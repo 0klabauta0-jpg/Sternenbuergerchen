@@ -1,0 +1,16 @@
+{
+  "source_head": "274f142c2a6abbc6a7cc5b88d17206681f44708f",
+  "branch": "task/building-asset-audit-20261110",
+  "inventory_hashes_rechecked": 703,
+  "changed_model_files": [],
+  "roundtrip_original_hashes_rechecked": 5,
+  "changed_original_maps": [],
+  "roundtrips_with_lost_root_metadata": 4,
+  "external_gltf_dependencies_checked": 193,
+  "missing_external_dependencies": 0,
+  "python_syntax": "PASS",
+  "documentation_links": "PASS",
+  "whitespace": "PASS",
+  "native_visual_acceptance": false,
+  "product_fixes_made": false
+}

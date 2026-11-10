@@ -162,7 +162,134 @@
 			}
 		]
 	},
-	"terrain_visual_theme_id": "ground_mission_mixed_v1",
+	"place_presentation": {
+		"migration_id": "frontier_buildings_20261110",
+		"props": [
+			{
+				"asset_id": "frontier_habitat_exterior",
+				"center": [
+					48.0,
+					37.0
+				],
+				"elevation": 0.0,
+				"path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+				"reserved_grids": [
+					[
+						47.0,
+						36.0
+					],
+					[
+						47.0,
+						37.0
+					],
+					[
+						47.0,
+						38.0
+					],
+					[
+						48.0,
+						36.0
+					],
+					[
+						48.0,
+						37.0
+					],
+					[
+						48.0,
+						38.0
+					],
+					[
+						49.0,
+						36.0
+					],
+					[
+						49.0,
+						37.0
+					],
+					[
+						49.0,
+						38.0
+					]
+				],
+				"rotation_degrees": 180.0,
+				"scale": 0.85
+			},
+			{
+				"asset_id": "frontier_hall_exterior",
+				"center": [
+					51.0,
+					37.0
+				],
+				"elevation": 0.0,
+				"path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+				"reserved_grids": [
+					[
+						49.0,
+						36.0
+					],
+					[
+						49.0,
+						37.0
+					],
+					[
+						49.0,
+						38.0
+					],
+					[
+						50.0,
+						36.0
+					],
+					[
+						50.0,
+						37.0
+					],
+					[
+						50.0,
+						38.0
+					],
+					[
+						51.0,
+						36.0
+					],
+					[
+						51.0,
+						37.0
+					],
+					[
+						51.0,
+						38.0
+					],
+					[
+						52.0,
+						36.0
+					],
+					[
+						52.0,
+						37.0
+					],
+					[
+						52.0,
+						38.0
+					],
+					[
+						53.0,
+						36.0
+					],
+					[
+						53.0,
+						37.0
+					],
+					[
+						53.0,
+						38.0
+					]
+				],
+				"rotation_degrees": 180.0,
+				"scale": 0.85
+			}
+		]
+	},
+	"terrain_visual_theme_id": "frontier_illustrated_v1",
 	"tile_size": {
 		"half_height": 32,
 		"half_width": 64
@@ -43164,49 +43291,51 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 47,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": true,
-			"cover_value": 60,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 47,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 2,
+			"object_height": 3,
 			"object_rotation_degrees": 180.0,
 			"object_scale": 0.85,
-			"object_type_id": "factory_building_a",
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
 			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 47,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -44067,46 +44196,49 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 48,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 48,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 48,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -44969,46 +45101,49 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 49,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 49,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 49,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -45873,46 +46008,49 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 50,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 50,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 50,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -46775,46 +46913,49 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 51,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 51,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 51,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -47686,49 +47827,51 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 52,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": true,
-			"cover_value": 60,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 52,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 2,
+			"object_height": 3,
 			"object_rotation_degrees": 180.0,
 			"object_scale": 0.85,
-			"object_type_id": "factory_building_d",
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
 			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 52,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,
@@ -48588,46 +48731,49 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 53,
 				"y": 36
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 53,
 				"y": 37
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 80,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 53,
 				"y": 38
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 3,
+			"object_type_id": "frontier_scene_solid",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
-			"walkable": true
+			"walkable": false
 		},
 		{
 			"blocks_los": false,

@@ -169,17 +169,31 @@
 		},
 		"gebaeude_structure_closed": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_closed.glb",
-			"scale": 1,
+			"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+			"scale": 0.3666361187849892,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_habitat_exterior"
 		},
 		"gebaeude_hangar_small_b": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
-			"scale": 1.5,
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.7802341127957428,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"plattform_center": {
 			"layer": "object",
@@ -845,59 +859,101 @@
 		},
 		"spacekit_hangar_large_a": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeA.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.5201560751971619,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_large_b": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeB.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.5721716951183654,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_round_a": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundA.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.8507786707813147,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_round_b": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundB.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.8507786707813147,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_round_glass": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundGlass.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.8459215113002133,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_small_a": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallA.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.5201560751971619,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_hangar_small_b": {
 			"layer": "object",
-			"source_id": "kenney_space_kit",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
-			"scale": 1,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.5201560751971619,
 			"y_offset": 0,
-			"rotation_degrees_offset": 0
+			"rotation_degrees_offset": 0,
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"spacekit_machine_barrel": {
 			"layer": "object",
@@ -2704,183 +2760,303 @@
 		},
 		"factory_building_a": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-a.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+			"scale": 0.3551824699798007,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_habitat_exterior"
 		},
 		"factory_building_b": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-b.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+			"scale": 0.3609019538872675,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_habitat_exterior"
 		},
 		"factory_building_c": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-c.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.3805537722905882,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_d": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-d.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.1792454088764141,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_e": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-e.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.3415341309391188,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_f": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-f.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.36312094835661074,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_g": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-g.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.3404285129289845,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_h": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-h.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.268126429813969,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_i": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-i.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.20856892852018388,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_j": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-j.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.20826139457948356,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_k": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-k.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.26429917149384224,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_l": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-l.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.4226784496503959,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_m": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-m.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.26702081180383475,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_n": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-n.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.19811833660339886,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				-2.3245811462402345e-08
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_o": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-o.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.17924542096786414,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				-2.3245811462402345e-08
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_p": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-p.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.2897435453331914,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_q": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-q.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.41474323721318185,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_r": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-r.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.37152601561590476,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_s": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-s.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.2676259440322946,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_building_t": {
 			"layer": "object",
-			"source_id": "factory_kit",
-			"model_path": "res://Assets/curated/kenney/factory/models/building-t.glb",
-			"scale": 0.78,
+			"source_id": "frontier_illustrated_v1_compatibility",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 0.3492707727081462,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
-			"factory_role": "industrial_building"
+			"factory_role": "industrial_building",
+			"position_offset": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"compatibility_replacement": "frontier_hall_exterior"
 		},
 		"factory_chimney_basic": {
 			"layer": "object",
@@ -2998,6 +3174,22 @@
 			"y_offset": 0.01,
 			"rotation_degrees_offset": 0,
 			"factory_role": "floor_marker"
+		},
+		"frontier_habitat_exterior": {
+			"layer": "object",
+			"source_id": "frontier_illustrated_v1",
+			"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+			"scale": 1.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"frontier_hall_exterior": {
+			"layer": "object",
+			"source_id": "frontier_illustrated_v1",
+			"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+			"scale": 1.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		}
 	}
 }

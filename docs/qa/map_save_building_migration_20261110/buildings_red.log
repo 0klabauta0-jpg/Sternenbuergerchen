@@ -1,0 +1,81 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: old building unavailable for new authoring: factory_building_a
+FAIL: old building unavailable for new authoring: factory_building_b
+FAIL: old building unavailable for new authoring: factory_building_c
+FAIL: old building unavailable for new authoring: factory_building_d
+FAIL: old building unavailable for new authoring: factory_building_e
+FAIL: old building unavailable for new authoring: factory_building_f
+FAIL: old building unavailable for new authoring: factory_building_g
+FAIL: old building unavailable for new authoring: factory_building_h
+FAIL: old building unavailable for new authoring: factory_building_i
+FAIL: old building unavailable for new authoring: factory_building_j
+FAIL: old building unavailable for new authoring: factory_building_k
+FAIL: old building unavailable for new authoring: factory_building_l
+FAIL: old building unavailable for new authoring: factory_building_m
+FAIL: old building unavailable for new authoring: factory_building_n
+FAIL: old building unavailable for new authoring: factory_building_o
+FAIL: old building unavailable for new authoring: factory_building_p
+FAIL: old building unavailable for new authoring: factory_building_q
+FAIL: old building unavailable for new authoring: factory_building_r
+FAIL: old building unavailable for new authoring: factory_building_s
+FAIL: old building unavailable for new authoring: factory_building_t
+FAIL: old building unavailable for new authoring: gebaeude_structure_closed_ne
+FAIL: old building unavailable for new authoring: gebaeude_structure_closed_nw
+FAIL: old building unavailable for new authoring: gebaeude_structure_closed_se
+FAIL: old building unavailable for new authoring: gebaeude_structure_closed_sw
+FAIL: old building unavailable for new authoring: gebaeude_hangar_small_b_ne
+FAIL: old building unavailable for new authoring: gebaeude_hangar_small_b_nw
+FAIL: old building unavailable for new authoring: gebaeude_hangar_small_b_se
+FAIL: old building unavailable for new authoring: gebaeude_hangar_small_b_sw
+FAIL: old building unavailable for new authoring: spacekit_hangar_large_a
+FAIL: old building unavailable for new authoring: spacekit_hangar_large_b
+FAIL: old building unavailable for new authoring: spacekit_hangar_round_a
+FAIL: old building unavailable for new authoring: spacekit_hangar_round_b
+FAIL: old building unavailable for new authoring: spacekit_hangar_round_glass
+FAIL: old building unavailable for new authoring: spacekit_hangar_small_a
+FAIL: old building unavailable for new authoring: spacekit_hangar_small_b
+FAIL: legacy ID resolves to current exterior: gebaeude_structure_closed
+FAIL: legacy ID resolves to current exterior: gebaeude_hangar_small_b
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_large_a
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_large_b
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_round_a
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_round_b
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_round_glass
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_small_a
+FAIL: legacy ID resolves to current exterior: spacekit_hangar_small_b
+FAIL: legacy ID resolves to current exterior: factory_building_a
+FAIL: legacy ID resolves to current exterior: factory_building_b
+FAIL: legacy ID resolves to current exterior: factory_building_c
+FAIL: legacy ID resolves to current exterior: factory_building_d
+FAIL: legacy ID resolves to current exterior: factory_building_e
+FAIL: legacy ID resolves to current exterior: factory_building_f
+FAIL: legacy ID resolves to current exterior: factory_building_g
+FAIL: legacy ID resolves to current exterior: factory_building_h
+FAIL: legacy ID resolves to current exterior: factory_building_i
+FAIL: legacy ID resolves to current exterior: factory_building_j
+FAIL: legacy ID resolves to current exterior: factory_building_k
+FAIL: legacy ID resolves to current exterior: factory_building_l
+FAIL: legacy ID resolves to current exterior: factory_building_m
+FAIL: legacy ID resolves to current exterior: factory_building_n
+FAIL: legacy ID resolves to current exterior: factory_building_o
+FAIL: legacy ID resolves to current exterior: factory_building_p
+FAIL: legacy ID resolves to current exterior: factory_building_q
+FAIL: legacy ID resolves to current exterior: factory_building_r
+FAIL: legacy ID resolves to current exterior: factory_building_s
+FAIL: legacy ID resolves to current exterior: factory_building_t
+FAIL: current building in palette: frontier_habitat_exterior
+FAIL: current exterior scene loads: frontier_habitat_exterior
+FAIL: current building in palette: frontier_hall_exterior
+FAIL: current exterior scene loads: frontier_hall_exterior
+FAIL: station_outpost_64x64 uses current profile
+FAIL: station_outpost_64x64 has no obsolete buildings
+FAIL: station_outpost_64x64 preserves building placement count
+FAIL: station_outpost_192x192 uses current profile
+FAIL: station_outpost_192x192 has no obsolete buildings
+FAIL: station_outpost_192x192 preserves building placement count
+FAIL: editor opens current authored map
+FAIL: mission_map_3d_calibration opens current authored map
+FAIL: mission_map_3d_render_spike opens current authored map
+FRONTIER_BUILDING_MIGRATION passed=0 failed=77

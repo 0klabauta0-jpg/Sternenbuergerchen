@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== FRONTIER PROBE 192x192 PLAYTEST PERFORMANCE ===
+PASS: Large frontier map loads without issue
+PASS: Mission scene exposes tactical spine
+[PLAYTEST][initial] total=36864 rendered=5184 skipped=31680 chunks=81 refresh=1 render_ms=894 assets=1198 nodes=4065 scene_ready_ms=5590
+PASS: Initial view has full 192x192 map truth
+PASS: Initial view uses visual streaming
+PASS: Initial render does not draw the full map
+PASS: Initial render duration stays below 2500 ms smoke budget
+[PLAYTEST][focus_24_24] total=36864 rendered=4096 skipped=32768 chunks=64 refresh=2 render_ms=745 assets=1046 nodes=3860
+PASS: Streaming remains active after camera focus (24, 24)
+PASS: Camera focus (24, 24) stays chunked
+[PLAYTEST][focus_96_96] total=36864 rendered=5184 skipped=31680 chunks=81 refresh=3 render_ms=893 assets=1199 nodes=4065
+PASS: Streaming remains active after camera focus (96, 96)
+PASS: Camera focus (96, 96) stays chunked
+[PLAYTEST][focus_168_34] total=36864 rendered=4032 skipped=32832 chunks=63 refresh=4 render_ms=748 assets=1043 nodes=3854
+PASS: Streaming remains active after camera focus (168, 34)
+PASS: Camera focus (168, 34) stays chunked
+[PLAYTEST][focus_34_168] total=36864 rendered=4032 skipped=32832 chunks=63 refresh=5 render_ms=726 assets=1044 nodes=3856
+PASS: Streaming remains active after camera focus (34, 168)
+PASS: Camera focus (34, 168) stays chunked
+PASS: Player path places LZ on the large map
+PASS: Dropship deploys and enters outbound state
+[PLAYTEST][post_drop] total=36864 rendered=5184 skipped=31680 chunks=81 refresh=6 render_ms=874 assets=1198 nodes=4172
+PASS: LZ remains visible after drop
+PASS: LZ terrain marker count stays stable
+PASS: Dropped fireteam is active and in 360 security
+[PLAYTEST][orders] total=36864 rendered=5184 skipped=31680 chunks=81 refresh=6 render_ms=874 assets=1198 nodes=4190
+PASS: Move, Defend and Take waypoints author on large map
+PASS: Area orders author on large map
+PASS: Waypoint terrain markers render
+PASS: Area order terrain markers render
+[PLAYTEST][contact] total=36864 rendered=3136 skipped=33728 chunks=49 refresh=7 render_ms=646 assets=935 nodes=3799
+PASS: Live contact markers appear
+[PLAYTEST][final] total=36864 rendered=3136 skipped=33728 chunks=49 refresh=7 render_ms=646 assets=935 nodes=3786
+PASS: Friendly fireteam captures the objective
+PASS: Mission resolves as victory
+PASS: Mission result is visible
+PASS: Mission victory releases firefight world-label declutter
+PASS: Unit tactical badges remain visible
+PASS: Final view still uses chunked rendering
+=== FRONTIER PLAYTEST RESULT: PASS ===

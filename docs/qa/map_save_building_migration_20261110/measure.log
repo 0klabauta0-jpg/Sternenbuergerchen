@@ -1,0 +1,83 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: 'res://Assets/curated/kenney/factory/models/building-a.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-b.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-c.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-d.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-e.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-f.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-g.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-h.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-i.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-j.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-k.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-l.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-m.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-n.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-o.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-p.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-q.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-r.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-s.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-t.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://docs/qa/map_save_building_migration_20261110/measure_buildings.gd:14)

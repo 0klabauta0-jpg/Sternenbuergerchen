@@ -1,0 +1,33 @@
+{
+  "maps": [
+    {
+      "map": "maps/station_outpost_64x64.json",
+      "buildings": 2,
+      "unique_reserved_cells": 21,
+      "patrol_waypoints_walkable_and_connected": 8,
+      "markers_exactly_preserved": true,
+      "patrols_exactly_preserved": true,
+      "non_footprint_tiles_exactly_preserved": true,
+      "sha256": "73677f22a0bda2fad6378e73e48828fb87e4ff8c01c779eced5b99eb946f9a9b"
+    },
+    {
+      "map": "maps/station_outpost_192x192.json",
+      "buildings": 18,
+      "unique_reserved_cells": 189,
+      "patrol_waypoints_walkable_and_connected": 8,
+      "markers_exactly_preserved": true,
+      "patrols_exactly_preserved": true,
+      "non_footprint_tiles_exactly_preserved": true,
+      "sha256": "e87d96df4bc3f591ce8264bd60c933944a508dce4f62056a4aba54251c5df02e"
+    }
+  ],
+  "original_model_hashes_unchanged": 703,
+  "new_assets": {
+    "scenes/terrain/frontier_habitat_exterior.tscn": "1b0de6c3a4765b92c696b1f88855ee3a30940e9db8e729ccb35b6f3af766a5fd",
+    "scenes/terrain/frontier_hall_exterior.tscn": "98cff9bf44169feddf5f95a0ba9f8c73195b67e724e82d25c0d2a0a867fdc196",
+    "Assets/curated/frontier_illustrated_20261101/building_previews/habitat.png": "9f1ef15af4fcacd5c91b5015e60c5840da7066ae784f8b38cb3beda09981175e",
+    "Assets/curated/frontier_illustrated_20261101/building_previews/hall.png": "20db1e9d3901831d28a7feddcac0a7836fc9dc2b02f337d45db5d269f6e07e5a"
+  },
+  "unsafe_workbench_demo_building_absent": true,
+  "navigation_check_scope": "stored cardinal graph, walkable and height delta<=1; not a combat/playability acceptance"
+}

@@ -1,5 +1,32 @@
 # IMPLEMENTATION_STATUS
 
+### Speichererhalt und aktuelle Gebaeudepfade — 10.11.2026
+Eigener Branch task/map-save-building-migration-20261110 auf274f142c2,
+bewusst auf noch nicht integrierten Ortsarbeiten. Root-Metadaten bleiben beim
+Speichern erhalten:41/0, echter Editor-SaveAs/Reload17/0.35 alte Palettentypen
+ausgeblendet,29 alte Mappinggruppen auf aktuelle Aussenhuellen umgestellt;
+110/0 inklusive Kompatibilitaetsabmessungen und Compilergrenze. Zwei native
+PackedScene-Vorlagen aus vorhandener Frontierfamilie und RGB-korrigierte Icons.
+Stationskarten2/18 aktuelle Gebaeude mit21/189 passenden reservierten Zellen;
+Marker/Patrouillen und sonstige Tiles erhalten,16 Patrouillenpunkte begehbar
+und verbunden. Editor-/Renderdefaults und Hintergrundgenerator auf GM01;
+freies Mehrzellen-Authoring folgt separat, falscher Einzelzellenweg gesperrt.
+Station33/0, Slice38/0, GM01-Guard24/0, Artprofil11/0, Frontier-Probe PASS.
+Alter Basisverifier20/2 wegen36x28-Annahme bei unveraenderten96x98-Karten;
+keine Gesamtfreigabe.703 Altmodellhashes unveraendert, keine Assetloeschung,
+kein Commit/Push/Mainmerge/Export. QA: docs/qa/map_save_building_migration_20261110/README.md.
+
+### Gebaeude-/Altasset-Bestandspruefung — 10.11.2026
+Quellstand274f142c2, eigener Auditbranch auf task/playtest-plan-20261110;
+noch nicht in Main integriert.703 Modell-/Quelldateien,352 Terrain-Mappings,
+21 parsebare Karten; aktive alte Gebaeudepaletten, Stationsgebaeude A/D und
+Render-/Editor-Defaults nachgewiesen. Aktuelle Basis verwendet Tuer-Ableitungen,
+GM01 weiter Pass04 plus geschlossene prozedurale Huellen. Fuenf echte Godot-
+Roundtrips: vier Ortskarten verlieren Root-Zusatzdaten beim Editor-Speicherpfad,
+Originale unveraendert. Keine Assetloeschung oder Produkt-/Editoraenderung.
+Bericht: docs/qa/building_asset_audit_20261110/README.md. Zuerst Erhaltungs-/
+Authoringpfad absichern, dann Altverbraucher abloesen und Editor nachziehen.
+
 ### Kampagnenersatz-Absturz: Quellfix geprueft, neue EXE offen — 10.11.2026
 Auf Mainbasis ee0591cfedb4d28a01788defdcf23d98439d49ad im Taskbranch
 task/campaign-replace-crash-20261110. Tatsaechliche alte r01-EXE reproduziert

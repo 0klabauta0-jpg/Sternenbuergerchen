@@ -11,6 +11,9 @@ var _map_name: String = ""
 var _terrain_visual_theme_id: String = ""
 var _authored_visual_layout_id: String = ""
 var _place_presentation: Dictionary = {}
+# Opaque authoring data (base layouts, site identity, future schema additions).
+# Canonical terrain fields are excluded so edits always win when saving.
+var _extension_metadata: Dictionary = {}
 var _grid_topology: String = "square8"
 var _mission_slot_count: int = 3
 var _grid_size: Vector2i = Vector2i.ZERO
@@ -49,6 +52,15 @@ static func load_from_file(path: String) -> TerrainMapData:
 		return terrain_map_data
 
 	var root_dict: Dictionary = parsed_json
+	var canonical_keys: Array = ["map_name", "grid_topology", "mission_slot_count", "grid_size",
+		"tile_size", "grid_origin", "markers", "patrol_paths", "enemy_team_configs",
+		"tiles", "terrain_visual_theme_id", "surface_visual_theme_id",
+		"authored_visual_layout_id", "place_presentation"]
+	for key in root_dict:
+		if canonical_keys.has(key):
+			continue
+		var value: Variant = root_dict[key]
+		terrain_map_data._extension_metadata[key] = value.duplicate(true) if value is Dictionary or value is Array else value
 	var topology: String = String(root_dict.get("grid_topology", "square8")).strip_edges()
 	if topology != "square8" and topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
 		terrain_map_data._load_issue_message = "Unsupported grid_topology '%s' in %s" % [topology, path]
@@ -193,7 +205,8 @@ func save_to_file(path: String) -> Error:
 	if file == null:
 		return FileAccess.get_open_error()
 
-	var json_root: Dictionary = {
+	var json_root: Dictionary = _extension_metadata.duplicate(true)
+	json_root.merge({
 		"map_name": _map_name,
 		"grid_topology": _grid_topology,
 		"mission_slot_count": _mission_slot_count,
@@ -213,7 +226,7 @@ func save_to_file(path: String) -> Error:
 		"patrol_paths": _serialize_patrol_paths(),
 		"enemy_team_configs": _serialize_enemy_team_configs(),
 		"tiles": [],
-	}
+	}, true)
 	if not _terrain_visual_theme_id.is_empty():
 		json_root["terrain_visual_theme_id"] = _terrain_visual_theme_id
 	if not _place_presentation.is_empty(): json_root["place_presentation"]=_place_presentation.duplicate(true)
@@ -248,7 +261,7 @@ func save_to_file(path: String) -> Error:
 			serialized_tile["object_scale"] = object_scale
 		json_root["tiles"].append(serialized_tile)
 
-	file.store_string(JSON.stringify(json_root, "\t") + "\n")
+	file.store_string(JSON.stringify(json_root, "\t", true, true) + "\n")
 	file.flush()
 	return OK
 
@@ -718,3 +731,7 @@ func _serialize_enemy_team_configs() -> Dictionary:
 
 func get_place_presentation() -> Dictionary:
 	return _place_presentation.duplicate(true)
+
+
+func set_place_presentation(presentation: Dictionary) -> void:
+	_place_presentation = presentation.duplicate(true)

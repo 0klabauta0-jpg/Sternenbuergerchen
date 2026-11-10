@@ -21,8 +21,9 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		var scene: PackedScene=load(path)
 		var prop: Node3D=scene.instantiate(); root.add_child(prop)
 		var position: Array=spec.get("center",[0,0])
-		prop.position=Vector3(float(position[0]),0,float(position[1]))
+		prop.position=Vector3(float(position[0]),float(spec.get("elevation",0.0)),float(position[1]))
 		prop.scale=Vector3.ONE*float(spec.get("scale",1.0))
+		prop.rotation_degrees.y=float(spec.get("rotation_degrees",0.0))
 		blockers.append(mesh_bounds(prop,root))
 	for spec: Dictionary in Array(presentation.get("pads",[])):
 		var pad: Node3D=PAD.new(); root.add_child(pad)

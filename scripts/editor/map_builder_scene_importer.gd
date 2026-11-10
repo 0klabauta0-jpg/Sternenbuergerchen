@@ -135,6 +135,10 @@ func _apply_placements_to_map(map_data, placements: Array, catalog) -> Dictionar
 			issues.append("Unknown map builder type_id: %s" % type_id)
 			stats["skipped_count"] = int(stats.get("skipped_count", 0)) + 1
 			continue
+		if type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"] or not bool(Dictionary(catalog.get_type(type_id)).get("palette_visible", true)):
+			issues.append("Building %s requires multi-cell layout authoring; single-cell compilation is unavailable." % type_id)
+			stats["skipped_count"] = int(stats.get("skipped_count", 0)) + 1
+			continue
 		var grid_position: Vector2i = _coerce_grid_position(placement.get("grid_position", Vector2i(-1, -1)))
 		var tile_data = map_data.call("get_tile_at_grid", grid_position) if map_data != null else null
 		if tile_data == null:
