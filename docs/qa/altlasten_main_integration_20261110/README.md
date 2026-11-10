@@ -28,9 +28,9 @@ Spiel-Releaseexport, keine native Gestaltungs- oder allgemeine FPS-Freigabe.
 Original-Checkout C:/dev/SternenBuergerchen blieb auf
 task/campaign-skirmish-rebuild-20261110 mit HEAD e765f507c. Kein Checkout,
 Stash, Reset, Restore, Add oder Commit dort. Indexeintraege und staged Diff
-blieben identisch;94 getrackte WIP-Dateien und252 ungetrackte Quelldateien
-wurden erfasst. Keine erfasste Datei fehlt; alle252 ungetrackten Dateien sind
-bytegleich. Waehrend der Integration wurden vier Dateien parallel ungestagt
+waren im Snapshot unmittelbar nach den Tests identisch;94 getrackte WIP-Dateien und252 ungetrackte Quelldateien
+wurden erfasst. In diesem Snapshot fehlt keine erfasste Datei; alle252
+ungetrackten Dateien sind bytegleich. Waehrend der Integration wurden vier Dateien parallel ungestagt
 weiterbearbeitet. Deren neueren Zustand haben wir bewusst nicht mit dem
 Anfangssnapshot ueberschrieben. Details: wip_preservation.json.
 
@@ -47,3 +47,14 @@ geprueft; kein Force-Push. Remote-HEAD-Nachweis erfolgt nach dem Push.
 Der lokale Rosterpin und die Rohlogs bleiben unter .godot. Erfasst werden
 SHA256/Laenge/mtime vor Tests; der bestehende Runner arbeitet fail-closed und
 restauriert niemals automatisch echte Profildaten.
+
+## Fortlaufende Arbeit nach dem ersten Main-Push
+Main74d893250 wurde erfolgreich gepusht und gegen den Remote-HEAD verifiziert.
+Eine weitere read-only Pruefung zeigte danach zusaetzliche ungestagte Edits,
+einen fortgeschriebenen ungetrackten Kampagnenbericht und eine neue Ergebnis-
+JSON im Original-Checkout. Index, staged Diff, Branch und HEAD blieben auch
+bei dieser Pruefung identisch. Diese neueren Arbeitsstaende wurden erhalten;
+es gab keine Ruecksetzung auf einen aelteren Snapshot. Die WIP-Belege sind
+bewusst Zeitpunktaufnahmen, keine Behauptung, parallele Arbeit einzufrieren.
+Beleg: wip_after_first_push.json. Der anschliessende Nachweiscommit aendert
+weiterhin ausschliesslich Dokumentation, nicht den frisch getesteten Produktbaum.

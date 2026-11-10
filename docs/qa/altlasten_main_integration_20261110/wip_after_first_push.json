@@ -1,0 +1,37 @@
+{
+  "source": "C:\\dev\\SternenBuergerchen",
+  "before_head": "e765f507cdfbd8b5190de3cb6d9dc8bbe15972cf",
+  "after_head": "e765f507cdfbd8b5190de3cb6d9dc8bbe15972cf",
+  "before_branch": "task/campaign-skirmish-rebuild-20261110",
+  "after_branch": "task/campaign-skirmish-rebuild-20261110",
+  "head_unchanged": true,
+  "branch_unchanged": true,
+  "index_entries_unchanged": true,
+  "staged_diff_unchanged": true,
+  "index_entries_sha256": "d951144f698d92e6c8c1d55f5450e0d2b0a5e384cdbe37e9394419179192dd39",
+  "staged_diff_sha256": "76c01ec75e746e1168c96364cd175a663cfb1537ff4c4d349bd7a35a44f06f9e",
+  "tracked_WIP_file_count": 94,
+  "tracked_WIP_files_changed_during_parallel_work": [
+    "scripts/meta/singleplayer_runtime_adapter.gd",
+    "docs/tasks/CAMPAIGN_SKIRMISH_REBUILD_2026_11_10.md",
+    "scripts/tests/mission_tactical_sandbox_controller.gd",
+    "docs/dev/mission_interaction_point_contract.md",
+    "scripts/meta/meta_layer_flow.gd",
+    "scripts/meta/singleplayer_services_presenter.gd",
+    "scripts/tests/campaign_stationary_use_verifier.gd"
+  ],
+  "tracked_WIP_files_missing": [],
+  "untracked_source_file_count_before": 252,
+  "untracked_source_file_count_after": 253,
+  "untracked_existing_changed": [
+    "docs/qa/campaign_skirmish_rebuild_20261110/README.md"
+  ],
+  "untracked_added": [
+    "docs/qa/campaign_skirmish_rebuild_20261110/save_cleanup_result.json"
+  ],
+  "source_checkout_write_operations": "none; read-only Git/hash inspection only",
+  "handling": "Never restore older snapshot over newer parallel edits.",
+  "recorded_stage": "after first successful and remote-verified Main push of 74d893250",
+  "recorded_at_utc": "2026-11-10T14:37:19.750432+00:00",
+  "meaning": "Newer parallel edits remain in place; snapshots are point-in-time evidence, not rollback targets."
+}
