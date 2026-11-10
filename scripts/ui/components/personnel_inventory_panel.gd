@@ -9,7 +9,8 @@ var _signature := ""
 var _unit_id := ""
 var _craft_id := ""
 var _selection: Dictionary = {}
-var _slots: HFlowContainer
+var _slots: Control
+var _body_preview:Control
 var _containers: HFlowContainer
 var _selected: Label
 var _amount: SpinBox
@@ -24,7 +25,9 @@ func _ready() -> void:
 	_rest=CheckButton.new(); _rest.name="AutomaticRest"; _rest.text="Automatisch ruhen"; add_child(_rest)
 	_rest.tooltip_text="Bei Leerlauf an der Basis ein Bett aufsuchen. Ausschalten, um die Person stehen zu lassen."
 	_rest.toggled.connect(func(enabled:bool): operation_requested.emit("base_auto_rest",{"unit_id":_unit_id,"enabled":enabled}))
-	_slots=HFlowContainer.new(); add_child(_slots)
+	_slots=Control.new();_slots.name="EquipmentBody";_slots.custom_minimum_size=Vector2(340,310);add_child(_slots)
+	_body_preview=preload("res://scripts/ui/components/personnel_body_preview.gd").new();_slots.add_child(_body_preview)
+	_slots.resized.connect(_layout_body_slots)
 	_containers=HFlowContainer.new(); add_child(_containers)
 	_containers.add_theme_constant_override("h_separation",12)
 	_selected=Label.new(); _selected.text="Gegenstand anklicken oder ziehen"; add_child(_selected)
@@ -40,9 +43,8 @@ func _ready() -> void:
 		_slot_target.add_item(spec[1]); _slot_target.set_item_metadata(_slot_target.item_count-1,spec[0])
 	_equip=Button.new(); _equip.text="Anlegen"; equipment_row.add_child(_equip)
 	_equip.pressed.connect(func(): _wear(_selection,String(_slot_target.get_item_metadata(_slot_target.selected))))
-	var future:=Label.new(); future.text="Helm / Aufsatz: später verfügbar"; future.add_theme_font_size_override("font_size",13); future.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; add_child(future)
 
-func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true) -> void:
+func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true, actor:Node=null) -> void:
 	var next_id := String(unit.get("id",""))
 	var selected_source := String(_selection.get("source_container_id",""))
 	var selected_item := String(_selection.get("item_id",""))
@@ -51,22 +53,27 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		_selection.clear()
 		if _selected != null: _selected.text = "Gegenstand anklicken oder ziehen"
 	_unit_id=next_id; _craft_id=craft_id
-	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible,equipment_allowed])
+	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible,equipment_allowed,actor.get_instance_id() if actor!=null else 0])
 	if signature==_signature: return
 	_signature=signature
-	for child in _slots.get_children(): child.free()
-	for child in _containers.get_children(): child.free()
+	for child in _slots.get_children():
+		if child!=_body_preview:
+			_slots.remove_child(child);child.queue_free()
+	for child in _containers.get_children():
+		_containers.remove_child(child);child.queue_free()
 	_target.clear(); _bodies.clear()
 	var loadout: Dictionary=unit.get("loadout",{})
+	_body_preview.call("update_actor",actor,loadout)
 	for spec in [["armor","Rüstung"],["weapon_1","Primär"],["weapon_2","Sekundär"]]:
 		var key: String=spec[0]
 		var item: String=ITEMS.item_from_slot(key,String(loadout.get(key,"none")))
 		var slot: PanelContainer=SURFACE.new(); slot.name="InventorySlot_"+key
-		slot.accepted_type="inventory_item"; slot.custom_minimum_size=Vector2(146,60); _slots.add_child(slot)
+		slot.accepted_type="inventory_item"; slot.custom_minimum_size=Vector2(130,66); _slots.add_child(slot)
 		var slot_body:=HBoxContainer.new(); slot_body.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot.add_child(slot_body)
 		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=Vector2(48,60); icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
-		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item)); label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
+		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item));label.custom_minimum_size.x=76;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
 		slot.payload_dropped.connect(func(data:Dictionary): _wear(data,key))
+	_layout_body_slots()
 	for spec in [["base:homebase","Basislager"],["craft:"+craft_id,"Schiffsfracht"],["unit:"+_unit_id+":backpack","Rucksack"]]:
 		var id: String=spec[0]
 		var data: Dictionary=inventory.get(id,{})
@@ -75,6 +82,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var style:=StyleBoxFlat.new(); style.bg_color=Color("102f3b"); style.border_color=Color("3e6972"); style.set_border_width_all(1); style.content_margin_left=8; style.content_margin_right=8; style.content_margin_top=8; style.content_margin_bottom=8; box.add_theme_stylebox_override("panel",style)
 		var body:=VBoxContainer.new(); box.add_child(body); _bodies[id]=body
 		var header:=Label.new(); header.text="%s · %d/%d" % [spec[1],ITEMS.used(data.get("items",{})),int(data.get("capacity",0))]; body.add_child(header)
+		if id=="base:homebase":header.text=header.text.replace("Basislager","Basislager · frei");header.tooltip_text="Freier Lagerbestand. Getragene Gegenstände stehen ausschließlich an der Person und werden hier nicht mitgezählt."
 		var allowed: bool=accessible.has(id)
 		if not allowed:
 			var locked:=Label.new(); locked.text="Hier nicht erreichbar"; body.add_child(locked)
@@ -88,6 +96,16 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
 	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty() or not equipment_allowed
+
+func _layout_body_slots()->void:
+	if _body_preview==null:return
+	var width:float=maxf(_slots.size.x,340)
+	_body_preview.position=Vector2((width-180)/2,0);_body_preview.size=Vector2(180,300)
+	for key:String in ["armor","weapon_1","weapon_2"]:
+		var slot:=_slots.get_node_or_null("InventorySlot_"+key) as Control
+		if slot==null:continue
+		slot.size=Vector2(130,66)
+		slot.position=Vector2((width-slot.size.x)/2,80) if key=="armor" else Vector2(0 if key=="weapon_1" else width-slot.size.x,186)
 
 func update_rest_snapshot(person: Dictionary) -> void:
 	_rest.visible=not person.is_empty()

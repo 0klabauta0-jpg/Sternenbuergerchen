@@ -140,11 +140,13 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	_add_compact_identity_overview(sheet, model, profile, compact_options)
 	_add_post_mission_award_alert(sheet, model, profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
-	var suitability_host := _overview_section(sheet, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
+	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
+	var suitability_host := _overview_section(overview, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
 	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
 	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
 	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
-	_overview_label(suitability_host, "CharacterDerivationGuide", "Eigenschaften wirken auf die gespeicherten Kernwerte. Werte, Verhalten, Fahrzeuge und Rollen-/Ausrüstungskontext fließen in die Eignung ein.", 13, true)
+	var guide:=_overview_section(overview,"HERKUNFT DER WERTE","CharacterDerivationOverview")
+	_overview_label(guide, "CharacterDerivationGuide", "Eigenschaften\n↓ gespeicherte Kernwerte\n↓ Verhalten und Fahrzeuge\n↓ Arbeitsweise und Einsatzeignung\n↓ Spezialisierung im Rollenrahmen", 13, true)
 	var social := HBoxContainer.new()
 	social.name = "CharacterTraitsAndRelationships"
 	social.add_theme_constant_override("separation", 10)
@@ -161,13 +163,19 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
-	_add_bar_section(values, "KERNWERTE (0,00 - 1,00):", Array(model.get("core_rows", [])), profile, options)
-	_add_value_section(values, "KOMMUNIKATION:", Array(model.get("communication_rows", [])), profile, options)
-	_add_value_section(values, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
-	_add_value_section(values, "PLATTFORM-SKILLS (nur falls relevant):", Array(model.get("platform_rows", [])), profile, options)
-	_add_value_section(values, "ABGELEITET:", Array(model.get("derived_rows", [])), profile, options)
+	var metric_columns:=HBoxContainer.new();metric_columns.add_theme_constant_override("separation",10);values.add_child(metric_columns)
+	var core_column:=VBoxContainer.new();core_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(core_column)
+	var auxiliary_column:=VBoxContainer.new();auxiliary_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(auxiliary_column)
+	var core:=_add_foldout(core_column,"core","Kernwerte",true)
+	_add_bar_section(core, "KERNWERTE (0,00 - 1,00):", Array(model.get("core_rows", [])), profile, options)
+	var communication:=_add_foldout(auxiliary_column,"communication","Kommunikation",true)
+	_add_value_section(communication, "KOMMUNIKATION:", Array(model.get("communication_rows", [])), profile, options)
+	var behavior:=_add_foldout(auxiliary_column,"behavior","Verhalten",true)
+	_add_value_section(behavior, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
+	var vehicles:=_add_foldout(values,"vehicles","Fahrzeuge")
+	_add_value_rows(vehicles,Array(model.get("platform_rows",[])),profile,options)
 	var why := _add_foldout(sheet, "suitability", "Alle Eignungen & genaue Herleitung", bool(options.get("expand_details", false)))
-	_add_value_rows(why, suitability, profile, options)
+	_add_derivation_tree(why,model,profile,options)
 	_add_text_section(why, "ROLLE / LOADOUT:", "Die Startrolle ist gespeichert. Die aktuelle Aufgabe kommt aus der Zuteilung. Eignung ist eine Berechnung; sie ändert weder Rolle noch Aufgabe.")
 	var all_relationships: Array = Array(model.get("relationship_entries", []))
 	if all_relationships.size() > 2:
@@ -182,6 +190,21 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		var background := _add_foldout(sheet, "background", "Hintergrund")
 		_add_text_section(background, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Angaben hinterlegt.")))
 	_apply_compact_readability(sheet)
+
+
+static func _add_derivation_tree(host:VBoxContainer,model:Dictionary,profile,options:Dictionary)->void:
+	if profile==null:return
+	for spec in [["methods","Arbeitsweise","Kernwerte + Kommunikation",Dictionary(profile.method_scores)],["functions","Einsatzeignung","Kernwerte + Verhalten + Fahrzeuge",Dictionary(profile.function_scores)]]:
+		var branch:=_add_foldout(host,String(spec[0]),String(spec[1]))
+		_overview_label(branch,"Inputs_"+String(spec[0]),"└  "+String(spec[2]),15,true)
+		for key:String in spec[3]:
+			_overview_label(branch,"DerivedScore_"+key,"    ├  %s: %s"%[COPY.text(key),_format_decimal_comma(float(spec[3][key]))],15)
+	var badges:=_add_foldout(host,"roles","Eignungen · Wert / Schwelle")
+	_add_value_rows(badges,Array(model.get("suitability_rows",[])),profile,options)
+	var specialty:=_add_foldout(host,"specialty","Spezialisierung")
+	_overview_label(specialty,"SpecialtyInputs","└  Rollenrahmen + Einsatzeignung + Arbeitsweise",15,true)
+	var rows:Array=Array(model.get("derived_rows",[]))
+	if rows.size()>2:_add_value_rows(specialty,rows.slice(2),profile,options,"ABGELEITET:")
 
 
 static func _apply_compact_readability(node: Node) -> void:
@@ -1098,8 +1121,8 @@ static func _add_metric_read_only_row(host: VBoxContainer, row_data: Dictionary)
 
 	var bar := ProgressBar.new()
 	bar.name = "ReadOnlyMetricBar_%s" % metric_fragment
-	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar.custom_minimum_size = Vector2(0.0, 18.0)
+	bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	bar.custom_minimum_size = Vector2(96.0, 18.0)
 	bar.min_value = 0.0
 	bar.max_value = 1.0
 	bar.value = normalized_value

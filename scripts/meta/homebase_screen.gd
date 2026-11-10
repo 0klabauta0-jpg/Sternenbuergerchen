@@ -2047,7 +2047,7 @@ func get_native_r2_layout_snapshot() -> Dictionary:
 		"roster": Rect2i(16, work_top, roster_width, work_height),
 		"fireteams": Rect2i(32 + roster_width, work_top, team_width, team_height),
 		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, transport_height),
-		"character_popup": Rect2i(viewport_size.x - mini(1240, viewport_size.x - 32) - 16, 32, mini(1240, viewport_size.x - 32), mini(760, viewport_size.y - 64)),
+		"character_popup": Rect2i(viewport_size.x - mini(1500, viewport_size.x - 24) - 12, 12, mini(1500, viewport_size.x - 24), viewport_size.y - 24),
 		"briefing_details_open": _r2_briefing_details_open,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -6003,7 +6003,7 @@ func get_personnel_inventory_view(unit_id: String, operations_snapshot: Dictiona
 			if String(entry.get("unit_id", "")) == unit_id:
 				person = entry
 				break
-	return {"inventory": Dictionary(Dictionary(singleplayer.get("supply", {})).get("inventory", {})), "unit": unit, "craft_id": craft_id, "accessible": Array(context.get("accessible_containers", [])), "equipment_allowed": bool(context.get("equipment_allowed", not context.is_empty())), "person": person}
+	return {"inventory": Dictionary(Dictionary(singleplayer.get("supply", {})).get("inventory", {})), "unit": unit, "craft_id": craft_id, "accessible": Array(context.get("accessible_containers", [])), "equipment_allowed": bool(context.get("equipment_allowed", not context.is_empty())), "person": person,"actor":personnel.call("get_actor",unit_id) if personnel!=null else null}
 
 
 func _update_character_inventory(operations_snapshot: Dictionary = {}) -> void:
@@ -6011,7 +6011,7 @@ func _update_character_inventory(operations_snapshot: Dictionary = {}) -> void:
 	if panel == null: return
 	var view := get_personnel_inventory_view(_focused_unit_id, operations_snapshot)
 	panel.visible = not Dictionary(view.inventory).is_empty()
-	panel.call("update_snapshot", view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed)
+	panel.call("update_snapshot", view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed,view.actor)
 	panel.call("update_rest_snapshot", view.person)
 
 

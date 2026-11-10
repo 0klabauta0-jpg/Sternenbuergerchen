@@ -1,0 +1,27 @@
+{
+  "label": "native_details_final",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 2,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\character_navigation_20261110\\native_profiles\\native_details_final",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "12981590",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\campaign-main-exe-20261110",
+    "--script",
+    "res://scripts/tests/character_navigation_equipment_verifier.gd"
+  ]
+}

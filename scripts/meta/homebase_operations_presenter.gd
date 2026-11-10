@@ -91,6 +91,8 @@ var _job_board: Control
 var _region_map: Control
 var _base_management_bar: VBoxContainer
 var _base_navigation_group: VBoxContainer
+var _flight_navigation_group: VBoxContainer
+var _flight_management_bar: VBoxContainer
 var _services_view: Control
 
 
@@ -167,10 +169,6 @@ func _build() -> void:
 	THEME.style_section_heading(title, 30)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	var back: Button = _button("‹ Zur Truppansicht", false)
-	back.name = "OperationsBack"
-	header.add_child(back)
-	back.pressed.connect(func(): _act("navigate", {"mode": "squad"}))
 	_workflow = HBoxContainer.new()
 	_workflow.name = "PreparationSequence"
 	_workflow.add_theme_constant_override("separation", 24)
@@ -204,6 +202,18 @@ func _build() -> void:
 			button.mouse_entered.connect(func(): _base_management_bar.show())
 			button.focus_entered.connect(func(): _base_management_bar.show())
 			_base_navigation_group.mouse_exited.connect(_close_base_navigation_after_exit)
+		elif key == "mission":
+			_flight_navigation_group = VBoxContainer.new()
+			_flight_navigation_group.name = "FlightNavigationGroup"
+			nav.add_child(_flight_navigation_group)
+			_flight_navigation_group.add_child(button)
+			_flight_management_bar = VBoxContainer.new()
+			_flight_management_bar.name = "FlightManagementActions"
+			_flight_navigation_group.add_child(_flight_management_bar)
+			_flight_management_bar.hide()
+			button.mouse_entered.connect(func(): _flight_management_bar.show())
+			button.focus_entered.connect(func(): _flight_management_bar.show())
+			_flight_navigation_group.mouse_exited.connect(_close_flight_navigation_after_exit)
 		else:
 			nav.add_child(button)
 		button.pressed.connect(func(): _act("navigate", {"mode": key}))
@@ -217,8 +227,12 @@ func _build() -> void:
 	var detail_button: Button = _button("Charakterdetails", false)
 	var refuel := _button("Tankservice", false)
 	refuel.name = "OpenBaseServices"
-	nav.add_child(refuel)
-	refuel.pressed.connect(func(): _open_base_management("ship"))
+	_flight_management_bar.add_child(refuel)
+	refuel.custom_minimum_size.y = 29
+	refuel.add_theme_font_size_override("font_size",13)
+	refuel.pressed.connect(func():
+		_flight_management_bar.hide()
+		_open_base_management("ship"))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	nav.move_child(_nav.jobs,nav.get_child_count()-1)
@@ -744,7 +758,7 @@ func refresh() -> void:
 	if not inventory.is_empty():
 		_equipment_palette.visible=false
 		var view: Dictionary = screen.call("get_personnel_inventory_view", _focused_id, snapshot)
-		_inventory_panel.update_snapshot(view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed)
+		_inventory_panel.update_snapshot(view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed,view.actor)
 		_inventory_panel.update_rest_snapshot(view.person)
 	if bool(screen.get("_character_sheet_open")):
 		screen.call("_update_character_inventory", snapshot)
@@ -1095,6 +1109,12 @@ func _close_base_navigation_after_exit() -> void:
 	await get_tree().create_timer(0.12).timeout
 	if not _base_navigation_group.get_global_rect().has_point(get_global_mouse_position()):
 		_base_management_bar.hide()
+
+
+func _close_flight_navigation_after_exit() -> void:
+	await get_tree().create_timer(0.12).timeout
+	if not _flight_navigation_group.get_global_rect().has_point(get_global_mouse_position()):
+		_flight_management_bar.hide()
 
 
 func _terminal_requested(id: String) -> void:

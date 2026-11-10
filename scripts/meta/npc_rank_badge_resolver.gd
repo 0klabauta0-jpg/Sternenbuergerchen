@@ -140,12 +140,19 @@ static func format_badge_tooltip(badge: Dictionary) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("%s: %s" % [_optional_text(label, "Badge"), score_text])
 	if not reason.is_empty():
-		lines.append(reason)
+		lines.append(_vertical_factors(reason))
 	if not requirement.is_empty() and requirement != reason:
 		lines.append(requirement)
 	if not detail.is_empty():
-		lines.append(detail)
+		lines.append(_vertical_factors(detail))
 	return "\n".join(lines)
+
+
+static func _vertical_factors(value:String)->String:
+	# Generated factor prose only; decimal commas do not contain a space.
+	var separators:=RegEx.new()
+	separators.compile(", (?=[A-Za-zÄÖÜäöü])| und (?=[A-Za-zÄÖÜäöü])")
+	return separators.sub(value.replace(": ",":\n"),"\n",true)
 
 
 static func apply_badge_help_metadata(control: Control, badge: Dictionary) -> void:
@@ -495,7 +502,7 @@ static func _badge_compact_lines(badge: Dictionary) -> PackedStringArray:
 	lines.append("%s: Eignung %.2f." % [_optional_text(label, "Badge"), float(badge.get("score", 0.0))])
 	var reason: String = String(badge.get("reason", "")).strip_edges()
 	if not reason.is_empty():
-		lines.append(reason)
+		lines.append(_vertical_factors(reason))
 	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
 	if not requirement.is_empty() and requirement != reason:
 		lines.append(requirement)
@@ -506,7 +513,7 @@ static func _badge_detail_lines(badge: Dictionary) -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
 	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
 	if not detail.is_empty():
-		lines.append(detail)
+		lines.append(_vertical_factors(detail))
 	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
 	if not requirement.is_empty():
 		lines.append(requirement)

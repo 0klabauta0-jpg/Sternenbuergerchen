@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### Charakterdetails und Navigation — 10.11.2026
+Task auf5df2d3b6f: Doppelbutton entfernt, Tankservice unter Flugdeck, volle
+Detailsfensterhöhe, vorhandenes NPC-Modell mit Körper-Slots, kompakte Werte und
+einklappbarer Herkunftsbaum. Freier Lagerbestand explizit gekennzeichnet.
+Native26/0 ohne Enginefehler, Compact22/0, Inventarverifier failures0.
+QA: docs/qa/character_navigation_20261110/README.md. Nicht auf Main/als EXE.
+
 ### Kompakte Truppkarte, Aufsitzen und Basis-Untermenü — 10.11.2026
 Taskbranch auf Main1e3cca237: gemeinsame FT-Karte, quadratische kleinere Porträts,
 Aufsitzen am Trupp, bestätigter Boardingstatus; Basisverwaltung als Hover-Untermenü.
