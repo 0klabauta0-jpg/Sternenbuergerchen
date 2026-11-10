@@ -1,0 +1,7 @@
+{
+  "script": "orbit_quantum_selection_boundary_verifier.gd",
+  "exit_code": 1,
+  "errors": 4,
+  "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\launch-lock-red\\orbit_quantum_selection_boundary_verifier.log",
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\launch-lock-red\\orbit_quantum_selection_boundary_verifier"
+}

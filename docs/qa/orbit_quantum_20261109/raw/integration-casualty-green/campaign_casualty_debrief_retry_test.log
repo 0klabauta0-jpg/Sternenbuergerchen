@@ -1,0 +1,170 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+CAMPAIGN_CASUALTY_CASE { "all_down": true, "damaged_craft": false, "retry_button": "ReturnToHomebaseButton" }
+PASS: Outside real pilot equips through existing operation owner
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: Accept actual job
+PASS: Choose actual location
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Last safe checkpoint exists before terminal casualty
+PASS: Casualty fixture follows actual moon launch, quantum and satellite approach
+PASS: Real unavailable person blocks physical boarding
+PASS: Terminal casualty result releases combat instead of waiting forever
+PASS: No impossible pending boarding retry
+PASS: Casualty debrief is visible
+PASS: Impossible extraction requires explicit checkpoint retry and no success
+PASS: Both original casualties and existing medical progression reach debrief
+PASS: Existing owner records failed job
+PASS: No return fuel debit or completion reward
+PASS: No invented physical home arrival or return transfer
+PASS: Failed extraction does not manufacture an orbital departure
+PASS: Stranded surface craft cannot invoke a moonbase landing
+PASS: Casualty and repair metadata cannot authorize a home checkpoint
+PASS: Repeated result and service ticks cannot duplicate failure receipts or debit
+PASS: Recovery/service ticks cannot move the stranded craft home
+PASS: Even a completed repair timer cannot create a safe home checkpoint away from base
+PASS: Terminal sortie never overwrites last safe checkpoint
+PASS: Visible primary action explicitly offers checkpoint continuation
+PASS: Actual primary button reloads existing Continue checkpoint
+PASS: Checkpoint restart retains exactly two real people
+PASS: Explicit checkpoint rollback restores grounded state rather than completing the failed flight
+PASS: Casualty and retry preserve Skirmish profile
+CAMPAIGN_CASUALTY_CASE { "all_down": false, "damaged_craft": false, "retry_button": "ReturnToFOBButton" }
+PASS: Outside real pilot equips through existing operation owner
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: Accept actual job
+PASS: Choose actual location
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Last safe checkpoint exists before terminal casualty
+PASS: Casualty fixture follows actual moon launch, quantum and satellite approach
+PASS: Real unavailable person blocks physical boarding
+PASS: Terminal casualty result releases combat instead of waiting forever
+PASS: No impossible pending boarding retry
+PASS: Casualty debrief is visible
+PASS: Impossible extraction requires explicit checkpoint retry and no success
+PASS: Both original casualties and existing medical progression reach debrief
+PASS: Existing owner records failed job
+PASS: No return fuel debit or completion reward
+PASS: No invented physical home arrival or return transfer
+PASS: Failed extraction does not manufacture an orbital departure
+PASS: Stranded surface craft cannot invoke a moonbase landing
+PASS: Casualty and repair metadata cannot authorize a home checkpoint
+PASS: Repeated result and service ticks cannot duplicate failure receipts or debit
+PASS: Recovery/service ticks cannot move the stranded craft home
+PASS: Even a completed repair timer cannot create a safe home checkpoint away from base
+PASS: Terminal sortie never overwrites last safe checkpoint
+PASS: Visible primary action explicitly offers checkpoint continuation
+PASS: Actual primary button reloads existing Continue checkpoint
+PASS: Checkpoint restart retains exactly two real people
+PASS: Explicit checkpoint rollback restores grounded state rather than completing the failed flight
+PASS: Casualty and retry preserve Skirmish profile
+CAMPAIGN_CASUALTY_CASE { "all_down": true, "damaged_craft": true, "retry_button": "ReturnToHomebaseButton" }
+PASS: Outside real pilot equips through existing operation owner
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: Accept actual job
+PASS: Choose actual location
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Last safe checkpoint exists before terminal casualty
+PASS: Casualty fixture follows actual moon launch, quantum and satellite approach
+PASS: Actual anti-armor fixture warns before damaging the landed craft
+PASS: Existing damage resolver produces a damaged original craft
+PASS: Craft damage commits through the actual mission SimulationRoot before crew loss
+PASS: Real unavailable person blocks physical boarding
+PASS: Terminal casualty result releases combat instead of waiting forever
+PASS: No impossible pending boarding retry
+PASS: Casualty debrief is visible
+PASS: Impossible extraction requires explicit checkpoint retry and no success
+PASS: Both original casualties and existing medical progression reach debrief
+PASS: Existing owner records failed job
+PASS: No return fuel debit or completion reward
+PASS: No invented physical home arrival or return transfer
+PASS: Failed extraction does not manufacture an orbital departure
+PASS: Stranded surface craft cannot invoke a moonbase landing
+PASS: Casualty and repair metadata cannot authorize a home checkpoint
+PASS: Real craft damage reaches existing recovery metadata
+PASS: Repeated result and service ticks cannot duplicate failure receipts or debit
+PASS: Recovery/service ticks cannot move the stranded craft home
+PASS: Even a completed repair timer cannot create a safe home checkpoint away from base
+PASS: Terminal sortie never overwrites last safe checkpoint
+PASS: Visible primary action explicitly offers checkpoint continuation
+PASS: Actual primary button reloads existing Continue checkpoint
+PASS: Checkpoint restart retains exactly two real people
+PASS: Explicit checkpoint rollback restores grounded state rather than completing the failed flight
+PASS: Casualty and retry preserve Skirmish profile
+CAMPAIGN_CASUALTY_RESULTS passed=159 failed=0
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)

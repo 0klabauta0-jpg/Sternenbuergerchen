@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+SHIP_CONTEXT_PREVIEW checks=37 failed=4
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ship_context_preview_verifier.gd:18)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ship_context_preview_verifier.gd:18)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _check_campaign_shared_simulation (res://scripts/tests/ship_context_preview_verifier.gd:110)
+       [1] _run (res://scripts/tests/ship_context_preview_verifier.gd:105)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _check_campaign_shared_simulation (res://scripts/tests/ship_context_preview_verifier.gd:110)
+       [1] _run (res://scripts/tests/ship_context_preview_verifier.gd:105)
+FAIL: Read-only pad preview hides the campaign world action controls
+FAIL: Pad preview does not cancel an accepted keyboard movement intent
+FAIL: Real campaign actor completes its path while pad preview is visible
+SCRIPT ERROR: Invalid assignment of property or key 'visible' with value of type 'bool' on a base object of type 'Nil'.
+   at: set_pad_preview (res://scripts/meta/explorable_homebase.gd:309)
+   GDScript backtrace (most recent call first):
+       [0] set_pad_preview (res://scripts/meta/explorable_homebase.gd:309)
+       [1] _check_campaign_shared_simulation (res://scripts/tests/ship_context_preview_verifier.gd:141)
+FAIL: Optional missing character model still enters read-only pad preview
+SCRIPT ERROR: Invalid assignment of property or key 'visible' with value of type 'bool' on a base object of type 'Nil'.
+   at: set_pad_preview (res://scripts/meta/explorable_homebase.gd:309)
+   GDScript backtrace (most recent call first):
+       [0] set_pad_preview (res://scripts/meta/explorable_homebase.gd:309)
+       [1] _update_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1000)
+       [2] refresh (res://scripts/meta/homebase_operations_presenter.gd:681)
+       [3] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9359)
+       [4] request_operation (res://scripts/meta/homebase_screen.gd:9223)
+       [5] _check_campaign_shared_simulation (res://scripts/tests/ship_context_preview_verifier.gd:145)

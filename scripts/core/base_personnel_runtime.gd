@@ -105,6 +105,8 @@ func is_pilot_aboard(craft_id: String) -> bool:
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	return _sim.request_base_personnel_command(operation, payload)
 func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
+	if not _at_home():
+		return _reject("away_from_base", "Personen sind im Ausflug oder Transit")
 	var id := String(payload.get("unit_id", ""))
 	var craft := String(payload.get("craft_id", ""))
 	if operation == "base_unboard" and bool(payload.get("whole_fireteam", false)):
@@ -125,8 +127,6 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 		return {"ok":true}
 	if state.status == "sleeping":
 		return _reject("unit_sleeping", "Person zuerst aufwecken")
-	if not _at_home():
-		return _reject("away_from_base", "Personen sind im Ausflug oder Transit")
 	if operation == "base_unboard":
 		return _unboard(id, craft, payload)
 	if state.status == "boarding" and _board_groups.has(String(state.craft_id)) and bool(_board_groups[state.craft_id].committed):
@@ -210,7 +210,12 @@ func _cancel(id: String) -> void:
 	_sim.call("_discard_pending_move_commands_for_unit", id)
 	state_changed.emit()
 func _at_home() -> bool:
-	return _flow.get("_active_mission") == null and Array(_flow.get("_pending_mission_craft_transfers")).is_empty()
+	if _flow.get("_active_mission") != null or not Array(_flow.get("_pending_mission_craft_transfers")).is_empty():
+		return false
+	# Orbit and Quantum normally have no mission scene or legacy transfer.
+	# Only the travel owner can confirm the actual landing back at the base.
+	var travel: Dictionary = get_parent().call("get_space_travel_snapshot")
+	return String(travel.get("phase", "")) == "grounded"
 func _world(raw: Variant) -> Vector2:
 	return _terrain.grid_to_world(Vector2i(int(raw[0]),int(raw[1])))
 func _find_layout(field: String, id: String) -> Dictionary:

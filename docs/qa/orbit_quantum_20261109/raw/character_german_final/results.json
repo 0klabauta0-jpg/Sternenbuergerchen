@@ -1,0 +1,51 @@
+[
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\character_sheet_compact_verifier"
+  },
+  {
+    "script": "task_207_npc_rank_skill_badge_derivation.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\task_207_npc_rank_skill_badge_derivation.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\task_207_npc_rank_skill_badge_derivation"
+  },
+  {
+    "script": "task_235_character_sheet_roster_gameplay_expansion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\task_235_character_sheet_roster_gameplay_expansion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\task_235_character_sheet_roster_gameplay_expansion"
+  },
+  {
+    "script": "task_265_character_sheet_loadout_help_content_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\task_265_character_sheet_loadout_help_content_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\task_265_character_sheet_loadout_help_content_pass"
+  },
+  {
+    "script": "bugfix_character_team_editor_usability_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\bugfix_character_team_editor_usability_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\bugfix_character_team_editor_usability_pass"
+  },
+  {
+    "script": "task_594_post_mission_skill_delta_homebase_bridge.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\task_594_post_mission_skill_delta_homebase_bridge.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\task_594_post_mission_skill_delta_homebase_bridge"
+  },
+  {
+    "script": "task_595_homebase_progression_visual_polish.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_german_final\\task_595_homebase_progression_visual_polish.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_german_final\\task_595_homebase_progression_visual_polish"
+  }
+]

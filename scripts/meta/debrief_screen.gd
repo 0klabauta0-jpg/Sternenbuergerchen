@@ -5,6 +5,7 @@ const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui
 
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
+const SHIP_IDENTITY_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
@@ -737,7 +738,7 @@ func _apply_player_readout_texts() -> void:
 		count_parts.append("%d %s" % [counts[state], state])
 	(vbox.get_node("TeamStateLabel") as Label).text = " · ".join(count_parts) if not count_parts.is_empty() else "Keine Personendaten im Bericht."
 	var recovery: Dictionary = _mission_result.get("air_asset_recovery", {})
-	(vbox.get_node("AirAssetEventsLabel") as Label).text = "Keine Angaben zu Luftfahrzeugen." if not has_report else ("Kein Verlust eines Luftfahrzeugs gemeldet." if recovery.is_empty() else "Luftfahrzeugstatus liegt vor · Einzelheiten im Originalbericht.")
+	(vbox.get_node("AirAssetEventsLabel") as Label).text = "Keine Angaben zu Luftfahrzeugen." if not has_report else ("Kein Verlust eines Luftfahrzeugs gemeldet." if recovery.is_empty() else _german_recovery_summary(recovery))
 	(vbox.get_node("FTLFeedbackLabel") as Label).text = _player_ftl_feedback()
 	var events := Array(_mission_result.get("character_events", []))
 	var personnel := Array(_mission_result.get("personnel_events", []))
@@ -2046,6 +2047,19 @@ func _ensure_personnel_events_label() -> Label:
 	else:
 		vbox.add_child(label)
 	return label
+
+
+func _german_recovery_summary(recovery: Dictionary) -> String:
+	var craft_name: String = SHIP_IDENTITY_SCRIPT.get_ui_display_name({"display_name": recovery.get("display_name", "Schiff"), "craft_type": recovery.get("asset_type", "dropship")})
+	var state: String = String(recovery.get("meta_state", "craft_available"))
+	var labels := {"craft_available": "einsatzbereit", "damaged_repairing": "beschädigt", "destroyed_replacement_pending": "verloren"}
+	var summary := "Luftfahrzeug: %s · %s" % [craft_name, String(labels.get(state, "Status unbekannt"))]
+	if state in ["damaged_repairing", "destroyed_replacement_pending"]:
+		var eta: int = maxi(int(recovery.get("eta_seconds", 0)), 0)
+		if bool(_mission_result.get("campaign_checkpoint_retry_required", false)):
+			return summary + " · %s: %d s an der Heimatbasis; keine Heimkehr erfolgt." % ["Ersatzbedarf" if state == "destroyed_replacement_pending" else "Reparaturbedarf", eta]
+		return summary + (" · Ersatz in %d s" if state == "destroyed_replacement_pending" else " · Reparatur: bereit in %d s") % eta
+	return summary
 
 
 func _on_return_to_fob_pressed() -> void:

@@ -1,0 +1,96 @@
+{
+  "schema": "sternenbuergerchen.orbit_quantum_sources.v1",
+  "base_commit": "b548b5556248c4b51b2ca994ac6766f31a3192d1",
+  "branch": "task/orbit-quantum-travel-20261109",
+  "files": [
+    {
+      "path": "data/contextual_help_catalog.json",
+      "sha256": "1363b788e2ebb99d57c9965ee8f0859462555511cad52dfada794e64bc04676d"
+    },
+    {
+      "path": "data/frontier_ship_visual_catalog.json",
+      "sha256": "7e9360f291c82c0747448cfa50efe2e80f4778a7c1662b70a2e1159d927bbb8b"
+    },
+    {
+      "path": "data/singleplayer/star_system.json",
+      "sha256": "f00a8bc5a2202d31f6d82101da7b7faedb85bf5aeec799dd1159a3928e56a2fd"
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "9ef79f93b808db05ddafe4066dd0ba07cef8c3d5b2811e81c4ec5f26a738cecf"
+    },
+    {
+      "path": "scripts/core/singleplayer_space_travel_state.gd",
+      "sha256": "64fd6656c9031cd2642ec02cfb699bee26f5e3a8d76121ce99c353bf43670512"
+    },
+    {
+      "path": "scripts/core/weapon_data.gd",
+      "sha256": "d10e9169328f8e6bd99492b11ed177dc63b60a7ecce3c05a67bdea69335139f1"
+    },
+    {
+      "path": "scripts/meta/aircraft_manager.gd",
+      "sha256": "511b577dbbbfc8d8ad389b53fee4be324584444d63c75474f3330ee0cb5ac4db"
+    },
+    {
+      "path": "scripts/meta/campaign_tutorial_presenter.gd",
+      "sha256": "505657a257b3e91d4d3e43cef6d934b8ffeac4674a32af4f191be02b83005ebf"
+    },
+    {
+      "path": "scripts/meta/character_sheet_copy.gd",
+      "sha256": "e85c45633ff7309c528d3eeda80032a25e8bedd6c4480d281d5f67c97d3dc5ed"
+    },
+    {
+      "path": "scripts/meta/character_sheet_formatter.gd",
+      "sha256": "2b452268de211b90fdc35aaaeeb1ce50b16dc3f283cbf10b73e6b579ad7fab34"
+    },
+    {
+      "path": "scripts/meta/character_sheet_view.gd",
+      "sha256": "8fe4cfb53ad44865951b7db90e4b3dbd2ba76d5e6a71cff19ce0d6f527c50631"
+    },
+    {
+      "path": "scripts/meta/homebase_operations_presenter.gd",
+      "sha256": "71e3cf23d62e70fd0b93085313be5116c49755c4d1aeb030cf33ceda6225002d"
+    },
+    {
+      "path": "scripts/meta/homebase_screen.gd",
+      "sha256": "0715b724d6d4b6264da0352d94ffda0f2d405b0ea638711626530df06825b8cd"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "29ccaba3f3422bc7b15f5adc902361e917552629a9f839f64028b5d926d19763"
+    },
+    {
+      "path": "scripts/meta/npc_rank_badge_resolver.gd",
+      "sha256": "521438771f94a85863f56ae1f839e39727047d5a5870473caac88cbec94f73a5"
+    },
+    {
+      "path": "scripts/meta/ship_context_backdrop.gd",
+      "sha256": "2f5e8d8c9524b02f7bdb44e1f1dd3bdf140efa273ec648314f8f3c3bfe48c52c"
+    },
+    {
+      "path": "scripts/meta/singleplayer_job_board_presenter.gd",
+      "sha256": "541dd0a8f09ced83350c6512e1d0a1dde35f6cfbd9373f2470768bba1b91423e"
+    },
+    {
+      "path": "scripts/meta/singleplayer_region_map_presenter.gd",
+      "sha256": "c4d762da3f2aa004c2d550b1efe0a53a163443886c57cea2c51e9b782219cc0a"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "30a0da3fa4bec9ab7a4e50253b5b3fd3a584e5d232a9173968f3082c88fbee93"
+    },
+    {
+      "path": "scripts/meta/singleplayer_services_presenter.gd",
+      "sha256": "e2122dd4d1ef6a18a8082630b0384fad461215bf1c788d566ed65e99482dbd09"
+    },
+    {
+      "path": "scripts/ui/star_map_canvas.gd",
+      "sha256": "352ef4454224370b542d8d19f9cc264afe5f43ed3f8fb59ccf11abb7171ada3b"
+    },
+    {
+      "path": "scripts/ui/star_map_screen.gd",
+      "sha256": "18d426d43a2fc9fc2aea09c6408946cf28d167655b005fc63a28c6d621b13979"
+    }
+  ],
+  "hash_normalization": "UTF-8 text with CRLF normalized to LF"
+}

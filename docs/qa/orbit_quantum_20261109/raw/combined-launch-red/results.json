@@ -1,0 +1,7 @@
+{
+  "script": "orbit_quantum_flow_verifier.gd",
+  "exit_code": 1,
+  "errors": 2,
+  "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-launch-red\\orbit_quantum_flow_verifier.log",
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-launch-red\\orbit_quantum_flow_verifier"
+}

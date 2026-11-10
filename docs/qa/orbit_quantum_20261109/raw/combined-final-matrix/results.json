@@ -1,0 +1,114 @@
+[
+  {
+    "script": "singleplayer_space_travel_state_test.gd",
+    "exit_code": 1,
+    "errors": 3,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\singleplayer_space_travel_state_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\singleplayer_space_travel_state_test"
+  },
+  {
+    "script": "star_map_camera_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\star_map_camera_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\star_map_camera_verifier"
+  },
+  {
+    "script": "star_map_ui_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\star_map_ui_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\star_map_ui_verifier"
+  },
+  {
+    "script": "orbit_quantum_flow_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\orbit_quantum_flow_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\orbit_quantum_flow_verifier"
+  },
+  {
+    "script": "orbit_quantum_entry_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\orbit_quantum_entry_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\orbit_quantum_entry_verifier"
+  },
+  {
+    "script": "orbit_quantum_safety_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\orbit_quantum_safety_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\orbit_quantum_safety_verifier"
+  },
+  {
+    "script": "orbit_quantum_selection_boundary_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\orbit_quantum_selection_boundary_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\orbit_quantum_selection_boundary_verifier"
+  },
+  {
+    "script": "character_identity_consistency_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\character_identity_consistency_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\character_identity_consistency_verifier"
+  },
+  {
+    "script": "character_detail_hierarchy_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\character_detail_hierarchy_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\character_detail_hierarchy_verifier"
+  },
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\character_sheet_compact_verifier"
+  },
+  {
+    "script": "campaign_launch_actionability_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\campaign_launch_actionability_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\campaign_launch_actionability_verifier"
+  },
+  {
+    "script": "campaign_start_integration_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\campaign_start_integration_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\campaign_start_integration_test"
+  },
+  {
+    "script": "campaign_onboarding_state_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\campaign_onboarding_state_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\campaign_onboarding_state_test"
+  },
+  {
+    "script": "campaign_menu_start_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\campaign_menu_start_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\campaign_menu_start_test"
+  },
+  {
+    "script": "task_278_air_asset_loss_recovery_meta_loop.gd",
+    "exit_code": 1,
+    "errors": 4,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\task_278_air_asset_loss_recovery_meta_loop.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\task_278_air_asset_loss_recovery_meta_loop"
+  },
+  {
+    "script": "task_503_mission_dropship_fireteam_hud_truth.gd",
+    "exit_code": 1,
+    "errors": 1,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-final-matrix\\task_503_mission_dropship_fireteam_hud_truth.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-final-matrix\\task_503_mission_dropship_fireteam_hud_truth"
+  }
+]

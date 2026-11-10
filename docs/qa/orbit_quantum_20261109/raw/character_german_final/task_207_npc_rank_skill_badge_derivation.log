@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_207 NPC Rank Skill Badge Derivation ===
+PASS: Rank particle catalog is loadable
+PASS: Badge asset is loadable: badge_role_ftl
+PASS: Badge asset is loadable: badge_role_medic
+PASS: Badge asset is loadable: badge_role_rifle
+PASS: Badge asset is loadable: badge_role_heavy
+PASS: Badge asset is loadable: badge_role_pilot
+PASS: Badge asset is loadable: badge_role_engineer
+PASS: Badge asset is loadable: badge_role_enemy
+PASS: Badge asset is loadable: badge_state_down
+PASS: Badge asset is loadable: badge_state_ready
+PASS: Badge asset is loadable: badge_state_suppressed
+PASS: Catalog exposes badge_role_medic
+PASS: Catalog exposes badge_role_rifle
+PASS: Catalog exposes badge_role_heavy
+PASS: Catalog exposes badge_role_pilot
+PASS: Catalog exposes badge_role_engineer
+PASS: Catalog exposes badge_role_ftl
+PASS: Resolver caps primary badges at three
+PASS: Badge selection is deterministic
+PASS: Medic role/loadout yields Medic badge
+PASS: Fireteam lead/leadership yields Leader badge
+PASS: Heavy weapon yields Heavy badge
+PASS: Derived badges carry catalog asset paths
+PASS: Sniper/rifle loadout yields Shooter badge
+PASS: Strong platform value yields Pilot badge
+PASS: Engineer source role yields Engineer badge even after normalized role mapping
+PASS: Enemy team receives a small enemy readability badge
+PASS: FOB/#17 compact card renders derived badge icons
+PASS: Homebase/roster meta card renders derived badge icons
+PASS: Character sheet renders derived badge icons
+PASS: Missing badge asset renders a diagnostic fallback node
+=== RESULTS: 31 passed, 0 failed ===
+ALL TESTS PASSED

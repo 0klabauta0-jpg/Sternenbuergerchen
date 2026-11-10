@@ -1,5 +1,22 @@
 # TASK_ROADMAP
 
+### Gemeinsamer Basis-/Orbit-/Charakterabschluss — 10.11.2026
+Beide fertigen Arbeiten im Integrationsbranch zusammengefuehrt und geprueft:
+Kampagne152/0, Skirmish105/0, Verlustfaelle159/0 und gezielte UI-/Ownergates.
+Main-/Push-/Exportabschluss aus diesem Stand gemaess ausdruecklichem Auftrag;
+Belege in `docs/qa/orbit_base_combined_20261110/README.md` und beim neuen Paket.
+Fruehere Einzelbranch-Meldungen unten sind damit historischer Kontext.
+
+### Orbitreise und UI-Klarheit — 09.11.2026
+Freigegebene Mondbasis-/Quantum-Reise samt Rueckweg auf eigenem Taskbranch
+implementiert und technisch geprueft. Kamera mit Cursor-Zoom/Pan und Raum fuer
+spaetere Begegnungen; drei Zukunftsmarker sind noch keine Gameplayorte.
+Pad-/Weltraumvorschau, deutscher kompakter Charakterbogen und sichtbarer
+Abflugweg ohne FOB. Kampagne124/0, freier Loop104/0, Matrix16/16; Kamera18/0,
+Sternkarten-UI91/0. QA `docs/qa/orbit_quantum_20261109/README.md`.
+Nutzerpruefung am eigenen Kandidatenbuild; kein Mainmerge oder Push.
+
+
 ### Kampagnenstart / Skirmish — 09.11.2026
 Freigegebene Einfuehrung implementiert: genau zwei NPCs, kleine Basis,
 Vorbereitung -> Satellit -> Handel/Tanken/Heimkehr, getrennte Modi und

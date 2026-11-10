@@ -1,0 +1,560 @@
+{
+  "schema": "orbit_base_combined.source_manifest.v1",
+  "baseline": "b548b5556248c4b51b2ca994ac6766f31a3192d1",
+  "main_parent": "43b1f153b14d59e4299e94fe0bb4d26eb48e5e05",
+  "orbit_parent": "0f2425aa7",
+  "files": [
+    {
+      "path": "Assets/curated/base_access_20261109/build_doors.py",
+      "canonical_sha256": "450c68538f88c580e9866db3823e8171d3d24377621663ccba0c99b3ce93121f",
+      "canonical_bytes": 3079,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/freihafen_hall_01.glb",
+      "canonical_sha256": "6db0eb95442058a3f5f9f2544ba95439fec734f8fafa4489077cdce12ef58b0b",
+      "canonical_bytes": 465096,
+      "mode": "binary"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/freihafen_hall_01.glb.import",
+      "canonical_sha256": "1d4d43c646a6746f6baca38159cdd8b5a401b1acfc0df8ec1839cb0748b91696",
+      "canonical_bytes": 1093,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/habitat_cutaway_01.glb",
+      "canonical_sha256": "4d0132905e4c7e91023fd632b0b6103044e9855d42a1528b72d459da7e41b4be",
+      "canonical_bytes": 371048,
+      "mode": "binary"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/habitat_cutaway_01.glb.import",
+      "canonical_sha256": "a72c61f0a802f9be22d986698f82378f1cae26e30c2349955ea115a3edd42e84",
+      "canonical_bytes": 1095,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/source/.gdignore",
+      "canonical_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "canonical_bytes": 1,
+      "mode": "binary"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/source/freihafen_hall_01.blend",
+      "canonical_sha256": "5ea3307e57765bc2f5dab2a44b4c756c5f6feb1979706b9f768cd3db69b0cd5a",
+      "canonical_bytes": 203394,
+      "mode": "binary"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/source/habitat_cutaway_01.blend",
+      "canonical_sha256": "44b4547d189f4454adb6d3dc98b4799a1cc708abae3bf23ee2187e39312fbf29",
+      "canonical_bytes": 185714,
+      "mode": "binary"
+    },
+    {
+      "path": "art/portraits_20261105/verify_portrait_sources.py",
+      "canonical_sha256": "0db1f70b325317ab8cf6f1f939c907d80e4338282837f51c68da998f91aca605",
+      "canonical_bytes": 4978,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "data/contextual_help_catalog.json",
+      "canonical_sha256": "c1c7fbda21f4b63a6277062ccdae32b8f06e8814f99529a856b351f1857accc3",
+      "canonical_bytes": 106132,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "data/frontier_ship_visual_catalog.json",
+      "canonical_sha256": "7e9360f291c82c0747448cfa50efe2e80f4778a7c1662b70a2e1159d927bbb8b",
+      "canonical_bytes": 2375,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "data/portrait_identity_catalog.json",
+      "canonical_sha256": "11e86d9b54224b5ec00349b85ce3eac744afcd713f22df7df4c821123ea8a9a3",
+      "canonical_bytes": 49358,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "data/singleplayer/star_system.json",
+      "canonical_sha256": "f00a8bc5a2202d31f6d82101da7b7faedb85bf5aeec799dd1159a3928e56a2fd",
+      "canonical_bytes": 1091,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "maps/base_interior_navigation.json",
+      "canonical_sha256": "f0aa97eee01c93ad0ace2a9e699dd778c636f8ed748e4dc6e0cfcfb4ae001106",
+      "canonical_bytes": 2202512,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "maps/campaign_intro_base.json",
+      "canonical_sha256": "3810936c3e2ca2661f05934e88c8135683fa37d724a50ca6ed7d22e3ca01e40a",
+      "canonical_bytes": 310162,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "maps/homebase_frontier_exploration.json",
+      "canonical_sha256": "3337b4d07d044c576e2702fb04c547cefde2f370e649a50c54afff11046576a1",
+      "canonical_bytes": 310136,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/core/base_personnel_actor.gd",
+      "canonical_sha256": "6b9833901d75ff08755443e4e9f54012d567d5e682820082bcde71e09a48629a",
+      "canonical_bytes": 269,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/core/base_personnel_runtime.gd",
+      "canonical_sha256": "672127a6757602b45509e36812f8c8468fd28bb3db3da6bb71e1115ad20d5066",
+      "canonical_bytes": 17652,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "canonical_sha256": "d5fd3327d718962cae593e5569411f495b28eee560ce16dfa2050e541fc6e06f",
+      "canonical_bytes": 163396,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/core/singleplayer_space_travel_state.gd",
+      "canonical_sha256": "64fd6656c9031cd2642ec02cfb699bee26f5e3a8d76121ce99c353bf43670512",
+      "canonical_bytes": 9732,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/core/weapon_data.gd",
+      "canonical_sha256": "d10e9169328f8e6bd99492b11ed177dc63b60a7ecce3c05a67bdea69335139f1",
+      "canonical_bytes": 9596,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/aircraft_manager.gd",
+      "canonical_sha256": "511b577dbbbfc8d8ad389b53fee4be324584444d63c75474f3330ee0cb5ac4db",
+      "canonical_bytes": 20177,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/base_interior_navigation.gd",
+      "canonical_sha256": "f8de7c0d635cdbe5a7cdf6ece51e9f8d5926fa6eb304aa8e388657d25f2eea9a",
+      "canonical_bytes": 3185,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/campaign_checkpoint_store.gd",
+      "canonical_sha256": "31d362520d0e984784aa8bda3f406db377dd06c1e43dc13c4e9abbef0ef1d3a9",
+      "canonical_bytes": 10485,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/campaign_start_configuration.gd",
+      "canonical_sha256": "cf5ad3a86a8c7cde2102f0eed64b92bb4fd19cf55ad11985014ce956b39f30e4",
+      "canonical_bytes": 6616,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/campaign_tutorial_presenter.gd",
+      "canonical_sha256": "6278ee4761eccc57905f44c3dc58cad686140d9ee07c835471decf66f8930f87",
+      "canonical_bytes": 12058,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/character_sheet_copy.gd",
+      "canonical_sha256": "39e87c0a2d33f0dfef03aa3978e597c56790863b75fcfcfef4aaf6d0054c49f8",
+      "canonical_bytes": 6201,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/character_sheet_formatter.gd",
+      "canonical_sha256": "6fabd02fcecef3481c2feff4e6b3e2c0fa61824cc5f611a6210b42a3369f0bde",
+      "canonical_bytes": 41128,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/character_sheet_view.gd",
+      "canonical_sha256": "569fc59d821d5b57b84b51f69f581dc43a19126242232a4550c15df826e740fc",
+      "canonical_bytes": 72535,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/debrief_screen.gd",
+      "canonical_sha256": "ae33d3921c18ea3f6be9bbe805f10c2144a144fd8a6c5a3cca50b29bf5b7a9be",
+      "canonical_bytes": 102452,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/explorable_homebase.gd",
+      "canonical_sha256": "610a6a4196c9f895692ac7bbc87b4c59ff892724a061591610073ec6a76bf327",
+      "canonical_bytes": 43052,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/homebase_operations_presenter.gd",
+      "canonical_sha256": "108a6d7b701ccdb3d13b8573fefd00692e05d104b8152e362e3696121d569fca",
+      "canonical_bytes": 54120,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/homebase_screen.gd",
+      "canonical_sha256": "8fa503a67a440881ac0a6c4234050f99cadf29ce6e84923bfd7c69a219196e79",
+      "canonical_bytes": 490556,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "canonical_sha256": "16724250cff9c6cc26a34ee1076e904f70417851ba64463912b2e2ce50cfe10f",
+      "canonical_bytes": 373832,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/npc_rank_badge_resolver.gd",
+      "canonical_sha256": "521438771f94a85863f56ae1f839e39727047d5a5870473caac88cbec94f73a5",
+      "canonical_bytes": 26434,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/portrait_identity_catalog.gd",
+      "canonical_sha256": "c6aa905e9520c39c0e668c2671454a702343bc6197be665210ae182283ed5382",
+      "canonical_bytes": 14873,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/ship_context_backdrop.gd",
+      "canonical_sha256": "2f5e8d8c9524b02f7bdb44e1f1dd3bdf140efa273ec648314f8f3c3bfe48c52c",
+      "canonical_bytes": 2082,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/singleplayer_job_board_presenter.gd",
+      "canonical_sha256": "541dd0a8f09ced83350c6512e1d0a1dde35f6cfbd9373f2470768bba1b91423e",
+      "canonical_bytes": 5490,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/singleplayer_region_map_presenter.gd",
+      "canonical_sha256": "c4d762da3f2aa004c2d550b1efe0a53a163443886c57cea2c51e9b782219cc0a",
+      "canonical_bytes": 951,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "canonical_sha256": "b8819af94b74bc6d5067f9d828e6ac9c8d94002b792dab655731d8256d88b808",
+      "canonical_bytes": 32633,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/singleplayer_services_presenter.gd",
+      "canonical_sha256": "e2122dd4d1ef6a18a8082630b0384fad461215bf1c788d566ed65e99482dbd09",
+      "canonical_bytes": 11797,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/meta/start_roster_generator.gd",
+      "canonical_sha256": "4367fa0178d7e56505a76d224f01d3d59ef0e44006e4d3671372688e7c976206",
+      "canonical_bytes": 33739,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/npc/unit_roster_presets.gd",
+      "canonical_sha256": "bbb4feebcbec0153060955207473cbe1f523eaac30b8d6404d2de9ba5c4f475d",
+      "canonical_bytes": 13186,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tactical/fireteam_movement_controller.gd",
+      "canonical_sha256": "4512825ea956a0daa3ab8a5869d6a9dbe574642d48ef66779aa2bfb584a3cf60",
+      "canonical_bytes": 142375,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "canonical_sha256": "b7bbf73a1f2cd7bd36536158753d7b207fa1ed778877c3192f09558f8a24c3cd",
+      "canonical_bytes": 877671,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/base_original_rooms_restore_test.gd",
+      "canonical_sha256": "0c003b043fc9efdd3c2981cf36022a10ad5674939df05bf8a7ff515ac2fc76ee",
+      "canonical_bytes": 2485,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/base_personnel_runtime_verifier.gd",
+      "canonical_sha256": "c7ad2033b92abcfc207b4ab5020c44d97374e6fe6796982d84ad43ab282e154c",
+      "canonical_bytes": 11413,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/base_personnel_visual_clearance_verifier.gd",
+      "canonical_sha256": "ab7d5db56d56f82142afc5bba82d65a135c2b332b9056d1aa365829674579bcb",
+      "canonical_bytes": 2386,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/base_personnel_world_ui_test.gd",
+      "canonical_sha256": "309fd9c9314504326131fb23642d3165799ab342d1127383f85da9072b61b931",
+      "canonical_bytes": 3549,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/base_real_personnel_geometry_verifier.gd",
+      "canonical_sha256": "0b95e703b8c3843e7ecce78d3332eaa7c5407e143767589509c1d09335d0a1e9",
+      "canonical_bytes": 4797,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/bugfix_character_team_editor_usability_pass.gd",
+      "canonical_sha256": "5e848c0a72d489c13129e85bb8880628007dbb5300fd57d290b10192ebca406d",
+      "canonical_bytes": 31345,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_base_map_test.gd",
+      "canonical_sha256": "9eada0ee394d39aa040575ff9c8b7bc6d5f549c30a24786fc209cd87066088fd",
+      "canonical_bytes": 1936,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_casualty_debrief_retry_test.gd",
+      "canonical_sha256": "7ba1d41086a618393651430b5edc42953bb4869a6f77689766cc1dfbbba8e924",
+      "canonical_bytes": 8322,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_intro_loop_smoke.gd",
+      "canonical_sha256": "4f4006f4b615497fbe8719d3095687517e814cbe5b925869488b47afc91008bb",
+      "canonical_bytes": 7856,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_launch_actionability_verifier.gd",
+      "canonical_sha256": "bc34956da6d3de65d6e65c1e6de95dd4cb05b9882be49d6bc2a5feb0e30780c0",
+      "canonical_bytes": 6371,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_onboarding_state_test.gd",
+      "canonical_sha256": "485b0d02910f366afa06fc83b9a816fc4d15e580240f9bedc7a5c9c2930476eb",
+      "canonical_bytes": 12480,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_pilot_ground_handoff_test.gd",
+      "canonical_sha256": "602d19babc462104a6c0f6dee237e68485c0ad03cbaf45d655a4157e2d0723d8",
+      "canonical_bytes": 1618,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_pilot_ground_loop_test.gd",
+      "canonical_sha256": "1345d50dcdeffb14d345d864fd61886819e8333f347974fde9ff1bdde8c1c8f0",
+      "canonical_bytes": 3835,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_preparation_continue_test.gd",
+      "canonical_sha256": "bf23fd8c6e1abe40f9f8c13ab42067ce1538cbe48d96926bb03bb965063949d2",
+      "canonical_bytes": 3772,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_start_integration_test.gd",
+      "canonical_sha256": "95c98403770a229e7d8f8e39eac17a05dc92470deb7c698d2c3340af0a54af88",
+      "canonical_bytes": 2467,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/campaign_two_person_formation_test.gd",
+      "canonical_sha256": "1a8c2f52957f3b18da2c8215e8eb123c9c37fb958f757914f64bf0cfd0bb2b1e",
+      "canonical_bytes": 1561,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/character_detail_hierarchy_verifier.gd",
+      "canonical_sha256": "8da389dbf95a5fd0ac97500605f037865ce091b4c5e94c67bb572b9cfb483723",
+      "canonical_bytes": 8335,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/character_identity_consistency_verifier.gd",
+      "canonical_sha256": "f16751cb4207545129d5e1226f26e7848594f46e69ce0b92010467e93846de17",
+      "canonical_bytes": 6849,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/character_sheet_compact_verifier.gd",
+      "canonical_sha256": "b9e4db5e0115d8c89f4b32969e02043cbd06d1522ad8e9557a9a1b66d74df94a",
+      "canonical_bytes": 6619,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/compact_singleplayer_panels_verifier.gd",
+      "canonical_sha256": "e5f37aff7ab71fbb46edaee152e37290f0050eae4bbff539a69e7633d440694d",
+      "canonical_bytes": 3589,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "canonical_sha256": "472e9ae701b9668fa77407c66b16b20b3a4ea7d7dae158f8b78a5cc37cdf86e7",
+      "canonical_bytes": 1914000,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/orbit_quantum_entry_verifier.gd",
+      "canonical_sha256": "96c55c90413e5668c37c972e8b252632f74a99cab8a932f8add5f1b632afee0c",
+      "canonical_bytes": 4323,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/orbit_quantum_flow_verifier.gd",
+      "canonical_sha256": "a5a52ef0cae7d66c9e2241785998626e8d7642a3dfb708b27b28bcbfdc78de71",
+      "canonical_bytes": 8465,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/orbit_quantum_safety_verifier.gd",
+      "canonical_sha256": "63db6b1f04295103a279c1b6b84976d81ebd3b75af8e478142af11db49997dc1",
+      "canonical_bytes": 7054,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/orbit_quantum_selection_boundary_verifier.gd",
+      "canonical_sha256": "1b6701f368dde360a900288aca03fffb831ad83a3c7d863eade0071110d912df",
+      "canonical_bytes": 7093,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_aborted_visit_return_verifier.gd",
+      "canonical_sha256": "e840430c4ff39a530e82227ace8995a86a12e5cf28278f6e79cba9165229a694",
+      "canonical_bytes": 3355,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_base_interior_pad_verifier.gd",
+      "canonical_sha256": "224950781de78540b4fbafe17bf2651e91ac0520d5d9096590831a7013d8cb8d",
+      "canonical_bytes": 5765,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_campaign_views_verifier.gd",
+      "canonical_sha256": "2cff297715a1fcce0f7556080a5176b87605e7e9da088ab5c5dac00dd62bd11a",
+      "canonical_bytes": 3531,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_roundtrip_fuel_verifier.gd",
+      "canonical_sha256": "48b5055ec5c614235ff6a4eec858b6400ad2f4a13ae9465ff1a1471f443c99b4",
+      "canonical_bytes": 4112,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+      "canonical_sha256": "5ab719cd851ddd496a969c885a7825e7102997ea61c7f65b792cd64544b5ee07",
+      "canonical_bytes": 25761,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/run_orbit_quantum_checks.ps1",
+      "canonical_sha256": "5bd71c3a081ad254f90e476272889d87676bcca2558f91c3e667480fce3554bf",
+      "canonical_bytes": 2565,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/ship_context_preview_verifier.gd",
+      "canonical_sha256": "22f63d48e6ad203c74adb965c900c7077214d9033d54ea1bf6f321764aa7bc03",
+      "canonical_bytes": 9830,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/space_travel_state_verifier.gd",
+      "canonical_sha256": "37e76962f8c5a4c9c9891f2760656614fcc8891e30a4829914c63285ed2e5baa",
+      "canonical_bytes": 10470,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/star_map_camera_verifier.gd",
+      "canonical_sha256": "d01faa8888c698e8c4cbd5d7baf67e2a81395d46c403073aeb99e6e00cfd0b0c",
+      "canonical_bytes": 7411,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/star_map_ui_verifier.gd",
+      "canonical_sha256": "5ed9e26146fc41d08af23d0046b5b777e36881080f26455c9aff50b2399761ff",
+      "canonical_bytes": 10850,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_232_start_roster_generation_contract.gd",
+      "canonical_sha256": "347fdc2108039a06406b7564a737eb2f4e6ad342759287cfe468cf6f1a796c50",
+      "canonical_bytes": 11039,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_235_character_sheet_roster_gameplay_expansion.gd",
+      "canonical_sha256": "d090cbfebc79d3fba7f63de5a799c3862306b24a018c26b2c159f601a61b1723",
+      "canonical_bytes": 9994,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_236_fireteam_relationship_affinity_and_cohesion.gd",
+      "canonical_sha256": "34284674beb4f0f7a09659c0aa5267ec341a50a2e91854749321f3eba37cdbe1",
+      "canonical_bytes": 9851,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_265_character_sheet_loadout_help_content_pass.gd",
+      "canonical_sha256": "3a69b674daa48ab0bf4a51f26f299f579ec24191b4ce05dc36019994923f084e",
+      "canonical_bytes": 12937,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_278_air_asset_loss_recovery_meta_loop.gd",
+      "canonical_sha256": "5e0853f1cce3a99f2c380478dc675a4106ce1855813c8a6e5dbf1b905c8fbf86",
+      "canonical_bytes": 9439,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_594_post_mission_skill_delta_homebase_bridge.gd",
+      "canonical_sha256": "79334efa4e739a44a49c0cbd7a297f90dfa392003f4dfb6d33362d3878d4e60c",
+      "canonical_bytes": 11175,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_595_homebase_progression_visual_polish.gd",
+      "canonical_sha256": "2aa076c68448d5c30ab3aecfc1df1a39477a1f899ae9a4dc51dd07a00dc5a4a0",
+      "canonical_bytes": 11458,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/task_597_homebase_progression_f6_evidence_capture.gd",
+      "canonical_sha256": "b1dc7d56bd4f21dc38a36e8d225d262a285b43404048b367a00fcf9ececb18e0",
+      "canonical_bytes": 26391,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "canonical_sha256": "3811963cff7a121d1309015c714f8d7a5b49249085c80c07536a48fb0c786242",
+      "canonical_bytes": 7838,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/tools/build_base_interior_navigation.gd",
+      "canonical_sha256": "431ab57bd734128ea98dc313fdc8bc96a090dcaffd640496abaaef5b0c0cffeb",
+      "canonical_bytes": 5132,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/ui/star_map_canvas.gd",
+      "canonical_sha256": "352ef4454224370b542d8d19f9cc264afe5f43ed3f8fb59ccf11abb7171ada3b",
+      "canonical_bytes": 13829,
+      "mode": "utf8_lf"
+    },
+    {
+      "path": "scripts/ui/star_map_screen.gd",
+      "canonical_sha256": "18d426d43a2fc9fc2aea09c6408946cf28d167655b005fc63a28c6d621b13979",
+      "canonical_bytes": 13776,
+      "mode": "utf8_lf"
+    }
+  ]
+}

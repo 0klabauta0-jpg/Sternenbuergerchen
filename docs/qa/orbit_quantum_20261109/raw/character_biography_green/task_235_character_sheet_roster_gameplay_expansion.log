@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_235 Character Sheet Roster Gameplay Expansion ===
+PASS: MetaUnitProfile stores availability status
+PASS: MetaUnitProfile stores recovery state
+PASS: MetaUnitProfile stores relationship links
+PASS: MetaUnitProfile stores fireteam history
+PASS: MetaUnitProfile stores mission history
+PASS: MetaUnitProfile stores progression
+PASS: MetaUnitProfile roundtrips portrait id
+PASS: MetaUnitProfile roundtrips traits
+PASS: Sheet formatter emits role_loadout_rows
+PASS: Sheet formatter emits status_rows
+PASS: Sheet formatter emits relationship_rows
+PASS: Sheet formatter emits progress_rows
+PASS: Sheet status rows include recovery
+PASS: Sheet relationship rows include teamfit summary
+PASS: Sheet progress rows include XP
+PASS: Missing relationship data falls back cleanly
+PASS: Missing mission history falls back cleanly
+PASS: Character sheet renders section AUFGABE & EIGNUNG
+PASS: Character sheet renders section STATUS & ERHOLUNG
+PASS: Character sheet renders section ZUSAMMENARBEIT
+PASS: Character sheet renders section ENTWICKLUNG
+PASS: Character sheet renders section KERNWERTE
+PASS: Character sheet portrait fallback/load remains stable
+PASS: Character sheet renders gameplay status and relationship text
+PASS: Homebase roster renders 30 scanable compact cards
+PASS: Compact roster card keeps bounded height
+PASS: Roster compact card combines confirmed status and actual location
+PASS: Homebase popup preserves gameplay sections behind the compact details action
+PASS: Homebase renders profile portraits from shared payload
+PASS: FOB accepts the same profile payload without conversion
+=== RESULTS: 30 passed, 0 failed ===
+ALL TESTS PASSED

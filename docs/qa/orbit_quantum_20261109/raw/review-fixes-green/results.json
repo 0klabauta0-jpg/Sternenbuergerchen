@@ -1,0 +1,23 @@
+[
+  {
+    "script": "orbit_quantum_selection_boundary_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\review-fixes-green\\orbit_quantum_selection_boundary_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\review-fixes-green\\orbit_quantum_selection_boundary_verifier"
+  },
+  {
+    "script": "orbit_quantum_flow_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\review-fixes-green\\orbit_quantum_flow_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\review-fixes-green\\orbit_quantum_flow_verifier"
+  },
+  {
+    "script": "orbit_quantum_entry_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\review-fixes-green\\orbit_quantum_entry_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\review-fixes-green\\orbit_quantum_entry_verifier"
+  }
+]

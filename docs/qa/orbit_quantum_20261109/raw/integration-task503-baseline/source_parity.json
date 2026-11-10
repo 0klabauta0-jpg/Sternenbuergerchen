@@ -1,0 +1,62 @@
+[
+  {
+    "path": "scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd",
+    "identical": true,
+    "baseline_sha256": "58F23CF202584331CB7A30C6AF245AB2421FE34B1FCFB651DA69EC96736BFECF",
+    "integration_sha256": "58F23CF202584331CB7A30C6AF245AB2421FE34B1FCFB651DA69EC96736BFECF"
+  },
+  {
+    "path": "scenes/tests/mission_reactivity_test.tscn",
+    "identical": true,
+    "baseline_sha256": "E3D5E05923B8042CDAAD829EFF049447BB6560351A0129C916A8A00DD168A8CE",
+    "integration_sha256": "E3D5E05923B8042CDAAD829EFF049447BB6560351A0129C916A8A00DD168A8CE"
+  },
+  {
+    "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+    "identical": true,
+    "baseline_sha256": "472E9AE701B9668FA77407C66B16B20B3A4EA7D7DAE158F8B78A5CC37CDF86E7",
+    "integration_sha256": "472E9AE701B9668FA77407C66B16B20B3A4EA7D7DAE158F8B78A5CC37CDF86E7"
+  },
+  {
+    "path": "scripts/ui/mission_a5_hud_layout.gd",
+    "identical": true,
+    "baseline_sha256": "5342A804244CC97DF59A30A1F8D4837E79A93CD0BD2E25A39EC27C2544F6A9ED",
+    "integration_sha256": "5342A804244CC97DF59A30A1F8D4837E79A93CD0BD2E25A39EC27C2544F6A9ED"
+  },
+  {
+    "path": "scripts/meta/npc_compact_card.gd",
+    "identical": true,
+    "baseline_sha256": "C209CAE813256360CC6B748B486AA0C9243BFF842276924E78816FFAA2FAEEAA",
+    "integration_sha256": "C209CAE813256360CC6B748B486AA0C9243BFF842276924E78816FFAA2FAEEAA"
+  },
+  {
+    "path": "scripts/meta/npc_meta_card.gd",
+    "identical": true,
+    "baseline_sha256": "D2259D62CDA3F79115D279C5D5288A9E05C8B274C7344579ECBB5D231A175D50",
+    "integration_sha256": "D2259D62CDA3F79115D279C5D5288A9E05C8B274C7344579ECBB5D231A175D50"
+  },
+  {
+    "path": "scripts/tactical/mission_hud_read_model.gd",
+    "identical": true,
+    "baseline_sha256": "7FC4E05A8C505132A4DA7B78F8AA71AF68FF0A4FAA7272C3731443F856F830FF",
+    "integration_sha256": "7FC4E05A8C505132A4DA7B78F8AA71AF68FF0A4FAA7272C3731443F856F830FF"
+  },
+  {
+    "path": "scripts/tests/mission_test_setup.gd",
+    "identical": true,
+    "baseline_sha256": "FD9A83118EA3EC3945641D1594D31DBC678CE986910B0D83623D8500139AD683",
+    "integration_sha256": "FD9A83118EA3EC3945641D1594D31DBC678CE986910B0D83623D8500139AD683"
+  },
+  {
+    "path": "scripts/tests/mission_combat_loop_driver.gd",
+    "identical": true,
+    "baseline_sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891",
+    "integration_sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891"
+  },
+  {
+    "path": "scripts/core/simulation_root.gd",
+    "identical": false,
+    "baseline_sha256": "C75DCFE8F91D7356AAC945FEDC7B4ED23CDAEDD9F2D4EA4CBDD103C11767502B",
+    "integration_sha256": "D5FD3327D718962CAE593E5569411F495B28EEE560CE16DFA2050E541FC6E06F"
+  }
+]

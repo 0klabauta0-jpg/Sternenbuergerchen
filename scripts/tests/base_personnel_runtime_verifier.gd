@@ -99,6 +99,24 @@ func _run() -> void:
 	result=screen.call("request_operation","board",{"craft_id":craft,"fireteam_id":"ft1"})
 	for i in range(20): sim.call("_physics_process",0.05)
 	_check(result.ok and runtime.get_snapshot().units[0].status=="aboard" and runtime.is_pilot_aboard(craft),"already complete boarding is idempotent")
+	_check(screen.call("request_operation", "accept_job", {"job_id":"satellite_recovery"}).get("ok", false), "accept actual job before orbital presence regression")
+	result = adapter.call("launch_to_moon_orbit", craft)
+	_check(result.get("ok", false), "actual boarded crew reaches moon orbit for presence checks")
+	if result.get("ok", false):
+		_check_away_operations(runtime, "moon orbit")
+		result = adapter.call("request_operation", "space_start_quantum", {"craft_id":craft,"target_orbit_id":"planet_orbit"})
+		_check(result.get("ok", false), "actual quantum begins for presence checks")
+		_check_away_operations(runtime, "quantum")
+		adapter.call("advance_space_travel", 0.6)
+		result = adapter.call("request_operation", "space_abort_quantum", {"craft_id":craft})
+		_check(result.get("ok", false), "actual quantum abort holds remote crew")
+		_check_away_operations(runtime, "stopped quantum")
+		result = adapter.call("request_operation", "space_start_quantum", {"craft_id":craft,"target_orbit_id":"moon_orbit"})
+		_check(result.get("ok", false), "held crew starts actual moon return")
+		adapter.call("advance_space_travel", 3.1)
+		_check_away_operations(runtime, "returned moon orbit before landing")
+		result = adapter.call("request_operation", "space_land_homebase", {"craft_id":craft})
+		_check(result.get("ok", false) and runtime.call("_at_home"), "only explicit actual moon landing restores base availability")
 	runtime.request_operation("base_unboard",{"craft_id":craft,"unit_id":pilot})
 	var saved: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint",flow,adapter)
 	_check(saved.get("ok",false),"optional base state passes checkpoint owner validation")
@@ -130,3 +148,15 @@ func _run() -> void:
 	await process_frame
 	print("BASE_PERSONNEL failed=",failed)
 	quit(1 if failed else 0)
+
+func _check_away_operations(runtime: Node, phase_label: String) -> void:
+	_check(not runtime.call("_at_home"), phase_label + " is not home without a mission or transfer")
+	var before: Dictionary = runtime.call("export_state").duplicate(true)
+	for spec: Dictionary in [
+		{"operation":"base_cancel","payload":{"unit_id":"campaign_pilot"}},
+		{"operation":"base_wake","payload":{"unit_id":"campaign_leader"}},
+		{"operation":"base_unboard","payload":{"whole_fireteam":true,"fireteam_id":"ft1"}},
+	]:
+		var result: Dictionary = runtime.call("request_operation", spec.operation, spec.payload)
+		_check(not result.get("ok", false) and String(result.get("reason", "")) == "away_from_base", phase_label + " rejects " + String(spec.operation) + " at owner boundary")
+	_check(runtime.call("export_state") == before, phase_label + " commands preserve actual crew presence")

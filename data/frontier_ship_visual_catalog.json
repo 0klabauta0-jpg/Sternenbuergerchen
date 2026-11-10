@@ -10,7 +10,7 @@
   "ships": {
     "cutlass_01": {
       "asset_id": "cutlass_01",
-      "display_name": "Cutlass",
+      "display_name": "Entermesser",
       "revision": "astra_refinement_03",
       "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
       "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
@@ -39,7 +39,7 @@
     },
     "buccaneer_01": {
       "asset_id": "buccaneer_01",
-      "display_name": "Buccaneer",
+      "display_name": "Freibeuter",
       "revision": "astra_refinement_03",
       "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
       "sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",

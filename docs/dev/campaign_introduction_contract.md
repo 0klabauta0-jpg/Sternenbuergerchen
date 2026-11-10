@@ -16,7 +16,7 @@ Nutzerpraezisierung vom 09./10.11.: Es gibt keine zusaetzliche Commanderfigur in
 
 | Etappe | Reale Voraussetzung | Freischaltung |
 | --- | --- | --- |
-| Basis vorbereiten | Satellitenauftrag angenommen, Satellitenort ausgewaehlt, Pilot zugewiesen, Leader als Payload fertig geboardet | Satellitenflug |
+| Basis vorbereiten | Satellitenauftrag angenommen, Pilot zugewiesen, Leader als Payload fertig geboardet | Abheben in den Mondorbit |
 | Satellit bergen | Bestehende Szenariogates `secure_satellite` und `return_to_ship`, bestaetigter Auftragserfolg, reale Heimkehr | Handelsort |
 | Versorgung sichern | Echter Handelsflug, Haendler-Use, erfolgreicher Kauf, erfolgreiche Betankung und reale Heimkehr | Einfuehrung abgeschlossen, vorhandene Orte frei besuchbar |
 
@@ -25,6 +25,13 @@ Ein Popup schliessen, ein Panel oeffnen oder einen Ortsnamen waehlen ist kein Mi
 Basisdarstellung verwendet `maps/campaign_intro_base.json`: nach Nutzerkorrektur wieder die groessere36x28-Heimatbasis mit beiden vorhandenen moeblierten Cutaway-Gebaeuden und beiden stabilen Pad-Flaechen. Der Startumfang bleibt klein (zwei NPCs und ein reales Schiff); die Karte wird deshalb nicht verkleinert. Skirmish behaelt dieselbe grosse Basisgrundlage. Satelliten- und Handelsort laden weiterhin ihre eigenen Karten und Szenarien. Ort, Auftrag, Karte, Szenario und Startmodus sind getrennte Begriffe.
 
 Die vereinfachte Behandlung des Handelspostens ist keine Gestaltungsvorgabe fuer die Heimatbasis. Die erhaltenen `structures_pass04`-Quellen bleiben unveraendert. Fuer tatsaechlich betretbare Schlafraeume duerfen nachvollziehbare Modellableitungen ausschliesslich fehlende Tueroeffnungen ergaenzen; Einrichtung, Materialstil und Raumaufteilung bleiben erhalten. Kahle Ersatzwaende sind kein Basisstil. Quelle: `docs/tasks/BASE_ORIGINAL_ROOMS_2026_11_09.md`; Durchgangs-/Personenauftrag: `docs/tasks/BASE_REAL_PERSONNEL_2026_11_09_DESIGN.md`.
+
+Seit dem freigegebenen Orbitauftrag vom 09.11.2026 liegt die Heimatbasis auf
+dem Mond und beide Aussenziele auf einem Planeten. Abheben startet noch keine
+Mission. Mondorbit -> kurzer abbrechbarer Quantum -> Planetenorbit -> Zielwahl
+-> ausdruecklicher Anflug folgt `orbit_quantum_travel_contract.md`. Die reale
+Heimkehr verlangt den Rueckweg in den Mondorbit und Landung an der Basis.
+Auftrags-/Versorgungsbelege und die Reihenfolge der Einfuehrung bleiben erhalten.
 
 ## Autoritaet und Hilfe
 

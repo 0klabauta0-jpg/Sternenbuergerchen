@@ -1,0 +1,16 @@
+[
+  {
+    "script": "orbit_quantum_flow_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-launch-green\\orbit_quantum_flow_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-launch-green\\orbit_quantum_flow_verifier"
+  },
+  {
+    "script": "campaign_launch_actionability_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-launch-green\\campaign_launch_actionability_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-launch-green\\campaign_launch_actionability_verifier"
+  }
+]

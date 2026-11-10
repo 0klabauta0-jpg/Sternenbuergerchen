@@ -1,0 +1,16 @@
+[
+  {
+    "script": "base_personnel_runtime_verifier.gd",
+    "exit_code": 1,
+    "errors": 16,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\integration-base-valid-red\\base_personnel_runtime_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\integration-base-valid-red\\base_personnel_runtime_verifier"
+  },
+  {
+    "script": "ship_context_preview_verifier.gd",
+    "exit_code": 1,
+    "errors": 6,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\integration-base-valid-red\\ship_context_preview_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\integration-base-valid-red\\ship_context_preview_verifier"
+  }
+]

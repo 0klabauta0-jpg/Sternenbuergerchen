@@ -112,7 +112,7 @@ func _test_capture_homebase_progression_f6_evidence() -> void:
 	_assert(String(evidence_snapshot.get("bridge_gate", "")) == "pass", "Homebase progression evidence keeps bridge gate green")
 	_assert(String(evidence_snapshot.get("style_id", "")) == "homebase_progression_delta_v1", "Homebase progression evidence sees style id")
 	_assert(String(evidence_snapshot.get("badge_text", "")) == "MISSION GAIN", "Homebase progression evidence sees badge")
-	_assert(String(evidence_snapshot.get("award_label_text", "")).contains("MISSION GAIN"), "Homebase progression evidence reads badge label")
+	_assert(String(evidence_snapshot.get("award_label_text", "")).contains("EINSATZGEWINN"), "Homebase progression evidence reads badge label")
 	_assert(String(evidence_snapshot.get("award_value_text", "")).contains("XP +"), "Homebase progression evidence reads XP delta")
 	_assert(_check_passed(evidence_snapshot, "award_inside_popup"), "Award row stays inside popup")
 	_assert(_check_passed(evidence_snapshot, "label_text_compact"), "Award label stays compact")

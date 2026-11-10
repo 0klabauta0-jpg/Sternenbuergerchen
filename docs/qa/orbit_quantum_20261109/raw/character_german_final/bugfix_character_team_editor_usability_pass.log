@@ -1,0 +1,108 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== BUGFIX Character Team Editor Usability Pass ===
+PASS: Team editor keeps the Rookie total budget at 30
+PASS: Team editor exposes per-focus min/max
+PASS: Team editor budget policy exposes focus locks
+PASS: Stat tactics explains its derived effect
+PASS: Stat tactics has an explicit lock flag
+PASS: Stat medical explains its derived effect
+PASS: Stat medical has an explicit lock flag
+PASS: Stat engineering explains its derived effect
+PASS: Stat engineering has an explicit lock flag
+PASS: Stat piloting explains its derived effect
+PASS: Stat piloting has an explicit lock flag
+PASS: Stat discipline explains its derived effect
+PASS: Stat discipline has an explicit lock flag
+PASS: Stat recon explains its derived effect
+PASS: Stat recon has an explicit lock flag
+PASS: Singleplayer start size policy is visible
+PASS: Multiplayer side cap is documented for UI scroll planning
+PASS: Shooter badge can be derived from weapon and Accuracy
+PASS: Shooter badge exposes a granular help id
+PASS: Shooter badge reason explains the source value
+PASS: Shooter badge detail exposes the threshold formula
+PASS: Badge controls carry the granular contextual help id
+PASS: Badge native tooltip keeps the composition text for FOB/Homebase
+PASS: Stored rank_badges do not override live value-derived role rings
+PASS: Medic ring can emerge from editable core/comms/behavior values without a fixed role label
+PASS: Rank badge resolver exposes next-rank requirements for greyed badges
+PASS: Platform skills derive from behavior axes instead of role-only fallbacks
+PASS: Character sheet greys out rank badge icons when no rank is reached
+PASS: Greyed badge hover tooltip explains what the next rank needs
+PASS: Character sheet renders role rings as a badge grid
+PASS: Character sheet labels each badge below the icon
+PASS: Character sheet can show all role-ring possibilities as progress badges
+PASS: Character sheet renders next-rank requirement text below badges
+PASS: Start roster begins with at most one active role ring per NPC
+PASS: Created team list exposes an explicit edit action
+PASS: Team editor is sheet-only even when a legacy card mode is requested
+PASS: Legacy 6er/9er team editor tabs are removed
+PASS: Character sheet mode exposes a name editor
+PASS: Character sheet mode exposes portrait choices from the catalog
+PASS: Portrait dropdown entries include mini preview icons
+PASS: Character sheet mode shows a live portrait preview
+PASS: Team editor exposes granular help popup ID: team_editor.team_name
+PASS: Team editor exposes granular help popup ID: team_editor.symbol
+PASS: Team editor exposes granular help popup ID: team_editor.stat.lock
+PASS: Team editor exposes granular help popup ID: character_sheet.name
+PASS: Team editor exposes granular help popup ID: character_sheet.portrait
+PASS: Team editor exposes granular help popup ID: character_sheet.skill_group_budget
+PASS: Team editor exposes granular help popup ID: character_sheet.value_lock
+PASS: Team editor exposes granular help popup ID: character_sheet.core.accuracy
+PASS: Team editor exposes granular help popup ID: character_sheet.platform.dropship_piloting
+PASS: Team editor exposes granular help popup ID: character_sheet.trait.calm
+PASS: Team editor exposes granular help popup ID: character_sheet.trait.steady
+PASS: Team focus copy explains that NPC values are edited separately
+PASS: Team editor sheet hides the short description block
+PASS: Character sheet renders value bars left and affected context right
+PASS: Character sheet shows next-rank requirements below the badges
+PASS: Team editor card badges are arranged in labeled columns
+PASS: Team editor sheet shows achieved and greyed role-ring possibilities
+PASS: Team editor scroll regions activate on hover
+PASS: Team focus values are draggable sliders
+PASS: Team focus rows expose a lock button
+PASS: Team focus plus takes one point from another unlocked focus
+PASS: Raising one focus by five lowers the five other focus values by one each
+PASS: Lowering one focus by five returns one point to each other unlocked focus
+PASS: Character name edits persist immediately
+PASS: Portrait selection persists immediately
+PASS: Rookie budget can move points between focuses
+PASS: Per-focus max blocks values above 10
+PASS: Locked team focus blocks direct value changes
+PASS: Character sheet renders editable core metric controls in the team editor
+PASS: Character sheet core metric renders a draggable slider
+PASS: Character sheet core metric renders a lock button
+PASS: Character metric value is placed left of the minus button
+PASS: Character sheet status bars are grouped with a point budget
+PASS: Character sheet core values show a group point budget
+PASS: Character sheet exposes editable dropship piloting
+PASS: Character sheet exposes editable freighter piloting
+PASS: Character sheet exposes editable fighter piloting
+PASS: Character sheet speed metric exposes a drag slider
+PASS: Dragging a metric slider keeps the sheet controls alive before commit
+PASS: Dragging a metric slider does not save and refresh on every mouse move
+PASS: Metric slider commits once when the drag ends
+PASS: Metric plus keeps the sheet controls alive during the value commit
+PASS: Character metric edits persist back into the roster
+PASS: Character sheet exposes stable controls for repeated metric edits
+PASS: Repeated metric edits do not free the active sheet controls
+PASS: Derived function summary refreshes after a live value edit
+PASS: Core budget can be clamped to current spend for redistribution test
+PASS: Raising one core value keeps the group budget balanced
+PASS: Raising one unlocked core value pulls points from another unlocked core value
+PASS: Character metric locks persist in team editor data
+PASS: Locked character metric disables upward edits
+PASS: Locked character metric keeps its value when pressed
+PASS: Character sheet shows a visual dependency guide for derived values
+PASS: Derived values show readable formula/detail text without one-letter wrapping
+PASS: Main menu help hover ignores controls freed before the delayed popup
+PASS: Delayed help popup stays hidden after its hover target was freed
+PASS: Map editor can select a tile for layer-stack inspection
+PASS: Selected map tile exists
+PASS: Layer stack keeps the structure layer
+PASS: Layer stack keeps an object on top of the structure
+PASS: Map editor documents object-on-structure stacking
+PASS: Layer stack tooltip explains the satellite dish workflow
+=== RESULTS: 103 passed, 0 failed ===

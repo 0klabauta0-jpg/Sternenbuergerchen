@@ -28,7 +28,15 @@ func _run() -> void:
 	screen.request_operation("accept_job", {"job_id": "satellite_recovery"})
 	screen.request_operation("select_destination", {"location_id": "satellite_crash", "job_id": "satellite_recovery"})
 	var result: Dictionary = screen.request_operation("start", {"craft_id": craft_id})
-	_check(not result.get("ok", true), "Real start rejects fuel sufficient only for outbound flight")
+	_check(result.get("ok", false), "Liftoff without a bound route remains possible with low fuel")
+	_check(flow.get("_active_mission") == null, "Low-fuel liftoff does not start a mission")
+	screen.request_operation("space_start_quantum", {"craft_id": craft_id, "target_orbit_id": "planet_orbit"})
+	var deadline := Time.get_ticks_msec() + 5000
+	while String(runtime.get_snapshot().space_travel.orbit_id) != "planet_orbit" and Time.get_ticks_msec() < deadline:
+		await process_frame
+	result = screen.request_operation("space_begin_approach", {"craft_id": craft_id, "location_id": "satellite_crash"})
+	_check(not result.get("ok", true) and result.get("reason", "") == "insufficient_return_fuel", "Explicit approach rejects fuel sufficient only for outbound flight")
+	_check(String(runtime.get_snapshot().space_travel.phase) == "orbit", "Rejected approach keeps star map usable in planet orbit")
 	_check(float(supply.get_supply_snapshot().fuel_by_craft_id[craft_id]) == 12.0, "Rejected flight consumes no fuel")
 	_check(flow.get("_active_mission") == null and Array(flow.get("_pending_mission_craft_transfers")).is_empty(), "Rejected roundtrip leaves no mission or half-started transfer")
 	_check(String(runtime.get_snapshot().campaign.jobs.satellite_recovery.status) == "accepted", "Rejected flight leaves job accepted")

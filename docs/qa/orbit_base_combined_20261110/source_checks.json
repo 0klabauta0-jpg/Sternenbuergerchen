@@ -1,0 +1,168 @@
+{
+  "schema": "orbit_base_combined.source_checks.v1",
+  "passing_processes": 23,
+  "checks": [
+    {
+      "script": "star_map_camera_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/star_map_camera_verifier.log"
+    },
+    {
+      "script": "star_map_ui_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/star_map_ui_verifier.log"
+    },
+    {
+      "script": "orbit_quantum_flow_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/orbit_quantum_flow_verifier.log"
+    },
+    {
+      "script": "orbit_quantum_entry_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/orbit_quantum_entry_verifier.log"
+    },
+    {
+      "script": "orbit_quantum_safety_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/orbit_quantum_safety_verifier.log"
+    },
+    {
+      "script": "orbit_quantum_selection_boundary_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/orbit_quantum_selection_boundary_verifier.log"
+    },
+    {
+      "script": "character_identity_consistency_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/character_identity_consistency_verifier.log"
+    },
+    {
+      "script": "character_detail_hierarchy_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/character_detail_hierarchy_verifier.log"
+    },
+    {
+      "script": "character_sheet_compact_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/character_sheet_compact_verifier.log"
+    },
+    {
+      "script": "campaign_launch_actionability_verifier.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/campaign_launch_actionability_verifier.log"
+    },
+    {
+      "script": "campaign_start_integration_test.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/campaign_start_integration_test.log"
+    },
+    {
+      "script": "campaign_onboarding_state_test.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/campaign_onboarding_state_test.log"
+    },
+    {
+      "script": "campaign_menu_start_test.gd",
+      "run": "combined-final-matrix",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-final-matrix/campaign_menu_start_test.log"
+    },
+    {
+      "script": "space_travel_state_verifier.gd",
+      "run": "combined-domain-recovery-red",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-domain-recovery-red/space_travel_state_verifier.log"
+    },
+    {
+      "script": "task_511_export_runtime_package_hygiene.gd",
+      "run": "combined-domain-recovery-red",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-domain-recovery-red/task_511_export_runtime_package_hygiene.log"
+    },
+    {
+      "script": "task_278_air_asset_loss_recovery_meta_loop.gd",
+      "run": "combined-recovery-copy-green",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/combined-recovery-copy-green/task_278_air_asset_loss_recovery_meta_loop.log"
+    },
+    {
+      "script": "base_personnel_runtime_verifier.gd",
+      "run": "integration-base-green",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-base-green/base_personnel_runtime_verifier.log"
+    },
+    {
+      "script": "ship_context_preview_verifier.gd",
+      "run": "integration-base-green",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-base-green/ship_context_preview_verifier.log"
+    },
+    {
+      "script": "base_personnel_world_ui_test.gd",
+      "run": "integration-base-green",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-base-green/base_personnel_world_ui_test.log"
+    },
+    {
+      "script": "campaign_preparation_continue_test.gd",
+      "run": "integration-preparation",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-preparation/campaign_preparation_continue_test.log"
+    },
+    {
+      "script": "campaign_casualty_debrief_retry_test.gd",
+      "run": "integration-casualty-green",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-casualty-green/campaign_casualty_debrief_retry_test.log"
+    },
+    {
+      "script": "campaign_pilot_ground_loop_test.gd",
+      "run": "integration-pilot-flow-owned-services",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-pilot-flow-owned-services/campaign_pilot_ground_loop_test.log"
+    },
+    {
+      "script": "playtest_20261109_singleplayer_loop_smoke.gd",
+      "run": "integration-skirmish-flow-owned-services",
+      "exit_code": 0,
+      "errors": 0,
+      "log": "docs/qa/orbit_quantum_20261109/raw/integration-skirmish-flow-owned-services/playtest_20261109_singleplayer_loop_smoke.log"
+    }
+  ],
+  "known_baseline": "TASK503 9/1, same on 43b1f153b; see README"
+}

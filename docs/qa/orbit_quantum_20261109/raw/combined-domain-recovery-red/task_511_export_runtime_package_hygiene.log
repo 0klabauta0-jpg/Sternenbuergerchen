@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_511 Export Runtime Package Hygiene ===
+  PASS: Runtime export package contract is valid JSON
+  PASS: Contract targets the Windows Desktop preset
+  PASS: Contract documents local ignored export preset path
+  PASS: Contract keeps the runtime export executable target
+  PASS: Contract requires restoring the local export preset after the run
+  PASS: Contract excludes addons/asset_placer/** from runtime package
+  PASS: Contract excludes addons/godot_mcp/** from runtime package
+  PASS: Contract excludes addons/godot_open_rts_reference/** from runtime package
+  PASS: Contract excludes addons/map_builder_workbench/** from runtime package
+  PASS: Contract excludes docs/** from runtime package
+  PASS: Contract documents scripts/tests as an explicit runtime legacy dependency
+  PASS: Contract excludes scripts/tools/** from runtime package
+  PASS: Contract does not exclude runtime addon addons/limboai
+  PASS: Contract does not exclude runtime addon addons/terrain_3d
+  PASS: Contract does not exclude runtime addon addons/netfox
+  PASS: Contract does not exclude runtime addon addons/netfox.internals
+  PASS: Export script loads the runtime package contract
+  PASS: Export script patches the Godot exclude_filter
+  PASS: Export script backs up and restores the local export preset
+  PASS: Export script uses Godot headless release export
+  PASS: Export script treats Godot stderr warnings as log output and gates failure on the native exit code
+  PASS: Export script consumes contract exclude patterns
+  PASS: TASK_511 task file exists
+  PASS: Runtime package contract doc exists
+  PASS: Review report workbench exists and supports JSON export
+  PASS: Roadmap lists TASK_511
+  PASS: Implementation status lists TASK_511
+=== RESULTS: 27 passed, 0 failed ===
+ALL TESTS PASSED

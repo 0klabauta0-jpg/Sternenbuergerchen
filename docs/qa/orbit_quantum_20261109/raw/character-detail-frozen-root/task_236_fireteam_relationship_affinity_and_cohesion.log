@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_236 Fireteam Relationship Affinity and Cohesion ===
+PASS: Start roster validator accepts generated relationships
+PASS: Generator emits relationship pairs
+PASS: Several start roster NPCs know someone
+PASS: Generator does not make every NPC know every other NPC
+PASS: Start roster affinities stay mild
+PASS: Fireteam suggestions include cohesion snapshots
+PASS: Player roster store saves relationship roster
+PASS: Player roster store loads relationship roster
+PASS: Roster save roundtrips relationship pairs
+PASS: Roster save roundtrips unit relationship links
+PASS: Cohesion is deterministic
+PASS: Positive relationships and history lift cohesion
+PASS: Gameplay modifier morale_delta remains small
+PASS: Gameplay modifier communication_modifier remains small
+PASS: Gameplay modifier coordination_modifier remains small
+PASS: Gameplay modifier advance_readability_modifier remains small
+PASS: Tense pair carries negative average affinity
+PASS: Bad teamfit creates a small coordination penalty
+PASS: Bad teamfit penalty is bounded
+PASS: Character sheet shows best relationship
+PASS: Character sheet shows worst relationship
+PASS: FOB fireteam card exposes teamfit label
+PASS: FOB fireteam card renders cohesion summary
+=== RESULTS: 23 passed, 0 failed ===
+ALL TESTS PASSED

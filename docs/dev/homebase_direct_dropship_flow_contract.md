@@ -19,6 +19,13 @@ Dieses Dokument haelt den manuellen Zielzustand fuer Homebase-Direct-Dropships f
 - Erst nach dem Deboarding erscheinen die Fireteam-/Operator-Karten als Bodentrupp links im Missions-HUD.
 
 ## Boarding und Send
+
+Fuer die beiden Einzelspieler-Ortsreisen gilt seit 09.11.2026 die Erweiterung
+`orbit_quantum_travel_contract.md`: `Abheben` fuehrt zuerst zum Mondorbit.
+Der folgende `to_mission`-Handoff beginnt erst beim ausdruecklichen Ortsanflug
+aus dem Planetenorbit. Andere Skirmish-/Compatibility-Transporte behalten den
+nachfolgenden bisherigen Send-Vertrag.
+
 - Mehrere Dropships muessen parallel boarden koennen.
 - Fireteam 1 in Dropship 1 darf weiter boarden, waehrend Fireteam 2 sofort in Dropship 2 gezogen wird.
 - Boarding zeigt Mini-Portraits und Fortschritt; Boardingzeit basiert auf Speed und Discipline mit etwa vier Sekunden Durchschnitt pro Fireteam.

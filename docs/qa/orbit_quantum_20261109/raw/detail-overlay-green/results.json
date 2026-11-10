@@ -1,0 +1,23 @@
+[
+  {
+    "script": "campaign_launch_actionability_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\detail-overlay-green\\campaign_launch_actionability_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\detail-overlay-green\\campaign_launch_actionability_verifier"
+  },
+  {
+    "script": "campaign_tutorial_presenter_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\detail-overlay-green\\campaign_tutorial_presenter_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\detail-overlay-green\\campaign_tutorial_presenter_test"
+  },
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\detail-overlay-green\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\detail-overlay-green\\character_sheet_compact_verifier"
+  }
+]

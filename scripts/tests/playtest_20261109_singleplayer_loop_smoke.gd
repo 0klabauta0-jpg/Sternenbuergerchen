@@ -1,10 +1,9 @@
 extends SceneTree
-## Actual two-sortie campaign loop. Only boarding fixture time is advanced;
-## mission movement, Use progress, flight phases and completion run normally.
+## Actual two-sortie loop. Campaign base walks and boarding run at real 1x;
+## only the separate Skirmish boarding convenience fixture advances its clock.
 
 const FLOW: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
 const MAP: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
-const SERVICES: GDScript = preload("res://scripts/meta/singleplayer_services_presenter.gd")
 var _flow: Node
 var _screen: Control
 var _runtime: Node
@@ -22,6 +21,7 @@ func _init() -> void:
 func _run() -> void:
 	_configure_entry()
 	print("SINGLEPLAYER_LOOP_BEGIN time_scale=", Engine.time_scale, " user_data=", OS.get_user_data_dir())
+	_check(is_equal_approx(Engine.time_scale, 1.0), "Full travel and mission loop runs at real 1x simulation speed")
 	_flow = FLOW.instantiate()
 	root.add_child(_flow)
 	await process_frame
@@ -100,16 +100,17 @@ func _run() -> void:
 		_dump("service_context_after_use")
 		await _finish()
 		return
-	var services: Control = SERVICES.new()
-	root.add_child(services)
-	services.call("configure", Callable(_runtime, "get_snapshot"), Callable(_screen, "request_operation"))
+	var services: Control = _flow.get("_singleplayer_services")
+	if not _check(services != null and services == _flow.get_node_or_null("SingleplayerServiceLayer/MissionServices"), "Trade uses the actual Flow-owned service panel"):
+		await _finish()
+		return
 	services.call("set_selected_craft", _craft_id)
 	var buy: Button = services.find_child("BuySupply", true, false)
 	var fuel: Button = services.find_child("RefuelCraft", true, false)
+	var orbital_return: Button = services.find_child("ServiceReturnHomebase", true, false)
 	var service_supply: Dictionary = _supply()
-	if not _check(buy != null and not buy.disabled and fuel != null and not fuel.disabled, "Real bound service UI offers purchase and refuel after Use"):
+	if not await _wait(func(): return services.is_visible_in_tree() and buy != null and buy.is_visible_in_tree() and not buy.disabled and fuel != null and fuel.is_visible_in_tree() and not fuel.disabled, 2000, "Flow-owned service UI offers purchase and refuel after Use"):
 		_dump("service_ui")
-		services.queue_free()
 		await _finish()
 		return
 	buy.pressed.emit()
@@ -120,11 +121,34 @@ func _run() -> void:
 	_check(int(paid.credits) == int(service_supply.credits) - 70, "Real service double-clicks debit one purchase and one ten-unit refuel")
 	_check(int(Dictionary(paid.item_quantities).get("medictool", 0)) == int(Dictionary(service_supply.item_quantities).get("medictool", 0)) + 1, "Second sortie grants one real purchased item")
 	_check(float(paid.fuel_by_craft_id[_craft_id]) == float(service_supply.fuel_by_craft_id[_craft_id]) + 10.0, "Confirmed actual craft gains exactly ten fuel")
-	services.queue_free()
 	if not await _prepare_visit_return(mission):
 		await _finish()
 		return
-	var return_result: Dictionary = _screen.call("request_operation", "return_homebase", {"craft_id": _craft_id, "request_id": "loop:trade-return"})
+	print("SERVICE_RETURN_PRESENTATION_BEFORE_WAIT:", var_to_str({
+		"panel_path": services.get_path(), "meta_view": _flow.get("_current_meta_view"),
+		"panel_visible": services.is_visible_in_tree(),
+		"button_visible": orbital_return.is_visible_in_tree() if orbital_return != null else false,
+		"button_disabled": orbital_return.disabled if orbital_return != null else true,
+	}))
+	# The actual panel follows Flow's normal 0.25 s refresh after the embark commit.
+	if not await _wait(func(): return orbital_return != null and orbital_return.is_visible_in_tree() and not orbital_return.disabled, 2000, "Actual parked trade ship has a usable service return button"):
+		print("SERVICE_RETURN_DIAGNOSTIC:", var_to_str({
+			"visible": orbital_return.is_visible_in_tree() if orbital_return != null else false,
+			"disabled": orbital_return.disabled if orbital_return != null else true,
+			"tooltip": orbital_return.tooltip_text if orbital_return != null else "missing",
+			"service_presentation": services.call("get_presentation_snapshot"),
+			"service_context": _runtime.call("_service_context", _craft_id),
+			"craft": _craft(_flow.call("get_singleplayer_snapshot")),
+			"flow_card": _flow.call("_find_mission_drop_card_in_planning_state", _craft_id),
+			"controller_card": controller.call("_find_mission_dropship_card_entry", _craft_id),
+			"pilot_guard": controller.call("get_campaign_pilot_flight_guard", _craft_id),
+			"parked": controller.call("_is_parked_campaign_dropship", _craft_id),
+			"space": _space(),
+		}))
+		await _finish()
+		return
+	orbital_return.pressed.emit()
+	var return_result: Dictionary = Dictionary(Dictionary(services.get("_pending")).get("return_homebase", {})).get("result", {})
 	if not _check(bool(return_result.get("ok", false)), "Real visit return command accepts after service"):
 		print("RETURN_RESULT:", return_result)
 		_dump("trade_return")
@@ -167,12 +191,57 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 			print("BOARD_RESULT:", board)
 			_dump("boarding")
 			return false
-	_screen.call("_debug_advance_homebase_direct_boarding", 30.0)
+	if _screen.call("get_base_personnel_runtime") != null:
+		if not await _prepare_sortie_base():
+			return false
+	else:
+		_screen.call("_debug_advance_homebase_direct_boarding", 30.0)
+	var before_launch_job_status: String = String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", ""))
+	var before_launch_fuel: Dictionary = Dictionary(_supply().get("fuel_by_craft_id", {})).duplicate(true)
 	var launch: Dictionary = _screen.call("request_operation", "start", {"craft_id": _craft_id})
 	if not _check(bool(launch.get("ok", false)), scenario_id + " launches actual boarded craft"):
 		print("LAUNCH_RESULT:", launch)
 		_dump("launch")
 		return false
+	if not _check(_flow.get("_active_mission") == null and int(_flow.get("_active_mission_started_at_msec")) == 0, scenario_id + " takeoff loads no mission and starts no mission timer"):
+		return false
+	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == before_launch_job_status, "Takeoff alone activates no campaign job")
+	_check(Dictionary(_supply().get("fuel_by_craft_id", {})) == before_launch_fuel, "Takeoff alone debits no destination fuel")
+	if not _check(String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "moon_orbit", scenario_id + " actual takeoff reaches moon orbit"):
+		_dump("moon_orbit")
+		return false
+	if String(_runtime.call("get_snapshot").get("mode", "")) == "campaign":
+		var away_save: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime)
+		_check(not bool(away_save.get("ok", false)), "Moon orbit cannot be saved as a home checkpoint")
+	var premature: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": "satellite_crash" if scenario_id == "satellite_recovery" else "trade_outpost"})
+	_check(not bool(premature.get("ok", false)) and _flow.get("_active_mission") == null, "Planet map approach is blocked from moon orbit")
+	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": "planet_orbit", "request_id": "loop:jump:" + scenario_id})
+	if not _check(bool(jump.get("ok", false)), scenario_id + " actual target click begins quantum"):
+		print("JUMP_RESULT:", jump)
+		_dump("quantum_start")
+		return false
+	if not await _wait(func(): return float(_space().get("progress", 0.0)) > 0.05, 1500, "Quantum visibly progresses through normal runtime ticks"):
+		return false
+	var moving_position: Array = Array(_space().get("position", [])).duplicate()
+	var abort: Dictionary = _screen.call("request_operation", "space_abort_quantum", {"craft_id": _craft_id, "request_id": "loop:abort:" + scenario_id})
+	_check(bool(abort.get("ok", false)) and String(_space().get("phase", "")) == "stopped" and Array(_space().get("position", [])) == moving_position, "Actual abort holds the reached midpoint without teleport")
+	var stopped_position: Array = Array(_space().get("position", [])).duplicate()
+	await physics_frame
+	_check(Array(_space().get("position", [])) == stopped_position, "Aborted runtime trip remains still on subsequent tick")
+	var restart: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": "planet_orbit", "request_id": "loop:restart:" + scenario_id})
+	if not _check(bool(restart.get("ok", false)) and Array(_space().get("origin_position", [])) == stopped_position, "Restart begins at the actual stopped position"):
+		return false
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 5000, scenario_id + " short real quantum reaches planet orbit"):
+		_dump("planet_orbit")
+		return false
+	_check(_flow.get("_active_mission") == null and int(_flow.get("_active_mission_started_at_msec")) == 0, "Quantum arrival still loads no mission and starts no timer")
+	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == before_launch_job_status and Dictionary(_supply().get("fuel_by_craft_id", {})) == before_launch_fuel, "Quantum, abort and restart activate no job and debit no route fuel")
+	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": "satellite_crash" if scenario_id == "satellite_recovery" else "trade_outpost", "request_id": "loop:approach:" + scenario_id})
+	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from planet orbit"):
+		print("APPROACH_RESULT:", approach)
+		_dump("approach")
+		return false
+	_check(_flow.get("_active_mission") == null and String(_space().get("phase", "")) == "approach", "Explicit approach shows departure from star map before map instantiation")
 	if not await _wait(func(): return _flow.get("_active_mission") != null, 12000, scenario_id + " actual mission instance exists"):
 		_dump("mission_creation")
 		return false
@@ -203,6 +272,9 @@ func _on_actual_landed(_controller: Node) -> void:
 	pass
 
 func _prepare_initial_base() -> bool:
+	return true
+
+func _prepare_sortie_base() -> bool:
 	return true
 
 func _prepare_visit_return(_mission: Node) -> bool:
@@ -248,6 +320,22 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 	return true
 
 func _wait_homebase() -> bool:
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 35000, "Actual surface exit returns original craft to planet orbit"):
+		_dump("return_to_planet_orbit")
+		return false
+	_check(String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) != "homebase", "Planet orbit is not physical home arrival")
+	var home_jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": "moon_orbit"})
+	if not _check(bool(home_jump.get("ok", false)), "Real homeward target click begins moon quantum"):
+		print("HOME_JUMP_RESULT:", home_jump)
+		return false
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "moon_orbit", 5000, "Real homeward quantum reaches moon orbit"):
+		return false
+	_check(String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) != "homebase", "Moon orbit still requires an explicit home landing")
+	var home_land: Dictionary = _screen.call("request_operation", "space_land_homebase", {"craft_id": _craft_id})
+	if not _check(bool(home_land.get("ok", false)), "Explicit moonbase landing accepts after actual homeward travel"):
+		print("HOME_LAND_RESULT:", home_land)
+		_dump("moonbase_land")
+		return false
 	var ready: bool = await _wait(func():
 		var current: Dictionary = _flow.call("get_singleplayer_snapshot")
 		var craft: Dictionary = _craft(current)
@@ -255,6 +343,9 @@ func _wait_homebase() -> bool:
 	if not ready:
 		_dump("homebase_return")
 	return ready
+
+func _space() -> Dictionary:
+	return Dictionary(_flow.call("get_singleplayer_snapshot").get("space_travel", {}))
 
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 	var deadline: int = Time.get_ticks_msec() + milliseconds

@@ -1,0 +1,16 @@
+[
+  {
+    "script": "character_identity_consistency_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\identity_frozen_final\\character_identity_consistency_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\identity_frozen_final\\character_identity_consistency_verifier"
+  },
+  {
+    "script": "task_232_start_roster_generation_contract.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\identity_frozen_final\\task_232_start_roster_generation_contract.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\identity_frozen_final\\task_232_start_roster_generation_contract"
+  }
+]

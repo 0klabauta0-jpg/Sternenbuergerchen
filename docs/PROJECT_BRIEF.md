@@ -13,12 +13,12 @@ SternenBuergerchen
 Commander-gesteuertes Echtzeit-Taktikspiel mit FTL-Hierarchie, menügetriebenem Meta-Layer und taktischem Einsatz als Kern des Spiels.
 
 ## Core Loop
-Heimatbasis erkunden / Personal -> Trupp und Ausruestung -> Auftrag annehmen / Zielort waehlen -> Dropship -> Einsatz oder Ortsbesuch -> Rueckkehr und Ergebnis -> Skillentwicklung
+Mondbasis erkunden / Personal -> Trupp und Ausruestung -> Auftrag annehmen -> Abheben / Mondorbit -> Sternkarte / Quantum zum Planetenorbit -> Zielort und Anflug -> Einsatz oder Ortsbesuch -> Rueckorbit / Heimflug / Landung -> Ergebnis und Skillentwicklung
 
 ## Harte Designentscheidungen
 - Spieler ist Commander
 - Direkt steuerbar maximal bis Fire Team Leader (FTL)
-- Einzel-NPCs werden nicht direkt vom Spieler gesteuert
+- Im taktischen Einsatz werden Einzel-NPCs nicht direkt gesteuert; in der Heimatbasis verwaltet der Spieler die beiden echten Personen ueber deren Basisaktionen.
 - Einsatz ist Echtzeit ohne Pause
 - Die Heimatbasis ist begehbar und bietet dieselben Personal-/Trupp-/Abflugfunktionen wie die Operationsnavigation. Der regulaere Einzelspielerweg verwendet Homebase Direct; FOB ist vorerst gesperrt. Keine zweite Gameplay-Wahrheit in UI oder Basisdarstellung.
 - PvP ist wichtig, aber Multiplayer-Prototyp V1 arbeitet zuerst mit Testteams

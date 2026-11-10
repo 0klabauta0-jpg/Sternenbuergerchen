@@ -306,7 +306,9 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 		_sim.call("clear_queues")
 		_sim.set_physics_process(false)
 	_runtime.process_mode = Node.PROCESS_MODE_DISABLED
-	_model.visible = false
+	if _model != null:
+		_model.visible = false
+	_update_personnel_controls()
 	for entry: Dictionary in _person_visuals.values():
 		(entry.model as Node3D).hide()
 		(entry.marker as Node3D).hide()
@@ -746,7 +748,9 @@ func _physics_process(delta: float) -> void:
 
 func _clear_keyboard_input() -> void:
 	_keys.clear()
-	if _keyboard_move:
+	# The campaign owner keeps accepted movement running while its view is
+	# hidden. Clearing local input must not emit a gameplay cancel command.
+	if _keyboard_move and _personnel_runtime() == null:
 		_stop_avatar()
 	_keyboard_move = false
 

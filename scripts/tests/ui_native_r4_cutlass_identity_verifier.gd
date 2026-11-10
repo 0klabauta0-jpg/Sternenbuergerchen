@@ -43,12 +43,12 @@ func _run() -> void:
 		var pixels: Image = preview.get_image()
 		_check(pixels != null and pixels.get_pixel(0, 0).a < 0.05, "model preview retains a transparent background")
 		_check(preview == VISUALS.get_ui_preview_texture(craft), "same native UI preview resource is cached and reused")
-	_check(VISUALS.get_ui_display_name(craft) == "Cutlass 1", "default first-ship label visibly names the Cutlass class")
+	_check(VISUALS.get_ui_display_name(craft) == "Entermesser 1", "default first-ship label names its German class while retaining its number")
 	var named := craft.duplicate(true)
 	named["display_name"] = "Nachtigall ÄÖÜ"
 	var named_before := JSON.stringify(named)
-	_check(VISUALS.get_ui_display_name(named) == "Cutlass · Nachtigall ÄÖÜ", "player-selected ship names remain verbatim beside the class")
-	_check(VISUALS.decorate_ui_title("#19 Nachtigall ÄÖÜ · FOB", named) == "#19 Cutlass · Nachtigall ÄÖÜ · FOB", "class projection retains order number, custom name and context")
+	_check(VISUALS.get_ui_display_name(named) == "Entermesser · Nachtigall ÄÖÜ", "player-selected ship names remain verbatim beside the German class")
+	_check(VISUALS.decorate_ui_title("#19 Nachtigall ÄÖÜ · FOB", named) == "#19 Entermesser · Nachtigall ÄÖÜ · FOB", "German class projection retains order number, custom name and context")
 	_check(JSON.stringify(named) == named_before and JSON.stringify(craft) == before, "UI projection never changes craft IDs, names, texture paths or state")
 	var cargo := {"craft_id": "cargo_1", "craft_type": "craft_cargoB", "display_name": "Frachter"}
 	_check(VISUALS.get_ui_identity(cargo).is_empty() and VISUALS.get_ui_preview_texture(cargo) == null, "other craft classes are not relabeled or pictured as Cutlass")
@@ -83,7 +83,7 @@ func _run() -> void:
 		if phase != "parked":
 			state[phase] = true
 		_check(fob.call("_get_transport_craft_texture", state) == preview, "FOB retains the actual Cutlass preview during " + phase)
-	_check(String(fob.call("_build_transport_craft_title", named)).contains("Cutlass · Nachtigall ÄÖÜ"), "FOB title projects class without overwriting the custom name")
+	_check(String(fob.call("_build_transport_craft_title", named)).contains("Entermesser · Nachtigall ÄÖÜ"), "FOB title projects German class without overwriting the custom name")
 	fob.queue_free()
 	await process_frame
 	var scene: Node = load("res://scenes/tests/mission_reactivity_test.tscn").instantiate()
@@ -92,7 +92,7 @@ func _run() -> void:
 	var controller: Node = scene.get_node("TacticalController")
 	_check(controller.call("_get_mission_dropship_card_texture", craft) == preview, "mission card uses the exact model preview")
 	_check(controller.call("_get_dropship_texture_for_angle", "SE") != preview, "static UI preview is never substituted for a directional world sprite")
-	_check(String(controller.call("_build_mission_dropship_title_text", named)).contains("Cutlass · Nachtigall ÄÖÜ"), "mission title preserves custom identity with the Cutlass class")
+	_check(String(controller.call("_build_mission_dropship_title_text", named)).contains("Entermesser · Nachtigall ÄÖÜ"), "mission title preserves custom identity with the German class")
 	scene.queue_free()
 	for index in range(3):
 		await process_frame

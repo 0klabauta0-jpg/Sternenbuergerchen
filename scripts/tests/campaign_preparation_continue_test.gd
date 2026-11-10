@@ -11,6 +11,9 @@ func _run() -> void:
 	await process_frame
 	var screen: Control = flow.get_node("HomebaseScreen")
 	var craft: String = String(flow.get_meta("singleplayer_bootstrap_craft_id"))
+	var personnel: Node = screen.call("get_base_personnel_runtime")
+	var initial_people: Array = personnel.call("get_snapshot").get("units", [])
+	_check(initial_people.size() == 2 and initial_people.all(func(person: Dictionary): return String(person.status) == "outside"), "Both actual base people begin outside")
 	# People now deliberately start outside; preparation must not depend on
 	# the retired automatic boarding bootstrap.
 	var unboard: Dictionary = screen.call("request_operation", "unboard", {"craft_id": craft, "fireteam_id": "ft1"})
@@ -39,6 +42,11 @@ func _run() -> void:
 	var loadouts: Dictionary = screen.get("_member_loadout_by_unit_id")
 	_check(String(Dictionary(loadouts.get("campaign_leader", {})).get("weapon_1", "")) == "smg", "Continue preserves edited member equipment")
 	_check(Array(flow.get("_all_team_units")).size() == 2, "Preparation resume never creates additional NPCs")
+	var restored_runtime: Node = flow.get("_singleplayer_runtime")
+	var restored: Dictionary = restored_runtime.call("get_snapshot")
+	_check(String(restored.space_travel.phase) == "grounded", "Preparation checkpoint resumes before any orbital departure")
+	var restored_people: Array = restored_runtime.call("get_base_personnel_runtime").call("get_snapshot").get("units", [])
+	_check(restored_people.size() == 2 and restored_people.all(func(person: Dictionary): return String(person.status) == "outside"), "Continue preserves real outside presence without automatic boarding")
 	flow.queue_free()
 	await process_frame
 	print("CAMPAIGN_PREPARATION failed=", failed)

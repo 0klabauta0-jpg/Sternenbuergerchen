@@ -72,6 +72,9 @@ func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 		return {"ok": false, "reason": "campaign_load_failed"}
 	if flow.get("_active_mission") != null or not Array(flow.get("_pending_mission_craft_transfers")).is_empty():
 		return {"ok": false, "reason": "away_from_checkpoint"}
+	var travel: Dictionary = runtime.call("get_space_travel_snapshot") if runtime != null and runtime.has_method("get_space_travel_snapshot") else {}
+	if String(travel.get("phase", "grounded")) != "grounded":
+		return {"ok": false, "reason": "away_from_checkpoint"}
 	for field in ["_pending_homebase_team_transfers", "_pending_homebase_pilot_transfers", "_pending_homebase_cargo_loads"]:
 		if not Array(flow.get(field)).is_empty():
 			return {"ok": false, "reason": "preparation_in_progress"}

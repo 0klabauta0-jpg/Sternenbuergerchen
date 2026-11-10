@@ -1,0 +1,23 @@
+[
+  {
+    "script": "base_personnel_runtime_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\integration-base-green\\base_personnel_runtime_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\integration-base-green\\base_personnel_runtime_verifier"
+  },
+  {
+    "script": "ship_context_preview_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\integration-base-green\\ship_context_preview_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\integration-base-green\\ship_context_preview_verifier"
+  },
+  {
+    "script": "base_personnel_world_ui_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\integration-base-green\\base_personnel_world_ui_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\integration-base-green\\base_personnel_world_ui_test"
+  }
+]

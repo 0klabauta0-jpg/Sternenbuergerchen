@@ -1,0 +1,300 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+SINGLEPLAYER_LOOP_BEGIN time_scale=1.0 user_data=C:/dev/SternenBuergerchen-worktrees/orbit-quantum-build-20261110/output/orbit_quantum_20261109/profiles/integration-pilot-service-diagnostic/campaign_pilot_ground_loop_test/Godot/app_userdata/Sternenbuergerchen
+PASS: Full travel and mission loop runs at real 1x simulation speed
+PASS: Actual Flow has long-lived campaign runtime
+PASS: Outside real pilot equips through existing operation owner
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: Normal bootstrap has actual craft and team payload
+PASS: Initial payload contains the expected real crew identities
+PASS: Accept job through real operation bridge
+PASS: Acceptance alone starts no mission
+PASS: Select the distinct satellite location
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Pilot gear crosses actual deployment boundary
+PASS: Real pilot is deployed by SimulationRoot
+PASS: Pilot follows same existing tactical team without new permanent team
+PASS: Actual pilot on ground blocks flight even while assigned
+PASS: Pilot absence rejects return without consuming fuel
+PASS: Any actual NPC can take pilot post through shared assignment
+PASS: Reassignment does not invent presence at pilot post
+PASS: Unknown replacement is rejected
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Actual satellite scene cannot win on load
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: Recovered data still requires physical ship return
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: Real mission result completes accepted campaign job
+PASS: Runtime reward credits exactly one data-defined payment
+PASS: Exactly one campaign completion receipt
+PASS: Actual surface exit returns original craft to planet orbit
+PASS: Planet orbit is not physical home arrival
+PASS: Real homeward target click begins moon quantum
+PASS: Real homeward quantum reaches moon orbit
+PASS: Moon orbit still requires an explicit home landing
+PASS: Explicit moonbase landing accepts after actual homeward travel
+PASS: Actual reverse transit restores original craft to homebase
+PASS: Actual home arrival advances tutorial in order
+PASS: True return keeps exactly two NPCs
+PASS: Actual home milestone saves valid complete checkpoint
+PASS: Saved campaign checkpoint loads after real trip
+PASS: Continue preserves completed tutorial milestone
+PASS: Continue after orbital landing restores a grounded original craft
+PASS: Continue restores the same two authoritative base people
+PASS: Continue preserves actual presence and original craft for both people
+PASS: Continue preserves credits, craft fuel and purchased inventory
+PASS: Continue preserves original two NPC identities
+PASS: Campaign progress and continue preserve Skirmish profile bytes
+PASS: First actual round trip consumes outbound and reverse route fuel once
+PASS: Viewing result/homebase again cannot duplicate reward
+PASS: First return preserves all original identities and portraits
+PASS: Second sortie selects trade location without combat job
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: trade_outpost_visit launches actual boarded craft
+PASS: trade_outpost_visit takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: trade_outpost_visit actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: trade_outpost_visit actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: trade_outpost_visit short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: trade_outpost_visit explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: trade_outpost_visit actual mission instance exists
+PASS: trade_outpost_visit actual outbound transit reaches waiting craft
+PASS: trade_outpost_visit actual map click places LZ on saved reachable pad
+PASS: trade_outpost_visit real landing unloads all original crew into authoritative simulation
+PASS: Pilot gear crosses actual deployment boundary
+PASS: Selected location loads exact intended scenario trade_outpost_visit
+PASS: Landing alone cannot grant trader use proof
+PASS: trade_service actual move GO accepts
+PASS: trade_service becomes usable after real simulated approach
+PASS: trade_service real Use intent accepts
+PASS: trade_service Use GO accepts
+PASS: trade_service actual timed Use commits required runtime step
+PASS: Actual landed craft and completed trader Use enable service
+PASS: Real bound service UI offers purchase and refuel after Use
+PASS: Real service double-clicks debit one purchase and one ten-unit refuel
+PASS: Second sortie grants one real purchased item
+PASS: Confirmed actual craft gains exactly ten fuel
+PASS: Trader use cannot teleport remote pilot onto craft
+PASS: Both real people receive return walk
+PASS: Both people physically reach craft before boarding
+PASS: Boarding queues actual SimulationRoot effects
+PASS: Queued boarding is not already presence
+PASS: Flight opens only after real pilot embark commit
+PASS: Return payload has both IDs once
+SERVICE_RETURN_DIAGNOSTIC:{
+"controller_card": {
+"approach_angle": "NW",
+"boarded_fireteam_ids": ["ft1"],
+"card_feedback_text": "Trupp ab",
+"craft_id": "dropship_1",
+"display_name": "Dropship 1",
+"drop_sequence_position": Vector2(1726.3181, 768.84094),
+"drop_ship_requested": true,
+"drop_ship_staged": true,
+"dropship_position": Vector2(1726.3181, 768.84094),
+"embarked_unit_ids": ["campaign_leader", "campaign_pilot"],
+"eta_seconds": 0,
+"has_embarked_payload": true,
+"has_lz_position": true,
+"lz_label": "LZ1 Dropship 1",
+"lz_name": "LZ1 Dropship 1",
+"lz_position": Vector2(1726.3181, 768.84094),
+"passenger_count": 2,
+"payload_source": "homebase_direct",
+"pilot_display_name": "Anja Voss",
+"pilot_portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
+"pilot_text": "Pilot: Anja Voss",
+"pilot_unit_id": "campaign_leader",
+"progress": 100.0,
+"queued_fireteam_ids": ["ft1"],
+"state": "complete",
+"status_line": "",
+"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"title_text": "#19 Dropship 1"
+},
+"craft": {
+"busy": false,
+"cargo_options": [],
+"craft_id": "dropship_1",
+"craft_type": "dropship",
+"departure": {
+"craft_id": "dropship_1",
+"destination_location_id": "trade_outpost",
+"job_id": "",
+"landing_pad_id": "homebase_pad_01",
+"origin_location_id": "homebase"
+},
+"display_name": "Dropship 1",
+"landing_pad_id": "homebase_pad_01",
+"location_id": "trade_outpost",
+"summary": "Single-pilot shuttle for the FOB corridor.",
+"supports_cargo": false,
+"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"visible_on_pad": false
+},
+"disabled": false,
+"flow_card": {
+"approach_angle": "NW",
+"boarded_fireteam_ids": ["ft1"],
+"card_feedback_text": "Trupp ab",
+"craft_id": "dropship_1",
+"display_name": "Dropship 1",
+"drop_sequence_position": Vector2(1726.3181, 768.84094),
+"drop_ship_requested": true,
+"drop_ship_staged": true,
+"dropship_position": Vector2(1726.3181, 768.84094),
+"embarked_unit_ids": ["campaign_leader", "campaign_pilot"],
+"eta_seconds": 0,
+"has_embarked_payload": true,
+"has_lz_position": true,
+"lz_label": "LZ1 Dropship 1",
+"lz_name": "LZ1 Dropship 1",
+"lz_position": Vector2(1726.3181, 768.84094),
+"passenger_count": 2,
+"payload_source": "homebase_direct",
+"pilot_display_name": "Anja Voss",
+"pilot_portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
+"pilot_text": "Pilot: Anja Voss",
+"pilot_unit_id": "campaign_leader",
+"progress": 100.0,
+"queued_fireteam_ids": ["ft1"],
+"state": "complete",
+"status_line": "",
+"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"title_text": "#19 Dropship 1"
+},
+"parked": true,
+"pilot_guard": {
+"ok": true,
+"pilot_unit_id": "campaign_leader"
+},
+"service_context": {
+"craft_busy": false,
+"location_id": "trade_outpost"
+},
+"service_presentation": {
+"feedback": "Betankung bestaetigt",
+"pending_request_count": 0,
+"selected_craft_id": "dropship_1",
+"ui_sets_gameplay_truth": false
+},
+"space": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 3.0,
+"enabled": true,
+"location_id": "trade_outpost",
+"location_orbits": {
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "planet_orbit",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.23478225, 0.6628894],
+"phase": "surface",
+"position": [0.8, 0.28],
+"progress": 1.0,
+"result_summary": "",
+"revision": 444,
+"target_orbit_id": "planet_orbit"
+},
+"tooltip": "Rückflug für dieses Schiff anfordern",
+"visible": true
+}
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=1
+SINGLEPLAYER_LOOP_RESULTS passed=123 failed=1
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+FAIL: Actual parked trade ship has a usable service return button

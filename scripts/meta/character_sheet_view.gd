@@ -8,6 +8,15 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
+const COMPACT_SHEET_WIDTH: float = 660.0
+const SECTION_TITLES := {
+	"TRAIT:": "EIGENSCHAFTEN", "KURZBESCHREIBUNG:": "HINTERGRUND", "ROLLE / LOADOUT:": "AUFGABE & EIGNUNG",
+	"LETZTE AUSRUESTUNG:": "LETZTE AUSRÜSTUNG", "STATUS / RECOVERY:": "STATUS & ERHOLUNG", "TEAMFIT:": "ZUSAMMENARBEIT",
+	"PROGRESS:": "ENTWICKLUNG", "WERTE / BUDGETS:": "WERTE & PUNKTE", "STATUSWERTE:": "STATUSWERTE",
+	"KERNWERTE (0,00 - 1,00):": "KERNWERTE · 0 BIS 1", "KOMMUNIKATION:": "KOMMUNIKATION",
+	"PLATTFORM-SKILLS (nur falls relevant):": "FAHRZEUGE", "ABGELEITET:": "ARBEITSWEISE & SPEZIALISIERUNG", "VERHALTENSPROFIL:": "VERHALTEN",
+}
 const SHEET_WIDTH: float = 280.0
 const SHEET_WIDE_WIDTH: float = 760.0
 const SHEET_LEFT_COLUMN_WIDTH: float = 430.0
@@ -46,6 +55,9 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 	host.add_theme_constant_override("separation", 0)
 
 	var model: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_view_model(profile, options)
+	if not _metric_controls_are_editable(options) and bool(options.get("compact_read_only", true)):
+		_render_compact_read_only(host, model, profile, options)
+		return
 	var group_editable_metrics: bool = bool(options.get("group_editable_metrics", false))
 	var two_column_layout: bool = bool(options.get("two_column_layout", group_editable_metrics))
 	var sheet_root := VBoxContainer.new()
@@ -115,6 +127,156 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 		_add_loadout_dropdown_section(sheet_root, profile)
 
 
+static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, profile, options: Dictionary) -> void:
+	var sheet := VBoxContainer.new()
+	sheet.name = "SheetRoot"
+	sheet.custom_minimum_size = Vector2(COMPACT_SHEET_WIDTH, 0.0)
+	sheet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sheet.add_theme_constant_override("separation", 8)
+	host.add_child(sheet)
+	var compact_options := options.duplicate()
+	compact_options["compact_sheet"] = true
+	compact_options["show_badge_progress"] = false
+	_add_compact_identity_overview(sheet, model, profile, compact_options)
+	_add_post_mission_award_alert(sheet, model, profile, options)
+	var suitability: Array = Array(model.get("suitability_rows", []))
+	var suitability_host := _overview_section(sheet, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
+	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
+	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
+	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
+	_overview_label(suitability_host, "CharacterDerivationGuide", "Eigenschaften wirken auf die gespeicherten Kernwerte. Werte, Verhalten, Fahrzeuge und Rollen-/Ausrüstungskontext fließen in die Eignung ein.", 13, true)
+	var social := HBoxContainer.new()
+	social.name = "CharacterTraitsAndRelationships"
+	social.add_theme_constant_override("separation", 10)
+	sheet.add_child(social)
+	var traits := _overview_section(social, "EIGENSCHAFTEN & WIRKUNG", "CharacterTraitOverview")
+	(traits.get_parent() as Control).size_flags_stretch_ratio = 0.92
+	_add_overview_traits(traits, model)
+	var relationships := _overview_section(social, "ZUSAMMENARBEIT", "CharacterRelationshipOverview")
+	for row: Dictionary in Array(model.get("relationship_overview_rows", [])):
+		_add_overview_relationship(relationships, row)
+	if Array(model.get("relationship_overview_rows", [])).is_empty():
+		_overview_label(relationships, "NoKnownRelationships", String(model.get("relationship_empty_text", "Noch keine Beziehung bekannt.")), 14)
+	else:
+		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
+	var why := _add_foldout(sheet, "suitability", "Alle Eignungen & genaue Herleitung")
+	_add_value_rows(why, suitability, profile, options)
+	_add_text_section(why, "ROLLE / LOADOUT:", "Die Startrolle ist gespeichert. Die aktuelle Aufgabe kommt aus der Zuteilung. Eignung ist eine Berechnung; sie ändert weder Rolle noch Aufgabe.")
+	var all_relationships: Array = Array(model.get("relationship_entries", []))
+	if all_relationships.size() > 2:
+		var relationship_details := _add_foldout(sheet, "relationships", "Alle %d Beziehungen" % all_relationships.size())
+		_add_value_rows(relationship_details, all_relationships, profile, options)
+	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge")
+	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
+	_add_bar_section(values, "KERNWERTE (0,00 - 1,00):", Array(model.get("core_rows", [])), profile, options)
+	_add_value_section(values, "KOMMUNIKATION:", Array(model.get("communication_rows", [])), profile, options)
+	_add_value_section(values, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
+	_add_value_section(values, "PLATTFORM-SKILLS (nur falls relevant):", Array(model.get("platform_rows", [])), profile, options)
+	_add_value_section(values, "ABGELEITET:", Array(model.get("derived_rows", [])), profile, options)
+	var history := _add_foldout(sheet, "history", "Status, Ausrüstung & Verlauf")
+	_add_value_section(history, "ROLLE / LOADOUT:", Array(model.get("role_loadout_rows", [])), profile, options)
+	_add_value_section(history, "STATUS / RECOVERY:", Array(model.get("status_rows", [])), profile, options)
+	_add_value_section(history, "TEAMFIT:", Array(model.get("relationship_rows", [])), profile, options)
+	_add_value_section(history, "PROGRESS:", Array(model.get("progress_rows", [])), profile, options)
+	if not bool(options.get("hide_short_description", false)):
+		var background := _add_foldout(sheet, "background", "Hintergrund")
+		_add_text_section(background, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Angaben hinterlegt.")))
+
+
+static func _overview_label(host: Control, node_name: String, value: String, font_size: int, muted: bool = false) -> Label:
+	var label := Label.new()
+	label.name = node_name
+	label.text = value
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_body_label(label, font_size)
+	if muted:
+		label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED)
+	host.add_child(label)
+	return label
+
+
+static func _overview_section(host: Control, title: String, node_name: String) -> VBoxContainer:
+	var panel := PanelContainer.new()
+	panel.name = node_name
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var style: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT, TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 4, 1, Vector4(10, 8, 10, 8))
+	panel.add_theme_stylebox_override("panel", style)
+	host.add_child(panel)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	panel.add_child(column)
+	var heading := _overview_label(column, node_name + "Heading", title, 13, true)
+	heading.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
+	return column
+
+
+static func _add_compact_identity_overview(host: VBoxContainer, model: Dictionary, profile, options: Dictionary) -> void:
+	var row := HBoxContainer.new()
+	row.name = "CharacterIdentityOverview"
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 14)
+	host.add_child(row)
+	var portrait := TextureRect.new()
+	portrait.name = "PortraitRect"
+	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait, "character_sheet")
+	portrait.texture = _load_portrait_texture(String(profile.portrait_id), String(profile.portrait_path)) if profile != null else null
+	portrait.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_set_help_id(portrait, "character_sheet.portrait")
+	row.add_child(portrait)
+	var facts := VBoxContainer.new()
+	facts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	facts.add_theme_constant_override("separation", 3)
+	row.add_child(facts)
+	_overview_label(facts, "CharacterIdentityName", String(model.get("name", "Unbekannte Person")), 22)
+	_overview_label(facts, "CharacterStartRole", "Startrolle: " + String(model.get("start_role_text", "Im Profil nicht belegt")), 14)
+	_overview_label(facts, "CharacterAssignment", "Aufgabe: " + String(model.get("current_assignment_text", "Im Profil nicht belegt")), 14)
+	_overview_label(facts, "CharacterStatus", "Status: " + String(model.get("overview_status_text", "Im Profil nicht belegt")), 14, true)
+	_add_badge_row(facts, profile, options)
+
+
+static func _add_overview_traits(host: VBoxContainer, model: Dictionary) -> void:
+	var rows: Array = Array(model.get("trait_rows", []))
+	if rows.is_empty():
+		_overview_label(host, "NoKnownTraits", String(model.get("trait_text", "Keine Eigenschaften hinterlegt.")), 14)
+	for row: Dictionary in rows:
+		var id: String = _sanitize_node_fragment(String(row.get("trait_id", row.get("label", "trait"))))
+		var label := _overview_label(host, "TraitLabel_" + id, String(row.get("label", "Eigenschaft")), 14)
+		_set_help_id(label, String(row.get("help_id", "character_sheet.traits")))
+		label.tooltip_text = String(row.get("detail_text", ""))
+		if not label.tooltip_text.is_empty():
+			_overview_label(host, "TraitDetail_" + id, label.tooltip_text, 13, true)
+
+
+static func _add_overview_relationship(host: VBoxContainer, row: Dictionary) -> void:
+	var id: String = _sanitize_node_fragment(String(row.get("target_unit_id", "person")))
+	var label := _overview_label(host, "Relationship_" + id, "%s · %s" % [String(row.get("label", "Person")), String(row.get("value_text", ""))], 14)
+	_set_help_id(label, "character_sheet.relationship_links")
+	label.set_meta("target_unit_id", row.get("target_unit_id", ""))
+	label.set_meta("affinity", row.get("affinity", 0.0))
+	_overview_label(host, "RelationshipReason_" + id, String(row.get("detail_text", "")), 13, true)
+
+
+static func _add_foldout(host: VBoxContainer, key: String, title: String) -> VBoxContainer:
+	var button := Button.new()
+	button.name = "CharacterSheetToggle_" + key
+	button.text = "▸  " + title
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	button.custom_minimum_size = Vector2(0, 32)
+	META_UI_SKIN_SCRIPT.style_secondary_button(button)
+	host.add_child(button)
+	var details := VBoxContainer.new()
+	details.name = "CharacterSheetDetails_" + key
+	details.add_theme_constant_override("separation", 6)
+	details.hide()
+	host.add_child(details)
+	button.pressed.connect(func():
+		details.visible = not details.visible
+		button.text = ("▾  " if details.visible else "▸  ") + title
+	)
+	return details
+
+
 static func _add_post_mission_award_alert(host: VBoxContainer, model: Dictionary, profile, options: Dictionary = {}) -> void:
 	var rows: Array = Array(model.get("post_mission_rows", []))
 	if rows.is_empty():
@@ -161,7 +323,8 @@ static func _add_identity_block(host: VBoxContainer, model: Dictionary, profile,
 	summary_vbox.add_child(name_label)
 
 	_add_badge_row(summary_vbox, profile, options)
-	_add_next_rank_requirement(summary_vbox, profile)
+	if not bool(options.get("compact_sheet", false)):
+		_add_next_rank_requirement(summary_vbox, profile)
 
 	var reserved_space := Control.new()
 	reserved_space.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -312,15 +475,15 @@ static func _add_trait_section(host: VBoxContainer, trait_text: String, trait_ro
 		row.name = "TraitRow_%s" % _sanitize_node_fragment(String(row_data.get("trait_id", row_data.get("label", "trait"))))
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_theme_constant_override("separation", 1)
-		row.tooltip_text = detail_text
 		_set_help_id(row, help_id)
+		row.tooltip_text = detail_text
 		section_vbox.add_child(row)
 		var title_label := Label.new()
 		title_label.name = "TraitLabel_%s" % _sanitize_node_fragment(String(row_data.get("trait_id", row_data.get("label", "trait"))))
-		title_label.text = "%s  [%s]" % [String(row_data.get("label", "Trait")), String(row_data.get("value_text", "TAG"))]
+		title_label.text = String(row_data.get("label", "Eigenschaft"))
 		title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		title_label.tooltip_text = detail_text
 		_set_help_id(title_label, help_id)
+		title_label.tooltip_text = detail_text
 		META_UI_SKIN_SCRIPT.style_body_label(title_label, 10)
 		row.add_child(title_label)
 		if not detail_text.is_empty():
@@ -329,8 +492,8 @@ static func _add_trait_section(host: VBoxContainer, trait_text: String, trait_ro
 			detail_label.text = detail_text
 			detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			detail_label.modulate = Color(0.72, 0.82, 0.86, 0.92)
-			detail_label.tooltip_text = detail_text
 			_set_help_id(detail_label, help_id)
+			detail_label.tooltip_text = detail_text
 			META_UI_SKIN_SCRIPT.style_body_label(detail_label, 9)
 			row.add_child(detail_label)
 
@@ -420,7 +583,7 @@ static func _add_value_rows(host: VBoxContainer, rows: Array, profile = null, op
 		label.name = "PostMissionAwardLabel" if is_post_mission_award else "ValueLabel_%s" % _sanitize_node_fragment(String(row_data.get("label", "value")))
 		var row_label_text: String = "%s:" % String(row_data.get("label", "Value"))
 		if is_post_mission_award:
-			row_label_text = "%s | %s" % [String(row_data.get("badge_text", "MISSION GAIN")), row_label_text]
+			row_label_text = "%s | %s" % [COPY.text(String(row_data.get("badge_text", "MISSION GAIN"))), row_label_text]
 		label.text = row_label_text
 		label.custom_minimum_size = Vector2(168.0 if is_post_mission_award else ROW_LABEL_WIDTH, 0.0)
 		_set_help_id(label, help_id)
@@ -512,9 +675,9 @@ static func _add_derived_dependency_guide(host: VBoxContainer) -> void:
 	guide.tooltip_text = "Zeigt kompakt, welche sichtbaren Werte die abgeleiteten Zeilen speisen."
 	host.add_child(guide)
 	for link_variant in [
-		{"from": "Kern + Verhalten + Traits", "to": "Method Tags"},
-		{"from": "Skills + Plattform + Loadout", "to": "Function Scores"},
-		{"from": "Hohe Function Scores", "to": "Primary / Secondary"},
+		{"from": "Kernwerte + Kommunikation", "to": "Arbeitsweise"},
+		{"from": "Werte + Fahrzeuge", "to": "Einsatzeignung"},
+		{"from": "Rollenrahmen + Funktion + Arbeitsweise", "to": "Spezialisierung"},
 	]:
 		var link: Dictionary = Dictionary(link_variant)
 		var row := HBoxContainer.new()
@@ -1132,7 +1295,7 @@ static func _add_armor_dropdown_row(host: VBoxContainer, selected_armor_id: Stri
 	option.add_theme_font_size_override("font_size", 9)
 	var normalized_selected: String = _normalize_armor_id(selected_armor_id)
 	for armor_id in PackedStringArray(["light", "medium", "heavy"]):
-		option.add_item("%s Armor" % armor_id.capitalize())
+		option.add_item(COPY.armor(armor_id))
 		var item_index: int = option.item_count - 1
 		option.set_item_metadata(item_index, armor_id)
 		option.set_item_disabled(item_index, armor_id != normalized_selected)
@@ -1204,7 +1367,7 @@ static func _build_loadout_row(label_text: String) -> HBoxContainer:
 
 static func _add_section_header(host: VBoxContainer, title: String) -> void:
 	var header_label := Label.new()
-	header_label.text = title
+	header_label.text = String(SECTION_TITLES.get(title, title))
 	_set_help_id(header_label, String(SECTION_HELP_IDS.get(title, "")))
 	META_UI_SKIN_SCRIPT.style_header_label(header_label, 11)
 	host.add_child(header_label)

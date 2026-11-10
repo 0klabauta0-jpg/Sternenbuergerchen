@@ -28,17 +28,15 @@ func _all_crew_deployed(controller: Node) -> bool:
 	return super._all_crew_deployed(controller)
 
 func _wait_homebase() -> bool:
-	var ready: bool = await _wait(func():
-		var current: Dictionary = _flow.call("get_singleplayer_snapshot")
-		var craft: Dictionary = _craft(current)
-		return String(craft.get("location_id", "")) == "homebase" and not bool(craft.get("busy", true)), 35000, "Actual reverse transit restores original craft to homebase")
-	if not ready:
-		_dump("homebase_return")
+	if not await super._wait_homebase():
 		return false
 	_return_number += 1
 	_flow.call("_show_homebase")
 	_runtime.call("observe_campaign_progress")
 	var before: Dictionary = _flow.call("get_singleplayer_snapshot")
+	var presence_before: Dictionary = {}
+	for person: Dictionary in Array(Dictionary(before.get("base_personnel", {})).get("units", [])):
+		presence_before[String(person.unit_id)] = [String(person.status), String(person.craft_id)]
 	_check(int(before.onboarding.stage_index) == _return_number + 1, "Actual home arrival advances tutorial in order")
 	_check(Array(_flow.get("_all_team_units")).size() == 2, "True return keeps exactly two NPCs")
 	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime)
@@ -57,6 +55,13 @@ func _wait_homebase() -> bool:
 	_runtime = _flow.get("_singleplayer_runtime")
 	var after: Dictionary = _flow.call("get_singleplayer_snapshot")
 	_check(int(after.onboarding.stage_index) == int(before.onboarding.stage_index), "Continue preserves completed tutorial milestone")
+	_check(String(after.space_travel.phase) == "grounded" and String(_craft(after).location_id) == "homebase", "Continue after orbital landing restores a grounded original craft")
+	var people: Array = _runtime.call("get_base_personnel_runtime").call("get_snapshot").get("units", [])
+	_check(people.size() == 2 and people.all(func(person: Dictionary): return person.unit_id in ["campaign_leader", "campaign_pilot"]), "Continue restores the same two authoritative base people")
+	var presence_after: Dictionary = {}
+	for person: Dictionary in people:
+		presence_after[String(person.unit_id)] = [String(person.status), String(person.craft_id)]
+	_check(presence_after == presence_before, "Continue preserves actual presence and original craft for both people")
 	_check(int(after.supply.credits) == int(before.supply.credits) and after.supply.fuel_by_craft_id == before.supply.fuel_by_craft_id and after.supply.item_quantities == before.supply.item_quantities, "Continue preserves credits, craft fuel and purchased inventory")
 	_check(_identity(_screen.call("get_operations_snapshot")) == _identity_before, "Continue preserves original two NPC identities")
 	_check(FileAccess.get_file_as_bytes(ROSTER.get_save_path()) == _skirmish_bytes, "Campaign progress and continue preserve Skirmish profile bytes")
@@ -85,12 +90,23 @@ func _prepare_initial_base() -> bool:
 	return await _board_actual_base_crew()
 
 func _board_actual_base_crew() -> bool:
+	if _base_crew_ready():
+		return _check(true, "Both actual base people and transport payload already agree on boarding")
 	var boarding: Dictionary = _screen.call("request_operation", "base_board", {"craft_id": _craft_id, "fireteam_id": _team_id, "whole_fireteam": true})
 	if not _check(bool(boarding.get("ok", false)), "Both base people receive real boarding walk"):
 		print("BASE_BOARD_RESULT:", boarding)
 		return false
+	return await _wait(_base_crew_ready, 60000, "Both real people arrive, embark and complete the existing transport payload before launch")
+
+func _base_crew_ready() -> bool:
 	var personnel: Node = _runtime.call("get_base_personnel_runtime")
-	return await _wait(func(): return bool(personnel.call("is_pilot_aboard", _craft_id)), 60000, "Base pilot reaches actual craft before launch")
+	if personnel == null or not bool(personnel.call("is_pilot_aboard", _craft_id)):
+		return false
+	var people: Array = personnel.call("get_snapshot").get("units", [])
+	return people.size() == 2 and people.all(func(person: Dictionary): return String(person.status) == "aboard" and String(person.craft_id) == _craft_id) and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", _craft_id))
+
+func _prepare_sortie_base() -> bool:
+	return await _board_actual_base_crew()
 
 func _prepare_visit_return(mission: Node) -> bool:
 	var controller: Node = mission.get_node("TacticalController")

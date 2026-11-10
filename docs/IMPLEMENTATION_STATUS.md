@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### Gemeinsame Basis-/Orbit-/Charakterintegration — 10.11.2026
+Fertiger Main43b1f153b und Orbit-/Charakterstand0f2425aa7 gemeinsam geprueft.
+Physischer Pilot am Mondabflug, Grounded-Grenze fuer Basis/Checkpoint,
+Shared-Sim-Padvorschau und beschaedigtes Schiff bei fehlgeschlagener Extraktion
+korrigiert. Deutscher Debrief behaelt konkrete Folge und Ersatz-/Reparaturdauer.
+Kampagne152/0 mit Pilotwechsel, beiden echten Ausfluegen und beiden Continue-
+Meilensteinen; Skirmish105/0; drei Verlustfaelle159/0, Basis65/0, Vorschau37/0,
+Weltbedienung9/0 und gezielte Karten-/Charakter-/Einstiegsgates gruen.
+Der echte Flow-Servicebutton wird ueber seinen regulaeren Refresh geprueft.
+TASK5039/1 ist identisch auf unveraendertem Main43b1f153b reproduziert; kein
+neuer HUD-Fix und keine allgemeine Gesamttest-/Performance-/MP-Freigabe.
+QA `docs/qa/orbit_base_combined_20261110/README.md`. Beauftragter Abschluss:
+diesen geprueften Stand nach Main uebernehmen/pushen, dann Export aus genau
+diesem sauberen Main. Git-/Export-/EXE-Belege liegen abschliessend beim Paket
+`C:/dev/SternenBuergerchen-builds/2026-11-10-orbit-base-main-r01/`.
+Die folgenden Einzelbranch-Statusmeldungen dokumentieren ihre frueheren Staende.
+
 ### Echte Basis-NPCs, Tueren und Kampagnenbesatzung — 10.11.2026
 Kampagne zeigt genau die beiden echten Rosterpersonen ohne zusaetzlichen
 Commander. Weltaktionen fuer Bewegung, Ein-/Aussteigen, Ausruestung und
@@ -25,6 +42,33 @@ Handelsposten und Gameplay-/Save-Owner unveraendert. Basis16/0, Karte9/0,
 Innenraum-/Tuer-/Commander-Laufen139/0, Kampagnenstart11/0, Fortsetzen10/0.
 Originalmeshes unveraendert; neue native Stil-/Geometriepassung nicht abgenommen.
 QA: docs/qa/base_original_rooms_20261109/README.md. Kein Push.
+### Grosser Charakterbogen / Portraitkonsistenz — 10.11.2026
+Nur grosser Detailbogen: obere Identitaets-/Aufgaben-/Statusflaeche genutzt,
+Eigenschaften und benannte echte Beziehungen vor aufklappbaren Details.
+Kleine Portrait-/Rangkarten und Editor erhalten. Standard-Anja/neue Kampagne
+Portrait004; neue Generierung aus dokumentierten Praesentationsgruppen ohne
+RNG-/Namens-/Werteaenderung. Gespeicherte/custom Identitaeten nicht migriert.
+Fuenf frische Gates152/25/41/23/321, alle0Fehler; unabhaengige Reviews gruen.
+QA `docs/qa/character_detail_20261110/README.md`. Noch kein Mainmerge/Push/Export;
+Nutzer verlangt erst Abschluss des anderen Basis-/Orte-/UI-Chats und dann
+gemeinsamen geprueften/gepushten Main vor der EXE.
+
+
+### Mondbasis / Quantum / kompakte deutsche UI — 09.11.2026
+Eigener Taskbranch `task/orbit-quantum-travel-20261109` auf Main `b548b5556`.
+Abheben ohne Ortswahl, Mond-/Planetenorbit, 3-s-Quantum mit Abbruch/Neustart,
+bewusster spaeter Kartenanflug und Rueckreise mit echter Heimatlandung.
+Cursor-Zoom/Pan, Glut/Glut I,3inaktive Zukunftsbereiche; eigene schematische
+Sternkarte nach Nutzerreferenz. Reale Pad-/Weltraumvorschau, sichtbarer
+Abflug-Sperrgrund, kompaktere deutsche Mobilgeraet-/Charakteransichten und
+nachvollziehbare Startrolle/Aufgabe/Eignung bei unveraenderten Scores.
+Echte Kampagne124/0 mit beiden Checkpoint-Neuladungen, freier Loop104/0,
+Finalmatrix16/16 und weitere gezielte UI-/Domainregressionen gruen.
+Kamera18/0 und Sternkarten-UI91/0; unabhaengiger Review ohne Restblocker.
+QA: `docs/qa/orbit_quantum_20261109/README.md`. Keine Mainintegration,
+kein Push; eigener Kandidatenbuild zur Nutzerpruefung. Native Gestaltung,
+allgemeine Performance/MP und spaetere Raumkaempfe bleiben getrennt.
+
 
 ### Kampagnenstart und Skirmish — 09.11.2026, technisch geprueft
 Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), groesserer

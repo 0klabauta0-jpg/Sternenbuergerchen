@@ -1,0 +1,44 @@
+[
+  {
+    "script": "space_travel_state_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\space_travel_state_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\space_travel_state_verifier"
+  },
+  {
+    "script": "task_263_contextual_help_popup_ux_contract.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\task_263_contextual_help_popup_ux_contract.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\task_263_contextual_help_popup_ux_contract"
+  },
+  {
+    "script": "task_235_character_sheet_roster_gameplay_expansion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\task_235_character_sheet_roster_gameplay_expansion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\task_235_character_sheet_roster_gameplay_expansion"
+  },
+  {
+    "script": "task_265_character_sheet_loadout_help_content_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\task_265_character_sheet_loadout_help_content_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\task_265_character_sheet_loadout_help_content_pass"
+  },
+  {
+    "script": "task_362_homebase_aircraft_state_manager_extraction.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\task_362_homebase_aircraft_state_manager_extraction.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\task_362_homebase_aircraft_state_manager_extraction"
+  },
+  {
+    "script": "playtest_20261109_services_ui_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-domain-copy\\playtest_20261109_services_ui_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-domain-copy\\playtest_20261109_services_ui_verifier"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "script": "space_travel_state_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\space_travel_state_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\space_travel_state_verifier"
+  },
+  {
+    "script": "orbit_quantum_flow_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\orbit_quantum_flow_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\orbit_quantum_flow_verifier"
+  },
+  {
+    "script": "orbit_quantum_safety_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\orbit_quantum_safety_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\orbit_quantum_safety_verifier"
+  },
+  {
+    "script": "orbit_quantum_selection_boundary_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\orbit_quantum_selection_boundary_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\orbit_quantum_selection_boundary_verifier"
+  },
+  {
+    "script": "orbit_quantum_entry_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\orbit_quantum_entry_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\orbit_quantum_entry_verifier"
+  },
+  {
+    "script": "campaign_launch_actionability_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\campaign_launch_actionability_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\campaign_launch_actionability_verifier"
+  },
+  {
+    "script": "ship_context_preview_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\ship_context_preview_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\ship_context_preview_verifier"
+  },
+  {
+    "script": "compact_singleplayer_panels_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\compact_singleplayer_panels_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\compact_singleplayer_panels_verifier"
+  },
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\character_sheet_compact_verifier"
+  },
+  {
+    "script": "campaign_preparation_continue_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\campaign_preparation_continue_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\campaign_preparation_continue_test"
+  },
+  {
+    "script": "playtest_20261109_roundtrip_fuel_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\playtest_20261109_roundtrip_fuel_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\playtest_20261109_roundtrip_fuel_verifier"
+  },
+  {
+    "script": "playtest_20261109_aborted_visit_return_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\playtest_20261109_aborted_visit_return_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\playtest_20261109_aborted_visit_return_verifier"
+  },
+  {
+    "script": "playtest_20261109_campaign_authority_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\playtest_20261109_campaign_authority_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\playtest_20261109_campaign_authority_verifier"
+  },
+  {
+    "script": "campaign_mission_handoff_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\campaign_mission_handoff_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\campaign_mission_handoff_test"
+  },
+  {
+    "script": "campaign_menu_start_test.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\campaign_menu_start_test.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\campaign_menu_start_test"
+  },
+  {
+    "script": "ui_native_r4_cutlass_identity_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\final-matrix\\ui_native_r4_cutlass_identity_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\final-matrix\\ui_native_r4_cutlass_identity_verifier"
+  }
+]

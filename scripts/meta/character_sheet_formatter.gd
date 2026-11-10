@@ -7,6 +7,7 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/roster_relationship_model.gd")
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
 const CORE_ORDER: Array = [
 	["accuracy", "Accuracy"],
 	["speed", "Speed"],
@@ -58,25 +59,25 @@ const FUNCTION_ORDER: Array = [
 ]
 
 const VALUE_HELP_TEXTS: Dictionary = {
-	"skill_values.accuracy": "Accuracy beeinflusst Trefferchance und Shooter-Badges; hohe Werte staerken spaeter die Nutzung von Team-Zielhilfe.",
-	"skill_values.speed": "Speed beeinflusst Bewegung, Initiative und Scout-Fits; hohe Werte helfen bei schnellen Befehlen und Kontakt-Umsetzung.",
-	"skill_values.toughness": "Toughness senkt erlittenen Druck und stuetzt Sentinel, Rapid-Methoden und Recovery-Lesbarkeit.",
-	"skill_values.awareness": "Awareness hilft Wahrnehmung, Kontakt-Initiative, Pathfinder, Scout und Watchful-Fits.",
-	"skill_values.recognition": "Recognition steht fuer Kontaktlesen, Bestaetigung und Freund-Feind-Erkennung; wichtig fuer Kontakt-Initiative, Coordinator und Watchful.",
-	"skill_values.stealth": "Stealth stuetzt leise Bewegung, Silent-Methoden, Scout und Infiltrator-Fits.",
-	"skill_values.discipline": "Discipline stuetzt Order Fidelity, Silent/Steady/Watchful und verlaessliche Sicherung.",
-	"skill_values.leadership": "Leadership beeinflusst Leader-Badges, Coordinator-Fit, Kommunikation, Team-Zielhilfe und Fireteam-Fuehrung.",
-	"communication_values.speech_quality": "Speech Quality verbessert Kontaktansagen, Buddy-Team-Zielhilfe, Fuehrungslesbarkeit und Coordinator-Fit.",
-	"communication_values.speech_quantity": "Speech Quantity beschreibt Sprechhaeufigkeit; weniger kann Silent-Methoden staerken.",
-	"behavior_axes.initiative": "Initiative entsteht vor allem aus Speed, Awareness und Leadership und senkt spaeter die Kontakt-Initiative.",
-	"behavior_axes.order_fidelity": "Order Fidelity entsteht aus Discipline, Recognition und Speech Quality und beschreibt Befehlsruhe.",
-	"behavior_axes.signature_control": "Signature Control entsteht aus Stealth, Discipline und geringer Speech Quantity.",
-	"behavior_axes.contact_stability": "Contact Stability entsteht aus Toughness, Discipline und Awareness und stabilisiert Kontaktreaktion unter Druck.",
-	"behavior_axes.autonomy": "Autonomy entsteht aus Recognition, Leadership und Discipline und beschreibt selbststaendiges Arbeiten.",
-	"platform_values.ground_vehicle_handling": "Ground Vehicle Handling beschreibt Bodenfahrzeug-Fit aus Speed, Recognition, Awareness, Discipline und Verhalten.",
-	"platform_values.dropship_piloting": "Dropship Piloting beschreibt LZ-Anflug aus Awareness, Recognition, Discipline, Speech und Verhalten.",
-	"platform_values.freighter_piloting": "Freighter Piloting beschreibt Cargo- und Transportruhe aus Toughness, Recognition, Discipline, Speech und Verhalten.",
-	"platform_values.fighter_piloting": "Fighter Piloting beschreibt Escort- und Strike-Fit aus Speed, Accuracy, Awareness, Discipline und Verhalten.",
+	"skill_values.accuracy": "Treffsicherheit beeinflusst die Trefferchance. Gespeicherte wirksame Werte enthalten bereits die berücksichtigten Eigenschaften.",
+	"skill_values.speed": "Tempo beeinflusst Bewegung und Initiative sowie Aufklärung und Fahrzeugwerte.",
+	"skill_values.toughness": "Belastbarkeit senkt den erlittenen Schaden und fließt in Ruhe im Kontakt und Sicherung ein.",
+	"skill_values.awareness": "Wahrnehmung fließt in Initiative, Aufklärung, Fahrzeugwerte und mehrere Einsatzeignungen ein.",
+	"skill_values.recognition": "Erkennen hilft beim Lesen von Kontakten. Es fließt in Befehlstreue, Selbstständigkeit und Koordination ein.",
+	"skill_values.stealth": "Tarnung fließt in Unauffälligkeit, leise Arbeitsweise, Aufklärung und Infiltration ein.",
+	"skill_values.discipline": "Disziplin fließt in Befehlstreue, Unauffälligkeit, Ruhe im Kontakt und Fahrzeugwerte ein.",
+	"skill_values.leadership": "Führung fließt in Kommunikation, Initiative, Selbstständigkeit und Koordination ein.",
+	"communication_values.speech_quality": "Meldequalität beschreibt verständliche Ansagen. Ohne Vorgabe wird sie aus Führung und Erkennen sowie Rollenanteilen abgeleitet.",
+	"communication_values.speech_quantity": "Sprechhäufigkeit beschreibt, wie viel gemeldet wird. Weniger unterstützt eine leise Arbeitsweise.",
+	"behavior_axes.initiative": "Ohne Vorgabe aus Tempo, Wahrnehmung und Führung abgeleitet; wirkt auf Bewegung und Fahrzeugwerte.",
+	"behavior_axes.order_fidelity": "Ohne Vorgabe aus Disziplin, Erkennen und Meldequalität abgeleitet; fließt in die Befehlsausführung ein.",
+	"behavior_axes.signature_control": "Ohne Vorgabe aus Tarnung, Disziplin und geringer Sprechhäufigkeit abgeleitet; beeinflusst Unauffälligkeit.",
+	"behavior_axes.contact_stability": "Ohne Vorgabe aus Belastbarkeit, Disziplin und Wahrnehmung abgeleitet; stabilisiert Reaktionen im Kontakt.",
+	"behavior_axes.autonomy": "Ohne Vorgabe aus Erkennen, Führung und Disziplin abgeleitet; beschreibt selbstständiges Arbeiten.",
+	"platform_values.ground_vehicle_handling": "Bodenfahrzeugwert aus Tempo, Wahrnehmung, Erkennen, Disziplin und Verhalten, sofern keine Vorgabe gespeichert ist.",
+	"platform_values.dropship_piloting": "Landefährenwert aus Wahrnehmung, Erkennen, Disziplin, Tempo, Kommunikation und Verhalten, sofern keine Vorgabe gespeichert ist.",
+	"platform_values.freighter_piloting": "Frachterwert aus Belastbarkeit, Erkennen, Disziplin, Kommunikation und Verhalten, sofern keine Vorgabe gespeichert ist.",
+	"platform_values.fighter_piloting": "Jägerwert aus Tempo, Treffsicherheit, Wahrnehmung, Disziplin und Verhalten, sofern keine Vorgabe gespeichert ist.",
 }
 
 
@@ -126,7 +127,7 @@ static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	var skill_values: Dictionary = Dictionary(profile.skill_values)
 	for entry in CORE_ORDER:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(skill_values.get(key, 0.0))
 		skill_parts.append("%s %.2f %s" % [label, value, UNIT_PROFILE_MATH_SCRIPT.describe_value(value)])
 	var skill_lines: PackedStringArray = ["Core: %s" % " | ".join(skill_parts.slice(0, 4))]
@@ -137,7 +138,7 @@ static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	var behavior_axes: Dictionary = Dictionary(profile.behavior_axes)
 	for entry in BEHAVIOR_ORDER:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		behavior_parts.append("%s %.2f" % [label, float(behavior_axes.get(key, 0.0))])
 	var trait_lines: PackedStringArray = []
 	trait_lines.append("Traits: %s" % _optional_text(String(profile.trait_summary_text), "none"))
@@ -155,7 +156,7 @@ static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	var platform_parts: PackedStringArray = []
 	for entry in PLATFORM_ORDER:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(platform_values.get(key, UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE))
 		if value < 0.0:
 			platform_parts.append("%s n/a" % label)
@@ -188,7 +189,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 	if profile == null:
 		return {
 			"name": "No operator selected",
-			"trait_text": "Keine Traits verfuegbar.",
+			"trait_text": "Keine Eigenschaften hinterlegt.",
 			"trait_rows": [],
 			"short_description": "Keine Kurzbeschreibung verfuegbar.",
 			"core_rows": _build_scored_rows({}, CORE_ORDER, "skill_values", "character_sheet.core"),
@@ -210,12 +211,26 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 
 	var trait_text: String = _build_expanded_trait_text(profile)
 
-	var short_description: String = String(profile.short_description).strip_edges()
-	if short_description.is_empty():
-		short_description = _optional_text(String(profile.biography_text), "Keine Kurzbeschreibung hinterlegt.")
+	var short_description: String = String(profile.short_description)
+	if short_description.strip_edges().is_empty():
+		short_description = String(profile.biography_text)
+		if short_description.strip_edges().is_empty():
+			short_description = "Keine Kurzbeschreibung hinterlegt."
+	short_description = COPY.stock_biography(short_description, profile)
+	var suitability_rows: Array = _build_suitability_rows(profile)
+	var relationship_entries: Array = _build_relationship_entries(profile, options)
 
 	return {
-		"name": _optional_text(String(profile.display_name), "Unknown Operator"),
+		"name": _optional_text(String(profile.display_name), "Unbekannte Person"),
+		"start_role_text": _start_role_text(profile),
+		"current_assignment_text": _optional_text(String(options.get("current_assignment_text", "")), "Im Profil nicht belegt"),
+		"suitability_rows": suitability_rows,
+		"primary_suitability_reason": String(suitability_rows[0].get("reason", "")) if not suitability_rows.is_empty() else "Noch keine Eignung berechnet.",
+		"relationship_entries": relationship_entries,
+		"relationship_overview_rows": _relationship_highlights(relationship_entries),
+		"relationship_empty_text": "Noch keine Beziehung bekannt.",
+		"overview_status_text": format_status_text(String(options.get("status_text", profile.availability_status))),
+		"pilot_explanation": _build_pilot_explanation(profile),
 		"trait_text": trait_text,
 		"trait_rows": _build_trait_rows(profile),
 		"short_description": short_description,
@@ -246,11 +261,46 @@ static func build_loadout_text_from_member_loadout(member_loadout: Dictionary, f
 static func _build_role_loadout_rows(profile, options: Dictionary = {}) -> Array:
 	var loadout_text: String = String(options.get("loadout_text", "")).strip_edges()
 	return [
-		{"label": "Rollen-Fit", "value_text": _build_role_fit_text(profile), "help_id": "character_sheet.role", "detail_text": _build_role_fit_detail_text(profile)},
-		{"label": "Category", "value_text": _optional_text(String(profile.roster_role_category).replace("_", " "), "n/a"), "help_id": "character_sheet.role_category"},
-		{"label": "Fireteam", "value_text": _optional_text(String(options.get("fireteam_text", "")), _optional_text(String(profile.fireteam_id).to_upper(), "UNASSIGNED")), "help_id": "character_sheet.fireteam_assignment"},
-		{"label": "Loadout", "value_text": _optional_text(loadout_text, _optional_text(String(profile.loadout_summary), _build_profile_loadout_text(profile))), "help_id": "character_sheet.loadout_summary"},
+		{"label": "Startrolle", "value_text": _start_role_text(profile), "help_id": "character_sheet.role_category", "detail_text": "Gespeicherte Ausgangsrolle. Sie ist weder ein Leistungsnachweis noch eine aktuelle Schiffszuteilung."},
+		{"label": "Aktuelle Aufgabe", "value_text": _optional_text(String(options.get("current_assignment_text", "")), "Im Profil nicht belegt"), "help_id": "character_sheet.fireteam_assignment"},
+		{"label": "Berechnete Eignung", "value_text": _build_role_fit_text(profile), "help_id": "character_sheet.role", "detail_text": _build_role_fit_detail_text(profile)},
+		{"label": "Trupp", "value_text": _optional_text(String(options.get("fireteam_text", "")), _optional_text(String(profile.fireteam_id).to_upper(), "Nicht zugewiesen")), "help_id": "character_sheet.fireteam_assignment"},
+		{"label": "Ausrüstung", "value_text": _optional_text(loadout_text, _build_profile_loadout_text(profile)), "help_id": "character_sheet.loadout_summary"},
 	]
+
+
+static func _start_role_text(profile) -> String:
+	var category: String = String(profile.roster_role_category).strip_edges()
+	return COPY.label(category) if not category.is_empty() else _optional_text(COPY.text(String(profile.role_name)), "Im Profil nicht belegt")
+
+
+## Display translation only; never changes the saved role or its scoring input.
+static func format_role_name(role_name: String) -> String:
+	return COPY.text(role_name)
+
+
+static func format_status_text(status_text: String) -> String:
+	var known: String = COPY.text(status_text.to_lower())
+	return status_text if known == status_text.to_lower() else known
+
+
+static func _build_suitability_rows(profile) -> Array:
+	var rows: Array = []
+	for badge: Dictionary in NPC_RANK_BADGE_RESOLVER_SCRIPT.get_badge_progress_for_profile(profile):
+		var key: String = String(badge.get("badge_key", ""))
+		if key == "enemy":
+			continue
+		rows.append({"label": COPY.label(key), "value_text": "%s / %s" % [COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)], "badge_key": key, "reason": String(badge.get("reason", "")), "help_id": String(badge.get("help_id", "character_sheet.role")), "detail_text": _build_pilot_explanation(profile) if key == "pilot" else "%s\n%s" % [String(badge.get("reason", "")), String(badge.get("detail_text", ""))]})
+	return rows
+
+
+static func _build_pilot_explanation(profile) -> String:
+	var breakdown: Dictionary = NPC_RANK_BADGE_RESOLVER_SCRIPT.get_pilot_score_breakdown(profile)
+	var parts: PackedStringArray = []
+	for factor: Dictionary in breakdown.factors:
+		parts.append("%s %s × %d %%" % [COPY.label(String(factor.value_key)), COPY.decimal(float(factor.value)), roundi(float(factor.weight) * 100.0)])
+	parts.append("Rollen-/Beschreibungskontext: +%s" % COPY.decimal(float(breakdown.role_bonus)))
+	return "Piloteneignung %s; Schwelle %s.\n%s\nDer beste Fahrzeugwert schließt Bodenfahrzeuge ein. Eignung weist niemanden einem Schiff zu. Eine Berufslaufbahn ist im Profil nicht belegt." % [COPY.decimal(float(breakdown.score)), COPY.decimal(float(breakdown.threshold)), "; ".join(parts)]
 
 
 static func _build_role_fit_text(profile) -> String:
@@ -263,7 +313,7 @@ static func _build_role_fit_text(profile) -> String:
 		var badge: Dictionary = Dictionary(badge_variant)
 		if String(badge.get("badge_key", "")).strip_edges() == "enemy":
 			continue
-		var part: String = "%s %.2f" % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
+		var part: String = "%s %s" % [COPY.label(String(badge.get("badge_key", ""))), COPY.decimal(float(badge.get("score", 0.0)))]
 		if bool(badge.get("achieved", false)):
 			achieved_parts.append(part)
 		elif next_parts.size() < 2:
@@ -278,17 +328,17 @@ static func _build_role_fit_text(profile) -> String:
 static func _build_role_fit_detail_text(profile) -> String:
 	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", profile, 0, false))
 	var lines: PackedStringArray = PackedStringArray()
-	lines.append("Rollenringe werden aus Kernwerten, Kommunikation, Verhaltensprofil, Plattformwerten und kleinem Loadout-Kontext abgeleitet.")
+	lines.append("Eignung wird aus aktuellen Profilwerten und vorhandenem Rollen-/Ausrüstungskontext berechnet. Das ist keine automatische Aufgabe.")
 	for badge_variant in progress:
 		if typeof(badge_variant) != TYPE_DICTIONARY:
 			continue
 		var badge: Dictionary = Dictionary(badge_variant)
 		if bool(badge.get("achieved", false)):
-			lines.append("%s erreicht: %.2f" % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))])
+			lines.append("%s erreicht: %s" % [COPY.label(String(badge.get("badge_key", ""))), COPY.decimal(float(badge.get("score", 0.0)))])
 		elif lines.size() < 4:
-			lines.append("%s fehlt: %s" % [String(badge.get("label", "Badge")), String(badge.get("requirement_text", ""))])
+			lines.append("%s: %s; Schwelle %s" % [COPY.label(String(badge.get("badge_key", ""))), COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)])
 	if profile != null and not String(profile.role_name).strip_edges().is_empty():
-		lines.append("Gespeicherter Starttext: %s" % String(profile.role_name).strip_edges())
+		lines.append("Gespeicherter Starttext: %s" % COPY.text(String(profile.role_name).strip_edges()))
 	return "\n".join(lines)
 
 
@@ -296,31 +346,81 @@ static func _build_status_rows(profile, options: Dictionary = {}) -> Array:
 	var status_text: String = String(options.get("status_text", profile.status_text)).strip_edges()
 	var recovery_text: String = _format_recovery_state(Dictionary(profile.recovery_state))
 	var progression: Dictionary = Dictionary(profile.progression)
-	var morale_row: Dictionary = {"label": "Morale", "value_text": _format_fraction_or_na(progression.get("morale", "n/a")), "help_id": "character_sheet.morale"}
+	var morale_row: Dictionary = {"label": "Moral", "value_text": _format_fraction_or_na(progression.get("morale", "n/a")), "help_id": "character_sheet.morale"}
 	_apply_fraction_row_metadata(morale_row, progression.get("morale", "n/a"), "progression", "morale")
 	var frustration_row: Dictionary = {"label": "Frustration", "value_text": _format_fraction_or_na(progression.get("frustration", "n/a")), "help_id": "character_sheet.frustration"}
 	_apply_fraction_row_metadata(frustration_row, progression.get("frustration", "n/a"), "progression", "frustration")
 	return [
-		{"label": "Status", "value_text": _optional_text(status_text, _optional_text(String(profile.availability_status), "active")), "help_id": "character_sheet.status"},
-		{"label": "Recovery", "value_text": recovery_text, "help_id": "character_sheet.recovery"},
+		{"label": "Status", "value_text": COPY.text(_optional_text(status_text, _optional_text(String(profile.availability_status), "active"))), "help_id": "character_sheet.status"},
+		{"label": "Erholung", "value_text": recovery_text, "help_id": "character_sheet.recovery"},
 		morale_row,
 		frustration_row,
 	]
 
 
-static func _build_relationship_rows(profile, _options: Dictionary = {}) -> Array:
-	var profile_data: Dictionary = Dictionary(profile.call("to_dict")) if profile != null and profile.has_method("to_dict") else {}
-	var summary: Dictionary = Dictionary(ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("summarize_unit_relationships_without_text", profile_data))
-	var best_link: Dictionary = Dictionary(summary.get("best_link", {}))
-	var worst_link: Dictionary = Dictionary(summary.get("worst_link", {}))
+static func _build_relationship_entries(profile, options: Dictionary = {}) -> Array:
+	var data: Dictionary = profile.call("to_dict") if profile != null and profile.has_method("to_dict") else {}
+	var names: Dictionary = {}
+	for id in Dictionary(options.get("roster_names_by_id", {})):
+		names[ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_unit_id(String(id))] = String(options.roster_names_by_id[id]).strip_edges()
+	# Normalization owns identity, signs, duplicate targets and ordering. Keep
+	# custom stored prose verbatim rather than deriving reasons from traits.
+	var reasons: Dictionary = {}
+	for raw: Dictionary in Array(data.get("relationship_links", [])):
+		var id: String = ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_unit_id(String(raw.get("target_unit_id", raw.get("unit_id", ""))))
+		if not reasons.has(id):
+			reasons[id] = String(raw.get("reason", ""))
+	var entries: Array = []
+	for link: Dictionary in ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_links_for_unit(data):
+		var id: String = String(link.target_unit_id)
+		var name_text: String = String(names.get(id, ""))
+		if name_text.is_empty():
+			name_text = String(link.get("target_name", ""))
+			if name_text.is_empty() or name_text.to_lower() == id:
+				name_text = "Person ohne hinterlegten Namen"
+		var tags: PackedStringArray = []
+		for tag in PackedStringArray(link.get("tags", [])):
+			tags.append(COPY.label(tag))
+		var value: float = float(link.affinity)
+		entries.append({"label": name_text, "value_text": COPY.signed_decimal(value) + (" · " + ", ".join(tags) if not tags.is_empty() else ""), "detail_text": COPY.relationship_reason(String(reasons.get(id, link.get("reason", "")))), "help_id": "character_sheet.relationship_links", "target_unit_id": id, "affinity": value})
+	return entries
+
+
+static func _relationship_highlights(entries: Array) -> Array:
+	var highlights: Array = []
+	for sign_value in [1.0, -1.0]:
+		for entry: Dictionary in entries:
+			if float(entry.affinity) * sign_value > 0.0:
+				highlights.append(entry.duplicate(true))
+				break
+	for entry: Dictionary in entries:
+		if highlights.size() >= 2:
+			break
+		if not highlights.any(func(highlight: Dictionary): return highlight.target_unit_id == entry.target_unit_id):
+			highlights.append(entry.duplicate(true))
+	return highlights
+
+
+static func _build_relationship_rows(profile, options: Dictionary = {}) -> Array:
+	var entries: Array = _build_relationship_entries(profile, options)
+	var best: Dictionary = {}
+	var worst: Dictionary = {}
+	for entry: Dictionary in entries:
+		if float(entry.affinity) > 0.0 and best.is_empty():
+			best = entry
+		if float(entry.affinity) < 0.0 and worst.is_empty():
+			worst = entry
 	var relationship_summary: String = String(profile.relationship_summary_text)
-	if relationship_summary.strip_edges().is_empty() and not profile_data.is_empty():
-		relationship_summary = String(ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("build_unit_relationship_summary_text", profile_data))
+	if relationship_summary.strip_edges().is_empty():
+		relationship_summary = "%d gespeicherte Beziehungen" % entries.size() if not entries.is_empty() else "Noch keine Beziehung bekannt."
+	var names: PackedStringArray = []
+	for entry: Dictionary in entries:
+		names.append("%s %s" % [entry.label, COPY.signed_decimal(float(entry.affinity))])
 	return [
 		{"label": "Teamfit", "value_text": _optional_text(relationship_summary, "Noch keine Beziehungsauswertung."), "help_id": "character_sheet.teamfit"},
-		{"label": "Best Fit", "value_text": _format_relationship_link_summary(best_link, "none yet"), "help_id": "character_sheet.best_fit"},
-		{"label": "Tension", "value_text": _format_relationship_link_summary(worst_link, "none yet"), "help_id": "character_sheet.tension"},
-		{"label": "Links", "value_text": _format_relationship_links(Array(profile.relationship_links)), "help_id": "character_sheet.relationship_links"},
+		{"label": "Gute Zusammenarbeit", "value_text": "%s %s" % [best.label, best.value_text] if not best.is_empty() else "Noch keine", "detail_text": String(best.get("detail_text", "")), "help_id": "character_sheet.best_fit"},
+		{"label": "Spannungen", "value_text": "%s %s" % [worst.label, worst.value_text] if not worst.is_empty() else "Noch keine", "detail_text": String(worst.get("detail_text", "")), "help_id": "character_sheet.tension"},
+		{"label": "Beziehungen", "value_text": "; ".join(names) if not names.is_empty() else "Noch keine Beziehung bekannt.", "help_id": "character_sheet.relationship_links"},
 	]
 
 
@@ -328,10 +428,10 @@ static func _build_progress_rows(profile, options: Dictionary = {}) -> Array:
 	var progression: Dictionary = Dictionary(profile.progression)
 	return [
 		{"label": "XP", "value_text": str(int(progression.get("xp", 0))), "help_id": "character_sheet.xp"},
-		{"label": "Missions", "value_text": str(int(progression.get("missions_completed", Array(profile.mission_history).size()))), "help_id": "character_sheet.missions"},
-		{"label": "FTL Impact", "value_text": _format_ftl_tactical_impact(profile), "help_id": "character_sheet.ftl_tactical_impact"},
-		{"label": "Last Mission", "value_text": _format_last_history(Array(profile.mission_history), "mission_id"), "help_id": "character_sheet.last_mission"},
-		{"label": "Fireteam History", "value_text": _format_last_history(Array(profile.fireteam_history), "fireteam_id"), "help_id": "character_sheet.fireteam_history"},
+		{"label": "Einsätze", "value_text": str(int(progression.get("missions_completed", Array(profile.mission_history).size()))), "help_id": "character_sheet.missions"},
+		{"label": "Führungswirkung", "value_text": _format_ftl_tactical_impact(profile), "help_id": "character_sheet.ftl_tactical_impact"},
+		{"label": "Letzter Einsatz", "value_text": _format_last_history(Array(profile.mission_history), "mission_id"), "help_id": "character_sheet.last_mission"},
+		{"label": "Truppverlauf", "value_text": _format_last_history(Array(profile.fireteam_history), "fireteam_id"), "help_id": "character_sheet.fireteam_history"},
 	]
 
 
@@ -354,18 +454,18 @@ static func _build_post_mission_skill_delta_row(options: Dictionary) -> Dictiona
 			parts.append("XP +%d" % xp_delta)
 		var skill_gain_count: int = int(award.get("skill_gain_count", 0))
 		if skill_gain_count > 0:
-			parts.append("Skills +%d" % skill_gain_count)
+			parts.append("Werte +%d" % skill_gain_count)
 		var ftl_gain: float = float(award.get("ftl_tactical_gain", 0.0))
 		if ftl_gain > 0.0:
-			parts.append("FTL +%.3f" % ftl_gain)
+			parts.append(("Führung +%.3f" % ftl_gain).replace(".", ","))
 		value_text = " | ".join(parts)
 	if value_text.is_empty():
-		value_text = "no delta"
+		value_text = "Kein Zuwachs"
 	return {
-		"label": "Last Award",
-		"value_text": value_text,
+		"label": "Letzter Zuwachs",
+		"value_text": COPY.award_text(value_text),
 		"help_id": "character_sheet.post_mission_skill_delta",
-		"detail_text": "Read-only MissionProgressionResolver delta from the last Debrief/Homebase return.",
+		"detail_text": "Bestätigter Zuwachs aus dem letzten Einsatzergebnis. Diese Anzeige vergibt keine weiteren Punkte.",
 		"style_key": "post_mission_award",
 		"style_id": "homebase_progression_delta_v1",
 		"badge_text": "MISSION GAIN",
@@ -375,28 +475,11 @@ static func _build_post_mission_skill_delta_row(options: Dictionary) -> Dictiona
 
 
 static func _build_derived_rows(profile) -> Array:
-	var skill_values: Dictionary = Dictionary(profile.skill_values) if profile != null else {}
-	var behavior_axes: Dictionary = Dictionary(profile.behavior_axes) if profile != null else {}
-	var platform_values: Dictionary = Dictionary(profile.platform_values) if profile != null else {}
-	var method_detail: String = "Aus Speed %.2f, Discipline %.2f, Stealth %.2f, Initiative %.2f und Trait-Tags entstehen Tags wie steady, rapid, silent oder command." % [
-		float(skill_values.get("speed", 0.0)),
-		float(skill_values.get("discipline", 0.0)),
-		float(skill_values.get("stealth", 0.0)),
-		float(behavior_axes.get("initiative", 0.0)),
-	]
-	var function_detail: String = "Fighting/Shooter liest Weapon und Accuracy %.2f. Scout liest Awareness %.2f, Speed, Stealth und Recognition. Leader/Coordinator liest Leadership %.2f plus Speech Quality, Recognition und Discipline. Pilot liest Platform-Skills wie Dropship %.2f." % [
-		float(skill_values.get("accuracy", 0.0)),
-		float(skill_values.get("awareness", 0.0)),
-		float(skill_values.get("leadership", 0.0)),
-		float(platform_values.get("dropship_piloting", UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE)),
-	]
-	var primary_detail: String = "Der hoechste Function Score plus Rollen- und Trait-Kontext bestimmt die Primaer-Spezialisierung."
-	var secondary_detail: String = "Der naechste belastbare Fit bleibt sichtbar, damit Hybridrollen nicht im Namen verschwinden."
 	return [
-		{"label": "Method Tags", "value_text": _optional_text(String(profile.method_summary_text), _format_score_summary(Dictionary(profile.method_scores), "n/a")), "help_id": "character_sheet.method_tags", "detail_text": method_detail},
-		{"label": "Function Scores", "value_text": _optional_text(String(profile.function_summary_text), _format_score_summary(Dictionary(profile.function_scores), "n/a")), "help_id": "character_sheet.function_scores", "detail_text": function_detail},
-		{"label": "Primary Specialty", "value_text": _optional_text(String(profile.primary_specialty), _optional_text(String(profile.specialty_text), "n/a")), "help_id": "character_sheet.primary_specialty", "detail_text": primary_detail},
-		{"label": "Secondary Specialty", "value_text": _optional_text(String(profile.secondary_specialty), "n/a"), "help_id": "character_sheet.secondary_specialty", "detail_text": secondary_detail},
+		{"label": "Arbeitsweise", "value_text": _format_score_summary(Dictionary(profile.method_scores), "—"), "help_id": "character_sheet.method_tags", "detail_text": "Gewichtete Kernwerte und Kommunikation bestimmen Arbeitsweisen wie leise, schnell oder wachsam. Eigenschaften wirken über die Profilwerte."},
+		{"label": "Einsatzeignung", "value_text": _format_score_summary(Dictionary(profile.function_scores), "—"), "help_id": "character_sheet.function_scores", "detail_text": "Funktionswerte aus Kernwerten, Kommunikation und passenden Fahrzeugwerten. Diese Werte erteilen keine Aufgabe."},
+		{"label": "Spezialisierung", "value_text": COPY.text(_optional_text(String(profile.primary_specialty), _optional_text(String(profile.specialty_text), "—"))), "help_id": "character_sheet.primary_specialty", "detail_text": "Beste Kombination aus zugelassener Rollenfunktion und Arbeitsweise. Der gespeicherte Rollenrahmen begrenzt die Auswahl."},
+		{"label": "Weitere Stärke", "value_text": COPY.text(_optional_text(String(profile.secondary_specialty), "—")), "help_id": "character_sheet.secondary_specialty", "detail_text": "Zweite Kombination, wenn sie die vorhandenen Mindest- und Abstandsregeln erfüllt."},
 	]
 
 
@@ -405,17 +488,17 @@ static func _format_ftl_tactical_impact(profile) -> String:
 		return "n/a"
 	var explicit_text: String = String(profile.ftl_tactical_effect_text).strip_edges()
 	if not explicit_text.is_empty():
-		return explicit_text
+		return COPY.tactical_text(explicit_text)
 	var snapshot: Dictionary = Dictionary(profile.ftl_tactical_progression)
 	if snapshot.is_empty():
 		snapshot = Dictionary(Dictionary(profile.progression).get("ftl_tactical_snapshot", {}))
 	if not snapshot.is_empty():
-		return String(FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("build_tactical_effect_text", snapshot))
+		return COPY.tactical_text(String(FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("build_tactical_effect_text", snapshot)))
 	if not bool(profile.is_fireteam_lead):
-		return "Not leading"
+		return "Keine Truppführung"
 	var leader_data: Dictionary = profile.call("to_dict") if profile != null and profile.has_method("to_dict") else {}
 	var derived_snapshot: Dictionary = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("build_leader_tactical_skill_snapshot", leader_data, {"fireteam_id": String(profile.fireteam_id)})
-	return String(FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("build_tactical_effect_text", derived_snapshot))
+	return COPY.tactical_text(String(FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("build_tactical_effect_text", derived_snapshot)))
 
 
 static func build_loadout_text_from_ids(armor_id: String, weapon_1_id: String, weapon_2_id: String, fallback: String = "standard kit") -> String:
@@ -424,8 +507,8 @@ static func build_loadout_text_from_ids(armor_id: String, weapon_1_id: String, w
 	var normalized_weapon_2_id: String = _normalize_weapon_id(weapon_2_id)
 	if normalized_armor_id.is_empty() and normalized_weapon_1_id.is_empty() and normalized_weapon_2_id.is_empty():
 		return fallback
-	return "%s Armor | %s | %s" % [
-		_normalize_armor_id(normalized_armor_id).capitalize(),
+	return "%s | %s | %s" % [
+		COPY.armor(_normalize_armor_id(normalized_armor_id)),
 		WEAPON_DATA_SCRIPT.get_display_name(normalized_weapon_1_id),
 		WEAPON_DATA_SCRIPT.get_display_name(normalized_weapon_2_id),
 	]
@@ -434,13 +517,13 @@ static func build_loadout_text_from_ids(armor_id: String, weapon_1_id: String, w
 static func format_fireteam_label(fireteam_id: String) -> String:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges()
 	if normalized_fireteam_id.is_empty():
-		return "UNASSIGNED"
+		return "Nicht zugewiesen"
 	return normalized_fireteam_id.replace("_", " ").to_upper()
 
 
 static func _build_expanded_trait_text(profile) -> String:
 	if profile == null:
-		return "Keine Traits verfuegbar."
+		return "Keine Eigenschaften hinterlegt."
 
 	var trait_names: PackedStringArray = []
 	if profile.trait_ids is PackedStringArray:
@@ -456,7 +539,7 @@ static func _build_expanded_trait_text(profile) -> String:
 	var trait_text: String = String(profile.trait_summary_text).strip_edges()
 	if trait_text.is_empty() and profile.trait_tags is PackedStringArray and not (profile.trait_tags as PackedStringArray).is_empty():
 		trait_text = " ".join(profile.trait_tags)
-	return _optional_text(trait_text, "Keine markanten Traits hinterlegt.")
+	return _optional_text(trait_text, "Keine markanten Eigenschaften hinterlegt.")
 
 
 static func _build_trait_rows(profile) -> Array:
@@ -477,7 +560,7 @@ static func _build_trait_rows(profile) -> Array:
 					"value_text": trait_id.to_upper(),
 					"trait_id": trait_id,
 					"help_id": "character_sheet.traits",
-					"detail_text": "Unbekannter Trait aus dem gespeicherten Profil.",
+					"detail_text": "Unbekannte Eigenschaft aus dem gespeicherten Profil.",
 				})
 				continue
 			rows.append({
@@ -497,21 +580,21 @@ static func _build_trait_rows(profile) -> Array:
 				"value_text": "TAG",
 				"trait_id": trait_tag.to_lower(),
 				"help_id": "character_sheet.traits",
-				"detail_text": "Trait-Tag aus dem Profil, ohne eigene Trait-Library-Regel.",
+				"detail_text": "Eigenschaft aus dem Profil ohne hinterlegte Rechenregel.",
 			})
 	return rows
 
 
 static func _format_trait_modifier_text(skill_modifiers: Dictionary) -> String:
 	if skill_modifiers.is_empty():
-		return "Trait beschreibt Verhalten und hat keinen direkten Skill-Modifikator."
+		return "Diese Eigenschaft beschreibt Verhalten ohne direkten Wertemodifikator."
 	var keys: Array = skill_modifiers.keys()
 	keys.sort()
 	var parts: PackedStringArray = PackedStringArray()
 	for key_variant in keys:
 		var key: String = String(key_variant)
-		parts.append("%s %+.2f" % [_humanize_key(key), float(skill_modifiers.get(key_variant, 0.0))])
-	return "Skill-Modifikatoren: %s" % " | ".join(parts)
+		parts.append("%s %s" % [COPY.label(key), ("%+.2f" % float(skill_modifiers.get(key_variant, 0.0))).replace(".", ",")])
+	return "Wirkung auf Werte: %s" % " · ".join(parts)
 
 
 static func _build_profile_loadout_text(profile) -> String:
@@ -543,7 +626,7 @@ static func _build_scored_rows(source_values: Dictionary, order: Array, value_gr
 	var rows: Array = []
 	for entry in order:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(source_values.get(key, 0.0))
 		rows.append(
 			{
@@ -563,7 +646,7 @@ static func _build_platform_rows(platform_values: Dictionary) -> Array:
 	var rows: Array = []
 	for entry in PLATFORM_ORDER:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(platform_values.get(key, UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE))
 		rows.append(
 			{
@@ -579,7 +662,7 @@ static func _build_platform_value_rows(platform_values: Dictionary, include_not_
 	var rows: Array = []
 	for entry in PLATFORM_ORDER:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(platform_values.get(key, UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE))
 		if value < 0.0 and not include_not_applicable:
 			continue
@@ -592,7 +675,7 @@ static func _build_platform_value_rows(platform_values: Dictionary, include_not_
 				"value_group": "platform_values",
 				"value_key": key,
 				"help_id": "character_sheet.platform.%s" % key,
-				"detail_text": "%s %s" % [_value_help_text("platform_values", key), "Nicht gesetzt startet bei 0,00; Plus/Minus speichert den Plattformwert direkt am NPC." if value < 0.0 else "Plus/Minus speichert den Plattformwert direkt am NPC."],
+				"detail_text": "%s %s" % [_value_help_text("platform_values", key), "Der gespeicherte Fahrzeugwert kann als Vorgabe vorliegen; seine ursprüngliche Herleitung ist nicht im Profil protokolliert."],
 			}
 		)
 	return rows
@@ -602,7 +685,7 @@ static func _build_ordered_score_rows(source_values: Dictionary, order: Array) -
 	var rows: Array = []
 	for entry in order:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		rows.append(
 			{
 				"label": label,
@@ -619,7 +702,7 @@ static func _build_value_rows(source_values: Dictionary, order: Array, value_gro
 	var rows: Array = []
 	for entry in order:
 		var key: String = String(entry[0])
-		var label: String = String(entry[1])
+		var label: String = COPY.label(key)
 		var value: float = float(source_values.get(key, 0.0))
 		rows.append(
 			{
@@ -666,17 +749,17 @@ static func _format_score_summary(scores: Dictionary, fallback: String) -> Strin
 
 static func _format_recovery_state(recovery_state: Dictionary) -> String:
 	if recovery_state.is_empty():
-		return "none"
+		return "Keine"
 	var state: String = String(recovery_state.get("state", recovery_state.get("status", "recovering"))).strip_edges()
 	var turns_remaining: int = int(recovery_state.get("turns_remaining", recovery_state.get("days_remaining", -1)))
 	if turns_remaining >= 0:
-		return "%s | %d remaining" % [_optional_text(state, "recovering"), turns_remaining]
-	return _optional_text(state, "recovering")
+		return "%s | %d verbleibend" % [COPY.text(_optional_text(state, "recovering")), turns_remaining]
+	return COPY.text(_optional_text(state, "recovering"))
 
 
 static func _format_relationship_links(links: Array) -> String:
 	if links.is_empty():
-		return "none yet"
+		return "Noch keine"
 	var parts: PackedStringArray = PackedStringArray()
 	for index in range(mini(links.size(), 2)):
 		if typeof(links[index]) != TYPE_DICTIONARY:
@@ -686,7 +769,7 @@ static func _format_relationship_links(links: Array) -> String:
 		var value: float = float(link.get("affinity", 0.0))
 		parts.append("%s %+.2f" % [target, value])
 	if parts.is_empty():
-		return "none yet"
+		return "Noch keine"
 	if links.size() > 2:
 		parts.append("+%d" % (links.size() - 2))
 	return " | ".join(parts)
@@ -705,20 +788,20 @@ static func _format_relationship_link_summary(link: Dictionary, fallback: String
 
 static func _format_last_history(history: Array, id_key: String) -> String:
 	if history.is_empty():
-		return "none yet"
+		return "Noch keine"
 	var entry: Dictionary = Dictionary(history[history.size() - 1]) if typeof(history[history.size() - 1]) == TYPE_DICTIONARY else {}
 	if entry.is_empty():
-		return "none yet"
+		return "Noch keine"
 	var id_text: String = String(entry.get(id_key, "")).strip_edges()
 	var result_text: String = String(entry.get("result", "")).strip_edges()
 	if result_text.is_empty():
 		return _optional_text(id_text, "recorded")
-	return "%s | %s" % [_optional_text(id_text, "recorded"), result_text]
+	return "%s | %s" % [_optional_text(id_text, "Erfasst"), COPY.text(result_text)]
 
 
 static func _format_fraction_or_na(value: Variant) -> String:
 	if typeof(value) == TYPE_STRING and String(value) == "n/a":
-		return "n/a"
+		return "—"
 	return _format_decimal_comma(float(value))
 
 

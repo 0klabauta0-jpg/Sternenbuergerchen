@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+ERROR: Attempt to open script 'res://scripts/tests/singleplayer_space_travel_state_test.gd' resulted in error 'File not found'.
+   at: load_source_code (modules/gdscript/gdscript.cpp:1127)
+ERROR: Failed loading resource: res://scripts/tests/singleplayer_space_travel_state_test.gd.
+   at: _load (core/io/resource_loader.cpp:343)
+ERROR: Can't load script: res://scripts/tests/singleplayer_space_travel_state_test.gd
+   at: start (main/main.cpp:4243)

@@ -101,7 +101,7 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"medictool": {
 		"id": "medictool",
-		"display_name": "Medictool",
+		"display_name": "Sanitätswerkzeug",
 		"damage_per_hit": 0,
 		"base_hit_chance": 0.0,
 		"ticks_between_attacks": 0,

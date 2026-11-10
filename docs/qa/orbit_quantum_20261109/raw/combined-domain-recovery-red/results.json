@@ -1,0 +1,23 @@
+[
+  {
+    "script": "space_travel_state_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-domain-recovery-red\\space_travel_state_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-domain-recovery-red\\space_travel_state_verifier"
+  },
+  {
+    "script": "task_278_air_asset_loss_recovery_meta_loop.gd",
+    "exit_code": 1,
+    "errors": 2,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-domain-recovery-red\\task_278_air_asset_loss_recovery_meta_loop.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-domain-recovery-red\\task_278_air_asset_loss_recovery_meta_loop"
+  },
+  {
+    "script": "task_511_export_runtime_package_hygiene.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\combined-domain-recovery-red\\task_511_export_runtime_package_hygiene.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\combined-domain-recovery-red\\task_511_export_runtime_package_hygiene"
+  }
+]
