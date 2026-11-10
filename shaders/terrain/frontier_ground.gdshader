@@ -2,6 +2,10 @@ shader_type spatial;
 render_mode diffuse_burley, specular_disabled;
 
 uniform vec4 base_color : source_color = vec4(0.76, 0.49, 0.30, 1.0);
+uniform bool surface_blending = false;
+uniform sampler2D surface_mask : filter_linear, repeat_disable;
+uniform vec4 surface_bounds = vec4(0.0,0.0,1.0,1.0);
+uniform vec4 world_to_grid = vec4(1.0,0.0,0.0,1.0);
 uniform bool rock_strata = false;
 uniform bool paved_surface = false;
 uniform bool authored_paving_wear = false;
@@ -117,6 +121,25 @@ void fragment() {
 		shoulder=max(shoulder,authored_paving_wear?dusty_shoulder(p,wear_utility_span.xy,wear_utility_span.zw,0.64):0.0);
 		float broken_deposit=shoulder*smoothstep(0.40,0.80,broad_patch(p*7.0+vec2(patch,region)));
 		pigment=mix(pigment,sediment_color.rgb,broken_deposit*0.30);
+	}
+	if (surface_blending && !rock_strata && !marking_surface) {
+		// One map-space paint field spans every mesh. A hex can contain sand,
+		// a feathered shoulder and road; hex outlines remain a separate overlay.
+		vec2 p = ground_world_position.xz;
+		vec2 grid = vec2(dot(p,world_to_grid.xy),dot(p,world_to_grid.zw));
+		vec2 warp = vec2(broad_patch(p*2.2),broad_patch(p*2.2+vec2(8.0,3.0)))-0.5;
+		vec2 uv = (grid+warp*0.18-surface_bounds.xy+0.5)/surface_bounds.zw;
+		vec4 weights = texture(surface_mask,uv);
+		float road = smoothstep(0.12,0.85,weights.r);
+		float rock = smoothstep(0.05,0.95,weights.g);
+		float sand = clamp(weights.b+(broad_patch(p*0.21)-0.5)*0.42,0.0,1.0);
+		vec3 earth = mix(vec3(0.65,0.36,0.25),vec3(0.81,0.54,0.34),sand);
+		earth = mix(earth,vec3(0.62,0.38,0.30),rock*0.65);
+		// Dust remains at the irregular road shoulder and in small worn patches.
+		float road_wear = broad_patch(p*4.0)*0.16;
+		earth = mix(earth,vec3(0.46,0.47,0.39),road*(1.0-road_wear));
+		earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
+		pigment = pow(earth,vec3(2.2));
 	}
 	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;

@@ -1456,6 +1456,10 @@ func render_map(terrain_map_data = null) -> void:
 		_fire_sector_los_cache_signature = ""
 	_read_map_transform()
 	_ensure_nodes()
+	if _frontier_art_enabled and _terrain_map_data != null:
+		var q_axis := _grid_to_3d_position(Vector2(1,0),0)
+		var r_axis := _grid_to_3d_position(Vector2(0,1),0)
+		_frontier_art_profile.configure_surface_blend(Array(_terrain_map_data.call("get_tiles")),Vector2(q_axis.x,q_axis.z),Vector2(r_axis.x,r_axis.z))
 	_sync_authored_visual_layout()
 	_clear_children(_map_root)
 	_clear_children(_marker_root)

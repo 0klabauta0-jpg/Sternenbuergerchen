@@ -201,3 +201,11 @@ orbit_base_combined_20261110 und orbit_quantum_20261109.
 Groesste Risiken: Karte vergroessern ohne bezahlbare Navigation; freie LZ ohne
 dynamischen Rueckkehranker; Inventar nur als UI-Kopie; mehrere Orte bei weiterhin
 globalem Reise-/Missionsowner. Diese Punkte bestimmen die Reihenfolge.
+
+## Nachtrag waehrend Umsetzung — Bodenmalerei
+
+Nutzerkorrektur: Bodengestaltung nicht pro Hex einfarbig abschneiden. Sand, Geröll,
+Wegrand und Weg innerhalb eines Felds mischen; Grid separat als Kanten. AP5 ergaenzt
+eine aus bestehender Terrainwahrheit abgeleitete, kontinuierlich gefilterte
+Materialmaske in Weltkoordinaten. Keine Aenderung der Bewegungskosten, Hoehen oder
+Landbarkeit durch visuelle Mischung. Native Nah-/Fernansicht auf Nahtfreiheit pruefen.

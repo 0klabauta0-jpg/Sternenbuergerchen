@@ -12,6 +12,9 @@ const SURFACE_COLORS := {
 	"water": Color("638f9a"),
 }
 var _materials: Dictionary = {}
+var _blend: Dictionary = {}
+var _blend_texture: ImageTexture
+var _world_to_grid := Vector4(1,0,0,1)
 
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
@@ -30,6 +33,7 @@ func material_for(color: Color, rock: bool = false, paved: bool = false) -> Shad
 	material.set_shader_parameter("paved_surface", paved)
 	# Location-specific wear belongs to authored dressing, never generic maps.
 	material.set_shader_parameter("authored_paving_wear", false)
+	_apply_blend(material,rock)
 	_materials[key] = material
 	return material
 
@@ -55,3 +59,18 @@ func apply_light(light: DirectionalLight3D) -> void:
 	light.shadow_normal_bias = 0.45
 	light.shadow_bias = 0.025
 	light.directional_shadow_max_distance = 45.0
+
+func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> void:
+	_blend=load("res://scripts/terrain/terrain_surface_blend.gd").build(tiles)
+	if _blend.is_empty(): return
+	_blend_texture=ImageTexture.create_from_image(_blend.image)
+	var inverse := Transform2D(axis_q,axis_r,Vector2.ZERO).affine_inverse()
+	_world_to_grid=Vector4(inverse.x.x,inverse.y.x,inverse.x.y,inverse.y.y)
+	for material in _materials.values(): _apply_blend(material,bool(material.get_shader_parameter("rock_strata")))
+
+func _apply_blend(material: ShaderMaterial, rock: bool) -> void:
+	material.set_shader_parameter("surface_blending",not rock and not _blend.is_empty())
+	if rock or _blend.is_empty(): return
+	material.set_shader_parameter("surface_mask",_blend_texture)
+	material.set_shader_parameter("surface_bounds",_blend.bounds)
+	material.set_shader_parameter("world_to_grid",_world_to_grid)
