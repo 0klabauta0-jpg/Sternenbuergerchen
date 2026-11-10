@@ -15,4 +15,3 @@ func _run() -> void:
 	var ok: bool=viewport.encloses(bounds) and bounds.position.y>=190 and bounds.size.y<600 and not panel.get("_feedback").text.contains("Kein reales Schiff")
 	print("SERVICE_LAYOUT passed=",ok," bounds=",bounds," viewport=",viewport," minimum=",panel.get_combined_minimum_size()," feedback=",panel.get("_feedback").text)
 	layer.queue_free(); await process_frame; quit(0 if ok else 1)
-
