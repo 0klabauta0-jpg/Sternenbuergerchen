@@ -24,6 +24,8 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			if not ids.has(id) or typeof(base.units[id]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_base_identity"}
 			var unit: Dictionary = base.units[id]
+			for field in ["auto_rest_enabled","rest_automatic"]:
+				if unit.has(field) and typeof(unit[field])!=TYPE_BOOL: return {"ok":false,"reason":"invalid_auto_rest_setting"}
 			if typeof(unit.get("position")) != TYPE_ARRAY or unit.position.size() != 2 or not String(unit.get("status", "")) in ["outside","sleeping","aboard"]:
 				return {"ok":false,"reason":"invalid_base_position"}
 			for number in unit.position:

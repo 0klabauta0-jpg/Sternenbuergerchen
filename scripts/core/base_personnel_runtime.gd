@@ -19,6 +19,9 @@ var _board_groups: Dictionary = {}
 var _poll_seconds: float = 0.0
 var _navigation_graph: RefCounted
 var _committing_transport: bool = false
+var _rest_elapsed := 0.0
+const AUTOMATIC_REST_IDLE_SECONDS := 20.0
+const MANUAL_PRIORITY_SECONDS := 30.0
 
 func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionary = {}) -> void:
 	_flow = flow
@@ -57,8 +60,10 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 		actor.position = spawn + Vector2(index * 24.0, index * 12.0)
 		_registry.register_unit(id, actor)
 		_sim.register_known_unit(id, actor)
-		_states[id] = {"unit_id":id,"name":String(profile.get("display_name", id)),"role":String(profile.get("role_name", "")),"status":"outside","craft_id":"","bed_id":"","action":{},"last_result":{}}
+		_states[id] = {"unit_id":id,"name":String(profile.get("display_name", id)),"role":String(profile.get("role_name", "")),"status":"outside","craft_id":"","bed_id":"","action":{},"last_result":{},"auto_rest_enabled":true,"idle_seconds":0.0,"manual_priority_seconds":0.0,"rest_automatic":false}
 		var restore: Dictionary = saved.get(id, {})
+		_states[id].auto_rest_enabled=bool(restore.get("auto_rest_enabled",true))
+		_states[id].rest_automatic=bool(restore.get("rest_automatic",false))
 		var point: Array = restore.get("position", [])
 		if point.size() == 2:
 			var candidate := Vector2(float(point[0]), float(point[1]))
@@ -89,6 +94,7 @@ func get_snapshot() -> Dictionary:
 	for id in _states:
 		var entry: Dictionary = _states[id].duplicate(true)
 		entry.world_position = get_actor(id).position
+		if not _unit_is_home(String(id)): entry.status="away"
 		units.append(entry)
 	return {"units":units,"layout":_layout,"bed_occupants":_beds.duplicate(),"runtime_authority":"SimulationRoot"}
 func export_state() -> Dictionary:
@@ -97,7 +103,7 @@ func export_state() -> Dictionary:
 		var state: Dictionary = _states[id]
 		var pos := get_actor(id).position
 		# Midwalk saves resume safely at actual position without stale commands.
-		units[id] = {"position":[pos.x,pos.y],"status":state.status if state.status in ["sleeping","aboard"] else "outside","craft_id":state.craft_id if state.status == "aboard" else "","bed_id":state.bed_id if state.status == "sleeping" else ""}
+		units[id] = {"position":[pos.x,pos.y],"status":state.status if state.status in ["sleeping","aboard"] else "outside","craft_id":state.craft_id if state.status == "aboard" else "","bed_id":state.bed_id if state.status == "sleeping" else "","auto_rest_enabled":bool(state.get("auto_rest_enabled",true)),"rest_automatic":bool(state.get("rest_automatic",false))}
 	return {"version":1,"units":units}
 func is_pilot_aboard(craft_id: String) -> bool:
 	var id := String(_screen.call("_get_assigned_pilot_id", craft_id))
@@ -105,10 +111,15 @@ func is_pilot_aboard(craft_id: String) -> bool:
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	return _sim.request_base_personnel_command(operation, payload)
 func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
-	if not _at_home():
-		return _reject("away_from_base", "Personen sind im Ausflug oder Transit")
 	var id := String(payload.get("unit_id", ""))
 	var craft := String(payload.get("craft_id", ""))
+	if operation=="base_auto_rest":
+		if not _states.has(id) or typeof(payload.get("enabled"))!=TYPE_BOOL: return _reject("invalid_rest_setting","Person und Schalterzustand erforderlich")
+		_states[id].auto_rest_enabled=bool(payload.enabled)
+		if not payload.enabled and _unit_is_home(id) and (bool(_states[id].get("rest_automatic",false)) or bool(Dictionary(_states[id].action).get("automatic",false))): _cancel(id)
+		state_changed.emit()
+		return {"ok":true,"message":"Automatisches Ruhen eingeschaltet" if payload.enabled else "Automatisches Ruhen ausgeschaltet"}
+	if not _at_home() or (_states.has(id) and not _unit_is_home(id)): return _reject("away_from_base","Person ist nicht an der Basis")
 	if operation == "base_unboard" and bool(payload.get("whole_fireteam", false)):
 		var result: Dictionary = _reject("not_aboard", "Trupp ist nicht an Bord")
 		for member in _screen.call("_get_member_unit_ids_for_fireteam", String(payload.get("fireteam_id", "ft1"))):
@@ -125,7 +136,7 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 			return _reject("not_sleeping", "Person schlaeft nicht")
 		_cancel(id)
 		return {"ok":true}
-	if state.status == "sleeping":
+	if state.status == "sleeping" and operation not in ["base_move","base_board","base_terminal","base_cancel"]:
 		return _reject("unit_sleeping", "Person zuerst aufwecken")
 	if operation == "base_unboard":
 		return _unboard(id, craft, payload)
@@ -207,15 +218,20 @@ func _cancel(id: String) -> void:
 	state.action = {}
 	state.status = "outside"
 	state.craft_id = ""
+	state.rest_automatic=false
+	state.idle_seconds=0.0
+	state.manual_priority_seconds=MANUAL_PRIORITY_SECONDS
 	_sim.call("_discard_pending_move_commands_for_unit", id)
 	state_changed.emit()
+func _unit_is_home(id: String) -> bool:
+	if not _states.has(id): return false
+	var craft:=String(_states[id].get("craft_id",""))
+	if craft.is_empty(): return true
+	return String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft,""))=="homebase" and Dictionary(_flow.call("_find_pending_mission_craft_transfer",craft)).is_empty() and String(get_parent().call("get_space_travel_snapshot",craft).get("phase","grounded"))=="grounded"
 func _at_home() -> bool:
-	if _flow.get("_active_mission") != null or not Array(_flow.get("_pending_mission_craft_transfers")).is_empty():
-		return false
-	# Orbit and Quantum normally have no mission scene or legacy transfer.
-	# Only the travel owner can confirm the actual landing back at the base.
-	var travel: Dictionary = get_parent().call("get_space_travel_snapshot")
-	return String(travel.get("phase", "")) == "grounded"
+	for id in _states:
+		if _unit_is_home(String(id)): return true
+	return false
 func _world(raw: Variant) -> Vector2:
 	return _terrain.grid_to_world(Vector2i(int(raw[0]),int(raw[1])))
 func _find_layout(field: String, id: String) -> Dictionary:
@@ -252,8 +268,7 @@ func _board_team(craft: String, payload: Dictionary) -> Dictionary:
 		ids.append(pilot)
 	var previously_aboard: Dictionary = {}
 	for id in ids:
-		if not _states.has(id) or _states[id].status == "sleeping":
-			return _reject("unit_sleeping", "Alle Personen zuerst aufwecken")
+		if not _unit_is_home(String(id)): return _reject("unit_away","Person ist nicht an der Basis")
 		if _states[id].status == "aboard":
 			if _states[id].craft_id != craft:
 				return _reject("unit_aboard_other_craft", "Person ist bereits in einem anderen Schiff")
@@ -303,9 +318,9 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 	_board_groups.erase(craft)
 	return {"ok":true}
 func _on_tick(_tick: int) -> void:
-	if not _at_home():
-		return
+	_rest_elapsed+=maxf(float(_sim.call("get_last_tick_delta")),0.0)
 	for id in _states:
+		if not _unit_is_home(String(id)): continue
 		var state: Dictionary = _states[id]
 		if state.status != "moving":
 			continue
@@ -317,6 +332,7 @@ func _on_tick(_tick: int) -> void:
 		match String(action.type):
 			"sleep":
 				state.status = "sleeping"
+				state.rest_automatic=bool(action.get("automatic",false))
 			"terminal":
 				terminal_ready.emit(id, String(action.terminal_id))
 			"pilot_board":
@@ -327,10 +343,12 @@ func _on_tick(_tick: int) -> void:
 				state.craft_id = action.craft_id
 		state_changed.emit()
 	# Only two base actors; owner polling throttled, no SceneTree search.
-	_poll_seconds += 1.0 / float(Engine.physics_ticks_per_second)
+	_poll_seconds += maxf(float(_sim.call("get_last_tick_delta")),0.0)
 	if _poll_seconds < 0.2:
 		return
 	_poll_seconds = 0.0
+	advance_automatic_rest(_rest_elapsed)
+	_rest_elapsed=0.0
 	for craft in _board_groups.keys():
 		var group: Dictionary = _board_groups[craft]
 		var arrived := true
@@ -368,8 +386,31 @@ func validate_operation(operation: String, payload: Dictionary) -> Dictionary:
 	var id := String(payload.get("unit_id", ""))
 	if _states.has(id) and operation in ["assign","remove","loadout","pilot","board","start"]:
 		var state: Dictionary = _states[id]
-		if state.status == "sleeping" or not String(state.bed_id).is_empty():
-			return _reject("unit_sleeping", "Person zuerst aufwecken oder Schlafweg abbrechen")
+		if state.status == "sleeping" or (state.status=="moving" and String(Dictionary(state.action).get("type",""))=="sleep"): return {"ok":true}
 		if state.status in ["moving","boarding"]:
 			return _reject("base_action_in_progress", "Basisaktion zuerst abschliessen oder abbrechen")
 	return {"ok":true}
+
+func claim_manual_control(id: String) -> void:
+	if not _states.has(id) or not _unit_is_home(id): return
+	var state: Dictionary=_states[id]
+	if state.status=="sleeping" or (state.status=="moving" and String(Dictionary(state.action).get("type",""))=="sleep"): _cancel(id)
+	state.idle_seconds=0.0; state.manual_priority_seconds=MANUAL_PRIORITY_SECONDS
+
+func advance_automatic_rest(delta: float) -> void:
+	if not is_finite(delta) or delta<=0.0: return
+	for id in _states:
+		var state: Dictionary=_states[id]
+		if not _unit_is_home(String(id)) or not bool(state.get("auto_rest_enabled",true)) or state.status!="outside" or not Dictionary(state.action).is_empty(): continue
+		var priority: float=float(state.get("manual_priority_seconds",0.0))
+		if priority>0.0:
+			state.manual_priority_seconds=maxf(priority-delta,0.0)
+			continue
+		state.idle_seconds=float(state.get("idle_seconds",0.0))+delta
+		if state.idle_seconds<AUTOMATIC_REST_IDLE_SECONDS: continue
+		for bed: Dictionary in Array(_layout.get("beds",[])):
+			if _beds.has(bed.id): continue
+			var result:=_walk(String(id),_world(bed.grid),{"type":"sleep","bed_id":String(bed.id),"automatic":true})
+			if bool(result.get("ok",false)):
+				_beds[bed.id]=id; state.bed_id=String(bed.id); state.rest_automatic=true
+				break

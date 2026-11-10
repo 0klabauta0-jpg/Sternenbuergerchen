@@ -701,6 +701,12 @@ func refresh() -> void:
 			for ship in Array(singleplayer.get("crafts",[])):
 				if String(ship.get("craft_id",""))==selected_id and bool(ship.get("visible_on_pad",false)): accessible.append("craft:"+selected_id)
 		_inventory_panel.update_snapshot(inventory,focused,String(Dictionary(snapshot.get("selected_craft",{})).get("id","")),accessible)
+		var rest_person: Dictionary={}
+		var owner: Node=_screen.get_ref().call("get_base_personnel_runtime") if _screen!=null and _screen.get_ref()!=null else null
+		if owner!=null:
+			for person: Dictionary in owner.call("get_snapshot").get("units",[]):
+				if String(person.unit_id)==_focused_id: rest_person=person; break
+		_inventory_panel.update_rest_snapshot(rest_person)
 	_update_flight(Dictionary(snapshot.get("selected_craft", {})), snapshot)
 	if changed_mode:
 		_layout_columns()

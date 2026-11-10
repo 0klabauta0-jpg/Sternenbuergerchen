@@ -3,7 +3,8 @@ extends VBoxContainer
 signal operation_requested(operation: String, payload: Dictionary)
 const SURFACE = preload("res://scripts/meta/operations_drag_surface.gd")
 const ITEMS = preload("res://scripts/mission/inventory_transfer_contract.gd")
-const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","none":"Leer"}
+const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","mining_tool":"Miningwerkzeug","salvage_tool":"Bergungswerkzeug","ore":"Erz","salvage":"Bergungsgut","none":"Leer"}
+var _rest: CheckButton
 var _signature := ""
 var _unit_id := ""
 var _craft_id := ""
@@ -20,6 +21,9 @@ var _bodies: Dictionary = {}
 
 func _ready() -> void:
 	add_theme_constant_override("separation",10)
+	_rest=CheckButton.new(); _rest.name="AutomaticRest"; _rest.text="Automatisch ruhen"; add_child(_rest)
+	_rest.tooltip_text="Bei Leerlauf an der Basis ein Bett aufsuchen. Ausschalten, um die Person stehen zu lassen."
+	_rest.toggled.connect(func(enabled:bool): operation_requested.emit("base_auto_rest",{"unit_id":_unit_id,"enabled":enabled}))
 	_slots=HFlowContainer.new(); add_child(_slots)
 	_containers=HFlowContainer.new(); add_child(_containers)
 	_containers.add_theme_constant_override("h_separation",12)
@@ -75,6 +79,10 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
 	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty()
+
+func update_rest_snapshot(person: Dictionary) -> void:
+	_rest.visible=not person.is_empty()
+	_rest.set_pressed_no_signal(bool(person.get("auto_rest_enabled",true)))
 
 func _move(source: String, item: String, target: String, amount: int) -> void:
 	operation_requested.emit("inventory_transfer",{"unit_id":_unit_id,"craft_id":_craft_id,"source_container_id":source,"destination_container_id":target,"item_id":item,"amount":amount})

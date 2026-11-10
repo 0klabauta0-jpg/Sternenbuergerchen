@@ -9057,7 +9057,7 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	if base_runtime != null and not in_transit and payload_craft.is_empty():
 		for person: Dictionary in base_runtime.call("get_snapshot").get("units", []):
 			if String(person.unit_id) == id:
-				outside_campaign = String(person.status) == "outside"
+				outside_campaign = String(person.status) in ["outside","sleeping"] or (String(person.status)=="moving" and String(Dictionary(person.get("action",{})).get("type",""))=="sleep")
 	var role_id: String = String(unit_data.get("roster_role_category", unit_data.get("role_id", "")))
 	var role_names: Dictionary = {"leader": "Truppführung", "medic": "Sanität", "engineer": "Technik", "pilot": "Pilot", "shooter": "Schütze", "heavy_support": "Unterstützung", "scout_sniper": "Aufklärung"}
 	var role: String = String(role_names.get(role_id, CHARACTER_SHEET_FORMATTER_SCRIPT.format_role_name(String(profile.role_name) if profile != null else String(unit_data.get("role_name", "Operator")))))
@@ -9361,6 +9361,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 			mission_selection_changed.emit(mission_id)
 		_:
 			return _operations_rejected("unknown_operation", "Aktion nicht verfügbar")
+	if base_runtime!=null and operation in ["assign","remove","loadout","pilot"]: base_runtime.call("claim_manual_control",unit_id)
 	if _operations_presenter != null:
 		_operations_presenter.call("refresh")
 	_sync_operations_visibility()

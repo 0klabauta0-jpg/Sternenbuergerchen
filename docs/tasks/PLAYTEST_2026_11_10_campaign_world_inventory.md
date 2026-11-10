@@ -209,3 +209,18 @@ Wegrand und Weg innerhalb eines Felds mischen; Grid separat als Kanten. AP5 erga
 eine aus bestehender Terrainwahrheit abgeleitete, kontinuierlich gefilterte
 Materialmaske in Weltkoordinaten. Keine Aenderung der Bewegungskosten, Hoehen oder
 Landbarkeit durch visuelle Mischung. Native Nah-/Fernansicht auf Nahtfreiheit pruefen.
+
+## Weitere Nutzerkorrekturen waehrend Umsetzung
+
+27. Native Aufnahme ist stilistisch noch nicht angenommen: Weltbeschriftung zu
+gross, dunkler mittiger Block/Marker stoert, alte Kenney-Darstellung unten rechts
+entfernen und in den vorgesehenen Modellpfad bringen. Boden detaillierter und
+zusammenhaengend entsprechend eigener Referenzen, Insel-RTS als Stilvergleich.
+Gleiche native Ansicht/gleicher Zoom vor und nach der Aenderung vergleichen.
+
+28. Basis: Leerlauf-NPCs gehen automatisch in freie Betten. Manuelle Lauf-,
+Ausrüstungs- und Boardingbefehle haben Vorrang und koennen Personen herausnehmen.
+NPC anklicken und im Menue weiter bedienen. Pro NPC sichtbarer Schalter
+Automatisch ruhen an/aus; ausgeschaltet bleibt die Person am manuell gewaehlten
+Platz. Einstellung im Basischeckpoint erhalten. Vorhandene Beduerfnisse pruefen;
+keine neue Hunger-/Fatigue-/Heilungswahrheit in UI oder BaseActor erfinden.

@@ -141,7 +141,7 @@ func _build_personnel_controls() -> void:
 	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	_person_panel.offset_left = 24.0
 	_person_panel.offset_right = 424.0
-	_person_panel.offset_top = -254.0
+	_person_panel.offset_top = -298.0
 	_person_panel.offset_bottom = -24.0
 	_person_selector = OptionButton.new()
 	_person_selector.tooltip_text = "Person auswählen – auch Besatzung an Bord"
@@ -149,6 +149,13 @@ func _build_personnel_controls() -> void:
 	_person_panel.add_child(_person_selector)
 	_person_state = Label.new()
 	_person_panel.add_child(_person_state)
+	var rest := CheckButton.new()
+	rest.name = "AutomaticRest"
+	rest.text = "Automatisch ruhen"
+	rest.tooltip_text = "Bei Leerlauf zu einem freien Bett gehen. Aus: nach manuellen Befehlen stehen bleiben."
+	rest.toggled.connect(func(enabled: bool): _personnel_action("base_auto_rest", {"enabled":enabled}))
+	_person_panel.add_child(rest)
+	_person_buttons["auto_rest"] = rest
 	var actions := GridContainer.new()
 	actions.columns = 3
 	_person_panel.add_child(actions)
@@ -193,7 +200,8 @@ func _update_personnel_controls() -> void:
 		var status: String = String(person.get("status", "outside"))
 		var labels: Dictionary = {"outside": "In der Basis", "moving": "Unterwegs", "sleeping": "Schläft", "aboard": "An Bord", "boarding": "Geht zum Schiff", "away": "Im Einsatz"}
 		_person_state.text = String(labels.get(status, status))
-		(_person_buttons.base_board as Button).disabled = status in ["aboard", "sleeping", "away"]
+		(_person_buttons.base_board as Button).disabled = status in ["aboard", "away"]
+		(_person_buttons.auto_rest as CheckButton).set_pressed_no_signal(bool(person.get("auto_rest_enabled",true)))
 		(_person_buttons.base_unboard as Button).disabled = status != "aboard"
 		(_person_buttons.base_wake as Button).disabled = status != "sleeping"
 		(_person_buttons.base_sleep as Button).disabled = status in ["aboard", "sleeping", "away"]
@@ -539,6 +547,7 @@ func _initialize_runtime() -> void:
 	_runtime.add_child(_view)
 	_view.call("set_frontier_art_enabled", true)
 	_view.call("set_hex_grid_visible", false)
+	_view.call("set_authoring_markers_visible",false)
 	_view.call("configure_from_map", _map_data)
 	_view.set("_camera_size", 16.0)
 	_view.set("_camera_yaw_degrees", 24.0)

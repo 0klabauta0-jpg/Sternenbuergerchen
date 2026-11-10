@@ -185,6 +185,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if context.is_empty(): return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
 		var result := _commit("singleplayer_supply",operation,data,request_id,context)
 		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
+			if _base_personnel!=null: _base_personnel.call("claim_manual_control",unit_id)
 			for key in ["armor","weapon_1","weapon_2"]:
 				_screen.call("_set_homebase_member_loadout_value",unit_id,key,String(result.loadout[key]))
 			_screen.call("_emit_homebase_fireteam_context_changed")
@@ -535,7 +536,7 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 		var found := false
 		for actor in Array(_base_personnel.get_snapshot().get("units",[])):
 			if String(actor.get("unit_id",""))==unit_id:
-				found=String(actor.get("status","")) in ["outside","idle"]
+				found=String(actor.get("status","")) in ["outside","idle","sleeping"] or (String(actor.get("status",""))=="moving" and String(Dictionary(actor.get("action",{})).get("type",""))=="sleep")
 		if not found: return {}
 	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
 	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
