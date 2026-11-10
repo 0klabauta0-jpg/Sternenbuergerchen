@@ -1,6 +1,9 @@
 extends Control
 ## Schematic artwork. All ship positions and phases are runtime projections.
 signal orbit_requested(orbit_id: String)
+signal location_selected(location_id: String)
+var _location_buttons: Dictionary={}
+var _ship_texture: Texture2D
 var _travel: Dictionary = {}
 var _moon: Button
 var _planet: Button
@@ -19,6 +22,7 @@ func _ready() -> void:
 	set_meta("visual_reference", "https://scplanner.org/#/karte")
 	set_meta("image_status", "schematic_runtime_drawing")
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_ship_texture=load("res://scripts/terrain/frontier_ship_visuals.gd").get_ui_preview_texture({"craft_type":"dropship"})
 	_moon = _button("MoonOrbit", "MOND\nMondbasis", "moon_orbit")
 	_planet = _button("PlanetOrbit", "PLANET\nZwei Zielorte", "planet_orbit")
 	for id in ["moon_orbit", "planet_orbit"]:
@@ -149,13 +153,14 @@ func _orbit_point(id: String) -> Vector2:
 	return _point(Dictionary(Dictionary(_travel.get("orbits", {})).get(id, {})).get("position", fallback))
 
 func _layout_buttons() -> void:
+	_layout_location_buttons()
 	if _moon != null:
 		var width: float = clampf(size.x * 0.28, 104, 136)
 		for button in [_moon, _planet]:
 			button.custom_minimum_size = Vector2(width, 40)
 			button.size = Vector2(width, 40)
 		_moon.position = _orbit_point("moon_orbit") + Vector2(-width * 0.5, 66)
-		_planet.position = _orbit_point("planet_orbit") + Vector2(-width * 0.5, 72)
+		_planet.position = _orbit_point("planet_orbit") + Vector2(-width * 0.5, 112)
 		if not _body_hits.is_empty():
 			_body_hits.moon_orbit.position = _orbit_point("moon_orbit") + Vector2(-28, 6)
 			_body_hits.moon_orbit.size = Vector2(56, 56)
@@ -241,13 +246,10 @@ func _draw() -> void:
 		draw_dashed_line(ship, destination, Color(0.6, 0.85, 0.9, 0.55), 1, 6)
 		draw_line(ship - direction * 35, ship - direction * 12, Color(0.25, 0.8, 1, 0.4), 7, true)
 		draw_line(ship - direction * 28, ship - direction * 12, Color("b4f6ff"), 2, true)
-	var polygon := PackedVector2Array()
-	for point in [Vector2(10, 0), Vector2(-7, -6), Vector2(-3, 0), Vector2(-7, 6)]:
-		polygon.append(ship + point.rotated(direction.angle()))
-	draw_circle(ship, 19, Color(0.3, 0.9, 0.9, 0.1))
-	draw_colored_polygon(polygon, Color("f1c183"))
-	draw_circle(ship, 16, Color("e5a65d"), false, 1, true)
-	draw_string(ThemeDB.fallback_font, ship + Vector2(23, 4), "DEIN SCHIFF", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e9d5b5"))
+	draw_circle(ship,28,Color(0.3,0.9,0.9,0.1))
+	if _ship_texture!=null:
+		draw_texture_rect(_ship_texture,Rect2(ship-Vector2(48,32),Vector2(96,64)),false)
+	draw_string(ThemeDB.fallback_font,ship+Vector2(47,8),"ENTERMESSER",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("e9d5b5"))
 
 func _draw_grid() -> void:
 	var center := Vector2(0.5, 0.52)
@@ -283,10 +285,37 @@ func _draw_moon(center: Vector2) -> void:
 	draw_rect(Rect2(center + Vector2(-4, 7), Vector2(8, 3)), Color("e8c891"))
 
 func _draw_planet(center: Vector2) -> void:
-	for radius in [42, 35, 28]:
+	for radius in [74, 66, 59]:
 		draw_circle(center, radius, Color(0.9, 0.49, 0.2, 0.045))
-	_ellipse(center, Vector2(48, 19), -0.18, Color(0.82, 0.56, 0.28, 0.4))
-	draw_circle(center, 21, Color("916c49"))
-	draw_arc(center + Vector2(-2, -4), 14, 0.2, 2.8, 24, Color("d4a36a"), 7, true)
-	draw_arc(center + Vector2(3, 1), 12, 3.3, 5.4, 24, Color("7a654e"), 6, true)
-	draw_arc(center, 20, PI * 0.85, PI * 1.65, 36, Color("f2c992"), 1.5, true)
+	_ellipse(center, Vector2(78, 30), -0.18, Color(0.82, 0.56, 0.28, 0.4))
+	draw_circle(center, 52, Color("916c49"))
+	draw_arc(center + Vector2(-2, -4), 39, 0.2, 2.8, 24, Color("d4a36a"), 7, true)
+	draw_arc(center + Vector2(3, 1), 34, 3.3, 5.4, 24, Color("7a654e"), 6, true)
+	draw_arc(center, 51, PI * 0.85, PI * 1.65, 36, Color("f2c992"), 1.5, true)
+
+func set_location_snapshot(locations: Dictionary) -> void:
+	for id in locations:
+		if not _location_buttons.has(id):
+			var created:=Button.new()
+			created.name="PlanetSite_"+String(id)
+			created.custom_minimum_size=Vector2(28,28)
+			created.add_theme_font_size_override("font_size",15)
+			created.pressed.connect(func(): location_selected.emit(String(id)))
+			created.gui_input.connect(_child_gui_input.bind(created))
+			add_child(created); _location_buttons[id]=created
+		var data: Dictionary=locations[id]
+		var button: Button=_location_buttons[id]
+		button.text="◆" if bool(data.get("selected",false)) else ("◈" if String(id)=="satellite_crash" else "⌂")
+		button.disabled=not bool(data.get("available",false))
+		button.tooltip_text=String(data.get("name",id))+"\n"+String(data.get("reason","Ort auswaehlen"))
+	_layout_location_buttons()
+
+func location_map_point(id: String) -> Vector2:
+	var coordinates: Array=Dictionary(Dictionary(_travel.get("orbits",{})).get("planet_orbit",{})).get("position",[0.80,0.28])
+	return Vector2(float(coordinates[0]),float(coordinates[1]))+(Vector2(-0.028,0.075) if id=="satellite_crash" else Vector2(0.028,0.12))
+
+func _layout_location_buttons() -> void:
+	for id in _location_buttons:
+		var button: Button=_location_buttons[id]
+		button.size=Vector2(28,28).max(button.get_combined_minimum_size())
+		button.position=map_to_screen(location_map_point(String(id)))-button.size*0.5

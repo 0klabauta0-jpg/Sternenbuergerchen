@@ -34,6 +34,9 @@ var _sort_selector: OptionButton
 var _roster_return_target: PanelContainer
 var _team_drag_source: PanelContainer
 var _craft_drop_target: PanelContainer
+var _squad_craft_image: TextureRect
+var _squad_craft_selector: OptionButton
+var _squad_craft_caption: Label
 var _inventory_panel: VBoxContainer
 var _equipment_slots: Dictionary = {}
 var _equipment_palette: VBoxContainer
@@ -180,7 +183,7 @@ func _build() -> void:
 	nav.custom_minimum_size.x = 166
 	nav.add_theme_constant_override("separation", 8)
 	body.add_child(nav)
-	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "jobs", "label": "Smart Mobile"}, {"id": "map", "label": "Sternkarte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}]:
+	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "map", "label": "Sternkarte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}, {"id": "jobs", "label": "Smart Mobile"}]:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
@@ -192,12 +195,6 @@ func _build() -> void:
 		if button.disabled:
 			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
-	var fob: Button = _button("F̶O̶B̶ · gesperrt", false)
-	fob.name = "Navigate_fob"
-	fob.disabled = true
-	fob.custom_minimum_size.y = 46
-	fob.tooltip_text = "FOB ist im Einzelspieler vorübergehend gesperrt"
-	nav.add_child(fob)
 	var nav_spacer := Control.new()
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)
@@ -208,6 +205,7 @@ func _build() -> void:
 	refuel.pressed.connect(func(): _act("navigate", {"mode": "services"}))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
+	nav.move_child(_nav.jobs,nav.get_child_count()-1)
 	_workspace = Control.new()
 	_workspace.name = "Workspace"
 	_workspace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -328,6 +326,14 @@ func _build_squad() -> void:
 	var add: Button = _button("Neuer Trupp", false)
 	row.add_child(add)
 	add.pressed.connect(func(): _act("add_fireteam"))
+	_squad_craft_selector=_option(content,"SquadCraftSelector")
+	_squad_craft_selector.item_selected.connect(func(index:int): _act("craft",{"craft_id":String(_squad_craft_selector.get_item_metadata(index))}))
+	_squad_craft_image=_portrait(Vector2(180,110))
+	_squad_craft_image.name="SquadCraftPreview"
+	_squad_craft_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	content.add_child(_squad_craft_image)
+	_squad_craft_caption=_label("",14,MUTED)
+	content.add_child(_squad_craft_caption)
 
 
 func _build_equipment() -> void:
@@ -765,7 +771,7 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	role.tooltip_text = role.text
 	var status: Label = row.status
 	var loadout: Dictionary = Dictionary(unit.get("loadout", {}))
-	status.text = "%s · %s / %s" % [String(unit.get("status", "")), String(loadout.get("armor", "")), String(loadout.get("weapon_1", ""))] if not unit.is_empty() else ""
+	status.text = "%s · %s / %s" % [String(unit.get("status", "")), String(EQUIPMENT_LABELS.get(String(loadout.get("armor","")),"")), String(EQUIPMENT_LABELS.get(String(loadout.get("weapon_1","")),""))] if not unit.is_empty() else ""
 	status.tooltip_text = status.text
 	panel.tooltip_text = "%s · %s" % [String(unit.get("name", "Freier Platz")), status.text]
 	panel.custom_minimum_size.y = 58.0 if unit.is_empty() else 80.0
@@ -817,6 +823,9 @@ func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
 func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_craft_id = String(craft.get("id", ""))
 	_set_options(_craft_selector, Array(snapshot.get("crafts", [])), _craft_id)
+	_set_options(_squad_craft_selector,Array(snapshot.get("crafts",[])),_craft_id)
+	_set_texture(_squad_craft_image,String(craft.get("texture_path","")))
+	_squad_craft_caption.text="%s · Pilot: %s\n%d Kräfte · %s" % [String(craft.get("name","")),String(craft.get("pilot_name","Nicht zugewiesen")),int(craft.get("passenger_count",0)),String(craft.get("status",""))]
 	_set_options(_mission_selector, Array(snapshot.get("missions", [])), String(snapshot.get("mission_id", "")))
 	_set_options(_pilot_selector, Array(craft.get("pilot_options", [])), String(craft.get("pilot_id", "")))
 	_pilot_selector.disabled = bool(craft.get("busy", false)) or craft.is_empty()
@@ -919,23 +928,19 @@ func _layout_columns() -> void:
 	var rects: Dictionary = {}
 	var scene_rect := Rect2()
 	if _mode == "personnel":
-		var roster_width: float = available.x * (0.50 if narrow else 0.48)
+		var roster_width: float = clampf(available.x * 0.25, 280.0, 380.0)
 		var equipment_width: float = available.x - roster_width - gap
 		rects["roster"] = Rect2(0, 0, roster_width, available.y)
 		rects["equipment"] = Rect2(roster_width + gap, 0, equipment_width, available.y)
 	elif _mode in ["base", "jobs", "map", "services"]:
 		pass
-	elif narrow and _mode == "squad":
-		var usable: float = maxf(available.x - gap * 2.0, 0.0)
-		var roster_width: float = usable * 0.32
-		var squad_width: float = usable * 0.30
-		rects["roster"] = Rect2(0, 0, roster_width, available.y)
-		rects["squad"] = Rect2(roster_width + gap, 0, squad_width, available.y)
-		var right_x: float = roster_width + squad_width + gap * 2.0
-		var preview_height: float = minf(220.0, available.y * 0.38)
-		var equipment_height: float = maxf(available.y - preview_height - gap, 0.0)
-		rects["equipment"] = Rect2(right_x, 0, usable * 0.38, equipment_height)
-		scene_rect = Rect2(right_x, equipment_height + gap, usable * 0.38, preview_height)
+	elif _mode == "squad":
+		var roster_width: float = clampf(available.x*0.18,280.0,320.0)
+		var squad_width: float = clampf(available.x*0.20,250.0,320.0)
+		rects["roster"] = Rect2(0,0,roster_width,available.y)
+		rects["squad"] = Rect2(roster_width+gap,0,squad_width,available.y)
+		var right_x: float=roster_width+squad_width+gap*2
+		rects["equipment"] = Rect2(right_x,0,maxf(available.x-right_x,280.0),available.y)
 	else:
 		var start_x: float = 0.0
 		if _mode != "mission":

@@ -36,7 +36,7 @@ func _ready() -> void:
 		_slot_target.add_item(spec[1]); _slot_target.set_item_metadata(_slot_target.item_count-1,spec[0])
 	_equip=Button.new(); _equip.text="Anlegen"; equipment_row.add_child(_equip)
 	_equip.pressed.connect(func(): _wear(_selection,String(_slot_target.get_item_metadata(_slot_target.selected))))
-	var future:=Label.new(); future.text="Helm / Aufsatz: noch keine separaten Ausrüstungsslots"; future.add_theme_font_size_override("font_size",13); future.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; add_child(future)
+	var future:=Label.new(); future.text="Helm / Aufsatz: später verfügbar"; future.add_theme_font_size_override("font_size",13); future.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; add_child(future)
 
 func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array) -> void:
 	_unit_id=String(unit.get("id","")); _craft_id=craft_id
@@ -70,7 +70,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var grid:=GridContainer.new(); grid.columns=2; body.add_child(grid)
 		for item in Dictionary(data.get("items",{})):
 			var source: PanelContainer=SURFACE.new(); source.drag_payload={"type":"inventory_item","source_container_id":id,"item_id":item,"label":String(LABELS.get(item,item))} if allowed else {}; grid.add_child(source)
-			var button:=Button.new(); button.text="%s\n× %d" % [LABELS.get(item,item),int(data.items[item])]; button.custom_minimum_size=Vector2(126,66); button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
+			var button:=Button.new(); button.text="%s\n× %d" % [String(LABELS.get(item,item)).replace("Maschinenpistole","Maschinen-\npistole"),int(data.items[item])]; button.custom_minimum_size=Vector2(126,66); button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)

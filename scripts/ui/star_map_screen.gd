@@ -79,6 +79,7 @@ func _build() -> void:
 	_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_canvas.orbit_requested.connect(_jump)
+	_canvas.location_selected.connect(_select)
 	body.add_child(_canvas)
 	_details = PanelContainer.new()
 	_details.name = "DetailsPanel"
@@ -206,6 +207,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var locations: Dictionary = campaign.get("locations", {})
 	var selected: String = String(campaign.get("selected_location_id", ""))
 	var at_planet := phase == "orbit" and orbit == "planet_orbit"
+	var marker_locations: Dictionary={}
 	var reasons: PackedStringArray = []
 	for id in LOCATION_IDS:
 		var button: Button = _sites[id]
@@ -213,9 +215,11 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		button.text = ("◆  " if selected == id else "◇  ") + String(location.get("name", "Satelliten-Absturzstelle" if id == "satellite_crash" else "Handelsposten"))
 		var reason := _lock_reason(id)
 		button.disabled = not at_planet or not reason.is_empty()
+		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"reason":reason}
 		button.tooltip_text = reason if not reason.is_empty() else ("Zielort auswaehlen. Erst der Anflug laedt die Karte." if at_planet else "Zielorte werden im Planetenorbit waehlbar.")
 		if not reason.is_empty():
 			reasons.append(String(location.get("name", id)) + ": " + reason)
+	_canvas.call("set_location_snapshot",marker_locations)
 	_locks.text = "\n".join(reasons)
 	_locks.visible = not reasons.is_empty()
 	var selected_location: Dictionary = locations.get(selected, {})

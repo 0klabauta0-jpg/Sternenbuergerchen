@@ -68,3 +68,18 @@ Headless-/Strukturtests sichern Callbackrouting, echte IDs, Busy-/Leer-Gates,
 Rostererhalt, Ressourcen und Controlwiederverwendung. Native Fullscreenbilder
 bei 3440x1440, 1920x1080 und 1280x720 pruefen Layout, Eingabe und Crop.
 Gestalterisches Nutzerurteil und menschliche Verstaendlichkeit bleiben eigene Gates.
+
+## Playtestrevision 10.11.2026
+
+Personalspalte begrenzt auf ca. ein Viertel der Arbeitsflaeche (280..380 Designpixel),
+Truppansicht mit wiederverwendetem Referenzinventar und eigener revisionstreuer
+Schiffsvorschau/Schiffsauswahl. Namen/Details, Badges, Sortierung und DnD bleiben.
+FOB entfaellt als Menueknopf, Smart Mobile steht unter den uebrigen Aktionen.
+Kampagnenhilfe laesst sich am Titel ziehen; Detailhilfe respektiert Navigation
+und Abflugaktionen. Ausgeblendete Hilfe bleibt kompakt im Kopfbereich.
+
+Sternkarte: groesserer Glut mit direkt anklickbaren Ortsmarkern. Marker benutzen
+denselben Kameratransform und dieselben Freigaben/Selection-Commands wie die rechte
+Liste. Auswahl allein startet keinen Anflug. Der Schiffsmarker benutzt die
+vorhandene hashgebundene isometrische Cutlass-Projektion aus dem Visualkatalog.
+Keine neuen Referenzorte werden als erfundener Spielinhalt eingefuehrt.

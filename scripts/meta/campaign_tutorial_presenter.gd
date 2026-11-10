@@ -34,6 +34,8 @@ var _signature: String = ""
 var _help_id: String = ""
 var _step_id: String = ""
 var _hints_hidden: bool = false
+var _guidance_dragging := false
+var _guidance_moved := false
 var _pinned: bool = false
 var _seen: Dictionary = {}
 var _render_count: int = 0
@@ -65,6 +67,10 @@ func _build_ui() -> void:
 	_title = Label.new()
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(_title)
+	_title.mouse_filter=Control.MOUSE_FILTER_STOP
+	_title.mouse_default_cursor_shape=Control.CURSOR_DRAG
+	_title.tooltip_text="Titel ziehen, um die Kampagnenhilfe zu verschieben"
+	_title.gui_input.connect(_drag_guidance)
 	_help_button = Button.new()
 	_help_button.name = "CampaignHelpButton"
 	_help_button.text = "?"
@@ -221,11 +227,12 @@ func _dismiss_popup() -> void:
 func _layout() -> void:
 	if _strip == null:
 		return
-	_strip.position = Vector2(210, 88)
-	_strip.size.x = maxf(300, minf(560, get_viewport_rect().size.x - 640))
+	if not _guidance_moved: _strip.position = Vector2(210, 88)
+	_strip.size.x = 300 if _hints_hidden else maxf(300, minf(560, get_viewport_rect().size.x - 640))
+	if _hints_hidden and not _guidance_moved: _strip.position=Vector2(maxf(210,get_viewport_rect().size.x-500),8)
 	_guidance.custom_minimum_size.x = maxf(260, _strip.size.x - 24)
 	_strip.reset_size()
-	for protected in _launch_action_rects():
+	for protected in ([] if _guidance_moved else _launch_action_rects()):
 		if _strip.get_global_rect().intersects(protected):
 			_strip.position = Vector2(210, 88)
 			break
@@ -261,7 +268,7 @@ func _place_popup_host() -> void:
 	height = minf(height, maxf(viewport_size.y - preferred_y - 16, 96))
 	var window_size := Vector2(minf(content_width, viewport_size.x - 32), height)
 	var forbidden: Array[Rect2] = _launch_action_rects()
-	var candidates := [Vector2(16, preferred_y), Vector2(16, 16), Vector2(viewport_size.x - window_size.x - 16, preferred_y), Vector2(16, viewport_size.y - height - 16)]
+	var candidates := [Vector2(_strip.position.x, preferred_y), Vector2(viewport_size.x - window_size.x - 16, preferred_y), Vector2(_strip.position.x, viewport_size.y - height - 16)]
 	for point in candidates:
 		var candidate := Rect2(point, window_size)
 		if not Rect2(Vector2.ZERO, viewport_size).encloses(candidate):
@@ -281,3 +288,12 @@ func _place_popup_host() -> void:
 
 func get_presentation_snapshot() -> Dictionary:
 	return {"step_id": _step_id, "help_id": _help_id, "guidance": _guidance.text if _guidance != null else "", "hints_hidden": _hints_hidden, "popup_visible": _popup.visible if _popup != null else false, "render_count": _render_count, "help_mode": _service.get_help_mode()}
+
+func _drag_guidance(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT:
+		_guidance_dragging=event.pressed
+	elif event is InputEventMouseMotion and _guidance_dragging:
+		_guidance_moved=true
+		var limit: Vector2=get_viewport_rect().size-_strip.size-Vector2(8,8)
+		_strip.position=(_strip.position+event.relative).clamp(Vector2(8,8),limit.max(Vector2(8,8)))
+		if _popup_host.visible: _place_popup_host()
