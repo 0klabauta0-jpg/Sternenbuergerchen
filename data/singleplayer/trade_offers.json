@@ -10,12 +10,39 @@
       "name": "Sanitaetswerkzeug",
       "unit_price": 50,
       "stock": 4,
-      "location_ids": ["trade_outpost"]
+      "location_ids": [
+        "trade_outpost"
+      ]
+    },
+    "mining_tool_supply": {
+      "id": "mining_tool_supply",
+      "item_id": "mining_tool",
+      "name": "Miningwerkzeug",
+      "unit_price": 35,
+      "stock": 4,
+      "location_ids": [
+        "trade_outpost"
+      ]
+    },
+    "salvage_tool_supply": {
+      "id": "salvage_tool_supply",
+      "item_id": "salvage_tool",
+      "name": "Bergungswerkzeug",
+      "unit_price": 50,
+      "stock": 4,
+      "location_ids": [
+        "trade_outpost"
+      ]
     }
   },
   "service_locations": {
-    "homebase": ["refuel"],
-    "trade_outpost": ["trade", "refuel"],
+    "homebase": [
+      "refuel"
+    ],
+    "trade_outpost": [
+      "trade",
+      "refuel"
+    ],
     "satellite_crash": []
   },
   "route_fuel_costs": {

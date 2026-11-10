@@ -1231,6 +1231,9 @@ var _authored_visual_owned_grids: Array[Vector2i] = []
 var _authored_visual_grid_visible: bool = true
 var _map_plane_bounds: Rect2 = Rect2()
 var _map_axial_bounds: Rect2i = Rect2i()
+const REFERENCE_PROPS = preload("res://scripts/terrain/frontier_place_props.gd")
+var _reference_place_enabled := false
+var _show_authoring_markers := true
 var _place_dressing_root: Node3D
 var _place_dressing_signature := ""
 var _place_dressing_grids: Array[Vector2i]=[]
@@ -4073,6 +4076,12 @@ func _add_tile_visual(tile_data) -> void:
 		return
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+	if object_type_id=="resource_wreck_solid": return # Local resource runtime owns the full current-model wreck visual.
+	if _frontier_art_enabled and _reference_place_enabled and REFERENCE_PROPS.supports(object_type_id):
+		var replacement: Node3D=REFERENCE_PROPS.build(_map_root,object_type_id,_frontier_art_profile,int(tile_data.grid_position.x)*1709+int(tile_data.grid_position.y)*73)
+		replacement.position=_grid_to_3d_position(Vector2(tile_data.grid_position),top_y)
+		_asset_model_count+=1
+		return
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	var structure_visual_type_id: String = _resolve_structure_tile_asset_type_id(type_id)
 	if not structure_visual_type_id.is_empty():
@@ -5786,6 +5795,7 @@ func _rebuild_marker_visuals() -> void:
 			_marker_count += 1
 			_compass_marker_count += 1
 			continue
+		if not _show_authoring_markers and String(marker_record.get("placement_context","editor_only"))=="editor_only": continue
 		var marker := MeshInstance3D.new()
 		marker.name = "Marker_%s" % String(marker_id)
 		var mesh := CylinderMesh.new()
@@ -10699,7 +10709,7 @@ func _rebuild_status_visuals() -> void:
 	if _status_root == null or _mission_status_payload.is_empty():
 		return
 	var objective_position_variant = _mission_status_payload.get("objective_position", null)
-	if typeof(objective_position_variant) == TYPE_VECTOR2:
+	if typeof(objective_position_variant) == TYPE_VECTOR2 and not bool(_mission_status_payload.get("interaction_objectives_only", false)):
 		_add_objective_status_visual(Vector2(objective_position_variant))
 	if bool(_mission_status_payload.get("mission_resolved", false)):
 		_add_mission_result_visual(Vector2(objective_position_variant) if typeof(objective_position_variant) == TYPE_VECTOR2 else _get_map_center_world_position())
@@ -10866,6 +10876,9 @@ func _get_valid_route_callout_dictionaries(route_callouts: Array) -> Array:
 
 
 func _add_mission_interaction_object_reaction_visuals() -> void:
+	# Reference places already have physical consoles, ship and resource models.
+	# Generic station debug proxies would cover these with duplicate dark blocks.
+	if _reference_place_enabled: return
 	var reactions: Array = Array(_mission_status_payload.get("mission_interaction_object_reactions", []))
 	for reaction_variant in reactions:
 		if typeof(reaction_variant) != TYPE_DICTIONARY:
@@ -11098,21 +11111,32 @@ func _add_mission_interaction_visual_state_visuals() -> void:
 		if state.has("player_label"): short_label=short_label.replace(" · ","\n")
 		if short_label.is_empty():
 			short_label = state_id
-		_add_marker3d(
-			_status_root,
-			world_position,
-			Color(color.r, color.g, color.b, 0.70),
-			"MissionInteractionStateMarker_%s" % _sanitize_node_name(state_id),
-			MISSION_INTERACTION_VISUAL_STATE_MARKER_RADIUS,
-			MISSION_INTERACTION_VISUAL_STATE_MARKER_HEIGHT,
-			24,
-			MISSION_INTERACTION_VISUAL_STATE_MARKER_SURFACE_OFFSET
-		)
+		var reference_place: bool=_reference_place_enabled
+		if reference_place:
+			short_label=String(state.get("display_name",short_label))
+			if String(state.get("status",""))=="complete": short_label+=" · Erledigt"
+			elif String(state.get("status",""))=="in_progress": short_label+=" · %d%%" % roundi(float(state.get("progress",0))*100)
+			var ring:=MeshInstance3D.new(); ring.name="MissionInteractionStateMarker_"+_sanitize_node_name(state_id)
+			var mesh:=TorusMesh.new(); mesh.inner_radius=.43; mesh.outer_radius=.46; mesh.rings=24; mesh.ring_segments=6
+			ring.mesh=mesh; ring.material_override=_make_unshaded_material(Color(color.r,color.g,color.b,.55))
+			ring.position=_world_to_surface_3d_position(world_position,.04); _status_root.add_child(ring)
+		else:
+			_add_marker3d(
+				_status_root,
+				world_position,
+				Color(color.r, color.g, color.b, 0.70),
+				"MissionInteractionStateMarker_%s" % _sanitize_node_name(state_id),
+				MISSION_INTERACTION_VISUAL_STATE_MARKER_RADIUS,
+				MISSION_INTERACTION_VISUAL_STATE_MARKER_HEIGHT,
+				24,
+				MISSION_INTERACTION_VISUAL_STATE_MARKER_SURFACE_OFFSET
+			)
 		var label_offset_world: Vector2 = _get_mission_interaction_visual_state_label_offset_world(overlap_index, overlap_count)
 		var label_world_position: Vector2 = world_position + label_offset_world
 		var label_height: float = MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT + (float(overlap_index) * MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT_STEP)
-		_add_station_route_label_backplate(_status_root, label_world_position, "MissionInteractionStateLabelBackplate_%s" % _sanitize_node_name(state_id), MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID, 0.68)
-		_mission_interaction_visual_state_label_backplate_count += 1
+		if not reference_place:
+			_add_station_route_label_backplate(_status_root, label_world_position, "MissionInteractionStateLabelBackplate_%s" % _sanitize_node_name(state_id), MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID, 0.68)
+			_mission_interaction_visual_state_label_backplate_count += 1
 		var label: Label3D = _add_label3d(
 			_status_root,
 			short_label,
@@ -11201,7 +11225,7 @@ func _apply_mission_interaction_visual_state_label_style(label: Label3D) -> void
 	label.pixel_size = MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE
 	label.width=180.0
 	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	label.outline_size = MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE
+	label.outline_size = 3 if _reference_place_enabled else MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.96)
 	label.set_meta("mission_interaction_visual_state_style_id", MISSION_INTERACTION_VISUAL_STATE_STYLE_ID)
 	label.set_meta("mission_interaction_visual_state_backplate_style_id", MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID)
@@ -15370,6 +15394,7 @@ func _clear_children(node: Node) -> void:
 
 func _sync_place_reference_dressing() -> void:
 	var presentation: Dictionary=_terrain_map_data.call("get_place_presentation") if _terrain_map_data!=null and _terrain_map_data.has_method("get_place_presentation") else {}
+	_reference_place_enabled=not presentation.is_empty()
 	var signature:=JSON.stringify(presentation)
 	for grid in _place_dressing_grids:
 		var owner: WeakRef=_external_terrain_object_visuals.get(grid)
@@ -15388,3 +15413,8 @@ func _sync_place_reference_dressing() -> void:
 		if String(tile.object_type_id)=="frontier_scene_solid":
 			_external_terrain_object_visuals[tile.grid_position]=weakref(_place_dressing_root)
 			_place_dressing_grids.append(tile.grid_position)
+
+func set_authoring_markers_visible(enabled: bool) -> void:
+	if _show_authoring_markers==enabled: return
+	_show_authoring_markers=enabled
+	_rebuild_marker_visuals()

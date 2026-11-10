@@ -173,5 +173,6 @@ static func _build_summary(entries: Array, next_interaction_id: String) -> Strin
 static func _player_label(interaction: Dictionary, status: String, progress: float) -> String:
 	var title := String(interaction.get("display_name", interaction.get("interaction_id", "Interaktion")))
 	var state: String = {"complete":"Erledigt", "usable":"Bereit", "blocked":"Noch gesperrt", "out_of_range":"Trupp heranfuehren", "interrupted":"Unterbrochen"}.get(status, "Ziel auswaehlen")
+	if status == "blocked" and not String(interaction.get("blocked_reason", "")).is_empty(): state=String(interaction.blocked_reason)
 	if status == "in_progress": state = "Laeuft: %d %%" % roundi(progress * 100)
 	return title + " · " + state

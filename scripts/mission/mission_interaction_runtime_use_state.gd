@@ -110,6 +110,7 @@ static func _build_status_reason(status: String, binding: Dictionary, has_marker
 		STATUS_COMPLETE:
 			return "interaction_complete"
 		STATUS_BLOCKED:
+			if not String(binding.get("blocked_reason", "")).is_empty(): return String(binding.blocked_reason)
 			var blocked_by_step_id: String = String(binding.get("blocked_by_step_id", "")).strip_edges()
 			return "blocked_by_%s" % blocked_by_step_id if not blocked_by_step_id.is_empty() else "blocked"
 		STATUS_INTERRUPTED:

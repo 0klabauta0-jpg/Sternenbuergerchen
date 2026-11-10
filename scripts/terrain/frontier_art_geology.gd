@@ -315,3 +315,9 @@ func _triangle(surface: SurfaceTool,a: Vector3,b: Vector3,c: Vector3) -> void:
 func _quad(surface: SurfaceTool,a: Vector3,b: Vector3,c: Vector3,d: Vector3) -> void:
 	_triangle(surface,a,b,c)
 	_triangle(surface,a,c,d)
+
+func build_tile_rock(profile: RefCounted, seed_value: int) -> void:
+	_materials.clear()
+	for color in ["aa583d","ae5c3e","b46141","bb6846","c1724d"]: _materials.append(profile.material_for(Color(color),true))
+	_sediment_material=profile.material_for(profile.surface_color("ground"))
+	_add_mesa("ErodedFragment",Vector2.ZERO,Vector3(1.2,1.1,1.0),seed_value)

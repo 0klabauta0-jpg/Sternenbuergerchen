@@ -802,6 +802,10 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 	var complete: bool = bool(payload.get("complete", false)) or (duration_seconds <= 0.0 and bool(payload.get("can_complete_zero_duration", false))) or (duration_seconds > 0.0 and hold_seconds + 0.001 >= duration_seconds)
 	if complete and (interaction_id == "ship_return" or String(payload.get("step_id", "")) == "return_to_ship") and not _has_actual_campaign_return_craft():
 		return {"accepted": false, "complete": false, "reason": "return_craft_not_at_authored_pad"}
+	var resources: Node=get_parent().get_node_or_null("LocationResources")
+	if resources!=null:
+		var gate: Dictionary=resources.call("accept_progress",payload,complete)
+		if not bool(gate.get("accepted",false)): return gate
 	var progress: float = 1.0 if complete else clampf(float(payload.get("progress", 0.0)), 0.0, 1.0)
 	if duration_seconds > 0.0:
 		progress = 1.0 if complete else clampf(hold_seconds / duration_seconds, 0.0, 1.0)

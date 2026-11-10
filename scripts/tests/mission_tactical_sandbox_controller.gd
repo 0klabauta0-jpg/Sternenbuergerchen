@@ -15879,6 +15879,8 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 			payload["objective_contested"] = bool(objective_status.call("is_contested"))
 	if payload.is_empty():
 		return
+	# Peaceful campaign locations use physical interaction targets, not capture zones.
+	payload["interaction_objectives_only"] = _should_keep_campaign_dropship_landed()
 	if _should_sync_frontier_probe_route_callouts():
 		var route_callouts: Array = _build_frontier_probe_mini_scenario_route_callouts(_build_frontier_probe_mini_scenario_route_beats())
 		if not route_callouts.is_empty():
@@ -29390,7 +29392,9 @@ func get_mission_interaction_point_binding_snapshot() -> Dictionary:
 	var runtime_context: Dictionary = {
 		"scenario_gate_snapshot": _get_mission_scenario_runtime_gate_snapshot_for_readability(),
 	}
-	return Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("load_snapshot_from_file", scenario_path, terrain_map_data, runtime_context)).duplicate(true)
+	var snapshot: Dictionary=Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("load_snapshot_from_file", scenario_path, terrain_map_data, runtime_context)).duplicate(true)
+	var resources: Node=get_parent().get_node_or_null("LocationResources")
+	return resources.call("project_bindings",snapshot) if resources!=null else snapshot
 
 
 func get_mission_interaction_runtime_use_state_snapshot() -> Dictionary:

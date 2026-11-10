@@ -700,7 +700,10 @@ func refresh() -> void:
 			var selected_id:=String(Dictionary(snapshot.get("selected_craft",{})).get("id",""))
 			for ship in Array(singleplayer.get("crafts",[])):
 				if String(ship.get("craft_id",""))==selected_id and bool(ship.get("visible_on_pad",false)): accessible.append("craft:"+selected_id)
-		_inventory_panel.update_snapshot(inventory,focused,String(Dictionary(snapshot.get("selected_craft",{})).get("id","")),accessible)
+		var adapter: Node=_owner_screen().get_parent().get("_singleplayer_runtime")
+		var access_context: Dictionary=adapter.call("get_inventory_context",_focused_id,String(Dictionary(snapshot.get("selected_craft",{})).get("id",""))) if adapter!=null else {}
+		accessible=Array(access_context.get("accessible_containers",[]))
+		_inventory_panel.update_snapshot(inventory,focused,String(Dictionary(snapshot.get("selected_craft",{})).get("id","")),accessible,bool(access_context.get("equipment_allowed",true)))
 		var rest_person: Dictionary={}
 		var owner: Node=_screen.get_ref().call("get_base_personnel_runtime") if _screen!=null and _screen.get_ref()!=null else null
 		if owner!=null:

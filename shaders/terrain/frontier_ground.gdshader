@@ -100,10 +100,10 @@ void fragment() {
 		float crust = smoothstep(0.55, 0.82, broad_patch(p * 9.0 + vec2(stroke * 0.45, 0.0)));
 		float silt = deposit * smoothstep(0.28, 0.70, stroke);
 		pigment = mix(pigment, base_color.rgb * vec3(1.40, 1.29, 1.12), silt * 0.50);
-		value *= 1.0 - deposit * crust * (paved_surface ? 0.025 : 0.06);
+		value *= 1.0 - deposit * crust * (paved_surface && !surface_blending ? 0.025 : 0.06);
 		value *= mix(0.94, 1.04, stroke);
 	}
-	if (paved_surface) {
+	if (paved_surface && !surface_blending) {
 		if (authored_paving_wear) {
 			float wheels=max(wheel_mark(ground_world_position.xz,wear_hall_span.xy+vec2(-0.28,0.0),wear_hall_span.zw+vec2(-0.28,0.0)),wheel_mark(ground_world_position.xz,wear_hall_span.xy+vec2(0.28,0.0),wear_hall_span.zw+vec2(0.28,0.0)));
 			value*=1.0-wheels*0.18;
@@ -139,7 +139,31 @@ void fragment() {
 		float road_wear = broad_patch(p*4.0)*0.16;
 		earth = mix(earth,vec3(0.46,0.47,0.39),road*(1.0-road_wear));
 		earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
+		// Several scales of world-space sand, broken crust and sparse gravel.
+		// Anti-aliased grains stay quiet in overview, rather than stippling every hex.
+		float gravel_zone=smoothstep(0.48,0.76,broad_patch(p*0.53+vec2(4.3,7.1)));
+		vec2 grain_cell=floor(p*7.0);
+		vec2 grain_local=fract(p*7.0)-0.5;
+		vec2 grain_offset=(vec2(patch_hash(grain_cell),patch_hash(grain_cell+vec2(23.0,71.0)))-0.5)*0.42;
+		float grain_distance=length(grain_local-grain_offset);
+		float grain_edge=max(fwidth(grain_distance)*1.3,0.035);
+		float pebble=(1.0-smoothstep(0.15-grain_edge,0.15+grain_edge,grain_distance))*gravel_zone;
+		float crust_zone=smoothstep(0.45,0.72,broad_patch(p*0.85+vec2(6.7,2.1)))*(1.0-road);
+		float crack_field=abs(broad_patch(p*2.6+warp)-0.51);
+		float fissure=(1.0-smoothstep(0.018,0.045,crack_field))*crust_zone;
+		float shoulder=(1.0-smoothstep(0.025,0.11,abs(weights.r-0.62)))*broad_patch(p*3.0);
+		earth*=1.0-fissure*0.14-shoulder*0.09;
+		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*0.38);
 		pigment = pow(earth,vec3(2.2));
+		float relief=pebble*0.012-fissure*0.006+broad_patch(p*16.0)*0.003;
+		vec3 surface_dx=dFdx(ground_world_position);
+		vec3 surface_dy=dFdy(ground_world_position);
+		vec3 cross_x=cross(surface_dy,ground_world_normal);
+		vec3 cross_y=cross(ground_world_normal,surface_dx);
+		float determinant=dot(surface_dx,cross_x);
+		vec3 gradient=(dFdx(relief)*cross_x+dFdy(relief)*cross_y)/max(abs(determinant),0.000001)*sign(determinant);
+		vec3 detailed_normal=normalize(ground_world_normal-gradient*0.65);
+		NORMAL=normalize((VIEW_MATRIX*vec4(detailed_normal,0.0)).xyz);
 	}
 	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;

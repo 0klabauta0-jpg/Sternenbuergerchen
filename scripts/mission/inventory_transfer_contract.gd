@@ -1,9 +1,9 @@
 extends RefCounted
 ## Item identities and pure bounded-container validation; no gameplay mutation.
 const LOADOUT = preload("res://scripts/command/loadout_contract.gd")
-const START_STOCK := {"armor_light":2,"armor_medium":2,"armor_heavy":2,"smg":2,"rifle":2,"medictool":1}
+const START_STOCK := {"armor_light":2,"armor_medium":2,"armor_heavy":2,"smg":2,"rifle":2,"medictool":1,"mining_tool":1,"salvage_tool":1}
 static func known(item: String) -> bool:
-	return item in ["armor_light","armor_medium","armor_heavy","ore","salvage"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
+	return item in ["armor_light","armor_medium","armor_heavy","ore","salvage","mining_tool","salvage_tool"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
 static func compatible(item: String, slot: String) -> bool:
 	return item in ["armor_light","armor_medium","armor_heavy"] if slot=="armor" else (slot in ["weapon_1","weapon_2"] and LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item))
 static func item_from_slot(slot: String, value: String) -> String:

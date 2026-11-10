@@ -527,6 +527,8 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
+	var field:=_field_inventory_context(unit_id,craft_id)
+	if not field.is_empty(): return field
 	var snapshot: Dictionary = _screen.call("get_operations_snapshot",false)
 	var unit: Dictionary = {}
 	for entry in Array(snapshot.get("roster",[])):
@@ -546,3 +548,22 @@ func get_world_checkpoint_guard() -> Dictionary:
 	if not _travel.all_grounded(): return _reject("world_active","Speichern gesperrt: mindestens ein Schiff ist noch unterwegs oder an einem anderen Ort")
 	if Array(_flow.get("_homebase_aircraft_definitions")).size()!=1: return _reject("fleet_checkpoint_unsupported","Speichern gesperrt: Mehrschiff-Weltcheckpoint ist noch nicht verfuegbar")
 	return {"ok":true}
+
+func _field_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
+	var mission: Node=_flow.call("get_mission_for_craft",craft_id)
+	if mission==null: return {}
+	var controller: Node=mission.get_node("TacticalController")
+	if not Dictionary(controller.get("_deployed_unit_ids")).has(unit_id): return {}
+	var card: Dictionary=controller.call("_find_mission_dropship_card_entry",craft_id)
+	var team:=String(controller.call("_get_deployed_unit_fireteam_id",unit_id))
+	if not Array(card.get("queued_fireteam_ids",[])).has(team) and not Array(card.get("boarded_fireteam_ids",[])).has(team) and not Array(card.get("embarked_unit_ids",[])).has(unit_id):
+		# Once disembarked, the original card retains its assigned fireteams.
+		var members: Array=Array(_flow.call("_find_mission_drop_card_in_planning_state",craft_id).get("embarked_unit_ids",[]))
+		if not members.has(unit_id): return {}
+	var unit: Node=controller.call("_find_friendly_unit_by_id",unit_id)
+	if unit==null or (unit.has_method("get_vital_state") and unit.get_vital_state()!="fit"): return {}
+	var access: Array=["unit:"+unit_id+":backpack"]
+	if controller.call("_is_parked_campaign_dropship",craft_id) and unit.position.distance_to(controller.call("_campaign_landed_craft_position",craft_id))<=128.0: access.append("craft:"+craft_id)
+	return {"accessible_containers":access,"unit_id":unit_id,"equipment_allowed":false}
+func get_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
+	return _inventory_context(unit_id,craft_id).duplicate(true)

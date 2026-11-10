@@ -42,9 +42,9 @@ func _ready() -> void:
 	_equip.pressed.connect(func(): _wear(_selection,String(_slot_target.get_item_metadata(_slot_target.selected))))
 	var future:=Label.new(); future.text="Helm / Aufsatz: später verfügbar"; future.add_theme_font_size_override("font_size",13); future.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; add_child(future)
 
-func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array) -> void:
+func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true) -> void:
 	_unit_id=String(unit.get("id","")); _craft_id=craft_id
-	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible])
+	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible,equipment_allowed])
 	if signature==_signature: return
 	_signature=signature
 	for child in _slots.get_children(): child.free()
@@ -78,7 +78,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
-	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty()
+	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty() or not equipment_allowed
 
 func update_rest_snapshot(person: Dictionary) -> void:
 	_rest.visible=not person.is_empty()

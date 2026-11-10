@@ -1,0 +1,22 @@
+{
+  "status": "task-source candidate; user style acceptance open",
+  "references": "docs/reports/assets/playtest-2026-11-10/manifest.json",
+  "sha256": {
+    "shaders/terrain/frontier_ground.gdshader": "b60fef78ab33566425a2b1a31975245942109e733c47000f4859adc73f6f7ce3",
+    "scripts/terrain/frontier_place_props.gd": "02e19fad8aae2139011a8fb0b88c9d5dc3d852155bff0db2054a06cdc85b9384",
+    "scripts/terrain/location_resource_visuals.gd": "2e01151e1a10ab465ea79220f1ab8a0496486d248151e5ea766e695682df8ce8",
+    "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+  },
+  "camera": {
+    "satellite_trade": 22,
+    "renderer": "D3D12 Forward+",
+    "resolution": "1920x1080"
+  },
+  "unchanged_geometry": "curated Cutlass refinement03 reused for wreck; tilted and partially buried",
+  "geometry_sources": [
+    "scripts/terrain/frontier_place_props.gd",
+    "scripts/terrain/location_resource_visuals.gd"
+  ],
+  "prior_native": "C:/dev/SternenBuergerchen/output/playtest_20261110/native-world-before-dressing",
+  "current_native": "output/playtest_20261110/native-world and native-resources"
+}

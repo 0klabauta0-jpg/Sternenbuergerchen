@@ -4,6 +4,7 @@ extends RefCounted
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
 var _inventory: Dictionary = {}
+var _location_resources: Dictionary = {}
 
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
 
@@ -35,6 +36,11 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_credits = int(data.initial_credits)
 	_item_quantities.clear()
 	_inventory.clear()
+	_location_resources.clear()
+	var resources: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/location_resources.json"))
+	for place in resources:
+		var owner=load("res://scripts/core/location_runtime_state.gd").new()
+		owner.configure(resources[place]); _location_resources[place]=owner
 	_fuel_by_craft_id.clear()
 	_stock_by_offer_id.clear()
 	_requests.clear()
@@ -74,6 +80,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 	var payload: Dictionary = command.payload
 	var result: Dictionary
 	match String(command.operation):
+		"collect_resource": result = _collect_resource(payload, authority_context)
 		"inventory_transfer": result = _inventory_transfer(payload, authority_context)
 		"inventory_equip": result = _inventory_equip(payload, authority_context)
 		"buy": result = _buy(payload, authority_context)
@@ -203,7 +210,7 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true)}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources()}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -214,7 +221,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for field in ["definitions", "item_quantities", "fuel_by_craft_id", "stock_by_offer_id", "requests", "reward_receipts"]:
 		if typeof(data.get(field)) != TYPE_DICTIONARY:
 			return _reject("invalid_supply_state", "Versorgungsfelder fehlen")
-	if JSON.stringify(data.definitions, "", true) != JSON.stringify(fresh._definitions, "", true):
+	if not _compatible_definitions(data.definitions, fresh._definitions):
 		return _reject("stale_supply_definitions", "Versorgungsdefinition geaendert")
 	var items: Array = []
 	for offer in fresh._definitions.offers.values():
@@ -222,10 +229,10 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for item_id in data.item_quantities:
 		if not (items.has(String(item_id)) or INVENTORY.known(String(item_id))) or not _valid_nonnegative_integer(data.item_quantities[item_id]):
 			return _reject("invalid_inventory", "Inventar ungueltig")
-	if data.stock_by_offer_id.size() != fresh._stock_by_offer_id.size():
+	if data.stock_by_offer_id.size() != Dictionary(data.definitions.get("offers",{})).size():
 		return _reject("invalid_stock", "Angebotsbestand ungueltig")
-	for offer_id in fresh._stock_by_offer_id:
-		if not _valid_nonnegative_integer(data.stock_by_offer_id.get(offer_id)) or float(data.stock_by_offer_id[offer_id]) > float(fresh._stock_by_offer_id[offer_id]):
+	for offer_id in data.stock_by_offer_id:
+		if not Dictionary(data.definitions.get("offers",{})).has(offer_id) or not _valid_nonnegative_integer(data.stock_by_offer_id.get(offer_id)) or float(data.stock_by_offer_id[offer_id]) > float(fresh._stock_by_offer_id[offer_id]):
 			return _reject("invalid_stock", "Angebotsbestand ungueltig")
 	for craft_id in data.fuel_by_craft_id:
 		if typeof(craft_id) != TYPE_STRING or String(craft_id).is_empty() or not _valid_nonnegative_number(data.fuel_by_craft_id[craft_id]) or float(data.fuel_by_craft_id[craft_id]) > float(fresh._definitions.fuel_capacity):
@@ -255,13 +262,19 @@ func restore_state(data: Dictionary) -> Dictionary:
 			return _reject("invalid_inventory", "Container ungueltig")
 	if containers.has("base:homebase") and Dictionary(containers["base:homebase"].items)!=Dictionary(data.item_quantities):
 		return _reject("invalid_inventory", "Basislager widerspricht Kaufbestand")
+	var resources: Variant=data.get("location_resources",{})
+	if typeof(resources)!=TYPE_DICTIONARY: return _reject("invalid_resources","Ortsressourcen ungueltig")
+	for place in resources:
+		if not fresh._location_resources.has(place) or typeof(resources[place])!=TYPE_DICTIONARY or not fresh._location_resources[place].restore_state(resources[place]): return _reject("invalid_resources","Ortsressourcen ungueltig")
+	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
 	_item_quantities = data.item_quantities.duplicate(true)
 	_inventory = containers.duplicate(true)
 	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
 	_fuel_by_craft_id = data.fuel_by_craft_id.duplicate(true)
-	_stock_by_offer_id = data.stock_by_offer_id.duplicate(true)
+	_stock_by_offer_id = fresh._stock_by_offer_id.duplicate(true)
+	_stock_by_offer_id.merge(data.stock_by_offer_id,true)
 	for item_id in _item_quantities:
 		_item_quantities[item_id] = int(_item_quantities[item_id])
 	for offer_id in _stock_by_offer_id:
@@ -306,6 +319,7 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	return {"ok":true,"message":"Gegenstand verschoben"}
 
 func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if context.get("equipment_allowed",true)!=true: return _reject("equipment_in_field","Ausrüstung an der Basis wechseln")
 	var source := String(payload.get("source_container_id",""))
 	var slot := String(payload.get("slot",""))
 	var item := String(payload.get("item_id",""))
@@ -326,3 +340,40 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
 	_revision+=1
 	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}
+
+func get_location_resources(location_id: String) -> RefCounted:
+	return _location_resources.get(location_id)
+func _export_resources() -> Dictionary:
+	var data: Dictionary={}
+	for place in _location_resources: data[place]=_location_resources[place].export_state()
+	return data
+func preview_resource_collection(location_id: String,site_id: String,unit_id: String) -> Dictionary:
+	var owner: RefCounted=get_location_resources(location_id)
+	var site: Dictionary=owner.get_site_snapshot(site_id) if owner!=null else {}
+	if site.is_empty() or not bool(site.get("discovered",false)): return _reject("undiscovered","Noch nicht entdeckt")
+	if int(site.remaining)<=0: return _reject("depleted","Bereits geborgen")
+	var bag: Dictionary=_inventory.get("unit:"+unit_id+":backpack",{})
+	if int(Dictionary(bag.get("items",{})).get(site.required_tool,0))<1: return _reject("tool_missing","Miningwerkzeug fehlt" if site.required_tool=="mining_tool" else "Bergungswerkzeug fehlt")
+	if INVENTORY.used(bag.items)+int(site.remaining)>int(bag.capacity): return _reject("container_full","Rucksack voll – am Schiff umladen")
+	return {"ok":true}
+func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
+	var place:=String(payload.get("location_id","")); var id:=String(payload.get("site_id","")); var unit:=String(payload.get("unit_id",""))
+	if context.get("resource_authorized")!=true or context.get("unit_id")!=unit or context.get("location_id")!=place or context.get("use_complete")!=true or context.get("within_radius")!=true: return _reject("resource_authority","Entnahme muss lokal abgeschlossen werden")
+	var gate:=preview_resource_collection(place,id,unit)
+	if not gate.get("ok",false): return gate
+	var owner: RefCounted=get_location_resources(place); var site: Dictionary=owner.get_site_snapshot(id)
+	var bag: Dictionary=_inventory["unit:"+unit+":backpack"].items
+	bag[site.item_id]=int(bag.get(site.item_id,0))+int(site.remaining)
+	var quantity:=int(site.remaining); owner.consume(id); _revision+=1
+	return {"ok":true,"item_id":site.item_id,"quantity":quantity,"message":"Geborgen: %d" % quantity}
+
+func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
+	var left:=saved.duplicate(true); var right:=current.duplicate(true)
+	var old_offers: Variant=left.get("offers")
+	if typeof(old_offers)!=TYPE_DICTIONARY: return false
+	for id in Dictionary(right.get("offers",{})):
+		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply"]: return false
+	for id in old_offers:
+		if not Dictionary(right.get("offers",{})).has(id) or JSON.stringify(old_offers[id],"",true)!=JSON.stringify(right.offers[id],"",true): return false
+	left.erase("offers"); right.erase("offers")
+	return JSON.stringify(left,"",true)==JSON.stringify(right,"",true)

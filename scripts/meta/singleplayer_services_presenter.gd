@@ -17,6 +17,7 @@ var _credits: Label
 var _items: Label
 var _craft_selector: OptionButton
 var _fuel: Label
+var _tool_buttons: Dictionary={}
 var _buy: Button
 var _amount: SpinBox
 var _refuel: Button
@@ -67,6 +68,9 @@ func _build() -> void:
 	_buy = _button("Sanitätswerkzeug kaufen", "BuySupply")
 	content.add_child(_buy)
 	_buy.pressed.connect(func(): _submit("buy"))
+	for id in ["mining_tool_supply","salvage_tool_supply"]:
+		var tool:=_button("",id); content.add_child(tool); _tool_buttons[id]=tool
+		tool.pressed.connect(func(): _submit("buy",id))
 	var fuel_row := HBoxContainer.new()
 	content.add_child(fuel_row)
 	var amount_label: Label = _label("Tankmenge", 14)
@@ -155,6 +159,14 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		buy_reason = "Kredite reichen für den Kauf nicht"
 	_buy.disabled = not buy_reason.is_empty() or _pending.has("buy")
 	_buy.tooltip_text = buy_reason if not buy_reason.is_empty() else "Ein Sanitätswerkzeug kaufen"
+	for id in _tool_buttons:
+		var tool_offer: Dictionary=Dictionary(supply.get("offers",{})).get(id,{})
+		var tool_stock:=int(Dictionary(supply.get("stock_by_offer_id",{})).get(id,0))
+		var tool_price:=int(tool_offer.get("unit_price",0))
+		var button: Button=_tool_buttons[id]
+		button.text="%s · %d Cr · %d verfügbar" % [tool_offer.get("name",id),tool_price,tool_stock]
+		button.disabled=not available or not Array(tool_offer.get("location_ids",[])).has(location) or tool_stock<1 or int(supply.get("credits",0))<tool_price or _pending.has("buy")
+		button.tooltip_text="Werkzeug wird in dieses Schiff geliefert" if not button.disabled else "Schiff muss am Handelsservice sein; Credits und Bestand erforderlich"
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
 	_refuel.text = "+%s Treibstoff · %s Cr" % [str(amount), str(cost)]
@@ -199,10 +211,10 @@ func set_selected_craft(craft_id: String) -> bool:
 			return true
 	return false
 
-func _submit(operation: String) -> void:
+func _submit(operation: String, offer_id: String=OFFER_ID) -> void:
 	if _pending.has(operation):
 		return
-	var button: Button = _buy if operation == "buy" else (_refuel if operation == "refuel" else _return)
+	var button: Button = (_buy if offer_id==OFFER_ID else _tool_buttons[offer_id]) if operation == "buy" else (_refuel if operation == "refuel" else _return)
 	if button.disabled or not _command_handler.is_valid():
 		_feedback.text = button.tooltip_text
 		return
@@ -210,7 +222,7 @@ func _submit(operation: String) -> void:
 	var request_id: String = "services:%d:%d" % [get_instance_id(), _sequence]
 	var payload: Dictionary = {"craft_id": _selected_craft_id, "request_id": request_id}
 	if operation == "buy":
-		payload["offer_id"] = OFFER_ID
+		payload["offer_id"] = offer_id
 		payload["quantity"] = 1
 	elif operation == "refuel":
 		payload["amount"] = _amount.value

@@ -4244,6 +4244,11 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		if mission_setup.has_method("apply_runtime_selection_contract"):
 			mission_setup.call("apply_runtime_selection_contract")
 
+	if not preview_mode and not location_id.is_empty() and mission_instance.get_node_or_null("LocationResources")==null:
+		var resources: Node=load("res://scripts/core/location_resource_runtime.gd").new()
+		resources.name="LocationResources"; mission_instance.add_child(resources)
+		resources.configure(_singleplayer_runtime.get("_supply"),location_id)
+
 	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
 	if tactical_controller != null:
 		tactical_controller.set("preview_mode", preview_mode)

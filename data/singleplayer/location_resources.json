@@ -1,0 +1,34 @@
+{
+  "satellite_crash": {
+    "iron_ridge_01": {
+      "name": "Erzader abbauen",
+      "item_id": "ore",
+      "quantity": 4,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        -8,
+        14
+      ],
+      "kind": "ore",
+      "id": "iron_ridge_01"
+    },
+    "freighter_wreck_01": {
+      "name": "Transporterwrack bergen",
+      "item_id": "salvage",
+      "quantity": 8,
+      "required_tool": "salvage_tool",
+      "duration_seconds": 6.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        31,
+        15
+      ],
+      "kind": "wreck",
+      "id": "freighter_wreck_01"
+    }
+  }
+}

@@ -208,6 +208,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
 			continue
+		if use_2_5d_primary_view: _hide_legacy_unit_visual_children(unit)
 
 		var unit_id: String = String(unit.call("get_unit_id"))
 		var unit_team_id: String = ""
@@ -1040,6 +1041,7 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 	if not view.is_inside_tree():
 		call_deferred("_configure_primary_3d_view", view, unit_nodes)
 		return
+	if view.has_method("set_authoring_markers_visible"): view.call("set_authoring_markers_visible",false)
 	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
 		view.call("configure_from_map", _loaded_terrain_map_data)
 	if view.has_method("set_unit_nodes"):
