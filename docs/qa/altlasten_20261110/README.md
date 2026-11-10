@@ -62,7 +62,33 @@ Diese drei push_error-Ausgaben sind Testassertionen, keine verschwiegenen
 Runtimefehler; siehe baseline_failures.json. Alle60 uebrigen Assertions,
 einschliesslich Navigation und Legacy-Abgrenzung, bestehen.
 
+## 4. Diagnosegrenze
+Der803-Zeilen-Reportbuilder ist ein stateless Helper unter
+scripts/mission/diagnostics. Der oeffentliche Controllergetter delegiert mit
+expliziten Konstanten; alle147 Quellmethoden laufen am urspruenglichen
+Controller, auch in Probe-Subklassen. Kein neuer State, Cache oder Live-HUD-Pfad.
+Die eingefrorene alte Methode liegt ausschliesslich im Testoracle. Neue
+Verifier und dieses Oracle sind exakt vom Runtimeexport ausgeschlossen.
+
+Vollstaendige typed-/Variantbyte-Paritaet ueber439 Felder in fuenf Faellen:
+42/0 vor und nach dem Schnitt; Aufrufreihenfolge und Runtimeowner unveraendert.
+Live-Projektion163/0, TASK1043 14/0, TASK1153 40/0, TASK1174 17/0,
+Exportvertrag TASK51127/0, TASK100870/0 und TASK104294/0.
+
+67 alte Source-Guards suchen116 verschobene Reportkeys jetzt im Helper; API-
+und Preloadassertionen bleiben am Controller. Fuer65 Dateien wurde unabhaengig
+bytegleiche Rueckfuehrbarkeit nach Entfernung genau dieses mechanischen
+Schnitts geprueft. TASK1008/1042 behalten ihre Assertions, verwenden fuer den
+vollstaendigen Report aber den echten Missionscontroller statt eines
+freistehenden Nodes ohne Parent. Sie laufen dadurch ohne Scriptfehler.
+Inventar: diagnostic_guard_migration.json. Nicht alle67 historischen
+Szenariofixtures wurden erneut abgespielt; ihre116 Strukturguards und die
+vollstaendige aktuelle Reportparitaet sind separat nachgewiesen.
+
+Zusaetzliche LOS-Reviewfaelle pruefen WeakRef-Ablauf sowie Runtime-
+Zielausschluss/Same-Cell gegen Preview-Endpoint: aktuell28/0.
+
 ## Fortschritt
-4 Diagnostik, 5 Portraetexport folgen seriell.
+5 Portraetexport folgt.
 Keine Mainintegration oder neue Release-EXE. Allgemeine Performance und native
 Gestaltungsabnahme sind kein Ergebnis dieser Komponentenregressionen.

@@ -48,6 +48,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_977 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_977 HUD wiring service exists")
 	_assert(task_text.contains("TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring"), "Task names TASK_977")
@@ -71,7 +72,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT"), "Controller preloads TASK_977 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_extension_snapshot"), "Controller exposes TASK_976 snapshot")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot"), "Controller exposes TASK_977 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_hud_wiring_line"), "Command feedback exports TASK_977 line")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_hud_wiring_line"), "Command feedback exports TASK_977 line")
 
 
 func _test_missing_source_blocks() -> void:

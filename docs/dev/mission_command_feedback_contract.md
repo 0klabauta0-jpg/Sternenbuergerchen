@@ -32,6 +32,17 @@ TASK_1144 benennt die sichtbaren Mission-HUD-Flaechen `#16 BEFEHLE`, `#17 AUSGEW
 ## Snapshot-Regel
 `get_command_feedback_snapshot()` ist der Headless-Pruefpunkt fuer Auswahl, #16/#17/#18-Texte, geplante/visualisierte Waypoints und AreaOrders. `TerrainMap3DView.get_render_snapshot()` spiegelt die selektierten Fireteams ueber `order_selected_fireteam_ids` und den aktiven Order-Phase-Index.
 
+Der vollstaendige Debug-/Reportbuilder liegt in
+`scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd`. Der
+Controller behaelt seine oeffentliche Methode und uebergibt die bestehenden
+Konstanten explizit; alle Quellen werden weiterhin am urspruenglichen Controller
+gelesen, einschliesslich geerbter Probe-Overrides. Der Helper speichert keinen
+State, aendert keine Aufrufreihenfolge und wird nicht an den Live-HUD-Refresh
+gebunden. Die ausfuehrbare Vor-Extraktions-Oracle bleibt ausschliesslich ein
+Testfixture und wird zusammen mit den neuen Altlasten-Verifiern vom Runtime-
+Export ausgeschlossen; die weiterhin produktiven Legacy-Szenen-Driver unter
+`scripts/tests/` bleiben Exportabhaengigkeiten.
+
 ## Live Tactical Event Log Hotpath (TASK_1043)
 `get_live_tactical_event_log_feedback_snapshot()` ist der schmale, read-only Runtime-Pfad fuer `TacticalEventLogPanel`. Er liefert nur ausgewaehlte Fireteam-IDs, sichtbare Tactical-Event-Log-Eintraege, bestehende Firefight-/CONTACT-FIRE-Displaydaten und die benoetigten Event-Log-Polish-Metadaten. Der wiederkehrende Panel-Refresh darf dafuer nicht `get_command_feedback_snapshot()` aufrufen.
 

@@ -40,6 +40,7 @@ func _test_docs_reports_and_contract() -> void:
 	var contract_text: String = _read_text(CONTRACT_PATH)
 	var presenter_text: String = _read_text(PRESENTER_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_624 task file exists")
 	_assert(task_text.contains("Host Client Live Input Feedback Review"), "TASK_624 task names live input feedback")
 	_assert(status_text.contains("TASK_624 - Host Client Live Input Feedback Review"), "Implementation status tracks TASK_624")
@@ -50,7 +51,7 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(handbook_text.contains("TASK_624 - Host Client Live Input Feedback Review"), "Status handbook tracks TASK_624")
 	_assert(handbook_text.contains('current_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Status handbook current task advances beyond TASK_624")
 	_assert(presenter_text.contains("_build_reject_reason_label"), "Presenter contains reject reason label builder")
-	_assert(controller_text.contains("authority_feedback_line"), "Controller exports authority feedback line")
+	_assert(feedback_source_text.contains("authority_feedback_line"), "Controller exports authority feedback line")
 	_test_report_export_fields(report_text, handbook_text)
 
 

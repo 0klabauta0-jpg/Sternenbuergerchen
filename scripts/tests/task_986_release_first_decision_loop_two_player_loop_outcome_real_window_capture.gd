@@ -51,6 +51,7 @@ func _test_docs_and_static_hooks() -> void:
 	var service_text: String = _read_text(SERVICE_PATH)
 	var tool_text: String = _read_text(TOOL_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_986 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_986 real-window analyzer exists")
 	_assert(FileAccess.file_exists(TOOL_PATH), "TASK_986 real-window capture tool exists")
@@ -74,7 +75,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(tool_text.contains("updates_shortcuts = $false"), "Capture tool updates no shortcuts")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_REAL_WINDOW_CAPTURE_SCRIPT"), "Controller preloads TASK_986 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_outcome_real_window_capture_snapshot"), "Controller exposes TASK_986 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_outcome_real_window_capture_status"), "Command feedback exports TASK_986 status")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_outcome_real_window_capture_status"), "Command feedback exports TASK_986 status")
 
 
 func _test_missing_source_blocks() -> void:

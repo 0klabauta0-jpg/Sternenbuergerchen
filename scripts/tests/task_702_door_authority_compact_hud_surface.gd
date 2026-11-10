@@ -46,6 +46,7 @@ func _test_docs() -> void:
 	var roadmap_text: String = _read_text(ROADMAP_PATH)
 	var handbook_text: String = _read_text(HANDBOOK_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_702 task file exists")
 	_assert(task_text.contains("Door Authority Compact HUD Surface"), "Task documents compact HUD surface")
 	_assert(contract_text.contains("Door Authority Compact HUD Surface"), "Interaction contract documents compact HUD surface")
@@ -53,7 +54,7 @@ func _test_docs() -> void:
 	_assert(roadmap_text.contains("TASK_702 - Door Authority Compact HUD Surface (implementiert)"), "Roadmap marks TASK_702 implemented")
 	_assert(handbook_text.contains("TASK_702 - Door Authority Compact HUD Surface"), "Current handbook references TASK_702")
 	_assert(handbook_text.contains('data-export-key="mission_interaction_door_authority_compact_hud_surface.manifest_path"'), "Current handbook exports TASK_702 manifest path")
-	_assert(controller_text.contains("mission_interaction_door_authority_visible_line"), "Command feedback exports visible Door line")
+	_assert(feedback_source_text.contains("mission_interaction_door_authority_visible_line"), "Command feedback exports visible Door line")
 	_assert(controller_text.contains("compact_line") and controller_text.find("compact_line") < controller_text.find("summary_line", controller_text.find("_build_visible_door_authority_command_line")), "Visible Door line prefers compact line before summary fallback")
 
 

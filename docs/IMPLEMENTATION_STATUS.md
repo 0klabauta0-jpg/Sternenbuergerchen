@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Altlasten — Schritt4 Diagnostik, 10.11.2026
+803-Zeilen-Reportbuilder stateless ausgelagert; oeffentliche API,439Felder
+und Probe-Overrides erhalten. Typedparitaet42/0 plus sieben HUD-/Report-/
+Exportnachbarn gruen.67 historische Source-Guards mechanisch auf den
+tatsaechlichen Besitzer umgestellt, zwei freistehende Reportfixtures an
+echten Missionskontext gebunden. LOS-Reviewraender28/0. Kein FPSanspruch.
+QA: docs/qa/altlasten_20261110/README.md. Portraetexport folgt.
+
 ### Altlasten — Schritt3 Bedienreste, 10.11.2026
 Wirkungslose R/F-Phasenbindings und unerreichbarer Legacy-Rueckkehrbutton
 entfernt; GO/Plan/Kamera/Auswahl und benoetigte alte Panels erhalten.

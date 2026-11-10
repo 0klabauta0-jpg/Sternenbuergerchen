@@ -49,6 +49,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_1004 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_1004 real-window capture service exists")
 	_assert(task_text.contains("TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture"), "Task names TASK_1004")
@@ -66,8 +67,8 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Capture service creates no multiplayer truth")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ROUND_LOOP_REAL_WINDOW_CAPTURE_SCRIPT"), "Controller preloads TASK_1004 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot"), "Controller exposes TASK_1004 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_gate"), "Command feedback exports TASK_1004 gate")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_window_screenshot_path"), "Command feedback exports TASK_1004 screenshot path")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_gate"), "Command feedback exports TASK_1004 gate")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_window_screenshot_path"), "Command feedback exports TASK_1004 screenshot path")
 
 
 func _test_missing_source_blocks() -> void:

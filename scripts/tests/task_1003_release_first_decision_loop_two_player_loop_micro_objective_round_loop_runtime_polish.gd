@@ -46,6 +46,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_1003 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_1003 runtime polish service exists")
 	_assert(task_text.contains("TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish"), "Task names TASK_1003")
@@ -64,8 +65,8 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Runtime polish creates no multiplayer truth")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ROUND_LOOP_RUNTIME_POLISH_SCRIPT"), "Controller preloads TASK_1003 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish_snapshot"), "Controller exposes TASK_1003 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish_line"), "Command feedback exports TASK_1003 line")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish_surface_specs"), "Command feedback exports TASK_1003 surface specs")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish_line"), "Command feedback exports TASK_1003 line")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish_surface_specs"), "Command feedback exports TASK_1003 surface specs")
 
 
 func _test_missing_source_blocks() -> void:

@@ -11,7 +11,9 @@
     "addons/map_builder_workbench/**",
     "docs/**",
     "scripts/tools/**",
-    "tmp/**"
+    "tmp/**",
+    "scripts/tests/altlasten_*",
+    "scripts/tests/fixtures/legacy_command_feedback_oracle.gd"
   ],
   "runtime_addon_allowlist": [
     "addons/limboai",

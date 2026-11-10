@@ -42,11 +42,11 @@ zur Ausfuehrung liegt vor; kein erneuter Planfreigabehalt.
 - [x] Eingabe-/Homebasegates pruefen und committen.
 
 ## Task 4: Diagnostikgrenze
-- [ ] Vollstaendigen Feedbacksnapshot mit eingefrorenen Quellen vor Aenderung
+- [x] Vollstaendigen Feedbacksnapshot mit eingefrorenen Quellen vor Aenderung
       charakterisieren; Ownerstate und schmale Live-Projektion absichern.
-- [ ] Stateless mission/diagnostics-Helper, bestehender Controllergetter als
+- [x] Stateless mission/diagnostics-Helper, bestehender Controllergetter als
       kompatible Delegation; Aufrufreihenfolge und alle Varianttypen erhalten.
-- [ ] Paritaet/Probe-Overrides/HUD-/Snapshotgates pruefen und committen.
+- [x] Paritaet/Probe-Overrides/HUD-/Snapshotgates pruefen und committen.
 
 ## Task 5: Portraetexport
 - [ ] Fehlende bekannte Aliasdatei und vorhandenen unbekannten Pfad als Regression.

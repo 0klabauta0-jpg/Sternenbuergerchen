@@ -28,6 +28,7 @@ func _run() -> void:
 	_test_map_only_edits()
 	_test_stationary_display_refresh()
 	_test_sparse_endpoint_height()
+	_test_endpoint_and_expired_registry()
 	print("ALTLASTEN_LOS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
 
@@ -122,3 +123,26 @@ func _test_sparse_endpoint_height() -> void:
 	var b: Vector2 = registry.grid_to_world(Vector2i(3, 0))
 	check(LOS.new().has_line_of_sight_between_points(a, b, -1.0, registry), "sparse endpoint retains nearest-tile runtime height")
 	registry.free()
+
+func _test_endpoint_and_expired_registry() -> void:
+	var map = MAP.create_empty("Endpoint/expiry", Vector2i(3, 1), Vector2.ZERO, 64.0, 32.0, 3)
+	var target := Vector2i(2, 0)
+	map.get_tile_at_grid(target).blocks_los = true
+	map.get_tile_at_grid(target).object_height = 2
+	var registry = REGISTRY.new()
+	registry.configure_iso_grid(Vector2.ZERO, 64.0, 32.0)
+	for tile in map.get_tiles(): registry.register_tile(tile)
+	var view = VIEW.new()
+	view.set("_terrain_map_data", map)
+	view.call("set_runtime_terrain_registry", registry)
+	var los = LOS.new()
+	var a: Vector2 = registry.grid_to_world(Vector2i.ZERO)
+	var b: Vector2 = registry.grid_to_world(target)
+	check(los.has_line_of_sight_between_points(a, b, -1.0, registry), "runtime excludes a target's own blocker cell")
+	check(los.has_line_of_sight_between_points(b, b, -1.0, registry), "runtime same-cell sight keeps its endpoint semantics")
+	check(view.call("_find_fire_sector_los_blocker_grid_cached", Vector2i.ZERO, target) == target, "preview clips at an unoccupied blocked endpoint")
+	registry.set_runtime_tile_overrides([{"grid_position": target, "blocks_los_override": false}])
+	check(view.call("_find_fire_sector_los_blocker_grid_cached", Vector2i.ZERO, target) == NONE, "preview endpoint respects runtime override")
+	registry.free()
+	check(view.call("_find_fire_sector_los_blocker_grid_cached", Vector2i.ZERO, target) == target, "expired registry drops cached override and reads map fallback")
+	view.free()
