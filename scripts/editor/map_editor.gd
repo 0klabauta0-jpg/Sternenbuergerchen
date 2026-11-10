@@ -23,7 +23,7 @@ const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
-const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
+const DEFAULT_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
 const DEFAULT_FALLBACK_GRID_SIZE: Vector2i = Vector2i(64, 64)
@@ -131,8 +131,8 @@ const RUNTIME_BUILDER_ENTRY_SCENE_PATH: String = "res://scenes/editor/map_builde
 const RUNTIME_MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 const BUILDER_QUICK_TERRAIN_TYPE_ID: String = "ground_flat"
 const BUILDER_QUICK_ROAD_TYPE_ID: String = "spacekit_terrain_road_straight"
-const BUILDER_QUICK_ASSET_TYPE_ID: String = "factory_building_a"
-const BUILDER_QUICK_FACTORY_TYPE_ID: String = "factory_building_a"
+const BUILDER_QUICK_ASSET_TYPE_ID: String = "frontier_habitat_exterior"
+const BUILDER_QUICK_FACTORY_TYPE_ID: String = "frontier_hall_exterior"
 const BUILDER_QUICK_SPACE_FLOOR_TYPE_ID: String = "modular_floor"
 const BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID: String = "station_wall_door"
 const BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID: String = "station_set_door_single_closed"
@@ -667,7 +667,11 @@ func _erase_selected_tile_object() -> bool:
 
 
 func _is_fixed_authored_layout() -> bool:
-	return _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FIXED_AUTHORED_LAYOUT_ID
+	if _terrain_map_data == null:
+		return false
+	if _terrain_map_data.has_method("get_place_presentation") and not Dictionary(_terrain_map_data.call("get_place_presentation")).get("migration_id", "").is_empty():
+		return true # Multi-cell scene and stored footprints must be edited together.
+	return _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FIXED_AUTHORED_LAYOUT_ID
 
 
 func _reject_fixed_authored_layout_edit() -> bool:
@@ -1061,6 +1065,9 @@ func _select_grid_area(start_grid_position: Vector2i, end_grid_position: Vector2
 
 func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	if _reject_fixed_authored_layout_edit():
+		return
+	if _selected_type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"]:
+		_set_marker_feedback("Mehrzellen-Gebäude: aktuelle Layoutvorlage. Freies Platzieren folgt mit dem Ortseditor; Einzelzellen-Pinsel bleibt gesperrt.")
 		return
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
@@ -1649,8 +1656,12 @@ func _activate_runtime_builder_palette_brush(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
 		return false
+	if not bool(Dictionary(_tile_catalog.get_type(normalized_type_id)).get("palette_visible", true)):
+		return false
 	if not set_palette_type_for_authoring(normalized_type_id):
 		return false
+	if normalized_type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"]:
+		_set_marker_feedback("Aktuelle Gebäudefamilie als Layoutvorlage. Mehrzellen-Platzierung folgt mit dem Ortseditor.")
 	return set_authoring_tool(AUTHORING_TOOL_BRUSH)
 
 
@@ -8860,6 +8871,8 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 		return false
 	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
 		return false
+	if not bool(Dictionary(_tile_catalog.get_type(normalized_type_id)).get("palette_visible", true)):
+		return false
 	_selected_type_id = normalized_type_id
 	_remember_palette_recent_type_id(normalized_type_id)
 	_apply_palette_scale_override_for_type(normalized_type_id)
@@ -9330,6 +9343,8 @@ func _populate_tile_palette() -> void:
 	var types_by_group: Dictionary = {}
 	var all_types: Array = []
 	for tile_type in _tile_catalog.get_all_types():
+		if not bool(tile_type.get("palette_visible", true)):
+			continue
 		if String(tile_type.get("type_id", "")) == FIXED_AUTHORED_SOLID_TYPE:
 			continue # A multi-cell layout footprint has no independent visual asset.
 		all_types.append(tile_type)
@@ -9584,6 +9599,9 @@ func _get_thumbnail_palette_preview_texture(source_texture: Texture2D, cache_key
 	var image: Image = source_texture.get_image()
 	if image == null or image.is_empty():
 		return source_texture
+	if image.is_compressed():
+		image.decompress()
+	image.convert(Image.FORMAT_RGBA8)
 	var bounds: Rect2i = _get_opaque_image_bounds(image)
 	if bounds.size.x <= 0 or bounds.size.y <= 0:
 		return source_texture

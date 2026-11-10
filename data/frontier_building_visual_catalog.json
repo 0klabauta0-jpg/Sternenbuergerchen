@@ -1,0 +1,32 @@
+{
+	"frontier_habitat_exterior": {
+		"max": [
+			1.2924998998641968,
+			1.2025575637817383,
+			1.3637499809265137
+		],
+		"min": [
+			-1.2924998998641968,
+			0.0,
+			-1.3637499809265137
+		],
+		"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+		"source_model": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+		"source_sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+	},
+	"frontier_hall_exterior": {
+		"max": [
+			1.9224998950958252,
+			1.654999852180481,
+			1.335249900817871
+		],
+		"min": [
+			-1.9224998950958252,
+			0.0,
+			-1.335249900817871
+		],
+		"model_path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+		"source_model": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+		"source_sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+	}
+}

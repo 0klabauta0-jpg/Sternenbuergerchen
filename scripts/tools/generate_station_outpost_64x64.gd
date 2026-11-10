@@ -8,7 +8,7 @@ const MAP_PATH: String = "res://maps/station_outpost_64x64.json"
 const MAP_NAME: String = "station_outpost_64x64"
 const MAP_SIZE: Vector2i = Vector2i(64, 64)
 const GRID_ORIGIN: Vector2 = Vector2(4608.0, 96.0)
-const THEME_ID: String = "ground_mission_mixed_v1"
+const THEME_ID: String = "frontier_illustrated_v1"
 
 const GRID_SPAWN_ALPHA: Vector2i = Vector2i(8, 55)
 const GRID_SPAWN_BRAVO: Vector2i = Vector2i(56, 11)
@@ -38,6 +38,9 @@ func _run() -> void:
 	_paint_pipe_runs(map_data, catalog)
 	_place_cover_and_nature(map_data, catalog)
 	_place_markers_and_routes(map_data)
+	if not preload("res://scripts/tools/frontier_station_building_migration.gd").apply(map_data):
+		quit(1)
+		return
 	if not _validate_catalog_usage(map_data, catalog):
 		quit(1)
 		return

@@ -1,0 +1,23 @@
+{
+  "head": "274f142c2a6abbc6a7cc5b88d17206681f44708f",
+  "branch": "task/map-save-building-migration-20261110",
+  "checked_final_logs": [
+    "final_map_save_metadata_roundtrip_verifier.log",
+    "final_frontier_building_migration_verifier.log",
+    "final_editor_integration.log",
+    "final_task_494_station_outpost_64_map.log",
+    "final_task_517_mission_scenario_vertical_slice.log",
+    "final_rgb_preview.log",
+    "final_frontier_probe.log",
+    "final_import.log"
+  ],
+  "final_logs_script_errors": 0,
+  "data_json_parse": "PASS",
+  "report_links": "PASS",
+  "diff_check": "PASS",
+  "review": "No remaining blocker in requested scope",
+  "legacy_base_verifier": "20 passed,2 failed: unchanged maps already96x98 vs old36x28 expectation",
+  "editor_layout_tools": "follow-up; unsafe single-cell authoring blocked",
+  "asset_deletions": 0,
+  "commit_push_merge_export": false
+}

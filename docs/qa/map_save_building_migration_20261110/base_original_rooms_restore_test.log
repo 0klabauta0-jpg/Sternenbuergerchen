@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: unchanged archived furnished original habitat_cutaway_01
+PASS: unchanged archived furnished original freihafen_hall_01
+FAIL: campaign retains the larger base map
+PASS: campaign retains both authored building areas
+PASS: campaign retains stable landing footprints
+PASS: campaign renders no bare replacement walls
+PASS: campaign shows furnished source habitat_cutaway_01
+PASS: campaign uses verified furnished doorway candidate habitat_cutaway_01
+PASS: campaign retains original furnished source provenance habitat_cutaway_01
+PASS: campaign shows furnished source freihafen_hall_01
+PASS: campaign uses verified furnished doorway candidate freihafen_hall_01
+PASS: campaign retains original furnished source provenance freihafen_hall_01
+FAIL: skirmish retains the larger base map
+PASS: skirmish retains both authored building areas
+PASS: skirmish retains stable landing footprints
+PASS: skirmish renders no bare replacement walls
+PASS: skirmish shows furnished source habitat_cutaway_01
+PASS: skirmish uses verified furnished doorway candidate habitat_cutaway_01
+PASS: skirmish retains original furnished source provenance habitat_cutaway_01
+PASS: skirmish shows furnished source freihafen_hall_01
+PASS: skirmish uses verified furnished doorway candidate freihafen_hall_01
+PASS: skirmish retains original furnished source provenance freihafen_hall_01
+BASE_ORIGINAL_ROOMS passed=20 failed=2

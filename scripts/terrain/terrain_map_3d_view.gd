@@ -15406,7 +15406,7 @@ func _sync_place_reference_dressing() -> void:
 			_place_dressing_root.queue_free()
 		_place_dressing_root=null
 		_place_dressing_signature=signature
-	if Array(presentation.get("structures",[])).is_empty(): return
+	if Array(presentation.get("structures",[])).is_empty() and Array(presentation.get("props",[])).is_empty() and Array(presentation.get("pads",[])).is_empty(): return
 	if not is_instance_valid(_place_dressing_root):
 		_place_dressing_root=load("res://scripts/terrain/place_reference_dressing.gd").build(_world_root,presentation).root
 	for tile in _terrain_map_data.call("get_tiles"):

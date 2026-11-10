@@ -170,9 +170,9 @@
 		],
 		"sample_assets": [
 			{
-				"type_id": "factory_building_a",
-				"label": "Factory Building A",
-				"model_path": "res://Assets/curated/kenney/factory/models/building-a.glb",
+				"type_id": "frontier_habitat_exterior",
+				"label": "Frontier Habitat",
+				"model_path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
 				"scale": 0.78
 			},
 			{
@@ -201,7 +201,7 @@
 			"x": 8,
 			"y": 6
 		},
-		"terrain_visual_theme_id": "ground_mission_mixed_v1",
+		"terrain_visual_theme_id": "frontier_illustrated_v1",
 		"cells": [
 			{"grid": [0, 0, 0], "item_id": 1, "rotation_degrees": 0},
 			{"grid": [1, 0, 0], "item_id": 2, "rotation_degrees": 90},
@@ -220,7 +220,6 @@
 			{"grid": [2, 0, 2], "item_id": 15, "rotation_degrees": 180}
 		],
 		"props": [
-			{"type_id": "factory_building_a", "grid_position": [1, 1], "rotation_degrees": 180, "object_scale": 1.15},
 			{"type_id": "spacekit_rover", "grid_position": [3, 3], "rotation_degrees": 90, "object_scale": 1.0},
 			{"type_id": "spacekit_satellite_dish_large", "grid_position": [4, 3], "rotation_degrees": 0, "object_scale": 1.0},
 			{"type_id": "station_computer", "grid_position": [0, 2], "rotation_degrees": 270, "object_scale": 1.0}

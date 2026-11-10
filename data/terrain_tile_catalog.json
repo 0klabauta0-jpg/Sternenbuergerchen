@@ -108,6 +108,34 @@
 	],
 	"tile_types": [
 		{
+			"type_id": "frontier_hall_exterior",
+			"display_name": "Frontier Freihafenhalle",
+			"palette_group": "gebaeude",
+			"placement_layer": "object",
+			"texture_path": "res://Assets/curated/frontier_illustrated_20261101/building_previews/hall.png",
+			"surface_type": "ground",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 80,
+			"height_level": 0,
+			"object_height": 3,
+			"palette_visible": true
+		},
+		{
+			"type_id": "frontier_habitat_exterior",
+			"display_name": "Frontier Habitat",
+			"palette_group": "gebaeude",
+			"placement_layer": "object",
+			"texture_path": "res://Assets/curated/frontier_illustrated_20261101/building_previews/habitat.png",
+			"surface_type": "ground",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 80,
+			"height_level": 0,
+			"object_height": 3,
+			"palette_visible": true
+		},
+		{
 			"type_id": "frontier_utility_fuel_01",
 			"display_name": "Frontier Versorgung (P04 Modell)",
 			"palette_group": "technik",
@@ -824,7 +852,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_b",
@@ -839,7 +868,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_c",
@@ -854,7 +884,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_d",
@@ -869,7 +900,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_e",
@@ -884,7 +916,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_f",
@@ -899,7 +932,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_g",
@@ -914,7 +948,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_h",
@@ -929,7 +964,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_i",
@@ -944,7 +980,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_j",
@@ -959,7 +996,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_k",
@@ -974,7 +1012,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_l",
@@ -989,7 +1028,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_m",
@@ -1004,7 +1044,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_n",
@@ -1019,7 +1060,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_o",
@@ -1034,7 +1076,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_p",
@@ -1049,7 +1092,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_q",
@@ -1064,7 +1108,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_r",
@@ -1079,7 +1124,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_s",
@@ -1094,7 +1140,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_building_t",
@@ -1109,7 +1156,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "factory_chimney_basic",
@@ -1508,7 +1556,8 @@
 			"blocks_los": true,
 			"cover_value": 60,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_structure_closed_nw",
@@ -1520,7 +1569,8 @@
 			"blocks_los": true,
 			"cover_value": 60,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_structure_closed_se",
@@ -1532,7 +1582,8 @@
 			"blocks_los": true,
 			"cover_value": 60,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_structure_closed_sw",
@@ -1544,7 +1595,8 @@
 			"blocks_los": true,
 			"cover_value": 60,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_hangar_small_b_ne",
@@ -1556,7 +1608,8 @@
 			"blocks_los": true,
 			"cover_value": 70,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_hangar_small_b_nw",
@@ -1568,7 +1621,8 @@
 			"blocks_los": true,
 			"cover_value": 70,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_hangar_small_b_se",
@@ -1580,7 +1634,8 @@
 			"blocks_los": true,
 			"cover_value": 70,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "gebaeude_hangar_small_b_sw",
@@ -1592,7 +1647,8 @@
 			"blocks_los": true,
 			"cover_value": 70,
 			"height_level": 0,
-			"object_height": 3
+			"object_height": 3,
+			"palette_visible": false
 		},
 		{
 			"type_id": "plattform_center_ne",
@@ -2462,7 +2518,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_large_b",
@@ -2477,7 +2534,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_round_a",
@@ -2492,7 +2550,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_round_b",
@@ -2507,7 +2566,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_round_glass",
@@ -2522,7 +2582,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_small_a",
@@ -2537,7 +2598,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_hangar_small_b",
@@ -2552,7 +2614,8 @@
 			"height_level": 0,
 			"object_height": 2,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"palette_visible": false
 		},
 		{
 			"type_id": "spacekit_machine_barrel",

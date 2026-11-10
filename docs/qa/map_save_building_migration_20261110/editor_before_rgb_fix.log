@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: Condition "format != p_src->format" is true.
+   at: blit_rect (core/io/image.cpp:3112)
+   GDScript backtrace (most recent call first):
+       [0] _get_thumbnail_palette_preview_texture (res://scripts/editor/map_editor.gd:9607)
+       [1] _get_palette_preview_texture (res://scripts/editor/map_editor.gd:9583)
+       [2] _populate_tile_palette (res://scripts/editor/map_editor.gd:9412)
+       [3] _ready (res://scripts/editor/map_editor.gd:314)
+       [4] _run (res://scripts/tests/map_editor_metadata_saveas_verifier.gd:16)
+ERROR: Condition "format != p_src->format" is true.
+   at: blit_rect (core/io/image.cpp:3112)
+   GDScript backtrace (most recent call first):
+       [0] _get_thumbnail_palette_preview_texture (res://scripts/editor/map_editor.gd:9607)
+       [1] _get_palette_preview_texture (res://scripts/editor/map_editor.gd:9583)
+       [2] _populate_tile_palette (res://scripts/editor/map_editor.gd:9412)
+       [3] _ready (res://scripts/editor/map_editor.gd:314)
+       [4] _run (res://scripts/tests/map_editor_metadata_saveas_verifier.gd:16)
+PASS: old building cannot be selected through authoring API
+PASS: current habitat can be inspected in palette
+PASS: Asset quick tool selects current model
+PASS: Asset quick tool has current habitat
+PASS: Factory quick tool selects current model
+PASS: Factory quick tool has current hall
+PASS: multi-cell asset cannot be painted as a single blocking cell
+PASS: real SaveAs callback writes scratch file
+PASS: real editor SaveAs preserves singleplayer_site
+PASS: real editor SaveAs preserves place_world
+PASS: real editor SaveAs preserves place_presentation
+PASS: real editor reload retains place models
+PASS: source map untouched by SaveAs
+PASS: migrated multi-cell layout protected until layout tools exist
+PASS: migrated station uses Frontier profile
+PASS: migrated station has no missing-model boxes
+PASS: actual renderer installs both current building scenes
+MAP_EDITOR_METADATA passed=17 failed=0

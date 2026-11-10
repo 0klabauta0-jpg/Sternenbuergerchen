@@ -1,0 +1,436 @@
+{
+	"_current_habitat": {
+		"max": [
+			1.2924998998641968,
+			1.2025575637817383,
+			1.3637499809265137
+		],
+		"min": [
+			-1.2924998998641968,
+			0.0,
+			-1.3637499809265137
+		],
+		"path": "res://scenes/terrain/frontier_habitat_exterior.tscn",
+		"scale": 1.0
+	},
+	"_current_hall": {
+		"max": [
+			1.9224998950958252,
+			1.654999852180481,
+			1.335249900817871
+		],
+		"min": [
+			-1.9224998950958252,
+			0.0,
+			-1.335249900817871
+		],
+		"path": "res://scenes/terrain/frontier_hall_exterior.tscn",
+		"scale": 1.0
+	},
+	"factory_building_a": {
+		"max": [
+			1.0417940616607666,
+			1.4700000286102295,
+			0.6210001111030579
+		],
+		"min": [
+			-1.0417940616607666,
+			0.0,
+			-0.6210001111030579
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-a.glb",
+		"scale": 0.78
+	},
+	"factory_building_b": {
+		"max": [
+			1.0417940616607666,
+			1.4700000286102295,
+			0.6310000419616699
+		],
+		"min": [
+			-1.0417940616607666,
+			0.0,
+			-0.6310000419616699
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-b.glb",
+		"scale": 0.78
+	},
+	"factory_building_c": {
+		"max": [
+			0.9379674196243286,
+			1.25,
+			1.0540106296539307
+		],
+		"min": [
+			-0.9379674196243286,
+			0.0,
+			-1.0540106296539307
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-c.glb",
+		"scale": 0.78
+	},
+	"factory_building_d": {
+		"max": [
+			0.44179394841194153,
+			1.4145522117614746,
+			0.7100000381469727
+		],
+		"min": [
+			-0.44179394841194153,
+			0.0,
+			-0.7100000381469727
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-d.glb",
+		"scale": 0.78
+	},
+	"factory_building_e": {
+		"max": [
+			0.8417940139770508,
+			1.649999976158142,
+			0.6450000405311584
+		],
+		"min": [
+			-0.8417940139770508,
+			0.0,
+			-0.6450000405311584
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-e.glb",
+		"scale": 0.78
+	},
+	"factory_building_f": {
+		"max": [
+			0.8949999809265137,
+			1.9249999523162842,
+			0.6399999856948853
+		],
+		"min": [
+			-0.8949999809265137,
+			0.0,
+			-0.6399999856948853
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-f.glb",
+		"scale": 0.78
+	},
+	"factory_building_g": {
+		"max": [
+			0.8390689492225647,
+			1.28000009059906,
+			0.641793966293335
+		],
+		"min": [
+			-0.8390689492225647,
+			0.0,
+			-0.641793966293335
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-g.glb",
+		"scale": 0.78
+	},
+	"factory_building_h": {
+		"max": [
+			0.6608628630638123,
+			0.7335410118103027,
+			0.6550000309944153
+		],
+		"min": [
+			-0.6608628630638123,
+			0.0,
+			-0.6550000309944153
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-h.glb",
+		"scale": 0.78
+	},
+	"factory_building_i": {
+		"max": [
+			0.5140689015388489,
+			0.7335410118103027,
+			0.6500000357627869
+		],
+		"min": [
+			-0.5140689015388489,
+			0.0,
+			-0.6500000357627869
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-i.glb",
+		"scale": 0.78
+	},
+	"factory_building_j": {
+		"max": [
+			0.5133109092712402,
+			0.8611457943916321,
+			0.6499999761581421
+		],
+		"min": [
+			-0.5133109092712402,
+			0.0,
+			-0.6499999761581421
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-j.glb",
+		"scale": 0.78
+	},
+	"factory_building_k": {
+		"max": [
+			0.6514296531677246,
+			0.772741436958313,
+			0.45679396390914917
+		],
+		"min": [
+			-0.6514296531677246,
+			0.0,
+			-0.45679396390914917
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-k.glb",
+		"scale": 0.78
+	},
+	"factory_building_l": {
+		"max": [
+			1.041793942451477,
+			1.9249999523162842,
+			0.934999942779541
+		],
+		"min": [
+			-1.041793942451477,
+			0.0,
+			-0.934999942779541
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-l.glb",
+		"scale": 0.78
+	},
+	"factory_building_m": {
+		"max": [
+			0.6581377983093262,
+			1.519006609916687,
+			0.8500000238418579
+		],
+		"min": [
+			-0.6581377983093262,
+			0.0,
+			-0.8500000238418579
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-m.glb",
+		"scale": 0.78
+	},
+	"factory_building_n": {
+		"max": [
+			0.48831087350845337,
+			1.9045557975769043,
+			0.7099999785423279
+		],
+		"min": [
+			-0.48831087350845337,
+			0.0,
+			-0.7100000381469727
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-n.glb",
+		"scale": 0.78
+	},
+	"factory_building_o": {
+		"max": [
+			0.4417939782142639,
+			0.9179999828338623,
+			0.6200000047683716
+		],
+		"min": [
+			-0.4417939782142639,
+			0.0,
+			-0.6200000643730164
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-o.glb",
+		"scale": 0.78
+	},
+	"factory_building_p": {
+		"max": [
+			0.8417940139770508,
+			0.7145521640777588,
+			0.4960000514984131
+		],
+		"min": [
+			-0.8417940139770508,
+			0.0,
+			-0.4960000514984131
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-p.glb",
+		"scale": 0.78
+	},
+	"factory_building_q": {
+		"max": [
+			1.0700000524520874,
+			0.8799999952316284,
+			0.8849457502365112
+		],
+		"min": [
+			-1.0700000524520874,
+			0.0,
+			-0.8849457502365112
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-q.glb",
+		"scale": 0.78
+	},
+	"factory_building_r": {
+		"max": [
+			1.2417939901351929,
+			1.3930000066757202,
+			0.6360000967979431
+		],
+		"min": [
+			-1.2417939901351929,
+			0.0,
+			-0.6360000967979431
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-r.glb",
+		"scale": 0.78
+	},
+	"factory_building_s": {
+		"max": [
+			1.059999942779541,
+			0.8367910385131836,
+			0.4581378400325775
+		],
+		"min": [
+			-1.059999942779541,
+			0.0,
+			-0.4581378400325775
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-s.glb",
+		"scale": 0.78
+	},
+	"factory_building_t": {
+		"max": [
+			0.8608628511428833,
+			1.014552116394043,
+			0.6950001120567322
+		],
+		"min": [
+			-0.8608628511428833,
+			0.0,
+			-0.6950001120567322
+		],
+		"path": "res://Assets/curated/kenney/factory/models/building-t.glb",
+		"scale": 0.78
+	},
+	"gebaeude_hangar_small_b": {
+		"max": [
+			1.0,
+			1.0,
+			1.0
+		],
+		"min": [
+			-1.0,
+			0.0,
+			-1.0
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
+		"scale": 1.5
+	},
+	"gebaeude_structure_closed": {
+		"max": [
+			0.5,
+			1.0,
+			0.5
+		],
+		"min": [
+			-0.5,
+			0.0,
+			-0.5
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_closed.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_large_a": {
+		"max": [
+			1.0,
+			1.0,
+			1.5
+		],
+		"min": [
+			-1.0,
+			0.0,
+			-1.5
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeA.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_large_b": {
+		"max": [
+			1.100000023841858,
+			1.100000023841858,
+			1.5
+		],
+		"min": [
+			-1.100000023841858,
+			0.0,
+			-1.5
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeB.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_round_a": {
+		"max": [
+			1.6356219053268433,
+			1.5,
+			1.4164899587631226
+		],
+		"min": [
+			-1.6356219053268433,
+			0.0,
+			-1.4164899587631226
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundA.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_round_b": {
+		"max": [
+			1.6356219053268433,
+			1.7999999523162842,
+			1.4164899587631226
+		],
+		"min": [
+			-1.6356219053268433,
+			0.0,
+			-1.4164899587631226
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundB.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_round_glass": {
+		"max": [
+			1.6356219053268433,
+			1.399999976158142,
+			1.4164899587631226
+		],
+		"min": [
+			-1.6356219053268433,
+			0.0,
+			-1.4164899587631226
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundGlass.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_small_a": {
+		"max": [
+			1.0,
+			1.0,
+			1.0
+		],
+		"min": [
+			-1.0,
+			0.0,
+			-1.0
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallA.glb",
+		"scale": 1.0
+	},
+	"spacekit_hangar_small_b": {
+		"max": [
+			1.0,
+			1.0,
+			1.0
+		],
+		"min": [
+			-1.0,
+			0.0,
+			-1.0
+		],
+		"path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
+		"scale": 1.0
+	}
+}

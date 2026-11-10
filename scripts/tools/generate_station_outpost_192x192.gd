@@ -62,6 +62,7 @@ func _run() -> void:
 			_stamp_sector(source_tiles, target_lookup, sector, rotation_degrees)
 
 	_copy_center_markers_and_routes(source_map, target_map, target_lookup)
+	_copy_building_presentations(source_map, target_map)
 	if not _validate_catalog_usage(target_map, catalog):
 		quit(1)
 		return
@@ -105,6 +106,28 @@ func _copy_tile(source_tile, target_tile, target_grid: Vector2i, rotation_degree
 	target_tile.object_scale = float(source_tile.object_scale)
 	target_tile.surface_type = String(source_tile.surface_type)
 	target_tile.edge_type = String(source_tile.edge_type)
+
+
+func _copy_building_presentations(source_map, target_map) -> void:
+	var props: Array = []
+	for sector_x in range(3):
+		for sector_y in range(3):
+			var sector := Vector2i(sector_x, sector_y)
+			var yaw: float = float(SECTOR_ROTATIONS.get(sector, 0.0))
+			for source in Array(source_map.get_place_presentation().get("props", [])):
+				var prop: Dictionary = Dictionary(source).duplicate(true)
+				var center: Array = prop.center
+				var grid := Vector2i(int(center[0]), int(center[1]))
+				grid = _rotate_local_grid(grid, yaw) + sector * SOURCE_SIZE
+				prop.center = [grid.x,grid.y]
+				prop.rotation_degrees = fposmod(float(prop.get("rotation_degrees", 0.0)) + yaw, 360.0)
+				var reserved: Array = []
+				for cell in Array(prop.get("reserved_grids", [])):
+					var moved := _rotate_local_grid(Vector2i(cell[0], cell[1]), yaw) + sector * SOURCE_SIZE
+					reserved.append([moved.x,moved.y])
+				prop.reserved_grids = reserved
+				props.append(prop)
+	target_map.set_place_presentation({"props":props,"migration_id":"frontier_buildings_20261110"})
 
 
 func _apply_sector_variation(tile_data, grid: Vector2i, sector: Vector2i) -> void:

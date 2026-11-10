@@ -47,7 +47,7 @@ func _test_map_authoring() -> void:
 	_assert(Vector2i(map_data.call("get_grid_size")) == Vector2i(64, 64), "Station outpost map is exactly 64x64")
 	_assert(Array(map_data.call("get_tiles")).size() == 4096, "Station outpost map contains 4096 tiles")
 	_assert(int(map_data.call("get_mission_slot_count")) == 8, "Station outpost map exposes eight mission slots")
-	_assert(String(map_data.call("get_terrain_visual_theme_id")) == "ground_mission_mixed_v1", "Station outpost uses the mixed ground visual theme")
+	_assert(String(map_data.call("get_terrain_visual_theme_id")) == "frontier_illustrated_v1", "Station outpost uses the current Frontier visual theme")
 	for marker_id in [
 		"spawn_alpha",
 		"spawn_bravo",
@@ -69,7 +69,11 @@ func _test_map_authoring() -> void:
 	_assert(int(counts.get("station_floor_tiles", 0)) >= 250, "Map has a large station floor footprint")
 	_assert(int(counts.get("station_objects", 0)) >= 55, "Map has station walls, doors and interior assets")
 	_assert(int(counts.get("station_door_assets", 0)) >= 6, "Map has multiple station door states/assets")
-	_assert(int(counts.get("factory_objects", 0)) >= 7, "Map has a small factory yard")
+	_assert(int(counts.get("factory_objects", 0)) >= 5, "Map retains the five factory yard props")
+	var buildings: Array = Array(map_data.get_place_presentation().get("props", []))
+	_assert(buildings.size() == 2, "Yard has two authored current building models")
+	for building in buildings:
+		_assert(String(building.get("asset_id", "")) in ["frontier_habitat_exterior", "frontier_hall_exterior"], "Yard building uses current family")
 	_assert(int(counts.get("pipe_objects", 0)) >= 18, "Map has pipe runs between station and factory")
 	_assert(int(counts.get("height_tiles", 0)) >= 550, "Map has hills and raised terrain")
 	_assert(int(counts.get("height_two_tiles", 0)) >= 60, "Map has level-two ridge tops")

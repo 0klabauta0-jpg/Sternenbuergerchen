@@ -1,0 +1,96 @@
+{
+	"base_nav_layout_assets": [
+		{
+			"exists": true,
+			"id": "habitat_cutaway_01",
+			"path": "res://Assets/curated/base_access_20261109/habitat_cutaway_01.glb"
+		},
+		{
+			"exists": true,
+			"id": "freihafen_hall_01",
+			"path": "res://Assets/curated/base_access_20261109/freihafen_hall_01.glb"
+		},
+		{
+			"exists": true,
+			"id": "utility_fuel_01",
+			"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb"
+		},
+		{
+			"exists": true,
+			"id": "cutlass_01",
+			"path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb"
+		}
+	],
+	"engine": "4.6.2-stable (official)",
+	"probe_executed_successfully": true,
+	"roundtrips": [
+		{
+			"lost_top_level_keys": [
+				"homebase_exploration",
+				"place_world"
+			],
+			"place_presentation_preserved": true,
+			"save_error": 0,
+			"scratch": "user://building_asset_audit_20261110_52756/campaign_intro_base.json",
+			"source": "res://maps/campaign_intro_base.json",
+			"source_sha256": "468cb030696acbf07c699300f927b71c99d78b7acab43536eb445e5fb2fd9858",
+			"source_unchanged": true,
+			"tiles_after": 9408,
+			"tiles_before": 9408
+		},
+		{
+			"lost_top_level_keys": [
+				"homebase_exploration",
+				"place_world"
+			],
+			"place_presentation_preserved": true,
+			"save_error": 0,
+			"scratch": "user://building_asset_audit_20261110_52756/homebase_frontier_exploration.json",
+			"source": "res://maps/homebase_frontier_exploration.json",
+			"source_sha256": "d0f97bad4ba43d2ec3e74c0647c211a6d72265723e821c2918cc2ca0fdc9cae2",
+			"source_unchanged": true,
+			"tiles_after": 9408,
+			"tiles_before": 9408
+		},
+		{
+			"lost_top_level_keys": [
+				"place_world",
+				"singleplayer_site"
+			],
+			"place_presentation_preserved": true,
+			"save_error": 0,
+			"scratch": "user://building_asset_audit_20261110_52756/trade_outpost.json",
+			"source": "res://maps/trade_outpost.json",
+			"source_sha256": "e1e4b5df3e988b1d0ddc6f03b879c7c30b8ee10f1e4e26e67547ba42130fe75f",
+			"source_unchanged": true,
+			"tiles_after": 9408,
+			"tiles_before": 9408
+		},
+		{
+			"lost_top_level_keys": [
+				"singleplayer_site",
+				"place_world"
+			],
+			"place_presentation_preserved": true,
+			"save_error": 0,
+			"scratch": "user://building_asset_audit_20261110_52756/satellite_crash_site.json",
+			"source": "res://maps/satellite_crash_site.json",
+			"source_sha256": "4cf5aeb42f6778fea01a870c82e798ca255e09339e2169664f23ed6d878e19e0",
+			"source_unchanged": true,
+			"tiles_after": 9408,
+			"tiles_before": 9408
+		},
+		{
+			"lost_top_level_keys": [],
+			"place_presentation_preserved": true,
+			"save_error": 0,
+			"scratch": "user://building_asset_audit_20261110_52756/Ground_Mission01_32x32.json",
+			"source": "res://maps/Ground_Mission01_32x32.json",
+			"source_sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+			"source_unchanged": true,
+			"tiles_after": 9408,
+			"tiles_before": 9408
+		}
+	],
+	"scope": "Actual TerrainMapData save used by editor; scratch only; no rendering or original map writes"
+}

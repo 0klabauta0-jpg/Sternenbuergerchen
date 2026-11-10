@@ -3,7 +3,7 @@ extends Node3D
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 
-@export var map_file_path: String = "res://maps/test_mission.json"
+@export var map_file_path: String = "res://maps/Ground_Mission01_32x32.json"
 
 var _primary_view: CanvasLayer = null
 

@@ -96,6 +96,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 
 		catalog._tile_types[type_id] = {
 			"type_id": type_id,
+			"palette_visible": bool(entry.get("palette_visible", true)),
 			"display_name": String(entry.get("display_name", type_id)),
 			"palette_group": palette_group,
 			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")).strip_edges().to_lower(),
