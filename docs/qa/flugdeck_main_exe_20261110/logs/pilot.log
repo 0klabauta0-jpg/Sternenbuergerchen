@@ -1,0 +1,49 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/flugdeck_pilot_membership_verifier.gd:12)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/flugdeck_pilot_membership_verifier.gd:12)
+PASS: real initial team and pilot boarding accepted
+PASS: pilot really reaches ship
+PASS: flightdeck snapshot exposes actual pilot aboard
+PASS: pilot selector visibly confirms An Bord
+PASS: pilot card says An Bord
+PASS: pilot can leave real ship
+PASS: pilot no longer aboard
+PASS: Anja stays aboard
+ASSIGN_RESULT { "ok": true, "operation": "assign", "message": "" }
+PASS: outside assigned pilot may join already boarded same-craft FT1
+PASS: pilot is a real FT1 member
+PASS: FT1 membership retains pilot assignment
+PASS: owner refresh retains dual role
+PASS: outside pilot keeps launch blocked
+PASS: remaining pilot can board without unloading Anja
+PASS: dual-role pilot really boards
+PASS: pilot remains FT1 after boarding
+PASS: pilot exists once in actual team
+PASS: same-craft dual-role crew can launch after real boarding
+PASS: dual-role pilot exits without dissolving FT1 payload
+PASS: Anja stays aboard when FT1 pilot alone exits
+PASS: individual pilot exit preserves FT1 membership
+PASS: dual-role grounded crew supports real checkpoint
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/flugdeck_pilot_membership_verifier.gd:63)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/flugdeck_pilot_membership_verifier.gd:63)
+PASS: Continue retains membership plus pilot function
+PASS: aboard Anja may take pilot role while retaining FT1
+PASS: new aboard pilot cannot conceal an outside FT1 member
+PASS: authoritative launch rejects outside former pilot after role swap
+PASS: former pilot can reboard as FT1 passenger
+PASS: both unique physical FT1 members agree with ready launch after role swap
+FLUGDECK_PILOT checks=28 failures=0

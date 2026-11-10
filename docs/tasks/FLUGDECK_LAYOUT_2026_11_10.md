@@ -59,3 +59,15 @@ Keine Absetzung unterwegs, in Vorschau oder ohne lokale Commandberechtigung.
 Quellstand umgesetzt und gezielt geprüft. Ergebnisse, native Bilder und
 Baselinegrenzen: docs/qa/flugdeck_basis_data_20261110/README.md.
 Kein Mainmerge/EXE-Export in diesem Folgeabschluss.
+
+## Beauftragte Mainintegration und EXE — 10.11.2026
+Ziel: Task befc157a9 auf Main b92808399 integrieren und neue Windows-EXE
+bereitstellen. Integrationsbranch task/flugdeck-main-exe-20261110,
+konfliktfreier Merge b9c9b4b2d mit exakt gleichem Produktbaum. Keine weiteren
+Produktänderungen. Frische gezielte Quell-/Nativeprüfung vor Main-Push;
+Releaseexport aus sauberem Main-Commit mit dem vorhandenen Exportvertrag.
+Akzeptanz: Main/Remote/Exportcommit identisch, EXE-Menüstart und native
+D3D12-Einzelspieler-Startprobe ohne Enginefehler; Paket und Hashbelege.
+Offene Komponenten-/Modell-/Gebäudepläne und alte vier Basistestabweichungen
+bleiben wie im bestehenden QA-Bericht begrenzt. Private Testprofile;
+keine alten Builds löschen und fremdes WIP nicht verändern.

@@ -1,0 +1,81 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: dual-role sortie pilot physically exits first
+PASS: dual-role sortie pilot joins Anja in existing boarded FT1
+PASS: real pilot membership before flight
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: first accepted
+PASS: first destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: landed crew may reboard before testing absetzen
+PASS: real landed pilot is aboard again
+PASS: landed craft exposes clearly named Trupp absetzen
+PASS: actual existing deploy effects put both crew members on ground
+PASS: absetzen leaves no duplicate embarked people
+PASS: real insertion effects and security finish after repeated absetzen
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: real chip recovered awaits upload
+PASS: pending status
+PASS: no reward before physical home upload
+PASS: Actual surface exit returns original craft to planet orbit
+PASS: Planet orbit is not physical home arrival
+PASS: Real homeward target click begins moon quantum
+PASS: Real homeward quantum reaches moon orbit
+PASS: Moon orbit still requires an explicit home landing
+PASS: Explicit moonbase landing accepts after actual homeward travel
+PASS: Actual reverse transit restores original craft to homebase
+PASS: direct base data terminal exposes real pending upload
+UPLOAD_RESULT { "ok": true }
+PASS: real home upload accepted
+PASS: upload completes first mission
+PASS: one exact reward
+PASS: earned blueprint enables actual workshop control
+PASS: workshop button adds one real armor item to finite base stock
+PASS: workshop charges existing authoritative recipe once
+SAVE_RESULT ok
+PASS: real home checkpoint saves new campaign
+PASS: new checkpoint loads
+PASS: Actual transient insertion guard was exercised
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=0
+SINGLEPLAYER_LOOP_RESULTS passed=70 failed=0

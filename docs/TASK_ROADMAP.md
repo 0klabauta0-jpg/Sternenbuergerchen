@@ -1,5 +1,16 @@
 # TASK_ROADMAP
 
+### Flugdeck/Basis/Daten: Mainintegration und neue EXE — 10.11.2026
+Task befc157a9 konfliktfrei auf Main b92808399 integriert (b9c9b4b2d).
+Produktbaum identisch; nur Integrationsdokumentation ergänzt. Frische Prüfung:
+realer Kampagnenausflug samt dualem Pilot, Absetzen, Daten-Buttonupload,
+Herstellung und Save70/0; Pilot/FT28/0; Skirmishstarts97/0; native D3D12-UI40/0,
+keine Enginefehler. Ältere vier Basistestabweichungen separat erhalten.
+QA: docs/qa/flugdeck_main_exe_20261110/README.md. Beauftragter Main-Push und
+EXE-Paketabschluss aus diesem sauberen Stand unter
+C:/dev/SternenBuergerchen-builds/2026-11-10-flugdeck-basis-main-r05/.
+Komponenten bleiben Plan; keine allgemeinen Performance-/Stilzusagen.
+
 ### Flugdeck, nutzbare Basis und Datenfeedback — 10.11.2026
 Taskbranch auf Main b92808399. Kompaktes Flugdeck mit realer Padvorschau,
 Padwahl, Pilot-Anwesenheit und Trupp absetzen an Basis/Missionsort. Pilot darf
