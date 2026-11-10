@@ -165,7 +165,6 @@ var _post_mission_skill_delta_summary: Dictionary = {}
 var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 var _operations_mode: String = "squad"
 var _operations_presenter: Control
-var _operations_return_button: Button
 
 
 func _ready() -> void:
@@ -8973,15 +8972,6 @@ func _ensure_operations_presenter() -> void:
 	var popup := get_node_or_null("CharacterSheetPopup") as Control
 	if popup != null:
 		popup.z_index = 100
-	_operations_return_button = Button.new()
-	_operations_return_button.name = "OperationsReturnButton"
-	_operations_return_button.text = "‹ Zur Truppansicht"
-	_operations_return_button.position = Vector2(18, 14)
-	_operations_return_button.custom_minimum_size = Vector2(208, 44)
-	_operations_return_button.add_theme_font_size_override("font_size", 18)
-	_operations_return_button.z_index = 200
-	add_child(_operations_return_button)
-	_operations_return_button.pressed.connect(func(): request_operation("navigate", {"mode": "squad"}))
 	visibility_changed.connect(_sync_operations_visibility)
 
 
@@ -8996,8 +8986,6 @@ func _sync_operations_visibility() -> void:
 	if old_header != null:
 		old_header.visible = legacy
 	_operations_presenter.visible = not legacy
-	if _operations_return_button != null:
-		_operations_return_button.visible = legacy
 
 
 func _operations_payload_craft_for_team(fireteam_id: String) -> String:

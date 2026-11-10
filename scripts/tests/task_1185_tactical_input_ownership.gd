@@ -31,8 +31,6 @@ const REQUIRED_ACTIONS: PackedStringArray = [
 	"tactical_toggle_fire_sector",
 	"tactical_toggle_los",
 	"tactical_sort_fireteam",
-	"tactical_phase_previous",
-	"tactical_phase_next",
 	"show_npc_thoughts",
 ]
 
@@ -130,6 +128,9 @@ func _test_settings_expose_rebindable_action_descriptors() -> void:
 		described_actions.append(String(Dictionary(descriptor_variant).get("action", "")))
 	for action_name in REQUIRED_ACTIONS:
 		_assert(described_actions.has(action_name), "Settings expose %s" % action_name)
+	for inactive_action in ["tactical_phase_previous", "tactical_phase_next"]:
+		_assert(not described_actions.has(inactive_action), "Settings do not offer disabled phase action %s" % inactive_action)
+		_assert(not InputMap.has_action(inactive_action), "Disabled phase action is not registered: %s" % inactive_action)
 
 
 func _test_thought_hold_does_not_restore_the_t_alias() -> void:

@@ -36,10 +36,10 @@ zur Ausfuehrung liegt vor; kein erneuter Planfreigabehalt.
 - [x] Dokumentieren und committen.
 
 ## Task 3: Unerreichbare Controls
-- [ ] R/F-Deskriptoren/InputMap und unerreichbare Handler entfernen; TASK1185
+- [x] R/F-Deskriptoren/InputMap und unerreichbare Handler entfernen; TASK1185
       auf aktuelle erreichbare Aktionen ausrichten.
-- [ ] Unerreichbaren OperationsReturnButton entfernen; alte Detailcontrols erhalten.
-- [ ] Eingabe-/Homebasegates pruefen und committen.
+- [x] Unerreichbaren OperationsReturnButton entfernen; alte Detailcontrols erhalten.
+- [x] Eingabe-/Homebasegates pruefen und committen.
 
 ## Task 4: Diagnostikgrenze
 - [ ] Vollstaendigen Feedbacksnapshot mit eingefrorenen Quellen vor Aenderung

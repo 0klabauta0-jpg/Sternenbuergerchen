@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### Altlasten — Schritt3 Bedienreste, 10.11.2026
+Wirkungslose R/F-Phasenbindings und unerreichbarer Legacy-Rueckkehrbutton
+entfernt; GO/Plan/Kamera/Auswahl und benoetigte alte Panels erhalten.
+Inputgate114/0, Weltbedienung9/0. Breites Operationsgate60/3 mit exakt
+identischen drei Layoutannahmen auf sauberem Main fbb7f52be bestaetigt.
+Belege: docs/qa/altlasten_20261110/README.md und baseline_failures.json.
+
 ### Altlasten — Schritt2 Loadoutowner, 10.11.2026
 SimulationRoot-gebundener Personenloadoutowner statt UI-Wahrheit, gleicher
 Checkpointvertrag und atomarer Erfolgssignalzustand. Neue Regression13/0;

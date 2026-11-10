@@ -49,7 +49,20 @@ Loadout-, Boarding- und zweiten Continueassertionen bestehen auch im breiten
 BasePersonnel-Gate. Belege lokal unter .godot/altlasten/baseline381 und
 baseline-base-personnel; Vergleich im versionierten baseline_failures.json.
 
+## 3. Tote Bedienreste
+R/F-Deskriptoren, InputMap-Eintraege und unerreichbare Eingabezweige entfernt.
+Gemeinsame Phasendaten, GO, Planmodus, Kamera und Auswahl bleiben. Nur der
+unerreichbare OperationsReturnButton entfaellt; benoetigte alte Panels und
+NodePaths bestehen weiter.
+
+TASK1185 zuerst116/4, danach114/0. Basis-Weltbedienung9/0. Das breitere
+Homebase-Operationsgate60/3 scheitert an drei alten Breiten-/Spaltenannahmen
+und ist mit denselben Fehlernamen auf sauberem Main fbb7f52be reproduziert.
+Diese drei push_error-Ausgaben sind Testassertionen, keine verschwiegenen
+Runtimefehler; siehe baseline_failures.json. Alle60 uebrigen Assertions,
+einschliesslich Navigation und Legacy-Abgrenzung, bestehen.
+
 ## Fortschritt
-3 Controls, 4 Diagnostik, 5 Portraetexport folgen seriell.
+4 Diagnostik, 5 Portraetexport folgen seriell.
 Keine Mainintegration oder neue Release-EXE. Allgemeine Performance und native
 Gestaltungsabnahme sind kein Ergebnis dieser Komponentenregressionen.

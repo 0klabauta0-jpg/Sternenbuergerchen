@@ -301,8 +301,6 @@ const ACTION_ISSUE_BREACH: StringName = &"tactical_issue_breach"
 const ACTION_TOGGLE_FIRE_SECTOR: StringName = &"tactical_toggle_fire_sector"
 const ACTION_TOGGLE_LOS: StringName = &"tactical_toggle_los"
 const ACTION_SORT_FIRETEAM: StringName = &"tactical_sort_fireteam"
-const ACTION_PHASE_PREVIOUS: StringName = &"tactical_phase_previous"
-const ACTION_PHASE_NEXT: StringName = &"tactical_phase_next"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -1030,12 +1028,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif key_event.is_action_pressed(ACTION_CYCLE_FIRETEAM_NEXT, false, true):
 		_change_fireteam(1)
-		get_viewport().set_input_as_handled()
-	elif PHASE_PLANNING_ENABLED and key_event.is_action_pressed(ACTION_PHASE_PREVIOUS):
-		_change_phase(-1)
-		get_viewport().set_input_as_handled()
-	elif PHASE_PLANNING_ENABLED and key_event.is_action_pressed(ACTION_PHASE_NEXT):
-		_change_phase(1)
 		get_viewport().set_input_as_handled()
 	elif key_event.is_action_pressed(ACTION_EXECUTE_ORDERS):
 		if execute_selected_fireteam_orders():

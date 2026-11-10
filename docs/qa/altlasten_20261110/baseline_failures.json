@@ -50,6 +50,32 @@
         ]
       },
       "identical_failures": true
+    },
+    {
+      "name": "homebase_operations",
+      "baseline": {
+        "report": ".godot/altlasten/baseline-operations/20261110T131511Z-0973a51c/report.json",
+        "exit_code": 1,
+        "error_count": 3,
+        "isolation_verified": true,
+        "failures": [
+          "ERROR: FAIL: 1280 roster has full row width and never wraps role or status by letter",
+          "ERROR: FAIL: 1600-wide squad keeps all four columns",
+          "ERROR: FAIL: 1920-wide squad keeps all four columns"
+        ]
+      },
+      "task": {
+        "report": ".godot/altlasten/controls-final/20261110T131414Z-f46b47e6/report.json",
+        "exit_code": 1,
+        "error_count": 3,
+        "isolation_verified": true,
+        "failures": [
+          "ERROR: FAIL: 1280 roster has full row width and never wraps role or status by letter",
+          "ERROR: FAIL: 1600-wide squad keeps all four columns",
+          "ERROR: FAIL: 1920-wide squad keeps all four columns"
+        ]
+      },
+      "identical_failures": true
     }
   ]
 }
