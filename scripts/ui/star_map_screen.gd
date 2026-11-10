@@ -19,6 +19,9 @@ var _approach: Button
 var _land: Button
 var _close: Button
 var _sites: Dictionary = {}
+var _fleet_selector: OptionButton
+var _visit_list: VBoxContainer
+var _visit_buttons: Dictionary={}
 var _details: PanelContainer
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
@@ -102,6 +105,13 @@ func _build() -> void:
 	information.name = "DestinationInformation"
 	information.add_theme_constant_override("separation", 10)
 	inset.add_child(information)
+	_fleet_selector=OptionButton.new()
+	_fleet_selector.name="FleetCraftSelector"
+	information.add_child(_fleet_selector)
+	_fleet_selector.item_selected.connect(func(index:int): _send("space_focus_craft",{"craft_id":String(_fleet_selector.get_item_metadata(index))}))
+	_visit_list=VBoxContainer.new()
+	_visit_list.name="LoadedLocations"
+	information.add_child(_visit_list)
 	information.add_child(_label("ZIEL & ANFLUG", 13, Color("70c8d0")))
 	_status = _label("", 15)
 	_status.name = "TravelStatus"
@@ -193,6 +203,22 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_runtime = snapshot.duplicate(true) if not snapshot.is_empty() else (Dictionary(_provider.call()) if _provider.is_valid() else {})
 	var travel: Dictionary = _runtime.get("space_travel", {})
 	var phase: String = String(travel.get("phase", "grounded"))
+	var fleet_signature:=JSON.stringify(_runtime.get("crafts",[]))
+	if String(_fleet_selector.get_meta("fleet_signature",""))!=fleet_signature:
+		_fleet_selector.clear()
+		for craft: Dictionary in Array(_runtime.get("crafts",[])):
+			_fleet_selector.add_item(String(craft.get("display_name",craft.get("craft_id","Schiff"))))
+			_fleet_selector.set_item_metadata(_fleet_selector.item_count-1,String(craft.get("craft_id","")))
+		_fleet_selector.set_meta("fleet_signature",fleet_signature)
+	for index in range(_fleet_selector.item_count):
+		if String(_fleet_selector.get_item_metadata(index))==String(travel.get("craft_id","")): _fleet_selector.select(index)
+	for location: Dictionary in Array(_runtime.get("location_runtimes",[])):
+		var id:=String(location.location_id)
+		if not _visit_buttons.has(id):
+			var button:=_button("ViewLocation_"+id,"Ort ansehen",func(): _send("focus_location",{"location_id":id}))
+			_visit_list.add_child(button); _visit_buttons[id]=button
+		var place_name: String=String(Dictionary(Dictionary(_runtime.get("campaign",{})).get("locations",{})).get(id,{}).get("name",id))
+		(_visit_buttons[id] as Button).text="Ansehen: "+place_name
 	if phase != previous_phase:
 		_error.text = ""
 	var orbit: String = String(travel.get("orbit_id", ""))

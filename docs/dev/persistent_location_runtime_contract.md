@@ -64,3 +64,5 @@ Zwei echte Schiffe/Trupps an A/B: Wechsel A-B-A erhaelt Positionen, Interaktion,
 Belegung und Fortschritt. Ein Schiff kehrt heim, das andere bleibt am Ort.
 Zweite Besucher sehen denselben Restbestand. Zwei-Personen-Startkampagne bleibt
 unveraendert; Mehrtrupppruefung verwendet ein isoliertes groesseres Team.
+
+Implementierungsnachtrag AP8: Registry location_runtime_registry.gd liefert ausschliesslich Node-Lookup. Die bestehenden Szenen/SimulationRoots besitzen lokale Wahrheit; MetaLayerFlow bindet Lifecyclecallbacks an die Quellszene und liest Planungsstate direkt aus deren Controller. Kontextdaten besitzen nur ausstehende Ergebnisbehandlung und Identitaetsprojektion. Verborgene HUD-Arbeit/SubViewport-Rendering ist deaktiviert. Kein neuer Doppel-Physikowner. Mehrschiff-Checkpoint auch bei vollstaendiger Heimkehr gesperrt, solange dessen Serializer nur ein Schiff erhalten kann. Belege: docs/qa/playtest_20261110_multi_location/README.md.

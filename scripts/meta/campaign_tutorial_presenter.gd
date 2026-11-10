@@ -143,7 +143,8 @@ func refresh() -> void:
 	visible = true
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}
-	var signature := JSON.stringify({"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
+	var checkpoint_guard: Dictionary=Dictionary(_runtime.call("get_snapshot").get("checkpoint_guard",{}))
+	var signature := JSON.stringify({"checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
 	if signature == _signature:
 		return
 	_signature = signature
@@ -154,6 +155,7 @@ func refresh() -> void:
 	_title.text = "Kampagne: Einfuehrung abgeschlossen" if int(onboarding.get("stage_index", 0)) >= 3 else "Kampagne: Etappe %d / 3" % (int(onboarding.get("stage_index", 0)) + 1)
 	_guidance.text = String(step[1])
 	_checkpoint_label.text = "Speichert an Basis-Meilensteinen." if checkpoint.is_empty() else ("Basisstand gespeichert." if bool(checkpoint.get("ok", false)) else "Speichern fehlgeschlagen. Der letzte Basisstand bleibt erhalten.")
+	if not bool(checkpoint_guard.get("ok",true)): _checkpoint_label.text=String(checkpoint_guard.get("message","Speichern wartet auf die Rueckkehr aller Schiffe"))
 	_service.register_control(_guidance, _help_id)
 	_service.register_control(_help_button, _help_id)
 	_guidance.visible = not _hints_hidden

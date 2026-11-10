@@ -68,3 +68,6 @@ Domain: Abbruchposition, Neustart, Ankunft, Orbitgrenzen, ungueltige/duplizierte
 Commands. UI: Aktionen, Sperrgruende, expliziter Anflug. Flow: keine vorzeitige
 Mission/Timer, echte Ortskarte erst nach Anflug, Fuel einmal, Rueckorbit und
 Landung vor Heimkehr. Native Verstaendlichkeit bleibt getrennte Sichtpruefung.
+
+## Revision 10.11.2026
+Die historische Ein-Reise-Grenze ist fuer diesen Slice abgeloest: singleplayer_fleet_travel_state.gd indiziert unveraenderte individuelle Reiseowner. Orte und Ansicht folgen persistent_location_runtime_contract.md. Die erste Kampagne bleibt bei zwei Personen/einem Schiff; Mehrtruppbetrieb ist mit isoliertem groesserem Team geprueft. Mehrschiff-Weltcheckpoint bleibt sichtbar gesperrt, statt ein unvollstaendiges Ein-Schiff-Save zu erzeugen.

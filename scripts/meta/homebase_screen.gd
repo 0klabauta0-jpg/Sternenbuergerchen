@@ -9232,7 +9232,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 		var gate: Dictionary = base_runtime.call("validate_operation", operation, gate_payload)
 		if not bool(gate.get("ok", false)):
 			return gate
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip"]:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip", "focus_location"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))
@@ -9317,6 +9317,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 			if _get_aircraft_definition_by_id(craft_id).is_empty():
 				return _operations_rejected("unknown_craft", "Schiff nicht verfügbar")
 			_on_shipcard_select_requested(craft_id)
+			if _singleplayer_command_handler.is_valid(): _singleplayer_command_handler.call("space_focus_craft",{"craft_id":craft_id})
 		"pilot", "board", "unboard", "start":
 			if _get_aircraft_definition_by_id(craft_id).is_empty() or _operations_craft_busy(craft_id):
 				return _operations_rejected("craft_busy", "Schiff ist nicht an der Heimatbasis verfügbar")

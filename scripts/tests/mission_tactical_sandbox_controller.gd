@@ -843,6 +843,7 @@ func _process(delta: float) -> void:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["hud_light_usec"] = scopes_usec["feedback_and_security_usec"]
 		scope_started_usec = Time.get_ticks_usec()
+	if not _tactical_ui_visible: return
 	_card_refresh_time_remaining -= delta
 	_runtime_hud_heavy_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
@@ -4090,7 +4091,10 @@ func _get_approach_angle_name() -> String:
 
 
 func set_tactical_ui_visible(is_visible: bool) -> void:
+	var changed: bool=_tactical_ui_visible!=is_visible
 	_tactical_ui_visible = is_visible
+	if not is_visible: _cancel_periodic_hud_projection()
+	elif changed: _runtime_hud_command_refresh_pending=true
 	for path in [
 		"../TacticalUI/MissionTint",
 		"../TacticalUI/MissionIdentityPanel",
@@ -4270,6 +4274,7 @@ func get_periodic_hud_projection_queue_debug_snapshot() -> Dictionary:
 
 
 func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
+	if not _tactical_ui_visible: return
 	if include_heavy_surfaces:
 		# Supersede only older work BEFORE projecting: requests raised by this
 		# synchronous pass or its callbacks must survive its return.
@@ -4280,6 +4285,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 
 
 func _update_ui_projection(include_heavy_surfaces: bool, force_heavy_surfaces: bool, skip_runtime_surfaces: bool = false) -> void:
+	if not _tactical_ui_visible: return
 	if _mission_visible_frame_timing_debug_enabled:
 		_hud_projection_debug_calls.clear()
 		_hud_projection_debug_scopes_usec.clear()

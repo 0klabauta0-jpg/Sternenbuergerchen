@@ -70,6 +70,8 @@ func _initial_roster() -> Array:
 func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
+	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")
+	if not bool(guard.get("ok",false)): return guard
 	if flow.get("_active_mission") != null or not Array(flow.get("_pending_mission_craft_transfers")).is_empty():
 		return {"ok": false, "reason": "away_from_checkpoint"}
 	var travel: Dictionary = runtime.call("get_space_travel_snapshot") if runtime != null and runtime.has_method("get_space_travel_snapshot") else {}
