@@ -1,0 +1,75 @@
+{
+  "tool": "image_gen.imagegen",
+  "date": "2026-11-11",
+  "status": "generated individual portraits; native integration to be verified",
+  "reference": "res://art/portraits_20261111/basis_concept_portrait_reference.png",
+  "prompt_record": "Structured generation instructions retained from execution summary. This is not a byte-for-byte tool transcript.",
+  "shared_instructions": "One 2:3 individual portrait, same warm semi-realistic painterly 3D game portrait style as reference. Muted teal, ochre and ivory, warm daylight, blurred background, complete head and shoulder bust. No UI, text, weapons, helmet or border. Individual appearance is fictional art metadata, independent of skills.",
+  "faces": [
+    {
+      "portrait_id": "char_portrait_045",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_045.tres",
+      "source": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/anja.png",
+      "source_sha256": "3965a5efb1e94a85ce43d012533108f3a7f8379d5e3d76fdbfe4bc47005548cd",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1c792-fd49-72f1-b9e5-55144605b486\\exec-dbd3d173-0e6b-4c09-87b8-3dab1434fd89.png",
+      "description": "Woman around 34, olive-light skin, warm brown wavy chin-length hair, dark brown eyes, small freckle left cheek, sand-beige field jacket and dark olive scarf.",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "import_size": [
+        512,
+        768
+      ]
+    },
+    {
+      "portrait_id": "char_portrait_046",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_046.tres",
+      "source": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/samira.png",
+      "source_sha256": "fd04d9e9f1864208a07216def576702fd44aa5b0ba61a6cdc6501e31c011b64c",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1c792-fd49-72f1-b9e5-55144605b486\\exec-06876483-86cc-4c88-a21a-5a3a9df96bcb.png",
+      "description": "Woman around 49, deep brown skin, short salt-and-pepper natural curls, broad face, scar at outer right eyebrow, amber-brown eyes, teal mechanic jacket with ochre collar.",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "import_size": [
+        512,
+        768
+      ]
+    },
+    {
+      "portrait_id": "char_portrait_047",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_047.tres",
+      "source": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/tomas.png",
+      "source_sha256": "2cde3751459daf46c0e663c8d3a71cfac562e77eb7be6afa9a2895d3f02a100c",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1c792-fd49-72f1-b9e5-55144605b486\\exec-f73ec373-6f5a-48c2-ad8e-e547c26effa3.png",
+      "description": "Man around 30, East Asian appearance, black swept-back undercut, clean shaven rounded jaw, dark eyes, blue-grey flight jacket.",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "import_size": [
+        512,
+        768
+      ]
+    },
+    {
+      "portrait_id": "char_portrait_048",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_048.tres",
+      "source": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/erik.png",
+      "source_sha256": "8bd8bf2a144c7501979259d76501722ab5f246b416503ff69a03493226cc8fde",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1c792-fd49-72f1-b9e5-55144605b486\\exec-4a1f2610-937d-41ed-93c7-291a3e21efd1.png",
+      "description": "Man around 54, pale freckled skin, high balding forehead, ginger-grey beard, square jaw, broad nose, blue-green eyes, slate jacket and rust shoulder.",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "import_size": [
+        512,
+        768
+      ]
+    }
+  ],
+  "reference_sha256": "48fb10cb7e09594d66ead95b614b06f99e69b209487d37746054b630bf148ece"
+}

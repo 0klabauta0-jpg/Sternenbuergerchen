@@ -21,10 +21,10 @@ func _run() -> void:
 	var old_entries: Array = Array(baseline.get("entries", []))
 	var by_id: Dictionary = Dictionary(loaded.get("entries_by_id", {}))
 	var validation: Dictionary = CATALOG.validate_catalog()
-	_assert(old_entries.size() == 42 and entries.size() == 42, "Exactly all 42 existing identities remain")
+	_assert(old_entries.size() == 42 and entries.size() >= old_entries.size(), "All 42 existing identities remain in the extended catalog")
 	_assert(bool(validation.get("valid", false)), "Active catalog validates")
-	_assert(int(validation.get("loadable_count", 0)) == 42, "All 42 portraits are loadable")
-	_assert(int(validation.get("candidate_count", 0)) == 42, "All 42 candidates remain")
+	_assert(int(validation.get("loadable_count", 0)) == entries.size(), "All catalog portraits are loadable")
+	_assert(int(validation.get("candidate_count", 0)) == entries.size(), "All catalog entries are candidates")
 	_assert(CATALOG.get_candidate_entries().size() >= 30, "Minimum start-roster candidate pool remains")
 	_assert(Dictionary(loaded.get("entries_by_legacy_path", {})).size() == 42, "Every old portrait path has one alias")
 	for old_variant in old_entries:
@@ -100,11 +100,12 @@ func _run() -> void:
 
 func _test_cache_and_custom_catalog(first: Dictionary, last: Dictionary) -> void:
 	var snapshot: Dictionary = CATALOG.load_catalog()
+	var expected_count: int = Array(snapshot.get("entries", [])).size()
 	Dictionary(snapshot.get("entries_by_id", {})).clear()
 	Array(snapshot.get("entries", [])).clear()
 	var next_snapshot: Dictionary = CATALOG.load_catalog()
-	_assert(Dictionary(next_snapshot.get("entries_by_id", {})).size() == 42, "Caller mutation cannot corrupt cached ID map")
-	_assert(Array(next_snapshot.get("entries", [])).size() == 42, "Caller mutation cannot corrupt cached entries")
+	_assert(Dictionary(next_snapshot.get("entries_by_id", {})).size() == expected_count, "Caller mutation cannot corrupt cached ID map")
+	_assert(Array(next_snapshot.get("entries", [])).size() == expected_count, "Caller mutation cannot corrupt cached entries")
 	var fixture_path: String = "user://portrait_atlas_fixture_%d.json" % Time.get_ticks_usec()
 	var fixture: Dictionary = {"schema_version": 1, "catalog_id": "portrait_identity_catalog_v1", "entries": [first]}
 	_assert(_write_fixture(fixture_path, fixture), "Custom test catalog writes in isolated user data")
@@ -114,7 +115,7 @@ func _test_cache_and_custom_catalog(first: Dictionary, last: Dictionary) -> void
 	_assert(CATALOG.resolve_path(String(last.get("id", "")), "", fixture_path) == String(last.get("path", "")), "Custom catalog rereads changes without cache reset")
 	_assert(DirAccess.remove_absolute(ProjectSettings.globalize_path(fixture_path)) == OK, "Custom fixture cleaned up")
 	CATALOG.clear_cache_for_tests()
-	_assert(CATALOG.load_catalog().get("entries", []).size() == 42, "Explicit cache reset rereads shipped catalog")
+	_assert(CATALOG.load_catalog().get("entries", []).size() == expected_count, "Explicit cache reset rereads shipped catalog")
 
 
 func _write_fixture(path: String, value: Dictionary) -> bool:
