@@ -1,0 +1,115 @@
+{
+  "first_move_ms": 1189.378,
+  "go_dispatch_ms": 36.277,
+  "actual_shots": 8,
+  "phases": {
+    "still": {
+      "frames": 119,
+      "median_wall_ms": 3.885,
+      "p95_wall_ms": 17.619,
+      "p99_wall_ms": 25.4,
+      "max_wall_ms": 40.694,
+      "max_sim_ms": 3.409,
+      "max_view_ms": 12.533
+    },
+    "pan_1": {
+      "frames": 240,
+      "median_wall_ms": 8.076,
+      "p95_wall_ms": 16.552,
+      "p99_wall_ms": 25.284,
+      "max_wall_ms": 27.729,
+      "max_sim_ms": 3.317,
+      "max_view_ms": 8.601
+    },
+    "pan_2": {
+      "frames": 240,
+      "median_wall_ms": 8.2725,
+      "p95_wall_ms": 15.852,
+      "p99_wall_ms": 24.187,
+      "max_wall_ms": 47.078,
+      "max_sim_ms": 3.46,
+      "max_view_ms": 6.963
+    },
+    "go_to_contact": {
+      "frames": 6365,
+      "median_wall_ms": 6.011,
+      "p95_wall_ms": 19.099,
+      "p99_wall_ms": 29.021,
+      "max_wall_ms": 366.556,
+      "max_sim_ms": 143.258,
+      "max_view_ms": 11.885
+    },
+    "combat": {
+      "frames": 210,
+      "median_wall_ms": 14.359,
+      "p95_wall_ms": 52.632,
+      "p99_wall_ms": 74.711,
+      "max_wall_ms": 94.604,
+      "max_sim_ms": 32.742,
+      "max_view_ms": 18.929
+    }
+  },
+  "preparation_transitions": [
+    {
+      "elapsed_ms": 4067,
+      "snapshot": {
+        "cancel_available": true,
+        "error": "",
+        "expected_chunks": 0,
+        "geometry_build_count": 0,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 0,
+        "memory_static_delta_bytes": 0,
+        "memory_static_peak_bytes": 0,
+        "prepared_chunks": 0,
+        "progress": 0.0,
+        "ready": false,
+        "reason": "",
+        "retained_payload_bytes": 0,
+        "status": "loading_data"
+      }
+    },
+    {
+      "elapsed_ms": 8690,
+      "snapshot": {
+        "cancel_available": true,
+        "error": "",
+        "expected_chunks": 2161,
+        "geometry_build_count": 0,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 974941238,
+        "memory_static_delta_bytes": 0,
+        "memory_static_peak_bytes": 974941238,
+        "prepared_chunks": 0,
+        "progress": 0.0,
+        "ready": false,
+        "reason": "",
+        "retained_payload_bytes": 0,
+        "status": "preparing_resources"
+      }
+    },
+    {
+      "elapsed_ms": 24532,
+      "snapshot": {
+        "cancel_available": true,
+        "error": "",
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 974941238,
+        "memory_static_delta_bytes": 308079727,
+        "memory_static_peak_bytes": 1283020965,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "retained_payload_bytes": 213117380,
+        "status": "ready"
+      }
+    }
+  ],
+  "preparation_static_peak": 1282957219,
+  "preparation_video_peak": 1108410368,
+  "profile_zip_entry": "B_battle_profile.json",
+  "scope": "combined after state; no isolated FPS before-after claim"
+}

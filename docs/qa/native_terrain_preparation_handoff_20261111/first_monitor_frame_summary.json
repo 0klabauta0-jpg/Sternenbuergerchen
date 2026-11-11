@@ -1,0 +1,47 @@
+{
+  "still": {
+    "frames": 119,
+    "median_wall_ms": 3.8,
+    "p95_wall_ms": 16.625,
+    "p99_wall_ms": 19.375,
+    "max_wall_ms": 29.504,
+    "max_sim_ms": 3.359,
+    "max_view_ms": 12.75
+  },
+  "pan_1": {
+    "frames": 240,
+    "median_wall_ms": 7.567,
+    "p95_wall_ms": 15.987,
+    "p99_wall_ms": 25.28,
+    "max_wall_ms": 27.932,
+    "max_sim_ms": 3.69,
+    "max_view_ms": 11.448
+  },
+  "pan_2": {
+    "frames": 240,
+    "median_wall_ms": 6.9885,
+    "p95_wall_ms": 14.946,
+    "p99_wall_ms": 23.386,
+    "max_wall_ms": 40.77,
+    "max_sim_ms": 3.585,
+    "max_view_ms": 7.072
+  },
+  "go_to_contact": {
+    "frames": 6300,
+    "median_wall_ms": 5.6845,
+    "p95_wall_ms": 20.12,
+    "p99_wall_ms": 45.446,
+    "max_wall_ms": 356.903,
+    "max_sim_ms": 118.424,
+    "max_view_ms": 11.785
+  },
+  "combat": {
+    "frames": 285,
+    "median_wall_ms": 10.357,
+    "p95_wall_ms": 31.2,
+    "p99_wall_ms": 53.715,
+    "max_wall_ms": 58.528,
+    "max_sim_ms": 22.881,
+    "max_view_ms": 9.5
+  }
+}

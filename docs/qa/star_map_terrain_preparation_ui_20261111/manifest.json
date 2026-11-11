@@ -1,0 +1,46 @@
+{
+  "status": "headless_16_and_89_pass_native_combined_handoff_62_pass",
+  "artifacts": [
+    {
+      "path": "scripts/ui/star_map_screen.gd",
+      "sha256": "7b1771af046fc10e8122a57caa2948fbc2e6efec95cbdb5ce53dbb12f3ea7ab9",
+      "bytes": 21516
+    },
+    {
+      "path": "scripts/tests/star_map_terrain_preparation_ui_test.gd",
+      "sha256": "241e48b160b657e9d1ab0156bbfce9cc411971792f3261a395f284344568352e",
+      "bytes": 4292
+    },
+    {
+      "path": "docs/tasks/STAR_MAP_TERRAIN_PREPARATION_UI_2026_11_11.md",
+      "sha256": "f6c4f644b5a509f02129bc3fdc7a7454a56c1a8eca5be3492bd504f93bc580fb",
+      "bytes": 1587
+    },
+    {
+      "path": "docs/qa/star_map_terrain_preparation_ui_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/star_map_terrain_preparation_ui_20261111/r06_production_ui_green.log",
+      "sha256": "03567b3fbef791aab3f1978b12b26d368c764fd0f681f6480cc038b71162cdc5",
+      "bytes": 1172
+    },
+    {
+      "path": "docs/qa/star_map_terrain_preparation_ui_20261111/r06_production_ui_red.log",
+      "sha256": "45fc6cce98a5004df30f918b45a5a27a88123f8bfd1f503d04fd2c20aeb3f854",
+      "bytes": 1171
+    },
+    {
+      "path": "docs/qa/star_map_terrain_preparation_ui_20261111/r06_production_ui_regression.log",
+      "sha256": "fe6e6e01bf8b8de92884e94ad0f6caf56bdd57589d848f1e30fcce2b297aba7a",
+      "bytes": 215
+    },
+    {
+      "path": "docs/qa/star_map_terrain_preparation_ui_20261111/README.md",
+      "sha256": "8df15b1e5e477d409fc357728406398f121927f9bcd8fd9e4cc245f3349b4970",
+      "bytes": 1093
+    }
+  ],
+  "native_cancel_not_separately_claimed": true
+}

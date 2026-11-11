@@ -1,0 +1,114 @@
+{
+  "basis_commit": "7ef57c931",
+  "engine": "Godot4.6.2 stable",
+  "mode": "headless functional + native combined B62/0, broad FPS acceptance open",
+  "source_sha256": {
+    "scripts/terrain/terrain_chunk_resource_cache.gd": "de4b483dc4825b612e988c973b876ddddeff17fce43dc0d1d5c6bfa65f8c7660",
+    "scripts/terrain/terrain_map_3d_view.gd": "b065ba504e3bbd64718c849f5c78dbd46c0e76928f33a49eb9263b70bbceeba8",
+    "scripts/meta/meta_layer_flow.gd": "b99f930fe75d1b0d187f73018fa66f984005c29df7031c84ec54a7e7df6c56b6",
+    "scripts/tests/mission_test_setup.gd": "c3739b19818b301eff9cdb6c33494a9dd2fa1d35c6bd16560ccb580e23509e38",
+    "scripts/tests/terrain_chunk_resource_cache_test.gd": "9a500e694e4d59370fc6e592e5fb5e1f43b70681e9b3aaf45dc6f2f3258399a8",
+    "scripts/tests/terrain_resource_prefill_test.gd": "64ad6dd9276cd9e7ff03234dac64acbbf5b2b2f749253db5779a9be389be2a6c",
+    "scripts/tests/terrain_approach_readiness_test.gd": "052c77c3848d4b109922a90057e1365acdb38c380498760f552a8e31052cc5bc"
+  },
+  "evidence": [
+    {
+      "log": "cache_final.log",
+      "sha256": "2d85938b8f57954a65bd234aa4dc76d639ff0de7c8496aac67aee92c63d37357",
+      "last_line": "TERRAIN_CHUNK_RESOURCE_CACHE 41 passed, 0 failed"
+    },
+    {
+      "log": "approach_final.log",
+      "sha256": "7f3a99d350fbf408c915fba35af9ec39af1aae7023815734acd8a5cb59226fc1",
+      "last_line": "TERRAIN_APPROACH_READINESS 13 passed, 0 failed"
+    },
+    {
+      "log": "fow_regression.log",
+      "sha256": "db345f68b1264f298faa488b3d441712a730e8a1047b4e6be9af18505923c8a6",
+      "last_line": "REGIONAL_FOW_PUBLICATION 13 passed, 0 failed"
+    },
+    {
+      "log": "streaming_regression.log",
+      "sha256": "80acbf520b2282fb26b0fa44d92a888c4ff87197cffc23b4c8f4b1eae774c77c",
+      "last_line": "REGIONAL_HIDDEN_VIEWPORT PASS"
+    },
+    {
+      "log": "prefill_A.log",
+      "sha256": "08be86bb4456072f04bdefde726d311af77398c690d7bf688a551e5365dfd1f7",
+      "last_line": "TERRAIN_RESOURCE_PREFILL 18 passed, 0 failed",
+      "snapshot": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 380199380,
+        "memory_static_delta_bytes": 236578708,
+        "memory_static_peak_bytes": 616778088,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 149115384,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      }
+    },
+    {
+      "log": "prefill_B.log",
+      "sha256": "076bf289a7888ab3e78223bb80e803f0a1f46439805ba9eda353917f3a99f009",
+      "last_line": "TERRAIN_RESOURCE_PREFILL 18 passed, 0 failed",
+      "snapshot": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 382489948,
+        "memory_static_delta_bytes": 301706684,
+        "memory_static_peak_bytes": 684196632,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 213117380,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      }
+    },
+    {
+      "log": "prefill_C.log",
+      "sha256": "887fecd7e014aaa45b91b6472a77bad8c393e938fc795b6e2f9ff505f5accf6c",
+      "last_line": "TERRAIN_RESOURCE_PREFILL 18 passed, 0 failed",
+      "snapshot": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 382042376,
+        "memory_static_delta_bytes": 237921352,
+        "memory_static_peak_bytes": 619963728,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 151662728,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      }
+    },
+    {
+      "log": "approach_stale_result_green.log",
+      "sha256": "be253bfe16d9d180a04aacefb7c4cdc7da1683492d4f8691d6155458061d78b1",
+      "last_line": "TERRAIN_APPROACH_READINESS 18 passed, 0 failed"
+    }
+  ],
+  "native_proof": "docs/qa/native_terrain_preparation_handoff_20261111/README.md",
+  "current_lifecycle_checks": 18,
+  "native_execution_before_eol_normalization_sha256": {
+    "scripts/meta/meta_layer_flow.gd": "ede7a111ede3dfc7a2b85b4c059f95db3cd2dafc837b7738f36ceb1877a739e5",
+    "scripts/tests/terrain_approach_readiness_test.gd": "b7ded0254522d92fb533acbfab50e18dc69fbe0431f1daafdf476e9aed27103e"
+  },
+  "eol_note": "Only CRLF to repository LF after native run; source semantics unchanged."
+}

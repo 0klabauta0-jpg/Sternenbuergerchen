@@ -93,6 +93,7 @@ var unit_loadout_modifiers_by_unit_id: Dictionary = {}
 var _is_initialized: bool = false
 var _terrain_renderer = null
 var _terrain_3d_view = null
+var _prepared_terrain_resource_cache: RefCounted
 var _loaded_terrain_map_data = null
 var _loaded_terrain_map_path: String = ""
 var _mission_scenario = null
@@ -798,6 +799,10 @@ func _build_enemy_patrol_paths() -> Dictionary:
 	return result
 
 
+func use_prepared_terrain_resource_cache(cache: RefCounted) -> void:
+	_prepared_terrain_resource_cache = cache
+
+
 func use_prepared_terrain(path: String, map) -> void:
 	if map != null and not map.get_tiles().is_empty():
 		_loaded_terrain_map_path = path
@@ -1065,6 +1070,9 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 		view.call("set_runtime_terrain_registry", get_node_or_null(terrain_registry_path))
 	if view.has_method("set_authoring_markers_visible"): view.call("set_authoring_markers_visible",false)
 	var regional := _loaded_terrain_map_data != null and float(_loaded_terrain_map_data.get_regional_height_step()) > 0.0
+	if _prepared_terrain_resource_cache != null:
+		view.call("set_prepared_terrain_resource_cache", _prepared_terrain_resource_cache)
+		_prepared_terrain_resource_cache = null
 	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
 		if regional:
 			var presentation: Dictionary = _loaded_terrain_map_data.get_place_presentation()

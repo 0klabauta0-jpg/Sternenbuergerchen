@@ -1,0 +1,164 @@
+{
+  "status": "native_62_pass_0_fail_hitches_open",
+  "armor_candidate_commit": "0f1334ba1",
+  "go_commit": "5f8a6a3cb",
+  "first_run_monitor_failure": "expired fire event ring",
+  "second_run_monitor_failure": "base writer receipt not closed before subclass reads",
+  "artifacts": [
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/B_battle_profile.zip",
+      "sha256": "4fc0aed30c079cabb3df76c635ce10b8f7afe5067d33b244b0d6f008e65b4062",
+      "bytes": 1249574
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/B_terrain_preparation.json",
+      "sha256": "3b96a4b059e1e37bc9eed7be336b4cd8551443c7d3aece492d3c74aa73390c33",
+      "bytes": 7214
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/B_terrain_preparation.png",
+      "sha256": "de2c00b7e282f7fb450a209bcc320bacc96b1ec3f2396f3faf35f1c3fa9e9924",
+      "bytes": 458253
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/battle_verified.json",
+      "sha256": "521ad4b975d2abdfb6e4cbcbeb30e02a9e7c62056777b08f87df06696289a044",
+      "bytes": 780
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/battle_verified.log",
+      "sha256": "fc2d94e03bd217dce6ed40848b5fec4455bb7c41b2c246b614512719086599f8",
+      "bytes": 7842
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/check_only.log",
+      "sha256": "54f54888bb4de38919848caff0154c84e5c75e9db0364c7ca3d7d231f82ac0e2",
+      "bytes": 543
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_B_terrain_preparation.json",
+      "sha256": "0d395d6ab9d3b686225f53c0eb3c97edea01ada41a31e6daea2d92f5a00b6a31",
+      "bytes": 6744
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_B_terrain_preparation.png",
+      "sha256": "a3bb1db4990aa012c8c2de16b70a5d572d476604f996586b7e8c20bd3cee06ba",
+      "bytes": 458165
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_battle.json",
+      "sha256": "57ca5a0e5af7b6dcd147fd208418c065a4d5fe446be2e2b6d3ee6ed052150a5d",
+      "bytes": 761
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_battle.log",
+      "sha256": "88a4fe5ecac79a4f5f6801307705dadf0e25e3767dc5463aab4c1e4d900a491a",
+      "bytes": 7537
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_battle_profile.zip",
+      "sha256": "76e2146381cacd9e2763260509bae3172740169051681a6a6f02c9b143e0d323",
+      "bytes": 1253709
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/first_monitor_frame_summary.json",
+      "sha256": "4123aa508fb3fa067713e4d8bf05b58d01a765967156e8e4d24ae9225d182c67",
+      "bytes": 1044
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/README.md",
+      "sha256": "9c35ed7acbe57d67b19b2ec1a33b02688efbb1155f416c1f8cadadf6f06464a6",
+      "bytes": 4586
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/second_monitor_B_terrain_preparation.json",
+      "sha256": "944391048ad2e00704f12f900ae32dcf6f6ef2be4f370762f3aa8093bead03a9",
+      "bytes": 6987
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/second_monitor_B_terrain_preparation.png",
+      "sha256": "7c6b1f08ce6320ac96e0ffc61421266f6c88d6636f9516008f892f17095dc62e",
+      "bytes": 458289
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/second_monitor_battle_final.json",
+      "sha256": "f08d4025e34821447423db29e2071ee2934b973d8fef8fcb1a7dea74a50ea6f9",
+      "bytes": 773
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/second_monitor_battle_final.log",
+      "sha256": "d6e45074dabd2355213267930453eeb2fc8078f8e9ec3521da018ed842719649",
+      "bytes": 8199
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/second_monitor_battle_profile.zip",
+      "sha256": "768a5d6db948117fab534bd49affd809783a1ad8c17e1a612335d7c1d6e3b9f9",
+      "bytes": 1102653
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/summary.json",
+      "sha256": "03352fd1a575eb023d6c9b8757c1df46d3c2516fb9dc5405c0173f36bc959767",
+      "bytes": 3161
+    },
+    {
+      "path": "docs/qa/native_terrain_preparation_handoff_20261111/writer_close_check.log",
+      "sha256": "54f54888bb4de38919848caff0154c84e5c75e9db0364c7ca3d7d231f82ac0e2",
+      "bytes": 543
+    },
+    {
+      "path": "docs/tasks/NATIVE_TERRAIN_PREPARATION_HANDOFF_2026_11_11.md",
+      "sha256": "d6662894fcbaa1c1abf40def796e61877aa19a69721d4ec87cd5f03c2a1c8b52",
+      "bytes": 3587
+    },
+    {
+      "path": "maps/trade_outpost.json",
+      "sha256": "d3ab04a32a142a51ea20d180397b7cd9355dfa55452e2fc224fbd63f360624a7",
+      "bytes": 21343682
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "2d3545ab15d9d9118c78eef2fe82d1a98340f1c5bc06bb5bcc915299a2d40d13",
+      "bytes": 176359
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "b99f930fe75d1b0d187f73018fa66f984005c29df7031c84ec54a7e7df6c56b6",
+      "bytes": 407301
+    },
+    {
+      "path": "scripts/terrain/personnel_armor_visual.gd",
+      "sha256": "62c6e22ec0df1b08f4c598751a8be3f09b6c68254d3d7d6a0f25b6a23dd49349",
+      "bytes": 38336
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "b065ba504e3bbd64718c849f5c78dbd46c0e76928f33a49eb9263b70bbceeba8",
+      "bytes": 922794
+    },
+    {
+      "path": "scripts/tests/mission_test_setup.gd",
+      "sha256": "c3739b19818b301eff9cdb6c33494a9dd2fa1d35c6bd16560ccb580e23509e38",
+      "bytes": 67956
+    },
+    {
+      "path": "scripts/tests/native_glut_battle_profile.gd",
+      "sha256": "e547231a9f21206653ee3cb8dbadd7660c6a530b91298d380bdf01051d59270a",
+      "bytes": 12466
+    },
+    {
+      "path": "scripts/tests/native_terrain_preparation_battle_test.gd",
+      "sha256": "a662d14b1e1f18e30d6313aff8b723e7a99870a5801882594e590bcc2f2b2080",
+      "bytes": 11752
+    },
+    {
+      "path": "scripts/ui/star_map_screen.gd",
+      "sha256": "7b1771af046fc10e8122a57caa2948fbc2e6efec95cbdb5ce53dbb12f3ea7ab9",
+      "bytes": 21516
+    }
+  ],
+  "native_execution_before_eol_normalization_sha256": {
+    "scripts/meta/meta_layer_flow.gd": "ede7a111ede3dfc7a2b85b4c059f95db3cd2dafc837b7738f36ceb1877a739e5",
+    "scripts/tests/terrain_approach_readiness_test.gd": "b7ded0254522d92fb533acbfab50e18dc69fbe0431f1daafdf476e9aed27103e"
+  },
+  "eol_note": "Only CRLF to repository LF after native run; source semantics unchanged."
+}

@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual travel owner remains in approach and creates no mission before full readiness
+PASS: Readiness/progress comes from the actual whole-map preloader
+PASS: StarMap provider projects the same owner loading snapshot
+PASS: Existing star-map operations still use the runtime adapter
+PASS: Cancel returns through the actual owner to the same destination orbit
+PASS: Cancel starts no units and restores the preceding craft-location projection
+PASS: Cancellation stays visible in loading feedback
+PASS: Budget failure aborts before mission and returns the actual owner to orbit
+PASS: Failure is explicit and never partial-ready
+PASS: Stale location job is discarded without changing a newer travel phase
+PASS: Cancel does not wait synchronously for an unfinished data worker
+FAIL: Retired data result is joined and cannot activate a stale mission
+PASS: Loading timeout cannot leave an endless approach
+TERRAIN_APPROACH_READINESS 12 passed, 1 failed
+WARNING: A Thread object is being destroyed without its completion having been realized.
+Please call wait_to_finish() on it to ensure correct cleanup.
+   at: ~Thread (core/os/thread.cpp:102)

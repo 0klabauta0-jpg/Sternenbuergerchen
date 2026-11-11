@@ -149,6 +149,9 @@ var _location_registry = preload("res://scripts/mission/location_runtime_registr
 var _location_contexts: Dictionary = {}
 var _craft_location_runtime: Dictionary = {}
 var _space_approaches: Dictionary = {}
+var _surface_preparation_results: Dictionary = {}
+var _retired_terrain_workers: Array[Thread] = []
+const TERRAIN_PREPARATION_TIMEOUT_MSEC := 180000
 var _location_callback_active := false
 var _singleplayer_services: Control
 var _singleplayer_services_elapsed: float = 0.0
@@ -275,7 +278,7 @@ func _ready() -> void:
 	_star_map_screen.name = "StarMapScreen"
 	star_layer.add_child(_star_map_screen)
 	_star_map_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_star_map_screen.call("configure", Callable(_singleplayer_runtime, "get_snapshot"), Callable(_singleplayer_runtime, "request_operation"))
+	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"))
 	_star_map_screen.hide()
 	_ensure_meta_nav_timer_labels()
 
@@ -344,7 +347,9 @@ func _process(_delta: float) -> void:
 	var scopes: Dictionary = {}
 	if _singleplayer_runtime != null:
 		_singleplayer_runtime.call("advance_space_travel", _delta)
+	_poll_retired_terrain_workers()
 	for craft_id in _space_approaches.keys():
+		if not _space_approaches.has(craft_id): continue
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
 		if float(_space_approaches[craft_id].remaining)<=0.0: _finish_space_approach(String(craft_id))
 	if profile_enabled:
@@ -4153,7 +4158,7 @@ func _continue_campaign_after_failed_extraction() -> bool:
 	return true
 
 
-func _start_mission(prepared_map = null) -> void:
+func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> void:
 	var mission_host = _get_mission_host()
 	if mission_host == null:
 		push_warning("MetaLayerFlow requires a MissionHost child.")
@@ -4176,6 +4181,10 @@ func _start_mission(prepared_map = null) -> void:
 				if _active_mission==existing: _active_mission=null
 				existing.free()
 			else:
+				var resident_view := existing.get_node_or_null("Primary3DView")
+				if prepared_cache != null and resident_view != null:
+					resident_view.call("set_prepared_terrain_resource_cache", prepared_cache)
+					resident_view.call("render_map")
 				_admit_existing_location(existing)
 				_show_mission()
 				return
@@ -4185,7 +4194,7 @@ func _start_mission(prepared_map = null) -> void:
 		_active_mission = null
 
 	var mission_instance = MISSION_TEST_SCENE.instantiate()
-	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map)
+	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map, prepared_cache)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
 	if not location_id.is_empty():
@@ -4202,10 +4211,10 @@ func _start_mission(prepared_map = null) -> void:
 	call_deferred("_sync_mission_host_visibility")
 
 
-func _start_or_update_active_mission(prepared_map = null) -> void:
+func _start_or_update_active_mission(prepared_map = null, prepared_cache: RefCounted = null) -> void:
 	var location_id:=String(_active_singleplayer_identity.get("location_id",""))
 	if not location_id.is_empty():
-		_start_mission(prepared_map)
+		_start_mission(prepared_map, prepared_cache)
 		return
 	if _active_mission != null:
 		_release_preview_mission()
@@ -4214,10 +4223,10 @@ func _start_or_update_active_mission(prepared_map = null) -> void:
 		_sync_active_homebase_direct_selection_from_mission_setup()
 		_show_mission()
 		return
-	_start_mission(prepared_map)
+	_start_mission(prepared_map, prepared_cache)
 
 
-func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, preview_mode: bool, prepared_map = null) -> void:
+func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, preview_mode: bool, prepared_map = null, prepared_cache: RefCounted = null) -> void:
 	_bind_location_visit(mission_instance, _active_singleplayer_identity.duplicate(true) if not preview_mode else {})
 	if selected_unit_ids.is_empty():
 		selected_unit_ids = _selected_unit_ids.duplicate()
@@ -4300,6 +4309,8 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		if prepared_map != null:
 			mission_setup.call("use_prepared_terrain", String(mission_setup.get("map_file_path")), prepared_map)
+		if prepared_cache != null:
+			mission_setup.call("use_prepared_terrain_resource_cache", prepared_cache)
 		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", NO_SCENARIO_FILE_PATH)).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)
@@ -7620,6 +7631,12 @@ func _show_star_map() -> void:
 
 
 func _begin_space_approach(craft_id: String, departure: Dictionary) -> void:
+	var previous_location := String(_craft_location_runtime.get(craft_id, ""))
+	if _space_approaches.has(craft_id):
+		previous_location = String(_space_approaches[craft_id].get("previous_craft_location", previous_location))
+		_retire_terrain_preparation(_space_approaches[craft_id])
+		_space_approaches.erase(craft_id)
+	_surface_preparation_results.erase(craft_id)
 	# A new craft visit never inherits another ship's accepted LZ/drop trigger.
 	_craft_location_runtime[craft_id]=String(departure.get("destination_location_id",""))
 	var visit_planning:=_mission_planning_state.duplicate(true)
@@ -7633,13 +7650,19 @@ func _begin_space_approach(craft_id: String, departure: Dictionary) -> void:
 			card["state"]="to_mission"; card["progress"]=0.0
 	_space_approaches[craft_id]={"remaining":0.65,"planning":visit_planning,"mission":_get_selected_mission_definition().duplicate(true),"mission_id":_selected_mission_id,"units":_selected_unit_ids.duplicate(),"teams":_selected_fireteam_ids.duplicate(),"identity":{"craft_id":craft_id,"job_id":String(departure.get("job_id","")),"scenario_id":String(_get_selected_mission_definition().get("scenario_file_path","")).get_file().get_basename(),"location_id":String(departure.get("destination_location_id","")),"departure_token":String(Dictionary(_singleplayer_runtime.get("_departure_token_by_craft")).get(craft_id,"")),"unit_ids":Array(_selected_unit_ids),"fireteam_ids":Array(_selected_fireteam_ids)}}
 	var approach: Dictionary = _space_approaches[craft_id]
+	approach["started_msec"] = Time.get_ticks_msec()
+	approach["previous_craft_location"] = previous_location
 	var map_path := String(approach.mission.get("map_file_path", ""))
 	var resident: Node = _location_registry.get_location(String(approach.identity.location_id))
 	var resident_identity: Dictionary = resident.get_meta("singleplayer_mission_identity", {}) if is_instance_valid(resident) else {}
 	var resident_driver: Node = resident.get_node_or_null("CombatLoopDriver") if is_instance_valid(resident) else null
 	var reuses_resident := is_instance_valid(resident) and String(resident_identity.get("scenario_id", "")) == String(approach.identity.scenario_id) \
 		and (resident_driver == null or not bool(resident_driver.get("_combat_finished")))
-	if map_path in REGIONAL_CAMPAIGN_MAPS and not reuses_resident:
+	approach["requires_resources"] = map_path in REGIONAL_CAMPAIGN_MAPS
+	var resident_view: Node = resident.get_node_or_null("Primary3DView") if reuses_resident else null
+	var resident_ready := resident_view != null and resident_view.has_method("get_prepared_terrain_resource_cache") and resident_view.call("get_prepared_terrain_resource_cache") != null
+	approach["resident_ready"] = reuses_resident and (not bool(approach.requires_resources) or resident_ready)
+	if map_path in REGIONAL_CAMPAIGN_MAPS and not bool(approach.resident_ready):
 		var worker := Thread.new()
 		var task := Callable(TERRAIN_MAP_DATA_SCRIPT, "load_from_file").bind(map_path)
 		if worker.start(task) == OK:
@@ -7650,32 +7673,144 @@ func _begin_space_approach(craft_id: String, departure: Dictionary) -> void:
 func _finish_space_approach(craft_id: String = "") -> void:
 	if not _space_approaches.has(craft_id): return
 	var entry: Dictionary = _space_approaches[craft_id]
-	var worker := entry.get("map_worker") as Thread
-	if worker != null and worker.is_alive():
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot", craft_id)
+	if String(travel.get("phase", "")) != "approach" or String(travel.get("location_id", "")) != String(entry.identity.location_id):
+		_retire_terrain_preparation(entry)
+		_space_approaches.erase(craft_id)
 		return
-	var prepared_map = worker.wait_to_finish() if worker != null else null
+	if Time.get_ticks_msec() - int(entry.get("started_msec", Time.get_ticks_msec())) > TERRAIN_PREPARATION_TIMEOUT_MSEC:
+		_cancel_space_approach(craft_id, "preparation_timeout")
+		return
+	var worker := entry.get("map_worker") as Thread
+	if worker != null:
+		if worker.is_alive(): return
+		entry["prepared_map"] = worker.wait_to_finish()
+		entry.erase("map_worker")
+	var prepared_map = entry.get("prepared_map")
+	var prepared_cache: RefCounted
+	if bool(entry.get("requires_resources", false)) and not bool(entry.get("resident_ready", false)):
+		if prepared_map == null:
+			_cancel_space_approach(craft_id, "terrain_data_unavailable")
+			return
+		var preloader := entry.get("preloader") as Node
+		if not is_instance_valid(preloader):
+			# Only one resource builder is admitted; other craft keep real loading state.
+			for other_id: String in _space_approaches:
+				if other_id != craft_id and is_instance_valid(_space_approaches[other_id].get("preloader")): return
+			preloader = load("res://scripts/terrain/terrain_map_3d_view.gd").new()
+			preloader.name = "TerrainResourcePreparation_" + craft_id.validate_node_name()
+			preloader.hide()
+			add_child(preloader)
+			entry["preloader"] = preloader
+			preloader.call("set_authoring_markers_visible", false)
+			preloader.call("configure_terrain_resource_prefill", prepared_map)
+		var readiness: Dictionary = preloader.call("get_terrain_resource_preparation_snapshot")
+		if String(readiness.status) == "failed":
+			_cancel_space_approach(craft_id, String(readiness.reason))
+			return
+		if not bool(readiness.ready): return
+		prepared_cache = preloader.call("get_prepared_terrain_resource_cache")
+		if prepared_cache == null:
+			_cancel_space_approach(craft_id, "terrain_cache_not_ready")
+			return
+	var completed := get_surface_preparation_snapshot(craft_id)
+	completed["status"] = "ready"
+	completed["ready"] = true
+	completed["progress"] = 1.0
+	completed["cancel_available"] = false
+	_surface_preparation_results[craft_id] = completed
 	_space_approaches.erase(craft_id)
-	var travel: Dictionary=_singleplayer_runtime.call("get_space_travel_snapshot",craft_id)
-	if String(travel.get("phase",""))!="approach": return
-	if _active_mission!=null: _remember_location(_active_mission)
-	_active_mission=null
-	_active_singleplayer_identity=entry.identity.duplicate(true)
-	_craft_location_runtime[craft_id]=String(entry.identity.location_id)
-	_selected_mission_id=String(entry.mission_id)
-	_selected_mission_map_path=String(entry.mission.get("map_file_path",DEFAULT_META_MAP_PATH))
-	_selected_unit_ids=entry.units.duplicate(); _selected_fireteam_ids=entry.teams.duplicate()
-	_mission_planning_state=entry.planning.duplicate(true)
-	_begin_mission_craft_transfer(craft_id,"to_mission",1.0,MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
-	_aircraft_location_by_craft[craft_id]="starmap"
+	_retire_terrain_preparation(entry)
+	if _active_mission != null: _remember_location(_active_mission)
+	_active_mission = null
+	_active_singleplayer_identity = entry.identity.duplicate(true)
+	_craft_location_runtime[craft_id] = String(entry.identity.location_id)
+	_selected_mission_id = String(entry.mission_id)
+	_selected_mission_map_path = String(entry.mission.get("map_file_path", DEFAULT_META_MAP_PATH))
+	_selected_unit_ids = entry.units.duplicate()
+	_selected_fireteam_ids = entry.teams.duplicate()
+	_mission_planning_state = entry.planning.duplicate(true)
+	_begin_mission_craft_transfer(craft_id, "to_mission", 1.0, MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
+	_aircraft_location_by_craft[craft_id] = "starmap"
 	_sync_homebase_direct_mission_drop_transport_fields()
-	_singleplayer_runtime.call("finish_space_approach",craft_id)
+	_singleplayer_runtime.call("finish_space_approach", craft_id)
 	_last_mission_result.clear()
 	_begin_active_mission_timer()
-	_start_or_update_active_mission(prepared_map)
+	_start_or_update_active_mission(prepared_map, prepared_cache)
 	_ensure_transport_timer_state()
+
+func _get_star_map_snapshot() -> Dictionary:
+	var result: Dictionary = _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}
+	var craft_id := String(Dictionary(result.get("space_travel", {})).get("craft_id", ""))
+	result["map_preparation"] = get_surface_preparation_snapshot(craft_id)
+	return result
+
+func _request_star_map_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "space_cancel_approach":
+		return _cancel_space_approach(String(payload.get("craft_id", "")), "user_cancel")
+	var result: Dictionary = _singleplayer_runtime.call("request_operation", operation, payload) if _singleplayer_runtime != null else {"ok": false, "reason": "runtime_unavailable"}
+	if operation == "space_start_quantum" and result.get("ok", false):
+		_surface_preparation_results.erase(String(payload.get("craft_id", "")))
+	return result
+
+func get_surface_preparation_snapshot(craft_id: String) -> Dictionary:
+	if not _space_approaches.has(craft_id):
+		return Dictionary(_surface_preparation_results.get(craft_id, {"status": "idle", "progress": 0.0, "ready": false, "cancel_available": false, "error": "", "reason": ""})).duplicate(true)
+	var entry: Dictionary = _space_approaches[craft_id]
+	var preloader := entry.get("preloader") as Node
+	var data: Dictionary = preloader.call("get_terrain_resource_preparation_snapshot") if is_instance_valid(preloader) else {}
+	return {"status": String(data.get("status", "loading_data")), "progress": float(data.get("progress", 0.0)),
+		"ready": bool(data.get("ready", false)), "cancel_available": true, "error": "", "reason": String(data.get("reason", "")),
+		"expected_chunks": int(data.get("expected_chunks", 0)), "prepared_chunks": int(data.get("prepared_chunks", 0)),
+		"retained_payload_bytes": int(data.get("retained_payload_bytes", 0)), "max_payload_bytes": int(data.get("max_payload_bytes", 268435456)),
+		"memory_static_baseline_bytes": int(data.get("memory_static_baseline_bytes", 0)), "memory_static_peak_bytes": int(data.get("memory_static_peak_bytes", 0)),
+		"memory_static_delta_bytes": int(data.get("memory_static_delta_bytes", 0)), "geometry_build_count": int(data.get("geometry_build_count", 0))}
+
+func _cancel_space_approach(craft_id: String, reason: String) -> Dictionary:
+	if not _space_approaches.has(craft_id): return {"ok": false, "reason": "approach_not_active"}
+	var entry: Dictionary = _space_approaches[craft_id]
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot", craft_id)
+	if String(travel.get("phase", "")) != "approach" or String(travel.get("location_id", "")) != String(entry.identity.location_id):
+		return {"ok": false, "reason": "stale_approach"}
+	var result: Dictionary = _singleplayer_runtime.call("enter_space_orbit", craft_id)
+	if not result.get("ok", false): return result
+	var snapshot := get_surface_preparation_snapshot(craft_id)
+	snapshot["status"] = "cancelled" if reason == "user_cancel" else "failed"
+	snapshot["ready"] = false
+	snapshot["cancel_available"] = false
+	snapshot["reason"] = reason
+	snapshot["error"] = "Anflug abgebrochen. Das Schiff bleibt im Orbit." if reason == "user_cancel" else "Ortskarte konnte nicht vollständig vorbereitet werden. Das Schiff bleibt im Orbit."
+	_surface_preparation_results[craft_id] = snapshot
+	_space_approaches.erase(craft_id)
+	var previous := String(entry.get("previous_craft_location", ""))
+	if previous.is_empty(): _craft_location_runtime.erase(craft_id)
+	else: _craft_location_runtime[craft_id] = previous
+	_aircraft_location_by_craft[craft_id] = "starmap"
+	_retire_terrain_preparation(entry)
+	return {"ok": true, "reason": reason}
+
+func _retire_terrain_preparation(entry: Dictionary) -> void:
+	var preloader := entry.get("preloader") as Node
+	if is_instance_valid(preloader):
+		preloader.set_process(false)
+		preloader.queue_free()
+	var worker := entry.get("map_worker") as Thread
+	if worker != null and worker.is_started():
+		if worker.is_alive(): _retired_terrain_workers.append(worker)
+		else: worker.wait_to_finish()
+
+func _poll_retired_terrain_workers() -> void:
+	for index in range(_retired_terrain_workers.size() - 1, -1, -1):
+		var worker: Thread = _retired_terrain_workers[index]
+		if not worker.is_alive():
+			worker.wait_to_finish()
+			_retired_terrain_workers.remove_at(index)
 
 
 func _exit_tree() -> void:
+	for worker: Thread in _retired_terrain_workers:
+		if worker.is_started(): worker.wait_to_finish()
+	_retired_terrain_workers.clear()
 	for approach: Dictionary in _space_approaches.values():
 		var worker := approach.get("map_worker") as Thread
 		if worker != null and worker.is_started():

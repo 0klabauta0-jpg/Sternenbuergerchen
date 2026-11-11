@@ -12051,3 +12051,41 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Kompakte NPC-Karten koennen per Doppelklick weiter das Character Sheet anfordern, auch wenn sie fuer Staging-/Transit-Zustaende optisch disabled sind.
 - Risiken: Die FOB-UI bleibt Staging-/Darstellungsschicht; Transport-, Respawn- und Fireteam-Zustand duerfen nicht als zweite Gameplay-Wahrheit in den Karten landen. Der finale FullHD-Sichtcheck der kompakten Karten bleibt offen.
 - Lokale Pruefung: `task_316_fob_fireteam_staging_migration.gd`, `task_309_fireteam_assignment_board_compact_frames.gd` und `git diff --check` laufen gruen.
+
+
+## 2026-11-11 — R07 Körper/Schulterlinie und vollständige Geländevorbereitung (Taskbranch)
+
+Bewusst auf task/native-glut-maps-20261110, keine Main-/EXE-Integration.
+R06 mit77bd2ccf8 erhalten; GO-Budgetfolgefix und isolierte R02-Paarmessung
+mit5f8a6a3cb gesichert. 1/2/3/4zugelassene Suchen nutzen96/48/32/24
+Expansionen bei unverändertem Gesamtlimit96. Neuer Gate37/0,6passende
+Regressionsgates grün; echter B-Nachlauf separat. Warme R02-Publikation
+12AB/BA-Paare: Median21,186→3,7465ms, kein GPU-/Gesamt-FPS-Beweis.
+
+R07 folgt der zusätzlichen Nutzerkorrektur Schulter-/Kopfverhältnis:
+echte Körperform breiter, Kopf moderat kleiner, 30Wearables neu angepasst.
+Root-Produktionschecks Armor156/0, Body-/Spacehelm165/0 jeweils headless
+und nativ; Ausrüstungsweg15/0bzw16/0. Vergleichsworkbench5Varianten,
+164Browserchecks/0Fehler. Künstlerische Nutzerabnahme und Sitz-/Transport-
+extreme offen. Quelle/QA art/armor_kenney_r07_20261111 und
+ docs/qa/armor_kenney_r07_20261111. Keine Fahrzeugarbeiten.
+
+Neue Vollkartenressourcen: A/B/C bleiben512×256, jeweils2161 vorbereitete
+Chunks. Cache41/0, Anfluglifecycle13/0, FoW13/0, StreamingPASS,
+A/B/Cvoll jeweils18/0headless. Keine Units/FoW/Nodes im Ressourcencache;
+frische Nodes bleiben bis FoW-Freigabe verborgen, nur lokale Nodes begrenzt
+resident. Fortschritt/Abbruch über Flow-Snapshot in Sternkarte (UI16/0,
+Regression89/0), keine UI-Readinesswahrheit. Cachekontext beinhaltet Map,
+Terrain, Art, Raster/Höhe; Handoff-Mismatch scheitert explizit.
+Native Missionsübergabe, Ladelatenz/Speicher und B1× laufen separat;
+Headless-Payload213MB fürB ist kein Gesamt-RAM-/VRAM-Beweis.
+
+
+### Native Abschlussbelege dieses Taskstands
+R07 separat0f1334ba1 gesichert. Kombinierter echterB1×-Lauf62/0,
+8Schüsse, alle2161Chunks vor Missionbereit, Fernschwenks0Geometrieneubauten.
+Ladebereit24532ms abLaunch; erste gemessene >1Worldunit-Bewegung1189ms.
+Flow-Stalefehler behoben, Anflugprüfung jetzt18/0. Details/Fehllaufhistorie:
+docs/qa/native_terrain_preparation_handoff_20261111/README.md.
+Combat-Wallframes p95 52,632/max94,604ms: Ruckler bleiben offen, keine
+allgemeine FPS-/Ruckelfreiheitsfreigabe. Keine Main-/EXE-Integration.

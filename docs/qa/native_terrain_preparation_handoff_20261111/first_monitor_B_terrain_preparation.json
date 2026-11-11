@@ -1,0 +1,238 @@
+{
+	"actual_shots": 6,
+	"camera_receipts": [
+		{
+			"active_chunks": 80,
+			"identity": {
+				"actual_sorted_resource_ids_sha256": "22746a0b3b9e1def16346d73766a6c560a7d11cd84c310d17a8e7819d5255b4b",
+				"cache_instance_id": -9223357548117856958,
+				"context_fingerprint": "ac517a7fc651be21a1327a1a75cbacc475988113c86bd5c8ed17c46452981023",
+				"geometry_resource_count": 6748
+			},
+			"preparation": {
+				"expected_chunks": 2161,
+				"geometry_build_count": 0,
+				"is_total_gpu_memory_measurement": false,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 0,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 0,
+				"prepared_chunks": 2161,
+				"progress": 1.0,
+				"ready": true,
+				"reason": "",
+				"resource_restore_count": 218,
+				"retained_payload_bytes": 213117380,
+				"retained_scene_nodes": 144,
+				"status": "ready"
+			},
+			"retained_nodes": 144,
+			"settled": true,
+			"target_grid": [
+				190,
+				75
+			]
+		},
+		{
+			"active_chunks": 84,
+			"identity": {
+				"actual_sorted_resource_ids_sha256": "22746a0b3b9e1def16346d73766a6c560a7d11cd84c310d17a8e7819d5255b4b",
+				"cache_instance_id": -9223357548117856958,
+				"context_fingerprint": "ac517a7fc651be21a1327a1a75cbacc475988113c86bd5c8ed17c46452981023",
+				"geometry_resource_count": 6748
+			},
+			"preparation": {
+				"expected_chunks": 2161,
+				"geometry_build_count": 0,
+				"is_total_gpu_memory_measurement": false,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 0,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 0,
+				"prepared_chunks": 2161,
+				"progress": 1.0,
+				"ready": true,
+				"reason": "",
+				"resource_restore_count": 302,
+				"retained_payload_bytes": 213117380,
+				"retained_scene_nodes": 148,
+				"status": "ready"
+			},
+			"retained_nodes": 148,
+			"settled": true,
+			"target_grid": [
+				-110,
+				-65
+			]
+		},
+		{
+			"active_chunks": 80,
+			"identity": {
+				"actual_sorted_resource_ids_sha256": "22746a0b3b9e1def16346d73766a6c560a7d11cd84c310d17a8e7819d5255b4b",
+				"cache_instance_id": -9223357548117856958,
+				"context_fingerprint": "ac517a7fc651be21a1327a1a75cbacc475988113c86bd5c8ed17c46452981023",
+				"geometry_resource_count": 6748
+			},
+			"preparation": {
+				"expected_chunks": 2161,
+				"geometry_build_count": 0,
+				"is_total_gpu_memory_measurement": false,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 0,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 0,
+				"prepared_chunks": 2161,
+				"progress": 1.0,
+				"ready": true,
+				"reason": "",
+				"resource_restore_count": 382,
+				"retained_payload_bytes": 213117380,
+				"retained_scene_nodes": 144,
+				"status": "ready"
+			},
+			"retained_nodes": 144,
+			"settled": true,
+			"target_grid": [
+				190,
+				-65
+			]
+		},
+		{
+			"active_chunks": 90,
+			"identity": {
+				"actual_sorted_resource_ids_sha256": "22746a0b3b9e1def16346d73766a6c560a7d11cd84c310d17a8e7819d5255b4b",
+				"cache_instance_id": -9223357548117856958,
+				"context_fingerprint": "ac517a7fc651be21a1327a1a75cbacc475988113c86bd5c8ed17c46452981023",
+				"geometry_resource_count": 6748
+			},
+			"preparation": {
+				"expected_chunks": 2161,
+				"geometry_build_count": 0,
+				"is_total_gpu_memory_measurement": false,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 0,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 0,
+				"prepared_chunks": 2161,
+				"progress": 1.0,
+				"ready": true,
+				"reason": "",
+				"resource_restore_count": 472,
+				"retained_payload_bytes": 213117380,
+				"retained_scene_nodes": 154,
+				"status": "ready"
+			},
+			"restored_original_focus": true,
+			"retained_nodes": 154,
+			"settled": true
+		}
+	],
+	"errors": [],
+	"loading_screenshot": {
+		"loading": {
+			"cancel_available": true,
+			"error": "",
+			"expected_chunks": 2161,
+			"geometry_build_count": 3,
+			"max_payload_bytes": 268435456,
+			"memory_static_baseline_bytes": 974884278,
+			"memory_static_delta_bytes": 3213235,
+			"memory_static_peak_bytes": 978097513,
+			"prepared_chunks": 3,
+			"progress": 0.001388246182323,
+			"ready": false,
+			"reason": "",
+			"retained_payload_bytes": 104276,
+			"status": "preparing_resources"
+		},
+		"path": "res://output/native_glut_maps/B_terrain_preparation.png",
+		"process_frame": 2967,
+		"save_error": 0,
+		"star_map_visible": true
+	},
+	"map_sha256": "d3ab04a32a142a51ea20d180397b7cd9355dfa55452e2fc224fbd63f360624a7",
+	"memory_scope": "process static allocator + renderer-reported video memory; not total process RSS or physical dedicated VRAM",
+	"mission_handoff": {
+		"expected_chunks": 2161,
+		"geometry_build_count": 0,
+		"is_total_gpu_memory_measurement": false,
+		"max_payload_bytes": 268435456,
+		"memory_static_baseline_bytes": 0,
+		"memory_static_delta_bytes": 0,
+		"memory_static_peak_bytes": 0,
+		"prepared_chunks": 2161,
+		"progress": 1.0,
+		"ready": true,
+		"reason": "",
+		"resource_restore_count": 138,
+		"retained_payload_bytes": 213117380,
+		"retained_scene_nodes": 138,
+		"status": "ready"
+	},
+	"native_run": true,
+	"observed_frames": 3917,
+	"pending_frames": 3916,
+	"preparation_renderer_video_peak_bytes": 1108410368,
+	"preparation_static_memory_peak_bytes": 1282900259,
+	"scale": 1.0,
+	"schema": "native_terrain_preparation_handoff_v1",
+	"transitions": [
+		{
+			"elapsed_ms": 4033,
+			"snapshot": {
+				"cancel_available": true,
+				"error": "",
+				"expected_chunks": 0,
+				"geometry_build_count": 0,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 0,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 0,
+				"prepared_chunks": 0,
+				"progress": 0.0,
+				"ready": false,
+				"reason": "",
+				"retained_payload_bytes": 0,
+				"status": "loading_data"
+			}
+		},
+		{
+			"elapsed_ms": 9205,
+			"snapshot": {
+				"cancel_available": true,
+				"error": "",
+				"expected_chunks": 2161,
+				"geometry_build_count": 0,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 974884278,
+				"memory_static_delta_bytes": 0,
+				"memory_static_peak_bytes": 974884278,
+				"prepared_chunks": 0,
+				"progress": 0.0,
+				"ready": false,
+				"reason": "",
+				"retained_payload_bytes": 0,
+				"status": "preparing_resources"
+			}
+		},
+		{
+			"elapsed_ms": 26902,
+			"snapshot": {
+				"cancel_available": true,
+				"error": "",
+				"expected_chunks": 2161,
+				"geometry_build_count": 2161,
+				"max_payload_bytes": 268435456,
+				"memory_static_baseline_bytes": 974884278,
+				"memory_static_delta_bytes": 308079727,
+				"memory_static_peak_bytes": 1282964005,
+				"prepared_chunks": 2161,
+				"progress": 1.0,
+				"ready": true,
+				"reason": "",
+				"retained_payload_bytes": 213117380,
+				"status": "ready"
+			}
+		}
+	]
+}

@@ -1,0 +1,82 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Preparation battle requires the normal post-A checkpoint and explicit 1x
+PASS: Preparation receipt reset requires the same private APPDATA guard as the base profile
+PASS: Prior fixed battle receipt clears before the new run
+CAMPAIGN_TEST_PROFILE C:/dev/SternenBuergerchen-worktrees/native-glut-maps-20261110/output/native_glut_maps/profiles/r07-full-cache/battle_final/Godot/app_userdata/Sternenbuergerchen/ scale=1.0
+PASS: Continue resumes a completed first sortie
+PASS: Native renderer is active
+PASS: Actual ship refuels at home
+PASS: Regular accept_job
+PASS: Regular select_destination
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: outpost_recovery launches actual boarded craft
+PASS: outpost_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: outpost_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: outpost_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: outpost_recovery real quantum reaches its target orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: outpost_recovery explicit approach accepts from its location orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: outpost_recovery actual mission instance exists
+REGIONAL_APPROACH_LOAD_MS outpost_recovery 23858
+PASS: outpost_recovery actual outbound transit reaches waiting craft
+PASS: outpost_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: outpost_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario outpost_recovery
+PASS: Real MissionSetup receives all 2161 prepared terrain chunks
+PASS: Real mission restores prepared resources without initial geometry construction
+PASS: Mission keeps the transferred resource cache
+PASS: Distant camera keeps actual cache instance, context and geometry resource IDs (190, 75)
+PASS: Distant camera settles with no geometry rebuild (190, 75)
+PASS: Distant camera retains complete preparation (190, 75)
+PASS: Distant camera keeps bounded terrain scene nodes (190, 75)
+PASS: Distant camera keeps actual cache instance, context and geometry resource IDs (-110, -65)
+PASS: Distant camera settles with no geometry rebuild (-110, -65)
+PASS: Distant camera retains complete preparation (-110, -65)
+PASS: Distant camera keeps bounded terrain scene nodes (-110, -65)
+PASS: Distant camera keeps actual cache instance, context and geometry resource IDs (190, -65)
+PASS: Distant camera settles with no geometry rebuild (190, -65)
+PASS: Distant camera retains complete preparation (190, -65)
+PASS: Distant camera keeps bounded terrain scene nodes (190, -65)
+PASS: Returning camera reuses the same complete map resources
+PASS: Distant camera really restores additional terrain chunks
+PASS: Regular GO starts live approach
+REGIONAL_GO_DISPATCH 32.773 { "enabled": true, "receipt_limit": 8, "invocation_count": 1, "receipts": [{ "invocation_id": 1, "command": "go", "started_usec": 88301220, "process_frame": 6041, "selected_fireteam_count": 1, "outcome": "accepted", "complete": true, "scopes_usec": { "guards_and_handoffs_usec": 36, "execution_loop_usec": 7047, "coordination_usec": 36, "decision_summary_usec": 155, "feedback_bubbles_usec": 1563, "order_visuals_usec": 2683, "command_feedback_usec": 19606, "planning_publication_and_callbacks_usec": 1578 }, "nested_scopes_usec": { "activation_resolve_profile_usec": 978, "activation_profile_and_plan_commit_usec": 19, "movement_start_and_arguments_usec": 1263, "movement_recent_trace_and_flow_mirror_usec": 4714, "activation_issue_waypoint_usec": 6021, "feedback_button_state_usec": 3902, "feedback_light_ui_usec": 14141, "feedback_native_layout_usec": 1548 }, "nested_scope_counts": { "activation_resolve_profile_usec": 1, "activation_profile_and_plan_commit_usec": 1, "movement_start_and_arguments_usec": 1, "movement_recent_trace_and_flow_mirror_usec": 1, "activation_issue_waypoint_usec": 1, "feedback_button_state_usec": 1, "feedback_light_ui_usec": 1, "feedback_native_layout_usec": 1 }, "phase_index": 1, "issued_fireteam_count": 1, "continued_fireteam_count": 0, "already_active_fireteam_count": 0, "blocked_fireteam_count": 0, "light_ui_scopes_usec": { "primary_block_labels_usec": 47, "shared_station_route_snapshot_usec": 1763, "primary_command_door_usec": 713, "primary_command_route_usec": 0, "primary_command_decision_usec": 106, "primary_command_target_waypoint_usec": 605, "primary_command_feedback_usec": 1424, "primary_hotkey_usec": 6, "primary_fireteam_status_usec": 3460, "primary_fireteam_tooltips_usec": 1678, "primary_labels_usec": 8378, "panel_fireteam_phase_usec": 1661, "panel_nav_timer_usec": 13, "panel_identity_usec": 1482, "panel_team_chip_usec": 376, "panel_nav_identity_usec": 1871, "panel_dropship_usec": 1146, "panel_event_log_usec": 508, "mission_panels_usec": 5186, "runtime_surfaces_usec": 0, "secondary_labels_usec": 0 }, "light_ui_projection_scopes_usec": {  }, "light_ui_projection_build_calls": { "_build_fireteam_status_text": 1, "_build_mission_combat_hud_density_snapshot": 2, "_build_release_candidate_firefight_decision_line_snapshot": 1, "_build_mission_combat_hud_detail_tooltip_text": 1, "_build_selected_fireteam_live_decision_detail_tooltip": 1, "_build_native_player_readout_context": 1 }, "finished_usec": 88333941, "total_usec": 32721, "finished_process_frame": 6041, "accepted": true }], "inflight_count": 0, "nested_scopes_not_additive": true, "read_only": true }
+REGIONAL_FIRST_GO_MOVEMENT_MS 1181.804
+PASS: CPU receipts keep exact frame IDs and draw FIFO drains
+PASS: Native combat records multiple physics ticks rather than only the last one
+PASS: Real 1x fire exchange clears B guard
+PASS: First real movement observed at 1x on all 131072 cells
+PASS: Profile output opens
+REGIONAL_BATTLE_PROFILE frames=6075 shots=8 output=res://output/native_glut_maps/B_battle_profile.json
+PASS: Observed pending approach creates no mission, mission units or mission timer before ready
+PASS: Native screenshot records real StarMap terrain loading progress
+PASS: Separate terrain preparation receipt opens
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=0
+SINGLEPLAYER_LOOP_RESULTS passed=59 failed=2
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+ERROR: Parse JSON failed. Error at line 0: Unterminated string
+   at: parse_string (core/io/json.cpp:624)
+   GDScript backtrace (most recent call first):
+       [0] _finish (res://scripts/tests/native_terrain_preparation_battle_test.gd:158)
+       [1] _run (res://scripts/tests/campaign_five_actual_sorties_verifier.gd:26)
+       [2] _remaining_missions (res://scripts/tests/native_glut_battle_profile.gd:154)
+FAIL: Fresh inherited battle receipt matches this private profile, map and 1x scale
+FAIL: Inherited B encounter fires at least eight actual shots at 1x

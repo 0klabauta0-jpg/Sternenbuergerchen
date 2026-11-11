@@ -128,7 +128,7 @@ func _build() -> void:
 	_status = _label("", 15)
 	_status.name = "TravelStatus"
 	information.add_child(_status)
-	_abort = _button("AbortQuantum", "Sprung abbrechen", func(): _send("space_abort_quantum", {"craft_id": _craft_id()}))
+	_abort = _button("AbortQuantum", "Sprung abbrechen", _cancel_current_travel)
 	_abort.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	information.add_child(_abort)
 	_progress = ProgressBar.new()
@@ -286,10 +286,17 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var orbit: String = String(travel.get("orbit_id", ""))
 	_canvas.call("set_travel_snapshot", travel)
 	_sync_orbit_targets(travel)
-	_status.text = _phase_text(travel)
-	_abort.visible = phase == "quantum"
-	_progress.visible = phase in ["quantum", "stopped"]
-	_progress.value = clampf(float(travel.get("progress", 0.0)) * 100.0, 0, 100)
+	var preparation: Dictionary = _runtime.get("map_preparation", {})
+	_status.text = _phase_text(travel, preparation)
+	_abort.visible = phase == "quantum" or (phase == "approach" and bool(preparation.get("cancel_available", false)))
+	_abort.text = "Anflug abbrechen" if phase == "approach" else "Sprung abbrechen"
+	var preparing := phase == "approach" and String(preparation.get("status", "")) in ["preparing_resources", "ready"]
+	_progress.visible = phase in ["quantum", "stopped"] or preparing
+	_progress.value = clampf(float(preparation.get("progress", 0.0) if preparing else travel.get("progress", 0.0)) * 100.0, 0, 100)
+	if phase == "orbit" and String(preparation.get("status", "")) == "failed":
+		_error.text = String(preparation.get("error", "Ortskarte konnte nicht vorbereitet werden."))
+	elif phase == "orbit" and String(preparation.get("status", "")) == "cancelled":
+		_error.text = ""
 	_close.visible = phase in ["grounded", "orbit", "quantum", "stopped"]
 	_close.text = "Abflug zur Sternkarte vorbereiten" if phase == "grounded" else "Trupp & Ausrüstung"
 	var campaign: Dictionary = _runtime.get("campaign", {})
@@ -326,13 +333,21 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_boundary.visible = _approach.visible or phase == "approach"
 	_error.visible = not _error.text.is_empty()
 
-func _phase_text(travel: Dictionary) -> String:
-	match String(travel.get("phase", "grounded")):
+func _phase_text(travel: Dictionary, preparation: Dictionary = {}) -> String:
+	var phase := String(travel.get("phase", "grounded"))
+	if phase == "orbit":
+		if String(preparation.get("status", "")) == "failed": return "Ortskarte konnte nicht vorbereitet werden · Zurück im Orbit."
+		if String(preparation.get("status", "")) == "cancelled": return "Anflug abgebrochen · Zurück im Orbit."
+	match phase:
 		"grounded": return "Mondbasis · Am Flightdeck abheben, um den Mondorbit zu erreichen."
 		"quantum": return "Quantum-Sprung → %s · %d %% · Abbruch jederzeit möglich" % [_marker_name(travel, true), roundi(float(travel.get("progress", 0.0)) * 100)]
 		"stopped": return "Sprung abgebrochen · Position gehalten. Ziel anklicken, um erneut zu springen."
 		"orbit": return "%s erreicht · %s" % [_marker_name(travel), "Zielort wählen und Anflug starten." if String(travel.get("orbit_id", "")) != "moon_orbit" else "Zielorbit wählen oder an der Mondbasis landen."]
-		"approach": return "Anflug · Sternkarte wird verlassen. Ortskarte wird geladen …"
+		"approach":
+			match String(preparation.get("status", "loading_data")):
+				"preparing_resources": return "Ortskarte wird vorbereitet · %d %%" % roundi(clampf(float(preparation.get("progress", 0.0)), 0.0, 1.0) * 100.0)
+				"ready": return "Ortskarte bereit · Einsatz wird geöffnet …"
+			return "Anflug · Ortskarte wird geladen …"
 		"surface": return "Am Zielort · Nach dem Abheben kehrst du in den zugehörigen Orbit zurück."
 	return "Sternkarte wird vorbereitet …"
 
@@ -385,6 +400,14 @@ func _select(location_id: String) -> void:
 				job_id = String(id)
 				break
 	_send("select_destination", {"location_id": location_id, "job_id": job_id})
+
+func _cancel_current_travel() -> void:
+	var phase := String(Dictionary(_runtime.get("space_travel", {})).get("phase", ""))
+	if phase == "approach":
+		if bool(Dictionary(_runtime.get("map_preparation", {})).get("cancel_available", false)):
+			_send("space_cancel_approach", {"craft_id": _craft_id()})
+	else:
+		_send("space_abort_quantum", {"craft_id": _craft_id()})
 
 func _begin_approach() -> void:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime

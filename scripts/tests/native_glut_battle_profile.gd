@@ -145,6 +145,8 @@ func _remaining_missions() -> void:
 			"first_move_ms": first_move_ms, "go_dispatch_ms": go_dispatch_ms,
 			"memory_static_bytes": OS.get_static_memory_usage(), "video_bytes": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED),
 			"rows": _rows}))
+		# Subclass completion probes read this receipt before coroutine locals retire.
+		file.close()
 	print("REGIONAL_BATTLE_PROFILE frames=", _rows.size(), " shots=", shot_count, " output=", path)
 	RenderingServer.viewport_set_measure_render_time(rid, false)
 	view.call("set_runtime_frame_timing_debug_enabled", false)

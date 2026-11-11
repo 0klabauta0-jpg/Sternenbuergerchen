@@ -163,6 +163,8 @@ const KENNEY_AUTHORING_OFFSET_Z: float = 1.5
 const KENNEY_OFFSET_EPSILON: float = 0.01
 const GROUND_MULTIMESH_CHUNK_SIZE: int = 8
 const REGIONAL_RETAINED_CHUNKS: int = 64
+const TERRAIN_CHUNK_RESOURCE_CACHE_SCRIPT = preload("res://scripts/terrain/terrain_chunk_resource_cache.gd")
+const TERRAIN_RESOURCE_PAYLOAD_LIMIT := 256 * 1024 * 1024
 const VISUAL_STREAMING_TILE_THRESHOLD: int = 4096
 const VISUAL_STREAMING_MIN_CHUNK_RADIUS: int = 2
 const VISUAL_STREAMING_MAX_CHUNK_RADIUS: int = 5
@@ -1259,6 +1261,16 @@ var _regional_pending_chunks: Array[Vector2i] = []
 var _regional_chunk_stats: Dictionary = {}
 var _regional_fow_render_cache: Dictionary = {}
 var _regional_retained_chunks: Dictionary = {}
+var _terrain_resource_cache
+var _terrain_resource_prefill_only := false
+var _terrain_resource_prefill_queue: Array = []
+var _terrain_resource_status := "idle"
+var _terrain_resource_failure := ""
+var _terrain_resource_budget := TERRAIN_RESOURCE_PAYLOAD_LIMIT
+var _terrain_resource_restore_count := 0
+var _terrain_resource_handoff_pending := false
+var _terrain_resource_memory_before := 0
+var _terrain_resource_memory_peak := 0
 var _regional_surface_profiles: Dictionary = {}
 var _regional_loading_label: Label
 var _regional_chunk_build_count: int = 0
@@ -1282,6 +1294,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _terrain_resource_prefill_only:
+		_process_terrain_resource_prefill()
+		return
 	var profile_enabled: bool = _runtime_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -1657,10 +1672,18 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 			if not _regional_tiles_by_chunk.has(chunk):
 				_regional_tiles_by_chunk[chunk] = []
 			_regional_tiles_by_chunk[chunk].append(tile)
-		var initial_chunks := _build_active_visual_chunk_lookup()
-		for chunk: Vector2i in initial_chunks:
-			_build_regional_chunk(chunk)
-		_publish_regional_chunks(initial_chunks)
+		if _terrain_resource_cache != null and not _begin_terrain_resource_context(tiles):
+			_is_rendering_map = false
+			return
+		if _terrain_resource_prefill_only:
+			_terrain_resource_prefill_queue = _regional_tiles_by_chunk.keys()
+			_terrain_resource_memory_before = int(Performance.get_monitor(Performance.MEMORY_STATIC))
+			_terrain_resource_memory_peak = _terrain_resource_memory_before
+		else:
+			var initial_chunks := _build_active_visual_chunk_lookup()
+			for chunk: Vector2i in initial_chunks:
+				_build_regional_chunk(chunk)
+			_publish_regional_chunks(initial_chunks)
 	else:
 		var render_tiles: Array = _select_tiles_for_visual_render(tiles)
 		_visual_streaming_skipped_tile_count = maxi(_map_total_tile_count - render_tiles.size(), 0)
@@ -4245,10 +4268,22 @@ func _process_regional_pending_chunks() -> void:
 	_request_viewport_redraw()
 
 
-func _build_regional_chunk(chunk: Vector2i) -> void:
+func _build_regional_chunk(chunk: Vector2i, resources_only: bool = false) -> void:
 	var parent := _map_root
+	if not resources_only and _terrain_resource_cache != null and _terrain_resource_cache.has_chunk(chunk):
+		var restored: Node3D = _terrain_resource_cache.instantiate_chunk(chunk)
+		parent.add_child(restored)
+		_regional_chunk_nodes[chunk] = restored
+		_regional_chunk_stats[chunk] = _terrain_resource_cache.get_chunk_render_counts(chunk)
+		# R02's static overlay layout belongs to the view, never to this resource cache.
+		_regional_fow_render_cache[chunk] = _build_fow_overlay_render_cache(_regional_tiles_by_chunk[chunk])
+		_terrain_resource_restore_count += 1
+		return
 	var visual := Node3D.new()
 	visual.name = "TerrainChunk_%d_%d" % [chunk.x, chunk.y]
+	# Existing static prop bounds read global transforms; only one hidden
+	# temporary chunk enters this disabled preloader viewport at a time.
+	if resources_only: visual.hide()
 	parent.add_child(visual)
 	_map_root = visual
 	var previous_counts := Vector3i(_ground_multimesh_instance_count, _ground_multimesh_tile_count, _tile_grid_line_count)
@@ -4256,18 +4291,24 @@ func _build_regional_chunk(chunk: Vector2i) -> void:
 	var tiles: Array = _regional_tiles_by_chunk[chunk]
 	_build_terrain_visuals(tiles, tiles)
 	_add_regional_cliff_faces(tiles)
-	_regional_chunk_stats[chunk] = Vector3i(
-		_ground_multimesh_instance_count - previous_counts.x,
+	var counts := Vector3i(_ground_multimesh_instance_count - previous_counts.x,
 		_ground_multimesh_tile_count - previous_counts.y, _tile_grid_line_count)
 	_ground_multimesh_instance_count = previous_counts.x
 	_ground_multimesh_tile_count = previous_counts.y
 	_tile_grid_line_count = previous_counts.z
-	_regional_chunk_nodes[chunk] = visual
-	# Static overlay geometry shares this chunk's bounded construction/lifetime.
-	# Current visibility stays outside this cache and is resolved at publication.
-	_regional_fow_render_cache[chunk] = _build_fow_overlay_render_cache(tiles)
 	_regional_chunk_build_count += 1
 	_map_root = parent
+	if _terrain_resource_cache != null:
+		var captured: Dictionary = _terrain_resource_cache.capture_chunk(chunk, visual, counts)
+		if not captured.ok:
+			_terrain_resource_status = "failed"
+			_terrain_resource_failure = String(captured.reason)
+	if resources_only:
+		visual.free()
+	else:
+		_regional_chunk_nodes[chunk] = visual
+		_regional_chunk_stats[chunk] = counts
+		_regional_fow_render_cache[chunk] = _build_fow_overlay_render_cache(tiles)
 
 
 func _remove_regional_chunk(chunk: Vector2i) -> void:
@@ -16055,3 +16096,94 @@ func set_authoring_markers_visible(enabled: bool) -> void:
 	if _show_authoring_markers==enabled: return
 	_show_authoring_markers=enabled
 	_rebuild_marker_visuals()
+
+
+# Whole-map static preparation runs in a hidden, actor-free approach view.
+func configure_terrain_resource_prefill(map, max_payload_bytes: int = TERRAIN_RESOURCE_PAYLOAD_LIMIT) -> void:
+	_terrain_resource_prefill_only = true
+	_terrain_resource_status = "preparing_resources"
+	_terrain_resource_failure = ""
+	_terrain_resource_budget = max_payload_bytes
+	_terrain_resource_cache = TERRAIN_CHUNK_RESOURCE_CACHE_SCRIPT.new()
+	_terrain_resource_handoff_pending = false
+	_terrain_resource_prefill_queue.clear()
+	hide()
+	configure_from_map(map)
+	if _subviewport != null: _subviewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+
+func set_prepared_terrain_resource_cache(cache: RefCounted) -> void:
+	_terrain_resource_cache = cache
+	_terrain_resource_handoff_pending = cache != null
+	if cache != null: _terrain_resource_budget = int(cache.call("get_debug_snapshot").max_payload_bytes)
+	_terrain_resource_prefill_only = false
+	_terrain_resource_status = "ready" if cache != null and cache.call("is_ready") else "idle"
+	_terrain_resource_failure = ""
+
+func get_prepared_terrain_resource_cache() -> RefCounted:
+	return _terrain_resource_cache if _terrain_resource_cache != null and _terrain_resource_cache.is_ready() else null
+
+func cancel_terrain_resource_prefill() -> void:
+	_terrain_resource_prefill_queue.clear()
+	_terrain_resource_status = "cancelled"
+	if _terrain_resource_cache != null: _terrain_resource_cache.clear()
+
+func get_terrain_resource_preparation_snapshot() -> Dictionary:
+	var cached: Dictionary = _terrain_resource_cache.get_debug_snapshot() if _terrain_resource_cache != null else {}
+	var ready := bool(cached.get("ready", false)) and _terrain_resource_status not in ["failed", "cancelled"]
+	return {"status": "ready" if ready else _terrain_resource_status, "progress": float(cached.get("progress", 0.0)), "ready": ready,
+		"expected_chunks": int(cached.get("expected_chunks", 0)), "prepared_chunks": int(cached.get("cached_chunks", 0)),
+		"retained_payload_bytes": int(cached.get("retained_payload_bytes", 0)), "max_payload_bytes": _terrain_resource_budget,
+		"reason": _terrain_resource_failure, "retained_scene_nodes": _regional_chunk_nodes.size(),
+		"geometry_build_count": _regional_chunk_build_count, "resource_restore_count": _terrain_resource_restore_count,
+		"memory_static_baseline_bytes": _terrain_resource_memory_before, "memory_static_peak_bytes": _terrain_resource_memory_peak,
+		"memory_static_delta_bytes": maxi(0, _terrain_resource_memory_peak - _terrain_resource_memory_before),
+		"is_total_gpu_memory_measurement": false}
+
+func _process_terrain_resource_prefill() -> void:
+	if _terrain_resource_status != "preparing_resources": return
+	var until := Time.get_ticks_usec() + 4000
+	for count in range(2):
+		if _terrain_resource_prefill_queue.is_empty(): break
+		var chunk: Vector2i = _terrain_resource_prefill_queue.pop_back()
+		if not _terrain_resource_cache.has_chunk(chunk): _build_regional_chunk(chunk, true)
+		_terrain_resource_memory_peak = maxi(_terrain_resource_memory_peak, int(Performance.get_monitor(Performance.MEMORY_STATIC)))
+		if _terrain_resource_status == "failed" or Time.get_ticks_usec() >= until: break
+	if _terrain_resource_status == "failed":
+		_terrain_resource_prefill_queue.clear()
+	elif _terrain_resource_prefill_queue.is_empty():
+		if _terrain_resource_cache.is_ready():
+			_terrain_resource_status = "ready"
+		else:
+			_terrain_resource_status = "failed"
+			_terrain_resource_failure = "incomplete_resource_prefill"
+
+func _begin_terrain_resource_context(tiles: Array) -> bool:
+	var digest := HashingContext.new()
+	digest.start(HashingContext.HASH_SHA256)
+	for tile in tiles:
+		digest.update(var_to_bytes([tile.grid_position, tile.type_id, tile.height_level, tile.surface_type, tile.edge_type,
+			tile.object_type_id, tile.object_height, tile.walkable, tile.blocks_los, tile.object_rotation_degrees, tile.object_scale]))
+	var owned: Array = _external_terrain_object_visuals.keys()
+	owned.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x or (a.x == b.x and a.y < b.y))
+	digest.update(var_to_bytes(owned))
+	var terrain_revision := digest.finish().hex_encode()
+	var presentation: Dictionary = _terrain_map_data.call("get_place_presentation")
+	var art := [str(_active_terrain_visual_theme_id), _frontier_art_enabled, JSON.stringify(presentation, "", true),
+		FileAccess.get_sha256("res://scripts/terrain/frontier_art_profile.gd"), FileAccess.get_sha256("res://scripts/terrain/frontier_place_props.gd"),
+		FileAccess.get_sha256("res://scripts/terrain/frontier_art_geology.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_ground_batch.gd")]
+	var grid := [_active_grid_topology, _get_3d_cell_size(), _get_3d_height_step(), _get_3d_ground_thickness(), _get_3d_ground_fill(), _hex_grid_visible]
+	var context := {"map_id": String(_terrain_map_data.call("get_map_name")), "terrain_revision": terrain_revision,
+		"art_revision": var_to_bytes(art).hex_encode().sha256_text(), "grid_revision": var_to_bytes(grid).hex_encode().sha256_text()}
+	if _terrain_resource_handoff_pending:
+		var prior: Dictionary = _terrain_resource_cache.get_debug_snapshot()
+		if not bool(prior.ready) or String(prior.context_fingerprint) != JSON.stringify(context, "", true).sha256_text() or int(prior.expected_chunks) != _regional_tiles_by_chunk.size():
+			_terrain_resource_status = "failed"
+			_terrain_resource_failure = "prepared_cache_context_mismatch"
+			return false
+		_terrain_resource_handoff_pending = false
+	var started: Dictionary = _terrain_resource_cache.begin_map(context, _regional_tiles_by_chunk.keys(), _terrain_resource_budget)
+	if not started.ok:
+		_terrain_resource_status = "failed"
+		_terrain_resource_failure = String(started.reason)
+		return false
+	return true

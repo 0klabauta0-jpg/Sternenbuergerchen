@@ -1,0 +1,30 @@
+{
+  "label": "battle_final",
+  "exit_code": 1,
+  "errors": 3,
+  "warnings": 2,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\profiles\\r07-full-cache\\battle_final",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "2756844",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://scripts/tests/native_terrain_preparation_battle_test.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}
