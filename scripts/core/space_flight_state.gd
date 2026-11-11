@@ -46,7 +46,7 @@ func commit_travel_pose(position: Vector2, heading: float) -> bool:
 	_revision += 1
 	return true
 
-func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
+func validate_motion(proposal: Dictionary, tick: int) -> Dictionary:
 	if _craft_id.is_empty() or tick <= _tick:
 		return {"ok": false, "reason": "stale_tick"}
 	if proposal.get("expected_revision", -1) != _revision:
@@ -55,6 +55,14 @@ func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
 	next.merge(proposal, true)
 	if not _valid_pose(next):
 		return {"ok": false, "reason": "invalid_pose"}
+	return {"ok": true}
+
+func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
+	var validation := validate_motion(proposal, tick)
+	if not validation.ok:
+		return validation
+	var next := get_snapshot()
+	next.merge(proposal, true)
 	_position = next.position_plane
 	_velocity = next.velocity_plane
 	_heading = float(next.heading_rad)

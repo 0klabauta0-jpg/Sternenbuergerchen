@@ -95,7 +95,9 @@ Verifier und diese Statusdokumentation.
   vollständige AP02-Abnahme fehlen.
 - AP03 Vorstufe: deterministische Feldreservierung für Bewegungs-/Drehpfade;
   Segment-Supercover erfasst eine getestete exakte Randberührung, Drehbögen
-  erhalten eine konservative Krümmungszugabe. Sieben gezielte Fälle bestanden.
+  erhalten eine konservative Krümmungszugabe. Mehrfeldrümpfe werden beim
+  Indexieren als gedrehte Hexflächen abgebildet; ein Einfeldjäger behält
+  genau ein Ankerfeld. Elf gezielte Fälle bestanden.
   Zeitliche Reservierung, Blockadeauflösung, begrenzte Laufzeitkosten und
   Rootintegration fehlen. Der Helfer ist nicht als produktives Kollisionsgate
   angeschlossen; allgemeine Geometrie- und Performanceabnahme stehen aus.

@@ -29,7 +29,7 @@ func _initialize() -> void:
 	if not is_equal_approx(float(snap.elapsed_seconds), 1.0): failed += 1
 	if root.tick_counter != 60: failed += 1
 	if not is_equal_approx(float(snap.progress), 1.0 / 3.0): failed += 1
-	var enemy := {"craft_id":"npc1", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(3, 3)}
+	var enemy := {"craft_id":"npc1", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(3, 3), "footprint_hexes":[Vector2i.ZERO]}
 	if root.admit_space_actor(enemy, {}).get("reason") != "runtime_authority_required": failed += 1
 	if not root.admit_space_actor(enemy, {"runtime_authorized":true}).get("ok", false): failed += 1
 	if fleet.get_flight_state("npc1") != null or root.get_space_actor("npc1") == null: failed += 1
@@ -48,7 +48,7 @@ func _initialize() -> void:
 	var thrust_proposal: Dictionary = FLIGHT_RESOLVER.step(before_flight, {"forward":1.0, "assist_mode":"decoupled"}, hull, {}, 0.25)
 	if not root.commit_space_actor_motion("npc1", thrust_proposal, 2, {"runtime_authorized":true}).get("ok", false): failed += 1
 	if npc_flight.get_snapshot().position_plane == before_flight.position_plane: failed += 1
-	var player := {"craft_id":"a", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(snap.position))}
+	var player := {"craft_id":"a", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(snap.position)), "footprint_hexes":[Vector2i.ZERO]}
 	if root.admit_space_actor(player, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
 	for i in range(121): root._physics_process(1.0 / 60.0)
 	snap = fleet.get_snapshot("a")
@@ -58,7 +58,7 @@ func _initialize() -> void:
 	fleet.register_craft("b")
 	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"launch_to_orbit", "payload":{"craft_id":"b"}, "request_id":"lb"}, {"runtime_authorized":true})
 	var b_snapshot: Dictionary = fleet.get_snapshot("b")
-	var b_player := {"craft_id":"b", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(b_snapshot.position))}
+	var b_player := {"craft_id":"b", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(b_snapshot.position)), "footprint_hexes":[Vector2i.ZERO]}
 	if not root.admit_space_actor(b_player, {"runtime_authorized":true}).get("ok", false): failed += 1
 	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"b", "target_orbit_id":"planet_orbit"}, "request_id":"jb"})
 	if root.enter_space_tactical("b", 1, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
@@ -75,9 +75,9 @@ func _initialize() -> void:
 	if player_flight.get_snapshot().velocity_plane != flight_snap.velocity_plane: failed += 1
 	var reject_travel: Dictionary = fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"a", "target_orbit_id":"moon_orbit"}, "request_id":"new"})
 	if reject_travel.get("reason") != "combat_active": failed += 1
-	var spoof := {"craft_id":"a", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(4,4)}
+	var spoof := {"craft_id":"a", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(4,4), "footprint_hexes":[Vector2i.ZERO]}
 	if root.admit_space_actor(spoof, {"runtime_authorized":true}).get("reason") != "craft_identity_conflict": failed += 1
-	var invalid := {"craft_id":"npc2", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(9999,9999)}
+	var invalid := {"craft_id":"npc2", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(9999,9999), "footprint_hexes":[Vector2i.ZERO]}
 	if root.admit_space_actor(invalid, {"runtime_authorized":true}).get("reason") != "invalid_actor_cell": failed += 1
 	var at_30 := _simulate_frames(30)
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
