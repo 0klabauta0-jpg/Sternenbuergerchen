@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Eigene Rüstungsformen und Helm — 11.11.2026
+
+Taskbranch task/native-glut-maps-20261110 auf46acfaa58. Vom Nutzer abgelehnte
+flache Rüstung durch eigene körperumschließende Formen ersetzt. Die Helme des
+Figurenpakets dienen nach bestätigter Korrektur nur als Referenz.17 eigene
+Segmente mit eigener Helmkonstruktion; gecachte Outfits mit einem Mesh und
+höchstens fünf Materialflächen. Originalkopf unverändert, geschlossene
+Helmprojektion beim Ablegen reversibel. Native beide Rigs/Posen/Kopfdrehung109/0,
+echter Inventar-/Basisweg16/0. Blender17/17 ohne Geometriefehler. QA unter
+armor_revision_20261111. Stilurteil, Sitz-/Transportextreme, breite Framerate,
+weitere Fahrzeuge, Main und EXE bleiben offen.
+
 ### Gefechtsmessung und Tutorial-Projektion — 11.11.2026
 
 Taskbranch task/native-glut-maps-20261110 auf6651ca479. Begrenzte opt-in

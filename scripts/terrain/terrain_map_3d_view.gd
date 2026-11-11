@@ -13110,8 +13110,6 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 				)
 				root.set_meta("unit_visual_error", true)
 			model_root.add_child(model_instance)
-			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(model_instance,
-				String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else "suit")
 			if not unit_visual_entry.is_empty():
 				var visual_archetype_id: String = String(unit_visual_entry.get("resolved_visual_archetype_id", unit_visual_entry.get("visual_archetype_id", ""))).strip_edges()
 				if not visual_archetype_id.is_empty():
@@ -13143,6 +13141,10 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 					root.set_meta("unit_blaster_error", true)
 					root.set_meta("unit_visual_error", true)
 			root.add_child(model_root)
+			# Equipment projection follows accessory construction so a closed armor
+			# helmet can hide the legacy helmet without a duplicate shell.
+			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(root,
+				String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else "suit")
 			root.set_meta("uses_kenney_model", true)
 			root.set_meta("unit_body_visual_visible", true)
 			root.set_meta("unit_body_visual_kind", "animated_model")

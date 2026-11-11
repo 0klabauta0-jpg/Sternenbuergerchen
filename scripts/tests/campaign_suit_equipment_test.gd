@@ -66,6 +66,9 @@ func _run() -> void:
 	var visuals: Dictionary = base.get("_person_visuals")
 	if DisplayServer.get_name() != "headless":
 		_check(visuals.has(id) and String(visuals[id].model.get_meta("worn_armor_id", "")) == "heavy", "Actual base world follows restored armor")
+		# Let the newly visible nested terrain viewport finish its first redraw.
+		# A single frame can capture the UI labels before its world texture exists.
+		for index in range(24): await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://output/native_glut_maps/armor_actual_base.png")
 	flow.queue_free()

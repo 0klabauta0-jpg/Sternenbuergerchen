@@ -1,0 +1,91 @@
+INFO Draco mesh compression is available, use library at C:\Program Files\Blender Foundation\Blender 5.1\5.1\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: torso_heavy_Mesh
+10:56:10 | INFO: Primitives created: 4
+10:56:10 | INFO: Finished glTF 2.0 export in 0.014992475509643555 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: torso_medium_Mesh
+10:56:10 | INFO: Primitives created: 4
+10:56:10 | INFO: Finished glTF 2.0 export in 0.007837533950805664 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: torso_light_Mesh
+10:56:10 | INFO: Primitives created: 3
+10:56:10 | INFO: Finished glTF 2.0 export in 0.007924079895019531 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: pelvis_heavy_Mesh
+10:56:10 | INFO: Primitives created: 2
+10:56:10 | INFO: Finished glTF 2.0 export in 0.004421710968017578 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: pelvis_medium_Mesh
+10:56:10 | INFO: Primitives created: 2
+10:56:10 | INFO: Finished glTF 2.0 export in 0.004422903060913086 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: pelvis_light_Mesh
+10:56:10 | INFO: Primitives created: 2
+10:56:10 | INFO: Finished glTF 2.0 export in 0.003968238830566406 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: pauldron_Mesh
+10:56:10 | INFO: Primitives created: 2
+10:56:10 | INFO: Finished glTF 2.0 export in 0.003879070281982422 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: upper_arm_Mesh
+10:56:10 | INFO: Primitives created: 2
+10:56:10 | INFO: Finished glTF 2.0 export in 0.0038909912109375 s
+
+10:56:10 | INFO: Starting glTF 2.0 export
+10:56:10 | INFO: Extracting primitive: forearm_Mesh
+10:56:10 | INFO: Primitives created: 3
+10:56:10 | INFO: Finished glTF 2.0 export in 0.0048427581787109375 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: hand_guard_Mesh
+10:56:11 | INFO: Primitives created: 2
+10:56:11 | INFO: Finished glTF 2.0 export in 0.0037860870361328125 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: thigh_Mesh
+10:56:11 | INFO: Primitives created: 2
+10:56:11 | INFO: Finished glTF 2.0 export in 0.00409245491027832 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: knee_Mesh
+10:56:11 | INFO: Primitives created: 2
+10:56:11 | INFO: Finished glTF 2.0 export in 0.004651069641113281 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: shin_Mesh
+10:56:11 | INFO: Primitives created: 3
+10:56:11 | INFO: Finished glTF 2.0 export in 0.00587153434753418 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: boot_Mesh
+10:56:11 | INFO: Primitives created: 3
+10:56:11 | INFO: Finished glTF 2.0 export in 0.006043672561645508 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: helmet_medium_Mesh
+10:56:11 | INFO: Primitives created: 5
+10:56:11 | INFO: Finished glTF 2.0 export in 0.009169578552246094 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: helmet_heavy_Mesh
+10:56:11 | INFO: Primitives created: 5
+10:56:11 | INFO: Finished glTF 2.0 export in 0.010226011276245117 s
+
+10:56:11 | INFO: Starting glTF 2.0 export
+10:56:11 | INFO: Extracting primitive: Torus
+10:56:11 | INFO: Primitives created: 1
+10:56:11 | INFO: Finished glTF 2.0 export in 0.0030994415283203125 s
+
+Info: Saved as "armor_outfit_parts.blend"
+ARMOR_OUTFIT_PARTS_PASS 17 segments
+Blender 5.1.1 (hash b70da489d7f4 built 2026-04-14 01:37:22)
+
+Blender quit

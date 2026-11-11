@@ -1,5 +1,10 @@
 # Anzug und sichtbare Rüstung
 
+Grafikstatus: Diese frühere Modellfassung wurde vom Nutzer gestalterisch
+abgelehnt. Die Funktionsnachweise bleiben erhalten; die aktive eigene
+Modellrevision ist unter [armor_revision_20261111](../armor_revision_20261111/README.md)
+dokumentiert. Diese ältere QA ist keine Stilabnahme.
+
 Stand11.11.2026, isolierter Taskbranch auf820a91caf. Frische Kampagne beginnt im
 Anzug ohne freie leichte Rüstung. Vorhandener Satelliten-Blueprint und Herstellung
 für20Credits bleiben der frühe Erwerbsweg. Alte kanonische Loadouts behalten ihre

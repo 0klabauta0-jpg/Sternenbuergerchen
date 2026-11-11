@@ -1,0 +1,143 @@
+{
+  "revision": "shaped_outfit_r02",
+  "status": "integrated_isolated_task_branch_not_user_approved",
+  "engine": "Godot 4.6.2",
+  "blender": "5.1.1",
+  "user_reference": {
+    "path": "user_heavy_reference.png",
+    "sha256": "0adf259075beb8afd4d54674d136e311a53811878fd9de4edce9342075e44a9b"
+  },
+  "own_sources": [
+    {
+      "path": "build_outfit_parts.py",
+      "sha256": "733003d24c83e00eb4fba81250c28f610b3813bb5fa81eaa13c8ff5ff92b4758"
+    },
+    {
+      "path": "armor_outfit_parts.blend",
+      "sha256": "808e10bff62c8bbbd92545d85cc6e31ce12847be473e53fbd14b6fb378a7193d"
+    },
+    {
+      "path": "qa.json",
+      "sha256": "6175524ca508e6d039f9af01f76a0bd13dc9b5386a9c90f6b390b3c42aa62d45"
+    }
+  ],
+  "exports": [
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/boot.glb",
+      "sha256": "ffb1d92e60e136ce9e4232a03ef4e05889ba9b086af09276e549683c4aeb446c",
+      "bytes": 17852
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/collar.glb",
+      "sha256": "52880ab1ff2a6b74796d36b0a292389b51041e12b9786fdeaaece63eef6396fb",
+      "bytes": 11324
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/forearm.glb",
+      "sha256": "33499c378fc57a930fdd5d947d1d99bfd0ed343a409a5fb7c5fd3f3e22198e2a",
+      "bytes": 14744
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/hand_guard.glb",
+      "sha256": "6b4d2aedc31744b87eecfb784989d36a56cc3f09f71b1d79fe77395065d05221",
+      "bytes": 9872
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/helmet_heavy.glb",
+      "sha256": "273467bd01a04947ac1c50ea3b0c33ebf5d5cb1b19b94abb88fe7f14146e455c",
+      "bytes": 40328
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/helmet_medium.glb",
+      "sha256": "ae0d28f4ad0b7b39280ba84a8dcc11134b574719c502b4c7ef4d1fdd35c9ffe7",
+      "bytes": 40332
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/knee.glb",
+      "sha256": "b5668ac70410e97387076c11c9c1acc49a93d4f1df40da2e6367264786207705",
+      "bytes": 9216
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/pauldron.glb",
+      "sha256": "ca7c2f5a3b7fc29c7d1860d6244e706ce8af005657539fd24a1b58b551fb7103",
+      "bytes": 9476
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/pelvis_heavy.glb",
+      "sha256": "85e2b61078cbddb8addd21264032fae7571364f440a0d1c26a048ac7bc5cd5f1",
+      "bytes": 11500
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/pelvis_light.glb",
+      "sha256": "8f7d705443e6e85b669208b1800667abc43b1c0eee6c5dc9f2403e951a4b9cc6",
+      "bytes": 10816
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/pelvis_medium.glb",
+      "sha256": "109bc7c826a3076d3656704e58b55ef98d7bccad4bc132caf42248fab99338db",
+      "bytes": 11504
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/shin.glb",
+      "sha256": "87b98f353bf6fd01acf2d36acc6574e8610fdab71c461121564e9e2e2b484054",
+      "bytes": 16068
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/thigh.glb",
+      "sha256": "3e1d153682437f2b1cca71ebec187571a5db340e0c26ac9d4592bc8f4e90d46c",
+      "bytes": 8740
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/torso_heavy.glb",
+      "sha256": "47b08ef204a6d82ef9815ad33a021dbbb0ab0c41f3b5ab22680d3fc3415ab014",
+      "bytes": 18756
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/torso_light.glb",
+      "sha256": "77e77533ddc9c65ace10a78d28be8dc3cc82ebf5b76d28a160b14ea907ddfa67",
+      "bytes": 13972
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/torso_medium.glb",
+      "sha256": "c312340e2543b79b0939bd8da4aa3fe4fa5bca979d8da974ef45fdc559614275",
+      "bytes": 17856
+    },
+    {
+      "path": "Assets/curated/personnel/armor_revision_20261111/upper_arm.glb",
+      "sha256": "471fbef170a405523ebbcf3b63fb547a45a499b9a68058302e26fdf470a5125f",
+      "bytes": 8612
+    }
+  ],
+  "package_geometry_adopted": false,
+  "references_only": [
+    {
+      "path": "C:\\Users\\bjoer\\Pictures\\Sternenbürger\\Animated Characters Bundle\\Accessories\\astroHelmet.fbx",
+      "sha256": "59669b19bbfd87f88c3f130e1081a3bb75b84678b31c02d2d909236273cc4b89",
+      "source": "Existing Kenney Animated Characters Bundle, CC0",
+      "usage": "proportions and form reference only; not adopted as new armor geometry"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\Pictures\\Sternenbürger\\Animated Characters Bundle\\Accessories\\militaryHelmet.fbx",
+      "sha256": "731e79595d8000bebdda27a50ef8ae0cd4b501e4bf0ca9b713152d7063d774ba",
+      "source": "Existing Kenney Animated Characters Bundle, CC0",
+      "usage": "proportions and form reference only; not adopted as new armor geometry"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\Pictures\\Sternenbürger\\Animated Characters Bundle\\Accessories\\racingHelmet.fbx",
+      "sha256": "b816a316a52cee912c69c6f55bc39e456f6d9ce5286277257dbb2ef1f7159bbc",
+      "source": "Existing Kenney Animated Characters Bundle, CC0",
+      "usage": "proportions and form reference only; not adopted as new armor geometry"
+    }
+  ],
+  "native_checks": {
+    "poses": 109,
+    "failures": 0,
+    "actual_equipment": 16
+  },
+  "outfit_triangles": {
+    "light": 1168,
+    "medium": 4652,
+    "heavy": 5756
+  },
+  "max_material_surfaces": 5
+}
