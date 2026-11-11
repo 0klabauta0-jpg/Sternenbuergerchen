@@ -33,6 +33,17 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warpankunft-Ownerpfad: Root prüft echte Fleet-/Flight- und Equipmentdaten,
+  aktuelle Pilotenzuordnung und vorhandene Rotte beziehungsweise bereitet
+  eine Einzelrotte vor. Die Suche verarbeitet höchstens 256 Felder pro Aufruf
+  im unteren Eintrittsband; nach vollständiger Prüfung werden Flight, Index,
+  Rotte und Travel synchron veröffentlicht. Ein gezielter Test mit echtem
+  Adapter/Fleet/Equipment und Pilot-Testdouble zeigt Pilotverweigerung sowie
+  taktische Aufnahme einer Cutlass mit vollständigem Footprint. Der Pfad ist
+  bewusst noch nicht an den produktiven Warptick angeschlossen: lokale
+  Warpabreise und Observer-/Adapterabschluss fehlen, damit kein Einbahnweg
+  entsteht. Kein nativer Boarding- oder Mehrspielernachweis.
+
 - Warp-Aufnahme-Vorstufe: Flight-Areawechsel und erstmalige lokale Registry-/
   Combataufnahme sind vor dem stillen Schritt separat validierbar; die
   Ersteintrittsfixture nutzt beide nach der Rottenprüfung. Vorläufige
