@@ -177,6 +177,9 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Parallelcommit 6a3f9c535 (Boden-Gruppen-/3D-Bewegungsleser und Root) als
+  73ddde704 integriert. Bodenbewegung, Konsumenten, Raumtakt, Bereichsflug
+  und Eintrittsvorschau gezielt grün; keine umfassende native Abnahme.
 - Neue Nutzerfestlegung aus parallelem Chat: fliegende Schiffe immer genau eine
   Rotte, einschließlich Einzelschiff/Dropship; ein 512×256-Orbitraum pro
   Körper ersetzt drei getrennte Marker. Ownergrenze, Abhängigkeiten und
