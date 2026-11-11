@@ -7,6 +7,8 @@ var _person := ""
 var _signature := ""
 var _content: VBoxContainer
 var _status: Label
+var _refuel_button: Button
+var _fuel_label: Label
 var _credits: Label
 var _catalog: Dictionary = {}
 
@@ -25,7 +27,8 @@ func configure(adapter: Node) -> void:
 	_credits = _label(menu, "")
 	for category: Dictionary in _catalog.get("categories", []):
 		_button(menu, String(category.name), _select_page.bind(String(category.id)))
-	_button(menu, "Tanken / +10 Einheiten", _request.bind("refuel", {"amount":10.0}))
+	_fuel_label = _label(menu, "")
+	_refuel_button = _button(menu, "Tanken", _request_refuel)
 	_button(menu, "Rueckflug vorbereiten", _request.bind("return_homebase", {}))
 	_status = _label(menu, "")
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -46,6 +49,11 @@ func configure(adapter: Node) -> void:
 func refresh(snapshot: Dictionary) -> void:
 	_snapshot = snapshot
 	_credits.text = "%d Credits" % int(snapshot.get("credits", 0))
+	var quote := refuel_quote(snapshot)
+	_fuel_label.text = "Schiff: %s\nTank: %.2f / %.2f" % [String(snapshot.get("craft_id", "-")), float(snapshot.get("fuel", 0.0)), float(snapshot.get("fuel_capacity", 0.0))]
+	_refuel_button.text = "Tanken / +%.2f / %d Cr" % [float(quote.amount), int(quote.cost)] if quote.amount > 0.0 else String(quote.reason)
+	_refuel_button.disabled = not quote.allowed
+	_refuel_button.tooltip_text = String(quote.reason)
 	var signature := JSON.stringify([_page, _person, snapshot])
 	if signature == _signature: return
 	_signature = signature
@@ -82,7 +90,7 @@ func refresh(snapshot: Dictionary) -> void:
 		var row := HBoxContainer.new()
 		_content.add_child(row)
 		var stock := int(Dictionary(snapshot.get("stock", {})).get(offer_id, 0))
-		_label(row, "%s / %d Cr / Bestand %d" % [offer.get("name", offer.item_id), int(offer.unit_price), stock])
+		_label(row, "%s / %d Cr / Bestand %d / Schiffslager %d" % [offer.get("name", offer.item_id), int(offer.unit_price), stock, _cargo(String(offer.item_id))])
 		var locked: bool = snapshot.get("require_blueprints", false) and not String(offer.get("required_blueprint", "")).is_empty() and not Array(snapshot.get("blueprints", [])).has(String(offer.required_blueprint))
 		var ship := String(offer.get("kind", "")) == "ship"
 		_button(row, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"offer_id":offer_id,"quantity":1}), locked or stock < 1 or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
@@ -94,7 +102,40 @@ func refresh(snapshot: Dictionary) -> void:
 		_label(_content, "Ankauf aus dem gelandeten Schiffslager / je 1 Einheit")
 		for item: String in snapshot.get("buy_orders", {}):
 			var price := int(snapshot.buy_orders[item])
-			_button(_content, "%s verkaufen / %d Cr" % [item, price], _request.bind("sell", {"item_id":item,"quantity":1}), _cargo(item) < 1)
+			_button(_content, "%s / Lager %d / 1 verkaufen fuer %d Cr" % [item, _cargo(item), price], _request.bind("sell", {"item_id":item,"quantity":1}), _cargo(item) < 1)
+
+static func refuel_quote(snapshot: Dictionary) -> Dictionary:
+	var capacity := float(snapshot.get("fuel_capacity", 0.0))
+	var fuel := float(snapshot.get("fuel", 0.0))
+	var price := float(snapshot.get("fuel_price_per_unit", 0.0))
+	var amount := minf(10.0, maxf(0.0, capacity - fuel))
+	var cost := int(ceil(amount * price))
+	var reason := ""
+	if not bool(snapshot.get("service_ready", false)): reason = "Zuerst landen und Stationsschalter benutzen"
+	elif not bool(snapshot.get("fuel_registered", false)) or String(snapshot.get("craft_id", "")).is_empty(): reason = "Kein registriertes Schiff am Tankservice"
+	elif capacity <= 0.0 or price <= 0.0: reason = "Tankservice nicht verfuegbar"
+	elif amount <= 0.0: reason = "Tank voll"
+	elif int(snapshot.get("credits", 0)) < cost: reason = "Credits reichen nicht"
+	return {"amount":amount,"cost":cost,"allowed":reason.is_empty(),"reason":reason}
+
+func _request_refuel() -> void:
+	# Re-read the projection at click time; the Supply owner still validates/commits.
+	if not is_instance_valid(_adapter) or not _adapter.has_method("get_polisa_snapshot") or not _adapter.has_method("request_operation"):
+		_status.text = "Tankservice nicht verfuegbar"
+		_refuel_button.disabled = true
+		return
+	var projection: Variant = _adapter.call("get_polisa_snapshot")
+	if not projection is Dictionary:
+		_status.text = "Tankservice nicht verfuegbar"
+		_refuel_button.disabled = true
+		return
+	var current: Dictionary = projection
+	refresh(current)
+	var quote := refuel_quote(current)
+	if not quote.allowed:
+		_status.text = String(quote.reason)
+		return
+	_request("refuel", {"amount":float(quote.amount)})
 
 func _cargo(item: String) -> int:
 	return int(Dictionary(Dictionary(_snapshot.get("inventory", {})).get("craft:" + String(_snapshot.get("craft_id", "")), {})).get("items", {}).get(item, 0))
@@ -123,9 +164,10 @@ func _label(parent: Node, value: String) -> Label:
 	parent.add_child(label)
 	return label
 
-func _button(parent: Node, value: String, action: Callable, disabled := false) -> void:
+func _button(parent: Node, value: String, action: Callable, disabled := false) -> Button:
 	var button := Button.new()
 	button.text = value
 	button.disabled = disabled
 	button.pressed.connect(action)
 	parent.add_child(button)
+	return button

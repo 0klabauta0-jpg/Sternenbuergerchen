@@ -1,0 +1,47 @@
+{
+  "source_freeze": "2026-11-11 after adapter-guard review",
+  "branch": "task/native-glut-maps-20261110",
+  "files": [
+    {
+      "path": "scripts/ui/polisa_station_screen.gd",
+      "sha256": "ef925395cfbdd75578f9a9ff258985c1a3bfb303fdb7d52890f444feaae934a9"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "e0042e129a9a0c770522e4d4c76d8cc5a66fea98a2b52233ab17351e3dfaf715"
+    },
+    {
+      "path": "scripts/tests/polisa_services_remainder_check.gd",
+      "sha256": "9c6cfeb6ce9634225103853da8e470cbee7285038c9926cc9c6849d480c8f2cf"
+    },
+    {
+      "path": "docs/tasks/POLISA_SERVICES_REMAINDER_2026_11_11.md",
+      "sha256": "170eba5dd62328cf3623b9de1185522932f277104f8cd74aefedda43d5935570"
+    },
+    {
+      "path": "docs/dev/polisa_ship_equipment_contract.md",
+      "sha256": "9414cc35ac0f81421a112c69f6ddeffd6936767a901671cc47758da2c4eb2033"
+    },
+    {
+      "path": "docs/qa/polisa_services_remainder_20261111/check_adapter.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/polisa_services_remainder_20261111/check_screen.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/polisa_services_remainder_20261111/domain.log",
+      "sha256": "4abbc29f36048078d22ecea902549ae119fc32e05955e55988e58b238b533757"
+    },
+    {
+      "path": "docs/qa/polisa_services_remainder_20261111/domain_initial_parse_failure.log",
+      "sha256": "08719f31949441b69c746aa6db320f27218528b413f4e48851c2faabbddc1f4e"
+    },
+    {
+      "path": "docs/qa/polisa_services_remainder_20261111/README.md",
+      "sha256": "d2f5174a552dcc0071c7564719acda1e35e295d307624fbf6127031ce3662f20"
+    }
+  ],
+  "root_integration": "LF-normalized source; independent review, null-adapter guard included in final11-case fixture. Ship equipment and local pickup remain open."
+}

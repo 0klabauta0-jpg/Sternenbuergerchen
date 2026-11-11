@@ -1074,6 +1074,8 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		var access := _inventory_context(id, craft_id)
 		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
 	return {"craft_id":craft_id,"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
+		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
 		"people":people,"blueprints":supply.get("blueprints", []),"require_blueprints":_campaign_mode,"revision":int(supply.get("revision", 0)),
 		"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})}

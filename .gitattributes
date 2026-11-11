@@ -105,3 +105,6 @@ docs/qa/tabletop_restplan_integration_20261111/** -text whitespace=-blank-at-eof
 
 # Preserve bounded industry evidence and hashes.
 docs/qa/campaign_industry_runtime_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Preserve bounded Polisa service evidence.
+docs/qa/polisa_services_remainder_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
