@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (5 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+
+EXIT 0
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: 80-node component is not truncated into a published 64-node corridor
+PASS: serial component job resumes and deduplicates overlapping pending origins
+PASS: complete path has stable sorted endpoints and exposes an ordered passage axis
+PASS: returned arrays are independent and warm lookups read no new terrain
+PASS: zero budget retains pending work without terrain reads
+PASS: caller cannot exceed the 64-new-node ceiling
+PASS: invalid input is rejected before terrain queries
+PASS: revision change invalidates finished components and starts fresh bounded work
+PASS: same revision on a different registry never reuses old topology
+PASS: mid-query revision change discards all provisional topology
+PASS: degree-three junction bounds three narrow components instead of merging through it
+PASS: closed six-cell cycle is explicitly undirected and has no invented endpoints
+PASS: asymmetric helper fixture cannot publish an invented bidirectional component
+PASS: walkable singleton has no invented passage axis
+PASS: unknown or blocked origin never becomes a walkable singleton
+PASS: real TerrainRegistry ramp axis uses canonical H/H+1 legal transitions
+PASS: explicit fallback agrees with real registry path using both allows_step directions
+PASS: ramp H+0.5 side rejects a plain plateau and remains a separate component
+HEX_CORRIDOR_CACHE_PASS 18/0
+
+
+EXIT 0
