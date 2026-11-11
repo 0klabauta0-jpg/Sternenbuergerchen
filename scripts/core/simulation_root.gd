@@ -59,6 +59,8 @@ var _singleplayer_supply_owner: RefCounted
 var _campaign_onboarding_owner: RefCounted
 var _singleplayer_space_travel_owner: RefCounted
 var _ship_equipment_owner: RefCounted
+var _departure_adapter: WeakRef
+var _departure_group_receipts: Dictionary = {}
 
 
 func configure_ship_equipment(owner: RefCounted) -> void:
@@ -68,10 +70,105 @@ func configure_ship_equipment(owner: RefCounted) -> void:
 func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null, travel: RefCounted = null) -> void:
 	if _singleplayer_space_travel_owner != travel:
 		_space_move_receipts.clear()
+	if _singleplayer_campaign_owner != campaign or _singleplayer_supply_owner != supply:
+		_departure_group_receipts.clear()
+		_departure_adapter = null
 	_singleplayer_campaign_owner = campaign
 	_singleplayer_supply_owner = supply
 	_campaign_onboarding_owner = onboarding
 	_singleplayer_space_travel_owner = travel
+
+func configure_departure_adapter(adapter: Node) -> Dictionary:
+	if not is_instance_valid(adapter) or not adapter.has_method("validate_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
+	if _departure_adapter != null and _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_already_bound"}
+	_departure_adapter = weakref(adapter)
+	return {"ok":true}
+
+func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: String, approach_request_id: String = "") -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_required"}
+	if craft_id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or _singleplayer_supply_owner == null or _singleplayer_campaign_owner == null: return {"ok":false, "reason":"invalid_departure"}
+	if _departure_group_receipts.has(request_id):
+		var receipt: Dictionary = _departure_group_receipts[request_id]
+		if receipt.craft_id != craft_id or receipt.approach_request_id != approach_request_id: return {"ok":false, "reason":"request_id_conflict"}
+		if receipt.supply != _singleplayer_supply_owner or receipt.campaign != _singleplayer_campaign_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
+		if not approach_request_id.is_empty() and (receipt.fleet != _singleplayer_space_travel_owner or _singleplayer_space_travel_owner == null or receipt.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id)): return {"ok":false, "reason":"owner_changed"}
+		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
+	if _departure_group_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
+	# Adapter re-reads boarding, selection and actual pad immediately before
+	# preparation. UI-provided pilot, fuel and departure data are not accepted.
+	var gate: Dictionary = adapter.validate_departure(craft_id)
+	if not gate.get("ok", false): return gate
+	var departure: Dictionary = gate.get("departure", {})
+	if departure.get("craft_id") != craft_id: return {"ok":false, "reason":"invalid_departure"}
+	var pads: Array = adapter._built_home_pad_ids()
+	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
+	var bound: Dictionary = _singleplayer_campaign_owner.configure_departure_preparation_authority(self)
+	if not bound.get("ok", false): return bound
+	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":departure.duplicate(true), "request_id":request_id + ":fuel"}
+	var binding := {"contract_category":"singleplayer_campaign", "operation":"bind_departure", "payload":departure.duplicate(true), "request_id":request_id}
+	var activation := {}
+	if not String(departure.get("job_id", "")).is_empty():
+		activation = {"contract_category":"singleplayer_campaign", "operation":"activate_job", "payload":{"job_id":departure.job_id, "craft_id":craft_id}, "request_id":request_id + ":active"}
+	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":true})
+	if not supply_candidate.get("ok", false): return supply_candidate
+	var campaign_context := {"authority":self, "transaction_id":request_id, "built_home_pad_ids":pads.duplicate()}
+	var campaign_candidate: Dictionary = _singleplayer_campaign_owner.prepare_departure(binding, activation, campaign_context)
+	if not campaign_candidate.get("ok", false): return campaign_candidate
+	var travel_context := {}
+	var travel_candidate := {}
+	var travel_validation := {}
+	var flight_validation := {}
+	var actor_validation := {}
+	var flight: RefCounted
+	if not approach_request_id.is_empty():
+		if _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"travel_unavailable"}
+		flight = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+		if flight == null: return {"ok":false, "reason":"unknown_actor"}
+		var pose: Dictionary = flight.get_snapshot()
+		var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+		var area_id := String(pose.get("space_area_id", ""))
+		if pose.get("coordinate_frame") == "local":
+			var area_revision: int = _space_combat_state.get_area_revision(area_id)
+			var gate_preview: Dictionary = preview_surface_deactivation(craft_id, String(departure.destination_location_id), pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true,"actor_id":"singleplayer"})
+			if not gate_preview.get("ok", false): return gate_preview
+			flight_validation = flight.validate_space_activity_transition(gate_preview.activity_proposal, gate_preview.activity_tick)
+			actor_validation = _space_combat_state.validate_deactivation(craft_id, pose.revision, area_revision)
+			if not flight_validation.get("ok", false) or not actor_validation.get("ok", false): return {"ok":false, "reason":"space_deactivation_invalid"}
+		elif pose.get("coordinate_frame") != "strategic" or not area_id.is_empty(): return {"ok":false, "reason":"invalid_area"}
+		var fleet_bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
+		if not fleet_bound.get("ok", false): return fleet_bound
+		var travel_payload := {"craft_id":craft_id, "location_id":String(departure.destination_location_id)}
+		travel_context = {"request_id":approach_request_id,"request_signature":JSON.stringify({"operation":"begin_approach","payload":travel_payload}, "", true),"operation":"begin_approach","payload":travel_payload,"source_area_id":area_id,"target_area_id":area_id,"expected_travel_revision":travel.get("revision", -1),"expected_phase":"orbit","context_id":"departure:" + request_id}
+		var context_bound: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
+		if not context_bound.get("ok", false): return context_bound
+		travel_candidate = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, travel_context.expected_travel_revision, area_id, area_id, travel_context)
+		if not travel_candidate.get("ok", false):
+			_singleplayer_space_travel_owner.release_space_area_transition_context(travel_context.context_id, self)
+			return travel_candidate
+		travel_validation = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(travel_candidate, travel_context)
+	var sv: Dictionary = _singleplayer_supply_owner.validate_prepared_route_fuel(supply_candidate, self)
+	var cv: Dictionary = _singleplayer_campaign_owner.validate_prepared_departure(campaign_candidate, campaign_context)
+	if not sv.get("ok", false) or not cv.get("ok", false) or sv.get("patch", {}).get("mode") != "apply" or cv.get("replayed", false) or (not approach_request_id.is_empty() and (not travel_validation.get("ok", false) or travel_validation.get("replayed", false))):
+		if not travel_context.is_empty(): _singleplayer_space_travel_owner.release_space_area_transition_context(travel_context.context_id, self)
+		return {"ok":false, "reason":"departure_validation_failed"}
+	# No callbacks or fallible operations between first owner write and receipt.
+	var fuel_result: Dictionary = _singleplayer_supply_owner._publish_prepared_route_fuel(supply_candidate, sv)
+	var campaign_result: Dictionary = _singleplayer_campaign_owner._publish_prepared_departure(campaign_candidate, cv)
+	var result := {"ok":true, "departure":departure.duplicate(true)}
+	if not travel_context.is_empty():
+		if not flight_validation.is_empty():
+			flight._publish_space_activity_transition(flight_validation)
+			_space_combat_state._publish_deactivation(actor_validation)
+		result["travel_result"] = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(travel_candidate, travel_validation)
+	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight}
+	singleplayer_command_committed.emit(fuel, fuel_result)
+	singleplayer_command_committed.emit(binding, campaign_result.binding_result)
+	if not activation.is_empty(): singleplayer_command_committed.emit(activation, campaign_result.activation_result)
+	if not travel_context.is_empty():
+		var travel_command := {"contract_category":"singleplayer_space_travel", "operation":"begin_approach", "payload":travel_context.payload.duplicate(true), "request_id":approach_request_id}
+		singleplayer_command_committed.emit(travel_command, result.travel_result)
+	return result
 
 
 var _space_encounter_owner: RefCounted
