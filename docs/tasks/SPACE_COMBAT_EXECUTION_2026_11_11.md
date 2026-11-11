@@ -224,6 +224,13 @@ Verifier und diese Statusdokumentation.
   kontext, Supply/Campaign/Departure, Events und native Integration fehlen.
   Vor Produktfreigabe müssen diese Voraussetzungen und Fehlerfälle gemeinsam
   abgesichert werden; keine Fuel-/Oberflächenfreigabe aus diesem Pfad.
+- AP04a Eintrittsverteilung: reiner deterministischer Allocator plant für
+  mehrere Testschiffe getrennte vollständige Footprints im Eintrittsband,
+  berücksichtigt bestehende Bereichsbelegung und verändert keinen Owner.
+  Gezielte Prüfung6/6. Nicht angebunden; Suche bei dichtem Band kann bis zum
+  vollständigen Durchlauf aufwendig werden und braucht vor Produktfreigabe
+  begrenzte/inkrementelle Ausführung und Messung. Commit muss Belegung erneut
+  prüfen; Vorschau reserviert noch keine Felder.
 - AP04a Reviewkorrektur: Eintrittsvorschau prüft das **gesamte** Footprint im
   Eintrittsband, nicht nur den Anker (8/8). Erfolgreiche Fixtureübergänge
   verlassen den begrenzten Pool offener Tokens; Replayquittungen liegen
