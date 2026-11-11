@@ -89,6 +89,11 @@ func read_unit(unit_id: String) -> Dictionary:
 	result["stand_height_steps2"] = roundi(2.0 * float(_registry.call("get_stand_height_at", result["grid"])))
 	result["terrain_revision"] = _terrain_revision()
 	result["movement_state"] = {"moving":false}
+	var route:Array=_segments_by_unit_id.get(unit_id,[])
+	result["route_state"]={"has_commitments":not route.is_empty()}
+	if not route.is_empty():
+		var last:Dictionary=route.back()
+		result.route_state.merge({"final_grid":last.to_grid,"last_handoff_tick":last.handoff_tick,"end_tick":int(last.start_tick)+int(last.duration_ticks),"command_id":last.command_id})
 	var centering:Dictionary=_centering_by_unit_id.get(unit_id,{})
 	if not centering.is_empty() and _tick<int(centering.start_tick)+int(centering.duration_ticks):
 		result["movement_state"]={"moving":true,"phase":"centering","start_tick":centering.start_tick,"duration_ticks":centering.duration_ticks}
@@ -118,6 +123,22 @@ func build_planning_snapshot() -> Dictionary:
 
 func get_current_tick() -> int:
 	return _tick
+
+
+func has_unit(unit_id: String) -> bool:
+	return _is_configured() and _units_by_id.has(unit_id)
+
+
+func get_unit_ids() -> Array:
+	return _units_by_id.keys() if _is_configured() else []
+
+
+func get_unit_grid(unit_id:String) -> Variant:
+	return _units_by_id[unit_id].grid if has_unit(unit_id) else null
+
+
+func has_motion_commitments(unit_id: String) -> bool:
+	return _segments_by_unit_id.has(unit_id) or _centering_by_unit_id.has(unit_id)
 
 
 ## Presentation only: fractional reads never advance ownership, clocks or rolls.

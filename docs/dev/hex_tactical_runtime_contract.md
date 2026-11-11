@@ -210,6 +210,35 @@ Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
 Terrainowner; `allows_registry_step` ist nach beiden Registrygates das gemeinsame
 Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
-Noch offen: aktive Ausführung AP5, Lifecycle/Save/Netzwerk AP6–8.
-Ein Datenindex ersetzt nicht die aktive Bewegung oder Minimum-Spacing.
+Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen und 2DActor-
+projektion gemäß HEX_MOVE_COMMAND_ADAPTER_2026_11_11.md. 3DView-/Gruppenankunft,
+Bewegungsschuss, Türguard und Rücksetz-Ausführung sowie AP6–8 bleiben offen.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
+
+## Echte Bewegungsabsichten und Darstellung
+
+Im zugelassenen Hexruntime wendet Root den vorhandenen UnitCommand an und
+übergibt das Ziel an seinen privaten HexMovementCommandRuntime. Dieser hält
+Absicht, abgeleitete Navigation und Ankunft; Ground besitzt allein Zelle,
+Segmentzusagen und Zentrierphase. `requeue_until_target` erzeugt hier keine
+zweite Framebewegung. Neue Ziele stoppen alte Abhängigkeiten vor neuer Planung;
+Hold/Wunde räumen auch noch nicht zugesagte Such-/Pfad-/Timingdaten auf.
+
+Pro Root-Tick höchstens vier Navscheiben/96 Expansionen sowie16 Requests mit
+je drei neuen Übergängen. Das vorhandene Navzulassungsbudget kann null sein.
+Wartende unveränderte Routen benutzen ihren Such-/Oberflächenzeitcache weiter;
+stehende/verwundete Figuren blockieren Navigation, gemeinsame Abfahrten werden
+weiter atomar vom Planer geprüft. Zeit basiert auf physischem Hexmaß und
+vorhandenen Geschwindigkeitsprofilen, unabhängig von Bildschirmrichtung.
+
+Root projektiert nur abgeleitete Actorposition/Richtung/Höhenmetadaten. Alte
+Avoidance, Abstandskorrektur und Passageplanung dürfen zugelassene Hexfiguren
+nicht zusätzlich verschieben. Fractional-Renderreads würfeln oder committen
+nichts. Capture liest das zugelassene logische Feld statt der Renderposition.
+Ankunft verlangt aktuelle Zielidentität und Ende aller Kanten/Zentrierphasen;
+die letzte Feldübergabe allein reicht nicht. Read-/Ansichtswechsel führen weder
+Stop noch Neuplanung aus und benutzen ausschließlich die Registry dieses Orts.
+
+QA hex_move_commands_20261111:42/0 echte Root-/UnitRegistry-/CapabilityActor-
+Prüfungen, direkte Nachbarcases und enger Review. Kleine synthetische Bewegung,
+keine vollständige TestUnit-/3D-/Meta-/Save-/Netzwerk- oder Lastabnahme.
