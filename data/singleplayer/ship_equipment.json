@@ -16,7 +16,25 @@
       "compatible_item_ids": [
         "warp_odyssey",
         "warp_hemera"
-      ]
+      ],
+      "flight_profile": {
+        "mass": 1.0,
+        "main_thrust": 2.0,
+        "reverse_thrust": 1.0,
+        "side_thrust": 1.2,
+        "turn_acceleration": 0.6,
+        "thrust_fraction": 1.0
+      }
+    }
+  },
+  "flight_profiles": {
+    "buccaneer": {
+      "mass": 1.0,
+      "main_thrust": 2.8,
+      "reverse_thrust": 1.4,
+      "side_thrust": 1.8,
+      "turn_acceleration": 1.1,
+      "thrust_fraction": 1.0
     }
   },
   "items": {
@@ -33,5 +51,5 @@
       "quantum_duration_multiplier": 0.730768994891357
     }
   },
-  "effect_note": "Vereinfachte relative Spiel-Reisedauer aus datierten Geschwindigkeitsreferenzen; kein Star-Citizen-Flugmodell."
+  "effect_note": "Vereinfachte relative Spiel-Reisedauer aus datierten Geschwindigkeitsreferenzen; kein Star-Citizen-Flugmodell. Das Cutlass-Flugprofil sind vorläufige spielinterne Startwerte, keine physikalische Referenz."
 }

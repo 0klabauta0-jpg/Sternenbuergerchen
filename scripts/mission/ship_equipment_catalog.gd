@@ -8,6 +8,10 @@ static func definition() -> Dictionary:
 	return raw if typeof(raw) == TYPE_DICTIONARY else {}
 static func item(id: String) -> Dictionary: return Dictionary(definition().get("items", {}).get(id, {})).duplicate(true)
 static func model(id: String) -> Dictionary: return Dictionary(definition().get("models", {}).get(id, {})).duplicate(true)
+static func flight_profile(id: String) -> Dictionary:
+	var data := definition()
+	var model_data: Dictionary = data.get("models", {}).get(id, {})
+	return Dictionary(model_data.get("flight_profile", data.get("flight_profiles", {}).get(id, {}))).duplicate(true)
 static func compatible(model_id: String, slot: String, item_id: String) -> bool:
 	var entry := model(model_id)
 	return not entry.is_empty() and slot == String(entry.get("slot_id", "")) and Array(entry.get("compatible_item_ids", [])).has(item_id) and item(item_id).get("size") == entry.get("size")
