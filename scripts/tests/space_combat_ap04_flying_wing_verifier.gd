@@ -22,5 +22,9 @@ func _initialize() -> void:
 	var duplicate = OWNER.new()
 	if duplicate.ensure_flying_wings("player", ["fighter", "cutlass"], owned, {"fighter":"p1", "cutlass":"p1"}).get("ok", false) or not duplicate.get_snapshot().wings.is_empty(): failed += 1
 	if state.ensure_flying_wings("player", ["fighter", "fighter"], owned, pilots).get("ok", false): failed += 1
-	print("SPACE_COMBAT_AP04_FLYING_WING passed=", 9 - failed, " failed=", failed)
+	var context := {"authorized":true, "actor_id":"player", "phase":"tactical", "owned_crafts":owned, "craft_pilots":pilots, "flying_crafts":["fighter"]}
+	var removal := {"contract_category":"space_combat", "operation":"wing_remove", "request_id":"remove-flying", "expected_revision":state.get_snapshot().revision, "payload":{"wing_id":result.wing_by_craft.fighter, "craft_id":"fighter"}}
+	var before_remove: Dictionary = state.get_snapshot()
+	if state.apply_command(removal, context).get("reason") != "craft_flying" or state.get_snapshot() != before_remove: failed += 1
+	print("SPACE_COMBAT_AP04_FLYING_WING passed=", 10 - failed, " failed=", failed)
 	quit(1 if failed else 0)

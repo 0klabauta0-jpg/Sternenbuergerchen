@@ -39,6 +39,53 @@ strategischen 256×256-Karte. Boden-NPC und Tabletop bleiben beim anderen Chat.
   weiteren Flugowner noch einen zweiten Rottenbestand. Gemeinsame konkrete
   API und Besitz gemeinsam berührter Dateien erst abstimmen.
 
+## Konkretisierte gemeinsame Grenze
+
+Der Orbitkarten-Chat meldet `OrbitApproachLayout.build(body_id)` mit
+`body_map_id = "orbit_approach:" + URI-kodierte kanonische Body-ID`,
+`map_bounds = Rect2i(0,0,512,256)`, unterem Eintrittsband
+`Rect2i(0,224,512,32)`, `body_cells` und `gate_cells`. Der Saum ist nominal
+256 Felder breit und höchstens vier Felder tief; das Gate liegt in der ersten
+freien Zelle unter der Körpermaske. Ein Sonnenorbit erzeugt kein frei erfundenes
+Oberflächenziel. Der alte Drei-Marker-Pfad bleibt bis zum vollständigen
+Anschluss produktiv.
+
+Für unseren Bereich schlagen wir folgende Root-Operationen vor; dies sind
+**Vertragsentwürfe, noch keine implementierten APIs**:
+
+```
+prepare_space_area_transition(craft_id, area_id, target_pose,
+    expected_flight_revision, expected_travel_revision, authority_context) -> Dictionary
+commit_space_area_transition(transition_token, authority_context) -> Dictionary
+```
+
+Die Vorbereitung prüft Quelle/Ziel und Revisionswerte, kanonisches Layout,
+gültige bereichslokale Pose, vollständigen freien Footprint und die planbare
+eindeutige Rottenzuordnung. Sie erzeugt nur einen Root-internen, einmaligen
+Token, keine Spielzustandsänderung. Commit prüft beide Revisionen, Besitz,
+Footprint/Belegung und Voraussetzungen erneut; Flugzustand samt
+`space_area_id`/`coordinate_frame`, Reisephase, räumliche Indizes und
+Wingzuordnung werden als eine fachliche Transaktion geändert. Dafür müssen
+Owner ihre Änderungen vorab vorbereiten und ohne nachträgliche Fehler
+übernehmen können; falls das bestehende Owner-API das nicht garantiert, ist
+eine explizite transaktionale Lösung nötig. Ein fehlgeschlagener oder
+veralteter Übergang hinterlässt keine Teilmutation; ein identisch wiederholter
+Commit darf keine zweite Bewegung oder Rotte erzeugen.
+
+Der Reise-/Surface-Owner akzeptiert später ausschließlich einen vom Root aus
+Flight-/Area-/Travelrevision sowie Position und echtem Gate abgeleiteten
+Kontext. Vor Treibstoffabbuchung erfolgt eine Vorschau, beim Commit eine
+erneute Prüfung; kein UI-Boolean ist Nachweis einer Saumposition. Die genaue
+Tokenform, Travel-Prepare-/Commit-Schnittstelle, Rücktritt von Reservierungen
+und Legacy-Abbildung werden mit dem Reiseowner gemeinsam finalisiert.
+
+Dateibesitz: Wir bearbeiten `space_flight_state.gd`, bereichsbezogene
+Raumregistry/-navigation, Raumcommands, Wingowner und die Raumtransition in
+`simulation_root.gd`. Der andere Chat bearbeitet Orbitlayout/-vertrag und
+Ansicht sowie nach gesichertem Import Reisegate und Migration. Gemeinsam
+berührte Root-/Adapterdateien erst nach konkreter Abstimmung integrieren;
+kein gegenseitiges Bearbeiten uncommitteter Änderungen.
+
 ## Akzeptanzkriterien / kleine Arbeitsschritte
 
 1. Bereichs-ID, strategische/lokale Koordinaten, Atomarität, Saumgeometrie,

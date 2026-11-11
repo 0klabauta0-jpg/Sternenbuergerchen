@@ -197,6 +197,11 @@ Verifier und diese Statusdokumentation.
   `wing_transfer` nutzt diesen Wechsel und seine vorhandenen Replaybelege;
   Prüfung18/18 inklusive Sechsergrenze und Wiederholung, AP00 und Owner grün.
   Adapter, UI und Flugstart sind noch nicht angeschlossen.
+- AP04 Entfernungsgate-Vorstufe: Der Owner verweigert `wing_remove`, wenn
+  der vertrauenswürdige Runtime-Kontext das Schiff als fliegend ausweist.
+  Prüfung10/10, Transfer18/18 und bestehender Adapter9/9. Der Adapter liefert
+  die Liste bisher nicht; ohne sie ist die Regel noch nicht produktiv
+  durchgesetzt. Reise-/Adapteranbindung gehört zur abgestimmten Folgearbeit.
 - Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
   integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
   Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine

@@ -192,6 +192,8 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 		"wing_remove":
 			var craft: String = payload.craft_id
 			if not _wings[id].craft_ids.has(craft): return _reject("not_member")
+			if typeof(context.get("flying_crafts", [])) != TYPE_ARRAY: return _reject("invalid_flying_crafts")
+			if context.get("flying_crafts", []).has(craft): return _reject("craft_flying")
 			_wings[id].craft_ids.erase(craft)
 			_craft_wings.erase(craft)
 			if _wings[id].craft_ids.is_empty():
