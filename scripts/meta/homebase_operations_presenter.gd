@@ -1283,7 +1283,7 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		var target_name := String(Dictionary(orbits.get(String(travel.get("target_orbit_id", "")), {})).get("name", "Zielorbit"))
 		match phase:
 			"orbit": context["caption"] = "Im Weltraum · " + orbit_name
-			"quantum": context["caption"] = "Quantum-Sprung → %s · %d %%" % [target_name, roundi(float(travel.get("progress", 0.0)) * 100)]
+			"quantum": context["caption"] = "Warp-Sprung → %s · %d %%" % [target_name, roundi(float(travel.get("progress", 0.0)) * 100)]
 			"stopped": context["caption"] = "Im Weltraum · Sprung abgebrochen, Position gehalten"
 			"approach": context["caption"] = "Ortsanflug · %s wird verlassen" % orbit_name
 		return context

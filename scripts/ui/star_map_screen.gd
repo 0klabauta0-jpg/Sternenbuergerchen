@@ -349,7 +349,7 @@ func _phase_text(travel: Dictionary, preparation: Dictionary = {}) -> String:
 		if String(preparation.get("status", "")) == "cancelled": return "Anflug abgebrochen · Zurück im Orbit."
 	match phase:
 		"grounded": return "Mondbasis · Am Flightdeck abheben, um den Mondorbit zu erreichen."
-		"quantum": return "Quantum-Sprung → %s · %d %% · Abbruch jederzeit möglich" % [_marker_name(travel, true), roundi(float(travel.get("progress", 0.0)) * 100)]
+		"quantum": return "Warp-Sprung → %s · %d %% · Abbruch jederzeit möglich" % [_marker_name(travel, true), roundi(float(travel.get("progress", 0.0)) * 100)]
 		"stopped": return "Sprung abgebrochen · Position gehalten. Ziel anklicken, um erneut zu springen."
 		"orbit": return "%s erreicht · %s" % [_marker_name(travel), "Zielort wählen und Anflug starten." if String(travel.get("orbit_id", "")) != "moon_orbit" else "Zielorbit wählen oder an der Mondbasis landen."]
 		"approach":
