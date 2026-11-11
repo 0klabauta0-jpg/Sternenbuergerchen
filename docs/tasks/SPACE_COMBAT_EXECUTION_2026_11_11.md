@@ -120,9 +120,11 @@ Verifier und diese Statusdokumentation.
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
   löst sie auf. Verifier19/19. Root nimmt die Commandkategorie über den
   gemeinsamen Singleplayer-Ownerpfad an; Root-/Ownercheck30/30 und
-  Warp-Rootregression7/7. Der autoritative Aufrufer muss eine vollständige
-  aktuelle Craft-/Pilotenzuordnung liefern; Adapter-/UI-Anschluss,
-  Lifecycle- und Checkpointintegration fehlen.
+  Warp-Rootregression7/7. Singleplayer-Adapter liest eigene Flotte und die
+  bestehende Pilotenzuordnung; keine UI-Berechtigungsdaten. Identische
+  Wiederholung funktioniert auch nach Reisebeginn; neue Umstellung während
+  Warp/Anflug bleibt gesperrt. Adaptercheck9/9. UI-Anschluss,
+  automatische Pilotverlustbehandlung und Checkpointintegration fehlen.
 - AP02/AP03/AP04 Rest und AP05–AP20: offen.
 
 ## Risiken / offene Punkte

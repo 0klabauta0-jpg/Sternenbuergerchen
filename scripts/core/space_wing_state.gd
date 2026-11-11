@@ -14,6 +14,23 @@ func get_snapshot() -> Dictionary:
 		wings[id]["active"] = not wings[id].craft_ids.is_empty()
 	return {"revision": _revision, "wings": wings}
 
+func check_replay(command: Dictionary, actor_id: String) -> Dictionary:
+	if typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).is_empty():
+		return {"found": false}
+	var receipts: Dictionary = _receipts.get(actor_id, {})
+	if not receipts.has(command.request_id):
+		return {"found": false}
+	if not CONTRACT._finite(command):
+		return {"found": true, "result": _reject("invalid_payload")}
+	if CONTRACT._has_authority_key(command):
+		return {"found": true, "result": _reject("untrusted_authority")}
+	var receipt: Dictionary = receipts[command.request_id]
+	if receipt.signature != CONTRACT.request_signature(command):
+		return {"found": true, "result": _reject("request_id_conflict")}
+	var result: Dictionary = receipt.result.duplicate(true)
+	result["replayed"] = true
+	return {"found": true, "result": result}
+
 func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 	var actor: Variant = context.get("actor_id")
 	if typeof(actor) != TYPE_STRING or String(actor).strip_edges().is_empty() or context.get("authorized") != true:

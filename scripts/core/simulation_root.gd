@@ -84,6 +84,9 @@ var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 func get_space_wing_snapshot() -> Dictionary:
 	return _space_wing_state.get_snapshot()
 
+func check_space_wing_replay(command: Dictionary, actor_id: String) -> Dictionary:
+	return _space_wing_state.check_replay(command, actor_id)
+
 func admit_space_actor(definition: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}

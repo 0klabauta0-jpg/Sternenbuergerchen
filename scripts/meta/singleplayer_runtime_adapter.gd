@@ -204,6 +204,10 @@ func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "space_wing_command":
+		if typeof(payload.get("command")) != TYPE_DICTIONARY:
+			return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
 	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
@@ -671,6 +675,45 @@ func advance_space_travel(delta: float) -> void:
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
 		_finish_space_encounter_result()
+
+func _request_space_wing_command(command: Dictionary) -> Dictionary:
+	if _simulation == null or _travel == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	if command.get("contract_category") != "space_combat" or typeof(command.get("payload")) != TYPE_DICTIONARY:
+		return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+	var operation := String(command.get("operation", ""))
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set"]:
+		return _reject("unsupported_operation", "Dieser Rottenauftrag ist noch nicht verfuegbar")
+	var prior: Dictionary = _simulation.check_space_wing_replay(command, "singleplayer")
+	if prior.get("found", false):
+		return prior.result
+	var routes: Dictionary = _travel.get_snapshot().get("routes", {})
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var payload: Dictionary = command.payload
+	var wing_id: String = String(payload.get("wing_id", ""))
+	var wings: Dictionary = _simulation.get_space_wing_snapshot().get("wings", {})
+	var affected: Dictionary = {}
+	if wings.has(wing_id):
+		for id in wings[wing_id].craft_ids: affected[id] = true
+	for key in ["craft_id", "leader_craft_id"]:
+		if typeof(payload.get(key)) == TYPE_STRING and not String(payload[key]).is_empty():
+			affected[payload[key]] = true
+	var phase := "grounded"
+	for id in affected:
+		if not routes.has(id): return _reject("unknown_craft", "Schiff ist nicht in der eigenen Flotte")
+		var craft_phase: String = String(_travel.get_snapshot(id).get("phase", ""))
+		var flight: RefCounted = _travel.get_flight_state(id)
+		if flight != null and flight.get_snapshot().motion_mode == "tactical":
+			phase = "tactical"
+		elif craft_phase in ["orbit", "stopped"] and phase != "tactical":
+			phase = "orbit"
+		elif craft_phase != "grounded":
+			return _reject("craft_busy", "Schiff ist auf einem nicht unterbrechbaren Flug oder Anflug")
+	var context := {"authorized":true, "actor_id":"singleplayer", "phase":phase,
+		"owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
+	return _simulation.request_singleplayer_command(command.duplicate(true), context)
 
 func validate_space_launch(craft_id: String, observe_progress: bool = true) -> Dictionary:
 	if String(_travel.get_snapshot(craft_id).phase) != "grounded":
