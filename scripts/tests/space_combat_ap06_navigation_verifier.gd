@@ -34,5 +34,10 @@ func _initialize() -> void:
 	if RESOLVER.resolve(patrol, world, 0.1).next_waypoint_index != 0: failed += 1
 	if RESOLVER.resolve(order, {"members":{}}, 0.1).get("reason") != "no_members": failed += 1
 	if RESOLVER.resolve(order, world, -1.0).get("reason") != "invalid_delta": failed += 1
-	print("SPACE_COMBAT_AP06_NAVIGATION passed=", 10 - failed, " failed=", failed)
+	var local_cell: Vector2i = GRID.from_offset(Vector2i(400,100))
+	var local_order := {"verb":"move", "target_hex":local_cell}
+	world["coordinate_frame"] = "local"
+	world["space_area_id"] = "orbit_approach:moon"
+	if not RESOLVER.resolve(local_order, world, 0.1).get("ok", false): failed += 1
+	print("SPACE_COMBAT_AP06_NAVIGATION passed=", 11 - failed, " failed=", failed)
 	quit(1 if failed else 0)

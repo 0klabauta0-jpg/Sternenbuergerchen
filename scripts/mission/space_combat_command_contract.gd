@@ -1,7 +1,7 @@
 extends RefCounted
 ## Stateless validation only. Ownership and revision come from the trusted caller.
 
-const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const AREA = preload("res://scripts/core/space_area_grid.gd")
 const OPERATIONS := ["wing_create", "wing_assign", "wing_remove", "wing_transfer", "wing_rename", "wing_leader_set", "order_issue", "order_cancel", "fire_rule_set", "assist_preference_set", "maneuver_request"]
 
 static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
@@ -35,19 +35,21 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 	if context.get("phase") not in ["grounded", "orbit", "tactical"]:
 		return _reject("invalid_phase")
 	var payload: Dictionary = command.payload
+	# Bounds come exclusively from the trusted runtime context.
+	var area := {"coordinate_frame":context.get("coordinate_frame", "strategic"), "space_area_id":context.get("space_area_id", "")}
 	if not _finite(payload):
 		return _reject("invalid_payload")
 	for key in ["wing_id", "craft_id", "leader_craft_id"]:
 		if payload.has(key) and (typeof(payload[key]) != TYPE_STRING or String(payload[key]).strip_edges().is_empty()):
 			return _reject("invalid_id")
-	if payload.has("target_hex") and (typeof(payload.target_hex) != TYPE_VECTOR2I or not GRID.contains(payload.target_hex)):
+	if payload.has("target_hex") and (typeof(payload.target_hex) != TYPE_VECTOR2I or not AREA.contains(payload.target_hex, area)):
 		return _reject("invalid_hex")
 	for key in ["area_hexes", "waypoints"]:
 		if payload.has(key):
 			if typeof(payload[key]) != TYPE_ARRAY or payload[key].is_empty():
 				return _reject("invalid_hex")
 			for cell in payload[key]:
-				if typeof(cell) != TYPE_VECTOR2I or not GRID.contains(cell):
+				if typeof(cell) != TYPE_VECTOR2I or not AREA.contains(cell, area):
 					return _reject("invalid_hex")
 	if operation in ["wing_assign", "wing_remove", "wing_transfer"] and not payload.has_all(["wing_id", "craft_id"]):
 		return _reject("missing_field")
@@ -97,7 +99,7 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 	if operation == "maneuver_request":
 		var target: Variant = payload.target
 		if typeof(target) == TYPE_VECTOR2I:
-			if not GRID.contains(target): return _reject("invalid_hex")
+			if not AREA.contains(target, area): return _reject("invalid_hex")
 		elif typeof(target) != TYPE_STRING or not Array(context.get("known_targets", [])).has(target):
 			return _reject("unknown_target")
 	var wings: Array = [payload.wing_id] if payload.has("wing_id") else payload.get("wing_ids", [])

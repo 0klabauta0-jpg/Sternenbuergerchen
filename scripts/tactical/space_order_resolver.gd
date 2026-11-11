@@ -1,6 +1,7 @@
 extends RefCounted
 ## Pure navigation intent only. No movement or world state is committed here.
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const AREA = preload("res://scripts/core/space_area_grid.gd")
 const ARRIVAL_SPEED := 0.05
 
 static func resolve(order: Dictionary, world: Dictionary, dt: float) -> Dictionary:
@@ -10,6 +11,7 @@ static func resolve(order: Dictionary, world: Dictionary, dt: float) -> Dictiona
 	var verb: String = String(order.get("verb", ""))
 	if verb not in ["move", "patrol", "secure", "withdraw"]: return _reject("unsupported_order")
 	var target: Variant = order.get("target_hex")
+	var area := {"coordinate_frame":world.get("coordinate_frame", "strategic"), "space_area_id":world.get("space_area_id", "")}
 	var index: int = 0
 	var waypoints: Array = []
 	if verb == "patrol":
@@ -19,9 +21,9 @@ static func resolve(order: Dictionary, world: Dictionary, dt: float) -> Dictiona
 		index = int(order.get("waypoint_index", 0))
 		if index < 0 or index >= waypoints.size(): return _reject("invalid_target")
 		for waypoint in waypoints:
-			if typeof(waypoint) != TYPE_VECTOR2I or not GRID.contains(waypoint): return _reject("invalid_target")
+			if typeof(waypoint) != TYPE_VECTOR2I or not AREA.contains(waypoint, area): return _reject("invalid_target")
 		target = waypoints[index]
-	if typeof(target) != TYPE_VECTOR2I or not GRID.contains(target): return _reject("invalid_target")
+	if typeof(target) != TYPE_VECTOR2I or not AREA.contains(target, area): return _reject("invalid_target")
 	var radius_value: Variant = order.get("arrival_radius", 0.25)
 	if typeof(radius_value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(radius_value)) or float(radius_value) <= 0.0:
 		return _reject("invalid_radius")

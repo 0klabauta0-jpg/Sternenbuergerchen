@@ -210,6 +210,11 @@ Verifier und diese Statusdokumentation.
   jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
   Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale
   Aufnahme bleibt bis zur vollständigen Transaktion gesperrt.
+- AP04a Commands/Zielresolver: Ziel- und Wegpunktgrenzen folgen dem allein
+  vom Runtime-Kontext gelieferten Koordinatenrahmen; strategische Defaults
+  bleiben kompatibel. Bereichs-Command4/4, Zielresolver11/11, AP00 und
+  Rottenauftragsowner grün. Bereichszuordnung mehrerer beauftragter Rotten
+  und produktive Runtime-Kontextlieferung bleiben offen.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
