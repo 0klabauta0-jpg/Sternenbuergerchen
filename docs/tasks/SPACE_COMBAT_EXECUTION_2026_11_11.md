@@ -153,6 +153,10 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Parallelcommit d539cbe89 (Polisa-Schiffsübernahme und Rückkehr) als
+  381f06802 integriert. Backend-, Übergabe-, Weltraumtakt-, echter Szenen-,
+  Rottenadapter-, Panel- und Auftragsownercheck jeweils Exit0 ohne Fehler.
+  Der parallele Worktree wurde nicht geändert.
 - Parallelstand b67b307b0 als 1ced3be19 integriert: Warp-Ausrüstung besitzt
   bereits eigenen Root-Owner, Katalog, Supply-Transaktionen und Savevalidierung.
   AP09/15/16 müssen diese vorhandene Struktur erweitern und Warp-Belege samt
