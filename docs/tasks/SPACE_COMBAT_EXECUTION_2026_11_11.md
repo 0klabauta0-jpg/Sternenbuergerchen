@@ -241,6 +241,11 @@ Verifier und diese Statusdokumentation.
   jenseits der strategischen 256er-Grenze, Blocker und Kartenrand4/4;
   strategische Geometrie, Batch und Fixture-Flugtakt grün. Root-Mutation,
   lokale Kampfaufnahme und tatsächliche Layoutblocker noch nicht verbunden.
+- AP04a Bereichsbatch-Fixture: Root filtert Akteure und Zielbelegung nach
+  Raum-ID; lokale Batchcommits verlangen expliziten Fixturekontext und
+  Testschiff-ID. Bereichstrennung und Sperre5/5, bestehende Batch- und
+  Übergangsfixture grün. Keine produktive lokale Bewegung; Kartenblocker,
+  KI/Guidance und gemischte Formationen sind nicht angebunden.
 - AP04a Footprint: einzellige und große Rümpfe prüfen die Grenzen des
   jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
   Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale

@@ -76,6 +76,7 @@ var _space_runtime_tick: Callable
 const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
 const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const SPACE_AREA_GRID = preload("res://scripts/core/space_area_grid.gd")
 const SPACE_NAVIGATION = preload("res://scripts/tactical/space_navigation_resolver.gd")
 const SPACE_FLIGHT_RESOLVER = preload("res://scripts/tactical/space_flight_resolver.gd")
 const SPACE_GUIDANCE_RESOLVER = preload("res://scripts/tactical/space_guidance_resolver.gd")
@@ -360,9 +361,12 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		return {"ok": false, "reason": "runtime_authority_required"}
 	if proposals.is_empty():
 		return {"ok": false, "reason": "empty_batch"}
+	var area := {"coordinate_frame":world.get("coordinate_frame", "strategic"), "space_area_id":world.get("space_area_id", "")}
+	if not SPACE_AREA_GRID.contains(Vector2i.ZERO, area): return {"ok":false, "reason":"invalid_area"}
 	var actors: Array[Dictionary] = []
 	for snapshot in _space_combat_state.get_flight_snapshots():
-		if snapshot.motion_mode == "tactical": actors.append(snapshot)
+		if snapshot.motion_mode == "tactical" and snapshot.get("coordinate_frame", "strategic") == area.coordinate_frame and snapshot.get("space_area_id", "") == area.space_area_id:
+			actors.append(snapshot)
 	var seen := {}
 	for proposal in proposals:
 		var id: Variant = proposal.get("craft_id")
@@ -372,6 +376,11 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		var flight: RefCounted = _space_combat_state.get_actor(id)
 		if flight == null or flight.get_snapshot().motion_mode != "tactical":
 			return {"ok": false, "reason": "not_tactical"}
+		var snapshot: Dictionary = flight.get_snapshot()
+		if snapshot.coordinate_frame != area.coordinate_frame or snapshot.space_area_id != area.space_area_id:
+			return {"ok":false, "reason":"area_mismatch"}
+		if area.coordinate_frame == "local" and (authority_context.get("fixture") != true or not String(id).begins_with("space_fixture_")):
+			return {"ok":false, "reason":"local_area_not_ready"}
 		if proposal.get("motion_mode", "tactical") != "tactical":
 			return {"ok": false, "reason": "invalid_motion_mode"}
 		var valid: Dictionary = flight.validate_motion(proposal, tick)
@@ -385,7 +394,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 	ids.sort()
 	for id in ids:
 		var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(id, accepted[id])
-		for occupant in _space_combat_state.query_cells(cells):
+		for occupant in _space_combat_state.query_cells(cells, String(area.space_area_id)):
 			if occupant != id:
 				return {"ok": false, "reason": "occupied"}
 	for id in ids:
