@@ -21,6 +21,7 @@ func _initialize() -> void:
 	if sim.prepare_space_area_transition(actor.craft_id, "orbit_approach:moon", {}, 0, 0, auth).get("reason") != "not_authority": failed += 1
 	if sim.commit_space_area_transition("missing", auth).get("reason") != "not_authority" or sim.release_space_area_transition("missing", auth).get("reason") != "not_authority": failed += 1
 	if sim.commit_fixture_surface_group({}, {}).get("reason") != "not_authority": failed += 1
+	if sim.commit_singleplayer_departure(null, "ship", "request").get("reason") != "not_authority": failed += 1
 	if sim.request_singleplayer_space_move({}).get("reason") != "not_authority" or sim.set_space_flight_control(actor.craft_id, {}, {}, {}, auth).get("reason") != "not_authority": failed += 1
 	if sim.enter_space_tactical(actor.craft_id, 1, auth).get("reason") != "not_authority" or sim.commit_space_actor_motion(actor.craft_id, {}, 1, auth).get("reason") != "not_authority": failed += 1
 	var proposals: Array[Dictionary] = []

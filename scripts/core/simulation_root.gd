@@ -86,6 +86,7 @@ func configure_departure_adapter(adapter: Node) -> Dictionary:
 
 func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: String, approach_request_id: String = "") -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
 	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_required"}
 	if craft_id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or _singleplayer_supply_owner == null or _singleplayer_campaign_owner == null: return {"ok":false, "reason":"invalid_departure"}
 	if _departure_group_receipts.has(request_id):
