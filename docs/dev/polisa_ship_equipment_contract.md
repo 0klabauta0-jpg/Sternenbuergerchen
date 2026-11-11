@@ -69,3 +69,12 @@ pads. Station pickup requires an authoritative location/pad-occupancy/arrival an
 crew handoff, plus persistence for the newly local craft; it cannot be achieved
 by changing UI text or a receipt destination. No local-pickup option is offered
 until those owners support the full handoff. No new vehicle models in this scope.
+
+## Local pickup follow-up plan / 2026-11-11
+Concrete unimplemented task: [POLISA_LOCAL_SHIP_PICKUP_2026_11_11](../tasks/POLISA_LOCAL_SHIP_PICKUP_2026_11_11.md). Scope is existing Cutlass/Buccaneer only; no equipment/warp consumer changes. Product ownership must be agreed before edits.
+
+All seven polisa_pad_01..07 already exist as product MapData markers. Their canonical R08 source is art/polisa_r08_20261111/author_layout.py:39-42 and layout.json/layout_compiled.json: two M12x12, one L16x24, four S8x6. build_candidate.py:28-29,59-63 adds origin_plane [0,-70], snaps to a walkable hex and writes iso marker coordinates. Runtime reads each real MapData marker; local centers or visual transforms are not substitute gameplay positions. spawn_alpha/ship_return alias pad_01; current Tactical authored-pad getter uses that single alias. Missing functionality is shared local pad selection/reservation and a real parked craft, not missing art markers. Art reserve_envelope alone does not prove model compatibility.
+
+Use existing Supply receipts/stock/fuel, local Tactical card/sequence/presence, Flow location/visit bindings and per-craft Travel owners. New craft needs authorized surface/polisa initialization and an explicit legitimate local departure/return identity. Do not fabricate a home outbound token. Service context currently depends on campaign departure destination and must recognize actual station birth. Local pilot/crew handoff must uniquely update source/target visits and use existing SimulationRoot embark effects; whole-location sortie enumeration is not a safe craft-membership substitute.
+
+Keep checkpoints home-only. Proposed minimal delivery scope reserves an existing built free home return pad while acquiring on a distinct real local pad; this limitation must be agreed before implementation. Version purchase receipts with separate acquisition location/pad and home return pad; old home-delivery receipts retain explicit compatibility. Receipt history must not become pad-occupancy authority. No local pickup UI option before the complete authoritative handoff, retry/failure consistency and eventual home-checkpoint reconstruction work. No product edits or tests performed for this documentation follow-up.
