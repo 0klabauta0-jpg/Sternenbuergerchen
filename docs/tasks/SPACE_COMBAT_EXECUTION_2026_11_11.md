@@ -93,10 +93,12 @@ Verifier und diese Statusdokumentation.
   zusätzlich ein einzelner Fixture-Commit über den tatsächlichen Root.
   Produkt-Rumpfkatalog, automatische Tickanbindung, Kollision und
   vollständige AP02-Abnahme fehlen.
-- AP03 Vorstufe: deterministische, konservativ reservierende Stichproben für
-  Bewegungs-/Drehpfade; fünf gezielte Fälle bestanden. Exakte Randberührungen,
-  zeitliche Reservierung, Blockadeauflösung und Rootintegration fehlen. Der
-  Helfer ist ausdrücklich nicht als produktives Kollisionsgate angeschlossen.
+- AP03 Vorstufe: deterministische Feldreservierung für Bewegungs-/Drehpfade;
+  Segment-Supercover erfasst eine getestete exakte Randberührung, Drehbögen
+  erhalten eine konservative Krümmungszugabe. Sieben gezielte Fälle bestanden.
+  Zeitliche Reservierung, Blockadeauflösung, begrenzte Laufzeitkosten und
+  Rootintegration fehlen. Der Helfer ist nicht als produktives Kollisionsgate
+  angeschlossen; allgemeine Geometrie- und Performanceabnahme stehen aus.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung

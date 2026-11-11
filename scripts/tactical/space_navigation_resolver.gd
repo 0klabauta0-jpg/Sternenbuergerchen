@@ -1,6 +1,6 @@
 extends RefCounted
-## Provisional sampled swept-hex proposal validation. No runtime binding yet.
-## Exact edge-grazing coverage and temporal reservations remain AP03 work.
+## Conservative swept-hex proposal validation. No runtime binding yet.
+## Temporal reservations and deadlock recovery remain AP03 work.
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const MAX_SAMPLES := 128
 
@@ -69,22 +69,49 @@ static func _sweep(flight: Dictionary, proposal: Dictionary) -> Dictionary:
 	for offset in footprint:
 		if typeof(offset) != TYPE_VECTOR2I: return {"ok":false, "reason":"invalid_footprint"}
 	var angle := angle_difference(float(a), float(b))
-	var sample_count := maxi(1, maxi(ceili(start.distance_to(finish) * 4.0), ceili(absf(angle) * 18.0 / PI)))
+	var max_radius := 0.0
+	for offset in footprint:
+		max_radius = maxf(max_radius, GRID.HEX.axial_to_plane(Vector2(offset)).length())
+	var sample_count := maxi(1, maxi(ceili((start.distance_to(finish) + max_radius * absf(angle)) * 4.0), ceili(absf(angle) * 18.0 / PI)))
 	if sample_count > MAX_SAMPLES:
 		return {"ok":false, "reason":"sweep_limit"}
 	var result := {}
 	var previous: Dictionary = {}
+	var margin := max_radius * (1.0 - cos(absf(angle) / sample_count * 0.5)) + 0.00001
 	for index in range(sample_count + 1):
 		var t := float(index) / sample_count
 		var position := start.lerp(finish, t)
 		var heading := float(a) + angle * t
 		for offset in footprint:
 			var local: Vector2 = GRID.HEX.axial_to_plane(Vector2(offset)).rotated(heading)
-			var cell: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(position + local))
-			var traversed: Array[Vector2i] = [cell]
-			if previous.has(offset): traversed = GRID.HEX.line(previous[offset], cell)
-			for visited in traversed:
+			var current: Vector2 = position + local
+			var from: Vector2 = previous.get(offset, current)
+			for visited in _supercover(from, current, margin):
 				if not GRID.contains(visited): return {"ok":false, "reason":"map_edge"}
 				result[visited] = true
-			previous[offset] = cell
+			previous[offset] = current
 	return {"ok":true, "cells":result.keys()}
+
+static func _supercover(from: Vector2, to: Vector2, margin: float) -> Array[Vector2i]:
+	var first: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(from))
+	var last: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(to))
+	var candidates := {}
+	for base in GRID.HEX.line(first, last):
+		candidates[base] = true
+		for direction in GRID.HEX.DIRECTIONS:
+			candidates[base + direction] = true
+	var result: Array[Vector2i] = []
+	for cell in candidates:
+		var center: Vector2 = GRID.HEX.axial_to_plane(Vector2(cell))
+		var polygon := PackedVector2Array()
+		var radius: float = GRID.HEX.DEFAULT_RADIUS * (1.0 + 2.0 * margin)
+		for corner in 6:
+			polygon.append(center + Vector2.from_angle(PI / 6.0 + corner * PI / 3.0) * radius)
+		var hit := Geometry2D.is_point_in_polygon(from, polygon) or Geometry2D.is_point_in_polygon(to, polygon)
+		if not hit:
+			for corner in 6:
+				if Geometry2D.segment_intersects_segment(from, to, polygon[corner], polygon[(corner + 1) % 6]) != null:
+					hit = true
+					break
+		if hit: result.append(cell)
+	return result

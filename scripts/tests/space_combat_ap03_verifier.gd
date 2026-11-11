@@ -28,5 +28,12 @@ func _initialize() -> void:
 	var rotate: Array[Dictionary] = [{"craft_id":"large","position_plane":plane(Vector2i(10,10)), "heading_rad":PI}]
 	result = NAV.resolve_motion(actors, rotate, {"blocked_cells":[Vector2i(9,12),Vector2i(11,8)]})
 	if result.rejected.get("large") != "blocked": failed += 1
-	print("SPACE_COMBAT_AP03 passed=", 5 - failed, " failed=", failed)
+	var edge_center := plane(Vector2i(11,10))
+	var cover: Array[Vector2i] = NAV._supercover(edge_center + Vector2(-0.5,-0.2), edge_center + Vector2(-0.5,0.2), 0.00001)
+	if not cover.has(Vector2i(10,10)) or not cover.has(Vector2i(11,10)): failed += 1
+	actors = [actor("a", Vector2i(10,10))]
+	var long_move: Array[Dictionary] = [{"craft_id":"a","position_plane":plane(Vector2i(80,10))}]
+	result = NAV.resolve_motion(actors, long_move, {})
+	if result.rejected.get("a") != "sweep_limit": failed += 1
+	print("SPACE_COMBAT_AP03 passed=", 7 - failed, " failed=", failed)
 	quit(1 if failed else 0)
