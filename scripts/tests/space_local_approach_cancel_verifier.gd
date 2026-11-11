@@ -51,6 +51,7 @@ func _initialize() -> void:
 	flow._space_approaches.clear()
 	assert(adapter.enter_space_orbit(id).get("replayed", false) and supply.export_state() == fuel_before)
 	sim.tick_counter = flight.get_snapshot().tick
+	flow._transfer_sequence += 1 # An unrelated craft moved after this ship cancelled.
 	var campaign_before: Dictionary = campaign.get_campaign_snapshot()
 	assert(adapter.authorize_departure(id, "approach-again").ok)
 	assert(state.get_inactive_actor(id) == flight and fleet.get_snapshot(id).phase == "approach" and supply.export_state() == fuel_before and campaign.get_campaign_snapshot() == campaign_before)

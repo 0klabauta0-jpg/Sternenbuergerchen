@@ -566,6 +566,8 @@ func authorize_departure(craft_id: String, approach_request_id: String = "") -> 
 	var binding: Dictionary = _simulation.configure_departure_adapter(self)
 	if not binding.get("ok", false): return binding
 	var token: String = "departure:%s:%s:%d" % [_request_session, craft_id, int(_flow.get("_transfer_sequence")) + 1]
+	var previous := String(_departure_token_by_craft.get(craft_id, ""))
+	if not approach_request_id.is_empty() and _simulation.has_confirmed_cancelled_departure(self, craft_id, previous): token = previous
 	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id)
 	if not result.get("ok", false): return result
 	_departure_token_by_craft[craft_id] = token
