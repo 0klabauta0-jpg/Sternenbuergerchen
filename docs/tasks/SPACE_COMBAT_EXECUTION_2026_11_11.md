@@ -38,14 +38,17 @@ Verifier und diese Statusdokumentation.
   Replay-Vorcheck. 20/20 Fälle im temporären Minimalprojekt; dessen
   `user://`-Schreibprobe lag im eigenen temporären APPDATA.
   Die erneute Ausführung bestätigt keinen Produktanschluss.
-- AP01–AP20: offen.
+- AP01 erster Teil: isolierter per-Schiff-Flugdatensatz mit Pose, Geschwindigkeit,
+  Modus, Masse, Revision und Tick; identischer/alter Tick und veraltete Revision
+  werden abgelehnt. Kleiner Minimalprojektcheck 6/6. Noch keine Anbindung an
+  Reise, Root, NPC-Registry oder Physiktakt.
+- AP01 Rest und AP02–AP20: offen.
 
 ## Risiken / offene Punkte
 
-Basis: Plancommit de87366a6 und integrierter Groundcommit ac53ff105. Der
-parallele native Branch ist bei b3f9ab26d weiter: insbesondere
-`singleplayer_runtime_adapter.gd`, `meta_layer_flow.gd` und Ansichten wurden
-dort geändert. Vor AP01 diesen Stand erneut prüfen und gezielt integrieren;
-nicht den parallelen Worktree oder dessen uncommittete Arbeit verändern.
+Basis: Plancommit de87366a6, integrierter Groundcommit ac53ff105 und
+integrierter paralleler Adapterstand b3f9ab26d als 23f0df031. Der parallele
+Worktree und dessen uncommittete Arbeit bleiben unverändert; vor weiterer
+gemeinsamer Integration die aktuelle Entwicklung erneut prüfen.
 Die Replay-Quittungen müssen vom künftigen autoritativen Owner pro Absender
 geführt werden; der reine Validator speichert sie nicht selbst.
