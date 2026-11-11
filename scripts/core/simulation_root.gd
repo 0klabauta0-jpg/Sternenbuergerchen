@@ -174,6 +174,48 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 	_space_combat_state.update_actor_cell(craft_id, cell)
 	return result
 
+func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	if proposals.is_empty():
+		return {"ok": false, "reason": "empty_batch"}
+	var actors: Array[Dictionary] = []
+	for snapshot in _space_combat_state.get_flight_snapshots():
+		if snapshot.motion_mode == "tactical": actors.append(snapshot)
+	var seen := {}
+	for proposal in proposals:
+		var id: Variant = proposal.get("craft_id")
+		if typeof(id) != TYPE_STRING or String(id).is_empty() or seen.has(id):
+			return {"ok": false, "reason": "invalid_actor"}
+		seen[id] = true
+		var flight: RefCounted = _space_combat_state.get_actor(id)
+		if flight == null or flight.get_snapshot().motion_mode != "tactical":
+			return {"ok": false, "reason": "not_tactical"}
+		if proposal.get("motion_mode", "tactical") != "tactical":
+			return {"ok": false, "reason": "invalid_motion_mode"}
+		var valid: Dictionary = flight.validate_motion(proposal, tick)
+		if not valid.get("ok", false): return valid
+		if _space_combat_state.preview_actor_cells(id, proposal).is_empty():
+			return {"ok": false, "reason": "invalid_footprint"}
+	var clearance: Dictionary = SPACE_NAVIGATION.resolve_motion(actors, proposals, world)
+	if not clearance.get("ok", false): return clearance
+	var accepted: Dictionary = clearance.accepted
+	var ids: Array = accepted.keys()
+	ids.sort()
+	for id in ids:
+		var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(id, accepted[id])
+		for occupant in _space_combat_state.query_cells(cells):
+			if occupant != id:
+				return {"ok": false, "reason": "occupied"}
+	for id in ids:
+		var flight: RefCounted = _space_combat_state.get_actor(id)
+		var result: Dictionary = flight.commit_motion(accepted[id], tick)
+		assert(result.get("ok", false))
+		var cell: Vector2i = SPACE_GRID.cell_at(Vector2(flight.get_snapshot().position_plane) / SPACE_GRID.EXTENT)
+		var indexed: bool = _space_combat_state.update_actor_cell(id, cell)
+		assert(indexed)
+	return {"ok": true, "accepted": ids, "rejected": clearance.rejected}
+
 func configure_space_runtime_tick(callback: Callable) -> void:
 	_space_runtime_tick = callback
 	set_physics_process(callback.is_valid())

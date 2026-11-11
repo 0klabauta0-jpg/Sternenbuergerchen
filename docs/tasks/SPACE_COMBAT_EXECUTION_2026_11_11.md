@@ -105,6 +105,11 @@ Verifier und diese Statusdokumentation.
   außerhalb der Karte wird vor der Mutation abgelehnt. Rootcheck43/43,
   Geometriecheck11/11, Registry6/6. Geländeblocker, zeitliche
   Batchreservierungen und Blockadeauflösung bleiben offen.
+- AP03 Batch-Vorstufe: Root validiert alle Revisionen vor einer Mutation,
+  prüft konservative Sweepreservierungen und committet zugelassene Vorschläge
+  in stabiler Reihenfolge. Kreuzende Wege und veralteter Batch geprüft,
+  Batchcheck8/8. Die Reservierung umfasst derzeit den gesamten Tick;
+  feinere Zeitfenster, Blockadeauflösung und echte Kartenhindernisse fehlen.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
