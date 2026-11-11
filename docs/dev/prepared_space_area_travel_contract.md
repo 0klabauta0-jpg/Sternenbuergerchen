@@ -1,0 +1,16 @@
+# Prepared Space-Area Travel: nichtproduktive Ownergrenze
+
+Dieser Vertrag betrifft nur den vorhandenen Fleet-/Travelowner. Der Slice ist ausdruecklich nicht produktiv aufgerufen. Root, Flight, lokale Pose, Bereichsbelegung, Gates, Fuel und Campaign werden hier nicht angebunden.
+
+Die kanonische Fleetdelegation lautet prepare_space_area_transition(craft_id,expected_travel_revision,source_area_id,target_area_id,root_context), validate_prepared_space_area_transition(candidate,root_context), commit_prepared_space_area_transition(candidate,root_context). Der Rootkontext bindet Request-ID/Signatur, Operation, typed Payload, Quell-/Zielbereich, erwartete Reisephase/Revision und private Context-ID. Eine vorab konfigurierte Objectidentitaet muss den Kontext registriert haben; runtime_authorized=true allein autorisiert nichts. Das ist eine explizite Inprocessvertrauensgrenze, keine Isolation gegen beliebigen Code im selben Prozess.
+
+Nur zwei erklaerbare Operationen sind vorgesehen: advance beendet einen bereits laufenden Quantumflug durch das konkret ausreichende Delta; enter_orbit verlässt den vorhandenen surface/approach-Zustand in den passend gebundenen Orbit. Es gibt keine erfundene warp_arrival-Phase und keinen Surface-/Departure-/Fuel-/Campaignanschluss.
+
+Prepare ist mutationsfrei. Ownerbindung, Lifecyclegeneration, Revision, gesamter Kontext und vorbereiteter Inhalt muessen beim Commit unveraendert sein. Gleiche erfolgreiche Requests werden idempotent beantwortet, geaenderte Nutzung derselben Request-ID abgewiesen. Der stille Publish setzt ausschliesslich vorbereitete Reisephasendaten; er ruft weder apply_command noch _arrive auf und schreibt keine Flightpose. Die gemeinsamen Rootpruefungen und die Reihenfolge aller anderen Ownerwrites bleiben vor produktiver Verwendung offen.
+
+Quelle: docs/tasks/PREPARED_SPACE_AREA_TRAVEL_2026_11_11.md. Kanonische SourceArea ist fuer beide Kandidaten leer; TargetArea ist build(canonical_body_id).body_map_id mit orbit_approach:-Praefix. Der kanonische Body folgt beim Warp aus dem echten Targetorbit, bei enter_orbit aus dem echten Locationorbit. Definitionen sind nur Plausibilitaetsdaten, keine Positions-/Belegungsbelege.
+
+
+Offene Kontexte sind auf 64 begrenzt. release_space_area_transition_context(context_id,authority) hebt eine uncommittete Bindung auf. Jede frische Bindung bekommt eine interne monotone Serial, die auch bei exakt gleichem Rootkontext alte Kandidaten nach Release dauerhaft entwertet. ErfolgsPublish entfernt seinen Kontext sofort aus dem offenen Pool. Gleiche abgeschlossene Requests bleiben ueber separate Receipts replaybar; geaenderte erfolgreiche Requests oder geaenderte aktive Requestbindungen werden abgewiesen. Lifecycleconfigure invalidiert alle Bindungen und Belege. Die Authoritaet kann ohne diesen Reset nicht von einem zweiten Objekt uebernommen werden.
+
+Requestledger ist ebenfalls Revalidierungszustand: ein Legacy-Noop kann bei unveraenderter Revision einen Requestkey verbrauchen. Der vorbereitete Commit darf diesen Beleg nicht ueberschreiben. Die neuen Siegel aendern nicht den globalen Combat-RNG. Sie sind Inprocessintegritaetshilfen, keine Sicherheitsisolation. Aktueller Beleg: 15/0 kleine Ownerchecks, weiterhin runtime_wired=false.

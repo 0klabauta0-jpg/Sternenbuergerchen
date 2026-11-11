@@ -46,8 +46,9 @@ Reiseowner, Körperdaten/Validator und Orbitkartenprojektion. Kein fremdes WIP �
 
 ## Lokale Prüfung / Status
 
-Schnittstellenaudit abgeschlossen. Layoutkandidat und kleine Geometrieprüfung in
-Arbeit. Noch keine neue produktive Orbitreise, Rotteintegration oder Blockadeabnahme.
+Schnittstellenaudit abgeschlossen. Layoutkandidat in 9874511c4 gesichert,
+acht kleine Geometriechecks und Compile bestanden. Noch keine neue produktive
+Orbitreise, Rotteintegration oder Blockadeabnahme.
 
 Abstimmung bestätigt (Weltraumkampf-Chat, a6dffd0e2): Dort liegen Flightbereich,
 gebietsspezifische Registry/Navigation/Commands/Footprints und Roottransition.
@@ -57,16 +58,18 @@ und Migration. Vereinbarter Entwurf:
 expected_flight_revision, expected_travel_revision, authority_context)` und
 `commit_space_area_transition(transition_token, authority_context)`.
 Prepare bleibt mutationsfrei; Commit revalidiert und veröffentlicht atomar.
-Konkreter Travel-Prepare/Commit-Anschluss samt Rücktritt bleibt gemeinsam
-festzulegen, bevor diese gemeinsamen Produktdateien geändert werden.
+Konkreter Travel-Prepare/Commit-Anschluss wurde anschließend wie unten
+festgehalten; produktive Mehr-Ownerverdrahtung bleibt eigener nächster Schritt.
 
 ## Risiken / offene Punkte
 
-Flight besitzt bisher keine Bereichs-ID; mehrere Spacepfade sind auf 256 begrenzt.
-Zellindizes ohne Bereich würden verschiedene Karten vermischen. Bisheriger
+Der hier integrierte Flightpfad besitzt noch keine neuen Bereichs-APIs; im
+Weltraumkampfbranch sind diese und gebietsbezogene Index-/Grenzvorstufen gesichert,
+aber hier noch nicht importiert. Zellindizes ohne Bereich würden verschiedene
+Karten vermischen. Bisheriger
 Travelgate blockiert taktischen Flug pauschal; neue autoritative Übergänge müssen
 diesen Fall sauber unterscheiden. Aktueller Anflug prüft den Saum noch nicht.
-Methodennamen/Dateibesitz werden mit dem Weltraumkampf-Chat abgestimmt.
+Methodennamen/Dateibesitz sind abgestimmt; echter Owneranschluss bleibt offen.
 
 ## Konkrete Travelgrenze (Abstimmung nach 2a17362d1)
 
@@ -104,3 +107,20 @@ passend abgefangen werden; Übergänge verwenden den vorbereiteten stillen Tail.
 Nicht durch Entfernen der Assertion oder Akzeptieren des Posewrites umgehen.
 Bis dahin bleibt der lokale Produktpfad gesperrt. Quellseitig grüne strategische
 Fleet-/Taktchecks sind keine Prüfung dieses noch offenen lokalen Anschlusses.
+
+## Aktuelle Fortsetzung
+
+Spacechat hat 953cf0095 als gesicherte, ausdrücklich nichtproduktive Rootfixture
+gemeldet: Fake-Fleet und Fixturecrafts, keine echte Travel-/Fuel-/Campaignaufnahme.
+Dieser Stand wird hier nicht als fertiger Orbitpfad importiert. Der echte
+unverdrahtete Fleet-/Travelcandidate wird im eigenen Task
+`PREPARED_SPACE_AREA_TRAVEL_2026_11_11.md` implementiert. Der kanonische
+Quellbereich ist für diese zwei Vorbereitungsvorgänge leer (`strategic`), das
+Ziel die Layout-ID `orbit_approach:` plus URI-kodierter tatsächlicher Body-ID.
+Keine erfundene `surface:`-Flightarea. Vollständiger Context einschließlich
+`expected_phase` wird über gebundene Inprocessauthority registriert.
+
+Der folgende vollständige Anfluganschluss braucht auch reine Supply-/Campaign-
+Vorbereitung. Konkrete heutige Mutationen und Risiken stehen in
+`ORBIT_DEPARTURE_ATOMICITY_AUDIT_2026_11_11.md`; alleinige Travelvorbereitung
+oder ein Export/Restore-Liveclone ersetzen diesen Schritt nicht.

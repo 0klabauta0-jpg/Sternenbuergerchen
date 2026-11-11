@@ -26,8 +26,13 @@ var _route_hexes: Array[Vector2i] = []
 var _route_control := Vector2.ZERO
 var _route_destination := Vector2.ZERO
 var _heading: float = 0.0
+# Internal prepared-area transaction integrity, not a separate travel/pose owner.
+var _space_area_epoch := 0
+var _space_area_seal := ""
 
 func configure() -> Dictionary:
+	_space_area_epoch += 1
+	_space_area_seal = str(get_instance_id()) + ":" + str(_space_area_epoch) + ":" + str(Time.get_ticks_usec())
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DEFINITION_PATH))
 	if typeof(raw) != TYPE_DICTIONARY or not _valid_definition(raw):
 		return _reject("invalid_system", "Sternsystem ist nicht verfuegbar")
@@ -314,3 +319,82 @@ func _initialize_surface(payload: Dictionary) -> Dictionary:
 	_orbit_id = ""
 	_revision += 1
 	return {"ok":true,"location_id":location}
+
+
+# Unwired in-process Fleet delegation. No command router exposes these methods.
+func _prepare_space_area_transition_state(expected_revision: int, context: Dictionary) -> Dictionary:
+	if _revision != expected_revision: return _reject("travel_revision_changed", "Reisezustand hat sich geaendert")
+	if _phase != String(context.get("expected_phase", "")): return _reject("travel_phase_changed", "Reisephase hat sich geaendert")
+	var payload: Dictionary = context.get("payload", {})
+	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
+	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
+	var operation := String(context.operation)
+	var orbit := ""
+	var marker := ""
+	var elapsed := _elapsed_seconds
+	var progress := _progress
+	var next_revision := _revision + 1
+	if operation == "advance":
+		if _phase != "quantum" or not _valid_delta(payload): return _reject("quantum_completion_required", "Nur bestaetigter Warpabschluss kann vorbereitet werden")
+		var delta := float(payload.delta_seconds)
+		if delta <= 0.0 or _elapsed_seconds + delta < _active_jump_duration_seconds: return _reject("quantum_not_complete", "Warpflug ist noch nicht abgeschlossen")
+		orbit = _target_orbit_id
+		marker = _target_orbit_marker_id
+		elapsed = _active_jump_duration_seconds
+		progress = 1.0
+		next_revision += 1 # Existing completion: advance revision followed by arrival revision.
+	elif operation == "enter_orbit":
+		if _phase not in ["surface", "approach"]: return _reject("surface_exit_required", "Kein vorhandener Ortsabflug")
+		orbit = String(Dictionary(_definition.get("location_orbits", {})).get(_location_id, ""))
+		marker = _orbit_marker_id
+	else: return _reject("unsupported_area_operation", "Operation gehoert nicht zu dieser vorbereiteten Grenze")
+	var orbit_definition: Dictionary = Dictionary(_definition.get("orbits", {})).get(orbit, {})
+	var body_id := String(orbit_definition.get("body_id", ""))
+	var body: Dictionary = Dictionary(_definition.get("bodies", {})).get(body_id, {})
+	if body.is_empty() or String(body.get("id", "")) != body_id: return _reject("unbound_target_body", "Zielkoerper ist nicht kanonisch gebunden")
+	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
+	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
+	var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
+	if not layout.get("ok", false) or String(context.source_area_id) != "" or String(context.target_area_id) != String(layout.body_map_id):
+		return _reject("area_body_mismatch", "Bereich passt nicht zum tatsaechlichen Reiseziel")
+	var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,
+		"expected_revision":expected_revision,"context":context.duplicate(true),
+		"next":{"phase":"orbit","orbit_id":orbit,"orbit_marker_id":marker,"target_orbit_id":"","target_orbit_marker_id":"",
+			"location_id":"","elapsed_seconds":elapsed,"progress":progress,"revision":next_revision}}
+	candidate["seal"] = _sign_space_area_state(candidate)
+	return candidate
+
+func _sign_space_area_state(candidate: Dictionary) -> String:
+	var content := candidate.duplicate(true)
+	content.erase("seal")
+	return (_space_area_seal + JSON.stringify(content, "", true)).sha256_text()
+
+func _validate_prepared_space_area_state(candidate: Dictionary, context: Dictionary) -> Dictionary:
+	if not candidate.get("ok", false) or int(candidate.get("owner_instance_id", 0)) != get_instance_id() or int(candidate.get("owner_epoch", -1)) != _space_area_epoch or String(candidate.get("seal", "")) != _sign_space_area_state(candidate):
+		return _reject("invalid_area_candidate", "Vorbereitung gehoert nicht zu diesem Reiseowner")
+	if JSON.stringify(candidate.get("context", {}), "", true) != JSON.stringify(context, "", true): return _reject("area_context_changed", "Rootkontext hat sich geaendert")
+	if _revision != int(candidate.get("expected_revision", -1)): return _reject("travel_revision_changed", "Reisezustand hat sich geaendert")
+	if _phase != String(context.get("expected_phase", "")): return _reject("travel_phase_changed", "Reisephase hat sich geaendert")
+	# A no-op legacy request may consume this key without changing revision.
+	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde zwischenzeitlich verwendet")
+	return {"ok":true}
+
+func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
+	# Root-private synchronous tail AFTER validation. No apply_command/_arrive,
+	# no signals, callbacks, awaits or strategic/local Flight pose assignments.
+	var next: Dictionary = candidate.next
+	_phase = String(next.phase)
+	_orbit_id = String(next.orbit_id)
+	_orbit_marker_id = String(next.orbit_marker_id)
+	_target_orbit_id = String(next.target_orbit_id)
+	_target_orbit_marker_id = String(next.target_orbit_marker_id)
+	_location_id = String(next.location_id)
+	_elapsed_seconds = float(next.elapsed_seconds)
+	_progress = float(next.progress)
+	_route_hexes.clear()
+	_revision = int(next.revision)
+	var context: Dictionary = candidate.context
+	var result := {"ok":true,"phase":_phase,"revision":_revision,"craft_id":_craft_id,
+		"source_area_id":String(context.source_area_id),"target_area_id":String(context.target_area_id)}
+	_requests[String(context.request_id)] = {"signature":JSON.stringify({"operation":context.operation,"payload":context.payload}, "", true),"result":result.duplicate(true)}
+	return result

@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS bool/unknown context cannot replace explicit in-process authority wiring
+PASS authority cannot be taken over by second caller
+PASS actual prepare is mutation-free
+PASS only delta which actually completes current quantum can prepare
+PASS real target body and canonical empty source area bind candidates
+PASS tampered state/payload and changed signature under same request reject
+PASS actual intervening travel advance invalidates old revision
+PASS replacement craft owner cannot consume old candidate
+PASS real no-op request-key consumption invalidates candidate even without revision change
+PASS silent publish commits real phase/orbit, preserves pose and retires successful pending context
+PASS successful receipt retries after phase change and context release without new writes
+PASS release/rebind never resurrects an older candidate with identical context content
+PASS cancel releases pending bindings and lifecycle reset invalidates contexts/candidates
+PASS surface and approach use their genuine location-bound orbit without pose writes
+PASS new configure/context integrity consumes no global combat RNG
+PREPARED_AREA_RESULT checks=15 failures=0 runtime_wired=false
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
