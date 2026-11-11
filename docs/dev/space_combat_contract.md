@@ -230,9 +230,10 @@ Gegner und neutrale Kampfobjekte erhalten eigene Runtimeidentitäten, aber
 keinen Eintrag in Spielerhangar, Supply, Padbelegung oder Spieler-Roster.
 
 Der aktuelle Renderprozess treibt Reisezeit noch über den Runtimeadapter an;
-AP01 ersetzt dies durch einen begrenzten Physiktick im CampaignSimulationRoot.
-Ansichtswechsel dürfen diesen Takt nicht stoppen. Bestehende Bodenroots
-erhalten dadurch keinen zusätzlichen Raum- oder zweiten Bewegungstick.
+AP01 ersetzt dies durch einen Physiktick im CampaignSimulationRoot.
+Der vorhandene Basis-Personnel-Owner nutzt denselben Root; seine Bodenlogik
+muss im selben Tick weiterlaufen. Ansichtswechsel dürfen den Raumtick nicht
+stoppen. Andere Bodenroots erhalten keinen zusätzlichen Raumtick.
 
 Schiffsausrüstung und Rotten sind eigene begrenzte Datenbereiche unter Root.
 Registries indexieren, Resolver schlagen vor; weder Registry noch UI erfinden

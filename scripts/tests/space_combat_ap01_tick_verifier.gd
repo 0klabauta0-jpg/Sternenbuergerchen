@@ -20,7 +20,7 @@ func _initialize() -> void:
 	for i in range(60): root._physics_process(1.0 / 60.0)
 	var snap: Dictionary = fleet.get_snapshot("a")
 	if not is_equal_approx(float(snap.elapsed_seconds), 1.0): failed += 1
-	if root.tick_counter != 0: failed += 1
+	if root.tick_counter != 60: failed += 1
 	if not is_equal_approx(float(snap.progress), 1.0 / 3.0): failed += 1
 	var enemy := {"craft_id":"npc1", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(3, 3)}
 	if root.admit_space_actor(enemy, {}).get("reason") != "runtime_authority_required": failed += 1

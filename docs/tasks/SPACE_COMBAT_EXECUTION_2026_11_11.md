@@ -59,6 +59,13 @@ Verifier und diese Statusdokumentation.
 - AP01 Prüfgrenze: Orbit-Gesamtverifier im neuen Worktree wegen fehlender
   importierter Godot-Ressourcen nicht lauffähig, Zeitlimit nach60s;
   kein bestandener oder gescheiterter Verhaltensnachweis.
+- AP01 Korrektur: Der im Plan vorgeschlagene frühe Root-Rücksprung kappte
+  Basis-Personnel-Bewegung, da beide denselben Root nutzen. Raumcallback
+  läuft jetzt vor dem bestehenden Bodentick, ohne Rücksprung. Kleiner
+  Rootcheck10/10. Nach gezielter Cacheergänzung erreichte der alte
+  Orbit-Gesamtverifier Start, Boarding, Abheben, Warp-Abbruch und Neustart:
+  26/30; vier alte Satelliten-Orbitannahmen scheiterten, zudem fehlte ein
+  importiertes Schiffsmodell. Das ist keine vollständige Orbitfreigabe.
 - AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität und
   tatsächlicher Adapter-/Root-/Ansichtswechselcheck bei30/60/144Render-FPS,
   und vollständiger Reiselauf.

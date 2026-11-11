@@ -1421,7 +1421,6 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if _space_runtime_tick.is_valid():
 		_space_runtime_tick.call(delta)
-		return
 	if _should_skip_local_tick_processing():
 		return
 
