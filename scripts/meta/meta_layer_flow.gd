@@ -186,6 +186,8 @@ var _active_mission_time_limit_seconds: float = 0.0
 var _last_meta_timer_text: String = ""
 var _transport_refresh_timing_debug_enabled: bool = false
 var _transport_refresh_timing_debug_snapshot: Dictionary = {}
+var _runtime_frame_timing_debug_enabled := false
+var _runtime_frame_timing_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
 var _transport_refresh_timing_debug_invocation_count: int = 0
 var _homebase_presentation_dirty: bool = false
 var _full_plan_apply_count: int = 0
@@ -336,29 +338,69 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	var profile_enabled := _runtime_frame_timing_debug_enabled
+	var frame_started_usec := Time.get_ticks_usec() if profile_enabled else 0
+	var scope_started_usec := frame_started_usec
+	var scopes: Dictionary = {}
 	if _singleplayer_runtime != null:
 		_singleplayer_runtime.call("advance_space_travel", _delta)
 	for craft_id in _space_approaches.keys():
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
 		if float(_space_approaches[craft_id].remaining)<=0.0: _finish_space_approach(String(craft_id))
+	if profile_enabled:
+		scopes["travel_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_meta_mission_timer_labels()
+	if profile_enabled:
+		scopes["timer_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
 	_singleplayer_services_elapsed += _delta
 	if _singleplayer_services_elapsed >= 0.25:
 		_singleplayer_services_elapsed = 0.0
+		if profile_enabled: scope_started_usec = Time.get_ticks_usec()
 		_refresh_singleplayer_services()
+		if profile_enabled:
+			scopes["services_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		if _location_contexts.is_empty():
 			if not _pending_campaign_mission_result.is_empty(): _on_mission_combat_resolved(_pending_campaign_mission_result.duplicate(true))
 		else:
 			for id in _location_contexts.keys():
 				var pending: Dictionary=_location_contexts[id].get("pending",{})
 				if not pending.is_empty(): _on_location_combat_resolved(pending.duplicate(true),_location_registry.get_location(String(id)))
+		if profile_enabled: scopes["pending_results_usec"] = Time.get_ticks_usec() - scope_started_usec
 		if is_campaign_start() and _singleplayer_runtime != null:
+			if profile_enabled: scope_started_usec = Time.get_ticks_usec()
 			_singleplayer_runtime.call("observe_campaign_progress")
+			if profile_enabled:
+				scopes["observe_campaign_usec"] = Time.get_ticks_usec() - scope_started_usec
+				scope_started_usec = Time.get_ticks_usec()
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
 			if bool(saved.get("ok", false)) or String(saved.get("reason", "")) not in ["away_from_checkpoint", "preparation_in_progress"]:
 				set_meta("campaign_checkpoint_result", saved)
+			if profile_enabled:
+				scopes["checkpoint_usec"] = Time.get_ticks_usec() - scope_started_usec
+				scope_started_usec = Time.get_ticks_usec()
 			if _campaign_tutorial != null:
 				_campaign_tutorial.call("refresh")
+			if profile_enabled: scopes["tutorial_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
+		_runtime_frame_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - frame_started_usec, scopes)
+
+
+func set_runtime_frame_timing_debug_enabled(enabled: bool) -> void:
+	_runtime_frame_timing_debug_enabled = enabled
+	if not enabled: _runtime_frame_timing_debug.clear()
+	if _campaign_tutorial != null and _campaign_tutorial.has_method("set_runtime_frame_timing_debug_enabled"):
+		_campaign_tutorial.call("set_runtime_frame_timing_debug_enabled", enabled)
+
+
+func get_runtime_frame_timing_debug_snapshot(process_frame: int = -1) -> Dictionary:
+	var frame_id := Engine.get_process_frames() if process_frame < 0 else process_frame
+	var result: Dictionary = _runtime_frame_timing_debug.get_snapshot(frame_id)
+	result["enabled"] = _runtime_frame_timing_debug_enabled
+	result["read_only"] = true
+	result["tutorial"] = _campaign_tutorial.call("get_runtime_frame_timing_debug_snapshot", frame_id) if _campaign_tutorial != null and _campaign_tutorial.has_method("get_runtime_frame_timing_debug_snapshot") else {}
+	return result
 
 
 func set_transport_refresh_timing_debug_enabled(enabled: bool) -> void:

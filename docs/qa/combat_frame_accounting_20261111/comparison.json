@@ -1,0 +1,1755 @@
+{
+  "before": {
+    "engine": "4.6.2-stable (official)",
+    "adapter": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "window": "(1280, 720)",
+    "terrain_viewport": "(1920, 1080)",
+    "renderer": "forward_plus",
+    "scale": 1.0,
+    "map_sha256": "d3ab04a32a142a51ea20d180397b7cd9355dfa55452e2fc224fbd63f360624a7",
+    "shots": 8,
+    "first_move_ms": 2236.015,
+    "go_dispatch_ms": 23.42,
+    "frames": 9510,
+    "binding_errors": 0,
+    "post_draw_callback_frame_offset": {
+      "count": 9510,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "phases": {
+      "combat": {
+        "frames": 140,
+        "wall_pre_draw_interval_ms": {
+          "count": 140,
+          "mean": 31.165792857142858,
+          "median": 19.5905,
+          "p95": 98.892,
+          "p99": 166.954,
+          "max": 201.45
+        },
+        "physics_ticks_per_frame": {
+          "count": 140,
+          "mean": 1.8428571428571427,
+          "median": 1.0,
+          "p95": 6.0,
+          "p99": 8.0,
+          "max": 8.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 140,
+          "mean": 6.9454142857142855,
+          "median": 3.769,
+          "p95": 26.837,
+          "p99": 33.26,
+          "max": 36.385
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 140,
+          "mean": 0.09194285714285715,
+          "median": 0.054,
+          "p95": 0.301,
+          "p99": 0.414,
+          "max": 0.497
+        },
+        "view_process_ms": {
+          "count": 140,
+          "mean": 2.606185714285714,
+          "median": 0.9984999999999999,
+          "p95": 7.222,
+          "p99": 11.167,
+          "max": 45.052
+        },
+        "view_fow_external_ms": {
+          "count": 140,
+          "mean": 1.8171642857142858,
+          "median": 0.0,
+          "p95": 6.185,
+          "p99": 7.354,
+          "max": 8.314
+        },
+        "view_regional_publish_ms_active": {
+          "count": 1,
+          "mean": 36.613,
+          "median": 36.613,
+          "p95": 36.613,
+          "p99": 36.613,
+          "max": 36.613
+        },
+        "meta_quarter_ms": {
+          "count": 15,
+          "mean": 11.317666666666668,
+          "median": 11.34,
+          "p95": 12.587,
+          "p99": 12.587,
+          "max": 12.587
+        },
+        "meta_observe_campaign_ms": {
+          "count": 15,
+          "mean": 9.419733333333333,
+          "median": 9.422,
+          "p95": 10.696,
+          "p99": 10.696,
+          "max": 10.696
+        },
+        "tutorial_refresh_ms": {
+          "count": 15,
+          "mean": 1.1045333333333334,
+          "median": 1.138,
+          "p95": 1.438,
+          "p99": 1.438,
+          "max": 1.438
+        },
+        "tutorial_projection_count": {
+          "count": 15,
+          "mean": 2.0,
+          "median": 2.0,
+          "p95": 2.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "tutorial_projection_ms": {
+          "count": 15,
+          "mean": 0.9765333333333334,
+          "median": 1.009,
+          "p95": 1.299,
+          "p99": 1.299,
+          "max": 1.299
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 15,
+          "mean": 0.5254666666666666,
+          "median": 0.535,
+          "p95": 0.778,
+          "p99": 0.778,
+          "max": 0.778
+        },
+        "latest_available_gpu_ms": {
+          "count": 140,
+          "mean": 4.181857147387096,
+          "median": 3.9329999685287502,
+          "p95": 7.09600019454956,
+          "p99": 12.08899974823,
+          "max": 12.8459997177124
+        },
+        "test_poll_ms_active": {
+          "count": 28,
+          "mean": 0.10582142857142857,
+          "median": 0.1135,
+          "p95": 0.154,
+          "p99": 0.165,
+          "max": 0.165
+        },
+        "sampler_pre_draw_ms": {
+          "count": 140,
+          "mean": 0.07109285714285714,
+          "median": 0.065,
+          "p95": 0.117,
+          "p99": 0.155,
+          "max": 0.224
+        },
+        "largest_frames": [
+          {
+            "process_frame": 13406,
+            "wall_ms": 201.45,
+            "physics_ticks": 8,
+            "physics_sum_ms": 36.385,
+            "view_ms": 2.208,
+            "publish_ms": 0.0,
+            "meta_ms": 0.032
+          },
+          {
+            "process_frame": 13409,
+            "wall_ms": 166.954,
+            "physics_ticks": 7,
+            "physics_sum_ms": 27.725,
+            "view_ms": 1.766,
+            "publish_ms": 0.0,
+            "meta_ms": 0.037
+          },
+          {
+            "process_frame": 13411,
+            "wall_ms": 147.362,
+            "physics_ticks": 8,
+            "physics_sum_ms": 30.329,
+            "view_ms": 1.13,
+            "publish_ms": 0.0,
+            "meta_ms": 0.032
+          },
+          {
+            "process_frame": 13407,
+            "wall_ms": 127.367,
+            "physics_ticks": 8,
+            "physics_sum_ms": 33.26,
+            "view_ms": 1.081,
+            "publish_ms": 0.0,
+            "meta_ms": 10.743
+          },
+          {
+            "process_frame": 13405,
+            "wall_ms": 118.436,
+            "physics_ticks": 6,
+            "physics_sum_ms": 28.131,
+            "view_ms": 2.189,
+            "publish_ms": 0.0,
+            "meta_ms": 0.03
+          }
+        ]
+      },
+      "go_to_contact": {
+        "frames": 8770,
+        "wall_pre_draw_interval_ms": {
+          "count": 8770,
+          "mean": 6.188238654503991,
+          "median": 4.28,
+          "p95": 15.965,
+          "p99": 24.917,
+          "max": 209.13
+        },
+        "physics_ticks_per_frame": {
+          "count": 8770,
+          "mean": 0.37103762827822123,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 8.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 8770,
+          "mean": 0.7613741163055873,
+          "median": 0.0,
+          "p95": 4.18,
+          "p99": 5.339,
+          "max": 40.383
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 8770,
+          "mean": 0.0161363740022805,
+          "median": 0.0,
+          "p95": 0.054,
+          "p99": 0.096,
+          "max": 0.386
+        },
+        "view_process_ms": {
+          "count": 8770,
+          "mean": 0.6979131128848347,
+          "median": 0.575,
+          "p95": 1.206,
+          "p99": 1.908,
+          "max": 25.04
+        },
+        "view_fow_external_ms": {
+          "count": 8770,
+          "mean": 0.13725427594070697,
+          "median": 0.0,
+          "p95": 1.321,
+          "p99": 3.248,
+          "max": 4.441
+        },
+        "view_regional_publish_ms_active": {
+          "count": 0
+        },
+        "meta_quarter_ms": {
+          "count": 213,
+          "mean": 9.891976525821596,
+          "median": 10.474,
+          "p95": 12.414,
+          "p99": 12.848,
+          "max": 13.186
+        },
+        "meta_observe_campaign_ms": {
+          "count": 213,
+          "mean": 8.210037558685446,
+          "median": 8.687,
+          "p95": 10.327,
+          "p99": 10.787,
+          "max": 10.993
+        },
+        "tutorial_refresh_ms": {
+          "count": 213,
+          "mean": 0.9684929577464789,
+          "median": 0.882,
+          "p95": 1.297,
+          "p99": 1.445,
+          "max": 1.475
+        },
+        "tutorial_projection_count": {
+          "count": 213,
+          "mean": 2.0,
+          "median": 2.0,
+          "p95": 2.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "tutorial_projection_ms": {
+          "count": 213,
+          "mean": 0.8518215962441315,
+          "median": 0.789,
+          "p95": 1.138,
+          "p99": 1.288,
+          "max": 1.296
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 213,
+          "mean": 0.4289201877934272,
+          "median": 0.402,
+          "p95": 0.583,
+          "p99": 0.618,
+          "max": 0.718
+        },
+        "latest_available_gpu_ms": {
+          "count": 8770,
+          "mean": 1.6076425314765157,
+          "median": 1.41199994087219,
+          "p95": 2.62899994850159,
+          "p99": 3.0699999332428,
+          "max": 4.70300006866455
+        },
+        "test_poll_ms_active": {
+          "count": 1754,
+          "mean": 0.013628278221208667,
+          "median": 0.013,
+          "p95": 0.02,
+          "p99": 0.026,
+          "max": 0.196
+        },
+        "sampler_pre_draw_ms": {
+          "count": 8770,
+          "mean": 0.043740250855188144,
+          "median": 0.038,
+          "p95": 0.067,
+          "p99": 0.093,
+          "max": 0.39
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4603,
+            "wall_ms": 209.13,
+            "physics_ticks": 8,
+            "physics_sum_ms": 40.383,
+            "view_ms": 0.773,
+            "publish_ms": 0.0,
+            "meta_ms": 0.046
+          },
+          {
+            "process_frame": 12275,
+            "wall_ms": 133.892,
+            "physics_ticks": 5,
+            "physics_sum_ms": 10.742,
+            "view_ms": 2.255,
+            "publish_ms": 0.0,
+            "meta_ms": 12.194
+          },
+          {
+            "process_frame": 12277,
+            "wall_ms": 118.166,
+            "physics_ticks": 7,
+            "physics_sum_ms": 17.619,
+            "view_ms": 2.445,
+            "publish_ms": 0.0,
+            "meta_ms": 0.029
+          },
+          {
+            "process_frame": 12276,
+            "wall_ms": 109.114,
+            "physics_ticks": 8,
+            "physics_sum_ms": 12.796,
+            "view_ms": 1.699,
+            "publish_ms": 0.0,
+            "meta_ms": 0.035
+          },
+          {
+            "process_frame": 12646,
+            "wall_ms": 89.243,
+            "physics_ticks": 1,
+            "physics_sum_ms": 4.372,
+            "view_ms": 1.245,
+            "publish_ms": 0.0,
+            "meta_ms": 0.026
+          }
+        ]
+      },
+      "pan_1": {
+        "frames": 240,
+        "wall_pre_draw_interval_ms": {
+          "count": 240,
+          "mean": 6.301,
+          "median": 5.266500000000001,
+          "p95": 22.189,
+          "p99": 28.126,
+          "max": 38.184
+        },
+        "physics_ticks_per_frame": {
+          "count": 240,
+          "mean": 0.37916666666666665,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.31705,
+          "median": 0.0,
+          "p95": 2.168,
+          "p99": 2.31,
+          "max": 2.808
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.0135875,
+          "median": 0.0,
+          "p95": 0.043,
+          "p99": 0.06,
+          "max": 0.069
+        },
+        "view_process_ms": {
+          "count": 240,
+          "mean": 2.619629166666667,
+          "median": 3.4775,
+          "p95": 4.329,
+          "p99": 10.191,
+          "max": 25.419
+        },
+        "view_fow_external_ms": {
+          "count": 240,
+          "mean": 0.00395,
+          "median": 0.0,
+          "p95": 0.065,
+          "p99": 0.07,
+          "max": 0.078
+        },
+        "view_regional_publish_ms_active": {
+          "count": 15,
+          "mean": 15.857533333333334,
+          "median": 16.713,
+          "p95": 18.352,
+          "p99": 18.352,
+          "max": 18.352
+        },
+        "meta_quarter_ms": {
+          "count": 6,
+          "mean": 8.022833333333333,
+          "median": 8.039,
+          "p95": 8.459,
+          "p99": 8.459,
+          "max": 8.459
+        },
+        "meta_observe_campaign_ms": {
+          "count": 6,
+          "mean": 6.667833333333333,
+          "median": 6.6775,
+          "p95": 6.936,
+          "p99": 6.936,
+          "max": 6.936
+        },
+        "tutorial_refresh_ms": {
+          "count": 6,
+          "mean": 0.7461666666666666,
+          "median": 0.7355,
+          "p95": 0.849,
+          "p99": 0.849,
+          "max": 0.849
+        },
+        "tutorial_projection_count": {
+          "count": 6,
+          "mean": 2.0,
+          "median": 2.0,
+          "p95": 2.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "tutorial_projection_ms": {
+          "count": 6,
+          "mean": 0.656,
+          "median": 0.646,
+          "p95": 0.751,
+          "p99": 0.751,
+          "max": 0.751
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 6,
+          "mean": 0.3288333333333333,
+          "median": 0.3185,
+          "p95": 0.381,
+          "p99": 0.381,
+          "max": 0.381
+        },
+        "latest_available_gpu_ms": {
+          "count": 240,
+          "mean": 0.9238166662553946,
+          "median": 0.898499995470047,
+          "p95": 0.977999985218048,
+          "p99": 0.989000022411346,
+          "max": 0.992999970912933
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 240,
+          "mean": 0.0405625,
+          "median": 0.038,
+          "p95": 0.054,
+          "p99": 0.071,
+          "max": 0.139
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4315,
+            "wall_ms": 38.184,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.808,
+            "view_ms": 3.996,
+            "publish_ms": 18.352,
+            "meta_ms": 8.459
+          },
+          {
+            "process_frame": 4303,
+            "wall_ms": 28.29,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.21,
+            "view_ms": 25.419,
+            "publish_ms": 17.801,
+            "meta_ms": 0.012
+          },
+          {
+            "process_frame": 4156,
+            "wall_ms": 28.126,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.244,
+            "view_ms": 4.409,
+            "publish_ms": 0.0,
+            "meta_ms": 8.043
+          },
+          {
+            "process_frame": 4175,
+            "wall_ms": 24.569,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 3.671,
+            "publish_ms": 17.466,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4155,
+            "wall_ms": 24.401,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 22.638,
+            "publish_ms": 18.224,
+            "meta_ms": 0.014
+          }
+        ]
+      },
+      "pan_2": {
+        "frames": 240,
+        "wall_pre_draw_interval_ms": {
+          "count": 240,
+          "mean": 6.2072666666666665,
+          "median": 5.266,
+          "p95": 21.951,
+          "p99": 24.79,
+          "max": 25.885
+        },
+        "physics_ticks_per_frame": {
+          "count": 240,
+          "mean": 0.37083333333333335,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.3073875,
+          "median": 0.0,
+          "p95": 2.022,
+          "p99": 2.175,
+          "max": 2.466
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.0138125,
+          "median": 0.0,
+          "p95": 0.042,
+          "p99": 0.078,
+          "max": 0.093
+        },
+        "view_process_ms": {
+          "count": 240,
+          "mean": 2.341975,
+          "median": 3.4924999999999997,
+          "p95": 3.868,
+          "p99": 4.196,
+          "max": 4.267
+        },
+        "view_fow_external_ms": {
+          "count": 240,
+          "mean": 0.004279166666666666,
+          "median": 0.0,
+          "p95": 0.065,
+          "p99": 0.072,
+          "max": 0.077
+        },
+        "view_regional_publish_ms_active": {
+          "count": 16,
+          "mean": 16.6928125,
+          "median": 16.7265,
+          "p95": 17.727,
+          "p99": 17.727,
+          "max": 17.727
+        },
+        "meta_quarter_ms": {
+          "count": 6,
+          "mean": 7.902333333333333,
+          "median": 7.8740000000000006,
+          "p95": 8.266,
+          "p99": 8.266,
+          "max": 8.266
+        },
+        "meta_observe_campaign_ms": {
+          "count": 6,
+          "mean": 6.576833333333333,
+          "median": 6.532,
+          "p95": 7.015,
+          "p99": 7.015,
+          "max": 7.015
+        },
+        "tutorial_refresh_ms": {
+          "count": 6,
+          "mean": 0.7384999999999999,
+          "median": 0.7335,
+          "p95": 0.763,
+          "p99": 0.763,
+          "max": 0.763
+        },
+        "tutorial_projection_count": {
+          "count": 6,
+          "mean": 2.0,
+          "median": 2.0,
+          "p95": 2.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "tutorial_projection_ms": {
+          "count": 6,
+          "mean": 0.6468333333333334,
+          "median": 0.645,
+          "p95": 0.667,
+          "p99": 0.667,
+          "max": 0.667
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 6,
+          "mean": 0.3275,
+          "median": 0.3295,
+          "p95": 0.337,
+          "p99": 0.337,
+          "max": 0.337
+        },
+        "latest_available_gpu_ms": {
+          "count": 240,
+          "mean": 1.3019583297272526,
+          "median": 1.33750003576279,
+          "p95": 1.71700000762939,
+          "p99": 1.80999994277954,
+          "max": 1.88800001144409
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 240,
+          "mean": 0.03954166666666667,
+          "median": 0.038,
+          "p95": 0.05,
+          "p99": 0.065,
+          "max": 0.092
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4543,
+            "wall_ms": 25.885,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 3.811,
+            "publish_ms": 17.727,
+            "meta_ms": 0.028
+          },
+          {
+            "process_frame": 4435,
+            "wall_ms": 25.256,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 3.622,
+            "publish_ms": 17.617,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4587,
+            "wall_ms": 24.79,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.22,
+            "view_ms": 3.656,
+            "publish_ms": 16.967,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4391,
+            "wall_ms": 24.423,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.211,
+            "view_ms": 3.563,
+            "publish_ms": 16.858,
+            "meta_ms": 0.016
+          },
+          {
+            "process_frame": 4511,
+            "wall_ms": 24.175,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.215,
+            "view_ms": 3.683,
+            "publish_ms": 17.713,
+            "meta_ms": 0.019
+          }
+        ]
+      },
+      "still": {
+        "frames": 120,
+        "wall_pre_draw_interval_ms": {
+          "count": 119,
+          "mean": 4.209319327731093,
+          "median": 2.451,
+          "p95": 10.417,
+          "p99": 14.149,
+          "max": 17.6
+        },
+        "physics_ticks_per_frame": {
+          "count": 120,
+          "mean": 0.275,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 120,
+          "mean": 0.24257499999999999,
+          "median": 0.0,
+          "p95": 2.139,
+          "p99": 2.358,
+          "max": 2.44
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 120,
+          "mean": 0.010591666666666666,
+          "median": 0.0,
+          "p95": 0.046,
+          "p99": 0.065,
+          "max": 0.067
+        },
+        "view_process_ms": {
+          "count": 120,
+          "mean": 0.8620916666666667,
+          "median": 0.53,
+          "p95": 3.723,
+          "p99": 3.966,
+          "max": 4.442
+        },
+        "view_fow_external_ms": {
+          "count": 120,
+          "mean": 0.002841666666666667,
+          "median": 0.0,
+          "p95": 0.0,
+          "p99": 0.068,
+          "max": 0.077
+        },
+        "view_regional_publish_ms_active": {
+          "count": 0
+        },
+        "meta_quarter_ms": {
+          "count": 2,
+          "mean": 8.797,
+          "median": 8.797,
+          "p95": 9.033,
+          "p99": 9.033,
+          "max": 9.033
+        },
+        "meta_observe_campaign_ms": {
+          "count": 2,
+          "mean": 7.38,
+          "median": 7.38,
+          "p95": 7.539,
+          "p99": 7.539,
+          "max": 7.539
+        },
+        "tutorial_refresh_ms": {
+          "count": 2,
+          "mean": 0.7395,
+          "median": 0.7395,
+          "p95": 0.752,
+          "p99": 0.752,
+          "max": 0.752
+        },
+        "tutorial_projection_count": {
+          "count": 2,
+          "mean": 2.0,
+          "median": 2.0,
+          "p95": 2.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "tutorial_projection_ms": {
+          "count": 2,
+          "mean": 0.6525000000000001,
+          "median": 0.6525000000000001,
+          "p95": 0.661,
+          "p99": 0.661,
+          "max": 0.661
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 2,
+          "mean": 0.3235,
+          "median": 0.3235,
+          "p95": 0.325,
+          "p99": 0.325,
+          "max": 0.325
+        },
+        "latest_available_gpu_ms": {
+          "count": 120,
+          "mean": 2.8643583382169404,
+          "median": 0.98199999332428,
+          "p95": 7.36999988555908,
+          "p99": 7.72200012207031,
+          "max": 7.93699979782104
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 120,
+          "mean": 0.03870833333333333,
+          "median": 0.037,
+          "p95": 0.048,
+          "p99": 0.066,
+          "max": 0.099
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4024,
+            "wall_ms": 17.6,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.292,
+            "view_ms": 0.563,
+            "publish_ms": 0.0,
+            "meta_ms": 9.033
+          },
+          {
+            "process_frame": 4046,
+            "wall_ms": 14.149,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 0.554,
+            "publish_ms": 0.0,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4004,
+            "wall_ms": 11.849,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.102,
+            "view_ms": 3.678,
+            "publish_ms": 0.0,
+            "meta_ms": 0.014
+          },
+          {
+            "process_frame": 4015,
+            "wall_ms": 11.116,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.358,
+            "view_ms": 0.719,
+            "publish_ms": 0.0,
+            "meta_ms": 0.014
+          },
+          {
+            "process_frame": 4091,
+            "wall_ms": 10.763,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 0.506,
+            "publish_ms": 0.0,
+            "meta_ms": 8.561
+          }
+        ]
+      }
+    }
+  },
+  "after": {
+    "engine": "4.6.2-stable (official)",
+    "adapter": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "window": "(1280, 720)",
+    "terrain_viewport": "(1920, 1080)",
+    "renderer": "forward_plus",
+    "scale": 1.0,
+    "map_sha256": "d3ab04a32a142a51ea20d180397b7cd9355dfa55452e2fc224fbd63f360624a7",
+    "shots": 8,
+    "first_move_ms": 2251.772,
+    "go_dispatch_ms": 25.98,
+    "frames": 12770,
+    "binding_errors": 0,
+    "post_draw_callback_frame_offset": {
+      "count": 12770,
+      "mean": 0.0,
+      "median": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "phases": {
+      "combat": {
+        "frames": 515,
+        "wall_pre_draw_interval_ms": {
+          "count": 515,
+          "mean": 7.32166213592233,
+          "median": 5.1,
+          "p95": 20.516,
+          "p99": 29.964,
+          "max": 48.718
+        },
+        "physics_ticks_per_frame": {
+          "count": 515,
+          "mean": 0.44271844660194176,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 515,
+          "mean": 1.2631242718446603,
+          "median": 0.0,
+          "p95": 5.148,
+          "p99": 9.19,
+          "max": 10.573
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 515,
+          "mean": 0.016559223300970875,
+          "median": 0.0,
+          "p95": 0.044,
+          "p99": 0.079,
+          "max": 0.1
+        },
+        "view_process_ms": {
+          "count": 515,
+          "mean": 0.853409708737864,
+          "median": 0.539,
+          "p95": 2.176,
+          "p99": 5.312,
+          "max": 30.867
+        },
+        "view_fow_external_ms": {
+          "count": 515,
+          "mean": 0.39678446601941747,
+          "median": 0.0,
+          "p95": 3.111,
+          "p99": 3.344,
+          "max": 3.718
+        },
+        "view_regional_publish_ms_active": {
+          "count": 1,
+          "mean": 27.49,
+          "median": 27.49,
+          "p95": 27.49,
+          "p99": 27.49,
+          "max": 27.49
+        },
+        "meta_quarter_ms": {
+          "count": 14,
+          "mean": 7.3967857142857145,
+          "median": 7.3385,
+          "p95": 7.829,
+          "p99": 7.829,
+          "max": 7.829
+        },
+        "meta_observe_campaign_ms": {
+          "count": 14,
+          "mean": 6.408357142857143,
+          "median": 6.38,
+          "p95": 6.847,
+          "p99": 6.847,
+          "max": 6.847
+        },
+        "tutorial_refresh_ms": {
+          "count": 14,
+          "mean": 0.37757142857142856,
+          "median": 0.378,
+          "p95": 0.398,
+          "p99": 0.398,
+          "max": 0.398
+        },
+        "tutorial_projection_count": {
+          "count": 14,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "tutorial_projection_ms": {
+          "count": 14,
+          "mean": 0.31707142857142856,
+          "median": 0.3185,
+          "p95": 0.331,
+          "p99": 0.331,
+          "max": 0.331
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 0
+        },
+        "latest_available_gpu_ms": {
+          "count": 515,
+          "mean": 1.6111067982553278,
+          "median": 1.62300002574921,
+          "p95": 2.01600003242493,
+          "p99": 2.11500000953674,
+          "max": 2.15899991989136
+        },
+        "test_poll_ms_active": {
+          "count": 103,
+          "mean": 0.07874757281553398,
+          "median": 0.08,
+          "p95": 0.103,
+          "p99": 0.111,
+          "max": 0.153
+        },
+        "sampler_pre_draw_ms": {
+          "count": 515,
+          "mean": 0.03779417475728156,
+          "median": 0.036,
+          "p95": 0.05,
+          "p99": 0.062,
+          "max": 0.098
+        },
+        "largest_frames": [
+          {
+            "process_frame": 16472,
+            "wall_ms": 48.718,
+            "physics_ticks": 1,
+            "physics_sum_ms": 4.049,
+            "view_ms": 30.867,
+            "publish_ms": 27.49,
+            "meta_ms": 0.017
+          },
+          {
+            "process_frame": 16474,
+            "wall_ms": 32.037,
+            "physics_ticks": 1,
+            "physics_sum_ms": 8.691,
+            "view_ms": 4.002,
+            "publish_ms": 0.0,
+            "meta_ms": 0.021
+          },
+          {
+            "process_frame": 16557,
+            "wall_ms": 31.397,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 0.558,
+            "publish_ms": 0.0,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 16508,
+            "wall_ms": 30.881,
+            "physics_ticks": 1,
+            "physics_sum_ms": 1.87,
+            "view_ms": 1.451,
+            "publish_ms": 0.0,
+            "meta_ms": 7.748
+          },
+          {
+            "process_frame": 16699,
+            "wall_ms": 30.454,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 1.968,
+            "publish_ms": 0.0,
+            "meta_ms": 0.019
+          }
+        ]
+      },
+      "go_to_contact": {
+        "frames": 11655,
+        "wall_pre_draw_interval_ms": {
+          "count": 11655,
+          "mean": 4.6588482196482195,
+          "median": 3.245,
+          "p95": 10.576,
+          "p99": 16.44,
+          "max": 226.763
+        },
+        "physics_ticks_per_frame": {
+          "count": 11655,
+          "mean": 0.27927927927927926,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 8.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 11655,
+          "mean": 0.4939951093951094,
+          "median": 0.0,
+          "p95": 3.015,
+          "p99": 4.573,
+          "max": 44.198
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 11655,
+          "mean": 0.010053367653367654,
+          "median": 0.0,
+          "p95": 0.039,
+          "p99": 0.053,
+          "max": 0.301
+        },
+        "view_process_ms": {
+          "count": 11655,
+          "mean": 0.6014746460746461,
+          "median": 0.536,
+          "p95": 0.987,
+          "p99": 1.395,
+          "max": 16.931
+        },
+        "view_fow_external_ms": {
+          "count": 11655,
+          "mean": 0.08321818961818962,
+          "median": 0.0,
+          "p95": 0.082,
+          "p99": 2.19,
+          "max": 3.355
+        },
+        "view_regional_publish_ms_active": {
+          "count": 0
+        },
+        "meta_quarter_ms": {
+          "count": 215,
+          "mean": 7.7277813953488375,
+          "median": 7.682,
+          "p95": 8.629,
+          "p99": 9.114,
+          "max": 9.235
+        },
+        "meta_observe_campaign_ms": {
+          "count": 215,
+          "mean": 6.720311627906977,
+          "median": 6.679,
+          "p95": 7.449,
+          "p99": 7.757,
+          "max": 7.856
+        },
+        "tutorial_refresh_ms": {
+          "count": 215,
+          "mean": 0.3962418604651163,
+          "median": 0.387,
+          "p95": 0.457,
+          "p99": 0.561,
+          "max": 0.658
+        },
+        "tutorial_projection_count": {
+          "count": 215,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "tutorial_projection_ms": {
+          "count": 215,
+          "mean": 0.3319674418604651,
+          "median": 0.323,
+          "p95": 0.384,
+          "p99": 0.493,
+          "max": 0.56
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 0
+        },
+        "latest_available_gpu_ms": {
+          "count": 11655,
+          "mean": 1.2802628059082408,
+          "median": 1.22899997234344,
+          "p95": 1.56700003147125,
+          "p99": 1.88800001144409,
+          "max": 3.03800010681152
+        },
+        "test_poll_ms_active": {
+          "count": 2331,
+          "mean": 0.012308451308451308,
+          "median": 0.012,
+          "p95": 0.017,
+          "p99": 0.022,
+          "max": 0.159
+        },
+        "sampler_pre_draw_ms": {
+          "count": 11655,
+          "mean": 0.037271557271557273,
+          "median": 0.035,
+          "p95": 0.051,
+          "p99": 0.069,
+          "max": 0.22
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4813,
+            "wall_ms": 226.763,
+            "physics_ticks": 8,
+            "physics_sum_ms": 44.198,
+            "view_ms": 0.829,
+            "publish_ms": 0.0,
+            "meta_ms": 0.05
+          },
+          {
+            "process_frame": 9216,
+            "wall_ms": 80.358,
+            "physics_ticks": 6,
+            "physics_sum_ms": 9.156,
+            "view_ms": 1.523,
+            "publish_ms": 0.0,
+            "meta_ms": 0.05
+          },
+          {
+            "process_frame": 9223,
+            "wall_ms": 79.29,
+            "physics_ticks": 3,
+            "physics_sum_ms": 5.694,
+            "view_ms": 0.729,
+            "publish_ms": 0.0,
+            "meta_ms": 0.026
+          },
+          {
+            "process_frame": 9215,
+            "wall_ms": 77.92,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 0.524,
+            "publish_ms": 0.0,
+            "meta_ms": 0.016
+          },
+          {
+            "process_frame": 4814,
+            "wall_ms": 73.767,
+            "physics_ticks": 5,
+            "physics_sum_ms": 28.545,
+            "view_ms": 0.767,
+            "publish_ms": 0.0,
+            "meta_ms": 7.644
+          }
+        ]
+      },
+      "pan_1": {
+        "frames": 240,
+        "wall_pre_draw_interval_ms": {
+          "count": 240,
+          "mean": 7.250895833333334,
+          "median": 5.7379999999999995,
+          "p95": 24.671,
+          "p99": 35.136,
+          "max": 36.002
+        },
+        "physics_ticks_per_frame": {
+          "count": 240,
+          "mean": 0.4375,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.39952916666666666,
+          "median": 0.0,
+          "p95": 2.325,
+          "p99": 2.652,
+          "max": 2.914
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.018829166666666668,
+          "median": 0.0,
+          "p95": 0.053,
+          "p99": 0.096,
+          "max": 0.329
+        },
+        "view_process_ms": {
+          "count": 240,
+          "mean": 2.9344833333333336,
+          "median": 3.577,
+          "p95": 5.684,
+          "p99": 15.468,
+          "max": 30.567
+        },
+        "view_fow_external_ms": {
+          "count": 240,
+          "mean": 0.005595833333333334,
+          "median": 0.0,
+          "p95": 0.065,
+          "p99": 0.105,
+          "max": 0.251
+        },
+        "view_regional_publish_ms_active": {
+          "count": 15,
+          "mean": 18.438466666666667,
+          "median": 18.85,
+          "p95": 29.217,
+          "p99": 29.217,
+          "max": 29.217
+        },
+        "meta_quarter_ms": {
+          "count": 7,
+          "mean": 8.281285714285714,
+          "median": 7.997,
+          "p95": 9.529,
+          "p99": 9.529,
+          "max": 9.529
+        },
+        "meta_observe_campaign_ms": {
+          "count": 7,
+          "mean": 7.077857142857143,
+          "median": 6.976,
+          "p95": 7.951,
+          "p99": 7.951,
+          "max": 7.951
+        },
+        "tutorial_refresh_ms": {
+          "count": 7,
+          "mean": 0.4164285714285714,
+          "median": 0.386,
+          "p95": 0.559,
+          "p99": 0.559,
+          "max": 0.559
+        },
+        "tutorial_projection_count": {
+          "count": 7,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "tutorial_projection_ms": {
+          "count": 7,
+          "mean": 0.3542857142857143,
+          "median": 0.328,
+          "p95": 0.492,
+          "p99": 0.492,
+          "max": 0.492
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 0
+        },
+        "latest_available_gpu_ms": {
+          "count": 240,
+          "mean": 0.9254083332916101,
+          "median": 0.9034999907016755,
+          "p95": 0.98199999332428,
+          "p99": 0.986999988555908,
+          "max": 0.989000022411346
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 240,
+          "mean": 0.04643333333333333,
+          "median": 0.042499999999999996,
+          "p95": 0.073,
+          "p99": 0.103,
+          "max": 0.183
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4473,
+            "wall_ms": 36.002,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 4.232,
+            "publish_ms": 29.217,
+            "meta_ms": 0.048
+          },
+          {
+            "process_frame": 4513,
+            "wall_ms": 35.826,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.266,
+            "view_ms": 30.567,
+            "publish_ms": 22.055,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4437,
+            "wall_ms": 35.136,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 4.11,
+            "publish_ms": 20.12,
+            "meta_ms": 8.745
+          },
+          {
+            "process_frame": 4549,
+            "wall_ms": 29.585,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.343,
+            "view_ms": 5.583,
+            "publish_ms": 21.36,
+            "meta_ms": 0.029
+          },
+          {
+            "process_frame": 4365,
+            "wall_ms": 28.081,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.601,
+            "view_ms": 23.548,
+            "publish_ms": 18.76,
+            "meta_ms": 0.012
+          }
+        ]
+      },
+      "pan_2": {
+        "frames": 240,
+        "wall_pre_draw_interval_ms": {
+          "count": 240,
+          "mean": 7.602108333333334,
+          "median": 5.867,
+          "p95": 25.717,
+          "p99": 29.527,
+          "max": 43.401
+        },
+        "physics_ticks_per_frame": {
+          "count": 240,
+          "mean": 0.4583333333333333,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 2.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.46085,
+          "median": 0.0,
+          "p95": 2.429,
+          "p99": 3.631,
+          "max": 4.175
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 240,
+          "mean": 0.019616666666666668,
+          "median": 0.0,
+          "p95": 0.059,
+          "p99": 0.136,
+          "max": 0.186
+        },
+        "view_process_ms": {
+          "count": 240,
+          "mean": 2.665354166666667,
+          "median": 3.733,
+          "p95": 4.989,
+          "p99": 6.498,
+          "max": 6.9
+        },
+        "view_fow_external_ms": {
+          "count": 240,
+          "mean": 0.0055583333333333335,
+          "median": 0.0,
+          "p95": 0.067,
+          "p99": 0.091,
+          "max": 0.117
+        },
+        "view_regional_publish_ms_active": {
+          "count": 16,
+          "mean": 20.0744375,
+          "median": 19.3975,
+          "p95": 28.965,
+          "p99": 28.965,
+          "max": 28.965
+        },
+        "meta_quarter_ms": {
+          "count": 7,
+          "mean": 8.448428571428572,
+          "median": 8.218,
+          "p95": 9.73,
+          "p99": 9.73,
+          "max": 9.73
+        },
+        "meta_observe_campaign_ms": {
+          "count": 7,
+          "mean": 7.196428571428571,
+          "median": 6.991,
+          "p95": 8.208,
+          "p99": 8.208,
+          "max": 8.208
+        },
+        "tutorial_refresh_ms": {
+          "count": 7,
+          "mean": 0.4565714285714286,
+          "median": 0.407,
+          "p95": 0.605,
+          "p99": 0.605,
+          "max": 0.605
+        },
+        "tutorial_projection_count": {
+          "count": 7,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "tutorial_projection_ms": {
+          "count": 7,
+          "mean": 0.37985714285714284,
+          "median": 0.342,
+          "p95": 0.536,
+          "p99": 0.536,
+          "max": 0.536
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 0
+        },
+        "latest_available_gpu_ms": {
+          "count": 240,
+          "mean": 1.4236458308994773,
+          "median": 1.4154999852180499,
+          "p95": 1.84099996089935,
+          "p99": 1.96200001239777,
+          "max": 2.00600004196167
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 240,
+          "mean": 0.047904166666666664,
+          "median": 0.043,
+          "p95": 0.08,
+          "p99": 0.141,
+          "max": 0.158
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4753,
+            "wall_ms": 43.401,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.356,
+            "view_ms": 4.702,
+            "publish_ms": 28.965,
+            "meta_ms": 0.044
+          },
+          {
+            "process_frame": 4757,
+            "wall_ms": 29.584,
+            "physics_ticks": 1,
+            "physics_sum_ms": 0.251,
+            "view_ms": 6.498,
+            "publish_ms": 19.607,
+            "meta_ms": 0.038
+          },
+          {
+            "process_frame": 4771,
+            "wall_ms": 29.527,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 4.705,
+            "publish_ms": 0.0,
+            "meta_ms": 0.016
+          },
+          {
+            "process_frame": 4645,
+            "wall_ms": 29.458,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 3.836,
+            "publish_ms": 22.546,
+            "meta_ms": 0.017
+          },
+          {
+            "process_frame": 4765,
+            "wall_ms": 29.051,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.271,
+            "view_ms": 4.456,
+            "publish_ms": 20.094,
+            "meta_ms": 0.021
+          }
+        ]
+      },
+      "still": {
+        "frames": 120,
+        "wall_pre_draw_interval_ms": {
+          "count": 119,
+          "mean": 4.397932773109244,
+          "median": 2.554,
+          "p95": 10.738,
+          "p99": 16.464,
+          "max": 17.076
+        },
+        "physics_ticks_per_frame": {
+          "count": 120,
+          "mean": 0.2833333333333333,
+          "median": 0.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 2.0
+        },
+        "physics_cpu_sum_ms": {
+          "count": 120,
+          "mean": 0.2598,
+          "median": 0.0,
+          "p95": 2.166,
+          "p99": 2.776,
+          "max": 3.014
+        },
+        "base_physics_cpu_sum_ms": {
+          "count": 120,
+          "mean": 0.011166666666666667,
+          "median": 0.0,
+          "p95": 0.049,
+          "p99": 0.061,
+          "max": 0.062
+        },
+        "view_process_ms": {
+          "count": 120,
+          "mean": 0.93875,
+          "median": 0.565,
+          "p95": 3.913,
+          "p99": 5.61,
+          "max": 5.611
+        },
+        "view_fow_external_ms": {
+          "count": 120,
+          "mean": 0.0037166666666666667,
+          "median": 0.0,
+          "p95": 0.066,
+          "p99": 0.085,
+          "max": 0.092
+        },
+        "view_regional_publish_ms_active": {
+          "count": 0
+        },
+        "meta_quarter_ms": {
+          "count": 2,
+          "mean": 8.06,
+          "median": 8.06,
+          "p95": 8.095,
+          "p99": 8.095,
+          "max": 8.095
+        },
+        "meta_observe_campaign_ms": {
+          "count": 2,
+          "mean": 7.0695,
+          "median": 7.0695,
+          "p95": 7.088,
+          "p99": 7.088,
+          "max": 7.088
+        },
+        "tutorial_refresh_ms": {
+          "count": 2,
+          "mean": 0.3865,
+          "median": 0.3865,
+          "p95": 0.404,
+          "p99": 0.404,
+          "max": 0.404
+        },
+        "tutorial_projection_count": {
+          "count": 2,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "tutorial_projection_ms": {
+          "count": 2,
+          "mean": 0.3305,
+          "median": 0.3305,
+          "p95": 0.347,
+          "p99": 0.347,
+          "max": 0.347
+        },
+        "tutorial_redundant_guard_projection_ms": {
+          "count": 0
+        },
+        "latest_available_gpu_ms": {
+          "count": 120,
+          "mean": 2.822841674586137,
+          "median": 0.9824999868869785,
+          "p95": 7.94600009918213,
+          "p99": 8.58699989318848,
+          "max": 9.52999973297119
+        },
+        "test_poll_ms_active": {
+          "count": 0
+        },
+        "sampler_pre_draw_ms": {
+          "count": 120,
+          "mean": 0.041433333333333336,
+          "median": 0.0395,
+          "p95": 0.059,
+          "p99": 0.068,
+          "max": 0.07
+        },
+        "largest_frames": [
+          {
+            "process_frame": 4240,
+            "wall_ms": 17.076,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 0.598,
+            "publish_ms": 0.0,
+            "meta_ms": 0.019
+          },
+          {
+            "process_frame": 4237,
+            "wall_ms": 16.464,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.356,
+            "view_ms": 0.689,
+            "publish_ms": 0.0,
+            "meta_ms": 8.095
+          },
+          {
+            "process_frame": 4223,
+            "wall_ms": 14.066,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.353,
+            "view_ms": 4.414,
+            "publish_ms": 0.0,
+            "meta_ms": 0.015
+          },
+          {
+            "process_frame": 4219,
+            "wall_ms": 13.114,
+            "physics_ticks": 0,
+            "physics_sum_ms": 0.0,
+            "view_ms": 5.61,
+            "publish_ms": 0.0,
+            "meta_ms": 0.02
+          },
+          {
+            "process_frame": 4218,
+            "wall_ms": 13.029,
+            "physics_ticks": 1,
+            "physics_sum_ms": 2.776,
+            "view_ms": 5.611,
+            "publish_ms": 0.0,
+            "meta_ms": 0.016
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Gefechtsmessung und Tutorial-Projektion — 11.11.2026
+
+Taskbranch task/native-glut-maps-20261110 auf6651ca479. Begrenzte opt-in
+Frame-Receipts erfassen alle Physiktakte pro Renderframe; CPU-Zuordnung erfolgt
+vor dem Renderdispatch, GPU-Werte bleiben als latest_available gekennzeichnet.
+Tutorial liest denselben frischen Owner-Snapshot einmal statt zweimal.
+Drei neue gezielte Verifier erneut11/0,7/0,7/0; Navigation15/0 und Streaming3/0
+im dokumentierten Lauf. Zwei private native B-Gefechte bei1× jeweils37/0 und
+acht echte Schüsse. Stark streuende Gesamtzeiten belegen keine allgemeine
+FPS-Freigabe. Regionale Publikation und Kampagnenbeobachtung bleiben konkrete
+Folgearbeiten. QA: combat_frame_accounting_20261111. Kein Main-/EXE-Schritt.
+
 ### Gezeichnete Porträts, Kampagnen-Workbench und tragbare Rüstung —11.11.2026
 
 Taskbranch task/native-glut-maps-20261110 auf820a91caf. Vier neue Porträts auf

@@ -1,0 +1,11 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL Runtime step maps to actionable help: satellite_completed
+FAIL Runtime step maps to actionable help: satellite_home
+FAIL Runtime step maps to actionable help: trade_departed
+FAIL Runtime step maps to actionable help: trade_used
+FAIL Runtime step maps to actionable help: bought
+FAIL Runtime step maps to actionable help: refueled
+FAIL Runtime step maps to actionable help: trade_home
+Campaign presenter: 31 checks, 7 failures

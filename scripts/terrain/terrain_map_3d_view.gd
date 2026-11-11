@@ -1067,6 +1067,9 @@ var _dropship_rotation_y: float = 0.0
 var _map_render_duration_msec: int = 0
 var _runtime_frame_timing_debug_enabled: bool = false
 var _runtime_frame_timing_debug_snapshot: Dictionary = {}
+var _runtime_process_timing_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
+var _runtime_fow_timing_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
+var _runtime_regional_publish_timing_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
 var _last_fow_work_usec: int = -1
 var _fow_work_invocation_count: int = 0
 var _marker_count: int = 0
@@ -1282,9 +1285,15 @@ func _process(delta: float) -> void:
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_process_pending_fow_overlay_full_rebuild()
+	if profile_enabled:
+		scopes_usec["pending_fow_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_process_regional_pending_chunks()
 	if profile_enabled:
+		scopes_usec["regional_chunks_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_resize_subviewport()
 	if profile_enabled:
@@ -1297,12 +1306,16 @@ func _process(delta: float) -> void:
 	_refresh_dynamic_order_visuals_if_needed()
 	if profile_enabled:
 		scopes_usec["dynamic_order_visuals_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_update_air_visual_animation(delta)
 	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if profile_enabled:
+		scopes_usec["air_visual_and_redraw_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_runtime_process_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - frame_started_usec, scopes_usec)
 		_runtime_frame_timing_debug_snapshot = {
 			"enabled": _runtime_frame_timing_debug_enabled,
+			"process_frame": Engine.get_process_frames(),
 			"total_usec": Time.get_ticks_usec() - frame_started_usec,
 			"scopes_usec": scopes_usec.duplicate(true),
 			"conditional_scopes_usec": {"fow_work_usec": _last_fow_work_usec},
@@ -2089,6 +2102,7 @@ func _set_contact_density_heatmap_enabled_internal(enabled: bool, force_rebuild:
 
 
 func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
+	var complete_started_usec := Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var normalized_state: Dictionary = _normalize_fog_of_war_visual_state(fog_of_war_state)
 	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
 	var same_context: bool = (
@@ -2101,6 +2115,8 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var next_revision: int = int(normalized_state.get("visibility_revision", 0))
 	var same_revision: bool = next_revision == int(_fog_of_war_state.get("visibility_revision", 0))
 	if next_signature == _fog_of_war_state_signature and unchanged_terrain and same_revision and normalized_state == _fog_of_war_state:
+		if _runtime_frame_timing_debug_enabled:
+			_runtime_fow_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - complete_started_usec, {"unchanged_fow_usec":Time.get_ticks_usec() - complete_started_usec})
 		return
 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
@@ -2146,6 +2162,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	if _runtime_frame_timing_debug_enabled:
 		_last_fow_work_usec = Time.get_ticks_usec() - work_started_usec
 		_fow_work_invocation_count += 1
+		_runtime_fow_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - complete_started_usec, {"changed_fow_usec":Time.get_ticks_usec() - complete_started_usec})
 
 
 func set_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
@@ -2679,10 +2696,22 @@ func set_runtime_frame_timing_debug_enabled(enabled: bool) -> void:
 	_runtime_frame_timing_debug_enabled = enabled
 	if not enabled:
 		_runtime_frame_timing_debug_snapshot.clear()
+		_runtime_process_timing_debug.clear()
+		_runtime_fow_timing_debug.clear()
+		_runtime_regional_publish_timing_debug.clear()
 
 
 func get_runtime_frame_timing_debug_snapshot() -> Dictionary:
 	return _runtime_frame_timing_debug_snapshot.duplicate(true)
+
+
+func get_runtime_frame_work_debug_snapshot(process_frame: int = -1) -> Dictionary:
+	var frame_id := Engine.get_process_frames() if process_frame < 0 else process_frame
+	return {"enabled":_runtime_frame_timing_debug_enabled,"process_frame":frame_id,
+		"process":_runtime_process_timing_debug.get_snapshot(frame_id),
+		"fow_calls":_runtime_fow_timing_debug.get_snapshot(frame_id),
+		"regional_publish":_runtime_regional_publish_timing_debug.get_snapshot(frame_id),
+		"nested_scopes_not_additive":true,"read_only":true}
 
 
 func get_unit_proxy_sync_diagnostics() -> Dictionary:
@@ -4261,6 +4290,7 @@ func _prune_regional_retained_chunks() -> void:
 
 
 func _publish_regional_chunks(next: Dictionary) -> void:
+	var publish_started_usec := Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	for chunk: Vector2i in _regional_chunk_nodes.keys():
 		if next.has(chunk):
 			_regional_retained_chunks.erase(chunk)
@@ -4268,6 +4298,8 @@ func _publish_regional_chunks(next: Dictionary) -> void:
 			_retain_regional_chunk(chunk)
 	_prune_regional_retained_chunks()
 	if next == _visual_streaming_active_chunks:
+		if _runtime_frame_timing_debug_enabled:
+			_runtime_regional_publish_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - publish_started_usec)
 		return
 	var counts := Vector3i.ZERO
 	var visible_tiles: Array = []
@@ -4286,6 +4318,8 @@ func _publish_regional_chunks(next: Dictionary) -> void:
 	for chunk in next:
 		_regional_chunk_nodes[chunk].show()
 	_request_viewport_redraw()
+	if _runtime_frame_timing_debug_enabled:
+		_runtime_regional_publish_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - publish_started_usec)
 
 
 func _build_active_visual_chunk_lookup() -> Dictionary:

@@ -1,0 +1,16 @@
+{
+  "git": "6651ca47910b9fe8596d3edcc75d05643f259217",
+  "checkpoint_source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\profiles\\battle-regional-nav\\Godot\\app_userdata\\Sternenbuergerchen\\campaigns\\introduction\\checkpoint_v1.json",
+  "checkpoint_sha256": "9BB343088EE9EF04BBA6575224CED8E2CC69563454EC4A1E0CF2E7CF4554B53F",
+  "files": {
+    "scripts/tests/native_glut_battle_profile.gd": "944308D0FDC182427325CACFD8904E015FF3640D0D2BD735FA97228ED42D2C0F",
+    "scripts/meta/campaign_tutorial_presenter.gd": "FEB1AA73DED9269B4E668C3CD678E2C383A9B2592A6AA4FCF6F26DB0BC95CFC9",
+    "maps/satellite_crash_site.json": "808071D16B6A1B226A626164436EE7BBFF05DD6C85EE2851AF0C0C8CFFD1DE01",
+    "maps/trade_outpost.json": "D3AB04A32A142A51EA20D180397B7CD9355DFA55452E2FC224FBD63F360624A7",
+    "maps/fortified_outpost.json": "B1EEF21763EEE8228BA4162FAE92AA4C6173A707BFFE0A8A9F46BE926C5E953C",
+    "scripts/terrain/terrain_map_3d_view.gd": "A675655DDB6090199AA442F54340AD0C0D962EED5DEC157A12C478BF0912524D",
+    "scripts/core/simulation_root.gd": "0A55D04BEF28DC5B5594A79470DBAC69F5907A26F3D020EBCAE0AD7AD8376133",
+    "scripts/meta/meta_layer_flow.gd": "98F48D43A2EAE44DAD9DF9D72DFB24FFAF93C32FAF052C9EE7F0554D67FA3DB2",
+    "scripts/core/frame_timing_accumulator.gd": "AEF355910BE9C14A267FDE36DE3F00B02063E4D284E2EC50A64CB33918AF7827"
+  }
+}

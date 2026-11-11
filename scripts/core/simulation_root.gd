@@ -258,6 +258,7 @@ var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
 var _navigation_last_path_metrics: Dictionary = {}
 var _runtime_tick_budget_debug_snapshot: Dictionary = {}
+var _runtime_frame_budget_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
 var _runtime_command_type_count: Dictionary = {}
 var _runtime_command_type_usec: Dictionary = {}
 var _runtime_command_requeue_count: Dictionary = {}
@@ -428,6 +429,7 @@ func set_runtime_tick_budget_debug_enabled(enabled: bool) -> void:
 	runtime_tick_budget_debug_enabled = enabled
 	if not runtime_tick_budget_debug_enabled:
 		_runtime_tick_budget_debug_snapshot.clear()
+		_runtime_frame_budget_debug.clear()
 		_runtime_command_type_count.clear()
 		_runtime_command_type_usec.clear()
 		_runtime_command_requeue_count.clear()
@@ -439,9 +441,20 @@ func get_runtime_tick_budget_debug_snapshot() -> Dictionary:
 	return _runtime_tick_budget_debug_snapshot.duplicate(true)
 
 
+func get_runtime_frame_budget_debug_snapshot(process_frame: int = -1) -> Dictionary:
+	var frame_id := Engine.get_process_frames() if process_frame < 0 else process_frame
+	var result: Dictionary = _runtime_frame_budget_debug.get_snapshot(frame_id)
+	result["enabled"] = runtime_tick_budget_debug_enabled
+	result["known_empty_current_frame"] = runtime_tick_budget_debug_enabled and frame_id == Engine.get_process_frames() and not bool(result.has_sample)
+	result["read_only"] = true
+	return result
+
+
 func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec: int, profile_scopes: Dictionary, command_count: int, effect_count: int) -> void:
+	var record_started_usec := Time.get_ticks_usec()
 	_runtime_tick_budget_debug_snapshot = {
 		"enabled": runtime_tick_budget_debug_enabled,
+		"process_frame": Engine.get_process_frames(),
 		"tick": tick_counter,
 		"delta": delta,
 		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,
@@ -465,6 +478,11 @@ func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec:
 			"viewer_paths_read_only": true,
 		},
 	}
+	var record_usec := Time.get_ticks_usec() - record_started_usec
+	_runtime_tick_budget_debug_snapshot["debug_record_usec"] = record_usec
+	var frame_scopes: Dictionary = profile_scopes.duplicate()
+	frame_scopes["debug_record_usec"] = record_usec
+	_runtime_frame_budget_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - tick_started_usec, frame_scopes, tick_counter)
 
 
 func _count_runtime_registered_units() -> int:

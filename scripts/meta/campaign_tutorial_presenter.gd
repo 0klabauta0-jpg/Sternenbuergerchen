@@ -41,6 +41,22 @@ var _guidance_moved := false
 var _pinned: bool = false
 var _seen: Dictionary = {}
 var _render_count: int = 0
+var _runtime_frame_timing_debug_enabled := false
+var _runtime_frame_timing_debug = preload("res://scripts/core/frame_timing_accumulator.gd").new()
+
+func set_runtime_frame_timing_debug_enabled(enabled: bool) -> void:
+	_runtime_frame_timing_debug_enabled = enabled
+	if not enabled: _runtime_frame_timing_debug.clear()
+
+func get_runtime_frame_timing_debug_snapshot(process_frame: int = -1) -> Dictionary:
+	return _runtime_frame_timing_debug.get_snapshot(Engine.get_process_frames() if process_frame < 0 else process_frame)
+
+func _timed_runtime_snapshot(scope: String) -> Dictionary:
+	var started := Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
+	var result: Dictionary = _runtime.get_snapshot()
+	if _runtime_frame_timing_debug_enabled:
+		_runtime_frame_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - started, {scope:Time.get_ticks_usec() - started})
+	return result
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -131,7 +147,7 @@ func refresh() -> void:
 	if not is_instance_valid(_runtime) or not _runtime.has_method("get_snapshot") or _strip == null:
 		visible = false
 		return
-	var snapshot: Dictionary = _runtime.get_snapshot()
+	var snapshot: Dictionary = _timed_runtime_snapshot("initial_snapshot_usec")
 	if String(snapshot.get("mode", "")) != "campaign":
 		visible = false
 		return
@@ -149,7 +165,7 @@ func refresh() -> void:
 	visible = true
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}
-	var checkpoint_guard: Dictionary=Dictionary(_runtime.call("get_snapshot").get("checkpoint_guard",{}))
+	var checkpoint_guard: Dictionary=Dictionary(snapshot.get("checkpoint_guard",{}))
 	var signature := JSON.stringify({"view_mode":String(homebase.get("_operations_mode")) if homebase != null else "", "checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
 	if signature == _signature:
 		return

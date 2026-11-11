@@ -1,0 +1,14 @@
+{
+  "archive": "raw_frames.zip",
+  "archive_sha256": "88b9c905da6b6cbaf0c31ae64c9bf8a8112d66602dd7b2b7324200267283a89b",
+  "files": {
+    "before.json": {
+      "bytes": 30841808,
+      "sha256": "d135d7e9f51794925edfb06fbec45fa2eee87f3eacdf161da29662b523e8245e"
+    },
+    "after.json": {
+      "bytes": 40324686,
+      "sha256": "db93387323b463cf4ae04e11b4b7e10a896377ccf5869ae82cf5765f0d924a22"
+    }
+  }
+}
