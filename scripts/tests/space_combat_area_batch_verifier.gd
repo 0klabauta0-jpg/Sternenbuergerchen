@@ -23,7 +23,16 @@ func _initialize() -> void:
 	if sim.commit_space_fleet_motion(proposal, 2, foreign_world, {"runtime_authorized":true, "fixture":true}).get("reason") != "area_mismatch": failed += 1
 	if sim.commit_space_fleet_motion(proposal, 2, world, {"runtime_authorized":true}).get("reason") != "local_area_not_ready": failed += 1
 	sim.free()
-	print("SPACE_COMBAT_AREA_BATCH passed=", 5 - failed, " failed=", failed)
+	var body_sim = ROOT.new()
+	var body_state: RefCounted = body_sim.get("_space_combat_state")
+	var body_start: Vector2i = GRID.from_offset(Vector2i(256,6))
+	var body_target: Vector2i = GRID.from_offset(Vector2i(256,2))
+	var mover = _add(body_state, "space_fixture_body", "orbit_approach:moon", body_start)
+	var body_move: Array[Dictionary] = [{"craft_id":"space_fixture_body", "position_plane":GRID.HEX.axial_to_plane(Vector2(body_target)), "expected_revision":mover.get_snapshot().revision}]
+	var body_result: Dictionary = body_sim.commit_space_fleet_motion(body_move, 1, world, {"runtime_authorized":true, "fixture":true})
+	if not body_result.get("ok", false) or body_result.rejected.get("space_fixture_body") != "blocked": failed += 1
+	body_sim.free()
+	print("SPACE_COMBAT_AREA_BATCH passed=", 6 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _add(state: RefCounted, id: String, area: String, cell: Vector2i) -> RefCounted:

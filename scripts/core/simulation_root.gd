@@ -89,6 +89,7 @@ var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 var _fixture_area_tokens: Dictionary = {}
 var _fixture_area_requests: Dictionary = {}
+var _fixture_area_blockers: Dictionary = {}
 var _fixture_area_sequence := 0
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
@@ -388,7 +389,22 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		if not valid.get("ok", false): return valid
 		if _space_combat_state.preview_actor_cells(id, proposal).is_empty():
 			return {"ok": false, "reason": "invalid_footprint"}
-	var clearance: Dictionary = SPACE_NAVIGATION.resolve_motion(actors, proposals, world)
+	var navigation_world: Dictionary = world.duplicate(true)
+	if area.coordinate_frame == "local":
+		var local_id := String(area.space_area_id)
+		if not local_id.begins_with("orbit_approach:"): return {"ok":false, "reason":"invalid_area"}
+		if not _fixture_area_blockers.has(local_id):
+			var body_id := local_id.trim_prefix("orbit_approach:").uri_decode()
+			var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
+			if not layout.get("ok", false) or layout.body_map_id != local_id: return {"ok":false, "reason":"invalid_area"}
+			var body_cells: Array[Vector2i] = []
+			for offset in layout.body_cells: body_cells.append(SPACE_GRID.from_offset(offset))
+			_fixture_area_blockers[local_id] = body_cells
+		if typeof(navigation_world.get("blocked_cells", [])) != TYPE_ARRAY: return {"ok":false, "reason":"invalid_world"}
+		var blockers: Array = navigation_world.get("blocked_cells", []).duplicate()
+		blockers.append_array(_fixture_area_blockers[local_id])
+		navigation_world["blocked_cells"] = blockers
+	var clearance: Dictionary = SPACE_NAVIGATION.resolve_motion(actors, proposals, navigation_world)
 	if not clearance.get("ok", false): return clearance
 	var accepted: Dictionary = clearance.accepted
 	var ids: Array = accepted.keys()

@@ -247,9 +247,11 @@ Verifier und diese Statusdokumentation.
   lokale Kampfaufnahme und tatsächliche Layoutblocker noch nicht verbunden.
 - AP04a Bereichsbatch-Fixture: Root filtert Akteure und Zielbelegung nach
   Raum-ID; lokale Batchcommits verlangen expliziten Fixturekontext und
-  Testschiff-ID. Bereichstrennung und Sperre5/5, bestehende Batch- und
-  Übergangsfixture grün. Keine produktive lokale Bewegung; Kartenblocker,
-  KI/Guidance und gemischte Formationen sind nicht angebunden.
+  Testschiff-ID. Körpermasken des kanonischen Orbitlayouts werden als
+  Blockerzellen ergänzt und pro Bereich zwischengespeichert. Bereichstrennung,
+  Sperre und Körperkollision6/6, bestehende Batch- und Übergangsfixture grün.
+  Keine produktive lokale Bewegung; KI/Guidance und gemischte Formationen sind
+  nicht angebunden. Fixturecache und volle Tickkosten sind nicht abgenommen.
 - AP04a Footprint: einzellige und große Rümpfe prüfen die Grenzen des
   jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
   Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale
