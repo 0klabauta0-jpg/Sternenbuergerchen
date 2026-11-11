@@ -97,12 +97,16 @@ maximal 64 untersuchte Felder ueber alle blockierten Requests. Nur freie Pfade
 zu einem legalen Feld mit mehr als zwei Anschluessen werden vorgeschlagen.
 `blocked.backoff_path_grid_points` und `backoff_examined_cells` sind Lesedaten.
 Ein gefundener Pfad setzt `reason: backoff_required`; andernfalls bleibt
-`no_passing_space`. Keine accepted_steps werden dadurch ersetzt. Owner/AP5
-entscheidet und fuehrt einen Ruecksetzvorschlag separat aus.
+`no_passing_space`. Keine accepted_steps werden dadurch ersetzt. Die Vorschlags-
+zielwahl vermeidet andere Requestquellen, deren nächste drei Übergänge und
+Endziele über einen kleinen16×5-Index; das64-Knoten-Suchbudget bleibt gemeinsam.
+Owner/AP5 führt einen Rücksetzvorschlag separat im folgenden Planertick aus;
+derselbe atomare Commit prüft alle Zusagen neu, keine Umgehung des Owners.
 
 ## Grenzen
 
 Der Rücksetzgraph bleibt begrenzt und aufruflokal. Vollständiger Terraincache
 ist angebunden; keine allgemeine Deadlockfreiheit oder optimale Routenwahl.
 Grosse Karten-, Lifecycle-, Save-, Netzwerk-, Gefechts- und Performanceabnahmen
-sind weiterhin spaeter. Ohne Owner-Commit/AP5 bewegt dieser Plan keine Figur.
+sind weiterhin spaeter. Der reine Planer bewegt keine Figur; der angeschlossene
+Root-Moveadapter führt Vorschläge gemäß HEX_BACKOFF_EXECUTION_2026_11_11.md aus.

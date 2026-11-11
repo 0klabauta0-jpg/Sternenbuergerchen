@@ -452,3 +452,13 @@ ferne Türen; Opt-in ohne Owner fällt geschlossen aus. Door58/0 inklusive42Basi
 SightConsumers39/0, ReservationOwner36/0; Review geschlossen, QA hex_door_guard_20261111.
 Nicht vorweggenommen: Szenariorebuild/Zulassung AP6, atomarer Save-/MPrestore AP7.
 Weiter AP5 Rücksetzausführung und AP6–8, große AP9-Prüfungen ausdrücklich später.
+
+AP5-Rücksetzausführung ergänzt: tatsächliche temporäre Ausweichabsicht über
+denselben atomaren Planer/Owner, Originalziel/Command/Wartealter bleiben erhalten.
+Passagebeobachtung und reine Claims lösen Baywarten; Terrain-/Auftragsabbrüche
+räumen Recovery auf. Gültige getaktete Konkurrenzrequests kooperieren ohne neue
+Navjobs; kleiner16×5-Zielindex verhindert eine Bay auf dem direkten Gegenweg.
+Backoff55/0 inklusive42Basis, Planer26/0, ReservationOwner36/0, Review geschlossen;
+QA hex_backoff_execution_20261111. AP5-Kern optiert angeschlossen, keine Karten-
+aktivierung oder globale Deadlock-/Native-/Leistungsfreigabe. Weiter AP6 echte
+Admission/Embark/Deploy, AP7 Restore/Authority, AP8 kleiner Kandidat; AP9 später.

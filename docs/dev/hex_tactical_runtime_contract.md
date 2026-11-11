@@ -212,7 +212,8 @@ Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
 Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen, Actorprojektion
 und Gruppen-/Viewleser gemäß den beiden AP5-Move-Tasks sowie Bewegungsschuss.
-Rücksetz-Ausführung sowie AP6–8 bleiben offen; lokaler Türguard siehe unten.
+Lokaler Türguard und Rücksetzausführung sind ebenfalls angeschlossen, siehe
+unten. Zulassung/Lifecycle, Restore/Authority und Kandidat AP6–8 bleiben offen.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
 
 ## Echte Bewegungsabsichten und Darstellung
@@ -315,3 +316,38 @@ Rootqueue-/Drivermutationspfad und Ressourcenseiteneffektzähler; keine native M
 Szenarioneuaufbau/Zulassung AP6 und atomarer Save-/Multiplayersnapshot AP7 sind eigene
 Lebenszyklusgrenzen und werden dadurch nicht als abgesichert behauptet. Keine Karte
 aktiviert, große AP9-Prüfungen bleiben später.
+
+## Tatsächliches Ausweichen mit unverändertem Auftrag
+
+HexMovementCommandRuntime nimmt höchstens einen tatsächlichen backoff_required-
+Vorschlag pro Tick als temporäre Recoveryabsicht an. Nur aktive wartende
+Moveabsichten ohne Motionzusagen; ausdrücklich haltende NPCs werden nicht
+verschoben. Niedrigerer Prioritäts-/Wartescore, dann stabile ID entscheiden unter
+geeigneten Vorschlägen. Der geräumte Standort muss auf dem Weg eines anderen
+Requests liegen. Reine Vorschlagsziele meiden dessen aktuelle Quelle, nächste
+drei Übergänge und Endziel; keine Rücksetzposition direkt vor dem Gegenverkehr.
+
+Öffentliches Ziel, Commandidentität, Skill-/Auftragskontext und Wartealter bleiben
+erhalten. Die Recoveryroute wird im nächsten Tick durch denselben gemeinsamen
+Planer und Groundcommit geführt, samt Rampen, Zeiten und Dreischritthorizont.
+An der Bay wartet der NPC auf committed Passage und Freigabe des zugehörigen
+Claims; ein beendeter/ersetzter/entfernter oder ohne Bewegungszusage blockierter
+konkurrierender Auftrag löst ebenfalls
+die Wartebindung. Danach frische Navigation zum ursprünglichen Ziel, keine frühe
+Ankunft an der Bay. Hold/Wunde/Neuziel/Release/Kontextende räumen Recovery und
+den rein abgeleiteten Reverse-Watcherindex auf. Ungültige Bays und verschwundene
+Clearancezellen verwerfen die private Wartebindung; Originalziel wird neu geplant.
+
+Ein ohnehin laufender Plan kann direkt konkurrierende Retryrequests aus gültigem
+Cache bis zum bestehenden16er Limit ergänzen. Das verhindert einen dauernden
+Taktsversatz bei Navbudget1, ohne eine neue Suche zuzulassen. Der bei Timingaufbau
+abgeleitete Pfadindex ersetzt Vollpfadscans bei Handoffs/Beziehungsprüfung; Bay-
+Warten startet keine neue Navigation. Vollständige Pfadrestkopien und bestehende
+Planerarbeit sind weiterhin Arbeit, kein gemessener CPU-/FPSgewinn.
+
+QA hex_backoff_execution_20261111:55/0 einschließlich42 Basisprüfungen,
+Planer26/0, Reservierungsowner36/0, enger Review geschlossen. Kleine tatsächliche
+Rootqueuefälle: Gegenaufträge, Priorität, frühe Freigabe vor Fernziel, Navbudget1,
+Terraininvalidierung, Hold und fehlende Bay. Keine globale Deadlockfreiheit oder
+optimale Mehragentenplanung behauptet. AP7 muss Recoverysemantik einschließlich
+beobachteter Passage/Wartealter sichern; Pfad-/Timing-/Watcherindizes nicht speichern.
