@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS read-only local tactical prepare builds phase/location only; geometry gate remains Root-owned
+PASS typed begin payload permits exactly craft and string location
+PASS real strategic or inactive Flight cannot begin local surface approach
+PASS actual location orbit, explicit body surface link and canonical area must all match
+PASS actual station and home landing remain separate paths
+PASS real intervening Flight motion invalidates candidate without Travel mutation
+PASS public commit is stale after actual Activitydeactivation
+PASS prevalidated private tail publishes after deactivation and trusted finish stays phase-only
+PASS successful begin replays read-only after finish; changed target under same request rejects
+PASS strategic Warp arrival and inactive local exit remain pose-free through actual Activity API
+PREPARED_LOCAL_BEGIN_RESULT checks=10 failures=0 runtime_wired=false
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors

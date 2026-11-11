@@ -354,6 +354,8 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	var elapsed := _elapsed_seconds
 	var progress := _progress
 	var next_revision := _revision + 1
+	var next_phase := "orbit"
+	var next_location := ""
 	if operation == "advance":
 		if _phase != "quantum" or not _valid_delta(payload): return _reject("quantum_completion_required", "Nur bestaetigter Warpabschluss kann vorbereitet werden")
 		var delta := float(payload.delta_seconds)
@@ -367,11 +369,23 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		if _phase not in ["surface", "approach"]: return _reject("surface_exit_required", "Kein vorhandener Ortsabflug")
 		orbit = String(Dictionary(_definition.get("location_orbits", {})).get(_location_id, ""))
 		marker = _orbit_marker_id
+	elif operation == "begin_approach":
+		if _phase != "orbit": return _reject("orbit_required", "Lokaler Anflug braucht den vorhandenen Zielorbit")
+		next_location = String(payload.get("location_id", ""))
+		if next_location == "homebase": return _reject("home_landing_separate", "Heimatlandung bleibt ein eigener Pfad")
+		var named_body: Dictionary = Dictionary(_definition.get("bodies", {})).get(next_location, {})
+		if String(named_body.get("kind", "")) == "station": return _reject("station_not_surface", "Station ist kein Oberflaechenziel")
+		orbit = _orbit_id
+		if next_location.is_empty() or String(Dictionary(_definition.get("location_orbits", {})).get(next_location, "")) != orbit: return _reject("location_orbit_mismatch", "Zielort liegt nicht am tatsaechlichen Orbit")
+		marker = _orbit_marker_id
+		next_phase = "approach"
 	else: return _reject("unsupported_area_operation", "Operation gehoert nicht zu dieser vorbereiteten Grenze")
 	var orbit_definition: Dictionary = Dictionary(_definition.get("orbits", {})).get(orbit, {})
 	var body_id := String(orbit_definition.get("body_id", ""))
 	var body: Dictionary = Dictionary(_definition.get("bodies", {})).get(body_id, {})
 	if body.is_empty() or String(body.get("id", "")) != body_id: return _reject("unbound_target_body", "Zielkoerper ist nicht kanonisch gebunden")
+	if operation == "begin_approach" and (String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != next_location):
+		return _reject("body_surface_mismatch", "Koerper weist diesen Ort nicht als Oberflaeche aus")
 	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
 	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
 	var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
@@ -379,7 +393,11 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		return _reject("area_body_mismatch", "Bereich passt nicht zum tatsaechlichen Reiseziel")
 	var flight_binding := {}
 	var flight_snapshot: Dictionary = _flight.get_snapshot()
-	if flight_snapshot.get("coordinate_frame", "strategic") == "local":
+	if operation == "begin_approach":
+		if flight_snapshot.get("coordinate_frame") != "local" or flight_snapshot.get("motion_mode") != "tactical" or String(flight_snapshot.get("space_area_id", "")) != String(context.source_area_id) or String(context.source_area_id) != String(layout.body_map_id):
+			return _reject("local_surface_approach_required", "Oberflaechenanflug braucht den echten lokalen taktischen Flight")
+		flight_binding = _space_area_flight_binding(flight_snapshot)
+	elif flight_snapshot.get("coordinate_frame", "strategic") == "local":
 		if operation != "enter_orbit" or flight_snapshot.get("motion_mode") != "inactive" or String(flight_snapshot.get("space_area_id", "")) != String(context.source_area_id) or String(context.source_area_id) != String(layout.body_map_id):
 			return _reject("inactive_local_return_required", "Nur passender inaktiver Ortsflight darf lokal reaktiviert werden")
 		flight_binding = _space_area_flight_binding(flight_snapshot)
@@ -387,8 +405,8 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		return _reject("area_body_mismatch", "Strategischer Ausgangsbereich muss leer sein")
 	var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,
 		"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":flight_binding,
-		"next":{"phase":"orbit","orbit_id":orbit,"orbit_marker_id":marker,"target_orbit_id":"","target_orbit_marker_id":"",
-			"location_id":"","elapsed_seconds":elapsed,"progress":progress,"revision":next_revision}}
+		"next":{"phase":next_phase,"orbit_id":orbit,"orbit_marker_id":marker,"target_orbit_id":"","target_orbit_marker_id":"",
+			"location_id":next_location,"elapsed_seconds":elapsed,"progress":progress,"revision":next_revision}}
 	candidate["seal"] = _sign_space_area_state(candidate)
 	return candidate
 
