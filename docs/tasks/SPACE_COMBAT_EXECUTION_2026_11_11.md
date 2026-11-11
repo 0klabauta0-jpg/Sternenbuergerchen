@@ -177,6 +177,10 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Supply-Preparedpatch 3f5b4ae04 als b555288d1 und Campaign-Preparedpatch
+  07ca63a89 als b4d0b497f integriert; beide Ownerchecks erneut je12/12 mit
+  isoliertem APPDATA. Noch kein gemeinsamer Root-Gruppencommit; vorbereiteter
+  Travel-BeginApproach und die vollständige private Contextbindung fehlen.
 - Polisa-Flight-ID-Fix 78f5966b5 als e521b3ebe integriert. Identitätscheck,
   echte Ersteintrittsfixture, Saumvorschau und Autoritätstick gezielt grün.
   Warpankunft, Oberflächenanflug/-abflug und Stationsverkehr benötigen
