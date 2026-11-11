@@ -421,3 +421,11 @@ pro Query, unabhängiger0Budget-Ownerbeweis, keine Teilfreigabe langer Gänge.
 Cache18/0, Integration15/0, Planer26/0, ReservationOwner36/0, Topologie23/0,
 RootOwner51/0; frischer Review schloss stale ferne Ausfahrten mit12/3→15/0.
 AP5–8 bleiben tatsächliche Ausführung/Lifecycle/Save/Slice, AP9 weiterhin später.
+
+AP5-Teilpaket echte Commands: Root-eigene Zielabsichten, Navigation/Timingcache,
+Groundzusagen, Hold/Wunde, echte Ankunft und 2DActorprojektion angeschlossen.
+Move42/0, Owner56/0, Stop34/0, Projektion56/0, Facing24/0, Security34/0,
+Consumer39/0, ReservationOwner36/0, Korridor15/0; frischer Review geschlossen.
+QA hex_move_commands_20261111. AP5-Checkboxen bleiben bis zu 3D-/Fireteam-
+Ankunft, Türguard, Bewegungsschuss und Rücksetzausführung offen. Keine Karte
+aktiviert, keine Main-/EXEfreigabe; AP6–8 folgen, große AP9-Tests erst später.

@@ -435,6 +435,8 @@ func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i, registry = null, opt
 
 
 func _is_neighbor_walkable_scoped(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary) -> bool:
+	var blockers:Dictionary=options.get("blocked_grids",{})
+	if blockers.has(neighbor_grid):return false
 	var context_variant: Variant = options.get(STEP_COST_CONTEXT_OPTION, null)
 	if context_variant is StepCostContext:
 		var context := context_variant as StepCostContext
