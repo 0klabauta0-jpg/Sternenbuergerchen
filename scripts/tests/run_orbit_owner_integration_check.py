@@ -10,7 +10,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "surface":"scripts/tests/space_surface_approach_preview_verifier.gd",
           "authority":"scripts/tests/space_combat_authority_tick_verifier.gd",
           "reactivation":"scripts/tests/space_surface_real_reactivation_verifier.gd",
-          "move":"scripts/tests/space_singleplayer_move_verifier.gd"}
+          "move":"scripts/tests/space_singleplayer_move_verifier.gd",
+          "departure":"scripts/tests/space_atomic_departure_verifier.gd",
+          "surface_group":"scripts/tests/space_surface_group_fixture_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)

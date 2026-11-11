@@ -9,7 +9,19 @@ Hold/Wunde/Replan sauber auf. Damit sind die AP5-Codepfade im Taskstand
 zusammengeführt; native Abnahme bleibt offen. Jetzt AP6 echte Aufnahme/Freigabe,
 danach AP7 Restore/Authority und AP8 kleiner integrierter Kandidat.
 
-Aktueller Orbitnachtrag: Spacegrundlagen bis 613a03c3c samt gemeinsamem Flight-
+Neuester Orbitstand: Raumbewegung und reale Reaktivierung bis 00098ed5d sind
+integriert, privat Bewegung bestanden und Reaktivierung15/0. Produktive
+Abflug-/Anfluggruppe bis2171e7f25 ist als e205137d6 zusammengefuehrt; frische
+private Departure-/SurfaceGrouppruefungen bestanden samt Quell-/Profilguards.
+Der Gruppenreplay prueft auch die individuelle Travelownerepoche. Nachweise in
+orbit_owner_integration_20261111/parent_movement und /parent_departure.
+Echte AP6-Boarding-/Gruppenaufnahme, produktiver lokaler Rueckweg mit Fuel,
+vollstaendiger Orbitbildschirm und Live-V3-Katalogwechsel bleiben offen.
+OrbitAreaCanvas und reine V3-Katalogprojektion sind vorbereitet, nicht aktiviert.
+AP7 Restore/Authority und AP8 Kandidatenaktivierung folgen den Ownergrenzen;
+grosse AP9-Pruefung spaeter. Vor jeder EXE ausdruecklich den Nutzer fragen.
+
+Historischer Orbitnachtrag: Spacegrundlagen bis 613a03c3c samt gemeinsamem Flight-
 Owner und Polisa-Flight-IDfix 78f5966b5 sind als 3d3bf7a1e integriert. Danach
 Ersteintritt-/Index-/Saumvorschau und Client-Tickguard bis Source13462af85
 gezielt übernommen. Eigene enge Nachweise: Door58/0, Saum12/0, Authority4/0,
