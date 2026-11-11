@@ -195,13 +195,13 @@ Anschlusspunkt, keine Schallphysik und kein zusätzlicher NPC-Vollscan pro Schus
 
 Terraincover, Damage-/Diagnosepositionen und Höhenbonus lesen im Hexkontext
 dieselben logischen Felder; H+0,5 bleibt als halber Schritt im bestehenden
-Höhenfaktor erhalten. Legacyregeln bleiben getrennt. Ein konkret skillabhängiger
-Bewegungsschussabzug ist in diesem Damagepfad noch nicht nachgewiesen; vorhandene
-Skill-/Attackbonuswerte bleiben bestehen. Dessen genaue Balance bleibt vor
-Aktivierung der AP5-Bewegung ausdrücklich offen, kein neuer Wert wird behauptet.
+Höhenfaktor erhalten. Legacyregeln bleiben getrennt; vorhandene Skill-/
+Attackbonuswerte bleiben bestehen. Der AP5-Anschluss unten ergänzt einen
+ausdrücklich vorläufigen Bewegungsfaktor; Balanceabnahme bleibt offen.
 
-Keine Karte ist aktiviert. Aktive Bewegung, Zulassung/Lifecycle und Save-/
-Netzpfade bleiben AP5–8; die großen Szenen-/Leistungsabnahmen AP9 folgen später.
+Keine Karte ist aktiviert. Die folgenden AP5-Abschnitte beschreiben aktuelle
+Anschlüsse; Zulassung/Lifecycle und Save-/Netzpfade bleiben AP6–8, große
+Szenen-/Leistungsabnahmen AP9 folgen später.
 
 ## Rampen und offene Anbindung
 
@@ -211,7 +211,7 @@ Terrainowner; `allows_registry_step` ist nach beiden Registrygates das gemeinsam
 Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
 Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen, Actorprojektion
-und Gruppen-/Viewleser gemäß den beiden AP5-Move-Tasks. Bewegungsschuss,
+und Gruppen-/Viewleser gemäß den beiden AP5-Move-Tasks sowie Bewegungsschuss.
 Türguard und Rücksetz-Ausführung sowie AP6–8 bleiben offen.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
 
@@ -261,3 +261,30 @@ geglättet. Animationsbewegung folgt der Phase, Waffenpose bleibt beim vorhanden
 Feuereventpfad. Legacyglättung und Pixelankunft bleiben im bisherigen Zweig.
 Kleine Consumerprüfung65/0 samt Zweierformation und großer Metrik256/128;
 QA hex_move_consumers_20261111, keine native Grafik-/Animationsfreigabe.
+
+## Bewegungsschuss und lokale Profilreads
+
+UnitProfileMath leitet `moving_shot_accuracy_multiplier` aus Coreaccuracy ab.
+Vorläufiger Kandidat0.65..0.95 für Skill0..1:35%..5% relativer Abzug auf die
+bereits fertig berechnete Trefferchance, danach dieselben Min-/Maxgrenzen.
+Root verwendet den Faktor ausschließlich bei zugelassenem Angreifer mit
+Groundbewegungsphase, einschließlich Zentrierung. Stationär/Legacy gilt1;
+Actorposition, Animation und bewegte Renderflags entscheiden nichts. Vorhandene
+Auftrags-/FireRule-Producer entscheiden weiter, ob überhaupt geschossen wird.
+Kein zusätzlicher Treffer-, Rüstungs- oder Schadenswurf ist hinzugekommen.
+
+TestUnit bietet `get_damage_profile_snapshot()` als expliziten Opt-in für die
+kanonischen effektiven Combatwerte einschließlich Loadout/Leadership. Root liest
+ihn höchstens einmal pro Beteiligtem/Effect; bei Selbstschaden einmal insgesamt.
+Der Snapshot ist nur eine lokale Variable dieses Schusses. Weitere Effects sehen
+neue Skills/Ausrüstung sofort; keine neue dauerhafte Statwahrheit. Andere Actors
+behalten die bisherigen Einzelgetter und deren Vorrang, Fallbacks lesen nur die
+benötigten Rollenwerte. Bewegungsskillfallback wird nur bei bewegtem Angreifer
+ausgewertet und liest vorhandene Corewerte vor dem älteren Skillgetter.
+
+Ältere TestUnit-Bundles ohne neuen Effekt leiten ihn beim Lesen aus vorhandener
+Coreaccuracy ab, ohne das Bundle umzuschreiben. Hitcontext und read-only Damage-
+auflösung nennen logische Bewegung und angewendeten Faktor. Schadensmenge und
+Würfelkadenz behalten ihre bisherigen Regeln. Kleine MovingShot65/0 (einschließlich
+42 Basisprüfungen), MoveConsumers65/0 und SightConsumers39/0 mit geschlossenem
+Review; QA hex_moving_shot_20261111. Keine Balance-/Last-/FPSfreigabe.

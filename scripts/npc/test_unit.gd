@@ -435,12 +435,19 @@ func get_character_profile_bundle() -> Dictionary:
 
 func get_combat_effects() -> Dictionary:
 	var effects: Dictionary = Dictionary(_character_profile_bundle.get("combat_effects", {}))
-	if effects.is_empty():
-		var base_effects := {"hit_chance_multiplier": 1.0, "speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
-		return _apply_loadout_modifiers_to_effects(base_effects)
-	var result: Dictionary = effects.duplicate(true)
+	var result:Dictionary=effects.duplicate(true) if not effects.is_empty() else {"hit_chance_multiplier":1.0,"speed_multiplier":1.0,"hit_modifier":0.0,"evasion_modifier":0.0,"damage_taken_multiplier":1.0}
+	if not result.has("moving_shot_accuracy_multiplier"):
+		var core:Dictionary=Dictionary(_character_profile_bundle.get("core_values",{}))
+		var accuracy:float=float(core.accuracy) if core.has("accuracy") else get_accuracy_skill()
+		result["moving_shot_accuracy_multiplier"]=UNIT_PROFILE_MATH_SCRIPT.accuracy_to_moving_shot_multiplier(accuracy)
 	result["hit_modifier"] = float(result.get("hit_modifier", 0.0)) + _leadership_bonus
 	return _apply_loadout_modifiers_to_effects(result)
+
+
+## Opt into the canonical per-effect bulk read; all combat wrappers above/below
+## derive from these same effective profile/loadout/leadership values.
+func get_damage_profile_snapshot() -> Dictionary:
+	return get_combat_effects()
 
 
 func apply_leadership_bonus(bonus: float) -> void:
