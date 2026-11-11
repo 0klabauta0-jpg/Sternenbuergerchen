@@ -109,7 +109,22 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 	return {"ok": true, "reason": "", "replayed": false, "signature": request_signature(command), "command": command.duplicate(true)}
 
 static func request_signature(command: Dictionary) -> String:
-	return JSON.stringify(command, "", true)
+	return var_to_str(_canonical(command))
+
+static func _canonical(value: Variant) -> Variant:
+	if typeof(value) == TYPE_DICTIONARY:
+		var keys: Array = value.keys()
+		keys.sort()
+		var ordered: Dictionary = {}
+		for key in keys:
+			ordered[key] = _canonical(value[key])
+		return ordered
+	if typeof(value) == TYPE_ARRAY:
+		var result: Array = []
+		for item in value:
+			result.append(_canonical(item))
+		return result
+	return value
 
 static func _has_authority_key(value: Variant) -> bool:
 	if typeof(value) == TYPE_DICTIONARY:

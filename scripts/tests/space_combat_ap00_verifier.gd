@@ -74,5 +74,13 @@ func _initialize() -> void:
 			fixture.store_string("isolated")
 			fixture.close()
 			if FileAccess.get_file_as_string("user://space_ap00_fixture.txt") != "isolated": failures += 1
-	print("SPACE_COMBAT_AP00 passed=", 20 - failures, " failed=", failures)
+	var target_command := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"r2", "expected_revision":1, "payload":{"wing_ids":["w1"], "verb":"move", "target_hex":Vector2i.ZERO}}
+	var target_context := context.duplicate(true)
+	target_context.receipts = {"r2":{"signature":CONTRACT.request_signature(target_command), "result":{"ok":true}}}
+	var different_type := target_command.duplicate(true)
+	different_type.payload.target_hex = "(0, 0)"
+	if CONTRACT.validate(different_type, target_context).reason != "request_id_conflict": failures += 1
+	var reordered := {"payload":target_command.payload.duplicate(true), "expected_revision":1, "request_id":"r2", "operation":"order_issue", "contract_category":"space_combat"}
+	if not CONTRACT.validate(reordered, target_context).get("replayed", false): failures += 1
+	print("SPACE_COMBAT_AP00 passed=", 22 - failures, " failed=", failures)
 	quit(1 if failures else 0)

@@ -37,7 +37,8 @@ Verifier und diese Statusdokumentation.
   Berechtigung, Revisionsprüfung, Adress-/Ziel-/Feldvalidierung und reinem
   Replay-Vorcheck. 20/20 Fälle im temporären Minimalprojekt; dessen
   `user://`-Schreibprobe lag im eigenen temporären APPDATA.
-  Die erneute Ausführung bestätigt keinen Produktanschluss.
+  Nachprüfung im Projekt 22/22, einschließlich typfester Replay-Signaturen
+  und unabhängig von Dictionary-Reihenfolge. Noch kein Produktanschluss.
 - AP01 erster Teil: per-Schiff-Flugdatensatz mit Pose, Geschwindigkeit,
   Modus, Masse, Revision und Tick; identischer/alter Tick und veraltete Revision
   werden abgelehnt. Minimalprojektcheck 6/6. Reiseowner und Flottenindex
