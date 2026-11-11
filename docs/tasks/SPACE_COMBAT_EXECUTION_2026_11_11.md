@@ -199,6 +199,12 @@ Verifier und diese Statusdokumentation.
   belegtes Ziel bleibt inaktiv. 9/9, Claims-/Saum-/Ersteintrittschecks grün.
   Root-Transaktion, Saum-/Travel-/Economyprüfung und produktiver Aufrufer
   bleiben offen; der Raumowner erstellt keinen neuen Piloten-/Rottenzustand.
+- AP04a Root-Reaktivierungsvorschau: prüft inaktives identisches Flightobjekt,
+  vorhandene Rotte, Surface-/Approach-Location→Orbit→Body, vier Revisionen,
+  erlaubte Zielpose, Körpermaske, Saumkontakt, vollständigen Footprint und
+  fremde Belegung/Claims. 8/8 mit veraltetem Stand, falschem Ort, Körper und
+  belegtem Ziel. Keine Mutation, kein Travel-/Economycommit; Legacy-Surface
+  ohne vorherigen lokalen Bestand braucht weiterhin eigenen Aufnahmeweg.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
