@@ -1,0 +1,119 @@
+{
+  "base": "7ef57c931",
+  "status": "headless_verified_native_real_B_pending",
+  "new_verifier": {
+    "checks": 37,
+    "failures": 0,
+    "red_failures": 9
+  },
+  "first_move_ticks": {
+    "one_job": [
+      96,
+      24
+    ],
+    "two_jobs": [
+      96,
+      48
+    ]
+  },
+  "max_expansions_per_tick": 96,
+  "max_admitted_jobs": 4,
+  "headless_is_not_full_map_or_fps_acceptance": true,
+  "artifacts": [
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "bytes": 176359,
+      "sha256": "2d3545ab15d9d9118c78eef2fe82d1a98340f1c5bc06bb5bcc915299a2d40d13"
+    },
+    {
+      "path": "scripts/tests/regional_go_budget_reuse_test.gd",
+      "bytes": 7971,
+      "sha256": "0b0b065bacd218b634848a27f65197b7db41b519eb92f223301331bc496e42c4"
+    },
+    {
+      "path": "docs/tasks/REGIONAL_GO_BUDGET_REUSE_2026_11_11.md",
+      "bytes": 3253,
+      "sha256": "d43131c9a9d4f152cce4e884751c8510f840b042ed41f3103eb5988fae87a717"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/diagnostic.json",
+      "bytes": 1622,
+      "sha256": "b1956205817e2d5fb17aba644c1792175b2bba8e37896d8a22210fec9599f099"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/green.log",
+      "bytes": 3606,
+      "sha256": "cb38d64ed3144cac68da3e4a5f7bc44382695915fc7c5c972a0de92aeeb7bcb9"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/green_diagnostic.json",
+      "bytes": 1622,
+      "sha256": "b1956205817e2d5fb17aba644c1792175b2bba8e37896d8a22210fec9599f099"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/playtest_20261105_empty_token_commit_verifier.log",
+      "bytes": 1337,
+      "sha256": "24c8a2a1e02be34836186dfab8363686942d221d51b3c4bbda7fbcce86dd3161"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/README.md",
+      "bytes": 5537,
+      "sha256": "a78570c51ba009e24caa58440ae9272e0473b1ecefc2791228ad1b8778801a86"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/red.log",
+      "bytes": 3606,
+      "sha256": "892692bc8623f77a0e01fea7c109aa109570b3c8085a01fb2e284641443bbd1f"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/red_diagnostic.json",
+      "bytes": 1622,
+      "sha256": "454fff5926b014d1ea36cd2d10048d60f2c0964c8908e9c56b02a7af9941ac55"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/regional_navigation_runtime_test.log",
+      "bytes": 235,
+      "sha256": "c1d591e3de1c9aca310d7584335b16e8eb4eb1d2640342415232ff99eab2cc5d"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/regional_navigation_slices_test.log",
+      "bytes": 227,
+      "sha256": "7950aea84ceb3e305881bb6760479f8240cfa4d93afb25c0a8ccb679505a8c71"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/regressions.json",
+      "bytes": 1119,
+      "sha256": "fd291671e753ff825849582ddb250d3290d52e5ac2719b474a86cad357c9ce4d"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/source_snapshots.json",
+      "bytes": 313,
+      "sha256": "77952546bc6a340654e722d8a6d1b48f5f0019aa5cd024d28bfdfd7403a39329"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/source_snapshots.zip",
+      "bytes": 64624,
+      "sha256": "99eb4d3eb5109bdfd8c36fe6e11254cb161b37d93632abb8201b411d6225a47b"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/task_217_navigation_pathfinding_los_performance_pass.log",
+      "bytes": 3514,
+      "sha256": "ed434c55befe7dfba35d9a15b394f6b66dec18920d6f3befc7f91bab8eeee77c"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/task_476_fireteam_corridor_lane_cover_navigation.log",
+      "bytes": 2233,
+      "sha256": "938c3686e9d6054f928c7f9664ebd554540c948a5301735a8a5c2250b5f2c8ca"
+    },
+    {
+      "path": "docs/qa/regional_go_budget_reuse_20261111/task_501_integrated_movement_command_lifecycle_hardening.log",
+      "bytes": 941,
+      "sha256": "3d045e3fa87cf8094ce7836bb258eae9595068897794c018ba36253be4ec5679"
+    }
+  ]
+}

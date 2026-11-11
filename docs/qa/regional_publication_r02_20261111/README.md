@@ -1,7 +1,7 @@
 # Regionale Chunk-/FoW-Publikation — R02
 
 11.11.2026. Isolierter bestehender Taskbranch task/native-glut-maps-20261110,
-Basis85fd00afc. Noch keine Commits/Pushes oder native Freigabe durch Teilagent.
+Basis85fd00afc. R02 wurde mit 7ef57c931 auf diesem Taskbranch gesichert; keine Main-/EXE-Freigabe.
 Task: REGIONAL_NAV_PUBLICATION_R02_2026_11_11.md.
 
 ## Befund und enger Fix
@@ -56,33 +56,30 @@ Keine Nutzerstände und keine Live-Blender-Sitzung verwendet.
 Keine neue breite Regression, deren Zusammenhang nicht betroffen wäre.
 Headless-Prüfung ist kein Pixel-, nativer Schatten- oder Frameratebeweis.
 
-## Noch ausstehende Messung / Wiederholung
+## Isolierte CPU-Paarmessung
 
-Eine Paarprobe ist vorbereitet: compare_publication.gd verwendet eine
-unveränderte Before-Kopie aus85fd00afc (nur globalen class_name entfernt,
-damit beide Versionen im selben Testprozess geladen werden), die aktuelle
-After-Quelle und dieselbe echte B. Zwölf AB/BA-Paare wechseln zwischen107 und
-108 bereits residenten Chunks; komplette FoW-Füllung liegt außerhalb des
-Publikationstimers. Vorherquelle ist als terrain_view_before.gd in diesem QA-Ordner erhalten;
-die archivierte Paarprobe lädt diese explizit. Erst nach exklusiver Root-
-Freigabe ausführen; bisher bewusst nicht parallel zu Astra-Rendern gestartet.
+Root führte die eingefrorene Paarprobe nach ausdrücklicher Pause der parallelen
+Blender-/Godot-Arbeiten aus. Zwölf AB/BA-Paare auf derselben echten B wechseln
+zwischen107 und108 warmen Chunks. FoW-Füllung liegt außerhalb des Timers.
+Headless-Dummy, identischer Prozess und unveränderte Kartendatei.
 
-Native B-1×-Nachprüfung und belastbare Gesamtframerate bleiben beim Root,
-nach Ende der Art-/Importarbeit. Die beobachteten Spiel- und Kartenfakten
-werden durch den Fix nicht geändert. Kein Main-/EXE-Schritt.
+| Publish | Median | Maximum | Minimum |
+| --- | ---: | ---: | ---: |
+| Vorher85fd00afc |21,186ms |25,102ms |19,352ms |
+| NachherR02 |3,7465ms |4,489ms |3,170ms |
+
+Rohwerte: paired_cpu.json und paired_cpu.log; Berechnung: paired_summary.json.
+Das ist ein CPU-Nachweis für die warme Publikation, kein GPU- oder Gesamt-FPS-
+Nachweis. Native B-1×-Nachprüfung bleibt bis nach Art-/Importarbeit offen.
 
 ## Eingefrorene Paarquellen
-Root hat beide tatsächlichen Terrain-View-Quellen separat als
-terrain_view_before.gd (85fd00afc) und terrain_view_after.gd (R02) archiviert,
-nur globalen class_name entfernt. Die Paarprobe lädt diese Kopien, damit
-spätere Ressourcen-Cache-Arbeit nicht versehentlich in diese Messung gerät.
-Die produktive Source-SHA zum R02-Stand ist
-e3d1d9f701f54d5b27edb4acea8b75c62bb2f99417fedc2d91ad902e998a1a61.
-Messung weiterhin ausstehend; keine CPU-/GPU-Freigabe vorweggenommen.
 
-Die beiden großen GDScript-Snapshots sind platzsparend in paired_sources.zip
-mit Hashliste paired_sources.json erhalten. run_pair.py entpackt ausschließlich
-die zwei bekannten Einträge nach output/native_glut_maps/regional_publication_r02,
-prüft ihre Hashes und startet die Probe mit privater APPDATA. Vor Ausführung
-exklusives CPU/GPU-Fenster koordinieren. Globale Art-/Quellenänderungen nach
-R02 werden damit nicht unbemerkt in diese isolierte Paarprobe aufgenommen.
+paired_sources.zip enthält die tatsächlichen Before-/After-GDScript-Quellen,
+nur globalen class_name entfernt. paired_sources.json bindet deren Hashes.
+run_pair.py entpackt ausschließlich die zwei bekannten Einträge unter output,
+prüft die Hashes und nutzt private APPDATA. So kann spätere Ressourcen-Cache-
+Arbeit nicht unbemerkt in die R02-Messung geraten.
+
+Die produktive Terrain-View-SHA zum historischen R02-Stand7ef57c931 ist
+`e3d1d9f701f54d5b27edb4acea8b75c62bb2f99417fedc2d91ad902e998a1a61`.
+Sie beschreibt ausdrücklich diesen Stand, nicht spätere Änderungen derselben Datei.

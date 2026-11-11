@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_217 Navigation Pathfinding LOS Performance Pass ===
+PASS: Benchmark includes legacy and TASK_217 scenarios
+PASS: Summary marks 64x64 metrics as present
+PASS: Summary marks hill metrics as present
+PASS: Summary marks query Median/P95/P99 as present
+PASS: Summary marks LOS/Cover diagnostics as present
+PASS: Summary marks cache diagnostics as present
+PASS: Summary marks query-flood staggering as present
+PASS: open_32x32_queries scenario exists
+PASS: open_32x32_queries HPA resolves every query
+PASS: open_32x32_queries terrain A* resolves every query
+PASS: open_32x32_queries HPA exposes query percentiles
+PASS: open_32x32_queries terrain A* exposes query percentiles
+PASS: open_32x32_queries HPA exposes cache diagnostics
+PASS: open_32x32_queries HPA p99 stays under broad local budget
+PASS: hill_cover_32x32_queries scenario exists
+PASS: hill_cover_32x32_queries HPA resolves every query
+PASS: hill_cover_32x32_queries terrain A* resolves every query
+PASS: hill_cover_32x32_queries HPA exposes query percentiles
+PASS: hill_cover_32x32_queries terrain A* exposes query percentiles
+PASS: hill_cover_32x32_queries HPA exposes cache diagnostics
+PASS: hill_cover_32x32_queries HPA p99 stays under broad local budget
+PASS: open_64x64_queries scenario exists
+PASS: open_64x64_queries HPA resolves every query
+PASS: open_64x64_queries terrain A* resolves every query
+PASS: open_64x64_queries HPA exposes query percentiles
+PASS: open_64x64_queries terrain A* exposes query percentiles
+PASS: open_64x64_queries HPA exposes cache diagnostics
+PASS: open_64x64_queries HPA p99 stays under broad local budget
+PASS: chokepoint_cover_64x64_queries scenario exists
+PASS: chokepoint_cover_64x64_queries HPA resolves every query
+PASS: chokepoint_cover_64x64_queries terrain A* resolves every query
+PASS: chokepoint_cover_64x64_queries HPA exposes query percentiles
+PASS: chokepoint_cover_64x64_queries terrain A* exposes query percentiles
+PASS: chokepoint_cover_64x64_queries HPA exposes cache diagnostics
+PASS: chokepoint_cover_64x64_queries HPA p99 stays under broad local budget
+PASS: Hill/Cover HPA counts LOS checks
+PASS: Hill/Cover HPA counts cover checks
+PASS: Chokepoint HPA counts LOS checks
+PASS: Chokepoint HPA counts cover checks
+PASS: LOS/Cover probe samples grid positions
+PASS: LOS/Cover probe counts LOS checks
+PASS: LOS/Cover probe counts cover checks
+PASS: LOS/Cover probe reports average timing
+PASS: Query-flood probe submits multiple movement commands
+PASS: Query-flood probe respects per-tick path budget
+PASS: Query-flood probe delays excess path queries
+PASS: Query-flood probe keeps pending path queries visible
+PASS: Navigation pathfinding LOS profile report exists
+PASS: Report documents TASK_217 32x32/64x64 matrix
+PASS: Report documents query percentile fields
+PASS: Report documents LOS/Cover/Cache/Avoidance diagnostics
+TASK_217 benchmark summary: {"has_avoidance_metrics":true,"has_cache_diagnostics":true,"has_cover_metrics":true,"has_delay_metrics":true,"has_hill_metrics":true,"has_hpa_build_stats":true,"has_large_map_metrics":true,"has_los_cover_diagnostics":true,"has_query_flood_staggering":true,"has_query_metrics":true,"has_query_percentiles":true,"scenario_count":11,"variant_count":27}
+=== RESULTS: 51 passed, 0 failed ===
+ALL TESTS PASSED

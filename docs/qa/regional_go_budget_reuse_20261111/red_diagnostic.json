@@ -1,0 +1,83 @@
+[
+  {
+    "admitted": 1,
+    "first_tick_cpu_usec": 1664,
+    "jobs": 1,
+    "max_tick_expansions": 24,
+    "per_job_expansions": 96
+  },
+  {
+    "admitted": 2,
+    "first_tick_cpu_usec": 4166,
+    "jobs": 2,
+    "max_tick_expansions": 48,
+    "per_job_expansions": 48
+  },
+  {
+    "admitted": 3,
+    "first_tick_cpu_usec": 4292,
+    "jobs": 3,
+    "max_tick_expansions": 72,
+    "per_job_expansions": 32
+  },
+  {
+    "admitted": 4,
+    "first_tick_cpu_usec": 5784,
+    "jobs": 4,
+    "max_tick_expansions": 96,
+    "per_job_expansions": 24
+  },
+  {
+    "admitted": 4,
+    "first_tick_cpu_usec": 6624,
+    "jobs": 6,
+    "max_tick_expansions": 96,
+    "per_job_expansions": 24
+  },
+  {
+    "after": {
+      "cpu_max_tick_usec": 2820,
+      "cpu_sum_usec": 127023,
+      "first_move_ticks": {
+        "budget_0": 96
+      },
+      "jobs": 1,
+      "max_tick_expansions": 24,
+      "oracle24": false
+    },
+    "before": {
+      "cpu_max_tick_usec": 4673,
+      "cpu_sum_usec": 139747,
+      "first_move_ticks": {
+        "budget_0": 96
+      },
+      "jobs": 1,
+      "max_tick_expansions": 24,
+      "oracle24": true
+    }
+  },
+  {
+    "after": {
+      "cpu_max_tick_usec": 6478,
+      "cpu_sum_usec": 258893,
+      "first_move_ticks": {
+        "budget_0": 96,
+        "budget_1": 96
+      },
+      "jobs": 2,
+      "max_tick_expansions": 48,
+      "oracle24": false
+    },
+    "before": {
+      "cpu_max_tick_usec": 7006,
+      "cpu_sum_usec": 259017,
+      "first_move_ticks": {
+        "budget_0": 96,
+        "budget_1": 96
+      },
+      "jobs": 2,
+      "max_tick_expansions": 48,
+      "oracle24": true
+    }
+  }
+]

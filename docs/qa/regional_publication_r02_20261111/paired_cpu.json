@@ -1,0 +1,186 @@
+{
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "map_sha256": "d3ab04a32a142a51ea20d180397b7cd9355dfa55452e2fc224fbd63f360624a7",
+  "renderer": "headless_dummy",
+  "rows": [
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 0,
+      "publish_usec": 21112,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 0,
+      "publish_usec": 3751,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 1,
+      "publish_usec": 3329,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 1,
+      "publish_usec": 22937,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 2,
+      "publish_usec": 21260,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 2,
+      "publish_usec": 4423,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 3,
+      "publish_usec": 3170,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 3,
+      "publish_usec": 19972,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 4,
+      "publish_usec": 20491,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 4,
+      "publish_usec": 3742,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 5,
+      "publish_usec": 3847,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 5,
+      "publish_usec": 25102,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 6,
+      "publish_usec": 24081,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 6,
+      "publish_usec": 4489,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 7,
+      "publish_usec": 3225,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 7,
+      "publish_usec": 21868,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 8,
+      "publish_usec": 19352,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 8,
+      "publish_usec": 4370,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 9,
+      "publish_usec": 3633,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 9,
+      "publish_usec": 22707,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 107,
+      "pair": 10,
+      "publish_usec": 20375,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 107,
+      "pair": 10,
+      "publish_usec": 4310,
+      "tiles": 6848
+    },
+    {
+      "arm": "after",
+      "chunks": 108,
+      "pair": 11,
+      "publish_usec": 3424,
+      "tiles": 6912
+    },
+    {
+      "arm": "before",
+      "chunks": 108,
+      "pair": 11,
+      "publish_usec": 19725,
+      "tiles": 6912
+    }
+  ],
+  "workload": "actual publication between107/108 cached realB chunks, latest known terrain;12alternating pairs;overlay fills outside timed call"
+}

@@ -2513,7 +2513,13 @@ func _prepare_regional_navigation_admissions() -> void:
 	for candidate: Dictionary in candidates:
 		if _regional_navigation_admissions.size() >= slots:
 			break
-		_regional_navigation_admissions[candidate.unit_id] = true
+		_regional_navigation_admissions[candidate.unit_id] = REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE
+	# Reuse the existing total budget when fewer than four jobs are admitted.
+	# Selection, priority and least-recent-service rotation stay unchanged.
+	if not _regional_navigation_admissions.is_empty():
+		var share: int = REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK / _regional_navigation_admissions.size()
+		for unit_id: String in _regional_navigation_admissions:
+			_regional_navigation_admissions[unit_id] = share
 
 
 func _delay_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2, reason: String) -> void:
@@ -2966,6 +2972,8 @@ func _build_regional_path_world_points(cmd: Dictionary, unit, terrain_registry, 
 		cmd["_regional_navigation_search"] = search
 	var limit := REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE
 	if is_processing_tick:
+		var unit_id := _extract_unit_id_for_path_recompute(unit)
+		limit = int(_regional_navigation_admissions.get(unit_id, limit))
 		limit = mini(limit, REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK - _regional_navigation_expansions_this_tick)
 	var started := Time.get_ticks_usec()
 	_regional_navigation_expansions_this_tick += search.advance(_terrain_pathfinder, terrain_registry, limit)

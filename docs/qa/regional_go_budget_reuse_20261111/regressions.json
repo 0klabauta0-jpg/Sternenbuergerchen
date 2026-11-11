@@ -1,0 +1,50 @@
+[
+  {
+    "script": "regional_navigation_runtime_test",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "Regional navigation runtime: 15 checks, 0 failures"
+    ]
+  },
+  {
+    "script": "regional_navigation_slices_test",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "Regional navigation: 14 checks, 0 failures"
+    ]
+  },
+  {
+    "script": "task_217_navigation_pathfinding_los_performance_pass",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "=== RESULTS: 51 passed, 0 failed ==="
+    ]
+  },
+  {
+    "script": "task_501_integrated_movement_command_lifecycle_hardening",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "=== RESULTS: 10 passed, 0 failed ==="
+    ]
+  },
+  {
+    "script": "playtest_20261105_empty_token_commit_verifier",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "PLAYTEST_EMPTY_TOKEN_COMMIT_DONE 15 passed, 0 failed"
+    ]
+  },
+  {
+    "script": "task_476_fireteam_corridor_lane_cover_navigation",
+    "exit": 0,
+    "errors": [],
+    "summary": [
+      "=== RESULTS: 36 passed, 0 failed ==="
+    ]
+  }
+]

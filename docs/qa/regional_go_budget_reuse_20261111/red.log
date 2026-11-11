@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: 1 jobs use 96 expansions for each of 1 admitted searches
+FAIL: 1 jobs respect and consume the shared96 cap
+PASS: 1 jobs create no search objects outside four admissions
+PASS: 1 jobs do not move before complete legal routes
+PASS: 1 jobs retain global cap across follow-up ticks
+FAIL: 2 jobs use 48 expansions for each of 2 admitted searches
+FAIL: 2 jobs respect and consume the shared96 cap
+PASS: 2 jobs create no search objects outside four admissions
+PASS: 2 jobs do not move before complete legal routes
+PASS: 2 jobs retain global cap across follow-up ticks
+FAIL: 3 jobs use 32 expansions for each of 3 admitted searches
+FAIL: 3 jobs respect and consume the shared96 cap
+PASS: 3 jobs create no search objects outside four admissions
+PASS: 3 jobs do not move before complete legal routes
+PASS: 3 jobs retain global cap across follow-up ticks
+PASS: 4 jobs use 24 expansions for each of 4 admitted searches
+PASS: 4 jobs respect and consume the shared96 cap
+PASS: 4 jobs create no search objects outside four admissions
+PASS: 4 jobs do not move before complete legal routes
+PASS: 4 jobs retain global cap across follow-up ticks
+PASS: 6 jobs use 24 expansions for each of 4 admitted searches
+PASS: 6 jobs respect and consume the shared96 cap
+PASS: 6 jobs create no search objects outside four admissions
+PASS: 6 jobs do not move before complete legal routes
+PASS: 6 jobs retain global cap across follow-up ticks
+PASS: Six long jobs retain fair rotating progress
+PASS: Explicit query cap0 remains authoritative without extra search setup
+FAIL: Explicit query cap2 remains authoritative without extra search setup
+PASS: 1 jobs yield identical full routes to the fixed24-slice oracle
+PASS: 1 jobs actually begin physical movement in both schedules
+FAIL: 1 jobs begin sooner in ticks by using the existing unused budget
+PASS: 1 jobs route comparison never exceeds96 expansions
+PASS: 2 jobs yield identical full routes to the fixed24-slice oracle
+PASS: 2 jobs actually begin physical movement in both schedules
+FAIL: 2 jobs begin sooner in ticks by using the existing unused budget
+PASS: 2 jobs route comparison never exceeds96 expansions
+PASS: Non-physics caller retains its existing24-expansion slice
+REGIONAL_GO_BUDGET_DIAGNOSTIC [{"admitted":1,"first_tick_cpu_usec":1664,"jobs":1,"max_tick_expansions":24,"per_job_expansions":96},{"admitted":2,"first_tick_cpu_usec":4166,"jobs":2,"max_tick_expansions":48,"per_job_expansions":48},{"admitted":3,"first_tick_cpu_usec":4292,"jobs":3,"max_tick_expansions":72,"per_job_expansions":32},{"admitted":4,"first_tick_cpu_usec":5784,"jobs":4,"max_tick_expansions":96,"per_job_expansions":24},{"admitted":4,"first_tick_cpu_usec":6624,"jobs":6,"max_tick_expansions":96,"per_job_expansions":24},{"after":{"cpu_max_tick_usec":2820,"cpu_sum_usec":127023,"first_move_ticks":{"budget_0":96},"jobs":1,"max_tick_expansions":24,"oracle24":false},"before":{"cpu_max_tick_usec":4673,"cpu_sum_usec":139747,"first_move_ticks":{"budget_0":96},"jobs":1,"max_tick_expansions":24,"oracle24":true}},{"after":{"cpu_max_tick_usec":6478,"cpu_sum_usec":258893,"first_move_ticks":{"budget_0":96,"budget_1":96},"jobs":2,"max_tick_expansions":48,"oracle24":false},"before":{"cpu_max_tick_usec":7006,"cpu_sum_usec":259017,"first_move_ticks":{"budget_0":96,"budget_1":96},"jobs":2,"max_tick_expansions":48,"oracle24":true}}]
+REGIONAL_GO_BUDGET_REUSE 37 checks, 9 failures
