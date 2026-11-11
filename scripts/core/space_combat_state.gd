@@ -8,6 +8,9 @@ var _metadata: Dictionary = {}
 var _indexed_revisions: Dictionary = {}
 var _flight_controls: Dictionary = {}
 var _flight_status: Dictionary = {}
+var _navigation_claims: Dictionary = {}
+var _claim_cells: Dictionary = {}
+var _claim_revisions: Dictionary = {}
 
 func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture: bool = false) -> Dictionary:
 	# Occupancy and sweep callers still use strategic bounds. Fail closed until
@@ -49,10 +52,57 @@ func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:
 	return _registry.query_cells(cells, area_id)
 
 func get_area_revision(area_id: String) -> int:
-	return _registry.get_area_revision(area_id)
+	return _registry.get_area_revision(area_id) + int(_claim_revisions.get(area_id, 0))
 
 func actor_cells_match(craft_id: String, area_id: String, cells: Array[Vector2i]) -> bool:
 	return _registry.actor_cells_match(craft_id, area_id, cells)
+
+func record_navigation_claim(craft_id: String, area_id: String, cells: Array[Vector2i]) -> Dictionary:
+	# Owner-internal cell claims; scheduling/conflict resolution belongs to Root.
+	var flight: RefCounted = _registry.get_actor(craft_id)
+	if flight == null or String(flight.get_snapshot().get("space_area_id", "")) != area_id or cells.is_empty() or cells.size() > 512:
+		return {"ok":false, "reason":"invalid_claim"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	var unique := {}
+	for cell in cells:
+		if not AREA.contains(cell, snapshot): return {"ok":false, "reason":"invalid_claim"}
+		unique[cell] = true
+	var old: Dictionary = _navigation_claims.get(craft_id, {})
+	if not old.is_empty() and old.area_id == area_id and old.cells == unique:
+		return {"ok":true, "changed":false, "area_revision":get_area_revision(area_id)}
+	_remove_navigation_claim(craft_id)
+	_navigation_claims[craft_id] = {"area_id":area_id, "cells":unique}
+	if not _claim_cells.has(area_id): _claim_cells[area_id] = {}
+	for cell in unique:
+		if not _claim_cells[area_id].has(cell): _claim_cells[area_id][cell] = {}
+		_claim_cells[area_id][cell][craft_id] = true
+	_claim_revisions[area_id] = int(_claim_revisions.get(area_id, 0)) + 1
+	return {"ok":true, "changed":true, "area_revision":get_area_revision(area_id)}
+
+func release_navigation_claim(craft_id: String) -> Dictionary:
+	return {"ok":true, "changed":_remove_navigation_claim(craft_id)}
+
+func query_navigation_claims(cells: Array[Vector2i], area_id: String) -> Array[String]:
+	var found := {}
+	var indexed: Dictionary = _claim_cells.get(area_id, {})
+	for cell in cells:
+		for craft_id in indexed.get(cell, {}): found[craft_id] = true
+	var result: Array[String] = []
+	result.assign(found.keys())
+	result.sort()
+	return result
+
+func _remove_navigation_claim(craft_id: String) -> bool:
+	if not _navigation_claims.has(craft_id): return false
+	var old: Dictionary = _navigation_claims[craft_id]
+	var area_id: String = old.area_id
+	for cell in old.cells:
+		_claim_cells[area_id][cell].erase(craft_id)
+		if _claim_cells[area_id][cell].is_empty(): _claim_cells[area_id].erase(cell)
+	if _claim_cells[area_id].is_empty(): _claim_cells.erase(area_id)
+	_navigation_claims.erase(craft_id)
+	_claim_revisions[area_id] = int(_claim_revisions.get(area_id, 0)) + 1
+	return true
 
 func update_actor_cell(craft_id: String, cell: Vector2i) -> bool:
 	var flight: RefCounted = _registry.get_actor(craft_id)

@@ -49,6 +49,18 @@ func _initialize() -> void:
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "occupied": failed += 1
 	registry.unregister_actor("intruder")
 	area_rev = state.get_area_revision("orbit_approach:moon")
+	var claimant = FLIGHT.new()
+	var claimant_cell: Vector2i = GRID.from_offset(gate_offset + Vector2i(20,4))
+	claimant.configure("space_fixture_claimant", {"position_plane":GRID.HEX.axial_to_plane(Vector2(claimant_cell)), "coordinate_frame":"local", "space_area_id":"orbit_approach:moon"})
+	state.admit_actor({"craft_id":"space_fixture_claimant", "faction_id":"enemy", "control_domain":"enemy", "start_hex":claimant_cell, "footprint_hexes":[Vector2i.ZERO]}, claimant, true)
+	area_rev = state.get_area_revision("orbit_approach:moon")
+	var claim: Array[Vector2i] = [gate]
+	state.record_navigation_claim("space_fixture_claimant", "orbit_approach:moon", claim)
+	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "stale_area_revision": failed += 1
+	area_rev = state.get_area_revision("orbit_approach:moon")
+	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "navigation_claimed": failed += 1
+	state.release_navigation_claim("space_fixture_claimant")
+	area_rev = state.get_area_revision("orbit_approach:moon")
 	var away: Vector2i = GRID.from_offset(gate_offset + Vector2i(0,3))
 	flight.commit_motion({"expected_revision":flight_rev, "position_plane":GRID.HEX.axial_to_plane(Vector2(away))}, 2)
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, area_rev, wing_rev, auth).get("reason") != "stale_spatial_index": failed += 1
@@ -59,5 +71,5 @@ func _initialize() -> void:
 	state.sync_moved_actors()
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, state.get_area_revision("orbit_approach:moon"), wing_rev, auth).get("reason") != "body_blocked": failed += 1
 	sim.free()
-	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 14 - failed, " failed=", failed)
+	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 16 - failed, " failed=", failed)
 	quit(1 if failed else 0)

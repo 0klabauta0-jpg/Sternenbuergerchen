@@ -29,6 +29,8 @@ func _initialize() -> void:
 	var target := {"position_plane":GRID.HEX.axial_to_plane(Vector2(GRID.from_offset(Vector2i(200,230)))), "heading_rad":0.0}
 	var failed := 0
 	if not sim.admit_space_actor(actor, auth).get("ok", false): failed += 1
+	var old_claim: Array[Vector2i] = [Vector2i(11,10)]
+	sim.get("_space_combat_state").record_navigation_claim(actor.craft_id, "", old_claim)
 	var before: Dictionary = fleet.flight.get_snapshot()
 	if sim.prepare_space_area_transition(actor.craft_id, "orbit_approach:moon", target, 0, 3, {}).get("reason") != "runtime_authority_required": failed += 1
 	if sim.prepare_space_area_transition(actor.craft_id, "orbit_approach:moon", target, 0, 2, auth).get("reason") != "stale_travel_revision": failed += 1
@@ -72,6 +74,7 @@ func _initialize() -> void:
 	var committed: Dictionary = sim.commit_space_area_transition(String(prepared.get("token", "")), auth)
 	if not committed.get("ok", false): failed += 1
 	if fleet.flight.get_snapshot().space_area_id != "orbit_approach:moon" or sim.get_space_wing_snapshot().wings.size() != 1: failed += 1
+	if not sim.get("_space_combat_state").query_navigation_claims(old_claim, "").is_empty(): failed += 1
 	var destination: Array[Vector2i] = [GRID.from_offset(Vector2i(200,230))]
 	if sim.get("_space_combat_state").query_cells(destination, "orbit_approach:moon") != [actor.craft_id]: failed += 1
 	var local_snap: Dictionary = fleet.flight.get_snapshot()
@@ -87,5 +90,5 @@ func _initialize() -> void:
 	if not sim.prepare_space_area_transition(actor.craft_id, "orbit_approach:moon", target, 0, 3, auth).get("replayed", false): failed += 1
 	if sim.release_space_area_transition(prepared.token, auth).get("reason") != "already_committed": failed += 1
 	sim.free()
-	print("SPACE_COMBAT_AREA_ROOT_PREPARE passed=", 22 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AREA_ROOT_PREPARE passed=", 23 - failed, " failed=", failed)
 	quit(1 if failed else 0)

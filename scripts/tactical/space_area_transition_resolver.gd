@@ -4,7 +4,7 @@ const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 
 static func preview(flight: RefCounted, expected_revision: int, body_id: String, target: Dictionary, footprint: Array, occupancy: RefCounted, tick: int) -> Dictionary:
-	if flight == null or occupancy == null or not flight.has_method("validate_area_transition") or not occupancy.has_method("preview_footprint") or not occupancy.has_method("query_cells"):
+	if flight == null or occupancy == null or not flight.has_method("validate_area_transition") or not occupancy.has_method("preview_footprint") or not occupancy.has_method("query_cells") or not occupancy.has_method("query_navigation_claims"):
 		return {"ok":false, "reason":"invalid_context"}
 	for key in target:
 		if key not in ["position_plane", "heading_rad", "velocity_plane", "angular_velocity"]: return {"ok":false, "reason":"invalid_target"}
@@ -30,4 +30,6 @@ static func preview(flight: RefCounted, expected_revision: int, body_id: String,
 		if body_cells.has(GRID.to_offset(cell)): return {"ok":false, "reason":"blocked"}
 	for id in occupancy.query_cells(cells, layout.body_map_id):
 		if id != before.craft_id: return {"ok":false, "reason":"occupied"}
+	for id in occupancy.query_navigation_claims(cells, layout.body_map_id):
+		if id != before.craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	return {"ok":true, "space_area_id":layout.body_map_id, "proposal":proposal, "cells":cells}

@@ -191,14 +191,16 @@ Verifier und diese Statusdokumentation.
   aktuellen indexierten vollständigen Footprint, fremde Belegung, Körpermaske,
   echten Gatekontakt und Location→Orbit→Body-Bindung. Ein großer Rumpf darf
   außerhalb der einfeldtiefen Gatezeile bleiben, solange ein Feld Kontakt hat
-  und der Rest frei ist. Prüfung14/14 einschließlich fremder Belegung,
+  und der Rest frei ist. Prüfung16/16 einschließlich fremder Belegung/Claims,
   veraltetem Index und Körperüberdeckung. Keine Freigabe oder Produktaufrufer: Zielklassifikation,
   Pilot/Crew/Job, Supply/Campaign/Departure, spätere Revalidierung und
-  gemeinsame stille Veröffentlichung fehlen. Der Bereichsindex versioniert
-  derzeit Belegung, nicht zukünftige Raum-Reservationsclaims. **Produktblocker:**
-  Relevante Claimsänderungen müssen vor echter Anbindung in dieselbe
-  versionierte Konsistenzgrenze einbezogen werden; die heutige Indexrevision
-  allein ist kein Nachweis für zukünftige Flugkorridore.
+  gemeinsame stille Veröffentlichung fehlen. Der Bereichsowner führt nun
+  konservative zellbasierte Navigationsclaims; Belegungs- und Claimsänderungen
+  erhöhen gemeinsam die abgefragte Bereichsrevision. Claimowner6/6,
+  Bereichsbatch7/7 und Eintrittssuche7/7. **Produktblocker:** Die echte
+  Flugsteuerung veröffentlicht/erneuert/löst diese Claims noch nicht; keine
+  zeitlichen Reservierungsfenster und keine volle Lifecycle-/Leistungsabnahme.
+  Ein leerer Claimindex beweist daher noch keine freien Zukunftswege.
 - Parallelcommit 26303641d (Boden-Türguard und Root) als 2a872b762
   integriert; Türguard, echte und Fake-Orbitfixture sowie Raumtakt gezielt
   grün. Keine vollständige native oder Boden-/Mehrspielerfreigabe.

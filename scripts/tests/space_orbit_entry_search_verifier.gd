@@ -2,6 +2,7 @@ extends SceneTree
 const SEARCH = preload("res://scripts/tactical/space_orbit_entry_search.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const STATE = preload("res://scripts/core/space_combat_state.gd")
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 
 func _initialize() -> void:
 	var a = FLIGHT.new()
@@ -41,5 +42,23 @@ func _initialize() -> void:
 		changed = changing.advance(1)
 		if changed.get("status") != "pending": break
 	if changed.get("reason") != "occupancy_changed": failed += 1
-	print("SPACE_ORBIT_ENTRY_SEARCH passed=", 6 - failed, " failed=", failed)
+	registry.unregister_actor("intruder")
+	var claimed = SEARCH.new()
+	claimed.begin("moon", requests, state)
+	claimed.advance(1)
+	var selected: Dictionary = claimed.get("_allocations").a
+	var claimant = FLIGHT.new()
+	claimant.configure("space_fixture_claimant", {"position_plane":Vector2(200,100), "coordinate_frame":"local", "space_area_id":"orbit_approach:moon"})
+	var claimant_cell := Vector2i(150,110)
+	claimant.commit_motion({"expected_revision":0, "position_plane":GRID.HEX.axial_to_plane(Vector2(claimant_cell))}, 1)
+	state.admit_actor({"craft_id":"space_fixture_claimant", "faction_id":"enemy", "control_domain":"enemy", "start_hex":claimant_cell, "footprint_hexes":[Vector2i.ZERO]}, claimant, true)
+	var claim_cells: Array[Vector2i] = []
+	claim_cells.assign(selected.cells)
+	state.record_navigation_claim("space_fixture_claimant", "orbit_approach:moon", claim_cells)
+	var claim_result := {}
+	for i in range(20):
+		claim_result = claimed.advance(1)
+		if claim_result.get("status") != "pending": break
+	if claim_result.get("reason") != "occupancy_changed": failed += 1
+	print("SPACE_ORBIT_ENTRY_SEARCH passed=", 7 - failed, " failed=", failed)
 	quit(1 if failed else 0)

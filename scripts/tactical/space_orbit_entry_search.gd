@@ -16,7 +16,7 @@ var _body := {}
 var _ended := false
 
 func begin(body_id: String, requests: Array[Dictionary], occupancy: RefCounted) -> Dictionary:
-	if not _layout.is_empty() or occupancy == null or not occupancy.has_method("preview_footprint") or not occupancy.has_method("query_cells") or requests.is_empty() or requests.size() > 64:
+	if not _layout.is_empty() or occupancy == null or not occupancy.has_method("preview_footprint") or not occupancy.has_method("query_cells") or not occupancy.has_method("query_navigation_claims") or requests.is_empty() or requests.size() > 64:
 		return {"ok":false, "reason":"invalid_request"}
 	var layout: Dictionary = LAYOUT.build(body_id)
 	if not layout.get("ok", false): return {"ok":false, "reason":"invalid_body"}
@@ -69,6 +69,10 @@ func advance(budget: int) -> Dictionary:
 				invalid = true
 				break
 		if invalid or not _occupancy.query_cells(cells, _layout.body_map_id).is_empty(): continue
+		var claimed := false
+		for claimant in _occupancy.query_navigation_claims(cells, _layout.body_map_id):
+			if claimant != id: claimed = true; break
+		if claimed: continue
 		for cell in cells: _reserved[cell] = true
 		_allocations[id] = {"position_plane":snapshot.position_plane, "cells":cells}
 		_index += 1
@@ -76,10 +80,15 @@ func advance(budget: int) -> Dictionary:
 			_x = _layout.entry_band.position.x
 			_y = _layout.entry_band.end.y - 1
 			continue
-		for allocated in _allocations.values():
+		for allocated_id in _allocations:
+			var allocated: Dictionary = _allocations[allocated_id]
 			if not _occupancy.query_cells(allocated.cells, _layout.body_map_id).is_empty():
 				_ended = true
 				return {"ok":false, "reason":"occupancy_changed"}
+			for claimant in _occupancy.query_navigation_claims(allocated.cells, _layout.body_map_id):
+				if claimant != allocated_id:
+					_ended = true
+					return {"ok":false, "reason":"occupancy_changed"}
 		_ended = true
 		return {"ok":true, "status":"complete", "space_area_id":_layout.body_map_id, "allocations":_allocations.duplicate(true)}
 	return {"ok":true, "status":"pending"}
