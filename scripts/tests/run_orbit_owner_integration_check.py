@@ -8,7 +8,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "root":"scripts/tests/space_combat_area_real_travel_verifier.gd",
           "birth":"scripts/tests/polisa_birth_flight_identity_check.gd",
           "surface":"scripts/tests/space_surface_approach_preview_verifier.gd",
-          "authority":"scripts/tests/space_combat_authority_tick_verifier.gd"}
+          "authority":"scripts/tests/space_combat_authority_tick_verifier.gd",
+          "reactivation":"scripts/tests/space_surface_real_reactivation_verifier.gd",
+          "move":"scripts/tests/space_singleplayer_move_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)

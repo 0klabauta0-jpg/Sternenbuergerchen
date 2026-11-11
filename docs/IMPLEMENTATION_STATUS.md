@@ -12459,3 +12459,14 @@ wiederholte breite Hexmatrix. Nachweis actual_move unter tabletop_restplan_
 integration_20261111. Produktionskarten bleiben unaktiviert;3DView-/Fireteam-
 ankunft, Tuerguard/MovingShot/Backoff und AP6–8 laufen im Tabletop-Chat weiter.
 Keine neue native Gefechts-/FPS-/Save-/Netzfreigabe, kein Main/EXE.
+# 2026-11-11: begrenzte Orbitbewegung integriert
+
+Quellpakete bis 00098ed5d sind im isolierten Taskstand a87246495 zusammengefuehrt.
+Autoritative Einzelspieler-Raumbewegung, indizierte Eigenschiffprojektion und
+inaktive/reale Flight-Reaktivierung sind vorhanden. Frische private Integrations-
+pruefungen: Raumbewegung bestanden, Reaktivierung 15/0; Logs sauber, Quell- und
+Nutzerprofilschutz bestaetigt. Nachweis unter
+docs/qa/orbit_owner_integration_20261111/parent_movement.
+Produktive Reisegruppe wird getrennt integriert; AP6 bis AP8 sowie native
+Gesamtabnahme offen. Kein Live-V3-Katalogwechsel, keine Main-/EXE-Integration.
+
