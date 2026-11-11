@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### Weltraumkampf AP00 — Commandgrenze — 11.11.2026
+
+Erster isolierter Baustein für Rotten-/Auftragscommands: Eingabe-, Rechte-,
+Revisions-, Ziel- und Replay-Vorprüfung ohne Gameplaymutation.
+Temporäres Minimalprojekt20/20 einschließlich privater user://-Schreibprobe;
+kein Produktanschluss oder Kampfsystem. AP01–AP20 offen. Separater Branch
+task/space-combat-implementation-20261111 auf Planstand und Groundcommit;
+paralleler nativer Adapterstand b3f9ab26d vor AP01 gezielt abzugleichen.
+Task: [SPACE_COMBAT_EXECUTION_2026_11_11.md](tasks/SPACE_COMBAT_EXECUTION_2026_11_11.md).
+
 ### Weltraumkampf-Konzept und Arbeitspakete — 11.11.2026
 
 Vom Nutzer bestätigtes Konzept dokumentiert: Rotten1–6, gemeinsame Aufträge,
