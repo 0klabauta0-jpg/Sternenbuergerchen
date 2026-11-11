@@ -975,6 +975,7 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 
 	for tile_data in terrain_map_data.call("get_tiles"):
 		terrain_registry.call("register_tile", tile_data)
+	terrain_registry.call("prepare_spatial_queries")
 
 	var map_root: Node = get_node_or_null("../MapRoot")
 	if map_root != null and _terrain_renderer != null and not use_2_5d_primary_view:

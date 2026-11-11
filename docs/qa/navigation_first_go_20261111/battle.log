@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+CAMPAIGN_TEST_PROFILE C:/dev/SternenBuergerchen-worktrees/native-glut-maps-20261110/output/native_glut_maps/profiles/battle-regional-nav/Godot/app_userdata/Sternenbuergerchen/ scale=4.0
+PASS: Continue resumes a completed first sortie
+PASS: Native renderer is active
+PASS: Actual ship refuels at home
+PASS: Regular accept_job
+PASS: Regular select_destination
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: outpost_recovery launches actual boarded craft
+PASS: outpost_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: outpost_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: outpost_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: outpost_recovery real quantum reaches its target orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: outpost_recovery explicit approach accepts from its location orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: outpost_recovery actual mission instance exists
+REGIONAL_APPROACH_LOAD_MS outpost_recovery 7841
+PASS: outpost_recovery actual outbound transit reaches waiting craft
+PASS: outpost_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: outpost_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario outpost_recovery
+PASS: Regular GO starts live approach
+REGIONAL_GO_DISPATCH 39.803 { "enabled": true, "receipt_limit": 8, "invocation_count": 1, "receipts": [{ "invocation_id": 1, "command": "go", "started_usec": 69583062, "process_frame": 1761, "selected_fireteam_count": 1, "outcome": "accepted", "complete": true, "scopes_usec": { "guards_and_handoffs_usec": 60, "execution_loop_usec": 8584, "coordination_usec": 53, "decision_summary_usec": 154, "feedback_bubbles_usec": 2558, "order_visuals_usec": 5941, "command_feedback_usec": 21157, "planning_publication_and_callbacks_usec": 1214 }, "nested_scopes_usec": { "activation_resolve_profile_usec": 1553, "activation_profile_and_plan_commit_usec": 66, "movement_start_and_arguments_usec": 1534, "movement_recent_trace_and_flow_mirror_usec": 5320, "activation_issue_waypoint_usec": 6921, "feedback_button_state_usec": 6379, "feedback_light_ui_usec": 13078, "feedback_native_layout_usec": 1679 }, "nested_scope_counts": { "activation_resolve_profile_usec": 1, "activation_profile_and_plan_commit_usec": 1, "movement_start_and_arguments_usec": 1, "movement_recent_trace_and_flow_mirror_usec": 1, "activation_issue_waypoint_usec": 1, "feedback_button_state_usec": 1, "feedback_light_ui_usec": 1, "feedback_native_layout_usec": 1 }, "phase_index": 1, "issued_fireteam_count": 1, "continued_fireteam_count": 0, "already_active_fireteam_count": 0, "blocked_fireteam_count": 0, "light_ui_scopes_usec": { "primary_block_labels_usec": 83, "shared_station_route_snapshot_usec": 1586, "primary_command_door_usec": 1081, "primary_command_route_usec": 0, "primary_command_decision_usec": 143, "primary_command_target_waypoint_usec": 473, "primary_command_feedback_usec": 1697, "primary_hotkey_usec": 8, "primary_fireteam_status_usec": 2862, "primary_fireteam_tooltips_usec": 1298, "primary_labels_usec": 7534, "panel_fireteam_phase_usec": 1683, "panel_nav_timer_usec": 19, "panel_identity_usec": 1129, "panel_team_chip_usec": 282, "panel_nav_identity_usec": 1430, "panel_dropship_usec": 1093, "panel_event_log_usec": 574, "mission_panels_usec": 4780, "runtime_surfaces_usec": 0, "secondary_labels_usec": 0 }, "light_ui_projection_scopes_usec": {  }, "light_ui_projection_build_calls": { "_build_fireteam_status_text": 1, "_build_mission_combat_hud_density_snapshot": 2, "_build_release_candidate_firefight_decision_line_snapshot": 1, "_build_mission_combat_hud_detail_tooltip_text": 1, "_build_selected_fireteam_live_decision_detail_tooltip": 1, "_build_native_player_readout_context": 1 }, "finished_usec": 69622803, "total_usec": 39741, "finished_process_frame": 1761, "accepted": true }], "inflight_count": 0, "nested_scopes_not_additive": true, "read_only": true }
+REGIONAL_FIRST_GO_MOVEMENT_MS 2294.724
+PASS: Real 1x fire exchange clears B guard
+PASS: First real movement observed at 1x on all 131072 cells
+PASS: Profile output opens
+REGIONAL_BATTLE_PROFILE frames=4050 shots=8 output=res://output/native_glut_maps/B_battle_profile.json
+PASS: Actual transient insertion guard was exercised
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=0
+SINGLEPLAYER_LOOP_RESULTS passed=35 failed=0

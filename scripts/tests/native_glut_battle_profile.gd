@@ -48,9 +48,18 @@ func _remaining_missions() -> void:
 	controller.call("set_selected_fireteams_tactical_stance", "aggressive")
 	controller.call("set_selected_fireteams_fire_rule", "free")
 	controller.call("_create_waypoints_for_selected_fireteams", goal, true)
+	var lead = mission.get_node("UnitRegistry").call("get_unit", _crew_ids[0])
+	var initial_position: Vector2 = lead.global_position
 	var previous := Time.get_ticks_usec()
+	var go_usec := previous
+	controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 	if not _check(bool(controller.call("execute_selected_fireteam_orders")), "Regular GO starts live approach"):
 		return
+	var go_dispatch_ms := (Time.get_ticks_usec() - go_usec) * 0.001
+	print("REGIONAL_GO_DISPATCH ", go_dispatch_ms, " ", controller.call("get_command_commit_timing_debug_snapshot"))
+	controller.call("set_mission_visible_frame_timing_debug_enabled", false)
+	var first_move_ms := -1.0
+	var trace_navigation := OS.get_cmdline_user_args().has("regional-nav-trace")
 	var shot_count := 0
 	var frame := 0
 	var settled_frames := 0
@@ -58,6 +67,16 @@ func _remaining_missions() -> void:
 	var cleared := false
 	while Time.get_ticks_msec() < deadline:
 		await process_frame
+		if first_move_ms < 0.0 and lead.global_position.distance_to(initial_position) > 1.0:
+			first_move_ms = (Time.get_ticks_usec() - go_usec) * 0.001
+			print("REGIONAL_FIRST_GO_MOVEMENT_MS ", first_move_ms)
+		if trace_navigation and frame % 90 == 0:
+			var queued: Array = []
+			for command: Dictionary in sim.command_queue:
+				var search: Variant = command.get("_regional_navigation_search")
+				queued.append([command.get("unit_id"), command.get("command_token"), command.get("target_position"),
+					search.expanded_count if search != null else -1, Array(command.get("path", [])).size()])
+			print("REGIONAL_NAV_TRACE ", frame, " ", lead.global_position, " goal=", goal, " ", queued)
 		if frame % 5 == 0:
 			shot_count = maxi(shot_count, Array(driver.call("get_fire_event_snapshot")).size())
 			cleared = PackedStringArray(driver.call("get_mission_scenario_runtime_gate_snapshot").get("completed_step_ids", [])).has("clear_outpost")
@@ -69,12 +88,15 @@ func _remaining_missions() -> void:
 			if settled_frames >= 60:
 				break
 	_check(cleared and shot_count > 0, "Real 1x fire exchange clears B guard")
+	_check(first_move_ms >= 0.0 and Engine.time_scale == 1.0 and int(registry.call("get_tile_count")) == 512 * 256,
+		"First real movement observed at 1x on all 131072 cells")
 	var path := "res://output/native_glut_maps/B_battle_profile.json"
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if _check(file != null, "Profile output opens"):
 		file.store_string(JSON.stringify({"engine": Engine.get_version_info().string,
 			"renderer": RenderingServer.get_current_rendering_method(), "window": str(root.size),
 			"terrain_viewport": str(viewport.size), "scale": Engine.time_scale, "shots": shot_count,
+			"first_move_ms": first_move_ms, "go_dispatch_ms": go_dispatch_ms,
 			"memory_static_bytes": OS.get_static_memory_usage(), "video_bytes": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED),
 			"rows": _rows}))
 	print("REGIONAL_BATTLE_PROFILE frames=", _rows.size(), " shots=", shot_count, " output=", path)

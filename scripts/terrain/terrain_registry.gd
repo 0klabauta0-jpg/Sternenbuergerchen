@@ -268,9 +268,29 @@ func get_object_height_at_grid(grid_pos: Vector2i) -> int:
 
 
 func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
+	if _tiles.size() >= 512 * 256 and _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and world_pos.is_finite():
+		for radius: float in [256.0, 512.0, 1024.0]:
+			var candidate: Variant = _nearest_walkable_in_tiles(world_pos, _get_cover_radius_candidates(world_pos, radius))
+			if _cover_radius_index_has_non_finite_positions:
+				return candidate
+			if typeof(candidate) == TYPE_VECTOR2I:
+				var distance_squared: float = world_pos.distance_squared_to(_tiles[candidate].world_position)
+				# Any omitted bucket is outside this square, hence at least
+				# radius away. Keep the original tolerance and insertion order.
+				if distance_squared + 0.001 < radius * radius:
+					return candidate
+	return _nearest_walkable_in_tiles(world_pos, _tiles.values())
+
+
+func prepare_spatial_queries() -> void:
+	if _tiles.size() >= 512 * 256 and _cover_radius_index_dirty:
+		_rebuild_cover_radius_index()
+
+
+func _nearest_walkable_in_tiles(world_pos: Vector2, tiles: Array) -> Variant:
 	var nearest_grid: Variant = null
 	var nearest_distance: float = INF
-	for tile_data in _tiles.values():
+	for tile_data in tiles:
 		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
 		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
 		if not _is_nearest_candidate_better(distance_to_tile, grid_position, nearest_distance, nearest_grid):

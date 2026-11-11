@@ -164,6 +164,76 @@ class StablePathFrontier:
 			_indices[Vector2i(_entries[index].grid)] = index
 
 
+class RegionalHexSearch:
+	extends RefCounted
+	# Owned by one queued move. The caller checks the live registry revision
+	# before each slice, so no frontier can span two terrain revisions.
+	var source: Vector2i
+	var goal: Vector2i
+	var revision: int
+	var options: Dictionary
+	var cost_options: Dictionary
+	var registry_id: int
+	var finished: bool = false
+	var path: Array = []
+	var expanded_count: int = 0
+	var started_usec: int = Time.get_ticks_usec()
+	var last_slice_usec: int = 0
+	var work_usec: int = 0
+	var max_slice_usec: int = 0
+	var _frontier := StablePathFrontier.new()
+	var _came_from: Dictionary = {}
+	var _cost_by_grid: Dictionary = {}
+	var _nearest: Vector2i
+	var _nearest_distance: int
+	var _minimum_cost: float
+
+	func _init(start: Vector2i, target: Vector2i, terrain_revision: int, query_options: Dictionary, registry) -> void:
+		source = start
+		goal = target
+		revision = terrain_revision
+		registry_id = registry.get_instance_id()
+		cost_options = query_options.duplicate(true)
+		options = query_options.duplicate(false)
+		options[STEP_COST_CONTEXT_OPTION] = StepCostContext.new(registry)
+		_nearest = start
+		_nearest_distance = HEX_GRID_SCRIPT.distance(start, target)
+		_minimum_cost = MIN_SURFACE_PATH_COST
+		if bool(options.get("cover_aware_enabled", false)):
+			_minimum_cost = maxf(MIN_COVER_AWARE_STEP_COST, _minimum_cost - maxf(float(options.get("cover_weight", 0.0)), 0.0))
+		_cost_by_grid[start] = 0.0
+		_frontier.offer(start, _nearest_distance * _minimum_cost)
+
+	func advance(pathfinder, registry, expansion_limit: int) -> int:
+		var used := 0
+		while used < expansion_limit and not _frontier.is_empty():
+			var current := _frontier.pop_lowest()
+			used += 1
+			var distance: int = HEX_GRID_SCRIPT.distance(current, goal)
+			if distance < _nearest_distance:
+				_nearest_distance = distance
+				_nearest = current
+			if current == goal:
+				break
+			var current_cost: float = _cost_by_grid[current]
+			for direction: Vector2i in HEX_GRID_SCRIPT.DIRECTIONS:
+				var neighbor := current + direction
+				var known_cost: float = _cost_by_grid.get(neighbor, INF)
+				if current_cost + _minimum_cost >= known_cost:
+					continue
+				var next_cost: float = current_cost + pathfinder.get_step_cost(current, neighbor, registry, options)
+				if next_cost >= known_cost:
+					continue
+				_cost_by_grid[neighbor] = next_cost
+				_came_from[neighbor] = current
+				_frontier.offer(neighbor, next_cost + HEX_GRID_SCRIPT.distance(neighbor, goal) * _minimum_cost)
+		expanded_count += used
+		finished = _nearest == goal or _frontier.is_empty()
+		if finished:
+			path = pathfinder._reconstruct_path(_came_from, _nearest)
+		return used
+
+
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
 	return find_path_with_options(from_grid, to_grid, registry, {})
 
@@ -341,7 +411,8 @@ func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array:
 	var path: Array = [current]
 	while came_from.has(current):
 		current = came_from[current]
-		path.push_front(current)
+		path.append(current)
+	path.reverse()
 
 	return path
 

@@ -109,6 +109,9 @@ const LOCAL_AVOIDANCE_MIN_FORWARD_PROGRESS_FACTOR: float = 0.35
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
+const REGIONAL_NAVIGATION_MIN_TILES: int = 512 * 256
+const REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE: int = 24
+const REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK: int = 96
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const BOTTLENECK_RESERVATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
@@ -233,6 +236,9 @@ var _hpa_navigation_cache_hit_count: int = 0
 var _hpa_navigation_last_build_stats: Dictionary = {}
 var _navigation_new_path_queries_this_tick: int = 0
 var _navigation_path_queries_this_tick: int = 0
+var _regional_navigation_expansions_this_tick: int = 0
+var _regional_navigation_admissions: Dictionary = {}
+var _regional_navigation_last_service_tick: Dictionary = {}
 var _navigation_delayed_this_tick: int = 0
 var _navigation_fallback_queries_this_tick: int = 0
 var _navigation_unreachable_queries_this_tick: int = 0
@@ -279,10 +285,29 @@ func enqueue_command(cmd: Dictionary) -> void:
 			var pending_command: Dictionary = Dictionary(command_queue[index])
 			if String(pending_command.get("command_token", "")).strip_edges() != command_token:
 				continue
+			_retain_regional_navigation(pending_command, queued_command)
 			command_queue[index] = queued_command
 			return
 
 	command_queue.append(queued_command)
+
+
+func _retain_regional_navigation(pending: Dictionary, replacement: Dictionary) -> void:
+	if not pending.has("_regional_navigation_search") and not pending.has("_regional_navigation_route"):
+		return
+	if pending.get("unit_id") != replacement.get("unit_id") or _extract_command_type(pending) != _extract_command_type(replacement):
+		return
+	if not Vector2(pending.get("target_position", Vector2.ZERO)).is_equal_approx(Vector2(replacement.get("target_position", Vector2.ZERO))):
+		return
+	var registry = _get_terrain_registry()
+	if _build_navigation_cost_options(pending, registry) != _build_navigation_cost_options(replacement, registry):
+		return
+	for key in ["_regional_navigation_search", "_regional_navigation_route", "path", "navigation_resolved_target_position",
+			"navigation_path_terrain_revision", "local_avoidance_repath_requested", "local_avoidance_deadlock"]:
+		if pending.has(key) and not replacement.has(key):
+			replacement[key] = pending[key]
+		elif pending.has(key) and key == "path" and Array(replacement[key]).is_empty():
+			replacement[key] = pending[key]
 
 
 func enqueue_effect(effect: Dictionary) -> void:
@@ -2313,6 +2338,9 @@ func _extract_or_build_path_world_points(
 		return []
 
 	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry, cmd, unit)
+	if cmd.has("_regional_navigation_search"):
+		_delay_navigation_path_request(cmd, unit, current_position, target_position, "regional_search_pending")
+		return []
 	cmd["path"] = path_world_points.duplicate(true)
 	if not path_world_points.is_empty():
 		cmd["navigation_resolved_target_position"] = _coerce_vector2(path_world_points[-1], target_position)
@@ -2353,6 +2381,11 @@ func _should_recompute_move_path(
 	if existing_path.is_empty():
 		return false
 
+	# An exact regional route already uses this command's fixed costs. The
+	# explicit avoidance request and terrain revision checks above still apply.
+	if _uses_regional_navigation(terrain_registry):
+		return false
+
 	var resolved_target_position: Vector2 = _coerce_vector2(cmd.get("navigation_resolved_target_position", target_position), target_position)
 	var target_grid: Vector2i = terrain_registry.call("world_to_grid", resolved_target_position)
 	var current_final_waypoint: Vector2 = _coerce_vector2(existing_path[-1], target_position)
@@ -2375,6 +2408,8 @@ func _should_recompute_move_path(
 
 
 func _begin_navigation_budget_tick() -> void:
+	_regional_navigation_expansions_this_tick = 0
+	_prepare_regional_navigation_admissions()
 	_navigation_new_path_queries_this_tick = 0
 	_navigation_path_queries_this_tick = 0
 	_navigation_delayed_this_tick = 0
@@ -2395,11 +2430,53 @@ func _try_begin_navigation_path_request(cmd: Dictionary, unit, current_position:
 	if navigation_budget_enabled and is_processing_tick and _navigation_new_path_queries_this_tick >= max_queries:
 		_delay_navigation_path_request(cmd, unit, current_position, target_position, "budget_exhausted")
 		return false
+	if is_processing_tick and _uses_regional_navigation(_get_terrain_registry()):
+		var unit_id := _extract_unit_id_for_path_recompute(unit)
+		if not _regional_navigation_admissions.has(unit_id):
+			_delay_navigation_path_request(cmd, unit, current_position, target_position, "regional_search_turn")
+			return false
+		_regional_navigation_last_service_tick[unit_id] = tick_counter
 
 	_navigation_new_path_queries_this_tick += 1
 	cmd.erase("navigation_pending_reason")
 	cmd.erase("navigation_pending_since_tick")
 	return true
+
+
+func _prepare_regional_navigation_admissions() -> void:
+	_regional_navigation_admissions.clear()
+	var registry = _get_terrain_registry()
+	if not _uses_regional_navigation(registry):
+		_regional_navigation_last_service_tick.clear()
+		return
+	var candidates: Array[Dictionary] = []
+	var next_history: Dictionary = {}
+	var revision := _get_terrain_registry_revision(registry)
+	for index in range(command_queue.size()):
+		var command: Dictionary = command_queue[index]
+		if _extract_command_type(command) not in ["move_to_position", "engage_area"]:
+			continue
+		if not Array(command.get("path", [])).is_empty() and not bool(command.get("local_avoidance_repath_requested", false)) and int(command.get("navigation_path_terrain_revision", -1)) == revision:
+			continue
+		var unit_id := String(command.get("unit_id", ""))
+		var last_tick: int = _regional_navigation_last_service_tick.get(unit_id, -1)
+		next_history[unit_id] = last_tick
+		candidates.append({"unit_id": unit_id, "priority": _extract_priority(command), "last_tick": last_tick, "index": index})
+	_regional_navigation_last_service_tick = next_history
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a.priority != b.priority:
+			return int(a.priority) > int(b.priority)
+		if a.last_tick != b.last_tick:
+			return int(a.last_tick) < int(b.last_tick)
+		return int(a.index) < int(b.index)
+	)
+	var slots := REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK / REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE
+	if navigation_budget_enabled:
+		slots = mini(slots, maxi(0, navigation_max_new_path_queries_per_tick))
+	for candidate: Dictionary in candidates:
+		if _regional_navigation_admissions.size() >= slots:
+			break
+		_regional_navigation_admissions[candidate.unit_id] = true
 
 
 func _delay_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2, reason: String) -> void:
@@ -2416,6 +2493,12 @@ func _delay_navigation_path_request(cmd: Dictionary, unit, current_position: Vec
 	record["current_position"] = current_position
 	record["target_position"] = target_position
 	record["delayed"] = true
+	var pending_search: Variant = cmd.get("_regional_navigation_search")
+	if pending_search != null:
+		record["duration_usec"] = pending_search.last_slice_usec if reason == "regional_search_pending" else 0
+		record["search_total_usec"] = pending_search.work_usec
+		record["search_max_slice_usec"] = pending_search.max_slice_usec
+		record["search_expanded_count"] = pending_search.expanded_count
 	_append_navigation_debug_record(record)
 
 
@@ -2456,7 +2539,7 @@ func _make_navigation_record(
 	if unit_id.is_empty():
 		unit_id = String(cmd.get("unit_id", ""))
 	var route_type: String = "none"
-	if status == "direct_a_star":
+	if status in ["direct_a_star", "regional_nearest_reachable"]:
 		route_type = "direct_a_star"
 	elif status == HPA_PATHFINDER_SCRIPT.STATUS_HPA or status == HPA_PATHFINDER_SCRIPT.STATUS_SAME_COMPONENT:
 		route_type = "hpa"
@@ -2468,6 +2551,7 @@ func _make_navigation_record(
 		or status == HPA_PATHFINDER_SCRIPT.STATUS_LOCAL_PATH_FAILED
 		or status == HPA_PATHFINDER_SCRIPT.STATUS_INVALID
 	)
+	unreachable = unreachable or status == "regional_nearest_reachable"
 	return {
 		"tick": tick_counter,
 		"unit_id": unit_id,
@@ -2479,6 +2563,8 @@ func _make_navigation_record(
 		"from_grid": from_grid,
 		"to_grid": to_grid,
 		"duration_usec": duration_usec,
+		"search_elapsed_usec": int(query_result.get("search_elapsed_usec", duration_usec)),
+		"search_max_slice_usec": int(query_result.get("search_max_slice_usec", duration_usec)),
 		"path_grid_count": path.size(),
 		"path_length_grid": int(query_result.get("path_length_grid", path.size())),
 		"exposure_sum": float(query_result.get("exposure_sum", 0.0)),
@@ -2781,6 +2867,8 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 			from_grid = nearest_start_grid
 
 	var navigation_options: Dictionary = _build_navigation_cost_options(cmd, terrain_registry)
+	if _uses_regional_navigation(terrain_registry):
+		return _build_regional_path_world_points(cmd, unit, terrain_registry, from_grid, to_grid, resolved_target_position, navigation_options)
 	var navigation_started_usec: int = Time.get_ticks_usec()
 	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry, navigation_options)
 	var navigation_duration_usec: int = Time.get_ticks_usec() - navigation_started_usec
@@ -2819,6 +2907,52 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		path_world_points.append(target_position)
 
 	return path_world_points
+
+
+func _uses_regional_navigation(terrain_registry) -> bool:
+	return (
+		_uses_hex_movement_metric(terrain_registry)
+		and terrain_registry.has_method("get_tile_count")
+		and int(terrain_registry.call("get_tile_count")) >= REGIONAL_NAVIGATION_MIN_TILES
+	)
+
+
+func _build_regional_path_world_points(cmd: Dictionary, unit, terrain_registry, from_grid: Vector2i, to_grid: Vector2i, resolved_target: Vector2, options: Dictionary) -> Array:
+	var revision := _get_terrain_registry_revision(terrain_registry)
+	var search: TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch = cmd.get("_regional_navigation_search")
+	if (
+		search == null or search.source != from_grid or search.goal != to_grid
+		or search.revision != revision or search.registry_id != terrain_registry.get_instance_id()
+		or search.cost_options != options
+	):
+		search = TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch.new(from_grid, to_grid, revision, options, terrain_registry)
+		cmd["_regional_navigation_search"] = search
+	var limit := REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE
+	if is_processing_tick:
+		limit = mini(limit, REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK - _regional_navigation_expansions_this_tick)
+	var started := Time.get_ticks_usec()
+	_regional_navigation_expansions_this_tick += search.advance(_terrain_pathfinder, terrain_registry, limit)
+	search.last_slice_usec = Time.get_ticks_usec() - started
+	search.work_usec += search.last_slice_usec
+	search.max_slice_usec = maxi(search.max_slice_usec, search.last_slice_usec)
+	if not search.finished:
+		return []
+	cmd.erase("_regional_navigation_search")
+	cmd["_regional_navigation_route"] = true
+	var reached: bool = not search.path.is_empty() and search.path[-1] == to_grid
+	if navigation_debug_enabled:
+		var result := {"path": search.path, "status": "direct_a_star" if reached else "regional_nearest_reachable"}
+		_annotate_navigation_query_metrics(result, search.path, terrain_registry, options)
+		result["search_elapsed_usec"] = Time.get_ticks_usec() - search.started_usec
+		result["search_max_slice_usec"] = search.max_slice_usec
+		_record_navigation_path_query(cmd, unit, from_grid, to_grid, result, search.work_usec, "primary", "", search.expanded_count)
+	var simplified := _simplify_grid_path_turns(search.path)
+	var world_path: Array = []
+	for index in range(1, simplified.size()):
+		world_path.append(terrain_registry.call("grid_to_world", simplified[index]))
+	if reached and (world_path.is_empty() or Vector2(world_path[-1]).distance_to(resolved_target) > 0.5):
+		world_path.append(resolved_target)
+	return world_path
 
 
 func _simplify_grid_path_turns(path_grid_points: Array) -> Array:
