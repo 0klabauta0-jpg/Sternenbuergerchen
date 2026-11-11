@@ -1,6 +1,7 @@
 from pathlib import Path
 import shutil,subprocess,uuid
 root=Path.cwd(); folder=root/'output/native_glut_maps/hex_corridor_cache_20261111'; project=folder/'project'
+project.mkdir(parents=True,exist_ok=True)
 import re
 pending=['scripts/terrain/hex_corridor_topology_cache.gd','scripts/terrain/terrain_registry.gd','scripts/terrain/terrain_tile_data.gd','scripts/terrain/hex_grid.gd']
 shutil.copyfile(folder/'verifier.gd',project/'verifier.gd')
