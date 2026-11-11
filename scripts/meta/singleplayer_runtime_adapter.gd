@@ -196,12 +196,26 @@ func sync_crafts() -> void:
 				break
 
 	if _base_personnel != null: _base_personnel.call("_refresh_capacity")
+	sync_space_wings()
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
 
 func get_base_personnel_runtime() -> Node:
 	return _base_personnel
+
+func sync_space_wings() -> Dictionary:
+	if _simulation == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	var definitions: Variant = _flow.get("_homebase_aircraft_definitions")
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(definitions) != TYPE_ARRAY or typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var craft_ids: Array = []
+	for definition in definitions:
+		if typeof(definition) == TYPE_DICTIONARY and typeof(definition.get("craft_id")) == TYPE_STRING:
+			craft_ids.append(definition.craft_id)
+	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	if operation == "space_wing_command":

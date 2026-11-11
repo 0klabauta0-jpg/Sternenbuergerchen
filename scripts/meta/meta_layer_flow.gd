@@ -3992,6 +3992,8 @@ func _on_homebase_aircraft_pilot_assigned(craft_id: String, pilot_unit_id: Strin
 		_assigned_aircraft_pilot_by_craft.erase(assigned_craft_id)
 
 	_assigned_aircraft_pilot_by_craft[normalized_craft_id] = normalized_pilot_id
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_space_wings")
 	if _singleplayer_runtime == null:
 		_homebase_staged_unit_ids = _remove_unit_ids_from_list(_homebase_staged_unit_ids, PackedStringArray([normalized_pilot_id]))
 	_refresh_homebase_screen()
@@ -4002,6 +4004,8 @@ func _on_homebase_aircraft_pilot_cleared(craft_id: String) -> void:
 	if normalized_craft_id.is_empty():
 		return
 	_assigned_aircraft_pilot_by_craft.erase(normalized_craft_id)
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_space_wings")
 	_refresh_homebase_screen()
 
 
@@ -4114,6 +4118,8 @@ func _on_fob_transport_craft_pilot_assigned(craft_id: String, pilot_unit_id: Str
 	if not previous_pilot_id.is_empty() and previous_pilot_id != normalized_pilot_id:
 		_append_unit_to_fob(previous_pilot_id)
 	_assigned_aircraft_pilot_by_craft[normalized_craft_id] = normalized_pilot_id
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_space_wings")
 	_remove_unit_from_fob_selection(normalized_pilot_id)
 	_refresh_fob_screen()
 	_refresh_homebase_screen()
@@ -4130,6 +4136,8 @@ func _on_fob_transport_craft_pilot_cleared(craft_id: String) -> void:
 		return
 	var previous_pilot_id: String = String(_assigned_aircraft_pilot_by_craft.get(normalized_craft_id, "")).strip_edges()
 	_assigned_aircraft_pilot_by_craft.erase(normalized_craft_id)
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_space_wings")
 	if not previous_pilot_id.is_empty():
 		_append_unit_to_fob(previous_pilot_id)
 	_refresh_fob_screen()
@@ -8206,6 +8214,8 @@ func remove_skirmish_person(unit_id: String) -> void:
 	for craft in _assigned_aircraft_pilot_by_craft.keys():
 		if String(_assigned_aircraft_pilot_by_craft[craft]) == unit_id:
 			_assigned_aircraft_pilot_by_craft.erase(craft)
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_space_wings")
 	var index := _homebase_staged_unit_ids.find(unit_id)
 	if index >= 0:
 		_homebase_staged_unit_ids.remove_at(index)

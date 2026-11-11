@@ -87,6 +87,11 @@ func get_space_wing_snapshot() -> Dictionary:
 func check_space_wing_replay(command: Dictionary, actor_id: String) -> Dictionary:
 	return _space_wing_state.check_replay(command, actor_id)
 
+func reconcile_space_wings(crafts: Array, pilots: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	return _space_wing_state.reconcile_crafts("singleplayer", crafts, pilots)
+
 func admit_space_actor(definition: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}

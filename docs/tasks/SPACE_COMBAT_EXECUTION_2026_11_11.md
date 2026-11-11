@@ -124,7 +124,12 @@ Verifier und diese Statusdokumentation.
   bestehende Pilotenzuordnung; keine UI-Berechtigungsdaten. Identische
   Wiederholung funktioniert auch nach Reisebeginn; neue Umstellung während
   Warp/Anflug bleibt gesperrt. Adaptercheck9/9. UI-Anschluss,
-  automatische Pilotverlustbehandlung und Checkpointintegration fehlen.
+  Tod-/Verlustereignisse im Raumkampf und Checkpointintegration fehlen.
+- AP04 Lifecycle-Vorstufe: bestehende Änderungen an Pilotenzuordnungen und
+  Flottensynchronisierung prüfen Rotten erneut. Ohne zugeordneten Piloten
+  bleibt das Schiff Mitglied; ein verfügbarer Führer wird stabil gewählt,
+  sonst ist die Rotte inaktiv. Entfernte Schiffe werden gelöst. Prüfung12/12;
+  kein Nachweis für spätere Kampf-/Todereignisse.
 - AP02/AP03/AP04 Rest und AP05–AP20: offen.
 
 ## Risiken / offene Punkte
