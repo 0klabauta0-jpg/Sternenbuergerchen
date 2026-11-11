@@ -193,8 +193,10 @@ Verifier und diese Statusdokumentation.
   durchgesetzt. Betroffene Reise- und Orbitdateien bleiben bis Abstimmung frei.
 - AP04 Transfer-Vorstufe: interner Ownerwechsel verschiebt ein Schiff atomar,
   prüft Ownership und Zielkapazität, löst eine geleerte Quellrotte auf und
-  erhält beziehungsweise ersetzt die Führung. Gezielte Prüfung16/16 inklusive
-  Sechsergrenze; bisher kein Command-/UI-/Flugstartanschluss.
+  erhält beziehungsweise ersetzt die Führung. Der validierte Ownercommand
+  `wing_transfer` nutzt diesen Wechsel und seine vorhandenen Replaybelege;
+  Prüfung18/18 inklusive Sechsergrenze und Wiederholung, AP00 und Owner grün.
+  Adapter, UI und Flugstart sind noch nicht angeschlossen.
 - Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
   integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
   Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine

@@ -30,7 +30,14 @@ func _initialize() -> void:
 		if not full.transfer_craft("p", "ship%d" % i, target, many_pilots).get("ok", false): failed += 1
 	var full_before: Dictionary = full.get_snapshot()
 	if full.transfer_craft("p", "ship6", target, many_pilots).get("reason") != "wing_full" or full.get_snapshot() != full_before: failed += 1
-	print("SPACE_COMBAT_AP04_TRANSFER passed=", 16 - failed, " failed=", failed)
+	var command_owner = OWNER.new()
+	for pair in [["left", "a"], ["right", "b"]]:
+		_apply(command_owner, context, "wing_create", {"wing_id":pair[0]}, "create-" + pair[0])
+		_apply(command_owner, context, "wing_assign", {"wing_id":pair[0], "craft_id":pair[1]}, "assign-" + pair[0])
+	var command := {"contract_category":"space_combat", "operation":"wing_transfer", "request_id":"transfer", "expected_revision":4, "payload":{"wing_id":"right", "craft_id":"a"}}
+	if not command_owner.apply_command(command, context).get("ok", false): failed += 1
+	if command_owner.get_snapshot().revision != 5 or not command_owner.apply_command(command, context).get("replayed", false) or command_owner.get_snapshot().revision != 5: failed += 1
+	print("SPACE_COMBAT_AP04_TRANSFER passed=", 18 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _apply(state: RefCounted, context: Dictionary, op: String, payload: Dictionary, request: String) -> Dictionary:

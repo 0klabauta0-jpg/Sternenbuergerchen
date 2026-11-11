@@ -153,7 +153,7 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 	if typeof(actor) != TYPE_STRING or String(actor).strip_edges().is_empty() or context.get("authorized") != true:
 		return _reject("authority_required")
 	var operation: String = String(command.get("operation", ""))
-	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set", "order_issue", "order_cancel"]:
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_transfer", "wing_rename", "wing_leader_set", "order_issue", "order_cancel"]:
 		return _reject("unsupported_operation")
 	var owned: Array = []
 	var members: Dictionary = {}
@@ -211,6 +211,10 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 			if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(payload.leader_craft_id)) != TYPE_STRING or String(pilots[payload.leader_craft_id]).strip_edges().is_empty():
 				return _reject("pilot_missing")
 			_wings[id].leader_craft_id = payload.leader_craft_id
+		"wing_transfer":
+			if typeof(context.get("craft_pilots")) != TYPE_DICTIONARY: return _reject("invalid_pilot_mapping")
+			var transferred: Dictionary = transfer_craft(actor, payload.craft_id, id, context.craft_pilots)
+			if not transferred.get("ok", false): return transferred
 		"order_issue":
 			# Preflight all wings before replacing any current order.
 			for wing_id in payload.wing_ids:
@@ -227,7 +231,7 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 			var current: Dictionary = _wings[id].get("order", {})
 			if current.is_empty() or current.get("order_id") != payload.order_id: return _reject("order_mismatch")
 			_wings[id]["order"] = {}
-	_revision += 1
+	if operation != "wing_transfer": _revision += 1
 	var result := {"ok": true, "reason": "", "revision": _revision, "replayed": false}
 	if not _receipts.has(actor): _receipts[actor] = {}
 	_receipts[actor][command.request_id] = {"signature": checked.signature, "result": result.duplicate(true)}

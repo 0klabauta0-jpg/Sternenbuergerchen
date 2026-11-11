@@ -2,7 +2,7 @@ extends RefCounted
 ## Stateless validation only. Ownership and revision come from the trusted caller.
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
-const OPERATIONS := ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set", "order_issue", "order_cancel", "fire_rule_set", "assist_preference_set", "maneuver_request"]
+const OPERATIONS := ["wing_create", "wing_assign", "wing_remove", "wing_transfer", "wing_rename", "wing_leader_set", "order_issue", "order_cancel", "fire_rule_set", "assist_preference_set", "maneuver_request"]
 
 static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 	if command.get("contract_category") != "space_combat" or typeof(command.get("operation")) != TYPE_STRING:
@@ -49,7 +49,7 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 			for cell in payload[key]:
 				if typeof(cell) != TYPE_VECTOR2I or not GRID.contains(cell):
 					return _reject("invalid_hex")
-	if operation in ["wing_assign", "wing_remove"] and not payload.has_all(["wing_id", "craft_id"]):
+	if operation in ["wing_assign", "wing_remove", "wing_transfer"] and not payload.has_all(["wing_id", "craft_id"]):
 		return _reject("missing_field")
 	if operation == "wing_rename" and (not payload.has_all(["wing_id", "name"]) or typeof(payload.name) != TYPE_STRING or String(payload.name).strip_edges().is_empty()):
 		return _reject("missing_field")
