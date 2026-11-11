@@ -30,6 +30,24 @@ func preview_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: 
 	if result.get("ok", false): result["expected_revision"] = _revision
 	return result
 
+func reconcile_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+	# Publish reconciliation and missing singleton wings together; an invalid
+	# pilot map or flying craft cannot leave a half-reconciled live owner.
+	var candidate = get_script().new()
+	candidate._wings = _wings.duplicate(true)
+	candidate._craft_wings = _craft_wings.duplicate(true)
+	candidate._revision = _revision
+	var reconciled: Dictionary = candidate.reconcile_crafts(actor_id, owned_crafts, pilots)
+	if not reconciled.get("ok", false): return reconciled
+	var ensured: Dictionary = candidate.ensure_flying_wings(actor_id, flying_crafts, owned_crafts, pilots)
+	if not ensured.get("ok", false): return ensured
+	var changed: bool = bool(reconciled.get("changed", false)) or bool(ensured.get("changed", false))
+	if changed:
+		_wings = candidate._wings
+		_craft_wings = candidate._craft_wings
+		_revision = candidate._revision
+	return {"ok":true, "changed":changed, "revision":_revision, "wing_by_craft":ensured.wing_by_craft.duplicate(true)}
+
 func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary, expected_revision: int = -1) -> Dictionary:
 	# Lifecycle preflight: build the entire candidate before changing membership.
 	if expected_revision >= 0 and expected_revision != _revision: return _reject("stale_revision")

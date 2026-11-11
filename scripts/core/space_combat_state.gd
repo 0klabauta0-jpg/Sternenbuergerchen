@@ -90,7 +90,7 @@ func validate_deactivation(craft_id: String, expected_flight_revision: int, expe
 		return {"ok":false, "reason":"stale_spatial_index"}
 	return {"ok":true, "craft_id":craft_id, "flight":flight}
 
-func validate_local_departure(craft_id: String, proposal: Dictionary, tick: int, expected_area_revision: int) -> Dictionary:
+func validate_local_departure(craft_id: String, proposal: Dictionary, tick: int, expected_area_revision: int, expected_mode: String = "travel") -> Dictionary:
 	var flight: RefCounted = _registry.get_actor(craft_id)
 	if flight == null: return {"ok":false, "reason":"unknown_actor"}
 	var snapshot: Dictionary = flight.get_snapshot()
@@ -100,7 +100,7 @@ func validate_local_departure(craft_id: String, proposal: Dictionary, tick: int,
 	for claimant in query_navigation_claims(cells, snapshot.space_area_id):
 		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	var movement: Dictionary = flight.validate_area_transition(proposal, tick)
-	if not movement.get("ok", false) or movement.next_pose.get("coordinate_frame") != "strategic" or not String(movement.next_pose.get("space_area_id", "")).is_empty() or movement.next_pose.get("motion_mode") != "travel": return {"ok":false, "reason":"invalid_transition"}
+	if expected_mode not in ["travel", "grounded"] or not movement.get("ok", false) or movement.next_pose.get("coordinate_frame") != "strategic" or not String(movement.next_pose.get("space_area_id", "")).is_empty() or movement.next_pose.get("motion_mode") != expected_mode: return {"ok":false, "reason":"invalid_transition"}
 	return {"ok":true, "craft_id":craft_id, "flight":flight}
 
 func _publish_local_departure(validation: Dictionary) -> void:

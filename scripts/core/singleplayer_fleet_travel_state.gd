@@ -140,6 +140,7 @@ func _valid_space_area_context(context: Dictionary) -> bool:
 		return payload.size() == 2 and typeof(payload.get("delta_seconds")) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(payload.delta_seconds))
 	if context.operation == "begin_approach":
 		return payload.size() == 2 and typeof(payload.get("location_id")) == TYPE_STRING and not String(payload.location_id).is_empty()
+	if context.operation in ["launch_to_orbit", "land_homebase"]: return payload.size() == 1
 	if context.operation == "start_quantum":
 		if payload.size() not in [2, 3] or typeof(payload.get("target_orbit_id")) != TYPE_STRING or String(payload.target_orbit_id).is_empty() or (payload.has("target_orbit_marker_id") and typeof(payload.target_orbit_marker_id) != TYPE_STRING): return false
 		for key in payload:
@@ -236,6 +237,7 @@ func _publish_prepared_space_area_transition(candidate: Dictionary, validation: 
 	if validation.get("replayed", false):
 		var replay: Dictionary = validation.result.duplicate(true); replay["replayed"] = true; return replay
 	var result: Dictionary = _owners[String(candidate.craft_id)]._publish_prepared_space_area_state(candidate.state)
+	if candidate.context.operation == "launch_to_orbit": _focus = String(candidate.craft_id)
 	_space_area_receipts[String(candidate.context.request_id)] = {"context_binding":JSON.stringify(candidate.context, "", true),"result":result.duplicate(true),"travel_owner_instance_id":_owners[String(candidate.craft_id)].get_instance_id(),"travel_owner_epoch":int(_owners[String(candidate.craft_id)].get("_space_area_epoch"))}
 	_space_area_contexts.erase(String(candidate.context.context_id))
 	_space_area_context_serials.erase(String(candidate.context.context_id))

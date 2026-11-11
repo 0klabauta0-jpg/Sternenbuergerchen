@@ -33,6 +33,19 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Fluglebenszyklus: Heimatstart und strategischer Polisa-Start bereiten die
+  tatsächliche Pilot-/Crewprüfung, Singletonrotte und Travel/Flight gemeinsam
+  vor. Polisa bleibt eigener Stationsweg; sein Rückflugfuel wird erst beim
+  bestätigten Orbitwechsel gebucht. Synchronisierung ergänzt fehlende Rotten
+  bereits für ältere fliegende Fleet-Schiffe. Die explizite Heimatlandung aus
+  dem lokalen Mondorbit prüft Pilot, Pad und freien vollständigen Footprint am
+  Mondgate und veröffentlicht Flight/Index/Travel synchron. Warpankunft setzt
+  eine deterministische Eintrittsausrichtung, damit die vorläufige mehrhexige
+  Cutlass das Heimatgate geometrisch erreichen kann. Gezielt geprüft: Home-
+  Start, Polisa-Backend, Rotten-Lifecycle, Clientguard und Warp/Mond/Home-Owner-
+  zyklus; Pilot-/Flow-Nachweise darin teils Testdoubles. Automatischer lokaler
+  Warptick und echte AP6-/native Abnahme sind weiterhin offen.
+
 - Lokaler Warpabflug: Fleet/Travel bereiten den Warpstart mit dem aus dem
   Quellkörper abgeleiteten strategischen Ursprung und installiertem Warp-Effekt
   vor. Root prüft Pilot, Rotte, vollständige lokale Belegung und Flight-/Travel-

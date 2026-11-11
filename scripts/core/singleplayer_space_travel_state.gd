@@ -346,9 +346,44 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if _revision != expected_revision: return _reject("travel_revision_changed", "Reisezustand hat sich geaendert")
 	if _phase != String(context.get("expected_phase", "")): return _reject("travel_phase_changed", "Reisephase hat sich geaendert")
 	var payload: Dictionary = context.get("payload", {})
+	var operation := String(context.operation)
+	if operation == "launch_to_orbit":
+		var id := String(payload.get("craft_id", ""))
+		var current_flight: Dictionary = _flight.get_snapshot()
+		if _phase != "grounded" or id.is_empty() or current_flight.get("craft_id") != id or current_flight.get("coordinate_frame") != "strategic" or not String(current_flight.get("space_area_id", "")).is_empty() or not String(context.source_area_id).is_empty() or not String(context.target_area_id).is_empty(): return _reject("launch_context_changed", "Startzustand passt nicht")
+		if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits verwendet")
+		var moon: Dictionary = Dictionary(_definition.get("orbits", {})).get("moon_orbit", {})
+		var marker: Dictionary = GRID.orbit_marker(moon, GRID.ORBIT_MARKER_IDS[0])
+		if marker.is_empty(): return _reject("unknown_orbit_marker", "Heimorbitmarker fehlt")
+		var position: Vector2 = GRID.normalized(GRID.cell_from_record(marker)) * GRID.EXTENT
+		var launch_candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"launch_pose":{"position":position,"heading":float(current_flight.heading_rad)},"next":{"craft_id":id,"phase":"orbit","orbit_id":"moon_orbit","orbit_marker_id":GRID.ORBIT_MARKER_IDS[0],"target_orbit_id":"","target_orbit_marker_id":"","location_id":"","elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		launch_candidate["seal"] = _sign_space_area_state(launch_candidate)
+		return launch_candidate
+	if operation == "enter_orbit" and _phase == "surface" and _location_id == "polisa" and String(context.source_area_id).is_empty() and String(context.target_area_id).is_empty():
+		var current_flight: Dictionary = _flight.get_snapshot()
+		if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty() or current_flight.get("coordinate_frame") != "strategic" or current_flight.get("motion_mode") == "tactical" or not String(current_flight.get("space_area_id", "")).is_empty(): return _reject("station_flight_changed", "Stationsflugzustand passt nicht")
+		if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits verwendet")
+		var station_orbit := String(Dictionary(_definition.get("location_orbits", {})).get(_location_id, ""))
+		var orbit: Dictionary = Dictionary(_definition.get("orbits", {})).get(station_orbit, {})
+		var marker_id := _orbit_marker_id if not _orbit_marker_id.is_empty() else GRID.ORBIT_MARKER_IDS[0]
+		var marker: Dictionary = GRID.orbit_marker(orbit, marker_id)
+		if marker.is_empty(): return _reject("unknown_orbit_marker", "Stationsorbitmarker fehlt")
+		var position: Vector2 = GRID.normalized(GRID.cell_from_record(marker)) * GRID.EXTENT
+		var station_candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"launch_pose":{"position":position,"heading":float(current_flight.heading_rad)},"next":{"phase":"orbit","orbit_id":station_orbit,"orbit_marker_id":marker_id,"target_orbit_id":"","target_orbit_marker_id":"","location_id":"","elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		station_candidate["seal"] = _sign_space_area_state(station_candidate)
+		return station_candidate
+	if operation == "land_homebase":
+		var current_flight: Dictionary = _flight.get_snapshot()
+		if _phase != "orbit" or _orbit_id != "moon_orbit" or String(payload.get("craft_id", "")) != _craft_id or current_flight.get("coordinate_frame") != "local" or current_flight.get("motion_mode") != "tactical" or current_flight.get("space_area_id") != "orbit_approach:moon" or context.source_area_id != "orbit_approach:moon" or not String(context.target_area_id).is_empty(): return _reject("moon_orbit_required", "Heimatlandung braucht den lokalen Mondorbit")
+		if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits verwendet")
+		var moon: Dictionary = Dictionary(_definition.get("bodies", {})).get("moon", {})
+		if typeof(moon.get("position")) != TYPE_ARRAY or moon.position.size() != 2: return _reject("invalid_body_position", "Heimatkoerper ungueltig")
+		var position: Vector2 = GRID.pair(moon.position) * GRID.EXTENT
+		var home_candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"home_pose":{"position":position},"next":{"phase":"grounded","orbit_id":"","orbit_marker_id":"","target_orbit_id":"","target_orbit_marker_id":"","location_id":"homebase","elapsed_seconds":0.0,"progress":0.0,"revision":_revision + 1}}
+		home_candidate["seal"] = _sign_space_area_state(home_candidate)
+		return home_candidate
 	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
-	var operation := String(context.operation)
 	if operation == "start_quantum":
 		if _phase != "orbit": return _reject("orbit_required", "Lokaler Warpstart braucht den vorhandenen Orbit")
 		var current_flight: Dictionary = _flight.get_snapshot()
@@ -466,6 +501,7 @@ func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
 	# Root-private synchronous tail AFTER validation. No apply_command/_arrive,
 	# no signals, callbacks, awaits or strategic/local Flight pose assignments.
 	var next: Dictionary = candidate.next
+	if next.has("craft_id"): _craft_id = String(next.craft_id)
 	_phase = String(next.phase)
 	_orbit_id = String(next.orbit_id)
 	_orbit_marker_id = String(next.orbit_marker_id)
@@ -482,6 +518,7 @@ func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
 		_route_control = warp.control
 		_route_hexes.assign(warp.route_hexes)
 		_active_jump_duration_seconds = float(warp.duration)
+	if candidate.has("home_pose"): _origin_position = Vector2(candidate.home_pose.position) / GRID.EXTENT
 	_revision = int(next.revision)
 	var context: Dictionary = candidate.context
 	var result := {"ok":true,"phase":_phase,"revision":_revision,"craft_id":_craft_id,

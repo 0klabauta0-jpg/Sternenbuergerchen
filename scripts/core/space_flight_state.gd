@@ -44,12 +44,21 @@ func bind_craft(craft_id: String, allow_rebind: bool = false) -> bool:
 	return true
 
 func commit_travel_pose(position: Vector2, heading: float) -> bool:
-	if _coordinate_frame != "strategic" or _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
-		return false
-	_position = position
-	_heading = heading
-	_revision += 1
+	var prepared := validate_travel_pose(_revision, position, heading)
+	if not prepared.get("ok", false): return false
+	_publish_travel_pose(prepared)
 	return true
+
+func validate_travel_pose(expected_revision: int, position: Vector2, heading: float) -> Dictionary:
+	if expected_revision != _revision: return {"ok":false, "reason":"stale_revision"}
+	if _coordinate_frame != "strategic" or _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
+		return {"ok":false, "reason":"invalid_travel_pose"}
+	return {"ok":true, "position":position, "heading":heading}
+
+func _publish_travel_pose(prepared: Dictionary) -> void:
+	_position = prepared.position
+	_heading = prepared.heading
+	_revision += 1
 
 func validate_motion(proposal: Dictionary, tick: int) -> Dictionary:
 	if _craft_id.is_empty() or tick <= _tick:
