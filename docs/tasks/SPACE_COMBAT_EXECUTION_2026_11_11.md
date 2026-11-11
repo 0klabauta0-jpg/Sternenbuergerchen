@@ -205,6 +205,13 @@ Verifier und diese Statusdokumentation.
   fremde Belegung/Claims. 8/8 mit veraltetem Stand, falschem Ort, Körper und
   belegtem Ziel. Keine Mutation, kein Travel-/Economycommit; Legacy-Surface
   ohne vorherigen lokalen Bestand braucht weiterhin eigenen Aufnahmeweg.
+- AP04a Warpdeparture-Vorschau: prüft aktiven lokalen Flight, seine Rotte,
+  Gebiet/Belegung/Claims und vier Revisionen; Zielorbit muss zu einem anderen
+  Körper gehören. Strategischer Startpunkt wird aus dem bestehenden
+  Quellkörper abgeleitet; ein Area-/Travelvorschlag wird nur geprüft, nicht
+  übernommen. 6/6, Surface-/First-Entry-Fixture grün. Echte Travel-/Warp-
+  Vorbereitung, Fuel-/Kampfregeln, Frame-/Geschwindigkeitssemantik und
+  gemeinsamer Commit fehlen; kein produktiver Warpstart.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test

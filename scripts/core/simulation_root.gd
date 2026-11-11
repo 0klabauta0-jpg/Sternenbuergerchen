@@ -398,6 +398,59 @@ func preview_surface_reactivation(craft_id: String, location_id: String, target_
 	if not at_gate: return {"ok":false, "reason":"not_at_approach_gate"}
 	return {"ok":true, "craft_id":craft_id, "location_id":location_id, "space_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "footprint_cells":availability.cells, "activity_proposal":proposal, "activity_tick":tick}
 
+func preview_warp_departure(craft_id: String, target_orbit_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	# Preview only; prepared Travel/Economy and a coordinated commit are required.
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	var actor_id: Variant = authority_context.get("actor_id")
+	if typeof(actor_id) != TYPE_STRING or String(actor_id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_actor"}
+	if _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"travel_unavailable"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"unknown_actor"}
+	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	if metadata.get("control_domain") != "player": return {"ok":false, "reason":"not_owned"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.revision != expected_flight_revision: return {"ok":false, "reason":"stale_flight_revision"}
+	if snapshot.coordinate_frame != "local" or snapshot.motion_mode != "tactical": return {"ok":false, "reason":"not_active_local"}
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_snapshot(craft_id)
+	if travel.get("revision") != expected_travel_revision: return {"ok":false, "reason":"stale_travel_revision"}
+	if travel.get("phase") != "orbit": return {"ok":false, "reason":"invalid_phase"}
+	var orbits: Dictionary = travel.get("orbits", {})
+	if not orbits.has(target_orbit_id): return {"ok":false, "reason":"unknown_orbit"}
+	var source: Dictionary = orbits.get(String(travel.get("orbit_id", "")), {})
+	var target: Dictionary = orbits[target_orbit_id]
+	var body_id := String(source.get("body_id", ""))
+	if body_id.is_empty(): return {"ok":false, "reason":"invalid_source_orbit"}
+	if String(target.get("body_id", "")) == body_id: return {"ok":false, "reason":"already_in_orbit"}
+	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
+	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
+	if String(body.get("id", "")) != body_id or not layout.get("ok", false) or layout.body_map_id != snapshot.space_area_id:
+		return {"ok":false, "reason":"area_body_mismatch"}
+	if _space_combat_state.get_area_revision(snapshot.space_area_id) != expected_area_revision: return {"ok":false, "reason":"stale_area_revision"}
+	if _space_wing_state.get_snapshot().revision != expected_wing_revision: return {"ok":false, "reason":"stale_wing_revision"}
+	var wing_id: String = _space_wing_state.get_craft_wing(craft_id, actor_id)
+	if wing_id.is_empty(): return {"ok":false, "reason":"wing_required"}
+	var cells: Array[Vector2i] = _space_combat_state.preview_footprint(snapshot, metadata.get("footprint_hexes", []))
+	if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
+	if not _space_combat_state.actor_cells_match(craft_id, snapshot.space_area_id, cells): return {"ok":false, "reason":"stale_spatial_index"}
+	var body_cells := {}
+	for cell in layout.body_cells: body_cells[cell] = true
+	for cell in cells:
+		if body_cells.has(SPACE_GRID.to_offset(cell)): return {"ok":false, "reason":"body_blocked"}
+	for occupant in _space_combat_state.query_cells(cells, snapshot.space_area_id):
+		if occupant != craft_id: return {"ok":false, "reason":"occupied"}
+	for claimant in _space_combat_state.query_navigation_claims(cells, snapshot.space_area_id):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
+	var position: Variant = body.get("position")
+	if typeof(position) != TYPE_ARRAY or position.size() != 2: return {"ok":false, "reason":"invalid_body_position"}
+	for value in position:
+		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) < 0.0 or float(value) > 1.0: return {"ok":false, "reason":"invalid_body_position"}
+	var proposal := {"expected_revision":expected_flight_revision, "coordinate_frame":"strategic", "space_area_id":"", "position_plane":SPACE_GRID.pair(position) * SPACE_GRID.EXTENT, "motion_mode":"travel"}
+	var tick := tick_counter + 1
+	var validation: Dictionary = flight.validate_area_transition(proposal, tick)
+	if not validation.get("ok", false): return validation
+	return {"ok":true, "craft_id":craft_id, "target_orbit_id":target_orbit_id, "source_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "area_proposal":proposal, "transition_tick":tick}
+
 func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
