@@ -1,8 +1,8 @@
 extends RefCounted
 ## Read-only equipment projection: one cached rigid-skinned outfit per rig/class.
-const PATH := "res://Assets/curated/personnel/armor_kenney_r06_20261111/"
+const PATH := "res://Assets/curated/personnel/armor_kenney_r07_20261111/"
 const PREFIX := "ArmorVisual_"
-const REVISION := "kenney_authored_r06"
+const REVISION := "kenney_authored_r07"
 static var _parts: Dictionary = {}
 static var _outfits: Dictionary = {}
 static var _underlays: Dictionary = {}
@@ -430,10 +430,16 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 			var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
 			center = axes.inverse() * shoulder.lerp(elbow, 0.07)
 			dimensions.y += shoulder.distance_to(elbow)*.06
+			var roof_width:float={"light":1.06,"medium":1.40,"heavy":1.62}[armor_id]
+			dimensions.x *= roof_width
+			dimensions.y *= {"light":1.0,"medium":.90,"heavy":.82}[armor_id]
 			if bounds.has_volume():
-				center.x = bounds.get_center().x
+				center.x = bounds.get_center().x + dimensions.x*(1-1/roof_width)*.40*(1 if bone.begins_with("Left") else -1)
 				center.z = bounds.get_center().z
 				dimensions.z = bounds.size.z * {"light":1.38,"medium":1.62,"heavy":1.92}[armor_id]
+			var roof_center_world:Vector3=axes*center
+			axes=axes*Basis(Vector3.BACK,deg_to_rad({"light":0.0,"medium":-40.0,"heavy":-50.0}[armor_id])*(1 if bone.begins_with("Left") else -1))
+			center=axes.inverse()*roof_center_world
 		elif part.begins_with("knee_"):
 			var joint := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
 			var ankle := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Leg","Foot"))).origin
@@ -444,7 +450,7 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 				dimensions = Vector3(bounds.size.x * {"light":.80,"medium":1.18,"heavy":1.26}[armor_id],bounds.size.x * {"light":.73,"medium":1.0,"heavy":1.02}[armor_id],bounds.size.z*1.10)
 				center.x = bounds.get_center().x
 				center.z = bounds.get_center().z + bounds.size.z*.13
-				model.set_meta("r06_knee_section_"+bone,{"bounds":bounds,"center":center,"dimensions":dimensions})
+				model.set_meta("r07_knee_section_"+bone,{"bounds":bounds,"center":center,"dimensions":dimensions})
 		elif part.begins_with("forearm_") or part.begins_with("thigh_") or part.begins_with("shin_") or part.begins_with("upper_arm_"):
 			var bounds := _bone_bounds(model,skeleton,bone,axes)
 			if bounds.has_volume():
@@ -569,7 +575,7 @@ static var _body_profile: Dictionary = {}
 
 static func _valid_body_profile(data: Variant) -> bool:
 	if not data is Dictionary:return false
-	if String(data.get("revision",""))!="kenney_body_r06":return false
+	if String(data.get("revision",""))!="kenney_body_r07":return false
 	var rows: Variant = data.get("rows")
 	if not rows is Array or rows.size()<2:return false
 	var previous := -INF
@@ -587,6 +593,19 @@ static func _valid_body_profile(data: Variant) -> bool:
 	if not center is Array or center.size()!=3:return false
 	for value: Variant in center:
 		if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	for key in ["head_scale","head_blend","deltoid_scale","deltoid_lateral"]:
+		var values: Variant=data.get(key)
+		if not values is Array or values.size()!={"head_scale":3,"head_blend":2,"deltoid_scale":2,"deltoid_lateral":4}[key]:return false
+		for value:Variant in values:
+			if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	if typeof(data.get("head_pivot_height")) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(data.head_pivot_height)):return false
+	if float(data.head_blend[0])>=float(data.head_blend[1]):return false
+	for value in data.head_scale:
+		if float(value)<=0.0:return false
+	for value in data.deltoid_scale:
+		if float(value)<=0.0:return false
+	for index in range(3):
+		if float(data.deltoid_lateral[index])>=float(data.deltoid_lateral[index+1]):return false
 	return true
 
 static func _body_point(point: Vector3, width: float, height: float) -> Vector3:
@@ -608,10 +627,18 @@ static func _body_point(point: Vector3, width: float, height: float) -> Vector3:
 	sx=1.0+(sx-1.0)*mask
 	sd=1.0+(sd-1.0)*mask
 	var center := width*float(_body_profile.depth_center_width)
-	return Vector3(point.x*sx,point.y,center+(point.z-center)*sd)
+	var q:=Vector3(point.x*sx,point.y,center+(point.z-center)*sd)
+	var lateral:Array=_body_profile.deltoid_lateral
+	var shoulder_mask:float=smoothstep(lateral[0],lateral[1],edge)*(1-smoothstep(lateral[2],lateral[3],edge))*(1-smoothstep(1.20,1.28,h))*smoothstep(.70,.82,h)
+	q.y=height+(q.y-height)*(1+(float(_body_profile.deltoid_scale[0])-1)*shoulder_mask)
+	q.z*=1+(float(_body_profile.deltoid_scale[1])-1)*shoulder_mask
+	var hm:float=smoothstep(_body_profile.head_blend[0],_body_profile.head_blend[1],h)
+	var pivot:=Vector3(0,height*float(_body_profile.head_pivot_height),0)
+	for index in range(3):q[index]=pivot[index]+(q[index]-pivot[index])*(1+(float(_body_profile.head_scale[index])-1)*hm)
+	return q
 
 static func _prepare_body_variant(model: Node3D) -> void:
-	if String(model.get_meta("body_shape_revision",""))=="kenney_body_r06":return
+	if String(model.get_meta("body_shape_revision",""))=="kenney_body_r07":return
 	if _body_profile.is_empty():
 		if not FileAccess.file_exists(PATH+"body_shape_profile.json"):return
 		var loaded: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH+"body_shape_profile.json"))
@@ -636,9 +663,10 @@ static func _prepare_body_variant(model: Node3D) -> void:
 	var applied_any := false
 	for body: MeshInstance3D in model.find_children("*","MeshInstance3D",true,false):
 		if not String(body.name).to_lower().contains("character") or body.skin==null:continue
-		var source: Mesh = body.get_meta("r06_source_body_mesh",body.get_meta("armor_original_body_mesh",body.mesh))
+		var source: Mesh = body.get_meta("armor_source_body_mesh",body.get_meta("r07_source_body_mesh",body.get_meta("r06_source_body_mesh",body.get_meta("armor_original_body_mesh",body.mesh))))
 		if source==null or source.get_surface_count()==0 or body.skin.get_bind_count()==0:continue
-		body.set_meta("r06_source_body_mesh",source)
+		body.set_meta("r07_source_body_mesh",source)
+		body.set_meta("armor_source_body_mesh",source)
 		var bind := 0
 		var bone := body.skin.get_bind_bone(bind)
 		if not String(body.skin.get_bind_name(bind)).is_empty():bone=sk.find_bone(body.skin.get_bind_name(bind))
@@ -682,6 +710,28 @@ static func _prepare_body_variant(model: Node3D) -> void:
 			_body_variants[key]=result
 		body.mesh=_body_variants[key]
 		body.set_meta("armor_original_body_mesh",body.mesh)
-		body.set_meta("r06_body_variant_mesh",body.mesh)
+		body.set_meta("r07_body_variant_mesh",body.mesh)
+		_prepare_legacy_helmets(model,sk,mesh_to_rest*canonical.affine_inverse(),height)
 		applied_any=true
-	if applied_any:model.set_meta("body_shape_revision","kenney_body_r06")
+	if applied_any:model.set_meta("body_shape_revision","kenney_body_r07")
+
+
+static func _prepare_legacy_helmets(model:Node3D,sk:Skeleton3D,canonical_to_rest:Transform3D,height:float)->void:
+	var values:Array=_body_profile.head_scale
+	var scaling:=Basis.from_scale(Vector3(values[0],values[1],values[2]))
+	var pivot:=Vector3(0,height*float(_body_profile.head_pivot_height),0)
+	var remap:=canonical_to_rest*Transform3D(scaling,pivot-scaling*pivot)*canonical_to_rest.affine_inverse()
+	for helmet:Node3D in model.find_children("HelmetVisual_*","Node3D",true,false):
+		var parent:Node3D=helmet.get_parent() as Node3D
+		var parent_chain:=Transform3D.IDENTITY
+		while parent!=null and not parent is BoneAttachment3D and parent!=sk:
+			parent_chain=parent.transform*parent_chain
+			parent=parent.get_parent() as Node3D
+		if not parent is BoneAttachment3D:continue
+		var bone:=sk.find_bone(parent.bone_name)
+		if bone<0:continue
+		var parent_rest:Transform3D=sk.get_bone_global_rest(bone)*parent_chain
+		if not helmet.has_meta("armor_source_transform"):helmet.set_meta("armor_source_transform",helmet.transform)
+		var source:Transform3D=helmet.get_meta("armor_source_transform")
+		helmet.transform=parent_rest.affine_inverse()*remap*parent_rest*source
+		helmet.set_meta("body_shape_revision","kenney_body_r07")

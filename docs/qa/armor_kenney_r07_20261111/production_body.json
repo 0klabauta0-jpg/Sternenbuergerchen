@@ -1,0 +1,30 @@
+{
+  "label": "production_body",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 0,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\profiles\\r07-native\\production_body",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "12194316",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://docs/qa/armor_kenney_r07_20261111/production_body_test.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}

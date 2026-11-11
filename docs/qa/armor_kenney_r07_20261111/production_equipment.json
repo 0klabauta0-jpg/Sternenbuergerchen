@@ -1,0 +1,30 @@
+{
+  "label": "production_equipment",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 2,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\profiles\\r07-native\\production_equipment",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "5116250",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://scripts/tests/campaign_suit_equipment_test.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}

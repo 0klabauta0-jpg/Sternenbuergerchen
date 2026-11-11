@@ -1,0 +1,30 @@
+{
+  "label": "production_comparison",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 0,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\profiles\\r07-native\\production_comparison",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "5050714",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://output/native_glut_maps/armor_r07_production_probe.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}

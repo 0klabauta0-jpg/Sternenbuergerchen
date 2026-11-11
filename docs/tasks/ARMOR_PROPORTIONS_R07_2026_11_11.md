@@ -7,8 +7,9 @@ Kopfproportionen als Alternative/Ergänzung; die frühere Vorgabe unveränderter
 Kopfgröße ist damit aufgehoben. Nicht nur Schulterplatten aufblasen.
 
 ## Basis / Quellen / Verträge
-Isolierter task/native-glut-maps-20261110 auf7ef57c931 plus bewusst noch nicht
-integrierter/committeter R06-Arbeit. R06 ist technisch geprüft, vom Nutzer
+Isolierter task/native-glut-maps-20261110. R06 ist mit77bd2ccf8 als
+separater Kandidat gesichert; GO-Folgearbeit mit5f8a6a3cb. R07 baut bewusst
+auf diesem noch nicht nach Main integrierten Taskstand auf. R06 ist technisch geprüft, vom Nutzer
 weiter zur Überarbeitung bestimmt. Eigene R06-Quellen/Exporte und native
 Front/Seite/Quarter erhalten. Bestätigte Light/Medium/Heavy2D-Tafeln unter
 art/armor_orc_morozov_20261111. graphics_reference_revision_contract,

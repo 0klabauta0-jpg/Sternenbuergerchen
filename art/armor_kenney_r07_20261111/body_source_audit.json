@@ -1,0 +1,85 @@
+{
+  "pass": true,
+  "unchanged": {
+    "vertices": true,
+    "triangles": true,
+    "oriented_faces_with_corner_uv": true,
+    "weights": true,
+    "vertex_groups": true,
+    "bones": true,
+    "actions": true
+  },
+  "action_count": 2,
+  "bone_count": 45,
+  "raw_loop_serialization_identical": {
+    "indices": true,
+    "uv": true
+  },
+  "original_qa_warnings": [
+    "characterMedium: duplicate verts=215 loose verts=0"
+  ],
+  "derived_qa_warnings": [
+    "characterMedium: duplicate verts=215 loose verts=0"
+  ],
+  "metrics": {
+    "original": {
+      "verts": 1029,
+      "faces": 1604,
+      "tris": 1604,
+      "ngons": 0,
+      "boundary_edges": 432,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 215,
+      "islands": 12,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1,
+      "unweighted_verts": 0,
+      "verts_over_4_influences": 0,
+      "uv_maps": 1,
+      "uv_oob_pct": 0.0,
+      "uv_zero_area_faces": 0,
+      "uv_overlap_pct": 0.0,
+      "uv_coverage_pct": 55.3
+    },
+    "derived": {
+      "verts": 1029,
+      "faces": 1604,
+      "tris": 1604,
+      "ngons": 0,
+      "boundary_edges": 432,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 215,
+      "islands": 12,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1,
+      "unweighted_verts": 0,
+      "verts_over_4_influences": 0,
+      "uv_maps": 1,
+      "uv_oob_pct": 0.0,
+      "uv_zero_area_faces": 0,
+      "uv_overlap_pct": 0.0,
+      "uv_coverage_pct": 55.3
+    }
+  },
+  "note": "Position changes are intentional. Oriented faces including each vertex-index/UV-corner pair are compared independent of cyclic start and face ordering. Raw index and UV loop arrays are also identical in the final source. No reversed face orientation is permitted by this comparison."
+}

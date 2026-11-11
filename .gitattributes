@@ -71,3 +71,9 @@ docs/qa/regional_go_budget_reuse_20261111/** -text whitespace=blank-at-eol,blank
 docs/qa/star_map_terrain_preparation_ui_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 docs/qa/terrain_resource_prefill_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+art/armor_kenney_r07_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/armor_kenney_r07_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+Assets/curated/personnel/armor_kenney_r07_20261111/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+docs/qa/native_terrain_preparation_handoff_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

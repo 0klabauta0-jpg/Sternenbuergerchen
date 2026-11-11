@@ -1,0 +1,165 @@
+static var _body_variants: Dictionary = {}
+static var _body_profile: Dictionary = {}
+
+static func _valid_body_profile(data: Variant) -> bool:
+	if not data is Dictionary:return false
+	if String(data.get("revision",""))!="kenney_body_r07":return false
+	var rows: Variant = data.get("rows")
+	if not rows is Array or rows.size()<2:return false
+	var previous := -INF
+	for row: Variant in rows:
+		if not row is Array or row.size()!=3:return false
+		for value: Variant in row:
+			if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+		if float(row[0])<=previous or float(row[1])<=0.0 or float(row[2])<=0.0:return false
+		previous=float(row[0])
+	for key in ["lateral_full","lateral_end","depth_center_width"]:
+		var value: Variant = data.get(key)
+		if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	if float(data.lateral_end)<=float(data.lateral_full):return false
+	var center: Variant = data.get("canonical_bounds_center")
+	if not center is Array or center.size()!=3:return false
+	for value: Variant in center:
+		if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	for key in ["head_scale","head_blend","deltoid_scale","deltoid_lateral"]:
+		var values: Variant=data.get(key)
+		if not values is Array or values.size()!={"head_scale":3,"head_blend":2,"deltoid_scale":2,"deltoid_lateral":4}[key]:return false
+		for value:Variant in values:
+			if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	if typeof(data.get("head_pivot_height")) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(data.head_pivot_height)):return false
+	if float(data.head_blend[0])>=float(data.head_blend[1]):return false
+	for value in data.head_scale:
+		if float(value)<=0.0:return false
+	for value in data.deltoid_scale:
+		if float(value)<=0.0:return false
+	for index in range(3):
+		if float(data.deltoid_lateral[index])>=float(data.deltoid_lateral[index+1]):return false
+	return true
+
+static func _body_point(point: Vector3, width: float, height: float) -> Vector3:
+	var rows: Array = _body_profile.rows
+	var h := point.y/height
+	var sx := 1.0
+	var sd := 1.0
+	for index in rows.size()-1:
+		var a: Array = rows[index]
+		var b: Array = rows[index+1]
+		if h>=float(a[0]) and h<=float(b[0]):
+			var t: float = (h-float(a[0]))/(float(b[0])-float(a[0]))
+			sx=lerpf(float(a[1]),float(b[1]),t)
+			sd=lerpf(float(a[2]),float(b[2]),t)
+			break
+	var edge := absf(point.x)/width
+	var t := clampf((edge-float(_body_profile.lateral_full))/(float(_body_profile.lateral_end)-float(_body_profile.lateral_full)),0,1)
+	var mask := 1.0-t*t*(3.0-2.0*t)
+	sx=1.0+(sx-1.0)*mask
+	sd=1.0+(sd-1.0)*mask
+	var center := width*float(_body_profile.depth_center_width)
+	var q:=Vector3(point.x*sx,point.y,center+(point.z-center)*sd)
+	var lateral:Array=_body_profile.deltoid_lateral
+	var shoulder_mask:float=smoothstep(lateral[0],lateral[1],edge)*(1-smoothstep(lateral[2],lateral[3],edge))*(1-smoothstep(1.20,1.28,h))*smoothstep(.70,.82,h)
+	q.y=height+(q.y-height)*(1+(float(_body_profile.deltoid_scale[0])-1)*shoulder_mask)
+	q.z*=1+(float(_body_profile.deltoid_scale[1])-1)*shoulder_mask
+	var hm:float=smoothstep(_body_profile.head_blend[0],_body_profile.head_blend[1],h)
+	var pivot:=Vector3(0,height*float(_body_profile.head_pivot_height),0)
+	for index in range(3):q[index]=pivot[index]+(q[index]-pivot[index])*(1+(float(_body_profile.head_scale[index])-1)*hm)
+	return q
+
+static func _prepare_body_variant(model: Node3D) -> void:
+	if String(model.get_meta("body_shape_revision",""))=="kenney_body_r07":return
+	if _body_profile.is_empty():
+		if not FileAccess.file_exists(PATH+"body_shape_profile.json"):return
+		var loaded: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH+"body_shape_profile.json"))
+		if not _valid_body_profile(loaded):return
+		_body_profile=loaded
+	var skeletons := model.find_children("*","Skeleton3D",true,false)
+	if skeletons.is_empty():return
+	var sk: Skeleton3D = skeletons[0]
+	for name in ["Hips","Head","LeftArm","RightArm"]:
+		if sk.find_bone(name)<0:return
+	var hips := sk.get_bone_global_rest(sk.find_bone("Hips")).origin
+	var head := sk.get_bone_global_rest(sk.find_bone("Head")).origin
+	var left := sk.get_bone_global_rest(sk.find_bone("LeftArm")).origin
+	var right := sk.get_bone_global_rest(sk.find_bone("RightArm")).origin
+	var up := (head-hips).normalized()
+	var horizontal := (left-right).normalized()
+	horizontal=(horizontal-up*horizontal.dot(up)).normalized()
+	var axes := Basis(horizontal,up,horizontal.cross(up).normalized())
+	var width := left.distance_to(right)
+	var height := (left-hips).dot(up)
+	if width<=0.000001 or height<=0.000001 or axes.determinant()<0.000001:return
+	var applied_any := false
+	for body: MeshInstance3D in model.find_children("*","MeshInstance3D",true,false):
+		if not String(body.name).to_lower().contains("character") or body.skin==null:continue
+		var source: Mesh = body.get_meta("armor_source_body_mesh",body.get_meta("r07_source_body_mesh",body.get_meta("r06_source_body_mesh",body.get_meta("armor_original_body_mesh",body.mesh))))
+		if source==null or source.get_surface_count()==0 or body.skin.get_bind_count()==0:continue
+		body.set_meta("r07_source_body_mesh",source)
+		body.set_meta("armor_source_body_mesh",source)
+		var bind := 0
+		var bone := body.skin.get_bind_bone(bind)
+		if not String(body.skin.get_bind_name(bind)).is_empty():bone=sk.find_bone(body.skin.get_bind_name(bind))
+		if bone<0:continue
+		var mesh_to_rest := sk.get_bone_global_rest(bone)*body.skin.get_bind_pose(bind)
+		var canonical := Transform3D(axes.inverse(),-(axes.inverse()*hips))*mesh_to_rest
+		# The mission control rig's first bind has a translated origin compared
+		# with the base rig. Anchor the Blender profile to the complete immutable
+		# body envelope; applying the inverse transform leaves actor placement intact.
+		var envelope := AABB()
+		var first := true
+		for surface in source.get_surface_count():
+			for vertex: Vector3 in source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]:
+				var p := canonical*vertex
+				envelope = AABB(p,Vector3.ZERO) if first else envelope.expand(p)
+				first=false
+		var reference: Array = _body_profile.canonical_bounds_center
+		canonical.origin += Vector3(reference[0],reference[1],reference[2])*width-envelope.get_center()
+		var key := str(source.get_rid().get_id())+str(canonical)+str(width)+str(height)
+		if not _body_variants.has(key):
+			var result := ArrayMesh.new()
+			for surface in source.get_surface_count():
+				var arrays: Array = source.surface_get_arrays(surface).duplicate(true)
+				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+				for index in vertices.size():
+					var p := canonical*vertices[index]
+					var q := _body_point(p,width,height)
+					if p.distance_squared_to(q)<width*width*0.00000000001:continue
+					vertices[index]=canonical.affine_inverse()*q
+					var eps := width*.0001
+					var dx := (_body_point(p+Vector3.RIGHT*eps,width,height)-_body_point(p-Vector3.RIGHT*eps,width,height))/(2*eps)
+					var dy := (_body_point(p+Vector3.UP*eps,width,height)-_body_point(p-Vector3.UP*eps,width,height))/(2*eps)
+					var dz := (_body_point(p+Vector3.BACK*eps,width,height)-_body_point(p-Vector3.BACK*eps,width,height))/(2*eps)
+					var jacobian := canonical.basis.inverse()*Basis(dx,dy,dz)*canonical.basis
+					normals[index]=(jacobian.inverse().transposed()*normals[index]).normalized()
+				arrays[Mesh.ARRAY_VERTEX]=vertices
+				arrays[Mesh.ARRAY_NORMAL]=normals
+				result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+				result.surface_set_material(surface,source.surface_get_material(surface))
+			_body_variants[key]=result
+		body.mesh=_body_variants[key]
+		body.set_meta("armor_original_body_mesh",body.mesh)
+		body.set_meta("r07_body_variant_mesh",body.mesh)
+		_prepare_legacy_helmets(model,sk,mesh_to_rest*canonical.affine_inverse(),height)
+		applied_any=true
+	if applied_any:model.set_meta("body_shape_revision","kenney_body_r07")
+
+
+static func _prepare_legacy_helmets(model:Node3D,sk:Skeleton3D,canonical_to_rest:Transform3D,height:float)->void:
+	var values:Array=_body_profile.head_scale
+	var scaling:=Basis.from_scale(Vector3(values[0],values[1],values[2]))
+	var pivot:=Vector3(0,height*float(_body_profile.head_pivot_height),0)
+	var remap:=canonical_to_rest*Transform3D(scaling,pivot-scaling*pivot)*canonical_to_rest.affine_inverse()
+	for helmet:Node3D in model.find_children("HelmetVisual_*","Node3D",true,false):
+		var parent:Node3D=helmet.get_parent() as Node3D
+		var parent_chain:=Transform3D.IDENTITY
+		while parent!=null and not parent is BoneAttachment3D and parent!=sk:
+			parent_chain=parent.transform*parent_chain
+			parent=parent.get_parent() as Node3D
+		if not parent is BoneAttachment3D:continue
+		var bone:=sk.find_bone(parent.bone_name)
+		if bone<0:continue
+		var parent_rest:Transform3D=sk.get_bone_global_rest(bone)*parent_chain
+		if not helmet.has_meta("armor_source_transform"):helmet.set_meta("armor_source_transform",helmet.transform)
+		var source:Transform3D=helmet.get_meta("armor_source_transform")
+		helmet.transform=parent_rest.affine_inverse()*remap*parent_rest*source
+		helmet.set_meta("body_shape_revision","kenney_body_r07")

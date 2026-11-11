@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Data loading is shown from the owner snapshot
+PASS: Approach has its own explicit cancellation action
+PASS: Approach cancel sends the real owner command for the craft
+PASS: A UI command does not manufacture readiness or phase completion
+PASS: Preparation label uses actual owner progress
+PASS: Same owner progress drives the progress bar
+PASS: Normal UI omits implementation counters
+PASS: Refresh never mutates the source snapshot
+PASS: Progress refresh retains the existing control tree
+PASS: Unavailable approach cancel stays hidden and sends no command
+PASS: Ready is projected while phase remains owner controlled
+PASS: Preparation failure survives the actual return-to-orbit refresh
+PASS: Cancellation status comes from the returned owner snapshot
+PASS: Old load result does not obscure a new quantum phase
+PASS: Quantum retains its existing abort action
+PASS: Quantum cancellation command remains unchanged
+STAR_MAP_TERRAIN_PREPARATION_UI 16 passed, 0 failed

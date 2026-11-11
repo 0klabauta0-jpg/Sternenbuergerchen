@@ -1,0 +1,228 @@
+{
+  "method": "Front images, manually identified shoulder-cap and helmet endpoints; 2D uncertainty approx 3px. Native bounds use foreground pixels in restricted helmet/pauldron bands. Width ratios are scale invariant; height-normalized widths distinguish head size from shoulder span.",
+  "reference": {
+    "light": {
+      "height_px": 744,
+      "helmet_x": [
+        145,
+        380
+      ],
+      "shoulder_x": [
+        156,
+        367
+      ],
+      "helmet_width_px": 236,
+      "shoulder_width_px": 212,
+      "shoulder_over_helmet": 0.8983050847457628,
+      "helmet_over_height": 0.3172043010752688,
+      "shoulder_over_height": 0.2849462365591398
+    },
+    "medium": {
+      "height_px": 768,
+      "helmet_x": [
+        145,
+        385
+      ],
+      "shoulder_x": [
+        120,
+        407
+      ],
+      "helmet_width_px": 241,
+      "shoulder_width_px": 288,
+      "shoulder_over_helmet": 1.1950207468879668,
+      "helmet_over_height": 0.3138020833333333,
+      "shoulder_over_height": 0.375
+    },
+    "heavy": {
+      "height_px": 770,
+      "helmet_x": [
+        129,
+        370
+      ],
+      "shoulder_x": [
+        75,
+        427
+      ],
+      "helmet_width_px": 242,
+      "shoulder_width_px": 353,
+      "shoulder_over_helmet": 1.4586776859504131,
+      "helmet_over_height": 0.3142857142857143,
+      "shoulder_over_height": 0.4584415584415584
+    }
+  },
+  "initial_r06_broad_band_estimate": {
+    "light": {
+      "height_px": 933,
+      "helmet_x": [
+        166,
+        459
+      ],
+      "shoulder_x": [
+        183,
+        436
+      ],
+      "helmet_width_px": 294,
+      "shoulder_width_px": 254,
+      "shoulder_over_helmet": 0.8639455782312925,
+      "helmet_over_height": 0.31511254019292606,
+      "shoulder_over_height": 0.2722400857449089
+    },
+    "medium": {
+      "height_px": 933,
+      "helmet_x": [
+        800,
+        1097
+      ],
+      "shoulder_x": [
+        815,
+        1083
+      ],
+      "helmet_width_px": 298,
+      "shoulder_width_px": 269,
+      "shoulder_over_helmet": 0.9026845637583892,
+      "helmet_over_height": 0.31939978563772775,
+      "shoulder_over_height": 0.2883172561629153
+    },
+    "heavy": {
+      "height_px": 933,
+      "helmet_x": [
+        1434,
+        1735
+      ],
+      "shoulder_x": [
+        1441,
+        1730
+      ],
+      "helmet_width_px": 302,
+      "shoulder_width_px": 290,
+      "shoulder_over_helmet": 0.9602649006622517,
+      "helmet_over_height": 0.3236870310825295,
+      "shoulder_over_height": 0.3108252947481243
+    }
+  },
+  "r06": {
+    "light": {
+      "helmet_x": [
+        166,
+        459
+      ],
+      "shoulder_x": [
+        196,
+        436
+      ],
+      "helmet_width_px": 294,
+      "shoulder_width_px": 241,
+      "height_px": 933,
+      "shoulder_over_helmet": 0.8197278911564626,
+      "helmet_over_height": 0.31511254019292606,
+      "shoulder_over_height": 0.2583065380493033,
+      "shoulder_y_band": [
+        430,
+        512
+      ]
+    },
+    "medium": {
+      "helmet_x": [
+        800,
+        1097
+      ],
+      "shoulder_x": [
+        816,
+        1083
+      ],
+      "helmet_width_px": 298,
+      "shoulder_width_px": 268,
+      "height_px": 933,
+      "shoulder_over_helmet": 0.8993288590604027,
+      "helmet_over_height": 0.31939978563772775,
+      "shoulder_over_height": 0.2872454448017149,
+      "shoulder_y_band": [
+        410,
+        535
+      ]
+    },
+    "heavy": {
+      "helmet_x": [
+        1434,
+        1735
+      ],
+      "shoulder_x": [
+        1441,
+        1730
+      ],
+      "helmet_width_px": 302,
+      "shoulder_width_px": 290,
+      "height_px": 933,
+      "shoulder_over_helmet": 0.9602649006622517,
+      "helmet_over_height": 0.3236870310825295,
+      "shoulder_over_height": 0.3108252947481243,
+      "shoulder_y_band": [
+        481,
+        555
+      ]
+    }
+  },
+  "r07": {
+    "light": {
+      "helmet_x": [
+        173,
+        451
+      ],
+      "shoulder_x": [
+        193,
+        442
+      ],
+      "helmet_width_px": 279,
+      "shoulder_width_px": 250,
+      "height_px": 911,
+      "shoulder_over_helmet": 0.8960573476702509,
+      "helmet_over_height": 0.3062568605927552,
+      "shoulder_over_height": 0.27442371020856204,
+      "shoulder_y_band": [
+        430,
+        512
+      ]
+    },
+    "medium": {
+      "helmet_x": [
+        807,
+        1089
+      ],
+      "shoulder_x": [
+        782,
+        1117
+      ],
+      "helmet_width_px": 283,
+      "shoulder_width_px": 336,
+      "height_px": 911,
+      "shoulder_over_helmet": 1.187279151943463,
+      "helmet_over_height": 0.3106476399560922,
+      "shoulder_over_height": 0.36882546652030734,
+      "shoulder_y_band": [
+        410,
+        535
+      ]
+    },
+    "heavy": {
+      "helmet_x": [
+        1441,
+        1731
+      ],
+      "shoulder_x": [
+        1378,
+        1793
+      ],
+      "helmet_width_px": 291,
+      "shoulder_width_px": 416,
+      "height_px": 911,
+      "shoulder_over_helmet": 1.429553264604811,
+      "helmet_over_height": 0.3194291986827662,
+      "shoulder_over_height": 0.4566410537870472,
+      "shoulder_y_band": [
+        410,
+        555
+      ]
+    }
+  },
+  "native_measurement_note": "Refined shoulder-cap landmarks isolate ceramic colors, excluding dark upper-arm silhouettes and amber uniform patches. Initial R06 broad-band estimate is retained separately. These silhouette measurements are not anatomical bone widths."
+}

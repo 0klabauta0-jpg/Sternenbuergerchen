@@ -1,0 +1,8 @@
+{
+  "checks": 164,
+  "errors": [],
+  "variant": "r07",
+  "available_variants": 5,
+  "native_combinations": 75,
+  "fixture_export_contains_automated_notes_not_user_approval": true
+}

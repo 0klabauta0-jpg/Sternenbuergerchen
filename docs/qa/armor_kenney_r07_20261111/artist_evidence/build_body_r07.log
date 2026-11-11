@@ -1,0 +1,17 @@
+13:41:38 | INFO: Data are loaded, start creating Blender stuff
+13:41:38 | INFO: Blender create Mesh node characterMedium
+13:41:38 | INFO: Blender create Mesh node Gear_Breastplate_Mesh
+13:41:38 | INFO: glTF import finished in 0.06s
+Info: Saved as "body_r07_editable.blend"
+INFO Draco mesh compression is available, use library at C:\Program Files\Blender Foundation\Blender 5.1\5.1\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+13:41:38 | INFO: Starting glTF 2.0 export
+13:41:38 | INFO: Extracting primitive: characterMedium
+13:41:38 | INFO: Primitives created: 1
+13:41:38 | INFO: Extracting primitive: Gear_Breastplate_Mesh
+13:41:38 | INFO: Primitives created: 3
+13:41:39 | INFO: Finished glTF 2.0 export in 0.2781026363372803 s
+
+R07_BODY {"blender": "5.1.1", "vertices": 1029, "changed_vertices": 460, "maximum_displacement": 0.06773213518925292, "width": 0.3172805856252476, "height": 0.5280175789222807, "profile": {"revision": "kenney_body_r07", "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c", "rows": [[-0.45, 1.0, 1.0], [-0.1, 0.98, 0.97], [0.12, 0.94, 0.94], [0.32, 0.82, 0.87], [0.48, 0.87, 0.9], [0.66, 1.19, 0.98], [0.85, 1.42, 1.04], [1.0, 1.42, 1.02], [1.12, 1.18, 1.0], [1.28, 1.0, 1.0]], "lateral_full": 0.47, "lateral_end": 0.97, "depth_center_width": 0.1, "head_scale": [0.95, 0.92, 0.95], "head_pivot_height": 1.3041783347522133, "head_blend": [1.178, 1.2215], "deltoid_scale": [1.2, 1.1], "deltoid_lateral": [0.4, 0.64, 1.05, 1.28], "description": "R07 broader real clavicle/deltoid contour and modest head reduction; hands/feet/rest skeleton unchanged.", "canonical_bounds_center": [2.8179148430054896e-07, 0.9519510919704418, -0.018390346296293502], "canonical_bounds_size": [5.392452016850282, 5.615744340453994, 1.5536674931845116]}, "body_qa_pass": true, "body_glb_sha256": "c1e3f54de89b7481eb26f6365f99e1368bae063e7876863cc37311588338b376"}
+Blender 5.1.1 (hash b70da489d7f4 built 2026-04-14 01:37:22)
+
+Blender quit

@@ -1,0 +1,512 @@
+[
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_light_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\torso_heavy_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_light_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\pauldron_heavy_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_light_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\knee_heavy_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\forearm_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\shin_heavy_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_medium_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_material_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\thigh_heavy_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "top",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_material.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_material_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_material_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_material_back.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_material_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "back",
+      "three_quarter"
+    ]
+  },
+  {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_wire_right.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_wire_back.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_kenney_r07_20261111\\body_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "right",
+      "back",
+      "three_quarter"
+    ]
+  }
+]
