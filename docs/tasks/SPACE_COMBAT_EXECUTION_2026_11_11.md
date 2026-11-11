@@ -144,7 +144,12 @@ Verifier und diese Statusdokumentation.
   Einbau oberhalb verschob bestehende Bedienelemente aus dem sichtbaren
   Bereich; dafür ist die Rottenverwaltung gegebenenfalls durch Scrollen zu
   erreichen. Native Ergonomie bleibt zu prüfen.
-- AP02/AP03/AP04/AP05 Rest und AP06–AP20: offen.
+- AP06 Owner-Vorstufe: Ein validierter Auftrag kann atomar mehrere aktive
+  Rotten ersetzen; passive Kontakt-/Feuerregeln bleiben im Snapshot,
+  Wiederholung ist idempotent, Abbruch prüft die aktuelle Auftrags-ID.
+  Inaktive oder fremde Rotten verhindern die gesamte Änderung. 13/13;
+  Adapter, UI, Flugausführung und Speicherung sind noch nicht angeschlossen.
+- AP02/AP03/AP04/AP05/AP06 Rest und AP07–AP20: offen.
 
 ## Risiken / offene Punkte
 

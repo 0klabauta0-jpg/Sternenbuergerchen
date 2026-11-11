@@ -76,7 +76,7 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 	if typeof(actor) != TYPE_STRING or String(actor).strip_edges().is_empty() or context.get("authorized") != true:
 		return _reject("authority_required")
 	var operation: String = String(command.get("operation", ""))
-	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set"]:
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set", "order_issue", "order_cancel"]:
 		return _reject("unsupported_operation")
 	var owned: Array = []
 	var members: Dictionary = {}
@@ -93,7 +93,7 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 	if not checked.get("ok", false) or checked.get("replayed", false):
 		return checked
 	var payload: Dictionary = command.payload
-	var id: String = payload.wing_id
+	var id: String = String(payload.get("wing_id", ""))
 	match operation:
 		"wing_create":
 			if _wings.has(id): return _reject("wing_exists")
@@ -134,6 +134,22 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 			if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(payload.leader_craft_id)) != TYPE_STRING or String(pilots[payload.leader_craft_id]).strip_edges().is_empty():
 				return _reject("pilot_missing")
 			_wings[id].leader_craft_id = payload.leader_craft_id
+		"order_issue":
+			# Preflight all wings before replacing any current order.
+			for wing_id in payload.wing_ids:
+				if String(_wings[wing_id].leader_craft_id).is_empty(): return _reject("wing_inactive")
+			var order: Dictionary = payload.duplicate(true)
+			order.erase("wing_ids")
+			order["order_id"] = command.request_id
+			if not order.has("stance"): order["stance"] = "normal"
+			if not order.has("fire_rule"): order["fire_rule"] = "hold"
+			if not order.has("contact_response"): order["contact_response"] = "observe"
+			for wing_id in payload.wing_ids:
+				_wings[wing_id]["order"] = order.duplicate(true)
+		"order_cancel":
+			var current: Dictionary = _wings[id].get("order", {})
+			if current.is_empty() or current.get("order_id") != payload.order_id: return _reject("order_mismatch")
+			_wings[id]["order"] = {}
 	_revision += 1
 	var result := {"ok": true, "reason": "", "revision": _revision, "replayed": false}
 	if not _receipts.has(actor): _receipts[actor] = {}
