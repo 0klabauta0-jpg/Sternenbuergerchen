@@ -157,3 +157,4 @@ docs/qa/hex_move_consumers_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_moving_shot_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_door_guard_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/prepared_supply_route_fuel_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/orbit_owner_integration_20261111/parent_followup/** -text whitespace=-blank-at-eof,cr-at-eol

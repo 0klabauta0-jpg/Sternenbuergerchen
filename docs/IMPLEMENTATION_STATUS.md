@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### Raum-/Reisegrundlagen und Wirtschaftsvorbereitung zusammengeführt
+
+Spacegrundlagen bis613a03c3c wurden isoliert mit dem Tabletopstand zusammengeführt
+und als3d3bf7a1e übernommen. Gemeinsamer Fleet-/Flightowner, Raumindex, Rotten-
+verwaltung und weiterhin gesperrte lokale Fixtures sind erhalten. Polisa-Geburt
+bindet jetzt dieselbe echte Flight-Craft-ID. Weitere gesicherte Ersteintritts-,
+Belegungsrevisions-, Saumpreview- und Client-Tickguarddeltas integriert;
+Parent-Saum12/0, Authority4/0, Door58/0, Adapterpreview4/0 als begrenzte Nachweise.
+Private Supply- und Campaignvorbereitungen mit je12/0 sind integriert, aber noch
+nicht mit Reise/Root/Events verdrahtet. Kein produktiver Orbitanschluss daraus.
+QA: `docs/qa/orbit_owner_integration_20261111/parent_followup/README.md`.
+AP5 Backoff und AP6–8 bleiben in Arbeit; AP9 groß später, EXE nur nach Nutzerfrage.
+
 ### Weltraumkampf AP01 — gemeinsamer Flugzustand und Takt — 11.11.2026
 
 Reise-/Kampfakteure referenzieren je Schiff denselben Flugzustand; Root

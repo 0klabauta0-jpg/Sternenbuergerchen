@@ -1,4 +1,4 @@
-"""Only three bounded owner checks, in a private project/profile; no game startup."""
+"""Selected bounded owner checks in a private project/profile; no game startup."""
 from pathlib import Path
 import hashlib, json, os, re, shutil, subprocess, sys, uuid
 
@@ -6,7 +6,9 @@ source=Path(__file__).resolve().parents[2]
 case=sys.argv[1]
 fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_check.gd",
           "root":"scripts/tests/space_combat_area_real_travel_verifier.gd",
-          "birth":"scripts/tests/polisa_birth_flight_identity_check.gd"}
+          "birth":"scripts/tests/polisa_birth_flight_identity_check.gd",
+          "surface":"scripts/tests/space_surface_approach_preview_verifier.gd",
+          "authority":"scripts/tests/space_combat_authority_tick_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)

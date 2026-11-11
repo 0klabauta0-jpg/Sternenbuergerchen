@@ -2,6 +2,16 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+Aktueller Orbitnachtrag: Spacegrundlagen bis 613a03c3c samt gemeinsamem Flight-
+Owner und Polisa-Flight-IDfix 78f5966b5 sind als 3d3bf7a1e integriert. Danach
+Ersteintritt-/Index-/Saumvorschau und Client-Tickguard bis Source13462af85
+gezielt übernommen. Eigene enge Nachweise: Door58/0, Saum12/0, Authority4/0,
+Adapterpreview4/0. Noch kein produktiver lokaler Flug-/Oberflächenweg.
+Supply-Fuelvorbereitung3f5b4ae04 und Campaign-Abflug/Jobvorbereitung07ca63a89
+sind mit je12/0 integriert und unabhängig eng geprüft, aber ohne Produktaufrufer.
+Ein gemeinsamer Commit, Zielklassifikation und echte Navigationsclaimproducer
+bleiben vor Orbitaktivierung offen. Große Tests später; EXE nur nach Nachfrage.
+
 Neueste Nutzerentscheidung: vor jedem neuen EXE-Build ausdrücklich nachfragen;
 zuerst weitere APs umsetzen. Kein automatischer Export nach bestandenen Gates.
 Lokaler Türschutz jetzt als 26303641d integriert, gemeinsamer enger DoorGuard58/0
