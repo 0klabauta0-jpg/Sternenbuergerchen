@@ -200,8 +200,12 @@ Verifier und diese Statusdokumentation.
   vorhandene Offsetkonvertierung gegen strategische256×256 oder lokale
   Orbitlayout512×256-Grenzen; das strategische Grid bleibt unverändert.
   Grenzprüfung8/8 und bestehende Geometrieprüfung grün. Bereichsidentität/
-  Berechtigung bleiben Rootpflicht; alte Navigation nutzt den Helfer noch
-  nicht, lokale Kampfaufnahme bleibt gesperrt.
+  Berechtigung bleiben Rootpflicht; lokale Kampfaufnahme bleibt gesperrt.
+- AP04a Navigation: Sweeps und Blockerzellen nutzen den jeweiligen
+  Koordinatenrahmen, gemischte Bereichs-IDs werden abgewiesen. Lokale Tests
+  jenseits der strategischen 256er-Grenze, Blocker und Kartenrand4/4;
+  strategische Geometrie, Batch und Fixture-Flugtakt grün. Root-Mutation,
+  lokale Kampfaufnahme und tatsächliche Layoutblocker noch nicht verbunden.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot

@@ -2,6 +2,7 @@ extends RefCounted
 ## Conservative swept-hex proposal validation. No runtime binding yet.
 ## Temporal reservations and deadlock recovery remain AP03 work.
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const AREA = preload("res://scripts/core/space_area_grid.gd")
 const MAX_SAMPLES := 128
 
 static func preview_swept_cells(flight: Dictionary, proposal: Dictionary) -> Dictionary:
@@ -12,12 +13,16 @@ static func resolve_motion(flights: Array[Dictionary], proposals: Array[Dictiona
 	var initial := {}
 	var requested := {}
 	var blocked := {}
+	var area := {"coordinate_frame":world.get("coordinate_frame", "strategic"), "space_area_id":world.get("space_area_id", "")}
+	if not AREA.contains(Vector2i.ZERO, area): return {"ok":false, "reason":"invalid_area"}
 	if typeof(world.get("blocked_cells", [])) != TYPE_ARRAY:
 		return {"ok":false, "reason":"invalid_world"}
 	for cell in world.get("blocked_cells", []):
-		if typeof(cell) != TYPE_VECTOR2I or not GRID.contains(cell): return {"ok":false, "reason":"invalid_world"}
+		if typeof(cell) != TYPE_VECTOR2I or not AREA.contains(cell, area): return {"ok":false, "reason":"invalid_world"}
 		blocked[cell] = true
 	for flight in flights:
+		if flight.get("coordinate_frame", "strategic") != area.coordinate_frame or flight.get("space_area_id", "") != area.space_area_id:
+			return {"ok":false, "reason":"area_mismatch"}
 		var id: Variant = flight.get("craft_id")
 		if typeof(id) != TYPE_STRING or String(id).is_empty() or actors.has(id):
 			return {"ok":false, "reason":"invalid_actor"}
@@ -97,7 +102,7 @@ static func _sweep(flight: Dictionary, proposal: Dictionary) -> Dictionary:
 				var previous_heading := float(a) + angle * maxf(0.0, float(index - 1) / sample_count)
 				visited_cells = _hull_supercover(from, current, previous_heading, heading, margin if index > 0 else 0.0)
 			for visited in visited_cells:
-				if not GRID.contains(visited): return {"ok":false, "reason":"map_edge"}
+				if not AREA.contains(visited, flight): return {"ok":false, "reason":"map_edge"}
 				result[visited] = true
 			previous[offset] = current
 	return {"ok":true, "cells":result.keys()}
