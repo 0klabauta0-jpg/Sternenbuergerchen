@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: All ten owner facts match physical home readiness and job states
+OBSERVE_COUNTS snapshots=1 operations=1 unused_services=0
+PASS: One fresh progress projection after chip recovery
+PASS: Unused service context is not built
+PASS: Accepted first mission at home still reads real launch readiness
+PASS: Chip recovery remains before progress observation
+PASS: Active mission skips home-only UI projection
+PASS: Transit skips impossible home readiness
+PASS: A craft away from home skips readiness even without an active scene
+PASS: Assigned payload is not sufficient without physical boarding
+PASS: Assigned pilot must physically be aboard
+PASS: A pilot assignment is still required
+PASS: Existing launch payload gate remains required
+PASS: Readiness changes are visible immediately without a retained cache
+PASS: Progress reads mutations from recovery and skips irrelevant readiness
+PASS: Later job and progression changes reach the next observation
+PASS: Non-campaign path performs no observation work
+CAMPAIGN_OBSERVE_PROJECTION checks=16 failures=0

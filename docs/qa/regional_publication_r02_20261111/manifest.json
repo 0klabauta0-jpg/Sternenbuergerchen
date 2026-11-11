@@ -1,0 +1,92 @@
+{
+  "base": "85fd00afc",
+  "status": "headless_verified_native_and_isolated_timing_pending",
+  "checks": {
+    "new": 13,
+    "streaming": 3,
+    "r4_projection": 29,
+    "task225": 34
+  },
+  "artifacts": [
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "e3d1d9f701f54d5b27edb4acea8b75c62bb2f99417fedc2d91ad902e998a1a61",
+      "bytes": 915044
+    },
+    {
+      "path": "scripts/tests/regional_fow_publication_test.gd",
+      "sha256": "da780e0075a0b46b5879296d3cdb01e0f58d2a79f9860526e777f1ce05c7d136",
+      "bytes": 4496
+    },
+    {
+      "path": "docs/tasks/REGIONAL_NAV_PUBLICATION_R02_2026_11_11.md",
+      "sha256": "61317ccfb1723caf783bd85315a2a194c3f3ae1da6fe3129dad87be22ed52c48",
+      "bytes": 3108
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/baseline_diagnostic.json",
+      "sha256": "6068bddbcf9972c6c9bd1539ba90d7d01cab35c3452223d25a911cc7d49c640b",
+      "bytes": 676
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/baseline_diagnostic.log",
+      "sha256": "9bd4f88bc70b8b463408339d7a875b9ad63a9c0d302ac211071983d98ef4d124",
+      "bytes": 702
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/compare_publication.gd",
+      "sha256": "42d9bc2b545f17c5237f775bfbbe97ea9931f5a8a594460b3f546fe6955018ee",
+      "bytes": 2080
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/green.log",
+      "sha256": "db345f68b1264f298faa488b3d441712a730e8a1047b4e6be9af18505923c8a6",
+      "bytes": 1131
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/native_glut_streaming_verifier.log",
+      "sha256": "80acbf520b2282fb26b0fa44d92a888c4ff87197cffc23b4c8f4b1eae774c77c",
+      "bytes": 296
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/publish_probe.gd",
+      "sha256": "ef48bfb5da713b8f5d5c06b1fa4b59d02f5f7252401b25ffccd96a8084cd5ea9",
+      "bytes": 1786
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/README.md",
+      "sha256": "de4fbd669ed583e27021679b03630fdbb302a957b4040d2dfcac41685eff700c",
+      "bytes": 4208
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/red.log",
+      "sha256": "2e1a1f2ad69282bb8307689a5a991881e7239b6d16fbdb069335038d23d2deef",
+      "bytes": 282
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/regressions.json",
+      "sha256": "e9476d25458a9bc1a024a9734cf387a1ed5f08f310f8be714d760de39bc385ce",
+      "bytes": 579
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/runtime_hitches_r4_20261107_fog_projection_verifier.log",
+      "sha256": "37f58f60e69c9af224540dad03862aa7f3d6ce227a9b25e6013900b932974be6",
+      "bytes": 2226
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.log",
+      "sha256": "23520be101a1c321fbff229d76958f73ed9418ffe9988dfd0c9784ba669c18be",
+      "bytes": 2156
+    },
+    {
+      "path": "docs/qa/regional_publication_r02_20261111/terrain_view_before.gd",
+      "sha256": "82e10338e31d47f2c17ed76d6d47534c1294520d5ece2c59cde117b07ad261c1",
+      "bytes": 913007
+    }
+  ]
+}

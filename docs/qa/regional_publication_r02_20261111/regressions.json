@@ -1,0 +1,25 @@
+[
+  {
+    "script": "native_glut_streaming_verifier",
+    "exit": 0,
+    "issues": [
+      "REGIONAL_CAMERA_REVERSAL PASS active=108",
+      "REGIONAL_CAMERA_CACHE PASS retained=64",
+      "REGIONAL_HIDDEN_VIEWPORT PASS"
+    ]
+  },
+  {
+    "script": "runtime_hitches_r4_20261107_fog_projection_verifier",
+    "exit": 0,
+    "issues": [
+      "R4_FOG_PROJECTION: 29 passed, 0 failed"
+    ]
+  },
+  {
+    "script": "task_225_fog_of_war_2_5d_visual_overlay_and_contacts",
+    "exit": 0,
+    "issues": [
+      "=== RESULTS: 34 passed, 0 failed ==="
+    ]
+  }
+]

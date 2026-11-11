@@ -54,3 +54,11 @@ art/armor_kenney_r05_20261111/** -text whitespace=blank-at-eol,blank-at-eof,spac
 docs/qa/armor_orc_morozov_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/qa/armor_kenney_r05_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/qa/armor_kenney_r05_flat_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# R06 armor revision retains independently hashed source/evidence bytes.
+art/armor_kenney_r06_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/armor_kenney_r06_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Parallel campaign-observation and regional-publication evidence is byte hashed.
+docs/qa/campaign_observe_projection_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/regional_publication_r02_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

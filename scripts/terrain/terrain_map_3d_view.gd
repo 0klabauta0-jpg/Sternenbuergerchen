@@ -1257,6 +1257,7 @@ var _regional_chunk_nodes: Dictionary = {}
 var _regional_requested_chunks: Dictionary = {}
 var _regional_pending_chunks: Array[Vector2i] = []
 var _regional_chunk_stats: Dictionary = {}
+var _regional_fow_render_cache: Dictionary = {}
 var _regional_retained_chunks: Dictionary = {}
 var _regional_surface_profiles: Dictionary = {}
 var _regional_loading_label: Label
@@ -1548,6 +1549,7 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 	_regional_pending_chunks.clear()
 	_set_regional_loading_visible(false)
 	_regional_chunk_stats.clear()
+	_regional_fow_render_cache.clear()
 	_regional_retained_chunks.clear()
 	_regional_chunk_build_count = 0
 	_regional_overview_root = null
@@ -4261,6 +4263,9 @@ func _build_regional_chunk(chunk: Vector2i) -> void:
 	_ground_multimesh_tile_count = previous_counts.y
 	_tile_grid_line_count = previous_counts.z
 	_regional_chunk_nodes[chunk] = visual
+	# Static overlay geometry shares this chunk's bounded construction/lifetime.
+	# Current visibility stays outside this cache and is resolved at publication.
+	_regional_fow_render_cache[chunk] = _build_fow_overlay_render_cache(tiles)
 	_regional_chunk_build_count += 1
 	_map_root = parent
 
@@ -4271,6 +4276,7 @@ func _remove_regional_chunk(chunk: Vector2i) -> void:
 	retired.queue_free()
 	_regional_chunk_nodes.erase(chunk)
 	_regional_chunk_stats.erase(chunk)
+	_regional_fow_render_cache.erase(chunk)
 	_regional_retained_chunks.erase(chunk)
 
 
@@ -4302,18 +4308,18 @@ func _publish_regional_chunks(next: Dictionary) -> void:
 			_runtime_regional_publish_timing_debug.record_sample(Engine.get_process_frames(), Time.get_ticks_usec() - publish_started_usec)
 		return
 	var counts := Vector3i.ZERO
-	var visible_tiles: Array = []
+	var visible_tile_count: int = 0
 	for chunk in next:
 		counts += Vector3i(_regional_chunk_stats[chunk])
-		visible_tiles.append_array(_regional_tiles_by_chunk[chunk])
+		visible_tile_count += _regional_tiles_by_chunk[chunk].size()
 	_ground_multimesh_instance_count = counts.x
 	_ground_multimesh_tile_count = counts.y
 	_tile_grid_line_count = counts.z
-	_map_tile_count = visible_tiles.size()
+	_map_tile_count = visible_tile_count
 	_visual_streaming_skipped_tile_count = _map_total_tile_count - _map_tile_count
 	_visual_streaming_active_chunks = next
 	_visual_streaming_active_chunk_key = _build_visual_chunk_key(next)
-	_cache_fow_overlay_render_tiles(visible_tiles)
+	_cache_fow_overlay_regional_chunks(next)
 	_rebuild_fog_of_war_visuals()
 	for chunk in next:
 		_regional_chunk_nodes[chunk].show()
@@ -6899,10 +6905,17 @@ func _rebuild_fog_of_war_visuals() -> void:
 
 
 func _cache_fow_overlay_render_tiles(tiles: Array) -> void:
-	_fow_overlay_render_tiles.clear()
-	_fow_overlay_render_tile_ids = PackedStringArray()
-	_fow_overlay_tile_by_id.clear()
-	_fow_overlay_cached_blackout_y = _authored_visual_top_y
+	_install_fow_overlay_render_cache(_build_fow_overlay_render_cache(tiles))
+
+
+func _build_fow_overlay_render_cache(tiles: Array) -> Dictionary:
+	# Geometry only: never retain team, revision, explored or visible state.
+	var render_tiles: Array = []
+	var ids := PackedStringArray()
+	var tile_by_id: Dictionary = {}
+	var blackout_y: float = _authored_visual_top_y
+	var safety_min := Vector3.ZERO
+	var safety_max := Vector3.ZERO
 	var has_bounds: bool = false
 	for tile_data in tiles:
 		if tile_data == null:
@@ -6910,23 +6923,64 @@ func _cache_fow_overlay_render_tiles(tiles: Array) -> void:
 		var tile_id: String = _get_explicit_tile_id_for_fow(tile_data)
 		if tile_id.is_empty():
 			continue
-		_fow_overlay_render_tiles.append(tile_data)
-		_fow_overlay_render_tile_ids.append(tile_id)
-		_fow_overlay_tile_by_id[tile_id] = tile_data
+		render_tiles.append(tile_data)
+		ids.append(tile_id)
+		tile_by_id[tile_id] = tile_data
 		var surface_origin: Vector3 = _get_fow_surface_overlay_transform(tile_data).origin
 		if not has_bounds:
-			_fow_overlay_safety_min = surface_origin
-			_fow_overlay_safety_max = surface_origin
+			safety_min = surface_origin
+			safety_max = surface_origin
 			has_bounds = true
 		else:
-			_fow_overlay_safety_min.x = minf(_fow_overlay_safety_min.x, surface_origin.x)
-			_fow_overlay_safety_min.z = minf(_fow_overlay_safety_min.z, surface_origin.z)
-			_fow_overlay_safety_max.x = maxf(_fow_overlay_safety_max.x, surface_origin.x)
-			_fow_overlay_safety_max.z = maxf(_fow_overlay_safety_max.z, surface_origin.z)
+			safety_min.x = minf(safety_min.x, surface_origin.x)
+			safety_min.z = minf(safety_min.z, surface_origin.z)
+			safety_max.x = maxf(safety_max.x, surface_origin.x)
+			safety_max.z = maxf(safety_max.z, surface_origin.z)
 		var tile_top_y: float = float(tile_data.height_level) * _get_3d_height_step()
 		var object_top_y: float = tile_top_y + (maxf(float(tile_data.object_height), 0.0) * OBJECT_HEIGHT_STEP)
-		_fow_overlay_cached_blackout_y = maxf(_fow_overlay_cached_blackout_y, object_top_y)
-	_fow_overlay_cached_blackout_y += FOW_BLACKOUT_COVER_Y_OFFSET
+		blackout_y = maxf(blackout_y, object_top_y)
+	return {"tiles": render_tiles, "ids": ids, "tile_by_id": tile_by_id,
+		"safety_min": safety_min, "safety_max": safety_max,
+		"blackout_y": blackout_y + FOW_BLACKOUT_COVER_Y_OFFSET}
+
+
+func _cache_fow_overlay_regional_chunks(chunks: Dictionary) -> void:
+	var render_tiles: Array = []
+	var ids := PackedStringArray()
+	var tile_by_id: Dictionary = {}
+	var blackout_y: float = _authored_visual_top_y + FOW_BLACKOUT_COVER_Y_OFFSET
+	var safety_min := Vector3.ZERO
+	var safety_max := Vector3.ZERO
+	var has_bounds: bool = false
+	for chunk: Vector2i in chunks:
+		var cached: Dictionary = _regional_fow_render_cache[chunk]
+		render_tiles.append_array(cached.tiles)
+		ids.append_array(cached.ids)
+		tile_by_id.merge(cached.tile_by_id, true)
+		if cached.ids.is_empty():
+			continue
+		if not has_bounds:
+			safety_min = cached.safety_min
+			safety_max = cached.safety_max
+			has_bounds = true
+		else:
+			safety_min.x = minf(safety_min.x, cached.safety_min.x)
+			safety_min.z = minf(safety_min.z, cached.safety_min.z)
+			safety_max.x = maxf(safety_max.x, cached.safety_max.x)
+			safety_max.z = maxf(safety_max.z, cached.safety_max.z)
+		blackout_y = maxf(blackout_y, cached.blackout_y)
+	_install_fow_overlay_render_cache({"tiles": render_tiles, "ids": ids,
+		"tile_by_id": tile_by_id, "safety_min": safety_min,
+		"safety_max": safety_max, "blackout_y": blackout_y})
+
+
+func _install_fow_overlay_render_cache(cached: Dictionary) -> void:
+	_fow_overlay_render_tiles = cached.tiles
+	_fow_overlay_render_tile_ids = cached.ids
+	_fow_overlay_tile_by_id = cached.tile_by_id
+	_fow_overlay_safety_min = cached.safety_min
+	_fow_overlay_safety_max = cached.safety_max
+	_fow_overlay_cached_blackout_y = cached.blackout_y
 
 
 func _process_pending_fow_overlay_full_rebuild() -> void:

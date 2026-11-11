@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real512x256B subset spans multiple chunks and overlay slices
+PASS: Every resident chunk has its matching static metadata
+PASS: Warm publication performs zero per-tile surface geometry queries
+PASS: Uncached independent publication still visits every source tile
+PASS: Cached publication exactly matches full ordered IDs, lookups, safety bounds and blackout height
+PASS: Unexplored publication retains protective blackout until overlay completes
+PASS: Latest FoW knowledge wins while cached geometry overlay is prepared
+PASS: Current visibility revision remains authoritative
+PASS: Retiring chunk also releases metadata
+PASS: Recreated chunk rebuilds metadata from current source geometry
+PASS: Recreated chunk publishes changed height instead of stale cached blackout
+PASS: Map replacement clears every old regional metadata entry
+PASS: Map replacement uses only replacement terrain
+REGIONAL_FOW_PUBLICATION 13 passed, 0 failed

@@ -1,0 +1,15 @@
+{
+  "base": "85fd00afc",
+  "after": "R02 reviewed source e3d1d9f701f54d5b27edb4acea8b75c62bb2f99417fedc2d91ad902e998a1a61",
+  "modification": "global class_name removed, LF text for both copies",
+  "files": [
+    {
+      "name": "terrain_view_before.gd",
+      "sha256": "82e10338e31d47f2c17ed76d6d47534c1294520d5ece2c59cde117b07ad261c1"
+    },
+    {
+      "name": "terrain_view_after.gd",
+      "sha256": "f2259d022a5b85a67f05606c482afa01de506486b7860054a4861530f16b0076"
+    }
+  ]
+}

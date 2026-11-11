@@ -1,0 +1,93 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: exactly two actual roster actors
+PASS: both initially outside despite pilot assignment
+PASS: registry has no commander third actor
+PASS: assignment is not physical pilot presence
+PASS: outside pilot equips before checkpoint
+PASS: sleep reserves bed and starts real walk
+PASS: sleep never teleports to sleeping
+PASS: reserved bed rejects other person
+PASS: real navigation arrives at reserved bed
+FAIL: sleep blocks incompatible movement
+PASS: sleep never mutates medical roster values
+PASS: sleeping base checkpoint saves at actual bed arrival
+FAIL: continue restores actual sleeping person and exclusive bed
+PASS: unassigned-team pilot loadout survives checkpoint restore
+FAIL: wake frees sleeping person
+PASS: wake releases bed
+PASS: waking never heals or mutates medical roster values
+PASS: other person can reserve free bed
+PASS: cancel walk releases bed
+PASS: cancel removes movement intent and holds actual position
+PASS: terminal request starts validated path
+PASS: hidden base still reaches terminal and emits once
+PASS: arrival does not reopen terminal repeatedly
+PASS: crew boarding begins through actual map
+PASS: moving boarding blocks equipment changes
+PASS: both same identities board via owner after arrival
+PASS: existing transport owner confirms troop payload
+PASS: pilot exits physically while assignment remains
+PASS: unboard retains pilot assignment
+PASS: repeat team boarding accepts returning pilot without recreating payload
+PASS: repeat boarding keeps existing passenger and payload coherent
+PASS: already complete boarding is idempotent
+PASS: accept actual job before orbital presence regression
+PASS: actual boarded crew reaches moon orbit for presence checks
+PASS: moon orbit is not home without a mission or transfer
+PASS: moon orbit rejects base_cancel at owner boundary
+PASS: moon orbit rejects base_wake at owner boundary
+PASS: moon orbit rejects base_unboard at owner boundary
+PASS: moon orbit commands preserve actual crew presence
+PASS: actual quantum begins for presence checks
+PASS: quantum is not home without a mission or transfer
+PASS: quantum rejects base_cancel at owner boundary
+PASS: quantum rejects base_wake at owner boundary
+PASS: quantum rejects base_unboard at owner boundary
+PASS: quantum commands preserve actual crew presence
+PASS: actual quantum abort holds remote crew
+PASS: stopped quantum is not home without a mission or transfer
+PASS: stopped quantum rejects base_cancel at owner boundary
+PASS: stopped quantum rejects base_wake at owner boundary
+PASS: stopped quantum rejects base_unboard at owner boundary
+PASS: stopped quantum commands preserve actual crew presence
+PASS: held crew starts actual moon return
+PASS: returned moon orbit before landing is not home without a mission or transfer
+PASS: returned moon orbit before landing rejects base_cancel at owner boundary
+PASS: returned moon orbit before landing rejects base_wake at owner boundary
+PASS: returned moon orbit before landing rejects base_unboard at owner boundary
+PASS: returned moon orbit before landing commands preserve actual crew presence
+PASS: only explicit actual moon landing restores base availability
+PASS: optional base state passes checkpoint owner validation
+PASS: continue retains actual positions/presence and identities
+PASS: pilot loadout survives boarded refresh and second Continue
+PASS: continue restores existing transport payload alongside presence
+PASS: legacy checkpoint without optional fields remains valid
+FAIL: checkpoint accepts any actual roster person as pilot and other person as leader
+PASS: malformed optional base position rejects restore
+BASE_PERSONNEL failed=4
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:12)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:12)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:52)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:52)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:127)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_personnel_runtime_verifier.gd:127)

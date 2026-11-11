@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Getaktete Kampagnenbeobachtung und regionale Publikation —11.11.2026
+
+Isolierter Taskstand auf85fd00afc. Fortschrittsbeobachtung verwendet einen
+frischen lokalen Snapshot nach Chip-Recovery (Probe5→1) und liest unterwegs
+keine vollständige Operations-UI; physische Readiness unverändert. Neuer
+Verifier16/0, Domain54/0, Tutorial7/0. Vier alte Basisverifier-Fehler auf
+unverändertem Adapter reproduziert und nach Fix identisch; alter
+Onboardingverifier bleibt ebenfalls nicht grün. Statische FoW-Metadaten werden
+je regionalem Chunk vorbereitet, Publikation ohne6912 wiederholte
+Geometrieabfragen, neuer Verifier13/0 und Streaming3/0/FoW29/0/Overlay34/0.
+QA campaign_observe_projection_20261111 und regional_publication_r02_20261111.
+Isolierte CPU-Paarmessung und neuer nativer B-Lauf noch ausstehend, keine
+allgemeine FPS-Freigabe. Ganze Gelände-Renderressourcen vorzubereiten bleibt
+eigener Folgetask TERRAIN_RESOURCE_PREFILL_2026_11_11; Kartengröße unverändert.
+
+
 ### Körperfolgende Rüstung R05 — 11.11.2026
 
 Isolierter Taskbranch task/native-glut-maps-20261110 auf290fa0fb6. Nach vom

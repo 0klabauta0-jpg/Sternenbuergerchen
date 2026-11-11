@@ -1,0 +1,71 @@
+{
+  "date": "2026-11-11",
+  "baseline": "85fd00afc",
+  "target_checks": {
+    "red_checks": 16,
+    "red_failures": 6,
+    "green_checks": 16,
+    "green_failures": 0,
+    "campaign_chain": 54,
+    "tutorial_projection": 7,
+    "known_base_personnel_failures_before": 4,
+    "known_base_personnel_failures_after": 4
+  },
+  "counts": {
+    "progress_snapshot_before": 5,
+    "progress_snapshot_after": 1,
+    "away_ui_before": 1,
+    "away_ui_after": 0
+  },
+  "isolated_native_timings_pending": true,
+  "artifacts": [
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "810a207101b5933c24ae75f0704b7df12753c08a3879abbf2b663116caf62ef2"
+    },
+    {
+      "path": "scripts/tests/campaign_observe_projection_test.gd",
+      "sha256": "e2fc6c1d9c3b235cb9d5966fbc93c0505e03f59c774dabefd4e9f2f5d9118ee0"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_after_base_personnel_full.log",
+      "sha256": "a68d208180ec1b6d26e13f5942af363a4f6aae37b4dbce1d51b240a0436e399e"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_baseline_base_personnel.log",
+      "sha256": "cfd03398f842fbad0a8483e87128769f6bece93fb72cb52b2ff81f881d06ce1d"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_counts_after.log",
+      "sha256": "9ecb9c25985e921201c0ba6e6d571e4f9e731defee1b1e169518e68e018095dd"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_counts_before.log",
+      "sha256": "68ed1b074d91c2ea1226fd5c78debf5c7877e42cf7c6e34d00076d12e185a500"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_green.log",
+      "sha256": "19308d19010bce49cf9e1d8b24cead14079f56666733e4fd8dc0646e5b4bb31b"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_red.log",
+      "sha256": "293de371d1eecc5888f2b48290ec486d89971821d516dfaeeaa4ffc08dc040a3"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_regression_campaign_five_missions_chain_test.log",
+      "sha256": "34673a321759ae76dac070a24d49dc548a4a4ec8db3978499d08f35800374318"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_regression_campaign_onboarding_state_test.log",
+      "sha256": "1903f97ce18783196d9073ed839ea3e1fc98ecf38ccaeedcaa0d91ec716daf94"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/campaign_observe_regression_campaign_tutorial_single_projection_verifier.log",
+      "sha256": "5cfe433010697ecc31c979ce2a65b8ca24d1d2d7024cbdc869c8dc203beb2ccc"
+    },
+    {
+      "path": "docs/qa/campaign_observe_projection_20261111/review.md",
+      "sha256": "10150bc90df5a867e03079911fb67e55ac137e142d88fd3b3c2ae1ca897b1275"
+    }
+  ]
+}

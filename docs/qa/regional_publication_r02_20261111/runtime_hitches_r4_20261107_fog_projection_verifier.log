@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Small real terrain overlay completed
+PASS: Fixture contains actual last-known contact geometry
+PASS: Fixture contains actual planned-order geometry
+PASS: Fresh timestamp is published even when visuals are unchanged
+PASS: Timestamp-only update retains actual contact nodes without rebuilding
+PASS: Timestamp-only update retains actual order nodes without rebuilding
+PASS: Timestamp-only update retains the full contact visual receipt
+PASS: Consumer does not mutate caller snapshot
+PASS: Fresh revision is published independently of visual reuse
+PASS: Revision-only update retains both actual node groups
+PASS: Complete latest source metadata is published even when geometry is unchanged
+PASS: Metadata-only source update retains actual geometry
+PASS: Same-tick detection change remains fresh in the full source snapshot
+PASS: Same-tick detection change updates the actual contact projection
+PASS: Exact source coordinates invalidate contact geometry without display rounding
+PASS: Moved last-known contact rebuilds to its actual new position
+PASS: Blackout contact removal leaves no stale actual marker
+PASS: Unknown current contact remains filtered without invented knowledge
+PASS: Changed terrain visibility invalidates dynamic admission even at the same revision and target IDs
+PASS: Losing terrain visibility removes the formerly admitted current contact
+PASS: Actual current target visibility admits its existing contact without terrain reveal
+PASS: Losing target visibility removes the formerly admitted current contact
+PASS: Off mode refreshes and admits the existing current contact
+PASS: Full current contact profile/confidence payload is preserved
+PASS: New blackout team cannot retain old off-mode admission
+PASS: Changed selected-fireteam payload still filters existing contacts
+PASS: Returning selection reprojects the same actual contact
+PASS: All source tile values remain unchanged
+PASS: Existing order payload remains unchanged
+R4_FOG_PROJECTION: 29 passed, 0 failed
+R4_FOG_PROJECTION_PASS

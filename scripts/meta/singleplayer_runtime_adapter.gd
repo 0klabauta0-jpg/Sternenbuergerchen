@@ -578,19 +578,32 @@ func observe_campaign_progress() -> void:
 	if not _campaign_mode:
 		return
 	_recover_secured_campaign_chips()
+	# One fresh progress projection after recovery; never retain it across calls.
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
+	var jobs: Dictionary = campaign.jobs
 	var at_home := _flow.get("_active_mission") == null and not _has_active_transit()
 	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
 		at_home = at_home and String(location) == "homebase"
-	var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
-	var craft_id: String = String(selected_craft.get("id", ""))
-	var ready := not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
-	ready = ready and (_base_personnel == null or (_base_personnel.is_pilot_aboard(craft_id) and bool(_base_personnel.get_payload_presence(craft_id).all_aboard)))
-	var job: Dictionary = Dictionary(campaign.jobs.get("satellite_recovery", {}))
-	var service := _service_context(craft_id)
-	var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(craft_id, {}))
-	var progress: Dictionary = campaign.get("progress",{})
-	_observe({"base_ready":at_home and ready and String(job.get("status","")) == "accepted","satellite_uploaded":String(job.get("status","")) == "completed","outpost_completed":_job_complete("outpost_recovery"),"outpost_recruited":bool(progress.get("recruited_outpost",false)),"crate_loaded":bool(progress.get("crate_loaded",false)),"delivery_completed":_job_complete("benit_delivery"),"outpost_chip_uploaded":_job_complete("outpost_chip_recovery"),"rescue_completed":_job_complete("buccaneer_rescue"),"pilot_recruited":bool(progress.get("recruited_pilot",false)),"second_pad_built":bool(progress.get("second_pad_built",false))})
+	var job: Dictionary = Dictionary(jobs.get("satellite_recovery", {}))
+	var ready := false
+	# This full UI projection is only needed when base_ready can become true.
+	if at_home and String(job.get("status", "")) == "accepted":
+		var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
+		var craft_id: String = String(selected_craft.get("id", ""))
+		ready = not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
+		ready = ready and (_base_personnel == null or (_base_personnel.is_pilot_aboard(craft_id) and bool(_base_personnel.get_payload_presence(craft_id).all_aboard)))
+	var progress: Dictionary = campaign.get("progress", {})
+	_observe({
+		"base_ready": ready,
+		"satellite_uploaded": String(job.get("status", "")) == "completed",
+		"outpost_completed": String(Dictionary(jobs.get("outpost_recovery", {})).get("status", "")) == "completed",
+		"outpost_recruited": bool(progress.get("recruited_outpost", false)),
+		"crate_loaded": bool(progress.get("crate_loaded", false)),
+		"delivery_completed": String(Dictionary(jobs.get("benit_delivery", {})).get("status", "")) == "completed",
+		"outpost_chip_uploaded": String(Dictionary(jobs.get("outpost_chip_recovery", {})).get("status", "")) == "completed",
+		"rescue_completed": String(Dictionary(jobs.get("buccaneer_rescue", {})).get("status", "")) == "completed",
+		"pilot_recruited": bool(progress.get("recruited_pilot", false)),
+		"second_pad_built": bool(progress.get("second_pad_built", false))})
 
 func get_space_travel_snapshot(craft_id: String = "") -> Dictionary:
 	if _travel == null:
