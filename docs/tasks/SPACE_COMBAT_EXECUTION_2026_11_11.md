@@ -33,6 +33,16 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warp-Abschlussabsicht bleibt nach Pilot-/Eintrittsfehlern an Fleetowner,
+  Einzel-Travelowner-Epoche, Flightrevision und Reise gebunden. Ein kleinerer
+  Folgetick darf nicht wieder strategisch weiterlaufen; Ownerreset verwirft
+  die Absicht. Großtick→Pilot fehlt→kleiner Folgetick war rot, danach grün.
+- Die Cutlass-Zielregelung bremst am Körpergate stärker: Ein 60-Hz-Test ab
+  sechs Feldern vor dem Gate traf zuvor durch Überschwingen die Körpersperre;
+  danach erreicht der echte Bewegungscommand das Gate und die Heimatlandung.
+  Bestehende Guidance- und Polisa-Nachbarprüfungen grün. Eintritt/Flow/Pilot im
+  Test weiterhin über begrenzte Fixtures; keine native Gesamtfreigabe.
+
 - Polisa-Pilotguard: Auch ein regulärer nichtkampagnen Stationsbesuch mit
   aktiver schiffseigener Visitidentität durchläuft nun den vorhandenen echten
   Pilot-/Crew-/Embark-/Pending-Effect-Guard und liefert die aktuelle Piloten-ID.

@@ -24,6 +24,7 @@ func _initialize() -> void:
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = ADAPTER.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._space_route_requested = true
+	sim.configure_base_personnel(pilot)
 	assert(not adapter._local_warp_arrival_enabled)
 	adapter._local_warp_arrival_enabled = true
 	adapter._pad_by_craft["ship"] = "homebase_pad_01"
@@ -31,6 +32,10 @@ func _initialize() -> void:
 	pilot.aboard = false
 	adapter.advance_space_travel(3.0)
 	assert(fleet.get_craft_snapshot("ship").phase == "quantum" and adapter._warp_arrival_feedback.ship.reason == "pilot_not_aboard")
+	var blocked_travel: Dictionary = fleet.get_craft_snapshot("ship")
+	var blocked_pose: Dictionary = fleet.get_flight_state("ship").get_snapshot()
+	adapter.advance_space_travel(0.01)
+	assert(fleet.get_craft_snapshot("ship") == blocked_travel and fleet.get_flight_state("ship").get_snapshot() == blocked_pose)
 	pilot.aboard = true
 	assert(_arrive(sim, adapter))
 	var flight = fleet.get_flight_state("ship")
@@ -68,9 +73,23 @@ func _initialize() -> void:
 			if gates.has(GRID.to_offset(cell)): at_gate = true
 		if valid and at_gate: target = point; break
 	assert(target.is_finite())
-	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "position_plane":target, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}, flight.get_snapshot().tick + 1).ok)
-	assert(state.update_actor_cell("ship", GRID.HEX.round_axial(GRID.HEX.plane_to_axial(target))))
+	var target_hex: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(target))
+	# Place the fixture several cells before the gate, then use the real command
+	# and 60 Hz flight tick for the final approach (no whole-map soak).
+	var start_hex: Vector2i = GRID.from_offset(GRID.to_offset(target_hex) + Vector2i(0, 6))
+	var start_position: Vector2 = GRID.HEX.axial_to_plane(Vector2(start_hex))
+	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "position_plane":start_position, "velocity_plane":Vector2.ZERO}, flight.get_snapshot().tick + 1).ok)
+	assert(state.update_actor_cell("ship", start_hex))
+	var move: Dictionary = adapter.request_operation("space_move", {"craft_id":"ship", "target_hex":target_hex, "request_id":"to-home-gate"})
+	if not move.get("ok", false): print("HOME_GATE_MOVE_REJECT: ", move, " target=", target_hex)
+	assert(move.ok)
 	sim.tick_counter = flight.get_snapshot().tick
+	for _step in 1200:
+		sim.tick_counter += 1
+		sim._advance_space_flights(1.0 / 60.0, sim.tick_counter)
+		if state.get_flight_controls().is_empty(): break
+	if sim.get_space_flight_status("ship").get("reason") != "arrived": print("HOME_GATE_MOVE_STATUS: ", sim.get_space_flight_status("ship"), " pose=", flight.get_snapshot(), " target=", target, " control=", state.get_flight_controls())
+	assert(sim.get_space_flight_status("ship").get("reason") == "arrived")
 	pilot.aboard = false
 	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home-no-pilot").get("reason") == "pilot_not_aboard")
 	pilot.aboard = true

@@ -53,8 +53,24 @@ func _initialize() -> void:
 	assert(observed == [true] and flight.get_snapshot() == arrived)
 	assert(state.remove_actor("space_fixture_entry_blocker"))
 	adapter.free(); pilot.free(); flow.free(); sim.free()
+	_verify_completion_intent_owner_reset()
 	print("SPACE_WARP_ENTRY_OWNER passed")
 	quit(0)
+
+func _verify_completion_intent_owner_reset() -> void:
+	var fleet = FLEET.new(); assert(fleet.configure().ok); fleet.register_craft("ship")
+	assert(_travel(fleet, "launch_to_orbit", {"craft_id":"ship"}, "launch").ok)
+	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"planet_orbit"}, "warp").ok)
+	var sim = ROOT.new(); sim.configure_singleplayer_owners(null, null, null, fleet)
+	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
+	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = ADAPTER.new()
+	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot
+	assert(sim.configure_departure_adapter(adapter).ok)
+	assert(sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0).reason == "pilot_not_aboard" and sim.is_singleplayer_warp_entry_pending("ship"))
+	var flight: RefCounted = fleet.get_flight_state("ship")
+	assert(fleet._owners.ship.configure("ship").ok and fleet.get_flight_state("ship") == flight)
+	assert(not sim.is_singleplayer_warp_entry_pending("ship"))
+	adapter.free(); pilot.free(); flow.free(); sim.free()
 
 func _travel(fleet: RefCounted, operation: String, payload: Dictionary, request_id: String) -> Dictionary:
 	return fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":operation, "payload":payload, "request_id":request_id}, {"runtime_authorized":true})
