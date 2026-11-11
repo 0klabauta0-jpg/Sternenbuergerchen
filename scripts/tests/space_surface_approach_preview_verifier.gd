@@ -3,6 +3,7 @@ const ROOT = preload("res://scripts/core/simulation_root.gd")
 const FLEET = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 
 func _initialize() -> void:
 	var fleet = FLEET.new()
@@ -37,6 +38,17 @@ func _initialize() -> void:
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev - 1, wing_rev, auth).get("reason") != "stale_area_revision": failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev - 1, auth).get("reason") != "stale_wing_revision": failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, {"runtime_authorized":true, "actor_id":"other"}).get("reason") != "wing_required": failed += 1
+	var intruder = FLIGHT.new()
+	intruder.configure("intruder", {"position_plane":before.position_plane, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon"})
+	var registry: RefCounted = state.get("_registry")
+	registry.register_actor("intruder", intruder)
+	var overlap: Array[Vector2i] = [gate]
+	registry.update_actor_cells("intruder", overlap)
+	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "stale_area_revision": failed += 1
+	area_rev = state.get_area_revision("orbit_approach:moon")
+	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "occupied": failed += 1
+	registry.unregister_actor("intruder")
+	area_rev = state.get_area_revision("orbit_approach:moon")
 	var away: Vector2i = GRID.from_offset(gate_offset + Vector2i(0,3))
 	flight.commit_motion({"expected_revision":flight_rev, "position_plane":GRID.HEX.axial_to_plane(Vector2(away))}, 2)
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, area_rev, wing_rev, auth).get("reason") != "stale_spatial_index": failed += 1
@@ -47,5 +59,5 @@ func _initialize() -> void:
 	state.sync_moved_actors()
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, state.get_area_revision("orbit_approach:moon"), wing_rev, auth).get("reason") != "body_blocked": failed += 1
 	sim.free()
-	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 12 - failed, " failed=", failed)
+	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 14 - failed, " failed=", failed)
 	quit(1 if failed else 0)
