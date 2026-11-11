@@ -16,8 +16,11 @@ func _initialize() -> void:
 	var claim: Array[Vector2i] = [cell + Vector2i(1,0)]
 	state.record_navigation_claim(id, area, claim)
 	if state.deactivate_actor(id).get("reason") != "flight_not_inactive": failed += 1
-	flight.commit_space_activity_transition({"expected_revision":0, "motion_mode":"inactive"}, 1)
-	if not state.deactivate_actor(id).get("ok", false): failed += 1
+	var prepared: Dictionary = state.validate_deactivation(id, 0, state.get_area_revision(area))
+	var activity: Dictionary = flight.validate_space_activity_transition({"expected_revision":0, "motion_mode":"inactive"}, 1)
+	if not prepared.get("ok", false) or not activity.get("ok", false) or flight.get_snapshot().motion_mode != "tactical": failed += 1
+	flight._publish_space_activity_transition(activity)
+	state._publish_deactivation(prepared)
 	if state.get_actor(id) != null or state.get_inactive_actor(id) != flight or not state.query_navigation_claims(claim, area).is_empty(): failed += 1
 	if state.admit_actor(definition, flight, true).get("reason") != "already_inactive": failed += 1
 	var next: Vector2i = cell + Vector2i(1,0)

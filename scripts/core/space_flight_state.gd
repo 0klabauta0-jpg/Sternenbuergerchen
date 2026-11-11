@@ -114,14 +114,16 @@ func validate_space_activity_transition(proposal: Dictionary, tick: int) -> Dict
 	var next := get_snapshot()
 	next.merge(proposal, true)
 	if not _valid_pose(next): return {"ok":false, "reason":"invalid_pose"}
-	return {"ok":true}
+	return {"ok":true, "next_pose":next, "tick":tick}
 
 func commit_space_activity_transition(proposal: Dictionary, tick: int) -> Dictionary:
 	var validation := validate_space_activity_transition(proposal, tick)
 	if not validation.ok: return validation
-	var next := get_snapshot()
-	next.merge(proposal, true)
-	_apply_pose(next, tick)
+	return _publish_space_activity_transition(validation)
+
+func _publish_space_activity_transition(validation: Dictionary) -> Dictionary:
+	# Root-private synchronous tail after fresh validation of every participant.
+	_apply_pose(validation.next_pose, validation.tick)
 	return {"ok":true, "revision":_revision}
 
 func _apply_pose(next: Dictionary, tick: int) -> void:

@@ -53,17 +53,34 @@ func get_actor(craft_id: String) -> RefCounted:
 func get_inactive_actor(craft_id: String) -> RefCounted:
 	return _inactive_actors.get(craft_id)
 
+func validate_deactivation(craft_id: String, expected_flight_revision: int, expected_area_revision: int) -> Dictionary:
+	var flight: RefCounted = _registry.get_actor(craft_id)
+	if flight == null: return {"ok":false, "reason":"unknown_actor"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.revision != expected_flight_revision: return {"ok":false, "reason":"stale_flight_revision"}
+	if snapshot.motion_mode != "tactical" or snapshot.coordinate_frame != "local": return {"ok":false, "reason":"not_active_local"}
+	if get_area_revision(snapshot.space_area_id) != expected_area_revision: return {"ok":false, "reason":"stale_area_revision"}
+	var cells: Array[Vector2i] = preview_footprint(snapshot, _metadata[craft_id].footprint_hexes)
+	if cells.is_empty() or not _registry.actor_cells_match(craft_id, snapshot.space_area_id, cells):
+		return {"ok":false, "reason":"stale_spatial_index"}
+	return {"ok":true, "craft_id":craft_id, "flight":flight}
+
+func _publish_deactivation(validation: Dictionary) -> void:
+	# Root-private synchronous tail after fresh validation of every participant.
+	var craft_id: String = validation.craft_id
+	_remove_navigation_claim(craft_id)
+	_registry._publish_unregister_actor(craft_id)
+	_inactive_actors[craft_id] = validation.flight
+	_indexed_revisions.erase(craft_id)
+	_flight_controls.erase(craft_id)
+	_flight_status.erase(craft_id)
+
 func deactivate_actor(craft_id: String) -> Dictionary:
 	# The flight owner must already be inactive; Root coordinates the full tail.
 	var flight: RefCounted = _registry.get_actor(craft_id)
 	if flight == null: return {"ok":false, "reason":"unknown_actor"}
 	if flight.get_snapshot().get("motion_mode") != "inactive": return {"ok":false, "reason":"flight_not_inactive"}
-	_remove_navigation_claim(craft_id)
-	if not _registry.unregister_actor(craft_id): return {"ok":false, "reason":"index_failed"}
-	_inactive_actors[craft_id] = flight
-	_indexed_revisions.erase(craft_id)
-	_flight_controls.erase(craft_id)
-	_flight_status.erase(craft_id)
+	_publish_deactivation({"craft_id":craft_id, "flight":flight})
 	return {"ok":true}
 
 func preview_reactivation(craft_id: String, proposal: Dictionary, tick: int) -> Dictionary:
