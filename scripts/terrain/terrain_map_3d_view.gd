@@ -12553,17 +12553,18 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_aim_direction(unit, unit_world_position)
-			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
+			var hex_motion:Dictionary=_get_hex_unit_motion_visual(unit)
+			var next_position: Vector3 = hex_motion.position if not hex_motion.is_empty() else _world_to_surface_3d_position(unit_world_position, 0.06)
 			var proxy_distance: float = proxy.position.distance_to(next_position)
-			unit_is_moving = proxy_distance > 0.01
+			unit_is_moving = bool(hex_motion.moving) if not hex_motion.is_empty() else proxy_distance > 0.01
 			_maybe_emit_unit_step_sfx(unit_id, unit_world_position, unit_is_moving, next_visible)
 			if proxy_distance > 0.0001:
 				changed = true
-			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
+			if not hex_motion.is_empty() or force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
 				proxy.position = next_position
 			else:
 				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
-			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event, visible_contact_direction)
+			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event, visible_contact_direction,hex_motion)
 			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
@@ -13114,8 +13115,20 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 	return 0
 
 
-func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}, visible_contact_direction: Vector2 = Vector2.ZERO) -> float:
+func _get_hex_unit_motion_visual(unit:Node) -> Dictionary:
+	if not (unit is Node2D) or not unit.has_meta("hex_ground_stand_height_logical") or not unit.has_meta("hex_ground_moving") or not unit.has_meta("hex_ground_facing_angle"):return {}
+	var height:float=float(unit.get_meta("hex_ground_stand_height_logical"))
+	var facing:float=float(unit.get_meta("hex_ground_facing_angle"))
+	if not is_finite(height) or not is_finite(facing) or not (unit as Node2D).global_position.is_finite():return {}
+	return {"position":_world_to_3d_position((unit as Node2D).global_position,height*_get_3d_height_step()+0.06),"moving":bool(unit.get_meta("hex_ground_moving")),"facing_angle":facing}
+
+
+func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}, visible_contact_direction: Vector2 = Vector2.ZERO,hex_motion:Dictionary={}) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	if hex_motion.is_empty():hex_motion=_get_hex_unit_motion_visual(unit)
+	if not hex_motion.is_empty():
+		var direction_scale:float=maxf(_half_tile_width,_half_tile_height)
+		return _get_unit_world_direction_yaw(current_world_position,current_world_position+Vector2.RIGHT.rotated(float(hex_motion.facing_angle))*direction_scale,fallback_yaw)
 	if not active_fire_event.is_empty():
 		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
 		if fire_direction.length_squared() > 0.0001:

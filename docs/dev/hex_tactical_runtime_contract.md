@@ -210,9 +210,9 @@ Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
 Terrainowner; `allows_registry_step` ist nach beiden Registrygates das gemeinsame
 Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
-Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen und 2DActor-
-projektion gemäß HEX_MOVE_COMMAND_ADAPTER_2026_11_11.md. 3DView-/Gruppenankunft,
-Bewegungsschuss, Türguard und Rücksetz-Ausführung sowie AP6–8 bleiben offen.
+Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen, Actorprojektion
+und Gruppen-/Viewleser gemäß den beiden AP5-Move-Tasks. Bewegungsschuss,
+Türguard und Rücksetz-Ausführung sowie AP6–8 bleiben offen.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
 
 ## Echte Bewegungsabsichten und Darstellung
@@ -242,3 +242,22 @@ Stop noch Neuplanung aus und benutzen ausschließlich die Registry dieses Orts.
 QA hex_move_commands_20261111:42/0 echte Root-/UnitRegistry-/CapabilityActor-
 Prüfungen, direkte Nachbarcases und enger Review. Kleine synthetische Bewegung,
 keine vollständige TestUnit-/3D-/Meta-/Save-/Netzwerk- oder Lastabnahme.
+
+AP5-Konsumentenanschluss: `get_hex_logical_unit_position` liest den Zellmittelpunkt
+aus der zum Root gehörenden Registry. `has_hex_position_arrived(unit,target,token)`
+verlangt das angefragte Zielhex, passende Absichtsidentität und Ende aller Bewegung.
+Für deckende Gruppenmitglieder gilt alternativ ein tatsächlich angewendeter Hold
+mit demselben Token und explizitem endlichen Ziel dieses Hex. Ein generischer Hold
+ohne Ziel ist kein Ankunftsbeweis. FireteamMovementController reicht seinen
+vorhandenen Rootparameter bis in Gruppenankunft, aktuelle Position, Start- und
+Formationsanker einschließlich Abschlussfallback; Darstellung entscheidet nichts.
+
+TerrainMap3DView liest abgeleitete Actorphase/-höhe und ausschließlich das separate
+`hex_ground_facing_angle`. Ältere kosmetische Facingwrites bestimmen den Hexkörper
+nicht. Root setzt/entfernt diese Metadaten; sie werden weder gespeichert noch zur
+Wahrnehmung zurückgelesen. Rampenhöhe multipliziert der View mit seinem bestehenden
+`_get_3d_height_step()` (Mapping oder regional), Position wird kein zweites Mal
+geglättet. Animationsbewegung folgt der Phase, Waffenpose bleibt beim vorhandenen
+Feuereventpfad. Legacyglättung und Pixelankunft bleiben im bisherigen Zweig.
+Kleine Consumerprüfung65/0 samt Zweierformation und großer Metrik256/128;
+QA hex_move_consumers_20261111, keine native Grafik-/Animationsfreigabe.

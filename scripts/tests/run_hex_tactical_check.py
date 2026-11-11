@@ -29,6 +29,7 @@ CASES = {
     "movement_stop": ("hex_movement_stop_verifier.gd", "HEX_MOVEMENT_STOP_PASS"),
     "locations": ("hex_location_runtime_verifier.gd", "HEX_LOCATION_RUNTIME_PASS"),
     "movement": ("hex_movement_verifier.gd", "HEX_MOVEMENT_PASS"),
+    "movement_consumers": ("hex_movement_consumers_verifier.gd", "HEX_MOVEMENT_CONSUMERS_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -74,11 +75,16 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
-        if args.case == "movement":
+        if args.case in {"movement", "movement_consumers"}:
             pending.append("scripts/registries/unit_registry.gd")
+        if args.case == "movement_consumers":
+            pending.extend(["scripts/tests/hex_movement_verifier.gd",
+                            "scripts/terrain/terrain_map_3d_view.gd",
+                            "scripts/tactical/fireteam_movement_controller.gd"])
+            paths.append("shaders/terrain/hex_grid_coverage.gdshader")
         if args.case == "security":
             pending.extend(["scripts/core/hex_sight_runtime_adapter.gd",
                             "scripts/tactical/fireteam_security_controller.gd",
@@ -99,6 +105,8 @@ def main() -> int:
             paths.append(relative)
             code = (source / relative).read_text(encoding="utf-8-sig")
             pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"', code))
+            if args.case == "movement_consumers":
+                paths.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
         paths.append("data/terrain_tile_catalog.json")
         if args.case == "consumers":
             paths.extend(["addons/limboai/bin/limboai.gdextension",
