@@ -31,6 +31,7 @@ CASES = {
     "movement": ("hex_movement_verifier.gd", "HEX_MOVEMENT_PASS"),
     "movement_consumers": ("hex_movement_consumers_verifier.gd", "HEX_MOVEMENT_CONSUMERS_PASS"),
     "moving_shot": ("hex_moving_shot_verifier.gd", "HEX_MOVING_SHOT_PASS"),
+    "door_guard": ("hex_door_guard_verifier.gd", "HEX_DOOR_GUARD_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -76,13 +77,15 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case in {"movement", "movement_consumers"}:
             pending.append("scripts/registries/unit_registry.gd")
         if args.case == "moving_shot":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/npc/test_unit.gd"])
+        if args.case == "door_guard":
+            pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "movement_consumers":
             pending.extend(["scripts/tests/hex_movement_verifier.gd",
                             "scripts/terrain/terrain_map_3d_view.gd",
@@ -111,7 +114,7 @@ def main() -> int:
             if args.case == "movement_consumers":
                 paths.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
         paths.append("data/terrain_tile_catalog.json")
-        if args.case == "consumers":
+        if args.case in {"consumers", "door_guard"}:
             paths.extend(["addons/limboai/bin/limboai.gdextension",
                           "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll"])
     paths = list(dict.fromkeys(paths))
@@ -128,7 +131,7 @@ def main() -> int:
     config = ('config_version=5\n[application]\nconfig/name=' + json.dumps(app_name)
               + '\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n')
     (project / "project.godot").write_text(config, encoding="utf-8")
-    if args.case == "consumers":
+    if args.case in {"consumers", "door_guard"}:
         (project / ".godot").mkdir(exist_ok=True)
         (project / ".godot/extension_list.cfg").write_text(
             'res://addons/limboai/bin/limboai.gdextension\n', encoding="utf-8")

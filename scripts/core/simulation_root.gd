@@ -478,6 +478,14 @@ func get_hex_ground_events() -> Array[Dictionary]:
 	return _last_hex_ground_events.duplicate(true)
 
 
+func can_block_hex_ground_cells(grids:Array,terrain_registry:Node) -> Dictionary:
+	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	if terrain_registry!=_hex_ground_registry:return {"ok":false,"reason":"wrong_hex_registry"}
+	if int(_hex_ground_runtime.get_current_tick())!=tick_counter:return {"ok":false,"reason":"hex_clock_unsynced"}
+	return _hex_ground_runtime.can_block_cells(grids)
+
+
 func stop_hex_ground_units(unit_ids: PackedStringArray, reason: String) -> Dictionary:
 	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
 	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}

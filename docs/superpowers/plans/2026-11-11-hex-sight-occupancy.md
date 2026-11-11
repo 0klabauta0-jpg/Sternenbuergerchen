@@ -444,3 +444,11 @@ alter Präzedenz/benötigten Rollenreads. MovingShot65/0, MoveConsumers65/0,
 SightConsumers39/0, enger Review geschlossen; QA hex_moving_shot_20261111.
 Keine zusätzliche Würfelung oder gemessene Performanceabnahme. Weiter AP5
 Türguard und Rücksetzausführung; Lifecycle/Save/Authority/Kandidat AP6–8 folgen.
+
+AP5 lokaler Türguard ergänzt: tatsächliche Drivermutation prüft Open→Blocked
+vor Owner-/Ressourcencommit gegen reine Root-/Groundclaims. Aktuelle Felder,
+aktive/future Segmentendpunkte und vollständige Passagegrants schützen auch
+ferne Türen; Opt-in ohne Owner fällt geschlossen aus. Door58/0 inklusive42Basis,
+SightConsumers39/0, ReservationOwner36/0; Review geschlossen, QA hex_door_guard_20261111.
+Nicht vorweggenommen: Szenariorebuild/Zulassung AP6, atomarer Save-/MPrestore AP7.
+Weiter AP5 Rücksetzausführung und AP6–8, große AP9-Prüfungen ausdrücklich später.
