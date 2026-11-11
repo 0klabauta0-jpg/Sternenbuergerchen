@@ -9,6 +9,10 @@ var _flight_controls: Dictionary = {}
 var _flight_status: Dictionary = {}
 
 func admit_actor(definition: Dictionary, flight: RefCounted) -> Dictionary:
+	# Occupancy and sweep callers still use strategic bounds. Fail closed until
+	# the complete local-area admission and navigation path is connected.
+	if flight != null and flight.get_snapshot().get("coordinate_frame", "strategic") != "strategic":
+		return {"ok":false, "reason":"local_area_not_ready"}
 	var craft_id: String = String(definition.get("craft_id", ""))
 	var faction: String = String(definition.get("faction_id", ""))
 	var domain: String = String(definition.get("control_domain", ""))

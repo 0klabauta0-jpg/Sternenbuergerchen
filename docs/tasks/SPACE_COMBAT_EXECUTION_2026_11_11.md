@@ -189,6 +189,13 @@ Verifier und diese Statusdokumentation.
   Rahmen nicht wechseln. Gezielte Prüfung8/8, Raumtakt-/Guidance- und
   Fleettravelprüfungen grün. Noch keine Bereichstransition, lokaler Index
   oder Produktanbindung; Layout-/Reisegate stammen vom parallelen Chat.
+- AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
+  Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
+  strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
+  bis zur Umstellung von Bounds, Footprint und Navigation explizit abgelehnt.
+  Registry-/Sperrprüfung12/12, alte Registry-, Roottakt- und Batchprüfung
+  grün. Das Orbitlayout des Parallelchats 9874511c4 ist als be6b9cc74
+  integriert; keine Freigabe des noch fehlenden Bereichswechsels.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
