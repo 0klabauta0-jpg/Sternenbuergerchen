@@ -87,7 +87,13 @@ Verifier und diese Statusdokumentation.
   ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
   gemeinsames Achsbudget. Kleiner Verifier5/5. Nur Fixtureparameter;
   Rumpfkatalog, Tickanbindung und vollständige AP02-Abnahme fehlen.
-- AP01/AP02 Rest und AP03–AP20: offen.
+- AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
+  Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
+  Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
+  löst sie auf. Verifier19/19. Der autoritative Aufrufer muss eine vollständige
+  aktuelle Craft-/Pilotenzuordnung liefern; UI-Anschluss, Root-/Lifecycle- und
+  Checkpointintegration fehlen.
+- AP01/AP02/AP04 Rest und AP03 sowie AP05–AP20: offen.
 
 ## Risiken / offene Punkte
 
