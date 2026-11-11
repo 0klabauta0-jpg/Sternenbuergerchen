@@ -309,7 +309,11 @@ func preview_surface_approach(craft_id: String, location_id: String, expected_fl
 	var orbit_id: String = String(Dictionary(travel.get("location_orbits", {})).get(location_id, ""))
 	if orbit_id.is_empty() or orbit_id != String(travel.get("orbit_id", "")): return {"ok":false, "reason":"location_orbit_mismatch"}
 	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
-	var layout: Dictionary = ORBIT_LAYOUT.build(String(orbit.get("body_id", "")))
+	var body_id := String(orbit.get("body_id", ""))
+	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
+	if String(body.get("id", "")) != body_id or String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != location_id:
+		return {"ok":false, "reason":"not_surface_destination"}
+	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
 	if not layout.get("ok", false) or layout.body_map_id != snapshot.space_area_id: return {"ok":false, "reason":"area_body_mismatch"}
 	if _space_combat_state.get_area_revision(snapshot.space_area_id) != expected_area_revision: return {"ok":false, "reason":"stale_area_revision"}
 	if _space_wing_state.get_snapshot().revision != expected_wing_revision: return {"ok":false, "reason":"stale_wing_revision"}

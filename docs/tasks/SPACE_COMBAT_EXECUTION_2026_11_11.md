@@ -177,6 +177,10 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Polisa-Flight-ID-Fix 78f5966b5 als e521b3ebe integriert. Identitätscheck,
+  echte Ersteintrittsfixture, Saumvorschau und Autoritätstick gezielt grün.
+  Warpankunft, Oberflächenanflug/-abflug und Stationsverkehr benötigen
+  getrennte Transitionen; inaktive Flight-/Area-Semantik ist noch abzustimmen.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
@@ -191,8 +195,11 @@ Verifier und diese Statusdokumentation.
   aktuellen indexierten vollständigen Footprint, fremde Belegung, Körpermaske,
   echten Gatekontakt und Location→Orbit→Body-Bindung. Ein großer Rumpf darf
   außerhalb der einfeldtiefen Gatezeile bleiben, solange ein Feld Kontakt hat
-  und der Rest frei ist. Prüfung16/16 einschließlich fremder Belegung/Claims,
-  veraltetem Index und Körperüberdeckung. Keine Freigabe oder Produktaufrufer: Zielklassifikation,
+  und der Rest frei ist. Prüfung17/17 einschließlich fremder Belegung/Claims,
+  veraltetem Index, Körperüberdeckung und falschem Oberflächenziel. Der echte
+  Body muss das Ziel explizit als `surface_location_id` ausweisen und darf
+  keine Station sein; Orbit-/Stationsziele erhalten kein Planetensaumgate.
+  Keine Freigabe oder Produktaufrufer: weitere Ziel-/Lifecycleklassifikation,
   Pilot/Crew/Job, Supply/Campaign/Departure, spätere Revalidierung und
   gemeinsame stille Veröffentlichung fehlen. Der Bereichsowner führt nun
   konservative zellbasierte Navigationsclaims; Belegungs- und Claimsänderungen

@@ -34,6 +34,9 @@ func _initialize() -> void:
 	if flight.get_snapshot() != before: failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, {}).get("reason") != "runtime_authority_required": failed += 1
 	if sim.preview_surface_approach(id, "fortified_outpost", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "location_orbit_mismatch": failed += 1
+	var travel_owner: RefCounted = fleet.get("_owners")[id]
+	travel_owner.get("_definition").location_orbits["fixture_station"] = "moon_orbit"
+	if sim.preview_surface_approach(id, "fixture_station", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "not_surface_destination": failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev - 1, travel_rev, area_rev, wing_rev, auth).get("reason") != "stale_flight_revision": failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev - 1, wing_rev, auth).get("reason") != "stale_area_revision": failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev - 1, auth).get("reason") != "stale_wing_revision": failed += 1
@@ -71,5 +74,5 @@ func _initialize() -> void:
 	state.sync_moved_actors()
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, state.get_area_revision("orbit_approach:moon"), wing_rev, auth).get("reason") != "body_blocked": failed += 1
 	sim.free()
-	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 16 - failed, " failed=", failed)
+	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 17 - failed, " failed=", failed)
 	quit(1 if failed else 0)
