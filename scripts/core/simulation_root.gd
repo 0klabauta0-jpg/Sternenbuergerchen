@@ -131,6 +131,7 @@ const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mul
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const HEX_GROUND_RUNTIME_SCRIPT: GDScript = preload("res://scripts/core/hex_ground_runtime.gd")
+const HEX_MOVEMENT_RUNTIME_SCRIPT=preload("res://scripts/core/hex_movement_command_runtime.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
@@ -286,6 +287,10 @@ var _hex_facing_seen: Dictionary = {}
 var _hex_facing_replay_keys: Array[String] = []
 var _hex_facing_replay_cursor := 0
 var _last_hex_ground_events: Array[Dictionary] = []
+var _hex_movement_runtime=HEX_MOVEMENT_RUNTIME_SCRIPT.new()
+var _hex_visual_unit_ids:Dictionary={}
+var _hex_projection_terrain_revision:=-1
+var _hex_boundary_facing:Dictionary={}
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -306,6 +311,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 		return {"ok": false, "reason": "invalid_terrain_registry"}
 	var rules := String(map_data.call("get_tactical_grid_rules"))
 	if rules.is_empty():
+		_clear_hex_movement_context()
 		_hex_ground_runtime.clear()
 		_hex_ground_registry = null
 		_hex_ground_enabled = false
@@ -323,6 +329,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	for method in ["is_walkable","get_stand_height_at","grid_to_world","world_to_grid_float","get_movement_distance","get_cover_at","get_tile_at_grid"]:
 		if not terrain_registry.has_method(method):
 			return {"ok": false, "reason": "invalid_hex_registry"}
+	_clear_hex_movement_context()
 	_hex_ground_runtime.configure(terrain_registry, String(map_data.call("get_map_name")), tick_counter)
 	_hex_ground_registry = terrain_registry
 	_hex_ground_enabled = true
@@ -332,7 +339,58 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	_hex_facing_replay_keys.clear()
 	_hex_facing_replay_cursor = 0
 	_last_hex_ground_events.clear()
+	_hex_movement_runtime.configure(self,terrain_registry,_hex_ground_runtime)
 	return {"ok": true, "enabled": true}
+
+
+func _clear_hex_movement_context() -> void:
+	for id in _hex_ground_runtime.get_unit_ids():_clear_hex_actor_metadata(String(id))
+	_hex_movement_runtime.clear()
+	_hex_visual_unit_ids.clear()
+	_hex_boundary_facing.clear()
+	_hex_projection_terrain_revision=-1
+
+
+func _clear_hex_actor_metadata(unit_id:String) -> void:
+	var actor=_resolve_known_unit_for_contract(unit_id)
+	if not is_instance_valid(actor):return
+	for key in ["hex_ground_stand_height_logical","hex_ground_moving"]:
+		if actor.has_meta(key):actor.remove_meta(key)
+
+
+func get_hex_movement_readout(unit_id:String) -> Dictionary:
+	return _hex_movement_runtime.get_readout(unit_id) if is_hex_ground_runtime_active() else {}
+
+
+func get_hex_movement_audit_snapshot() -> Dictionary:
+	return _hex_movement_runtime.get_audit() if is_hex_ground_runtime_active() else {}
+
+
+func has_hex_destination_arrived(unit_id:String,command_id:String) -> bool:
+	return is_hex_ground_runtime_active() and _hex_movement_runtime.has_arrived(unit_id,command_id)
+
+
+func _commit_hex_movement_facing(unit_id:String,direction:int) -> void:
+	if direction<0 or direction>5 or not is_hex_ground_runtime_active():return
+	_hex_ground_runtime.commit_facing(unit_id,direction)
+	_hex_boundary_facing[unit_id]=true
+
+
+func _project_hex_ground_actors(fraction:float) -> void:
+	if not is_hex_ground_runtime_active():return
+	for id in _hex_visual_unit_ids.keys():
+		var actor=_resolve_known_unit_for_contract(id)
+		if not is_instance_valid(actor) or not actor is Node2D or not _hex_ground_runtime.has_unit(id):
+			_hex_visual_unit_ids.erase(id)
+			continue
+		var projection:Dictionary=get_hex_motion_projection(id,fraction)
+		if projection.is_empty():continue
+		(actor as Node2D).global_position=projection.position_world
+		actor.set_meta("facing_angle",projection.facing_angle)
+		actor.set_meta("map_facing_angle",projection.facing_angle)
+		actor.set_meta("hex_ground_stand_height_logical",projection.stand_height_logical)
+		actor.set_meta("hex_ground_moving",projection.moving)
+		if not _hex_ground_runtime.has_motion_commitments(id):_hex_visual_unit_ids.erase(id)
 
 
 func is_hex_ground_runtime_active() -> bool:
@@ -386,7 +444,10 @@ func commit_hex_ground_plan(plan: Dictionary, expected_revision: int) -> Diction
 		return {"ok":false,"reason":"hex_ground_inactive"}
 	if int(_hex_ground_runtime.get_current_tick()) != tick_counter:
 		return {"ok":false,"reason":"hex_clock_unsynced"}
-	return _hex_ground_runtime.commit_plan(plan,expected_revision)
+	var result:Dictionary=_hex_ground_runtime.commit_plan(plan,expected_revision)
+	if result.ok:
+		for segment in plan.accepted_steps:_hex_visual_unit_ids[segment.unit_id]=true
+	return result
 
 
 func get_hex_ground_events() -> Array[Dictionary]:
@@ -398,8 +459,12 @@ func stop_hex_ground_units(unit_ids: PackedStringArray, reason: String) -> Dicti
 	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
 	if int(_hex_ground_runtime.get_current_tick())!=tick_counter:return {"ok":false,"reason":"hex_clock_unsynced"}
 	var result:Dictionary=_hex_ground_runtime.stop_units(unit_ids,reason)
+	if result.ok:
+		_hex_movement_runtime.mark_external_stop(unit_ids,reason)
+		for id in result.affected_unit_ids:_hex_visual_unit_ids[id]=true
 	if result.ok and not result.events.is_empty():
 		_last_hex_ground_events.append_array(result.events)
+		_hex_movement_runtime.notify_ground_events(result.events)
 		hex_ground_events_committed.emit(result.events.duplicate(true))
 	return result
 
@@ -408,6 +473,11 @@ func _advance_hex_ground_tick() -> void:
 	_last_hex_ground_events.clear()
 	if not is_hex_ground_runtime_active():return
 	_last_hex_ground_events = _hex_ground_runtime.advance_tick(tick_counter)
+	_hex_movement_runtime.notify_ground_events(_last_hex_ground_events)
+	var revision:int=_hex_ground_registry.call("get_revision")
+	if _hex_projection_terrain_revision!=revision:
+		for id in _hex_ground_runtime.get_unit_ids():_hex_visual_unit_ids[id]=true
+		_hex_projection_terrain_revision=revision
 	if not _last_hex_ground_events.is_empty():
 		hex_ground_events_committed.emit(_last_hex_ground_events.duplicate(true))
 
@@ -418,12 +488,19 @@ func admit_hex_ground_units(placements: Array[Dictionary]) -> Dictionary:
 		return {"ok": false, "reason": "not_authority"}
 	if not is_hex_ground_runtime_active():
 		return {"ok": false, "reason": "hex_ground_inactive"}
-	return _hex_ground_runtime.admit_units(placements)
+	var result:Dictionary=_hex_ground_runtime.admit_units(placements)
+	if result.ok:
+		for id in result.admitted_unit_ids:_hex_visual_unit_ids[id]=true
+		_project_hex_ground_actors(0.0)
+	return result
 
 
 func release_hex_ground_unit(unit_id: String, reason: String) -> void:
 	if _should_skip_local_tick_processing():
 		return
+	_clear_hex_actor_metadata(unit_id)
+	_hex_visual_unit_ids.erase(unit_id)
+	_hex_movement_runtime.release_unit(unit_id)
 	_hex_ground_runtime.release_unit(unit_id, reason)
 	_hex_facing_pending.erase(unit_id)
 
@@ -492,6 +569,7 @@ func _commit_hex_facing_intents() -> void:
 	unit_ids.sort()
 	for unit_id in unit_ids:
 		var intent: Dictionary = _hex_facing_pending[unit_id]
+		if _hex_boundary_facing.has(unit_id):continue
 		if int(intent["ready_tick"]) > tick_counter:
 			continue
 		_hex_facing_pending.erase(unit_id)
@@ -500,7 +578,7 @@ func _commit_hex_facing_intents() -> void:
 			continue
 		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 			continue
-		_hex_ground_runtime.commit_facing(String(unit_id),int(intent["direction"]))
+		if _hex_ground_runtime.commit_facing(String(unit_id),int(intent["direction"])):_hex_visual_unit_ids[unit_id]=true
 
 
 func _init() -> void:
@@ -515,6 +593,11 @@ func enqueue_command(cmd: Dictionary) -> void:
 	if typeof(cmd) != TYPE_DICTIONARY:
 		push_warning("SimulationRoot.enqueue_command expects a Dictionary command.")
 		return
+	if is_hex_ground_runtime_active() and _extract_command_type(cmd) in ["move_to_position","engage_area"] and not String(cmd.get("unit_id","")).is_empty():
+		var target:Variant=cmd.get("target_position")
+		if not target is Vector2 or not target.is_finite():
+			_record_discarded_move_command(cmd,"invalid_target_position")
+			return
 
 	var queued_command: Dictionary = cmd.duplicate(true)
 	var command_token: String = String(queued_command.get("command_token", "")).strip_edges()
@@ -698,6 +781,7 @@ func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec:
 		"registered_unit_count": _count_runtime_registered_units(),
 		"known_unit_count": _known_units_by_id.size(),
 		"navigation": get_navigation_debug_snapshot(),
+		"hex_movement":get_hex_movement_audit_snapshot(),
 		"unit_minimum_spacing": get_unit_minimum_spacing_debug_snapshot(),
 		"hotpath_audit": {
 			"authority_root": "SimulationRoot",
@@ -763,6 +847,7 @@ func get_bottleneck_reservation_debug_snapshot() -> Dictionary:
 
 
 func resolve_bottleneck_reservation_for_commands(commands: Array, candidates: Array, options: Dictionary = {}) -> Dictionary:
+	if is_hex_ground_runtime_active():return {}
 	if not bottleneck_reservation_enabled:
 		return {}
 	var plan_options: Dictionary = options.duplicate(true)
@@ -785,6 +870,7 @@ func resolve_bottleneck_reservation_for_commands(commands: Array, candidates: Ar
 
 
 func resolve_bottleneck_reservation_for_command(command: Dictionary, bottleneck_cells: Array, current_tick: int = -1, options: Dictionary = {}) -> Dictionary:
+	if is_hex_ground_runtime_active():return {}
 	if not bottleneck_reservation_enabled:
 		return {}
 	var plan_options: Dictionary = options.duplicate(true)
@@ -834,6 +920,9 @@ func register_known_unit(unit_id: String, unit: Node) -> bool:
 		return false
 
 	_known_units_by_id[unit_id] = unit
+	if is_hex_ground_runtime_active() and _hex_ground_runtime.has_unit(unit_id):
+		_hex_visual_unit_ids[unit_id]=true
+		_project_hex_ground_actors(0.0)
 	return true
 
 
@@ -1373,6 +1462,7 @@ func _copy_current_remote_vitals(unit, payload: Dictionary) -> void:
 
 
 func _process(_delta: float) -> void:
+	_project_hex_ground_actors(Engine.get_physics_interpolation_fraction())
 	# A stopped packet stream must not retain incomplete buffers indefinitely.
 	if _incoming_snapshot_chunks_by_tick.is_empty():
 		return
@@ -1396,6 +1486,7 @@ func _physics_process(delta: float) -> void:
 
 	tick_counter += 1
 	is_processing_tick = true
+	_hex_boundary_facing.clear()
 	_begin_navigation_budget_tick()
 	_advance_hex_ground_tick()
 	if profile_enabled:
@@ -1416,12 +1507,17 @@ func _physics_process(delta: float) -> void:
 	if profile_enabled:
 		profile_scopes["command_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
 
+	if profile_enabled:scope_started_usec=Time.get_ticks_usec()
+	if is_hex_ground_runtime_active():_hex_movement_runtime.tick(delta)
+	if profile_enabled:profile_scopes["hex_move_plan_usec"]=Time.get_ticks_usec()-scope_started_usec
 	_commit_hex_facing_intents()
+	_project_hex_ground_actors(0.0)
 	var effects: Array = _drain_queue(effects_queue)
 	var effect_count: int = effects.size()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_process_effects(effects, delta)
+	if _hex_movement_runtime.flush_stops():_project_hex_ground_actors(0.0)
 	if profile_enabled:
 		profile_scopes["effect_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if profile_enabled:
@@ -2272,6 +2368,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		_record_discarded_move_command(cmd, "invalid_target_position", {"unit_id": unit_id})
 		push_warning("SimulationRoot move command expects a Vector2 target_position.")
 		return
+	if is_hex_ground_runtime_active() and not Vector2(target_position).is_finite():
+		_record_discarded_move_command(cmd,"invalid_target_position",{"unit_id":unit_id})
+		return
 
 	var unit_registry = _get_unit_registry()
 	if unit_registry == null or not unit_registry.has_method("get_unit"):
@@ -2291,13 +2390,24 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 
 	if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 		_record_discarded_move_command(cmd, "unit_not_fit", {"unit_id": unit_id})
+		if is_hex_ground_runtime_active():_hex_movement_runtime.stage_stop(unit_id,"unit_not_fit")
 		return
 
 	if _is_stale_tokenized_move_command(cmd, unit):
 		_record_discarded_move_command(cmd, "stale_command_token", {"unit_id": unit_id})
 		return
+	if is_hex_ground_runtime_active() and not _hex_ground_runtime.has_unit(unit_id):
+		_record_discarded_move_command(cmd,"hex_unit_not_admitted",{"unit_id":unit_id})
+		return
 
-	_apply_unit_command_status(cmd, unit)
+	var command_applied:bool=_apply_unit_command_status(cmd,unit)
+	if is_hex_ground_runtime_active():
+		if not command_applied:
+			_record_discarded_move_command(cmd,"invalid_hex_unit_command",{"unit_id":unit_id})
+			return
+		var staged:Dictionary=_hex_movement_runtime.stage_move(cmd,unit)
+		if not staged.ok:_record_discarded_move_command(cmd,String(staged.reason),{"unit_id":unit_id})
+		return
 
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
@@ -2341,25 +2451,31 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		enqueue_command(cmd)
 
 
-func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
+func _apply_unit_command_status(cmd: Dictionary, unit = null) -> bool:
 	var target_unit = unit
 	if target_unit == null:
 		var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
 		if unit_id.is_empty():
-			return
+			return false
 		var unit_registry = _get_unit_registry()
 		if unit_registry != null and unit_registry.has_method("get_unit"):
 			target_unit = unit_registry.call("get_unit", unit_id)
 		if target_unit == null:
 			target_unit = _resolve_known_unit(unit_id)
 	if target_unit == null or not target_unit.has_method("assign_unit_command"):
-		return
+		return false
 
-	var command = UNIT_COMMAND_SCRIPT.call("from_dict", cmd)
+	var status_data:Dictionary=cmd
+	if is_hex_ground_runtime_active() and not cmd.has("command_type"):
+		status_data=cmd.duplicate(false)
+		status_data["command_type"]=_extract_command_type(cmd)
+	var command = UNIT_COMMAND_SCRIPT.call("from_dict", status_data)
 	if command == null or not command.has_method("is_valid") or not bool(command.call("is_valid")):
-		return
+		return false
 
-	target_unit.call("assign_unit_command", command)
+	var applied:Variant=target_unit.call("assign_unit_command",command)
+	if is_hex_ground_runtime_active() and applied is bool and not applied:return false
+	if is_hex_ground_runtime_active() and _extract_command_type(cmd)=="hold_position":_hex_movement_runtime.stage_stop(String(cmd.get("unit_id","")),"hold_position")
 	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
 	var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
 	if not unit_id.is_empty():
@@ -2368,6 +2484,7 @@ func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
 			# An authoritative untokenized Hold supersedes already queued Moves.
 			_latest_command_token_by_unit_id[unit_id] = ""
 	_apply_unit_command_facing(cmd, target_unit)
+	return true
 
 
 func _apply_unit_command_facing(cmd: Dictionary, unit) -> void:
@@ -2547,6 +2664,7 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 
 
 func _discard_pending_move_commands_for_unit(unit_id: String) -> void:
+	if is_hex_ground_runtime_active():_hex_movement_runtime.stage_stop(unit_id,"unit_not_fit")
 	for index in range(command_queue.size() - 1, -1, -1):
 		var pending_command: Dictionary = command_queue[index]
 		if String(pending_command.get("unit_id", "")).strip_edges() != unit_id:
@@ -2713,6 +2831,9 @@ func _try_begin_navigation_path_request(cmd: Dictionary, unit, current_position:
 
 func _prepare_regional_navigation_admissions() -> void:
 	_regional_navigation_admissions.clear()
+	if is_hex_ground_runtime_active():
+		_regional_navigation_last_service_tick.clear()
+		return
 	var registry = _get_terrain_registry()
 	if not _uses_regional_navigation(registry):
 		_regional_navigation_last_service_tick.clear()
@@ -2908,7 +3029,7 @@ func _prepare_local_avoidance_tick(force: bool = false) -> void:
 		return
 	_local_avoidance_resolver.call(
 		"build_from_units",
-		Array(unit_registry.call("get_all_units")),
+		_get_legacy_spacing_units(Array(unit_registry.call("get_all_units"))),
 		local_avoidance_agent_radius,
 		local_avoidance_spatial_cell_size
 	)
@@ -2925,6 +3046,7 @@ func _enforce_unit_minimum_spacing() -> void:
 	for unit in Array(unit_registry.call("get_all_units")):
 		if not (unit is Node2D):
 			continue
+		if is_hex_ground_runtime_active() and unit.has_method("get_unit_id") and _hex_ground_runtime.has_unit(String(unit.call("get_unit_id"))):continue
 		if unit.has_method("get_unit_id") and String(unit.call("get_unit_id")).strip_edges().is_empty():
 			continue
 		units.append(unit)
@@ -2987,6 +3109,15 @@ func _enforce_unit_minimum_spacing() -> void:
 	}
 	if unit_minimum_spacing_debug_enabled and int(_unit_minimum_spacing_debug_snapshot.get("blocked_pair_count", 0)) > 0:
 		push_warning("SimulationRoot minimum spacing could not separate every active unit pair.")
+
+
+func _get_legacy_spacing_units(units:Array) -> Array:
+	if not is_hex_ground_runtime_active():return units
+	var legacy:Array=[]
+	for unit in units:
+		if is_instance_valid(unit) and unit.has_method("get_unit_id") and _hex_ground_runtime.has_unit(String(unit.call("get_unit_id"))):continue
+		legacy.append(unit)
+	return legacy
 
 
 func _is_local_avoidance_enabled_for_command(cmd: Dictionary) -> bool:
@@ -4066,6 +4197,9 @@ func _get_objective_team_ids_in_radius(objective_status) -> PackedStringArray:
 	var team_ids: PackedStringArray = []
 	var objective_position: Vector2 = objective_status.position
 	var capture_radius: float = maxf(float(objective_status.capture_radius), 0.0)
+	var hex_mode:bool=is_hex_ground_runtime_active()
+	var objective_grid:Vector2i=_hex_ground_registry.call("world_to_grid",objective_position) if hex_mode else Vector2i.ZERO
+	var hex_spacing:float=float(_hex_ground_registry.call("get_movement_distance",_hex_ground_registry.call("grid_to_world",Vector2i.ZERO),_hex_ground_registry.call("grid_to_world",Vector2i.RIGHT))) if hex_mode else 1.0
 	for unit in unit_registry.call("get_all_units"):
 		if unit == null or not (unit is Node2D):
 			continue
@@ -4080,8 +4214,14 @@ func _get_objective_team_ids_in_radius(objective_status) -> PackedStringArray:
 		if team_id.is_empty() or team_ids.has(team_id):
 			continue
 
-		var unit_position: Vector2 = (unit as Node2D).global_position
-		if unit_position.distance_to(objective_position) <= capture_radius:
+		var distance:float=0.0
+		if hex_mode:
+			if not unit.has_method("get_unit_id"):continue
+			var grid:Variant=_hex_ground_runtime.get_unit_grid(String(unit.call("get_unit_id")))
+			if not grid is Vector2i:continue
+			distance=float(HEX_GRID_SCRIPT.distance(grid,objective_grid))*hex_spacing
+		else:distance=(unit as Node2D).global_position.distance_to(objective_position)
+		if distance <= capture_radius:
 			team_ids.append(team_id)
 
 	return team_ids

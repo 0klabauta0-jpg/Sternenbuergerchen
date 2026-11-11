@@ -95,3 +95,4 @@ docs/qa/hex_reservation_exit_fix_20261111/** -text whitespace=-blank-at-eof,cr-a
 docs/qa/hex_corridor_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_motion_projection_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_movement_stop_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_move_commands_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

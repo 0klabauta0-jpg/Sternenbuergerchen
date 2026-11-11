@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### AP5 echte Movebefehle und 2DActorprojektion — 11.11.2026
+
+Root besitzt jetzt angenommene Hexziele samt gecachter inkrementeller Navigation
+und Ankunft. Groundzusagen führen echte Commands aus; Hold/Wunde stoppen sicher,
+Actorposition folgt rein der Phase. Logisches Capture, LegacyAvoidance-/Spacing-
+Ausschluss, Alias-/NaN-Grenzen und wartende Cachebereinigung sind angeschlossen.
+Kleiner tatsächlicher Root-/UnitRegistry-/CapabilityActorcase42/0, direkte
+Nachbarn grün; QA hex_move_commands_20261111 mit Quellen und frischem Review.
+3DView, Fireteamankunft, Türguard, Bewegungsschuss und Backoff-Ausführung bleiben
+AP5-Folgearbeit, Lifecycle/Save/Netzwerk AP6–8. Keine Karte aktiviert und keine
+große Test-/Framerate-/Spielgefühlfreigabe. Basis bleibt unintegrierter Rampen-
+Task97e00aba plus die dokumentierten Hexschritte; keine Main-/EXEfreigabe.
+
 ### AP5 Stoppkern und kleine Ortsisolation — 11.11.2026
 
 Interne Ground-/Root-Stoppgrenze nimmt abhängige Zukunftszusagen gemeinsam
