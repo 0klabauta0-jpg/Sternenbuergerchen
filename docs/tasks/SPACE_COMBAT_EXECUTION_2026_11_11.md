@@ -33,6 +33,17 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Rückkehrvorbereitung: Der bestehende Adapter trennt die lesende Prüfung von
+  Visitbeleg, tatsächlichem Pilot-Guard und Route vom bisherigen Fuelcommit.
+  Der Polisa-Backendtest bestätigt abgewiesenen unbesetzten Pilotensitz und
+  unveränderte Ownerdaten bei gültiger Vorschau; Legacy-Buchung bleibt gleich.
+  Flight-Reaktivierung und Indexaufnahme haben nun getrennte Vorprüfung und
+  stillen Veröffentlichungsschritt; der bestehende Travel-Rückkehrtest nutzt
+  beides und verweigert Replay nach Reset desselben Einzel-Travelowners.
+  Noch kein produktiver atomarer Rückflug: Die aktuelle Flow-Reihenfolge kann
+  Treibstoff vor dem Orbitübergang belasten. Ground-/Embark-Effekte gehören
+  weiterhin dem parallel bearbeiteten AP6-Owner.
+
 - Reise-Replay prüft zusätzlich den ursprünglichen Fleet-Kandidaten und dessen
   Einzel-Travelowner-Epoche. Ein Reset desselben Owners mit unveränderter
   Flight-Referenz wird sowohl produktiv als auch in der Gruppenfixture

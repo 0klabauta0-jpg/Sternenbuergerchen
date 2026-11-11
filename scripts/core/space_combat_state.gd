@@ -102,6 +102,21 @@ func preview_reactivation(craft_id: String, proposal: Dictionary, tick: int) -> 
 	if not query_navigation_claims(cells, snapshot.space_area_id).is_empty(): return {"ok":false, "reason":"navigation_claimed"}
 	return {"ok":true, "cells":cells}
 
+func validate_reactivation(craft_id: String, proposal: Dictionary, tick: int) -> Dictionary:
+	var flight: RefCounted = _inactive_actors.get(craft_id)
+	if flight == null or not _registry.can_register_actor(craft_id, flight): return {"ok":false, "reason":"index_unavailable"}
+	var preview: Dictionary = preview_reactivation(craft_id, proposal, tick)
+	if not preview.get("ok", false): return preview
+	var snapshot: Dictionary = flight.get_snapshot()
+	return {"ok":true, "craft_id":craft_id, "flight":flight, "area_id":String(snapshot.space_area_id), "indexed_revision":int(snapshot.revision) + 1, "cells":preview.cells.duplicate()}
+
+func _publish_reactivation(validation: Dictionary) -> void:
+	# Root-private synchronous tail after Flight and registry preflight.
+	var craft_id: String = validation.craft_id
+	_registry._publish_register_actor_cells(craft_id, validation.flight, validation.area_id, validation.cells)
+	_inactive_actors.erase(craft_id)
+	_indexed_revisions[craft_id] = validation.indexed_revision
+
 func reactivate_actor(craft_id: String) -> Dictionary:
 	# Root must have revalidated body/gate and committed the flight activity first.
 	var flight: RefCounted = _inactive_actors.get(craft_id)
