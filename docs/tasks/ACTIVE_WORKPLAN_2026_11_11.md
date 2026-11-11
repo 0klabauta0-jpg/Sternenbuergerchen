@@ -2,10 +2,16 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+Neueste Nutzerentscheidung: vor jedem neuen EXE-Build ausdrücklich nachfragen;
+zuerst weitere APs umsetzen. Kein automatischer Export nach bestandenen Gates.
+Lokaler Türschutz jetzt als 26303641d integriert, gemeinsamer enger DoorGuard58/0
+mit Guards grün. Noch offen: AP5 Backoff, AP6 Zulassung/Freigabe und Lifecycle,
+AP7 Restore/Authority, AP8 integrierter Kandidat. Große AP9-Prüfung bleibt später.
+
 Aktueller Bewegungsstand: Commands/2D-Actor, logische Gruppenankunft/3D-View
 und Bewegungsschuss sind integriert (c5e536d0d, 6a3f9c535, 615327eaf).
 Jeweils gezielte gemeinsame Läufe bestanden; zuletzt MovingShot65/0 mit Guards.
-Fähigkeitsfaktor 0.65..0.95 ausdrücklich vorläufig. Türschutz und Backoff sowie
+Fähigkeitsfaktor 0.65..0.95 ausdrücklich vorläufig. Backoff sowie
 Lifecycle-/Save-/Authoritygrenzen AP6–8 bleiben beim Tabletop-Chat. Echter
 Türproducer ist `update_mission_interaction_runtime_progress`; dessen enger
 Guardbereich und `_refresh_mission_interaction_door_runtime_overrides` sind frei.

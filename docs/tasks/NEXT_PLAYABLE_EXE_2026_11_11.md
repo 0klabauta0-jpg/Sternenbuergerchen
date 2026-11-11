@@ -6,6 +6,10 @@ Der Nutzer fragt nach dem aktuellen Gesamtstand und der nächsten EXE, beauftrag
 weitere Tabletop-/Orbitintegration und verschiebt große Tests ausdrücklich.
 Ein klar begrenzter spielbarer Kandidat soll vor weiteren Contentausbauten stehen.
 
+Neueste ausdrückliche Nutzerentscheidung: zuerst weitere APs fertigstellen und
+vor dem EXE-Build nachfragen. Auch bestandene Kandidatengates autorisieren keinen
+automatischen Export. Vorbereitung und Integration dürfen weiterlaufen.
+
 ## Umfang / Nicht-Ziele
 
 Vorhandenes Gelände/Editor, R07-Rüstungen, Polisa, lokale Schiffsabholung,
@@ -32,7 +36,7 @@ für den vollständigen Tabletopmodus aktiviert.
 
 ## Erforderliche Schritte vor diesem Kandidaten
 
-1. Tabletop liefert Türschutz/Backoff und kleinstes konsistentes
+1. Türschutz ist als 26303641d integriert. Tabletop liefert Backoff und kleinstes konsistentes
    Aufnahme-/Freigabe-/Lifecyclepaket. Gesicherte Schritte prüfen/integrieren;
    explizite Kartenaktivierung erst nach diesen Voraussetzungen.
 2. Orbit: echten Travelkandidaten mit kanonischem Flightbereich/Rootübergang
@@ -42,7 +46,8 @@ für den vollständigen Tabletopmodus aktiviert.
    durchgängig funktionieren. Ein Fixturebeweis allein genügt nicht.
 3. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle
    Kampagne/Gefechtsmatrix. Aktivierung und noch offene Grenzen dokumentieren.
-4. Export aus sauberem gesichertem Quellstand in neuen eigenen Paketordner;
+4. Nach konkretem Kandidatenstatus Nutzer vor dem Build fragen. Erst nach dessen
+   Zustimmung Export aus sauberem gesichertem Quellstand in neuen eigenen Paketordner;
    vorhandene Pakete nicht überschreiben. EXE, PCK und benötigte DLLs zusammen,
    Provenienz mit Commit/Hashes, kleine echte Paketstartprüfung.
 

@@ -1,5 +1,15 @@
 # Tabletop-Abstimmung und Restplan-Integration
 
+## Lokaler Türschutz integriert
+
+e4c098f63 nach unabhängigem Review als 26303641d auf ce57b07f7 übernommen.
+Produkt automatisch zusammengeführt; additive Statusdokumentation beidseitig
+erhalten. Frischer enger gemeinsamer DoorGuard58/0 einschließlich 42 Grundchecks,
+Quell-/Profil-/Canaryguards grün. Beleg: QA-Unterordner `door_guard`.
+Kein MP-/Szenariorebuildnachweis. Noch offen: AP5 Backoff, AP6 Aufnahme/Freigabe,
+AP7 Restore/Authority, AP8 kleiner Kandidat. AP9 große Tests später. Nutzer verlangt
+vor nächstem EXE-Build ausdrücklich eine Nachfrage; bis dahin weitere APs umsetzen.
+
 ## Bewegungsschuss nach Konsumentenanschluss
 
 a74fbab2f nach unabhängigem Review als 615327eaf auf 698188f64 integriert.
