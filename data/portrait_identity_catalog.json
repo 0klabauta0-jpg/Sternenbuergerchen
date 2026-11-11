@@ -3,14 +3,14 @@
   "catalog_id": "portrait_identity_catalog_v1",
   "source_root": "res://Assets/curated/portraits/frontier_20261105/",
   "source_inventory": {
-    "scanned_png_count": 11,
+    "scanned_png_count": 12,
     "dimension_distribution": {
-      "1254x1254": 11
+      "1254x1254": 12
     },
     "large_png_count": 0,
-    "max_bytes": 2433975,
-    "atlas_region_count": 44,
-    "assigned_identity_count": 42,
+    "max_bytes": 2572870,
+    "atlas_region_count": 48,
+    "assigned_identity_count": 46,
     "reserve_region_count": 2
   },
   "minimum_start_roster_candidates": 30,
@@ -1468,116 +1468,120 @@
       "id": "char_portrait_045",
       "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_045.tres",
       "file_name": "char_portrait_045.tres",
-      "width": 512,
-      "height": 768,
-      "bytes": 314,
+      "width": 627,
+      "height": 627,
+      "bytes": 280,
       "candidate": true,
       "duplicate_group": "",
       "tags": [
         "frontier",
-        "individual_20261111"
+        "drawn_revision_20261111"
       ],
       "diagnostics": [],
       "legacy_paths": [],
-      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/anja.png",
-      "sheet_sha256": "3965a5efb1e94a85ce43d012533108f3a7f8379d5e3d76fdbfe4bc47005548cd",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+      "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
       "region": [
         0,
         0,
-        512,
-        768
+        627,
+        627
       ],
       "presentation_group": "female",
       "presentation_source": {
-        "prompt_path": "res://art/portraits_20261111/manifest.json",
-        "authored_group": "female"
+        "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+        "authored_group": "female",
+        "policy": "authored_synthetic_character_intent"
       }
     },
     {
       "id": "char_portrait_046",
       "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_046.tres",
       "file_name": "char_portrait_046.tres",
-      "width": 512,
-      "height": 768,
-      "bytes": 316,
+      "width": 627,
+      "height": 627,
+      "bytes": 282,
       "candidate": true,
       "duplicate_group": "",
       "tags": [
         "frontier",
-        "individual_20261111"
+        "drawn_revision_20261111"
       ],
       "diagnostics": [],
       "legacy_paths": [],
-      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/samira.png",
-      "sheet_sha256": "fd04d9e9f1864208a07216def576702fd44aa5b0ba61a6cdc6501e31c011b64c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+      "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
       "region": [
+        627,
         0,
-        0,
-        512,
-        768
+        627,
+        627
       ],
       "presentation_group": "female",
       "presentation_source": {
-        "prompt_path": "res://art/portraits_20261111/manifest.json",
-        "authored_group": "female"
+        "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+        "authored_group": "female",
+        "policy": "authored_synthetic_character_intent"
       }
     },
     {
       "id": "char_portrait_047",
       "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_047.tres",
       "file_name": "char_portrait_047.tres",
-      "width": 512,
-      "height": 768,
-      "bytes": 315,
+      "width": 627,
+      "height": 627,
+      "bytes": 282,
       "candidate": true,
       "duplicate_group": "",
       "tags": [
         "frontier",
-        "individual_20261111"
+        "drawn_revision_20261111"
       ],
       "diagnostics": [],
       "legacy_paths": [],
-      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/tomas.png",
-      "sheet_sha256": "2cde3751459daf46c0e663c8d3a71cfac562e77eb7be6afa9a2895d3f02a100c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+      "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
       "region": [
         0,
-        0,
-        512,
-        768
+        627,
+        627,
+        627
       ],
       "presentation_group": "male",
       "presentation_source": {
-        "prompt_path": "res://art/portraits_20261111/manifest.json",
-        "authored_group": "male"
+        "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+        "authored_group": "male",
+        "policy": "authored_synthetic_character_intent"
       }
     },
     {
       "id": "char_portrait_048",
       "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_048.tres",
       "file_name": "char_portrait_048.tres",
-      "width": 512,
-      "height": 768,
-      "bytes": 314,
+      "width": 627,
+      "height": 627,
+      "bytes": 284,
       "candidate": true,
       "duplicate_group": "",
       "tags": [
         "frontier",
-        "individual_20261111"
+        "drawn_revision_20261111"
       ],
       "diagnostics": [],
       "legacy_paths": [],
-      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/erik.png",
-      "sheet_sha256": "8bd8bf2a144c7501979259d76501722ab5f246b416503ff69a03493226cc8fde",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+      "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
       "region": [
-        0,
-        0,
-        512,
-        768
+        627,
+        627,
+        627,
+        627
       ],
       "presentation_group": "male",
       "presentation_source": {
-        "prompt_path": "res://art/portraits_20261111/manifest.json",
-        "authored_group": "male"
+        "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+        "authored_group": "male",
+        "policy": "authored_synthetic_character_intent"
       }
     }
   ],

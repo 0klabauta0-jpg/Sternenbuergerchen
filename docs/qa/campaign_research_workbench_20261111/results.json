@@ -1,0 +1,28 @@
+{
+  "passed": 23,
+  "checks": [
+    "18 seeded graph nodes",
+    "only first mission initially ready",
+    "first reward credits from source",
+    "delivery requires actual preparation",
+    "both preparation branches unlock delivery",
+    "cost edit appears on graph",
+    "cycle explicitly diagnosed",
+    "cycle edit invalidates completed dependents",
+    "cyclic mission cannot be completed",
+    "cycle resolved",
+    "custom step added",
+    "notes rendered as plain text",
+    "export includes nodes and test decisions",
+    "node notes retained",
+    "source hashes exported",
+    "file protocol JSON download",
+    "local reload restores edited graph",
+    "reset restores baseline",
+    "import restores full graph",
+    "invalid import preserves current graph",
+    "search works",
+    "proposal filter includes custom node",
+    "mobile document stays within viewport"
+  ]
+}

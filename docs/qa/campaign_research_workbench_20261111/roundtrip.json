@@ -1,0 +1,670 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "campaign_research_20261111",
+  "title": "SternenBürgerchen · Kampagne & Forschung",
+  "exported_at": "2026-11-11T08:53:53.445Z",
+  "controls": {
+    "design.model": "blueprints",
+    "design.branching": "branches",
+    "design.decision": "offen",
+    "tests.sequence": true,
+    "tests.rewards": false,
+    "tests.choice": false,
+    "design.notes": "Erst Industrie, dann schwere Rüstung.",
+    "campaign.notes": ""
+  },
+  "notes": {
+    "global": "",
+    "nodes": {
+      "satellite_recovery": "",
+      "craft_light_armor": "Leichte Rüstung früher anbieten.",
+      "outpost_recovery": "",
+      "benit_delivery": "",
+      "craft_mining_tool": "",
+      "outpost_chip_recovery": "",
+      "craft_assault_rifle": "",
+      "buccaneer_rescue": "",
+      "recruit_outpost": "",
+      "load_crate": "",
+      "recruit_pilot": "",
+      "second_pad": "",
+      "workshop_research": "",
+      "research_medium": "",
+      "research_heavy": "",
+      "research_industry": "",
+      "research_ground": "",
+      "research_flight": "",
+      "custom_1794387233329_1": ""
+    }
+  },
+  "active_choices": {
+    "design": "blueprints"
+  },
+  "computed": {
+    "ready": [
+      "satellite_recovery"
+    ],
+    "done": [],
+    "cycles": [],
+    "projected_credits": 500
+  },
+  "metadata": {
+    "date": "2026-11-11",
+    "source_hashes": {
+      "data/singleplayer/jobs.json": "a07db8f538eae28b5c24ae5ed0477526ae8692df39131e6313729e7fe3d9f641",
+      "data/singleplayer/job_briefings.json": "2f7843113da912f3548ea095883aeb4df788d5095385275f0f220ed9810a63a2",
+      "data/singleplayer/trade_offers.json": "7b9878f0daa08de591b3758c7bba142b21ee5bf6fe907ee64462ce615d544024",
+      "scripts/core/singleplayer_supply_state.gd": "bbcdeef9899bafd105ae006eef5b34aa806bfb29d650b197b83b08b2108f93c3",
+      "scripts/core/singleplayer_campaign_state.gd": "c7ddbbe31d1fb95630f6c6e687cb42019481a5ac07ae3b144a939ae6e57a3f06"
+    },
+    "baseline_nodes": [
+      {
+        "id": "satellite_recovery",
+        "title": "Satellitendaten bergen",
+        "kind": "mission",
+        "requires": [],
+        "reward": "150 Credits · Bauplan: Leichte Rüstung",
+        "cost": 0,
+        "description": "Satelliten-Absturzstelle finden → Satellitendaten bergen → Datenträger zur Heimatbasis bringen und hochladen",
+        "proposal": false,
+        "credits": 150,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#satellite_recovery",
+        "home_upload": true
+      },
+      {
+        "id": "craft_light_armor",
+        "title": "Leichte Rüstung herstellen",
+        "kind": "research",
+        "requires": [
+          "satellite_recovery"
+        ],
+        "reward": "1 × Leichte Rüstung",
+        "cost": 20,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.light_armor"
+      },
+      {
+        "id": "outpost_recovery",
+        "title": "Ersten Außenposten sichern",
+        "kind": "mission",
+        "requires": [
+          "satellite_recovery"
+        ],
+        "reward": "100 Credits",
+        "cost": 0,
+        "description": "Außenposten sichern → Kiste bergen und zum Schiff zurückbringen",
+        "proposal": false,
+        "credits": 100,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#outpost_recovery",
+        "home_upload": false
+      },
+      {
+        "id": "benit_delivery",
+        "title": "C-Benit zum Satelliten-Handelsposten liefern",
+        "kind": "mission",
+        "requires": [
+          "outpost_recovery",
+          "recruit_outpost",
+          "load_crate"
+        ],
+        "reward": "100 Credits · Bauplan: Hand-Mining-Tool",
+        "cost": 0,
+        "description": "C-Benit zum Handelsposten liefern → Zum Schiff zurückkehren",
+        "proposal": false,
+        "credits": 100,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#benit_delivery",
+        "home_upload": false
+      },
+      {
+        "id": "craft_mining_tool",
+        "title": "Hand-Mining-Tool herstellen",
+        "kind": "research",
+        "requires": [
+          "benit_delivery"
+        ],
+        "reward": "1 × Hand-Mining-Tool",
+        "cost": 30,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.mining_tool"
+      },
+      {
+        "id": "outpost_chip_recovery",
+        "title": "Chip aus gesichertem Außenposten bergen",
+        "kind": "mission",
+        "requires": [
+          "benit_delivery"
+        ],
+        "reward": "250 Credits · Bauplan: Sturmgewehr",
+        "cost": 0,
+        "description": "Außenposten sichern → Datenträger bergen → Zur Heimatbasis bringen und hochladen",
+        "proposal": false,
+        "credits": 250,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#outpost_chip_recovery",
+        "home_upload": true
+      },
+      {
+        "id": "craft_assault_rifle",
+        "title": "Sturmgewehr herstellen",
+        "kind": "research",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "1 × Sturmgewehr",
+        "cost": 60,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.assault_rifle"
+      },
+      {
+        "id": "buccaneer_rescue",
+        "title": "Buccaneer im Weltraum retten",
+        "kind": "mission",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "300 Credits",
+        "cost": 0,
+        "description": "Feindliche Cutlass besiegen → Neutrale Buccaneer retten",
+        "proposal": false,
+        "credits": 300,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#buccaneer_rescue",
+        "home_upload": false
+      },
+      {
+        "id": "recruit_outpost",
+        "title": "Person am Außenposten aufnehmen",
+        "kind": "base",
+        "requires": [
+          "outpost_recovery"
+        ],
+        "reward": "Zusätzliche Person",
+        "cost": 0,
+        "description": "Für den nächsten Lieferauftrag erforderlich. Im Spiel bereits nach dem Sichern des noch aktiven Außenpostens möglich; diese Übersicht bündelt den Ausflug bis zum Abschluss.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "load_crate",
+        "title": "C-Benit-Kiste verladen",
+        "kind": "base",
+        "requires": [
+          "outpost_recovery"
+        ],
+        "reward": "Lieferfracht an Bord",
+        "cost": 0,
+        "description": "Auftrag abschließen und die vorhandene Kiste am Ort wirklich verladen. Voraussetzung für die Annahme des Lieferauftrags.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "recruit_pilot",
+        "title": "Geretteten Piloten aufnehmen",
+        "kind": "base",
+        "requires": [
+          "buccaneer_rescue"
+        ],
+        "reward": "Pilot für die Buccaneer",
+        "cost": 0,
+        "description": "Bestätigte Ortsinteraktion nach der erfolgreichen Rettung.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "second_pad",
+        "title": "Zweites Landepad bauen",
+        "kind": "base",
+        "requires": [
+          "recruit_pilot"
+        ],
+        "reward": "Zusätzliches Landepad",
+        "cost": 100,
+        "description": "Nach der Pilotenrettung an der Heimatbasis bauen. Vorhandener Preis aus SingleplayerSupplyState._campaign_build.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "workshop_research",
+        "title": "Werkstatt zur Entwicklung ausbauen",
+        "kind": "base",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "Entwicklungsplatz an der Basis",
+        "cost": 180,
+        "description": "Vorschlag: Einen gesicherten Bauplan im Basisgebäude entschlüsseln. Freischaltung und bezahlte Einzelanfertigung bleiben getrennt.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_medium",
+        "title": "Mittlere Rüstung entwickeln",
+        "kind": "research",
+        "requires": [
+          "craft_light_armor",
+          "workshop_research"
+        ],
+        "reward": "Rezept: mittlere Rüstung · Fertigungspreis noch festzulegen",
+        "cost": 120,
+        "description": "Vorschlag: Mehr Schutz mit höherem Gewicht. Entwicklung einmal bezahlen; jede zusätzliche Rüstung separat fertigen.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_heavy",
+        "title": "Schwere Rüstung entwickeln",
+        "kind": "research",
+        "requires": [
+          "research_medium"
+        ],
+        "reward": "Rezept: schwere Rüstung · Fertigungspreis noch festzulegen",
+        "cost": 240,
+        "description": "Vorschlag: Schwerer Schutz als Spezialisierung, mit erkennbaren Nachteilen bei Bewegung und Traglast.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_industry",
+        "title": "Bergung und Rohstoffverarbeitung",
+        "kind": "research",
+        "requires": [
+          "craft_mining_tool",
+          "workshop_research"
+        ],
+        "reward": "Folgeaufträge für Vulture und Prospector",
+        "cost": 160,
+        "description": "Vorschlag: Nicht das Schiff gratis vergeben. Bergungs- und Bergbauaufträge öffnen den Zugang zu Ersatzteilen und anschließend zu Kauf und Ausbau.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_ground",
+        "title": "Bodenfahrzeuge erschließen",
+        "kind": "research",
+        "requires": [
+          "workshop_research"
+        ],
+        "reward": "Cyclone-/Nova-Aufträge",
+        "cost": 180,
+        "description": "Vorschlag: Cyclone ist ein Jeep, Nova ein Panzer. Fahrer, Standfläche und tatsächlicher Fahrzeugtransport müssen vor dem Kauf spielbar integriert sein.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_flight",
+        "title": "Flottenwerkstatt und Frachtausbau",
+        "kind": "research",
+        "requires": [
+          "second_pad",
+          "workshop_research"
+        ],
+        "reward": "Komponenten- und Frachteraufträge",
+        "cost": 220,
+        "description": "Vorschlag: Nach der Buccaneer-Rettung geht die Kampagne über Schiffskomponenten und spezialisierte Folgeaufträge weiter. Keine kostenlose Flotte.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      }
+    ],
+    "scope": "Ist-Baseline plus Vorschläge. Keine Runtime- oder Spielstandsänderung."
+  },
+  "plan": {
+    "nodes": [
+      {
+        "id": "satellite_recovery",
+        "title": "Satellitendaten bergen",
+        "kind": "mission",
+        "requires": [],
+        "reward": "150 Credits · Bauplan: Leichte Rüstung",
+        "cost": 0,
+        "description": "Satelliten-Absturzstelle finden → Satellitendaten bergen → Datenträger zur Heimatbasis bringen und hochladen",
+        "proposal": false,
+        "credits": 150,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#satellite_recovery",
+        "home_upload": true,
+        "test": "offen"
+      },
+      {
+        "id": "craft_light_armor",
+        "title": "Leichte Rüstung herstellen",
+        "kind": "research",
+        "requires": [
+          "satellite_recovery"
+        ],
+        "reward": "1 × Leichte Rüstung",
+        "cost": 25,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "Leichte Rüstung früher anbieten.",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.light_armor",
+        "test": "offen"
+      },
+      {
+        "id": "outpost_recovery",
+        "title": "Ersten Außenposten sichern",
+        "kind": "mission",
+        "requires": [
+          "satellite_recovery"
+        ],
+        "reward": "100 Credits",
+        "cost": 0,
+        "description": "Außenposten sichern → Kiste bergen und zum Schiff zurückbringen",
+        "proposal": false,
+        "credits": 100,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#outpost_recovery",
+        "home_upload": false
+      },
+      {
+        "id": "benit_delivery",
+        "title": "C-Benit zum Satelliten-Handelsposten liefern",
+        "kind": "mission",
+        "requires": [
+          "outpost_recovery",
+          "recruit_outpost",
+          "load_crate"
+        ],
+        "reward": "100 Credits · Bauplan: Hand-Mining-Tool",
+        "cost": 0,
+        "description": "C-Benit zum Handelsposten liefern → Zum Schiff zurückkehren",
+        "proposal": false,
+        "credits": 100,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#benit_delivery",
+        "home_upload": false
+      },
+      {
+        "id": "craft_mining_tool",
+        "title": "Hand-Mining-Tool herstellen",
+        "kind": "research",
+        "requires": [
+          "benit_delivery"
+        ],
+        "reward": "1 × Hand-Mining-Tool",
+        "cost": 30,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.mining_tool"
+      },
+      {
+        "id": "outpost_chip_recovery",
+        "title": "Chip aus gesichertem Außenposten bergen",
+        "kind": "mission",
+        "requires": [
+          "benit_delivery"
+        ],
+        "reward": "250 Credits · Bauplan: Sturmgewehr",
+        "cost": 0,
+        "description": "Außenposten sichern → Datenträger bergen → Zur Heimatbasis bringen und hochladen",
+        "proposal": false,
+        "credits": 250,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#outpost_chip_recovery",
+        "home_upload": true
+      },
+      {
+        "id": "craft_assault_rifle",
+        "title": "Sturmgewehr herstellen",
+        "kind": "research",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "1 × Sturmgewehr",
+        "cost": 60,
+        "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen",
+        "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.assault_rifle"
+      },
+      {
+        "id": "buccaneer_rescue",
+        "title": "Buccaneer im Weltraum retten",
+        "kind": "mission",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "300 Credits",
+        "cost": 0,
+        "description": "Feindliche Cutlass besiegen → Neutrale Buccaneer retten",
+        "proposal": false,
+        "credits": 300,
+        "note": "",
+        "decision": "offen",
+        "source": "data/singleplayer/jobs.json#buccaneer_rescue",
+        "home_upload": false
+      },
+      {
+        "id": "recruit_outpost",
+        "title": "Person am Außenposten aufnehmen",
+        "kind": "base",
+        "requires": [
+          "outpost_recovery"
+        ],
+        "reward": "Zusätzliche Person",
+        "cost": 0,
+        "description": "Für den nächsten Lieferauftrag erforderlich. Im Spiel bereits nach dem Sichern des noch aktiven Außenpostens möglich; diese Übersicht bündelt den Ausflug bis zum Abschluss.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "load_crate",
+        "title": "C-Benit-Kiste verladen",
+        "kind": "base",
+        "requires": [
+          "outpost_recovery"
+        ],
+        "reward": "Lieferfracht an Bord",
+        "cost": 0,
+        "description": "Auftrag abschließen und die vorhandene Kiste am Ort wirklich verladen. Voraussetzung für die Annahme des Lieferauftrags.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "recruit_pilot",
+        "title": "Geretteten Piloten aufnehmen",
+        "kind": "base",
+        "requires": [
+          "buccaneer_rescue"
+        ],
+        "reward": "Pilot für die Buccaneer",
+        "cost": 0,
+        "description": "Bestätigte Ortsinteraktion nach der erfolgreichen Rettung.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "second_pad",
+        "title": "Zweites Landepad bauen",
+        "kind": "base",
+        "requires": [
+          "recruit_pilot"
+        ],
+        "reward": "Zusätzliches Landepad",
+        "cost": 100,
+        "description": "Nach der Pilotenrettung an der Heimatbasis bauen. Vorhandener Preis aus SingleplayerSupplyState._campaign_build.",
+        "proposal": false,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "workshop_research",
+        "title": "Werkstatt zur Entwicklung ausbauen",
+        "kind": "base",
+        "requires": [
+          "outpost_chip_recovery"
+        ],
+        "reward": "Entwicklungsplatz an der Basis",
+        "cost": 180,
+        "description": "Vorschlag: Einen gesicherten Bauplan im Basisgebäude entschlüsseln. Freischaltung und bezahlte Einzelanfertigung bleiben getrennt.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_medium",
+        "title": "Mittlere Rüstung entwickeln",
+        "kind": "research",
+        "requires": [
+          "craft_light_armor",
+          "workshop_research"
+        ],
+        "reward": "Rezept: mittlere Rüstung · Fertigungspreis noch festzulegen",
+        "cost": 120,
+        "description": "Vorschlag: Mehr Schutz mit höherem Gewicht. Entwicklung einmal bezahlen; jede zusätzliche Rüstung separat fertigen.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_heavy",
+        "title": "Schwere Rüstung entwickeln",
+        "kind": "research",
+        "requires": [
+          "research_medium"
+        ],
+        "reward": "Rezept: schwere Rüstung · Fertigungspreis noch festzulegen",
+        "cost": 240,
+        "description": "Vorschlag: Schwerer Schutz als Spezialisierung, mit erkennbaren Nachteilen bei Bewegung und Traglast.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_industry",
+        "title": "Bergung und Rohstoffverarbeitung",
+        "kind": "research",
+        "requires": [
+          "craft_mining_tool",
+          "workshop_research"
+        ],
+        "reward": "Folgeaufträge für Vulture und Prospector",
+        "cost": 160,
+        "description": "Vorschlag: Nicht das Schiff gratis vergeben. Bergungs- und Bergbauaufträge öffnen den Zugang zu Ersatzteilen und anschließend zu Kauf und Ausbau.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_ground",
+        "title": "Bodenfahrzeuge erschließen",
+        "kind": "research",
+        "requires": [
+          "workshop_research"
+        ],
+        "reward": "Cyclone-/Nova-Aufträge",
+        "cost": 180,
+        "description": "Vorschlag: Cyclone ist ein Jeep, Nova ein Panzer. Fahrer, Standfläche und tatsächlicher Fahrzeugtransport müssen vor dem Kauf spielbar integriert sein.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "research_flight",
+        "title": "Flottenwerkstatt und Frachtausbau",
+        "kind": "research",
+        "requires": [
+          "second_pad",
+          "workshop_research"
+        ],
+        "reward": "Komponenten- und Frachteraufträge",
+        "cost": 220,
+        "description": "Vorschlag: Nach der Buccaneer-Rettung geht die Kampagne über Schiffskomponenten und spezialisierte Folgeaufträge weiter. Keine kostenlose Flotte.",
+        "proposal": true,
+        "credits": 0,
+        "note": "",
+        "decision": "offen"
+      },
+      {
+        "id": "custom_1794387233329_1",
+        "title": "Bergungsauftrag nach dem Außenposten",
+        "kind": "research",
+        "requires": [
+          "satellite_recovery"
+        ],
+        "reward": "Vulture-Ersatzteile <script>test</script>",
+        "cost": 0,
+        "credits": 0,
+        "description": "",
+        "note": "",
+        "proposal": true,
+        "decision": "offen",
+        "test": "offen"
+      }
+    ],
+    "done": [],
+    "initial_credits": 500,
+    "controls": {
+      "design.model": "blueprints",
+      "design.branching": "branches",
+      "design.decision": "offen",
+      "tests.sequence": true,
+      "tests.rewards": false,
+      "tests.choice": false,
+      "design.notes": "Erst Industrie, dann schwere Rüstung.",
+      "campaign.notes": ""
+    }
+  }
+}

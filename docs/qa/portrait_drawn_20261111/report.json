@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.125,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-11T09:00:00.942786+00:00",
+  "finished_at": "2026-11-11T09:00:12.918904+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-portrait_variation_20261111_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\portrait_variation_20261111_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 3.515,
+      "name": "portrait_variation_20261111_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\check-portrait_variation_20261111_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-portrait_variation_20261111_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-playtest_20261105_portrait_atlas_verifier.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\playtest_20261105_portrait_atlas_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.073,
+      "name": "playtest_20261105_portrait_atlas_verifier",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\check-playtest_20261105_portrait_atlas_verifier.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-playtest_20261105_portrait_atlas_verifier.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-task_233_portrait_identity_catalog_and_roster_presentation.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\task_233_portrait_identity_catalog_and_roster_presentation.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.249,
+      "name": "task_233_portrait_identity_catalog_and_roster_presentation",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\check-task_233_portrait_identity_catalog_and_roster_presentation.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\portrait_drawn_checks_final\\20261111T090000Z-pid6880\\logs\\engine-check-task_233_portrait_identity_catalog_and_roster_presentation.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

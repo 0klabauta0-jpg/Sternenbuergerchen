@@ -1,0 +1,267 @@
+{
+  "date": "2026-11-11",
+  "tool": "image_gen.imagegen",
+  "status": "drawn revision integrated; user judgment pending",
+  "request": "Neue fotografisch wirkende Porträts zurück zur gezeichneten Bildsprache.",
+  "original_tool_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1c792-fd49-72f1-b9e5-55144605b486\\exec-f11792c0-d057-4857-9575-48a7be1ea9b3.png",
+  "original_size": [
+    1254,
+    1254
+  ],
+  "atlas_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+  "reference_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+  "reference_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+  "prompt_file": "prompt.txt",
+  "prompt_sha256": "bf884b658521fb68f612ec1e5f80d70e468001f8bf55d61996466e132548dbd9",
+  "processing": "Original atlas copied without raster editing; four equal native AtlasTexture regions.",
+  "records": [
+    {
+      "id": "char_portrait_045",
+      "previous_entry": {
+        "id": "char_portrait_045",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_045.tres",
+        "file_name": "char_portrait_045.tres",
+        "width": 512,
+        "height": 768,
+        "bytes": 314,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "individual_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/anja.png",
+        "sheet_sha256": "3965a5efb1e94a85ce43d012533108f3a7f8379d5e3d76fdbfe4bc47005548cd",
+        "region": [
+          0,
+          0,
+          512,
+          768
+        ],
+        "presentation_group": "female",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/manifest.json",
+          "authored_group": "female"
+        }
+      },
+      "active_entry": {
+        "id": "char_portrait_045",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_045.tres",
+        "file_name": "char_portrait_045.tres",
+        "width": 627,
+        "height": 627,
+        "bytes": 280,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "drawn_revision_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ],
+        "presentation_group": "female",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+          "authored_group": "female",
+          "policy": "authored_synthetic_character_intent"
+        }
+      }
+    },
+    {
+      "id": "char_portrait_046",
+      "previous_entry": {
+        "id": "char_portrait_046",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_046.tres",
+        "file_name": "char_portrait_046.tres",
+        "width": 512,
+        "height": 768,
+        "bytes": 316,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "individual_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/samira.png",
+        "sheet_sha256": "fd04d9e9f1864208a07216def576702fd44aa5b0ba61a6cdc6501e31c011b64c",
+        "region": [
+          0,
+          0,
+          512,
+          768
+        ],
+        "presentation_group": "female",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/manifest.json",
+          "authored_group": "female"
+        }
+      },
+      "active_entry": {
+        "id": "char_portrait_046",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_046.tres",
+        "file_name": "char_portrait_046.tres",
+        "width": 627,
+        "height": 627,
+        "bytes": 282,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "drawn_revision_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ],
+        "presentation_group": "female",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+          "authored_group": "female",
+          "policy": "authored_synthetic_character_intent"
+        }
+      }
+    },
+    {
+      "id": "char_portrait_047",
+      "previous_entry": {
+        "id": "char_portrait_047",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_047.tres",
+        "file_name": "char_portrait_047.tres",
+        "width": 512,
+        "height": 768,
+        "bytes": 315,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "individual_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/tomas.png",
+        "sheet_sha256": "2cde3751459daf46c0e663c8d3a71cfac562e77eb7be6afa9a2895d3f02a100c",
+        "region": [
+          0,
+          0,
+          512,
+          768
+        ],
+        "presentation_group": "male",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/manifest.json",
+          "authored_group": "male"
+        }
+      },
+      "active_entry": {
+        "id": "char_portrait_047",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_047.tres",
+        "file_name": "char_portrait_047.tres",
+        "width": 627,
+        "height": 627,
+        "bytes": 282,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "drawn_revision_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ],
+        "presentation_group": "male",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+          "authored_group": "male",
+          "policy": "authored_synthetic_character_intent"
+        }
+      }
+    },
+    {
+      "id": "char_portrait_048",
+      "previous_entry": {
+        "id": "char_portrait_048",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_048.tres",
+        "file_name": "char_portrait_048.tres",
+        "width": 512,
+        "height": 768,
+        "bytes": 314,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "individual_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/individuals_20261111/erik.png",
+        "sheet_sha256": "8bd8bf2a144c7501979259d76501722ab5f246b416503ff69a03493226cc8fde",
+        "region": [
+          0,
+          0,
+          512,
+          768
+        ],
+        "presentation_group": "male",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/manifest.json",
+          "authored_group": "male"
+        }
+      },
+      "active_entry": {
+        "id": "char_portrait_048",
+        "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_048.tres",
+        "file_name": "char_portrait_048.tres",
+        "width": 627,
+        "height": 627,
+        "bytes": 284,
+        "candidate": true,
+        "duplicate_group": "",
+        "tags": [
+          "frontier",
+          "drawn_revision_20261111"
+        ],
+        "diagnostics": [],
+        "legacy_paths": [],
+        "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sheet_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ],
+        "presentation_group": "male",
+        "presentation_source": {
+          "prompt_path": "res://art/portraits_20261111/drawn_revision/prompt.txt",
+          "authored_group": "male",
+          "policy": "authored_synthetic_character_intent"
+        }
+      }
+    }
+  ]
+}

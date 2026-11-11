@@ -44,7 +44,7 @@ func _test_inventory_doc_and_json() -> void:
 	_assert(doc.contains("PNG-Dateien gesamt: %d" % source_png_count), "Inventory doc records total PNG count")
 	_assert(doc.contains("96x120") and doc.contains("64x64") and doc.contains("38x38"), "Inventory doc documents fixed UI target sizes")
 	var active_count: int = _count_pngs("res://Assets/curated/portraits/frontier_20261105/sheets")
-	_assert(active_count == 11, "Active source directory has all eleven portrait sheets")
+	_assert(active_count == 12, "Active source directory has twelve portrait sheets including the drawn revision")
 	_assert(int(Dictionary(catalog.get("source_inventory", {})).get("scanned_png_count", 0)) == active_count, "Active inventory records actual portrait sheet count")
 	_assert(doc.contains("Aktive Viererboegen: %d" % active_count), "Inventory doc records the current atlas count")
 	_assert(String(catalog.get("source_root", "")) == "res://Assets/curated/portraits/frontier_20261105/", "Active catalog uses the curated project-local portrait package")

@@ -40,7 +40,8 @@ func _run() -> void:
 	for index in range(4):
 		var id := "char_portrait_%03d" % (45 + index)
 		var texture := CATALOG.load_texture(id)
-		_check(texture is AtlasTexture and texture.get_size() == Vector2(512, 768), "Bounded texture loads %s" % id)
+		_check(texture is AtlasTexture and texture.get_size() == Vector2(627, 627), "Drawn square atlas region loads %s" % id)
+		_check(String(catalog.entries_by_id[id].sheet_path).ends_with("crew_l_drawn_20261111.png"), "Saved identity resolves drawn revision %s" % id)
 		_check(generated_ids.has(id), "Normal recruitment generator reaches %s" % id)
 		var profile = PROFILE.new({"unit_id": id, "display_name": names[index], "portrait_id": id,
 			"portrait_path": CATALOG.resolve_path(id), "role_name": "Rifle Operator",

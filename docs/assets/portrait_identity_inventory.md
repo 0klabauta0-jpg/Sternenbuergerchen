@@ -7,13 +7,16 @@ illustriertes Frontier-Ensemble. Alte Originaldateien bleiben unter
 `res://Assets/Char/` erhalten. Produktive Bildreferenzen sind ausschliesslich
 projektlokale `res://`-Pfade; UI-Skripte skalieren in feste Zielrechtecke.
 
-## Aktive Atlasquellen, 05.11.2026
+## Aktive Atlasquellen, aktualisiert 11.11.2026
 - Quelle: `res://Assets/curated/portraits/frontier_20261105/`
-- Aktive Viererboegen: 11
+- Aktive Viererboegen: 12
 - Abmessungen je Originalbogen: 1254x1254 RGB; je exakter Quadrant: 627x627
-- Regionen: 44 AtlasTexture-Ressourcen, 42 stabile Katalog-IDs und zwei Reserven
+- Regionen: 48 AtlasTexture-Ressourcen, 46 stabile Katalog-IDs und zwei Reserven
 - Kein Cropping/Resampling der PNGs; Originale bytegleich ins Projekt kopiert.
 - Prompts, SHA-256, Herkunft und Sichturteil: `art/portraits_20261105/manifest.json`
+- Die vier zusätzlichen IDs 045–048 verwenden die gezeichnete Revision aus
+  `art/portraits_20261111/drawn_revision/manifest.json`. Frühere fotografischer
+  wirkende Einzelbilder bleiben als verworfene Kandidaten erhalten.
 - Bekannte IDs priorisieren aktuelle Bilder; alte explizite Pfade werden ohne
   Saveaenderung lesend als `legacy_paths` zum selben bisherigen ID-Eintrag erkannt.
 - Standardkatalog pro Prozess gecacht, Rueckgaben tief kopiert. Customkataloge
@@ -22,7 +25,7 @@ projektlokale `res://`-Pfade; UI-Skripte skalieren in feste Zielrechtecke.
 ## Erhaltener Legacy-Scan
 - Quelle: `res://Assets/Char/`
 - PNG-Dateien gesamt: 99
-- Runtime-Katalog fuer Start-Roster: 42 Kandidaten
+- Runtime-Katalog fuer Start-Roster: 46 Kandidaten
 - Mindestbedarf Start-Roster: 20 bis 30 NPCs
 - Lokale absolute Pfade: keine
 
