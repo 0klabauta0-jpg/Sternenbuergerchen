@@ -92,3 +92,4 @@ docs/qa/hex_ramp_bands_20261111/** -text whitespace=blank-at-eol,blank-at-eof,sp
 docs/qa/hex_reservation_planner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_reservation_owner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_reservation_exit_fix_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_corridor_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

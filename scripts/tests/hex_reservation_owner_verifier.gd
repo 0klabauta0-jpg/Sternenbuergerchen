@@ -110,9 +110,7 @@ func _run() -> void:
 	var group:Array[Dictionary]=[{"unit_id":"a","grid":Vector2i(2,0)},{"unit_id":"c","grid":Vector2i.ZERO}]
 	state.admit_units(group)
 	snapshot=state.build_planning_snapshot()
-	plan=RESOLVER.build_hex_plan([],snapshot,corridor)
-	plan.accepted_steps=[_segment("a",Vector2i(2,0),Vector2i(3,0),0,4)]
-	plan.corridor_grants=[{"cells":[Vector2i.ZERO,Vector2i(1,0),Vector2i(2,0),Vector2i(3,0),Vector2i(4,0),Vector2i(5,0)],"unit_ids":["a"]}]
+	plan=RESOLVER.build_hex_plan([_request("a",[Vector2i(2,0),Vector2i(3,0)],[4])],snapshot,corridor)
 	_check(state.commit_plan(plan,int(snapshot.revision)).ok,"owner can preserve a closed local corridor cohort")
 	snapshot=state.build_planning_snapshot()
 	forged=RESOLVER.build_hex_plan([],snapshot,corridor)
@@ -132,6 +130,7 @@ func _run() -> void:
 	_check(onward.ok and not onward.accepted_steps.is_empty() and state.commit_plan(onward,int(onward.expected_revision)).ok,"topology reclassification cannot permanently lock later commits")
 	corridor.set_runtime_tile_overrides([])
 	state.configure(corridor,"opposing_grant",0)
+	corridor.get_hex_corridor_topology([Vector2i.ZERO],64)
 	group=[{"unit_id":"a","grid":Vector2i.ZERO},{"unit_id":"c","grid":Vector2i(5,0)}]
 	state.admit_units(group)
 	snapshot=state.build_planning_snapshot()

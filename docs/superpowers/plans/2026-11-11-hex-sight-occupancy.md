@@ -415,3 +415,9 @@ Split-/fehlende Gruppen, Taktobergrenze, Türübersteuerungen und veraltete
 Gruppen nach Terrainänderung durch RED/GREEN plus frischen Review geschlossen.
 Vollständiger Korridorcache und AP5-Actorprojektion bleiben nächste Arbeit;
 keine Karte aktiviert und keine großen Tests. QA hex_reservation_owner_20261111.
+
+AP4-Cacheanschluss ergänzt: vollständige Terrainkomponenten mit64 neuen Knoten
+pro Query, unabhängiger0Budget-Ownerbeweis, keine Teilfreigabe langer Gänge.
+Cache18/0, Integration15/0, Planer26/0, ReservationOwner36/0, Topologie23/0,
+RootOwner51/0; frischer Review schloss stale ferne Ausfahrten mit12/3→15/0.
+AP5–8 bleiben tatsächliche Ausführung/Lifecycle/Save/Slice, AP9 weiterhin später.

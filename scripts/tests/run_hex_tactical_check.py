@@ -23,6 +23,8 @@ CASES = {
     "reservation": ("hex_reservation_verifier.gd", "HEX_RESERVATION_PASS"),
     "reservation_owner": ("hex_reservation_owner_verifier.gd", "HEX_RESERVATION_OWNER_PASS"),
     "topology": ("hex_neighbor_cache_verifier.gd", "HEX_NEIGHBOR_CACHE_PASS"),
+    "corridors": ("output/native_glut_maps/hex_corridor_cache_20261111/verifier.gd", "HEX_CORRIDOR_CACHE_PASS"),
+    "corridor_integration": ("hex_corridor_integration_verifier.gd", "HEX_CORRIDOR_INTEGRATION_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -41,6 +43,7 @@ def main() -> int:
     args = parser.parse_args()
     source = Path(__file__).resolve().parents[2]
     script, marker = CASES[args.case]
+    script_path = script if "/" in script else "scripts/tests/" + script
     run = source / ".godot/hex_tactical_checks" / (args.case + "-" + uuid.uuid4().hex)
     project = run / "project"
     project.mkdir(parents=True)
@@ -51,11 +54,12 @@ def main() -> int:
     real_user = Path(os.environ["APPDATA"]) / "Godot/app_userdata/Sternenbuergerchen"
     before = fingerprint(real_user)
     paths = [
-        "scripts/tests/" + script,
+        script_path,
         "scripts/tests/review2_isolated_user_guard.gd",
         "scripts/terrain/hex_grid.gd",
         "scripts/terrain/terrain_tile_data.gd",
         "scripts/terrain/terrain_registry.gd",
+        "scripts/terrain/hex_corridor_topology_cache.gd",
         "scripts/terrain/terrain_truth_audit.gd",
         "scripts/core/los_system.gd",
         "scripts/core/hex_ground_runtime.gd",
@@ -114,7 +118,7 @@ def main() -> int:
     engine = shutil.which("godot_console.exe")
     if engine is None:
         raise RuntimeError("godot_console.exe is unavailable")
-    argv = [engine, "--headless", "--path", str(project), "--script", "res://scripts/tests/" + script]
+    argv = [engine, "--headless", "--path", str(project), "--script", "res://" + script_path]
     prepare_argv = [engine, "--headless", "--editor", "--path", str(project), "--import", "--quit"]
     env = dict(os.environ, SB_REVIEW2_USER_DIR=str(user_root))
     with (run / "output.log").open("w", encoding="utf-8") as stream:

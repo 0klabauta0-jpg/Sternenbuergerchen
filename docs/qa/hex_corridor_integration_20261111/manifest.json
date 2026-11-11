@@ -1,0 +1,231 @@
+{
+  "base": "21779cbaf",
+  "engine": "4.6.2.stable.official.71f334935",
+  "final": {
+    "corridors": {
+      "run": "corridors-4a0970d215d149a78a7ff29514512248",
+      "checks": [
+        18,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    },
+    "corridor_integration": {
+      "run": "corridor_integration-cfc7255907e44c92a20e228f4e2dcea8",
+      "checks": [
+        15,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    },
+    "reservation": {
+      "run": "reservation-11048988371749a884eb18f6a23a7d22",
+      "checks": [
+        26,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    },
+    "reservation_owner": {
+      "run": "reservation_owner-db9713a2a86f4945861f23ac68738545",
+      "checks": [
+        36,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    },
+    "topology": {
+      "run": "topology-f8dbdc8e494448dcb0ab4eedcb452826",
+      "checks": [
+        23,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    },
+    "owner": {
+      "run": "owner-d02ea1b680b648ecabae74be597f7dfd",
+      "checks": [
+        51,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "sources_unchanged": true,
+        "real_profile_unchanged": true
+      }
+    }
+  },
+  "tested_source_sha256": {
+    "data/terrain_tile_catalog.json": "e336d2f3dee60e79fd920fa4555feb9f16d9f311ddfc36b6589bd0ca8d0e05c1",
+    "output/native_glut_maps/hex_corridor_cache_20261111/verifier.gd": "c9a1f497bb740b9be4ac702745da76be185b40f31818308724f5a9397fae6485",
+    "scripts/command/ad_hoc_order.gd": "611aa3da16144f6037c3083cd7a71ab7a5c374de33a0f9c5b17496c05ad778f6",
+    "scripts/command/area_order.gd": "ed133e00e9e4c345108d38513c9523238766b21aa8ee158a70f228713f47e517",
+    "scripts/command/commander_command.gd": "b76e0e8bee973855285ed880d47b62c6aba248ca17abfba9a30c6f20ca678ee6",
+    "scripts/command/commander_intent.gd": "9a673f78c458868599124e9e634e48ff6049abf54c0806f8b5f0634ef0f0bdff",
+    "scripts/command/loadout_contract.gd": "b48c591436ab77f0b63797c26c23ae7da9a2c5d2dca6fbe65d7def35cb14b4ef",
+    "scripts/core/damage_model.gd": "40402d1bccfcbca2ed245011cb6fca75704646aaa497e1602bb0d842b4e96ed0",
+    "scripts/core/frame_timing_accumulator.gd": "aef355910be9c14a267fde36de3f00b02063e4d284e2ec50a64cb33918af7827",
+    "scripts/core/hex_detection_state.gd": "4bc1e3ccdabe85df6258669632925940f6beeb64916fb128979ffcaaadce6d5e",
+    "scripts/core/hex_ground_runtime.gd": "5d16eb56264b22e346ed9fe11f4ffee4000c4df98db3368e12dcb96c875d6c19",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/los_system.gd": "34e2d58d0ffe3562d7af9eb4a42ed3b2a3276978cfcf57494ac063db1f0ec55b",
+    "scripts/core/objective_status.gd": "7b9ea518066c59426f453cb235325ffb924580cae46972a563221c8d2042d977",
+    "scripts/core/personnel_loadout_state.gd": "4187c5b60e52cf169ff0433bdebc5ce98d979cb193ecc54358087e0aba6ff3ec",
+    "scripts/core/simulation_root.gd": "9463bd1f3e586c51c721f40abd5dfbef9bcd337e67e155488329eb0f511a64e6",
+    "scripts/core/weapon_data.gd": "a16f41e1c8b5556ea05eb7f7321653bebd0c49efdbf7902f8a5805633e418240",
+    "scripts/mission/combat_visibility_cache.gd": "5e757fd1f573262c9bea7bbdcd18fd77a1b28fa4c9beecf8753ee1a2515faba3",
+    "scripts/multiplayer/multiplayer_command_contract.gd": "6e61a6bbcf8e26d5f8e6ba3426196b45a47b97da936ef385d829795f21da8e63",
+    "scripts/multiplayer/multiplayer_roster_contract.gd": "d96118e1f4b00fbccd054a2375c8084c22960d9b0ecae9c69f6089a2d01b5914",
+    "scripts/multiplayer/multiplayer_snapshot_contract.gd": "ae7a02f4c8d4b83a7e6335f245a9afce3d4a961855f7ac11e75816323da6e81f",
+    "scripts/npc/unit_command.gd": "a04f22488dd822d2a0b98e81d5005305ac647f709764220c7ce25ce38d211be4",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "fd3278eeb4a9c96b4c8454cad99866f5620c5d856e7d80b7b201991123dc2094",
+    "scripts/tactical/enemy_team_tactics_profile.gd": "285b3fdd5417cafa82293213b7713e8ffd15ce14e976a68d73639a975495526b",
+    "scripts/tactical/local_avoidance_resolver.gd": "75721232a4e2bb9cddf0ed6523d41784aab83572adfc6ec13b3df65afaf9f4e3",
+    "scripts/terrain/hex_corridor_topology_cache.gd": "b9bfc3dcda3b0e040df6253ed4a22f2c52d5d9ba9a948641990d6c4b16d24cc3",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/hpa_navigation_graph.gd": "2251d85c062dc8ed3f1839774cad8d93cef9b8a4f2bd7340ca12bf5ab58e5e6a",
+    "scripts/terrain/hpa_pathfinder.gd": "ac7140281c19da041f224e9cc565ffcd1021ee068e236499b3ca034a73d7ba33",
+    "scripts/terrain/terrain_map_data.gd": "4129979fcf9746be0fd02c7fa9239560810760f3368e1af4e456a6d7b952879e",
+    "scripts/terrain/terrain_marker_catalog.gd": "489fa41494980dab339ee4a84b8fed9f10226902ea1c56a2efc505a23fd87fb2",
+    "scripts/terrain/terrain_pathfinder.gd": "d08d655744a85fa95ccde55e6ce013bff7fa055b0942af12e8c8db32b2c875f0",
+    "scripts/terrain/terrain_registry.gd": "438762744bedfafa0288ef4f247cb68cba3318278aadfb3c5ce6c8158661b474",
+    "scripts/terrain/terrain_texture_catalog.gd": "9c33921d0390c62e45aa7e87da216d88370417123cb33fcf44ddf8c95772fb7f",
+    "scripts/terrain/terrain_tile_catalog.gd": "58374699895c000c3280f00424ac114e407df6834b0e8257a277b5d1da50a0c5",
+    "scripts/terrain/terrain_tile_data.gd": "776782a0a4f9a559665e8b21a6f8866a40558de6a49d62d688923d7a20a267ce",
+    "scripts/terrain/terrain_truth_audit.gd": "183527343206600b8639fe237826f0569292b27c41e01cac954e79982b4554de",
+    "scripts/tests/hex_corridor_integration_verifier.gd": "f9d861469a455210f47bc237f4975c96ce444a0a0a5eeb3d648c6c44dc8eb935",
+    "scripts/tests/hex_ground_owner_verifier.gd": "391db6fc596b74acb5c4110e6938afe505e6ca0edd7796e03404561e886f6fb3",
+    "scripts/tests/hex_neighbor_cache_verifier.gd": "c8e02f592f09d2c346335daf286f5468a6a92e57b5c14789f46cadb740323fd3",
+    "scripts/tests/hex_reservation_owner_verifier.gd": "951155f645fe49be969141a053a4198fb3c1a45cb480674ea92587bbb1e4ab75",
+    "scripts/tests/hex_reservation_verifier.gd": "0bffee72ffdd16ec4b8c9c441ee647292cb16ab5c87eed6469ffeb3ece70f169",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  },
+  "runner_sha256": "5549138880f1c5d16387a3aa3cd55bef2de4a1ee95e9609aff1a6e13e6401d5f",
+  "attempts": [
+    {
+      "run": "corridor_integration-309237f999104b2ca1b0fab0c53fe366",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridor_integration-549fab669ca047ec8b8ba95c9f7e5ec6",
+      "passed": false,
+      "exit_code": 1
+    },
+    {
+      "run": "corridor_integration-87d7a37da487428d9ba4cdbdb42efb81",
+      "passed": false,
+      "exit_code": 1
+    },
+    {
+      "run": "corridor_integration-8e35b9e1ed5248f79e248c31295b54ac",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridor_integration-bbf9cc9f956a47c780ea91bac2bb7960",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridor_integration-beeae92a074f41d29cf084b2445eec4e",
+      "passed": false,
+      "exit_code": 1
+    },
+    {
+      "run": "corridor_integration-cfc7255907e44c92a20e228f4e2dcea8",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridor_integration-ee02174935404b0d826915cc7215450c",
+      "passed": false,
+      "exit_code": 0
+    },
+    {
+      "run": "corridors-15cd0f7dd20145da92a62be63ef14d3e",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridors-4a0970d215d149a78a7ff29514512248",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "corridors-ba41f098f68344efaaf3edd716c91a51",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "owner-d02ea1b680b648ecabae74be597f7dfd",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation-11048988371749a884eb18f6a23a7d22",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation-5e61b86b23d34d1bbe70dbb5eb595281",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation_owner-0ab9b7c5ad1e4a8c9395740867077c7b",
+      "passed": false,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation_owner-94dddc447c8e4b00b29ee6ba9153eccf",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation_owner-abadb64fd5af4932b105c1aaee798153",
+      "passed": false,
+      "exit_code": 1
+    },
+    {
+      "run": "reservation_owner-b597c861fc654c3d8b382b8517e9a389",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "reservation_owner-db9713a2a86f4945861f23ac68738545",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "topology-47b9d84d89bd4152847ef04746d022cb",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "topology-f8dbdc8e494448dcb0ab4eedcb452826",
+      "passed": true,
+      "exit_code": 0
+    }
+  ]
+}

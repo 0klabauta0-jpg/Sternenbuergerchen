@@ -17,6 +17,7 @@ var _occupant_by_grid: Dictionary = {}
 var _segments_by_unit_id: Dictionary = {}
 var _corridor_grants: Array[Dictionary] = []
 var _reservation_terrain_revision := -1
+var _topology_revalidation_pending := false
 
 
 func configure(registry: Node, map_id: String, tick: int) -> void:
@@ -208,9 +209,10 @@ func _validate_grants(grants: Array, schedules: Dictionary) -> Dictionary:
 		if not value is Dictionary or not value.get("cells") is Array or not value.get("unit_ids") is Array:
 			return _reject("invalid_corridor_grant")
 		var grant: Dictionary = value
-		if grant.cells.size()<2 or grant.cells.size()>64 or grant.unit_ids.is_empty():
+		var max_cells:int=int(_registry.call("get_tile_count")) if _registry.has_method("get_hex_corridor_topology") and _registry.has_method("get_tile_count") else 64
+		if grant.cells.size()<2 or grant.cells.size()>max_cells or grant.unit_ids.is_empty():
 			return _reject("invalid_corridor_grant")
-		var geometry_issue := _corridor_geometry_issue(grant.cells)
+		var geometry_issue := _corridor_geometry_issue(grant.cells,true)
 		if not geometry_issue.is_empty():return _reject(geometry_issue)
 		var members: Dictionary = {}
 		var cohort_direction := 0
@@ -235,7 +237,7 @@ func _validate_grants(grants: Array, schedules: Dictionary) -> Dictionary:
 	return {"ok":true}
 
 
-func _corridor_geometry_issue(corridor_cells: Array) -> String:
+func _corridor_geometry_issue(corridor_cells: Array, require_complete: bool = false) -> String:
 	var cells: Dictionary = {}
 	for i in range(corridor_cells.size()):
 		var grid: Variant = corridor_cells[i]
@@ -252,13 +254,24 @@ func _corridor_geometry_issue(corridor_cells: Array) -> String:
 				if PLANNER._hex_legal_step(grid,grid+direction,_registry):degree+=1
 			if degree>2:return "corridor_is_junction"
 		cells[grid]=true
+	if _registry.has_method("get_hex_corridor_topology"):
+		var proof:Dictionary=_registry.call("get_hex_corridor_topology",[corridor_cells[0]],0)
+		if not proof.get("ok",false) or proof.get("registry_id")!=_registry.get_instance_id() or proof.get("terrain_revision")!=_terrain_revision():return "invalid_corridor_topology"
+		if not proof.get("query_complete",false):
+			return "corridor_topology_pending" if require_complete else ""
+		for component in proof.corridors:
+			if component.directed and component.cells==corridor_cells:return ""
+		return "incomplete_corridor_component"
 	return ""
 
 func _validate_new_corridor_policy(additions: Dictionary, grants: Array) -> Dictionary:
 	var queries: Array = []
 	for segments in additions.values():
 		for segment in segments:queries.append({"path_grid_points":[segment.from_grid,segment.to_grid]})
-	var corridors: Array = PLANNER._hex_corridors(PLANNER._hex_local_graph(queries,_registry))
+	var topology:Dictionary=PLANNER._hex_query_corridors(queries,_registry,0)
+	if not topology.ok:return _reject("invalid_corridor_topology")
+	if not topology.complete:return _reject("corridor_topology_pending")
+	var corridors:Array=topology.corridors
 	for cells in corridors:
 		var effective_old: Array = []
 		for old in _corridor_grants:
@@ -308,6 +321,7 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 		return events
 	var due: Array[Dictionary] = []
 	if _reservation_terrain_revision != _terrain_revision():
+		_topology_revalidation_pending=not _corridor_grants.is_empty()
 		var legal := true
 		for segments in _segments_by_unit_id.values():
 			for segment in segments:
@@ -318,16 +332,23 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 					events.append({"event_type":"hex_route_cancelled","unit_id":id,"reason":"terrain_changed"})
 			_segments_by_unit_id.clear()
 			_corridor_grants.clear()
+			_topology_revalidation_pending=false
 			_revision+=1
-		else:
-			var retained: Array[Dictionary] = []
-			for grant in _corridor_grants:
-				if _corridor_geometry_issue(grant.cells).is_empty():retained.append(grant)
-				else:events.append({"event_type":"hex_corridor_invalidated","reason":"terrain_changed","cells":grant.cells.duplicate()})
-			if retained.size()!=_corridor_grants.size():
-				_corridor_grants=retained
-				_revision+=1
 		_reservation_terrain_revision=_terrain_revision()
+	if _topology_revalidation_pending:
+		var retained: Array[Dictionary] = []
+		var unresolved:=false
+		for grant in _corridor_grants:
+			var issue:=_corridor_geometry_issue(grant.cells,true)
+			if issue=="corridor_topology_pending":
+				retained.append(grant)
+				unresolved=true
+			elif issue.is_empty():retained.append(grant)
+			else:events.append({"event_type":"hex_corridor_invalidated","reason":"terrain_changed","cells":grant.cells.duplicate()})
+		if retained.size()!=_corridor_grants.size():
+			_corridor_grants=retained
+			_revision+=1
+		_topology_revalidation_pending=unresolved
 	for segments in _segments_by_unit_id.values():
 		for segment in segments:
 			if _tick<int(segment.handoff_tick) and int(segment.handoff_tick)<=tick:
@@ -407,6 +428,7 @@ func clear() -> void:
 	_segments_by_unit_id.clear()
 	_corridor_grants.clear()
 	_reservation_terrain_revision=-1
+	_topology_revalidation_pending=false
 	_revision += 1
 
 

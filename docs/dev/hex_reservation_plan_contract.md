@@ -63,10 +63,15 @@ Dieser Einstieg teilt den kanonischen Endpunkthöhenkern mit `allows_step`;
 Runtime-Türübersteuerungen ändern keine Rampenrichtung oder Höhenfreigabe.
 Kein pauschales Rampenmutex: breite passende
 H+0.5-Baender und Kurven benutzen denselben Graph wie Plateaus und Rampenachsen.
-Der aufruflokale Graph liest maximal 64 Felder, niemals get_sorted_tiles oder
-die gesamte Karte. Zusammenhaengende lokale Abschnitte mit maximal zwei legalen
-Nachbarn werden entlang ihrer Enden stabil geordnet. Geschlossene Ringe werden
-nicht als gerichteter Gang interpretiert. Kein persistenter Resolvercache.
+Der aufruflokale Graph für Rücksetzvorschläge liest maximal64 Felder, niemals
+get_sorted_tiles oder die gesamte Karte. Die echte Registry liefert vollständige,
+revisionierte Komponenten aus ihrem abgeleiteten Korridorcache. Pro Query
+höchstens64 neue Klassifikationen; unfertige Komponenten bleiben
+`ok=true, reason=topology_pending` mit vollständigen pending_requests und ohne
+neue Zusagen. Warm bekannte aktuelle Punkte warten nicht auf fremde offene Jobs.
+Geschlossene Ringe und Singletons werden nicht als gerichteter Gang interpretiert.
+Legacy-Registryadapter ohne diese API behalten den konservativen lokalen64-Weg.
+Kein persistenter Gameplayzustand im Resolver.
 
 Grant: `{cells:Array[Vector2i], unit_ids:Array[String]}`. Ein uebernommener Grant
 bleibt bestehen, solange ein Gruppenmitglied im Gang steht ODER ein committed
@@ -74,7 +79,13 @@ Segment des Mitglieds den Gang beansprucht, auch nach Handoff. Neue Ankoemmlinge
 erweitern diese Bestandsgruppe nicht. Neue Gruppen enthalten ausschliesslich
 die in diesem Aufruf angenommenen gleichgerichteten Mitglieder. Ein besetzter
 Ausgang wird auch jenseits des Dreischritthorizonts nicht zugefahren; die lokale
-Ausgangspruefung ist auf 64 Pfadfelder begrenzt.
+Ausgangsprüfung darf bei vollständig zertifizierter Komponente den vorhandenen
+Pfadrest lesen; im lokalen Legacyfallback bleibt sie auf64 Pfadfelder begrenzt.
+Ein-/Austrittskanten lesen aktuelle Walkability und den kanonischen Übergang.
+Innerhalb der vollständigen geordneten Komponente belegt eine Indexdifferenz1
+die legale Kante; veraltete Tür-/Fehlfeld-/Sprungtails beweisen keine Ausfahrt.
+Kopieren/Indexieren langer Komponenten und Lesen langer Pfadlisten sind
+zusätzliche CPUarbeit, keine durch das Knotenbudget belegte Performancefreigabe.
 
 Eine schon im Abschnitt stehende fremde Person darf monoton zum naeheren
 Gangende raeumen. Diese Ausnahme erlaubt weder Eintritt noch Wiedereintritt
@@ -91,7 +102,7 @@ entscheidet und fuehrt einen Ruecksetzvorschlag separat aus.
 
 ## Grenzen
 
-Der lokale Graph ist begrenzt und aufruflokal: kein fertig integrierter globaler
-Korridorcache, keine allgemeine Deadlockfreiheit oder optimale Routenwahl.
+Der Rücksetzgraph bleibt begrenzt und aufruflokal. Vollständiger Terraincache
+ist angebunden; keine allgemeine Deadlockfreiheit oder optimale Routenwahl.
 Grosse Karten-, Lifecycle-, Save-, Netzwerk-, Gefechts- und Performanceabnahmen
 sind weiterhin spaeter. Ohne Owner-Commit/AP5 bewegt dieser Plan keine Figur.
