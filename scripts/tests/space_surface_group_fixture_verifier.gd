@@ -72,6 +72,8 @@ func _initialize() -> void:
 	pilot.free()
 	var changed := bundle.duplicate(true); changed.fuel_command.request_id = "other"
 	assert(sim.commit_fixture_surface_group(changed, context).reason == "request_id_conflict")
+	assert(fleet._owners[id].configure(id).ok and fleet.get_flight_state(id) == flight)
+	assert(sim.commit_fixture_surface_group(bundle, context).reason == "owner_changed")
 	fleet.unregister_craft(id); fleet.register_craft(id)
 	assert(sim.commit_fixture_surface_group(bundle, context).reason == "owner_changed")
 	sim.free()

@@ -78,6 +78,9 @@ func _verify_strategic_approach() -> void:
 	assert(campaign.get_campaign_snapshot().jobs.satellite_recovery.status == "active")
 	var after := _fingerprint(supply, campaign)
 	assert(adapter.authorize_departure("ship", "approach").replayed and _fingerprint(supply, campaign) == after)
+	var same_flight: RefCounted = fleet.get_flight_state("ship")
+	assert(fleet._owners.ship.configure("ship").ok and fleet.get_flight_state("ship") == same_flight)
+	assert(not adapter.authorize_departure("ship", "approach").get("ok", false) and _fingerprint(supply, campaign) == after)
 	adapter.free(); flow.free(); sim.free()
 
 func _travel(fleet: RefCounted, operation: String, payload: Dictionary, request_id: String) -> Dictionary:
