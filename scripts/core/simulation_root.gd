@@ -88,6 +88,7 @@ const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 var _fixture_area_tokens: Dictionary = {}
+var _fixture_area_receipts: Dictionary = {}
 var _fixture_area_requests: Dictionary = {}
 var _fixture_area_blockers: Dictionary = {}
 var _fixture_area_sequence := 0
@@ -108,7 +109,8 @@ func prepare_space_area_transition(craft_id: String, area_id: String, target_pos
 	if _fixture_area_requests.has(request_key):
 		var prior: Dictionary = _fixture_area_requests[request_key]
 		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
-		if _fixture_area_tokens.has(prior.token) and _fixture_area_tokens[prior.token].context == authority_context:
+		var existing: Dictionary = _fixture_area_tokens.get(prior.token, _fixture_area_receipts.get(prior.token, {}))
+		if not existing.is_empty() and existing.context == authority_context and existing.owner == _singleplayer_space_travel_owner:
 			return {"ok":true, "token":prior.token, "replayed":true}
 		return {"ok":false, "reason":"context_changed"}
 	if _fixture_area_tokens.size() >= 128: return {"ok":false, "reason":"fixture_capacity"}
@@ -137,16 +139,18 @@ func prepare_space_area_transition(craft_id: String, area_id: String, target_pos
 func commit_space_area_transition(token: String, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
+	if _fixture_area_receipts.has(token):
+		var receipt: Dictionary = _fixture_area_receipts[token]
+		if receipt.context != authority_context or receipt.owner != _singleplayer_space_travel_owner: return {"ok":false, "reason":"context_changed"}
+		var replay: Dictionary = receipt.result.duplicate(true)
+		replay["replayed"] = true
+		return replay
 	if not _fixture_area_tokens.has(token): return {"ok":false, "reason":"unknown_token"}
 	var prepared: Dictionary = _fixture_area_tokens[token]
 	if prepared.context != authority_context: return {"ok":false, "reason":"context_changed"}
 	if prepared.owner != _singleplayer_space_travel_owner:
 		_drop_fixture_area_token(token)
 		return {"ok":false, "reason":"context_changed"}
-	if prepared.has("result"):
-		var replay: Dictionary = prepared.result.duplicate(true)
-		replay["replayed"] = true
-		return replay
 	var flight: RefCounted = _space_combat_state.get_actor(prepared.craft_id)
 	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(prepared.craft_id): return {"ok":false, "reason":"unknown_actor"}
 	if _singleplayer_space_travel_owner.get_snapshot(prepared.craft_id).get("revision") != prepared.travel_revision: return _reject_fixture_area_token(token, "stale_travel_revision")
@@ -164,16 +168,21 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	assert(indexed)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner.commit_prepared_space_area_transition(prepared.travel_candidate, authority_context)
 	assert(travel_result.get("ok", false))
-	prepared["result"] = {"ok":true, "replayed":false}
-	return prepared.result.duplicate(true)
+	var result := {"ok":true, "replayed":false}
+	_fixture_area_receipts[token] = {"context":prepared.context, "owner":prepared.owner, "result":result.duplicate(true)}
+	_fixture_area_tokens.erase(token)
+	return result
 
 func release_space_area_transition(token: String, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
+	if _fixture_area_receipts.has(token):
+		var receipt: Dictionary = _fixture_area_receipts[token]
+		if receipt.context != authority_context: return {"ok":false, "reason":"context_changed"}
+		return {"ok":false, "reason":"already_committed"}
 	if not _fixture_area_tokens.has(token): return {"ok":false, "reason":"unknown_token"}
 	var prepared: Dictionary = _fixture_area_tokens[token]
 	if prepared.context != authority_context: return {"ok":false, "reason":"context_changed"}
-	if prepared.has("result"): return {"ok":false, "reason":"already_committed"}
 	_drop_fixture_area_token(token)
 	return {"ok":true}
 
@@ -189,7 +198,7 @@ func _drop_fixture_area_token(token: String) -> void:
 func _purge_fixture_area_tokens() -> void:
 	for token in _fixture_area_tokens.keys():
 		var prepared: Dictionary = _fixture_area_tokens[token]
-		if not prepared.has("result") and (prepared.owner != _singleplayer_space_travel_owner or Time.get_ticks_usec() >= prepared.expires_usec):
+		if prepared.owner != _singleplayer_space_travel_owner or Time.get_ticks_usec() >= prepared.expires_usec:
 			_drop_fixture_area_token(token)
 
 func get_space_wing_snapshot() -> Dictionary:
@@ -270,7 +279,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 	var controls: Dictionary = _space_combat_state.get_flight_controls()
 	var ids: Array = controls.keys()
 	ids.sort()
-	var proposals: Array[Dictionary] = []
+	var groups := {}
 	for craft_id in ids:
 		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 		if flight == null or flight.get_snapshot().motion_mode != "tactical": continue
@@ -287,16 +296,25 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 			_space_combat_state.set_flight_status(craft_id, proposal)
 			continue
 		proposal["craft_id"] = craft_id
-		proposals.append(proposal)
-	if proposals.is_empty(): return
-	var result: Dictionary = commit_space_fleet_motion(proposals, tick, {}, {"runtime_authorized":true})
-	if not result.get("ok", false):
-		for proposal in proposals: _space_combat_state.set_flight_status(proposal.craft_id, result)
-		return
-	for craft_id in result.accepted:
-		_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
-	for craft_id in result.rejected:
-		_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
+		var snapshot: Dictionary = flight.get_snapshot()
+		var key := var_to_str([snapshot.coordinate_frame, snapshot.space_area_id])
+		if not groups.has(key):
+			groups[key] = {"world":{"coordinate_frame":snapshot.coordinate_frame, "space_area_id":snapshot.space_area_id}, "proposals":[]}
+		groups[key].proposals.append(proposal)
+	var group_ids: Array = groups.keys()
+	group_ids.sort()
+	for key in group_ids:
+		var group: Dictionary = groups[key]
+		var proposals: Array[Dictionary] = []
+		proposals.assign(group.proposals)
+		var result: Dictionary = commit_space_fleet_motion(proposals, tick, group.world, {"runtime_authorized":true, "fixture":true})
+		if not result.get("ok", false):
+			for proposal in proposals: _space_combat_state.set_flight_status(proposal.craft_id, result)
+			continue
+		for craft_id in result.accepted:
+			_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
+		for craft_id in result.rejected:
+			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:

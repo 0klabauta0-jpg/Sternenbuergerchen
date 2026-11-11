@@ -40,5 +40,7 @@ func _initialize() -> void:
 	registry.update_actor_cells("other", cells)
 	if not PREVIEW.preview(flight, 0, "moon", target, [Vector2i.ZERO], actual, 1).get("ok", false): failed += 1
 	if PREVIEW.preview(flight, 0, "planet", target, [Vector2i.ZERO], actual, 1).get("reason") != "occupied": failed += 1
-	print("SPACE_COMBAT_AREA_TRANSITION_PREVIEW passed=", 7 - failed, " failed=", failed)
+	target.position_plane = GRID.HEX.axial_to_plane(Vector2(GRID.from_offset(Vector2i(200,224))))
+	if PREVIEW.preview(flight, 0, "moon", target, [Vector2i.ZERO, Vector2i(0,-1)], actual, 1).get("reason") != "outside_entry_band": failed += 1
+	print("SPACE_COMBAT_AREA_TRANSITION_PREVIEW passed=", 8 - failed, " failed=", failed)
 	quit(1 if failed else 0)

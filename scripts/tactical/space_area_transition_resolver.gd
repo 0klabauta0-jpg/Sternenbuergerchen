@@ -22,6 +22,8 @@ static func preview(flight: RefCounted, expected_revision: int, body_id: String,
 	if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
 	var anchor: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(target.position_plane))
 	if not layout.entry_band.has_point(GRID.to_offset(anchor)): return {"ok":false, "reason":"outside_entry_band"}
+	for cell in cells:
+		if not layout.entry_band.has_point(GRID.to_offset(cell)): return {"ok":false, "reason":"outside_entry_band"}
 	var body_cells := {}
 	for cell in layout.body_cells: body_cells[cell] = true
 	for cell in cells:

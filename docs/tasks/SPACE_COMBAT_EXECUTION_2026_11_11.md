@@ -224,6 +224,15 @@ Verifier und diese Statusdokumentation.
   kontext, Supply/Campaign/Departure, Events und native Integration fehlen.
   Vor Produktfreigabe müssen diese Voraussetzungen und Fehlerfälle gemeinsam
   abgesichert werden; keine Fuel-/Oberflächenfreigabe aus diesem Pfad.
+- AP04a Reviewkorrektur: Eintrittsvorschau prüft das **gesamte** Footprint im
+  Eintrittsband, nicht nur den Anker (8/8). Erfolgreiche Fixtureübergänge
+  verlassen den begrenzten Pool offener Tokens; Replayquittungen liegen
+  separat (Rootfixture20/20 einschließlich 128 vorhandener Quittungen).
+  Produktiver Receipt-Lifecycle und echte Ownertransaktion bleiben offen.
+- AP04a Flugtaktfixture: strategischer und lokaler Testakteur werden im selben
+  Roottakt getrennt nach Bereich gebatcht und bewegen sich unabhängig; 6/6,
+  strategische Tick-/Rootfixtureprüfungen grün. Körpermaske wird mitgeführt.
+  Keine Produktfreigabe oder Performanceabnahme.
 - AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
   Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
   strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
