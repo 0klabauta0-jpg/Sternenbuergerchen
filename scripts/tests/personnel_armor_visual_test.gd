@@ -36,7 +36,7 @@ func _run() -> void:
 	var unit := UNIT.new()
 	unit.unit_id = "armor_probe"
 	var classes := ["suit", "light", "medium", "heavy"]
-	var counts := [0, 4, 15, 20]
+	var counts := [0, 15, 15, 20]
 	for row in range(2):
 		for index in range(4):
 			unit.armor_id = classes[index]
@@ -59,12 +59,24 @@ func _run() -> void:
 			for attachment: MeshInstance3D in attachments:
 				_check(attachment.skin != null and attachment.skin.get_bind_count() == skeletons[0].get_bone_count(), "Skin uses actual existing bones")
 				_check(attachment.mesh.get_surface_count() <= 5, "At most five shared material surfaces")
+				var clear_visor := false
+				var used_bones := {}
 				for surface in attachment.mesh.get_surface_count():
+					var material := attachment.mesh.surface_get_material(surface) as BaseMaterial3D
+					if material != null and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and material.albedo_color.a > 0.0 and material.albedo_color.a < 1.0:
+						clear_visor = true
 					var arrays: Array = attachment.mesh.surface_get_arrays(surface)
 					var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+					var bone_indices: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+					for influence in weights.size():
+						if weights[influence] > 0.5:
+							used_bones[skeletons[0].get_bone_name(bone_indices[influence])] = true
 					_check(weights.size() == arrays[Mesh.ARRAY_VERTEX].size() * 4, "Four skin indices per vertex")
 					for vertex in arrays[Mesh.ARRAY_VERTEX]:
 						if not vertex.is_finite(): _check(false, "Finite fitted vertex")
+				if classes[index] in ["light", "medium"]:
+					_check(clear_visor, "Light and medium retain a visible transparent visor")
+					_check(used_bones.has("Spine") and used_bones.has("Hips"), "Abdominal plates use torso and hip articulation")
 			var label := Label3D.new()
 			label.text = ("Basis · " if row == 0 else "Einsatz · ") + classes[index]
 			label.font_size = 32
@@ -82,13 +94,16 @@ func _run() -> void:
 	await process_frame
 	await _capture("armor_front")
 	for model in _models:
+		var walk_clips: Array[String] = []
 		for player: AnimationPlayer in model.find_children("*", "AnimationPlayer", true, false):
-			for clip in player.get_animation_list():
-				if "walk" in String(clip).to_lower():
-					player.play(clip)
-					player.advance(0.25)
-					player.pause()
-					break
+			var clip := _walk_clip(player)
+			if clip.is_empty(): continue
+			walk_clips.append(clip)
+			player.play(clip)
+			player.advance(0.25)
+			player.pause()
+		_check(not walk_clips.is_empty(), "Actual non-crouched walk clip available")
+		print("ARMOR_WALK_CLIPS ", walk_clips)
 	await process_frame
 	await _capture("armor_walk")
 	for index in range(4, 8):
@@ -113,6 +128,8 @@ func _run() -> void:
 	stage.add_child(duplicate)
 	var duplicate_result := ARMOR.apply_to_model(duplicate, "heavy")
 	var cached: MeshInstance3D = _models[3].find_children("ArmorVisual_*", "MeshInstance3D", true, false)[0]
+	var medium: MeshInstance3D = _models[2].find_children("ArmorVisual_*", "MeshInstance3D", true, false)[0]
+	_check(cached.mesh != medium.mesh, "Armor classes retain distinct cached outfit meshes")
 	var reused: MeshInstance3D = duplicate.find_children("ArmorVisual_*", "MeshInstance3D", true, false)[0]
 	_check(duplicate_result.ok and cached.mesh == reused.mesh and cached.skin == reused.skin, "Identical rigs share baked mesh and skin")
 	duplicate.queue_free()
@@ -120,8 +137,13 @@ func _run() -> void:
 		for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 			if not body.has_meta("armor_original_body_mesh"): continue
 			var original: Mesh = body.get_meta("armor_original_body_mesh")
-			var closed := String(model.get_meta("worn_armor_id")) in ["medium", "heavy"]
-			_check((body.mesh != original) == closed, "Closed helmets cover head without mutating original mesh")
+			var closed := String(model.get_meta("worn_armor_id")) == "heavy"
+			_check((body.mesh != original) == closed, "Opaque heavy helmet covers head without mutating original mesh")
+		if String(model.get_meta("worn_armor_id")) == "heavy":
+			_check(ARMOR.apply_to_model(model, "medium").ok, "Heavy-to-medium equipment switch succeeds")
+			for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+				if body.has_meta("armor_original_body_mesh"):
+					_check(body.mesh == body.get_meta("armor_original_body_mesh"), "Clear medium visor restores face after opaque heavy helmet")
 		_check(ARMOR.apply_to_model(model, "suit").count == 0 and model.find_children("ArmorVisual_*", "MeshInstance3D", true, false).is_empty(), "Unequip removes only armor attachments")
 		for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 			if body.has_meta("armor_original_body_mesh"):
@@ -139,6 +161,17 @@ func _capture(name: String) -> void:
 	if DisplayServer.get_name() == "headless": return
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://output/native_glut_maps/revision_%s.png" % name)
+
+func _walk_clip(player: AnimationPlayer) -> String:
+	for clip in player.get_animation_list():
+		var key := String(clip).to_lower()
+		if key == "walk" or key.ends_with("/walk") or key.ends_with("|walk"):
+			return String(clip)
+	for clip in player.get_animation_list():
+		var key := String(clip).to_lower()
+		if "walk" in key and not "crouch" in key and not "back" in key and not "strafe" in key:
+			return String(clip)
+	return ""
 
 func _check(ok: bool, message: String) -> void:
 	if ok: _passed += 1

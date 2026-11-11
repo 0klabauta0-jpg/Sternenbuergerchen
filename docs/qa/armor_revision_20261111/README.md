@@ -1,5 +1,9 @@
 # Eigene Rüstung und Helm — Revision02
 
+Historischer Stand; die aktive R05-Modellrevision und ihre eigenen Prüfungen
+stehen unter [armor_kenney_r05_20261111](../armor_kenney_r05_20261111/README.md).
+
+
 11.11.2026, isolierter Branch `task/native-glut-maps-20261110` auf46acfaa58.
 Die Pakethelme dienen nach bestätigter Nutzerkorrektur ausschließlich als
 Form-/Größenreferenz. Keine Militär-/Rennhelmgeometrie wurde als neue Rüstung

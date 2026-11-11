@@ -47,3 +47,10 @@ docs/qa/cpu_hud_r7_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-
 
 # CPU/HUD R8 evidence keeps original hashed bytes.
 docs/qa/cpu_hud_r8_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Armor source and native QA retain the bytes recorded in their SHA-256 manifests.
+art/armor_orc_morozov_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+art/armor_kenney_r05_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/armor_orc_morozov_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/armor_kenney_r05_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/armor_kenney_r05_flat_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

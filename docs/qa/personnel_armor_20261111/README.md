@@ -1,7 +1,11 @@
 # Anzug und sichtbare Rüstung
 
+Historischer Stand; die aktive R05-Modellrevision und ihre eigenen Prüfungen
+stehen unter [armor_kenney_r05_20261111](../armor_kenney_r05_20261111/README.md).
+
+
 Grafikstatus: Diese frühere Modellfassung wurde vom Nutzer gestalterisch
-abgelehnt. Die Funktionsnachweise bleiben erhalten; die aktive eigene
+abgelehnt. Die Funktionsnachweise bleiben erhalten; die damalige nachfolgende eigene
 Modellrevision ist unter [armor_revision_20261111](../armor_revision_20261111/README.md)
 dokumentiert. Diese ältere QA ist keine Stilabnahme.
 

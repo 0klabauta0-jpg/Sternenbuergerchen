@@ -1,8 +1,8 @@
 extends RefCounted
 ## Read-only equipment projection: one cached rigid-skinned outfit per rig/class.
-const PATH := "res://Assets/curated/personnel/armor_revision_20261111/"
+const PATH := "res://Assets/curated/personnel/armor_kenney_r05_20261111/"
 const PREFIX := "ArmorVisual_"
-const REVISION := "shaped_outfit_r02"
+const REVISION := "kenney_authored_r05"
 static var _parts: Dictionary = {}
 static var _outfits: Dictionary = {}
 static var _underlays: Dictionary = {}
@@ -31,7 +31,7 @@ static func apply_to_model(model: Node3D, armor_id: String) -> Dictionary:
 	var rest_signature: Array = []
 	for index in skeleton.get_bone_count():
 		rest_signature.append([skeleton.get_bone_name(index), skeleton.get_bone_global_rest(index)])
-	var key := armor_id + var_to_bytes(rest_signature).hex_encode()
+	var key := REVISION + armor_id + var_to_bytes(rest_signature).hex_encode()
 	for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		if String(body.name).to_lower().contains("character"):
 			var source: Mesh = body.get_meta("armor_original_body_mesh", body.mesh)
@@ -72,61 +72,93 @@ static func _bake_outfit(skeleton: Skeleton3D, armor_id: String, model: Node3D) 
 	var head_span: float = Vector3(bones.Head).distance_to(bones.Chest)
 	if width <= 0.00001 or torso <= 0.00001:
 		return {"ok": false, "reason": "armor_rig_dimensions_invalid", "count": 0}
-	var bulk: float = {"light": 0.99, "medium": 1.10, "heavy": 1.25}[armor_id]
+	var bulk: float = {"light": 0.93, "medium": 1.22, "heavy": 1.50}[armor_id]
 	var specs: Array = []
 	_add_spec(specs, "torso_" + armor_id, "Chest", axes,
-		Vector3(bones.Hips) + up * torso * 0.61 + forward * width * 0.025,
-		Vector3(width * 1.10 * bulk, torso * 1.04, width * 0.88 * bulk))
+		Vector3(bones.Hips) + up * torso * 0.61 + forward * width * (0.055 if armor_id != "heavy" else 0.025),
+		Vector3(width * 1.10 * bulk, torso * 1.04, width * (0.90 if armor_id == "medium" else 0.98 if armor_id == "light" else 0.88) * bulk))
 	_add_spec(specs, "pelvis_" + armor_id, "Hips", axes,
 		Vector3(bones.Hips) + up * torso * 0.02,
 		Vector3(width * 1.06 * bulk, torso * 0.32, width * 0.78 * bulk))
-	if armor_id in ["medium", "heavy"]:
+	if armor_id in ["light", "medium", "heavy"]:
 		var head_bounds := _bone_bounds(model, skeleton, "Head", axes)
 		var helmet_center: Vector3 = Vector3(bones.Head) + up * head_span * 0.56
 		var helmet_size := Vector3(width * 1.38 * bulk, head_span * 1.25, width * 1.30 * bulk)
 		if head_bounds.has_volume():
 			helmet_center = axes * head_bounds.get_center()
+			if armor_id != "heavy": helmet_center -= up * head_bounds.size.y * 0.025
 			helmet_size = head_bounds.size * Vector3(1.38, 1.00, 1.30)
 			if armor_id == "medium":
-				helmet_size = head_bounds.size * Vector3(1.24, 0.96, 1.22)
+				helmet_size = head_bounds.size * Vector3(1.36, 1.08, 1.20)
+			elif armor_id == "light":
+				helmet_size = head_bounds.size * Vector3(1.34, 1.08, 1.20)
 		model.set_meta("armor_head_fit", {"center": helmet_center, "size": helmet_size})
 		_add_spec(specs, "helmet_" + armor_id, "Head", axes,
 			helmet_center, helmet_size)
 	if armor_id == "heavy":
 		_add_spec(specs, "collar", "Chest", axes,
-			Vector3(bones.Head) - up * width * 0.20,
-			Vector3(width * 1.15, torso * 0.20, width * 0.82))
+			Vector3(bones.Head) - up * width * 0.24,
+			Vector3(width * 1.75, torso * 0.34, width * 1.48))
 	for side: String in ["Left", "Right"]:
 		var arm: Vector3 = bones[side + "Arm"]
 		var elbow: Vector3 = bones[side + "ForeArm"]
 		var wrist: Vector3 = bones[side + "Hand"]
-		if armor_id in ["medium", "heavy"]:
-			_add_spec(specs, "pauldron", side + "Arm", axes,
-				arm + up * width * 0.18,
-				Vector3(width * 0.57 * bulk, width * 0.42 * bulk, width * 0.76 * bulk))
+		if armor_id in ["light", "medium", "heavy"]:
+			_add_spec(specs, "pauldron_" + armor_id, side + "Arm", _limb_axes((arm-elbow).normalized(), forward),
+				arm.lerp(elbow, 0.24),
+				Vector3(width * {"light":0.39,"medium":0.56,"heavy":0.72}[armor_id],
+					arm.distance_to(elbow) * {"light":0.43,"medium":0.65,"heavy":0.82}[armor_id],
+					width * {"light":0.48,"medium":0.66,"heavy":0.77}[armor_id]))
 		if armor_id == "heavy":
-			_add_limb(specs, "upper_arm", side + "Arm", arm, elbow, forward,
+			_add_limb(specs, "upper_arm_" + armor_id, side + "Arm", arm, elbow, forward,
 				width * 0.40, width * 0.49, 0.73)
-		_add_limb(specs, "forearm", side + "ForeArm", elbow, wrist, forward,
-			width * (0.43 if armor_id == "heavy" else 0.36), width * 0.46, 0.78)
+		_add_limb(specs, "forearm_" + armor_id, side + "ForeArm", elbow, wrist, forward,
+			width * {"light":0.30,"medium":0.53,"heavy":0.58}[armor_id],
+			width * {"light":0.46,"medium":0.56,"heavy":0.60}[armor_id], 0.78 if armor_id == "light" else 0.90)
 		if armor_id == "heavy":
 			var hand_axis := (elbow - wrist).normalized()
-			_add_spec(specs, "hand_guard", side + "Hand", _limb_axes(hand_axis, forward),
+			_add_spec(specs, "hand_guard_" + armor_id, side + "Hand", _limb_axes(hand_axis, forward),
 				wrist - hand_axis * width * 0.13 + forward * width * 0.035,
 				Vector3(width * 0.30, width * 0.31, width * 0.24))
-		if armor_id == "light": continue
+		if armor_id == "light":
+			_add_spec(specs, "knee_light", side + "Leg", axes,
+				Vector3(bones[side + "Leg"]) + forward * width * 0.20,
+				Vector3(width * 0.32, width * 0.30, width * 0.23))
 		var hip: Vector3 = bones[side + "UpLeg"]
 		var knee: Vector3 = bones[side + "Leg"]
 		var ankle: Vector3 = bones[side + "Foot"]
-		_add_limb(specs, "thigh", side + "UpLeg", hip, knee, forward,
-			width * 0.43 * bulk, width * 0.53 * bulk, 0.78)
-		_add_spec(specs, "knee", side + "Leg", axes, knee + forward * width * 0.22,
-			Vector3(width * 0.45 * bulk, width * 0.43, width * 0.36))
-		_add_limb(specs, "shin", side + "Leg", knee, ankle, forward,
-			width * 0.43 * bulk, width * 0.50 * bulk, 0.78)
-		_add_spec(specs, "boot", side + "Foot", axes,
-			ankle + forward * width * 0.20 - up * width * 0.10,
-			Vector3(width * 0.48 * bulk, width * 0.43, width * 0.86))
+		if armor_id == "light":
+			var sign_side := 1.0 if side == "Left" else -1.0
+			_add_spec(specs, "thigh_light", side + "UpLeg", _limb_axes((hip-knee).normalized(),forward),
+				hip.lerp(knee,0.32) + forward * width * 0.19 + right * sign_side * width * 0.12,
+				Vector3(width * 0.25, hip.distance_to(knee)*0.36, width*0.21))
+			_add_spec(specs, "shin_light", side + "Leg", _limb_axes((knee-ankle).normalized(),forward),
+				knee.lerp(ankle,0.58) + forward * width * 0.04,
+				Vector3(width * 0.18, knee.distance_to(ankle)*0.33, width*0.25))
+		else:
+			_add_limb(specs, "thigh_" + armor_id, side + "UpLeg", hip, knee, forward,
+				width * 0.43 * bulk, width * 0.66 * bulk, 0.78)
+			_add_spec(specs, "knee_" + armor_id, side + "Leg", axes, knee + forward * width * 0.22,
+				Vector3(width * 0.45 * bulk, width * 0.38, width * 0.24))
+			_add_limb(specs, "shin_" + armor_id, side + "Leg", knee, ankle, forward,
+				width * 0.43 * bulk, width * 0.62 * bulk, 0.78)
+		var foot_axes := axes
+		var toe_index := skeleton.find_bone(side + "Toes")
+		if toe_index >= 0:
+			var foot_forward: Vector3 = skeleton.get_bone_global_rest(toe_index).origin - ankle
+			foot_forward = (foot_forward - up * foot_forward.dot(up)).normalized()
+			foot_axes = Basis(up.cross(foot_forward).normalized(), up, foot_forward)
+		var foot_bounds := _bone_bounds(model, skeleton, side + "Foot", foot_axes)
+		var toe_bounds := _bone_bounds(model, skeleton, side + "Toes", foot_axes)
+		if toe_bounds.has_volume(): foot_bounds = foot_bounds.merge(toe_bounds)
+		_add_spec(specs, "boot_" + armor_id, side + "Foot", foot_axes,
+			foot_axes * foot_bounds.get_center(),
+			foot_bounds.size * Vector3(1.13 if armor_id == "light" else 1.10, 1.10, 1.12 if armor_id == "light" else 1.08))
+		if toe_index >= 0:
+			specs[-1]["toe_bone"] = toe_index
+			specs[-1]["toe_origin"] = skeleton.get_bone_global_rest(toe_index).origin
+			specs[-1]["toe_forward"] = foot_axes.z
+	_fit_anatomical_specs(specs, model, skeleton, armor_id, axes, width)
 	var buckets: Dictionary = {}
 	for spec: Dictionary in specs:
 		var result := _append_segment(buckets, skeleton, spec)
@@ -156,6 +188,7 @@ static func _bone_bounds(model: Node3D, skeleton: Skeleton3D, bone_name: String,
 	var bounds := AABB()
 	var found := false
 	var target := skeleton.find_bone(bone_name)
+	if target < 0: return AABB()
 	for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		if not String(body.name).to_lower().contains("character") or body.skin == null: continue
 		var bind := -1
@@ -218,6 +251,7 @@ static func _load_part(name: String) -> Dictionary:
 			primitives.append({"arrays": instance.mesh.surface_get_arrays(surface), "transform": transform,
 				"material": instance.mesh.surface_get_material(surface)})
 	root.free()
+	if name.begins_with("torso_"): _assign_torso_components(primitives)
 	_parts[name] = {"primitives": primitives, "bounds": bounds}
 	return _parts[name]
 
@@ -236,6 +270,8 @@ static func _append_segment(buckets: Dictionary, skeleton: Skeleton3D, spec: Dic
 	var part := _load_part(String(spec.part))
 	if part.is_empty(): return {"ok": false, "reason": "armor_part_missing:" + String(spec.part), "count": 0}
 	var bounds: AABB = part.bounds
+	if String(spec.part).begins_with("torso_") or String(spec.part).begins_with("pelvis_") or String(spec.part).begins_with("forearm_") or String(spec.part).begins_with("thigh_") or String(spec.part).begins_with("shin_"):
+		bounds = AABB(Vector3(-0.5,-0.5,-0.5),Vector3.ONE)
 	if minf(bounds.size.x, minf(bounds.size.y, bounds.size.z)) <= 0.0:
 		return {"ok": false, "reason": "armor_part_bounds_invalid", "count": 0}
 	var axes: Basis = spec.axes
@@ -260,7 +296,13 @@ static func _append_segment(buckets: Dictionary, skeleton: Skeleton3D, spec: Dic
 			bucket.vertices.append(transform * vertices[index])
 			bucket.normals.append((normal_basis * normals[index]).normalized())
 			bucket.uvs.append(uvs[index] if index < uvs.size() else Vector2.ZERO)
-			bucket.bones.append_array([bone_index, 0, 0, 0])
+			var vertex_bone := bone_index
+			if primitive.has("bone_tags"):
+				var named_bone := skeleton.find_bone(["Chest","Spine","Hips"][int(primitive.bone_tags[index])])
+				if named_bone >= 0: vertex_bone = named_bone
+			if spec.has("toe_bone") and (transform * vertices[index] - Vector3(spec.toe_origin)).dot(Vector3(spec.toe_forward)) > 0.0:
+				vertex_bone = int(spec.toe_bone)
+			bucket.bones.append_array([vertex_bone, 0, 0, 0])
 			bucket.weights.append_array([1.0, 0.0, 0.0, 0.0])
 		if indices.is_empty():
 			for index in vertices.size(): bucket.indices.append(offset + index)
@@ -272,10 +314,10 @@ static func _append_segment(buckets: Dictionary, skeleton: Skeleton3D, spec: Dic
 static func _prepare_underlayer(model: Node3D, armor_id: String) -> void:
 	for legacy: Node3D in model.find_children("Gear_Modular", "Node3D", true, false): legacy.hide()
 	for helmet: Node3D in model.find_children("HelmetVisual_*", "Node3D", true, false):
-		helmet.visible = armor_id in ["suit", "light"]
+		helmet.visible = armor_id == "suit"
 	for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		if not String(body.name).to_lower().contains("character"): continue
-		_set_covered_head(body, armor_id in ["medium", "heavy"])
+		_set_covered_head(body, armor_id == "heavy")
 		if body.has_meta("armor_underlayer_applied"): continue
 		var original := body.get_active_material(0) as BaseMaterial3D
 		if original == null: continue
@@ -290,10 +332,11 @@ uniform vec4 base_tint : source_color = vec4(1.0);
 void fragment(){
  vec4 source = texture(base_texture,UV)*base_tint*COLOR;
  float hi=max(source.r,max(source.g,source.b));
- float lo=min(source.r,min(source.g,source.b));
- float neutral=1.0-smoothstep(0.12,0.32,hi-lo);
- float cloth=neutral*smoothstep(0.24,0.60,hi);
- vec3 flexible=vec3(0.060,0.074,0.095)*(0.72+hi*0.35);
+ // Preserve the Kenney face/hair and dark facial marks. Replace the legacy
+ // printed neutral armor pattern with one coherent flexible under-suit.
+ float warm=step(source.b+0.07,source.r)*step(source.g+0.015,source.r);
+ float cloth=(1.0-warm)*smoothstep(0.10,0.20,hi);
+ vec3 flexible=vec3(0.050,0.060,0.075)*(0.98+hi*0.025);
  ALBEDO=mix(source.rgb,flexible,cloth);
  ROUGHNESS=0.88;
 }"""
@@ -354,3 +397,116 @@ static func _set_covered_head(body: MeshInstance3D, covered: bool) -> void:
 			mesh.surface_set_material(mesh.get_surface_count() - 1, source.surface_get_material(surface))
 		_headless_meshes[key] = mesh
 	body.mesh = _headless_meshes[key]
+
+
+static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleton3D, armor_id: String, body_axes: Basis, width: float) -> void:
+	# Fit only when assembling an outfit. Original body meshes remain immutable.
+	# Limb depth comes from the actual local body envelope, not shoulder span.
+	for spec: Dictionary in specs:
+		var part := String(spec.part)
+		var bone := String(spec.bone)
+		var axes: Basis = spec.axes
+		var dimensions: Vector3 = spec.dimensions
+		var center: Vector3 = axes.inverse() * Vector3(spec.center)
+		if part.begins_with("torso_"):
+			var torso_bounds := _bone_bounds(model, skeleton, "Spine", axes)
+			for name in ["Chest", "Hips"]:
+				var addition := _bone_bounds(model, skeleton, name, axes)
+				if addition.size.length() > 0.0: torso_bounds = torso_bounds.merge(addition)
+			if torso_bounds.size.z > 0.0:
+				center.z = torso_bounds.get_center().z
+				dimensions.z = torso_bounds.size.z * {"light":1.18,"medium":1.25,"heavy":1.26}[armor_id]
+				dimensions.x = width * {"light":1.02,"medium":1.16,"heavy":1.36}[armor_id]
+				if armor_id=="heavy":dimensions.y*=.93
+		elif part.begins_with("pelvis_"):
+			var bounds := _bone_bounds(model, skeleton, "Hips", axes)
+			if bounds.has_volume():
+				center.z = bounds.get_center().z
+				dimensions.z = bounds.size.z * {"light":1.04,"medium":1.10,"heavy":1.18}[armor_id]
+		elif part.begins_with("pauldron_"):
+			var bounds := _bone_bounds(model, skeleton, bone, axes)
+			var elbow := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Arm","ForeArm"))).origin
+			var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
+			center = axes.inverse() * shoulder.lerp(elbow, 0.10)
+			if bounds.has_volume():
+				center.x = bounds.get_center().x
+				center.z = bounds.get_center().z
+				dimensions.z = bounds.size.z * {"light":1.38,"medium":1.62,"heavy":1.92}[armor_id]
+		elif part.begins_with("knee_"):
+			var joint := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
+			var ankle := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Leg","Foot"))).origin
+			axes = _limb_axes((joint-ankle).normalized(),body_axes.z)
+			var bounds := _bone_bounds(model,skeleton,bone,axes)
+			center = axes.inverse()*joint
+			if bounds.has_volume():
+				dimensions = Vector3(bounds.size.x * {"light":0.70,"medium":1.16,"heavy":1.33}[armor_id],bounds.size.x * {"light":0.65,"medium":0.75,"heavy":0.80}[armor_id],bounds.size.z * {"light":0.18,"medium":0.24,"heavy":0.30}[armor_id])
+				center.x = bounds.get_center().x
+				center.z = bounds.end.z + dimensions.z * 0.15
+		elif part.begins_with("forearm_") or part.begins_with("thigh_") or part.begins_with("shin_") or part.begins_with("upper_arm_"):
+			var bounds := _bone_bounds(model,skeleton,bone,axes)
+			if bounds.has_volume():
+				if armor_id=="light" and (part.begins_with("thigh_") or part.begins_with("shin_")):
+					center.z = bounds.end.z-dimensions.z*.35
+				else:
+					center.x = bounds.get_center().x
+					center.z = bounds.get_center().z
+					if part.begins_with("forearm_"):
+						dimensions.x = bounds.size.x * {"light":0.90,"medium":1.35,"heavy":1.42}[armor_id]
+						dimensions.z = bounds.size.z * {"light":1.13,"medium":1.30,"heavy":1.40}[armor_id]
+					elif part.begins_with("thigh_"):
+						dimensions.x = bounds.size.x * (1.10 if armor_id=="medium" else 1.22)
+						dimensions.z = bounds.size.z * (1.12 if armor_id=="medium" else 1.22)
+						center.y-=dimensions.y*.08
+						dimensions.y*=.90
+					elif part.begins_with("shin_"):
+						dimensions.x = bounds.size.x * (1.10 if armor_id=="medium" else 1.30)
+						dimensions.z = bounds.size.z * (1.18 if armor_id=="medium" else 1.30)
+					else:
+						dimensions.z=bounds.size.z*1.25
+		spec.axes=axes
+		spec.center=axes*center
+		spec.dimensions=dimensions
+
+
+static func _component_root(parents: Array[int], index: int) -> int:
+	while parents[index] != index:
+		parents[index] = parents[parents[index]]
+		index = parents[index]
+	return index
+
+
+static func _assign_torso_components(primitives: Array) -> void:
+	# Weld glTF's UV/normal/material vertex splits for connectivity only. A
+	# complete rigid shell gets one bone from its component center, never a
+	# different bone for individual vertices on opposite sides of a threshold.
+	var points: Array[Vector3] = []
+	var parents: Array[int] = []
+	var welded: Dictionary = {}
+	for primitive: Dictionary in primitives:
+		var arrays: Array = primitive.arrays
+		var mapping := PackedInt32Array()
+		for vertex: Vector3 in arrays[Mesh.ARRAY_VERTEX]:
+			var point: Vector3 = Transform3D(primitive.transform) * vertex
+			if not welded.has(point):
+				welded[point] = points.size()
+				parents.append(points.size())
+				points.append(point)
+			mapping.append(int(welded[point]))
+		primitive["component_vertices"] = mapping
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		if indices.is_empty():
+			for index in mapping.size():indices.append(index)
+		for start in range(0,indices.size(),3):
+			var root := _component_root(parents,mapping[indices[start]])
+			for offset in [1,2]:parents[_component_root(parents,mapping[indices[start+offset]])]=root
+	var bounds: Dictionary = {}
+	for index in points.size():
+		var root := _component_root(parents,index)
+		bounds[root] = AABB(points[index],Vector3.ZERO) if not bounds.has(root) else (bounds[root] as AABB).expand(points[index])
+	for primitive: Dictionary in primitives:
+		var tags := PackedInt32Array()
+		for index in primitive.component_vertices:
+			var center: Vector3 = (bounds[_component_root(parents,index)] as AABB).get_center()
+			tags.append(2 if center.y<-.39 else 1 if center.y<-.07 else 0)
+		primitive["bone_tags"]=tags
+		primitive.erase("component_vertices")

@@ -1,0 +1,21 @@
+{
+  "checks_passed": 104,
+  "errors": [],
+  "final_variant": "r05",
+  "variants": [
+    "r04",
+    "r05_flat",
+    "r05"
+  ],
+  "class_view_combinations": 45,
+  "desktop": [
+    1600,
+    1000
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "browser": "Chrome headless --disable-gpu",
+  "roundtrip_is_automated_fixture_not_user_decision": true
+}

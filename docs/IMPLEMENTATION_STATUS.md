@@ -1,5 +1,23 @@
 # IMPLEMENTATION_STATUS
 
+### Körperfolgende Rüstung R05 — 11.11.2026
+
+Isolierter Taskbranch task/native-glut-maps-20261110 auf290fa0fb6. Nach vom
+Nutzer bestätigten 2D-Vorlagen und weiteren Korrekturen eigene Astra-Ultra-
+Blenderrevision übernommen: gewölbte statt flacher Brust-/Arm-/Beinschalen,
+anatomischer Sitz, kleinere Abstände, feste Wangen-/Kinnschalen und klare
+Visiere für leicht/mittel. Keine Körper-/Rig-/Gameplayänderung.30 GLBs,
+5.020/5.608/6.736 Dreiecke je leicht/mittel/schwer und je fünf Materialflächen.
+Frischer Import0, produktiver Headless-/Nativeverifier jeweils132/0,
+tatsächlicher Inventar-/Basisweg nativ16/0. Blender30/30; Kandidatenprüfungen
+separat124/0. Zusätzlicher echter B-Lauf1×37/0 mit acht Schüssen, keine
+allgemeine FPS-Freigabe. Vergleichsworkbench104/0 Browserchecks.
+QA armor_kenney_r05_20261111, Offlinevergleich
+armor_comparison_20261111.html. R04 und frühere Quellen bleiben erhalten.
+Native Stilabnahme, Sitz-/Transportextreme, breite FPS-Abnahme, Main und EXE
+offen; Fahrzeugmodelle weiterhin zurückgestellt.
+
+
 ### Eigene Rüstungsformen und Helm — 11.11.2026
 
 Taskbranch task/native-glut-maps-20261110 auf46acfaa58. Vom Nutzer abgelehnte

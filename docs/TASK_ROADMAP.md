@@ -1,5 +1,11 @@
 # TASK_ROADMAP
 
+### Rüstung vor weiteren Fahrzeugmodellen —11.11.2026
+Nutzerpriorität: Fahrzeugmodelle zurückgestellt; später voraussichtlich
+Caterpillar zuerst. Aktuell drei Rüstungsstufen nach Kenney-Proportionen und
+ORC-/Morozov-Formreferenzen, mit Bilder-KI-Mehransichten und nativer Übertragung.
+Task: ARMOR_ORC_MOROZOV_2026_11_11.md. Kein neuer Fahrzeug-/Kaufpfad in diesem Schritt.
+
 ### Personal-/Basis-UI nach Main — 10.11.2026
 Beauftragte Integration der fünf Taskcommits5df2d3b6f bis2ea460017 auf Main1e3cca237,
 ohne Produktkonflikte/weitere Codeänderung. Frischer nativer Ausflug102/0,

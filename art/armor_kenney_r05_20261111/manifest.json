@@ -1,0 +1,170 @@
+{
+  "blender": "5.1.1",
+  "source": "build_armor_r05.py",
+  "parts": [
+    {
+      "name": "helmet_light",
+      "bytes": 120232,
+      "sha256": "3b79d97bef5895b45208f4b7c05a30d9790eaab7da023f1bb283fa314a5246f2"
+    },
+    {
+      "name": "torso_light",
+      "bytes": 55536,
+      "sha256": "8e1e14d403ac3fbe8924921a9687db9ad7182976c7e38ff548a8e4336ccc25a9"
+    },
+    {
+      "name": "pelvis_light",
+      "bytes": 9592,
+      "sha256": "db1c8d5096a399dbf26cba9f531f3edd23595d39e593b196f02cefeca5626d02"
+    },
+    {
+      "name": "pauldron_light",
+      "bytes": 19328,
+      "sha256": "63a709249e29073d97a2d119dd5b09897253320ba40586334c71883df8859776"
+    },
+    {
+      "name": "forearm_light",
+      "bytes": 20024,
+      "sha256": "eef207bf72c5feeb33efe719508a629b2e6fcc01d7b1e67a70d9e6c6a76dc2b0"
+    },
+    {
+      "name": "knee_light",
+      "bytes": 13168,
+      "sha256": "effa284ac41ce2dd786b5731800abe9feaa59b1ccc906c4644a22b15ba2b3152"
+    },
+    {
+      "name": "thigh_light",
+      "bytes": 20020,
+      "sha256": "f9577fc2f81e271133118e511bea83be0a319d5f5882567e0a80773e30646a50"
+    },
+    {
+      "name": "shin_light",
+      "bytes": 20020,
+      "sha256": "a3a19f22019bf0e2af5454ae4c12dd031bccfdbff57939e9282ca3c73c0730c7"
+    },
+    {
+      "name": "boot_light",
+      "bytes": 24948,
+      "sha256": "0a2e3c472c3afde333f9ead3b22e4cc2b6dd671fd2f1309a2402259e8719cd6c"
+    },
+    {
+      "name": "helmet_medium",
+      "bytes": 120204,
+      "sha256": "a271023f3fbbd622d63ce235b6be23f733ef033c4387e928b95d71c4f789f7b8"
+    },
+    {
+      "name": "torso_medium",
+      "bytes": 68812,
+      "sha256": "aa89367cda0c3ebd37b396785557670f8674fd80ba89d888bf45d486f52d6c05"
+    },
+    {
+      "name": "pelvis_medium",
+      "bytes": 16196,
+      "sha256": "20894e39ef20390853b60c9a1311212a15db6249f53884513d6416439d70dd0f"
+    },
+    {
+      "name": "pauldron_medium",
+      "bytes": 24572,
+      "sha256": "3276321b67dd61d3de9b8d19ab615491dc4a6741b69a12354c11de0f7ba17918"
+    },
+    {
+      "name": "forearm_medium",
+      "bytes": 25152,
+      "sha256": "420453e87ef35585593ec11982cf9e265942e3f104972ab63a9aed4ce0968deb"
+    },
+    {
+      "name": "knee_medium",
+      "bytes": 13168,
+      "sha256": "8950650ec4594e21e6860f715ec4c5c664110124491e1e9bf7a0160a969ec695"
+    },
+    {
+      "name": "thigh_medium",
+      "bytes": 20600,
+      "sha256": "810939d5d9b03c4c2182ba8c60f09fd8aa5a18765a2ce70fa976a106e9637ad4"
+    },
+    {
+      "name": "shin_medium",
+      "bytes": 25148,
+      "sha256": "798834a69f05ca416304d463af1d5b7856e4bf54434b78f347604ffcb64bfd15"
+    },
+    {
+      "name": "boot_medium",
+      "bytes": 27192,
+      "sha256": "ce8a9b7acf83398d1298426a3f8cd90c304579516f227965a7e7ef7facf89d92"
+    },
+    {
+      "name": "helmet_heavy",
+      "bytes": 48620,
+      "sha256": "6837c81e75aae30ec21912077b3cd57c6b5f89df8190b930c961bcc0564e8a2c"
+    },
+    {
+      "name": "torso_heavy",
+      "bytes": 57648,
+      "sha256": "423a17c13725e2054fdc1e84f898d35f47edc96bd710bfcec6de43c5c9919b5d"
+    },
+    {
+      "name": "pelvis_heavy",
+      "bytes": 19284,
+      "sha256": "8dbdad421171cde2be10e6b2f4ce81439d4df77071c0d455b2aa800304bb03db"
+    },
+    {
+      "name": "pauldron_heavy",
+      "bytes": 31312,
+      "sha256": "12bf4e2aba6c072037b5ab3ff8d6da326951d0eef2aea685762415b87d14082d"
+    },
+    {
+      "name": "forearm_heavy",
+      "bytes": 27972,
+      "sha256": "8bbb2fc5ea85440de72594a00e22c49ce654596239086f4d1983d2585994ddc2"
+    },
+    {
+      "name": "knee_heavy",
+      "bytes": 15972,
+      "sha256": "7778057bdaada0fa10c4969a322aff0b2fec06362dac1c92a3e625b3d050e3d0"
+    },
+    {
+      "name": "thigh_heavy",
+      "bytes": 35572,
+      "sha256": "07dee7757704d71b40997f7ec1cb0adf3455cfd5308778ccaddc057e32058be2"
+    },
+    {
+      "name": "shin_heavy",
+      "bytes": 24208,
+      "sha256": "b4f47bd7fcfd0e9dd0415e1ac6c55817fc1845a5f4e6c46eb5ce27827e1fbe47"
+    },
+    {
+      "name": "boot_heavy",
+      "bytes": 27196,
+      "sha256": "d7ab59fc1076bc0fd5fd032139b98b63a749183e62da1160830f8a59c1cf439c"
+    },
+    {
+      "name": "upper_arm_heavy",
+      "bytes": 24216,
+      "sha256": "7a4804710a6802510a6ec8b35472b8df2a16ff58766677f49dc99239ed58d5e2"
+    },
+    {
+      "name": "hand_guard_heavy",
+      "bytes": 24220,
+      "sha256": "2580f748be4a2d9cff949b4554bdf116411e0a51a44dfee9d61ea58b926e75e7"
+    },
+    {
+      "name": "collar",
+      "bytes": 41716,
+      "sha256": "7fbee3d50ad22ed35c49d457a9f601ea51f4b2815ddbc6eb10e35f27e0c7cbac"
+    }
+  ],
+  "reference_images": [
+    {
+      "path": "art\\armor_orc_morozov_20261111\\heavy_turnaround_ai_r04.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e"
+    },
+    {
+      "path": "art\\armor_orc_morozov_20261111\\light_turnaround_ai_r04.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997"
+    },
+    {
+      "path": "art\\armor_orc_morozov_20261111\\medium_turnaround_ai_r04.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8"
+    }
+  ]
+}

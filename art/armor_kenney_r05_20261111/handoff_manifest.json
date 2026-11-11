@@ -1,0 +1,467 @@
+{
+  "status": "candidate_ready_for_owner_integration_not_user_aesthetic_acceptance",
+  "date": "2026-11-11",
+  "blender": "5.1.1",
+  "godot": "4.6.2",
+  "source_body": {
+    "path": "Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+    "bytes": 397300,
+    "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+  },
+  "references": [
+    {
+      "path": "art\\armor_orc_morozov_20261111\\heavy_turnaround_ai_r04.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e"
+    },
+    {
+      "path": "art\\armor_orc_morozov_20261111\\light_turnaround_ai_r04.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997"
+    },
+    {
+      "path": "art\\armor_orc_morozov_20261111\\medium_turnaround_ai_r04.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8"
+    }
+  ],
+  "user_overrides": [
+    "sealed clear visor and rigid cheek/chin protection for light and medium",
+    "less bulk and body-envelope fitting",
+    "curved faceted shells with returning sides"
+  ],
+  "qa": {
+    "parts": 30,
+    "passed": 30,
+    "native_checks_passed": 124,
+    "headless_checks_passed": 124,
+    "accepted_warning": "centered wearable pivots, not ground props",
+    "other_warnings": [],
+    "aesthetic_acceptance": false
+  },
+  "runtime_metrics": [
+    {
+      "armor": "light",
+      "exported_vertices": 10901,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_ClearVisor",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "base",
+      "segments": 15,
+      "skin_binds": 45,
+      "surfaces": 5,
+      "triangles": 5020
+    },
+    {
+      "armor": "medium",
+      "exported_vertices": 12347,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_ClearVisor",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "base",
+      "segments": 15,
+      "skin_binds": 45,
+      "surfaces": 5,
+      "triangles": 5608
+    },
+    {
+      "armor": "heavy",
+      "exported_vertices": 15322,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium",
+        "M_Armor_Visor"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "base",
+      "segments": 20,
+      "skin_binds": 45,
+      "surfaces": 5,
+      "triangles": 6736
+    },
+    {
+      "armor": "light",
+      "exported_vertices": 10901,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_ClearVisor",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "mission",
+      "segments": 15,
+      "skin_binds": 58,
+      "surfaces": 5,
+      "triangles": 5020
+    },
+    {
+      "armor": "medium",
+      "exported_vertices": 12347,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_ClearVisor",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "mission",
+      "segments": 15,
+      "skin_binds": 58,
+      "surfaces": 5,
+      "triangles": 5608
+    },
+    {
+      "armor": "heavy",
+      "exported_vertices": 15322,
+      "materials": [
+        "M_Armor_Amber",
+        "M_Armor_Ceramic",
+        "M_Armor_Graphite",
+        "M_Armor_Titanium",
+        "M_Armor_Visor"
+      ],
+      "positive_influence_counts": [
+        "1"
+      ],
+      "rig": "mission",
+      "segments": 20,
+      "skin_binds": 58,
+      "surfaces": 5,
+      "triangles": 6736
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "art/armor_kenney_r05_20261111/armor_r05_editable.blend",
+      "bytes": 642489,
+      "sha256": "49cb7ade244cfb7486b97ad77a30a104f680efd1fc979b8f0a02aea8b0a952c5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/build_armor_r05.py",
+      "bytes": 24652,
+      "sha256": "3e2c3f2abc06dd2b8c7c2ebd343104bc6ea2c91fc16488b41e950045cfffedaa"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/anatomical_fit.gdinc",
+      "bytes": 5701,
+      "sha256": "f41aacd4337a967d4ed4cd2714282576b7912c19a563e1cddc78a8f7c8dff722"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/runtime_candidate.gd",
+      "bytes": 26595,
+      "sha256": "537927e0dd3a39673184d442d04096dbf0fc907a643c9ae5b5e731ff5d1024fd"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/qa.json",
+      "bytes": 30524,
+      "sha256": "ebcbc9b26ffbebf47dd1a373fc6fc7a7689c326b33969beb8dd2072c3b812666"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/runtime_metrics.json",
+      "bytes": 1971,
+      "sha256": "daa02502f934886efb0f9b7bd093d7d9e6861f49d919fad496fe3e084d4d95bf"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/review_armor_r05.py",
+      "bytes": 1009,
+      "sha256": "7d818832522440f2443160135916fe7cb9c55cc4ba7dcec640968d75ddfb565f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/review_shots.json",
+      "bytes": 19007,
+      "sha256": "b64956b5c6f2cbb766065e609b8300fe16f3dc9f24aea17fa4150172067fd7d6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/README.md",
+      "bytes": 8165,
+      "sha256": "274d7f23460a75a18112fc58c09b829e93e1bbc25b6eebccbc3a3bb74387f808"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/boot_heavy.glb",
+      "bytes": 27196,
+      "sha256": "d7ab59fc1076bc0fd5fd032139b98b63a749183e62da1160830f8a59c1cf439c"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/boot_light.glb",
+      "bytes": 24948,
+      "sha256": "0a2e3c472c3afde333f9ead3b22e4cc2b6dd671fd2f1309a2402259e8719cd6c"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/boot_medium.glb",
+      "bytes": 27192,
+      "sha256": "ce8a9b7acf83398d1298426a3f8cd90c304579516f227965a7e7ef7facf89d92"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/collar.glb",
+      "bytes": 41716,
+      "sha256": "7fbee3d50ad22ed35c49d457a9f601ea51f4b2815ddbc6eb10e35f27e0c7cbac"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/forearm_heavy.glb",
+      "bytes": 27972,
+      "sha256": "8bbb2fc5ea85440de72594a00e22c49ce654596239086f4d1983d2585994ddc2"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/forearm_light.glb",
+      "bytes": 20024,
+      "sha256": "eef207bf72c5feeb33efe719508a629b2e6fcc01d7b1e67a70d9e6c6a76dc2b0"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/forearm_medium.glb",
+      "bytes": 25152,
+      "sha256": "420453e87ef35585593ec11982cf9e265942e3f104972ab63a9aed4ce0968deb"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/hand_guard_heavy.glb",
+      "bytes": 24220,
+      "sha256": "2580f748be4a2d9cff949b4554bdf116411e0a51a44dfee9d61ea58b926e75e7"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/helmet_heavy.glb",
+      "bytes": 48620,
+      "sha256": "6837c81e75aae30ec21912077b3cd57c6b5f89df8190b930c961bcc0564e8a2c"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/helmet_light.glb",
+      "bytes": 120232,
+      "sha256": "3b79d97bef5895b45208f4b7c05a30d9790eaab7da023f1bb283fa314a5246f2"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/helmet_medium.glb",
+      "bytes": 120204,
+      "sha256": "a271023f3fbbd622d63ce235b6be23f733ef033c4387e928b95d71c4f789f7b8"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/knee_heavy.glb",
+      "bytes": 15972,
+      "sha256": "7778057bdaada0fa10c4969a322aff0b2fec06362dac1c92a3e625b3d050e3d0"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/knee_light.glb",
+      "bytes": 13168,
+      "sha256": "effa284ac41ce2dd786b5731800abe9feaa59b1ccc906c4644a22b15ba2b3152"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/knee_medium.glb",
+      "bytes": 13168,
+      "sha256": "8950650ec4594e21e6860f715ec4c5c664110124491e1e9bf7a0160a969ec695"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pauldron_heavy.glb",
+      "bytes": 31312,
+      "sha256": "12bf4e2aba6c072037b5ab3ff8d6da326951d0eef2aea685762415b87d14082d"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pauldron_light.glb",
+      "bytes": 19328,
+      "sha256": "63a709249e29073d97a2d119dd5b09897253320ba40586334c71883df8859776"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pauldron_medium.glb",
+      "bytes": 24572,
+      "sha256": "3276321b67dd61d3de9b8d19ab615491dc4a6741b69a12354c11de0f7ba17918"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pelvis_heavy.glb",
+      "bytes": 19284,
+      "sha256": "8dbdad421171cde2be10e6b2f4ce81439d4df77071c0d455b2aa800304bb03db"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pelvis_light.glb",
+      "bytes": 9592,
+      "sha256": "db1c8d5096a399dbf26cba9f531f3edd23595d39e593b196f02cefeca5626d02"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/pelvis_medium.glb",
+      "bytes": 16196,
+      "sha256": "20894e39ef20390853b60c9a1311212a15db6249f53884513d6416439d70dd0f"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/shin_heavy.glb",
+      "bytes": 24208,
+      "sha256": "b4f47bd7fcfd0e9dd0415e1ac6c55817fc1845a5f4e6c46eb5ce27827e1fbe47"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/shin_light.glb",
+      "bytes": 20020,
+      "sha256": "a3a19f22019bf0e2af5454ae4c12dd031bccfdbff57939e9282ca3c73c0730c7"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/shin_medium.glb",
+      "bytes": 25148,
+      "sha256": "798834a69f05ca416304d463af1d5b7856e4bf54434b78f347604ffcb64bfd15"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/thigh_heavy.glb",
+      "bytes": 35572,
+      "sha256": "07dee7757704d71b40997f7ec1cb0adf3455cfd5308778ccaddc057e32058be2"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/thigh_light.glb",
+      "bytes": 20020,
+      "sha256": "f9577fc2f81e271133118e511bea83be0a319d5f5882567e0a80773e30646a50"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/thigh_medium.glb",
+      "bytes": 20600,
+      "sha256": "810939d5d9b03c4c2182ba8c60f09fd8aa5a18765a2ce70fa976a106e9637ad4"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/torso_heavy.glb",
+      "bytes": 57648,
+      "sha256": "423a17c13725e2054fdc1e84f898d35f47edc96bd710bfcec6de43c5c9919b5d"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/torso_light.glb",
+      "bytes": 55536,
+      "sha256": "8e1e14d403ac3fbe8924921a9687db9ad7182976c7e38ff548a8e4336ccc25a9"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/torso_medium.glb",
+      "bytes": 68812,
+      "sha256": "aa89367cda0c3ebd37b396785557670f8674fd80ba89d888bf45d486f52d6c05"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_parts/upper_arm_heavy.glb",
+      "bytes": 24216,
+      "sha256": "7a4804710a6802510a6ec8b35472b8df2a16ff58766677f49dc99239ed58d5e2"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_native.png",
+      "bytes": 226942,
+      "sha256": "020381d7385800bbff3a5f90783aeba8a7a7229b78dc551e5c63d01a35919587"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_native_quarter.png",
+      "bytes": 200470,
+      "sha256": "3a037e3525bea8bcc7198c92d001fe1cbd304f905d4bca2b8eeb56ce967849aa"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_native_rear.png",
+      "bytes": 89317,
+      "sha256": "b518ec5d88dd3736527bf49d2b231930f072ac8b9146d1a15261dde733a33d37"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_native_side.png",
+      "bytes": 110463,
+      "sha256": "3140fce25b4442e9a644b16f8c0c94845b171d74321740f09a31835f5803f0af"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_native_top.png",
+      "bytes": 52069,
+      "sha256": "25babfe214833fbca4f1048414da3a0e7985e1a35d39a6f8e8cb8611c1ce3b46"
+    },
+    {
+      "path": "output/native_glut_maps/r05_revision_armor_fire.png",
+      "bytes": 265606,
+      "sha256": "e604fe69a3dbe3a89378b0ed453fe886c87e5b8cc08ff35e53e4d7f62f5f0f19"
+    },
+    {
+      "path": "output/native_glut_maps/r05_revision_armor_front.png",
+      "bytes": 252922,
+      "sha256": "4694a34699b4d02e43327bdc3297ef197a9f7f299085629756be0c2736edea8f"
+    },
+    {
+      "path": "output/native_glut_maps/r05_revision_armor_head_turn.png",
+      "bytes": 259961,
+      "sha256": "721b71cb73f83ecde89b37f7d9ea36cfdaffeb7b02024d53e22b39f79f4d8faf"
+    },
+    {
+      "path": "output/native_glut_maps/r05_revision_armor_rear.png",
+      "bytes": 222744,
+      "sha256": "572016fcfd406830be0f2bfd3960cade11e3f35990b24d899e287ff61524b8f2"
+    },
+    {
+      "path": "output/native_glut_maps/r05_revision_armor_walk.png",
+      "bytes": 265871,
+      "sha256": "b6c155682e4cf6354acca85d1f39d973f9c42b8139bad1dfb1905fa461ae1223"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_walk_only_feet_015.png",
+      "bytes": 166038,
+      "sha256": "ad9ab34ad2bba43cfbc0efd796e110b5716d2c1554d6a70211660ebfcfe0f270"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_walk_only_feet_042.png",
+      "bytes": 169198,
+      "sha256": "1001041dd4e18dbe5e37caa9c28c39d8c8682cd35d99357f20971b0d53815184"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_walk_only_feet_070.png",
+      "bytes": 170081,
+      "sha256": "277c17e1d328a67fb983c7d057e10c5ea78978de3769904152d1af4aabad5f72"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_neck_turn_-25.png",
+      "bytes": 160156,
+      "sha256": "9219b56b5a5ce04789156cd3e46327e6500084adbedb67d279549e185d4e7064"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_neck_turn_25.png",
+      "bytes": 182979,
+      "sha256": "19c6be33853fdad13c47a6c6c96a2adfa40e551eef8b11aa03f10b9929bf2d61"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_fit_idle.png",
+      "bytes": 312360,
+      "sha256": "368269aa35b30e0bc61c6ee87ebce5ccb45cef94bd7c29f3ec0b486406ddc4f7"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_fit_rest.png",
+      "bytes": 265449,
+      "sha256": "fb645db57e18578aaea7ecbfa5273fe2c8e65d2a6e6a62fb047a7e432aa58e5a"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_fit_walk.png",
+      "bytes": 306309,
+      "sha256": "e6471df16b1063545d5f402304a092bd998494dfc26c56801be1dfb016574ae3"
+    },
+    {
+      "path": "output/native_glut_maps/personnel_armor_visual_r05.gd",
+      "bytes": 26595,
+      "sha256": "537927e0dd3a39673184d442d04096dbf0fc907a643c9ae5b5e731ff5d1024fd"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_rig_test.gd_native.log",
+      "bytes": 528,
+      "sha256": "50c62a90adf0153eea58f4a3583b9f290bcf7d312e3bcb8b4e61dbf8c46a6a38"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_rig_test.gd_headless.log",
+      "bytes": 444,
+      "sha256": "0fdcd99a97d3f0a1cf9446914370dff00620968541c9aebb908b98470ba2672c"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_walk_feet.gd_native.log",
+      "bytes": 808,
+      "sha256": "eaf9dd0b924043ba8107c5d73f44f5472d14e65f7dce956a2f99979eaecf38a9"
+    },
+    {
+      "path": "output/native_glut_maps/armor_r05_headturn_probe.gd_native.log",
+      "bytes": 314,
+      "sha256": "df890a3f6ec69195da0a0b574fe2bfb93b01a9627447490161edef568702d9a5"
+    }
+  ]
+}

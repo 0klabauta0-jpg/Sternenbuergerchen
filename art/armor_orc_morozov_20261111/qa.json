@@ -1,0 +1,1238 @@
+[
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "torso_medium": {
+        "verts": 374,
+        "faces": 708,
+        "tris": 708,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 10,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 48.4
+      }
+    },
+    "asset": "torso_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "torso_heavy": {
+        "verts": 628,
+        "faces": 1176,
+        "tris": 1176,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 20,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 42.6
+      }
+    },
+    "asset": "torso_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "helmet_medium": {
+        "verts": 264,
+        "faces": 508,
+        "tris": 508,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 6,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 39.5
+      }
+    },
+    "asset": "helmet_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "helmet_heavy": {
+        "verts": 446,
+        "faces": 872,
+        "tris": 872,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 49.1
+      }
+    },
+    "asset": "helmet_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "torso_light": {
+        "verts": 271,
+        "faces": 518,
+        "tris": 518,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 6,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 54.8
+      }
+    },
+    "asset": "torso_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "helmet_light": {
+        "verts": 264,
+        "faces": 508,
+        "tris": 508,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 6,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 39.0
+      }
+    },
+    "asset": "helmet_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "pelvis_light": {
+        "verts": 104,
+        "faces": 200,
+        "tris": 200,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 2,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 61.2
+      }
+    },
+    "asset": "pelvis_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "pauldron_light": {
+        "verts": 162,
+        "faces": 316,
+        "tris": 316,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 2,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 55.7
+      }
+    },
+    "asset": "pauldron_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "forearm_light": {
+        "verts": 156,
+        "faces": 304,
+        "tris": 304,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 2,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 63.6
+      }
+    },
+    "asset": "forearm_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "knee_light": {
+        "verts": 162,
+        "faces": 316,
+        "tris": 316,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 2,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 54.0
+      }
+    },
+    "asset": "knee_light",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "pauldron_medium": {
+        "verts": 198,
+        "faces": 384,
+        "tris": 384,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 58.9
+      }
+    },
+    "asset": "pauldron_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "forearm_medium": {
+        "verts": 192,
+        "faces": 372,
+        "tris": 372,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 70.1
+      }
+    },
+    "asset": "forearm_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "thigh_medium": {
+        "verts": 192,
+        "faces": 372,
+        "tris": 372,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 70.1
+      }
+    },
+    "asset": "thigh_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "knee_medium": {
+        "verts": 198,
+        "faces": 384,
+        "tris": 384,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 60.0
+      }
+    },
+    "asset": "knee_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "shin_medium": {
+        "verts": 192,
+        "faces": 372,
+        "tris": 372,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 70.1
+      }
+    },
+    "asset": "shin_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "boot_medium": {
+        "verts": 192,
+        "faces": 372,
+        "tris": 372,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 3,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 70.1
+      }
+    },
+    "asset": "boot_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "pelvis_medium": {
+        "verts": 172,
+        "faces": 328,
+        "tris": 328,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 4,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 59.6
+      }
+    },
+    "asset": "pelvis_medium",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: pauldron_heavy (6 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "pauldron_heavy",
+        "tri_pairs": 6
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "pauldron_heavy": {
+        "verts": 234,
+        "faces": 448,
+        "tris": 448,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 60.2
+      }
+    },
+    "asset": "pauldron_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: forearm_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "forearm_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "forearm_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "forearm_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: thigh_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "thigh_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "thigh_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "thigh_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: knee_heavy (5 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "knee_heavy",
+        "tri_pairs": 5
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "knee_heavy": {
+        "verts": 234,
+        "faces": 448,
+        "tris": 448,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 60.9
+      }
+    },
+    "asset": "knee_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: shin_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "shin_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "shin_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "shin_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: boot_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "boot_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "boot_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "boot_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: upper_arm_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "upper_arm_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "upper_arm_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "upper_arm_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "hidden back-to-back faces: hand_guard_heavy (7 pairs) - delete to save tris",
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "hand_guard_heavy",
+        "tri_pairs": 7
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "hand_guard_heavy": {
+        "verts": 228,
+        "faces": 436,
+        "tris": 436,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 67.0
+      }
+    },
+    "asset": "hand_guard_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.5 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.5,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "pelvis_heavy": {
+        "verts": 172,
+        "faces": 328,
+        "tris": 328,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 4,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 5,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 59.6
+      }
+    },
+    "asset": "pelvis_heavy",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  },
+  {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=-0.4507 (not resting on ground plane z=0)"
+    ],
+    "ground_z": -0.4507,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "collar": {
+        "verts": 128,
+        "faces": 256,
+        "tris": 256,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 1,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 1,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 40.6
+      }
+    },
+    "asset": "collar",
+    "accepted_warning_reason": "Centered wearable segment: no independent ground plane; joints are assembled against actual bone rests."
+  }
+]

@@ -1,0 +1,1938 @@
+{
+  "status": "integrated_isolated_task_branch_no_main_no_exe_no_user_style_acceptance",
+  "branch": "task/native-glut-maps-20261110",
+  "base_before_revision": "290fa0fb604a66123b51c1c40d07b0c1fd1fc194",
+  "date": "2026-11-11",
+  "production_checks": {
+    "headless_visual": 132,
+    "native_visual": 132,
+    "headless_equipment": 15,
+    "native_equipment": 16,
+    "browser": 104,
+    "native_battle_B_1x": 37,
+    "actual_shots": 8
+  },
+  "artifacts": [
+    {
+      "path": "art/armor_kenney_r05_20261111/.gdignore",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/anatomical_fit.gdinc",
+      "bytes": 5701,
+      "sha256": "f41aacd4337a967d4ed4cd2714282576b7912c19a563e1cddc78a8f7c8dff722"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/armor_r05_editable.blend",
+      "bytes": 642489,
+      "sha256": "49cb7ade244cfb7486b97ad77a30a104f680efd1fc979b8f0a02aea8b0a952c5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/anatomical_fit.gdinc",
+      "bytes": 3790,
+      "sha256": "244c9eacb33535c1e2193d35cf2203a853bac2a9df2184e7727dac1bdd5c232a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/armor_r05_editable.blend",
+      "bytes": 613191,
+      "sha256": "1800d1f94bfa90008b56a5bb429797e4fc0536dde16f5b6660b87c94902c33d4"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/build_armor_r05.py",
+      "bytes": 23388,
+      "sha256": "0b72266983e734b678e8faad598f14f53e81c7115cec889bf92b8641f0f270c9"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/manifest.json",
+      "bytes": 5229,
+      "sha256": "3961527868af6b86ac3778f51df6f901e304fc918e2430333ca882d2cfd359ad"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/boot_heavy.glb",
+      "bytes": 27196,
+      "sha256": "d7ab59fc1076bc0fd5fd032139b98b63a749183e62da1160830f8a59c1cf439c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/boot_light.glb",
+      "bytes": 24948,
+      "sha256": "0a2e3c472c3afde333f9ead3b22e4cc2b6dd671fd2f1309a2402259e8719cd6c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/boot_medium.glb",
+      "bytes": 27192,
+      "sha256": "ce8a9b7acf83398d1298426a3f8cd90c304579516f227965a7e7ef7facf89d92"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/collar.glb",
+      "bytes": 41716,
+      "sha256": "7fbee3d50ad22ed35c49d457a9f601ea51f4b2815ddbc6eb10e35f27e0c7cbac"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/forearm_heavy.glb",
+      "bytes": 18948,
+      "sha256": "2e7160a0ed10ac465efe81d2d92025e3a21527eb533ac49dce1c37e635afcef0"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/forearm_light.glb",
+      "bytes": 13776,
+      "sha256": "a3c1fce3c2faf676c8941b4313f6e697d8d81d2810f5bc8f0c13b6a22a10976e"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/forearm_medium.glb",
+      "bytes": 16120,
+      "sha256": "19c688dc0a4c43b7dd6a9693d8e87d08ea40ede578bc02dd02626b9967a7c60b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/hand_guard_heavy.glb",
+      "bytes": 15192,
+      "sha256": "71773e50941ba68e42007a1c395f0264c0e113979163ad090ae37bef84865a54"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/helmet_heavy.glb",
+      "bytes": 48620,
+      "sha256": "6837c81e75aae30ec21912077b3cd57c6b5f89df8190b930c961bcc0564e8a2c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/helmet_light.glb",
+      "bytes": 120232,
+      "sha256": "3b79d97bef5895b45208f4b7c05a30d9790eaab7da023f1bb283fa314a5246f2"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/helmet_medium.glb",
+      "bytes": 120204,
+      "sha256": "a271023f3fbbd622d63ce235b6be23f733ef033c4387e928b95d71c4f789f7b8"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/knee_heavy.glb",
+      "bytes": 11988,
+      "sha256": "85c1b483e281ca372d806afcad3f29730e74a896fec3de6f526697c17ffd4f95"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/knee_light.glb",
+      "bytes": 9184,
+      "sha256": "36352d40e645d0626eff71f067ec332cea2306190bd44b3469c859a8d85fb30d"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/knee_medium.glb",
+      "bytes": 9184,
+      "sha256": "8e75663d3ee5b250436a7792b962095a42be8363c42cdff067fd02b2bb2f972b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pauldron_heavy.glb",
+      "bytes": 20852,
+      "sha256": "9418fbcb4d4dd4239fd19403b61db5fbb4867afcc0e2db6227f66a4bad495750"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pauldron_light.glb",
+      "bytes": 13520,
+      "sha256": "52ed1d2d473df51dc087105b061c8b4cefea59c53e02225b233f77e03aca47e4"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pauldron_medium.glb",
+      "bytes": 16980,
+      "sha256": "534f44bb1516c774c15a62e689059e01f88c1b938a43ec45973945545b64fa2f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pelvis_heavy.glb",
+      "bytes": 19284,
+      "sha256": "8dbdad421171cde2be10e6b2f4ce81439d4df77071c0d455b2aa800304bb03db"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pelvis_light.glb",
+      "bytes": 9592,
+      "sha256": "db1c8d5096a399dbf26cba9f531f3edd23595d39e593b196f02cefeca5626d02"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/pelvis_medium.glb",
+      "bytes": 16196,
+      "sha256": "20894e39ef20390853b60c9a1311212a15db6249f53884513d6416439d70dd0f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/shin_heavy.glb",
+      "bytes": 15180,
+      "sha256": "1e088c06e341fc71f314bbe163d8f465a0afbc451e892b6e0d6ac010ac2ced33"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/shin_light.glb",
+      "bytes": 13772,
+      "sha256": "1e9eb343a1ad405936fce0cf43489df389c393180b42f505e285c1ed432a3bc2"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/shin_medium.glb",
+      "bytes": 16116,
+      "sha256": "a024e89b4edaf0a1056b7742b2e9e1d6b1ed250f968c8daeec142a3d3084df86"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/thigh_heavy.glb",
+      "bytes": 24224,
+      "sha256": "a4ca4e4a65ae24898d59d08bc9039ce3d795e2493ef2d28be1786c98ddcae279"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/thigh_light.glb",
+      "bytes": 13772,
+      "sha256": "791a4c4a375ca8bdf19f46413778cf503356d9140fe447543431fd429c9e41e1"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/thigh_medium.glb",
+      "bytes": 13904,
+      "sha256": "9228e0737c7cd87f0170c0a2aefe9af521402905b6145d6c19aa427659f22ece"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/torso_heavy.glb",
+      "bytes": 51916,
+      "sha256": "d8de585e532e2116c4eb4165e738e51222c585e66f83b184ba09ae3421f0ec08"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/torso_light.glb",
+      "bytes": 42828,
+      "sha256": "a24be57152763c09d6c2b036712eae1a3f72aaf5b1dc85128464a04c045decbf"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/torso_medium.glb",
+      "bytes": 50892,
+      "sha256": "68b1e5f95e9fe2d4f394204fb2ce81246ec03609cdee15edbd16567e5bf1b4d6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/parts/upper_arm_heavy.glb",
+      "bytes": 15192,
+      "sha256": "91be4e76d00856575d8c4a588ae8ecfdb8950396588f94e411e82f2855e9ca2d"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/qa.json",
+      "bytes": 30508,
+      "sha256": "1db87066cfb6470c0230b8b2b96c83e21a75d56abf15fdd0c92fbf63777b71fb"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/before_curvature_1222/runtime_candidate.gd",
+      "bytes": 24384,
+      "sha256": "f92a68a8159337f770bef6a3ad2343b1a852418349781b0e2ece09fddcdec3de"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_material.png",
+      "bytes": 544074,
+      "sha256": "906e4a18d98d044a0c5c57a856809d4e2b7227cc133b0d2aa7415c5b68a19db1"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_material_front.png",
+      "bytes": 140722,
+      "sha256": "c15867da1dbae188b4bb44fb8af7737c14eec18c6424e54cf4cc1d54c27bfdfd"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_material_right.png",
+      "bytes": 140417,
+      "sha256": "b9ba99608a16d06e04e8c6653c7d4537298214036049fe45265a5289022bfd96"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_material_three_quarter.png",
+      "bytes": 145600,
+      "sha256": "409afef30ebe71caae97c9b5efb9482dab85f7c5a2e2864d4f27d1c46cd41e08"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_material_top.png",
+      "bytes": 120485,
+      "sha256": "48b7c85e73254f394a34b71eb62119adab1419c2e23735437a8cb72407c6746a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_wire.png",
+      "bytes": 735917,
+      "sha256": "6b3985665d6d320eefc5400229ac0da24d7439f675578b1358f7b123558422e8"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_wire_front.png",
+      "bytes": 183239,
+      "sha256": "085e97bcbd13a263abe7f795ddb9d6caed60f79c454ddd694ce05b50b845fe54"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_wire_right.png",
+      "bytes": 188863,
+      "sha256": "49b853defafa8d67f02bc8c92c6836f7199102db01698ac0de1a1b65c59aadf6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_wire_three_quarter.png",
+      "bytes": 201346,
+      "sha256": "a12c4ac8a7f262022ea6fd5f7f24136b870e0e0527cd9138c69981470be397c6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/boot_medium_wire_top.png",
+      "bytes": 153968,
+      "sha256": "50b74bfd074bc604b85351bb1a8b7b45da84b33cac5ec95e3a35da1a323f9bf0"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/build_armor_r05.py",
+      "bytes": 24652,
+      "sha256": "3e2c3f2abc06dd2b8c7c2ebd343104bc6ea2c91fc16488b41e950045cfffedaa"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_material.png",
+      "bytes": 543220,
+      "sha256": "c19ee74b25c60a49cb1358975f3ad03b21f64c2da39854c5bd3729d1f3fddc9a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_material_front.png",
+      "bytes": 142564,
+      "sha256": "4450959417086d6b6145d3fac8440427e31b57c02c7a664ed00803b72bab155f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_material_right.png",
+      "bytes": 134618,
+      "sha256": "8da9c4c740a61373c3f357d80d3c6229a152d4556c7fd731158231fa44cd5f90"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_material_three_quarter.png",
+      "bytes": 144700,
+      "sha256": "d8ee058d46dbc758bc1657112b667574b6c5a84486999992e24841cd41bf85e1"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_material_top.png",
+      "bytes": 119114,
+      "sha256": "6e1be5eb4730f226b981512c3258e6a8ba098c838424ab798ba0d04c084815fa"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_wire.png",
+      "bytes": 675386,
+      "sha256": "aee4f8a1ce1dd87e457665adc5896c1dc25d7e0a5ceb441b81abcd29b6dc5e55"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_wire_front.png",
+      "bytes": 176869,
+      "sha256": "f8760a5745629429d28411f6a307ca0d71140d7c47cbb7440388b489d664f03c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_wire_right.png",
+      "bytes": 164441,
+      "sha256": "f3226080c860c5ac154a0e19c19e9684c90401da5e3109760871a04743048173"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_wire_three_quarter.png",
+      "bytes": 178244,
+      "sha256": "773b7730c40aaee76ca728c01654527d1200eadf34db2da1c172deef5026ee17"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/forearm_medium_wire_top.png",
+      "bytes": 149697,
+      "sha256": "83fa488f0eecbc39f91fe8e5da77e7ae6b82793b0a76f6ff14b10d539117e28a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/handoff_manifest.json",
+      "bytes": 16053,
+      "sha256": "4e4a8690c5226c5d2c2ca395e5810259686ec8ca01635542eeeda40abfe48555"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_material.png",
+      "bytes": 525012,
+      "sha256": "fa6311750e298e23af9aefb9cfb08e3b6ae458bef3f22d7d23d44f4ac815058c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_material_front.png",
+      "bytes": 130335,
+      "sha256": "a86b942a1d5b8b675ce20fba06e51a6d3b4d4f7e8d65691cced3435fc60734c1"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_material_right.png",
+      "bytes": 130761,
+      "sha256": "4665f2136be25d284ee38bf5a5d2c07aa1d4fc6edff0804b827e8007b32f0fae"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_material_three_quarter.png",
+      "bytes": 136557,
+      "sha256": "bd1b33e0ae9ad5947a528bbbc2e6659bc767e49f75044cc54c38745f0b9f004f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_material_top.png",
+      "bytes": 132845,
+      "sha256": "85f037fc43f3208cd125d7e10f5a9c409d6ecb098c35b15151d1965ea53b8f1a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_wire.png",
+      "bytes": 668398,
+      "sha256": "ad3bfea88bb055c6b0592061fa5b746a4210958bcd7a16f6fe188b3419ce840c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_wire_front.png",
+      "bytes": 164230,
+      "sha256": "e717253553ce7eebf0af4746c79166000d5130c79e8510f7465568022cc001ce"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_wire_right.png",
+      "bytes": 161737,
+      "sha256": "0bbfe421419eb3747d629c63226082e09ba952cd2bc66b65237520ded201339a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_wire_three_quarter.png",
+      "bytes": 173953,
+      "sha256": "66b5a913576ef7a1a92712b0c21e14ca3712e95e97117373054283746c348907"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_heavy_wire_top.png",
+      "bytes": 169316,
+      "sha256": "f15c13d8367e6c5d7c4ff5b258439e1b1f09aac9427cabaee85010cbffa953b6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_material.png",
+      "bytes": 560827,
+      "sha256": "15d7b64abfbc813bf6269699add03d110599a47c63087e02b6c4e54f835f3d3e"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_material_front.png",
+      "bytes": 140670,
+      "sha256": "44af9641fcd69a7d61754a8215b98bba9139908997f4d8fd76cf7ec9ceecef48"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_material_right.png",
+      "bytes": 136189,
+      "sha256": "e1a0a33bbc26f84574cbcaafe6ec1539ecbd8da6c92102ee2f75da4b48ab7911"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_material_three_quarter.png",
+      "bytes": 147105,
+      "sha256": "4bcf21411057b41111d51961ee5d05e9f82e8417ea8523d24998600f74d5e6ba"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_material_top.png",
+      "bytes": 137112,
+      "sha256": "dee2dc3d8d5ead45d6a76eefea19f6f5e9074bfebb02c2e5b0b104e924cdef1f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_wire.png",
+      "bytes": 732807,
+      "sha256": "4918e09ac299e5384ab7f23fe6411fda127396996c7823cfb8fa6f4a9247a128"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_wire_front.png",
+      "bytes": 180220,
+      "sha256": "8ebe5b1491bbd3ea67c8fc4a7f5e9fc688eced95c7cd88de790b916dfc9aef80"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_wire_right.png",
+      "bytes": 176396,
+      "sha256": "ef3b4c45a4d35f4f2e560d5f7c4a1998d2177888c6b0f4c80db3a1909e4e575c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_wire_three_quarter.png",
+      "bytes": 184655,
+      "sha256": "4415139721fa4b9c53428f9ea541bf297f50e0eca81d348a423a3a7df87cb1f8"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_light_wire_top.png",
+      "bytes": 188002,
+      "sha256": "cf568b3e5fba3b1ed9377581741cee282fab238090d6d0ac6b02bd8bd0cb14f3"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_material.png",
+      "bytes": 558684,
+      "sha256": "5c7454c9f6d0987c7eef78ab71f223f522eaf66fdbfeb025eeaa250b5033b9e3"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_material_front.png",
+      "bytes": 140600,
+      "sha256": "639b3783c6220214505b778ae2671c41bca20ae4b2576eac00fdc90b3559142b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_material_right.png",
+      "bytes": 136269,
+      "sha256": "bf0b67964785c326a7028114ff6e273f5f249c81b94bc7054378cf1bc2cc8131"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_material_three_quarter.png",
+      "bytes": 146419,
+      "sha256": "d1323790c9c50992fab8b57964ca0d476900d0c8c9513dd9f24d9637b2b346e5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_material_top.png",
+      "bytes": 136855,
+      "sha256": "dbeaf36025de700e3c6ee367bf60fe0a9c5535cc400954c25f3a3b7913881711"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_wire.png",
+      "bytes": 732907,
+      "sha256": "679b8687f76b1dfb1eec7131f744864d6ca01849ce87b95a49cfe8298c4fc160"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_wire_front.png",
+      "bytes": 180791,
+      "sha256": "fe9c8a1e15fe1b9e6ba31788b64620e66483dce4c22efdebf6bbf9de818045a0"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_wire_right.png",
+      "bytes": 175909,
+      "sha256": "49c6df0d892a7b6e7228221c32e2e725aa5f101f6d3eb4b5a1f4086d56e94f68"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_wire_three_quarter.png",
+      "bytes": 184668,
+      "sha256": "e6e1087a54e1dd11bb282e44dd492dca0e4f74bb3a3f9c0bcd36e82f50fda498"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/helmet_medium_wire_top.png",
+      "bytes": 187126,
+      "sha256": "0e9cf2c6c19b88226a0597af6750b6400c8ab3addce5e374f56314241955f53e"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/manifest.json",
+      "bytes": 5231,
+      "sha256": "94c1d3f97f04148c8f96b0f40174057ec37538da27fb36c99c6e56bb00a90042"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_material.png",
+      "bytes": 534036,
+      "sha256": "0ef0a9a7646882eab787261c73ab4b86df83076405a3ecdb237f601f65a044fd"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_material_front.png",
+      "bytes": 132093,
+      "sha256": "aa251b876040abfb0569a55dc8d80ff4f4290708319c78cd8cfc22e4c0138d99"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_material_right.png",
+      "bytes": 133109,
+      "sha256": "3f186e96451cd5c56d6732b6ef9c023572ed037e6066ef93d8d44d0da9f1265b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_material_three_quarter.png",
+      "bytes": 140230,
+      "sha256": "cbad47587852c24e0a2c96471e7c90ced1797f2027ca0f3dc46a00eb2c61834b"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_material_top.png",
+      "bytes": 134424,
+      "sha256": "7a5181855392da7d82215f7a1cd6224b2885c31598a25ceab34cc016a0eebf02"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_wire.png",
+      "bytes": 683391,
+      "sha256": "6e645d8254ac64d3940fcdd7e1e7a8336522379b3b165e79b0547882fb8dbecf"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_wire_front.png",
+      "bytes": 168815,
+      "sha256": "12a3bd96eae1ccec986dc8b68b12f466b7333e567285001956d8e392356f26f5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_wire_right.png",
+      "bytes": 170221,
+      "sha256": "70a5097d6186ff9da4a474aeee167efe7d24d63b8c7edf77d153e33a5d9404b2"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_wire_three_quarter.png",
+      "bytes": 180277,
+      "sha256": "d34d26e39227084501f4f9a71fc851419fdeeea639b76739b9ec018b16527671"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_heavy_wire_top.png",
+      "bytes": 171697,
+      "sha256": "95b512e9fab9b2afd5259b629266babacb040efdea8b8353b9bf0ef24fe9ad67"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_material.png",
+      "bytes": 535335,
+      "sha256": "4ef64a0357bd0115d5d3dc0c1192f398132597e1fdb731526b4d8cbb22aaa231"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_material_front.png",
+      "bytes": 131062,
+      "sha256": "3522638ec22d3890b3ce565c7278309674200a2a337cd1aa4fbdf7603922d5d3"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_material_right.png",
+      "bytes": 134599,
+      "sha256": "a22b52b8f89050262f439a2729a5f4c6d7345081f3f0be560e7f70a5bb0df6fe"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_material_three_quarter.png",
+      "bytes": 139002,
+      "sha256": "54809247ac17903102606a61375b48a9f09445967c1c5654b716ed75cf7f38ae"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_material_top.png",
+      "bytes": 137972,
+      "sha256": "c63417fa88dbbf3bb76c3e947385bc7d3dbcaca8303bbde66f8425cb21191232"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_wire.png",
+      "bytes": 680252,
+      "sha256": "4633c3a7446f1105df0f163eb454406a01204840bc383e3acb0f800c6503874c"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_wire_front.png",
+      "bytes": 165938,
+      "sha256": "00d8c461a6da91e600097b37de322724e563f9b019d184e32daea4a31fec4c77"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_wire_right.png",
+      "bytes": 168212,
+      "sha256": "7c9a170a7b25114ed67b3a998d060f684d2508bf339508eda77e2cf28b6720b5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_wire_three_quarter.png",
+      "bytes": 176059,
+      "sha256": "b1d7ef5bf2f5bc53165ca476d9db6d33d9170f90fd54981d3c9150b5a20e85ae"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/pauldron_medium_wire_top.png",
+      "bytes": 177551,
+      "sha256": "c606e0fd306d14b846d8aebfb81cb8138c281c789558484f0bd89ef8760b6f44"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/qa.json",
+      "bytes": 30524,
+      "sha256": "ebcbc9b26ffbebf47dd1a373fc6fc7a7689c326b33969beb8dd2072c3b812666"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/README.md",
+      "bytes": 8165,
+      "sha256": "274d7f23460a75a18112fc58c09b829e93e1bbc25b6eebccbc3a3bb74387f808"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/review_armor_r05.py",
+      "bytes": 1009,
+      "sha256": "7d818832522440f2443160135916fe7cb9c55cc4ba7dcec640968d75ddfb565f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/review_shots.json",
+      "bytes": 19007,
+      "sha256": "b64956b5c6f2cbb766065e609b8300fe16f3dc9f24aea17fa4150172067fd7d6"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/runtime_candidate.gd",
+      "bytes": 26595,
+      "sha256": "537927e0dd3a39673184d442d04096dbf0fc907a643c9ae5b5e731ff5d1024fd"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/runtime_metrics.json",
+      "bytes": 1971,
+      "sha256": "daa02502f934886efb0f9b7bd093d7d9e6861f49d919fad496fe3e084d4d95bf"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_material.png",
+      "bytes": 543192,
+      "sha256": "9079e9ac1e836ddaff97598247a632094cf3dd545628cb35caeeee5d292be8d3"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_material_front.png",
+      "bytes": 142586,
+      "sha256": "c734c02df113ad104e32cae4164e208f27d614ba5c27bd0113e9846bc8cfa1a7"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_material_right.png",
+      "bytes": 134614,
+      "sha256": "b82f63401082c04fb8549a1cc7ad4dca60fdc6399ea86aa5d2f88f9fa3dca132"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_material_three_quarter.png",
+      "bytes": 144707,
+      "sha256": "b1ce9648cdc11466cd30e258d0e95a5cbfe27bc129d89cbad3f3d7abceed1bc1"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_material_top.png",
+      "bytes": 119078,
+      "sha256": "a8f210c3f766219f58f4ecd5897bb560f620ddf1d4d56b7ae1272236feb4b632"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_wire.png",
+      "bytes": 675567,
+      "sha256": "e4adea5607eb7342eac61eff0909f31fd2a161158872819f2bad10c6e304bf63"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_wire_front.png",
+      "bytes": 176790,
+      "sha256": "8172dcec8d710bdd027c5b9df98ff9ef05a7c0c4da32f9e01b7c3a42f288be28"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_wire_right.png",
+      "bytes": 164303,
+      "sha256": "c6e0982e7950e94c35e4ce3cada4d47f8c915d56e80451c08da46e3bf7dfbe1a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_wire_three_quarter.png",
+      "bytes": 178189,
+      "sha256": "3a52d1394a14725f77883f2679a641df00c3219d3d97406b637b93853ff117e4"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/shin_medium_wire_top.png",
+      "bytes": 150142,
+      "sha256": "e1dff3234382662928016d8153603c8143ee55c4e9cf2cbdab6615fcdb102d17"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_material.png",
+      "bytes": 532906,
+      "sha256": "74cefa40118693e1cbc489ff47ee5a06c4f3814ab26b31617d5cf70210488111"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_material_front.png",
+      "bytes": 143822,
+      "sha256": "a9d2fd6907d080db5065f66844919f8c9d1ab066a092e0a63fc82bd30d92b156"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_material_right.png",
+      "bytes": 129926,
+      "sha256": "b00a59b7c80dd9a58e1871ad06cc755bd29d507f75e6fdb7fb407d2cb7cb19da"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_material_three_quarter.png",
+      "bytes": 141523,
+      "sha256": "0c1cb860a3ee03b7faa5aa74b4d2e1e69cbd59e1290ebebae9df8cd161dedb53"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_material_top.png",
+      "bytes": 120937,
+      "sha256": "6d4b92f443ddcbcaba62f61227a4a9fb10464e2e7c0b0620306967f86beadf44"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_wire.png",
+      "bytes": 679381,
+      "sha256": "fb6b957be29809d703faf75e70cc7204222ff3795dcd368ff0a932c3181d9e2e"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_wire_front.png",
+      "bytes": 182599,
+      "sha256": "0ea71242b42ce1998f7dd45b1f3bfbae407635e38181d18ea5fecc532c923779"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_wire_right.png",
+      "bytes": 155458,
+      "sha256": "576cdd1bd68a9bd4fe92c7e112a9be693a7dcb24adc62e681de398d899825971"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_wire_three_quarter.png",
+      "bytes": 179082,
+      "sha256": "e11144626dbdd53e239b522fb54f4a30ba1cfe918cc497ec4df7fa62b336c45f"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/thigh_heavy_wire_top.png",
+      "bytes": 156213,
+      "sha256": "a8addc31eb7de9d44f88c2d287b1d39faa2125967d82337e41c7f250be0ea2c7"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_material.png",
+      "bytes": 571601,
+      "sha256": "a5de13e26579593c8529ba09569e7395534d80b4acb38441e9b533fd5bdfc473"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_material_front.png",
+      "bytes": 141076,
+      "sha256": "7904998312c5352565c681cde50e7464f84150fdcdf130d0663aed2dd932d351"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_material_right.png",
+      "bytes": 142543,
+      "sha256": "f29955c8c4ea3b90c7aab10adeca74d66269f3b025298fcdb678c30117242b27"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_material_three_quarter.png",
+      "bytes": 150092,
+      "sha256": "3a6691cadb68619ffacc25bb59789e5842fc8c220a56ff32b742047c8a7fe1a7"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_material_top.png",
+      "bytes": 138632,
+      "sha256": "3dae3d91d0382912d8a274b1da9020467ab0f319ede59a09020dc8fc38a4a4e4"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_wire.png",
+      "bytes": 741780,
+      "sha256": "7d78f221161ecfe8283faa8336fa4ad37386287d6ddec7b4fb4bad07d57e3cbd"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_wire_front.png",
+      "bytes": 182221,
+      "sha256": "2eb77c6a70bc10e0c7d35267f0550706d22a7876c9abaa047bd7b1115cd98017"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_wire_right.png",
+      "bytes": 186278,
+      "sha256": "cdb81e03079dac1da97b58bb559d0a63aecf542286e6b9b60aa91fb8aebf8d41"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_wire_three_quarter.png",
+      "bytes": 194879,
+      "sha256": "7ee164b4bda5839836cbfe4f39895b9dff5c19f7f4dea56037d6652ef150c774"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_heavy_wire_top.png",
+      "bytes": 176753,
+      "sha256": "92bf60f3882943c9766563660d7bc7da4c2553b26207762e5f678397f06d8683"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_material.png",
+      "bytes": 577344,
+      "sha256": "154986f4d8ab45a80ad16157e0c05992a149f78def096858709eb8a1ee7ea02a"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_material_front.png",
+      "bytes": 139795,
+      "sha256": "ae81d7c5f31ccd8d098701675a33f41a7e1b24084393c700dc0e50960be5c207"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_material_right.png",
+      "bytes": 144851,
+      "sha256": "e73eb2b7803ff6b25eab544ccba8ebe2e59bc7c7e33e0970e5d34a9d22174359"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_material_three_quarter.png",
+      "bytes": 152443,
+      "sha256": "0e197511010ca18a8df26f85d65ea50e46aa04b643ae8f5b6949e04a520b9d85"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_material_top.png",
+      "bytes": 139480,
+      "sha256": "706492d05e10db2559b2d245e36550e3677fdb9025d6ca0070fd32cc66e4e04d"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_wire.png",
+      "bytes": 749396,
+      "sha256": "c6796a1909f90c895ec2645e4d592471a7b5f2c24aca74862aca22a1a71ed691"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_wire_front.png",
+      "bytes": 186355,
+      "sha256": "fd15f34d6bc40d0c4f50915a8188003196c2da313b0c7f6eb17e80d9df93dce5"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_wire_right.png",
+      "bytes": 186790,
+      "sha256": "0b7626aa5cf8c5dee8e4ab3d484f81d276ccc0e9c0680eb517769c004e635f52"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_wire_three_quarter.png",
+      "bytes": 199666,
+      "sha256": "9c12181bbbc5f3d02b262b1e8b2f73f607b9c377fd51218cb2ad4d672c363bc4"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/torso_medium_wire_top.png",
+      "bytes": 175951,
+      "sha256": "d82ff48abf6e7802a2708df925dad7f9dc79cfc9afa27921c80170a6a0b037ba"
+    },
+    {
+      "path": "art/armor_kenney_r05_20261111/write_handoff_manifest.py",
+      "bytes": 2251,
+      "sha256": "640be9756065dadca7a1cd7f2f4ab20d83782ea2cd92449f4d3d660e53bae763"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/armor_outfit_parts.blend",
+      "bytes": 323581,
+      "sha256": "b2bb91a964383ee204f99cfbf66578fb6ea1b23bd1c53139110ff7181142e2f6"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/build_outfit_parts.py",
+      "bytes": 18712,
+      "sha256": "bf60e02fc09ca881ca60b2ec73354184c73c302e332040e0dcc572d7d3043c99"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/heavy_turnaround_ai.png",
+      "bytes": 1559400,
+      "sha256": "0647574fbcfb97991d2dd9be9cd352a3aef830c839f15ea26659d133fcafa63a"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/heavy_turnaround_ai_r04.png",
+      "bytes": 1713006,
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/light_turnaround_ai_r04.png",
+      "bytes": 1661536,
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/manifest.json",
+      "bytes": 9623,
+      "sha256": "7ace8b9572e0d5beeeaa6024f1294616fc43405f36d8a56202971980bc3348cc"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/medium_turnaround_ai.png",
+      "bytes": 1529057,
+      "sha256": "d3ff96b6373dc0df47e42eb6ee5c9a3a885a1eb91c101132e4d3143ef26ab292"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/medium_turnaround_ai_r04.png",
+      "bytes": 1741257,
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/morozov_concept.jpg",
+      "bytes": 1578483,
+      "sha256": "c1b86a0143ffd13f74445e23bbd05b8b57e4c6f9fafbb336d56a5b32fdb179ca"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/native_generation_input.png",
+      "bytes": 314573,
+      "sha256": "b31fae1ad0a5599f54569808fcde1046cb3c10d010592a1d1e455d4ab57c1946"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/orc_medium.webp",
+      "bytes": 104296,
+      "sha256": "3980f832e6015d8e0096fa0e1f4111f72c92a4fe6885bbcb375d6a4ff78d68ad"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/personnel_armor_visual_r04.gd",
+      "bytes": 18028,
+      "sha256": "5eade69cfb2bde89e6f23babab63c9707d87977e0a18aafe5b48b43ab7a59944"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/prompts.json",
+      "bytes": 5717,
+      "sha256": "67d81441a2135cb3aeb081dde7bc1adc950691e229bd85508e77ef6e9d90035b"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/prompts_user_revision.json",
+      "bytes": 3693,
+      "sha256": "73a9d633c666db95670cd9e96538cbc55245d9195e743ed4e9304c3969dacc88"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/qa.json",
+      "bytes": 31306,
+      "sha256": "eade8888fbc0d64bf99ee9f425b2c7ca7f6301d379193b3de8fad5272d8f3438"
+    },
+    {
+      "path": "art/armor_orc_morozov_20261111/README.md",
+      "bytes": 4834,
+      "sha256": "6c02ba76b631bd672c9d4a286cc94e61b65d9fc441586093dd746c4975e73626"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_heavy.glb",
+      "bytes": 27196,
+      "sha256": "d7ab59fc1076bc0fd5fd032139b98b63a749183e62da1160830f8a59c1cf439c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_heavy.glb.import",
+      "bytes": 1087,
+      "sha256": "fd68a1c1b0e29c58120673e349158aaa81c0ed6a889a0a8bba91f4585f9554df"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_light.glb",
+      "bytes": 24948,
+      "sha256": "0a2e3c472c3afde333f9ead3b22e4cc2b6dd671fd2f1309a2402259e8719cd6c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_light.glb.import",
+      "bytes": 1087,
+      "sha256": "26a8bfa60b047f4b7dd8cee1367dab988f2da120f58c997544b960ba369c61c7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_medium.glb",
+      "bytes": 27192,
+      "sha256": "ce8a9b7acf83398d1298426a3f8cd90c304579516f227965a7e7ef7facf89d92"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/boot_medium.glb.import",
+      "bytes": 1089,
+      "sha256": "5b09e76b400153b5fdf58b69f236284ca003623fa6a6391c26d73ff9cd3a3cd0"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/collar.glb",
+      "bytes": 41716,
+      "sha256": "7fbee3d50ad22ed35c49d457a9f601ea51f4b2815ddbc6eb10e35f27e0c7cbac"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/collar.glb.import",
+      "bytes": 1075,
+      "sha256": "063bdd53aa02ae9be4b43228fd087c1755af713404bb800e173d2a684f0f8374"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_heavy.glb",
+      "bytes": 27972,
+      "sha256": "8bbb2fc5ea85440de72594a00e22c49ce654596239086f4d1983d2585994ddc2"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_heavy.glb.import",
+      "bytes": 1096,
+      "sha256": "ed2cf40a3a9c77d3a80b7ef23bbd8118af2fd6a6e7d9cad252ba7284359ad33d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_light.glb",
+      "bytes": 20024,
+      "sha256": "eef207bf72c5feeb33efe719508a629b2e6fcc01d7b1e67a70d9e6c6a76dc2b0"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_light.glb.import",
+      "bytes": 1095,
+      "sha256": "6829be88ea5775e45207c6bd3267b1d81df19f3397c2e74aab5999d11fe44e6a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_medium.glb",
+      "bytes": 25152,
+      "sha256": "420453e87ef35585593ec11982cf9e265942e3f104972ab63a9aed4ce0968deb"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/forearm_medium.glb.import",
+      "bytes": 1099,
+      "sha256": "c0bc5918e3b28f5a347948b7881a5d71193e433533e545146e8a809d1a2b601c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/hand_guard_heavy.glb",
+      "bytes": 24220,
+      "sha256": "2580f748be4a2d9cff949b4554bdf116411e0a51a44dfee9d61ea58b926e75e7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/hand_guard_heavy.glb.import",
+      "bytes": 1105,
+      "sha256": "e768d7c694c55aaeb1b371cf4bea873b1413ba9e93c80b156b3774c369f1b9f9"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_heavy.glb",
+      "bytes": 48620,
+      "sha256": "6837c81e75aae30ec21912077b3cd57c6b5f89df8190b930c961bcc0564e8a2c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_heavy.glb.import",
+      "bytes": 1093,
+      "sha256": "755221b53683e4dbb0b5ce628506d74c909c9c53122e4aff2d8228ba104f3a8d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_light.glb",
+      "bytes": 120232,
+      "sha256": "3b79d97bef5895b45208f4b7c05a30d9790eaab7da023f1bb283fa314a5246f2"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_light.glb.import",
+      "bytes": 1092,
+      "sha256": "3edba6692686662aa346497cb61ddb04c0f5fd56f891f946171f7371ed866a22"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_medium.glb",
+      "bytes": 120204,
+      "sha256": "a271023f3fbbd622d63ce235b6be23f733ef033c4387e928b95d71c4f789f7b8"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/helmet_medium.glb.import",
+      "bytes": 1096,
+      "sha256": "73d64960bf7df03128ca38e3febe051939d28a6fdff6a48c57be9d342a8cf596"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_heavy.glb",
+      "bytes": 15972,
+      "sha256": "7778057bdaada0fa10c4969a322aff0b2fec06362dac1c92a3e625b3d050e3d0"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_heavy.glb.import",
+      "bytes": 1087,
+      "sha256": "cbc54a3395a82fbca2945d6121f207204103f78128afb8a7b39bccd01355df3a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_light.glb",
+      "bytes": 13168,
+      "sha256": "effa284ac41ce2dd786b5731800abe9feaa59b1ccc906c4644a22b15ba2b3152"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_light.glb.import",
+      "bytes": 1087,
+      "sha256": "22e1dd4061e72e90533a32562876d34721c1d371dfb289e78994b8fdd1bfb53f"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_medium.glb",
+      "bytes": 13168,
+      "sha256": "8950650ec4594e21e6860f715ec4c5c664110124491e1e9bf7a0160a969ec695"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/knee_medium.glb.import",
+      "bytes": 1090,
+      "sha256": "98e1de535ac3a118db4243f8c2cf901ac733799f98c34bbf00f742b0a81c77d3"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_heavy.glb",
+      "bytes": 31312,
+      "sha256": "12bf4e2aba6c072037b5ab3ff8d6da326951d0eef2aea685762415b87d14082d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_heavy.glb.import",
+      "bytes": 1099,
+      "sha256": "218cf1c4ddad3ecf9e3f3c3c1848b347dc98aeccec123a9b7173b4cda05340da"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_light.glb",
+      "bytes": 19328,
+      "sha256": "63a709249e29073d97a2d119dd5b09897253320ba40586334c71883df8859776"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_light.glb.import",
+      "bytes": 1099,
+      "sha256": "4dcbb956be24984ffded1eb49b9ca44eb88f65ab2abc3867a03ade7938d454b8"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_medium.glb",
+      "bytes": 24572,
+      "sha256": "3276321b67dd61d3de9b8d19ab615491dc4a6741b69a12354c11de0f7ba17918"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pauldron_medium.glb.import",
+      "bytes": 1101,
+      "sha256": "a5e325f4c15a7f7a85622c04db5a6d2c7c6c009c398c4033e5f69e37545a4f83"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_heavy.glb",
+      "bytes": 19284,
+      "sha256": "8dbdad421171cde2be10e6b2f4ce81439d4df77071c0d455b2aa800304bb03db"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_heavy.glb.import",
+      "bytes": 1092,
+      "sha256": "6d50ccfdef0d6f5e279515948f211740e37c2895e4fffb2d66f68d6d1a33b7a6"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_light.glb",
+      "bytes": 9592,
+      "sha256": "db1c8d5096a399dbf26cba9f531f3edd23595d39e593b196f02cefeca5626d02"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_light.glb.import",
+      "bytes": 1093,
+      "sha256": "25e6b2abbd3e119ab92a6ee0df064e9b3fadec9a5a5d90c07a48d290fd32fb22"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_medium.glb",
+      "bytes": 16196,
+      "sha256": "20894e39ef20390853b60c9a1311212a15db6249f53884513d6416439d70dd0f"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/pelvis_medium.glb.import",
+      "bytes": 1096,
+      "sha256": "3a9f151cc44d20fba0bf1a7e8b382954994498e6e328db173526337d8a425a93"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_heavy.glb",
+      "bytes": 24208,
+      "sha256": "b4f47bd7fcfd0e9dd0415e1ac6c55817fc1845a5f4e6c46eb5ce27827e1fbe47"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_heavy.glb.import",
+      "bytes": 1087,
+      "sha256": "2c78ceb5d40ad278ad7e87757a0da2ae6f307e744c11b8da6c0a91870cdadf47"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_light.glb",
+      "bytes": 20020,
+      "sha256": "a3a19f22019bf0e2af5454ae4c12dd031bccfdbff57939e9282ca3c73c0730c7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_light.glb.import",
+      "bytes": 1087,
+      "sha256": "8985dcbef305f5507bbbd76c38335caa68fb888a699e66641a907ca2c943eb62"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_medium.glb",
+      "bytes": 25148,
+      "sha256": "798834a69f05ca416304d463af1d5b7856e4bf54434b78f347604ffcb64bfd15"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/shin_medium.glb.import",
+      "bytes": 1090,
+      "sha256": "05242d0a708874bc41aacc224d82e87ffbaa18d5ce5a147f0270e273ff4f5445"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_heavy.glb",
+      "bytes": 35572,
+      "sha256": "07dee7757704d71b40997f7ec1cb0adf3455cfd5308778ccaddc057e32058be2"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_heavy.glb.import",
+      "bytes": 1090,
+      "sha256": "ae8ee5ee90a14558cca28dbdc7be20079d0ad06164d5b72f58570057acbb4f27"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_light.glb",
+      "bytes": 20020,
+      "sha256": "f9577fc2f81e271133118e511bea83be0a319d5f5882567e0a80773e30646a50"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_light.glb.import",
+      "bytes": 1090,
+      "sha256": "238aae3a13bf4593bf8ac8083444dd1d543e75c9d0b0967b86ffbed30ea08c6c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_medium.glb",
+      "bytes": 20600,
+      "sha256": "810939d5d9b03c4c2182ba8c60f09fd8aa5a18765a2ce70fa976a106e9637ad4"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/thigh_medium.glb.import",
+      "bytes": 1093,
+      "sha256": "37aacff9f96dbee5e6586ddd31d6df779a010ce2d65524cadb5c1536b88d19ec"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_heavy.glb",
+      "bytes": 57648,
+      "sha256": "423a17c13725e2054fdc1e84f898d35f47edc96bd710bfcec6de43c5c9919b5d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_heavy.glb.import",
+      "bytes": 1090,
+      "sha256": "b2327caaf8808ef28969b4f8c0e8b2e0cad2cd4512eafcaab2071f41b8472eeb"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_light.glb",
+      "bytes": 55536,
+      "sha256": "8e1e14d403ac3fbe8924921a9687db9ad7182976c7e38ff548a8e4336ccc25a9"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_light.glb.import",
+      "bytes": 1090,
+      "sha256": "2624e5c4893d9982e784dbc4ca65774ca240339ad0a2daed2fb3491c2ca7a60c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_medium.glb",
+      "bytes": 68812,
+      "sha256": "aa89367cda0c3ebd37b396785557670f8674fd80ba89d888bf45d486f52d6c05"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/torso_medium.glb.import",
+      "bytes": 1092,
+      "sha256": "bd21d30312a2980f3d492c4758c31d2dff567880a673b65f3098439b584c21bf"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/upper_arm_heavy.glb",
+      "bytes": 24216,
+      "sha256": "7a4804710a6802510a6ec8b35472b8df2a16ff58766677f49dc99239ed58d5e2"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r05_20261111/upper_arm_heavy.glb.import",
+      "bytes": 1102,
+      "sha256": "d2353f90b70bcea56a9822645a022c5e042c5cf9b32c3aed2fd7f862c5cc268e"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_heavy.glb",
+      "bytes": 20020,
+      "sha256": "8015cccde4696be6b688da9f2a9a322d8161ed06c32e43c0e0e17bc14ff3da3a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_heavy.glb.import",
+      "bytes": 1087,
+      "sha256": "f0203db1a92cfc20ce259f9e21135e87f0a0ebcf51489f1e3c5340c98d0194b7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_medium.glb",
+      "bytes": 16860,
+      "sha256": "cbac793b6a98f876c1bdbd16e53a186ad187f9b631709eb639f5d0d479e48ee4"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_medium.glb.import",
+      "bytes": 1091,
+      "sha256": "72c0d28920bf9e42e6cbf9ddda1fc02f847c7717c3c3cadc995905c471f140a8"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/collar.glb",
+      "bytes": 11936,
+      "sha256": "ce27a2fd0df99638bcde53f2f8d1688ed5cb70df9f7a541df90a8d1115d58711"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/collar.glb.import",
+      "bytes": 1076,
+      "sha256": "0d4952a7beb1639d02ca5ae3e70c5547ad1e4e2b3bbd71cdaadb5c3c9c6462a3"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_heavy.glb",
+      "bytes": 20036,
+      "sha256": "e79680f66bbae0b466f16a614ed78dac14a2a74340a62ea97512fc299856e0cf"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_heavy.glb.import",
+      "bytes": 1096,
+      "sha256": "b1a4cbf3e25e8a5edd13299df012a5e9e02c0936622b01e12875de04f1bf4b0e"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_light.glb",
+      "bytes": 12712,
+      "sha256": "fb27e6c8734812e597a6221aefa28cfd64dd82ac27f1e736b4a1de39b8a4efff"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_light.glb.import",
+      "bytes": 1097,
+      "sha256": "0b9fadb1a00734c83f0c9ebc14271daec1a9dfd09f61e2e978d33d922aed12b6"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_medium.glb",
+      "bytes": 16868,
+      "sha256": "ad6da8bd6ab22a0e438c8f6bc73faa8ba5832d172d3c16ca09d40744e795c1a1"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_medium.glb.import",
+      "bytes": 1100,
+      "sha256": "091d89405be9c7f2dd0ac5523a659cab16cbedb3fa3f84fc14b9944eb5cf52e5"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/hand_guard_heavy.glb",
+      "bytes": 20040,
+      "sha256": "eca3ad298dc6b9e6e7b0888b49b5f9c851ecc9b3c96990080cc21a2a78a71c61"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/hand_guard_heavy.glb.import",
+      "bytes": 1106,
+      "sha256": "df2f0e81a3ad5dc0b6efd17c54315fad2b182e0354b9cec369b83641881e9604"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_heavy.glb",
+      "bytes": 36992,
+      "sha256": "dd81e2317e31496dab81024ffd452f625825fe357be3ce0406193bff709f8014"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_heavy.glb.import",
+      "bytes": 1093,
+      "sha256": "201fdf1f6095974de907e125be1e57804a7cfa240050707015711b2fa61e8802"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_light.glb",
+      "bytes": 31068,
+      "sha256": "0808155f90daa4e3e77626b76b7da029e5cfbd8d9173873a6b0a0f2bc204fb73"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_light.glb.import",
+      "bytes": 1094,
+      "sha256": "bbe1bca19d0a3ff5f579ffbec7cc48b3f30a58382cad6d9dce90e311c04ef99f"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_medium.glb",
+      "bytes": 31004,
+      "sha256": "54a835055a016db429683b59b0ff055c8533d052654f3adec258d54fa2d0a10b"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_medium.glb.import",
+      "bytes": 1097,
+      "sha256": "5339df64318475520ecefcf59a8045a2a29772b1c5a725f3ea15e319303da647"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_heavy.glb",
+      "bytes": 20552,
+      "sha256": "61e3caf2ccc19c3cb3547cc5a862e7754b599d5c2eff7c67992167a575a7f6a3"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_heavy.glb.import",
+      "bytes": 1088,
+      "sha256": "b80ef05c6ee6f24451329627d12657a5baa01a4011d31f0ae5791545cb035b46"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_light.glb",
+      "bytes": 13232,
+      "sha256": "ae0b8168102bc367bc435a8f96fb1cc13c8de1a24a294bc6e56778ef7cdf1a7c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_light.glb.import",
+      "bytes": 1088,
+      "sha256": "8a1529c5ca58fa522bbfc7a1c348095a91c023180de684fb147c650d5cb2dd00"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_medium.glb",
+      "bytes": 17384,
+      "sha256": "ed8bc4a64eec2088e3b052ef3ce616fe7529643da0eaadd0a98f20c7ccdf6029"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_medium.glb.import",
+      "bytes": 1091,
+      "sha256": "15fe6075c72365dafc7903ab4daaf2863988ec990e80a1f307965c6bede52e1a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_heavy.glb",
+      "bytes": 20560,
+      "sha256": "10d7832f74e58a68b4a43e26bfa9646d8e5218ad28cad926a9af3f38fef0a89a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_heavy.glb.import",
+      "bytes": 1100,
+      "sha256": "796f6ee239cd68f9698a54b50a4a0db66a6f2176820d70cf8e9d8179ca1bf8fd"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_light.glb",
+      "bytes": 13236,
+      "sha256": "71007c0496ac085ae6b1434b9fdcd60bf933f87679476a7dca1410bc2ffd4ad0"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_light.glb.import",
+      "bytes": 1099,
+      "sha256": "0b407d6e1c684ad0f0e6ba410fff944aa8b5ac9aed8ec0744e7d02611cc68cc5"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_medium.glb",
+      "bytes": 17392,
+      "sha256": "4844e39b3d1340006fe515575cc0ffe9146b137465a988ff543965b5372914ad"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_medium.glb.import",
+      "bytes": 1102,
+      "sha256": "fe4311b8ae19f04f48cbee901c510cf25af4fdb0332f90b277a7f63c65236334"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_heavy.glb",
+      "bytes": 16848,
+      "sha256": "40f077cfc433cc592c32753ef30ddab91896cff6b69457fef6e3caddec29f795"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_heavy.glb.import",
+      "bytes": 1094,
+      "sha256": "de1a004828015d94c788a4bedab8e4835a510de8c727075760eb63b819d7b0ca"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_light.glb",
+      "bytes": 10312,
+      "sha256": "42516bedbb0391c4364bfc3e5b1f87a05d3bf648be35b0f0d1db11d524e668f9"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_light.glb.import",
+      "bytes": 1093,
+      "sha256": "6da46e51fc0ff8785105bb6989d4c6d6ee87f2a0df705a44f9eb5e9a005f2563"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_medium.glb",
+      "bytes": 16864,
+      "sha256": "70c68c9333266ee62cf22734b954d0255d5ccd590f7f820dd5cbf7ba1b8cfa7e"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_medium.glb.import",
+      "bytes": 1097,
+      "sha256": "1c66973598ee768870bcb85dcd58fc396924a5af6407ec12e5dfc92f94bb30a1"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_heavy.glb",
+      "bytes": 20020,
+      "sha256": "586d3354f2f4c6e3b09c54d6a7f76a0c5a96b993059a032c690d061612d08915"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_heavy.glb.import",
+      "bytes": 1087,
+      "sha256": "6c0ea47550b95707ae2921b5a97ffbf9d55553b39fbb4b42a217a71dc87a8165"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_medium.glb",
+      "bytes": 16860,
+      "sha256": "cd83c747924581dfca651ea4108bb1c477aca138c7a7248e90f383759608cc52"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_medium.glb.import",
+      "bytes": 1091,
+      "sha256": "c275ac5b8e66243249ee6b1a90ad4f80589dc6918b09f7fb2abf2f0808080cf6"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_heavy.glb",
+      "bytes": 20032,
+      "sha256": "3fef57b03dc0b5fc112a9f7a1f9a221aceb377c25460e8289e06d989eecdb134"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_heavy.glb.import",
+      "bytes": 1091,
+      "sha256": "5733ee7c92f4dfbfd8b1440bba89103adce72d93384b815ae0230fe0545658b9"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_medium.glb",
+      "bytes": 16864,
+      "sha256": "6063eee22e2dafac4b01df4cc13afd22af5c49206617d20cd3c890b8c24b7bf7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_medium.glb.import",
+      "bytes": 1094,
+      "sha256": "98840d4f59339e41aaaabb9e7453478d0a0ea8d0c493aafbbe478ae0611b7f58"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_heavy.glb",
+      "bytes": 63020,
+      "sha256": "fb4f1da5169128700bb7479d6a2f0eba3dad19dede71db6f5ebe37843b625b0f"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_heavy.glb.import",
+      "bytes": 1091,
+      "sha256": "53db046e81a52d4e9a93ebbb825a1e4172d46f0c975e418d925a2d4f342a2d9d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_light.glb",
+      "bytes": 24760,
+      "sha256": "f18d6c25f352ef25a1fc82301f1358a8e9c5cb2a9d3984b7c035a3ca0feae2fe"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_light.glb.import",
+      "bytes": 1091,
+      "sha256": "7e19c6be49290db3fbe04677b2adf448d4a9dc5ed706abe611fffb5313cb1778"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_medium.glb",
+      "bytes": 35596,
+      "sha256": "58b89fcd7c4181196e4b9391a1a40722ccde3199e848245275ef01a41ac3d827"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_medium.glb.import",
+      "bytes": 1094,
+      "sha256": "e9184f338a7e413d12244b26962f4ea21914dcfe276c59a91b7b07b92e5df07e"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/upper_arm_heavy.glb",
+      "bytes": 20028,
+      "sha256": "041bd0a7b2192e127fd59612053be3216a6ff8cfa31ebeda2316120ceb7e383d"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/upper_arm_heavy.glb.import",
+      "bytes": 1103,
+      "sha256": "7fdc78399b0a3ff2491ac370c04e4faa1439e9f3e5b897edfbe2120e10f7cd76"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/armor_actual_base.png",
+      "bytes": 2496496,
+      "sha256": "4b48c31d28f1c8159eeaf701a2abc79932b13ef566fc373d97097dd5e49d0389"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/armor_actual_equipment.png",
+      "bytes": 283721,
+      "sha256": "36a64297a1528ab37b1c7d01066ddd518d2152eba544f2d4ab54eb103ccd6ef9"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/armor_r05_production_metrics.gd",
+      "bytes": 1788,
+      "sha256": "b0a821ae24a7615616116e6326e367ed9c6b4b298e84ae31714de27afeb43367"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/armor_r05_production_probe.gd",
+      "bytes": 3849,
+      "sha256": "cb05b68c5165bfac437f00f297a6243e847ba76228687603365638b0ef03a871"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/battle/after-armor.json",
+      "bytes": 756,
+      "sha256": "6849db06f4865c6f38051bfd53aa937a66b0069a759cd23c7e49c4a4a5fc38aa"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/battle/after-armor.log",
+      "bytes": 6014,
+      "sha256": "b2104dfbf0c322c1850c7bb6f2451107df284aa4772002beacb8dfa0f39a127e"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/battle/B_battle_profile.json",
+      "bytes": 32772182,
+      "sha256": "9f5c6809b3d4878d9db49f31a316f8a124ac97062529c017de3fb5255302a98e"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_fit_idle.png",
+      "bytes": 312360,
+      "sha256": "368269aa35b30e0bc61c6ee87ebce5ccb45cef94bd7c29f3ec0b486406ddc4f7"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_fit_rest.png",
+      "bytes": 265449,
+      "sha256": "fb645db57e18578aaea7ecbfa5273fe2c8e65d2a6e6a62fb047a7e432aa58e5a"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_fit_walk.png",
+      "bytes": 306309,
+      "sha256": "e6471df16b1063545d5f402304a092bd998494dfc26c56801be1dfb016574ae3"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_neck_turn_-25.png",
+      "bytes": 160156,
+      "sha256": "9219b56b5a5ce04789156cd3e46327e6500084adbedb67d279549e185d4e7064"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_neck_turn_25.png",
+      "bytes": 182979,
+      "sha256": "19c6be33853fdad13c47a6c6c96a2adfa40e551eef8b11aa03f10b9929bf2d61"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_walk_only_feet_015.png",
+      "bytes": 166038,
+      "sha256": "ad9ab34ad2bba43cfbc0efd796e110b5716d2c1554d6a70211660ebfcfe0f270"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_walk_only_feet_042.png",
+      "bytes": 169198,
+      "sha256": "1001041dd4e18dbe5e37caa9c28c39d8c8682cd35d99357f20971b0d53815184"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/candidate_armor_r05_walk_only_feet_070.png",
+      "bytes": 170081,
+      "sha256": "277c17e1d328a67fb983c7d057e10c5ea78978de3769904152d1af4aabad5f72"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/native_front.png",
+      "bytes": 225876,
+      "sha256": "16dc56698122a428565d27706bb9d5104b1e77b304175836000959baa7a063eb"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/native_quarter.png",
+      "bytes": 200037,
+      "sha256": "1da3ad59ab9702667c4e67444da6b0c004f5d10d2c33cf397b5eb5f5a8cdb321"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/native_rear.png",
+      "bytes": 91142,
+      "sha256": "e946239598424de9fecf7a35f7fd9083b7a60dede3b06436b20adca5372b6288"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/native_side.png",
+      "bytes": 110268,
+      "sha256": "d2479f8d757a0ed7a134df768ab427668ace7205033a42432dddec1e2703165a"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/native_top.png",
+      "bytes": 52056,
+      "sha256": "fe53f9e2260e3308392e69421c2c0fea2c9ef524c4874c8bd38227bbd48543b9"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_pose_fire.png",
+      "bytes": 264899,
+      "sha256": "42f6c104b1746ed87b3d5c4c94697c4e7aecc05fde26d4df79fe5963816cf73d"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_pose_front.png",
+      "bytes": 252765,
+      "sha256": "9e492e1febd4da4fe419dae6471f04fe9325e36f6425c979447ff393a15bb7fc"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_pose_head_turn.png",
+      "bytes": 259263,
+      "sha256": "c8c27a0ac003d5a86d3f2661a79e8ffd8afc18c37ea953f6614c1610b07da142"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_pose_rear.png",
+      "bytes": 222306,
+      "sha256": "b482589a087f53bfebb633b2309a71438f7aabb872a82cc2891912a58c44071f"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_pose_walk.png",
+      "bytes": 265604,
+      "sha256": "8cd9df59c9a261be4885909b7ec30be6af121bb3f6cd7a330776f2ba628a1a9a"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/production_projector.gd",
+      "bytes": 26025,
+      "sha256": "267ebc1b7856c606e0691c6aa5a06f22683422a53f193fd626e200a7598070e6"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_comparison.log",
+      "bytes": 314,
+      "sha256": "df890a3f6ec69195da0a0b574fe2bfb93b01a9627447490161edef568702d9a5"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_equipment_headless.log",
+      "bytes": 942,
+      "sha256": "b527ffd889c9969631c27331b0ebc31896dad5471b536d90f981036830989cb4"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_equipment_native.log",
+      "bytes": 1026,
+      "sha256": "5bc6c20d539df6d0aeb4c2297e4101d6fc3e77895400d0746fc0cd70caeff3ac"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_import.log",
+      "bytes": 20737,
+      "sha256": "26bbef3fc144beecda01df31d20689f8e835cd3812835bf2b6bbff82b2a19c4a"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_metrics.log",
+      "bytes": 1735,
+      "sha256": "68fcaa9a453de36b266649ef9b723f3f5e983a305c4b7bd0bffa0ba2a91cfbc8"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_visual_headless.log",
+      "bytes": 444,
+      "sha256": "0d92073319058a964a24829dce252072284ccf4846d911afe496f0ce21adc5c9"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/r05_production_visual_native.log",
+      "bytes": 528,
+      "sha256": "767c4642df0de64c79a0a6a6014bc318057caa6157398122b89dd250a976feb5"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/README.md",
+      "bytes": 5718,
+      "sha256": "e0ba191b2fd424cf9120afa8ebab8c7ef62709934665ca721e88f491203398df"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/runtime_metrics.json",
+      "bytes": 1971,
+      "sha256": "daa02502f934886efb0f9b7bd093d7d9e6861f49d919fad496fe3e084d4d95bf"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/workbench_desktop.png",
+      "bytes": 434869,
+      "sha256": "ea1cc86c85fff1660a35d82b45c8fb3e44dae7185d43bf1290ea7c86f1512462"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/workbench_mobile.png",
+      "bytes": 322721,
+      "sha256": "b5443d3b90519a460d69d9f78d92f1a5b47b26ccc3a32188056001105adaeec6"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/workbench_probe.js",
+      "bytes": 6656,
+      "sha256": "76f03e4599f4be73ff46d8247dbeb7cae243157023b15ce33bfa1c85bf34262e"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/workbench_results.json",
+      "bytes": 360,
+      "sha256": "1c9e0d3c235d0316551eb38a7d02d2c1d59ff6ba6df65bb9bc506418e8b0edef"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_20261111/workbench_roundtrip.json",
+      "bytes": 29853,
+      "sha256": "558fda879e80a07d963e341ca8a4f3b4947b127e1c0140cb51692f0812e30fd3"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/native_front.png",
+      "bytes": 213863,
+      "sha256": "ba1b89f0a1c4f2ec97d43c02ae076acb494ced332b990433adebafe90bc1a168"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/native_quarter.png",
+      "bytes": 188510,
+      "sha256": "7801d60d2a0e53ce6a7a7baa192a6a5cc6fe6153978699581a513278e69b446b"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/native_rear.png",
+      "bytes": 88194,
+      "sha256": "afca849017c578f8c64eb035fb673af1cb3710489efc4869033aacf2e8297785"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/native_side.png",
+      "bytes": 106474,
+      "sha256": "64ddb5629c4dc71507adcadafd72e9e0ea08a4794663a7920e8b3ff082e80bc7"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/native_top.png",
+      "bytes": 51340,
+      "sha256": "377a8247f413067d6489367009bcdf7777e3a250c07311dc1f93ff1a79766ccc"
+    },
+    {
+      "path": "docs/qa/armor_kenney_r05_flat_20261111/README.md",
+      "bytes": 606,
+      "sha256": "2e76fc08463f7a0b0e82df3c1b3113131e8a3a3708b006e52897748d2538df1b"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_actual_base.png",
+      "bytes": 2496571,
+      "sha256": "4c8c59624c895c181ffc8fa7744afce74162978910319e827548cbaa3b94cb98"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_actual_equipment.png",
+      "bytes": 282415,
+      "sha256": "b1b3685d51d7afb1721b6b62a49e809d736ade1453eb3254c603f0295278faae"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_r04_build.log",
+      "bytes": 6033,
+      "sha256": "34905297b851448707c5f7c8b881ec791afeeec51d692996057daae78fdca1a6"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_r04_import.log",
+      "bytes": 7177,
+      "sha256": "93cd2b10c805a24355ab9f11e38e84a68fb09eefb892bc49ebabb64dbd9fd660"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_r04_review.log",
+      "bytes": 17264,
+      "sha256": "e3869335d0d9af4dcf619dc55b4eec120adc2c8edf001530fd19fbda4f48c3b0"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/armor_three_classes_silhouette.png",
+      "bytes": 22941,
+      "sha256": "83bfc8afd85911ade84f9e6cc285f573b53f58d9b6b2c5f0af0f8734e4548c71"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_comparison_probe.gd",
+      "bytes": 3784,
+      "sha256": "b3ce29f648aa052d8c93746a2b0cab667065108ac8b95bc9fab4d28e77dcf1e0"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_front.png",
+      "bytes": 270327,
+      "sha256": "08943a0e8c6041bb78a438a4ef7f026d5ac62b0932e6daed3724e765e1ff2f39"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_quarter.png",
+      "bytes": 239373,
+      "sha256": "0035d8db6ab7c2057fd8aee807981f56c5949f0ec5d534f06ea3e1dacd6278bc"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_rear.png",
+      "bytes": 117786,
+      "sha256": "4600f168bb7efe4ae05fedb204a18433cc7e9c4ee2adf232915b1996615c38be"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_side.png",
+      "bytes": 134551,
+      "sha256": "977bb61005d1ea74a1f0bd0a135d6cd51db9fa31889bc4c322d1a57278da4e3f"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_silhouette_probe.gd",
+      "bytes": 2390,
+      "sha256": "cb87fcc5a8bb944fbb777edb8bd916c6a3a3b302d922e0ee3f8e910d99a9b690"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/native_top.png",
+      "bytes": 102349,
+      "sha256": "b104976b4b4f84d8b2a62308318bc7f5e53edab49970fe26f522ccd7372175f1"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_armor_three_classes_probe.log",
+      "bytes": 314,
+      "sha256": "df890a3f6ec69195da0a0b574fe2bfb93b01a9627447490161edef568702d9a5"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_campaign_suit_equipment_test.log",
+      "bytes": 1026,
+      "sha256": "5bc6c20d539df6d0aeb4c2297e4101d6fc3e77895400d0746fc0cd70caeff3ac"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_headless_campaign_suit_equipment_test.log",
+      "bytes": 942,
+      "sha256": "b527ffd889c9969631c27331b0ebc31896dad5471b536d90f981036830989cb4"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_headless_personnel_armor_visual_test.log",
+      "bytes": 228,
+      "sha256": "3fd26b4f96e83e902acab19b901dc7852a211b1f0b137557d5b0d6570090136d"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_personnel_armor_visual_test.log",
+      "bytes": 312,
+      "sha256": "a72219d9f72eab58fa9841d384a5896b7576c7b24e4434456eba83f961c194bd"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_final_silhouette.log",
+      "bytes": 299,
+      "sha256": "37aafb73665f42d7e5a72e8d7566e7abf4e73880f29365633955593cadbf7e5a"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_heavy_material.png",
+      "bytes": 305984,
+      "sha256": "8b42dbc58ec8439d10e736c776f7833704b9a0c4a63b051f22565610196afd02"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_heavy_wire.png",
+      "bytes": 393963,
+      "sha256": "3a8d9bc526298850fc69551ca6b630e0b8fe0761a140b59849b2a4d8e8dd56dd"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_light_material.png",
+      "bytes": 310494,
+      "sha256": "4bd5c2a353ee8e87d412727ae7e743e447cd2765b2eeab7943089d4b324e1451"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_light_wire.png",
+      "bytes": 390391,
+      "sha256": "8f8928f8d4f34fa3f373f4074e5abc30d33468e909b2c249bc0a6d282d3e4f40"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_medium_material.png",
+      "bytes": 310440,
+      "sha256": "c0d503c8c6df9c8837d4d48fa2d7a4be5f47bd6bc8876dd6a2d59ddc6efbd6b5"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_helmet_medium_wire.png",
+      "bytes": 390937,
+      "sha256": "8b30ef4ac3911549f8470d86e58ae75a0348b84b4207fc61301c5ece9ee0d0c1"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_heavy_material.png",
+      "bytes": 337841,
+      "sha256": "44e80525fcae61b381a34914793d84d84d23edfc4318d2979032cec0365842fd"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_heavy_wire.png",
+      "bytes": 428883,
+      "sha256": "f5c061a23492f9919e5c572b48ef2afba5f939f985af08d2f02febb9db0c34e4"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_light_material.png",
+      "bytes": 321421,
+      "sha256": "04915e38deecfa5deadf9b1eb5517a6004ed7c416cab26bc0980f278f58dabfb"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_light_wire.png",
+      "bytes": 410788,
+      "sha256": "4ae98e7a9d6bc7892b9bfdd9fb6d5fe9b86c94716d255671d371558067d5fe5b"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_medium_material.png",
+      "bytes": 335455,
+      "sha256": "24ecfaa2b7f65493721419dc7f846b465274ede5e8d3969c0f2dcc34ca23393c"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/r04_torso_medium_wire.png",
+      "bytes": 422847,
+      "sha256": "02fd687a8cc33de29073970aeb2f75bb616b3058ea54403001d37f778fb4970f"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/README.md",
+      "bytes": 4874,
+      "sha256": "522b476a2389b9183ae5be56901385d3e844ea6899bd15e6485fa1c5385c3613"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/revision_armor_fire.png",
+      "bytes": 277112,
+      "sha256": "ef48b53581807f9e5b26c950ef0e667656bc819f1a89a1fb957fd06d8db12b75"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/revision_armor_front.png",
+      "bytes": 268533,
+      "sha256": "a2cc7700c70a0d06cdbbcc8d4f92e15819707dae0e4af890dc0ce8ae8924b963"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/revision_armor_head_turn.png",
+      "bytes": 274142,
+      "sha256": "7a5dacfdfd099b51d04464aee338a9a969b191330689eb64400431ecfa99f17c"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/revision_armor_rear.png",
+      "bytes": 245155,
+      "sha256": "cfb4797b603c49d7fc11cf0a264f147cf8194b91ec8cffc96e8551054f246196"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/revision_armor_walk.png",
+      "bytes": 264312,
+      "sha256": "851f41ec6f500d39c552ac029323a8942426cf182cb77239a707058b19808f75"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/workbench_desktop.png",
+      "bytes": 422973,
+      "sha256": "ff7080c882d3dc8838644bf645db346d75c74a91d04896b94bcf92132e555a7f"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/workbench_mobile.png",
+      "bytes": 311960,
+      "sha256": "5ec0436f2d31875d387562c34667397d969f4000c423bc72bb63068ed37234f6"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/workbench_probe.js",
+      "bytes": 5704,
+      "sha256": "2fdc7cc7a12e9bd9915232739b305f716734233674be2afb25f7bc54ed88b87d"
+    },
+    {
+      "path": "docs/qa/armor_orc_morozov_20261111/workbench_roundtrip.json",
+      "bytes": 15753,
+      "sha256": "b0e4c0d2bedb2f11f7e46de4359cfd68a9093e633c650e8f1f056e6569ef0295"
+    },
+    {
+      "path": "docs/reports/armor_comparison_20261111.html",
+      "bytes": 31409,
+      "sha256": "6f9d3136d488e5e2c78c080601c5b191fadfb2a5f790970c4c01fa28eb3a347b"
+    },
+    {
+      "path": "scripts/terrain/personnel_armor_visual.gd",
+      "bytes": 26025,
+      "sha256": "267ebc1b7856c606e0691c6aa5a06f22683422a53f193fd626e200a7598070e6"
+    },
+    {
+      "path": "scripts/tests/personnel_armor_visual_test.gd",
+      "bytes": 9224,
+      "sha256": "250f67ef4dcf3f9533d1f0508849fb91430d6614f7e346d7745f07cef49d55f0"
+    },
+    {
+      "path": "tools/build_armor_comparison.py",
+      "bytes": 19216,
+      "sha256": "e7b356bdba84f0b0accde4aafbc8ae9b51bc22cba3933df2456d8f58fab75ed2"
+    }
+  ],
+  "byte_preservation": "Artifact directories use existing repository -text convention in .gitattributes; source and evidence hashes retain original bytes."
+}
