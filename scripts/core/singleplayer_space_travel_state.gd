@@ -3,6 +3,7 @@ extends RefCounted
 ## SimulationRoot's runtime adapter may confirm lifecycle changes or advance time.
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const ORBIT_CATALOG = preload("res://scripts/mission/orbit_destination_catalog.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
 const TRUSTED_OPERATIONS := ["initialize_surface", "launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
@@ -38,6 +39,7 @@ func configure(craft_id: String = "") -> Dictionary:
 	_space_area_epoch += 1
 	_space_area_seal = str(get_instance_id()) + ":" + str(_space_area_epoch) + ":" + str(Time.get_ticks_usec())
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DEFINITION_PATH))
+	_definition.clear()
 	if typeof(raw) != TYPE_DICTIONARY or not _valid_definition(raw):
 		return _reject("invalid_system", "Sternsystem ist nicht verfuegbar")
 	_definition = Dictionary(raw).duplicate(true)
@@ -262,6 +264,13 @@ func _orbit_position(orbit: String) -> Vector2:
 	return Vector2(float(point[0]), float(point[1]))
 
 func _valid_definition(data: Dictionary) -> bool:
+	var version: Variant = data.get("version")
+	if typeof(version) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(version)):
+		return false
+	if float(version) == 3.0:
+		return bool(ORBIT_CATALOG.validate_v3_product(data).get("ok", false))
+	if float(version) != 2.0:
+		return false
 	if typeof(data.get("bodies")) != TYPE_DICTIONARY or typeof(data.get("orbits")) != TYPE_DICTIONARY or typeof(data.get("location_orbits")) != TYPE_DICTIONARY or typeof(data.get("jump_duration_seconds")) not in [TYPE_FLOAT, TYPE_INT]:
 		return false
 	var duration: float = float(data.jump_duration_seconds)
