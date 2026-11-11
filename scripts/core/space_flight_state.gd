@@ -56,6 +56,8 @@ func validate_motion(proposal: Dictionary, tick: int) -> Dictionary:
 		return {"ok": false, "reason": "stale_tick"}
 	if proposal.get("expected_revision", -1) != _revision:
 		return {"ok": false, "reason": "stale_revision"}
+	if _motion_mode == "inactive" or proposal.get("motion_mode", _motion_mode) == "inactive":
+		return {"ok":false, "reason":"activity_transition_required"}
 	if proposal.get("space_area_id", _space_area_id) != _space_area_id or proposal.get("coordinate_frame", _coordinate_frame) != _coordinate_frame:
 		return {"ok": false, "reason": "area_transition_required"}
 	var next := get_snapshot()
@@ -77,6 +79,8 @@ func validate_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
 	# Root coordinates this preflight with travel, membership and occupancy.
 	if _craft_id.is_empty() or tick <= _tick: return {"ok":false, "reason":"stale_tick"}
 	if proposal.get("expected_revision", -1) != _revision: return {"ok":false, "reason":"stale_revision"}
+	if _motion_mode == "inactive" or proposal.get("motion_mode", _motion_mode) == "inactive":
+		return {"ok":false, "reason":"activity_transition_required"}
 	if not proposal.has_all(["coordinate_frame", "space_area_id", "position_plane"]):
 		return {"ok":false, "reason":"invalid_pose"}
 	var next := get_snapshot()
@@ -88,6 +92,32 @@ func validate_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
 
 func commit_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
 	var validation := validate_area_transition(proposal, tick)
+	if not validation.ok: return validation
+	var next := get_snapshot()
+	next.merge(proposal, true)
+	_apply_pose(next, tick)
+	return {"ok":true, "revision":_revision}
+
+func validate_space_activity_transition(proposal: Dictionary, tick: int) -> Dictionary:
+	# Root is responsible for gate, occupancy, and other owner preconditions.
+	if _craft_id.is_empty() or tick <= _tick: return {"ok":false, "reason":"stale_tick"}
+	if proposal.get("expected_revision", -1) != _revision: return {"ok":false, "reason":"stale_revision"}
+	if _coordinate_frame != "local": return {"ok":false, "reason":"not_local"}
+	var mode: Variant = proposal.get("motion_mode")
+	if not ((_motion_mode == "tactical" and mode == "inactive") or (_motion_mode == "inactive" and mode == "tactical")):
+		return {"ok":false, "reason":"invalid_activity_transition"}
+	var allowed: Array = ["expected_revision", "motion_mode"] if mode == "inactive" else ["expected_revision", "motion_mode", "position_plane", "velocity_plane", "heading_rad", "angular_velocity", "assist_mode"]
+	for key in proposal:
+		if not allowed.has(key): return {"ok":false, "reason":"invalid_activity_transition"}
+	if mode == "tactical" and typeof(proposal.get("position_plane")) != TYPE_VECTOR2:
+		return {"ok":false, "reason":"invalid_pose"}
+	var next := get_snapshot()
+	next.merge(proposal, true)
+	if not _valid_pose(next): return {"ok":false, "reason":"invalid_pose"}
+	return {"ok":true}
+
+func commit_space_activity_transition(proposal: Dictionary, tick: int) -> Dictionary:
+	var validation := validate_space_activity_transition(proposal, tick)
 	if not validation.ok: return validation
 	var next := get_snapshot()
 	next.merge(proposal, true)
@@ -122,4 +152,5 @@ static func _valid_pose(pose: Dictionary) -> bool:
 	if frame == "strategic" and not String(area).is_empty(): return false
 	if frame == "local" and String(area).strip_edges().is_empty(): return false
 	if frame not in ["strategic", "local"]: return false
-	return pose.get("assist_mode", "coupled") in ["coupled", "decoupled"] and pose.get("motion_mode", "grounded") in ["grounded", "travel", "tactical"]
+	if pose.get("motion_mode", "grounded") == "inactive" and frame != "local": return false
+	return pose.get("assist_mode", "coupled") in ["coupled", "decoupled"] and pose.get("motion_mode", "grounded") in ["grounded", "travel", "tactical", "inactive"]

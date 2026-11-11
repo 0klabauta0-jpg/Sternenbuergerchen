@@ -16,7 +16,7 @@ func _initialize() -> void:
 	if not local.commit_motion({"expected_revision":snap.revision, "position_plane":Vector2(2,1)}, 0).get("ok", false): failed += 1
 	if FLIGHT.new().configure("invalid", {"position_plane":Vector2.ZERO, "coordinate_frame":"local", "space_area_id":""}).get("ok", false): failed += 1
 	if FLIGHT.new().configure("invalid", {"position_plane":Vector2.ZERO, "coordinate_frame":"strategic", "space_area_id":"orbit_approach:moon"}).get("ok", false): failed += 1
-	var transition := {"expected_revision":initial.revision, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon", "position_plane":Vector2(10,10), "velocity_plane":Vector2(1,0)}
+	var transition := {"expected_revision":initial.revision, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon", "position_plane":Vector2(10,10), "velocity_plane":Vector2(1,0), "motion_mode":"tactical"}
 	if not flight.validate_area_transition(transition, 0).get("ok", false) or flight.get_snapshot() != initial: failed += 1
 	var stale := transition.duplicate(true)
 	stale.expected_revision = 99
@@ -26,5 +26,15 @@ func _initialize() -> void:
 	if moved.coordinate_frame != "local" or moved.space_area_id != "orbit_approach:moon" or moved.velocity_plane != Vector2(1,0): failed += 1
 	if flight.commit_area_transition(transition, 0).get("reason") != "stale_tick" or flight.get_snapshot() != moved: failed += 1
 	if flight.commit_travel_pose(Vector2(2,2), 0.0) or flight.get_snapshot() != moved: failed += 1
-	print("SPACE_COMBAT_AREA_FLIGHT passed=", 14 - failed, " failed=", failed)
+	if flight.commit_motion({"expected_revision":moved.revision, "motion_mode":"inactive"}, 1).get("reason") != "activity_transition_required": failed += 1
+	if flight.commit_space_activity_transition({"expected_revision":moved.revision, "motion_mode":"inactive", "position_plane":Vector2.ZERO}, 1).get("reason") != "invalid_activity_transition" or flight.get_snapshot() != moved: failed += 1
+	var deactivate := {"expected_revision":moved.revision, "motion_mode":"inactive"}
+	if not flight.commit_space_activity_transition(deactivate, 1).get("ok", false): failed += 1
+	var inactive: Dictionary = flight.get_snapshot()
+	if inactive.position_plane != moved.position_plane or inactive.space_area_id != moved.space_area_id or inactive.motion_mode != "inactive": failed += 1
+	if flight.commit_motion({"expected_revision":inactive.revision, "motion_mode":"tactical"}, 2).get("reason") != "activity_transition_required": failed += 1
+	if flight.commit_space_activity_transition({"expected_revision":inactive.revision, "motion_mode":"tactical", "position_plane":Vector2(11,10), "space_area_id":"orbit_approach:planet"}, 2).get("reason") != "invalid_activity_transition" or flight.get_snapshot() != inactive: failed += 1
+	var reactivate := {"expected_revision":inactive.revision, "motion_mode":"tactical", "position_plane":Vector2(11,10)}
+	if not flight.commit_space_activity_transition(reactivate, 2).get("ok", false) or flight.get_snapshot().position_plane != Vector2(11,10): failed += 1
+	print("SPACE_COMBAT_AREA_FLIGHT passed=", 21 - failed, " failed=", failed)
 	quit(1 if failed else 0)
