@@ -91,8 +91,10 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	if craft_id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or _singleplayer_supply_owner == null or _singleplayer_campaign_owner == null: return {"ok":false, "reason":"invalid_departure"}
 	if _departure_group_receipts.has(request_id):
 		var receipt: Dictionary = _departure_group_receipts[request_id]
-		if receipt.craft_id != craft_id or receipt.approach_request_id != approach_request_id: return {"ok":false, "reason":"request_id_conflict"}
+		if receipt.craft_id != craft_id: return {"ok":false, "reason":"request_id_conflict"}
 		if receipt.supply != _singleplayer_supply_owner or receipt.campaign != _singleplayer_campaign_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
+		if receipt.approach_request_id != approach_request_id:
+			return _commit_singleplayer_reapproach(adapter, craft_id, request_id, approach_request_id, receipt)
 		if not approach_request_id.is_empty() and (receipt.fleet != _singleplayer_space_travel_owner or _singleplayer_space_travel_owner == null or receipt.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id)): return {"ok":false, "reason":"owner_changed"}
 		if not approach_request_id.is_empty():
 			var travel_replay: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.travel_candidate, receipt.travel_context)
@@ -174,6 +176,49 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 		var travel_command := {"contract_category":"singleplayer_space_travel", "operation":"begin_approach", "payload":travel_context.payload.duplicate(true), "request_id":approach_request_id}
 		events.append({"command":travel_command, "result":result.travel_result})
 	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "travel_candidate":travel_candidate.duplicate(true), "travel_context":travel_context.duplicate(true), "events":events.duplicate(true), "events_published":false}
+	return result
+
+func _commit_singleplayer_reapproach(adapter: Node, craft_id: String, request_id: String, approach_request_id: String, receipt: Dictionary) -> Dictionary:
+	if approach_request_id.is_empty() or not adapter.has_method("preview_reapproach") or _singleplayer_space_travel_owner == null or receipt.fleet != _singleplayer_space_travel_owner: return {"ok":false, "reason":"request_id_conflict"}
+	var cancellation_id := String(_local_return_latest_by_craft.get(craft_id, ""))
+	if not cancellation_id.begins_with("local-cancel:" + request_id + ":") or not _local_return_receipts.has(cancellation_id): return {"ok":false, "reason":"request_id_conflict"}
+	var cancellation: Dictionary = _local_return_receipts[cancellation_id]
+	var old_travel: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.travel_candidate, receipt.travel_context)
+	var cancel_travel: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(cancellation.travel_candidate, cancellation.travel_context)
+	if not old_travel.get("ok", false) or not old_travel.get("replayed", false) or not cancel_travel.get("ok", false) or not cancel_travel.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
+	var gate: Dictionary = adapter.preview_reapproach(craft_id)
+	if not gate.get("ok", false): return gate
+	if gate.get("departure") != receipt.result.get("departure"): return {"ok":false, "reason":"departure_changed"}
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or flight != receipt.flight or _space_combat_state.get_actor(craft_id) != flight: return {"ok":false, "reason":"owner_changed"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	var area_revision: int = _space_combat_state.get_area_revision(String(pose.space_area_id))
+	var preview: Dictionary = preview_surface_deactivation(craft_id, String(gate.departure.destination_location_id), pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
+	if not preview.get("ok", false): return preview
+	var fv: Dictionary = flight.validate_space_activity_transition(preview.activity_proposal, preview.activity_tick)
+	var av: Dictionary = _space_combat_state.validate_deactivation(craft_id, pose.revision, area_revision)
+	if not fv.get("ok", false) or not av.get("ok", false): return {"ok":false, "reason":"space_deactivation_invalid"}
+	var payload := {"craft_id":craft_id, "location_id":String(gate.departure.destination_location_id)}
+	var context := {"request_id":approach_request_id,"request_signature":JSON.stringify({"operation":"begin_approach","payload":payload}, "", true),"operation":"begin_approach","payload":payload,"source_area_id":pose.space_area_id,"target_area_id":pose.space_area_id,"expected_travel_revision":travel.revision,"expected_phase":"orbit","context_id":"reapproach:" + approach_request_id}
+	var bound: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(context, self)
+	if not bound.get("ok", false): return bound
+	var candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, travel.revision, pose.space_area_id, pose.space_area_id, context)
+	var tv: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(candidate, context) if candidate.get("ok", false) else candidate
+	if not tv.get("ok", false) or tv.get("replayed", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
+		return {"ok":false, "reason":"travel_validation_failed"}
+	flight._publish_space_activity_transition(fv)
+	_space_combat_state._publish_deactivation(av)
+	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
+	var result := {"ok":true, "departure":gate.departure.duplicate(true), "travel_result":travel_result}
+	var command := {"contract_category":"singleplayer_space_travel", "operation":"begin_approach", "payload":payload, "request_id":approach_request_id}
+	receipt.approach_request_id = approach_request_id
+	receipt.travel_candidate = candidate.duplicate(true)
+	receipt.travel_context = context.duplicate(true)
+	receipt.result = result.duplicate(true)
+	receipt.events = [{"command":command, "result":travel_result.duplicate(true)}]
+	receipt.events_published = false
 	return result
 
 func publish_singleplayer_departure_events(adapter: Node, request_id: String) -> void:
@@ -478,7 +523,8 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 		var replay_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(previous.travel_candidate, previous.travel_context)
 		if not replay_check.get("ok", false) or not replay_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		return {"ok":true, "replayed":true, "receipt_id":latest_key}
-	var current_phase := String(_singleplayer_space_travel_owner.get_craft_snapshot(craft_id).get("phase", ""))
+	var current_travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	var current_phase := String(current_travel.get("phase", ""))
 	var is_cancel := current_phase == "approach"
 	if is_cancel and not adapter.has_method("preview_local_approach_cancel"): return {"ok":false, "reason":"adapter_required"}
 	var gate: Dictionary = adapter.preview_local_approach_cancel(craft_id) if is_cancel else adapter.preview_local_surface_return(craft_id)
@@ -487,6 +533,7 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	var route: Dictionary = gate.route
 	if route.get("craft_id") != craft_id or route.get("destination_location_id") != "homebase": return {"ok":false, "reason":"invalid_return_context"}
 	var key := ("local-cancel:" if is_cancel else "local-return:") + String(gate.outward_token) + ":" + craft_id
+	if is_cancel: key += ":" + str(current_travel.get("revision", -1))
 	if _local_return_receipts.has(key):
 		var previous: Dictionary = _local_return_receipts[key]
 		if previous.supply != _singleplayer_supply_owner or previous.fleet != _singleplayer_space_travel_owner or previous.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}

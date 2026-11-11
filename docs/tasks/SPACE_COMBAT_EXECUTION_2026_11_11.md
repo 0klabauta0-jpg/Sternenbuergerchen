@@ -52,8 +52,11 @@ Verifier und diese Statusdokumentation.
   ursprünglichen Travel-Ownerbeleg und reaktiviert Flight/Index mit dem
   vorbereiteten Orbitübergang; keine weitere Fuelbuchung oder Groundmutation.
   Gezielter Test mit echtem Adapter und Ownern sowie Pilot-Testdouble grün.
-  Ein erneuter Anflug nach Abbruch braucht noch einen eigenen Folgeschritt:
-  bestehende Abflugbindung wiederverwenden, ohne Treibstoff doppelt zu buchen.
+  Ein erneuter Anflug verwendet nach lesender Pilot-/Zielprüfung und gültigem
+  Abbruchbeleg dieselbe Abflug- und Auftragsbindung; nur Travel und Flight
+  werden erneut veröffentlicht, ohne zusätzliche Fuelbuchung. Ein zweiter
+  Abbruch ist über die aktuelle Reiserevision getrennt belegbar. Gezielter
+  Abbruch→erneuter Anflug→Abbruch-Test mit echten Ownern und Testdouble grün.
 
 - Lokaler Oberflächen-Rückflug: Der echte Adapter prüft zunächst Visitbeleg,
   vorhandenen Missions-Pilot-Guard und Fuel ohne Abbuchung. Bei tatsächlichem

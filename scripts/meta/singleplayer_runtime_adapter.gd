@@ -498,7 +498,10 @@ func preview_departure(craft_id: String) -> Dictionary:
 	# This is a read projection, not a transferable authorization receipt.
 	return _validate_departure_gates(craft_id, false)
 
-func _validate_departure_gates(craft_id: String, observe_progress: bool) -> Dictionary:
+func preview_reapproach(craft_id: String) -> Dictionary:
+	return _validate_departure_gates(craft_id, false, true)
+
+func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_departure: bool = false) -> Dictionary:
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	var travel: Dictionary = get_space_travel_snapshot(craft_id)
@@ -545,6 +548,11 @@ func _validate_departure_gates(craft_id: String, observe_progress: bool) -> Dict
 	for binding: Dictionary in Dictionary(selected.get("departures_by_craft_id",{})).values():
 		if String(binding.get("job_id",""))==selected_job and String(binding.get("craft_id",""))!=craft_id: selected_job=""
 	var departure: Dictionary = {"craft_id": craft_id, "origin_location_id": "homebase", "destination_location_id": destination, "landing_pad_id": pad, "job_id": selected_job}
+	if reuse_departure:
+		var existing: Dictionary = Dictionary(selected.get("departures_by_craft_id", {})).get(craft_id, {})
+		if existing != departure: return _reject("departure_changed", "Abflugbindung passt nicht mehr zum Ziel")
+		if not selected_job.is_empty() and (selected_job_definition.get("status") != "active" or selected_job_definition.get("craft_id") != craft_id): return _reject("job_changed", "Auftrag ist nicht mehr diesem Schiff zugeordnet")
+		return {"ok":true, "departure":departure}
 	var campaign_gate: Dictionary = _campaign.validate_departure(departure, {"departure_authorized": true, "built_home_pad_ids":_built_home_pad_ids()})
 	if not campaign_gate.get("ok", false):
 		return campaign_gate
