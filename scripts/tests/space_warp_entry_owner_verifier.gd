@@ -5,6 +5,7 @@ const EQUIPMENT = preload("res://scripts/core/singleplayer_ship_equipment_state.
 const ADAPTER = preload("res://scripts/meta/singleplayer_runtime_adapter.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 class FlowFixture extends Node:
 	var _assigned_aircraft_pilot_by_craft := {"ship":"pilot"}
 class PilotFixture extends Node:
@@ -23,14 +24,21 @@ func _initialize() -> void:
 	var flight = fleet.get_flight_state("ship"); var before: Dictionary = flight.get_snapshot()
 	assert(sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0).reason == "pilot_not_aboard" and flight.get_snapshot() == before and fleet.get_snapshot("ship").phase == "quantum")
 	pilot.aboard = true
-	var result := {}
+	var state = sim.get("_space_combat_state")
+	var blocker = FLIGHT.new(); var blocker_cell: Vector2i = GRID.from_offset(Vector2i(5, 100))
+	assert(blocker.configure("space_fixture_entry_blocker", {"position_plane":GRID.HEX.axial_to_plane(Vector2(blocker_cell)), "coordinate_frame":"local", "space_area_id":"orbit_approach:planet", "motion_mode":"tactical"}).ok)
+	assert(state.admit_actor({"craft_id":"space_fixture_entry_blocker", "faction_id":"enemy", "control_domain":"enemy", "start_hex":blocker_cell, "footprint_hexes":[Vector2i.ZERO]}, blocker, true).ok)
+	var claims: Array[Vector2i] = []
+	for x in 256: claims.append(GRID.from_offset(Vector2i(x, 255)))
+	assert(state.record_navigation_claim("space_fixture_entry_blocker", "orbit_approach:planet", claims).ok)
+	var result: Dictionary = sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0)
+	assert(result.ok and result.status == "pending" and fleet.get_craft_snapshot("ship").phase == "quantum")
 	for _attempt in 65:
-		result = sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0)
+		result = sim.advance_singleplayer_warp_entry(adapter, "ship", 0.01)
 		assert(result.ok)
 		if result.status == "complete": break
 	assert(result.status == "complete" and fleet.get_snapshot("ship").phase == "orbit")
 	assert(flight.get_snapshot().motion_mode == "tactical" and flight.get_snapshot().space_area_id == "orbit_approach:planet" and sim.get_space_actor("ship") == flight)
-	var state = sim.get("_space_combat_state")
 	for cell: Vector2i in state.get_indexed_actor_cells("ship"): assert(LAYOUT.ENTRY_BAND.has_point(GRID.to_offset(cell)))
 	assert(state.get_metadata("ship").footprint_hexes == [Vector2i.ZERO, Vector2i(1, 0)])
 	assert(not sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer").is_empty())
@@ -43,6 +51,7 @@ func _initialize() -> void:
 	sim.publish_singleplayer_warp_entry_event(adapter, result.receipt_id)
 	sim.publish_singleplayer_warp_entry_event(adapter, result.receipt_id)
 	assert(observed == [true] and flight.get_snapshot() == arrived)
+	assert(state.remove_actor("space_fixture_entry_blocker"))
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("SPACE_WARP_ENTRY_OWNER passed")
 	quit(0)
