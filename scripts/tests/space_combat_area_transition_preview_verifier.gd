@@ -13,6 +13,9 @@ class OccupiedSpace extends RefCounted:
 		var result: Array[String] = []
 		if blocked: result.append("other")
 		return result
+	func query_navigation_claims(_cells: Array[Vector2i], _area: String) -> Array[String]:
+		var result: Array[String] = []
+		return result
 
 func _initialize() -> void:
 	var flight = FLIGHT.new()

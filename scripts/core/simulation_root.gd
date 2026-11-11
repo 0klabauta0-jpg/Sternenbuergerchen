@@ -196,6 +196,7 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	assert(wings.get("ok", false))
 	var movement: Dictionary = flight.commit_area_transition(geometry.proposal, tick_counter)
 	assert(movement.get("ok", false))
+	_space_combat_state.release_navigation_claim(prepared.craft_id)
 	var cell: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(geometry.proposal.position_plane))
 	var indexed := false
 	if prepared.needs_admission:
@@ -328,6 +329,8 @@ func preview_surface_approach(craft_id: String, location_id: String, expected_fl
 		if gate_cells.has(offset): at_gate = true
 	for occupant in _space_combat_state.query_cells(cells, snapshot.space_area_id):
 		if occupant != craft_id: return {"ok":false, "reason":"occupied"}
+	for claimant in _space_combat_state.query_navigation_claims(cells, snapshot.space_area_id):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	if not at_gate: return {"ok":false, "reason":"not_at_approach_gate"}
 	return {"ok":true, "craft_id":craft_id, "location_id":location_id, "space_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "footprint_cells":cells}
 
@@ -457,6 +460,8 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 	for occupant in _space_combat_state.query_cells(swept_cells):
 		if occupant != craft_id:
 			return {"ok": false, "reason": "blocked"}
+	for claimant in _space_combat_state.query_navigation_claims(swept_cells, ""):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	var result: Dictionary = flight.commit_motion(proposal, tick)
 	if not result.get("ok", false):
 		return result
@@ -513,6 +518,16 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 	if not clearance.get("ok", false): return clearance
 	var accepted: Dictionary = clearance.accepted
 	var ids: Array = accepted.keys()
+	ids.sort()
+	for id in ids:
+		var swept_cells: Array[Vector2i] = []
+		swept_cells.assign(clearance.swept_cells[id])
+		for claimant in _space_combat_state.query_navigation_claims(swept_cells, String(area.space_area_id)):
+			if claimant != id:
+				clearance.rejected[id] = "navigation_claimed"
+				accepted.erase(id)
+				break
+	ids = accepted.keys()
 	ids.sort()
 	for id in ids:
 		var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(id, accepted[id])

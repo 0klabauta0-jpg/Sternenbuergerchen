@@ -32,7 +32,17 @@ func _initialize() -> void:
 	var body_result: Dictionary = body_sim.commit_space_fleet_motion(body_move, 1, world, {"runtime_authorized":true, "fixture":true})
 	if not body_result.get("ok", false) or body_result.rejected.get("space_fixture_body") != "blocked": failed += 1
 	body_sim.free()
-	print("SPACE_COMBAT_AREA_BATCH passed=", 6 - failed, " failed=", failed)
+	var claim_sim = ROOT.new()
+	var claim_state: RefCounted = claim_sim.get("_space_combat_state")
+	var claim_a = _add(claim_state, "space_fixture_claim_a", "orbit_approach:moon", start)
+	_add(claim_state, "space_fixture_claim_b", "orbit_approach:moon", GRID.from_offset(Vector2i(410,100)))
+	var claim_cells: Array[Vector2i] = [end]
+	claim_state.record_navigation_claim("space_fixture_claim_b", "orbit_approach:moon", claim_cells)
+	var claim_move: Array[Dictionary] = [{"craft_id":"space_fixture_claim_a", "position_plane":GRID.HEX.axial_to_plane(Vector2(end)), "expected_revision":claim_a.get_snapshot().revision}]
+	var claimed: Dictionary = claim_sim.commit_space_fleet_motion(claim_move, 1, world, {"runtime_authorized":true, "fixture":true})
+	if not claimed.get("ok", false) or claimed.rejected.get("space_fixture_claim_a") != "navigation_claimed": failed += 1
+	claim_sim.free()
+	print("SPACE_COMBAT_AREA_BATCH passed=", 7 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _add(state: RefCounted, id: String, area: String, cell: Vector2i) -> RefCounted:

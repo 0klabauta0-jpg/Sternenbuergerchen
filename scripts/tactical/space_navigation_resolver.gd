@@ -42,6 +42,7 @@ static func resolve_motion(flights: Array[Dictionary], proposals: Array[Dictiona
 	ids.sort()
 	var accepted := {}
 	var rejected := {}
+	var swept_by_id := {}
 	for id in ids:
 		var sweep: Dictionary = _sweep(actors[id], requested[id])
 		if not sweep.ok:
@@ -59,8 +60,9 @@ static func resolve_motion(flights: Array[Dictionary], proposals: Array[Dictiona
 			rejected[id] = reason
 			continue
 		accepted[id] = requested[id].duplicate(true)
+		swept_by_id[id] = sweep.cells
 		for cell in sweep.cells: reservations[cell] = id
-	return {"ok":true, "accepted":accepted, "rejected":rejected}
+	return {"ok":true, "accepted":accepted, "rejected":rejected, "swept_cells":swept_by_id}
 
 static func _sweep(flight: Dictionary, proposal: Dictionary) -> Dictionary:
 	if typeof(flight.get("position_plane")) != TYPE_VECTOR2 or typeof(proposal.get("position_plane")) != TYPE_VECTOR2:
