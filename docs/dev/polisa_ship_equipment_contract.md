@@ -2,6 +2,27 @@
 
 Status: concrete follow-up contract, not implemented ship equipment.
 
+## Read-only follow-up audit / 2026-11-11
+The smallest repeatedly reachable consumer is quantum travel duration:
+SingleplayerSpaceTravelState currently advances and projects the configured
+jump_duration_seconds. The bounded first-contact CampaignSpaceEncounter is
+not a reliable post-Polisa upgrade consumer. Prefer one quantum-drive slot
+before weapon hardpoints: dedicated per-craft equipment state, validated
+catalog compatibility, duration frozen at jump start, same duration in the
+travel snapshot, versioned home-checkpoint defaults/validation, then atomic
+installation through the real station Supply/service path. This is a concrete
+next-slice proposal, not an implemented slot or validated Erkul loadout.
+
+Existing location runtime already shares missions, dropcards and people across
+craft at a place; do not replace that architecture for local ship pickup.
+Missing station-birth operations must initialize travel at surface/polisa,
+allocate a real free pad, transfer pilot/crew uniquely, and authorize a return
+without inventing a prior outbound home token. Checkpoints currently require
+all craft at homebase/waiting_pad and reject active departures. Preserve that
+restriction explicitly or implement and validate location-aware persistence;
+do not label current away-state saves as supported. Coordinate Root/lifecycle
+and checkpoint edits with the Tabletop AP5-8 owner before shared-file changes.
+
 ## Verified current ownership / 2026-11-11
 SingleplayerFleetTravelState indexes per-craft SingleplayerSpaceTravelState;
 it does not own ship hardpoints, components or combat. SingleplayerSupplyState

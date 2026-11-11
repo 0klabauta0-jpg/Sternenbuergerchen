@@ -1,5 +1,14 @@
 # Tabletop-Abstimmung und Restplan-Integration
 
+## Aktueller Stand nach Polisa-Freigabe
+AP1-3, Facing/Sicherung und AP4-Owner samt Sparse-Grantfix sind integriert.
+Vollstaendiger Korridorcache04dc691bb wurde nach unabhaengigem Review als
+f4353eed4 konfliktfrei uebernommen. Root/Ground/Resolver frisch check-only0;
+keine erneute grosse Matrix. Naechster aktiver Schritt liegt im Tabletop-Chat:
+AP5-Commands und Bewegungsprojektion mit vorhandenen Tempo-/Accuracygettern,
+danach AP6-8-Lifecycle-/Save-/Netzgrenzen. Keine Kartenaktivierung daraus.
+Die folgenden Abschnitte sind die historische Fortschreibung.
+
 ## Ziel und Ursache
 Der Nutzer beauftragt am 11.11.2026 die selbststaendige Fortsetzung, Abstimmung und Zusammenfuehrung der Tabletop-Aenderungen. Grosse Tests werden spaeter gebuendelt. Gesicherte Pakete werden integriert; unfertige aktive Gameplay-Anschluesse werden nicht als abgeschlossen markiert.
 

@@ -1,3 +1,20 @@
+# Aktueller Restplan nach Polisa-Freigabe — 11.11.2026
+
+Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
+
+- **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
+- **Bewegung:** AP4-Owner und vollstaendiger Korridorcache integriert (f4353eed4). AP5-Commands, effektives Tempo, stetige Darstellung und anschliessende Lifecycle-/Save-/Netzgrenzen laufen im Tabletop-Chat. Keine aktive Karte oder fertige Actorbewegung daraus behauptet.
+- **Profilanzeige:** gemeinsame exakte Vorlagenzuordnung und klares individuelles Profil, Profilwirkung aus bestehenden Ableitungen. Keine neue Tempo-/Combatformel. Enger Folgeauftrag in Arbeit.
+- **Forschung:** naechster nutzbarer Slice ist Recycling von Bergungsgut zu vorhandenen Rucksaecken; bestehender Supply-/Inventarowner. Forschung100Cr, Fertigung2salvage+20Cr als erste Balance, noch nicht integriert. Danach Workbench-Baseline aktualisieren.
+- **Schiffe:** Komponenten mit echtem Verbraucher sowie lokale Polisa-Abholung bleiben offen. Aktueller Code wird gegen den bisherigen Contract geprueft. Neue Fahrzeugmodelle bleiben zurueckgestellt.
+- **Spaeter:** grosse gemeinsame Spiel-/Performance-/Save-/Netzpruefung, dann Main/EXE. Keine erneute grosse Matrix jetzt.
+
+Konkrete Zustaendigkeiten und Grenzen: RESTPLAN_FORTSETZUNG_2026_11_11.md.
+
+---
+
+## Historische Fortschreibung (aeltere offene Listen sind ueberholt)
+
 # Aktiver Arbeitsplan und Abschlussliste — 11.11.2026
 
 ## Ziel / Anlass / Arbeitsbasis
