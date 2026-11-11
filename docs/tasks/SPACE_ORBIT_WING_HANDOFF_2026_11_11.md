@@ -79,6 +79,21 @@ erneute Prüfung; kein UI-Boolean ist Nachweis einer Saumposition. Die genaue
 Tokenform, Travel-Prepare-/Commit-Schnittstelle, Rücktritt von Reservierungen
 und Legacy-Abbildung werden mit dem Reiseowner gemeinsam finalisiert.
 
+Der parallele Chat bestätigt als vorbereitenden Travel-Arbeitsvertrag:
+`prepare_area_transition(craft_id, operation, payload, expected_travel_revision,
+request_id, root_context) -> Dictionary` und
+`validate_prepared_area_transition(candidate, root_context) -> Dictionary`.
+Der Root hält den Kandidaten privat. Der spätere stille Publish-Tail darf keine
+alten Travelcommands oder `_arrive` erneut aufrufen und veröffentlicht Events
+erst nach gemeinsamer Übernahme. Erste Roottransition ausschließlich als
+nichtproduktive Warp-/Area-Ownerfixture: `release_space_area_transition(token)`
+bei Abbruch/Fehler/Ownerwechsel/Ablauf; Requestsignatur und Receipt verhindern
+Wiederholung und geänderte Nutzung desselben Requests. Unmittelbar vor dem
+signal-/awaitfreien Tail alle beteiligten Owner und Belegung erneut prüfen.
+Oberflächenanflug benötigt zusätzlich vorbereitete Supply-, Campaign- und
+Departureänderungen; ein Travelcandidate allein reicht nicht. Kein Fueldebit
+vor vollständigem Prepare und keine ausgleichenden Dummyrefunds.
+
 Dateibesitz: Wir bearbeiten `space_flight_state.gd`, bereichsbezogene
 Raumregistry/-navigation, Raumcommands, Wingowner und die Raumtransition in
 `simulation_root.gd`. Der andere Chat bearbeitet Orbitlayout/-vertrag und

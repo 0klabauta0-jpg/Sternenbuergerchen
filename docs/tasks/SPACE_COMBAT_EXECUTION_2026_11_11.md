@@ -196,7 +196,8 @@ Verifier und diese Statusdokumentation.
   Wing-/Registry-Verbindung und schaltet keine lokalen Bereiche frei.
 - AP04a geometrische Eintrittsvorschau: baut kanonisches Orbitlayout, prüft
   Flugrevision, unteres Eintrittsband, vollständigen Rumpf, Körpermaske und
-  belegte Zielfelder ohne Mutation. Prüfung5/5, Flight- und Footprintchecks
+  belegte Zielfelder ohne Mutation. Prüfung7/7 einschließlich echter
+  gebietsspezifischer Registry, Flight- und Footprintchecks
   grün. Sie ist keine Berechtigungsprüfung: reale Körper-/Reisezuordnung,
   Travelrevision, Rottenrevision, Token und atomarer Commit fehlen weiterhin.
 - AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei

@@ -30,5 +30,15 @@ func _initialize() -> void:
 	target.position_plane = GRID.HEX.axial_to_plane(Vector2(GRID.from_offset(Vector2i(200,100))))
 	if PREVIEW.preview(flight, 0, "moon", target, [Vector2i.ZERO], space, 1).get("reason") != "outside_entry_band": failed += 1
 	if not flight.get_snapshot() == before: failed += 1
-	print("SPACE_COMBAT_AREA_TRANSITION_PREVIEW passed=", 5 - failed, " failed=", failed)
+	target.position_plane = GRID.HEX.axial_to_plane(Vector2(GRID.from_offset(Vector2i(200,230))))
+	var actual = COMBAT.new()
+	var registry: RefCounted = actual.get("_registry")
+	var occupant = FLIGHT.new()
+	occupant.configure("other", {"position_plane":target.position_plane, "coordinate_frame":"local", "space_area_id":"orbit_approach:planet"})
+	registry.register_actor("other", occupant)
+	var cells: Array[Vector2i] = [GRID.from_offset(Vector2i(200,230))]
+	registry.update_actor_cells("other", cells)
+	if not PREVIEW.preview(flight, 0, "moon", target, [Vector2i.ZERO], actual, 1).get("ok", false): failed += 1
+	if PREVIEW.preview(flight, 0, "planet", target, [Vector2i.ZERO], actual, 1).get("reason") != "occupied": failed += 1
+	print("SPACE_COMBAT_AREA_TRANSITION_PREVIEW passed=", 7 - failed, " failed=", failed)
 	quit(1 if failed else 0)
