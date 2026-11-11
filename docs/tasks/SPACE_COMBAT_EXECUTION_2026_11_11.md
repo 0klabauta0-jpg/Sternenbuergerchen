@@ -100,9 +100,11 @@ Verifier und diese Statusdokumentation.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
-  löst sie auf. Verifier19/19. Der autoritative Aufrufer muss eine vollständige
-  aktuelle Craft-/Pilotenzuordnung liefern; UI-Anschluss, Root-/Lifecycle- und
-  Checkpointintegration fehlen.
+  löst sie auf. Verifier19/19. Root nimmt die Commandkategorie über den
+  gemeinsamen Singleplayer-Ownerpfad an; Root-/Ownercheck30/30 und
+  Warp-Rootregression7/7. Der autoritative Aufrufer muss eine vollständige
+  aktuelle Craft-/Pilotenzuordnung liefern; Adapter-/UI-Anschluss,
+  Lifecycle- und Checkpointintegration fehlen.
 - AP02/AP03/AP04 Rest und AP05–AP20: offen.
 
 ## Risiken / offene Punkte

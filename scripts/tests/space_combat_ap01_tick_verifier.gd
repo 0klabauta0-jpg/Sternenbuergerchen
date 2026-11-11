@@ -14,6 +14,12 @@ func _initialize() -> void:
 	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"a", "target_orbit_id":"planet_orbit"}, "request_id":"j"})
 	var root = ROOT.new()
 	root.configure_singleplayer_owners(null, null, null, fleet)
+	var wing_context := {"authorized":true, "actor_id":"player", "phase":"grounded", "owned_crafts":["a"], "craft_pilots":{"a":"pilot"}}
+	var wing_create := {"contract_category":"space_combat", "operation":"wing_create", "request_id":"wc", "expected_revision":0, "payload":{"wing_id":"w"}}
+	if not root.request_singleplayer_command(wing_create, wing_context).get("ok", false): failed += 1
+	var wing_assign := {"contract_category":"space_combat", "operation":"wing_assign", "request_id":"wa", "expected_revision":1, "payload":{"wing_id":"w", "craft_id":"a"}}
+	if not root.request_singleplayer_command(wing_assign, wing_context).get("ok", false): failed += 1
+	if root.get_space_wing_snapshot().wings.w.craft_ids != ["a"]: failed += 1
 	var adapter = ADAPTER.new()
 	adapter.set("_travel", fleet)
 	adapter.set("_simulation", root)
@@ -77,7 +83,7 @@ func _initialize() -> void:
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 27 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 30 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

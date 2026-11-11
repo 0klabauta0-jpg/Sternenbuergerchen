@@ -76,7 +76,12 @@ var _space_runtime_tick: Callable
 const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
 const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
+var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
+
+func get_space_wing_snapshot() -> Dictionary:
+	return _space_wing_state.get_snapshot()
 
 func admit_space_actor(definition: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
@@ -158,6 +163,8 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 	# never interpreted as runtime evidence, service location or departure proof.
 	var owner: RefCounted
 	match String(command.get("contract_category", "")):
+		"space_combat":
+			owner = _space_wing_state
 		"campaign_space":
 			owner = _space_encounter_owner
 		"singleplayer_campaign":
