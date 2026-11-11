@@ -23,6 +23,9 @@ Läufen mit privatem APPDATA; keine echten Spielerprofile wurden verwendet.
   Rückzug, Sichern, Patrouillenwechsel und Blockade. Kein Flugtaktanschluss.
 - AP06 Einzel-Guidance im Root-Takt 11/11 inklusive blockierter Zielzelle;
   nur Fixture, keine vorausschauende Bremsung vor Hindernissen.
+- AP04 Pflichtrotte Owner-Vorstufe 9/9, einschließlich Cutlass, idempotentem
+  Wiederholen und atomarer Ablehnung; Lifecycle-/Rotten-/Auftragsverifier grün.
+  Flugstart und Gegneraufnahme verwenden die Methode noch nicht.
 - AP03 Kostenprobe: jeweils25 wiederholte, identische Einzel-Sweeps in einem
   headless Lauf. Einfeldjäger P95 106→93µs, dreizelliger Rumpf 833→442µs
   nach geometrischer Kandidatenbegrenzung; Dateien `space_sweep_cost_before.log`

@@ -183,6 +183,14 @@ Verifier und diese Statusdokumentation.
   Prüffälle: `docs/tasks/SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`; AP04a im
   Plan. Aktuelle Implementierung erfüllt diese Vorgaben noch nicht; konkrete
   API und gemeinsam berührte Produktdateien vor Änderung abstimmen.
+- AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
+  Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
+  Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
+  lässt die Rotte inaktiv; fremde oder doppelte Schiffe und doppelte Piloten
+  werden abgewiesen. Gezielte Prüfung9/9, alte Rotten-/Lifecycle-/Auftrags-
+  verifier grün. Noch kein Anschluss an Flugstart, Gegneraufnahme, atomaren
+  Transfer oder Speicherung; die Flug-Invariante ist damit noch nicht global
+  durchgesetzt. Betroffene Reise- und Orbitdateien bleiben bis Abstimmung frei.
 - Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
   integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
   Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine

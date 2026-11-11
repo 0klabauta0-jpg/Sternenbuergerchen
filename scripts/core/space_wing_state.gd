@@ -14,6 +14,55 @@ func get_snapshot() -> Dictionary:
 		wings[id]["active"] = not String(wings[id].leader_craft_id).is_empty()
 	return {"revision": _revision, "wings": wings}
 
+func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+	# Lifecycle preflight: build the entire candidate before changing membership.
+	if actor_id.strip_edges().is_empty(): return _reject("invalid_actor")
+	var requested := {}
+	for craft in flying_crafts:
+		if typeof(craft) != TYPE_STRING or String(craft).strip_edges().is_empty() or requested.has(craft):
+			return _reject("invalid_craft")
+		if not owned_crafts.has(craft): return _reject("not_owned")
+		if _craft_wings.has(craft) and _wings[_craft_wings[craft]].owner_id != actor_id:
+			return _reject("not_owned")
+		requested[craft] = true
+	var existing: Array = []
+	for wing in _wings.values():
+		if wing.owner_id == actor_id:
+			for craft in wing.craft_ids: existing.append(craft)
+	for craft in requested:
+		if not existing.has(craft): existing.append(craft)
+	var seen_pilots := {}
+	for craft in existing:
+		var pilot: Variant = pilots.get(craft, "")
+		if typeof(pilot) != TYPE_STRING: return _reject("invalid_pilot_mapping")
+		if String(pilot).strip_edges().is_empty(): continue
+		if seen_pilots.has(pilot): return _reject("pilot_already_assigned")
+		seen_pilots[pilot] = true
+	var candidate: Dictionary = _wings.duplicate(true)
+	var membership: Dictionary = _craft_wings.duplicate()
+	var ids: Array = requested.keys()
+	ids.sort()
+	var changed := false
+	for craft in ids:
+		if membership.has(craft): continue
+		var base: String = "solo:" + craft
+		var wing_id := base
+		var suffix := 1
+		while candidate.has(wing_id):
+			wing_id = "%s:%d" % [base, suffix]
+			suffix += 1
+		var leader: String = craft if not String(pilots.get(craft, "")).strip_edges().is_empty() else ""
+		candidate[wing_id] = {"wing_id":wing_id, "name":wing_id, "owner_id":actor_id, "craft_ids":[craft], "leader_craft_id":leader}
+		membership[craft] = wing_id
+		changed = true
+	if changed:
+		_wings = candidate
+		_craft_wings = membership
+		_revision += 1
+	var wing_by_craft := {}
+	for craft in ids: wing_by_craft[craft] = _craft_wings[craft]
+	return {"ok":true, "changed":changed, "revision":_revision, "wing_by_craft":wing_by_craft}
+
 func check_replay(command: Dictionary, actor_id: String) -> Dictionary:
 	if typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).is_empty():
 		return {"found": false}
