@@ -1,0 +1,27 @@
+{
+  "red": {
+    "run": "reservation_owner-0ab9b7c5ad1e4a8c9395740867077c7b",
+    "passed": false,
+    "exit_code": 0
+  },
+  "green": {
+    "run": "reservation_owner-94dddc447c8e4b00b29ee6ba9153eccf",
+    "passed": true,
+    "exit_code": 0
+  },
+  "tested_source_sha256": {
+    "scripts/tests/hex_reservation_owner_verifier.gd": "d97b132f204f7ebf027376f3353fa38ad00c70ee11b0cb151ed979e00f4b9133",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_tile_data.gd": "776782a0a4f9a559665e8b21a6f8866a40558de6a49d62d688923d7a20a267ce",
+    "scripts/terrain/terrain_registry.gd": "a0fd3bcae5fe02b35d040fbab15e9cb64c2acc802a6bc9a949fe370235decd6d",
+    "scripts/terrain/hex_corridor_topology_cache.gd": "3af535ba4d85a3a133476c93f15da96153237401c4fe4e7e66a5dd0ca1aa2372",
+    "scripts/terrain/terrain_truth_audit.gd": "183527343206600b8639fe237826f0569292b27c41e01cac954e79982b4554de",
+    "scripts/core/los_system.gd": "34e2d58d0ffe3562d7af9eb4a42ed3b2a3276978cfcf57494ac063db1f0ec55b",
+    "scripts/core/hex_ground_runtime.gd": "25074bc908507422a4af8cb972ae6bc598ea1b7e5c846cda56efd62b7ce38e01",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "4430ceb7ebc270bbb289416ab96650eb67684c6e0553555fdef035c420e8c05a",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/hex_detection_state.gd": "4bc1e3ccdabe85df6258669632925940f6beeb64916fb128979ffcaaadce6d5e",
+    "scripts/mission/combat_visibility_cache.gd": "5e757fd1f573262c9bea7bbdcd18fd77a1b28fa4c9beecf8753ee1a2515faba3"
+  }
+}
