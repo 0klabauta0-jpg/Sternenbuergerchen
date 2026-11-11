@@ -23,6 +23,8 @@ var _recruit_candidates: Array = []
 var _resource_owners: Dictionary = {}
 var _campaign_mode := false
 var _space_route_requested := false
+var _local_warp_arrival_enabled := false
+var _warp_arrival_feedback: Dictionary = {}
 var _request_session := str(Time.get_unix_time_from_system()) + ":" + str(randi())
 var _sequence: int = 0
 var _pad_by_craft: Dictionary = {}
@@ -719,6 +721,7 @@ func get_space_travel_snapshot(craft_id: String = "") -> Dictionary:
 	if _travel == null:
 		return {}
 	var snapshot: Dictionary = _travel.get_snapshot(craft_id)
+	if _warp_arrival_feedback.has(String(snapshot.get("craft_id", ""))): snapshot["arrival_feedback"] = Dictionary(_warp_arrival_feedback[snapshot.craft_id]).duplicate(true)
 	snapshot["enabled"] = is_campaign_mission() or String(snapshot.phase) != "grounded"
 	snapshot["result_summary"] = String(Dictionary(_flow.get("_last_mission_result")).get("result", ""))
 	return snapshot
@@ -745,7 +748,23 @@ func preview_space_warp_entry(craft_id: String) -> Dictionary:
 
 func advance_space_travel(delta: float) -> void:
 	if _travel != null and _travel.is_quantum_active():
-		_commit("singleplayer_space_travel", "advance", {"delta_seconds": minf(delta, 60.0)}, "", {"runtime_authorized": true})
+		var step := minf(delta, 60.0)
+		if not _local_warp_arrival_enabled or step <= 0.0:
+			_commit("singleplayer_space_travel", "advance", {"delta_seconds":step}, "", {"runtime_authorized":true})
+		else:
+			for progress: Dictionary in _travel.get_active_quantum_progress():
+				var craft_id := String(progress.craft_id)
+				var is_station: bool = progress.target_orbit_id == "polisa_orbit"
+				var completing: bool = _simulation.is_singleplayer_warp_entry_pending(craft_id) or float(progress.elapsed_seconds) + step >= float(progress.duration_seconds)
+				if is_station or not completing:
+					_commit("singleplayer_space_travel", "advance", {"craft_id":craft_id, "delta_seconds":step}, "", {"runtime_authorized":true})
+				else:
+					var arrival: Dictionary = _simulation.advance_singleplayer_warp_entry(self, craft_id, step)
+					if arrival.get("ok", false) and arrival.get("status") == "complete":
+						_warp_arrival_feedback.erase(craft_id)
+						if not arrival.get("replayed", false): call_deferred("_publish_warp_entry_event", String(arrival.receipt_id))
+					else:
+						_warp_arrival_feedback[craft_id] = {"status":"searching" if arrival.get("ok", false) else "waiting", "reason":String(arrival.get("reason", ""))}
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
 		_finish_space_encounter_result()
