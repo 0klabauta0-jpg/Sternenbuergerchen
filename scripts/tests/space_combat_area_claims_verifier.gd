@@ -21,5 +21,7 @@ func _initialize() -> void:
 	if not state.record_navigation_claim(id, area, cells).get("ok", false) or state.get_area_revision(area) != revision: failed += 1
 	if state.record_navigation_claim(id, "orbit_approach:planet", cells).get("ok", false) or state.get_area_revision(area) != revision: failed += 1
 	if not state.release_navigation_claim(id).get("ok", false) or state.get_area_revision(area) <= revision or not state.query_navigation_claims(cells, area).is_empty(): failed += 1
-	print("SPACE_COMBAT_AREA_CLAIMS passed=", 6 - failed, " failed=", failed)
+	state.record_navigation_claim(id, area, cells)
+	if not state.remove_actor(id) or not state.query_navigation_claims(cells, area).is_empty() or state.get_actor(id) != null: failed += 1
+	print("SPACE_COMBAT_AREA_CLAIMS passed=", 7 - failed, " failed=", failed)
 	quit(1 if failed else 0)

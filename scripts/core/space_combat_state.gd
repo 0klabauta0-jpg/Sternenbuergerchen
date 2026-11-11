@@ -11,6 +11,7 @@ var _flight_status: Dictionary = {}
 var _navigation_claims: Dictionary = {}
 var _claim_cells: Dictionary = {}
 var _claim_revisions: Dictionary = {}
+var _inactive_actors: Dictionary = {}
 
 func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture: bool = false) -> Dictionary:
 	# Occupancy and sweep callers still use strategic bounds. Fail closed until
@@ -19,6 +20,7 @@ func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture
 		if not allow_local_fixture or not String(definition.get("craft_id", "")).begins_with("space_fixture_"):
 			return {"ok":false, "reason":"local_area_not_ready"}
 	var craft_id: String = String(definition.get("craft_id", ""))
+	if _inactive_actors.has(craft_id): return {"ok":false, "reason":"already_inactive"}
 	var faction: String = String(definition.get("faction_id", ""))
 	var domain: String = String(definition.get("control_domain", ""))
 	var cell: Variant = definition.get("start_hex")
@@ -47,6 +49,65 @@ func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture
 
 func get_actor(craft_id: String) -> RefCounted:
 	return _registry.get_actor(craft_id)
+
+func get_inactive_actor(craft_id: String) -> RefCounted:
+	return _inactive_actors.get(craft_id)
+
+func deactivate_actor(craft_id: String) -> Dictionary:
+	# The flight owner must already be inactive; Root coordinates the full tail.
+	var flight: RefCounted = _registry.get_actor(craft_id)
+	if flight == null: return {"ok":false, "reason":"unknown_actor"}
+	if flight.get_snapshot().get("motion_mode") != "inactive": return {"ok":false, "reason":"flight_not_inactive"}
+	_remove_navigation_claim(craft_id)
+	if not _registry.unregister_actor(craft_id): return {"ok":false, "reason":"index_failed"}
+	_inactive_actors[craft_id] = flight
+	_indexed_revisions.erase(craft_id)
+	_flight_controls.erase(craft_id)
+	_flight_status.erase(craft_id)
+	return {"ok":true}
+
+func preview_reactivation(craft_id: String, proposal: Dictionary, tick: int) -> Dictionary:
+	var flight: RefCounted = _inactive_actors.get(craft_id)
+	if flight == null: return {"ok":false, "reason":"unknown_actor"}
+	var valid: Dictionary = flight.validate_space_activity_transition(proposal, tick)
+	if not valid.get("ok", false): return valid
+	var snapshot: Dictionary = flight.get_snapshot()
+	snapshot.merge(proposal, true)
+	var cells: Array[Vector2i] = preview_footprint(snapshot, _metadata[craft_id].footprint_hexes)
+	if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
+	if not _registry.query_cells(cells, snapshot.space_area_id).is_empty(): return {"ok":false, "reason":"occupied"}
+	if not query_navigation_claims(cells, snapshot.space_area_id).is_empty(): return {"ok":false, "reason":"navigation_claimed"}
+	return {"ok":true, "cells":cells}
+
+func reactivate_actor(craft_id: String) -> Dictionary:
+	# Root must have revalidated body/gate and committed the flight activity first.
+	var flight: RefCounted = _inactive_actors.get(craft_id)
+	if flight == null: return {"ok":false, "reason":"unknown_actor"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.motion_mode != "tactical": return {"ok":false, "reason":"flight_not_tactical"}
+	var cells: Array[Vector2i] = preview_footprint(snapshot, _metadata[craft_id].footprint_hexes)
+	if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
+	if not _registry.query_cells(cells, snapshot.space_area_id).is_empty(): return {"ok":false, "reason":"occupied"}
+	if not query_navigation_claims(cells, snapshot.space_area_id).is_empty(): return {"ok":false, "reason":"navigation_claimed"}
+	if not _registry.register_actor(craft_id, flight): return {"ok":false, "reason":"index_failed"}
+	if not _registry.update_actor_cells(craft_id, cells):
+		_registry.unregister_actor(craft_id)
+		return {"ok":false, "reason":"index_failed"}
+	_inactive_actors.erase(craft_id)
+	_indexed_revisions[craft_id] = int(snapshot.revision)
+	return {"ok":true}
+
+func remove_actor(craft_id: String) -> bool:
+	# Runtime owner coordinates lifecycle and wing changes before invoking this.
+	if _registry.get_actor(craft_id) == null and not _inactive_actors.has(craft_id): return false
+	_remove_navigation_claim(craft_id)
+	if _registry.get_actor(craft_id) != null and not _registry.unregister_actor(craft_id): return false
+	_inactive_actors.erase(craft_id)
+	_metadata.erase(craft_id)
+	_indexed_revisions.erase(craft_id)
+	_flight_controls.erase(craft_id)
+	_flight_status.erase(craft_id)
+	return true
 
 func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:
 	return _registry.query_cells(cells, area_id)
