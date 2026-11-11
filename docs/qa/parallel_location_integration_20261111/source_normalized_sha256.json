@@ -1,0 +1,11 @@
+{
+  "scripts/meta/meta_layer_flow.gd": "eccccb9ca6673232ebeee3a73a6b115e2f4057087d2c2eb943f32f447ace187b",
+  "scripts/meta/singleplayer_runtime_adapter.gd": "5483a151585e322fd2389d86ae105c74016aa647e5a5a52904c49a311f867d1b",
+  "scripts/meta/singleplayer_services_presenter.gd": "491d1eb7744918c1bb9a30dcf311bf1b7a20eeec6e0d947bc35da338c7b617b9",
+  "scripts/ui/polisa_station_screen.gd": "4d3d44f72fd95a8054b275a4782f602065c9421a7673df8fc138f51cd4d7233b",
+  "scripts/ui/star_map_screen.gd": "eedaf93a79540742382042a31c85f18cc455d1b2e5b0ef625727f405cefda727",
+  "scripts/ui/star_map_canvas.gd": "247bb9e42a619ed287cccab2dd4b47ae62f8d0d44fec7aee21b948b0fdd7217d",
+  "scripts/tests/mission_tactical_sandbox_controller.gd": "0f854a4c1abe5b25b0cb55913f54b498dfe4f93600e484e8ce8e2497c9c3c66e",
+  "scripts/tests/local_service_context_check.gd": "79989819598994b3a3145f8180e584c3675c0acde8b97f8c94d7b4c44b9c8425",
+  "output/native_glut_maps/parallel_location_view_20261111/view_fixture.gd": "8743e34c9bcedd164535c391a409b7ee444b99f01ef94b109df1be667f604066"
+}

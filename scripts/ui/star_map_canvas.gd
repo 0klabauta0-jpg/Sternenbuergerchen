@@ -215,7 +215,7 @@ func _layout_buttons() -> void:
 		_camera_pan = (Vector2(0.5, 0.5) - Vector2(0.57, 0.5)) * _screen_scale()
 	_world.update_camera(size, _pixels_per_unit(), screen_to_map(size * 0.5) * GRID.EXTENT)
 	var label_directions := {
-		"moon_orbit": Vector2.DOWN, "planet_orbit": Vector2.DOWN,
+		"moon_orbit": Vector2.DOWN, "planet_orbit": Vector2.DOWN, "polisa_orbit": Vector2.DOWN,
 		"glut_1a_orbit": Vector2.UP, "glut_1b_orbit": Vector2(0.8, -0.6),
 	}
 	for id in _body_labels:

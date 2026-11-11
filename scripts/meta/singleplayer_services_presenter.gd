@@ -186,27 +186,34 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		incoming = _snapshot_provider.call()
 	_snapshot = Dictionary(incoming.get("singleplayer", incoming)).duplicate(true)
 	var supply: Dictionary = Dictionary(_snapshot.get("supply", {}))
-	_refresh_campaign_actions(supply)
 	_release_acknowledged(int(supply.get("revision", -1)))
-	var crafts: Array = Array(_snapshot.get("crafts", []))
+	var view: Dictionary = _snapshot.get("location_view", {})
+	var place := String(view.get("location_id", ""))
+	var crafts: Array = Array(_snapshot.get("crafts", [])).filter(func(craft: Dictionary): return not place.is_empty() and String(craft.get("location_id", "")) == place)
+	_selected_craft_id = String(view.get("craft_id", ""))
 	var ids: Array[String] = []
 	for craft: Dictionary in crafts:
 		ids.append(String(craft.get("craft_id", craft.get("id", ""))))
 	if not ids.has(_selected_craft_id):
-		_selected_craft_id = ids[0] if not ids.is_empty() else ""
+		_selected_craft_id = ""
 	var labels: Array[String] = []
 	for craft: Dictionary in crafts:
 		labels.append(SHIP_VISUALS.get_ui_display_name(craft))
 	var signature: String = JSON.stringify([ids, labels])
 	if String(_craft_selector.get_meta("craft_signature", "")) != signature:
 		_craft_selector.clear()
+		_craft_selector.add_item("Serviceschiff auswählen")
+		_craft_selector.set_item_metadata(0, "")
 		for index in range(ids.size()):
 			_craft_selector.add_item(labels[index])
 			_craft_selector.set_item_metadata(_craft_selector.item_count - 1, ids[index])
 		_craft_selector.set_meta("craft_signature", signature)
 	if ids.has(_selected_craft_id):
-		_craft_selector.select(ids.find(_selected_craft_id))
+		_craft_selector.select(ids.find(_selected_craft_id) + 1)
+	else:
+		_craft_selector.select(0)
 	_craft_selector.disabled = ids.is_empty() or not _pending.is_empty()
+	_refresh_campaign_actions(supply)
 	_credits.text = "Kredite: %d" % int(supply.get("credits", 0)) if not supply.is_empty() else "Kredite: —"
 	var quantities: Dictionary = Dictionary(supply.get("item_quantities", {}))
 	_items.text = "Sanitätswerkzeug: %d" % int(quantities.get("medictool", 0)) if not supply.is_empty() else "Bestand: —"
@@ -221,7 +228,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var available: bool = not context.is_empty() and not bool(context.get("craft_busy", true)) and _command_handler.is_valid()
 	var unavailable_reason: String = "Versorgung erst nach Landung am passenden Versorgungsort"
 	if _selected_craft_id.is_empty():
-		unavailable_reason = "Kein reales Schiff verfügbar"
+		unavailable_reason = "Serviceschiff auswählen"
 	elif not _command_handler.is_valid():
 		unavailable_reason = "Versorgung noch nicht verbunden"
 	var offer: Dictionary = Dictionary(Dictionary(supply.get("offers", {})).get(OFFER_ID, {}))
@@ -379,9 +386,16 @@ static func get_blueprint_details(blueprint_id:String)->String:
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():
 		return false
+	if craft_id.is_empty() and _command_handler.is_valid():
+		var cleared: Dictionary = _command_handler.call("select_location_view_craft", {"location_id":String(Dictionary(_snapshot.get("location_view", {})).get("location_id", "")), "craft_id":""})
+		refresh()
+		return bool(cleared.get("ok", false))
 	for craft: Dictionary in Array(_snapshot.get("crafts", [])):
 		if String(craft.get("craft_id", craft.get("id", ""))) == craft_id:
-			_selected_craft_id = craft_id
+			var place := String(Dictionary(_snapshot.get("location_view", {})).get("location_id", ""))
+			if String(craft.get("location_id", "")) != place or place.is_empty() or not _command_handler.is_valid(): return false
+			var result: Dictionary = _command_handler.call("select_location_view_craft", {"location_id":place, "craft_id":craft_id})
+			if not bool(result.get("ok", false)): return false
 			_feedback.text = ""
 			refresh()
 			return true
@@ -391,9 +405,12 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 	var campaign: Dictionary = _snapshot.get("campaign",{})
 	var jobs: Dictionary = campaign.get("jobs",{})
 	var progress: Dictionary = campaign.get("progress",{})
-	var home := true
-	for craft: Dictionary in Array(_snapshot.get("crafts",[])):
-		home = home and String(craft.get("location_id","")) in ["homebase","waiting_pad"] and not bool(craft.get("busy",false))
+	var home_services: Dictionary = _snapshot.get("home_services", {})
+	var home := bool(home_services.get("workshop_available", false))
+	var local_uploads: Array = home_services.get("upload_job_ids", [])
+	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id", {})).get(_selected_craft_id, {})
+	var job_craft := String(Dictionary(jobs.get("outpost_recovery", {})).get("craft_id", ""))
+	var at_outpost := String(context.get("location_id", "")) == "trade_outpost" and not _selected_craft_id.is_empty() and _selected_craft_id == job_craft
 	var has_chip := false
 	for job: Dictionary in jobs.values(): has_chip = has_chip or String(job.get("status","")) == "pending_upload"
 	for key in _campaign_buttons:
@@ -402,12 +419,18 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 		var show := String(_snapshot.get("mode","")) == "campaign"
 		var enabled := home
 		match String(action.operation):
-			"campaign_upload": show = has_chip
+			"campaign_upload":
+				show = has_chip
+				enabled = not local_uploads.is_empty()
 			"campaign_recruit":
 				show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) in ["active","completed"] and not bool(progress.get("recruited_outpost",false))
-				enabled = not Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).is_empty()
-			"campaign_load_crate": show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) == "completed" and not bool(progress.get("crate_loaded",false))
-			"campaign_build_pad": show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
+				enabled = at_outpost
+			"campaign_load_crate":
+				show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) == "completed" and not bool(progress.get("crate_loaded",false))
+				enabled = at_outpost or (String(context.get("location_id", "")) == "homebase" and _selected_craft_id == job_craft)
+			"campaign_build_pad":
+				show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
+				enabled = bool(home_services.get("all_at_home", false))
 			"campaign_fabricate":
 				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id))
 				var quote: Dictionary = supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {})
@@ -417,7 +440,7 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 				enabled = home and bool(research.get("available", false))
 		button.visible = show
 		button.disabled = not enabled or not _command_handler.is_valid()
-		button.tooltip_text = "Zur Basis zurückkehren" if not enabled else ""
+		button.tooltip_text = "Lokaler Zugang oder Voraussetzung fehlt" if not enabled else ""
 		if String(action.operation) == "campaign_research" and home:
 			button.tooltip_text = String(supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {}).get("message", "Entwicklung derzeit nicht verfügbar"))
 		if String(action.operation) == "campaign_fabricate" and home:
@@ -439,7 +462,7 @@ func _submit_sell() -> void:
 	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
 	var item := "c_benit" if String(context.get("location_id","")) == "satellite_crash" else "b_benit"
 	_sequence += 1
-	var result: Dictionary = _command_handler.call("sell",{"craft_id":_selected_craft_id,"item_id":item,"quantity":1,"request_id":"services-sell:%d:%d" % [get_instance_id(),_sequence]})
+	var result: Dictionary = _command_handler.call("sell",{"service_location_id":String(context.get("location_id", "")),"craft_id":_selected_craft_id,"item_id":item,"quantity":1,"request_id":"services-sell:%d:%d" % [get_instance_id(),_sequence]})
 	_feedback.text = String(result.get("message",result.get("reason","Verkauf bestätigt")))
 	refresh()
 
@@ -452,7 +475,7 @@ func _submit(operation: String, offer_id: String=OFFER_ID) -> void:
 		return
 	_sequence += 1
 	var request_id: String = "services:%d:%d" % [get_instance_id(), _sequence]
-	var payload: Dictionary = {"craft_id": _selected_craft_id, "request_id": request_id}
+	var payload: Dictionary = {"craft_id": _selected_craft_id, "request_id": request_id, "service_location_id":String(Dictionary(Dictionary(_snapshot.get("service_contexts_by_craft_id", {})).get(_selected_craft_id, {})).get("location_id", ""))}
 	if operation == "buy":
 		payload["offer_id"] = offer_id
 		payload["quantity"] = 1

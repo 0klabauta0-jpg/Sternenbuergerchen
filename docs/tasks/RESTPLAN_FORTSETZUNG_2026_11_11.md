@@ -7,6 +7,7 @@ Der Nutzer hat Polisa R08 am11.11.2026 gestalterisch freigegeben und beauftragt 
 Gesicherte Tabletop-Pakete gezielt pruefen/integrieren; unabhaengige Profil- und Forschungsfortsetzung auf vorhandenen Ownern. Polisa gestalterisch erhalten. Kein neuer Fahrzeugmodellbau, keine vorgezogene grosse Gefechts-/FPS-/Save-/Netzmatrix, kein Main-/EXE-Schritt in diesem Paket.
 
 ## Arbeitsaufteilung / konkrete naechste Schritte
+0. Neuer Nutzerauftrag parallele Orte: Heimat/Polisa/Einsatz ohne Neuaufbau ansehen, Hintergrundfortschritt erhalten und lokale Serviceaktionen nicht an die gesamte Flotte koppeln. Bestehende Orts-/Reiseowner nutzen. Task PARALLEL_LOCATION_OPERATIONS_2026_11_11 und eigener Contract; Crew-Faehrbetrieb und unterwegs Speichern nicht implizit freigeben.
 1. Tabletop besitzt AP5-Bewegung: Commands als Absichten, effektives vorhandenes Tempo in Ticksegmente umrechnen, logische Felduebergabe und stetige Darstellung trennen. Danach Lifecycle-/Speicher-/Netzgrenzen. Root integriert nur gesicherte Pakete; keine automatische Kartenaktivierung. AP4 plus vollstaendiger Korridorcache sind in Root f4353eed4 vorhanden, aber bewegen noch keine Figuren.
 2. Profilagent: gemeinsamer read-only Erfahrungstext. Nur exakte Uebereinstimmung mit derselben Vorlage als solche kennzeichnen, sonst Individuelles Profil. Profilanteil an Tempo/Zielen/Schadenseingang aus vorhandener UnitProfileMath zeigen, keine neue Kampf-/Tempoformel und keine Savefelder. Echte interne Wertevereinfachung erst mit stabilen Tabletop-Verbrauchern abstimmen.
 3. Forschungsagent: bezahltes Recycling nach Industrie und tatsaechlich gefertigtem Bergungswerkzeug; zwei salvage aus Basislager plus20Cr zu einem bestehenden Rucksack mit echtem12-Slot-Verbraucher. Forschung100Cr, alles vorlaeufige Balance. Bestehender Supplyowner, atomare Materialien/Output/Credits, alte Rezepte/Spielstaende erhalten. Danach Workbench-Ist-Baseline nachziehen.
@@ -21,3 +22,6 @@ Aufgaben haben klare Dateibesitzer; keine zweite Gameplaywahrheit im UI. Bestehe
 
 ## Risiken / offen
 AP5 und Lifecycle sind noch keine aktive Bewegung. Drei Vorlagen ersetzen nicht automatisch alle internen Achsen. Recyclingmaterialien brauchen Restore-/Replaybelege ohne Altstandbruch. Schiffsowner/Komponentenkatalog/Consumer und lokale Pad-/Crewuebergabe sind noch offen. Neue Fahrzeuge bleiben zurueckgestellt.
+
+## Fortschreibung nach den Folgepaketen
+Profilreadout6308e6f02 und Recycling/Workbench84dd481b1 sind integriert und gepusht. Die obigen Punkte2/3 beschreiben deren begrenzten Umfang, keinen offenen Implementierungsauftrag mehr. Kleine Profil-/Recyclingchecks und statischer Workbenchcheck bestanden; grosse Nutzungs-/Saveabnahme bleibt offen. AP5 besitzt jetzt reine Bewegungsprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a; echte Command-/Actoraktivierung bleibt im Tabletop-Chat.

@@ -3,9 +3,10 @@
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
 - **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
-- **Bewegung:** AP4-Owner und vollstaendiger Korridorcache integriert (f4353eed4). AP5-Commands, effektives Tempo, stetige Darstellung und anschliessende Lifecycle-/Save-/Netzgrenzen laufen im Tabletop-Chat. Keine aktive Karte oder fertige Actorbewegung daraus behauptet.
-- **Profilanzeige:** gemeinsame exakte Vorlagenzuordnung und klares individuelles Profil, Profilwirkung aus bestehenden Ableitungen. Keine neue Tempo-/Combatformel. Enger Folgeauftrag in Arbeit.
-- **Forschung:** naechster nutzbarer Slice ist Recycling von Bergungsgut zu vorhandenen Rucksaecken; bestehender Supply-/Inventarowner. Forschung100Cr, Fertigung2salvage+20Cr als erste Balance, noch nicht integriert. Danach Workbench-Baseline aktualisieren.
+- **Parallele Orte:** View-/Servicekorrektur implementiert: Heimat/Polisa/Einsatz auf bestehenden Ortsroots ansehen, Hintergrundankunft behaelt Fremdansicht, explizite Serviceschiffwahl und lokale Basisguards. Frische kleine Viewprobe44/0, Serviceprobe30/0, Flow/Adapter Compile0 und unabhaengiger Review nach Korrekturen. Echte Mehrortreise/-gefechte/-kaeufe noch nicht abgenommen; Vertrag und Crew-Faehrgrenze in parallel_location_operations_contract.md.
+- **Bewegung:** AP4-Owner/Korridorcache, reine Bewegungsprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a integriert. AP5-Commands, Actoranschluss und anschliessende Lifecycle-/Save-/Netzgrenzen laufen im Tabletop-Chat. Keine aktive Karte oder fertige Actorbewegung daraus behauptet.
+- **Profilanzeige:**6308e6f02 integriert: exakte Vorlagenzuordnung, individuelles Profil und Profilwirkung aus bestehenden Ableitungen. Keine neue Tempo-/Combatformel; interne Wertevereinfachung bleibt abgestimmt offen.
+- **Forschung:**84dd481b1 integriert: Recycling von Bergungsgut zu vorhandenen Rucksaecken auf bestehendem Supply-/Inventarowner. Forschung100Cr, Fertigung2salvage+20Cr als erste Balance. Workbench-Ist-Baseline auf23Knoten aktualisiert; keine native Gesamt-/Balanceabnahme.
 - **Schiffe:** Komponenten mit echtem Verbraucher sowie lokale Polisa-Abholung bleiben offen. Aktueller Code wird gegen den bisherigen Contract geprueft. Neue Fahrzeugmodelle bleiben zurueckgestellt.
 - **Spaeter:** grosse gemeinsame Spiel-/Performance-/Save-/Netzpruefung, dann Main/EXE. Keine erneute grosse Matrix jetzt.
 

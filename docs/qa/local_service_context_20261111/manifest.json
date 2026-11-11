@@ -1,0 +1,25 @@
+{
+  "status": "frozen; 30/0 domain; 3 source compile checks; no broad acceptance",
+  "files": [
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "7008a0299a28a03563651d47091a10da322251fc8dd474e9bc55a5241cc7f173"
+    },
+    {
+      "path": "scripts/meta/singleplayer_services_presenter.gd",
+      "sha256": "142fe625351470037a9d53cfe6257a52c092dd4d30ce5da1a21171968e9d0a74"
+    },
+    {
+      "path": "scripts/ui/polisa_station_screen.gd",
+      "sha256": "acb67f02668fc6a59c9428b2c3350abb6d849080acad13d20689532bdb63d884"
+    },
+    {
+      "path": "scripts/tests/local_service_context_check.gd",
+      "sha256": "01fb9ded93c7d9cfa9090ccf21b105ae73ceca1aa8f04944c9c75ef5efe8b2ff"
+    },
+    {
+      "path": "docs/tasks/LOCAL_SERVICE_CONTEXT_2026_11_11.md",
+      "sha256": "268c2ffd497a7006b0e5c68d8d71a5679b72ea355b98476a7103ff56f647cb63"
+    }
+  ]
+}
