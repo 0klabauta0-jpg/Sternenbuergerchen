@@ -1,0 +1,59 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (5 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+
+EXIT 0
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: static hex planner exists
+PASS: column retries follower after slower leader has a committed proposal
+PASS: inputs remain unchanged
+PASS: owner and terrain revisions preserved
+PASS: canonical midpoint handoff
+PASS: canonical midpoint handoff
+PASS: canonical midpoint handoff
+PASS: canonical midpoint handoff
+PASS: slower leader delays follower
+PASS: head-on swap cannot erase stationary occupants
+PASS: occupied exit never becomes a guessed departure
+PASS: opposing committed edge blocks full traversal interval
+PASS: post-handoff segment retains old edge until end before next departure
+PASS: waiting age can overcome finite command priority
+PASS: overflow requests remain intact beyond 16 request budget
+PASS: three-transition lookahead retains remaining route
+PASS: AP1 snapshot cannot silently impersonate reservation snapshot
+PASS: stale terrain snapshot rejected
+PASS: matching H+0.5 side connections allow parallel ramp traffic
+PASS: legal backoff is a bounded proposal and never an accepted route rewrite
+PASS: occupied corridor exit beyond lookahead stays clear without repeated blind replanning
+PASS: live inherited closed corridor group blocks new entrant
+PASS: post-handoff edge keeps inherited corridor group live
+PASS: corridor group releases only after unit and committed edge clear it
+PASS: existing outsider clears corridor endpoint without joining inherited closed group
+PASS: six rotated ramp axes and matching curved H+0.5 band connections
+HEX_RESERVATION_PASS 26/0
+
+
+EXIT 0

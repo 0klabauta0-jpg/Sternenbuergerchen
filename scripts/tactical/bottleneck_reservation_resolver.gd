@@ -434,3 +434,432 @@ func _sort_requests(a: Dictionary, b: Dictionary) -> bool:
 
 func _cell_key(cell: Vector2i) -> String:
 	return "%d,%d" % [cell.x, cell.y]
+
+
+# Pure AP4 entry point. All durable promises belong to HexGroundRuntime.
+static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain_registry: Node, options: Dictionary = {}) -> Dictionary:
+	var plan: Dictionary = {"ok": false, "reason": "snapshot_incompatible",
+		"expected_revision": ground_snapshot.get("revision", -1),
+		"terrain_revision": ground_snapshot.get("terrain_revision", -1),
+		"accepted_steps": [], "waits": [], "blocked": [], "pending_requests": [],
+		"corridor_grants": [], "processed_requests": 0}
+	if not _hex_valid_snapshot(ground_snapshot, terrain_registry):
+		plan.pending_requests = requests.duplicate(true)
+		return plan
+	var now: int = ground_snapshot.current_tick
+	var units: Dictionary = ground_snapshot.units_by_id
+	var schedules: Dictionary = {}
+	for id in units: schedules[id] = []
+	for segment in ground_snapshot.committed_segments:
+		schedules[segment.unit_id].append(segment.duplicate(true))
+	for id in schedules:
+		schedules[id].sort_custom(func(a: Dictionary,b: Dictionary)->bool: return a.start_tick<b.start_tick)
+		if not _hex_valid_schedule(schedules[id], units[id].grid, now, terrain_registry):
+			plan.reason = "invalid_committed_segments"
+			plan.pending_requests = requests.duplicate(true)
+			return plan
+	var index: Dictionary = _hex_index(units,schedules,now)
+	for id in units:
+		if not _hex_conflict(id,units[id].grid,schedules[id],now,index).is_empty():
+			plan.reason="conflicting_snapshot"
+			plan.pending_requests=requests.duplicate(true)
+			return plan
+	for grant in ground_snapshot.committed_corridor_grants:
+		if _hex_grant_active(grant,units,schedules): plan.corridor_grants.append(grant.duplicate(true))
+	var ordered: Array = requests.duplicate(true)
+	ordered.sort_custom(func(a:Variant,b:Variant)->bool:
+		if not a is Dictionary: return false
+		if not b is Dictionary: return true
+		var score_a: int = _hex_fairness_score(a)
+		var score_b: int = _hex_fairness_score(b)
+		if score_a != score_b: return score_a>score_b
+		return str(a.get("unit_id",""))+":"+str(a.get("command_id","")) < str(b.get("unit_id",""))+":"+str(b.get("command_id",""))
+	)
+	var queue: Array = []
+	for request in ordered:
+		if queue.size()<16: queue.append(request)
+		else: plan.pending_requests.append(request)
+	plan.processed_requests = queue.size()
+	var graph:Dictionary=_hex_local_graph(queue,terrain_registry)
+	var corridors:Array=_hex_corridors(graph)
+	var seen: Dictionary = {}
+	var active: Array = []
+	for request in queue:
+		var reason: String = _hex_request_error(request,units,terrain_registry)
+		var id: String = str(request.get("unit_id","")) if request is Dictionary else ""
+		if reason.is_empty() and seen.has(id): reason="duplicate_unit_request"
+		seen[id]=true
+		if not reason.is_empty():
+			plan.blocked.append({"unit_id":id,"command_id":request.get("command_id","") if request is Dictionary else "","reason":reason})
+			plan.pending_requests.append(request)
+		else: active.append(request)
+	active.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var a_inside:bool=_hex_in_corridor(units[a.unit_id].grid,corridors)
+		var b_inside:bool=_hex_in_corridor(units[b.unit_id].grid,corridors)
+		if a_inside!=b_inside: return a_inside
+		var score_a:int=_hex_fairness_score(a); var score_b:int=_hex_fairness_score(b)
+		if score_a!=score_b: return score_a>score_b
+		return a.unit_id<b.unit_id
+	)
+	var raw_wait:Variant=options.get("max_wait_ticks",16)
+	var max_wait: int = clampi(raw_wait,0,64) if raw_wait is int else 16
+	var reasons: Dictionary = {}
+	var inherited_grants:Array=plan.corridor_grants.duplicate(true)
+	# Retry blocked followers only when another request actually obtained a promise.
+	for pass_index in range(16):
+		var remaining: Array = []
+		var progress: bool = false
+		for request in active:
+			var id: String = request.unit_id
+			var earliest: int=now
+			if not schedules[id].is_empty():
+				var last: Dictionary=schedules[id].back()
+				if last.to_grid!=request.path_grid_points[0]:
+					reasons[id]="existing_commitment"
+					remaining.append(request)
+					continue
+				earliest=maxi(now,last.start_tick+last.duration_ticks)
+			var exit_conflict:String=_hex_corridor_exit_conflict(request,corridors,index)
+			if not exit_conflict.is_empty():
+				reasons[id]=exit_conflict; remaining.append(request)
+				continue
+			var path: Array = request.path_grid_points
+			var count: int = mini(3,path.size()-1)
+			var chosen: Array = []
+			var chosen_wait: int = 0
+			for delay in range(max_wait+1):
+				var proposed: Array = []
+				var tick: int = earliest+delay
+				for step_index in range(count):
+					var duration: int = request.duration_ticks_by_step[step_index]
+					proposed.append({"unit_id":id,"command_id":request.command_id,
+						"from_grid":path[step_index],"to_grid":path[step_index+1],
+						"start_tick":tick,"duration_ticks":duration,"handoff_tick":tick+ceili(duration/2.0)})
+					tick+=duration
+				var conflict: String = _hex_conflict(id,units[id].grid,schedules[id]+proposed,now,index)
+				if conflict.is_empty(): conflict=_hex_grant_conflict(id,proposed,inherited_grants)
+				if conflict.is_empty(): conflict=_hex_new_direction_conflict(proposed,plan.accepted_steps,corridors)
+				if conflict.is_empty():
+					chosen=proposed; chosen_wait=earliest-now+delay
+					break
+				reasons[id]=conflict
+			if chosen.is_empty():
+				remaining.append(request)
+				continue
+			schedules[id]=schedules[id]+chosen
+			plan.accepted_steps.append_array(chosen)
+			for cells in corridors:
+				if not _hex_segments_touch(chosen,cells): continue
+				var existing:int=-1
+				for grant_index in range(plan.corridor_grants.size()):
+					if plan.corridor_grants[grant_index].cells==cells: existing=grant_index
+				if existing<0: plan.corridor_grants.append({"cells":cells.duplicate(),"unit_ids":[id]})
+				# A new invocation never adds arrivals to a still-live closed group.
+				elif existing>=inherited_grants.size() and not plan.corridor_grants[existing].unit_ids.has(id):
+					plan.corridor_grants[existing].unit_ids.append(id)
+			index=_hex_index(units,schedules,now)
+			progress=true
+			if chosen_wait>0: plan.waits.append({"unit_id":id,"command_id":request.command_id,"wait_ticks":chosen_wait,"reason":"reserved_interval"})
+			if count<path.size()-1:
+				var pending: Dictionary=request.duplicate(true)
+				pending.path_grid_points=path.slice(count)
+				pending.duration_ticks_by_step=request.duration_ticks_by_step.slice(count)
+				plan.pending_requests.append(pending)
+		active=remaining
+		if not progress or active.is_empty(): break
+	var backoff_budget:Dictionary={"remaining":64}
+	for request in active:
+		plan.pending_requests.append(request)
+		var blocked:Dictionary={"unit_id":request.unit_id,"command_id":request.command_id,
+			"reason":String(reasons.get(request.unit_id,"no_passing_space"))}
+		if blocked.reason=="no_passing_space":
+			var backoff:Dictionary=_hex_backoff(request.unit_id,units[request.unit_id].grid,index,graph,backoff_budget)
+			blocked.merge(backoff)
+			if not backoff.backoff_path_grid_points.is_empty(): blocked.reason="backoff_required"
+		plan.blocked.append(blocked)
+	plan.ok=true; plan.reason=""
+	return plan
+
+
+static func _hex_valid_snapshot(snapshot:Dictionary,registry:Node)->bool:
+	if not snapshot.get("reservation_schema_version") is int or snapshot.get("reservation_schema_version",0)!=1 or not snapshot.get("committed_segments") is Array: return false
+	for key in ["revision","current_tick","terrain_revision"]:
+		if not snapshot.get(key) is int or int(snapshot[key])<0: return false
+	if snapshot.current_tick>1000000000000: return false
+	if not snapshot.get("committed_corridor_grants") is Array: return false
+	for grant in snapshot.committed_corridor_grants:
+		if not grant is Dictionary or not grant.get("cells") is Array or not grant.get("unit_ids") is Array: return false
+		for grid in grant.cells:
+			if not grid is Vector2i: return false
+		for id in grant.unit_ids:
+			if not id is String: return false
+	if not snapshot.get("map_id") is String or snapshot.map_id.is_empty(): return false
+	if not snapshot.get("units_by_id") is Dictionary or not snapshot.get("occupant_by_grid") is Dictionary: return false
+	if not is_instance_valid(registry): return false
+	for method in ["get_grid_topology","get_revision","get_tile_at_grid","is_walkable"]:
+		if not registry.has_method(method): return false
+	if registry.call("get_grid_topology")!="hex_axial_v1" or registry.call("get_revision")!=snapshot.terrain_revision: return false
+	if snapshot.units_by_id.size()!=snapshot.occupant_by_grid.size(): return false
+	for id in snapshot.units_by_id:
+		if not id is String or id.is_empty() or not snapshot.units_by_id[id] is Dictionary: return false
+		var unit:Dictionary=snapshot.units_by_id[id]
+		if not unit.get("grid") is Vector2i or snapshot.occupant_by_grid.get(unit.grid)!=id: return false
+	for segment in snapshot.committed_segments:
+		if not segment is Dictionary or not snapshot.units_by_id.has(segment.get("unit_id")): return false
+		if not _hex_valid_segment(segment): return false
+	return true
+
+
+static func _hex_valid_segment(segment:Dictionary)->bool:
+	for key in ["unit_id","command_id"]:
+		if not segment.get(key) is String or String(segment[key]).is_empty(): return false
+	for key in ["from_grid","to_grid"]:
+		if not segment.get(key) is Vector2i: return false
+	for key in ["start_tick","duration_ticks","handoff_tick"]:
+		if not segment.get(key) is int: return false
+	return segment.start_tick>=0 and segment.start_tick<=1000000000000 and segment.duration_ticks>0 and segment.duration_ticks<=1000000 and segment.handoff_tick==segment.start_tick+ceili(segment.duration_ticks/2.0)
+
+
+static func _hex_valid_schedule(segments:Array,grid:Vector2i,now:int,registry:Node)->bool:
+	var current:Vector2i=grid
+	var last_end:int=-1
+	for segment in segments:
+		if not _hex_legal_step(segment.from_grid,segment.to_grid,registry): return false
+		if segment.start_tick<last_end: return false
+		last_end=segment.start_tick+segment.duration_ticks
+		if last_end<=now: return false # Owner snapshots contain live/future commitments only.
+		if segment.handoff_tick<=now:
+			if segment.to_grid!=current: return false
+		else:
+			if segment.from_grid!=current: return false
+			current=segment.to_grid
+	return true
+
+
+static func _hex_request_error(request:Variant,units:Dictionary,registry:Node)->String:
+	if not request is Dictionary: return "invalid_request"
+	for key in ["unit_id","command_id"]:
+		if not request.get(key) is String or String(request[key]).is_empty(): return "invalid_request"
+	if not request.get("priority") is int: return "invalid_priority"
+	if not request.get("wait_ticks",0) is int or int(request.get("wait_ticks",0))<0: return "invalid_wait_ticks"
+	if not units.has(request.unit_id): return "unit_not_admitted"
+	if not request.get("path_grid_points") is Array or not request.get("duration_ticks_by_step") is Array: return "invalid_path"
+	var path:Array=request.path_grid_points
+	if path.size()<2 or request.duration_ticks_by_step.size()!=path.size()-1: return "invalid_path"
+	if path[0]!=units[request.unit_id].grid: return "path_origin_mismatch"
+	for i in range(mini(3,path.size()-1)):
+		if not path[i] is Vector2i or not path[i+1] is Vector2i: return "invalid_grid"
+		if not request.duration_ticks_by_step[i] is int or request.duration_ticks_by_step[i]<=0 or request.duration_ticks_by_step[i]>1000000: return "invalid_duration"
+		if not _hex_legal_step(path[i],path[i+1],registry): return "illegal_terrain_step"
+	return ""
+
+
+static func _hex_legal_step(from:Vector2i,to:Vector2i,registry:Node)->bool:
+	var hex=preload("res://scripts/terrain/hex_grid.gd")
+	var tile=preload("res://scripts/terrain/terrain_tile_data.gd")
+	return hex.are_neighbors(from,to) and registry.call("is_walkable",from) and registry.call("is_walkable",to) and tile.allows_step(registry.call("get_tile_at_grid",from),registry.call("get_tile_at_grid",to))
+
+
+static func _hex_timeline(id:String,grid:Vector2i,segments:Array,now:int)->Array:
+	var intervals:Array=[]
+	var start:int=now
+	var current:Vector2i=grid
+	for segment in segments:
+		if segment.handoff_tick<=now: continue
+		intervals.append({"unit_id":id,"grid":current,"start":start,"end":segment.handoff_tick})
+		current=segment.to_grid; start=segment.handoff_tick
+	intervals.append({"unit_id":id,"grid":current,"start":start,"end":9223372036854775807})
+	return intervals
+
+
+static func _hex_index(units:Dictionary,schedules:Dictionary,now:int)->Dictionary:
+	var index:Dictionary={"cells":{},"edges":{}}
+	for id in units:
+		for interval in _hex_timeline(id,units[id].grid,schedules[id],now):
+			if not index.cells.has(interval.grid): index.cells[interval.grid]=[]
+			index.cells[interval.grid].append(interval)
+		for segment in schedules[id]:
+			var key:String=_hex_edge_key(segment.from_grid,segment.to_grid)
+			if not index.edges.has(key): index.edges[key]=[]
+			index.edges[key].append(segment)
+	return index
+
+
+static func _hex_conflict(id:String,grid:Vector2i,segments:Array,now:int,index:Dictionary)->String:
+	for interval in _hex_timeline(id,grid,segments,now):
+		for other in index.cells.get(interval.grid,[]):
+			if other.unit_id!=id and interval.start<other.end and other.start<interval.end: return "no_passing_space"
+	for segment in segments:
+		for other in index.edges.get(_hex_edge_key(segment.to_grid,segment.from_grid),[]):
+			if other.unit_id!=id and segment.start_tick<other.start_tick+other.duration_ticks and other.start_tick<segment.start_tick+segment.duration_ticks: return "opposite_edge_interval"
+	return ""
+
+
+static func _hex_edge_key(from:Vector2i,to:Vector2i)->String:
+	return "%d,%d>%d,%d"%[from.x,from.y,to.x,to.y]
+
+
+# Local legal-transition graph, bounded across this invocation; no full-map reads.
+static func _hex_local_graph(requests:Array,registry:Node)->Dictionary:
+	var graph:Dictionary={}
+	var queue:Array=[]
+	for request in requests:
+		if request is Dictionary and request.get("path_grid_points") is Array:
+			for grid in request.path_grid_points.slice(0,4):
+				if grid is Vector2i and not queue.has(grid) and queue.size()<64: queue.append(grid)
+	var cursor:int=0
+	var hex=preload("res://scripts/terrain/hex_grid.gd")
+	while cursor<queue.size() and graph.size()<64:
+		var grid:Vector2i=queue[cursor]; cursor+=1
+		var neighbors:Array=[]
+		for direction in hex.DIRECTIONS:
+			var next:Vector2i=grid+direction
+			if _hex_legal_step(grid,next,registry):
+				neighbors.append(next)
+				if not queue.has(next) and queue.size()<64: queue.append(next)
+		graph[grid]=neighbors
+	return graph
+
+
+static func _hex_corridors(graph:Dictionary)->Array:
+	var visited:Dictionary={}
+	var corridors:Array=[]
+	for start in graph:
+		if visited.has(start) or graph[start].size()>2: continue
+		var queue:Array=[start]
+		var cells:Array=[]
+		visited[start]=true
+		var cursor:int=0
+		while cursor<queue.size():
+			var grid:Vector2i=queue[cursor]; cursor+=1
+			cells.append(grid)
+			for neighbor in graph[grid]:
+				if graph.has(neighbor) and graph[neighbor].size()<=2 and not visited.has(neighbor):
+					visited[neighbor]=true; queue.append(neighbor)
+		if cells.size()>1:
+			var endpoints:Array=[]
+			for cell in cells:
+				var count:int=0
+				for neighbor in graph[cell]:
+					if cells.has(neighbor): count+=1
+				if count<2: endpoints.append(cell)
+			if endpoints.size()!=2: continue
+			endpoints.sort_custom(func(a:Vector2i,b:Vector2i)->bool: return a.x<b.x or (a.x==b.x and a.y<b.y))
+			var ordered:Array=[endpoints[0]]
+			while ordered.size()<cells.size():
+				var next:Variant=null
+				for neighbor in graph[ordered.back()]:
+					if cells.has(neighbor) and not ordered.has(neighbor): next=neighbor; break
+				if next==null: break
+				ordered.append(next)
+			corridors.append(ordered)
+	return corridors
+
+
+static func _hex_segments_touch(segments:Array,cells:Array)->bool:
+	for segment in segments:
+		if cells.has(segment.from_grid) or cells.has(segment.to_grid): return true
+	return false
+
+
+static func _hex_grant_active(grant:Dictionary,units:Dictionary,schedules:Dictionary)->bool:
+	for id in grant.unit_ids:
+		if units.has(id) and (grant.cells.has(units[id].grid) or _hex_segments_touch(schedules[id],grant.cells)): return true
+	return false
+
+
+static func _hex_grant_conflict(id:String,segments:Array,grants:Array)->String:
+	for grant in grants:
+		if grant.unit_ids.has(id) or not _hex_segments_touch(segments,grant.cells): continue
+		var from_index:int=grant.cells.find(segments[0].from_grid)
+		# A pre-existing outsider may clear towards its nearest endpoint, never enter.
+		if from_index>=0:
+			var clear_direction:int=-1 if from_index<grant.cells.size()/2.0 else 1
+			var previous:int=from_index
+			var clearing:bool=true
+			for segment in segments:
+				var next:int=grant.cells.find(segment.to_grid)
+				if previous<0:
+					if next>=0: clearing=false
+				elif next>=0:
+					if next-previous!=clear_direction: clearing=false
+				elif (clear_direction<0 and previous!=0) or (clear_direction>0 and previous!=grant.cells.size()-1): clearing=false
+				previous=next
+			if clearing: continue
+		return "corridor_group_active"
+	return ""
+
+
+static func _hex_direction(segments:Array,cells:Array)->int:
+	for segment in segments:
+		var from:int=cells.find(segment.from_grid)
+		var to:int=cells.find(segment.to_grid)
+		if from>=0 and to>=0: return 1 if to>from else -1
+		if from<0 and to>=0: return 1 if to==0 else -1
+		if from>=0 and to<0: return -1 if from==0 else 1
+	return 0
+
+
+static func _hex_new_direction_conflict(proposed:Array,accepted:Array,corridors:Array)->String:
+	for cells in corridors:
+		var direction:int=_hex_direction(proposed,cells)
+		if direction==0: continue
+		for segment in accepted:
+			var other:int=_hex_direction([segment],cells)
+			if other!=0 and other!=direction: return "corridor_direction_conflict"
+	return ""
+
+
+static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Dictionary,budget:Dictionary)->Dictionary:
+	var queue:Array=[start]
+	var parents:Dictionary={start:start}
+	var cursor:int=0
+	var goal:Variant=null
+	while cursor<queue.size() and budget.remaining>0:
+		var grid:Vector2i=queue[cursor]; cursor+=1; budget.remaining-=1
+		var legal:Array=graph.get(grid,[])
+		if grid!=start and legal.size()>2:
+			goal=grid; break
+		for next in legal:
+			if parents.has(next) or parents.size()>=64 or not graph.has(next): continue
+			var occupied:bool=false
+			for interval in index.cells.get(next,[]):
+				if interval.unit_id!=id: occupied=true; break
+			if not occupied:
+				parents[next]=grid; queue.append(next)
+	var path:Array=[]
+	if goal!=null:
+		var current:Vector2i=goal
+		while current!=start:
+			path.push_front(current); current=parents[current]
+		path.push_front(start)
+	return {"backoff_path_grid_points":path,"backoff_examined_cells":cursor}
+
+
+static func _hex_corridor_exit_conflict(request:Dictionary,corridors:Array,index:Dictionary)->String:
+	for cells in corridors:
+		var touched:bool=false
+		var exit_grid:Variant=null
+		var path:Array=request.path_grid_points
+		for i in range(mini(path.size(),64)):
+			if cells.has(path[i]): touched=true; exit_grid=path[i]
+			elif touched: exit_grid=path[i]; break
+		if not touched: continue
+		if path.size()>64 and exit_grid==path[63] and cells.has(exit_grid): return "corridor_budget_exhausted"
+		for interval in index.cells.get(exit_grid,[]):
+			if interval.unit_id!=request.unit_id and interval.end==9223372036854775807: return "no_passing_space"
+	return ""
+
+
+static func _hex_fairness_score(request:Dictionary)->int:
+	var priority:Variant=request.get("priority",0)
+	var age:Variant=request.get("wait_ticks",0)
+	var bounded_priority:int=clampi(priority,-1000000,1000000) if priority is int else 0
+	var bounded_age:int=clampi(age,0,1000000000000) if age is int else 0
+	return bounded_priority+bounded_age
+
+
+static func _hex_in_corridor(grid:Vector2i,corridors:Array)->bool:
+	for cells in corridors:
+		if cells.has(grid): return true
+	return false

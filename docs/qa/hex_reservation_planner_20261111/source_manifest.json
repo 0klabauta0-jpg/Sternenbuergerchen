@@ -1,0 +1,19 @@
+{
+  "scope": "pure AP4 planner only; owner/AP5 not implemented here",
+  "original_frozen_hashes": {
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "67ed2a2c919205647703c5871a87a891914837a7a951c3e425c02bd679430d3e",
+    "scripts/tests/hex_reservation_verifier.gd": "e3350982ea477fbfb13d9ce3abeb337ddd6bbf2aae47e195a1d050e18ee01c74",
+    "docs/dev/hex_reservation_plan_contract.md": "0a98dc9b3cf8f75900224e43cd3568799db76020f66c6a6b8d794534ae6cfa4b",
+    "docs/tasks/HEX_RESERVATION_PLANNER_2026_11_11.md": "c92b790194d689f712d86f6970f0572a268903f76ca25551f6e3df0de9143e27"
+  },
+  "files": {
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "85aef532966f651c2db1e3945d270d6cf7b1f0496f2e6c9f509952b24d6e4c0e",
+    "scripts/tests/hex_reservation_verifier.gd": "0bffee72ffdd16ec4b8c9c441ee647292cb16ab5c87eed6469ffeb3ece70f169",
+    "docs/dev/hex_reservation_plan_contract.md": "0a98dc9b3cf8f75900224e43cd3568799db76020f66c6a6b8d794534ae6cfa4b",
+    "docs/tasks/HEX_RESERVATION_PLANNER_2026_11_11.md": "c92b790194d689f712d86f6970f0572a268903f76ca25551f6e3df0de9143e27",
+    "docs/qa/hex_reservation_planner_20261111/private_check.log": "7b24392e5fb4b20898334ccb67f084545c054ffc8b774f0bf8316a8f6a39ae3b",
+    "docs/qa/hex_reservation_planner_20261111/README.md": "7e56fd0e5c196d063cd1398770e97148f2fcbf5802e17eeb00a28b4e652ab86f",
+    "docs/qa/hex_reservation_planner_20261111/reproduce_private_check.py": "e2bea156ac1cdfb6ceaa435ae9e39377a5acaaf0176f6d3055c1bb1ab2111a01"
+  },
+  "normalization": "LF source; removed trailing empty verifier line only, no executable change."
+}

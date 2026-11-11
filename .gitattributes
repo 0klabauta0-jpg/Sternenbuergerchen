@@ -111,3 +111,6 @@ docs/qa/polisa_services_remainder_20261111/** -text whitespace=-blank-at-eof,cr-
 
 # Preserve static research baseline evidence.
 docs/qa/campaign_research_baseline_refresh_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Keep private AP4 planner evidence byte-stable.
+docs/qa/hex_reservation_planner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
