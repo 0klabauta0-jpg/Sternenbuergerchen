@@ -96,6 +96,8 @@ func admit_units(placements:Array[Dictionary],admission_id:String="")->Dictionar
 	if not staged.ok:return staged
 	if not admission_id.is_empty() and not _admission_access_valid(_admission_by_id[admission_id]):return _reject("admission_access_changed")
 	if not staged.units.is_empty():
+		if not admission_id.is_empty():
+			for id in staged.units:staged.units[id]["admission_id"]=admission_id
 		_units_by_id.merge(staged.units)
 		_occupant_by_grid.merge(staged.cells)
 		if not admission_id.is_empty():

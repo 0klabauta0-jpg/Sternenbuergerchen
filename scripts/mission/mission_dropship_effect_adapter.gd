@@ -30,7 +30,7 @@ func enqueue_presence_effect(simulation_root: Node, unit: Node, unit_id: String,
 	)
 
 
-func enqueue_deploy_effect(simulation_root: Node, unit: Node, unit_id: String, world_position: Vector2, team_id: String = "") -> bool:
+func enqueue_deploy_effect(simulation_root: Node, unit: Node, unit_id: String, world_position: Vector2, team_id: String = "", admission_id: String = "") -> bool:
 	_remember_known_unit(simulation_root, unit, unit_id)
 	var effect: Dictionary = {
 		"effect_type": "dropship_deploy_unit",
@@ -46,6 +46,7 @@ func enqueue_deploy_effect(simulation_root: Node, unit: Node, unit_id: String, w
 	var normalized_team_id: String = team_id.strip_edges()
 	if not normalized_team_id.is_empty():
 		effect["team_id"] = normalized_team_id
+	if not admission_id.is_empty():effect["admission_id"]=admission_id
 	return _enqueue_effect(simulation_root, effect)
 
 

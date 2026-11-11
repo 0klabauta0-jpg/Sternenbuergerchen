@@ -97,3 +97,37 @@ Integrationsreview AP6b: Registrylookup allein beweist noch keine Root-Lifecycle
 Bindung. Tatsächliche Actorzulassung verlangt deshalb den expliziten Known-Eintrag
 desselben Actors, dessen Tree-Exitcleanup beim Binden verbunden wurde. Kleiner
 Registry-only→Admission→free-Fall, keine Erweiterung der Prüffläche.
+
+## AP6c konkrete Aussteigeproducer
+
+Die bestehenden primären/parallelen Sequenzen behalten Zeitintervalle und ihren
+unit_index. Ein schmaler Missionsadapter bereitet die Gruppe im Root vor und
+sendet den vorhandenen Deployeffect mit optionaler admission_id. Fortschritt
+und deployed/embarked-Projektionen werden erst nach tatsächlichem Groundcommit
+publiziert. Der Ground hält die Herkunft seiner Zulassung als Receipt, damit ein
+schon weitergelaufener NPC den erfolgreichen Ausstieg nicht nachträglich verliert.
+Pollendes Rendern erzeugt keine doppelten Effects oder vorzeitigen Feldwechsel.
+
+Offener Folgeschritt: echte Card-/Sequence-/Visit-Landestände liefern fremde Schiffsflächen;
+inaktive Orbitflugpositionen sind keine Groundfootprints. Fehlende erforderliche
+Schiffsgeometrie führt zu Warten. Primär→Parallel-Handoff überträgt nur den
+Ticketbeleg; wirklicher Abbruch gibt Restslots frei. Parent besitzt weiterhin
+Same-Deck-/Transport-/Besuchsmitgliedschaft, Basis-/Setupanschluss folgt danach.
+
+Kleine Fixture `--case deployment_phase`: kein Fortschritt vor Roottick, kein
+Duplikat beim Polling, Ausstiegsbestätigung auch nach Bewegung, einzelner
+Folgeausstieg und Abschluss durch den vorhandenen Sequenzowner.
+
+Transportteil klein geprüft: Phase95/0 und tatsächlicher vollständiger Controller73/0,
+jeweils private Projekte ohne Hauptszene. Die Controllerprobe deaktiviert nur
+Ready-/UIcallbacks und liefert bekannte Crew-/Mapeingaben; Ausstieg, Timer,
+Handoff, Retirement, Root, Registry und Effects sind echte Produktkörper.
+Review schloss verdoppelte Kadenz, parallelen Ticketverlust und Legacyfallback bei
+fehlendem Hexowner. Zusätzlicher echter Zwischenzustand Rootcommit vor Receiptpoll
+verlangt die Root-Präsenz statt nur des verzögerten deployed-Readouts beim Retirement.
+
+Parent behält seine neuere exakte `_campaign_craft_crew`-Auswahl und alle Team-/
+Visit-/Solo-Pilotregeln. Im Retirement werden nur die eine Root-Präsenzbedingung
+und der Cancelcall für die konkrete gespeicherte craft-Sequenz ergänzt.
+Fremde Footprints, reguläre Bindung akzeptierter Schiffsgeometrie, Setup und
+Basisaktionen sind noch keine Lieferung dieses Transportteilpakets. Danach AP7/8.
