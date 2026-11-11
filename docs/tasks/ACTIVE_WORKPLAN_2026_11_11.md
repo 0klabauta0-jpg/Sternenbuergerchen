@@ -12,6 +12,12 @@ Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung d
   Vertrag: `docs/dev/orbital_approach_contract.md`; Task:
   `docs/tasks/ORBITAL_APPROACH_MAPS_2026_11_11.md`.
 
+  Fortschritt: echter unverdrahteter Fleet-/Travel-Prepare/Validate/Publish-Slice
+  für Warpabschluss und Rückorbit implementiert, 15 kleine Ownerchecks bestanden.
+  Root-/Flight-/Supply-/Campaignanschluss bleibt offen. Spacechat hat seine
+  Eintrittsfootprint- und offenen Tokenpool-Grenzen nach engem Review korrigiert;
+  seine Rootfixture ist weiterhin ausdrücklich kein Produktanschluss.
+
 - **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
 - **Parallele Orte:** View-/Servicekorrektur implementiert: Heimat/Polisa/Einsatz auf bestehenden Ortsroots ansehen, Hintergrundankunft behaelt Fremdansicht, explizite Serviceschiffwahl und lokale Basisguards. Frische kleine Viewprobe44/0, Serviceprobe30/0, Flow/Adapter Compile0 und unabhaengiger Review nach Korrekturen. Echte Mehrortreise/-gefechte/-kaeufe noch nicht abgenommen; Vertrag und Crew-Faehrgrenze in parallel_location_operations_contract.md.
 - **Bewegung:** AP4-Owner/Korridorcache, reine Bewegungsprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a integriert. AP5-Commands, Actoranschluss und anschliessende Lifecycle-/Save-/Netzgrenzen laufen im Tabletop-Chat. Keine aktive Karte oder fertige Actorbewegung daraus behauptet.

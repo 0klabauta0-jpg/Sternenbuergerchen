@@ -37,6 +37,20 @@ Plan: [2026-11-11-space-combat.md](superpowers/plans/2026-11-11-space-combat.md)
 Task: [SPACE_COMBAT_2026_11_11_PLAN.md](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
 Keine Engine-/Sicht-/Performance-/MP-Abnahme, kein Mainmerge oder EXE.
 
+### Echte Travelvorbereitung für lokale Orbitaufnahme — 11.11.2026
+
+Fleet-/Travelowner können jetzt die vereinbarten Übergänge vorbereiten,
+revalidieren und ohne Posewrites oder Events veröffentlichen: tatsächlicher
+Warpabschluss durch `advance` sowie vorhandenes `enter_orbit`. Root-private
+Object-/Kontextbindung, Bindgeneration, Owner-/Revisions-/Receiptprüfung und
+separate Erfolgswiederholung schützen Abbruch und erneute Anmeldung.
+15 kleine Ownerchecks bestanden; unabhängiger Review schloss den Release-/
+Rebindbefund. Noch kein produktiver Aufrufer und keine Flug-/Bereichsaufnahme.
+Rootfixture aus dem Weltraumkampf-Chat bleibt getrennt; echter gemeinsamer
+Flight-/Travelcommit und vorbereitete Supply-/Campaignabfahrt folgen.
+Task: `PREPARED_SPACE_AREA_TRAVEL_2026_11_11.md`. Große Tests bleiben später.
+
+
 ### Gemeinsame Orbitbereiche: Layoutvorbereitung — 11.11.2026
 
 Neue Nutzerentscheidung: ein Orbitbereich je Stern/Planet/Mond, lokal 512 × 256,
