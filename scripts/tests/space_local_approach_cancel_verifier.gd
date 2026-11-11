@@ -16,6 +16,7 @@ class PilotFixture extends Node:
 class AdapterFixture extends "res://scripts/meta/singleplayer_runtime_adapter.gd":
 	var gate := {}
 	func preview_departure(_id: String) -> Dictionary: return gate.duplicate(true)
+	func preview_reapproach(_id: String) -> Dictionary: return gate.duplicate(true)
 	func _built_home_pad_ids() -> Array: return ["homebase_pad_01"]
 
 func _initialize() -> void:
@@ -49,6 +50,13 @@ func _initialize() -> void:
 	assert(result.ok and state.get_actor(id) == flight and fleet.get_snapshot(id).phase == "orbit" and supply.export_state() == fuel_before)
 	flow._space_approaches.clear()
 	assert(adapter.enter_space_orbit(id).get("replayed", false) and supply.export_state() == fuel_before)
+	sim.tick_counter = flight.get_snapshot().tick
+	var campaign_before: Dictionary = campaign.get_campaign_snapshot()
+	assert(adapter.authorize_departure(id, "approach-again").ok)
+	assert(state.get_inactive_actor(id) == flight and fleet.get_snapshot(id).phase == "approach" and supply.export_state() == fuel_before and campaign.get_campaign_snapshot() == campaign_before)
+	flow._space_approaches[id] = {"identity":{"craft_id":id, "location_id":"satellite_crash", "departure_token":adapter._departure_token_by_craft[id]}}
+	sim.tick_counter = flight.get_snapshot().tick
+	assert(adapter.enter_space_orbit(id).ok and supply.export_state() == fuel_before)
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("SPACE_LOCAL_APPROACH_CANCEL passed")
 	quit(0)
