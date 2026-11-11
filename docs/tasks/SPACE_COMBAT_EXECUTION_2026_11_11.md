@@ -33,6 +33,14 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Lokaler Anflugabbruch: Der Adapter prüft aktiven Flow-Anflug samt passendem
+  Schiffs-/Ziel-/Abflugbeleg und tatsächlichem Pilot-Guard. Root prüft den
+  ursprünglichen Travel-Ownerbeleg und reaktiviert Flight/Index mit dem
+  vorbereiteten Orbitübergang; keine weitere Fuelbuchung oder Groundmutation.
+  Gezielter Test mit echtem Adapter und Ownern sowie Pilot-Testdouble grün.
+  Ein erneuter Anflug nach Abbruch braucht noch einen eigenen Folgeschritt:
+  bestehende Abflugbindung wiederverwenden, ohne Treibstoff doppelt zu buchen.
+
 - Lokaler Oberflächen-Rückflug: Der echte Adapter prüft zunächst Visitbeleg,
   vorhandenen Missions-Pilot-Guard und Fuel ohne Abbuchung. Bei tatsächlichem
   `enter_space_orbit` bereitet Root Fuel, Flightreaktivierung, freien Gate-

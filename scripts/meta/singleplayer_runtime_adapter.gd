@@ -805,7 +805,7 @@ func finish_space_approach(craft_id: String) -> Dictionary:
 
 func enter_space_orbit(craft_id: String) -> Dictionary:
 	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
-	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface") or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") in ["surface", "approach"]) or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
 		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
 		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
 		return result
@@ -820,6 +820,18 @@ func preview_local_surface_return(craft_id: String) -> Dictionary:
 	var pilot: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
 	if not pilot.get("ok", false): return pilot
 	return preview
+
+func preview_local_approach_cancel(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_flow) or _travel == null or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	var approaches: Variant = _flow.get("_space_approaches")
+	var travel: Dictionary = _travel.get_craft_snapshot(craft_id)
+	if typeof(approaches) != TYPE_DICTIONARY or not approaches.has(craft_id) or travel.get("phase") != "approach": return _reject("approach_not_active", "Kein aktiver Anflug")
+	var entry: Variant = approaches[craft_id]
+	if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("identity")) != TYPE_DICTIONARY or entry.identity.get("craft_id") != craft_id or entry.identity.get("location_id") != travel.get("location_id"): return _reject("approach_context_changed", "Anflug passt nicht zum Schiff und Ziel")
+	var token := String(_departure_token_by_craft.get(craft_id, ""))
+	if token.is_empty(): return _reject("no_departure_receipt", "Bestaetigter Abflugbeleg fehlt")
+	if entry.identity.get("departure_token") != token: return _reject("approach_context_changed", "Abflugbeleg passt nicht zum Anflug")
+	return {"ok":true, "route":{"craft_id":craft_id, "origin_location_id":String(travel.location_id), "destination_location_id":"homebase"}, "outward_token":token}
 
 func _publish_local_return_events(receipt_id: String) -> void:
 	if _simulation != null: _simulation.publish_singleplayer_local_return_events(self, receipt_id)

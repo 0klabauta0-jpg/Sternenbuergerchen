@@ -471,12 +471,15 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 		var replay_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(previous.travel_candidate, previous.travel_context)
 		if not replay_check.get("ok", false) or not replay_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		return {"ok":true, "replayed":true, "receipt_id":latest_key}
-	var gate: Dictionary = adapter.preview_local_surface_return(craft_id)
+	var current_phase := String(_singleplayer_space_travel_owner.get_craft_snapshot(craft_id).get("phase", ""))
+	var is_cancel := current_phase == "approach"
+	if is_cancel and not adapter.has_method("preview_local_approach_cancel"): return {"ok":false, "reason":"adapter_required"}
+	var gate: Dictionary = adapter.preview_local_approach_cancel(craft_id) if is_cancel else adapter.preview_local_surface_return(craft_id)
 	if not gate.get("ok", false): return gate
 	if typeof(gate.get("route")) != TYPE_DICTIONARY or typeof(gate.get("outward_token")) != TYPE_STRING or String(gate.outward_token).is_empty(): return {"ok":false, "reason":"invalid_return_context"}
 	var route: Dictionary = gate.route
 	if route.get("craft_id") != craft_id or route.get("destination_location_id") != "homebase": return {"ok":false, "reason":"invalid_return_context"}
-	var key := "local-return:" + String(gate.outward_token) + ":" + craft_id
+	var key := ("local-cancel:" if is_cancel else "local-return:") + String(gate.outward_token) + ":" + craft_id
 	if _local_return_receipts.has(key):
 		var previous: Dictionary = _local_return_receipts[key]
 		if previous.supply != _singleplayer_supply_owner or previous.fleet != _singleplayer_space_travel_owner or previous.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}
@@ -488,7 +491,12 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	if flight == null or _space_combat_state.get_inactive_actor(craft_id) != flight: return {"ok":false, "reason":"unknown_actor"}
 	var pose: Dictionary = flight.get_snapshot()
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
-	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "inactive" or travel.get("phase") != "surface" or route.get("origin_location_id") != travel.get("location_id"): return {"ok":false, "reason":"return_context_changed"}
+	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "inactive" or travel.get("phase") != ("approach" if is_cancel else "surface") or route.get("origin_location_id") != travel.get("location_id"): return {"ok":false, "reason":"return_context_changed"}
+	if is_cancel:
+		var departure: Dictionary = _departure_group_receipts.get(String(gate.outward_token), {})
+		if departure.get("craft_id") != craft_id or departure.get("fleet") != _singleplayer_space_travel_owner or departure.get("flight") != flight or Dictionary(departure.get("travel_context", {})).get("payload", {}).get("location_id") != travel.location_id: return {"ok":false, "reason":"no_departure_receipt"}
+		var departure_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(departure.travel_candidate, departure.travel_context)
+		if not departure_check.get("ok", false) or not departure_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 	var orbit_id := String(Dictionary(travel.get("location_orbits", {})).get(travel.location_id, ""))
 	var body_id := String(Dictionary(Dictionary(travel.get("orbits", {})).get(orbit_id, {})).get("body_id", ""))
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
@@ -505,32 +513,35 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 		var candidate: Dictionary = preview_surface_reactivation(craft_id, travel.location_id, target, pose.revision, travel.revision, area_revision, wing_revision, context)
 		if candidate.get("ok", false): chosen = candidate; break
 	if chosen.is_empty(): return {"ok":false, "reason":"return_gate_unavailable"}
-	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":route.duplicate(true), "request_id":"return:" + String(gate.outward_token) + ":fuel"}
-	var fuel_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
-	if not fuel_candidate.get("ok", false): return fuel_candidate
+	var fuel := {}
+	var fuel_candidate := {}
+	if not is_cancel:
+		if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
+		fuel = {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":route.duplicate(true), "request_id":"return:" + String(gate.outward_token) + ":fuel"}
+		fuel_candidate = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
+		if not fuel_candidate.get("ok", false): return fuel_candidate
 	var bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
 	if not bound.get("ok", false): return bound
 	var payload := {"craft_id":craft_id}
-	var travel_context := {"request_id":key, "request_signature":JSON.stringify({"operation":"enter_orbit", "payload":payload}, "", true), "operation":"enter_orbit", "payload":payload, "source_area_id":pose.space_area_id, "target_area_id":pose.space_area_id, "expected_travel_revision":travel.revision, "expected_phase":"surface", "context_id":key}
+	var travel_context := {"request_id":key, "request_signature":JSON.stringify({"operation":"enter_orbit", "payload":payload}, "", true), "operation":"enter_orbit", "payload":payload, "source_area_id":pose.space_area_id, "target_area_id":pose.space_area_id, "expected_travel_revision":travel.revision, "expected_phase":String(travel.phase), "context_id":key}
 	bound = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
 	if not bound.get("ok", false): return bound
 	var travel_candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, travel.revision, pose.space_area_id, pose.space_area_id, travel_context)
 	var tv: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(travel_candidate, travel_context) if travel_candidate.get("ok", false) else travel_candidate
-	var sv: Dictionary = _singleplayer_supply_owner.validate_prepared_route_fuel(fuel_candidate, self)
+	var sv: Dictionary = {"ok":true} if is_cancel else _singleplayer_supply_owner.validate_prepared_route_fuel(fuel_candidate, self)
 	var fv: Dictionary = flight.validate_space_activity_transition(chosen.activity_proposal, chosen.activity_tick)
 	var av: Dictionary = _space_combat_state.validate_reactivation(craft_id, chosen.activity_proposal, chosen.activity_tick)
 	if not tv.get("ok", false) or tv.get("replayed", false) or not sv.get("ok", false) or not fv.get("ok", false) or not av.get("ok", false):
 		_singleplayer_space_travel_owner.release_space_area_transition_context(key, self)
 		return {"ok":false, "reason":"return_validation_failed"}
 	# Silent synchronous tail: all owner validations and boarding are complete.
-	var fuel_result: Dictionary = _singleplayer_supply_owner._publish_prepared_route_fuel(fuel_candidate, sv)
+	var fuel_result: Dictionary = {} if is_cancel else _singleplayer_supply_owner._publish_prepared_route_fuel(fuel_candidate, sv)
 	flight._publish_space_activity_transition(fv)
 	_space_combat_state._publish_reactivation(av)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(travel_candidate, tv)
 	var travel_command := {"contract_category":"singleplayer_space_travel", "operation":"enter_orbit", "payload":payload, "request_id":key}
 	var events: Array = []
-	if sv.patch.mode == "apply": events.append({"command":fuel,"result":fuel_result})
+	if not is_cancel and sv.patch.mode == "apply": events.append({"command":fuel,"result":fuel_result})
 	events.append({"command":travel_command,"result":travel_result})
 	_local_return_receipts[key] = {"supply":_singleplayer_supply_owner,"supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"),"fleet":_singleplayer_space_travel_owner,"flight":flight,"travel_candidate":travel_candidate.duplicate(true),"travel_context":travel_context.duplicate(true),"events":events,"events_published":false}
 	_local_return_latest_by_craft[craft_id] = key
