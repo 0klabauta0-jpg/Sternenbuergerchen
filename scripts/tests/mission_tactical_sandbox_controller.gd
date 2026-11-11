@@ -36912,7 +36912,12 @@ func preview_station_craft_admission(craft: Dictionary, requested_pad_id: String
 	var pads: Array = POLISA_CRAFT.station_pads(map)
 	var projection := _station_craft_projection(craft)
 	if not bool(projection.get("ok", false)): return projection
+	var profile_contract = preload("res://scripts/mission/polisa_ground_body_profile.gd")
+	var own_profile: Dictionary = profile_contract.from_projection(craft, projection)
+	if not bool(own_profile.get("ok", false)): return own_profile
+	projection = own_profile.profile
 	var occupied: Array = []
+	var occupied_profiles := {}
 	for card: Dictionary in _get_mission_dropship_card_entries():
 		var other_id := String(card.get("craft_id", ""))
 		var sequence: Dictionary = _parallel_drop_sequences_by_craft.get(other_id, {})
@@ -36922,16 +36927,20 @@ func preview_station_craft_admission(craft: Dictionary, requested_pad_id: String
 		if phase in ["outbound", "to_homebase", "homebase", "starmap", "ready"]: continue
 		var position: Variant = sequence.get("lz_position", card.get("lz_position"))
 		if not position is Vector2 or not Vector2(position).is_finite(): return {"ok":false,"reason":"occupied_station_position_unknown"}
-		var other_projection := _station_craft_projection(card)
-		var body: Dictionary = POLISA_CRAFT.projected_body(position, other_projection)
+		var landing: Dictionary = _field_landing_by_craft.get(other_id, {})
+		var other_profile: Dictionary = profile_contract.read_bound(card, landing.get("ground_body_profile"))
+		if not bool(other_profile.get("ok", false)): return other_profile
+		var body: Dictionary = POLISA_CRAFT.projected_body(position, other_profile.profile)
 		if not bool(body.get("ok", false)): return body
+		occupied_profiles[other_id] = other_profile.profile.duplicate(true)
 		occupied.append({"pad_id":String(card.get("station_pad_id", "")),"footprint":body.footprint})
 	var result: Dictionary = POLISA_CRAFT.preview_admission(craft, pads, projection, occupied, requested_pad_id)
 	if not bool(result.get("ok", false)): return result
 	var registry = _get_terrain_registry()
 	var checked: Dictionary = FIELD_LANDING.validate(registry, registry.call("world_to_grid", result.position), []) if registry != null else {"ok":false,"reason":"terrain_unavailable"}
 	if not bool(checked.get("ok", false)): return checked
-	result["owner_signature"] = JSON.stringify({"cards":_mission_drop_cards,"sequences":_parallel_drop_sequences_by_craft}, "", true).sha256_text()
+	result["ground_body_profile"] = projection.duplicate(true)
+	result["owner_signature"] = JSON.stringify({"cards":_mission_drop_cards,"sequences":_parallel_drop_sequences_by_craft,"occupied_ground_body_profiles":occupied_profiles}, "", true).sha256_text()
 	return result
 
 func admit_station_craft(craft: Dictionary, pad_id: String, request_id: String) -> Dictionary:
@@ -36947,7 +36956,7 @@ func admit_station_craft(craft: Dictionary, pad_id: String, request_id: String) 
 	var id := String(craft.craft_id)
 	var sequence: Dictionary = POLISA_CRAFT.parked_sequence(craft, admission)
 	_parallel_drop_sequences_by_craft[id] = sequence
-	_field_landing_by_craft[id] = {"ok":true,"requested_lz_position":admission.position,"resolved_lz_position":admission.position,"station_pad_id":pad_id}
+	_field_landing_by_craft[id] = {"ok":true,"requested_lz_position":admission.position,"resolved_lz_position":admission.position,"station_pad_id":pad_id,"ground_body_profile":admission.ground_body_profile.duplicate(true)}
 	var fields := _build_drop_sequence_card_fields(sequence)
 	fields.merge({"model_id":String(craft.model_id),"craft_type":String(craft.get("craft_type", "")),
 		"station_pad_id":pad_id,"crew_capacity":int(craft.crew_capacity),"pilot_unit_id":"","payload_source":"homebase_direct"},true)

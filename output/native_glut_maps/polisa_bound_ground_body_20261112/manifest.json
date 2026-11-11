@@ -1,0 +1,13 @@
+{
+  "scope": "Two reserved Controller bodies + pure helper; no commit",
+  "green_run": "bound_body-592a148439e74bd2a74c99476cba0727",
+  "checks": "12/0",
+  "sha256": {
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "9df1926d38920d5d7705711f403839acb7d098318214043f4cc2bc619dc0068f",
+    "scripts/mission/polisa_ground_body_profile.gd": "909c45619d359aac75522741584b66be09e970e8f9d82f5a0ce7d1862f917d7c",
+    "docs/tasks/POLISA_BOUND_GROUND_BODY_PROFILE_2026_11_12.md": "174f9c55234ecb31b0945fb7b10909e07187864d74ce90c90d2ffc9581f377c7",
+    "docs/dev/polisa_bound_ground_body_profile_contract.md": "3a37c6f66d6af13f4b101e556172de2cead42b7092d2c9ec9792423c188d6498",
+    "output/native_glut_maps/polisa_bound_ground_body_20261112/check.gd": "24c060905e480104cbd6778323478ce3640784268f4efa158a469c5977ff0051",
+    "output/native_glut_maps/polisa_bound_ground_body_20261112/run.py": "4ff853b704c897d27b0fb26dab37d1b9292829e4a88086b7689a1f28f6956f70"
+  }
+}
