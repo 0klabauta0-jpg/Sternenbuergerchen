@@ -30,6 +30,11 @@ func unregister_craft(craft_id: String) -> void:
 		_focus = String(_owners.keys()[0]) if not _owners.is_empty() else ""
 func get_flight_state(craft_id: String) -> RefCounted:
 	return _owners[craft_id].get_flight_state() if _owners.has(craft_id) else null
+func get_craft_snapshot(craft_id: String) -> Dictionary:
+	if not _owners.has(craft_id): return {}
+	var snapshot: Dictionary = _owners[craft_id].get_snapshot()
+	snapshot["craft_id"] = craft_id
+	return snapshot
 func focus_craft(craft_id: String) -> bool:
 	if not _owners.has(craft_id): return false
 	_focus=craft_id; return true

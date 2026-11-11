@@ -298,6 +298,10 @@ func set_flight_control(craft_id: String, control: Dictionary) -> bool:
 	_flight_controls[craft_id] = control.duplicate(true)
 	return true
 
+func clear_flight_control(craft_id: String) -> void:
+	_flight_controls.erase(craft_id)
+	_remove_navigation_claim(craft_id)
+
 func get_flight_controls() -> Dictionary:
 	return _flight_controls.duplicate(true)
 

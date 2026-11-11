@@ -39,9 +39,20 @@ Verifier und diese Statusdokumentation.
   Schiffe; Kontakt-/Feindsicht braucht einen eigenen Sichtbarkeitsvertrag.
   Inaktive Schiffe werden beim Tick und Snapshot sicher ausgelassen. Gezielt
   geprüft: Snapshot, Deaktivierung und echte Rückkehr, jeweils Exit 0.
-  Der Bewegungspfad bleibt gesperrt: Der vorhandene Equipment-Owner führt
-  derzeit nur den Quantenslot, Hull-/Antriebs-/Power-Werte liegen nur als
-  Fixture vor; Flugzulassung und tatsächliche Korridorclaims sind noch offen.
+  Die produktive Flugzulassung und ein vollständiger Reiseübergang bleiben
+  weiterhin offen; zur folgenden Bewegungsvorstufe siehe nächsten Eintrag.
+- Bewegungs-Vorstufe: Cutlass und Buccaneer besitzen vorläufige interne
+  Spielbalanceprofile im Equipment-Katalog; Leistungsbudget 1.0 ist eine
+  Übergangsannahme und noch kein austauschbarer Kraftwerksslot. Root prüft
+  Flight-/Fleet-Identität, Live-Pilot, Rotte, Area, Ziel und Equipment und
+  steuert den bestehenden Tick mit einem Zielclaim. Pilot- oder Equipment-
+  Änderungen stoppen den Auftrag; Treffer auf eine Sperre geben ihn frei.
+  Der Claim reserviert das Ziel, nicht einen vorausberechneten Gesamtkorridor;
+  die vorhandene Sweep-Prüfung sichert die tatsächlichen Bewegungsschritte.
+  Fixtureprüfung für Bewegung, Replay, Besitz, Pilot und belegtes Ziel sowie
+  Bereichstick, Rückkehr und Warp-Slice bestanden. Keine native UI-Abnahme.
+  Produktive lokale Aufnahme, Reise-Transaktion, Adapter und vollständiger
+  Korridor-/Auftragslebenszyklus bleiben offen; keine Freischaltung behauptet.
 
 - Oberflächenanflug, Vorbereitung: Der bestehende Flight-Owner kann eine
   zuvor geprüfte Deaktivierung ohne zweite Validierung veröffentlichen; der

@@ -66,6 +66,8 @@ func configure_ship_equipment(owner: RefCounted) -> void:
 
 
 func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null, travel: RefCounted = null) -> void:
+	if _singleplayer_space_travel_owner != travel:
+		_space_move_receipts.clear()
 	_singleplayer_campaign_owner = campaign
 	_singleplayer_supply_owner = supply
 	_campaign_onboarding_owner = onboarding
@@ -92,6 +94,7 @@ var _fixture_area_receipts: Dictionary = {}
 var _fixture_area_requests: Dictionary = {}
 var _fixture_area_blockers: Dictionary = {}
 var _fixture_area_sequence := 0
+var _space_move_receipts: Dictionary = {}
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
@@ -506,6 +509,53 @@ func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictio
 func get_space_flight_status(craft_id: String) -> Dictionary:
 	return _space_combat_state.get_flight_status(craft_id)
 
+func request_singleplayer_space_move(command: Dictionary) -> Dictionary:
+	# The adapter supplies only this strict payload; all authority is read here.
+	if command.size() != 3 or not command.has_all(["craft_id", "target_hex", "request_id"]): return {"ok":false, "reason":"invalid_command"}
+	if typeof(command.craft_id) != TYPE_STRING or String(command.craft_id).strip_edges().is_empty() or typeof(command.request_id) != TYPE_STRING or String(command.request_id).strip_edges().is_empty() or typeof(command.target_hex) != TYPE_VECTOR2I: return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.craft_id
+	var signature := SPACE_COMMAND_CONTRACT.request_signature(command)
+	if _space_move_receipts.has(command.request_id):
+		var receipt: Dictionary = _space_move_receipts[command.request_id]
+		if receipt.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
+		return {"ok":true, "replayed":true}
+	if _space_move_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
+	if _singleplayer_space_travel_owner == null or _ship_equipment_owner == null or not is_instance_valid(_base_personnel_owner): return {"ok":false, "reason":"runtime_unavailable"}
+	var flight: RefCounted = _space_combat_state.get_actor(id)
+	if flight == null or _singleplayer_space_travel_owner.get_flight_state(id) != flight: return {"ok":false, "reason":"not_owned"}
+	if _space_wing_state.get_craft_wing(id, "singleplayer").is_empty(): return {"ok":false, "reason":"wing_required"}
+	if not _base_personnel_owner.is_pilot_aboard(id): return {"ok":false, "reason":"pilot_not_aboard"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(id)
+	if pose.motion_mode != "tactical" or pose.coordinate_frame != "local" or travel.get("phase") != "orbit": return {"ok":false, "reason":"not_active_local"}
+	if not SPACE_AREA_GRID.contains(command.target_hex, pose): return {"ok":false, "reason":"invalid_target"}
+	var profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(id)
+	if not profile.get("ok", false): return profile
+	if not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_mass_mismatch"}
+	var area_id: String = pose.space_area_id
+	if not area_id.begins_with("orbit_approach:"): return {"ok":false, "reason":"invalid_area"}
+	var layout: Dictionary = ORBIT_LAYOUT.build(area_id.trim_prefix("orbit_approach:").uri_decode())
+	if not layout.get("ok", false) or layout.body_map_id != area_id: return {"ok":false, "reason":"invalid_area"}
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(String(travel.get("orbit_id", "")), {})
+	if String(orbit.get("body_id", "")) != String(layout.body_id): return {"ok":false, "reason":"area_body_mismatch"}
+	var target_plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(command.target_hex))
+	var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(id, {"position_plane":target_plane})
+	if cells.is_empty(): return {"ok":false, "reason":"invalid_target"}
+	for cell in cells:
+		if layout.body_cells.has(SPACE_GRID.to_offset(cell)): return {"ok":false, "reason":"blocked_target"}
+	for occupant in _space_combat_state.query_cells(cells, area_id):
+		if occupant != id: return {"ok":false, "reason":"occupied"}
+	for claimant in _space_combat_state.query_navigation_claims(cells, area_id):
+		if claimant != id: return {"ok":false, "reason":"navigation_claimed"}
+	var goal := {"target_plane":target_plane}
+	var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(pose, goal, profile.hull, profile.power)
+	if not guidance.get("ok", false): return guidance
+	var claim: Dictionary = _space_combat_state.record_navigation_claim(id, area_id, cells)
+	if not claim.get("ok", false): return claim
+	_space_combat_state.set_flight_control(id, {"goal":goal, "hull":profile.hull, "power":profile.power, "singleplayer_move":true, "equipment_snapshot":_ship_equipment_owner.get_snapshot(id), "equipment_owner_id":_ship_equipment_owner.get_instance_id(), "area_id":area_id})
+	_space_move_receipts[command.request_id] = {"signature":signature}
+	return {"ok":true, "replayed":false}
+
 func set_space_fixture_goal(craft_id: String, goal: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok":false, "reason":"runtime_authority_required"}
@@ -526,8 +576,21 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 	var groups := {}
 	for craft_id in ids:
 		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
-		if flight == null or flight.get_snapshot().motion_mode != "tactical": continue
 		var control: Dictionary = controls[craft_id]
+		if flight == null or flight.get_snapshot().motion_mode != "tactical":
+			if control.get("singleplayer_move", false): _space_combat_state.clear_flight_control(craft_id)
+			continue
+		if control.get("singleplayer_move", false):
+			var pose: Dictionary = flight.get_snapshot()
+			var live_equipment: Dictionary = _ship_equipment_owner.get_snapshot(craft_id) if _ship_equipment_owner != null else {}
+			if _singleplayer_space_travel_owner == null or _singleplayer_space_travel_owner.get_flight_state(craft_id) != flight or _singleplayer_space_travel_owner.get_craft_snapshot(craft_id).get("phase") != "orbit" or not is_instance_valid(_base_personnel_owner) or not _base_personnel_owner.is_pilot_aboard(craft_id) or _space_wing_state.get_craft_wing(craft_id, "singleplayer").is_empty() or pose.space_area_id != control.area_id or _ship_equipment_owner == null or _ship_equipment_owner.get_instance_id() != control.equipment_owner_id or live_equipment != control.equipment_snapshot:
+				_space_combat_state.clear_flight_control(craft_id)
+				_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":"movement_context_changed"})
+				continue
+			if pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and pose.velocity_plane.length() < 0.02:
+				_space_combat_state.clear_flight_control(craft_id)
+				_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"arrived"})
+				continue
 		var intent: Dictionary = control.get("intent", {})
 		if control.has("goal"):
 			var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(flight.get_snapshot(), control.goal, control.hull, control.power)
@@ -551,13 +614,16 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var group: Dictionary = groups[key]
 		var proposals: Array[Dictionary] = []
 		proposals.assign(group.proposals)
-		var result: Dictionary = commit_space_fleet_motion(proposals, tick, group.world, {"runtime_authorized":true, "fixture":true})
+		var result: Dictionary = commit_space_fleet_motion(proposals, tick, group.world, {"runtime_authorized":true, "fixture":true, "internal_flight_tick":self})
 		if not result.get("ok", false):
-			for proposal in proposals: _space_combat_state.set_flight_status(proposal.craft_id, result)
+			for proposal in proposals:
+				if Dictionary(controls.get(proposal.craft_id, {})).get("singleplayer_move", false): _space_combat_state.clear_flight_control(proposal.craft_id)
+				_space_combat_state.set_flight_status(proposal.craft_id, result)
 			continue
 		for craft_id in result.accepted:
 			_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
 		for craft_id in result.rejected:
+			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false): _space_combat_state.clear_flight_control(craft_id)
 			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
@@ -646,7 +712,8 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		if snapshot.coordinate_frame != area.coordinate_frame or snapshot.space_area_id != area.space_area_id:
 			return {"ok":false, "reason":"area_mismatch"}
 		if area.coordinate_frame == "local" and (authority_context.get("fixture") != true or not String(id).begins_with("space_fixture_")):
-			return {"ok":false, "reason":"local_area_not_ready"}
+			var own_control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
+			if authority_context.get("internal_flight_tick") != self or not own_control.get("singleplayer_move", false): return {"ok":false, "reason":"local_area_not_ready"}
 		if proposal.get("motion_mode", "tactical") != "tactical":
 			return {"ok": false, "reason": "invalid_motion_mode"}
 		var valid: Dictionary = flight.validate_motion(proposal, tick)
