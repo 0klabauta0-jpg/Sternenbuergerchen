@@ -1,5 +1,6 @@
 # IMPLEMENTATION_STATUS
 
+
 ### Echte Travelvorbereitung für lokale Orbitaufnahme — 11.11.2026
 
 Fleet-/Travelowner können jetzt die vereinbarten Übergänge vorbereiten,
@@ -26,6 +27,18 @@ Bereichs-ID, lokaler Index und atomarer Rootübergang werden mit dem kanonischen
 Flight-/Rottenowner im Weltraumkampf-Chat abgestimmt. Bisherige Drei-Marker-Reise
 bleibt bis zum vollständigen Anschluss produktiv. Vertrag:
 `docs/dev/orbital_approach_contract.md`. Große Tests bleiben später.
+
+### AP5 lokaler Türschlussguard — 11.11.2026
+
+Echter Driver-Progressproducer lehnt Open→Blocked vor Statecommit und Ressourcen-
+Gate ab, solange Root/Ground Zelle, beide Segmentendpunkte oder vollständige
+Passagegrants beanspruchen. Reine Rootbatchreads prüfen Registry/Authority/Clock;
+Opt-in-Karten fallen bei fehlendem Owner geschlossen aus. DoorGuard58/0 inklusive
+42 Basis, SightConsumers39/0, ReservationOwner36/0, Guards/Quellhashes und enger
+Review grün; QA hex_door_guard_20261111. Öffnen/echtes Legacy erhalten. Szenario-
+Rebuild/Zulassung AP6 und atomarer Save-/MPrestore AP7 bleiben offen, ebenso
+AP5-Backoff-Ausführung. Keine Karte oder große/native Tests aktiviert.
+
 
 ### AP5 Bewegungsschuss und lokale Profilsnapshots — 11.11.2026
 

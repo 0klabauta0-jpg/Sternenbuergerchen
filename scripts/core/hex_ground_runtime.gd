@@ -559,6 +559,45 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 	return events
 
 
+func can_block_cells(grids:Array) -> Dictionary:
+	if not _is_configured():return _reject("not_configured")
+	if grids.size()>64:return _reject("cell_query_budget")
+	var wanted:Dictionary={}
+	for value in grids:
+		if typeof(value)!=TYPE_VECTOR2I:return _reject("invalid_cell")
+		if _registry.call("get_tile_at_grid",value)==null:return _reject("unknown_cell")
+		wanted[value]=true
+	var blocked:Dictionary={}
+	for grid in wanted:
+		if _occupant_by_grid.has(grid):_record_block_claim(blocked,grid,"occupied",PackedStringArray([String(_occupant_by_grid[grid])]))
+	for id in _segments_by_unit_id:
+		for segment in _segments_by_unit_id[id]:
+			if int(segment.start_tick)+int(segment.duration_ticks)<=_tick:continue
+			for grid in [segment.from_grid,segment.to_grid]:
+				if wanted.has(grid):_record_block_claim(blocked,grid,"segment",PackedStringArray([String(id)]))
+	for grant in _corridor_grants:
+		if not PLANNER._hex_grant_active(grant,_units_by_id,_segments_by_unit_id):continue
+		for grid in wanted:
+			if grant.cells.has(grid):_record_block_claim(blocked,grid,"corridor_grant",PackedStringArray(grant.unit_ids))
+	var result:Array=[]
+	for grid in wanted:
+		if blocked.has(grid):result.append(blocked[grid])
+	return {"ok":true,"can_block":result.is_empty(),"blocked_cells":result}
+
+
+func _record_block_claim(blocked:Dictionary,grid:Vector2i,reason:String,ids:PackedStringArray) -> void:
+	var entry:Dictionary=blocked.get(grid,{"grid":grid,"reasons":PackedStringArray(),"unit_ids":PackedStringArray()})
+	var reasons:PackedStringArray=entry.reasons
+	if not reasons.has(reason):reasons.append(reason)
+	var units:PackedStringArray=entry.unit_ids
+	for id in ids:
+		if not units.has(id):units.append(id)
+	units.sort()
+	entry.reasons=reasons
+	entry.unit_ids=units
+	blocked[grid]=entry
+
+
 func _cell_has_future_claim(grid: Vector2i) -> bool:
 	for segments in _segments_by_unit_id.values():
 		for segment in segments:

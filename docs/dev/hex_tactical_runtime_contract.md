@@ -212,7 +212,7 @@ Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
 Aktueller Anschluss: echte Root-Moveabsichten, Groundzusagen, Actorprojektion
 und Gruppen-/Viewleser gemäß den beiden AP5-Move-Tasks sowie Bewegungsschuss.
-Türguard und Rücksetz-Ausführung sowie AP6–8 bleiben offen.
+Rücksetz-Ausführung sowie AP6–8 bleiben offen; lokaler Türguard siehe unten.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
 
 ## Echte Bewegungsabsichten und Darstellung
@@ -288,3 +288,30 @@ auflösung nennen logische Bewegung und angewendeten Faktor. Schadensmenge und
 Würfelkadenz behalten ihre bisherigen Regeln. Kleine MovingShot65/0 (einschließlich
 42 Basisprüfungen), MoveConsumers65/0 und SightConsumers39/0 mit geschlossenem
 Review; QA hex_moving_shot_20261111. Keine Balance-/Last-/FPSfreigabe.
+
+## Lokaler Türschluss vor Ownercommit
+
+`Ground.can_block_cells` und `Root.can_block_hex_ground_cells` sind reine
+Claimreads für höchstens64 konkrete Zellen. Aktuelle Belegung (auch verwundet),
+beide Endpunkte noch nicht beendeter Segmente und aktive vollständige Korridor-
+grants verhindern eine neue Blockierung. Damit ist auch ein ferner Türausgang
+jenseits des Dreischritthorizonts geschützt. Root prüft eigene Registry,
+Autorität und synchronen Tick; unbekannte/ungültige Zellen fallen geschlossen aus.
+Keine Actor-, SceneTree- oder Vollkartensuche; Grantmitgliedschaft bleibt eine
+Lesearbeit über vorhandene aktive Zusagen, keine gemessene Laufzeitfreigabe.
+
+Der tatsächliche lokale Producer ist Driver.update_mission_interaction_runtime_progress.
+Bei Open→Blocked prüft er den vorhandenen DoorRuntimeCollisionLOS-Kandidaten vor
+Statecommit und vor LocationResources.accept_progress. Konflikte werden explizit
+abgelehnt; Interactionstate, physischer Registryoverride und Reservierungen bleiben
+gleich. Kein versteckter Schließtimer, kein nur optisches Offenhalten. Öffnen,
+unveränderte Blockierung und Nicht-Türinteraktionen brauchen diesen Claimread nicht.
+Auf Opt-in-Karten verhindert auch fehlender/inaktiver Root den Schluss; nur echte
+Legacykarten behalten den früheren Weg. ShipReturn-/Ressourcenregeln sind erhalten.
+
+QA hex_door_guard_20261111:58/0 einschließlich42 Basisprüfungen, SightConsumers39/0,
+ReservationOwner36/0, enger Review geschlossen. Neunfelderausgangsraum, tatsächlicher
+Rootqueue-/Drivermutationspfad und Ressourcenseiteneffektzähler; keine native Mission.
+Szenarioneuaufbau/Zulassung AP6 und atomarer Save-/Multiplayersnapshot AP7 sind eigene
+Lebenszyklusgrenzen und werden dadurch nicht als abgesichert behauptet. Keine Karte
+aktiviert, große AP9-Prüfungen bleiben später.

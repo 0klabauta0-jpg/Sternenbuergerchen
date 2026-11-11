@@ -155,3 +155,4 @@ docs/qa/tabletop_restplan_integration_20261111/actual_move/** -text whitespace=-
 docs/qa/hex_move_commands_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_move_consumers_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_moving_shot_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_door_guard_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
