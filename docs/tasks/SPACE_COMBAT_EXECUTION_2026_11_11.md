@@ -111,6 +111,10 @@ Verifier und diese Statusdokumentation.
   in stabiler Reihenfolge. Kreuzende Wege und veralteter Batch geprüft,
   Batchcheck8/8. Die Reservierung umfasst derzeit den gesamten Tick;
   feinere Zeitfenster, Blockadeauflösung und echte Kartenhindernisse fehlen.
+- AP03 gezielte Kostenprobe: P95 dreizelliger Einzel-Sweep833→442µs nach
+  geometrischer Kandidatenbegrenzung; 25 Messungen je Stand, laufende
+  Fremdlast, kein Frame-/FPS-Nachweis. Geometrie14/14 und Batch8/8.
+  Belege: `docs/qa/space_combat_20261111/README.md`.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung

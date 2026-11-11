@@ -121,6 +121,10 @@ static func _hull_supercover(from: Vector2, to: Vector2, from_angle: float, to_a
 	var result: Array[Vector2i] = []
 	for cell in candidates:
 		var center: Vector2 = GRID.HEX.axial_to_plane(Vector2(cell))
+		var nearest: Vector2 = Geometry2D.get_closest_point_to_segment(center, from, to)
+		var bound: float = 2.0 * GRID.HEX.DEFAULT_RADIUS + margin + 0.00001
+		if center.distance_squared_to(nearest) > bound * bound:
+			continue
 		var polygon := PackedVector2Array()
 		for corner in 6:
 			polygon.append(center + Vector2.from_angle(PI / 6.0 + corner * PI / 3.0) * GRID.HEX.DEFAULT_RADIUS)
