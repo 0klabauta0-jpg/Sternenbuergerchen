@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure, UNWIRED V2 -> V3 draft compiler. Never resolves live stale commands.
+## Pure, UNWIRED V2 -> V3 draft/product compilers. Never remaps live commands.
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const SUN_ORBIT := "sun_orbit"
@@ -47,18 +47,38 @@ static func build_v3_draft(legacy_definition: Dictionary) -> Dictionary:
 		"body_orbits":body_orbits,"body_area_ids":body_areas}
 
 static func validate_v3_draft(definition: Dictionary) -> Dictionary:
-	return _validate_definition(definition, 3)
+	return _validate_definition(definition, 3, true)
+
+## Explicit opt-in product preparation, never selected by the draft API.
+static func build_v3_product(legacy_definition: Dictionary) -> Dictionary:
+	var draft := build_v3_draft(legacy_definition)
+	if not draft.get("ok",false): return draft
+	var definition: Dictionary = draft.definition
+	definition.erase("draft")
+	var valid := validate_v3_product(definition)
+	if not valid.get("ok",false): return valid
+	return {"ok":true,"source_version":2,"definition":definition,
+		"body_orbits":draft.body_orbits,"body_area_ids":draft.body_area_ids}
+
+static func validate_v3_product(definition: Dictionary) -> Dictionary:
+	return _validate_definition(definition, 3, false)
 
 static func _physical_body_orbits() -> Dictionary:
-	var result := {"sun":SUN_ORBIT}
-	for orbit_id: String in GRID.ORBITS: result[String(GRID.ORBITS[orbit_id])] = orbit_id
+	var result := {}
+	var orbits := GRID.orbits_for_version(3)
+	for orbit_id: String in orbits:
+		result[String(orbits[orbit_id])] = orbit_id
 	return result
 
-static func _validate_definition(data: Dictionary, version: int) -> Dictionary:
+static func _validate_definition(data: Dictionary, version: int, draft_mode: bool = false) -> Dictionary:
 	if not _plain_data(data) or not _integer(data.get("version")) or int(data.version) != version or not _size_pair(data.get("grid_size"), Vector2i(256,256)): return _reject("invalid_catalog_header")
 	if typeof(data.get("id")) != TYPE_STRING or String(data.id).is_empty() or typeof(data.get("jump_duration_seconds")) not in [TYPE_INT,TYPE_FLOAT] or float(data.jump_duration_seconds) <= 0.0 or float(data.jump_duration_seconds) > 60.0: return _reject("invalid_catalog_header")
 	if not data.get("bodies") is Dictionary or not data.get("orbits") is Dictionary or not data.get("location_orbits") is Dictionary: return _reject("invalid_catalog_tables")
-	if version == 3 and data.get("draft") != true: return _reject("not_a_draft")
+	if version == 3:
+		if draft_mode and data.get("draft") != true: return _reject("not_a_draft")
+		if not draft_mode and data.has("draft"): return _reject("draft_not_product")
+		for key in ["marker_aliases_v2_to_v3","marker_aliases_migration_only"]:
+			if data.has(key): return _reject("migration_data_not_catalog")
 	var expected := _physical_body_orbits()
 	var orbit_count: int = GRID.ORBITS.size() + (1 if version == 3 else 0)
 	if data.orbits.size() != orbit_count: return _reject("unexpected_orbit_count")

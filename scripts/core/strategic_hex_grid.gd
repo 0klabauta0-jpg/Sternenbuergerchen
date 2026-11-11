@@ -8,6 +8,13 @@ const ORBITS := {"moon_orbit": "moon", "planet_orbit": "planet",
 	"glut_1a_orbit": "glut_1a", "glut_1b_orbit": "glut_1b", "polisa_orbit": "glut_2"}
 const ORBIT_MARKER_IDS := ["orbit_1", "orbit_2", "orbit_3"]
 
+## Pure version facts. Existing V2 constants remain unchanged.
+static func orbits_for_version(version: int) -> Dictionary:
+	if version not in [2,3]: return {}
+	var result: Dictionary = ORBITS.duplicate(true)
+	if version == 3: result["sun_orbit"] = "sun"
+	return result
+
 static func from_offset(offset: Vector2i) -> Vector2i:
 	return Vector2i(offset.x - floori(offset.y * 0.5), offset.y)
 

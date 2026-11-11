@@ -11,6 +11,7 @@ var _travel: Dictionary = {}
 var _body_labels: Dictionary = {}
 var _bodies: Dictionary = {}
 var _orbits: Dictionary = {}
+var _catalog_version := 2
 var _orbit_by_hex: Dictionary = {}
 var _snapshot_applied := false
 var _world
@@ -33,16 +34,6 @@ func _ready() -> void:
 	_world = WORLD.new()
 	add_child(_world)
 	set_process(false)
-	var names := {"moon_orbit": "Moon", "planet_orbit": "Planet",
-		"glut_1a_orbit": "Glut1a", "glut_1b_orbit": "Glut1b", "polisa_orbit": "Glut2Polisa"}
-	for id: String in names:
-		var label := Label.new()
-		label.name = names[id] + "Caption"
-		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		label.add_theme_font_size_override("font_size", 15)
-		label.add_theme_color_override("font_color", Color("b0c8d5"))
-		add_child(label)
-		_body_labels[id] = label
 	_recenter = Button.new()
 	_recenter.name = "RecenterMap"
 	_recenter.text = "Gesamtansicht"
@@ -53,6 +44,7 @@ func _ready() -> void:
 	add_child(_recenter)
 	resized.connect(_layout_buttons)
 	var system: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SYSTEM.DEFINITION_PATH))
+	_catalog_version = int(system.get("version",2))
 	_set_bodies(system.bodies)
 	_set_orbits(system.orbits)
 	_build_grid_mesh()
@@ -78,31 +70,87 @@ func set_travel_snapshot(travel: Dictionary) -> void:
 		set_process(true)
 	_travel = travel.duplicate(true)
 	_snapshot_applied = true
+	var previous_version := _catalog_version
+	_catalog_version = int(travel.get("system_version",travel.get("version",_catalog_version)))
 	var bodies: Dictionary = travel.get("bodies", _bodies)
 	if bodies != _bodies and bodies.has("sun"):
 		_set_bodies(bodies)
 	var orbits: Dictionary = travel.get("orbits", _orbits)
-	if orbits != _orbits and not orbits.is_empty():
+	if travel.get("draft",false) == true:
+		_set_orbits({})
+	elif orbits != _orbits or previous_version != _catalog_version:
 		_set_orbits(orbits)
 	_world.update_ships(travel)
 	_layout_buttons()
 
 
 func _set_bodies(bodies: Dictionary) -> void:
-	_bodies = bodies
+	_bodies = bodies.duplicate(true)
 	_world.update_bodies(bodies)
 
 
 func _set_orbits(orbits: Dictionary) -> void:
-	_orbits = orbits
+	# Owners validate the catalog. This rejects mismatched display records too.
+	_orbits = {}
 	_orbit_by_hex.clear()
-	for id in orbits:
-		for marker: Dictionary in orbits[id].get("markers", []):
-			_orbit_by_hex[GRID.cell_from_record(marker)] = {"orbit_id": id, "marker_id": marker.id}
+	var expected := GRID.orbits_for_version(_catalog_version)
+	var marker_count := 1 if _catalog_version == 3 else 3
+	var valid := not expected.is_empty() and orbits.size() == expected.size()
+	var projected_cells := {}
+	if valid:
+		for id: String in expected:
+			var orbit: Variant = orbits.get(id)
+			var body: Variant = _bodies.get(expected[id])
+			if not orbit is Dictionary or not body is Dictionary or orbit.get("body_id") != body.get("id") or body.get("kind","") == "station":
+				valid = false
+				break
+			var markers: Variant = orbit.get("markers")
+			if not markers is Array or markers.size() != marker_count:
+				valid = false
+				break
+			for index in marker_count:
+				var marker: Variant = markers[index]
+				if not marker is Dictionary or marker.get("id") != "orbit_%d" % (index+1) or not _display_cell_valid(marker.get("hex")):
+					valid = false
+					break
+				var cell := GRID.cell_from_record(marker)
+				if projected_cells.has(cell):
+					valid = false
+					break
+				projected_cells[cell] = {"orbit_id":id,"marker_id":marker.id}
+			if not valid: break
+	if valid:
+		_orbits = orbits.duplicate(true)
+		_orbit_by_hex = projected_cells
+	_sync_body_labels()
 
+static func _display_cell_valid(pair: Variant) -> bool:
+	if not pair is Array or pair.size() != 2: return false
+	for value in pair:
+		if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or float(value) != floor(float(value)): return false
+	var row := float(pair[1])
+	var column: float = float(pair[0]) + floor(row*0.5)
+	return row >= 0 and row < GRID.SIZE.y and column >= 0 and column < GRID.SIZE.x
+
+func _sync_body_labels() -> void:
+	for id in _body_labels.keys():
+		if not _orbits.has(id):
+			remove_child(_body_labels[id])
+			_body_labels[id].queue_free()
+			_body_labels.erase(id)
+	var names := {"moon_orbit":"Moon","planet_orbit":"Planet","glut_1a_orbit":"Glut1a","glut_1b_orbit":"Glut1b","polisa_orbit":"Glut2Polisa"}
+	for id: String in _orbits:
+		if _body_labels.has(id): continue
+		var label := Label.new()
+		label.name = String(names.get(id,id.validate_node_name())) + "Caption"
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size",15)
+		label.add_theme_color_override("font_color",Color("b0c8d5"))
+		add_child(label)
+		_body_labels[id] = label
 
 func get_orbit_definitions() -> Dictionary:
-	return _orbits
+	return _orbits.duplicate(true)
 
 
 func _pixels_per_unit() -> float:
@@ -219,13 +267,13 @@ func _layout_buttons() -> void:
 		"glut_1a_orbit": Vector2.UP, "glut_1b_orbit": Vector2(0.8, -0.6),
 	}
 	for id in _body_labels:
-		var body: Dictionary = _bodies[GRID.ORBITS[id]]
+		var body: Dictionary = _bodies[_orbits[id].body_id]
 		var center := map_to_screen(GRID.pair(body.position))
 		var radius: float = float(body.radius) * _pixels_per_unit()
 		var label: Label = _body_labels[id]
 		label.text = String(body.name).get_slice(" · ", 0)
 		label.reset_size()
-		label.position = center + Vector2(label_directions[id]) * (radius + 24.0) - label.size * 0.5
+		label.position = center + Vector2(label_directions.get(id,Vector2.LEFT if String(body.id) == "sun" else Vector2.DOWN)) * (radius + 24.0) - label.size * 0.5
 	_layout_location_buttons()
 	if _recenter != null:
 		_recenter.position = Vector2(maxf(size.x - 138, 0), 12)
@@ -263,7 +311,8 @@ func _draw() -> void:
 	_draw_warp_effect()
 	_draw_cutlass_exhaust()
 	draw_texture_rect(_world.get_texture(), Rect2(Vector2.ZERO, size), false)
-	draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), "Glut", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
+	if not _body_labels.has("sun_orbit"):
+		draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), "Glut", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
 	for id in _location_buttons:
 		var body: Dictionary = _body_for_location(id)
 		if body.is_empty():
@@ -434,6 +483,7 @@ func set_location_snapshot(locations: Dictionary) -> void:
 	_layout_location_buttons()
 
 func _body_for_location(id: String) -> Dictionary:
+	if id.is_empty(): return {}
 	for body: Dictionary in _bodies.values():
 		if String(body.surface_location_id) == id:
 			return body

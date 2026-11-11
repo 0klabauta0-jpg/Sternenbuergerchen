@@ -40,6 +40,7 @@ var _visit_buttons: Dictionary={}
 var _details: PanelContainer
 var _orbit_target_list: HFlowContainer
 var _orbit_target_buttons: Array[Button] = []
+var _orbit_target_signature := ""
 
 func configure(snapshot_provider: Callable, command_handler: Callable, area_provider: Callable = Callable()) -> void:
 	_provider = snapshot_provider
@@ -247,9 +248,24 @@ func _style_buttons() -> void:
 		button.add_theme_color_override("font_disabled_color", Color("85929f"))
 
 func _sync_orbit_targets(travel: Dictionary) -> void:
-	if _orbit_target_buttons.is_empty():
-		var orbits: Dictionary = _canvas.call("get_orbit_definitions")
-		for orbit_id in ["planet_orbit", "glut_1a_orbit", "glut_1b_orbit", "moon_orbit"]:
+	var orbits: Dictionary = _canvas.call("get_orbit_definitions")
+	var signature := var_to_str(orbits)
+	if signature != _orbit_target_signature:
+		_orbit_target_signature = signature
+		for child in _orbit_target_list.get_children():
+			_orbit_target_list.remove_child(child)
+			child.queue_free()
+		_orbit_target_buttons.clear()
+		# Body source order preserves V2's existing four rows, then adds others.
+		var ordered: Array = []
+		var bodies: Dictionary = travel.get("bodies",{})
+		for body_id in bodies:
+			if body_id == "sun": continue
+			for orbit_id in orbits:
+				if orbits[orbit_id].get("body_id") == body_id: ordered.append(orbit_id)
+		for orbit_id in orbits:
+			if not ordered.has(orbit_id): ordered.append(orbit_id)
+		for orbit_id in ordered:
 			var orbit: Dictionary = orbits.get(orbit_id, {})
 			if orbit.is_empty():
 				continue
