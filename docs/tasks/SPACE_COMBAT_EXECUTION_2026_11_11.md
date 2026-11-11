@@ -188,9 +188,13 @@ Verifier und diese Statusdokumentation.
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
   lässt die Rotte inaktiv; fremde oder doppelte Schiffe und doppelte Piloten
   werden abgewiesen. Gezielte Prüfung9/9, alte Rotten-/Lifecycle-/Auftrags-
-  verifier grün. Noch kein Anschluss an Flugstart, Gegneraufnahme, atomaren
-  Transfer oder Speicherung; die Flug-Invariante ist damit noch nicht global
+  verifier grün. Noch kein Anschluss an Flugstart, Gegneraufnahme, Transfer-
+  Commands oder Speicherung; die Flug-Invariante ist damit noch nicht global
   durchgesetzt. Betroffene Reise- und Orbitdateien bleiben bis Abstimmung frei.
+- AP04 Transfer-Vorstufe: interner Ownerwechsel verschiebt ein Schiff atomar,
+  prüft Ownership und Zielkapazität, löst eine geleerte Quellrotte auf und
+  erhält beziehungsweise ersetzt die Führung. Gezielte Prüfung16/16 inklusive
+  Sechsergrenze; bisher kein Command-/UI-/Flugstartanschluss.
 - Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
   integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
   Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine

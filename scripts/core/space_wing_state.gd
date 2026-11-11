@@ -63,6 +63,34 @@ func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: A
 	for craft in ids: wing_by_craft[craft] = _craft_wings[craft]
 	return {"ok":true, "changed":changed, "revision":_revision, "wing_by_craft":wing_by_craft}
 
+func transfer_craft(actor_id: String, craft_id: String, destination_id: String, pilots: Dictionary) -> Dictionary:
+	# Internal owner operation; command authority and phase must be checked by caller.
+	if actor_id.strip_edges().is_empty() or not _craft_wings.has(craft_id) or not _wings.has(destination_id):
+		return _reject("unknown_wing_or_craft")
+	var source_id: String = _craft_wings[craft_id]
+	if _wings[source_id].owner_id != actor_id or _wings[destination_id].owner_id != actor_id:
+		return _reject("not_owned")
+	if source_id == destination_id: return _reject("already_member")
+	if _wings[destination_id].craft_ids.size() >= MAX_MEMBERS: return _reject("wing_full")
+	var ready: Array = []
+	for craft in _wings[source_id].craft_ids:
+		if typeof(pilots.get(craft, "")) != TYPE_STRING: return _reject("invalid_pilot_mapping")
+		if craft != craft_id and not String(pilots.get(craft, "")).strip_edges().is_empty(): ready.append(craft)
+	var candidate: Dictionary = _wings.duplicate(true)
+	candidate[source_id].craft_ids.erase(craft_id)
+	if candidate[source_id].craft_ids.is_empty():
+		candidate.erase(source_id)
+	elif candidate[source_id].leader_craft_id == craft_id:
+		ready.sort()
+		candidate[source_id].leader_craft_id = "" if ready.is_empty() else ready[0]
+	candidate[destination_id].craft_ids.append(craft_id)
+	if String(candidate[destination_id].leader_craft_id).is_empty() and not String(pilots.get(craft_id, "")).strip_edges().is_empty():
+		candidate[destination_id].leader_craft_id = craft_id
+	_wings = candidate
+	_craft_wings[craft_id] = destination_id
+	_revision += 1
+	return {"ok":true, "revision":_revision}
+
 func check_replay(command: Dictionary, actor_id: String) -> Dictionary:
 	if typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).is_empty():
 		return {"found": false}
