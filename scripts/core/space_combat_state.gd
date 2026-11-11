@@ -50,6 +50,12 @@ func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture
 func get_actor(craft_id: String) -> RefCounted:
 	return _registry.get_actor(craft_id)
 
+func get_area_actor_ids(area_id: String) -> Array[String]:
+	return _registry.get_area_actor_ids(area_id)
+
+func get_indexed_actor_cells(craft_id: String) -> Array:
+	return _registry.get_indexed_actor_cells(craft_id)
+
 func get_inactive_actor(craft_id: String) -> RefCounted:
 	return _inactive_actors.get(craft_id)
 
@@ -195,7 +201,19 @@ func update_actor_cell(craft_id: String, cell: Vector2i) -> bool:
 func get_flight_snapshots() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for craft_id in _metadata:
-		var snapshot: Dictionary = _registry.get_actor(craft_id).get_snapshot()
+		var flight: RefCounted = _registry.get_actor(craft_id)
+		if flight == null: continue
+		var snapshot: Dictionary = flight.get_snapshot()
+		snapshot["footprint_hexes"] = _metadata[craft_id].footprint_hexes.duplicate()
+		result.append(snapshot)
+	return result
+
+func get_area_flight_snapshots(area_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for craft_id in _registry.get_area_actor_ids(area_id):
+		var flight: RefCounted = _registry.get_actor(craft_id)
+		if flight == null: continue
+		var snapshot: Dictionary = flight.get_snapshot()
 		snapshot["footprint_hexes"] = _metadata[craft_id].footprint_hexes.duplicate()
 		result.append(snapshot)
 	return result
@@ -264,6 +282,7 @@ func _polygon_area(polygon: PackedVector2Array) -> float:
 func sync_moved_actors() -> void:
 	for craft_id in _metadata:
 		var flight: RefCounted = _registry.get_actor(craft_id)
+		if flight == null: continue
 		var snapshot: Dictionary = flight.get_snapshot()
 		if int(_indexed_revisions.get(craft_id, -1)) == int(snapshot.revision):
 			continue

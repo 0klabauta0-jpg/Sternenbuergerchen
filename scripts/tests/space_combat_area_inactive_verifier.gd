@@ -22,6 +22,8 @@ func _initialize() -> void:
 	flight._publish_space_activity_transition(activity)
 	state._publish_deactivation(prepared)
 	if state.get_actor(id) != null or state.get_inactive_actor(id) != flight or not state.query_navigation_claims(claim, area).is_empty(): failed += 1
+	state.sync_moved_actors()
+	if not state.get_flight_snapshots().is_empty(): failed += 1
 	if state.admit_actor(definition, flight, true).get("reason") != "already_inactive": failed += 1
 	var next: Vector2i = cell + Vector2i(1,0)
 	var proposal := {"expected_revision":flight.get_snapshot().revision, "motion_mode":"tactical", "position_plane":GRID.HEX.axial_to_plane(Vector2(next))}
@@ -35,5 +37,5 @@ func _initialize() -> void:
 	if not state.reactivate_actor(id).get("ok", false) or state.get_actor(id) != flight or state.get_inactive_actor(id) != null: failed += 1
 	var cells: Array[Vector2i] = [next]
 	if state.query_cells(cells, area) != [id]: failed += 1
-	print("SPACE_COMBAT_AREA_INACTIVE passed=", 9 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AREA_INACTIVE passed=", 10 - failed, " failed=", failed)
 	quit(1 if failed else 0)

@@ -310,6 +310,22 @@ func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 func get_space_area_revision(area_id: String) -> int:
 	return _space_combat_state.get_area_revision(area_id)
 
+func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
+	# Until contact visibility exists, disclose only the singleplayer fleet.
+	if actor_id != "singleplayer" or _singleplayer_space_travel_owner == null:
+		return {"ok":false, "reason":"actor_unavailable"}
+	if area_id.is_empty(): return {"ok":false, "reason":"invalid_area"}
+	var actors: Array[Dictionary] = []
+	for craft_id in _space_combat_state.get_area_actor_ids(area_id):
+		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+		if flight == null or _singleplayer_space_travel_owner.get_flight_state(craft_id) != flight: continue
+		var wing_id: String = _space_wing_state.get_craft_wing(craft_id, actor_id)
+		if wing_id.is_empty(): continue
+		var pose: Dictionary = flight.get_snapshot()
+		if pose.get("space_area_id") != area_id or pose.get("motion_mode") != "tactical": continue
+		actors.append({"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)})
+	return {"ok":true, "space_area_id":area_id, "area_revision":_space_combat_state.get_area_revision(area_id), "actors":actors}
+
 func preview_surface_approach(craft_id: String, location_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
 	# Read-only geometric evidence, never authorization or a reservation.
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
@@ -614,7 +630,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 	var area := {"coordinate_frame":world.get("coordinate_frame", "strategic"), "space_area_id":world.get("space_area_id", "")}
 	if not SPACE_AREA_GRID.contains(Vector2i.ZERO, area): return {"ok":false, "reason":"invalid_area"}
 	var actors: Array[Dictionary] = []
-	for snapshot in _space_combat_state.get_flight_snapshots():
+	for snapshot in _space_combat_state.get_area_flight_snapshots(String(area.space_area_id)):
 		if snapshot.motion_mode == "tactical" and snapshot.get("coordinate_frame", "strategic") == area.coordinate_frame and snapshot.get("space_area_id", "") == area.space_area_id:
 			actors.append(snapshot)
 	var seen := {}
