@@ -71,9 +71,13 @@ func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:
 
 func unregister_actor(craft_id: String) -> bool:
 	if not _actors.has(craft_id): return false
+	_publish_unregister_actor(craft_id)
+	return true
+
+func _publish_unregister_actor(craft_id: String) -> void:
+	# Caller has already validated identity; no external callbacks or signals.
 	_remove_actor_cells(craft_id)
 	_actors.erase(craft_id)
-	return true
 
 func _remove_actor_cells(craft_id: String) -> void:
 	var area: String = String(_actor_areas.get(craft_id, ""))
