@@ -731,6 +731,14 @@ func get_space_area_projection(craft_id: String) -> Dictionary:
 		if actor.get("craft_id") == craft_id: return projection
 	return {"ok":false, "reason":"not_owned"}
 
+func preview_space_warp_entry(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_flow) or _travel == null or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(craft_id)) != TYPE_STRING or String(pilots[craft_id]).is_empty(): return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var routes: Dictionary = _travel.get_snapshot().get("routes", {})
+	if not routes.has(craft_id): return _reject("unknown_craft", "Schiff ist nicht in der eigenen Flotte")
+	return {"ok":true, "owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
+
 func advance_space_travel(delta: float) -> void:
 	if _travel != null and _travel.is_quantum_active():
 		_commit("singleplayer_space_travel", "advance", {"delta_seconds": minf(delta, 60.0)}, "", {"runtime_authorized": true})

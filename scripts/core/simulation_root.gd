@@ -243,6 +243,7 @@ const SPACE_NAVIGATION = preload("res://scripts/tactical/space_navigation_resolv
 const SPACE_FLIGHT_RESOLVER = preload("res://scripts/tactical/space_flight_resolver.gd")
 const SPACE_GUIDANCE_RESOLVER = preload("res://scripts/tactical/space_guidance_resolver.gd")
 const SPACE_AREA_TRANSITION = preload("res://scripts/tactical/space_area_transition_resolver.gd")
+const SPACE_ORBIT_ENTRY_SEARCH = preload("res://scripts/tactical/space_orbit_entry_search.gd")
 const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
@@ -258,6 +259,7 @@ var _fixture_surface_group_receipts: Dictionary = {}
 var _fixture_surface_group_serial := 0
 var _local_return_receipts: Dictionary = {}
 var _local_return_latest_by_craft: Dictionary = {}
+var _warp_entry_searches: Dictionary = {}
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
@@ -493,6 +495,77 @@ func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 
 func get_space_area_revision(area_id: String) -> int:
 	return _space_combat_state.get_area_revision(area_id)
+
+func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: float) -> Dictionary:
+	# Internal bounded owner path; adapter tick is intentionally not connected
+	# until the inverse local-to-strategic transition is also available.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or not adapter.has_method("preview_space_warp_entry"): return {"ok":false, "reason":"adapter_required"}
+	if not is_finite(delta) or delta <= 0.0 or delta > 60.0 or _singleplayer_space_travel_owner == null or _ship_equipment_owner == null: return {"ok":false, "reason":"invalid_entry_context"}
+	var pilot_context: Dictionary = adapter.preview_space_warp_entry(craft_id)
+	if not pilot_context.get("ok", false): _warp_entry_searches.erase(craft_id); return pilot_context
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or _space_combat_state.get_actor(craft_id) != null or _space_combat_state.get_inactive_actor(craft_id) != null: _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"actor_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	if travel.get("phase") != "quantum" or pose.get("coordinate_frame") != "strategic" or not String(pose.get("space_area_id", "")).is_empty(): _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"quantum_completion_required"}
+	if float(travel.get("elapsed_seconds", 0.0)) + delta < float(travel.get("duration_seconds", 0.0)): return {"ok":false, "reason":"quantum_not_complete"}
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(String(travel.get("target_orbit_id", "")), {})
+	var body_id := String(orbit.get("body_id", ""))
+	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
+	if not layout.get("ok", false): return {"ok":false, "reason":"invalid_body"}
+	var equipment_snapshot: Dictionary = _ship_equipment_owner.get_snapshot(craft_id)
+	var state: Dictionary = _warp_entry_searches.get(craft_id, {})
+	if not state.is_empty() and (state.flight != flight or state.flight_revision != pose.revision or state.travel_revision != travel.revision or state.equipment_owner != _ship_equipment_owner or state.equipment_snapshot != equipment_snapshot or state.body_id != body_id):
+		_warp_entry_searches.erase(craft_id)
+		return {"ok":false, "reason":"entry_context_changed"}
+	if state.is_empty():
+		if _warp_entry_searches.size() >= 64: return {"ok":false, "reason":"entry_capacity"}
+		var profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(craft_id)
+		if not profile.get("ok", false): return profile
+		if not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_mass_mismatch"}
+		var search = SPACE_ORBIT_ENTRY_SEARCH.new()
+		var started: Dictionary = search.begin(body_id, [{"craft_id":craft_id, "flight":flight, "footprint_hexes":profile.footprint_hexes}], _space_combat_state)
+		if not started.get("ok", false): return started
+		state = {"search":search, "flight":flight, "flight_revision":pose.revision, "travel_revision":travel.revision, "equipment_owner":_ship_equipment_owner, "equipment_snapshot":equipment_snapshot, "body_id":body_id, "footprint":profile.footprint_hexes.duplicate(), "delta":delta}
+		_warp_entry_searches[craft_id] = state
+	var search_result: Dictionary = state.search.advance(256)
+	if not search_result.get("ok", false): _warp_entry_searches.erase(craft_id); return search_result
+	if search_result.status == "pending": return {"ok":true, "status":"pending"}
+	var target := {"position_plane":search_result.allocations[craft_id].position_plane, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}
+	var tick := tick_counter + 1
+	var geometry: Dictionary = SPACE_AREA_TRANSITION.preview(flight, pose.revision, body_id, target, state.footprint, _space_combat_state, tick)
+	if not geometry.get("ok", false): _warp_entry_searches.erase(craft_id); return geometry
+	var wing: Dictionary = _space_wing_state.preview_flying_wings("singleplayer", [craft_id], pilot_context.owned_crafts, pilot_context.craft_pilots)
+	if not wing.get("ok", false): _warp_entry_searches.erase(craft_id); return wing
+	var definition := {"craft_id":craft_id, "faction_id":"player", "control_domain":"player", "footprint_hexes":state.footprint}
+	var admission: Dictionary = _space_combat_state.validate_new_local_admission(definition, flight, geometry.proposal, tick)
+	var movement: Dictionary = flight.validate_area_transition(geometry.proposal, tick)
+	if not admission.get("ok", false) or not movement.get("ok", false): _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"admission_invalid"}
+	var bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
+	if not bound.get("ok", false): _warp_entry_searches.erase(craft_id); return bound
+	var id := "warp-arrival:%s:%d" % [craft_id, int(travel.revision)]
+	var payload := {"craft_id":craft_id, "delta_seconds":state.delta}
+	var context := {"request_id":id, "request_signature":JSON.stringify({"operation":"advance", "payload":payload}, "", true), "operation":"advance", "payload":payload, "source_area_id":"", "target_area_id":layout.body_map_id, "expected_travel_revision":travel.revision, "expected_phase":"quantum", "context_id":id}
+	bound = _singleplayer_space_travel_owner.bind_space_area_transition_context(context, self)
+	if not bound.get("ok", false): _warp_entry_searches.erase(craft_id); return bound
+	var candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, travel.revision, "", layout.body_map_id, context)
+	var tv: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(candidate, context) if candidate.get("ok", false) else candidate
+	if not tv.get("ok", false) or tv.get("replayed", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(id, self); _warp_entry_searches.erase(craft_id)
+		return {"ok":false, "reason":"travel_validation_failed"}
+	# The wing owner mutates first only after all other participants validate;
+	# all remaining operations are synchronous internal publication tails.
+	var committed_wing: Dictionary = _space_wing_state.ensure_flying_wings("singleplayer", [craft_id], pilot_context.owned_crafts, pilot_context.craft_pilots, wing.expected_revision)
+	if not committed_wing.get("ok", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(id, self); _warp_entry_searches.erase(craft_id)
+		return committed_wing
+	flight._publish_area_transition(movement)
+	_space_combat_state._publish_new_local_admission(admission)
+	var arrival: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
+	_warp_entry_searches.erase(craft_id)
+	return {"ok":true, "status":"complete", "space_area_id":layout.body_map_id, "travel_result":arrival}
 
 func preview_singleplayer_local_return_fuel(adapter: Node, craft_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
