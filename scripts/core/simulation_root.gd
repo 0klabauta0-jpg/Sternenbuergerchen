@@ -50,6 +50,7 @@ func request_base_personnel_command(operation: String, payload: Dictionary) -> D
 	return _base_personnel_owner.call("apply_operation", operation, payload.duplicate(true))
 
 signal tick_processed(tick: int)
+signal hex_ground_events_committed(events: Array[Dictionary])
 signal singleplayer_command_committed(command: Dictionary, result: Dictionary)
 
 var _singleplayer_campaign_owner: RefCounted
@@ -284,6 +285,7 @@ var _hex_facing_pending: Dictionary = {}
 var _hex_facing_seen: Dictionary = {}
 var _hex_facing_replay_keys: Array[String] = []
 var _hex_facing_replay_cursor := 0
+var _last_hex_ground_events: Array[Dictionary] = []
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -298,7 +300,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	if not map_data.has_method("get_map_name") or not map_data.has_method("get_grid_size"):
 		return {"ok": false, "reason": "invalid_map_context"}
 	var map_size: Variant = map_data.call("get_grid_size")
-	if String(map_data.call("get_map_name")).strip_edges().is_empty() or typeof(map_size) != TYPE_VECTOR2I or map_size.x <= 0 or map_size.y <= 0 or tick_counter < 0:
+	if String(map_data.call("get_map_name")).strip_edges().is_empty() or typeof(map_size) != TYPE_VECTOR2I or map_size.x <= 0 or map_size.y <= 0 or tick_counter < 0 or tick_counter > HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:
 		return {"ok": false, "reason": "invalid_map_context"}
 	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_grid_topology") or String(terrain_registry.call("get_grid_topology")) != String(map_data.call("get_grid_topology")):
 		return {"ok": false, "reason": "invalid_terrain_registry"}
@@ -312,6 +314,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 		_hex_facing_seen.clear()
 		_hex_facing_replay_keys.clear()
 		_hex_facing_replay_cursor = 0
+		_last_hex_ground_events.clear()
 		return {"ok": true, "enabled": false}
 	if rules != "hex_tactical_v1" or String(map_data.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
 		return {"ok": false, "reason": "unsupported_tactical_grid_rules"}
@@ -328,6 +331,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	_hex_facing_seen.clear()
 	_hex_facing_replay_keys.clear()
 	_hex_facing_replay_cursor = 0
+	_last_hex_ground_events.clear()
 	return {"ok": true, "enabled": true}
 
 
@@ -369,6 +373,28 @@ func get_hex_ground_planning_snapshot() -> Dictionary:
 	var snapshot: Dictionary = _hex_ground_runtime.build_planning_snapshot()
 	snapshot["current_tick"] = tick_counter
 	return snapshot
+
+
+func commit_hex_ground_plan(plan: Dictionary, expected_revision: int) -> Dictionary:
+	if _should_skip_local_tick_processing():
+		return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():
+		return {"ok":false,"reason":"hex_ground_inactive"}
+	if int(_hex_ground_runtime.get_current_tick()) != tick_counter:
+		return {"ok":false,"reason":"hex_clock_unsynced"}
+	return _hex_ground_runtime.commit_plan(plan,expected_revision)
+
+
+func get_hex_ground_events() -> Array[Dictionary]:
+	return _last_hex_ground_events.duplicate(true)
+
+
+func _advance_hex_ground_tick() -> void:
+	_last_hex_ground_events.clear()
+	if not is_hex_ground_runtime_active():return
+	_last_hex_ground_events = _hex_ground_runtime.advance_tick(tick_counter)
+	if not _last_hex_ground_events.is_empty():
+		hex_ground_events_committed.emit(_last_hex_ground_events.duplicate(true))
 
 
 ## Internal runtime admission boundary; lifecycle adapters choose placements.
@@ -1356,6 +1382,7 @@ func _physics_process(delta: float) -> void:
 	tick_counter += 1
 	is_processing_tick = true
 	_begin_navigation_budget_tick()
+	_advance_hex_ground_tick()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_prepare_local_avoidance_tick()

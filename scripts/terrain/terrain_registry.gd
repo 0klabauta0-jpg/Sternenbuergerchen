@@ -4,6 +4,7 @@ extends Node
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const COVER_RADIUS_BUCKET_WORLD_SIZE: float = 256.0
+const HEX_NEIGHBOR_CACHE_CAPACITY := 4096
 
 var _tiles: Dictionary = {}
 var _tile_id_lookup: Dictionary = {}
@@ -20,6 +21,11 @@ var _cover_radius_index_dirty: bool = true
 var _cover_radius_index_tiles: Array = []
 var _cover_radius_index_buckets: Dictionary = {}
 var _cover_radius_index_has_non_finite_positions: bool = false
+var _hex_neighbor_cache: Dictionary = {}
+var _hex_neighbor_cache_keys: Array[Vector2i] = []
+var _hex_neighbor_cache_cursor := 0
+var _hex_neighbor_cache_hits := 0
+var _hex_neighbor_cache_builds := 0
 
 
 func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float, grid_topology: String = "square8") -> void:
@@ -37,6 +43,42 @@ func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half
 
 func get_grid_topology() -> String:
 	return _grid_topology
+
+
+## Derived bidirectional foot topology only; occupancy and promises live in
+## SimulationRoot. Revision tags invalidate lazily without a whole-cache clear.
+func get_legal_hex_neighbors(grid: Vector2i) -> Array[Vector2i]:
+	var neighbors: Array[Vector2i] = []
+	if _grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return neighbors
+	var cached: Dictionary = _hex_neighbor_cache.get(grid,{})
+	if not cached.is_empty() and int(cached["revision"]) == _revision:
+		_hex_neighbor_cache_hits+=1
+		return cached["neighbors"].duplicate()
+	_hex_neighbor_cache_builds+=1
+	if is_walkable(grid):
+		var from_tile = get_tile_at_grid(grid)
+		for direction in HEX_GRID_SCRIPT.DIRECTIONS:
+			var next: Vector2i = grid+direction
+			if not is_walkable(next):continue
+			var to_tile = get_tile_at_grid(next)
+			if TERRAIN_TILE_DATA_SCRIPT.allows_registry_step(from_tile,to_tile,true,true) and TERRAIN_TILE_DATA_SCRIPT.allows_registry_step(to_tile,from_tile,true,true):
+				neighbors.append(next)
+	if not _hex_neighbor_cache.has(grid):
+		if _hex_neighbor_cache_keys.size()<HEX_NEIGHBOR_CACHE_CAPACITY:
+			_hex_neighbor_cache_keys.append(grid)
+		else:
+			_hex_neighbor_cache.erase(_hex_neighbor_cache_keys[_hex_neighbor_cache_cursor])
+			_hex_neighbor_cache_keys[_hex_neighbor_cache_cursor]=grid
+			_hex_neighbor_cache_cursor=(_hex_neighbor_cache_cursor+1)%HEX_NEIGHBOR_CACHE_CAPACITY
+	_hex_neighbor_cache[grid]={"revision":_revision,"neighbors":neighbors}
+	return neighbors.duplicate()
+
+
+func get_hex_neighbor_cache_audit_snapshot() -> Dictionary:
+	return {"entry_count":_hex_neighbor_cache.size(),"capacity":HEX_NEIGHBOR_CACHE_CAPACITY,
+		"hits":_hex_neighbor_cache_hits,"builds":_hex_neighbor_cache_builds,
+		"revision":_revision,"derived_only":true}
 
 
 func are_grid_neighbors(a: Vector2i, b: Vector2i) -> bool:

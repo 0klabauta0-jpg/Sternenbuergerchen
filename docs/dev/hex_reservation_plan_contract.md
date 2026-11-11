@@ -2,7 +2,8 @@
 
 `BottleneckReservationResolver.build_hex_plan(requests, ground_snapshot,
 terrain_registry, options={})` ist statisch und mutiert keine Eingaben, Actoren,
-Registries oder Owner. Legacy-Einstiege bleiben unveraendert. Dieser Vertrag
+Gameplayzustand in Registries oder Ownern. Rein abgeleitete, revisionierte
+Nachbartopologie darf in der Registry wiederverwendet werden. Legacy-Einstiege bleiben unveraendert. Dieser Vertrag
 wurde vor Implementierung ueber Root mit dem Tabletop-Owner abgestimmt.
 
 ## Snapshot und Segmente
@@ -57,7 +58,10 @@ Nur echte Fortschritte starten einen weiteren begrenzten Followerdurchlauf.
 ## Korridore und Ruecksetzvorschlaege
 
 Legalitaet verwendet sechs Hexnachbarn, Runtime-Walkability und ausschliesslich
-`TerrainTileData.allows_step`. Kein pauschales Rampenmutex: breite passende
+`TerrainTileData.allows_registry_step` nach beiden maßgeblichen Walkabilitygates.
+Dieser Einstieg teilt den kanonischen Endpunkthöhenkern mit `allows_step`;
+Runtime-Türübersteuerungen ändern keine Rampenrichtung oder Höhenfreigabe.
+Kein pauschales Rampenmutex: breite passende
 H+0.5-Baender und Kurven benutzen denselben Graph wie Plateaus und Rampenachsen.
 Der aufruflokale Graph liest maximal 64 Felder, niemals get_sorted_tiles oder
 die gesamte Karte. Zusammenhaengende lokale Abschnitte mit maximal zwei legalen

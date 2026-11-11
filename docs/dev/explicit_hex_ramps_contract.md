@@ -23,6 +23,11 @@ An einer geteilten Kante muessen beide Endpunkthoehen uebereinstimmen.
 Plateau besitzt an jeder Kante seine height_level. Rampen besitzen an der Laengsachse H/H+1 und seitlich H+0.5. Normaler H0/H1-Kontakt ist gesperrt,
 auch wenn die Differenz nur1 ist. A*, HPA und tatsaechliche Bewegung muessen
 denselben TerrainTileData-Vertrag lesen. Keine Freigabe aus UI/Visualmesh.
+Runtime-Aufrufer verwenden `allows_registry_step` mit der beidseitig geprüften
+Registrybegehbarkeit, damit Türübersteuerungen maßgeblich bleiben. Dieser
+Einstieg teilt denselben Endpunkthöhenkern; Authoring-`allows_step` und
+`endpoint_height` behalten ihre Raw-Walkabilitydefaults. Eine geöffnete Tür
+gibt weder Rampenflanken noch falsche Endpunkthöhen oder H8→H9 frei.
 
 ## Standhoehe und Projektion
 Logische Stand-/Sichthoehe im Rampenzentrum ist H+0.5. Renderinterpolation
