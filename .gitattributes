@@ -95,3 +95,7 @@ docs/qa/hex_terrain_composition_20261111/** -text whitespace=blank-at-eol,blank-
 art/hex_terrain_composition_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 docs/qa/polisa_station_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Preserve exact hashes of frozen Polisa lookdev sources and native evidence.
+art/polisa_lookdev_20261111/** -text
+docs/qa/polisa_lookdev_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
