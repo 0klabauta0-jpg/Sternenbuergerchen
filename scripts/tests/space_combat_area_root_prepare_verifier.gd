@@ -77,10 +77,15 @@ func _initialize() -> void:
 	var local_snap: Dictionary = fleet.flight.get_snapshot()
 	var ordinary := {"expected_revision":local_snap.revision, "position_plane":local_snap.position_plane}
 	if sim.commit_space_actor_motion(actor.craft_id, ordinary, 1, auth).get("reason") != "local_area_not_ready": failed += 1
+	if not sim.enter_space_tactical(actor.craft_id, 1, auth).get("ok", false): failed += 1
+	var next_cell: Vector2i = GRID.from_offset(Vector2i(201,230))
+	var next_motion: Array[Dictionary] = [{"craft_id":actor.craft_id, "expected_revision":fleet.flight.get_snapshot().revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(next_cell))}]
+	var moved: Dictionary = sim.commit_space_fleet_motion(next_motion, 2, {"coordinate_frame":"local", "space_area_id":"orbit_approach:moon"}, auth)
+	if not moved.get("ok", false) or moved.accepted != [actor.craft_id]: failed += 1
 	if not sim.commit_space_area_transition(String(prepared.get("token", "")), auth).get("replayed", false) or fleet.revision != 4: failed += 1
 	if sim.get("_fixture_area_tokens").has(prepared.token) or not sim.get("_fixture_area_receipts").has(prepared.token): failed += 1
 	if not sim.prepare_space_area_transition(actor.craft_id, "orbit_approach:moon", target, 0, 3, auth).get("replayed", false): failed += 1
 	if sim.release_space_area_transition(prepared.token, auth).get("reason") != "already_committed": failed += 1
 	sim.free()
-	print("SPACE_COMBAT_AREA_ROOT_PREPARE passed=", 20 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AREA_ROOT_PREPARE passed=", 22 - failed, " failed=", failed)
 	quit(1 if failed else 0)
