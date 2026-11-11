@@ -76,15 +76,20 @@ idempotence, replacement return, and the actual consumer effect before broader
 native service/flight/save-continuation acceptance. Existing old saves remain
 valid through the explicit default, not an invented external loadout.
 
-## Local ship pickup is separate and still open
-Current Polisa purchases explicitly deliver Cutlass/Buccaneer to free built home
-pads. Station pickup requires an authoritative location/pad-occupancy/arrival and
-crew handoff, plus persistence for the newly local craft; it cannot be achieved
-by changing UI text or a receipt destination. No local-pickup option is offered
-until those owners support the full handoff. No new vehicle models in this scope.
+## Local ship pickup: bounded implementation
+Polisa now offers home delivery or actual local Cutlass/Buccaneer pickup. A real
+uncrewed parked card/sequence, free compatible R08 pad, exact local visit, fresh
+surface travel owner and versioned acquisition receipt are connected. A free
+built home pad remains reserved. Explicit crew/pilot handoff updates both visits,
+the base personnel transport binding and global pilot assignment before signals.
+Boarding/flight guards still require real presence. Existing model projection
+selects the actual Buccaneer asset. Home-only checkpoints validate old/new receipts.
+Contract polisa_local_ship_pickup_contract.md and QA polisa_local_pickup_integration_20261111
+define the tested boundary. Tiny vertical18/0, Flow23/0, Backend43/0; presence is
+explicit_owner_endpoints_not_flight_motion, not native travel/save acceptance. No new vehicle models.
 
 ## Local pickup follow-up plan / 2026-11-11
-Concrete unimplemented task: [POLISA_LOCAL_SHIP_PICKUP_2026_11_11](../tasks/POLISA_LOCAL_SHIP_PICKUP_2026_11_11.md). Scope is existing Cutlass/Buccaneer only; no equipment/warp consumer changes. Product ownership must be agreed before edits.
+Historical audit and now implemented task: [POLISA_LOCAL_SHIP_PICKUP_2026_11_11](../tasks/POLISA_LOCAL_SHIP_PICKUP_2026_11_11.md). Scope is existing Cutlass/Buccaneer only; no equipment/warp consumer changes. The following paragraphs preserve its original boundary and design rationale.
 
 All seven polisa_pad_01..07 already exist as product MapData markers. Their canonical R08 source is art/polisa_r08_20261111/author_layout.py:39-42 and layout.json/layout_compiled.json: two M12x12, one L16x24, four S8x6. build_candidate.py:28-29,59-63 adds origin_plane [0,-70], snaps to a walkable hex and writes iso marker coordinates. Runtime reads each real MapData marker; local centers or visual transforms are not substitute gameplay positions. spawn_alpha/ship_return alias pad_01; current Tactical authored-pad getter uses that single alias. Missing functionality is shared local pad selection/reservation and a real parked craft, not missing art markers. Art reserve_envelope alone does not prove model compatibility.
 

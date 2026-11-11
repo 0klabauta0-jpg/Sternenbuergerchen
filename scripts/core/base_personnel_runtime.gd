@@ -195,6 +195,32 @@ func mark_recruit_remote(unit_id: String, craft_id: String) -> Dictionary:
 	state_changed.emit()
 	return {"ok":true,"unit_id":unit_id,"craft_id":craft_id}
 
+func validate_remote_craft_handoff(unit_ids: PackedStringArray, source_craft_id: String, target_craft_id: String) -> Dictionary:
+	# This changes only the existing remote transport binding. The local mission
+	# owns actual deployed/embarked presence and validates it before committing.
+	if source_craft_id.is_empty() or source_craft_id == target_craft_id or unit_ids.is_empty() or _flow == null:
+		return _reject("invalid_transport_handoff", "Besatzungswechsel ist ungueltig")
+	var locations: Dictionary = _flow.get("_aircraft_location_by_craft")
+	for craft_id in [source_craft_id,target_craft_id]:
+		if String(locations.get(craft_id, "")) != "mission" or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty():
+			return _reject("invalid_transport_handoff", "Beide Schiffe muessen am entfernten Ort anwesend sein")
+	var unique := {}
+	for id in unit_ids:
+		if unique.has(id) or not _states.has(id) or String(_states[id].get("status", "")) != "aboard" or String(_states[id].get("craft_id", "")) != source_craft_id:
+			return _reject("invalid_transport_membership", "Person ist nicht diesem Ausflugsschiff zugeordnet")
+		unique[id] = true
+	return {"ok":true}
+
+func commit_remote_craft_handoff(unit_ids: PackedStringArray, source_craft_id: String, target_craft_id: String) -> Dictionary:
+	var checked := validate_remote_craft_handoff(unit_ids, source_craft_id, target_craft_id)
+	if not checked.get("ok", false): return checked
+	# Synchronous, no signals/await or fallible work after the validated loop.
+	for id in unit_ids: _states[id].craft_id = target_craft_id
+	return {"ok":true}
+
+func finalize_remote_craft_handoff() -> void:
+	state_changed.emit()
+
 func get_unit_registry() -> Node:
 	return _registry
 func get_terrain_registry() -> Node:

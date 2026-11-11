@@ -12282,3 +12282,25 @@ Deltareview ohne Restblocker. Tabletop-Rootdateibesitz abgestimmt, keine seiner
 Hex-/Move-/Tick-/Actorbodies veraendert. Grosse native Bedien-/Reise-/Save-/
 Performanceabnahme, Waffen, lokale Schiffsabholung und Retrofit-Retirement offen.
 Keine Main-/EXE-Integration. QA warp_drive_integration_20261111.
+
+
+## 2026-11-11: lokale Polisa-Schiffsabholung
+Heimatlieferung plus ausdrueckliche lokale Cutlass-/Buccaneerabholung auf echten
+freien passenden R08Pads angeschlossen. Unbemannte Card/Sequence im vorhandenen
+Ort, kein fingierter Anflug/Personenrespawn. Vorhandener Reiseowner entsteht
+autorisiert surface/polisa, eigene versionierte Erwerbsherkunft statt falschem
+Heimat-Outboundtoken. Ein gebautes Heimatpad bleibt als Rueckkehrplatz reserviert.
+Supply/Stock/Fuel/Receipts und vorhandene Registry/Transportowner bleiben Wahrheit.
+Explizite Crew-/Pilotuebergabe aktualisiert genaue Visits/parallele Teamarrays,
+globale Piloten und BasePersonnelremoteBinding emitfrei gemeinsam; bestehende
+Embark-/Deployeffekte und Distanz-/Pendinggates bleiben. Stationsschiffe brauchen
+auch ohne Campaignmarker echte Besatzung. Historische Ready-Karten setzen keine
+Pilotenbesitzer zurueck; partialer Pilotabflug beendet keine verbliebenen Teamplaene.
+Vorhandenes Buccaneermodell wird im bestehenden Renderer korrekt ausgewaehlt.
+Alte Heimat- und neue lokale Erwerbsbelege beim weiterhin home-only Checkpoint
+validiert. Unabhaengige Reviews mit gezielten Korrekturen; frisch kleine gemeinsame
+Vertikal18/0, Flow23/0, Backend43/0 und zwei Rootcompiles0. Helper27/0/Controller26/0
+sind Teilbelege. Vertikalgrenze ausdruecklich explicit_owner_endpoints_not_flight_motion; native Wege/
+Effectcommit/Heimkehr/SaveContinue/Gefechte/Performance spaeter, kein Main/EXE.
+QA polisa_local_pickup_integration_20261111. Tabletop-Dateibesitz abgestimmt; dessen
+neuer AP5-Commandschritt war zur Abholpruefung noch nicht als Commit uebergeben.

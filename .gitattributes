@@ -148,3 +148,6 @@ docs/qa/tabletop_restplan_integration_20261111/motion_projection/** -text whites
 docs/qa/tabletop_restplan_integration_20261111/motion_stop/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/warp_drive_slot_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/warp_drive_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/polisa_local_pickup_backend_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/polisa_local_pickup_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+output/native_glut_maps/polisa_local_pickup_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

@@ -1,0 +1,15 @@
+{
+  "scripts/core/base_personnel_runtime.gd": "a37d38365c5b4e921b233fbfcb2aa90ad87eb795f4a1b8516d5a59724421e57e",
+  "scripts/core/singleplayer_fleet_travel_state.gd": "aefd7c64bb2104249294fae077d8016376091776cfef1b632f02e3106d2503f2",
+  "scripts/core/singleplayer_space_travel_state.gd": "b535be354ae92a894c7cb1951a347edaa35f63633617f28a180b064dde5b477e",
+  "scripts/core/singleplayer_supply_state.gd": "c48ef577cc47bc9528616fd71b5acbf98fb6befb5b7e3d7ff23d03ca7bbba907",
+  "scripts/meta/meta_layer_flow.gd": "979ed1e3c415443d03d0dcf2d489dbb72618931ae7c7aacdffdf5a276277d82a",
+  "scripts/meta/singleplayer_runtime_adapter.gd": "a547aa36e0ca54fbdb1c3c9f0529219ddcbba610275d0ae9b572a55011021de6",
+  "scripts/mission/polisa_station_craft_runtime.gd": "77b2edff276b4b8bfdeb790940c1874d5a66b754943f4e23743633b72c232a6d",
+  "scripts/terrain/terrain_map_3d_view.gd": "ba133b819acaa974c21b1a67f83154af2316eac5d6b1676f095de26fd8c06342",
+  "scripts/tests/mission_tactical_sandbox_controller.gd": "0829c31e1356f8d003764d72b64c183f2ae7e04df9dc4cc1835baf6f19b2b735",
+  "scripts/ui/polisa_station_screen.gd": "48e836dfc4021ce3d7b7251a7121212e8bfc735914ba4277dc8751bac318b73d",
+  "scripts/tests/polisa_local_pickup_flow_check.gd": "30108ade6ca4324cf1ffc0bd43d888befdc7991fb2c7bae2f64d0e78e01027c1",
+  "scripts/tests/polisa_local_pickup_backend_check.gd": "cd369502242ca18248d28531bc725c042b72ba4dbf2f7c12d745dea86114de65",
+  "output/native_glut_maps/polisa_local_pickup_20261111/vertical_return_fixture.gd": "b54cad01e7e038c2d652340ffcf87339d42c2174b083b3bc8d4b22e1a76a093a"
+}

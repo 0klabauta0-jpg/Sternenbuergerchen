@@ -4,7 +4,7 @@ extends RefCounted
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
-const TRUSTED_OPERATIONS := ["launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
+const TRUSTED_OPERATIONS := ["initialize_surface", "launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
 const MAX_ADVANCE_SECONDS: float = 60.0
 
 var _definition: Dictionary = {}
@@ -86,10 +86,11 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 	if operation != "advance":
 		if typeof(payload.get("craft_id")) != TYPE_STRING or String(payload.craft_id).strip_edges().is_empty():
 			return _reject("invalid_craft", "Schiff fehlt")
-		if operation != "launch_to_orbit" and String(payload.craft_id) != _craft_id:
+		if operation not in ["launch_to_orbit", "initialize_surface"] and String(payload.craft_id) != _craft_id:
 			return _reject("craft_mismatch", "Dieses Schiff ist nicht auf der aktiven Reise")
 	var result: Dictionary
 	match operation:
+		"initialize_surface": result = _initialize_surface(payload)
 		"launch_to_orbit": result = _launch(payload)
 		"start_quantum": result = _start_quantum(payload, authority_context)
 		"abort_quantum": result = _abort_quantum()
@@ -299,3 +300,17 @@ func _valid_cell(record: Dictionary) -> bool:
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
+
+
+func _initialize_surface(payload: Dictionary) -> Dictionary:
+	# Stationary birth, not a fabricated prior launch/approach from home.
+	if _phase != "grounded" or not _craft_id.is_empty() or _revision != 0: return _reject("craft_already_initialized", "Schiff besitzt bereits einen Reiseverlauf")
+	var location := String(payload.get("location_id", ""))
+	if location != "polisa" or not Dictionary(_definition.location_orbits).has(location): return _reject("invalid_surface_origin", "Lokaler Erwerbsort ungültig")
+	_craft_id = String(payload.craft_id)
+	_arrive(String(_definition.location_orbits[location]))
+	_phase = "surface"
+	_location_id = location
+	_orbit_id = ""
+	_revision += 1
+	return {"ok":true,"location_id":location}
