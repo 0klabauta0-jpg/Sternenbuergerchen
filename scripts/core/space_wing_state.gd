@@ -14,6 +14,16 @@ func get_snapshot() -> Dictionary:
 		wings[id]["active"] = not String(wings[id].leader_craft_id).is_empty()
 	return {"revision": _revision, "wings": wings}
 
+func preview_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+	# The isolated candidate shares no mutable state with the live owner.
+	var candidate = get_script().new()
+	candidate._wings = _wings.duplicate(true)
+	candidate._craft_wings = _craft_wings.duplicate(true)
+	candidate._revision = _revision
+	var result: Dictionary = candidate.ensure_flying_wings(actor_id, flying_crafts, owned_crafts, pilots)
+	if result.get("ok", false): result["expected_revision"] = _revision
+	return result
+
 func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
 	# Lifecycle preflight: build the entire candidate before changing membership.
 	if actor_id.strip_edges().is_empty(): return _reject("invalid_actor")

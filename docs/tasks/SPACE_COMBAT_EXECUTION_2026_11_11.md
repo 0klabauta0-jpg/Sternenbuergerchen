@@ -228,6 +228,10 @@ Verifier und diese Statusdokumentation.
   verifier grün. Noch kein Anschluss an Flugstart, Gegneraufnahme, Transfer-
   Commands oder Speicherung; die Flug-Invariante ist damit noch nicht global
   durchgesetzt. Betroffene Reise- und Orbitdateien bleiben bis Abstimmung frei.
+- AP04a Vorbereitung: `preview_flying_wings` prüft die Zuordnung auf einer
+  isolierten Kopie und liefert die erwartete Rottenrevision ohne Liveänderung;
+  Vorschau und anschließende Zuordnung liefern gleiche IDs. Prüfung12/12;
+  Root muss die Revision beim Commit erneut prüfen. Keine Transaktion fertig.
 - AP04 Transfer-Vorstufe: interner Ownerwechsel verschiebt ein Schiff atomar,
   prüft Ownership und Zielkapazität, löst eine geleerte Quellrotte auf und
   erhält beziehungsweise ersetzt die Führung. Der validierte Ownercommand
