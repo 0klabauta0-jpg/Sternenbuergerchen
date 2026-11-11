@@ -3,6 +3,7 @@ const ROOT = preload("res://scripts/core/simulation_root.gd")
 const ADAPTER = preload("res://scripts/meta/singleplayer_runtime_adapter.gd")
 const FLEET = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const FLIGHT_RESOLVER = preload("res://scripts/tactical/space_flight_resolver.gd")
 
 func _initialize() -> void:
 	var failed := 0
@@ -36,6 +37,11 @@ func _initialize() -> void:
 	var check_cell: Array[Vector2i] = [new_cell]
 	if root.get_space_actors_at(check_cell) != ["npc1"]: failed += 1
 	if root.commit_space_actor_motion("npc1", proposal, 1, {"runtime_authorized":true}).get("reason") != "stale_tick": failed += 1
+	var before_flight: Dictionary = npc_flight.get_snapshot()
+	var hull := {"main_thrust":2.0, "reverse_thrust":2.0, "side_thrust":2.0, "turn_acceleration":1.0}
+	var thrust_proposal: Dictionary = FLIGHT_RESOLVER.step(before_flight, {"forward":1.0, "assist_mode":"decoupled"}, hull, {}, 0.25)
+	if not root.commit_space_actor_motion("npc1", thrust_proposal, 2, {"runtime_authorized":true}).get("ok", false): failed += 1
+	if npc_flight.get_snapshot().position_plane == before_flight.position_plane: failed += 1
 	var player := {"craft_id":"a", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(snap.position))}
 	if root.admit_space_actor(player, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
 	for i in range(121): root._physics_process(1.0 / 60.0)
@@ -71,7 +77,7 @@ func _initialize() -> void:
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 25 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 27 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

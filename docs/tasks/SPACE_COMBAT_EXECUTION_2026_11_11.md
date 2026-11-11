@@ -77,7 +77,7 @@ Verifier und diese Statusdokumentation.
   identischer Tick wird abgelehnt. Aufnahme und Eintritt prüfen die Reisephase
   getrennt; zwischenzeitlicher Warp verhindert Kampfeintritt. Bewegte
   registrierte Flugzustände aktualisieren ihre Feldindizes revisionsbasiert.
-  Rootcheck25/25.
+  Rootcheck27/27 einschließlich eines fixturegesteuerten Resolver-Commits.
 - AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
   Warp, Heimatansicht während der Reise, Sternkarte und Abbruch; gezielter
   headless Szenenlauf11/11, Exit0, keine Fehler. Beleg:
@@ -86,8 +86,10 @@ Verifier und diese Statusdokumentation.
   Ansichtswechsel bei30/60/144Render-FPS und vollständiger Reiselauf.
 - AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
   ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
-  gemeinsames Achsbudget. Kleiner Verifier5/5. Nur Fixtureparameter;
-  Rumpfkatalog, Tickanbindung und vollständige AP02-Abnahme fehlen.
+  gemeinsames Achsbudget. Kleiner Verifier8/8 mit explizitem Fixture-Rumpf;
+  zusätzlich ein einzelner Fixture-Commit über den tatsächlichen Root.
+  Produkt-Rumpfkatalog, automatische Tickanbindung, Kollision und
+  vollständige AP02-Abnahme fehlen.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
