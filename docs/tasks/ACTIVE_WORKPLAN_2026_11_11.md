@@ -1,98 +1,71 @@
-# Aktueller Restplan nach Polisa-Freigabe — 11.11.2026
+# Aktueller Arbeitsplan — 11.11.2026
 
-Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
+Diese Uebersicht ist der aktuelle Stand. Die Fortschreibung unter der Trennlinie
+bleibt als Historie erhalten und ist keine neue Offenliste.
 
-Neuester Raumanschluss: Source60dc78f62 als562373d13 integriert. Der lokale
-Rueckweg nutzt echte Adapter-/Ownergrenzen fuer gemeinsamen Fuel-/Flight-/Index-/
-Travelcommit. Private erweiterte SurfaceGroupprobe und enger unabhaengiger Review
-bestanden. UI-Ansichtswechsel und Narrowprovider in d42b3f973 (10/0, Compiles0,
-enger Review ohne Blocker); explizite Schiffswahl, keine Defaultuebernahme.
-Noch offen: produktiver Warpeintritt, lokaler Anflugabbruch und Live-V3-/Einmarker-
-Umschaltung. Neue produktive Katalog-/Darstellungsbereitschaft wird vorbereitet,
-LiveJSON bleibt bis zur gemeinsamen Umschaltung V2. AP6 und AP7/8 nicht fertig.
+## Aktiver Auftrag und Grenzen
 
-AP6a Source86347ca54 ist nach engem unabhaengigem Review als69194ddab integriert.
-Frischer privater gemeinsamer Lifecycle64/0 samt Quell-/Profil-/Isolationsguards.
-Gruppenplatzierung und echte Actoraufnahme/-freigabe sind vorhanden, produktive
-gestaffelte Transportvormerkungen, Setup-/Deploy- und Basisadapter folgen noch.
-AP6 daher nicht vollstaendig; AP7/8 danach, grosse AP9-Tests spaeter. QA lifecycle
-unter tabletop_restplan_integration_20261111.
+AP5 bis AP8 selbststaendig mit dem Tabletop-Chat weiterfuehren; Orbitanschluss mit
+dem Weltraumkampf-Chat abstimmen. Nur kleine notwendige Integrationspruefungen.
+Grosse AP9-Tests spaeter. Vor JEDEM EXE-Build den Nutzer ausdruecklich fragen.
+Kein Build beauftragt, keine Mainintegration. Isolierter noch nicht integrierter
+Taskbranch task/native-glut-maps-20261110; keine Arbeit direkt auf Main.
 
-AP5-Ausführung nach aktuellem Nutzerauftrag: Backoff258183ce2 nach engem Review
-als0730e760e integriert; frischer gemeinsamer Backoff55/0 samt Guards grün.
-Originalziel/Command/Wartealter bleiben erhalten, temporäre Erholung räumt bei
-Hold/Wunde/Replan sauber auf. Damit sind die AP5-Codepfade im Taskstand
-zusammengeführt; native Abnahme bleibt offen. Jetzt AP6 echte Aufnahme/Freigabe,
-danach AP7 Restore/Authority und AP8 kleiner integrierter Kandidat.
+A/B/C bleiben 512x256, strategische Sternkarte256x256, lokale Orbitbereiche512x256.
+PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt.
 
-Neuester Orbitstand: Raumbewegung und reale Reaktivierung bis 00098ed5d sind
-integriert, privat Bewegung bestanden und Reaktivierung15/0. Produktive
-Abflug-/Anfluggruppe bis2171e7f25 ist als e205137d6 zusammengefuehrt; frische
-private Departure-/SurfaceGrouppruefungen bestanden samt Quell-/Profilguards.
-Der Gruppenreplay prueft auch die individuelle Travelownerepoche. Nachweise in
-orbit_owner_integration_20261111/parent_movement und /parent_departure.
-Echte AP6-Boarding-/Gruppenaufnahme, produktiver lokaler Rueckweg mit Fuel,
-vollstaendiger Orbitbildschirm und Live-V3-Katalogwechsel bleiben offen.
-OrbitAreaCanvas und reine V3-Katalogprojektion sind vorbereitet, nicht aktiviert.
-AP7 Restore/Authority und AP8 Kandidatenaktivierung folgen den Ownergrenzen;
-grosse AP9-Pruefung spaeter. Vor jeder EXE ausdruecklich den Nutzer fragen.
+## Bewegung: AP5 bis AP8
 
-Historischer Orbitnachtrag: Spacegrundlagen bis 613a03c3c samt gemeinsamem Flight-
-Owner und Polisa-Flight-IDfix 78f5966b5 sind als 3d3bf7a1e integriert. Danach
-Ersteintritt-/Index-/Saumvorschau und Client-Tickguard bis Source13462af85
-gezielt übernommen. Eigene enge Nachweise: Door58/0, Saum12/0, Authority4/0,
-Adapterpreview4/0. Noch kein produktiver lokaler Flug-/Oberflächenweg.
-Supply-Fuelvorbereitung3f5b4ae04 und Campaign-Abflug/Jobvorbereitung07ca63a89
-sind mit je12/0 integriert und unabhängig eng geprüft, aber ohne Produktaufrufer.
-Ein gemeinsamer Commit, Zielklassifikation und echte Navigationsclaimproducer
-bleiben vor Orbitaktivierung offen. Große Tests später; EXE nur nach Nachfrage.
+- AP5-Codepfade zusammengefuehrt: Commands/Actorbewegung, Gruppen-/3D-Verbraucher,
+  Blickrichtung/Sicherung, Bewegungsschuss, Tuerschutz und Backoff. Backoff55/0
+  frisch im gemeinsamen Stand. Native Gesamt-/Balance-/Leistungsabnahme offen.
+- AP6a Source86347ca54 als69194ddab integriert: vollstaendige begrenzte
+  Gruppenplatzierung und Aufnahme/Freigabe echter Missionsactors. Frisch64/0
+  inklusive42 Bewegungsgrundfaellen, Quell-/Profil-/Isolationsguards gruen.
+  Tabletop arbeitet an Vormerkungen fuer gestaffelte Ausstiege, produktivem
+  Setup-/Deployadapter und Basisaktionen; dieses WIP noch nicht importiert.
+- AP7 Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
+  und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
+  privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
+- AP8 danach: kleiner opt-in Integrationsslice gemaess Hexplan, keine globale
+  Aktivierung der grossen A/B/C-Karten. AP6 bis AP8 sind NICHT abgeschlossen.
 
-Neueste Nutzerentscheidung: vor jedem neuen EXE-Build ausdrücklich nachfragen;
-zuerst weitere APs umsetzen. Kein automatischer Export nach bestandenen Gates.
-Lokaler Türschutz jetzt als 26303641d integriert, gemeinsamer enger DoorGuard58/0
-mit Guards grün. Noch offen: AP5 Backoff, AP6 Zulassung/Freigabe und Lifecycle,
-AP7 Restore/Authority, AP8 integrierter Kandidat. Große AP9-Prüfung bleibt später.
+Belege: docs/qa/tabletop_restplan_integration_20261111; aktueller Hexplan
+unter docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md.
 
-Aktueller Bewegungsstand: Commands/2D-Actor, logische Gruppenankunft/3D-View
-und Bewegungsschuss sind integriert (c5e536d0d, 6a3f9c535, 615327eaf).
-Jeweils gezielte gemeinsame Läufe bestanden; zuletzt MovingShot65/0 mit Guards.
-Fähigkeitsfaktor 0.65..0.95 ausdrücklich vorläufig. Backoff sowie
-Lifecycle-/Save-/Authoritygrenzen AP6–8 bleiben beim Tabletop-Chat. Echter
-Türproducer ist `update_mission_interaction_runtime_progress`; dessen enger
-Guardbereich und `_refresh_mission_interaction_door_runtime_overrides` sind frei.
-Eine `_on_simulation_mission_interaction_runtime_event` existiert hier nicht.
-Produktionskarten noch nicht aktiviert; native Animation und große Tests später.
+## Orbit: integrierte Schritte und naechste Gates
 
-Nächste EXE: siehe `NEXT_PLAYABLE_EXE_2026_11_11.md`. Ziel ist ein spielbarer
-Kandidat nach kleinem Bewegungs-/Orbitanschluss, nicht erst nach allen künftigen
-Forschungs-/Modell-/Contentwünschen. Noch keine belastbare Zeitangabe und kein
-Exportauftrag abgeschlossen; Laufzeitpaket muss den genauen Quellstand ausweisen.
+Root/Fleet/Travel/Flight/Rotte/Raumindex sind gemeinsam integriert. Produktive
+Abflug-/Anfluggruppe bis2171e7f25 und lokaler Rueckweg60dc78f62 verwenden
+vorbereitete Ownerpatches; Fuel wird beim lokalen Rueckweg erst im gemeinsamen
+Uebergang gebucht. Replays binden konkrete Owner samt Einzel-Travelownerepoche.
+Anflugabbruch71ec552a0, tactical-Erstbeitrittfix6437af3b6 und validierte
+Aufnahme2abd780cc integriert. Enge gemeinsame Tests und Reviews dokumentiert
+unter docs/qa/orbit_owner_integration_20261111; keine native Vollreiseabnahme.
 
-- **Neue Orbitvorgabe:** genau ein gemeinsamer Bereich pro Stern/Planet/Mond,
-  lokal 512 × 256; strategische Karte 256 × 256. Oben mittig ein großer Körperbogen
-  nominal 256 Felder breit und höchstens vier tief, Ankunft unten, Oberfläche erst
-  am erreichbaren Saum. Jedes fliegende Schiff einschließlich Dropship in genau
-  einer kanonischen Rotte. Reine Layoutvorbereitung 8/0 und Compile sauber;
-  Runtimeanschluss mit Weltraumkampf-Chat abgestimmt in Arbeit. Der bisherige
-  Drei-Marker-Produktpfad bleibt bis zum vollständigen Anschluss bestehen.
-  Vertrag: `docs/dev/orbital_approach_contract.md`; Task:
-  `docs/tasks/ORBITAL_APPROACH_MAPS_2026_11_11.md`.
+OrbitAreaCanvas und Screen-/Flow-Narrowprovider sind angeschlossen. Explizite
+Schiffswahl, kein Default-/Erstschiff-Fallback; Positionswahrheit bleibt beim
+Root. Kleine UI-Pruefung10/0 und Compiles0, keine native Gestaltungsabnahme.
 
-  Fortschritt: echter unverdrahteter Fleet-/Travel-Prepare/Validate/Publish-Slice
-  für Warpabschluss und Rückorbit implementiert, 15 kleine Ownerchecks bestanden.
-  Root-/Flight-/Supply-/Campaignanschluss bleibt offen. Spacechat hat seine
-  Eintrittsfootprint- und offenen Tokenpool-Grenzen nach engem Review korrigiert;
-  seine Rootfixture ist weiterhin ausdrücklich kein Produktanschluss.
+Versionierte Katalog-/Darstellungsbereitschaft6c899fe77 gesichert: Produkt- und
+Draftvalidator getrennt, V3 sechs einzelne Koerperorbits einschliesslich Sonne,
+Polisa zusaetzlich als Stationsziel. LiveJSON bleibt V2. Noch offen:
+Wiederanflug nach Abbruch ohne Doppelbuchung (Source878801344 im Review),
+produktiver lokaler Warp-Eintritt UND sichere Warp-Abreise sowie abgestimmter
+Live-V3-/Einmarkerwechsel. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
+hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
 
-- **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
-- **Parallele Orte:** View-/Servicekorrektur implementiert: Heimat/Polisa/Einsatz auf bestehenden Ortsroots ansehen, Hintergrundankunft behaelt Fremdansicht, explizite Serviceschiffwahl und lokale Basisguards. Frische kleine Viewprobe44/0, Serviceprobe30/0, Flow/Adapter Compile0 und unabhaengiger Review nach Korrekturen. Echte Mehrortreise/-gefechte/-kaeufe noch nicht abgenommen; Vertrag und Crew-Faehrgrenze in parallel_location_operations_contract.md.
-- **Bewegung:** siehe aktuellen Bewegungsstand oben. Grundlagen und genannte Verbraucher integriert, weitere Aktivierungsgrenzen offen. Keine Produktionskarte aktiviert und keine FPS-/Gesamtfreigabe.
-- **Profilanzeige:**6308e6f02 integriert: exakte Vorlagenzuordnung, individuelles Profil und Profilwirkung aus bestehenden Ableitungen. Keine neue Tempo-/Combatformel; interne Wertevereinfachung bleibt abgestimmt offen.
-- **Forschung:**84dd481b1 integriert: Recycling von Bergungsgut zu vorhandenen Rucksaecken auf bestehendem Supply-/Inventarowner. Forschung100Cr, Fertigung2salvage+20Cr als erste Balance. Workbench-Ist-Baseline auf23Knoten aktualisiert; keine native Gesamt-/Balanceabnahme.
-- **Schiffe:** Warp-Slot b67b307b0 (Odyssey C/Hemera A) gesichert; Qualitaet D bis A, Kosten/Bestand vorlaeufig. Lokale Polisa-Abholung jetzt als Alternative zur Heimatlieferung angeschlossen: echtes unbemanntes Schiff auf freiem passenden Pad, explizite Crew-/Pilotuebergabe, Boarding/Rueckflug und versionierte Erwerbsbelege. Heimatpad bleibt reserviert, Save weiter nurHome. Frische enge Vertikal18/0/Flow23/0/Backend43/0, Helper27/0/Controller26/0 als Teilbelege. Native Weg-/Presencecommit-/Rueckreise-/Saveabnahme spaeter. Umgeruestete Skirmishschiffe bleiben bis konsistenter Retire-Historie rueckgabegesperrt. Waffen und neue Fahrzeugmodelle bleiben offen/zurueckgestellt.
-- **Spaeter:** grosse gemeinsame Spiel-/Performance-/Save-/Netzpruefung, dann Main/EXE. Keine erneute grosse Matrix jetzt.
+## Erhaltene weitere Pakete
 
-Konkrete Zustaendigkeiten und Grenzen: RESTPLAN_FORTSETZUNG_2026_11_11.md.
+R07-Ruestungs-/Koerperstand, PolisaR08/Shop-/Padmassstab, lokale Abholung und
+explizite Crewuebergabe, parallele Ortsansichten, Warp-Antrieb D bis A,
+Profilreadout6308e6f02 und Recycling/Workbench84dd481b1 sind implementiert.
+Grosse native Mehrort-/Handels-/Rueckreise-/Save-/Gefechts-/Performanceabnahme
+bleibt spaeter. Schiffswaffen, konsistentes Retrofit-Retirement, vollstaendige
+interne Wertevereinfachung und weitere Forschungsinhalte sind benannte spaetere
+Restpunkte, keine stillen Voraussetzungen fuer neue Modelle oder diesen Slice.
+
+Naechster Kandidat: docs/tasks/NEXT_PLAYABLE_EXE_2026_11_11.md.
 
 ---
 
