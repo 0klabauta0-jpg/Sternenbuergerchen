@@ -101,6 +101,11 @@ Verifier und diese Statusdokumentation.
   Zeitliche Reservierung, Blockadeauflösung, begrenzte Laufzeitkosten und
   Rootintegration fehlen. Der Helfer ist nicht als produktives Kollisionsgate
   angeschlossen; allgemeine Geometrie- und Performanceabnahme stehen aus.
+- AP03 zusätzliche Zielprüfung: Root prüft vor einem einzelnen Bewegungscommit
+  den vollständigen Ziel-Footprint und vorhandene Belegung; außerhalb der
+  Karte wird vor der Mutation abgelehnt. Rootcheck33/33, Geometriecheck11/11.
+  Dies prüft noch nicht den gesamten Bewegungsweg und ersetzt keine
+  kollisionssichere Batch-Übernahme.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung

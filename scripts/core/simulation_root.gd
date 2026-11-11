@@ -145,6 +145,15 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 	var cell: Vector2i = SPACE_GRID.cell_at(position / SPACE_GRID.EXTENT)
 	if not SPACE_GRID.contains(cell):
 		return {"ok": false, "reason": "invalid_actor_cell"}
+	var validation: Dictionary = flight.validate_motion(proposal, tick)
+	if not validation.get("ok", false):
+		return validation
+	var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(craft_id, proposal)
+	if cells.is_empty():
+		return {"ok": false, "reason": "invalid_footprint"}
+	for occupant in _space_combat_state.query_cells(cells):
+		if occupant != craft_id:
+			return {"ok": false, "reason": "occupied"}
 	var result: Dictionary = flight.commit_motion(proposal, tick)
 	if not result.get("ok", false):
 		return result

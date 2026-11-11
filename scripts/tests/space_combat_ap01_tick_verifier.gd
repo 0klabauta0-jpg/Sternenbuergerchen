@@ -79,11 +79,18 @@ func _initialize() -> void:
 	if root.admit_space_actor(spoof, {"runtime_authorized":true}).get("reason") != "craft_identity_conflict": failed += 1
 	var invalid := {"craft_id":"npc2", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(9999,9999), "footprint_hexes":[Vector2i.ZERO]}
 	if root.admit_space_actor(invalid, {"runtime_authorized":true}).get("reason") != "invalid_actor_cell": failed += 1
+	var large := {"craft_id":"large", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(10,10), "footprint_hexes":[Vector2i.ZERO,Vector2i(1,0)]}
+	if not root.admit_space_actor(large, {"runtime_authorized":true}).get("ok", false): failed += 1
+	var large_flight: RefCounted = root.get_space_actor("large")
+	var large_before: Dictionary = large_flight.get_snapshot()
+	var outside := {"expected_revision":large_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(255,0))}
+	if root.commit_space_actor_motion("large", outside, 1, {"runtime_authorized":true}).get("reason") != "invalid_footprint": failed += 1
+	if large_flight.get_snapshot() != large_before: failed += 1
 	var at_30 := _simulate_frames(30)
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 30 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 33 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

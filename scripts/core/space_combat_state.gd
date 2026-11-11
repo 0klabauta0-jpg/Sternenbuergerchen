@@ -57,6 +57,13 @@ func get_flight_snapshots() -> Array[Dictionary]:
 		result.append(snapshot)
 	return result
 
+func preview_actor_cells(craft_id: String, proposal: Dictionary) -> Array[Vector2i]:
+	var flight: RefCounted = _registry.get_actor(craft_id)
+	if flight == null or not _metadata.has(craft_id): return []
+	var snapshot: Dictionary = flight.get_snapshot()
+	snapshot.merge(proposal, true)
+	return _occupied_cells(snapshot, _metadata[craft_id].footprint_hexes)
+
 func _occupied_cells(snapshot: Dictionary, footprint: Array) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	if footprint.size() == 1 and footprint[0] == Vector2i.ZERO:
