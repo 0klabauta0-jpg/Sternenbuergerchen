@@ -16,7 +16,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "approach_cancel":"scripts/tests/space_local_approach_cancel_verifier.gd",
           "first_entry":"scripts/tests/space_combat_area_real_first_entry_verifier.gd",
           "warp_entry_owner":"scripts/tests/space_warp_entry_owner_verifier.gd",
-          "warp_cycle":"scripts/tests/space_warp_product_cycle_verifier.gd"}
+          "warp_cycle":"scripts/tests/space_warp_product_cycle_verifier.gd",
+          "home_launch":"scripts/tests/space_home_launch_wing_verifier.gd",
+          "regular_polisa_pilot":"scripts/tests/polisa_regular_visit_pilot_guard_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)
@@ -27,15 +29,20 @@ def fingerprint(path):
             for p in path.rglob("*") if p.is_file()} if path.exists() else {}
 before=fingerprint(profile)
 pending=[script,"scripts/tests/review2_isolated_user_guard.gd"]
+if case == "regular_polisa_pilot":
+    # External URI shared by the shipped station GLBs in the controller closure.
+    pending.append("Assets/curated/kenney/space_station/models_all/Textures/colormap.png")
 hashes={}
 while pending:
     relative=pending.pop()
     if relative in hashes:continue
     origin=source/relative
-    code=origin.read_text(encoding="utf-8-sig")
+    code=origin.read_text(encoding="utf-8-sig") if origin.suffix in {".gd", ".gdshader", ".gdshaderinc", ".tscn", ".tres"} else ""
     target=project/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
     hashes[relative]=hashlib.sha256(origin.read_bytes()).hexdigest()
-    pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"',code))
+    pending.extend(v for v in re.findall(r'"res://([^\"]+)"',code) if (source/v).is_file())
+    pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.(?:gd|gdshader))"',code))
+    pending.extend(re.findall(r'extends\s+"res://([^\"]+\.gd)"',code))
 for origin in (source/"data").rglob("*.json"):
     target=project/origin.relative_to(source);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
 (project/"project.godot").write_text('config_version=5\n[application]\nconfig/name='+json.dumps(app)+'\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n',encoding="utf-8")

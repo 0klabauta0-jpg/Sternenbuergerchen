@@ -59,8 +59,13 @@ ebenfalls integriert/geprueft; Completionreceipt/Observeraf0bd88f4 als855036033
 nach engem Review integriert und privat im gemeinsamen Stand bestanden.
 Warpabflug Sourcef311042a0 als7a8129784 integriert, frischer privater Ownerzyklus
 lokaler Planet -> Warp -> manuelle Mondankunft bestanden, enger Review geschlossen.
-Noch offen: automatischer Warptickanschluss, getrennter Polisa-Dockpfad und fruehe
-Pflichtrotte beim Abheben/Stationsstart sowie abgestimmter Live-V3-/Einmarkerwechsel.
+Fruehe Pflichtrotte, ausdrueckliche Heimatlandung und strategischer Polisa-
+Stationsstart bisSource605/ed/a9 sind als9c293ac8d integriert; drei frische private
+Lifecycleproben samt Guards bestanden. Automatischer lokaler Warptick ist als
+standardmaessig ausgeschaltete Vorstufe vorhanden; Retryfix61af7ec9a im Review.
+Noch offen: gemeinsame Aktivierung, lokaler getrennter Stationsdockpfad sowie
+abgestimmter Live-V3-/Einmarkerwechsel. Polisa-Profilhook244a7354a verlangt noch
+den AP6c-Bindungsproducer regulaerer Besucher auch fuer bisherige Kaufwege.
 Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
 
