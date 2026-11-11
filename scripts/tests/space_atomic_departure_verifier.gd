@@ -13,7 +13,7 @@ class FlowFixture extends Node:
 
 class AdapterFixture extends "res://scripts/meta/singleplayer_runtime_adapter.gd":
 	var gate := {}
-	func validate_departure(_craft_id: String) -> Dictionary: return gate.duplicate(true)
+	func preview_departure(_craft_id: String) -> Dictionary: return gate.duplicate(true)
 	func _built_home_pad_ids() -> Array: return ["homebase_pad_01"]
 
 func _initialize() -> void:
@@ -63,8 +63,18 @@ func _verify_strategic_approach() -> void:
 	assert(not adapter.authorize_departure("ship", "approach").ok and _fingerprint(supply, campaign) == before and fleet.get_snapshot("ship").phase == "orbit")
 	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"glut_1a_orbit"}, "warp").ok)
 	assert(_travel(fleet, "advance", {"craft_id":"ship", "delta_seconds":3.0}, "advance").ok)
+	var observed := []
+	sim.singleplayer_command_committed.connect(func(_command: Dictionary, _result: Dictionary):
+		var replay: Dictionary = adapter.authorize_departure("ship", "approach")
+		observed.append(adapter._departure_token_by_craft.has("ship") and adapter._space_operation_requests.has("outer") and replay.get("replayed", false) and replay.get("travel_result", {}).get("replayed", false)))
 	var result: Dictionary = adapter.authorize_departure("ship", "approach")
 	assert(result.ok and result.travel_result.ok and fleet.get_snapshot("ship").phase == "approach")
+	assert(observed.is_empty() and adapter._departure_token_by_craft.has("ship"))
+	adapter._space_operation_requests["outer"] = {"signature":"fixture", "result":result.travel_result.duplicate(true)}
+	sim.publish_singleplayer_departure_events(adapter, adapter._departure_token_by_craft.ship)
+	assert(observed == [true, true, true, true])
+	sim.publish_singleplayer_departure_events(adapter, adapter._departure_token_by_craft.ship)
+	assert(observed.size() == 4)
 	assert(campaign.get_campaign_snapshot().jobs.satellite_recovery.status == "active")
 	var after := _fingerprint(supply, campaign)
 	assert(adapter.authorize_departure("ship", "approach").replayed and _fingerprint(supply, campaign) == after)

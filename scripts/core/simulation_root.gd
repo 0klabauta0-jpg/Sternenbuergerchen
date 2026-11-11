@@ -79,7 +79,7 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	_singleplayer_space_travel_owner = travel
 
 func configure_departure_adapter(adapter: Node) -> Dictionary:
-	if not is_instance_valid(adapter) or not adapter.has_method("validate_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
+	if not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
 	if _departure_adapter != null and _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_already_bound"}
 	_departure_adapter = weakref(adapter)
 	return {"ok":true}
@@ -94,11 +94,14 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 		if receipt.craft_id != craft_id or receipt.approach_request_id != approach_request_id: return {"ok":false, "reason":"request_id_conflict"}
 		if receipt.supply != _singleplayer_supply_owner or receipt.campaign != _singleplayer_campaign_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
 		if not approach_request_id.is_empty() and (receipt.fleet != _singleplayer_space_travel_owner or _singleplayer_space_travel_owner == null or receipt.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id)): return {"ok":false, "reason":"owner_changed"}
-		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
+		var replay: Dictionary = receipt.result.duplicate(true)
+		replay["replayed"] = true
+		if replay.has("travel_result"): replay.travel_result["replayed"] = true
+		return replay
 	if _departure_group_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
 	# Adapter re-reads boarding, selection and actual pad immediately before
 	# preparation. UI-provided pilot, fuel and departure data are not accepted.
-	var gate: Dictionary = adapter.validate_departure(craft_id)
+	var gate: Dictionary = adapter.preview_departure(craft_id)
 	if not gate.get("ok", false): return gate
 	var departure: Dictionary = gate.get("departure", {})
 	if departure.get("craft_id") != craft_id: return {"ok":false, "reason":"invalid_departure"}
@@ -162,14 +165,24 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 			flight._publish_space_activity_transition(flight_validation)
 			_space_combat_state._publish_deactivation(actor_validation)
 		result["travel_result"] = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(travel_candidate, travel_validation)
-	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight}
-	singleplayer_command_committed.emit(fuel, fuel_result)
-	singleplayer_command_committed.emit(binding, campaign_result.binding_result)
-	if not activation.is_empty(): singleplayer_command_committed.emit(activation, campaign_result.activation_result)
+	var events: Array = [{"command":fuel, "result":fuel_result}, {"command":binding, "result":campaign_result.binding_result}]
+	if not activation.is_empty(): events.append({"command":activation, "result":campaign_result.activation_result})
 	if not travel_context.is_empty():
 		var travel_command := {"contract_category":"singleplayer_space_travel", "operation":"begin_approach", "payload":travel_context.payload.duplicate(true), "request_id":approach_request_id}
-		singleplayer_command_committed.emit(travel_command, result.travel_result)
+		events.append({"command":travel_command, "result":result.travel_result})
+	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "events":events.duplicate(true), "events_published":false}
 	return result
+
+func publish_singleplayer_departure_events(adapter: Node, request_id: String) -> void:
+	# Adapter has already recorded its token and, for an approach, the outer
+	# request receipt. Mark first so observer reentry cannot publish twice.
+	if _should_skip_local_tick_processing() or _departure_adapter == null or _departure_adapter.get_ref() != adapter or not _departure_group_receipts.has(request_id): return
+	var receipt: Dictionary = _departure_group_receipts[request_id]
+	if receipt.events_published: return
+	receipt.events_published = true
+	var events: Array = receipt.events.duplicate(true)
+	for event in events:
+		singleplayer_command_committed.emit(event.command, event.result)
 
 
 var _space_encounter_owner: RefCounted
