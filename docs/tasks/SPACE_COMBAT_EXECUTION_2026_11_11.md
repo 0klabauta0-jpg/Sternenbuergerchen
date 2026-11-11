@@ -224,6 +224,18 @@ Verifier und diese Statusdokumentation.
   kontext, Supply/Campaign/Departure, Events und native Integration fehlen.
   Vor Produktfreigabe müssen diese Voraussetzungen und Fehlerfälle gemeinsam
   abgesichert werden; keine Fuel-/Oberflächenfreigabe aus diesem Pfad.
+- AP04a echte Reiseowner-Fixture: Parallelcommit ce57b07f7 als 82c636c5f
+  übernommen. Beim Konflikt blieb der gemeinsame Flightstate als Poseowner
+  erhalten; Travel-Seal und -Epoch wurden ergänzt. Der echte vorbereitete
+  Fleet-/Travelowner wurde in einer separaten, explizit auf Testschiff-IDs
+  beschränkten Rootfixture gebunden: Warpabschluss, Flight-/Wing-/Index- und
+  stiller Travel-Tail, Wiederholung, Abbruch und konkurrierender No-op-Request
+  gezielt14/14. Der ursprüngliche Ownercheck lief erneut isoliert15/15;
+  bestehende Fleettravel- und Fake-Rootfixturechecks grün. Kein produktiver
+  Aufrufer, keine Surface-/Fuel-/Campaign-/Departureintegration, keine native
+  Freigabe. Die echten Tail- und Rootinvarianten sind vor Produktanschluss
+  noch gemeinsam zu reviewen; insbesondere lokaler Travel-Snapshot/Projektion,
+  Root-Kontextbesitz, Rollback-/Fehlergrenzen und Events sind nicht abgenommen.
 - AP04a Eintrittsverteilung: reiner deterministischer Allocator plant für
   mehrere Testschiffe getrennte vollständige Footprints im Eintrittsband,
   berücksichtigt bestehende Bereichsbelegung und verändert keinen Owner.

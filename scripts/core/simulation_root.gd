@@ -96,16 +96,22 @@ var _fixture_area_sequence := 0
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
-	if authority_context.get("fixture") != true or not craft_id.begins_with("space_fixture_") or _singleplayer_space_travel_owner == null or not _singleplayer_space_travel_owner.has_method("is_space_area_transition_fixture") or not _singleplayer_space_travel_owner.is_space_area_transition_fixture():
+	if authority_context.get("fixture") != true or not craft_id.begins_with("space_fixture_") or _singleplayer_space_travel_owner == null:
 		return {"ok":false, "reason":"fixture_only"}
+	var owner_script: Script = _singleplayer_space_travel_owner.get_script()
+	var real_travel_fixture: bool = owner_script != null and owner_script.resource_path == "res://scripts/core/singleplayer_fleet_travel_state.gd"
+	var fake_travel_fixture: bool = _singleplayer_space_travel_owner.has_method("is_space_area_transition_fixture") and _singleplayer_space_travel_owner.is_space_area_transition_fixture()
+	if not real_travel_fixture and not fake_travel_fixture: return {"ok":false, "reason":"fixture_only"}
 	for method in ["get_flight_state", "get_snapshot", "prepare_space_area_transition", "validate_prepared_space_area_transition", "commit_prepared_space_area_transition"]:
 		if not _singleplayer_space_travel_owner.has_method(method): return {"ok":false, "reason":"fixture_only"}
 	if typeof(authority_context.get("actor_id")) != TYPE_STRING or typeof(authority_context.get("request_id")) != TYPE_STRING or String(authority_context.request_id).is_empty() or typeof(authority_context.get("owned_crafts")) != TYPE_ARRAY or typeof(authority_context.get("craft_pilots")) != TYPE_DICTIONARY:
 		return {"ok":false, "reason":"invalid_context"}
 	if String(authority_context.actor_id).strip_edges().is_empty() or String(authority_context.request_id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_context"}
 	if not SPACE_COMMAND_CONTRACT._finite(target_pose): return {"ok":false, "reason":"invalid_target"}
+	if real_travel_fixture and (typeof(authority_context.get("payload")) != TYPE_DICTIONARY or not SPACE_COMMAND_CONTRACT._finite(authority_context.payload)):
+		return {"ok":false, "reason":"invalid_context"}
 	var request_key := var_to_str([authority_context.actor_id, authority_context.request_id])
-	var signature: String = SPACE_COMMAND_CONTRACT.request_signature({"craft_id":craft_id, "area_id":area_id, "target":target_pose, "flight_revision":expected_flight_revision, "travel_revision":expected_travel_revision})
+	var signature: String = SPACE_COMMAND_CONTRACT.request_signature({"craft_id":craft_id, "area_id":area_id, "target":target_pose, "flight_revision":expected_flight_revision, "travel_revision":expected_travel_revision, "operation":authority_context.get("operation", ""), "payload":authority_context.get("payload", {})})
 	if _fixture_area_requests.has(request_key):
 		var prior: Dictionary = _fixture_area_requests[request_key]
 		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
@@ -118,8 +124,17 @@ func prepare_space_area_transition(craft_id: String, area_id: String, target_pos
 	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"unknown_actor"}
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_snapshot(craft_id)
 	if travel.get("revision") != expected_travel_revision: return {"ok":false, "reason":"stale_travel_revision"}
-	if travel.get("phase") != "orbit": return {"ok":false, "reason":"invalid_phase"}
-	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(travel.get("orbit_id", ""), {})
+	var orbit_id := String(travel.get("orbit_id", ""))
+	if real_travel_fixture:
+		var operation := String(authority_context.get("operation", ""))
+		if operation == "advance" and travel.get("phase") == "quantum":
+			orbit_id = String(travel.get("target_orbit_id", ""))
+		elif operation == "enter_orbit" and travel.get("phase") in ["surface", "approach"]:
+			orbit_id = String(Dictionary(travel.get("location_orbits", {})).get(travel.get("location_id", ""), ""))
+		else: return {"ok":false, "reason":"invalid_phase"}
+	else:
+		if travel.get("phase") != "orbit": return {"ok":false, "reason":"invalid_phase"}
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
 	var body_id: String = String(orbit.get("body_id", ""))
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
 	if not layout.get("ok", false) or layout.body_map_id != area_id: return {"ok":false, "reason":"wrong_orbit"}
@@ -128,11 +143,23 @@ func prepare_space_area_transition(craft_id: String, area_id: String, target_pos
 	if not geometry.get("ok", false): return geometry
 	var wings: Dictionary = _space_wing_state.preview_flying_wings(authority_context.actor_id, [craft_id], authority_context.owned_crafts, authority_context.craft_pilots)
 	if not wings.get("ok", false): return wings
-	var travel_candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, expected_travel_revision, flight.get_snapshot().space_area_id, area_id, authority_context)
-	if not travel_candidate.get("ok", false): return {"ok":false, "reason":"travel_prepare_failed"}
 	_fixture_area_sequence += 1
 	var token := "fixture-area:%d" % _fixture_area_sequence
-	_fixture_area_tokens[token] = {"craft_id":craft_id, "area_id":area_id, "body_id":body_id, "target":target_pose.duplicate(true), "flight_revision":expected_flight_revision, "travel_revision":expected_travel_revision, "wing_revision":wings.expected_revision, "context":authority_context.duplicate(true), "travel_candidate":travel_candidate.duplicate(true), "owner":_singleplayer_space_travel_owner, "request_key":request_key, "expires_usec":Time.get_ticks_usec() + 30000000}
+	var travel_context: Dictionary = authority_context
+	if real_travel_fixture:
+		if typeof(authority_context.get("payload")) != TYPE_DICTIONARY: return {"ok":false, "reason":"invalid_context"}
+		var payload: Dictionary = authority_context.payload.duplicate(true)
+		var operation := String(authority_context.operation)
+		travel_context = {"request_id":authority_context.request_id, "request_signature":JSON.stringify({"operation":operation, "payload":payload}, "", true), "operation":operation, "payload":payload, "source_area_id":flight.get_snapshot().space_area_id, "target_area_id":area_id, "expected_travel_revision":expected_travel_revision, "expected_phase":String(travel.phase), "context_id":token}
+		var bound_owner: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
+		if not bound_owner.get("ok", false): return bound_owner
+		var bound_context: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
+		if not bound_context.get("ok", false): return bound_context
+	var travel_candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, expected_travel_revision, flight.get_snapshot().space_area_id, area_id, travel_context)
+	if not travel_candidate.get("ok", false):
+		if real_travel_fixture: _singleplayer_space_travel_owner.release_space_area_transition_context(token, self)
+		return {"ok":false, "reason":"travel_prepare_failed"}
+	_fixture_area_tokens[token] = {"craft_id":craft_id, "area_id":area_id, "body_id":body_id, "target":target_pose.duplicate(true), "flight_revision":expected_flight_revision, "travel_revision":expected_travel_revision, "wing_revision":wings.expected_revision, "context":authority_context.duplicate(true), "travel_context":travel_context.duplicate(true), "real_travel_fixture":real_travel_fixture, "travel_candidate":travel_candidate.duplicate(true), "owner":_singleplayer_space_travel_owner, "request_key":request_key, "expires_usec":Time.get_ticks_usec() + 30000000}
 	_fixture_area_requests[request_key] = {"signature":signature, "token":token}
 	return {"ok":true, "token":token}
 
@@ -155,7 +182,8 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(prepared.craft_id): return {"ok":false, "reason":"unknown_actor"}
 	if _singleplayer_space_travel_owner.get_snapshot(prepared.craft_id).get("revision") != prepared.travel_revision: return _reject_fixture_area_token(token, "stale_travel_revision")
 	if _space_wing_state.get_snapshot().revision != prepared.wing_revision: return _reject_fixture_area_token(token, "stale_wing_revision")
-	if not _singleplayer_space_travel_owner.validate_prepared_space_area_transition(prepared.travel_candidate, authority_context).get("ok", false): return _reject_fixture_area_token(token, "travel_validation_failed")
+	var travel_validation: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(prepared.travel_candidate, prepared.travel_context)
+	if not travel_validation.get("ok", false) or travel_validation.get("replayed", false): return _reject_fixture_area_token(token, "travel_validation_failed")
 	var metadata: Dictionary = _space_combat_state.get_metadata(prepared.craft_id)
 	var geometry: Dictionary = SPACE_AREA_TRANSITION.preview(flight, prepared.flight_revision, prepared.body_id, prepared.target, metadata.get("footprint_hexes", []), _space_combat_state, tick_counter)
 	if not geometry.get("ok", false): return _reject_fixture_area_token(token, String(geometry.get("reason", "invalid_geometry")))
@@ -166,7 +194,7 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	var cell: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(geometry.proposal.position_plane))
 	var indexed: bool = _space_combat_state.update_actor_cell(prepared.craft_id, cell)
 	assert(indexed)
-	var travel_result: Dictionary = _singleplayer_space_travel_owner.commit_prepared_space_area_transition(prepared.travel_candidate, authority_context)
+	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(prepared.travel_candidate, travel_validation) if prepared.real_travel_fixture else _singleplayer_space_travel_owner.commit_prepared_space_area_transition(prepared.travel_candidate, prepared.travel_context)
 	assert(travel_result.get("ok", false))
 	var result := {"ok":true, "replayed":false}
 	_fixture_area_receipts[token] = {"context":prepared.context, "owner":prepared.owner, "result":result.duplicate(true)}
@@ -192,6 +220,9 @@ func _reject_fixture_area_token(token: String, reason: String) -> Dictionary:
 
 func _drop_fixture_area_token(token: String) -> void:
 	if not _fixture_area_tokens.has(token): return
+	var prepared: Dictionary = _fixture_area_tokens[token]
+	if prepared.get("real_travel_fixture", false) and is_instance_valid(prepared.owner):
+		prepared.owner.release_space_area_transition_context(String(prepared.travel_context.context_id), self)
 	_fixture_area_requests.erase(_fixture_area_tokens[token].request_key)
 	_fixture_area_tokens.erase(token)
 
