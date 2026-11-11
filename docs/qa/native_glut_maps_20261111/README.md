@@ -11,6 +11,7 @@ B erhält getrennte Felsrücken, Freihafen, Feldlandefläche und das östliche
 Lager. C erhält Verwerfungen, eine eigene Chip-Hochfläche, gebaute Decks und
 zwei erreichbare Querungen. Beide ererbten Streumuster auf C sowie
 isolierte H1-Erhebungen ohne Objekt wurden aus allen drei Karten entfernt.
+Die früheren Streufelder nehmen den Farbton ihrer Nachbarflächen an.
 Begehbare Nachbarfelder mit genau einer Stufe sind in beide Richtungen
 verbunden. Eine triangulierte Bodenfläche schließt die Rampen bis in die
 Ecken, mit kurzen Wandflächen an verbleibenden steilen Übergängen. Raster,
@@ -45,9 +46,10 @@ Mondorbits.
   gleicher Anker, Abstand und Kamerawinkel bei 1280 × 720.
 - [A Schlucht und sichtbare Hexkanten](../../../output/native_glut_maps/A_final_canyon_18.png)
   und [A mit echtem Trupp, gelandetem Schiff und FT1](../../../output/native_glut_maps/A_landing_live_ramps.png).
-- [B Lager](../../../output/native_glut_maps/B_depot_44.png) und
-  [B Gesamtansicht](../../../output/native_glut_maps/B_depot_540.png)
+- [B Lager](../../../output/native_glut_maps/B_depot_final_44.png) und
+  [B Gesamtansicht](../../../output/native_glut_maps/B_depot_final_540.png)
   bei 1920 × 1080.
+- [C Landebereich mit bereinigten Bodenfarben](../../../output/native_glut_maps/C_surface_final_44.png).
 - [C Hauptquerung](../../../output/native_glut_maps/C_deck_final_44.png),
   [C nah](../../../output/native_glut_maps/C_deck_final_18.png) und
   [C Gesamtansicht](../../../output/native_glut_maps/C_deck_final_540.png)

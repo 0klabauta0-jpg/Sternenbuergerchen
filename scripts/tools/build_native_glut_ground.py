@@ -17,6 +17,7 @@ BASE = "639a49d657086c9e436de89979fa04cc5d69ba39"
 MAPS = {"A": "satellite_crash_site", "B": "trade_outpost", "C": "fortified_outpost"}
 WIDTH, HEIGHT = 512, 256
 MIN_COLUMN, MIN_ROW = -170, -108
+DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
 
 # Layout is in offset columns and axial rows. The old site occupies an
 # irregular axial core, so the regional approaches meet its flat apron.
@@ -148,14 +149,17 @@ def geology_tile(zone, q, r, column, route_distances):
     return tile
 
 
-def clean_legacy_tile(tile, zone):
+def clean_legacy_tile(tile, zone, source_tiles):
     q, r = tile["grid_position"]["x"], tile["grid_position"]["y"]
     variants = {"A": (1,), "B": (2,), "C": (2, 3)}[zone]
     if (any((q * 17 + r * 31 + variant * 7) % 29 == 0 for variant in variants)
             and not tile.get("object_type_id")
             and tile["height_level"] == 1 and tile["cover_value"] == 30
             and tile["surface_type"] == "rock" and tile["edge_type"] == "slope"):
-        return dict(tile, height_level=0, cover_value=0, edge_type="none")
+        neighbors = [source_tiles.get((q + dq, r + dr), {}) for dq, dr in DIRECTIONS]
+        ground = [neighbor.get("surface_type") for neighbor in neighbors if neighbor.get("height_level") == 0]
+        surface = max(("sand", "ground", "rock"), key=ground.count)
+        return dict(tile, height_level=0, cover_value=0, edge_type="none", surface_type=surface)
     return tile
 
 
@@ -182,7 +186,7 @@ def move_depot(zone, data, old):
         if abs(q + r * .5 - 59) > 9 or abs(r - 40) > 9:
             continue
         target_q = q + shift
-        moved[target_q, r] = dict(clean_legacy_tile(tile, zone), grid_position={"x": target_q, "y": r},
+        moved[target_q, r] = dict(clean_legacy_tile(tile, zone, old), grid_position={"x": target_q, "y": r},
                                   height_level=height, edge_type="slope")
         removed.add((q, r))
     # The front wall and its overhang were added after the original saved
@@ -222,20 +226,19 @@ def compile_map(zone, name, source_dir, output_dir):
                     tiles.append(preserved)
                     continue
                 if min(distance_to_route(q + r * .5, r, route) for route in LOCAL_A_ROUTES) < 4.0**2:
-                    tiles.append(clean_legacy_tile(preserved, zone))
+                    tiles.append(clean_legacy_tile(preserved, zone, old))
                     continue
             elif preserved is not None:
                 if (q, r) in removed and preserved.get("object_type_id") == "frontier_scene_solid":
                     tiles.append({"grid_position": {"x": q, "y": r}, "type_id": "ground_flat", "surface_type": "ground", "height_level": 0, "edge_type": "none"})
                 else:
-                    tiles.append(clean_legacy_tile(preserved, zone))
+                    tiles.append(clean_legacy_tile(preserved, zone, old))
                 continue
             distances = [distance_to_route(column, r, route) for route in ROUTES[zone]]
             tiles.append(geology_tile(zone, q, r, column, distances))
     # High ground only needs a LOS flag along exposed escarpments; the
     # interior of a same-height plateau is clear.
     index = {(t["grid_position"]["x"], t["grid_position"]["y"]): t for t in tiles}
-    directions = ((1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1))
     if zone in FIELD_LZ:
         q0, r0, pad_height = FIELD_LZ[zone]
         for dq in range(-5, 6):
@@ -254,7 +257,7 @@ def compile_map(zone, name, source_dir, output_dir):
         tile for (q, r), tile in index.items()
         if tile["height_level"] == 1 and not tile.get("object_type_id")
         and all(index.get((q + dq, r + dr), {}).get("height_level", 0) == 0
-                for dq, dr in directions)
+                for dq, dr in DIRECTIONS)
     ]
     for tile in isolated_rises:
         tile.update(height_level=0, edge_type="none", cover_value=0)
@@ -262,7 +265,7 @@ def compile_map(zone, name, source_dir, output_dir):
         if tile["height_level"] < 3 or tile.get("object_type_id") or tile["edge_type"] != "cliff":
             continue
         if any(tile["height_level"] - index.get((q + dq, r + dr), tile)["height_level"] >= 2
-               for dq, dr in directions):
+               for dq, dr in DIRECTIONS):
             tile.update(blocks_los=True, cover_value=25)
     data["tiles"] = tiles
     data["grid_size"] = {"x": WIDTH, "y": HEIGHT}
