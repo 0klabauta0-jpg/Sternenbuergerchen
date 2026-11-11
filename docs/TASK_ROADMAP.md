@@ -1,5 +1,13 @@
 # TASK_ROADMAP
 
+### Hex-Korridorcache vollständig angebunden — 11.11.2026
+
+AP4 nutzt vollständige revisionierte Komponenten statt lokaler Teilgruppen.
+Neue Klassifikationen64/Query, Ownerbeweis0; ungeklärte Requests bleiben pending.
+Kleine Integration15/0 und enge Nachbarfälle bestanden, frischer Review geschlossen.
+Nächster Schritt AP5 tatsächliche Commands und flüssige Projektion, danach AP6–8.
+Große Tests/AP9 und Kartenaktivierung bleiben später.
+
 ### Hex-Reservierungsowner geprüft, Bewegungsanbindung folgt — 11.11.2026
 
 AP1–3 sind hinter Versionsgate vorhanden. AP4 besitzt jetzt atomare Zusagen,

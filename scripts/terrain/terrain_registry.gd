@@ -3,6 +3,7 @@ extends Node
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+const HEX_CORRIDOR_CACHE_SCRIPT = preload("res://scripts/terrain/hex_corridor_topology_cache.gd")
 const COVER_RADIUS_BUCKET_WORLD_SIZE: float = 256.0
 const HEX_NEIGHBOR_CACHE_CAPACITY := 4096
 
@@ -26,6 +27,7 @@ var _hex_neighbor_cache_keys: Array[Vector2i] = []
 var _hex_neighbor_cache_cursor := 0
 var _hex_neighbor_cache_hits := 0
 var _hex_neighbor_cache_builds := 0
+var _hex_corridor_topology_cache = HEX_CORRIDOR_CACHE_SCRIPT.new()
 
 
 func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float, grid_topology: String = "square8") -> void:
@@ -79,6 +81,16 @@ func get_hex_neighbor_cache_audit_snapshot() -> Dictionary:
 	return {"entry_count":_hex_neighbor_cache.size(),"capacity":HEX_NEIGHBOR_CACHE_CAPACITY,
 		"hits":_hex_neighbor_cache_hits,"builds":_hex_neighbor_cache_builds,
 		"revision":_revision,"derived_only":true}
+
+
+## Complete derived components, never occupancy or corridor-group truth.
+func get_hex_corridor_topology(grid_points: Array, node_budget: int = 64) -> Dictionary:
+	var result: Dictionary = _hex_corridor_topology_cache.query(self,grid_points,node_budget)
+	var current_complete: bool = bool(result.get("ok",false))
+	for grid in grid_points:
+		if result.get("pending_grid_points",[]).has(grid):current_complete=false
+	result["query_complete"]=current_complete
+	return result
 
 
 func are_grid_neighbors(a: Vector2i, b: Vector2i) -> bool:

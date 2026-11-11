@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP4 vollständiger Korridorcache angeschlossen — 11.11.2026
+
+Helfer4753975d8/472f1ad8f gezielt übernommen. Registry teilt vollständige
+abgeleitete Komponenten mit Planer und unabhängigem Ground-Commit; unfertige
+lange Gänge bleiben ohne Teilfreigabe pending. Aufrufe klassifizieren höchstens64
+neue Knoten, Ownerprüfung baut0. Geänderte vollständige Gruppen werden nach
+Revision neu bewertet. Besetzte oder inzwischen illegale ferne Ausgänge bleiben
+gesperrt. Kleine Cache18/0, Integration15/0, Planer26/0, Owner36/0, Topologie23/0;
+frischer Review mit gezielter Korrektur veralteter Ausgangskanten.
+Keine Actorbewegung/aktive Karte, keine gemessene Performanceabnahme; AP5–8 folgen.
+
 ### AP4 Reservierungsowner und logischer Tickkern — 11.11.2026
 
 Reiner Planer30840746c hier als161d62dff übernommen. Ground besitzt versionierte

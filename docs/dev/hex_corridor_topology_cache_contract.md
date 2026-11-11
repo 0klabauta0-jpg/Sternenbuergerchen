@@ -56,20 +56,28 @@ Edges sind auch bei directed=true in beide Richtungen begehbar.
 Mit owning Chat bestaetigt: `get_legal_hex_neighbors(grid:Vector2i)->Array[Vector2i]`
 liefert eine unabhaengige Kopie, nur im Hexkontext. Beide Felder muessen begehbar
 sein und sowohl allows_step(from,to) als auch allows_step(to,from) erlauben.
+Runtime-Übersteuerungen lesen dabei `allows_registry_step` mit beiden
+Registrybegehbarkeitsgates und demselben Endpunkthöhenkern; die Authoringdefaults
+bleiben unverändert.
 `get_revision()->int` und Node.get_instance_id() liefern den Kontext. Zusetzlich
 wird die Ursprungs-Walkability geprueft, damit eine fehlende/blockierte Zelle
 nicht als isolierter begehbarer Korridor gilt.
 
 Wenn die neue Nachbar-API noch fehlt, nutzt der Cache exakt sechs Hexrichtungen,
-Registry-Walkability und TerrainTileData.allows_step in BEIDEN Richtungen.
+Registry-Walkability und TerrainTileData.allows_registry_step in BEIDEN Richtungen.
 Kein alternativer Hoehenvertrag. Ein Knotenbudget meint vollstaendige lokale
 Klassifikationen; jede Klassifikation prueft hoechstens sechs Anschluesse.
 Typen, Hexnachbarschaft und doppelte Nachbarn werden validiert; bereits gelesene
 Rueckanschluesse muessen reziprok sein. Eine inkonsistente Helperliste verwirft
 alles als invalid_neighbors, statt eine gerichtete Passage zu erfinden.
 Die vorhandenen Rampen-/Terrainregeln bleiben alleinige Legalitaetsquelle.
-Dieser Helper veraendert keine Registry-/Owner-/Resolverdatei. Fertige Daten
-werden erst spaeter ueber OwnerOptions an Verbraucher uebergeben.
+Der separat übernommene Helper verändert keine Gameplaywahrheit. Der Anschluss
+liegt jetzt bei `TerrainRegistry.get_hex_corridor_topology(grid_points,budget)`.
+Er ergänzt `query_complete`: nur die aktuellen Punkte müssen fertig sein,
+während `complete` weiterhin alle offenen Jobs im Kontext bezeichnet. Planer
+liest ausschließlich diesen Ownerreadadapter, keine ungeprüften OwnerOptions.
+Ground liest dieselbe vollständige Komponente mit0 Baubudget unabhängig erneut;
+eine abgeschnittene oder umsortierte Grantzellenliste wird zurückgewiesen.
 
 Kleine private CPU-Fixture unter
 output/native_glut_maps/hex_corridor_cache_20261111. Keine grosse Native-,

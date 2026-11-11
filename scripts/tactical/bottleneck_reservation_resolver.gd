@@ -480,8 +480,14 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 		if queue.size()<16: queue.append(request)
 		else: plan.pending_requests.append(request)
 	plan.processed_requests = queue.size()
+	var topology:Dictionary=_hex_query_corridors(queue,terrain_registry)
+	if not topology.ok or not topology.complete:
+		plan.ok=bool(topology.ok)
+		plan.reason="topology_pending" if topology.ok else "invalid_topology"
+		plan.pending_requests.append_array(queue)
+		return plan
 	var graph:Dictionary=_hex_local_graph(queue,terrain_registry)
-	var corridors:Array=_hex_corridors(graph)
+	var corridors:Array=topology.corridors
 	var seen: Dictionary = {}
 	var active: Array = []
 	for request in queue:
@@ -519,7 +525,7 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 					remaining.append(request)
 					continue
 				earliest=maxi(now,last.start_tick+last.duration_ticks)
-			var exit_conflict:String=_hex_corridor_exit_conflict(request,corridors,index)
+			var exit_conflict:String=_hex_corridor_exit_conflict(request,corridors,index,terrain_registry,topology.full)
 			if not exit_conflict.is_empty():
 				reasons[id]=exit_conflict; remaining.append(request)
 				continue
@@ -766,6 +772,24 @@ static func _hex_corridors(graph:Dictionary)->Array:
 	return corridors
 
 
+## Registry is the only topology certifier. No caller-supplied corridor options.
+static func _hex_query_corridors(requests:Array,registry:Node,node_budget:int=64)->Dictionary:
+	if not registry.has_method("get_hex_corridor_topology"):
+		return {"ok":true,"complete":true,"full":false,"corridors":_hex_corridors(_hex_local_graph(requests,registry))}
+	var origins:Array=[]
+	for request in requests:
+		if request is Dictionary and request.get("path_grid_points") is Array:
+			for grid in request.path_grid_points.slice(0,4):
+				if grid is Vector2i and not origins.has(grid):origins.append(grid)
+	var proof:Variant=registry.call("get_hex_corridor_topology",origins,node_budget)
+	if not proof is Dictionary or not proof.get("ok",false) or proof.get("registry_id")!=registry.get_instance_id() or proof.get("terrain_revision")!=registry.call("get_revision"):
+		return {"ok":false,"complete":false,"full":true,"corridors":[]}
+	var corridors:Array=[]
+	for component in proof.get("corridors",[]):
+		if component.get("directed",false):corridors.append(component.cells)
+	return {"ok":true,"complete":bool(proof.get("query_complete",false)),"full":true,"corridors":corridors}
+
+
 static func _hex_segments_touch(segments:Array,cells:Array)->bool:
 	for segment in segments:
 		if cells.has(segment.from_grid) or cells.has(segment.to_grid): return true
@@ -846,16 +870,28 @@ static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Diction
 	return {"backoff_path_grid_points":path,"backoff_examined_cells":cursor}
 
 
-static func _hex_corridor_exit_conflict(request:Dictionary,corridors:Array,index:Dictionary)->String:
+static func _hex_corridor_exit_conflict(request:Dictionary,corridors:Array,index:Dictionary,registry:Node,full_topology:bool=false)->String:
 	for cells in corridors:
+		var cell_lookup:Dictionary={}
+		for cell_index in range(cells.size()):cell_lookup[cells[cell_index]]=cell_index
 		var touched:bool=false
 		var exit_grid:Variant=null
 		var path:Array=request.path_grid_points
-		for i in range(mini(path.size(),64)):
-			if cells.has(path[i]): touched=true; exit_grid=path[i]
-			elif touched: exit_grid=path[i]; break
+		var limit:int=path.size() if full_topology else mini(path.size(),64)
+		for i in range(limit):
+			if cell_lookup.has(path[i]):
+				if i>0:
+					if cell_lookup.has(path[i-1]) and full_topology:
+						if absi(int(cell_lookup[path[i]])-int(cell_lookup[path[i-1]]))!=1:return "illegal_corridor_path"
+					elif not path[i-1] is Vector2i or not _hex_legal_step(path[i-1],path[i],registry):return "illegal_corridor_path"
+				touched=true
+				exit_grid=path[i]
+			elif touched:
+				if not path[i] is Vector2i or not _hex_legal_step(path[i-1],path[i],registry):return "illegal_corridor_exit"
+				exit_grid=path[i]
+				break
 		if not touched: continue
-		if path.size()>64 and exit_grid==path[63] and cells.has(exit_grid): return "corridor_budget_exhausted"
+		if not full_topology and path.size()>64 and exit_grid==path[63] and cell_lookup.has(exit_grid): return "corridor_budget_exhausted"
 		for interval in index.cells.get(exit_grid,[]):
 			if interval.unit_id!=request.unit_id and interval.end==9223372036854775807: return "no_passing_space"
 	return ""

@@ -199,5 +199,5 @@ func _read_legal_neighbors(registry:Node,grid:Vector2i)->Variant:
 		var next:Vector2i = grid+direction
 		if not registry.call("is_walkable",next): continue
 		var to = registry.call("get_tile_at_grid",next)
-		if TILE.allows_step(from,to) and TILE.allows_step(to,from): result.append(next)
+		if TILE.allows_registry_step(from,to,true,true) and TILE.allows_registry_step(to,from,true,true): result.append(next)
 	return result
