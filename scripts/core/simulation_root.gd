@@ -350,6 +350,54 @@ func preview_surface_deactivation(craft_id: String, location_id: String, expecte
 	gate["activity_tick"] = tick
 	return gate
 
+func preview_surface_reactivation(craft_id: String, location_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	# Read-only preflight for a previously inactive local Flight object.
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	var actor_id: Variant = authority_context.get("actor_id")
+	if typeof(actor_id) != TYPE_STRING or String(actor_id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_actor"}
+	if _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"travel_unavailable"}
+	var flight: RefCounted = _space_combat_state.get_inactive_actor(craft_id)
+	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"unknown_actor"}
+	if _space_combat_state.get_metadata(craft_id).get("control_domain") != "player": return {"ok":false, "reason":"not_owned"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.revision != expected_flight_revision: return {"ok":false, "reason":"stale_flight_revision"}
+	if snapshot.coordinate_frame != "local" or snapshot.motion_mode != "inactive": return {"ok":false, "reason":"not_inactive_local"}
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_snapshot(craft_id)
+	if travel.get("revision") != expected_travel_revision: return {"ok":false, "reason":"stale_travel_revision"}
+	if travel.get("phase") not in ["surface", "approach"]: return {"ok":false, "reason":"invalid_phase"}
+	if String(travel.get("location_id", "")) != location_id: return {"ok":false, "reason":"location_mismatch"}
+	var orbit_id := String(Dictionary(travel.get("location_orbits", {})).get(location_id, ""))
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
+	var body_id := String(orbit.get("body_id", ""))
+	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
+	if body_id.is_empty() or String(body.get("id", "")) != body_id or String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != location_id:
+		return {"ok":false, "reason":"not_surface_destination"}
+	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
+	if not layout.get("ok", false) or layout.body_map_id != snapshot.space_area_id: return {"ok":false, "reason":"area_body_mismatch"}
+	if _space_combat_state.get_area_revision(snapshot.space_area_id) != expected_area_revision: return {"ok":false, "reason":"stale_area_revision"}
+	if _space_wing_state.get_snapshot().revision != expected_wing_revision: return {"ok":false, "reason":"stale_wing_revision"}
+	var wing_id: String = _space_wing_state.get_craft_wing(craft_id, actor_id)
+	if wing_id.is_empty(): return {"ok":false, "reason":"wing_required"}
+	for key in target_pose:
+		if key not in ["position_plane", "velocity_plane", "heading_rad", "angular_velocity", "assist_mode"]: return {"ok":false, "reason":"invalid_target"}
+	var proposal: Dictionary = target_pose.duplicate(true)
+	proposal.merge({"expected_revision":expected_flight_revision, "motion_mode":"tactical"}, true)
+	var tick := tick_counter + 1
+	var availability: Dictionary = _space_combat_state.preview_reactivation(craft_id, proposal, tick)
+	if not availability.get("ok", false): return availability
+	var body_cells := {}
+	var gate_cells := {}
+	for cell in layout.body_cells: body_cells[cell] = true
+	for cell in layout.gate_cells: gate_cells[cell] = true
+	var at_gate := false
+	for cell in availability.cells:
+		var offset: Vector2i = SPACE_GRID.to_offset(cell)
+		if body_cells.has(offset): return {"ok":false, "reason":"body_blocked"}
+		if gate_cells.has(offset): at_gate = true
+	if not at_gate: return {"ok":false, "reason":"not_at_approach_gate"}
+	return {"ok":true, "craft_id":craft_id, "location_id":location_id, "space_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "footprint_cells":availability.cells, "activity_proposal":proposal, "activity_tick":tick}
+
 func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
