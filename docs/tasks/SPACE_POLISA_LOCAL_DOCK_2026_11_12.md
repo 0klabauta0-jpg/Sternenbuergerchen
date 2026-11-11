@@ -134,6 +134,12 @@ Die hier genannten Erweiterungen sind **geplant**, nicht bereits implementiert.
 Vor dem ersten Codepaket den von Parent gelieferten Deskriptorstand übernehmen
 und dessen Schema prüfen; keine Controller- oder AP6-Bodies berühren.
 
+Stand: Der geprüfte Deskriptor ist selektiv übernommen. `space_area_grid.gd`
+cached dessen Glut-2-Stationsblock einmal und wendet ihn auf lokale Bounds-/
+Footprint-/Claimprüfungen an. Eine enge Prüfung für Block, freies Gate, andere
+Area, unveränderliche Projektion und echte Claimvalidierung ist grün. Root-DTO,
+Dock-/Undocktransaktionen und produktive UI-Anbindung sind weiterhin offen.
+
 ## Akzeptanz, Prüfung und Risiken
 
 Kleine Layoutprobe: deterministische Revision/Koordinaten, Gate im Bounds und
