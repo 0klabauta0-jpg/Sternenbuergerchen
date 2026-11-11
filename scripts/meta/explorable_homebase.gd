@@ -208,6 +208,15 @@ func _update_personnel_controls() -> void:
 		return
 	_person_panel.visible = _active and not _pad_preview and not _selected_person_id.is_empty()
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	for person: Dictionary in units:
+		var id := String(person.unit_id)
+		if not _person_visuals.has(id): continue
+		var actor: Node = _personnel_runtime().call("get_actor", id)
+		var armor_id := String(actor.call("get_armor_id"))
+		var model: Node3D = _person_visuals[id].model
+		if String(model.get_meta("worn_armor_id", "")) != armor_id:
+			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(model, armor_id)
+			_view.call("_request_viewport_redraw")
 	if _person_selector.item_count != units.size():
 		_person_selector.clear()
 		for person: Dictionary in units:

@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: base to backpack confirmed
+PASS: replay changes nothing
+PASS: request signature conflict rejected
+PASS: invalid amount leaves inventory unchanged
+PASS: invalid amount leaves inventory unchanged
+PASS: invalid amount leaves inventory unchanged
+PASS: invalid amount leaves inventory unchanged
+PASS: remote or foreign container rejected
+PASS: remote or foreign container rejected
+PASS: remote or foreign container rejected
+PASS: unknown item rejected
+PASS: weapon cannot equip armor slot
+PASS: armor swap returns confirmed loadout
+PASS: old equipped armor returned atomically
+PASS: full backpack does not consume source
+PASS: checkpoint restores container state
+PASS: checkpoint preserves exact quantities
+PASS: light campaign armor supplies one chip slot with no starter backpack
+PASS: ordinary cargo cannot use reserved suit storage
+PASS: Benit crate cannot fit into the armor chip slot
+PASS: actual chip cargo command fills the starter armor slot
+PASS: chip pickup retries preserve one chip
+PASS: second chip requires an additional slot
+PASS: checkpoint preserves the occupied suit and empty backpack slot
+PASS: backpack purchase delivers a real item to parked ship cargo
+PASS: purchase alone does not increase carried capacity
+PASS: equipping uses the existing inventory operation
+PASS: equipping adds twelve storage slots and consumes the purchased item
+PASS: equipping replays without duplicating gear or capacity
+PASS: equipped backpack can now carry normal items
+PASS: backpack containing cargo cannot be removed
+PASS: contents can be unloaded before removing a backpack
+PASS: empty backpack can be put back in ship cargo
+PASS: removing backpack returns the item and leaves the armor chip
+PASS: upload consumption empties armor slot
+PASS: older checkpoint is compatible with the new backpack offer
+PASS: migration preserves all old cargo and gives a suit chip slot
+PASS: migrated full backpack checkpoint roundtrips
+INVENTORY failures=0

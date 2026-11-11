@@ -1385,7 +1385,7 @@ static func _add_armor_dropdown_row(host: VBoxContainer, selected_armor_id: Stri
 	_set_help_id(option, "character_sheet.loadout_summary")
 	option.add_theme_font_size_override("font_size", 9)
 	var normalized_selected: String = _normalize_armor_id(selected_armor_id)
-	for armor_id in PackedStringArray(["light", "medium", "heavy"]):
+	for armor_id in PackedStringArray(["suit", "light", "medium", "heavy"]):
 		option.add_item(COPY.armor(armor_id))
 		var item_index: int = option.item_count - 1
 		option.set_item_metadata(item_index, armor_id)
@@ -1528,7 +1528,7 @@ static func _load_weapon_preview_texture(weapon_id: String) -> Texture2D:
 
 static func _normalize_armor_id(armor_id: String) -> String:
 	var normalized: String = armor_id.strip_edges().to_lower()
-	if normalized == "light" or normalized == "medium" or normalized == "heavy":
+	if normalized in ["suit", "light", "medium", "heavy"]:
 		return normalized
 	return "medium"
 

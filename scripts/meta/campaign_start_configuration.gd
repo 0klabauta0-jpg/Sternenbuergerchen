@@ -52,7 +52,8 @@ func configure(flow: Node, request: Dictionary) -> void:
 	flow.set_meta("singleplayer_bootstrap_fireteam_id", String(staged_teams[0]) if not staged_teams.is_empty() else "")
 	flow.set_meta("singleplayer_bootstrap_enabled", true)
 	var fob: Node = flow.call("_get_fob_screen")
-	var definitions: Array = Array(craft_state.get("fireteam_definitions", [{"id": "ft1", "lead_unit_id": leader, "name": "Pioniertrupp", "loadout_id": "light", "member_unit_ids":[leader], "member_loadouts":{leader:{"armor":"light","weapon_1":"pistol","weapon_2":"medictool"}}}])).duplicate(true)
+	var initial_armor := String(roster[0].get("armor", roster[0].get("armor_id", "light")))
+	var definitions: Array = Array(craft_state.get("fireteam_definitions", [{"id": "ft1", "lead_unit_id": leader, "name": "Pioniertrupp", "loadout_id": initial_armor, "member_unit_ids":[leader], "member_loadouts":{leader:{"armor":initial_armor,"weapon_1":"pistol","weapon_2":"medictool"}}}])).duplicate(true)
 	fob.call("set_team", staged_units, staged_teams, definitions)
 	flow.set("_selected_mission_id", "satellite_recovery")
 	flow.set("_selected_mission_map_path", "res://maps/satellite_crash_site.json")
@@ -61,13 +62,13 @@ func configure(flow: Node, request: Dictionary) -> void:
 	var loadouts: Dictionary = Dictionary(craft_state.get("member_loadouts", {})).duplicate(true)
 	if checkpoint.is_empty():
 		for person: Dictionary in roster:
-			loadouts[String(person.unit_id)] = {"armor":"light","weapon_1":"pistol","weapon_2":"medictool"}
+			loadouts[String(person.unit_id)] = {"armor":"suit","weapon_1":"pistol","weapon_2":"medictool"}
 	flow.get_node("HomebaseScreen").call("restore_personnel_loadouts", loadouts)
 
 func _initial_roster() -> Array:
 	var presets: Array = PRESETS.get_homebase_roster()
 	var leader: Dictionary = Dictionary(presets[0]).duplicate(true)
-	leader.merge({"unit_id": "campaign_leader", "display_name": "Anja Voss", "roster_role_category": "operator", "role_name": "Fireteam Leader", "fireteam_id": "ft1", "armor":"light", "armor_id":"light", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
+	leader.merge({"unit_id": "campaign_leader", "display_name": "Anja Voss", "roster_role_category": "operator", "role_name": "Fireteam Leader", "fireteam_id": "ft1", "armor":"suit", "armor_id":"suit", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
 	# The dedicated pilot preset already carries the canonical piloting values.
 	var pilot: Dictionary = {}
 	for unit: Dictionary in presets:
@@ -76,7 +77,7 @@ func _initial_roster() -> Array:
 			break
 	if pilot.is_empty():
 		pilot = Dictionary(presets.back()).duplicate(true)
-	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": "", "armor":"light", "armor_id":"light", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
+	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": "", "armor":"suit", "armor_id":"suit", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
 	return [leader, pilot]
 
 func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:

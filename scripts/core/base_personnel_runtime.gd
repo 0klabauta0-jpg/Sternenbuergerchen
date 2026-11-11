@@ -79,6 +79,7 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 		var id := String(profile.unit_id)
 		var actor: Node2D = ACTOR.new()
 		actor.unit_id = id
+		actor.configure_equipment_source(_sim)
 		actor.name = id.validate_node_name()
 		add_child(actor)
 		var spawn: Vector2 = _world(_layout.get("avatar_spawn_grid", [28,44]))
@@ -124,6 +125,7 @@ func sync_roster() -> void:
 			continue
 		var actor: Node2D = ACTOR.new()
 		actor.unit_id = id
+		actor.configure_equipment_source(_sim)
 		actor.name = id.validate_node_name()
 		add_child(actor)
 		var raw: Array = _layout.get("avatar_spawn_grid", [36,40])

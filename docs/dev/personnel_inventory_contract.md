@@ -51,6 +51,21 @@ solange kein vollstaendiger Weltcheckpoint existiert.
 
 ## Darstellung und Pruefung
 
+### Anzug und tragbare Rüstung —11.11.2026
+
+`suit` ist die kanonische intrinsische Unterbekleidung. Sie hat keinen kaufbaren
+Lagerbestand und erzeugt beim Wechsel keinen Gegenstand. `inventory_equip` mit
+Slot `armor` und Item-ID `suit` legt die bisherige tatsächliche Rüstung in den
+gewählten erreichbaren Container; Zugriff und freier Rückgabeplatz bleiben Pflicht.
+Neue Kampagnenpersonen beginnen im Anzug ohne freie leichte Rüstung. Der vorhandene
+Satelliten-Blueprint öffnet die Herstellung leichter Rüstung. Alte gespeicherte
+Loadouts behalten ihre Klasse. Das bestehende Datenträgerfach benötigt keinen Rucksack.
+
+Basisakteure lesen den bestehenden Personal-Loadout-Owner des SimulationRoot.
+Körpervorschau, Basiswelt und Einsatzmodelle zeigen dieselbe Klasse über starre
+Knochenanhänge. Nur geänderte Ausrüstung erzeugt neue Anhänge; Mesh-/Szenenressourcen
+sind gecacht. Ein Visual verändert weder Gegenstände noch Rüstungswirkung.
+
 Referenzen: `inventory_drag.png` und `inventory_grid.png` im Playtest-Assetordner.
 Echte Personenportraits und IDs bleiben. Ein gemeinsames Panel fuer Personal und
 Trupp zeigt Slots sowie Basislager, Schiff und Rucksack mit Mengen/Kapazitaeten.

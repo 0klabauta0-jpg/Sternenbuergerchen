@@ -353,7 +353,7 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
 	if slot == "backpack":
 		return _change_backpack(String(payload.unit_id), source, item, context)
-	var unequip := item=="none" and slot=="weapon_2"
+	var unequip := (item == "none" and slot == "weapon_2") or (item == "suit" and slot == "armor")
 	if not unequip and not INVENTORY.compatible(item,slot): return _reject("incompatible_slot", "Gegenstand passt nicht in diesen Slot")
 	var from: Dictionary = _inventory[source].items
 	if not unequip and int(from.get(item,0))<1: return _reject("insufficient_items", "Gegenstand nicht vorhanden")
@@ -444,7 +444,7 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 func configure_start_inventory(mode: String) -> void:
 	if mode != "campaign": return
 	_item_quantities.clear()
-	_item_quantities.merge({"armor_light":2,"pistol":2,"medictool":1})
+	_item_quantities.merge({"pistol":2,"medictool":1})
 	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
 	_revision += 1
 

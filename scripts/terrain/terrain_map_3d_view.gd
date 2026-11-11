@@ -12641,6 +12641,7 @@ func _build_unit_visual_signature(unit: Node) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(_get_unit_id(unit))
 	parts.append(_get_unit_team_id(unit))
+	parts.append(String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else "suit")
 	parts.append(String(unit_visual_entry.get("visual_id", "")))
 	parts.append(String(unit_visual_entry.get("model_path", "")))
 	parts.append(String(unit_visual_entry.get("skin_path", "")))
@@ -12657,6 +12658,7 @@ func _build_unit_visual_input_signature(unit: Node) -> String:
 	var parts: PackedStringArray = PackedStringArray([
 		_get_unit_id(unit),
 		_get_unit_team_id(unit),
+		String(unit.call("get_armor_id")) if unit != null and unit.has_method("get_armor_id") else "suit",
 		String(unit.call("get_weapon_1_id")) if unit != null and unit.has_method("get_weapon_1_id") else "",
 		String(unit.call("get_weapon_2_id")) if unit != null and unit.has_method("get_weapon_2_id") else "",
 	])
@@ -13074,6 +13076,8 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 				)
 				root.set_meta("unit_visual_error", true)
 			model_root.add_child(model_instance)
+			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(model_instance,
+				String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else "suit")
 			if not unit_visual_entry.is_empty():
 				var visual_archetype_id: String = String(unit_visual_entry.get("resolved_visual_archetype_id", unit_visual_entry.get("visual_archetype_id", ""))).strip_edges()
 				if not visual_archetype_id.is_empty():

@@ -10,7 +10,7 @@ const COPY=preload("res://scripts/meta/character_sheet_copy.gd")
 const PORTRAITS=preload("res://scripts/meta/portrait_identity_catalog.gd")
 const PORTRAIT_SIZE := Vector2(112, 140)
 const MODEL_HEIGHT := 500.0
-const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","none":"Leer"}
+const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","none":"Leer"}
 var _rest: CheckButton
 var _signature := ""
 var _unit_id := ""
@@ -27,6 +27,7 @@ var _slot_target: OptionButton
 var _transfer: Button
 var _equip: Button
 var _remove_backpack: Button
+var _remove_armor: Button
 var _bodies: Dictionary = {}
 var _rest_row:HBoxContainer
 var _identity:HBoxContainer
@@ -94,6 +95,16 @@ func _ready() -> void:
 	_remove_backpack.pressed.connect(func():
 		if _target.selected >= 0:
 			_wear({"source_container_id": _target.get_item_metadata(_target.selected), "item_id": "none"}, "backpack"))
+	_remove_armor = Button.new()
+	_remove_armor.name = "UnequipArmor"
+	_remove_armor.text = "Rüstung ablegen"
+	_remove_armor.tooltip_text = "Rüstung in den ausgewählten Container legen; der Anzug bleibt getragen."
+	_remove_armor.hide()
+	SKIN.button(_remove_armor)
+	equipment_row.add_child(_remove_armor)
+	_remove_armor.pressed.connect(func():
+		if _target.selected >= 0:
+			_wear({"source_container_id": _target.get_item_metadata(_target.selected), "item_id": "suit"}, "armor"))
 
 func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true, actor:Node=null) -> void:
 	_update_identity(unit)
@@ -169,6 +180,8 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
 	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty() or not equipment_allowed
+	_remove_armor.visible = equipment_allowed and String(loadout.get("armor", "suit")) != "suit"
+	_remove_armor.disabled = accessible.is_empty()
 	_layout_body_slots()
 
 func _layout_body_slots() -> void:

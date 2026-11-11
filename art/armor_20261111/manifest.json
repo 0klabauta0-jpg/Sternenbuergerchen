@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-11",
+  "engine": "Godot 4.6.2",
+  "blender": "5.1.1",
+  "reference": "Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+  "reference_sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+  "reference_role": "Own drawn crew atlas: petrol cloth, sand protective plates, readable broad shapes. Shape construction is a first rigid-plate revision, not a user-approved final outfit.",
+  "editable_source": "armor_parts.blend",
+  "qa": "qa.json",
+  "pipeline": "build_armor_parts.py",
+  "status": "integrated rigid bone attachments; native idle/walk/fire/rear and actual base/equip checked; subjective style approval and additional transport poses remain open",
+  "accepted_warning": "Centered wearable parts have a bone-local center pivot; the individual part is intentionally not placed on a ground plane.",
+  "assets": {
+    "back_plate.glb": "0a35815fb4fe289624a635e991df6269d4c0bbbd81ff43362eb0588d26ca1b74",
+    "collar.glb": "34772e212270886e2c0cd5cff9f55bc982e2c0c7133599e538e2dd14a286e7b4",
+    "heavy_chest.glb": "bb2ae9005dc527ab1b42d5377f7dcc6f91705ac12a9282560cef10886310aacf",
+    "light_chest.glb": "9ed351d54228d2ebf0ce673fc5c0e9dc71b1bfef4225823477a8f48d49a5d577",
+    "medium_chest.glb": "d7ba8cbfb6c2279e4cc0ea4c1f9a3367ea873a3401c485490a1d24f8f829d6ea",
+    "shin.glb": "17dc9756a536f1ca3ecc75f5d6307bf220b94517145d5e372edb451899f22be1",
+    "shoulder.glb": "cae538af6adf3e6aa86fa18cb7c12f050bdd814719b8e3091722abd404c74a98",
+    "thigh.glb": "be77bf177a516efebd4f2eefa58a69bb779e5dbbd55a7421a0c837bc64b3a6a1"
+  }
+}

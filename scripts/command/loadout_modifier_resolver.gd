@@ -66,6 +66,12 @@ const WEAPON_FORMULAS: Dictionary = {
 }
 
 const ARMOR_FORMULAS: Dictionary = {
+	"suit": {
+		"speed_mod": 0.18,
+		"toughness_mod": -0.15,
+		"cover_mod": -0.08,
+		"weight": 0.5,
+	},
 	"light": {
 		"speed_mod": 0.15,
 		"toughness_mod": -0.08,

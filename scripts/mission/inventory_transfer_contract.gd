@@ -11,6 +11,7 @@ static func known(item: String) -> bool:
 static func compatible(item: String, slot: String) -> bool:
 	return item in ["armor_light","armor_medium","armor_heavy"] if slot=="armor" else (slot in ["weapon_1","weapon_2"] and LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item))
 static func item_from_slot(slot: String, value: String) -> String:
+	if slot == "armor" and value == "suit": return "suit"
 	return "armor_"+value if slot=="armor" else value
 static func used(items: Dictionary) -> int:
 	var count := 0

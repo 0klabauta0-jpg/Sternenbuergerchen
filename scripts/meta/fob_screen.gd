@@ -1439,7 +1439,7 @@ func _update_staging_panel() -> void:
 	clear_respawn_button.disabled = respawn_fireteam_id.is_empty() or (not respawn_enabled and not respawn_anchor_active)
 
 	loadout_status_label.visible = has_loadout_fireteam
-	var armor_label := String({"light": "Leicht", "medium": "Mittel", "heavy": "Schwer"}.get(String(loadout_definition.get("loadout", "medium")), String(loadout_definition.get("loadout", "medium"))))
+	var armor_label := String({"suit": "Anzug", "light": "Leicht", "medium": "Mittel", "heavy": "Schwer"}.get(String(loadout_definition.get("loadout", "medium")), String(loadout_definition.get("loadout", "medium"))))
 	loadout_status_label.text = "Ausrüstung: %s · Last %.1f" % [armor_label, _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
 	loadout_help_label.text = "Truppkarte hier ablegen, um die Ausrüstung zu ändern."
 	loadout_help_label.visible = not has_loadout_fireteam

@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.043,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-11T09:14:03.132585+00:00",
+  "finished_at": "2026-11-11T09:14:30.371555+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\engine-check-personnel_armor_visual_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\personnel_armor_visual_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.474,
+      "name": "personnel_armor_visual_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\check-personnel_armor_visual_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\engine-check-personnel_armor_visual_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\engine-check-campaign_suit_equipment_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\campaign_suit_equipment_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 25.711,
+      "name": "campaign_suit_equipment_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\check-campaign_suit_equipment_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\armor_updated_final\\20261111T091403Z-pid32168\\logs\\engine-check-campaign_suit_equipment_test.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 2,
+    "passed": 2,
+    "failed": 0
+  }
+}

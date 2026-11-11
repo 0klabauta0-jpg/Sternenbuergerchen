@@ -3609,7 +3609,7 @@ func _build_homebase_scaled_preview_texture(source_texture: Texture2D) -> Textur
 
 func _build_homebase_loadout_option_label(option_value: String) -> String:
 	var normalized_value: String = option_value.strip_edges().to_lower()
-	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
+	if LOADOUT_CONTRACT_SCRIPT.get_armor_ids().has(normalized_value):
 		return String(LOADOUT_CONTRACT_SCRIPT.call("get_armor_label", normalized_value))
 	return String(LOADOUT_CONTRACT_SCRIPT.call("get_weapon_label", normalized_value))
 

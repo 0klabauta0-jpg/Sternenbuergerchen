@@ -13,6 +13,7 @@ const ROLES := {
 	"pilot": {"label": "Pilot", "name": "Dropship Pilot", "cost": 10},
 }
 const ARMOR := {
+	"suit": {"label": "Anzug", "cost": 0},
 	"light": {"label": "Leicht", "cost": 10},
 	"medium": {"label": "Mittel", "cost": 25},
 	"heavy": {"label": "Schwer", "cost": 45},

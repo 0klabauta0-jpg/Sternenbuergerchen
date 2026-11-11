@@ -632,7 +632,7 @@ static func _build_profile_loadout_text(profile) -> String:
 
 static func _normalize_armor_id(armor_id: String) -> String:
 	var normalized_armor_id: String = armor_id.strip_edges().to_lower()
-	if normalized_armor_id == "light" or normalized_armor_id == "medium" or normalized_armor_id == "heavy":
+	if normalized_armor_id in ["suit", "light", "medium", "heavy"]:
 		return normalized_armor_id
 	return "medium"
 

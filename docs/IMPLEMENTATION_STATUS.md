@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### Gezeichnete Porträts, Kampagnen-Workbench und tragbare Rüstung —11.11.2026
+
+Taskbranch task/native-glut-maps-20261110 auf820a91caf. Vier neue Porträts auf
+stärkere Illustration revidiert, stabile IDs erhalten, drei gezielte Programme
+und native63/0. Lokale Kampagnen-/Forschungsworkbench mit18 Schritten, editierbaren
+Voraussetzungen/Belohnungen, Zyklusprüfung, Planspiel und JSON-Roundtrip;23Browserchecks.
+Sechs Forschungsfortsetzungen sind ausdrücklich Vorschläge, kein Runtimebaum.
+Frische Kampagne startet im Anzug, vorhandener Satelliten-Blueprint öffnet leichte
+Rüstung. Erste tatsächliche starre Rüstungsmeshes an beiden vorhandenen Rigs,
+kanonische Basisakteur-Getter und echter Ablegenbutton. Neun Headless-Programme,
+native Posen62/0 und tatsächlicher Inventar-/Basisweg16/0. QA: portrait_drawn_20261111,
+campaign_research_workbench_20261111 und personnel_armor_20261111. Weitere Fahrzeuge,
+Transportposen, Gefechtsframerate, endgültiges Stilurteil, Main und EXE bleiben offen.
+
 ### Punktebasis und vereinfachter Einkauf — 11.11.2026
 
 Taskbranch task/native-glut-maps-20261110 auf 52cba3f80. Neuer 1000/1500-Punkte-

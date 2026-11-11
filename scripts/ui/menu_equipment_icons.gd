@@ -1,7 +1,7 @@
 extends RefCounted
 ## Illustrated menu identities. Map models and combat data remain unchanged.
 const PATH="res://Assets/curated/ui/menu_equipment_20261110/icons_01.png"
-const CELLS={"armor_light":0,"rifle":1,"pistol":2,"medictool":3,"mining_tool":4,"satellite_chip":5,"outpost_chip":5}
+const CELLS={"suit":0,"armor_light":0,"rifle":1,"pistol":2,"medictool":3,"mining_tool":4,"satellite_chip":5,"outpost_chip":5}
 static var _cache:Dictionary={}
 static func get_icon(item_id:String)->Texture2D:
 	if not CELLS.has(item_id):return null

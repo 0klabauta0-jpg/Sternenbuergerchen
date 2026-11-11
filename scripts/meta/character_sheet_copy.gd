@@ -60,7 +60,7 @@ static func relationship_reason(value: String) -> String:
 	}.get(value, value)) if not value.is_empty() else "Kein Grund hinterlegt."
 
 static func armor(armor_id: String) -> String:
-	return String({"light": "Leichte Rüstung", "medium": "Mittlere Rüstung", "heavy": "Schwere Rüstung"}.get(armor_id, armor_id))
+	return String({"suit": "Anzug", "light": "Leichte Rüstung", "medium": "Mittlere Rüstung", "heavy": "Schwere Rüstung"}.get(armor_id, armor_id))
 
 static func tactical_text(value: String) -> String:
 	if value.begins_with("Plan ") and value.contains(" | Comms "):
