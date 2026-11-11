@@ -24,7 +24,7 @@ func _initialize() -> void:
 	if sim.get_space_actor(id) != null or flight.get_snapshot() != before or not sim.get_space_wing_snapshot().wings.is_empty(): failed += 1
 	var result: Dictionary = sim.commit_space_area_transition(String(prepared.get("token", "")), context)
 	if not result.get("ok", false): failed += 1
-	if sim.get_space_actor(id) != flight or flight.get_snapshot().space_area_id != "orbit_approach:planet": failed += 1
+	if sim.get_space_actor(id) != flight or flight.get_snapshot().space_area_id != "orbit_approach:planet" or flight.get_snapshot().motion_mode != "tactical": failed += 1
 	var cells: Array[Vector2i] = [GRID.from_offset(Vector2i(200,230))]
 	if sim.get("_space_combat_state").query_cells(cells, "orbit_approach:planet") != [id]: failed += 1
 	if sim.get_space_wing_snapshot().wings.size() != 1 or fleet.get_snapshot(id).phase != "orbit": failed += 1
