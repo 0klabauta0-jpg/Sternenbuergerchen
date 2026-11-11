@@ -565,6 +565,8 @@ func _validate_hex_ground_actor_group(unit_ids:PackedStringArray,allow_staged:bo
 		var actor=_resolve_known_unit_for_contract(id) if allow_staged else registered
 		if is_instance_valid(registered) and registered!=actor:return {"ok":false,"reason":"mission_actor_lookup_conflict","unit_id":id}
 		if not is_instance_valid(actor) or not actor is Node2D or not scope.is_ancestor_of(actor) or _resolve_known_unit_for_contract(id)!=actor:return {"ok":false,"reason":"mission_actor_unavailable","unit_id":id}
+		var bound=_known_units_by_id.get(id,null)
+		if not is_instance_valid(bound) or bound!=actor:return {"ok":false,"reason":"mission_actor_unbound","unit_id":id}
 		if not actor.is_inside_tree() or actor.is_queued_for_deletion():return {"ok":false,"reason":"mission_actor_exiting","unit_id":id}
 		if not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=id or not actor.has_method("assign_unit_command") or not actor.has_method("get_current_unit_command"):return {"ok":false,"reason":"invalid_mission_actor","unit_id":id}
 		actors[id]=actor

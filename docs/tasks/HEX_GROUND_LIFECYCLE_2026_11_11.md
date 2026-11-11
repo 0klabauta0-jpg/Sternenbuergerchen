@@ -92,3 +92,8 @@ Transporteffects, gestagte Actors, Slotabbruch, Terraininvalidierung, Tree-Exit,
 stale Registry und alte Queuepayloads geprüft. Frischer enger Review schloss
 stalen Registryschlüssel und leeren Releasegrund. Diese Lieferung ist weiterhin
 ein Teilpaket: konkrete Controller-/Setup-/Basisproducer folgen vor AP6-Abschluss.
+
+Integrationsreview AP6b: Registrylookup allein beweist noch keine Root-Lifecycle-
+Bindung. Tatsächliche Actorzulassung verlangt deshalb den expliziten Known-Eintrag
+desselben Actors, dessen Tree-Exitcleanup beim Binden verbunden wurde. Kleiner
+Registry-only→Admission→free-Fall, keine Erweiterung der Prüffläche.
