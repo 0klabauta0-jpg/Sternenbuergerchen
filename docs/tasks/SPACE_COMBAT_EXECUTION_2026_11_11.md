@@ -93,13 +93,17 @@ Verifier und diese Statusdokumentation.
   zusätzlich ein einzelner Fixture-Commit über den tatsächlichen Root.
   Produkt-Rumpfkatalog, automatische Tickanbindung, Kollision und
   vollständige AP02-Abnahme fehlen.
+- AP03 Vorstufe: deterministische, konservativ reservierende Stichproben für
+  Bewegungs-/Drehpfade; fünf gezielte Fälle bestanden. Exakte Randberührungen,
+  zeitliche Reservierung, Blockadeauflösung und Rootintegration fehlen. Der
+  Helfer ist ausdrücklich nicht als produktives Kollisionsgate angeschlossen.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
   löst sie auf. Verifier19/19. Der autoritative Aufrufer muss eine vollständige
   aktuelle Craft-/Pilotenzuordnung liefern; UI-Anschluss, Root-/Lifecycle- und
   Checkpointintegration fehlen.
-- AP02/AP04 Rest und AP03 sowie AP05–AP20: offen.
+- AP02/AP03/AP04 Rest und AP05–AP20: offen.
 
 ## Risiken / offene Punkte
 
