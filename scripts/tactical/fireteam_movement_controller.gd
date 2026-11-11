@@ -167,6 +167,10 @@ func start_execution(
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"started": false}
+	if _uses_hex_movement_owner(simulation_root):
+		for record in member_records:
+			if simulation_root.call("get_hex_logical_unit_position",String(record.unit_id))==null:
+				return {"started":false,"reason":"missing_hex_member"}
 	var normalized_command_type: String = command_type.strip_edges().to_lower()
 	var raw_style: String = _extract_advance_style(behavior_profile)
 	var tactical_stance: String = _extract_tactical_stance(behavior_profile)
@@ -177,7 +181,7 @@ func start_execution(
 	var execution_profile: Dictionary = _extract_execution_profile(behavior_profile)
 	var fire_rule: String = _extract_fire_rule(behavior_profile)
 	var leader_unit_id: String = _extract_leader_unit_id(leader, member_records)
-	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader)
+	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader,simulation_root)
 	var resolved_target_position: Vector2 = target_position
 	if _uses_execution_target_offset(normalized_command_type):
 		resolved_target_position = _apply_execution_target_offset(
@@ -289,7 +293,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 		}
 	if bool(state.get("contact_halt_active", false)):
 		_clear_engage_contact_halt_state(state)
-	if _are_current_targets_reached(state, member_records):
+	if _are_current_targets_reached(state, member_records,simulation_root):
 		state["completed_stage_count"] = int(state.get("completed_stage_count", 0)) + 1
 		var bound_event: Dictionary = {
 			"fireteam_id": normalized_fireteam_id,
@@ -300,7 +304,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 			"covering_unit_ids": PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray())),
 			"target_position": Vector2(state.get("current_anchor_target_position", state.get("final_target_position", Vector2.ZERO))),
 		}
-		if _is_execution_complete(state, member_records):
+		if _is_execution_complete(state, member_records,simulation_root):
 			_execution_by_fireteam.erase(normalized_fireteam_id)
 			bound_event["reason"] = BOUND_COMPLETE_REASON_FINAL
 			return {
@@ -330,7 +334,7 @@ func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simula
 	if simulation_root == null:
 		return
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
-	var current_positions: Dictionary = _build_current_positions(member_records)
+	var current_positions: Dictionary = _build_current_positions(member_records,simulation_root)
 	var modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
 	var readout: Dictionary = Dictionary(contact_context.get("readout", {})).duplicate(true)
 	var cover_decision_result: Dictionary = _build_contact_cover_decisions(state, member_records, current_positions, terrain_registry, contact_context, readout)
@@ -842,9 +846,10 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 		String(state.get("leader_unit_id", "")),
 		stage_scatter_factor,
 		_allow_trailing_slots_for_state(state),
-		state
+		state,
+		simulation_root
 	)
-	var current_positions: Dictionary = _build_current_positions(member_records)
+	var current_positions: Dictionary = _build_current_positions(member_records,simulation_root)
 	var issued_count: int = 0
 	var walkable_adjustment_count: int = 0
 	var target_spacing_adjustment_count: int = 0
@@ -990,11 +995,27 @@ func _allow_trailing_slots_for_state(state: Dictionary) -> bool:
 	return true
 
 
-func _are_current_targets_reached(state: Dictionary, member_records: Array) -> bool:
+func _uses_hex_movement_owner(simulation_root) -> bool:
+	return is_instance_valid(simulation_root) and simulation_root.has_method("is_hex_ground_runtime_active") and bool(simulation_root.call("is_hex_ground_runtime_active"))
+
+
+func _are_hex_targets_reached(state:Dictionary,member_records:Array,unit_ids:PackedStringArray,targets:Dictionary,simulation_root) -> bool:
+	if unit_ids.is_empty():return false
+	var present:Dictionary={}
+	for record in member_records:present[String(record.get("unit_id",""))]=true
+	for id in unit_ids:
+		if not present.has(id) or not targets.has(id):return false
+		if not simulation_root.call("has_hex_position_arrived",id,Vector2(targets[id]),_build_stage_command_token(state,id)):return false
+	return true
+
+
+func _are_current_targets_reached(state: Dictionary, member_records: Array,simulation_root=null) -> bool:
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
 	if moving_unit_ids.is_empty():
 		return false
 	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
+	if _uses_hex_movement_owner(simulation_root):
+		return _are_hex_targets_reached(state,member_records,moving_unit_ids,current_target_positions,simulation_root)
 	for record in member_records:
 		var unit_id: String = String(record.get("unit_id", ""))
 		if unit_id.is_empty() or not moving_unit_ids.has(unit_id):
@@ -1008,12 +1029,14 @@ func _are_current_targets_reached(state: Dictionary, member_records: Array) -> b
 	return true
 
 
-func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
+func _is_execution_complete(state: Dictionary, member_records: Array,simulation_root=null) -> bool:
 	var final_target_position: Vector2 = Vector2(state.get("final_target_position", Vector2.ZERO))
 	var current_anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", final_target_position))
 	if current_anchor_target_position.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
 		return false
-	var final_targets: Dictionary = _resolve_completion_targets(state, member_records, final_target_position)
+	var final_targets: Dictionary = _resolve_completion_targets(state, member_records, final_target_position,simulation_root)
+	if _uses_hex_movement_owner(simulation_root):
+		return _are_hex_targets_reached(state,member_records,_packed_unit_ids(member_records),final_targets,simulation_root)
 	for record in member_records:
 		var unit = record.get("unit", null)
 		if not (unit is Node2D):
@@ -1025,7 +1048,7 @@ func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
 	return true
 
 
-func _resolve_completion_targets(state: Dictionary, member_records: Array, final_target_position: Vector2) -> Dictionary:
+func _resolve_completion_targets(state: Dictionary, member_records: Array, final_target_position: Vector2,simulation_root=null) -> Dictionary:
 	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
 	if _target_positions_cover_member_records(current_target_positions, member_records):
 		return current_target_positions
@@ -1035,7 +1058,8 @@ func _resolve_completion_targets(state: Dictionary, member_records: Array, final
 		String(state.get("leader_unit_id", "")),
 		float(state.get("formation_scatter_factor", 1.0)),
 		_allow_trailing_slots_for_state(state),
-		state
+		state,
+		simulation_root
 	)
 
 
@@ -1317,7 +1341,7 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 		return
 	var covering_unit_ids: PackedStringArray = PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray()))
 	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
-	var current_positions: Dictionary = _build_current_positions(member_records)
+	var current_positions: Dictionary = _build_current_positions(member_records,simulation_root)
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var walkable_adjustment_count: int = 0
 	var target_spacing_adjustment_count: int = 0
@@ -1507,7 +1531,7 @@ func _compute_next_anchor_target(state: Dictionary, _member_records: Array) -> V
 	return current_anchor_position + direction.normalized() * step_distance
 
 
-func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0, allow_trailing_slots: bool = true, state: Dictionary = {}) -> Dictionary:
+func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0, allow_trailing_slots: bool = true, state: Dictionary = {},simulation_root=null) -> Dictionary:
 	var targets: Dictionary = {}
 	var ordered_records: Array = member_records.duplicate()
 	ordered_records.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -1520,8 +1544,9 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 	var forward: Vector2 = Vector2.DOWN
 	if not ordered_records.is_empty():
 		var leader_unit = ordered_records[0].get("unit", null)
-		if leader_unit is Node2D:
-			var direction: Vector2 = anchor_position - (leader_unit as Node2D).global_position
+		var leader_position:Variant=simulation_root.call("get_hex_logical_unit_position",String(ordered_records[0].get("unit_id",""))) if _uses_hex_movement_owner(simulation_root) else ((leader_unit as Node2D).global_position if leader_unit is Node2D else null)
+		if typeof(leader_position)==TYPE_VECTOR2:
+			var direction: Vector2 = anchor_position - Vector2(leader_position)
 			if not direction.is_zero_approx():
 				forward = direction.normalized()
 	var lateral: Vector2 = forward.orthogonal()
@@ -1636,9 +1661,13 @@ func _get_formation_max_distance_from_anchor(member_count: int, scatter_factor: 
 	return minf(slot_spacing * distance_factor * maxf(scatter_factor, 0.5), cap)
 
 
-func _build_current_positions(member_records: Array) -> Dictionary:
+func _build_current_positions(member_records: Array,simulation_root=null) -> Dictionary:
 	var positions: Dictionary = {}
 	for record in member_records:
+		if _uses_hex_movement_owner(simulation_root):
+			var logical:Variant=simulation_root.call("get_hex_logical_unit_position",String(record.get("unit_id","")))
+			if typeof(logical)==TYPE_VECTOR2:positions[String(record.unit_id)]=logical
+			continue
 		var unit = record.get("unit", null)
 		if unit is Node2D:
 			positions[String(record.get("unit_id", ""))] = (unit as Node2D).global_position
@@ -2361,7 +2390,13 @@ func _build_contact_halt_command_token(state: Dictionary, unit_id: String) -> St
 	return "%s:contact_halt" % _build_stage_command_token(state, unit_id)
 
 
-func _resolve_origin_anchor(member_records: Array, leader) -> Vector2:
+func _resolve_origin_anchor(member_records: Array, leader,simulation_root=null) -> Vector2:
+	if _uses_hex_movement_owner(simulation_root):
+		var positions:Dictionary=_build_current_positions(member_records,simulation_root)
+		if is_instance_valid(leader) and leader.has_method("get_unit_id") and positions.has(String(leader.call("get_unit_id"))):return positions[String(leader.call("get_unit_id"))]
+		var sum_logical:=Vector2.ZERO
+		for position in positions.values():sum_logical+=Vector2(position)
+		return sum_logical/float(maxi(1,positions.size()))
 	if leader is Node2D:
 		return (leader as Node2D).global_position
 	if member_records.is_empty():
