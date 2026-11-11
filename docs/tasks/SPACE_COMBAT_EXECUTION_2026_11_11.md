@@ -196,6 +196,12 @@ Verifier und diese Statusdokumentation.
   Registry-/Sperrprüfung12/12, alte Registry-, Roottakt- und Batchprüfung
   grün. Das Orbitlayout des Parallelchats 9874511c4 ist als be6b9cc74
   integriert; keine Freigabe des noch fehlenden Bereichswechsels.
+- AP04a Grenzen: separater `space_area_grid` prüft axiale Zellen über die
+  vorhandene Offsetkonvertierung gegen strategische256×256 oder lokale
+  Orbitlayout512×256-Grenzen; das strategische Grid bleibt unverändert.
+  Grenzprüfung8/8 und bestehende Geometrieprüfung grün. Bereichsidentität/
+  Berechtigung bleiben Rootpflicht; alte Navigation nutzt den Helfer noch
+  nicht, lokale Kampfaufnahme bleibt gesperrt.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
