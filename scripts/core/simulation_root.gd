@@ -524,6 +524,7 @@ func commit_singleplayer_space_launch(adapter: Node, craft_id: String, request_i
 	if craft_id.is_empty() or request_id.is_empty() or _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"invalid_launch"}
 	if _launch_receipts.has(request_id):
 		var prior: Dictionary = _launch_receipts[request_id]
+		if prior.context.operation != "launch_to_orbit": return {"ok":false, "reason":"request_id_conflict"}
 		if prior.craft_id != craft_id or prior.fleet != _singleplayer_space_travel_owner or prior.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}
 		var replay_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(prior.candidate, prior.context)
 		if not replay_check.get("ok", false) or not replay_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
@@ -752,6 +753,9 @@ func publish_singleplayer_warp_departure_event(adapter: Node, receipt_id: String
 	receipt.event_published = true
 	singleplayer_command_committed.emit(receipt.command.duplicate(true), receipt.result.travel_result.duplicate(true))
 
+func is_singleplayer_warp_entry_pending(craft_id: String) -> bool:
+	return _warp_entry_searches.has(craft_id)
+
 func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: float) -> Dictionary:
 	# Internal bounded owner path; adapter tick is intentionally not connected
 	# until the inverse local-to-strategic transition is also available.
@@ -776,7 +780,7 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 	var pose: Dictionary = flight.get_snapshot()
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
 	if travel.get("phase") != "quantum" or pose.get("coordinate_frame") != "strategic" or not String(pose.get("space_area_id", "")).is_empty(): _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"quantum_completion_required"}
-	if float(travel.get("elapsed_seconds", 0.0)) + delta < float(travel.get("duration_seconds", 0.0)): return {"ok":false, "reason":"quantum_not_complete"}
+	if not _warp_entry_searches.has(craft_id) and float(travel.get("elapsed_seconds", 0.0)) + delta < float(travel.get("duration_seconds", 0.0)): return {"ok":false, "reason":"quantum_not_complete"}
 	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(String(travel.get("target_orbit_id", "")), {})
 	var body_id := String(orbit.get("body_id", ""))
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)

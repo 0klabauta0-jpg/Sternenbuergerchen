@@ -24,8 +24,14 @@ func _initialize() -> void:
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = ADAPTER.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._space_route_requested = true
+	assert(not adapter._local_warp_arrival_enabled)
+	adapter._local_warp_arrival_enabled = true
 	adapter._pad_by_craft["ship"] = "homebase_pad_01"
 	assert(sim.configure_departure_adapter(adapter).ok)
+	pilot.aboard = false
+	adapter.advance_space_travel(3.0)
+	assert(fleet.get_craft_snapshot("ship").phase == "quantum" and adapter._warp_arrival_feedback.ship.reason == "pilot_not_aboard")
+	pilot.aboard = true
 	assert(_arrive(sim, adapter))
 	var flight = fleet.get_flight_state("ship")
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().motion_mode == "tactical" and flight.get_snapshot().space_area_id == "orbit_approach:planet")
@@ -71,6 +77,8 @@ func _initialize() -> void:
 	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home").ok)
 	assert(fleet.get_craft_snapshot("ship").phase == "grounded" and flight.get_snapshot().motion_mode == "grounded" and sim.get_space_actor("ship") == null and flow.home_landings == 1)
 	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home").replayed and flow.home_landings == 1)
+	var landed_pose: Dictionary = flight.get_snapshot()
+	assert(sim.commit_singleplayer_space_launch(adapter, "ship", "space-operation:home").get("reason") == "request_id_conflict" and flight.get_snapshot() == landed_pose)
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("SPACE_WARP_PRODUCT_CYCLE passed")
 	quit(0)
@@ -80,7 +88,6 @@ func _travel(fleet: RefCounted, operation: String, payload: Dictionary, request_
 
 func _arrive(sim: Node, adapter: Node) -> bool:
 	for _attempt in 65:
-		var result: Dictionary = sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0)
-		if not result.get("ok", false): return false
-		if result.get("status") == "complete": return true
+		adapter.advance_space_travel(3.0)
+		if adapter._travel.get_craft_snapshot("ship").phase == "orbit" and sim.get_space_actor("ship") != null: return true
 	return false

@@ -52,6 +52,16 @@ func is_quantum_active() -> bool:
 	for owner in _owners.values():
 		if owner.is_quantum_active(): return true
 	return false
+
+func get_active_quantum_progress() -> Array[Dictionary]:
+	var ids: Array = _owners.keys(); ids.sort()
+	var result: Array[Dictionary] = []
+	for id in ids:
+		if _owners[id].is_quantum_active():
+			var entry: Dictionary = _owners[id].get_quantum_progress()
+			entry["craft_id"] = id
+			result.append(entry)
+	return result
 func all_grounded() -> bool:
 	for owner in _owners.values():
 		if String(owner.get_snapshot().phase)!="grounded": return false

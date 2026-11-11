@@ -69,6 +69,9 @@ func _set_travel_pose(position: Vector2, heading: float) -> void:
 func is_quantum_active() -> bool:
 	return _phase == "quantum"
 
+func get_quantum_progress() -> Dictionary:
+	return {"phase":_phase, "target_orbit_id":_target_orbit_id, "elapsed_seconds":_elapsed_seconds, "duration_seconds":_active_jump_duration_seconds}
+
 func get_snapshot() -> Dictionary:
 	return {"system_version": int(_definition.get("version", 1)), "hex": GRID.cell_at(_position),
 		"route_hexes": _route_hexes.duplicate(), "heading": _heading, "phase": _phase, "craft_id": _craft_id, "orbit_id": _orbit_id,

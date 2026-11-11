@@ -33,6 +33,15 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warptick-Vorstufe: Schmale Fleet-Fortschrittsabfrage und begrenzter lokaler
+  Ankunftsweg sind hinter einem intern standardmäßig ausgeschalteten Schalter
+  vorbereitet. Polisa bleibt ausdrücklich strategischer Stationspfad. Ein
+  gezielter Stufentest deckt fehlenden Piloten, Planet→Warp→Mond→Heimatgate
+  und Polisa-Anflug/Rückkehr ab. Keine Freigabe des Schalters: tatsächlicher
+  AP6-/Boardingfluss, Polisa-Pilotkontinuität und native Abnahme stehen aus.
+  Zusätzlich weist der Home-Start fremde Operationsbelege unter derselben ID
+  ab; Kollisionstest vor Fix rot und danach grün.
+
 - Fluglebenszyklus: Heimatstart und strategischer Polisa-Start bereiten die
   tatsächliche Pilot-/Crewprüfung, Singletonrotte und Travel/Flight gemeinsam
   vor. Polisa bleibt eigener Stationsweg; sein Rückflugfuel wird erst beim
