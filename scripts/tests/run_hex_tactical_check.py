@@ -1,0 +1,100 @@
+"""One bounded, isolated Hex contract case; never loads the game's main scene."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import uuid
+
+
+CASES = {
+    "ground": ("hex_ground_state_verifier.gd", "HEX_GROUND_STATE_PASS"),
+    "visibility": ("hex_visibility_verifier.gd", "HEX_VISIBILITY_PASS"),
+    "detection": ("hex_detection_verifier.gd", "HEX_DETECTION_PASS"),
+}
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
+
+
+def fingerprint(directory: Path) -> dict:
+    if not directory.exists():
+        return {}
+    return {str(p.relative_to(directory)): [hashlib.sha256(p.read_bytes()).hexdigest(), p.stat().st_mtime_ns]
+            for p in directory.rglob("*") if p.is_file()}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--case", required=True, choices=CASES)
+    args = parser.parse_args()
+    source = Path(__file__).resolve().parents[2]
+    script, marker = CASES[args.case]
+    run = source / ".godot/hex_tactical_checks" / (args.case + "-" + uuid.uuid4().hex)
+    project = run / "project"
+    project.mkdir(parents=True)
+    app_name = "SB-Codex-Review2-" + uuid.uuid4().hex
+    user_root = Path(os.environ["APPDATA"]) / "Godot/app_userdata" / app_name
+    if user_root.exists():
+        raise RuntimeError("Private profile must be fresh")
+    real_user = Path(os.environ["APPDATA"]) / "Godot/app_userdata/Sternenbuergerchen"
+    before = fingerprint(real_user)
+    paths = [
+        "scripts/tests/" + script,
+        "scripts/tests/review2_isolated_user_guard.gd",
+        "scripts/terrain/hex_grid.gd",
+        "scripts/terrain/terrain_tile_data.gd",
+        "scripts/terrain/terrain_registry.gd",
+        "scripts/terrain/terrain_truth_audit.gd",
+        "scripts/core/los_system.gd",
+        "scripts/core/hex_ground_runtime.gd",
+        "scripts/core/hex_visibility_query.gd",
+        "scripts/core/hex_detection_state.gd",
+    ]
+    hashes = {}
+    for relative in paths:
+        origin = source / relative
+        if not origin.is_file():
+            continue  # Missing implementation is a clean assertion in the RED verifier.
+        target = project / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(origin, target)
+        hashes[relative] = hashlib.sha256(origin.read_bytes()).hexdigest()
+        assert hashlib.sha256(target.read_bytes()).hexdigest() == hashes[relative]
+    config = ('config_version=5\n[application]\nconfig/name=' + json.dumps(app_name)
+              + '\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n')
+    (project / "project.godot").write_text(config, encoding="utf-8")
+    engine = shutil.which("godot_console.exe")
+    if engine is None:
+        raise RuntimeError("godot_console.exe is unavailable")
+    argv = [engine, "--headless", "--path", str(project), "--script", "res://scripts/tests/" + script]
+    prepare_argv = [engine, "--headless", "--editor", "--path", str(project), "--import", "--quit"]
+    env = dict(os.environ, SB_REVIEW2_USER_DIR=str(user_root))
+    with (run / "output.log").open("w", encoding="utf-8") as stream:
+        prepared = subprocess.run(prepare_argv, env=env, stdout=stream,
+                                  stderr=subprocess.STDOUT, timeout=30)
+        result = subprocess.run(argv, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=30) \
+            if prepared.returncode == 0 else prepared
+    output = ANSI.sub("", (run / "output.log").read_text(encoding="utf-8", errors="replace"))
+    unchanged = before == fingerprint(real_user)
+    copied_unchanged = all(hashlib.sha256((source / p).read_bytes()).hexdigest() == value
+                           for p, value in hashes.items())
+    isolated = (user_root / "review2_isolation_canary.json").is_file()
+    passed = result.returncode == 0 and marker in output and not ERROR.search(output) \
+        and unchanged and copied_unchanged and isolated
+    report = {"case": args.case, "passed": passed, "exit_code": result.returncode,
+              "source_sha256": hashes, "sources_unchanged": copied_unchanged,
+              "real_profile_unchanged": unchanged, "isolated": isolated,
+              "argv": argv, "prepare_argv": prepare_argv, "log": str(run / "output.log")}
+    (run / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(output.rstrip())
+    print("REPORT=" + str(run / "report.json"))
+    return 0 if passed else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
