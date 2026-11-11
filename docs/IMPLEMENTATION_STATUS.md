@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### AP5 Ausweichen mit erhaltenem Originalauftrag — 11.11.2026
+
+Root-Moveadapter führt höchstens einen vorgeschlagenen Rücksetzweg je Tick durch
+denselben Planer/Commit aus und nimmt nach Passage das ursprüngliche Ziel wieder
+auf. Private Recoveryphase, Watcherindex und Pfadcache bleiben abgeleitet; Ziele/
+UnitCommands/Wartealter erhalten. Gecachte konkurrierende Retryrequests vermeiden
+Taktsperren ohne zusätzliche Suche; Bay liegt nicht im unmittelbaren Gegenverkehr.
+Backoff55/0 inklusive42 Basis, Planer26/0, ReservationOwner36/0, Guards und enger
+Review grün; QA hex_backoff_execution_20261111. AP5-Kern hinter Opt-in angeschlossen,
+keine Produktionskarte/Native-/Performanceabnahme. AP6 echte Lifecyclezulassung,
+AP7 Restore/Authority und AP8 kleiner Kandidat folgen, große AP9-Prüfungen später.
+
 ### AP5 lokaler Türschlussguard — 11.11.2026
 
 Echter Driver-Progressproducer lehnt Open→Blocked vor Statecommit und Ressourcen-

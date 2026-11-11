@@ -499,6 +499,15 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 			plan.blocked.append({"unit_id":id,"command_id":request.get("command_id","") if request is Dictionary else "","reason":reason})
 			plan.pending_requests.append(request)
 		else: active.append(request)
+	# A passing place must not become the next obstruction in another route.
+	# Only the binding three-step prefix and final goal need this small index.
+	var route_goal_owners:Dictionary={}
+	for request in active:
+		var protected:Array=request.path_grid_points.slice(0,4)
+		protected.append(request.path_grid_points.back())
+		for grid in protected:
+			if not route_goal_owners.has(grid):route_goal_owners[grid]={}
+			route_goal_owners[grid][request.unit_id]=true
 	active.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var a_inside:bool=_hex_in_corridor(units[a.unit_id].grid,corridors)
 		var b_inside:bool=_hex_in_corridor(units[b.unit_id].grid,corridors)
@@ -581,7 +590,7 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 		var blocked:Dictionary={"unit_id":request.unit_id,"command_id":request.command_id,
 			"reason":String(reasons.get(request.unit_id,"no_passing_space"))}
 		if blocked.reason=="no_passing_space":
-			var backoff:Dictionary=_hex_backoff(request.unit_id,units[request.unit_id].grid,index,graph,backoff_budget)
+			var backoff:Dictionary=_hex_backoff(request.unit_id,units[request.unit_id].grid,index,graph,backoff_budget,route_goal_owners)
 			blocked.merge(backoff)
 			if not backoff.backoff_path_grid_points.is_empty(): blocked.reason="backoff_required"
 		plan.blocked.append(blocked)
@@ -853,7 +862,7 @@ static func _hex_new_direction_conflict(proposed:Array,accepted:Array,corridors:
 	return ""
 
 
-static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Dictionary,budget:Dictionary)->Dictionary:
+static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Dictionary,budget:Dictionary,route_goal_owners:Dictionary={})->Dictionary:
 	var queue:Array=[start]
 	var parents:Dictionary={start:start}
 	var cursor:int=0
@@ -861,7 +870,10 @@ static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Diction
 	while cursor<queue.size() and budget.remaining>0:
 		var grid:Vector2i=queue[cursor]; cursor+=1; budget.remaining-=1
 		var legal:Array=graph.get(grid,[])
-		if grid!=start and legal.size()>2:
+		var on_other_route:=false
+		for other in route_goal_owners.get(grid,{}):
+			if other!=id:on_other_route=true;break
+		if grid!=start and legal.size()>2 and not on_other_route:
 			goal=grid; break
 		for next in legal:
 			if parents.has(next) or parents.size()>=64 or not graph.has(next): continue
