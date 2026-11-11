@@ -80,13 +80,40 @@ werden ohne Änderung bestehender Episoden abgelehnt. IDs bleiben strukturierte
 Paare. `forget_unit` entfernt Beobachter-/Zielreferenzen; `clear` auch den
 Zeitkontext. Keine Skills, Würfe oder Kontaktpublikation aus diesem Helper.
 
+`read_pair` und `build_episode_snapshot` leiten Read-Payloads und Restticks
+aus diesen Deadlines ab, ohne Episoden zu erzeugen oder die Uhr zu verändern.
+
+## Erste aktive Consumer hinter dem Opt-in
+
+`HexSightRuntimeAdapter` hält nur Owner-/Cacheverweise. Im Hexkontext lesen
+Contact-, Schuss- und FoW-Abfragen die vom Owner zugelassenen logischen Zellen,
+Standhöhen und Richtungen. Fehlende Zulassung ist unsichtbar; Legacy nimmt
+weiter den bisherigen Weltpositionspfad. Derselbe CombatVisibilityCache dient
+allen drei Lesern. Ohne dessen neue API bleibt die reine Hexquery korrekt,
+aber ohne gemeinsame Geometriewiederverwendung. Weltreichweiten werden mit
+der bestehenden Hexmetrik auf ganze Hexradien abgerundet; Kegeldefault120°
+ist ein konfigurierbarer Vorschlagswert, keine neue Skill-/Waffenbalance.
+
+FoW friert logische Beobachter und Profile für ihre begrenzten Jobs ein.
+Normale und statische Signaturen enthalten Profil, Blickrichtung und Owner-/
+Registrykontext; reine Renderbewegung ersetzt keine Arbeit. Kontextwechsel
+erzwingen eine neue Probe, gleich nummerierte Revisionen fremder Registries
+sind verschieden. Deltaänderungen vergleichen weiterhin die tatsächlich zuvor
+publizierte Sicht, damit auch notwendige Ausblendungen an den View gehen.
+Contactwissen und Schusserlaubnis bleiben eigene Entscheidungen. Die Hex-
+Erkennung im Driver liest Deadlines; Legacy-Countdowns bleiben kompatibel.
+
+Dies ist ein Reader-Zwischenschritt. Keine Karte ist aktiviert. Sicherung,
+Overwatch, Flankierung und autoritative Facingabsichten folgen gesondert;
+Command-/Movement-/Lifecycle-/Savepfade sind damit nicht bereits migriert.
+
 ## Rampen und offene Anbindung
 
 Gemeinsamer Rampenvertrag: längs H/H+1, seitlich H+0,5 nur bei passenden
 Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
 Terrainowner; `allows_step` bleibt für Bewegung/Reservierung das Terrain-Tor.
 
-Noch offen: AP3-Verbraucher, zeitliche
+Noch offen: weitere AP3-Verbraucher und Facingabsichten, zeitliche
 Reservierung und ihre Ausführung AP4/5, Lifecycle/Save/Netzwerk AP6–8.
 Ein Datenindex ersetzt nicht die aktive Bewegung oder Minimum-Spacing.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.

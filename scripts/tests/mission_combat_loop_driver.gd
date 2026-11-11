@@ -2,6 +2,8 @@ extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const COMBAT_VISIBILITY_CACHE_SCRIPT: GDScript = preload("res://scripts/mission/combat_visibility_cache.gd")
+const HEX_SIGHT_ADAPTER_SCRIPT = preload("res://scripts/core/hex_sight_runtime_adapter.gd")
+const HEX_DETECTION_STATE_SCRIPT = preload("res://scripts/core/hex_detection_state.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
@@ -161,6 +163,10 @@ var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
+var _hex_sight_adapter = HEX_SIGHT_ADAPTER_SCRIPT.new()
+var _hex_detection_state = HEX_DETECTION_STATE_SCRIPT.new()
+var _hex_detection_context := ""
+@export_range(0.0, 360.0, 1.0) var hex_sight_arc_degrees := 120.0
 var _discipline_break_cooldown: Dictionary = {}
 var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
@@ -365,7 +371,7 @@ func _refresh_contact_decision_snapshot_presence(snapshot: Dictionary) -> void:
 	snapshot["active_friendly_count"] = active_friendly_count
 	snapshot["active_enemy_count"] = active_enemy_count
 	snapshot["contact_count"] = get_contact_snapshot().size()
-	snapshot["detection_pending_count"] = _detection_progress.size()
+	snapshot["detection_pending_count"] = get_detection_progress().size()
 
 	var reason: String = String(snapshot.get("reason", "")).strip_edges().to_lower()
 	if reason != "no_contact_pair":
@@ -1036,6 +1042,31 @@ func _get_combat_visibility_system():
 	if cache != null and cache.has_method("has_line_of_sight_between_nodes") and cache.has_method("has_line_of_sight_between_points"):
 		return cache
 	return _los_system
+
+
+func get_hex_sight_adapter() -> RefCounted:
+	_hex_sight_adapter.configure(get_node_or_null(simulation_root_path), _get_combat_visibility_system(), hex_sight_arc_degrees)
+	return _hex_sight_adapter
+
+
+func _query_current_visibility(attacker, target, range_world: float) -> Dictionary:
+	return get_hex_sight_adapter().query_units(attacker, target, range_world)
+
+
+func _get_contact_observation_position(unit) -> Vector2:
+	var adapter = get_hex_sight_adapter()
+	if adapter.is_active():
+		return Vector2(adapter.build_observer_state(unit,-1.0).get("position",Vector2.ZERO))
+	return (unit as Node2D).global_position if unit is Node2D else Vector2.ZERO
+
+
+func _get_hex_detection_state() -> RefCounted:
+	var owner = get_node_or_null(simulation_root_path)
+	var context := "%d:%d" % [owner.get_instance_id(), owner.get_hex_ground_context_revision()]
+	if context != _hex_detection_context:
+		_hex_detection_state.clear()
+		_hex_detection_context = context
+	return _hex_detection_state
 
 
 func _get_combat_visibility_cache_audit() -> Dictionary:
@@ -2004,7 +2035,7 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
 		"last_contact_tracking_los_cache_hit_count": _last_contact_tracking_los_cache_hit_count,
 		"contact_count": get_contact_snapshot().size(),
-		"detection_pending_count": _detection_progress.size(),
+		"detection_pending_count": get_detection_progress().size(),
 	}
 	var detection_snapshot: Dictionary = _build_first_detection_progress_snapshot()
 	if not detection_snapshot.is_empty():
@@ -2178,6 +2209,11 @@ func _resolve_candidate_block_reason(readout: Dictionary, attacker_ready: bool, 
 
 
 func _build_first_detection_progress_snapshot() -> Dictionary:
+	if get_hex_sight_adapter().is_active():
+		var episodes: Array = _get_hex_detection_state().build_episode_snapshot(_current_tick)
+		if episodes.is_empty():
+			return {}
+		return episodes[0].duplicate(true)
 	if _detection_progress.is_empty():
 		return {}
 	var keys: Array = _detection_progress.keys()
@@ -2976,11 +3012,21 @@ func _make_detection_key(attacker_id: String, target_id: String) -> String:
 
 
 func _is_detection_complete(attacker_id: String, target_id: String) -> bool:
+	if get_hex_sight_adapter().is_active():
+		return bool(_get_hex_detection_state().read_pair(attacker_id,target_id,_current_tick).get("detection_complete",false))
 	var key: String = _make_detection_key(attacker_id, target_id)
 	return _detection_progress.has(key) and int(_detection_progress[key]) <= 0
 
 
 func _start_or_continue_detection(attacker, attacker_id: String, target_id: String) -> void:
+	if get_hex_sight_adapter().is_active():
+		var target = _resolve_unit_by_id(target_id)
+		if not _has_valid_los(attacker,target):
+			return
+		var episode: Dictionary = _get_hex_detection_state().observe_pair(attacker_id,target_id,true,_current_tick,_get_detection_delay_ticks(attacker))
+		if bool(episode.get("episode_started",false)) and not bool(episode.get("detection_complete",false)) and attacker != null and attacker.has_method("show_event_text"):
+			attacker.call("show_event_text","DETECTING...",DETECTION_EVENT_COLOR,0.8)
+		return
 	var key: String = _make_detection_key(attacker_id, target_id)
 	if _detection_progress.has(key):
 		return
@@ -2992,6 +3038,12 @@ func _start_or_continue_detection(attacker, attacker_id: String, target_id: Stri
 
 
 func _advance_detection_timers() -> void:
+	if get_hex_sight_adapter().is_active():
+		var state = _get_hex_detection_state()
+		for episode in state.build_episode_snapshot(_current_tick):
+			if not _has_valid_los(_resolve_unit_by_id(episode.attacker_unit_id),_resolve_unit_by_id(episode.target_unit_id)):
+				state.observe_pair(episode.attacker_unit_id,episode.target_unit_id,false,_current_tick,0)
+		return
 	var keys_to_remove: Array = []
 	for key in _detection_progress.keys():
 		var remaining: int = int(_detection_progress[key])
@@ -3148,6 +3200,9 @@ func _has_valid_los(attacker, target) -> bool:
 	var los_range: float = _get_effective_range(target)
 	if _uses_weapon_range_for_contact_detection(attacker):
 		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
+	var logical: Dictionary = _query_current_visibility(attacker,target,los_range)
+	if bool(logical.get("handled",false)):
+		return bool(logical.get("visible",false))
 	return bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", attacker, target, los_range, _get_terrain_registry()))
 
 
@@ -3203,7 +3258,7 @@ func _update_contact_tracking() -> void:
 				"unit_id": enemy_unit_id,
 				"team_id": String(enemy.call("get_team_id")) if enemy.has_method("get_team_id") else "",
 				"enemy_type": _get_contact_enemy_type(enemy),
-				"last_known_position": (enemy as Node2D).global_position if enemy is Node2D else Vector2.ZERO,
+				"last_known_position": _get_contact_observation_position(enemy),
 				"detection_complete": _is_detection_complete(attacker_id, enemy_unit_id),
 			})
 	for attacker_id_variant in _fire_candidate_target_ids_by_attacker_id.keys():
@@ -3247,6 +3302,11 @@ func _advance_flank_vulnerability_state() -> void:
 
 
 func get_detection_progress() -> Dictionary:
+	if get_hex_sight_adapter().is_active():
+		var result: Dictionary = {}
+		for episode in _get_hex_detection_state().build_episode_snapshot(_current_tick):
+			result[JSON.stringify([episode.attacker_unit_id,episode.target_unit_id])] = episode.ticks_remaining
+		return result
 	return _detection_progress.duplicate(true)
 
 
@@ -3608,6 +3668,7 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"spotted_contact_hit_chance_malus": SPOTTED_CONTACT_HIT_CHANCE_MALUS,
 		"cache_effective_attack_range_by_attacker": true,
 		"los_system": _get_combat_visibility_system(),
+		"query_current_visibility": Callable(self,"_query_current_visibility"),
 		"terrain_registry": _get_terrain_registry(),
 		"check_discipline_break": Callable(self, "_check_discipline_break"),
 		"can_return_fire": Callable(self, "_can_unit_return_fire"),

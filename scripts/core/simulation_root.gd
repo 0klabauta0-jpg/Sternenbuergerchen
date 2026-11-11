@@ -276,6 +276,7 @@ var _last_damage_effect_resolution: Dictionary = {}
 var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
+var _hex_ground_context_revision := 0
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -299,6 +300,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 		_hex_ground_runtime.clear()
 		_hex_ground_registry = null
 		_hex_ground_enabled = false
+		_hex_ground_context_revision += 1
 		return {"ok": true, "enabled": false}
 	if rules != "hex_tactical_v1" or String(map_data.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
 		return {"ok": false, "reason": "unsupported_tactical_grid_rules"}
@@ -309,11 +311,20 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	_hex_ground_runtime.configure(terrain_registry, String(map_data.call("get_map_name")), tick_counter)
 	_hex_ground_registry = terrain_registry
 	_hex_ground_enabled = true
+	_hex_ground_context_revision += 1
 	return {"ok": true, "enabled": true}
 
 
 func is_hex_ground_runtime_active() -> bool:
 	return _hex_ground_enabled and is_instance_valid(_hex_ground_registry)
+
+
+func get_hex_ground_terrain_registry() -> Node:
+	return _hex_ground_registry if is_hex_ground_runtime_active() else null
+
+
+func get_hex_ground_context_revision() -> int:
+	return _hex_ground_context_revision
 
 
 func get_hex_unit_state(unit_id: String) -> Dictionary:

@@ -2,6 +2,7 @@ class_name FogOfWarSystem
 extends RefCounted
 
 const MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
+const HEX_SIGHT_ADAPTER = preload("res://scripts/core/hex_sight_runtime_adapter.gd")
 const DEFAULT_WORK_BUDGET_TILES: int = 256
 const DEFAULT_DIRTY_CHUNK_SIZE: int = 8
 
@@ -17,6 +18,8 @@ var _visibility_revision_by_team: Dictionary = {}
 var _last_visibility_delta_by_team: Dictionary = {}
 var _committed_observer_states_by_team: Dictionary = {}
 var _committed_visibility_mode_by_team: Dictionary = {}
+var _committed_hex_context_by_team: Dictionary = {}
+var _committed_hex_registry_by_team: Dictionary = {}
 var _committed_terrain_revision_by_team: Dictionary = {}
 var _pending_tile_visibility_by_team: Dictionary = {}
 
@@ -225,11 +228,20 @@ func request_tile_visibility_update_for_team(
 
 	var mode: String = get_mode_for_team(team_id)
 	var active_observers: Array = _filter_active_observers(observers, options)
-	var observer_states: Dictionary = _build_observer_states(active_observers, terrain_registry, sight_range_world)
+	var observer_states: Dictionary = _build_observer_states(active_observers, terrain_registry, sight_range_world, options)
+	var hex_adapter = options.get("hex_sight_adapter")
+	var hex_context := ""
+	var hex_registry_id := 0
+	if hex_adapter != null and hex_adapter.is_active():
+		los_system = hex_adapter.get_visibility_cache()
+		hex_context = hex_adapter.get_context_key()
+		hex_registry_id = terrain_registry.get_instance_id()
+	var context_changed: bool = String(_committed_hex_context_by_team.get(team_id,"")) != hex_context
 	var terrain_revision: int = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
 	var previous_observer_states: Dictionary = Dictionary(_committed_observer_states_by_team.get(team_id, {}))
 	var force_full: bool = bool(options.get("force_full", false))
 	var full_scan: bool = force_full or not _committed_terrain_revision_by_team.has(team_id) or int(_committed_terrain_revision_by_team.get(team_id, -2)) != terrain_revision or String(_committed_visibility_mode_by_team.get(team_id, "")) != mode
+	full_scan = full_scan or context_changed
 	if not full_scan and _observer_states_equal(previous_observer_states, observer_states):
 		return _build_visibility_work_snapshot(team_id, {}, true)
 	if not full_scan and _has_unbounded_changed_observer(previous_observer_states, observer_states):
@@ -252,6 +264,7 @@ func request_tile_visibility_update_for_team(
 		"los_system": los_system,
 		"sight_range_world": sight_range_world,
 		"terrain_revision": terrain_revision,
+		"hex_context_key":hex_context,"hex_registry_id":hex_registry_id,
 		"observer_states": observer_states,
 		"candidate_tiles": candidate_tiles,
 		"candidate_tile_ids": {},
@@ -270,14 +283,19 @@ func request_tile_visibility_update_for_team(
 		"processed_tile_count": 0,
 		"checked_tile_count": 0,
 		"los_blocked_count": 0,
-		"next_visible_tiles": Dictionary(_current_visible_tiles_by_team.get(team_id, {})).duplicate(),
-		"next_explored_tiles": Dictionary(_explored_tiles_by_team.get(team_id, {})).duplicate(),
+		"next_visible_tiles": {} if context_changed else Dictionary(_current_visible_tiles_by_team.get(team_id, {})).duplicate(),
+		"next_explored_tiles": {} if context_changed and int(_committed_hex_registry_by_team.get(team_id,0)) != hex_registry_id else Dictionary(_explored_tiles_by_team.get(team_id, {})).duplicate(),
 		"explored_before": _count_true(Dictionary(_explored_tiles_by_team.get(team_id, {}))),
 		"changed_tiles": [],
 		"full_scan": full_scan,
 		"started_usec": Time.get_ticks_usec(),
 		"work_budget_tiles": maxi(int(options.get("work_budget_tiles", DEFAULT_WORK_BUDGET_TILES)), 1),
 	}
+	if context_changed:
+		# The replacement maps can start empty, but deltas still compare against
+		# what the view actually published (including tiles which must be hidden).
+		work["published_visible_tiles"] = Dictionary(_current_visible_tiles_by_team.get(team_id,{})).duplicate()
+		work["published_explored_tiles"] = Dictionary(_explored_tiles_by_team.get(team_id,{})).duplicate()
 	_pending_tile_visibility_by_team[team_id] = work
 	return _build_visibility_work_snapshot(team_id, work, false)
 
@@ -300,6 +318,8 @@ func process_pending_tile_visibility_work(team_id: String, work_budget_tiles: in
 	var processed_in_slice: int = 0
 	var next_visible_tiles: Dictionary = Dictionary(work.get("next_visible_tiles", {}))
 	var next_explored_tiles: Dictionary = Dictionary(work.get("next_explored_tiles", {}))
+	var comparison_visible: Dictionary = Dictionary(work.get("published_visible_tiles",next_visible_tiles))
+	var comparison_explored: Dictionary = Dictionary(work.get("published_explored_tiles",next_explored_tiles))
 	var changed_tiles: Array = Array(work.get("changed_tiles", []))
 	var checked_tile_count: int = int(work.get("checked_tile_count", 0))
 	var los_blocked_count: int = int(work.get("los_blocked_count", 0))
@@ -310,8 +330,8 @@ func process_pending_tile_visibility_work(team_id: String, work_budget_tiles: in
 		var tile_id: String = _tile_id_for_tile(tile_data)
 		if tile_id.is_empty():
 			continue
-		var visible_before: bool = bool(next_visible_tiles.get(tile_id, false))
-		var explored_before: bool = bool(next_explored_tiles.get(tile_id, false))
+		var visible_before: bool = bool(comparison_visible.get(tile_id, false))
+		var explored_before: bool = bool(comparison_explored.get(tile_id, false))
 		var evaluation: Dictionary = _evaluate_tile_visibility(tile_data, String(work.get("mode", MODE_CONTRACT_SCRIPT.MODE_OFF)), Dictionary(work.get("observer_states", {})), work.get("terrain_registry", null), work.get("los_system", null))
 		var visible_after: bool = bool(evaluation.get("visible", false))
 		checked_tile_count += int(evaluation.get("checked_tile_count", 0))
@@ -343,6 +363,8 @@ func process_pending_tile_visibility_work(team_id: String, work_budget_tiles: in
 	_committed_observer_states_by_team[team_id] = Dictionary(work.get("observer_states", {})).duplicate(true)
 	_committed_visibility_mode_by_team[team_id] = String(work.get("mode", MODE_CONTRACT_SCRIPT.MODE_OFF))
 	_committed_terrain_revision_by_team[team_id] = int(work.get("terrain_revision", -1))
+	_committed_hex_context_by_team[team_id] = String(work.get("hex_context_key",""))
+	_committed_hex_registry_by_team[team_id] = int(work.get("hex_registry_id",0))
 	var visibility_revision: int = int(_visibility_revision_by_team.get(team_id, 0)) + 1
 	_visibility_revision_by_team[team_id] = visibility_revision
 	var delta: Dictionary = {
@@ -423,7 +445,7 @@ func _build_visibility_work_snapshot(team_id: String, work: Dictionary, complete
 	}
 
 
-func _build_observer_states(observers: Array, terrain_registry, base_sight_range_world: float) -> Dictionary:
+func _build_observer_states(observers: Array, terrain_registry, base_sight_range_world: float, options: Dictionary = {}) -> Dictionary:
 	var states: Dictionary = {}
 	for observer_variant in observers:
 		var observer := observer_variant as Node2D
@@ -434,6 +456,12 @@ func _build_observer_states(observers: Array, terrain_registry, base_sight_range
 			var unit_id: String = String(observer.call("get_unit_id")).strip_edges()
 			if not unit_id.is_empty():
 				observer_id = unit_id
+		var hex_adapter = options.get("hex_sight_adapter")
+		if hex_adapter != null and hex_adapter.is_active():
+			var logical: Dictionary = hex_adapter.build_observer_state(observer, _get_observer_sight_range_world(observer, base_sight_range_world))
+			if not logical.is_empty():
+				states[observer_id] = logical
+			continue
 		var position: Vector2 = observer.global_position
 		states[observer_id] = {
 			"position": position,
@@ -452,6 +480,10 @@ func _observer_states_equal(previous: Dictionary, current: Dictionary) -> bool:
 			return false
 		var old_state: Dictionary = Dictionary(previous.get(observer_id, {}))
 		var next_state: Dictionary = Dictionary(current.get(observer_id, {}))
+		if old_state.has("hex_state") or next_state.has("hex_state"):
+			if old_state != next_state:
+				return false
+			continue
 		if Vector2(old_state.get("position", Vector2.ZERO)).distance_squared_to(Vector2(next_state.get("position", Vector2.ZERO))) > 0.0001:
 			return false
 		if not is_equal_approx(float(old_state.get("sight_range_world", 0.0)), float(next_state.get("sight_range_world", 0.0))):
@@ -643,6 +675,14 @@ func _evaluate_tile_visibility(tile_data, mode: String, observer_states: Diction
 	var target_position: Vector2 = tile_data.world_position
 	for observer_state_variant in observer_states.values():
 		var observer_state: Dictionary = Dictionary(observer_state_variant)
+		if observer_state.has("hex_state"):
+			checked_tile_count += 1
+			var grid := Vector2i(tile_data.grid_position)
+			var target := {"grid":grid,"stand_height_steps2":roundi(2.0 * float(terrain_registry.call("get_stand_height_at",grid)))}
+			if bool(HEX_SIGHT_ADAPTER.query_snapshot(observer_state,target,terrain_registry,los_system).get("visible",false)):
+				return {"visible":true,"checked_tile_count":checked_tile_count,"los_blocked_count":los_blocked_count}
+			los_blocked_count += 1
+			continue
 		var observer_position: Vector2 = Vector2(observer_state.get("position", Vector2.ZERO))
 		var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
 		checked_tile_count += 1
@@ -810,6 +850,8 @@ func clear() -> void:
 	_committed_observer_states_by_team.clear()
 	_committed_visibility_mode_by_team.clear()
 	_committed_terrain_revision_by_team.clear()
+	_committed_hex_context_by_team.clear()
+	_committed_hex_registry_by_team.clear()
 	_pending_tile_visibility_by_team.clear()
 
 

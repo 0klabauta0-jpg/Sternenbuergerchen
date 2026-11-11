@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP3 Hexsicht: erster Readeranschluss — 11.11.2026
+
+Contact-/Schussprüfung und Terrain-/Ziel-FoW nutzen hinter dem expliziten
+Opt-in denselben logischen Reader und Geometriecache. Hex-Erkennung liest
+feste Deadlines; Legacy bleibt kompatibel. Kleine tatsächliche Consumerchecks
+30/0, Episoden25/0, Owner39/0; Kontext-/Profilinvalidierung und Hide-Deltas
+mit Regressionen abgesichert. Noch keine Karte aktiviert; Sicherung, Overwatch,
+Flankierung, Facingabsichten und Bewegung bleiben weitere Schritte.
+MissionTestSetup-Wiring statisch geprüft, nativer Ablauf später.
+QA: docs/qa/hex_sight_consumers_20261111/README.md.
+
 ### AP1 Hex-Owner und Versionsgate — 11.11.2026
 
 SimulationRoot besitzt den gekapselten Ground-State; MapData validiert den

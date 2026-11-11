@@ -7,6 +7,9 @@ Geometrie-LRU im vorhandenen Cache und Erkennungsepisoden. Finale kleine
 Checks25/0,38/0,21/0. AP1-Owner-/Versionsgate ergänzt, eigener Check39/0;
 zwei unabhängige Reviewbefunde mit RED/GREEN behoben. Keine aktive
 Missions-/Basis-/Bewegungsintegration.
+Erster AP3-Readeranschluss hinter dem Versionsgate ergänzt: Contact, Schuss,
+FoW und Hex-Erkennung; kleine Checks30/0,25/0,39/0. Übrige AP3-Consumer und
+Facing bleiben offen. QA hex_sight_consumers_20261111.
 Vertrag: `docs/dev/hex_tactical_runtime_contract.md`.
 QA: `docs/qa/hex_runtime_foundation_20261111/README.md` und
 `docs/qa/hex_ground_owner_20261111/README.md`.
@@ -62,6 +65,26 @@ Die bereits abgestimmte Regionalversion3 aus5204312c0 wird beim MapData-
 Abgleich erhalten. BasePersonnel, Supply, CampaignSave, OrbitUI und Editor
 bleiben beim koordinierenden Chat. Kleine Prüfung: Runner-Case `owner`,
 echte Quellen und minimale private Projektkopie; keine Szene starten.
+
+### AP3 erster Consumeranschluss
+
+Gemeinsamer Read-Adapter für Contact-/Schussprüfung und Terrain-/Ziel-FoW:
+aktivierte Hexkontexte lesen ausschließlich logische Zelle, halbe Standhöhe
+und Blickrichtung vom Owner. Fehlende Zulassung bleibt unsichtbar; kein
+Rückfall auf Renderpositionen. Legacy behält den bisherigen Pfad. Bestehender
+CombatVisibilityCache wird gemeinsam genutzt, FoW-Jobs behalten ihre eingefrorenen
+Beobachter und atomare Publikation. Gerichteter Winkel ist konfigurierbar
+(Vorschlagsdefault120°), keine neue Waffen-/Skillbalance. Erkennungsepisoden
+ersetzen im Hexzweig heruntergezählte Parallelwerte; Legacy bleibt kompatibel.
+
+Dateien: neuer `scripts/core/hex_sight_runtime_adapter.gd`, HexDetectionState,
+SimulationRoot-Registry-/Kontextreads, CombatLoopDriver, CombatFireDecisionResolver,
+FogOfWarSystem und abgestimmter MissionTestSetup-Sichtadapter. Letztere Datei
+ist nach direktem Koordinationsauftrag vom Kartenchat für diesen engen Schritt
+freigegeben; Vorbereitungs-/Readiness-/Übergabepfade bleiben bestehen.
+Kleine Cases `consumers` und `detection`. Keine große Laufzeit-/Battlematrix.
+Sicherungs-/Overwatch-/Flankierungs-/Facingabsichten, Reservierung, Bewegung
+und Lifecycle bleiben weitere APs und sperren eine produktive Kartenaktivierung.
 
 ## Relevante Dokumente
 

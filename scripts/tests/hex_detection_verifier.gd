@@ -20,9 +20,18 @@ func _run() -> void:
 		_finish()
 		return
 	var state = load(PATH).new()
+	_check(state.has_method("read_pair") and state.has_method("build_episode_snapshot"),"episode exposes read-only deadline projections")
+	if failed>0:
+		_finish()
+		return
 	var first: Dictionary = state.observe_pair("observer","target",true,10,4)
 	_check(first.episode_started and first.ready_tick==14 and not first.detection_complete,"first sight starts one skill-dependent deadline")
 	var repeat: Dictionary = state.observe_pair("observer","target",true,10,100)
+	_check(state.read_pair("observer","target",10).ready_tick==14 and state.read_pair("missing","target",10).is_empty(),"read does not create or reschedule episodes")
+	var projection: Array = state.build_episode_snapshot(11)
+	_check(projection.size()==1 and projection[0].ticks_remaining==3,"snapshot derives remaining time from fixed deadline")
+	projection[0].ready_tick=0
+	_check(state.read_pair("observer","target",11).ready_tick==14,"snapshot mutation cannot change episode")
 	_check(not repeat.episode_started and repeat.ready_tick==14,"same tick cannot start or reroll another episode")
 	_check(not state.observe_pair("observer","target",true,13,0).detection_complete,"later changed delay cannot accelerate existing deadline")
 	_check(state.observe_pair("observer","target",true,14,100).detection_complete,"deadline completes on simulation tick")
