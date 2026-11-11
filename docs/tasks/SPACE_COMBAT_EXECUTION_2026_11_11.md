@@ -205,6 +205,14 @@ Verifier und diese Statusdokumentation.
   fremde Belegung/Claims. 8/8 mit veraltetem Stand, falschem Ort, Körper und
   belegtem Ziel. Keine Mutation, kein Travel-/Economycommit; Legacy-Surface
   ohne vorherigen lokalen Bestand braucht weiterhin eigenen Aufnahmeweg.
+- AP04a echte Rückkehrfixture: Travelguard 346144881 als c4d1bda94 integriert,
+  echter Ownercheck isoliert11/11. Root bereitet `enter_orbit` für ein bereits
+  lokal inaktives Flightobjekt am freien Saum vor und verbindet im Fixture-Tail
+  Activity, Index und stillen echten Travelowner; dieselbe Rotte bleibt.
+  Gezielte Prüfung15/15 einschließlich Abbruch, neuer Blockade und Replay;
+  bisherige Warp-/Fakefixtures grün. Der Test stellt die vorherige
+  Anflugphase gezielt her, er beweist keinen vollständigen Oberflächenbesuch,
+  keinen produktiven Caller und keine Supply-/Campaign-/Eventtransaktion.
 - AP04a Warpdeparture-Vorschau: prüft aktiven lokalen Flight, seine Rotte,
   Gebiet/Belegung/Claims und vier Revisionen; Zielorbit muss zu einem anderen
   Körper gehören. Strategischer Startpunkt wird aus dem bestehenden
