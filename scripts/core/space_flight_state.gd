@@ -32,6 +32,20 @@ func get_snapshot() -> Dictionary:
 		"heading_rad": _heading, "angular_velocity": _angular_velocity, "assist_mode": _assist_mode,
 		"motion_mode": _motion_mode, "mass": _mass, "revision": _revision, "tick": _tick}
 
+func bind_craft(craft_id: String, allow_rebind: bool = false) -> bool:
+	if craft_id.strip_edges().is_empty() or (not allow_rebind and _craft_id != "__unassigned__" and _craft_id != craft_id):
+		return false
+	_craft_id = craft_id
+	return true
+
+func commit_travel_pose(position: Vector2, heading: float) -> bool:
+	if _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
+		return false
+	_position = position
+	_heading = heading
+	_revision += 1
+	return true
+
 func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
 	if _craft_id.is_empty() or tick <= _tick:
 		return {"ok": false, "reason": "stale_tick"}

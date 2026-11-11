@@ -38,10 +38,18 @@ Verifier und diese Statusdokumentation.
   Replay-Vorcheck. 20/20 Fälle im temporären Minimalprojekt; dessen
   `user://`-Schreibprobe lag im eigenen temporären APPDATA.
   Die erneute Ausführung bestätigt keinen Produktanschluss.
-- AP01 erster Teil: isolierter per-Schiff-Flugdatensatz mit Pose, Geschwindigkeit,
+- AP01 erster Teil: per-Schiff-Flugdatensatz mit Pose, Geschwindigkeit,
   Modus, Masse, Revision und Tick; identischer/alter Tick und veraltete Revision
-  werden abgelehnt. Kleiner Minimalprojektcheck 6/6. Noch keine Anbindung an
-  Reise, Root, NPC-Registry oder Physiktakt.
+  werden abgelehnt. Minimalprojektcheck 6/6. Reiseowner und Flottenindex
+  referenzieren nun dieselbe Flugzustandsinstanz; Position und Bugrichtung
+  werden daraus projiziert. Bindingcheck4/4, bestehender Zwei-Schiffe-
+  Fleettravel-Verifier8/8, jeweils isoliertes Minimalprojekt.
+- AP01 Prüfgrenze: Der ältere SpaceTravel-Verifier hat im vorhandenen
+  Sternsystem zwei veraltete Erwartungen (fünf Körper und alte Ortsbindungen).
+  Der versuchte Minimalprojektlauf war zudem unvollständig, weil er einen
+  echten SimulationRoot benötigt; er ist kein Integrationsbeleg.
+- AP01 weiterhin offen: Combatowner-/NPC-Admission, Root-Physiktakt,
+  Bewegungstakt-Exklusivität und tatsächlicher Adapter-/Root-/Ansichtswechselcheck.
 - AP01 Rest und AP02–AP20: offen.
 
 ## Risiken / offene Punkte
