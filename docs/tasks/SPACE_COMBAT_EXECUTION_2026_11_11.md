@@ -177,6 +177,10 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Autoritätskorrektur: Client-Skip wird vor Raumcallback und
+  Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
+  Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
+  simuliert die Skipentscheidung; er ist kein vollständiger Multiplayerlauf.
 - AP04a Saumgate-Vorbereitung: Root-/Adaptergrenze und Mehrhexregel mit dem
   Orbitchat abgestimmt; Details in `SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`.
   Raumregistry besitzt pro Bereich monotone Belegungsrevisionen, unveränderte
