@@ -46,13 +46,22 @@ Verifier und diese Statusdokumentation.
   Fleettravel-Verifier8/8, jeweils isoliertes Minimalprojekt.
 - AP01 weiterer Baustein: räumliche Registry für bestehende Flugreferenzen,
   eindeutige IDs, gezielte Feldindexänderung und sortierte Abfrage. Separater
-  Minimalprojektcheck6/6; noch nicht an Root oder Gegneraufnahme angeschlossen.
+  Minimalprojektcheck6/6.
+- AP01 nächster Baustein: CampaignSimulationRoot nutzt einen Raum-Physiktakt
+  über den bestehenden Adapter; der Meta-Renderprozess treibt die Reise
+  nicht mehr an. Rootvalidierte Gegneraufnahme nutzt die separate Registry und
+  erzeugt keinen Flotteneintrag; Spielerreferenz bleibt objektidentisch zum
+  Flottenowner. Kleiner Root-/Adaptercheck10/10.
 - AP01 Prüfgrenze: Der ältere SpaceTravel-Verifier hat im vorhandenen
   Sternsystem zwei veraltete Erwartungen (fünf Körper und alte Ortsbindungen).
   Der versuchte Minimalprojektlauf war zudem unvollständig, weil er einen
   echten SimulationRoot benötigt; er ist kein Integrationsbeleg.
-- AP01 weiterhin offen: Combatowner-/NPC-Admission, Root-Physiktakt,
-  Bewegungstakt-Exklusivität und tatsächlicher Adapter-/Root-/Ansichtswechselcheck.
+- AP01 Prüfgrenze: Orbit-Gesamtverifier im neuen Worktree wegen fehlender
+  importierter Godot-Ressourcen nicht lauffähig, Zeitlimit nach60s;
+  kein bestandener oder gescheiterter Verhaltensnachweis.
+- AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität und
+  tatsächlicher Adapter-/Root-/Ansichtswechselcheck bei30/60/144Render-FPS,
+  und vollständiger Reiselauf.
 - AP01 Rest und AP02–AP20: offen.
 
 ## Risiken / offene Punkte

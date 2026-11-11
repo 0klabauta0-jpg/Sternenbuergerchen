@@ -59,6 +59,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_screen.call("bind_personnel_loadout_simulation", _simulation, Array(_flow.get("_all_team_units")))
 
 	_simulation.call("configure_space_encounter",_space_encounter)
+	_simulation.call("configure_space_runtime_tick", Callable(self, "advance_space_travel"))
 	if _campaign_mode:
 		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
 		if not checkpoint.is_empty():

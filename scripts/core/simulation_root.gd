@@ -67,6 +67,40 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 
 
 var _space_encounter_owner: RefCounted
+var _space_runtime_tick: Callable
+const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
+const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
+const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
+
+func admit_space_actor(definition: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	if typeof(definition.get("craft_id")) != TYPE_STRING or typeof(definition.get("faction_id")) != TYPE_STRING or typeof(definition.get("control_domain")) != TYPE_STRING or typeof(definition.get("start_hex")) != TYPE_VECTOR2I:
+		return {"ok": false, "reason": "invalid_actor"}
+	var cell: Vector2i = definition.start_hex
+	if not SPACE_GRID.contains(cell):
+		return {"ok": false, "reason": "invalid_actor_cell"}
+	var craft_id: String = definition.craft_id
+	var flight: RefCounted
+	if definition.control_domain == "player":
+		if _singleplayer_space_travel_owner == null or not _singleplayer_space_travel_owner.has_method("get_flight_state"):
+			return {"ok": false, "reason": "flight_unavailable"}
+		flight = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+		if flight == null or SPACE_GRID.cell_at(Vector2(flight.get_snapshot().position_plane) / SPACE_GRID.EXTENT) != cell:
+			return {"ok": false, "reason": "flight_position_mismatch"}
+	else:
+		flight = SPACE_FLIGHT_STATE.new()
+		if not flight.configure(craft_id, {"position_plane": SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "motion_mode": "tactical"}).ok:
+			return {"ok": false, "reason": "invalid_actor"}
+	return _space_combat_state.admit_actor(definition, flight)
+
+func get_space_actor(craft_id: String) -> RefCounted:
+	return _space_combat_state.get_actor(craft_id)
+
+func configure_space_runtime_tick(callback: Callable) -> void:
+	_space_runtime_tick = callback
+	set_physics_process(callback.is_valid())
 
 func configure_space_encounter(owner: RefCounted) -> void:
 	_space_encounter_owner = owner
@@ -1385,6 +1419,9 @@ func _process(_delta: float) -> void:
 
 # Commands are committed before effects on every authoritative physics tick.
 func _physics_process(delta: float) -> void:
+	if _space_runtime_tick.is_valid():
+		_space_runtime_tick.call(delta)
+		return
 	if _should_skip_local_tick_processing():
 		return
 

@@ -347,8 +347,6 @@ func _process(_delta: float) -> void:
 	var frame_started_usec := Time.get_ticks_usec() if profile_enabled else 0
 	var scope_started_usec := frame_started_usec
 	var scopes: Dictionary = {}
-	if _singleplayer_runtime != null:
-		_singleplayer_runtime.call("advance_space_travel", _delta)
 	_poll_retired_terrain_workers()
 	for craft_id in _space_approaches.keys():
 		if not _space_approaches.has(craft_id): continue
