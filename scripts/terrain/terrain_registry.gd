@@ -35,11 +35,12 @@ func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half
 		push_warning("TerrainRegistry rejects unsupported grid_topology '%s'." % grid_topology)
 		return
 	var topology_changed: bool = _grid_topology != grid_topology
+	var metric_changed: bool = _grid_origin_world!=grid_origin_world or _half_tile_width!=maxf(half_tile_width,0.001) or _half_tile_height!=maxf(half_tile_height,0.001)
 	_grid_topology = grid_topology
 	_grid_origin_world = grid_origin_world
 	_half_tile_width = maxf(half_tile_width, 0.001)
 	_half_tile_height = maxf(half_tile_height, 0.001)
-	if topology_changed:
+	if topology_changed or metric_changed:
 		_bump_revision()
 
 

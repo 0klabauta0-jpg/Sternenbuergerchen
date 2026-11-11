@@ -14,6 +14,19 @@ Plan: [2026-11-11-space-combat.md](superpowers/plans/2026-11-11-space-combat.md)
 Task: [SPACE_COMBAT_2026_11_11_PLAN.md](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
 Keine Engine-/Sicht-/Performance-/MP-Abnahme, kein Mainmerge oder EXE.
 
+### AP5 Stoppkern und kleine Ortsisolation — 11.11.2026
+
+Interne Ground-/Root-Stoppgrenze nimmt abhängige Zukunftszusagen gemeinsam
+zurück; aktuelle exklusive Zellen bleiben, unabhängige Routen laufen weiter.
+Angefangene halbe Bewegung zentriert im eigenen Feld; neue Schritte warten.
+Privater vorberechneter Geometriecache und intrinsische Phase vermeiden
+Terrain-/Metrikreste; frischer Review schloss Revisionmaskierung und Tickdrift.
+Kleine Cases34/0 Stop,56/0 Root,56/0 Projektion,36/0 Reservierungsowner,
+26/0 Planer,15/0 Korridor,23/0 Nachbarn,9/0 Zwei-Root-Isolation.
+Ortswechsel als reine Readwahl mutiert keine Zusagen. Keine Meta-/UIabnahme,
+echte Move-/Wundenproducer und View-/Actoranbindung bleiben AP5-Folgearbeit.
+QA hex_movement_stop_20261111; keine aktive Karte oder große Tests.
+
 ### AP5 erster Teil: stetige Motionprojektion — 11.11.2026
 
 Ground-/Rootreadadapter leiten Position, logische/renderumgerechnete Höhe und

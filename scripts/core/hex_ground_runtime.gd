@@ -20,6 +20,8 @@ var _segments_by_unit_id: Dictionary = {}
 var _corridor_grants: Array[Dictionary] = []
 var _reservation_terrain_revision := -1
 var _topology_revalidation_pending := false
+var _centering_by_unit_id: Dictionary = {}
+var _motion_geometry_by_unit_id: Dictionary = {}
 
 
 func configure(registry: Node, map_id: String, tick: int) -> void:
@@ -87,7 +89,11 @@ func read_unit(unit_id: String) -> Dictionary:
 	result["stand_height_steps2"] = roundi(2.0 * float(_registry.call("get_stand_height_at", result["grid"])))
 	result["terrain_revision"] = _terrain_revision()
 	result["movement_state"] = {"moving":false}
+	var centering:Dictionary=_centering_by_unit_id.get(unit_id,{})
+	if not centering.is_empty() and _tick<int(centering.start_tick)+int(centering.duration_ticks):
+		result["movement_state"]={"moving":true,"phase":"centering","start_tick":centering.start_tick,"duration_ticks":centering.duration_ticks}
 	for segment in _segments_by_unit_id.get(unit_id,[]):
+		if result.movement_state.get("phase","")=="centering":break
 		if int(segment.start_tick) <= _tick and _tick < int(segment.start_tick)+int(segment.duration_ticks):
 			result["movement_state"] = {"moving":true,"command_id":segment.command_id,
 				"from_grid":segment.from_grid,"to_grid":segment.to_grid,
@@ -122,20 +128,28 @@ func get_motion_projection(unit_id: String, interpolation_fraction: float, heigh
 	var position:Vector2=_registry.call("grid_to_world",grid)
 	var height:float=_registry.call("get_stand_height_at",grid)
 	var moving:=false
+	var centering:Dictionary=_centering_by_unit_id.get(unit_id,{})
+	if not centering.is_empty() and _tick<int(centering.start_tick)+int(centering.duration_ticks):
+		var progress:float=clampf((float(_tick-int(centering.start_tick))+clampf(interpolation_fraction,0.0,1.0))/float(centering.duration_ticks),0.0,1.0)
+		var offset:Vector2=Vector2(centering.offset_axial)*(1.0-progress)
+		var axis_q:Vector2=Vector2(_registry.call("grid_to_world",grid+Vector2i(1,0)))-position
+		var axis_r:Vector2=Vector2(_registry.call("grid_to_world",grid+Vector2i(0,1)))-position
+		position+=axis_q*offset.x+axis_r*offset.y
+		height=lerpf(float(centering.stand_height_logical),height,progress)
+		moving=true
 	for segment in _segments_by_unit_id.get(unit_id,[]):
+		if moving:break
 		if int(segment.start_tick)>_tick or _tick>=int(segment.start_tick)+int(segment.duration_ticks):continue
 		var progress:float=clampf((float(_tick-int(segment.start_tick))+clampf(interpolation_fraction,0.0,1.0))/float(segment.duration_ticks),0.0,1.0)
-		var source:Vector2=_registry.call("grid_to_world",segment.from_grid)
-		var target:Vector2=_registry.call("grid_to_world",segment.to_grid)
+		var geometry:Dictionary=_motion_geometry_by_unit_id.get(unit_id,{}).get(int(segment.start_tick),{})
+		if geometry.is_empty():return {}
+		var source:Vector2=geometry.source_world
+		var target:Vector2=geometry.target_world
 		position=source.lerp(target,progress)
-		var from_tile=_registry.call("get_tile_at_grid",segment.from_grid)
-		var to_tile=_registry.call("get_tile_at_grid",segment.to_grid)
-		var low:float=TILE.stand_height(from_tile)
-		var high:float=TILE.stand_height(to_tile)
-		if from_tile!=null and to_tile!=null and from_tile.explicit_hex_ramps and to_tile.explicit_hex_ramps:
-			var shared:float=TILE.endpoint_height_for_registry(from_tile,segment.to_grid,bool(_registry.call("is_walkable",segment.from_grid)))
-			var other:float=TILE.endpoint_height_for_registry(to_tile,segment.from_grid,bool(_registry.call("is_walkable",segment.to_grid)))
-			if not is_finite(shared) or not is_finite(other) or not is_equal_approx(shared,other):return {}
+		var low:float=geometry.source_height
+		var high:float=geometry.target_height
+		if geometry.explicit_ramps:
+			var shared:float=geometry.shared_height
 			height=lerpf(low,shared,progress*2.0) if progress<=0.5 else lerpf(shared,high,(progress-0.5)*2.0)
 		else:height=lerpf(low,high,progress)
 		moving=true
@@ -145,6 +159,70 @@ func get_motion_projection(unit_id: String, interpolation_fraction: float, heigh
 	return {"position_world":position,"stand_height_logical":height,"stand_height_world":height*height_step_world,"facing_angle":bearing.angle(),"moving":moving}
 
 
+func _build_motion_geometry(segment: Dictionary) -> Dictionary:
+	var source:Vector2=_registry.call("grid_to_world",segment.from_grid)
+	var target:Vector2=_registry.call("grid_to_world",segment.to_grid)
+	var from_tile=_registry.call("get_tile_at_grid",segment.from_grid)
+	var to_tile=_registry.call("get_tile_at_grid",segment.to_grid)
+	if from_tile==null or to_tile==null or not source.is_finite() or not target.is_finite():return {}
+	var explicit_ramps:bool=from_tile.explicit_hex_ramps and to_tile.explicit_hex_ramps
+	var shared:=0.0
+	if explicit_ramps:
+		shared=TILE.endpoint_height_for_registry(from_tile,segment.to_grid,bool(_registry.call("is_walkable",segment.from_grid)))
+		var other:float=TILE.endpoint_height_for_registry(to_tile,segment.from_grid,bool(_registry.call("is_walkable",segment.to_grid)))
+		if not is_finite(shared) or not is_finite(other) or not is_equal_approx(shared,other):return {}
+	return {"source_world":source,"target_world":target,"source_height":TILE.stand_height(from_tile),"target_height":TILE.stand_height(to_tile),"shared_height":shared,"explicit_ramps":explicit_ramps}
+
+
+## Batch stop: any remaining trajectory depending on a now held cell joins it.
+func stop_units(unit_ids: PackedStringArray, reason: String) -> Dictionary:
+	if not _is_configured() or reason.strip_edges().is_empty():return _reject("invalid_stop_context")
+	for id in unit_ids:
+		if not _units_by_id.has(id):return _reject("unit_not_admitted",id)
+	var future_owners:Dictionary={}
+	for id in _segments_by_unit_id:
+		for interval in PLANNER._hex_timeline(id,_units_by_id[id].grid,_segments_by_unit_id[id],_tick):
+			if not future_owners.has(interval.grid):future_owners[interval.grid]={}
+			future_owners[interval.grid][id]=true
+	var affected:Dictionary={}
+	var queue:Array=[]
+	for id in unit_ids:
+		if not affected.has(id):affected[id]=true;queue.append(id)
+	var cursor:=0
+	while cursor<queue.size():
+		var grid:Vector2i=_units_by_id[queue[cursor]].grid
+		cursor+=1
+		for id in future_owners.get(grid,{}):
+			if not affected.has(id):affected[id]=true;queue.append(id)
+	var ids:Array=affected.keys()
+	ids.sort()
+	var staged_centers:Dictionary={}
+	for id in ids:
+		if _centering_by_unit_id.has(id) or not _segments_by_unit_id.has(id):continue
+		var pose:Dictionary=get_motion_projection(id,0.0)
+		if pose.is_empty():return _reject("invalid_motion_projection",id)
+		for segment in _segments_by_unit_id[id]:
+			if int(segment.start_tick)>_tick or _tick>=int(segment.start_tick)+int(segment.duration_ticks):continue
+			var progress:float=float(_tick-int(segment.start_tick))/float(segment.duration_ticks)
+			var offset:Vector2=Vector2(segment.from_grid).lerp(Vector2(segment.to_grid),progress)-Vector2(_units_by_id[id].grid)
+			if offset.is_zero_approx():break
+			var duration:int=_tick-int(segment.start_tick) if _units_by_id[id].grid==segment.from_grid else int(segment.start_tick)+int(segment.duration_ticks)-_tick
+			staged_centers[id]={"offset_axial":offset,"stand_height_logical":pose.stand_height_logical,"start_tick":_tick,"duration_ticks":duration}
+			break
+	var events:Array[Dictionary]=[]
+	for id in ids:
+		if not _segments_by_unit_id.has(id):continue
+		_segments_by_unit_id.erase(id)
+		_motion_geometry_by_unit_id.erase(id)
+		if staged_centers.has(id):_centering_by_unit_id[id]=staged_centers[id]
+		events.append({"event_type":"hex_route_cancelled","unit_id":id,"reason":reason if unit_ids.has(id) else "dependency_stop","tick":_tick})
+	if not events.is_empty():
+		_revision+=1
+		for event in events:_units_by_id[event.unit_id].state_revision=_revision
+	_prune_corridor_grants()
+	return {"ok":true,"affected_unit_ids":ids,"events":events}
+
+
 func release_unit(unit_id: String, _reason: String) -> void:
 	if not _units_by_id.has(unit_id):
 		return
@@ -152,6 +230,8 @@ func release_unit(unit_id: String, _reason: String) -> void:
 	_occupant_by_grid.erase(grid)
 	_units_by_id.erase(unit_id)
 	_segments_by_unit_id.erase(unit_id)
+	_centering_by_unit_id.erase(unit_id)
+	_motion_geometry_by_unit_id.erase(unit_id)
 	for grant in _corridor_grants:
 		grant.unit_ids.erase(unit_id)
 	_prune_corridor_grants()
@@ -195,6 +275,8 @@ func commit_plan(plan: Dictionary, expected_revision: int) -> Dictionary:
 			return _reject("invalid_segment_context",id)
 		if int(segment.start_tick)>MAX_TICK-int(segment.duration_ticks):
 			return _reject("segment_outside_clock",id)
+		var centering:Dictionary=_centering_by_unit_id.get(id,{})
+		if not centering.is_empty() and int(segment.start_tick)<int(centering.start_tick)+int(centering.duration_ticks):return _reject("centering_in_progress",id)
 		added_by_unit[id] = int(added_by_unit.get(id,0))+1
 		if int(added_by_unit[id]) > 3 or added_by_unit.size() > 16:
 			return _reject("plan_budget_exceeded",id)
@@ -226,13 +308,22 @@ func commit_plan(plan: Dictionary, expected_revision: int) -> Dictionary:
 		if not conflict.is_empty():return _reject(conflict,id)
 	var next_grants: Array[Dictionary] = []
 	for grant in plan.corridor_grants: next_grants.append(grant.duplicate(true))
+	var staged_geometry:Dictionary={}
+	for id in additions:
+		staged_geometry[id]={}
+		for segment in additions[id]:
+			var geometry:=_build_motion_geometry(segment)
+			if geometry.is_empty():return _reject("invalid_motion_geometry",id)
+			staged_geometry[id][int(segment.start_tick)]=geometry
 	var changed: bool = not plan.accepted_steps.is_empty() or next_grants != _corridor_grants
 	var nonempty: Dictionary = {}
 	for id in schedules:
 		if not schedules[id].is_empty():nonempty[id]=schedules[id]
 	_segments_by_unit_id = nonempty
 	_corridor_grants = next_grants
-	_reservation_terrain_revision = _terrain_revision()
+	for id in staged_geometry:
+		if not _motion_geometry_by_unit_id.has(id):_motion_geometry_by_unit_id[id]={}
+		_motion_geometry_by_unit_id[id].merge(staged_geometry[id])
 	if changed: _revision+=1
 	return {"ok":true,"revision":_revision,"committed":changed}
 
@@ -355,18 +446,27 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 	var due: Array[Dictionary] = []
 	if _reservation_terrain_revision != _terrain_revision():
 		_topology_revalidation_pending=not _corridor_grants.is_empty()
-		var legal := true
-		for segments in _segments_by_unit_id.values():
-			for segment in segments:
-				if not PLANNER._hex_legal_step(segment.from_grid,segment.to_grid,_registry):legal=false
-		if not legal:
-			for id in _segments_by_unit_id:
-				if not _segments_by_unit_id[id].is_empty():
-					events.append({"event_type":"hex_route_cancelled","unit_id":id,"reason":"terrain_changed"})
-			_segments_by_unit_id.clear()
-			_corridor_grants.clear()
-			_topology_revalidation_pending=false
-			_revision+=1
+		var invalid_ids:=PackedStringArray()
+		for id in _segments_by_unit_id:
+			for segment in _segments_by_unit_id[id]:
+				if not PLANNER._hex_legal_step(segment.from_grid,segment.to_grid,_registry):
+					invalid_ids.append(id)
+					break
+		if not invalid_ids.is_empty():
+			var stopped:=stop_units(invalid_ids,"terrain_changed")
+			if stopped.ok:events.append_array(stopped.events)
+			else:
+				# Corrupt projection data cannot authorize an illegal field handoff.
+				for id in _segments_by_unit_id:events.append({"event_type":"hex_route_cancelled","unit_id":id,"reason":"invalid_motion_geometry"})
+				_segments_by_unit_id.clear()
+				_motion_geometry_by_unit_id.clear()
+				_corridor_grants.clear()
+				_revision+=1
+		# Remaining legal routes adopt the current canonical terrain/metric profile.
+		for id in _segments_by_unit_id:
+			var geometry_by_start:Dictionary={}
+			for segment in _segments_by_unit_id[id]:geometry_by_start[int(segment.start_tick)]=_build_motion_geometry(segment)
+			_motion_geometry_by_unit_id[id]=geometry_by_start
 		_reservation_terrain_revision=_terrain_revision()
 	if _topology_revalidation_pending:
 		var retained: Array[Dictionary] = []
@@ -418,9 +518,20 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 		var live: Array = []
 		for segment in _segments_by_unit_id[id]:
 			if int(segment.start_tick)+int(segment.duration_ticks)>tick:live.append(segment)
-			else:expired=true
-		if live.is_empty():_segments_by_unit_id.erase(id)
+			else:
+				expired=true
+				_motion_geometry_by_unit_id.get(id,{}).erase(int(segment.start_tick))
+		if live.is_empty():
+			_segments_by_unit_id.erase(id)
+			_motion_geometry_by_unit_id.erase(id)
 		else:_segments_by_unit_id[id]=live
+	for id in _centering_by_unit_id.keys():
+		var centering:Dictionary=_centering_by_unit_id[id]
+		var end:int=int(centering.start_tick)+int(centering.duration_ticks)
+		if end>tick:continue
+		_centering_by_unit_id.erase(id)
+		expired=true
+		events.append({"event_type":"hex_centering_completed","unit_id":id,"tick":end})
 	_tick=tick
 	if expired:_revision+=1
 	_prune_corridor_grants()
@@ -459,6 +570,8 @@ func clear() -> void:
 	_units_by_id.clear()
 	_occupant_by_grid.clear()
 	_segments_by_unit_id.clear()
+	_centering_by_unit_id.clear()
+	_motion_geometry_by_unit_id.clear()
 	_corridor_grants.clear()
 	_reservation_terrain_revision=-1
 	_topology_revalidation_pending=false
