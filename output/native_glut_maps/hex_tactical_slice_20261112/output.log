@@ -1,0 +1,117 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (81 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AudioEventBus[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AudioEventContract[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | AudioEventPlayerPool[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | AdHocOrder[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | AreaOrder[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | CommanderCommand[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | CommanderIntent[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | LoadoutContract[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | DamageModel[39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | HexDetectionState[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | HexSightRuntimeAdapter[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | HexVisibilityQuery[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | LineOfSightSystem[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | ObjectiveStatus[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | PersonnelLoadoutState[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | SimulationRoot[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | CharacterGameplayResolver[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | FireteamCohesionResolver[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | RosterRelationshipModel[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | CombatVisibilityCache[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | HexGroundAdmission[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MissionCargoTouchdownBridge[39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | MissionCombatAuthorityContract[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | MissionCombatRemoteEventBridge[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | MissionCombatResolutionResolver[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionDoorRuntimeCollisionLOS[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionPointBinding[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | MissionScenarioRuntimeGates[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | MissionScenarioVerticalSliceContract[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | MultiplayerCommandContract[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | MultiplayerRosterContract[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSnapshotContract[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | UnitProfileMath[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | UnitRegistry[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | AreaOrderResolver[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | CombatFireDecisionResolver[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | CombatReadabilityPresenter[39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | ContactTracker[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | EnemyBehaviorOrchestrator[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | EnemyLimboBehaviorAdapter[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | EnemyTeamTacticsProfile[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | FireteamSecurityController[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | FlankVulnerabilityResolver[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | LocalAvoidanceResolver[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | MedicSupportResolver[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | OverwatchController[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | TacticalCommunicationEvent[39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | HPANavigationGraph[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | HPAPathfinder[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainMapData[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | TerrainMarkerCatalog[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | TerrainTextureCatalog[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | TerrainTruthAudit[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-76c342f6c5ae4708a2e059e644790ad8
+PASS real owner admits three actual capability NPCs on only twelve terrain hexes
+PASS queued units wait before closed ramp/door route; actual shot sight blocks target
+PASS real driver opens door; rear logical facing still hides target
+SLICE_EVIDENCE passage_order=["leader", "follower"] ramp_half_height=true detected_at=(7, 0)
+PASS reserved movement crosses half-height ramp and door in order without double occupancy
+PASS real door producer refuses closure through active passage claims
+PASS logical field/facing change triggers real detection; shot resolver reads current sight
+PASS both actual movement commands report completed arrivals
+PASS post-arrival logical turn invalidates detection and shot permission immediately
+AP7_PENDING export_state=false restore_state=false checkpoint_peer_owner=not_verified
+HEX_TACTICAL_SLICE_PARTIAL checks=8 failures=0 full_ap8=false
+HEX_TACTICAL_SLICE_PARTIAL_READY
