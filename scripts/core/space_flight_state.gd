@@ -70,6 +70,31 @@ func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
 		return validation
 	var next := get_snapshot()
 	next.merge(proposal, true)
+	_apply_pose(next, tick)
+	return {"ok": true, "revision": _revision}
+
+func validate_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
+	# Root coordinates this preflight with travel, membership and occupancy.
+	if _craft_id.is_empty() or tick <= _tick: return {"ok":false, "reason":"stale_tick"}
+	if proposal.get("expected_revision", -1) != _revision: return {"ok":false, "reason":"stale_revision"}
+	if not proposal.has_all(["coordinate_frame", "space_area_id", "position_plane"]):
+		return {"ok":false, "reason":"invalid_pose"}
+	var next := get_snapshot()
+	next.merge(proposal, true)
+	if not _valid_pose(next): return {"ok":false, "reason":"invalid_pose"}
+	if next.coordinate_frame == _coordinate_frame and next.space_area_id == _space_area_id:
+		return {"ok":false, "reason":"same_area"}
+	return {"ok":true}
+
+func commit_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
+	var validation := validate_area_transition(proposal, tick)
+	if not validation.ok: return validation
+	var next := get_snapshot()
+	next.merge(proposal, true)
+	_apply_pose(next, tick)
+	return {"ok":true, "revision":_revision}
+
+func _apply_pose(next: Dictionary, tick: int) -> void:
 	_position = next.position_plane
 	_velocity = next.velocity_plane
 	_heading = float(next.heading_rad)
@@ -77,9 +102,10 @@ func commit_motion(proposal: Dictionary, tick: int) -> Dictionary:
 	_assist_mode = String(next.assist_mode)
 	_motion_mode = String(next.motion_mode)
 	_mass = float(next.mass)
+	_coordinate_frame = next.coordinate_frame
+	_space_area_id = next.space_area_id
 	_tick = tick
 	_revision += 1
-	return {"ok": true, "revision": _revision}
 
 static func _valid_pose(pose: Dictionary) -> bool:
 	if typeof(pose.get("position_plane")) != TYPE_VECTOR2 or typeof(pose.get("velocity_plane", Vector2.ZERO)) != TYPE_VECTOR2:

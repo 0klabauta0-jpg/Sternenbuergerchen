@@ -189,6 +189,11 @@ Verifier und diese Statusdokumentation.
   Rahmen nicht wechseln. Gezielte Prüfung8/8, Raumtakt-/Guidance- und
   Fleettravelprüfungen grün. Noch keine Bereichstransition, lokaler Index
   oder Produktanbindung; Layout-/Reisegate stammen vom parallelen Chat.
+- AP04a Flighttransition-Baustein: mutationsfreie Revisions-/Tick-/Pose-
+  Vorprüfung und separater Commit für den reinen Flightowner; Geschwindigkeit
+  und Bereich werden gemeinsam übernommen. 13/13, vorhandene Flugtakt- und
+  Fleettravelprüfungen grün. Dies ist noch keine transaktionale Root-/Travel-/
+  Wing-/Registry-Verbindung und schaltet keine lokalen Bereiche frei.
 - AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
   Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
   strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
