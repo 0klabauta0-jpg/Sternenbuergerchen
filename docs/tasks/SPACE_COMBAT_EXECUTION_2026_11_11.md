@@ -181,7 +181,19 @@ Verifier und diese Statusdokumentation.
   Orbitchat abgestimmt; Details in `SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`.
   Raumregistry besitzt pro Bereich monotone Belegungsrevisionen, unveränderte
   Updates erhöhen sie nicht. Registryprüfung15/15, Rotten- und
-  Ersteintrittsfixture grün; tatsächliche Gatevorschau folgt, keine Freigabe.
+  Ersteintrittsfixture grün; keine Freigabe.
+- AP04a Root-Saumvorschau: `preview_surface_approach` prüft autoritativen
+  Flight-/Travel-/Rottenowner, Gebiet und deren erwartete Revisionen, den
+  aktuellen indexierten vollständigen Footprint, fremde Belegung, Körpermaske,
+  echten Gatekontakt und Location→Orbit→Body-Bindung. Ein großer Rumpf darf
+  außerhalb der einfeldtiefen Gatezeile bleiben, solange ein Feld Kontakt hat
+  und der Rest frei ist. Prüfung12/12 einschließlich veraltetem Index und
+  Körperüberdeckung. Keine Freigabe oder Produktaufrufer: Zielklassifikation,
+  Pilot/Crew/Job, Supply/Campaign/Departure, spätere Revalidierung und
+  gemeinsame stille Veröffentlichung fehlen. Der Bereichsindex versioniert
+  derzeit Belegung, nicht zukünftige Raum-Reservationsclaims; solche Claims
+  existieren im Fixturebatch noch nicht dauerhaft und müssen vor echter
+  Anbindung in dieselbe Konsistenzgrenze einbezogen werden.
 - Parallelcommit 26303641d (Boden-Türguard und Root) als 2a872b762
   integriert; Türguard, echte und Fake-Orbitfixture sowie Raumtakt gezielt
   grün. Keine vollständige native oder Boden-/Mehrspielerfreigabe.
