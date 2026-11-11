@@ -24,13 +24,16 @@ func _initialize() -> void:
 	sim.configure_singleplayer_owners(null, null, null, fleet)
 	sim.configure_ship_equipment(equipment)
 	sim.configure_base_personnel(pilot)
-	var adapter = ADAPTER.new(); adapter._simulation = sim
+	var adapter = ADAPTER.new(); adapter._simulation = sim; adapter._travel = fleet
 	var flight = fleet.get_flight_state(id)
 	var cell: Vector2i = GRID.from_offset(Vector2i(200, 100))
 	assert(flight.commit_area_transition({"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon", "position_plane":GRID.HEX.axial_to_plane(Vector2(cell)), "motion_mode":"tactical"}, 1).ok)
 	var state = sim.get("_space_combat_state")
 	assert(state.admit_actor({"craft_id":id, "faction_id":"player", "control_domain":"player", "start_hex":cell, "footprint_hexes":[Vector2i.ZERO]}, flight, true).ok)
 	assert(sim.get("_space_wing_state").ensure_flying_wings("singleplayer", [id], [id], {id:"pilot"}).ok)
+	var projection: Dictionary = adapter.get_space_area_projection(id)
+	assert(projection.ok and projection.actors.size() == 1 and projection.actors[0].craft_id == id)
+	assert(not adapter.get_space_area_projection("").ok and not adapter.get_space_area_projection("other").ok)
 	var target := cell + Vector2i(4, 0)
 	var request := {"craft_id":id, "target_hex":target, "request_id":"move"}
 	var forged := request.duplicate(); forged["hull"] = {"main_thrust":999.0}

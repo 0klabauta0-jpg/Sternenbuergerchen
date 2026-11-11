@@ -7,9 +7,19 @@ const COMMANDS = preload("res://scripts/mission/singleplayer_campaign_command_co
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const EQUIPMENT = preload("res://scripts/core/singleplayer_ship_equipment_state.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 
 class PilotFixture extends Node:
 	func is_pilot_aboard(_craft_id: String) -> bool: return true
+class MissionPilot extends Node:
+	var aboard := false
+	func get_campaign_pilot_flight_guard(_craft_id: String) -> Dictionary: return {"ok":aboard, "reason":"pilot_not_aboard"}
+class ReturnFlow extends Node:
+	var _aircraft_location_by_craft := {}
+	var visit: Node
+	func _find_homebase_aircraft_definition(id: String) -> Dictionary: return {"craft_id":id}
+	func _find_pending_mission_craft_transfer(_id: String) -> Dictionary: return {}
+	func get_mission_for_craft(_id: String) -> Node: return visit
 
 func _initialize() -> void:
 	var sim = ROOT.new()
@@ -55,10 +65,38 @@ func _initialize() -> void:
 	assert(_travel(fleet, "finish_approach", {"craft_id":id}, "land").ok)
 	assert(fleet.get_snapshot(id).phase == "surface" and state.get_inactive_actor(id) == flight)
 	sim.tick_counter = 2
-	var return_context := {"runtime_authorized":true, "fixture":true, "actor_id":"singleplayer", "owned_crafts":[id], "craft_pilots":{id:"pilot"}, "request_id":"return", "operation":"enter_orbit", "payload":{"craft_id":id}}
-	var return_pose := {"position_plane":GRID.HEX.axial_to_plane(Vector2(gate))}
-	var returning: Dictionary = sim.prepare_space_area_transition(id, "orbit_approach:glut_1a", return_pose, flight.get_snapshot().revision, fleet.get_snapshot(id).revision, return_context)
-	assert(returning.get("ok", false) and sim.commit_space_area_transition(returning.token, return_context).get("ok", false))
+	var return_adapter = load("res://scripts/meta/singleplayer_runtime_adapter.gd").new()
+	var return_flow = ReturnFlow.new(); var mission = Node.new(); var mission_pilot = MissionPilot.new()
+	mission_pilot.name = "TacticalController"; mission.add_child(mission_pilot); return_flow.visit = mission
+	return_flow._aircraft_location_by_craft[id] = "mission"
+	return_adapter._simulation = sim; return_adapter._flow = return_flow; return_adapter._campaign = campaign; return_adapter._supply = supply; return_adapter._travel = fleet
+	return_adapter._campaign_mode = true; return_adapter._pad_by_craft[id] = "homebase_pad_01"; return_adapter._departure_token_by_craft[id] = "group"
+	assert(sim.configure_departure_adapter(return_adapter).ok)
+	var return_before: Dictionary = supply.get_supply_snapshot()
+	assert(not return_adapter.authorize_return(id).ok and supply.get_supply_snapshot() == return_before and state.get_inactive_actor(id) == flight)
+	mission_pilot.aboard = true
+	var return_fuel_before: float = supply._fuel_by_craft_id[id]
+	supply._fuel_by_craft_id[id] = 0.0
+	assert(not return_adapter.authorize_return(id).ok and state.get_inactive_actor(id) == flight and fleet.get_snapshot(id).phase == "surface")
+	supply._fuel_by_craft_id[id] = return_fuel_before
+	assert(return_adapter.authorize_return(id).get("deferred", false) and supply.get_supply_snapshot() == return_before)
+	var blocked_gate: Vector2i = GRID.from_offset(LAYOUT.build("glut_1a").gate_cells[0])
+	var obstacle = FLIGHT.new(); obstacle.configure("space_fixture_gate_block", {"position_plane":GRID.HEX.axial_to_plane(Vector2(blocked_gate)), "motion_mode":"tactical", "coordinate_frame":"local", "space_area_id":"orbit_approach:glut_1a"})
+	assert(state.admit_actor({"craft_id":"space_fixture_gate_block", "faction_id":"enemy", "control_domain":"enemy", "start_hex":blocked_gate, "footprint_hexes":[Vector2i.ZERO]}, obstacle, true).ok)
+	var observed := []
+	sim.singleplayer_command_committed.connect(func(_cmd: Dictionary, _result: Dictionary): observed.append(return_flow._aircraft_location_by_craft[id] == "starmap" and return_adapter.enter_space_orbit(id).get("replayed", false)))
+	var returning: Dictionary = return_adapter.enter_space_orbit(id)
+	assert(returning.get("ok", false) and supply.get_supply_snapshot().fuel_by_craft_id[id] == return_before.fuel_by_craft_id[id] - 12.0)
+	assert(observed.is_empty())
+	return_flow._aircraft_location_by_craft[id] = "starmap"
+	sim.publish_singleplayer_local_return_events(return_adapter, returning.receipt_id)
+	assert(observed == [true, true])
+	sim.publish_singleplayer_local_return_events(return_adapter, returning.receipt_id)
+	assert(observed.size() == 2)
+	assert(not state.get_indexed_actor_cells(id).has(blocked_gate))
+	assert(state.remove_actor("space_fixture_gate_block"))
+	var returned_fuel: Dictionary = supply.get_supply_snapshot()
+	assert(sim.commit_singleplayer_local_return(return_adapter, id).replayed and supply.get_supply_snapshot() == returned_fuel)
 	assert(fleet.get_snapshot(id).phase == "orbit" and state.get_actor(id) == flight and flight.get_snapshot().motion_mode == "tactical")
 	assert(sim.commit_fixture_surface_group(bundle, context).replayed)
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":id, "model_id":"cutlass"}]).ok)
@@ -69,7 +107,7 @@ func _initialize() -> void:
 	var old_position: Vector2 = flight.get_snapshot().position_plane
 	sim._advance_space_flights(0.1, flight.get_snapshot().tick + 1)
 	assert(flight.get_snapshot().position_plane != old_position)
-	pilot.free()
+	pilot.free(); return_adapter.free(); mission.free(); return_flow.free()
 	var changed := bundle.duplicate(true); changed.fuel_command.request_id = "other"
 	assert(sim.commit_fixture_surface_group(changed, context).reason == "request_id_conflict")
 	assert(fleet._owners[id].configure(id).ok and fleet.get_flight_state(id) == flight)
