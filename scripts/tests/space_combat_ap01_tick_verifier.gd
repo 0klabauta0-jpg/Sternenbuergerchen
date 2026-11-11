@@ -32,7 +32,33 @@ func _initialize() -> void:
 	if root.get_space_actor("a") != fleet.get_flight_state("a"): failed += 1
 	var invalid := {"craft_id":"npc2", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(9999,9999)}
 	if root.admit_space_actor(invalid, {"runtime_authorized":true}).get("reason") != "invalid_actor_cell": failed += 1
+	var at_30 := _simulate_frames(30)
+	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 10 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 11 - failed, " failed=", failed)
 	quit(1 if failed else 0)
+
+func _simulate_frames(frame_count: int) -> float:
+	var fleet = FLEET.new()
+	fleet.configure()
+	fleet.register_craft("a")
+	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"launch_to_orbit", "payload":{"craft_id":"a"}, "request_id":"l"}, {"runtime_authorized":true})
+	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"a", "target_orbit_id":"planet_orbit"}, "request_id":"j"})
+	var sim = ROOT.new()
+	sim.configure_singleplayer_owners(null, null, null, fleet)
+	var adapter = ADAPTER.new()
+	adapter.set("_travel", fleet)
+	adapter.set("_simulation", sim)
+	sim.configure_space_runtime_tick(Callable(adapter, "advance_space_travel"))
+	var done := 0
+	for frame in frame_count:
+		sim._process(1.0 / frame_count)
+		var target := floori(float(frame + 1) * 60.0 / frame_count)
+		while done < target:
+			sim._physics_process(1.0 / 60.0)
+			done += 1
+	var progress := float(fleet.get_snapshot("a").progress)
+	sim.free()
+	adapter.free()
+	return progress
