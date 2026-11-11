@@ -87,3 +87,6 @@ docs/qa/simple_team_experience_20261111/** -text whitespace=blank-at-eol,blank-a
 docs/qa/explicit_hex_ramp_runtime_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 docs/qa/hex_ramp_bands_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Keep private AP4 planner evidence byte-stable.
+docs/qa/hex_reservation_planner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
