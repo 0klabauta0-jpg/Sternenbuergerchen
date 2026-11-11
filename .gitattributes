@@ -102,3 +102,6 @@ docs/qa/polisa_lookdev_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 
 # Keep bounded Tabletop integration logs byte-stable.
 docs/qa/tabletop_restplan_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Preserve bounded industry evidence and hashes.
+docs/qa/campaign_industry_runtime_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

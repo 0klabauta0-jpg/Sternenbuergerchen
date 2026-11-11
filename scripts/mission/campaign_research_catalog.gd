@@ -33,7 +33,8 @@ static func missing_requirement(node: Dictionary, developed: Dictionary, rewards
 			return "Voraussetzung: " + String(parent.get("title", research_id))
 	for blueprint_id: String in node.get("requires_fabricated", {}):
 		if String(fabricated.get(blueprint_id, "")) != String(node.requires_fabricated[blueprint_id]):
-			return "Zuerst eine leichte Rüstung in der Werkstatt herstellen."
+			var label := String(Dictionary(node.get("requires_fabricated_labels", {})).get(blueprint_id, blueprint_id))
+			return "Zuerst %s in der Werkstatt herstellen." % label
 	return ""
 
 static func build_snapshot(developed: Dictionary, rewards: Dictionary, requests: Dictionary, credits: int) -> Dictionary:

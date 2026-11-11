@@ -129,6 +129,7 @@ func _build() -> void:
 		["campaign_load_crate","Geborgene C-Benit-Kiste übernehmen",{}],
 		["campaign_build_pad","Zweites Landepad bauen · 100 Cr",{}],
 		["campaign_fabricate","Hand-Mining-Tool herstellen",{"blueprint_id":"mining_tool"}],
+		["campaign_fabricate","Bergungswerkzeug herstellen",{"blueprint_id":"salvage_tool"}],
 		["campaign_fabricate","Sturmgewehr herstellen",{"blueprint_id":"assault_rifle"}],
 		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}],
 		["campaign_fabricate","Mittlere Rüstung herstellen",{"blueprint_id":"medium_armor"}],
@@ -152,7 +153,7 @@ func _build() -> void:
 		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
 		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
 		if ResourceLoader.exists(path):icon.texture=load(path)
-		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
+		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","salvage_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
 		if String(action[0])!="campaign_build_pad":icon.texture=MENU_ICONS.get_icon(menu_item)
 		if not blueprint.is_empty():body.add_child(_label(get_blueprint_details(blueprint),14))
 		if String(action[0]) == "campaign_research":
@@ -365,6 +366,7 @@ static func get_blueprint_details(blueprint_id:String)->String:
 		lines.append("Basisschaden: %d"%weapons.get_damage_per_hit("rifle"))
 		lines.append("Reichweite: %d Felder"%weapons.get_effective_tile_range("rifle"))
 	elif String(recipe.item)=="mining_tool":lines.append("Werkzeug zum Abbau\nmarkierter Vorkommen")
+	elif String(recipe.item)=="salvage_tool":lines.append("Werkzeug zur Bergung\nmarkierter Wracks")
 	elif String(recipe.item) in ["armor_light", "armor_medium", "armor_heavy"]:
 		lines.append("Rüstungsklasse: " + {"armor_light":"Leicht", "armor_medium":"Mittel", "armor_heavy":"Schwer"}[String(recipe.item)])
 	lines.append("Herstellung: %d Cr"%int(recipe.cost))

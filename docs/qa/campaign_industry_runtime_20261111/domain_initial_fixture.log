@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing Supply config loads
+PASS: Industry needs workshop development
+PASS: Unchanged trusted job fixture satellite_recovery
+PASS: Unchanged trusted job fixture outpost_recovery
+PASS: Unchanged trusted job fixture benit_delivery
+PASS: Unchanged trusted job fixture outpost_chip_recovery
+PASS: Workshop uses existing uploaded-chip reward evidence
+PASS: Existing mining-tool purchase remains available
+PASS: Purchased tool does not replace fabrication evidence; correct missing-tool text
+PASS: Existing mining recipe fabricates for 30Cr
+PASS: Industry becomes available after actual mining fabrication
+PASS: Salvage recipe locked before development
+PASS: Industry development requires home
+PASS: Industry development requires campaign authority
+PASS: Development costs exactly 160Cr once
+PASS: Development grants blueprint without free tool
+PASS: Replay and second request cannot double charge
+PASS: Salvage fabrication requires home
+PASS: Separate salvage fabrication costs40Cr into existing storage
+PASS: Fabrication replay creates no duplicate
+PASS: Fabricated item matches existing wreck collection contract
+FAIL: Single industry ledger JSON roundtrip preserves recipe
+CAMPAIGN_INDUSTRY_SLICE 22 checked, 1 failed

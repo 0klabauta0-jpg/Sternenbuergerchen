@@ -1,0 +1,73 @@
+{
+  "status": "small_domain_industry22_protection24_compile2_pass_native_pending",
+  "balance_status": "initial_not_final",
+  "supply_state_modified_by_this_slice": false,
+  "artifacts": [
+    {
+      "path": "data/singleplayer/research.json",
+      "bytes": 2227,
+      "sha256": "4d37e297ce83a8001bb1b5e65dd072689e381ba8435e66e588d264427bb43cf9"
+    },
+    {
+      "path": "scripts/mission/campaign_research_catalog.gd",
+      "bytes": 5029,
+      "sha256": "2e51b93d495bb66e371adc95dea761aa89464ffc4bff33cc476fe164a9a8f445"
+    },
+    {
+      "path": "scripts/meta/singleplayer_services_presenter.gd",
+      "bytes": 29927,
+      "sha256": "966876bd7bc409d7d7d951b183c25fd5ddf9eb804b9b5eb100f2dca7579de8aa"
+    },
+    {
+      "path": "scripts/tests/campaign_industry_slice_check.gd",
+      "bytes": 5348,
+      "sha256": "7ad939d6ba06559570a6188198d0789549bb7ce8c7d1b296c8cd199c4abb6519"
+    },
+    {
+      "path": "docs/tasks/CAMPAIGN_INDUSTRY_RUNTIME_2026_11_11.md",
+      "bytes": 2785,
+      "sha256": "9a3d6fe951eba21536add8811e968d0590b78ea8095eab521e667572471ecddc"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/catalog_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/domain_check.log",
+      "bytes": 1429,
+      "sha256": "5d56cf2f44b7cd8b94bb7d2aa1be33905dc0bc296dbd384e14ca6859cf822e02"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/domain_fixture_diagnostic.log",
+      "bytes": 1552,
+      "sha256": "306d232f6c6c9ddfe44d1c30f8833eb2fde5e76c5fa408a1318f11c3bf671d3e"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/domain_initial_fixture.log",
+      "bytes": 1429,
+      "sha256": "314cc3e15b6a0f6526b49a8edbf6236bd9b99805baa13875b3d8a4917a71f3a7"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/presenter_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/protection_regression.log",
+      "bytes": 1542,
+      "sha256": "2055640e1aeea1c6feeac3971115cb6733618604446a34f165acc2df7c0a8141"
+    },
+    {
+      "path": "docs/qa/campaign_industry_runtime_20261111/README.md",
+      "bytes": 4709,
+      "sha256": "bb89aa57cd6a04b4231e00017bc450d1029b42000c8a2a6dfef4c9be4a8b2524"
+    }
+  ],
+  "root_integration": "Source text normalized to LF; independent static review without blocker; source-linked use path, no native salvage acceptance."
+}
