@@ -106,6 +106,10 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 			return _reject("invalid_craft", "Schiff fehlt")
 		if operation not in ["launch_to_orbit", "initialize_surface"] and String(payload.craft_id) != _craft_id:
 			return _reject("craft_mismatch", "Dieses Schiff ist nicht auf der aktiven Reise")
+	var local_flight: Dictionary = _flight.get_snapshot()
+	if local_flight.get("coordinate_frame", "strategic") == "local":
+		var inactive_finish: bool = operation == "finish_approach" and _phase == "approach" and local_flight.get("motion_mode") == "inactive"
+		if not inactive_finish: return _reject("local_area_transition_required", "Lokaler Flug braucht den bestaetigten Rootuebergang")
 	var result: Dictionary
 	match operation:
 		"initialize_surface": result = _initialize_surface(payload)
@@ -371,10 +375,18 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
 	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
 	var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
-	if not layout.get("ok", false) or String(context.source_area_id) != "" or String(context.target_area_id) != String(layout.body_map_id):
+	if not layout.get("ok", false) or String(context.target_area_id) != String(layout.body_map_id):
 		return _reject("area_body_mismatch", "Bereich passt nicht zum tatsaechlichen Reiseziel")
+	var flight_binding := {}
+	var flight_snapshot: Dictionary = _flight.get_snapshot()
+	if flight_snapshot.get("coordinate_frame", "strategic") == "local":
+		if operation != "enter_orbit" or flight_snapshot.get("motion_mode") != "inactive" or String(flight_snapshot.get("space_area_id", "")) != String(context.source_area_id) or String(context.source_area_id) != String(layout.body_map_id):
+			return _reject("inactive_local_return_required", "Nur passender inaktiver Ortsflight darf lokal reaktiviert werden")
+		flight_binding = _space_area_flight_binding(flight_snapshot)
+	elif String(context.source_area_id) != "" or String(flight_snapshot.get("space_area_id", "")) != "":
+		return _reject("area_body_mismatch", "Strategischer Ausgangsbereich muss leer sein")
 	var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,
-		"expected_revision":expected_revision,"context":context.duplicate(true),
+		"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":flight_binding,
 		"next":{"phase":"orbit","orbit_id":orbit,"orbit_marker_id":marker,"target_orbit_id":"","target_orbit_marker_id":"",
 			"location_id":"","elapsed_seconds":elapsed,"progress":progress,"revision":next_revision}}
 	candidate["seal"] = _sign_space_area_state(candidate)
@@ -391,6 +403,9 @@ func _validate_prepared_space_area_state(candidate: Dictionary, context: Diction
 	if JSON.stringify(candidate.get("context", {}), "", true) != JSON.stringify(context, "", true): return _reject("area_context_changed", "Rootkontext hat sich geaendert")
 	if _revision != int(candidate.get("expected_revision", -1)): return _reject("travel_revision_changed", "Reisezustand hat sich geaendert")
 	if _phase != String(context.get("expected_phase", "")): return _reject("travel_phase_changed", "Reisephase hat sich geaendert")
+	var expected_flight: Dictionary = candidate.get("flight_binding", {})
+	if not expected_flight.is_empty() and JSON.stringify(expected_flight, "", true) != JSON.stringify(_space_area_flight_binding(_flight.get_snapshot()), "", true):
+		return _reject("local_flight_changed", "Lokaler Flightzustand hat sich seit Vorbereitung geaendert")
 	# A no-op legacy request may consume this key without changing revision.
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde zwischenzeitlich verwendet")
 	return {"ok":true}
@@ -414,3 +429,8 @@ func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
 		"source_area_id":String(context.source_area_id),"target_area_id":String(context.target_area_id)}
 	_requests[String(context.request_id)] = {"signature":JSON.stringify({"operation":context.operation,"payload":context.payload}, "", true),"result":result.duplicate(true)}
 	return result
+
+
+func _space_area_flight_binding(snapshot: Dictionary) -> Dictionary:
+	return {"owner_instance_id":_flight.get_instance_id(),"craft_id":String(snapshot.get("craft_id", "")),"revision":int(snapshot.get("revision", -1)),
+		"coordinate_frame":String(snapshot.get("coordinate_frame", "")),"space_area_id":String(snapshot.get("space_area_id", "")),"motion_mode":String(snapshot.get("motion_mode", ""))}

@@ -1,0 +1,15 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS actual Local travel rejects legacy actions before phase/pose/receipt mutations
+PASS existing tactical guard retains precedence including old receipt replay
+PASS strategic legacy replay semantics remain unchanged
+PASS actual Source activity deactivation retains last pose/area and does not authorize untrusted finish
+PASS trusted inactive finish changes Travel phase only
+PASS inactive finish requires existing approach; successful identical replay stays read-only
+PASS prepared local return rejects still-active tactical Flight
+PASS inactive local prepare is read-only and binds actual canonical source/body area
+PASS public commit rejects changed Flight revision/mode after actual reactivation
+PASS Root-private Travel tail publishes after activity without Flight reread/write
+PASS existing strategic prepared Warp completion remains pose-free
+LOCAL_TRAVEL_LIFECYCLE_RESULT checks=11 failures=0 runtime_reactivation_wired=false
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
