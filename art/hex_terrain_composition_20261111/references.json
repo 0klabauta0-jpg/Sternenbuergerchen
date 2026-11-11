@@ -1,0 +1,45 @@
+[
+  {
+    "zone": "A",
+    "source": "C:\\Users\\bjoer\\.codex\\visualizations\\2026\\11\\10\\01a1c61f-714c-7b51-829d-277d83d7d62b\\sternenbuergerchen-v3-gesamtkarte\\boden_galerie\\map_a_wide\\A_512x256.png",
+    "sha256": "139d03b5a046e7a2b6cec4b33f7f3db839e6b8dde95081d817987daf077836a2",
+    "status": "generated 2D composition reference; opened and inspected"
+  },
+  {
+    "zone": "B",
+    "source": "C:\\Users\\bjoer\\.codex\\visualizations\\2026\\11\\10\\01a1c61f-714c-7b51-829d-277d83d7d62b\\sternenbuergerchen-v3-gesamtkarte\\boden_galerie\\map_b_wide\\B_512x256.png",
+    "sha256": "d69855fb1ec77dd1a4a384b67213da468202c72a1b94003a0aa29120f67a53c8",
+    "status": "generated 2D composition reference; opened and inspected"
+  },
+  {
+    "zone": "C",
+    "source": "C:\\Users\\bjoer\\.codex\\visualizations\\2026\\11\\10\\01a1c61f-714c-7b51-829d-277d83d7d62b\\sternenbuergerchen-v3-gesamtkarte\\boden_galerie\\map_c_wide\\C_512x256.png",
+    "sha256": "dc723b4253458b5fcd277de0a3d3a9ce2e510b56c2d79b9a6b4dec2632d7a333",
+    "status": "generated 2D composition reference; opened and inspected"
+  },
+  {
+    "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\A_final_canyon_18.png",
+    "sha256": "6bee690b83ff1abf58ba30c2a3e78476162fba083bc31edfb4166545764e71eb",
+    "status": "previous native Godot candidate; opened and inspected"
+  },
+  {
+    "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\B_depot_final_540.png",
+    "sha256": "6b47e3e276f67d9f31907d60b0560ea589ba43ae2ee32b7eb628d7f1fa137a11",
+    "status": "previous native Godot candidate; opened and inspected"
+  },
+  {
+    "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\C_deck_final_540.png",
+    "sha256": "d81fdd908b649d3363deb921935a6c6183d76d67173db3f1da94a93f77c08a1d",
+    "status": "previous native Godot candidate; opened and inspected"
+  },
+  {
+    "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\hex_terrain_composition_20261111\\compiler_before.py",
+    "sha256": "5079b6b2476f1f723f577a9bd43091af32527c5c361aa9930ab9662405cb336a",
+    "status": "unchanged compiler source before terrain composition"
+  },
+  {
+    "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\Assets\\curated\\glut_regional\\sandstone_04.glb",
+    "sha256": "c88b18317764b3fc46e9cdd46bfe4127bae060dc0c493ef156f295833528b35a",
+    "status": "existing curated asset, unchanged by composition authoring"
+  }
+]

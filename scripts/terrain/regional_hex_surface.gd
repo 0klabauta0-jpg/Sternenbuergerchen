@@ -1,5 +1,6 @@
 extends RefCounted
 ## A regional ramp cap shares its edge midpoints and corners with adjoining cells.
+const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 static var ring: PackedVector2Array = _make_ring()
 
@@ -84,7 +85,12 @@ static func _explicit_profile(tile, tiles: Dictionary) -> PackedFloat32Array:
 			# Both sides read the same quarter-step midpoint. Shared caps form a
 			# broad bank instead of independent sloping ribs with vertical seams.
 			var midpoint := center + ring[edge * 2 + 1]
-			result[edge * 2 + 1] = snappedf((_nominal_height(tile, midpoint) + _nominal_height(neighbor, midpoint)) * 0.5 - base - 0.5, 0.25)
+			var my_end: float = TILE.endpoint_height(tile, neighbor.grid_position)
+			var their_end: float = TILE.endpoint_height(neighbor, tile.grid_position)
+			if is_equal_approx(my_end, their_end):
+				result[edge * 2 + 1] = my_end - base - 0.5
+			else:
+				result[edge * 2 + 1] = snappedf((_nominal_height(tile, midpoint) + _nominal_height(neighbor, midpoint)) * 0.5 - base - 0.5, 0.25)
 		var previous = tiles.get(neighbor_cell(tile.grid_position, (edge + 5) % 6))
 		var corner_tiles: Array = [tile]
 		for adjacent in [neighbor, previous]:

@@ -39,6 +39,7 @@ func _run() -> void:
 	band_lookup[turned.grid_position] = turned
 	var cap_turn := SURFACE.profile(turned, band_lookup)
 	cap_a = SURFACE.profile(band_a, band_lookup)
+	check(is_equal_approx(cap_a[1], 0.0), "Turned bank rendered midpoint matches the authoritative H+0.5 side")
 	for sample in range(3):
 		check(is_equal_approx(cap_a[sample], cap_turn[8 - sample]), "Turned bank seam shares corner/midpoint " + str(sample))
 

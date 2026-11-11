@@ -1,0 +1,180 @@
+{
+  "status": "integrated_map_data_and_editor_narrow_checks_only",
+  "artifacts": [
+    {
+      "path": "scripts/tools/build_native_glut_ground.py",
+      "sha256": "4552454986dcb6646003d8fef930164bceb2ae9f6b110491e1ad3ff35992436b",
+      "bytes": 34579
+    },
+    {
+      "path": "scripts/terrain/terrain_map_data.gd",
+      "sha256": "1e401740ef5a27bd76cf491db7b02fe526bd28a1a4362a9d0334c97e4516ec99",
+      "bytes": 31715
+    },
+    {
+      "path": "scripts/terrain/regional_hex_surface.gd",
+      "sha256": "652c5be6cd78a256ec31679d9b2786bd20eb7cb973a5185d0736ce97f41a79db",
+      "bytes": 5683
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "341d582838b6dbb2c3a4cfef7d2599e2c0f7293f4e06c334891c4537d64919f2",
+      "bytes": 924690
+    },
+    {
+      "path": "scripts/tests/explicit_hex_ramp_contract_test.gd",
+      "sha256": "e0638802e9ee27e10b26092b63e57d25ea469c2efe92928dd3f8e5f3b5b2fddb",
+      "bytes": 7229
+    },
+    {
+      "path": "maps/satellite_crash_site.json",
+      "sha256": "dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2",
+      "bytes": 25652338
+    },
+    {
+      "path": "maps/trade_outpost.json",
+      "sha256": "2913cf9d60624efc08d6b77d4a55c83f139bef297b0ae5693796b2aa58525053",
+      "bytes": 25711631
+    },
+    {
+      "path": "maps/fortified_outpost.json",
+      "sha256": "b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286",
+      "bytes": 25656117
+    },
+    {
+      "path": "scripts/editor/map_editor.gd",
+      "sha256": "257e06e6f9e4f0120876ac333de53b40f975479e3a5bc3c8811aac850ae82db6",
+      "bytes": 468426
+    },
+    {
+      "path": "scripts/editor/map_editor_height_tool.gd",
+      "sha256": "1298d9df3c816c1a43c750b231839be0f0fc90bd9c8d1b9e15d120d02c7379e3",
+      "bytes": 1009
+    },
+    {
+      "path": "scripts/editor/building_layout_authoring.gd",
+      "sha256": "7222db424655f53a2f22745989b2e6985225a72c331c3befe7442e06001cc434",
+      "bytes": 11257
+    },
+    {
+      "path": "docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md",
+      "sha256": "02316a127bd006cd9dc7cae585d08049488d1158527d797cc19b7b8aa710f0c0",
+      "bytes": 10007
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/audit_candidate.py",
+      "sha256": "aff8ee009da3e2c780d7c7442749cb6fe1e25d859b9b866070d600a6bc222a5a",
+      "bytes": 5537
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/A_composition_data.png",
+      "sha256": "6461773b8929ae1ac6982a6658fa40bd9b420972774262210481b4fdeefb368a",
+      "bytes": 460091
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/B_composition_data.png",
+      "sha256": "0efd97fc351d9c189a8d07601861f90ec254aef3a0f08d491838bea6181baa85",
+      "bytes": 488211
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/compiler_before.py",
+      "sha256": "5079b6b2476f1f723f577a9bd43091af32527c5c361aa9930ab9662405cb336a",
+      "bytes": 14926
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/C_composition_data.png",
+      "sha256": "a7ee0cdacb7d88dc55ce6455385facfa2c40c68867748816daa40d9945134728",
+      "bytes": 394372
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/manifest.json",
+      "sha256": "e2054331956808d725b26e6863ee4ee5c1c2615f4849480bee1cd0eaf88f7aa3",
+      "bytes": 19506
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/plot_composition.py",
+      "sha256": "6cd9980da5ee6c543e5004885def03ce6dfa521dcedfb7d02d9bbb6170562423",
+      "bytes": 2832
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/README.md",
+      "sha256": "99e58e05b8eed0e71387ab365e425e030e170baa1df4d7d8cc40604639466fc3",
+      "bytes": 4690
+    },
+    {
+      "path": "art/hex_terrain_composition_20261111/references.json",
+      "sha256": "c3c427d86e94f7090c767d5a987fe3f3bfc7927da2da8e6fdcaed79374bb3f00",
+      "bytes": 2624
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/A_authoring_check.json",
+      "sha256": "d25ebfda65bdac2185265f61d0be926f00199519ee4d764a0f08f6adb2021d5c",
+      "bytes": 3592
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/A_native_48.png",
+      "sha256": "97b650f244230341e714363682fad6fa50d9a9a49aa0149ca0b3dcbb0a19f53d",
+      "bytes": 1305614
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/A_v3_capture.log",
+      "sha256": "e843bbc1558cd95dc7d36558bb8396d0464b1d6a1bf8c717d142e43a1f9d9e17",
+      "bytes": 477
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/B_authoring_check.json",
+      "sha256": "ed0c13cb1c3b906b672f81761678fd3216466468f01ae78aac04b821c82fa555",
+      "bytes": 3755
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/B_capture.log",
+      "sha256": "715e44987dd63abe34037c1c71d4effc2fdddbe4f6c4ec19d5f14e3107c74ea1",
+      "bytes": 477
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/B_native_48.png",
+      "sha256": "c7290e22a9454f9e8fa80135ac09498efa55d6171f56f94c524f754a305ca027",
+      "bytes": 1306020
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/C_authoring_check.json",
+      "sha256": "545aa7a77b7ad382ec1af980c92fd8ab2bda6ad0e1d603c6d2463c66e7b754d7",
+      "bytes": 3878
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/C_capture.log",
+      "sha256": "9757eac971abad25fea5c3dc9c8d8530b77c090788ead1a8d4b22029f068ce40",
+      "bytes": 477
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/C_corner_18.png",
+      "sha256": "2b3c946ab1ec25bd0d31499ff7857534cc8cea2dcb3952f74a98579212e7d7f3",
+      "bytes": 1316408
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/C_corner_capture.log",
+      "sha256": "3aa4af06051159ff6d4637480868d13c798bbc8ad715956d76e88aea4d41202b",
+      "bytes": 477
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/C_native_44.png",
+      "sha256": "69283bcdb8b96ea5198cfea27332da030f1af26386aa8566eb7517e3677e84bd",
+      "bytes": 1251695
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/final_ramp_contract.log",
+      "sha256": "05644e51f8efd243c22c9ff15cbac7c237c44b4498440b073b62b618ca1bcf1f",
+      "bytes": 2443
+    },
+    {
+      "path": "docs/qa/hex_terrain_composition_20261111/README.md",
+      "sha256": "69bb19b05b87580d7a780e245dac576c0c186fd62cf14cc067961f074a4fa53f",
+      "bytes": 1437
+    }
+  ]
+}

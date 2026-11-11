@@ -1,0 +1,50 @@
+{
+  "status": "small_editor_fixture19_pass_check_only0_large_and_native_tests_deferred",
+  "artifacts": [
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/check_only.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80",
+      "bytes": 75
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/contract.log",
+      "sha256": "7d6deecec6dbf632d0ace7bd6894cf81697e2692d25123e370cd2845420d3c43",
+      "bytes": 1332
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/README.md",
+      "sha256": "e2ac149ea76c2233dfde1621ea9e9a1eebdf4f2a64ca095f016076118a85489d",
+      "bytes": 2831
+    },
+    {
+      "path": "docs/tasks/EXPLICIT_HEX_RAMP_EDITOR_2026_11_11.md",
+      "sha256": "a028ec3ff1708fa4ebfb2eb5fb52041d8a1a3fc60d71446f2925ed7f349b1d8a",
+      "bytes": 2212
+    },
+    {
+      "path": "scripts/editor/building_layout_authoring.gd",
+      "sha256": "7222db424655f53a2f22745989b2e6985225a72c331c3befe7442e06001cc434",
+      "bytes": 11257
+    },
+    {
+      "path": "scripts/editor/map_editor.gd",
+      "sha256": "257e06e6f9e4f0120876ac333de53b40f975479e3a5bc3c8811aac850ae82db6",
+      "bytes": 468426
+    },
+    {
+      "path": "scripts/editor/map_editor_height_tool.gd",
+      "sha256": "1298d9df3c816c1a43c750b231839be0f0fc90bd9c8d1b9e15d120d02c7379e3",
+      "bytes": 1009
+    },
+    {
+      "path": "scripts/tests/explicit_hex_ramp_editor_test.gd",
+      "sha256": "8d7e021d8163379ba77025c4d22b65cd79757d01469a7929deaada0ab39aee4a",
+      "bytes": 5673
+    }
+  ]
+}

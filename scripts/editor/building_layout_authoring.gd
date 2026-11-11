@@ -2,7 +2,7 @@ extends RefCounted
 ## Cold authoring transactions on MapData. No UI or live-simulation ownership.
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const CATALOG_PATH := "res://data/frontier_building_visual_catalog.json"
-const FIELDS := ["type_id","object_type_id","walkable","blocks_los","cover_value","height_level","surface_type","edge_type","object_height","object_rotation_degrees","object_scale"]
+const FIELDS := ["type_id","object_type_id","walkable","blocks_los","cover_value","height_level","ramp_direction","explicit_hex_ramps","regional_grade","surface_type","edge_type","object_height","object_rotation_degrees","object_scale"]
 static var _catalog: Dictionary = {}
 
 static func catalog() -> Dictionary:
@@ -174,6 +174,7 @@ static func plan(map, action: String, payload: Dictionary) -> Dictionary:
 			var tile=map.get_tile_at_grid(grid)
 			if tile==null: return _error("Gebaeude reicht ueber den Kartenrand.")
 			var substrate: Dictionary=base.get(key,fields(tile))
+			if bool(substrate.get("explicit_hex_ramps", false)) and int(substrate.get("ramp_direction", -1)) >= 0: return _error("Gebaeude braucht ein Plateau, keine Rampe.")
 			if not bool(substrate.walkable) or not String(substrate.object_type_id).is_empty() or String(substrate.surface_type)=="water": return _error("Gebaeude kollidiert mit Terrain oder einem Objekt.")
 			if not is_equal_approx(float(substrate.height_level) * height_step,float(edited.elevation)): return _error("Gebaeude braucht einen ebenen Untergrund.")
 			if protected.has(key) and not old_cells.has(key): return _error("Gebaeude wuerde Marker oder Patrouille blockieren.")

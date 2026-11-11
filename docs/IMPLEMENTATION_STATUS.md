@@ -12089,3 +12089,22 @@ Flow-Stalefehler behoben, Anflugprüfung jetzt18/0. Details/Fehllaufhistorie:
 docs/qa/native_terrain_preparation_handoff_20261111/README.md.
 Combat-Wallframes p95 52,632/max94,604ms: Ruckler bleiben offen, keine
 allgemeine FPS-/Ruckelfreiheitsfreigabe. Keine Main-/EXE-Integration.
+
+
+## 2026-11-11 — parallelisierte Abschlussarbeit nach Nutzerkorrektur
+Grosse Tests werden ausdruecklich spaeter gebuendelt. KleineCompile-/Domain-
+kontrollen und wenige nativeFormansichten sind getrennt dokumentiert.
+0d2864468: Kartensteuerung im Escape-Menue, aktiveRestliste.
+4e44521fd: ersterRuntime-Schutzforschungszweig(24/0klein), kompakter eigener
+Teameditor mit bewussten3Erfahrungs-Vorlagen(163/0klein).
+97e00aba1: expliziteRampen/Plateaus, gemeinsameEndpunkte, logischeH+.5,
+seitlichepassendeRampenbaender, InitialRootContract49/0; danach kleine
+Praezisierung des Eck-Mittelpunkts(50/0). Tabletop-Chat uebernimmtAP0-Basis.
+NeueA/B/C-Karten512x256 aus Referenzen: zusammenhaengendeH0-H8-Plateaus,
+breiteAufstiege, Ecken und geschlosseneKanten. EditorPlateau/Rampen6Richtungen,
+Hexpinsel, Undo/Redo/Save und Gebaeudeflaechenschutz(19/0klein).
+NeueMapversion3 nutzt dieselbe0.75Hoehenstufe; reine Gelaende-LOS-Fakten ohne
+Objekt bekommen keine fehlendenObjekt-Platzhalter. NativeB/C-Artansichten
+ohneEnginefehler geoeffnet; kein neuesGefechts-/FPS-/SaveContinue-PASS.
+Polisa-Station ist zusaetzlicher, gesondert noch laufenderIntegrationsauftrag.
+KeineMain-/EXE-Integration dieserTaskarbeit.

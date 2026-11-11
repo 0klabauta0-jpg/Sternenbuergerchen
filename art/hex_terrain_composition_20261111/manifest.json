@@ -1,0 +1,771 @@
+{
+  "schema": "sternenbuergerchen.hex_terrain_composition.v1",
+  "status": "PASS",
+  "source_baseline": "639a49d657086c9e436de89979fa04cc5d69ba39",
+  "compiler_sha256": "4552454986dcb6646003d8fef930164bceb2ae9f6b110491e1ad3ff35992436b",
+  "terrain_height_rules": "explicit_hex_ramps_v1",
+  "regional_terrain_version": 3,
+  "scope": "offline candidate authoring only; no native gameplay, save, multiplayer or performance acceptance",
+  "results": [
+    {
+      "zone": "A",
+      "map": "output\\native_glut_maps\\explicit_ramps_candidate\\satellite_crash_site.json",
+      "sha256": "dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2",
+      "repeated_build_byte_identical": true,
+      "repeated_build_executed": true,
+      "status": "PASS",
+      "failures": [],
+      "metadata_differences": [],
+      "tile_count": 131072,
+      "isolated_objectless_raised_peaks": 0,
+      "height8_components_largest_first": [
+        2051,
+        1681,
+        1648,
+        1634,
+        1336,
+        1334,
+        1328,
+        1293,
+        1186,
+        1127,
+        1031,
+        1030,
+        763,
+        118,
+        105
+      ],
+      "existing_rock_footprints_preserved": 0,
+      "objects_by_type": {
+        "glut_sandstone_04": 72,
+        "frontier_scene_solid": 46,
+        "station_container_wide": 1,
+        "resource_wreck_solid": 114,
+        "spacekit_satellite_dish_detailed": 1
+      },
+      "alternative_crossings": {},
+      "authoring": {
+        "zone": "A",
+        "status": "PASS",
+        "tiles": 131072,
+        "height_histogram": {
+          "0": 62264,
+          "1": 10937,
+          "2": 13444,
+          "3": 90,
+          "4": 6907,
+          "5": 30,
+          "6": 19735,
+          "8": 17665
+        },
+        "ramp_cells": 75,
+        "reachable_cells": 53973,
+        "marker_checks": [
+          {
+            "id": "spawn_alpha",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_bravo",
+            "axial": [
+              18,
+              14
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "objective_point",
+            "axial": [
+              18,
+              38
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "satellite_data",
+            "axial": [
+              18,
+              38
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "ship_return",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "trade_service",
+            "axial": [
+              38,
+              -8
+            ],
+            "reachable_adjacent": true
+          }
+        ],
+        "bridge_cells": 0,
+        "preserved_object_cells": 162,
+        "persistent_footprint_changes": 0,
+        "isolated_objectless_h1": 0,
+        "resource_checks": [
+          {
+            "id": "iron_ridge_01",
+            "grid": [
+              -8,
+              14
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "freighter_wreck_01",
+            "grid": [
+              31,
+              15
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "b_benit_01",
+            "grid": [
+              31,
+              25
+            ],
+            "reachable_adjacent": true
+          }
+        ],
+        "new_rock_prop_budget": 72,
+        "stairs": [
+          {
+            "id": "west_rim",
+            "start_axial": [
+              -80,
+              27
+            ],
+            "end_axial": [
+              -80,
+              53
+            ],
+            "bottom": 0,
+            "top": 4,
+            "direction": 5,
+            "directions": [
+              5,
+              5,
+              5,
+              5
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 20,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "east_overlook",
+            "start_axial": [
+              119,
+              50
+            ],
+            "end_axial": [
+              131,
+              24
+            ],
+            "bottom": 0,
+            "top": 4,
+            "direction": 2,
+            "directions": [
+              2,
+              1,
+              1,
+              2
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 20,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "north_table",
+            "start_axial": [
+              150,
+              -54
+            ],
+            "end_axial": [
+              150,
+              -92
+            ],
+            "bottom": 0,
+            "top": 6,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 30,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "curved_corner_band",
+            "start_axial": [
+              110,
+              52
+            ],
+            "end_axial": [
+              113,
+              50
+            ],
+            "bottom": 0,
+            "top": 1,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              1,
+              1,
+              1
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 5,
+            "flat_cells_between_rises": 0,
+            "corner_axial": [
+              111,
+              50
+            ],
+            "profile": "shared_midheight_side_edges"
+          }
+        ],
+        "failures": [],
+        "scope": "offline data authoring check; no native gameplay/performance acceptance",
+        "map_sha256": "dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2"
+      }
+    },
+    {
+      "zone": "B",
+      "map": "output\\native_glut_maps\\explicit_ramps_candidate\\trade_outpost.json",
+      "sha256": "2913cf9d60624efc08d6b77d4a55c83f139bef297b0ae5693796b2aa58525053",
+      "repeated_build_byte_identical": true,
+      "repeated_build_executed": true,
+      "status": "PASS",
+      "failures": [],
+      "metadata_differences": [],
+      "tile_count": 131072,
+      "isolated_objectless_raised_peaks": 0,
+      "height8_components_largest_first": [
+        1828,
+        1794,
+        1751,
+        1437,
+        1399,
+        1371,
+        1367,
+        1341,
+        1302,
+        742,
+        550,
+        511,
+        284,
+        207,
+        119,
+        96,
+        13
+      ],
+      "existing_rock_footprints_preserved": 103,
+      "objects_by_type": {
+        "glut_sandstone_04": 72,
+        "spacekit_rock_large_a": 103,
+        "frontier_scene_solid": 142
+      },
+      "alternative_crossings": {},
+      "authoring": {
+        "zone": "B",
+        "status": "PASS",
+        "tiles": 131072,
+        "height_histogram": {
+          "0": 57952,
+          "1": 12697,
+          "2": 14555,
+          "3": 90,
+          "4": 8121,
+          "5": 60,
+          "6": 21485,
+          "8": 16112
+        },
+        "ramp_cells": 85,
+        "reachable_cells": 57737,
+        "marker_checks": [
+          {
+            "id": "objective_point",
+            "axial": [
+              106,
+              34
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "ship_return",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_alpha",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_bravo",
+            "axial": [
+              17,
+              14
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "trade_service",
+            "axial": [
+              10,
+              8
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "recover_crate",
+            "axial": [
+              106,
+              34
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_enemy_defense",
+            "axial": [
+              105,
+              36
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "recruit_contact",
+            "axial": [
+              11,
+              9
+            ],
+            "reachable_adjacent": true
+          }
+        ],
+        "bridge_cells": 0,
+        "preserved_object_cells": 142,
+        "persistent_footprint_changes": 0,
+        "isolated_objectless_h1": 0,
+        "resource_checks": [
+          {
+            "id": "a_benit_01",
+            "grid": [
+              18,
+              29
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "c_benit_01",
+            "grid": [
+              29,
+              10
+            ],
+            "reachable_adjacent": true
+          }
+        ],
+        "new_rock_prop_budget": 72,
+        "stairs": [
+          {
+            "id": "southern_overlook",
+            "start_axial": [
+              15,
+              104
+            ],
+            "end_axial": [
+              15,
+              66
+            ],
+            "bottom": 0,
+            "top": 6,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 30,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "depot_watch",
+            "start_axial": [
+              145,
+              36
+            ],
+            "end_axial": [
+              153,
+              4
+            ],
+            "bottom": 0,
+            "top": 6,
+            "direction": 2,
+            "directions": [
+              2,
+              3,
+              2,
+              1,
+              2,
+              1
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 30,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "western_pass",
+            "start_axial": [
+              -117,
+              88
+            ],
+            "end_axial": [
+              -117,
+              62
+            ],
+            "bottom": 0,
+            "top": 4,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 20,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "curved_corner_band",
+            "start_axial": [
+              134,
+              40
+            ],
+            "end_axial": [
+              137,
+              38
+            ],
+            "bottom": 0,
+            "top": 1,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              1,
+              1,
+              1
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 5,
+            "flat_cells_between_rises": 0,
+            "corner_axial": [
+              135,
+              38
+            ],
+            "profile": "shared_midheight_side_edges"
+          }
+        ],
+        "failures": [],
+        "scope": "offline data authoring check; no native gameplay/performance acceptance",
+        "map_sha256": "2913cf9d60624efc08d6b77d4a55c83f139bef297b0ae5693796b2aa58525053"
+      }
+    },
+    {
+      "zone": "C",
+      "map": "output\\native_glut_maps\\explicit_ramps_candidate\\fortified_outpost.json",
+      "sha256": "b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286",
+      "repeated_build_byte_identical": true,
+      "repeated_build_executed": true,
+      "status": "PASS",
+      "failures": [],
+      "metadata_differences": [],
+      "tile_count": 131072,
+      "isolated_objectless_raised_peaks": 0,
+      "height8_components_largest_first": [
+        4448,
+        2105,
+        1942,
+        1529,
+        1324,
+        1319,
+        1297,
+        1291,
+        1237,
+        1154,
+        1138,
+        962,
+        853,
+        792,
+        483,
+        169,
+        46,
+        4
+      ],
+      "existing_rock_footprints_preserved": 103,
+      "objects_by_type": {
+        "glut_sandstone_04": 72,
+        "spacekit_rock_large_a": 103,
+        "glut_bridge_deck": 108,
+        "frontier_scene_solid": 142
+      },
+      "alternative_crossings": {
+        "objective_reachable_without_north_bridge": true,
+        "objective_reachable_without_main_bridge": true
+      },
+      "authoring": {
+        "zone": "C",
+        "status": "PASS",
+        "tiles": 131072,
+        "height_histogram": {
+          "0": 34860,
+          "1": 5493,
+          "2": 11635,
+          "3": 60,
+          "4": 39736,
+          "5": 80,
+          "6": 17085,
+          "7": 30,
+          "8": 22093
+        },
+        "ramp_cells": 65,
+        "reachable_cells": 76046,
+        "marker_checks": [
+          {
+            "id": "objective_point",
+            "axial": [
+              131,
+              34
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "ship_return",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_alpha",
+            "axial": [
+              7,
+              11
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_bravo",
+            "axial": [
+              17,
+              14
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "spawn_enemy_defense",
+            "axial": [
+              130,
+              36
+            ],
+            "reachable_adjacent": true
+          },
+          {
+            "id": "outpost_chip",
+            "axial": [
+              131,
+              34
+            ],
+            "reachable_adjacent": true
+          }
+        ],
+        "bridge_cells": 108,
+        "preserved_object_cells": 250,
+        "persistent_footprint_changes": 0,
+        "isolated_objectless_h1": 0,
+        "resource_checks": [],
+        "new_rock_prop_budget": 72,
+        "stairs": [
+          {
+            "id": "main_lower",
+            "start_axial": [
+              40,
+              46
+            ],
+            "end_axial": [
+              54,
+              46
+            ],
+            "bottom": 0,
+            "top": 2,
+            "direction": 0,
+            "directions": [
+              0,
+              0
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 10,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "main_upper",
+            "start_axial": [
+              73,
+              46
+            ],
+            "end_axial": [
+              87,
+              46
+            ],
+            "bottom": 2,
+            "top": 4,
+            "direction": 0,
+            "directions": [
+              0,
+              0
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 10,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "flank_lower",
+            "start_axial": [
+              69,
+              -12
+            ],
+            "end_axial": [
+              83,
+              -12
+            ],
+            "bottom": 0,
+            "top": 2,
+            "direction": 0,
+            "directions": [
+              0,
+              0
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 10,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "flank_upper",
+            "start_axial": [
+              96,
+              -12
+            ],
+            "end_axial": [
+              110,
+              -12
+            ],
+            "bottom": 2,
+            "top": 4,
+            "direction": 0,
+            "directions": [
+              0,
+              0
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 10,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "citadel_overlook",
+            "start_axial": [
+              149,
+              40
+            ],
+            "end_axial": [
+              161,
+              14
+            ],
+            "bottom": 4,
+            "top": 8,
+            "direction": 2,
+            "directions": [
+              2,
+              1,
+              1,
+              2
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 20,
+            "flat_cells_between_rises": 5
+          },
+          {
+            "id": "curved_corner_band",
+            "start_axial": [
+              138,
+              50
+            ],
+            "end_axial": [
+              141,
+              48
+            ],
+            "bottom": 4,
+            "top": 5,
+            "direction": 2,
+            "directions": [
+              2,
+              2,
+              1,
+              1,
+              1
+            ],
+            "band_width_hex": 5,
+            "ramp_cells": 5,
+            "flat_cells_between_rises": 0,
+            "corner_axial": [
+              139,
+              48
+            ],
+            "profile": "shared_midheight_side_edges"
+          }
+        ],
+        "failures": [],
+        "scope": "offline data authoring check; no native gameplay/performance acceptance",
+        "map_sha256": "b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286"
+      }
+    }
+  ],
+  "artifact_sha256": {
+    "A_composition_data.png": "6461773b8929ae1ac6982a6658fa40bd9b420972774262210481b4fdeefb368a",
+    "audit_candidate.py": "aff8ee009da3e2c780d7c7442749cb6fe1e25d859b9b866070d600a6bc222a5a",
+    "B_composition_data.png": "0efd97fc351d9c189a8d07601861f90ec254aef3a0f08d491838bea6181baa85",
+    "C_composition_data.png": "a7ee0cdacb7d88dc55ce6455385facfa2c40c68867748816daa40d9945134728",
+    "compiler_before.py": "5079b6b2476f1f723f577a9bd43091af32527c5c361aa9930ab9662405cb336a",
+    "plot_composition.py": "6cd9980da5ee6c543e5004885def03ce6dfa521dcedfb7d02d9bbb6170562423",
+    "README.md": "99e58e05b8eed0e71387ab365e425e030e170baa1df4d7d8cc40604639466fc3",
+    "references.json": "c3c427d86e94f7090c767d5a987fe3f3bfc7927da2da8e6fdcaed79374bb3f00"
+  }
+}

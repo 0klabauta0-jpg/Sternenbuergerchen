@@ -27,4 +27,7 @@ static func get_next_height_level(current_height: int, mode: String) -> int:
 			return 1
 		MODE_SET_2:
 			return 2
+	if mode.begins_with("set_"):
+		var level := mode.trim_prefix("set_")
+		if level.is_valid_int(): return clampi(int(level), 0, TILE.MAX_HEIGHT_LEVEL)
 	return 0

@@ -1,0 +1,6 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+NATIVE_MAP parse_ms=3441 initial_render_ms=1618 static_bytes=453230565 video_bytes=530792448
+NATIVE_MAP capture=res://output/native_glut_maps/explicit_ramps_candidate/B_native_48.png size=(1280, 720) error=0

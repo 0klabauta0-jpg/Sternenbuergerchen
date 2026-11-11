@@ -127,3 +127,23 @@ oder IMPLEMENTATION_STATUS-Edit durch diesen Teilagenten; Root integriert.
   required_fields. Enges git diff --check ohne Befund.
 - Keine neue Runtime-, Layout-, Klick-, Screenshot- oder Gefechtsabnahme.
   Insbesondere native Menuegroesse/Tastaturfokus bleibt fuer spaeter offen.
+
+
+## Fortschreibung nach den parallelen Auftraegen
+- Kartensteuerung ist ueber Escape erreichbar (0d2864468), nur compile-geprueft.
+- Schutzforschung ist jetzt ein erster Runtime-Zweig in der Werkstatt: echter
+  C-Chip-Upload, Entwicklung, Medium/Heavy-Bauplan und getrennte Einzelherstellung.
+  KleineDomainprobe24/0; Industrie/Fahrzeugzweige bleiben offen. 4e44521fd.
+- Eigene Teamcharaktere oeffnen kompakt; bewusster Expertenmodus und drei
+  Erfahrungs-Vorlagen ueber bestehenden Owner. KleineDatenprobe163/0, keine
+  nativeUI-/SaveAbnahme. Ebenfalls4e44521fd.
+- Expliziter Rampenvertrag mit Seitenjoins und Standhoehe H+.5 gesichert97e00aba1.
+  Tabletop-Chat hat diese Basis uebernommen und arbeitet isoliert weiter.
+- A/B/C-Komposition und Editor-Folgeauftrag sind jetzt implementiert; enge
+  Daten-/Formkontrollen statt grosser Gefechts-/Performancelaeufe. Die alten
+  Gefechtsnachweise gelten fuer den vorigen Kartenstand, nicht fuer neue Karten.
+- Neuer Nutzerauftrag Polisa: zusaetzlicher Planet, begehbare Orbitalstation,
+  Waren-/Infanterie-/Ruestungshandel, vorhandene Schiffe mit Heimatlieferung und
+  bezahlte echte Heimatpads3..6. Eigener Agent arbeitet an der Integration.
+  Schiffswaffen-/Komponenten-Ausruestungsowner und lokaleSchiffsabholung sind
+  technische Restpunkte; kein bloss dekorativer Kauf als fertigeFunktion.

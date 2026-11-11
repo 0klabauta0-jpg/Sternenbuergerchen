@@ -1,0 +1,203 @@
+{
+  "zone": "A",
+  "status": "PASS",
+  "tiles": 131072,
+  "height_histogram": {
+    "0": 62264,
+    "1": 10937,
+    "2": 13444,
+    "3": 90,
+    "4": 6907,
+    "5": 30,
+    "6": 19735,
+    "8": 17665
+  },
+  "ramp_cells": 75,
+  "reachable_cells": 53973,
+  "marker_checks": [
+    {
+      "id": "spawn_alpha",
+      "axial": [
+        7,
+        11
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "spawn_bravo",
+      "axial": [
+        18,
+        14
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "objective_point",
+      "axial": [
+        18,
+        38
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "satellite_data",
+      "axial": [
+        18,
+        38
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "ship_return",
+      "axial": [
+        7,
+        11
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "trade_service",
+      "axial": [
+        38,
+        -8
+      ],
+      "reachable_adjacent": true
+    }
+  ],
+  "bridge_cells": 0,
+  "preserved_object_cells": 162,
+  "persistent_footprint_changes": 0,
+  "isolated_objectless_h1": 0,
+  "resource_checks": [
+    {
+      "id": "iron_ridge_01",
+      "grid": [
+        -8,
+        14
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "freighter_wreck_01",
+      "grid": [
+        31,
+        15
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "b_benit_01",
+      "grid": [
+        31,
+        25
+      ],
+      "reachable_adjacent": true
+    }
+  ],
+  "new_rock_prop_budget": 72,
+  "stairs": [
+    {
+      "id": "west_rim",
+      "start_axial": [
+        -80,
+        27
+      ],
+      "end_axial": [
+        -80,
+        53
+      ],
+      "bottom": 0,
+      "top": 4,
+      "direction": 5,
+      "directions": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 20,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "east_overlook",
+      "start_axial": [
+        119,
+        50
+      ],
+      "end_axial": [
+        131,
+        24
+      ],
+      "bottom": 0,
+      "top": 4,
+      "direction": 2,
+      "directions": [
+        2,
+        1,
+        1,
+        2
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 20,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "north_table",
+      "start_axial": [
+        150,
+        -54
+      ],
+      "end_axial": [
+        150,
+        -92
+      ],
+      "bottom": 0,
+      "top": 6,
+      "direction": 2,
+      "directions": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 30,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "curved_corner_band",
+      "start_axial": [
+        110,
+        52
+      ],
+      "end_axial": [
+        113,
+        50
+      ],
+      "bottom": 0,
+      "top": 1,
+      "direction": 2,
+      "directions": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 5,
+      "flat_cells_between_rises": 0,
+      "corner_axial": [
+        111,
+        50
+      ],
+      "profile": "shared_midheight_side_edges"
+    }
+  ],
+  "failures": [],
+  "scope": "offline data authoring check; no native gameplay/performance acceptance",
+  "map_sha256": "dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2"
+}

@@ -1276,6 +1276,7 @@ var _regional_loading_label: Label
 var _regional_chunk_build_count: int = 0
 var _regional_overview_root: Node3D
 var _max_render_height: int = 0
+var _orbital_station_view := false
 var _regional_height_step: float = 0.0
 var _hex_grid_visible: bool = true
 
@@ -3964,6 +3965,10 @@ func _ensure_nodes() -> void:
 	environment.adjustment_saturation = EDITOR_ADJUSTMENT_SATURATION
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_environment(environment)
+	if _orbital_station_view:
+		environment.background_color = Color("050a16")
+		environment.ambient_light_color = Color("b0c7e5")
+		environment.ambient_light_energy = 0.42
 	# This is empty space outside the saved Hex union, never decorative sand.
 	# Read the current MapData rather than the previous authored-root state:
 	# _ensure_nodes also runs before that root is swapped on a map change.
@@ -3988,6 +3993,8 @@ func _apply_editor_light_settings() -> void:
 	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_light(light)
+	if _orbital_station_view:
+		light.light_color = Color("e4eeff")
 
 
 func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
@@ -4055,6 +4062,7 @@ func _screen_to_viewport_position(screen_position: Vector2) -> Vector2:
 
 
 func _read_map_transform() -> void:
+	_orbital_station_view = _terrain_map_data != null and _terrain_map_data.has_method("get_place_presentation") and bool(_terrain_map_data.call("get_place_presentation").get("orbital_station", false))
 	if _terrain_map_data == null:
 		_active_terrain_visual_theme_id = ""
 		_update_frontier_art_profile()
@@ -4570,6 +4578,9 @@ func _build_visual_chunk_key(chunk_lookup: Dictionary) -> String:
 
 
 func _add_tile_visual(tile_data) -> void:
+	# Orbital void cells remain authoritative blockers, never a painted ground sea.
+	if _orbital_station_view and tile_data != null and not tile_data.walkable:
+		return
 	if tile_data == null or _map_root == null:
 		return
 	var height_level: int = maxi(int(tile_data.height_level), 0)
@@ -4622,7 +4633,7 @@ func _add_tile_visual(tile_data) -> void:
 	if object_type_id == "glut_bridge_deck":
 		_add_glut_bridge_rails(tile_data, top_y)
 		return
-	if not _regional_tiles_by_chunk.is_empty() and object_type_id.is_empty() and height_level > 2 and int(tile_data.object_height) == 0:
+	if not _regional_tiles_by_chunk.is_empty() and object_type_id.is_empty() and int(tile_data.object_height) == 0:
 		return # An authored terrain-only LOS edge is already the cliff geometry.
 	if _frontier_art_enabled and _reference_place_enabled and REFERENCE_PROPS.supports(object_type_id):
 		var replacement: Node3D=REFERENCE_PROPS.build(_map_root,object_type_id,_frontier_art_profile,int(tile_data.grid_position.x)*1709+int(tile_data.grid_position.y)*73)
@@ -5359,6 +5370,7 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 	var line_count := 0
 	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
+		if _orbital_station_view and not tile.walkable: continue
 		var top: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + 0.008
 		if authored:
 			top = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006

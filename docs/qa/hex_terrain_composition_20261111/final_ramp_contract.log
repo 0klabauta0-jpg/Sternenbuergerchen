@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Lower end reciprocal direction0
+PASS: Upper end reciprocal direction0
+PASS: Same-height ramp side blocked0
+PASS: Authoritative logical heights0
+PASS: Lower end reciprocal direction1
+PASS: Upper end reciprocal direction1
+PASS: Same-height ramp side blocked1
+PASS: Authoritative logical heights1
+PASS: Lower end reciprocal direction2
+PASS: Upper end reciprocal direction2
+PASS: Same-height ramp side blocked2
+PASS: Authoritative logical heights2
+PASS: Lower end reciprocal direction3
+PASS: Upper end reciprocal direction3
+PASS: Same-height ramp side blocked3
+PASS: Authoritative logical heights3
+PASS: Lower end reciprocal direction4
+PASS: Upper end reciprocal direction4
+PASS: Same-height ramp side blocked4
+PASS: Authoritative logical heights4
+PASS: Lower end reciprocal direction5
+PASS: Upper end reciprocal direction5
+PASS: Same-height ramp side blocked5
+PASS: Authoritative logical heights5
+PASS: Matching ramp-band lateral seam is reciprocal
+PASS: Ramp-band side uses shared midpoint height
+PASS: Broad ramp seam shares corner/midpoint 0
+PASS: Broad ramp seam shares corner/midpoint 1
+PASS: Broad ramp seam shares corner/midpoint 2
+PASS: Turned bank rendered midpoint matches the authoritative H+0.5 side
+PASS: Turned bank seam shares corner/midpoint 0
+PASS: Turned bank seam shares corner/midpoint 1
+PASS: Turned bank seam shares corner/midpoint 2
+PASS: Plateau one-level cliff remains blocked
+PASS: Wrong upper endpoint rejected
+PASS: H8 ramp rejected without becoming traversable
+PASS: Blocked ramp remains blocked
+PASS: Unversioned regional legacy rule retained
+PASS: Internal copy keeps rules and direction
+PASS: Actual Astar crosses only the explicit ramp
+PASS: Actual Pathfinder rejects ramp flank
+PASS: HPA components share the ramp transition owner
+PASS: Registry exposes logical float standing height
+PASS: Actual movement correction rejects ramp flank
+PASS: Actual movement correction accepts ramp axis
+PASS: Owner direction edit invalidates navigation revision
+PASS: Map-level version assigns the runtime flag
+PASS: Map save succeeds
+PASS: Save and reload preserve map rules and ramp direction
+PASS: No implicit activation on old map files
+EXPLICIT_HEX_RAMP_CONTRACT 50 passed, 0 failed

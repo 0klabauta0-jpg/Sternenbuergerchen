@@ -742,7 +742,7 @@ func set_place_presentation(presentation: Dictionary) -> void:
 
 
 func get_regional_height_step() -> float:
-	if int(_extension_metadata.get("regional_terrain_version", 0)) != 2:
+	if int(_extension_metadata.get("regional_terrain_version", 0)) not in [2, 3]:
 		return 0.0
 	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)
 

@@ -6,6 +6,7 @@ Existing semantic IDs, pads and resource records stay fixed. Depot and chip
 compounds move east; the safe campaign checkpoint contains no surface actors.
 """
 from argparse import ArgumentParser
+from collections import Counter, deque
 from hashlib import sha256
 import json
 from math import cos, sin, sqrt
@@ -52,6 +53,74 @@ DEPOT_MARKERS = {
     "B": ("objective_point", "recover_crate", "spawn_enemy_defense"),
     "C": ("objective_point", "outpost_chip", "spawn_enemy_defense"),
 }
+
+# Broad authored landforms, in the physical hex plane (x, axial row). Each
+# ellipse contributes nested, connected shelves; their unions make ridges.
+# The small coherent contour offset breaks symmetry without single-cell noise.
+MESAS = {
+    "A": [(-150,-72,53,30,8),(-112,-39,48,25,6),(-68,-78,39,24,8),
+          (-35,-38,35,21,6),(25,-66,41,27,8),(12,61,37,25,6),
+          (-71,59,43,27,8),(-129,104,52,29,8),(48,102,37,25,6),
+          (131,-82,40,25,8),(156,-18,42,24,6),(135,27,28,20,6),
+          (171,88,45,26,8),(219,-69,40,28,6),(233,5,51,26,8),
+          (280,83,42,27,6),(321,-40,48,34,8),(335,137,43,29,8),
+          (-30,24,31,20,6),(61,57,27,21,6),(58,-23,28,18,6),
+          (103,110,34,27,8),(217,125,45,29,8),(234,-104,40,22,8)],
+    "B": [(-147,-72,62,25,8),(-81,-43,49,23,6),(-27,-66,43,27,8),
+          (31,-46,33,24,6),(86,-76,40,25,8),(151,-60,39,22,6),
+          (210,-88,53,29,8),(285,-63,52,27,8),(-133,21,53,24,6),
+          (-79,49,48,24,8),(-16,67,34,21,6),(48,75,36,22,8),
+          (104,78,35,20,6),(162,12,35,22,8),(223,76,45,26,8),
+          (283,53,43,25,6),(333,99,47,30,8),(-77,140,57,25,8),
+          (23,143,43,22,6),(139,139,51,29,8),
+          (61,18,22,15,6),(71,-15,30,20,6),(123,-9,27,18,6),
+          (-11,26,23,16,4),(291,-4,34,23,6)],
+    "C": [(-143,-62,61,33,8),(-88,-23,45,29,8),(-58,30,41,27,8),
+          (-102,105,55,31,8),(4,102,39,25,6),(26,-61,40,27,8),
+          (70,-80,40,25,8),(66,90,32,21,6),(151,-62,40,24,8),
+          (174,1,33,25,8),(190,84,39,24,8),(249,-51,43,27,8),
+          (282,8,39,24,8),(302,106,51,30,8),(343,-89,43,28,8),
+          (117,95,31,27,8),(219,105,35,24,8),(318,-40,42,28,8),
+          (205,-83,26,26,6),(183,43,21,17,6)],
+}
+
+# Open loops are deliberately legible from the landing region. C retains the
+# previous crossing centres, but the two climbs now have explicit straight
+# ramp approaches and level benches. Saved bridge footprints are overlaid last.
+COMPOSITION_ROUTES = {
+    "A": ROUTES["A"] + [
+        [(34,-8),(63,-24),(94,-30),(145,-35),(196,-23),(246,-6),(288,26),(220,46)],
+        [(37,38),(16,53),(-27,50),(-64,27),(-64,-9)],
+        [(144,51),(143,73),(170,106)],
+        [(246,-74),(283,-53),(308,-14),(320,71),(259,110)],
+    ],
+    "B": ROUTES["B"] + [
+        [(66,-9),(88,6),(125,40)],
+        [(249,-52),(277,-22),(281,18)],
+        [(219,37),(252,91),(179,77)],
+    ],
+    "C": [
+        [(12,11),(52,24),(59,39),(63,46),(79,46),(90,46),(96,46),(111,46),
+         (114,49),(150,41),(179,44),(239,41),(341,35)],
+        [(12,11),(45,-9),(63,-12),(79,-12),(94,-12),(110,-12),
+         (111,-10),(136,4),(151,24),(150,41)],
+        [(150,41),(169,66),(213,82),(253,72),(281,50),(239,41)],
+        [(136,4),(165,-25),(207,-33),(235,-9),(239,41)],
+    ],
+}
+
+# q, r, upward direction, bottom level, number of rises. A full ramp is
+# followed by five flat cells before the next rise, never a ramp chain.
+STAIRS = {
+    "A": [("west_rim",-80,27,5,0,4),("east_overlook",119,50,(2,1,1,2),0,4),
+          ("north_table",150,-54,2,0,6)],
+    "B": [("southern_overlook",15,104,2,0,6),("depot_watch",145,36,(2,3,2,1,2,1),0,6),
+          ("western_pass",-117,88,2,0,4)],
+    "C": [("main_lower",40,46,0,0,2),("main_upper",73,46,0,2,2),
+          ("flank_lower",69,-12,0,0,2),("flank_upper",96,-12,0,2,2),
+          ("citadel_overlook",149,40,(2,1,1,2),4,4)],
+}
+CORNER_BANDS={"A":(109,50,0),"B":(133,38,0),"C":(137,48,4)}
 
 
 def distance_to_route(x, y, route):
@@ -200,6 +269,300 @@ def move_depot(zone, data, old):
     return moved, removed
 
 
+def composed_height(zone, x, r):
+    """Large coherent silhouettes; detail never creates a random height pin."""
+    height = 0
+    if zone == "C":
+        lower_bank = 73 + 8 * sin(r / 21) + 3 * sin(r / 7)
+        upper_bank = 105 + 7 * sin(r / 31) + 3 * sin(r / 11)
+        height = 2 if x >= lower_bank else 0
+        if x >= upper_bank:
+            height = 4
+    for cx, cy, rx, ry, peak in MESAS[zone]:
+        # B's oblique shelves create a different grain from A's branching wash.
+        yy = r - cy + (x - cx) * (0.23 if zone == "B" else -0.06)
+        radial = sqrt(((x - cx) / rx) ** 2 + (yy / ry) ** 2)
+        phase = 3 * sin(cx * 0.137 + cy * 0.17)
+        radial += (0.13 * sin((x-cx)/rx*3.7 + sin((r-cy)/ry*2) + phase)
+                   + 0.08 * cos((r-cy)/ry*5 + phase*1.7) - 0.05 * sin((x+r)/9))
+        level = 0
+        for boundary, shelf in ((1.10, 1), (0.98, 2), (0.84, max(2,peak-2)), (0.63, peak)):
+            if radial < boundary:
+                level = min(peak, shelf)
+        height = max(height, level)
+    return height
+
+
+def hex_disk(q, r, radius):
+    for dq in range(-radius, radius + 1):
+        for dr in range(max(-radius, -dq - radius), min(radius, -dq + radius) + 1):
+            yield q + dq, r + dr
+
+
+def carve_flat(index, cells, height, protected, surface="ground"):
+    for position in cells:
+        if position not in index or position in protected:
+            continue
+        tile = index[position]
+        tile.update(height_level=height, ramp_direction=-1, edge_type="cliff",
+                    surface_type=surface, walkable=True, blocks_los=False, cover_value=0)
+        if tile.get("object_type_id") == "glut_sandstone_04":
+            for key in ("object_type_id", "object_height", "object_rotation_degrees", "object_scale"):
+                tile.pop(key, None)
+
+
+def author_stair(index, spec, protected):
+    name, q, r, direction, bottom, rises = spec
+    directions = [direction] * rises if isinstance(direction,int) else list(direction)
+    if len(directions) != rises:
+        raise ValueError(f"{name}: one direction per rise required")
+    start=(q,r)
+    bends=[]
+    # Each stage has one five-hex-wide ramp band and flat turning platforms.
+    # Consecutive bands may turn by 60 degrees, but never bend inside a ramp.
+    for rise, direction in enumerate(directions):
+        if rise and (direction-directions[rise-1]) % 6 not in (0,1,5):
+            raise ValueError(f"{name}: turns must be 60 degrees")
+        dq,dr=DIRECTIONS[direction]
+        sq,sr=DIRECTIONS[(direction+2)%6]
+        last_step=8 if rise==rises-1 else 6
+        for step in range(last_step+1):
+            level=bottom+rise+(1 if step>=4 else 0)
+            for lane in range(-2,3):
+                position=(q+step*dq+lane*sq,r+step*dr+lane*sr)
+                if position in protected:
+                    raise ValueError(f"{name}: ramp approach touches persistent footprint {position}")
+                carve_flat(index,[position],level,protected,"ground")
+                if step==3:
+                    index[position].update(ramp_direction=direction,edge_type="slope")
+        bends.append((q,r,bottom+rise))
+        q,r=q+last_step*dq,r+last_step*dr
+    end=(q,r)
+    for q0,r0,level in bends:
+        carve_flat(index,hex_disk(q0,r0,2),level,protected)
+    carve_flat(index, hex_disk(*start, 2), bottom, protected)
+    carve_flat(index, hex_disk(*end, 4), bottom + rises, protected, "rock")
+    return {"id": name, "start_axial": start, "end_axial": end,
+            "bottom": bottom, "top": bottom + rises, "direction": directions[0],
+            "directions":directions,"band_width_hex":5,
+            "ramp_cells": 5 * rises, "flat_cells_between_rises": 5}
+
+
+def author_corner_band(zone,index,protected):
+    """One continuous five-cell shoulder around a 60-degree terrace corner.
+
+    Adjacent ramps deliberately change from direction 2 to direction 1.
+    Their shared flank endpoints are H+0.5; all low/high neighbours are
+    explicitly sculpted at H/H+1. This is a visible native corner specimen,
+    not a hidden exception to the tile transition contract.
+    """
+    q0,r0,bottom=CORNER_BANDS[zone]
+    footprint=[(q,r) for q in range(q0-2,q0+7) for r in range(r0-4,r0+5)
+               if max(abs(q-q0-2),abs(r-r0),abs(q-q0-2+r-r0))<=6]
+    for q,r in footprint:
+        if (q,r) in protected or index[q,r]["ramp_direction"]>=0:
+            raise ValueError(f"{zone}: corner band overlaps an existing authored feature")
+        high=r<r0 or q>=q0+3
+        carve_flat(index,[(q,r)],bottom+int(high),protected,"ground")
+    ramps=[(q0,r0,2),(q0+1,r0,2),(q0+2,r0,1),(q0+2,r0+1,1),(q0+2,r0+2,1)]
+    for q,r,direction in ramps:
+        index[q,r].update(height_level=bottom,ramp_direction=direction,edge_type="slope")
+    return {"id":"curved_corner_band","start_axial":[q0+1,r0+2],
+            "end_axial":[q0+4,r0],"bottom":bottom,"top":bottom+1,
+            "direction":2,"directions":[2,2,1,1,1],"band_width_hex":5,
+            "ramp_cells":5,"flat_cells_between_rises":0,
+            "corner_axial":[q0+2,r0],"profile":"shared_midheight_side_edges"}
+
+
+def compose_terrain(zone, data, index):
+    # Preserve actual persistent assets and every previously authored bridge.
+    # Existing decorative rocks keep their footprint and adopt their shelf.
+    protected = {p: dict(t) for p, t in index.items()
+                 if t.get("object_type_id") not in (None, "", "glut_sandstone_04", "spacekit_rock_large_a")}
+    old_rocks = {p: dict(t) for p, t in index.items() if t.get("object_type_id") == "spacekit_rock_large_a"}
+    for (q, r), tile in index.items():
+        x = q + r * 0.5
+        height = composed_height(zone, x, r)
+        routes = COMPOSITION_ROUTES[zone]
+        route_distance = sqrt(min(distance_to_route(x, r, route) for route in routes))
+        if zone == "A":
+            route_distance = min(route_distance, sqrt(min(distance_to_route(x, r, route) for route in LOCAL_A_ROUTES)))
+        # A wide basin joins all existing settlement anchors organically.
+        basin = ((x - 17) / (30 if zone == "A" else 35)) ** 2 + ((r - 16) / 27) ** 2
+        route_height = (0 if x < 73 else 2 if x < 105 else 4) if zone == "C" else 0
+        if route_distance < 5.0 + 0.8 * sin((x + r) / 19):
+            height = route_height
+        if basin < 1:
+            height = 0
+        surface = "rock" if height >= 2 else "ground"
+        if route_distance < 1.8:
+            surface = "sand" if zone == "A" else "ground"
+        fault = zone == "C" and min(abs(x - 114 - 0.23 * r - 6 * sin(r / 20)),
+                                    abs(x - 254 + 0.38 * r + 12 * sin(r / 18))) < 2.6
+        tile.clear()
+        tile.update(grid_position={"x": q, "y": r}, type_id="ground_flat",
+                    height_level=0 if fault else height, surface_type="rock" if fault else surface,
+                    edge_type="cliff", ramp_direction=-1, walkable=not fault,
+                    blocks_los=False, cover_value=0)
+    # Preserve flat object aprons, landing pads and the original mission loop.
+    for position, tile in protected.items():
+        if tile.get("object_type_id") != "glut_bridge_deck":
+            carve_flat(index, hex_disk(*position, 2), int(tile["height_level"]), protected)
+    carve_flat(index, hex_disk(7, 11, 7), 0, protected)
+    if zone in FIELD_LZ:
+        q, r, height = FIELD_LZ[zone]
+        carve_flat(index, hex_disk(q, r, 5), height, protected)
+    # Bridge approach decks are level H4; the ravine keeps its exact authored
+    # footprint and is never silently converted into a second walkable layer.
+    for (q, r), tile in protected.items():
+        if tile.get("object_type_id") == "glut_bridge_deck":
+            for cell in hex_disk(q, r, 2):
+                if cell in index and index[cell]["walkable"]:
+                    carve_flat(index, [cell], 4, protected)
+    stairs = [author_stair(index, spec, protected) for spec in STAIRS[zone]]
+    stairs.append(author_corner_band(zone,index,protected))
+    for position, tile in old_rocks.items():
+        height = index[position]["height_level"]
+        tile.update(height_level=height, ramp_direction=-1, edge_type="cliff")
+        index[position].update(tile)
+    for position, tile in protected.items():
+        index[position].clear()
+        index[position].update(tile, ramp_direction=-1, edge_type="cliff")
+    # Small connected contour remnants are absorbed, not rendered as pins.
+    for _ in range(2):
+        isolated = [p for p, t in index.items() if t["height_level"] > 0
+                    and t["ramp_direction"] == -1 and not t.get("object_type_id")
+                    and all(index.get((p[0]+dq,p[1]+dr), t)["height_level"] < t["height_level"]
+                            for dq,dr in DIRECTIONS)]
+        for p in isolated:
+            height=max(index.get((p[0]+dq,p[1]+dr),index[p])["height_level"] for dq,dr in DIRECTIONS)
+            index[p].update(height_level=height, surface_type="rock" if height>=2 else "ground")
+    # A bounded existing asset vocabulary adds local rhythm to cliff toes.
+    candidates = []
+    for (q, r), tile in index.items():
+        if tile.get("object_type_id") or not tile["walkable"] or tile["ramp_direction"] >= 0:
+            continue
+        height = tile["height_level"]
+        neighbors = [index.get((q+dq, r+dr), tile) for dq,dr in DIRECTIONS]
+        if height >= 2 and any(height - n["height_level"] >= 2 for n in neighbors):
+            tile.update(blocks_los=True, cover_value=25)
+        if height in (2,4,6) and any(n["height_level"] >= height + 2 for n in neighbors):
+            seed = sha256(f"glut-composition-v3:{zone}:{q}:{r}".encode()).digest()
+            candidates.append((seed, (q,r)))
+    chosen = []
+    for seed, (q,r) in sorted(candidates):
+        if any(max(abs(q-a),abs(r-b),abs(q-a+r-b)) < 4 for a,b in chosen):
+            continue
+        if any(index.get(p,{}).get("ramp_direction",-1) >= 0 for p in hex_disk(q,r,5)):
+            continue
+        index[q,r].update(object_type_id="glut_sandstone_04", object_height=2,
+                          object_rotation_degrees=int.from_bytes(seed[1:3]) % 360,
+                          object_scale=round(0.86+seed[3]/1100,3), walkable=False,
+                          blocks_los=True,cover_value=55)
+        chosen.append((q,r))
+        if len(chosen) >= 72:
+            break
+    return stairs, protected
+
+
+def can_cross(index, source, target):
+    a, b = index.get(source), index.get(target)
+    if not a or not b or not a.get("walkable",True) or not b.get("walkable",True):
+        return False
+    difference = (target[0]-source[0],target[1]-source[1])
+    if difference not in DIRECTIONS:
+        return False
+    direction = DIRECTIONS.index(difference)
+    heights = []
+    for tile, outgoing in ((a,direction),(b,(direction+3)%6)):
+        ramp = tile.get("ramp_direction",-1)
+        if ramp == -1:
+            heights.append(tile["height_level"])
+        elif outgoing == ramp:
+            heights.append(tile["height_level"]+1)
+        elif outgoing == (ramp+3)%6:
+            heights.append(tile["height_level"])
+        else:
+            heights.append(tile["height_level"]+0.5)
+    return heights[0] == heights[1]
+
+
+def validate_composition(zone, data, index, stairs, protected):
+    failures = []
+    ramp_count = 0
+    for (q,r), tile in index.items():
+        direction = tile.get("ramp_direction",-1)
+        if direction < 0:
+            continue
+        ramp_count += 1
+        if not 0 <= direction <= 5 or not 0 <= tile["height_level"] <= 7:
+            failures.append(["invalid_ramp",q,r])
+            continue
+        dq,dr = DIRECTIONS[direction]
+        if not can_cross(index,(q-dq,r-dr),(q,r)) or not can_cross(index,(q,r),(q+dq,r+dr)):
+            failures.append(["disconnected_ramp",q,r])
+    expected_ramps=sum(stair["ramp_cells"] for stair in stairs)
+    if ramp_count!=expected_ramps:
+        failures.append(["ramp_count",ramp_count,expected_ramps])
+    start=(7,11)
+    reached={start}
+    queue=deque([start])
+    while queue:
+        current=queue.popleft()
+        for dq,dr in DIRECTIONS:
+            target=(current[0]+dq,current[1]+dr)
+            if target not in reached and can_cross(index,current,target):
+                reached.add(target)
+                queue.append(target)
+    anchors=[]
+    for name, marker in data["markers"].items():
+        # Invert the canonical legacy Iso projection, then the physical hex
+        # plane. Marker interaction anchors may sit on their solid object;
+        # an adjacent reachable flat is the appropriate narrow authoring gate.
+        px=(marker["x"]-data["grid_origin"]["x"])/128
+        pz=(marker["y"]-data["grid_origin"]["y"])/64
+        x,z=px+pz,pz-px
+        r=round(z/(sqrt(3)/2));q=round(x-r*.5)
+        nearby=[p for p in hex_disk(q,r,2) if p in reached]
+        anchors.append({"id":name,"axial":[q,r],"reachable_adjacent":bool(nearby)})
+        if not nearby:
+            failures.append(["marker_unreachable",name,q,r])
+    for stair in stairs:
+        for key in ("start_axial","end_axial"):
+            if tuple(stair[key]) not in reached:
+                failures.append(["stair_unreachable",stair["id"],key])
+    bridges=[p for p,t in index.items() if t.get("object_type_id")=="glut_bridge_deck"]
+    if any(p not in reached for p in bridges):
+        failures.append(["bridge_unreachable",sum(p not in reached for p in bridges)])
+    resources=json.loads((ROOT/"data/singleplayer/location_resources.json").read_text(encoding="utf-8"))
+    resource_checks=[]
+    for identifier, resource in resources.get(data["singleplayer_site"]["location_id"],{}).items():
+        q,r=map(int,resource["grid"])
+        accessible=any(p in reached for p in hex_disk(q,r,1))
+        resource_checks.append({"id":identifier,"grid":[q,r],"reachable_adjacent":accessible})
+        if not accessible:
+            failures.append(["resource_unreachable",identifier,q,r])
+    footprint_fields=("object_type_id","object_height","object_rotation_degrees","object_scale",
+                      "walkable","blocks_los","cover_value","height_level")
+    changed_footprints=[p for p,t in protected.items()
+                        if any(index[p].get(k)!=t.get(k) for k in footprint_fields)]
+    if changed_footprints:
+        failures.append(["persistent_footprint_changed",len(changed_footprints)])
+    isolated_h1=sum(t["height_level"]==1 and t["ramp_direction"]==-1 and not t.get("object_type_id")
+                    and all(index.get((p[0]+dq,p[1]+dr),{}).get("height_level",0)==0
+                            for dq,dr in DIRECTIONS) for p,t in index.items())
+    if isolated_h1:
+        failures.append(["isolated_h1",isolated_h1])
+    return {"zone":zone,"status":"PASS" if not failures else "FAIL",
+            "tiles":len(index),"height_histogram":dict(sorted(Counter(t["height_level"] for t in index.values()).items())),
+            "ramp_cells":ramp_count,"reachable_cells":len(reached),"marker_checks":anchors,
+            "bridge_cells":len(bridges),"preserved_object_cells":len(protected),
+            "persistent_footprint_changes":len(changed_footprints),"isolated_objectless_h1":isolated_h1,
+            "resource_checks":resource_checks,
+            "new_rock_prop_budget":72,"stairs":stairs,"failures":failures,
+            "scope":"offline data authoring check; no native gameplay/performance acceptance"}
+
+
 def compile_map(zone, name, source_dir, output_dir):
     filename = name + ".json"
     if source_dir is None:
@@ -267,18 +630,22 @@ def compile_map(zone, name, source_dir, output_dir):
         if any(tile["height_level"] - index.get((q + dq, r + dr), tile)["height_level"] >= 2
                for dq, dr in DIRECTIONS):
             tile.update(blocks_los=True, cover_value=25)
+    stairs, protected = compose_terrain(zone, data, index)
+    report = validate_composition(zone, data, index, stairs, protected)
     data["tiles"] = tiles
     data["grid_size"] = {"x": WIDTH, "y": HEIGHT}
-    data["regional_terrain_version"] = 2
+    data["regional_terrain_version"] = 3
     data["regional_height_step"] = 0.75
+    data["terrain_height_rules"] = "explicit_hex_ramps_v1"
     data["place_world"]["regional_extent"] = {
-        "version": 2,
+        "version": 3,
         "layout": "odd_r_offset",
         "offset_min": [MIN_COLUMN, MIN_ROW],
         "axial_min": [min(t["grid_position"]["x"] for t in tiles), MIN_ROW],
         "source_sha256": sha256(source).hexdigest(),
         "profile": zone,
-        "routes_offset": ROUTES[zone],
+        "routes_offset": COMPOSITION_ROUTES[zone],
+        "explicit_ramp_passages": stairs,
         "depot_q_displacement": DEPOT_SHIFT.get(zone, 0),
         "field_lz": FIELD_LZ.get(zone),
     }
@@ -291,16 +658,23 @@ def compile_map(zone, name, source_dir, output_dir):
         output.write(",\n".join("    " + json.dumps(tile, separators=(",", ":"), ensure_ascii=False) for tile in tiles))
         output.write("\n  ]\n}\n")
     temporary.replace(target)
+    report["map_sha256"] = sha256(target.read_bytes()).hexdigest()
+    (output_dir / f"{zone}_authoring_check.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(json.dumps({"zone":zone,"status":report["status"],"ramps":report["ramp_cells"],
+                      "reachable":report["reachable_cells"],"failures":report["failures"]}))
+    return report
 
 
 def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument("zones", nargs="+", choices=MAPS)
     parser.add_argument("--source-dir", type=Path)
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "maps")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "output/native_glut_maps/explicit_ramps_candidate")
     args = parser.parse_args()
-    for zone in args.zones:
-        compile_map(zone, MAPS[zone], args.source_dir, args.output_dir)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    reports=[compile_map(zone, MAPS[zone], args.source_dir, args.output_dir) for zone in args.zones]
+    if any(report["failures"] for report in reports):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
