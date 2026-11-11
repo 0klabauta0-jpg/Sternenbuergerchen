@@ -33,6 +33,21 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Produktiver Adapter/Anflug: Der gebundene Singleplayer-Adapter lässt Root
+  Boarding-/Ziel-/Padprüfung erneut ausführen. Root bereitet Fuel, Campaign
+  und optional den echten Travel-Anflug gemeinsam vor und veröffentlicht
+  sie vor Signalen synchron; lokaler Flight/Index wird dabei am gültigen Gate
+  ebenfalls deaktiviert. Der vorhandene strategische Anflug bleibt für alte
+  Oberflächen- und Stationspfade erhalten und ist jetzt Teil der Transaktion.
+  Der Adapter reicht `space_move` mit strengem Payload an Root weiter.
+  Gezielte Owner-/Adaptertests bestehen für falschen Orbit ohne Belastung,
+  strategischen und lokalen Anflug, Replay und Flugbewegung; Boarding im
+  Transaktionstest stammt aus einem Adapter-Testdouble. Die produktive lokale
+  Aufnahme/Warpeintritt, Rückkehranschluss und echter Boarding-Ende-zu-Ende-
+  Nachweis bleiben offen. Der alte Orbit-UI-Verifier flog zum Planet und
+  erwartete anschließend den inzwischen Glut 1a zugeordneten Satellitenort;
+  ein weiterer UI-Lauf scheiterte an fehlenden importierten .godot-Assets.
+
 - Oberflächen-Gruppencommit als ausdrücklich begrenzte Fixture: Root prüft
   Anfluggate, gemeinsame Flight-Identität, Rotte und Revisionen und bereitet
   echte Travel-, Supply- und Campaign-Owner gemeinsam vor. Nach erneuter

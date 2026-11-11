@@ -53,6 +53,7 @@ func configure(flow: Node, screen: Control) -> void:
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
 	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding, _travel)
+	_simulation.configure_departure_adapter(self)
 	_ship_equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
 	_ship_equipment.configure(Array(_flow.get("_homebase_aircraft_definitions")))
 	_simulation.call("configure_ship_equipment", _ship_equipment)
@@ -218,6 +219,9 @@ func sync_space_wings() -> Dictionary:
 	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "space_move":
+		if _simulation == null: return _reject("runtime_unavailable", "Weltraumsimulation ist nicht bereit")
+		return _simulation.request_singleplayer_space_move(payload.duplicate(true))
 	if operation == "space_wing_command":
 		if typeof(payload.get("command")) != TYPE_DICTIONARY:
 			return _reject("invalid_command", "Rottenauftrag ist ungueltig")
@@ -540,24 +544,15 @@ func validate_departure(craft_id: String) -> Dictionary:
 		return fuel_gate
 	return {"ok": true, "departure": departure}
 
-func authorize_departure(craft_id: String) -> Dictionary:
-	var validation: Dictionary = validate_departure(craft_id)
-	if not validation.get("ok", false):
-		return validation
-	var departure: Dictionary = validation.departure
+func authorize_departure(craft_id: String, approach_request_id: String = "") -> Dictionary:
+	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")
+	var binding: Dictionary = _simulation.configure_departure_adapter(self)
+	if not binding.get("ok", false): return binding
 	var token: String = "departure:%s:%s:%d" % [_request_session, craft_id, int(_flow.get("_transfer_sequence")) + 1]
-	var fuel: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", departure, token + ":fuel", {"departure_authorized": true, "require_return_reserve": true})
-	if not fuel.get("ok", false):
-		return fuel
-	var bound: Dictionary = _commit("singleplayer_campaign", "bind_departure", departure, token, {"departure_authorized": true, "built_home_pad_ids":_built_home_pad_ids()})
-	if not bound.get("ok", false):
-		return bound
-	if not String(departure.job_id).is_empty():
-		var activated: Dictionary = _commit("singleplayer_campaign", "activate_job", {"job_id": departure.job_id, "craft_id": craft_id}, token + ":active", {"departure_authorized": true})
-		if not activated.get("ok", false):
-			return activated
+	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id)
+	if not result.get("ok", false): return result
 	_departure_token_by_craft[craft_id] = token
-	return {"ok": true, "departure": departure}
+	return result
 
 func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	if Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty() or _home_pad_for(craft_id).is_empty():
@@ -826,10 +821,10 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return _reject("destination_mismatch", "Den gewünschten Ort im zugehörigen Orbit auswählen")
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
-		var departure := authorize_departure(craft_id)
+		var departure := authorize_departure(craft_id, owner_request_id)
 		if not departure.get("ok", false):
 			return departure
-		var result := _commit("singleplayer_space_travel", "begin_approach", {"craft_id": craft_id, "location_id": location_id}, owner_request_id, {"runtime_authorized": true})
+		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":

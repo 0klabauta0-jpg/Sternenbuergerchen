@@ -349,6 +349,18 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
 	var operation := String(context.operation)
+	# Existing strategic approach has no local Flight/index transition. Stage
+	# its phase change so departure fuel, campaign and travel publish together.
+	if operation == "begin_approach" and String(context.source_area_id).is_empty() and String(context.target_area_id).is_empty():
+		var current_flight: Dictionary = _flight.get_snapshot()
+		var location: Variant = payload.get("location_id")
+		if _phase != "orbit": return _reject("orbit_required", "Zuerst den Zielorbit erreichen")
+		if current_flight.get("coordinate_frame") != "strategic" or not String(current_flight.get("space_area_id", "")).is_empty() or current_flight.get("motion_mode") == "tactical": return _reject("strategic_flight_required", "Strategischer Flugzustand erforderlich")
+		if typeof(location) != TYPE_STRING or not Dictionary(_definition.location_orbits).has(location) or location == "homebase": return _reject("unknown_location", "Zielort unbekannt; Mondbasis separat landen")
+		if String(_definition.location_orbits[location]) != _orbit_id: return _reject("wrong_orbit", "Dieser Ort liegt an einem anderen Himmelskoerper")
+		var strategic_candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"next":{"phase":"approach","orbit_id":_orbit_id,"orbit_marker_id":_orbit_marker_id,"target_orbit_id":"","target_orbit_marker_id":"","location_id":location,"elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		strategic_candidate["seal"] = _sign_space_area_state(strategic_candidate)
+		return strategic_candidate
 	var orbit := ""
 	var marker := ""
 	var elapsed := _elapsed_seconds
