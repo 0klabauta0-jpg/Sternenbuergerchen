@@ -57,7 +57,7 @@ Mondorbits.
   [Flug](../../../output/native_glut_maps/star_final_tuned_route.png) und
   [Oberflächenfeld C](../../../output/native_glut_maps/star_final_tuned_surface.png)
   bei 1920 × 1080.
-- [Charakterkarte mit Profil und Figur](../../../output/native_glut_maps/details/details_1280.png).
+- [Kompakte Charakterkarte mit Rangsymbolen und Figur](../../../output/native_glut_maps/details_compact/details_1280.png).
 - [Felsvergleich in Godot](../../../output/native_glut_maps/rock_native_comparison.png)
   bei gleicher Beleuchtung und Kamera. Links der integrierte 100-Dreieck-Fels
   aus der CC-BY-Quelle, rechts die lokale CC-BY-NC-Studie mit 288 Dreiecken.
@@ -100,7 +100,7 @@ gestalterische Nutzerabnahme steht aus.
 | Anflug und Landung | Flugvisual- und Rasterprobe 24/0 inklusive durchgehender Cutlass-Ausrichtung, stabiler Reisehöhe und Aufsetzen am Geländedatum |
 | Kampagnenfortsetzung mit Rüstungsfach | 55/0 neuer erster Einsatz und Upload, 179/0 native Fortsetzung vom echten A-Checkpoint über B, A-Wiederbesuch, C-Upload und die Orbitalrettung bis Continue mit vier Personen und zwei Schiffen |
 | Ausrüstung und Bestand | Leichte Startrüstung bietet ein Datenträgerfach. Rucksack für 40 Cr im Handelsaußenposten, +12 Plätze nach Anlegen. Altes Checkpoint-Fingerprint migriert mit allen fünf Aufträgen und Mengen. Handel 41/0, Dienste 26/0, Abbau mit gekauftem Rucksack 18/0. |
-| FT1 und Figur | 50/0 Truppkarte bei 1280, 1920 und 3440. 84/0 tatsächliches Aufsitzen und erneutes Absetzen samt Upload. Gemeinsame Charakterkarte 61/0, Compact/Einsatz 28/0, Inventar 28/0 und Basisfenster 111/0. |
+| FT1 und Figur | 50/0 Truppkarte bei 1280, 1920 und 3440. 84/0 tatsächliches Aufsitzen und erneutes Absetzen samt Upload. Gemeinsame Charakterkarte 74/0, Compact/Einsatz 28/0, Inventar 28/0 und Basisfenster 113/0. |
 
 Der Rückweg von C verwendet reguläre Wegpunkte über das Deck. Ein früherer
 Lauf mit einem einzelnen langen GO-Befehl lief dabei ins Zeitlimit. Der

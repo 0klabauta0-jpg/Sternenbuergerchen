@@ -32,7 +32,8 @@ func _run()->void:
  check(preview.size.y>=500,"shared character card gives the figure more vertical room")
  check(bool(preview.get_meta("preview_idle_pose",false)),"preview freezes existing idle pose rather than showing the bind pose")
  check(panel.get("_identity_portrait").texture!=null,"original identity portrait is retained beside the shared character name")
- check(panel.get("_badges").get_child_count()>=3,"actual character bonuses also appear in equipment view")
+ var badges:Control=panel.get("_badges")
+ check(badges.get_child_count()>=3 and badges.get_children().all(func(child):return child is TextureRect and child.texture!=null and not child.tooltip_text.is_empty()),"actual character bonuses use the existing rank icons and tooltips")
  check(panel.get("_rest_row").size_flags_horizontal==Control.SIZE_SHRINK_BEGIN and panel.get("_rest_row").get_child(0)==panel.get("_rest"),"rest switch is compact and immediately left of its label")
  check(popup.find_child("CharacterDerivationOverview",true,false)==null,"unused origins box is removed from character overview")
  for key:String in ["armor","weapon_1","weapon_2"]:
@@ -41,6 +42,8 @@ func _run()->void:
  var slot:Control=panel.get("_slots").get_node("InventorySlot_weapon_1")
  slot.payload_dropped.emit({"source_container_id":"base:homebase","item_id":"medictool"})
  for i in 8:await process_frame
+ var feedback:Label=popup.find_child("CharacterInventoryFeedback",true,false)
+ check(not feedback.visible and feedback.text.is_empty(),"successful equipment change leaves no stock update heading")
  var after:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory
  check(int(after["base:homebase"].items.get("medictool",0))==int(before["base:homebase"].items.get("medictool",0))-1,"equipping consumes one actual free item")
  check(int(after["base:homebase"].items.get("pistol",0))==int(before["base:homebase"].items.get("pistol",0))+1,"previously carried pistol returns once to free base stock")
@@ -68,15 +71,18 @@ func _run()->void:
   var primary:Label=panel.find_child("PrimaryRole",true,false)
   var secondary:Label=panel.find_child("SecondaryRole",true,false)
   var status:Label=panel.find_child("PersonnelCondition",true,false)
-  var profile_row:Label=panel.find_child("IdentityProfile",true,false)
+  var rest_row:Control=panel.get("_rest_row")
+  var armor:Control=panel.get("_slots").get_node("InventorySlot_armor")
   check(portrait.size.x>=112 and portrait.size.y>=140,"portrait stays legible "+str(resolution))
   check(name_row.global_position.x>=portrait.get_global_rect().end.x+8 and name_row.global_position.y<portrait.get_global_rect().end.y,"profile facts start beside the portrait "+str(resolution))
   check(primary.get_global_rect().end.y<=secondary.global_position.y and secondary.get_global_rect().end.y<=status.global_position.y and not secondary.clip_text,"role and status rows remain separate and uncut "+str(resolution))
-  check(profile_row!=null and profile_row.visible and profile_row.text.contains("ROOK") and profile_row.text.contains("Bastion-7"),"header restores authored identity facts "+str(resolution))
+  check(panel.find_child("IdentityProfile",true,false)==null,"header omits callsign, origin and age "+str(resolution))
+  check(primary.get_line_count()==1 and secondary.get_line_count()==1,"Anja's two role labels each fit on one line "+str(resolution))
+  check(rest_row.get_parent()==name_row.get_parent() and rest_row.global_position.x>=name_row.get_global_rect().end.x and absf(rest_row.global_position.y-name_row.global_position.y)<=5,"rest switch sits after the name on the same line "+str(resolution))
+  check(armor.global_position.y-panel.global_position.y<185,"first equipment slot starts close to the header "+str(resolution))
   check(status.text.begins_with("Status: ") and status.text.contains("FT1"),"header keeps authoritative assignment status "+str(resolution))
   var identity:Control=panel.get("_identity")
-  var armor:Control=panel.get("_slots").get_node("InventorySlot_armor")
-  check(not identity.get_global_rect().intersects(preview.get_global_rect()) and identity.get_global_rect().end.y<=armor.global_position.y,"identity, model and equipment stay distinct "+str(resolution))
+  check(identity.get_global_rect().end.y<=armor.global_position.y,"equipment begins after identity and status "+str(resolution))
   var camera:Camera3D=preview.get("_camera")
   var bounds:AABB=preview.get("_model_bounds")
   var frame:=Rect2(Vector2.ZERO, camera.get_viewport().get_visible_rect().size)
@@ -85,6 +91,8 @@ func _run()->void:
    model_rect=model_rect.expand(camera.unproject_position(bounds.get_endpoint(corner)))
   print("DETAIL_MODEL preview=",preview.size," frame=",frame," model=",model_rect," bounds=",bounds," camera=",camera.size)
   check(model_rect.size.y>=300 and frame.encloses(model_rect),"full model fits the tighter camera frame "+str(resolution))
+  var visible_model:=Rect2(preview.global_position+model_rect.position,model_rect.size)
+  check(not visible_model.intersects(portrait.get_global_rect()) and not visible_model.intersects(rest_row.get_global_rect()),"portrait and rest switch clear the rendered model "+str(resolution))
   if DisplayServer.get_name()!="headless":
    await RenderingServer.frame_post_draw
    var capture_dir := OS.get_environment("STERNENBUERGERCHEN_DETAIL_CAPTURE_DIR")
@@ -99,15 +107,12 @@ func _run()->void:
  var unit:Dictionary=view.unit.duplicate()
  unit.secondary_role="Aufklärung, Fernmeldekoordination und technische Einsatzunterstützung"
  unit.condition="injured"
- unit.identity_profile="Rufname ROOK · Außenstation mit einem langen benutzerdefinierten Namen · 34 Jahre"
  panel.call("update_snapshot",view.inventory,unit,view.craft_id,view.accessible,view.equipment_allowed,view.actor)
  for i in 12:await process_frame
  var long_secondary:Label=panel.find_child("SecondaryRole",true,false)
  var readiness:Label=panel.find_child("ReadinessStatus",true,false)
- var long_profile:Label=panel.find_child("IdentityProfile",true,false)
- var badges:Control=panel.get("_badges")
  var armor_slot:Control=panel.get("_slots").get_node("InventorySlot_armor")
  check(long_secondary.get_line_count()>1 and readiness.visible and readiness.text=="Bereitschaft: Verletzt","long roles wrap and independent readiness stays visible")
- check(long_profile.get_global_rect().end.y<=badges.global_position.y and badges.get_global_rect().end.y<=armor_slot.global_position.y,"long custom profile and badges push the slots down")
+ check(readiness.get_global_rect().end.y<=armor_slot.global_position.y and badges.get_global_rect().end.y<=armor_slot.global_position.y,"long role and readiness keep equipment clear")
  flow.queue_free();await process_frame
  print("CHARACTER_NAVIGATION checks=%d failures=%d"%[checks,failures]);quit(1 if failures else 0)

@@ -2737,13 +2737,10 @@ func _ensure_character_sheet_popup() -> void:
 	inventory_column.name = "CharacterInventoryColumn"
 	inventory_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inventory_scroll.add_child(inventory_column)
-	var inventory_heading := Label.new()
-	inventory_heading.text = "AUSRÜSTUNG & INVENTAR"
-	META_UI_SKIN_SCRIPT.style_header_label(inventory_heading, 14)
-	inventory_column.add_child(inventory_heading)
 	var feedback := Label.new()
 	feedback.name = "CharacterInventoryFeedback"
 	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedback.hide()
 	inventory_column.add_child(feedback)
 	var inventory_panel: VBoxContainer = PERSONNEL_INVENTORY_PANEL.new()
 	inventory_panel.name = "CharacterInventoryPanel"
@@ -5984,7 +5981,8 @@ func _on_character_inventory_operation(operation: String, payload: Dictionary) -
 	var result: Dictionary = request_operation(operation, payload)
 	var feedback := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/CharacterInventoryScroll/CharacterInventoryColumn/CharacterInventoryFeedback") as Label
 	if feedback != null:
-		feedback.text = String(result.get("message", result.get("reason", ""))) if not bool(result.get("ok", false)) else "Bestand aktualisiert"
+		feedback.text = "" if bool(result.get("ok", false)) else String(result.get("message", result.get("reason", "")))
+		feedback.visible = not feedback.text.is_empty()
 	_update_character_inventory()
 
 
@@ -6000,7 +5998,6 @@ func get_personnel_inventory_view(unit_id: String, operations_snapshot: Dictiona
 	var profile = _profiles_by_id.get(unit_id)
 	if profile != null and not unit.is_empty():
 		unit["primary_role"] = String(profile.role_name)
-		unit["identity_profile"] = CHARACTER_SHEET_FORMATTER_SCRIPT.format_identity_profile_line(profile)
 	var singleplayer: Dictionary = snapshot.get("singleplayer", {})
 	var craft_id: String = String(Dictionary(snapshot.get("selected_craft", {})).get("id", ""))
 	var adapter: Node = get_parent().get("_singleplayer_runtime") if get_parent() != null and get_parent().get_script() != null else null

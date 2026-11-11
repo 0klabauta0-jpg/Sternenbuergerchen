@@ -279,21 +279,6 @@ static func format_role_name(role_name: String) -> String:
 	return COPY.text(role_name)
 
 
-static func format_identity_profile_line(profile) -> String:
-	if profile == null:
-		return ""
-	var facts := PackedStringArray()
-	var callsign := String(profile.callsign).strip_edges()
-	if not callsign.is_empty():
-		facts.append("Rufname " + callsign)
-	var homeworld := String(profile.homeworld).strip_edges()
-	if not homeworld.is_empty():
-		facts.append(homeworld)
-	if int(profile.age_years) > 0:
-		facts.append("%d Jahre" % int(profile.age_years))
-	return " · ".join(facts)
-
-
 static func format_status_text(status_text: String) -> String:
 	var known: String = COPY.text(status_text.to_lower())
 	return status_text if known == status_text.to_lower() else known

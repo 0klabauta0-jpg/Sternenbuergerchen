@@ -36,8 +36,7 @@ var _main_role:Label
 var _secondary_role:Label
 var _condition:Label
 var _readiness:Label
-var _profile:Label
-var _badges:HFlowContainer
+var _badges:HBoxContainer
 var _identity_signature:String=""
 var _bag_preview:PanelContainer
 var _bag_grid:GridContainer
@@ -52,12 +51,6 @@ static func get_preferred_character_column_width(viewport_width: float) -> float
 
 func _ready() -> void:
 	add_theme_constant_override("separation",10)
-	var code:=Label.new();code.text="LA-04  /  AUSRÜSTUNG & FREIER BESTAND";SKIN.eyebrow(code);add_child(code)
-	_rest_row=HBoxContainer.new();_rest_row.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;_rest_row.add_theme_constant_override("separation",4);add_child(_rest_row)
-	_rest=CheckButton.new(); _rest.name="AutomaticRest"; _rest.text="";_rest.custom_minimum_size=Vector2(48,28); _rest_row.add_child(_rest)
-	var rest_label:=Label.new();rest_label.text="Automatisch ruhen";SKIN.label(rest_label,15);rest_label.autowrap_mode=TextServer.AUTOWRAP_OFF;_rest_row.add_child(rest_label)
-	_rest.tooltip_text="Bei Leerlauf an der Basis ein Bett aufsuchen. Ausschalten, um die Person stehen zu lassen."
-	_rest.toggled.connect(func(enabled:bool): operation_requested.emit("base_auto_rest",{"unit_id":_unit_id,"enabled":enabled}))
 	_slots=Control.new();_slots.name="EquipmentBody";_slots.custom_minimum_size=Vector2(360,508);add_child(_slots)
 	_body_frame=Panel.new();_body_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE;_body_frame.show_behind_parent=true;SKIN.panel(_body_frame,true);_slots.add_child(_body_frame)
 	_body_preview=preload("res://scripts/ui/components/personnel_body_preview.gd").new();_slots.add_child(_body_preview)
@@ -187,9 +180,10 @@ func _layout_body_slots() -> void:
 	var left := 190.0 if stacked else 314.0
 	var show_bag := width >= 820
 	_identity.position = Vector2(12, 10)
-	_identity.size = Vector2(width - 24 if stacked else left - 22, 0)
+	var header_width := width - 24 if stacked else minf(width - 24, 455.0)
+	_identity.size = Vector2(header_width, 0)
 	var slots_top := _identity.position.y + _identity.size.y + 12
-	var model_top := slots_top if stacked else 4.0
+	var model_top := slots_top if stacked else maxf(4.0, _identity.size.y - 92.0)
 	var model_space := width - left - (180 if show_bag else 12)
 	var body_size := Vector2(minf(model_space, 370), MODEL_HEIGHT)
 	_body_preview.custom_minimum_size = body_size
@@ -237,22 +231,37 @@ func _build_identity() -> void:
 	facts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	facts.add_theme_constant_override("separation", 3)
 	_identity.add_child(facts)
-	_identity_name = _identity_label(facts, "IdentityName", 22)
+	var name_line := HFlowContainer.new()
+	name_line.name = "PersonnelNameLine"
+	name_line.add_theme_constant_override("h_separation", 14)
+	facts.add_child(name_line)
+	_identity_name = _identity_label(name_line, "IdentityName", 22)
+	_identity_name.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_identity_name.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_rest_row=HBoxContainer.new();_rest_row.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;_rest_row.add_theme_constant_override("separation",4);name_line.add_child(_rest_row)
+	_rest=CheckButton.new(); _rest.name="AutomaticRest"; _rest.text="";_rest.custom_minimum_size=Vector2(48,28); _rest_row.add_child(_rest)
+	var rest_label:=Label.new();rest_label.text="Automatisch ruhen";SKIN.label(rest_label,15);rest_label.autowrap_mode=TextServer.AUTOWRAP_OFF;_rest_row.add_child(rest_label)
+	_rest.tooltip_text="Bei Leerlauf an der Basis ein Bett aufsuchen. Ausschalten, um die Person stehen zu lassen."
+	_rest.toggled.connect(func(enabled:bool): operation_requested.emit("base_auto_rest",{"unit_id":_unit_id,"enabled":enabled}))
 	_main_role = _identity_label(facts, "PrimaryRole", 15)
 	_secondary_role = _identity_label(facts, "SecondaryRole", 15)
-	_condition = _identity_label(facts, "PersonnelCondition", 15)
+	var status_line := HFlowContainer.new()
+	status_line.add_theme_constant_override("h_separation", 10)
+	facts.add_child(status_line)
+	_condition = _identity_label(status_line, "PersonnelCondition", 15)
+	_condition.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_condition.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_badges = HBoxContainer.new()
+	_badges.name = "PersonnelBadges"
+	_badges.add_theme_constant_override("separation", 5)
+	status_line.add_child(_badges)
 	_readiness = _identity_label(facts, "ReadinessStatus", 14)
 	_readiness.add_theme_color_override("font_color", SKIN.CYAN)
-	_profile = _identity_label(facts, "IdentityProfile", 14, true)
-	_badges = HFlowContainer.new()
-	_badges.name = "PersonnelBadges"
-	_badges.add_theme_constant_override("h_separation", 6)
-	facts.add_child(_badges)
 
-func _identity_label(facts: VBoxContainer, node_name: String, font_size: int, muted: bool = false) -> Label:
+func _identity_label(facts: Container, node_name: String, font_size: int) -> Label:
 	var label := Label.new()
 	label.name = node_name
-	SKIN.label(label, font_size, muted)
+	SKIN.label(label, font_size)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	facts.add_child(label)
 	return label
@@ -262,8 +271,7 @@ func _update_identity(unit: Dictionary) -> void:
 	var secondary := COPY.text(String(unit.get("secondary_role", "")))
 	var condition := COPY.text(String(unit.get("condition", "")))
 	var status := COPY.text(String(unit.get("status", condition)))
-	var profile := String(unit.get("identity_profile", ""))
-	var signature := JSON.stringify([unit.get("name", ""), main, secondary, condition, status, profile,
+	var signature := JSON.stringify([unit.get("name", ""), main, secondary, condition, status,
 		unit.get("portrait_id", ""), unit.get("portrait_path", ""), unit.get("badges", [])])
 	if signature == _identity_signature:
 		return
@@ -276,11 +284,32 @@ func _update_identity(unit: Dictionary) -> void:
 	_condition.visible = not status.is_empty()
 	_readiness.text = "Bereitschaft: " + condition
 	_readiness.visible = not condition.is_empty() and condition != status
-	_profile.text = profile
-	_profile.visible = not profile.is_empty()
-	for child:Node in _badges.get_children():_badges.remove_child(child);child.queue_free()
-	for badge:Dictionary in unit.get("badges",[]):
-		var label:=Label.new();label.text=String(badge.get("label",""));SKIN.label(label,14);label.autowrap_mode=TextServer.AUTOWRAP_OFF;label.mouse_filter=Control.MOUSE_FILTER_STOP;BADGES.apply_badge_help_metadata(label,badge);label.tooltip_text=BADGES.format_badge_tooltip(badge);_badges.add_child(label)
+	for child in _badges.get_children():
+		_badges.remove_child(child)
+		child.queue_free()
+	for badge: Dictionary in unit.get("badges", []):
+		var path := String(badge.get("path", ""))
+		var texture := load(path) as Texture2D if not path.is_empty() and ResourceLoader.exists(path) else null
+		var indicator: Control
+		if texture != null:
+			var icon := TextureRect.new()
+			icon.name = "RankBadge_" + String(badge.get("badge_key", badge.get("badge_id", "")))
+			icon.texture = texture
+			icon.custom_minimum_size = Vector2(23, 23)
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			indicator = icon
+		else:
+			var label := Label.new()
+			label.text = String(badge.get("label", ""))
+			SKIN.label(label, 14)
+			indicator = label
+		indicator.mouse_filter = Control.MOUSE_FILTER_PASS
+		indicator.tooltip_text = BADGES.format_badge_tooltip(badge)
+		BADGES.apply_badge_help_metadata(indicator, badge)
+		_badges.add_child(indicator)
+	_badges.visible = _badges.get_child_count() > 0
+
 
 func _carried_storage_title(data: Dictionary) -> String:
 	var capacity := int(data.get("capacity", 0))

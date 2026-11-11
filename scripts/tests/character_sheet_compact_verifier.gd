@@ -91,10 +91,10 @@ func _run() -> void:
 	VIEW.render(host, stock, {"editable_metrics": false, "inventory_view": inventory_view})
 	await process_frame
 	var equipment := host.find_child("SharedCharacterEquipment", true, false) as Control
-	var identity_profile := equipment.find_child("IdentityProfile", true, false) as Label if equipment != null else null
+	var main_role := equipment.find_child("PrimaryRole", true, false) as Label if equipment != null else null
 	var mission_status := equipment.find_child("PersonnelCondition", true, false) as Label if equipment != null else null
-	_check(identity_profile != null and identity_profile.text == "Rufname ROOK" and identity_profile.visible, "Mission sheet restores the same authored profile header")
-	_check(mission_status != null and mission_status.text == "Status: Im Einsatz", "Mission sheet retains its live status alongside profile facts")
+	_check(main_role != null and main_role.text.begins_with("Hauptrolle: ") and equipment.find_child("IdentityProfile", true, false) == null, "Mission sheet shows the same compact role header")
+	_check(mission_status != null and mission_status.text == "Status: Im Einsatz", "Mission sheet retains its live status alongside role facts")
 	_check(not inventory_view.unit.has("identity_profile") and stock.to_dict() == stock_before, "Shared header enriches only its read-only presentation")
 	host.queue_free()
 	await process_frame

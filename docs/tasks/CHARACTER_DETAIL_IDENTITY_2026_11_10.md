@@ -105,3 +105,19 @@ Der andere Basis-/Orte-/UI-Chat arbeitet noch. Beide fertigen Staende werden
 erst danach gemeinsam integriert und geprueft, auf Main committed/gepusht;
 erst anschliessend folgt die gemeinsame EXE. Aktuelle andere WIP-Piloten-/
 Personalregeln muessen bei dieser Integration bewahrt werden.
+
+## Kompakter Kopf nach dem Playtest am 11.11.2026
+
+Porträt und Name führen die gemeinsame Charakterkarte an. Der Schalter
+„Automatisch ruhen“ sitzt neben dem Namen. Haupt- und Nebenrolle passen
+für Anja jeweils in eine Zeile. Eignungen verwenden die vorhandenen
+Rangsymbole und ihre Tooltips. Der kurze Status bleibt sichtbar, eine
+abweichende Bereitschaft erscheint bei Bedarf darunter. Rufname,
+Herkunft und Alter bleiben in den Profilquellen. Der sichtbare Kopf
+beginnt direkt mit der Person und die Ausrüstungsplätze folgen früher.
+Fehler beim Anlegen oder Verschieben erscheinen weiter am Inventar.
+
+Betroffen sind der gemeinsame Inventarkopf, die Einbettung im
+Charakterbogen und die gezielten Verifier. Prüfung über die real
+geöffneten Details bei 1280 × 720, 1920 × 1080 und 3440 × 1440, die
+taktische Einbettung und eine echte Ausrüstungsänderung.

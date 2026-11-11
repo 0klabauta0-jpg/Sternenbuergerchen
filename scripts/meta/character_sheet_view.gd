@@ -81,7 +81,6 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 			columns.add_child(equipment)
 			var view:Dictionary=options.inventory_view
 			var identity: Dictionary = Dictionary(view.unit).duplicate()
-			identity["identity_profile"] = CHARACTER_SHEET_FORMATTER_SCRIPT.format_identity_profile_line(profile)
 			equipment.call("update_snapshot",view.inventory,identity,view.craft_id,view.accessible,view.equipment_allowed,view.actor)
 			equipment.call("update_rest_snapshot",{})
 			var handler:Callable=options.get("inventory_request",Callable())
