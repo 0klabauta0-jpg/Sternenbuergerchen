@@ -63,3 +63,32 @@ Fremde Schiffsfootprints müssen aus dem vorhandenen Objekt-/Transportowner
 kommen; keine Ersatzliste im UI. Save/Restore und Peergrenzen folgen in AP7.
 Arbeitsbasis ist der nicht auf Main integrierte Rampenstand 97e00aba1 plus
 die auf `task/hex-ground-foundation-20261111` geprüften AP1–5-Pakete.
+
+## Zweiter Teilschritt: verbindliche Aussteigeplätze
+
+Root bereitet eine vollständige Gruppe vor und erhält ein kontextgebundenes
+Admissionticket. Ground hält dessen noch ungenutzte Plätze. Personen an Bord
+erhalten dabei keine Groundzelle. Pro vorhandener Aussteigephase konsumiert
+genau ein tatsächlicher Deployeffect genau seinen Platz. Falsches/altes Ticket
+bewirkt keine Anwesenheits- oder Registrymutation. Claims sperren auch Bewegung,
+Türschluss und andere Zulassung; der Owner prüft unabhängig vom Planer.
+
+Abbruch gibt nur verbleibende Vormerkungen frei, bereits ausgestiegene Personen
+bleiben am Boden. Entfernen eines noch vorgemerkten NPCs verwirft die verbleibende
+Gruppenvormerkung; Kontextwechsel räumt alle Tickets. Unpassierbare oder nicht
+mehr kanonisch verbundene geplante Felder verhindern die Fortsetzung.
+
+Kleiner Case `--case admission_slots`, gleiche isolierte Prüfbasis. Die konkrete
+Transportsequenz publiziert ihren Fortschritt erst nach dem tatsächlichen
+Rootcommit. Legacykarten behalten den bestehenden Effektpfad.
+
+## Gesicherter Teilstand
+
+AP6a `86347ca54`: Gruppenplatzierung und registrierte Missionsactorprimitive,
+Lifecycle64/0, Ground25/0, ReservationOwner36/0; Parentintegration `69194ddab`.
+
+AP6b: Slotcase87/0, Backoff55/0, Planer26/0 und Owner56/0. Tatsächliche Root-
+Transporteffects, gestagte Actors, Slotabbruch, Terraininvalidierung, Tree-Exit,
+stale Registry und alte Queuepayloads geprüft. Frischer enger Review schloss
+stalen Registryschlüssel und leeren Releasegrund. Diese Lieferung ist weiterhin
+ein Teilpaket: konkrete Controller-/Setup-/Basisproducer folgen vor AP6-Abschluss.

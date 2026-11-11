@@ -34,6 +34,7 @@ CASES = {
     "door_guard": ("hex_door_guard_verifier.gd", "HEX_DOOR_GUARD_PASS"),
     "backoff": ("hex_backoff_execution_verifier.gd", "HEX_BACKOFF_EXECUTION_PASS"),
     "lifecycle": ("hex_ground_lifecycle_verifier.gd", "HEX_GROUND_LIFECYCLE_PASS"),
+    "admission_slots": ("hex_admission_slots_verifier.gd", "HEX_ADMISSION_SLOTS_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -79,7 +80,7 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case in {"movement", "movement_consumers"}:
@@ -90,8 +91,10 @@ def main() -> int:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "backoff":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case == "lifecycle":
+        if args.case in {"lifecycle", "admission_slots"}:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
+        if args.case == "admission_slots":
+            pending.append("scripts/tests/hex_ground_lifecycle_verifier.gd")
         if args.case == "movement_consumers":
             pending.extend(["scripts/tests/hex_movement_verifier.gd",
                             "scripts/terrain/terrain_map_3d_view.gd",

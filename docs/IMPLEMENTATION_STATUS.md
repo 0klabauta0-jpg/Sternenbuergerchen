@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Groundvormerkung und echte einzelne Transporteffects — 11.11.2026
+
+Ground hält verbindliche Slots für vollständige Gruppen, ohne Bordpersonen als
+Groundunits zu führen. Echte Root-Deployeffects konsumieren je einen Slot und
+aktivieren gestagte Missionsactors erst danach; Embark räumt Ground/Move. Planer,
+Navigation und Türclaim berücksichtigen Slots. Abbruch/Terrain/Despawn/Kontext
+räumen verbleibende Zusagen; interne Queuegenerationen verhindern alte Aufträge
+nach Readmission. Ungültige Registrykeys fallen vor Write geschlossen aus.
+Slotcase87/0, Backoff55/0, Planer26/0, Owner56/0; isolierte kleine Prüfungen,
+Guards und enger Review geschlossen. QA hex_admission_slots_20261111.
+Noch AP6: konkrete gestaffelte Controller-, Setup- und Basisproducer anbinden;
+danach AP7/8. Keine Produktionskarte, Main, EXE oder große AP9-Abnahme.
+
 ### AP6 atomare Gruppenplatzierung als erstes Teilpaket — 11.11.2026
 
 Reiner Admissionhelper verteilt vollständige Gruppen entlang kanonischer

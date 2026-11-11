@@ -293,6 +293,9 @@ var _hex_visual_unit_ids:Dictionary={}
 var _hex_projection_terrain_revision:=-1
 var _hex_boundary_facing:Dictionary={}
 const HEX_ADMISSION_SCRIPT=preload("res://scripts/mission/hex_ground_admission.gd")
+var _hex_deployment_serial:=0
+var _last_hex_lifecycle_resolution:Dictionary={}
+var _hex_unit_lifecycle_revision:Dictionary={}
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -351,6 +354,8 @@ func _clear_hex_movement_context() -> void:
 	_hex_visual_unit_ids.clear()
 	_hex_boundary_facing.clear()
 	_hex_projection_terrain_revision=-1
+	_hex_unit_lifecycle_revision.clear()
+	_last_hex_lifecycle_resolution.clear()
 
 
 func _clear_hex_actor_metadata(unit_id:String) -> void:
@@ -531,6 +536,8 @@ func admit_hex_ground_units(placements: Array[Dictionary]) -> Dictionary:
 func release_hex_ground_unit(unit_id: String, reason: String) -> void:
 	if _should_skip_local_tick_processing():
 		return
+	if _hex_ground_runtime.has_unit(unit_id) or _hex_ground_runtime.has_pending_admission(unit_id) or _known_units_by_id.has(unit_id):
+		_hex_unit_lifecycle_revision[unit_id]=int(_hex_unit_lifecycle_revision.get(unit_id,0))+1
 	_clear_hex_actor_metadata(unit_id)
 	_hex_visual_unit_ids.erase(unit_id)
 	_hex_movement_runtime.release_unit(unit_id)
@@ -540,19 +547,25 @@ func release_hex_ground_unit(unit_id: String, reason: String) -> void:
 
 ## Synchronous internal lifecycle boundary. These are actual registered mission
 ## actors, not base personnel projections or caller-supplied actor references.
-func _validate_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
+func _validate_hex_ground_actor_group(unit_ids:PackedStringArray,allow_staged:bool=false)->Dictionary:
 	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
 	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
 	if unit_ids.is_empty() or unit_ids.size()>64:return {"ok":false,"reason":"invalid_admission_group"}
 	var registry=get_unit_registry()
 	if registry==null or not registry.has_method("get_unit"):return {"ok":false,"reason":"unit_registry_unavailable"}
+	for method in ["has_unit","register_unit"]:
+		if not registry.has_method(method):return {"ok":false,"reason":"unit_registry_unavailable"}
 	var scope:Node=get_parent()
 	if scope==null or scope==get_tree().root or not scope.is_ancestor_of(registry):return {"ok":false,"reason":"invalid_mission_scope"}
 	var actors:Dictionary={}
 	for id in unit_ids:
 		if id.is_empty() or id!=id.strip_edges() or actors.has(id):return {"ok":false,"reason":"invalid_admission_unit"}
-		var actor=registry.call("get_unit",id)
+		var registered=registry.call("get_unit",id)
+		if registry.call("has_unit",id) and not is_instance_valid(registered):return {"ok":false,"reason":"stale_unit_registry_entry","unit_id":id}
+		var actor=_resolve_known_unit_for_contract(id) if allow_staged else registered
+		if is_instance_valid(registered) and registered!=actor:return {"ok":false,"reason":"mission_actor_lookup_conflict","unit_id":id}
 		if not is_instance_valid(actor) or not actor is Node2D or not scope.is_ancestor_of(actor) or _resolve_known_unit_for_contract(id)!=actor:return {"ok":false,"reason":"mission_actor_unavailable","unit_id":id}
+		if not actor.is_inside_tree() or actor.is_queued_for_deletion():return {"ok":false,"reason":"mission_actor_exiting","unit_id":id}
 		if not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=id or not actor.has_method("assign_unit_command") or not actor.has_method("get_current_unit_command"):return {"ok":false,"reason":"invalid_mission_actor","unit_id":id}
 		actors[id]=actor
 	return {"ok":true,"actors":actors}
@@ -578,7 +591,7 @@ func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2
 
 
 func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
-	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
+	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids,true)
 	if not checked.ok:return checked
 	for id in unit_ids:
 		_discard_pending_move_commands_for_unit(id)
@@ -586,6 +599,76 @@ func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
 	for id in unit_ids:checked.actors[id].set_meta("dropship_embarked",true)
 	for id in unit_ids:checked.actors[id].visible=false
 	return {"ok":true,"embarked_unit_ids":unit_ids.duplicate()}
+
+
+func prepare_hex_ground_deployment(unit_ids:PackedStringArray,anchor_grid:Vector2i)->Dictionary:
+	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids,true)
+	if not checked.ok:return checked
+	if _hex_deployment_serial>=HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:return {"ok":false,"reason":"admission_serial_exhausted"}
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor_grid,_hex_ground_registry,snapshot)
+	if not plan.ok:return plan
+	_hex_deployment_serial+=1
+	var admission_id:String="hex_admission:%d:%d"%[_hex_ground_context_revision,_hex_deployment_serial]
+	var placements:Array[Dictionary]=[]
+	placements.assign(plan.placements)
+	var result:Dictionary=_hex_ground_runtime.reserve_admission_group(admission_id,placements,snapshot.revision)
+	if result.ok:_hex_movement_runtime.notify_ground_events([{"event_type":"hex_admission_prepared"}])
+	return result
+
+
+func get_hex_ground_deployment(admission_id:String)->Dictionary:
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	return _hex_ground_runtime.get_admission_group(admission_id)
+
+
+func cancel_hex_ground_deployment(admission_id:String,reason:String)->Dictionary:
+	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	var result:Dictionary=_hex_ground_runtime.cancel_admission_group(admission_id,reason)
+	if result.ok and not result.released_unit_ids.is_empty():_hex_movement_runtime.notify_ground_events([{"event_type":"hex_admission_cancelled"}])
+	return result
+
+
+func get_last_hex_lifecycle_resolution()->Dictionary:
+	return _last_hex_lifecycle_resolution.duplicate(true)
+
+
+func _apply_hex_dropship_deploy_effect(effect:Dictionary)->Dictionary:
+	var id:String=String(effect.get("unit_id",""))
+	var checked:Dictionary=_validate_hex_ground_actor_group(PackedStringArray([id]),true)
+	if not checked.ok:return checked
+	var actor:Node2D=checked.actors[id]
+	var admission_id:String=String(effect.get("admission_id",""))
+	if admission_id.is_empty():
+		# Existing presence refreshes may publish an already committed actor, but
+		# cannot admit a new person or teleport an existing logical position.
+		if _hex_ground_runtime.has_unit(id) and not bool(actor.get_meta("dropship_embarked",false)):
+			_project_hex_ground_actors(0.0)
+			actor.visible=bool(effect.get("visible",true))
+			return {"ok":true,"unit_id":id,"already_present":true}
+		return {"ok":false,"reason":"admission_ticket_required","unit_id":id}
+	var ticket:Dictionary=_hex_ground_runtime.get_admission_group(admission_id)
+	if not ticket.ok:return ticket
+	var placement:Array[Dictionary]=[]
+	for entry in ticket.placements:
+		if entry.unit_id==id:placement.append(entry)
+	if placement.is_empty():return {"ok":false,"reason":"admission_ticket_mismatch","unit_id":id}
+	var result:Dictionary=_hex_ground_runtime.admit_units(placement,admission_id)
+	if not result.ok:return result
+	# Actor/registry preflight was complete before the Ground write. UnitRegistry
+	# registration has no callbacks; publish visibility/activation afterwards.
+	var registry=get_unit_registry()
+	if not registry.has_unit(id):registry.register_unit(id,actor)
+	actor.set_meta("dropship_embarked",false)
+	_hex_visual_unit_ids[id]=true
+	_apply_dropship_runtime_activation(id,actor,effect)
+	_project_hex_ground_actors(0.0)
+	actor.visible=bool(effect.get("visible",true))
+	var status:String=String(effect.get("runtime_status",""))
+	if not status.is_empty() and actor.has_method("set_runtime_status"):actor.call("set_runtime_status",status)
+	if actor.has_method("refresh_terrain_readability"):actor.call("refresh_terrain_readability")
+	return {"ok":true,"unit_id":id,"admission_id":admission_id,"grid":placement[0].grid}
 
 
 ## Internal runtime intents, never accepted as client/UI-provided facing state.
@@ -672,9 +755,22 @@ func _ready() -> void:
 	set_combat_rng_seed(combat_rng_seed)
 
 
+func _hex_payload_identity(unit_id:String)->Dictionary:
+	var actor=_resolve_known_unit_for_contract(unit_id)
+	return {"context":_hex_ground_context_revision,"lifecycle":int(_hex_unit_lifecycle_revision.get(unit_id,0)),"actor":actor.get_instance_id() if is_instance_valid(actor) else 0}
+
+
+func _is_current_hex_payload(payload:Dictionary)->bool:
+	if not payload.has("_hex_lifecycle"):return true
+	return is_hex_ground_runtime_active() and payload._hex_lifecycle is Dictionary and payload._hex_lifecycle==_hex_payload_identity(String(payload.get("unit_id","")))
+
+
 func enqueue_command(cmd: Dictionary) -> void:
 	if typeof(cmd) != TYPE_DICTIONARY:
 		push_warning("SimulationRoot.enqueue_command expects a Dictionary command.")
+		return
+	if not _is_current_hex_payload(cmd):
+		_record_discarded_move_command(cmd,"stale_hex_lifecycle")
 		return
 	if is_hex_ground_runtime_active() and _extract_command_type(cmd) in ["move_to_position","engage_area"] and not String(cmd.get("unit_id","")).is_empty():
 		var target:Variant=cmd.get("target_position")
@@ -683,6 +779,8 @@ func enqueue_command(cmd: Dictionary) -> void:
 			return
 
 	var queued_command: Dictionary = cmd.duplicate(true)
+	if is_hex_ground_runtime_active() and _extract_command_type(cmd) in ["move_to_position","engage_area","hold_position"] and not String(cmd.get("unit_id","")).is_empty():
+		queued_command["_hex_lifecycle"]=_hex_payload_identity(String(cmd.unit_id))
 	var command_token: String = String(queued_command.get("command_token", "")).strip_edges()
 	var unit_id: String = String(queued_command.get("unit_id", "")).strip_edges()
 	if not command_token.is_empty() and not unit_id.is_empty():
@@ -722,7 +820,12 @@ func enqueue_effect(effect: Dictionary) -> void:
 		push_warning("SimulationRoot.enqueue_effect expects a Dictionary effect.")
 		return
 
-	effects_queue.append(effect)
+	if not _is_current_hex_payload(effect):return
+	if is_hex_ground_runtime_active() and _extract_effect_type(effect) in ["dropship_embark_unit","dropship_deploy_unit"]:
+		var queued:Dictionary=effect.duplicate(true)
+		queued["_hex_lifecycle"]=_hex_payload_identity(String(effect.get("unit_id","")))
+		effects_queue.append(queued)
+	else:effects_queue.append(effect)
 
 
 func get_air_asset_status_snapshot(asset_id: String = "") -> Dictionary:
@@ -1010,10 +1113,24 @@ func register_known_unit(unit_id: String, unit: Node) -> bool:
 		if unit.has_method("get_unit_id") and String(unit.call("get_unit_id"))!=unit_id:return false
 
 	_known_units_by_id[unit_id] = unit
+	var on_exit:Callable=Callable(self,"_on_hex_known_unit_tree_exiting").bind(unit_id,unit.get_instance_id())
+	if not unit.tree_exiting.is_connected(on_exit):unit.tree_exiting.connect(on_exit)
 	if is_hex_ground_runtime_active() and _hex_ground_runtime.has_unit(unit_id):
 		_hex_visual_unit_ids[unit_id]=true
 		_project_hex_ground_actors(0.0)
 	return true
+
+
+func _on_hex_known_unit_tree_exiting(unit_id:String,instance_id:int)->void:
+	if not is_hex_ground_runtime_active():return
+	var known=_known_units_by_id.get(unit_id,null)
+	var registry=get_unit_registry()
+	var registered=registry.call("get_unit",unit_id) if registry!=null else null
+	if is_instance_valid(known) and known.get_instance_id()==instance_id:
+		unregister_known_unit(unit_id)
+	elif not is_instance_valid(known) and is_instance_valid(registered) and registered.get_instance_id()==instance_id:
+		release_hex_ground_unit(unit_id,"actor_exiting")
+	if is_instance_valid(registered) and registered.get_instance_id()==instance_id:registry.call("unregister_unit",unit_id)
 
 
 func unregister_known_unit(unit_id: String) -> void:
@@ -2269,6 +2386,9 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 	if typeof(cmd) != TYPE_DICTIONARY:
 		push_warning("SimulationRoot can only apply Dictionary commands.")
 		return
+	if not _is_current_hex_payload(cmd):
+		_record_discarded_move_command(cmd,"stale_hex_lifecycle")
+		return
 
 	if delta < 0.0:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
@@ -2344,6 +2464,9 @@ func _build_authoritative_tactical_rules_snapshot(context_rules: Variant) -> Arr
 func _apply_effect(effect: Dictionary, delta: float) -> void:
 	if typeof(effect) != TYPE_DICTIONARY:
 		push_warning("SimulationRoot can only apply Dictionary effects.")
+		return
+	if not _is_current_hex_payload(effect):
+		_last_hex_lifecycle_resolution={"ok":false,"reason":"stale_hex_lifecycle","unit_id":effect.get("unit_id","")}
 		return
 
 	if delta < 0.0:
@@ -4466,6 +4589,9 @@ func _apply_respawn_effect(effect: Dictionary) -> void:
 
 
 func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
+	if is_hex_ground_runtime_active():
+		_last_hex_lifecycle_resolution=embark_hex_ground_actor_group(PackedStringArray([String(effect.get("unit_id",""))]))
+		return
 	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		push_warning("SimulationRoot dropship embark effect expects a non-empty unit_id.")
@@ -4479,6 +4605,9 @@ func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
 
 
 func _apply_dropship_deploy_unit_effect(effect: Dictionary) -> void:
+	if is_hex_ground_runtime_active():
+		_last_hex_lifecycle_resolution=_apply_hex_dropship_deploy_effect(effect)
+		return
 	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		push_warning("SimulationRoot dropship deploy effect expects a non-empty unit_id.")

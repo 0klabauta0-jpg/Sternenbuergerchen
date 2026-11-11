@@ -383,3 +383,48 @@ Diese Primitive schalten bestehende Setup-/Transportadapter noch nicht um. Die
 gestaffelten Aussteigephasen benötigen zuerst verbindliche Groundvormerkungen
 für die gesamte Gruppe; Basisankunft und Anwesenheit folgen im nächsten AP6-Teil.
 Kleine Prüfungen sind keine Produktionskarten-, Native- oder Performancefreigabe.
+
+## AP6 Vormerkungen für gestaffelte Aussteigephasen
+
+`Root.prepare_hex_ground_deployment(ids, anchor_grid)` prüft die ganze Gruppe und
+gibt ein kontextgebundenes Admissionticket zurück. Ground hält bis zu16 Gruppen
+mit je höchstens64 Personen und deren noch ungenutzte Plätze. Diese Slots sind
+keine Groundunits. Auch echte, vorab bekannte Missionsactors ohne Registrierung
+können vorgemerkt werden; der Missionssubtree und die tatsächliche Actoridentität
+müssen bereits stimmen. Ein belegter, aber ungültiger Registryschlüssel wird vor
+dem ersten Write abgelehnt. `UnitRegistry.get_unit` gibt für freigegebene Nodes
+rein lesend null zurück, bereinigt den Index nicht versteckt.
+
+Der tatsächliche Root-Deployeffect braucht für neue Hexanwesenheit `admission_id`.
+Er konsumiert genau den für diese Person vorgemerkten Platz und registriert den
+Actor erst nach erfolgreicher Groundvalidierung. Ein vorhandener Presence-Refresh
+kann eine bereits zugelassene Person anzeigen, aber keine neue Person einsetzen
+oder ihre logische Zelle teleportieren. Falsche/alte Tickets verändern nichts.
+Der echte Embarkeffect benutzt den Lifecyclepfad und gibt alle Claims frei.
+
+Vormerkungen sperren fremde Zulassung, Türschluss und Bewegung. Ein neuer
+geschlossener Korridorgrant darf keine noch ungenutzten Aussteigeplätze umfassen;
+der Planer wartet konservativ, bis deren Aussteigephasen abgeschlossen sind.
+Ground prüft das unabhängig vom Planervorschlag. Navigation maskiert Slots und
+Abbruch weckt wartende Aufträge auf. Fremde Schiffsfootprints benötigen weiterhin
+den vorhandenen Landungs-/Visitowner als Eingabe des produktiven Adapters.
+
+`cancel_hex_ground_deployment(ticket, reason)` gibt nur verbleibende Slots frei;
+bereits ausgestiegene Personen behalten ihre Zelle. Entfernung einer vorgemerkten
+Person verwirft die verbleibende Gruppe, ohne die anderen Bordpersonen zu löschen.
+Ungültige oder nicht mehr kanonisch verbundene Zugangsflächen verhindern Consume;
+bei Terrainrevision wird die Vormerkung vor dem Deployeffect verworfen.
+Kontextwechsel leert alle Tickets und erlaubt keine Wiederverwendung alter IDs.
+
+Queued Hex-Move/Hold- und Embark/Deploy-Payloads tragen intern Kontextrevision,
+Actorinstanz und Lifecyclegeneration. Prüfung vor Apply und Requeue verhindert,
+dass ein alter Auftrag nach Ortswechsel oder Readmission dieselbe ID trifft.
+Die Felder sind keine Clientauthority. Bekannte Actors melden `tree_exiting`;
+Root entfernt Ground und den passenden Registryeintrag anhand der gebundenen
+Actorinstanz. Das berührt keinen neueren Actor unter derselben ID und benötigt
+keinen SceneTreescan. Legacycallbacks bleiben ohne Groundmutation.
+
+Kleiner Slotcase87/0 einschließlich63 voriger Movement-/Lifecyclechecks;
+Backoff55/0, Planer26/0, Owner56/0, Quell-/Profilguards und enger Review geschlossen.
+Konkrete Controller-/Setup-/Basisproducer sind der nächste AP6-Teilschritt;
+ohne sie keine produktive Kartenaktivierung. Save/Peergrenzen folgen in AP7.

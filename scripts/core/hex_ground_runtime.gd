@@ -22,6 +22,9 @@ var _reservation_terrain_revision := -1
 var _topology_revalidation_pending := false
 var _centering_by_unit_id: Dictionary = {}
 var _motion_geometry_by_unit_id: Dictionary = {}
+var _admission_by_id: Dictionary = {}
+var _admission_slots_by_grid: Dictionary = {}
+var _admission_id_by_unit: Dictionary = {}
 
 
 func configure(registry: Node, map_id: String, tick: int) -> void:
@@ -38,9 +41,11 @@ func configure(registry: Node, map_id: String, tick: int) -> void:
 	_reservation_terrain_revision = _terrain_revision()
 
 
-func admit_units(placements: Array[Dictionary]) -> Dictionary:
+func _stage_admission_units(placements: Array[Dictionary], admission_id:String="") -> Dictionary:
 	if not _is_configured():
 		return _reject("not_configured")
+	if placements.size()>64:return _reject("admission_budget")
+	if not admission_id.is_empty() and not _admission_by_id.has(admission_id):return _reject("admission_ticket_unavailable")
 	var staged_units: Dictionary = {}
 	var staged_cells: Dictionary = {}
 	for placement in placements:
@@ -53,6 +58,10 @@ func admit_units(placements: Array[Dictionary]) -> Dictionary:
 		var grid: Variant = placement.get("grid", null)
 		if typeof(grid) != TYPE_VECTOR2I:
 			return _reject("invalid_grid", unit_id)
+		if not admission_id.is_empty():
+			var expected:Dictionary=_admission_by_id[admission_id].remaining.get(unit_id,{})
+			if expected.is_empty() or expected.grid!=grid:return _reject("admission_ticket_mismatch",unit_id)
+		elif _admission_id_by_unit.has(unit_id):return _reject("unit_admission_pending",unit_id)
 		var facing: Variant = placement.get("facing_dir", 0)
 		if typeof(facing) != TYPE_INT or int(facing) < 0 or int(facing) > 5:
 			return _reject("invalid_facing", unit_id)
@@ -77,12 +86,81 @@ func admit_units(placements: Array[Dictionary]) -> Dictionary:
 	if not staged_units.is_empty():
 		# A vacated endpoint remains locked until the whole crossing ends. Closed
 		# corridor cohorts also protect cells beyond the three promised steps.
-		var claims:Dictionary=can_block_cells(staged_cells.keys())
+		var claims:Dictionary=can_block_cells(staged_cells.keys(),admission_id)
 		if not claims.ok or not claims.can_block:return _reject("cell_reserved")
-		_units_by_id.merge(staged_units)
-		_occupant_by_grid.merge(staged_cells)
-		_revision += 1
-	return {"ok": true, "admitted_unit_ids": staged_units.keys()}
+	return {"ok":true,"units":staged_units,"cells":staged_cells}
+
+
+func admit_units(placements:Array[Dictionary],admission_id:String="")->Dictionary:
+	var staged:Dictionary=_stage_admission_units(placements,admission_id)
+	if not staged.ok:return staged
+	if not admission_id.is_empty() and not _admission_access_valid(_admission_by_id[admission_id]):return _reject("admission_access_changed")
+	if not staged.units.is_empty():
+		_units_by_id.merge(staged.units)
+		_occupant_by_grid.merge(staged.cells)
+		if not admission_id.is_empty():
+			for id in staged.units:
+				_admission_slots_by_grid.erase(staged.units[id].grid)
+				_admission_id_by_unit.erase(id)
+				_admission_by_id[admission_id].remaining.erase(id)
+			if _admission_by_id[admission_id].remaining.is_empty():_admission_by_id.erase(admission_id)
+		_revision+=1
+	return {"ok":true,"admitted_unit_ids":staged.units.keys()}
+
+
+func reserve_admission_group(admission_id:String,placements:Array[Dictionary],expected_revision:int)->Dictionary:
+	if admission_id.is_empty() or admission_id!=admission_id.strip_edges() or admission_id.length()>256:return _reject("invalid_admission_ticket")
+	if _admission_by_id.has(admission_id) or _admission_by_id.size()>=16 or expected_revision!=_revision:return _reject("admission_revision_or_budget")
+	if placements.is_empty():return _reject("invalid_admission_group")
+	var staged:Dictionary=_stage_admission_units(placements)
+	if not staged.ok:return staged
+	var remaining:Dictionary={}
+	for entry in placements:remaining[entry.unit_id]=entry.duplicate(true)
+	var group:Dictionary={"admission_id":admission_id,"entry_grid":placements[0].grid,"access_cells":staged.cells.duplicate(),"remaining":remaining}
+	if not _admission_access_valid(group):return _reject("invalid_admission_access")
+	_admission_by_id[admission_id]=group
+	for id in remaining:
+		_admission_slots_by_grid[remaining[id].grid]={"admission_id":admission_id,"unit_id":id}
+		_admission_id_by_unit[id]=admission_id
+	_revision+=1
+	return get_admission_group(admission_id)
+
+
+func get_admission_group(admission_id:String)->Dictionary:
+	if not _admission_by_id.has(admission_id):return _reject("admission_ticket_unavailable")
+	var group:Dictionary=_admission_by_id[admission_id]
+	return {"ok":true,"admission_id":admission_id,"placements":group.remaining.values().duplicate(true),"remaining_unit_ids":PackedStringArray(group.remaining.keys())}
+
+
+func has_pending_admission(unit_id:String)->bool:
+	return _admission_id_by_unit.has(unit_id)
+
+
+func cancel_admission_group(admission_id:String,reason:String)->Dictionary:
+	if reason.strip_edges().is_empty():return _reject("invalid_admission_cancel")
+	if not _admission_by_id.has(admission_id):return {"ok":true,"released_unit_ids":PackedStringArray()}
+	var group:Dictionary=_admission_by_id[admission_id]
+	for id in group.remaining:
+		_admission_slots_by_grid.erase(group.remaining[id].grid)
+		_admission_id_by_unit.erase(id)
+	_admission_by_id.erase(admission_id)
+	_revision+=1
+	return {"ok":true,"released_unit_ids":PackedStringArray(group.remaining.keys())}
+
+
+func _admission_access_valid(group:Dictionary)->bool:
+	var cells:Dictionary=group.access_cells
+	var queue:Array=[group.entry_grid]
+	var reached:Dictionary={group.entry_grid:true}
+	var cursor:=0
+	while cursor<queue.size() and cursor<64:
+		var grid:Vector2i=queue[cursor]
+		cursor+=1
+		var tile=_registry.call("get_tile_at_grid",grid)
+		if tile==null or not tile.is_valid() or not bool(_registry.call("is_walkable",grid)):return false
+		for next in _registry.call("get_legal_hex_neighbors",grid):
+			if cells.has(next) and not reached.has(next):reached[next]=true;queue.append(next)
+	return reached.size()==cells.size()
 
 
 func read_unit(unit_id: String) -> Dictionary:
@@ -122,6 +200,7 @@ func build_planning_snapshot() -> Dictionary:
 		"reservation_schema_version":RESERVATION_SCHEMA_VERSION,
 		"committed_segments":_all_segments(),
 		"committed_corridor_grants":_corridor_grants.duplicate(true),
+		"admission_slots_by_grid":_admission_slots_by_grid.duplicate(true),
 	}
 
 
@@ -249,6 +328,7 @@ func stop_units(unit_ids: PackedStringArray, reason: String) -> Dictionary:
 
 
 func release_unit(unit_id: String, _reason: String) -> void:
+	if _admission_id_by_unit.has(unit_id):cancel_admission_group(_admission_id_by_unit[unit_id],_reason if not _reason.strip_edges().is_empty() else "unit_released")
 	if not _units_by_id.has(unit_id):
 		return
 	var grid: Vector2i = _units_by_id[unit_id]["grid"]
@@ -295,6 +375,7 @@ func commit_plan(plan: Dictionary, expected_revision: int) -> Dictionary:
 		if not value is Dictionary or not PLANNER._hex_valid_segment(value):
 			return _reject("invalid_segment")
 		var segment: Dictionary = value
+		if _admission_slots_by_grid.has(segment.from_grid) or _admission_slots_by_grid.has(segment.to_grid):return _reject("admission_reserved",segment.unit_id)
 		var id: String = segment.unit_id
 		if not _units_by_id.has(id) or String(segment.command_id).strip_edges().is_empty() or int(segment.start_tick) < _tick:
 			return _reject("invalid_segment_context",id)
@@ -326,6 +407,9 @@ func commit_plan(plan: Dictionary, expected_revision: int) -> Dictionary:
 		if not conflict.is_empty():return _reject(conflict,id)
 	var grants_result := _validate_grants(plan.corridor_grants,schedules)
 	if not grants_result.ok: return grants_result
+	for grant in plan.corridor_grants:
+		for grid in grant.cells:
+			if _admission_slots_by_grid.has(grid):return _reject("admission_reserved")
 	var policy_result := _validate_new_corridor_policy(additions,plan.corridor_grants)
 	if not policy_result.ok:return policy_result
 	for id in additions:
@@ -470,6 +554,10 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 		return events
 	var due: Array[Dictionary] = []
 	if _reservation_terrain_revision != _terrain_revision():
+		for admission_id in _admission_by_id.keys():
+			if not _admission_access_valid(_admission_by_id[admission_id]):
+				var cancelled:Dictionary=cancel_admission_group(admission_id,"terrain_changed")
+				events.append({"event_type":"hex_admission_cancelled","admission_id":admission_id,"unit_ids":cancelled.released_unit_ids,"reason":"terrain_changed"})
 		_topology_revalidation_pending=not _corridor_grants.is_empty()
 		var invalid_ids:=PackedStringArray()
 		for id in _segments_by_unit_id:
@@ -563,7 +651,7 @@ func advance_tick(tick: int) -> Array[Dictionary]:
 	return events
 
 
-func can_block_cells(grids:Array) -> Dictionary:
+func can_block_cells(grids:Array,ignore_admission_id:String="") -> Dictionary:
 	if not _is_configured():return _reject("not_configured")
 	if grids.size()>64:return _reject("cell_query_budget")
 	var wanted:Dictionary={}
@@ -574,6 +662,8 @@ func can_block_cells(grids:Array) -> Dictionary:
 	var blocked:Dictionary={}
 	for grid in wanted:
 		if _occupant_by_grid.has(grid):_record_block_claim(blocked,grid,"occupied",PackedStringArray([String(_occupant_by_grid[grid])]))
+		var slot:Dictionary=_admission_slots_by_grid.get(grid,{})
+		if not slot.is_empty() and slot.admission_id!=ignore_admission_id:_record_block_claim(blocked,grid,"admission_slot",PackedStringArray([String(slot.unit_id)]))
 	for id in _segments_by_unit_id:
 		for segment in _segments_by_unit_id[id]:
 			if int(segment.start_tick)+int(segment.duration_ticks)<=_tick:continue
@@ -637,6 +727,9 @@ func clear() -> void:
 	_centering_by_unit_id.clear()
 	_motion_geometry_by_unit_id.clear()
 	_corridor_grants.clear()
+	_admission_by_id.clear()
+	_admission_slots_by_grid.clear()
+	_admission_id_by_unit.clear()
 	_reservation_terrain_revision=-1
 	_topology_revalidation_pending=false
 	_revision += 1

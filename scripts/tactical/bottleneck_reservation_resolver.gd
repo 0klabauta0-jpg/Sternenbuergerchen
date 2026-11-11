@@ -488,12 +488,24 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 		return plan
 	var graph:Dictionary=_hex_local_graph(queue,terrain_registry)
 	var corridors:Array=topology.corridors
+	var admission_blocked:Dictionary=ground_snapshot.get("admission_slots_by_grid",{}).duplicate()
+	if not admission_blocked.is_empty():
+		# A closed corridor grant must not swallow a not-yet-used unload slot.
+		for cells in corridors:
+			var claimed:=false
+			for grid in cells:
+				if admission_blocked.has(grid):claimed=true;break
+			if claimed:
+				for grid in cells:admission_blocked[grid]=true
 	var seen: Dictionary = {}
 	var active: Array = []
 	for request in queue:
 		var reason: String = _hex_request_error(request,units,terrain_registry)
 		var id: String = str(request.get("unit_id","")) if request is Dictionary else ""
 		if reason.is_empty() and seen.has(id): reason="duplicate_unit_request"
+		if reason.is_empty():
+			for grid in request.path_grid_points.slice(0,4):
+				if admission_blocked.has(grid):reason="admission_reserved";break
 		seen[id]=true
 		if not reason.is_empty():
 			plan.blocked.append({"unit_id":id,"command_id":request.get("command_id","") if request is Dictionary else "","reason":reason})
@@ -590,7 +602,7 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 		var blocked:Dictionary={"unit_id":request.unit_id,"command_id":request.command_id,
 			"reason":String(reasons.get(request.unit_id,"no_passing_space"))}
 		if blocked.reason=="no_passing_space":
-			var backoff:Dictionary=_hex_backoff(request.unit_id,units[request.unit_id].grid,index,graph,backoff_budget,route_goal_owners)
+			var backoff:Dictionary=_hex_backoff(request.unit_id,units[request.unit_id].grid,index,graph,backoff_budget,route_goal_owners,admission_blocked)
 			blocked.merge(backoff)
 			if not backoff.backoff_path_grid_points.is_empty(): blocked.reason="backoff_required"
 		plan.blocked.append(blocked)
@@ -599,6 +611,12 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 
 
 static func _hex_valid_snapshot(snapshot:Dictionary,registry:Node)->bool:
+	if not snapshot.get("occupant_by_grid") is Dictionary:return false
+	if not snapshot.get("admission_slots_by_grid",{}) is Dictionary:return false
+	for grid in snapshot.get("admission_slots_by_grid",{}):
+		if not grid is Vector2i or snapshot.get("occupant_by_grid",{}).has(grid):return false
+		var slot:Variant=snapshot.admission_slots_by_grid[grid]
+		if not slot is Dictionary or not slot.get("admission_id") is String or String(slot.admission_id).is_empty() or not slot.get("unit_id") is String or String(slot.unit_id).is_empty():return false
 	if not snapshot.get("reservation_schema_version") is int or snapshot.get("reservation_schema_version",0)!=1 or not snapshot.get("committed_segments") is Array: return false
 	for key in ["revision","current_tick","terrain_revision"]:
 		if not snapshot.get(key) is int or int(snapshot[key])<0: return false
@@ -862,7 +880,7 @@ static func _hex_new_direction_conflict(proposed:Array,accepted:Array,corridors:
 	return ""
 
 
-static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Dictionary,budget:Dictionary,route_goal_owners:Dictionary={})->Dictionary:
+static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Dictionary,budget:Dictionary,route_goal_owners:Dictionary={},blocked_cells:Dictionary={})->Dictionary:
 	var queue:Array=[start]
 	var parents:Dictionary={start:start}
 	var cursor:int=0
@@ -876,7 +894,7 @@ static func _hex_backoff(id:String,start:Vector2i,index:Dictionary,graph:Diction
 		if grid!=start and legal.size()>2 and not on_other_route:
 			goal=grid; break
 		for next in legal:
-			if parents.has(next) or parents.size()>=64 or not graph.has(next): continue
+			if parents.has(next) or parents.size()>=64 or not graph.has(next) or blocked_cells.has(next): continue
 			var occupied:bool=false
 			for interval in index.cells.get(next,[]):
 				if interval.unit_id!=id: occupied=true; break

@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### AP6 Aussteigevormerkungen im Ground-Owner — 11.11.2026
+
+Vollständige Gruppenslots, einzelne echte Deploy-/Embarkeffects sowie Abbruch-,
+Despawn- und Queuegenerationen klein geprüft. Nächster Schritt ist deren Anbindung
+an konkrete Controller-/Setup-/Basisproducer, danach AP7/8. Keine Kartenaktivierung;
+große AP9-Prüfungen und EXE bleiben später.
+
 ### AP6 erster Lifecyclebaustein — 11.11.2026
 
 Vollständige begrenzte Gruppenplatzierung und Root-Primitive für tatsächliche
