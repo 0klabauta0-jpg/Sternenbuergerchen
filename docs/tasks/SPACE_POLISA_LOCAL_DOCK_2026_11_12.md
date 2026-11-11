@@ -74,6 +74,56 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   Claim-, Visit-, Pilot- oder Treibstoffwahrheit. Die genaue Adapter- und
   Receipt-Signatur wird bei der Implementierung an vorhandene Owner gebunden.
 
+### Konkrete vorhandene Operations- und Receiptgrenze
+
+- `space_begin_approach` in `singleplayer_runtime_adapter.gd` ruft heute
+  `authorize_departure` und `SimulationRoot.commit_singleplayer_departure`
+  auf. Diese Transaktion bereitet Supply (`prepare_route_fuel`), Campaign
+  (`prepare_departure`) und Fleet (`prepare_space_area_transition`) vor und
+  speichert `_departure_group_receipts`; das Root-Event folgt nach Commit.
+  Für lokales Polisa erhält genau dieser Pfad eine **separate Stationsgate-**
+  **prüfung** statt `preview_surface_deactivation`. Der Gameplayort bleibt
+  `location_id=polisa`, der Gatekontext bindet zusätzlich `target_id` und
+  Layoutrevision. Der resultierende Fleet-Übergang bleibt `begin_approach`;
+  `finish_space_approach` und der bestehende Visit-/Padablauf bleiben erhalten.
+  `preview_departure` und tatsächliche Wirtschaftskandidaten werden erneut
+  gelesen; ein Navigationauftrag allein belastet weder Supply noch Campaign.
+- `singleplayer_space_travel_state.gd::_prepare_space_area_transition_state`
+  kennt bereits strategisches `begin_approach` für Polisa und den lokalen
+  Oberflächenzweig. Ein eigener lokaler Stationszweig muss Glut-2-Area,
+  Stationstarget und Gatebeleg prüfen; er darf `surface_location_id` nicht
+  umdeuten. Fleet bindet denselben unveränderten Kontext mittels
+  `bind_space_area_transition_context`, prüft Kandidat und Owner-Epoche mit
+  `validate_prepared_space_area_transition` und publiziert erst im Root-Tail
+  mit `_publish_prepared_space_area_transition`. Die vorhandenen Fleet- und
+  Root-Receipts binden Request, Operation, Schiff, Context und Owner; ein
+  Replay darf keine zweite Deaktivierung oder Fuel-/Campaignbuchung auslösen.
+- `enter_space_orbit` routet heute strategische Polisa-Abreise über
+  `commit_singleplayer_station_orbit` und lokale Oberflächenrückkehr über
+  `commit_singleplayer_local_return`. Ein expliziter **lokaler** Stationszweig
+  benötigt denselben echten `preview_station_orbit_departure`-Pilot- und
+  Visitbeleg sowie deren vorhandene Fuelquittung, aber eine vorbereitete
+  lokale Flight-/Indexreaktivierung am Stationsgate. Er darf nicht bloß den
+  strategischen `station_orbit`-Zweig ausführen. Für ein auf Polisa neu
+  erworbenes Schiff ohne lokalen inaktiven Actor ist die erstmalige Admission
+  gesondert an echte Visit-/Equipment-/Pilotowner zu binden; fehlt dieser
+  Nachweis, bleibt diese Variante abgewiesen und der Legacyweg erhalten.
+- Vor Commit abgebrochene Navigation ist ein lokaler Move-/Claimabbruch. Nach
+  `begin_approach` verwendet ein Abbruch die bestehende schiffsgebundene
+  Cancel-/Returnquittung und deren bereits bezahlten Abflug; kein pauschales
+  Fuel-Rollback. Ein späterer Reapproach prüft Gate, Pilot und Ziel neu und
+  verwendet den konkreten alten Abflugbeleg ohne erneute Routenbuchung.
+- `space_area_grid.gd` ist bislang Bounds-only; Hindernis- und Claimswahrheit
+  liegt bei `space_combat_state.gd`. Stationsblock und Körpermaske einmal pro
+  Area/Layoutrevision aufbereiten und im bestehenden Index-/Claimsweg nutzen,
+  nicht pro Bewegungstick oder in UI neu aufbauen. Root ergänzt ausschließlich
+  für die passende Area im `get_space_area_snapshot`-DTO die lesbare Ziel-ID
+  und Layoutrevision; daraus entsteht weder ein Auftrag noch eine Freigabe.
+
+Die hier genannten Erweiterungen sind **geplant**, nicht bereits implementiert.
+Vor dem ersten Codepaket den von Parent gelieferten Deskriptorstand übernehmen
+und dessen Schema prüfen; keine Controller- oder AP6-Bodies berühren.
+
 ## Akzeptanz, Prüfung und Risiken
 
 Kleine Layoutprobe: deterministische Revision/Koordinaten, Gate im Bounds und
