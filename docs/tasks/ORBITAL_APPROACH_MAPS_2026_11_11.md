@@ -95,3 +95,12 @@ und gemeinsam veröffentlicht werden. Keine Dummyrefunds oder halbe Freigabe.
 Root-private Reservierungen/Token bei Abbruch freigeben; erfolgreiche gleiche
 Requests idempotent beantworten, geänderte Signatur ablehnen. Roottransition bis
 zum vollständigen Anschluss nur als nichtproduktive Ownerfixture ausweisen.
+
+Integrationsbedingung aus Weltraumkampf-Commit 238b89c5f: `commit_travel_pose`
+weist strategische Posewrites im lokalen Koordinatenbezug zurück. Der dortige
+alte Travelpfad `_set_travel_pose` erwartet bisher Erfolg per Assertion. Vor
+produktiver lokaler Aufnahme müssen sämtliche alten Reiseaktionen im Travelowner
+passend abgefangen werden; Übergänge verwenden den vorbereiteten stillen Tail.
+Nicht durch Entfernen der Assertion oder Akzeptieren des Posewrites umgehen.
+Bis dahin bleibt der lokale Produktpfad gesperrt. Quellseitig grüne strategische
+Fleet-/Taktchecks sind keine Prüfung dieses noch offenen lokalen Anschlusses.
