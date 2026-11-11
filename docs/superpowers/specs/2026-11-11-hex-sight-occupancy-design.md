@@ -90,8 +90,12 @@ Kartenarbeit. Vor AP1 muss dessen freigegebener Commit samt APIs integriert sein
 - `terrain_height_rules = "explicit_hex_ramps_v1"`.
 - `ramp_direction = -1`: Plateau; `0..5`: Aufwärtsrichtung entlang `HexGrid.DIRECTIONS`.
 - `height_level = H` bezeichnet bei Rampen die untere Ebene.
-- Rampe: genau eine Zelle, Enden H/H+1, Standhöhe H+0,5, seitlich gesperrt,
-  in beiden Richtungen benutzbar. H8→H9 bleibt ungültig.
+- Rampe: genau eine Zelle, längs Enden H/H+1, Standhöhe H+0,5 und seitliche
+  Endpunkthöhe H+0,5; längs in beiden Richtungen benutzbar. H8→H9 bleibt ungültig.
+- Seitliche Übergänge sind zwischen passenden Rampen mit gleicher Endpunkthöhe
+  erlaubt. Normale Plateaus H/H+1 passen seitlich nicht. Breite Rampenbänder
+  sowie Innen-/Außenecken verwenden die gemeinsamen Kanten-/Eckprofile des
+  Terrainvertrags; der Editor konsumiert dieselben Regeln im Kartentask.
 - Reine Plateau-H0/H1-Kante ist gesperrt; kein automatisches Steigen oder Klettern.
 - APIs: `TerrainTileData.allows_step(from_tile, to_tile)`,
   `endpoint_height(tile, neighbor_grid)`, `stand_height(tile)`;
@@ -187,6 +191,11 @@ beim Räumen. Danach werden Warteanfragen fair nach zunehmender Wartezeit,
 Auftragspriorität und stabiler Unit-ID entschieden. Eine Durchlassgruppe
 übernimmt höchstens die bereits zugelassenen Mitglieder; neue Ankömmlinge
 verlängern die Gegenrichtungssperre nicht unbegrenzt.
+
+Die Erkennung verwendet die tatsächlich erlaubten Übergänge, nicht den
+Tiletyp `Rampe`. Ein breites seitlich verbundenes Rampenband wird nicht
+pauschal als einspuriger Gang gesperrt. Auch dort bleiben einzelne Felder und
+gegenläufige Kanten exklusiv; verfügbare parallele Wege können genutzt werden.
 
 Ein blockierter Ausgang wird nicht zugefahren. Gegenverkehr wartet außerhalb.
 Bereits verkeilte Figuren erhalten eine begrenzte Rücksetzsuche bis zur

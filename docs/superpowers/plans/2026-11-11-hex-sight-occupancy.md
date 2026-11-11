@@ -26,7 +26,8 @@ und [Task](../../tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md).
 - `SimulationRoot` committet State; UI und Visuals bleiben Leseschichten.
 - `hex_axial_v1`, sechs Nachbarn, keine SceneTree-Vollscans oder Vollkartenjobs pro Frame.
 - `terrain_height_rules = "explicit_hex_ramps_v1"`; H0/H1-Plateaukante gesperrt,
-  Rampenstandhöhe H+0,5, seitlich gesperrt, längs in beide Richtungen begehbar.
+  Rampenstandhöhe H+0,5, längs in beide Richtungen begehbar; seitliche Enden
+  H+0,5 verbinden nur passende Rampen, keine normalen Plateaus.
 - A/B/C bleiben 512×256; Sternkarte bleibt 256×256.
 - Neue Produktlogik nach `scripts/core/`, `scripts/mission/` oder `scripts/tactical/`;
   keine neue Produktlogik unter `scripts/tests/` oder `scripts/simulation/`.
@@ -39,7 +40,7 @@ und [Task](../../tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md).
 1. Langsame/festgehaltene Figur vor einer Kolonne: kein Folgender betritt ihr Feld;
    erlaubte nachfolgende Schritte werden trotzdem atomar und flüssig gestartet (AP4/5).
 2. Tür, Rampe oder Höhenprofil ändert sich bei aktiver Sicht/Bewegung: kein veralteter
-   Treffer, keine Seitenfahrt und kein abgeschnittenes H+0,5 (AP2/4/5).
+   Treffer, kein regelwidriger Seitenwechsel und kein abgeschnittenes H+0,5 (AP2/4/5).
 3. Aussteigen/Respawn/Continue mit belegter Fläche: alle IDs bleiben erhalten,
    keine doppelte Zelle, keine fingierte vollständige Einsetzung (AP6/7).
 4. Gegner verborgen, nur gehört oder per Relay gemeldet: kein bestätigtes Ziel,
@@ -52,7 +53,8 @@ und [Task](../../tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md).
 Dieser Doku-Branch basiert bewusst auf dem noch nicht integrierten
 Kampagnenstand `e4b407fe0598f1f601b40177c7fec408fd73618c`.
 Zusätzlich gelesen: nativer Kartenstand
-`e55206832aab2366013375a2fb678cb057ce9de3` und dessen laufender Rampenvertrag.
+`4e44521fd1c0e512d725d28e58fc910d4948e56b` und dessen weiterhin uncommitteter
+Rampenvertrag einschließlich breiter Rampenbänder und gemeinsamer Eckprofile.
 Die in diesem Branch fehlenden Rampen-APIs sind **Eingaben von AP0**, kein
 Auftrag, fremde uncommittete Dateien zu kopieren. Vor Runtime-Arbeit den dann
 gemeinsam integrierten Stand prüfen und einen frischen Taskbranch davon anlegen.
@@ -107,7 +109,9 @@ Ausgabe: ein benannter gemeinsam integrierter Startcommit und API-Abgleich.
 
 - [ ] Relevante Regeln, Git-/Worktreestatus und den dann aktuellen Rampencommit lesen.
 - [ ] Prüfen, dass Version/Richtung serialisiert und revisioniert sind, beide
-  Rampenenden legal sind und A*/HPA/Bewegung denselben Übergangspfad verwenden.
+  Längsenden und passende seitliche Rampenanschlüsse legal sind und A*/HPA/
+  Bewegung denselben Übergangspfad verwenden. Breiten-/Eck-/Editorregeln
+  gehören dem Kartentask; hier keine alternative Rampenimplementierung anlegen.
 - [ ] Den Startcommit, eigene Dateigrenzen und ggf. konkrete APIabweichungen in
   der Taskdatei festhalten. Bei fehlender Rampenbasis keine alternative Rampe bauen.
 - [ ] Nur Dokument-/Diffprüfung ausführen; keine eigene große Rampenmatrix starten.
@@ -229,13 +233,18 @@ validiert und committet alles oder nichts. Alte MAPF-Light-Einstiege bleiben Leg
 - [ ] RED-Fixture auf höchstens zwölf Feldern: gleichgerichtete Kolonne,
   überlappende Gegenkante, besetzter Ausgang, langsamere Führungsfigur,
   Auftragspriorität mit Wartezeit, sechsfach gedrehte Rampen und fehlender
-  Ausweichraum. Über 16 Anfragen dürfen pending bleiben, keine verschwinden.
+  Ausweichraum. Passende Seitenrampen verbinden ein zweispuriges Band;
+  Plateau-/Höhenfehlanschlüsse bleiben gesperrt. Das Band darf nicht allein
+  wegen seines Tiletyps als einspuriger Gang gelten. Über 16 Anfragen dürfen
+  pending bleiben, keine verschwinden.
 - [ ] `python scripts/tests/run_hex_tactical_check.py --case reservation` RED prüfen.
 - [ ] Feld- und Kantenintervalle einschließlich stehender Figuren planen;
   zugesagte Freigaben nur mit gemeinsam committetem Folgeschritt nutzen.
   Dauerhafte Zusagen hält der Ground-Owner, nicht ein lokales Resolverdictionary.
 - [ ] Korridore mit sechs Nachbarn und gemeinsamer Terrainprüfung erkennen,
-  pro Terrainrevision cachen. Drei Übergänge voraus, 16 neue Anfragen/Tick,
+  pro Terrainrevision cachen; breite Rampenbänder und Kurven nach ihrem legalen
+  Übergangsgraph behandeln, ohne pauschale Einspurensperre. Drei Übergänge
+  voraus, 16 neue Anfragen/Tick,
   Rücksetzsuche maximal 64 Felder. Belegte Passage räumen lassen, dann
   abgeschlossene Gruppen fair durchlassen; `blocked/no_passing_space` ruhig erhalten.
 - [ ] GREEN einschließlich Revisionskonflikt/keiner Teilmutation prüfen;
@@ -257,7 +266,9 @@ Terrainfaktoren; physisches Hexmaß, keine projizierte Bildschirmdistanz.
 
 - [ ] RED-Fixture: zwei folgende NPCs durch mehrere Felder, keine Gleichbelegung
   an der Handoffgrenze, Gegenverkehr wartet, alle sechs Richtungen gleich schnell.
-  Rampe längs auf/ab legal, seitlich gesperrt. Revisionswechsel vor Eintritt
+  Rampe längs auf/ab legal, seitlich nur zu passender Rampe gleicher Endpunkthöhe;
+  seitlicher Plateauanschluss gesperrt. Gerade und geknickte Rampenbandnaht
+  verwenden dieselbe Übergangsquelle. Revisionswechsel vor Eintritt
   verhindert ihn. Auftragswechsel/Verwundung lässt keine fremde Reservierung stehen.
 - [ ] `python scripts/tests/run_hex_tactical_check.py --case movement` RED prüfen.
 - [ ] Neue Commands über Resolver und atomaren Commit führen, Feldwechsel vor

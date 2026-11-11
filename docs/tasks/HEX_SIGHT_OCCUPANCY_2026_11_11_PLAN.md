@@ -9,7 +9,7 @@ nur Dokumente, Schnittstellen und Git-Diff, startet keine Engine.
 Planungsbranch: `task/hex-sight-occupancy-plan-20261111`, bewusst auf dem noch
 nicht integrierten Kampagnenstand `e4b407fe0598f1f601b40177c7fec408fd73618c`.
 Nicht auf dem alten `integration/core-foundation` vom August implementieren.
-Der native Kartenstand `e55206832aab2366013375a2fb678cb057ce9de3` und dessen
+Der native Kartenstand `4e44521fd1c0e512d725d28e58fc910d4948e56b` und dessen
 laufende Rampenarbeit sind getrennte Integrationsvoraussetzungen. Dieser
 Doku-Branch übernimmt weder deren uncommittete Änderungen noch fremde WIP.
 
@@ -62,7 +62,8 @@ Mainintegration oder EXE in dieser Planungsrunde.
 - Voraussetzung: `docs/dev/explicit_hex_ramps_contract.md` aus dem Kartenchat.
   Beim Planlesen noch in dessen Worktree, nicht in diesem Branch verfügbar:
   `C:/dev/SternenBuergerchen-worktrees/native-glut-maps-20261110/`.
-  Gelesener SHA256: `23d2c12b7cfbed9a4ba5a20596103700c5ba3ca9a11379c159742873b608fe95`.
+  Gelesener SHA256 einschließlich breiter Rampenbänder und Editorergänzung:
+  `783d7779ad2e7d27148e457eb2f071f89536011f3f2b0a0612885f8cb0f681c3`.
 - Lokale Diagnose: `output/performance_hex_audit_20261111/20261111T133734/BERICHT.md`.
 
 ## Akzeptanzkriterien des Plans
@@ -72,6 +73,9 @@ Mainintegration oder EXE in dieser Planungsrunde.
   einen integrierbaren Commit; spätere Abnahme ist sichtbar zurückgestellt.
 - A*, HPA, Bewegung und Reservierung konsumieren dieselben Rampenanschlüsse.
 - H0/H1-Plateaukante gesperrt; Rampenzentrum H+0,5, keine Float-Abschneidung.
+- Seitliche Endpunkthöhe H+0,5 verbindet nur passende Rampen; breite Bänder
+  und Innen-/Außenecken lesen dieselben Übergänge und gelten nicht pauschal
+  als einspuriger Gang. Normale seitliche Plateauanschlüsse bleiben gesperrt.
 - Ein autoritativer logischer Ground-State; kein UI-/Mesh- oder Registryowner
   mit einer zweiten Mission-, NPC-, Wahrnehmungs- oder Belegungswahrheit.
 - Erkennungstimer, Kontaktwissen, aktuelle Sicht und Schusszulässigkeit bleiben

@@ -3,11 +3,12 @@
 ### Hexsicht und Feldbelegung: konkreter Arbeitsplan — 11.11.2026
 
 Nur Planung auf `task/hex-sight-occupancy-plan-20261111`, bewusst auf dem
-noch nicht integrierten Kampagnenstand e4b407fe0. Native Kartenbasis e55206832
+noch nicht integrierten Kampagnenstand e4b407fe0. Native Kartenbasis 4e44521fd
 und deren expliziter Rampenvertrag sind separate Integrationsvoraussetzungen.
 AP0–AP8: gemeinsamer Ground-State, Hexsicht/Erkennung, zeitliche Feld- und
 Kantenreservierungen, tatsächliche Bewegung, Lifecycle und Save/Authority.
-Ein NPC pro Feld; Rampenzentrum H+0,5, seitliche Rampenkanten gesperrt.
+Ein NPC pro Feld; Rampenzentrum H+0,5, seitlich nur passende Rampenanschlüsse
+auf H+0,5. Breite Rampenbänder/Ecken werden nicht pauschal einspurig gesperrt.
 AP9 große/native Vergleichs- und Gefechtstests auf Nutzerwunsch zurückgestellt.
 Keine Produktänderung, Engineprüfung oder Performancefreigabe durch diesen Plan.
 Task: `docs/tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md`.
