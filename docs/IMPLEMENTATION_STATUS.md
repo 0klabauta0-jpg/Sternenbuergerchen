@@ -13,6 +13,17 @@ Flight-/Rottenowner im Weltraumkampf-Chat abgestimmt. Bisherige Drei-Marker-Reis
 bleibt bis zum vollständigen Anschluss produktiv. Vertrag:
 `docs/dev/orbital_approach_contract.md`. Große Tests bleiben später.
 
+### AP5 Gruppenankunft und 3DProxyleser — 11.11.2026
+
+Fireteam-Start, laufende Position, Formationsanker und Ankunft lesen im Hexpfad
+den bereits übergebenen Ortsroot. Stage-/Zielidentität und Bewegungsende zählen;
+deckende Holds brauchen eigenes explizites Ziel. 3DProxy folgt stetiger Rootpose
+mit bestehendem Höhenmaßstab und separatem committetem Körperwinkel; keine zweite
+Positionsglättung. Consumer65/0, Movement42/0, Security34/0 mit Guards/Quellhashes
+und geschlossenem Review; QA hex_move_consumers_20261111. Viewreader geprüft,
+keine native Grafik-/Animations-/Spielgefühlabnahme. AP5 Türguard, Bewegungsschuss
+und Backoff sowie AP6–8 bleiben offen; keine Karte aktiviert oder großen Tests.
+
 ### AP5 echte Movebefehle und 2DActorprojektion — 11.11.2026
 
 Root besitzt jetzt angenommene Hexziele samt gecachter inkrementeller Navigation

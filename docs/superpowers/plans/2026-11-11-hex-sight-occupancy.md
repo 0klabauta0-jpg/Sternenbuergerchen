@@ -429,3 +429,10 @@ Consumer39/0, ReservationOwner36/0, Korridor15/0; frischer Review geschlossen.
 QA hex_move_commands_20261111. AP5-Checkboxen bleiben bis zu 3D-/Fireteam-
 Ankunft, Türguard, Bewegungsschuss und Rücksetzausführung offen. Keine Karte
 aktiviert, keine Main-/EXEfreigabe; AP6–8 folgen, große AP9-Tests erst später.
+
+AP5-Konsumenten ergänzt: tatsächliche Fireteamankunft und logische Start-/
+Formationsanker bis Completionfallback, 3DProxy liest stetige Rootpose samt
+separatem Körperwinkel und bestehender Höhenskalierung, keine zweite Glättung.
+Consumer65/0, Movement42/0, Security34/0; Review schloss vier reproduzierte
+Randfälle. QA hex_move_consumers_20261111. Kein nativer Renderer-/Spielgefühltest.
+Offen AP5: Türmutationsguard, Bewegungsschuss, Rücksetzausführung; AP6–8 folgen.

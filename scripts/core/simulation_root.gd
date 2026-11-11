@@ -372,7 +372,7 @@ func _clear_hex_movement_context() -> void:
 func _clear_hex_actor_metadata(unit_id:String) -> void:
 	var actor=_resolve_known_unit_for_contract(unit_id)
 	if not is_instance_valid(actor):return
-	for key in ["hex_ground_stand_height_logical","hex_ground_moving"]:
+	for key in ["hex_ground_stand_height_logical","hex_ground_moving","hex_ground_facing_angle"]:
 		if actor.has_meta(key):actor.remove_meta(key)
 
 
@@ -386,6 +386,28 @@ func get_hex_movement_audit_snapshot() -> Dictionary:
 
 func has_hex_destination_arrived(unit_id:String,command_id:String) -> bool:
 	return is_hex_ground_runtime_active() and _hex_movement_runtime.has_arrived(unit_id,command_id)
+
+
+func get_hex_logical_unit_position(unit_id:String) -> Variant:
+	var state:Dictionary=get_hex_unit_state(unit_id)
+	return _hex_ground_registry.call("grid_to_world",state.grid) if not state.is_empty() else null
+
+
+func has_hex_position_arrived(unit_id:String,target_position:Vector2,command_id:String) -> bool:
+	if not is_hex_ground_runtime_active() or not target_position.is_finite() or command_id.is_empty():return false
+	var state:Dictionary=get_hex_unit_state(unit_id)
+	if state.is_empty() or state.movement_state.moving or state.route_state.has_commitments:return false
+	var target_grid:Vector2i=_hex_ground_registry.call("world_to_grid",target_position)
+	if state.grid!=target_grid:return false
+	var order:Dictionary=get_hex_movement_readout(unit_id)
+	if not order.is_empty() and order.goal_grid==target_grid and has_hex_destination_arrived(unit_id,command_id):return true
+	# Covering members receive an explicit Hold for this stage, not a Move goal.
+	var actor=_resolve_known_unit_for_contract(unit_id)
+	if not is_instance_valid(actor) or not actor.has_method("get_current_unit_command"):return false
+	var command=actor.call("get_current_unit_command")
+	if command==null or String(command.command_type)!="hold_position" or String(command.command_token)!=command_id:return false
+	var command_target:Variant=command.target_position
+	return typeof(command_target)==TYPE_VECTOR2 and Vector2(command_target).is_finite() and _hex_ground_registry.call("world_to_grid",Vector2(command_target))==target_grid
 
 
 func _commit_hex_movement_facing(unit_id:String,direction:int) -> void:
@@ -408,6 +430,7 @@ func _project_hex_ground_actors(fraction:float) -> void:
 		actor.set_meta("map_facing_angle",projection.facing_angle)
 		actor.set_meta("hex_ground_stand_height_logical",projection.stand_height_logical)
 		actor.set_meta("hex_ground_moving",projection.moving)
+		actor.set_meta("hex_ground_facing_angle",projection.facing_angle)
 		if not _hex_ground_runtime.has_motion_commitments(id):_hex_visual_unit_ids.erase(id)
 
 
