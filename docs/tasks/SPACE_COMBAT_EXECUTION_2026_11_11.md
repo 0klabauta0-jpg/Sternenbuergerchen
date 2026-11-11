@@ -194,6 +194,10 @@ Verifier und diese Statusdokumentation.
   und Bereich werden gemeinsam übernommen. 13/13, vorhandene Flugtakt- und
   Fleettravelprüfungen grün. Dies ist noch keine transaktionale Root-/Travel-/
   Wing-/Registry-Verbindung und schaltet keine lokalen Bereiche frei.
+  Der alte `commit_travel_pose` verweigert lokale Koordinaten; Flightprüfung
+  14/14 und vorhandene Reiseprüfungen grün. Vor produktiver Freigabe muss der
+  Reiseowner alte Aktionen auf lokalen Zuständen abfangen: dessen bisheriger
+  `_set_travel_pose` erwartet Erfolg per Assertion.
 - AP04a geometrische Eintrittsvorschau: baut kanonisches Orbitlayout, prüft
   Flugrevision, unteres Eintrittsband, vollständigen Rumpf, Körpermaske und
   belegte Zielfelder ohne Mutation. Prüfung7/7 einschließlich echter

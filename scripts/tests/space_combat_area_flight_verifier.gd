@@ -25,5 +25,6 @@ func _initialize() -> void:
 	var moved: Dictionary = flight.get_snapshot()
 	if moved.coordinate_frame != "local" or moved.space_area_id != "orbit_approach:moon" or moved.velocity_plane != Vector2(1,0): failed += 1
 	if flight.commit_area_transition(transition, 0).get("reason") != "stale_tick" or flight.get_snapshot() != moved: failed += 1
-	print("SPACE_COMBAT_AREA_FLIGHT passed=", 13 - failed, " failed=", failed)
+	if flight.commit_travel_pose(Vector2(2,2), 0.0) or flight.get_snapshot() != moved: failed += 1
+	print("SPACE_COMBAT_AREA_FLIGHT passed=", 14 - failed, " failed=", failed)
 	quit(1 if failed else 0)

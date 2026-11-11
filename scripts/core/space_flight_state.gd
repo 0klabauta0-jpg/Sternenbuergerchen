@@ -44,7 +44,7 @@ func bind_craft(craft_id: String, allow_rebind: bool = false) -> bool:
 	return true
 
 func commit_travel_pose(position: Vector2, heading: float) -> bool:
-	if _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
+	if _coordinate_frame != "strategic" or _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
 		return false
 	_position = position
 	_heading = heading
