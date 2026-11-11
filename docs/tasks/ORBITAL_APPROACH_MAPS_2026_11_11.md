@@ -67,3 +67,31 @@ Zellindizes ohne Bereich würden verschiedene Karten vermischen. Bisheriger
 Travelgate blockiert taktischen Flug pauschal; neue autoritative Übergänge müssen
 diesen Fall sauber unterscheiden. Aktueller Anflug prüft den Saum noch nicht.
 Methodennamen/Dateibesitz werden mit dem Weltraumkampf-Chat abgestimmt.
+
+## Konkrete Travelgrenze (Abstimmung nach 2a17362d1)
+
+Der Weltraumkampfstand bietet Bereichs-/Index-/Geometrievorstufen, aber noch
+keinen atomaren Root-/Travelübergang. Deshalb nicht als fertige Reise integrieren.
+Für den Fleetowner sind folgende Delegationssignaturen vereinbart:
+
+- `prepare_space_area_transition(craft_id, expected_travel_revision,
+  source_area_id, target_area_id, root_context) -> Dictionary`
+- `validate_prepared_space_area_transition(candidate, root_context) -> Dictionary`
+- `commit_prepared_space_area_transition(candidate, root_context) -> Dictionary`
+
+Rootkontext bindet zusätzlich Request-ID/Signatur, erlaubte Reiseoperation und
+deren Ziel/Phase. Identische Quell-/Zielbereiche allein beweisen keinen Saumanflug.
+Kandidaten bleiben Root-privat, Prepare verändert keinen Gameplayzustand und
+bucht keinen Treibstoff. Der vorhandene Travelowner bietet diese APIs noch nicht.
+Nach finaler gemeinsamer Revision-/Belegungsprüfung soll ein synchroner,
+signal-/awaitfreier Tail vorbereitete Zustände veröffentlichen; dabei nicht den
+alten `apply_command`-/`_arrive`-Pfad erneut aufrufen, der strategische Flugposen
+schreibt. Events erst nach Veröffentlichung aller beteiligten Owner.
+
+Der aktuelle Adapter ruft vor Anflug `authorize_departure` auf. Dies mutiert
+Supply-Fuel und Campaign-Abflug/Job. Travelvorbereitung allein macht daher noch
+keinen atomaren Anflug: auch diese Effekte müssen vor erstem Debit vorbereitet
+und gemeinsam veröffentlicht werden. Keine Dummyrefunds oder halbe Freigabe.
+Root-private Reservierungen/Token bei Abbruch freigeben; erfolgreiche gleiche
+Requests idempotent beantworten, geänderte Signatur ablehnen. Roottransition bis
+zum vollständigen Anschluss nur als nichtproduktive Ownerfixture ausweisen.
