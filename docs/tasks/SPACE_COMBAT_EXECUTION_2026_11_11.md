@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warp-Aufnahme-Vorstufe: Flight-Areawechsel und erstmalige lokale Registry-/
+  Combataufnahme sind vor dem stillen Schritt separat validierbar; die
+  Ersteintrittsfixture nutzt beide nach der Rottenprüfung. Vorläufige
+  Katalog-Footprints: Cutlass zwei, Buccaneer ein Hex; keine UI-Werte.
+  Ziel-Owner- und Warp-Sliceprüfungen grün. Die produktive Tickanbindung und
+  sichere Warp-Abreise sind weiterhin offen.
+
 - Warp-Eintrittsgrundlage: Die lokale Eintrittspose setzt den Flightmodus nun
   ausdrücklich auf taktisch. Die bisherige Fixture übernahm irrtümlich den
   strategischen Modus und war damit für Bewegungs-/Lesepfad nicht nutzbar.

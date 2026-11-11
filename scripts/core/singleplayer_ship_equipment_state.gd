@@ -41,13 +41,21 @@ func get_space_flight_profile(craft_id: String) -> Dictionary:
 	if not _crafts.has(craft_id): return {"ok":false, "reason":"unknown_craft"}
 	var model_id := String(_crafts[craft_id].get("model_id", ""))
 	var profile: Dictionary = CATALOG.flight_profile(model_id)
-	if not profile.has_all(["mass", "main_thrust", "reverse_thrust", "side_thrust", "turn_acceleration", "thrust_fraction"]):
+	if not profile.has_all(["mass", "main_thrust", "reverse_thrust", "side_thrust", "turn_acceleration", "thrust_fraction", "footprint_hexes"]):
 		return {"ok":false, "reason":"flight_profile_unavailable"}
 	for key in ["mass", "main_thrust", "reverse_thrust", "side_thrust", "turn_acceleration", "thrust_fraction"]:
 		if typeof(profile[key]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(profile[key])) or float(profile[key]) <= 0.0:
 			return {"ok":false, "reason":"invalid_flight_profile"}
 	if float(profile.thrust_fraction) > 1.0: return {"ok":false, "reason":"invalid_flight_profile"}
-	return {"ok":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "mass":float(profile.mass), "hull":{"main_thrust":float(profile.main_thrust), "reverse_thrust":float(profile.reverse_thrust), "side_thrust":float(profile.side_thrust), "turn_acceleration":float(profile.turn_acceleration)}, "power":{"thrust_fraction":float(profile.thrust_fraction)}}
+	if typeof(profile.footprint_hexes) != TYPE_ARRAY or profile.footprint_hexes.is_empty() or profile.footprint_hexes.size() > 64: return {"ok":false, "reason":"invalid_flight_profile"}
+	var footprint: Array[Vector2i] = []
+	for raw in profile.footprint_hexes:
+		if typeof(raw) != TYPE_ARRAY or raw.size() != 2 or typeof(raw[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(raw[1]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(raw[0])) or not is_finite(float(raw[1])) or float(raw[0]) != floorf(float(raw[0])) or float(raw[1]) != floorf(float(raw[1])): return {"ok":false, "reason":"invalid_flight_profile"}
+		var cell := Vector2i(int(raw[0]), int(raw[1]))
+		if footprint.has(cell): return {"ok":false, "reason":"invalid_flight_profile"}
+		footprint.append(cell)
+	if not footprint.has(Vector2i.ZERO): return {"ok":false, "reason":"invalid_flight_profile"}
+	return {"ok":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "mass":float(profile.mass), "footprint_hexes":footprint, "hull":{"main_thrust":float(profile.main_thrust), "reverse_thrust":float(profile.reverse_thrust), "side_thrust":float(profile.side_thrust), "turn_acceleration":float(profile.turn_acceleration)}, "power":{"thrust_fraction":float(profile.thrust_fraction)}}
 func prepare_install(craft_id: String, slot_id: String, item_id: String, expected_revision: int) -> Dictionary:
 	if expected_revision != _revision: return _reject("equipment_changed")
 	if not _crafts.has(craft_id) or not CATALOG.compatible(String(_crafts[craft_id].model_id), slot_id, item_id): return _reject("incompatible_component")

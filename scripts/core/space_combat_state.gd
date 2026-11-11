@@ -59,6 +59,25 @@ func get_indexed_actor_cells(craft_id: String) -> Array:
 func get_inactive_actor(craft_id: String) -> RefCounted:
 	return _inactive_actors.get(craft_id)
 
+func validate_new_local_admission(definition: Dictionary, flight: RefCounted, proposal: Dictionary, tick: int) -> Dictionary:
+	var craft_id: Variant = definition.get("craft_id")
+	var faction: Variant = definition.get("faction_id")
+	var domain: Variant = definition.get("control_domain")
+	var footprint: Variant = definition.get("footprint_hexes")
+	if typeof(craft_id) != TYPE_STRING or String(craft_id).strip_edges().is_empty() or typeof(faction) != TYPE_STRING or String(faction).strip_edges().is_empty() or domain not in ["player", "neutral", "enemy"] or typeof(footprint) != TYPE_ARRAY or _metadata.has(craft_id) or _inactive_actors.has(craft_id) or not _registry.can_register_actor(craft_id, flight): return {"ok":false, "reason":"invalid_actor"}
+	var movement: Dictionary = flight.validate_area_transition(proposal, tick)
+	if not movement.get("ok", false) or movement.next_pose.get("coordinate_frame") != "local" or movement.next_pose.get("motion_mode") != "tactical": return {"ok":false, "reason":"invalid_transition"}
+	var cells: Array[Vector2i] = preview_footprint(movement.next_pose, footprint)
+	var area_id := String(movement.next_pose.space_area_id)
+	if cells.is_empty() or not _registry.query_cells(cells, area_id).is_empty() or not query_navigation_claims(cells, area_id).is_empty(): return {"ok":false, "reason":"occupied_or_invalid_footprint"}
+	return {"ok":true, "craft_id":craft_id, "flight":flight, "area_id":area_id, "cells":cells.duplicate(), "indexed_revision":int(movement.next_pose.revision) + 1, "metadata":{"faction_id":faction, "control_domain":domain, "footprint_hexes":footprint.duplicate()}}
+
+func _publish_new_local_admission(validation: Dictionary) -> void:
+	# Root-private tail following Flight preflight and a synchronous wing commit.
+	_registry._publish_register_actor_cells(validation.craft_id, validation.flight, validation.area_id, validation.cells)
+	_metadata[validation.craft_id] = validation.metadata.duplicate(true)
+	_indexed_revisions[validation.craft_id] = validation.indexed_revision
+
 func validate_deactivation(craft_id: String, expected_flight_revision: int, expected_area_revision: int) -> Dictionary:
 	var flight: RefCounted = _registry.get_actor(craft_id)
 	if flight == null: return {"ok":false, "reason":"unknown_actor"}
