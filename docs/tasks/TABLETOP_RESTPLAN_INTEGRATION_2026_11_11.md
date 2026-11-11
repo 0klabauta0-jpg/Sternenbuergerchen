@@ -1,5 +1,18 @@
 # Tabletop-Abstimmung und Restplan-Integration
 
+## Bewegungsschuss nach Konsumentenanschluss
+
+a74fbab2f nach unabhängigem Review als 615327eaf auf 698188f64 integriert.
+Frischer enger gemeinsamer MovingShotlauf 65/0 inklusive 42 Grundchecks,
+Profil-/Canary-/Sourceguards grün. Nur additive Statusdokumentation konfliktbehaftet.
+Belege: `docs/qa/tabletop_restplan_integration_20261111/moving_shot/`.
+Vorläufiger Faktor 0.65..0.95 ist keine Balancefreigabe; weniger Profilreads sind
+keine gemessene Performanceverbesserung. Keine Karte aktiviert, große Tests später.
+Driver `_refresh_mission_interaction_door_runtime_overrides` und entsprechender
+autoritativer Runtimeeventanschluss sind für den nächsten Tabletop-Türguard frei;
+der zweite genannte Handlername existiert hier bisher nicht. Kein breiterer
+Driver-/Sandbox-/Polisa-/Orbitbesitz daraus. Noch offen: Türguard, Backoff, AP6–8.
+
 ## Neuester AP5-Anschluss: Gruppen und 3D-View
 
 5a8544fea nach unabhängigem Review als 6a3f9c535 auf 9874511c4 integriert.

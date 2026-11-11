@@ -2,6 +2,12 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+Neuster Bewegungsstand: auch Bewegungsschuss a74fbab2f als 615327eaf integriert,
+frischer enger gemeinsamer MovingShotlauf 65/0 mit Guards grün. Fähigkeitsfaktor
+0.65..0.95 ausdrücklich vorläufig; kein zusätzlicher Wurf, Profilread pro Effect.
+Türmutationsguard und Backoff sowie AP6–8 bleiben offen. Die zwei eng benannten
+Driver-Türproducerbereiche sind für den Tabletop-Chat freigegeben.
+
 Aktueller Bewegungsnachtrag: Gruppenankunft/3D-View aus 5a8544fea jetzt als
 6a3f9c535 integriert, enger gemeinsamer Consumerlauf 65/0 mit Guards grün.
 Diese beiden Punkte sind erledigt; Türguard, Bewegungsschuss, Backoff und
