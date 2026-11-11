@@ -166,6 +166,10 @@ var _detection_progress: Dictionary = {}
 var _hex_sight_adapter = HEX_SIGHT_ADAPTER_SCRIPT.new()
 var _hex_detection_state = HEX_DETECTION_STATE_SCRIPT.new()
 var _hex_detection_context := ""
+var _hex_adapter_initialized := false
+var _hex_adapter_owner_path: NodePath
+var _hex_adapter_cache_path: NodePath
+var _hex_adapter_arc := -1.0
 @export_range(0.0, 360.0, 1.0) var hex_sight_arc_degrees := 120.0
 var _discipline_break_cooldown: Dictionary = {}
 var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
@@ -1045,12 +1049,48 @@ func _get_combat_visibility_system():
 
 
 func get_hex_sight_adapter() -> RefCounted:
-	_hex_sight_adapter.configure(get_node_or_null(simulation_root_path), _get_combat_visibility_system(), hex_sight_arc_degrees)
+	if not _hex_adapter_initialized or simulation_root_path != _hex_adapter_owner_path or combat_visibility_cache_path != _hex_adapter_cache_path or hex_sight_arc_degrees != _hex_adapter_arc or not _hex_sight_adapter.has_runtime_dependencies():
+		_hex_sight_adapter.configure(get_node_or_null(simulation_root_path), _get_combat_visibility_system(), hex_sight_arc_degrees)
+		_hex_adapter_owner_path = simulation_root_path
+		_hex_adapter_cache_path = combat_visibility_cache_path
+		_hex_adapter_arc = hex_sight_arc_degrees
+		_hex_adapter_initialized = true
 	return _hex_sight_adapter
 
 
 func _query_current_visibility(attacker, target, range_world: float) -> Dictionary:
 	return get_hex_sight_adapter().query_units(attacker, target, range_world)
+
+
+func _get_hex_combat_geometry(attacker, target) -> Dictionary:
+	var owner = get_node_or_null(simulation_root_path)
+	if owner == null or not owner.has_method("get_hex_combat_geometry"):
+		return {"handled":false}
+	var attacker_id: String = String(attacker.call("get_unit_id")) if attacker != null and attacker.has_method("get_unit_id") else ""
+	var target_id: String = String(target.call("get_unit_id")) if target != null and target.has_method("get_unit_id") else ""
+	return owner.call("get_hex_combat_geometry",attacker_id,target_id)
+
+
+## A gameplay sound producer supplies an already addressed hint, not a target
+## confirmation. Audio playback/visibility is deliberately not its producer.
+func notify_hex_sound_cue(unit_id: String, source_grid: Vector2i, event_id: String) -> Dictionary:
+	var adapter = get_hex_sight_adapter()
+	if not adapter.is_active() or event_id.strip_edges().is_empty():
+		return {"ok":false,"reason":"invalid_sound_context"}
+	var owner = get_node_or_null(simulation_root_path)
+	var registry = owner.call("get_hex_ground_terrain_registry")
+	var unit = _resolve_unit_by_id(unit_id)
+	var position: Dictionary = adapter.read_position(unit)
+	if not bool(position.get("valid",false)) or registry.call("get_tile_at_grid",source_grid) == null:
+		return {"ok":false,"reason":"invalid_sound_hint"}
+	var destination: Vector2 = registry.call("grid_to_world",source_grid)
+	var delta: Vector2 = destination-Vector2(position.position)
+	if delta.length_squared() < 0.000001:
+		return {"ok":false,"reason":"sound_has_no_direction"}
+	var delay := maxi(_get_detection_delay_ticks(unit),1)
+	if _current_tick < 0 or _current_tick > 9223372036854775807-delay:
+		return {"ok":false,"reason":"invalid_sound_tick"}
+	return owner.call("queue_hex_facing_intent",unit_id,adapter.world_angle_to_facing(delta.angle()),"sound:%s"%event_id,"noise_reaction",_current_tick+delay)
 
 
 func _get_contact_observation_position(unit) -> Vector2:
@@ -1507,6 +1547,12 @@ func _store_combat_attacker_facing(attacker, target) -> void:
 	if attacker_position.distance_squared_to(target_position) <= 0.0001:
 		return
 	var facing_angle: float = _get_facing_angle_between_positions(attacker_position, target_position)
+	var hex_adapter = get_hex_sight_adapter()
+	if hex_adapter.is_active():
+		var logical: Dictionary = hex_adapter.build_observer_state(attacker,-1.0)
+		if logical.is_empty():
+			return
+		facing_angle = hex_adapter.facing_to_world_angle(int(logical.hex_state.facing_dir))
 	var is_enemy_attacker: bool = attacker.has_method("get_team_id") and String(attacker.call("get_team_id")) != friendly_team_id
 	var effect: Dictionary = {
 		"effect_type": "set_unit_combat_posture",
@@ -3512,6 +3558,7 @@ func resolve_flank_attack(attacker, target) -> Dictionary:
 func resolve_flank_attack_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
 	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
 		return {}
+	_flank_vulnerability_resolver.configure_hex_sight_adapter(get_hex_sight_adapter())
 	var result: Dictionary = Dictionary(_flank_vulnerability_resolver.call("resolve_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
 	if result.is_empty():
 		return {}
@@ -3581,6 +3628,7 @@ func resolve_flank_attack_preview(attacker, target) -> Dictionary:
 func resolve_flank_attack_preview_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
 	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
 		return {}
+	_flank_vulnerability_resolver.configure_hex_sight_adapter(get_hex_sight_adapter())
 	return Dictionary(_flank_vulnerability_resolver.call("preview_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
 
 
@@ -3668,7 +3716,6 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"spotted_contact_hit_chance_malus": SPOTTED_CONTACT_HIT_CHANCE_MALUS,
 		"cache_effective_attack_range_by_attacker": true,
 		"los_system": _get_combat_visibility_system(),
-		"query_current_visibility": Callable(self,"_query_current_visibility"),
 		"terrain_registry": _get_terrain_registry(),
 		"check_discipline_break": Callable(self, "_check_discipline_break"),
 		"can_return_fire": Callable(self, "_can_unit_return_fire"),
@@ -3681,6 +3728,9 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"get_weapon_attack_range": Callable(self, "_get_weapon_attack_range"),
 		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
 	}
+	if get_hex_sight_adapter().is_active():
+		context["query_current_visibility"] = Callable(self,"_query_current_visibility")
+		context["get_hex_combat_geometry"] = Callable(self,"_get_hex_combat_geometry")
 	if combat_tick_budget_debug_enabled:
 		context["record_target_evaluation"] = Callable(self, "_record_resolver_target_evaluation")
 		context["combat_hotspot_debug_enabled"] = true
@@ -4271,6 +4321,9 @@ func _build_enemy_security_state(group_id: String, units: Array, tactics: Dictio
 	var direction_angle: float = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("resolve_facing_angle", facing, fallback_angle)
 	var security_mode: String = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("normalize_enemy_security_mode", String(tactics.get("security_mode", "directional")))
 	var assignments: Array = Array(FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("build_enemy_member_assignments", units, security_mode, direction_angle, _get_terrain_registry()))
+	var hex_adapter = get_hex_sight_adapter()
+	if hex_adapter.is_active():
+		assignments = hex_adapter.apply_security_assignments(assignments,"enemy_security:%s:%d"%[group_id,_current_tick],security_mode,direction_angle)
 	for unit in units:
 		if unit == null or not unit.has_method("get_unit_id"):
 			continue
@@ -4280,7 +4333,12 @@ func _build_enemy_security_state(group_id: String, units: Array, tactics: Dictio
 		unit_ids.append(unit_id)
 		if unit is Node:
 			(unit as Node).set_meta("enemy_security_group_id", group_id)
-			(unit as Node).set_meta("enemy_facing_angle", direction_angle)
+			var visual_angle: float = direction_angle
+			if hex_adapter.is_active():
+				var logical: Dictionary = hex_adapter.build_observer_state(unit,-1.0)
+				if not logical.is_empty():
+					visual_angle = hex_adapter.facing_to_world_angle(int(logical.hex_state.facing_dir))
+			(unit as Node).set_meta("enemy_facing_angle", visual_angle)
 			(unit as Node).set_meta("enemy_security_mode", security_mode)
 	var state: Dictionary = {
 		"security_group_id": group_id,
@@ -4300,6 +4358,9 @@ func _build_enemy_security_state(group_id: String, units: Array, tactics: Dictio
 		"overwatch_ready": security_mode == "360" or String(tactics.get("profile_id", "")).strip_edges().to_lower() == "sniper_watch",
 	}
 	state["watched_unit_ids"] = _build_enemy_watched_unit_ids(units, state)
+	if hex_adapter.is_active():
+		state["hex_tactical"] = true
+		state["sector_width"] = deg_to_rad(hex_sight_arc_degrees)
 	state["watch_label"] = _build_enemy_security_label(state)
 	return state
 
@@ -4325,6 +4386,15 @@ func _build_enemy_watched_unit_ids(units: Array, state: Dictionary) -> PackedStr
 			var friendly_id: String = String(friendly.call("get_unit_id")) if friendly.has_method("get_unit_id") else ""
 			if friendly_id.is_empty() or result.has(friendly_id):
 				continue
+			var hex_adapter = get_hex_sight_adapter()
+			if hex_adapter.is_active():
+				var enemy_position: Vector2 = _get_contact_observation_position(enemy)
+				var friendly_position: Vector2 = _get_contact_observation_position(friendly)
+				if not _angle_within_sector(hex_adapter.bearing(enemy_position,friendly_position),hex_adapter.world_angle_to_plane(float(assignment.get("center_angle",0.0))),float(assignment.get("arc_width",0.0))):
+					continue
+				if bool(_query_current_visibility(enemy,friendly,float(assignment.get("weapon_range_world",0.0))).get("visible",false)):
+					result.append(friendly_id)
+				continue
 			var to_target: Vector2 = (friendly as Node2D).global_position - (enemy as Node2D).global_position
 			if String(state.get("security_mode", "")) != "360" and not _angle_within_sector(to_target.angle(), float(assignment.get("center_angle", 0.0)), float(assignment.get("arc_width", 0.0))):
 				continue
@@ -4341,7 +4411,10 @@ func _resolve_enemy_security_anchor(units: Array) -> Vector2:
 	var count: int = 0
 	for unit in units:
 		if unit is Node2D:
-			sum += (unit as Node2D).global_position
+			var position: Dictionary = get_hex_sight_adapter().read_position(unit)
+			if not bool(position.get("valid",false)):
+				continue
+			sum += Vector2(position.position)
 			count += 1
 	if count <= 0:
 		return Vector2.ZERO
@@ -4351,6 +4424,7 @@ func _resolve_enemy_security_anchor(units: Array) -> Vector2:
 func _resolve_enemy_security_focus_position(units: Array, fallback_position: Vector2) -> Vector2:
 	var nearest_position: Vector2 = fallback_position
 	var nearest_distance: float = INF
+	var hex_adapter = get_hex_sight_adapter()
 	for enemy in units:
 		if enemy == null or not (enemy is Node2D):
 			continue
@@ -4358,10 +4432,14 @@ func _resolve_enemy_security_focus_position(units: Array, fallback_position: Vec
 			if friendly == null or not (friendly is Node2D):
 				continue
 			var distance: float = (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position)
+			if hex_adapter.is_active():
+				if not _has_valid_los(enemy,friendly):
+					continue
+				distance = hex_adapter.distance(_get_contact_observation_position(enemy),_get_contact_observation_position(friendly))
 			if distance >= nearest_distance:
 				continue
 			nearest_distance = distance
-			nearest_position = (friendly as Node2D).global_position
+			nearest_position = _get_contact_observation_position(friendly)
 	if nearest_distance < INF:
 		return nearest_position
 	return _get_objective_position()
@@ -5576,6 +5654,7 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 	if simulation_root == null or _overwatch_controller == null:
 		return []
+	_overwatch_controller.configure_hex_sight_adapter(get_hex_sight_adapter())
 	var tactical_controller = _get_tactical_controller()
 	if tactical_controller == null or not tactical_controller.has_method("refresh_fireteam_security_state") or not tactical_controller.has_method("get_fireteam_security_snapshot"):
 		_overwatch_controller.call("reset_all")

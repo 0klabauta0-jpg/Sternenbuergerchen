@@ -1,4 +1,4 @@
-# Hex Tactical Runtime: isolierte Grundlagen V1
+# Hex Tactical Runtime V1
 
 Stand11.11.2026, Basis97e00aba14ced147b268113085854ac67dc764c5.
 Implementierte Bausteine; keine bereits aktivierte Missions-/Basisintegration.
@@ -85,7 +85,8 @@ aus diesen Deadlines ab, ohne Episoden zu erzeugen oder die Uhr zu verändern.
 
 ## Erste aktive Consumer hinter dem Opt-in
 
-`HexSightRuntimeAdapter` hält nur Owner-/Cacheverweise. Im Hexkontext lesen
+`HexSightRuntimeAdapter` hält Owner-/Cacheverweise und eine interne Sequenz
+für eindeutige Absichts-IDs. Er besitzt keine zweite Unitwahrheit. Im Hexkontext lesen
 Contact-, Schuss- und FoW-Abfragen die vom Owner zugelassenen logischen Zellen,
 Standhöhen und Richtungen. Fehlende Zulassung ist unsichtbar; Legacy nimmt
 weiter den bisherigen Weltpositionspfad. Derselbe CombatVisibilityCache dient
@@ -103,9 +104,45 @@ publizierte Sicht, damit auch notwendige Ausblendungen an den View gehen.
 Contactwissen und Schusserlaubnis bleiben eigene Entscheidungen. Die Hex-
 Erkennung im Driver liest Deadlines; Legacy-Countdowns bleiben kompatibel.
 
-Dies ist ein Reader-Zwischenschritt. Keine Karte ist aktiviert. Sicherung,
-Overwatch, Flankierung und autoritative Facingabsichten folgen gesondert;
-Command-/Movement-/Lifecycle-/Savepfade sind damit nicht bereits migriert.
+Sicherung, Overwatch und Flankierung lesen ebenfalls Zellmitten und aktuelle
+Richtungen. Kanonische Winkel werden in der unverzerrten Hexebene geprüft;
+Visual-Metadaten erhalten daraus abgeleitete projizierte Winkel. Ein einzelner
+360°-Wächter behält seinen individuellen Kegel. Für mehrere Wächter wird die
+gemeinsame Basis einmal quantisiert und auf sechs Richtungen verteilt; drei
+120°-Wächter können geometrisch Rundumsicht bilden. Terrain bleibt wirksam.
+Alte Sicherungssnapshots erweitern weder aktuelle Richtung noch Kegelbreite.
+Kontextwechsel löschen auch lokale Sicherungs-/Overwatch-/Flank-Ableitungen.
+
+## Autoritative Blickabsichten
+
+`SimulationRoot.queue_hex_facing_intent(unit_id,direction,command_id,reason,
+ready_tick=-1)` nimmt interne Absichten an. Gültige Gründe: noise_reaction,
+combat_reaction, security_assignment, movement (Prioritäten10/20/30/40).
+Eine Absicht je zugelassenem Runtime-NPC; fehlende Autorität/Unit, ungültige
+Richtung/Identität/Zeiten werden abgelehnt. Der Root committet nach Commands
+und vor Effects/Tickverbrauchern. Frühestens nächster Tick oder der spätere
+Fälligkeitstick; Wiederholungen gleicher Richtung verschieben die ursprüngliche
+Deadline nicht nach hinten. Replayfenster4096IDs als begrenzter O(1)-Ring.
+Ground-State ändert die Revision nur bei tatsächlichem Richtungswechsel.
+
+Auftragsfingerprint und Kontextwechsel verwerfen veraltete Absichten. Hold,
+Retreat, SeekCover, Defend/Take und reines Move erlauben keinen freien Noise- /
+Combat-Nachsehauftrag; eine neue Sicherungsanweisung hat Vorrang. Der Driver-
+Hook `notify_hex_sound_cue(unit_id,source_grid,event_id)` benutzt die vorhandene
+Awareness-/Bereitschaftsverzögerung und Root-Auftragspolicy, bestätigt aber keinen
+Kontakt. AudioEventBus ist Darstellung; ein Gameplay-Schallausbreitungsproducer
+ist hier nicht vorhanden/neu eingebaut. Der explizite adressierte Hook ist der
+Anschlusspunkt, keine Schallphysik und kein zusätzlicher NPC-Vollscan pro Schuss.
+
+Terraincover, Damage-/Diagnosepositionen und Höhenbonus lesen im Hexkontext
+dieselben logischen Felder; H+0,5 bleibt als halber Schritt im bestehenden
+Höhenfaktor erhalten. Legacyregeln bleiben getrennt. Ein konkret skillabhängiger
+Bewegungsschussabzug ist in diesem Damagepfad noch nicht nachgewiesen; vorhandene
+Skill-/Attackbonuswerte bleiben bestehen. Dessen genaue Balance bleibt vor
+Aktivierung der AP5-Bewegung ausdrücklich offen, kein neuer Wert wird behauptet.
+
+Keine Karte ist aktiviert. Aktive Bewegung, Zulassung/Lifecycle und Save-/
+Netzpfade bleiben AP4–8; die großen Szenen-/Leistungsabnahmen AP9 folgen später.
 
 ## Rampen und offene Anbindung
 
@@ -113,7 +150,7 @@ Gemeinsamer Rampenvertrag: längs H/H+1, seitlich H+0,5 nur bei passenden
 Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
 Terrainowner; `allows_step` bleibt für Bewegung/Reservierung das Terrain-Tor.
 
-Noch offen: weitere AP3-Verbraucher und Facingabsichten, zeitliche
+Noch offen: zeitliche
 Reservierung und ihre Ausführung AP4/5, Lifecycle/Save/Netzwerk AP6–8.
 Ein Datenindex ersetzt nicht die aktive Bewegung oder Minimum-Spacing.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.

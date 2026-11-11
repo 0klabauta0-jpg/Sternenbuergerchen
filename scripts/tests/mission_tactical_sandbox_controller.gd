@@ -3279,6 +3279,8 @@ func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 	var started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var security_changed: bool = false
+	var combat_driver = _get_combat_loop_driver()
+	var hex_adapter = combat_driver.call("get_hex_sight_adapter") if combat_driver != null and combat_driver.has_method("get_hex_sight_adapter") else null
 	for fireteam_id_variant in _get_available_fireteam_ids():
 		var fireteam_id: String = String(fireteam_id_variant)
 		var previous_state: Dictionary = Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
@@ -3287,6 +3289,9 @@ func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 			_fireteam_security_controller.call("reset_fireteam", fireteam_id)
 			_clear_fireteam_security_facing_meta(fireteam_id)
 		else:
+			var security_context: Dictionary = _get_area_execution_security_context(fireteam_id).duplicate(true)
+			if hex_adapter != null and hex_adapter.is_active():
+				security_context["hex_sight_adapter"] = hex_adapter
 			_fireteam_security_controller.call(
 				"update_fireteam_state",
 				fireteam_id,
@@ -3297,7 +3302,7 @@ func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 				Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {})).duplicate(true),
 				Dictionary(_ad_hoc_order_controller.call("get_active_order", fireteam_id)) if _ad_hoc_order_controller != null else {},
 				get_fireteam_contact_snapshot(fireteam_id),
-				_get_area_execution_security_context(fireteam_id)
+				security_context
 			)
 			_apply_fireteam_security_facing_from_state(Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)))
 		var next_state: Dictionary = Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
@@ -33378,6 +33383,8 @@ func _apply_fireteam_security_facing_from_state(security_state: Dictionary) -> v
 	if fireteam_id.is_empty():
 		return
 	var unit_by_id: Dictionary = {}
+	var combat_driver = _get_combat_loop_driver()
+	var hex_adapter = combat_driver.call("get_hex_sight_adapter") if combat_driver != null and combat_driver.has_method("get_hex_sight_adapter") else null
 	for unit in _get_fireteam_units(fireteam_id, true):
 		if unit == null or not (unit is Node) or not unit.has_method("get_unit_id"):
 			continue
@@ -33391,6 +33398,11 @@ func _apply_fireteam_security_facing_from_state(security_state: Dictionary) -> v
 		if unit == null or not (unit is Node):
 			continue
 		var facing_angle: float = float(assignment.get("center_angle", security_state.get("direction_angle", 0.0)))
+		if hex_adapter != null and hex_adapter.is_active():
+			var logical: Dictionary = hex_adapter.build_observer_state(unit,-1.0)
+			if logical.is_empty():
+				continue
+			facing_angle = hex_adapter.facing_to_world_angle(int(logical.hex_state.facing_dir))
 		(unit as Node).set_meta("security_facing_angle", facing_angle)
 		(unit as Node).set_meta("security_coverage_role", String(assignment.get("coverage_role", "")))
 		(unit as Node).set_meta("security_facing_active", true)

@@ -150,7 +150,7 @@ static func build_cover_effectiveness_readout(attacker, target, context: Diction
 		return _build_unknown_cover_readout("no_attack_weapon", contact_state)
 
 	var weapon_range_world: float = _get_weapon_attack_range(attacker, target, context)
-	var distance_world: float = _get_node_distance(attacker, target)
+	var distance_world: float = _get_node_distance(attacker, target, context)
 	var range_state: String = _resolve_range_state(distance_world, weapon_range_world)
 	var los_state: String = _resolve_los_state(attacker, target, context)
 	var raw_cover_score: int = _get_target_cover_score(target, context)
@@ -547,7 +547,12 @@ static func _build_unknown_cover_readout(reason: String, contact_state: String =
 	}
 
 
-static func _get_node_distance(attacker, target) -> float:
+static func _get_node_distance(attacker, target, context: Dictionary = {}) -> float:
+	var geometry: Callable = context.get("get_hex_combat_geometry",Callable())
+	if geometry.is_valid():
+		var logical: Dictionary = geometry.call(attacker,target)
+		if bool(logical.get("handled",false)):
+			return float(logical.get("distance_world",-1.0))
 	if attacker is Node2D and target is Node2D:
 		return (attacker as Node2D).global_position.distance_to((target as Node2D).global_position)
 	return -1.0
@@ -575,6 +580,13 @@ static func _resolve_los_state(attacker, target, context: Dictionary) -> String:
 
 
 static func _get_target_cover_score(target, context: Dictionary) -> int:
+	var geometry: Callable = context.get("get_hex_combat_geometry",Callable())
+	if geometry.is_valid():
+		# The observer is irrelevant for scalar cover; use the target as both
+		# endpoints without consulting its continuously rendered transform.
+		var logical: Dictionary = geometry.call(target,target)
+		if bool(logical.get("handled",false)):
+			return int(logical.get("target_cover_score",-1))
 	if target != null and target.has_method("get_effective_cover_score"):
 		return clampi(int(target.call("get_effective_cover_score")), 0, 100)
 	if target is Node2D:

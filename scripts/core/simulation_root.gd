@@ -130,6 +130,7 @@ const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mul
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const HEX_GROUND_RUNTIME_SCRIPT: GDScript = preload("res://scripts/core/hex_ground_runtime.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
@@ -277,6 +278,12 @@ var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
 var _hex_ground_context_revision := 0
+const HEX_FACING_PRIORITIES := {"noise_reaction":10,"combat_reaction":20,"security_assignment":30,"movement":40}
+const HEX_FACING_REPLAY_CAPACITY := 4096
+var _hex_facing_pending: Dictionary = {}
+var _hex_facing_seen: Dictionary = {}
+var _hex_facing_replay_keys: Array[String] = []
+var _hex_facing_replay_cursor := 0
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -301,17 +308,26 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 		_hex_ground_registry = null
 		_hex_ground_enabled = false
 		_hex_ground_context_revision += 1
+		_hex_facing_pending.clear()
+		_hex_facing_seen.clear()
+		_hex_facing_replay_keys.clear()
+		_hex_facing_replay_cursor = 0
 		return {"ok": true, "enabled": false}
 	if rules != "hex_tactical_v1" or String(map_data.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
 		return {"ok": false, "reason": "unsupported_tactical_grid_rules"}
 	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_grid_topology") or String(terrain_registry.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
 		return {"ok": false, "reason": "invalid_hex_registry"}
-	if not terrain_registry.has_method("is_walkable") or not terrain_registry.has_method("get_stand_height_at"):
-		return {"ok": false, "reason": "invalid_hex_registry"}
+	for method in ["is_walkable","get_stand_height_at","grid_to_world","world_to_grid_float","get_movement_distance","get_cover_at","get_tile_at_grid"]:
+		if not terrain_registry.has_method(method):
+			return {"ok": false, "reason": "invalid_hex_registry"}
 	_hex_ground_runtime.configure(terrain_registry, String(map_data.call("get_map_name")), tick_counter)
 	_hex_ground_registry = terrain_registry
 	_hex_ground_enabled = true
 	_hex_ground_context_revision += 1
+	_hex_facing_pending.clear()
+	_hex_facing_seen.clear()
+	_hex_facing_replay_keys.clear()
+	_hex_facing_replay_cursor = 0
 	return {"ok": true, "enabled": true}
 
 
@@ -325,6 +341,22 @@ func get_hex_ground_terrain_registry() -> Node:
 
 func get_hex_ground_context_revision() -> int:
 	return _hex_ground_context_revision
+
+
+func get_hex_combat_geometry(attacker_id: String, target_id: String) -> Dictionary:
+	if not is_hex_ground_runtime_active():
+		return {"handled":false}
+	var source := get_hex_unit_state(attacker_id)
+	var destination := get_hex_unit_state(target_id)
+	if source.is_empty() or destination.is_empty():
+		return {"handled":true,"valid":false,"distance_world":-1.0,"target_cover_score":-1}
+	var origin: Vector2 = _hex_ground_registry.call("grid_to_world",Vector2i.ZERO)
+	var neighbor: Vector2 = _hex_ground_registry.call("grid_to_world",Vector2i(1,0))
+	var spacing: float = _hex_ground_registry.call("get_movement_distance",origin,neighbor)
+	var target = _resolve_known_unit_for_contract(target_id)
+	return {"handled":true,"valid":true,
+		"distance_world":float(HEX_GRID_SCRIPT.distance(source.grid,destination.grid))*spacing,
+		"target_cover_score":roundi(_extract_effective_cover_score(target))}
 
 
 func get_hex_unit_state(unit_id: String) -> Dictionary:
@@ -352,6 +384,82 @@ func release_hex_ground_unit(unit_id: String, reason: String) -> void:
 	if _should_skip_local_tick_processing():
 		return
 	_hex_ground_runtime.release_unit(unit_id, reason)
+	_hex_facing_pending.erase(unit_id)
+
+
+## Internal runtime intents, never accepted as client/UI-provided facing state.
+## A delayed reaction can specify its already skill-derived ready tick.
+func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String, reason: String, ready_tick: int = -1) -> Dictionary:
+	if _should_skip_local_tick_processing():
+		return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active() or get_hex_unit_state(unit_id).is_empty():
+		return {"ok":false,"reason":"hex_unit_unavailable"}
+	if direction < 0 or direction > 5 or command_id.strip_edges().is_empty() or not HEX_FACING_PRIORITIES.has(reason):
+		return {"ok":false,"reason":"invalid_facing_intent"}
+	if tick_counter < 0 or tick_counter == 9223372036854775807 or ready_tick < -1:
+		return {"ok":false,"reason":"invalid_facing_tick"}
+	var unit = _resolve_known_unit_for_contract(unit_id)
+	if not is_instance_valid(unit):
+		return {"ok":false,"reason":"runtime_unit_unavailable"}
+	var order := _get_hex_facing_order(unit)
+	if reason in ["noise_reaction","combat_reaction"]:
+		var command_type := String(order.get("command_type",""))
+		var source_type := String(order.get("source_command_type",""))
+		if command_type in ["hold_position","retreat","seek_cover"] or source_type in ["defend","take","retreat"] or (command_type == "move_to_position" and source_type not in ["engage","flank"]):
+			return {"ok":false,"reason":"assignment_locks_facing"}
+	var replay_key := JSON.stringify([unit_id,command_id])
+	if _hex_facing_seen.has(replay_key):
+		return {"ok":true,"replayed":true}
+	var order_key := JSON.stringify(order)
+	var previous: Dictionary = _hex_facing_pending.get(unit_id,{})
+	if not previous.is_empty() and String(previous.get("order_key","")) == order_key and int(previous.get("priority",0)) > int(HEX_FACING_PRIORITIES[reason]):
+		return {"ok":false,"reason":"higher_priority_facing_pending"}
+	if _hex_facing_replay_keys.size() < HEX_FACING_REPLAY_CAPACITY:
+		_hex_facing_replay_keys.append(replay_key)
+	else:
+		_hex_facing_seen.erase(_hex_facing_replay_keys[_hex_facing_replay_cursor])
+		_hex_facing_replay_keys[_hex_facing_replay_cursor] = replay_key
+		_hex_facing_replay_cursor = (_hex_facing_replay_cursor+1) % HEX_FACING_REPLAY_CAPACITY
+	_hex_facing_seen[replay_key] = true
+	var resolved_ready := maxi(ready_tick,tick_counter+1)
+	if not previous.is_empty() and String(previous.get("order_key","")) == order_key and int(previous.get("priority",0)) == int(HEX_FACING_PRIORITIES[reason]) and int(previous.get("direction",-1)) == direction:
+		resolved_ready = mini(resolved_ready,int(previous["ready_tick"]))
+	_hex_facing_pending[unit_id] = {"direction":direction,"ready_tick":resolved_ready,
+		"priority":HEX_FACING_PRIORITIES[reason],"order_key":order_key}
+	return {"ok":true,"replayed":false}
+
+
+func _get_hex_facing_order(unit) -> Dictionary:
+	if not is_instance_valid(unit) or not unit.has_method("get_current_unit_command"):
+		return {}
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("to_dict"):
+		return {}
+	var data: Dictionary = command.call("to_dict")
+	var result: Dictionary = {}
+	# Exclude continually derived cover/skill readouts; only the actual order
+	# identity and its policy can invalidate an intent between ticks.
+	for key in ["command_type","source_command_type","command_token","target_position","target_area_id","phase","fire_rule","movement_posture"]:
+		result[key] = data.get(key)
+	return result
+
+
+func _commit_hex_facing_intents() -> void:
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active():
+		return
+	var unit_ids: Array = _hex_facing_pending.keys()
+	unit_ids.sort()
+	for unit_id in unit_ids:
+		var intent: Dictionary = _hex_facing_pending[unit_id]
+		if int(intent["ready_tick"]) > tick_counter:
+			continue
+		_hex_facing_pending.erase(unit_id)
+		var unit = _resolve_known_unit_for_contract(unit_id)
+		if not is_instance_valid(unit) or String(intent["order_key"]) != JSON.stringify(_get_hex_facing_order(unit)):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		_hex_ground_runtime.commit_facing(String(unit_id),int(intent["direction"]))
 
 
 func _init() -> void:
@@ -1266,6 +1374,7 @@ func _physics_process(delta: float) -> void:
 	if profile_enabled:
 		profile_scopes["command_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
 
+	_commit_hex_facing_intents()
 	var effects: Array = _drain_queue(effects_queue)
 	var effect_count: int = effects.size()
 	if profile_enabled:
@@ -3798,6 +3907,9 @@ func _extract_effective_cover_score(unit) -> float:
 
 
 func _extract_terrain_cover_score(unit) -> float:
+	if is_hex_ground_runtime_active():
+		var state := _hex_ground_state_for_unit(unit)
+		return float(_hex_ground_registry.call("get_cover_at",state.grid)) if not state.is_empty() else 0.0
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry == null or unit == null or not (unit is Node2D) or not terrain_registry.has_method("get_cover_at_world"):
 		return 0.0
@@ -3806,9 +3918,18 @@ func _extract_terrain_cover_score(unit) -> float:
 
 
 func _get_unit_world_position_for_damage_resolution(unit) -> Vector2:
+	if is_hex_ground_runtime_active():
+		var state := _hex_ground_state_for_unit(unit)
+		return Vector2(_hex_ground_registry.call("grid_to_world",state.grid)) if not state.is_empty() else Vector2.ZERO
 	if unit is Node2D:
 		return (unit as Node2D).global_position
 	return Vector2.ZERO
+
+
+func _hex_ground_state_for_unit(unit) -> Dictionary:
+	if not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+		return {}
+	return get_hex_unit_state(String(unit.call("get_unit_id")))
 
 
 func _extract_unit_attack_bonus(unit) -> float:
@@ -3819,6 +3940,13 @@ func _extract_unit_attack_bonus(unit) -> float:
 
 
 func _extract_height_accuracy_modifier(attacker_unit, target_unit) -> float:
+	if is_hex_ground_runtime_active():
+		var source := _hex_ground_state_for_unit(attacker_unit)
+		var destination := _hex_ground_state_for_unit(target_unit)
+		if source.is_empty() or destination.is_empty():
+			return 0.0
+		var difference := clampf(float(int(source.stand_height_steps2)-int(destination.stand_height_steps2))*0.5,-2.0,2.0)
+		return HEIGHT_ADVANTAGE_ACCURACY_BONUS*difference if difference>=0.0 else HEIGHT_DISADVANTAGE_ACCURACY_PENALTY*difference
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry == null or attacker_unit == null or target_unit == null:
 		return 0.0

@@ -14,6 +14,8 @@ const MIN_SHIFT_DELAY_MSEC: int = 250
 const MAX_SHIFT_DELAY_MSEC: int = 1200
 
 var _state_by_fireteam: Dictionary = {}
+var _hex_sight_adapter = null
+var _hex_context := "legacy"
 
 
 func reset_fireteam(fireteam_id: String) -> void:
@@ -109,6 +111,13 @@ func update_fireteam_state(
 	threat_inputs: Array,
 	area_context: Dictionary = {}
 ) -> Dictionary:
+	_hex_sight_adapter = area_context.get("hex_sight_adapter")
+	if _hex_sight_adapter != null and not _hex_sight_adapter.is_active():
+		_hex_sight_adapter = null
+	var context: String = _hex_sight_adapter.get_context_key() if _hex_sight_adapter != null else "legacy"
+	if context != _hex_context:
+		reset_all()
+		_hex_context = context
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return {}
@@ -119,11 +128,14 @@ func update_fireteam_state(
 	var anchor_position: Vector2 = _resolve_anchor_position(fit_members, leader)
 	if typeof(area_context.get("center_position", null)) == TYPE_VECTOR2:
 		anchor_position = Vector2(area_context.get("center_position"))
+		if _hex_sight_adapter != null:
+			anchor_position = _hex_sight_adapter.snap_world_position(anchor_position)
 	var previous_state: Dictionary = Dictionary(_state_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
 	var threat_info: Dictionary = _resolve_main_threat(anchor_position, threat_inputs)
 	var threat_position: Variant = threat_info.get("position", null)
 	var threat_distance: float = float(threat_info.get("distance", INF))
 	var leadership: float = _read_skill_value(leader, "get_leadership_skill", 0.0)
+	var directional_arc_width: float = _hex_sight_adapter.get_arc_radians() if _hex_sight_adapter != null else DIRECTIONAL_ARC_WIDTH
 	var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
 	var command_type: String = _extract_command_type(behavior_profile_dict, area_context)
 	var mode_override: String = _resolve_security_mode_override(behavior_profile_dict, area_context)
@@ -143,7 +155,10 @@ func update_fireteam_state(
 	var pending_ready_at_msec: int = int(previous_state.get("pending_shift_ready_at_msec", 0))
 	if mode == SECURITY_MODE_DIRECTIONAL and typeof(threat_position) == TYPE_VECTOR2:
 		var desired_angle: float = (Vector2(threat_position) - anchor_position).angle()
-		if _angle_within_sector(desired_angle, direction_angle, DIRECTIONAL_ARC_WIDTH):
+		var threat_in_sector := _angle_within_sector(desired_angle,direction_angle,directional_arc_width)
+		if _hex_sight_adapter != null:
+			threat_in_sector = absf(wrapf(_hex_sight_adapter.world_angle_to_plane(desired_angle)-_hex_sight_adapter.world_angle_to_plane(direction_angle),-PI,PI)) <= directional_arc_width*0.5+0.000001
+		if threat_in_sector:
 			direction_angle = desired_angle
 			pending_angle = null
 			pending_ready_at_msec = 0
@@ -165,7 +180,9 @@ func update_fireteam_state(
 		pending_ready_at_msec = 0
 		if typeof(threat_position) == TYPE_VECTOR2:
 			direction_angle = (Vector2(threat_position) - anchor_position).angle()
-	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world, now_msec)
+	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world, now_msec, directional_arc_width)
+	if _hex_sight_adapter != null:
+		member_assignments = _hex_sight_adapter.apply_security_assignments(member_assignments,"security:%s:%d"%[normalized_fireteam_id,_hex_sight_adapter.get_current_tick()],mode,direction_angle)
 	var defense_ready: bool = _is_defense_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var overwatch_ready: bool = _is_overwatch_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var state: Dictionary = {
@@ -191,6 +208,8 @@ func update_fireteam_state(
 		"area_center_position": Vector2(area_context.get("center_position", anchor_position)) if typeof(area_context.get("center_position", null)) == TYPE_VECTOR2 else null,
 		"area_status": String(area_context.get("status", "")),
 	}
+	if _hex_sight_adapter != null:
+		state["hex_tactical"] = true
 	_state_by_fireteam[normalized_fireteam_id] = state
 	return _build_public_state(state)
 
@@ -199,6 +218,8 @@ func _build_fit_members(units: Array) -> Array:
 	var result: Array = []
 	for unit in units:
 		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		if _hex_sight_adapter != null and not bool(_hex_sight_adapter.read_position(unit).get("valid",false)):
 			continue
 		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 			continue
@@ -238,18 +259,22 @@ static func _build_enemy_assignment(unit, center_angle: float, arc_width: float,
 
 func _resolve_anchor_position(fit_members: Array, leader) -> Vector2:
 	if leader is Node2D:
-		return (leader as Node2D).global_position
+		return _unit_position(leader)
 	var sum: Vector2 = Vector2.ZERO
 	var count: int = 0
 	for member in fit_members:
 		var unit = member.get("unit", null)
 		if not (unit is Node2D):
 			continue
-		sum += (unit as Node2D).global_position
+		sum += _unit_position(unit)
 		count += 1
 	if count <= 0:
 		return Vector2.ZERO
 	return sum / float(count)
+
+
+func _unit_position(unit) -> Vector2:
+	return Vector2(_hex_sight_adapter.read_position(unit).get("position",Vector2.ZERO)) if _hex_sight_adapter != null else (unit as Node2D).global_position
 
 
 func _resolve_main_threat(anchor_position: Vector2, threat_inputs: Array) -> Dictionary:
@@ -294,8 +319,8 @@ func _coerce_threat_info(threat_input, anchor_position: Vector2) -> Dictionary:
 	var threat_node: Node2D = threat_input
 	return {
 		"unit_id": String(threat_input.call("get_unit_id")) if threat_input.has_method("get_unit_id") else "",
-		"position": threat_node.global_position,
-		"distance": anchor_position.distance_to(threat_node.global_position),
+		"position": _unit_position(threat_node),
+		"distance": _hex_sight_adapter.distance(anchor_position,_unit_position(threat_node)) if _hex_sight_adapter != null else anchor_position.distance_to(threat_node.global_position),
 		"detection_state": "confirmed",
 	}
 
@@ -346,7 +371,7 @@ func _normalize_security_mode(value: Variant) -> String:
 			return ""
 
 
-func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0, now_msec: int = 0) -> Array:
+func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0, now_msec: int = 0, directional_arc_width: float = DIRECTIONAL_ARC_WIDTH) -> Array:
 	var assignments: Array = []
 	if fit_members.is_empty():
 		return assignments
@@ -377,7 +402,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 			"base_angle": base_angle,
 			"scan_offset_angle": scan_offset,
 			"center_angle": wrapf(base_angle + scan_offset, -PI, PI),
-			"arc_width": DIRECTIONAL_ARC_WIDTH,
+			"arc_width": directional_arc_width,
 			"coverage_role": String(assignment_offset.get("coverage_role", "front")),
 			"security_radius_world": security_radius_world,
 		})
@@ -555,7 +580,7 @@ func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
 func _build_public_state(state: Dictionary) -> Dictionary:
 	if state.is_empty():
 		return {}
-	return {
+	var result: Dictionary = {
 		"fireteam_id": String(state.get("fireteam_id", "")),
 		"security_mode": String(state.get("security_mode", SECURITY_MODE_DIRECTIONAL)),
 		"anchor_position": Vector2(state.get("anchor_position", Vector2.ZERO)),
@@ -576,6 +601,9 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"area_center_position": state.get("area_center_position", null),
 		"area_status": String(state.get("area_status", "")),
 	}
+	if bool(state.get("hex_tactical",false)):
+		result["hex_tactical"] = true
+	return result
 
 
 func _build_overwatch_unit_ids(member_assignments: Array) -> PackedStringArray:

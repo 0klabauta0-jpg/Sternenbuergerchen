@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### AP3 Blickrichtung, Sicherung und übrige Sichtverbraucher — 11.11.2026
+
+SimulationRoot committet interne Blickabsichten vor Tickverbrauchern; Auftrag,
+Kontext und Replay begrenzen freie Reaktionen. Sicherung/Overwatch/Flankierung
+lesen aktuelle logische Zellen/Richtungen, kanonische Winkel und einzelne Kegel.
+Dreier-Rundumsicherung verteilt diskrete Richtungen ohne Projektions-/Tie-Lücken.
+Damagecover, Diagnosepositionen und Rampen-Halbhöhen nutzen denselben Ground-State.
+Soundhook nutzt vorhandene Skillverzögerung und bestätigt keinen Kontakt; kein
+neuer Schallproducer. Kleine Cases Facing24/0, Security34/0, Consumer39/0,
+Owner39/0, Ground25/0. Frischer Review und gezielte Regressionen abgeschlossen.
+Sandboxhooks hier statisch; gemeinsamer Check-only folgt bei Integration.
+Keine Karte aktiviert; AP4–8 und Bewegungsschussbalance bleiben Folgearbeit,
+große AP9-Tests später. QA hex_facing_security_20261111.
+
 ### AP3 Hexsicht: erster Readeranschluss — 11.11.2026
 
 Contact-/Schussprüfung und Terrain-/Ziel-FoW nutzen hinter dem expliziten
