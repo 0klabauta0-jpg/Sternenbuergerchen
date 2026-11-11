@@ -1,0 +1,363 @@
+{
+  "checks": {
+    "single_walkable_component": true,
+    "retained_marker_ids": true,
+    "exactly_five_front_pads": true,
+    "pad06_removed": true,
+    "rooms_reachable": true,
+    "markers_reachable": true,
+    "no_deck_behind_wall": true,
+    "rings_diameter_covers_large_pad": true,
+    "rings_clear_all_pad_rectangles": true,
+    "no_duplicate_pad_dressing": true,
+    "pad_envelopes_clear": true,
+    "globe_walkaround": true
+  },
+  "tile_count": 13172,
+  "walkable": 12399,
+  "reachable": 12399,
+  "blocked": 773,
+  "unreachable_sample": [],
+  "pad_envelopes": [
+    {
+      "id": "polisa_pad_01",
+      "deck": [
+        24,
+        26
+      ],
+      "reserve_envelope": [
+        18,
+        20
+      ],
+      "clear_cells": 426,
+      "clear": true,
+      "margin_per_side": [
+        3,
+        3
+      ]
+    },
+    {
+      "id": "polisa_pad_02",
+      "deck": [
+        32,
+        40
+      ],
+      "reserve_envelope": [
+        26,
+        34
+      ],
+      "clear_cells": 1060,
+      "clear": true,
+      "margin_per_side": [
+        3,
+        3
+      ]
+    },
+    {
+      "id": "polisa_pad_03",
+      "deck": [
+        40,
+        48
+      ],
+      "reserve_envelope": [
+        34,
+        42
+      ],
+      "clear_cells": 1691,
+      "clear": true,
+      "margin_per_side": [
+        3,
+        3
+      ]
+    },
+    {
+      "id": "polisa_pad_04",
+      "deck": [
+        32,
+        40
+      ],
+      "reserve_envelope": [
+        26,
+        34
+      ],
+      "clear_cells": 1060,
+      "clear": true,
+      "margin_per_side": [
+        3,
+        3
+      ]
+    },
+    {
+      "id": "polisa_pad_05",
+      "deck": [
+        24,
+        26
+      ],
+      "reserve_envelope": [
+        18,
+        20
+      ],
+      "clear_cells": 426,
+      "clear": true,
+      "margin_per_side": [
+        3,
+        3
+      ]
+    }
+  ],
+  "marker_anchors": {
+    "trade_service": {
+      "local_plane": [
+        0,
+        21
+      ],
+      "world_plane": [
+        0.0,
+        -43.30127018922193
+      ],
+      "grid": [
+        25,
+        -50
+      ],
+      "world_iso": [
+        2771.2812921102036,
+        -1385.6406460551018
+      ]
+    },
+    "objective_point": {
+      "local_plane": [
+        0,
+        21
+      ],
+      "world_plane": [
+        0.0,
+        -43.30127018922193
+      ],
+      "grid": [
+        25,
+        -50
+      ],
+      "world_iso": [
+        2771.2812921102036,
+        -1385.6406460551018
+      ]
+    },
+    "spawn_alpha": {
+      "local_plane": [
+        -80,
+        53
+      ],
+      "world_plane": [
+        -80.5,
+        -11.258330249197702
+      ],
+      "grid": [
+        -74,
+        -13
+      ],
+      "world_iso": [
+        -4431.466864051347,
+        -2936.2665679743263
+      ]
+    },
+    "spawn_bravo": {
+      "local_plane": [
+        80,
+        53
+      ],
+      "world_plane": [
+        79.5,
+        -11.258330249197702
+      ],
+      "grid": [
+        86,
+        -13
+      ],
+      "world_iso": [
+        5808.533135948653,
+        2183.7334320256737
+      ]
+    },
+    "ship_return": {
+      "local_plane": [
+        -80,
+        53
+      ],
+      "world_plane": [
+        -80.5,
+        -11.258330249197702
+      ],
+      "grid": [
+        -74,
+        -13
+      ],
+      "world_iso": [
+        -4431.466864051347,
+        -2936.2665679743263
+      ]
+    },
+    "polisa_pad_01": {
+      "local_plane": [
+        -80,
+        53.0
+      ],
+      "world_plane": [
+        -80.5,
+        -11.258330249197702
+      ],
+      "grid": [
+        -74,
+        -13
+      ],
+      "world_iso": [
+        -4431.466864051347,
+        -2936.2665679743263
+      ]
+    },
+    "polisa_pad_02": {
+      "local_plane": [
+        -44,
+        60.0
+      ],
+      "world_plane": [
+        -44.0,
+        -3.4641016151377544
+      ],
+      "grid": [
+        -42,
+        -4
+      ],
+      "world_iso": [
+        -2594.2974966311835,
+        -1518.8512516844082
+      ]
+    },
+    "polisa_pad_03": {
+      "local_plane": [
+        0,
+        64.0
+      ],
+      "world_plane": [
+        0.0,
+        0.0
+      ],
+      "grid": [
+        0,
+        0
+      ],
+      "world_iso": [
+        0.0,
+        0.0
+      ]
+    },
+    "polisa_pad_04": {
+      "local_plane": [
+        44,
+        60.0
+      ],
+      "world_plane": [
+        44.0,
+        -3.4641016151377544
+      ],
+      "grid": [
+        46,
+        -4
+      ],
+      "world_iso": [
+        3037.7025033688165,
+        1297.1487483155918
+      ]
+    },
+    "polisa_pad_05": {
+      "local_plane": [
+        80,
+        53.0
+      ],
+      "world_plane": [
+        79.5,
+        -11.258330249197702
+      ],
+      "grid": [
+        86,
+        -13
+      ],
+      "world_iso": [
+        5808.533135948653,
+        2183.7334320256737
+      ]
+    }
+  },
+  "room_service_anchors": {
+    "infantry": {
+      "grid": [
+        21,
+        -78
+      ],
+      "world_plane": [
+        -18.0,
+        -67.54998149518622
+      ],
+      "reachable": true
+    },
+    "armor": {
+      "grid": [
+        39,
+        -78
+      ],
+      "world_plane": [
+        0.0,
+        -67.54998149518622
+      ],
+      "reachable": true
+    },
+    "engineering": {
+      "grid": [
+        57,
+        -78
+      ],
+      "world_plane": [
+        18.0,
+        -67.54998149518622
+      ],
+      "reachable": true
+    },
+    "supplies": {
+      "grid": [
+        2,
+        -58
+      ],
+      "world_plane": [
+        -27.0,
+        -50.22947341949744
+      ],
+      "reachable": true
+    },
+    "freight": {
+      "grid": [
+        56,
+        -58
+      ],
+      "world_plane": [
+        27.0,
+        -50.22947341949744
+      ],
+      "reachable": true
+    }
+  },
+  "rooms": 5,
+  "walls": 23,
+  "furniture": 19,
+  "layout_sha256": "59fadabd04242da53c64e3b0ab5e070d1c68a186bc615e7673d92f8daa549734",
+  "map_sha256": "d8306a179d5777a36d5d04423b2a298d90329d8d0a382e3dbf379fc4d2642010",
+  "space_bounds_plane": [
+    -128,
+    -90.1,
+    128,
+    131.7
+  ],
+  "station_deck_z_bounds": [
+    -86.60254037844386,
+    23.38268590217984
+  ],
+  "scope": "offline authoring graph; not live navigation, travel, shop or landing acceptance"
+}

@@ -60,10 +60,10 @@ func _run() -> void:
 	invalid.supply.requests["polisa-test-ship"].result.landing_pad_id = "homebase_pad_03junk"
 	check(not CHECKPOINT.validate_payload(invalid).get("ok", false), "reject_noncanonical_pad")
 	var map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file("res://maps/polisa_station.json")
-	check(map != null and Vector2(map.get_marker_position("spawn_alpha")).is_equal_approx(Vector2(-1344,-672)), "station_authored_pad_coordinates")
+	check(map != null and map.has_marker("polisa_pad_05") and not map.has_marker("polisa_pad_06") and map.get_marker_position("spawn_alpha").is_equal_approx(map.get_marker_position("polisa_pad_01")) and map.get_marker_position("ship_return").is_equal_approx(map.get_marker_position("polisa_pad_01")), "station_authored_pad_binding")
 	var visual: Node = load("res://scenes/terrain/polisa_station_visual.tscn").instantiate()
 	root.add_child(visual)
-	check(visual.get_child_count() > 20, "cold_station_visual_build")
+	check(visual.has_meta("polisa_visual_metrics") and int(visual.get_meta("polisa_visual_metrics").get("static_triangles", 0)) > 0, "cold_station_visual_build")
 	var ui: Control = load("res://scripts/ui/polisa_station_screen.gd").new()
 	root.add_child(ui)
 	ui.configure(visual)

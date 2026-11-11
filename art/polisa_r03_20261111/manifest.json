@@ -1,0 +1,493 @@
+{
+  "schema": "polisa_r03_candidate_manifest_v1",
+  "status": "frozen private native candidate; no aesthetic approval or gameplay acceptance",
+  "source_base": "7c9b5c7b1",
+  "head_at_freeze": "7c9b5c7b1a34cc6fceb54861663640f870121aee",
+  "owned_sources_and_final_evidence": [
+    {
+      "path": "art/polisa_r03_20261111/build_candidate.py",
+      "sha256": "36cd4ba673ef13c76a1c0ba33ec593ec1e5bed50db46d1b1ec1773147a743102",
+      "bytes": 6252
+    },
+    {
+      "path": "art/polisa_r03_20261111/layout.json",
+      "sha256": "c78ac4d2b5fe869801bad74bacda08e868f1371b1513aa9b2d14d6f7bf17ce24",
+      "bytes": 9232
+    },
+    {
+      "path": "art/polisa_r03_20261111/layout_compiled.json",
+      "sha256": "7f50d9c550e6c32795d994cd4afd3d74131fd746f0f17f9acd63d7bfa33b2501",
+      "bytes": 16230
+    },
+    {
+      "path": "art/polisa_r03_20261111/layout_target.svg",
+      "sha256": "debcd230fc2eb683cb1fc1f05e64ba5df1bbb8ff05900e14dc9f2436d5584725",
+      "bytes": 2399
+    },
+    {
+      "path": "art/polisa_r03_20261111/polisa_r03_visual.gd",
+      "sha256": "9f4aeadc2ea52e9b7a67125cb095c85d2532d5388692449119d1850222aee07d",
+      "bytes": 14613
+    },
+    {
+      "path": "art/polisa_r03_20261111/polisa_r03_visual.tscn",
+      "sha256": "38fbcab60a6c098ea551606c8e71aac9c735841bad305460d2020eecccf37440",
+      "bytes": 193
+    },
+    {
+      "path": "art/polisa_r03_20261111/README.md",
+      "sha256": "a785a1153793b81a8484c6f70d757f865453981e4f8f2893e0d1386c2c8d52b4",
+      "bytes": 4677
+    },
+    {
+      "path": "art/polisa_r03_20261111/TASK.md",
+      "sha256": "c267510ebac808232ec7f727077c38f80f3014213a3a686f3287fb4276deefb2",
+      "bytes": 2783
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/capture_r03.gd",
+      "sha256": "8dae981a703acc9d1c9fb1e42cd35de667698ebed069cb6028c052febb706728",
+      "bytes": 2563
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/native_metrics.json",
+      "sha256": "fabb4aa3134ccbf7bd79c329f3f2197507ebdd89075975cb08e29831bc36777f",
+      "bytes": 357
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/offline_checks.json",
+      "sha256": "de8ab1a5f297624df5ba01d7a41379cfa4d8f40d7e09a45cebb42e880214c08d",
+      "bytes": 2388
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/polisa_r03_armor_room.png",
+      "sha256": "8e19a978f71bbcfe5001cfa9332f248f2985aba9a3a9772eb8171427b27064b6",
+      "bytes": 1175594
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/polisa_r03_overview.png",
+      "sha256": "c8a6121edeac43a52fd27092c0cba21d59a8b7846caa167513143f40d1a72019",
+      "bytes": 342876
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/polisa_station_candidate.json",
+      "sha256": "b87eeb736f96fa3588d3635164de112dbc673a165a0d48701029e9c70eafa47f",
+      "bytes": 1036165
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/r03_final.json",
+      "sha256": "d3b128465a82a8deced8e6d5a9822d96cb1b8b90c987211de8bca5b17628a041",
+      "bytes": 776
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r03_20261111/r03_final.log",
+      "sha256": "c070f96137a582d0b2355906c6787ca006f2be974f39726799fdbb5318d65d1d",
+      "bytes": 819
+    }
+  ],
+  "existing_dependencies": [
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+      "bytes": 397300
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/body_r07_derived.glb",
+      "sha256": "c1e3f54de89b7481eb26f6365f99e1368bae063e7876863cc37311588338b376",
+      "bytes": 403164
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/boot_heavy.glb",
+      "sha256": "257cc7b55458830804c10abd1b39295ebed9a93d40697a44c1ee1d11d41af77b",
+      "bytes": 27196
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/boot_light.glb",
+      "sha256": "4cca5373fb0da96b982d39693b9f8b3c6d30d9d5eaa7494cd2e107664c14707c",
+      "bytes": 24948
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/boot_medium.glb",
+      "sha256": "8fe6d21cc827c605bcd4064c81483f41fd207a0f48f0875c5d39f75fa2f90439",
+      "bytes": 27192
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/collar.glb",
+      "sha256": "68d0a2a7eb63a3800417deadf82ce8cec69e3b582d1858d1873ff975fc536cfa",
+      "bytes": 41716
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/forearm_heavy.glb",
+      "sha256": "91d4fc2c44f90ad7873cdaf18b9a70324b25ed71d1568f85196acc855741aa73",
+      "bytes": 31656
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/forearm_light.glb",
+      "sha256": "38e9ab3b52d4062f21baa62e8a9eef3d607602fac6f8a0097062602ff12dfb53",
+      "bytes": 20024
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/forearm_medium.glb",
+      "sha256": "bfda7fc5d24ab5ac796bd453c801356d3322e6c0b2708a35e37d3c4c301a4f95",
+      "bytes": 28824
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/hand_guard_heavy.glb",
+      "sha256": "bdf1d58b728b2a75546aa58c532c92e3aa6ee123e9cce2b7beab323079f096be",
+      "bytes": 24220
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/helmet_heavy.glb",
+      "sha256": "32e573670cbd0ae6ac92959d52fc6698d596ccb254b170adedbca47b23984614",
+      "bytes": 48620
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/helmet_light.glb",
+      "sha256": "47f830ae2de8e3d2b1efc28f251f5a4529ada084fb4b464c15bdbc298bf1fd35",
+      "bytes": 120232
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/helmet_medium.glb",
+      "sha256": "05046f45e273426df59eedfffbb69e7f5691c9181186783f854e75b1c6e5c296",
+      "bytes": 120204
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/knee_heavy.glb",
+      "sha256": "4bcada98b4226bcc63d4a6235158f0f0d23637b71230a34b2b0bc70b9faffaf5",
+      "bytes": 13692
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/knee_light.glb",
+      "sha256": "c42c16f78b99d291c6b6e6d400b0e6ff03c02b1b71dd58ec33978835ebf0668a",
+      "bytes": 10892
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/knee_medium.glb",
+      "sha256": "1035b5320f9137cb51c515210e6e6a64e62f37004de60717ec4c794f4d94b9a0",
+      "bytes": 10896
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pauldron_heavy.glb",
+      "sha256": "367657dadd953ca0b08252e71dd74c2001f7244ebd5ed0ffb083d9b0bf16211a",
+      "bytes": 18152
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pauldron_light.glb",
+      "sha256": "851549e015418460c75965a18d4ad81c0c844f8174bfb7e2737e81e9395a0752",
+      "bytes": 18400
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pauldron_medium.glb",
+      "sha256": "1eea5d62d4eeca81af07090b1a9b3d4d44735e0bf161be0feb335789bc2f6055",
+      "bytes": 14040
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pelvis_heavy.glb",
+      "sha256": "5b79c01604492f958eab43db031f5a6f711b44d60ab209431bbc7356d74f0e10",
+      "bytes": 19284
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pelvis_light.glb",
+      "sha256": "b8ebb9d940983754142c0cc54e57973f4df80bb0c5a2ddabff5303050048e413",
+      "bytes": 9592
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/pelvis_medium.glb",
+      "sha256": "aea6220b08cafbe52d04228078d554627e809e626df4450a829603892dc68c12",
+      "bytes": 16196
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/shin_heavy.glb",
+      "sha256": "3bb4bf4cd6bddaaa0f6c6a66213cf019999f9d503871d6a458d8a524d63a167b",
+      "bytes": 27936
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/shin_light.glb",
+      "sha256": "670f3b91cf829fdd073db8a9ce3893dc662c1f92584011e9cd1ee5cb60cbaf04",
+      "bytes": 20020
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/shin_medium.glb",
+      "sha256": "095c7705e95b48012fcc80816733d7a9cd19d61c1bac6e7f6532d7791dc7b118",
+      "bytes": 28884
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/thigh_heavy.glb",
+      "sha256": "db31f89e135f1b0fda92ab68c5c03401d8357cb9ba641f3dbaff7ca7d2df54dd",
+      "bytes": 35604
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/thigh_light.glb",
+      "sha256": "dcef44df3635fea3081ebcbe5c8ec180c6032ff3af3e1f5a49b4158abc3ed0e5",
+      "bytes": 20020
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/thigh_medium.glb",
+      "sha256": "6e664cf90b99c6ef0a60eaf951108fe0868e413eaa4b03a0ac752ea98a7036a6",
+      "bytes": 23760
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/torso_heavy.glb",
+      "sha256": "261a3bde9e293d7d83fe1d81fac4e29b6877713acbcd374e18d371d8d6daf50a",
+      "bytes": 99752
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/torso_light.glb",
+      "sha256": "19a0b6a3c4a5d2d789bc83610499ff06505aaf1b7582629764d60e14765e9145",
+      "bytes": 61116
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/torso_medium.glb",
+      "sha256": "81691e27ec134b5c41fdfced63e1417f4d877d41cc867a29de4b7db73f9c67d4",
+      "bytes": 100264
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/upper_arm_heavy.glb",
+      "sha256": "2401bc39896eb97c5db0952e158ee7179c9ee43d7184e6e91ae223641e115a45",
+      "bytes": 23704
+    },
+    {
+      "path": "data/frontier_ship_visual_catalog.json",
+      "sha256": "7e9360f291c82c0747448cfa50efe2e80f4778a7c1662b70a2e1159d927bbb8b",
+      "bytes": 2375
+    },
+    {
+      "path": "maps/polisa_station.json",
+      "sha256": "89e8c121a2109c90490868869206ef4ac923207f665fe4c368e799f5a536a6b4",
+      "bytes": 161983
+    },
+    {
+      "path": "scripts/terrain/personnel_armor_visual.gd",
+      "sha256": "62c6e22ec0df1b08f4c598751a8be3f09b6c68254d3d7d6a0f25b6a23dd49349",
+      "bytes": 38336
+    },
+    {
+      "path": "scripts/terrain/polisa_station_visual.gd",
+      "sha256": "48fe28de140be048d9def2c2b667bf367d537a4dff1fb38bb568307ff019a417",
+      "bytes": 13300
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "0c5d704486c0170615a0ac956cd888a569ea9c7ba0b30278feb8cf7d08ebb242",
+      "bytes": 925138
+    }
+  ],
+  "references": [
+    {
+      "path": "art/polisa_lookdev_20261111/references/port_olisar_official.jpg",
+      "sha256": "e0db6347286a0c1dbbe7c0b10730d6d06a4d3340d38bee925c7efb73acb64e6b",
+      "bytes": 1369636,
+      "url": "https://static.robertsspaceindustries.com/galactapedia/upload/43778f99-9ce7-4bc5-8ab7-621a386625ea",
+      "status": "external visual reference; not imported"
+    },
+    {
+      "path": "art/polisa_lookdev_20261111/references/port_olisar_side.webp",
+      "sha256": "af28135f0427c01b6dff70a4b69c825704d2776ab5177cf971103481d7e72e05",
+      "bytes": 123802,
+      "url": "https://media.starcitizen.tools/thumb/a/a0/Port_Olisar_Side.jpg/1280px-Port_Olisar_Side.jpg.webp",
+      "status": "external visual reference; not imported"
+    },
+    {
+      "path": "art/polisa_lookdev_20261111/references/port_olisar_hub.webp",
+      "sha256": "250c0734d4d10223e2fb8f80b31c9b72d4adc1263952a13e832125c8b66f4d9d",
+      "bytes": 197078,
+      "url": "https://media.starcitizen.tools/thumb/c/c1/Port_Olisar_main_hub.png/1280px-Port_Olisar_main_hub.png.webp",
+      "status": "external visual reference; not imported"
+    },
+    {
+      "path": "output/native_glut_maps/polisa_native_54.png",
+      "sha256": "b125946293e88f728bff563a6687db7289833a381b71ff78aacaeb3641e11acd",
+      "bytes": 192866,
+      "url": "",
+      "status": "R02 source/baseline"
+    },
+    {
+      "path": "scripts/terrain/polisa_station_visual.gd",
+      "sha256": "48fe28de140be048d9def2c2b667bf367d537a4dff1fb38bb568307ff019a417",
+      "bytes": 13300,
+      "url": "",
+      "status": "R02 source/baseline"
+    },
+    {
+      "path": "maps/polisa_station.json",
+      "sha256": "89e8c121a2109c90490868869206ef4ac923207f665fe4c368e799f5a536a6b4",
+      "bytes": 161983,
+      "url": "",
+      "status": "R02 source/baseline"
+    }
+  ],
+  "final_native": {
+    "label": "r03_final",
+    "exit_code": 0,
+    "errors": 0,
+    "warnings": 0,
+    "hidden_parent_visible": false,
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\polisa_r03_20261111\\profiles\\r03_final",
+    "arguments": [
+      "--display-driver",
+      "windows",
+      "--rendering-driver",
+      "d3d12",
+      "--rendering-method",
+      "forward_plus",
+      "--audio-driver",
+      "Dummy",
+      "--single-window",
+      "--resolution",
+      "1280x720",
+      "--wid",
+      "15075474",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+      "--script",
+      "res://output/native_glut_maps/polisa_r03_20261111/capture_r03.gd",
+      "--",
+      "continue-chapter",
+      "1x"
+    ]
+  },
+  "metrics": {
+    "active_collisions": 0,
+    "showcase_mesh_nodes": 6,
+    "showcase_triangles": 22472,
+    "station": {
+      "collision_nodes": 0,
+      "dynamic_lights": 0,
+      "layout_sha256": "c78ac4d2b5fe869801bad74bacda08e868f1371b1513aa9b2d14d6f7bf17ce24",
+      "primitive_boxes": 895,
+      "showcase_rigs": 3,
+      "static_mesh_nodes": 9,
+      "static_triangles": 14124
+    }
+  },
+  "offline": {
+    "checks": {
+      "single_walkable_component": true,
+      "retained_marker_ids": true,
+      "six_pads": true,
+      "three_pads_each_z": true,
+      "no_x_end_pads": true,
+      "rooms_reachable": true,
+      "markers_reachable": true,
+      "pad_envelopes_clear": true
+    },
+    "tile_count": 5565,
+    "walkable": 4899,
+    "reachable": 4899,
+    "blocked": 666,
+    "unreachable_sample": [],
+    "pad_envelopes": [
+      {
+        "id": "polisa_pad_01",
+        "deck": [
+          18,
+          18
+        ],
+        "reserve_envelope": [
+          14,
+          14
+        ],
+        "clear_cells": 232,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "id": "polisa_pad_02",
+        "deck": [
+          28,
+          34
+        ],
+        "reserve_envelope": [
+          24,
+          30
+        ],
+        "clear_cells": 857,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "id": "polisa_pad_03",
+        "deck": [
+          18,
+          18
+        ],
+        "reserve_envelope": [
+          14,
+          14
+        ],
+        "clear_cells": 232,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "id": "polisa_pad_04",
+        "deck": [
+          18,
+          18
+        ],
+        "reserve_envelope": [
+          14,
+          14
+        ],
+        "clear_cells": 232,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "id": "polisa_pad_05",
+        "deck": [
+          28,
+          34
+        ],
+        "reserve_envelope": [
+          24,
+          30
+        ],
+        "clear_cells": 857,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "id": "polisa_pad_06",
+        "deck": [
+          18,
+          18
+        ],
+        "reserve_envelope": [
+          14,
+          14
+        ],
+        "clear_cells": 232,
+        "clear": true,
+        "margin_per_side": [
+          2.0,
+          2.0
+        ]
+      }
+    ],
+    "rooms": 6,
+    "walls": 34,
+    "furniture": 16,
+    "layout_sha256": "c78ac4d2b5fe869801bad74bacda08e868f1371b1513aa9b2d14d6f7bf17ce24",
+    "map_sha256": "b87eeb736f96fa3588d3635164de112dbc673a165a0d48701029e9c70eafa47f",
+    "scope": "offline authored facts only; no actual navigation/travel/shop/ship landing validation"
+  },
+  "gpu_released": true,
+  "integration_owner": "root",
+  "production_files_changed_by_candidate_agent": false
+}

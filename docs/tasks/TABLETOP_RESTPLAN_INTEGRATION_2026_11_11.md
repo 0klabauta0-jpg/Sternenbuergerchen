@@ -31,3 +31,7 @@ AP1 814faabac nach unabhaengigem statischem Review konfliktfrei als 7b532a316 ue
 AP3-Reader 2a0ffeef8 nach unabhaengigem Review konfliktfrei als 2ff978d1a uebernommen. Driver/Setup im gemeinsamen Stand jeweils Compile0; keine erneute Consumer-/Gefechtmatrix. Neue Karten bleiben inaktiv. Sicherung/Facing/Overwatch und AP4-8 werden abgestimmt weiterbearbeitet.
 
 Restpakete integriert: Bergungswerkzeug-Forschung 1f676bfbc (kleine Industrie22/0, Schutz24/0), Polisa-Tank-/Frachtservice538eb737e (kleine11/0), Workbench-Baseline ba4135069 (27 statische Datenpruefungen, kein neuer Browsertest). Sourcechecks ersetzen keine native Gesamtbedienung. Schiffswaffen/-komponenten und lokale Stationsabholung bleiben ausdruecklich offen.
+
+
+## Fortsetzung: Blickrichtung, Sicherung und Bewegung
+Erneuter Nutzerauftrag: die naechsten fertigen Schritte selbststaendig abstimmen und zusammenfuehren; grosse Tests bleiben spaeter. Tabletop bearbeitet Facingqueue/Ownercommit und Sicherung/Overwatch/Flank-Adapter. Ein unabhaengiger reiner AP4-Planer ist an einen Agenten delegiert: ausschliesslich bottleneck_reservation_resolver.gd (neuer build_hex_plan-Pfad, Legacy erhalten), neuer hex_reservation_verifier.gd sowie eigene Task/QA/neuer hex_reservation_plan_contract.md. GroundOwner, SimulationRoot, Driver, Runner und aktive Bewegung bleiben im Tabletop-Chat. Snapshot-/Segmentgrenzen werden vor Code abgestimmt; Handoff erfolgt wie in der bestehenden Spec in der Segmentmitte, nicht erst bei Bewegungsende. Zusagen und Commit sind Owneraufgabe.

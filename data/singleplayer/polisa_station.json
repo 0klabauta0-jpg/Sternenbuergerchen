@@ -12,11 +12,11 @@
     },
     {
       "id": "armor",
-      "name": "Ruestung"
+      "name": "Rüstung"
     },
     {
       "id": "ship_equipment",
-      "name": "Schiffswaffen & Ausruestung"
+      "name": "Schiffswaffen & Ausrüstung"
     },
     {
       "id": "ships",
@@ -24,10 +24,10 @@
     },
     {
       "id": "commodities",
-      "name": "Warenhaendler"
+      "name": "Warenhändler"
     }
   ],
-  "ship_equipment_unavailable": "Schiffskomponenten sind noch nicht als spielbare Ausruestung integriert. Hier werden keine wirkungslosen Teile verkauft.",
+  "ship_equipment_unavailable": "Schiffskomponenten sind noch nicht als spielbare Ausrüstung integriert. Hier werden keine wirkungslosen Teile verkauft.",
   "ship_delivery": "Lieferung zur Heimatbasis. Ein gebautes freies Heimatpad ist erforderlich.",
   "prices_status": "Erste Balancewerte; keine finale Preisfreigabe."
 }

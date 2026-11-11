@@ -15,8 +15,9 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
   3D-Pinselvorschau, sechs Richtungen, Undo/Redo und Save. Gesichert bis c8c7b7d3b.
 - **Tabletop-Integration:** Foundation, AP1 und das erste AP3-Readerpaket sind nach statischem Review im
   Taskstand (22dc4cb61/0bc338151/7b532a316/2ff978d1a). Kontakt, Schusspruefung und
-  FoW teilen die logische Sicht. Sicherung/Facing/Overwatch werden im abgestimmten
-  Tabletop-Chat vervollstaendigt. Kartenaktivierung erst nach den weiteren
+  FoW teilen die logische Sicht. Sicherung/Facing/Overwatch sind als b3d5f4b62 integriert. Der reine
+  AP4-Reservierungsplaner30840746c liegt vor; verbindlicher Owneranschluss und
+  Bewegung werden im abgestimmten Tabletop-Chat fortgesetzt. Kartenaktivierung erst nach den weiteren
   Bewegungs-/Lifecycle-Vertraegen; bisher keine Aktivierung.
 - **Forschungsfortsetzung:** Industrie/Bergungswerkzeug auf vorhandenen
   Forschungs-, Herstellungs- und Ortsressourcen-Ownern integriert (1f676bfbc).
@@ -177,3 +178,6 @@ Editor-Anschluss umgesetzt: echte3D-Vorschau mitCap/Umriss/Aufwaertspfeil, gemei
    schritte. Neue Fahrzeugmodelle bleiben wie beauftragt zurueckgestellt.
 5. Danach die ausdruecklich verschobene grosse Abnahme auf dem gemeinsamen Stand;
    Main und EXE sind nach wie vor separate Schritte.
+
+## Polisa nach Nutzerkorrektur R04
+Aktuelle Station: oben am Kartenrand, fuenf Frontpads (S/M/L/M/S), keine hinteren Pads. RingeD52, grosse Solarausleger, fuenf24x24Shops mit sichtbaren Waren und zentraler48x32Globusraum. Standardkamera zeigt alle Inhalte ohne Drehung; weitere Kartenuebersicht durch Orbital-Zoom bis280 erreichbar. Kaufmenue nach tatsaechlichem Andocken ohne persoenlichen Schalterzwang; Credits/Bestand/Commands bleiben bei ihren bisherigen Ownern. Kleine Andock-/Kameraprobe9/0 und native Art-/UIbilder, keine grosse Spielwegabnahme. Siehe POLISA_ROOMS_FIVE_PADS_2026_11_11.

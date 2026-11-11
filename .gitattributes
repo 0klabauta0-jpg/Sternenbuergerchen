@@ -114,3 +114,9 @@ docs/qa/campaign_research_baseline_refresh_20261111/** -text whitespace=-blank-a
 
 # Keep private AP4 planner evidence byte-stable.
 docs/qa/hex_reservation_planner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Preserve frozen station revisions, layouts and native evidence bytes.
+art/polisa_r03_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+art/polisa_r04_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/polisa_r03_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/polisa_r04_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

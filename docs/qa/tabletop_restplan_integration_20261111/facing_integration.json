@@ -1,0 +1,14 @@
+{
+  "scripts/core/simulation_root.gd": {
+    "exit": 0,
+    "sha256": "f9eb7845580d74de2e8736babab0afa7e3e079ff35125a49d625233d57240bd9"
+  },
+  "scripts/tests/mission_combat_loop_driver.gd": {
+    "exit": 0,
+    "sha256": "3169a90e17ab681515da7ab71d6fa9aa913d3b906becc04382951694867bda31"
+  },
+  "scripts/tests/mission_tactical_sandbox_controller.gd": {
+    "exit": 0,
+    "sha256": "ac90c47862ee6d4675cc0f70d0247887fc358e531c320835830a7f8a8784d32a"
+  }
+}

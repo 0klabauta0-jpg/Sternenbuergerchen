@@ -92,7 +92,9 @@
     "landing_pad_ids": [
       "polisa_pad_01",
       "polisa_pad_02",
-      "polisa_pad_03"
+      "polisa_pad_03",
+      "polisa_pad_04",
+      "polisa_pad_05"
     ],
     "services": [
       "trade",

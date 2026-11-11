@@ -1,0 +1,17 @@
+# Polisa R04: bounded native model and menu evidence
+
+Root opened the final station close-up, whole-map view, complete station view and actual shop screen. The five square shops are all visible from the same yaw0/pitch58 camera, including freight. Central48x32 lobby has the blue globe console and a clear walkaround; all five24x24 shops have direct access. Five front pads are S24x26/M32x40/L40x48/M32x40/S24x26, no rear pads. RingsD52 clear all pad rectangles; enlarged solar arms form the side boundary.
+
+Production map has256x256 declared cells with13172 authored deck tiles,12399 walkable tiles in one connected component. Station occupies the top boundary with substantial empty space in front. Pads use only the station visual; place_presentation.pads=[] avoids duplicate FrontierOutpostPad dressing. Tile/door/furniture facts and geometry come from the same layout. Existing runtime scene/location/interaction IDs remain; pad06 is removed and01..05 are registered.
+
+Native candidate r04_final: Godot4.6.2 D3D12, hidden window, private absolute profile, exit0/errors0/warnings0.40420 visible triangles total (17948 static +22472 R07 displays),16 visible meshes, no collisions/dynamic lights/own frame loops. Candidate images are art proofs, not travel/shop/save/battle acceptance. Older R03 references remain historical, not current production.
+
+Native actual menu r04_native_menu_final: exit0/errors0/warnings0. Uses the production PolisaStationScreen, shared management skin/icons, real offer definitions and a private newly configured Supply owner (500Cr, empty crew/cargo). This is an actual UI capture on a disposable state, not proof of an end-to-end real landing/purchase. Equipment buttons correctly remain disabled without a local person. Menu offers all station categories and checks actual docking through the runtime adapter in the product; it does not fabricate landing state.
+
+Small docked_menu_camera_access check9/0: real parked gate permits menu service without counter-Use; airborne/pending/unknown crafts denied; other visits keep their counter gate; normal zoom reaches whole map; other-map zoom limits unchanged; initial camera matches the shown composition and respects subsequent manual pan. Flow/controller fixtures isolate these reader boundaries; this is not a real flight. Initial fixture/argument mistakes are retained as initial_fixture logs and corrected final logs are clean.
+
+Station-only grid lift/contrast keep the true hex overlay above deck paint. Shader default0.08 remains unchanged elsewhere. Orbital map zoom limit280 enables the shown full map; initial preset uses a camera-only marker derived from layout, no extra geometry rebuild.
+
+Root authoring integration archives source_r03_map.json and redirects the compiler to this durable baseline, rather than depending on untracked output. Existing production builder generates the map and camera preset from the same layout. Original artist manifest describes its frozen source; root_integration_manifest.json records current integrated bytes and the narrow authoring-path/presentation changes.
+
+No Caterpillar imported or landed: pad reserve is geometric only. No large scenario, performance, network, save or gameplay matrix. Main/EXE remain separate. Shader-cache/runner setup failures from earlier R03 and the first WindowsPowerShell5 wrapper attempt are not clean acceptance evidence; final native runs use PowerShell7 and succeed.

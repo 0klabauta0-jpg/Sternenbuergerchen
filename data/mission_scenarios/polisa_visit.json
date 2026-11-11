@@ -19,12 +19,12 @@
   },
   "patrol_bindings": [],
   "briefing": {
-    "summary": "Auf einem freien Deck landen, den Stationsschalter aufsuchen und Waren handeln. Rueckflug ueber das eigene Schiff.",
+    "summary": "In Polisa andocken und die Station über das Menü oder zu Fuß erkunden. Im zentralen Globusraum führen die Wege zu allen Läden. Rückflug über das eigene Schiff.",
     "minimap_mode": "terrain_only",
     "objectives": [
       {
         "target_id": "trade_service",
-        "text": "Stationsschalter aufsuchen"
+        "text": "Station erkunden oder Stationsmenü öffnen"
       },
       {
         "target_id": "ship_return",

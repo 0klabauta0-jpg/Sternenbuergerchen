@@ -1096,6 +1096,16 @@ func _frame_reference_mission_camera(view: Node) -> bool:
 		return false
 	var presentation: Dictionary=_loaded_terrain_map_data.call("get_place_presentation")
 	var initial_size: float=float(presentation.get("initial_camera_size",0.0))
+	var station_camera: Dictionary = presentation.get("station_initial_camera", {})
+	if bool(presentation.get("orbital_station", false)) and not station_camera.is_empty():
+		if bool(view.get_meta("place_initial_camera", false)): return true
+		view.set("_camera_yaw_degrees", float(station_camera.get("yaw_degrees", 0.0)))
+		view.set("_camera_pitch_degrees", clampf(float(station_camera.get("pitch_degrees", 58.0)), 20.0, 85.0))
+		view.set("_camera_size", clampf(float(station_camera.get("size", initial_size)), 5.5, 120.0))
+		view.call("focus_world_position", _loaded_terrain_map_data.get_marker_position(String(station_camera.get("focus_marker", "trade_service"))))
+		view.set_meta("place_initial_camera", true)
+		return true
+
 	if initial_size>0.0 and is_finite(initial_size):
 		if bool(view.get_meta("place_initial_camera",false)): return true
 		var points: Array=[]

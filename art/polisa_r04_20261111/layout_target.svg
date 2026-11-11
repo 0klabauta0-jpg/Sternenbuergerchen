@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1120" viewBox="-140 -104 280 245">
+<rect x="-140" y="-104" width="280" height="245" fill="#10202b"/>
+<rect x="-128" y="-90" width="256" height="222" fill="none" stroke="#507781" stroke-width=".4"/>
+<g font-family="sans-serif" fill="#dce7e3" text-anchor="middle"><text x="0" y="-97" font-size="4">POLISA R04 · 2D ZIEL · 256×256 SPACE MAP</text></g>
+<g fill="#71848a" stroke="#dce7e3" stroke-width=".4"><rect x="-24" y="-64" width="48" height="32"/><rect x="-92" y="-34" width="184" height="10"/>
+<rect x="-36" y="-88" width="24" height="24"/><rect x="-12" y="-88" width="24" height="24"/><rect x="12" y="-88" width="24" height="24"/>
+<rect x="-48" y="-62" width="24" height="24"/><rect x="24" y="-62" width="24" height="24"/>
+<rect x="-92" y="-24" width="24" height="26"/><rect x="-60" y="-24" width="32" height="40"/><rect x="-20" y="-24" width="40" height="48"/><rect x="28" y="-24" width="32" height="40"/><rect x="68" y="-24" width="24" height="26"/></g>
+<g fill="#1a3540" font-family="sans-serif" font-size="3" text-anchor="middle"><text x="-24" y="-75">INFANTERIE</text><text x="0" y="-75">RÜSTUNG</text><text x="24" y="-75">TECHNIK</text><text x="-36" y="-49">VERSORGUNG</text><text x="36" y="-49">FRACHT</text><text x="0" y="-35">SAMMELRAUM</text></g>
+<circle cx="0" cy="-49" r="3" fill="#65c8e4"/><circle cx="0" cy="-49" r="7" fill="none" stroke="#d4ac4f" stroke-dasharray="1,1"/>
+<g fill="#dce7e3" font-family="sans-serif" font-size="4" text-anchor="middle"><text x="-80" y="-10">01</text><text x="-44" y="-5">02</text><text x="0" y="0">03 / L</text><text x="44" y="-5">04</text><text x="80" y="-10">05</text><text x="0" y="88">FREIES WELTRAUM-VORFELD</text><text x="0" y="96" font-size="3">kein begehbarer Boden · keine zusätzlichen Pads</text></g>
+<g fill="none" stroke="#d4ac4f" stroke-width="2"><ellipse cx="-104" cy="-28" rx="3" ry="26"/><ellipse cx="104" cy="-28" rx="3" ry="26"/></g>
+<g fill="#28496a" stroke="#91acbb" stroke-width=".4"><rect x="-126" y="-60" width="14" height="32"/><rect x="-126" y="-10" width="14" height="32"/><rect x="112" y="-60" width="14" height="32"/><rect x="112" y="-10" width="14" height="32"/></g>
+</svg>

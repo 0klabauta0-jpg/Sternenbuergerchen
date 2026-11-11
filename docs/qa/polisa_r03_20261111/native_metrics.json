@@ -1,0 +1,14 @@
+{
+  "active_collisions": 0,
+  "showcase_mesh_nodes": 6,
+  "showcase_triangles": 22472,
+  "station": {
+    "collision_nodes": 0,
+    "dynamic_lights": 0,
+    "layout_sha256": "c78ac4d2b5fe869801bad74bacda08e868f1371b1513aa9b2d14d6f7bf17ce24",
+    "primitive_boxes": 895,
+    "showcase_rigs": 3,
+    "static_mesh_nodes": 9,
+    "static_triangles": 14124
+  }
+}

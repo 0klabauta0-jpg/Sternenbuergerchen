@@ -2383,6 +2383,7 @@ func rotate_camera(delta_degrees: float) -> void:
 
 func zoom_camera(delta_steps: float) -> void:
 	var limit := REGIONAL_OVERVIEW_MAX_SIZE if not _regional_tiles_by_chunk.is_empty() and not _is_fog_of_war_visual_filter_active() else CAMERA_MAX_SIZE
+	if _orbital_station_view: limit = maxf(limit, 280.0)
 	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, limit)
 	_update_camera_transform()
 	_request_viewport_redraw(true)
@@ -5374,6 +5375,9 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 		var top: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + 0.008
 		if authored:
 			top = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
+		if _orbital_station_view:
+			# Station prop floors and flush markings sit above the raw H0 cap.
+			top = maxf(top, TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET)
 		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
 		var profile := _regional_surface_profile(tile) if regional else PackedFloat32Array()
 		for index in range(6):
@@ -5413,6 +5417,7 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 
 func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	var key: String = "hex_grid_coverage_regional" if _regional_height_step > 0.0 else ("hex_grid_coverage_authored" if authored else "hex_grid_coverage_plain")
+	if _orbital_station_view: key += "_orbital"
 	if _material_cache.has(key):
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
@@ -5420,6 +5425,9 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.27) if authored else Color(0.25, 0.15, 0.10, 0.30))
 	if _regional_height_step > 0.0:
 		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.54))
+	if _orbital_station_view:
+		material.set_shader_parameter("line_color", Color(0.10, 0.21, 0.26, 0.56))
+		material.set_shader_parameter("distant_contrast_floor", 0.5)
 	material.set_shader_parameter("world_line_width", 0.04)
 	material.set_shader_parameter("cell_size", _get_3d_cell_size())
 	_material_cache[key] = material

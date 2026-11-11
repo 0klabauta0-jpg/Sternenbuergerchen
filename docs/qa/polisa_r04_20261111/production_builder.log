@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "single_walkable_component": true,
+    "retained_marker_ids": true,
+    "exactly_five_front_pads": true,
+    "pad06_removed": true,
+    "rooms_reachable": true,
+    "markers_reachable": true,
+    "no_deck_behind_wall": true,
+    "rings_diameter_covers_large_pad": true,
+    "rings_clear_all_pad_rectangles": true,
+    "no_duplicate_pad_dressing": true,
+    "pad_envelopes_clear": true,
+    "globe_walkaround": true
+  },
+  "tile_count": 13172,
+  "walkable": 12399,
+  "reachable": 12399,
+  "blocked": 773,
+  "unreachable_sample": [],
+  "station_deck_z_bounds": [
+    -86.60254037844386,
+    23.38268590217984
+  ]
+}

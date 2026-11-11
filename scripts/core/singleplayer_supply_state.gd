@@ -615,7 +615,7 @@ func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 
 func _station_buy_ship(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
 	if String(context.get("location_id", "")) != "polisa" or bool(context.get("craft_busy", true)) or context.get("station_service_verified", false) != true:
-		return _reject("station_service_required", "Schiffskauf erst nach Landung und Besuch des Stationsschalters")
+		return _reject("station_service_required", "Schiffskauf erst nach dem Andocken in Polisa")
 	var offer_id := String(payload.get("offer_id", ""))
 	var offer: Dictionary = Dictionary(_definitions.get("offers", {})).get(offer_id, {})
 	if String(offer.get("kind", "")) != "ship" or not Array(offer.get("location_ids", [])).has("polisa"):
@@ -647,7 +647,7 @@ func get_station_home_pads() -> int:
 
 
 func _station_build_home_pad(context: Dictionary) -> Dictionary:
-	if context.get("station_service_verified", false) != true or String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst Stationsschalter besuchen")
+	if context.get("station_service_verified", false) != true or String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst in Polisa andocken")
 	if context.get("second_pad_built", false) != true: return _reject("base_progress_required", "Zuerst den zweiten Heimatlandeplatz in der Kampagne fertigstellen")
 	var count := get_station_home_pads()
 	if count >= 6: return _reject("pad_limit", "Alle sechs Heimatbauplaetze sind ausgebaut")

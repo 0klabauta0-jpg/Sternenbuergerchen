@@ -1,0 +1,127 @@
+{
+  "checks": {
+    "single_walkable_component": true,
+    "retained_marker_ids": true,
+    "six_pads": true,
+    "three_pads_each_z": true,
+    "no_x_end_pads": true,
+    "rooms_reachable": true,
+    "markers_reachable": true,
+    "pad_envelopes_clear": true
+  },
+  "tile_count": 5565,
+  "walkable": 4899,
+  "reachable": 4899,
+  "blocked": 666,
+  "unreachable_sample": [],
+  "pad_envelopes": [
+    {
+      "id": "polisa_pad_01",
+      "deck": [
+        18,
+        18
+      ],
+      "reserve_envelope": [
+        14,
+        14
+      ],
+      "clear_cells": 232,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "id": "polisa_pad_02",
+      "deck": [
+        28,
+        34
+      ],
+      "reserve_envelope": [
+        24,
+        30
+      ],
+      "clear_cells": 857,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "id": "polisa_pad_03",
+      "deck": [
+        18,
+        18
+      ],
+      "reserve_envelope": [
+        14,
+        14
+      ],
+      "clear_cells": 232,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "id": "polisa_pad_04",
+      "deck": [
+        18,
+        18
+      ],
+      "reserve_envelope": [
+        14,
+        14
+      ],
+      "clear_cells": 232,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "id": "polisa_pad_05",
+      "deck": [
+        28,
+        34
+      ],
+      "reserve_envelope": [
+        24,
+        30
+      ],
+      "clear_cells": 857,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    },
+    {
+      "id": "polisa_pad_06",
+      "deck": [
+        18,
+        18
+      ],
+      "reserve_envelope": [
+        14,
+        14
+      ],
+      "clear_cells": 232,
+      "clear": true,
+      "margin_per_side": [
+        2.0,
+        2.0
+      ]
+    }
+  ],
+  "rooms": 6,
+  "walls": 34,
+  "furniture": 16,
+  "layout_sha256": "c78ac4d2b5fe869801bad74bacda08e868f1371b1513aa9b2d14d6f7bf17ce24",
+  "map_sha256": "b87eeb736f96fa3588d3635164de112dbc673a165a0d48701029e9c70eafa47f",
+  "scope": "offline authored facts only; no actual navigation/travel/shop/ship landing validation"
+}

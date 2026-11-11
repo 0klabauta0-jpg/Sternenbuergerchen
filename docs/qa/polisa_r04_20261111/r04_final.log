@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+POLISA_R04_CAPTURE res://output/native_glut_maps/polisa_r04_20261111/polisa_r04_station_near.png error=0
+POLISA_R04_CAPTURE res://output/native_glut_maps/polisa_r04_20261111/polisa_r04_whole_map.png error=0
+POLISA_R04_METRICS {"active_collisions":0,"dressing_visible_mesh_nodes":16,"dressing_visible_triangles":40420,"showcase_mesh_nodes":6,"showcase_triangles":22472,"station":{"collision_nodes":0,"dynamic_lights":0,"layout_sha256":"59fadabd04242da53c64e3b0ab5e070d1c68a186bc615e7673d92f8daa549734","primitive_boxes":958,"showcase_rigs":3,"static_mesh_nodes":10,"static_triangles":17948}}
+PASS: Polisa R04 art capture

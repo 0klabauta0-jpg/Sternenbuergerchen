@@ -1,6 +1,8 @@
 extends Node3D
-## Cold-built station visual. All deck, navigation and services remain in MapData.
-## Geometry is batched by material; no process loop, collision or dynamic light.
+## Authored layout projection only. Static batches; no runtime truth or collisions.
+const FACTS = "res://art/polisa_r04_20261111/layout_compiled.json"
+const ARMOR = preload("res://scripts/terrain/personnel_armor_visual.gd")
+const PERSON = preload("res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb")
 const HULL := "c9cfc8"
 const STEEL := "83918e"
 const DECK := "52656b"
@@ -9,167 +11,230 @@ const DARK := "1c2e38"
 const YELLOW := "d4ac4f"
 const CYAN := "70c7c5"
 const GLASS := "365c68"
+const SOLAR := "294763"
+const HOLO := "3c9ecc"
 var _batches: Dictionary = {}
 var _materials: Dictionary = {}
 var _triangle_count := 0
 var _box_count := 0
+var _showcase_count := 0
 
 func _ready() -> void:
-	if get_child_count() > 0: return
-	name = "PolisaStationVisual"
-	_build_hull()
-	_build_hall()
-	_build_pad(Vector2(-21.5,0),Vector2(13,10),"01")
-	_build_pad(Vector2(21.5,0),Vector2(13,10),"02")
-	_build_pad(Vector2(0,21.5),Vector2(10,13),"03")
-	_build_rings()
+	if get_child_count()>0:return
+	name="PolisaR04Visual"
+	var facts:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(FACTS))
+	_build_structure(facts)
+	for wall:Dictionary in facts.walls:_build_wall(wall)
+	for room:Dictionary in facts.rooms:_build_room(room)
+	for item:Dictionary in facts.furniture:_build_furniture(item)
+	for pad:Dictionary in facts.pads:_build_pad(pad)
+	_build_engineering(facts.engineering)
+	_build_space_extent(facts)
 	_flush()
-	set_meta("polisa_visual_metrics",{"triangles":_triangle_count,"mesh_nodes":_batches.size(),"primitive_boxes":_box_count,"collision_nodes":0,"dynamic_lights":0})
+	set_meta("polisa_visual_metrics",{"static_triangles":_triangle_count,"static_mesh_nodes":_batches.size(),"primitive_boxes":_box_count,"showcase_rigs":_showcase_count,"collision_nodes":0,"dynamic_lights":0,"layout_sha256":facts.layout_sha256})
 
-func _build_hull() -> void:
-	# Every visible walking plane keeps the original position and dimensions.
-	_box(Vector3(18,.20,16),Vector3(0,-.09,0),DECK)
-	_chamfered_shell(Vector2(18.8,16.8),.9,-.22,-2.55,Vector2.ZERO,HULL)
-	_chamfered_shell(Vector2(14.4,12.6),1.6,-2.55,-4.1,Vector2.ZERO,DARK)
-	_box(Vector3(46,1.15,2.8),Vector3(0,-1.1,0),DARK)
-	_box(Vector3(34,.18,3.2),Vector3(0,-.08,0),DECK)
-	_box(Vector3(3.2,.18,14),Vector3(0,-.08,12),DECK)
-	_box(Vector3(2.8,1.0,18),Vector3(0,-.85,14),DARK)
-	for side: float in [-1.0,1.0]:
-		_beam(Vector3(side*7,-3.3,0),Vector3(side*21,-1.25,0),.75,DARK)
-		_box(Vector3(7.0,.38,3.6),Vector3(side*12.5,-.40,0),HULL)
-		for z: float in [-1.46,1.46]:
-			_box(Vector3(6.4,.028,.1),Vector3(side*12.1,.03,z),YELLOW)
-		for z: float in [-1.80,1.80]:
-			_box(Vector3(6.0,.10,.10),Vector3(side*12.0,.78,z),HULL)
-			for station_x: float in [9.4,12.0,14.6]:
-				_box(Vector3(.12,.74,.12),Vector3(side*station_x,.39,z),STEEL)
-		for x: float in [-6.0,-3.0,0.0,3.0,6.0]:
-			_box(Vector3(1.65,.68,.12),Vector3(x,-1.12,side*8.12),INSET)
-			_box(Vector3(1.25,.075,.15),Vector3(x,-.75,side*8.16),STEEL)
-	_beam(Vector3(0,-3.5,5),Vector3(0,-1.2,21),.85,DARK)
-	for x: float in [-1.46,1.46]:
-		_box(Vector3(.1,.028,7.6),Vector3(x,.03,12.1),YELLOW)
-	for x: float in [-1.80,1.80]:
-		_box(Vector3(.10,.10,6.2),Vector3(x,.78,11.6),HULL)
-		for z: float in [8.6,11.6,14.6]:
-			_box(Vector3(.12,.74,.12),Vector3(x,.39,z),STEEL)
-	# The hub's compact lower machinery anchors the rings and all three arms.
-	_cylinder(3.35,2.55,4.8,Vector3(0,-5.75,0),DARK,12)
-	_cylinder(3.55,3.55,.55,Vector3(0,-4.05,0),STEEL,12)
-	_cylinder(2.8,2.8,.65,Vector3(0,-7.65,0),HULL,12)
-	_cylinder(1.3,1.3,16.2,Vector3(0,-7.45,0),DARK,12,Vector3(0,0,PI*.5))
-	for side: float in [-1.0,1.0]:
-		_cylinder(1.65,1.65,.5,Vector3(side*8.2,-7.45,0),HULL,12,Vector3(0,0,PI*.5))
-		_cylinder(1.18,1.18,.55,Vector3(side*8.55,-7.45,0),INSET,12,Vector3(0,0,PI*.5))
-	for x: float in [-1.55,1.55]:
-		_box(Vector3(.55,2.7,1.6),Vector3(x,-5.8,2.9),STEEL)
-		_box(Vector3(.30,1.45,.08),Vector3(x,-5.6,3.74),YELLOW)
+func _rect_center(r:Array)->Vector2:
+	return Vector2((float(r[0])+float(r[2]))*.5,(float(r[1])+float(r[3]))*.5)
 
-func _build_hall() -> void:
-	# Floor panels and a directional cross are flush paint, never new obstacles.
-	for x: float in [-4.7,4.7]:
-		_box(Vector3(7.2,.02,12.6),Vector3(x,.021,0),INSET)
-		for z: float in [-5.8,-2.9,2.9,5.8]:
-			_box(Vector3(6.3,.022,.045),Vector3(x,.037,z),STEEL)
-	_box(Vector3(3.0,.026,14.0),Vector3(0,.027,0),STEEL)
-	_box(Vector3(16.4,.028,2.45),Vector3(0,.030,0),STEEL)
-	for x: float in [-1.7,1.7]:
-		_box(Vector3(.08,.025,11.8),Vector3(x,.038,0),YELLOW)
-	for x: float in [-5.5,5.5]:
-		# Rear panels sit on the already blocked rear wall. Front stays cut away.
-		_box(Vector3(7,.9,.4),Vector3(x,.45,7.5),HULL)
-		_box(Vector3(7,2.5,.40),Vector3(x,1.25,-7.5),HULL)
-		_box(Vector3(6.4,1.25,.08),Vector3(x,1.35,-7.24),GLASS)
-		_box(Vector3(6.4,.11,.10),Vector3(x,2.09,-7.18),CYAN)
-		_box(Vector3(7.4,.35,2.0),Vector3(x,2.72,-7.1),HULL)
-		_box(Vector3(6.8,.10,.24),Vector3(x,2.50,-6.18),DARK)
-	for x: float in [-8.7,8.7]:
-		for z: float in [-4.5,4.5]:
-			_box(Vector3(.4,.9,5),Vector3(x,.45,z),HULL)
-			_box(Vector3(.46,.13,4.9),Vector3(x,.96,z),YELLOW)
-		_box(Vector3(.58,2.9,.55),Vector3(x,1.45,-7.5),HULL)
-		_box(Vector3(.18,1.2,.10),Vector3(x,1.65,-7.18),CYAN)
-		for z: float in [-5.2,5.2]:
-			_cylinder(.24,.30,1.15,Vector3(signf(x)*9.16,.65,z),STEEL,8)
-			_cylinder(.29,.29,.12,Vector3(signf(x)*9.16,1.24,z),YELLOW,8)
-	# A roof header reads as a hall without hiding the playable floor.
-	_box(Vector3(18.0,.42,.75),Vector3(0,3.12,-7.45),HULL)
-	_box(Vector3(5.0,.95,.22),Vector3(0,2.95,-7.00),DARK)
-	_label("POLISA",Vector3(0,3.0,-6.83),.032,false,false)
-	for entrance: Vector3 in [Vector3(-8.7,0,0),Vector3(8.7,0,0),Vector3(0,0,7.5)]:
-		var side := Vector3(0,0,1.8) if absf(entrance.x)>1 else Vector3(1.8,0,0)
-		for sign_value: float in [-1.0,1.0]:
-			_box(Vector3(.38,1.5,.38),entrance+side*sign_value+Vector3(0,.75,0),HULL)
-			_box(Vector3(.16,.5,.16),entrance+side*sign_value+Vector3(0,1.0,0),CYAN)
-	for spec: Array in [[Vector3(-5,0,-4.7),"HANDWAFFEN",CYAN],[Vector3(5,0,-4.7),"RUESTUNG",YELLOW],[Vector3(-5,0,4.6),"SCHIFFE",CYAN],[Vector3(5,0,4.6),"WAREN",YELLOW]]:
-		_counter(spec[0],String(spec[1]),String(spec[2]))
-	# Same original service pedestal footprint; the faceted globe is decorative.
-	_cylinder(.65,.8,.8,Vector3(0,.4,0),DARK,8)
-	_cylinder(.74,.74,.10,Vector3(0,.86,0),HULL,8)
-	_cylinder(.55,.55,.04,Vector3(0,.94,0),CYAN,12)
-	var globe := SphereMesh.new()
-	globe.radius=.48;globe.height=.96;globe.radial_segments=12;globe.rings=6
-	_append(globe,Vector3(0,1.57,0),GLASS)
-	_box(Vector3(.06,1.0,.06),Vector3(0,1.2,0),CYAN)
+func _rect_size(r:Array)->Vector2:
+	return Vector2(float(r[2])-float(r[0]),float(r[3])-float(r[1]))
 
-func _counter(position: Vector3,title: String,accent: String) -> void:
-	_box(Vector3(3,.78,1.15),position+Vector3(0,.39,0),DARK)
-	_box(Vector3(3.1,.09,1.22),position+Vector3(0,.82,0),HULL)
-	_box(Vector3(2.5,.34,1.16),position+Vector3(0,.40,0),STEEL)
-	var back := -1.0 if position.z<0 else 1.0
-	_box(Vector3(1.9,.57,.12),position+Vector3(0,1.12,back*.42),DARK)
-	_box(Vector3(1.64,.38,.13),position+Vector3(0,1.16,back*.39),accent)
-	for x: float in [-1.12,1.12]:
-		_box(Vector3(.28,.26,.38),position+Vector3(x,.99,0),STEEL)
-	_label(title,position+Vector3(0,1.68,0),.017,false,true)
+func _build_structure(facts:Dictionary)->void:
+	for deck:Dictionary in facts.decks:
+		var c:=_rect_center(deck.rect)
+		var s:=_rect_size(deck.rect)
+		_box(Vector3(s.x,.3,s.y),Vector3(c.x,-.14,c.y),DECK)
+		if deck.kind in ["hub","room"]:
+			_chamfered_shell(s+Vector2(.5,.5),1.1,-.3,-3.2,c,HULL)
+		if deck.kind=="bridge":
+			_chamfered_shell(s+Vector2(.5,.5),1.1,-.3,-2.0,c,HULL)
+			for x:float in [-84,-72,-60,-48,-36,-24,-12,0,12,24,36,48,60,72,84]:
+				_box(Vector3(8.8,.8,.15),Vector3(x,-.9,40.2),INSET)
+	_box(Vector3(208,3.0,6.5),Vector3(0,-5.0,36),DARK)
+	_chamfered_shell(Vector2(43,27),2.5,-3.2,-6.8,Vector2(0,14),DARK)
+	for x:float in [-80,-44,0,44,80]:
+		_beam(Vector3(x,-5.5,35),Vector3(x,-1.5,60),1.8,DARK)
+	_box(Vector3(41,.02,25),Vector3(0,.025,16),STEEL)
+	for x:float in [-21,21]:_box(Vector3(.14,.015,29),Vector3(x,.045,16),YELLOW)
+	_box(Vector3(181,.015,.14),Vector3(0,.045,31.0),YELLOW)
+	_box(Vector3(181,.015,.14),Vector3(0,.045,38.8),YELLOW)
+	_label("POLISA",Vector3(0,.055,28),.12,true,false)
+	_label("SAMMELRAUM / TRANSIT",Vector3(0,.055,25.5),.027,true,false)
 
-func _build_pad(center: Vector2,size: Vector2,id: String) -> void:
-	_box(Vector3(size.x,.24,size.y),Vector3(center.x,-.11,center.y),DECK)
-	_chamfered_shell(size+Vector2(.38,.38),.70,-.24,-1.55,center,HULL)
-	_box(Vector3(size.x-1.5,.022,size.y-1.5),Vector3(center.x,.023,center.y),INSET)
-	for sign_value: float in [-1.0,1.0]:
-		_box(Vector3(size.x-.5,.025,.13),Vector3(center.x,.045,center.y+sign_value*(size.y*.5-.45)),YELLOW)
-		_box(Vector3(.13,.025,size.y-.5),Vector3(center.x+sign_value*(size.x*.5-.45),.045,center.y),YELLOW)
-		# Four corners stay at the original marker positions and 0.08m height.
-		for edge: float in [-1.0,1.0]:
-			_box(Vector3(.3,.08,.3),Vector3(center.x+sign_value*(size.x*.5-.2),.05,center.y+edge*(size.y*.5-.2)),CYAN)
-		for lane: float in [-1.0,0.0,1.0]:
-			_box(Vector3(.52,.026,.12),Vector3(center.x+lane*1.0,.052,center.y+sign_value*2.25),HULL)
-		_box(Vector3(.14,.03,3.65),Vector3(center.x+sign_value*2.25,.053,center.y),HULL)
-		for offset: float in [-2.6,2.6]:
-			var a := center+Vector2(sign_value*(size.x*.5-.8),offset)
-			_box(Vector3(.58,.026,.28),Vector3(a.x,.055,a.y),YELLOW)
-	_label(id,Vector3(center.x,.058,center.y),.068,true,false)
-	_label("POLISA",Vector3(center.x,.058,center.y+size.y*.5-1.0),.024,true,false)
-	# Utilities are outside the existing pad footprint; tops read as machinery.
-	if absf(center.x)>1:
-		var side := signf(center.x)
-		var edge_x := center.x+side*(size.x*.5+1.30)
-		_box(Vector3(2.35,.4,9.2),Vector3(edge_x,-.65,center.y),DARK)
-		for n: int in range(4):
-			_box(Vector3(2.12,.10,1.70),Vector3(edge_x,-.39,center.y-3.1+n*2.05),GLASS)
-			_box(Vector3(.08,.025,1.65),Vector3(edge_x,-.32,center.y-3.1+n*2.05),STEEL)
-		for z: float in [-3.8,3.8]:
-			_box(Vector3(1.0,.85,1.2),Vector3(edge_x,.01,z),STEEL)
-			_box(Vector3(1.05,.10,1.25),Vector3(edge_x,.46,z),YELLOW)
+func _build_wall(w:Dictionary)->void:
+	var c:=_rect_center(w.rect)
+	var s:=_rect_size(w.rect)
+	var h:=float(w.height)
+	if bool(w.get("window",false)):
+		_box(Vector3(s.x,h*.38,s.y),Vector3(c.x,h*.19+.01,c.y),HULL)
+		_box(Vector3(s.x,h*.48,s.y*.6),Vector3(c.x,h*.63,c.y),GLASS)
+		_box(Vector3(s.x,.10,s.y),Vector3(c.x,h-.02,c.y),STEEL)
 	else:
-		for x: float in [-3.9,3.9]:
-			_box(Vector3(1.3,.85,1.1),Vector3(x,-.05,28.7),STEEL)
-			_box(Vector3(1.35,.1,1.15),Vector3(x,.43,28.7),YELLOW)
+		_box(Vector3(s.x,h,s.y),Vector3(c.x,h*.5+.01,c.y),HULL)
+		if s.x>s.y:
+			_box(Vector3(maxf(.1,s.x-.5),h*.58,.04),Vector3(c.x,h*.52,c.y+.42),INSET)
+		_box(Vector3(s.x+.08,.12,s.y+.08),Vector3(c.x,h+.03,c.y),STEEL)
 
-func _build_rings() -> void:
-	for x: float in [-5.3,5.3]:
-		var center := Vector3(x,-7.8,0)
-		_ring(center,7.35,6.50,.90,32)
-		_ring(center,6.49,6.23,1.03,32,DARK)
-		for angle: float in [PI*.22,PI*.78,PI*1.22,PI*1.78]:
-			var rim := center+Vector3(0,cos(angle)*6.35,sin(angle)*6.35)
-			_beam(center,rim,.46,STEEL)
-		for z: float in [-4.0,4.0]:
-			_beam(Vector3(x,-1.8,z),Vector3(x,-5.3,z*1.4),.55,DARK)
+func _build_room(room:Dictionary)->void:
+	var c:=_rect_center(room.rect)
+	var s:=_rect_size(room.rect)
+	var accent:=YELLOW if room.accent=="yellow" else CYAN
+	_box(Vector3(s.x-.8,.018,s.y-.8),Vector3(c.x,.029,c.y),INSET)
+	# Back lintel only: all contents are visible from the single front camera.
+	if room.door_side=="front":
+		_box(Vector3(s.x+.4,.3,1.1),Vector3(c.x,3.48,float(room.rect[1])),HULL)
+		_box(Vector3(s.x-.3,.10,.12),Vector3(c.x,3.28,float(room.rect[1])+.65),CYAN)
+	var d:=Vector2(float(room.door[0]),float(room.door[1]))
+	var transverse:=Vector2.RIGHT if room.door_side=="front" else Vector2(0,1)
+	for sign_value:float in [-1,1]:
+		var p:=d+transverse*sign_value*2.75
+		_box(Vector3(.23,1.5,.23),Vector3(p.x,.76,p.y),DARK)
+		_box(Vector3(.13,1.1,.25),Vector3(p.x,.84,p.y),accent)
+	var threshold:=Vector3(5.2,.015,1.0) if room.door_side=="front" else Vector3(1,.015,5.2)
+	_box(threshold,Vector3(d.x,.045,d.y),accent)
+	_label(String(room.title),Vector3(c.x,.055,c.y+7.5),.048,true,false)
+	# Small upright title at rear, never a front billboard wall.
+	_label(String(room.title),Vector3(c.x,2.3,c.y-10.5),.026,false,true)
 
-func _ring(center: Vector3,outer: float,inner: float,width: float,segments: int,color: String=HULL) -> void:
+func _build_globe(item:Dictionary)->void:
+	var c:=_rect_center(item.rect)
+	_cylinder(2.15,2.2,.65,Vector3(c.x,.335,c.y),DARK,16)
+	_cylinder(2.25,2.25,.12,Vector3(c.x,.69,c.y),HULL,16)
+	_cylinder(1.45,1.45,.05,Vector3(c.x,.78,c.y),CYAN,20)
+	var globe:=SphereMesh.new()
+	globe.radius=1.05;globe.height=2.1;globe.radial_segments=24;globe.rings=12
+	_append(globe,Vector3(c.x,1.85,c.y),HOLO)
+	for angle:float in [0,PI*.5]:
+		var band:=TorusMesh.new()
+		band.inner_radius=1.055;band.outer_radius=1.08;band.rings=24;band.ring_segments=6
+		_append(band,Vector3(c.x,1.85,c.y),CYAN,Vector3(PI*.5,angle,0))
+	for index in range(4):
+		var a:=TAU*index/4
+		_box(Vector3(.55,.35,.45),Vector3(c.x+cos(a)*1.8,.92,c.y+sin(a)*1.8),STEEL)
+		_box(Vector3(.42,.025,.30),Vector3(c.x+cos(a)*1.8,1.11,c.y+sin(a)*1.8),CYAN)
+	for index in range(64):
+		var a:=TAU*index/64
+		var b:=TAU*(index+1)/64
+		_quad(Vector3(c.x+cos(a)*5.5,.052,c.y+sin(a)*5.5),Vector3(c.x+cos(b)*5.5,.052,c.y+sin(b)*5.5),Vector3(c.x+cos(b)*5.65,.052,c.y+sin(b)*5.65),Vector3(c.x+cos(a)*5.65,.052,c.y+sin(a)*5.65),CYAN)
+
+func _build_engineering(spec:Dictionary)->void:
+	var rz:=float(spec.ring_z)
+	for x_value in spec.ring_x:
+		var x:=float(x_value)
+		var c:=Vector3(x,float(spec.ring_center_y),rz)
+		var yaw:=signf(x)*deg_to_rad(float(spec.ring_yaw_degrees))
+		var turn:=Basis(Vector3.UP,yaw)
+		_ring(c,26,23,2.3,64,HULL,yaw)
+		_ring(c,22.65,21.9,2.7,64,DARK,yaw)
+		_cylinder(3.7,3.7,7,c,DARK,16,Vector3(0,yaw,PI*.5))
+		_cylinder(4.1,4.1,.7,c+turn*Vector3(signf(x)*3.1,0,0),HULL,16,Vector3(0,yaw,PI*.5))
+		for index in range(8):
+			var a:=TAU*index/8
+			_beam(c,c+turn*Vector3(0,cos(a)*22.5,sin(a)*22.5),1.05,STEEL)
+			_box(Vector3(3.1,1.0,1.8),c+turn*Vector3(0,cos(a)*24.5,sin(a)*24.5),DARK)
+		_beam(Vector3(signf(x)*87,-5,36),c,2.5,DARK)
+		_beam(c,Vector3(signf(x)*119,-4,36),2.0,DARK)
+	for x_value in spec.solar_x:
+		var x:=float(x_value)
+		for z_value in spec.solar_z:
+			var z:=float(z_value)
+			_beam(Vector3(x,-4,36),Vector3(x,-2,z),1.2,STEEL)
+			_box(Vector3(14.6,.6,32.6),Vector3(x,-2.2,z),DARK)
+			for col in range(3):
+				for row in range(8):
+					var c:=Vector3(x+(col-1)*4.6,-1.85,z+(row-3.5)*3.95)
+					_box(Vector3(4.3,.1,3.65),c,SOLAR)
+					_box(Vector3(.08,.025,3.65),c+Vector3(0,.065,0),STEEL)
+					_box(Vector3(4.3,.025,.06),c+Vector3(0,.065,0),STEEL)
+
+func _build_space_extent(facts:Dictionary)->void:
+	# A visual perimeter of declared map extent, not extra navigable tiles.
+	var o:=Vector2(float(facts.origin_plane[0]),float(facts.origin_plane[1]))
+	var r:Array=facts.space_bounds
+	var lo:=Vector2(float(r[0]),float(r[1]))-o
+	var hi:=Vector2(float(r[2]),float(r[3]))-o
+	for z:float in [lo.y,hi.y]:_box(Vector3(hi.x-lo.x,.03,.14),Vector3((lo.x+hi.x)*.5,-.25,z),GLASS)
+	for x:float in [lo.x,hi.x]:_box(Vector3(.14,.03,hi.y-lo.y),Vector3(x,-.25,(lo.y+hi.y)*.5),GLASS)
+	_label("POLISA ORBIT / 256 x 256",Vector3(0,.02,hi.y-3),.065,true,false)
+	for index in range(110):
+		var x:=lo.x+4+fposmod(float(index*73),hi.x-lo.x-8)
+		var z:=lo.y+4+fposmod(float(index*97),hi.y-lo.y-8)
+		var size:=.12 if index%5 else .24
+		_box(Vector3(size,.025,size),Vector3(x,-18,z),STEEL)
+
+
+func _build_furniture(item: Dictionary) -> void:
+	if item.kind=="globe":
+		_build_globe(item)
+		return
+	var c := _rect_center(item.rect)
+	var s := _rect_size(item.rect)
+	var h := float(item.height)
+	var accent := CYAN if item.accent=="cyan" else YELLOW
+	_box(Vector3(s.x,h,s.y),Vector3(c.x,h*.5+.01,c.y),DARK)
+	_box(Vector3(s.x+.08,.10,s.y+.08),Vector3(c.x,h+.02,c.y),HULL)
+	if item.kind=="counter":
+		_box(Vector3(s.x-.35,.35,s.y+.015),Vector3(c.x,.49,c.y),STEEL)
+		_box(Vector3(1.12,.5,.12),Vector3(c.x+.7,h+.32,c.y),DARK)
+		_box(Vector3(.94,.34,.13),Vector3(c.x+.7,h+.35,c.y+.04),accent)
+		_box(Vector3(.55,.18,.45),Vector3(c.x-1.1,h+.18,c.y),STEEL)
+	elif item.kind=="goods":
+		# Actual visible shelf goods, placed wholly in their shared blocker footprint.
+		for y: float in [.5,1.2,1.8]:
+			_box(Vector3(s.x,.1,s.y),Vector3(c.x,y,c.y),STEEL)
+			for n in range(3):
+				var x := c.x+(float(n)-1.0)*s.x*.28
+				_box(Vector3(s.x*.19,.37,s.y*.62),Vector3(x,y+.23,c.y),accent if n==1 else HULL)
+				_box(Vector3(s.x*.14,.08,.02),Vector3(x,y+.25,c.y+s.y*.33),DARK)
+	elif item.kind=="cargo":
+		for x: float in [-1.4,1.4]:
+			for z: float in [-1.05,1.05]:
+				_box(Vector3(1.25,1.05,1.5),Vector3(c.x+x,h+.6,c.y+z),YELLOW if x<0 else STEEL)
+				_box(Vector3(.12,1.1,1.54),Vector3(c.x+x,h+.6,c.y+z),DARK)
+				_box(Vector3(1.3,.12,1.54),Vector3(c.x+x,h+1.1,c.y+z),HULL)
+
+	elif item.kind=="armor":
+		_box(Vector3(s.x-.2,.04,s.y-.2),Vector3(c.x,h+.095,c.y),accent)
+		_box(Vector3(s.x,2.6,.15),Vector3(c.x,1.6,c.y-s.y*.48),INSET)
+		for sign_value: float in [-1.0,1.0]:
+			_box(Vector3(.08,2.7,.12),Vector3(c.x+sign_value*(s.x*.5-.1),1.6,c.y-s.y*.46),CYAN)
+		var model: Node3D=PERSON.instantiate()
+		model.name="Showcase_"+String(item.armor)
+		model.position=Vector3(c.x,h+.13,c.y)
+		model.scale=Vector3.ONE*1.0
+		add_child(model)
+		ARMOR.apply_to_model(model,String(item.armor))
+		for player: AnimationPlayer in model.find_children("*","AnimationPlayer",true,false):
+			player.play("idle");player.advance(0);player.pause()
+		model.process_mode=Node.PROCESS_MODE_DISABLED
+		_showcase_count+=1
+		_label({"light":"LEICHT","medium":"MITTEL","heavy":"SCHWER"}[String(item.armor)],Vector3(c.x,2.92,c.y-.25),.021,false,true)
+	elif item.kind=="bench":
+		_box(Vector3(s.x,.7,.22),Vector3(c.x,.88,c.y-s.y*.35),STEEL)
+
+func _build_pad(pad: Dictionary) -> void:
+	var c := Vector2(float(pad.center[0]),float(pad.center[1]))
+	var s := Vector2(float(pad.size[0]),float(pad.size[1]))
+	_chamfered_shell(s+Vector2(.6,.6),1.0,-.30,-1.65,c,HULL)
+	for sign_value: float in [-1.0,1.0]:
+		_box(Vector3(s.x-1,.015,.16),Vector3(c.x,.045,c.y+sign_value*(s.y*.5-.65)),YELLOW)
+		_box(Vector3(.16,.015,s.y-1),Vector3(c.x+sign_value*(s.x*.5-.65),.045,c.y),YELLOW)
+		for other: float in [-1.0,1.0]:
+			_box(Vector3(.6,.13,.6),Vector3(c.x+sign_value*(s.x*.5-.2),.07,c.y+other*(s.y*.5-.2)),CYAN)
+		_box(Vector3(.18,.015,s.y*.5),Vector3(c.x+sign_value*(s.x*.25),.045,c.y),HULL)
+		for n in range(5):
+			_box(Vector3(.55,.014,.18),Vector3(c.x+(float(n)-2)*1.4,.045,c.y+sign_value*s.y*.25),HULL)
+		# External equipment stays entirely outside the pad and the reserved envelope.
+		var x := c.x+sign_value*(s.x*.5+1.1)
+		_box(Vector3(1.6,.5,s.y*.55),Vector3(x,-.55,c.y),DARK)
+		for z: float in [-s.y*.2,0,s.y*.2]:
+			_box(Vector3(1.4,.45,2.1),Vector3(x,-.10,c.y+z),STEEL)
+			_box(Vector3(1.45,.1,2.15),Vector3(x,.18,c.y+z),YELLOW)
+	_label(String(pad.number)+" / "+String(pad["class"]),Vector3(c.x,.045,c.y),.105,true,false)
+	_label("POLISA  /  DOCK",Vector3(c.x,.045,c.y+s.y*.5-1.5),.035,true,false)
+
+
+func _ring(center: Vector3,outer: float,inner: float,width: float,segments: int,color: String=HULL,yaw:float=0.0) -> void:
 	for i: int in range(segments):
 		var a := TAU*float(i)/segments
 		var b := TAU*float(i+1)/segments
@@ -177,7 +242,7 @@ func _ring(center: Vector3,outer: float,inner: float,width: float,segments: int,
 		for axis: float in [-width*.5,width*.5]:
 			for radius: float in [outer,inner]:
 				for angle: float in [a,b]:
-					points.append(center+Vector3(axis,cos(angle)*radius,sin(angle)*radius))
+					points.append(center+Basis(Vector3.UP,yaw)*Vector3(axis,cos(angle)*radius,sin(angle)*radius))
 		var part_color := YELLOW if color==HULL and i%8==0 else color
 		for face: Array in [[0,1,3,2],[4,6,7,5],[0,4,5,1],[2,3,7,6],[0,2,6,4],[1,5,7,3]]:
 			_quad(points[face[0]],points[face[3]],points[face[2]],points[face[1]],part_color)
@@ -262,7 +327,10 @@ func _material(color: String) -> StandardMaterial3D:
 		material.roughness=.78
 		material.metallic=.14
 		material.cull_mode=BaseMaterial3D.CULL_DISABLED
-		if color==CYAN:
+		if color==GLASS:
+			material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+			material.albedo_color.a=.38
+		if color==CYAN or color==HOLO:
 			material.emission_enabled=true
 			material.emission=Color(color)
 			material.emission_energy_multiplier=.42
@@ -273,6 +341,7 @@ func _label(text: String,position: Vector3,pixel_size: float,floor_label: bool=f
 	var label := Label3D.new()
 	label.text=text;label.position=position;label.pixel_size=pixel_size;label.font_size=36
 	label.modulate=Color(HULL);label.outline_size=3
+	label.no_depth_test = not floor_label
 	if floor_label: label.rotation_degrees.x=-90
 	elif billboard: label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 	add_child(label)

@@ -409,11 +409,9 @@ func _service_context(craft_id: String) -> Dictionary:
 	if location == "mission" and place_id == "polisa":
 		var mission: Node = _flow.call("get_mission_for_craft", craft_id)
 		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
-		var driver: Node = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
-		if controller == null or driver == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
-		var states: Dictionary = driver.call("get_mission_interaction_runtime_states")
-		if bool(Dictionary(states.get("trade_service", {})).get("complete", false)):
-			return {"location_id":"polisa", "craft_busy":false, "station_service_verified":true}
+		if controller == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
+		# Station-wide service menu after actual docking; walking to the counter is optional.
+		return {"location_id":"polisa", "craft_busy":false, "station_service_verified":true}
 	if location == "mission" and place_id in ["trade_outpost","satellite_crash"]:
 		var card: Dictionary = _flow.call("_find_mission_drop_card_in_planning_state",craft_id)
 		if String(card.get("state",card.get("mission_drop_state",""))) not in ["landed","unloading","complete"]: return {}
@@ -1073,7 +1071,7 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		if registry == null or registry.call("get_unit", id) == null: continue
 		var access := _inventory_context(id, craft_id)
 		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
-	return {"craft_id":craft_id,"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+	return {"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
 		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
