@@ -215,6 +215,8 @@ Verifier und diese Statusdokumentation.
   jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
   Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale
   Aufnahme bleibt bis zur vollständigen Transaktion gesperrt.
+  Die validierte Footprintvorschau und gebietsbezogene Zellabfrage stehen
+  für die spätere Root-Vorprüfung bereit; Test5/5, keine Mutation.
 - AP04a Commands/Zielresolver: Ziel- und Wegpunktgrenzen folgen dem allein
   vom Runtime-Kontext gelieferten Koordinatenrahmen; strategische Defaults
   bleiben kompatibel. Bereichs-Command4/4, Zielresolver11/11, AP00 und

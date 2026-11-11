@@ -43,8 +43,8 @@ func admit_actor(definition: Dictionary, flight: RefCounted) -> Dictionary:
 func get_actor(craft_id: String) -> RefCounted:
 	return _registry.get_actor(craft_id)
 
-func query_cells(cells: Array[Vector2i]) -> Array[String]:
-	return _registry.query_cells(cells)
+func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:
+	return _registry.query_cells(cells, area_id)
 
 func update_actor_cell(craft_id: String, cell: Vector2i) -> bool:
 	var flight: RefCounted = _registry.get_actor(craft_id)
@@ -70,6 +70,18 @@ func preview_actor_cells(craft_id: String, proposal: Dictionary) -> Array[Vector
 	var snapshot: Dictionary = flight.get_snapshot()
 	snapshot.merge(proposal, true)
 	return _occupied_cells(snapshot, _metadata[craft_id].footprint_hexes)
+
+func preview_footprint(snapshot: Dictionary, footprint: Array) -> Array[Vector2i]:
+	var empty: Array[Vector2i] = []
+	if typeof(snapshot.get("position_plane")) != TYPE_VECTOR2 or not snapshot.position_plane.is_finite() or typeof(snapshot.get("heading_rad")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(snapshot.heading_rad)):
+		return empty
+	if footprint.is_empty() or footprint.size() > 64: return empty
+	var seen := {}
+	for offset in footprint:
+		if typeof(offset) != TYPE_VECTOR2I or seen.has(offset): return empty
+		seen[offset] = true
+	if not seen.has(Vector2i.ZERO): return empty
+	return _occupied_cells(snapshot, footprint)
 
 func _occupied_cells(snapshot: Dictionary, footprint: Array) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
