@@ -4,10 +4,12 @@
 
 Isolierte Grundlagen implementiert: Ground-State, reine Hexsicht mit separater
 Geometrie-LRU im vorhandenen Cache und Erkennungsepisoden. Finale kleine
-Checks25/0,38/0,21/0. Frischer Read-only-Review ohne Blocker; ergänzte kleine
-Grenzfälle geprüft. Keine aktive Missions-/Basis-/Bewegungsintegration.
+Checks25/0,38/0,21/0. AP1-Owner-/Versionsgate ergänzt, eigener Check39/0;
+zwei unabhängige Reviewbefunde mit RED/GREEN behoben. Keine aktive
+Missions-/Basis-/Bewegungsintegration.
 Vertrag: `docs/dev/hex_tactical_runtime_contract.md`.
-QA: `docs/qa/hex_runtime_foundation_20261111/README.md`.
+QA: `docs/qa/hex_runtime_foundation_20261111/README.md` und
+`docs/qa/hex_ground_owner_20261111/README.md`.
 
 ## Ziel / Problem
 
@@ -43,6 +45,24 @@ bleiben zunächst unverändert, bis deren konkrete Anbindung separat geprüft
 wird. Keine Karten-/Editor-/Stationsänderung, keine große Matrix, native
 Gefechtsprobe, Performancefreigabe, Mainintegration oder EXE.
 
+### Nächster abgegrenzter Schritt: AP1-Owner und Version
+
+Auf ausdrücklichen Abstimmungsauftrag folgt die Versionsprüfung in MapData
+und der zentrale Besitz in SimulationRoot. `tactical_grid_rules=hex_tactical_v1`
+ist nur mit `hex_axial_v1` zulässig. Fehlende Kennung bleibt Legacy;
+unbekannte/falsch typisierte Kennungen und Topologiemischungen melden einen
+Load-Issue. Ein fehlgeschlagener Konfigurationsversuch verändert keinen
+bestehenden gültigen Kontext. Read-Payloads bleiben unabhängige Kopien.
+Zulassung/Freigabe erfolgen ausschließlich über den Simulationsowner und
+dessen bestehende Autoritätsprüfung. Keine Karte wird jetzt aktiviert.
+
+Zusätzlich betroffene Dateien: `scripts/core/simulation_root.gd`,
+`scripts/terrain/terrain_map_data.gd`, neuer kleiner Owner-Verifier und Runner.
+Die bereits abgestimmte Regionalversion3 aus5204312c0 wird beim MapData-
+Abgleich erhalten. BasePersonnel, Supply, CampaignSave, OrbitUI und Editor
+bleiben beim koordinierenden Chat. Kleine Prüfung: Runner-Case `owner`,
+echte Quellen und minimale private Projektkopie; keine Szene starten.
+
 ## Relevante Dokumente
 
 - `docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md`, AP0–AP3
@@ -77,5 +97,5 @@ keine persistenten Spielprofile laden. Keine allgemeine Testsuite jetzt.
 ## Risiken / offene Punkte
 
 Diese Helper allein ändern noch keine Missionsbewegung oder Bildrate.
-Versionsgate, gemeinsamer Owner, aktuelle Consumer und echte Reservierungs-
+Aktuelle Consumer und echte Reservierungs-
 ausführung bleiben die nachfolgenden Integrationsschritte des Gesamtplans.

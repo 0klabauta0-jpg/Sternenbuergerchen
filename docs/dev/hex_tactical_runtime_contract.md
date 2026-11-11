@@ -6,8 +6,20 @@ Gesamtplan: `docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md`.
 
 ## Besitz und Aktivierung
 
-HexGroundRuntime ist zum ausschließlichen Besitz durch SimulationRoot bestimmt.
-Dessen Command-/Bewegungspfade sind noch nicht angeschlossen. Die Helper
+HexGroundRuntime gehört SimulationRoot. `configure_hex_ground_runtime` prüft
+vor Kontextwechsel Mapname, positive Größe, Load-Issue und Registrytopologie.
+Nur `tactical_grid_rules=hex_tactical_v1` mit `hex_axial_v1` aktiviert ihn;
+fehlende/leere Kennung wählt Legacy. Fehler erhalten den bisherigen Zustand.
+Ein abgebrochener Mapload bleibt nach bloßer Kennungskorrektur ungültig und
+unspeicherbar; die vollständige korrigierte Quelle muss neu geladen werden.
+Unbekannte oder falsch typisierte Kennungen sind Load-Issues. Regionalversion2
+und3 sowie Rampenkennung bleiben erhalten. Keine Karte ist jetzt umgestellt.
+
+`admit_hex_ground_units`/`release_hex_ground_unit` passieren die vorhandene
+Autoritätsprüfung des Simulationsowners. `get_hex_unit_state` und
+`get_hex_ground_planning_snapshot` geben Kopien aus; letzteres liest den
+aktuellen Ownertick. Der private Helper wird nicht als zweiter Mutationsweg
+herausgegeben. Aktive Command-/Bewegungs-/Lifecyclepfade sind noch offen. Die Helper
 mutieren keine Actortransforms oder Terrain-/Unitobjekte. ContactTracker
 bleibt Kontaktwissen; keine neue UI-/Registryautorität.
 
@@ -74,7 +86,7 @@ Gemeinsamer Rampenvertrag: längs H/H+1, seitlich H+0,5 nur bei passenden
 Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
 Terrainowner; `allows_step` bleibt für Bewegung/Reservierung das Terrain-Tor.
 
-Noch offen: AP1-Versions-/Owneranbindung, AP3-Verbraucher, zeitliche
+Noch offen: AP3-Verbraucher, zeitliche
 Reservierung und ihre Ausführung AP4/5, Lifecycle/Save/Netzwerk AP6–8.
 Ein Datenindex ersetzt nicht die aktive Bewegung oder Minimum-Spacing.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.
