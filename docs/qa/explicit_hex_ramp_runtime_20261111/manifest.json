@@ -1,0 +1,62 @@
+{
+  "status": "historical_first_stage41_before_user_lateral_bank_extension",
+  "source_basis": "e55206832 plus parallel isolated WIP",
+  "artifacts": [
+    {
+      "path": "docs/qa/explicit_hex_ramp_runtime_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_runtime_20261111/check_only.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80",
+      "bytes": 75
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_runtime_20261111/contract.log",
+      "sha256": "e59034d851641abdfb34bc4878b7d26f69edb94c930760c3da7f2aa7ed389da1",
+      "bytes": 1975
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_runtime_20261111/README.md",
+      "sha256": "dcae0aca214c60739e75a7d414544bba3f113fa0df09ebb108829ee073df221e",
+      "bytes": 3107
+    },
+    {
+      "path": "docs/tasks/EXPLICIT_HEX_RAMP_RUNTIME_2026_11_11.md",
+      "sha256": "9504419a97fb4c6ba5a2ad83d9ccc3c126982e875268043b02df47c7c4dbe8e3",
+      "bytes": 2384
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "f333755247fa6d04e4e055f0b9284106131107dbf3322ec98e4226af6a5a39dd",
+      "bytes": 177348
+    },
+    {
+      "path": "scripts/terrain/terrain_map_data.gd",
+      "sha256": "7071f5b29bd49ec2fd97348901402917ab6fc2cc01fff824b4e6ee04518511bc",
+      "bytes": 31706
+    },
+    {
+      "path": "scripts/terrain/terrain_pathfinder.gd",
+      "sha256": "8803d0d9e85cf12f2f36f520922cea6a3881c27348b7bbfa3e4b8598ba2f378b",
+      "bytes": 29788
+    },
+    {
+      "path": "scripts/terrain/terrain_registry.gd",
+      "sha256": "939dfd8cc295a4d07439d1083fd5f24a4d508b384df6db7930ae3eebbb2b4e66",
+      "bytes": 19650
+    },
+    {
+      "path": "scripts/terrain/terrain_tile_data.gd",
+      "sha256": "8d109efc5b588b209cad79b300afcaa487b91303bbafd01199300c021f8d2180",
+      "bytes": 8378
+    },
+    {
+      "path": "scripts/tests/explicit_hex_ramp_contract_test.gd",
+      "sha256": "8e334286c688a86a1a35aea3a36c13b1fb725da0e6383dab7010654adf496c3c",
+      "bytes": 6072
+    }
+  ],
+  "followup": "docs/qa/hex_ramp_bands_20261111"
+}

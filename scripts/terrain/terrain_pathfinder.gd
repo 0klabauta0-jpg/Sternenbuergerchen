@@ -479,13 +479,7 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	elif not bool(neighbor_tile.walkable):
 		return false
 
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
-	if height_difference == 0:
-		return true
-
-	var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-	var lower_tile = current_tile if higher_tile == neighbor_tile else neighbor_tile
-	return TERRAIN_TILE_DATA_SCRIPT.allows_height_transition(higher_tile, lower_tile)
+	return TERRAIN_TILE_DATA_SCRIPT.allows_step(current_tile, neighbor_tile)
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -513,7 +507,7 @@ func _compute_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registr
 	if not _is_neighbor_walkable_scoped(current_grid, neighbor_grid, registry, options):
 		return INF
 
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
+	var height_difference: float = absf(TERRAIN_TILE_DATA_SCRIPT.stand_height(neighbor_tile) - TERRAIN_TILE_DATA_SCRIPT.stand_height(current_tile))
 	var surface_cost: float = TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(neighbor_tile.surface_type))
 
 	# Slopes cost more per height level than flat terrain

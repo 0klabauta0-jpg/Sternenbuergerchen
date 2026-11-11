@@ -1,6 +1,9 @@
 class_name TerrainTileData
 extends RefCounted
 
+const HEX_GRID_SCRIPT = preload("res://scripts/terrain/hex_grid.gd")
+const EXPLICIT_HEIGHT_RULES := "explicit_hex_ramps_v1"
+
 const SURFACE_GROUND: String = "ground"
 const SURFACE_ROAD: String = "road"
 const SURFACE_SAND: String = "sand"
@@ -37,6 +40,8 @@ var object_scale: float = DEFAULT_OBJECT_SCALE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
 var regional_grade: bool = false
+var explicit_hex_ramps: bool = false
+var ramp_direction: int = -1
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -49,7 +54,9 @@ static func from_dict(data: Dictionary):
 
 
 func is_valid() -> bool:
-	return not tile_id.is_empty() and _is_surface_type_valid(surface_type)
+	return not tile_id.is_empty() and _is_surface_type_valid(surface_type) \
+		and (not explicit_hex_ramps or (ramp_direction >= -1 and ramp_direction < 6 \
+		and (ramp_direction == -1 or height_level < MAX_HEIGHT_LEVEL)))
 
 
 func to_dict() -> Dictionary:
@@ -68,10 +75,52 @@ func to_dict() -> Dictionary:
 		"object_scale": object_scale,
 		"surface_type": surface_type,
 		"edge_type": edge_type,
+		"regional_grade": regional_grade,
+		"explicit_hex_ramps": explicit_hex_ramps,
+		"ramp_direction": ramp_direction,
 	}
 
 
+static func is_explicit_ramp(tile) -> bool:
+	return tile != null and tile.explicit_hex_ramps and tile.ramp_direction >= 0 \
+		and tile.ramp_direction < 6 and tile.height_level < MAX_HEIGHT_LEVEL
+
+
+static func stand_height(tile) -> float:
+	if tile == null: return 0.0
+	return float(tile.height_level) + (0.5 if is_explicit_ramp(tile) else 0.0)
+
+
+static func endpoint_height(tile, neighbor_grid: Vector2i) -> float:
+	if tile == null or not tile.walkable: return INF
+	if not tile.explicit_hex_ramps or tile.ramp_direction == -1:
+		return float(tile.height_level)
+	if not is_explicit_ramp(tile): return INF
+	var delta: Vector2i = neighbor_grid - Vector2i(tile.grid_position)
+	var uphill: Vector2i = HEX_GRID_SCRIPT.DIRECTIONS[tile.ramp_direction]
+	if delta == uphill: return float(tile.height_level + 1)
+	if delta == -uphill: return float(tile.height_level)
+	# Lateral seams connect only to another ramp with the same midpoint height.
+	# Integer-height plateaus never match this half-level.
+	return stand_height(tile)
+
+
+static func allows_step(from_tile, to_tile) -> bool:
+	if from_tile == null or to_tile == null: return false
+	if from_tile.explicit_hex_ramps or to_tile.explicit_hex_ramps:
+		if not from_tile.explicit_hex_ramps or not to_tile.explicit_hex_ramps: return false
+		if not HEX_GRID_SCRIPT.are_neighbors(from_tile.grid_position, to_tile.grid_position): return false
+		var from_height := endpoint_height(from_tile, to_tile.grid_position)
+		var to_height := endpoint_height(to_tile, from_tile.grid_position)
+		return is_finite(from_height) and is_finite(to_height) and is_equal_approx(from_height, to_height)
+	if int(from_tile.height_level) == int(to_tile.height_level): return true
+	var higher = from_tile if int(from_tile.height_level) > int(to_tile.height_level) else to_tile
+	return allows_height_transition(higher, to_tile if higher == from_tile else from_tile)
+
+
 static func allows_height_transition(higher, lower) -> bool:
+	if higher.explicit_hex_ramps or lower.explicit_hex_ramps:
+		return allows_step(higher, lower)
 	var difference := int(higher.height_level) - int(lower.height_level)
 	if higher.regional_grade and lower.regional_grade:
 		return difference == 1 and higher.walkable and lower.walkable \
@@ -162,6 +211,9 @@ func _apply_dict(data: Dictionary) -> void:
 	object_scale = _normalize_object_scale(float(data.get("object_scale", DEFAULT_OBJECT_SCALE)))
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
+	regional_grade = bool(data.get("regional_grade", false))
+	explicit_hex_ramps = bool(data.get("explicit_hex_ramps", false))
+	ramp_direction = int(data.get("ramp_direction", -1))
 
 
 static func _normalize_object_rotation_degrees(value: float) -> float:

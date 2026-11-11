@@ -79,7 +79,9 @@ void fragment() {
 	float sediment = broad_patch(ground_world_position.xz * 1.6 + vec2(region * 3.0, patch));
 	float value = mix(0.87, 1.12, smoothstep(0.10, 0.88, patch));
 	if (slope_normal_softening > 0.0) {
-		value *= 1.0 - 0.10 * smoothstep(0.05, 0.32, ramp_incline);
+		// A broad, quiet value change makes the actual grade readable at play distance.
+		// No extra texture, geometry, or gameplay classification is introduced.
+		value *= 1.0 - 0.18 * smoothstep(0.05, 0.32, ramp_incline);
 	}
 	vec3 pigment = mix(base_color.rgb * vec3(0.91, 0.89, 0.91), base_color.rgb * vec3(1.14, 1.10, 1.0), region);
 	value *= mix(0.97, 1.025, grit);

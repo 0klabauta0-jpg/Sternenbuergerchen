@@ -4,6 +4,7 @@ extends RefCounted
 const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 const DEFAULT_MAX_RANGE: float = 320.0
 const NO_BLOCKER_GRID := Vector2i(2147483647, 2147483647)
+const TILE_HEIGHT = preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX_GRID_SCRIPT = preload("res://scripts/terrain/hex_grid.gd")
 
 var _los_step_buffer: Array[Vector2i] = []
@@ -79,11 +80,11 @@ func find_first_blocker_grid(source_grid: Vector2i, target_grid: Vector2i, terra
 	if not target_grid_float.is_finite(): target_grid_float = Vector2(target_grid)
 	var source_tile = terrain_reader.call("get_tile_at_grid", source_grid)
 	var target_tile = terrain_reader.call("get_tile_at_grid", target_grid)
-	var source_height: int = int(source_tile.height_level) if source_tile != null else 0
-	var target_height: int = int(target_tile.height_level) if target_tile != null else 0
+	var source_height: float = TILE_HEIGHT.stand_height(source_tile) if source_tile != null else 0.0
+	var target_height: float = TILE_HEIGHT.stand_height(target_tile) if target_tile != null else 0.0
 	if endpoint_heights.is_finite():
-		source_height = int(endpoint_heights.x)
-		target_height = int(endpoint_heights.y)
+		source_height = endpoint_heights.x
+		target_height = endpoint_heights.y
 	var hex_grid: bool = _uses_hex_grid(terrain_reader)
 	_build_grid_line_into(source_grid, target_grid, _los_step_buffer, terrain_reader)
 	for stepped_grid in _los_step_buffer:
@@ -100,10 +101,10 @@ func find_first_blocker_grid(source_grid: Vector2i, target_grid: Vector2i, terra
 		var object_height: int = int(tile_data.object_height)
 		if terrain_reader.has_method("get_object_height_at_grid"):
 			object_height = int(terrain_reader.call("get_object_height_at_grid", stepped_grid))
-		var blocker_height: int = int(tile_data.height_level) + object_height
+		var blocker_height: float = TILE_HEIGHT.stand_height(tile_data) + object_height
 		# A high escarpment with no object above it obstructs lower lines.
 		# Observers already on that shelf see across its own rim.
-		if object_height == 0 and blocker_height > 2 and blocker_height <= maxi(source_height, target_height):
+		if object_height == 0 and blocker_height > 2 and blocker_height <= maxf(source_height, target_height):
 			continue
 		if blocker_height >= source_height and blocker_height >= target_height:
 			if not hex_grid and _tile_uses_wall_segment_los(tile_data):

@@ -1,0 +1,125 @@
+{
+  "status": "narrow49_and_native_form_only_large_tests_deferred",
+  "artifacts": [
+    {
+      "path": "scripts/terrain/terrain_tile_data.gd",
+      "sha256": "258a7d31b66cad4f09c79a0fee4749a1fe81075ca471accc2699497a0a6b9c4c",
+      "bytes": 8526
+    },
+    {
+      "path": "scripts/terrain/terrain_map_data.gd",
+      "sha256": "7071f5b29bd49ec2fd97348901402917ab6fc2cc01fff824b4e6ee04518511bc",
+      "bytes": 31706
+    },
+    {
+      "path": "scripts/terrain/terrain_pathfinder.gd",
+      "sha256": "8803d0d9e85cf12f2f36f520922cea6a3881c27348b7bbfa3e4b8598ba2f378b",
+      "bytes": 29788
+    },
+    {
+      "path": "scripts/terrain/terrain_registry.gd",
+      "sha256": "939dfd8cc295a4d07439d1083fd5f24a4d508b384df6db7930ae3eebbb2b4e66",
+      "bytes": 19650
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "f333755247fa6d04e4e055f0b9284106131107dbf3322ec98e4226af6a5a39dd",
+      "bytes": 177348
+    },
+    {
+      "path": "scripts/terrain/regional_hex_surface.gd",
+      "sha256": "a9f2d9ed3426dba1cf1281ffea4c9f5cdcb15b903f119da320236edfea3caa0e",
+      "bytes": 5366
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "7b6d6e2bd71a7802ba16c954e16038fced3fbcc4328f3c073ad07bb5a2537327",
+      "bytes": 924017
+    },
+    {
+      "path": "scripts/core/los_system.gd",
+      "sha256": "34e2d58d0ffe3562d7af9eb4a42ed3b2a3276978cfcf57494ac063db1f0ec55b",
+      "bytes": 7602
+    },
+    {
+      "path": "scripts/mission/combat_visibility_cache.gd",
+      "sha256": "9a23573634615f6fc3c2dd77c1a9c654bae7f7746eef0db72aa79899040096db",
+      "bytes": 9617
+    },
+    {
+      "path": "scripts/core/fog_of_war_system.gd",
+      "sha256": "3b3648c62cc1fd9d81cf9f8e5a3d788207eb94d2c7902f7b5f8d797bdfc8e68d",
+      "bytes": 41482
+    },
+    {
+      "path": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "5d1588ab07bdab2ec6db4b17d0684ba0e16dabb28c4b2763c2e279e95206c486",
+      "bytes": 10654
+    },
+    {
+      "path": "shaders/terrain/regional_fog_overlay.gdshader",
+      "sha256": "12ad1a9763f286183a50061ee33d04f25363c0e76e0f17971ee198dd36b206ab",
+      "bytes": 549
+    },
+    {
+      "path": "scripts/tests/explicit_hex_ramp_contract_test.gd",
+      "sha256": "cbaac23dec11eb48e17d7dc1670e7291577f0cf8076d579d3bc59e4748dd3d46",
+      "bytes": 7120
+    },
+    {
+      "path": "docs/dev/explicit_hex_ramps_contract.md",
+      "sha256": "783d7779ad2e7d27148e457eb2f071f89536011f3f2b0a0612885f8cb0f681c3",
+      "bytes": 3353
+    },
+    {
+      "path": "docs/tasks/EXPLICIT_HEX_RAMP_RUNTIME_2026_11_11.md",
+      "sha256": "888b2c65d4114d32800094674534dd3f834aa30171963624bdf3c5a627ac2714",
+      "bytes": 2674
+    },
+    {
+      "path": "docs/tasks/FINISHING_PASS_2026_11_11.md",
+      "sha256": "f0597bef475f93f0ff1427275fd11e23317614f657a8367e92b90a8fd94ccb2d",
+      "bytes": 2484
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/capture.gd",
+      "sha256": "de7e494f15298bb334b185feeaa0241203c7f020aa988b7eb68b21e9df26e24b",
+      "bytes": 2618
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/contract.log",
+      "sha256": "81fa2273dd02c584c151fa13a5812b061272c44eb5d951ac392ef8a861adccb9",
+      "bytes": 2369
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/fixture.json",
+      "sha256": "ece1a2afa9049548d83a72fadf3cd780aad2c76b2649b7b22fa2321d0033d443",
+      "bytes": 59092
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/native_capture.log",
+      "sha256": "30f1de3ac228c2f5cbc228cc75ada3de9682109b4244fb05d4b54ea668e81cd6",
+      "bytes": 524
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/native_joined.png",
+      "sha256": "0e9512651562723993d243dbf348872f4b216e3e38a83962ca041527784bd4b0",
+      "bytes": 983890
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/native_separate_before.png",
+      "sha256": "c412f6f3b9bebaa9a62f3d4872a36d98cdfd55bd1bc444b9f4b74aae346760ff",
+      "bytes": 984949
+    },
+    {
+      "path": "docs/qa/hex_ramp_bands_20261111/README.md",
+      "sha256": "32f78677d5b6dbf0146b793e4c6d78a69878f0386a6aff4fa3cc88ea511d1029",
+      "bytes": 1401
+    }
+  ]
+}

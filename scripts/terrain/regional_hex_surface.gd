@@ -18,6 +18,8 @@ static func neighbor_cell(cell: Vector2i, edge: int) -> Vector2i:
 
 
 static func profile(tile, tiles: Dictionary) -> PackedFloat32Array:
+	if tile.explicit_hex_ramps:
+		return _explicit_profile(tile, tiles)
 	if not tile.regional_grade or not tile.walkable or tile.object_type_id == "glut_bridge_deck":
 		return PackedFloat32Array()
 	var neighbors: Array = []
@@ -58,6 +60,50 @@ static func profile(tile, tiles: Dictionary) -> PackedFloat32Array:
 		result[edge * 2] = grade
 		changed = changed or grade != 0
 	return result if changed else PackedFloat32Array()
+
+
+static func _valid_ramp(tile) -> bool:
+	return tile != null and tile.explicit_hex_ramps and tile.walkable and tile.ramp_direction >= 0 and tile.ramp_direction < 6 and tile.height_level < 8
+
+
+static func _nominal_height(tile, world_corner: Vector2) -> float:
+	var axis: Vector2 = HEX.axial_to_plane(Vector2(HEX.DIRECTIONS[tile.ramp_direction])).normalized()
+	return float(tile.height_level) + 0.5 + clampf((world_corner - HEX.axial_to_plane(Vector2(tile.grid_position))).dot(axis), -0.5, 0.5)
+
+
+static func _explicit_profile(tile, tiles: Dictionary) -> PackedFloat32Array:
+	if not _valid_ramp(tile): return PackedFloat32Array()
+	var center := HEX.axial_to_plane(Vector2(tile.grid_position))
+	var base := float(tile.height_level)
+	var result := PackedFloat32Array()
+	for point: Vector2 in ring:
+		result.append(_nominal_height(tile, center + point) - base - 0.5)
+	for edge in range(6):
+		var neighbor = tiles.get(neighbor_cell(tile.grid_position, edge))
+		if _valid_ramp(neighbor) and neighbor.height_level == tile.height_level:
+			# Both sides read the same quarter-step midpoint. Shared caps form a
+			# broad bank instead of independent sloping ribs with vertical seams.
+			var midpoint := center + ring[edge * 2 + 1]
+			result[edge * 2 + 1] = snappedf((_nominal_height(tile, midpoint) + _nominal_height(neighbor, midpoint)) * 0.5 - base - 0.5, 0.25)
+		var previous = tiles.get(neighbor_cell(tile.grid_position, (edge + 5) % 6))
+		var corner_tiles: Array = [tile]
+		for adjacent in [neighbor, previous]:
+			if _valid_ramp(adjacent) and adjacent.height_level == tile.height_level:
+				corner_tiles.append(adjacent)
+		if corner_tiles.size() < 2: continue
+		var corner := center + ring[edge * 2]
+		var plateau_height := INF
+		for adjacent in [neighbor, previous]:
+			if adjacent != null and adjacent.explicit_hex_ramps and adjacent.ramp_direction == -1 and adjacent.height_level in [tile.height_level, tile.height_level + 1]:
+				plateau_height = float(adjacent.height_level)
+		if is_finite(plateau_height):
+			result[edge * 2] = plateau_height - base - 0.5
+		else:
+			corner_tiles.sort_custom(func(a, b): return a.grid_position.x < b.grid_position.x or (a.grid_position.x == b.grid_position.x and a.grid_position.y < b.grid_position.y))
+			var height := 0.0
+			for ramp in corner_tiles: height += _nominal_height(ramp, corner)
+			result[edge * 2] = snappedf(height / corner_tiles.size() - base - 0.5, 0.25)
+	return result
 
 
 static func _is_ground(tile) -> bool:

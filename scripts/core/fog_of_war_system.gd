@@ -700,6 +700,8 @@ func get_known_tile_info(team_id: String, tile_id: String, terrain_registry) -> 
 		"tile_id": tile_id,
 		"grid_position": tile_data.grid_position,
 		"height_level": int(tile_data.height_level),
+		"ramp_direction": int(tile_data.ramp_direction),
+		"explicit_hex_ramps": bool(tile_data.explicit_hex_ramps),
 		"object_height": int(tile_data.object_height),
 		"cover_value": int(tile_data.cover_value),
 		"blocks_los": bool(tile_data.blocks_los),

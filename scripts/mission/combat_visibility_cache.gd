@@ -170,9 +170,9 @@ func _build_cache_key(source_id: String, target_id: String, source_position: Vec
 func _format_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry, revisions: Dictionary) -> String:
 	var source_grid: Vector2i = _world_to_grid(terrain_registry, source_position)
 	var target_grid: Vector2i = _world_to_grid(terrain_registry, target_position)
-	var source_height_class: int = _height_at_world(terrain_registry, source_position)
-	var target_height_class: int = _height_at_world(terrain_registry, target_position)
-	return "tick:%d|source:%s|target:%s|source_grid:%d,%d|target_grid:%d,%d|source_height:%d|target_height:%d|terrain_revision:%d|cover_revision:%d|navigation_revision:%d|source_position:%s|target_position:%s" % [
+	var source_height_class: float = _height_at_world(terrain_registry, source_position)
+	var target_height_class: float = _height_at_world(terrain_registry, target_position)
+	return "tick:%d|source:%s|target:%s|source_grid:%d,%d|target_grid:%d,%d|source_height:%.2f|target_height:%.2f|terrain_revision:%d|cover_revision:%d|navigation_revision:%d|source_position:%s|target_position:%s" % [
 		_current_tick,
 		source_id,
 		target_id,
@@ -209,7 +209,9 @@ func _world_to_grid(terrain_registry, world_position: Vector2) -> Vector2i:
 	return Vector2i(roundi(world_position.x), roundi(world_position.y))
 
 
-func _height_at_world(terrain_registry, world_position: Vector2) -> int:
+func _height_at_world(terrain_registry, world_position: Vector2) -> float:
+	if terrain_registry != null and terrain_registry.has_method("get_stand_height_at_world"):
+		return float(terrain_registry.call("get_stand_height_at_world", world_position))
 	if terrain_registry != null and terrain_registry.has_method("get_height_at_world"):
 		return int(terrain_registry.call("get_height_at_world", world_position))
 	return 0

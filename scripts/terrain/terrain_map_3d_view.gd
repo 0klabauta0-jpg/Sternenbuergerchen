@@ -2577,7 +2577,7 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 				continue
 		elif not _pick_regional_surface(tile_data, profile, viewport_position):
 			continue
-		var surface_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
+		var surface_y: float = _get_grid_surface_y(tile_data.grid_position) + TILE_SELECTION_SURFACE_Y_OFFSET
 		var tile_center_3d: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), surface_y)
 		var camera_depth: float = (tile_center_3d - camera_origin).dot(camera_forward)
 		var center_screen: Vector2 = _camera.unproject_position(tile_center_3d)
@@ -4436,7 +4436,7 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 			continue
 		var cell: Vector2i = tile.grid_position
 		var height := int(tile.height_level)
-		var center := _grid_to_3d_position(Vector2(cell), float(height) * height_step)
+		var center := _grid_to_3d_position(Vector2(cell), TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * height_step)
 		var profile := _regional_surface_profile(tile)
 		if not profile.is_empty():
 			var surface_type := String(tile.surface_type)
@@ -4449,7 +4449,7 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 		for edge in range(6):
 			var neighbor = _render_tile_by_grid.get(REGIONAL_SURFACE.neighbor_cell(cell, edge))
 			var bridge_or_boundary := neighbor == null or String(neighbor.object_type_id) == "glut_bridge_deck"
-			var neighbor_y := -0.09 if bridge_or_boundary else float(neighbor.height_level) * height_step
+			var neighbor_y: float = -0.09 if bridge_or_boundary else TERRAIN_TILE_DATA_SCRIPT.stand_height(neighbor) * height_step
 			if neighbor_y >= center.y + 2.0 * height_step:
 				continue
 			if neighbor_y == center.y and profile.is_empty():
@@ -4472,8 +4472,8 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 				var b := (first + half + 1) % 12
 				var top_a := _regional_ring_point(center, a, profile[a] if not profile.is_empty() else 0.0, cell_size, height_step)
 				var top_b := _regional_ring_point(center, b, profile[b] if not profile.is_empty() else 0.0, cell_size, height_step)
-				var low_a := neighbor_y + (neighbor_profile[(opposite + 2 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
-				var low_b := neighbor_y + (neighbor_profile[(opposite + 1 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
+				var low_a: float = neighbor_y + (neighbor_profile[(opposite + 2 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
+				var low_b: float = neighbor_y + (neighbor_profile[(opposite + 1 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
 				var base_a := Vector3(top_a.x, minf(top_a.y, low_a), top_a.z)
 				var base_b := Vector3(top_b.x, minf(top_b.y, low_b), top_b.z)
 				_add_regional_triangle(walls, top_a, base_a, top_b)
@@ -4488,7 +4488,7 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 func _regional_ramp_material(tile, surface_type: String) -> Material:
 	if not _frontier_art_enabled:
 		return _make_material(_get_tile_color(tile))
-	return _frontier_art_profile.surface_material_for(surface_type, 0.25)
+	return _frontier_art_profile.surface_material_for(surface_type, 0.08)
 
 
 func _add_regional_ramp_cap(surface: SurfaceTool, center: Vector3, profile: PackedFloat32Array, cell_size: float, height_step: float) -> void:
@@ -5359,9 +5359,9 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 	var line_count := 0
 	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
-		var top: float = float(tile.height_level) * _get_3d_height_step() + 0.008
+		var top: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + 0.008
 		if authored:
-			top = float(tile.height_level) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
+			top = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
 		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
 		var profile := _regional_surface_profile(tile) if regional else PackedFloat32Array()
 		for index in range(6):
@@ -5370,7 +5370,7 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 			if regional:
 				if index >= 3:
 					var neighbor = _render_tile_by_grid.get(tile.grid_position + HEX_GRID_SCRIPT.DIRECTIONS[(11 - index) % 6])
-					if neighbor != null and neighbor.height_level == tile.height_level:
+					if neighbor != null and neighbor.height_level == tile.height_level and _regional_surface_profile(tile).is_empty() and _regional_surface_profile(neighbor).is_empty():
 						continue
 			else:
 				var edge_key: String = _get_grid_edge_key(a, b)
@@ -6627,7 +6627,13 @@ func _rebuild_selection_visuals() -> void:
 			selection.mesh = _hex_ground_batch.mesh_for(0.018, cell_size * 0.98 / sqrt(3.0))
 		var depth_test: bool=managed_buildings and String(tile_data.object_type_id)=="frontier_scene_solid"
 		selection.material_override = _make_editor_selection_material(false,depth_test)
-		var selection_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
+		var selection_y: float = _get_grid_surface_y(grid_position) + TILE_SELECTION_SURFACE_Y_OFFSET
+		var profile := _regional_surface_profile(tile_data) if _regional_height_step > 0.0 else PackedFloat32Array()
+		if not profile.is_empty():
+			var cap := SurfaceTool.new()
+			cap.begin(Mesh.PRIMITIVE_TRIANGLES)
+			_add_regional_ramp_cap(cap, Vector3.ZERO, profile, cell_size, _get_3d_height_step())
+			selection.mesh = cap.commit()
 		selection.position = _grid_to_3d_position(Vector2(grid_position), selection_y)
 		_selection_root.add_child(selection)
 		_add_selection_border(grid_position, selection_y + 0.035,depth_test)
@@ -6645,8 +6651,15 @@ func _add_selection_border(grid_position: Vector2i, y_position: float, depth_tes
 	var center: Vector3 = _grid_to_3d_position(Vector2(grid_position), y_position)
 	if _uses_hex_grid():
 		var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size / sqrt(3.0))
+		var tile = _render_tile_by_grid.get(grid_position)
+		var profile := _regional_surface_profile(tile) if tile != null and _regional_height_step > 0.0 else PackedFloat32Array()
 		for index in range(6):
-			_add_grid_line_quad(mesh, center + Vector3(corners[index].x, 0.0, corners[index].y), center + Vector3(corners[(index+1)%6].x, 0.0, corners[(index+1)%6].y), line_width)
+			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
+			var b := center + Vector3(corners[(index+1)%6].x, 0.0, corners[(index+1)%6].y)
+			if not profile.is_empty():
+				a.y += profile[index * 2] * _get_3d_height_step()
+				b.y += profile[((index + 1) * 2) % 12] * _get_3d_height_step()
+			_add_grid_line_quad(mesh, a, b, line_width)
 		mesh.surface_end()
 		var hex_border := MeshInstance3D.new()
 		hex_border.name = "SelectionBorder_%d_%d" % [grid_position.x, grid_position.y]
@@ -6977,7 +6990,7 @@ func _build_fow_overlay_render_cache(tiles: Array) -> Dictionary:
 			safety_min.z = minf(safety_min.z, surface_origin.z)
 			safety_max.x = maxf(safety_max.x, surface_origin.x)
 			safety_max.z = maxf(safety_max.z, surface_origin.z)
-		var tile_top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+		var tile_top_y: float = (TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) + (0.5 if tile_data.explicit_hex_ramps and tile_data.ramp_direction >= 0 else 0.0)) * _get_3d_height_step()
 		var object_top_y: float = tile_top_y + (maxf(float(tile_data.object_height), 0.0) * OBJECT_HEIGHT_STEP)
 		blackout_y = maxf(blackout_y, object_top_y)
 	return {"tiles": render_tiles, "ids": ids, "tile_by_id": tile_by_id,
@@ -7251,11 +7264,11 @@ func _apply_fow_overlay_tile_to_multimesh(tile_id: String) -> void:
 		if tile_state == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN or tile_state == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
 			var profile := _regional_surface_profile(tile_data)
 			if not profile.is_empty():
-				# Three base-five samples fit per channel, including signed half steps.
+				# Three base-nine samples fit per channel, including signed quarter steps.
 				for channel in range(4):
 					var a := channel * 3
-					var samples := Vector3(profile[a], profile[a + 1], profile[a + 2]) * 2.0 + Vector3(2, 2, 2)
-					grade_data[channel] = samples.dot(Vector3(1, 5, 25)) / 124.0
+					var samples := Vector3(profile[a], profile[a + 1], profile[a + 2]) * 4.0 + Vector3(4, 4, 4)
+					grade_data[channel] = samples.dot(Vector3(1, 9, 81)) / 728.0
 		_fow_overlay_multimesh.set_instance_custom_data(slot, grade_data)
 	match tile_state:
 		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
@@ -7363,7 +7376,7 @@ func _get_explicit_tile_id_for_fow(tile_data) -> String:
 
 func _get_fow_surface_overlay_transform(tile_data) -> Transform3D:
 	var grid_position: Vector2 = Vector2(tile_data.grid_position)
-	var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + FOW_OVERLAY_SURFACE_Y_OFFSET
+	var top_y: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET
 	return Transform3D(Basis(), _grid_to_3d_position(grid_position, top_y))
 
 
@@ -7376,7 +7389,7 @@ func _get_fow_blackout_cover_y(tiles: Array) -> float:
 	for tile_data in tiles:
 		if tile_data == null:
 			continue
-		var tile_top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+		var tile_top_y: float = (TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) + (0.5 if tile_data.explicit_hex_ramps and tile_data.ramp_direction >= 0 else 0.0)) * _get_3d_height_step()
 		var object_top_y: float = tile_top_y + (maxf(float(tile_data.object_height), 0.0) * OBJECT_HEIGHT_STEP)
 		max_y = maxf(max_y, object_top_y)
 	return max_y + FOW_BLACKOUT_COVER_Y_OFFSET
@@ -16046,7 +16059,7 @@ func _get_grid_surface_y(grid_position: Vector2i) -> float:
 	var tile_data = _render_tile_by_grid.get(grid_position, null)
 	if tile_data == null:
 		return 0.0
-	return float(tile_data.height_level) * _get_3d_height_step()
+	return TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) * _get_3d_height_step()
 
 
 func _grid_to_3d_position(grid_position: Vector2, y_offset: float) -> Vector3:
@@ -16162,7 +16175,7 @@ func _begin_terrain_resource_context(tiles: Array) -> bool:
 	digest.start(HashingContext.HASH_SHA256)
 	for tile in tiles:
 		digest.update(var_to_bytes([tile.grid_position, tile.type_id, tile.height_level, tile.surface_type, tile.edge_type,
-			tile.object_type_id, tile.object_height, tile.walkable, tile.blocks_los, tile.object_rotation_degrees, tile.object_scale]))
+			tile.object_type_id, tile.object_height, tile.walkable, tile.blocks_los, tile.object_rotation_degrees, tile.object_scale, tile.explicit_hex_ramps, tile.ramp_direction]))
 	var owned: Array = _external_terrain_object_visuals.keys()
 	owned.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x or (a.x == b.x and a.y < b.y))
 	digest.update(var_to_bytes(owned))
@@ -16170,7 +16183,7 @@ func _begin_terrain_resource_context(tiles: Array) -> bool:
 	var presentation: Dictionary = _terrain_map_data.call("get_place_presentation")
 	var art := [str(_active_terrain_visual_theme_id), _frontier_art_enabled, JSON.stringify(presentation, "", true),
 		FileAccess.get_sha256("res://scripts/terrain/frontier_art_profile.gd"), FileAccess.get_sha256("res://scripts/terrain/frontier_place_props.gd"),
-		FileAccess.get_sha256("res://scripts/terrain/frontier_art_geology.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_ground_batch.gd")]
+		FileAccess.get_sha256("res://scripts/terrain/frontier_art_geology.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_ground_batch.gd"), FileAccess.get_sha256("res://scripts/terrain/regional_hex_surface.gd")]
 	var grid := [_active_grid_topology, _get_3d_cell_size(), _get_3d_height_step(), _get_3d_ground_thickness(), _get_3d_ground_fill(), _hex_grid_visible]
 	var context := {"map_id": String(_terrain_map_data.call("get_map_name")), "terrain_revision": terrain_revision,
 		"art_revision": var_to_bytes(art).hex_encode().sha256_text(), "grid_revision": var_to_bytes(grid).hex_encode().sha256_text()}

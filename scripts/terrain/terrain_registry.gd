@@ -558,3 +558,11 @@ func _is_nearest_candidate_better(distance_to_tile: float, grid_position: Vector
 	if absf(distance_to_tile - nearest_distance) <= 0.001:
 		return _is_grid_before(grid_position, Vector2i(nearest_grid))
 	return false
+
+
+func get_stand_height_at(grid_pos: Vector2i) -> float:
+	return TERRAIN_TILE_DATA_SCRIPT.stand_height(get_tile_at_grid(grid_pos))
+
+
+func get_stand_height_at_world(world_pos: Vector2) -> float:
+	return TERRAIN_TILE_DATA_SCRIPT.stand_height(get_tile_at_world(world_pos))

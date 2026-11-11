@@ -83,6 +83,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._patrol_paths = _coerce_patrol_dictionary(root_dict.get("patrol_paths", {}))
 	terrain_map_data._enemy_team_configs = _coerce_enemy_team_config_dictionary(root_dict.get("enemy_team_configs", {}), terrain_map_data._grid_size)
 
+	var explicit_ramps := topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and String(root_dict.get("terrain_height_rules", "")) == TERRAIN_TILE_DATA_SCRIPT.EXPLICIT_HEIGHT_RULES
 	var regional_grade := topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and terrain_map_data.get_regional_height_step() > 0.0
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
@@ -117,6 +118,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
 			_normalize_legacy_object_layer_tile(normalized_tile_entry, tile_catalog)
 
+			normalized_tile_entry["explicit_hex_ramps"] = explicit_ramps
 			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", normalized_tile_entry)
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
 				continue
@@ -253,6 +255,8 @@ func save_to_file(path: String) -> Error:
 			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
 			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
 		}
+		if int(tile_dict.get("ramp_direction", -1)) >= 0:
+			serialized_tile["ramp_direction"] = int(tile_dict.ramp_direction)
 		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
 		if not object_type_id.is_empty():
 			serialized_tile["object_type_id"] = object_type_id
@@ -741,3 +745,7 @@ func get_regional_height_step() -> float:
 	if int(_extension_metadata.get("regional_terrain_version", 0)) != 2:
 		return 0.0
 	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)
+
+
+func get_terrain_height_rules() -> String:
+	return String(_extension_metadata.get("terrain_height_rules", ""))

@@ -2256,7 +2256,7 @@ func _apply_move_command_with_terrain_avoidance(
 	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, avoidance_speed, delta, terrain_registry)
 	if safe_velocity.length_squared() <= 0.0001 \
 		and bool(cmd.get("local_avoidance_deadlock", false)) \
-		and _is_local_avoidance_position_walkable(next_waypoint, terrain_registry):
+		and _is_local_avoidance_transition_walkable(current_position, next_waypoint, terrain_registry):
 		safe_velocity = desired_velocity
 	var displacement: Vector2 = safe_velocity * delta
 	if hex_metric:
@@ -2794,11 +2794,11 @@ func _resolve_local_avoidance_velocity(
 	var discard_reason: String = ""
 	if terrain_registry != null:
 		var candidate_position: Vector2 = current_position + safe_velocity * delta
-		if not _is_local_avoidance_position_walkable(candidate_position, terrain_registry):
+		if not _is_local_avoidance_transition_walkable(current_position, candidate_position, terrain_registry):
 			var desired_position: Vector2 = current_position + desired_velocity * delta
 			discarded_correction = true
 			discard_reason = "non_walkable_correction"
-			if _is_local_avoidance_position_walkable(desired_position, terrain_registry):
+			if _is_local_avoidance_transition_walkable(current_position, desired_position, terrain_registry):
 				safe_velocity = desired_velocity
 			else:
 				safe_velocity = Vector2.ZERO
@@ -2826,6 +2826,19 @@ func _preserve_local_avoidance_forward_progress(desired_velocity: Vector2, safe_
 	if next_velocity.length() > max_speed:
 		next_velocity = next_velocity.normalized() * max_speed
 	return next_velocity
+
+
+func _is_local_avoidance_transition_walkable(from_position: Vector2, to_position: Vector2, terrain_registry) -> bool:
+	if not _is_local_avoidance_position_walkable(to_position, terrain_registry): return false
+	if terrain_registry == null or not terrain_registry.has_method("get_tile_at_world"): return true
+	var from_tile = terrain_registry.call("get_tile_at_world", from_position)
+	var to_tile = terrain_registry.call("get_tile_at_world", to_position)
+	var explicit_ramp_rules: bool = (from_tile != null and bool(from_tile.explicit_hex_ramps)) \
+		or (to_tile != null and bool(to_tile.explicit_hex_ramps))
+	if not explicit_ramp_rules: return true
+	# Reuse the same bounded segment partition as minimum-spacing correction.
+	# Every crossed edge is checked by TerrainPathfinder, including ramp flanks.
+	return bool(_local_avoidance_resolver.call("_is_spacing_transition_walkable", from_position, to_position, terrain_registry))
 
 
 func _is_local_avoidance_position_walkable(position: Vector2, terrain_registry) -> bool:
