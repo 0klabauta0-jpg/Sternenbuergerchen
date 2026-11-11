@@ -33,6 +33,19 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Lokaler Oberflächen-Rückflug: Der echte Adapter prüft zunächst Visitbeleg,
+  vorhandenen Missions-Pilot-Guard und Fuel ohne Abbuchung. Bei tatsächlichem
+  `enter_space_orbit` bereitet Root Fuel, Flightreaktivierung, freien Gate-
+  Footprint und Travel vor und veröffentlicht sie synchron; Wiederholung
+  bucht nicht erneut. Signale folgen verzögert nach dem Flow-Aufruf. Geprüft
+  mit echtem Adapter/Ownern, Pilot-Guard-Testdouble, fehlendem Treibstoff,
+  belegtem erstem Gate und reentrantem Observer. Strategischer/Polisa-Pfad
+  bleibt erhalten. Produktiver lokaler Warpeintritt, lokaler Anflugabbruch und
+  nativer Besuch mit realem AP6-Boarding bleiben offen.
+- `get_space_area_projection(craft_id)` löst die exakte Fleetreferenz auf,
+  prüft aktiven lokalen Flight und delegiert unverändert das eigene Root-DTO;
+  keine Fokusauswahl, Fremdkontakte oder Zustandsmutation. Gezielter Test grün.
+
 - Rückkehrvorbereitung: Der bestehende Adapter trennt die lesende Prüfung von
   Visitbeleg, tatsächlichem Pilot-Guard und Route vom bisherigen Fuelcommit.
   Der Polisa-Backendtest bestätigt abgewiesenen unbesetzten Pilotensitz und

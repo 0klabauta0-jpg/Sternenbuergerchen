@@ -596,6 +596,9 @@ func preview_return(craft_id: String) -> Dictionary:
 func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	var preview: Dictionary = preview_return(craft_id)
 	if not preview.get("ok", false): return preview
+	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface":
+		return _simulation.preview_singleplayer_local_return_fuel(self, craft_id)
 	# One return per accepted outward trip, regardless of whether the request
 	# came from a UI retry, automatic debrief, or the transport hook itself.
 	# Owner replay occurs before fuel validation, so a repeated success remains
@@ -708,6 +711,18 @@ func get_space_travel_snapshot(craft_id: String = "") -> Dictionary:
 	snapshot["result_summary"] = String(Dictionary(_flow.get("_last_mission_result")).get("result", ""))
 	return snapshot
 
+func get_space_area_projection(craft_id: String) -> Dictionary:
+	if craft_id.strip_edges().is_empty() or _simulation == null or _travel == null: return {"ok":false, "reason":"unknown_craft"}
+	var flight: RefCounted = _travel.get_flight_state(craft_id)
+	if flight == null or _simulation.get_space_actor(craft_id) != flight: return {"ok":false, "reason":"unknown_craft"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.get("coordinate_frame") != "local" or snapshot.get("motion_mode") != "tactical" or String(snapshot.get("space_area_id", "")).is_empty(): return {"ok":false, "reason":"not_active_local"}
+	var projection: Dictionary = _simulation.get_space_area_snapshot(snapshot.space_area_id, "singleplayer")
+	if not projection.get("ok", false): return projection
+	for actor: Dictionary in projection.actors:
+		if actor.get("craft_id") == craft_id: return projection
+	return {"ok":false, "reason":"not_owned"}
+
 func advance_space_travel(delta: float) -> void:
 	if _travel != null and _travel.is_quantum_active():
 		_commit("singleplayer_space_travel", "advance", {"delta_seconds": minf(delta, 60.0)}, "", {"runtime_authorized": true})
@@ -789,7 +804,25 @@ func finish_space_approach(craft_id: String) -> Dictionary:
 	return _commit("singleplayer_space_travel", "finish_approach", {"craft_id": craft_id}, _request_id("approach-finish", {}), {"runtime_authorized": true})
 
 func enter_space_orbit(craft_id: String) -> Dictionary:
+	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface") or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
+		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
+		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
+		return result
 	return _commit("singleplayer_space_travel", "enter_orbit", {"craft_id": craft_id}, _request_id("orbit-return", {}), {"runtime_authorized": true})
+
+func preview_local_surface_return(craft_id: String) -> Dictionary:
+	var preview: Dictionary = preview_return(craft_id)
+	if not preview.get("ok", false): return preview
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+	if controller == null or not controller.has_method("get_campaign_pilot_flight_guard"): return _reject("pilot_presence_unknown", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilot: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
+	if not pilot.get("ok", false): return pilot
+	return preview
+
+func _publish_local_return_events(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_local_return_events(self, receipt_id)
 
 func _request_space_operation(operation: String, data: Dictionary, request_id: String) -> Dictionary:
 	var snapshot := get_space_travel_snapshot(String(data.get("craft_id","")))
