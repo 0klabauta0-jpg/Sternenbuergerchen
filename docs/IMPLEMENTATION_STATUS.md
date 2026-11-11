@@ -1,5 +1,24 @@
 # IMPLEMENTATION_STATUS
 
+## Aktuell im isolierten Integrationsstand — 12.11.2026
+
+Verbindliche aktuelle Offenliste: `docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md`.
+Die chronologischen Eintraege darunter enthalten auch ueberholte Zwischenstaende.
+AP5 ist auf Codeebene integriert. AP6a/b einschliesslich Root-Actorbindungsfix
+0535b3b2f sind zusammengefuehrt und privat mit zuletzt88/0 geprueft. AP6c
+Controller/Setup/Basis und AP7 laufen weiter; AP8 wird als kleiner Teilablauf
+vorbereitet und ist noch nicht abgeschlossen. Grosse AP9-Abnahme spaeter.
+
+Orbit: vorbereitete Wirtschaft und produktive Abflug-/Anflug-/Rueckkehr-/
+Abbruch-/Wiederanflugpfade sowie lokaler Warpabflug integriert. Echte kleine
+UI/Adapter/Ownerprobe10/0, manueller Warpownerzyklus bestanden, jeweils mit
+expliziten Grenzen in docs/qa/orbit_owner_integration_20261111. Automatischer
+lokaler Warptick, fruehe Pflichtrotte, Heimatlandung und getrennter Polisa-Dockpfad
+sind weitere Aktivierungsgrenzen im Weltraumkampf-Chat. Katalog-/UI-V3-Bereitschaft
+6c899fe77 vorhanden; LiveJSON bleibtV2. Keine behauptete native Gesamtabnahme.
+
+Kein Mainrelease, keine EXE. Vor jedem EXE-Build ausdruecklich den Nutzer fragen.
+
 
 ### Raum-/Reisegrundlagen und Wirtschaftsvorbereitung zusammengeführt
 

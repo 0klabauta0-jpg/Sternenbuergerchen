@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+Aktueller Integrationsstatus vom12.11.2026: AP5-Code integriert, AP6a/b mit
+Actorbindungsfix und frischer gemeinsamer88/0-Pruefung integriert. AP6c sowie
+AP7/8 laufen weiter, AP9-grosse Tests bleiben verschoben. Orbitowner-/UIanschluss
+teilweise produktiv, automatischer lokaler Warptick und Live-Einmarkerumschaltung
+noch gesperrt. Genaue aktuelle Restpunkte und EXE-Nachfragepflicht stehen in
+`docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md`. Aeltere Eintraege darunter sind Historie.
+
 ### Weltraumkampf geplant — 11.11.2026
 
 Bestätigtes Konzept mit flexiblen Rotten1–6, gemeinsamen Aufträgen, beiden
