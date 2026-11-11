@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### AP6 konkreter Transportphasenadapter — 12.11.2026
+
+Primäre/parallele Ausstiege und geparkter Crewbutton veröffentlichen nur echte
+Rootcommits bei erhaltener Kadenz. Kleine reale Controller-/Rootfälle bestanden.
+Weiter: fremde Schiffsflächen/gebundene reguläre Landegeometrie, Setup/Base;
+danach AP7/8. Große AP9-Prüfungen, Kartenaktivierung und EXE bleiben später.
+
 ### AP6 Aussteigevormerkungen im Ground-Owner — 11.11.2026
 
 Vollständige Gruppenslots, einzelne echte Deploy-/Embarkeffects sowie Abbruch-,

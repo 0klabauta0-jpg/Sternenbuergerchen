@@ -35,6 +35,8 @@ CASES = {
     "backoff": ("hex_backoff_execution_verifier.gd", "HEX_BACKOFF_EXECUTION_PASS"),
     "lifecycle": ("hex_ground_lifecycle_verifier.gd", "HEX_GROUND_LIFECYCLE_PASS"),
     "admission_slots": ("hex_admission_slots_verifier.gd", "HEX_ADMISSION_SLOTS_PASS"),
+    "deployment_phase": ("hex_deployment_phase_verifier.gd", "HEX_DEPLOYMENT_PHASE_PASS"),
+    "deployment_controller": ("hex_deployment_controller_verifier.gd", "HEX_DEPLOYMENT_CONTROLLER_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -80,7 +82,7 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case in {"movement", "movement_consumers"}:
@@ -91,10 +93,16 @@ def main() -> int:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "backoff":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"lifecycle", "admission_slots"}:
+        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller"}:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case == "admission_slots":
+        if args.case in {"admission_slots", "deployment_phase", "deployment_controller"}:
             pending.append("scripts/tests/hex_ground_lifecycle_verifier.gd")
+        if args.case in {"deployment_phase", "deployment_controller"}:
+            pending.append("scripts/tests/hex_admission_slots_verifier.gd")
+            if (source / "scripts/mission/hex_ground_deployment_adapter.gd").exists():
+                pending.append("scripts/mission/hex_ground_deployment_adapter.gd")
+        if args.case == "deployment_controller":
+            pending.extend(["scripts/tests/hex_deployment_phase_verifier.gd","scripts/tests/mission_tactical_sandbox_controller.gd"])
         if args.case == "movement_consumers":
             pending.extend(["scripts/tests/hex_movement_verifier.gd",
                             "scripts/terrain/terrain_map_3d_view.gd",
@@ -118,12 +126,18 @@ def main() -> int:
                 continue
             visited.add(relative)
             paths.append(relative)
+            if args.case == "deployment_controller" and Path(relative).suffix not in {".gd", ".tscn", ".tres", ".gdshader"}:
+                continue
             code = (source / relative).read_text(encoding="utf-8-sig")
             pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"', code))
+            if args.case == "deployment_controller":
+                pending.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
+                pending.extend(re.findall(r'path="res://([^\"]+)"', code))
+                pending.extend(re.findall(r'extends\s+"res://([^\"]+)"', code))
             if args.case == "movement_consumers":
                 paths.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
         paths.append("data/terrain_tile_catalog.json")
-        if args.case in {"consumers", "door_guard"}:
+        if args.case in {"consumers", "door_guard", "deployment_controller"}:
             paths.extend(["addons/limboai/bin/limboai.gdextension",
                           "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll"])
     paths = list(dict.fromkeys(paths))
@@ -140,7 +154,7 @@ def main() -> int:
     config = ('config_version=5\n[application]\nconfig/name=' + json.dumps(app_name)
               + '\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n')
     (project / "project.godot").write_text(config, encoding="utf-8")
-    if args.case in {"consumers", "door_guard"}:
+    if args.case in {"consumers", "door_guard", "deployment_controller"}:
         (project / ".godot").mkdir(exist_ok=True)
         (project / ".godot/extension_list.cfg").write_text(
             'res://addons/limboai/bin/limboai.gdextension\n', encoding="utf-8")

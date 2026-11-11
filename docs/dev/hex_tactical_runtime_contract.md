@@ -436,3 +436,41 @@ lehnt fehlende Bindung vor jedem Write ab. Echter Registry-only→Admission→fr
 Repro87/1, nach Guard88/0; QA hex_admission_binding_fix_20261112. Die internen
 datenorientierten Foundation-Placementchecks sind davon getrennt; kein Adapter
 darf sie als Umgehung der tatsächlichen Actor-Lifecyclegrenze verwenden.
+
+## AP6 tatsächliche Aussteigesequenzen
+
+Der bestehende Missionscontroller führt primäre, parallele und ausdrücklich
+angeforderte Ausstiege geparkter Crew über HexGroundDeploymentAdapter. Dieser
+besitzt keinen Zustand: Nur der bestehende Sequenzowner hält den Ticketbeleg,
+pending Unit-ID und Sendetick. Root besitzt weiter Slots und tatsächliche Präsenz.
+MissionDropshipEffectAdapter ergänzt optional admission_id; leere ID erhält den
+bisherigen Legacy-Effectdict ohne Zusatzfeld.
+
+Queueannahme erhöht weder unit_index noch deployed und entfernt keine Bordperson.
+Der Controller bestätigt einen Ausstieg erst über den Rootreceipt. Ground speichert
+dazu admission_id an der tatsächlich zugelassenen Unit. Die Bestätigung bleibt
+gültig, wenn die Person bereits in eine Folgezelle gelaufen ist oder das letzte
+Ticket vollständig konsumiert wurde. Boarding/Release entfernt diese Präsenz.
+Renderpolling erzeugt keinen doppelten Deployeffect und keinen neuen Feldwechsel.
+
+Commitbestätigung geschieht unabhängig vom Ausstiegstimer. Nur Einreihen der
+nächsten Phase verbraucht ein vorhandenes DROP_UNLOAD_INTERVAL_SECONDS; ausstehende
+Bestätigung verbraucht kein zweites Intervall. Primär→Parallel überträgt den
+abgetrennten Beleg und gibt seine Slots nicht frei. Wirklicher Abbruch verwirft
+Restslots. Visit-Retirement benutzt genau seine gespeicherte Sequenz und liest
+für genau die übergebenen Personen auch tatsächliche Root-Präsenz. Dadurch wird
+ein NPC zwischen Rootcommit und verzögerter deployed-Publikation ebenfalls über
+den bestehenden Embarkeffect entfernt. Andere Teams/Visits bleiben beim Owner.
+
+Eine geladene Karte mit nichtleeren taktischen Regeln benötigt den Hexowner;
+fehlender/inaktiver Root führt zu Warten oder Ablehnung vor jeder Publikation.
+Root merkt seine Hexbindung auch bei Terrainverlust und wechselt für Deploy/
+Embark nicht in Legacyteleports. Echte Karten ohne taktische Kennung behalten
+ihren bisherigen Scheduling-/Effectpfad, ebenso die isolierte Vorschau.
+
+Kleine private Phase95/0 und voller Controller73/0 mit höchstens zwölf Feldern
+je Fixture, Quell-/Originalprofilguards und engem geschlossenem Review. Der volle
+Controllerscript wird mit seiner tatsächlichen Preloadclosure geladen, keine
+Quellkörperextraktion. Keine Hauptszene, große Karte, native Darstellung oder
+Performancefreigabe. Fremde Schiffsfootprints und deren bindender regulärer
+Landeproducer sowie Setup/Base sind weitere AP6-Teile; noch keine Kartenaktivierung.

@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 konkrete Aussteigephasen an Rootcommit gebunden — 12.11.2026
+
+Primäre/parallele Sequenzen und geparkter Crewbutton benutzen echte einzelne
+Transporteffects mit Ticketreceipt. Bisherige Kadenz, getrennte Queue/Commit-
+Publikation und Bestätigung nach Weiterlaufen geprüft. Retirement räumt Restslots
+und schon zugelassene NPCs auch vor Receiptpoll; fehlender Hexowner wartet statt
+Legacyfallback. Phase95/0, tatsächlicher voller Controller73/0, Guards/Review grün;
+QA hex_deployment_phases_20261112. Fremde Footprints/Schiffsprofilbindung, Setup
+und Base sind noch weitere AP6-Teile, danach AP7/8. Keine Produktionskarte,
+Main, EXE oder große AP9-Abnahme.
+
 ### AP6 Integrationsnachprüfung der Actorbindung — 12.11.2026
 
 Tatsächliche Admission verlangt nun den expliziten Root-Known-Eintrag desselben

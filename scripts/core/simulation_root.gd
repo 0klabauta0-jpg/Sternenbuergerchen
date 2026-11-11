@@ -427,6 +427,10 @@ func is_hex_ground_runtime_active() -> bool:
 	return _hex_ground_enabled and is_instance_valid(_hex_ground_registry)
 
 
+func is_hex_ground_runtime_required()->bool:
+	return _hex_ground_enabled
+
+
 func get_hex_ground_terrain_registry() -> Node:
 	return _hex_ground_registry if is_hex_ground_runtime_active() else null
 
@@ -622,6 +626,12 @@ func prepare_hex_ground_deployment(unit_ids:PackedStringArray,anchor_grid:Vector
 func get_hex_ground_deployment(admission_id:String)->Dictionary:
 	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
 	return _hex_ground_runtime.get_admission_group(admission_id)
+
+
+func get_hex_ground_deployment_receipt(admission_id:String,unit_id:String)->Dictionary:
+	var state:Dictionary=get_hex_unit_state(unit_id)
+	if admission_id.is_empty() or state.is_empty() or String(state.get("admission_id",""))!=admission_id:return {"ok":false,"reason":"deployment_not_committed"}
+	return {"ok":true,"unit_id":unit_id,"admission_id":admission_id,"grid":state.grid,"position_world":get_hex_logical_unit_position(unit_id)}
 
 
 func cancel_hex_ground_deployment(admission_id:String,reason:String)->Dictionary:
@@ -4591,7 +4601,10 @@ func _apply_respawn_effect(effect: Dictionary) -> void:
 
 
 func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
-	if is_hex_ground_runtime_active():
+	if _hex_ground_enabled:
+		if not is_hex_ground_runtime_active():
+			_last_hex_lifecycle_resolution={"ok":false,"reason":"hex_ground_inactive"}
+			return
 		_last_hex_lifecycle_resolution=embark_hex_ground_actor_group(PackedStringArray([String(effect.get("unit_id",""))]))
 		return
 	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
@@ -4607,7 +4620,10 @@ func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
 
 
 func _apply_dropship_deploy_unit_effect(effect: Dictionary) -> void:
-	if is_hex_ground_runtime_active():
+	if _hex_ground_enabled:
+		if not is_hex_ground_runtime_active():
+			_last_hex_lifecycle_resolution={"ok":false,"reason":"hex_ground_inactive"}
+			return
 		_last_hex_lifecycle_resolution=_apply_hex_dropship_deploy_effect(effect)
 		return
 	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()

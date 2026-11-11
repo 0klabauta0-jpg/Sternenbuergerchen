@@ -26,6 +26,7 @@ const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/miss
 const MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT: GDScript = preload("res://scripts/mission/mission_release_recapture_service.gd")
 const COMMAND_FEEDBACK_DIAGNOSTICS_SCRIPT: GDScript = preload("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
+const HEX_DEPLOYMENT_ADAPTER_SCRIPT=preload("res://scripts/mission/hex_ground_deployment_adapter.gd")
 const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
 const MISSION_RUNTIME_INDEX_SCRIPT: GDScript = preload("res://scripts/tactical/mission_runtime_index.gd")
 const MISSION_HUD_READ_MODEL_SCRIPT: GDScript = preload("res://scripts/tactical/mission_hud_read_model.gd")
@@ -639,6 +640,7 @@ var _lz_drop_timing_debug_snapshot: Dictionary = {}
 var _drop_sequence_phase: String = ""
 var _drop_sequence_units: Array = []
 var _drop_sequence_unit_index: int = 0
+var _drop_sequence_hex_admission:Dictionary={}
 var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
 var _drop_sequence_fireteam_name: String = "ALL"
@@ -13776,6 +13778,9 @@ func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
 		crew.append(unit); embarked[String(unit.call("get_unit_id"))]=true
 	var card:=_find_mission_dropship_card_entry(craft_id)
 	var sequence:Dictionary={"units":crew,"unit_index":0,"embarked_unit_ids":embarked,"lz_position":_campaign_landed_craft_position(craft_id),"approach_angle":String(card.get("approach_angle","NW"))}
+	if _requires_hex_deployment_owner():
+		if not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable","message":"Ausstieg ist noch nicht bereit"}
+		return _begin_hex_campaign_crew_deployment(craft_id,sequence)
 	# Use the existing SimulationRoot deploy effects and presence bookkeeping.
 	for i in crew.size(): _deploy_next_embarked_unit_for_sequence(sequence)
 	if _is_active_drop_sequence_for_craft(craft_id):
@@ -35746,9 +35751,13 @@ func _advance_primary_drop_sequence_unloading(delta: float) -> bool:
 		return true
 	_drop_sequence_timer += maxf(delta, 0.0)
 	var previous_unit_index: int = _drop_sequence_unit_index
-	while _drop_sequence_timer >= DROP_UNLOAD_INTERVAL_SECONDS and _drop_sequence_unit_index < _drop_sequence_units.size():
+	var hex_active:bool=_has_live_hex_deployment_owner()
+	if hex_active and not String(_drop_sequence_hex_admission.get("pending_unit_id","")).is_empty():_deploy_next_embarked_unit()
+	while _drop_sequence_timer >= DROP_UNLOAD_INTERVAL_SECONDS and _drop_sequence_unit_index < _drop_sequence_units.size() and (not hex_active or String(_drop_sequence_hex_admission.get("pending_unit_id","")).is_empty()):
 		_drop_sequence_timer -= DROP_UNLOAD_INTERVAL_SECONDS
+		var before_index:int=_drop_sequence_unit_index
 		_deploy_next_embarked_unit()
+		if _drop_sequence_unit_index==before_index:break
 	var deployed_this_tick: bool = _drop_sequence_unit_index != previous_unit_index
 	if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 		_mission_drop_passenger_count = _embarked_unit_ids.size()
@@ -35765,9 +35774,13 @@ func _advance_drop_sequence_unloading_for_sequence(sequence: Dictionary, delta: 
 	if units.is_empty():
 		return true
 	sequence["timer"] = float(sequence.get("timer", 0.0)) + maxf(delta, 0.0)
-	while float(sequence.get("timer", 0.0)) >= DROP_UNLOAD_INTERVAL_SECONDS and int(sequence.get("unit_index", 0)) < units.size():
+	var hex_active:bool=_has_live_hex_deployment_owner()
+	if hex_active and not String(Dictionary(sequence.get("hex_admission",{})).get("pending_unit_id","")).is_empty():_deploy_next_embarked_unit_for_sequence(sequence)
+	while float(sequence.get("timer", 0.0)) >= DROP_UNLOAD_INTERVAL_SECONDS and int(sequence.get("unit_index", 0)) < units.size() and (not hex_active or String(Dictionary(sequence.get("hex_admission",{})).get("pending_unit_id","")).is_empty()):
 		sequence["timer"] = float(sequence.get("timer", 0.0)) - DROP_UNLOAD_INTERVAL_SECONDS
+		var before_index:int=int(sequence.get("unit_index",0))
 		_deploy_next_embarked_unit_for_sequence(sequence)
+		if int(sequence.get("unit_index",0))==before_index:break
 	sequence["progress"] = _build_drop_sequence_progress_value(sequence)
 	return int(sequence.get("unit_index", 0)) >= units.size()
 
@@ -35834,7 +35847,93 @@ func _complete_parallel_drop_sequence_return(sequence: Dictionary, exit_position
 	_last_command_text = "DROPSHIP CLEARED"
 
 
+func _begin_hex_campaign_crew_deployment(craft_id:String,sequence:Dictionary)->Dictionary:
+	if _is_active_drop_sequence_for_craft(craft_id) and _drop_sequence_phase==DROP_SEQUENCE_UNLOADING:
+		return {"ok":true,"pending":true,"message":"Trupp steigt aus"}
+	var previous:Dictionary=_parallel_drop_sequences_by_craft.get(craft_id,{})
+	if String(previous.get("phase",""))==DROP_SEQUENCE_UNLOADING:
+		return {"ok":true,"pending":true,"message":"Trupp steigt aus"}
+	var ids:=PackedStringArray()
+	for unit in sequence.units:ids.append(String(unit.call("get_unit_id")))
+	var checked:Dictionary=get_node_or_null("../SimulationRoot").call("_validate_hex_ground_actor_group",ids,true)
+	if not checked.ok:return checked
+	if _is_active_drop_sequence_for_craft(craft_id):
+		_drop_sequence_units=sequence.units
+		_drop_sequence_unit_index=0
+		_drop_sequence_embarked_unit_ids=sequence.embarked_unit_ids
+		_drop_sequence_hex_admission={}
+		_drop_sequence_phase=DROP_SEQUENCE_UNLOADING
+		_drop_sequence_timer=0.0
+		_drop_sequence_visual_only=false
+	else:
+		var next:Dictionary=previous.duplicate(false)
+		next.merge(sequence,true)
+		next.merge({"craft_id":craft_id,"phase":DROP_SEQUENCE_UNLOADING,"timer":0.0,"visual_only":false,"hex_admission":{}},true)
+		_parallel_drop_sequences_by_craft[craft_id]=next
+	_mission_drop_passenger_count=_embarked_unit_ids.size()
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	return {"ok":true,"pending":true,"message":"Trupp steigt aus"}
+
+
+func _has_live_hex_deployment_owner()->bool:
+	var simulation_root:Node=get_node_or_null("../SimulationRoot")
+	return not preview_mode and simulation_root!=null and simulation_root.has_method("is_hex_ground_runtime_active") and bool(simulation_root.call("is_hex_ground_runtime_active"))
+
+
+func _requires_hex_deployment_owner()->bool:
+	if preview_mode:return false
+	var simulation_root:Node=get_node_or_null("../SimulationRoot")
+	if simulation_root!=null and simulation_root.has_method("is_hex_ground_runtime_required") and bool(simulation_root.call("is_hex_ground_runtime_required")):return true
+	var map=_get_active_mission_terrain_map_data_for_readability()
+	return is_instance_valid(map) and map.has_method("get_tactical_grid_rules") and not String(map.call("get_tactical_grid_rules")).is_empty()
+
+
+func _cancel_hex_deployment_sequence(sequence:Dictionary,reason:String)->void:
+	if _has_live_hex_deployment_owner() and not Dictionary(sequence.get("hex_admission",{})).is_empty():
+		HEX_DEPLOYMENT_ADAPTER_SCRIPT.new().cancel(get_node_or_null("../SimulationRoot"),sequence,reason)
+
+
+func _advance_hex_drop_unit(sequence:Dictionary)->void:
+	var simulation_root:Node=get_node_or_null("../SimulationRoot")
+	var lz:Vector2=_coerce_vector2_value(sequence.get("lz_position",Vector2.ZERO),Vector2.ZERO)
+	var approach:String=_sanitize_approach_angle_name(String(sequence.get("approach_angle","NW")))
+	var result:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new().advance_phase(simulation_root,sequence,lz+_get_unload_offset(0,approach))
+	if result.phase=="queued":
+		_enqueue_initial_loadout_effect_for_unit(result.unit_id)
+		return
+	if result.phase!="committed":
+		if result.phase=="waiting":
+			var reason:String=String(result.get("reason",""))
+			_last_command_text="Trupp steigt aus" if reason=="deployment_effect_pending" else ("Ausstieg wartet auf freie Felder" if reason in ["insufficient_admission_space","admission_budget","cell_reserved","admission_reserved"] else "Ausstieg wartet")
+		return
+	var index:int=int(sequence.get("unit_index",0))
+	var units:Array=sequence.get("units",[])
+	var unit:Node=units[index]
+	var id:String=result.unit_id
+	# Presence is already committed by Root. These are the existing transport
+	# readouts, never a prediction made when enqueue_effect returned true.
+	sequence["unit_index"]=index+1
+	var embarked:Dictionary=sequence.get("embarked_unit_ids",{})
+	embarked.erase(id)
+	sequence["embarked_unit_ids"]=embarked
+	_embarked_unit_ids.erase(id)
+	_deployed_unit_ids[id]=true
+	_deployed_unit_positions[id]=result.position_world
+	_fireteam_runtime_ui_refresh_frames_remaining=6
+	if unit.has_method("show_event_text"):unit.call("show_event_text","AB",Color(0.55,1.0,0.72,1.0),1.5)
+	var fireteam_id:String=String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
+	if not fireteam_id.is_empty():
+		_post_drop_security_pending_fireteam_ids[fireteam_id]=true
+		_runtime_activation_pending_fireteam_ids[fireteam_id]=true
+	_last_command_text="AB %d/%d"%[index+1,units.size()]
+
+
 func _deploy_next_embarked_unit_for_sequence(sequence: Dictionary) -> void:
+	if _requires_hex_deployment_owner():
+		if _has_live_hex_deployment_owner():_advance_hex_drop_unit(sequence)
+		else:_last_command_text="Ausstieg wartet"
+		return
 	var units: Array = Array(sequence.get("units", []))
 	var unit_index: int = int(sequence.get("unit_index", 0))
 	if unit_index >= units.size():
@@ -35954,6 +36053,16 @@ func _handoff_active_drop_sequence_to_card() -> void:
 
 
 func _deploy_next_embarked_unit() -> void:
+	if _requires_hex_deployment_owner():
+		if not _has_live_hex_deployment_owner():
+			_last_command_text="Ausstieg wartet"
+			return
+		var sequence:Dictionary={"units":_drop_sequence_units,"unit_index":_drop_sequence_unit_index,"embarked_unit_ids":_drop_sequence_embarked_unit_ids,"lz_position":_drop_sequence_lz_position,"approach_angle":_drop_sequence_approach_angle,"hex_admission":_drop_sequence_hex_admission,"craft_id":_drop_sequence_craft_id}
+		_advance_hex_drop_unit(sequence)
+		_drop_sequence_unit_index=int(sequence.unit_index)
+		_drop_sequence_embarked_unit_ids=sequence.embarked_unit_ids
+		_drop_sequence_hex_admission=sequence.get("hex_admission",{})
+		return
 	if _drop_sequence_unit_index >= _drop_sequence_units.size():
 		return
 	var unit = _drop_sequence_units[_drop_sequence_unit_index]
@@ -36030,6 +36139,7 @@ func _capture_active_drop_sequence() -> Dictionary:
 		"phase": _drop_sequence_phase,
 		"units": _drop_sequence_units.duplicate(),
 		"unit_index": _drop_sequence_unit_index,
+		"hex_admission":_drop_sequence_hex_admission.duplicate(true),
 		"timer": _drop_sequence_timer,
 		"position": _drop_sequence_position,
 		"fireteam_name": _drop_sequence_fireteam_name,
@@ -36050,7 +36160,7 @@ func _store_primary_drop_sequence_as_parallel() -> bool:
 	var craft_id: String = String(sequence.get("craft_id", "")).strip_edges()
 	_parallel_drop_sequences_by_craft[craft_id] = sequence
 	_update_mission_dropship_card_fields(craft_id, _build_drop_sequence_card_fields(sequence))
-	_clear_drop_sequence_context()
+	_clear_drop_sequence_context(true)
 	_live_drop_bootstrap_consumed = false
 	return true
 
@@ -36065,7 +36175,10 @@ func _prepare_drop_sequence_context() -> void:
 	_drop_sequence_embarked_unit_ids = _build_drop_unit_state_dict(_build_sorted_drop_unit_id_array(_embarked_unit_ids))
 
 
-func _clear_drop_sequence_context() -> void:
+func _clear_drop_sequence_context(preserve_hex_admission:bool=false) -> void:
+	if not preserve_hex_admission and not _drop_sequence_hex_admission.is_empty() and _has_live_hex_deployment_owner():
+		HEX_DEPLOYMENT_ADAPTER_SCRIPT.new().cancel(get_node_or_null("../SimulationRoot"),{"hex_admission":_drop_sequence_hex_admission},"transport_context_cleared")
+	_drop_sequence_hex_admission={}
 	_drop_sequence_phase = ""
 	_drop_sequence_units = []
 	_drop_sequence_unit_index = 0
@@ -36838,12 +36951,13 @@ func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray) 
 		if unit!=null:
 			var team:=String(unit.call("get_fireteam_id"))
 			if not teams.has(team): teams.append(team)
-			if _deployed_unit_ids.has(id): _enqueue_dropship_embark_effect(unit,id,position)
+			if _deployed_unit_ids.has(id) or (_has_live_hex_deployment_owner() and not Dictionary(get_node_or_null("../SimulationRoot").call("get_hex_unit_state",id)).is_empty()): _enqueue_dropship_embark_effect(unit,id,position)
 		_deployed_unit_ids.erase(id); _deployed_unit_positions.erase(id); _embarked_unit_ids.erase(id)
 	for team in teams:
 		_clear_fireteam_runtime_execution_for_post_drop(team)
 		for key in _order_plans_by_key.keys():
 			if String(key).begins_with(team+"|"): _order_plans_by_key.erase(key)
+	_cancel_hex_deployment_sequence(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id,{})),"visit_retired")
 	_parallel_drop_sequences_by_craft.erase(craft_id)
 	_field_landing_by_craft.erase(craft_id)
 	if _drop_sequence_craft_id==craft_id: _clear_drop_sequence_context()
