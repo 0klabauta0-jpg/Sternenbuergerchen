@@ -18,6 +18,7 @@ var _abort: Button
 var _approach: Button
 var _land: Button
 var _close: Button
+var _view_homebase: Button
 var _sites: Dictionary = {}
 var _sites_row: VBoxContainer
 var _fleet_selector: OptionButton
@@ -72,6 +73,8 @@ func _build() -> void:
 	heading.add_child(title)
 	_close = _button("CloseStarMap", "Abflug zur Sternkarte vorbereiten", _open_operations)
 	heading.add_child(_close)
+	_view_homebase = _button("ViewHomebase", "Basis ansehen", func(): _send("open_location_view", {"location_id":"homebase"}))
+	heading.add_child(_view_homebase)
 	column.add_child(_label("GLUT-SYSTEM  ·  256 × 256 HEXFELDER", 12, Color("789baa")))
 	var body := HBoxContainer.new()
 	body.name = "SystemAndDetails"
@@ -188,7 +191,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close] + _sites.values() + _orbit_target_buttons:
+	for button in [_abort, _approach, _land, _close, _view_homebase] + _sites.values() + _orbit_target_buttons:
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -274,10 +277,16 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		_fleet_selector.set_meta("fleet_signature",fleet_signature)
 	for index in range(_fleet_selector.item_count):
 		if String(_fleet_selector.get_item_metadata(index))==String(travel.get("craft_id","")): _fleet_selector.select(index)
+	var loaded_ids := {}
+	for location: Dictionary in Array(_runtime.get("location_runtimes",[])): loaded_ids[String(location.location_id)] = true
+	for id: String in _visit_buttons.keys():
+		if not loaded_ids.has(id):
+			_visit_buttons[id].queue_free()
+			_visit_buttons.erase(id)
 	for location: Dictionary in Array(_runtime.get("location_runtimes",[])):
 		var id:=String(location.location_id)
 		if not _visit_buttons.has(id):
-			var button:=_button("ViewLocation_"+id,"Ort ansehen",func(): _send("focus_location",{"location_id":id}))
+			var button:=_button("ViewLocation_"+id,"Ort ansehen",func(): _send("open_location_view",{"location_id":id}))
 			_visit_list.add_child(button); _visit_buttons[id]=button
 		var place_name: String=String(Dictionary(Dictionary(_runtime.get("campaign",{})).get("locations",{})).get(id,{}).get("name",id))
 		(_visit_buttons[id] as Button).text="Ansehen: "+place_name

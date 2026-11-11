@@ -148,6 +148,7 @@ var _active_singleplayer_identity: Dictionary = {}
 var _location_registry = preload("res://scripts/mission/location_runtime_registry.gd").new()
 var _location_contexts: Dictionary = {}
 var _craft_location_runtime: Dictionary = {}
+var _view_craft_by_location: Dictionary = {} # UI selection only; never a visit/travel identity.
 var _space_approaches: Dictionary = {}
 var _surface_preparation_results: Dictionary = {}
 var _retired_terrain_workers: Array[Thread] = []
@@ -7722,6 +7723,10 @@ func _finish_space_approach(craft_id: String = "") -> void:
 	_surface_preparation_results[craft_id] = completed
 	_space_approaches.erase(craft_id)
 	_retire_terrain_preparation(entry)
+	var previous_view := _current_meta_view
+	var previous_context := _capture_location_view_context()
+	var previous_result := _last_mission_result.duplicate(true)
+	var follow_arrival := previous_view == "star_map" and _get_view_travel_craft_id() == craft_id
 	if _active_mission != null: _remember_location(_active_mission)
 	_active_mission = null
 	_active_singleplayer_identity = entry.identity.duplicate(true)
@@ -7739,6 +7744,10 @@ func _finish_space_approach(craft_id: String = "") -> void:
 	_begin_active_mission_timer()
 	_start_or_update_active_mission(prepared_map, prepared_cache)
 	_ensure_transport_timer_state()
+	if not follow_arrival:
+		if _active_mission != null: _remember_location(_active_mission)
+		_last_mission_result = previous_result
+		_restore_location_view_context(previous_context, previous_view, _active_mission)
 
 func _get_star_map_snapshot() -> Dictionary:
 	var result: Dictionary = _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}
@@ -7747,6 +7756,8 @@ func _get_star_map_snapshot() -> Dictionary:
 	return result
 
 func _request_star_map_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "open_location_view":
+		return open_location_view(String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
 	if operation == "space_cancel_approach":
 		return _cancel_space_approach(String(payload.get("craft_id", "")), "user_cancel")
 	var result: Dictionary = _singleplayer_runtime.call("request_operation", operation, payload) if _singleplayer_runtime != null else {"ok": false, "reason": "runtime_unavailable"}
@@ -7829,23 +7840,28 @@ func _finish_space_surface_departure(craft_id: String) -> void:
 		instance.get_node("TacticalController").call("retire_location_craft_visit",craft_id,PackedStringArray(visit.get("unit_ids",[])))
 		_remember_location(instance)
 	_aircraft_location_by_craft[craft_id]="starmap"
-	if instance==_active_mission:
+	# A real departure retires its visit, not the player's independent place view.
+	# Keep the old non-persistent scene behaviour for compatibility.
+	if instance==_active_mission and instance != null and String(instance.get_meta("location_id", "")).is_empty():
 		_active_mission=null
 		_reset_active_mission_timer()
 		_show_star_map()
 
 
 func _finish_space_home_landing(craft_id: String) -> void:
+	var follow_arrival := _current_meta_view == "star_map" and _get_view_travel_craft_id() == craft_id
+	var returning_mission := get_mission_for_craft(craft_id)
+	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_remove_pending_mission_craft_transfer(craft_id)
-	if _active_mission != null and _active_mission==get_mission_for_craft(craft_id):
+	if release_legacy:
 		_release_active_mission()
 		_active_singleplayer_identity.clear()
 		_mission_planning_state=DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
 		_reset_active_mission_timer()
 	_refresh_homebase_screen()
-	_show_homebase()
+	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
 
 
@@ -7863,7 +7879,7 @@ func _refresh_singleplayer_services() -> void:
 	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open")) and String(get_node("HomebaseScreen").get("_operations_mode")) != "services"
 	if _singleplayer_services == null or _singleplayer_runtime == null: return
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
-	var at_polisa := _current_meta_view == "mission" and String(_active_singleplayer_identity.get("location_id", "")) == "polisa"
+	var at_polisa := _current_meta_view == "mission" and String(get_location_view_snapshot().get("location_id", "")) == "polisa"
 	if at_polisa and _polisa_station_screen == null:
 		_polisa_station_screen = load("res://scripts/ui/polisa_station_screen.gd").new()
 		_singleplayer_services.get_parent().add_child(_polisa_station_screen)
@@ -7874,9 +7890,7 @@ func _refresh_singleplayer_services() -> void:
 	var presenter: Node=get_node("HomebaseScreen").get("_operations_presenter")
 	var base: Node=presenter.get("_base") if presenter!=null else null
 	if base!=null and not base.is_connected("world_selection_changed",_on_base_world_selection_changed): base.connect("world_selection_changed",_on_base_world_selection_changed)
-	var selected_ship := String(base.call("get_selected_world_craft_id")) if base!=null else ""
-	var at_home := _current_meta_view == "homebase" and presenter!=null and (String(presenter.get("_mode"))=="base" and not selected_ship.is_empty())
-	if at_home and String(presenter.get("_mode"))=="base" and not selected_ship.is_empty(): _singleplayer_services.set("_selected_craft_id",selected_ship)
+	var at_home := _current_meta_view == "homebase" and presenter!=null and String(presenter.get("_mode"))=="base"
 	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
 	_singleplayer_services.visible = (at_home or remote) and not at_polisa
 	if _singleplayer_services.visible:
@@ -7924,7 +7938,87 @@ func _finish_singleplayer_visit_if_returned() -> void:
 
 
 # Persistent-location lifecycle. Local SimulationRoots and controllers own state.
-const LOCATION_CONTEXT_FIELDS := ["_active_mission","_mission_planning_state","_active_singleplayer_identity","_pending_campaign_mission_result","_selected_unit_ids","_selected_fireteam_ids","_selected_mission_id","_selected_mission_map_path","_active_mission_started_at_msec"]
+const LOCATION_CONTEXT_FIELDS := ["_active_mission","_mission_planning_state","_active_singleplayer_identity","_pending_campaign_mission_result","_selected_unit_ids","_selected_fireteam_ids","_selected_mission_id","_selected_mission_map_path","_active_mission_started_at_msec","_active_mission_time_limit_seconds"]
+
+## These entry points change only the viewed projection and serviceship selection.
+func open_location_view(location_id: String, craft_id: String = "") -> Dictionary:
+	if location_id not in ["homebase", "star_map"] and _location_registry.get_location(location_id) == null:
+		return {"ok":false,"reason":"location_not_loaded","message":"An diesem Ort ist noch keine Laufzeitinstanz geladen"}
+	if not craft_id.is_empty():
+		var selected := select_location_view_craft(location_id, craft_id)
+		if not bool(selected.get("ok", false)): return selected
+	if location_id == "homebase":
+		_show_homebase(true)
+	elif location_id == "star_map":
+		_show_star_map()
+	else:
+		return focus_location(location_id)
+	return {"ok":true,"view":get_location_view_snapshot()}
+
+func select_location_view_craft(location_id: String, craft_id: String) -> Dictionary:
+	if location_id != "homebase" and _location_registry.get_location(location_id) == null:
+		return {"ok":false,"reason":"location_not_loaded","message":"Der Ort ist nicht geladen"}
+	if craft_id.is_empty():
+		_view_craft_by_location.erase(location_id)
+		return {"ok":true}
+	if not _is_location_view_craft_present(location_id, craft_id):
+		return {"ok":false,"reason":"craft_not_at_location","message":"Dieses Schiff ist nicht an diesem Ort anwesend"}
+	_view_craft_by_location[location_id] = craft_id
+	return {"ok":true}
+
+func get_location_view_snapshot() -> Dictionary:
+	var location_id := "homebase" if _current_meta_view == "homebase" else ""
+	if _current_meta_view == "mission" and is_instance_valid(_active_mission):
+		location_id = String(_active_mission.get_meta("location_id", ""))
+	var craft_id := String(_view_craft_by_location.get(location_id, ""))
+	if not _is_location_view_craft_present(location_id, craft_id): craft_id = ""
+	return {"view":_current_meta_view,"location_id":location_id,"craft_id":craft_id}
+
+func _is_location_view_craft_present(location_id: String, craft_id: String) -> bool:
+	if craft_id.is_empty() or _find_homebase_aircraft_definition(craft_id).is_empty(): return false
+	if location_id == "homebase": return String(_aircraft_location_by_craft.get(craft_id, "")) == "homebase"
+	return not location_id.is_empty() and _location_registry.get_location(location_id) != null and String(_craft_location_runtime.get(craft_id, "")) == location_id and String(_aircraft_location_by_craft.get(craft_id, "")) == "mission"
+
+func _get_view_travel_craft_id() -> String:
+	if _singleplayer_runtime == null: return ""
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot")
+	return String(travel.get("craft_id", ""))
+
+func _capture_location_view_context() -> Dictionary:
+	var previous := {}
+	for key: String in LOCATION_CONTEXT_FIELDS:
+		var value: Variant = get(key)
+		previous[key] = value.duplicate(true) if value is Dictionary or value is Array else (value.duplicate() if value is PackedStringArray else value)
+	return previous
+
+func _restore_location_view_context(previous: Dictionary, view: String, updated_instance: Node) -> void:
+	var previous_instance: Node = previous.get("_active_mission")
+	if is_instance_valid(previous_instance) and previous_instance == updated_instance:
+		# Admission/callback may have changed this same live root while its UI was hidden.
+		# Reproject its current Controller/Setup; never replay stale pre-arrival planning.
+		_enter_location_context(previous_instance)
+	else:
+		for key: String in LOCATION_CONTEXT_FIELDS: set(key, previous[key])
+	match view:
+		"mission": _show_mission()
+		"homebase": _show_homebase(true)
+		"star_map": _show_star_map()
+		"debrief": _show_debrief()
+		_:
+			_current_meta_view = view
+			_sync_mission_host_visibility()
+
+func _location_timer_view_projection(instance: Node, cached: Dictionary) -> Dictionary:
+	var started := int(cached.get("started_at_msec", 0))
+	var limit := float(cached.get("time_limit_seconds", 0.0))
+	var driver := instance.get_node_or_null("CombatLoopDriver")
+	if driver != null:
+		started = int(driver.get("mission_timer_started_at_msec"))
+		limit = float(driver.get("mission_time_limit_seconds"))
+	elif instance == _active_mission:
+		started = _active_mission_started_at_msec
+		limit = _active_mission_time_limit_seconds
+	return {"started_at_msec":started,"time_limit_seconds":limit}
 func get_mission_for_craft(craft_id: String) -> Node:
 	var location_id:=String(_craft_location_runtime.get(craft_id,""))
 	if not location_id.is_empty(): return _location_registry.get_location(location_id)
@@ -7946,6 +8040,7 @@ func _remember_location(instance: Node) -> void:
 	if id.is_empty(): return
 	var controller: Node=instance.get_node_or_null("TacticalController")
 	var data: Dictionary=Dictionary(_location_contexts.get(id,{})).duplicate()
+	data.merge(_location_timer_view_projection(instance, data), true)
 	data["identity"]=Dictionary(instance.get_meta("singleplayer_mission_identity",{})).duplicate(true)
 	data["mission_id"]=String(data.get("identity",{}).get("scenario_id",_selected_mission_id))
 	var setup: Node=instance.get_node_or_null("MissionSetup")
@@ -7957,7 +8052,10 @@ func _remember_location(instance: Node) -> void:
 func _enter_location_context(instance: Node) -> void:
 	var id:=String(instance.get_meta("location_id",""))
 	var data: Dictionary=_location_contexts.get(id,{})
+	var timer := _location_timer_view_projection(instance, data)
 	_active_mission=instance
+	_active_mission_started_at_msec = int(timer.started_at_msec)
+	_active_mission_time_limit_seconds = float(timer.time_limit_seconds)
 	_active_singleplayer_identity=Dictionary(data.get("identity",instance.get_meta("singleplayer_mission_identity",{}))).duplicate(true)
 	_mission_planning_state=Dictionary(instance.get_node("TacticalController").call("get_planning_state")).duplicate(true)
 	_pending_campaign_mission_result=Dictionary(data.get("pending",{})).duplicate(true)
@@ -7980,20 +8078,14 @@ func _on_location_combat_resolved(result: Dictionary, instance: Node) -> void:
 func _run_location_callback(instance: Node, callback: Callable, payload: Dictionary) -> void:
 	if not is_instance_valid(instance) or _location_callback_active: return
 	_location_callback_active=true
-	var previous: Dictionary={}
-	for key in LOCATION_CONTEXT_FIELDS: previous[key]=get(key)
+	var previous := _capture_location_view_context()
 	var old_view:=_current_meta_view
 	var focused: bool=instance==_active_mission and old_view=="mission"
 	_enter_location_context(instance)
 	callback.call(payload)
 	_remember_location(instance)
 	if not focused:
-		for key in LOCATION_CONTEXT_FIELDS: set(key,previous[key])
-		if _current_meta_view!=old_view:
-			if old_view=="mission": _show_mission()
-			elif old_view=="homebase": _show_homebase(true)
-			elif old_view=="star_map": _show_star_map()
-		_sync_mission_host_visibility()
+		_restore_location_view_context(previous, old_view, instance)
 	_location_callback_active=false
 
 func _admit_existing_location(instance: Node) -> void:
@@ -8142,5 +8234,7 @@ func rename_campaign_person(unit_id: String, display_name: String) -> Dictionary
 	return {"ok":true,"message":"Name geändert"}
 
 func _on_base_world_selection_changed(kind: String, id: String) -> void:
-	if kind=="ship": get_node("HomebaseScreen").call("request_operation","craft",{"craft_id":id})
+	if kind=="ship":
+		select_location_view_craft("homebase", id)
+		get_node("HomebaseScreen").call("request_operation","craft",{"craft_id":id})
 	_refresh_singleplayer_services()

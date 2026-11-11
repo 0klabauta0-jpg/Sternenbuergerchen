@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Workshop remains local while other craft is abroad
+PASS: Registered grounded home craft has its own service
+PASS: Unknown route never inherits default grounded service
+PASS: Pending transfer blocks exact home craft
+PASS: Unbuilt workshop rejects local fabrication
+PASS: Unregistered base child gives no facility authority
+PASS: Fixture stores real remote chip in craft:away
+PASS: Fixture stores real remote chip in unit:remote:backpack
+PASS: Upload command refuses chips still aboard remote craft
+PASS: Remote ship/person chips are not local uploads
+PASS: Global recovery dedupe finder remains unchanged
+PASS: Actual base chip accessible while source ship stays abroad
+PASS: Fabricate command forwards local facility proof despite fleet abroad
+PASS: Real local suit data slot needs no backpack
+PASS: Polisa never falls back to focused or first local craft
+PASS: Explicit actual Polisa craft enables its own service
+PASS: Two actual station craft require explicit choice
+PASS: Stale selected craft never reroutes to other station craft
+PASS: Non-Polisa view has no Polisa access
+PASS: Physical unparked actor denies service again at command time
+PASS: Known orbit phase blocks stale parked actor service
+PASS: Polisa pending departure denies its exact craft
+PASS: Stale Polisa intent cannot silently refuel home craft
+PASS: Job crate cannot be redirected to unrelated home craft
+PASS: Job recruit cannot use unrelated local craft
+PASS: Existing noncampaign ownerless all-home fabrication retained
+PASS: Ownerless legacy fallback stays globally strict
+PASS: Campaign never inherits ownerless pseudo-permission
+PASS: Real encounter delivery consumes completed result exactly once
+PASS: Automatic pilot rescue proof survives consumed result without another mutation
+LOCAL_SERVICE_CONTEXT checks=30 failures=0

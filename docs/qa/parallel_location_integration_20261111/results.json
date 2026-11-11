@@ -1,0 +1,22 @@
+[
+  {
+    "name": "service",
+    "exit": 0,
+    "clean": true
+  },
+  {
+    "name": "view",
+    "exit": 0,
+    "clean": true
+  },
+  {
+    "name": "flow_compile",
+    "exit": 0,
+    "clean": true
+  },
+  {
+    "name": "adapter_compile",
+    "exit": 0,
+    "clean": true
+  }
+]

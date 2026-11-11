@@ -3962,7 +3962,10 @@ func _navigate_to_meta_view(target_view: String) -> void:
 
 	match target_view:
 		"homebase":
-			if meta_root.has_method("_show_homebase"):
+			if meta_root.has_method("open_location_view"):
+				meta_root.call("open_location_view", "homebase")
+				return
+			elif meta_root.has_method("_show_homebase"):
 				meta_root.call("_show_homebase")
 				return
 		"fob":

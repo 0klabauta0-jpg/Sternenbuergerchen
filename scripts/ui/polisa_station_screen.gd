@@ -11,6 +11,7 @@ var _content: VBoxContainer
 var _status: Label
 var _refuel_button: Button
 var _fuel_label: Label
+var _craft_picker: OptionButton
 var _credits: Label
 var _catalog: Dictionary = {}
 var _armor_images: Dictionary = {}
@@ -29,6 +30,13 @@ func configure(adapter: Node) -> void:
 	panel.add_child(menu)
 	_label(menu, "POLISA / Landestation")
 	_credits = _label(menu, "")
+	_craft_picker = OptionButton.new()
+	menu.add_child(_craft_picker)
+	_craft_picker.item_selected.connect(func(index: int):
+		var craft_id := String(_craft_picker.get_item_metadata(index))
+		var result: Dictionary = _adapter.call("request_operation", "select_location_view_craft", {"location_id":"polisa", "craft_id":craft_id})
+		_status.text = String(result.get("message", "Schiff ausgewählt" if result.get("ok", false) else "Auswahl nicht verfügbar"))
+		refresh(_adapter.call("get_polisa_snapshot")))
 	for category: Dictionary in _catalog.get("categories", []):
 		_button(menu, String(category.name), _select_page.bind(String(category.id)))
 	_fuel_label = _label(menu, "")
@@ -54,6 +62,14 @@ func configure(adapter: Node) -> void:
 
 func refresh(snapshot: Dictionary) -> void:
 	_snapshot = snapshot
+	_craft_picker.clear()
+	_craft_picker.add_item("Serviceschiff auswählen")
+	_craft_picker.set_item_metadata(0, "")
+	for craft: Dictionary in snapshot.get("local_crafts", []):
+		_craft_picker.add_item(String(craft.get("name", craft.craft_id)))
+		_craft_picker.set_item_metadata(_craft_picker.item_count - 1, String(craft.craft_id))
+		if String(craft.craft_id) == String(snapshot.get("craft_id", "")): _craft_picker.select(_craft_picker.item_count - 1)
+	_craft_picker.disabled = _craft_picker.item_count < 2
 	_credits.text = "%d Credits" % int(snapshot.get("credits", 0))
 	var quote := refuel_quote(snapshot)
 	_fuel_label.text = "Schiff: %s\nTank: %.2f / %.2f" % [String(snapshot.get("craft_name", snapshot.get("craft_id", "-"))), float(snapshot.get("fuel", 0.0)), float(snapshot.get("fuel_capacity", 0.0))]
@@ -70,7 +86,7 @@ func refresh(snapshot: Dictionary) -> void:
 	if _page == "explore": return
 	_label(_content, "POLISA / " + _category_title(_page))
 	if not snapshot.get("service_ready", false):
-		_label(_content, "In Polisa landen, um die Station über dieses Menü zu nutzen.")
+		_label(_content, "Serviceschiff auswählen" if snapshot.get("selection_required", false) else "In Polisa landen, um die Station über dieses Menü zu nutzen.")
 		return
 	if _page == "ship_equipment":
 		_label(_content, "Schiffswaffen und Komponenten sind noch nicht verfügbar. Kauf und Einbau folgen mit dem Ausbau der Schiffsausrüstung.")
@@ -133,17 +149,17 @@ func refresh(snapshot: Dictionary) -> void:
 		details.add_child(actions)
 		var locked: bool = snapshot.get("require_blueprints", false) and not String(offer.get("required_blueprint", "")).is_empty() and not Array(snapshot.get("blueprints", [])).has(String(offer.required_blueprint))
 		var ship := String(offer.get("kind", "")) == "ship"
-		var buy := _button(actions, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"offer_id":offer_id,"quantity":1}), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
+		var buy := _button(actions, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"craft_id":String(snapshot.get("craft_id", "")),"offer_id":offer_id,"quantity":1}), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
 		buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if _page in ["infantry", "armor"]:
 			var slot := "armor" if item.begins_with("armor_") else ("backpack" if item == "backpack" else "weapon_1")
-			var equip := _button(actions, "Ausrüsten", _request.bind("inventory_equip", {"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
+			var equip := _button(actions, "Ausrüsten", _request.bind("inventory_equip", {"craft_id":String(snapshot.get("craft_id", "")),"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
 			equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _page == "commodities":
 		_label(_content, "Ankauf aus dem gelandeten Schiffslager / je 1 Einheit")
 		for item: String in snapshot.get("buy_orders", {}):
 			var price := int(snapshot.buy_orders[item])
-			_button(_content, "%s / Lager %d / 1 verkaufen fuer %d Cr" % [item, _cargo(item), price], _request.bind("sell", {"item_id":item,"quantity":1}), _cargo(item) < 1)
+			_button(_content, "%s / Lager %d / 1 verkaufen fuer %d Cr" % [item, _cargo(item), price], _request.bind("sell", {"craft_id":String(_snapshot.get("craft_id", "")),"item_id":item,"quantity":1}), _cargo(item) < 1)
 
 static func refuel_quote(snapshot: Dictionary) -> Dictionary:
 	var capacity := float(snapshot.get("fuel_capacity", 0.0))
@@ -152,7 +168,7 @@ static func refuel_quote(snapshot: Dictionary) -> Dictionary:
 	var amount := minf(10.0, maxf(0.0, capacity - fuel))
 	var cost := int(ceil(amount * price))
 	var reason := ""
-	if not bool(snapshot.get("service_ready", false)): reason = "Zuerst in Polisa landen"
+	if not bool(snapshot.get("service_ready", false)): reason = "Serviceschiff auswählen" if snapshot.get("selection_required", false) else "Zuerst in Polisa landen"
 	elif not bool(snapshot.get("fuel_registered", false)) or String(snapshot.get("craft_id", "")).is_empty(): reason = "Kein registriertes Schiff am Tankservice"
 	elif capacity <= 0.0 or price <= 0.0: reason = "Tankservice nicht verfuegbar"
 	elif amount <= 0.0: reason = "Tank voll"
@@ -185,6 +201,7 @@ func _request_refuel() -> void:
 		_status.text = "Tankservice nicht verfuegbar"
 		_refuel_button.disabled = true
 		return
+	var expected_craft := String(_snapshot.get("craft_id", ""))
 	var projection: Variant = _adapter.call("get_polisa_snapshot")
 	if not projection is Dictionary:
 		_status.text = "Tankservice nicht verfuegbar"
@@ -192,6 +209,9 @@ func _request_refuel() -> void:
 		return
 	var current: Dictionary = projection
 	refresh(current)
+	if String(current.get("craft_id", "")) != expected_craft:
+		_status.text = "Schiffsauswahl geändert; Tankmenge erneut prüfen"
+		return
 	var quote := refuel_quote(current)
 	if not quote.allowed:
 		_status.text = String(quote.reason)
@@ -213,7 +233,8 @@ func _select_page(page: String) -> void:
 
 func _request(operation: String, payload: Dictionary) -> void:
 	var data := payload.duplicate(true)
-	data["craft_id"] = String(_snapshot.get("craft_id", ""))
+	if not data.has("craft_id"): data["craft_id"] = String(_snapshot.get("craft_id", ""))
+	data["service_location_id"] = "polisa"
 	var result: Dictionary = _adapter.call("request_operation", operation, data)
 	_status.text = String(result.get("message", "Vorgang abgeschlossen" if result.get("ok", false) else result.get("reason", "Nicht verfuegbar")))
 	_signature = ""

@@ -144,7 +144,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -193,6 +193,12 @@ func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "select_location_view_craft":
+		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
+	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad"]:
+		var live_context := _service_context(String(payload.get("craft_id", "")))
+		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
+			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
 	if operation.begins_with("skirmish_"):
 		var data := payload.duplicate(true)
 		var request_id := _request_id(operation, data)
@@ -401,9 +407,11 @@ func _service_context(craft_id: String) -> Dictionary:
 		return {}
 	var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, ""))
 	if location == "homebase":
-		if _home_pad_for(craft_id).is_empty():
+		if _home_pad_for(craft_id).is_empty() or not _craft_grounded_at_home(craft_id):
 			return {}
 		return {"location_id": "homebase", "craft_busy": false}
+	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
+	if routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) not in ["grounded", "surface"]: return {}
 	var departure: Dictionary = Dictionary(_campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {}))
 	var place_id := String(departure.get("destination_location_id",""))
 	if location == "mission" and place_id == "polisa":
@@ -416,6 +424,8 @@ func _service_context(craft_id: String) -> Dictionary:
 		var card: Dictionary = _flow.call("_find_mission_drop_card_in_planning_state",craft_id)
 		if String(card.get("state",card.get("mission_drop_state",""))) not in ["landed","unloading","complete"]: return {}
 		var mission: Node = _flow.call("get_mission_for_craft",craft_id)
+		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+		if controller == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
 		var driver: Node = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
 		if driver == null or not driver.has_method("get_mission_interaction_runtime_states"): return {}
 		var states: Dictionary = driver.call("get_mission_interaction_runtime_states")
@@ -909,24 +919,21 @@ func _all_at_home() -> bool:
 func _request_campaign_action(operation: String, payload: Dictionary, request_id: String) -> Dictionary:
 	if not _campaign_mode and operation not in ["campaign_upload","campaign_fabricate"]: return _reject("campaign_only","Diese Aktion gehört zur Kampagne")
 	var snapshot: Dictionary = _campaign.get_campaign_snapshot()
-	var craft_id := String(payload.get("craft_id",get_space_travel_snapshot().get("craft_id","")))
-	if craft_id.is_empty():
-		var definitions: Array = _flow.get("_homebase_aircraft_definitions")
-		if not definitions.is_empty(): craft_id = String(definitions[0].craft_id)
+	var craft_id := String(payload.get("craft_id", ""))
 	var at_home := _all_at_home()
 	if operation == "campaign_upload":
-		if not at_home: return _reject("upload_requires_home","Zur Heimatbasis zurückkehren und am Terminal hochladen")
+		if not _has_live_base_owner(): return _reject("upload_requires_home","Lokales Basisterminal nicht verfügbar")
 		var job_id := String(payload.get("job_id",""))
 		if job_id.is_empty():
 			for id in snapshot.jobs:
-				if String(snapshot.jobs[id].status) == "pending_upload":
+				if String(snapshot.jobs[id].status) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if String(id) == "satellite_recovery" else "outpost_chip").is_empty():
 					job_id = String(id)
 					break
 		var job: Dictionary = snapshot.jobs.get(job_id,{})
 		if String(job.get("status","")) != "pending_upload": return _reject("no_chip","Kein geborgener Chip zum Hochladen")
 		craft_id = String(job.get("craft_id",craft_id))
 		var item_id := "satellite_chip" if job_id == "satellite_recovery" else "outpost_chip"
-		var container:String=_find_campaign_chip_container(item_id,craft_id)
+		var container:String=_find_local_campaign_chip_container(item_id)
 		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt bei der Person, im Schiff oder im Basislager")
 		var cargo := _commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":item_id,"amount":-1},"campaign-cargo:upload:"+job_id,{"campaign_authorized":true})
 		if not bool(cargo.get("ok",false)): return cargo
@@ -937,7 +944,7 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		observe_campaign_progress()
 		return result
 	if operation in ["campaign_fabricate", "campaign_research"]:
-		return _commit("singleplayer_supply",operation,payload,request_id,{"at_home":at_home,"campaign_authorized":true})
+		return _commit("singleplayer_supply",operation,payload,request_id,{"at_home":_home_workshop_available(),"campaign_authorized":true})
 	if operation == "campaign_build_pad":
 		if bool(snapshot.progress.second_pad_built): return {"ok":true,"changed":false,"message":"Zweites Landepad bereits gebaut"}
 		if not at_home or not bool(snapshot.progress.recruited_pilot): return _reject("pad_not_ready","Nach der Rettung zur Heimatbasis zurückkehren")
@@ -955,6 +962,9 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		var pilot := String(payload.get("kind","outpost")) == "pilot"
 		var key := "recruited_pilot" if pilot else "recruited_outpost"
 		if bool(snapshot.progress.get(key,false)): return {"ok":true,"changed":false,"message":"Person bereits im Team"}
+		var job_craft := String(Dictionary(snapshot.jobs.get("buccaneer_rescue" if pilot else "outpost_recovery", {})).get("craft_id", ""))
+		if craft_id.is_empty() or craft_id != job_craft: return _reject("recruit_craft_required", "Das Schiff des zugehörigen Auftrags auswählen")
+		if pilot and not _has_verified_pilot_rescue(craft_id): return _reject("rescue_not_here", "Bestätigte Rettung dieses Schiffs fehlt")
 		var outpost_cleared := false
 		if not pilot:
 			var mission: Node = _flow.call("get_mission_for_craft",craft_id)
@@ -980,7 +990,8 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 	if operation == "campaign_load_crate":
 		if bool(snapshot.progress.crate_loaded): return {"ok":true,"changed":false}
 		if not _job_complete("outpost_recovery"): return _reject("crate_not_ready","Kiste zuerst am Außenposten bergen")
-		if not at_home and String(_service_context(craft_id).get("location_id","")) != "trade_outpost": return _reject("crate_not_here","Kiste am gesicherten Außenposten oder nach Rückkehr übernehmen")
+		var job_craft := String(Dictionary(snapshot.jobs.get("outpost_recovery", {})).get("craft_id", ""))
+		if craft_id.is_empty() or craft_id != job_craft or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
 		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,"load:outpost_recovery")
 		if not bool(cargo.get("ok",false)): return cargo
 		return _commit("singleplayer_campaign","load_crate",{},"load:outpost_recovery",{"runtime_authorized":true})
@@ -1053,25 +1064,28 @@ func _project_polisa_loadout(unit_id: String, craft_id: String, loadout: Diction
 
 func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 	if snapshot.is_empty(): snapshot = get_snapshot()
-	var craft_id := String(Dictionary(snapshot.get("space_travel", {})).get("craft_id", ""))
+	var view: Dictionary = snapshot.get("location_view", {})
+	var craft_id := String(view.get("craft_id", "")) if String(view.get("location_id", "")) == "polisa" else ""
 	var contexts: Dictionary = snapshot.get("service_contexts_by_craft_id", {})
-	if String(Dictionary(contexts.get(craft_id, {})).get("location_id", "")) != "polisa":
-		for id: String in contexts:
-			if String(Dictionary(contexts[id]).get("location_id", "")) == "polisa": craft_id = id; break
+	var local_crafts: Array = []
+	for craft: Dictionary in snapshot.get("crafts", []):
+		if String(Dictionary(contexts.get(String(craft.get("craft_id", "")), {})).get("location_id", "")) == "polisa":
+			local_crafts.append({"craft_id":String(craft.craft_id), "name":String(craft.get("display_name", craft.craft_id))})
+	if not local_crafts.any(func(craft: Dictionary): return String(craft.craft_id) == craft_id): craft_id = ""
 	var supply: Dictionary = snapshot.get("supply", {})
 	var offers := {}
 	for id: String in supply.get("offers", {}):
 		var offer: Dictionary = supply.offers[id]
 		if Array(offer.get("location_ids", [])).has("polisa"): offers[id] = offer
 	var people: Array = []
-	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id) if not craft_id.is_empty() else null
 	var registry: Node = mission.get_node_or_null("UnitRegistry") if mission != null else null
 	for profile: Dictionary in Array(_flow.get("_all_team_units")):
 		var id := String(profile.get("unit_id", ""))
 		if registry == null or registry.call("get_unit", id) == null: continue
 		var access := _inventory_context(id, craft_id)
 		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
-	return {"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+	return {"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
 		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
@@ -1095,3 +1109,52 @@ func _built_home_pad_ids() -> Array:
 func _selected_destination_is_free_visit() -> bool:
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	return bool(Dictionary(campaign.locations.get(String(campaign.selected_location_id), {})).get("free_visit", false))
+
+
+func _craft_grounded_at_home(craft_id: String) -> bool:
+	if _flow == null or _travel == null: return false
+	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase": return false
+	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty(): return false
+	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
+	return routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) == "grounded"
+
+func _has_live_base_owner() -> bool:
+	return is_instance_valid(_base_personnel) and _base_personnel.is_inside_tree() and _base_personnel.get_parent() == self and is_instance_valid(_simulation) and _simulation.get("_base_personnel_owner") == _base_personnel and String(Dictionary(_base_personnel.call("get_snapshot")).get("runtime_authority", "")) == "SimulationRoot"
+
+func _home_workshop_available() -> bool:
+	if not _has_live_base_owner():
+		# Legacy non-campaign sessions never created a BasePersonnel owner.
+		return not _campaign_mode and _base_personnel == null and _all_at_home()
+	for asset: Dictionary in Dictionary(_base_personnel.call("get_snapshot")).get("layout", {}).get("assets", []):
+		if String(asset.get("id", "")) == "freihafen_hall_01" and bool(asset.get("built", true)): return true
+	return false
+
+func _find_local_campaign_chip_container(item_id: String) -> String:
+	if not _has_live_base_owner(): return ""
+	var allowed: Array[String] = ["base:homebase"]
+	for craft: Dictionary in Array(_flow.get("_homebase_aircraft_definitions")):
+		var id := String(craft.get("craft_id", ""))
+		if _craft_grounded_at_home(id): allowed.append("craft:" + id)
+	for person: Dictionary in Dictionary(_base_personnel.call("get_snapshot")).get("units", []):
+		var status := String(person.get("status", "away"))
+		var craft_id := String(person.get("craft_id", ""))
+		if status != "away" and (craft_id.is_empty() or _craft_grounded_at_home(craft_id)):
+			allowed.append("unit:" + String(person.get("unit_id", "")) + ":backpack")
+	var inventory: Dictionary = _supply.get_supply_snapshot().get("inventory", {})
+	for container: String in allowed:
+		if int(Dictionary(inventory.get(container, {})).get("items", {}).get(item_id, 0)) > 0: return container
+	return ""
+
+func _home_services_snapshot() -> Dictionary:
+	var local_jobs: Array[String] = []
+	for id: String in _campaign.get_campaign_snapshot().get("jobs", {}):
+		var job: Dictionary = _campaign.get_campaign_snapshot().jobs[id]
+		if String(job.get("status", "")) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip").is_empty(): local_jobs.append(id)
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "all_at_home":_all_at_home()}
+
+func _has_verified_pilot_rescue(craft_id: String) -> bool:
+	# get_completed_result consumes its delivery flag before automatic recruitment.
+	# The authoritative read-only state retains the exact victorious craft.
+	if _space_encounter == null: return false
+	var encounter: Dictionary = _space_encounter.get_snapshot()
+	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
