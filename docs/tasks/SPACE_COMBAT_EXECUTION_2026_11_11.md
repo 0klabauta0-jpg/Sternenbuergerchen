@@ -71,7 +71,9 @@ Verifier und diese Statusdokumentation.
   importiertes Schiffsmodell. Das ist keine vollständige Orbitfreigabe.
 - AP01 Phasengrenze: Spieleraufnahme während Quantum abgelehnt; ein im
   taktischen Modus befindlicher Flugzustand weist neue Reisecommands zurück;
-  Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Rootcheck14/14.
+  Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Taktische Bewegung
+  wird nur über den Root committet und aktualisiert den Feldindex;
+  identischer Tick wird abgelehnt. Rootcheck18/18.
 - AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
   Warp, Heimatansicht während der Reise, Sternkarte und Abbruch; gezielter
   headless Szenenlauf11/11, Exit0, keine Fehler. Beleg:

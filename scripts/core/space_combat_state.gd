@@ -26,5 +26,9 @@ func get_actor(craft_id: String) -> RefCounted:
 func query_cells(cells: Array[Vector2i]) -> Array[String]:
 	return _registry.query_cells(cells)
 
+func update_actor_cell(craft_id: String, cell: Vector2i) -> bool:
+	var cells: Array[Vector2i] = [cell]
+	return _registry.update_actor_cells(craft_id, cells)
+
 func get_metadata(craft_id: String) -> Dictionary:
 	return Dictionary(_metadata.get(craft_id, {})).duplicate(true)

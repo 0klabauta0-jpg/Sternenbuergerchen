@@ -27,6 +27,15 @@ func _initialize() -> void:
 	if not root.admit_space_actor(enemy, {"runtime_authorized":true}).get("ok", false): failed += 1
 	if fleet.get_flight_state("npc1") != null or root.get_space_actor("npc1") == null: failed += 1
 	if root.admit_space_actor(enemy, {"runtime_authorized":true}).get("ok", false): failed += 1
+	var npc_flight: RefCounted = root.get_space_actor("npc1")
+	var npc_snapshot: Dictionary = npc_flight.get_snapshot()
+	var new_cell := Vector2i(4, 3)
+	var proposal := {"expected_revision":npc_snapshot.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(new_cell))}
+	if root.commit_space_actor_motion("npc1", proposal, 1, {}).get("reason") != "runtime_authority_required": failed += 1
+	if not root.commit_space_actor_motion("npc1", proposal, 1, {"runtime_authorized":true}).get("ok", false): failed += 1
+	var check_cell: Array[Vector2i] = [new_cell]
+	if root.get_space_actors_at(check_cell) != ["npc1"]: failed += 1
+	if root.commit_space_actor_motion("npc1", proposal, 1, {"runtime_authorized":true}).get("reason") != "stale_tick": failed += 1
 	var player := {"craft_id":"a", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(snap.position))}
 	if root.admit_space_actor(player, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
 	for i in range(121): root._physics_process(1.0 / 60.0)
@@ -47,7 +56,7 @@ func _initialize() -> void:
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 14 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 18 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

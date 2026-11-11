@@ -102,6 +102,31 @@ func admit_space_actor(definition: Dictionary, authority_context: Dictionary) ->
 func get_space_actor(craft_id: String) -> RefCounted:
 	return _space_combat_state.get_actor(craft_id)
 
+func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
+	return _space_combat_state.query_cells(cells)
+
+func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null:
+		return {"ok": false, "reason": "unknown_actor"}
+	if String(flight.get_snapshot().motion_mode) != "tactical":
+		return {"ok": false, "reason": "not_tactical"}
+	if proposal.get("motion_mode", "tactical") != "tactical":
+		return {"ok": false, "reason": "invalid_motion_mode"}
+	var position: Variant = proposal.get("position_plane")
+	if typeof(position) != TYPE_VECTOR2 or not position.is_finite():
+		return {"ok": false, "reason": "invalid_position"}
+	var cell: Vector2i = SPACE_GRID.cell_at(position / SPACE_GRID.EXTENT)
+	if not SPACE_GRID.contains(cell):
+		return {"ok": false, "reason": "invalid_actor_cell"}
+	var result: Dictionary = flight.commit_motion(proposal, tick)
+	if not result.get("ok", false):
+		return result
+	_space_combat_state.update_actor_cell(craft_id, cell)
+	return result
+
 func configure_space_runtime_tick(callback: Callable) -> void:
 	_space_runtime_tick = callback
 	set_physics_process(callback.is_valid())
