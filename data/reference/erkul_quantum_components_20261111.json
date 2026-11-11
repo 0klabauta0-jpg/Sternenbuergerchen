@@ -1,0 +1,22 @@
+{
+  "source_url": "https://erkul.games/calculator",
+  "observed_date": "2026-11-11",
+  "data_version": "4.10.2-LIVE.12913470",
+  "method": "Visible calculator chassis defaults and Cutlass Black quantum-drive swap table, normal browser UI",
+  "status": "dated_reference_not_star_citizen_physics_or_final_game_balance",
+  "ships": {
+    "cutlass_black": {"quantum_slot_size": 2, "default_drive": "odyssey", "verified_compatible_candidates": ["odyssey", "hemera"]},
+    "buccaneer": {"quantum_slot_size": 1, "default_drive": "rush", "verified_compatible_candidates": ["rush"]}
+  },
+  "drives": {
+    "odyssey": {"name": "Odyssey", "manufacturer": "Tarsus", "size": 2, "grade": "C", "class": "Civilian", "displayed_speed_km_s": 238314, "displayed_spool_seconds": 6.9},
+    "hemera": {"name": "Hemera", "manufacturer": "Roberts Space Industries", "size": 2, "grade": "A", "class": "Civilian", "displayed_speed_km_s": 326114, "displayed_spool_seconds": 6.2},
+    "rush": {"name": "Rush", "manufacturer": "ArcCorp", "size": 1, "grade": "C", "class": "Civilian", "displayed_speed_km_s": 209236, "displayed_spool_seconds": 4.9}
+  },
+  "notes": [
+    "These are a bounded manual transcription, not a complete component or hardpoint catalog.",
+    "Cutlass compatibility was visible in its own size-2 swap table. Buccaneer was observed in default chassis configuration only.",
+    "No external prices, fuel, acceleration, cooldown or full loadouts are imported by this reference.",
+    "A simplified game-duration ratio is a separate gameplay choice; these facts alone do not install or balance an item."
+  ]
+}
