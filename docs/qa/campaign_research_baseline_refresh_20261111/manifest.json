@@ -1,0 +1,36 @@
+{
+  "status": "static_data27_pass_browser_not_run",
+  "artifacts": [
+    {
+      "path": "docs/reports/campaign_research_workbench.html",
+      "sha256": "fe0ef4e4c84d9b14e7fe9dec14bf8a0608e65be7e2379be427eae40239c8b16d",
+      "bytes": 45888
+    },
+    {
+      "path": "docs/tasks/CAMPAIGN_RESEARCH_WORKBENCH_2026_11_11.md",
+      "sha256": "3d507b895ce350c0d5789a2ea41013f0444033842b5bed6e43354e8ef6d3c40a",
+      "bytes": 5064
+    },
+    {
+      "path": "docs/qa/campaign_research_baseline_refresh_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/campaign_research_baseline_refresh_20261111/check_baseline.py",
+      "sha256": "fe208babd09a497a64a1549867f28d154b311a3fce4e42a9291d0cdbfd70daff",
+      "bytes": 4065
+    },
+    {
+      "path": "docs/qa/campaign_research_baseline_refresh_20261111/README.md",
+      "sha256": "3d293488dffe58f6d7154338aff1e424d44c3d22a18605d0a513dc185a5e4aaa",
+      "bytes": 1869
+    },
+    {
+      "path": "docs/qa/campaign_research_baseline_refresh_20261111/results.json",
+      "sha256": "5d7a61751212adc158e65d62e442ec276001a0ee026850ba5b77b58a433831d1",
+      "bytes": 3009
+    }
+  ],
+  "root_integration": "LF-normalized text; baseline only, no executable JS/CSS/storage changes."
+}

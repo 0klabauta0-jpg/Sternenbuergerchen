@@ -29,13 +29,13 @@
  </aside></div></section>
  <section id="design" class="panel" hidden><div class="intro"><h2>Forschung soll die nächste Expedition ermöglichen</h2><p>Mein Vorschlag: In Einsätzen Daten oder Baupläne finden, an der Basis neue Möglichkeiten entwickeln und anschließend konkrete Ausrüstung herstellen. So wächst der Baum aus der Kampagne heraus. Entwicklung und Herstellung haben unterschiedliche Kosten.</p></div><div class="grid">
  <article class="card"><h3>Schutz & Ausrüstung</h3><p>Leichte Rüstung → mittlere Rüstung → schwere Rüstung. Jede Stufe bekommt eine erkennbare Rolle und sichtbare 3D-Ausrüstung. Schwerere Ausrüstung soll nicht automatisch in jeder Situation besser sein.</p></article>
- <article class="card"><h3>Industrie & Versorgung</h3><p>Mining-Tool → Verarbeitung und Bergung → Folgeaufträge für Prospector und Vulture. Erfolgreiche Forschung öffnet Zugang; Schiffe und einzelne Gegenstände kosten weiterhin Ressourcen.</p></article>
+ <article class="card"><h3>Industrie & Versorgung</h3><p>Ist: gefertigtes Mining-Tool → Bergungswerkzeug entwickeln → einzeln herstellen. Rohstoffverarbeitung und Folgeaufträge für Prospector und Vulture bleiben Vorschläge.</p></article>
  <article class="card"><h3>Mobilität & Flotte</h3><p>Buccaneer-Rettung und zweites Pad → Flottenwerkstatt → Komponenten und Frachteraufträge. Bodenfahrzeuge erhalten einen eigenen Zweig: Cyclone als Jeep, Nova als Panzer.</p></article>
  <article class="card"><h3>Was möchtest du übernehmen?</h3><label>Forschungsmodell<select data-export-key="design.model"><option value="blueprints">Baupläne bergen, an der Basis entwickeln</option><option value="missions">Nur durch Auftragsbelohnungen freischalten</option><option value="mixed">Baupläne plus Forschungsressourcen</option></select></label><label>Fortschritt<select data-export-key="design.branching"><option value="branches">Nach dem Einstieg mehrere freie Zweige</option><option value="linear">Weiterhin feste Reihenfolge</option></select></label><label>Entscheidungsstand<select data-export-key="design.decision"><option value="offen">Vorschlag prüfen</option><option value="uebernehmen">Grundidee übernehmen</option><option value="umbauen">Grundidee ändern</option></select></label></article>
  <article class="card"><h3>Test / Entscheidung</h3><label><input type="checkbox" data-export-key="tests.sequence"> Reihenfolge verständlich</label><label><input type="checkbox" data-export-key="tests.rewards"> Belohnungen sinnvoll</label><label><input type="checkbox" data-export-key="tests.choice"> Genug freie Entscheidungen</label><label>Deine Forschungs-Idee<textarea data-export-key="design.notes" placeholder="Was soll man wann bekommen? Was fehlt nach der fünften Mission?"></textarea></label></article>
  <article class="card"><h3>Globale Notizen</h3><label>Notizen zur Kampagne<textarea id="globalNotes" data-export-key="campaign.notes" style="min-height:210px" placeholder="Zum Beispiel: erst Bergungsauftrag, dann Werkstatt …"></textarea></label></article>
  </div></section>
- <section id="sources" class="panel" hidden><div class="grid"><article class="card"><h2>Was existiert im Spiel?</h2><p>Fünf Kampagnenaufträge, ihre Reihenfolge und Belohnungen, drei herstellbare Baupläne, Personal-/Kisteninteraktionen und das zweite Landepad. Diese Seite bündelt die Schritte; einzelne Ortsinteraktionen bleiben im Spiel feiner geregelt.</p><p>Die zusätzlichen Forschungszweige und ihre Entwicklungskosten sind ein Entwurf. Es gibt im aktuellen Spiel noch keinen eigenständigen Forschungsbaum mit diesen Zweigen.</p><p>Die Credit-Anzeige ist eine Planungshilfe. Sie berücksichtigt die hier abgeschlossenen Knoten, keine Flugkosten, Handelskäufe oder wiederholte Produktion.</p><label>Start-Credits im Planspiel<input type="number" id="initialCredits" min="0" max="10000000"></label><button id="resetAll" style="margin-top:14px">Entwurf auf Ausgangsstand zurücksetzen</button></article><article class="card"><h2>Unveränderte Ausgangsquellen</h2><p>Beim Erstellen direkt aus dem Arbeitsbranch übernommen. Nachträgliche Spieländerungen aktualisieren diese lokale Datei erst durch erneutes Erzeugen.</p><div id="sourceList" class="sources"></div></article><article class="card"><h2>So gibst du den Plan weiter</h2><p>„JSON exportieren“ lädt einen vollständigen Stand herunter. Du kannst ihn später wieder importieren oder mir geben. Ein Export verändert weder Projektdateien noch Spielstände. Lokale Vormerkung hängt vom Browser ab; ein JSON-Export ist die verlässliche Sicherung.</p><p id="baselineInfo" class="note"></p></article></div></section>
+ <section id="sources" class="panel" hidden><div class="grid"><article class="card"><h2>Was existiert im Spiel?</h2><p>Fünf Kampagnenaufträge, ihre Reihenfolge und Belohnungen, Werkstatt-/Schutz-/Bergungsentwicklung, sechs Einzelrezepte, Personal-/Kisteninteraktionen und das zweite Landepad. Entwicklung und Herstellung sind getrennte Schritte. Diese Seite bündelt die Schritte; einzelne Ortsinteraktionen bleiben im Spiel feiner geregelt.</p><p>Schutz- und Bergungsentwicklung sind im Taskstand integriert; ihre Kosten sind erste Balancewerte. Rohstoffverarbeitung, Fahrzeug- und Flottenforschung bleiben Vorschläge. Native Gesamtprüfung und endgültige Balance stehen aus.</p><p>Die Credit-Anzeige ist eine Planungshilfe. Sie berücksichtigt die hier abgeschlossenen Knoten, keine Flugkosten, Handelskäufe oder wiederholte Produktion.</p><label>Start-Credits im Planspiel<input type="number" id="initialCredits" min="0" max="10000000"></label><button id="resetAll" style="margin-top:14px">Entwurf auf Ausgangsstand zurücksetzen</button></article><article class="card"><h2>Datierte Ausgangsquellen</h2><p>Aus dem Arbeitsbranch nachgezogen bis 1f676bfbc. Weitere Spieländerungen aktualisieren diese Datei nicht automatisch. Vorhandene lokale Entwürfe und Notizen bleiben erhalten; die neue Baseline gilt für frische Pläne oder den ausdrücklichen Reset.</p><div id="sourceList" class="sources"></div></article><article class="card"><h2>So gibst du den Plan weiter</h2><p>„JSON exportieren“ lädt einen vollständigen Stand herunter. Du kannst ihn später wieder importieren oder mir geben. Ein Export verändert weder Projektdateien noch Spielstände. Lokale Vormerkung hängt vom Browser ab; ein JSON-Export ist die verlässliche Sicherung.</p><p id="baselineInfo" class="note"></p></article></div></section>
 </main>
 <footer><div class="actions"><button id="exportJsonButton" class="primary">JSON exportieren</button><button id="copyJsonButton">JSON anzeigen / kopieren</button><label style="margin:0">JSON importieren<input id="importJsonInput" type="file" accept="application/json,.json"></label></div><div id="message" class="message" aria-live="polite"></div><details><summary>Exporttext anzeigen</summary><textarea id="jsonOutput" readonly aria-label="Exportiertes JSON"></textarea></details></footer>
 <script id="baseline" type="application/json">
@@ -244,13 +244,14 @@
       "requires": [
         "outpost_chip_recovery"
       ],
-      "reward": "Entwicklungsplatz an der Basis",
+      "reward": "Werkstattentwicklung: Schutz- und Bergungszweig verfügbar",
       "cost": 180,
-      "description": "Vorschlag: Einen gesicherten Bauplan im Basisgebäude entschlüsseln. Freischaltung und bezahlte Einzelanfertigung bleiben getrennt.",
-      "proposal": true,
+      "description": "Geborgene Daten nach dem Heim-Upload in der vorhandenen Werkstatt nutzbar machen. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
       "credits": 0,
       "note": "",
-      "decision": "offen"
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.workshop_research"
     },
     {
       "id": "research_medium",
@@ -260,13 +261,14 @@
         "craft_light_armor",
         "workshop_research"
       ],
-      "reward": "Rezept: mittlere Rüstung · Fertigungspreis noch festzulegen",
+      "reward": "Bauplan: mittlere Rüstung · Einzelherstellung separat 40 Cr",
       "cost": 120,
-      "description": "Vorschlag: Mehr Schutz mit höherem Gewicht. Entwicklung einmal bezahlen; jede zusätzliche Rüstung separat fertigen.",
-      "proposal": true,
+      "description": "Eine leichte Rüstung tatsächlich fertigen, dann das mittlere Schutzpaket entwickeln. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
       "credits": 0,
       "note": "",
-      "decision": "offen"
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_medium"
     },
     {
       "id": "research_heavy",
@@ -275,29 +277,31 @@
       "requires": [
         "research_medium"
       ],
-      "reward": "Rezept: schwere Rüstung · Fertigungspreis noch festzulegen",
+      "reward": "Bauplan: schwere Rüstung · Einzelherstellung separat 80 Cr",
       "cost": 240,
-      "description": "Vorschlag: Schwerer Schutz als Spezialisierung, mit erkennbaren Nachteilen bei Bewegung und Traglast.",
-      "proposal": true,
+      "description": "Auf der entwickelten mittleren Rüstung aufbauen. Jede Rüstung danach einzeln fertigen. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
       "credits": 0,
       "note": "",
-      "decision": "offen"
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_heavy"
     },
     {
       "id": "research_industry",
-      "title": "Bergung und Rohstoffverarbeitung",
+      "title": "Bergungswerkzeug entwickeln",
       "kind": "research",
       "requires": [
         "craft_mining_tool",
         "workshop_research"
       ],
-      "reward": "Folgeaufträge für Vulture und Prospector",
+      "reward": "Bauplan: Bergungswerkzeug · Einzelherstellung separat 40 Cr",
       "cost": 160,
-      "description": "Vorschlag: Nicht das Schiff gratis vergeben. Bergungs- und Bergbauaufträge öffnen den Zugang zu Ersatzteilen und anschließend zu Kauf und Ausbau.",
-      "proposal": true,
+      "description": "Entwickle nach einem selbst gefertigten Hand-Mining-Tool das Bergungswerkzeug. Damit können markierte Wracks geborgen werden. Jedes Werkzeug wird einzeln hergestellt. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte. Rohstoffverarbeitung und Folgeaufträge für Vulture/Prospector bleiben Vorschläge.",
+      "proposal": false,
       "credits": 0,
       "note": "",
-      "decision": "offen"
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_industry"
     },
     {
       "id": "research_ground",
@@ -329,17 +333,67 @@
       "credits": 0,
       "note": "",
       "decision": "offen"
+    },
+    {
+      "id": "craft_medium_armor",
+      "title": "Mittlere Rüstung herstellen",
+      "kind": "research",
+      "requires": [
+        "research_medium"
+      ],
+      "reward": "1 × mittlere Rüstung",
+      "cost": 40,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.medium_armor"
+    },
+    {
+      "id": "craft_heavy_armor",
+      "title": "Schwere Rüstung herstellen",
+      "kind": "research",
+      "requires": [
+        "research_heavy"
+      ],
+      "reward": "1 × schwere Rüstung",
+      "cost": 80,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.heavy_armor"
+    },
+    {
+      "id": "craft_salvage_tool",
+      "title": "Bergungswerkzeug herstellen",
+      "kind": "research",
+      "requires": [
+        "research_industry"
+      ],
+      "reward": "1 × Bergungswerkzeug",
+      "cost": 40,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.salvage_tool"
     }
   ],
   "source_hashes": {
     "data/singleplayer/jobs.json": "a07db8f538eae28b5c24ae5ed0477526ae8692df39131e6313729e7fe3d9f641",
     "data/singleplayer/job_briefings.json": "2f7843113da912f3548ea095883aeb4df788d5095385275f0f220ed9810a63a2",
-    "data/singleplayer/trade_offers.json": "7b9878f0daa08de591b3758c7bba142b21ee5bf6fe907ee64462ce615d544024",
-    "scripts/core/singleplayer_supply_state.gd": "bbcdeef9899bafd105ae006eef5b34aa806bfb29d650b197b83b08b2108f93c3",
-    "scripts/core/singleplayer_campaign_state.gd": "c7ddbbe31d1fb95630f6c6e687cb42019481a5ac07ae3b144a939ae6e57a3f06"
+    "data/singleplayer/trade_offers.json": "ed36effcaa46e5db9e040e79418dd25a5b8873a26ca0a5373fb7a3b854e35bbd",
+    "scripts/core/singleplayer_supply_state.gd": "87f0c5595d9beb07a3fb7af1a06f9c0fdb02c7f9b4857ba1952a23c5b70e6428",
+    "scripts/core/singleplayer_campaign_state.gd": "c56edc6bffce6da6e71c6f4363b552b06db6e4f8a5fe75a9dd1598764c59b934",
+    "data/singleplayer/research.json": "4d37e297ce83a8001bb1b5e65dd072689e381ba8435e66e588d264427bb43cf9",
+    "scripts/mission/campaign_research_catalog.gd": "2e51b93d495bb66e371adc95dea761aa89464ffc4bff33cc476fe164a9a8f445"
   },
   "design": "Bauplan bergen → an der Basis entwickeln → einzelne Ausrüstung fertigen",
-  "scope": "Ist-Baseline plus Vorschläge. Keine Runtime- oder Spielstandsänderung."
+  "scope": "Ist-Baseline des Taskstands bis 1f676bfbc: fünf Aufträge, vier Entwicklungsschritte und sechs Einzelrezepte. Fahrzeug-/Verarbeitungsfortsetzung bleibt Vorschlag. Initiale Balancewerte, keine native Gesamtfreigabe; keine Runtime- oder Spielstandsänderung."
 }
 </script>
 <script>

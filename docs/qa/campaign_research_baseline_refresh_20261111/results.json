@@ -1,0 +1,116 @@
+{
+  "status": "pass",
+  "checks": 27,
+  "failures": 0,
+  "limits": "Embedded JSON/source/static preservation only; no browser/native/game tests",
+  "results": [
+    {
+      "check": "21 unique baseline node IDs",
+      "ok": true
+    },
+    {
+      "check": "All18 existing IDs retained",
+      "ok": true
+    },
+    {
+      "check": "Other14 previous nodes unchanged, including vehicle proposals",
+      "ok": true
+    },
+    {
+      "check": "Runtime research node and prerequisites match: workshop_research",
+      "ok": true
+    },
+    {
+      "check": "Runtime research node and prerequisites match: research_medium",
+      "ok": true
+    },
+    {
+      "check": "Runtime research node and prerequisites match: research_heavy",
+      "ok": true
+    },
+    {
+      "check": "Runtime research node and prerequisites match: research_industry",
+      "ok": true
+    },
+    {
+      "check": "Separate paid fabrication: medium_armor",
+      "ok": true
+    },
+    {
+      "check": "Research reward quotes separate manufacturing cost: medium_armor",
+      "ok": true
+    },
+    {
+      "check": "Separate paid fabrication: heavy_armor",
+      "ok": true
+    },
+    {
+      "check": "Research reward quotes separate manufacturing cost: heavy_armor",
+      "ok": true
+    },
+    {
+      "check": "Separate paid fabrication: salvage_tool",
+      "ok": true
+    },
+    {
+      "check": "Research reward quotes separate manufacturing cost: salvage_tool",
+      "ok": true
+    },
+    {
+      "check": "Vehicles/fleet/processing remain proposals",
+      "ok": true
+    },
+    {
+      "check": "All prerequisites exist; dependency graph is acyclic",
+      "ok": true
+    },
+    {
+      "check": "Baseline contains no overwritten user notes/choices",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: data/singleplayer/jobs.json",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: data/singleplayer/job_briefings.json",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: data/singleplayer/trade_offers.json",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: scripts/core/singleplayer_supply_state.gd",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: scripts/core/singleplayer_campaign_state.gd",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: data/singleplayer/research.json",
+      "ok": true
+    },
+    {
+      "check": "Current source hash: scripts/mission/campaign_research_catalog.gd",
+      "ok": true
+    },
+    {
+      "check": "New research/fabrication source fragments resolve",
+      "ok": true
+    },
+    {
+      "check": "Executable JavaScript unchanged byte-for-byte: storage/import/export/user drafts",
+      "ok": true
+    },
+    {
+      "check": "Styles/layout unchanged",
+      "ok": true
+    },
+    {
+      "check": "All HTML control IDs unchanged",
+      "ok": true
+    }
+  ]
+}

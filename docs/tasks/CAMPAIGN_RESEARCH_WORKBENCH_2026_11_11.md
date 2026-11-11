@@ -58,3 +58,29 @@ Kosten neuer Forschung bleiben Balancevorschläge. HTML-Entscheidungen müssen
 vor Runtimeübernahme geprüft werden. Nutzerurteil zur Bildrevision bleibt von
 technisch bestandenem Import getrennt. Der aktuelle Branch enthält bereits
 unabgeschlossene Rüstungsarbeiten; diese werden nicht als fertig ausgewiesen.
+
+## Baseline-Nachzug nach Runtimeintegration — 11.11.2026
+Ziel/Ursache: Die eingebettete Ausgangsplanung bezeichnet inzwischen vorhandene
+Schutz-/Bergungsentwicklung noch als Vorschlag. Nur Baseline-/Quellhinweise
+nachziehen, bezogen auf CAMPAIGN_RESEARCH_RUNTIME_2026_11_11,
+CAMPAIGN_INDUSTRY_RUNTIME_2026_11_11 und html_report_workbench_contract.
+Akzeptanz: Vier echte Forschungsknoten als Ist markieren; ihre einmaligen
+180/120/240/160Cr-Kosten und getrennte40/80/40Cr-Herstellung korrekt darstellen.
+Drei Einzelherstellungsknoten ergänzen, alle bisherigen IDs erhalten. Erweiterte
+Rohstoffverarbeitung und Fahrzeug-/Flottenzweige bleiben Vorschläge. Aktuelle
+Quellenhashes dokumentieren. Layout, JavaScript, Storagekey, Export/Import und
+lokale Nutzerentwürfe/Notizen bleiben unangetastet. Bestehende Entwürfe werden
+nicht automatisch mit der neuen Baseline überschrieben; nur frischer Plan bzw.
+vorhandener expliziter Reset nutzt den neuen Ausgangsstand.
+Betroffene Dateien: docs/reports/campaign_research_workbench.html, diese Task,
+eigene QA unter docs/qa/campaign_research_baseline_refresh_20261111.
+Nur enge JSON-/Quell-/Abhängigkeitsprüfung; keine Browser-/Screenshotmatrix oder
+neue Spieltests. Initiale Forschungs-/Herstellungspreise bleiben unbalanciert;
+Workbench ist ein Planspiel mit einmal abschließbaren Knoten, keine vollständige
+Produktion oder Gameplay-Wahrheit. Kein Commit/Push durch diesen Teilagenten.
+
+Nachzug umgesetzt: Baseline21Knoten (alle18altenIDs erhalten),4Runtimeforschungen
+alsIst,3separateHerstellungen40/80/40. Quellen-/Isthinweise korrigiert,
+weitergehendeVerarbeitung/Fahrzeuge alsVorschläge. StatischerDatencheck27/0;
+JavaScript/CSS/ControlIDs unverändert. KeineBrowser- oderSpieltestwiederholung.
+QA: docs/qa/campaign_research_baseline_refresh_20261111/README.md.

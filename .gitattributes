@@ -108,3 +108,6 @@ docs/qa/campaign_industry_runtime_20261111/** -text whitespace=-blank-at-eof,cr-
 
 # Preserve bounded Polisa service evidence.
 docs/qa/polisa_services_remainder_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Preserve static research baseline evidence.
+docs/qa/campaign_research_baseline_refresh_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
