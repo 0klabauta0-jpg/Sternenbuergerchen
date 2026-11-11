@@ -285,8 +285,12 @@ func _build_portals_for_clusters(registry, cluster_ids: Array) -> void:
 		var cluster: Dictionary = Dictionary(_clusters_by_id.get(cluster_id, {}))
 		var walkable_tiles: Array = Array(cluster.get("walkable_tiles", [])).duplicate()
 		walkable_tiles.sort_custom(_sort_vector2i)
+		# A one-hex step cannot leave the cluster from its interior.
+		var interior := Rect2i(cluster_id * cluster_size + Vector2i.ONE, Vector2i.ONE * maxi(cluster_size - 2, 0))
 		for grid_variant in walkable_tiles:
 			var from_grid: Vector2i = Vector2i(grid_variant)
+			if interior.has_point(from_grid):
+				continue
 			for direction_variant in directions:
 				var to_grid: Vector2i = from_grid + Vector2i(direction_variant)
 				var to_cluster_id: Vector2i = get_cluster_id_for_grid(to_grid)

@@ -20,8 +20,8 @@ func mesh_for(height: float, radius: float) -> CylinderMesh:
 	_meshes[key] = mesh
 	return mesh
 
-func queue_tile(center: Vector3, color: Color, cell_size: float, material: Material) -> void:
-	var bottom_y := -0.09
+func queue_tile(center: Vector3, color: Color, cell_size: float, material: Material, deck: bool = false) -> void:
+	var bottom_y := center.y - 0.14 if deck else -0.09
 	var height := maxf(center.y - bottom_y, 0.035)
 	var key := "%0.4f:%s" % [height, color.to_html()]
 	if not _groups.has(key):

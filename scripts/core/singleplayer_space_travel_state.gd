@@ -2,6 +2,7 @@ extends RefCounted
 ## Authoritative travel position and phase. Presentation reads snapshots; only
 ## SimulationRoot's runtime adapter may confirm lifecycle changes or advance time.
 
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
 const TRUSTED_OPERATIONS := ["launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
 const MAX_ADVANCE_SECONDS: float = 60.0
@@ -18,6 +19,10 @@ var _progress: float = 0.0
 var _location_id: String = "homebase"
 var _revision: int = 0
 var _requests: Dictionary = {}
+var _route_hexes: Array[Vector2i] = []
+var _route_control := Vector2.ZERO
+var _route_destination := Vector2.ZERO
+var _heading: float = 0.0
 
 func configure() -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DEFINITION_PATH))
@@ -35,14 +40,18 @@ func configure() -> Dictionary:
 	_location_id = "homebase"
 	_revision = 0
 	_requests.clear()
+	_route_hexes.clear()
+	_heading = 0.0
 	return {"ok": true}
 
 func is_quantum_active() -> bool:
 	return _phase == "quantum"
 
 func get_snapshot() -> Dictionary:
-	return {"phase": _phase, "craft_id": _craft_id, "orbit_id": _orbit_id,
+	return {"system_version": int(_definition.get("version", 1)), "hex": GRID.cell_at(_position),
+		"route_hexes": _route_hexes.duplicate(), "heading": _heading, "phase": _phase, "craft_id": _craft_id, "orbit_id": _orbit_id,
 		"position": [_position.x, _position.y], "origin_position": [_origin_position.x, _origin_position.y],
+		"route_control": [_route_control.x, _route_control.y], "route_destination": [_route_destination.x, _route_destination.y],
 		"target_orbit_id": _target_orbit_id, "progress": _progress, "elapsed_seconds": _elapsed_seconds,
 		"duration_seconds": float(_definition.get("jump_duration_seconds", 3.0)),
 		"location_id": _location_id, "revision": _revision,
@@ -113,6 +122,10 @@ func _start_quantum(payload: Dictionary) -> Dictionary:
 		return _reject("already_in_orbit", "Schiff ist bereits in diesem Orbit")
 	_origin_position = _position
 	_target_orbit_id = target
+	_route_destination = _orbit_position(target)
+	_route_control = GRID.route_control(_origin_position, _route_destination)
+	_route_hexes = GRID.route(_origin_position, _route_control, _route_destination)
+	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, 0.0)
 	_orbit_id = ""
 	_location_id = ""
 	_elapsed_seconds = 0.0
@@ -136,7 +149,8 @@ func _advance(payload: Dictionary) -> Dictionary:
 	var duration: float = float(_definition.jump_duration_seconds)
 	_elapsed_seconds = minf(duration, _elapsed_seconds + delta)
 	_progress = clampf(_elapsed_seconds / duration, 0.0, 1.0)
-	_position = _origin_position.lerp(_orbit_position(_target_orbit_id), _progress)
+	_position = GRID.route_point(_origin_position, _route_control, _route_destination, _progress)
+	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, _progress)
 	_revision += 1
 	if _progress >= 1.0:
 		_arrive(_target_orbit_id)
@@ -179,6 +193,7 @@ func _land_homebase() -> Dictionary:
 	_origin_position = _position
 	_elapsed_seconds = 0.0
 	_progress = 0.0
+	_route_hexes.clear()
 	_revision += 1
 	return {"ok": true}
 
@@ -186,6 +201,8 @@ func _arrive(orbit: String) -> void:
 	_phase = "orbit"
 	_orbit_id = orbit
 	_position = _orbit_position(orbit)
+	_target_orbit_id = ""
+	_route_hexes.clear()
 	_location_id = ""
 	_revision += 1
 
@@ -199,8 +216,16 @@ func _valid_definition(data: Dictionary) -> bool:
 	var duration: float = float(data.jump_duration_seconds)
 	if not is_finite(duration) or duration <= 0.0 or duration > MAX_ADVANCE_SECONDS:
 		return false
-	for orbit in ["moon_orbit", "planet_orbit"]:
-		if typeof(data.orbits.get(orbit)) != TYPE_DICTIONARY:
+	if int(data.get("version", 1)) != 2 or Vector2i(GRID.pair(data.get("grid_size", []))) != GRID.SIZE:
+		return false
+	if data.orbits.size() != GRID.ORBITS.size() or not data.bodies.has("sun"):
+		return false
+	for orbit in GRID.ORBITS:
+		if typeof(data.orbits.get(orbit)) != TYPE_DICTIONARY or typeof(data.bodies.get(GRID.ORBITS[orbit])) != TYPE_DICTIONARY:
+			return false
+		if String(data.orbits[orbit].get("body_id", "")) != GRID.ORBITS[orbit]:
+			return false
+		if not _valid_hex_record(data.orbits[orbit]) or not _valid_hex_record(data.bodies[GRID.ORBITS[orbit]]):
 			return false
 		var point: Variant = data.orbits[orbit].get("position")
 		if typeof(point) != TYPE_ARRAY or point.size() != 2:
@@ -208,7 +233,26 @@ func _valid_definition(data: Dictionary) -> bool:
 		for value in point:
 			if typeof(value) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(value)) or float(value) < 0.0 or float(value) > 1.0:
 				return false
-	return data.bodies.has("moon") and data.bodies.has("planet") and data.location_orbits.get("homebase") == "moon_orbit" and data.location_orbits.get("satellite_crash") == "planet_orbit" and data.location_orbits.get("trade_outpost") == "planet_orbit"
+		var body: Dictionary = data.bodies[GRID.ORBITS[orbit]]
+		var location := String(body.get("surface_location_id", ""))
+		if String(data.location_orbits.get(location, "")) != orbit:
+			return false
+		if not GRID.ring(GRID.cell_from_record(body), int(body.get("ring_radius", 0))).has(GRID.cell_from_record(data.orbits[orbit])):
+			return false
+	for orbit in data.location_orbits.values():
+		if not GRID.ORBITS.has(orbit):
+			return false
+	return _valid_hex_record(data.bodies.sun) and data.location_orbits.get("homebase") == "moon_orbit"
+
+func _valid_hex_record(record: Dictionary) -> bool:
+	var raw: Variant = record.get("hex")
+	if not raw is Array or raw.size() != 2:
+		return false
+	for value in raw:
+		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) != floorf(float(value)):
+			return false
+	var cell: Vector2i = GRID.cell_from_record(record)
+	return GRID.contains(cell) and GRID.normalized(cell).is_equal_approx(GRID.pair(record.get("position")))
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}

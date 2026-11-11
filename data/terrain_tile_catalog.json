@@ -3518,6 +3518,21 @@
 			"preserve_hill_fields": true
 		},
 		{
+			"type_id": "glut_sandstone_04",
+			"display_name": "Glut-Sandsteinblock",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 55,
+			"height_level": 0,
+			"object_height": 2,
+			"object_scale": 1,
+			"surface_type": "rock",
+			"edge_type": "none",
+			"preserve_hill_fields": true
+		},
+		{
 			"type_id": "spacekit_rock_large_a",
 			"display_name": "Terrain Rock Large A",
 			"palette_group": "space_kit_full",

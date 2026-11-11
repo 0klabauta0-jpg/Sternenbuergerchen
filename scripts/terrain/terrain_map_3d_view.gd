@@ -74,6 +74,8 @@ const CAMERA_DEFAULT_SIZE: float = 34.0
 const DEFAULT_CAMERA_PITCH_DEGREES: float = 40.0 # Approximately 35 degrees elevation in the existing offset projection.
 const CAMERA_MIN_SIZE: float = 5.5
 const CAMERA_MAX_SIZE: float = 120.0
+const REGIONAL_OVERVIEW_MIN_SIZE: float = 84.0
+const REGIONAL_OVERVIEW_MAX_SIZE: float = 520.0
 const CAMERA_ZOOM_STEP: float = 2.2
 const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
@@ -96,6 +98,8 @@ const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
 const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
 const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
+const REGIONAL_SURFACE = preload("res://scripts/terrain/regional_hex_surface.gd")
+const REGIONAL_FOG_SHADER = preload("res://shaders/terrain/regional_fog_overlay.gdshader")
 const RAMP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SE.png")
 const RAMP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png")
 const RAMP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png")
@@ -158,6 +162,7 @@ const KENNEY_AUTHORING_OFFSET_X: float = 2.0
 const KENNEY_AUTHORING_OFFSET_Z: float = 1.5
 const KENNEY_OFFSET_EPSILON: float = 0.01
 const GROUND_MULTIMESH_CHUNK_SIZE: int = 8
+const REGIONAL_RETAINED_CHUNKS: int = 64
 const VISUAL_STREAMING_TILE_THRESHOLD: int = 4096
 const VISUAL_STREAMING_MIN_CHUNK_RADIUS: int = 2
 const VISUAL_STREAMING_MAX_CHUNK_RADIUS: int = 5
@@ -1244,6 +1249,18 @@ var _place_dressing_grids: Array[Vector2i]=[]
 var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
 var _active_grid_topology: String = "square8"
 var _hex_ground_batch = HEX_GROUND_BATCH_SCRIPT.new()
+var _regional_tiles_by_chunk: Dictionary = {}
+var _regional_chunk_nodes: Dictionary = {}
+var _regional_requested_chunks: Dictionary = {}
+var _regional_pending_chunks: Array[Vector2i] = []
+var _regional_chunk_stats: Dictionary = {}
+var _regional_retained_chunks: Dictionary = {}
+var _regional_surface_profiles: Dictionary = {}
+var _regional_loading_label: Label
+var _regional_chunk_build_count: int = 0
+var _regional_overview_root: Node3D
+var _max_render_height: int = 0
+var _regional_height_step: float = 0.0
 var _hex_grid_visible: bool = true
 
 
@@ -1266,6 +1283,7 @@ func _process(delta: float) -> void:
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
 	_process_pending_fow_overlay_full_rebuild()
+	_process_regional_pending_chunks()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_resize_subviewport()
@@ -1460,7 +1478,7 @@ func _sync_fire_sector_los_revision() -> void:
 		_dynamic_sources_dirty = true
 
 
-func configure_from_map(terrain_map_data) -> void:
+func configure_from_map(terrain_map_data, initial_focus: Variant = null, initial_camera_size: float = 0.0) -> void:
 	_terrain_map_data = terrain_map_data
 	_dynamic_unit_source_signatures.clear()
 	_dynamic_sources_dirty = true
@@ -1468,11 +1486,10 @@ func configure_from_map(terrain_map_data) -> void:
 	_order_dynamic_visual_signature = ""
 	_fire_sector_los_cache.clear()
 	_fire_sector_los_cache_signature = ""
-	_read_map_transform()
-	render_map()
+	render_map(null, initial_focus, initial_camera_size)
 
 
-func render_map(terrain_map_data = null) -> void:
+func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_camera_size: float = 0.0) -> void:
 	var render_started_at_msec: int = Time.get_ticks_msec()
 	_is_rendering_map = true
 	_visual_streaming_refresh_queued = false
@@ -1486,6 +1503,11 @@ func render_map(terrain_map_data = null) -> void:
 		_fire_sector_los_cache_signature = ""
 	_read_map_transform()
 	_ensure_nodes()
+	if initial_focus is Vector2:
+		_focus_grid_position = _world_to_grid_float(initial_focus)
+		if is_finite(initial_camera_size) and initial_camera_size > 0.0:
+			_camera_size = clampf(initial_camera_size, 5.5, 120.0)
+		_update_camera_transform()
 	if _frontier_art_enabled and _terrain_map_data != null:
 		var q_axis := _grid_to_3d_position(Vector2(1,0),0)
 		var r_axis := _grid_to_3d_position(Vector2(0,1),0)
@@ -1505,7 +1527,17 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_drop_root)
 	_clear_children(_feedback_bubble_hud_root)
 	_render_tile_by_grid.clear()
+	_regional_surface_profiles.clear()
 	_render_tile_order_by_grid.clear()
+	_regional_tiles_by_chunk.clear()
+	_regional_chunk_nodes.clear()
+	_regional_requested_chunks.clear()
+	_regional_pending_chunks.clear()
+	_set_regional_loading_visible(false)
+	_regional_chunk_stats.clear()
+	_regional_retained_chunks.clear()
+	_regional_chunk_build_count = 0
+	_regional_overview_root = null
 	_map_total_tile_count = 0
 	_map_tile_count = 0
 	_visual_streaming_active = false
@@ -1602,26 +1634,24 @@ func render_map(terrain_map_data = null) -> void:
 
 	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
 	_map_total_tile_count = tiles.size()
-	var render_tiles: Array = _select_tiles_for_visual_render(tiles)
-	_visual_streaming_skipped_tile_count = maxi(_map_total_tile_count - render_tiles.size(), 0)
 	_rebuild_render_tile_index(tiles)
-	for tile_data in render_tiles:
-		_add_tile_visual(tile_data)
-	_flush_ground_model_batches()
-	if _uses_hex_grid():
-		var hex_counts: Dictionary = _hex_ground_batch.flush(_map_root)
-		_ground_multimesh_instance_count += int(hex_counts["batch_count"])
-		_ground_multimesh_tile_count += int(hex_counts["tile_count"])
-	_flush_surface_tint_batches()
-	_flush_static_prop_model_batches()
-	# The fixed authored ground covers the complete saved field. Its visible
-	# grid cannot stop at a moving streaming-chunk border inside that surface.
-	_add_tile_grid_lines(tiles if is_instance_valid(_authored_visual_layout_root) else render_tiles)
-	for tile_data in render_tiles:
-		_add_height_edge_visuals(tile_data)
-	_flush_height_edge_model_batches()
-	_cache_fow_overlay_render_tiles(render_tiles)
-	_rebuild_fog_of_war_visuals()
+	if _uses_hex_grid() and _regional_height_step > 0.0 and not is_instance_valid(_authored_visual_layout_root):
+		_visual_streaming_active = true
+		for tile in tiles:
+			var chunk := _get_ground_batch_chunk_position(tile.grid_position)
+			if not _regional_tiles_by_chunk.has(chunk):
+				_regional_tiles_by_chunk[chunk] = []
+			_regional_tiles_by_chunk[chunk].append(tile)
+		var initial_chunks := _build_active_visual_chunk_lookup()
+		for chunk: Vector2i in initial_chunks:
+			_build_regional_chunk(chunk)
+		_publish_regional_chunks(initial_chunks)
+	else:
+		var render_tiles: Array = _select_tiles_for_visual_render(tiles)
+		_visual_streaming_skipped_tile_count = maxi(_map_total_tile_count - render_tiles.size(), 0)
+		_build_terrain_visuals(render_tiles, tiles if is_instance_valid(_authored_visual_layout_root) else render_tiles)
+		_cache_fow_overlay_render_tiles(render_tiles)
+		_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
 	_rebuild_network_drag_preview_visuals()
@@ -1635,6 +1665,24 @@ func render_map(terrain_map_data = null) -> void:
 	_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
 	_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 	_is_rendering_map = false
+	if _regional_overview_requested():
+		_queue_visual_streaming_refresh_if_needed()
+
+
+func _build_terrain_visuals(tiles: Array, grid_tiles: Array) -> void:
+	for tile in tiles:
+		_add_tile_visual(tile)
+	_flush_ground_model_batches()
+	if _uses_hex_grid():
+		var hex_counts: Dictionary = _hex_ground_batch.flush(_map_root)
+		_ground_multimesh_instance_count += int(hex_counts["batch_count"])
+		_ground_multimesh_tile_count += int(hex_counts["tile_count"])
+	_flush_surface_tint_batches()
+	_flush_static_prop_model_batches()
+	_add_tile_grid_lines(grid_tiles)
+	for tile in tiles:
+		_add_height_edge_visuals(tile)
+	_flush_height_edge_model_batches()
 
 
 func set_unit_nodes(unit_nodes: Array) -> void:
@@ -2061,6 +2109,10 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var previous_drop_admission_signature: String = _build_drop_fow_admission_signature()
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
+	if not same_context and not _regional_tiles_by_chunk.is_empty():
+		if _is_fog_of_war_visual_filter_active():
+			_set_regional_overview(false)
+		_queue_visual_streaming_refresh_if_needed()
 	if _weapon_fire_feedback_root != null:
 		_weapon_fire_feedback_root.call("refresh_visibility")
 	# Contact-only updates keep the existing terrain slots and pending cursor.
@@ -2287,7 +2339,8 @@ func rotate_camera(delta_degrees: float) -> void:
 
 
 func zoom_camera(delta_steps: float) -> void:
-	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, CAMERA_MAX_SIZE)
+	var limit := REGIONAL_OVERVIEW_MAX_SIZE if not _regional_tiles_by_chunk.is_empty() and not _is_fog_of_war_visual_filter_active() else CAMERA_MAX_SIZE
+	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, limit)
 	_update_camera_transform()
 	_request_viewport_redraw(true)
 
@@ -2433,7 +2486,7 @@ func _get_screen_rect_tile_candidates(screen_rect: Rect2) -> Array:
 		var ray_direction: Vector3 = _camera.project_ray_normal(screen_corner)
 		if absf(ray_direction.y) <= 0.000001:
 			return Array(_terrain_map_data.call("get_tiles"))
-		for height_level in range(3):
+		for height_level in [0, _max_render_height]:
 			# The old center projection includes off-screen centers behind the ray
 			# origin, so intersect the infinite line instead of a forward-only ray.
 			var surface_y: float = float(height_level) * _get_3d_height_step()
@@ -2471,8 +2524,16 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 	for tile_data in _get_tile_pick_candidates(viewport_position):
 		if tile_data == null:
 			continue
-		var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
-		if screen_quad.size() < 3 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
+		if not _regional_pending_chunks.is_empty():
+			var chunk := _get_ground_batch_chunk_position(tile_data.grid_position)
+			if _regional_requested_chunks.has(chunk) and not _visual_streaming_active_chunks.has(chunk):
+				continue
+		var profile := _regional_surface_profile(tile_data) if _regional_height_step > 0.0 else PackedFloat32Array()
+		if profile.is_empty():
+			var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
+			if screen_quad.size() < 3 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
+				continue
+		elif not _pick_regional_surface(tile_data, profile, viewport_position):
 			continue
 		var surface_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
 		var tile_center_3d: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), surface_y)
@@ -2487,11 +2548,14 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 
 func _rebuild_render_tile_index(tiles: Array) -> void:
 	_render_tile_by_grid.clear()
+	_regional_surface_profiles.clear()
 	_render_tile_order_by_grid.clear()
+	_max_render_height = 0
 	for tile_data in tiles:
 		if tile_data != null:
 			_render_tile_order_by_grid[tile_data.grid_position] = _render_tile_by_grid.size()
 			_render_tile_by_grid[tile_data.grid_position] = tile_data
+			_max_render_height = maxi(_max_render_height, int(tile_data.height_level))
 
 
 func _get_tile_pick_candidates(viewport_position: Vector2) -> Array:
@@ -2499,9 +2563,9 @@ func _get_tile_pick_candidates(viewport_position: Vector2) -> Array:
 	var seen: Dictionary = {}
 	var ray_origin: Vector3 = _camera.project_ray_origin(viewport_position)
 	var ray_direction: Vector3 = _camera.project_ray_normal(viewport_position)
-	# TerrainTileData's legal H0/H1/H2 surfaces. Intersect each top plane so
+	# Authored terrain heights. Intersect each top plane so
 	# raised tiles can win even when their ground-plane grid coordinate differs.
-	for height_level in range(3):
+	for height_level in range(_max_render_height + 1):
 		var top_y: float = float(height_level) * _get_3d_height_step() + TILE_GRID_LINE_SURFACE_Y_OFFSET
 		var hit = Plane(Vector3.UP, top_y).intersects_ray(ray_origin, ray_direction)
 		if typeof(hit) != TYPE_VECTOR3:
@@ -2804,6 +2868,8 @@ func get_render_snapshot() -> Dictionary:
 		"rendered_tile_count": _map_tile_count,
 		"visual_streaming_active": _visual_streaming_active,
 		"visual_streaming_tile_threshold": VISUAL_STREAMING_TILE_THRESHOLD,
+		"regional_chunk_build_count": _regional_chunk_build_count,
+		"regional_overview_visible": is_instance_valid(_regional_overview_root) and _regional_overview_root.visible,
 		"visual_streaming_chunk_size": GROUND_MULTIMESH_CHUNK_SIZE,
 		"visual_streaming_chunk_radius": _visual_streaming_chunk_radius,
 		"visual_streaming_active_chunk_count": _visual_streaming_active_chunks.size(),
@@ -3882,6 +3948,8 @@ func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
 
 func _on_parent_viewport_size_changed() -> void:
 	_resize_subviewport()
+	if not _regional_tiles_by_chunk.is_empty():
+		call_deferred("_queue_visual_streaming_refresh_if_needed")
 	# Native anchors may already have resized the container before this signal.
 	# Still redraw once when a static preview's process loop is disabled.
 	_request_viewport_redraw(can_process(), CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
@@ -3907,7 +3975,7 @@ func _resize_subviewport() -> void:
 
 
 func _request_viewport_redraw(continuous: bool = false, duration_msec: int = CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC) -> void:
-	if _subviewport == null:
+	if _subviewport == null or not visible:
 		return
 	if continuous and can_process():
 		_continuous_redraw_until_msec = maxi(_continuous_redraw_until_msec, Time.get_ticks_msec() + maxi(duration_msec, 1))
@@ -3942,6 +4010,7 @@ func _read_map_transform() -> void:
 	if next_topology != _active_grid_topology:
 		_ground_batch_source_cache.clear()
 	_active_grid_topology = next_topology
+	_regional_height_step = float(_terrain_map_data.call("get_regional_height_step")) if _terrain_map_data.has_method("get_regional_height_step") else 0.0
 	_map_plane_bounds = Rect2()
 	_map_axial_bounds = Rect2i()
 	if _uses_hex_grid():
@@ -4028,9 +4097,11 @@ func _select_tiles_for_visual_render(tiles: Array) -> Array:
 func _queue_visual_streaming_refresh_if_needed() -> void:
 	if _is_rendering_map or not _visual_streaming_active or _terrain_map_data == null:
 		return
-	var next_chunks: Dictionary = _build_active_visual_chunk_lookup()
-	var next_key: String = _build_visual_chunk_key(next_chunks)
-	if next_key == _visual_streaming_active_chunk_key:
+	var overview := _regional_overview_requested()
+	var overview_visible := is_instance_valid(_regional_overview_root) and _regional_overview_root.visible
+	var next_chunks: Dictionary = _visual_streaming_active_chunks if overview else _build_active_visual_chunk_lookup()
+	var previous := _regional_requested_chunks if not _regional_pending_chunks.is_empty() else _visual_streaming_active_chunks
+	if next_chunks == previous and overview_visible == overview:
 		return
 	if _visual_streaming_refresh_queued:
 		return
@@ -4042,13 +4113,186 @@ func _refresh_visual_streaming_chunks() -> void:
 	_visual_streaming_refresh_queued = false
 	if not _visual_streaming_active or _terrain_map_data == null:
 		return
-	_visual_streaming_refresh_count += 1
-	render_map()
+	if not _regional_tiles_by_chunk.is_empty():
+		if _set_regional_overview(_regional_overview_requested()):
+			_request_viewport_redraw()
+			return
+		var next := _build_active_visual_chunk_lookup()
+		var current_request := _regional_requested_chunks if not _regional_pending_chunks.is_empty() else _visual_streaming_active_chunks
+		if next == current_request:
+			return
+		_visual_streaming_refresh_count += 1
+		_request_regional_chunks(next)
+	else:
+		_visual_streaming_refresh_count += 1
+		render_map()
+
+
+func _regional_overview_requested() -> bool:
+	return not _regional_tiles_by_chunk.is_empty() and _camera_size >= REGIONAL_OVERVIEW_MIN_SIZE and not _is_fog_of_war_visual_filter_active()
+
+
+func _set_regional_overview(enabled: bool) -> bool:
+	var was_visible := is_instance_valid(_regional_overview_root) and _regional_overview_root.visible
+	if enabled == was_visible:
+		return enabled
+	if enabled:
+		_set_regional_loading_visible(false)
+	if enabled and not is_instance_valid(_regional_overview_root):
+		_regional_overview_root = Node3D.new()
+		_regional_overview_root.name = "RegionalTerrainOverview"
+		_map_root.add_child(_regional_overview_root)
+		var cell_size := _get_3d_cell_size()
+		var height_step := _get_3d_height_step()
+		var batches = HEX_GROUND_BATCH_SCRIPT.new()
+		for tile in _render_tile_by_grid.values():
+			var color: Color = _frontier_art_profile.surface_color(String(tile.surface_type)) if _frontier_art_enabled else _get_tile_color(tile)
+			var material: Material = _frontier_art_profile.surface_material_for(String(tile.surface_type)) if _frontier_art_enabled else _make_material(color)
+			batches.queue_tile(_grid_to_3d_position(Vector2(tile.grid_position), float(tile.height_level) * height_step),
+				color, cell_size, material, String(tile.object_type_id) == "glut_bridge_deck")
+		batches.flush(_regional_overview_root)
+		for batch: MultiMeshInstance3D in _regional_overview_root.get_children():
+			batch.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if is_instance_valid(_regional_overview_root):
+		_regional_overview_root.visible = enabled
+	for chunk in _regional_chunk_nodes:
+		_regional_chunk_nodes[chunk].visible = not enabled and _visual_streaming_active_chunks.has(chunk)
+	return enabled
+
+
+func _request_regional_chunks(next: Dictionary) -> void:
+	_regional_requested_chunks = next
+	_regional_pending_chunks.clear()
+	for chunk: Vector2i in _regional_chunk_nodes.keys():
+		if not next.has(chunk) and not _visual_streaming_active_chunks.has(chunk):
+			_retain_regional_chunk(chunk)
+	for chunk: Vector2i in next:
+		_regional_retained_chunks.erase(chunk)
+		if not _regional_chunk_nodes.has(chunk):
+			_regional_pending_chunks.append(chunk)
+	_prune_regional_retained_chunks()
+	var focus := _get_ground_batch_chunk_position(Vector2i(_focus_grid_position.round()))
+	_set_regional_loading_visible(_regional_pending_chunks.has(focus))
+	_regional_pending_chunks.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.distance_squared_to(focus) < b.distance_squared_to(focus))
+	if _regional_pending_chunks.is_empty():
+		_publish_regional_chunks(next)
+
+
+func _set_regional_loading_visible(show_loading: bool) -> void:
+	if show_loading and not is_instance_valid(_regional_loading_label):
+		_regional_loading_label = Label.new()
+		_regional_loading_label.text = "Kartenausschnitt wird aufgebaut …"
+		_regional_loading_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_regional_loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_regional_loading_label.add_theme_color_override("font_shadow_color", Color(0.02, 0.04, 0.06, 0.95))
+		_regional_loading_label.add_theme_constant_override("shadow_outline_size", 7)
+		add_child(_regional_loading_label)
+		_regional_loading_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_regional_loading_label.offset_left = -180.0
+		_regional_loading_label.offset_right = 180.0
+		_regional_loading_label.offset_top = 94.0
+		_regional_loading_label.offset_bottom = 120.0
+	if is_instance_valid(_regional_loading_label):
+		_regional_loading_label.visible = show_loading
+
+
+func _process_regional_pending_chunks() -> void:
+	if _regional_pending_chunks.is_empty() or _regional_overview_requested():
+		return
+	var until := Time.get_ticks_usec() + 4000
+	for index in range(3):
+		var chunk: Vector2i = _regional_pending_chunks.pop_front()
+		_build_regional_chunk(chunk)
+		# Newly loaded fog cells are revealed only after the overlay admits them.
+		_regional_chunk_nodes[chunk].visible = not _is_fog_of_war_visual_filter_active()
+		if _regional_pending_chunks.is_empty() or Time.get_ticks_usec() >= until:
+			break
+	if _regional_pending_chunks.is_empty():
+		_set_regional_loading_visible(false)
+		_publish_regional_chunks(_regional_requested_chunks)
+	_request_viewport_redraw()
+
+
+func _build_regional_chunk(chunk: Vector2i) -> void:
+	var parent := _map_root
+	var visual := Node3D.new()
+	visual.name = "TerrainChunk_%d_%d" % [chunk.x, chunk.y]
+	parent.add_child(visual)
+	_map_root = visual
+	var previous_counts := Vector3i(_ground_multimesh_instance_count, _ground_multimesh_tile_count, _tile_grid_line_count)
+	_tile_grid_line_count = 0
+	var tiles: Array = _regional_tiles_by_chunk[chunk]
+	_build_terrain_visuals(tiles, tiles)
+	_add_regional_cliff_faces(tiles)
+	_regional_chunk_stats[chunk] = Vector3i(
+		_ground_multimesh_instance_count - previous_counts.x,
+		_ground_multimesh_tile_count - previous_counts.y, _tile_grid_line_count)
+	_ground_multimesh_instance_count = previous_counts.x
+	_ground_multimesh_tile_count = previous_counts.y
+	_tile_grid_line_count = previous_counts.z
+	_regional_chunk_nodes[chunk] = visual
+	_regional_chunk_build_count += 1
+	_map_root = parent
+
+
+func _remove_regional_chunk(chunk: Vector2i) -> void:
+	var retired: Node3D = _regional_chunk_nodes[chunk]
+	_map_root.remove_child(retired)
+	retired.queue_free()
+	_regional_chunk_nodes.erase(chunk)
+	_regional_chunk_stats.erase(chunk)
+	_regional_retained_chunks.erase(chunk)
+
+
+func _retain_regional_chunk(chunk: Vector2i) -> void:
+	_regional_chunk_nodes[chunk].hide()
+	if not _regional_retained_chunks.has(chunk):
+		_regional_retained_chunks[chunk] = true
+
+
+func _prune_regional_retained_chunks() -> void:
+	var excess := _regional_retained_chunks.size() - REGIONAL_RETAINED_CHUNKS
+	if excess <= 0:
+		return
+	var oldest_first := _regional_retained_chunks.keys()
+	for index in range(excess):
+		_remove_regional_chunk(oldest_first[index])
+
+
+func _publish_regional_chunks(next: Dictionary) -> void:
+	for chunk: Vector2i in _regional_chunk_nodes.keys():
+		if next.has(chunk):
+			_regional_retained_chunks.erase(chunk)
+		else:
+			_retain_regional_chunk(chunk)
+	_prune_regional_retained_chunks()
+	if next == _visual_streaming_active_chunks:
+		return
+	var counts := Vector3i.ZERO
+	var visible_tiles: Array = []
+	for chunk in next:
+		counts += Vector3i(_regional_chunk_stats[chunk])
+		visible_tiles.append_array(_regional_tiles_by_chunk[chunk])
+	_ground_multimesh_instance_count = counts.x
+	_ground_multimesh_tile_count = counts.y
+	_tile_grid_line_count = counts.z
+	_map_tile_count = visible_tiles.size()
+	_visual_streaming_skipped_tile_count = _map_total_tile_count - _map_tile_count
+	_visual_streaming_active_chunks = next
+	_visual_streaming_active_chunk_key = _build_visual_chunk_key(next)
+	_cache_fow_overlay_render_tiles(visible_tiles)
+	_rebuild_fog_of_war_visuals()
+	for chunk in next:
+		_regional_chunk_nodes[chunk].show()
+	_request_viewport_redraw()
 
 
 func _build_active_visual_chunk_lookup() -> Dictionary:
 	var result: Dictionary = {}
 	_visual_streaming_chunk_radius = _get_visual_streaming_chunk_radius()
+	if not _regional_tiles_by_chunk.is_empty():
+		return _camera_regional_chunks()
 	var focus_grid := Vector2i(roundi(_focus_grid_position.x), roundi(_focus_grid_position.y))
 	var focus_chunk: Vector2i = _get_ground_batch_chunk_position(focus_grid)
 	for chunk_x in range(focus_chunk.x - _visual_streaming_chunk_radius, focus_chunk.x + _visual_streaming_chunk_radius + 1):
@@ -4059,12 +4303,164 @@ func _build_active_visual_chunk_lookup() -> Dictionary:
 	return result
 
 
+func _camera_regional_chunks() -> Dictionary:
+	var chunks := {}
+	var viewport_size := Vector2(_get_viewport_size())
+	var min_grid := Vector2(INF, INF)
+	var max_grid := Vector2(-INF, -INF)
+	for pixel in [Vector2.ZERO, viewport_size, Vector2(viewport_size.x, 0), Vector2(0, viewport_size.y)]:
+		var origin := _camera.project_ray_origin(pixel)
+		var ray := _camera.project_ray_normal(pixel)
+		if absf(ray.y) < 0.0001:
+			continue
+		for y: float in [0.0, _max_render_height * _get_3d_height_step()]:
+			var point := origin + ray * ((y - origin.y) / ray.y)
+			var grid := _world_to_grid_float(_position_3d_to_world(point))
+			min_grid = min_grid.min(grid)
+			max_grid = max_grid.max(grid)
+	if not min_grid.is_finite() or not max_grid.is_finite():
+		return chunks
+	var first := _get_ground_batch_chunk_position(Vector2i(min_grid.floor()) - Vector2i.ONE * 2)
+	var last := _get_ground_batch_chunk_position(Vector2i(max_grid.ceil()) + Vector2i.ONE * 2)
+	for x in range(first.x, last.x + 1):
+		for y in range(first.y, last.y + 1):
+			var chunk := Vector2i(x, y)
+			if _regional_tiles_by_chunk.has(chunk):
+				chunks[chunk] = true
+	return chunks
+
+
+func _regional_surface_profile(tile) -> PackedFloat32Array:
+	var cell: Vector2i = tile.grid_position
+	if not _regional_surface_profiles.has(cell):
+		_regional_surface_profiles[cell] = REGIONAL_SURFACE.profile(tile, _render_tile_by_grid)
+	return _regional_surface_profiles[cell]
+
+
+func _regional_ring_point(center: Vector3, index: int, rise: float, cell_size: float, height_step: float) -> Vector3:
+	var point: Vector2 = REGIONAL_SURFACE.ring[index]
+	return center + Vector3(point.x * cell_size, rise * height_step, point.y * cell_size)
+
+
+func _add_regional_cliff_faces(tiles: Array) -> void:
+	var material: Material = _frontier_art_profile.material_for(Color("874b3c"), true) if _frontier_art_enabled else _make_material(Color("874b3c"))
+	var walls := SurfaceTool.new()
+	walls.begin(Mesh.PRIMITIVE_TRIANGLES)
+	walls.set_material(material)
+	var ramps := {}
+	var cell_size := _get_3d_cell_size()
+	var height_step := _get_3d_height_step()
+	for tile in tiles:
+		if String(tile.object_type_id) == "glut_bridge_deck":
+			continue
+		var cell: Vector2i = tile.grid_position
+		var height := int(tile.height_level)
+		var center := _grid_to_3d_position(Vector2(cell), float(height) * height_step)
+		var profile := _regional_surface_profile(tile)
+		if not profile.is_empty():
+			var surface_type := String(tile.surface_type)
+			if not ramps.has(surface_type):
+				var ramp := SurfaceTool.new()
+				ramp.begin(Mesh.PRIMITIVE_TRIANGLES)
+				ramp.set_material(_regional_ramp_material(tile, surface_type))
+				ramps[surface_type] = ramp
+			_add_regional_ramp_cap(ramps[surface_type], center, profile, cell_size, height_step)
+		for edge in range(6):
+			var neighbor = _render_tile_by_grid.get(REGIONAL_SURFACE.neighbor_cell(cell, edge))
+			var bridge_or_boundary := neighbor == null or String(neighbor.object_type_id) == "glut_bridge_deck"
+			var neighbor_y := -0.09 if bridge_or_boundary else float(neighbor.height_level) * height_step
+			if neighbor_y >= center.y + 2.0 * height_step:
+				continue
+			if neighbor_y == center.y and profile.is_empty():
+				continue
+			var neighbor_profile := PackedFloat32Array() if bridge_or_boundary else _regional_surface_profile(neighbor)
+			var opposite := (edge + 3) % 6 * 2
+			var first := edge * 2
+			if profile.is_empty() and neighbor_profile.is_empty():
+				if neighbor_y >= center.y:
+					continue
+				var a := _regional_ring_point(center, first, 0.0, cell_size, height_step)
+				var b := _regional_ring_point(center, (first + 2) % 12, 0.0, cell_size, height_step)
+				var base_a := Vector3(a.x, neighbor_y, a.z)
+				var base_b := Vector3(b.x, neighbor_y, b.z)
+				_add_regional_triangle(walls, a, base_a, b)
+				_add_regional_triangle(walls, b, base_a, base_b)
+				continue
+			for half in range(2):
+				var a := (first + half) % 12
+				var b := (first + half + 1) % 12
+				var top_a := _regional_ring_point(center, a, profile[a] if not profile.is_empty() else 0.0, cell_size, height_step)
+				var top_b := _regional_ring_point(center, b, profile[b] if not profile.is_empty() else 0.0, cell_size, height_step)
+				var low_a := neighbor_y + (neighbor_profile[(opposite + 2 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
+				var low_b := neighbor_y + (neighbor_profile[(opposite + 1 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
+				var base_a := Vector3(top_a.x, minf(top_a.y, low_a), top_a.z)
+				var base_b := Vector3(top_b.x, minf(top_b.y, low_b), top_b.z)
+				_add_regional_triangle(walls, top_a, base_a, top_b)
+				_add_regional_triangle(walls, top_b, base_a, base_b)
+	_commit_regional_surface(walls, "RegionalCliffFaces")
+	for surface_type in ramps:
+		var ramp: SurfaceTool = ramps[surface_type]
+		ramp.generate_normals()
+		_commit_regional_surface(ramp, "RegionalRamps_" + String(surface_type))
+
+
+func _regional_ramp_material(tile, surface_type: String) -> Material:
+	if not _frontier_art_enabled:
+		return _make_material(_get_tile_color(tile))
+	return _frontier_art_profile.surface_material_for(surface_type, 0.25)
+
+
+func _add_regional_ramp_cap(surface: SurfaceTool, center: Vector3, profile: PackedFloat32Array, cell_size: float, height_step: float) -> void:
+	for a in range(12):
+		var b := (a + 1) % 12
+		_add_regional_triangle(surface, center,
+			_regional_ring_point(center, a, profile[a], cell_size, height_step),
+			_regional_ring_point(center, b, profile[b], cell_size, height_step))
+
+
+func _add_regional_triangle(surface: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> void:
+	var normal := (c - a).cross(b - a)
+	if normal.length_squared() < 0.00000001:
+		return
+	surface.set_normal(normal.normalized())
+	surface.add_vertex(a)
+	surface.add_vertex(b)
+	surface.add_vertex(c)
+
+
+func _commit_regional_surface(surface: SurfaceTool, node_name: String) -> void:
+	var mesh := surface.commit()
+	if mesh == null or mesh.get_surface_count() == 0:
+		return
+	var visual := MeshInstance3D.new()
+	visual.name = node_name
+	visual.mesh = mesh
+	_map_root.add_child(visual)
+
+
+func _pick_regional_surface(tile, profile: PackedFloat32Array, viewport_position: Vector2) -> bool:
+	var height_step := _get_3d_height_step()
+	var center := _grid_to_3d_position(Vector2(tile.grid_position), float(tile.height_level) * height_step)
+	var cell_size := _get_3d_cell_size()
+	var origin := _camera.project_ray_origin(viewport_position)
+	var direction := _camera.project_ray_normal(viewport_position)
+	for a in range(12):
+		var b := (a + 1) % 12
+		var point_a := _regional_ring_point(center, a, profile[a], cell_size, height_step)
+		var point_b := _regional_ring_point(center, b, profile[b], cell_size, height_step)
+		if Geometry3D.ray_intersects_triangle(origin, direction, center, point_a, point_b) != null:
+			return true
+	return false
+
+
 func _get_visual_streaming_chunk_radius() -> int:
 	var camera_chunks: int = ceili(_camera_size / (float(GROUND_MULTIMESH_CHUNK_SIZE) * VISUAL_STREAMING_CAMERA_CHUNK_DIVISOR)) + 1
 	return clampi(camera_chunks, VISUAL_STREAMING_MIN_CHUNK_RADIUS, VISUAL_STREAMING_MAX_CHUNK_RADIUS)
 
 
 func _visual_chunk_overlaps_map(chunk_position: Vector2i) -> bool:
+	if not _regional_tiles_by_chunk.is_empty():
+		return _regional_tiles_by_chunk.has(chunk_position)
 	if _grid_size == Vector2i.ZERO:
 		return true
 	var min_grid := Vector2i(chunk_position.x * GROUND_MULTIMESH_CHUNK_SIZE, chunk_position.y * GROUND_MULTIMESH_CHUNK_SIZE)
@@ -4105,7 +4501,17 @@ func _add_tile_visual(tile_data) -> void:
 		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
 		var hex_material: Material = _frontier_art_profile.surface_material_for(String(tile_data.surface_type)) if _frontier_art_enabled else _make_material(hex_color)
 		if not owns_flat_ground:
-			_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material)
+			var thin_cap: bool = _regional_height_step > 0.0
+			var is_bridge := String(tile_data.object_type_id) == "glut_bridge_deck"
+			if is_bridge:
+				# The ravine bed is visual only. The sole saved surface and
+				# picking/navigation target of this cell is the deck above it.
+				var floor_color := Color("754c41")
+				_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), -0.025), floor_color, cell_size, _make_material(floor_color), true)
+				hex_color = Color("756858")
+				hex_material = _make_material(hex_color)
+			if not thin_cap or _regional_surface_profile(tile_data).is_empty():
+				_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material, thin_cap)
 	elif owns_flat_ground:
 		pass # Continuous authored ground owns H0; saved tiles still own gameplay.
 	elif _uses_strict_3d_asset_mapping():
@@ -4122,7 +4528,7 @@ func _add_tile_visual(tile_data) -> void:
 		_map_root.add_child(tile_instance)
 		_ground_mesh_count += 1
 		_ground_individual_model_count += 1
-	if not (owns_flat_ground and is_instance_valid(_authored_visual_layout_root)):
+	if _regional_height_step <= 0.0 and not (owns_flat_ground and is_instance_valid(_authored_visual_layout_root)):
 		_add_surface_tint_visual(tile_data, top_y)
 		_add_surface_detail_visual(tile_data, top_y)
 	_map_tile_count += 1
@@ -4132,6 +4538,11 @@ func _add_tile_visual(tile_data) -> void:
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	if object_type_id=="resource_wreck_solid": return # Local resource runtime owns the full current-model wreck visual.
+	if object_type_id == "glut_bridge_deck":
+		_add_glut_bridge_rails(tile_data, top_y)
+		return
+	if not _regional_tiles_by_chunk.is_empty() and object_type_id.is_empty() and height_level > 2 and int(tile_data.object_height) == 0:
+		return # An authored terrain-only LOS edge is already the cliff geometry.
 	if _frontier_art_enabled and _reference_place_enabled and REFERENCE_PROPS.supports(object_type_id):
 		var replacement: Node3D=REFERENCE_PROPS.build(_map_root,object_type_id,_frontier_art_profile,int(tile_data.grid_position.x)*1709+int(tile_data.grid_position.y)*73)
 		replacement.position=_grid_to_3d_position(Vector2(tile_data.grid_position),top_y)
@@ -4146,6 +4557,25 @@ func _add_tile_visual(tile_data) -> void:
 		_add_object_visual(tile_data, top_y, object_visual_type_id, true)
 	elif structure_visual_type_id.is_empty() and (bool(tile_data.blocks_los) or int(tile_data.object_height) > 0):
 		_add_object_visual(tile_data, top_y, "")
+
+
+func _add_glut_bridge_rails(tile_data, top_y: float) -> void:
+	var cell: Vector2i = tile_data.grid_position
+	var cell_size := _get_3d_cell_size()
+	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size / sqrt(3.0))
+	var center := _grid_to_3d_position(Vector2(cell), top_y + 0.18)
+	for edge in range(6):
+		var other = _render_tile_by_grid.get(cell + HEX_GRID_SCRIPT.DIRECTIONS[(5 - edge + 6) % 6])
+		if other == null or (bool(other.walkable) and int(other.height_level) == int(tile_data.height_level)):
+			continue
+		var a: Vector2 = corners[edge]
+		var b: Vector2 = corners[(edge + 1) % 6]
+		var rail := MeshInstance3D.new()
+		rail.mesh = _make_box_mesh(Vector3(a.distance_to(b), 0.10, 0.055))
+		rail.material_override = _make_material(Color("594e43"))
+		rail.position = center + Vector3((a.x + b.x) * 0.5, 0.0, (a.y + b.y) * 0.5)
+		rail.rotation.y = -(b - a).angle()
+		_map_root.add_child(rail)
 
 
 func _add_object_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> void:
@@ -4844,35 +5274,59 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 	# One depth-tested coverage pass replaces two aliased subpixel cores.
 	# Topology stays fixed; the shader handles actual projected pixel coverage.
 	var edges: Dictionary = {}
+	var regional := _regional_height_step > 0.0
+	var line_count := 0
 	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
 		var top: float = float(tile.height_level) * _get_3d_height_step() + 0.008
 		if authored:
 			top = float(tile.height_level) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
 		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
+		var profile := _regional_surface_profile(tile) if regional else PackedFloat32Array()
 		for index in range(6):
 			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
 			var b := center + Vector3(corners[(index + 1) % 6].x, 0.0, corners[(index + 1) % 6].y)
-			var edge_key: String = _get_grid_edge_key(a, b)
-			if not edges.has(edge_key):
+			if regional:
+				if index >= 3:
+					var neighbor = _render_tile_by_grid.get(tile.grid_position + HEX_GRID_SCRIPT.DIRECTIONS[(11 - index) % 6])
+					if neighbor != null and neighbor.height_level == tile.height_level:
+						continue
+			else:
+				var edge_key: String = _get_grid_edge_key(a, b)
+				if edges.has(edge_key):
+					continue
 				edges[edge_key] = true
+			if profile.is_empty():
 				_add_hex_grid_coverage_quad(mesh, a, b, 0.04)
+				line_count += 1
+			else:
+				var midpoint := a.lerp(b, 0.5)
+				var first := index * 2
+				var step := _get_3d_height_step()
+				a.y += profile[first] * step
+				midpoint.y += profile[first + 1] * step
+				b.y += profile[(first + 2) % 12] * step
+				_add_hex_grid_coverage_quad(mesh, a, midpoint, 0.04)
+				_add_hex_grid_coverage_quad(mesh, midpoint, b, 0.04)
+				line_count += 2
 	mesh.surface_end()
 	var lines := MeshInstance3D.new()
 	lines.name = "TileGridLines3D"
 	lines.mesh = mesh
 	lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_map_root.add_child(lines)
-	_tile_grid_line_count = edges.size()
+	_tile_grid_line_count = line_count
 
 
 func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
-	var key: String = "hex_grid_coverage_authored" if authored else "hex_grid_coverage_plain"
+	var key: String = "hex_grid_coverage_regional" if _regional_height_step > 0.0 else ("hex_grid_coverage_authored" if authored else "hex_grid_coverage_plain")
 	if _material_cache.has(key):
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
 	material.shader = HEX_GRID_COVERAGE_SHADER
-	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.27) if authored else Color(0.34, 0.24, 0.16, 0.20))
+	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.27) if authored else Color(0.25, 0.15, 0.10, 0.30))
+	if _regional_height_step > 0.0:
+		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.54))
 	material.set_shader_parameter("world_line_width", 0.04)
 	material.set_shader_parameter("cell_size", _get_3d_cell_size())
 	_material_cache[key] = material
@@ -4881,6 +5335,8 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 
 func _get_hex_grid_coverage_snapshot() -> Dictionary:
 	var lines: MeshInstance3D = _map_root.get_node_or_null("TileGridLines3D") as MeshInstance3D if _map_root != null else null
+	if lines == null and not _regional_chunk_nodes.is_empty():
+		lines = _regional_chunk_nodes.values()[0].get_node_or_null("TileGridLines3D") as MeshInstance3D
 	var material: ShaderMaterial = lines.mesh.surface_get_material(0) as ShaderMaterial if lines != null and lines.mesh != null and lines.mesh.get_surface_count() > 0 else null
 	return {
 		"active": material != null and material.shader == HEX_GRID_COVERAGE_SHADER,
@@ -6386,8 +6842,8 @@ func _rebuild_fog_of_war_visuals() -> void:
 	_fow_tile_total_count = 0
 	if _fow_root == null or _terrain_map_data == null:
 		return
-	_fow_tile_total_count = Array(_terrain_map_data.call("get_tiles")).size()
-	if _fow_overlay_render_tiles.is_empty():
+	_fow_tile_total_count = _map_total_tile_count
+	if _fow_overlay_render_tiles.is_empty() and _regional_tiles_by_chunk.is_empty():
 		_cache_fow_overlay_render_tiles(_select_tiles_for_visual_overlay(Array(_terrain_map_data.call("get_tiles"))))
 	if not _is_fog_of_war_visual_filter_active():
 		_fow_visible_tile_count = _fow_overlay_render_tile_ids.size()
@@ -6642,6 +7098,7 @@ func _create_fow_overlay_multimesh() -> void:
 	var multi_mesh := MultiMesh.new()
 	multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
 	multi_mesh.use_colors = true
+	multi_mesh.use_custom_data = _regional_height_step > 0.0
 	multi_mesh.mesh = _make_fow_tile_overlay_mesh(cell_size)
 	multi_mesh.instance_count = _fow_overlay_slot_by_tile_id.size()
 	var instance := MultiMeshInstance3D.new()
@@ -6660,6 +7117,17 @@ func _apply_fow_overlay_tile_to_multimesh(tile_id: String) -> void:
 	var slot: int = int(_fow_overlay_slot_by_tile_id[tile_id])
 	var tile_data = _fow_overlay_tile_by_id.get(tile_id, null)
 	var tile_state: String = String(_fow_overlay_tile_states_by_id.get(tile_id, FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE))
+	if _fow_overlay_multimesh.use_custom_data:
+		var grade_data := Color(0.5, 0.5, 0.5, 0.5)
+		if tile_state == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN or tile_state == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
+			var profile := _regional_surface_profile(tile_data)
+			if not profile.is_empty():
+				# Three base-five samples fit per channel, including signed half steps.
+				for channel in range(4):
+					var a := channel * 3
+					var samples := Vector3(profile[a], profile[a + 1], profile[a + 2]) * 2.0 + Vector3(2, 2, 2)
+					grade_data[channel] = samples.dot(Vector3(1, 5, 25)) / 124.0
+		_fow_overlay_multimesh.set_instance_custom_data(slot, grade_data)
 	match tile_state:
 		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
 			_fow_overlay_multimesh.set_instance_transform(slot, _get_fow_surface_overlay_transform(tile_data))
@@ -6675,7 +7143,12 @@ func _apply_fow_overlay_tile_to_multimesh(tile_id: String) -> void:
 			_fow_overlay_multimesh.set_instance_color(slot, Color(0.0, 0.0, 0.0, 0.0))
 
 
-func _make_fow_dynamic_overlay_material() -> StandardMaterial3D:
+func _make_fow_dynamic_overlay_material() -> Material:
+	if _regional_height_step > 0.0:
+		var regional_material := ShaderMaterial.new()
+		regional_material.shader = REGIONAL_FOG_SHADER
+		regional_material.set_shader_parameter("height_step", _regional_height_step)
+		return regional_material
 	var material := StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -6686,6 +7159,15 @@ func _make_fow_dynamic_overlay_material() -> StandardMaterial3D:
 
 
 func _make_fow_tile_overlay_mesh(cell_size: float) -> Mesh:
+	if _regional_height_step > 0.0:
+		var surface := SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for edge in range(12):
+			for index in [12, edge, (edge + 1) % 12]:
+				surface.set_uv(Vector2(float(index), 0.0))
+				var point := Vector2.ZERO if index == 12 else REGIONAL_SURFACE.ring[index]
+				surface.add_vertex(Vector3(point.x * cell_size, 0.0, point.y * cell_size))
+		return surface.commit()
 	if is_instance_valid(_authored_visual_layout_root):
 		if _uses_hex_grid():
 			var vertices := PackedVector3Array()
@@ -10618,6 +11100,16 @@ func _world_to_air_layer_3d_position_for_payload(payload: Dictionary, world_posi
 	var minimum: float = 0.0 if MISSION_FLIGHT_VISUAL_SCRIPT.AIR_PHASES.has(phase) or MISSION_FLIGHT_VISUAL_SCRIPT.GROUND_PHASES.has(phase) else AIR_LAYER_MIN_CLEARANCE
 	_dropship_air_clearance = maxf(visual_clearance + extra_y_offset, minimum)
 	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance
+	if _regional_height_step > 0.0 and MISSION_FLIGHT_VISUAL_SCRIPT.AIR_PHASES.has(phase):
+		# Cruise altitude has a common datum. Near the pad, blend from its
+		# elevation so crossing a ridge never makes the model copy its contour.
+		var cruise_floor := float(_max_render_height) * _regional_height_step
+		if lz_variant is Vector2 and phase in ["inbound", "outbound", "departing", "to_fob"]:
+			var landing_floor := _get_world_surface_y(lz_variant)
+			var blend := smoothstep(0.0, MISSION_FLIGHT_VISUAL_SCRIPT.APPROACH_DISTANCE, distance_from_lz)
+			cruise_floor = lerpf(landing_floor, cruise_floor, blend)
+		_dropship_air_y = maxf(_dropship_surface_y, cruise_floor) + _dropship_air_clearance
+		_dropship_air_clearance = _dropship_air_y - _dropship_surface_y
 	return _world_to_3d_position(world_position, _dropship_air_y)
 
 
@@ -11523,7 +12015,8 @@ func _get_dropship_rotation_y(world_position: Vector2) -> float:
 func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: Vector2) -> float:
 	if typeof(payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(payload.get("dropship_target_position", world_position))
-		return _get_dropship_model_yaw(world_position, target_position, -_camera_yaw_degrees)
+		var heading_origin: Vector2 = Vector2(payload.get("flight_heading_origin", world_position))
+		return _get_dropship_model_yaw(heading_origin, target_position, -_camera_yaw_degrees)
 	if typeof(payload.get("lz_position", null)) == TYPE_VECTOR2:
 		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
 	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
@@ -14629,6 +15122,8 @@ func _get_3d_cell_size() -> float:
 
 
 func _get_3d_height_step() -> float:
+	if _regional_height_step > 0.0:
+		return _regional_height_step
 	return _get_3d_grid_number("height_step", HEIGHT_STEP)
 
 
@@ -15394,7 +15889,18 @@ func _world_to_surface_3d_position(world_position: Vector2, y_offset: float) -> 
 
 
 func _get_world_surface_y(world_position: Vector2) -> float:
-	return _get_grid_surface_y(_world_to_grid_position(world_position))
+	var cell := _world_to_grid_position(world_position)
+	var height := _get_grid_surface_y(cell)
+	if _regional_height_step <= 0.0:
+		return height
+	var tile = _render_tile_by_grid.get(cell)
+	if tile == null:
+		return height
+	var profile := _regional_surface_profile(tile)
+	if profile.is_empty():
+		return height
+	var offset: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(_world_to_grid_float(world_position) - Vector2(cell))
+	return height + REGIONAL_SURFACE.rise_at(offset, profile) * _regional_height_step
 
 
 func _get_grid_surface_y(grid_position: Vector2i) -> float:
@@ -15444,6 +15950,7 @@ func _sync_place_reference_dressing() -> void:
 		_place_dressing_signature=signature
 	if Array(presentation.get("structures",[])).is_empty() and Array(presentation.get("props",[])).is_empty() and Array(presentation.get("pads",[])).is_empty(): return
 	if not is_instance_valid(_place_dressing_root):
+		presentation["height_step"] = _get_3d_height_step()
 		_place_dressing_root=load("res://scripts/terrain/place_reference_dressing.gd").build(_world_root,presentation).root
 	for tile in _terrain_map_data.call("get_tiles"):
 		if String(tile.object_type_id)=="frontier_scene_solid":

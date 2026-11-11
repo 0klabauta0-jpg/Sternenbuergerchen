@@ -266,8 +266,12 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if typeof(containers)!=TYPE_DICTIONARY:
 		return _reject("invalid_inventory", "Container fehlen")
 	for id in containers:
-		if not (String(id)=="base:homebase" or String(id).begins_with("craft:") or (String(id).begins_with("unit:") and String(id).ends_with(":backpack"))) or not INVENTORY.valid_container(containers[id]):
+		var personal := String(id).begins_with("unit:") and String(id).ends_with(":backpack")
+		var container: Variant = containers[id]
+		if not (String(id) == "base:homebase" or String(id).begins_with("craft:") or personal) or not INVENTORY.valid_container(container):
 			return _reject("invalid_inventory", "Container ungueltig")
+		if not personal and container.has("armor_chip_capacity"):
+			return _reject("invalid_inventory", "Rüstungsplatz gehört zu einer Person")
 	if containers.has("base:homebase") and Dictionary(containers["base:homebase"].items)!=Dictionary(data.item_quantities):
 		return _reject("invalid_inventory", "Basislager widerspricht Kaufbestand")
 	var resources: Variant=data.get("location_resources",{})
@@ -292,7 +296,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_revision = int(data.revision)
 	return {"ok":true}
 
-func configure_inventory(unit_ids: Array, craft_ids: Array) -> void:
+func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
 	if not _inventory.has("base:homebase"):
 		_inventory["base:homebase"]={"capacity":200,"items":_item_quantities}
 		for item in INVENTORY.START_STOCK:
@@ -302,7 +306,16 @@ func configure_inventory(unit_ids: Array, craft_ids: Array) -> void:
 		if not _inventory.has(key): _inventory[key]={"capacity":48,"items":{}}
 	for id in unit_ids:
 		var key := "unit:"+String(id)+":backpack"
-		if not _inventory.has(key): _inventory[key]={"capacity":12,"items":{}}
+		if not _inventory.has(key):
+			_inventory[key] = {"capacity": 0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY, "items": {}}
+			if campaign_personnel:
+				_inventory[key].armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
+		elif campaign_personnel and not _inventory[key].has("armor_chip_capacity"):
+			# Existing checkpoints already granted this bag. Keep every saved
+			# item, including the previously capacity-exempt second chip.
+			var bag: Dictionary = _inventory[key]
+			bag.armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
+			bag.capacity = maxi(int(bag.capacity), INVENTORY.backpack_slots_used(bag))
 
 func _inventory_access(id: String, context: Dictionary) -> bool:
 	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
@@ -319,7 +332,12 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	var from: Dictionary = _inventory[source].items
 	var to: Dictionary = _inventory[target].items
 	if int(from.get(item,0))<amount: return _reject("insufficient_items", "Bestand reicht nicht")
-	if INVENTORY.used(to)+amount>int(_inventory[target].capacity): return _reject("container_full", "Zielcontainer ist voll")
+	if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(to.get(item, 0)) + amount > 1:
+		return _reject("duplicate_quest_cargo", "Auftragsfracht bereits vorhanden")
+	var destination: Dictionary = _inventory[target]
+	var fits := INVENTORY.has_space(destination, item, amount) if destination.has("armor_chip_capacity") else INVENTORY.used(to) + amount <= int(destination.capacity)
+	if not fits:
+		return _reject("container_full", "Kein freier Platz im Zielcontainer")
 	from[item]=int(from[item])-amount
 	if from[item]==0: from.erase(item)
 	to[item]=int(to.get(item,0))+amount
@@ -333,6 +351,8 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var item := String(payload.get("item_id",""))
 	if String(payload.get("unit_id",""))!=String(context.get("unit_id","")) or not context.has("loadout") or not _inventory_access(source,context):
 		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
+	if slot == "backpack":
+		return _change_backpack(String(payload.unit_id), source, item, context)
 	var unequip := item=="none" and slot=="weapon_2"
 	if not unequip and not INVENTORY.compatible(item,slot): return _reject("incompatible_slot", "Gegenstand passt nicht in diesen Slot")
 	var from: Dictionary = _inventory[source].items
@@ -340,7 +360,8 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var loadout: Dictionary = Dictionary(context.loadout).duplicate(true)
 	var previous: String = INVENTORY.item_from_slot(slot,String(loadout.get(slot,"none")))
 	var returns_item := previous!="none" and INVENTORY.known(previous)
-	if INVENTORY.used(from)-(0 if unequip else 1)+(1 if returns_item else 0)>int(_inventory[source].capacity): return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
+	if INVENTORY.backpack_slots_used(_inventory[source]) - (0 if unequip else 1) + (1 if returns_item else 0) > int(_inventory[source].capacity):
+		return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
 	if not unequip:
 		from[item]=int(from[item])-1
 		if from[item]==0: from.erase(item)
@@ -348,6 +369,38 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
 	_revision+=1
 	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}
+
+func _change_backpack(unit_id: String, source: String, item: String, context: Dictionary) -> Dictionary:
+	var personal := "unit:" + unit_id + ":backpack"
+	if not _inventory_access(personal, context) or not _inventory[personal].has("armor_chip_capacity"):
+		return _reject("inventory_access", "Rucksackslot ist hier nicht verfügbar")
+	if item not in ["backpack", "none"]:
+		return _reject("incompatible_slot", "Gegenstand passt nicht in den Rucksackslot")
+	var bag: Dictionary = _inventory[personal]
+	var wearing := int(bag.capacity) > 0
+	var removing := item == "none"
+	if wearing != removing:
+		return _reject("equipment_unchanged", "Kein Rucksack angelegt" if removing else "Ein Rucksack ist bereits angelegt")
+	var storage: Dictionary = _inventory[source]
+	var stock: Dictionary = storage.items
+	if removing:
+		if INVENTORY.backpack_slots_used(bag) > 0:
+			return _reject("backpack_not_empty", "Rucksack vor dem Ablegen leeren")
+		if source == personal or not INVENTORY.has_space(storage, "backpack", 1):
+			return _reject("container_full", "Kein Platz für den abgelegten Rucksack")
+		stock["backpack"] = int(stock.get("backpack", 0)) + 1
+		bag.capacity = 0
+	else:
+		var count := int(stock.get("backpack", 0))
+		if count < 1:
+			return _reject("insufficient_items", "Rucksack nicht vorhanden")
+		if count == 1:
+			stock.erase("backpack")
+		else:
+			stock["backpack"] = count - 1
+		bag.capacity = INVENTORY.BACKPACK_CAPACITY
+	_revision += 1
+	return {"ok": true, "loadout": Dictionary(context.loadout).duplicate(true), "message": "Rucksack abgelegt" if removing else "Rucksack angelegt"}
 
 func get_location_resources(location_id: String) -> RefCounted:
 	return _location_resources.get(location_id)
@@ -362,7 +415,8 @@ func preview_resource_collection(location_id: String,site_id: String,unit_id: St
 	if int(site.remaining)<=0: return _reject("depleted","Bereits geborgen")
 	var bag: Dictionary=_inventory.get("unit:"+unit_id+":backpack",{})
 	if int(Dictionary(bag.get("items",{})).get(site.required_tool,0))<1: return _reject("tool_missing","Miningwerkzeug fehlt" if site.required_tool=="mining_tool" else "Bergungswerkzeug fehlt")
-	if INVENTORY.used(bag.items)+int(site.remaining)>int(bag.capacity): return _reject("container_full","Rucksack voll – am Schiff umladen")
+	if not INVENTORY.has_space(bag, String(site.item_id), int(site.remaining)):
+		return _reject("container_full", "Rucksack voll – am Schiff umladen")
 	return {"ok":true}
 func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	var place:=String(payload.get("location_id","")); var id:=String(payload.get("site_id","")); var unit:=String(payload.get("unit_id",""))
@@ -380,7 +434,7 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	var old_offers: Variant=left.get("offers")
 	if typeof(old_offers)!=TYPE_DICTIONARY: return false
 	for id in Dictionary(right.get("offers",{})):
-		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply"]: return false
+		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply","backpack_supply"]: return false
 	for id in old_offers:
 		if not Dictionary(right.get("offers",{})).has(id) or JSON.stringify(old_offers[id],"",true)!=JSON.stringify(right.offers[id],"",true): return false
 	left.erase("offers"); right.erase("offers")
@@ -419,9 +473,10 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var amount := int(raw)
 	var items: Dictionary = _inventory[container].items
 	if int(items.get(item,0))+amount<0: return _reject("missing_cargo","Benoetigte Fracht fehlt")
-	if INVENTORY.RESERVED_QUEST_ITEMS.has(item):
-		if int(items.get(item,0))+amount>1: return _reject("duplicate_quest_cargo","Auftragsfracht bereits vorhanden")
-	elif INVENTORY.used(items)+amount>int(_inventory[container].capacity): return _reject("container_full","Kein Platz fuer Fracht")
+	if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(items.get(item, 0)) + amount > 1:
+		return _reject("duplicate_quest_cargo", "Auftragsfracht bereits vorhanden")
+	if amount > 0 and not INVENTORY.has_space(_inventory[container], item, amount):
+		return _reject("container_full", "Kein freier Platz für Fracht")
 	items[item]=int(items.get(item,0))+amount
 	if items[item]==0: items.erase(item)
 	_revision+=1

@@ -8,6 +8,7 @@ var _flow: Node
 var _screen: Control
 var _runtime: Node
 var _craft_id: String = ""
+var _sortie_orbit: String = ""
 var _team_id: String = ""
 var _pilot_id: String = ""
 var _crew_ids: Array[String] = []
@@ -213,9 +214,11 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if String(_runtime.call("get_snapshot").get("mode", "")) == "campaign":
 		var away_save: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime)
 		_check(not bool(away_save.get("ok", false)), "Moon orbit cannot be saved as a home checkpoint")
-	var premature: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": "satellite_crash" if scenario_id == "satellite_recovery" else "trade_outpost"})
+	var destination := "satellite_crash" if scenario_id == "satellite_recovery" else "trade_outpost"
+	_sortie_orbit = String(Dictionary(_space().get("location_orbits", {})).get(destination, ""))
+	var premature: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination})
 	_check(not bool(premature.get("ok", false)) and _flow.get("_active_mission") == null, "Planet map approach is blocked from moon orbit")
-	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": "planet_orbit", "request_id": "loop:jump:" + scenario_id})
+	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": _sortie_orbit, "request_id": "loop:jump:" + scenario_id})
 	if not _check(bool(jump.get("ok", false)), scenario_id + " actual target click begins quantum"):
 		print("JUMP_RESULT:", jump)
 		_dump("quantum_start")
@@ -228,16 +231,16 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	var stopped_position: Array = Array(_space().get("position", [])).duplicate()
 	await physics_frame
 	_check(Array(_space().get("position", [])) == stopped_position, "Aborted runtime trip remains still on subsequent tick")
-	var restart: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": "planet_orbit", "request_id": "loop:restart:" + scenario_id})
+	var restart: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": _sortie_orbit, "request_id": "loop:restart:" + scenario_id})
 	if not _check(bool(restart.get("ok", false)) and Array(_space().get("origin_position", [])) == stopped_position, "Restart begins at the actual stopped position"):
 		return false
-	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 5000, scenario_id + " short real quantum reaches planet orbit"):
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == _sortie_orbit, 5000, scenario_id + " short real quantum reaches destination orbit"):
 		_dump("planet_orbit")
 		return false
 	_check(_flow.get("_active_mission") == null and int(_flow.get("_active_mission_started_at_msec")) == 0, "Quantum arrival still loads no mission and starts no timer")
 	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == before_launch_job_status and Dictionary(_supply().get("fuel_by_craft_id", {})) == before_launch_fuel, "Quantum, abort and restart activate no job and debit no route fuel")
-	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": "satellite_crash" if scenario_id == "satellite_recovery" else "trade_outpost", "request_id": "loop:approach:" + scenario_id})
-	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from planet orbit"):
+	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id})
+	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from destination orbit"):
 		print("APPROACH_RESULT:", approach)
 		_dump("approach")
 		return false
@@ -323,7 +326,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 	return true
 
 func _wait_homebase() -> bool:
-	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 35000, "Actual surface exit returns original craft to planet orbit"):
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == _sortie_orbit, 35000, "Actual surface exit returns original craft to the location orbit"):
 		_dump("return_to_planet_orbit")
 		return false
 	_check(String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) != "homebase", "Planet orbit is not physical home arrival")

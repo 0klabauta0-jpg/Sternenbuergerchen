@@ -46,5 +46,74 @@ func _run() -> void:
 	var restored = owner.get_script().new()
 	_check(restored.restore_state(state).get("ok",false),"checkpoint restores container state")
 	_check(restored.get_supply_snapshot().inventory==owner.get_supply_snapshot().inventory,"checkpoint preserves exact quantities")
+	_check_campaign_storage()
+	_check_legacy_campaign_storage()
 	print("INVENTORY failures=",failures)
 	quit(1 if failures else 0)
+
+
+func _check_campaign_storage() -> void:
+	owner = owner.get_script().new()
+	owner.configure(["c1"])
+	owner.configure_inventory(["u1"], ["c1"], true)
+	context.loadout.armor = "light"
+	context.campaign_authorized = true
+	context.location_id = "trade_outpost"
+	context.craft_id = "c1"
+	context.craft_busy = false
+	var personal := "unit:u1:backpack"
+	var cargo := "craft:c1"
+	var pickup := {"container_id": personal, "item_id": "satellite_chip", "amount": 1}
+	var transfer := {"item_id": "rifle", "amount": 1, "source_container_id": "base:homebase", "destination_container_id": personal}
+	var bag: Dictionary = owner.get_supply_snapshot().inventory[personal]
+	_check(bag.get("armor_chip_capacity") == 1 and bag.capacity == 0, "light campaign armor supplies one chip slot with no starter backpack")
+	_check(not _cmd("inventory_transfer", transfer).get("ok", false), "ordinary cargo cannot use reserved suit storage")
+	var crate := pickup.duplicate()
+	crate.item_id = "c_benit_crate"
+	_check(not _cmd("campaign_cargo", crate).get("ok", false), "Benit crate cannot fit into the armor chip slot")
+	_check(_cmd("campaign_cargo", pickup, "suit-pickup").get("ok", false), "actual chip cargo command fills the starter armor slot")
+	_check(_cmd("campaign_cargo", pickup, "suit-pickup").get("replayed", false), "chip pickup retries preserve one chip")
+	var other_chip := pickup.duplicate()
+	other_chip.item_id = "outpost_chip"
+	_check(not _cmd("campaign_cargo", other_chip).get("ok", false), "second chip requires an additional slot")
+	var restored: RefCounted = owner.get_script().new()
+	_check(restored.restore_state(owner.export_state()).get("ok", false) and restored.get_supply_snapshot().inventory == owner.get_supply_snapshot().inventory, "checkpoint preserves the occupied suit and empty backpack slot")
+	_check(_cmd("buy", {"offer_id": "backpack_supply", "quantity": 1}).get("ok", false), "backpack purchase delivers a real item to parked ship cargo")
+	bag = owner.get_supply_snapshot().inventory[personal]
+	_check(bag.capacity == 0, "purchase alone does not increase carried capacity")
+	var equip := {"unit_id": "u1", "slot": "backpack", "item_id": "backpack", "source_container_id": cargo}
+	_check(_cmd("inventory_equip", equip, "backpack-equip").get("ok", false), "equipping uses the existing inventory operation")
+	var snapshot: Dictionary = owner.get_supply_snapshot()
+	_check(snapshot.inventory[personal].capacity == 12 and not snapshot.inventory[cargo].items.has("backpack"), "equipping adds twelve storage slots and consumes the purchased item")
+	_check(_cmd("inventory_equip", equip, "backpack-equip").get("replayed", false) and snapshot == owner.get_supply_snapshot(), "equipping replays without duplicating gear or capacity")
+	_check(_cmd("inventory_transfer", transfer).get("ok", false), "equipped backpack can now carry normal items")
+	var unequip := equip.duplicate()
+	unequip.item_id = "none"
+	_check(not _cmd("inventory_equip", unequip).get("ok", false), "backpack containing cargo cannot be removed")
+	var unload := transfer.duplicate()
+	unload.source_container_id = personal
+	unload.destination_container_id = cargo
+	_check(_cmd("inventory_transfer", unload).get("ok", false), "contents can be unloaded before removing a backpack")
+	_check(_cmd("inventory_equip", unequip).get("ok", false), "empty backpack can be put back in ship cargo")
+	snapshot = owner.get_supply_snapshot()
+	_check(snapshot.inventory[personal].capacity == 0 and snapshot.inventory[personal].items == {"satellite_chip": 1} and snapshot.inventory[cargo].items.get("backpack", 0) == 1, "removing backpack returns the item and leaves the armor chip")
+	pickup.amount = -1
+	_check(_cmd("campaign_cargo", pickup).get("ok", false) and owner.get_supply_snapshot().inventory[personal].items.is_empty(), "upload consumption empties armor slot")
+
+
+func _check_legacy_campaign_storage() -> void:
+	owner = owner.get_script().new()
+	owner.configure(["c1"])
+	owner.configure_inventory(["u1"], ["c1"])
+	var legacy: Dictionary = owner.export_state()
+	legacy.definitions.offers.erase("backpack_supply")
+	legacy.stock_by_offer_id.erase("backpack_supply")
+	var personal := "unit:u1:backpack"
+	var old_items := {"rifle": 12, "satellite_chip": 1, "outpost_chip": 1}
+	legacy.inventory[personal].items = old_items
+	_check(owner.restore_state(legacy).get("ok", false), "older checkpoint is compatible with the new backpack offer")
+	owner.configure_inventory(["u1"], ["c1"], true)
+	var snapshot: Dictionary = owner.get_supply_snapshot()
+	_check(snapshot.inventory[personal].items == old_items and snapshot.inventory[personal].armor_chip_capacity == 1, "migration preserves all old cargo and gives a suit chip slot")
+	var restored: RefCounted = owner.get_script().new()
+	_check(restored.restore_state(owner.export_state()).get("ok", false) and restored.get_supply_snapshot().inventory == snapshot.inventory, "migrated full backpack checkpoint roundtrips")

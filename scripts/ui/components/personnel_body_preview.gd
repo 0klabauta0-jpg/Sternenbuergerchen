@@ -5,6 +5,7 @@ var _view:SubViewport
 var _scene:Node3D
 var _camera:Camera3D
 var _model:Node3D
+var _model_bounds := AABB()
 var _signature:String=""
 
 func _ready()->void:
@@ -17,6 +18,7 @@ func _ready()->void:
 	add_child(_view)
 	_scene=Node3D.new();_view.add_child(_scene)
 	_camera=Camera3D.new();_camera.projection=Camera3D.PROJECTION_ORTHOGONAL;_scene.add_child(_camera)
+	_camera.keep_aspect = Camera3D.KEEP_HEIGHT
 	var light:=DirectionalLight3D.new();light.rotation_degrees=Vector3(-30,-25,0);light.light_energy=1.4;_scene.add_child(light)
 	var environment:=WorldEnvironment.new();var settings:=Environment.new()
 	settings.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;settings.ambient_light_color=Color.WHITE;settings.ambient_light_energy=.7
@@ -28,6 +30,7 @@ func update_actor(actor:Node,loadout:Dictionary)->void:
 	var signature:=str(actor.get_instance_id() if actor!=null else 0)+JSON.stringify(loadout)
 	if signature==_signature:return
 	_signature=signature
+	_model_bounds = AABB()
 	if is_instance_valid(_model):_model.free()
 	if actor==null:return
 	var resolver:Node=VISUALS.new()
@@ -43,12 +46,12 @@ func update_actor(actor:Node,loadout:Dictionary)->void:
 	var boxes:Array[AABB]=[]
 	_collect_bounds(_model,boxes)
 	if boxes.is_empty():return
-	var bounds:AABB=boxes[0]
-	for box:AABB in boxes:bounds=bounds.merge(box)
-	var center:=bounds.get_center()
-	_camera.position=center+Vector3(0,bounds.size.y*.06,maxf(bounds.size.y*2,2))
+	_model_bounds = boxes[0]
+	for box: AABB in boxes:
+		_model_bounds = _model_bounds.merge(box)
+	var center := _model_bounds.get_center()
+	_camera.position = center + Vector3(0, _model_bounds.size.y * 0.06, maxf(_model_bounds.size.y * 2, 2))
 	_camera.look_at(center)
-	_camera.size=maxf(bounds.size.y*1.16,bounds.size.x*1.8)
 	set_meta("preview_unit_id",String(actor.call("get_unit_id")))
 	set_meta("preview_uses_existing_model",bool(_model.get_meta("uses_kenney_model",false)))
 	_render_once()
@@ -58,5 +61,11 @@ func _collect_bounds(node:Node,boxes:Array[AABB])->void:
 		boxes.append(node.global_transform*node.get_aabb())
 	for child:Node in node.get_children():_collect_bounds(child,boxes)
 
-func _render_once()->void:
-	if _view!=null and is_visible_in_tree():_view.render_target_update_mode=SubViewport.UPDATE_ONCE
+func _render_once() -> void:
+	if _view == null or not is_visible_in_tree():
+		return
+	if _model_bounds.has_surface() and size.x > 0 and size.y > 0:
+		# Orthographic camera keeps its height; account for the actual panel aspect.
+		var aspect := size.x / size.y
+		_camera.size = maxf(_model_bounds.size.y, _model_bounds.size.x / aspect) * 1.08
+	_view.render_target_update_mode = SubViewport.UPDATE_ONCE

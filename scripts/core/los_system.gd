@@ -101,6 +101,10 @@ func find_first_blocker_grid(source_grid: Vector2i, target_grid: Vector2i, terra
 		if terrain_reader.has_method("get_object_height_at_grid"):
 			object_height = int(terrain_reader.call("get_object_height_at_grid", stepped_grid))
 		var blocker_height: int = int(tile_data.height_level) + object_height
+		# A high escarpment with no object above it obstructs lower lines.
+		# Observers already on that shelf see across its own rim.
+		if object_height == 0 and blocker_height > 2 and blocker_height <= maxi(source_height, target_height):
+			continue
 		if blocker_height >= source_height and blocker_height >= target_height:
 			if not hex_grid and _tile_uses_wall_segment_los(tile_data):
 				if not bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("does_tile_wall_block_los", tile_data, source_grid_float, target_grid_float)):

@@ -412,14 +412,9 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	if height_difference == 0:
 		return true
 
-	# Determine edge_type of the higher tile — it controls traversability
 	var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-	var edge_type: String = String(higher_tile.edge_type)
-
-	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-		return true  # slopes are always traversable
-	else:
-		return false
+	var lower_tile = current_tile if higher_tile == neighbor_tile else neighbor_tile
+	return TERRAIN_TILE_DATA_SCRIPT.allows_height_transition(higher_tile, lower_tile)
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -453,10 +448,7 @@ func _compute_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registr
 	# Slopes cost more per height level than flat terrain
 	var base_cost: float = surface_cost
 	if height_difference > 0:
-		var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-		var edge_type: String = String(higher_tile.edge_type)
-		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-			base_cost = surface_cost + (float(height_difference) * 1.0)
+		base_cost += float(height_difference)
 
 	var components: Dictionary = _get_target_cost_components(neighbor_grid, registry, options)
 	if bool(options.get("cover_aware_enabled", false)):

@@ -134,14 +134,6 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		_place(button, Rect2(maxf(float(layout.target_order.position.x), float(team.end.x + 12)) + index * 128, band.position.y - 44, 120, 36))
 	_place_context_tool(controller, "DoorBreachButton", _context_tool_rect(layout, 0), true)
 	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
-	var all_button := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
-	if all_button != null:
-		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 64, 8)), Vector2(52, 24)))
-	var stance_panel := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
-	if stance_panel != null:
-		stance_panel.clip_contents = false
-		_place(stance_panel, Rect2(Vector2(team.position) + Vector2(8, float(layout.portrait_height)+60), Vector2(team.size.x - 16, 28)))
-		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
 		info_scroll.clip_contents = true
@@ -349,8 +341,7 @@ static func _present_context_button(button: Button) -> void:
 
 
 static func _refresh_stance_buttons(stance: Control) -> void:
-	# The legacy frame plus inner margin otherwise requires 56px even with the
-	# summary hidden. Keep one 8px frame inset around the 28px button row.
+	# The compact stance frame owns vertical padding after the summary is hidden.
 	var margin := stance.get_node_or_null("MarginContainer") as MarginContainer
 	if margin != null:
 		for side in ["margin_top", "margin_bottom"]:
@@ -653,43 +644,88 @@ static func _hide_raw_readouts(controller: Node) -> void:
 
 static func _layout_selected_team_controls(controller: Node, team: PanelContainer, rect: Rect2, metrics: Dictionary) -> void:
 	var font_size: int = int(metrics.body_font_size)
+	var width := rect.size.x
+	var row_y := 8.0
+	var header_height := 28.0 if font_size < 18 else 32.0
+	var button_font := font_size - 2
 	var identity := _ensure_label(team, "A5TeamIdentity", font_size + 2)
 	THEME.style_section_heading(identity, font_size + 2)
 	identity.max_lines_visible = 1
+	identity.clip_text = true
+	identity.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	identity.add_theme_color_override("font_color", THEME.COLOR_BORDER_SELECTED)
-	_place(identity, Rect2(rect.position + Vector2(10, 8), Vector2(rect.size.x - 164, 30)))
+	_place(identity, Rect2(rect.position + Vector2(10, row_y), Vector2(width - 164, header_height)))
+	var details := team.get_node("A5DetailsButton") as Button
+	details.add_theme_font_size_override("font_size", button_font)
+	_place(details, Rect2(rect.position + Vector2(width - 144, row_y), Vector2(76, header_height)))
+	var all := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
+	if all != null:
+		all.add_theme_font_size_override("font_size", button_font)
+		_place(all, Rect2(rect.position + Vector2(width - 64, row_y), Vector2(52, header_height)))
+
+	row_y += header_height + 4.0
+	var portrait_height := float(metrics.portrait_height)
+	var portraits := team.get_node("A5TeamPortraits") as HBoxContainer
+	_place(portraits, Rect2(rect.position + Vector2(10, row_y), Vector2(width - 20, portrait_height)))
+
+	row_y += portrait_height + 3.0
 	var summary := _ensure_label(team, "A5TeamSummary", font_size - 1)
 	summary.max_lines_visible = 1
-	_place(summary, Rect2(rect.position + Vector2(10, float(metrics.portrait_height)+38), Vector2(rect.size.x - 20, 20)))
+	summary.clip_text = true
+	var summary_height := float(font_size + 6)
+	_place(summary, Rect2(rect.position + Vector2(10, row_y), Vector2(width - 20, summary_height)))
+
+	row_y += summary_height + 3.0
+	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as PanelContainer
+	if stance != null:
+		stance.clip_contents = false
+		_compact_team_stylebox(stance, "panel", 2.0)
+		_refresh_stance_buttons(stance)
+		var stance_height := stance.get_minimum_size().y
+		_place(stance, Rect2(rect.position + Vector2(8, row_y), Vector2(width - 16, stance_height)))
+		row_y += stance_height + 4.0
+
+	var fire_height := float(font_size + 12)
 	var fire_heading := _ensure_label(team, "A5FireRuleHeading", font_size - 1)
 	fire_heading.text = "Feuerregel"
 	fire_heading.max_lines_visible = 1
 	fire_heading.clip_text = true
 	fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	fire_heading.visible = true
-	var row_y: float = float(metrics.portrait_height)+94
-	var row_height: float = 26
-	_place(fire_heading, Rect2(rect.position + Vector2(10, row_y), Vector2(88, row_height)))
+	_place(fire_heading, Rect2(rect.position + Vector2(10, row_y), Vector2(88, fire_height)))
 	fire_heading.z_index = 12
 	var selector := team.get_node("A5FireRuleSelector") as OptionButton
-	selector.add_theme_font_size_override("font_size", font_size)
-	_place(selector, Rect2(rect.position + Vector2(100, row_y), Vector2(rect.size.x - 110, row_height)))
-	var details := team.get_node("A5DetailsButton") as Button
-	details.add_theme_font_size_override("font_size", font_size - 1)
-	_place(details, Rect2(rect.position + Vector2(rect.size.x - 144, 8), Vector2(76, 24)))
-	var all := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
-	if all != null:
-		all.add_theme_font_size_override("font_size", font_size - 1)
-	var portraits:=team.get_node("A5TeamPortraits") as HBoxContainer
-	_place(portraits,Rect2(rect.position+Vector2(10,34),Vector2(rect.size.x-20,metrics.portrait_height)))
-	var board:=team.get_node("A5TeamBoard") as Button
-	board.add_theme_font_size_override("font_size",font_size)
-	_place(board,Rect2(rect.position+Vector2(10,float(metrics.portrait_height)+126),Vector2(104,28)))
-	var status:=team.get_node("A5BoardStatus") as Label
-	_place(status,Rect2(rect.position+Vector2(122,float(metrics.portrait_height)+124),Vector2(rect.size.x-132,36)))
+	selector.add_theme_font_size_override("font_size", font_size - 1)
+	_place(selector, Rect2(rect.position + Vector2(100, row_y), Vector2(width - 110, fire_height)))
+
+	row_y += fire_height + 4.0
+	var board := team.get_node("A5TeamBoard") as Button
+	board.add_theme_font_size_override("font_size", font_size - 1)
+	_place(board, Rect2(rect.position + Vector2(10, row_y), Vector2(96, fire_height)))
+	var status := team.get_node("A5BoardStatus") as Label
+	status.clip_text = true
+	status.max_lines_visible = 2
+	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_place(status, Rect2(rect.position + Vector2(114, row_y), Vector2(width - 124, rect.size.y - row_y - 6.0)))
 	team.mouse_filter = Control.MOUSE_FILTER_STOP
 	THEME.style_card(team, true)
 	team.set_meta("native_a5_parameter_group_left", true)
+
+
+static func _compact_team_stylebox(control: Control, style_name: String, padding: float) -> void:
+	var style := control.get_theme_stylebox(style_name)
+	if style.content_margin_top == padding and style.content_margin_bottom == padding:
+		return
+	var compact := style.duplicate() as StyleBox
+	compact.content_margin_top = padding
+	compact.content_margin_bottom = padding
+	control.add_theme_stylebox_override(style_name, compact)
+
+
+static func _style_compact_team_button(button: Button) -> void:
+	THEME.style_command_button(button)
+	for style_name in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		_compact_team_stylebox(button, style_name, 2.0)
 
 
 static func _refresh_navigation(controller: Node, metrics: Dictionary) -> void:
@@ -742,9 +778,21 @@ static func _style_protocol(controller: Node, metrics: Dictionary) -> void:
 
 static func _ensure_team_controls(controller: Node, team: PanelContainer, layer: CanvasLayer) -> void:
 	if team.get_node_or_null("A5TeamPortraits") == null:
-		var portraits:=HBoxContainer.new();portraits.name="A5TeamPortraits";portraits.add_theme_constant_override("separation",4);team.add_child(portraits)
-		var board:=Button.new();board.name="A5TeamBoard";board.text="Aufsitzen";board.pressed.connect(Callable(controller,"request_selected_team_boarding"));team.add_child(board);THEME.style_command_button(board)
-		var status:=Label.new();status.name="A5BoardStatus";status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.add_theme_font_size_override("font_size",13);team.add_child(status)
+		var portraits := HBoxContainer.new()
+		portraits.name = "A5TeamPortraits"
+		portraits.add_theme_constant_override("separation", 4)
+		team.add_child(portraits)
+		var board := Button.new()
+		board.name = "A5TeamBoard"
+		board.text = "Aufsitzen"
+		board.pressed.connect(Callable(controller, "request_selected_team_boarding"))
+		team.add_child(board)
+		_style_compact_team_button(board)
+		var status := Label.new()
+		status.name = "A5BoardStatus"
+		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		status.add_theme_font_size_override("font_size", 13)
+		team.add_child(status)
 	if team.get_node_or_null("A5FireRuleSelector") == null:
 		var selector := OptionButton.new()
 		selector.name = "A5FireRuleSelector"
@@ -758,8 +806,7 @@ static func _ensure_team_controls(controller: Node, team: PanelContainer, layer:
 		selector.item_selected.connect(Callable(controller, "_on_native_fire_rule_selected"))
 		selector.set_meta("ui_sets_gameplay_truth", false)
 		team.add_child(selector)
-		THEME.style_command_button(selector)
-		selector.add_theme_font_size_override("font_size", 14)
+		_style_compact_team_button(selector)
 	if team.get_node_or_null("A5DetailsButton") == null:
 		var button := Button.new()
 		button.name = "A5DetailsButton"
@@ -767,8 +814,7 @@ static func _ensure_team_controls(controller: Node, team: PanelContainer, layer:
 		button.tooltip_text = "Teamzustand, Befehlsdetails, Evakuieren und Tastenkürzel anzeigen"
 		button.pressed.connect(Callable(controller, "_open_native_team_details"))
 		team.add_child(button)
-		THEME.style_command_button(button)
-		button.add_theme_font_size_override("font_size", 12)
+		_style_compact_team_button(button)
 	if layer.get_node_or_null("A5TeamDetailsPopup") == null:
 		var popup := PopupPanel.new()
 		popup.name = "A5TeamDetailsPopup"

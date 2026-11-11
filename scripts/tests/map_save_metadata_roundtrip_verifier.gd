@@ -10,7 +10,7 @@ func _check(condition: bool, message: String) -> void:
 	else: failed += 1
 	print("PASS: " if condition else "FAIL: ", message)
 func _run() -> void:
-	for name in ["campaign_intro_base", "homebase_frontier_exploration", "trade_outpost", "satellite_crash_site", "Ground_Mission01_32x32"]:
+	for name in ["campaign_intro_base", "homebase_frontier_exploration", "trade_outpost", "satellite_crash_site", "fortified_outpost", "Ground_Mission01_32x32"]:
 		var path := "res://maps/%s.json" % name
 		var before_hash := FileAccess.get_sha256(path)
 		var before: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))

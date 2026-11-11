@@ -7,7 +7,9 @@ func check(ok:bool,label:String)->void:
 	if not ok:failures+=1;printerr("FAIL: ",label)
 	else:print("PASS: ",label)
 func _run()->void:
-	root.size=Vector2i(1280,720)
+	root.content_scale_size = Vector2i(1280, 720)
+	root.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_IGNORE
+	root.size = Vector2i(1280, 720)
 	var mission:Node=load("res://scenes/tests/mission_reactivity_test.tscn").instantiate()
 	var setup:Node=mission.get_node("MissionSetup")
 	setup.set("defer_friendly_runtime_activation",false)
@@ -18,6 +20,7 @@ func _run()->void:
 	controller.call("_set_selected_fireteams",PackedStringArray(["ft1"]),false)
 	controller.call("_update_ui")
 	for resolution in [Vector2i(1280,720),Vector2i(1920,1080),Vector2i(3440,1440)]:
+		root.content_scale_size = resolution
 		root.size=resolution
 		for i in 12:await process_frame
 		controller.call("_update_ui")
@@ -36,6 +39,7 @@ func _run()->void:
 		check(board.is_visible_in_tree() and board.text=="Aufsitzen","troop owns obvious boarding action")
 		check(board.disabled and not panel.get_node("A5BoardStatus").text.is_empty(),"absent parked ship gives disabled action with reason")
 		check(panel.get_global_rect().grow(2).encloses(board.get_global_rect()),"boarding remains inside combined card")
+		_check_selected_card_geometry(panel, resolution)
 		for i in 12:controller.call("_update_ui")
 		check(row.get_children().map(func(node:Node):return node.get_instance_id())==before,"unchanged HUD retains portrait controls")
 		if DisplayServer.get_name()!="headless":
@@ -56,3 +60,31 @@ func _run()->void:
 	check(mini.get_node(("FireteamMiniCard_"+"ft1".capitalize())).is_visible_in_tree() and not mini.get_node(("FireteamMiniCard_"+"ft2".capitalize())).is_visible_in_tree(),"selection switch merges new focus without losing previous team")
 	mission.queue_free();await process_frame
 	print("COMPACT_TEAM checks=%d failures=%d"%[checks,failures]);quit(1 if failures else 0)
+
+
+func _check_selected_card_geometry(panel: Control, resolution: Vector2i) -> void:
+	var all_button: Button = panel.get_node("FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton")
+	var stance: Control = panel.get_node("FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/TacticalStancePanel")
+	var controls: Array[Control] = [
+		panel.get_node("A5TeamIdentity"), panel.get_node("A5DetailsButton"), all_button,
+		panel.get_node("A5TeamPortraits"), panel.get_node("A5TeamSummary"), stance,
+		panel.get_node("A5FireRuleHeading"), panel.get_node("A5FireRuleSelector"),
+		panel.get_node("A5TeamBoard"), panel.get_node("A5BoardStatus"),
+	]
+	var overlaps: PackedStringArray = []
+	var outside_card: PackedStringArray = []
+	for first in range(controls.size()):
+		var control := controls[first]
+		if not control.is_visible_in_tree():
+			continue
+		var rect := control.get_global_rect()
+		if not panel.get_global_rect().encloses(rect):
+			outside_card.append("%s %s" % [control.name, rect])
+		for second in range(first + 1, controls.size()):
+			var other := controls[second]
+			if other.is_visible_in_tree() and rect.intersects(other.get_global_rect()):
+				overlaps.append("%s %s / %s %s" % [control.name, rect, other.name, other.get_global_rect()])
+	var viewport_size := root.get_visible_rect().size
+	check(viewport_size == Vector2(resolution), "requested logical viewport %s, actual %s" % [resolution, viewport_size])
+	check(overlaps.is_empty(), "%s: selected team controls have separate hit rectangles: %s" % [viewport_size, overlaps])
+	check(outside_card.is_empty(), "%s: selected team controls fit their card: %s" % [viewport_size, outside_card])

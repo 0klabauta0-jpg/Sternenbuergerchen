@@ -68,7 +68,7 @@ func configure(flow: Node, screen: Control) -> void:
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units,inventory_crafts)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode)
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
@@ -149,7 +149,7 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units,actual.keys())
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode)
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
@@ -211,9 +211,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if operation == "select_destination" and not Dictionary(_flow.call("_find_pending_mission_craft_transfer",String(data.get("craft_id",_travel.get_snapshot().craft_id)))).is_empty():
 			return _reject("craft_in_transit", "Zielwechsel erst nach dem laufenden Flug")
 		if operation == "select_destination":
-			var travel: Dictionary = _travel.get_snapshot()
-			if String(travel.phase) != "grounded" and not (String(travel.phase) == "orbit" and String(travel.orbit_id) == "planet_orbit"):
-				return _reject("planet_orbit_required", "Zielort erst im Planetenorbit waehlen; laufenden Anflug oder Ortsbesuch zuerst beenden")
+			var travel: Dictionary = _travel.get_snapshot(String(data.get("craft_id", "")))
+			if String(travel.phase) != "grounded" and not _in_destination_orbit(travel, String(data.get("location_id", ""))):
+				return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
 
 		var campaign_operation: String = "fail_job" if operation == "abandon_job" else operation
 		if _campaign_mode and operation == "accept_job" and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get(String(data.get("job_id", "")), {})).get("status", "")) == "failed":
@@ -289,11 +289,15 @@ func _service_context(craft_id: String) -> Dictionary:
 
 	return {}
 
+func _in_destination_orbit(travel: Dictionary, location_id: String) -> bool:
+	var orbit := String(Dictionary(travel.get("location_orbits", {})).get(location_id, ""))
+	return not orbit.is_empty() and location_id != "homebase" and String(travel.get("phase", "")) == "orbit" and String(travel.get("orbit_id", "")) == orbit
+
 func validate_departure(craft_id: String) -> Dictionary:
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	var travel: Dictionary = get_space_travel_snapshot(craft_id)
-	var in_planet_orbit := String(travel.get("craft_id", "")) == craft_id and String(travel.get("phase", "")) == "orbit" and String(travel.get("orbit_id", "")) == "planet_orbit"
+
 	if _campaign_mode:
 		observe_campaign_progress()
 		var stage: int = int(_onboarding.get_snapshot().stage_index)
@@ -301,6 +305,7 @@ func validate_departure(craft_id: String) -> Dictionary:
 			return _reject("preparation_incomplete", "Zuerst Satellitenauftrag annehmen, Ziel waehlen und Boarding abschliessen")
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var destination: String = String(selected.selected_location_id)
+	var in_destination_orbit := String(travel.get("craft_id", "")) == craft_id and _in_destination_orbit(travel, destination)
 	if _campaign_mode:
 		var gate: Dictionary = _campaign_operation_gate("select_destination", {"location_id": destination})
 		if not gate.ok:
@@ -323,12 +328,12 @@ func validate_departure(craft_id: String) -> Dictionary:
 		return _reject("destination_unavailable", "Karte oder Szenario fuer diesen Zielort fehlt")
 	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty():
 		return _reject("craft_busy", "Schiff ist bereits unterwegs")
-	if not in_planet_orbit and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase":
+	if not in_destination_orbit and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase":
 		return _reject("craft_unavailable", "Schiff steht nicht auf seinem Startpad")
-	if _screen == null or (not in_planet_orbit and not bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id))) or String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, "")).is_empty():
+	if _screen == null or (not in_destination_orbit and not bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id))) or String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, "")).is_empty():
 		return _reject("launch_payload_missing", "Pilot, Trupp und abgeschlossenes Boarding fehlen")
 	var definition: Dictionary = _flow.call("_find_homebase_aircraft_definition", craft_id)
-	if definition.is_empty() or (not in_planet_orbit and not bool(_screen.call("_can_send_craft", definition, craft_id))) or (in_planet_orbit and not bool(_flow.call("_has_mission_start_payload"))):
+	if definition.is_empty() or (not in_destination_orbit and not bool(_screen.call("_can_send_craft", definition, craft_id))) or (in_destination_orbit and not bool(_flow.call("_has_mission_start_payload"))):
 		return _reject("launch_payload_invalid", "Schiff und Payload sind nicht startbereit")
 	var selected_job:=String(selected.selected_job_id)
 	for binding: Dictionary in Dictionary(selected.get("departures_by_craft_id",{})).values():
@@ -417,11 +422,14 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 			if not Array(gates.get("completed_step_ids",[])).has(step): return
 		if bool(job.get("home_upload",false)):
 			var item_id:String="satellite_chip" if job_id=="satellite_recovery" else "outpost_chip"
-			# Existing saves/result integrations may still recover directly into cargo.
-			# A chip already picked up by the real leader must never be granted twice.
-			if _find_campaign_chip_container(item_id,craft_id).is_empty():
-				var granted := _campaign_cargo(craft_id,item_id,1,"chip:"+job_id)
-				if not bool(granted.get("ok",false)): return
+			if _find_campaign_chip_container(item_id, craft_id).is_empty():
+				# Live objectives must produce a carried chip first. Preserve the
+				# legacy result-only handoff when no live mission exists.
+				if _flow.call("get_mission_for_craft", craft_id) != null:
+					return
+				var granted := _campaign_cargo(craft_id, item_id, 1, "chip:" + job_id)
+				if not bool(granted.get("ok", false)):
+					return
 		if job_id == "outpost_recovery":
 			var granted := _campaign_cargo(craft_id,"c_benit_crate",1,"load:"+job_id)
 			if not bool(granted.get("ok",false)): return
@@ -561,15 +569,15 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var result := _commit("singleplayer_space_travel", "start_quantum" if operation == "space_start_quantum" else "abort_quantum", data, owner_request_id)
 		return _remember_space_operation(request_id, signature, result)
 	if operation == "space_begin_approach":
-		if String(snapshot.phase) != "orbit" or String(snapshot.orbit_id) != "planet_orbit":
-			return _reject("planet_orbit_required", "Zuerst den Planetenorbit erreichen")
 		var location_id := String(data.get("location_id", ""))
+		if not _in_destination_orbit(snapshot, location_id):
+			return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
 		if _campaign_mode:
 			var tutorial_gate := _campaign_operation_gate("select_destination", data)
 			if not tutorial_gate.get("ok", false):
 				return tutorial_gate
 		if location_id != String(_campaign.get_campaign_snapshot().selected_location_id) or not Dictionary(_campaign.get_campaign_snapshot().locations).has(location_id) or location_id == "homebase":
-			return _reject("destination_mismatch", "Den gewuenschten Zielort im Planetenorbit auswaehlen")
+			return _reject("destination_mismatch", "Den gewünschten Ort im zugehörigen Orbit auswählen")
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
 		var departure := authorize_departure(craft_id)
@@ -764,7 +772,7 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		craft_id = String(job.get("craft_id",craft_id))
 		var item_id := "satellite_chip" if job_id == "satellite_recovery" else "outpost_chip"
 		var container:String=_find_campaign_chip_container(item_id,craft_id)
-		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt in Rucksack, Schiff oder Basislager")
+		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt bei der Person, im Schiff oder im Basislager")
 		var cargo := _commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":item_id,"amount":-1},"campaign-cargo:upload:"+job_id,{"campaign_authorized":true})
 		if not bool(cargo.get("ok",false)): return cargo
 		var result := _commit("singleplayer_campaign","upload_job",{"job_id":job_id},"upload:"+job_id,{"at_home":true})

@@ -39,7 +39,7 @@ func _run() -> void:
 	await _finish()
 
 func _wait_homebase() -> bool:
-	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 35000, "Actual surface exit returns original craft to planet orbit"):
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == _sortie_orbit, 35000, "Actual surface exit returns original craft to the location orbit"):
 		_dump("return_to_planet_orbit")
 		return false
 	_check(String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) != "homebase", "Planet orbit is not physical home arrival")

@@ -94,6 +94,7 @@ var _is_initialized: bool = false
 var _terrain_renderer = null
 var _terrain_3d_view = null
 var _loaded_terrain_map_data = null
+var _loaded_terrain_map_path: String = ""
 var _mission_scenario = null
 var _scenario_enemy_ids: PackedStringArray = PackedStringArray()
 var _scenario_tactical_authoring: Dictionary = {}
@@ -797,6 +798,12 @@ func _build_enemy_patrol_paths() -> Dictionary:
 	return result
 
 
+func use_prepared_terrain(path: String, map) -> void:
+	if map != null and not map.get_tiles().is_empty():
+		_loaded_terrain_map_path = path
+		_loaded_terrain_map_data = map
+
+
 func _load_mission_scenario_if_available() -> void:
 	_mission_scenario = null
 	_scenario_enemy_ids = PackedStringArray()
@@ -808,15 +815,18 @@ func _load_mission_scenario_if_available() -> void:
 	if scenario == null:
 		push_warning("MissionTestSetup could not load mission scenario: %s" % normalized_path)
 		return
-	var validation: Dictionary = Dictionary(scenario.call("validate"))
+	var scenario_map_path: String = String(scenario.get("map_file_path")).strip_edges()
+	if not scenario_map_path.is_empty():
+		map_file_path = scenario_map_path
+		if _loaded_terrain_map_data == null or _loaded_terrain_map_path != scenario_map_path:
+			_loaded_terrain_map_path = scenario_map_path
+			_loaded_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", scenario_map_path)
+	var validation: Dictionary = Dictionary(scenario.call("validate", _loaded_terrain_map_data))
 	if not bool(validation.get("valid", false)):
 		push_warning("Mission scenario has authoring issues: %s" % ", ".join(PackedStringArray(validation.get("errors", PackedStringArray()))))
 	_mission_scenario = scenario
 	_scenario_enemy_ids = PackedStringArray(_mission_scenario.call("get_enemy_ids"))
 	_scenario_tactical_authoring = Dictionary(_mission_scenario.call("get_tactical_authoring_config")).duplicate(true)
-	var scenario_map_path: String = String(_mission_scenario.get("map_file_path")).strip_edges()
-	if not scenario_map_path.is_empty():
-		map_file_path = scenario_map_path
 
 
 func _get_scenario_enemy_id_for_slot(slot_index: int, fallback_unit_id: String) -> String:
@@ -945,10 +955,13 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	if map_file_path.is_empty() or not FileAccess.file_exists(map_file_path):
 		return false
 
-	var terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
+	var terrain_map_data = _loaded_terrain_map_data
+	if terrain_map_data == null or _loaded_terrain_map_path != map_file_path:
+		terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
 	if terrain_map_data == null or terrain_map_data.call("get_tiles").is_empty():
 		return false
 	_loaded_terrain_map_data = terrain_map_data
+	_loaded_terrain_map_path = map_file_path
 
 	var tile_size: Dictionary = terrain_map_data.call("get_tile_size")
 	terrain_registry.call("clear_tiles")
@@ -1050,11 +1063,17 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 	if view.has_method("set_runtime_terrain_registry"):
 		view.call("set_runtime_terrain_registry", get_node_or_null(terrain_registry_path))
 	if view.has_method("set_authoring_markers_visible"): view.call("set_authoring_markers_visible",false)
+	var regional := _loaded_terrain_map_data != null and float(_loaded_terrain_map_data.get_regional_height_step()) > 0.0
 	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
-		view.call("configure_from_map", _loaded_terrain_map_data)
+		if regional:
+			var presentation: Dictionary = _loaded_terrain_map_data.get_place_presentation()
+			var initial_size := float(presentation.get("initial_camera_size", 22.0))
+			view.call("configure_from_map", _loaded_terrain_map_data, _loaded_terrain_map_data.get_marker_position("spawn_alpha"), initial_size)
+		else:
+			view.call("configure_from_map", _loaded_terrain_map_data)
 	if view.has_method("set_unit_nodes"):
 		view.call("set_unit_nodes", unit_nodes)
-	if _frame_reference_mission_camera(view):
+	if regional or _frame_reference_mission_camera(view):
 		return
 	var objective_marker := _resolve_marker(objective_point_path)
 	if objective_marker != null and view.has_method("focus_world_position"):

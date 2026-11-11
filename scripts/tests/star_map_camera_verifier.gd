@@ -1,5 +1,6 @@
 extends SceneTree
 ## Real viewport input checks: cursor-anchored zoom, drag over children and transformed picking.
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 var checks := 0
 var failed := 0
 var targets: Array[String] = []
@@ -54,6 +55,10 @@ func _run() -> void:
 		canvas.free()
 		_finish()
 		return
+	_check(float(canvas.call("get_camera_snapshot").zoom) > 1.0, "Initial view is closer than the complete overview")
+	for body: Dictionary in definitions.bodies.values():
+		_check(Rect2(Vector2.ZERO, canvas.size).has_point(canvas.map_to_screen(GRID.pair(body.position))),
+			"Initial view shows " + String(body.name))
 	var cursor := Vector2(420, 290)
 	var world_before: Vector2 = canvas.call("screen_to_map", cursor)
 	_move(cursor, Vector2.ZERO)
@@ -104,9 +109,21 @@ func _run() -> void:
 	_button(cursor, MOUSE_BUTTON_LEFT, false)
 	_check(not targets.is_empty() and targets.back() == "planet_orbit", "Actual planet picking remains correct after zoom and pan")
 	_check(travel == before, "All camera interaction leaves authoritative travel snapshot unchanged")
+	canvas.reset_camera()
+	var center: Vector2 = canvas.map_to_screen(GRID.pair(definitions.bodies.planet.position))
+	canvas.zoom_at(center, 8.0)
+	canvas.pan_by(canvas.size * 0.5 - center)
+	var ring_cell: Vector2i = GRID.cell_from_record(definitions.orbits.planet_orbit)
+	cursor = canvas.map_to_screen(GRID.normalized(ring_cell))
+	count_before = targets.size()
+	_move(cursor, Vector2.ZERO)
+	_button(cursor, MOUSE_BUTTON_LEFT, true)
+	_button(cursor, MOUSE_BUTTON_LEFT, false)
+	_check(targets.size() == count_before + 1 and targets.back() == "planet_orbit", "Rendered orbit belt cell is a clickable target")
+	canvas.reset_camera()
 	for index in range(30):
 		canvas.call("zoom_at", Vector2(250, 200), 100.0)
-	_check(is_equal_approx(float(canvas.call("get_camera_snapshot").zoom), 3.5), "Zoom maximum is bounded")
+	_check(is_equal_approx(float(canvas.call("get_camera_snapshot").zoom), 32.0), "Zoom maximum is bounded")
 	canvas.call("zoom_at", Vector2(250, 200), 0.001)
 	_check(is_equal_approx(float(canvas.call("get_camera_snapshot").zoom), 0.55), "Zoom minimum is bounded")
 	var recenter: Control = canvas.find_child("RecenterMap", true, false)
@@ -123,7 +140,11 @@ func _run() -> void:
 	_check(Vector2(canvas.call("get_camera_snapshot").pan).is_zero_approx(), "Gesamtansicht restores the system center")
 	var placeholders: Array = Array(canvas.call("get_camera_snapshot").encounter_slots)
 	_check(placeholders.size() == 3 and placeholders.all(func(slot: Dictionary): return not slot.available), "Exactly three future orbit areas remain unavailable")
+	canvas.zoom_at(center, 5.0)
+	canvas.pan_by(canvas.size * 0.5 - center)
 	var placeholder: Control = canvas.find_child("Future_planet_orbit_sector_03", true, false)
+	_check(placeholder.visible and Rect2(Vector2.ZERO, canvas.size).has_point(placeholder.get_global_rect().get_center()),
+		"Unavailable orbit label is actually visible before testing its click")
 	count_before = targets.size()
 	cursor = placeholder.get_global_rect().get_center()
 	_move(cursor, Vector2.ZERO)

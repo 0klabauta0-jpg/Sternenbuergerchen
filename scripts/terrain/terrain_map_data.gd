@@ -38,14 +38,15 @@ static func load_from_file(path: String) -> TerrainMapData:
 		push_warning("TerrainMapData could not open map file for reading: %s" % path)
 		return terrain_map_data
 
-	var file_text: String = file.get_as_text()
+	var raw := file.get_buffer(file.get_length())
+	if raw.has(0):
+		push_warning("TerrainMapData found NUL bytes in map file: %s" % path)
+		return terrain_map_data
+	var file_text := raw.get_string_from_utf8()
+	raw = PackedByteArray()
 	if file_text.strip_edges().is_empty():
 		push_warning("TerrainMapData found an empty map file: %s" % path)
 		return terrain_map_data
-	if _contains_nul_codepoint(file_text):
-		push_warning("TerrainMapData found NUL bytes in map file: %s" % path)
-		return terrain_map_data
-
 	var parsed_json: Variant = JSON.parse_string(file_text)
 	if typeof(parsed_json) != TYPE_DICTIONARY:
 		push_warning("TerrainMapData expected a Dictionary JSON root in: %s" % path)
@@ -82,6 +83,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._patrol_paths = _coerce_patrol_dictionary(root_dict.get("patrol_paths", {}))
 	terrain_map_data._enemy_team_configs = _coerce_enemy_team_config_dictionary(root_dict.get("enemy_team_configs", {}), terrain_map_data._grid_size)
 
+	var regional_grade := topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and terrain_map_data.get_regional_height_step() > 0.0
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
 		var tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
@@ -108,7 +110,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			if typeof(tile_entry) != TYPE_DICTIONARY:
 				continue
 
-			var normalized_tile_entry: Dictionary = tile_entry.duplicate(true)
+			var normalized_tile_entry: Dictionary = tile_entry
 			var grid_position: Vector2i = _coerce_vector2i(normalized_tile_entry.get("grid_position", Vector2i.ZERO))
 			normalized_tile_entry["grid_position"] = grid_position
 			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
@@ -119,6 +121,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
 				continue
 
+			tile_data.regional_grade = regional_grade
 			terrain_map_data._tiles.append(tile_data)
 			if not terrain_map_data._tiles_by_grid.has(tile_data.grid_position):
 				terrain_map_data._tiles_by_grid[tile_data.grid_position] = tile_data
@@ -594,13 +597,6 @@ static func _coerce_vector2(value: Variant) -> Vector2:
 	return Vector2.ZERO
 
 
-static func _contains_nul_codepoint(text: String) -> bool:
-	for index in range(text.length()):
-		if text.unicode_at(index) == 0:
-			return true
-	return false
-
-
 static func _coerce_marker_dictionary(value: Variant) -> Dictionary:
 	var result: Dictionary = {}
 	if typeof(value) != TYPE_DICTIONARY:
@@ -739,3 +735,9 @@ func has_authoring_metadata(key: String) -> bool:
 
 func set_place_presentation(presentation: Dictionary) -> void:
 	_place_presentation = presentation.duplicate(true)
+
+
+func get_regional_height_step() -> float:
+	if int(_extension_metadata.get("regional_terrain_version", 0)) != 2:
+		return 0.0
+	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)

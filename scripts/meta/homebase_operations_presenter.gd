@@ -1252,11 +1252,14 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		var context: Dictionary = travel.duplicate(true)
 		context["kind"] = "space"
 		var orbit: String = String(travel.get("orbit_id", ""))
+		var orbits: Dictionary = travel.get("orbits", {})
+		var orbit_name := String(Dictionary(orbits.get(orbit, {})).get("name", "Orbit"))
+		var target_name := String(Dictionary(orbits.get(String(travel.get("target_orbit_id", "")), {})).get("name", "Zielorbit"))
 		match phase:
-			"orbit": context["caption"] = "Im Weltraum · " + ("Mondorbit" if orbit == "moon_orbit" else "Planetenorbit")
-			"quantum": context["caption"] = "Quantum-Sprung → %s · %d %%" % ["Mondorbit" if String(travel.get("target_orbit_id", "")) == "moon_orbit" else "Planetenorbit", roundi(float(travel.get("progress", 0.0)) * 100)]
+			"orbit": context["caption"] = "Im Weltraum · " + orbit_name
+			"quantum": context["caption"] = "Quantum-Sprung → %s · %d %%" % [target_name, roundi(float(travel.get("progress", 0.0)) * 100)]
 			"stopped": context["caption"] = "Im Weltraum · Sprung abgebrochen, Position gehalten"
-			"approach": context["caption"] = "Ortsanflug · Planetenorbit wird verlassen"
+			"approach": context["caption"] = "Ortsanflug · %s wird verlassen" % orbit_name
 		return context
 	if not Dictionary(craft.get("pad_visual",{})).is_empty():
 		return {"kind":"base_pad","phase":String(craft.pad_visual.phase),"craft_id":_craft_id,"landing_pad_id":String(craft.get("landing_pad_id","")),"caption":"Mondbasis · An-/Abflug am tatsächlichen Landepad"}

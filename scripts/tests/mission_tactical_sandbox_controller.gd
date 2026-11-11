@@ -15598,6 +15598,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"dropship_visible": true,
 				"dropship_position": primary_position,
 				"dropship_target_position": target_position,
+				"flight_heading_origin": _get_drop_sequence_staging_position() if _has_lz_position and _drop_sequence_phase != DROP_SEQUENCE_OUTBOUND else primary_position,
 				"has_lz_position": _has_lz_position,
 				"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if not _drop_sequence_phase.is_empty() else _mission_drop_state),
 				"lz_position": _lz_position,
@@ -15785,6 +15786,12 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	if not body_visible and not has_lz:
 		return {}
 	var approach_origin_position: Vector2 = _get_mission_dropship_approach_origin_position(card, index, state, ship_position, has_lz, lz_position, is_selected)
+	var heading_origin := ship_position
+	if has_lz and state in [DROP_SEQUENCE_INBOUND, DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE]:
+		var angle := String(card.get("approach_angle", _get_approach_angle_name()))
+		heading_origin = _get_drop_sequence_staging_position() if is_active_sequence_card else _get_drop_staging_position_for_lz(lz_position, angle)
+	elif has_lz and state == DROP_SEQUENCE_OUTBOUND:
+		heading_origin = lz_position
 	var show_lz_marker: bool = has_lz and bool(card.get("show_lz_marker", _should_show_lz_marker_for_state(state)))
 	return {
 		"craft_id": craft_id,
@@ -15796,6 +15803,7 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"requested_lz_position": Dictionary(_field_landing_by_craft.get(craft_id, {})).get("requested_lz_position", lz_position),
 		"resolved_lz_position": Dictionary(_field_landing_by_craft.get(craft_id, {})).get("resolved_lz_position", lz_position),
 		"dropship_target_position": target_position,
+		"flight_heading_origin": heading_origin,
 		"approach_origin_position": approach_origin_position,
 		"approach_vector_origin_position": approach_origin_position,
 		"approach_vector_target_position": lz_position if has_lz else target_position,

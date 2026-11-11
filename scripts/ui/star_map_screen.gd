@@ -69,7 +69,7 @@ func _build() -> void:
 	heading.add_child(title)
 	_close = _button("CloseStarMap", "Abflug zur Sternkarte vorbereiten", _open_operations)
 	heading.add_child(_close)
-	column.add_child(_label("MONDBASIS  /  MONDORBIT  /  PLANETENORBIT  /  ORTSANFLUG", 12, Color("789baa")))
+	column.add_child(_label("GLUT-SYSTEM  ·  256 × 256 HEXFELDER", 12, Color("789baa")))
 	var body := HBoxContainer.new()
 	body.name = "SystemAndDetails"
 	body.add_theme_constant_override("separation", 12)
@@ -124,7 +124,7 @@ func _build() -> void:
 	_progress.custom_minimum_size.y = 8
 	_progress.show_percentage = false
 	information.add_child(_progress)
-	information.add_child(_label("ORTE AM PLANETEN", 11, Color("789baa")))
+	information.add_child(_label("ZIELORTE", 11, Color("789baa")))
 	_sites_row = VBoxContainer.new()
 	_sites_row.name = "DestinationRows"
 	_sites_row.add_theme_constant_override("separation", 10)
@@ -248,7 +248,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var locations: Dictionary = campaign.get("locations", {})
 	_sync_sites(locations)
 	var selected: String = String(campaign.get("selected_location_id", ""))
-	var at_planet := phase == "orbit" and orbit == "planet_orbit"
+	var location_orbits: Dictionary = travel.get("location_orbits", {})
 	var marker_locations: Dictionary={}
 	var reasons: PackedStringArray = []
 	for id in _sites:
@@ -256,9 +256,11 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var location: Dictionary = locations.get(id, {})
 		button.text = ("◆  " if selected == id else "◇  ") + String(location.get("name", "Satelliten-Absturzstelle" if id == "satellite_crash" else "Handelsposten"))
 		var reason := _lock_reason(id)
-		button.disabled = not at_planet or not reason.is_empty()
+		var required_orbit := String(location_orbits.get(id, "planet_orbit" if location_orbits.is_empty() else ""))
+		var at_site_orbit: bool = phase == "orbit" and not required_orbit.is_empty() and orbit == required_orbit
+		button.disabled = not at_site_orbit or not reason.is_empty()
 		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"reason":reason,"region_position":location.get("region_position",[])}
-		button.tooltip_text = reason if not reason.is_empty() else ("Zielort auswaehlen. Erst der Anflug laedt die Karte." if at_planet else "Zielorte werden im Planetenorbit waehlbar.")
+		button.tooltip_text = reason if not reason.is_empty() else ("Zielort auswaehlen. Erst der Anflug laedt die Karte." if at_site_orbit else "Erst den Orbit dieses Zielorts erreichen.")
 		if not reason.is_empty():
 			reasons.append(String(location.get("name", id)) + ": " + reason)
 	_canvas.call("set_location_snapshot",marker_locations)
@@ -266,9 +268,11 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_locks.visible = not reasons.is_empty()
 	var selected_location: Dictionary = locations.get(selected, {})
 	var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(String(campaign.get("selected_job_id", "")), {})
-	_selection.text = "Ziel: %s  ·  Auftrag: %s" % [String(selected_location.get("name", "Noch keinen Zielort ausgewaehlt")), String(job.get("title", "Ortsbesuch"))] if _sites.has(selected) else "Zielort im Planetenorbit auswählen."
-	_approach.visible = at_planet and _sites.has(selected)
-	_approach.disabled = not _lock_reason(selected).is_empty() or not at_planet
+	_selection.text = "Ziel: %s  ·  Auftrag: %s" % [String(selected_location.get("name", "Noch keinen Zielort ausgewaehlt")), String(job.get("title", "Ortsbesuch"))] if _sites.has(selected) else "Zielort im zugehörigen Orbit auswählen."
+	var selected_orbit := String(location_orbits.get(selected, "planet_orbit" if location_orbits.is_empty() else ""))
+	var at_selected_orbit := phase == "orbit" and not selected_orbit.is_empty() and orbit == selected_orbit
+	_approach.visible = at_selected_orbit and _sites.has(selected)
+	_approach.disabled = not _lock_reason(selected).is_empty() or not at_selected_orbit
 	_approach.text = "Anflug starten"
 	_land.visible = phase == "orbit" and orbit == "moon_orbit"
 	_boundary.visible = _approach.visible or phase == "approach"
@@ -279,9 +283,9 @@ func _phase_text(travel: Dictionary) -> String:
 		"grounded": return "Mondbasis · Am Flightdeck abheben, um den Mondorbit zu erreichen."
 		"quantum": return "Quantum-Sprung → %s · %d %% · Abbruch jederzeit moeglich" % [_orbit_name(String(travel.get("target_orbit_id", ""))), roundi(float(travel.get("progress", 0.0)) * 100)]
 		"stopped": return "Sprung abgebrochen · Position gehalten. Ziel anklicken, um erneut zu springen."
-		"orbit": return "%s erreicht · %s" % [_orbit_name(String(travel.get("orbit_id", ""))), "Zielort waehlen und Anflug starten." if String(travel.get("orbit_id", "")) == "planet_orbit" else "Planet anklicken oder an der Mondbasis landen."]
+		"orbit": return "%s erreicht · %s" % [_orbit_name(String(travel.get("orbit_id", ""))), "Zielort wählen und Anflug starten." if String(travel.get("orbit_id", "")) != "moon_orbit" else "Zielorbit wählen oder an der Mondbasis landen."]
 		"approach": return "Anflug · Sternkarte wird verlassen. Ortskarte wird geladen …"
-		"surface": return "Am Zielort · Nach dem Abheben kehrst du in den Planetenorbit zurueck."
+		"surface": return "Am Zielort · Nach dem Abheben kehrst du in den zugehörigen Orbit zurück."
 	return "Sternkarte wird vorbereitet …"
 
 func _open_operations() -> void:
@@ -289,7 +293,9 @@ func _open_operations() -> void:
 	_send("space_prepare_launch" if phase == "grounded" else "space_open_operations")
 
 func _orbit_name(id: String) -> String:
-	return "Mondorbit" if id == "moon_orbit" else "Planetenorbit"
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var definition: Dictionary = Dictionary(travel.get("orbits", {})).get(id, {})
+	return String(definition.get("name", "Mondorbit" if id == "moon_orbit" else "Planetenorbit"))
 
 func _lock_reason(location_id: String) -> String:
 	if String(_runtime.get("mode", "")) != "campaign":

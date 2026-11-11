@@ -1,6 +1,8 @@
 extends Node2D
 
 const BUILDING_AUTHORING = preload("res://scripts/editor/building_layout_authoring.gd")
+var _regional_authoring_status: Dictionary = {}
+var _regional_authoring_status_key: Array = []
 var _building_move_id := ""
 var _building_feedback_text := "Gebäude: Vorlage in der Palette wählen oder ein Gebäude auswählen."
 
@@ -3814,7 +3816,7 @@ func _refresh_authoring_status_controls() -> void:
 	var status_panel := get_node_or_null("UI/PropertyPanel/Margin/VBox/AuthoringStatusPanel") as VBoxContainer
 	if status_panel == null:
 		return
-	var snapshot: Dictionary = get_map_editor_usability_snapshot(false)
+	var snapshot: Dictionary = _authoring_status_snapshot()
 	var validation: Dictionary = Dictionary(snapshot.get("validation", {}))
 	var manifest: Dictionary = Dictionary(snapshot.get("map_manifest", {}))
 	var tool_label := status_panel.get_node_or_null("AuthoringToolStatusLabel") as Label
@@ -3839,6 +3841,22 @@ func _refresh_authoring_status_controls() -> void:
 	if manifest_label != null:
 		manifest_label.text = "MP Map: %s" % String(manifest.get("state", "not_ready")).replace("_", " ")
 		manifest_label.tooltip_text = "MP Map: multiplayer/mission-map readiness state derived from the current map manifest."
+
+
+func _authoring_status_snapshot() -> Dictionary:
+	if _terrain_map_data == null or float(_terrain_map_data.call("get_regional_height_step")) <= 0.0:
+		return get_map_editor_usability_snapshot(false)
+	var key := [_terrain_map_data, _current_map_path, _current_scenario_path, _dirty, _scenario_dirty]
+	if _regional_authoring_status.is_empty() or _regional_authoring_status_key != key:
+		_regional_authoring_status_key = key
+		_regional_authoring_status = get_authoring_validation_snapshot(false)
+	return {
+		"active_tool": _get_active_authoring_tool(),
+		"brush_radius": _get_brush_radius(),
+		"selected_grid": _selected_grid_position,
+		"validation": _regional_authoring_status,
+		"map_manifest": _regional_authoring_status.get("sections", {}).get("multiplayer", {}),
+	}
 
 
 func _build_authoring_validation_tooltip(validation: Dictionary) -> String:
@@ -4468,6 +4486,7 @@ func _build_mission_scenario_info_text() -> String:
 
 
 func _mark_scenario_dirty(is_dirty: bool) -> void:
+	_regional_authoring_status.clear()
 	_scenario_dirty = is_dirty
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 	var panel := _get_mission_scenario_panel()
@@ -7543,7 +7562,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	var next_walkable: bool = bool(patch.get("walkable", tile_data.walkable))
 	var next_blocks_los: bool = bool(patch.get("blocks_los", tile_data.blocks_los))
 	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
-	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
+	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	var next_object_height: int = clampi(int(patch.get("object_height", tile_data.object_height)), 0, 3)
 	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
 	var next_edge_type: String = String(patch.get("edge_type", tile_data.edge_type))
@@ -8018,6 +8037,7 @@ func _refresh_top_bar() -> void:
 
 
 func _mark_dirty(is_dirty: bool) -> void:
+	_regional_authoring_status.clear()
 	_dirty = is_dirty
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
@@ -8095,7 +8115,7 @@ func _configure_property_height_spinbox() -> void:
 	if height_spinbox == null:
 		return
 	height_spinbox.min_value = 0.0
-	height_spinbox.max_value = 2.0
+	height_spinbox.max_value = float(TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	height_spinbox.step = 1.0
 
 

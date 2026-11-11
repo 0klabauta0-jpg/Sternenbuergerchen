@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Native Glut-Karten und Sternkarte — 11.11.2026
+
+Isolierter Kandidat `task/native-glut-maps-20261110` auf Main `639a49d65`.
+Glut A/B/C je 512 × 256 echte Hexfelder mit Schluchten, H8-Hochterrain,
+geschlossenen Rampen und zwei C-Brücken. Sternkarte 256 × 256 mit drei
+Monden, näherer Startkamera, ruhiger Flugkurve, Quantum-Ring und
+Triebwerksstrahl. Gelände lädt während des Anflugs, zuletzt benutzte
+3D-Ausschnitte bleiben im Cache. FT1, Charakterkarte und Rüstungsfach
+aus dem Playtest nachgezogen. Kampagnenprobe mit erstem Upload,
+A-Wiederbesuch, B, C, Orbitalrettung und Mehrschiff-Continue im QA-Bericht.
+[Prüfbericht](qa/native_glut_maps_20261111/README.md).
+
 ### Personal-/Basis-UI: Mainintegration — 10.11.2026
 Beauftragte Fast-forward-Integration der fünf Taskcommits5df2d3b6f bis2ea460017
 auf Main1e3cca237. Produktbaum identisch zu2ea460017; nur Integrationsdokumentation

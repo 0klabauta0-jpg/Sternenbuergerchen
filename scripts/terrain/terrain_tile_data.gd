@@ -11,6 +11,7 @@ const DEFAULT_WALKABLE: bool = true
 const DEFAULT_BLOCKS_LOS: bool = false
 const DEFAULT_COVER_VALUE: int = 0
 const DEFAULT_HEIGHT_LEVEL: int = 0
+const MAX_HEIGHT_LEVEL: int = 8
 const DEFAULT_OBJECT_HEIGHT: int = 0
 const DEFAULT_OBJECT_SCALE: float = 1.0
 const MIN_OBJECT_SCALE: float = 0.25
@@ -35,6 +36,7 @@ var object_rotation_degrees: float = 0.0
 var object_scale: float = DEFAULT_OBJECT_SCALE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
+var regional_grade: bool = false
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -67,6 +69,15 @@ func to_dict() -> Dictionary:
 		"surface_type": surface_type,
 		"edge_type": edge_type,
 	}
+
+
+static func allows_height_transition(higher, lower) -> bool:
+	var difference := int(higher.height_level) - int(lower.height_level)
+	if higher.regional_grade and lower.regional_grade:
+		return difference == 1 and higher.walkable and lower.walkable \
+			and String(higher.object_type_id) != "glut_bridge_deck" \
+			and String(lower.object_type_id) != "glut_bridge_deck"
+	return String(higher.edge_type) == EDGE_SLOPE
 
 
 static func get_surface_speed_factor(next_surface_type: String) -> float:
@@ -145,7 +156,7 @@ func _apply_dict(data: Dictionary) -> void:
 	walkable = bool(data.get("walkable", DEFAULT_WALKABLE))
 	blocks_los = bool(data.get("blocks_los", DEFAULT_BLOCKS_LOS))
 	cover_value = clampi(int(data.get("cover_value", DEFAULT_COVER_VALUE)), 0, 100)
-	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, 2)
+	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, MAX_HEIGHT_LEVEL)
 	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, 3)
 	object_rotation_degrees = _normalize_object_rotation_degrees(float(data.get("object_rotation_degrees", 0.0)))
 	object_scale = _normalize_object_scale(float(data.get("object_scale", DEFAULT_OBJECT_SCALE)))

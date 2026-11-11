@@ -7,6 +7,7 @@ uniform sampler2D surface_mask : filter_linear, repeat_disable;
 uniform vec4 surface_bounds = vec4(0.0,0.0,1.0,1.0);
 uniform vec4 world_to_grid = vec4(1.0,0.0,0.0,1.0);
 uniform bool rock_strata = false;
+uniform float slope_normal_softening = 0.0;
 uniform bool paved_surface = false;
 uniform bool authored_paving_wear = false;
 uniform vec4 wear_service_span = vec4(11.2,10.45,15.0,10.45);
@@ -16,6 +17,7 @@ uniform bool marking_surface = false;
 uniform vec4 sediment_color : source_color = vec4(0.73, 0.51, 0.33, 1.0);
 varying vec3 ground_world_position;
 varying vec3 ground_world_normal;
+varying float ramp_incline;
 
 float patch_hash(vec2 p) {
 	// Integer lattice hashing keeps shared corners identical after GPU inlining.
@@ -58,6 +60,8 @@ float dusty_shoulder(vec2 p,vec2 a,vec2 b,float width) {
 }
 
 void vertex() {
+	ramp_incline = 1.0 - clamp(NORMAL.y, 0.0, 1.0);
+	NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), slope_normal_softening));
 	ground_world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	ground_world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
 }
@@ -74,6 +78,9 @@ void fragment() {
 	float grit = mix(0.5, broad_patch(ground_world_position.xz * 18.0), detail_visibility(ground_world_position.xz * 18.0));
 	float sediment = broad_patch(ground_world_position.xz * 1.6 + vec2(region * 3.0, patch));
 	float value = mix(0.87, 1.12, smoothstep(0.10, 0.88, patch));
+	if (slope_normal_softening > 0.0) {
+		value *= 1.0 - 0.10 * smoothstep(0.05, 0.32, ramp_incline);
+	}
 	vec3 pigment = mix(base_color.rgb * vec3(0.91, 0.89, 0.91), base_color.rgb * vec3(1.14, 1.10, 1.0), region);
 	value *= mix(0.97, 1.025, grit);
 	// Soft sediment fields break up the flat paint without drawing a square/hex grid.

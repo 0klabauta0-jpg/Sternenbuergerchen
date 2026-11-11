@@ -9,6 +9,7 @@ const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
+const PERSONNEL_INVENTORY_PANEL = preload("res://scripts/ui/components/personnel_inventory_panel.gd")
 const COMPACT_SHEET_WIDTH: float = 660.0
 const SECTION_TITLES := {
 	"TRAIT:": "EIGENSCHAFTEN", "KURZBESCHREIBUNG:": "HINTERGRUND", "ROLLE / LOADOUT:": "AUFGABE & EIGNUNG",
@@ -73,11 +74,15 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 			var values:=VBoxContainer.new();values.size_flags_horizontal=Control.SIZE_EXPAND_FILL;columns.add_child(values)
 			var shared_options:=options.duplicate();shared_options["hide_identity_overview"]=true;shared_options["compact_sheet_width"]=0
 			_render_compact_read_only(values,model,profile,shared_options)
-			var equipment:VBoxContainer=load("res://scripts/ui/components/personnel_inventory_panel.gd").new();equipment.name="SharedCharacterEquipment";equipment.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			equipment.custom_minimum_size.x=780 if host.get_viewport_rect().size.x>=1500 else 520
+			var equipment: VBoxContainer = PERSONNEL_INVENTORY_PANEL.new()
+			equipment.name = "SharedCharacterEquipment"
+			equipment.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			equipment.custom_minimum_size.x = PERSONNEL_INVENTORY_PANEL.get_preferred_character_column_width(host.get_viewport_rect().size.x)
 			columns.add_child(equipment)
 			var view:Dictionary=options.inventory_view
-			equipment.call("update_snapshot",view.inventory,view.unit,view.craft_id,view.accessible,view.equipment_allowed,view.actor)
+			var identity: Dictionary = Dictionary(view.unit).duplicate()
+			identity["identity_profile"] = CHARACTER_SHEET_FORMATTER_SCRIPT.format_identity_profile_line(profile)
+			equipment.call("update_snapshot",view.inventory,identity,view.craft_id,view.accessible,view.equipment_allowed,view.actor)
 			equipment.call("update_rest_snapshot",{})
 			var handler:Callable=options.get("inventory_request",Callable())
 			if handler.is_valid():equipment.connect("operation_requested",handler)
@@ -190,7 +195,10 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
-	var metric_columns:=HBoxContainer.new();metric_columns.add_theme_constant_override("separation",10);values.add_child(metric_columns)
+	# Leave width for the adjacent portrait, figure and inventory in the shared sheet.
+	var metric_columns: BoxContainer = VBoxContainer.new() if bool(options.get("hide_identity_overview", false)) else HBoxContainer.new()
+	metric_columns.add_theme_constant_override("separation", 10)
+	values.add_child(metric_columns)
 	var core_column:=VBoxContainer.new();core_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(core_column)
 	var auxiliary_column:=VBoxContainer.new();auxiliary_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(auxiliary_column)
 	var core:=_add_foldout(core_column,"core","Kernwerte",true)

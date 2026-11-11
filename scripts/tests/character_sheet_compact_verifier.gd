@@ -84,6 +84,18 @@ func _run() -> void:
 	VIEW.render(host,pilot,{"editable_metrics":false,"two_column_layout":true,"current_assignment_text":"Pilot · Mondfähre 1","hide_loadout_dropdowns":true})
 	await process_frame
 	_check(host.find_child("MetricSlider_accuracy",true,false)==null and host.find_child("ReadOnlyMetricBar_accuracy",true,false)!=null,"return from editor invalidates old read-only cache")
+	var inventory_view := {
+		"inventory": {}, "unit": {"id": stock.unit_id, "name": stock.display_name, "status": "Im Einsatz"},
+		"craft_id": "mission_craft", "accessible": [], "equipment_allowed": false, "actor": null,
+	}
+	VIEW.render(host, stock, {"editable_metrics": false, "inventory_view": inventory_view})
+	await process_frame
+	var equipment := host.find_child("SharedCharacterEquipment", true, false) as Control
+	var identity_profile := equipment.find_child("IdentityProfile", true, false) as Label if equipment != null else null
+	var mission_status := equipment.find_child("PersonnelCondition", true, false) as Label if equipment != null else null
+	_check(identity_profile != null and identity_profile.text == "Rufname ROOK" and identity_profile.visible, "Mission sheet restores the same authored profile header")
+	_check(mission_status != null and mission_status.text == "Status: Im Einsatz", "Mission sheet retains its live status alongside profile facts")
+	_check(not inventory_view.unit.has("identity_profile") and stock.to_dict() == stock_before, "Shared header enriches only its read-only presentation")
 	host.queue_free()
 	await process_frame
 	print("CHARACTER_SHEET_COMPACT passed=%d failed=%d" % [_passed, _failed])

@@ -35,6 +35,22 @@ func _run() -> void:
 	_expect(contact <= 0.06 and climbing > contact and departing > climbing, "Outbound rises with actual distance from LZ")
 	payload["state"] = "inbound"
 	_expect(payload == original, "Visual height leaves input payload and route unchanged")
+	payload["flight_heading_origin"] = far
+	var inbound_yaw: float = view.call("_get_dropship_rotation_y_for_payload", payload, near)
+	payload["state"] = "landed"
+	var landed_yaw: float = view.call("_get_dropship_rotation_y_for_payload", payload, lz)
+	payload["state"] = "complete"
+	var parked_yaw: float = view.call("_get_dropship_rotation_y_for_payload", payload, lz)
+	_expect(is_equal_approx(inbound_yaw, landed_yaw) and is_equal_approx(inbound_yaw, parked_yaw),
+		"Cutlass holds its approach heading through touchdown and parking")
+	payload["state"] = "inbound"
+	view.set("_regional_height_step", 0.75)
+	view.set("_max_render_height", 8)
+	var second_far: Vector2 = view.call("_position_3d_to_world", Vector3(24.0, 0.0, 0.0))
+	_expect(is_equal_approx(_height(view, payload, far), _height(view, payload, second_far)),
+		"Regional cruise uses a common altitude above high terrain")
+	_expect(_height(view, payload, lz) <= 0.06, "Regional approach reaches its landing datum")
+	view.set("_regional_height_step", 0.0)
 	_expect(view.has_method("_make_hex_grid_material"), "Hex path exposes dedicated antialiased material")
 	if view.has_method("_make_hex_grid_material"):
 		var material: Material = view.call("_make_hex_grid_material", true)

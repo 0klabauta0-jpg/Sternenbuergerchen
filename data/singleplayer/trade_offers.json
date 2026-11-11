@@ -24,6 +24,16 @@
         "trade_outpost"
       ]
     },
+    "backpack_supply": {
+      "id": "backpack_supply",
+      "item_id": "backpack",
+      "name": "Rucksack",
+      "unit_price": 40,
+      "stock": 6,
+      "location_ids": [
+        "trade_outpost"
+      ]
+    },
     "salvage_tool_supply": {
       "id": "salvage_tool_supply",
       "item_id": "salvage_tool",

@@ -1,6 +1,8 @@
 class_name MapEditorHeightTool
 extends RefCounted
 
+const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
+
 const MODE_RAISE: String = "raise"
 const MODE_LOWER: String = "lower"
 const MODE_SET_1: String = "set_1"
@@ -18,9 +20,9 @@ static func build_height_patch(current_height: int, mode: String, edge_type: Str
 static func get_next_height_level(current_height: int, mode: String) -> int:
 	match mode:
 		MODE_RAISE:
-			return clampi(current_height + 1, 0, 2)
+			return clampi(current_height + 1, 0, TILE.MAX_HEIGHT_LEVEL)
 		MODE_LOWER:
-			return clampi(current_height - 1, 0, 2)
+			return clampi(current_height - 1, 0, TILE.MAX_HEIGHT_LEVEL)
 		MODE_SET_1:
 			return 1
 		MODE_SET_2:

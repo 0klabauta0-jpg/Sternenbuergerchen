@@ -10,6 +10,7 @@ const OPERATIONS_BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_r
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const PERSONNEL_INVENTORY_PANEL = preload("res://scripts/ui/components/personnel_inventory_panel.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
@@ -2744,7 +2745,7 @@ func _ensure_character_sheet_popup() -> void:
 	feedback.name = "CharacterInventoryFeedback"
 	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	inventory_column.add_child(feedback)
-	var inventory_panel: VBoxContainer = preload("res://scripts/ui/components/personnel_inventory_panel.gd").new()
+	var inventory_panel: VBoxContainer = PERSONNEL_INVENTORY_PANEL.new()
 	inventory_panel.name = "CharacterInventoryPanel"
 	inventory_column.add_child(inventory_panel)
 	inventory_panel.operation_requested.connect(_on_character_inventory_operation)
@@ -2765,7 +2766,8 @@ func _apply_character_popup_rect() -> void:
 	_apply_fixed_window_contract("CharacterSheetPopup", rect)
 	popup.set_meta("homebase_character_popup_rect", rect)
 	var inventory_scroll:=popup.find_child("CharacterInventoryScroll",true,false) as Control
-	if inventory_scroll!=null:inventory_scroll.custom_minimum_size.x=780 if get_viewport_rect().size.x>=1500 else 520
+	if inventory_scroll != null:
+		inventory_scroll.custom_minimum_size.x = PERSONNEL_INVENTORY_PANEL.get_preferred_character_column_width(get_viewport_rect().size.x)
 
 
 func _disable_legacy_homebase_window(path: String, meta_key: String) -> void:
@@ -5993,8 +5995,12 @@ func get_personnel_inventory_view(unit_id: String, operations_snapshot: Dictiona
 	var unit: Dictionary = {}
 	for entry: Dictionary in Array(snapshot.get("roster", [])):
 		if String(entry.get("id", "")) == unit_id:
-			unit = entry
+			unit = entry.duplicate()
 			break
+	var profile = _profiles_by_id.get(unit_id)
+	if profile != null and not unit.is_empty():
+		unit["primary_role"] = String(profile.role_name)
+		unit["identity_profile"] = CHARACTER_SHEET_FORMATTER_SCRIPT.format_identity_profile_line(profile)
 	var singleplayer: Dictionary = snapshot.get("singleplayer", {})
 	var craft_id: String = String(Dictionary(snapshot.get("selected_craft", {})).get("id", ""))
 	var adapter: Node = get_parent().get("_singleplayer_runtime") if get_parent() != null and get_parent().get_script() != null else null

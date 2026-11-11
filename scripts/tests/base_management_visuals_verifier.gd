@@ -60,7 +60,7 @@ func _run()->void:
     check(board.get("_job_cards").get_child_count()==1,"Smart Mobile initially shows only the unlocked satellite mission")
     check(board.get("_details").get_global_rect().size.x>=250,"selected mission retains readable detail column")
     check(root.get_visible_rect().encloses(board.get("_accept").get_global_rect()),"first mission acceptance is visible without scrolling")
-    check(String(board.get("_details").text).contains("Glut (Planet)") and String(board.get("_objectives").text).contains("Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
+    check(String(board.get("_details").text).contains("Glut 1a (Mond)") and String(board.get("_objectives").text).contains("Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
    if section=="inventory":
     check(presenter.get("_inventory_panel").get("_identity_portrait").is_visible_in_tree(),"original portrait is shown in shared identity and equipment card")
     check(drawer.size.x>=800,"equipment drawer is wider for the enlarged figure and slots")

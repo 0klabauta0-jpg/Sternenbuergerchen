@@ -90,7 +90,7 @@ func _build() -> void:
 	_buy = _button("Sanitätswerkzeug kaufen", "BuySupply")
 	ship_content.add_child(_buy)
 	_buy.pressed.connect(func(): _submit("buy"))
-	for id in ["mining_tool_supply","salvage_tool_supply"]:
+	for id in ["mining_tool_supply", "salvage_tool_supply", "backpack_supply"]:
 		var tool:=_button("",id); ship_content.add_child(tool); _tool_buttons[id]=tool
 		tool.pressed.connect(func(): _submit("buy",id))
 
@@ -234,7 +234,9 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		button.text="%s · %d Cr · %d verfügbar" % [tool_offer.get("name",id),tool_price,tool_stock]
 		button.disabled=not available or not Array(tool_offer.get("location_ids",[])).has(location) or tool_stock<1 or int(supply.get("credits",0))<tool_price or _pending.has("buy")
 		if id == "mining_tool_supply" and String(_snapshot.get("mode","")) == "campaign" and not Array(supply.get("blueprints",[])).has("mining_tool"): button.disabled = true
-		button.tooltip_text="Werkzeug wird in dieses Schiff geliefert" if not button.disabled else "Schiff muss am Handelsservice sein; Credits und Bestand erforderlich"
+		button.tooltip_text = "Kauf wird in dieses Schiff geliefert" if not button.disabled else "Schiff muss am Handelsservice sein. Credits und Bestand erforderlich."
+		if id == "backpack_supply" and not button.disabled:
+			button.tooltip_text = "Wird in die Schiffsfracht geliefert. An der Heimatbasis anlegen."
 
 	var purchased_item := "c_benit" if location == "satellite_crash" else "b_benit"
 	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory",{})).get("craft:"+_selected_craft_id,{})).get("items",{})
@@ -265,7 +267,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 			craft = entry
 	_return.visible = not craft.is_empty() and String(craft.get("location_id", "homebase")) != "homebase"
 	var space: Dictionary = _snapshot.get("space_travel", {})
-	_return.text = "Zum Planetenorbit abheben" if String(space.get("phase", "")) == "surface" and String(space.get("craft_id", "")) == _selected_craft_id else "Zur Heimatbasis"
+	_return.text = "Zum Ortsorbit abheben" if String(space.get("phase", "")) == "surface" and String(space.get("craft_id", "")) == _selected_craft_id else "Zur Heimatbasis"
 	_return.disabled = bool(craft.get("busy", true)) or not available or _pending.has("return_homebase")
 	_return.tooltip_text = "Rückflug erst nach bestätigter Landung am Versorgungsort" if _return.disabled else "Rückflug für dieses Schiff anfordern"
 	if not available:
@@ -293,6 +295,7 @@ func _apply_section() -> void:
 	var trade_context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
 	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]
 	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading
+	_tool_buttons["backpack_supply"].visible = ship and String(trade_context.get("location_id", "")) == "trade_outpost" and String(_snapshot.get("mode", "")) == "campaign"
 	_items.visible = ship and trading
 	_refuel.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	_refuel.custom_minimum_size.x=180

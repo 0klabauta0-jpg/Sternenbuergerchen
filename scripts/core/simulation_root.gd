@@ -3025,14 +3025,14 @@ func _ensure_hpa_navigation_graph(terrain_registry):
 	):
 		_hpa_navigation_cache_hit_count += 1
 		return _hpa_navigation_graph
-	var dirty_grids: Array = _get_terrain_registry_dirty_grids(terrain_registry)
-	if (
+	var incremental_candidate: bool = (
 		_hpa_navigation_graph != null
 		and _hpa_navigation_registry == terrain_registry
 		and _hpa_navigation_tile_count == tile_count
-		and not dirty_grids.is_empty()
 		and _hpa_navigation_graph.has_method("rebuild_dirty_clusters_from_registry")
-	):
+	)
+	var dirty_grids: Array = _get_terrain_registry_dirty_grids(terrain_registry) if incremental_candidate else []
+	if not dirty_grids.is_empty():
 		var incremental_built: bool = bool(_hpa_navigation_graph.call("rebuild_dirty_clusters_from_registry", terrain_registry, dirty_grids, HPA_NAVIGATION_CLUSTER_SIZE))
 		_hpa_navigation_build_count += 1
 		_hpa_navigation_last_build_stats = _get_hpa_graph_build_stats(_hpa_navigation_graph)
@@ -3556,7 +3556,8 @@ func _extract_height_accuracy_modifier(attacker_unit, target_unit) -> float:
 
 	var attacker_height: int = int(terrain_registry.call("get_height_at_world", (attacker_unit as Node2D).global_position))
 	var target_height: int = int(terrain_registry.call("get_height_at_world", (target_unit as Node2D).global_position))
-	var height_difference: int = attacker_height - target_height
+	# Additional terrain elevations extend geometry, not the existing accuracy budget.
+	var height_difference: int = clampi(attacker_height - target_height, -2, 2)
 	if height_difference > 0:
 		return HEIGHT_ADVANTAGE_ACCURACY_BONUS * float(height_difference)
 

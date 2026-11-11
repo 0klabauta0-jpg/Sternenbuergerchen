@@ -8,7 +8,13 @@ func _check(value: bool, label: String) -> void:
 	else: failed += 1
 	print("PASS: " if value else "FAIL: ", label)
 func _run() -> void:
-	var source := "res://maps/trade_outpost.json"
+	for name in ["trade_outpost", "satellite_crash_site", "fortified_outpost"]:
+		await _roundtrip(name)
+	print("MAP_EDITOR_METADATA passed=%d failed=%d" % [passed,failed])
+	quit(1 if failed else 0)
+
+func _roundtrip(name: String) -> void:
+	var source := "res://maps/%s.json" % name
 	var before := FileAccess.get_sha256(source)
 	var original: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(source))
 	var editor = EDITOR.instantiate()
@@ -26,15 +32,22 @@ func _run() -> void:
 	var state: String = JSON.stringify(tile.to_dict())
 	editor.call("_apply_brush_at_world_position", tile.world_position)
 	_check(JSON.stringify(tile.to_dict()) == state, "building outside map boundary rejected atomically")
-	var target := "user://editor_metadata_%d/trade_saved.json" % OS.get_process_id()
+	var target := "user://editor_metadata_%d/%s_saved.json" % [OS.get_process_id(), name]
 	editor.call("_on_save_as_file_selected", target)
 	_check(FileAccess.file_exists(target), "real SaveAs callback writes scratch file")
 	var saved: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(target))
 	for key in ["singleplayer_site", "place_world", "place_presentation"]:
 		_check(saved.get(key) == original.get(key), "real editor SaveAs preserves " + key)
 	editor.call("_load_map", target)
-	_check(editor.get("_terrain_map_data").get_place_presentation() == original.place_presentation, "real editor reload retains place models")
+	var reloaded = editor.get("_terrain_map_data")
+	_check(reloaded.get_place_presentation() == original.place_presentation, name + " editor reload retains place models")
+	_check(reloaded.get_grid_size() == Vector2i(512, 256) and reloaded.get_tiles().size() == 131072, name + " editor reload retains every regional cell")
+	_check(reloaded.get_tiles().any(func(cell): return cell.height_level >= 7), name + " editor reload retains high terrain")
 	_check(FileAccess.get_sha256(source) == before, "source map untouched by SaveAs")
+	if name != "trade_outpost":
+		editor.queue_free()
+		await process_frame
+		return
 	editor.call("_load_map", "res://maps/station_outpost_64x64.json")
 	_check(not bool(editor.call("_is_fixed_authored_layout")), "migrated station supports whole-building authoring")
 	var view = editor.get_node("Primary3DView")
@@ -45,5 +58,3 @@ func _run() -> void:
 	_check(dressing != null and dressing.get_child_count() == 2, "actual renderer installs both current building scenes")
 	editor.queue_free()
 	await process_frame
-	print("MAP_EDITOR_METADATA passed=%d failed=%d" % [passed,failed])
-	quit(1 if failed else 0)

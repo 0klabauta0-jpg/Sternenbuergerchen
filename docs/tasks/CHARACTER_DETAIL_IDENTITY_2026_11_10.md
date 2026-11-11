@@ -1,5 +1,32 @@
 # Grosser Charakterbogen: Identitaet, Zusammenhang und Zusammenarbeit
 
+## Playtest-Nachtrag 11.11.2026
+
+Im gemeinsamen Detailkopf sind Porträt und Figur zu klein. Auf 1280×720
+überlagern sich fest positionierte Rollenzeilen. Der Kopf soll neben einem
+lesbaren Porträt Name, Hauptrolle, Nebenrolle, Status, vorhandene Bereitschaft,
+Kurzprofil und Eignungsbadges ohne abgeschnittene Rollen zeigen. Die reale
+3D-Figur erhält mehr Platz und bleibt vollständig sichtbar. Ausrüstung und
+Rucksack bleiben erreichbar, auch bei langem Profil und kleinem Fenster.
+
+Umfang: gemeinsames PersonnelInventoryPanel und Modellvorschau, lesende
+Profilprojektionen für Basis und Einsatz sowie die vorhandenen Detail-Gates.
+Der Vertrag `docs/dev/homebase_direct_dropship_flow_contract.md` bleibt für
+Datenbesitz und Inventarzugriffe maßgeblich. Kleine Truppkarten bleiben außerhalb
+des Umfangs. Prüfen: Rollen/Status/Profil, Rahmen und nicht überlappende Slots bei
+1280×720, 1920×1080 und 3440×1440, Modellgrenzen sowie vorhandene Inventar- und
+Compact-Regressionen. Lange benutzerdefinierte Texte dürfen die Kartenhöhe
+vergrößern und bleiben im vorhandenen Scrollbereich lesbar.
+
+Der Detailkopf nutzt ein 112×140-Porträt mit umbrechenden Profilzeilen.
+Die Wertebereiche des gemeinsamen Bogens stehen untereinander, damit die
+breitere Figur und das Inventar im auf 1500 Pixel begrenzten Fenster bleiben.
+Der Headless-Layoutlauf bestand 61 Prüfungen. Die projizierten Modellgrenzen
+betragen bei 1280×720, 1920×1080 und 3440×1440 rund 352, 376 und 385 Pixel in
+der Höhe und liegen vollständig im jeweiligen Vorschaufenster. Die gemeinsame
+Einsatzbogen-Projektion ist im Compact-Verifier mit 28 Prüfungen abgedeckt.
+Für diesen Nachtrag liegen keine neuen nativen Bildaufnahmen vor.
+
 Status: eigener Umfang implementiert/geprueft, unabhaengige Reviews ohne
 Restbefund. Nachweis `docs/qa/character_detail_20261110/README.md`.
 Gemeinsame Integration/Push/EXE bleiben am Abschluss des anderen Chats haengen.

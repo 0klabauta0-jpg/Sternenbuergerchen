@@ -62,6 +62,8 @@ func _run() -> void:
 	view.refresh()
 	check(Dictionary(view.get("_sites")).has("future_region"),"New authored fifth destination appears without code changes")
 	check(canvas.get("_location_buttons").has("future_region"),"New authored destination gets actual map marker")
+	var future_point: Vector2 = canvas.location_map_point("future_region")
+	check(not future_point.is_zero_approx() and not points.has(future_point), "Authored future destination gets a distinct projected region position")
 	runtime.mode = "skirmish"
 	view.refresh()
 	for button: Button in Dictionary(view.get("_sites")).values(): check(not button.disabled,"Skirmish external place stays open")
