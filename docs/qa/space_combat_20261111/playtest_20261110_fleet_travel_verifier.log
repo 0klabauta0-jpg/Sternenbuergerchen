@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: independent craft launch a
+PASS: independent quantum a
+PASS: independent craft launch b
+PASS: independent quantum b
+PASS: one authoritative tick advances hidden and focused routes
+PASS: approach does not replace other route
+PASS: checkpoint gate sees all routes
+PASS: snapshot projects both route identities
+FLEET_TRAVEL failed=0

@@ -22,12 +22,14 @@ func configure() -> Dictionary:
 	return _empty.configure()
 func register_craft(craft_id: String) -> void:
 	if craft_id.is_empty() or _owners.has(craft_id): return
-	var owner=TRAVEL.new(); owner.configure(); _owners[craft_id]=owner
+	var owner=TRAVEL.new(); owner.configure(craft_id); _owners[craft_id]=owner
 	if _focus.is_empty(): _focus=craft_id
 func unregister_craft(craft_id: String) -> void:
 	_owners.erase(craft_id)
 	if _focus == craft_id:
 		_focus = String(_owners.keys()[0]) if not _owners.is_empty() else ""
+func get_flight_state(craft_id: String) -> RefCounted:
+	return _owners[craft_id].get_flight_state() if _owners.has(craft_id) else null
 func focus_craft(craft_id: String) -> bool:
 	if not _owners.has(craft_id): return false
 	_focus=craft_id; return true

@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Read-only system map. Requests never move ships or load missions locally.
 const CANVAS = preload("res://scripts/ui/star_map_canvas.gd")
+const WING_PANEL = preload("res://scripts/ui/space_wing_panel.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 var _provider: Callable
 var _commands: Callable
@@ -22,6 +23,7 @@ var _view_homebase: Button
 var _sites: Dictionary = {}
 var _sites_row: VBoxContainer
 var _fleet_selector: OptionButton
+var _wing_panel
 var _visit_list: VBoxContainer
 var _visit_buttons: Dictionary={}
 var _details: PanelContainer
@@ -33,6 +35,8 @@ func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_commands = command_handler
 	if not _built:
 		_build()
+	else:
+		_wing_panel.configure(_provider, _commands)
 	refresh()
 
 func _process(delta: float) -> void:
@@ -165,6 +169,9 @@ func _build() -> void:
 	_error.name = "CommandError"
 	information.add_child(_error)
 	information.add_child(_visit_list)
+	_wing_panel = WING_PANEL.new()
+	information.add_child(_wing_panel)
+	_wing_panel.configure(_provider, _commands)
 	_style_buttons()
 	resized.connect(_layout_details)
 	_layout_details()
@@ -266,6 +273,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		return
 	var previous_phase: String = String(Dictionary(_runtime.get("space_travel", {})).get("phase", ""))
 	_runtime = snapshot.duplicate(true) if not snapshot.is_empty() else (Dictionary(_provider.call()) if _provider.is_valid() else {})
+	_wing_panel.refresh(_runtime)
 	var travel: Dictionary = _runtime.get("space_travel", {})
 	var phase: String = String(travel.get("phase", "grounded"))
 	var fleet_signature:=JSON.stringify(_runtime.get("crafts",[]))

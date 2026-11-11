@@ -1,5 +1,17 @@
 # TASK_ROADMAP
 
+### Weltraumkampf geplant — 11.11.2026
+
+Bestätigtes Konzept mit flexiblen Rotten1–6, gemeinsamen Aufträgen, beiden
+Flugarten, Manövern, Skill, Komponenten und Effekten festgehalten.
+AP00–AP20: gemeinsame Zustandsbasis → Raumflug/Rotten → Eskortengefecht →
+Manöver/VFX → Heimatcheckpoint/Service/Kampagne → Authority/native Abnahme.
+Alle Pakete offen; bestehende Taskprioritäten bleiben unverändert.
+[Konzept](dev/space_combat_contract.md) ·
+[Umsetzungsplan](superpowers/plans/2026-11-11-space-combat.md) ·
+[Task](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
+Bewusst native Taskbasis84dd481b1, keine Main-/Release-/Performancefreigabe.
+
 ### Hex-Korridorcache vollständig angebunden — 11.11.2026
 
 AP4 nutzt vollständige revisionierte Komponenten statt lokaler Teilgruppen.

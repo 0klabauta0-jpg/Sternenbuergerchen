@@ -3,6 +3,7 @@ extends RefCounted
 ## SimulationRoot's runtime adapter may confirm lifecycle changes or advance time.
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
 const TRUSTED_OPERATIONS := ["initialize_surface", "launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
 const MAX_ADVANCE_SECONDS: float = 60.0
@@ -12,7 +13,9 @@ var _phase: String = "grounded"
 var _craft_id: String = ""
 var _orbit_id: String = ""
 var _orbit_marker_id: String = ""
-var _position := Vector2(0.25, 0.62)
+var _flight: RefCounted = FLIGHT.new()
+var _position: Vector2:
+	get: return Vector2(_flight.get_snapshot().position_plane) / GRID.EXTENT
 var _origin_position := Vector2(0.25, 0.62)
 var _target_orbit_id: String = ""
 var _target_orbit_marker_id: String = ""
@@ -25,12 +28,13 @@ var _requests: Dictionary = {}
 var _route_hexes: Array[Vector2i] = []
 var _route_control := Vector2.ZERO
 var _route_destination := Vector2.ZERO
-var _heading: float = 0.0
+var _heading: float:
+	get: return float(_flight.get_snapshot().heading_rad)
 # Internal prepared-area transaction integrity, not a separate travel/pose owner.
 var _space_area_epoch := 0
 var _space_area_seal := ""
 
-func configure() -> Dictionary:
+func configure(craft_id: String = "") -> Dictionary:
 	_space_area_epoch += 1
 	_space_area_seal = str(get_instance_id()) + ":" + str(_space_area_epoch) + ":" + str(Time.get_ticks_usec())
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DEFINITION_PATH))
@@ -42,7 +46,8 @@ func configure() -> Dictionary:
 	_craft_id = ""
 	_orbit_id = ""
 	_orbit_marker_id = ""
-	_position = _orbit_position("moon_orbit")
+	if not _flight.configure(craft_id if not craft_id.is_empty() else "__unassigned__", {"position_plane": _orbit_position("moon_orbit") * GRID.EXTENT}).ok:
+		return _reject("invalid_flight", "Flugzustand ungueltig")
 	_origin_position = _position
 	_target_orbit_id = ""
 	_target_orbit_marker_id = ""
@@ -52,8 +57,14 @@ func configure() -> Dictionary:
 	_revision = 0
 	_requests.clear()
 	_route_hexes.clear()
-	_heading = 0.0
 	return {"ok": true}
+
+func get_flight_state() -> RefCounted:
+	return _flight
+
+func _set_travel_pose(position: Vector2, heading: float) -> void:
+	var committed: bool = _flight.commit_travel_pose(position * GRID.EXTENT, heading)
+	assert(committed)
 
 func is_quantum_active() -> bool:
 	return _phase == "quantum"
@@ -72,6 +83,8 @@ func get_snapshot() -> Dictionary:
 		"location_orbits": Dictionary(_definition.get("location_orbits", {})).duplicate(true)}
 
 func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
+	if _flight.get_snapshot().get("motion_mode") == "tactical":
+		return _reject("combat_active", "Raumkampf blockiert Reiseaktionen")
 	if _definition.is_empty() or typeof(command.get("contract_category")) != TYPE_STRING or command.get("contract_category") != "singleplayer_space_travel" or typeof(command.get("operation")) != TYPE_STRING or typeof(command.get("payload")) != TYPE_DICTIONARY or typeof(command.get("request_id", "")) != TYPE_STRING:
 		return _reject("invalid_command", "Reiseauftrag ungueltig")
 	var operation: String = command.operation
@@ -121,6 +134,8 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 func _launch(payload: Dictionary) -> Dictionary:
 	if _phase != "grounded":
 		return _reject("trip_active", "Ein Schiff ist bereits im Weltraum")
+	if not _flight.bind_craft(String(payload.craft_id), true):
+		return _reject("craft_mismatch", "Flugzustand gehoert einem anderen Schiff")
 	_craft_id = String(payload.craft_id)
 	_arrive("moon_orbit")
 	return {"ok": true}
@@ -150,7 +165,7 @@ func _start_quantum(payload: Dictionary, context: Dictionary = {}) -> Dictionary
 	_route_destination = GRID.normalized(GRID.cell_from_record(marker))
 	_route_control = GRID.route_control(_origin_position, _route_destination)
 	_route_hexes = GRID.route(_origin_position, _route_control, _route_destination)
-	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, 0.0)
+	_set_travel_pose(_position, GRID.route_heading(_origin_position, _route_control, _route_destination, 0.0))
 	_orbit_id = ""
 	_orbit_marker_id = ""
 	_location_id = ""
@@ -175,8 +190,7 @@ func _advance(payload: Dictionary) -> Dictionary:
 	var duration: float = _active_jump_duration_seconds
 	_elapsed_seconds = minf(duration, _elapsed_seconds + delta)
 	_progress = clampf(_elapsed_seconds / duration, 0.0, 1.0)
-	_position = GRID.route_point(_origin_position, _route_control, _route_destination, _progress)
-	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, _progress)
+	_set_travel_pose(GRID.route_point(_origin_position, _route_control, _route_destination, _progress), GRID.route_heading(_origin_position, _route_control, _route_destination, _progress))
 	_revision += 1
 	if _progress >= 1.0:
 		_arrive(_target_orbit_id, _target_orbit_marker_id)
@@ -229,7 +243,7 @@ func _arrive(orbit: String, marker_id: String = "orbit_1") -> void:
 	_phase = "orbit"
 	_orbit_id = orbit
 	_orbit_marker_id = marker_id
-	_position = GRID.normalized(GRID.cell_from_record(GRID.orbit_marker(_definition.orbits[orbit], marker_id)))
+	_set_travel_pose(GRID.normalized(GRID.cell_from_record(GRID.orbit_marker(_definition.orbits[orbit], marker_id))), _heading)
 	_target_orbit_id = ""
 	_target_orbit_marker_id = ""
 	_route_hexes.clear()
@@ -312,6 +326,8 @@ func _initialize_surface(payload: Dictionary) -> Dictionary:
 	if _phase != "grounded" or not _craft_id.is_empty() or _revision != 0: return _reject("craft_already_initialized", "Schiff besitzt bereits einen Reiseverlauf")
 	var location := String(payload.get("location_id", ""))
 	if location != "polisa" or not Dictionary(_definition.location_orbits).has(location): return _reject("invalid_surface_origin", "Lokaler Erwerbsort ungültig")
+	if not _flight.bind_craft(String(payload.craft_id)):
+		return _reject("craft_mismatch", "Flugzustand gehoert einem anderen Schiff")
 	_craft_id = String(payload.craft_id)
 	_arrive(String(_definition.location_orbits[location]))
 	_phase = "surface"

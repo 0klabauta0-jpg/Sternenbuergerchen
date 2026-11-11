@@ -1,5 +1,41 @@
 # IMPLEMENTATION_STATUS
 
+### Weltraumkampf AP01 — gemeinsamer Flugzustand und Takt — 11.11.2026
+
+Reise-/Kampfakteure referenzieren je Schiff denselben Flugzustand; Root
+koordiniert Raum- und vorhandenen Basistakt, prüft Raumakteuraufnahme und
+indizierte Bewegung. Warp-Equipmentstand des parallelen Branches integriert,
+kein doppelter Komponentenowner. Kleine Prüfungen: Reise69/69, Flotte8/8,
+Root27/27, echte Szene mit Heimat-/Sternkartenwechsel14/14 bei30/60/144
+Renderbegrenzung, Warpowner42/42 und Root7/7. Alte umfangreiche Orbitfixture
+bleibt wegen vier veralteter Satellitenorbitannahmen keine Gesamtfreigabe.
+AP02 und AP04 besitzen isolierte Helfer, Produktanbindung und AP03/AP05–20
+bleiben offen. QA: [space_combat_20261111](qa/space_combat_20261111/README.md).
+Keine vollständige Kampf-, Grafik-, Performance- oder Multiplayerabnahme.
+
+### Weltraumkampf AP00 — Commandgrenze — 11.11.2026
+
+Erster isolierter Baustein für Rotten-/Auftragscommands: Eingabe-, Rechte-,
+Revisions-, Ziel- und Replay-Vorprüfung ohne Gameplaymutation.
+Temporäres Minimalprojekt20/20 einschließlich privater user://-Schreibprobe;
+kein Produktanschluss oder Kampfsystem. AP01–AP20 offen. Separater Branch
+task/space-combat-implementation-20261111 auf Planstand und Groundcommit;
+paralleler nativer Adapterstand b3f9ab26d vor AP01 gezielt abzugleichen.
+Task: [SPACE_COMBAT_EXECUTION_2026_11_11.md](tasks/SPACE_COMBAT_EXECUTION_2026_11_11.md).
+
+### Weltraumkampf-Konzept und Arbeitspakete — 11.11.2026
+
+Vom Nutzer bestätigtes Konzept dokumentiert: Rotten1–6, gemeinsame Aufträge,
+eine Kampfebene/2,5D, gekoppelter und ausgekoppelter Flug, J-Hook/Manöver,
+Pilotenskill, Repeater sowie Waffen-/Schild-/Kraftwerkstausch und sichtbare VFX.
+21 kleine AP00–AP20 mit fünf Meilensteinen, konkreten Schnittstellen,
+Prüffällen und vollständiger Festlegungszuordnung. Keine Umsetzung gestartet.
+Doku-Branch task/space-combat-plan-20261111 bewusst auf dem noch nicht
+integrierten nativen Stand84dd481b1; vor Umsetzung Basis/Owner erneut abgleichen.
+Konzept: [space_combat_contract.md](dev/space_combat_contract.md).
+Plan: [2026-11-11-space-combat.md](superpowers/plans/2026-11-11-space-combat.md).
+Task: [SPACE_COMBAT_2026_11_11_PLAN.md](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
+Keine Engine-/Sicht-/Performance-/MP-Abnahme, kein Mainmerge oder EXE.
 
 ### Echte Travelvorbereitung für lokale Orbitaufnahme — 11.11.2026
 

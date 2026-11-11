@@ -63,6 +63,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_screen.call("bind_personnel_loadout_simulation", _simulation, Array(_flow.get("_all_team_units")))
 
 	_simulation.call("configure_space_encounter",_space_encounter)
+	_simulation.call("configure_space_runtime_tick", Callable(self, "advance_space_travel"))
 	if _campaign_mode:
 		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
 		if not checkpoint.is_empty():
@@ -153,7 +154,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -195,6 +196,7 @@ func sync_crafts() -> void:
 				break
 
 	if _base_personnel != null: _base_personnel.call("_refresh_capacity")
+	sync_space_wings()
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
@@ -202,7 +204,24 @@ func _home_pad_for(craft_id: String) -> String:
 func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
+func sync_space_wings() -> Dictionary:
+	if _simulation == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	var definitions: Variant = _flow.get("_homebase_aircraft_definitions")
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(definitions) != TYPE_ARRAY or typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var craft_ids: Array = []
+	for definition in definitions:
+		if typeof(definition) == TYPE_DICTIONARY and typeof(definition.get("craft_id")) == TYPE_STRING:
+			craft_ids.append(definition.craft_id)
+	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
+
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "space_wing_command":
+		if typeof(payload.get("command")) != TYPE_DICTIONARY:
+			return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
 	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
@@ -691,6 +710,45 @@ func advance_space_travel(delta: float) -> void:
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
 		_finish_space_encounter_result()
+
+func _request_space_wing_command(command: Dictionary) -> Dictionary:
+	if _simulation == null or _travel == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	if command.get("contract_category") != "space_combat" or typeof(command.get("payload")) != TYPE_DICTIONARY:
+		return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+	var operation := String(command.get("operation", ""))
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set"]:
+		return _reject("unsupported_operation", "Dieser Rottenauftrag ist noch nicht verfuegbar")
+	var prior: Dictionary = _simulation.check_space_wing_replay(command, "singleplayer")
+	if prior.get("found", false):
+		return prior.result
+	var routes: Dictionary = _travel.get_snapshot().get("routes", {})
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var payload: Dictionary = command.payload
+	var wing_id: String = String(payload.get("wing_id", ""))
+	var wings: Dictionary = _simulation.get_space_wing_snapshot().get("wings", {})
+	var affected: Dictionary = {}
+	if wings.has(wing_id):
+		for id in wings[wing_id].craft_ids: affected[id] = true
+	for key in ["craft_id", "leader_craft_id"]:
+		if typeof(payload.get(key)) == TYPE_STRING and not String(payload[key]).is_empty():
+			affected[payload[key]] = true
+	var phase := "grounded"
+	for id in affected:
+		if not routes.has(id): return _reject("unknown_craft", "Schiff ist nicht in der eigenen Flotte")
+		var craft_phase: String = String(_travel.get_snapshot(id).get("phase", ""))
+		var flight: RefCounted = _travel.get_flight_state(id)
+		if flight != null and flight.get_snapshot().motion_mode == "tactical":
+			phase = "tactical"
+		elif craft_phase in ["orbit", "stopped"] and phase != "tactical":
+			phase = "orbit"
+		elif craft_phase != "grounded":
+			return _reject("craft_busy", "Schiff ist auf einem nicht unterbrechbaren Flug oder Anflug")
+	var context := {"authorized":true, "actor_id":"singleplayer", "phase":phase,
+		"owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
+	return _simulation.request_singleplayer_command(command.duplicate(true), context)
 
 func validate_space_launch(craft_id: String, observe_progress: bool = true) -> Dictionary:
 	if String(_travel.get_snapshot(craft_id).phase) != "grounded":

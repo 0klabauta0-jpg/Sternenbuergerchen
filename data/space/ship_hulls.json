@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "fixture_only": true,
+  "hulls": {
+    "space_fixture_light": {
+      "footprint_hexes": [[0, 0]],
+      "mass": 1.0,
+      "main_thrust": 2.0,
+      "reverse_thrust": 2.0,
+      "side_thrust": 2.0,
+      "turn_acceleration": 1.0
+    }
+  }
+}
