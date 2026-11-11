@@ -161,6 +161,11 @@ Verifier und diese Statusdokumentation.
   nicht angeschlossen; andernfalls würden mehrere Schiffe denselben Punkt
   ansteuern. Daher ausdrücklich kein produktiver Taktanschluss und keine
   spielbare Auftragsausführung behauptet.
+- AP06 Einzel-Guidance-Vorstufe: separates Fixture berechnet aus Ziel und
+  Geschwindigkeit Vorwärts-/Seitenschub und bremst; ein einzelner simulierter
+  Flug erreicht sein Ziel mit geringer Geschwindigkeit. Prüfung5/5 sowie
+  Flugresolver8/8 und Zielresolver10/10. Keine Kollisionsvermeidung,
+  Formationsziele oder Bindung an echte Ausrüstungswerte; nicht im Produktpfad.
 - AP02/AP03/AP04/AP05/AP06 Rest und AP07–AP20: offen.
 
 ## Risiken / offene Punkte
