@@ -206,7 +206,20 @@ Verifier und diese Statusdokumentation.
   belegte Zielfelder ohne Mutation. Prüfung7/7 einschließlich echter
   gebietsspezifischer Registry, Flight- und Footprintchecks
   grün. Sie ist keine Berechtigungsprüfung: reale Körper-/Reisezuordnung,
-  Travelrevision, Rottenrevision, Token und atomarer Commit fehlen weiterhin.
+  Travelrevision, Rottenrevision, produktiver Token und atomarer Commit fehlen
+  in dieser reinen Vorschau weiterhin.
+- AP04a Root-Ownerfixture: `prepare_space_area_transition`,
+  `commit_space_area_transition` und `release_space_area_transition` sind
+  ausschließlich für `space_fixture_`-IDs und einen expliziten Test-Fleetowner
+  nutzbar. Geprüft werden unter anderem Orbit-/Revisionsbindung,
+  Mehrfachrequest, Belegung, Abbruch, Ablauf, ein stiller Übernahmepfad und
+  erneuter Commit; Test18/18. Normale lokale Flugcommits bleiben gesperrt.
+  Dies ist **keine produktive atomare Transaktion**: Der synchron geprüfte
+  Fixture-Tail setzt nicht fehlschlagende Fixture-Ownercommits voraus und hat
+  keinen Rollback; echter Travelcandidate, Root-generierter Berechtigungs-
+  kontext, Supply/Campaign/Departure, Events und native Integration fehlen.
+  Vor Produktfreigabe müssen diese Voraussetzungen und Fehlerfälle gemeinsam
+  abgesichert werden; keine Fuel-/Oberflächenfreigabe aus diesem Pfad.
 - AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
   Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
   strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
