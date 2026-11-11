@@ -152,6 +152,15 @@ Verifier und diese Statusdokumentation.
   Wiederholung ist idempotent, Abbruch prüft die aktuelle Auftrags-ID.
   Inaktive oder fremde Rotten verhindern die gesamte Änderung. 13/13;
   Adapter, UI, Flugausführung und Speicherung sind noch nicht angeschlossen.
+- AP06 Navigationsvorstufe: reiner Ziel-/Statusresolver für Bewegen,
+  Patrouille, Sichern und Rückzug; Ankunft erfordert auch niedrige
+  Geschwindigkeit, blockierte Gruppen liefern keine Bewegungsabsicht und
+  abgeschlossene Aufträge keine alten Absichten. 10/10, Owner13/13,
+  Kollisionsbatch8/8. Ruling: gemeinsames Ziel hier nur als abstrakte
+  Absicht ausgeben — Formation, Bremssteuerung und Korridorauflösung sind
+  nicht angeschlossen; andernfalls würden mehrere Schiffe denselben Punkt
+  ansteuern. Daher ausdrücklich kein produktiver Taktanschluss und keine
+  spielbare Auftragsausführung behauptet.
 - AP02/AP03/AP04/AP05/AP06 Rest und AP07–AP20: offen.
 
 ## Risiken / offene Punkte

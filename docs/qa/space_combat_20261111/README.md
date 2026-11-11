@@ -19,6 +19,8 @@ Läufen mit privatem APPDATA; keine echten Spielerprofile wurden verwendet.
   Aktionen aus dem Fenster; erneute Prüfung nach Umordnung erfolgreich.
 - AP06-Auftragsowner 13/13: gemeinsame Vergabe, passive Regeln, Replay,
   Abbruch und atomare Ablehnung bei inaktiver Rotte. Keine Flugausführung.
+- AP06-Ziel-/Statusresolver 10/10: Anflug, Geschwindigkeit bei Ankunft,
+  Rückzug, Sichern, Patrouillenwechsel und Blockade. Kein Flugtaktanschluss.
 - AP03 Kostenprobe: jeweils25 wiederholte, identische Einzel-Sweeps in einem
   headless Lauf. Einfeldjäger P95 106→93µs, dreizelliger Rumpf 833→442µs
   nach geometrischer Kandidatenbegrenzung; Dateien `space_sweep_cost_before.log`
