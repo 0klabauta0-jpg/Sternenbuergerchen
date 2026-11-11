@@ -2,6 +2,15 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+Neuester Raumanschluss: Source60dc78f62 als562373d13 integriert. Der lokale
+Rueckweg nutzt echte Adapter-/Ownergrenzen fuer gemeinsamen Fuel-/Flight-/Index-/
+Travelcommit. Private erweiterte SurfaceGroupprobe und enger unabhaengiger Review
+bestanden. UI-Ansichtswechsel und Narrowprovider in d42b3f973 (10/0, Compiles0,
+enger Review ohne Blocker); explizite Schiffswahl, keine Defaultuebernahme.
+Noch offen: produktiver Warpeintritt, lokaler Anflugabbruch und Live-V3-/Einmarker-
+Umschaltung. Neue produktive Katalog-/Darstellungsbereitschaft wird vorbereitet,
+LiveJSON bleibt bis zur gemeinsamen Umschaltung V2. AP6 und AP7/8 nicht fertig.
+
 AP6a Source86347ca54 ist nach engem unabhaengigem Review als69194ddab integriert.
 Frischer privater gemeinsamer Lifecycle64/0 samt Quell-/Profil-/Isolationsguards.
 Gruppenplatzierung und echte Actoraufnahme/-freigabe sind vorhanden, produktive
