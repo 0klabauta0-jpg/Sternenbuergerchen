@@ -1,4 +1,16 @@
-# Prepared Campaign Departure (unverdrahtet)
+# Prepared Campaign Departure
+
+## Aktueller Anschluss
+
+Seit Elternintegration e205137d6 verwendet Root diesen Owneranschluss in der
+produktiven Abflug-/Anfluggruppe. Supply, Campaign, optional Travel und lokale
+Flight-/Raumindexaenderung werden vor dem ersten Write geprueft und gemeinsam
+publiziert. Adaptertoken und aeusserer Operationsbeleg stehen vor Events bereit.
+Private Integrationsnachweise: `docs/qa/orbit_owner_integration_20261111/parent_departure`.
+Dies ist keine native Boarding-/Gesamtreiseabnahme. Der folgende Abschnitt
+beschreibt den urspruenglichen eigenstaendigen Slice, nicht den heutigen Aufruferstatus.
+
+## Urspruenglicher Owner-Slice
 
 Der bestehende Campaignowner kann einen zusammengehoerigen bind_departure- und optionalen activate_job-Patch vorbereiten, revalidieren und still publizieren. Es gibt noch keinen produktiven Aufrufer. Root muss kuenftig ALLE Owner vor jeder gemeinsamen Mutation pruefen und erst nach allen Publications Events senden.
 

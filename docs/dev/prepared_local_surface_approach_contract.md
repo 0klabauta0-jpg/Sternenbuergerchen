@@ -1,4 +1,11 @@
-# Prepared Local Begin Approach: unverdrahteter Anhang
+# Prepared Local Begin Approach
+
+Aktueller Anschluss seit Elternintegration e205137d6: Root benutzt den folgenden
+vorbereiteten Travelpatch fuer die produktive Abflug-/Anfluggruppe einschliesslich
+Saum-/Footprintpruefung und stiller Flightdeaktivierung/Raumindexfreigabe. Nachweis:
+`docs/qa/orbit_owner_integration_20261111/parent_departure`. Native Boarding- und
+Gesamtreisepruefung bleiben offen. Die nachfolgende Beschreibung und 10/0-Zahl
+beziehen sich auf den urspruenglichen unverdrahteten Owner-Slice.
 
 Die vorhandenen drei Fleet-Prepared-APIs akzeptieren zusaetzlich operation begin_approach mit exakt zwei Payloadfeldern craft_id und location_id, beide Strings. Der bestehende registrierte Rootkontext hat weiterhin neun Felder und dieselbe Objectauthority-, Serial-, Seal- und Replaygrenze. Kein neuer Commandrouter oder Productcaller.
 

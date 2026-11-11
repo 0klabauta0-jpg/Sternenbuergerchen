@@ -1,5 +1,12 @@
 # Prepared Supply Route Fuel
 
+Aktueller Anschluss seit Elternintegration e205137d6: Root verwendet die
+Vorbereitung fuer die gemeinsame produktive Abflug-/Anfluggruppe. Der unten
+beschriebene urspruengliche Slice war noch unverdrahtet. Nachweis:
+`docs/qa/orbit_owner_integration_20261111/parent_departure`. Produktiver lokaler
+Rueckweg ist separat in Arbeit; diese Fortschreibung behauptet keine native
+Boarding-/Rueckflug-/Save-/Performanceabnahme.
+
 Unverdrahteter interner Owneranschluss; alte apply_command/consume_route_fuel-Pfade
 bleiben unverändert. Einmal gebundene lebende Objectcapability ist Pflicht, UIflags
 allein nie Authority. Bindung bleibt bis configure/erfolgreichem Restore gesperrt,
