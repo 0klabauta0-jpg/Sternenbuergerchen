@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### Isolierte Hex-Runtime-Grundlagen — 11.11.2026
+
+Eigener Branch task/hex-ground-foundation-20261111 auf dem noch nicht
+integrierten nativen Rampenstand97e00aba1. Atomare Ground-Zulassung mit einem
+NPC pro Feld, reine Hexsicht mit präziser Rampenhöhe, begrenzte tickübergreifende
+Geometrie-LRU im bestehenden Cache und stabile Erkennungsepisoden implementiert.
+Kleine Privatprojektchecks25/0,38/0,21/0; frischer Read-only-Review ohne Blocker.
+Noch keine aktive Missions-/Basis-/Bewegungsanbindung, keine Feld-/Kanten-
+reservierungsausführung und keine FPSfreigabe. Große Tests/AP9 bleiben später.
+Ein früherer fachlich grüner Lauf wurde wegen Profilvergleich verworfen;
+Fehlversuche erhalten, finale drei Schutzprüfungen grün.
+Task: docs/tasks/HEX_RUNTIME_FOUNDATION_2026_11_11.md.
+QA: docs/qa/hex_runtime_foundation_20261111/README.md.
+
+
 ### Rüstung R06 und überarbeiteter Grundkörper —11.11.2026
 
 Isolierter Taskstand auf7ef57c931. Nach ausdrücklicher neuer Nutzerfreigabe

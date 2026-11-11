@@ -1,0 +1,230 @@
+{
+  "base": "97e00aba14ced147b268113085854ac67dc764c5",
+  "engine": "4.6.2.stable.official.71f334935",
+  "scope": "isolated foundations; no active mission/movement or FPS acceptance",
+  "final": {
+    "ground": {
+      "run": "ground-ef40a7b1f6184d30808cd74c6e0dfe21",
+      "case": "ground",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        25,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407816665087200
+    },
+    "visibility": {
+      "run": "visibility-82c34093d10747b784abdef399086e51",
+      "case": "visibility",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        38,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407821423587500
+    },
+    "detection": {
+      "run": "detection-6288155884af4018abfb23f10661554f",
+      "case": "detection",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        21,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407825937087300
+    }
+  },
+  "all_attempts": [
+    {
+      "run": "detection-54586130c9df4afc80f50517e9fafdf7",
+      "case": "detection",
+      "passed": false,
+      "exit_code": 1,
+      "checks": [
+        0,
+        1
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407491923587000
+    },
+    {
+      "run": "detection-6288155884af4018abfb23f10661554f",
+      "case": "detection",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        21,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407825937087300
+    },
+    {
+      "run": "detection-9b03450322f94cf298e27c1ef5d78963",
+      "case": "detection",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        17,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407517759089200
+    },
+    {
+      "run": "ground-36671a04e2e94403ae917da7a2664cad",
+      "case": "ground",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        20,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794406921767588900
+    },
+    {
+      "run": "ground-44b337cb826d4d87bc199886baedbc82",
+      "case": "ground",
+      "passed": false,
+      "exit_code": 1,
+      "checks": [
+        0,
+        1
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794406862035587500
+    },
+    {
+      "run": "ground-dc14ec5bd9834131a0a5b5195e77f6a6",
+      "case": "ground",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        23,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407608955088600
+    },
+    {
+      "run": "ground-ea507a89ff8a41ecb69ebc2c928eba2e",
+      "case": "ground",
+      "passed": false,
+      "exit_code": 1,
+      "checks": [
+        0,
+        1
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794406825085588900
+    },
+    {
+      "run": "ground-ef40a7b1f6184d30808cd74c6e0dfe21",
+      "case": "ground",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        25,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407816665087200
+    },
+    {
+      "run": "visibility-08c6a3cbd55948e6ad6cf669edeadd49",
+      "case": "visibility",
+      "passed": false,
+      "exit_code": 1,
+      "checks": [
+        0,
+        1
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407225400089300
+    },
+    {
+      "run": "visibility-82c34093d10747b784abdef399086e51",
+      "case": "visibility",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        38,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407821423587500
+    },
+    {
+      "run": "visibility-cd9a2469afe0465f84932c032e434ac7",
+      "case": "visibility",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        33,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407613524087400
+    },
+    {
+      "run": "visibility-d9bc51566ab142428ef31c171b066fbf",
+      "case": "visibility",
+      "passed": true,
+      "exit_code": 0,
+      "checks": [
+        30,
+        0
+      ],
+      "real_profile_unchanged": true,
+      "isolated": true,
+      "mtime": 1794407371451089500
+    },
+    {
+      "run": "visibility-e486ee91e1bc46f58f8c320f78c60ddd",
+      "case": "visibility",
+      "passed": false,
+      "exit_code": 0,
+      "checks": [
+        30,
+        0
+      ],
+      "real_profile_unchanged": false,
+      "isolated": true,
+      "mtime": 1794407321711087600
+    }
+  ],
+  "source_sha256": {
+    "scripts/core/hex_ground_runtime.gd": "90f695da5f290ebb6151b4bdd244004c0bd8e4ae6f384b1bfad94d8348c50295",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/hex_detection_state.gd": "07c0724dca9257bdc110cb202e8212a6a65e15dbce83f74a2d0f17f8f3afc0a5",
+    "scripts/mission/combat_visibility_cache.gd": "5e757fd1f573262c9bea7bbdcd18fd77a1b28fa4c9beecf8753ee1a2515faba3",
+    "scripts/tests/run_hex_tactical_check.py": "6c659647dd1e7f15255e6d6f7adf5f87b9d8ce6e04bab6c99508c5a5ab3908cc",
+    "scripts/tests/hex_ground_state_verifier.gd": "728ec17cae6b7422a636c2460ac9cc490812ef16aceacb8ae15eb29396c88098",
+    "scripts/tests/hex_visibility_verifier.gd": "1005627a328ea2eee2220e362e2b7be533857d27990462ae49ed2ce091b015d7",
+    "scripts/tests/hex_detection_verifier.gd": "09722b76a2a4600616df66ad0c3d00a3f2da56aaa5865c4efc28fb516690e413",
+    "docs/dev/explicit_hex_ramps_contract.md": "783d7779ad2e7d27148e457eb2f071f89536011f3f2b0a0612885f8cb0f681c3",
+    "docs/dev/hex_tactical_runtime_contract.md": "57d64becdd760b2d10ec6017f9cd49e0d09cbe3f4d54432bb02e3b4a811de226"
+  },
+  "evidence_sha256": "9352f6c319c88f6c7f213cdee19653434a54cfdbdefe3b5685a3a944f09aa40c"
+}

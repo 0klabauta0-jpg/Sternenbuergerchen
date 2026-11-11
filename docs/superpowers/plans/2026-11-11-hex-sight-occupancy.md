@@ -107,15 +107,15 @@ echtes Profil; FAIL/alte Baselinefehler werden getrennt ausgewiesen.
 `TerrainPathfinder.can_traverse_step(from_grid, to_grid, registry) -> bool`.
 Ausgabe: ein benannter gemeinsam integrierter Startcommit und API-Abgleich.
 
-- [ ] Relevante Regeln, Git-/Worktreestatus und den dann aktuellen Rampencommit lesen.
-- [ ] Prüfen, dass Version/Richtung serialisiert und revisioniert sind, beide
+- [x] Relevante Regeln, Git-/Worktreestatus und den dann aktuellen Rampencommit lesen.
+- [x] Prüfen, dass Version/Richtung serialisiert und revisioniert sind, beide
   Längsenden und passende seitliche Rampenanschlüsse legal sind und A*/HPA/
   Bewegung denselben Übergangspfad verwenden. Breiten-/Eck-/Editorregeln
   gehören dem Kartentask; hier keine alternative Rampenimplementierung anlegen.
-- [ ] Den Startcommit, eigene Dateigrenzen und ggf. konkrete APIabweichungen in
+- [x] Den Startcommit, eigene Dateigrenzen und ggf. konkrete APIabweichungen in
   der Taskdatei festhalten. Bei fehlender Rampenbasis keine alternative Rampe bauen.
-- [ ] Nur Dokument-/Diffprüfung ausführen; keine eigene große Rampenmatrix starten.
-- [ ] Den abgeglichenen Dokumentationsstand separat committen, falls verändert.
+- [x] Nur Dokument-/Diffprüfung ausführen; keine eigene große Rampenmatrix starten.
+- [x] Den abgeglichenen Dokumentationsstand separat committen, falls verändert.
 
 ### AP1: Versionierter logischer Ground-State und kleine Prüfgrundlage
 
@@ -162,18 +162,18 @@ terrain_registry: Node, profile: Dictionary) -> Dictionary` liefert
 verwendet diese Regeln; die alten booleschen LOS-Einstiege bleiben kompatibel.
 Die Aufnahme neuer Profilfelder erfordert einen Key-/Invalidierungscheck.
 
-- [ ] RED-Fixture: sechs Rotationen, Rand bei ±60 Grad, sichtbare Linie und
+- [x] RED-Fixture: sechs Rotationen, Rand bei ±60 Grad, sichtbare Linie und
   Vollblocker, Rampenhöhe H+0,5 ohne int-Verlust; vorhandene Legacy-Wandgrenze.
   Gleiche logische Abfrage in zwei Ticks erzeugt genau eine Terrainprüfung;
   reine Renderbewegung keine zusätzliche, Tür-/Rampenrevision eine neue.
-- [ ] `python scripts/tests/run_hex_tactical_check.py --case visibility` RED prüfen.
-- [ ] Zuerst Hexdistanz/Blickkegel filtern, dann kanonische Hexlinie auswerten.
+- [x] `python scripts/tests/run_hex_tactical_check.py --case visibility` RED prüfen.
+- [x] Zuerst Hexdistanz/Blickkegel filtern, dann kanonische Hexlinie auswerten.
   Reine Geometrie nach Spec cachen; `begin_tick` leert nur Legacy-Tickdaten.
   Karte/Registryidentität berücksichtigen, Key-Höhen als halbe Stufen führen.
   Cache auf 16.384 Beziehungen begrenzen; keine Weltkartenmaske je NPC anlegen.
-- [ ] Denselben Check GREEN ausführen und maximal den unmittelbar betroffenen
+- [x] Denselben Check GREEN ausführen und maximal den unmittelbar betroffenen
   vorhandenen LOS-Nachbarn prüfen. Keine neue Sicht-/Deckungsbalance einführen.
-- [ ] Commit: `perf: reuse hex visibility geometry across unchanged ticks`.
+- [x] Commit: `perf: reuse hex visibility geometry across unchanged ticks`.
 
 ### AP3: Gemeinsame Sicht für Erkennung, Sicherung, Schussprüfung und FoW
 
@@ -385,10 +385,12 @@ Baseline und Kandidat; aktive tatsächliche Arbeit und Fallzahlen protokollieren
   entscheiden. Bleibt etwas rot oder ungemessen, Kandidatenstatus erhalten;
   Testgrenzen, Akteurzahl oder Grafik nicht zum Erreichen eines grünen Werts ändern.
 
-## Abschlussstatus dieser Planungsrunde
+## Planung und nachfolgender Ausführungsstand
 
-Nur Dokumente werden erstellt, statisch geprüft und auf einem eigenen
-Taskbranch gesichert. Alle Umsetzungskästchen bleiben offen. Keine Engine-
-oder Performanceprüfung wird für diesen Plan erneut gestartet. Die spätere
-Ausführung erfolgt paketweise und sequenziell; Delegation nur bei gesondertem
-Auftrag beziehungsweise ausdrücklich gewähltem Ausführungsmodus.
+Die ursprüngliche Planungsrunde änderte nur Dokumente und startete keine
+Engine. Der danach geprüfte direkte Nutzerauftrag erlaubt die paketweise
+Ausführung mit kleinen Contractchecks, weiterhin ohne große Testreihen.
+AP0 ist auf97e00aba1 übernommen. AP2s isolierte Query-/Cachebausteine sowie
+Ground-State und Erkennungsepisoden sind im Foundation-Task belegt.
+AP1-Owner-/Versionsanbindung, AP3-Verbraucher und AP4–AP9 bleiben offen.
+Frischer Read-only-Review ohne Engine-/Dateiänderung und ohne Blocker.

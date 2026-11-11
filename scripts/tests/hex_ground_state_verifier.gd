@@ -58,6 +58,13 @@ func _run() -> void:
 	ramp.grid = Vector2i(99,99)
 	ramp.movement_state.moving = true
 	_check(state.read_unit("ramp").grid == Vector2i(2,0) and not state.read_unit("ramp").movement_state.moving, "read payload cannot mutate runtime")
+	var before_height: Dictionary = state.read_unit("ramp")
+	var before_cells: Dictionary = state.build_planning_snapshot().occupant_by_grid
+	terrain.get_tile_at_grid(Vector2i(2,0)).height_level=3
+	terrain.notify_tile_data_changed([Vector2i(2,0)])
+	var after_height: Dictionary = state.read_unit("ramp")
+	_check(after_height.stand_height_steps2==7 and after_height.terrain_revision>before_height.terrain_revision and after_height.state_revision==before_height.state_revision,"terrain height and revision stay fresh without mutating unit state")
+	_check(state.build_planning_snapshot().occupant_by_grid==before_cells,"terrain update preserves logical occupancy")
 	var snapshot: Dictionary = state.build_planning_snapshot()
 	snapshot.occupant_by_grid.clear()
 	snapshot.units_by_id.clear()
@@ -69,6 +76,15 @@ func _run() -> void:
 	_check(state.admit_units(_batch([{"unit_id":"replacement","grid":Vector2i.ZERO}])).ok, "released cell reusable")
 	state.clear()
 	_check(state.read_unit("b").is_empty() and not state.admit_units(_batch([{"unit_id":"x","grid":Vector2i.ZERO}])).ok, "clear removes context and claims")
+	state.configure(terrain,"second_map",0)
+	var empty: Dictionary = state.build_planning_snapshot()
+	_check(state.admit_units(_batch([])).ok and state.build_planning_snapshot()==empty,"empty admission is a no-op")
+	_check(not state.admit_units(_batch([{"unit_id":"x","grid":Vector2i.ZERO,"posture_key":null}])).ok,"invalid posture rejected")
+	var square: Node = REGISTRY.new()
+	square.configure_iso_grid(Vector2.ZERO,64.0,32.0,"square8")
+	state.configure(square,"legacy",0)
+	_check(not state.admit_units(_batch([{"unit_id":"x","grid":Vector2i.ZERO}])).ok,"legacy square registry cannot enable hex state")
+	square.free()
 	terrain.free()
 	_finish()
 

@@ -1,5 +1,14 @@
 # TASK_ROADMAP
 
+### Hex-Grundlagen umgesetzt, Integration offen — 11.11.2026
+
+AP0 auf97e00aba1 und isoliertes AP2-Query-/Cachepaket technisch geprüft.
+AP1-Datenhelper und AP3-Erkennungsepisoden vorhanden; Owner-/Versions- und
+Consumeranbindung sowie AP4–AP8 bleiben weitere Arbeit. Große Abnahme AP9
+auf Nutzerwunsch später. Keine aktive Bewegungsumstellung oder FPSfreigabe.
+Task: docs/tasks/HEX_RUNTIME_FOUNDATION_2026_11_11.md.
+
+
 ### Rüstung vor weiteren Fahrzeugmodellen —11.11.2026
 Nutzerpriorität: Fahrzeugmodelle zurückgestellt; später voraussichtlich
 Caterpillar zuerst. Aktuell drei Rüstungsstufen nach Kenney-Proportionen und
