@@ -192,6 +192,13 @@ Verifier und diese Statusdokumentation.
   Belegung oder Rotte zu mutieren. Saum-/Activityprüfung18/18, Flight21/21
   und Ersteintrittsfixture grün. Noch kein gemeinsamer Commit, keine
   Reaktivierung oder produktive Oberflächenfreigabe.
+- AP04a Raumowner-Lifecycle: Ein bereits inaktives Flightobjekt kann aus
+  aktivem Index, Steuerung und Korridorclaims genommen und mit derselben
+  Objektreferenz samt erhaltenem Footprint später wieder eingetragen werden.
+  Reaktivierungsvorschau prüft Flightrevision, ganze Fläche und Fremdbelegung;
+  belegtes Ziel bleibt inaktiv. 9/9, Claims-/Saum-/Ersteintrittschecks grün.
+  Root-Transaktion, Saum-/Travel-/Economyprüfung und produktiver Aufrufer
+  bleiben offen; der Raumowner erstellt keinen neuen Piloten-/Rottenzustand.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
