@@ -566,7 +566,8 @@ func authorize_departure(craft_id: String, approach_request_id: String = "") -> 
 		if _campaign_mode and not result.get("replayed", false): observe_campaign_progress()
 	return result
 
-func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
+func preview_return(craft_id: String) -> Dictionary:
+	# Read-only live visit and pilot check; no fuel or transfer mutation.
 	if Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty() or _home_pad_for(craft_id).is_empty():
 		return _reject("unknown_craft", "Kein reales Schiff mit Rueckkehrpad")
 	var binding: Dictionary = _craft_visit_binding(craft_id)
@@ -590,11 +591,16 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	var outward_token: String = "local-purchase:"+String(binding.get("origin_receipt_id", "")) if bool(binding.get("local_origin", false)) else String(_departure_token_by_craft.get(craft_id, ""))
 	if outward_token.is_empty():
 		return _reject("no_departure_receipt", "Bestaetigter Abflugbeleg fehlt")
+	return {"ok":true, "route":route, "outward_token":outward_token}
+
+func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
+	var preview: Dictionary = preview_return(craft_id)
+	if not preview.get("ok", false): return preview
 	# One return per accepted outward trip, regardless of whether the request
 	# came from a UI retry, automatic debrief, or the transport hook itself.
 	# Owner replay occurs before fuel validation, so a repeated success remains
 	# valid even if its original debit left less than another route's cost.
-	var result: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", route, "return:" + outward_token + ":fuel", {"departure_authorized": true})
+	var result: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", preview.route, "return:" + String(preview.outward_token) + ":fuel", {"departure_authorized": true})
 	if not request_id.is_empty():
 		result["return_request_id"] = request_id
 	return result

@@ -305,6 +305,9 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	if _fixture_area_receipts.has(token):
 		var receipt: Dictionary = _fixture_area_receipts[token]
 		if receipt.context != authority_context or receipt.owner != _singleplayer_space_travel_owner: return {"ok":false, "reason":"context_changed"}
+		if receipt.get("real_travel_fixture", false):
+			var verified: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.travel_candidate, receipt.travel_context)
+			if not verified.get("ok", false) or not verified.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		var replay: Dictionary = receipt.result.duplicate(true)
 		replay["replayed"] = true
 		return replay
@@ -329,9 +332,12 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	if prepared.surface_exit:
 		var return_preview: Dictionary = preview_surface_reactivation(prepared.craft_id, prepared.location_id, prepared.target, prepared.flight_revision, prepared.travel_revision, prepared.area_revision, prepared.wing_revision, authority_context)
 		if not return_preview.get("ok", false): return _reject_fixture_area_token(token, String(return_preview.get("reason", "invalid_geometry")))
-		var activity: Dictionary = flight.commit_space_activity_transition(return_preview.activity_proposal, return_preview.activity_tick)
-		assert(activity.get("ok", false))
-		indexed = _space_combat_state.reactivate_actor(prepared.craft_id).get("ok", false)
+		var activity: Dictionary = flight.validate_space_activity_transition(return_preview.activity_proposal, return_preview.activity_tick)
+		var reactivation: Dictionary = _space_combat_state.validate_reactivation(prepared.craft_id, return_preview.activity_proposal, return_preview.activity_tick)
+		if not activity.get("ok", false) or not reactivation.get("ok", false): return _reject_fixture_area_token(token, "reactivation_invalid")
+		flight._publish_space_activity_transition(activity)
+		_space_combat_state._publish_reactivation(reactivation)
+		indexed = true
 	else:
 		var geometry: Dictionary = SPACE_AREA_TRANSITION.preview(flight, prepared.flight_revision, prepared.body_id, prepared.target, prepared.footprint, _space_combat_state, tick_counter)
 		if not geometry.get("ok", false): return _reject_fixture_area_token(token, String(geometry.get("reason", "invalid_geometry")))
@@ -350,7 +356,7 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(prepared.travel_candidate, travel_validation) if prepared.real_travel_fixture else _singleplayer_space_travel_owner.commit_prepared_space_area_transition(prepared.travel_candidate, prepared.travel_context)
 	assert(travel_result.get("ok", false))
 	var result := {"ok":true, "replayed":false}
-	_fixture_area_receipts[token] = {"context":prepared.context, "owner":prepared.owner, "result":result.duplicate(true)}
+	_fixture_area_receipts[token] = {"context":prepared.context, "owner":prepared.owner, "result":result.duplicate(true), "real_travel_fixture":prepared.real_travel_fixture, "travel_candidate":prepared.travel_candidate.duplicate(true), "travel_context":prepared.travel_context.duplicate(true)}
 	_fixture_area_tokens.erase(token)
 	return result
 

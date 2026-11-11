@@ -65,8 +65,10 @@ func _initialize() -> void:
 	if state.get_actor(id) != flight or state.get_inactive_actor(id) != null or flight.get_snapshot().motion_mode != "tactical": failed += 1
 	if fleet.get_snapshot(id).phase != "orbit" or fleet.get_snapshot(id).orbit_id != "planet_orbit" or wings.get_snapshot().wings.size() != 1: failed += 1
 	if not sim.commit_space_area_transition(String(prepared.get("token", "")), context).get("replayed", false): failed += 1
+	if not fleet._owners[id].configure(id).get("ok", false) or fleet.get_flight_state(id) != flight: failed += 1
+	if sim.commit_space_area_transition(String(prepared.get("token", "")), context).get("reason") != "owner_changed": failed += 1
 	sim.free()
-	print("SPACE_SURFACE_REAL_REACTIVATION passed=", 15 - failed, " failed=", failed)
+	print("SPACE_SURFACE_REAL_REACTIVATION passed=", 17 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _travel(fleet: RefCounted, operation: String, payload: Dictionary, request_id: String, context: Dictionary) -> Dictionary:

@@ -157,8 +157,11 @@ func run() -> void:
 	check(adapter.request_operation("station_handoff_crew",{"craft_id":id,"source_craft_id":"visitor","target_craft_id":id,"unit_ids":["pilot"],"pilot_id":"pilot","request_id":"crew-route","service_location_id":"polisa"}).ok and flow.crew_calls[1] == ["handoff","visitor",id,["pilot"],"pilot","crew-route"],"Handoff UI command routes explicit source/target/crew/pilot without choosing people")
 	check(adapter.request_operation("station_board_crew",{"craft_id":id,"service_location_id":"polisa"}).ok and flow.crew_calls[2] == ["board",id],"Explicit boarding routes selected target to existing Flow boarding gates")
 	check(not adapter.request_operation("station_handoff_crew",{"craft_id":id,"source_craft_id":"visitor","target_craft_id":"different","unit_ids":["pilot"],"pilot_id":"pilot"}).ok and flow.crew_calls.size() == 3,"Mismatched target never reaches crew mutation bridge")
+	var before_preview := fingerprint(adapter, flow)
+	check(not adapter.preview_return(id).ok and fingerprint(adapter, flow) == before_preview, "Unmanned return preview rejects without mutation")
 	check(not adapter.authorize_return(id).ok,"Unmanned local craft cannot authorize return")
 	controller.pilot_ready = true
+	check(adapter.preview_return(id).ok and fingerprint(adapter, flow) == before_preview, "Boarded pilot preview does not debit fuel or mutate visit")
 	var fuel_before: float = adapter._supply.get_supply_snapshot().fuel_by_craft_id[id]
 	check(adapter.authorize_return(id,"first-return").ok and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Real local-origin return uses existing Polisa fuel route")
 	check(adapter.authorize_return(id,"second-return").get("replayed",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Local purchase return debit is once regardless UI request IDs")

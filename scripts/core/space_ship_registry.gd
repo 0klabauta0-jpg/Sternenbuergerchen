@@ -60,6 +60,23 @@ func get_area_actor_ids(area_id: String) -> Array[String]:
 func get_indexed_actor_cells(craft_id: String) -> Array:
 	return Array(_actor_cells.get(craft_id, [])).duplicate()
 
+func can_register_actor(craft_id: String, flight: RefCounted) -> bool:
+	return not craft_id.strip_edges().is_empty() and flight != null and not _actors.has(craft_id) and not _actor_cells.has(craft_id) and not _actor_areas.has(craft_id) and flight.get_snapshot().get("craft_id") == craft_id
+
+func _publish_register_actor_cells(craft_id: String, flight: RefCounted, area_id: String, cells: Array) -> void:
+	# Root-private tail: identity, cells and occupancy were checked immediately
+	# before the coordinated Flight transition. No callbacks or revalidation.
+	_actors[craft_id] = flight
+	_actor_cells[craft_id] = cells.duplicate()
+	_actor_areas[craft_id] = area_id
+	if not _area_actors.has(area_id): _area_actors[area_id] = {}
+	_area_actors[area_id][craft_id] = true
+	if not _cells.has(area_id): _cells[area_id] = {}
+	for cell in cells:
+		if not _cells[area_id].has(cell): _cells[area_id][cell] = {}
+		_cells[area_id][cell][craft_id] = true
+	_area_revisions[area_id] = get_area_revision(area_id) + 1
+
 func actor_cells_match(craft_id: String, area_id: String, cells: Array[Vector2i]) -> bool:
 	if _actor_areas.get(craft_id, null) != area_id: return false
 	var indexed: Array = _actor_cells.get(craft_id, [])
