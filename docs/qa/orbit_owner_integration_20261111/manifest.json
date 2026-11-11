@@ -1,0 +1,56 @@
+{
+  "base": "3fb8d29858b3ca976eb53159aa5d2d64a7c5ce04",
+  "source": "613a03c3cdf7867e2b778b8bce1e3b962f294692",
+  "merge": "8f62183f738202d1ad4b861ee0cff8389172823a",
+  "protected_sources": {
+    "scripts/core/hex_ground_runtime.gd": {
+      "baseline_sha256": "d8ab3bd03e46ab842d2fc9dd01c000c8006fc8e78b2960ec20bb6c4e4f36d4f4",
+      "merged_sha256": "d8ab3bd03e46ab842d2fc9dd01c000c8006fc8e78b2960ec20bb6c4e4f36d4f4",
+      "identical": true
+    },
+    "scripts/tests/mission_combat_loop_driver.gd": {
+      "baseline_sha256": "c302a0da0f14de32324e6ceb20aa61de2c6cb3d7974d141acad08801325a6150",
+      "merged_sha256": "c302a0da0f14de32324e6ceb20aa61de2c6cb3d7974d141acad08801325a6150",
+      "identical": true
+    },
+    "scripts/npc/unit_profile_math.gd": {
+      "baseline_sha256": "a04d1c6abd3968fdf7329d2e6d052ea0af85110636a2d935364a656feb3f511f",
+      "merged_sha256": "a04d1c6abd3968fdf7329d2e6d052ea0af85110636a2d935364a656feb3f511f",
+      "identical": true
+    },
+    "scripts/npc/test_unit.gd": {
+      "baseline_sha256": "d94f981073886dc9120f1d94f2608b3dcb2d3077df381243c0d39b0adfb00e40",
+      "merged_sha256": "d94f981073886dc9120f1d94f2608b3dcb2d3077df381243c0d39b0adfb00e40",
+      "identical": true
+    },
+    "scripts/terrain/terrain_map_3d_view.gd": {
+      "baseline_sha256": "b5b78dafbf1d568c89009f3e853110493ceaadb8f9564bfdfb460b687b8537c2",
+      "merged_sha256": "b5b78dafbf1d568c89009f3e853110493ceaadb8f9564bfdfb460b687b8537c2",
+      "identical": true
+    },
+    "scripts/core/singleplayer_supply_state.gd": {
+      "baseline_sha256": "c48ef577cc47bc9528616fd71b5acbf98fb6befb5b7e3d7ff23d03ca7bbba907",
+      "merged_sha256": "c48ef577cc47bc9528616fd71b5acbf98fb6befb5b7e3d7ff23d03ca7bbba907",
+      "identical": true
+    },
+    "scripts/core/singleplayer_campaign_state.gd": {
+      "baseline_sha256": "c56edc6bffce6da6e71c6f4363b552b06db6e4f8a5fe75a9dd1598764c59b934",
+      "merged_sha256": "c56edc6bffce6da6e71c6f4363b552b06db6e4f8a5fe75a9dd1598764c59b934",
+      "identical": true
+    },
+    "scripts/meta/campaign_checkpoint_store.gd": {
+      "baseline_sha256": "0de6ebb98a9295d47b50a88acc8f0cee48df151d39e9817a7ed4e9f0695f078b",
+      "merged_sha256": "0de6ebb98a9295d47b50a88acc8f0cee48df151d39e9817a7ed4e9f0695f078b",
+      "identical": true
+    }
+  },
+  "product_sha256": {
+    "scripts/core/simulation_root.gd": "6df7a0318b5d092e218079e63bcea71ed791fe7ccb74630ad26269e457e4a7fa",
+    "scripts/core/singleplayer_fleet_travel_state.gd": "86bf8f7f69bb55a81417e4c1db96c53a263e82571c94ce0af21da2d50b501e51",
+    "scripts/core/singleplayer_space_travel_state.gd": "1826f3e097bc4ad631020b0b7610008638befc1392a57c580ca3cc900d65fc0a",
+    "scripts/core/space_flight_state.gd": "c09e562e5ef3cf6e8a4525ff45600c80e4146a56cc3684b49a54cfd568898497",
+    "scripts/meta/singleplayer_runtime_adapter.gd": "51e6eb4cc9f24e26462981a63859fe703e2ad05d338445d9580b3ba0e3a26e4b",
+    "scripts/tests/polisa_birth_flight_identity_check.gd": "b8cbf4ee86fd1115ba83c8d814bf97f1b173e6a3c6119d149cb253f0d895df54",
+    "docs/qa/orbit_owner_integration_20261111/prepared_owner_check.gd": "06e9b3343eb2f3dace1ef9df10b4d4bba37fdbe2ad35bdbe8d27eaf99eac78f4"
+  }
+}

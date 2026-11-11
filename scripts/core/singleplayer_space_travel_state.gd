@@ -326,6 +326,8 @@ func _initialize_surface(payload: Dictionary) -> Dictionary:
 	if _phase != "grounded" or not _craft_id.is_empty() or _revision != 0: return _reject("craft_already_initialized", "Schiff besitzt bereits einen Reiseverlauf")
 	var location := String(payload.get("location_id", ""))
 	if location != "polisa" or not Dictionary(_definition.location_orbits).has(location): return _reject("invalid_surface_origin", "Lokaler Erwerbsort ungültig")
+	if not _flight.bind_craft(String(payload.craft_id)):
+		return _reject("craft_mismatch", "Flugzustand gehoert einem anderen Schiff")
 	_craft_id = String(payload.craft_id)
 	_arrive(String(_definition.location_orbits[location]))
 	_phase = "surface"
