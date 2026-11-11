@@ -473,13 +473,9 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	if current_tile == null or neighbor_tile == null:
 		return false
 
-	if registry.has_method("is_walkable"):
-		if not bool(registry.call("is_walkable", neighbor_grid)):
-			return false
-	elif not bool(neighbor_tile.walkable):
-		return false
-
-	return TERRAIN_TILE_DATA_SCRIPT.allows_step(current_tile, neighbor_tile)
+	var current_walkable: bool = bool(registry.call("is_walkable", current_grid)) if registry.has_method("is_walkable") else bool(current_tile.walkable)
+	var neighbor_walkable: bool = bool(registry.call("is_walkable", neighbor_grid)) if registry.has_method("is_walkable") else bool(neighbor_tile.walkable)
+	return TERRAIN_TILE_DATA_SCRIPT.allows_registry_step(current_tile, neighbor_tile, current_walkable, neighbor_walkable)
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:

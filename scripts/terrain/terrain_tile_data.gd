@@ -92,7 +92,11 @@ static func stand_height(tile) -> float:
 
 
 static func endpoint_height(tile, neighbor_grid: Vector2i) -> float:
-	if tile == null or not tile.walkable: return INF
+	return _endpoint_height(tile, neighbor_grid, false)
+
+
+static func _endpoint_height(tile, neighbor_grid: Vector2i, registry_passable: bool) -> float:
+	if tile == null or (not registry_passable and not tile.walkable): return INF
 	if not tile.explicit_hex_ramps or tile.ramp_direction == -1:
 		return float(tile.height_level)
 	if not is_explicit_ramp(tile): return INF
@@ -106,24 +110,38 @@ static func endpoint_height(tile, neighbor_grid: Vector2i) -> float:
 
 
 static func allows_step(from_tile, to_tile) -> bool:
+	return _allows_step(from_tile, to_tile, false)
+
+
+## Runtime callers must supply BOTH authoritative Registry passability results.
+## Only the raw walkable flag is superseded; endpoint geometry stays canonical.
+static func allows_registry_step(from_tile, to_tile, from_walkable: bool, to_walkable: bool) -> bool:
+	return from_walkable and to_walkable and _allows_step(from_tile, to_tile, true)
+
+
+static func _allows_step(from_tile, to_tile, registry_passable: bool) -> bool:
 	if from_tile == null or to_tile == null: return false
 	if from_tile.explicit_hex_ramps or to_tile.explicit_hex_ramps:
 		if not from_tile.explicit_hex_ramps or not to_tile.explicit_hex_ramps: return false
 		if not HEX_GRID_SCRIPT.are_neighbors(from_tile.grid_position, to_tile.grid_position): return false
-		var from_height := endpoint_height(from_tile, to_tile.grid_position)
-		var to_height := endpoint_height(to_tile, from_tile.grid_position)
+		var from_height := _endpoint_height(from_tile, to_tile.grid_position, registry_passable)
+		var to_height := _endpoint_height(to_tile, from_tile.grid_position, registry_passable)
 		return is_finite(from_height) and is_finite(to_height) and is_equal_approx(from_height, to_height)
 	if int(from_tile.height_level) == int(to_tile.height_level): return true
 	var higher = from_tile if int(from_tile.height_level) > int(to_tile.height_level) else to_tile
-	return allows_height_transition(higher, to_tile if higher == from_tile else from_tile)
+	return _allows_height_transition(higher, to_tile if higher == from_tile else from_tile, registry_passable)
 
 
 static func allows_height_transition(higher, lower) -> bool:
+	return _allows_height_transition(higher, lower, false)
+
+
+static func _allows_height_transition(higher, lower, registry_passable: bool) -> bool:
 	if higher.explicit_hex_ramps or lower.explicit_hex_ramps:
-		return allows_step(higher, lower)
+		return _allows_step(higher, lower, registry_passable)
 	var difference := int(higher.height_level) - int(lower.height_level)
 	if higher.regional_grade and lower.regional_grade:
-		return difference == 1 and higher.walkable and lower.walkable \
+		return difference == 1 and (registry_passable or (higher.walkable and lower.walkable)) \
 			and String(higher.object_type_id) != "glut_bridge_deck" \
 			and String(lower.object_type_id) != "glut_bridge_deck"
 	return String(higher.edge_type) == EDGE_SLOPE

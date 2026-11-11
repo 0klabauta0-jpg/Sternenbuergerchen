@@ -20,6 +20,9 @@ CASES = {
     "consumers": ("hex_sight_consumers_verifier.gd", "HEX_SIGHT_CONSUMERS_PASS"),
     "facing": ("hex_facing_state_verifier.gd", "HEX_FACING_STATE_PASS"),
     "security": ("hex_security_consumers_verifier.gd", "HEX_SECURITY_CONSUMERS_PASS"),
+    "reservation": ("hex_reservation_verifier.gd", "HEX_RESERVATION_PASS"),
+    "reservation_owner": ("hex_reservation_owner_verifier.gd", "HEX_RESERVATION_OWNER_PASS"),
+    "topology": ("hex_neighbor_cache_verifier.gd", "HEX_NEIGHBOR_CACHE_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -56,10 +59,13 @@ def main() -> int:
         "scripts/terrain/terrain_truth_audit.gd",
         "scripts/core/los_system.gd",
         "scripts/core/hex_ground_runtime.gd",
+        "scripts/tactical/bottleneck_reservation_resolver.gd",
         "scripts/core/hex_visibility_query.gd",
         "scripts/core/hex_detection_state.gd",
         "scripts/mission/combat_visibility_cache.gd",
     ]
+    if args.case == "reservation":
+        paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
     if args.case in {"owner", "consumers", "facing", "security"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]

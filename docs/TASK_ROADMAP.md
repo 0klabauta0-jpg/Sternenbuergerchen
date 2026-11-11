@@ -1,5 +1,14 @@
 # TASK_ROADMAP
 
+### Hex-Reservierungsowner geprüft, Bewegungsanbindung folgt — 11.11.2026
+
+AP1–3 sind hinter Versionsgate vorhanden. AP4 besitzt jetzt atomare Zusagen,
+logische Halbzeitfeldwechsel und terrainrevisionierte Gruppen-/Nachbarprüfung.
+Gemeinsamer Runtime-Rampenkern erhält Türübersteuerungen. Noch offen: vollständige
+Korridortopologie, AP5 sichtbare Bewegung/Commands, AP6–8 Lifecycle/Save/Slice.
+Keine große Karte aktiviert; AP9 bleibt auf Nutzerwunsch später.
+Task: docs/tasks/HEX_RESERVATION_OWNER_2026_11_11.md.
+
 ### Hex-Grundlagen umgesetzt, Integration offen — 11.11.2026
 
 AP0 auf97e00aba1 und isoliertes AP2-Query-/Cachepaket technisch geprüft.

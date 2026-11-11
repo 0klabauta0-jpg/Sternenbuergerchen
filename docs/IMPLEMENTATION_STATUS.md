@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### AP4 Reservierungsowner und logischer Tickkern — 11.11.2026
+
+Reiner Planer30840746c hier als161d62dff übernommen. Ground besitzt versionierte
+Zusagen und geschlossene Korridorgruppen; Commit prüft die gesamte Transaktion,
+Revisionen, Belegungs-/Kantenintervalle und Korridorpolitik unabhängig erneut.
+Root synchronisiert den logischen Tick; Feldwechsel erfolgt zur Segmentmitte,
+Kantensperre endet erst mit dem Segment. Revisionierte Nachbarn sind rein
+abgeleitet und begrenzt. Geöffnete Runtime-Türen lesen dieselben Registrygates
+und denselben Rampenkern in A*, HPA und Root-Schrittguard. Bei neuer Verzweigung
+veralten Gruppen ohne spätere Commit-Dauersperre. Kleine Checks: Ground25/0,
+Owner51/0, Reservation33/0, Planer26/0, Topologie23/0, Facing24/0, Consumer39/0.
+Enger frischer Review ohne verbleibenden Befund. QA hex_reservation_owner_20261111.
+AP4 bleibt für vollständigen Korridorcache offen; lokaler64-Graph ist begrenzt.
+Keine Actorprojektion, aktive Karte, Save-/Lifecyclefreigabe oder Performanceabnahme.
+
 ### AP3 Blickrichtung, Sicherung und übrige Sichtverbraucher — 11.11.2026
 
 SimulationRoot committet interne Blickabsichten vor Tickverbrauchern; Auftrag,

@@ -4,6 +4,10 @@ const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
 const SIM = preload("res://scripts/core/simulation_root.gd")
 const REGISTRY = preload("res://scripts/terrain/terrain_registry.gd")
 const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
+const RESOLVER = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
+const PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const HPA = preload("res://scripts/terrain/hpa_navigation_graph.gd")
+const HPA_PATHFINDER = preload("res://scripts/terrain/hpa_pathfinder.gd")
 var passed := 0
 var failed := 0
 
@@ -43,7 +47,7 @@ func _run() -> void:
 	root.add_child(sim)
 	var map = MAP.new()
 	_check(map.has_method("get_tactical_grid_rules") and map.has_method("set_tactical_grid_rules")
-		and sim.has_method("configure_hex_ground_runtime") and sim.has_method("get_hex_unit_state"),
+		and sim.has_method("configure_hex_ground_runtime") and sim.has_method("get_hex_unit_state") and sim.has_method("commit_hex_ground_plan"),
 		"versioned MapData and SimulationRoot owner APIs exist")
 	if failed > 0:
 		sim.free()
@@ -76,6 +80,26 @@ func _run() -> void:
 	var before: Dictionary = sim.get_hex_ground_planning_snapshot()
 	sim.tick_counter = 17
 	_check(sim.get_hex_ground_planning_snapshot().current_tick==17,"planning snapshot reads current owner tick")
+	var clock_before:int=sim._hex_ground_runtime.get_current_tick()
+	var empty_plan:Dictionary=RESOLVER.build_hex_plan([],sim.get_hex_ground_planning_snapshot(),terrain)
+	_check(not sim.commit_hex_ground_plan(empty_plan,int(empty_plan.expected_revision)).ok and sim._hex_ground_runtime.get_current_tick()==clock_before,"read snapshot cannot mutate or silently synchronize the movement clock")
+	sim.unit_minimum_spacing_enabled=false
+	sim._physics_process(0.0)
+	empty_plan=RESOLVER.build_hex_plan([],sim.get_hex_ground_planning_snapshot(),terrain)
+	_check(sim._hex_ground_runtime.get_current_tick()==sim.tick_counter and sim.commit_hex_ground_plan(empty_plan,int(empty_plan.expected_revision)).ok,"actual root physics synchronizes the ground clock and permits atomic commit")
+	terrain.register_tile(TILE.new({"tile_id":"upper","grid_position":Vector2i(1,0),"height_level":3,"explicit_hex_ramps":true,"walkable":true}))
+	var move_requests:Array=[{"unit_id":"a","command_id":"owner_move","priority":0,"path_grid_points":[Vector2i.ZERO,Vector2i(1,0)],"duration_ticks_by_step":[4]}]
+	var move_plan:Dictionary=RESOLVER.build_hex_plan(move_requests,sim.get_hex_ground_planning_snapshot(),terrain)
+	_check(move_plan.ok and sim.commit_hex_ground_plan(move_plan,int(move_plan.expected_revision)).ok,"root accepts real ramp traversal promises")
+	sim._physics_process(0.0)
+	_check(sim.get_hex_unit_state("a").grid==Vector2i.ZERO,"root clock keeps source ownership before midpoint")
+	sim._physics_process(0.0)
+	_check(sim.get_hex_unit_state("a").grid==Vector2i(1,0) and not sim.get_hex_ground_events().is_empty(),"root publishes authoritative midpoint field change")
+	sim._physics_process(0.0)
+	sim._physics_process(0.0)
+	_check(not sim.get_hex_unit_state("a").movement_state.moving,"root retains the active edge until its actual end")
+	sim.configure_hex_ground_runtime(loaded,terrain)
+	sim.admit_hex_ground_units(_batch([{"unit_id":"a","grid":Vector2i.ZERO,"facing_dir":2}]))
 	before = sim.get_hex_ground_planning_snapshot()
 	_check(not sim.configure_hex_ground_runtime(null,terrain).ok and sim.get_hex_ground_planning_snapshot()==before,"null map preserves active context")
 	for empty_map in [MAP.new(), MAP.load_from_file("user://missing_map.json")]:
@@ -111,6 +135,8 @@ func _run() -> void:
 	_check(not denied.configure_hex_ground_runtime(legacy,terrain).ok and not denied.admit_hex_ground_units(_batch([])).ok,"authority policy rejects configuration and admission")
 	denied.release_hex_ground_unit("a","denied")
 	_check(denied.get_hex_ground_planning_snapshot()==denied_before,"authority policy rejects release without mutation")
+	var denied_plan:Dictionary=RESOLVER.build_hex_plan([],denied.get_hex_ground_planning_snapshot(),terrain)
+	_check(not denied.commit_hex_ground_plan(denied_plan,int(denied_plan.expected_revision)).ok and denied.get_hex_ground_planning_snapshot()==denied_before,"authority policy rejects reservation commit without mutation")
 	denied.free()
 	var square_legacy = _write_map("square_legacy",{"grid_topology":"square8"})
 	_check(not square_legacy.has_load_issue(),"square map without tactical flag remains valid")
@@ -118,8 +144,31 @@ func _run() -> void:
 	_check(square_legacy.has_load_issue(),"setter enforces hex topology too")
 	square.free()
 	terrain.free()
+	_check_runtime_door_navigation(sim)
 	sim.free()
 	_finish()
+
+func _check_runtime_door_navigation(sim: Node) -> void:
+	var terrain=REGISTRY.new()
+	terrain.configure_iso_grid(Vector2.ZERO,64,32,"hex_axial_v1")
+	for data in [
+		{"tile_id":"low","grid_position":Vector2i(-1,0),"height_level":0},
+		{"tile_id":"door_ramp","grid_position":Vector2i.ZERO,"height_level":0,"ramp_direction":0,"walkable":false},
+		{"tile_id":"high","grid_position":Vector2i(1,0),"height_level":1},
+		{"tile_id":"side","grid_position":Vector2i(0,1),"height_level":0}]:
+		data.explicit_hex_ramps=true
+		terrain.register_tile(TILE.new(data))
+	terrain.set_runtime_tile_overrides([{"grid_position":Vector2i.ZERO,"walkable_override":true}])
+	var pathfinder=PATHFINDER.new()
+	_check(pathfinder.find_path(Vector2i(-1,0),Vector2i(1,0),terrain)==[Vector2i(-1,0),Vector2i.ZERO,Vector2i(1,0)] and pathfinder.can_traverse_step(Vector2i.ZERO,Vector2i(-1,0),terrain),"actual Astar accepts an opened runtime ramp door in both directions")
+	_check(not pathfinder.can_traverse_step(Vector2i.ZERO,Vector2i(0,1),terrain),"runtime passability never opens a ramp flank")
+	var graph=HPA.new()
+	graph.build_from_registry(terrain)
+	_check(HPA_PATHFINDER.new().find_path(Vector2i(-1,0),Vector2i(1,0),terrain,graph)==[Vector2i(-1,0),Vector2i.ZERO,Vector2i(1,0)],"actual HPA crosses a cluster portal through the opened ramp door")
+	_check(sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i(-1,0)),terrain.grid_to_world(Vector2i.ZERO),terrain) and not sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i.ZERO),terrain.grid_to_world(Vector2i(0,1)),terrain),"actual Root stepguard admits open ramp axis and rejects lateral cliff")
+	terrain.set_runtime_tile_overrides([{"grid_position":Vector2i.ZERO,"walkable_override":false}])
+	_check(not pathfinder.can_traverse_step(Vector2i.ZERO,Vector2i(1,0),terrain) and not sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i(-1,0)),terrain.grid_to_world(Vector2i.ZERO),terrain),"closed runtime door blocks source and destination step guards")
+	terrain.free()
 
 func _finish() -> void:
 	print("RESULTS: %d passed, %d failed" % [passed,failed])

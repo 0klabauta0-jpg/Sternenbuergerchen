@@ -407,3 +407,11 @@ für Contact, Schussprüfung, FoW und Hex-Erkennung sind als Zwischenschritt mit
 mit Facing24/0, Security34/0, Consumer39/0, Owner39/0 und Ground25/0 gesichert;
 Bewegungsschussbalance und AP4–AP9 bleiben offen. Keine Karte ist aktiviert.
 Frischer Read-only-Review ohne Engine-/Dateiänderung und ohne Blocker.
+
+AP4-Zwischenschritt: reiner Planer übernommen, autoritativer Zusagencommit und
+logischer AP5-Tickkern klein geprüft. Final Ground25/0, Owner51/0,
+ReservationOwner33/0, Planer26/0, Topologie23/0, Facing24/0, Consumer39/0.
+Split-/fehlende Gruppen, Taktobergrenze, Türübersteuerungen und veraltete
+Gruppen nach Terrainänderung durch RED/GREEN plus frischen Review geschlossen.
+Vollständiger Korridorcache und AP5-Actorprojektion bleiben nächste Arbeit;
+keine Karte aktiviert und keine großen Tests. QA hex_reservation_owner_20261111.

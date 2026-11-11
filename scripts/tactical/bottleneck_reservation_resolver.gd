@@ -657,7 +657,14 @@ static func _hex_request_error(request:Variant,units:Dictionary,registry:Node)->
 static func _hex_legal_step(from:Vector2i,to:Vector2i,registry:Node)->bool:
 	var hex=preload("res://scripts/terrain/hex_grid.gd")
 	var tile=preload("res://scripts/terrain/terrain_tile_data.gd")
-	return hex.are_neighbors(from,to) and registry.call("is_walkable",from) and registry.call("is_walkable",to) and tile.allows_step(registry.call("get_tile_at_grid",from),registry.call("get_tile_at_grid",to))
+	if not hex.are_neighbors(from,to):return false
+	if registry.has_method("get_legal_hex_neighbors"):
+		return registry.call("get_legal_hex_neighbors",from).has(to)
+	var source=registry.call("get_tile_at_grid",from)
+	var target=registry.call("get_tile_at_grid",to)
+	var from_walkable:bool=registry.call("is_walkable",from)
+	var to_walkable:bool=registry.call("is_walkable",to)
+	return tile.allows_registry_step(source,target,from_walkable,to_walkable) and tile.allows_registry_step(target,source,to_walkable,from_walkable)
 
 
 static func _hex_timeline(id:String,grid:Vector2i,segments:Array,now:int)->Array:
@@ -712,11 +719,14 @@ static func _hex_local_graph(requests:Array,registry:Node)->Dictionary:
 	while cursor<queue.size() and graph.size()<64:
 		var grid:Vector2i=queue[cursor]; cursor+=1
 		var neighbors:Array=[]
-		for direction in hex.DIRECTIONS:
-			var next:Vector2i=grid+direction
-			if _hex_legal_step(grid,next,registry):
-				neighbors.append(next)
-				if not queue.has(next) and queue.size()<64: queue.append(next)
+		if registry.has_method("get_legal_hex_neighbors"):
+			neighbors=registry.call("get_legal_hex_neighbors",grid)
+		else:
+			for direction in hex.DIRECTIONS:
+				var next:Vector2i=grid+direction
+				if _hex_legal_step(grid,next,registry):neighbors.append(next)
+		for next in neighbors:
+			if not queue.has(next) and queue.size()<64:queue.append(next)
 		graph[grid]=neighbors
 	return graph
 
