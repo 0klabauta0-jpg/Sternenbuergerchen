@@ -33,6 +33,12 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Wiederanflug nach Abbruch nutzt den schiffseigenen bezahlten Abflugbeleg,
+  sofern Root den passenden bestätigten Abbruch und Reiseowner verifiziert.
+  Regression: A bricht ab, ein anderer Schiffstransfer erhöht die globale
+  Sequenz, A fliegt erneut an; Fuel und Campaign bleiben unverändert. Der
+  gezielte Test war vor dem Fix rot und danach grün.
+
 - Warpankunft-Ownerpfad: Root prüft echte Fleet-/Flight- und Equipmentdaten,
   aktuelle Pilotenzuordnung und vorhandene Rotte beziehungsweise bereitet
   eine Einzelrotte vor. Die Suche verarbeitet höchstens 256 Felder pro Aufruf

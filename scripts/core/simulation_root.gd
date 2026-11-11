@@ -84,6 +84,18 @@ func configure_departure_adapter(adapter: Node) -> Dictionary:
 	_departure_adapter = weakref(adapter)
 	return {"ok":true}
 
+func has_confirmed_cancelled_departure(adapter: Node, craft_id: String, departure_id: String) -> bool:
+	if _should_skip_local_tick_processing() or _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _singleplayer_space_travel_owner == null or _singleplayer_supply_owner == null: return false
+	var id := String(_local_return_latest_by_craft.get(craft_id, ""))
+	if departure_id.is_empty() or not id.begins_with("local-cancel:" + departure_id + ":") or not _local_return_receipts.has(id): return false
+	var receipt: Dictionary = _local_return_receipts[id]
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if receipt.fleet != _singleplayer_space_travel_owner or receipt.supply != _singleplayer_supply_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.flight != flight or flight == null: return false
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.get("coordinate_frame") != "local" or snapshot.get("motion_mode") != "tactical" or snapshot.get("space_area_id") != receipt.travel_context.target_area_id or _singleplayer_space_travel_owner.get_craft_snapshot(craft_id).get("phase") != "orbit": return false
+	var check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.travel_candidate, receipt.travel_context)
+	return check.get("ok", false) and check.get("replayed", false)
+
 func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: String, approach_request_id: String = "") -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
