@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Polisa-Pilotguard: Auch ein regulärer nichtkampagnen Stationsbesuch mit
+  aktiver schiffseigener Visitidentität durchläuft nun den vorhandenen echten
+  Pilot-/Crew-/Embark-/Pending-Effect-Guard und liefert die aktuelle Piloten-ID.
+  Kein neuer Ground-/Transportowner und kein historischer Kampagnenmarker als
+  Ersatz. Enger Guardtest war vor Fix rot und danach grün; Polisa-Backendtest
+  grün. Die Probe nutzt Personen-/Sequenzdoubles, kein nativer AP6-Nachweis.
+
 - Der begrenzte Eintrittssucher wurde zusätzlich mit 256 belegten unteren
   Kandidaten geprüft: erster Aufruf bleibt wartend, ein kleinerer Folgetick
   setzt dieselbe Suche fort und findet danach eine freie vollständige Fläche.
