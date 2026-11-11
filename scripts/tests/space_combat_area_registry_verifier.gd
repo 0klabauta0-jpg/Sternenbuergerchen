@@ -20,10 +20,16 @@ func _initialize() -> void:
 	if registry.query_cells(cells, "orbit_approach:moon") != ["a"]: failed += 1
 	if registry.query_cells(cells, "orbit_approach:planet") != ["b"]: failed += 1
 	if registry.query_cells(cells) != ["c"]: failed += 1
+	var moon_revision: int = registry.get_area_revision("orbit_approach:moon")
+	var planet_revision: int = registry.get_area_revision("orbit_approach:planet")
+	if moon_revision <= 0 or planet_revision <= 0: failed += 1
+	registry.update_actor_cells("a", cells)
+	if registry.get_area_revision("orbit_approach:moon") != moon_revision: failed += 1
 	if not registry.unregister_actor("a") or not registry.query_cells(cells, "orbit_approach:moon").is_empty(): failed += 1
+	if registry.get_area_revision("orbit_approach:moon") <= moon_revision or registry.get_area_revision("orbit_approach:planet") != planet_revision: failed += 1
 	if registry.query_cells(cells, "orbit_approach:planet") != ["b"]: failed += 1
 	var combat = COMBAT.new()
 	var actor := {"craft_id":"a", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(0,0), "footprint_hexes":[Vector2i.ZERO]}
 	if combat.admit_actor(actor, first).get("reason") != "local_area_not_ready": failed += 1
-	print("SPACE_COMBAT_AREA_REGISTRY passed=", 12 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AREA_REGISTRY passed=", 15 - failed, " failed=", failed)
 	quit(1 if failed else 0)

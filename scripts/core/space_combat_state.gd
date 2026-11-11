@@ -48,6 +48,12 @@ func get_actor(craft_id: String) -> RefCounted:
 func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:
 	return _registry.query_cells(cells, area_id)
 
+func get_area_revision(area_id: String) -> int:
+	return _registry.get_area_revision(area_id)
+
+func actor_cells_match(craft_id: String, area_id: String, cells: Array[Vector2i]) -> bool:
+	return _registry.actor_cells_match(craft_id, area_id, cells)
+
 func update_actor_cell(craft_id: String, cell: Vector2i) -> bool:
 	var flight: RefCounted = _registry.get_actor(craft_id)
 	if flight == null: return false
@@ -134,7 +140,7 @@ func sync_moved_actors() -> void:
 		if int(_indexed_revisions.get(craft_id, -1)) == int(snapshot.revision):
 			continue
 		var cell: Vector2i = GRID.cell_at(Vector2(snapshot.position_plane) / GRID.EXTENT)
-		if GRID.contains(cell):
+		if AREA.contains(cell, snapshot):
 			update_actor_cell(craft_id, cell)
 
 func get_metadata(craft_id: String) -> Dictionary:

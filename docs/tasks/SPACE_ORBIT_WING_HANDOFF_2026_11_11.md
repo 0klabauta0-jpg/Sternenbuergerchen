@@ -105,6 +105,42 @@ Ansicht sowie nach gesichertem Import Reisegate und Migration. Gemeinsam
 berührte Root-/Adapterdateien erst nach konkreter Abstimmung integrieren;
 kein gegenseitiges Bearbeiten uncommitteter Änderungen.
 
+## Vorschau für Oberflächenanflug: enger Schnittstellenentwurf
+
+Root-Owner, zunächst ohne produktiven Aufrufer:
+
+```
+preview_surface_approach(craft_id, location_id,
+    expected_flight_revision, expected_travel_revision,
+    expected_area_revision, expected_wing_revision,
+    authority_context) -> Dictionary
+```
+
+`area_revision` bezeichnet die monotone Revision des **autoritativen
+Bereichsbelegungsindex**, nicht eine UI- oder Kartenrevision; zusätzlich
+trägt der Vorschlag die kanonische Layoutrevision. Flightrevision bindet auch
+Koordinatenrahmen und Bereichs-ID. Die Vorschau liest den tatsächlich
+registrierten Flightowner und vollständigen aktuellen Rumpffootprint,
+überprüft eigene eindeutige Rottenmitgliedschaft, Travelphase/-revision,
+Orbit-/Körper-/Ortsbindung, Grenzen und Belegung. Alle Rumpffelder müssen
+frei von Körpermaske und fremden Schiffen sein; mindestens ein Rumpffeld
+muss eine echte freie Gatezelle des zugeordneten Körpers berühren. Ein
+großer Rumpf muss also nicht in die nur eine Zelle tiefe Gatereihe passen.
+Die genannte Regel ist mit dem parallelen Orbitchat als technische Auslegung
+abgestimmt; die konkrete Produktabnahme steht noch aus. Reine Cursor-, Ziel- oder Darstellungswerte
+sind kein Saumnachweis.
+
+Der Rückgabewert ist eine kurzlebige **Vorschau**, keine selbständige
+Freigabe und kein vom Adapter vertrauenswürdig unterschreibbares UI-Token.
+Vor Commit sind alle beteiligten Revisionen, der vollständige Footprint,
+Location-/Bodybindung und vorbereitete Supply-/Campaign-/Departure-Owner
+erneut zu prüfen; Pilot, Crew, Job und Fuel bleiben bei den bestehenden
+Ownern. Sonnen ohne gültiges Oberflächenziel ergeben keine Freigabe. Root
+verantwortet diese Geometrie-/Indexgrenze; der andere Chat verantwortet
+vorerst reine Adaptergates sowie vorbereitete Supply-/Campaignpatches. Echte
+Authoritybindung, Replay, Eventreihenfolge und signal-/awaitfreier gemeinsamer
+Tail bleiben vor der Produktaktivierung offen.
+
 ## Akzeptanzkriterien / kleine Arbeitsschritte
 
 1. Bereichs-ID, strategische/lokale Koordinaten, Atomarität, Saumgeometrie,
