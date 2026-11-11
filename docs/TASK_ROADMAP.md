@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### AP6 erster Lifecyclebaustein — 11.11.2026
+
+Vollständige begrenzte Gruppenplatzierung und Root-Primitive für tatsächliche
+Missionsactors geprüft; keine gestaffelte Adapteraktivierung. Nächster Schritt:
+Groundvormerkungen für Aussteigephasen, Setup und Basisaktionen; dann AP7/8.
+Große Abnahme/AP9 und Produktionskartenaktivierung bleiben später.
+
 ### Hex-Korridorcache vollständig angebunden — 11.11.2026
 
 AP4 nutzt vollständige revisionierte Komponenten statt lokaler Teilgruppen.

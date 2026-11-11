@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 atomare Gruppenplatzierung als erstes Teilpaket — 11.11.2026
+
+Reiner Admissionhelper verteilt vollständige Gruppen entlang kanonischer
+Registry-/Rampenübergänge, maximal64 expandierte Zellen. Registrierte tatsächliche
+Missionsactors erhalten gemeinsam Plätze; Ground-/Movefreigabe beim Einsteigen
+und idempotentes Unregister sind vorhanden. Missionssubtree und stabile Lookups
+verhindern fremde Actorübernahme. Aktive Kanten und vollständige Passagegrants
+sperren auch interne Zulassung. Lifecycle64/0 inklusive42 Bewegungsfällen,
+Ground25/0 und ReservationOwner36/0. Bestehende Transport-/Setupadapter bleiben
+bis zu verbindlichen Gruppenvormerkungen unverändert; Basisadapter ebenfalls offen.
+AP6 ist damit noch nicht vollständig, danach AP7/8; große AP9-Prüfungen später.
+Task: docs/tasks/HEX_GROUND_LIFECYCLE_2026_11_11.md.
+
 ### AP5 Ausweichen mit erhaltenem Originalauftrag — 11.11.2026
 
 Root-Moveadapter führt höchstens einen vorgeschlagenen Rücksetzweg je Tick durch
