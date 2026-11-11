@@ -1,0 +1,338 @@
+# Weltraumkampf: paketweise Umsetzung
+
+## Ziel / Ursache
+
+Das bestätigte Weltraumkampfkonzept schrittweise umsetzen. Reise, Kampf,
+Rotten und Komponenten müssen dabei autoritative Zuständigkeiten behalten.
+
+## Umfang und Nicht-Ziele
+
+AP00 bis AP20 des bestehenden Umsetzungsplans in kleinen überprüfbaren
+Paketen bearbeiten. Keine stillschweigende Mainintegration oder EXE.
+
+## Grundlagen
+
+- [Konzept](../dev/space_combat_contract.md)
+- [Arbeitspakete](../superpowers/plans/2026-11-11-space-combat.md)
+- [Reisevertrag](../dev/orbit_quantum_travel_contract.md)
+- [Komponentenvertrag](../dev/polisa_ship_equipment_contract.md)
+- [Parallele Ortsoperationen](../dev/parallel_location_operations_contract.md)
+  ist auf dem weitergelaufenen nativen Branch vorhanden und vor AP01 zu integrieren.
+
+## Akzeptanz und Prüfung
+
+Jedes Paket erfüllt seine konkreten Akzeptanzkriterien; nur betroffene kleine
+Verifier und notwendige Regressionen ausführen. Native Sicht, Mehrspieler und
+Performance bleiben getrennte spätere Nachweise. Ergebnisse und Abweichungen
+werden hier fortgeschrieben.
+
+## Betroffene Dateien
+
+Die Datei- und Schnittstellenkarte steht im Plan. AP00: Commandvertrag,
+Verifier und diese Statusdokumentation.
+
+## Lokale Prüfung / Fortschritt
+
+- AP00: typisierte Commandgrenze mit extern bereitgestellter autoritativer
+  Berechtigung, Revisionsprüfung, Adress-/Ziel-/Feldvalidierung und reinem
+  Replay-Vorcheck. 20/20 Fälle im temporären Minimalprojekt; dessen
+  `user://`-Schreibprobe lag im eigenen temporären APPDATA.
+  Nachprüfung im Projekt 24/24, einschließlich typfester Replay-Signaturen,
+  Dictionary-Reihenfolge und widersprüchlicher Zielangaben. Rottenverifier
+  bleibt19/19. Noch kein Produktanschluss.
+- AP01 erster Teil: per-Schiff-Flugdatensatz mit Pose, Geschwindigkeit,
+  Modus, Masse, Revision und Tick; identischer/alter Tick und veraltete Revision
+  werden abgelehnt. Minimalprojektcheck 6/6. Reiseowner und Flottenindex
+  referenzieren nun dieselbe Flugzustandsinstanz; Position und Bugrichtung
+  werden daraus projiziert. Bindingcheck4/4, bestehender Zwei-Schiffe-
+  Fleettravel-Verifier8/8, jeweils isoliertes Minimalprojekt.
+- AP01 weiterer Baustein: räumliche Registry für bestehende Flugreferenzen,
+  eindeutige IDs, gezielte Feldindexänderung und sortierte Abfrage. Separater
+  Minimalprojektcheck6/6.
+- AP01 nächster Baustein: CampaignSimulationRoot nutzt einen Raum-Physiktakt
+  über den bestehenden Adapter; der Meta-Renderprozess treibt die Reise
+  nicht mehr an. Rootvalidierte Gegneraufnahme nutzt die separate Registry und
+  erzeugt keinen Flotteneintrag; Spielerreferenz bleibt objektidentisch zum
+  Flottenowner. Kleiner Root-/Adaptercheck10/10.
+- AP01 Prüfgrenze: Der ältere SpaceTravel-Verifier hat im vorhandenen
+  Sternsystem zwei veraltete Erwartungen (fünf Körper und alte Ortsbindungen).
+  Der versuchte Minimalprojektlauf war zudem unvollständig, weil er einen
+  echten SimulationRoot benötigt; er ist kein Integrationsbeleg.
+- AP01 Prüfgrenze: Orbit-Gesamtverifier im neuen Worktree wegen fehlender
+  importierter Godot-Ressourcen nicht lauffähig, Zeitlimit nach60s;
+  kein bestandener oder gescheiterter Verhaltensnachweis.
+- AP01 Korrektur: Der im Plan vorgeschlagene frühe Root-Rücksprung kappte
+  Basis-Personnel-Bewegung, da beide denselben Root nutzen. Raumcallback
+  läuft jetzt vor dem bestehenden Bodentick, ohne Rücksprung. Kleiner
+  Rootcheck11/11, einschließlich synthetischer 30/60/144-Renderaufrufe bei
+  jeweils60 Physikticks. Das ist noch kein echter Ansichtswechseltest.
+  Nach gezielter Cacheergänzung erreichte der alte
+  Orbit-Gesamtverifier Start, Boarding, Abheben, Warp-Abbruch und Neustart:
+  26/30; vier alte Satelliten-Orbitannahmen scheiterten, zudem fehlte ein
+  importiertes Schiffsmodell. Das ist keine vollständige Orbitfreigabe.
+- AP01 Phasengrenze: Spieleraufnahme während Quantum abgelehnt; ein im
+  taktischen Modus befindlicher Flugzustand weist neue Reisecommands zurück;
+  Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Taktische Bewegung
+  wird nur über den Root committet und aktualisiert den Feldindex;
+  identischer Tick wird abgelehnt. Aufnahme und Eintritt prüfen die Reisephase
+  getrennt; zwischenzeitlicher Warp verhindert Kampfeintritt. Bewegte
+  registrierte Flugzustände aktualisieren ihre Feldindizes revisionsbasiert.
+  Rootcheck27/27 einschließlich eines fixturegesteuerten Resolver-Commits.
+- AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
+  Warp, Heimatansicht während der Reise, Sternkarte und Abbruch. Gezielter
+  headless Szenenlauf14/14, inklusive30/60/144-Renderbegrenzungen, Exit0,
+  keine Fehler. Beleg:
+  `docs/qa/orbit_quantum_20261109/raw/space-ap01-real-view-fps-62cc0def794c48298207edab1c650726/space_combat_ap01_view_verifier.log`.
+- AP01 begrenzt abgeschlossen: Warp-Komponenten-/Checkpointstand integriert;
+  vorhandene Reiseownerprüfung nach Anpassung zweier überholter Kartendaten-
+  erwartungen69/69, Flottenreise8/8, echte Sichtwechselprobe14/14.
+  Diese Prüfung ersetzt weder volle Kampagnen-, Stil- noch Performanceabnahme.
+- AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
+  ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
+  gemeinsames Achsbudget. Kleiner Verifier8/8 mit explizitem Fixture-Rumpf;
+  zusätzlich ein einzelner Fixture-Commit über den tatsächlichen Root.
+  Produkt-Rumpfkatalog, automatische Tickanbindung, Kollision und
+  vollständige AP02-Abnahme fehlen.
+- AP03 Vorstufe: deterministische Feldreservierung für Bewegungs-/Drehpfade;
+  Segment-Supercover erfasst eine getestete exakte Randberührung, Drehbögen
+  erhalten eine konservative Krümmungszugabe. Mehrfeldrümpfe werden beim
+  Indexieren als gedrehte Hexflächen abgebildet; ein Einfeldjäger behält
+  genau ein Ankerfeld. Vierzehn gezielte Geometriefälle bestanden,
+  einschließlich benachbarter Rümpfe bei großen Kartenkoordinaten.
+  Zeitliche Batchreservierung, Blockadeauflösung und begrenzte Laufzeitkosten
+  bleiben offen; allgemeine Geometrie- und Performanceabnahme stehen aus.
+- AP03 Einzelcommit: Root prüft Ziel-Footprint und durchflogenen Korridor
+  gegen registrierte andere Schiffe, einschließlich gedrehter Mehrfeldrümpfe;
+  außerhalb der Karte wird vor der Mutation abgelehnt. Rootcheck43/43,
+  Geometriecheck11/11, Registry6/6. Geländeblocker, zeitliche
+  Batchreservierungen und Blockadeauflösung bleiben offen.
+- AP03 Batch-Vorstufe: Root validiert alle Revisionen vor einer Mutation,
+  prüft konservative Sweepreservierungen und committet zugelassene Vorschläge
+  in stabiler Reihenfolge. Kreuzende Wege und veralteter Batch geprüft,
+  Batchcheck8/8. Die Reservierung umfasst derzeit den gesamten Tick;
+  feinere Zeitfenster, Blockadeauflösung und echte Kartenhindernisse fehlen.
+- AP03 gezielte Kostenprobe: P95 dreizelliger Einzel-Sweep833→442µs nach
+  geometrischer Kandidatenbegrenzung; 25 Messungen je Stand, laufende
+  Fremdlast, kein Frame-/FPS-Nachweis. Geometrie14/14 und Batch8/8.
+  Belege: `docs/qa/space_combat_20261111/README.md`.
+- AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
+  Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
+  Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
+  löst sie auf. Verifier19/19. Root nimmt die Commandkategorie über den
+  gemeinsamen Singleplayer-Ownerpfad an; Root-/Ownercheck30/30 und
+  Warp-Rootregression7/7. Singleplayer-Adapter liest eigene Flotte und die
+  bestehende Pilotenzuordnung; keine UI-Berechtigungsdaten. Identische
+  Wiederholung funktioniert auch nach Reisebeginn; neue Umstellung während
+  Warp/Anflug bleibt gesperrt. Adaptercheck9/9. UI-Anschluss,
+  Tod-/Verlustereignisse im Raumkampf und Checkpointintegration fehlen.
+- AP04 Lifecycle-Vorstufe: bestehende Änderungen an Pilotenzuordnungen und
+  Flottensynchronisierung prüfen Rotten erneut. Ohne zugeordneten Piloten
+  bleibt das Schiff Mitglied; ein verfügbarer Führer wird stabil gewählt,
+  sonst ist die Rotte inaktiv. Entfernte Schiffe werden gelöst. Prüfung12/12;
+  kein Nachweis für spätere Kampf-/Todereignisse.
+- AP02 Tick-Vorstufe: Fixture-Flugsteuerung wird im Root-Physiktakt über
+  die Batch-Kollisionsprüfung angewandt; echte Schiffs-IDs sind gesperrt, bis
+  Kartenhindernisse und Ausrüstung angebunden sind. Gezielt 8/8; keine
+  spielbare Steuerung oder Abnahme von AP02.
+- AP05 Rottenpanel-Vorstufe: Sternkarte liest den Root-Rottensnapshot und
+  sendet Erstellen, Umbenennen, Zuordnen, Entfernen und Führerwahl über den
+  bestehenden Adapter. Mitglieder und Fehler werden angezeigt; Auswahl ist
+  nur UI-Zustand. Die noch fehlende Speicherung wird im Panel benannt.
+  Panelprüfung8/8, Adapter9/9, bestehende Sternkarten-UI89/89. Kartenwahl,
+  sichtbarer Kampfflug und native Sichtabnahme fehlen; AP05 bleibt offen.
+  Ruling: Panel unter der bestehenden Anflugbedienung angeordnet — erster
+  Einbau oberhalb verschob bestehende Bedienelemente aus dem sichtbaren
+  Bereich; dafür ist die Rottenverwaltung gegebenenfalls durch Scrollen zu
+  erreichen. Native Ergonomie bleibt zu prüfen.
+  Die Listen werden nur bei geänderten Rotten oder Schiffsnamen/-IDs neu
+  aufgebaut, nicht bei fortlaufenden Pad-Animationsdaten; Panelprüfung9/9
+  und Sternkarten-UI89/89.
+- AP06 Owner-Vorstufe: Ein validierter Auftrag kann atomar mehrere aktive
+  Rotten ersetzen; passive Kontakt-/Feuerregeln bleiben im Snapshot,
+  Wiederholung ist idempotent, Abbruch prüft die aktuelle Auftrags-ID.
+  Inaktive oder fremde Rotten verhindern die gesamte Änderung. 13/13;
+  Adapter, UI, Flugausführung und Speicherung sind noch nicht angeschlossen.
+- AP06 Navigationsvorstufe: reiner Ziel-/Statusresolver für Bewegen,
+  Patrouille, Sichern und Rückzug; Ankunft erfordert auch niedrige
+  Geschwindigkeit, blockierte Gruppen liefern keine Bewegungsabsicht und
+  abgeschlossene Aufträge keine alten Absichten. 10/10, Owner13/13,
+  Kollisionsbatch8/8. Ruling: gemeinsames Ziel hier nur als abstrakte
+  Absicht ausgeben — Formation, Bremssteuerung und Korridorauflösung sind
+  nicht angeschlossen; andernfalls würden mehrere Schiffe denselben Punkt
+  ansteuern. Daher ausdrücklich kein produktiver Taktanschluss und keine
+  spielbare Auftragsausführung behauptet.
+- AP06 Einzel-Guidance-Vorstufe: separates Fixture berechnet aus Ziel und
+  Geschwindigkeit Vorwärts-/Seitenschub und bremst; ein einzelner simulierter
+  Flug erreicht sein Ziel mit geringer Geschwindigkeit. Prüfung5/5 sowie
+  Flugresolver8/8 und Zielresolver10/10. Keine Kollisionsvermeidung,
+  Formationsziele oder Bindung an echte Ausrüstungswerte; nicht im Produktpfad.
+- AP06 Fixture-Integration: Root führt Einzel-Guidance im vorhandenen
+  Physiktakt über die Kollisionsbatchprüfung aus; nur `space_fixture_`-IDs
+  sind zugelassen. 11/11 einschließlich versperrtem Ziel, Flugtakt und
+  Bodenbewegungsverifier ebenfalls erfolgreich. Bei Blockade wird Bewegung
+  konservativ nicht committet; Geschwindigkeit bleibt erhalten, es findet
+  noch keine vorausschauende Bremsung oder Blockadeauflösung statt. Keine
+  Produktfreigabe.
+- AP02/AP03/AP04/AP05/AP06 Rest und AP07–AP20: offen.
+
+## Risiken / offene Punkte
+
+- Parallelcommit 615327eaf (Bewegungsschuss und Root) als 4bf5d3d41
+  integriert; Statuskonflikt mit Erhalt beider Einträge gelöst. Bewegungs-
+  schuss, Bodenkonsumenten, Rootfixture, Bereichsbatch und Raumtakt geprüft
+  und grün; keine vollständige native Freigabe.
+- Parallelcommit 6a3f9c535 (Boden-Gruppen-/3D-Bewegungsleser und Root) als
+  73ddde704 integriert. Bodenbewegung, Konsumenten, Raumtakt, Bereichsflug
+  und Eintrittsvorschau gezielt grün; keine umfassende native Abnahme.
+- Neue Nutzerfestlegung aus parallelem Chat: fliegende Schiffe immer genau eine
+  Rotte, einschließlich Einzelschiff/Dropship; ein 512×256-Orbitraum pro
+  Körper ersetzt drei getrennte Marker. Ownergrenze, Abhängigkeiten und
+  Prüffälle: `docs/tasks/SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`; AP04a im
+  Plan. Aktuelle Implementierung erfüllt diese Vorgaben noch nicht; konkrete
+  API und gemeinsam berührte Produktdateien vor Änderung abstimmen.
+- AP04a Bereichskennung: Flightstate führt `space_area_id` und
+  `coordinate_frame`; alte Zustände bleiben strategisch/ohne Bereich. Lokale
+  Zustände benötigen eine Bereichs-ID; normale Motioncommits können den
+  Rahmen nicht wechseln. Gezielte Prüfung8/8, Raumtakt-/Guidance- und
+  Fleettravelprüfungen grün. Noch keine Bereichstransition, lokaler Index
+  oder Produktanbindung; Layout-/Reisegate stammen vom parallelen Chat.
+- AP04a Flighttransition-Baustein: mutationsfreie Revisions-/Tick-/Pose-
+  Vorprüfung und separater Commit für den reinen Flightowner; Geschwindigkeit
+  und Bereich werden gemeinsam übernommen. 13/13, vorhandene Flugtakt- und
+  Fleettravelprüfungen grün. Dies ist noch keine transaktionale Root-/Travel-/
+  Wing-/Registry-Verbindung und schaltet keine lokalen Bereiche frei.
+  Der alte `commit_travel_pose` verweigert lokale Koordinaten; Flightprüfung
+  14/14 und vorhandene Reiseprüfungen grün. Vor produktiver Freigabe muss der
+  Reiseowner alte Aktionen auf lokalen Zuständen abfangen: dessen bisheriger
+  `_set_travel_pose` erwartet Erfolg per Assertion.
+- AP04a geometrische Eintrittsvorschau: baut kanonisches Orbitlayout, prüft
+  Flugrevision, unteres Eintrittsband, vollständigen Rumpf, Körpermaske und
+  belegte Zielfelder ohne Mutation. Prüfung7/7 einschließlich echter
+  gebietsspezifischer Registry, Flight- und Footprintchecks
+  grün. Sie ist keine Berechtigungsprüfung: reale Körper-/Reisezuordnung,
+  Travelrevision, Rottenrevision, produktiver Token und atomarer Commit fehlen
+  in dieser reinen Vorschau weiterhin.
+- AP04a Root-Ownerfixture: `prepare_space_area_transition`,
+  `commit_space_area_transition` und `release_space_area_transition` sind
+  ausschließlich für `space_fixture_`-IDs und einen expliziten Test-Fleetowner
+  nutzbar. Geprüft werden unter anderem Orbit-/Revisionsbindung,
+  Mehrfachrequest, Belegung, Abbruch, Ablauf, ein stiller Übernahmepfad und
+  erneuter Commit; Test18/18. Normale lokale Flugcommits bleiben gesperrt.
+  Dies ist **keine produktive atomare Transaktion**: Der synchron geprüfte
+  Fixture-Tail setzt nicht fehlschlagende Fixture-Ownercommits voraus und hat
+  keinen Rollback; echter Travelcandidate, Root-generierter Berechtigungs-
+  kontext, Supply/Campaign/Departure, Events und native Integration fehlen.
+  Vor Produktfreigabe müssen diese Voraussetzungen und Fehlerfälle gemeinsam
+  abgesichert werden; keine Fuel-/Oberflächenfreigabe aus diesem Pfad.
+- AP04a echte Reiseowner-Fixture: Parallelcommit ce57b07f7 als 82c636c5f
+  übernommen. Beim Konflikt blieb der gemeinsame Flightstate als Poseowner
+  erhalten; Travel-Seal und -Epoch wurden ergänzt. Der echte vorbereitete
+  Fleet-/Travelowner wurde in einer separaten, explizit auf Testschiff-IDs
+  beschränkten Rootfixture gebunden: Warpabschluss, Flight-/Wing-/Index- und
+  stiller Travel-Tail, Wiederholung, Abbruch und konkurrierender No-op-Request
+  gezielt14/14. Der ursprüngliche Ownercheck lief erneut isoliert15/15;
+  bestehende Fleettravel- und Fake-Rootfixturechecks grün. Kein produktiver
+  Aufrufer, keine Surface-/Fuel-/Campaign-/Departureintegration, keine native
+  Freigabe. Die echten Tail- und Rootinvarianten sind vor Produktanschluss
+  noch gemeinsam zu reviewen; insbesondere lokaler Travel-Snapshot/Projektion,
+  Root-Kontextbesitz, Rollback-/Fehlergrenzen und Events sind nicht abgenommen.
+- AP04a Eintrittsverteilung: reiner deterministischer Allocator plant für
+  mehrere Testschiffe getrennte vollständige Footprints im Eintrittsband,
+  berücksichtigt bestehende Bereichsbelegung und verändert keinen Owner.
+  Gezielte Prüfung6/6. Eine neue inkrementelle Suche bearbeitet höchstens256
+  Kandidaten pro Aufruf, prüft Flugrevisionen und erkennt zwischenzeitliche
+  Belegung; gezielte Suche6/6. Der synchrone Wrapper ist nur für Fixtures.
+  Produktanbindung, tatsächliche Kostenmessung und erneute Commitprüfung der
+  Belegung fehlen; Vorschau reserviert keine Felder.
+- AP04a Reviewkorrektur: Eintrittsvorschau prüft das **gesamte** Footprint im
+  Eintrittsband, nicht nur den Anker (8/8). Erfolgreiche Fixtureübergänge
+  verlassen den begrenzten Pool offener Tokens; Replayquittungen liegen
+  separat (Rootfixture20/20 einschließlich 128 vorhandener Quittungen).
+  Produktiver Receipt-Lifecycle und echte Ownertransaktion bleiben offen.
+- AP04a Flugtaktfixture: strategischer und lokaler Testakteur werden im selben
+  Roottakt getrennt nach Bereich gebatcht und bewegen sich unabhängig; 6/6,
+  strategische Tick-/Rootfixtureprüfungen grün. Körpermaske wird mitgeführt.
+  Keine Produktfreigabe oder Performanceabnahme.
+- AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
+  Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
+  strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
+  bis zur Umstellung von Bounds, Footprint und Navigation explizit abgelehnt.
+  Registry-/Sperrprüfung12/12, alte Registry-, Roottakt- und Batchprüfung
+  grün. Das Orbitlayout des Parallelchats 9874511c4 ist als be6b9cc74
+  integriert; keine Freigabe des noch fehlenden Bereichswechsels.
+- AP04a lokale Aufnahmefixture: `SpaceCombatState` kann ausdrücklich markierte
+  Testschiffe in getrennten lokalen Bereichen aufnehmen und verhindert dort
+  Mehrfachbelegung. Prüfung7/7; normale lokale Produktaufnahme bleibt gesperrt
+  und die Fixture ersetzt keine Pflichtrotten-/Reiseprüfung.
+- AP04a Grenzen: separater `space_area_grid` prüft axiale Zellen über die
+  vorhandene Offsetkonvertierung gegen strategische256×256 oder lokale
+  Orbitlayout512×256-Grenzen; das strategische Grid bleibt unverändert.
+  Grenzprüfung8/8 und bestehende Geometrieprüfung grün. Bereichsidentität/
+  Berechtigung bleiben Rootpflicht; lokale Kampfaufnahme bleibt gesperrt.
+- AP04a Navigation: Sweeps und Blockerzellen nutzen den jeweiligen
+  Koordinatenrahmen, gemischte Bereichs-IDs werden abgewiesen. Lokale Tests
+  jenseits der strategischen 256er-Grenze, Blocker und Kartenrand4/4;
+  strategische Geometrie, Batch und Fixture-Flugtakt grün. Root-Mutation,
+  lokale Kampfaufnahme und tatsächliche Layoutblocker noch nicht verbunden.
+- AP04a Bereichsbatch-Fixture: Root filtert Akteure und Zielbelegung nach
+  Raum-ID; lokale Batchcommits verlangen expliziten Fixturekontext und
+  Testschiff-ID. Körpermasken des kanonischen Orbitlayouts werden als
+  Blockerzellen ergänzt und pro Bereich zwischengespeichert. Bereichstrennung,
+  Sperre und Körperkollision6/6, bestehende Batch- und Übergangsfixture grün.
+  Keine produktive lokale Bewegung; KI/Guidance und gemischte Formationen sind
+  nicht angebunden. Fixturecache und volle Tickkosten sind nicht abgenommen.
+- AP04a Footprint: einzellige und große Rümpfe prüfen die Grenzen des
+  jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
+  Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale
+  Aufnahme bleibt bis zur vollständigen Transaktion gesperrt.
+  Die validierte Footprintvorschau und gebietsbezogene Zellabfrage stehen
+  für die spätere Root-Vorprüfung bereit; Test5/5, keine Mutation.
+- AP04a Commands/Zielresolver: Ziel- und Wegpunktgrenzen folgen dem allein
+  vom Runtime-Kontext gelieferten Koordinatenrahmen; strategische Defaults
+  bleiben kompatibel. Bereichs-Command4/4, Zielresolver11/11, AP00 und
+  Rottenauftragsowner grün. Bereichszuordnung mehrerer beauftragter Rotten
+  und produktive Runtime-Kontextlieferung bleiben offen.
+- AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
+  Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
+  Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
+  lässt die Rotte inaktiv; fremde oder doppelte Schiffe und doppelte Piloten
+  werden abgewiesen. Gezielte Prüfung9/9, alte Rotten-/Lifecycle-/Auftrags-
+  verifier grün. Noch kein Anschluss an Flugstart, Gegneraufnahme, Transfer-
+  Commands oder Speicherung; die Flug-Invariante ist damit noch nicht global
+  durchgesetzt. Betroffene Reise- und Orbitdateien bleiben bis Abstimmung frei.
+- AP04a Vorbereitung: `preview_flying_wings` prüft die Zuordnung auf einer
+  isolierten Kopie und liefert die erwartete Rottenrevision ohne Liveänderung;
+  Vorschau und anschließende Zuordnung liefern gleiche IDs. Prüfung12/12;
+  Root muss die Revision beim Commit erneut prüfen. Keine Transaktion fertig.
+  `ensure_flying_wings` kann nun die vorbereitete Revision erneut prüfen;
+  ein veralteter Stand bleibt unverändert. Prüfung13/13; Rootanbindung offen.
+- AP04 Transfer-Vorstufe: interner Ownerwechsel verschiebt ein Schiff atomar,
+  prüft Ownership und Zielkapazität, löst eine geleerte Quellrotte auf und
+  erhält beziehungsweise ersetzt die Führung. Der validierte Ownercommand
+  `wing_transfer` nutzt diesen Wechsel und seine vorhandenen Replaybelege;
+  Prüfung18/18 inklusive Sechsergrenze und Wiederholung, AP00 und Owner grün.
+  Adapter, UI und Flugstart sind noch nicht angeschlossen.
+- AP04 Entfernungsgate-Vorstufe: Der Owner verweigert `wing_remove`, wenn
+  der vertrauenswürdige Runtime-Kontext das Schiff als fliegend ausweist.
+  Prüfung10/10, Transfer18/18 und bestehender Adapter9/9. Der Adapter liefert
+  die Liste bisher nicht; ohne sie ist die Regel noch nicht produktiv
+  durchgesetzt. Reise-/Adapteranbindung gehört zur abgestimmten Folgearbeit.
+- Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
+  integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
+  Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine
+  vollständige Boden- oder native Sichtabnahme. Paralleler Worktree unverändert.
+- Parallelcommit d539cbe89 (Polisa-Schiffsübernahme und Rückkehr) als
+  381f06802 integriert. Backend-, Übergabe-, Weltraumtakt-, echter Szenen-,
+  Rottenadapter-, Panel- und Auftragsownercheck jeweils Exit0 ohne Fehler.
+  Der parallele Worktree wurde nicht geändert.
+- Parallelstand b67b307b0 als 1ced3be19 integriert: Warp-Ausrüstung besitzt
+  bereits eigenen Root-Owner, Katalog, Supply-Transaktionen und Savevalidierung.
+  AP09/15/16 müssen diese vorhandene Struktur erweitern und Warp-Belege samt
+  Komponentenbilanz erhalten. Kein zweiter Equipmentowner.
+
+Basis: Plancommit de87366a6, integrierter Groundcommit ac53ff105 und
+integrierter paralleler Adapterstand b3f9ab26d als 23f0df031. Der parallele
+Worktree und dessen uncommittete Arbeit bleiben unverändert; vor weiterer
+gemeinsamer Integration die aktuelle Entwicklung erneut prüfen.
+Die Replay-Quittungen müssen vom künftigen autoritativen Owner pro Absender
+geführt werden; der reine Validator speichert sie nicht selbst.

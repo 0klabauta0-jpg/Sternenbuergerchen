@@ -1,0 +1,120 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real campaign accepts satellite job
+PASS: Public basis command starts real crew walk and boarding
+PASS: Real pilot arrival and existing payload owner both confirm boarding
+PASS: Real boarding allows launch
+PASS: Real warp command starts
+PASS: Warp advances in star view
+PASS: Actual homebase view opens
+PASS: Warp continues while homebase is viewed
+PASS: Hidden warp follows physics ticks at 30 fps cap
+PASS: Hidden warp follows physics ticks at 60 fps cap
+PASS: Hidden warp follows physics ticks at 144 fps cap
+PASS: Actual star view reopens
+PASS: Abort remains available after view change
+PASS: Abort preserves position with ongoing physics frames
+ORBIT_QUANTUM_FLOW passed=14 failed=0
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:5)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:5)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15192)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14163)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13295)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:37)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:140)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6020)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5977)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5015)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:330)
+       [11] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:6)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15192)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14163)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13295)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:37)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:140)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:798)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5015)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:330)
+       [10] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:6)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:87)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:296)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7628)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3920)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6430)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9411)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9280)
+       [9] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:17)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:87)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:296)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7628)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3920)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6430)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9411)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9280)
+       [9] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:17)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:87)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:296)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7628)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3920)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6430)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9411)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9280)
+       [9] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:17)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:87)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:296)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7628)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3920)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6430)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9411)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9280)
+       [9] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:17)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:87)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:296)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7628)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3920)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6430)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9411)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9280)
+       [9] _run (res://scripts/tests/space_combat_ap01_view_verifier.gd:17)
