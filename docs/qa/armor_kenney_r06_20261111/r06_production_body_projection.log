@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+R06_BODY_PROJECTION 154 passed, 0 failed [{"blender_derived_max_error_in_shoulder_widths":0.00000190781429409981,"blender_original_max_error_in_shoulder_widths":0.00000190781423727026,"changed_exported_vertices":285,"head_max_displacement":0.0,"original_bind_origin_alignment_in_shoulder_widths":"(0.0, 0.0, -0.000001)","rig":"base","vertices":1029},{"blender_derived_max_error_in_shoulder_widths":0.00000270216855824401,"blender_original_max_error_in_shoulder_widths":0.00000270216853440986,"changed_exported_vertices":285,"head_max_displacement":0.0,"original_bind_origin_alignment_in_shoulder_widths":"(0.147003, 0.0, -0.000002)","rig":"mission","vertices":1029}]

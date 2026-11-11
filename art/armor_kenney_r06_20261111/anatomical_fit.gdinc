@@ -1,0 +1,285 @@
+static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleton3D, armor_id: String, body_axes: Basis, width: float) -> void:
+	# Fit only when assembling an outfit. Original body meshes remain immutable.
+	# Limb depth comes from the actual local body envelope, not shoulder span.
+	for spec: Dictionary in specs:
+		var part := String(spec.part)
+		var bone := String(spec.bone)
+		var axes: Basis = spec.axes
+		var dimensions: Vector3 = spec.dimensions
+		var center: Vector3 = axes.inverse() * Vector3(spec.center)
+		if part.begins_with("torso_"):
+			var torso_bounds := _bone_bounds(model, skeleton, "Spine", axes)
+			for name in ["Chest", "Hips"]:
+				var addition := _bone_bounds(model, skeleton, name, axes)
+				if addition.size.length() > 0.0: torso_bounds = torso_bounds.merge(addition)
+			if torso_bounds.size.z > 0.0:
+				center.z = torso_bounds.get_center().z
+				dimensions.z = torso_bounds.size.z * {"light":1.12,"medium":1.14,"heavy":1.16}[armor_id]
+				dimensions.x = width * {"light":1.02,"medium":1.18,"heavy":1.26}[armor_id]
+				if armor_id=="heavy":dimensions.y*=.93
+		elif part.begins_with("pelvis_"):
+			var bounds := _bone_bounds(model, skeleton, "Hips", axes)
+			if bounds.has_volume():
+				center.z = bounds.get_center().z
+				dimensions.z = bounds.size.z * {"light":1.04,"medium":1.10,"heavy":1.18}[armor_id]
+		elif part.begins_with("pauldron_"):
+			var bounds := _bone_bounds(model, skeleton, bone, axes)
+			var elbow := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Arm","ForeArm"))).origin
+			var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
+			center = axes.inverse() * shoulder.lerp(elbow, 0.07)
+			dimensions.y += shoulder.distance_to(elbow)*.06
+			if bounds.has_volume():
+				center.x = bounds.get_center().x
+				center.z = bounds.get_center().z
+				dimensions.z = bounds.size.z * {"light":1.38,"medium":1.62,"heavy":1.92}[armor_id]
+		elif part.begins_with("knee_"):
+			var joint := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
+			var ankle := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Leg","Foot"))).origin
+			axes = body_axes
+			center = axes.inverse()*joint
+			var bounds := _joint_section_bounds(model,skeleton,[bone,bone.replace("Leg","UpLeg")],axes,center.y,joint.distance_to(ankle)*.055)
+			if bounds.size.x>0.0 and bounds.size.z>0.0:
+				dimensions = Vector3(bounds.size.x * {"light":.80,"medium":1.18,"heavy":1.26}[armor_id],bounds.size.x * {"light":.73,"medium":1.0,"heavy":1.02}[armor_id],bounds.size.z*1.10)
+				center.x = bounds.get_center().x
+				center.z = bounds.get_center().z + bounds.size.z*.13
+				model.set_meta("r06_knee_section_"+bone,{"bounds":bounds,"center":center,"dimensions":dimensions})
+		elif part.begins_with("forearm_") or part.begins_with("thigh_") or part.begins_with("shin_") or part.begins_with("upper_arm_"):
+			var bounds := _bone_bounds(model,skeleton,bone,axes)
+			if bounds.has_volume():
+				if armor_id=="light" and (part.begins_with("thigh_") or part.begins_with("shin_")):
+					center.z = bounds.end.z-dimensions.z*.35
+				else:
+					center.x = bounds.get_center().x
+					center.z = bounds.get_center().z
+					if part.begins_with("forearm_"):
+						dimensions.x = bounds.size.x * {"light":0.90,"medium":1.35,"heavy":1.42}[armor_id]
+						dimensions.z = bounds.size.z * {"light":1.13,"medium":1.30,"heavy":1.40}[armor_id]
+					elif part.begins_with("thigh_"):
+						dimensions.x = bounds.size.x * (1.16 if armor_id=="medium" else 1.24)
+						dimensions.z = bounds.size.z * (1.16 if armor_id=="medium" else 1.24)
+						center.y-=dimensions.y*.08
+						dimensions.y*=.90
+					elif part.begins_with("shin_"):
+						dimensions.x = bounds.size.x * (1.15 if armor_id=="medium" else 1.25)
+						dimensions.z = bounds.size.z * (1.20 if armor_id=="medium" else 1.25)
+					else:
+						dimensions.z=bounds.size.z*1.25
+		spec.axes=axes
+		spec.center=axes*center
+		spec.dimensions=dimensions
+
+
+static func _component_root(parents: Array[int], index: int) -> int:
+	while parents[index] != index:
+		parents[index] = parents[parents[index]]
+		index = parents[index]
+	return index
+
+
+static func _assign_torso_components(primitives: Array) -> void:
+	# Weld glTF's UV/normal/material vertex splits for connectivity only. A
+	# complete rigid shell gets one bone from its component center, never a
+	# different bone for individual vertices on opposite sides of a threshold.
+	var points: Array[Vector3] = []
+	var parents: Array[int] = []
+	var welded: Dictionary = {}
+	for primitive: Dictionary in primitives:
+		var arrays: Array = primitive.arrays
+		var mapping := PackedInt32Array()
+		for vertex: Vector3 in arrays[Mesh.ARRAY_VERTEX]:
+			var point: Vector3 = Transform3D(primitive.transform) * vertex
+			if not welded.has(point):
+				welded[point] = points.size()
+				parents.append(points.size())
+				points.append(point)
+			mapping.append(int(welded[point]))
+		primitive["component_vertices"] = mapping
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		if indices.is_empty():
+			for index in mapping.size():indices.append(index)
+		for start in range(0,indices.size(),3):
+			var root := _component_root(parents,mapping[indices[start]])
+			for offset in [1,2]:parents[_component_root(parents,mapping[indices[start+offset]])]=root
+	var bounds: Dictionary = {}
+	for index in points.size():
+		var root := _component_root(parents,index)
+		bounds[root] = AABB(points[index],Vector3.ZERO) if not bounds.has(root) else (bounds[root] as AABB).expand(points[index])
+	for primitive: Dictionary in primitives:
+		var tags := PackedInt32Array()
+		for index in primitive.component_vertices:
+			var center: Vector3 = (bounds[_component_root(parents,index)] as AABB).get_center()
+			tags.append(2 if center.y<-.39 else 1 if center.y<-.07 else 0)
+		primitive["bone_tags"]=tags
+		primitive.erase("component_vertices")
+
+
+static func _joint_section_bounds(model: Node3D, skeleton: Skeleton3D, bone_names: Array, axes: Basis, section_y: float, half_band: float) -> AABB:
+	# Intersect original body triangles with three planes close to the joint.
+	# This samples the patella cross-section, not the calf's wider/lower AABB.
+	var result := AABB()
+	var found := false
+	for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if not String(body.name).to_lower().contains("character") or body.skin == null: continue
+		var accepted: Dictionary = {}
+		var rest := Transform3D.IDENTITY
+		for bind in body.skin.get_bind_count():
+			var bone := body.skin.get_bind_bone(bind)
+			var name := String(body.skin.get_bind_name(bind))
+			if not name.is_empty():bone = skeleton.find_bone(name)
+			elif bone >= 0:name = skeleton.get_bone_name(bone)
+			if bone < 0:continue
+			if name in bone_names:
+				accepted[bind] = true
+				rest = skeleton.get_bone_global_rest(bone) * body.skin.get_bind_pose(bind)
+		if accepted.is_empty():continue
+		var source: Mesh = body.get_meta("armor_original_body_mesh", body.mesh)
+		for surface in source.get_surface_count():
+			var arrays: Array = source.surface_get_arrays(surface)
+			var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+			var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+			if bones.size() != vertices.size()*4:continue
+			for start in range(0,indices.size(),3):
+				var points: Array[Vector3] = []
+				var belongs := false
+				for corner in range(3):
+					var index := indices[start+corner]
+					points.append(axes.inverse()*(rest*vertices[index]))
+					for influence in range(4):
+						if accepted.has(bones[index*4+influence]) and weights[index*4+influence]>.45:belongs=true
+				if not belongs:continue
+				for level in [section_y-half_band,section_y,section_y+half_band]:
+					for edge in range(3):
+						var a := points[edge]
+						var b := points[(edge+1)%3]
+						if absf(b.y-a.y)<.00000001:continue
+						var t: float = (float(level)-a.y)/(b.y-a.y)
+						if t<0.0 or t>1.0:continue
+						var point := a.lerp(b,t)
+						result = result.expand(point) if found else AABB(point,Vector3.ZERO)
+						found=true
+	return result
+
+
+static var _body_variants: Dictionary = {}
+static var _body_profile: Dictionary = {}
+
+static func _valid_body_profile(data: Variant) -> bool:
+	if not data is Dictionary:return false
+	if String(data.get("revision",""))!="kenney_body_r06":return false
+	var rows: Variant = data.get("rows")
+	if not rows is Array or rows.size()<2:return false
+	var previous := -INF
+	for row: Variant in rows:
+		if not row is Array or row.size()!=3:return false
+		for value: Variant in row:
+			if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+		if float(row[0])<=previous or float(row[1])<=0.0 or float(row[2])<=0.0:return false
+		previous=float(row[0])
+	for key in ["lateral_full","lateral_end","depth_center_width"]:
+		var value: Variant = data.get(key)
+		if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	if float(data.lateral_end)<=float(data.lateral_full):return false
+	var center: Variant = data.get("canonical_bounds_center")
+	if not center is Array or center.size()!=3:return false
+	for value: Variant in center:
+		if typeof(value) not in [TYPE_FLOAT,TYPE_INT] or not is_finite(float(value)):return false
+	return true
+
+static func _body_point(point: Vector3, width: float, height: float) -> Vector3:
+	var rows: Array = _body_profile.rows
+	var h := point.y/height
+	var sx := 1.0
+	var sd := 1.0
+	for index in rows.size()-1:
+		var a: Array = rows[index]
+		var b: Array = rows[index+1]
+		if h>=float(a[0]) and h<=float(b[0]):
+			var t: float = (h-float(a[0]))/(float(b[0])-float(a[0]))
+			sx=lerpf(float(a[1]),float(b[1]),t)
+			sd=lerpf(float(a[2]),float(b[2]),t)
+			break
+	var edge := absf(point.x)/width
+	var t := clampf((edge-float(_body_profile.lateral_full))/(float(_body_profile.lateral_end)-float(_body_profile.lateral_full)),0,1)
+	var mask := 1.0-t*t*(3.0-2.0*t)
+	sx=1.0+(sx-1.0)*mask
+	sd=1.0+(sd-1.0)*mask
+	var center := width*float(_body_profile.depth_center_width)
+	return Vector3(point.x*sx,point.y,center+(point.z-center)*sd)
+
+static func _prepare_body_variant(model: Node3D) -> void:
+	if String(model.get_meta("body_shape_revision",""))=="kenney_body_r06":return
+	if _body_profile.is_empty():
+		if not FileAccess.file_exists(PATH+"body_shape_profile.json"):return
+		var loaded: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH+"body_shape_profile.json"))
+		if not _valid_body_profile(loaded):return
+		_body_profile=loaded
+	var skeletons := model.find_children("*","Skeleton3D",true,false)
+	if skeletons.is_empty():return
+	var sk: Skeleton3D = skeletons[0]
+	for name in ["Hips","Head","LeftArm","RightArm"]:
+		if sk.find_bone(name)<0:return
+	var hips := sk.get_bone_global_rest(sk.find_bone("Hips")).origin
+	var head := sk.get_bone_global_rest(sk.find_bone("Head")).origin
+	var left := sk.get_bone_global_rest(sk.find_bone("LeftArm")).origin
+	var right := sk.get_bone_global_rest(sk.find_bone("RightArm")).origin
+	var up := (head-hips).normalized()
+	var horizontal := (left-right).normalized()
+	horizontal=(horizontal-up*horizontal.dot(up)).normalized()
+	var axes := Basis(horizontal,up,horizontal.cross(up).normalized())
+	var width := left.distance_to(right)
+	var height := (left-hips).dot(up)
+	if width<=0.000001 or height<=0.000001 or axes.determinant()<0.000001:return
+	var applied_any := false
+	for body: MeshInstance3D in model.find_children("*","MeshInstance3D",true,false):
+		if not String(body.name).to_lower().contains("character") or body.skin==null:continue
+		var source: Mesh = body.get_meta("r06_source_body_mesh",body.get_meta("armor_original_body_mesh",body.mesh))
+		if source==null or source.get_surface_count()==0 or body.skin.get_bind_count()==0:continue
+		body.set_meta("r06_source_body_mesh",source)
+		var bind := 0
+		var bone := body.skin.get_bind_bone(bind)
+		if not String(body.skin.get_bind_name(bind)).is_empty():bone=sk.find_bone(body.skin.get_bind_name(bind))
+		if bone<0:continue
+		var mesh_to_rest := sk.get_bone_global_rest(bone)*body.skin.get_bind_pose(bind)
+		var canonical := Transform3D(axes.inverse(),-(axes.inverse()*hips))*mesh_to_rest
+		# The mission control rig's first bind has a translated origin compared
+		# with the base rig. Anchor the Blender profile to the complete immutable
+		# body envelope; applying the inverse transform leaves actor placement intact.
+		var envelope := AABB()
+		var first := true
+		for surface in source.get_surface_count():
+			for vertex: Vector3 in source.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]:
+				var p := canonical*vertex
+				envelope = AABB(p,Vector3.ZERO) if first else envelope.expand(p)
+				first=false
+		var reference: Array = _body_profile.canonical_bounds_center
+		canonical.origin += Vector3(reference[0],reference[1],reference[2])*width-envelope.get_center()
+		var key := str(source.get_rid().get_id())+str(canonical)+str(width)+str(height)
+		if not _body_variants.has(key):
+			var result := ArrayMesh.new()
+			for surface in source.get_surface_count():
+				var arrays: Array = source.surface_get_arrays(surface).duplicate(true)
+				var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+				var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+				for index in vertices.size():
+					var p := canonical*vertices[index]
+					var q := _body_point(p,width,height)
+					if p.distance_squared_to(q)<width*width*0.00000000001:continue
+					vertices[index]=canonical.affine_inverse()*q
+					var eps := width*.0001
+					var dx := (_body_point(p+Vector3.RIGHT*eps,width,height)-_body_point(p-Vector3.RIGHT*eps,width,height))/(2*eps)
+					var dy := (_body_point(p+Vector3.UP*eps,width,height)-_body_point(p-Vector3.UP*eps,width,height))/(2*eps)
+					var dz := (_body_point(p+Vector3.BACK*eps,width,height)-_body_point(p-Vector3.BACK*eps,width,height))/(2*eps)
+					var jacobian := canonical.basis.inverse()*Basis(dx,dy,dz)*canonical.basis
+					normals[index]=(jacobian.inverse().transposed()*normals[index]).normalized()
+				arrays[Mesh.ARRAY_VERTEX]=vertices
+				arrays[Mesh.ARRAY_NORMAL]=normals
+				result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+				result.surface_set_material(surface,source.surface_get_material(surface))
+			_body_variants[key]=result
+		body.mesh=_body_variants[key]
+		body.set_meta("armor_original_body_mesh",body.mesh)
+		body.set_meta("r06_body_variant_mesh",body.mesh)
+		applied_any=true
+	if applied_any:model.set_meta("body_shape_revision","kenney_body_r06")

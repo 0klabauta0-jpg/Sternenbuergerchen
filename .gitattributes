@@ -62,3 +62,6 @@ docs/qa/armor_kenney_r06_20261111/** -text whitespace=blank-at-eol,blank-at-eof,
 # Parallel campaign-observation and regional-publication evidence is byte hashed.
 docs/qa/campaign_observe_projection_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/qa/regional_publication_r02_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Runtime body morph profile is copied byte-for-byte from the Blender manifest.
+Assets/curated/personnel/armor_kenney_r06_20261111/body_shape_profile.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

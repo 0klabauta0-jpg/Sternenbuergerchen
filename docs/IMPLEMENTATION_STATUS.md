@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Rüstung R06 und überarbeiteter Grundkörper —11.11.2026
+
+Isolierter Taskstand auf7ef57c931. Nach ausdrücklicher neuer Nutzerfreigabe
+vom Original abgeleitete Schulter-/Brust-/Taillenform auf beiden bestehenden
+Rigs. Breitere Brusthauptflächen, vollständige Kniekappen und mehr seitlich
+umgreifende Schalen nach bestätigten2D-Vorlagen; klare geschlossene Visiere
+bleiben. Originalquelle/Topology/Gewichte/Rig/Animation erhalten; neue Form
+bleibt beim Ablegen.31GLBs+Runtimeprofil, Wearables5052/6124/7216Tris je Klasse,
+maximal5Materialflächen. Produktionschecks156/0 headless+nativ, Body154/0,
+echter Equip-/Basisweg16/0; Vergleichsworkbench134/0. QA armor_kenney_r06_20261111.
+Nutzer verlangt weitere Kopf-/Schulterproportionen: FolgerundeR07 aktiv;
+R06 ist erhaltener Kandidat, keine Stilfreigabe. Sitzextreme, breiteFPS/Main/EXE
+offen. Terrainvollvorbereitung
+ist separater laufender Task; Fahrzeuge bleiben zurückgestellt.
+
+
 ### Getaktete Kampagnenbeobachtung und regionale Publikation —11.11.2026
 
 Isolierter Taskstand auf85fd00afc. Fortschrittsbeobachtung verwendet einen

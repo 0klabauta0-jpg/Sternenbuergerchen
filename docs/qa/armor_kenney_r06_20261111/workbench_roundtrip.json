@@ -1,0 +1,1367 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "armor_comparison_20261111",
+  "title": "Rüstung · Vorlage und Modell",
+  "exported_at": "2026-11-11T12:30:57.706Z",
+  "controls": {
+    "armor": "medium",
+    "view": "front",
+    "variant": "r06",
+    "tone": "color",
+    "checks": {
+      "medium.wrap": true
+    }
+  },
+  "notes": {
+    "light": "QA-Leicht: Abdeckung.",
+    "medium": "QA-Mittel: Schulterübergang vergleichen.",
+    "heavy": ""
+  },
+  "active_choices": {
+    "light": "close",
+    "medium": "revise",
+    "heavy": "unreviewed"
+  },
+  "computed": {
+    "reviewed_classes": 2,
+    "candidate_available": true,
+    "latest_available_variant": "r06"
+  },
+  "metadata": {
+    "source_template": "_html_workbench_template.html",
+    "image_catalog": {
+      "classes": {
+        "light": {
+          "label": "Leicht",
+          "index": 0,
+          "target": "../../art/armor_orc_morozov_20261111/light_turnaround_ai_r04.png",
+          "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997",
+          "frames": {
+            "front": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 50,
+                "width": 444,
+                "height": 760
+              },
+              "body": {
+                "x": 95,
+                "y": 54,
+                "width": 334,
+                "height": 746
+              }
+            },
+            "quarter": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 50,
+                "width": 444,
+                "height": 760
+              },
+              "body": {
+                "x": 95,
+                "y": 54,
+                "width": 334,
+                "height": 746
+              }
+            },
+            "rear": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 444,
+                "y": 50,
+                "width": 443,
+                "height": 760
+              },
+              "body": {
+                "x": 537,
+                "y": 66,
+                "width": 327,
+                "height": 734
+              }
+            },
+            "side": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 887,
+                "y": 50,
+                "width": 443,
+                "height": 760
+              },
+              "body": {
+                "x": 1011,
+                "y": 59,
+                "width": 237,
+                "height": 741
+              }
+            },
+            "top": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 1330,
+                "y": 50,
+                "width": 444,
+                "height": 760
+              },
+              "body": {
+                "x": 1390,
+                "y": 224,
+                "width": 319,
+                "height": 400
+              }
+            }
+          }
+        },
+        "medium": {
+          "label": "Mittel",
+          "index": 1,
+          "target": "../../art/armor_orc_morozov_20261111/medium_turnaround_ai_r04.png",
+          "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8",
+          "frames": {
+            "front": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 12,
+                "y": 27,
+                "width": 420,
+                "height": 777
+              }
+            },
+            "quarter": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 12,
+                "y": 27,
+                "width": 420,
+                "height": 777
+              }
+            },
+            "rear": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 444,
+                "y": 20,
+                "width": 443,
+                "height": 790
+              },
+              "body": {
+                "x": 524,
+                "y": 28,
+                "width": 351,
+                "height": 776
+              }
+            },
+            "side": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 887,
+                "y": 20,
+                "width": 443,
+                "height": 790
+              },
+              "body": {
+                "x": 1008,
+                "y": 26,
+                "width": 249,
+                "height": 778
+              }
+            },
+            "top": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 1330,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 1369,
+                "y": 205,
+                "width": 363,
+                "height": 417
+              }
+            }
+          }
+        },
+        "heavy": {
+          "label": "Schwer",
+          "index": 2,
+          "target": "../../art/armor_orc_morozov_20261111/heavy_turnaround_ai_r04.png",
+          "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e",
+          "frames": {
+            "front": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 67,
+                "y": 26,
+                "width": 365,
+                "height": 771
+              }
+            },
+            "quarter": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 0,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 67,
+                "y": 26,
+                "width": 365,
+                "height": 771
+              }
+            },
+            "rear": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 444,
+                "y": 20,
+                "width": 443,
+                "height": 790
+              },
+              "body": {
+                "x": 510,
+                "y": 26,
+                "width": 365,
+                "height": 771
+              }
+            },
+            "side": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 887,
+                "y": 20,
+                "width": 443,
+                "height": 790
+              },
+              "body": {
+                "x": 998,
+                "y": 26,
+                "width": 247,
+                "height": 771
+              }
+            },
+            "top": {
+              "width": 1774,
+              "height": 887,
+              "panel": {
+                "x": 1330,
+                "y": 20,
+                "width": 444,
+                "height": 790
+              },
+              "body": {
+                "x": 1342,
+                "y": 160,
+                "width": 385,
+                "height": 452
+              }
+            }
+          }
+        }
+      },
+      "views": {
+        "front": "Vorne",
+        "quarter": "Dreiviertel",
+        "side": "Seite",
+        "rear": "Hinten",
+        "top": "Oben"
+      },
+      "variants": {
+        "r04": {
+          "label": "R04 · technischer Entwurf",
+          "available": true,
+          "images": {
+            "front": "../qa/armor_orc_morozov_20261111/native_front.png",
+            "quarter": "../qa/armor_orc_morozov_20261111/native_quarter.png",
+            "side": "../qa/armor_orc_morozov_20261111/native_side.png",
+            "rear": "../qa/armor_orc_morozov_20261111/native_rear.png",
+            "top": "../qa/armor_orc_morozov_20261111/native_top.png"
+          },
+          "frames": {
+            "front": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 144,
+                  "y": 87,
+                  "width": 332,
+                  "height": 937
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 780,
+                  "y": 87,
+                  "width": 333,
+                  "height": 941
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "quarter": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 123,
+                  "y": 90,
+                  "width": 300,
+                  "height": 940
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 758,
+                  "y": 90,
+                  "width": 303,
+                  "height": 941
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "side": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 63,
+                  "y": 87,
+                  "width": 336,
+                  "height": 932
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 699,
+                  "y": 87,
+                  "width": 336,
+                  "height": 935
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "rear": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 179,
+                  "y": 87,
+                  "width": 308,
+                  "height": 925
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 812,
+                  "y": 87,
+                  "width": 311,
+                  "height": 925
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "top": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 145,
+                  "y": 465,
+                  "width": 331,
+                  "height": 336
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 781,
+                  "y": 465,
+                  "width": 334,
+                  "height": 336
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            }
+          },
+          "status": "Nativer Modellstand; keine automatische Stilfreigabe"
+        },
+        "r05_flat": {
+          "label": "R05 · vor der Wölbung (verworfen)",
+          "available": true,
+          "images": {
+            "front": "../qa/armor_kenney_r05_flat_20261111/native_front.png",
+            "quarter": "../qa/armor_kenney_r05_flat_20261111/native_quarter.png",
+            "side": "../qa/armor_kenney_r05_flat_20261111/native_side.png",
+            "rear": "../qa/armor_kenney_r05_flat_20261111/native_rear.png",
+            "top": "../qa/armor_kenney_r05_flat_20261111/native_top.png"
+          },
+          "frames": {
+            "front": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 144,
+                  "y": 95,
+                  "width": 332,
+                  "height": 934
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 780,
+                  "y": 95,
+                  "width": 338,
+                  "height": 934
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "quarter": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 120,
+                  "y": 96,
+                  "width": 303,
+                  "height": 939
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 754,
+                  "y": 96,
+                  "width": 316,
+                  "height": 939
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "side": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 75,
+                  "y": 95,
+                  "width": 309,
+                  "height": 932
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 711,
+                  "y": 95,
+                  "width": 308,
+                  "height": 932
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "rear": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 172,
+                  "y": 95,
+                  "width": 315,
+                  "height": 919
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 786,
+                  "y": 95,
+                  "width": 337,
+                  "height": 933
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "top": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 145,
+                  "y": 480,
+                  "width": 331,
+                  "height": 309
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 781,
+                  "y": 480,
+                  "width": 338,
+                  "height": 309
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            }
+          },
+          "status": "Nativer Modellstand; keine automatische Stilfreigabe"
+        },
+        "r05": {
+          "label": "R05 · gewölbte Schalen",
+          "available": true,
+          "images": {
+            "front": "../qa/armor_kenney_r05_20261111/native_front.png",
+            "quarter": "../qa/armor_kenney_r05_20261111/native_quarter.png",
+            "side": "../qa/armor_kenney_r05_20261111/native_side.png",
+            "rear": "../qa/armor_kenney_r05_20261111/native_rear.png",
+            "top": "../qa/armor_kenney_r05_20261111/native_top.png"
+          },
+          "frames": {
+            "front": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 144,
+                  "y": 95,
+                  "width": 330,
+                  "height": 934
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 780,
+                  "y": 95,
+                  "width": 338,
+                  "height": 934
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "quarter": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 120,
+                  "y": 96,
+                  "width": 300,
+                  "height": 939
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 754,
+                  "y": 96,
+                  "width": 322,
+                  "height": 939
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "side": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 75,
+                  "y": 95,
+                  "width": 309,
+                  "height": 932
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 711,
+                  "y": 95,
+                  "width": 308,
+                  "height": 932
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "rear": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 172,
+                  "y": 95,
+                  "width": 315,
+                  "height": 919
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 786,
+                  "y": 95,
+                  "width": 337,
+                  "height": 933
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "top": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 145,
+                  "y": 480,
+                  "width": 330,
+                  "height": 309
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 781,
+                  "y": 480,
+                  "width": 337,
+                  "height": 309
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            }
+          },
+          "status": "Nativer Modellstand; keine automatische Stilfreigabe"
+        },
+        "r06": {
+          "label": "R06 · Vorlagenproportionen",
+          "available": true,
+          "images": {
+            "front": "../qa/armor_kenney_r06_20261111/native_front.png",
+            "quarter": "../qa/armor_kenney_r06_20261111/native_quarter.png",
+            "side": "../qa/armor_kenney_r06_20261111/native_side.png",
+            "rear": "../qa/armor_kenney_r06_20261111/native_rear.png",
+            "top": "../qa/armor_kenney_r06_20261111/native_top.png"
+          },
+          "frames": {
+            "front": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 144,
+                  "y": 95,
+                  "width": 330,
+                  "height": 934
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 775,
+                  "y": 95,
+                  "width": 351,
+                  "height": 934
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "quarter": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 120,
+                  "y": 96,
+                  "width": 300,
+                  "height": 939
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 754,
+                  "y": 96,
+                  "width": 333,
+                  "height": 939
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "side": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 75,
+                  "y": 95,
+                  "width": 309,
+                  "height": 932
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 711,
+                  "y": 95,
+                  "width": 310,
+                  "height": 932
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "rear": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 172,
+                  "y": 95,
+                  "width": 315,
+                  "height": 919
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 778,
+                  "y": 95,
+                  "width": 351,
+                  "height": 933
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            },
+            "top": {
+              "light": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 0,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 145,
+                  "y": 480,
+                  "width": 330,
+                  "height": 309
+                }
+              },
+              "medium": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 640,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 775,
+                  "y": 479,
+                  "width": 350,
+                  "height": 310
+                }
+              },
+              "heavy": {
+                "width": 1920,
+                "height": 1080,
+                "panel": {
+                  "x": 1280,
+                  "y": 55,
+                  "width": 640,
+                  "height": 1025
+                },
+                "body": {
+                  "x": 1292,
+                  "y": 55,
+                  "width": 616,
+                  "height": 1003
+                }
+              }
+            }
+          },
+          "status": "Nativer Modellstand; keine automatische Stilfreigabe"
+        }
+      }
+    },
+    "only_local_review_notes": true
+  }
+}

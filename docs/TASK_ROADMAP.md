@@ -4,7 +4,9 @@
 Nutzerpriorität: Fahrzeugmodelle zurückgestellt; später voraussichtlich
 Caterpillar zuerst. Aktuell drei Rüstungsstufen nach Kenney-Proportionen und
 ORC-/Morozov-Formreferenzen, mit Bilder-KI-Mehransichten und nativer Übertragung.
-Task: ARMOR_ORC_MOROZOV_2026_11_11.md. Kein neuer Fahrzeug-/Kaufpfad in diesem Schritt.
+Aktuelle Folgerunde: ARMOR_PROPORTIONS_R07_2026_11_11.md;
+vorherige Körper-/Rüstungsrevision: ARMOR_REFERENCE_SHAPES_R06_2026_11_11.md;
+vorheriger Task: ARMOR_ORC_MOROZOV_2026_11_11.md. Kein neuer Fahrzeug-/Kaufpfad in diesem Schritt.
 
 ### Personal-/Basis-UI nach Main — 10.11.2026
 Beauftragte Integration der fünf Taskcommits5df2d3b6f bis2ea460017 auf Main1e3cca237,

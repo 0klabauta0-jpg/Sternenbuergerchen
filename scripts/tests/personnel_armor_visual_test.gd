@@ -46,6 +46,10 @@ func _run() -> void:
 			model.position = Vector3(index * 1.1, 1.0 if row == 0 else 0.0, 0.0)
 			if row == 1: model.rotation.y = PI * 0.5
 			var result := ARMOR.apply_to_model(model, classes[index])
+			for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+				if not String(body.name).to_lower().contains("character"): continue
+				_check(body.has_meta("r06_source_body_mesh") and body.has_meta("r06_body_variant_mesh"), "Original body and derived body remain separately available")
+				_check(body.get_meta("r06_source_body_mesh", body.mesh) != body.get_meta("r06_body_variant_mesh", body.mesh), "All armor classes, including suit, use the revised body")
 			# Mission proxies already project actual equipment before this call.
 			var attachments := model.find_children("ArmorVisual_*", "MeshInstance3D", true, false)
 			_check(attachments.size() == (0 if index == 0 else 1), "One combined skinned outfit")
@@ -148,6 +152,7 @@ func _run() -> void:
 		for body: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 			if body.has_meta("armor_original_body_mesh"):
 				_check(body.mesh == body.get_meta("armor_original_body_mesh"), "Unequip restores original head geometry")
+				_check(body.mesh == body.get_meta("r06_body_variant_mesh") and body.mesh != body.get_meta("r06_source_body_mesh"), "Unequip retains the revised shoulder and waist shape")
 		for helmet: Node3D in model.find_children("HelmetVisual_*", "Node3D", true, false):
 			_check(helmet.visible, "Unequip restores existing space helmet")
 	view.free()

@@ -1,0 +1,70 @@
+{
+  "revision": "kenney_body_r06",
+  "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+  "rows": [
+    [
+      -0.45,
+      1.0,
+      1.0
+    ],
+    [
+      -0.1,
+      0.98,
+      0.97
+    ],
+    [
+      0.12,
+      0.94,
+      0.94
+    ],
+    [
+      0.32,
+      0.82,
+      0.87
+    ],
+    [
+      0.48,
+      0.87,
+      0.9
+    ],
+    [
+      0.66,
+      1.16,
+      0.98
+    ],
+    [
+      0.85,
+      1.28,
+      1.04
+    ],
+    [
+      1.0,
+      1.22,
+      1.02
+    ],
+    [
+      1.12,
+      1.05,
+      1.0
+    ],
+    [
+      1.28,
+      1.0,
+      1.0
+    ]
+  ],
+  "lateral_full": 0.47,
+  "lateral_end": 0.97,
+  "depth_center_width": 0.1,
+  "description": "Blender-authored thorax/waist contour; head/hands/feet and rest skeleton unchanged.",
+  "canonical_bounds_center": [
+    2.8179148430054896e-07,
+    0.9519510919704418,
+    -0.018390346296293502
+  ],
+  "canonical_bounds_size": [
+    5.392452016850282,
+    5.615744340453994,
+    1.5536674931845116
+  ]
+}
