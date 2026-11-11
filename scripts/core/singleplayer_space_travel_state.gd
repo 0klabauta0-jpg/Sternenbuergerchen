@@ -70,7 +70,7 @@ func is_quantum_active() -> bool:
 	return _phase == "quantum"
 
 func get_quantum_progress() -> Dictionary:
-	return {"phase":_phase, "target_orbit_id":_target_orbit_id, "elapsed_seconds":_elapsed_seconds, "duration_seconds":_active_jump_duration_seconds}
+	return {"phase":_phase, "target_orbit_id":_target_orbit_id, "elapsed_seconds":_elapsed_seconds, "duration_seconds":_active_jump_duration_seconds, "revision":_revision}
 
 func get_snapshot() -> Dictionary:
 	return {"system_version": int(_definition.get("version", 1)), "hex": GRID.cell_at(_position),

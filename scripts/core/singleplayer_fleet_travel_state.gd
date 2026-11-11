@@ -35,6 +35,11 @@ func get_craft_snapshot(craft_id: String) -> Dictionary:
 	var snapshot: Dictionary = _owners[craft_id].get_snapshot()
 	snapshot["craft_id"] = craft_id
 	return snapshot
+func get_craft_quantum_progress(craft_id: String) -> Dictionary:
+	return _owners[craft_id].get_quantum_progress() if _owners.has(craft_id) else {}
+func get_craft_area_owner_stamp(craft_id: String) -> Dictionary:
+	if not _owners.has(craft_id): return {}
+	return {"owner_id":_owners[craft_id].get_instance_id(), "owner_epoch":int(_owners[craft_id].get("_space_area_epoch"))}
 func focus_craft(craft_id: String) -> bool:
 	if not _owners.has(craft_id): return false
 	_focus=craft_id; return true

@@ -18,7 +18,9 @@ static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, powe
 		return {"ok":false, "reason":"insufficient_thrust"}
 	var displacement: Vector2 = goal.target_plane - flight.position_plane
 	var desired_velocity: Vector2 = displacement.limit_length(5.0) * 0.8
-	var desired_force: Vector2 = (desired_velocity - flight.velocity_plane) * (2.0 * mass)
+	# Stronger velocity damping avoids overshooting a gate whose far edge is
+	# immediately blocked by the body, including asymmetric ship thrusters.
+	var desired_force: Vector2 = (desired_velocity - flight.velocity_plane) * (4.0 * mass)
 	var axis := Vector2.from_angle(float(flight.get("heading_rad", 0.0)))
 	var along := desired_force.dot(axis)
 	var forward := along / ((main if along >= 0.0 else reverse) * fraction)

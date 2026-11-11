@@ -272,6 +272,7 @@ var _fixture_surface_group_serial := 0
 var _local_return_receipts: Dictionary = {}
 var _local_return_latest_by_craft: Dictionary = {}
 var _warp_entry_searches: Dictionary = {}
+var _warp_completion_intents: Dictionary = {}
 var _warp_entry_receipts: Dictionary = {}
 var _warp_entry_latest_by_craft: Dictionary = {}
 var _warp_departure_receipts: Dictionary = {}
@@ -754,7 +755,12 @@ func publish_singleplayer_warp_departure_event(adapter: Node, receipt_id: String
 	singleplayer_command_committed.emit(receipt.command.duplicate(true), receipt.result.travel_result.duplicate(true))
 
 func is_singleplayer_warp_entry_pending(craft_id: String) -> bool:
-	return _warp_entry_searches.has(craft_id)
+	if not _warp_completion_intents.has(craft_id) or _singleplayer_space_travel_owner == null: return false
+	var intent: Dictionary = _warp_completion_intents[craft_id]
+	if intent.fleet != _singleplayer_space_travel_owner or intent.owner_stamp != _singleplayer_space_travel_owner.get_craft_area_owner_stamp(craft_id): return false
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	var progress: Dictionary = _singleplayer_space_travel_owner.get_craft_quantum_progress(craft_id)
+	return flight != null and flight == intent.flight and flight.get_snapshot().get("revision") == intent.flight_revision and progress.get("phase") == "quantum" and progress.get("revision") == intent.travel_revision and progress.get("target_orbit_id") == intent.target_orbit_id
 
 func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: float) -> Dictionary:
 	# Internal bounded owner path; adapter tick is intentionally not connected
@@ -773,14 +779,18 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 		var replay: Dictionary = receipt.result.duplicate(true)
 		replay["replayed"] = true; replay.travel_result["replayed"] = true
 		return replay
-	var pilot_context: Dictionary = adapter.preview_space_warp_entry(craft_id)
-	if not pilot_context.get("ok", false): _warp_entry_searches.erase(craft_id); return pilot_context
 	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
 	if flight == null or _space_combat_state.get_actor(craft_id) != null or _space_combat_state.get_inactive_actor(craft_id) != null: _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"actor_unavailable"}
 	var pose: Dictionary = flight.get_snapshot()
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
 	if travel.get("phase") != "quantum" or pose.get("coordinate_frame") != "strategic" or not String(pose.get("space_area_id", "")).is_empty(): _warp_entry_searches.erase(craft_id); return {"ok":false, "reason":"quantum_completion_required"}
-	if not _warp_entry_searches.has(craft_id) and float(travel.get("elapsed_seconds", 0.0)) + delta < float(travel.get("duration_seconds", 0.0)): return {"ok":false, "reason":"quantum_not_complete"}
+	if not is_singleplayer_warp_entry_pending(craft_id):
+		_warp_entry_searches.erase(craft_id)
+		_warp_completion_intents.erase(craft_id)
+		if float(travel.get("elapsed_seconds", 0.0)) + delta < float(travel.get("duration_seconds", 0.0)): return {"ok":false, "reason":"quantum_not_complete"}
+		_warp_completion_intents[craft_id] = {"fleet":_singleplayer_space_travel_owner, "owner_stamp":_singleplayer_space_travel_owner.get_craft_area_owner_stamp(craft_id), "flight":flight, "flight_revision":pose.revision, "travel_revision":travel.revision, "target_orbit_id":travel.target_orbit_id, "completion_delta":delta}
+	var pilot_context: Dictionary = adapter.preview_space_warp_entry(craft_id)
+	if not pilot_context.get("ok", false): _warp_entry_searches.erase(craft_id); return pilot_context
 	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(String(travel.get("target_orbit_id", "")), {})
 	var body_id := String(orbit.get("body_id", ""))
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
@@ -798,7 +808,7 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 		var search = SPACE_ORBIT_ENTRY_SEARCH.new()
 		var started: Dictionary = search.begin(body_id, [{"craft_id":craft_id, "flight":flight, "footprint_hexes":profile.footprint_hexes, "entry_heading":0.0}], _space_combat_state)
 		if not started.get("ok", false): return started
-		state = {"search":search, "flight":flight, "flight_revision":pose.revision, "travel_revision":travel.revision, "equipment_owner":_ship_equipment_owner, "equipment_snapshot":equipment_snapshot, "body_id":body_id, "footprint":profile.footprint_hexes.duplicate(), "delta":delta}
+		state = {"search":search, "flight":flight, "flight_revision":pose.revision, "travel_revision":travel.revision, "equipment_owner":_ship_equipment_owner, "equipment_snapshot":equipment_snapshot, "body_id":body_id, "footprint":profile.footprint_hexes.duplicate(), "delta":_warp_completion_intents[craft_id].completion_delta}
 		_warp_entry_searches[craft_id] = state
 	var search_result: Dictionary = state.search.advance(256)
 	if not search_result.get("ok", false): _warp_entry_searches.erase(craft_id); return search_result
@@ -835,6 +845,7 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 	_space_combat_state._publish_new_local_admission(admission)
 	var arrival: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
 	_warp_entry_searches.erase(craft_id)
+	_warp_completion_intents.erase(craft_id)
 	var result := {"ok":true, "status":"complete", "space_area_id":layout.body_map_id, "travel_result":arrival, "receipt_id":id, "replayed":false}
 	var command := {"contract_category":"singleplayer_space_travel", "operation":"advance", "payload":payload.duplicate(true), "request_id":id}
 	_warp_entry_receipts[id] = {"fleet":_singleplayer_space_travel_owner, "flight":flight, "equipment":_ship_equipment_owner, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":result.duplicate(true), "command":command, "event_published":false}
