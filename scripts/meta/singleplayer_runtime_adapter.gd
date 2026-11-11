@@ -468,12 +468,21 @@ func _in_destination_orbit(travel: Dictionary, location_id: String) -> bool:
 	return not orbit.is_empty() and location_id != "homebase" and String(travel.get("phase", "")) == "orbit" and String(travel.get("orbit_id", "")) == orbit
 
 func validate_departure(craft_id: String) -> Dictionary:
+	return _validate_departure_gates(craft_id, true)
+
+func preview_departure(craft_id: String) -> Dictionary:
+	# Preparation must not recover chips or publish onboarding commands.
+	# This is a read projection, not a transferable authorization receipt.
+	return _validate_departure_gates(craft_id, false)
+
+func _validate_departure_gates(craft_id: String, observe_progress: bool) -> Dictionary:
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	var travel: Dictionary = get_space_travel_snapshot(craft_id)
 
 	if _campaign_mode:
-		observe_campaign_progress()
+		if observe_progress:
+			observe_campaign_progress()
 		var stage: int = int(_onboarding.get_snapshot().stage_index)
 		if stage == 0 and not _selected_destination_is_free_visit():
 			return _reject("preparation_incomplete", "Zuerst Satellitenauftrag annehmen, Ziel waehlen und Boarding abschliessen")
