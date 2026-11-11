@@ -13,6 +13,7 @@ var _refuel_button: Button
 var _fuel_label: Label
 var _credits: Label
 var _catalog: Dictionary = {}
+var _armor_images: Dictionary = {}
 
 func configure(adapter: Node) -> void:
 	_adapter = adapter
@@ -45,6 +46,7 @@ func configure(adapter: Node) -> void:
 	shop.offset_bottom = -110
 	add_child(shop)
 	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	shop.add_child(scroll)
 	_content = VBoxContainer.new()
 	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -73,6 +75,7 @@ func refresh(snapshot: Dictionary) -> void:
 	if _page == "ship_equipment":
 		_label(_content, "Schiffswaffen und Komponenten sind noch nicht verfügbar. Kauf und Einbau folgen mit dem Ausbau der Schiffsausrüstung.")
 		return
+	_label(_content, "Schiffslager: %s / %d Einheiten" % [String(snapshot.get("craft_name", snapshot.get("craft_id", "-"))), _cargo_total()])
 	if _page == "ships":
 		_label(_content, "Lieferung zur Heimatbasis. Ein gebautes freies Heimatpad ist erforderlich.")
 		_label(_content, "Ausstattung der gelieferten Schiffe an der Heimatbasis.")
@@ -90,37 +93,52 @@ func refresh(snapshot: Dictionary) -> void:
 		people.visible = people.item_count > 0
 		if people.item_count == 0: _label(_content, "Zum Ausrüsten muss eine Person auf der Station sein.")
 		people.item_selected.connect(func(index: int): _person = String(people.get_item_metadata(index)); _signature = ""; refresh(_snapshot))
+	var products := HFlowContainer.new()
+	products.name = "Products"
+	products.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	products.add_theme_constant_override("h_separation", 12)
+	products.add_theme_constant_override("v_separation", 12)
+	_content.add_child(products)
 	for offer_id: String in snapshot.get("offers", {}):
 		var offer: Dictionary = snapshot.offers[offer_id]
 		if String(offer.get("category", "")) != _page: continue
 		var card := PanelContainer.new()
+		card.name = "Product_" + offer_id
+		card.custom_minimum_size.x = 236
+		card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		SKIN.panel(card, true)
-		_content.add_child(card)
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 14)
-		card.add_child(row)
+		products.add_child(card)
+		var details := VBoxContainer.new()
+		details.custom_minimum_size.x = 216
+		details.add_theme_constant_override("separation", 8)
+		card.add_child(details)
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(54, 54)
+		var item := String(offer.item_id)
+		var armor_image := _armor_illustration(item)
+		icon.custom_minimum_size = Vector2(0, 236 if armor_image != null else 64)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture = MENU_ICONS.get_icon(String(offer.item_id))
-		var armor_icon := "res://Assets/curated/ui/campaign_inventory/%s.svg" % String(offer.item_id)
-		if String(offer.item_id).begins_with("armor_") and ResourceLoader.exists(armor_icon): icon.texture = load(armor_icon)
+		icon.texture = armor_image if armor_image != null else MENU_ICONS.get_icon(item)
+		icon.tooltip_text = "Rüstung / 2D-Illustration" if armor_image != null else ""
 		icon.visible = icon.texture != null
-		row.add_child(icon)
-		var details := VBoxContainer.new()
-		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(details)
+		details.add_child(icon)
 		var stock := int(Dictionary(snapshot.get("stock", {})).get(offer_id, 0))
-		_label(details, String(offer.get("name", offer.item_id)).replace("Ruestung", "Rüstung"))
-		_label(details, "%d Cr  ·  Bestand %d  ·  Schiffslager %d" % [int(offer.unit_price), stock, _cargo(String(offer.item_id))])
+		var title := _label(details, String(offer.get("name", offer.item_id)).replace("Ruestung", "Rüstung"))
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		SKIN.label(title, 18)
+		_label(details, "%d Cr" % int(offer.unit_price))
+		_label(details, "Bestand %d / Schiffslager %d" % [stock, _cargo(item)])
+		var actions := HBoxContainer.new()
+		actions.add_theme_constant_override("separation", 8)
+		details.add_child(actions)
 		var locked: bool = snapshot.get("require_blueprints", false) and not String(offer.get("required_blueprint", "")).is_empty() and not Array(snapshot.get("blueprints", [])).has(String(offer.required_blueprint))
 		var ship := String(offer.get("kind", "")) == "ship"
-		_button(row, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"offer_id":offer_id,"quantity":1}), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
+		var buy := _button(actions, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"offer_id":offer_id,"quantity":1}), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
+		buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if _page in ["infantry", "armor"]:
-			var item := String(offer.item_id)
 			var slot := "armor" if item.begins_with("armor_") else ("backpack" if item == "backpack" else "weapon_1")
-			_button(row, "Ausruesten", _request.bind("inventory_equip", {"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
+			var equip := _button(actions, "Ausrüsten", _request.bind("inventory_equip", {"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
+			equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _page == "commodities":
 		_label(_content, "Ankauf aus dem gelandeten Schiffslager / je 1 Einheit")
 		for item: String in snapshot.get("buy_orders", {}):
@@ -140,6 +158,26 @@ static func refuel_quote(snapshot: Dictionary) -> Dictionary:
 	elif amount <= 0.0: reason = "Tank voll"
 	elif int(snapshot.get("credits", 0)) < cost: reason = "Credits reichen nicht"
 	return {"amount":amount,"cost":cost,"allowed":reason.is_empty(),"reason":reason}
+
+func _armor_illustration(item: String) -> Texture2D:
+	if item not in ["armor_light", "armor_medium", "armor_heavy"]: return null
+	if _armor_images.has(item): return _armor_images[item]
+	var path := "res://Assets/curated/ui/polisa_armor/%s_turnaround.png" % item.trim_prefix("armor_")
+	if not ResourceLoader.exists(path): return null
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load(path)
+	# Original target sheets remain intact. Display only the complete front figure,
+	# including helmet/boots, without neighbouring views or turnaround labels.
+	atlas.region = Rect2(55, 20, 395, 790)
+	atlas.filter_clip = true
+	_armor_images[item] = atlas
+	return atlas
+
+func _cargo_total() -> int:
+	var items: Dictionary = Dictionary(Dictionary(_snapshot.get("inventory", {})).get("craft:" + String(_snapshot.get("craft_id", "")), {})).get("items", {})
+	var total := 0
+	for quantity: Variant in items.values(): total += int(quantity)
+	return total
 
 func _request_refuel() -> void:
 	# Re-read the projection at click time; the Supply owner still validates/commits.

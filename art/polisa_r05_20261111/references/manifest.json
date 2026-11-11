@@ -1,0 +1,53 @@
+{
+  "status": "AI design concepts and approved 2D product illustration reuse; not native station acceptance",
+  "files": [
+    {
+      "path": "art/polisa_r05_20261111/references/merovingi_blueprint.png",
+      "sha256": "a10a1e62255f2dfe99e7be03c47d6c5ea757539212a9e5773d8117ba4d17b247"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/merovingi_blueprint.png.import",
+      "sha256": "cccd9f7530dd31548539945ad16fd59d8e968729bf93f936187610f00b3681aa"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/README.md",
+      "sha256": "b4eaf2b207fc6fbf4ab473d0b84f2b36bd9ded6fd8bbef26bbf79544f808fda7"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/shop_concept_ai.png",
+      "sha256": "eaa962ca1d972f75039bded4a22172485f0f8b9e0181aab31582ad614e844e9a"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/shop_concept_ai.png.import",
+      "sha256": "333ea9623db8fc9d51b5e18fc2e7a91bf595f801f51760abafbdc4c65227021c"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/shop_concept_ai.prompt.txt",
+      "sha256": "690e3175692647966fabd2b2b0887539fad0aa3a9e17f3d0a01dc376be7fa940"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/station_concept_ai.png",
+      "sha256": "f15466900da7b5446e0a91afadeec0652092304d703407adaf2b6975eda16d82"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/station_concept_ai.png.import",
+      "sha256": "02f84ba582c7c61e8a21b335aa26a15c633503acb315c4523ad3ed59268cdc51"
+    },
+    {
+      "path": "art/polisa_r05_20261111/references/station_concept_ai.prompt.txt",
+      "sha256": "9c51178bd197473b230a7e6866453050a5ba1cec20f4de211bac2c1b2b016e58"
+    },
+    {
+      "path": "Assets/curated/ui/polisa_armor/heavy_turnaround.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e"
+    },
+    {
+      "path": "Assets/curated/ui/polisa_armor/light_turnaround.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997"
+    },
+    {
+      "path": "Assets/curated/ui/polisa_armor/medium_turnaround.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8"
+    }
+  ]
+}

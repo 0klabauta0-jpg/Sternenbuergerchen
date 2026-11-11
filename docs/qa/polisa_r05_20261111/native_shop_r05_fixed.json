@@ -1,0 +1,30 @@
+{
+  "label": "native_shop_r05_fixed",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 1,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\polisa_ui_r05_profiles\\native_shop_r05_fixed",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "1115306",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://docs/qa/polisa_r05_20261111/capture_shop.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}
