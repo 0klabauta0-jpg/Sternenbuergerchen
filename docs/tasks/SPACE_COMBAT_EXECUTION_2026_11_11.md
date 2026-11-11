@@ -44,6 +44,9 @@ Verifier und diese Statusdokumentation.
   referenzieren nun dieselbe Flugzustandsinstanz; Position und Bugrichtung
   werden daraus projiziert. Bindingcheck4/4, bestehender Zwei-Schiffe-
   Fleettravel-Verifier8/8, jeweils isoliertes Minimalprojekt.
+- AP01 weiterer Baustein: räumliche Registry für bestehende Flugreferenzen,
+  eindeutige IDs, gezielte Feldindexänderung und sortierte Abfrage. Separater
+  Minimalprojektcheck6/6; noch nicht an Root oder Gegneraufnahme angeschlossen.
 - AP01 Prüfgrenze: Der ältere SpaceTravel-Verifier hat im vorhandenen
   Sternsystem zwei veraltete Erwartungen (fünf Körper und alte Ortsbindungen).
   Der versuchte Minimalprojektlauf war zudem unvollständig, weil er einen
