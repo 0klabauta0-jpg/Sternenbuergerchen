@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- AP7-Autoritätsgrenze: Die mutierenden Raumeingänge einschließlich der
+  vorbereiteten Area-Transaktion prüfen die bestehende Server-/Clientsperre
+  vor jeder Änderung. Lesevorschauen bleiben unverändert. Simulierter
+  Client-/Host-Verifier und betroffene Bewegungs-/Rückkehrprüfungen grün;
+  eine echte Mehrspieler-Sitzung ist damit noch nicht nachgewiesen. Ein künftig
+  ergänzter Root-Gruppencommit muss dieselbe Eingangssperre übernehmen.
+
 - Orbit-Lesepfad: `get_space_area_snapshot` liefert auf Basis eines nach Area
   geführten Registry-Index die aktiven eigenen Fleet-Schiffe mit Flight-,
   Rotten- und Footprintdaten. Vorerst ausschließlich Singleplayer und eigene

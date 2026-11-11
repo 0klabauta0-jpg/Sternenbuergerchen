@@ -97,6 +97,7 @@ var _fixture_area_sequence := 0
 var _space_move_receipts: Dictionary = {}
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
 	if authority_context.get("fixture") != true or not craft_id.begins_with("space_fixture_") or _singleplayer_space_travel_owner == null:
@@ -182,6 +183,7 @@ func prepare_space_area_transition(craft_id: String, area_id: String, target_pos
 	return {"ok":true, "token":token}
 
 func commit_space_area_transition(token: String, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
 	if _fixture_area_receipts.has(token):
@@ -237,6 +239,7 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	return result
 
 func release_space_area_transition(token: String, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	_purge_fixture_area_tokens()
 	if _fixture_area_receipts.has(token):
@@ -274,11 +277,13 @@ func check_space_wing_replay(command: Dictionary, actor_id: String) -> Dictionar
 	return _space_wing_state.check_replay(command, actor_id)
 
 func reconcile_space_wings(crafts: Array, pilots: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	return _space_wing_state.reconcile_crafts("singleplayer", crafts, pilots)
 
 func admit_space_actor(definition: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	if typeof(definition.get("craft_id")) != TYPE_STRING or typeof(definition.get("faction_id")) != TYPE_STRING or typeof(definition.get("control_domain")) != TYPE_STRING or typeof(definition.get("start_hex")) != TYPE_VECTOR2I:
@@ -492,6 +497,7 @@ func preview_warp_departure(craft_id: String, target_orbit_id: String, expected_
 	return {"ok":true, "craft_id":craft_id, "target_orbit_id":target_orbit_id, "source_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "area_proposal":proposal, "transition_tick":tick}
 
 func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	# The current tick adapter has no authoritative map-obstacle or equipment source.
@@ -510,6 +516,7 @@ func get_space_flight_status(craft_id: String) -> Dictionary:
 	return _space_combat_state.get_flight_status(craft_id)
 
 func request_singleplayer_space_move(command: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	# The adapter supplies only this strict payload; all authority is read here.
 	if command.size() != 3 or not command.has_all(["craft_id", "target_hex", "request_id"]): return {"ok":false, "reason":"invalid_command"}
 	if typeof(command.craft_id) != TYPE_STRING or String(command.craft_id).strip_edges().is_empty() or typeof(command.request_id) != TYPE_STRING or String(command.request_id).strip_edges().is_empty() or typeof(command.target_hex) != TYPE_VECTOR2I: return {"ok":false, "reason":"invalid_command"}
@@ -557,6 +564,7 @@ func request_singleplayer_space_move(command: Dictionary) -> Dictionary:
 	return {"ok":true, "replayed":false}
 
 func set_space_fixture_goal(craft_id: String, goal: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok":false, "reason":"runtime_authority_required"}
 	if not craft_id.begins_with("space_fixture_"):
@@ -627,6 +635,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
@@ -641,6 +650,7 @@ func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictio
 	return flight.commit_motion({"expected_revision":snapshot.revision, "motion_mode":"tactical"}, tick)
 
 func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
@@ -689,6 +699,7 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 	return result
 
 func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
 	if proposals.is_empty():
@@ -772,6 +783,7 @@ func configure_space_encounter(owner: RefCounted) -> void:
 	_space_encounter_owner = owner
 
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
+	if command.get("contract_category") == "space_combat" and _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	# Only the owning runtime adapter supplies authority_context. UI payload is
 	# never interpreted as runtime evidence, service location or departure proof.
 	var owner: RefCounted
