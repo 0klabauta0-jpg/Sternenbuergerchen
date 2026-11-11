@@ -69,7 +69,11 @@ Verifier und diese Statusdokumentation.
 - AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität und
   tatsächlicher Adapter-/Root-/Ansichtswechselcheck bei30/60/144Render-FPS,
   und vollständiger Reiselauf.
-- AP01 Rest und AP02–AP20: offen.
+- AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
+  ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
+  gemeinsames Achsbudget. Kleiner Verifier5/5. Nur Fixtureparameter;
+  Rumpfkatalog, Tickanbindung und vollständige AP02-Abnahme fehlen.
+- AP01/AP02 Rest und AP03–AP20: offen.
 
 ## Risiken / offene Punkte
 
