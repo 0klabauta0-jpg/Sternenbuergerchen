@@ -177,6 +177,9 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Parallelcommit 26303641d (Boden-Türguard und Root) als 2a872b762
+  integriert; Türguard, echte und Fake-Orbitfixture sowie Raumtakt gezielt
+  grün. Keine vollständige native oder Boden-/Mehrspielerfreigabe.
 - Parallelcommit 615327eaf (Bewegungsschuss und Root) als 4bf5d3d41
   integriert; Statuskonflikt mit Erhalt beider Einträge gelöst. Bewegungs-
   schuss, Bodenkonsumenten, Rootfixture, Bereichsbatch und Raumtakt geprüft
