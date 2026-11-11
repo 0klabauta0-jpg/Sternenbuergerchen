@@ -105,6 +105,20 @@ func get_space_actor(craft_id: String) -> RefCounted:
 func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 	return _space_combat_state.query_cells(cells)
 
+func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null:
+		return {"ok": false, "reason": "unknown_actor"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.motion_mode == "tactical":
+		return {"ok": false, "reason": "already_tactical"}
+	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	if metadata.get("control_domain") == "player" and (_singleplayer_space_travel_owner == null or String(_singleplayer_space_travel_owner.get_snapshot(craft_id).get("phase", "")) not in ["orbit", "stopped"]):
+		return {"ok": false, "reason": "travel_active"}
+	return flight.commit_motion({"expected_revision":snapshot.revision, "motion_mode":"tactical"}, tick)
+
 func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
@@ -1450,6 +1464,7 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if _space_runtime_tick.is_valid():
 		_space_runtime_tick.call(delta)
+		_space_combat_state.sync_moved_actors()
 	if _should_skip_local_tick_processing():
 		return
 

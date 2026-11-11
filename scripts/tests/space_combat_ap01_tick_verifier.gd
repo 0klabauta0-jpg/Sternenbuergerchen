@@ -43,9 +43,24 @@ func _initialize() -> void:
 	player.start_hex = GRID.cell_at(GRID.pair(snap.position))
 	if not root.admit_space_actor(player, {"runtime_authorized":true}).get("ok", false): failed += 1
 	if root.get_space_actor("a") != fleet.get_flight_state("a"): failed += 1
+	fleet.register_craft("b")
+	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"launch_to_orbit", "payload":{"craft_id":"b"}, "request_id":"lb"}, {"runtime_authorized":true})
+	var b_snapshot: Dictionary = fleet.get_snapshot("b")
+	var b_player := {"craft_id":"b", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(b_snapshot.position))}
+	if not root.admit_space_actor(b_player, {"runtime_authorized":true}).get("ok", false): failed += 1
+	fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"b", "target_orbit_id":"planet_orbit"}, "request_id":"jb"})
+	if root.enter_space_tactical("b", 1, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
+	root._physics_process(1.0)
+	var b_moved: Vector2i = GRID.cell_at(GRID.pair(fleet.get_snapshot("b").position))
+	var b_cells: Array[Vector2i] = [b_moved]
+	if not root.get_space_actors_at(b_cells).has("b"): failed += 1
+	var b_old_cells: Array[Vector2i] = [b_player.start_hex]
+	if b_moved == b_player.start_hex or root.get_space_actors_at(b_old_cells).has("b"): failed += 1
 	var player_flight: RefCounted = fleet.get_flight_state("a")
 	var flight_snap: Dictionary = player_flight.get_snapshot()
-	player_flight.commit_motion({"expected_revision":flight_snap.revision, "motion_mode":"tactical"}, 1)
+	if root.enter_space_tactical("a", 1, {}).get("reason") != "runtime_authority_required": failed += 1
+	if not root.enter_space_tactical("a", 1, {"runtime_authorized":true}).get("ok", false): failed += 1
+	if player_flight.get_snapshot().velocity_plane != flight_snap.velocity_plane: failed += 1
 	var reject_travel: Dictionary = fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"a", "target_orbit_id":"moon_orbit"}, "request_id":"new"})
 	if reject_travel.get("reason") != "combat_active": failed += 1
 	var spoof := {"craft_id":"a", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(4,4)}
@@ -56,7 +71,7 @@ func _initialize() -> void:
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 18 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 25 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

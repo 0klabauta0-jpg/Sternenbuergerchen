@@ -73,7 +73,10 @@ Verifier und diese Statusdokumentation.
   taktischen Modus befindlicher Flugzustand weist neue Reisecommands zurück;
   Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Taktische Bewegung
   wird nur über den Root committet und aktualisiert den Feldindex;
-  identischer Tick wird abgelehnt. Rootcheck18/18.
+  identischer Tick wird abgelehnt. Aufnahme und Eintritt prüfen die Reisephase
+  getrennt; zwischenzeitlicher Warp verhindert Kampfeintritt. Bewegte
+  registrierte Flugzustände aktualisieren ihre Feldindizes revisionsbasiert.
+  Rootcheck25/25.
 - AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
   Warp, Heimatansicht während der Reise, Sternkarte und Abbruch; gezielter
   headless Szenenlauf11/11, Exit0, keine Fehler. Beleg:
