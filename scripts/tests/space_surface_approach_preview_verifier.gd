@@ -15,7 +15,7 @@ func _initialize() -> void:
 	var flight: RefCounted = fleet.get_flight_state(id)
 	var gate_offset: Vector2i = LAYOUT.build("moon").gate_cells[128]
 	var gate: Vector2i = GRID.from_offset(gate_offset)
-	flight.commit_area_transition({"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon", "position_plane":GRID.HEX.axial_to_plane(Vector2(gate))}, 1)
+	flight.commit_area_transition({"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"orbit_approach:moon", "position_plane":GRID.HEX.axial_to_plane(Vector2(gate)), "motion_mode":"tactical"}, 1)
 	var sim = ROOT.new()
 	sim.configure_singleplayer_owners(null, null, null, fleet)
 	var state: RefCounted = sim.get("_space_combat_state")
@@ -32,6 +32,9 @@ func _initialize() -> void:
 	var preview: Dictionary = sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth)
 	if not preview.get("ok", false) or preview.get("space_area_id") != "orbit_approach:moon": failed += 1
 	if flight.get_snapshot() != before: failed += 1
+	sim.tick_counter = 1
+	var deactivation: Dictionary = sim.preview_surface_deactivation(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, auth)
+	if not deactivation.get("ok", false) or deactivation.get("activity_proposal", {}).get("motion_mode") != "inactive" or flight.get_snapshot() != before: failed += 1
 	if sim.preview_surface_approach(id, "homebase", flight_rev, travel_rev, area_rev, wing_rev, {}).get("reason") != "runtime_authority_required": failed += 1
 	if sim.preview_surface_approach(id, "fortified_outpost", flight_rev, travel_rev, area_rev, wing_rev, auth).get("reason") != "location_orbit_mismatch": failed += 1
 	var travel_owner: RefCounted = fleet.get("_owners")[id]
@@ -74,5 +77,5 @@ func _initialize() -> void:
 	state.sync_moved_actors()
 	if sim.preview_surface_approach(id, "homebase", flight.get_snapshot().revision, travel_rev, state.get_area_revision("orbit_approach:moon"), wing_rev, auth).get("reason") != "body_blocked": failed += 1
 	sim.free()
-	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 17 - failed, " failed=", failed)
+	print("SPACE_SURFACE_APPROACH_PREVIEW passed=", 18 - failed, " failed=", failed)
 	quit(1 if failed else 0)

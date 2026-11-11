@@ -187,6 +187,11 @@ Verifier und diese Statusdokumentation.
   und Area-Commits können den Modus nicht umgehen. Prüfung21/21, bestehende
   Reise-/Rootfixtures grün. Root muss Gate/Index/Claims/Travel/Economy noch
   gemeinsam und atomar koordinieren; keine produktive Freischaltung.
+- AP04a Root-Deaktivierungsvorschau baut nach gültiger Saumprüfung einen
+  für den nächsten Roottick validierten `inactive`-Vorschlag, ohne Flight,
+  Belegung oder Rotte zu mutieren. Saum-/Activityprüfung18/18, Flight21/21
+  und Ersteintrittsfixture grün. Noch kein gemeinsamer Commit, keine
+  Reaktivierung oder produktive Oberflächenfreigabe.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
