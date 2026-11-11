@@ -141,6 +141,32 @@ vorerst reine Adaptergates sowie vorbereitete Supply-/Campaignpatches. Echte
 Authoritybindung, Replay, Eventreihenfolge und signal-/awaitfreier gemeinsamer
 Tail bleiben vor der Produktaktivierung offen.
 
+## Übergangsarten und inaktiver Flugzustand: Abstimmungsvorschlag
+
+Warpankunft, Oberflächenanflug/-abflug und Stationsverkehr sind verschiedene
+Übergänge. Root muss `transition_kind` aus gebundenem Travel-/Zielzustand
+ableiten; kein frei gesetztes UI-Feld. `warp_arrival` wählt unten einen freien
+vollständigen Footprint. `surface_approach` benötigt gültige Body→Surface-
+Verknüpfung, echten Gatekontakt und vollständig vorbereitete beteiligte Owner.
+`surface_exit` reaktiviert dasselbe Flightobjekt an einem freien Saumplatz;
+Stationsanflug/-abflug braucht eigene typisierte Geometrie und darf keinen
+Planetenatmosphärensaum erfinden. Die alte Drei-Marker-Reise bleibt bis zum
+vollständigen Ersatz produktiv.
+
+Vorschlag für neue Übergänge: Ein ausdrücklicher inaktiver Flugmodus sperrt
+Raumcommands und entfernt nur die aktive Registrybelegung und Korridorclaims;
+Flightobjekt, Rotte und ein einziger Posezustand bleiben erhalten. Als
+Rückkehrbezug könnte dessen letzter lokaler Rahmen samt Area-ID erhalten
+bleiben, ohne dass diese inaktive Pose eine belegte Raumzelle darstellt.
+Legacy-Oberflächenfahrzeuge besitzen dagegen strategischen Rahmen und leere
+Area-ID. Der künftige `surface_exit` muss beide Herkunftsformen explizit
+prüfen und den Zielsaum vollständig neu validieren. Dies ist noch keine
+beschlossene Produktsemantik: Der jetzige Travelcandidate akzeptiert als
+Source ausschließlich `""`; Unterstützung für inaktive lokale Herkunft,
+genaue Flugmodus-/Positions-/Geschwindigkeitssemantik und Authority-API
+müssen mit dem Travelowner abgestimmt und vor Mutation implementiert werden.
+Kein temporäres Umstellen der Flightpose über Legacy-Reiseschreiber.
+
 ## Akzeptanzkriterien / kleine Arbeitsschritte
 
 1. Bereichs-ID, strategische/lokale Koordinaten, Atomarität, Saumgeometrie,
