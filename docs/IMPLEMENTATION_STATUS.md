@@ -12139,3 +12139,5 @@ konkreteoffeneAusbauschritte, keine alsfertigverkaufteFunktion.
 KreativePolisa-Modellrevision ist eigener Folgeschritt. KeineMain-/EXE.
 
 Polisa R02-Visual integriert: tragender Unterbau, segmentierte Ringe, offene Halle und ausgearbeitete Pads;7116Tris/8Meshgruppen. Zwei native Kandidatenansichten von Root geoeffnet, Deck/Navigation unveraendert. Stil-/Reise-/Shopabnahme weiterhin offen. art/polisa_lookdev_20261111, docs/qa/polisa_lookdev_20261111.
+
+Tabletop-Foundation gezielt integriert22dc4cb61+0bc338151 nach unabhaengigem statischem Review; gemeinsamerCombatVisibilityCache check-only0. NeueHexhelfer noch ohne aktiveOwner-/Consumerumschaltung; derenAP1/AP3 bleibenimTabletopChat. KeineerneuteGefecht-/FPS-Abnahme.

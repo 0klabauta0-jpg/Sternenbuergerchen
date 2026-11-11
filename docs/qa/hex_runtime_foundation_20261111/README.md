@@ -57,3 +57,6 @@ Kartenchat-Folgestand5204312c0 verlangt, bei späterer MapData-Anbindung die
 Unterstützung regional_terrain_version2und3 zu erhalten. Keine rückwärtigen
 Sourcekopien aus dem alten Kampagnencheckout übernehmen. Polisa/BasePersonnel
 bleiben derzeit fremde Arbeit und benötigen erneute Schnittstellenabstimmung.
+
+## Root integration
+Static independent integration review found no blocker against Polisa/map/editor task state. Original commits de09839c2+73a485b19 cherry-picked as22dc4cb61+0bc338151. Root combined cache --check-only exit0, recorded root_integration_compile.log; no new domain matrix or gameplay/FPS run. AP1 owner/version and AP3 consumers remain with the Tabletop chat. Original evidence manifest describes its original frozen source, not later consumer work.
