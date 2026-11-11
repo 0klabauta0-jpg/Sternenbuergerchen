@@ -13,6 +13,9 @@ static func definitions() -> Dictionary:
 static func fabrication(blueprint_id: String) -> Dictionary:
 	return Dictionary(Dictionary(definitions().get("fabrication", {})).get(blueprint_id, {})).duplicate(true)
 
+static func item_label(item: String) -> String:
+	return String({"salvage":"Bergungsgut", "backpack":"Rucksack"}.get(item, item))
+
 static func fabricated_blueprints(requests: Dictionary) -> Dictionary:
 	var result := {}
 	for request: Dictionary in requests.values():

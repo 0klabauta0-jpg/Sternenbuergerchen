@@ -13,7 +13,7 @@
 <header>
  <div class="topline"><div><div class="eyebrow">SternenBürgerchen / Entwurfswerkstatt</div><h1>Kampagne & Forschung</h1><p>Was kommt davor? Was öffnet sich danach? Und was bekommt die Crew dafür?</p></div><div class="actions"><button id="addNode" class="primary">+ Schritt hinzufügen</button><button id="exportTop">JSON exportieren</button></div></div>
  <div class="tag actual">Ist-Baseline: 11.11.2026</div> <span class="tag proposal">Fortsetzung als Vorschlag</span>
- <div class="facts"><div class="fact"><strong id="nodeCount">–</strong><span>Schritte im Entwurf</span></div><div class="fact"><strong id="readyCount">–</strong><span>im Planspiel als Nächstes möglich</span></div><div class="fact"><strong id="doneCount">–</strong><span>im Plan abgeschlossen</span></div><div class="fact"><strong id="creditCount">–</strong><span>Credits im Plan · ohne Fuel / Handel</span></div></div>
+ <div class="facts"><div class="fact"><strong id="nodeCount">–</strong><span>Schritte im Entwurf</span></div><div class="fact"><strong id="readyCount">–</strong><span>im Planspiel als Nächstes möglich</span></div><div class="fact"><strong id="doneCount">–</strong><span>im Plan abgeschlossen</span></div><div class="fact"><strong id="creditCount">–</strong><span>Credits im Plan · ohne Fuel / Handel / Materialbilanz</span></div></div>
  <nav aria-label="Bereiche"><button data-tab="plan" aria-pressed="true">Kampagnenkarte</button><button data-tab="design" aria-pressed="false">Forschung & Entscheidungen</button><button data-tab="sources" aria-pressed="false">Ist-Stand & Quellen</button></nav>
 </header>
 <main>
@@ -296,7 +296,7 @@
       ],
       "reward": "Bauplan: Bergungswerkzeug · Einzelherstellung separat 40 Cr",
       "cost": 160,
-      "description": "Entwickle nach einem selbst gefertigten Hand-Mining-Tool das Bergungswerkzeug. Damit können markierte Wracks geborgen werden. Jedes Werkzeug wird einzeln hergestellt. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte. Rohstoffverarbeitung und Folgeaufträge für Vulture/Prospector bleiben Vorschläge.",
+      "description": "Entwickle nach einem selbst gefertigten Hand-Mining-Tool das Bergungswerkzeug. Damit können markierte Wracks geborgen werden. Jedes Werkzeug wird einzeln hergestellt. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte. Weitergehende Rohstoffverarbeitung und Folgeaufträge für Vulture/Prospector bleiben Vorschläge.",
       "proposal": false,
       "credits": 0,
       "note": "",
@@ -381,19 +381,52 @@
       "note": "",
       "decision": "offen",
       "source": "data/singleplayer/research.json#fabrication.salvage_tool"
+    },
+    {
+      "id": "research_recycling",
+      "title": "Bergungsgut zu AusrÃ¼stung verarbeiten",
+      "kind": "research",
+      "requires": [
+        "research_industry",
+        "craft_salvage_tool"
+      ],
+      "reward": "Bauplan: Rucksack-Recycling; Einzelherstellung separat",
+      "cost": 100,
+      "description": "Nach einem selbst gefertigten Bergungswerkzeug die Verarbeitung von Bergungsgut entwickeln. Danach je Rucksack zwei Bergungsgut aus dem Basislager und 20 Credits einsetzen; die Entwicklung liefert keinen fertigen Rucksack. Erste Balancewerte; Entwicklung einmal bezahlen, kein Gratisgegenstand.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_recycling"
+    },
+    {
+      "id": "craft_backpack_recycling",
+      "title": "Rucksack aus Bergungsgut herstellen",
+      "kind": "research",
+      "requires": [
+        "research_recycling"
+      ],
+      "reward": "1 Rucksack mit 12 Inventarplätzen",
+      "cost": 20,
+      "description": "Je Rucksack 2 Bergungsgut aus dem Basislager und 20 Cr. Im Spiel separat wiederholbar; hier nur ein abschließbarer Planungsschritt. Das Planspiel führt keine Materialbilanz und verändert keinen Spielstand.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.backpack_recycling"
     }
   ],
   "source_hashes": {
     "data/singleplayer/jobs.json": "a07db8f538eae28b5c24ae5ed0477526ae8692df39131e6313729e7fe3d9f641",
     "data/singleplayer/job_briefings.json": "2f7843113da912f3548ea095883aeb4df788d5095385275f0f220ed9810a63a2",
     "data/singleplayer/trade_offers.json": "ed36effcaa46e5db9e040e79418dd25a5b8873a26ca0a5373fb7a3b854e35bbd",
-    "scripts/core/singleplayer_supply_state.gd": "87f0c5595d9beb07a3fb7af1a06f9c0fdb02c7f9b4857ba1952a23c5b70e6428",
+    "scripts/core/singleplayer_supply_state.gd": "3c339a171f147b158c9f2099323e2b1fea4bda8c6b1225d0c2f8a1ac064a46d0",
     "scripts/core/singleplayer_campaign_state.gd": "c56edc6bffce6da6e71c6f4363b552b06db6e4f8a5fe75a9dd1598764c59b934",
-    "data/singleplayer/research.json": "4d37e297ce83a8001bb1b5e65dd072689e381ba8435e66e588d264427bb43cf9",
-    "scripts/mission/campaign_research_catalog.gd": "2e51b93d495bb66e371adc95dea761aa89464ffc4bff33cc476fe164a9a8f445"
+    "data/singleplayer/research.json": "3f5adde1feef874da72b6c4aea5b94987d3ebb9adec84718d2407fcc391a6e03",
+    "scripts/mission/campaign_research_catalog.gd": "ac1c3017d036fb4ffee01662d5096774d7f0ce69ebf4fadf1a156b8993942756"
   },
   "design": "Bauplan bergen → an der Basis entwickeln → einzelne Ausrüstung fertigen",
-  "scope": "Ist-Baseline des Taskstands bis 1f676bfbc: fünf Aufträge, vier Entwicklungsschritte und sechs Einzelrezepte. Fahrzeug-/Verarbeitungsfortsetzung bleibt Vorschlag. Initiale Balancewerte, keine native Gesamtfreigabe; keine Runtime- oder Spielstandsänderung."
+  "scope": "Ist-Baseline nach Recyclingintegration: fünf Aufträge, fünf Entwicklungsschritte und sieben Einzelrezepte. Weitergehende Verarbeitung sowie Fahrzeug-/Flottenfortsetzung bleiben Vorschläge. Erste Balancewerte, keine native Gesamtfreigabe. Einmalige Planungsknoten ohne vollständige Material-/Produktionssimulation oder Spielstandsänderung."
 }
 </script>
 <script>

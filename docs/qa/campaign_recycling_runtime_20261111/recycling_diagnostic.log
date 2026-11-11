@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Suit data slot still needs no backpack
+PASS: Recycling cannot precede industry
+PASS: Existing normalized jobs and workshop/industry path remain usable
+PASS: Actual salvage fabrication is required
+PASS: Existing40Cr salvage tool recipe still works
+PASS: Legacy fabrication receipts without input fields restore
+PASS: 100Cr development grants recipe and no free backpack
+PASS: Development replay does not charge again
+PASS: Missing materials leave every owner field unchanged
+PASS: Trusted fixture places real salvage identity into ship cargo
+PASS: Ship stock is not remote-accessible fabrication material
+PASS: Existing explicit transfer unloads salvage into base
+PASS: Revision-cached owner projection now permits fabrication
+PASS: Remote fabrication is rejected without mutations
+MADE_DIAGNOSTIC { "ok": true, "message": "Gegenstand hergestellt", "item_id": "backpack", "recipe_id": "backpack_recycling", "cost": 20, "materials_consumed": { "salvage": 2.0 }, "request_id": "recycle", "operation": "campaign_fabricate" } credits=590 ->570 base={ "pistol": 2, "medictool": 1, "mining_tool": 1, "salvage_tool": 1, "backpack": 1 }
+FAIL: One atomic commit spends2salvage/20Cr and produces1backpack
+PASS: Fabrication replay cannot spend or create twice
+PASS: Conflicting request ID cannot spend materials
+EQUIP_DIAGNOSTIC { "ok": false, "reason": "inventory_access", "message": "Person und Ausruestung sind hier nicht erreichbar" } bag={ "capacity": 0, "items": {  }, &"armor_chip_capacity": 1 }
+FAIL: Crafted backpack feeds the existing12Slot consumer
+PASS: New material receipt and equipped output survive one JSON-domain roundtrip
+PASS: Tampered material receipt rejected: materials_consumed
+PASS: Tampered material receipt rejected: cost
+PASS: Tampered material receipt rejected: item_id
+PASS: Tampered material receipt rejected: recipe_id
+PASS: New material receipt cannot omit its spent inputs
+PASS: Full output blocks material-free legacy recipe without charges
+PASS: A full store can recycle2inputs into1output using final capacity
+PASS: Insufficient credits do not consume available material
+CAMPAIGN_RECYCLING_SLICE 27 checked, 2 failed

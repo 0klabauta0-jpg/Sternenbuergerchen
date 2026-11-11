@@ -1,0 +1,105 @@
+{
+  "checks": [
+    {
+      "check": "23 unique nodes",
+      "ok": true
+    },
+    {
+      "check": "all 21 existing IDs retained",
+      "ok": true
+    },
+    {
+      "check": "other 20 existing nodes unchanged",
+      "ok": true
+    },
+    {
+      "check": "runtime node matches: workshop_research",
+      "ok": true
+    },
+    {
+      "check": "runtime node matches: research_medium",
+      "ok": true
+    },
+    {
+      "check": "runtime node matches: research_heavy",
+      "ok": true
+    },
+    {
+      "check": "runtime node matches: research_industry",
+      "ok": true
+    },
+    {
+      "check": "runtime node matches: research_recycling",
+      "ok": true
+    },
+    {
+      "check": "material recipe and price match",
+      "ok": true
+    },
+    {
+      "check": "separate paid manufacturing",
+      "ok": true
+    },
+    {
+      "check": "material requirement and planning limit visible",
+      "ok": true
+    },
+    {
+      "check": "vehicle and fleet proposals remain proposals",
+      "ok": true
+    },
+    {
+      "check": "acyclic complete graph",
+      "ok": true
+    },
+    {
+      "check": "baseline does not overwrite user notes",
+      "ok": true
+    },
+    {
+      "check": "current source hash: data/singleplayer/jobs.json",
+      "ok": true
+    },
+    {
+      "check": "current source hash: data/singleplayer/job_briefings.json",
+      "ok": true
+    },
+    {
+      "check": "current source hash: data/singleplayer/trade_offers.json",
+      "ok": true
+    },
+    {
+      "check": "current source hash: scripts/core/singleplayer_supply_state.gd",
+      "ok": true
+    },
+    {
+      "check": "current source hash: scripts/core/singleplayer_campaign_state.gd",
+      "ok": true
+    },
+    {
+      "check": "current source hash: data/singleplayer/research.json",
+      "ok": true
+    },
+    {
+      "check": "current source hash: scripts/mission/campaign_research_catalog.gd",
+      "ok": true
+    },
+    {
+      "check": "research and recipe source fragments resolve",
+      "ok": true
+    },
+    {
+      "check": "executable JavaScript including storage/import/export unchanged",
+      "ok": true
+    },
+    {
+      "check": "CSS unchanged",
+      "ok": true
+    },
+    {
+      "check": "all control IDs unchanged",
+      "ok": true
+    }
+  ],
+  "failures": 0
+}

@@ -84,3 +84,13 @@ alsIst,3separateHerstellungen40/80/40. Quellen-/Isthinweise korrigiert,
 weitergehendeVerarbeitung/Fahrzeuge alsVorschläge. StatischerDatencheck27/0;
 JavaScript/CSS/ControlIDs unverändert. KeineBrowser- oderSpieltestwiederholung.
 QA: docs/qa/campaign_research_baseline_refresh_20261111/README.md.
+
+## Recyclingfortsetzung
+Nach dem echten Runtime-Recyclingslice Baseline auf23Knoten erweitert:
+research_recycling100Cr nach Industry+craft_salvage_tool und separate
+craft_backpack_recycling2salvage aus Basislager+20Cr. Alle21vorigenIDs erhalten;
+nur die Industry-Fortsetzungsbeschreibung wird praezisiert. Fuenf echte
+Entwicklungen/sieben Rezepte, weitergehende Verarbeitung/Flottenzweige weiterhin
+Vorschlaege. Quellenhashes erneuert; sichtbarer Materialbilanzhinweis ergaenzt.
+JavaScript/CSS/ControlIDs und lokale Import-/Export-/Notizlogik unveraendert.
+25statische Checks, kein Browser-/Spieltest; neue QA campaign_recycling_workbench_20261111.

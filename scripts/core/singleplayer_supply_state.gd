@@ -79,6 +79,11 @@ func get_supply_snapshot() -> Dictionary:
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
 		_research_snapshot_cache = RESEARCH.build_snapshot(_research_receipts, _reward_receipts, _requests, _credits)
+		var fabrication := {}
+		var recipes: Array = CAMPAIGN_RECIPES.keys()
+		recipes.append_array(RESEARCH.definitions().get("fabrication", {}).keys())
+		for id: String in recipes: fabrication[id] = preview_campaign_fabrication(id)
+		_research_snapshot_cache["fabrication"] = fabrication
 		_research_snapshot_revision = _revision
 	return _research_snapshot_cache.duplicate(true)
 
@@ -285,6 +290,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	var station_receipts: Dictionary = fresh.validate_station_receipts(data.requests)
 	if not station_receipts.get("ok", false): return station_receipts
 	var research: Variant = data.get("research_receipts", {})
+	if not _valid_campaign_fabrication_requests(data.requests):
+		return _reject("invalid_fabrication_receipts", "Herstellungsbelege widersprechen dem Rezept")
 	if not RESEARCH.validate_receipts(research, data.reward_receipts, data.requests):
 		return _reject("invalid_research_receipts", "Entwicklungsbelege widersprechen ihren Voraussetzungen")
 	var containers: Variant = data.get("inventory", {})
@@ -343,6 +350,8 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 			var bag: Dictionary = _inventory[key]
 			bag.armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
 			bag.capacity = maxi(int(bag.capacity), INVENTORY.backpack_slots_used(bag))
+	# The fabrication projection also depends on this cold-initialized storage.
+	_research_snapshot_revision = -1
 
 func _inventory_access(id: String, context: Dictionary) -> bool:
 	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
@@ -577,17 +586,56 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_revision+=1
 	return {"ok":true,"message":"Fracht bestaetigt","item_id":item,"amount":amount}
 
+func preview_campaign_fabrication(blueprint: String) -> Dictionary:
+	# Inventory/credit projection only. The command still checks runtime home access.
+	var recipe := get_campaign_recipe(blueprint)
+	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
+	if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
+	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary:
+		return _reject("invalid_recipe", "Herstellungsrezept ungültig")
+	var inputs: Dictionary = recipe.get("inputs", {})
+	var after := INVENTORY.used(_item_quantities)
+	for item: String in inputs:
+		if not INVENTORY.known(item) or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not INVENTORY.positive_integer(inputs[item]): return _reject("invalid_recipe", "Materialrezept ungültig")
+		if int(_item_quantities.get(item, 0)) < int(inputs[item]):
+			return _reject("missing_materials", "Im Basislager fehlen: %d × %s" % [int(inputs[item]), RESEARCH.item_label(item)])
+		after -= int(inputs[item])
+	if _credits < int(recipe.cost): return _reject("insufficient_credits", "Credits reichen nicht")
+	if after + 1 > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
+	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true)}
+
 func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
 	var blueprint := String(payload.get("blueprint_id",""))
-	var recipe:Dictionary=get_campaign_recipe(blueprint)
-	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
-	if _credits<int(recipe.cost): return _reject("insufficient_credits","Credits reichen nicht")
-	if INVENTORY.used(_item_quantities)>=int(_inventory["base:homebase"].capacity): return _reject("container_full","Basislager voll")
-	_credits-=int(recipe.cost)
-	_item_quantities[recipe.item]=int(_item_quantities.get(recipe.item,0))+1
-	_revision+=1
-	return {"ok":true,"message":"Gegenstand hergestellt","item_id":recipe.item}
+	var quote := preview_campaign_fabrication(blueprint)
+	if not quote.ok: return quote
+	# All checks precede the first mutation. The one Supply owner commits everything.
+	for item: String in quote.inputs:
+		_item_quantities[item] -= int(quote.inputs[item])
+		if _item_quantities[item] == 0: _item_quantities.erase(item)
+	_credits -= int(quote.cost)
+	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + 1
+	_revision += 1
+	var result := {"ok":true,"message":"Gegenstand hergestellt","item_id":quote.item_id}
+	# Preserve legacy receipt shape; only material recipes need the new exact ledger.
+	if not Dictionary(quote.inputs).is_empty():
+		result.merge({"recipe_id":blueprint,"cost":quote.cost,"materials_consumed":quote.inputs.duplicate(true)})
+	return result
+
+func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
+	for request: Dictionary in requests.values():
+		var signature: Variant = JSON.parse_string(String(request.get("signature", "{}")))
+		if not signature is Dictionary or signature.get("operation") != "campaign_fabricate": continue
+		var id := String(Dictionary(signature.get("payload", {})).get("blueprint_id", ""))
+		var recipe := get_campaign_recipe(id)
+		var receipt: Dictionary = request.get("result", {})
+		if recipe.is_empty() or receipt.get("item_id") != recipe.get("item"): return false
+		var inputs: Dictionary = recipe.get("inputs", {})
+		if not inputs.is_empty():
+			if receipt.get("recipe_id") != id or receipt.get("cost") != recipe.cost or receipt.get("materials_consumed") != inputs: return false
+		elif receipt.has("recipe_id") or receipt.has("materials_consumed"):
+			return false # New material fields cannot be relabelled as a legacy recipe.
+	return true
 
 func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)) or not bool(context.get("at_home",false)): return _reject("home_required","Ausbau nur an der Heimatbasis")

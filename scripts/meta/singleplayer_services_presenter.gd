@@ -130,6 +130,7 @@ func _build() -> void:
 		["campaign_build_pad","Zweites Landepad bauen · 100 Cr",{}],
 		["campaign_fabricate","Hand-Mining-Tool herstellen",{"blueprint_id":"mining_tool"}],
 		["campaign_fabricate","Bergungswerkzeug herstellen",{"blueprint_id":"salvage_tool"}],
+		["campaign_fabricate","Rucksack aus Bergungsgut herstellen",{"blueprint_id":"backpack_recycling"}],
 		["campaign_fabricate","Sturmgewehr herstellen",{"blueprint_id":"assault_rifle"}],
 		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}],
 		["campaign_fabricate","Mittlere Rüstung herstellen",{"blueprint_id":"medium_armor"}],
@@ -153,7 +154,7 @@ func _build() -> void:
 		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
 		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
 		if ResourceLoader.exists(path):icon.texture=load(path)
-		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","salvage_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
+		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","salvage_tool":"mining_tool","backpack_recycling":"backpack","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
 		if String(action[0])!="campaign_build_pad":icon.texture=MENU_ICONS.get_icon(menu_item)
 		if not blueprint.is_empty():body.add_child(_label(get_blueprint_details(blueprint),14))
 		if String(action[0]) == "campaign_research":
@@ -352,7 +353,7 @@ func _apply_section() -> void:
 		action.card.visible=action.button.visible
 		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Blueprint freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
 		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
-		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Blueprint fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else "Herstellung derzeit nicht möglich"
+		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Blueprint fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else String(action.button.tooltip_text)
 	for craft:Dictionary in _snapshot.get("crafts",[]):
 		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)
 	_layout_cards()
@@ -367,9 +368,12 @@ static func get_blueprint_details(blueprint_id:String)->String:
 		lines.append("Reichweite: %d Felder"%weapons.get_effective_tile_range("rifle"))
 	elif String(recipe.item)=="mining_tool":lines.append("Werkzeug zum Abbau\nmarkierter Vorkommen")
 	elif String(recipe.item)=="salvage_tool":lines.append("Werkzeug zur Bergung\nmarkierter Wracks")
+	elif String(recipe.item)=="backpack":lines.append("Rucksack für %d Inventarplätze" % int(load("res://scripts/mission/inventory_transfer_contract.gd").BACKPACK_CAPACITY))
 	elif String(recipe.item) in ["armor_light", "armor_medium", "armor_heavy"]:
 		lines.append("Rüstungsklasse: " + {"armor_light":"Leicht", "armor_medium":"Mittel", "armor_heavy":"Schwer"}[String(recipe.item)])
 	lines.append("Herstellung: %d Cr"%int(recipe.cost))
+	for item: String in recipe.get("inputs", {}):
+		lines.append("Material: %d × %s aus dem Basislager" % [int(recipe.inputs[item]), RESEARCH.item_label(item)])
 	return "\n".join(lines)
 
 func set_selected_craft(craft_id: String) -> bool:
@@ -406,6 +410,8 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 			"campaign_build_pad": show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
 			"campaign_fabricate":
 				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id))
+				var quote: Dictionary = supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {})
+				enabled = home and bool(quote.get("ok", false))
 			"campaign_research":
 				var research: Dictionary = supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {})
 				enabled = home and bool(research.get("available", false))
@@ -414,6 +420,8 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 		button.tooltip_text = "Zur Basis zurückkehren" if not enabled else ""
 		if String(action.operation) == "campaign_research" and home:
 			button.tooltip_text = String(supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {}).get("message", "Entwicklung derzeit nicht verfügbar"))
+		if String(action.operation) == "campaign_fabricate" and home:
+			button.tooltip_text = String(supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {}).get("message", "Herstellung derzeit nicht möglich")) if not enabled else ""
 
 func _submit_campaign(key: String) -> void:
 	var action: Dictionary = _campaign_buttons.get(key,{})
