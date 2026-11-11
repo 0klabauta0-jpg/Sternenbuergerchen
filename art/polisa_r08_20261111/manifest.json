@@ -1,0 +1,828 @@
+{
+  "schema": "polisa_private_candidate_manifest_v1",
+  "revision": "R08",
+  "authoring_base_commit": "472f1ad8f",
+  "shared_worktree_head_at_freeze": "8eabf50cdf4f90f5e6921953921bd8bed55af8af",
+  "source_status": "FROZEN private R08 candidate; preserves praised R07 form; Root owns production integration",
+  "source_files": [
+    {
+      "path": "art/polisa_r08_20261111/author_layout.py",
+      "sha256": "08cc6cab7869fa10d72c4cb05691a49205fc3bf4aa52e59810684c5ad531703e",
+      "bytes": 6798
+    },
+    {
+      "path": "art/polisa_r08_20261111/build_candidate.py",
+      "sha256": "8c0b86fdd472076fc7f80df0544ad08f54bb8eb27efbb0813e292d9d162a5086",
+      "bytes": 9943
+    },
+    {
+      "path": "art/polisa_r08_20261111/build_layout_svg.py",
+      "sha256": "00a47e5887a3f45c08e2a1375581d0a9dd1c5c23dbacaefb62b1bee15ef94a40",
+      "bytes": 1531
+    },
+    {
+      "path": "art/polisa_r08_20261111/capture_r08.gd",
+      "sha256": "17e49e60a8bdb7605284c5f30ae3f1089c89cd8ae5ce07ca705b1f0ec55d55cf",
+      "bytes": 4617
+    },
+    {
+      "path": "art/polisa_r08_20261111/freeze_manifest.py",
+      "sha256": "2d0d45b4c1701494df252e3204e0ada43b5c826fb8479b09dc88ad26cac55bd2",
+      "bytes": 2900
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout.json",
+      "sha256": "0a257d06f92224423f2c1500bfbd036d463af3f4eb284c1a95274af7ab9d495e",
+      "bytes": 22963
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout_compiled.json",
+      "sha256": "5ecafb7bd5ce80c43e9f4f6face668b27eb0f40ff54bb6a59f9b7408684e2669",
+      "bytes": 23832
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout_final.svg",
+      "sha256": "503511d3d1cfbc5f146f5e6b9baf8f8a6103f758ada84564d09d49f3eaaf4b2d",
+      "bytes": 10124
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout_target.svg",
+      "sha256": "3ca247ffd31ec120a32d28ca8c197742b0381898e36255ff48396efd56bde2ad",
+      "bytes": 1990
+    },
+    {
+      "path": "art/polisa_r08_20261111/polisa_r08_visual.gd",
+      "sha256": "65c9553ad73b7e4931e081189aea25f2737ee5f139ddb1f2a6083b5e9f8741a3",
+      "bytes": 22984
+    },
+    {
+      "path": "art/polisa_r08_20261111/polisa_r08_visual.tscn",
+      "sha256": "b0be5ed8d27ebae47d1796d2ef67fa9f0e6046469a2893504e8c957f398ccf84",
+      "bytes": 205
+    },
+    {
+      "path": "art/polisa_r08_20261111/README.md",
+      "sha256": "0958c55471f1814af093a5a274bf3c675ec766506708c45b02f4266d1652c36b",
+      "bytes": 7874
+    },
+    {
+      "path": "art/polisa_r08_20261111/TASK.md",
+      "sha256": "12e77d1bf73b0b47c363111efef676015a800514b944c0c12bbd9270d23106d5",
+      "bytes": 2498
+    }
+  ],
+  "baseline_r04": [
+    {
+      "path": "art/polisa_r08_20261111/baseline_r04/layout.json",
+      "sha256": "59fadabd04242da53c64e3b0ab5e070d1c68a186bc615e7673d92f8daa549734",
+      "bytes": 13972
+    },
+    {
+      "path": "art/polisa_r08_20261111/baseline_r04/polisa_station_candidate.json",
+      "sha256": "d8306a179d5777a36d5d04423b2a298d90329d8d0a382e3dbf379fc4d2642010",
+      "bytes": 2451131
+    },
+    {
+      "path": "art/polisa_r08_20261111/baseline_r04/README.md",
+      "sha256": "c185d613e3147116ffdb09315a77d76290c4c5e91abaf9c2ecff817b789486e9",
+      "bytes": 407
+    }
+  ],
+  "approved_r07_archive": [
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/ARCHIVE_STATUS.md",
+      "sha256": "ebd06713ba6cbda7c61cd0e01c363458acf93186fd162e25ac4a88d50d96d03a",
+      "bytes": 887
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/author_layout.py",
+      "sha256": "24e0be02bc3db5164b06b2bc2fc0597a5b5985f230fd2082c566bfb1df9d3603",
+      "bytes": 5854
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/baseline_r04/layout.json",
+      "sha256": "59fadabd04242da53c64e3b0ab5e070d1c68a186bc615e7673d92f8daa549734",
+      "bytes": 13972
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/baseline_r04/polisa_station_candidate.json",
+      "sha256": "d8306a179d5777a36d5d04423b2a298d90329d8d0a382e3dbf379fc4d2642010",
+      "bytes": 2451131
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/baseline_r04/README.md",
+      "sha256": "c185d613e3147116ffdb09315a77d76290c4c5e91abaf9c2ecff817b789486e9",
+      "bytes": 407
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/build_candidate.py",
+      "sha256": "389818a4e2a85a954f3e0aaeb2b0ee53a337cdaea06df305e487bbb5b4780dcc",
+      "bytes": 9008
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/build_layout_svg.py",
+      "sha256": "e00343ca054d7028736edadc92d27edc2027b16c3e092cb994b4b522ca3c06a6",
+      "bytes": 1531
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/capture_r07.gd",
+      "sha256": "73bd01642169cb9a57904b8a185b54875830bbdd067ea37d5d1d5fb57f467f4a",
+      "bytes": 4455
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/freeze_manifest.py",
+      "sha256": "58562eaa04b02864660a3fb97c51cf4d99f817b7bb11929f9ca85ea770546a54",
+      "bytes": 2411
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/layout.json",
+      "sha256": "defb425c272a83a4bbecb02079af3e6c7032d5a4d01c898f219d75eb2bf1fec0",
+      "bytes": 19727
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/layout_compiled.json",
+      "sha256": "eef7a0207b9ec702a093df554ad773078631f6c523ab71da2a6445cc8853914a",
+      "bytes": 20596
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/layout_final.svg",
+      "sha256": "7a5c4d85ff80bc3edbdade53973e5f0b7d03d2d6f6ef7cd88ac114856f93aa24",
+      "bytes": 9111
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/layout_target.svg",
+      "sha256": "7790d63992d74ffe5400a5d2cba6a45f59c5842ecb677642b2dda6fe0e91be75",
+      "bytes": 1818
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/manifest.json",
+      "sha256": "531261b9028c16a1f037f2592cad47f63d629582875aa7476e3246df6c4b996e",
+      "bytes": 17437
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/polisa_r07_visual.gd",
+      "sha256": "3e2c86adeda08058cdb02a83e76d192fb871eba5ce2eb0bcffcd3da909488043",
+      "bytes": 21816
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/polisa_r07_visual.tscn",
+      "sha256": "13d6fb73970929a3bff616e7d9eaece1c110934851d9e1cc5010457bc9ac03ae",
+      "bytes": 205
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/polisa_station_candidate.json",
+      "sha256": "9568ba9015744749e608d651f654b79d755c0b44b5c03f886dc58d84715a1c49",
+      "bytes": 839220
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/README.md",
+      "sha256": "9a391bc5c7b392412723b3cc8aca2c1780b66fd588a72778c6ef020614e97552",
+      "bytes": 6885
+    },
+    {
+      "path": "art/polisa_r08_20261111/approved_r07/TASK.md",
+      "sha256": "d6f77642d42c352d912965538fc9c95f4add4b1edeeab2ebbc60e9a39d504024",
+      "bytes": 2396
+    }
+  ],
+  "references": [
+    {
+      "path": "art/polisa_r06_20261111/references/station_concept_ai.png",
+      "sha256": "9ea97c0e5272fb098657498d3baf817ab0fed24d81350d72e906eaeb9978147e",
+      "bytes": 1838489
+    }
+  ],
+  "runtime_dependencies_at_freeze": [
+    {
+      "path": "maps/homebase_frontier_exploration.json",
+      "sha256": "ef39df8b1028f98f7b9710886966c79e97e012ec61614c87da28a5e22865dcb1",
+      "bytes": 1760689
+    },
+    {
+      "path": "scripts/terrain/frontier_outpost_pad.gd",
+      "sha256": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772",
+      "bytes": 5129
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "eb0d159e329f5abde77b1b9b787067f88f88d73aa0074286102c60d40b17267f",
+      "bytes": 927250
+    },
+    {
+      "path": "shaders/terrain/hex_grid_coverage.gdshader",
+      "sha256": "741c040539a7671c299ba2d5b26293a216ad2ecebd6529a505d58e3a3e16da65",
+      "bytes": 1212
+    },
+    {
+      "path": "scripts/terrain/personnel_armor_visual.gd",
+      "sha256": "62c6e22ec0df1b08f4c598751a8be3f09b6c68254d3d7d6a0f25b6a23dd49349",
+      "bytes": 38336
+    },
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+      "bytes": 397300
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/body_r07_derived.glb",
+      "sha256": "c1e3f54de89b7481eb26f6365f99e1368bae063e7876863cc37311588338b376",
+      "bytes": 403164
+    }
+  ],
+  "evidence": [
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/capture_r08.gd",
+      "sha256": "17e49e60a8bdb7605284c5f30ae3f1089c89cd8ae5ce07ca705b1f0ec55d55cf",
+      "bytes": 4617
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/grid_final_station_near.json",
+      "sha256": "663a097255066fb39725d92a303990d3f47efdbd22a514ea58b9cb679a800036",
+      "bytes": 399
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/grid_final_station_ports.json",
+      "sha256": "243d924db39a58eb63bba68c5cc9972e697d02b74eab0ba1c4d8b5a0247d9eba",
+      "bytes": 400
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/grid_final_whole_map.json",
+      "sha256": "a9bd30fc44eebb161d72b4ee641cccc05ba9f395ade22d0b26319f70ad5e89d4",
+      "bytes": 396
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/native_metrics.json",
+      "sha256": "897006aea0986dadee6053b48aa1c9ae912a833bd1bb57fce14e32e7784256c0",
+      "bytes": 434
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/offline_checks.json",
+      "sha256": "c98f8c661ff414c674135e60b611ce9d8333f533c93bd8d1e40f2591fd2baaaf",
+      "bytes": 9131
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/polisa_r08_station_near.png",
+      "sha256": "b753b7f6f5de65b972fe8f4477e4dcf8739e123be2af1e8d1f1419423503a77d",
+      "bytes": 910643
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/polisa_r08_station_ports.png",
+      "sha256": "547115101a37dcbec1f4caf240bb993ad8b86e39a670c763fe29bd32988359fb",
+      "bytes": 405636
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/polisa_r08_whole_map.png",
+      "sha256": "2505eb00eae34c31d13b1a96b08d9372f1ac422e811e2b61fa5df897422a41fd",
+      "bytes": 46172
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/polisa_station_candidate.json",
+      "sha256": "bfeea35122f079307fad54ac5d50cb2b6ad06453623674067b7fd616d12cb1b8",
+      "bytes": 839378
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r01_station_near.png",
+      "sha256": "7cb6aa22ba40319dc776f5e31e06015551c52d247b9cd6ec6c896d3c0eb86fd8",
+      "bytes": 911147
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r01_station_ports.png",
+      "sha256": "852a12b46b77dbeee403f915280029897ee7068429d1400aeb82df3edda0bcc9",
+      "bytes": 405787
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r01_whole_map.png",
+      "sha256": "1540c5597cf9ba5eb41b42219927a30ad4dec00be0e80f8bad55fd45e2109892",
+      "bytes": 46197
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r08_art01.json",
+      "sha256": "75ef4c6fe9570c45e772b724d7c24eea3bb5b621208d420e6fd59f9b7b5763e0",
+      "bytes": 776
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r08_art01.log",
+      "sha256": "a64a46863b4cd38e354a01f24ba4b147af3abdc564c5ff42549ebec084d16cad",
+      "bytes": 2037
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r08_final.json",
+      "sha256": "7ed9c4276982baa4809833ca154d2a1f349d7bc1994983a85a031c0f58ceee84",
+      "bytes": 775
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r08_20261111/r08_final.log",
+      "sha256": "a64a46863b4cd38e354a01f24ba4b147af3abdc564c5ff42549ebec084d16cad",
+      "bytes": 2037
+    }
+  ],
+  "native_metrics": {
+    "active_collisions": 0,
+    "dressing_visible_mesh_nodes": 16,
+    "dressing_visible_triangles": 45608,
+    "showcase_mesh_nodes": 6,
+    "showcase_triangles": 22472,
+    "station": {
+      "collision_nodes": 0,
+      "dynamic_lights": 0,
+      "layout_sha256": "0a257d06f92224423f2c1500bfbd036d463af3f4eb284c1a95274af7ab9d495e",
+      "primitive_boxes": 896,
+      "showcase_rigs": 3,
+      "static_mesh_nodes": 10,
+      "static_triangles": 23136
+    }
+  },
+  "offline": {
+    "checks": {
+      "single_walkable_component": true,
+      "retained_marker_ids": true,
+      "seven_front_pads": true,
+      "one_sector_seven_pads": true,
+      "rooms_reachable": true,
+      "markers_reachable": true,
+      "rings_diameter_covers_large_pad": true,
+      "ring_planes_perpendicular_to_x": true,
+      "large_twice_medium_length": true,
+      "rings_clear_all_pad_rectangles": true,
+      "technical_zones_blocked": true,
+      "outer_port_approaches_clear": true,
+      "small_pad_exact_homebase_size": true,
+      "homebase_source_hash_matches": true,
+      "one_common_straight_ring_axis": true,
+      "no_duplicate_pad_dressing": true,
+      "pad_envelopes_clear": true,
+      "globe_walkaround": true,
+      "open_passages_crossable": true,
+      "passages_are_geometry_only": true
+    },
+    "open_passages": [
+      {
+        "id": "pad_access_0",
+        "width": 2.5,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 10
+      },
+      {
+        "id": "pad_access_1",
+        "width": 2.5,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 10
+      },
+      {
+        "id": "pad_access_2",
+        "width": 2.5,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 10
+      },
+      {
+        "id": "pad_access_3",
+        "width": 2.5,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 10
+      },
+      {
+        "id": "pad_access_4",
+        "width": 2.5,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 10
+      },
+      {
+        "id": "lobby_entry_0",
+        "width": 4.0,
+        "status": "open_geometry",
+        "crossing_reachable": true,
+        "local_walkable_cells": 16
+      }
+    ],
+    "tile_count": 4486,
+    "walkable": 2205,
+    "reachable": 2205,
+    "blocked": 2281,
+    "unreachable_sample": [],
+    "pad_envelopes": [
+      {
+        "id": "polisa_pad_01",
+        "deck": [
+          12.0,
+          12.0
+        ],
+        "reserve_envelope": [
+          10.7,
+          10.7
+        ],
+        "clear_cells": 126,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_02",
+        "deck": [
+          12.0,
+          12.0
+        ],
+        "reserve_envelope": [
+          10.7,
+          10.7
+        ],
+        "clear_cells": 126,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_03",
+        "deck": [
+          16.0,
+          24.0
+        ],
+        "reserve_envelope": [
+          14.7,
+          22.7
+        ],
+        "clear_cells": 377,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_04",
+        "deck": [
+          8.0,
+          6.0
+        ],
+        "reserve_envelope": [
+          6.7,
+          4.7
+        ],
+        "clear_cells": 39,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_05",
+        "deck": [
+          8.0,
+          6.0
+        ],
+        "reserve_envelope": [
+          6.7,
+          4.7
+        ],
+        "clear_cells": 39,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_06",
+        "deck": [
+          8.0,
+          6.0
+        ],
+        "reserve_envelope": [
+          6.7,
+          4.7
+        ],
+        "clear_cells": 39,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      },
+      {
+        "id": "polisa_pad_07",
+        "deck": [
+          8.0,
+          6.0
+        ],
+        "reserve_envelope": [
+          6.7,
+          4.7
+        ],
+        "clear_cells": 39,
+        "clear": true,
+        "margin_per_side": [
+          0.65,
+          0.65
+        ]
+      }
+    ],
+    "marker_anchors": {
+      "polisa_pad_01": {
+        "local_plane": [
+          -29,
+          30.0
+        ],
+        "world_plane": [
+          -29.0,
+          -39.837168574084174
+        ],
+        "grid": [
+          -6,
+          -46
+        ],
+        "world_iso": [
+          693.5787887413871,
+          -2202.7893943706936
+        ]
+      },
+      "polisa_pad_02": {
+        "local_plane": [
+          -15,
+          30.0
+        ],
+        "world_plane": [
+          -15.0,
+          -39.837168574084174
+        ],
+        "grid": [
+          8,
+          -46
+        ],
+        "world_iso": [
+          1589.5787887413871,
+          -1754.7893943706936
+        ]
+      },
+      "polisa_pad_03": {
+        "local_plane": [
+          0,
+          36.0
+        ],
+        "world_plane": [
+          -0.5,
+          -33.77499074759311
+        ],
+        "grid": [
+          19,
+          -39
+        ],
+        "world_iso": [
+          2129.599407845959,
+          -1096.7997039229795
+        ]
+      },
+      "polisa_pad_04": {
+        "local_plane": [
+          14,
+          27.0
+        ],
+        "world_plane": [
+          14.0,
+          -43.30127018922193
+        ],
+        "grid": [
+          39,
+          -50
+        ],
+        "world_iso": [
+          3667.2812921102036,
+          -937.6406460551018
+        ]
+      },
+      "polisa_pad_05": {
+        "local_plane": [
+          24,
+          27.0
+        ],
+        "world_plane": [
+          24.0,
+          -43.30127018922193
+        ],
+        "grid": [
+          49,
+          -50
+        ],
+        "world_iso": [
+          4307.281292110203,
+          -617.6406460551018
+        ]
+      },
+      "polisa_pad_06": {
+        "local_plane": [
+          14,
+          35.0
+        ],
+        "world_plane": [
+          14.0,
+          -34.64101615137754
+        ],
+        "grid": [
+          34,
+          -40
+        ],
+        "world_iso": [
+          3113.0250336881627,
+          -660.5125168440813
+        ]
+      },
+      "polisa_pad_07": {
+        "local_plane": [
+          24,
+          35.0
+        ],
+        "world_plane": [
+          24.0,
+          -34.64101615137754
+        ],
+        "grid": [
+          44,
+          -40
+        ],
+        "world_iso": [
+          3753.0250336881627,
+          -340.51251684408135
+        ]
+      },
+      "trade_service": {
+        "local_plane": [
+          0,
+          17
+        ],
+        "world_plane": [
+          -0.5,
+          -52.827549630850754
+        ],
+        "grid": [
+          30,
+          -61
+        ],
+        "world_iso": [
+          3348.9631763744483,
+          -1706.4815881872241
+        ]
+      },
+      "objective_point": {
+        "local_plane": [
+          0,
+          17
+        ],
+        "world_plane": [
+          -0.5,
+          -52.827549630850754
+        ],
+        "grid": [
+          30,
+          -61
+        ],
+        "world_iso": [
+          3348.9631763744483,
+          -1706.4815881872241
+        ]
+      },
+      "spawn_alpha": {
+        "local_plane": [
+          -29,
+          30.0
+        ],
+        "world_plane": [
+          -29.0,
+          -39.837168574084174
+        ],
+        "grid": [
+          -6,
+          -46
+        ],
+        "world_iso": [
+          693.5787887413871,
+          -2202.7893943706936
+        ]
+      },
+      "ship_return": {
+        "local_plane": [
+          -29,
+          30.0
+        ],
+        "world_plane": [
+          -29.0,
+          -39.837168574084174
+        ],
+        "grid": [
+          -6,
+          -46
+        ],
+        "world_iso": [
+          693.5787887413871,
+          -2202.7893943706936
+        ]
+      },
+      "spawn_bravo": {
+        "local_plane": [
+          24,
+          27.0
+        ],
+        "world_plane": [
+          24.0,
+          -43.30127018922193
+        ],
+        "grid": [
+          49,
+          -50
+        ],
+        "world_iso": [
+          4307.281292110203,
+          -617.6406460551018
+        ]
+      }
+    },
+    "room_service_anchors": {
+      "infantry": {
+        "grid": [
+          29,
+          -82
+        ],
+        "world_plane": [
+          -12.0,
+          -71.01408311032397
+        ],
+        "reachable": true
+      },
+      "armor": {
+        "grid": [
+          41,
+          -82
+        ],
+        "world_plane": [
+          0.0,
+          -71.01408311032397
+        ],
+        "reachable": true
+      },
+      "engineering": {
+        "grid": [
+          53,
+          -82
+        ],
+        "world_plane": [
+          12.0,
+          -71.01408311032397
+        ],
+        "reachable": true
+      },
+      "supplies": {
+        "grid": [
+          20,
+          -72
+        ],
+        "world_plane": [
+          -16.0,
+          -62.35382907247958
+        ],
+        "reachable": true
+      },
+      "freight": {
+        "grid": [
+          52,
+          -72
+        ],
+        "world_plane": [
+          16.0,
+          -62.35382907247958
+        ],
+        "reachable": true
+      }
+    },
+    "rooms": 5,
+    "walls": 33,
+    "furniture": 19,
+    "layout_sha256": "0a257d06f92224423f2c1500bfbd036d463af3f4eb284c1a95274af7ab9d495e",
+    "map_sha256": "bfeea35122f079307fad54ac5d50cb2b6ad06453623674067b7fd616d12cb1b8",
+    "space_bounds_plane": [
+      -256,
+      -90,
+      256,
+      132
+    ],
+    "station_deck_z_bounds": [
+      -89.20061658979718,
+      -23.38268590217984
+    ],
+    "scope": "offline authoring graph; not live navigation, travel, shop or landing acceptance"
+  },
+  "limits": [
+    "R07 user praise is preserved; no R08 aesthetic end acceptance claimed",
+    "No release, FPS, battle, journey or save acceptance",
+    "Ports are geometric dressing, not implemented docking",
+    "Passages are statically open geometry; no interactive door state",
+    "Root owns production, catalog, UI and camera/view integration",
+    "Native grid and image-readability evidence is documented in README"
+  ]
+}

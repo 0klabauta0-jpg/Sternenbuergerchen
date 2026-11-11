@@ -1,6 +1,6 @@
 extends Node3D
 ## Authored layout projection only. Static batches; no runtime truth or collisions.
-const FACTS = "res://art/polisa_r07_20261111/layout_compiled.json"
+const FACTS = "res://art/polisa_r08_20261111/layout_compiled.json"
 const ARMOR = preload("res://scripts/terrain/personnel_armor_visual.gd")
 const PERSON = preload("res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb")
 const HULL := "c9cfc8"
@@ -23,11 +23,12 @@ var _showcase_copies: Array[Dictionary] = []
 
 func _ready() -> void:
 	if get_child_count()>0:return
-	name="PolisaR07Visual"
+	name="PolisaR08Visual"
 	var facts:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(FACTS))
 	_build_structure(facts)
 	set_meta("station_deck_owns_flat_ground",true) # Live, successfully built deck; root view owns cap/raster policy.
 	for wall:Dictionary in facts.walls:_build_wall(wall)
+	for passage:Dictionary in facts.passages:_build_open_passage(passage)
 	for room:Dictionary in facts.rooms:_build_room(room)
 	for item:Dictionary in facts.furniture:_build_furniture(item)
 	for pad:Dictionary in facts.pads:_build_pad(pad)
@@ -73,7 +74,6 @@ func _build_structure(facts:Dictionary)->void:
 	_box(Vector3(25,.02,16),Vector3(0,.025,10),STEEL)
 	for side:float in [-1,1]:_box(Vector3(.1,.015,18),Vector3(side*13,.045,10),YELLOW)
 	for z:float in [18.7,23.4]:_box(Vector3(82,.015,.1),Vector3(0,.045,z),YELLOW)
-	_label("POLISA",Vector3(0,.055,19),.07,true,false)
 	_label("TRANSIT / SERVICES",Vector3(0,.055,17.5),.018,true,false)
 	_label("POLISA",Vector3(0,4.1,-12.2),.05,false,true)
 
@@ -122,6 +122,20 @@ func _build_wall(w:Dictionary)->void:
 		if s.x>s.y:
 			_box(Vector3(maxf(.1,s.x-.5),h*.58,.04),Vector3(c.x,h*.52,c.y+.42),INSET)
 		_box(Vector3(s.x+.08,.12,s.y+.08),Vector3(c.x,h+.03,c.y),STEEL)
+
+func _build_open_passage(spec:Dictionary)->void:
+	# Permanently open geometry. The same fact defines the gap in authored blockers.
+	var c:=Vector2(float(spec.center[0]),float(spec.center[1]))
+	var width:=float(spec.width)
+	var clear_height:=float(spec.clear_height)
+	for side:float in [-1,1]:
+		var x:=c.x+side*(width*.5+.12)
+		_box(Vector3(.20,clear_height+.25,.42),Vector3(x,(clear_height+.25)*.5,c.y),DARK)
+		_box(Vector3(.10,clear_height-.15,.46),Vector3(x,clear_height*.5,c.y),HULL)
+		_box(Vector3(.07,.42,.47),Vector3(x,clear_height-.1,c.y),CYAN)
+	_box(Vector3(width+.44,.25,.45),Vector3(c.x,clear_height+.125,c.y),HULL)
+	_box(Vector3(width*.7,.08,.47),Vector3(c.x,clear_height+.13,c.y),CYAN)
+	_box(Vector3(width,.012,.48),Vector3(c.x,.046,c.y),YELLOW)
 
 func _build_room(room:Dictionary)->void:
 	var c:=_rect_center(room.rect)
@@ -177,7 +191,7 @@ func _build_engineering(spec:Dictionary)->void:
 		_cylinder(3.0,3.0,5.2,c,DARK,16,Vector3(0,0,PI*.5))
 		for side:float in [-1,1]:_cylinder(3.3,3.3,.55,c+Vector3(side*2.5,0,0),HULL,16,Vector3(0,0,PI*.5))
 		for angle:float in [PI/3,PI*2/3,PI,PI*4/3,PI*5/3]:
-			_beam(c,c+Vector3(0,cos(angle)*(radius-3),sin(angle)*(radius-3)),1.1,STEEL)
+			_beam(c,c+Vector3(0,cos(angle)*(radius-4.5),sin(angle)*(radius-4.5)),1.1,STEEL)
 		for index in range(12):
 			var a:=TAU*index/12
 			var p:=c+Vector3(0,cos(a)*(radius-1.4),sin(a)*(radius-1.4))
@@ -200,12 +214,17 @@ func _build_engineering(spec:Dictionary)->void:
 					_box(Vector3(.06,.025,d/5-.18),p+Vector3(0,.065,0),STEEL)
 	for port:Dictionary in spec.outer_ports:
 		var p:=Vector3(float(port.center[0]),ay,rz)
-		_box(Vector3(5,4.5,6),p,HULL)
-		_box(Vector3(3,3,.4),p+Vector3(0,0,3.2),DARK)
+		# A distinct docking head on the same axle; visual reserve, no docking owner.
+		_box(Vector3(7,6,8),p,HULL)
+		_box(Vector3(5.7,4.6,.55),p+Vector3(0,0,4.15),DARK)
+		_box(Vector3(3.8,2.9,.12),p+Vector3(0,0,4.5),INSET)
 		for side:float in [-1,1]:
-			_box(Vector3(.9,2,9),p+Vector3(side*3,-.4,7),HULL)
-			_box(Vector3(.6,1.2,.25),p+Vector3(side*3,-.4,11.6),CYAN)
-		_label("PORT",p+Vector3(0,3,0),.025,false,true)
+			_box(Vector3(.28,4.3,.18),p+Vector3(side*2.7,0,4.5),CYAN)
+			_box(Vector3(1.1,2.4,9),p+Vector3(side*3.8,-.4,7),HULL)
+			_box(Vector3(.7,1.5,.28),p+Vector3(side*3.8,-.4,11.6),CYAN)
+			_box(Vector3(5.4,.25,.18),p+Vector3(0,side*2.1,4.5),YELLOW)
+		_cylinder(2.6,2.6,.6,p+Vector3(0,0,-4.2),DARK,12,Vector3(PI*.5,0,0))
+		_label("DOCK L" if p.x<0 else "DOCK R",p+Vector3(0,4.2,2),.07,false,true)
 
 func _build_space_extent(facts:Dictionary)->void:
 	# A visual perimeter of declared map extent, not extra navigable tiles.

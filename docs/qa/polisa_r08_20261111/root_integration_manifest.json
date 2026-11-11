@@ -1,0 +1,51 @@
+{
+  "status": "isolated native R08 integration, no broad acceptance",
+  "source_art_manifest": "art/polisa_r08_20261111/manifest.json",
+  "root_differences": [
+    "production scene/name",
+    "layout-derived initial camera/focus and presentation camera bounds",
+    "production script LF normalization"
+  ],
+  "files": [
+    {
+      "path": "maps/polisa_station.json",
+      "sha256": "7b75c61bbcaf2a12e7c6343f4c4bcb6e179425ad94863529288eb05075d1db7e"
+    },
+    {
+      "path": "scripts/terrain/polisa_station_visual.gd",
+      "sha256": "02e35d6d432e2a94db33004c8892dc8173ed9353d7f4e7b80b8028e5fde98fa0"
+    },
+    {
+      "path": "tools/build_polisa_station.py",
+      "sha256": "eb9853342dce647be6f9b7f1eeba74f9a00f6ec8414c91f151743c9442136103"
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout.json",
+      "sha256": "0a257d06f92224423f2c1500bfbd036d463af3f4eb284c1a95274af7ab9d495e"
+    },
+    {
+      "path": "art/polisa_r08_20261111/layout_compiled.json",
+      "sha256": "5ecafb7bd5ce80c43e9f4f6face668b27eb0f40ff54bb6a59f9b7408684e2669"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "eb0d159e329f5abde77b1b9b787067f88f88d73aa0074286102c60d40b17267f"
+    },
+    {
+      "path": "scripts/tests/mission_test_setup.gd",
+      "sha256": "103cd3ee59436aca41996e790d4d6175200dd528985e364975e9709ae8afa55f"
+    },
+    {
+      "path": "docs/qa/polisa_r08_20261111/polisa_r08_station_near.png",
+      "sha256": "9e0cbc6ea76624f9f3d414ae69aaf5660db276b41b7c22aa83bbcfed449044a7"
+    },
+    {
+      "path": "docs/qa/polisa_r08_20261111/polisa_r08_station_ports.png",
+      "sha256": "e84bf19b2e2f1eac5f4a83be3698f02fdb2bf791ae76fdd5393102c640b1274b"
+    },
+    {
+      "path": "docs/qa/polisa_r08_20261111/polisa_r08_whole_map.png",
+      "sha256": "ad4a7c0659a10e0fefa2b1badab1ca65e59fa6888906442ec576df009f51a43e"
+    }
+  ]
+}

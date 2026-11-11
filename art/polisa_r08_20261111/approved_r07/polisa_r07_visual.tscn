@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://art/polisa_r07_20261111/polisa_r07_visual.gd" id="1"]
+
+[node name="PolisaR07Visual" type="Node3D"]
+script = ExtResource("1")

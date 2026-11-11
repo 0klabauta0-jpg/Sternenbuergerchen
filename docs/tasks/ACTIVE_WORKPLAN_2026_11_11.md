@@ -187,3 +187,6 @@ Aktuelle isoliert integrierte Station: ein Globusraum, fuenf Shops, sieben Pads,
 
 ## R07-Grundform bestaetigt; R08-Anschluss
 VerbindlicherS-Massstab8x6direktausHeimatbasis. R07mit2358begehbarenDeckhexenund4486gespeichertenTilesistdiegelobteGrundform. KlareresStationsrasterundnativerPadvergleichabgeschlossen. JetztR08nachPOLISA_RING_PORTS_DOORWAYS_R08_2026_11_11.md, keineerneuteGlobalskalierung; grosseTestsspaeter.
+
+## R08 integriert
+Grundformbewahrt, Ring-/Solar-/DockausbauundMauer-TuerdurchgaengeimProduktkandidatenintegriert.20kleineAuthoringchecksunddreiaktuelleNativeProduktansichtenbelegt;offenePortalesindkeineinteraktiveTuersimulation, PortskeineneueDockingfunktion. AP4Owner+Reviewfixintegriert, Root/Ground/PathfinderCompile0; AP5Projektion/KorridorcacheanschlussnochimTabletopChat. KeineMapaktivierung,grosseTestsspaeter.

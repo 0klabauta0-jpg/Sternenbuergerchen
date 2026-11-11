@@ -1,0 +1,30 @@
+{
+  "label": "r08_final",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 0,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\polisa_r08_20261111\\profiles\\r08_final",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "4982544",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://output/native_glut_maps/polisa_r08_20261111/capture_r08.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}

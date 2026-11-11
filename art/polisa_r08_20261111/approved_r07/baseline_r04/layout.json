@@ -1,0 +1,884 @@
+{
+  "schema": "polisa_authored_layout_v4",
+  "origin_plane": [
+    0,
+    -64
+  ],
+  "grid_size": [
+    256,
+    256
+  ],
+  "grid_offset_bounds": [
+    -128,
+    -104,
+    127,
+    151
+  ],
+  "space_bounds": [
+    -128,
+    -90.1,
+    128,
+    131.7
+  ],
+  "standard_camera": {
+    "yaw": 0,
+    "pitch": 58,
+    "size": 66,
+    "focus_local": [
+      0,
+      4
+    ]
+  },
+  "hub": [
+    -24,
+    0,
+    24,
+    32
+  ],
+  "decks": [
+    {
+      "id": "hub",
+      "rect": [
+        -24,
+        0,
+        24,
+        32
+      ],
+      "kind": "hub"
+    },
+    {
+      "id": "dock_concourse",
+      "rect": [
+        -92,
+        30,
+        92,
+        40
+      ],
+      "kind": "bridge"
+    },
+    {
+      "id": "infantry",
+      "rect": [
+        -36,
+        -24,
+        -12,
+        0
+      ],
+      "kind": "room"
+    },
+    {
+      "id": "armor",
+      "rect": [
+        -12,
+        -24,
+        12,
+        0
+      ],
+      "kind": "room"
+    },
+    {
+      "id": "engineering",
+      "rect": [
+        12,
+        -24,
+        36,
+        0
+      ],
+      "kind": "room"
+    },
+    {
+      "id": "supplies",
+      "rect": [
+        -48,
+        2,
+        -24,
+        26
+      ],
+      "kind": "room"
+    },
+    {
+      "id": "freight",
+      "rect": [
+        24,
+        2,
+        48,
+        26
+      ],
+      "kind": "room"
+    }
+  ],
+  "pads": [
+    {
+      "id": "polisa_pad_01",
+      "number": "01",
+      "center": [
+        -80,
+        53.0
+      ],
+      "size": [
+        24,
+        26
+      ],
+      "class": "S",
+      "reserve_envelope": [
+        18,
+        20
+      ]
+    },
+    {
+      "id": "polisa_pad_02",
+      "number": "02",
+      "center": [
+        -44,
+        60.0
+      ],
+      "size": [
+        32,
+        40
+      ],
+      "class": "M",
+      "reserve_envelope": [
+        26,
+        34
+      ]
+    },
+    {
+      "id": "polisa_pad_03",
+      "number": "03",
+      "center": [
+        0,
+        64.0
+      ],
+      "size": [
+        40,
+        48
+      ],
+      "class": "L",
+      "reserve_envelope": [
+        34,
+        42
+      ]
+    },
+    {
+      "id": "polisa_pad_04",
+      "number": "04",
+      "center": [
+        44,
+        60.0
+      ],
+      "size": [
+        32,
+        40
+      ],
+      "class": "M",
+      "reserve_envelope": [
+        26,
+        34
+      ]
+    },
+    {
+      "id": "polisa_pad_05",
+      "number": "05",
+      "center": [
+        80,
+        53.0
+      ],
+      "size": [
+        24,
+        26
+      ],
+      "class": "S",
+      "reserve_envelope": [
+        18,
+        20
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "infantry",
+      "title": "INFANTERIE",
+      "rect": [
+        -36,
+        -24,
+        -12,
+        0
+      ],
+      "door": [
+        -18,
+        0
+      ],
+      "door_side": "front",
+      "door_width": 5.2,
+      "accent": "yellow",
+      "service_anchor": [
+        -18,
+        -3
+      ]
+    },
+    {
+      "id": "armor",
+      "title": "RÜSTUNG",
+      "rect": [
+        -12,
+        -24,
+        12,
+        0
+      ],
+      "door": [
+        0,
+        0
+      ],
+      "door_side": "front",
+      "door_width": 5.2,
+      "accent": "yellow",
+      "service_anchor": [
+        0,
+        -3
+      ]
+    },
+    {
+      "id": "engineering",
+      "title": "TECHNIK",
+      "rect": [
+        12,
+        -24,
+        36,
+        0
+      ],
+      "door": [
+        18,
+        0
+      ],
+      "door_side": "front",
+      "door_width": 5.2,
+      "accent": "cyan",
+      "service_anchor": [
+        18,
+        -3
+      ]
+    },
+    {
+      "id": "supplies",
+      "title": "VERSORGUNG",
+      "rect": [
+        -48,
+        2,
+        -24,
+        26
+      ],
+      "door": [
+        -24,
+        14
+      ],
+      "door_side": "right",
+      "door_width": 5.2,
+      "accent": "cyan",
+      "service_anchor": [
+        -27,
+        14
+      ]
+    },
+    {
+      "id": "freight",
+      "title": "FRACHT",
+      "rect": [
+        24,
+        2,
+        48,
+        26
+      ],
+      "door": [
+        24,
+        14
+      ],
+      "door_side": "left",
+      "door_width": 5.2,
+      "accent": "yellow",
+      "service_anchor": [
+        27,
+        14
+      ]
+    }
+  ],
+  "walls": [
+    {
+      "rect": [
+        -36,
+        -24.4,
+        -12,
+        -23.6
+      ],
+      "height": 3.3,
+      "room": "infantry",
+      "window": false
+    },
+    {
+      "rect": [
+        -36,
+        -0.4,
+        -20.6,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "infantry",
+      "window": true
+    },
+    {
+      "rect": [
+        -15.4,
+        -0.4,
+        -12,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "infantry",
+      "window": true
+    },
+    {
+      "rect": [
+        -36.4,
+        -24,
+        -35.6,
+        0
+      ],
+      "height": 1.05,
+      "room": "infantry",
+      "window": true
+    },
+    {
+      "rect": [
+        -12.4,
+        -24,
+        -11.6,
+        0
+      ],
+      "height": 1.05,
+      "room": "infantry",
+      "window": true
+    },
+    {
+      "rect": [
+        -12,
+        -24.4,
+        12,
+        -23.6
+      ],
+      "height": 3.3,
+      "room": "armor",
+      "window": false
+    },
+    {
+      "rect": [
+        -12,
+        -0.4,
+        -2.6,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "armor",
+      "window": true
+    },
+    {
+      "rect": [
+        2.6,
+        -0.4,
+        12,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "armor",
+      "window": true
+    },
+    {
+      "rect": [
+        11.6,
+        -24,
+        12.4,
+        0
+      ],
+      "height": 1.05,
+      "room": "armor",
+      "window": true
+    },
+    {
+      "rect": [
+        12,
+        -24.4,
+        36,
+        -23.6
+      ],
+      "height": 3.3,
+      "room": "engineering",
+      "window": false
+    },
+    {
+      "rect": [
+        12,
+        -0.4,
+        15.4,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "engineering",
+      "window": true
+    },
+    {
+      "rect": [
+        20.6,
+        -0.4,
+        36,
+        0.4
+      ],
+      "height": 0.65,
+      "room": "engineering",
+      "window": true
+    },
+    {
+      "rect": [
+        35.6,
+        -24,
+        36.4,
+        0
+      ],
+      "height": 1.05,
+      "room": "engineering",
+      "window": true
+    },
+    {
+      "rect": [
+        -48,
+        1.6,
+        -24,
+        2.4
+      ],
+      "height": 1.0,
+      "room": "supplies",
+      "window": false
+    },
+    {
+      "rect": [
+        -48,
+        25.6,
+        -24,
+        26.4
+      ],
+      "height": 0.65,
+      "room": "supplies",
+      "window": true
+    },
+    {
+      "rect": [
+        -48.4,
+        2,
+        -47.6,
+        26
+      ],
+      "height": 1.05,
+      "room": "supplies",
+      "window": true
+    },
+    {
+      "rect": [
+        -24.4,
+        2,
+        -23.6,
+        11.4
+      ],
+      "height": 1.05,
+      "room": "supplies",
+      "window": true
+    },
+    {
+      "rect": [
+        -24.4,
+        16.6,
+        -23.6,
+        26
+      ],
+      "height": 1.05,
+      "room": "supplies",
+      "window": true
+    },
+    {
+      "rect": [
+        24,
+        1.6,
+        48,
+        2.4
+      ],
+      "height": 1.0,
+      "room": "freight",
+      "window": false
+    },
+    {
+      "rect": [
+        24,
+        25.6,
+        48,
+        26.4
+      ],
+      "height": 0.65,
+      "room": "freight",
+      "window": true
+    },
+    {
+      "rect": [
+        23.6,
+        2,
+        24.4,
+        11.4
+      ],
+      "height": 1.05,
+      "room": "freight",
+      "window": true
+    },
+    {
+      "rect": [
+        23.6,
+        16.6,
+        24.4,
+        26
+      ],
+      "height": 1.05,
+      "room": "freight",
+      "window": true
+    },
+    {
+      "rect": [
+        47.6,
+        2,
+        48.4,
+        26
+      ],
+      "height": 1.05,
+      "room": "freight",
+      "window": true
+    }
+  ],
+  "furniture": [
+    {
+      "id": "infantry_counter",
+      "kind": "counter",
+      "rect": [
+        -29.5,
+        -6.75,
+        -24.5,
+        -5.25
+      ],
+      "height": 0.9,
+      "room": "infantry",
+      "accent": "yellow"
+    },
+    {
+      "id": "armor_counter",
+      "kind": "counter",
+      "rect": [
+        -8.5,
+        -6.75,
+        -3.5,
+        -5.25
+      ],
+      "height": 0.9,
+      "room": "armor",
+      "accent": "yellow"
+    },
+    {
+      "id": "engineering_counter",
+      "kind": "counter",
+      "rect": [
+        24.5,
+        -6.75,
+        29.5,
+        -5.25
+      ],
+      "height": 0.9,
+      "room": "engineering",
+      "accent": "cyan"
+    },
+    {
+      "id": "supplies_counter",
+      "kind": "counter",
+      "rect": [
+        -33.5,
+        20.25,
+        -28.5,
+        21.75
+      ],
+      "height": 0.9,
+      "room": "supplies",
+      "accent": "cyan"
+    },
+    {
+      "id": "freight_counter",
+      "kind": "counter",
+      "rect": [
+        28.5,
+        20.25,
+        33.5,
+        21.75
+      ],
+      "height": 0.9,
+      "room": "freight",
+      "accent": "yellow"
+    },
+    {
+      "id": "showcase_light",
+      "kind": "armor",
+      "rect": [
+        -8.6,
+        -21.25,
+        -5.4,
+        -18.75
+      ],
+      "height": 0.3,
+      "room": "armor",
+      "accent": "yellow",
+      "armor": "light"
+    },
+    {
+      "id": "showcase_medium",
+      "kind": "armor",
+      "rect": [
+        -1.6,
+        -21.25,
+        1.6,
+        -18.75
+      ],
+      "height": 0.3,
+      "room": "armor",
+      "accent": "yellow",
+      "armor": "medium"
+    },
+    {
+      "id": "showcase_heavy",
+      "kind": "armor",
+      "rect": [
+        5.4,
+        -21.25,
+        8.6,
+        -18.75
+      ],
+      "height": 0.3,
+      "room": "armor",
+      "accent": "yellow",
+      "armor": "heavy"
+    },
+    {
+      "id": "infantry_goods_0",
+      "kind": "goods",
+      "rect": [
+        -31.5,
+        -20.2,
+        -26.5,
+        -17.8
+      ],
+      "height": 1.7,
+      "room": "infantry",
+      "accent": "cyan"
+    },
+    {
+      "id": "infantry_goods_1",
+      "kind": "goods",
+      "rect": [
+        -22.5,
+        -20.2,
+        -17.5,
+        -17.8
+      ],
+      "height": 1.7,
+      "room": "infantry",
+      "accent": "cyan"
+    },
+    {
+      "id": "engineering_goods_0",
+      "kind": "goods",
+      "rect": [
+        17.5,
+        -20.2,
+        22.5,
+        -17.8
+      ],
+      "height": 1.7,
+      "room": "engineering",
+      "accent": "cyan"
+    },
+    {
+      "id": "engineering_goods_1",
+      "kind": "goods",
+      "rect": [
+        26.5,
+        -20.2,
+        31.5,
+        -17.8
+      ],
+      "height": 1.7,
+      "room": "engineering",
+      "accent": "cyan"
+    },
+    {
+      "id": "supplies_goods_0",
+      "kind": "goods",
+      "rect": [
+        -44.5,
+        5.8,
+        -39.5,
+        8.2
+      ],
+      "height": 1.7,
+      "room": "supplies",
+      "accent": "cyan"
+    },
+    {
+      "id": "supplies_goods_1",
+      "kind": "goods",
+      "rect": [
+        -44.5,
+        15.8,
+        -39.5,
+        18.2
+      ],
+      "height": 1.7,
+      "room": "supplies",
+      "accent": "cyan"
+    },
+    {
+      "id": "freight_goods_0",
+      "kind": "cargo",
+      "rect": [
+        33.5,
+        5.0,
+        38.5,
+        9.0
+      ],
+      "height": 1.7,
+      "room": "freight",
+      "accent": "yellow"
+    },
+    {
+      "id": "freight_goods_1",
+      "kind": "cargo",
+      "rect": [
+        39.5,
+        14.0,
+        44.5,
+        18.0
+      ],
+      "height": 1.7,
+      "room": "freight",
+      "accent": "yellow"
+    },
+    {
+      "id": "globe_console",
+      "kind": "globe",
+      "rect": [
+        -2.2,
+        11.8,
+        2.2,
+        16.2
+      ],
+      "height": 0.65,
+      "room": "hub",
+      "accent": "cyan"
+    },
+    {
+      "id": "bench_-15",
+      "kind": "bench",
+      "rect": [
+        -18.0,
+        23.3,
+        -12.0,
+        24.7
+      ],
+      "height": 0.5,
+      "room": "hub",
+      "accent": "cyan"
+    },
+    {
+      "id": "bench_15",
+      "kind": "bench",
+      "rect": [
+        12.0,
+        23.3,
+        18.0,
+        24.7
+      ],
+      "height": 0.5,
+      "room": "hub",
+      "accent": "cyan"
+    }
+  ],
+  "engineering": {
+    "ring_x": [
+      -107,
+      107
+    ],
+    "ring_z": 36,
+    "ring_center_y": -6,
+    "ring_radius": 26,
+    "solar_x": [
+      -119,
+      119
+    ],
+    "solar_z": [
+      0,
+      82
+    ],
+    "solar_size": [
+      14,
+      32
+    ],
+    "ring_yaw_degrees": 30
+  },
+  "markers": {
+    "trade_service": [
+      0,
+      21
+    ],
+    "objective_point": [
+      0,
+      21
+    ],
+    "spawn_alpha": [
+      -80,
+      53
+    ],
+    "spawn_bravo": [
+      80,
+      53
+    ],
+    "ship_return": [
+      -80,
+      53
+    ],
+    "polisa_pad_01": [
+      -80,
+      53.0
+    ],
+    "polisa_pad_02": [
+      -44,
+      60.0
+    ],
+    "polisa_pad_03": [
+      0,
+      64.0
+    ],
+    "polisa_pad_04": [
+      44,
+      60.0
+    ],
+    "polisa_pad_05": [
+      80,
+      53.0
+    ]
+  },
+  "globe": {
+    "center": [
+      0,
+      14
+    ],
+    "base_radius": 2.2,
+    "sphere_radius": 1.05,
+    "walk_clear_radius": 6.0
+  }
+}

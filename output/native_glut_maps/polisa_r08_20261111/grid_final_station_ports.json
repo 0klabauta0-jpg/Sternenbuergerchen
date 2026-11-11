@@ -1,0 +1,16 @@
+{
+  "camera": "station_ports",
+  "focus_axial": "(32.33162, -64.66323)",
+  "grid_meshes": [
+    {
+      "aabb": "[P: (-42.02, 0.074, -81.13503), S: (84.04, 0.00001, 58.34701)]",
+      "triangles": 14956,
+      "visible": true
+    }
+  ],
+  "line_count": 7478,
+  "map_plane_bounds": "[P: (-41.5, -89.20061), S: (83.0, 65.81793)]",
+  "rendered_tiles": 2205,
+  "streaming": false,
+  "total_tiles": 4486
+}
