@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warp-Eintrittsgrundlage: Die lokale Eintrittspose setzt den Flightmodus nun
+  ausdrücklich auf taktisch. Die bisherige Fixture übernahm irrtümlich den
+  strategischen Modus und war damit für Bewegungs-/Lesepfad nicht nutzbar.
+  Regression zuvor rot, danach tatsächlicher Travel-Ersteintritt und
+  benachbarte Rückkehr-/Gruppenfixtures grün. Produktiver Warpeintritt ist
+  weiterhin nicht angeschlossen.
+
 - Lokaler Anflugabbruch: Der Adapter prüft aktiven Flow-Anflug samt passendem
   Schiffs-/Ziel-/Abflugbeleg und tatsächlichem Pilot-Guard. Root prüft den
   ursprünglichen Travel-Ownerbeleg und reaktiviert Flight/Index mit dem

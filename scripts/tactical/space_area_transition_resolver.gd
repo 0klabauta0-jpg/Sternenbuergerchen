@@ -13,7 +13,7 @@ static func preview(flight: RefCounted, expected_revision: int, body_id: String,
 	if not layout.get("ok", false): return {"ok":false, "reason":"invalid_body"}
 	var before: Dictionary = flight.get_snapshot()
 	var proposal: Dictionary = target.duplicate(true)
-	proposal.merge({"expected_revision":expected_revision, "coordinate_frame":"local", "space_area_id":layout.body_map_id}, true)
+	proposal.merge({"expected_revision":expected_revision, "coordinate_frame":"local", "space_area_id":layout.body_map_id, "motion_mode":"tactical"}, true)
 	var validation: Dictionary = flight.validate_area_transition(proposal, tick)
 	if not validation.get("ok", false): return validation
 	var candidate := before.duplicate(true)
