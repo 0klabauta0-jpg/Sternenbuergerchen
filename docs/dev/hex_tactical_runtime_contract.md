@@ -39,6 +39,33 @@ revision werden frisch gelesen, ohne logische Zelle oder Unitrevision zu ändern
 `stand_height_steps2` misst halbe logische Höhenstufen, keine Renderweltmetrik.
 Die reale Rampenstandhöhe2,5 wird als5 erhalten.
 
+## Reservierung und reine Motionprojektion
+
+Reservierungsowner und vollständige Terrainkomponenten sind hinter demselben
+Opt-in angebunden; Einzelheiten in `hex_reservation_plan_contract.md`.
+Root-Tickkern publiziert logische Feldwechsel zur Segmentmitte und hält Kanten
+bis zum Segmentende. Das allein bewegt noch keinen Actor.
+
+`get_motion_projection(unit_id,fraction,height_step_world=1.0)` bzw. Root-
+Readadapter `get_hex_motion_projection` liefern `position_world`,
+`stand_height_logical`, `stand_height_world`, `facing_angle`, `moving`.
+Fraction wird auf0..1 begrenzt; nichtfinite Eingaben, ungültige Skala und
+unbekannte IDs ergeben kein Ergebnis. Readcalls ändern weder Tick noch Revision,
+Feldbesitz, Zusagen oder Erkennung. Facing stammt aus dem committeten Zustand.
+
+Position folgt dem aktiven Segment; dessen Mitte ist die gemeinsame Feldkante.
+Explizite Rampenhöhe verläuft Zentrum→gemeinsamer Endpunkt→Zentrum. So bleibt
+ein Plateau bis zur Kante flach, Rampe und passend geknicktes H+0,5-Band schließen
+ohne Höhensprung an. Runtime-Endpunkthöhe liest den kanonischen Tilekern nach
+Registrybegehbarkeit; ein per Override geöffnetes Raw-Blockerfeld bleibt nutzbar.
+Unversionierte alte Höhengänge behalten lineare Zentrumshöheninterpolation.
+
+Die Skala ist ausschließlich ein Leseparameter des Darstellungsowners. Der
+View muss seine bestehende `_get_3d_height_step()` samt Mapping-/Regionalfallback
+übergeben; Ground speichert keine zweite 3D-Mappingwahrheit. Regionalhöhe0 ist
+weiter ein gültiger Nichtregional-Sentinel und kein Zulassungsfehler.
+Actor-/Viewanbindung, echte Commands und tatsächliche Zielankunft folgen AP5.
+
 ## Reine Sicht
 
 `HexVisibilityQuery.classify_candidate` prüft Hex-Registry, vorhandene Zellen,
@@ -142,15 +169,15 @@ Skill-/Attackbonuswerte bleiben bestehen. Dessen genaue Balance bleibt vor
 Aktivierung der AP5-Bewegung ausdrücklich offen, kein neuer Wert wird behauptet.
 
 Keine Karte ist aktiviert. Aktive Bewegung, Zulassung/Lifecycle und Save-/
-Netzpfade bleiben AP4–8; die großen Szenen-/Leistungsabnahmen AP9 folgen später.
+Netzpfade bleiben AP5–8; die großen Szenen-/Leistungsabnahmen AP9 folgen später.
 
 ## Rampen und offene Anbindung
 
 Gemeinsamer Rampenvertrag: längs H/H+1, seitlich H+0,5 nur bei passenden
 Rampennachbarn, StandhöheH+0,5. Breiten-/Eck-/Editorregeln stammen aus dem
-Terrainowner; `allows_step` bleibt für Bewegung/Reservierung das Terrain-Tor.
+Terrainowner; `allows_registry_step` ist nach beiden Registrygates das gemeinsame
+Runtime-Tor, `allows_step` behält seine Authoringdefaults.
 
-Noch offen: zeitliche
-Reservierung und ihre Ausführung AP4/5, Lifecycle/Save/Netzwerk AP6–8.
+Noch offen: aktive Ausführung AP5, Lifecycle/Save/Netzwerk AP6–8.
 Ein Datenindex ersetzt nicht die aktive Bewegung oder Minimum-Spacing.
 Große AP9-Abnahmen bleiben später; keine gemessene FPSverbesserung.

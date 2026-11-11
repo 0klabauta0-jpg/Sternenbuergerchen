@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### AP5 erster Teil: stetige Motionprojektion — 11.11.2026
+
+Ground-/Rootreadadapter leiten Position, logische/renderumgerechnete Höhe und
+committete Richtung aus demselben aktiven Segment ab. Rampen folgen gemeinsamen
+Endpunkten; Plateau bleibt bis zur Kante flach. Kleiner Check56/0 auf/ab in sechs
+Richtungen, offene Runtime-Rampe und geknicktes Band; Rootowner53/0, Facing24/0.
+Frischer Review schloss Nichtregional-Sentinelregression. Darstellungsskala ist
+reiner Readparameter, bestehende Mapzulassung unverändert. Noch kein Actor-
+oder Viewanschluss, keine echten Move-Commands oder Ankunft/Abbruch. AP5 läuft weiter.
+
 ### AP4 vollständiger Korridorcache angeschlossen — 11.11.2026
 
 Helfer4753975d8/472f1ad8f gezielt übernommen. Registry teilt vollständige

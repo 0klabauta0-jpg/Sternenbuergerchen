@@ -134,3 +134,4 @@ output/native_glut_maps/polisa_r08_20261111/** -text whitespace=-blank-at-eof,cr
 docs/qa/hex_reservation_owner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_reservation_exit_fix_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_corridor_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_motion_projection_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

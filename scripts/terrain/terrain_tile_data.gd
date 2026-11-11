@@ -95,6 +95,10 @@ static func endpoint_height(tile, neighbor_grid: Vector2i) -> float:
 	return _endpoint_height(tile, neighbor_grid, false)
 
 
+static func endpoint_height_for_registry(tile, neighbor_grid: Vector2i, walkable: bool) -> float:
+	return _endpoint_height(tile,neighbor_grid,true) if walkable else INF
+
+
 static func _endpoint_height(tile, neighbor_grid: Vector2i, registry_passable: bool) -> float:
 	if tile == null or (not registry_passable and not tile.walkable): return INF
 	if not tile.explicit_hex_ramps or tile.ramp_direction == -1:

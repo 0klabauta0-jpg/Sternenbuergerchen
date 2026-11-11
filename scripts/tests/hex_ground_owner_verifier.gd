@@ -59,6 +59,8 @@ func _run() -> void:
 		"height_level":2,"ramp_direction":0,"explicit_hex_ramps":true,"walkable":true}))
 	var legacy = _write_map("legacy",{})
 	_check(not legacy.has_load_issue() and legacy.get_tactical_grid_rules().is_empty(),"missing flag remains legacy")
+	var nonregional = _write_map("nonregional",{"tactical_grid_rules":"hex_tactical_v1"})
+	_check(nonregional.get_regional_height_step()==0.0 and sim.configure_hex_ground_runtime(nonregional,terrain).ok and sim.is_hex_ground_runtime_active(),"nonregional height sentinel cannot reject a valid tactical hex map")
 	_check(sim.configure_hex_ground_runtime(legacy,terrain).ok and not sim.is_hex_ground_runtime_active(),"legacy does not activate ground runtime")
 	_check(not sim.admit_hex_ground_units(_batch([{"unit_id":"a","grid":Vector2i.ZERO}])).ok,"inactive owner rejects admission")
 	for bad in [{"tactical_grid_rules":"hex_tactical_v2"}, {"tactical_grid_rules":null},
@@ -77,6 +79,7 @@ func _run() -> void:
 	_check(sim.configure_hex_ground_runtime(loaded,terrain).ok and sim.is_hex_ground_runtime_active(),"explicit valid context activates owner")
 	_check(sim.admit_hex_ground_units(_batch([{"unit_id":"a","grid":Vector2i.ZERO,"facing_dir":2}])).ok,"owner admits exclusive placement")
 	_check(sim.get_hex_unit_state("a").stand_height_steps2==5,"owner reads precise ramp stand height")
+	_check(is_equal_approx(sim.get_hex_motion_projection("a",0.0,0.75).stand_height_world,2.5*0.75) and sim.get_hex_unit_state("a").stand_height_steps2==5,"root projection accepts renderer height scale without changing logical half-height")
 	var before: Dictionary = sim.get_hex_ground_planning_snapshot()
 	sim.tick_counter = 17
 	_check(sim.get_hex_ground_planning_snapshot().current_tick==17,"planning snapshot reads current owner tick")

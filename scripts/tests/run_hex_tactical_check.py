@@ -25,6 +25,7 @@ CASES = {
     "topology": ("hex_neighbor_cache_verifier.gd", "HEX_NEIGHBOR_CACHE_PASS"),
     "corridors": ("output/native_glut_maps/hex_corridor_cache_20261111/verifier.gd", "HEX_CORRIDOR_CACHE_PASS"),
     "corridor_integration": ("hex_corridor_integration_verifier.gd", "HEX_CORRIDOR_INTEGRATION_PASS"),
+    "projection": ("hex_motion_projection_verifier.gd", "HEX_MOTION_PROJECTION_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
