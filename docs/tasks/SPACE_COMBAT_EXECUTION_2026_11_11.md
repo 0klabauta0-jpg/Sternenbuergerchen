@@ -43,6 +43,10 @@ Verifier und diese Statusdokumentation.
   Die Bündelung am Anflug ist ein Fixture-Szenario, keine Aussage, dass
   produktiver Flugtreibstoff dort erstmals belastet werden darf. Produktive
   Übergänge, Rückfall bei späteren Änderungen und UI-Anschluss bleiben offen.
+- Dieselbe Fixture prüft anschließend Landung, Rückkehr in den Orbit und
+  einen Bewegungstick mit demselben Flight-Objekt. Equipment ist echt, der
+  Pilotennachweis dabei ein Testdouble; echte Boarding-/Adapteranbindung und
+  eine native Sichtprüfung sind dadurch noch nicht belegt.
 
 - AP7-Autoritätsgrenze: Die mutierenden Raumeingänge einschließlich der
   vorbereiteten Area-Transaktion prüfen die bestehende Server-/Clientsperre
