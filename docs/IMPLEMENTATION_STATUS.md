@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### Weltraumkampf AP01 — gemeinsamer Flugzustand und Takt — 11.11.2026
+
+Reise-/Kampfakteure referenzieren je Schiff denselben Flugzustand; Root
+koordiniert Raum- und vorhandenen Basistakt, prüft Raumakteuraufnahme und
+indizierte Bewegung. Warp-Equipmentstand des parallelen Branches integriert,
+kein doppelter Komponentenowner. Kleine Prüfungen: Reise69/69, Flotte8/8,
+Root27/27, echte Szene mit Heimat-/Sternkartenwechsel14/14 bei30/60/144
+Renderbegrenzung, Warpowner42/42 und Root7/7. Alte umfangreiche Orbitfixture
+bleibt wegen vier veralteter Satellitenorbitannahmen keine Gesamtfreigabe.
+AP02 und AP04 besitzen isolierte Helfer, Produktanbindung und AP03/AP05–20
+bleiben offen. QA: [space_combat_20261111](qa/space_combat_20261111/README.md).
+Keine vollständige Kampf-, Grafik-, Performance- oder Multiplayerabnahme.
+
 ### Weltraumkampf AP00 — Commandgrenze — 11.11.2026
 
 Erster isolierter Baustein für Rotten-/Auftragscommands: Eingabe-, Rechte-,

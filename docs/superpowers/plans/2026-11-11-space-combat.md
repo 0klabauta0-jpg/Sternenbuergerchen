@@ -10,7 +10,9 @@
 
 **Spec:** [Bestätigtes Weltraumkampf-Konzept](../../dev/space_combat_contract.md)
 **Task:** [SPACE_COMBAT_2026_11_11_PLAN](../../tasks/SPACE_COMBAT_2026_11_11_PLAN.md)
-**Status:** Planung abgeschlossen; sämtliche AP unten **offen**. Dieser Auftrag implementiert nichts.
+**Status 11.11.:** AP00 und AP01 begrenzt umgesetzt und geprüft. AP02 und AP04
+besitzen erste isolierte Bausteine; ihre Produktanbindung und AP03/AP05–AP20
+bleiben offen. Details: [Ausführungstask](../../tasks/SPACE_COMBAT_EXECUTION_2026_11_11.md).
 **Quellbasis:** `84dd481b187299d3832ded3596bbc01dfd62abe9` auf `task/native-glut-maps-20261110`. Bewusst noch nicht integrierter nativer Taskstand, nicht Main.
 
 **Abgleich 11.11.:** Parallelstand b67b307b0 wurde als 1ced3be19 übernommen.
@@ -204,10 +206,10 @@ dem aktuellen Integrationsabgleich.
 **Interface:** `validate(command: Dictionary, context: Dictionary) -> Dictionary`;
 normalisierte Commanddaten oder stabiler Rejectgrund. Reine Prüfung ohne Mutation.
 
-- [ ] Native Karte, Ground-/Lifecycle-, Komponenten- und Checkpointarbeiten gegen aktuellen Gitstand abgleichen; exakten Implementierungsbasiscommit festhalten. Bestehende Contracts lesen, doppelte Owner ausschließen.
-- [ ] Rote Tests: `unknown_operation`, NaN/Infinity, falsche Payloadtypen, ungültige ID/Zelle, fremdes Schiff, UI-gefälschtes `runtime_authorized`, veraltete Revision; jeder Reject lässt Ausgangsstate unverändert.
-- [ ] Validator implementieren; erlaubte Operationen: `wing_create`, `wing_assign`, `wing_remove`, `wing_rename`, `wing_leader_set`, `order_issue`, `order_cancel`, `fire_rule_set`, `assist_preference_set`, `maneuver_request`. Umbenennen braucht `wing_id+name`, Führerwahl `wing_id+leader_craft_id` eines vorhandenen Mitglieds, Manöveranforderung `wing_ids+maneuver_id+target` als Absicht. Ownership/Revision gelten für alle. Interne Admit/Tick/Damage/Finalize-Operationen niemals als UIbefehle zulassen.
-- [ ] AP00 grün; Isolationspfad mit temporärer Fixturedatei nachweisen und reale Profildateien unverändert lassen. Commit `feat: define validated space command boundary`.
+- [x] Native Karte, Ground-/Lifecycle-, Komponenten- und Checkpointarbeiten gegen aktuellen Gitstand abgleichen; exakten Implementierungsbasiscommit festhalten. Bestehende Contracts lesen, doppelte Owner ausschließen.
+- [x] Rote Tests: `unknown_operation`, NaN/Infinity, falsche Payloadtypen, ungültige ID/Zelle, fremdes Schiff, UI-gefälschtes `runtime_authorized`, veraltete Revision; jeder Reject lässt Ausgangsstate unverändert.
+- [x] Validator implementieren; erlaubte Operationen: `wing_create`, `wing_assign`, `wing_remove`, `wing_rename`, `wing_leader_set`, `order_issue`, `order_cancel`, `fire_rule_set`, `assist_preference_set`, `maneuver_request`. Umbenennen braucht `wing_id+name`, Führerwahl `wing_id+leader_craft_id` eines vorhandenen Mitglieds, Manöveranforderung `wing_ids+maneuver_id+target` als Absicht. Ownership/Revision gelten für alle. Interne Admit/Tick/Damage/Finalize-Operationen niemals als UIbefehle zulassen.
+- [x] AP00 grün; Isolationspfad mit temporärer Fixturedatei nachweisen und reale Profildateien unverändert lassen. Commit `feat: define validated space command boundary`.
 
 **Abnahme:** Typ-/Rechteprüfung und Testisolation funktionieren; noch kein neuer Produktpfad aktiviert.
 
@@ -230,11 +232,11 @@ Root `set_space_runtime_tick_enabled(enabled: bool) -> void` und
 `advance_space_runtime(delta: float) -> void`, ausschließlich intern aufgerufen.
 Registry `get_actor(craft_id: String) -> RefCounted`, `query_cells(cells: Array[Vector2i]) -> Array[String]`.
 
-- [ ] Rote Tests: Travel- und Combatreader referenzieren dieselbe Objektinstanz, nicht nur gleiche Posewerte; doppelter Tick wird abgewiesen; taktischer Modus stoppt Quantumfortschritt; NPC-Admission erzeugt kein Spielerpad, Fuelkonto oder Roster.
-- [ ] Vorhandene Travel-Position/Heading in gemeinsame Flightinstanz überführen, normalisierte Snapshot-API erhalten. Root routet einen Tick an genau einen Bewegungsmodus. Gegner über separate Registry-Admission mit gültiger Startpose/Fraktion aufnehmen, nicht über `sync_crafts`.
-- [ ] Den Renderaufruf `MetaLayerFlow._process -> advance_space_travel` als Zeittreiber ablösen. CampaignSimulationRoot bekommt einen Raumtick-Callback in `_physics_process`. **Korrektur 11.11.: kein früher Rücksprung vor der Bodenlogik**: BasePersonnelRuntime benutzt denselben Root und muss weiterlaufen. Bisheriges pauschales `set_physics_process(false)` im Adapter dafür ersetzen; normale Bodenroots unverändert lassen. Renderpfad darf nur Feedback projizieren. Ansichtwechsel stoppen den Raumtick nicht.
-- [ ] Tatsächlichen Adapter-/Rootpfad bei30/60/144Render-FPS und verdeckter Sternkarte prüfen: gleiche Anzahl Physikticks, gleiche Pose/Quantumzeit/Encounterzeit. Nicht nur den reinen Resolver testen. Raumkampf bleibt bis AP17 ausdrücklich Fixture-/Opt-in-Pfad.
-- [ ] AP01 und `space_travel_state_verifier.gd`, `playtest_20261110_fleet_travel_verifier.gd` grün; Commit `feat: share authoritative space motion state`.
+- [x] Travel- und Combatreader referenzieren dieselbe Objektinstanz, nicht nur gleiche Posewerte; doppelter Tick wird abgewiesen; taktischer Modus stoppt Quantumfortschritt; NPC-Admission erzeugt kein Spielerpad, Fuelkonto oder Roster.
+- [x] Vorhandene Travel-Position/Heading in gemeinsame Flightinstanz überführen, normalisierte Snapshot-API erhalten. Root routet einen Tick an genau einen Bewegungsmodus. Gegner über separate Registry-Admission mit gültiger Startpose/Fraktion aufnehmen, nicht über `sync_crafts`.
+- [x] Den Renderaufruf `MetaLayerFlow._process -> advance_space_travel` als Zeittreiber ablösen. CampaignSimulationRoot bekommt einen Raumtick-Callback in `_physics_process`. **Korrektur 11.11.: kein früher Rücksprung vor der Bodenlogik**: BasePersonnelRuntime benutzt denselben Root und muss weiterlaufen. Bisheriges pauschales `set_physics_process(false)` im Adapter dafür ersetzen; normale Bodenroots unverändert lassen. Renderpfad darf nur Feedback projizieren. Ansichtwechsel stoppen den Raumtick nicht.
+- [x] Tatsächlichen Adapter-/Rootpfad bei30/60/144Renderbegrenzung und verdeckter Sternkarte prüfen: Warpfortschritt folgt den Physikticks. Synthetischer Vergleich gleicher Tickzahlen ergänzt den tatsächlichen Ansichtswechsel. Raumkampf bleibt bis AP17 ausdrücklich Fixture-/Opt-in-Pfad.
+- [x] AP01 und `space_travel_state_verifier.gd`, `playtest_20261110_fleet_travel_verifier.gd` grün; Commit `feat: share authoritative space motion state`.
 
 **Abnahme:** Ein Motionobjekt und ein Commit pro Schiff/Tick; alte Reiseaktionen behalten Verhalten.
 

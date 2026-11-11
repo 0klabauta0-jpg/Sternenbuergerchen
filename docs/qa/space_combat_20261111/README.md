@@ -1,0 +1,18 @@
+# Weltraumkampf: begrenzte Prüfbelege
+
+Basis: Weltraumkampf-Branch mit integriertem Warp-Equipmentstand
+`1ced3be19`. Alle hier abgelegten Logs stammen aus frischen headless
+Läufen mit privatem APPDATA; keine echten Spielerprofile wurden verwendet.
+
+- Raumreiseowner: 69/69; alte Erwartungen an die Sternsystemdaten zuvor an
+  die vorhandenen sieben Himmelskörper und Polisa-Ortsbindung angepasst.
+- Flottenreise: 8/8; zwei unabhängige Flugzustände und gemeinsamer Tick.
+- Echter Szenenpfad: 14/14, Auftrag/Boarding/Abflug/Warp, Heimatansicht,
+  Sternkartenrückkehr und Abbruch; Renderbegrenzungen30/60/144.
+- Root-/Takt-/Aufnahmecheck: 27/27; gekoppelt an den Fixture-Flugresolver.
+- Warp-Owner/Root: 42/42 und7/7 nach Integration des Parallelstands.
+- Isolierter Flugresolver8/8 und Rottenowner19/19; kein fertiger Kampffluss.
+
+Die alte umfassendere Orbitfixture hat vier veraltete Satelliten-Orbitannahmen
+und ist daher keine grüne Gesamtabnahme. Keine native Sicht-/Stil-, GPU-,
+Leistungs- oder Mehrspielerfreigabe; keine Validierung des gesamten Kampfplans.

@@ -83,8 +83,10 @@ Verifier und diese Statusdokumentation.
   headless Szenenlauf14/14, inklusive30/60/144-Renderbegrenzungen, Exit0,
   keine Fehler. Beleg:
   `docs/qa/orbit_quantum_20261109/raw/space-ap01-real-view-fps-62cc0def794c48298207edab1c650726/space_combat_ap01_view_verifier.log`.
-- AP01 weiterhin offen: vollständiger Reiselauf und erneuter Integrationsabgleich
-  mit zwischenzeitlich hinzugekommenen Warp-Komponenten und Checkpointowner.
+- AP01 begrenzt abgeschlossen: Warp-Komponenten-/Checkpointstand integriert;
+  vorhandene Reiseownerprüfung nach Anpassung zweier überholter Kartendaten-
+  erwartungen69/69, Flottenreise8/8, echte Sichtwechselprobe14/14.
+  Diese Prüfung ersetzt weder volle Kampagnen-, Stil- noch Performanceabnahme.
 - AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
   ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
   gemeinsames Achsbudget. Kleiner Verifier8/8 mit explizitem Fixture-Rumpf;
@@ -97,7 +99,7 @@ Verifier und diese Statusdokumentation.
   löst sie auf. Verifier19/19. Der autoritative Aufrufer muss eine vollständige
   aktuelle Craft-/Pilotenzuordnung liefern; UI-Anschluss, Root-/Lifecycle- und
   Checkpointintegration fehlen.
-- AP01/AP02/AP04 Rest und AP03 sowie AP05–AP20: offen.
+- AP02/AP04 Rest und AP03 sowie AP05–AP20: offen.
 
 ## Risiken / offene Punkte
 
