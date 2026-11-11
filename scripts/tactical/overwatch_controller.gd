@@ -10,6 +10,24 @@ const OVERWATCH_ACCURACY_BONUS: float = 0.1
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _last_enemy_positions_by_unit_id: Dictionary = {}
 var _member_ready_tick_by_unit_id: Dictionary = {}
+var _hex_sight_adapter = null
+var _hex_context := "legacy"
+
+
+func configure_hex_sight_adapter(adapter) -> void:
+	_hex_sight_adapter = adapter if adapter != null and adapter.is_active() else null
+	var context: String = _hex_sight_adapter.get_context_key() if _hex_sight_adapter != null else "legacy"
+	if context != _hex_context:
+		reset_all()
+		_hex_context = context
+
+
+func _unit_position(unit) -> Vector2:
+	return Vector2(_hex_sight_adapter.read_position(unit).get("position",Vector2.ZERO)) if _hex_sight_adapter != null else (unit as Node2D).global_position
+
+
+func _has_logical_position(unit) -> bool:
+	return _hex_sight_adapter == null or bool(_hex_sight_adapter.read_position(unit).get("valid",false))
 
 
 func reset_all() -> void:
@@ -111,17 +129,26 @@ func _try_build_overwatch_shot(member, enemy, assignment: Dictionary, anchor_pos
 	var enemy_unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 	if enemy_unit_id.is_empty():
 		return {}
-	var enemy_position: Vector2 = (enemy as Node2D).global_position
+	if not _has_logical_position(member) or not _has_logical_position(enemy):
+		return {}
+	var enemy_position: Vector2 = _unit_position(enemy)
 	var previous_position: Vector2 = Vector2(_last_enemy_positions_by_unit_id.get(enemy_unit_id, enemy_position))
 	if previous_position.distance_to(enemy_position) < OVERWATCH_MOVE_THRESHOLD:
 		return {}
 	var center_angle: float = float(assignment.get("center_angle", 0.0))
 	var arc_width: float = float(assignment.get("arc_width", TAU))
-	if not _angle_within_sector((enemy_position - anchor_position).angle(), center_angle, arc_width):
+	var target_angle: float = (enemy_position-anchor_position).angle()
+	if _hex_sight_adapter != null:
+		target_angle = _hex_sight_adapter.bearing(anchor_position,enemy_position)
+		center_angle = _hex_sight_adapter.world_angle_to_plane(center_angle)
+	if not _angle_within_sector(target_angle, center_angle, arc_width):
 		return {}
 	var active_weapon_id: String = _get_active_weapon_id(member)
 	var weapon_range_world: float = WEAPON_DATA_SCRIPT.get_effective_world_range(active_weapon_id, terrain_registry)
-	if not _los_system.has_line_of_sight_between_nodes(member, enemy, weapon_range_world, terrain_registry):
+	if _hex_sight_adapter != null:
+		if not bool(_hex_sight_adapter.query_units(member,enemy,weapon_range_world).get("visible",false)):
+			return {}
+	elif not _los_system.has_line_of_sight_between_nodes(member, enemy, weapon_range_world, terrain_registry):
 		return {}
 	return {
 		"attacker_unit_id": String(member.call("get_unit_id")) if member.has_method("get_unit_id") else "",
@@ -154,7 +181,10 @@ func _filter_enemy_units_for_overwatch(anchor_position: Vector2, enemy_units: Ar
 	for enemy in enemy_units:
 		if enemy == null or not (enemy is Node2D):
 			continue
-		if anchor_position.distance_squared_to((enemy as Node2D).global_position) > max_distance_sq:
+		if not _has_logical_position(enemy):
+			continue
+		var distance_sq: float = pow(_hex_sight_adapter.distance(anchor_position,_unit_position(enemy)),2) if _hex_sight_adapter != null else anchor_position.distance_squared_to((enemy as Node2D).global_position)
+		if distance_sq > max_distance_sq:
 			continue
 		result.append(enemy)
 	return result
@@ -180,7 +210,10 @@ func _prime_enemy_positions(enemy_units: Array) -> void:
 	for enemy in enemy_units:
 		if enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
 			continue
-		_last_enemy_positions_by_unit_id[String(enemy.call("get_unit_id"))] = (enemy as Node2D).global_position
+		if not _has_logical_position(enemy):
+			_last_enemy_positions_by_unit_id.erase(String(enemy.call("get_unit_id")))
+			continue
+		_last_enemy_positions_by_unit_id[String(enemy.call("get_unit_id"))] = _unit_position(enemy)
 
 
 func _angle_within_sector(target_angle: float, center_angle: float, arc_width: float) -> bool:

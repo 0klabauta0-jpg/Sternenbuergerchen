@@ -191,7 +191,9 @@ visible: bool, now_tick: int, delay_ticks: int) -> Dictionary` liefert
 `forget_unit(unit_id: String) -> void`, `clear() -> void`.
 Driver konsumiert AP1/AP2 statt separater Weltpositions-/LOS-Rekonstruktionen.
 SimulationRoot ergänzt `queue_hex_facing_intent(unit_id: String, direction: int,
-command_id: String, reason: String) -> Dictionary` für zulässige interne Runtimeabsichten.
+command_id: String, reason: String, ready_tick: int = -1) -> Dictionary` für
+zulässige interne Runtimeabsichten. Kleiner zusätzlicher Delayparameter dient
+dem vorhandenen skillabhängigen Reaktionszeitwert.
 
 - [ ] RED-Fixture: wiederholtes Observe im selben Tick erzeugt keine zweite
   Episode; ein Deadlinewert bleibt bei unveränderter Sicht stabil; echte
@@ -216,6 +218,13 @@ command_id: String, reason: String) -> Dictionary` für zulässige interne Runti
   konkreter Abzugswert, diesen vor Aktivierung als Balanceentscheidung markieren.
 - [ ] Denselben Check GREEN und nur den direkt betroffenen Kontaktvertrag-
   Nachbarn prüfen; Commit: `refactor: share hex perception across combat readers`.
+
+AP3-Kernanschluss ergänzt: Facing24/0, Security34/0, Consumer39/0, Owner39/0,
+Ground25/0. Geräuschproducer fehlt als Gameplayquelle; adressierter Hook steht,
+kein Kontakt aus einem Geräusch. Konkreter skillabhängiger Bewegungsschussabzug
+bleibt vor AP5-Aktivierung als Balancepunkt offen. Keine Karte umgestellt;
+Sandboxhooks statisch geprüft, kombinierter Check-only bei Integration.
+QA docs/qa/hex_facing_security_20261111.
 
 ### AP4: Zeitfenster und faire Engpassplanung
 
@@ -394,6 +403,7 @@ AP0 ist auf97e00aba1 übernommen. AP2s isolierte Query-/Cachebausteine sowie
 Ground-State und Erkennungsepisoden sind im Foundation-Task belegt.
 AP1-Owner-/Versionsanbindung ist mit39/0 kleinen Checks ergänzt. AP3-Verbraucher
 für Contact, Schussprüfung, FoW und Hex-Erkennung sind als Zwischenschritt mit
-30/0 Consumerchecks und25/0 Helperchecks ergänzt. Übrige AP3-Verbraucher/Facing
-und AP4–AP9 bleiben offen; keine Karte ist aktiviert.
+30/0 Consumerchecks und25/0 Helperchecks ergänzt. Weiterer AP3-Kernanschluss
+mit Facing24/0, Security34/0, Consumer39/0, Owner39/0 und Ground25/0 gesichert;
+Bewegungsschussbalance und AP4–AP9 bleiben offen. Keine Karte ist aktiviert.
 Frischer Read-only-Review ohne Engine-/Dateiänderung und ohne Blocker.

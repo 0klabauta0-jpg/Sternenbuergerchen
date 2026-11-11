@@ -97,6 +97,18 @@ func release_unit(unit_id: String, _reason: String) -> void:
 	_revision += 1
 
 
+## Only the owning SimulationRoot commits accepted runtime intents here.
+func commit_facing(unit_id: String, direction: int) -> bool:
+	if not _is_configured() or not _units_by_id.has(unit_id) or direction < 0 or direction > 5:
+		return false
+	if int(_units_by_id[unit_id]["facing_dir"]) == direction:
+		return true
+	_revision += 1
+	_units_by_id[unit_id]["facing_dir"] = direction
+	_units_by_id[unit_id]["state_revision"] = _revision
+	return true
+
+
 func clear() -> void:
 	_registry = null
 	_map_id = ""

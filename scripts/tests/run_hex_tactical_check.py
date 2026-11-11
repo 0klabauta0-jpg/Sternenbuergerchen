@@ -18,6 +18,8 @@ CASES = {
     "detection": ("hex_detection_verifier.gd", "HEX_DETECTION_PASS"),
     "owner": ("hex_ground_owner_verifier.gd", "HEX_GROUND_OWNER_PASS"),
     "consumers": ("hex_sight_consumers_verifier.gd", "HEX_SIGHT_CONSUMERS_PASS"),
+    "facing": ("hex_facing_state_verifier.gd", "HEX_FACING_STATE_PASS"),
+    "security": ("hex_security_consumers_verifier.gd", "HEX_SECURITY_CONSUMERS_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -58,9 +60,14 @@ def main() -> int:
         "scripts/core/hex_detection_state.gd",
         "scripts/mission/combat_visibility_cache.gd",
     ]
-    if args.case in {"owner", "consumers"}:
+    if args.case in {"owner", "consumers", "facing", "security"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
+        if args.case == "security":
+            pending.extend(["scripts/core/hex_sight_runtime_adapter.gd",
+                            "scripts/tactical/fireteam_security_controller.gd",
+                            "scripts/tactical/overwatch_controller.gd",
+                            "scripts/tactical/flank_vulnerability_resolver.gd"])
         if args.case == "consumers":
             pending.extend(["scripts/tests/mission_combat_loop_driver.gd",
                             "scripts/tactical/combat_fire_decision_resolver.gd",

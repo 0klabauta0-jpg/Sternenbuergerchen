@@ -8,6 +8,7 @@ const CACHE = preload("res://scripts/mission/combat_visibility_cache.gd")
 const DRIVER = preload("res://scripts/tests/mission_combat_loop_driver.gd")
 const FIRE = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const FOW = preload("res://scripts/core/fog_of_war_system.gd")
+const COMMAND = preload("res://scripts/npc/unit_command.gd")
 const ADAPTER_PATH := "res://scripts/core/hex_sight_runtime_adapter.gd"
 var passed := 0
 var failed := 0
@@ -15,10 +16,13 @@ var failed := 0
 class Actor extends Node2D:
 	var id := ""
 	var team := ""
+	var awareness := 0.5
+	var command = COMMAND.new({"command_type":"hold_position"})
 	func get_unit_id() -> String: return id
 	func get_team_id() -> String: return team
 	func get_vital_state() -> String: return "fit"
-	func get_awareness() -> float: return 0.5
+	func get_awareness() -> float: return awareness
+	func get_current_unit_command(): return command
 
 class Driver extends DRIVER:
 	var units: Dictionary = {}
@@ -79,6 +83,7 @@ func _run() -> void:
 		root.add_child(actor)
 		actors.append(actor)
 		driver.units[id]=actor
+		sim.register_known_unit(id,actor)
 	var adapter=driver.get_hex_sight_adapter()
 	_check(adapter.is_active(),"driver shares active adapter")
 	_check(driver._has_valid_los(actors[0],actors[1]),"contact sight reads logical cells instead of render positions")
@@ -89,6 +94,10 @@ func _run() -> void:
 	_check(FIRE.is_target_attackable(actors[0],actors[1],context),"shot reader shares current logical sight")
 	_check(not FIRE.is_target_attackable(actors[0],actors[2],context),"shot reader rejects rear target")
 	_check(cache.get_hex_cache_audit_snapshot().geometry_queries==count,"contact and shot share one terrain query")
+	_check(FIRE._get_node_distance(actors[0],actors[1],context)>0.0,"combat readout distance ignores coincident render transforms")
+	terrain.get_tile_at_grid(Vector2i(1,0)).cover_value=55
+	terrain.notify_tile_data_changed([Vector2i(1,0)])
+	_check(FIRE._get_target_cover_score(actors[1],context)==55,"combat readout cover uses the same logical tile as damage")
 	var fog=FOW.new()
 	fog.set_mode_for_team("alpha","explored")
 	fog.update_tile_visibility_for_team("alpha",[actors[0]],terrain,cache,1000.0,{"hex_sight_adapter":adapter})
@@ -114,6 +123,7 @@ func _run() -> void:
 		replacement.register_tile(TILE.new({"tile_id":"tile_%d"%x,"grid_position":grid,
 			"world_position":replacement.grid_to_world(grid),"walkable":true,
 			"blocks_los":x==1,"height_level":4 if x==1 else 0}))
+	replacement.notify_tile_data_changed([Vector2i(1,0)])
 	_check(replacement.get_revision()==terrain.get_revision(),"replacement fixture has equal numeric revision")
 	sim.configure_hex_ground_runtime(map,replacement)
 	sim.admit_hex_ground_units(batch)
@@ -168,12 +178,26 @@ func _run() -> void:
 	driver._current_tick=12
 	driver._advance_detection_timers()
 	_check(driver.get_detection_progress().is_empty() and not driver._is_detection_complete("a","b"),"real sight loss clears episode without confirming contact")
+	_check(driver.has_method("notify_hex_sound_cue"),"sound hints use an explicit runtime reaction hook")
+	if driver.has_method("notify_hex_sound_cue"):
+		sim.tick_counter=12
+		_check(not driver.notify_hex_sound_cue("a",Vector2i(-1,0),"hold_noise").ok,"sound hook preserves a holding assignment")
+		actors[0].command=COMMAND.new({"command_type":"engage_area","source_command_type":"engage","command_token":"noise_test"})
+		actors[0].awareness=0.0
+		var contacts_before=driver.get_contact_snapshot()
+		_check(driver.notify_hex_sound_cue("a",Vector2i(-1,0),"noise1").ok,"allowed sound cue queues one delayed reaction")
+		var slow_ready:int=sim._hex_facing_pending.a.ready_tick
+		actors[0].awareness=1.0
+		_check(driver.notify_hex_sound_cue("a",Vector2i(-1,0),"noise1").replayed and sim._hex_facing_pending.a.ready_tick==slow_ready,"repeated sound event cannot reroll an existing reaction")
+		_check(driver.notify_hex_sound_cue("a",Vector2i(-1,0),"noise2").ok and sim._hex_facing_pending.a.ready_tick<=slow_ready,"existing awareness delay controls a fresh reaction")
+		_check(driver.get_contact_snapshot()==contacts_before and driver.get_detection_progress().is_empty(),"sound cue alone confirms no enemy or detection episode")
 	map.set_tactical_grid_rules("")
 	_check(sim.configure_hex_ground_runtime(map,terrain).ok,"fixture can return to legacy")
 	driver.combat_visibility_cache_path=NodePath()
 	_check(not driver.get_hex_sight_adapter().query_units(actors[0],actors[1],1000.0).handled,"legacy accepts the RefCounted LOS fallback without activating hex sight")
 	driver._detection_progress={"a:b":2}
 	_check(driver.get_detection_progress()=={"a:b":2},"legacy countdown projection remains compatible")
+	_check(not driver._build_fire_decision_context().has("query_current_visibility"),"legacy target evaluation omits unused hex callbacks")
 	for actor in actors: actor.free()
 	driver.free()
 	cache.free()
