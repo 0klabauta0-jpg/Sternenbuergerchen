@@ -13,6 +13,13 @@
 **Status:** Planung abgeschlossen; sämtliche AP unten **offen**. Dieser Auftrag implementiert nichts.
 **Quellbasis:** `84dd481b187299d3832ded3596bbc01dfd62abe9` auf `task/native-glut-maps-20261110`. Bewusst noch nicht integrierter nativer Taskstand, nicht Main.
 
+**Abgleich 11.11.:** Parallelstand b67b307b0 wurde als 1ced3be19 übernommen.
+Er enthält bereits `singleplayer_ship_equipment_state.gd`, Katalog,
+Supply-/Servicepfad und Checkpointvalidierung für einen wirksamen Warp-Slot.
+AP09/15/16 erweitern diesen Owner und seine Verträge; keinen zweiten
+Schiffskomponentenowner anlegen. Die bisherige Warp-Bilanz und
+Installationshistorie bleiben kompatibel und prüfbar.
+
 ## Global Constraints
 
 - Eine taktische Kampfebene, 2,5D-Darstellung.
@@ -98,7 +105,7 @@ implementiert hat, bei AP00 diesen erweitern und die Pfadkarte aktualisieren.
 | `scripts/core/space_combat_state.gd` | Begegnung, Hülle/Schild/Reserve, Schussereignisse, laufende Manöver und Auftragsfortschritt |
 | `scripts/core/space_ship_registry.gd` | Referenzen und räumlicher Index, keine Gameplaymutationen |
 | `scripts/core/space_wing_state.gd` | Rottenmitgliedschaft, Führer, Gruppenaufträge |
-| `scripts/core/ship_equipment_state.gd` | Installierte Slot-/Item-IDs und Revision |
+| `scripts/core/singleplayer_ship_equipment_state.gd` | Bestehender Owner für installierte Slot-/Item-IDs und Revision; um Kampfkomponenten erweitern |
 | `scripts/tactical/space_flight_resolver.gd` | Schub/Assistenz/Integration als reiner Vorschlag |
 | `scripts/tactical/space_navigation_resolver.gd` | Sweeps, Belegung, Ausweich-/Reservierungsvorschlag |
 | `scripts/tactical/space_order_resolver.gd` | Auftrag → Mitgliederabsichten |
@@ -334,14 +341,19 @@ Combatstate `commit_shot(event: Dictionary) -> Dictionary`.
 
 ## AP09 — Installierte Waffen, Schildgenerator und Kraftwerk
 
-**Dateien:** Neu `scripts/core/ship_equipment_state.gd`; ändern Komponenten-/
-Hullkatalog, Combatstate, Root und Flug-/Waffenresolver; AP09-Verifier.
+**Dateien:** Ändern `scripts/core/singleplayer_ship_equipment_state.gd`,
+`scripts/mission/ship_equipment_catalog.gd`, Komponenten-/Hullkatalog,
+Combatstate, Root und Flug-/Waffenresolver; AP09-Verifier.
 **Interfaces:** Equipment `get_effective_stats(craft_id: String) -> Dictionary`,
 `validate_loadout(craft_id: String, slots: Dictionary) -> Dictionary`.
 Combatstate `advance_systems(dt: float, equipment: Dictionary) -> void` nur aus Root.
 
 - [ ] Rote Tests: falsche Slotgröße abweisen; mehr Komponentenmasse senkt Beschleunigung; Schild absorbiert vor Hülle; Feuer entleert Reserve; Kraftwerkswechsel verändert tatsächlich Reserve-/Schildaufladung.
 - [ ] Rumpfslots und installierte IDs validieren; gemeinsame effektive Werte an Verbraucher liefern. Ein Schildpool, Erholungsverzögerung nach Treffer und begrenzte Reserve.
+- [ ] Bestehende Warp-Slots, signierte Prepare/Commit-Transaktionen und
+  Checkpoint-/Supply-Quittungen erhalten. Die bisher Warp-spezifische
+  Komponentenbilanz vor Erweiterung versioniert und verlustfrei auf die
+  neuen Komponentenklassen erweitern; keine parallele Ausrüstungswahrheit.
 - [ ] Leistung deterministisch verteilen: benötigter sicherer Flugschub, danach Waffenreserve, danach Schilde; ausgeschöpfte Leistung erzeugt sichtbaren Grund. Keine freie UI-Energieerfindung.
 - [ ] AP09/AP02/AP08 grün; Commit `feat: connect ship equipment shields and power`.
 
@@ -459,7 +471,8 @@ Root führt Supply/Equipment-Transaktion aus.
 - [ ] AP16/AP09/AP15 grün; Commit `feat: install functional ship components through supply`.
 
 **Abnahme:** Komponententausch ist kauf-/bestands-/savewirksam und idempotent.
-Bestehende Quantumdrive-Vorschläge im Polisa-Contract bleiben getrennte Folgearbeit.
+Der bereits funktionierende Warp-Slot und dessen Beleg-/Bestandsbilanz bleiben
+erhalten; AP16 erweitert den bestehenden Installationspfad für Kampfkomponenten.
 
 ## AP17 — Kampagnenbegegnung, Rückzug und Ergebnis
 

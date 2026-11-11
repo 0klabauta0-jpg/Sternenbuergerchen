@@ -101,6 +101,11 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Parallelstand b67b307b0 als 1ced3be19 integriert: Warp-Ausrüstung besitzt
+  bereits eigenen Root-Owner, Katalog, Supply-Transaktionen und Savevalidierung.
+  AP09/15/16 müssen diese vorhandene Struktur erweitern und Warp-Belege samt
+  Komponentenbilanz erhalten. Kein zweiter Equipmentowner.
+
 Basis: Plancommit de87366a6, integrierter Groundcommit ac53ff105 und
 integrierter paralleler Adapterstand b3f9ab26d als 23f0df031. Der parallele
 Worktree und dessen uncommittete Arbeit bleiben unverändert; vor weiterer

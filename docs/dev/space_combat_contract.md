@@ -214,8 +214,10 @@ Integration mit laufenden Ground-/Lifecycle-Arbeiten erneut prüfen.
   individuelle Reisezustände und Spielerflottenindex.
 - `campaign_space_encounter.gd`: begrenzte Begegnung mit festem Schaden;
   keine allgemeine Rotte-, Bewegungs-, Schild- oder Komponentenmechanik.
-- `docs/dev/polisa_ship_equipment_contract.md`: Komponenten ausdrücklich
-  noch offen; Erkul-Daten nur Referenz.
+- Seit Parallelstand b67b307b0 gibt es einen realen Warp-Komponentenowner
+  `singleplayer_ship_equipment_state.gd` samt Katalog, Supply-Service und
+  Checkpointprüfung. Waffen, Schildgeneratoren und Kraftwerke bleiben offen.
+  Erkul-Daten sind Referenz, nicht direkt übernommene Spielbalance.
 - `scripts/npc/unit_profile_math.gd`: vorhandener Wert
   `fighter_piloting` auf Skala 0–1, noch kein belegter Manöververbraucher.
 
@@ -236,6 +238,8 @@ muss im selben Tick weiterlaufen. Ansichtswechsel dürfen den Raumtick nicht
 stoppen. Andere Bodenroots erhalten keinen zusätzlichen Raumtick.
 
 Schiffsausrüstung und Rotten sind eigene begrenzte Datenbereiche unter Root.
+Der vorhandene Warp-Ausrüstungsowner wird um Kampfkomponenten erweitert;
+es entsteht kein zweiter Komponentenowner.
 Registries indexieren, Resolver schlagen vor; weder Registry noch UI erfinden
 Gameplayzustand. Bestehende Boden-Combat-/LOS-/Höhenregeln bleiben eigenständig.
 Die interne vollständige Weltsicht wird vor UI-/Clientprojektion auf die
