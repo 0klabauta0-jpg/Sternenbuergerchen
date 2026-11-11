@@ -15,6 +15,7 @@ var _campaign: RefCounted
 var _supply: RefCounted
 var _onboarding: RefCounted
 var _travel: RefCounted
+var _ship_equipment: RefCounted
 var _space_encounter: RefCounted
 var _skirmish_economy: RefCounted
 var _recruit_candidate_signature := ""
@@ -52,6 +53,9 @@ func configure(flow: Node, screen: Control) -> void:
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
 	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding, _travel)
+	_ship_equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
+	_ship_equipment.configure(Array(_flow.get("_homebase_aircraft_definitions")))
+	_simulation.call("configure_ship_equipment", _ship_equipment)
 	if _flow.has_meta("skirmish_points_budget"):
 		_skirmish_economy = load("res://scripts/core/skirmish_economy_state.gd").new()
 		_skirmish_economy.configure(int(_flow.get_meta("skirmish_points_budget")))
@@ -65,6 +69,11 @@ func configure(flow: Node, screen: Control) -> void:
 			_campaign.restore_state(checkpoint.campaign)
 			_supply.restore_state(checkpoint.supply)
 			_onboarding.restore_state(checkpoint.onboarding)
+			if checkpoint.has("ship_equipment"):
+				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, Array(_flow.get("_homebase_aircraft_definitions")), checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
+				if not equipment_restore.get("ok", false):
+					push_error("Invalid Warp equipment checkpoint")
+					return
 	if _campaign_mode or _flow.has_meta("skirmish_preset_id"):
 		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
 		_base_personnel.name = "BasePersonnelRuntime"
@@ -144,7 +153,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -158,6 +167,7 @@ func sync_crafts() -> void:
 		if _base_personnel != null: _base_personnel.call("_refresh_capacity")
 	var actual: Dictionary = {}
 	for definition in Array(_flow.get("_homebase_aircraft_definitions")):
+		if _ship_equipment != null: _ship_equipment.register_craft(definition)
 		var craft_id: String = String(definition.get("craft_id", ""))
 		if not craft_id.is_empty():
 			actual[craft_id] = true
@@ -195,7 +205,7 @@ func get_base_personnel_runtime() -> Node:
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -259,7 +269,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 				var scenario := String(selected_job.get("scenario_id",String(snap.locations[location_id].scenario_file_path).get_file().get_basename()))
 				_flow.call("_on_homebase_mission_selection_changed",scenario)
 		return result
-	if operation in ["station_buy_ship", "station_build_home_pad"]:
+	if operation in ["station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
 		var craft_id := String(data.get("craft_id", ""))
 		var context := _service_context(craft_id)
 		if String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst am Stationsschalter anmelden")
@@ -293,6 +303,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
 		context["craft_id"]=craft_id
 		context["require_blueprints"]=_campaign_mode
+		context["ship_component_model_id"] = String(_ship_equipment.get_snapshot(craft_id).get("model_id", "")) if _ship_equipment != null else ""
 		var result: Dictionary = _commit("singleplayer_supply", operation, data, request_id, context)
 		if result.get("ok", false) and _campaign_mode and String(context.get("location_id", "")) == "trade_outpost":
 			_observe({"trade_used": true, "bought": operation == "buy", "refueled": operation == "refuel"})
@@ -359,6 +370,9 @@ func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dict
 			return {"ok": true, "craft_id": payload.craft_id, "message": "%s auf dem Landeplatz bereit" % entry.name}
 		"return_ship":
 			var id := String(payload.craft_id)
+			if _ship_equipment != null:
+				var equipment_return: Dictionary = _ship_equipment.validate_craft_return(id)
+				if not equipment_return.get("ok", false): return equipment_return
 			if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", id)).is_empty() or String(_flow.get("_aircraft_location_by_craft").get(id, "")) != "homebase" or String(get_space_travel_snapshot(id).get("phase", "grounded")) != "grounded":
 				return _reject("craft_away", "Schiff zuerst an der Basis landen")
 			if Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).has(id):
@@ -370,6 +384,9 @@ func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dict
 			var inventory: Dictionary = _supply.get_supply_snapshot().get("inventory", {})
 			if not Dictionary(inventory.get("craft:" + id, {}).get("items", {})).is_empty():
 				return _reject("craft_loaded", "Schiffsfracht zuerst entladen")
+			if _ship_equipment != null:
+				var equipment_removed: Dictionary = _ship_equipment.unregister_unmodified_craft(id)
+				if not equipment_removed.get("ok", false): return equipment_removed
 			_flow.call("remove_skirmish_craft", id)
 			_supply.remove_skirmish_craft(id)
 			_travel.unregister_craft(id)
@@ -777,7 +794,7 @@ func export_campaign_checkpoint() -> Dictionary:
 		resources[id] = {"version":1,"location_id":id,"sites":_supply.call("get_location_resources",id).export_state()}
 	for id in _resource_owners:
 		if is_instance_valid(_resource_owners[id]): resources[id] = _resource_owners[id].call("export_state")
-	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "base_personnel": _base_personnel.export_state() if _base_personnel != null else {},"location_resources":resources}
+	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "base_personnel": _base_personnel.export_state() if _base_personnel != null else {},"location_resources":resources,"ship_equipment":_ship_equipment.export_state()}
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
@@ -1085,7 +1102,7 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		if registry == null or registry.call("get_unit", id) == null: continue
 		var access := _inventory_context(id, craft_id)
 		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
-	return {"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+	return {"equipment":_ship_equipment.get_snapshot(craft_id) if _ship_equipment != null and not craft_id.is_empty() else {},"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
 		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),

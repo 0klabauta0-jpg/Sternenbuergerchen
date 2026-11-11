@@ -25,6 +25,8 @@ func configure(flow: Node, request: Dictionary) -> void:
 	flow.set_meta("player_roster_store_path", STORE.DEFAULT_PATH)
 	var craft_state: Dictionary = Dictionary(checkpoint.get("craft", {}))
 	var definition: Dictionary = Dictionary(craft_state.get("definition", flow.call("_build_homebase_aircraft_definition", "dropship", 1))).duplicate(true)
+	if checkpoint.is_empty():
+		definition["model_id"] = "cutlass" # Authored new-campaign starter, not a legacy role inference.
 	var craft_id: String = String(definition.get("craft_id", ""))
 	var pilot: String = String(craft_state.get("pilot_id", roster[1].unit_id))
 	var leader: String = String(roster[0].unit_id)

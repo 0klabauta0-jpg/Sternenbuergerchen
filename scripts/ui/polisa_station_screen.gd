@@ -89,7 +89,7 @@ func refresh(snapshot: Dictionary) -> void:
 		_label(_content, "Serviceschiff auswählen" if snapshot.get("selection_required", false) else "In Polisa landen, um die Station über dieses Menü zu nutzen.")
 		return
 	if _page == "ship_equipment":
-		_label(_content, "Schiffswaffen und Komponenten sind noch nicht verfügbar. Kauf und Einbau folgen mit dem Ausbau der Schiffsausrüstung.")
+		_show_warp_equipment(snapshot)
 		return
 	_label(_content, "Schiffslager: %s / %d Einheiten" % [String(snapshot.get("craft_name", snapshot.get("craft_id", "-"))), _cargo_total()])
 	if _page == "ships":
@@ -260,3 +260,24 @@ func _category_title(id: String) -> String:
 	for category: Dictionary in _catalog.get("categories", []):
 		if String(category.id) == id: return String(category.name)
 	return id
+
+
+func _show_warp_equipment(snapshot: Dictionary) -> void:
+	var catalog = load("res://scripts/mission/ship_equipment_catalog.gd")
+	var equipment: Dictionary = snapshot.get("equipment", {})
+	var installed := String(Dictionary(equipment.get("slots", {})).get("quantum_drive", ""))
+	_label(_content, "Warp-Antrieb / Qualität D → C → B → A")
+	if installed.is_empty():
+		_label(_content, "Für dieses Schiff ist noch kein austauschbarer Warp-Antrieb verfügbar.")
+		return
+	var drive: Dictionary = catalog.item(installed)
+	_label(_content, "Eingebaut: %s / Klasse %s" % [String(drive.get("name", installed)), String(drive.get("quality", ""))])
+	_label(_content, "Warp-Reisezeit: %.0f %% der Standardzeit" % (catalog.multiplier(installed)*100.0))
+	var offer: Dictionary = snapshot.get("offers", {}).get("polisa_warp_hemera", {})
+	if not offer.is_empty():
+		_button(_content, "Hemera / Klasse A / 160 Cr kaufen · Bestand %d" % int(snapshot.get("stock", {}).get("polisa_warp_hemera", 0)), _request.bind("buy", {"craft_id":String(snapshot.get("craft_id", "")), "offer_id":"polisa_warp_hemera", "quantity":1}), int(snapshot.get("credits", 0)) < 160 or int(snapshot.get("stock", {}).get("polisa_warp_hemera", 0)) < 1)
+	_label(_content, "Kauf ins Schiffslager; Einbau separat. Bisheriger Antrieb kommt ins gleiche Lager zurück.")
+	for item_id: String in catalog.ITEMS:
+		var item: Dictionary = catalog.item(item_id)
+		var quantity := _cargo(item_id)
+		_button(_content, "%s / Klasse %s einbauen · Schiffslager %d" % [String(item.name), String(item.quality), quantity], _request.bind("station_install_ship_component", {"craft_id":String(snapshot.get("craft_id", "")), "slot_id":"quantum_drive", "item_id":item_id, "source_container_id":"craft:"+String(snapshot.get("craft_id", "")), "expected_equipment_revision":int(equipment.get("revision", 0))}), quantity < 1 or installed == item_id)

@@ -16,6 +16,7 @@ var _position := Vector2(0.25, 0.62)
 var _origin_position := Vector2(0.25, 0.62)
 var _target_orbit_id: String = ""
 var _target_orbit_marker_id: String = ""
+var _active_jump_duration_seconds: float = 3.0
 var _elapsed_seconds: float = 0.0
 var _progress: float = 0.0
 var _location_id: String = "homebase"
@@ -31,6 +32,7 @@ func configure() -> Dictionary:
 	if typeof(raw) != TYPE_DICTIONARY or not _valid_definition(raw):
 		return _reject("invalid_system", "Sternsystem ist nicht verfuegbar")
 	_definition = Dictionary(raw).duplicate(true)
+	_active_jump_duration_seconds = float(_definition.jump_duration_seconds)
 	_phase = "grounded"
 	_craft_id = ""
 	_orbit_id = ""
@@ -58,7 +60,7 @@ func get_snapshot() -> Dictionary:
 		"position": [_position.x, _position.y], "origin_position": [_origin_position.x, _origin_position.y],
 		"route_control": [_route_control.x, _route_control.y], "route_destination": [_route_destination.x, _route_destination.y],
 		"target_orbit_id": _target_orbit_id, "progress": _progress, "elapsed_seconds": _elapsed_seconds,
-		"duration_seconds": float(_definition.get("jump_duration_seconds", 3.0)),
+		"duration_seconds": _active_jump_duration_seconds,
 		"location_id": _location_id, "revision": _revision,
 		"bodies": Dictionary(_definition.get("bodies", {})).duplicate(true),
 		"orbits": Dictionary(_definition.get("orbits", {})).duplicate(true),
@@ -89,7 +91,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 	var result: Dictionary
 	match operation:
 		"launch_to_orbit": result = _launch(payload)
-		"start_quantum": result = _start_quantum(payload)
+		"start_quantum": result = _start_quantum(payload, authority_context)
 		"abort_quantum": result = _abort_quantum()
 		"advance": result = _advance(payload)
 		"begin_approach": result = _begin_approach(payload)
@@ -117,7 +119,7 @@ func _launch(payload: Dictionary) -> Dictionary:
 	_arrive("moon_orbit")
 	return {"ok": true}
 
-func _start_quantum(payload: Dictionary) -> Dictionary:
+func _start_quantum(payload: Dictionary, context: Dictionary = {}) -> Dictionary:
 	if _phase not in ["orbit", "stopped"]:
 		return _reject("quantum_unavailable", "Sprung erst im Orbit oder nach Abbruch starten")
 	if typeof(payload.get("target_orbit_id")) != TYPE_STRING or not Dictionary(_definition.orbits).has(payload.target_orbit_id):
@@ -131,6 +133,11 @@ func _start_quantum(payload: Dictionary) -> Dictionary:
 		return _reject("unknown_orbit_marker", "Orbitmarker unbekannt")
 	if target == _orbit_id and requested_marker == _orbit_marker_id:
 		return _reject("already_in_orbit", "Schiff ist bereits an diesem Orbitmarker")
+	var multiplier: Variant = context.get("quantum_duration_multiplier", 1.0)
+	if typeof(multiplier) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(multiplier)) or float(multiplier) <= 0.0: return _reject("invalid_warp_effect", "Warp-Antriebseffekt ungültig")
+	var duration := float(_definition.jump_duration_seconds) * float(multiplier)
+	if not is_finite(duration) or duration <= 0.0: return _reject("invalid_warp_effect", "Warp-Reisedauer ungültig")
+	_active_jump_duration_seconds = duration
 	_origin_position = _position
 	_target_orbit_id = target
 	_target_orbit_marker_id = requested_marker
@@ -149,7 +156,7 @@ func _start_quantum(payload: Dictionary) -> Dictionary:
 
 func _abort_quantum() -> Dictionary:
 	if _phase != "quantum":
-		return _reject("quantum_not_active", "Kein laufender Quantum-Sprung")
+		return _reject("quantum_not_active", "Kein laufender Warp-Sprung")
 	_phase = "stopped"
 	_orbit_id = ""
 	_revision += 1
@@ -159,7 +166,7 @@ func _advance(payload: Dictionary) -> Dictionary:
 	var delta: float = float(payload.delta_seconds)
 	if _phase != "quantum" or delta == 0.0:
 		return {"ok": true, "advanced": false}
-	var duration: float = float(_definition.jump_duration_seconds)
+	var duration: float = _active_jump_duration_seconds
 	_elapsed_seconds = minf(duration, _elapsed_seconds + delta)
 	_progress = clampf(_elapsed_seconds / duration, 0.0, 1.0)
 	_position = GRID.route_point(_origin_position, _route_control, _route_destination, _progress)

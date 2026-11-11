@@ -184,6 +184,17 @@
       "location_ids": [
         "polisa"
       ]
+    },
+    "polisa_warp_hemera": {
+      "id": "polisa_warp_hemera",
+      "item_id": "warp_hemera",
+      "name": "Hemera · Warp-Antrieb A",
+      "unit_price": 160,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
     }
   },
   "service_locations": {

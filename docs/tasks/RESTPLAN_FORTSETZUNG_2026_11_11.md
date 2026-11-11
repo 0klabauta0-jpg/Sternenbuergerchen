@@ -25,3 +25,11 @@ AP5 und Lifecycle sind noch keine aktive Bewegung. Drei Vorlagen ersetzen nicht 
 
 ## Fortschreibung nach den Folgepaketen
 Profilreadout6308e6f02 und Recycling/Workbench84dd481b1 sind integriert und gepusht. Die obigen Punkte2/3 beschreiben deren begrenzten Umfang, keinen offenen Implementierungsauftrag mehr. Kleine Profil-/Recyclingchecks und statischer Workbenchcheck bestanden; grosse Nutzungs-/Saveabnahme bleibt offen. AP5 besitzt jetzt reine Bewegungsprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a; echte Command-/Actoraktivierung bleibt im Tabletop-Chat.
+
+Parallele Orte b3f9ab26d sind implementiert, kleine View44/0+Service30/0; echte
+Mehrortabnahme spaeter. Warp-Benennung/D-bis-A-Vertrag3dcb24c3b und datierte
+Erkul-/Abholreferenz2fca7f90d sind gesichert. Erster funktionaler Cutlass-Warpslot
+jetzt eng integriert/geprueft:42/0 Warp+Store,14/0 Return,7/0 Root,30/0 Service.
+Root/Tabletop-Hooks abgestimmt; kein Hex-/Move-/Tick-/Actorbody mitgeaendert.
+Lokale Abholung bleibt eigener vorhandener Task, Waffen und Retrofit-Retirement
+bleiben offen. Keine grossen Tests/Main/EXE.
