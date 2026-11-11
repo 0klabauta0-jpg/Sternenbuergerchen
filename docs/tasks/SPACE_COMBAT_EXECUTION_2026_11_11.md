@@ -33,6 +33,16 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Orbit-Lesepfad: `get_space_area_snapshot` liefert auf Basis eines nach Area
+  geführten Registry-Index die aktiven eigenen Fleet-Schiffe mit Flight-,
+  Rotten- und Footprintdaten. Vorerst ausschließlich Singleplayer und eigene
+  Schiffe; Kontakt-/Feindsicht braucht einen eigenen Sichtbarkeitsvertrag.
+  Inaktive Schiffe werden beim Tick und Snapshot sicher ausgelassen. Gezielt
+  geprüft: Snapshot, Deaktivierung und echte Rückkehr, jeweils Exit 0.
+  Der Bewegungspfad bleibt gesperrt: Der vorhandene Equipment-Owner führt
+  derzeit nur den Quantenslot, Hull-/Antriebs-/Power-Werte liegen nur als
+  Fixture vor; Flugzulassung und tatsächliche Korridorclaims sind noch offen.
+
 - Oberflächenanflug, Vorbereitung: Der bestehende Flight-Owner kann eine
   zuvor geprüfte Deaktivierung ohne zweite Validierung veröffentlichen; der
   Combat-Owner bereitet dazu die Entfernung aus Raumindex und vorhandenen

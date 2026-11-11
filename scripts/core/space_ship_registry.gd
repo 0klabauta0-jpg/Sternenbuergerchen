@@ -5,6 +5,7 @@ var _actors: Dictionary = {}
 var _cells: Dictionary = {}
 var _actor_cells: Dictionary = {}
 var _actor_areas: Dictionary = {}
+var _area_actors: Dictionary = {}
 var _area_revisions: Dictionary = {}
 
 func register_actor(craft_id: String, flight: RefCounted) -> bool:
@@ -38,6 +39,8 @@ func update_actor_cells(craft_id: String, cells: Array[Vector2i]) -> bool:
 	_remove_actor_cells(craft_id)
 	_actor_cells[craft_id] = unique.keys()
 	_actor_areas[craft_id] = area
+	if not _area_actors.has(area): _area_actors[area] = {}
+	_area_actors[area][craft_id] = true
 	if not _cells.has(area): _cells[area] = {}
 	for cell in unique:
 		if not _cells[area].has(cell): _cells[area][cell] = {}
@@ -47,6 +50,15 @@ func update_actor_cells(craft_id: String, cells: Array[Vector2i]) -> bool:
 
 func get_area_revision(area_id: String = "") -> int:
 	return int(_area_revisions.get(area_id, 0))
+
+func get_area_actor_ids(area_id: String) -> Array[String]:
+	var ids: Array[String] = []
+	ids.assign(Dictionary(_area_actors.get(area_id, {})).keys())
+	ids.sort()
+	return ids
+
+func get_indexed_actor_cells(craft_id: String) -> Array:
+	return Array(_actor_cells.get(craft_id, [])).duplicate()
 
 func actor_cells_match(craft_id: String, area_id: String, cells: Array[Vector2i]) -> bool:
 	if _actor_areas.get(craft_id, null) != area_id: return false
@@ -88,4 +100,7 @@ func _remove_actor_cells(craft_id: String) -> void:
 	if _cells.has(area) and _cells[area].is_empty(): _cells.erase(area)
 	_actor_cells.erase(craft_id)
 	_actor_areas.erase(craft_id)
+	if had_cells:
+		_area_actors[area].erase(craft_id)
+		if _area_actors[area].is_empty(): _area_actors.erase(area)
 	if had_cells: _area_revisions[area] = get_area_revision(area) + 1
