@@ -4,6 +4,7 @@ extends RefCounted
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const ORBIT_CATALOG = preload("res://scripts/mission/orbit_destination_catalog.gd")
+const STATION_DOCK = preload("res://scripts/mission/polisa_station_dock_layout.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
 const TRUSTED_OPERATIONS := ["initialize_surface", "launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
@@ -396,6 +397,17 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		return home_candidate
 	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
+	if operation in ["begin_station_dock", "undock_station"]:
+		var layout: Dictionary = STATION_DOCK.build()
+		var current_flight: Dictionary = _flight.get_snapshot()
+		var docking := operation == "begin_station_dock"
+		if not layout.get("ok", false) or payload.get("target_id") != layout.target_id or payload.get("layout_revision") != layout.revision or payload.get("location_id") != layout.station_id: return _reject("station_layout_changed", "Stationsziel passt nicht")
+		if context.source_area_id != layout.area_id or context.target_area_id != layout.area_id or current_flight.get("coordinate_frame") != "local" or current_flight.get("space_area_id") != layout.area_id or current_flight.get("motion_mode") != ("tactical" if docking else "inactive"): return _reject("station_flight_changed", "Lokaler Stationsflug passt nicht")
+		var station_orbit := String(Dictionary(_definition.get("location_orbits", {})).get("polisa", ""))
+		if station_orbit != "polisa_orbit" or (docking and (_phase != "orbit" or _orbit_id != station_orbit)) or (not docking and (_phase not in ["surface", "approach"] or _location_id != "polisa")): return _reject("station_phase_changed", "Stationsreise passt nicht")
+		var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"next":{"phase":"approach" if docking else "orbit","orbit_id":station_orbit,"orbit_marker_id":_orbit_marker_id if not _orbit_marker_id.is_empty() else GRID.ORBIT_MARKER_IDS[0],"target_orbit_id":"","target_orbit_marker_id":"","location_id":"polisa" if docking else "","elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		candidate["seal"] = _sign_space_area_state(candidate)
+		return candidate
 	if operation == "start_quantum":
 		if _phase != "orbit": return _reject("orbit_required", "Lokaler Warpstart braucht den vorhandenen Orbit")
 		var current_flight: Dictionary = _flight.get_snapshot()

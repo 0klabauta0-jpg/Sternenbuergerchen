@@ -139,6 +139,11 @@ cached dessen Glut-2-Stationsblock einmal und wendet ihn auf lokale Bounds-/
 Footprint-/Claimprüfungen an. Eine enge Prüfung für Block, freies Gate, andere
 Area, unveränderliche Projektion und echte Claimvalidierung ist grün. Root-DTO,
 Dock-/Undocktransaktionen und produktive UI-Anbindung sind weiterhin offen.
+Fleet und Travel bereiten jetzt getrennte `begin_station_dock`-/
+`undock_station`-Kandidaten mit Ziel- und Layoutbindung vor; ein isolierter
+Owner-Test deckt Phasenwechsel, ungültige Revision und Replay ab. Der Test
+setzt den lokalen Flightzustand als Fixture; Root-, Boarding-, Fuel- und
+Adaptertransaktion sind noch nicht angeschlossen oder dadurch nachgewiesen.
 
 ## Akzeptanz, Prüfung und Risiken
 
