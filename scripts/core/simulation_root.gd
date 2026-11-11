@@ -95,6 +95,8 @@ var _fixture_area_requests: Dictionary = {}
 var _fixture_area_blockers: Dictionary = {}
 var _fixture_area_sequence := 0
 var _space_move_receipts: Dictionary = {}
+var _fixture_surface_group_receipts: Dictionary = {}
+var _fixture_surface_group_serial := 0
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
@@ -317,6 +319,82 @@ func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 
 func get_space_area_revision(area_id: String) -> int:
 	return _space_combat_state.get_area_revision(area_id)
+
+func commit_fixture_surface_group(bundle: Dictionary, context: Dictionary) -> Dictionary:
+	# Exercise the real owner tails together, never accept production craft here.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if context.get("runtime_authorized") != true or context.get("fixture") != true or context.get("actor_id") != "singleplayer": return {"ok":false, "reason":"fixture_only"}
+	if bundle.size() != 6 or not bundle.has_all(["request_id", "craft_id", "location_id", "fuel_command", "binding_command", "activation_command"]): return {"ok":false, "reason":"invalid_bundle"}
+	for key in ["request_id", "craft_id", "location_id"]:
+		if typeof(bundle[key]) != TYPE_STRING or String(bundle[key]).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_bundle"}
+	if not String(bundle.craft_id).begins_with("space_fixture_"): return {"ok":false, "reason":"fixture_only"}
+	if typeof(context.get("built_home_pad_ids")) != TYPE_ARRAY: return {"ok":false, "reason":"invalid_context"}
+	for key in ["fuel_command", "binding_command", "activation_command"]:
+		if typeof(bundle[key]) != TYPE_DICTIONARY: return {"ok":false, "reason":"invalid_bundle"}
+	if _singleplayer_space_travel_owner == null or _singleplayer_supply_owner == null or _singleplayer_campaign_owner == null: return {"ok":false, "reason":"owner_unavailable"}
+	for pair in [[_singleplayer_space_travel_owner, "res://scripts/core/singleplayer_fleet_travel_state.gd"], [_singleplayer_supply_owner, "res://scripts/core/singleplayer_supply_state.gd"], [_singleplayer_campaign_owner, "res://scripts/core/singleplayer_campaign_state.gd"]]:
+		if pair[0].get_script() == null or pair[0].get_script().resource_path != pair[1]: return {"ok":false, "reason":"fixture_owner_required"}
+	var signature := SPACE_COMMAND_CONTRACT.request_signature({"bundle":bundle, "pads":context.built_home_pad_ids})
+	if _fixture_surface_group_receipts.has(bundle.request_id):
+		var prior: Dictionary = _fixture_surface_group_receipts[bundle.request_id]
+		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
+		if prior.fleet != _singleplayer_space_travel_owner or prior.supply != _singleplayer_supply_owner or prior.campaign != _singleplayer_campaign_owner: return {"ok":false, "reason":"owner_changed"}
+		if prior.flight != _singleplayer_space_travel_owner.get_flight_state(bundle.craft_id): return {"ok":false, "reason":"owner_changed"}
+		if prior.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or prior.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or prior.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
+		return {"ok":true, "replayed":true}
+	if _fixture_surface_group_receipts.size() >= 128: return {"ok":false, "reason":"fixture_capacity"}
+	var fuel: Dictionary = bundle.fuel_command
+	var binding: Dictionary = bundle.binding_command
+	if typeof(fuel.get("payload")) != TYPE_DICTIONARY or typeof(binding.get("payload")) != TYPE_DICTIONARY: return {"ok":false, "reason":"invalid_bundle"}
+	var fp: Dictionary = fuel.get("payload", {})
+	var bp: Dictionary = binding.get("payload", {})
+	if fuel.get("operation") != "consume_route_fuel" or binding.get("operation") != "bind_departure" or fp.get("craft_id") != bundle.craft_id or bp.get("craft_id") != bundle.craft_id or fp.get("destination_location_id") != bundle.location_id or bp.get("destination_location_id") != bundle.location_id or fp.get("origin_location_id") != bp.get("origin_location_id"):
+		return {"ok":false, "reason":"bundle_mismatch"}
+	var flight: RefCounted = _space_combat_state.get_actor(bundle.craft_id)
+	if flight == null or _singleplayer_space_travel_owner.get_flight_state(bundle.craft_id) != flight: return {"ok":false, "reason":"unknown_actor"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(bundle.craft_id)
+	var area_revision: int = _space_combat_state.get_area_revision(String(pose.space_area_id))
+	var wing_revision: int = _space_wing_state.get_snapshot().revision
+	var preview: Dictionary = preview_surface_deactivation(bundle.craft_id, bundle.location_id, pose.revision, travel.get("revision", -1), area_revision, wing_revision, context)
+	if not preview.get("ok", false): return preview
+	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
+	var campaign_binding: Dictionary = _singleplayer_campaign_owner.configure_departure_preparation_authority(self)
+	if not campaign_binding.get("ok", false): return campaign_binding
+	var fleet_binding: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
+	if not fleet_binding.get("ok", false): return fleet_binding
+	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":true})
+	if not supply_candidate.get("ok", false): return supply_candidate
+	var campaign_context := {"authority":self, "transaction_id":String(bundle.request_id), "built_home_pad_ids":context.built_home_pad_ids.duplicate()}
+	var campaign_candidate: Dictionary = _singleplayer_campaign_owner.prepare_departure(binding, bundle.activation_command, campaign_context)
+	if not campaign_candidate.get("ok", false): return campaign_candidate
+	_fixture_surface_group_serial += 1
+	var payload := {"craft_id":bundle.craft_id, "location_id":bundle.location_id}
+	var travel_context := {"request_id":String(bundle.request_id) + ":approach", "request_signature":JSON.stringify({"operation":"begin_approach", "payload":payload}, "", true), "operation":"begin_approach", "payload":payload, "source_area_id":pose.space_area_id, "target_area_id":pose.space_area_id, "expected_travel_revision":travel.revision, "expected_phase":"orbit", "context_id":"fixture-group:%d" % _fixture_surface_group_serial}
+	var bound: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
+	if not bound.get("ok", false): return bound
+	var travel_candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(bundle.craft_id, travel.revision, pose.space_area_id, pose.space_area_id, travel_context)
+	if not travel_candidate.get("ok", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(travel_context.context_id, self)
+		return travel_candidate
+	var sv: Dictionary = _singleplayer_supply_owner.validate_prepared_route_fuel(supply_candidate, self)
+	var cv: Dictionary = _singleplayer_campaign_owner.validate_prepared_departure(campaign_candidate, campaign_context)
+	var tv: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(travel_candidate, travel_context)
+	var fv: Dictionary = flight.validate_space_activity_transition(preview.activity_proposal, preview.activity_tick)
+	var av: Dictionary = _space_combat_state.validate_deactivation(bundle.craft_id, pose.revision, area_revision)
+	if not sv.get("ok", false) or not cv.get("ok", false) or not tv.get("ok", false) or not fv.get("ok", false) or not av.get("ok", false) or sv.get("patch", {}).get("mode") != "apply" or cv.get("replayed", false) or tv.get("replayed", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(travel_context.context_id, self)
+		return {"ok":false, "reason":"group_validation_failed"}
+	# All participants have just been validated. No external callbacks or awaits
+	# occur between the first mutation and the group receipt.
+	flight._publish_space_activity_transition(fv)
+	_space_combat_state._publish_deactivation(av)
+	_singleplayer_supply_owner._publish_prepared_route_fuel(supply_candidate, sv)
+	_singleplayer_campaign_owner._publish_prepared_departure(campaign_candidate, cv)
+	_singleplayer_space_travel_owner._publish_prepared_space_area_transition(travel_candidate, tv)
+	_fixture_surface_group_receipts[bundle.request_id] = {"signature":signature, "flight":flight, "fleet":_singleplayer_space_travel_owner, "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch"), "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch")}
+	return {"ok":true, "replayed":false}
 
 func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
 	# Until contact visibility exists, disclose only the singleplayer fleet.

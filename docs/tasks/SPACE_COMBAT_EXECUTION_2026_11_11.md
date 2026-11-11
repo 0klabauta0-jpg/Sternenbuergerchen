@@ -33,6 +33,17 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Oberflächen-Gruppencommit als ausdrücklich begrenzte Fixture: Root prüft
+  Anfluggate, gemeinsame Flight-Identität, Rotte und Revisionen und bereitet
+  echte Travel-, Supply- und Campaign-Owner gemeinsam vor. Nach erneuter
+  Prüfung veröffentlicht ein synchroner stiller Schritt Deaktivierung,
+  Ressourcen, Kampagnenbindung und Anflug; vollständige Root-Quittung schützt
+  vor erneutem Abbuchen. Client-Eingang wird abgewiesen. Geprüft mit echtem
+  Satellitenauftrag, unzureichendem Treibstoff und Konflikt/Wiederholung.
+  Die Bündelung am Anflug ist ein Fixture-Szenario, keine Aussage, dass
+  produktiver Flugtreibstoff dort erstmals belastet werden darf. Produktive
+  Übergänge, Rückfall bei späteren Änderungen und UI-Anschluss bleiben offen.
+
 - AP7-Autoritätsgrenze: Die mutierenden Raumeingänge einschließlich der
   vorbereiteten Area-Transaktion prüfen die bestehende Server-/Clientsperre
   vor jeder Änderung. Lesevorschauen bleiben unverändert. Simulierter
