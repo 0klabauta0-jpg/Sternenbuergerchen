@@ -49,6 +49,43 @@ Installationshistorie bleiben kompatibel und prüfbar.
 
 ## Abfolge und handhabbare Meilensteine
 
+### Orbit-Reise: minimaler Bewegungspfad vor der UI-Anbindung
+
+Für den Ende-zu-Ende-Reisepfad zunächst genau ein eigenes Schiff mit seiner
+verbindlichen Rotte und den Surface-Gates anschließen. Vollständige Kampf-KI,
+weitere Schiffsmodelle und Forschung sind dafür keine Voraussetzung. Die
+Orbitansicht bleibt bis zur Absicherung dieses Pfads ohne Bewegungsroute.
+
+1. **Owner-Kontext:** Root bezieht Schiff, gemeinsame Flight-Referenz,
+   lokale Area, Rottenmitgliedschaft, an Bord befindlichen Piloten sowie
+   tatsächlich verfügbare Hull-/Antriebs- und Energiewerte aus den zuständigen
+   Runtime- und Equipment-Ownern. Fehlende oder veraltete Zuordnung wird
+   abgewiesen; Fixture-Daten und UI-Angaben sind kein Autoritätsnachweis.
+2. **Command:** Die Ansicht übermittelt nur ausgewählte Wing- oder Craft-ID,
+   Zielhex und Request-ID. Ein vertrauenswürdiger Adapter liefert die
+   Absenderidentität; Root prüft Eigentum, Pilot, aktive lokale Phase,
+   Mitgliedschaft, Ziel und revisionsabhängige Belegung. Kein Hull-, Power-,
+   Pilot- oder Area-Override aus der UI. Replay gleicher Requests ist
+   wirkungsfrei, widersprüchliche Wiederverwendung wird abgewiesen.
+3. **Ausführung:** Root setzt nach Prüfung das vorhandene Guidance-Ziel und
+   nutzt den bestehenden autoritativen Flight-Tick. Footprint, Sperren und
+   tatsächliche Korridorclaim-Lebensdauer müssen vor Produktfreigabe gelten;
+   kein zweiter Tick und keine direkte Mutation durch die Ansicht.
+4. **Leseschnittstelle:** `get_space_area_snapshot(area_id, actor_id)` liefert
+   ein lesendes DTO aus bestehendem Area-Index, Flight, Metadaten und
+   Footprints; Sichtbarkeit und Eigentumsgrenzen werden serverseitig geprüft.
+   Keine SceneTree-Suche, keine neue Zustandswahrheit und keine Gameplay-
+   Mutation beim Lesen. Der konkrete DTO-Vertrag wird beim Implementieren
+   anhand der vorhandenen Registry-Zugriffe festgelegt.
+5. **Kleine Prüfung:** Gültigen Auftrag bis zur sichtbaren Positionsänderung
+   im bestehenden Tick prüfen; fremdes Schiff, fehlenden Piloten, falsche
+   Area, blockiertes Ziel, veralteten Kontext und Replay gezielt abdecken.
+   Anflug/Rückkehr und Ortswechsel dürfen Bewegung nicht doppelt ausführen.
+
+Der aktuelle Rottenadapter unterstützt nur Verwaltungsoperationen; die
+vorhandenen Guidance-Helfer mit expliziten Hull-/Power-Parametern sind noch
+kein produktiver, von der Ansicht autorisierter Bewegungsweg.
+
 | AP | Ergebnis | Voraussetzung |
 | --- | --- | --- |
 | 00 | Quellbasis, Commandschema und kleiner Prüfweg | – |
