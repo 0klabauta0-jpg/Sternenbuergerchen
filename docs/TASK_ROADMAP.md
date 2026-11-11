@@ -1,5 +1,17 @@
 # TASK_ROADMAP
 
+### Hexsicht, Erkennung und ein NPC pro Feld geplant — 11.11.2026
+
+Arbeitsplan erstellt, nicht umgesetzt. Zuerst gemeinsamen Rampen-/Kartenstand
+integrieren, danach logische Hexzustände, gemeinsame Sicht, Erkennung,
+Engpassreservierung und deren echte Ausführung paketweise anbinden.
+Kleine Paketchecks erst bei Umsetzung; große Native-/A/B/C-/Gefechts- und
+Performanceabnahme AP9 bleibt ausdrücklich für später zurückgestellt.
+Plan: `docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md`.
+Task: `docs/tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md`.
+Kein Main-/EXE-/Performanceabschluss und keine Änderung anderer Taskprioritäten.
+
+
 ### Kampagnenumbau / Skirmish-Startstände umgesetzt — 10.11.2026
 Fünf Aufträge, Wachstum2→3→4, zweites Schiff/Pad und drei freie Skirmish-Starts
 (Early8, Mid20, Late30) im eigenen Taskbranch implementiert und gezielt geprüft.

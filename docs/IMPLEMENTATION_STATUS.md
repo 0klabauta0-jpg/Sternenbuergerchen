@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### Hexsicht und Feldbelegung: konkreter Arbeitsplan — 11.11.2026
+
+Nur Planung auf `task/hex-sight-occupancy-plan-20261111`, bewusst auf dem
+noch nicht integrierten Kampagnenstand e4b407fe0. Native Kartenbasis e55206832
+und deren expliziter Rampenvertrag sind separate Integrationsvoraussetzungen.
+AP0–AP8: gemeinsamer Ground-State, Hexsicht/Erkennung, zeitliche Feld- und
+Kantenreservierungen, tatsächliche Bewegung, Lifecycle und Save/Authority.
+Ein NPC pro Feld; Rampenzentrum H+0,5, seitliche Rampenkanten gesperrt.
+AP9 große/native Vergleichs- und Gefechtstests auf Nutzerwunsch zurückgestellt.
+Keine Produktänderung, Engineprüfung oder Performancefreigabe durch diesen Plan.
+Task: `docs/tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md`.
+Plan: `docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md`.
+
+
 ### Fünf Kampagnenaufträge und drei Skirmish-Starts — 10.11.2026
 Auf eigenem Branch task/campaign-skirmish-rebuild-20261110, bewusst auf dem noch
 nicht integrierten Orts-/Gebäudestand e765f507c. Fünf Aufträge mit tatsächlicher
