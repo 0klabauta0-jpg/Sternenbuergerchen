@@ -180,7 +180,13 @@ Verifier und diese Statusdokumentation.
 - Polisa-Flight-ID-Fix 78f5966b5 als e521b3ebe integriert. Identitätscheck,
   echte Ersteintrittsfixture, Saumvorschau und Autoritätstick gezielt grün.
   Warpankunft, Oberflächenanflug/-abflug und Stationsverkehr benötigen
-  getrennte Transitionen; inaktive Flight-/Area-Semantik ist noch abzustimmen.
+  getrennte Transitionen; der gemeinsame Produktanschluss steht noch aus.
+- AP04a inaktiver Flightmode: gesonderte Activity-Validierung/-Commit für
+  local tactical→inactive und inactive→tactical; Deaktivierung bewahrt Pose,
+  Area und Objekt, Reaktivierung benötigt eine lokale Zielpose. Normale Motion-
+  und Area-Commits können den Modus nicht umgehen. Prüfung21/21, bestehende
+  Reise-/Rootfixtures grün. Root muss Gate/Index/Claims/Travel/Economy noch
+  gemeinsam und atomar koordinieren; keine produktive Freischaltung.
 - Autoritätskorrektur: Client-Skip wird vor Raumcallback und
   Indexsynchronisierung geprüft. Kleiner reproduzierter Client-/Hostcheck4/4,
   Raumtakt-, echte Reiseownerfixture und Bewegungsschuss grün. Der Test
