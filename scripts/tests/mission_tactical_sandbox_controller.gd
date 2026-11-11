@@ -13636,7 +13636,10 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 
 # Campaign pilot is a real sortie member. Assignment alone never authorizes flight.
 func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
-	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id):
+	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
+	var visit: Dictionary = visits.get(craft_id, {})
+	var live_polisa_visit := String(get_parent().get_meta("location_id", "")) == "polisa" and String(visit.get("craft_id", "")) == craft_id and not craft_id.is_empty()
+	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id) and not live_polisa_visit:
 		return {"ok": true}
 	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
 	var pilot_id: String = String(card.get("pilot_unit_id", ""))
