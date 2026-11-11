@@ -194,6 +194,11 @@ Verifier und diese Statusdokumentation.
   und Bereich werden gemeinsam übernommen. 13/13, vorhandene Flugtakt- und
   Fleettravelprüfungen grün. Dies ist noch keine transaktionale Root-/Travel-/
   Wing-/Registry-Verbindung und schaltet keine lokalen Bereiche frei.
+- AP04a geometrische Eintrittsvorschau: baut kanonisches Orbitlayout, prüft
+  Flugrevision, unteres Eintrittsband, vollständigen Rumpf, Körpermaske und
+  belegte Zielfelder ohne Mutation. Prüfung5/5, Flight- und Footprintchecks
+  grün. Sie ist keine Berechtigungsprüfung: reale Körper-/Reisezuordnung,
+  Travelrevision, Rottenrevision, Token und atomarer Commit fehlen weiterhin.
 - AP04a Raumindex: ShipRegistry trennt Zellbelegung nach Bereichs-ID; drei
   Schiffe auf derselben Zellkoordinate in zwei lokalen Bereichen und im
   strategischen Raum werden isoliert abgefragt. Lokale Kampfaufnahme wird
