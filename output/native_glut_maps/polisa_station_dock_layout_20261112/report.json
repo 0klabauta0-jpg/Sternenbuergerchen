@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "commands": [
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\polisa_dock_layout_checks\\7a673597d1d14dc88d98e7c520a15d93",
+      "--script",
+      "res://scripts/mission/polisa_station_dock_layout.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\polisa_dock_layout_checks\\7a673597d1d14dc88d98e7c520a15d93",
+      "--script",
+      "res://output/native_glut_maps/polisa_station_dock_layout_20261112/check.gd"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\polisa_dock_layout_checks\\7a673597d1d14dc88d98e7c520a15d93",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1de8df20947e4f11a0609a1f4b667e9a",
+  "source_sha256": {
+    "scripts/mission/polisa_station_dock_layout.gd": "16ef4cd0887407dc7d268bdf156b065f53c96cadb8de8489a26e6ceb554fc460",
+    "scripts/mission/orbit_approach_layout.gd": "7532d3088b524837cfd900b411e23542316cf0efdb5b4c9b92bb12b93d90a092",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "output/native_glut_maps/polisa_station_dock_layout_20261112/check.gd": "b638adca0a27f8918f7b1dd6defef8fa75a93934d03967148f6e2759081001a0"
+  }
+}
