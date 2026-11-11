@@ -4,6 +4,9 @@ extends RefCounted
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const MAX_SAMPLES := 128
 
+static func preview_swept_cells(flight: Dictionary, proposal: Dictionary) -> Dictionary:
+	return _sweep(flight, proposal)
+
 static func resolve_motion(flights: Array[Dictionary], proposals: Array[Dictionary], world: Dictionary) -> Dictionary:
 	var actors := {}
 	var initial := {}

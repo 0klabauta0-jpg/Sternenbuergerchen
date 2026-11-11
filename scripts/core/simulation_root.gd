@@ -76,6 +76,7 @@ var _space_runtime_tick: Callable
 const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
 const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const SPACE_NAVIGATION = preload("res://scripts/tactical/space_navigation_resolver.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
@@ -154,6 +155,21 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 	for occupant in _space_combat_state.query_cells(cells):
 		if occupant != craft_id:
 			return {"ok": false, "reason": "occupied"}
+	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	if Array(metadata.get("footprint_hexes", [])).size() != 1:
+		return {"ok": false, "reason": "multihex_sweep_pending"}
+	var actor: Dictionary = flight.get_snapshot()
+	actor["footprint_hexes"] = metadata.footprint_hexes
+	var move: Dictionary = proposal.duplicate(true)
+	move["craft_id"] = craft_id
+	var clearance: Dictionary = SPACE_NAVIGATION.preview_swept_cells(actor, move)
+	if not clearance.get("ok", false):
+		return {"ok": false, "reason": String(clearance.get("reason", "invalid_sweep"))}
+	var swept_cells: Array[Vector2i] = []
+	swept_cells.assign(clearance.cells)
+	for occupant in _space_combat_state.query_cells(swept_cells):
+		if occupant != craft_id:
+			return {"ok": false, "reason": "blocked"}
 	var result: Dictionary = flight.commit_motion(proposal, tick)
 	if not result.get("ok", false):
 		return result

@@ -86,11 +86,20 @@ func _initialize() -> void:
 	var outside := {"expected_revision":large_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(255,0))}
 	if root.commit_space_actor_motion("large", outside, 1, {"runtime_authorized":true}).get("reason") != "invalid_footprint": failed += 1
 	if large_flight.get_snapshot() != large_before: failed += 1
+	var obstacle := {"craft_id":"obstacle", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(20,20), "footprint_hexes":[Vector2i.ZERO]}
+	var mover := {"craft_id":"mover", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(18,20), "footprint_hexes":[Vector2i.ZERO]}
+	if not root.admit_space_actor(obstacle, {"runtime_authorized":true}).get("ok", false): failed += 1
+	if not root.admit_space_actor(mover, {"runtime_authorized":true}).get("ok", false): failed += 1
+	var moving_flight: RefCounted = root.get_space_actor("mover")
+	var moving_before: Dictionary = moving_flight.get_snapshot()
+	var through := {"expected_revision":moving_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(22,20))}
+	if root.commit_space_actor_motion("mover", through, 1, {"runtime_authorized":true}).get("reason") != "blocked": failed += 1
+	if moving_flight.get_snapshot() != moving_before: failed += 1
 	var at_30 := _simulate_frames(30)
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 33 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 37 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

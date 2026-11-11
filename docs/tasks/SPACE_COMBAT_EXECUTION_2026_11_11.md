@@ -103,9 +103,11 @@ Verifier und diese Statusdokumentation.
   angeschlossen; allgemeine Geometrie- und Performanceabnahme stehen aus.
 - AP03 zusätzliche Zielprüfung: Root prüft vor einem einzelnen Bewegungscommit
   den vollständigen Ziel-Footprint und vorhandene Belegung; außerhalb der
-  Karte wird vor der Mutation abgelehnt. Rootcheck33/33, Geometriecheck11/11.
-  Dies prüft noch nicht den gesamten Bewegungsweg und ersetzt keine
-  kollisionssichere Batch-Übernahme.
+  Karte wird vor der Mutation abgelehnt. Einfeldjäger prüfen zusätzlich den
+  durchflogenen Korridor über die vorhandene Feldregistry, ohne globale
+  Actor-/SceneTree-Suche. Rootcheck37/37, Geometriecheck11/11, Registry6/6.
+  Mehrfeldbewegung ist im Einzelcommit ausdrücklich gesperrt; Geländeblocker,
+  zeitliche Batchreservierungen und Blockadeauflösung bleiben offen.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
