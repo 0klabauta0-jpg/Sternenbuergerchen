@@ -59,6 +59,8 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 		return _reject("missing_field")
 	if operation in ["order_cancel", "fire_rule_set", "assist_preference_set"] and not payload.has("wing_id"):
 		return _reject("missing_field")
+	if operation == "order_cancel" and (typeof(payload.get("order_id")) != TYPE_STRING or String(payload.order_id).strip_edges().is_empty()):
+		return _reject("missing_field")
 	if operation in ["order_issue", "maneuver_request"] and (typeof(payload.get("wing_ids")) != TYPE_ARRAY or payload.wing_ids.is_empty()):
 		return _reject("missing_field")
 	if operation == "order_issue" and (typeof(payload.get("verb")) != TYPE_STRING or String(payload.verb) not in ["move", "patrol", "secure", "protect", "attack_target", "attack_area", "withdraw"]):
@@ -70,6 +72,12 @@ static func validate(command: Dictionary, context: Dictionary) -> Dictionary:
 		if payload.get("contact_response") == "avoid" and payload.get("fire_rule") != "hold": return _reject("incompatible_rules")
 		for key in ["protect_radius", "pursuit_limit"]:
 			if payload.has(key) and (typeof(payload[key]) not in [TYPE_INT, TYPE_FLOAT] or float(payload[key]) <= 0.0): return _reject("invalid_radius")
+		var target_key := "target_hex"
+		if payload.verb == "patrol": target_key = "waypoints"
+		elif payload.verb == "attack_area": target_key = "area_hexes"
+		elif payload.verb in ["attack_target", "protect"]: target_key = "target_id"
+		for key in ["target_hex", "waypoints", "area_hexes", "target_id"]:
+			if payload.has(key) and key != target_key: return _reject("conflicting_target")
 		match String(payload.verb):
 			"move", "secure", "withdraw":
 				if not payload.has("target_hex"): return _reject("missing_field")

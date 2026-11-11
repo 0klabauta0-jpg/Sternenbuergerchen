@@ -82,5 +82,12 @@ func _initialize() -> void:
 	if CONTRACT.validate(different_type, target_context).reason != "request_id_conflict": failures += 1
 	var reordered := {"payload":target_command.payload.duplicate(true), "expected_revision":1, "request_id":"r2", "operation":"order_issue", "contract_category":"space_combat"}
 	if not CONTRACT.validate(reordered, target_context).get("replayed", false): failures += 1
-	print("SPACE_COMBAT_AP00 passed=", 22 - failures, " failed=", failures)
+	var cancel := command.duplicate(true)
+	cancel.operation = "order_cancel"
+	cancel.payload = {"wing_id":"w1"}
+	if CONTRACT.validate(cancel, context).reason != "missing_field": failures += 1
+	var mixed := target_command.duplicate(true)
+	mixed.payload["target_id"] = "enemy1"
+	if CONTRACT.validate(mixed, context).reason != "conflicting_target": failures += 1
+	print("SPACE_COMBAT_AP00 passed=", 24 - failures, " failed=", failures)
 	quit(1 if failures else 0)
