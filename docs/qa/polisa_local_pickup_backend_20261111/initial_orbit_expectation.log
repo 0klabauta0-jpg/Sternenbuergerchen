@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Prepared Surfaceowner does not publish any flight index
+PASS: Existing visitor fixture has real Surface/polisa travel state
+PASS: Full/unavailable local pad rejects with every owner unchanged
+PASS: Final stale admission rejects before flight/fleet/wallet publication
+PASS: No free built return pad rejects local purchase atomically
+PASS: Invalid acquisition marker rejects before commit
+PASS: Actual Adapter/Root/Supply locally purchases Cutlass
+PASS: Versioned purchase separates local pad from reserved home return pad
+PASS: New craft is truly surface/polisa without changing travel focus
+PASS: Real debit, finite stock, cargo and normalized capacity publish once
+PASS: UI finalization occurs only after real Supplyreceipt exists
+PASS: Local birth fabricates neither home outbound nor foreign job binding
+PASS: Actual local service works while checkpoint remains away-blocked
+PASS: Same purchase replays without duplicate craft/pad/receipt or UI event
+PASS: Conflicting delivery mode under same request is rejected
+PASS: Unmanned local craft cannot authorize return
+PASS: Real local-origin return uses existing Polisa fuel route
+PASS: Local purchase return debit is once regardless UI request IDs
+PASS: Return receipt is anchored to actual local purchase, never a fake outbound
+FAIL: Station-born craft enters its real Polisa body orbit
+PASS: Existing travel owner supports real surface-exit/warp/home landing sequence
+PASS: Supply JSON restore accepts local-origin acquisition receipt
+PASS: Manipulated local receipt rejected: origin
+PASS: Manipulated local receipt rejected: pad
+PASS: Manipulated local receipt rejected: home-pad
+PASS: Manipulated local receipt rejected: schema
+PASS: Manipulated local receipt rejected: fit-revision
+PASS: Real home checkpoint validator accepts locally acquired ship after homecoming
+PASS: Checkpoint crosscheck rejects purchase/fleet model manipulation
+POLISA_LOCAL_PICKUP_BACKEND checks=29 failures=1

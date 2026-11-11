@@ -12106,7 +12106,7 @@ func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: St
 func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {}, visual_id: String = "primary") -> Node3D:
 	var payload: Dictionary = visual_payload if not visual_payload.is_empty() else _drop_payload
 	_dropship_rotation_y = _get_dropship_rotation_y_for_payload(payload, world_position)
-	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry(payload)
 	var model_scene: PackedScene = _get_asset_model_scene_by_path(String(frontier_entry.get("model_path",""))) if not frontier_entry.is_empty() else null
 	if model_scene == null:
 		model_scene = _get_asset_model_scene("fahrzeug_speeder_b_se")
@@ -12207,16 +12207,16 @@ func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: V
 	if typeof(payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(payload.get("dropship_target_position", world_position))
 		var heading_origin: Vector2 = Vector2(payload.get("flight_heading_origin", world_position))
-		return _get_dropship_model_yaw(heading_origin, target_position, -_camera_yaw_degrees)
+		return _get_dropship_model_yaw(heading_origin, target_position, -_camera_yaw_degrees, payload)
 	if typeof(payload.get("lz_position", null)) == TYPE_VECTOR2:
-		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
-	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees, payload)
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry(payload)
 	var offset_degrees: float = float(frontier_entry.get("root_rotation_y_degrees",0.0)) if not frontier_entry.is_empty() else DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES
 	return wrapf(-_camera_yaw_degrees + offset_degrees, 0.0, 360.0)
 
 
-func _get_dropship_model_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
-	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+func _get_dropship_model_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0, payload: Dictionary = {}) -> float:
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry(payload)
 	if not frontier_entry.is_empty():
 		# Ref03 geometry faces +Z. Use the actual rendered plane rather than the
 		# old Kenney forward convention; unit/world yaw helpers stay unchanged.
@@ -12227,11 +12227,25 @@ func _get_dropship_model_yaw(from_world_position: Vector2, to_world_position: Ve
 	return wrapf(direction_yaw + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
 
 
-func _get_frontier_dropship_visual_entry() -> Dictionary:
-	var entry: Dictionary = FRONTIER_SHIP_VISUALS_SCRIPT.get_for_role("dropship")
+func _get_frontier_dropship_visual_entry(payload: Dictionary = {}) -> Dictionary:
+	var explicit := not String(payload.get("model_id", "")).is_empty() or not String(payload.get("visual_asset_id", "")).is_empty()
+	var entry: Dictionary = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_identity(payload) if explicit else FRONTIER_SHIP_VISUALS_SCRIPT.get_for_role("dropship")
 	if entry.is_empty() or _get_asset_model_scene_by_path(String(entry.get("model_path","")))==null:
 		return {}
 	return entry
+
+
+func get_station_craft_body_projection(craft: Dictionary) -> Dictionary:
+	# _normalize_asset_model_instance centers X/Z and grounds Y before model scale.
+	var entry := _get_frontier_dropship_visual_entry(craft)
+	if entry.is_empty(): return {"ok":false,"reason":"station_model_unavailable"}
+	var minimum: Array = entry.get("bounds_min", [])
+	var dimensions: Array = entry.get("bounds_size", [])
+	if minimum.size() != 3 or dimensions.size() != 3: return {"ok":false,"reason":"station_model_bounds_missing"}
+	return {"ok":true,"bounds":AABB(Vector3(-float(dimensions[0])*0.5,0.0,-float(dimensions[2])*0.5),Vector3(dimensions[0],dimensions[1],dimensions[2])),
+		"model_scale":float(entry.get("scale",0.0)),"cell_size":_get_3d_cell_size(),
+		"yaw_degrees":wrapf(-_camera_yaw_degrees + float(entry.get("root_rotation_y_degrees",0.0)),0.0,360.0),
+		"model_id":String(craft.get("model_id","")),"asset_id":String(entry.get("asset_id",""))}
 
 
 func _maybe_emit_unit_step_sfx(

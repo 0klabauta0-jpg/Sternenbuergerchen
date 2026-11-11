@@ -149,6 +149,8 @@ var _location_registry = preload("res://scripts/mission/location_runtime_registr
 var _location_contexts: Dictionary = {}
 var _craft_location_runtime: Dictionary = {}
 var _view_craft_by_location: Dictionary = {} # UI selection only; never a visit/travel identity.
+var _polisa_handoff_requests: Dictionary = {}
+var _polisa_purchase_seal_key := str(Time.get_ticks_usec()) + ":" + str(randi())
 var _space_approaches: Dictionary = {}
 var _surface_preparation_results: Dictionary = {}
 var _retired_terrain_workers: Array[Thread] = []
@@ -7317,10 +7319,14 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 	if is_campaign_start() and _active_mission != null:
 		var setup: Node = _active_mission.get_node_or_null("MissionSetup")
 		var actual_ids: PackedStringArray = PackedStringArray(setup.get("selected_team_unit_ids")) if setup != null else PackedStringArray()
+		var location_id := String(_active_mission.get_meta("location_id", ""))
 		for card: Dictionary in Array(_mission_planning_state.get("mission_drop_cards", [])):
+			var craft_id := String(card.get("craft_id", ""))
+			if not location_id.is_empty() and (String(_craft_location_runtime.get(craft_id, "")) != location_id or String(_aircraft_location_by_craft.get(craft_id, "")) != "mission"):
+				continue # Historical ready cards are not current pilot ownership.
 			var pilot_id: String = String(card.get("pilot_unit_id", ""))
 			if actual_ids.has(pilot_id):
-				_assigned_aircraft_pilot_by_craft[String(card.get("craft_id", ""))] = pilot_id
+				_assigned_aircraft_pilot_by_craft[craft_id] = pilot_id
 	var fob_screen = _get_fob_screen()
 	var handled_mission_return: bool = _apply_mission_drop_card_return_requests(_mission_planning_state, fob_screen)
 	if bool(_mission_planning_state.get("mission_drop_return_requested", false)):
@@ -8246,3 +8252,203 @@ func _on_base_world_selection_changed(kind: String, id: String) -> void:
 		select_location_view_craft("homebase", id)
 		get_node("HomebaseScreen").call("request_operation","craft",{"craft_id":id})
 	_refresh_singleplayer_services()
+
+
+# Local station lifecycle. No scene/actor admission and no travel on view changes.
+func get_polisa_local_ship_purchase_capability() -> Dictionary:
+	var base: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime != null else null
+	if base == null or not base.has_method("validate_remote_craft_handoff") or not base.has_method("commit_remote_craft_handoff"):
+		return _polisa_lifecycle_reject("personnel_runtime_unavailable", "Lokale Abholung braucht eine verfuegbare Besatzungsverwaltung")
+	if _singleplayer_runtime.has_method("_has_live_base_owner") and not bool(_singleplayer_runtime.call("_has_live_base_owner")):
+		return _polisa_lifecycle_reject("personnel_runtime_unavailable", "Besatzungsverwaltung ist nicht verbunden")
+	var instance: Node = _location_registry.get_location("polisa")
+	var controller: Node = instance.get_node_or_null("TacticalController") if is_instance_valid(instance) else null
+	for method: String in ["preview_station_craft_admission", "admit_station_craft", "preview_station_crew_handoff", "commit_station_crew_handoff", "finalize_station_craft_update"]:
+		if controller == null or not controller.has_method(method):
+			return _polisa_lifecycle_reject("station_pickup_unavailable", "Lokale Schiffsabholung ist hier noch nicht verfuegbar")
+	return {"ok":true,"available":true,"message":"Abholung auf einem freien Stationspad; ein freies Heimatpad bleibt als Rueckkehrplatz reserviert"}
+
+func prepare_polisa_local_ship_purchase(craft: Dictionary, request_id: String, requested_pad_id: String = "") -> Dictionary:
+	if request_id.strip_edges().is_empty(): return _polisa_lifecycle_reject("invalid_request", "Kaufanfrage fehlt")
+	var capability := get_polisa_local_ship_purchase_capability()
+	if not capability.get("ok", false): return capability
+	var id := String(craft.get("craft_id", ""))
+	var model := String(craft.get("model_id", ""))
+	if id.is_empty() or model not in ["cutlass", "buccaneer"] or not _find_homebase_aircraft_definition(id).is_empty():
+		return _polisa_lifecycle_reject("invalid_station_craft", "Schiff ist bereits vorhanden oder nicht fuer die Station verfuegbar")
+	var normalized := craft.duplicate(true)
+	normalized["crew_capacity"] = 8 if model == "cutlass" else 1
+	normalized["seat_capacity"] = normalized.crew_capacity
+	if String(normalized.get("craft_type", "")) != ("dropship" if model == "cutlass" else "fighter"):
+		return _polisa_lifecycle_reject("invalid_station_craft", "Schiffstyp passt nicht zum Modell")
+	var instance: Node = _location_registry.get_location("polisa")
+	var admission: Dictionary = instance.get_node("TacticalController").call("preview_station_craft_admission", normalized, requested_pad_id)
+	if not admission.get("ok", false): return admission
+	var prepared := {"ok":true,"request_id":request_id,"craft_definition":normalized,
+		"location_instance_id":instance.get_instance_id(),"acquisition_pad_id":String(admission.get("pad_id", "")),
+		"pad_position":admission.get("position", Vector2.INF),
+		"visit_identity":{"craft_id":id,"location_id":"polisa","scenario_id":"polisa_visit","job_id":"",
+			"origin_kind":"local_station_purchase","origin_receipt_id":request_id,"unit_ids":[],"fireteam_ids":[]}}
+	if String(prepared.acquisition_pad_id).is_empty() or not prepared.pad_position is Vector2 or not Vector2(prepared.pad_position).is_finite():
+		return _polisa_lifecycle_reject("invalid_station_pad", "Stationspad ist nicht verfuegbar")
+	prepared["seal"] = _sign_polisa_purchase(prepared)
+	return prepared
+
+func _sign_polisa_purchase(prepared: Dictionary) -> String:
+	var content := prepared.duplicate(true)
+	content.erase("seal")
+	return (_polisa_purchase_seal_key + JSON.stringify(content, "", true)).sha256_text()
+
+func commit_polisa_local_ship_purchase(prepared: Dictionary) -> Dictionary:
+	if String(prepared.get("seal", "")) != _sign_polisa_purchase(prepared):
+		return _polisa_lifecycle_reject("invalid_station_transaction", "Kaufvorbereitung ist ungueltig")
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance) or instance.get_instance_id() != int(prepared.get("location_instance_id", 0)):
+		return _polisa_lifecycle_reject("station_changed", "Stationszustand hat sich geaendert")
+	var craft: Dictionary = prepared.craft_definition
+	var id := String(craft.craft_id)
+	if not _find_homebase_aircraft_definition(id).is_empty() or _craft_location_runtime.has(id):
+		return _polisa_lifecycle_reject("craft_already_registered", "Schiff ist bereits registriert")
+	# The controller revalidates its actual pad/sequence state before its first write.
+	# It publishes no planning signal until the adapter finishes all other owners.
+	var admitted: Dictionary = instance.get_node("TacticalController").call("admit_station_craft", craft, String(prepared.acquisition_pad_id), String(prepared.request_id))
+	if not admitted.get("ok", false): return admitted
+	_craft_location_runtime[id] = "polisa"
+	var visits: Dictionary = Dictionary(instance.get_meta("singleplayer_visit_identities", {})).duplicate(true)
+	visits[id] = Dictionary(prepared.visit_identity).duplicate(true)
+	instance.set_meta("singleplayer_visit_identities", visits)
+	_remember_location(instance)
+	if _active_mission == instance: _enter_location_context(instance)
+	return {"ok":true,"craft_id":id,"acquisition_pad_id":String(prepared.acquisition_pad_id),"pad_position":admitted.get("position", prepared.pad_position),"visit_identity":Dictionary(prepared.visit_identity).duplicate(true)}
+
+func finalize_polisa_local_ship_purchase(craft_id: String) -> void:
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance) or String(_craft_location_runtime.get(craft_id, "")) != "polisa": return
+	instance.get_node("TacticalController").call("finalize_station_craft_update")
+	_remember_location(instance)
+	if _active_mission == instance: _enter_location_context(instance)
+	_refresh_singleplayer_services()
+
+func _polisa_visit_identities(instance: Node) -> Dictionary:
+	var visits: Dictionary = Dictionary(instance.get_meta("singleplayer_visit_identities", {})).duplicate(true)
+	var controller: Node = instance.get_node_or_null("TacticalController")
+	# The legacy campaign start adds its real pilot to Setup after creating the
+	# outward visit. Complete that transport projection from exact local evidence.
+	for craft_id: String in visits:
+		if String(_craft_location_runtime.get(craft_id, "")) != "polisa" or String(_aircraft_location_by_craft.get(craft_id, "")) != "mission": continue
+		var pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
+		var card: Dictionary = controller.call("_find_mission_dropship_card_entry", craft_id) if controller != null else {}
+		var unit: Node = controller.call("_get_campaign_sortie_unit", pilot) if controller != null and not pilot.is_empty() else null
+		if unit == null or String(card.get("pilot_unit_id", "")) != pilot: continue
+		var ids: Array = Array(visits[craft_id].get("unit_ids", [])).duplicate()
+		var teams: Array = Array(visits[craft_id].get("fireteam_ids", [])).duplicate()
+		if not ids.has(pilot):
+			ids.append(pilot)
+			teams.append(String(unit.call("get_fireteam_id")))
+			visits[craft_id]["unit_ids"] = ids
+			visits[craft_id]["fireteam_ids"] = teams
+	return visits
+
+func get_polisa_crew_handoff_snapshot(target_craft_id: String) -> Dictionary:
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance): return {"sources":[]}
+	var controller: Node = instance.get_node_or_null("TacticalController")
+	if controller == null: return {"sources":[]}
+	var visits := _polisa_visit_identities(instance)
+	var sources: Array = []
+	for id: String in visits:
+		if id == target_craft_id or String(_craft_location_runtime.get(id, "")) != "polisa" or String(_aircraft_location_by_craft.get(id, "")) != "mission": continue
+		if not bool(controller.call("_is_parked_campaign_dropship", id)): continue
+		var people: Array = []
+		for raw_id: Variant in Array(visits[id].get("unit_ids", [])):
+			var unit_id := String(raw_id)
+			var unit: Node = controller.call("_get_campaign_sortie_unit", unit_id)
+			if unit == null or int(unit.call("get_health")) <= 0: continue
+			people.append({"unit_id":unit_id,"name":String(unit.call("get_display_name")),"fireteam_id":String(unit.call("get_fireteam_id"))})
+		sources.append({"id":id,"name":String(_find_homebase_aircraft_definition(id).get("display_name", id)),"unit_ids":Array(visits[id].get("unit_ids", [])).duplicate(),"people":people})
+	return {"sources":sources,"target_craft_id":target_craft_id}
+
+func deploy_polisa_craft_crew(craft_id: String) -> Dictionary:
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance) or get_mission_for_craft(craft_id) != instance or String(_aircraft_location_by_craft.get(craft_id, "")) != "mission":
+		return _polisa_lifecycle_reject("craft_not_at_station", "Schiff ist nicht auf Polisa")
+	return instance.get_node("TacticalController").call("request_campaign_crew_deployment", craft_id)
+
+func board_polisa_craft_crew(craft_id: String) -> Dictionary:
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance) or get_mission_for_craft(craft_id) != instance or String(_aircraft_location_by_craft.get(craft_id, "")) != "mission" or not _find_pending_mission_craft_transfer(craft_id).is_empty():
+		return _polisa_lifecycle_reject("craft_not_at_station", "Schiff ist nicht auf Polisa geparkt")
+	return instance.get_node("TacticalController").call("request_campaign_crew_boarding", craft_id)
+
+func handoff_polisa_station_crew(source_craft_id: String, target_craft_id: String, unit_ids: PackedStringArray, pilot_id: String, request_id: String) -> Dictionary:
+	if request_id.is_empty(): return _polisa_lifecycle_reject("invalid_request", "Besatzungsanfrage fehlt")
+	var signature := JSON.stringify([source_craft_id,target_craft_id,Array(unit_ids),pilot_id])
+	if _polisa_handoff_requests.has(request_id):
+		if String(_polisa_handoff_requests[request_id].signature) != signature: return _polisa_lifecycle_reject("request_id_conflict", "Anfrage-ID ist bereits anders verwendet")
+		var replay: Dictionary = _polisa_handoff_requests[request_id].result.duplicate(true)
+		replay["replayed"] = true
+		return replay
+	var instance: Node = _location_registry.get_location("polisa")
+	if not is_instance_valid(instance): return _polisa_lifecycle_reject("station_unavailable", "Polisa ist nicht geladen")
+	for id: String in [source_craft_id,target_craft_id]:
+		if String(_craft_location_runtime.get(id, "")) != "polisa" or String(_aircraft_location_by_craft.get(id, "")) != "mission" or not _find_pending_mission_craft_transfer(id).is_empty():
+			return _polisa_lifecycle_reject("craft_not_at_station", "Beide Schiffe muessen auf Polisa geparkt sein")
+	var visits := _polisa_visit_identities(instance)
+	if not visits.has(source_craft_id) or not visits.has(target_craft_id): return _polisa_lifecycle_reject("visit_missing", "Besatzungszuordnung fehlt")
+	var membership := {}
+	for id: String in visits:
+		if String(_craft_location_runtime.get(id, "")) == "polisa" and String(_aircraft_location_by_craft.get(id, "")) == "mission":
+			membership[id] = Array(visits[id].get("unit_ids", [])).duplicate()
+	for id: String in _assigned_aircraft_pilot_by_craft:
+		if id not in [source_craft_id,target_craft_id] and unit_ids.has(String(_assigned_aircraft_pilot_by_craft[id])):
+			return _polisa_lifecycle_reject("pilot_already_assigned", "Person ist einem anderen Schiff als Pilot zugewiesen")
+	var controller: Node = instance.get_node("TacticalController")
+	var preview: Dictionary = controller.call("preview_station_crew_handoff", source_craft_id,target_craft_id,unit_ids,pilot_id,membership)
+	if not preview.get("ok", false): return preview
+	var base_personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime != null else null
+	if base_personnel == null or not base_personnel.has_method("validate_remote_craft_handoff"):
+		return _polisa_lifecycle_reject("personnel_runtime_unavailable", "Besatzungsverwaltung ist nicht verfuegbar")
+	if _singleplayer_runtime.has_method("_has_live_base_owner") and not bool(_singleplayer_runtime.call("_has_live_base_owner")):
+		return _polisa_lifecycle_reject("personnel_runtime_unavailable", "Besatzungsverwaltung ist nicht verbunden")
+	var base_guard: Dictionary = base_personnel.call("validate_remote_craft_handoff", unit_ids,source_craft_id,target_craft_id)
+	if not base_guard.get("ok", false): return base_guard
+	var from: Dictionary = visits[source_craft_id]
+	var into: Dictionary = visits[target_craft_id]
+	var ids: Array = Array(from.get("unit_ids", []))
+	var teams: Array = Array(from.get("fireteam_ids", []))
+	if ids.size() != teams.size(): return _polisa_lifecycle_reject("invalid_visit_membership", "Besatzungszuordnung ist unvollstaendig")
+	var remaining: Array = []
+	var remaining_teams: Array = []
+	var target_ids: Array = Array(into.get("unit_ids", [])).duplicate()
+	var target_teams: Array = Array(into.get("fireteam_ids", [])).duplicate()
+	if target_ids.size() != target_teams.size(): return _polisa_lifecycle_reject("invalid_visit_membership", "Zielbesatzung ist unvollstaendig")
+	for index in ids.size():
+		if unit_ids.has(String(ids[index])):
+			target_ids.append(ids[index]); target_teams.append(teams[index])
+		else:
+			remaining.append(ids[index]); remaining_teams.append(teams[index])
+	from["unit_ids"] = remaining; from["fireteam_ids"] = remaining_teams
+	into["unit_ids"] = target_ids; into["fireteam_ids"] = target_teams
+	var committed: Dictionary = controller.call("commit_station_crew_handoff", source_craft_id,target_craft_id,unit_ids,pilot_id,membership,request_id)
+	if not committed.get("ok", false): return committed
+	# Controller commit is emit-free and never touches the base owner. Its just-
+	# validated remote binding therefore cannot change between these two commits.
+	base_personnel.call("commit_remote_craft_handoff", unit_ids,source_craft_id,target_craft_id)
+	visits[source_craft_id] = from; visits[target_craft_id] = into
+	instance.set_meta("singleplayer_visit_identities", visits)
+	if unit_ids.has(String(_assigned_aircraft_pilot_by_craft.get(source_craft_id, ""))): _assigned_aircraft_pilot_by_craft.erase(source_craft_id)
+	_assigned_aircraft_pilot_by_craft[target_craft_id] = pilot_id
+	var primary: Dictionary = instance.get_meta("singleplayer_mission_identity", {})
+	var primary_id := String(primary.get("craft_id", ""))
+	if visits.has(primary_id): instance.set_meta("singleplayer_mission_identity", Dictionary(visits[primary_id]).duplicate(true))
+	_remember_location(instance)
+	if _active_mission == instance: _enter_location_context(instance)
+	var result := {"ok":true,"source_craft_id":source_craft_id,"target_craft_id":target_craft_id,"pilot_id":pilot_id,"unit_ids":Array(unit_ids),"message":"Besatzung uebertragen; vor dem Abflug am neuen Schiff einsteigen"}
+	_polisa_handoff_requests[request_id] = {"signature":signature,"result":result.duplicate(true)}
+	base_personnel.call("finalize_remote_craft_handoff")
+	controller.call("finalize_station_craft_update")
+	_refresh_singleplayer_services()
+	return result
+
+func _polisa_lifecycle_reject(reason: String, message: String) -> Dictionary:
+	return {"ok":false,"available":false,"reason":reason,"message":message}

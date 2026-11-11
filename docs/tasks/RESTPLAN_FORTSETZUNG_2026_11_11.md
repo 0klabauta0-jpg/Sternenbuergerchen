@@ -33,3 +33,12 @@ jetzt eng integriert/geprueft:42/0 Warp+Store,14/0 Return,7/0 Root,30/0 Service.
 Root/Tabletop-Hooks abgestimmt; kein Hex-/Move-/Tick-/Actorbody mitgeaendert.
 Lokale Abholung bleibt eigener vorhandener Task, Waffen und Retrofit-Retirement
 bleiben offen. Keine grossen Tests/Main/EXE.
+
+Fortsetzung lokale Abholung: Nach Freigabe additiver Tactical-Crew-/Padbereiche
+ist der bestehende Task umgesetzt. Reale leere Stationsaufnahme, eigene
+Herkunft statt Fake-Outboundtoken, Heimatpadreserve, ausdruecklicher Handoff/
+Boarding/Rueckflug und Receiptkompatibilitaet. Gemeinsame kleine Vertikal18/0,
+Flow23/0, Backend43/0; Presencegrenze im Vertikaltest explicit_owner_endpoints_not_flight_motion.
+Historische Pilotkarten und fehlender Campaignmarker gezielt korrigiert.
+Grosse native Gesamtabnahme weiter spaeter. Movementquelle arbeitet noch ihre
+engen AP5-Reviewbefunde ab; ohne gesicherten Commit kein fremder WIPimport.

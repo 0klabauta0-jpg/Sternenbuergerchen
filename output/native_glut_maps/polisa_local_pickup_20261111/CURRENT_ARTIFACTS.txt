@@ -1,0 +1,8 @@
+scripts/mission/polisa_station_craft_runtime.gd
+scripts/tests/mission_tactical_sandbox_controller.gd
+scripts/terrain/terrain_map_3d_view.gd
+docs/tasks/POLISA_LOCAL_SHIP_PICKUP_2026_11_11.md
+output/native_glut_maps/polisa_local_pickup_20261111/vertical_return_fixture.gd
+output/native_glut_maps/polisa_local_pickup_20261111/vertical_return_fixture.log
+output/native_glut_maps/polisa_local_pickup_20261111/README.md
+output/native_glut_maps/polisa_local_pickup_20261111/vertical_sources_sha256.txt

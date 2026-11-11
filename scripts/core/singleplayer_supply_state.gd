@@ -2,6 +2,7 @@ extends RefCounted
 ## Long-lived domain owner. SimulationRoot supplies trusted service/runtime context.
 
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
+const STATION_CRAFT = preload("res://scripts/mission/polisa_station_craft_runtime.gd")
 const SHIP_COMPONENTS = preload("res://scripts/mission/ship_equipment_catalog.gd")
 const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
@@ -24,6 +25,8 @@ var _reward_receipts: Dictionary = {}
 var _research_receipts: Dictionary = {}
 var _research_snapshot_cache: Dictionary = {}
 var _research_snapshot_revision := -1
+var _station_purchase_cache_revision := -1
+var _station_purchase_cache: Dictionary = {}
 var _revision: int = 0
 
 func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
@@ -41,6 +44,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	for cost in Dictionary(data.get("route_fuel_costs", {})).values():
 		if not _valid_nonnegative_number(cost):
 			return _reject("invalid_supply_data", "Routenkosten ungueltig")
+	_station_purchase_cache_revision = -1
 	_definitions = data
 	_credits = int(data.initial_credits)
 	_item_quantities.clear()
@@ -336,6 +340,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_research_receipts = research.duplicate(true)
 	_research_snapshot_revision = -1
 	_revision = int(data.revision)
+	_station_purchase_cache_revision = -1
 	return {"ok":true}
 
 func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
@@ -679,18 +684,19 @@ func _station_buy_ship(payload: Dictionary, context: Dictionary, request_id: Str
 	var price := int(offer.get("unit_price", 0))
 	if price <= 0 or _credits < price: return _reject("insufficient_credits", "Credits reichen nicht")
 	if int(_stock_by_offer_id.get(offer_id, 0)) < 1: return _reject("insufficient_stock", "Schiff derzeit ausverkauft")
-	var fulfillment: Callable = context.get("station_ship_fulfillment", Callable())
-	if not fulfillment.is_valid(): return _reject("fleet_unavailable", "Flottenuebergabe nicht verfuegbar")
-	# The trusted runtime callback validates the free home pad before its first write.
-	# No await or UI callback occurs between fulfillment and the wallet receipt.
-	var result: Dictionary = fulfillment.call(offer.duplicate(true), request_id)
+	var delivery_mode := String(payload.get("delivery_mode", "homebase"))
+	if delivery_mode not in ["homebase", "local"]: return _reject("invalid_delivery_mode", "Lieferart ungültig")
+	var fulfillment: Callable = context.get("station_local_ship_fulfillment" if delivery_mode == "local" else "station_ship_fulfillment", Callable())
+	if not fulfillment.is_valid(): return _reject("fleet_unavailable", "Flottenübergabe nicht verfügbar")
+	# All failure gates precede the callback's publication tail and wallet debit.
+	var result: Dictionary = fulfillment.call(offer.duplicate(true), request_id, String(payload.get("requested_station_pad_id", ""))) if delivery_mode == "local" else fulfillment.call(offer.duplicate(true), request_id)
 	if not bool(result.get("ok", false)): return result
 	_credits -= price
 	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - 1
 	_revision += 1
 	result["cost"] = price
 	result["offer_id"] = offer_id
-	result["message"] = "Schiff gekauft / Lieferung zur Heimatbasis bestaetigt"
+	result["message"] = "Schiff gekauft / unbemannt auf Polisa bereit" if delivery_mode == "local" else "Schiff gekauft / Lieferung zur Heimatbasis bestaetigt"
 	return result
 
 
@@ -736,8 +742,17 @@ func validate_station_receipts(requests: Dictionary) -> Dictionary:
 			var model := String(offer.get("model_id", ""))
 			var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
 			var pad := String(result.get("landing_pad_id", ""))
-			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or result.get("delivery_location_id") != "homebase" or used_pads.has(pad) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
-			ships[id] = {"model_id":model,"craft_type":String(offer.craft_type),"pad":pad}
+			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or used_pads.has(pad) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
+			var mode := String(signature.get("payload", {}).get("delivery_mode", "homebase"))
+			if mode not in ["homebase", "local"]: return _reject("invalid_station_ship_receipt", "Lieferart ungültig")
+			var local_pad := String(result.get("acquisition_pad_id", ""))
+			if mode == "local":
+				if result.get("receipt_schema_version") != 2 or result.get("delivery_location_id") != "polisa" or result.get("origin_kind") != "local_station_purchase" or result.get("origin_location_id") != "polisa" or result.get("origin_receipt_id") != request_id or result.get("pad_fit_revision") != 1 or not STATION_CRAFT.receipt_pad_compatible(model, local_pad) or local_pad not in ["polisa_pad_01", "polisa_pad_02", "polisa_pad_03", "polisa_pad_04", "polisa_pad_05", "polisa_pad_06", "polisa_pad_07"]: return _reject("invalid_local_purchase_receipt", "Lokaler Erwerbsbeleg ungültig")
+				var requested_pad := String(signature.get("payload", {}).get("requested_station_pad_id", ""))
+				if not requested_pad.is_empty() and requested_pad != local_pad: return _reject("invalid_local_purchase_receipt", "Erwerbspad widerspricht Kaufauftrag")
+			elif result.get("delivery_location_id") != "homebase" or result.has("origin_kind") or result.has("acquisition_pad_id") or result.has("receipt_schema_version"):
+				return _reject("invalid_station_ship_receipt", "Heimatlieferbeleg ungültig")
+			ships[id] = {"craft_id":id,"model_id":model,"craft_type":String(offer.craft_type),"pad":pad,"landing_pad_id":pad,"delivery_mode":mode,"delivery_location_id":"polisa" if mode == "local" else "homebase","acquisition_pad_id":local_pad,"origin_kind":"local_station_purchase" if mode == "local" else "home_delivery","origin_location_id":"polisa" if mode == "local" else "homebase","origin_receipt_id":request_id}
 			used_pads.append(pad)
 	pads.sort()
 	for index in range(pads.size()):
@@ -801,3 +816,12 @@ func _valid_component_requests(requests: Dictionary, stock: Dictionary = {}) -> 
 	if stock.has("polisa_warp_hemera") and int(stock.polisa_warp_hemera) != 4-purchased: return false
 	if purchased > 0 and not stock.has("polisa_warp_hemera"): return false
 	return true
+
+
+func get_station_ship_purchase(craft_id: String) -> Dictionary:
+	# Derived immutable receipt projection; no second location/occupancy truth.
+	if _station_purchase_cache_revision != _revision:
+		var validated := validate_station_receipts(_requests)
+		_station_purchase_cache = validated.get("ships", {}) if validated.get("ok", false) else {}
+		_station_purchase_cache_revision = _revision
+	return Dictionary(_station_purchase_cache.get(craft_id, {})).duplicate(true)

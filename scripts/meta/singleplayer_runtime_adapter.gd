@@ -138,7 +138,7 @@ func get_snapshot() -> Dictionary:
 	var launch_readiness: Dictionary = {}
 	for definition in Array(_flow.get("_homebase_aircraft_definitions")):
 		var id: String = String(definition.get("craft_id", ""))
-		var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(id, {}))
+		var departure: Dictionary = _craft_visit_binding(id)
 		var transfer: Dictionary = _flow.call("_find_pending_mission_craft_transfer", id)
 		var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(id, "homebase"))
 		var projected: Dictionary = definition.duplicate(true)
@@ -224,7 +224,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -240,6 +240,15 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _base_personnel.request_operation(operation, payload) if _base_personnel != null else _reject("base_unavailable", "Basisaktion nur in Kampagne")
 	if _simulation == null:
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
+	if operation in ["station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+		var target := String(payload.get("craft_id", ""))
+		if String(_service_context(target).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")
+		if operation == "station_board_crew":
+			return _flow.call("board_polisa_craft_crew", target) if _flow.has_method("board_polisa_craft_crew") else _reject("crew_boarding_unavailable", "Einsteigen nicht verfügbar")
+		if operation == "station_deploy_crew":
+			return _flow.call("deploy_polisa_craft_crew", target) if _flow.has_method("deploy_polisa_craft_crew") else _reject("crew_handoff_unavailable", "Besatzungsübergabe nicht verfügbar")
+		if String(payload.get("target_craft_id", "")) != target or typeof(payload.get("unit_ids")) != TYPE_ARRAY: return _reject("invalid_crew_handoff", "Besatzungsauswahl ungültig")
+		return _flow.call("handoff_polisa_station_crew", String(payload.get("source_craft_id", "")), target, PackedStringArray(payload.unit_ids), String(payload.get("pilot_id", "")), _request_id("station-handoff", payload)) if _flow.has_method("handoff_polisa_station_crew") else _reject("crew_handoff_unavailable", "Besatzungsübergabe nicht verfügbar")
 	if operation == "buy" and _campaign_mode and String(payload.get("offer_id","")) == "mining_tool_supply" and not Array(_supply.get_supply_snapshot().get("blueprints",[])).has("mining_tool"):
 		return _reject("blueprint_locked","Miningwerkzeug nach dem Blueprint aus Mission 3 verfügbar")
 	var data: Dictionary = payload.duplicate(true)
@@ -294,10 +303,13 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst am Stationsschalter anmelden")
 		context["station_service_verified"] = true
 		context["station_ship_fulfillment"] = _fulfill_polisa_ship
+		context["station_local_ship_fulfillment"] = _fulfill_polisa_local_ship
 		context["station_pad_builder"] = _build_polisa_home_pad
 		context["second_pad_built"] = _campaign_mode and bool(_campaign.get_campaign_snapshot().progress.second_pad_built)
 		var result := _commit("singleplayer_supply", operation, data, request_id, context)
-		if result.get("ok", false): _flow.call("_refresh_homebase_screen")
+		if result.get("ok", false):
+			if operation == "station_buy_ship" and String(data.get("delivery_mode", "homebase")) == "local" and not bool(result.get("replayed", false)): _flow.call("finalize_polisa_local_ship_purchase", String(result.get("craft_id", "")))
+			_flow.call("_refresh_homebase_screen")
 		return result
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
@@ -448,7 +460,7 @@ func _service_context(craft_id: String) -> Dictionary:
 		return {"location_id": "homebase", "craft_busy": false}
 	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
 	if routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) not in ["grounded", "surface"]: return {}
-	var departure: Dictionary = Dictionary(_campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {}))
+	var departure: Dictionary = _craft_visit_binding(craft_id)
 	var place_id := String(departure.get("destination_location_id",""))
 	if location == "mission" and place_id == "polisa":
 		var mission: Node = _flow.call("get_mission_for_craft", craft_id)
@@ -550,7 +562,7 @@ func authorize_departure(craft_id: String) -> Dictionary:
 func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	if Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty() or _home_pad_for(craft_id).is_empty():
 		return _reject("unknown_craft", "Kein reales Schiff mit Rueckkehrpad")
-	var binding: Dictionary = Dictionary(_campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {}))
+	var binding: Dictionary = _craft_visit_binding(craft_id)
 	if binding.is_empty():
 		return _reject("no_campaign_departure", "Kein ortsgebundener Abflug fuer dieses Schiff")
 	var transfer: Dictionary = _flow.call("_find_pending_mission_craft_transfer", craft_id)
@@ -559,7 +571,7 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	# the same fixed-route cost model instead of inventing distance-based fuel.
 	if location != "mission" and String(transfer.get("phase", "")) != "to_mission":
 		return _reject("craft_not_remote", "Schiff ist nicht im Ausflug")
-	if _campaign_mode and location == "mission":
+	if (_campaign_mode or bool(binding.get("local_origin", false))) and location == "mission":
 		var mission: Node = _flow.call("get_mission_for_craft",craft_id)
 		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
 		if controller == null:
@@ -568,7 +580,7 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 		if not bool(pilot_guard.get("ok", false)):
 			return pilot_guard
 	var route := {"craft_id": craft_id, "origin_location_id": String(binding.destination_location_id), "destination_location_id": "homebase"}
-	var outward_token: String = String(_departure_token_by_craft.get(craft_id, ""))
+	var outward_token: String = "local-purchase:"+String(binding.get("origin_receipt_id", "")) if bool(binding.get("local_origin", false)) else String(_departure_token_by_craft.get(craft_id, ""))
 	if outward_token.is_empty():
 		return _reject("no_departure_receipt", "Bestaetigter Abflugbeleg fehlt")
 	# One return per accepted outward trip, regardless of whether the request
@@ -1160,7 +1172,9 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		if registry == null or registry.call("get_unit", id) == null: continue
 		var access := _inventory_context(id, craft_id)
 		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
-	return {"equipment":_ship_equipment.get_snapshot(craft_id) if _ship_equipment != null and not craft_id.is_empty() else {},"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+	var local_capability: Dictionary = _flow.call("get_polisa_local_ship_purchase_capability") if _flow.has_method("get_polisa_local_ship_purchase_capability") else {"available":false,"message":"Lokale Ausgabe noch nicht verfügbar"}
+	var crew_handoff: Dictionary = _flow.call("get_polisa_crew_handoff_snapshot", craft_id) if not craft_id.is_empty() and _flow.has_method("get_polisa_crew_handoff_snapshot") else {}
+	return {"crew_handoff":crew_handoff,"local_pickup_available":bool(local_capability.get("available", false)),"local_pickup_reason":String(local_capability.get("message", "")),"equipment":_ship_equipment.get_snapshot(craft_id) if _ship_equipment != null and not craft_id.is_empty() else {},"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
 		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
@@ -1233,3 +1247,50 @@ func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	if _space_encounter == null: return false
 	var encounter: Dictionary = _space_encounter.get_snapshot()
 	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
+
+
+func get_station_ship_purchase(craft_id: String) -> Dictionary:
+	return _supply.get_station_ship_purchase(craft_id) if _supply != null else {}
+
+func _craft_visit_binding(craft_id: String) -> Dictionary:
+	var existing: Dictionary = _campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {})
+	if not existing.is_empty(): return existing.duplicate(true)
+	var purchase := get_station_ship_purchase(craft_id)
+	if purchase.get("origin_kind") != "local_station_purchase" or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "mission": return {}
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	if mission == null or String(mission.get_meta("location_id", "")) != "polisa": return {}
+	return {"local_origin":true,"craft_id":craft_id,"job_id":"","origin_location_id":"polisa","destination_location_id":"polisa","landing_pad_id":String(purchase.landing_pad_id),"origin_receipt_id":String(purchase.origin_receipt_id)}
+
+func _fulfill_polisa_local_ship(offer: Dictionary, request_id: String, requested_pad_id: String = "") -> Dictionary:
+	var kind := String(offer.get("craft_type", ""))
+	var model := String(offer.get("model_id", ""))
+	if kind not in ["dropship", "fighter"] or model not in ["cutlass", "buccaneer"]: return _reject("unsupported_craft", "Schiff noch nicht spielbar")
+	if not _flow.has_method("prepare_polisa_local_ship_purchase") or not _flow.has_method("commit_polisa_local_ship_purchase") or not _flow.has_method("finalize_polisa_local_ship_purchase"): return _reject("local_pickup_unavailable", "Lokale Ausgabe nicht verfügbar")
+	var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
+	if not Dictionary(_flow.call("_find_homebase_aircraft_definition", id)).is_empty(): return _reject("craft_already_registered", "Schiffsbeleg bereits vorhanden")
+	var home_pad := _polisa_free_home_pad()
+	if home_pad.is_empty(): return _reject("no_free_home_pad", "Ein gebautes freies Rückkehrpad an der Heimatbasis wird benötigt")
+	var craft: Dictionary = _flow.call("_build_homebase_aircraft_definition", kind, 1)
+	craft.merge({"craft_id":id,"model_id":model,"display_name":String(offer.get("name", model))}, true)
+	var flow_candidate: Dictionary = _flow.call("prepare_polisa_local_ship_purchase", craft.duplicate(true), request_id, requested_pad_id)
+	if not flow_candidate.get("ok", false): return flow_candidate
+	if typeof(flow_candidate.get("craft_definition")) != TYPE_DICTIONARY: return _reject("invalid_local_craft", "Schiffsübergabe unvollständig")
+	craft = Dictionary(flow_candidate.craft_definition).duplicate(true)
+	if String(craft.get("craft_id", "")) != id or String(craft.get("model_id", "")) != model: return _reject("invalid_local_craft", "Schiffsidentität hat sich geändert")
+	var acquisition_pad := String(flow_candidate.get("acquisition_pad_id", ""))
+	if not load("res://scripts/mission/polisa_station_craft_runtime.gd").receipt_pad_compatible(model, acquisition_pad) or (not requested_pad_id.is_empty() and acquisition_pad != requested_pad_id): return _reject("invalid_local_pad", "Erwerbspad ungültig")
+	var travel_candidate: Dictionary = _travel.prepare_surface_registration(id, "polisa", "local-purchase:"+request_id+":surface")
+	if not travel_candidate.get("ok", false): return travel_candidate
+	var travel_validation: Dictionary = _travel.validate_surface_registration(travel_candidate)
+	if not travel_validation.get("ok", false): return travel_validation
+	# This is the last fallible owner commit. Its contract forbids partial writes,
+	# signals/await/reentry; all following publications are prepared assignments.
+	var admitted: Dictionary = _flow.call("commit_polisa_local_ship_purchase", flow_candidate)
+	if not admitted.get("ok", false): return admitted
+	_travel.call("_publish_surface_registration", travel_candidate)
+	var definitions: Array = _flow.get("_homebase_aircraft_definitions")
+	definitions.append(craft)
+	_flow.get("_aircraft_location_by_craft")[id] = "mission"
+	_pad_by_craft[id] = home_pad
+	sync_crafts()
+	return {"ok":true,"receipt_schema_version":2,"craft_id":id,"delivery_location_id":"polisa","landing_pad_id":home_pad,"acquisition_pad_id":acquisition_pad,"pad_fit_revision":1,"origin_kind":"local_station_purchase","origin_location_id":"polisa","origin_receipt_id":request_id}

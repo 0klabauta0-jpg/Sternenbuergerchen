@@ -12023,6 +12023,11 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 	var approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
 	var result: Dictionary = {
 		"craft_id": craft_id,
+		"model_id": String(card.get("model_id", "")),
+		"craft_type": String(card.get("craft_type", "")),
+		"visual_asset_id": String(card.get("visual_asset_id", "")),
+		"station_pad_id": String(card.get("station_pad_id", "")),
+		"crew_capacity": int(card.get("crew_capacity", 0)),
 		"display_name": display_name,
 		"title_text": String(card.get("title_text", card.get("mission_drop_title_text", display_name))).strip_edges(),
 		"texture_path": String(card.get("texture_path", card.get("mission_drop_texture_path", ""))).strip_edges(),
@@ -13631,7 +13636,7 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 
 # Campaign pilot is a real sortie member. Assignment alone never authorizes flight.
 func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
-	if not get_parent().has_meta("campaign_ground_pilot_id"):
+	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id):
 		return {"ok": true}
 	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
 	var pilot_id: String = String(card.get("pilot_unit_id", ""))
@@ -13646,6 +13651,16 @@ func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
 	for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
 		if String(effect.get("unit_id", "")) == pilot_id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]:
 			return {"ok": false, "reason": "pilot_boarding_pending", "message": "Pilot steigt ein"}
+	var ownership: PackedStringArray = _campaign_craft_crew_ids(craft_id)
+	if not ownership.has(pilot_id): return {"ok":false,"reason":"pilot_not_assigned_to_craft"}
+	var sequence: Dictionary = _capture_active_drop_sequence() if _is_active_drop_sequence_for_craft(craft_id) else Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
+	var aboard: Dictionary = sequence.get("embarked_unit_ids", {})
+	for id in ownership:
+		var member = _get_campaign_sortie_unit(id)
+		if member == null or int(member.call("get_health")) <= 0: return {"ok":false,"reason":"crew_unavailable"}
+		if _deployed_unit_ids.has(id) or not bool(member.get_meta("dropship_embarked", false)) or not aboard.has(id): return {"ok":false,"reason":"pilot_not_aboard" if id == pilot_id else "crew_not_aboard"}
+		for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
+			if String(effect.get("unit_id", "")) == id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]: return {"ok":false,"reason":"pilot_boarding_pending"}
 	return {"ok": true, "pilot_unit_id": pilot_id}
 
 
@@ -13670,6 +13685,11 @@ func _get_campaign_sortie_units() -> Array:
 func assign_campaign_pilot(craft_id: String, unit_id: String) -> Dictionary:
 	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
 		return {"ok": false, "reason": "craft_not_landed"}
+	if not _campaign_craft_crew_ids(craft_id).has(unit_id): return {"ok":false,"reason":"pilot_not_assigned_to_craft"}
+	var active_visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
+	for other: Dictionary in _get_mission_dropship_card_entries():
+		var other_id := String(other.get("craft_id", ""))
+		if other_id != craft_id and active_visits.has(other_id) and _is_parked_campaign_dropship(other_id) and String(other.get("pilot_unit_id", "")) == unit_id: return {"ok":false,"reason":"pilot_already_assigned"}
 	var unit = _get_campaign_sortie_unit(unit_id)
 	var setup: Node = get_node_or_null("../MissionSetup")
 	if setup == null or not PackedStringArray(setup.get("selected_team_unit_ids")).has(unit_id) or unit == null or int(unit.call("get_health")) <= 0:
@@ -13713,11 +13733,11 @@ func _refresh_campaign_pilot_selector(card_panel: Control, card: Dictionary) -> 
 
 
 func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "") -> Dictionary:
-	if not get_parent().has_meta("campaign_ground_pilot_id"): return {"ok": true}
+	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id): return {"ok": true}
 	var pilot_id: String = String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
 	var flight_guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
 	if String(flight_guard.get("reason", "")) == "pilot_unavailable": return flight_guard
-	var relevant_crew:Array=_get_campaign_sortie_units()
+	var relevant_crew:Array=_campaign_craft_crew(craft_id)
 	if not boarding_fireteam_id.is_empty():
 		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==boarding_fireteam_id)
 		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehört nicht zu diesem Schiff"}
@@ -13752,7 +13772,10 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		_embarked_unit_ids[id] = true
 		if _is_active_drop_sequence_for_craft(craft_id):
 			_drop_sequence_embarked_unit_ids[id] = true
-	_mission_drop_passenger_count = _embarked_unit_ids.size()
+		elif _parallel_drop_sequences_by_craft.has(craft_id):
+			_parallel_drop_sequences_by_craft[craft_id]["embarked_unit_ids"][id] = true
+	if _parallel_drop_sequences_by_craft.has(craft_id): _update_mission_dropship_card_fields(craft_id, _build_drop_sequence_card_fields(_parallel_drop_sequences_by_craft[craft_id]))
+	if craft_id == _mission_drop_craft_id: _mission_drop_passenger_count = _campaign_craft_crew_ids(craft_id).size()
 	_store_active_drop_sequence_card()
 	_store_selected_mission_dropship_plan()
 	_emit_planning_state_changed()
@@ -13762,8 +13785,8 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
 	if not _can_issue_local_commands() or preview_mode or not _is_parked_campaign_dropship(craft_id): return false
 	var identity:Dictionary=get_parent().get_meta("singleplayer_mission_identity",{})
-	if String(identity.get("craft_id",_mission_drop_craft_id)) != craft_id: return false
-	for unit in _get_campaign_sortie_units():
+	if String(identity.get("craft_id",_mission_drop_craft_id)) != craft_id and not Dictionary(get_parent().get_meta("singleplayer_visit_identities", {})).has(craft_id): return false
+	for unit in _campaign_craft_crew(craft_id):
 		if unit != null and _embarked_unit_ids.has(String(unit.call("get_unit_id"))) and int(unit.call("get_health")) > 0:
 			return true
 	return false
@@ -13774,7 +13797,7 @@ func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
 		return {"ok":false,"reason":"deployment_unavailable","message":"Absetzen braucht ein gelandetes Schiff mit Kräften an Bord"}
 	var crew:Array=[]
 	var embarked:Dictionary={}
-	for unit in _get_campaign_sortie_units():
+	for unit in _campaign_craft_crew(craft_id):
 		if unit == null or not _embarked_unit_ids.has(String(unit.call("get_unit_id"))) or int(unit.call("get_health")) <= 0: continue
 		crew.append(unit); embarked[String(unit.call("get_unit_id"))]=true
 	var card:=_find_mission_dropship_card_entry(craft_id)
@@ -15803,6 +15826,9 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	var show_lz_marker: bool = has_lz and bool(card.get("show_lz_marker", _should_show_lz_marker_for_state(state)))
 	return {
 		"craft_id": craft_id,
+		"model_id": String(card.get("model_id", "")),
+		"craft_type": String(card.get("craft_type", "")),
+		"visual_asset_id": String(card.get("visual_asset_id", "")),
 		"display_name": display_name,
 		"state": state,
 		"dropship_visible": body_visible,
@@ -36666,7 +36692,7 @@ func request_campaign_extraction(craft_id: String) -> Dictionary:
 	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
 	var teams := PackedStringArray()
-	for unit in _get_campaign_sortie_units():
+	for unit in _campaign_craft_crew(craft_id):
 		var id := String(unit.call("get_unit_id"))
 		if int(unit.call("get_health")) <= 0:
 			return {"ok": false, "reason": "crew_unavailable", "message": "Eine Bodenperson ist nicht einsatzfaehig"}
@@ -36844,6 +36870,13 @@ func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray) 
 			if _deployed_unit_ids.has(id): _enqueue_dropship_embark_effect(unit,id,position)
 		_deployed_unit_ids.erase(id); _deployed_unit_positions.erase(id); _embarked_unit_ids.erase(id)
 	for team in teams:
+		var local_team_remains := false
+		for member in _get_campaign_sortie_units():
+			var member_id := String(member.call("get_unit_id"))
+			if not unit_ids.has(member_id) and String(member.call("get_fireteam_id")) == team and (_deployed_unit_ids.has(member_id) or _embarked_unit_ids.has(member_id)):
+				local_team_remains = true
+				break
+		if local_team_remains: continue
 		_clear_fireteam_runtime_execution_for_post_drop(team)
 		for key in _order_plans_by_key.keys():
 			if String(key).begins_with(team+"|"): _order_plans_by_key.erase(key)
@@ -36857,3 +36890,154 @@ func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray) 
 	if _mission_drop_craft_id==craft_id:
 		_mission_drop_state="ready"; _has_lz_position=false; _drop_ship_requested=false; _mission_drop_passenger_count=0
 	_refresh_world_overlays()
+
+
+# Station admission reuses the existing local transport owner. No independent fleet.
+const POLISA_CRAFT = preload("res://scripts/mission/polisa_station_craft_runtime.gd")
+var _station_craft_requests: Dictionary = {}
+var _station_handoff_requests: Dictionary = {}
+
+func _station_craft_projection(craft: Dictionary) -> Dictionary:
+	var view = _get_primary_3d_view()
+	return view.call("get_station_craft_body_projection", craft) if view != null and view.has_method("get_station_craft_body_projection") else {"ok":false,"reason":"station_view_projection_unavailable"}
+
+func preview_station_craft_admission(craft: Dictionary, requested_pad_id: String = "") -> Dictionary:
+	if preview_mode or String(get_parent().get_meta("location_id", "")) != "polisa": return {"ok":false,"reason":"not_live_polisa"}
+	var id := String(craft.get("craft_id", ""))
+	if id.is_empty() or not _find_raw_mission_dropship_card_entry(id).is_empty() or _has_live_drop_sequence_for_craft(id): return {"ok":false,"reason":"station_craft_already_present"}
+	var model := String(craft.get("model_id", ""))
+	var capacity := int(craft.get("crew_capacity", 0))
+	if (model == "cutlass" and capacity != 8) or (model == "buccaneer" and capacity != 1): return {"ok":false,"reason":"invalid_station_crew_capacity"}
+	var map = _get_active_mission_terrain_map_data_for_readability()
+	var pads: Array = POLISA_CRAFT.station_pads(map)
+	var projection := _station_craft_projection(craft)
+	if not bool(projection.get("ok", false)): return projection
+	var occupied: Array = []
+	for card: Dictionary in _get_mission_dropship_card_entries():
+		var other_id := String(card.get("craft_id", ""))
+		var sequence: Dictionary = _parallel_drop_sequences_by_craft.get(other_id, {})
+		if _is_active_drop_sequence_for_craft(other_id): sequence = _capture_active_drop_sequence()
+		var phase := String(sequence.get("phase", card.get("state", "")))
+		if phase in ["", "ready", "waiting", "to_homebase", "homebase", "starmap"] and not bool(card.get("has_lz_position", false)): continue
+		if phase in ["outbound", "to_homebase", "homebase", "starmap", "ready"]: continue
+		var position: Variant = sequence.get("lz_position", card.get("lz_position"))
+		if not position is Vector2 or not Vector2(position).is_finite(): return {"ok":false,"reason":"occupied_station_position_unknown"}
+		var other_projection := _station_craft_projection(card)
+		var body: Dictionary = POLISA_CRAFT.projected_body(position, other_projection)
+		if not bool(body.get("ok", false)): return body
+		occupied.append({"pad_id":String(card.get("station_pad_id", "")),"footprint":body.footprint})
+	var result: Dictionary = POLISA_CRAFT.preview_admission(craft, pads, projection, occupied, requested_pad_id)
+	if not bool(result.get("ok", false)): return result
+	var registry = _get_terrain_registry()
+	var checked: Dictionary = FIELD_LANDING.validate(registry, registry.call("world_to_grid", result.position), []) if registry != null else {"ok":false,"reason":"terrain_unavailable"}
+	if not bool(checked.get("ok", false)): return checked
+	result["owner_signature"] = JSON.stringify({"cards":_mission_drop_cards,"sequences":_parallel_drop_sequences_by_craft}, "", true).sha256_text()
+	return result
+
+func admit_station_craft(craft: Dictionary, pad_id: String, request_id: String) -> Dictionary:
+	if request_id.is_empty(): return {"ok":false,"reason":"request_id_required"}
+	var signature := JSON.stringify({"craft":craft,"pad_id":pad_id}, "", true)
+	if _station_craft_requests.has(request_id):
+		var previous: Dictionary = _station_craft_requests[request_id]
+		if String(previous.signature) != signature: return {"ok":false,"reason":"request_id_conflict"}
+		var replay: Dictionary = previous.result.duplicate(true); replay["replayed"] = true; return replay
+	var admission := preview_station_craft_admission(craft, pad_id)
+	if not bool(admission.get("ok", false)): return admission
+	# Everything above is read-only. No signals/await until Flow/Travel/Supply publish.
+	var id := String(craft.craft_id)
+	var sequence: Dictionary = POLISA_CRAFT.parked_sequence(craft, admission)
+	_parallel_drop_sequences_by_craft[id] = sequence
+	_field_landing_by_craft[id] = {"ok":true,"requested_lz_position":admission.position,"resolved_lz_position":admission.position,"station_pad_id":pad_id}
+	var fields := _build_drop_sequence_card_fields(sequence)
+	fields.merge({"model_id":String(craft.model_id),"craft_type":String(craft.get("craft_type", "")),
+		"station_pad_id":pad_id,"crew_capacity":int(craft.crew_capacity),"pilot_unit_id":"","payload_source":"homebase_direct"},true)
+	_update_mission_dropship_card_fields(id, fields)
+	var result := {"ok":true,"craft_id":id,"pad_id":pad_id,"position":admission.position}
+	_station_craft_requests[request_id] = {"signature":signature,"result":result.duplicate(true)}
+	return result
+
+func finalize_station_craft_update() -> void:
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	_refresh_mission_dropship_panel()
+	_refresh_world_overlays()
+
+func _campaign_craft_crew_ids(craft_id: String) -> PackedStringArray:
+	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
+	if visits.has(craft_id):
+		var ids := PackedStringArray(Dictionary(visits[craft_id]).get("unit_ids", []))
+		var pilot := String(_find_raw_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+		if not pilot.is_empty() and not ids.has(pilot) and _get_campaign_sortie_unit(pilot) != null: ids.append(pilot)
+		return ids
+	# An admitted station craft without a published visit is still uncrewed.
+	if not visits.is_empty() or not String(_find_raw_mission_dropship_card_entry(craft_id).get("station_pad_id", "")).is_empty(): return PackedStringArray()
+	# Legacy scenes without per-visit identities retain their original sortie path.
+	var result := PackedStringArray()
+	for unit in _get_campaign_sortie_units(): result.append(String(unit.call("get_unit_id")))
+	return result
+
+func _campaign_craft_crew(craft_id: String) -> Array:
+	var result: Array = []
+	for id in _campaign_craft_crew_ids(craft_id):
+		var unit = _get_campaign_sortie_unit(id)
+		if unit != null: result.append(unit)
+	return result
+
+func _station_handoff_snapshot(trusted_membership: Dictionary) -> Dictionary:
+	var snapshot := {"membership":trusted_membership.duplicate(true),"crafts":{},"people":{}}
+	for card: Dictionary in _get_mission_dropship_card_entries():
+		var id := String(card.get("craft_id", ""))
+		if not trusted_membership.has(id): continue
+		snapshot.crafts[id] = {"parked":_is_parked_campaign_dropship(id),"capacity":(int(card.get("crew_capacity", 0)) if int(card.get("crew_capacity", 0)) > 0 else (1 if String(card.get("model_id", "")) == "buccaneer" else 8)),"pilot_unit_id":String(card.get("pilot_unit_id", ""))}
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	for unit in _get_campaign_sortie_units():
+		var id := String(unit.call("get_unit_id"))
+		var pending := false
+		for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
+			if String(effect.get("unit_id", "")) == id and String(effect.get("effect_type", "")) in ["dropship_embark_unit", "dropship_deploy_unit"]: pending = true
+		snapshot.people[id] = {"alive":int(unit.call("get_health")) > 0,"deployed":_deployed_unit_ids.has(id) and not bool(unit.get_meta("dropship_embarked", false)),"boarding_pending":pending,"fireteam_id":String(unit.call("get_fireteam_id"))}
+	return snapshot
+
+func preview_station_crew_handoff(source: String, target: String, unit_ids: PackedStringArray, pilot_id: String, trusted_membership: Dictionary) -> Dictionary:
+	if String(get_parent().get_meta("location_id", "")) != "polisa": return {"ok":false,"reason":"not_live_polisa"}
+	return POLISA_CRAFT.preview_handoff(source, target, unit_ids, pilot_id, _station_handoff_snapshot(trusted_membership))
+
+func commit_station_crew_handoff(source: String, target: String, unit_ids: PackedStringArray, pilot_id: String, trusted_membership: Dictionary, request_id: String) -> Dictionary:
+	if request_id.is_empty(): return {"ok":false,"reason":"request_id_required"}
+	var signature := JSON.stringify({"source":source,"target":target,"unit_ids":Array(unit_ids),"pilot_id":pilot_id}, "", true)
+	if _station_handoff_requests.has(request_id):
+		var previous: Dictionary = _station_handoff_requests[request_id]
+		if String(previous.signature) != signature: return {"ok":false,"reason":"request_id_conflict"}
+		var replay: Dictionary = previous.result.duplicate(true); replay["replayed"] = true; return replay
+	var result := preview_station_crew_handoff(source,target,unit_ids,pilot_id,trusted_membership)
+	if not bool(result.get("ok",false)): return result
+	# Local membership only. Flow commits visits/global pilot mapping before finalize.
+	for id in [source,target]:
+		var card := _find_raw_mission_dropship_card_entry(id)
+		var ids := PackedStringArray(trusted_membership.get(id, []))
+		for unit_id in unit_ids:
+			if id == source: ids.erase(unit_id)
+			elif not ids.has(unit_id): ids.append(unit_id)
+		var actors: Array = []
+		for unit_id in ids:
+			var actor = _get_campaign_sortie_unit(unit_id)
+			if actor != null: actors.append(actor)
+		if _is_active_drop_sequence_for_craft(id): _drop_sequence_units = actors
+		elif _parallel_drop_sequences_by_craft.has(id): _parallel_drop_sequences_by_craft[id]["units"] = actors
+		var old_pilot := String(card.get("pilot_unit_id", ""))
+		var new_pilot := pilot_id if id == target else ("" if unit_ids.has(old_pilot) else old_pilot)
+		var pilot = _get_campaign_sortie_unit(new_pilot)
+		_update_mission_dropship_card_fields(id,{"pilot_unit_id":new_pilot,"pilot_display_name":String(pilot.call("get_display_name")) if pilot != null else "","pilot_portrait_path":String(pilot.call("get_portrait_path")) if pilot != null else "","pilot_text":"Pilot: " + String(pilot.call("get_display_name")) if pilot != null else "Pilot fehlt"})
+		if id == _mission_drop_craft_id:
+			_mission_drop_pilot_unit_id = new_pilot
+			_mission_drop_pilot_display_name = String(pilot.call("get_display_name")) if pilot != null else ""
+			_mission_drop_pilot_portrait_path = String(pilot.call("get_portrait_path")) if pilot != null else ""
+			_mission_drop_pilot_text = "Pilot: " + _mission_drop_pilot_display_name if pilot != null else "Pilot fehlt"
+	_station_handoff_requests[request_id] = {"signature":signature,"result":result.duplicate(true)}
+	return result
+
+
+func _requires_exact_station_crew(craft_id: String) -> bool:
+	if not String(_find_raw_mission_dropship_card_entry(craft_id).get("station_pad_id", "")).is_empty(): return true
+	var visit: Dictionary = Dictionary(get_parent().get_meta("singleplayer_visit_identities", {})).get(craft_id, {})
+	return String(visit.get("origin_kind", "")) == "local_station_purchase"

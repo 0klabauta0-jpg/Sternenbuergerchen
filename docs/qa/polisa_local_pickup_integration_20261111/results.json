@@ -1,0 +1,38 @@
+[
+  {
+    "name": "vertical_return",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "POLISA_VERTICAL_ROUTE_RESULT checks=18 failures=0 presence_boundary=real_legacy_effect_committed route_boundary=explicit_owner_endpoints_not_flight_motion"
+    ]
+  },
+  {
+    "name": "flow",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "POLISA_PICKUP_FLOW checks=23 failures=0"
+    ]
+  },
+  {
+    "name": "backend",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "POLISA_LOCAL_PICKUP_BACKEND checks=43 failures=0"
+    ]
+  },
+  {
+    "name": "flow_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  },
+  {
+    "name": "base_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  }
+]

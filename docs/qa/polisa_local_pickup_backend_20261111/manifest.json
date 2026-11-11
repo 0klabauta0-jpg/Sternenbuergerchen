@@ -1,0 +1,37 @@
+{
+  "status": "backend freeze for joint review;43/0 bounded domain +5compile; no native/broad acceptance",
+  "files": [
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "f79609643c5ad719e8196da4a56e693fb8a024d8f40acf48847bc4d0150db98e"
+    },
+    {
+      "path": "scripts/core/singleplayer_space_travel_state.gd",
+      "sha256": "86deb728e5755ca3d8873097006c9aad230804bfb991db6111a2997b242bc4a5"
+    },
+    {
+      "path": "scripts/core/singleplayer_fleet_travel_state.gd",
+      "sha256": "c9fe33ed6caa5adfad8d386a95a7a89e42273fd5acff53fbae6167350b4d9cb2"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "d1e156b6130a65c2d500b6ec7435af6c95f7dea1db6bb4b00dffb3bba4212cc4"
+    },
+    {
+      "path": "scripts/ui/polisa_station_screen.gd",
+      "sha256": "20214a323403e40c3682ef6e7794041f959a966aafe3752ae318103b171289d9"
+    },
+    {
+      "path": "scripts/tests/polisa_local_pickup_backend_check.gd",
+      "sha256": "c3530f880438218475b8e2b0ece842a65ae7e81fa2aff2b1f285812b3ef4c0cb"
+    },
+    {
+      "path": "docs/tasks/POLISA_LOCAL_PICKUP_BACKEND_2026_11_11.md",
+      "sha256": "698d49716db23a4e42490f1c3438db94ca051ac3a174e516cccecefb895aeb66"
+    },
+    {
+      "path": "docs/dev/polisa_local_ship_pickup_backend_contract.md",
+      "sha256": "d9426deaadb693eee1950864a956a0e5f71a967000a1bd1bad4da381ef3481bd"
+    }
+  ]
+}
