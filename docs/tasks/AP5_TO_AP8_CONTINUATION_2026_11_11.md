@@ -1,5 +1,12 @@
 # AP5 bis AP8: abgestimmte Fortsetzung
 
+## Fortschritt
+
+AP5-Backoff258183ce2 als0730e760e übernommen. Enger unabhängiger Review ohne
+Blocker; gemeinsamer tatsächlicher Backoff55/0 einschließlich42 Grundchecks und
+Quell-/Profil-/Canaryguards grün. Kein Rootpatch, kein Produktflag. AP5-Codepfade
+zusammengeführt; AP6–8 bleiben in Arbeit, große AP9-Prüfung später.
+
 ## Ziel / Anlass
 
 Erneuter Nutzerauftrag: AP5 bis AP8 selbstständig fortsetzen und den Orbitweg

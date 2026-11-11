@@ -2,6 +2,13 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+AP5-Ausführung nach aktuellem Nutzerauftrag: Backoff258183ce2 nach engem Review
+als0730e760e integriert; frischer gemeinsamer Backoff55/0 samt Guards grün.
+Originalziel/Command/Wartealter bleiben erhalten, temporäre Erholung räumt bei
+Hold/Wunde/Replan sauber auf. Damit sind die AP5-Codepfade im Taskstand
+zusammengeführt; native Abnahme bleibt offen. Jetzt AP6 echte Aufnahme/Freigabe,
+danach AP7 Restore/Authority und AP8 kleiner integrierter Kandidat.
+
 Aktueller Orbitnachtrag: Spacegrundlagen bis 613a03c3c samt gemeinsamem Flight-
 Owner und Polisa-Flight-IDfix 78f5966b5 sind als 3d3bf7a1e integriert. Danach
 Ersteintritt-/Index-/Saumvorschau und Client-Tickguard bis Source13462af85
