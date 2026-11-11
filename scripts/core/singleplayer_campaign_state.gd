@@ -16,6 +16,11 @@ var _requests: Dictionary = {}
 var _revision: int = 0
 var _progress: Dictionary = {"recruited_outpost":false,"recruited_pilot":false,"crate_loaded":false,"crate_delivered":false,"second_pad_built":false}
 var _enforce_sequence := true
+# Unwired in-process preparation metadata, never campaign/save truth.
+var _departure_preparation_authority: WeakRef
+var _departure_preparation_epoch := 0
+var _departure_preparation_seal := ""
+var _prepared_departure_receipts: Dictionary = {}
 
 func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequence: bool = true) -> Dictionary:
 	_enforce_sequence = enforce_sequence
@@ -42,6 +47,7 @@ func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequen
 			return _reject("invalid_job", "Auftrag oder Zielort ungueltig")
 		job["status"] = "offered"
 		normalized_jobs[String(key)] = job
+	_reset_departure_preparation()
 	_locations = normalized_locations
 	_jobs = normalized_jobs
 	_selected_location_id = "homebase"
@@ -290,6 +296,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	var result: Dictionary = fresh._validate_saved_state(data)
 	if not result.ok:
 		return result
+	_reset_departure_preparation()
 	_locations = fresh._locations.duplicate(true)
 	_enforce_sequence = fresh._enforce_sequence
 	_jobs = fresh._jobs.duplicate(true)
@@ -380,3 +387,145 @@ func _compatible_locations(saved: Dictionary) -> bool:
 	var current := _locations.duplicate(true)
 	if not saved.has("polisa"): current.erase("polisa")
 	return JSON.stringify(saved, "", true) == JSON.stringify(current, "", true)
+
+
+func _reset_departure_preparation() -> void:
+	_departure_preparation_epoch += 1
+	_departure_preparation_seal = str(get_instance_id()) + ":" + str(_departure_preparation_epoch) + ":" + str(Time.get_ticks_usec())
+	_departure_preparation_authority = null
+	_prepared_departure_receipts.clear()
+
+func configure_departure_preparation_authority(authority: Object) -> Dictionary:
+	if not is_instance_valid(authority): return _reject("departure_authority_required", "Gebundener Runtimeowner fehlt")
+	if _departure_preparation_authority != null:
+		return {"ok":true} if _departure_preparation_authority.get_ref() == authority else _reject("departure_authority_already_bound", "Owner ist bereits gebunden")
+	_departure_preparation_authority = weakref(authority)
+	return {"ok":true}
+
+func _normalize_prepared_departure_context(context: Dictionary) -> Dictionary:
+	if context.size() != 3 or _departure_preparation_authority == null or not is_instance_valid(_departure_preparation_authority.get_ref()) or context.get("authority") != _departure_preparation_authority.get_ref():
+		return _reject("departure_authority_required", "Nur gebundener Inprocessowner darf vorbereiten")
+	if typeof(context.get("transaction_id")) != TYPE_STRING or String(context.transaction_id).strip_edges().is_empty() or typeof(context.get("built_home_pad_ids")) != TYPE_ARRAY:
+		return _reject("invalid_departure_context", "Transaktions- oder Padkontext fehlt")
+	var pads: Array = []
+	for pad: Variant in context.built_home_pad_ids:
+		if typeof(pad) != TYPE_STRING or String(pad).is_empty(): return _reject("invalid_departure_context", "Padkontext ist ungueltig")
+		if not pads.has(pad): pads.append(pad)
+	pads.sort()
+	return {"ok":true,"authority_instance_id":_departure_preparation_authority.get_ref().get_instance_id(),"transaction_id":String(context.transaction_id),"built_home_pad_ids":pads}
+
+func _prepared_departure_command(command: Dictionary, operation: String) -> Dictionary:
+	if not COMMANDS.validate_command(command) or String(command.operation) != operation: return {}
+	var normalized := command.duplicate(true)
+	normalized["request_id"] = String(command.request_id).strip_edges()
+	return normalized
+
+func _prepared_departure_signature(binding: Dictionary, activation: Dictionary, context: Dictionary) -> String:
+	return JSON.stringify({"binding":binding,"activation":activation,"context":context}, "", true)
+
+func _prepared_departure_inputs(binding: Dictionary, activation: Dictionary, context: Dictionary) -> String:
+	var payload: Dictionary = binding.payload
+	var craft_id := String(payload.get("craft_id", ""))
+	var job_id := String(payload.get("job_id", ""))
+	var bind_id := String(binding.request_id)
+	var activate_id := String(activation.get("request_id", ""))
+	return JSON.stringify({"revision":_revision,"selected_location_id":_selected_location_id,"selected_job_id":_selected_job_id,
+		"origin":_locations.get(String(payload.get("origin_location_id", "")), {}),"destination":_locations.get(String(payload.get("destination_location_id", "")), {}),
+		"job":_jobs.get(job_id, {}),"binding_present":_departures_by_craft_id.has(craft_id),"binding":_departures_by_craft_id.get(craft_id, {}),
+		"pads":context.built_home_pad_ids,"bind_receipt_present":_requests.has(bind_id),"bind_receipt":_requests.get(bind_id, {}),
+		"activate_receipt_present":not activate_id.is_empty() and _requests.has(activate_id),"activate_receipt":_requests.get(activate_id, {})}, "", true)
+
+func prepare_departure(binding_command: Dictionary, activation_command_or_empty: Dictionary, trusted_context: Dictionary) -> Dictionary:
+	var context := _normalize_prepared_departure_context(trusted_context)
+	if not context.get("ok", false): return context
+	var binding := _prepared_departure_command(binding_command, "bind_departure")
+	var activation := {} if activation_command_or_empty.is_empty() else _prepared_departure_command(activation_command_or_empty, "activate_job")
+	if binding.is_empty() or (not activation_command_or_empty.is_empty() and activation.is_empty()): return _reject("invalid_departure_commands", "Abflugcommands sind ungueltig")
+	var payload: Dictionary = binding.payload
+	var craft_id := String(payload.get("craft_id", ""))
+	var job_id := String(payload.get("job_id", ""))
+	if job_id.is_empty() != activation.is_empty(): return _reject("departure_activation_mismatch", "Auftrag und Aktivierung passen nicht zusammen")
+	if not activation.is_empty() and (String(activation.payload.get("craft_id", "")) != craft_id or String(activation.payload.get("job_id", "")) != job_id or activation.request_id == binding.request_id):
+		return _reject("departure_activation_mismatch", "Aktivierung gehoert nicht zu diesem Abflug")
+	var signature := _prepared_departure_signature(binding, activation, context)
+	var transaction_id := String(context.transaction_id)
+	if _prepared_departure_receipts.has(transaction_id):
+		var receipt: Dictionary = _prepared_departure_receipts[transaction_id]
+		if String(receipt.signature) != signature: return _reject("transaction_id_conflict", "Gruppen-ID wurde anders verwendet")
+		var replay := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_departure_preparation_epoch,"context":context,"signature":signature,"replay":true}
+		replay["seal"] = _sign_prepared_departure(replay)
+		return replay
+	if _requests.has(String(binding.request_id)) or (not activation.is_empty() and _requests.has(String(activation.request_id))):
+		return _reject("ambiguous_partial_departure", "Alte Teilbelege beweisen keinen vollstaendigen Gruppencommit")
+	if not job_id.is_empty() and _jobs.has(job_id) and String(_jobs[job_id].get("status", "")) == "active" and String(_jobs[job_id].get("craft_id", "")) != craft_id:
+		return _reject("ambiguous_active_job_owner", "Aktiver Auftrag ist nicht eindeutig diesem Schiff zugeordnet")
+	var gate := validate_departure(payload, {"departure_authorized":true,"built_home_pad_ids":context.built_home_pad_ids})
+	if not gate.get("ok", false): return gate
+	# Only inputs read by _bind_departure/_activate/apply_command are copied.
+	# No configure, file I/O, save export/restore or replacement of the live owner.
+	var staged = get_script().new()
+	for location_id: String in [String(payload.origin_location_id),String(payload.destination_location_id)]: staged._locations[location_id] = Dictionary(_locations[location_id]).duplicate(true)
+	if not job_id.is_empty(): staged._jobs[job_id] = Dictionary(_jobs[job_id]).duplicate(true)
+	if _departures_by_craft_id.has(craft_id): staged._departures_by_craft_id[craft_id] = Dictionary(_departures_by_craft_id[craft_id]).duplicate(true)
+	staged._revision = _revision
+	var command_context := {"departure_authorized":true,"built_home_pad_ids":context.built_home_pad_ids.duplicate()}
+	var bound: Dictionary = staged.apply_command(binding, command_context)
+	if not bound.get("ok", false): return bound
+	var activated := {}
+	if not activation.is_empty():
+		activated = staged.apply_command(activation, command_context)
+		if not activated.get("ok", false): return activated
+	var patch := {"craft_id":craft_id,"binding":Dictionary(staged._departures_by_craft_id[craft_id]).duplicate(true),"job_id":job_id,
+		"revision_delta":int(staged._revision) - _revision,"receipts":{},
+		"result":{"ok":true,"transaction_id":transaction_id,"departure":Dictionary(bound.departure).duplicate(true),"binding_result":bound.duplicate(true)}}
+	patch.receipts[String(binding.request_id)] = Dictionary(staged._requests[String(binding.request_id)]).duplicate(true)
+	if not activation.is_empty():
+		patch["job_patch"] = {"status":String(staged._jobs[job_id].status),"craft_id":String(staged._jobs[job_id].get("craft_id", ""))}
+		patch.receipts[String(activation.request_id)] = Dictionary(staged._requests[String(activation.request_id)]).duplicate(true)
+		patch.result["activation_result"] = activated.duplicate(true)
+	var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_departure_preparation_epoch,"context":context,
+		"signature":signature,"binding_command":binding,"activation_command":activation,
+		"inputs":_prepared_departure_inputs(binding, activation, context),"patch":patch}
+	candidate["seal"] = _sign_prepared_departure(candidate)
+	return candidate
+
+func _sign_prepared_departure(candidate: Dictionary) -> String:
+	var content := candidate.duplicate(true)
+	content.erase("seal")
+	return (_departure_preparation_seal + JSON.stringify(content, "", true)).sha256_text()
+
+func validate_prepared_departure(candidate: Dictionary, trusted_context: Dictionary) -> Dictionary:
+	var context := _normalize_prepared_departure_context(trusted_context)
+	if not context.get("ok", false): return context
+	if not candidate.get("ok", false) or int(candidate.get("owner_instance_id", 0)) != get_instance_id() or int(candidate.get("owner_epoch", -1)) != _departure_preparation_epoch or String(candidate.get("seal", "")) != _sign_prepared_departure(candidate):
+		return _reject("invalid_departure_candidate", "Vorbereitung gehoert nicht zu diesem Ownerzustand")
+	if JSON.stringify(context, "", true) != JSON.stringify(candidate.get("context", {}), "", true): return _reject("departure_context_changed", "Rootkontext hat sich geaendert")
+	var transaction_id := String(context.transaction_id)
+	if _prepared_departure_receipts.has(transaction_id):
+		var receipt: Dictionary = _prepared_departure_receipts[transaction_id]
+		if String(receipt.signature) != String(candidate.signature): return _reject("transaction_id_conflict", "Gruppen-ID wurde anders verwendet")
+		return {"ok":true,"replayed":true,"result":Dictionary(receipt.result).duplicate(true)}
+	if String(candidate.get("inputs", "")) != _prepared_departure_inputs(candidate.binding_command, candidate.activation_command, context):
+		return _reject("departure_inputs_changed", "Relevante Campaigninputs oder Teilbelege haben sich geaendert")
+	return {"ok":true}
+
+func commit_prepared_departure(candidate: Dictionary, trusted_context: Dictionary) -> Dictionary:
+	var validation := validate_prepared_departure(candidate, trusted_context)
+	return _publish_prepared_departure(candidate, validation) if validation.get("ok", false) else validation
+
+func _publish_prepared_departure(candidate: Dictionary, validation: Dictionary) -> Dictionary:
+	# Root-private silent tail AFTER all owners have been validated. Detach
+	# caller-owned dictionaries before the first live write; no fallible callbacks.
+	if validation.get("replayed", false):
+		var replay: Dictionary = validation.result.duplicate(true); replay["replayed"] = true; return replay
+	var patch: Dictionary = candidate.patch.duplicate(true)
+	var result: Dictionary = patch.result.duplicate(true)
+	var group_receipt := {"signature":String(candidate.signature),"result":result.duplicate(true)}
+	_departures_by_craft_id[String(patch.craft_id)] = patch.binding
+	if patch.has("job_patch"):
+		_jobs[String(patch.job_id)]["status"] = String(patch.job_patch.status)
+		_jobs[String(patch.job_id)]["craft_id"] = String(patch.job_patch.craft_id)
+	for request_id: String in patch.receipts: _requests[request_id] = patch.receipts[request_id]
+	_revision += int(patch.revision_delta)
+	_prepared_departure_receipts[String(candidate.context.transaction_id)] = group_receipt
+	return result

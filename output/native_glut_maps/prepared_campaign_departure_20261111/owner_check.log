@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS explicit object authority required; bool and takeover do not authorize
+PASS no-job private prepare is read-only and has no phantom activation
+PASS silent patch preserves legacy subreceipt shape and detaches caller data
+PASS own complete group replays once and changed command under same transaction rejects
+PASS actual accepted job binding and activation publish together
+PASS mismatched or absent activation rejects without half binding
+PASS relevant selection/job/binding/pad inputs revalidate beyond revision
+PASS tampered patch and different owner cannot consume candidate
+PASS real already_active receipt key write invalidates candidate without revision change
+PASS legacy partial subreceipt is rejected rather than guessed complete
+PASS legitimate built runtime pads03-06 prepare without save/restore cloning
+PASS lifecycle reset invalidates candidate/authority and new seals consume no combat RNG
+PREPARED_CAMPAIGN_RESULT checks=12 failures=0 runtime_wired=false
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
