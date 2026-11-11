@@ -16,6 +16,7 @@ CASES = {
     "ground": ("hex_ground_state_verifier.gd", "HEX_GROUND_STATE_PASS"),
     "visibility": ("hex_visibility_verifier.gd", "HEX_VISIBILITY_PASS"),
     "detection": ("hex_detection_verifier.gd", "HEX_DETECTION_PASS"),
+    "owner": ("hex_ground_owner_verifier.gd", "HEX_GROUND_OWNER_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -56,6 +57,20 @@ def main() -> int:
         "scripts/core/hex_detection_state.gd",
         "scripts/mission/combat_visibility_cache.gd",
     ]
+    if args.case == "owner":
+        # Only the real owner's bounded preload closure; no game autoloads/scenes.
+        pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
+        visited = set()
+        while pending:
+            relative = pending.pop()
+            if relative in visited:
+                continue
+            visited.add(relative)
+            paths.append(relative)
+            code = (source / relative).read_text(encoding="utf-8-sig")
+            pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"', code))
+        paths.append("data/terrain_tile_catalog.json")
+    paths = list(dict.fromkeys(paths))
     hashes = {}
     for relative in paths:
         origin = source / relative

@@ -129,6 +129,7 @@ const BOTTLENECK_RESERVATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/
 const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_command_contract.gd")
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const HEX_GROUND_RUNTIME_SCRIPT: GDScript = preload("res://scripts/core/hex_ground_runtime.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
@@ -272,6 +273,74 @@ var _local_avoidance_debug_by_unit_id: Dictionary = {}
 var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
 var _bottleneck_reservation_debug_snapshot: Dictionary = {}
 var _last_damage_effect_resolution: Dictionary = {}
+var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
+var _hex_ground_registry: Node
+var _hex_ground_enabled := false
+
+
+## Called by the owning map runtime, never interpreted from a UI/network payload.
+## Validate before replacing the current context, so failed loads preserve it.
+func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) -> Dictionary:
+	if _should_skip_local_tick_processing():
+		return {"ok": false, "reason": "not_authority"}
+	if map_data == null or not map_data.has_method("get_tactical_grid_rules") or not map_data.has_method("get_grid_topology") or not map_data.has_method("has_load_issue"):
+		return {"ok": false, "reason": "invalid_map_data"}
+	if bool(map_data.call("has_load_issue")):
+		return {"ok": false, "reason": "map_load_issue"}
+	if not map_data.has_method("get_map_name") or not map_data.has_method("get_grid_size"):
+		return {"ok": false, "reason": "invalid_map_context"}
+	var map_size: Variant = map_data.call("get_grid_size")
+	if String(map_data.call("get_map_name")).strip_edges().is_empty() or typeof(map_size) != TYPE_VECTOR2I or map_size.x <= 0 or map_size.y <= 0 or tick_counter < 0:
+		return {"ok": false, "reason": "invalid_map_context"}
+	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_grid_topology") or String(terrain_registry.call("get_grid_topology")) != String(map_data.call("get_grid_topology")):
+		return {"ok": false, "reason": "invalid_terrain_registry"}
+	var rules := String(map_data.call("get_tactical_grid_rules"))
+	if rules.is_empty():
+		_hex_ground_runtime.clear()
+		_hex_ground_registry = null
+		_hex_ground_enabled = false
+		return {"ok": true, "enabled": false}
+	if rules != "hex_tactical_v1" or String(map_data.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
+		return {"ok": false, "reason": "unsupported_tactical_grid_rules"}
+	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_grid_topology") or String(terrain_registry.call("get_grid_topology")) != HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY:
+		return {"ok": false, "reason": "invalid_hex_registry"}
+	if not terrain_registry.has_method("is_walkable") or not terrain_registry.has_method("get_stand_height_at"):
+		return {"ok": false, "reason": "invalid_hex_registry"}
+	_hex_ground_runtime.configure(terrain_registry, String(map_data.call("get_map_name")), tick_counter)
+	_hex_ground_registry = terrain_registry
+	_hex_ground_enabled = true
+	return {"ok": true, "enabled": true}
+
+
+func is_hex_ground_runtime_active() -> bool:
+	return _hex_ground_enabled and is_instance_valid(_hex_ground_registry)
+
+
+func get_hex_unit_state(unit_id: String) -> Dictionary:
+	return _hex_ground_runtime.read_unit(unit_id) if is_hex_ground_runtime_active() else {}
+
+
+func get_hex_ground_planning_snapshot() -> Dictionary:
+	if not is_hex_ground_runtime_active():
+		return {}
+	var snapshot: Dictionary = _hex_ground_runtime.build_planning_snapshot()
+	snapshot["current_tick"] = tick_counter
+	return snapshot
+
+
+## Internal runtime admission boundary; lifecycle adapters choose placements.
+func admit_hex_ground_units(placements: Array[Dictionary]) -> Dictionary:
+	if _should_skip_local_tick_processing():
+		return {"ok": false, "reason": "not_authority"}
+	if not is_hex_ground_runtime_active():
+		return {"ok": false, "reason": "hex_ground_inactive"}
+	return _hex_ground_runtime.admit_units(placements)
+
+
+func release_hex_ground_unit(unit_id: String, reason: String) -> void:
+	if _should_skip_local_tick_processing():
+		return
+	_hex_ground_runtime.release_unit(unit_id, reason)
 
 
 func _init() -> void:

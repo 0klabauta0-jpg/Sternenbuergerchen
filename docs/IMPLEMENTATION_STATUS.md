@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### AP1 Hex-Owner und Versionsgate — 11.11.2026
+
+SimulationRoot besitzt den gekapselten Ground-State; MapData validiert den
+expliziten Opt-in und erhält Rampen-/Regionalversion3. Eigener kleiner
+Privatprojektcheck39/0, Reviewbefunde zum abgebrochenen Load und ungültigem
+Legacywechsel behoben. Keine Karte aktiviert, keine Lifecycle-/Bewegungs-
+oder Sichtverbraucheranbindung behauptet. QA hex_ground_owner_20261111.
+
 ### Isolierte Hex-Runtime-Grundlagen — 11.11.2026
 
 Eigener Branch task/hex-ground-foundation-20261111 auf dem noch nicht

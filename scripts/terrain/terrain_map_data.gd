@@ -6,6 +6,7 @@ const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/t
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+const TACTICAL_GRID_RULES_V1 := "hex_tactical_v1"
 
 var _map_name: String = ""
 var _terrain_visual_theme_id: String = ""
@@ -68,6 +69,12 @@ static func load_from_file(path: String) -> TerrainMapData:
 		push_warning(terrain_map_data._load_issue_message)
 		return terrain_map_data
 	terrain_map_data._grid_topology = topology
+	if not terrain_map_data._get_tactical_grid_rules_issue().is_empty():
+		# Loading stops before canonical data/tiles are populated. Editing the
+		# flag later cannot repair this truncated object or make it saveable.
+		terrain_map_data._load_issue_message = terrain_map_data._get_tactical_grid_rules_issue()
+		push_warning(terrain_map_data.get_load_issue_message())
+		return terrain_map_data
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
 	terrain_map_data._terrain_visual_theme_id = _normalize_optional_id(String(root_dict.get("terrain_visual_theme_id", root_dict.get("surface_visual_theme_id", ""))))
 	terrain_map_data._authored_visual_layout_id = _normalize_optional_id(String(root_dict.get("authored_visual_layout_id", "")))
@@ -197,6 +204,8 @@ static func create_empty(
 
 
 func save_to_file(path: String) -> Error:
+	if has_load_issue():
+		return ERR_INVALID_DATA
 	if path.is_empty():
 		return ERR_INVALID_PARAMETER
 
@@ -278,11 +287,11 @@ func get_tiles() -> Array:
 
 
 func has_load_issue() -> bool:
-	return not _load_issue_message.is_empty()
+	return not _load_issue_message.is_empty() or not _get_tactical_grid_rules_issue().is_empty()
 
 
 func get_load_issue_message() -> String:
-	return _load_issue_message
+	return _load_issue_message if not _load_issue_message.is_empty() else _get_tactical_grid_rules_issue()
 
 
 func get_tile_at_grid(grid_position: Vector2i):
@@ -742,10 +751,35 @@ func set_place_presentation(presentation: Dictionary) -> void:
 
 
 func get_regional_height_step() -> float:
-	if int(_extension_metadata.get("regional_terrain_version", 0)) != 2:
+	if int(_extension_metadata.get("regional_terrain_version", 0)) not in [2, 3]:
 		return 0.0
 	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)
 
 
 func get_terrain_height_rules() -> String:
 	return String(_extension_metadata.get("terrain_height_rules", ""))
+
+
+func get_tactical_grid_rules() -> String:
+	var value: Variant = _extension_metadata.get("tactical_grid_rules", "")
+	return value if typeof(value) == TYPE_STRING else ""
+
+
+func set_tactical_grid_rules(value: String) -> void:
+	if value.is_empty():
+		_extension_metadata.erase("tactical_grid_rules")
+	else:
+		_extension_metadata["tactical_grid_rules"] = value
+
+
+func _get_tactical_grid_rules_issue() -> String:
+	var value: Variant = _extension_metadata.get("tactical_grid_rules", "")
+	if typeof(value) != TYPE_STRING:
+		return "tactical_grid_rules must be a String"
+	if String(value).is_empty():
+		return ""
+	if String(value) != TACTICAL_GRID_RULES_V1:
+		return "Unsupported tactical_grid_rules '%s'" % String(value)
+	if _grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return "tactical_grid_rules '%s' requires hex_axial_v1" % String(value)
+	return ""
