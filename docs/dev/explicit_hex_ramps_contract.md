@@ -55,3 +55,12 @@ auf ausdruecklichen Nutzerwunsch. Ungemessene Spielbarkeit nicht behaupten.
 Nutzerergaenzung: Der Editor zieht die gleichen Regeln mit: Richtung/Plateau,
 Breitenpinsel, Ecken, Vorschau, Undo/Redo und Save; keine stillschweigende
 Konvertierung alter nicht versionierter Karten.
+
+
+Editorvorschau: Auf versionierten Hexkarten zeigt der Hoehenpinsel die geplanten
+3D-Kappen fuer alle betroffenen Hexzellen inklusive unterer Hoehe und Richtung.
+Raise/Lower/Exact und Richtungserhalt lesen dieselbe Patchplanung wie die Mutation;
+die Vorschau verwendet nur fluechtige Kopien und das gemeinsame Regionalprofil.
+Sie aendert keine Map-/Registry-/History-Wahrheit, besitzt keine Pickkollisionen
+und verschwindet bei UI-, Werkzeug- oder Kartenwechsel. Kein Vollkartenrebuild
+pro Frame; Neuaufbau nur bei Hover-/Parameter-/Dirtywechsel.

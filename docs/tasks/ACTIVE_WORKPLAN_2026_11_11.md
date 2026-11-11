@@ -27,7 +27,7 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 
 | Bereich | Vorhandener Stand | Noch keine Abschlussaussage fuer |
 | --- | --- | --- |
-| Karten und Sternkarte | A/B/C512x256, Sternkarte256x256,3Orbitmarker jeKoerper, Liste und Karte | Neue explizite Rampen, neuer Kompositionskandidat, persoenliche Stilabnahme |
+| Karten und Sternkarte | A/B/C512x256 mitH0-H8-Plateaus und breiten expliziten Rampen integriert5204312c0; Sternkarte256x256,3Orbitmarker jeKoerper | Neue Karten im Gefecht/SaveContinue, persoenliche Stilabnahme |
 | Vollstaendige Gelanderessourcen | Vor Missionsbeginn2161/2161Chunks vorbereitet; Fernschwenks verwenden dieselben Ressourcen | Neue Rampen-/Kartenversion braucht spaetere erneute Abnahme |
 | GO/Wegsuche | Begrenztes gemeinsames Suchbudget besser genutzt; echterB-Nachlauf vorhanden | Allgemeine Ruckelfreiheit; neue Hexbelegung/Reservierungen |
 | Ruestung | R07: eigener breiterer Koerper, moderat kleinerer Kopf,3Ruestungsklassen, geschlossene Helme | Nutzerurteil, Sitz-/Transportextreme |
@@ -35,7 +35,7 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 | Punkte-Skirmish |1000/1500Budget,3Erfahrungsstufen, Personalpakete/Rekrutieren/Entlassen, Infrastruktur und aktuell spielbare Schiffe | Finale Balance und gesamtes vereinfachtes Charakterwertesystem |
 | Charakterdarstellung | Kompakte Rollen, Status, Badges; 3Erfahrungsstufen, Detailwerte aufklappbar | Neues Wertemodell, keine abgeschafften internen Faehigkeitsachsen behaupten |
 | Portraets | Gezeichnete Varianten im Katalog statt der verworfenen neuen Fotovarianten | Persoenliche Bild-/Varianzabnahme |
-| Kampagne | Bestehende5Auftraege/3Rezepte und Freischaltungen | Fortlaufender Runtime-Forschungsbaum |
+| Kampagne | Bestehende5Auftraege und erster Runtime-Schutzforschungszweig4e44521fd | Weitere Industrie-/Fahrzeugforschung, native Forschungs-/Save-Abnahme |
 | Kampagnenplanung | Lokale editierbare `docs/reports/campaign_research_workbench.html`, Voraussetzungen/Belohnungen/Notizen/Export | Hosting oder automatische Uebernahme in Spielstaende |
 
 ## Anderer Chat: abstimmen, nicht parallel neu erfinden
@@ -149,3 +149,8 @@ oder IMPLEMENTATION_STATUS-Edit durch diesen Teilagenten; Root integriert.
   technische Restpunkte; kein bloss dekorativer Kauf als fertigeFunktion.
 
 - Tabletop-Chat: Foundation73a485b19 gesichert. AP1 Owner-/Version und AP3 Consumer zur isolierten Fortsetzung freigegeben; Integration gezielt durch diesen Chat. Noch kein aktiver Produktumbau aus der Foundation behauptet.
+
+## Aktueller Anschlussauftrag
+Editorgrundlage5204312c0 bleibt aktiv. Jetzt echte nichtmutierende 3D-Hoehenpinselvorschau und gleichmaessige breite Striche (jedes Feld pro Strich nur einmal); Details im EXPLICIT_HEX_RAMP_EDITOR_2026_11_11. Polisa-Funktionskandidat a7f771143 und VisualR02 f06ae7f69 integriert; native Spielwegabnahme offen. Grosse Tests bleiben zurueckgestellt.
+
+Editor-Anschluss umgesetzt: echte3D-Vorschau mitCap/Umriss/Aufwaertspfeil, gemeinsamePatchplanung, einmaligeHoehenaenderungproStrich, UI-Release-/Hide-Behandlung und korrigierteRampenauswahl. KleineProbe12/12, dreiEditorScriptsCompile0 undViewCompile0, unabhaengigerFinalreviewohneBlocker. NativeMaus-/Layout-/Farbabnahme undgrosseTests bleibenoffen.

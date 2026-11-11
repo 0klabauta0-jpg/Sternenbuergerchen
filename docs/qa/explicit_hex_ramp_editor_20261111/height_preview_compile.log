@@ -1,0 +1,12 @@
+CHECK scripts/editor/map_editor.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/editor/map_editor_height_tool.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/editor/map_editor_height_preview.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0

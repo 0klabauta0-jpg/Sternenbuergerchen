@@ -47,3 +47,31 @@ Grosse Editor-Klick-/Layoutmatrix, durchgehende breite Kurven in A/B/C,
 Transport-/Gebaeude-Neuplaetze, Savevarianten und allgemeine Regressionen
 bleiben auf Nutzerwunsch spaeter. Diese kleinen Checks sind keine vollstaendige
 Editor-, Multiplayer- oder Framerateabnahme.
+
+
+## Nachtrag: echte 3D-Vorschau und breite Stroke-Ueberlappung
+`height_preview.log`: 12 enge Assertions bestanden. Geprueft werden nichtmutierende
+Planung von7Hexzellen, Root-View-Skala, gekapseltes Cap/Umriss/Pfeil-Mesh mit
+Signaturcache, Richtungserhalt/H7-Guard/PlateauH8 sowie ein echter Editorstroke
+ueber2benachbarte Mittelpunkte mit Radius1. Ueberlappung hebt proStroke nur einmal
+an; Vorschau zeigt besuchte Zellen unveraendert; Release vor GUI-Consumption committet und leertVisited; einUndo/Redo
+restauriert den ganzen Stroke. `height_preview_compile.log`: drei Skripte exit0.
+
+Der neue Editorhelper liest dieselbe HeightTool-Patchplanung wie die Mutation,
+RegionalHexSurface.profile und Zell-/Hoehenskalierung/PlaneTransform vom vorhandenen
+Root-View. Er haengt nur als nicht kollidierender Visual-Child im WorldRoot und
+schreibt keine Registry-/Map-/Historydaten. Begrenzte Nachbarschaftskopien, keine
+Vollkartenscans; Signatur verhindert wiederholte Meshaufbauten bei identischemHover.
+UI-/Tool-/Mapwechsel verbergen ihn; Neubau erfolgt bei Hover/Parameter/Dirty.
+Legacy bleibt beim vorhandenen Hover/Heightpfad. Kein TerrainMap3DView-Sourceedit.
+
+Keine native Maus-/Kamera-/Farbabnahme, kein breiter Editor-/Save-/Gefechtslauf.
+Die neue Probe erstellt nur ein isoliertes256Zellen-Dokument. Kurven werden weiter
+mit vorhandener Richtungsauswahl/Mehrfachauswahl und60Grad-Drehung autoriert; es
+wird keine automatische Kurvenplanung behauptet.
+
+Ergaenzend eine echte Camera3D-Ray-Pick-Assertion auf der sichtbaren Rampenkappe
+mit Root-Pickingfix (Standhoehe H+0.5): bestanden. Nur Headless-Raygeometrie, kein
+GPU-/Mauslayout-/Lookdevnachweis. Passiver UI-Hide-Hook wurde unabhaengig gelesen;
+keine weitere Testmatrix. Root-Hilfeeintraege in data/contextual_help_catalog.json
+und Root-Viewfix gehoeren zum gemeinsamen Integrationspaket, wurden hier nicht editiert.

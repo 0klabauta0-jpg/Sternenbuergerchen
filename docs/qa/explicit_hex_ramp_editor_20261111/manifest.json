@@ -1,5 +1,5 @@
 {
-  "status": "small_editor_fixture19_pass_check_only0_large_and_native_tests_deferred",
+  "status": "original_fixture19_pass_plus_height_preview12_pass_compile3_exit0_native_deferred",
   "artifacts": [
     {
       "path": "docs/qa/explicit_hex_ramp_editor_20261111/.gdignore",
@@ -18,13 +18,13 @@
     },
     {
       "path": "docs/qa/explicit_hex_ramp_editor_20261111/README.md",
-      "sha256": "e2ac149ea76c2233dfde1621ea9e9a1eebdf4f2a64ca095f016076118a85489d",
-      "bytes": 2831
+      "sha256": "d95d8014e46d9813b15f83509e6cecf7b1067f5a4b323a563755f35ad281a317",
+      "bytes": 4784
     },
     {
       "path": "docs/tasks/EXPLICIT_HEX_RAMP_EDITOR_2026_11_11.md",
-      "sha256": "a028ec3ff1708fa4ebfb2eb5fb52041d8a1a3fc60d71446f2925ed7f349b1d8a",
-      "bytes": 2212
+      "sha256": "84530a86fe9033792f450216d6638be4eca3ef025074d9348eb9cca7054df320",
+      "bytes": 3989
     },
     {
       "path": "scripts/editor/building_layout_authoring.gd",
@@ -33,18 +33,52 @@
     },
     {
       "path": "scripts/editor/map_editor.gd",
-      "sha256": "257e06e6f9e4f0120876ac333de53b40f975479e3a5bc3c8811aac850ae82db6",
-      "bytes": 468426
+      "sha256": "893564c5b6e70289a7cdf413e73f86207179f002ce86a7a456b0046c4492ef71",
+      "bytes": 472147
     },
     {
       "path": "scripts/editor/map_editor_height_tool.gd",
-      "sha256": "1298d9df3c816c1a43c750b231839be0f0fc90bd9c8d1b9e15d120d02c7379e3",
-      "bytes": 1009
+      "sha256": "4da09c4e98a4edd76e64d54b22188905c0f6c1ba45017f6423ca8efd4fda8271",
+      "bytes": 1600
     },
     {
       "path": "scripts/tests/explicit_hex_ramp_editor_test.gd",
       "sha256": "8d7e021d8163379ba77025c4d22b65cd79757d01469a7929deaada0ab39aee4a",
       "bytes": 5673
+    },
+    {
+      "path": "scripts/editor/map_editor_height_preview.gd",
+      "sha256": "ed2dcd15c7b193864edeae0087361f4babb58416bd4ccbfbfe35180afc901f4b",
+      "bytes": 4608
+    },
+    {
+      "path": "scripts/tests/explicit_hex_height_preview_test.gd",
+      "sha256": "7c50830d3f36c51d0662539bcfd2fbd5c8c9af027eb1459a23a2f98099ddfe79",
+      "bytes": 5217
+    },
+    {
+      "path": "docs/dev/explicit_hex_ramps_contract.md",
+      "sha256": "757d1e76ffa630d7d4c2fb0d40aced0c71c305de69c3a2f8b54cd8fcfef50bcf",
+      "bytes": 3901
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/height_preview.log",
+      "sha256": "064a1497720c89f359433480886e7a22bdb59f9d066c6a2d5bed41bc6dcdcbf9",
+      "bytes": 860
+    },
+    {
+      "path": "docs/qa/explicit_hex_ramp_editor_20261111/height_preview_compile.log",
+      "sha256": "eff5a7180f122ce8a99c517a2f29c00b9de9c5f702c4f8f316784f91e4db7ee9",
+      "bytes": 384
     }
-  ]
+  ],
+  "root_companion_files": [
+    "scripts/terrain/terrain_map_3d_view.gd",
+    "data/contextual_help_catalog.json"
+  ],
+  "root_companion_hashes": {
+    "scripts/terrain/terrain_map_3d_view.gd": "83d448ef44b7ebe16ec2262e46f7070d3103ed5dc395b3f7f58131eff6b38dda",
+    "data/contextual_help_catalog.json": "72dc5092d5ca0c0dd6aff999e524a15f478e5028737405c08f94030e2c6a9b77"
+  },
+  "root_integration_notes": "Source text normalized to LF before staging. Independent final static review found no remaining blocker. Root picking_compile.log exit0. Small12-case fixture; native UI and large tests deferred."
 }

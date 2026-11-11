@@ -598,10 +598,10 @@
       "title": "Height Tool",
       "compact_lines": [
         "Edits terrain height while preserving surface and object fields.",
-        "Slopes and cliffs follow the terrain hill rules contract."
+        "On explicit hex maps, choose Plateau or Ramp and one of six upward directions."
       ],
       "detail_lines": [
-        "Height authoring must roundtrip through map save/load without changing gameplay fields."
+        "A ramp spans one hex from H to H+1. Adjacent plateaus at different levels stay blocked. Ramp direction is preserved by save/load and undo/redo."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -2232,7 +2232,7 @@
       "status": "ready",
       "title": "Brush Size",
       "compact_lines": [
-        "Sets whether the brush paints one tile or a wider square.",
+        "Sets whether the brush paints one tile or a wider area; explicit hex height brushes use a hexagon.",
         "Large brushes still apply the same tile rules per field."
       ],
       "detail_lines": [
@@ -2252,7 +2252,7 @@
         "Height is terrain truth and roundtrips through map save/load."
       ],
       "detail_lines": [
-        "This tool changes height_level while preserving surface and object fields where possible."
+        "Explicit hex maps offer Plateau or Ramp, six upward directions and a 3D brush preview. H is the lower ramp end (maximum 7); plateaus reach H8. Each field changes once per brush stroke. Apply edits the selection; rotate turns selected ramps by 60 degrees. Undo and Redo preserve height and direction. Legacy maps keep their existing height rules."
       ],
       "target_audience": "advanced",
       "manual_review": false

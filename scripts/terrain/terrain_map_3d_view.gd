@@ -4529,7 +4529,7 @@ func _commit_regional_surface(surface: SurfaceTool, node_name: String) -> void:
 
 func _pick_regional_surface(tile, profile: PackedFloat32Array, viewport_position: Vector2) -> bool:
 	var height_step := _get_3d_height_step()
-	var center := _grid_to_3d_position(Vector2(tile.grid_position), float(tile.height_level) * height_step)
+	var center := _grid_to_3d_position(Vector2(tile.grid_position), TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * height_step)
 	var cell_size := _get_3d_cell_size()
 	var origin := _camera.project_ray_origin(viewport_position)
 	var direction := _camera.project_ray_normal(viewport_position)
