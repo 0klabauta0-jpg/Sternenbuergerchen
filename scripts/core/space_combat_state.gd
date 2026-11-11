@@ -2,6 +2,7 @@ extends RefCounted
 ## Encounter metadata references registered motion; it does not copy positions.
 const REGISTRY = preload("res://scripts/core/space_ship_registry.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const AREA = preload("res://scripts/core/space_area_grid.gd")
 var _registry: RefCounted = REGISTRY.new()
 var _metadata: Dictionary = {}
 var _indexed_revisions: Dictionary = {}
@@ -74,7 +75,7 @@ func _occupied_cells(snapshot: Dictionary, footprint: Array) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	if footprint.size() == 1 and footprint[0] == Vector2i.ZERO:
 		var anchor: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(Vector2(snapshot.position_plane)))
-		if GRID.contains(anchor): result.append(anchor)
+		if AREA.contains(anchor, snapshot): result.append(anchor)
 		return result
 	var seen := {}
 	for offset in footprint:
@@ -93,7 +94,7 @@ func _occupied_cells(snapshot: Dictionary, footprint: Array) -> Array[Vector2i]:
 					overlaps = true
 					break
 			if not overlaps: continue
-			if not GRID.contains(cell): return []
+			if not AREA.contains(cell, snapshot): return []
 			if not seen.has(cell):
 				seen[cell] = true
 				result.append(cell)

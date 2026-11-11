@@ -206,6 +206,10 @@ Verifier und diese Statusdokumentation.
   jenseits der strategischen 256er-Grenze, Blocker und Kartenrand4/4;
   strategische Geometrie, Batch und Fixture-Flugtakt grün. Root-Mutation,
   lokale Kampfaufnahme und tatsächliche Layoutblocker noch nicht verbunden.
+- AP04a Footprint: einzellige und große Rümpfe prüfen die Grenzen des
+  jeweiligen Koordinatenrahmens, einschließlich lokaler Kartenkante.
+  Footprintprüfung4/4 und strategische Geometrie-/Rootchecks grün; lokale
+  Aufnahme bleibt bis zur vollständigen Transaktion gesperrt.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
