@@ -79,10 +79,14 @@ erneute Prüfung; kein UI-Boolean ist Nachweis einer Saumposition. Die genaue
 Tokenform, Travel-Prepare-/Commit-Schnittstelle, Rücktritt von Reservierungen
 und Legacy-Abbildung werden mit dem Reiseowner gemeinsam finalisiert.
 
-Der parallele Chat bestätigt als vorbereitenden Travel-Arbeitsvertrag:
-`prepare_area_transition(craft_id, operation, payload, expected_travel_revision,
-request_id, root_context) -> Dictionary` und
-`validate_prepared_area_transition(candidate, root_context) -> Dictionary`.
+Als gemeinsamer Travel-Arbeitsvertrag sind vereinbart:
+`prepare_space_area_transition(craft_id, expected_travel_revision,
+source_area_id, target_area_id, root_context) -> Dictionary`,
+`validate_prepared_space_area_transition(candidate, root_context) -> Dictionary`
+und `commit_prepared_space_area_transition(candidate, root_context) -> Dictionary`.
+Der Root-private Kontext bindet Request-ID und -Signatur, erlaubte Operation,
+Ziel und Phase. Gleiche Quell-/Zielarea beweist weder Saumnähe noch ein
+Landungsziel. Das heutige Travel-API bietet diese Methoden noch nicht.
 Der Root hält den Kandidaten privat. Der spätere stille Publish-Tail darf keine
 alten Travelcommands oder `_arrive` erneut aufrufen und veröffentlicht Events
 erst nach gemeinsamer Übernahme. Erste Roottransition ausschließlich als

@@ -240,6 +240,8 @@ Verifier und diese Statusdokumentation.
   isolierten Kopie und liefert die erwartete Rottenrevision ohne Liveänderung;
   Vorschau und anschließende Zuordnung liefern gleiche IDs. Prüfung12/12;
   Root muss die Revision beim Commit erneut prüfen. Keine Transaktion fertig.
+  `ensure_flying_wings` kann nun die vorbereitete Revision erneut prüfen;
+  ein veralteter Stand bleibt unverändert. Prüfung13/13; Rootanbindung offen.
 - AP04 Transfer-Vorstufe: interner Ownerwechsel verschiebt ein Schiff atomar,
   prüft Ownership und Zielkapazität, löst eine geleerte Quellrotte auf und
   erhält beziehungsweise ersetzt die Führung. Der validierte Ownercommand

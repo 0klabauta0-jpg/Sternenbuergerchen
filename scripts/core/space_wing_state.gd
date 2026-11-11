@@ -24,8 +24,9 @@ func preview_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: 
 	if result.get("ok", false): result["expected_revision"] = _revision
 	return result
 
-func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary, expected_revision: int = -1) -> Dictionary:
 	# Lifecycle preflight: build the entire candidate before changing membership.
+	if expected_revision >= 0 and expected_revision != _revision: return _reject("stale_revision")
 	if actor_id.strip_edges().is_empty(): return _reject("invalid_actor")
 	var requested := {}
 	for craft in flying_crafts:
