@@ -24,6 +24,17 @@ func _run() -> void:
 	var before: float = float(_space().get("progress", 0.0))
 	_check(_flow.call("open_location_view", "homebase").get("ok", false), "Actual homebase view opens")
 	_check(await _wait(func(): return float(_space().get("progress", 0.0)) > before + 0.05, 4000), "Warp continues while homebase is viewed")
+	var sim: Node = personnel.call("get_simulation_root")
+	var previous_limit := Engine.max_fps
+	for fps in [30, 60, 144]:
+		Engine.max_fps = fps
+		var progress_before: float = float(_space().get("progress", 0.0))
+		var tick_before: int = int(sim.get("tick_counter"))
+		await create_timer(0.2).timeout
+		var advanced_ticks: int = int(sim.get("tick_counter")) - tick_before
+		var progress_delta: float = float(_space().get("progress", 0.0)) - progress_before
+		_check(advanced_ticks > 0 and absf(progress_delta - float(advanced_ticks) / 180.0) < 0.03, "Hidden warp follows physics ticks at %d fps cap" % fps)
+	Engine.max_fps = previous_limit
 	_check(_flow.call("open_location_view", "star_map").get("ok", false), "Actual star view reopens")
 	_check(_op("space_abort_quantum").get("ok", false), "Abort remains available after view change")
 	var stopped: Array = _space().position

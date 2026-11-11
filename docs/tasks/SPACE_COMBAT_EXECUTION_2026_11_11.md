@@ -79,11 +79,12 @@ Verifier und diese Statusdokumentation.
   registrierte Flugzustände aktualisieren ihre Feldindizes revisionsbasiert.
   Rootcheck27/27 einschließlich eines fixturegesteuerten Resolver-Commits.
 - AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
-  Warp, Heimatansicht während der Reise, Sternkarte und Abbruch; gezielter
-  headless Szenenlauf11/11, Exit0, keine Fehler. Beleg:
-  `docs/qa/orbit_quantum_20261109/raw/space-ap01-real-view-r3-23aabac5dd254f1cb7429e7c8e0aa636/space_combat_ap01_view_verifier.log`.
-- AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität, echter
-  Ansichtswechsel bei30/60/144Render-FPS und vollständiger Reiselauf.
+  Warp, Heimatansicht während der Reise, Sternkarte und Abbruch. Gezielter
+  headless Szenenlauf14/14, inklusive30/60/144-Renderbegrenzungen, Exit0,
+  keine Fehler. Beleg:
+  `docs/qa/orbit_quantum_20261109/raw/space-ap01-real-view-fps-62cc0def794c48298207edab1c650726/space_combat_ap01_view_verifier.log`.
+- AP01 weiterhin offen: vollständiger Reiselauf und erneuter Integrationsabgleich
+  mit zwischenzeitlich hinzugekommenen Warp-Komponenten und Checkpointowner.
 - AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
   ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
   gemeinsames Achsbudget. Kleiner Verifier8/8 mit explizitem Fixture-Rumpf;
