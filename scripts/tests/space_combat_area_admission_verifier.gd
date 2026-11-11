@@ -19,7 +19,12 @@ func _initialize() -> void:
 	if state.query_cells(cells, "orbit_approach:moon") != ["space_fixture_a"]: failed += 1
 	if state.query_cells(cells, "orbit_approach:planet") != ["space_fixture_b"]: failed += 1
 	if not state.query_cells(cells).is_empty(): failed += 1
-	print("SPACE_COMBAT_AREA_ADMISSION passed=", 7 - failed, " failed=", failed)
+	var next: Vector2i = GRID.from_offset(Vector2i(401,100))
+	a.commit_motion({"expected_revision":a.get_snapshot().revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(next))}, 1)
+	state.sync_moved_actors()
+	var next_cells: Array[Vector2i] = [next]
+	if not state.query_cells(cells, "orbit_approach:moon").is_empty() or state.query_cells(next_cells, "orbit_approach:moon") != ["space_fixture_a"]: failed += 1
+	print("SPACE_COMBAT_AREA_ADMISSION passed=", 8 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _flight(id: String, area: String, cell: Vector2i) -> RefCounted:

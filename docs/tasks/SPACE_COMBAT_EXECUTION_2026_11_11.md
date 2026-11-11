@@ -289,7 +289,8 @@ Verifier und diese Statusdokumentation.
   integriert; keine Freigabe des noch fehlenden Bereichswechsels.
 - AP04a lokale Aufnahmefixture: `SpaceCombatState` kann ausdrücklich markierte
   Testschiffe in getrennten lokalen Bereichen aufnehmen und verhindert dort
-  Mehrfachbelegung. Prüfung7/7; normale lokale Produktaufnahme bleibt gesperrt
+  Mehrfachbelegung; revisionsbasierte Indexsynchronisierung nutzt die lokalen
+  Grenzen. Prüfung8/8; normale lokale Produktaufnahme bleibt gesperrt
   und die Fixture ersetzt keine Pflichtrotten-/Reiseprüfung.
 - AP04a Grenzen: separater `space_area_grid` prüft axiale Zellen über die
   vorhandene Offsetkonvertierung gegen strategische256×256 oder lokale
