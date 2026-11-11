@@ -1,6 +1,6 @@
 # Weltraumkampf: Rotten, Raumflug und Komponenten
 
-Stand: 11.11.2026. **Vom Nutzer bestätigtes Zielkonzept; noch keine Implementierung.**
+Stand: 11.11.2026. **Vom Nutzer bestätigtes Zielkonzept; Umsetzung teilweise begonnen.**
 Auftrag: Konzept festhalten und in kleine umsetzbare Pakete schneiden.
 [Task](../tasks/SPACE_COMBAT_2026_11_11_PLAN.md) ·
 [Umsetzungsplan](../superpowers/plans/2026-11-11-space-combat.md)
@@ -21,7 +21,7 @@ Nutzerentscheidungen und keine bereits abgenommene Balance.
 | --- | --- |
 | F01 | Eine taktische Kampfebene, 2,5D-Darstellung. |
 | F02 | Ein leichter Jäger entspricht einem Hexfeld; größere Schiffe beanspruchen mehrere Felder. |
-| F03 | Eine Rotte besteht aus **1 bis 6 Schiffen**, ähnlich wie ein Fireteam zusammenstellbar. |
+| F03 | Eine Rotte besteht aus **1 bis 6 Schiffen**. Jedes fliegende Schiff gehört genau einer Rotte an, ausdrücklich auch Dropships und Cutlass; ein Einzelflieger bildet eine Einerschiffsrotte. |
 | F04 | Mehrere Rotten können gemeinsam einen Auftrag erhalten und darin Rollen übernehmen. |
 | F05 | Fliegen, Patrouillieren, Ort sichern, Beschützen, Ziel angreifen, Bereich angreifen und Zurückziehen/Sammeln. |
 | F06 | Schutzobjekt kann ein Ort, ein einzelnes Schiff/Großschiff oder eine andere Rotte sein. |
@@ -38,10 +38,20 @@ Nutzerentscheidungen und keine bereits abgenommene Balance.
 
 ## 2. Karte, Maßstab und Darstellung
 
-Der Kampf findet auf der vorhandenen Sternkarte statt, ohne obligatorischen
-Wechsel auf eine separate Gefechtskarte. Die aktuelle native Karte hat
-256×256 Hexe; 512×256 betrifft die Bodenkarten A/B/C. Die Karte komprimiert
-astronomische Distanzen. „Ein Jäger = ein Hex“ ist eine Spielgrößenregel,
+Die strategische Sternkarte behält 256×256 Hexfelder. Jeder Stern, Planet und
+Mond erhält einen gemeinsamen lokalen Orbitbereich von 512×256 Hexfeldern;
+dieser ist auch der Raum für Reise, Begegnung und Kampf. Pro Körper gibt es
+ein Orbitziel statt drei unabhängig wählbarer Marker. Warpankunft erfolgt am
+unteren Kartenrand. Oben mittig zeigt der Himmelskörper einen 256 Felder breiten,
+etwa vier Felder tiefen Saum; der übrige Körper liegt außerhalb der Karte.
+Nur am Saum ist der Weiteranflug auf eine Oberflächenkarte erlaubt. Bei nicht
+landbaren Körpern bleibt ein Oberflächenanflug ausgeschlossen. Blockaden
+entstehen im Raum, nicht durch eine gesperrte Auswahl einzelner Marker.
+
+Diese Festlegung ersetzt die frühere Annahme einer alleinigen Sternkarte und
+den Abschnitt „Orbitmarker“ des Reisevertrags als Zielvorgabe; die alte
+Markerbedienung ist im aktuellen Produktstand noch vorhanden. Die räumliche
+Darstellung komprimiert astronomische Distanzen. „Ein Jäger = ein Hex“ ist eine Spielgrößenregel,
 keine Übernahme realer Meter oder Kilometer aus Star Citizen.
 
 Position und Bugwinkel sind kontinuierlich. Das Hexraster dient Planung,
@@ -58,10 +68,32 @@ entsprechend adaptiert, keine vollständigen räumlichen Schraubenbahnen.
 
 ## 3. Rotten und gemeinsame Aufträge
 
-Ein Schiff gehört höchstens einer Rotte an; unzugewiesene Schiffe bleiben im
-bestehenden Schiffsbestand. Eine aktive Rotte hat 1–6 Mitglieder und genau
-einen bestimmten Rottenführer. Dieselbe Person darf nicht zugleich mehrere
-Schiffe pilotieren. Pilotenidentität und Boarding bleiben bestehende Wahrheit.
+Jedes fliegende Schiff gehört genau einer Rotte an; das gilt auch für
+Nichtjäger und einzelne Schiffe. Eine aktive Rotte hat 1–6 Mitglieder und genau
+einen bestimmten Rottenführer. Ein geerdetes Schiff darf vor der Zuordnung im
+Bestand verbleiben; der Übergang in einen fliegenden Zustand muss die eindeutige
+Zuordnung atomar sicherstellen. Einzelrotten können dafür automatisch entstehen;
+ein Umordnen muss ohne Zwischenzustand mit null oder zwei Mitgliedschaften
+erfolgen. Vorhandene Save-/Legacy-Schiffe benötigen beim ersten Flug dieselbe
+Regel. Die heutige Implementierung erzwingt diese Invariante noch nicht.
+Dieselbe Person darf nicht zugleich mehrere Schiffe pilotieren. Pilotenidentität
+und Boarding bleiben bestehende Wahrheit.
+
+### Zuständigkeit und notwendige Abstimmung
+
+`SpaceWingState` bleibt einziger Owner für Mitgliedschaft, Führung und
+Rottenaufträge. `SimulationRoot` führt atomare Übergänge aus; der vorhandene
+Reiseowner bleibt für Warp-/Anflugphase, Orbitzuordnung und Landefreigabe
+zuständig. Der gemeinsame pro Schiff referenzierte Flugzustand ist die
+Positions-/Geschwindigkeitsquelle innerhalb eines lokalen Orbitbereichs;
+Karte und Darstellung projizieren diesen Zustand nur. Ein lokaler Raumzustand
+muss seine Orbitbereichs-ID zusammen mit der Pose eindeutig tragen, sodass
+zwei Bereiche keine Positionen oder Belegungen vermischen. Der Wechsel zwischen
+strategischer Reiseposition und lokaler Pose ist ein expliziter atomarer
+Ownerübergang, kein zweiter Schiffssimulator. Genaue API, Lage des Saums,
+Eintrittsverteilung und Übergangs-/Saveformat sind vor gemeinsamem Produktcode
+mit dem parallelen Orbitkarten-Chat abzustimmen; bisher fehlen sie im aktuellen
+`SpaceFlightState` und in der auf 256×256 begrenzten `StrategicHexGrid`-API.
 
 Gemeinsame Aufträge referenzieren bestehende Rotten und kopieren keine Schiffe.
 Ein Auftrag kann beispielsweise Rotte A als engen Begleitschutz und Rotte B als

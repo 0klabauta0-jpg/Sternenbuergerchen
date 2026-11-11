@@ -177,6 +177,12 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Neue Nutzerfestlegung aus parallelem Chat: fliegende Schiffe immer genau eine
+  Rotte, einschließlich Einzelschiff/Dropship; ein 512×256-Orbitraum pro
+  Körper ersetzt drei getrennte Marker. Ownergrenze, Abhängigkeiten und
+  Prüffälle: `docs/tasks/SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`; AP04a im
+  Plan. Aktuelle Implementierung erfüllt diese Vorgaben noch nicht; konkrete
+  API und gemeinsam berührte Produktdateien vor Änderung abstimmen.
 - Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
   integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
   Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine

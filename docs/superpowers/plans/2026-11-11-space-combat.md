@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Steuerbarer Rottenkampf mit 1–6 Schiffen, gemeinsamen Aufträgen, gekoppeltem/ausgekoppeltem Flug und sichtbarer Pilotenausführung auf der bestehenden Sternkarte.
+**Goal:** Steuerbarer Rottenkampf mit 1–6 Schiffen, gemeinsamen Aufträgen, gekoppeltem/ausgekoppeltem Flug und sichtbarer Pilotenausführung in lokalen Orbitbereichen; strategische Sternkarte 256×256.
 
 **Architecture:** SimulationRoot committet Commands, Bewegung und Kampf; Reise und Kampf referenzieren denselben pro-Schiff-Flugzustand. Reine Resolver liefern Vorschläge, Registries nur Lookup, UI und Effekte lesen Snapshots. Bestehende Supply-, Personen-, Reise- und Checkpointowner bleiben in ihrem Bereich zuständig.
 
@@ -26,6 +26,8 @@ Installationshistorie bleiben kompatibel und prüfbar.
 
 - Eine taktische Kampfebene, 2,5D-Darstellung.
 - Eine Rotte besteht aus **1 bis 6 Schiffen**, ähnlich wie ein Fireteam zusammenstellbar.
+- Jedes fliegende Schiff, einschließlich Dropship/Cutlass, gehört genau einer Rotte an; Einzelflug entspricht einer Einerschiffsrotte.
+- Ein Orbitbereich je Stern/Planet/Mond: 512×256 Hexfelder, Warpankunft unten, oben mittig 256 Felder breiter und etwa vier Felder tiefer Saum; Oberflächenanflug nur am Saum.
 - Mehrere Rotten können gemeinsam einen Auftrag erhalten und darin Rollen übernehmen.
 - Der Kampf läuft in Echtzeit ohne Pause.
 - Schaden bleibt datenbasiert. Friendly Fire bleibt gemäß Projektgrundsatz aktiv.
@@ -33,7 +35,7 @@ Installationshistorie bleiben kompatibel und prüfbar.
 - Waffen, Schildgeneratoren und Kraftwerke sind austauschbare Komponenten mit tatsächlicher Wirkung.
 - Bestehende Heimatcheckpoint-Grenze bleibt.
 - Keine SceneTree-Vollscans oder kompletten HUD-Rebuilds pro Frame; räumliche Queries und VFX bleiben begrenzt.
-- Keine Änderung der Boden-Combat-/LOS-/Höhenregeln, keine freie 3D-Kampfebene, keine zweite Gefechtskarte.
+- Keine Änderung der Boden-Combat-/LOS-/Höhenregeln, keine freie 3D-Kampfebene und keine parallele Reise-/Kampfsimulation für denselben Orbitbereich.
 - Neues Gameplay in `scripts/core/`, reine Resolver in `scripts/tactical/`, Contracts/Bridges in `scripts/mission/`; kein produktiver Neucode unter `scripts/tests/`.
 - Zahlen dieses Plans sind reproduzierbare Start-/Testparameter, keine endgültig freigegebene Balance.
 
@@ -278,9 +280,19 @@ AP04-Verifier.
 - [ ] Rote Tests: Größen1 und6 zulässig,7 abgelehnt; dasselbe Schiff nicht in zwei Rotten; ein Pilot nicht gleichzeitig in zwei aktiven Schiffen; leere Rotte wird inaktiv/aufgelöst.
 - [ ] Erstellen, Umbenennen, Zuordnen, Entfernen und Führerwahl atomar implementieren. Mitgliedertransfer wird entweder vollständig angenommen oder ohne Nebenwirkung abgelehnt.
 - [ ] Verlust des Führers bestimmt einen vorhandenen einsatzfähigen Nachfolger mit stabiler ID-Reihenfolge; fehlender Pilot blockiert Teilnahme mit Grund.
+- [ ] Flugaufnahme und Umgruppierung atomar: jedes fliegende eigene oder fremde Schiff ist genau einer Rotte zugeordnet, auch Dropship/Cutlass und Einzelschiff. Geerdete Bestandsschiffe dürfen vor Flug unzugeordnet sein; Legacy-Stand beim ersten Flug berücksichtigen. Mehrere Rotten bleiben getrennte Ownerobjekte.
 - [ ] AP04/AP00 grün; Commit `feat: add flexible one-to-six ship wings`.
 
 **Abnahme:** Einzelflieger und Sechserrotte gleichwertig bedienbar; Personen-/Boardingwahrheit bleibt beim vorhandenen Owner.
+
+## AP04a — Lokaler Orbitbereich und Übergang (neue Festlegung)
+
+- [ ] Vor gemeinsamem Produktcode Zuständigkeiten und Dateibesitz mit dem Orbitkarten-Chat abstimmen. `SpaceWingState` besitzt Rotten; Reiseowner besitzt Reisephase, Orbitzuordnung und Anfluggate; `SimulationRoot` und derselbe `SpaceFlightState` committen die lokale Pose. Keine zweite Simulation oder zweite Positionswahrheit.
+- [ ] Gemeinsame API für Bereichs-ID, lokalen 512×256-Raumindex, atomaren Übergang strategischer/localer Pose, Ankunft unten und tatsächliche Saumlage vertraglich festlegen. Bestehendes `StrategicHexGrid` bleibt 256×256; keine stille globale Vergrößerung.
+- [ ] Ein Orbitziel pro Körper statt dreier Marker; Oberflächenanflug nur bei tatsächlicher Saumposition und gültiger Landeberechtigung. Bestehende Marker-/Save-/Warpdaten ausdrücklich migrieren und Legacy-Verhalten prüfen.
+- [ ] Testfälle: Einerschiffsrotte auch für Dropship beim Flug; kein unzugeordnetes oder doppelt zugeordnetes fliegendes Schiff; zwei lokale Bereiche ohne Positions-/Belegungskollision; Warpankunft unten; Anflug außerhalb des Saums abgewiesen, im Saum erlaubt; Raumblockade bleibt tatsächlich umflieg-/kämpfbar.
+
+**Stand:** Architektur-/Akzeptanzvorgabe, nicht implementiert. Die bisherige AP01-Abnahme bezog sich auf das strategische Raster und bestätigt noch keinen lokalen Bereichswechsel.
 
 ## AP05 — Rottenpanel, Kartenwahl und erster sichtbarer Flug
 
