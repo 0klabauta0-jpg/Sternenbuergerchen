@@ -33,6 +33,26 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Oberflächenanflug, Vorbereitung: Der bestehende Flight-Owner kann eine
+  zuvor geprüfte Deaktivierung ohne zweite Validierung veröffentlichen; der
+  Combat-Owner bereitet dazu die Entfernung aus Raumindex und vorhandenen
+  Korridorclaims vor. Der parallele Travel-Schritt `9813c7dcd` ist integriert:
+  Er bereitet den lokalen Anflug vor, ohne die Flugpose selbst zu verändern.
+  Gezielte Prüfungen: Travel-Owner 10/10, Deaktivierung, Rückkehr und erster
+  lokaler Eintritt jeweils ohne Fehler. Das ist noch kein gemeinsamer
+  produktiver Commit: Root muss Travel, Flight, Combat, Supply und Campaign
+  vor der ersten Änderung zusammen prüfen und atomar veröffentlichen.
+- Der Rückkehr-Verifier beginnt jetzt mit dem echten vorbereiteten lokalen
+  Anflug und veröffentlicht zuvor geprüfte Flight-, Combat- und Travel-Schritte
+  in einer Fixture. Landung und Rückkehr nutzen dasselbe Flight-Objekt; Exit 0.
+  Supply und Campaign fehlen hierbei; dies ist keine produktive Root-Transaktion.
+- Pflichtrotte und Pilotenzuordnung bleiben produktive Integrationsblocker:
+  Flugstart und bestehende Adapter müssen frische Fleet-/Pilot-/Boardingdaten
+  liefern; Rottenmetadaten allein beweisen keine Besetzung. Die tatsächliche
+  Erzeugung und Erneuerung von Navigationsclaims ist ebenfalls noch offen.
+  Legacy-Oberflächenrückkehr, Ereignisse und native Sichtprüfung sind nicht
+  durch die genannten Ownerprüfungen abgedeckt.
+
 - AP00: typisierte Commandgrenze mit extern bereitgestellter autoritativer
   Berechtigung, Revisionsprüfung, Adress-/Ziel-/Feldvalidierung und reinem
   Replay-Vorcheck. 20/20 Fälle im temporären Minimalprojekt; dessen

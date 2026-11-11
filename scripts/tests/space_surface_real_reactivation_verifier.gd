@@ -15,7 +15,6 @@ func _initialize() -> void:
 	if not _travel(fleet, "launch_to_orbit", {"craft_id":id}, "launch", auth).get("ok", false): failed += 1
 	if not _travel(fleet, "start_quantum", {"craft_id":id, "target_orbit_id":"planet_orbit"}, "warp", auth).get("ok", false): failed += 1
 	if not _travel(fleet, "advance", {"craft_id":id, "delta_seconds":3.0}, "advance", auth).get("ok", false): failed += 1
-	if not _travel(fleet, "begin_approach", {"craft_id":id, "location_id":"fortified_outpost"}, "approach", auth).get("ok", false): failed += 1
 	var flight: RefCounted = fleet.get_flight_state(id)
 	var gate_offset: Vector2i = LAYOUT.build("planet").gate_cells[128]
 	var gate: Vector2i = GRID.from_offset(gate_offset)
@@ -26,8 +25,19 @@ func _initialize() -> void:
 	if not state.admit_actor({"craft_id":id, "faction_id":"player", "control_domain":"player", "start_hex":gate, "footprint_hexes":[Vector2i.ZERO]}, flight, true).get("ok", false): failed += 1
 	var wings: RefCounted = sim.get("_space_wing_state")
 	wings.ensure_flying_wings("player", [id], [id], {id:"pilot"})
-	flight.commit_space_activity_transition({"expected_revision":flight.get_snapshot().revision, "motion_mode":"inactive"}, 2)
-	state.deactivate_actor(id)
+	# Stage the real local approach against the same Flight object before publishing.
+	var approach_payload := {"craft_id":id, "location_id":"fortified_outpost"}
+	var approach_context := {"request_id":"approach", "request_signature":JSON.stringify({"operation":"begin_approach", "payload":approach_payload}, "", true), "operation":"begin_approach", "payload":approach_payload, "source_area_id":"orbit_approach:planet", "target_area_id":"orbit_approach:planet", "expected_travel_revision":fleet.get_snapshot(id).revision, "expected_phase":"orbit", "context_id":"fixture-approach"}
+	assert(fleet.configure_space_area_transition_authority(sim).get("ok", false))
+	assert(fleet.bind_space_area_transition_context(approach_context, sim).get("ok", false))
+	var candidate: Dictionary = fleet.prepare_space_area_transition(id, approach_context.expected_travel_revision, approach_context.source_area_id, approach_context.target_area_id, approach_context)
+	var travel_validation: Dictionary = fleet.validate_prepared_space_area_transition(candidate, approach_context)
+	var flight_validation: Dictionary = flight.validate_space_activity_transition({"expected_revision":flight.get_snapshot().revision, "motion_mode":"inactive"}, 2)
+	var combat_validation: Dictionary = state.validate_deactivation(id, flight.get_snapshot().revision, state.get_area_revision("orbit_approach:planet"))
+	assert(travel_validation.get("ok", false) and flight_validation.get("ok", false) and combat_validation.get("ok", false))
+	flight._publish_space_activity_transition(flight_validation)
+	state._publish_deactivation(combat_validation)
+	fleet._publish_prepared_space_area_transition(candidate, travel_validation)
 	if not _travel(fleet, "finish_approach", {"craft_id":id}, "land", auth).get("ok", false): failed += 1
 	sim.tick_counter = 2
 	var before: Dictionary = flight.get_snapshot()
