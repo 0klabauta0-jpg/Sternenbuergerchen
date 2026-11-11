@@ -129,3 +129,4 @@ art/polisa_r07_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/polisa_r07_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 output/native_glut_maps/polisa_r07_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_reservation_owner_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_reservation_exit_fix_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

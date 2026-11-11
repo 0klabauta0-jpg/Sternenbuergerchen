@@ -774,7 +774,7 @@ static func _hex_segments_touch(segments:Array,cells:Array)->bool:
 
 static func _hex_grant_active(grant:Dictionary,units:Dictionary,schedules:Dictionary)->bool:
 	for id in grant.unit_ids:
-		if units.has(id) and (grant.cells.has(units[id].grid) or _hex_segments_touch(schedules[id],grant.cells)): return true
+		if units.has(id) and (grant.cells.has(units[id].grid) or _hex_segments_touch(schedules.get(id,[]),grant.cells)): return true
 	return false
 
 
