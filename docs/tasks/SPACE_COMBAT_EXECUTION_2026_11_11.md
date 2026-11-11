@@ -33,6 +33,11 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Der begrenzte Eintrittssucher wurde zusätzlich mit 256 belegten unteren
+  Kandidaten geprüft: erster Aufruf bleibt wartend, ein kleinerer Folgetick
+  setzt dieselbe Suche fort und findet danach eine freie vollständige Fläche.
+  Keine Simulation des gesamten Eintrittsbands in einem Tick.
+
 - Warptick-Vorstufe: Schmale Fleet-Fortschrittsabfrage und begrenzter lokaler
   Ankunftsweg sind hinter einem intern standardmäßig ausgeschalteten Schalter
   vorbereitet. Polisa bleibt ausdrücklich strategischer Stationspfad. Ein
