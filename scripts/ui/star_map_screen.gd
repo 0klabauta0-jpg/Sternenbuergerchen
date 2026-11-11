@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Read-only system map. Requests never move ships or load missions locally.
 const CANVAS = preload("res://scripts/ui/star_map_canvas.gd")
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 var _provider: Callable
 var _commands: Callable
 var _runtime: Dictionary = {}
@@ -23,6 +24,8 @@ var _fleet_selector: OptionButton
 var _visit_list: VBoxContainer
 var _visit_buttons: Dictionary={}
 var _details: PanelContainer
+var _orbit_target_list: HFlowContainer
+var _orbit_target_buttons: Array[Button] = []
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_provider = snapshot_provider
@@ -75,6 +78,10 @@ func _build() -> void:
 	body.add_theme_constant_override("separation", 12)
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(body)
+	var system_column := VBoxContainer.new()
+	system_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	system_column.add_theme_constant_override("separation", 6)
+	body.add_child(system_column)
 	_canvas = CANVAS.new()
 	_canvas.name = "SystemMap"
 	_canvas.custom_minimum_size.x = 350
@@ -83,7 +90,13 @@ func _build() -> void:
 	_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_canvas.orbit_requested.connect(_jump)
 	_canvas.location_selected.connect(_select)
-	body.add_child(_canvas)
+	system_column.add_child(_canvas)
+	system_column.add_child(_label("ORBITMARKER", 11, Color("789baa")))
+	_orbit_target_list = HFlowContainer.new()
+	_orbit_target_list.name = "OrbitTargetList"
+	_orbit_target_list.add_theme_constant_override("h_separation", 16)
+	_orbit_target_list.add_theme_constant_override("v_separation", 4)
+	system_column.add_child(_orbit_target_list)
 	_details = PanelContainer.new()
 	_details.name = "DetailsPanel"
 	var detail_style := StyleBoxFlat.new()
@@ -111,7 +124,6 @@ func _build() -> void:
 	_fleet_selector.item_selected.connect(func(index:int): _send("space_focus_craft",{"craft_id":String(_fleet_selector.get_item_metadata(index))}))
 	_visit_list=VBoxContainer.new()
 	_visit_list.name="LoadedLocations"
-	information.add_child(_visit_list)
 	information.add_child(_label("ZIEL & ANFLUG", 13, Color("70c8d0")))
 	_status = _label("", 15)
 	_status.name = "TravelStatus"
@@ -149,6 +161,7 @@ func _build() -> void:
 	_error = _label("", 14, Color("ffb1a5"))
 	_error.name = "CommandError"
 	information.add_child(_error)
+	information.add_child(_visit_list)
 	_style_buttons()
 	resized.connect(_layout_details)
 	_layout_details()
@@ -175,7 +188,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close, _canvas.get("_moon"), _canvas.get("_planet")] + _sites.values():
+	for button in [_abort, _approach, _land, _close] + _sites.values() + _orbit_target_buttons:
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -189,6 +202,40 @@ func _style_buttons() -> void:
 			button.add_theme_stylebox_override(state, style)
 		button.add_theme_color_override("font_color", Color("e5f0f3"))
 		button.add_theme_color_override("font_disabled_color", Color("85929f"))
+
+func _sync_orbit_targets(travel: Dictionary) -> void:
+	if _orbit_target_buttons.is_empty():
+		var orbits: Dictionary = _canvas.call("get_orbit_definitions")
+		for orbit_id in ["planet_orbit", "glut_1a_orbit", "glut_1b_orbit", "moon_orbit"]:
+			var orbit: Dictionary = orbits.get(orbit_id, {})
+			if orbit.is_empty():
+				continue
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 5)
+			_orbit_target_list.add_child(row)
+			var body_name := String(orbit.get("name", "")).get_slice(" · ", 0)
+			var label := _label(body_name, 14)
+			label.autowrap_mode = TextServer.AUTOWRAP_OFF
+			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(label)
+			for marker: Dictionary in orbit.get("markers", []):
+				var id := String(marker.id)
+				var number := id.get_slice("_", 1)
+				var button := _button("OrbitMarker_%s_%s" % [orbit_id, id], number, _jump.bind(orbit_id, id))
+				button.custom_minimum_size = Vector2(36, 29)
+				button.set_meta("orbit_id", orbit_id)
+				button.set_meta("marker_id", id)
+				button.set_meta("marker_label", "%s · Orbitmarker %s" % [body_name, number])
+				row.add_child(button)
+				_orbit_target_buttons.append(button)
+		_style_buttons()
+	for button in _orbit_target_buttons:
+		var orbit_id := String(button.get_meta("orbit_id"))
+		var marker_id := String(button.get_meta("marker_id"))
+		var current := orbit_id == String(travel.get("orbit_id", "")) and marker_id == String(travel.get("orbit_marker_id", GRID.ORBIT_MARKER_IDS[0]))
+		button.disabled = not GRID.can_jump_to_marker(travel, orbit_id, marker_id)
+		button.tooltip_text = String(button.get_meta("marker_label")) + (" · Aktueller Standort" if current else "")
+		button.add_theme_color_override("font_disabled_color", Color("f2c47c") if current else Color("85929f"))
 
 func _sync_sites(locations: Dictionary) -> void:
 	var changed := false
@@ -238,6 +285,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		_error.text = ""
 	var orbit: String = String(travel.get("orbit_id", ""))
 	_canvas.call("set_travel_snapshot", travel)
+	_sync_orbit_targets(travel)
 	_status.text = _phase_text(travel)
 	_abort.visible = phase == "quantum"
 	_progress.visible = phase in ["quantum", "stopped"]
@@ -281,9 +329,9 @@ func refresh(snapshot: Dictionary = {}) -> void:
 func _phase_text(travel: Dictionary) -> String:
 	match String(travel.get("phase", "grounded")):
 		"grounded": return "Mondbasis · Am Flightdeck abheben, um den Mondorbit zu erreichen."
-		"quantum": return "Quantum-Sprung → %s · %d %% · Abbruch jederzeit moeglich" % [_orbit_name(String(travel.get("target_orbit_id", ""))), roundi(float(travel.get("progress", 0.0)) * 100)]
+		"quantum": return "Quantum-Sprung → %s · %d %% · Abbruch jederzeit möglich" % [_marker_name(travel, true), roundi(float(travel.get("progress", 0.0)) * 100)]
 		"stopped": return "Sprung abgebrochen · Position gehalten. Ziel anklicken, um erneut zu springen."
-		"orbit": return "%s erreicht · %s" % [_orbit_name(String(travel.get("orbit_id", ""))), "Zielort wählen und Anflug starten." if String(travel.get("orbit_id", "")) != "moon_orbit" else "Zielorbit wählen oder an der Mondbasis landen."]
+		"orbit": return "%s erreicht · %s" % [_marker_name(travel), "Zielort wählen und Anflug starten." if String(travel.get("orbit_id", "")) != "moon_orbit" else "Zielorbit wählen oder an der Mondbasis landen."]
 		"approach": return "Anflug · Sternkarte wird verlassen. Ortskarte wird geladen …"
 		"surface": return "Am Zielort · Nach dem Abheben kehrst du in den zugehörigen Orbit zurück."
 	return "Sternkarte wird vorbereitet …"
@@ -296,6 +344,11 @@ func _orbit_name(id: String) -> String:
 	var travel: Dictionary = _runtime.get("space_travel", {})
 	var definition: Dictionary = Dictionary(travel.get("orbits", {})).get(id, {})
 	return String(definition.get("name", "Mondorbit" if id == "moon_orbit" else "Planetenorbit"))
+
+func _marker_name(travel: Dictionary, target: bool = false) -> String:
+	var orbit_id := String(travel.get("target_orbit_id" if target else "orbit_id", ""))
+	var marker_id := String(travel.get("target_orbit_marker_id" if target else "orbit_marker_id", GRID.ORBIT_MARKER_IDS[0]))
+	return "%s · Marker %s" % [_orbit_name(orbit_id), marker_id.get_slice("_", 1)]
 
 func _lock_reason(location_id: String) -> String:
 	if String(_runtime.get("mode", "")) != "campaign":
@@ -313,8 +366,8 @@ func _craft_id() -> String:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime
 	return String(Dictionary(runtime.get("space_travel", {})).get("craft_id", ""))
 
-func _jump(orbit_id: String) -> void:
-	_send("space_start_quantum", {"craft_id": _craft_id(), "target_orbit_id": orbit_id})
+func _jump(orbit_id: String, marker_id: String) -> void:
+	_send("space_start_quantum", {"craft_id": _craft_id(), "target_orbit_id": orbit_id, "target_orbit_marker_id": marker_id})
 
 func _select(location_id: String) -> void:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime
@@ -345,4 +398,4 @@ func _send(operation: String, payload: Dictionary = {}) -> void:
 	refresh()
 
 func get_ui_snapshot() -> Dictionary:
-	return {"phase": String(Dictionary(_runtime.get("space_travel", {})).get("phase", "grounded")), "status": _status.text, "load_boundary": _boundary.text if _boundary.visible else "", "error": _error.text, "trade_reason": _lock_reason("trade_outpost"), "body_count": 2}
+	return {"phase": String(Dictionary(_runtime.get("space_travel", {})).get("phase", "grounded")), "status": _status.text, "load_boundary": _boundary.text if _boundary.visible else "", "error": _error.text, "trade_reason": _lock_reason("trade_outpost"), "orbit_marker_count": _orbit_target_buttons.size()}

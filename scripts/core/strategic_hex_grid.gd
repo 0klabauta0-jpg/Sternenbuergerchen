@@ -6,6 +6,7 @@ const SIZE := Vector2i(256, 256)
 const EXTENT := Vector2(256.0, 221.70250336881628)
 const ORBITS := {"moon_orbit": "moon", "planet_orbit": "planet",
 	"glut_1a_orbit": "glut_1a", "glut_1b_orbit": "glut_1b"}
+const ORBIT_MARKER_IDS := ["orbit_1", "orbit_2", "orbit_3"]
 
 static func from_offset(offset: Vector2i) -> Vector2i:
 	return Vector2i(offset.x - floori(offset.y * 0.5), offset.y)
@@ -28,14 +29,19 @@ static func pair(value: Variant) -> Vector2:
 static func cell_from_record(record: Dictionary) -> Vector2i:
 	return Vector2i(pair(record.get("hex", [])))
 
-static func ring(center: Vector2i, radius: int) -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	var cursor := center + HEX.DIRECTIONS[4] * radius
-	for direction in HEX.DIRECTIONS:
-		for step in range(radius):
-			cells.append(cursor)
-			cursor += direction
-	return cells
+
+static func orbit_marker(orbit: Dictionary, marker_id: String) -> Dictionary:
+	for marker: Dictionary in orbit.get("markers", []):
+		if marker.get("id") == marker_id:
+			return marker
+	return {}
+
+
+static func can_jump_to_marker(travel: Dictionary, orbit_id: String, marker_id: String) -> bool:
+	if String(travel.get("phase", "grounded")) not in ["orbit", "stopped"]:
+		return false
+	return orbit_id != String(travel.get("orbit_id", "")) or marker_id != String(travel.get("orbit_marker_id", ORBIT_MARKER_IDS[0]))
+
 
 static func route_control(origin: Vector2, destination: Vector2) -> Vector2:
 	var direction := (destination - origin) * EXTENT

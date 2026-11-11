@@ -11,9 +11,11 @@ var _definition: Dictionary = {}
 var _phase: String = "grounded"
 var _craft_id: String = ""
 var _orbit_id: String = ""
+var _orbit_marker_id: String = ""
 var _position := Vector2(0.25, 0.62)
 var _origin_position := Vector2(0.25, 0.62)
 var _target_orbit_id: String = ""
+var _target_orbit_marker_id: String = ""
 var _elapsed_seconds: float = 0.0
 var _progress: float = 0.0
 var _location_id: String = "homebase"
@@ -32,9 +34,11 @@ func configure() -> Dictionary:
 	_phase = "grounded"
 	_craft_id = ""
 	_orbit_id = ""
+	_orbit_marker_id = ""
 	_position = _orbit_position("moon_orbit")
 	_origin_position = _position
 	_target_orbit_id = ""
+	_target_orbit_marker_id = ""
 	_elapsed_seconds = 0.0
 	_progress = 0.0
 	_location_id = "homebase"
@@ -50,6 +54,7 @@ func is_quantum_active() -> bool:
 func get_snapshot() -> Dictionary:
 	return {"system_version": int(_definition.get("version", 1)), "hex": GRID.cell_at(_position),
 		"route_hexes": _route_hexes.duplicate(), "heading": _heading, "phase": _phase, "craft_id": _craft_id, "orbit_id": _orbit_id,
+		"orbit_marker_id": _orbit_marker_id, "target_orbit_marker_id": _target_orbit_marker_id,
 		"position": [_position.x, _position.y], "origin_position": [_origin_position.x, _origin_position.y],
 		"route_control": [_route_control.x, _route_control.y], "route_destination": [_route_destination.x, _route_destination.y],
 		"target_orbit_id": _target_orbit_id, "progress": _progress, "elapsed_seconds": _elapsed_seconds,
@@ -118,15 +123,23 @@ func _start_quantum(payload: Dictionary) -> Dictionary:
 	if typeof(payload.get("target_orbit_id")) != TYPE_STRING or not Dictionary(_definition.orbits).has(payload.target_orbit_id):
 		return _reject("unknown_orbit", "Zielorbit unbekannt")
 	var target: String = payload.target_orbit_id
-	if target == _orbit_id:
-		return _reject("already_in_orbit", "Schiff ist bereits in diesem Orbit")
+	var requested_marker: Variant = payload.get("target_orbit_marker_id", GRID.ORBIT_MARKER_IDS[0])
+	if typeof(requested_marker) != TYPE_STRING:
+		return _reject("unknown_orbit_marker", "Orbitmarker unbekannt")
+	var marker := GRID.orbit_marker(_definition.orbits[target], requested_marker)
+	if marker.is_empty():
+		return _reject("unknown_orbit_marker", "Orbitmarker unbekannt")
+	if target == _orbit_id and requested_marker == _orbit_marker_id:
+		return _reject("already_in_orbit", "Schiff ist bereits an diesem Orbitmarker")
 	_origin_position = _position
 	_target_orbit_id = target
-	_route_destination = _orbit_position(target)
+	_target_orbit_marker_id = requested_marker
+	_route_destination = GRID.normalized(GRID.cell_from_record(marker))
 	_route_control = GRID.route_control(_origin_position, _route_destination)
 	_route_hexes = GRID.route(_origin_position, _route_control, _route_destination)
 	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, 0.0)
 	_orbit_id = ""
+	_orbit_marker_id = ""
 	_location_id = ""
 	_elapsed_seconds = 0.0
 	_progress = 0.0
@@ -153,7 +166,7 @@ func _advance(payload: Dictionary) -> Dictionary:
 	_heading = GRID.route_heading(_origin_position, _route_control, _route_destination, _progress)
 	_revision += 1
 	if _progress >= 1.0:
-		_arrive(_target_orbit_id)
+		_arrive(_target_orbit_id, _target_orbit_marker_id)
 	return {"ok": true, "advanced": true}
 
 func _valid_delta(payload: Dictionary) -> bool:
@@ -180,7 +193,7 @@ func _enter_orbit() -> Dictionary:
 	var orbit: String = String(_definition.location_orbits.get(_location_id, ""))
 	if orbit.is_empty():
 		return _reject("location_unbound", "Ortsorbit fehlt")
-	_arrive(orbit)
+	_arrive(orbit, _orbit_marker_id)
 	return {"ok": true}
 
 func _land_homebase() -> Dictionary:
@@ -189,7 +202,9 @@ func _land_homebase() -> Dictionary:
 	_phase = "grounded"
 	_location_id = "homebase"
 	_orbit_id = ""
+	_orbit_marker_id = ""
 	_target_orbit_id = ""
+	_target_orbit_marker_id = ""
 	_origin_position = _position
 	_elapsed_seconds = 0.0
 	_progress = 0.0
@@ -197,11 +212,13 @@ func _land_homebase() -> Dictionary:
 	_revision += 1
 	return {"ok": true}
 
-func _arrive(orbit: String) -> void:
+func _arrive(orbit: String, marker_id: String = "orbit_1") -> void:
 	_phase = "orbit"
 	_orbit_id = orbit
-	_position = _orbit_position(orbit)
+	_orbit_marker_id = marker_id
+	_position = GRID.normalized(GRID.cell_from_record(GRID.orbit_marker(_definition.orbits[orbit], marker_id)))
 	_target_orbit_id = ""
+	_target_orbit_marker_id = ""
 	_route_hexes.clear()
 	_location_id = ""
 	_revision += 1
@@ -220,6 +237,7 @@ func _valid_definition(data: Dictionary) -> bool:
 		return false
 	if data.orbits.size() != GRID.ORBITS.size() or not data.bodies.has("sun"):
 		return false
+	var used_marker_cells := {}
 	for orbit in GRID.ORBITS:
 		if typeof(data.orbits.get(orbit)) != TYPE_DICTIONARY or typeof(data.bodies.get(GRID.ORBITS[orbit])) != TYPE_DICTIONARY:
 			return false
@@ -237,7 +255,22 @@ func _valid_definition(data: Dictionary) -> bool:
 		var location := String(body.get("surface_location_id", ""))
 		if String(data.location_orbits.get(location, "")) != orbit:
 			return false
-		if not GRID.ring(GRID.cell_from_record(body), int(body.get("ring_radius", 0))).has(GRID.cell_from_record(data.orbits[orbit])):
+		var orbit_data: Dictionary = data.orbits[orbit]
+		var markers: Variant = orbit_data.get("markers")
+		if not markers is Array or markers.size() != GRID.ORBIT_MARKER_IDS.size():
+			return false
+		var corners: Array[Vector2i] = []
+		var radius := int(body.get("ring_radius", 0))
+		for direction in GRID.HEX.DIRECTIONS:
+			corners.append(GRID.cell_from_record(body) + direction * radius)
+		for i in markers.size():
+			if not markers[i] is Dictionary or markers[i].get("id") != GRID.ORBIT_MARKER_IDS[i] or not _valid_cell(markers[i]):
+				return false
+			var cell := GRID.cell_from_record(markers[i])
+			if cell not in corners or used_marker_cells.has(cell):
+				return false
+			used_marker_cells[cell] = true
+		if GRID.cell_from_record(markers[0]) != GRID.cell_from_record(orbit_data):
 			return false
 	for orbit in data.location_orbits.values():
 		if not GRID.ORBITS.has(orbit):
@@ -245,14 +278,17 @@ func _valid_definition(data: Dictionary) -> bool:
 	return _valid_hex_record(data.bodies.sun) and data.location_orbits.get("homebase") == "moon_orbit"
 
 func _valid_hex_record(record: Dictionary) -> bool:
+	return _valid_cell(record) and GRID.normalized(GRID.cell_from_record(record)).is_equal_approx(GRID.pair(record.get("position")))
+
+
+func _valid_cell(record: Dictionary) -> bool:
 	var raw: Variant = record.get("hex")
 	if not raw is Array or raw.size() != 2:
 		return false
 	for value in raw:
 		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) != floorf(float(value)):
 			return false
-	var cell: Vector2i = GRID.cell_from_record(record)
-	return GRID.contains(cell) and GRID.normalized(cell).is_equal_approx(GRID.pair(record.get("position")))
+	return GRID.contains(GRID.cell_from_record(record))
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}

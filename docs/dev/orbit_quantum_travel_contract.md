@@ -57,10 +57,10 @@ Cursor liegen (ausser eine erreichte Zoomgrenze veraendert den Faktor nicht).
 Zeichnung, klickbare Himmelskoerper und Schiffsposition nutzen einen gemeinsamen
 Transform. Kamerabewegung sendet keine Reise- oder Gameplaycommands.
 
-`Glut` und `Glut I` sind vorlaeufige deutsche Namen. Die drei Datenplaetze
-unter `planet_orbit.encounter_slots` sind sichtbare Zukunftsmarkierungen,
-keine anfliegbaren Orte und keine neuen Quantum-Ziele. Raumkaempfe und
-generierte Weltraumkarten benoetigen spaetere eigene Runtime-/Kartenvertraege.
+Die drei Datenplaetze unter `planet_orbit.encounter_slots` sind für spätere
+Begegnungen reserviert. Sie bleiben in der Definition und werden auf der
+Sternkarte ausgeblendet. Die aktiven Quantum-Ziele folgen dem Abschnitt
+Orbitmarker.
 
 ## Pruefung
 
@@ -71,3 +71,18 @@ Landung vor Heimkehr. Native Verstaendlichkeit bleibt getrennte Sichtpruefung.
 
 ## Revision 10.11.2026
 Die historische Ein-Reise-Grenze ist fuer diesen Slice abgeloest: singleplayer_fleet_travel_state.gd indiziert unveraenderte individuelle Reiseowner. Orte und Ansicht folgen persistent_location_runtime_contract.md. Die erste Kampagne bleibt bei zwei Personen/einem Schiff; Mehrtruppbetrieb ist mit isoliertem groesserem Team geprueft. Mehrschiff-Weltcheckpoint bleibt sichtbar gesperrt, statt ein unvollstaendiges Ein-Schiff-Save zu erzeugen.
+
+## Orbitmarker
+
+Jeder anfliegbare Himmelskörper besitzt drei einzelne Orbitmarker an
+abwechselnden Ecken seines Hexgürtels. Karte und Liste wählen denselben
+Marker. Die Sonne besitzt keine Orbitmarker. Der Quantum-Command nimmt
+optional `target_orbit_marker_id` entgegen. Ohne Marker startet die Reise
+zum bisherigen Standardpunkt. `orbit_id` bleibt die kanonische Ortsbindung.
+Der Snapshot hält den Zielmarker während des Sprungs und den erreichten
+Marker für Orbit, Anflug, Ortsbesuch und Rückflug. Jeder Marker am richtigen
+Körper erlaubt den regulären Anflug beziehungsweise die Heimlandung.
+
+Die Orbitbereichsdaten bleiben für ihre bisherige Bedeutung erhalten. Die
+Anzeige erfindet keine Feindpräsenz oder Freigabe. Der Basischeckpoint
+speichert weiterhin nur den geerdeten Stand.

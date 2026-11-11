@@ -3,17 +3,18 @@ extends Control
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const WORLD = preload("res://scripts/ui/star_map_world_view.gd")
 const SYSTEM = preload("res://scripts/core/singleplayer_space_travel_state.gd")
-signal orbit_requested(orbit_id: String)
+signal orbit_requested(orbit_id: String, marker_id: String)
 signal location_selected(location_id: String)
 var _location_buttons: Dictionary={}
 var _locations: Dictionary={}
 var _travel: Dictionary = {}
-var _orbit_buttons: Dictionary = {}
+var _body_labels: Dictionary = {}
 var _bodies: Dictionary = {}
+var _orbits: Dictionary = {}
 var _orbit_by_hex: Dictionary = {}
+var _snapshot_applied := false
 var _world
 static var _grid_mesh: ArrayMesh
-var _body_hits: Dictionary = {}
 var _camera_zoom := 1.0
 var _camera_pan := Vector2.ZERO
 var _initial_camera_framed := false
@@ -22,7 +23,6 @@ var _warp_afterglow: float = 0.0
 var _drag_button: int = 0
 var _drag_position := Vector2.ZERO
 var _recenter: Button
-var _encounter_labels: Dictionary = {}
 const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
 
@@ -36,14 +36,13 @@ func _ready() -> void:
 	var names := {"moon_orbit": "Moon", "planet_orbit": "Planet",
 		"glut_1a_orbit": "Glut1a", "glut_1b_orbit": "Glut1b"}
 	for id: String in names:
-		_orbit_buttons[id] = _button(names[id] + "Orbit", "", id)
-		var hit := Button.new()
-		hit.name = names[id] + "Body"
-		_style_hit_target(hit)
-		hit.pressed.connect(func(): orbit_requested.emit(id))
-		add_child(hit)
-		hit.gui_input.connect(_child_gui_input.bind(hit))
-		_body_hits[id] = hit
+		var label := Label.new()
+		label.name = names[id] + "Caption"
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size", 15)
+		label.add_theme_color_override("font_color", Color("b0c8d5"))
+		add_child(label)
+		_body_labels[id] = label
 	_recenter = Button.new()
 	_recenter.name = "RecenterMap"
 	_recenter.text = "Gesamtansicht"
@@ -55,6 +54,7 @@ func _ready() -> void:
 	resized.connect(_layout_buttons)
 	var system: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SYSTEM.DEFINITION_PATH))
 	_set_bodies(system.bodies)
+	_set_orbits(system.orbits)
 	_build_grid_mesh()
 	set_travel_snapshot(_travel)
 
@@ -66,55 +66,43 @@ func _style_hit_target(button: Button) -> void:
 	for state in ["normal", "hover", "pressed", "disabled"]:
 		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 
-func _button(node_name: String, title: String, orbit: String) -> Button:
-	var button := Button.new()
-	button.name = node_name
-	button.text = title
-	button.custom_minimum_size = Vector2(64, 25)
-	button.size = Vector2(64, 25)
-	button.add_theme_font_size_override("font_size", 15)
-	button.add_theme_color_override("font_disabled_color", Color("b0c8d5"))
-	button.pressed.connect(func(): orbit_requested.emit(orbit))
-	button.gui_input.connect(_child_gui_input.bind(button))
-	add_child(button)
-	return button
-
 func set_travel_snapshot(travel: Dictionary) -> void:
 	if _world == null:
 		_travel = travel.duplicate(true)
 		return
-	if not _travel.is_empty() and travel == _travel and _orbit_buttons.planet_orbit.text != "":
+	if _snapshot_applied and travel == _travel:
 		return
 	if String(_travel.get("phase", "")) == "quantum" and String(travel.get("phase", "")) == "orbit":
 		_warp_arrival = GRID.pair(travel.get("position", []))
 		_warp_afterglow = 0.35
 		set_process(true)
 	_travel = travel.duplicate(true)
+	_snapshot_applied = true
 	var bodies: Dictionary = travel.get("bodies", _bodies)
 	if bodies != _bodies and bodies.has("sun"):
 		_set_bodies(bodies)
-	var can_jump: bool = String(travel.get("phase", "grounded")) in ["orbit", "stopped"]
-	var orbit: String = String(travel.get("orbit_id", ""))
-	for id in _orbit_buttons:
-		var button: Button = _orbit_buttons[id]
-		var body: Dictionary = _bodies[GRID.ORBITS[id]]
-		button.text = String(body.name).get_slice(" · ", 0)
-		button.disabled = not can_jump or orbit == id
-		button.tooltip_text = String(body.name)
-		_body_hits[id].disabled = button.disabled
+	var orbits: Dictionary = travel.get("orbits", _orbits)
+	if orbits != _orbits and not orbits.is_empty():
+		_set_orbits(orbits)
 	_world.update_ships(travel)
-	_sync_encounter_labels()
 	_layout_buttons()
 
 
 func _set_bodies(bodies: Dictionary) -> void:
 	_bodies = bodies
-	_orbit_by_hex.clear()
-	for id in GRID.ORBITS:
-		var body: Dictionary = bodies[GRID.ORBITS[id]]
-		for cell in GRID.ring(GRID.cell_from_record(body), int(body.ring_radius)):
-			_orbit_by_hex[cell] = id
 	_world.update_bodies(bodies)
+
+
+func _set_orbits(orbits: Dictionary) -> void:
+	_orbits = orbits
+	_orbit_by_hex.clear()
+	for id in orbits:
+		for marker: Dictionary in orbits[id].get("markers", []):
+			_orbit_by_hex[GRID.cell_from_record(marker)] = {"orbit_id": id, "marker_id": marker.id}
+
+
+func get_orbit_definitions() -> Dictionary:
+	return _orbits
 
 
 func _pixels_per_unit() -> float:
@@ -161,10 +149,27 @@ func _gui_input(event: InputEvent) -> void:
 	if _handle_gui_event(event):
 		accept_event()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		var id := String(_orbit_by_hex.get(screen_to_hex(event.position), ""))
-		if not id.is_empty() and not _orbit_buttons[id].disabled:
-			orbit_requested.emit(id)
+		var target := orbit_marker_at(event.position)
+		if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
+			orbit_requested.emit(target.orbit_id, target.marker_id)
 			accept_event()
+
+
+func orbit_marker_at(point: Vector2) -> Dictionary:
+	var cell := screen_to_hex(point)
+	if _orbit_by_hex.has(cell):
+		return _orbit_by_hex[cell]
+	if _pixels_per_unit() * GRID.HEX.DEFAULT_RADIUS >= 6.0:
+		return {}
+	var closest: Dictionary = {}
+	var closest_distance := INF
+	for candidate: Vector2i in _orbit_by_hex:
+		if Geometry2D.is_point_in_polygon(point, _orbit_marker_polygon(candidate)):
+			var distance := point.distance_squared_to(map_to_screen(GRID.normalized(candidate)))
+			if distance < closest_distance:
+				closest = _orbit_by_hex[candidate]
+				closest_distance = distance
+	return closest
 
 func _child_gui_input(event: InputEvent, control: Control) -> void:
 	if _handle_gui_event(event):
@@ -213,59 +218,23 @@ func _layout_buttons() -> void:
 		"moon_orbit": Vector2.DOWN, "planet_orbit": Vector2.DOWN,
 		"glut_1a_orbit": Vector2.UP, "glut_1b_orbit": Vector2(0.8, -0.6),
 	}
-	for id in _orbit_buttons:
+	for id in _body_labels:
 		var body: Dictionary = _bodies[GRID.ORBITS[id]]
 		var center := map_to_screen(GRID.pair(body.position))
 		var radius: float = float(body.radius) * _pixels_per_unit()
-		var button: Button = _orbit_buttons[id]
-		button.position = center + Vector2(label_directions[id]) * (radius + 20.0) - button.size * 0.5
-		var hit: Button = _body_hits[id]
-		hit.size = Vector2.ONE * maxf(16.0, radius * 2.0)
-		hit.position = center - hit.size * 0.5
+		var label: Label = _body_labels[id]
+		label.text = String(body.name).get_slice(" · ", 0)
+		label.reset_size()
+		label.position = center + Vector2(label_directions[id]) * (radius + 24.0) - label.size * 0.5
 	_layout_location_buttons()
-	for id in _encounter_labels:
-		var label: Label = _encounter_labels[id]
-		label.position = map_to_screen(_encounter_position(label.get_meta("slot"))) + Vector2(-60, 10)
-		label.visible = _camera_zoom >= 4.0
 	if _recenter != null:
 		_recenter.position = Vector2(maxf(size.x - 138, 0), 12)
 		_recenter.size = Vector2(124, 30)
 	queue_redraw()
 
 
-func _encounter_slots() -> Array:
-	return Array(Dictionary(Dictionary(_travel.get("orbits", {})).get("planet_orbit", {})).get("encounter_slots", []))
-
-func _sync_encounter_labels() -> void:
-	for slot in _encounter_slots():
-		var id: String = String(slot.get("id", ""))
-		if id.is_empty() or _encounter_labels.has(id):
-			continue
-		var label := Label.new()
-		label.name = "Future_" + id.validate_node_name()
-		label.text = String(slot.get("name", "Orbitbereich")) + "\nspäter"
-		label.add_theme_font_size_override("font_size", 11)
-		label.add_theme_color_override("font_color", Color("78949e"))
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		label.size = Vector2(120, 32)
-		label.tooltip_text = "Zukünftiger Orbitbereich · noch nicht verfügbar"
-		label.mouse_filter = Control.MOUSE_FILTER_STOP
-		label.gui_input.connect(_child_gui_input.bind(label))
-		label.set_meta("slot", Dictionary(slot).duplicate(true))
-		add_child(label)
-		_encounter_labels[id] = label
-	# Panned labels must never cover the camera's recovery action.
-	if _recenter != null:
-		move_child(_recenter, get_child_count() - 1)
-
-func _encounter_position(slot: Dictionary) -> Vector2:
-	var planet: Dictionary = _bodies.planet
-	var angle := deg_to_rad(float(slot.get("angle_degrees", 0)))
-	return GRID.pair(planet.position) + Vector2.from_angle(angle) * (float(planet.ring_radius) + 3.0) / GRID.EXTENT
-
-
 func get_camera_snapshot() -> Dictionary:
-	return {"zoom": _camera_zoom, "pan": _camera_pan, "encounter_slots": _encounter_slots().duplicate(true),
+	return {"zoom": _camera_zoom, "pan": _camera_pan, "orbit_marker_count": _orbit_by_hex.size(),
 		"grid_size": GRID.SIZE, "cells": GRID.SIZE.x * GRID.SIZE.y}
 
 
@@ -285,12 +254,7 @@ func _draw() -> void:
 		if not parent_id.is_empty():
 			var parent := GRID.pair(_bodies[parent_id].position)
 			_draw_orbit(parent, ((center - parent) * GRID.EXTENT).length())
-		var ring_radius := int(body.ring_radius)
-		if ring_radius > 0:
-			for cell in GRID.ring(GRID.cell_from_record(body), ring_radius):
-				var polygon := _cell_polygon(cell)
-				draw_colored_polygon(polygon, Color(0.18, 0.70, 0.76, 0.13))
-				_outline(polygon, Color(0.27, 0.72, 0.80, 0.65))
+	_draw_orbit_markers()
 	var sun_center := map_to_screen(GRID.pair(_bodies.sun.position))
 	var sun_radius: float = float(_bodies.sun.radius) * _pixels_per_unit()
 	for factor in [2.6, 2.1, 1.65, 1.3]:
@@ -311,9 +275,24 @@ func _draw() -> void:
 		if _camera_zoom >= 3.0:
 			var letter: String = {"satellite_crash": "A", "trade_outpost": "B", "fortified_outpost": "C"}.get(id, "")
 			draw_string(ThemeDB.fallback_font, _hex_center(hex) + Vector2(-4, 4), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ebfaff"))
-	for slot in _encounter_slots():
-		if _camera_zoom >= 4.0:
-			draw_circle(map_to_screen(_encounter_position(slot)), 2.0, Color("8e785e"), false, 1.0, true)
+
+
+func _draw_orbit_markers() -> void:
+	for cell: Vector2i in _orbit_by_hex:
+		var target: Dictionary = _orbit_by_hex[cell]
+		var occupied: bool = target.orbit_id == _travel.get("orbit_id") and target.marker_id == _travel.get("orbit_marker_id")
+		var destination: bool = String(_travel.get("phase", "")) == "quantum" and target.orbit_id == _travel.get("target_orbit_id") and target.marker_id == _travel.get("target_orbit_marker_id")
+		var color := Color("f2c47c") if occupied or destination else Color("91e4ee")
+		var polygon := _orbit_marker_polygon(cell)
+		draw_colored_polygon(polygon, Color(color, 0.24))
+		_outline(polygon, color)
+		var center := map_to_screen(GRID.normalized(cell))
+		draw_string(ThemeDB.fallback_font, center + Vector2(-3, 4), String(target.marker_id).get_slice("_", 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 12 if _camera_zoom >= 3.0 else 10, color)
+
+
+func _orbit_marker_polygon(cell: Vector2i) -> PackedVector2Array:
+	var radius := maxf(GRID.HEX.DEFAULT_RADIUS, 6.0 / _pixels_per_unit())
+	return _cell_polygon(cell, radius)
 
 
 func _process(delta: float) -> void:
@@ -396,9 +375,9 @@ func _draw_orbit(center: Vector2, radius: float) -> void:
 	draw_polyline(points, Color(0.47, 0.68, 0.78, 0.30), 1.0, true)
 
 
-func _cell_polygon(cell: Vector2i) -> PackedVector2Array:
+func _cell_polygon(cell: Vector2i, radius: float = GRID.HEX.DEFAULT_RADIUS) -> PackedVector2Array:
 	var points := PackedVector2Array()
-	for corner in GRID.HEX.corners(GRID.HEX.axial_to_plane(Vector2(cell))):
+	for corner in GRID.HEX.corners(GRID.HEX.axial_to_plane(Vector2(cell)), radius):
 		points.append(map_to_screen(corner / GRID.EXTENT))
 	return points
 
@@ -484,9 +463,12 @@ func location_map_point(id: String) -> Vector2:
 func _layout_location_buttons() -> void:
 	for id in _location_buttons:
 		var button: Button = _location_buttons[id]
-		button.size = Vector2(18, 18)
+		var is_surface := not _body_for_location(id).is_empty()
+		var extent := clampf(_pixels_per_unit() * 1.8, 5.0, 18.0) if is_surface else 18.0
+		button.custom_minimum_size = Vector2.ONE * extent
+		button.size = Vector2.ONE * extent
 		button.position = map_to_screen(location_map_point(id)) - button.size * 0.5
 		button.mouse_filter = Control.MOUSE_FILTER_IGNORE if button.disabled else Control.MOUSE_FILTER_STOP
-		button.text = "◇" if _body_for_location(id).is_empty() else ""
+		button.text = "" if is_surface else "◇"
 	if _recenter != null:
 		move_child(_recenter, get_child_count() - 1)

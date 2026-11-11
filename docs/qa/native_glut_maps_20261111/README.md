@@ -22,16 +22,18 @@ Schluchtbett dient der Darstellung.
 
 A/B/C speichern je **512 × 256 = 131.072** eindeutige Hexzellen. Die Sternkarte
 stellt **256 × 256 = 65.536** strategische Zellen nativ dar. Sonne, Planet,
-drei Monde, Orbitgürtel, volle Planetenbahn, projizierte A/B/C-Felder und ein
+drei Monde, je drei einzelne Orbitmarker pro Zielkörper, volle Planetenbahn,
+projizierte A/B/C-Felder und ein
 drehbares Schiffsmodell laufen im Spielrenderer. Glut 1 hat sechs Hexeinheiten
 Durchmesser, seine drei Monde je 2,4. Die Ansicht öffnet näher am System
 und bietet die Gesamtansicht als Rücksprung. Der sichtbare Flugweg, die
 Schiffsposition und die Drehung folgen derselben quadratischen Kurve aus dem
 Reiseowner. Quantum öffnet einen farbigen Ring, und die Cutlass zeigt im Flug
 einen Triebwerksstrahl.
-C und der bestehende Notruf behalten `planet_orbit`. Der Eintritt liegt
-auf dem erweiterten Gürtel südöstlich von Glut 1. A und B haben eigene
-Mondorbits.
+C und der bestehende Notruf behalten `planet_orbit`. Die zwölf nummerierten
+Anflugpunkte sind auf der Karte und in der Liste wählbar. Ein Wechsel innerhalb
+desselben Orbits ist möglich. Der erreichte Marker bleibt beim Oberflächenanflug
+und beim Rückflug erhalten. Die vorhandenen Begegnungen behalten ihre Regeln.
 
 ### Lokale Bildbelege
 
@@ -54,11 +56,12 @@ Mondorbits.
   [C nah](../../../output/native_glut_maps/C_deck_final_18.png) und
   [C Gesamtansicht](../../../output/native_glut_maps/C_deck_final_540.png)
   bei 1920 × 1080.
-- Sternkarte [Startansicht](../../../output/native_glut_maps/star_final_tuned_system.png),
-  [Quantum-Ring](../../../output/native_glut_maps/star_final_tuned_warp.png),
-  [Flug](../../../output/native_glut_maps/star_final_tuned_route.png) und
-  [Oberflächenfeld C](../../../output/native_glut_maps/star_final_tuned_surface.png)
-  bei 1920 × 1080.
+- Sternkarte [Karte und Liste](../../../output/native_glut_maps/orbit_markers/glut_markers.png),
+  [Orbitmarker nah](../../../output/native_glut_maps/orbit_markers/glut_markers_detail.png),
+  [Quantum-Ring](../../../output/native_glut_maps/orbit_markers/glut_warp.png),
+  [Flug](../../../output/native_glut_maps/orbit_markers/glut_route.png) und
+  [Oberflächenfeld C](../../../output/native_glut_maps/orbit_markers/glut_surface.png)
+  bei 1280 × 720.
 - [Kompakte Charakterkarte mit Rangsymbolen und Figur](../../../output/native_glut_maps/details_compact/details_1280.png).
 - [Felsvergleich in Godot](../../../output/native_glut_maps/rock_native_comparison.png)
   bei gleicher Beleuchtung und Kamera. Links der integrierte 100-Dreieck-Fels
@@ -91,8 +94,8 @@ gestalterische Nutzerabnahme steht aus.
 | Runtime-Editor SaveAs und Reload | 49/0, inklusive aller drei Orte und Hochterrain |
 | A*/HPA, Höhe, Sicht und Decks | Einstufen-Rampen in allen sechs Richtungen auf A/B/C, Klippen mit größerem Sprung gesperrt, legale Hauptrouten auf A/B/C, jede C-Querung ohne die jeweils andere erreichbar, LOS-Beispiele am echten Gelände, korrekte Platzierung eines Gebäudes auf Hochterrain |
 | Kameraumkehr und Rendercache | Fernanforderung verworfen, Nachbaransicht und Rückschwenk verwenden fertige Geometrie, ausgeblendeter Viewport bleibt aus |
-| Sternkarten-UI, Kamera und Orte | 91/0, 26/0 und 27/0, inklusive Klick auf einen Orbitgürtel |
-| Reiseowner | A/B/C-Ankunft, Abbruch, Neustart, Anflug, Rückorbit und Heimlandung, beide Schiffe auf getrennten Orbits, kontinuierliche Kurve ohne Richtungswechsel auf demselben Sprung |
+| Sternkarten-UI, Kamera und Orte | 89/0, 33/0 und 27/0, inklusive zwölf echter Kartenklicks und der Liste |
+| Reiseowner | 108/0 und Reisevertragsregression 69/0. Zwölf exakte Ankünfte, Wechsel im gleichen Orbit, Anflug und Rückorbit oder Heimlandung, Abbruch, Neustart und unabhängige Flotte. Vollständige Einsätze von jedem Marker stehen aus. |
 | Altpfadregression | Hex 41/0, Navigation 72/0, LOS 28/0, altes Hügel-Testfeld 83/0 |
 | Kampagnenkarten und Gebäudeflächen | Inhalte 69/0. Gebäudeblocker auf B/C decken alle je 142 geprüften Felder ab, einschließlich der Frontwand der versetzten Außenposten. |
 | Skirmish | Drei tatsächliche vorbereitete Starts, 97/0 |

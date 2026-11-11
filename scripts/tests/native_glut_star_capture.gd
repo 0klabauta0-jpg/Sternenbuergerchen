@@ -2,6 +2,7 @@ extends SceneTree
 const CANVAS = preload("res://scripts/ui/star_map_canvas.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_space_travel_state.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const SCREEN = preload("res://scripts/ui/star_map_screen.gd")
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -12,6 +13,30 @@ func _run() -> void:
 		quit(2)
 		return
 	var owner = TRAVEL.new()
+	owner.configure()
+	owner.apply_command({"contract_category": "singleplayer_space_travel", "operation": "launch_to_orbit",
+		"payload": {"craft_id": "probe"}}, {"runtime_authorized": true})
+	var screen := SCREEN.new()
+	root.add_child(screen)
+	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen.configure(func(): return {
+		"space_travel": owner.get_snapshot(), "mode": "skirmish",
+		"crafts": [{"craft_id": "probe", "display_name": "Cutlass"}],
+		"campaign": {"locations": {
+			"satellite_crash": {"name": "Satellitenregion"},
+			"trade_outpost": {"name": "Freihafen"},
+			"fortified_outpost": {"name": "Gesicherter Außenposten"},
+		}},
+	}, Callable())
+	await process_frame
+	await process_frame
+	await _picture(args[0] + "_markers.png")
+	var map: Control = screen.find_child("SystemMap", true, false)
+	var planet_focus: Vector2 = map.map_to_screen(GRID.pair(owner.get_snapshot().bodies.planet.position))
+	map.zoom_at(planet_focus, 4.0)
+	map.pan_by(map.size * 0.5 - planet_focus)
+	await _picture(args[0] + "_markers_detail.png")
+	screen.free()
 	owner.configure()
 	var canvas := CANVAS.new()
 	root.add_child(canvas)
@@ -29,7 +54,7 @@ func _run() -> void:
 	owner.apply_command({"contract_category": "singleplayer_space_travel", "operation": "launch_to_orbit",
 		"payload": {"craft_id": "probe"}}, {"runtime_authorized": true})
 	owner.apply_command({"contract_category": "singleplayer_space_travel", "operation": "start_quantum",
-		"payload": {"craft_id": "probe", "target_orbit_id": "planet_orbit"}})
+		"payload": {"craft_id": "probe", "target_orbit_id": "planet_orbit", "target_orbit_marker_id": "orbit_2"}})
 	owner.apply_command({"contract_category": "singleplayer_space_travel", "operation": "advance",
 		"payload": {"delta_seconds": 0.32}}, {"runtime_authorized": true})
 	var departure: Dictionary = owner.get_snapshot()

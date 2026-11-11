@@ -56,11 +56,45 @@ func _run() -> void:
 		_check(_command(owner, "abort_quantum").ok and owner.get_snapshot().position == stopped, "abort holds the current position")
 		_check(_command(owner, "start_quantum", {"target_orbit_id": target}).ok, "restart from held position")
 		_command(owner, "advance", {"delta_seconds": 3.0})
-		_check(owner.get_snapshot().orbit_id == target, "arrived at " + target)
+		var arrived: Dictionary = owner.get_snapshot()
+		_check(arrived.orbit_id == target and arrived.orbit_marker_id == "orbit_1" and arrived.hex == GRID.cell_from_record(arrived.orbits[target]), "legacy destination arrives at the existing default marker " + target)
 		_check(_command(owner, "begin_approach", {"location_id": location}).ok, "approach uses matching orbit")
 		_check(_command(owner, "finish_approach").ok and _command(owner, "enter_orbit").ok, "return through surface exit")
 		_check(owner.get_snapshot().orbit_id == target, "return uses the same orbit")
 	_command(owner, "start_quantum", {"target_orbit_id": "moon_orbit"})
 	_command(owner, "advance", {"delta_seconds": 3.0})
 	_check(_command(owner, "land_homebase").ok, "land in existing home orbit")
+	_check_all_markers(expected)
 	quit(1 if failures else 0)
+
+func _check_all_markers(location_orbits: Dictionary) -> void:
+	for location in ["satellite_crash", "trade_outpost", "fortified_outpost", "homebase"]:
+		var orbit_id := String(location_orbits[location])
+		var owner := TRAVEL.new()
+		owner.configure()
+		_command(owner, "launch_to_orbit")
+		var orbit: Dictionary = owner.get_snapshot().orbits[orbit_id]
+		_check(orbit.markers.size() == 3, orbit_id + " has exactly three markers")
+		for marker: Dictionary in orbit.markers:
+			if location == "homebase":
+				_command(owner, "start_quantum", {"target_orbit_id": "planet_orbit"})
+				_command(owner, "advance", {"delta_seconds": 3.0})
+			var marker_id := String(marker.id)
+			var target := {"target_orbit_id": orbit_id, "target_orbit_marker_id": marker_id}
+			var point := GRID.normalized(GRID.cell_from_record(marker))
+			var label := orbit_id + "/" + marker_id
+			_check(_command(owner, "start_quantum", target).ok, "jump to " + label)
+			var flight: Dictionary = owner.get_snapshot()
+			_check(flight.target_orbit_marker_id == marker_id and GRID.pair(flight.route_destination).is_equal_approx(point) and flight.route_hexes.back() == GRID.cell_from_record(marker), "flight ends at chosen marker " + label)
+			_command(owner, "advance", {"delta_seconds": 3.0})
+			var arrival: Dictionary = owner.get_snapshot()
+			_check(arrival.orbit_id == orbit_id and arrival.orbit_marker_id == marker_id and GRID.pair(arrival.position).is_equal_approx(point), "exact arrival " + label)
+			_check(_command(owner, "start_quantum", target).get("reason") == "already_in_orbit", "cannot jump to current marker " + label)
+			if location == "homebase":
+				_check(_command(owner, "land_homebase").ok and owner.get_snapshot().orbit_marker_id == "", "legal home landing from " + label)
+				_command(owner, "launch_to_orbit")
+			else:
+				_check(_command(owner, "begin_approach", {"location_id": location}).ok and owner.get_snapshot().orbit_marker_id == marker_id, "regular approach retains " + label)
+				_check(_command(owner, "finish_approach").ok and _command(owner, "enter_orbit").ok and owner.get_snapshot().orbit_marker_id == marker_id, "return preserves " + label)
+		var prior := owner.get_snapshot()
+		_check(_command(owner, "start_quantum", {"target_orbit_id": orbit_id, "target_orbit_marker_id": "planet_orbit_sector_01"}).get("reason") == "unknown_orbit_marker" and owner.get_snapshot() == prior, "reserved encounter is not a marker for " + orbit_id)

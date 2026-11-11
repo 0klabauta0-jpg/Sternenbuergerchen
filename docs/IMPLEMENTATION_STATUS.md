@@ -5,8 +5,8 @@
 Isolierter Kandidat `task/native-glut-maps-20261110` auf Main `639a49d65`.
 Glut A/B/C je 512 × 256 echte Hexfelder mit Schluchten, H8-Hochterrain,
 geschlossenen Rampen und zwei C-Brücken. Sternkarte 256 × 256 mit drei
-Monden, näherer Startkamera, ruhiger Flugkurve, Quantum-Ring und
-Triebwerksstrahl. Gelände lädt während des Anflugs, zuletzt benutzte
+Monden, drei auswählbaren Anflugmarkern je Zielkörper, näherer
+Startkamera, ruhiger Flugkurve, Quantum-Ring und Triebwerksstrahl. Gelände lädt während des Anflugs, zuletzt benutzte
 3D-Ausschnitte bleiben im Cache. FT1, Charakterkarte und Rüstungsfach
 aus dem Playtest nachgezogen. Kampagnenprobe mit erstem Upload,
 A-Wiederbesuch, B, C, Orbitalrettung und Mehrschiff-Continue im QA-Bericht.
