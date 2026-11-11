@@ -12461,6 +12461,16 @@ ankunft, Tuerguard/MovingShot/Backoff und AP6–8 laufen im Tabletop-Chat weiter
 Keine neue native Gefechts-/FPS-/Save-/Netzfreigabe, kein Main/EXE.
 # 2026-11-11: begrenzte Orbitbewegung integriert
 
+Folgeintegration bis Source2171e7f25: produktive Abflug-/Anfluggruppe verbindet
+die vorhandenen Supply-/Campaign-/Travelowner und lokalen Flight-/Raumindex.
+Frische private Departure-/SurfaceGrouppruefungen bestanden; unabh. enger
+Nachreview bestaetigt Einzel-Travelowner-Epochenschutz bei Gruppenreplay.
+Weitere Rueckkehrvorbereitung3a24ac871 als2f57968d8 integriert, privat17/0 und
+enger Deltareview ohne Blocker. QA parent_departure und parent_return_preparation.
+Echte AP6-Boardinganbindung, produktiver gemeinsamer lokaler Rueckweg und
+Orbitbildschirmanschluss noch in Arbeit. Die nachfolgenden aelteren Grenzen
+beschreiben den vorangegangenen Zwischenstand.
+
 Quellpakete bis 00098ed5d sind im isolierten Taskstand a87246495 zusammengefuehrt.
 Autoritative Einzelspieler-Raumbewegung, indizierte Eigenschiffprojektion und
 inaktive/reale Flight-Reaktivierung sind vorhanden. Frische private Integrations-
