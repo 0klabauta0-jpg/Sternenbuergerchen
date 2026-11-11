@@ -7,6 +7,7 @@ func _initialize() -> void:
 	var before: Dictionary = owner.export_state()
 	var profile: Dictionary = owner.get_space_flight_profile("ship")
 	assert(profile.ok and profile.mass > 0.0 and profile.hull.main_thrust > profile.hull.reverse_thrust and profile.power.thrust_fraction == 1.0)
+	assert(profile.footprint_hexes == [Vector2i.ZERO, Vector2i(1, 0)] and owner.get_space_flight_profile("fighter").footprint_hexes == [Vector2i.ZERO])
 	assert(owner.get_space_flight_profile("fighter").hull.side_thrust > profile.hull.side_thrust)
 	profile.hull.main_thrust = 0.0
 	assert(owner.get_space_flight_profile("ship").hull.main_thrust > 0.0)

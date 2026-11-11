@@ -18,6 +18,7 @@
         "warp_hemera"
       ],
       "flight_profile": {
+        "footprint_hexes": [[0, 0], [1, 0]],
         "mass": 1.0,
         "main_thrust": 2.0,
         "reverse_thrust": 1.0,
@@ -29,6 +30,7 @@
   },
   "flight_profiles": {
     "buccaneer": {
+      "footprint_hexes": [[0, 0]],
       "mass": 1.0,
       "main_thrust": 2.8,
       "reverse_thrust": 1.4,

@@ -343,15 +343,22 @@ func commit_space_area_transition(token: String, authority_context: Dictionary) 
 	else:
 		var geometry: Dictionary = SPACE_AREA_TRANSITION.preview(flight, prepared.flight_revision, prepared.body_id, prepared.target, prepared.footprint, _space_combat_state, tick_counter)
 		if not geometry.get("ok", false): return _reject_fixture_area_token(token, String(geometry.get("reason", "invalid_geometry")))
+		var movement_validation: Dictionary = flight.validate_area_transition(geometry.proposal, tick_counter)
+		if not movement_validation.get("ok", false): return _reject_fixture_area_token(token, "flight_changed")
+		var admission := {}
+		if prepared.needs_admission:
+			var definition := {"craft_id":prepared.craft_id, "faction_id":"player", "control_domain":"player", "footprint_hexes":prepared.footprint}
+			admission = _space_combat_state.validate_new_local_admission(definition, flight, geometry.proposal, tick_counter)
+			if not admission.get("ok", false): return _reject_fixture_area_token(token, "admission_invalid")
 		var wings: Dictionary = _space_wing_state.ensure_flying_wings(authority_context.actor_id, [prepared.craft_id], authority_context.owned_crafts, authority_context.craft_pilots, prepared.wing_revision)
 		assert(wings.get("ok", false))
-		var movement: Dictionary = flight.commit_area_transition(geometry.proposal, tick_counter)
+		var movement: Dictionary = flight._publish_area_transition(movement_validation)
 		assert(movement.get("ok", false))
 		_space_combat_state.release_navigation_claim(prepared.craft_id)
 		var cell: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(geometry.proposal.position_plane))
 		if prepared.needs_admission:
-			var definition := {"craft_id":prepared.craft_id, "faction_id":"player", "control_domain":"player", "start_hex":cell, "footprint_hexes":prepared.footprint}
-			indexed = _space_combat_state.admit_actor(definition, flight, true).get("ok", false)
+			_space_combat_state._publish_new_local_admission(admission)
+			indexed = true
 		else:
 			indexed = _space_combat_state.update_actor_cell(prepared.craft_id, cell)
 	assert(indexed)
