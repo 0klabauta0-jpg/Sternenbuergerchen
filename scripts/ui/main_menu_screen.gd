@@ -66,6 +66,7 @@ var _campaign_dialog: ConfirmationDialog
 var _campaign_continue_button: Button
 var _campaign_replace_dialog: ConfirmationDialog
 var _skirmish_dialog: AcceptDialog
+var _skirmish_points_dialog: AcceptDialog
 
 var _settings_config_path: String = COMIC_BUBBLE_SETTINGS_SCRIPT.CONFIG_PATH
 var _comic_bubble_settings: Dictionary = {}
@@ -3818,7 +3819,7 @@ func _on_singleplayer_pressed() -> void:
 func _ensure_skirmish_entry() -> void:
 	_skirmish_dialog = AcceptDialog.new()
 	_skirmish_dialog.name = "SkirmishStartDialog"
-	_skirmish_dialog.title = "Skirmish — vorbereiteten Start laden"
+	_skirmish_dialog.title = "Skirmish"
 	_skirmish_dialog.ok_button_text = "Zurück"
 	add_child(_skirmish_dialog)
 	var content := VBoxContainer.new()
@@ -3829,6 +3830,13 @@ func _ensure_skirmish_entry() -> void:
 	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	heading.custom_minimum_size.x = 620
 	content.add_child(heading)
+	var points := Button.new()
+	points.name = "SkirmishPointsStart"
+	points.text = "Mit Punktebudget zusammenstellen"
+	points.custom_minimum_size.y = 42
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(points, "accent")
+	content.add_child(points)
+	points.pressed.connect(_open_skirmish_points)
 	var presets: Dictionary = load("res://scripts/meta/skirmish_start_configuration.gd").get_presets()
 	for id: String in ["early", "mid", "late"]:
 		var data: Dictionary = presets.get(id, {})
@@ -3856,10 +3864,22 @@ func _ensure_skirmish_entry() -> void:
 	content.add_child(note)
 
 
-func _start_skirmish(preset_id: String = "") -> void:
-	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id)
+func _open_skirmish_points() -> void:
+	if _skirmish_points_dialog == null:
+		_skirmish_points_dialog = load("res://scripts/ui/skirmish_points_dialog.gd").new()
+		_skirmish_points_dialog.connect("start_requested", func(draft: Dictionary) -> void: _start_skirmish("", draft))
+		add_child(_skirmish_points_dialog)
+		_skirmish_points_dialog.canceled.connect(func() -> void: _on_singleplayer_pressed.call_deferred())
+		_skirmish_points_dialog.confirmed.connect(func() -> void: _on_singleplayer_pressed.call_deferred())
+	_skirmish_dialog.hide()
+	_skirmish_points_dialog.popup_centered(Vector2i(740, 500))
+
+
+func _start_skirmish(preset_id: String = "", points_draft: Dictionary = {}) -> void:
+	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id, points_draft)
 	if not result.get("ok", false): return
 	if _skirmish_dialog != null: _skirmish_dialog.hide()
+	if _skirmish_points_dialog != null: _skirmish_points_dialog.hide()
 	_play_ui_sfx("confirm", "singleplayer")
 	_change_scene(SINGLEPLAYER_SCENE_PATH)
 

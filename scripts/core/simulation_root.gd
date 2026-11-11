@@ -29,6 +29,17 @@ func request_personnel_loadout_command(operation: String, payload: Dictionary) -
 			_personnel_loadout_owner.call("set_slot", String(payload.get("unit_id", "")), String(payload.get("key", "")), String(payload.get("value", "")))
 
 var _base_personnel_owner: Node
+var _skirmish_economy_owner: RefCounted
+var _skirmish_transaction: Callable
+
+func configure_skirmish_economy(owner: RefCounted, transaction: Callable) -> void:
+	_skirmish_economy_owner = owner
+	_skirmish_transaction = transaction
+
+func request_skirmish_command(command: Dictionary) -> Dictionary:
+	if _skirmish_economy_owner == null:
+		return {"ok": false, "reason": "skirmish_economy_unavailable"}
+	return _skirmish_economy_owner.call("apply_command", command.duplicate(true), _skirmish_transaction)
 
 func configure_base_personnel(owner: Node) -> void:
 	_base_personnel_owner = owner
@@ -577,6 +588,14 @@ func register_known_unit(unit_id: String, unit: Node) -> bool:
 
 	_known_units_by_id[unit_id] = unit
 	return true
+
+
+func unregister_known_unit(unit_id: String) -> void:
+	_discard_pending_move_commands_for_unit(unit_id)
+	_known_units_by_id.erase(unit_id)
+	_latest_command_token_by_unit_id.erase(unit_id)
+	_committed_command_token_by_unit_id.erase(unit_id)
+	_contact_path_recompute_ready_at_msec.erase(unit_id)
 
 
 func set_peer_team(peer_id: int, team_id: String) -> void:

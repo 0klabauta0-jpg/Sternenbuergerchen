@@ -174,10 +174,11 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	_add_post_mission_award_alert(sheet, model, profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
 	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
-	var suitability_host := _overview_section(overview, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
+	var suitability_host := _overview_section(overview, "EINSATZNIVEAU", "CharacterSuitabilityOverview")
 	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
-	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
-	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
+	var experience := _overview_label(suitability_host, "PrimarySuitability", CHARACTER_SHEET_FORMATTER_SCRIPT.get_experience_label(profile), 16)
+	experience.tooltip_text = "Einschätzung aus den aktuellen Fähigkeiten. Genaue Werte und Eignungen kannst du unten aufklappen."
+	_overview_label(suitability_host, "PrimarySuitabilityReason", String(primary.get("label", "Einsatzprofil")), 13)
 	var social := HBoxContainer.new()
 	social.name = "CharacterTraitsAndRelationships"
 	social.add_theme_constant_override("separation", 10)

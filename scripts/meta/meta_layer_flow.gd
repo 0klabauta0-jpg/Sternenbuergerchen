@@ -225,7 +225,7 @@ func _ready() -> void:
 		if not String(_campaign_start.get("error_message")).is_empty():
 			call_deferred("_campaign_load_failed")
 			return
-	elif not String(_game_start_request.get("preset_id", "")).is_empty():
+	elif _game_start_request.has("preset_id") or _game_start_request.has("points_draft"):
 		load("res://scripts/meta/skirmish_start_configuration.gd").new().configure(self, _game_start_request)
 	else:
 		_load_persistent_player_roster()
@@ -3885,6 +3885,9 @@ func _on_homebase_mission_start_requested() -> void:
 
 
 func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
+	if has_meta("skirmish_points_budget"):
+		_singleplayer_runtime.call("request_operation", "skirmish_ship", {"item_id": "cutlass" if base_craft_type == "dropship" else "buccaneer"})
+		return
 	var normalized_craft_type: String = base_craft_type.strip_edges()
 	if normalized_craft_type.is_empty():
 		normalized_craft_type = "dropship"
@@ -3897,6 +3900,9 @@ func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
 
 
 func _on_homebase_aircraft_remove_requested(craft_id: String) -> void:
+	if has_meta("skirmish_points_budget"):
+		_singleplayer_runtime.call("request_operation", "skirmish_return_ship", {"craft_id": craft_id})
+		return
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
@@ -5116,6 +5122,8 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 
 
 func _ensure_singleplayer_visible_homebase_actionability() -> void:
+	if has_meta("skirmish_preset_id"):
+		return
 	# Startup recovery must never rebuild an established multi-place roster.
 	if not _location_contexts.is_empty(): return
 	if _singleplayer_runtime != null and String(Dictionary(_singleplayer_runtime.call("get_space_travel_snapshot")).get("phase", "grounded")) != "grounded":
@@ -5153,6 +5161,8 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 
 
 func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
+	if has_meta("skirmish_preset_id"):
+		return
 	if not _location_contexts.is_empty(): return
 	if is_campaign_start():
 		return
@@ -7912,6 +7922,30 @@ func register_campaign_recruit(profile: Dictionary, craft_definition: Dictionary
 		if personnel!=null: personnel.call("sync_roster")
 	_refresh_homebase_screen()
 	return {"ok":true,"unit_id":id}
+
+
+func remove_skirmish_person(unit_id: String) -> void:
+	_all_team_units = _all_team_units.filter(func(unit: Dictionary) -> bool: return String(unit.unit_id) != unit_id)
+	_available_team_units = _available_team_units.filter(func(unit: Dictionary) -> bool: return String(unit.unit_id) != unit_id)
+	for craft in _assigned_aircraft_pilot_by_craft.keys():
+		if String(_assigned_aircraft_pilot_by_craft[craft]) == unit_id:
+			_assigned_aircraft_pilot_by_craft.erase(craft)
+	var index := _homebase_staged_unit_ids.find(unit_id)
+	if index >= 0:
+		_homebase_staged_unit_ids.remove_at(index)
+		if index < _homebase_staged_fireteam_ids.size(): _homebase_staged_fireteam_ids.remove_at(index)
+	index = _selected_unit_ids.find(unit_id)
+	if index >= 0:
+		_selected_unit_ids.remove_at(index)
+		if index < _selected_fireteam_ids.size(): _selected_fireteam_ids.remove_at(index)
+	_refresh_homebase_screen()
+
+
+func remove_skirmish_craft(craft_id: String) -> void:
+	_homebase_aircraft_definitions = _homebase_aircraft_definitions.filter(func(craft: Dictionary) -> bool: return String(craft.craft_id) != craft_id)
+	_aircraft_location_by_craft.erase(craft_id)
+	_selected_aircraft_cargo_by_craft.erase(craft_id)
+	_loaded_aircraft_cargo_by_craft.erase(craft_id)
 
 
 func rename_campaign_person(unit_id: String, display_name: String) -> Dictionary:

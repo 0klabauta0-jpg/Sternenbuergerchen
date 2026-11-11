@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:4081)
+       [1] _start_skirmish (res://scripts/ui/main_menu_screen.gd:3884)
+       [2] <anonymous lambda> (res://scripts/ui/main_menu_screen.gd:3870)
+       [3] <anonymous lambda> (res://scripts/ui/skirmish_points_dialog.gd:25)
+       [4] _run (res://scripts/tests/skirmish_base_economy_test.gd:26)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:4081)
+       [1] _start_skirmish (res://scripts/ui/main_menu_screen.gd:3884)
+       [2] <anonymous lambda> (res://scripts/ui/main_menu_screen.gd:3870)
+       [3] <anonymous lambda> (res://scripts/ui/skirmish_points_dialog.gd:25)
+       [4] _run (res://scripts/tests/skirmish_base_economy_test.gd:26)
+SKIRMISH_BASE_ECONOMY 56 checks, 0 failures

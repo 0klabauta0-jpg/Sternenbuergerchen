@@ -457,6 +457,45 @@ func configure_preset_supply(preset: Dictionary) -> void:
 	_inventory["base:homebase"].items = _item_quantities
 	_revision += 1
 
+
+func receive_skirmish_equipment(item: String) -> Dictionary:
+	if not INVENTORY.known(item) or not _inventory.has("base:homebase"):
+		return _reject("invalid_item", "Gegenstand fehlt")
+	var storage: Dictionary = _inventory["base:homebase"]
+	if not INVENTORY.has_space(storage, item, 1):
+		return _reject("container_full", "Das Basislager ist voll")
+	storage.items[item] = int(storage.items.get(item, 0)) + 1
+	_revision += 1
+	return {"ok": true, "message": "Ausrüstung ins Basislager geliefert"}
+
+
+func remove_skirmish_craft(craft_id: String) -> void:
+	_fuel_by_craft_id.erase(craft_id)
+	_inventory.erase("craft:" + craft_id)
+	_revision += 1
+
+
+func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> Dictionary:
+	var storage: Dictionary = _inventory["base:homebase"]
+	var bag_key := "unit:" + unit_id + ":backpack"
+	var bag: Dictionary = _inventory.get(bag_key, {"items": {}, "capacity": 0})
+	var returned: Dictionary = Dictionary(bag.items).duplicate()
+	if int(bag.capacity) > 0:
+		returned["backpack"] = int(returned.get("backpack", 0)) + 1
+	for slot: String in ["armor", "weapon_1", "weapon_2"]:
+		var item := INVENTORY.item_from_slot(slot, String(loadout.get(slot, "none")))
+		if INVENTORY.known(item): returned[item] = int(returned.get(item, 0)) + 1
+	if INVENTORY.used(storage.items) + INVENTORY.used(returned) > int(storage.capacity):
+		return _reject("container_full", "Für die abgegebene Ausrüstung fehlt Lagerplatz")
+	for item: String in returned:
+		if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(storage.items.get(item, 0)) + int(returned[item]) > 1:
+			return _reject("duplicate_quest_cargo", "Auftragsfracht bereits im Lager")
+	for item: String in returned:
+		storage.items[item] = int(storage.items.get(item, 0)) + int(returned[item])
+	_inventory.erase(bag_key)
+	_revision += 1
+	return {"ok": true}
+
 func _blueprints() -> Array:
 	var result: Array = []
 	for receipt: Dictionary in _reward_receipts.values():

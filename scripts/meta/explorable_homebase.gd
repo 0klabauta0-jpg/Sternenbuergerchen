@@ -31,6 +31,7 @@ var _person_state: Label
 var _person_feedback: Label
 var _person_buttons: Dictionary = {}
 var _personnel_ui_elapsed: float = 0.0
+var _camera_anchor: Node2D
 var _navigation_data
 var _navigation_graph: RefCounted
 
@@ -46,9 +47,17 @@ func configure_personnel_runtime(owner: Node, command: Callable) -> void:
 	var previous: Node = _personnel_runtime()
 	if previous != null and previous.is_connected("terminal_ready", _personnel_terminal_ready):
 		previous.disconnect("terminal_ready", _personnel_terminal_ready)
+	if previous != null and previous.is_connected("state_changed", _personnel_state_changed):
+		previous.disconnect("state_changed", _personnel_state_changed)
 	_personnel_owner = weakref(owner) if owner != null else null
 	if owner != null:
 		owner.connect("terminal_ready", _personnel_terminal_ready)
+		owner.connect("state_changed", _personnel_state_changed)
+
+
+func _personnel_state_changed() -> void:
+	if _initialized:
+		_update_personnel_visuals()
 
 
 func _personnel_terminal_ready(unit_id: String, terminal_id: String) -> void:
@@ -222,7 +231,23 @@ func _update_personnel_controls() -> void:
 
 func _update_personnel_visuals() -> void:
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
-	if _authored_stage!=null and units.size()>_person_visuals.size():_build_personnel_visuals(_authored_stage)
+	var current_ids := {}
+	var needs_visuals := false
+	for person: Dictionary in units:
+		current_ids[String(person.unit_id)] = true
+		needs_visuals = needs_visuals or not _person_visuals.has(String(person.unit_id))
+	for id in _person_visuals.keys():
+		if current_ids.has(id): continue
+		var entry: Dictionary = _person_visuals[id]
+		entry.model.queue_free()
+		entry.marker.queue_free()
+		_person_visuals.erase(id)
+	if not current_ids.has(_selected_person_id):
+		_selected_person_id = String(units[0].unit_id) if not units.is_empty() else ""
+		_avatar = _personnel_runtime().call("get_actor", _selected_person_id) if not _selected_person_id.is_empty() else _camera_anchor
+		_model = null
+	if _authored_stage != null and needs_visuals: _build_personnel_visuals(_authored_stage)
+	if _person_visuals.has(_selected_person_id): _model = _person_visuals[_selected_person_id].model
 	for person: Dictionary in units:
 		var id: String = String(person.unit_id)
 		if not _person_visuals.has(id):
@@ -236,7 +261,7 @@ func _update_personnel_visuals() -> void:
 		model.visible = status not in ["aboard", "away"] and not _pad_preview
 		(entry.marker as Node3D).visible = model.visible
 		var plane: Vector3 = _view.call("_world_to_3d_position", actor.position, 0.0)
-		var position_3d: Vector3 = plane + Vector3.UP * BASE_NAV.standing_y(plane)
+		var position_3d: Vector3 = plane + Vector3.UP * _standing_y(plane)
 		var sleeping_rotation: float = model.rotation.y
 		if status == "sleeping":
 			for bed: Dictionary in _layout.get("beds", []):
@@ -285,6 +310,7 @@ var _terminal_labels: Dictionary = {}
 var _layout: Dictionary = {}
 var _asset_sources: Array[Dictionary] = []
 var _structure_visual_nodes: Dictionary = {}
+var _asset_visual_nodes: Dictionary = {}
 var _structure_visual_records: Dictionary = {}
 var _refuel_service_available: bool = false
 var _map_bounds: Rect2
@@ -374,9 +400,13 @@ func set_transport_snapshot(snapshot: Dictionary) -> void:
 	# Presentation cache only. Actual membership, pad occupancy and phase arrive
 	# from the runtime adapter; this scene never creates or moves a real craft.
 	_refuel_service_available = not Dictionary(snapshot.get("supply", {})).is_empty()
+	var economy: Dictionary = snapshot.get("skirmish_economy", {})
+	if not economy.is_empty():
+		_refuel_service_available = int(economy.infrastructure.get("workshop", 0)) > 0 and not Array(snapshot.get("crafts", [])).is_empty()
 	for terminal in _terminals:
 		if String(terminal.get("id", "")) == "refuel":
 			terminal["enabled"] = _refuel_service_available
+			if not economy.is_empty(): terminal["title"] = "Auftanken"
 	var crafts: Array = Array(snapshot.get("crafts", [])).duplicate(true)
 	var signature: String = JSON.stringify(crafts, "", true)
 	if signature == _transport_signature:
@@ -593,6 +623,11 @@ func _initialize_runtime() -> void:
 		_units.call("register_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
 		_sim.call("register_known_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
 	else:
+		_camera_anchor = Node2D.new()
+		_camera_anchor.name = "EmptyBaseCameraAnchor"
+		_runtime.add_child(_camera_anchor)
+		_camera_anchor.position = _world_at_grid(_layout.get("avatar_spawn_grid", [36, 40]))
+		_avatar = _camera_anchor
 		var people: Array = personnel.call("get_snapshot").get("units", [])
 		if not people.is_empty():
 			_selected_person_id = String(people[0].unit_id)
@@ -604,10 +639,11 @@ func _initialize_runtime() -> void:
 	_view.call("set_hex_grid_visible", false)
 	_view.call("set_authoring_markers_visible",false)
 	_view.call("configure_from_map", _map_data)
-	_view.set("_camera_size", 16.0)
+	var points_base := not Dictionary(_layout.get("paid_infrastructure", {})).is_empty()
+	_view.set("_camera_size", 26.0 if points_base else 16.0)
 	_view.set("_camera_yaw_degrees", 24.0)
 	_view.set("_camera_pitch_degrees", VIEW_SCRIPT.DEFAULT_CAMERA_PITCH_DEGREES)
-	_view.call("focus_world_position", _avatar.position)
+	_view.call("focus_world_position", _world_at_grid([68, 52]) if points_base else _avatar.position)
 	var world: Node3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot") as Node3D
 	var stage := Node3D.new()
 	_authored_stage = stage
@@ -623,6 +659,8 @@ func _initialize_runtime() -> void:
 		if visual != null:
 			stage.add_child(visual)
 			visual.position = _plane_position(asset.get("plane", [0.0, 0.0]))
+			visual.visible = bool(asset.get("built", true))
+			_asset_visual_nodes[String(asset.id)] = visual
 			if String(asset.get("id", "")) in ["habitat_cutaway_01", "freihafen_hall_01"]:
 				# Furnished cutaway sources are the user's base target. Navigation
 				# remains in MapData; source meshes are never replaced or rewritten.
@@ -682,6 +720,14 @@ func _load_visual(source: Dictionary) -> Node3D:
 func _world_at_grid(raw_grid: Variant) -> Vector2:
 	var grid: Array = Array(raw_grid)
 	return _terrain.call("grid_to_world", Vector2i(int(grid[0]), int(grid[1])))
+
+
+func _standing_y(plane: Vector3) -> float:
+	var infrastructure: Dictionary = _layout.get("paid_infrastructure", {})
+	if not infrastructure.is_empty():
+		if int(infrastructure.get("habitat", 0)) == 0 and plane.x < 20.0: return 0.0
+		if int(infrastructure.get("workshop", 0)) == 0 and plane.x >= 20.0: return 0.0
+	return BASE_NAV.standing_y(plane)
 
 
 func _visual_bounds(visual: Node3D) -> AABB:
@@ -770,7 +816,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			var target: Variant = _view.call("screen_to_world_plane_position", local)
 			if typeof(target) == TYPE_VECTOR2:
 				var plane: Vector3 = _view.call("_world_to_3d_position", Vector2(target), 0.0)
-				target = _view.call("screen_to_world_plane_position", local, BASE_NAV.standing_y(plane))
+				target = _view.call("screen_to_world_plane_position", local, _standing_y(plane))
 				request_walk_to(Vector2(target))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -886,6 +932,7 @@ func _build_terminals(stage: Node3D) -> void:
 		if String(terminal.get("id", "")) == "flightdeck": terminal["title"] = "Flugdeck"
 		if String(terminal.get("id", "")) == "refuel":
 			terminal["enabled"] = _refuel_service_available
+			if not Dictionary(_layout.get("paid_infrastructure", {})).is_empty(): terminal["title"] = "Auftanken"
 		terminal["world_position"] = _world_at_grid(terminal["grid"])
 		_terminals.append(terminal)
 		var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", terminal["world_position"], 0.0)
@@ -898,6 +945,7 @@ func _build_terminals(stage: Node3D) -> void:
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.modulate = Color("eaf2df")
 		label.position = position_3d + Vector3(0.0, 0.95, 0.0)
+		label.visible = bool(terminal.get("enabled", true))
 		stage.add_child(label)
 		_terminal_labels[String(terminal["id"])] = label
 
@@ -1107,16 +1155,46 @@ func _get_structure_visual_snapshot() -> Dictionary:
 	return result
 
 
-var _capacity_visual_count: int = -1
+var _capacity_visual_signature: String = ""
 func _sync_capacity_visuals(stage: Node3D) -> void:
 	var personnel: Node = _personnel_runtime()
 	if personnel == null: return
 	var layout: Dictionary = personnel.call("get_snapshot").get("layout",{})
-	var count := Array(layout.get("beds",[])).size()*100+Array(layout.get("landing_pads",[])).size()
-	if Array(layout.get("landing_pads",[])).size()>1 and bool(layout.landing_pads[1].get("built",true)):count+=10000
-	if count==_capacity_visual_count:return
-	_capacity_visual_count=count
+	var signature := JSON.stringify([layout.get("capacity", {}), layout.get("paid_infrastructure", {}), layout.get("landing_pads", [])])
+	if signature == _capacity_visual_signature: return
+	_capacity_visual_signature = signature
 	_layout=layout.duplicate(true)
+	for asset: Dictionary in layout.get("assets", []):
+		var id := String(asset.id)
+		if _asset_visual_nodes.has(id): _asset_visual_nodes[id].visible = bool(asset.get("built", true))
+		if not _structure_visual_nodes.has(id): continue
+		var built := bool(asset.get("built", true))
+		_structure_visual_nodes[id].visible = built
+		var plot_name := "ConstructionPlot_" + id
+		var plot: Node3D = stage.get_node_or_null(plot_name)
+		if not built and plot == null:
+			plot = Node3D.new()
+			plot.name = plot_name
+			stage.add_child(plot)
+			plot.position = _plane_position(asset.plane)
+			var dimensions := Vector2(7.5, 5.5) if id == "habitat_cutaway_01" else Vector2(9.0, 5.5)
+			for side: float in [-1.0, 1.0]:
+				_box(plot, Vector3(dimensions.x, 0.025, 0.07), Vector3(0, 0.015, side * dimensions.y * 0.5), Color("d6ba71"))
+				_box(plot, Vector3(0.07, 0.025, dimensions.y), Vector3(side * dimensions.x * 0.5, 0.015, 0), Color("d6ba71"))
+			var label := Label3D.new()
+			label.text = "BAUPLATZ · HABITAT" if id == "habitat_cutaway_01" else "BAUPLATZ · WERKHALLE"
+			label.font_size = 32
+			label.pixel_size = 0.006
+			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			label.position.y = 0.3
+			plot.add_child(label)
+		if plot != null: plot.visible = not built
+	for terminal: Dictionary in _terminals:
+		for updated: Dictionary in layout.get("terminals", []):
+			if String(terminal.id) == String(updated.id):
+				terminal["enabled"] = bool(updated.get("enabled", true))
+				if _terminal_labels.has(String(terminal.id)):
+					_terminal_labels[String(terminal.id)].visible = bool(terminal.enabled)
 	for bed: Dictionary in Array(layout.get("beds",[])):
 		if String(bed.get("visual_kind",""))!="field_bunk" or stage.has_node(String(bed.id)):continue
 		var owner:=Node3D.new(); owner.name=String(bed.id); stage.add_child(owner)
@@ -1230,6 +1308,7 @@ func _refresh_screen_world_labels() -> void:
 		(_terminal_labels[id] as Label3D).hide()
 	for terminal: Dictionary in _terminals:
 		if overview_labels and String(terminal.id) not in ["personnel","team","flightdeck"]: continue
+		if not bool(terminal.get("enabled", true)) and not Dictionary(_layout.get("paid_infrastructure", {})).is_empty(): continue
 		entries.append({"id":"terminal:"+String(terminal.id),"text":String(terminal.title),"position":terminal.world_position})
 	for id in _craft_visuals:
 		var craft: Dictionary=_craft_visuals[id]

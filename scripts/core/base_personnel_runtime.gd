@@ -23,6 +23,11 @@ var _rest_elapsed := 0.0
 const AUTOMATIC_REST_IDLE_SECONDS := 20.0
 const MANUAL_PRIORITY_SECONDS := 30.0
 var _source_layout: Dictionary = {}
+var _building_blockers: Dictionary = {}
+const BUILDING_BOUNDS := {
+	"habitat": Rect2(7.0, 2.0, 10.0, 6.3),
+	"workshop": Rect2(22.0, 2.0, 11.0, 6.5),
+}
 const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
 
 func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionary = {}) -> void:
@@ -41,6 +46,22 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 	_terrain.configure_iso_grid(map_data.get_grid_origin(), tile_size.half_width, tile_size.half_height, map_data.get_grid_topology())
 	for tile in map_data.get_tiles():
 		_terrain.register_tile(tile)
+	if bool(Dictionary(_flow.get_meta("skirmish_infrastructure", {})).get("paid", false)):
+		for building: String in BUILDING_BOUNDS:
+			_building_blockers[building] = []
+		for tile in _terrain.get_all_tiles():
+			if tile.walkable: continue
+			var plane: Vector3 = navigation.plane_at_grid(tile.grid_position)
+			for building: String in BUILDING_BOUNDS:
+				if BUILDING_BOUNDS[building].has_point(Vector2(plane.x, plane.z)):
+					_building_blockers[building].append({"tile": tile, "blocks_los": tile.blocks_los,
+						"cover_value": tile.cover_value, "object_height": tile.object_height})
+					if int(_flow.get_meta("skirmish_infrastructure").get(building, 0)) == 0:
+						tile.walkable = true
+						tile.blocks_los = false
+						tile.cover_value = 0.0
+						tile.object_height = 0
+		_terrain.notify_tile_data_changed()
 	_navigation_graph = navigation.new()
 	_navigation_graph.call("configure_graph", _terrain)
 	_refresh_capacity()
@@ -115,6 +136,51 @@ func sync_roster() -> void:
 		_states[id] = {"unit_id":id,"name":String(profile.get("display_name",id)),"role":String(profile.get("role_name","")),"status":"outside","craft_id":"","bed_id":"","action":{},"last_result":{}}
 	state_changed.emit()
 
+
+func validate_dismiss(unit_id: String) -> Dictionary:
+	if not _states.has(unit_id) or not _unit_is_home(unit_id):
+		return _reject("person_away", "Person muss an der Basis sein")
+	if String(_states[unit_id].status) in ["aboard", "boarding"]:
+		return _reject("person_aboard", "Person zuerst aussteigen lassen")
+	return {"ok": true}
+
+
+func remove_person(unit_id: String) -> void:
+	_cancel(unit_id)
+	var actor := get_actor(unit_id)
+	_states.erase(unit_id)
+	_registry.unregister_unit(unit_id)
+	_sim.unregister_known_unit(unit_id)
+	actor.queue_free()
+	state_changed.emit()
+
+
+func build_infrastructure(item_id: String, infrastructure: Dictionary) -> Dictionary:
+	if BUILDING_BOUNDS.has(item_id):
+		for id: String in _states:
+			var plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(get_actor(id).position))
+			if _unit_is_home(id) and BUILDING_BOUNDS[item_id].has_point(Vector2(plane.x, plane.z)):
+				return _reject("construction_occupied", "Personen zuerst aus dem Bauplatz bewegen")
+		for command: Dictionary in _sim.command_queue:
+			for point: Vector2 in command.get("path", []):
+				var plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(point))
+				if BUILDING_BOUNDS[item_id].has_point(Vector2(plane.x, plane.z)):
+					return _reject("construction_path_occupied", "Den laufenden Weg über den Bauplatz zuerst abschließen oder abbrechen")
+	_flow.set_meta("skirmish_infrastructure", infrastructure.duplicate(true))
+	if _building_blockers.has(item_id):
+		var changed: Array = []
+		for original: Dictionary in _building_blockers[item_id]:
+			var tile = original.tile
+			tile.walkable = false
+			tile.blocks_los = bool(original.blocks_los)
+			tile.cover_value = float(original.cover_value)
+			tile.object_height = int(original.object_height)
+			changed.append(tile.grid_position)
+		_terrain.notify_tile_data_changed(changed)
+	_refresh_capacity()
+	state_changed.emit()
+	return {"ok": true, "message": "Bauvorhaben fertiggestellt"}
+
 func mark_recruit_remote(unit_id: String, craft_id: String) -> Dictionary:
 	# Trusted recruitment lifecycle: the local encounter/trader has already
 	# verified pickup. Represent arrival aboard the actual ship, not a second
@@ -186,6 +252,9 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 	if not _states.has(id):
 		return _reject("unknown_unit", "Person nicht verfuegbar")
 	var state: Dictionary = _states[id]
+	if operation == "base_board" and _board_groups.has(craft) and Array(_board_groups[craft].ids).has(id):
+		# A repeated pilot/crew click preserves the group's accepted walk.
+		return {"ok": true, "pending": state.status != "aboard", "unchanged": true}
 	if operation == "base_rename":
 		var next_name:=String(payload.get("display_name","")).strip_edges()
 		if next_name.is_empty() or next_name.length()>48 or next_name.contains("\n") or next_name.contains("\r"): return _reject("invalid_name","Name muss 1 bis 48 Zeichen lang sein")

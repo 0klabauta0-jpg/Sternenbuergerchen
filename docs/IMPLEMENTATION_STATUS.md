@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Punktebasis und vereinfachter Einkauf — 11.11.2026
+
+Taskbranch task/native-glut-maps-20261110 auf 52cba3f80. Neuer 1000/1500-Punkte-
+Start an einer leeren begehbaren Basis. Gemeinsamer SimulationRoot-gebundener
+Kontostand für Personalpakete, Ausrüstung, Cutlass/Buccaneer, Habitat, Werkhalle,
+Betten und Pads. Echte Rekruten, sichere Entlassung mit Gearrückgabe, endlicher
+Bestand, bezahlte Kapazitäten, bauabhängige Navigation und bestehender Abflugweg.
+Acht gezielte Programme bestanden, native Menü-/Basis-/Inventarprobe 56/0.
+995-Punkte-Paket mit gekaufter Crew regulär bis zum Mondorbit 14/0.
+QA unter docs/qa/skirmish_points_base_20261111. Fahrzeug-/Rüstungsmodelle,
+allgemeine Gefechtsframerate, Mainintegration und EXE-Export bleiben offen.
+
 ### Native Glut-Karten und Sternkarte — 11.11.2026
 
 Isolierter Kandidat `task/native-glut-maps-20261110` auf Main `639a49d65`.

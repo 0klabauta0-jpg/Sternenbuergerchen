@@ -9254,7 +9254,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
-	if operation.begins_with("space_"):
+	if operation.begins_with("space_") or operation.begins_with("skirmish_"):
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))

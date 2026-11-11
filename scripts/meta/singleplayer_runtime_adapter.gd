@@ -16,6 +16,9 @@ var _supply: RefCounted
 var _onboarding: RefCounted
 var _travel: RefCounted
 var _space_encounter: RefCounted
+var _skirmish_economy: RefCounted
+var _recruit_candidate_signature := ""
+var _recruit_candidates: Array = []
 var _resource_owners: Dictionary = {}
 var _campaign_mode := false
 var _space_route_requested := false
@@ -49,6 +52,10 @@ func configure(flow: Node, screen: Control) -> void:
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
 	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding, _travel)
+	if _flow.has_meta("skirmish_points_budget"):
+		_skirmish_economy = load("res://scripts/core/skirmish_economy_state.gd").new()
+		_skirmish_economy.configure(int(_flow.get_meta("skirmish_points_budget")))
+		_simulation.configure_skirmish_economy(_skirmish_economy, _apply_skirmish_transaction)
 	_screen.call("bind_personnel_loadout_simulation", _simulation, Array(_flow.get("_all_team_units")))
 
 	_simulation.call("configure_space_encounter",_space_encounter)
@@ -68,12 +75,15 @@ func configure(flow: Node, screen: Control) -> void:
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_economy != null)
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
 		var count := inventory_units.size()
-		_supply.call("configure_preset_supply",{"credits":int(_flow.get_meta("skirmish_start_credits",1000)),"stock":{"armor_heavy":maxi(2,count/2),"armor_medium":maxi(2,count/2),"rifle":count,"pistol":count,"medictool":maxi(2,count/4),"mining_tool":2,"salvage_tool":2}})
+		var stock := {"armor_heavy":maxi(2,count/2),"armor_medium":maxi(2,count/2),"rifle":count,"pistol":count,"medictool":maxi(2,count/4),"mining_tool":2,"salvage_tool":2}
+		if _flow.get_meta("skirmish_preset_id") == "points":
+			stock = {}
+		_supply.call("configure_preset_supply", {"credits": int(_flow.get_meta("skirmish_start_credits", 1000)), "stock": stock})
 	sync_crafts()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
@@ -92,6 +102,8 @@ func configure(flow: Node, screen: Control) -> void:
 	_flow.set("_mission_catalog", catalog)
 	if _flow.has_meta("skirmish_preset_id"):
 		for item: Dictionary in catalog: item["slot_count"] = maxi(int(item.get("slot_count",4)),inventory_units.size())
+	if _skirmish_economy != null:
+		_screen.set("_operations_mode", "base")
 
 func _request_id(prefix: String, payload: Dictionary) -> String:
 	var supplied: String = String(payload.get("request_id", "")).strip_edges()
@@ -108,6 +120,8 @@ func get_snapshot() -> Dictionary:
 		return {}
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var travel: Dictionary = get_space_travel_snapshot()
+	var economy: Dictionary = _skirmish_economy.get_snapshot() if _skirmish_economy != null else {}
+	if not economy.is_empty(): economy["recruits"] = _get_skirmish_recruits(economy)
 	var crafts: Array = []
 	var service_contexts: Dictionary = {}
 	var launch_readiness: Dictionary = {}
@@ -129,7 +143,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -149,7 +163,7 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode)
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_economy != null)
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
@@ -175,6 +189,14 @@ func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation.begins_with("skirmish_"):
+		var data := payload.duplicate(true)
+		var request_id := _request_id(operation, data)
+		data.erase("request_id")
+		var result: Dictionary = _simulation.request_skirmish_command({"operation": operation.trim_prefix("skirmish_"), "payload": data, "request_id": request_id})
+		if bool(result.get("ok", false)):
+			_flow.call("_refresh_homebase_screen")
+		return result
 	if operation.begins_with("base_"):
 		return _base_personnel.request_operation(operation, payload) if _base_personnel != null else _reject("base_unavailable", "Basisaktion nur in Kampagne")
 	if _simulation == null:
@@ -261,6 +283,96 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			return _reject("return_unavailable", "Rueckflug noch nicht verfuegbar")
 		return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")))
 	return _reject("unknown_operation", "Kampagnenaktion nicht verfuegbar")
+
+
+func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dictionary:
+	match operation:
+		"build":
+			var result: Dictionary = _base_personnel.build_infrastructure(String(payload.item_id), payload.infrastructure)
+			if bool(result.get("ok", false)): sync_crafts()
+			return result
+		"equipment":
+			return _supply.receive_skirmish_equipment(String(payload.item_id))
+		"person":
+			var candidates: Array = _get_skirmish_recruits(_skirmish_economy.get_snapshot())
+			var index: Variant = payload.get("candidate_index", 0)
+			if typeof(index) != TYPE_INT or index < 0 or index >= candidates.size():
+				return _reject("unknown_candidate", "Personenvorschlag bitte erneut auswählen")
+			var setup = load("res://scripts/meta/skirmish_start_configuration.gd").new()
+			var person: Dictionary = candidates[index].profile.duplicate(true)
+			person.unit_id = String(payload.unit_id)
+			setup._apply_points_profile(person, payload, payload.role == "pilot", false)
+			var result: Dictionary = _flow.call("register_campaign_recruit", person)
+			if bool(result.get("ok", false)):
+				_simulation.request_personnel_loadout_command("configure_roster", {"roster": [person]})
+				_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": person.unit_id,
+					"loadout": {"armor": person.armor, "weapon_1": person.weapon_1, "weapon_2": person.weapon_2}})
+				result["message"] = "%s rekrutiert" % String(person.display_name)
+			return result
+		"dismiss":
+			var id := String(payload.unit_id)
+			var check: Dictionary = _base_personnel.validate_dismiss(id)
+			if not bool(check.get("ok", false)): return check
+			var returned: Dictionary = _supply.return_skirmish_person_equipment(id, _simulation.get_personnel_loadout_state().get_loadout(id))
+			if not bool(returned.get("ok", false)): return returned
+			_simulation.request_base_personnel_command("base_cancel", {"unit_id": id})
+			_screen.call("request_operation", "remove", {"unit_id": id})
+			_base_personnel.remove_person(id)
+			_simulation.get_personnel_loadout_state().remove_unit(id)
+			_flow.call("remove_skirmish_person", id)
+			return {"ok": true, "message": "Personalpreis erstattet · Ausrüstung im Basislager"}
+		"ship":
+			var snapshot: Dictionary = _skirmish_economy.get_snapshot()
+			if Array(_flow.get("_homebase_aircraft_definitions")).size() >= int(snapshot.infrastructure.pads):
+				return _reject("no_free_pad", "Zuerst einen freien Landeplatz bauen")
+			var entry: Dictionary = load("res://scripts/meta/skirmish_points_catalog.gd").SHIPS[payload.item_id]
+			var craft: Dictionary = _flow.call("_build_homebase_aircraft_definition", String(entry.type), 1)
+			craft.merge({"craft_id": payload.craft_id, "model_id": payload.item_id, "display_name": entry.name}, true)
+			var definitions: Array = _flow.get("_homebase_aircraft_definitions")
+			definitions.append(craft)
+			var locations: Dictionary = _flow.get("_aircraft_location_by_craft")
+			locations[payload.craft_id] = "homebase"
+			sync_crafts()
+			return {"ok": true, "craft_id": payload.craft_id, "message": "%s auf dem Landeplatz bereit" % entry.name}
+		"return_ship":
+			var id := String(payload.craft_id)
+			if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", id)).is_empty() or String(_flow.get("_aircraft_location_by_craft").get(id, "")) != "homebase" or String(get_space_travel_snapshot(id).get("phase", "grounded")) != "grounded":
+				return _reject("craft_away", "Schiff zuerst an der Basis landen")
+			if Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).has(id):
+				return _reject("craft_occupied", "Pilotenzuweisung zuerst lösen")
+			if bool(_flow.call("_has_active_homebase_pilot_transfer", id)) or bool(_flow.call("_has_active_homebase_cargo_load", id)) or Dictionary(_flow.get("_loaded_aircraft_cargo_by_craft")).has(id):
+				return _reject("craft_loaded", "Schiff zuerst vollständig entladen")
+			for person: Dictionary in _base_personnel.get_snapshot().units:
+				if String(person.get("craft_id", "")) == id: return _reject("craft_occupied", "Schiff zuerst vollständig räumen")
+			var inventory: Dictionary = _supply.get_supply_snapshot().get("inventory", {})
+			if not Dictionary(inventory.get("craft:" + id, {}).get("items", {})).is_empty():
+				return _reject("craft_loaded", "Schiffsfracht zuerst entladen")
+			_flow.call("remove_skirmish_craft", id)
+			_supply.remove_skirmish_craft(id)
+			_travel.unregister_craft(id)
+			sync_crafts()
+			return {"ok": true, "message": "Schiff zurückgegeben"}
+	return _reject("unknown_operation", "Punkteaktion fehlt")
+
+
+func _get_skirmish_recruits(economy: Dictionary) -> Array:
+	var used := {}
+	for unit: Dictionary in Array(_flow.get("_all_team_units")):
+		used[String(unit.get("portrait_id", ""))] = true
+	var signature := JSON.stringify([economy.next_person_id, used.keys()])
+	if signature != _recruit_candidate_signature:
+		_recruit_candidate_signature = signature
+		_recruit_candidates.clear()
+		var packages := [
+			{"role": "operator", "experience": "junior", "armor": "light", "weapon": "rifle"},
+			{"role": "medic", "experience": "trained", "armor": "light", "weapon": "rifle"},
+			{"role": "pilot", "experience": "junior", "armor": "light", "weapon": "pistol"}]
+		var setup = load("res://scripts/meta/skirmish_start_configuration.gd").new()
+		for index in range(packages.size()):
+			var profile: Dictionary = setup.build_points_person(packages[index], "%s_offer_%d" % [economy.next_person_id, index], used)
+			used[String(profile.portrait_id)] = true
+			_recruit_candidates.append({"profile": profile, "configuration": packages[index]})
+	return _recruit_candidates.duplicate(true)
 
 func _has_active_transit() -> bool:
 	return not Array(_flow.get("_pending_mission_craft_transfers")).is_empty()

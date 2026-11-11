@@ -74,6 +74,9 @@ var _mission_selector: OptionButton
 var _mission_name: Label
 var _feedback: Label
 var _base: Control
+var _skirmish_shop: Control
+var _skirmish_shop_toggle: Button
+var _skirmish_shop_open := true
 var _focused_id: String = ""
 var _craft_id: String = ""
 var _fireteam_id: String = ""
@@ -227,6 +230,14 @@ func _build() -> void:
 			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
 	var nav_spacer := Control.new()
+	_skirmish_shop_toggle = _button("Aufbau & Einkauf", false)
+	_skirmish_shop_toggle.name = "ToggleSkirmishShop"
+	nav.add_child(_skirmish_shop_toggle)
+	_skirmish_shop_toggle.hide()
+	_skirmish_shop_toggle.pressed.connect(func():
+		_skirmish_shop_open = not _skirmish_shop.visible
+		_act("navigate", {"mode": "base"})
+		refresh())
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)
 	var detail_button: Button = _button("Charakterdetails", false)
@@ -258,6 +269,15 @@ func _build() -> void:
 	_base.call("set_active", false)
 	_base.connect("terminal_open_requested", _terminal_requested)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
+	_skirmish_shop = load("res://scripts/ui/skirmish_base_shop.gd").new()
+	_skirmish_shop.name = "SkirmishBaseShop"
+	_skirmish_shop.call("configure", _singleplayer_snapshot, _singleplayer_request)
+	_workspace.add_child(_skirmish_shop)
+	_skirmish_shop.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	_skirmish_shop.offset_right = 360
+	_skirmish_shop.resized.connect(_layout_base_surface)
+	_skirmish_shop.z_index = 1
+	_skirmish_shop.hide()
 	_job_board = load("res://scripts/meta/singleplayer_job_board_presenter.gd").new()
 	_workspace.add_child(_job_board)
 	_job_board.call("configure", _owner_screen() if _owner_screen() != null else get_parent())
@@ -732,6 +752,10 @@ func refresh() -> void:
 		var expected:String="squad" if _flyout_kind=="inventory" else ("jobs" if _flyout_kind=="jobs" else "services")
 		if _mode!=expected:_right_flyout_active=false
 	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
+	var points_base := not Dictionary(snapshot.get("singleplayer", {}).get("skirmish_economy", {})).is_empty()
+	_skirmish_shop_toggle.visible = points_base
+	_skirmish_shop.visible = points_base and _mode == "base" and _skirmish_shop_open
+	if _skirmish_shop.visible: _skirmish_shop.call("refresh")
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
 		_nav[key].tooltip_text = "" if campaign_ready else "Noch nicht verfügbar"
@@ -1226,6 +1250,8 @@ func _layout_base_surface() -> void:
 	if (_mode == "base" or _right_flyout_active) and is_visible_in_tree():
 		_reference_stage.hide()
 		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		if _skirmish_shop != null and _skirmish_shop.visible:
+			_base.offset_left = _skirmish_shop.size.x + 12
 		_base.call("set_active", true)
 	elif has_preview and String(_ship_preview_context.get("kind", "")) == "base_pad":
 		_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)

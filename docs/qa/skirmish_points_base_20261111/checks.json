@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "skirmish_base_economy_test",
+      "script": "res://scripts/tests/skirmish_base_economy_test.gd",
+      "success_marker": "SKIRMISH_BASE_ECONOMY",
+      "timeout": 150
+    },
+    {
+      "name": "skirmish_points_launch_test",
+      "script": "res://scripts/tests/skirmish_points_launch_test.gd",
+      "success_marker": "SKIRMISH_POINTS_LAUNCH",
+      "timeout": 150
+    },
+    {
+      "name": "skirmish_points_start_test",
+      "script": "res://scripts/tests/skirmish_points_start_test.gd",
+      "success_marker": "Skirmish points:",
+      "timeout": 120
+    },
+    {
+      "name": "skirmish_prepared_starts_test",
+      "script": "res://scripts/tests/skirmish_prepared_starts_test.gd",
+      "success_marker": "Prepared Skirmish:",
+      "timeout": 120
+    },
+    {
+      "name": "skirmish_prepared_flow_test",
+      "script": "res://scripts/tests/skirmish_prepared_flow_test.gd",
+      "success_marker": "Prepared Skirmish flow:",
+      "timeout": 180
+    },
+    {
+      "name": "base_capacity_layout_test",
+      "script": "res://scripts/tests/base_capacity_layout_test.gd",
+      "success_marker": "Base capacity:",
+      "timeout": 120
+    },
+    {
+      "name": "base_personnel_expansion_test",
+      "script": "res://scripts/tests/base_personnel_expansion_test.gd",
+      "success_marker": "Base expansion:",
+      "timeout": 120
+    },
+    {
+      "name": "character_sheet_compact_verifier",
+      "script": "res://scripts/tests/character_sheet_compact_verifier.gd",
+      "success_marker": "CHARACTER_SHEET_COMPACT",
+      "timeout": 90
+    }
+  ]
+}

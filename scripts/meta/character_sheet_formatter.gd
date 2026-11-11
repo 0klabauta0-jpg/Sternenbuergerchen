@@ -81,6 +81,21 @@ const VALUE_HELP_TEXTS: Dictionary = {
 }
 
 
+static func get_experience_label(profile) -> String:
+	if profile == null:
+		return "Keine Einschätzung"
+	var skills: Dictionary = profile.skill_values
+	var score := (float(skills.get("accuracy", 0.0)) + float(skills.get("speed", 0.0)) + float(skills.get("toughness", 0.0))) / 3.0
+	if String(profile.roster_role_category) == "pilot":
+		var platforms: Dictionary = profile.platform_values
+		score = maxf(float(platforms.get("dropship_piloting", 0.0)), maxf(float(platforms.get("fighter_piloting", 0.0)), float(platforms.get("freighter_piloting", 0.0))))
+	if score >= 0.65:
+		return "Gut erfahren"
+	if score >= 0.48:
+		return "Mittelerfahren"
+	return "Wenig erfahren"
+
+
 static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	if profile == null:
 		return {

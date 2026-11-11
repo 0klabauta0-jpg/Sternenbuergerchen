@@ -1,0 +1,219 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.045,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-11T02:52:13.987279+00:00",
+  "finished_at": "2026-11-11T02:55:08.208431+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_base_economy_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\skirmish_base_economy_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 27.668,
+      "name": "skirmish_base_economy_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-skirmish_base_economy_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_base_economy_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_points_launch_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\skirmish_points_launch_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 38.675,
+      "name": "skirmish_points_launch_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-skirmish_points_launch_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_points_launch_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_points_start_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\skirmish_points_start_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 18.138,
+      "name": "skirmish_points_start_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-skirmish_points_start_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_points_start_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_prepared_starts_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\skirmish_prepared_starts_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 3.705,
+      "name": "skirmish_prepared_starts_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-skirmish_prepared_starts_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_prepared_starts_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_prepared_flow_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\skirmish_prepared_flow_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 57.363,
+      "name": "skirmish_prepared_flow_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-skirmish_prepared_flow_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-skirmish_prepared_flow_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-base_capacity_layout_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\base_capacity_layout_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 7.678,
+      "name": "base_capacity_layout_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-base_capacity_layout_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-base_capacity_layout_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-base_personnel_expansion_test.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\base_personnel_expansion_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 18.781,
+      "name": "base_personnel_expansion_test",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-base_personnel_expansion_test.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-base_personnel_expansion_test.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-character_sheet_compact_verifier.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\scripts\\tests\\character_sheet_compact_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.124,
+      "name": "character_sheet_compact_verifier",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\check-character_sheet_compact_verifier.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\points_base_verification\\20261111T025213Z-pid26552\\logs\\engine-check-character_sheet_compact_verifier.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 8,
+    "passed": 8,
+    "failed": 0
+  }
+}
