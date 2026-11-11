@@ -367,6 +367,10 @@ func get_hex_unit_state(unit_id: String) -> Dictionary:
 	return _hex_ground_runtime.read_unit(unit_id) if is_hex_ground_runtime_active() else {}
 
 
+func get_hex_motion_projection(unit_id: String, interpolation_fraction: float, height_step_world: float = 1.0) -> Dictionary:
+	return _hex_ground_runtime.get_motion_projection(unit_id,interpolation_fraction,height_step_world) if is_hex_ground_runtime_active() else {}
+
+
 func get_hex_ground_planning_snapshot() -> Dictionary:
 	if not is_hex_ground_runtime_active():
 		return {}

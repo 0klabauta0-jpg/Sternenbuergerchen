@@ -7,6 +7,8 @@ const TOPOLOGY := "hex_axial_v1"
 const RESERVATION_SCHEMA_VERSION := 1
 const MAX_TICK := 1000000000000
 const PLANNER = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
+const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
+const HEX = preload("res://scripts/terrain/hex_grid.gd")
 
 var _registry: Node
 var _map_id := ""
@@ -110,6 +112,37 @@ func build_planning_snapshot() -> Dictionary:
 
 func get_current_tick() -> int:
 	return _tick
+
+
+## Presentation only: fractional reads never advance ownership, clocks or rolls.
+func get_motion_projection(unit_id: String, interpolation_fraction: float, height_step_world: float = 1.0) -> Dictionary:
+	if not _is_configured() or not _units_by_id.has(unit_id) or not is_finite(interpolation_fraction) or not is_finite(height_step_world) or height_step_world<=0.0:return {}
+	var unit:Dictionary=_units_by_id[unit_id]
+	var grid:Vector2i=unit.grid
+	var position:Vector2=_registry.call("grid_to_world",grid)
+	var height:float=_registry.call("get_stand_height_at",grid)
+	var moving:=false
+	for segment in _segments_by_unit_id.get(unit_id,[]):
+		if int(segment.start_tick)>_tick or _tick>=int(segment.start_tick)+int(segment.duration_ticks):continue
+		var progress:float=clampf((float(_tick-int(segment.start_tick))+clampf(interpolation_fraction,0.0,1.0))/float(segment.duration_ticks),0.0,1.0)
+		var source:Vector2=_registry.call("grid_to_world",segment.from_grid)
+		var target:Vector2=_registry.call("grid_to_world",segment.to_grid)
+		position=source.lerp(target,progress)
+		var from_tile=_registry.call("get_tile_at_grid",segment.from_grid)
+		var to_tile=_registry.call("get_tile_at_grid",segment.to_grid)
+		var low:float=TILE.stand_height(from_tile)
+		var high:float=TILE.stand_height(to_tile)
+		if from_tile!=null and to_tile!=null and from_tile.explicit_hex_ramps and to_tile.explicit_hex_ramps:
+			var shared:float=TILE.endpoint_height_for_registry(from_tile,segment.to_grid,bool(_registry.call("is_walkable",segment.from_grid)))
+			var other:float=TILE.endpoint_height_for_registry(to_tile,segment.from_grid,bool(_registry.call("is_walkable",segment.to_grid)))
+			if not is_finite(shared) or not is_finite(other) or not is_equal_approx(shared,other):return {}
+			height=lerpf(low,shared,progress*2.0) if progress<=0.5 else lerpf(shared,high,(progress-0.5)*2.0)
+		else:height=lerpf(low,high,progress)
+		moving=true
+		break
+	var facing_step:Vector2i=HEX.DIRECTIONS[int(unit.facing_dir)]
+	var bearing:Vector2=Vector2(_registry.call("grid_to_world",grid+facing_step))-Vector2(_registry.call("grid_to_world",grid))
+	return {"position_world":position,"stand_height_logical":height,"stand_height_world":height*height_step_world,"facing_angle":bearing.angle(),"moving":moving}
 
 
 func release_unit(unit_id: String, _reason: String) -> void:
