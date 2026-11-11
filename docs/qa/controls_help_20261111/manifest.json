@@ -1,0 +1,26 @@
+{
+  "status": "compile_only_pass_native_interaction_deferred_by_user",
+  "checks": "Godot check-only; JSON catalog and diff review",
+  "artifacts": [
+    {
+      "path": "scripts/ui/global_escape_menu.gd",
+      "sha256": "a943629d91a13e5f0bf40d73d709b3cebcd91ad2745a4dc9725bf0df2eef73ff",
+      "bytes": 27205
+    },
+    {
+      "path": "data/contextual_help_catalog.json",
+      "sha256": "cf90e18873d87c5279364899b5252b3ac4eb1b76cc1e0016bef51817c95d41d7",
+      "bytes": 107316
+    },
+    {
+      "path": "docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md",
+      "sha256": "5b53287d8fe284d3b1c09035f32a8e88a705106bc540a5d428faeb26140fabc6",
+      "bytes": 8665
+    },
+    {
+      "path": "docs/qa/controls_help_20261111/check_only.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80",
+      "bytes": 75
+    }
+  ]
+}
