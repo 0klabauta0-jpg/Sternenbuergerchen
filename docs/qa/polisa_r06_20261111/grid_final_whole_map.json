@@ -1,0 +1,16 @@
+{
+  "camera": "whole_map",
+  "focus_axial": "(-12.12436, 24.24871)",
+  "grid_meshes": [
+    {
+      "aabb": "[P: (-120.02, 0.074, -75.07285), S: (240.04, 0.00001, 158.806)]",
+      "triangles": 108328,
+      "visible": true
+    }
+  ],
+  "line_count": 54164,
+  "map_plane_bounds": "[P: (-256.0, -90.0), S: (512.0, 222.0)]",
+  "rendered_tiles": 17365,
+  "streaming": false,
+  "total_tiles": 30384
+}

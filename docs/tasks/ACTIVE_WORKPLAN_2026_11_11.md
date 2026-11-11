@@ -181,3 +181,9 @@ Editor-Anschluss umgesetzt: echte3D-Vorschau mitCap/Umriss/Aufwaertspfeil, gemei
 
 ## Polisa nach Nutzerkorrektur R04
 Aktuelle Station: oben am Kartenrand, fuenf Frontpads (S/M/L/M/S), keine hinteren Pads. RingeD52, grosse Solarausleger, fuenf24x24Shops mit sichtbaren Waren und zentraler48x32Globusraum. Standardkamera zeigt alle Inhalte ohne Drehung; weitere Kartenuebersicht durch Orbital-Zoom bis280 erreichbar. Kaufmenue nach tatsaechlichem Andocken ohne persoenlichen Schalterzwang; Credits/Bestand/Commands bleiben bei ihren bisherigen Ownern. Kleine Andock-/Kameraprobe9/0 und native Art-/UIbilder, keine grosse Spielwegabnahme. Siehe POLISA_ROOMS_FIVE_PADS_2026_11_11.
+
+## Polisa R06 nach neuester Nutzerkorrektur
+Aktuelle isoliert integrierte Station: ein Globusraum, fuenf Shops, sieben Pads, zwei Ringe, aeussere Ausleger auf512x256. R05Dreifachstation1024x512 wurde verworfen/nicht produktiv integriert. Neue KI-Illustration alsLeitbild; nativeKonturen/Moeblierung bleiben hinterderIllustration. Produktkarten38bc35468 mitganzen2D-Ruestungsbildern undechtemSupplykauf. R06NativeProduktkarte/-scene fehlerfreibildgeprueft; kleineDeck-/Kameraprobe10/0 undAuthoring15Checks, grosseTestsweiterhinspaeter. Task POLISA_COMPACT_GLOBE_R06_2026_11_11. TabletopCorridorcache4753975d8+472f1ad8f geliefert; Owner-/Bewegungsintegration bleibtimTabletopChat.
+
+## R07-Grundform bestaetigt; R08-Anschluss
+VerbindlicherS-Massstab8x6direktausHeimatbasis. R07mit2358begehbarenDeckhexenund4486gespeichertenTilesistdiegelobteGrundform. KlareresStationsrasterundnativerPadvergleichabgeschlossen. JetztR08nachPOLISA_RING_PORTS_DOORWAYS_R08_2026_11_11.md, keineerneuteGlobalskalierung; grosseTestsspaeter.

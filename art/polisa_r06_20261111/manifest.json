@@ -1,0 +1,655 @@
+{
+  "schema": "polisa_private_candidate_manifest_v1",
+  "revision": "R06",
+  "authoring_base_commit": "38bc35468",
+  "source_status": "FROZEN private R06 candidate; supersedes abandoned R05; Root owns production integration",
+  "source_files": [
+    {
+      "path": "art/polisa_r06_20261111/author_layout.py",
+      "sha256": "a9be716e09ff15b64b3e3f15189cc73b64b827ec9070cc2c5ba1233a2ee451dd",
+      "bytes": 5568
+    },
+    {
+      "path": "art/polisa_r06_20261111/build_candidate.py",
+      "sha256": "b64bcc8b2cde87e6c6e5311d0502768cc1052a0e22ab946c6587c563fce24c61",
+      "bytes": 8258
+    },
+    {
+      "path": "art/polisa_r06_20261111/build_layout_svg.py",
+      "sha256": "338f23a53c04939badb3b3e1e566bcfbaef6e60f623446c818c51c3e276f74a0",
+      "bytes": 1531
+    },
+    {
+      "path": "art/polisa_r06_20261111/capture_r06.gd",
+      "sha256": "0b1cb03fc9e9ec497a95c50c7f499501685c8541c95ca6cf38e8b56671f3c951",
+      "bytes": 4455
+    },
+    {
+      "path": "art/polisa_r06_20261111/freeze_manifest.py",
+      "sha256": "345295397e6cbcd1af4c3a0c8b90b08a1847cd9dbe1d8425582c5f0ec2d7b4a8",
+      "bytes": 2329
+    },
+    {
+      "path": "art/polisa_r06_20261111/layout.json",
+      "sha256": "777b1630aa22e5a63b864012eac74e31897c21d31dbb8e28175547c3d4d76b51",
+      "bytes": 19499
+    },
+    {
+      "path": "art/polisa_r06_20261111/layout_compiled.json",
+      "sha256": "f55331fe755863636b47d6a5e6cf5f1f040e14792d8a7ba0c8f6a3e376edd214",
+      "bytes": 20417
+    },
+    {
+      "path": "art/polisa_r06_20261111/layout_final.svg",
+      "sha256": "12782b7f33ea1a96fc4e60aab0f7d8ae9242e2a7a53570c886c8362cd9979975",
+      "bytes": 9260
+    },
+    {
+      "path": "art/polisa_r06_20261111/layout_target.svg",
+      "sha256": "3efc7dccadf0c155d0e638a8df040b2b045818cd9731640f0dc42ab7cb36707f",
+      "bytes": 1960
+    },
+    {
+      "path": "art/polisa_r06_20261111/polisa_r06_visual.gd",
+      "sha256": "c83377210757f02627407ad5bb273809dd92091cd1d2fd6d0863534a964db844",
+      "bytes": 21920
+    },
+    {
+      "path": "art/polisa_r06_20261111/polisa_r06_visual.tscn",
+      "sha256": "7d14f17bbd9110003bb4b81461463d2a191cc35c62b9f178d4cb9a7f9e1d1aa9",
+      "bytes": 205
+    },
+    {
+      "path": "art/polisa_r06_20261111/README.md",
+      "sha256": "2e7163c09b08dd17e9ae1d3df9538da33f81d04df6268847117bf6b62490da52",
+      "bytes": 6445
+    },
+    {
+      "path": "art/polisa_r06_20261111/TASK.md",
+      "sha256": "f9ce8bc2704b45934153291ad7fac33db11b55910d22e061613f10a58384c899",
+      "bytes": 2380
+    }
+  ],
+  "baseline_r04": [
+    {
+      "path": "art/polisa_r06_20261111/baseline_r04/layout.json",
+      "sha256": "59fadabd04242da53c64e3b0ab5e070d1c68a186bc615e7673d92f8daa549734",
+      "bytes": 13972
+    },
+    {
+      "path": "art/polisa_r06_20261111/baseline_r04/polisa_station_candidate.json",
+      "sha256": "d8306a179d5777a36d5d04423b2a298d90329d8d0a382e3dbf379fc4d2642010",
+      "bytes": 2451131
+    },
+    {
+      "path": "art/polisa_r06_20261111/baseline_r04/README.md",
+      "sha256": "f791cade35b89f69f215e7973953a92e3fab99ddf5ca762ba1a2fe2cbb0e38c4",
+      "bytes": 322
+    }
+  ],
+  "references": [
+    {
+      "path": "art/polisa_r06_20261111/references/station_concept_ai.png",
+      "sha256": "9ea97c0e5272fb098657498d3baf817ab0fed24d81350d72e906eaeb9978147e",
+      "bytes": 1838489
+    }
+  ],
+  "runtime_dependencies_at_capture": [
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "f0b7ef4e0e35e16d1a12e71348170adeea20aa9e895f6b61fd7cd1dbb09d2aa1",
+      "bytes": 927191
+    },
+    {
+      "path": "shaders/terrain/hex_grid_coverage.gdshader",
+      "sha256": "741c040539a7671c299ba2d5b26293a216ad2ecebd6529a505d58e3a3e16da65",
+      "bytes": 1212
+    },
+    {
+      "path": "scripts/terrain/personnel_armor_visual.gd",
+      "sha256": "62c6e22ec0df1b08f4c598751a8be3f09b6c68254d3d7d6a0f25b6a23dd49349",
+      "bytes": 38336
+    },
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+      "bytes": 397300
+    },
+    {
+      "path": "Assets/curated/personnel/armor_kenney_r07_20261111/body_r07_derived.glb",
+      "sha256": "c1e3f54de89b7481eb26f6365f99e1368bae063e7876863cc37311588338b376",
+      "bytes": 403164
+    }
+  ],
+  "evidence": [
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/capture_r06.gd",
+      "sha256": "0b1cb03fc9e9ec497a95c50c7f499501685c8541c95ca6cf38e8b56671f3c951",
+      "bytes": 4455
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/grid_final_station_near.json",
+      "sha256": "d14e6a734ca8579976484431adeb01b18b716fcd37c1046b7b2da7f7be1418a4",
+      "bytes": 406
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/grid_final_whole_map.json",
+      "sha256": "e080ae51b60290d1a59e788b7f326c48ef2dc704dc049598684579c1288310ce",
+      "bytes": 403
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/native_metrics.json",
+      "sha256": "e547c347f94187b211f3634a1d4440ac12bd3a588256d13f9d09820f17d072c2",
+      "bytes": 435
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/offline_checks.json",
+      "sha256": "fea19592f74e8387ce791a386d4c5750479b14788ef96fe3046a79bffc51108c",
+      "bytes": 7784
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/polisa_r06_station_near.png",
+      "sha256": "24cc6e6c23ce9c2955c68552d32b81e271f04242b4e4ad243aebfbb785f260c3",
+      "bytes": 956402
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/polisa_r06_whole_map.png",
+      "sha256": "ab4dcd04d87867f9625afa89ad9af4d4f9d2ad2c70534d8b3a1267664fe69d92",
+      "bytes": 128752
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/polisa_station_candidate.json",
+      "sha256": "421c5a74b50e68c0c11d6e3bddd9addaff2f1499cf6649ce646412ef9d4fecae",
+      "bytes": 5672705
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r01_station_near.png",
+      "sha256": "7d17fbd1a0f4e2e7063232b60b9027de11c9f8c7182d2b072ee7d1f3377e8709",
+      "bytes": 962260
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r01_whole_map.png",
+      "sha256": "f7a0dc0c4a13ff9c5b7582134232a63420df720404fec81c6a61f63fe0331733",
+      "bytes": 131415
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r06_art01.json",
+      "sha256": "c1dec1cb15fd8e0491fbfb96d774990b6137ba5ca22cef1736353ce7523d8d2b",
+      "bytes": 775
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r06_art01.log",
+      "sha256": "36497844f70c95282b70e2060a77172968d0d5568f3d36021b3ad74321c00300",
+      "bytes": 1597
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r06_final.json",
+      "sha256": "94bcebfbcc6f853864f0f029ae0f037fabccc7066e6f69a5b238ead97756d490",
+      "bytes": 775
+    },
+    {
+      "path": "output/native_glut_maps/polisa_r06_20261111/r06_final.log",
+      "sha256": "36497844f70c95282b70e2060a77172968d0d5568f3d36021b3ad74321c00300",
+      "bytes": 1597
+    }
+  ],
+  "native_metrics": {
+    "active_collisions": 0,
+    "dressing_visible_mesh_nodes": 16,
+    "dressing_visible_triangles": 50792,
+    "showcase_mesh_nodes": 6,
+    "showcase_triangles": 22472,
+    "station": {
+      "collision_nodes": 0,
+      "dynamic_lights": 0,
+      "layout_sha256": "777b1630aa22e5a63b864012eac74e31897c21d31dbb8e28175547c3d4d76b51",
+      "primitive_boxes": 1231,
+      "showcase_rigs": 3,
+      "static_mesh_nodes": 10,
+      "static_triangles": 28320
+    }
+  },
+  "offline": {
+    "checks": {
+      "single_walkable_component": true,
+      "retained_marker_ids": true,
+      "seven_front_pads": true,
+      "one_sector_seven_pads": true,
+      "rooms_reachable": true,
+      "markers_reachable": true,
+      "rings_diameter_covers_large_pad": true,
+      "ring_planes_perpendicular_to_x": true,
+      "large_twice_medium_length": true,
+      "rings_clear_all_pad_rectangles": true,
+      "technical_zones_blocked": true,
+      "outer_port_approaches_clear": true,
+      "no_duplicate_pad_dressing": true,
+      "pad_envelopes_clear": true,
+      "globe_walkaround": true
+    },
+    "tile_count": 30384,
+    "walkable": 17365,
+    "reachable": 17365,
+    "blocked": 13019,
+    "unreachable_sample": [],
+    "pad_envelopes": [
+      {
+        "id": "polisa_pad_01",
+        "deck": [
+          28,
+          40
+        ],
+        "reserve_envelope": [
+          22,
+          34
+        ],
+        "clear_cells": 877,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_02",
+        "deck": [
+          28,
+          40
+        ],
+        "reserve_envelope": [
+          22,
+          34
+        ],
+        "clear_cells": 877,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_03",
+        "deck": [
+          40,
+          80
+        ],
+        "reserve_envelope": [
+          34,
+          74
+        ],
+        "clear_cells": 2932,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_04",
+        "deck": [
+          18,
+          20
+        ],
+        "reserve_envelope": [
+          12,
+          14
+        ],
+        "clear_cells": 200,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_05",
+        "deck": [
+          18,
+          20
+        ],
+        "reserve_envelope": [
+          12,
+          14
+        ],
+        "clear_cells": 200,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_06",
+        "deck": [
+          18,
+          20
+        ],
+        "reserve_envelope": [
+          12,
+          14
+        ],
+        "clear_cells": 200,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      },
+      {
+        "id": "polisa_pad_07",
+        "deck": [
+          18,
+          20
+        ],
+        "reserve_envelope": [
+          12,
+          14
+        ],
+        "clear_cells": 200,
+        "clear": true,
+        "margin_per_side": [
+          3,
+          3
+        ]
+      }
+    ],
+    "marker_anchors": {
+      "polisa_pad_01": {
+        "local_plane": [
+          -80,
+          72
+        ],
+        "world_plane": [
+          -80.0,
+          24.24871130596428
+        ],
+        "grid": [
+          -94,
+          28
+        ],
+        "world_iso": [
+          -6671.917523581714,
+          -1784.041238209143
+        ]
+      },
+      "polisa_pad_02": {
+        "local_plane": [
+          -46,
+          72
+        ],
+        "world_plane": [
+          -46.0,
+          24.24871130596428
+        ],
+        "grid": [
+          -60,
+          28
+        ],
+        "world_iso": [
+          -4495.917523581714,
+          -696.041238209143
+        ]
+      },
+      "polisa_pad_03": {
+        "local_plane": [
+          0,
+          92
+        ],
+        "world_plane": [
+          -0.5,
+          44.167295593006365
+        ],
+        "grid": [
+          -26,
+          51
+        ],
+        "world_iso": [
+          -2858.7069179524074,
+          1397.3534589762037
+        ]
+      },
+      "polisa_pad_04": {
+        "local_plane": [
+          42,
+          62
+        ],
+        "world_plane": [
+          42.0,
+          13.856406460551018
+        ],
+        "grid": [
+          34,
+          16
+        ],
+        "world_iso": [
+          1801.1899865247349,
+          1787.4050067376324
+        ]
+      },
+      "polisa_pad_05": {
+        "local_plane": [
+          66,
+          62
+        ],
+        "world_plane": [
+          66.0,
+          13.856406460551018
+        ],
+        "grid": [
+          58,
+          16
+        ],
+        "world_iso": [
+          3337.189986524735,
+          2555.4050067376324
+        ]
+      },
+      "polisa_pad_06": {
+        "local_plane": [
+          42,
+          88
+        ],
+        "world_plane": [
+          42.0,
+          39.837168574084174
+        ],
+        "grid": [
+          19,
+          46
+        ],
+        "world_iso": [
+          138.42121125861286,
+          2618.7893943706936
+        ]
+      },
+      "polisa_pad_07": {
+        "local_plane": [
+          66,
+          88
+        ],
+        "world_plane": [
+          66.0,
+          39.837168574084174
+        ],
+        "grid": [
+          43,
+          46
+        ],
+        "world_iso": [
+          1674.4212112586129,
+          3386.7893943706936
+        ]
+      },
+      "trade_service": {
+        "local_plane": [
+          0,
+          33
+        ],
+        "world_plane": [
+          -0.5,
+          -14.722431864335457
+        ],
+        "grid": [
+          8,
+          -17
+        ],
+        "world_iso": [
+          910.2356393174692,
+          -487.1178196587346
+        ]
+      },
+      "objective_point": {
+        "local_plane": [
+          0,
+          33
+        ],
+        "world_plane": [
+          -0.5,
+          -14.722431864335457
+        ],
+        "grid": [
+          8,
+          -17
+        ],
+        "world_iso": [
+          910.2356393174692,
+          -487.1178196587346
+        ]
+      },
+      "spawn_alpha": {
+        "local_plane": [
+          -80,
+          72
+        ],
+        "world_plane": [
+          -80.0,
+          24.24871130596428
+        ],
+        "grid": [
+          -94,
+          28
+        ],
+        "world_iso": [
+          -6671.917523581714,
+          -1784.041238209143
+        ]
+      },
+      "ship_return": {
+        "local_plane": [
+          -80,
+          72
+        ],
+        "world_plane": [
+          -80.0,
+          24.24871130596428
+        ],
+        "grid": [
+          -94,
+          28
+        ],
+        "world_iso": [
+          -6671.917523581714,
+          -1784.041238209143
+        ]
+      },
+      "spawn_bravo": {
+        "local_plane": [
+          66,
+          62
+        ],
+        "world_plane": [
+          66.0,
+          13.856406460551018
+        ],
+        "grid": [
+          58,
+          16
+        ],
+        "world_iso": [
+          3337.189986524735,
+          2555.4050067376324
+        ]
+      }
+    },
+    "room_service_anchors": {
+      "B_infantry": {
+        "grid": [
+          4,
+          -59
+        ],
+        "world_plane": [
+          -25.5,
+          -51.09549882328188
+        ],
+        "reachable": true
+      },
+      "B_armor": {
+        "grid": [
+          29,
+          -59
+        ],
+        "world_plane": [
+          -0.5,
+          -51.09549882328188
+        ],
+        "reachable": true
+      },
+      "B_engineering": {
+        "grid": [
+          54,
+          -59
+        ],
+        "world_plane": [
+          24.5,
+          -51.09549882328188
+        ],
+        "reachable": true
+      },
+      "B_supplies": {
+        "grid": [
+          -22,
+          -34
+        ],
+        "world_plane": [
+          -39.0,
+          -29.444863728670914
+        ],
+        "reachable": true
+      },
+      "B_freight": {
+        "grid": [
+          56,
+          -34
+        ],
+        "world_plane": [
+          39.0,
+          -29.444863728670914
+        ],
+        "reachable": true
+      }
+    },
+    "rooms": 5,
+    "walls": 23,
+    "furniture": 19,
+    "layout_sha256": "777b1630aa22e5a63b864012eac74e31897c21d31dbb8e28175547c3d4d76b51",
+    "map_sha256": "421c5a74b50e68c0c11d6e3bddd9addaff2f1499cf6649ce646412ef9d4fecae",
+    "space_bounds_plane": [
+      -256,
+      -90,
+      256,
+      132
+    ],
+    "station_deck_z_bounds": [
+      -89.20061658979718,
+      83.13843876330611
+    ],
+    "scope": "offline authoring graph; not live navigation, travel, shop or landing acceptance"
+  },
+  "limits": [
+    "No aesthetic user approval",
+    "No release, FPS, battle, journey or save acceptance",
+    "Port reserves are geometric, not implemented docking",
+    "Root owns live pad catalog, UI and camera/view integration",
+    "Grid image-readability status is documented separately in README"
+  ]
+}

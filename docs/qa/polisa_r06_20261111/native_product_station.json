@@ -1,0 +1,30 @@
+{
+  "label": "native_product_station",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 0,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\polisa_ui_r06_profiles\\native_product_station",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "1115930",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+    "--script",
+    "res://docs/qa/polisa_r06_20261111/capture_product_station.gd",
+    "--",
+    "continue-chapter",
+    "1x"
+  ]
+}

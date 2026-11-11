@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+POLISA_R06 live_deck_owner_is_recognized=true
+POLISA_R06 whole_station_resident_without_camera_streaming=true
+POLISA_R06 one_grid_mesh_without_duplicate_ground_caps=true
+POLISA_R06 flat_deck_owner_preserves_elevated_tile_caps=true
+POLISA_R06 camera_includes_authored_empty_forefield=true
+POLISA_R06 missing_deck_owner_keeps_legacy_streaming=true
+POLISA_R06 normal_zoom_reaches_full_station_limit=true
+POLISA_R06 station_limit_is_bounded=true
+POLISA_R06 invalid_station_limit_uses_legacy_default=true
+POLISA_R06 ordinary_map_limit_unchanged=true
+POLISA_R06 failures=0

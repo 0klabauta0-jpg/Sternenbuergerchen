@@ -94,7 +94,9 @@
       "polisa_pad_02",
       "polisa_pad_03",
       "polisa_pad_04",
-      "polisa_pad_05"
+      "polisa_pad_05",
+      "polisa_pad_06",
+      "polisa_pad_07"
     ],
     "services": [
       "trade",

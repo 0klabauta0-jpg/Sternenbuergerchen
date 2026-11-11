@@ -1,0 +1,439 @@
+{
+  "checks": {
+    "single_walkable_component": true,
+    "retained_marker_ids": true,
+    "seven_front_pads": true,
+    "one_sector_seven_pads": true,
+    "rooms_reachable": true,
+    "markers_reachable": true,
+    "rings_diameter_covers_large_pad": true,
+    "ring_planes_perpendicular_to_x": true,
+    "large_twice_medium_length": true,
+    "rings_clear_all_pad_rectangles": true,
+    "technical_zones_blocked": true,
+    "outer_port_approaches_clear": true,
+    "small_pad_exact_homebase_size": true,
+    "homebase_source_hash_matches": true,
+    "one_common_straight_ring_axis": true,
+    "no_duplicate_pad_dressing": true,
+    "pad_envelopes_clear": true,
+    "globe_walkaround": true
+  },
+  "tile_count": 4486,
+  "walkable": 2358,
+  "reachable": 2358,
+  "blocked": 2128,
+  "unreachable_sample": [],
+  "pad_envelopes": [
+    {
+      "id": "polisa_pad_01",
+      "deck": [
+        12.0,
+        12.0
+      ],
+      "reserve_envelope": [
+        10.7,
+        10.7
+      ],
+      "clear_cells": 126,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_02",
+      "deck": [
+        12.0,
+        12.0
+      ],
+      "reserve_envelope": [
+        10.7,
+        10.7
+      ],
+      "clear_cells": 126,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_03",
+      "deck": [
+        16.0,
+        24.0
+      ],
+      "reserve_envelope": [
+        14.7,
+        22.7
+      ],
+      "clear_cells": 377,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_04",
+      "deck": [
+        8.0,
+        6.0
+      ],
+      "reserve_envelope": [
+        6.7,
+        4.7
+      ],
+      "clear_cells": 39,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_05",
+      "deck": [
+        8.0,
+        6.0
+      ],
+      "reserve_envelope": [
+        6.7,
+        4.7
+      ],
+      "clear_cells": 39,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_06",
+      "deck": [
+        8.0,
+        6.0
+      ],
+      "reserve_envelope": [
+        6.7,
+        4.7
+      ],
+      "clear_cells": 39,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    },
+    {
+      "id": "polisa_pad_07",
+      "deck": [
+        8.0,
+        6.0
+      ],
+      "reserve_envelope": [
+        6.7,
+        4.7
+      ],
+      "clear_cells": 39,
+      "clear": true,
+      "margin_per_side": [
+        0.65,
+        0.65
+      ]
+    }
+  ],
+  "marker_anchors": {
+    "polisa_pad_01": {
+      "local_plane": [
+        -29,
+        30.0
+      ],
+      "world_plane": [
+        -29.0,
+        -39.837168574084174
+      ],
+      "grid": [
+        -6,
+        -46
+      ],
+      "world_iso": [
+        693.5787887413871,
+        -2202.7893943706936
+      ]
+    },
+    "polisa_pad_02": {
+      "local_plane": [
+        -15,
+        30.0
+      ],
+      "world_plane": [
+        -15.0,
+        -39.837168574084174
+      ],
+      "grid": [
+        8,
+        -46
+      ],
+      "world_iso": [
+        1589.5787887413871,
+        -1754.7893943706936
+      ]
+    },
+    "polisa_pad_03": {
+      "local_plane": [
+        0,
+        36.0
+      ],
+      "world_plane": [
+        -0.5,
+        -33.77499074759311
+      ],
+      "grid": [
+        19,
+        -39
+      ],
+      "world_iso": [
+        2129.599407845959,
+        -1096.7997039229795
+      ]
+    },
+    "polisa_pad_04": {
+      "local_plane": [
+        14,
+        27.0
+      ],
+      "world_plane": [
+        14.0,
+        -43.30127018922193
+      ],
+      "grid": [
+        39,
+        -50
+      ],
+      "world_iso": [
+        3667.2812921102036,
+        -937.6406460551018
+      ]
+    },
+    "polisa_pad_05": {
+      "local_plane": [
+        24,
+        27.0
+      ],
+      "world_plane": [
+        24.0,
+        -43.30127018922193
+      ],
+      "grid": [
+        49,
+        -50
+      ],
+      "world_iso": [
+        4307.281292110203,
+        -617.6406460551018
+      ]
+    },
+    "polisa_pad_06": {
+      "local_plane": [
+        14,
+        35.0
+      ],
+      "world_plane": [
+        14.0,
+        -34.64101615137754
+      ],
+      "grid": [
+        34,
+        -40
+      ],
+      "world_iso": [
+        3113.0250336881627,
+        -660.5125168440813
+      ]
+    },
+    "polisa_pad_07": {
+      "local_plane": [
+        24,
+        35.0
+      ],
+      "world_plane": [
+        24.0,
+        -34.64101615137754
+      ],
+      "grid": [
+        44,
+        -40
+      ],
+      "world_iso": [
+        3753.0250336881627,
+        -340.51251684408135
+      ]
+    },
+    "trade_service": {
+      "local_plane": [
+        0,
+        17
+      ],
+      "world_plane": [
+        -0.5,
+        -52.827549630850754
+      ],
+      "grid": [
+        30,
+        -61
+      ],
+      "world_iso": [
+        3348.9631763744483,
+        -1706.4815881872241
+      ]
+    },
+    "objective_point": {
+      "local_plane": [
+        0,
+        17
+      ],
+      "world_plane": [
+        -0.5,
+        -52.827549630850754
+      ],
+      "grid": [
+        30,
+        -61
+      ],
+      "world_iso": [
+        3348.9631763744483,
+        -1706.4815881872241
+      ]
+    },
+    "spawn_alpha": {
+      "local_plane": [
+        -29,
+        30.0
+      ],
+      "world_plane": [
+        -29.0,
+        -39.837168574084174
+      ],
+      "grid": [
+        -6,
+        -46
+      ],
+      "world_iso": [
+        693.5787887413871,
+        -2202.7893943706936
+      ]
+    },
+    "ship_return": {
+      "local_plane": [
+        -29,
+        30.0
+      ],
+      "world_plane": [
+        -29.0,
+        -39.837168574084174
+      ],
+      "grid": [
+        -6,
+        -46
+      ],
+      "world_iso": [
+        693.5787887413871,
+        -2202.7893943706936
+      ]
+    },
+    "spawn_bravo": {
+      "local_plane": [
+        24,
+        27.0
+      ],
+      "world_plane": [
+        24.0,
+        -43.30127018922193
+      ],
+      "grid": [
+        49,
+        -50
+      ],
+      "world_iso": [
+        4307.281292110203,
+        -617.6406460551018
+      ]
+    }
+  },
+  "room_service_anchors": {
+    "infantry": {
+      "grid": [
+        29,
+        -82
+      ],
+      "world_plane": [
+        -12.0,
+        -71.01408311032397
+      ],
+      "reachable": true
+    },
+    "armor": {
+      "grid": [
+        41,
+        -82
+      ],
+      "world_plane": [
+        0.0,
+        -71.01408311032397
+      ],
+      "reachable": true
+    },
+    "engineering": {
+      "grid": [
+        53,
+        -82
+      ],
+      "world_plane": [
+        12.0,
+        -71.01408311032397
+      ],
+      "reachable": true
+    },
+    "supplies": {
+      "grid": [
+        20,
+        -72
+      ],
+      "world_plane": [
+        -16.0,
+        -62.35382907247958
+      ],
+      "reachable": true
+    },
+    "freight": {
+      "grid": [
+        52,
+        -72
+      ],
+      "world_plane": [
+        16.0,
+        -62.35382907247958
+      ],
+      "reachable": true
+    }
+  },
+  "rooms": 5,
+  "walls": 23,
+  "furniture": 19,
+  "layout_sha256": "defb425c272a83a4bbecb02079af3e6c7032d5a4d01c898f219d75eb2bf1fec0",
+  "map_sha256": "9568ba9015744749e608d651f654b79d755c0b44b5c03f886dc58d84715a1c49",
+  "space_bounds_plane": [
+    -256,
+    -90,
+    256,
+    132
+  ],
+  "station_deck_z_bounds": [
+    -89.20061658979718,
+    -23.38268590217984
+  ],
+  "scope": "offline authoring graph; not live navigation, travel, shop or landing acceptance"
+}

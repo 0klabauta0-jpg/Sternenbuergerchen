@@ -1,5 +1,7 @@
 # Polisa R05: Stationsmasse und kompakte Produktkarten
 
+Status: Stationsgeometrie durch Nutzerkorrektur verworfen. Ein Globusraum auf512x256 folgt in POLISA_COMPACT_GLOBE_R06_2026_11_11.md. Produktkarten38bc35468 bleiben gueltig.
+
 ## Ziel und Ursache
 R04 wirkt zu klein und flach. Der Nutzer verlangt eine maechtige Port-Olisar-inspirierte Station mit wiederholten Sektoren, geraden Ringen, groesseren sichtbaren Shops und kompaktem Kaufmenue mit ganzen Ruestungsbildern.
 

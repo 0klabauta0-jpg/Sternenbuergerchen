@@ -1,0 +1,11 @@
+# Polisa: statisches Deck und echte Hexprojektion
+
+Die kompakte lokale Stationskarte ist512x256. TerrainMapData bleibt Wahrheit fuer Hexe, Begehbarkeit und Blocker. Das statische Stationsmodell ist ausschliesslich eine Darstellung aus demselben authorierten Layout; keine neuen Kollisions-/Navigationsowner.
+
+Nach erfolgreichem Bodenbau darf ein lebender Stationsprop station_deck_owns_flat_ground=true als Node-Meta setzen. TerrainMap3DView liest dies nur beim kalten Place-Dressing-Sync und setzt die Ableitung bei jedem Sync zurueck. Ohne lebenden Prop und explizites Metaflag bleiben bisherige Kappen-/Streamingpfade erhalten. Das Flag besitzt nur objektfreieH0-Bodenvisuals; erhoehte Flaechen und Tileobjekte behalten den vorhandenen Darstellungspfad. Auch bei H0-Objekten wird nur die doppelte Grundkappe unterdrueckt.
+
+Bei vorhandenem statischem Deckowner bleiben alle echten Deckhexzellen resident, statt ein zu kleines Legacy-Streamingfenster zu zeichnen und bei Kamerabewegung neu aufzubauen. Ein gemeinsames Rastermesh stammt aus denselben begehbaren Tiles; keine zweite Topologie und kein Tile-Node pro Hex. Rasterumschalten oder Karten-/Dressingwechsel darf den kalten Darstellungspfad neu bauen. Normales Panning/Zoom rendert keine komplette Karte neu. FoW-/Picking-/Gameplaydaten bleiben im bestehenden Ownerpfad.
+
+place_presentation.space_bounds_plane ist eine ausschliessliche Kameragrenze, aus derselben Layoutquelle wie place_world.space_bounds_plane erzeugt. Nur valide vierendliche Werte mit positiver Flaeche ersetzen bei orbital_station die sparse Tilebbox; das leere Vorfeld wird dadurch kamerafahrbar, nicht begehbar. station_camera_max_size ist eine begrenzte optionale Zoomvorgabe (280 bis2048, Default280). Andere Karten behalten ihre bisherigen Grenzen.
+
+R07-Massstab: S8x6 stammt direkt aus der Heimatbasisquelle, M12x12/L16x24 davon abgeleitet; Lobby28x20 und Shops12x12 ohne Figurenskalierung. Sieben echte Padanker01..07, ein Globusraum, fuenf Shops, zwei gerade Ringe. Dockingarme sind Geometrie; Schiffswaffen-/Lieferungsgrenzen aus polisa_ship_equipment_contract.md gelten weiter. 2D-KI-Leitbild und native Darstellung sind getrennte Nachweise. Stationsraster hat fuer die Lesbarkeit einen breiteren Pixelkern; Welt-/Hexgroesse bleiben unveraendert.

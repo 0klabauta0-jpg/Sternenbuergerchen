@@ -1277,6 +1277,7 @@ var _regional_chunk_build_count: int = 0
 var _regional_overview_root: Node3D
 var _max_render_height: int = 0
 var _orbital_station_view := false
+var _orbital_deck_owns_ground := false
 var _regional_height_step: float = 0.0
 var _hex_grid_visible: bool = true
 
@@ -1536,7 +1537,7 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 	if initial_focus is Vector2:
 		_focus_grid_position = _world_to_grid_float(initial_focus)
 		if is_finite(initial_camera_size) and initial_camera_size > 0.0:
-			_camera_size = clampf(initial_camera_size, 5.5, 120.0)
+			_camera_size = clampf(initial_camera_size, 5.5, get_camera_zoom_limit() if _orbital_station_view else CAMERA_MAX_SIZE)
 		_update_camera_transform()
 	if _frontier_art_enabled and _terrain_map_data != null:
 		var q_axis := _grid_to_3d_position(Vector2(1,0),0)
@@ -1709,7 +1710,18 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 
 
 func _build_terrain_visuals(tiles: Array, grid_tiles: Array) -> void:
-	for tile in tiles:
+	var visual_tiles := tiles
+	if _orbital_deck_owns_ground and is_instance_valid(_place_dressing_root):
+		# The live static station prop supplies the complete H0 floor. Keep the
+		# authoritative whole-deck grid resident without duplicate hex columns;
+		# elevated surfaces and tile objects still use their existing visual path.
+		visual_tiles = []
+		for tile in tiles:
+			if int(tile.height_level) == 0 and String(tile.object_type_id).is_empty():
+				_map_tile_count += int(tile.walkable)
+			else:
+				visual_tiles.append(tile)
+	for tile in visual_tiles:
 		_add_tile_visual(tile)
 	_flush_ground_model_batches()
 	if _uses_hex_grid():
@@ -1719,7 +1731,7 @@ func _build_terrain_visuals(tiles: Array, grid_tiles: Array) -> void:
 	_flush_surface_tint_batches()
 	_flush_static_prop_model_batches()
 	_add_tile_grid_lines(grid_tiles)
-	for tile in tiles:
+	for tile in visual_tiles:
 		_add_height_edge_visuals(tile)
 	_flush_height_edge_model_batches()
 
@@ -2381,9 +2393,19 @@ func rotate_camera(delta_degrees: float) -> void:
 	_request_viewport_redraw(true)
 
 
-func zoom_camera(delta_steps: float) -> void:
+func get_camera_zoom_limit() -> float:
 	var limit := REGIONAL_OVERVIEW_MAX_SIZE if not _regional_tiles_by_chunk.is_empty() and not _is_fog_of_war_visual_filter_active() else CAMERA_MAX_SIZE
-	if _orbital_station_view: limit = maxf(limit, 280.0)
+	if _orbital_station_view:
+		var station_limit := 280.0
+		if _terrain_map_data != null and _terrain_map_data.has_method("get_place_presentation"):
+			station_limit = float(_terrain_map_data.call("get_place_presentation").get("station_camera_max_size", 280.0))
+		if not is_finite(station_limit): station_limit = 280.0
+		limit = maxf(limit, clampf(station_limit, 280.0, 2048.0))
+	return limit
+
+
+func zoom_camera(delta_steps: float) -> void:
+	var limit := get_camera_zoom_limit()
 	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, limit)
 	_update_camera_transform()
 	_request_viewport_redraw(true)
@@ -4088,6 +4110,12 @@ func _read_map_transform() -> void:
 			else:
 				_map_plane_bounds = _map_plane_bounds.expand(plane)
 				_map_axial_bounds = _map_axial_bounds.merge(Rect2i(grid, Vector2i.ONE))
+		if _orbital_station_view:
+			var bounds: Array = _terrain_map_data.call("get_place_presentation").get("space_bounds_plane", [])
+			if bounds.size() == 4:
+				var station_bounds := Rect2(Vector2(float(bounds[0]), float(bounds[1])), Vector2(float(bounds[2]) - float(bounds[0]), float(bounds[3]) - float(bounds[1])))
+				if station_bounds.position.is_finite() and station_bounds.size.is_finite() and station_bounds.size.x > 0.0 and station_bounds.size.y > 0.0:
+					_map_plane_bounds = station_bounds
 	_grid_origin_world = _terrain_map_data.call("get_grid_origin")
 	_active_terrain_visual_theme_id = _read_terrain_visual_theme_id(_terrain_map_data)
 	# This resolver only changes visual selection/cache state. render_map calls
@@ -4139,7 +4167,7 @@ func _select_tiles_for_visual_render(tiles: Array) -> Array:
 	# The fixed stage already owns the full ground and its solid models. Keep its
 	# small set of raised tile caps/grid/FoW resident once instead of rebuilding
 	# the whole 9408-cell overlay whenever the camera crosses a chunk boundary.
-	_visual_streaming_active = tiles.size() > VISUAL_STREAMING_TILE_THRESHOLD and not is_instance_valid(_authored_visual_layout_root)
+	_visual_streaming_active = tiles.size() > VISUAL_STREAMING_TILE_THRESHOLD and not is_instance_valid(_authored_visual_layout_root) and not (_orbital_deck_owns_ground and is_instance_valid(_place_dressing_root))
 	if not _visual_streaming_active:
 		_visual_streaming_active_chunk_key = "full"
 		_visual_streaming_active_chunks.clear()
@@ -4589,7 +4617,7 @@ func _add_tile_visual(tile_data) -> void:
 	var tile_thickness: float = _get_3d_ground_thickness()
 	var tile_fill: float = _get_3d_ground_fill()
 	var cell_size: float = _get_3d_cell_size()
-	var owns_flat_ground: bool = height_level == 0 and _flat_ground_visual_owner != null and is_instance_valid(_flat_ground_visual_owner.get_ref())
+	var owns_flat_ground: bool = height_level == 0 and ((_flat_ground_visual_owner != null and is_instance_valid(_flat_ground_visual_owner.get_ref())) or (_orbital_deck_owns_ground and is_instance_valid(_place_dressing_root)))
 	if _uses_hex_grid():
 		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
 		var hex_material: Material = _frontier_art_profile.surface_material_for(String(tile_data.surface_type)) if _frontier_art_enabled else _make_material(hex_color)
@@ -5426,8 +5454,9 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	if _regional_height_step > 0.0:
 		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.54))
 	if _orbital_station_view:
-		material.set_shader_parameter("line_color", Color(0.10, 0.21, 0.26, 0.56))
-		material.set_shader_parameter("distant_contrast_floor", 0.5)
+		material.set_shader_parameter("line_color", Color(0.015, 0.035, 0.05, 1.0))
+		material.set_shader_parameter("distant_contrast_floor", 0.85)
+		material.set_shader_parameter("minimum_pixel_width", 2.2)
 	material.set_shader_parameter("world_line_width", 0.04)
 	material.set_shader_parameter("cell_size", _get_3d_cell_size())
 	_material_cache[key] = material
@@ -16103,6 +16132,7 @@ func _clear_children(node: Node) -> void:
 		child.free()
 
 func _sync_place_reference_dressing() -> void:
+	_orbital_deck_owns_ground = false
 	var presentation: Dictionary=_terrain_map_data.call("get_place_presentation") if _terrain_map_data!=null and _terrain_map_data.has_method("get_place_presentation") else {}
 	_reference_place_enabled=not presentation.is_empty()
 	var signature:=JSON.stringify(presentation)
@@ -16120,6 +16150,11 @@ func _sync_place_reference_dressing() -> void:
 	if not is_instance_valid(_place_dressing_root):
 		presentation["height_step"] = _get_3d_height_step()
 		_place_dressing_root=load("res://scripts/terrain/place_reference_dressing.gd").build(_world_root,presentation).root
+	if _orbital_station_view and is_instance_valid(_place_dressing_root):
+		for prop: Node in _place_dressing_root.get_children():
+			if bool(prop.get_meta("station_deck_owns_flat_ground", false)):
+				_orbital_deck_owns_ground = true
+				break
 	for tile in _terrain_map_data.call("get_tiles"):
 		if String(tile.object_type_id)=="frontier_scene_solid":
 			_external_terrain_object_visuals[tile.grid_position]=weakref(_place_dressing_root)

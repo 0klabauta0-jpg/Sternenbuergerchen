@@ -1,0 +1,16 @@
+{
+  "active_collisions": 0,
+  "dressing_visible_mesh_nodes": 16,
+  "dressing_visible_triangles": 44192,
+  "showcase_mesh_nodes": 6,
+  "showcase_triangles": 22472,
+  "station": {
+    "collision_nodes": 0,
+    "dynamic_lights": 0,
+    "layout_sha256": "defb425c272a83a4bbecb02079af3e6c7032d5a4d01c898f219d75eb2bf1fec0",
+    "primitive_boxes": 802,
+    "showcase_rigs": 3,
+    "static_mesh_nodes": 10,
+    "static_triangles": 21720
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "status": "isolated R07 checkpoint; basic form approved; R08 follow-up pending",
+  "source_art_manifest": "art/polisa_r07_20261111/manifest.json",
+  "differences_from_art": "production scene/name/camera bindings and LF; stronger orbital grid material for readability; same authored geometry",
+  "files": [
+    {
+      "path": "maps/polisa_station.json",
+      "sha256": "9f9d08e96f8c405bbd634fec66235b109a8413a996543cef9680401cd13ebaec"
+    },
+    {
+      "path": "scripts/terrain/polisa_station_visual.gd",
+      "sha256": "57b7d7fac7edca9dd7d5817f21cf835ab81032c8715fd9087412402b1fc1fa01"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "eb0d159e329f5abde77b1b9b787067f88f88d73aa0074286102c60d40b17267f"
+    },
+    {
+      "path": "scripts/tests/mission_test_setup.gd",
+      "sha256": "103cd3ee59436aca41996e790d4d6175200dd528985e364975e9709ae8afa55f"
+    },
+    {
+      "path": "data/singleplayer/locations.json",
+      "sha256": "374f96fffcdeb4cb9161d5504e1813319dcc106e7ed00cd01e7eef27fad38c77"
+    },
+    {
+      "path": "tools/build_polisa_station.py",
+      "sha256": "41828156904097f54a17ebae43effbe59043f13db2af29ba2cf1aa7ee35698e0"
+    },
+    {
+      "path": "docs/qa/polisa_r07_20261111/pad_scale_comparison.png",
+      "sha256": "6563efd144dfff831cad54aa93385738b99f8f121c90c94b826402e826aa2675"
+    },
+    {
+      "path": "docs/qa/polisa_r07_20261111/polisa_r07_pad_hex_near.png",
+      "sha256": "0a472711f9c841d33a7f066afc752a19d2140cf16b6ae46c6cf9d697886a3bf7"
+    },
+    {
+      "path": "docs/qa/polisa_r07_20261111/polisa_r07_station_near.png",
+      "sha256": "42dd5cda299e05ddb769c0d9197afe9468074675b44af74255ac0f31eb482c70"
+    },
+    {
+      "path": "docs/qa/polisa_r07_20261111/polisa_r07_whole_map.png",
+      "sha256": "96af487449ef2908db3715a0a5a5bea4a022272e0ab1b452c0e997622e41ccfb"
+    }
+  ]
+}

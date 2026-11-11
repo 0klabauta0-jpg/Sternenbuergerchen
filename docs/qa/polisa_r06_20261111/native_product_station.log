@@ -1,0 +1,10 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+POLISA_R06_GRID {"camera":"station_near","focus_axial":"(2.309401, -4.618802)","grid_meshes":[{"aabb":"[P: (-120.02, 0.074, -75.07285), S: (240.04, 0.00001, 158.806)]","triangles":108328,"visible":true}],"line_count":54164,"map_plane_bounds":"[P: (-256.0, -90.0), S: (512.0, 222.0)]","rendered_tiles":17365,"streaming":false,"total_tiles":30384}
+POLISA_R06_CAPTURE res://docs/qa/polisa_r06_20261111/polisa_r06_station_near.png error=0
+POLISA_R06_GRID {"camera":"whole_map","focus_axial":"(-12.12436, 24.24871)","grid_meshes":[{"aabb":"[P: (-120.02, 0.074, -75.07285), S: (240.04, 0.00001, 158.806)]","triangles":108328,"visible":true}],"line_count":54164,"map_plane_bounds":"[P: (-256.0, -90.0), S: (512.0, 222.0)]","rendered_tiles":17365,"streaming":false,"total_tiles":30384}
+POLISA_R06_CAPTURE res://docs/qa/polisa_r06_20261111/polisa_r06_whole_map.png error=0
+POLISA_R06_METRICS {"active_collisions":0,"dressing_visible_mesh_nodes":16,"dressing_visible_triangles":50792,"showcase_mesh_nodes":6,"showcase_triangles":22472,"station":{"collision_nodes":0,"dynamic_lights":0,"layout_sha256":"777b1630aa22e5a63b864012eac74e31897c21d31dbb8e28175547c3d4d76b51","primitive_boxes":1231,"showcase_rigs":3,"static_mesh_nodes":10,"static_triangles":28320}}
+PASS: Polisa R06 art capture

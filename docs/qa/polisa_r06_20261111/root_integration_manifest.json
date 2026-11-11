@@ -1,0 +1,56 @@
+{
+  "status": "integrated isolated task branch; native art capture and small checks, no broad acceptance",
+  "source_art_manifest": "art/polisa_r06_20261111/manifest.json",
+  "differences_from_art_candidate": [
+    "production prop scene and map name",
+    "layout-derived station_camera_focus and station_initial_camera",
+    "layout-derived place_presentation.space_bounds_plane for visual camera",
+    "production script line endings LF"
+  ],
+  "files": [
+    {
+      "path": "maps/polisa_station.json",
+      "sha256": "b7024dcf2729d3c0bfbce35e303ff775345e3d1c918c4e0ef77e1c04af3b521e"
+    },
+    {
+      "path": "scripts/terrain/polisa_station_visual.gd",
+      "sha256": "4211a22a8f6412a1de838ae888e4e09354ea4cb56c0cb86820026c1b98c95fa0"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "f0b7ef4e0e35e16d1a12e71348170adeea20aa9e895f6b61fd7cd1dbb09d2aa1"
+    },
+    {
+      "path": "scripts/tests/mission_test_setup.gd",
+      "sha256": "103cd3ee59436aca41996e790d4d6175200dd528985e364975e9709ae8afa55f"
+    },
+    {
+      "path": "scripts/tests/polisa_station_domain_test.gd",
+      "sha256": "8b6ae4359fa45402c6e740f60038fd8fe61ad3da1f7224cd61cefee59dd98c31"
+    },
+    {
+      "path": "data/singleplayer/locations.json",
+      "sha256": "374f96fffcdeb4cb9161d5504e1813319dcc106e7ed00cd01e7eef27fad38c77"
+    },
+    {
+      "path": "tools/build_polisa_station.py",
+      "sha256": "fb7df9c3859c6fde14cc495ee60f00cad20d31b20afff728c8ac7c38bd1e2a3d"
+    },
+    {
+      "path": "docs/qa/polisa_r06_20261111/polisa_r06_station_near.png",
+      "sha256": "c9a0123b7b436bb7b17453cc30f30414a1acc25a99a2ca3d4c983ca3668644c1"
+    },
+    {
+      "path": "docs/qa/polisa_r06_20261111/polisa_r06_whole_map.png",
+      "sha256": "37fddcd52f0902729c47e328ace0fa4a37161cdb6ba7042d521a8dc13677af10"
+    },
+    {
+      "path": "art/polisa_r06_20261111/references/station_concept_ai.png",
+      "sha256": "9ea97c0e5272fb098657498d3baf817ab0fed24d81350d72e906eaeb9978147e"
+    },
+    {
+      "path": "art/polisa_r06_20261111/references/station_concept_ai.prompt.txt",
+      "sha256": "3620be88070943a35aa3a1e482a6ee0d904f9849cdb13a17d93f2585efeef960"
+    }
+  ]
+}

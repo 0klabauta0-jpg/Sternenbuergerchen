@@ -1101,7 +1101,8 @@ func _frame_reference_mission_camera(view: Node) -> bool:
 		if bool(view.get_meta("place_initial_camera", false)): return true
 		view.set("_camera_yaw_degrees", float(station_camera.get("yaw_degrees", 0.0)))
 		view.set("_camera_pitch_degrees", clampf(float(station_camera.get("pitch_degrees", 58.0)), 20.0, 85.0))
-		view.set("_camera_size", clampf(float(station_camera.get("size", initial_size)), 5.5, 120.0))
+		var station_limit: float = float(view.call("get_camera_zoom_limit")) if view.has_method("get_camera_zoom_limit") else 280.0
+		view.set("_camera_size", clampf(float(station_camera.get("size", initial_size)), 5.5, station_limit))
 		view.call("focus_world_position", _loaded_terrain_map_data.get_marker_position(String(station_camera.get("focus_marker", "trade_service"))))
 		view.set_meta("place_initial_camera", true)
 		return true
