@@ -1,0 +1,122 @@
+{
+  "base": "814faabac",
+  "engine": "4.6.2.stable.official.71f334935",
+  "scope": "gated first AP3 reader slice; no map activation or native/full AP3 acceptance",
+  "final": {
+    "consumers": {
+      "run": "consumers-6415f01df7444f9b874454707545301b",
+      "checks": [
+        30,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "real_profile_unchanged": true,
+        "sources_unchanged": true
+      }
+    },
+    "detection": {
+      "run": "detection-2995d3d20acb4f1aa8761b7f8246198e",
+      "checks": [
+        25,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "real_profile_unchanged": true,
+        "sources_unchanged": true
+      }
+    },
+    "owner": {
+      "run": "owner-b5dd068898954ea68243307cd88492b8",
+      "checks": [
+        39,
+        0
+      ],
+      "guards": {
+        "isolated": true,
+        "real_profile_unchanged": true,
+        "sources_unchanged": true
+      }
+    }
+  },
+  "source_sha256": {
+    "scripts/tests/hex_sight_consumers_verifier.gd": "32c936f3730588a538794e8a43f7d0890abb04439033a1db1c18fdf5350ebcd4",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_tile_data.gd": "258a7d31b66cad4f09c79a0fee4749a1fe81075ca471accc2699497a0a6b9c4c",
+    "scripts/terrain/terrain_registry.gd": "939dfd8cc295a4d07439d1083fd5f24a4d508b384df6db7930ae3eebbb2b4e66",
+    "scripts/terrain/terrain_truth_audit.gd": "183527343206600b8639fe237826f0569292b27c41e01cac954e79982b4554de",
+    "scripts/core/los_system.gd": "34e2d58d0ffe3562d7af9eb4a42ed3b2a3276978cfcf57494ac063db1f0ec55b",
+    "scripts/core/hex_ground_runtime.gd": "90f695da5f290ebb6151b4bdd244004c0bd8e4ae6f384b1bfad94d8348c50295",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/hex_detection_state.gd": "4bc1e3ccdabe85df6258669632925940f6beeb64916fb128979ffcaaadce6d5e",
+    "scripts/mission/combat_visibility_cache.gd": "5e757fd1f573262c9bea7bbdcd18fd77a1b28fa4c9beecf8753ee1a2515faba3",
+    "scripts/core/hex_sight_runtime_adapter.gd": "4374c76632ee4fb4a8c0ce80b1113e039fa9ea40044e664682499de5b90b4d3d",
+    "scripts/core/fog_of_war_system.gd": "2e243d8f292e767a35a084b662a257e22d2ac34bb471f7d98f21a36f3538d587",
+    "scripts/core/fog_of_war_mode_contract.gd": "9dd300a5140207ecefe14499ae68dd872624a6b93e70bf7ede5f794588453b4f",
+    "scripts/tactical/combat_fire_decision_resolver.gd": "55fcc98e62378bd9e59f4970c74cd16fdc7382cf8f3150324ff0c8041e0a966d",
+    "scripts/tactical/area_order_resolver.gd": "cbc50845e1bd5c541779bed27afe309c18b80f2dd7e446d567e60946ee5e0991",
+    "scripts/terrain/terrain_pathfinder.gd": "8803d0d9e85cf12f2f36f520922cea6a3881c27348b7bbfa3e4b8598ba2f378b",
+    "scripts/command/area_order.gd": "ed133e00e9e4c345108d38513c9523238766b21aa8ee158a70f228713f47e517",
+    "scripts/core/weapon_data.gd": "a16f41e1c8b5556ea05eb7f7321653bebd0c49efdbf7902f8a5805633e418240",
+    "scripts/tests/mission_combat_loop_driver.gd": "6f511d698f7a735e4fafaf2b7d920e184503223ef441eb412c920a209eb9a7c7",
+    "scripts/tactical/combat_readability_presenter.gd": "2266b8edd53688c7986e7f64cafd15cf94129288fcb592fb249029af5820f391",
+    "scripts/audio/audio_event_bus.gd": "cd92c9ca734005686b9137c395cf6b9b9df84af5bbd1ce41db500b0dc1032d61",
+    "scripts/audio/audio_event_player_pool.gd": "52760e969e4dbb782906d8653024c574d5da3f6ba3b5445ffa33a9605b8e17c7",
+    "scripts/audio/audio_event_contract.gd": "18368f4df29bc004884e52dbb840d4038b8beefe3c899eddd1039da14c1b4135",
+    "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+    "scripts/mission/mission_interaction_point_binding.gd": "e18782b7ddcd7e81bd8b969e3099aa07569028d35192f4a61c9b367cb37756f2",
+    "scripts/mission/mission_cargo_touchdown_bridge.gd": "fd8104f0d6feb0cd77e5c9e2ecb62ed66d0003e1b86f8d668fbff2287705e0cd",
+    "scripts/mission/mission_scenario_runtime_gates.gd": "847603495d7f6dfc960f5ee0c8e3d4ad12658a4f0ab9156c6c4a43f8f188e4ff",
+    "scripts/mission/mission_scenario_vertical_slice_contract.gd": "737f5a240eee3c4b7297361bd5a655d2aaea9121c10abdf19271783201c99529",
+    "scripts/mission/mission_combat_resolution_resolver.gd": "4ef77b04f49a87bd6dd722b48acb7df4ef4075c5e34a6baa57400c5a99c2741d",
+    "scripts/mission/mission_combat_authority_contract.gd": "3f1c7a4e938f2c952db7e63a99433507749822f945b7f7e2d11f81e0d3862450",
+    "scripts/mission/mission_combat_remote_event_bridge.gd": "89f8083cb4fac1f54c14a5e07330252b43952691e1d1951cc157913633ff9288",
+    "scripts/meta/character_gameplay_resolver.gd": "8f31b67d8cf84c248edd2320be7f53a22a5015b0dda51cec78ac06119be27e1c",
+    "scripts/meta/roster_relationship_model.gd": "2eab16884b1f6c2b957a00776bce3bbb85a4c077bf2ec334c1cf53222c3cfaab",
+    "scripts/meta/fireteam_cohesion_resolver.gd": "021cc43551646fbb75cffec3002dc57d73914104e69d6b0b93f773078ba98125",
+    "scripts/tactical/tactical_communication_event.gd": "184c58f548d23ac7ac9460abe1d206ce4031cc369b78213e86b3ce899b12dd78",
+    "scripts/tactical/enemy_behavior_orchestrator.gd": "91395d1f56339084a822613cb2ec4c5cb22670a5e014884a3e109ad34127e988",
+    "scripts/tactical/enemy_limbo_behavior_adapter.gd": "f8f97bb545aa179668e51542c222bee6551dc89faf32346367d0db954ad1464d",
+    "scripts/tactical/medic_support_resolver.gd": "0d7ded9269a100994a4985cde04f1d4e3276ed09092e7e01555ceb0a471ba4a6",
+    "scripts/tactical/flank_vulnerability_resolver.gd": "fca95731cb0f8fa3bef54971fa4fb7e2bd8a849422287d94f58ab30d6412998e",
+    "scripts/tactical/contact_tracker.gd": "a03e630a20a599926c4cd86bf0ccefda4afa93dd9ff18f19a01bdd830ddf94b1",
+    "scripts/tactical/local_avoidance_resolver.gd": "75721232a4e2bb9cddf0ed6523d41784aab83572adfc6ec13b3df65afaf9f4e3",
+    "scripts/tactical/enemy_team_tactics_profile.gd": "285b3fdd5417cafa82293213b7713e8ffd15ce14e976a68d73639a975495526b",
+    "scripts/tactical/fireteam_security_controller.gd": "17f34b4728f6fc1cc5252156e58d3e680190eafd981744feaa6281ee7b6d26de",
+    "scripts/tactical/overwatch_controller.gd": "f200b24cf245eb80aa696a1f3cf0f8c6247da416aa23a4e6367bf0a22f12aa97",
+    "scripts/terrain/terrain_map_data.gd": "4129979fcf9746be0fd02c7fa9239560810760f3368e1af4e456a6d7b952879e",
+    "scripts/terrain/terrain_tile_catalog.gd": "58374699895c000c3280f00424ac114e407df6834b0e8257a277b5d1da50a0c5",
+    "scripts/terrain/terrain_texture_catalog.gd": "9c33921d0390c62e45aa7e87da216d88370417123cb33fcf44ddf8c95772fb7f",
+    "scripts/terrain/terrain_marker_catalog.gd": "489fa41494980dab339ee4a84b8fed9f10226902ea1c56a2efc505a23fd87fb2",
+    "scripts/core/simulation_root.gd": "31bd3844dc5426741b52b975b1a2ef9d62b7678db33d8152a04b1c7906a61b32",
+    "scripts/core/frame_timing_accumulator.gd": "aef355910be9c14a267fde36de3f00b02063e4d284e2ec50a64cb33918af7827",
+    "scripts/multiplayer/multiplayer_snapshot_contract.gd": "ae7a02f4c8d4b83a7e6335f245a9afce3d4a961855f7ac11e75816323da6e81f",
+    "scripts/multiplayer/multiplayer_roster_contract.gd": "d96118e1f4b00fbccd054a2375c8084c22960d9b0ecae9c69f6089a2d01b5914",
+    "scripts/multiplayer/multiplayer_command_contract.gd": "6e61a6bbcf8e26d5f8e6ba3426196b45a47b97da936ef385d829795f21da8e63",
+    "scripts/command/ad_hoc_order.gd": "611aa3da16144f6037c3083cd7a71ab7a5c374de33a0f9c5b17496c05ad778f6",
+    "scripts/command/commander_intent.gd": "9a673f78c458868599124e9e634e48ff6049abf54c0806f8b5f0634ef0f0bdff",
+    "scripts/command/commander_command.gd": "b76e0e8bee973855285ed880d47b62c6aba248ca17abfba9a30c6f20ca678ee6",
+    "scripts/npc/unit_command.gd": "a04f22488dd822d2a0b98e81d5005305ac647f709764220c7ce25ce38d211be4",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "bba4b26de116be2f0a87c6a7440249983480a6a8153aaf4d6208d939e9461969",
+    "scripts/terrain/hpa_pathfinder.gd": "ac7140281c19da041f224e9cc565ffcd1021ee068e236499b3ca034a73d7ba33",
+    "scripts/terrain/hpa_navigation_graph.gd": "2251d85c062dc8ed3f1839774cad8d93cef9b8a4f2bd7340ca12bf5ab58e5e6a",
+    "scripts/core/objective_status.gd": "7b9ea518066c59426f453cb235325ffb924580cae46972a563221c8d2042d977",
+    "scripts/core/damage_model.gd": "40402d1bccfcbca2ed245011cb6fca75704646aaa497e1602bb0d842b4e96ed0",
+    "scripts/core/personnel_loadout_state.gd": "4187c5b60e52cf169ff0433bdebc5ce98d979cb193ecc54358087e0aba6ff3ec",
+    "scripts/command/loadout_contract.gd": "b48c591436ab77f0b63797c26c23ae7da9a2c5d2dca6fbe65d7def35cb14b4ef",
+    "data/terrain_tile_catalog.json": "e336d2f3dee60e79fd920fa4555feb9f16d9f311ddfc36b6589bd0ca8d0e05c1",
+    "addons/limboai/bin/limboai.gdextension": "e616dece245ad0e8b8d7403e681a52e142b2d94fdd850fa5eb24a06976170ee9",
+    "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll": "401d9751dc88ea0cce899cf42d4b8e2fc1a1c1caed56f958550459e199571aa8",
+    "scripts/tests/hex_detection_verifier.gd": "8d23ad520786c1f3f71894e5ebf77bc721ab5ab2361a3d788d49055c88667d6d",
+    "scripts/tests/hex_ground_owner_verifier.gd": "27a1904355b76986e6f7b38ec2ccc5cbc8abc80d0abdfb188c37efddf6076494",
+    "scripts/tests/run_hex_tactical_check.py": "b7c92a68ffc9370cc9ddaa088171b6ba1efec54657e38819c18031382f555e5a"
+  },
+  "static_source_sha256": {
+    "scripts/tests/mission_test_setup.gd": "03147fe7be13a9e0a315bba3b9f633b492fdca8f87467a97fbd593c196eeaff8",
+    "docs/dev/hex_tactical_runtime_contract.md": "19c735516fa8543f50790a344b7976eb4bca2ed9e010e546b64fb5b602a68fbc",
+    "docs/dev/explicit_hex_ramps_contract.md": "783d7779ad2e7d27148e457eb2f071f89536011f3f2b0a0612885f8cb0f681c3"
+  },
+  "evidence_sha256": "7bbb818b8f377b5a1ff1be02c13c985a1bb5e87979387cc80f5f02721a6c757a"
+}

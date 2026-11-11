@@ -42,6 +42,35 @@ func forget_unit(unit_id: String) -> void:
 			_episodes.erase(observer_id)
 
 
+func read_pair(observer_id: String, target_id: String, now_tick: int) -> Dictionary:
+	if now_tick < 0 or now_tick < _latest_tick:
+		return {}
+	var targets: Dictionary = _episodes.get(observer_id,{})
+	if not targets.has(target_id):
+		return {}
+	var ready_tick: int = targets[target_id]
+	return {"ready_tick":ready_tick,"detection_complete":now_tick>=ready_tick,
+		"ticks_remaining":maxi(ready_tick-now_tick,0)}
+
+
+func build_episode_snapshot(now_tick: int) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if now_tick < 0 or now_tick < _latest_tick:
+		return result
+	var observers: Array = _episodes.keys()
+	observers.sort()
+	for observer_id in observers:
+		var targets: Array = Dictionary(_episodes[observer_id]).keys()
+		targets.sort()
+		for target_id in targets:
+			var episode := read_pair(observer_id,target_id,now_tick)
+			episode["key"] = JSON.stringify([observer_id,target_id])
+			episode["attacker_unit_id"] = observer_id
+			episode["target_unit_id"] = target_id
+			result.append(episode)
+	return result
+
+
 func clear() -> void:
 	_episodes.clear()
 	_latest_tick = -1

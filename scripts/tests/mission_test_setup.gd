@@ -1163,6 +1163,11 @@ func _initialize_fog_of_war(unit_nodes: Array, terrain_registry) -> void:
 	call_deferred("_sync_fog_of_war_visual_state", true)
 
 
+func _get_hex_sight_adapter():
+	var driver = get_node_or_null("../CombatLoopDriver")
+	return driver.call("get_hex_sight_adapter") if driver != null and driver.has_method("get_hex_sight_adapter") else null
+
+
 func _sync_fog_of_war_visual_state(force: bool = false, advance_work: bool = true) -> void:
 	if _fog_of_war_system == null:
 		return
@@ -1213,7 +1218,8 @@ func _sync_fog_of_war_visual_state(force: bool = false, advance_work: bool = tru
 		_fog_terrain_registry,
 		_fog_of_war_los_system,
 		fog_of_war_sight_range_world,
-		{"work_budget_tiles": fog_of_war_work_budget_tiles, "force_full": force or replace_with_committed_state}
+		{"work_budget_tiles": fog_of_war_work_budget_tiles, "force_full": force or replace_with_committed_state,
+			"hex_sight_adapter": _get_hex_sight_adapter()}
 	)
 	# Retain the last complete terrain sample until the next atomic publication
 	# (TASK1189). Clearing it here would restart the real overlay on every step.
@@ -1259,6 +1265,7 @@ func _sync_fog_dynamic_target_visibility() -> void:
 	if _fog_of_war_system == null:
 		return
 	var observers: Array = _get_active_fog_observers()
+	var hex_adapter = _get_hex_sight_adapter()
 	var viewer_team_id: String = _get_fog_viewer_team_id()
 	for unit in _fog_unit_nodes:
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
@@ -1275,12 +1282,18 @@ func _sync_fog_dynamic_target_visibility() -> void:
 			if observer == null:
 				continue
 			var effective_sight_range_world: float = _get_effective_fog_sight_range_world(observer)
-			var has_line_of_sight: bool = _fog_of_war_los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, effective_sight_range_world, _fog_terrain_registry) == true
+			var has_line_of_sight: bool
+			if hex_adapter != null and hex_adapter.is_active():
+				has_line_of_sight = bool(hex_adapter.query_units(observer,unit,effective_sight_range_world).get("visible",false))
+			else:
+				has_line_of_sight = _fog_of_war_los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, effective_sight_range_world, _fog_terrain_registry) == true
 			if has_line_of_sight:
 				visible = true
 				break
 		_fog_of_war_system.call("set_visible", viewer_team_id, unit_id, visible)
 		if visible:
+			if hex_adapter != null and hex_adapter.is_active():
+				target_position = Vector2(hex_adapter.build_observer_state(unit,-1.0).get("position",Vector2.ZERO))
 			_fog_of_war_system.call("record_last_known_contact", viewer_team_id, {
 				"target_id": unit_id,
 				"team_id": String(unit.call("get_team_id")).strip_edges(),
@@ -1317,6 +1330,9 @@ func _get_effective_fog_sight_range_world(observer: Node) -> float:
 
 func _build_fog_runtime_signature(mode: String, include_positions: bool = true) -> String:
 	var parts: PackedStringArray = PackedStringArray()
+	var hex_adapter = _get_hex_sight_adapter()
+	if hex_adapter != null and hex_adapter.is_active():
+		parts.append("hex_context:%s" % hex_adapter.get_context_key())
 	parts.append(mode)
 	parts.append(_get_fog_viewer_team_id())
 	parts.append("base_sight:%s" % str(fog_of_war_sight_range_world))
@@ -1330,6 +1346,8 @@ func _build_fog_runtime_signature(mode: String, include_positions: bool = true) 
 		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"
 		var position: Vector2 = (unit as Node2D).global_position
 		var position_text: String = "%s,%s" % [str(position.x), str(position.y)] if include_positions else ""
+		if hex_adapter != null and hex_adapter.is_active():
+			position_text = hex_adapter.build_observer_signature(unit,_get_effective_fog_sight_range_world(unit),include_positions)
 		var sight_text: String = str(_get_fog_unit_sight_range_factor(unit))
 		parts.append("%s:%s:%s:%s:%s" % [
 			String(unit.call("get_unit_id")).strip_edges(),

@@ -393,5 +393,7 @@ Ausführung mit kleinen Contractchecks, weiterhin ohne große Testreihen.
 AP0 ist auf97e00aba1 übernommen. AP2s isolierte Query-/Cachebausteine sowie
 Ground-State und Erkennungsepisoden sind im Foundation-Task belegt.
 AP1-Owner-/Versionsanbindung ist mit39/0 kleinen Checks ergänzt. AP3-Verbraucher
+für Contact, Schussprüfung, FoW und Hex-Erkennung sind als Zwischenschritt mit
+30/0 Consumerchecks und25/0 Helperchecks ergänzt. Übrige AP3-Verbraucher/Facing
 und AP4–AP9 bleiben offen; keine Karte ist aktiviert.
 Frischer Read-only-Review ohne Engine-/Dateiänderung und ohne Blocker.

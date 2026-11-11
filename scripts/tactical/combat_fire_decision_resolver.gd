@@ -331,6 +331,12 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	if _get_team_id(attacker) == _get_team_id(target):
 		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
+	var current_visibility: Callable = context.get("query_current_visibility", Callable())
+	if current_visibility.is_valid():
+		var sight: Dictionary = current_visibility.call(attacker, target, _get_effective_attack_range(attacker, target, context))
+		if bool(sight.get("handled", false)):
+			if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
+			return bool(sight.get("visible", false))
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
@@ -556,6 +562,11 @@ static func _resolve_range_state(distance_world: float, weapon_range_world: floa
 static func _resolve_los_state(attacker, target, context: Dictionary) -> String:
 	if not (attacker is Node2D) or not (target is Node2D):
 		return "unknown"
+	var current_visibility: Callable = context.get("query_current_visibility",Callable())
+	if current_visibility.is_valid():
+		var sight: Dictionary = current_visibility.call(attacker,target,-1.0)
+		if bool(sight.get("handled",false)):
+			return "clear" if bool(sight.get("visible",false)) else "blocked"
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return "unknown"
