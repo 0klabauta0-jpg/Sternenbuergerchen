@@ -58,7 +58,10 @@ func _add_button(label: String, action: Callable) -> void:
 
 func refresh(snapshot: Dictionary) -> void:
 	_snapshot = snapshot
-	var signature := var_to_str([snapshot.get("space_wings", {}), snapshot.get("crafts", [])])
+	var craft_labels: Array = []
+	for craft: Dictionary in Array(snapshot.get("crafts", [])):
+		craft_labels.append([craft.get("craft_id", ""), craft.get("display_name", craft.get("craft_id", ""))])
+	var signature := var_to_str([snapshot.get("space_wings", {}), craft_labels])
 	if signature == _signature: return
 	_signature = signature
 	var selected_wing := _selected(_wings)

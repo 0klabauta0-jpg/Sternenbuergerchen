@@ -144,6 +144,9 @@ Verifier und diese Statusdokumentation.
   Einbau oberhalb verschob bestehende Bedienelemente aus dem sichtbaren
   Bereich; dafür ist die Rottenverwaltung gegebenenfalls durch Scrollen zu
   erreichen. Native Ergonomie bleibt zu prüfen.
+  Die Listen werden nur bei geänderten Rotten oder Schiffsnamen/-IDs neu
+  aufgebaut, nicht bei fortlaufenden Pad-Animationsdaten; Panelprüfung9/9
+  und Sternkarten-UI89/89.
 - AP06 Owner-Vorstufe: Ein validierter Auftrag kann atomar mehrere aktive
   Rotten ersetzen; passive Kontakt-/Feuerregeln bleiben im Snapshot,
   Wiederholung ist idempotent, Abbruch prüft die aktuelle Auftrags-ID.

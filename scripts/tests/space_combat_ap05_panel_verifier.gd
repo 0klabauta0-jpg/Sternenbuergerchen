@@ -18,8 +18,12 @@ func _initialize() -> void:
 	if panel.get_feedback().is_empty(): failed += 1
 	if not panel.submit("wing_remove", {"wing_id":"w", "craft_id":"b"}).get("ok", false): failed += 1
 	if owner.get_snapshot().wings.w.craft_ids != ["a"]: failed += 1
+	var signature: String = panel.get("_signature")
+	crafts[0]["pad_visual"] = {"progress":0.5}
+	panel.refresh(_snapshot())
+	if panel.get("_signature") != signature: failed += 1
 	panel.free()
-	print("SPACE_COMBAT_AP05_PANEL passed=", 8 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP05_PANEL passed=", 9 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _snapshot() -> Dictionary:
