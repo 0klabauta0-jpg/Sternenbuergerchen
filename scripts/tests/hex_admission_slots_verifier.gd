@@ -15,6 +15,7 @@ func _finish()->void:
 		_test_actual_despawn()
 		_test_stale_registry_entry()
 		_test_pending_group_cleanup()
+		_test_registry_only_actor()
 	print("RESULTS: %d passed, %d failed"%[passed,failed])
 	if failed==0:print("HEX_ADMISSION_SLOTS_PASS")
 	quit(0 if failed==0 else 1)
@@ -157,4 +158,16 @@ func _test_pending_group_cleanup()->void:
 	var next:Dictionary=rig.sim.prepare_hex_ground_deployment(PackedStringArray(["stays"]),Vector2i.ZERO)
 	rig.sim.release_hex_ground_unit("stays","")
 	_check(next.ok and rig.sim.get_hex_ground_planning_snapshot().admission_slots_by_grid.is_empty(),"internal release with empty legacy reason still clears pending slots")
+	rig.scene.free()
+
+func _test_registry_only_actor()->void:
+	var rig:Dictionary=_admission_rig([Vector2i.ZERO])
+	var actor=Actor.new()
+	actor.unit_id="registry_only"
+	rig.scene.add_child(actor)
+	rig.units.register_unit("registry_only",actor)
+	var before:Dictionary=rig.sim.get_hex_ground_planning_snapshot()
+	var admitted:Dictionary=rig.sim.admit_hex_ground_actor_group(PackedStringArray(["registry_only"]),Vector2i.ZERO)
+	actor.free()
+	_check(not admitted.ok and before==rig.sim.get_hex_ground_planning_snapshot(),"registry-only actor needs explicit Root lifecycle binding before admission")
 	rig.scene.free()

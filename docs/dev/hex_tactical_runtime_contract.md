@@ -428,3 +428,11 @@ Kleiner Slotcase87/0 einschließlich63 voriger Movement-/Lifecyclechecks;
 Backoff55/0, Planer26/0, Owner56/0, Quell-/Profilguards und enger Review geschlossen.
 Konkrete Controller-/Setup-/Basisproducer sind der nächste AP6-Teilschritt;
 ohne sie keine produktive Kartenaktivierung. Save/Peergrenzen folgen in AP7.
+
+Integrationsnachprüfung12.11.: Ein Registry-only Lookup reicht für tatsächliche
+Actorzulassung nicht aus. Derselbe gültige Actor muss explizit an Root gebunden
+sein (`register_known_unit`), damit der Tree-Exitpfad bereits besteht. Admission
+lehnt fehlende Bindung vor jedem Write ab. Echter Registry-only→Admission→free-
+Repro87/1, nach Guard88/0; QA hex_admission_binding_fix_20261112. Die internen
+datenorientierten Foundation-Placementchecks sind davon getrennt; kein Adapter
+darf sie als Umgehung der tatsächlichen Actor-Lifecyclegrenze verwenden.

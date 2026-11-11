@@ -77,6 +77,14 @@ Bereichs-ID, lokaler Index und atomarer Rootübergang werden mit dem kanonischen
 Flight-/Rottenowner im Weltraumkampf-Chat abgestimmt. Bisherige Drei-Marker-Reise
 bleibt bis zum vollständigen Anschluss produktiv. Vertrag:
 `docs/dev/orbital_approach_contract.md`. Große Tests bleiben später.
+### AP6 Integrationsnachprüfung der Actorbindung — 12.11.2026
+
+Tatsächliche Admission verlangt nun den expliziten Root-Known-Eintrag desselben
+Actors. Registryfallback allein besitzt keinen verbundenen Tree-Exitpfad und wird
+vor Write abgelehnt. Kleiner echter Repro87/1→88/0 mit Quell-/Profilguards;
+QA hex_admission_binding_fix_20261112. AP6-Produceranbindung, AP7/8 bleiben offen;
+große Tests weiterhin später.
+
 ### AP6 Groundvormerkung und echte einzelne Transporteffects — 11.11.2026
 
 Ground hält verbindliche Slots für vollständige Gruppen, ohne Bordpersonen als
