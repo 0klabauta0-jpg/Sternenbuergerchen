@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### Gemeinsame Orbitbereiche: Layoutvorbereitung — 11.11.2026
+
+Neue Nutzerentscheidung: ein Orbitbereich je Stern/Planet/Mond, lokal 512 × 256,
+strategisch weiterhin 256 × 256. Reiner `OrbitApproachLayout`-Helper beschreibt
+den oberen 256 Felder breiten und maximal vier Felder tiefen Körperbogen,
+erreichbare Gatekandidaten und ein unteres Eintrittsband. Acht kleine
+Geometriechecks ohne Fehler und check-only Compile ohne Scriptfehler.
+Helper noch unverdrahtet: kein neuer Warp-/Anflugweg, keine Blockadeabnahme.
+Bereichs-ID, lokaler Index und atomarer Rootübergang werden mit dem kanonischen
+Flight-/Rottenowner im Weltraumkampf-Chat abgestimmt. Bisherige Drei-Marker-Reise
+bleibt bis zum vollständigen Anschluss produktiv. Vertrag:
+`docs/dev/orbital_approach_contract.md`. Große Tests bleiben später.
+
 ### AP5 echte Movebefehle und 2DActorprojektion — 11.11.2026
 
 Root besitzt jetzt angenommene Hexziele samt gecachter inkrementeller Navigation

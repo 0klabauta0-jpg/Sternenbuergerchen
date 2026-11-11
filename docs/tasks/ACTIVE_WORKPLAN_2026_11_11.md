@@ -2,6 +2,16 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+- **Neue Orbitvorgabe:** genau ein gemeinsamer Bereich pro Stern/Planet/Mond,
+  lokal 512 × 256; strategische Karte 256 × 256. Oben mittig ein großer Körperbogen
+  nominal 256 Felder breit und höchstens vier tief, Ankunft unten, Oberfläche erst
+  am erreichbaren Saum. Jedes fliegende Schiff einschließlich Dropship in genau
+  einer kanonischen Rotte. Reine Layoutvorbereitung 8/0 und Compile sauber;
+  Runtimeanschluss mit Weltraumkampf-Chat abgestimmt in Arbeit. Der bisherige
+  Drei-Marker-Produktpfad bleibt bis zum vollständigen Anschluss bestehen.
+  Vertrag: `docs/dev/orbital_approach_contract.md`; Task:
+  `docs/tasks/ORBITAL_APPROACH_MAPS_2026_11_11.md`.
+
 - **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
 - **Parallele Orte:** View-/Servicekorrektur implementiert: Heimat/Polisa/Einsatz auf bestehenden Ortsroots ansehen, Hintergrundankunft behaelt Fremdansicht, explizite Serviceschiffwahl und lokale Basisguards. Frische kleine Viewprobe44/0, Serviceprobe30/0, Flow/Adapter Compile0 und unabhaengiger Review nach Korrekturen. Echte Mehrortreise/-gefechte/-kaeufe noch nicht abgenommen; Vertrag und Crew-Faehrgrenze in parallel_location_operations_contract.md.
 - **Bewegung:** AP4/Korridorcache, Projektion3095c11b0 und Stopkernfd8ed553a erhalten; echtes AP5-Commands-/2DActorpaket a66b84522 nach unabhaengigem Review als c5e536d0d integriert. Gemeinsamer ActualMove42/0, Polisa-Ownerheimkehr18/0 und Root/Runtimecompile0. 3DView-/Fireteamankunft, Tuerguard, Bewegungsschuss/Backoff und Lifecycle-/Save-/Authoritygrenzen folgen im Tabletop-Chat. Keine Produktionskarte aktiviert und keine FPS-/Gesamtfreigabe.
