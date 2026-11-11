@@ -130,6 +130,10 @@ Verifier und diese Statusdokumentation.
   bleibt das Schiff Mitglied; ein verfügbarer Führer wird stabil gewählt,
   sonst ist die Rotte inaktiv. Entfernte Schiffe werden gelöst. Prüfung12/12;
   kein Nachweis für spätere Kampf-/Todereignisse.
+- AP02 Tick-Vorstufe: Fixture-Flugsteuerung wird im Root-Physiktakt über
+  die Batch-Kollisionsprüfung angewandt; echte Schiffs-IDs sind gesperrt, bis
+  Kartenhindernisse und Ausrüstung angebunden sind. Gezielt 8/8; keine
+  spielbare Steuerung oder Abnahme von AP02.
 - AP02/AP03/AP04 Rest und AP05–AP20: offen.
 
 ## Risiken / offene Punkte

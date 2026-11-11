@@ -12,6 +12,8 @@ Läufen mit privatem APPDATA; keine echten Spielerprofile wurden verwendet.
 - Root-/Takt-/Aufnahmecheck: 27/27; gekoppelt an den Fixture-Flugresolver.
 - Warp-Owner/Root: 42/42 und7/7 nach Integration des Parallelstands.
 - Isolierter Flugresolver8/8 und Rottenowner19/19; kein fertiger Kampffluss.
+- Fixture-Flug über Root-Physiktakt 8/8; Root-Tick- und Batchregressionen
+  ebenfalls erfolgreich. Produktive Schiffe bleiben für diesen Pfad gesperrt.
 - AP03 Kostenprobe: jeweils25 wiederholte, identische Einzel-Sweeps in einem
   headless Lauf. Einfeldjäger P95 106→93µs, dreizelliger Rumpf 833→442µs
   nach geometrischer Kandidatenbegrenzung; Dateien `space_sweep_cost_before.log`

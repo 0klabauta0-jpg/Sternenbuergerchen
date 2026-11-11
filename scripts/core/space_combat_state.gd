@@ -5,6 +5,8 @@ const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 var _registry: RefCounted = REGISTRY.new()
 var _metadata: Dictionary = {}
 var _indexed_revisions: Dictionary = {}
+var _flight_controls: Dictionary = {}
+var _flight_status: Dictionary = {}
 
 func admit_actor(definition: Dictionary, flight: RefCounted) -> Dictionary:
 	var craft_id: String = String(definition.get("craft_id", ""))
@@ -118,3 +120,17 @@ func sync_moved_actors() -> void:
 
 func get_metadata(craft_id: String) -> Dictionary:
 	return Dictionary(_metadata.get(craft_id, {})).duplicate(true)
+
+func set_flight_control(craft_id: String, control: Dictionary) -> bool:
+	if not _metadata.has(craft_id): return false
+	_flight_controls[craft_id] = control.duplicate(true)
+	return true
+
+func get_flight_controls() -> Dictionary:
+	return _flight_controls.duplicate(true)
+
+func set_flight_status(craft_id: String, status: Dictionary) -> void:
+	if _metadata.has(craft_id): _flight_status[craft_id] = status.duplicate(true)
+
+func get_flight_status(craft_id: String) -> Dictionary:
+	return Dictionary(_flight_status.get(craft_id, {})).duplicate(true)

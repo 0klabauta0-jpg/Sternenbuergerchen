@@ -77,6 +77,7 @@ const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
 const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SPACE_NAVIGATION = preload("res://scripts/tactical/space_navigation_resolver.gd")
+const SPACE_FLIGHT_RESOLVER = preload("res://scripts/tactical/space_flight_resolver.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
@@ -123,6 +124,49 @@ func get_space_actor(craft_id: String) -> RefCounted:
 
 func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 	return _space_combat_state.query_cells(cells)
+
+func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok": false, "reason": "runtime_authority_required"}
+	# The current tick adapter has no authoritative map-obstacle or equipment source.
+	if not craft_id.begins_with("space_fixture_"):
+		return {"ok": false, "reason": "fixture_only"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null or flight.get_snapshot().motion_mode != "tactical":
+		return {"ok": false, "reason": "not_tactical"}
+	var validation: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), intent, hull, power, 0.0)
+	if not validation.get("ok", false):
+		return validation
+	_space_combat_state.set_flight_control(craft_id, {"intent":intent, "hull":hull, "power":power})
+	return {"ok": true}
+
+func get_space_flight_status(craft_id: String) -> Dictionary:
+	return _space_combat_state.get_flight_status(craft_id)
+
+func _advance_space_flights(delta: float, tick: int) -> void:
+	var controls: Dictionary = _space_combat_state.get_flight_controls()
+	var ids: Array = controls.keys()
+	ids.sort()
+	var proposals: Array[Dictionary] = []
+	for craft_id in ids:
+		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+		if flight == null or flight.get_snapshot().motion_mode != "tactical": continue
+		var control: Dictionary = controls[craft_id]
+		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), control.intent, control.hull, control.power, delta)
+		if not proposal.get("ok", false):
+			_space_combat_state.set_flight_status(craft_id, proposal)
+			continue
+		proposal["craft_id"] = craft_id
+		proposals.append(proposal)
+	if proposals.is_empty(): return
+	var result: Dictionary = commit_space_fleet_motion(proposals, tick, {}, {"runtime_authorized":true})
+	if not result.get("ok", false):
+		for proposal in proposals: _space_combat_state.set_flight_status(proposal.craft_id, result)
+		return
+	for craft_id in result.accepted:
+		_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
+	for craft_id in result.rejected:
+		_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
@@ -1573,6 +1617,8 @@ func _physics_process(delta: float) -> void:
 	var scope_started_usec: int = 0
 
 	tick_counter += 1
+	if _space_runtime_tick.is_valid():
+		_advance_space_flights(delta, tick_counter)
 	is_processing_tick = true
 	_begin_navigation_budget_tick()
 	_advance_hex_ground_tick()
