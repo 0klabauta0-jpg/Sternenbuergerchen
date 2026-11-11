@@ -80,7 +80,8 @@ static func _sweep(flight: Dictionary, proposal: Dictionary) -> Dictionary:
 		return {"ok":false, "reason":"sweep_limit"}
 	var result := {}
 	var previous: Dictionary = {}
-	var margin := max_radius * (1.0 - cos(absf(angle) / sample_count * 0.5)) + 0.00001
+	var margin := (max_radius + GRID.HEX.DEFAULT_RADIUS) * (1.0 - cos(absf(angle) / sample_count * 0.5))
+	var single_cell: bool = footprint.size() == 1 and footprint[0] == Vector2i.ZERO
 	for index in range(sample_count + 1):
 		var t := float(index) / sample_count
 		var position := start.lerp(finish, t)
@@ -89,11 +90,52 @@ static func _sweep(flight: Dictionary, proposal: Dictionary) -> Dictionary:
 			var local: Vector2 = GRID.HEX.axial_to_plane(Vector2(offset)).rotated(heading)
 			var current: Vector2 = position + local
 			var from: Vector2 = previous.get(offset, current)
-			for visited in _supercover(from, current, margin):
+			var visited_cells: Array[Vector2i]
+			if single_cell:
+				visited_cells = _supercover(from, current, 0.00001)
+			else:
+				var previous_heading := float(a) + angle * maxf(0.0, float(index - 1) / sample_count)
+				visited_cells = _hull_supercover(from, current, previous_heading, heading, margin if index > 0 else 0.0)
+			for visited in visited_cells:
 				if not GRID.contains(visited): return {"ok":false, "reason":"map_edge"}
 				result[visited] = true
 			previous[offset] = current
 	return {"ok":true, "cells":result.keys()}
+
+static func _hull_supercover(from: Vector2, to: Vector2, from_angle: float, to_angle: float, margin: float) -> Array[Vector2i]:
+	var points := PackedVector2Array()
+	for corner in 6:
+		var offset := PI / 6.0 + corner * PI / 3.0
+		points.append(from + Vector2.from_angle(from_angle + offset) * (GRID.HEX.DEFAULT_RADIUS + margin))
+		points.append(to + Vector2.from_angle(to_angle + offset) * (GRID.HEX.DEFAULT_RADIUS + margin))
+	var hull: PackedVector2Array = Geometry2D.convex_hull(points)
+	var first: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(from))
+	var last: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(to))
+	var candidates := {}
+	for base in GRID.HEX.line(first, last):
+		candidates[base] = true
+		for direction in GRID.HEX.DIRECTIONS:
+			candidates[base + direction] = true
+			for second in GRID.HEX.DIRECTIONS:
+				candidates[base + direction + second] = true
+	var result: Array[Vector2i] = []
+	for cell in candidates:
+		var center: Vector2 = GRID.HEX.axial_to_plane(Vector2(cell))
+		var polygon := PackedVector2Array()
+		for corner in 6:
+			polygon.append(center + Vector2.from_angle(PI / 6.0 + corner * PI / 3.0) * GRID.HEX.DEFAULT_RADIUS)
+		for intersection in Geometry2D.intersect_polygons(hull, polygon):
+			if intersection.size() >= 3 and absf(_polygon_area(intersection)) > 0.00000001:
+				result.append(cell)
+				break
+	return result
+
+static func _polygon_area(polygon: PackedVector2Array) -> float:
+	var area := 0.0
+	var origin := polygon[0]
+	for index in polygon.size():
+		area += (polygon[index] - origin).cross(polygon[(index + 1) % polygon.size()] - origin)
+	return area * 0.5
 
 static func _supercover(from: Vector2, to: Vector2, margin: float) -> Array[Vector2i]:
 	var first: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(from))

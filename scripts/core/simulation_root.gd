@@ -156,8 +156,6 @@ func commit_space_actor_motion(craft_id: String, proposal: Dictionary, tick: int
 		if occupant != craft_id:
 			return {"ok": false, "reason": "occupied"}
 	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
-	if Array(metadata.get("footprint_hexes", [])).size() != 1:
-		return {"ok": false, "reason": "multihex_sweep_pending"}
 	var actor: Dictionary = flight.get_snapshot()
 	actor["footprint_hexes"] = metadata.footprint_hexes
 	var move: Dictionary = proposal.duplicate(true)

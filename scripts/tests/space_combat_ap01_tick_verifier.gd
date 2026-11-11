@@ -86,6 +86,8 @@ func _initialize() -> void:
 	var outside := {"expected_revision":large_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(255,0))}
 	if root.commit_space_actor_motion("large", outside, 1, {"runtime_authorized":true}).get("reason") != "invalid_footprint": failed += 1
 	if large_flight.get_snapshot() != large_before: failed += 1
+	var legal := {"expected_revision":large_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(11,10))}
+	if not root.commit_space_actor_motion("large", legal, 1, {"runtime_authorized":true}).get("ok", false): failed += 1
 	var obstacle := {"craft_id":"obstacle", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(20,20), "footprint_hexes":[Vector2i.ZERO]}
 	var mover := {"craft_id":"mover", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(18,20), "footprint_hexes":[Vector2i.ZERO]}
 	if not root.admit_space_actor(obstacle, {"runtime_authorized":true}).get("ok", false): failed += 1
@@ -95,11 +97,22 @@ func _initialize() -> void:
 	var through := {"expected_revision":moving_before.revision, "position_plane":GRID.HEX.axial_to_plane(Vector2(22,20))}
 	if root.commit_space_actor_motion("mover", through, 1, {"runtime_authorized":true}).get("reason") != "blocked": failed += 1
 	if moving_flight.get_snapshot() != moving_before: failed += 1
+	var rotator := {"craft_id":"rotator", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(30,30), "footprint_hexes":[Vector2i.ZERO,Vector2i(2,0)]}
+	var upper := {"craft_id":"upper", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(29,32), "footprint_hexes":[Vector2i.ZERO]}
+	var lower := {"craft_id":"lower", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(31,28), "footprint_hexes":[Vector2i.ZERO]}
+	if not root.admit_space_actor(rotator, {"runtime_authorized":true}).get("ok", false): failed += 1
+	if not root.admit_space_actor(upper, {"runtime_authorized":true}).get("ok", false): failed += 1
+	if not root.admit_space_actor(lower, {"runtime_authorized":true}).get("ok", false): failed += 1
+	var rotating_flight: RefCounted = root.get_space_actor("rotator")
+	var rotating_before: Dictionary = rotating_flight.get_snapshot()
+	var rotate := {"expected_revision":rotating_before.revision, "position_plane":rotating_before.position_plane, "heading_rad":PI}
+	if root.commit_space_actor_motion("rotator", rotate, 1, {"runtime_authorized":true}).get("reason") != "blocked": failed += 1
+	if rotating_flight.get_snapshot() != rotating_before: failed += 1
 	var at_30 := _simulate_frames(30)
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 37 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 43 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:

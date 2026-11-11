@@ -97,17 +97,14 @@ Verifier und diese Statusdokumentation.
   Segment-Supercover erfasst eine getestete exakte Randberührung, Drehbögen
   erhalten eine konservative Krümmungszugabe. Mehrfeldrümpfe werden beim
   Indexieren als gedrehte Hexflächen abgebildet; ein Einfeldjäger behält
-  genau ein Ankerfeld. Elf gezielte Fälle bestanden.
-  Zeitliche Reservierung, Blockadeauflösung, begrenzte Laufzeitkosten und
-  Rootintegration fehlen. Der Helfer ist nicht als produktives Kollisionsgate
-  angeschlossen; allgemeine Geometrie- und Performanceabnahme stehen aus.
-- AP03 zusätzliche Zielprüfung: Root prüft vor einem einzelnen Bewegungscommit
-  den vollständigen Ziel-Footprint und vorhandene Belegung; außerhalb der
-  Karte wird vor der Mutation abgelehnt. Einfeldjäger prüfen zusätzlich den
-  durchflogenen Korridor über die vorhandene Feldregistry, ohne globale
-  Actor-/SceneTree-Suche. Rootcheck37/37, Geometriecheck11/11, Registry6/6.
-  Mehrfeldbewegung ist im Einzelcommit ausdrücklich gesperrt; Geländeblocker,
-  zeitliche Batchreservierungen und Blockadeauflösung bleiben offen.
+  genau ein Ankerfeld. Elf gezielte Geometriefälle bestanden.
+  Zeitliche Batchreservierung, Blockadeauflösung und begrenzte Laufzeitkosten
+  bleiben offen; allgemeine Geometrie- und Performanceabnahme stehen aus.
+- AP03 Einzelcommit: Root prüft Ziel-Footprint und durchflogenen Korridor
+  gegen registrierte andere Schiffe, einschließlich gedrehter Mehrfeldrümpfe;
+  außerhalb der Karte wird vor der Mutation abgelehnt. Rootcheck43/43,
+  Geometriecheck11/11, Registry6/6. Geländeblocker, zeitliche
+  Batchreservierungen und Blockadeauflösung bleiben offen.
 - AP04 erster isolierter Rottenowner: Zuordnung1–6, eindeutige Schiffs- und
   Pilotenbelegung, stabiler Ersatzführer, Ownership und actorbezogene
   Replayquittungen. Leere Entwurfsrotten sind inaktiv, letzte Entfernung
