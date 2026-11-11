@@ -1,0 +1,102 @@
+{
+  "status": "check_only_and_small_domain_24_pass_native_flow_pending",
+  "balance_status": "initial_values_not_final",
+  "job_data_modified": false,
+  "artifacts": [
+    {
+      "path": "data/singleplayer/research.json",
+      "bytes": 1466,
+      "sha256": "71f7a72d54011a9be22b1841c507cb3b545ac231b9a816cd7fd69653f06bf82f"
+    },
+    {
+      "path": "scripts/mission/campaign_research_catalog.gd",
+      "bytes": 4929,
+      "sha256": "803ab9ee54aed9d49906216bbd1ca4e4a6eddff21ac7cc9017ec57bd4ceb1bc0"
+    },
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "bytes": 37588,
+      "sha256": "cd72db026839b0f798ee64cdec7f3ac1fc65e8fa97c6c48cc60cfce0b5d83c3f"
+    },
+    {
+      "path": "scripts/mission/singleplayer_supply_command_contract.gd",
+      "bytes": 1923,
+      "sha256": "6022a78e15832fe50203c20301f7069ac8744b60644d23b509088603b274f9f6"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "bytes": 65369,
+      "sha256": "537bd4c5f6504551c47706703bc6bdc2d809a15a28ed0542bac3fc569b5059b7"
+    },
+    {
+      "path": "scripts/meta/singleplayer_services_presenter.gd",
+      "bytes": 29712,
+      "sha256": "ba8c0add6222f8fd2195c4a11f97c3d7ff554d495defdf3ea68133dc7b381210"
+    },
+    {
+      "path": "scripts/meta/homebase_screen.gd",
+      "bytes": 496220,
+      "sha256": "78de0654e7baed6c8295ee3756a56ca731e8c35c518915f1b38c34b5b89e28da"
+    },
+    {
+      "path": "scripts/tests/campaign_research_slice_check.gd",
+      "bytes": 5641,
+      "sha256": "ada37b016ea389da71111ad54f2185e8cef24ed166d5fe97c3063483cdfec1ee"
+    },
+    {
+      "path": "docs/tasks/CAMPAIGN_RESEARCH_RUNTIME_2026_11_11.md",
+      "bytes": 4101,
+      "sha256": "788f6ec1cf48e26efbb93034a2c04bcd5e55cde2e8e05622fce34363dd2f9710"
+    },
+    {
+      "path": "data/singleplayer/jobs.json",
+      "bytes": 2606,
+      "sha256": "a07db8f538eae28b5c24ae5ed0477526ae8692df39131e6313729e7fe3d9f641"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/.gdignore",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/campaign_research_catalog_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/domain_check.log",
+      "bytes": 1542,
+      "sha256": "2055640e1aeea1c6feeac3971115cb6733618604446a34f165acc2df7c0a8141"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/domain_fixture_initial.log",
+      "bytes": 1542,
+      "sha256": "745041affdf95b6aea482a16e19fe62e6c2750329cd91286a4f8aa83e60d9905"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/homebase_screen_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/README.md",
+      "bytes": 2510,
+      "sha256": "e991d1813fb87f2073805c3b37dfe5d3dfeddea51bf2061fe279d17a6701d1a9"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/singleplayer_runtime_adapter_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/singleplayer_services_presenter_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    },
+    {
+      "path": "docs/qa/campaign_research_runtime_20261111/singleplayer_supply_state_compile.log",
+      "bytes": 75,
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80"
+    }
+  ]
+}

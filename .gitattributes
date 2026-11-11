@@ -79,3 +79,7 @@ Assets/curated/personnel/armor_kenney_r07_20261111/*.json -text whitespace=blank
 docs/qa/native_terrain_preparation_handoff_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 docs/qa/controls_help_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+docs/qa/campaign_research_runtime_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+docs/qa/simple_team_experience_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

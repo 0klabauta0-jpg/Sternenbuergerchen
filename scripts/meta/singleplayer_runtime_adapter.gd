@@ -211,7 +211,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		var result := _commit("campaign_space",op,data,request_id)
 		_finish_space_encounter_result()
 		return result
-	if operation in ["campaign_upload","campaign_recruit","campaign_load_crate","campaign_deliver","campaign_build_pad","campaign_fabricate"]:
+	if operation in ["campaign_upload","campaign_recruit","campaign_load_crate","campaign_deliver","campaign_build_pad","campaign_fabricate","campaign_research"]:
 		return _request_campaign_action(operation,data,request_id)
 	if operation=="focus_location":
 		return _flow.call("focus_location",String(data.get("location_id","")))
@@ -906,8 +906,8 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 			_commit("singleplayer_supply","apply_reward",{"completion_id":receipt.completion_id},"reward:"+String(receipt.completion_id),{"completion_receipt":receipt})
 		observe_campaign_progress()
 		return result
-	if operation == "campaign_fabricate":
-		return _commit("singleplayer_supply","campaign_fabricate",payload,request_id,{"at_home":at_home,"campaign_authorized":true})
+	if operation in ["campaign_fabricate", "campaign_research"]:
+		return _commit("singleplayer_supply",operation,payload,request_id,{"at_home":at_home,"campaign_authorized":true})
 	if operation == "campaign_build_pad":
 		if bool(snapshot.progress.second_pad_built): return {"ok":true,"changed":false,"message":"Zweites Landepad bereits gebaut"}
 		if not at_home or not bool(snapshot.progress.recruited_pilot): return _reject("pad_not_ready","Nach der Rettung zur Heimatbasis zurückkehren")

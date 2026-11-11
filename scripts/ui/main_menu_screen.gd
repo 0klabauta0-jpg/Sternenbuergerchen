@@ -21,6 +21,8 @@ const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_na
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const SIMPLE_PROFILE_CONFIG: GDScript = preload("res://scripts/meta/skirmish_start_configuration.gd")
+const SIMPLE_PROFILE_POINTS: GDScript = preload("res://scripts/meta/skirmish_points_catalog.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
@@ -131,6 +133,7 @@ var _team_editor_save_button: Button = null
 var _team_editor_close_button: Button = null
 var _team_editor_refresh_queued: bool = false
 var _team_editor_metric_save_queued: bool = false
+var _team_editor_advanced_by_unit: Dictionary = {}
 var _team_editor_metric_save_reason: String = ""
 var _team_editor_metric_save_timer: Timer = null
 var _start_roster: Dictionary = {}
@@ -2032,7 +2035,9 @@ func _refresh_team_editor_sheet(roster: Dictionary) -> void:
 	_add_team_editor_character_edit_controls(_team_editor_sheet_host, unit)
 	_connect_help_controls_in_tree(_team_editor_sheet_host)
 	var unit_id: String = String(unit.get("unit_id", ""))
+	_add_team_editor_experience_controls(_team_editor_sheet_host, unit)
 	var render_options: Dictionary = {
+		"editable_metrics": bool(_team_editor_advanced_by_unit.get(unit_id, false)),
 		"on_value_changed": Callable(self, "_on_team_editor_profile_metric_changed").bind(unit_id),
 		"on_metric_lock_changed": Callable(self, "_on_team_editor_profile_metric_lock_changed").bind(unit_id),
 		"metric_group_budgets": _build_team_editor_metric_group_budgets(unit),
@@ -2051,6 +2056,70 @@ func _refresh_team_editor_sheet(roster: Dictionary) -> void:
 	_team_editor_sheet_host.add_child(sheet_body)
 	CHARACTER_SHEET_VIEW_SCRIPT.call("render", sheet_body, profile, render_options)
 	_connect_help_controls_in_tree(sheet_body)
+
+
+func _add_team_editor_experience_controls(host: VBoxContainer, unit: Dictionary) -> void:
+	var unit_id := String(unit.get("unit_id", ""))
+	var column := VBoxContainer.new()
+	column.name = "TeamEditorExperienceControls"
+	column.add_theme_constant_override("separation", 6)
+	host.add_child(column)
+	var choices := HBoxContainer.new()
+	choices.add_theme_constant_override("separation", 10)
+	column.add_child(choices)
+	var option := OptionButton.new()
+	option.name = "TeamEditorExperienceChoice"
+	option.add_item("Erfahrungsstufe wählen …")
+	option.set_item_metadata(0, "")
+	for key: String in SIMPLE_PROFILE_POINTS.EXPERIENCE:
+		option.add_item(String(SIMPLE_PROFILE_POINTS.EXPERIENCE[key].label))
+		option.set_item_metadata(option.item_count - 1, key)
+	choices.add_child(option)
+	var apply := Button.new()
+	apply.name = "TeamEditorExperienceApply"
+	apply.text = "Vorlage anwenden"
+	apply.disabled = true
+	choices.add_child(apply)
+	option.item_selected.connect(func(index: int) -> void: apply.disabled = index == 0)
+	apply.pressed.connect(func() -> void:
+		var result := _apply_team_editor_experience(unit_id, String(option.get_item_metadata(option.selected)))
+		if not bool(result.get("ok", false)):
+			_status_label.text = "Erfahrungs-Vorlage konnte nicht übernommen werden."
+	)
+	var hint := Label.new()
+	hint.name = "TeamEditorExperienceHint"
+	hint.text = "Anwenden ersetzt Fähigkeiten, Verhalten, Kommunikation und Fahrzeugwerte; individuelle Einzelwerte werden überschrieben. Rolle, Person, Fortschritt und Ausrüstung bleiben erhalten."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(hint)
+	var advanced := CheckButton.new()
+	advanced.name = "TeamEditorAdvancedValuesToggle"
+	advanced.text = "Einzelwerte bearbeiten"
+	advanced.set_pressed_no_signal(bool(_team_editor_advanced_by_unit.get(unit_id, false)))
+	advanced.toggled.connect(func(enabled: bool) -> void:
+		_team_editor_advanced_by_unit[unit_id] = enabled
+		_queue_team_editor_refresh()
+	)
+	column.add_child(advanced)
+
+
+func _apply_team_editor_experience(unit_id: String, experience_id: String) -> Dictionary:
+	var unit := _find_team_editor_unit(_get_team_editor_roster_source(), unit_id)
+	if unit.is_empty(): return {"ok": false, "reason": "unit_not_found"}
+	var proposal: Dictionary = SIMPLE_PROFILE_CONFIG.new().build_experience_patch(unit, experience_id)
+	if not bool(proposal.get("ok", false)): return proposal
+	var edited := unit.duplicate(true)
+	edited.merge(Dictionary(proposal.patch), true)
+	# Keep the existing roster projection/save path, including derived effects and badges.
+	edited = _rebuild_team_editor_profile_derived_values(edited, {"value_group": "platform_values"})
+	edited["role_id"] = unit.get("role_id", "")
+	var result := _update_team_editor_unit(unit_id, edited, "team_editor_experience_template", true, true)
+	if bool(result.get("ok", false)):
+		# Group caps are editor draft limits, not purchasing points. Rebase only
+		# after this explicit full-template action so the expert view stays usable.
+		for group: String in TEAM_EDITOR_METRIC_GROUP_CONFIG:
+			_team_editor_metric_group_budgets.erase("%s|%s" % [unit_id, group])
+	_queue_team_editor_refresh()
+	return result
 
 
 func _add_team_editor_character_edit_controls(host: VBoxContainer, unit: Dictionary) -> void:
@@ -2075,7 +2144,7 @@ func _add_team_editor_character_edit_controls(host: VBoxContainer, unit: Diction
 	var title := Label.new()
 	title.text = "Charakter bearbeiten"
 	title.add_theme_font_size_override("font_size", 13)
-	title.tooltip_text = "Alle sichtbaren Plus/Minus-Werte im Blatt speichern sofort im Roster."
+	title.tooltip_text = "Name und Porträt speichern direkt; Erfahrungs-Vorlagen erst nach Anwenden. Einzelwerte sind optional."
 	title.set_meta("help_id", "character_sheet.identity")
 	vbox.add_child(title)
 	var name_row := HBoxContainer.new()

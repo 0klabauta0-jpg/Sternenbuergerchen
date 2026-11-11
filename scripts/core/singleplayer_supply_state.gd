@@ -2,6 +2,7 @@ extends RefCounted
 ## Long-lived domain owner. SimulationRoot supplies trusted service/runtime context.
 
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
+const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
 var _inventory: Dictionary = {}
 var _location_resources: Dictionary = {}
@@ -10,7 +11,7 @@ const DATA_PATH := "res://data/singleplayer/trade_offers.json"
 const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
 
 static func get_campaign_recipe(blueprint_id:String)->Dictionary:
-	return Dictionary(CAMPAIGN_RECIPES.get(blueprint_id,{})).duplicate(true)
+	return Dictionary(CAMPAIGN_RECIPES[blueprint_id]).duplicate(true) if CAMPAIGN_RECIPES.has(blueprint_id) else RESEARCH.fabrication(blueprint_id)
 
 var _definitions: Dictionary = {}
 var _credits: int = 0
@@ -19,6 +20,9 @@ var _fuel_by_craft_id: Dictionary = {}
 var _stock_by_offer_id: Dictionary = {}
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
+var _research_receipts: Dictionary = {}
+var _research_snapshot_cache: Dictionary = {}
+var _research_snapshot_revision := -1
 var _revision: int = 0
 
 func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
@@ -49,6 +53,8 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_stock_by_offer_id.clear()
 	_requests.clear()
 	_reward_receipts.clear()
+	_research_receipts.clear()
+	_research_snapshot_revision = -1
 	_revision = 0
 	for offer_id in Dictionary(data.get("offers", {})):
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
@@ -68,7 +74,13 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints()}
+	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot()}
+
+func get_research_snapshot() -> Dictionary:
+	if _research_snapshot_revision != _revision:
+		_research_snapshot_cache = RESEARCH.build_snapshot(_research_receipts, _reward_receipts, _requests, _credits)
+		_research_snapshot_revision = _revision
+	return _research_snapshot_cache.duplicate(true)
 
 func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if not COMMANDS.validate_command(command) or _definitions.is_empty():
@@ -92,6 +104,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
 		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
+		"campaign_research": result = _campaign_research(payload, authority_context, request_id)
 		"campaign_fabricate": result = _campaign_fabricate(payload, authority_context)
 		"campaign_build": result = _campaign_build(payload, authority_context)
 		"sell": result = _sell(payload, authority_context)
@@ -218,7 +231,7 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources()}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true)}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -262,6 +275,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	var research: Variant = data.get("research_receipts", {})
+	if not RESEARCH.validate_receipts(research, data.reward_receipts, data.requests):
+		return _reject("invalid_research_receipts", "Entwicklungsbelege widersprechen ihren Voraussetzungen")
 	var containers: Variant = data.get("inventory", {})
 	if typeof(containers)!=TYPE_DICTIONARY:
 		return _reject("invalid_inventory", "Container fehlen")
@@ -293,6 +309,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 		_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id])
 	_requests = data.requests.duplicate(true)
 	_reward_receipts = data.reward_receipts.duplicate(true)
+	_research_receipts = research.duplicate(true)
+	_research_snapshot_revision = -1
 	_revision = int(data.revision)
 	return {"ok":true}
 
@@ -501,7 +519,29 @@ func _blueprints() -> Array:
 	for receipt: Dictionary in _reward_receipts.values():
 		var id := String(Dictionary(receipt.get("reward",{})).get("blueprint_id",""))
 		if not id.is_empty() and not result.has(id): result.append(id)
+	for id: String in _research_receipts:
+		var node: Dictionary = RESEARCH.definitions().get("nodes", {}).get(id, {})
+		var blueprint := String(node.get("blueprint_id", ""))
+		if not blueprint.is_empty() and not result.has(blueprint): result.append(blueprint)
 	return result
+
+func _campaign_research(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if not bool(context.get("campaign_authorized", false)):
+		return _reject("campaign_only", "Entwicklung gehört zur Kampagne")
+	if not bool(context.get("at_home", false)):
+		return _reject("home_required", "Entwicklung nur an der Heimatbasis")
+	var id := String(payload.get("research_id", ""))
+	var node: Dictionary = get_research_snapshot().nodes.get(id, {})
+	if node.is_empty(): return _reject("unknown_research", "Entwicklung unbekannt")
+	if bool(node.developed):
+		return {"ok": true, "changed": false, "cost": 0, "research_id": id, "message": "Bereits entwickelt; keine weiteren Kosten"}
+	if not bool(node.available): return _reject("research_locked", String(node.message))
+	var receipt := {"schema_version": 1, "research_id": id, "request_id": request_id, "cost": int(node.cost)}
+	_credits -= int(node.cost)
+	_research_receipts[id] = receipt
+	_revision += 1
+	return {"ok": true, "changed": true, "cost": int(node.cost), "research_id": id,
+		"development_receipt": receipt.duplicate(true), "message": "Entwicklung abgeschlossen. Einzelstücke jetzt in der Werkstatt herstellen."}
 
 func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)): return _reject("untrusted_cargo","Kein bestaetigter Bergungs-/Lieferbeleg")

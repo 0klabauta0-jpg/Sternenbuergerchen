@@ -5,6 +5,7 @@ const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const SKIN=preload("res://scripts/ui/base_management_skin.gd")
 const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
+const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const OFFER_ID := "medictool_supply"
 const DEBOUNCE_SECONDS := 0.35
 
@@ -122,15 +123,21 @@ func _build() -> void:
 	ship_content.move_child(_craft_selector,0);ship_content.move_child(_fuel,1);ship_content.move_child(fuel_row,2);ship_content.move_child(_refuel,3)
 	_return.pressed.connect(func(): _submit("return_homebase"))
 	_cards=GridContainer.new();_cards.name="ServiceActionCards";_cards.add_theme_constant_override("h_separation",14);_cards.add_theme_constant_override("v_separation",14);content.add_child(_cards)
-	for action in [
+	var campaign_actions: Array = [
 		["campaign_upload","Missionsdaten hochladen",{}],
 		["campaign_recruit","Person am Handelsposten aufnehmen",{"kind":"outpost"}],
 		["campaign_load_crate","Geborgene C-Benit-Kiste übernehmen",{}],
 		["campaign_build_pad","Zweites Landepad bauen · 100 Cr",{}],
 		["campaign_fabricate","Hand-Mining-Tool herstellen",{"blueprint_id":"mining_tool"}],
 		["campaign_fabricate","Sturmgewehr herstellen",{"blueprint_id":"assault_rifle"}],
-		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}]]:
-		var key := String(action[0])+String(Dictionary(action[2]).get("blueprint_id",""))
+		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}],
+		["campaign_fabricate","Mittlere Rüstung herstellen",{"blueprint_id":"medium_armor"}],
+		["campaign_fabricate","Schwere Rüstung herstellen",{"blueprint_id":"heavy_armor"}]]
+	for id: String in RESEARCH.definitions().get("nodes", {}):
+		var node: Dictionary = RESEARCH.definitions().nodes[id]
+		campaign_actions.append(["campaign_research", node.title, {"research_id": id}])
+	for action in campaign_actions:
+		var key := String(action[0])+String(Dictionary(action[2]).get("blueprint_id",Dictionary(action[2]).get("research_id","")))
 		var button := _button(String(action[1]),key)
 		button.visible = false
 		var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;SKIN.panel(card,true);_cards.add_child(card)
@@ -145,12 +152,16 @@ func _build() -> void:
 		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
 		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
 		if ResourceLoader.exists(path):icon.texture=load(path)
-		var menu_item:String={"light_armor":"armor_light","mining_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
+		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
 		if String(action[0])!="campaign_build_pad":icon.texture=MENU_ICONS.get_icon(menu_item)
 		if not blueprint.is_empty():body.add_child(_label(get_blueprint_details(blueprint),14))
+		if String(action[0]) == "campaign_research":
+			var node: Dictionary = RESEARCH.definitions().nodes[String(action[2].research_id)]
+			body.add_child(_label("Einmalige Entwicklung: %d Cr\n%s" % [int(node.cost), String(node.description)], 14))
 		var state:=_label("",15);state.custom_minimum_size.y=42;body.add_child(state)
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(button);SKIN.button(button,true)
 		if String(action[0])=="campaign_fabricate":button.text="Herstellen"
+		if String(action[0])=="campaign_research":button.text="Entwickeln"
 		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2],"card":card,"state_label":state}
 		button.pressed.connect(_submit_campaign.bind(key))
 	_feedback = _label("", 14)
@@ -287,8 +298,8 @@ func _apply_section() -> void:
 	var ship := _section in ["all", "ship"]
 	_ship_panel.visible=ship
 	_eyebrow.text={"all":"SC-06  /  VERSORGUNG","ship":"SC-06  /  TRANSPORT","build":"BAU-02  /  INFRASTRUKTUR","workshop":"WB-03  /  FERTIGUNG","data":"DT-05  /  INFORMATION"}.get(_section,"")
-	_heading.text = {"all":"Versorgung", "build":"Basis · Bauen", "workshop":"Werkstatt · Blueprints", "data":"Datenterminal · Hochladen", "ship":"Schiff · Versorgung"}.get(_section,"Versorgung")
-	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Blueprint auswählen und herstellen. Fertige Waffen und Rüstung liegen anschließend im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Schiff auswählen und Treibstoff ergänzen. Besatzung und Fracht im Flugdeck verwalten."}.get(_section, "")
+	_heading.text = {"all":"Versorgung", "build":"Basis · Bauen", "workshop":"Werkstatt · Entwicklung & Fertigung", "data":"Datenterminal · Hochladen", "ship":"Schiff · Versorgung"}.get(_section,"Versorgung")
+	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Baupläne durch Aufträge freischalten, Schutztechnik einmal entwickeln und anschließend jedes Stück separat fertigen. Fertige Ausrüstung liegt im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Schiff auswählen und Treibstoff ergänzen. Besatzung und Fracht im Flugdeck verwalten."}.get(_section, "")
 	_section_note.visible = not _section_note.text.is_empty()
 	for control in [_craft_selector,_fuel,_buy,_sell,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
 		control.visible = ship
@@ -308,7 +319,7 @@ func _apply_section() -> void:
 	for action:Dictionary in _campaign_buttons.values():
 		var button:Button=action.button
 		if _section == "all": continue
-		var wanted:bool=(_section=="build" and String(action.operation)=="campaign_build_pad") or (_section=="workshop" and String(action.operation)=="campaign_fabricate") or (_section=="data" and String(action.operation)=="campaign_upload")
+		var wanted:bool=(_section=="build" and String(action.operation)=="campaign_build_pad") or (_section=="workshop" and (String(action.operation)=="campaign_fabricate" or (String(action.operation)=="campaign_research" and String(_snapshot.get("mode",""))=="campaign"))) or (_section=="data" and String(action.operation)=="campaign_upload")
 		if not wanted:
 			button.hide()
 			continue
@@ -354,7 +365,8 @@ static func get_blueprint_details(blueprint_id:String)->String:
 		lines.append("Basisschaden: %d"%weapons.get_damage_per_hit("rifle"))
 		lines.append("Reichweite: %d Felder"%weapons.get_effective_tile_range("rifle"))
 	elif String(recipe.item)=="mining_tool":lines.append("Werkzeug zum Abbau\nmarkierter Vorkommen")
-	elif String(recipe.item)=="armor_light":lines.append("Rüstungsklasse: Leicht")
+	elif String(recipe.item) in ["armor_light", "armor_medium", "armor_heavy"]:
+		lines.append("Rüstungsklasse: " + {"armor_light":"Leicht", "armor_medium":"Mittel", "armor_heavy":"Schwer"}[String(recipe.item)])
 	lines.append("Herstellung: %d Cr"%int(recipe.cost))
 	return "\n".join(lines)
 
@@ -392,9 +404,14 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 			"campaign_build_pad": show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
 			"campaign_fabricate":
 				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id))
+			"campaign_research":
+				var research: Dictionary = supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {})
+				enabled = home and bool(research.get("available", false))
 		button.visible = show
 		button.disabled = not enabled or not _command_handler.is_valid()
 		button.tooltip_text = "Zur Basis zurückkehren" if not enabled else ""
+		if String(action.operation) == "campaign_research" and home:
+			button.tooltip_text = String(supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {}).get("message", "Entwicklung derzeit nicht verfügbar"))
 
 func _submit_campaign(key: String) -> void:
 	var action: Dictionary = _campaign_buttons.get(key,{})

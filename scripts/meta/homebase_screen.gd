@@ -9289,7 +9289,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 		var gate: Dictionary = base_runtime.call("validate_operation", operation, gate_payload)
 		if not bool(gate.get("ok", false)):
 			return gate
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip", "focus_location", "sell", "campaign_upload", "campaign_recruit", "campaign_load_crate", "campaign_build_pad", "campaign_fabricate"]:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip", "focus_location", "sell", "campaign_upload", "campaign_recruit", "campaign_load_crate", "campaign_build_pad", "campaign_fabricate", "campaign_research"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))

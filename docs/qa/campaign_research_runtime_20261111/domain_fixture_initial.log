@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing supply config loads
+PASS: Old save without research restores empty progress
+PASS: Workshop blocked before real uploaded-chip receipt without charge
+PASS: Trusted fixture receipt uses unchanged job definition satellite_recovery
+PASS: Trusted fixture receipt uses unchanged job definition outpost_chip_recovery
+PASS: Development requires home
+PASS: Development requires campaign authority
+PASS: Workshop development pays once from existing credits
+PASS: Identical request replays without charge
+PASS: Conflicting request ID rejected
+PASS: A second development request cannot double-charge
+PASS: Medium requires an actually fabricated light armor
+PASS: Blueprint does not precede development
+PASS: Existing light recipe remains 20 credits
+PASS: Medium unlocks after workshop plus actual light fabrication
+FAIL: Development unlocks recipe without free equipment
+FAIL: Medium separately fabricated into existing storage
+PASS: Heavy follows medium development and separate fabrication
+PASS: JSON save restores all developed recipes
+PASS: Tampered development cost rejected
+PASS: Missing development prerequisite rejected
+PASS: Missing fabrication evidence rejected
+PASS: Research requests cannot survive a missing ledger
+PASS: Failed restore preserves existing valid state
+CAMPAIGN_RESEARCH_SLICE 24 passed/checked, 2 failed

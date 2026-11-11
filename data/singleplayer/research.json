@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "catalog_id": "campaign_research_v1",
+  "balance_status": "initial_workbench_values_not_final",
+  "nodes": {
+    "workshop_research": {
+      "title": "Werkstatt zur Entwicklung ausbauen",
+      "cost": 180,
+      "requires_jobs": [
+        "outpost_chip_recovery"
+      ],
+      "requires_research": [],
+      "requires_fabricated": {},
+      "blueprint_id": "",
+      "description": "Geborgene Daten nach dem Heim-Upload in der vorhandenen Werkstatt nutzbar machen."
+    },
+    "research_medium": {
+      "title": "Mittlere Rüstung entwickeln",
+      "cost": 120,
+      "requires_jobs": [],
+      "requires_research": [
+        "workshop_research"
+      ],
+      "requires_fabricated": {
+        "light_armor": "armor_light"
+      },
+      "blueprint_id": "medium_armor",
+      "description": "Eine leichte Rüstung tatsächlich fertigen, dann das mittlere Schutzpaket entwickeln."
+    },
+    "research_heavy": {
+      "title": "Schwere Rüstung entwickeln",
+      "cost": 240,
+      "requires_jobs": [],
+      "requires_research": [
+        "research_medium"
+      ],
+      "requires_fabricated": {},
+      "blueprint_id": "heavy_armor",
+      "description": "Auf der entwickelten mittleren Rüstung aufbauen. Jede Rüstung danach einzeln fertigen."
+    }
+  },
+  "fabrication": {
+    "medium_armor": {
+      "item": "armor_medium",
+      "cost": 40
+    },
+    "heavy_armor": {
+      "item": "armor_heavy",
+      "cost": 80
+    }
+  }
+}

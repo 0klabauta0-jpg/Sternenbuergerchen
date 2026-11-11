@@ -68,6 +68,30 @@ func build_points_person(person: Dictionary, unit_id: String, used_portraits: Di
 	return unit
 
 
+## Explicit editor action: reuse the points profile, but return only ability fields.
+## Opening an existing roster or selecting a dropdown never calls this method.
+func build_experience_patch(unit: Dictionary, experience_id: String) -> Dictionary:
+	if not POINTS.EXPERIENCE.has(experience_id):
+		return {"ok": false, "reason": "experience_missing", "patch": {}}
+	var category := String(unit.get("roster_role_category", "operator"))
+	var role := category if POINTS.ROLES.has(category) else "operator"
+	var candidate := unit.duplicate(true)
+	_apply_points_profile(candidate, {"role": role, "experience": experience_id,
+		"armor": "suit", "weapon": "pistol"}, role == "pilot", bool(unit.get("is_fireteam_lead", false)))
+	var patch := {}
+	for group: String in ["skill_values", "communication_values", "behavior_axes", "platform_values"]:
+		patch[group] = Dictionary(candidate[group]).duplicate(true)
+	# Preserve the same canonical and compatibility aliases as the existing purchase path.
+	for key: String in candidate.skill_values:
+		patch[key] = candidate.skill_values[key]
+		patch["skill_" + key] = candidate.skill_values[key]
+	for key: String in candidate.communication_values:
+		patch[key] = candidate.communication_values[key]
+	for key: String in candidate.platform_values:
+		patch[key] = candidate.platform_values[key]
+	return {"ok": true, "reason": "", "experience_id": experience_id, "patch": patch}
+
+
 func _build_configuration(preset_id: String, preset: Dictionary, bought_people: Array = []) -> Dictionary:
 	var size := int(preset.roster_size)
 	var generated := GENERATOR.generate_start_roster("prepared_skirmish_" + preset_id, maxi(20, size), "skirmish_" + preset_id)

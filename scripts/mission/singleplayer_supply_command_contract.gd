@@ -2,7 +2,7 @@ extends RefCounted
 ## Pure command construction; this contract never changes a balance.
 
 const CATEGORY := "singleplayer_supply"
-const OPERATIONS := ["buy", "refuel", "consume_route_fuel", "apply_reward", "inventory_transfer", "inventory_equip", "campaign_cargo", "campaign_fabricate", "campaign_build", "sell", "collect_resource"]
+const OPERATIONS := ["buy", "refuel", "consume_route_fuel", "apply_reward", "inventory_transfer", "inventory_equip", "campaign_cargo", "campaign_fabricate", "campaign_research", "campaign_build", "sell", "collect_resource"]
 
 static func build_buy_command(offer_id: String, quantity: int, request_id: String) -> Dictionary:
 	return build_command("buy", {"offer_id": offer_id, "quantity": quantity}, request_id)

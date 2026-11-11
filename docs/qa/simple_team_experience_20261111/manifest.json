@@ -1,0 +1,50 @@
+{
+  "basis": "task/native-glut-maps-20261110 after0d2864468 plus parallelWIP",
+  "status": "compile_and_pure_fixture_pass_native_UI_and_save_deferred",
+  "pure_fixture": {
+    "checks": 163,
+    "failures": 0
+  },
+  "artifacts": [
+    {
+      "path": "docs/qa/simple_team_experience_20261111/.gdignore",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/qa/simple_team_experience_20261111/README.md",
+      "sha256": "6b86f4f122217b704e221ceef1fc55f21b0fa9f41e09ad70230e13827f7263cf",
+      "bytes": 1364
+    },
+    {
+      "path": "docs/qa/simple_team_experience_20261111/data_check.log",
+      "sha256": "f8a7a6d2fb8b70688e81185ca62b10c5bb7bedf17137b67449ba5aaac3630eae",
+      "bytes": 228
+    },
+    {
+      "path": "docs/qa/simple_team_experience_20261111/menu_check.log",
+      "sha256": "746bb3b08265d0fed9e1a569d570a8e1d6a910c38ebf0ba187918b819da7ab80",
+      "bytes": 75
+    },
+    {
+      "path": "docs/tasks/AGREED_SYSTEM_SIMPLIFICATION_2026_11_11.md",
+      "sha256": "63cf0ac8bb197865ee7ef3fc6329604c1f1d8a4ef830f8a689fda82aaae168c9",
+      "bytes": 3829
+    },
+    {
+      "path": "scripts/meta/skirmish_start_configuration.gd",
+      "sha256": "fc2881011afd17738a6dab6cf78d60ab51f75ed50d83e92913f0548823e2cf5c",
+      "bytes": 12361
+    },
+    {
+      "path": "scripts/tests/simple_team_experience_template_test.gd",
+      "sha256": "4ca320169a2ad3b491c07a94e56784b1bf73644e9dc3349291e04cec96af8d41",
+      "bytes": 2263
+    },
+    {
+      "path": "scripts/ui/main_menu_screen.gd",
+      "sha256": "bc683845fb4205c3c28bee5d3e5355c313d238ad5872efac1f9c116d2ecfb7fa",
+      "bytes": 207150
+    }
+  ]
+}
