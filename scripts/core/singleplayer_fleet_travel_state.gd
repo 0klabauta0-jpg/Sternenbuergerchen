@@ -133,6 +133,8 @@ func _valid_space_area_context(context: Dictionary) -> bool:
 	if typeof(payload.get("craft_id")) != TYPE_STRING or String(payload.craft_id).is_empty(): return false
 	if context.operation == "advance":
 		return payload.size() == 2 and typeof(payload.get("delta_seconds")) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(payload.delta_seconds))
+	if context.operation == "begin_approach":
+		return payload.size() == 2 and typeof(payload.get("location_id")) == TYPE_STRING and not String(payload.location_id).is_empty()
 	return context.operation == "enter_orbit" and payload.size() == 1
 
 func bind_space_area_transition_context(context: Dictionary, authority: Object) -> Dictionary:
