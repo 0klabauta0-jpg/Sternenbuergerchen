@@ -2,16 +2,20 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
-Neuster Bewegungsstand: auch Bewegungsschuss a74fbab2f als 615327eaf integriert,
-frischer enger gemeinsamer MovingShotlauf 65/0 mit Guards grün. Fähigkeitsfaktor
-0.65..0.95 ausdrücklich vorläufig; kein zusätzlicher Wurf, Profilread pro Effect.
-Türmutationsguard und Backoff sowie AP6–8 bleiben offen. Die zwei eng benannten
-Driver-Türproducerbereiche sind für den Tabletop-Chat freigegeben.
+Aktueller Bewegungsstand: Commands/2D-Actor, logische Gruppenankunft/3D-View
+und Bewegungsschuss sind integriert (c5e536d0d, 6a3f9c535, 615327eaf).
+Jeweils gezielte gemeinsame Läufe bestanden; zuletzt MovingShot65/0 mit Guards.
+Fähigkeitsfaktor 0.65..0.95 ausdrücklich vorläufig. Türschutz und Backoff sowie
+Lifecycle-/Save-/Authoritygrenzen AP6–8 bleiben beim Tabletop-Chat. Echter
+Türproducer ist `update_mission_interaction_runtime_progress`; dessen enger
+Guardbereich und `_refresh_mission_interaction_door_runtime_overrides` sind frei.
+Eine `_on_simulation_mission_interaction_runtime_event` existiert hier nicht.
+Produktionskarten noch nicht aktiviert; native Animation und große Tests später.
 
-Aktueller Bewegungsnachtrag: Gruppenankunft/3D-View aus 5a8544fea jetzt als
-6a3f9c535 integriert, enger gemeinsamer Consumerlauf 65/0 mit Guards grün.
-Diese beiden Punkte sind erledigt; Türguard, Bewegungsschuss, Backoff und
-AP6–8 bleiben beim Tabletop-Chat. Native Animation und große Tests später.
+Nächste EXE: siehe `NEXT_PLAYABLE_EXE_2026_11_11.md`. Ziel ist ein spielbarer
+Kandidat nach kleinem Bewegungs-/Orbitanschluss, nicht erst nach allen künftigen
+Forschungs-/Modell-/Contentwünschen. Noch keine belastbare Zeitangabe und kein
+Exportauftrag abgeschlossen; Laufzeitpaket muss den genauen Quellstand ausweisen.
 
 - **Neue Orbitvorgabe:** genau ein gemeinsamer Bereich pro Stern/Planet/Mond,
   lokal 512 × 256; strategische Karte 256 × 256. Oben mittig ein großer Körperbogen
@@ -25,7 +29,7 @@ AP6–8 bleiben beim Tabletop-Chat. Native Animation und große Tests später.
 
 - **Polisa:** R08 gestalterisch vom Nutzer freigegeben. Grundform/Massstab bleiben; keine weitere Grafikrunde beauftragt.
 - **Parallele Orte:** View-/Servicekorrektur implementiert: Heimat/Polisa/Einsatz auf bestehenden Ortsroots ansehen, Hintergrundankunft behaelt Fremdansicht, explizite Serviceschiffwahl und lokale Basisguards. Frische kleine Viewprobe44/0, Serviceprobe30/0, Flow/Adapter Compile0 und unabhaengiger Review nach Korrekturen. Echte Mehrortreise/-gefechte/-kaeufe noch nicht abgenommen; Vertrag und Crew-Faehrgrenze in parallel_location_operations_contract.md.
-- **Bewegung:** AP4/Korridorcache, Projektion3095c11b0 und Stopkernfd8ed553a erhalten; echtes AP5-Commands-/2DActorpaket a66b84522 nach unabhaengigem Review als c5e536d0d integriert. Gemeinsamer ActualMove42/0, Polisa-Ownerheimkehr18/0 und Root/Runtimecompile0. 3DView-/Fireteamankunft, Tuerguard, Bewegungsschuss/Backoff und Lifecycle-/Save-/Authoritygrenzen folgen im Tabletop-Chat. Keine Produktionskarte aktiviert und keine FPS-/Gesamtfreigabe.
+- **Bewegung:** siehe aktuellen Bewegungsstand oben. Grundlagen und genannte Verbraucher integriert, weitere Aktivierungsgrenzen offen. Keine Produktionskarte aktiviert und keine FPS-/Gesamtfreigabe.
 - **Profilanzeige:**6308e6f02 integriert: exakte Vorlagenzuordnung, individuelles Profil und Profilwirkung aus bestehenden Ableitungen. Keine neue Tempo-/Combatformel; interne Wertevereinfachung bleibt abgestimmt offen.
 - **Forschung:**84dd481b1 integriert: Recycling von Bergungsgut zu vorhandenen Rucksaecken auf bestehendem Supply-/Inventarowner. Forschung100Cr, Fertigung2salvage+20Cr als erste Balance. Workbench-Ist-Baseline auf23Knoten aktualisiert; keine native Gesamt-/Balanceabnahme.
 - **Schiffe:** Warp-Slot b67b307b0 (Odyssey C/Hemera A) gesichert; Qualitaet D bis A, Kosten/Bestand vorlaeufig. Lokale Polisa-Abholung jetzt als Alternative zur Heimatlieferung angeschlossen: echtes unbemanntes Schiff auf freiem passenden Pad, explizite Crew-/Pilotuebergabe, Boarding/Rueckflug und versionierte Erwerbsbelege. Heimatpad bleibt reserviert, Save weiter nurHome. Frische enge Vertikal18/0/Flow23/0/Backend43/0, Helper27/0/Controller26/0 als Teilbelege. Native Weg-/Presencecommit-/Rueckreise-/Saveabnahme spaeter. Umgeruestete Skirmishschiffe bleiben bis konsistenter Retire-Historie rueckgabegesperrt. Waffen und neue Fahrzeugmodelle bleiben offen/zurueckgestellt.
