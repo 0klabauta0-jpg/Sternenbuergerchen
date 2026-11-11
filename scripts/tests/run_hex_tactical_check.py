@@ -54,6 +54,7 @@ def main() -> int:
         "scripts/core/hex_ground_runtime.gd",
         "scripts/core/hex_visibility_query.gd",
         "scripts/core/hex_detection_state.gd",
+        "scripts/mission/combat_visibility_cache.gd",
     ]
     hashes = {}
     for relative in paths:
@@ -80,7 +81,10 @@ def main() -> int:
         result = subprocess.run(argv, env=env, stdout=stream, stderr=subprocess.STDOUT, timeout=30) \
             if prepared.returncode == 0 else prepared
     output = ANSI.sub("", (run / "output.log").read_text(encoding="utf-8", errors="replace"))
-    unchanged = before == fingerprint(real_user)
+    after = fingerprint(real_user)
+    unchanged = before == after
+    profile_changes = [name for name in sorted(before.keys() | after.keys())
+                       if before.get(name) != after.get(name)]
     copied_unchanged = all(hashlib.sha256((source / p).read_bytes()).hexdigest() == value
                            for p, value in hashes.items())
     isolated = (user_root / "review2_isolation_canary.json").is_file()
@@ -89,6 +93,7 @@ def main() -> int:
     report = {"case": args.case, "passed": passed, "exit_code": result.returncode,
               "source_sha256": hashes, "sources_unchanged": copied_unchanged,
               "real_profile_unchanged": unchanged, "isolated": isolated,
+              "real_profile_changes": profile_changes,
               "argv": argv, "prepare_argv": prepare_argv, "log": str(run / "output.log")}
     (run / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(output.rstrip())

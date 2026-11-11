@@ -1,7 +1,10 @@
 # Hexsicht und ein NPC pro Feld: Entwurfsgrundlage V1
 
-Status: Planungsgrundlage zum Nutzerauftrag vom 11.11.2026. Keine Umsetzung
-oder Performancefreigabe. Details unter [Arbeitsauftrag](../../tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md).
+Status: Entwurfsgrundlage zum Nutzerauftrag vom 11.11.2026, keine
+Fertigstellungs- oder Performancefreigabe. Isolierte Grundlagen stehen im
+[Foundation-Task](../../tasks/HEX_RUNTIME_FOUNDATION_2026_11_11.md);
+aktive Verbraucher und Bewegung bleiben offen. Ursprünglicher
+[Arbeitsauftrag](../../tasks/HEX_SIGHT_OCCUPANCY_2026_11_11_PLAN.md).
 
 ## Ziel und bestätigte Entscheidungen
 

@@ -6,6 +6,11 @@ Konkreter Arbeitsplan erstellt; keine Runtime-Umsetzung. Der Nutzer verlangt
 ausdrücklich, größere Tests später durchzuführen. Diese Planungsrunde prüft
 nur Dokumente, Schnittstellen und Git-Diff, startet keine Engine.
 
+Nachfolgende autorisierte Ausführung auf einem eigenen Branch: AP0 auf
+97e00aba14ced147b268113085854ac67dc764c5 übernommen; isolierte Grundbausteine
+mit kleinen Checks umgesetzt, siehe `HEX_RUNTIME_FOUNDATION_2026_11_11.md`.
+Die folgenden Angaben zur reinen Planungsrunde bleiben deren historische Basis.
+
 Planungsbranch: `task/hex-sight-occupancy-plan-20261111`, bewusst auf dem noch
 nicht integrierten Kampagnenstand `e4b407fe0598f1f601b40177c7fec408fd73618c`.
 Nicht auf dem alten `integration/core-foundation` vom August implementieren.

@@ -1,5 +1,14 @@
 # Hex-Runtime-Grundlagen — 11.11.2026
 
+## Status
+
+Isolierte Grundlagen implementiert: Ground-State, reine Hexsicht mit separater
+Geometrie-LRU im vorhandenen Cache und Erkennungsepisoden. Finale kleine
+Checks25/0,38/0,21/0. Frischer Read-only-Review ohne Blocker; ergänzte kleine
+Grenzfälle geprüft. Keine aktive Missions-/Basis-/Bewegungsintegration.
+Vertrag: `docs/dev/hex_tactical_runtime_contract.md`.
+QA: `docs/qa/hex_runtime_foundation_20261111/README.md`.
+
 ## Ziel / Problem
 
 Die autorisierten unabhängigen Teile des Hex-Arbeitsplans implementieren:

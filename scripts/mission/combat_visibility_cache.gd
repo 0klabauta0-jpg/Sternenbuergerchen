@@ -8,6 +8,17 @@ extends Node
 ## decisions so it never becomes gameplay truth.
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const HEX_VISIBILITY_SCRIPT: GDScript = preload("res://scripts/core/hex_visibility_query.gd")
+const MAX_HEX_CACHE_CAPACITY := 16384
+
+# Separate derived geometry lifetime: logical cells can reuse geometry across ticks.
+# Legacy callers below retain their existing exact-position/tick-local behavior.
+var _hex_results: Dictionary = {}
+var _hex_head := ""
+var _hex_tail := ""
+var _hex_capacity := MAX_HEX_CACHE_CAPACITY
+var _hex_hits := 0
+var _hex_geometry_queries := 0
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _current_tick: int = -1
@@ -22,6 +33,91 @@ var _profile_enabled: bool = false
 var _profile_scope_active: bool = false
 var _profile_usec: Dictionary = {}
 var _profile_counts: Dictionary = {}
+
+
+func query_hex_visibility(observer: Dictionary, target: Dictionary,
+		terrain_registry: Node, profile: Dictionary) -> Dictionary:
+	var result: Dictionary = HEX_VISIBILITY_SCRIPT.classify_candidate(observer, target, terrain_registry, profile)
+	if result.reason != "terrain_pending":
+		return result
+	# A reader without an authoritative revision cannot safely retain geometry.
+	if not terrain_registry.has_method("get_revision"):
+		_hex_geometry_queries += 1
+		return HEX_VISIBILITY_SCRIPT.evaluate(observer, target, terrain_registry, profile)
+	var from: Vector2i = observer.grid
+	var to: Vector2i = target.grid
+	var key := "%d:%d|%d,%d:%d|%d,%d:%d" % [terrain_registry.get_instance_id(),
+		int(terrain_registry.call("get_revision")), from.x, from.y, int(observer.stand_height_steps2),
+		to.x, to.y, int(target.stand_height_steps2)]
+	if _hex_results.has(key):
+		_hex_hits += 1
+		_touch_hex_entry(key)
+		var geometry: Dictionary = _hex_results[key]
+		result.terrain_checked = true
+		result.terrain_clear = geometry["clear"]
+		result.visible = geometry["clear"]
+		result.reason = "visible" if result.visible else "terrain_blocked"
+		result["blocker_grid"] = geometry["blocker"]
+		return result
+	_hex_geometry_queries += 1
+	result = HEX_VISIBILITY_SCRIPT.evaluate(observer, target, terrain_registry, profile)
+	if _hex_results.size() >= _hex_capacity:
+		var evicted: String = _hex_head
+		_unlink_hex_entry(evicted)
+		_hex_results.erase(evicted)
+	_hex_results[key] = {"clear":result.terrain_clear,"blocker":result["blocker_grid"],"prev":"","next":""}
+	_append_hex_entry(key)
+	return result
+
+
+func set_hex_cache_capacity(capacity: int) -> void:
+	_hex_capacity = clampi(capacity, 1, MAX_HEX_CACHE_CAPACITY)
+	clear_hex_cache()
+
+
+func clear_hex_cache() -> void:
+	_hex_results.clear()
+	_hex_head = ""
+	_hex_tail = ""
+	_hex_hits = 0
+	_hex_geometry_queries = 0
+
+
+func get_hex_cache_audit_snapshot() -> Dictionary:
+	return {"entry_count":_hex_results.size(),"capacity":_hex_capacity,
+		"hits":_hex_hits,"geometry_queries":_hex_geometry_queries,"derived_only":true}
+
+
+func _touch_hex_entry(key: String) -> void:
+	if key == _hex_tail:
+		return
+	_unlink_hex_entry(key)
+	_append_hex_entry(key)
+
+
+func _unlink_hex_entry(key: String) -> void:
+	var entry: Dictionary = _hex_results[key]
+	var previous: String = entry["prev"]
+	var next: String = entry["next"]
+	if previous.is_empty():
+		_hex_head = next
+	else:
+		_hex_results[previous]["next"] = next
+	if next.is_empty():
+		_hex_tail = previous
+	else:
+		_hex_results[next]["prev"] = previous
+	entry["prev"] = ""
+	entry["next"] = ""
+
+
+func _append_hex_entry(key: String) -> void:
+	_hex_results[key]["prev"] = _hex_tail
+	if _hex_tail.is_empty():
+		_hex_head = key
+	else:
+		_hex_results[_hex_tail]["next"] = key
+	_hex_tail = key
 
 func set_debug_profiling_enabled(enabled: bool) -> void:
 	_profile_enabled = enabled
