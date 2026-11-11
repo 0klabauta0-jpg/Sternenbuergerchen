@@ -134,7 +134,17 @@ Verifier und diese Statusdokumentation.
   die Batch-Kollisionsprüfung angewandt; echte Schiffs-IDs sind gesperrt, bis
   Kartenhindernisse und Ausrüstung angebunden sind. Gezielt 8/8; keine
   spielbare Steuerung oder Abnahme von AP02.
-- AP02/AP03/AP04 Rest und AP05–AP20: offen.
+- AP05 Rottenpanel-Vorstufe: Sternkarte liest den Root-Rottensnapshot und
+  sendet Erstellen, Umbenennen, Zuordnen, Entfernen und Führerwahl über den
+  bestehenden Adapter. Mitglieder und Fehler werden angezeigt; Auswahl ist
+  nur UI-Zustand. Die noch fehlende Speicherung wird im Panel benannt.
+  Panelprüfung8/8, Adapter9/9, bestehende Sternkarten-UI89/89. Kartenwahl,
+  sichtbarer Kampfflug und native Sichtabnahme fehlen; AP05 bleibt offen.
+  Ruling: Panel unter der bestehenden Anflugbedienung angeordnet — erster
+  Einbau oberhalb verschob bestehende Bedienelemente aus dem sichtbaren
+  Bereich; dafür ist die Rottenverwaltung gegebenenfalls durch Scrollen zu
+  erreichen. Native Ergonomie bleibt zu prüfen.
+- AP02/AP03/AP04/AP05 Rest und AP06–AP20: offen.
 
 ## Risiken / offene Punkte
 

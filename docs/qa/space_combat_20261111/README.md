@@ -14,6 +14,9 @@ Läufen mit privatem APPDATA; keine echten Spielerprofile wurden verwendet.
 - Isolierter Flugresolver8/8 und Rottenowner19/19; kein fertiger Kampffluss.
 - Fixture-Flug über Root-Physiktakt 8/8; Root-Tick- und Batchregressionen
   ebenfalls erfolgreich. Produktive Schiffe bleiben für diesen Pfad gesperrt.
+- Rottenpanel-Vorstufe 8/8, Adapter 9/9 und Sternkarten-UI 89/89;
+  headless, keine native Sichtabnahme. Erstes Layout verschob vorhandene
+  Aktionen aus dem Fenster; erneute Prüfung nach Umordnung erfolgreich.
 - AP03 Kostenprobe: jeweils25 wiederholte, identische Einzel-Sweeps in einem
   headless Lauf. Einfeldjäger P95 106→93µs, dreizelliger Rumpf 833→442µs
   nach geometrischer Kandidatenbegrenzung; Dateien `space_sweep_cost_before.log`
