@@ -11,6 +11,12 @@ Alle Pakete offen; bestehende Taskprioritäten bleiben unverändert.
 [Umsetzungsplan](superpowers/plans/2026-11-11-space-combat.md) ·
 [Task](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
 Bewusst native Taskbasis84dd481b1, keine Main-/Release-/Performancefreigabe.
+### AP6 erster Lifecyclebaustein — 11.11.2026
+
+Vollständige begrenzte Gruppenplatzierung und Root-Primitive für tatsächliche
+Missionsactors geprüft; keine gestaffelte Adapteraktivierung. Nächster Schritt:
+Groundvormerkungen für Aussteigephasen, Setup und Basisaktionen; dann AP7/8.
+Große Abnahme/AP9 und Produktionskartenaktivierung bleiben später.
 
 ### Hex-Korridorcache vollständig angebunden — 11.11.2026
 

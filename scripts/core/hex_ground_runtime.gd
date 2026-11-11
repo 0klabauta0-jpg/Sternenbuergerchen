@@ -61,10 +61,10 @@ func admit_units(placements: Array[Dictionary]) -> Dictionary:
 			return _reject("invalid_posture", unit_id)
 		if _occupant_by_grid.has(grid) or staged_cells.has(grid):
 			return _reject("cell_occupied", unit_id)
-		if _cell_has_future_claim(grid):
-			return _reject("cell_reserved",unit_id)
 		if not bool(_registry.call("is_walkable", grid)):
 			return _reject("cell_unwalkable", unit_id)
+		var tile=_registry.call("get_tile_at_grid",grid)
+		if tile==null or not tile.is_valid():return _reject("invalid_admission_tile",unit_id)
 		var stand_height: float = float(_registry.call("get_stand_height_at", grid))
 		if not is_finite(stand_height):
 			return _reject("invalid_stand_height", unit_id)
@@ -75,6 +75,10 @@ func admit_units(placements: Array[Dictionary]) -> Dictionary:
 		}
 		staged_cells[grid] = unit_id
 	if not staged_units.is_empty():
+		# A vacated endpoint remains locked until the whole crossing ends. Closed
+		# corridor cohorts also protect cells beyond the three promised steps.
+		var claims:Dictionary=can_block_cells(staged_cells.keys())
+		if not claims.ok or not claims.can_block:return _reject("cell_reserved")
 		_units_by_id.merge(staged_units)
 		_occupant_by_grid.merge(staged_cells)
 		_revision += 1

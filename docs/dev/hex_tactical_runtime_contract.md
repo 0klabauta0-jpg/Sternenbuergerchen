@@ -351,3 +351,35 @@ Rootqueuefälle: Gegenaufträge, Priorität, frühe Freigabe vor Fernziel, Navbu
 Terraininvalidierung, Hold und fehlende Bay. Keine globale Deadlockfreiheit oder
 optimale Mehragentenplanung behauptet. AP7 muss Recoverysemantik einschließlich
 beobachteter Passage/Wartealter sichern; Pfad-/Timing-/Watcherindizes nicht speichern.
+
+## AP6 Gruppenplatzierung und registrierte Missionsactors
+
+`HexGroundAdmission.plan_group` plant ohne Gameplaymutation maximal64 Personen
+mit höchstens64 expandierten Feldern. Die Reihenfolge des Transport-/Rosterowners
+bleibt erhalten. Erst bei ausreichend erreichbaren Feldern liefert der Helper
+die vollständige Gruppe; sonst warten alle IDs ohne Teilplatzierung. Ein belegter
+oder beanspruchter Anker wird nicht übersprungen. Registry-Nachbarn benutzen den
+kanonischen beidseitigen Rampenkern; gesperrte Felder werden nicht durchquert.
+
+`Root.admit_hex_ground_actor_group` validiert vor dem Write sämtliche registrierten
+Missionsactors und ihre ID/Commandfähigkeit. Root, Registry und Actors gehören zur
+selben Missionsszene; der globale SceneTree ist keine solche Scopebindung. Zwei
+Orte dürfen dieselbe Personen-ID nur mit ihren eigenen Lookup-/Actorprojektionen
+führen; ein fremder tatsächlicher Actor darf nicht zur zweiten Groundfigur werden.
+Ein bestehender lebender Lookup wird im Hexpfad nicht durch einen anderen Actor
+überschrieben. Dauerhafte Basisprojektionen benutzen diese Missions-API nicht.
+
+Erst nach vollständigem Groundcommit werden Embarkedmetadaten, Transform und
+Sichtbarkeit publiziert. `embark_hex_ground_actor_group` räumt Ground, Moveabsicht
+und ausstehende Movecommands, erhält aber die tatsächliche Actoridentität in der
+Registry. `unregister_known_unit` gibt vor Entfernen des Lookups Ground frei;
+Wiederholung ändert keine Feldbelegung. Verwundung allein entfernt keinen NPC.
+
+Auch die interne Placement-API prüft jetzt beide Endpunkte laufender Kanten und
+vollständige aktive Passagegrants. Das nach Handoff freigewordene Quellfeld kann
+dadurch nicht während der restlichen Überquerung neu besetzt werden.
+
+Diese Primitive schalten bestehende Setup-/Transportadapter noch nicht um. Die
+gestaffelten Aussteigephasen benötigen zuerst verbindliche Groundvormerkungen
+für die gesamte Gruppe; Basisankunft und Anwesenheit folgen im nächsten AP6-Teil.
+Kleine Prüfungen sind keine Produktionskarten-, Native- oder Performancefreigabe.

@@ -1218,6 +1218,7 @@ var _hex_movement_runtime=HEX_MOVEMENT_RUNTIME_SCRIPT.new()
 var _hex_visual_unit_ids:Dictionary={}
 var _hex_projection_terrain_revision:=-1
 var _hex_boundary_facing:Dictionary={}
+const HEX_ADMISSION_SCRIPT=preload("res://scripts/mission/hex_ground_admission.gd")
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -1461,6 +1462,56 @@ func release_hex_ground_unit(unit_id: String, reason: String) -> void:
 	_hex_movement_runtime.release_unit(unit_id)
 	_hex_ground_runtime.release_unit(unit_id, reason)
 	_hex_facing_pending.erase(unit_id)
+
+
+## Synchronous internal lifecycle boundary. These are actual registered mission
+## actors, not base personnel projections or caller-supplied actor references.
+func _validate_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
+	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	if unit_ids.is_empty() or unit_ids.size()>64:return {"ok":false,"reason":"invalid_admission_group"}
+	var registry=get_unit_registry()
+	if registry==null or not registry.has_method("get_unit"):return {"ok":false,"reason":"unit_registry_unavailable"}
+	var scope:Node=get_parent()
+	if scope==null or scope==get_tree().root or not scope.is_ancestor_of(registry):return {"ok":false,"reason":"invalid_mission_scope"}
+	var actors:Dictionary={}
+	for id in unit_ids:
+		if id.is_empty() or id!=id.strip_edges() or actors.has(id):return {"ok":false,"reason":"invalid_admission_unit"}
+		var actor=registry.call("get_unit",id)
+		if not is_instance_valid(actor) or not actor is Node2D or not scope.is_ancestor_of(actor) or _resolve_known_unit_for_contract(id)!=actor:return {"ok":false,"reason":"mission_actor_unavailable","unit_id":id}
+		if not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=id or not actor.has_method("assign_unit_command") or not actor.has_method("get_current_unit_command"):return {"ok":false,"reason":"invalid_mission_actor","unit_id":id}
+		actors[id]=actor
+	return {"ok":true,"actors":actors}
+
+
+func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2i)->Dictionary:
+	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
+	if not checked.ok:return checked
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor_grid,_hex_ground_registry,_hex_ground_runtime.build_planning_snapshot())
+	if not plan.ok:return plan
+	var placements:Array[Dictionary]=[]
+	placements.assign(plan.placements)
+	var result:Dictionary=_hex_ground_runtime.admit_units(placements)
+	if not result.ok:return result
+	# Complete the model before publishing any transform/visibility change.
+	for id in unit_ids:
+		checked.actors[id].set_meta("dropship_embarked",false)
+		_hex_visual_unit_ids[id]=true
+	_project_hex_ground_actors(0.0)
+	for id in unit_ids:checked.actors[id].visible=true
+	result.placements=plan.placements
+	return result
+
+
+func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
+	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
+	if not checked.ok:return checked
+	for id in unit_ids:
+		_discard_pending_move_commands_for_unit(id)
+		release_hex_ground_unit(id,"embarked")
+	for id in unit_ids:checked.actors[id].set_meta("dropship_embarked",true)
+	for id in unit_ids:checked.actors[id].visible=false
+	return {"ok":true,"embarked_unit_ids":unit_ids.duplicate()}
 
 
 ## Internal runtime intents, never accepted as client/UI-provided facing state.
@@ -1876,6 +1927,13 @@ func get_last_damage_effect_resolution() -> Dictionary:
 func register_known_unit(unit_id: String, unit: Node) -> bool:
 	if unit_id.is_empty() or unit == null:
 		return false
+	if is_hex_ground_runtime_active():
+		var registry=get_unit_registry()
+		var registered=registry.call("get_unit",unit_id) if registry!=null and registry.has_method("get_unit") else null
+		if is_instance_valid(registered) and registered!=unit:return false
+		var previous=_known_units_by_id.get(unit_id,null)
+		if is_instance_valid(previous) and previous!=unit:return false
+		if unit.has_method("get_unit_id") and String(unit.call("get_unit_id"))!=unit_id:return false
 
 	_known_units_by_id[unit_id] = unit
 	if is_hex_ground_runtime_active() and _hex_ground_runtime.has_unit(unit_id):
@@ -1886,6 +1944,7 @@ func register_known_unit(unit_id: String, unit: Node) -> bool:
 
 func unregister_known_unit(unit_id: String) -> void:
 	_discard_pending_move_commands_for_unit(unit_id)
+	if is_hex_ground_runtime_active():release_hex_ground_unit(unit_id,"unregistered")
 	_known_units_by_id.erase(unit_id)
 	_latest_command_token_by_unit_id.erase(unit_id)
 	_committed_command_token_by_unit_id.erase(unit_id)
