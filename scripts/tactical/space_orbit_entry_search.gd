@@ -33,6 +33,9 @@ func begin(body_id: String, requests: Array[Dictionary], occupancy: RefCounted) 
 			seen[offset] = true
 		var snapshot: Dictionary = flight.get_snapshot()
 		if not seen.has(Vector2i.ZERO) or snapshot.get("craft_id") != id or typeof(snapshot.get("revision")) != TYPE_INT: return {"ok":false, "reason":"invalid_request"}
+		if request.has("entry_heading"):
+			if typeof(request.entry_heading) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(request.entry_heading)): return {"ok":false, "reason":"invalid_request"}
+			snapshot["heading_rad"] = float(request.entry_heading)
 		checked[id] = {"flight":flight, "snapshot":snapshot.duplicate(true), "footprint":footprint.duplicate()}
 	_layout = layout
 	_occupancy = occupancy

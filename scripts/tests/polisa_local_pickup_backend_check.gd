@@ -6,10 +6,11 @@ const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 class Controller extends Node:
 	var pilot_ready := false
 	func _is_parked_campaign_dropship(_id: String) -> bool: return true
-	func get_campaign_pilot_flight_guard(_id: String) -> Dictionary: return {"ok":pilot_ready,"reason":"pilot_not_aboard"}
+	func get_campaign_pilot_flight_guard(_id: String) -> Dictionary: return {"ok":pilot_ready,"reason":"pilot_not_aboard", "pilot_unit_id":"pilot" if pilot_ready else ""}
 class SetupFlow extends Node:
 	var _homebase_aircraft_definitions: Array = [{"craft_id":"visitor","craft_type":"dropship","model_id":"cutlass"}]
 	var _aircraft_location_by_craft := {"visitor":"mission"}
+	var _assigned_aircraft_pilot_by_craft := {}
 	var _all_team_units: Array = []
 	var _selected_mission_id := ""
 	var _last_mission_result := {}
@@ -161,13 +162,15 @@ func run() -> void:
 	check(not adapter.preview_return(id).ok and fingerprint(adapter, flow) == before_preview, "Unmanned return preview rejects without mutation")
 	check(not adapter.authorize_return(id).ok,"Unmanned local craft cannot authorize return")
 	controller.pilot_ready = true
+	flow._assigned_aircraft_pilot_by_craft[id] = "pilot"
 	check(adapter.preview_return(id).ok and fingerprint(adapter, flow) == before_preview, "Boarded pilot preview does not debit fuel or mutate visit")
 	var fuel_before: float = adapter._supply.get_supply_snapshot().fuel_by_craft_id[id]
-	check(adapter.authorize_return(id,"first-return").ok and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Real local-origin return uses existing Polisa fuel route")
+	check(adapter._simulation.configure_departure_adapter(adapter).ok, "Station return binds the actual runtime adapter")
+	check(adapter.authorize_return(id,"first-return").get("deferred",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before,"Station return previews fuel without charging early")
+	check(adapter.enter_space_orbit(id).ok and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "Boarded Polisa departure charges once and creates the flying wing")
 	check(adapter.authorize_return(id,"second-return").get("replayed",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Local purchase return debit is once regardless UI request IDs")
 	check(adapter._supply.export_state().requests.has("return:local-purchase:local-buy:fuel"),"Return receipt is anchored to actual local purchase, never a fake outbound")
-	var travel_cmd := {"contract_category":"singleplayer_space_travel","operation":"enter_orbit","payload":{"craft_id":id},"request_id":"exit"}
-	check(adapter._travel.apply_command(travel_cmd,{"runtime_authorized":true}).ok and adapter._travel.get_snapshot(id).orbit_id == "polisa_orbit", "Station-born craft enters its real Polisa body orbit")
+	check(adapter._travel.get_snapshot(id).orbit_id == "polisa_orbit", "Station-born craft enters its real Polisa body orbit")
 	var trusted := {"runtime_authorized":true}
 	adapter._travel.apply_command({"contract_category":"singleplayer_space_travel","operation":"start_quantum","payload":{"craft_id":id,"target_orbit_id":"moon_orbit"},"request_id":"home-jump"},trusted)
 	adapter._travel.apply_command({"contract_category":"singleplayer_space_travel","operation":"advance","payload":{"craft_id":id,"delta_seconds":3.0},"request_id":""},trusted)

@@ -8,6 +8,10 @@ const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 class FlowFixture extends Node:
 	var _assigned_aircraft_pilot_by_craft := {"ship":"pilot"}
 	var _last_mission_result := {}
+	var _selected_mission_id := ""
+	var home_landings := 0
+	func _find_homebase_aircraft_definition(id: String) -> Dictionary: return {"craft_id":id}
+	func _finish_space_home_landing(_id: String) -> void: home_landings += 1
 class PilotFixture extends Node:
 	var aboard := true
 	func is_pilot_aboard(_id: String) -> bool: return aboard
@@ -20,6 +24,7 @@ func _initialize() -> void:
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = ADAPTER.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._space_route_requested = true
+	adapter._pad_by_craft["ship"] = "homebase_pad_01"
 	assert(sim.configure_departure_adapter(adapter).ok)
 	assert(_arrive(sim, adapter))
 	var flight = fleet.get_flight_state("ship")
@@ -38,8 +43,34 @@ func _initialize() -> void:
 	sim.tick_counter = flight.get_snapshot().tick
 	assert(_arrive(sim, adapter))
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().space_area_id == "orbit_approach:moon" and flight.get_snapshot().motion_mode == "tactical")
+	assert(is_zero_approx(flight.get_snapshot().heading_rad))
 	for cell: Vector2i in sim.get("_space_combat_state").get_indexed_actor_cells("ship"): assert(LAYOUT.ENTRY_BAND.has_point(GRID.to_offset(cell)))
 	assert(sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer") == wing)
+	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home-too-early").get("reason") == "not_at_home_gate")
+	var state = sim.get("_space_combat_state")
+	var layout: Dictionary = LAYOUT.build("moon")
+	var body := {}; var gates := {}
+	for cell in layout.body_cells: body[cell] = true
+	for cell in layout.gate_cells: gates[cell] = true
+	var target := Vector2.INF
+	for offset in layout.gate_cells:
+		var point: Vector2 = GRID.HEX.axial_to_plane(Vector2(GRID.from_offset(offset)))
+		var cells: Array[Vector2i] = state.preview_actor_cells("ship", {"position_plane":point})
+		var valid := not cells.is_empty(); var at_gate := false
+		for cell in cells:
+			if body.has(GRID.to_offset(cell)): valid = false
+			if gates.has(GRID.to_offset(cell)): at_gate = true
+		if valid and at_gate: target = point; break
+	assert(target.is_finite())
+	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "position_plane":target, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}, flight.get_snapshot().tick + 1).ok)
+	assert(state.update_actor_cell("ship", GRID.HEX.round_axial(GRID.HEX.plane_to_axial(target))))
+	sim.tick_counter = flight.get_snapshot().tick
+	pilot.aboard = false
+	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home-no-pilot").get("reason") == "pilot_not_aboard")
+	pilot.aboard = true
+	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home").ok)
+	assert(fleet.get_craft_snapshot("ship").phase == "grounded" and flight.get_snapshot().motion_mode == "grounded" and sim.get_space_actor("ship") == null and flow.home_landings == 1)
+	assert(adapter._request_space_operation("space_land_homebase", {"craft_id":"ship"}, "home").replayed and flow.home_landings == 1)
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("SPACE_WARP_PRODUCT_CYCLE passed")
 	quit(0)

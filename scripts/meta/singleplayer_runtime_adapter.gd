@@ -609,6 +609,8 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
 	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface":
 		return _simulation.preview_singleplayer_local_return_fuel(self, craft_id)
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
+		return _simulation.preview_singleplayer_local_return_fuel(self, craft_id)
 	# One return per accepted outward trip, regardless of whether the request
 	# came from a UI retry, automatic debrief, or the transport hook itself.
 	# Owner replay occurs before fuel validation, so a repeated success remains
@@ -807,16 +809,19 @@ func validate_space_launch(craft_id: String, observe_progress: bool = true) -> D
 	return {"ok": true}
 
 func launch_to_moon_orbit(craft_id: String) -> Dictionary:
-	var gate := validate_space_launch(craft_id)
-	if not gate.get("ok", false):
-		return gate
-	var result := _commit("singleplayer_space_travel", "launch_to_orbit", {"craft_id": craft_id}, _request_id("orbit-launch", {}), {"runtime_authorized": true})
+	var request_id := _request_id("orbit-launch", {})
+	var result: Dictionary = _simulation.commit_singleplayer_space_launch(self, craft_id, request_id)
 	if result.get("ok", false):
 		_flow.get("_aircraft_location_by_craft")[craft_id] = "starmap"
 		# Publish the lifecycle change before any stale preparation callback can
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
+		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		return result.travel_result
 	return result
+
+func _publish_space_launch_event(request_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_space_launch_event(self, request_id)
 
 func finish_space_approach(craft_id: String) -> Dictionary:
 	return _commit("singleplayer_space_travel", "finish_approach", {"craft_id": craft_id}, _request_id("approach-finish", {}), {"runtime_authorized": true})
@@ -827,7 +832,32 @@ func enter_space_orbit(craft_id: String) -> Dictionary:
 		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
 		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
 		return result
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
+		var request_id := _request_id("station-orbit", {})
+		var result: Dictionary = _simulation.commit_singleplayer_station_orbit(self, craft_id, request_id)
+		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		return result.travel_result if result.get("ok", false) else result
 	return _commit("singleplayer_space_travel", "enter_orbit", {"craft_id": craft_id}, _request_id("orbit-return", {}), {"runtime_authorized": true})
+
+func preview_station_orbit_departure(craft_id: String) -> Dictionary:
+	var visit: Dictionary = preview_return(craft_id)
+	if not visit.get("ok", false): return visit
+	if visit.route.get("origin_location_id") != "polisa": return _reject("station_visit_required", "Schiff ist nicht bei Polisa")
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+	if controller == null or not controller.has_method("get_campaign_pilot_flight_guard"): return _reject("pilot_presence_unknown", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilot: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
+	if not pilot.get("ok", false): return pilot
+	var pilot_id := String(pilot.get("pilot_unit_id", ""))
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if pilot_id.is_empty() or typeof(pilots) != TYPE_DICTIONARY: return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var actual: Dictionary = pilots.duplicate(true); actual[craft_id] = pilot_id
+	return {"ok":true, "owned_crafts":Dictionary(_travel.get_snapshot().routes).keys(), "craft_pilots":actual, "route":visit.route.duplicate(true), "outward_token":visit.outward_token}
+
+func preview_space_home_landing(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_flow) or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	if _home_pad_for(craft_id).is_empty() or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty(): return _reject("pad_unavailable", "Heimatpad ist nicht verfuegbar")
+	return {"ok":true}
 
 func preview_local_surface_return(craft_id: String) -> Dictionary:
 	var preview: Dictionary = preview_return(craft_id)
@@ -927,6 +957,18 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 				_flow.call("_begin_space_approach", craft_id, departure.departure)
 		return result
 	if operation == "space_land_homebase":
+		var flight: RefCounted = _travel.get_flight_state(craft_id)
+		if flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
+			var landing: Dictionary = _simulation.commit_singleplayer_home_landing(self, craft_id, owner_request_id)
+			if not landing.get("ok", false): return landing
+			var landing_result: Dictionary = landing.travel_result.duplicate(true)
+			if landing.get("replayed", false): landing_result["replayed"] = true
+			_remember_space_operation(request_id, signature, landing_result)
+			if not landing.get("replayed", false):
+				_space_route_requested = false
+				_flow.call("_finish_space_home_landing", craft_id)
+				call_deferred("_publish_space_launch_event", String(landing.receipt_id))
+			return landing_result
 		var result := _commit("singleplayer_space_travel", "land_homebase", {"craft_id": craft_id}, owner_request_id, {"runtime_authorized": true})
 		_remember_space_operation(request_id, signature, result)
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
