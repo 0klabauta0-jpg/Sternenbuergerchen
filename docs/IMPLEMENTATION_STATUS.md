@@ -13,8 +13,11 @@ Orbit: vorbereitete Wirtschaft und produktive Abflug-/Anflug-/Rueckkehr-/
 Abbruch-/Wiederanflugpfade sowie lokaler Warpabflug integriert. Echte kleine
 UI/Adapter/Ownerprobe10/0, manueller Warpownerzyklus bestanden, jeweils mit
 expliziten Grenzen in docs/qa/orbit_owner_integration_20261111. Automatischer
-lokaler Warptick, fruehe Pflichtrotte, Heimatlandung und getrennter Polisa-Dockpfad
-sind weitere Aktivierungsgrenzen im Weltraumkampf-Chat. Katalog-/UI-V3-Bereitschaft
+lokaler Warptick bleibt standardmaessig ausgeschaltet. Fruehe Pflichtrotte und
+Heimatlandung bis605/ed/a9 integriert, drei private Lifecycleproben bestanden;
+Retry-/Gatefix61af7ec9a als8d50f8172 mit zwei frischen Ownerproben integriert.
+Lokaler getrennter Polisa-Dockpfad und gepaarter regulaerer Besucherprofilproducer
+bleiben Aktivierungsgrenzen. Katalog-/UI-V3-Bereitschaft
 6c899fe77 vorhanden; LiveJSON bleibtV2. Keine behauptete native Gesamtabnahme.
 
 Kein Mainrelease, keine EXE. Vor jedem EXE-Build ausdruecklich den Nutzer fragen.

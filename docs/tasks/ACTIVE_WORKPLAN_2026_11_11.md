@@ -32,6 +32,8 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
 - AP8 danach: kleiner opt-in Integrationsslice gemaess Hexplan, keine globale
   Aktivierung der grossen A/B/C-Karten. AP6 bis AP8 sind NICHT abgeschlossen.
+  Teilfixtureae1b543f7 verbindet auf12Hexes echte Bewegung/Rampe/Tuer/Sicht/
+  Schusspruefung/Ankunft,8/0; AP7Restore fehlt, daher ausdruecklich full_ap8=false.
 
 Belege: docs/qa/tabletop_restplan_integration_20261111; aktueller Hexplan
 unter docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md.
@@ -62,7 +64,8 @@ lokaler Planet -> Warp -> manuelle Mondankunft bestanden, enger Review geschloss
 Fruehe Pflichtrotte, ausdrueckliche Heimatlandung und strategischer Polisa-
 Stationsstart bisSource605/ed/a9 sind als9c293ac8d integriert; drei frische private
 Lifecycleproben samt Guards bestanden. Automatischer lokaler Warptick ist als
-standardmaessig ausgeschaltete Vorstufe vorhanden; Retryfix61af7ec9a im Review.
+standardmaessig ausgeschaltete Vorstufe vorhanden; Retryfix61af7ec9a als8d50f8172
+integriert, frische private Entry-/Gatezyklusproben samt Guards bestanden.
 Noch offen: gemeinsame Aktivierung, lokaler getrennter Stationsdockpfad sowie
 abgestimmter Live-V3-/Einmarkerwechsel. Polisa-Profilhook244a7354a verlangt noch
 den AP6c-Bindungsproducer regulaerer Besucher auch fuer bisherige Kaufwege.
