@@ -28,6 +28,11 @@ var _research_snapshot_revision := -1
 var _station_purchase_cache_revision := -1
 var _station_purchase_cache: Dictionary = {}
 var _revision: int = 0
+# Opt-in in-process capability for the UNWIRED prepared departure seam.
+var _route_prepare_authority: WeakRef
+var _route_prepare_bound := false
+var _route_prepare_epoch := 0
+var _route_prepare_seal_key := ""
 
 func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH)) if definitions.is_empty() else definitions
@@ -44,6 +49,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	for cost in Dictionary(data.get("route_fuel_costs", {})).values():
 		if not _valid_nonnegative_number(cost):
 			return _reject("invalid_supply_data", "Routenkosten ungueltig")
+	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
 	_credits = int(data.initial_credits)
@@ -322,6 +328,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if typeof(resources)!=TYPE_DICTIONARY: return _reject("invalid_resources","Ortsressourcen ungueltig")
 	for place in resources:
 		if not fresh._location_resources.has(place) or typeof(resources[place])!=TYPE_DICTIONARY or not fresh._location_resources[place].restore_state(resources[place]): return _reject("invalid_resources","Ortsressourcen ungueltig")
+	_reset_route_fuel_preparation()
 	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
@@ -825,3 +832,101 @@ func get_station_ship_purchase(craft_id: String) -> Dictionary:
 		_station_purchase_cache = validated.get("ships", {}) if validated.get("ok", false) else {}
 		_station_purchase_cache_revision = _revision
 	return Dictionary(_station_purchase_cache.get(craft_id, {})).duplicate(true)
+
+
+func _reset_route_fuel_preparation() -> void:
+	_route_prepare_authority = null
+	_route_prepare_bound = false
+	_route_prepare_epoch += 1
+	_route_prepare_seal_key = ""
+
+func bind_route_fuel_preparation_authority(authority: Object) -> bool:
+	if not is_instance_valid(authority): return false
+	if _route_prepare_bound:
+		return _route_prepare_authority != null and _route_prepare_authority.get_ref() == authority
+	_route_prepare_authority = weakref(authority)
+	_route_prepare_bound = true
+	# No global RNG use: authority object identity is the access capability;
+	# this private per-binding seal only protects prepared data from alteration.
+	_route_prepare_seal_key = "%s:%s:%s" % [get_instance_id(), _route_prepare_epoch, Time.get_ticks_usec()]
+	return true
+
+func _has_route_fuel_authority(authority: Variant) -> bool:
+	return typeof(authority) == TYPE_OBJECT and is_instance_valid(authority) and _route_prepare_bound and _route_prepare_authority != null and _route_prepare_authority.get_ref() == authority
+
+func _route_fuel_input_fingerprint(command: Dictionary, flags: Dictionary) -> String:
+	var payload: Dictionary = command.payload
+	var craft_id := String(payload.get("craft_id", ""))
+	var route := String(payload.get("origin_location_id", "")) + ">" + String(payload.get("destination_location_id", ""))
+	var reverse := String(payload.get("destination_location_id", "")) + ">" + String(payload.get("origin_location_id", ""))
+	var routes: Dictionary = _definitions.get("route_fuel_costs", {})
+	var request_id := String(command.request_id).strip_edges()
+	var inputs := {"revision":_revision,"bind_epoch":_route_prepare_epoch,
+		"craft_id":craft_id,"fuel_present":_fuel_by_craft_id.has(craft_id),"fuel":_fuel_by_craft_id.get(craft_id),
+		"route":route,"route_present":routes.has(route),"route_cost":routes.get(route),
+		"reserve_required":bool(flags.require_return_reserve),
+		"request_id":request_id,"receipt_present":_requests.has(request_id),"receipt":_requests.get(request_id)}
+	if bool(flags.require_return_reserve):
+		inputs.merge({"reverse_route":reverse,"reverse_present":routes.has(reverse),"reverse_cost":routes.get(reverse)})
+	# O(1) selected inputs: unrelated receipts, craft registrations, offers and
+	# inventory configuration are not consumed by preview_route_fuel.
+	return JSON.stringify(inputs, "", true).sha256_text()
+
+func _sign_prepared_route_fuel(candidate: Dictionary) -> String:
+	var content := candidate.duplicate(true)
+	content.erase("seal")
+	return (_route_prepare_seal_key + JSON.stringify(content, "", true)).sha256_text()
+
+func prepare_route_fuel(command: Dictionary, trusted_context: Dictionary = {}) -> Dictionary:
+	if not _has_route_fuel_authority(trusted_context.get("route_fuel_authority")):
+		return _reject("route_preparation_authority_required", "Routenvorbereitung benötigt gebundene Laufzeitberechtigung")
+	if not COMMANDS.validate_command(command) or _definitions.is_empty() or String(command.get("operation", "")) != "consume_route_fuel": return _reject("invalid_command", "Nur Routentreibstoff kann vorbereitet werden")
+	var request_id := String(command.request_id).strip_edges()
+	var signature := JSON.stringify({"operation":command.operation,"payload":command.payload}, "", true)
+	var mode := "apply"
+	var result := {}
+	if _requests.has(request_id):
+		if String(_requests[request_id].signature) != signature: return _reject("request_id_conflict", "Anfrage-ID bereits anders verwendet")
+		mode = "replay"
+		result = Dictionary(_requests[request_id].result).duplicate(true)
+		result["replayed"] = true
+	var flags := {"departure_authorized":typeof(trusted_context.get("departure_authorized")) == TYPE_BOOL and trusted_context.get("departure_authorized") == true, "require_return_reserve":typeof(trusted_context.get("require_return_reserve", false)) == TYPE_BOOL and trusted_context.get("require_return_reserve", false) == true}
+	if mode == "apply":
+		if typeof(trusted_context.get("departure_authorized")) != TYPE_BOOL or typeof(trusted_context.get("require_return_reserve", false)) != TYPE_BOOL: return _reject("invalid_route_context", "Routenberechtigung ungültig")
+		result = preview_route_fuel(command.payload, flags)
+		if not result.get("ok", false): return result
+		result["request_id"] = request_id
+		result["operation"] = "consume_route_fuel"
+	var candidate := {"ok":true,"candidate_schema":1,"owner_id":get_instance_id(),"bind_epoch":_route_prepare_epoch,"expected_revision":_revision,"input_fingerprint":_route_fuel_input_fingerprint(command, flags),"command":command.duplicate(true),"flags":flags,"mode":mode,"result":result.duplicate(true)}
+	if mode == "apply": candidate["fuel_after"] = maxf(float(_fuel_by_craft_id[String(command.payload.get("craft_id", ""))]) - float(result.fuel_cost), 0.0)
+	candidate["seal"] = _sign_prepared_route_fuel(candidate)
+	return candidate
+
+func validate_prepared_route_fuel(candidate: Dictionary, authority: Object) -> Dictionary:
+	if not _has_route_fuel_authority(authority): return _reject("route_preparation_authority_required", "Routenvorbereitung benötigt gebundene Laufzeitberechtigung")
+	if candidate.get("ok") != true or candidate.get("candidate_schema") != 1 or candidate.get("owner_id") != get_instance_id() or candidate.get("bind_epoch") != _route_prepare_epoch or String(candidate.get("seal", "")) != _sign_prepared_route_fuel(candidate): return _reject("invalid_prepared_route", "Routenvorbereitung ungültig")
+	if candidate.get("expected_revision") != _revision or String(candidate.get("input_fingerprint", "")) != _route_fuel_input_fingerprint(candidate.command, candidate.flags): return _reject("stale_prepared_route", "Versorgungsstand hat sich geändert")
+	var cmd: Dictionary = candidate.command
+	var result: Dictionary = Dictionary(candidate.result).duplicate(true)
+	var patch := {"mode":String(candidate.mode),"result":result}
+	if String(candidate.mode) == "apply":
+		patch.merge({"craft_id":String(cmd.payload.get("craft_id", "")),"fuel_after":float(candidate.fuel_after),"request_id":String(cmd.request_id).strip_edges(),"receipt":{"signature":JSON.stringify({"operation":cmd.operation,"payload":cmd.payload}, "", true),"result":result.duplicate(true)}})
+	# Detached validation output is the immutable-by-contract tail input. The
+	# publisher never dereferences caller-mutatable candidate dictionaries.
+	return {"ok":true,"patch":patch}
+
+func commit_prepared_route_fuel(candidate: Dictionary, authority: Object) -> Dictionary:
+	var validation := validate_prepared_route_fuel(candidate, authority)
+	if not validation.get("ok", false): return validation
+	return _publish_prepared_route_fuel(candidate, validation)
+
+func _publish_prepared_route_fuel(_candidate: Dictionary, validation: Dictionary) -> Dictionary:
+	# INTERNAL no-fail tail. Only a synchronous owning coordinator may pass a
+	# fresh successful validation after checking ALL participating owners. No
+	# intervening writes/reentry/await are permitted. Public callers use commit.
+	var patch: Dictionary = validation.patch
+	if String(patch.mode) == "apply":
+		_fuel_by_craft_id[String(patch.craft_id)] = float(patch.fuel_after)
+		_revision += 1
+		_requests[String(patch.request_id)] = Dictionary(patch.receipt).duplicate(true)
+	return Dictionary(patch.result).duplicate(true)
