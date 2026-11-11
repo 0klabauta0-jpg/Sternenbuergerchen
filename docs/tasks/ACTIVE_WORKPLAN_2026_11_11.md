@@ -54,7 +54,9 @@ Root. Kleine UI-Pruefung10/0 und Compiles0, keine native Gestaltungsabnahme.
 
 Versionierte Katalog-/Darstellungsbereitschaft6c899fe77 gesichert: Produkt- und
 Draftvalidator getrennt, V3 sechs einzelne Koerperorbits einschliesslich Sonne,
-Polisa zusaetzlich als Stationsziel. LiveJSON bleibt V2. Noch offen:
+Polisa zusaetzlich als Stationsziel. Strikter V2/V3-Travelreader0bbcee40b als
+c1a1de786 integriert und frisch privat mit echten Kaltstarts/Negativfaellen
+geprueft; SourceJSON und Spielerprofil unveraendert. LiveJSON bleibt V2.
 Wiederanflug nach Abbruch ist mit Source878801344 plus Mehrschiff-Fix21ec46ff5
 integriert und frisch privat geprueft. Unverdrahteter Warpankunft-Owner8990daabd
 ebenfalls integriert/geprueft; Completionreceipt/Observeraf0bd88f4 als855036033

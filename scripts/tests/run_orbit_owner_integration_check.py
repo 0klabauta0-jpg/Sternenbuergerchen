@@ -18,7 +18,8 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "warp_entry_owner":"scripts/tests/space_warp_entry_owner_verifier.gd",
           "warp_cycle":"scripts/tests/space_warp_product_cycle_verifier.gd",
           "home_launch":"scripts/tests/space_home_launch_wing_verifier.gd",
-          "regular_polisa_pilot":"scripts/tests/polisa_regular_visit_pilot_guard_verifier.gd"}
+          "regular_polisa_pilot":"scripts/tests/polisa_regular_visit_pilot_guard_verifier.gd",
+          "v3_reader":"scripts/tests/space_v3_product_reader_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)
@@ -45,7 +46,11 @@ while pending:
     pending.extend(re.findall(r'extends\s+"res://([^\"]+\.gd)"',code))
 for origin in (source/"data").rglob("*.json"):
     target=project/origin.relative_to(source);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
-(project/"project.godot").write_text('config_version=5\n[application]\nconfig/name='+json.dumps(app)+'\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n',encoding="utf-8")
+project_settings='config_version=5\n[application]\nconfig/name='+json.dumps(app)+'\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n'
+if case == "v3_reader":
+    # Only this newly created private project permits the fixture's catalog writes.
+    project_settings+='[space_reader_probe]\nisolated=true\n'
+(project/"project.godot").write_text(project_settings,encoding="utf-8")
 user=Path(os.environ["APPDATA"])/"Godot/app_userdata"/app
 env=dict(os.environ,SB_REVIEW2_USER_DIR=str(user))
 engine=shutil.which("godot_console.exe")

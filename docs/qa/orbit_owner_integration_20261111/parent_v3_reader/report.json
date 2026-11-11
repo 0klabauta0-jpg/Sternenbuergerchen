@@ -1,0 +1,19 @@
+{
+  "case": "v3_reader",
+  "exit_code": 0,
+  "clean_log": true,
+  "real_profile_unchanged": true,
+  "source_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/space_v3_product_reader_verifier.gd": "592cac925ea0f79a91c90aaa10bad1df80bd4e5905270eadcca634bc8a546803",
+    "scripts/mission/orbit_destination_catalog.gd": "6f4bad23de01208f170bca4ad37b2e58338ed8ea751943345c573e30d133b705",
+    "scripts/mission/orbit_approach_layout.gd": "7532d3088b524837cfd900b411e23542316cf0efdb5b4c9b92bb12b93d90a092",
+    "scripts/core/strategic_hex_grid.gd": "4872952d87ba59ef3a7c49cd44b0220867d4a0985c053c27151457e3cfaecc3c",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/core/singleplayer_space_travel_state.gd": "daef6eb22f90dfc2162af06474b2ba79727e56c7d693d91ccf3d329a563bd5e4",
+    "scripts/core/space_flight_state.gd": "d5dab39870ac4a3288a73a7f82802ccecc61032f118af96e3587553cb6984905",
+    "data/singleplayer/star_system.json": "61001acdcbc044beee59d917554825682ba53b3ce3591fb3aac15e97d2dddf3a"
+  }
+}
