@@ -78,6 +78,7 @@ const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SPACE_NAVIGATION = preload("res://scripts/tactical/space_navigation_resolver.gd")
 const SPACE_FLIGHT_RESOLVER = preload("res://scripts/tactical/space_flight_resolver.gd")
+const SPACE_GUIDANCE_RESOLVER = preload("res://scripts/tactical/space_guidance_resolver.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
@@ -143,6 +144,19 @@ func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictio
 func get_space_flight_status(craft_id: String) -> Dictionary:
 	return _space_combat_state.get_flight_status(craft_id)
 
+func set_space_fixture_goal(craft_id: String, goal: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
+	if authority_context.get("runtime_authorized") != true:
+		return {"ok":false, "reason":"runtime_authority_required"}
+	if not craft_id.begins_with("space_fixture_"):
+		return {"ok":false, "reason":"fixture_only"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null or flight.get_snapshot().motion_mode != "tactical":
+		return {"ok":false, "reason":"not_tactical"}
+	var validation: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(flight.get_snapshot(), goal, hull, power)
+	if not validation.get("ok", false): return validation
+	_space_combat_state.set_flight_control(craft_id, {"goal":goal, "hull":hull, "power":power})
+	return {"ok":true}
+
 func _advance_space_flights(delta: float, tick: int) -> void:
 	var controls: Dictionary = _space_combat_state.get_flight_controls()
 	var ids: Array = controls.keys()
@@ -152,7 +166,14 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 		if flight == null or flight.get_snapshot().motion_mode != "tactical": continue
 		var control: Dictionary = controls[craft_id]
-		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), control.intent, control.hull, control.power, delta)
+		var intent: Dictionary = control.get("intent", {})
+		if control.has("goal"):
+			var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(flight.get_snapshot(), control.goal, control.hull, control.power)
+			if not guidance.get("ok", false):
+				_space_combat_state.set_flight_status(craft_id, guidance)
+				continue
+			intent = guidance.intent
+		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), intent, control.hull, control.power, delta)
 		if not proposal.get("ok", false):
 			_space_combat_state.set_flight_status(craft_id, proposal)
 			continue

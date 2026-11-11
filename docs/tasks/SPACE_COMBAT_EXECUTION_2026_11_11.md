@@ -166,10 +166,21 @@ Verifier und diese Statusdokumentation.
   Flug erreicht sein Ziel mit geringer Geschwindigkeit. Prüfung5/5 sowie
   Flugresolver8/8 und Zielresolver10/10. Keine Kollisionsvermeidung,
   Formationsziele oder Bindung an echte Ausrüstungswerte; nicht im Produktpfad.
+- AP06 Fixture-Integration: Root führt Einzel-Guidance im vorhandenen
+  Physiktakt über die Kollisionsbatchprüfung aus; nur `space_fixture_`-IDs
+  sind zugelassen. 11/11 einschließlich versperrtem Ziel, Flugtakt und
+  Bodenbewegungsverifier ebenfalls erfolgreich. Bei Blockade wird Bewegung
+  konservativ nicht committet; Geschwindigkeit bleibt erhalten, es findet
+  noch keine vorausschauende Bremsung oder Blockadeauflösung statt. Keine
+  Produktfreigabe.
 - AP02/AP03/AP04/AP05/AP06 Rest und AP07–AP20: offen.
 
 ## Risiken / offene Punkte
 
+- Parallelcommit c5e536d0d (Boden-Hexbewegung und Root) als bcd721bac
+  integriert; Konflikt in Statusdoku unter Erhalt beider Einträge aufgelöst.
+  Bodenbewegung und betroffene Raumtakt-/Auftragsprüfungen Exit0, keine
+  vollständige Boden- oder native Sichtabnahme. Paralleler Worktree unverändert.
 - Parallelcommit d539cbe89 (Polisa-Schiffsübernahme und Rückkehr) als
   381f06802 integriert. Backend-, Übergabe-, Weltraumtakt-, echter Szenen-,
   Rottenadapter-, Panel- und Auftragsownercheck jeweils Exit0 ohne Fehler.
