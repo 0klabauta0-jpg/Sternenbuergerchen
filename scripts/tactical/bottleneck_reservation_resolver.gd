@@ -518,6 +518,8 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 		for request in active:
 			var id: String = request.unit_id
 			var earliest: int=now
+			var movement:Dictionary=units[id].get("movement_state",{})
+			if movement.get("phase","")=="centering":earliest=maxi(earliest,int(movement.start_tick)+int(movement.duration_ticks))
 			if not schedules[id].is_empty():
 				var last: Dictionary=schedules[id].back()
 				if last.to_grid!=request.path_grid_points[0]:
@@ -610,6 +612,13 @@ static func _hex_valid_snapshot(snapshot:Dictionary,registry:Node)->bool:
 		if not id is String or id.is_empty() or not snapshot.units_by_id[id] is Dictionary: return false
 		var unit:Dictionary=snapshot.units_by_id[id]
 		if not unit.get("grid") is Vector2i or snapshot.occupant_by_grid.get(unit.grid)!=id: return false
+		if not unit.get("movement_state",{}) is Dictionary:return false
+		var movement:Dictionary=unit.get("movement_state",{})
+		if not movement.get("moving",false) is bool or movement.get("phase","") not in ["","centering"]:return false
+		if movement.get("phase","")=="centering":
+			if not movement.get("start_tick") is int or not movement.get("duration_ticks") is int or not movement.get("moving",false):return false
+			if movement.start_tick<0 or movement.start_tick>snapshot.current_tick or movement.duration_ticks<=0 or movement.duration_ticks>1000000:return false
+			if movement.duration_ticks>1000000000000-movement.start_tick or movement.start_tick+movement.duration_ticks<=snapshot.current_tick:return false
 	for segment in snapshot.committed_segments:
 		if not segment is Dictionary or not snapshot.units_by_id.has(segment.get("unit_id")): return false
 		if not _hex_valid_segment(segment): return false

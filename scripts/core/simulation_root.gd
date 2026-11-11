@@ -393,6 +393,17 @@ func get_hex_ground_events() -> Array[Dictionary]:
 	return _last_hex_ground_events.duplicate(true)
 
 
+func stop_hex_ground_units(unit_ids: PackedStringArray, reason: String) -> Dictionary:
+	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	if int(_hex_ground_runtime.get_current_tick())!=tick_counter:return {"ok":false,"reason":"hex_clock_unsynced"}
+	var result:Dictionary=_hex_ground_runtime.stop_units(unit_ids,reason)
+	if result.ok and not result.events.is_empty():
+		_last_hex_ground_events.append_array(result.events)
+		hex_ground_events_committed.emit(result.events.duplicate(true))
+	return result
+
+
 func _advance_hex_ground_tick() -> void:
 	_last_hex_ground_events.clear()
 	if not is_hex_ground_runtime_active():return

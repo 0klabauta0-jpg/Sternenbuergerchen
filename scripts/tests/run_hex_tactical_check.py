@@ -26,6 +26,8 @@ CASES = {
     "corridors": ("output/native_glut_maps/hex_corridor_cache_20261111/verifier.gd", "HEX_CORRIDOR_CACHE_PASS"),
     "corridor_integration": ("hex_corridor_integration_verifier.gd", "HEX_CORRIDOR_INTEGRATION_PASS"),
     "projection": ("hex_motion_projection_verifier.gd", "HEX_MOTION_PROJECTION_PASS"),
+    "movement_stop": ("hex_movement_stop_verifier.gd", "HEX_MOVEMENT_STOP_PASS"),
+    "locations": ("hex_location_runtime_verifier.gd", "HEX_LOCATION_RUNTIME_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -71,7 +73,7 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case == "security":
