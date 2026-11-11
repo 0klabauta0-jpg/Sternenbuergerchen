@@ -1,0 +1,23 @@
+{
+  "status": "read-only UI contribution; no native layout acceptance",
+  "source_fixture": "output/native_glut_maps/profile_readout_20261111/manifest.json",
+  "normalization": "production source LF, source agent freeze retained",
+  "files": [
+    {
+      "path": "scripts/meta/skirmish_start_configuration.gd",
+      "sha256": "c73e2b9c1e19551526770ec12e2d02fed7f00a3b5b33ae38671b0cf09c663545"
+    },
+    {
+      "path": "scripts/meta/character_sheet_formatter.gd",
+      "sha256": "654ea6f229615ccfad41c5c37d60b0d6ab0faa689aa20172f03d19525373eba4"
+    },
+    {
+      "path": "scripts/meta/character_sheet_view.gd",
+      "sha256": "187eaba522b0f928652925612947623ad10b8bf94499b813cc946c05be43cad7"
+    },
+    {
+      "path": "scripts/tests/skirmish_points_start_test.gd",
+      "sha256": "dabd1302b911ad226ead0b16c482f165cc24eae69f13f6310aeb4b2dab51faf2"
+    }
+  ]
+}

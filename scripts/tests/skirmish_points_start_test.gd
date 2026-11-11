@@ -33,8 +33,8 @@ func _run() -> void:
 	var profile = load("res://scripts/meta/meta_unit_profile_builder.gd").build_from_identity_config(configuration.roster[0])
 	_check(is_equal_approx(profile.skill_values.accuracy, 0.55) and profile.trait_ids.is_empty(),
 		"Paid experience remains exact in effective profile")
-	_check(load("res://scripts/meta/character_sheet_formatter.gd").get_experience_label(profile) == "Mittelerfahren",
-		"Character sheet reads the same experience level")
+	_check(load("res://scripts/meta/character_sheet_formatter.gd").get_experience_label(profile) == "Entspricht Vorlage: Mittelerfahren",
+		"Character sheet discloses exact template equivalence without inventing provenance")
 	var menu: Node = load("res://scenes/ui/main_menu.tscn").instantiate()
 	root.add_child(menu)
 	await process_frame

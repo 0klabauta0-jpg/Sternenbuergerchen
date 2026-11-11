@@ -1,0 +1,65 @@
+{
+  "status": "private child-agent source freeze; no commit or broad acceptance",
+  "checks": 24,
+  "failures": 0,
+  "compile_exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "no_runtime_formula_or_getter_changes": true,
+  "files": [
+    {
+      "path": "scripts/meta/skirmish_start_configuration.gd",
+      "sha256": "c73e2b9c1e19551526770ec12e2d02fed7f00a3b5b33ae38671b0cf09c663545"
+    },
+    {
+      "path": "scripts/meta/character_sheet_formatter.gd",
+      "sha256": "654ea6f229615ccfad41c5c37d60b0d6ab0faa689aa20172f03d19525373eba4"
+    },
+    {
+      "path": "scripts/meta/character_sheet_view.gd",
+      "sha256": "187eaba522b0f928652925612947623ad10b8bf94499b813cc946c05be43cad7"
+    },
+    {
+      "path": "scripts/tests/skirmish_points_start_test.gd",
+      "sha256": "dabd1302b911ad226ead0b16c482f165cc24eae69f13f6310aeb4b2dab51faf2"
+    },
+    {
+      "path": "docs/tasks/PROFILE_READOUT_FOLLOWUP_2026_11_11.md",
+      "sha256": "7347307c74721ee6d3a6fc68ea82548ad50e8a63acac6d1aa19ec0dc3c110935"
+    },
+    {
+      "path": "docs/dev/profile_readout_contract.md",
+      "sha256": "ca6eac0850cf299620a7de72cbbc0b6660a5b513ba1f7b8c3055e162e01dcde9"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/verifier.gd",
+      "sha256": "6d1feab099019c95dcbc3f4dc70a7e16d0514fe5bcb2c0963b8db9fe754cddb5"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/run_private_check.py",
+      "sha256": "9af9c9b7e977593e0d96e8b6d3f31ff291d38abe84b418b4ffdcce1714c22023"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/private_check.log",
+      "sha256": "f3857f07d1b7e3d8a6dba7dc691ea6a4e658eb02ef27200c81bd3d10a6db6fc5"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/README.md",
+      "sha256": "5fa779ec7ef1eab92414b328b8498fc7c919a95a9b1e9e3261fe9be5a47bf132"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/skirmish_start_configuration_compile.log",
+      "sha256": "da76a36a586ec310ae98a6bf8844ab87166457610861a810027a91d273cbb93f"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/character_sheet_formatter_compile.log",
+      "sha256": "da76a36a586ec310ae98a6bf8844ab87166457610861a810027a91d273cbb93f"
+    },
+    {
+      "path": "output/native_glut_maps/profile_readout_20261111/character_sheet_view_compile.log",
+      "sha256": "da76a36a586ec310ae98a6bf8844ab87166457610861a810027a91d273cbb93f"
+    }
+  ]
+}

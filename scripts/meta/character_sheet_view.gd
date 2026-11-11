@@ -176,8 +176,9 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
 	var suitability_host := _overview_section(overview, "EINSATZNIVEAU", "CharacterSuitabilityOverview")
 	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
-	var experience := _overview_label(suitability_host, "PrimarySuitability", CHARACTER_SHEET_FORMATTER_SCRIPT.get_experience_label(profile), 16)
-	experience.tooltip_text = "Einschätzung aus den aktuellen Fähigkeiten. Genaue Werte und Eignungen kannst du unten aufklappen."
+	var experience_readout: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_experience_readout(profile)
+	var experience := _overview_label(suitability_host, "PrimarySuitability", String(experience_readout.label), 16)
+	experience.tooltip_text = String(experience_readout.detail_text)
 	_overview_label(suitability_host, "PrimarySuitabilityReason", String(primary.get("label", "Einsatzprofil")), 13)
 	var social := HBoxContainer.new()
 	social.name = "CharacterTraitsAndRelationships"
@@ -195,6 +196,10 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
+	if not String(experience_readout.effects_text).is_empty():
+		var effects := _overview_label(values, "ProfileContribution", String(experience_readout.effects_text), 13)
+		effects.tooltip_text = String(experience_readout.effects_detail)
+		experience.tooltip_text += "\n\n" + String(experience_readout.effects_text) + "\n" + String(experience_readout.effects_detail)
 	# Leave width for the adjacent portrait, figure and inventory in the shared sheet.
 	var metric_columns: BoxContainer = VBoxContainer.new() if bool(options.get("hide_identity_overview", false)) else HBoxContainer.new()
 	metric_columns.add_theme_constant_override("separation", 10)

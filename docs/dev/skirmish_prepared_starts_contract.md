@@ -79,10 +79,13 @@ Eigenschaftsboni entfallen bei diesen gekauften Personen. Der Sanitätskauf
 enthält das Medictool. Schiffe und Personen werden über die vorhandene
 Startkonfiguration in die autoritativen Runtime-Owner überführt.
 
-Die normale Charakteransicht zeigt das Einsatzniveau in drei Stufen.
-Bei vorhandenen Personen ist diese Anzeige eine Einschätzung aus den
-aktuellen Fähigkeiten. Die genauen Werte und Herleitungen bleiben
-aufklappbar. Diese Darstellung schreibt keine alten Profile um.
+Die normale Charakteransicht bezeichnet nur eine exakte Uebereinstimmung aller
+vier Faehigkeitsgruppen als Entspricht Vorlage: [Stufe]. Angepasste oder andere
+Personen heissen Individuelles Profil; eine Mittelwerteinschaetzung wird nicht
+als Erfahrungsstufe ausgegeben. Das beschreibt aktuelle Werte, keine bewiesene
+Ausbildungs-/Kaufherkunft. Profilwirkung aus derselben bestehenden Ableitung
+bleibt im Werte-Foldout/Tooltip erklaert; Ausruestung, Gelaende und Zustand
+bestimmen zusaetzlich die Laufzeitwirkung. Keine alten Profile werden umgeschrieben.
 
 Die ersten Preise sind ein Balanceentwurf. Die bisher spielbaren Cutlass
 und Buccaneer bilden den ersten kaufbaren Flottenumfang. Der Punkte-Start

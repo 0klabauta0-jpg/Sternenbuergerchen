@@ -92,6 +92,28 @@ func build_experience_patch(unit: Dictionary, experience_id: String) -> Dictiona
 	return {"ok": true, "reason": "", "experience_id": experience_id, "patch": patch}
 
 
+## Read-only value match, never a statement of purchase/training provenance.
+func match_experience_template(unit: Dictionary) -> Dictionary:
+	for experience_id: String in POINTS.EXPERIENCE:
+		var proposal := build_experience_patch(unit, experience_id)
+		var matches := true
+		for group: String in ["skill_values", "communication_values", "behavior_axes", "platform_values"]:
+			var expected: Dictionary = proposal.patch[group]
+			var actual: Variant = unit.get(group)
+			if not actual is Dictionary or actual.size() != expected.size():
+				matches = false
+				break
+			for key: String in expected:
+				var value: Variant = actual.get(key)
+				if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) != float(expected[key]):
+					matches = false
+					break
+			if not matches: break
+		if matches:
+			return {"matches_template": true, "experience_id": experience_id, "label": "Entspricht Vorlage: " + String(POINTS.EXPERIENCE[experience_id].label)}
+	return {"matches_template": false, "experience_id": "", "label": "Individuelles Profil"}
+
+
 func _build_configuration(preset_id: String, preset: Dictionary, bought_people: Array = []) -> Dictionary:
 	var size := int(preset.roster_size)
 	var generated := GENERATOR.generate_start_roster("prepared_skirmish_" + preset_id, maxi(20, size), "skirmish_" + preset_id)
