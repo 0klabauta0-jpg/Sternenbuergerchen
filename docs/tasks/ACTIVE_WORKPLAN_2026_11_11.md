@@ -54,8 +54,11 @@ Wiederanflug nach Abbruch ist mit Source878801344 plus Mehrschiff-Fix21ec46ff5
 integriert und frisch privat geprueft. Unverdrahteter Warpankunft-Owner8990daabd
 ebenfalls integriert/geprueft; Completionreceipt/Observeraf0bd88f4 als855036033
 nach engem Review integriert und privat im gemeinsamen Stand bestanden.
-Noch offen: produktiver lokaler Warp-Eintritt UND sichere Warp-Abreise sowie abgestimmter
-Live-V3-/Einmarkerwechsel. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
+Warpabflug Sourcef311042a0 als7a8129784 integriert, frischer privater Ownerzyklus
+lokaler Planet -> Warp -> manuelle Mondankunft bestanden, enger Review geschlossen.
+Noch offen: automatischer Warptickanschluss, getrennter Polisa-Dockpfad und fruehe
+Pflichtrotte beim Abheben/Stationsstart sowie abgestimmter Live-V3-/Einmarkerwechsel.
+Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
 
 ## Erhaltene weitere Pakete
