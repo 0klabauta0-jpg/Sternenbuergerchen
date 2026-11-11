@@ -151,4 +151,5 @@ docs/qa/warp_drive_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-
 docs/qa/polisa_local_pickup_backend_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/polisa_local_pickup_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 output/native_glut_maps/polisa_local_pickup_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/tabletop_restplan_integration_20261111/actual_move/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_move_commands_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

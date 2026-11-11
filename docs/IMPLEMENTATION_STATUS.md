@@ -12317,3 +12317,19 @@ sind Teilbelege. Vertikalgrenze ausdruecklich explicit_owner_endpoints_not_fligh
 Effectcommit/Heimkehr/SaveContinue/Gefechte/Performance spaeter, kein Main/EXE.
 QA polisa_local_pickup_integration_20261111. Tabletop-Dateibesitz abgestimmt; dessen
 neuer AP5-Commandschritt war zur Abholpruefung noch nicht als Commit uebergeben.
+
+
+## 2026-11-11: fertiges AP5-Commands-/2DActorpaket zusammengefuehrt
+Quellcommit a66b84522 nach unabhaengigem engem Review als c5e536d0d auf dem
+Polisa-Abholstand d539cbe89 integriert. Rootbewegungsadapter besitzt angenommene
+Ziele/inkrementelle Navigation/Dauerprofile/Ankunft; Ground bleibt Zellen-/
+Zusagenowner. Actorprojektion ist stetige2DDarstellung, Capture liest logisches
+Hex. Hold/Wunde/NaN-/Facing-/Pendingcancel-Grenzen und Legacybewegungstrennung
+vorhanden. Einziger Konflikt war .gitattributes-Append; beide Evidenzpfadsaetze
+erhalten, Warp-/Equipment-/ShipPickup-Hooks unveraendert. Frisch ActualMove42/0
+im privaten gemeinsamen Projekt mit Sourceguard/Canary/Nutzerprofil unveraendert;
+Polisa-Return-Ownerprobe18/0 im vereintenRoot, Root/neuerRuntime Compile0. Keine
+wiederholte breite Hexmatrix. Nachweis actual_move unter tabletop_restplan_
+integration_20261111. Produktionskarten bleiben unaktiviert;3DView-/Fireteam-
+ankunft, Tuerguard/MovingShot/Backoff und AP6–8 laufen im Tabletop-Chat weiter.
+Keine neue native Gefechts-/FPS-/Save-/Netzfreigabe, kein Main/EXE.

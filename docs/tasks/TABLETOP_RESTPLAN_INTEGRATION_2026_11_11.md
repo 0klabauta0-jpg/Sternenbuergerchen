@@ -49,3 +49,14 @@ Erneuter Nutzerauftrag: die naechsten fertigen Schritte selbststaendig abstimmen
 Facing/Sicherung b3d5f4b62, AP4-Owner c69269578 mit SparseGrantkorrektur8eabf50cd und vollstaendiger Korridorcache f4353eed4 sind integriert. AP5-Readprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a wurden unabhaengig geprueft und Root/Ground frisch kompiliert. Keine Aktivierung von Actorcommands oder Karten. Enge Integrationsbelege jeweils in docs/qa/tabletop_restplan_integration_20261111.
 
 Neue Nutzeranforderung parallele Ortsansichten abgestimmt: kein Stop/Clear/Configure/Admission durch Ansichtswechsel; Root/Ground/Registry/Actor und Dooroverrideguards bleiben im Tabletop-Chat. Root bearbeitet Flow/Serviceprojektion sowie ausdruecklich freigegebenen Sandbox-homebase-Navigationszweig. Bewegungsabzug pro Schuss wird dort spaeter aus kanonischem Profilbundle abgestimmt, ohne neue Rootformel hier. Grosse Tests weiterhin spaeter.
+
+## Echte AP5-Commands/2DActor und Polisa-Abholung
+Abholpaket d539cbe89 gesichert (eigenes Vertrags-/QA-Paket). Anschliessend fertigen
+Quellcommit a66b84522 nach unabhaengigem Review als c5e536d0d integriert; nur
+additive Evidenzattrs konfliktbehaftet, beide Seiten erhalten. Rootwarphooks
+und freigegebene Ship-/Crewbereiche blieben bestehen. ActualMove42/0 frisch im
+isolierten gemeinsamen Quellstand, Profilguard/Canary/Sourceguard gruen. Eigene
+Polisa-Ownerheimkehr18/0 nach Rootzusammenfuehrung erneut gruen; Root/neuerRuntime
+check-only0. Kleine CapabilityActor-/2D-/Ownernachweise, keine Produktionskarte
+aktiviert. Noch offen:3DView/Fireteamankunft/Tuerguard/MovingShot/Backoff sowie
+AP6–8; grosseTests/Main/EXE weiter spaeter. QA actual_move.

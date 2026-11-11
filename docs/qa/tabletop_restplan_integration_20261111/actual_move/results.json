@@ -1,0 +1,22 @@
+[
+  {
+    "name": "polisa_return",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "POLISA_VERTICAL_ROUTE_RESULT checks=18 failures=0 presence_boundary=real_legacy_effect_committed route_boundary=explicit_owner_endpoints_not_flight_motion"
+    ]
+  },
+  {
+    "name": "root_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  },
+  {
+    "name": "movement_runtime_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  }
+]

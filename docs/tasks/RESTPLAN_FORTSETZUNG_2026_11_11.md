@@ -42,3 +42,9 @@ Flow23/0, Backend43/0; Presencegrenze im Vertikaltest explicit_owner_endpoints_n
 Historische Pilotkarten und fehlender Campaignmarker gezielt korrigiert.
 Grosse native Gesamtabnahme weiter spaeter. Movementquelle arbeitet noch ihre
 engen AP5-Reviewbefunde ab; ohne gesicherten Commit kein fremder WIPimport.
+
+Danach Quellpaket a66b84522 fertig uebergeben, unabhaengig geprueft und als
+c5e536d0d integriert. ActualMove42/0 im gemeinsamen Stand; Polisa-Heimkehrprobe
+18/0 nach Rootintegration und zwei Compilechecks0. Nur Evidenzattrs manuell
+vereinigt, keine Gameplaykonflikte. 3D-/Gruppenankunft und weitere AP5/AP6–8-
+Grenzen bleiben beim Tabletop-Chat; Produktionskarten weiter unaktiviert.
