@@ -60,5 +60,14 @@ func _initialize() -> void:
 			var cells: Array[Vector2i] = [Vector2i(q,r)]
 			if small_space.query_cells(cells).has("small"): small_occupied += 1
 	if small_occupied != 1: failed += 1
-	print("SPACE_COMBAT_AP03 passed=", 11 - failed, " failed=", failed)
+	var far_actors: Array[Dictionary] = [actor("big_far", Vector2i(100,100), [Vector2i.ZERO, Vector2i(1,0)]), actor("neighbor_far", Vector2i(102,100))]
+	var no_moves: Array[Dictionary] = []
+	if not NAV.resolve_motion(far_actors, no_moves, {}).get("ok", false): failed += 1
+	var far_state = STATE.new()
+	for entry in far_actors:
+		var far_flight = FLIGHT.new()
+		far_flight.configure(entry.craft_id, {"position_plane":entry.position_plane, "motion_mode":"tactical"})
+		var far_definition := {"craft_id":entry.craft_id, "faction_id":"enemy", "control_domain":"enemy", "start_hex":GRID.cell_at(entry.position_plane / GRID.EXTENT), "footprint_hexes":entry.footprint_hexes}
+		if not far_state.admit_actor(far_definition, far_flight).get("ok", false): failed += 1
+	print("SPACE_COMBAT_AP03 passed=", 14 - failed, " failed=", failed)
 	quit(1 if failed else 0)

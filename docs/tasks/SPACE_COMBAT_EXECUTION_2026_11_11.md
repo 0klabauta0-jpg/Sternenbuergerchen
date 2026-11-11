@@ -97,7 +97,8 @@ Verifier und diese Statusdokumentation.
   Segment-Supercover erfasst eine getestete exakte Randberührung, Drehbögen
   erhalten eine konservative Krümmungszugabe. Mehrfeldrümpfe werden beim
   Indexieren als gedrehte Hexflächen abgebildet; ein Einfeldjäger behält
-  genau ein Ankerfeld. Elf gezielte Geometriefälle bestanden.
+  genau ein Ankerfeld. Vierzehn gezielte Geometriefälle bestanden,
+  einschließlich benachbarter Rümpfe bei großen Kartenkoordinaten.
   Zeitliche Batchreservierung, Blockadeauflösung und begrenzte Laufzeitkosten
   bleiben offen; allgemeine Geometrie- und Performanceabnahme stehen aus.
 - AP03 Einzelcommit: Root prüft Ziel-Footprint und durchflogenen Korridor
