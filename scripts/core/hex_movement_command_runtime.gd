@@ -260,6 +260,7 @@ func tick(delta:float)->void:
 		return
 	var snapshot:Dictionary=_ground.build_planning_snapshot()
 	var blockers:Dictionary={}
+	for grid in snapshot.get("admission_slots_by_grid",{}):blockers[grid]=true
 	for id in snapshot.units_by_id:
 		if not _orders.has(id) or _orders[id].status in ["arrived","canceled","blocked","waiting_speed","waiting_clearance"]:blockers[snapshot.units_by_id[id].grid]=true
 	var blocker_keys:Array=blockers.keys()

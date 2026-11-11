@@ -163,3 +163,4 @@ docs/qa/orbit_owner_integration_20261111/parent_followup/** -text whitespace=-bl
 docs/qa/hex_backoff_execution_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 
 docs/qa/hex_ground_admission_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_admission_slots_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

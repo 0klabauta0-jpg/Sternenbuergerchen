@@ -33,7 +33,8 @@ func get_unit(unit_id: String) -> Node:
 	if unit_id.is_empty():
 		return null
 
-	return _units_by_id.get(unit_id, null)
+	var unit:Variant=_units_by_id.get(unit_id,null)
+	return unit if is_instance_valid(unit) else null
 
 
 func has_unit(unit_id: String) -> bool:
