@@ -22,8 +22,11 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
 - AP6a Source86347ca54 als69194ddab integriert: vollstaendige begrenzte
   Gruppenplatzierung und Aufnahme/Freigabe echter Missionsactors. Frisch64/0
   inklusive42 Bewegungsgrundfaellen, Quell-/Profil-/Isolationsguards gruen.
-  Tabletop arbeitet an Vormerkungen fuer gestaffelte Ausstiege, produktivem
-  Setup-/Deployadapter und Basisaktionen; dieses WIP noch nicht importiert.
+  AP6b-Gruppenvormerkungen Sourcea74514742 plus Bindungsfix0535b3b2f sind als
+  68ca862aa/0a63027d7 integriert; frische gemeinsame Slotpruefung88/0 mit Guards.
+  Registry-only-Actor ohne Root-Exitbindung wird vor Admission abgewiesen.
+  Tabletop arbeitet jetzt an AP6c-Controllersequenz, produktivem Setup-/
+  Deployadapter und Basisaktionen; dieses WIP noch nicht importiert.
 - AP7 Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
