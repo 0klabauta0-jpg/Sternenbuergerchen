@@ -177,6 +177,14 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- AP04a Saumgate-Vorbereitung: Root-/Adaptergrenze und Mehrhexregel mit dem
+  Orbitchat abgestimmt; Details in `SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`.
+  Raumregistry besitzt pro Bereich monotone Belegungsrevisionen, unveränderte
+  Updates erhöhen sie nicht. Registryprüfung15/15, Rotten- und
+  Ersteintrittsfixture grün; tatsächliche Gatevorschau folgt, keine Freigabe.
+- Parallelcommit 26303641d (Boden-Türguard und Root) als 2a872b762
+  integriert; Türguard, echte und Fake-Orbitfixture sowie Raumtakt gezielt
+  grün. Keine vollständige native oder Boden-/Mehrspielerfreigabe.
 - Parallelcommit 615327eaf (Bewegungsschuss und Root) als 4bf5d3d41
   integriert; Statuskonflikt mit Erhalt beider Einträge gelöst. Bewegungs-
   schuss, Bodenkonsumenten, Rootfixture, Bereichsbatch und Raumtakt geprüft

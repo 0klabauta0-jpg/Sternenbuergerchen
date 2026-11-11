@@ -14,6 +14,12 @@ func get_snapshot() -> Dictionary:
 		wings[id]["active"] = not String(wings[id].leader_craft_id).is_empty()
 	return {"revision": _revision, "wings": wings}
 
+func get_craft_wing(craft_id: String, actor_id: String) -> String:
+	var wing_id: String = String(_craft_wings.get(craft_id, ""))
+	if wing_id.is_empty() or not _wings.has(wing_id) or _wings[wing_id].owner_id != actor_id:
+		return ""
+	return wing_id
+
 func preview_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
 	# The isolated candidate shares no mutable state with the live owner.
 	var candidate = get_script().new()
