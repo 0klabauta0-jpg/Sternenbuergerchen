@@ -282,7 +282,7 @@ func _ready() -> void:
 	_star_map_screen.name = "StarMapScreen"
 	star_layer.add_child(_star_map_screen)
 	_star_map_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"))
+	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"), Callable(self, "_get_star_map_area_projection"))
 	_star_map_screen.hide()
 	_ensure_meta_nav_timer_labels()
 
@@ -7760,6 +7760,13 @@ func _finish_space_approach(craft_id: String = "") -> void:
 		if _active_mission != null: _remember_location(_active_mission)
 		_last_mission_result = previous_result
 		_restore_location_view_context(previous_context, previous_view, _active_mission)
+
+func _get_star_map_area_projection(craft_id: String) -> Dictionary:
+	# Narrow read seam. No Area/Flight lookup or authority is manufactured here.
+	if craft_id.is_empty() or not is_instance_valid(_singleplayer_runtime) or not _singleplayer_runtime.has_method("get_space_area_projection"):
+		return {"ok":false,"reason":"area_projection_unavailable"}
+	var projection: Variant = _singleplayer_runtime.call("get_space_area_projection",craft_id)
+	return projection if projection is Dictionary else {"ok":false,"reason":"invalid_area_projection"}
 
 func _get_star_map_snapshot() -> Dictionary:
 	var result: Dictionary = _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}

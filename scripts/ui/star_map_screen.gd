@@ -1,10 +1,21 @@
 extends PanelContainer
 ## Read-only system map. Requests never move ships or load missions locally.
 const CANVAS = preload("res://scripts/ui/star_map_canvas.gd")
+const ORBIT_CANVAS = preload("res://scripts/ui/orbit_area_canvas.gd")
 const WING_PANEL = preload("res://scripts/ui/space_wing_panel.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 var _provider: Callable
 var _commands: Callable
+var _area_provider: Callable
+var _orbit_canvas: Control
+var _orbit_button: Button
+var _system_button: Button
+var _orbit_center: Button
+var _orbit_craft_id := ""
+var _orbit_visible := false
+var _orbit_availability_signature := ""
+var _move_sequence := 0
+var _move_session := ""
 var _runtime: Dictionary = {}
 var _elapsed := 0.0
 var _built := false
@@ -30,9 +41,10 @@ var _details: PanelContainer
 var _orbit_target_list: HFlowContainer
 var _orbit_target_buttons: Array[Button] = []
 
-func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
+func configure(snapshot_provider: Callable, command_handler: Callable, area_provider: Callable = Callable()) -> void:
 	_provider = snapshot_provider
 	_commands = command_handler
+	_area_provider = area_provider
 	if not _built:
 		_build()
 	else:
@@ -45,7 +57,8 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= 0.1:
 		_elapsed = 0.0
-		refresh()
+		if _orbit_visible: _refresh_orbit_projection()
+		else: refresh()
 
 func _build() -> void:
 	_built = true
@@ -89,6 +102,19 @@ func _build() -> void:
 	system_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	system_column.add_theme_constant_override("separation", 6)
 	body.add_child(system_column)
+	var map_views := HBoxContainer.new()
+	map_views.name = "SpaceMapViews"
+	system_column.add_child(map_views)
+	_system_button = _button("SystemView", "System", _show_system_view)
+	map_views.add_child(_system_button)
+	_orbit_button = _button("OrbitView", "Orbit ansehen", _show_orbit_view)
+	_orbit_button.disabled = true
+	_orbit_button.tooltip_text = "Schiff explizit auswählen; benötigt einen aktiven lokalen Orbitbereich."
+	map_views.add_child(_orbit_button)
+	_orbit_center = _button("OrbitRecenter", "Schiff zentrieren", func(): _orbit_canvas.call("recenter_selected"))
+	_orbit_center.hide()
+	map_views.add_child(_orbit_center)
+	_move_session = "%d:%d" % [get_instance_id(),Time.get_ticks_usec()]
 	_canvas = CANVAS.new()
 	_canvas.name = "SystemMap"
 	_canvas.custom_minimum_size.x = 350
@@ -98,6 +124,13 @@ func _build() -> void:
 	_canvas.orbit_requested.connect(_jump)
 	_canvas.location_selected.connect(_select)
 	system_column.add_child(_canvas)
+	_orbit_canvas = ORBIT_CANVAS.new()
+	_orbit_canvas.name = "LocalOrbitMap"
+	_orbit_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_orbit_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_orbit_canvas.move_requested.connect(_on_orbit_move_requested)
+	system_column.add_child(_orbit_canvas)
+	_orbit_canvas.hide()
 	system_column.add_child(_label("ORBITMARKER", 11, Color("789baa")))
 	_orbit_target_list = HFlowContainer.new()
 	_orbit_target_list.name = "OrbitTargetList"
@@ -128,7 +161,7 @@ func _build() -> void:
 	_fleet_selector=OptionButton.new()
 	_fleet_selector.name="FleetCraftSelector"
 	information.add_child(_fleet_selector)
-	_fleet_selector.item_selected.connect(func(index:int): _send("space_focus_craft",{"craft_id":String(_fleet_selector.get_item_metadata(index))}))
+	_fleet_selector.item_selected.connect(_on_fleet_craft_selected)
 	_visit_list=VBoxContainer.new()
 	_visit_list.name="LoadedLocations"
 	information.add_child(_label("ZIEL & ANFLUG", 13, Color("70c8d0")))
@@ -198,7 +231,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close, _view_homebase] + _sites.values() + _orbit_target_buttons:
+	for button in [_abort, _approach, _land, _close, _view_homebase, _system_button, _orbit_button, _orbit_center] + _sites.values() + _orbit_target_buttons:
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -285,6 +318,11 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		_fleet_selector.set_meta("fleet_signature",fleet_signature)
 	for index in range(_fleet_selector.item_count):
 		if String(_fleet_selector.get_item_metadata(index))==String(travel.get("craft_id","")): _fleet_selector.select(index)
+	var route: Dictionary = Dictionary(travel.get("routes",{})).get(_orbit_craft_id,{})
+	var availability_signature := str([_orbit_craft_id,route.get("phase",""),route.get("revision",-1)])
+	if availability_signature != _orbit_availability_signature:
+		_orbit_availability_signature = availability_signature
+		_refresh_orbit_projection()
 	var loaded_ids := {}
 	for location: Dictionary in Array(_runtime.get("location_runtimes",[])): loaded_ids[String(location.location_id)] = true
 	for id: String in _visit_buttons.keys():
@@ -349,6 +387,52 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_land.visible = phase == "orbit" and orbit == "moon_orbit"
 	_boundary.visible = _approach.visible or phase == "approach"
 	_error.visible = not _error.text.is_empty()
+
+func _on_fleet_craft_selected(index: int) -> void:
+	_orbit_craft_id = String(_fleet_selector.get_item_metadata(index))
+	_orbit_availability_signature = ""
+	_send("space_focus_craft", {"craft_id":_orbit_craft_id})
+
+func _refresh_orbit_projection() -> void:
+	var projection: Dictionary = {}
+	if not _orbit_craft_id.is_empty() and _area_provider.is_valid():
+		var result: Variant = _area_provider.call(_orbit_craft_id)
+		if result is Dictionary: projection = result
+	_orbit_canvas.call("set_projection",projection,_orbit_craft_id,_orbit_body_visual(projection))
+	var available: bool = not _orbit_craft_id.is_empty() and String(_orbit_canvas.call("get_selected_craft_id")) == _orbit_craft_id
+	_orbit_button.disabled = not available
+	_orbit_button.tooltip_text = "Lokalen Orbit ansehen" if available else "Schiff explizit auswählen; benötigt einen aktiven lokalen Orbitbereich."
+	if _orbit_visible and not available: _show_system_view()
+
+func _orbit_body_visual(projection: Dictionary) -> Dictionary:
+	var area_id := String(projection.get("space_area_id",""))
+	if not area_id.begins_with("orbit_approach:"): return {}
+	var body_id := area_id.trim_prefix("orbit_approach:").uri_decode()
+	var body: Dictionary = Dictionary(Dictionary(_runtime.get("space_travel",{})).get("bodies",{})).get(body_id,{})
+	return {"name":String(body.get("name",body_id)),"color":Color.from_string(String(body.get("color","866349")),Color("866349"))}
+
+func _show_orbit_view() -> void:
+	_refresh_orbit_projection()
+	if _orbit_button.disabled: return
+	_orbit_visible = true
+	_canvas.hide()
+	_orbit_target_list.hide()
+	_orbit_canvas.show()
+	_orbit_center.show()
+	_elapsed = 0.0
+
+func _show_system_view() -> void:
+	_orbit_visible = false
+	_canvas.show()
+	_orbit_target_list.show()
+	_orbit_canvas.hide()
+	_orbit_center.hide()
+	_elapsed = 0.0
+
+func _on_orbit_move_requested(craft_id: String, target_hex: Vector2i) -> void:
+	if not _orbit_visible or craft_id.is_empty() or craft_id != _orbit_craft_id or String(_orbit_canvas.call("get_selected_craft_id")) != craft_id: return
+	_move_sequence += 1
+	_send("space_move",{"craft_id":craft_id,"target_hex":target_hex,"request_id":"orbit-ui:%s:%d" % [_move_session,_move_sequence]})
 
 func _phase_text(travel: Dictionary, preparation: Dictionary = {}) -> String:
 	var phase := String(travel.get("phase", "grounded"))
@@ -436,7 +520,10 @@ func _send(operation: String, payload: Dictionary = {}) -> void:
 		return
 	var result: Variant = _commands.call(operation, payload)
 	_error.text = String(Dictionary(result).get("message", "Aktion wurde abgelehnt.")) if result is Dictionary and not bool(result.get("ok", false)) else ""
-	refresh()
+	if operation == "space_move":
+		_refresh_orbit_projection()
+		_error.visible = not _error.text.is_empty()
+	else: refresh()
 
 func get_ui_snapshot() -> Dictionary:
 	return {"phase": String(Dictionary(_runtime.get("space_travel", {})).get("phase", "grounded")), "status": _status.text, "load_boundary": _boundary.text if _boundary.visible else "", "error": _error.text, "trade_reason": _lock_reason("trade_outpost"), "orbit_marker_count": _orbit_target_buttons.size()}

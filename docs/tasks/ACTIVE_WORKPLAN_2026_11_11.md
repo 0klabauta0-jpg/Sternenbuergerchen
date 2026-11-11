@@ -2,6 +2,13 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+AP6a Source86347ca54 ist nach engem unabhaengigem Review als69194ddab integriert.
+Frischer privater gemeinsamer Lifecycle64/0 samt Quell-/Profil-/Isolationsguards.
+Gruppenplatzierung und echte Actoraufnahme/-freigabe sind vorhanden, produktive
+gestaffelte Transportvormerkungen, Setup-/Deploy- und Basisadapter folgen noch.
+AP6 daher nicht vollstaendig; AP7/8 danach, grosse AP9-Tests spaeter. QA lifecycle
+unter tabletop_restplan_integration_20261111.
+
 AP5-Ausführung nach aktuellem Nutzerauftrag: Backoff258183ce2 nach engem Review
 als0730e760e integriert; frischer gemeinsamer Backoff55/0 samt Guards grün.
 Originalziel/Command/Wartealter bleiben erhalten, temporäre Erholung räumt bei
