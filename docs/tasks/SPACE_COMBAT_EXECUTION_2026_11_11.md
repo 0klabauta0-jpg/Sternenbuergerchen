@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- V3-Produktreader im bestehenden Travelowner vorbereitet: V2 bleibt lesbar,
+  V3 nutzt den strikten Produktkatalog mit sechs Körperorbits; Entwürfe,
+  Migrationsdaten, unbekannte Versionen und alte V3-Marker werden abgewiesen.
+  Eine private Projektkopie prüft Coldconfigure, Warp zum Sonnenorbit und die
+  Ablehnung eines Sonnenoberflächenorts. Produktives JSON und Eintrittsflag
+  bleiben unverändert; lokale Stationsanbindung und native Abnahme sind offen.
+
 - Warp-Abschlussabsicht bleibt nach Pilot-/Eintrittsfehlern an Fleetowner,
   Einzel-Travelowner-Epoche, Flightrevision und Reise gebunden. Ein kleinerer
   Folgetick darf nicht wieder strategisch weiterlaufen; Ownerreset verwirft
