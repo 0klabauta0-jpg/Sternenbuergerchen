@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### Weltraumkampf-Konzept und Arbeitspakete — 11.11.2026
+
+Vom Nutzer bestätigtes Konzept dokumentiert: Rotten1–6, gemeinsame Aufträge,
+eine Kampfebene/2,5D, gekoppelter und ausgekoppelter Flug, J-Hook/Manöver,
+Pilotenskill, Repeater sowie Waffen-/Schild-/Kraftwerkstausch und sichtbare VFX.
+21 kleine AP00–AP20 mit fünf Meilensteinen, konkreten Schnittstellen,
+Prüffällen und vollständiger Festlegungszuordnung. Keine Umsetzung gestartet.
+Doku-Branch task/space-combat-plan-20261111 bewusst auf dem noch nicht
+integrierten nativen Stand84dd481b1; vor Umsetzung Basis/Owner erneut abgleichen.
+Konzept: [space_combat_contract.md](dev/space_combat_contract.md).
+Plan: [2026-11-11-space-combat.md](superpowers/plans/2026-11-11-space-combat.md).
+Task: [SPACE_COMBAT_2026_11_11_PLAN.md](tasks/SPACE_COMBAT_2026_11_11_PLAN.md).
+Keine Engine-/Sicht-/Performance-/MP-Abnahme, kein Mainmerge oder EXE.
+
 ### AP5 erster Teil: stetige Motionprojektion — 11.11.2026
 
 Ground-/Rootreadadapter leiten Position, logische/renderumgerechnete Höhe und
