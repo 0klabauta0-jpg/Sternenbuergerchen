@@ -93,3 +93,5 @@ docs/qa/explicit_hex_ramp_editor_20261111/** -text whitespace=blank-at-eol,blank
 docs/qa/hex_terrain_composition_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 
 art/hex_terrain_composition_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+docs/qa/polisa_station_20261111/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

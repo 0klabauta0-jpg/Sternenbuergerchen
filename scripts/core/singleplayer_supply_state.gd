@@ -74,7 +74,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot()}
+	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -100,6 +100,8 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"inventory_transfer": result = _inventory_transfer(payload, authority_context)
 		"inventory_equip": result = _inventory_equip(payload, authority_context)
 		"buy": result = _buy(payload, authority_context)
+		"station_buy_ship": result = _station_buy_ship(payload, authority_context, request_id)
+		"station_build_home_pad": result = _station_build_home_pad(authority_context)
 		"refuel": result = _refuel(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
@@ -121,6 +123,11 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var offer: Dictionary = Dictionary(Dictionary(_definitions.get("offers", {})).get(offer_id, {}))
 	if offer.is_empty():
 		return _reject("unknown_offer", "Angebot unbekannt")
+	if String(offer.get("kind", "")) == "ship":
+		return _reject("ship_service_required", "Schiffe beim Schiffshaendler kaufen")
+	var blueprint := String(offer.get("required_blueprint", ""))
+	if bool(context.get("require_blueprints", false)) and not blueprint.is_empty() and not _blueprints().has(blueprint):
+		return _reject("blueprint_locked", "Zuerst den passenden Bauplan freischalten")
 	if bool(context.get("craft_busy", true)):
 		return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
 	if not _has_service(location_id, "trade") or not Array(offer.get("location_ids", [])).has(location_id):
@@ -275,6 +282,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	var station_receipts: Dictionary = fresh.validate_station_receipts(data.requests)
+	if not station_receipts.get("ok", false): return station_receipts
 	var research: Variant = data.get("research_receipts", {})
 	if not RESEARCH.validate_receipts(research, data.reward_receipts, data.requests):
 		return _reject("invalid_research_receipts", "Entwicklungsbelege widersprechen ihren Voraussetzungen")
@@ -448,15 +457,22 @@ func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	return {"ok":true,"item_id":site.item_id,"quantity":quantity,"message":"Geborgen: %d" % quantity}
 
 func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
-	var left:=saved.duplicate(true); var right:=current.duplicate(true)
-	var old_offers: Variant=left.get("offers")
-	if typeof(old_offers)!=TYPE_DICTIONARY: return false
-	for id in Dictionary(right.get("offers",{})):
-		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply","backpack_supply"]: return false
+	var left := saved.duplicate(true)
+	var right := current.duplicate(true)
+	var old_offers: Variant = left.get("offers")
+	if typeof(old_offers) != TYPE_DICTIONARY: return false
+	for id: String in Dictionary(right.get("offers", {})):
+		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply","backpack_supply"] and not id.begins_with("polisa_"): return false
 	for id in old_offers:
-		if not Dictionary(right.get("offers",{})).has(id) or JSON.stringify(old_offers[id],"",true)!=JSON.stringify(right.offers[id],"",true): return false
+		if not Dictionary(right.get("offers", {})).has(id) or JSON.stringify(old_offers[id], "", true) != JSON.stringify(right.offers[id], "", true): return false
 	left.erase("offers"); right.erase("offers")
-	return JSON.stringify(left,"",true)==JSON.stringify(right,"",true)
+	# Additive station data preserves the exact old economy and existing routes.
+	if not Dictionary(left.get("service_locations", {})).has("polisa"):
+		right.service_locations.erase("polisa")
+	for route: String in Dictionary(right.get("route_fuel_costs", {})).keys():
+		if route.contains("polisa") and not Dictionary(left.get("route_fuel_costs", {})).has(route): right.route_fuel_costs.erase(route)
+	if not left.has("commodity_buy_orders"): right.erase("commodity_buy_orders")
+	return JSON.stringify(left, "", true) == JSON.stringify(right, "", true)
 
 
 func configure_start_inventory(mode: String) -> void:
@@ -584,12 +600,93 @@ func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not _has_service(location,"trade") or bool(context.get("craft_busy",true)): return _reject("trade_unavailable","Handel nicht erreichbar")
 	var wanted := "c_benit" if location=="satellite_crash" else "b_benit"
 	var item := String(payload.get("item_id",""))
+	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted:15})
+	var price := int(orders.get(item, 0))
 	var container := "craft:"+String(context.get("craft_id",""))
-	if item!=wanted or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
+	if price <= 0 or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
 	var quantity := int(payload.quantity)
 	var items: Dictionary = _inventory[container].items
 	if int(items.get(item,0))<quantity: return _reject("insufficient_items","Bestand reicht nicht")
 	items[item]-=quantity
 	if items[item]==0: items.erase(item)
-	_credits+=quantity*15; _revision+=1
-	return {"ok":true,"message":"Rohstoff verkauft"}
+	_credits+=quantity*price; _revision+=1
+	return {"ok":true,"message":"Waren verkauft","item_id":item,"quantity":quantity,"proceeds":quantity*price}
+
+
+func _station_buy_ship(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if String(context.get("location_id", "")) != "polisa" or bool(context.get("craft_busy", true)) or context.get("station_service_verified", false) != true:
+		return _reject("station_service_required", "Schiffskauf erst nach Landung und Besuch des Stationsschalters")
+	var offer_id := String(payload.get("offer_id", ""))
+	var offer: Dictionary = Dictionary(_definitions.get("offers", {})).get(offer_id, {})
+	if String(offer.get("kind", "")) != "ship" or not Array(offer.get("location_ids", [])).has("polisa"):
+		return _reject("unknown_offer", "Dieses Schiff wird hier nicht verkauft")
+	var price := int(offer.get("unit_price", 0))
+	if price <= 0 or _credits < price: return _reject("insufficient_credits", "Credits reichen nicht")
+	if int(_stock_by_offer_id.get(offer_id, 0)) < 1: return _reject("insufficient_stock", "Schiff derzeit ausverkauft")
+	var fulfillment: Callable = context.get("station_ship_fulfillment", Callable())
+	if not fulfillment.is_valid(): return _reject("fleet_unavailable", "Flottenuebergabe nicht verfuegbar")
+	# The trusted runtime callback validates the free home pad before its first write.
+	# No await or UI callback occurs between fulfillment and the wallet receipt.
+	var result: Dictionary = fulfillment.call(offer.duplicate(true), request_id)
+	if not bool(result.get("ok", false)): return result
+	_credits -= price
+	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - 1
+	_revision += 1
+	result["cost"] = price
+	result["offer_id"] = offer_id
+	result["message"] = "Schiff gekauft / Lieferung zur Heimatbasis bestaetigt"
+	return result
+
+
+func get_station_home_pads() -> int:
+	var count := 2
+	for receipt: Dictionary in _requests.values():
+		var result: Dictionary = receipt.get("result", {})
+		if result.get("operation", "") == "station_build_home_pad": count = maxi(count, int(result.get("home_pad_count", 2)))
+	return mini(count, 6)
+
+
+func _station_build_home_pad(context: Dictionary) -> Dictionary:
+	if context.get("station_service_verified", false) != true or String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst Stationsschalter besuchen")
+	if context.get("second_pad_built", false) != true: return _reject("base_progress_required", "Zuerst den zweiten Heimatlandeplatz in der Kampagne fertigstellen")
+	var count := get_station_home_pads()
+	if count >= 6: return _reject("pad_limit", "Alle sechs Heimatbauplaetze sind ausgebaut")
+	if _credits < 200: return _reject("insufficient_credits", "Landeplatzbau kostet 200 Credits")
+	var builder: Callable = context.get("station_pad_builder", Callable())
+	if not builder.is_valid(): return _reject("base_unavailable", "Heimatbauplatz nicht verfuegbar")
+	var result: Dictionary = builder.call(count + 1)
+	if not result.get("ok", false): return result
+	_credits -= 200
+	_revision += 1
+	return {"ok":true,"home_pad_count":count + 1,"cost":200,"message":"Heimatlandeplatz gebaut"}
+
+
+func validate_station_receipts(requests: Dictionary) -> Dictionary:
+	var pads: Array = []
+	var ships := {}
+	var used_pads: Array = []
+	for request_id: String in requests:
+		var receipt: Dictionary = requests[request_id]
+		var result: Dictionary = receipt.get("result", {})
+		var signature: Dictionary = JSON.parse_string(String(receipt.get("signature", "{}")))
+		if result.get("operation", "") == "station_build_home_pad":
+			if not _valid_nonnegative_integer(result.get("home_pad_count")): return _reject("invalid_station_pad_receipt", "Landeplatzanzahl ungueltig")
+			var count := int(result.home_pad_count)
+			if count < 3 or count > 6 or pads.has(count) or result.get("cost") != 200: return _reject("invalid_station_pad_receipt", "Landeplatzbeleg ungueltig")
+			pads.append(count)
+		elif result.get("operation", "") == "station_buy_ship":
+			var offer_id := String(signature.get("payload", {}).get("offer_id", ""))
+			var offer: Dictionary = Dictionary(_definitions.get("offers", {})).get(offer_id, {})
+			var model := String(offer.get("model_id", ""))
+			var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
+			var pad := String(result.get("landing_pad_id", ""))
+			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or result.get("delivery_location_id") != "homebase" or used_pads.has(pad) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
+			ships[id] = {"model_id":model,"craft_type":String(offer.craft_type),"pad":pad}
+			used_pads.append(pad)
+	pads.sort()
+	for index in range(pads.size()):
+		if pads[index] != index + 3: return _reject("invalid_station_pad_sequence", "Landeplatzbaubelege unvollstaendig")
+	var capacity := 2 + pads.size()
+	for ship: Dictionary in ships.values():
+		if int(String(ship.pad).trim_prefix("homebase_pad_")) > capacity: return _reject("unbuilt_station_delivery_pad", "Lieferlandeplatz nicht gebaut")
+	return {"ok":true,"capacity":capacity,"ships":ships}

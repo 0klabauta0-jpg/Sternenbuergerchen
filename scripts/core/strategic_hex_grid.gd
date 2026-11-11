@@ -5,7 +5,7 @@ const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const SIZE := Vector2i(256, 256)
 const EXTENT := Vector2(256.0, 221.70250336881628)
 const ORBITS := {"moon_orbit": "moon", "planet_orbit": "planet",
-	"glut_1a_orbit": "glut_1a", "glut_1b_orbit": "glut_1b"}
+	"glut_1a_orbit": "glut_1a", "glut_1b_orbit": "glut_1b", "polisa_orbit": "glut_2"}
 const ORBIT_MARKER_IDS := ["orbit_1", "orbit_2", "orbit_3"]
 
 static func from_offset(offset: Vector2i) -> Vector2i:

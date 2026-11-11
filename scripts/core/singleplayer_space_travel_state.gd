@@ -252,7 +252,7 @@ func _valid_definition(data: Dictionary) -> bool:
 			if typeof(value) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(value)) or float(value) < 0.0 or float(value) > 1.0:
 				return false
 		var body: Dictionary = data.bodies[GRID.ORBITS[orbit]]
-		var location := String(body.get("surface_location_id", ""))
+		var location := String(data.orbits[orbit].get("location_id", body.get("surface_location_id", "")))
 		if String(data.location_orbits.get(location, "")) != orbit:
 			return false
 		var orbit_data: Dictionary = data.orbits[orbit]

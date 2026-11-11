@@ -55,7 +55,16 @@ func update_bodies(bodies: Dictionary) -> void:
 			mesh.rings = 24
 			mesh.radius = 1.0
 			mesh.height = 2.0
-			sphere.mesh = mesh
+			if String(body.get("kind", "")) == "station":
+				var hub := BoxMesh.new(); hub.size = Vector3(1.8, .35, 1.3)
+				sphere.mesh = hub
+				var ring := MeshInstance3D.new()
+				var torus := TorusMesh.new(); torus.inner_radius = .85; torus.outer_radius = 1.0; torus.rings = 20; torus.ring_segments = 6
+				ring.mesh = torus; ring.position.y = -.2
+				var hull := StandardMaterial3D.new(); hull.albedo_color = Color("c9cbbd"); hull.roughness = .85
+				ring.material_override = hull; sphere.add_child(ring)
+			else:
+				sphere.mesh = mesh
 			var material := ShaderMaterial.new()
 			material.shader = BODY_SHADER
 			sphere.material_override = material

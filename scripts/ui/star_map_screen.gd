@@ -369,6 +369,7 @@ func _lock_reason(location_id: String) -> String:
 	if String(_runtime.get("mode", "")) != "campaign":
 		return ""
 	var campaign: Dictionary = _runtime.get("campaign", {})
+	if bool(Dictionary(Dictionary(campaign.get("locations", {})).get(location_id, {})).get("free_visit", false)): return ""
 	var jobs: Dictionary = campaign.get("jobs", {})
 	for job: Dictionary in jobs.values():
 		if String(job.get("location_id", "")) != location_id: continue

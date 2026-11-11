@@ -152,7 +152,7 @@ func validate_departure(payload: Dictionary, authority_context: Dictionary = {})
 	var job_id: String = String(payload.get("job_id", ""))
 	if craft_id.is_empty() or not _locations.has(origin) or not _locations.has(destination) or origin == destination:
 		return _reject("invalid_departure", "Schiff oder Ortsverbindung ungueltig")
-	if not Array(_locations[origin].landing_pad_ids).has(pad_id):
+	if not Array(_locations[origin].landing_pad_ids).has(pad_id) and not (origin == "homebase" and Array(context.get("built_home_pad_ids", [])).has(pad_id)):
 		return _reject("invalid_pad", "Abflugpad gehoert nicht zum Ausgangsort")
 	if not job_id.is_empty():
 		if not _jobs.has(job_id) or not String(_jobs[job_id].status) in ["accepted", "active"] or String(_jobs[job_id].location_id) != destination:
@@ -320,7 +320,7 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		var allowed := ["active","completed"] if pair[0] == "recruited_outpost" else ["completed"]
 		if bool(data.progress.get(pair[0],false)) and String(Dictionary(data.jobs.get(pair[1],{})).get("status","")) not in allowed: return _reject("invalid_progress","Fortschritt ohne Missionsabschluss")
 	if bool(data.progress.second_pad_built) and not bool(data.progress.recruited_pilot): return _reject("invalid_progress","Pad ohne geretteten Piloten")
-	if JSON.stringify(data.locations, "", true) != JSON.stringify(_locations, "", true) or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
+	if not _compatible_locations(data.locations) or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
 		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
 	for job_id in _jobs:
 		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
@@ -373,3 +373,10 @@ func _saved_integer(value: Variant) -> bool:
 
 func _saved_equal(a: Variant, b: Variant) -> bool:
 	return JSON.stringify(JSON.parse_string(JSON.stringify(a)), "", true) == JSON.stringify(JSON.parse_string(JSON.stringify(b)), "", true)
+
+
+func _compatible_locations(saved: Dictionary) -> bool:
+	# Polisa is an additive free visit; no old location definition may drift.
+	var current := _locations.duplicate(true)
+	if not saved.has("polisa"): current.erase("polisa")
+	return JSON.stringify(saved, "", true) == JSON.stringify(current, "", true)

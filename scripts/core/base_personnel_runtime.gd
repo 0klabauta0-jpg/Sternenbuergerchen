@@ -546,3 +546,30 @@ func advance_automatic_rest(delta: float) -> void:
 			if bool(result.get("ok",false)):
 				_beds[bed.id]=id; state.bed_id=String(bed.id); state.rest_automatic=true
 				break
+
+
+func build_campaign_landing_pad(count: int) -> Dictionary:
+	if _flow == null or not _flow.call("is_campaign_start") or count < 3 or count > 6:
+		return _reject("invalid_pad_construction", "Kampagnenbauplatz ungueltig")
+	var infrastructure := {"pads":count}
+	var candidate: Dictionary = CAPACITY_LAYOUT.expand(_source_layout, _terrain, _navigation_graph, Array(_flow.get("_all_team_units")).size(), infrastructure)
+	if Array(candidate.get("landing_pads", [])).size() != count:
+		return _reject("pad_site_blocked", "Heimatbauplatz ist nicht begehbar angebunden")
+	var pad: Dictionary = candidate.landing_pads[count - 1]
+	var plane: Array = pad.plane
+	var bounds := Rect2(Vector2(float(plane[0])-4.5, float(plane[1])-3.5), Vector2(9,7))
+	var center := Vector2i(int(pad.grid[0]), int(pad.grid[1]))
+	for row in range(center.y - 18, center.y + 19):
+		for column in range(center.x - 28, center.x + 29):
+			var grid := Vector2i(column, row)
+			var cell_plane: Vector3 = load(NAV_PATH).plane_at_grid(grid)
+			if bounds.has_point(Vector2(cell_plane.x, cell_plane.z)) and not _terrain.is_walkable(grid): return _reject("pad_site_blocked", "Heimatlandeplatz braucht eine vollstaendig freie Bodenflaeche")
+	for id: String in _states:
+		if not _unit_is_home(id): continue
+		var actor_plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(get_actor(id).position))
+		if bounds.has_point(Vector2(actor_plane.x, actor_plane.z)): return _reject("construction_occupied", "Personen zuerst vom Landeplatzbauplatz bewegen")
+	for command: Dictionary in _sim.command_queue:
+		for point: Vector2 in command.get("path", []):
+			var path_plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(point))
+			if bounds.has_point(Vector2(path_plane.x, path_plane.z)): return _reject("construction_path_occupied", "Laufenden Weg ueber den Bauplatz abschliessen")
+	return build_infrastructure("landing_pad", infrastructure)

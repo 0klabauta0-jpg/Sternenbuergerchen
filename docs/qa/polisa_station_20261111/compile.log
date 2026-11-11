@@ -1,0 +1,60 @@
+CHECK scripts/ui/polisa_station_screen.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/core/singleplayer_supply_state.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/meta/singleplayer_runtime_adapter.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/meta/campaign_checkpoint_store.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/core/base_personnel_runtime.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/terrain/polisa_station_visual.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/meta/meta_layer_flow.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/core/singleplayer_campaign_state.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/core/singleplayer_space_travel_state.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/core/strategic_hex_grid.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/mission/singleplayer_location_contract.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/mission/singleplayer_supply_command_contract.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/ui/star_map_canvas.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/ui/star_map_screen.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0
+CHECK scripts/ui/star_map_world_view.gd
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+EXIT 0

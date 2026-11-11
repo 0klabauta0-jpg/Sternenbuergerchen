@@ -144,6 +144,8 @@ oder IMPLEMENTATION_STATUS-Edit durch diesen Teilagenten; Root integriert.
   Gefechtsnachweise gelten fuer den vorigen Kartenstand, nicht fuer neue Karten.
 - Neuer Nutzerauftrag Polisa: zusaetzlicher Planet, begehbare Orbitalstation,
   Waren-/Infanterie-/Ruestungshandel, vorhandene Schiffe mit Heimatlieferung und
-  bezahlte echte Heimatpads3..6. Eigener Agent arbeitet an der Integration.
+  bezahlte echte Heimatpads3..6. Funktionskandidat integriert;18 kleine Domainchecks und15 Compilechecks. Native Reise-/Shop-Abnahme folgt spaeter; eigener Kreativagent verbessert die Stationsansicht.
   Schiffswaffen-/Komponenten-Ausruestungsowner und lokaleSchiffsabholung sind
   technische Restpunkte; kein bloss dekorativer Kauf als fertigeFunktion.
+
+- Tabletop-Chat: Foundation73a485b19 gesichert. AP1 Owner-/Version und AP3 Consumer zur isolierten Fortsetzung freigegeben; Integration gezielt durch diesen Chat. Noch kein aktiver Produktumbau aus der Foundation behauptet.

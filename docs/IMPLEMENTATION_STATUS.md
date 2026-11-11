@@ -12108,3 +12108,17 @@ Objekt bekommen keine fehlendenObjekt-Platzhalter. NativeB/C-Artansichten
 ohneEnginefehler geoeffnet; kein neuesGefechts-/FPS-/SaveContinue-PASS.
 Polisa-Station ist zusaetzlicher, gesondert noch laufenderIntegrationsauftrag.
 KeineMain-/EXE-Integration dieserTaskarbeit.
+
+
+### Polisa / neuer Glut2 — funktionaler Kandidat
+Separater 96x96Space-Ort mit867Deckzellen(807begehbar),3verbundenenPads,
+Sternkarten-/Orbitzugang, linkerStationsnavigation und bestehendenSupply-/
+Inventar-/Reiseowner-Anschluessen. Waren/Infanterie/Ruestung kaufen/verkaufen,
+Ausrüstung und vorhandeneCutlass/Buccaneer bestellen. Schiffe werden auf echte
+freieHeimatpads geliefert; bezahltePads3..6 nutzen vorhandenenBasisbau und
+Supplybelege. Checkpointvalidator bewahrtalte1/2Flottenstaende und prueftneue
+Schiffe/Padbelege. KleineDomainprobe18/0,15Compilechecks0; ein nativerArtblick
+geoeffnet. GrosseReise-/Shop-/SaveContinueabnahme ausdruecklichspaeter.
+Schiffswaffen/Komponenten-Einbau und lokaleStations-Schiffsabholung bleiben
+konkreteoffeneAusbauschritte, keine alsfertigverkaufteFunktion.
+KreativePolisa-Modellrevision ist eigener Folgeschritt. KeineMain-/EXE.

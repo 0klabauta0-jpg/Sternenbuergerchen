@@ -34,7 +34,7 @@ func _ready() -> void:
 	add_child(_world)
 	set_process(false)
 	var names := {"moon_orbit": "Moon", "planet_orbit": "Planet",
-		"glut_1a_orbit": "Glut1a", "glut_1b_orbit": "Glut1b"}
+		"glut_1a_orbit": "Glut1a", "glut_1b_orbit": "Glut1b", "polisa_orbit": "Glut2Polisa"}
 	for id: String in names:
 		var label := Label.new()
 		label.name = names[id] + "Caption"

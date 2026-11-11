@@ -1,0 +1,12 @@
+{
+  "declared_grid": {
+    "x": 96,
+    "y": 96
+  },
+  "deck_cells": 867,
+  "walkable": 807,
+  "connected_walkable": 807,
+  "pad_centers_connected": true,
+  "world_markers_use_existing_isometric_transform": true,
+  "gpu_or_native_acceptance": false
+}

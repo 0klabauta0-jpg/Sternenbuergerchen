@@ -113,13 +113,21 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if String(job.status) == "active":
 			return {"ok":false,"reason":"checkpoint_active_job"}
 	var fleet: Variant = payload.get("fleet",[{"definition":craft.definition,"pilot_id":craft.pilot_id,"location":"homebase"}])
-	if typeof(fleet) != TYPE_ARRAY or fleet.is_empty() or fleet.size() > 2: return {"ok":false,"reason":"invalid_campaign_fleet"}
+	var station: Dictionary = supply.validate_station_receipts(payload.supply.requests)
+	if not station.get("ok", false): return station
+	if int(station.capacity) > 2 and not bool(payload.campaign.get("progress", {}).get("second_pad_built", false)): return {"ok":false,"reason":"checkpoint_pad_progress_mismatch"}
+	if typeof(fleet) != TYPE_ARRAY or fleet.is_empty() or fleet.size() > int(station.capacity): return {"ok":false,"reason":"invalid_campaign_fleet"}
 	var fleet_ids: Array = []
 	for ship in fleet:
 		if typeof(ship) != TYPE_DICTIONARY or typeof(ship.get("definition")) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_campaign_fleet"}
 		var ship_id := String(ship.definition.get("craft_id",""))
 		if ship_id.is_empty() or fleet_ids.has(ship_id) or String(ship.get("pilot_id","")) not in ([""]+ids) or String(ship.get("location","homebase")) not in ["homebase","waiting_pad"]: return {"ok":false,"reason":"invalid_campaign_fleet"}
+		if ship_id.begins_with("polisa_"):
+			var purchased: Dictionary = station.ships.get(ship_id, {})
+			if purchased.is_empty() or String(ship.definition.get("model_id", "")) != String(purchased.model_id) or String(ship.definition.get("craft_type", "")) != String(purchased.craft_type): return {"ok":false,"reason":"checkpoint_unverified_station_ship"}
 		fleet_ids.append(ship_id)
+	for purchased_id: String in station.ships:
+		if not fleet_ids.has(purchased_id): return {"ok":false,"reason":"checkpoint_missing_purchased_ship"}
 	if String(fleet[0].definition.get("craft_id","")) != String(craft.definition.craft_id) or JSON.stringify(fleet[0].definition,"",true) != JSON.stringify(craft.definition,"",true) or String(fleet[0].get("pilot_id","")) != String(craft.pilot_id): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
 	if payload.has("location_resources"):
 		if typeof(payload.location_resources) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_resource_checkpoint"}
@@ -150,7 +158,8 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if not payload.campaign.completion_receipts.has(String(sequence[index])+":completed"): return {"ok":false,"reason":"checkpoint_progress_mismatch"}
 	var progress: Dictionary = payload.campaign.get("progress",{})
 	if ids.has("campaign_outpost_recruit") != bool(progress.get("recruited_outpost",false)) or ids.has("campaign_rescue_pilot") != bool(progress.get("recruited_pilot",false)): return {"ok":false,"reason":"checkpoint_roster_progress_mismatch"}
-	if bool(progress.get("recruited_pilot",false)) != (fleet_ids.size() == 2): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
+	var original_fleet_count := fleet_ids.size() - Dictionary(station.ships).size()
+	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
 
 	return {"ok":true}
 static func _valid_path(path: String) -> bool:

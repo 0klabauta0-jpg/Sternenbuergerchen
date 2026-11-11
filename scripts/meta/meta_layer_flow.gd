@@ -153,6 +153,7 @@ var _surface_preparation_results: Dictionary = {}
 var _retired_terrain_workers: Array[Thread] = []
 const TERRAIN_PREPARATION_TIMEOUT_MSEC := 180000
 var _location_callback_active := false
+var _polisa_station_screen: Control
 var _singleplayer_services: Control
 var _singleplayer_services_elapsed: float = 0.0
 var _star_map_screen: Control
@@ -7862,6 +7863,14 @@ func _refresh_singleplayer_services() -> void:
 	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open")) and String(get_node("HomebaseScreen").get("_operations_mode")) != "services"
 	if _singleplayer_services == null or _singleplayer_runtime == null: return
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
+	var at_polisa := _current_meta_view == "mission" and String(_active_singleplayer_identity.get("location_id", "")) == "polisa"
+	if at_polisa and _polisa_station_screen == null:
+		_polisa_station_screen = load("res://scripts/ui/polisa_station_screen.gd").new()
+		_singleplayer_services.get_parent().add_child(_polisa_station_screen)
+		_polisa_station_screen.call("configure", _singleplayer_runtime)
+	if _polisa_station_screen != null:
+		_polisa_station_screen.visible = at_polisa
+		if at_polisa: _polisa_station_screen.call("refresh", _singleplayer_runtime.call("get_polisa_snapshot", snapshot))
 	var presenter: Node=get_node("HomebaseScreen").get("_operations_presenter")
 	var base: Node=presenter.get("_base") if presenter!=null else null
 	if base!=null and not base.is_connected("world_selection_changed",_on_base_world_selection_changed): base.connect("world_selection_changed",_on_base_world_selection_changed)
@@ -7869,7 +7878,7 @@ func _refresh_singleplayer_services() -> void:
 	var at_home := _current_meta_view == "homebase" and presenter!=null and (String(presenter.get("_mode"))=="base" and not selected_ship.is_empty())
 	if at_home and String(presenter.get("_mode"))=="base" and not selected_ship.is_empty(): _singleplayer_services.set("_selected_craft_id",selected_ship)
 	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
-	_singleplayer_services.visible = at_home or remote
+	_singleplayer_services.visible = (at_home or remote) and not at_polisa
 	if _singleplayer_services.visible:
 		_singleplayer_services.call("refresh", snapshot)
 		_singleplayer_services.call("fit_to_viewport")

@@ -1,0 +1,131 @@
+extends Control
+## Read-only station projection. All purchases and equipment use runtime commands.
+var _adapter: Node
+var _snapshot: Dictionary = {}
+var _page := "explore"
+var _person := ""
+var _signature := ""
+var _content: VBoxContainer
+var _status: Label
+var _credits: Label
+var _catalog: Dictionary = {}
+
+func configure(adapter: Node) -> void:
+	_adapter = adapter
+	_catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/polisa_station.json"))
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var panel := PanelContainer.new()
+	panel.position = Vector2(10, 76)
+	panel.custom_minimum_size = Vector2(216, 0)
+	add_child(panel)
+	var menu := VBoxContainer.new()
+	panel.add_child(menu)
+	_label(menu, "POLISA / Landestation")
+	_credits = _label(menu, "")
+	for category: Dictionary in _catalog.get("categories", []):
+		_button(menu, String(category.name), _select_page.bind(String(category.id)))
+	_button(menu, "Tanken / +10 Einheiten", _request.bind("refuel", {"amount":10.0}))
+	_button(menu, "Rueckflug vorbereiten", _request.bind("return_homebase", {}))
+	_status = _label(menu, "")
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var shop := PanelContainer.new()
+	shop.name = "Shop"
+	shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shop.offset_left = 240
+	shop.offset_top = 76
+	shop.offset_right = -16
+	shop.offset_bottom = -110
+	add_child(shop)
+	var scroll := ScrollContainer.new()
+	shop.add_child(scroll)
+	_content = VBoxContainer.new()
+	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_content)
+
+func refresh(snapshot: Dictionary) -> void:
+	_snapshot = snapshot
+	_credits.text = "%d Credits" % int(snapshot.get("credits", 0))
+	var signature := JSON.stringify([_page, _person, snapshot])
+	if signature == _signature: return
+	_signature = signature
+	get_node("Shop").visible = _page != "explore"
+	for child in _content.get_children():
+		_content.remove_child(child)
+		child.queue_free()
+	if _page == "explore": return
+	_label(_content, "POLISA / " + _page.to_upper())
+	if not snapshot.get("service_ready", false):
+		_label(_content, "Landen, aussteigen und den Stationsschalter in der Halle benutzen.")
+		return
+	if _page == "ship_equipment":
+		_label(_content, "Schiffswaffen und Komponenten sind noch nicht verfügbar. Kauf und Einbau folgen mit dem Ausbau der Schiffsausrüstung.")
+		return
+	if _page == "ships":
+		_label(_content, "Lieferung zur Heimatbasis. Ein gebautes freies Heimatpad ist erforderlich.")
+		_label(_content, "Ausstattung der gelieferten Schiffe an der Heimatbasis.")
+		if snapshot.get("campaign_mode", false):
+			_button(_content, "Heimatpad %d bauen / 200 Credits" % (int(snapshot.get("home_pad_count", 2)) + 1), _request.bind("station_build_home_pad", {}), int(snapshot.get("home_pad_count", 2)) >= 6)
+	if _page in ["infantry", "armor"]:
+		_label(_content, "Kauf ins gelandete Schiffslager. Zum Ausruesten bei Schiff oder Stationsschalter bleiben.")
+		var people := OptionButton.new()
+		_content.add_child(people)
+		for person: Dictionary in snapshot.get("people", []):
+			people.add_item(String(person.name))
+			people.set_item_metadata(people.item_count - 1, String(person.unit_id))
+			if _person.is_empty(): _person = String(person.unit_id)
+			if _person == String(person.unit_id): people.select(people.item_count - 1)
+		people.item_selected.connect(func(index: int): _person = String(people.get_item_metadata(index)); _signature = ""; refresh(_snapshot))
+	for offer_id: String in snapshot.get("offers", {}):
+		var offer: Dictionary = snapshot.offers[offer_id]
+		if String(offer.get("category", "")) != _page: continue
+		var row := HBoxContainer.new()
+		_content.add_child(row)
+		var stock := int(Dictionary(snapshot.get("stock", {})).get(offer_id, 0))
+		_label(row, "%s / %d Cr / Bestand %d" % [offer.get("name", offer.item_id), int(offer.unit_price), stock])
+		var locked: bool = snapshot.get("require_blueprints", false) and not String(offer.get("required_blueprint", "")).is_empty() and not Array(snapshot.get("blueprints", [])).has(String(offer.required_blueprint))
+		var ship := String(offer.get("kind", "")) == "ship"
+		_button(row, "Bauplan fehlt" if locked else "Kaufen", _request.bind("station_buy_ship" if ship else "buy", {"offer_id":offer_id,"quantity":1}), locked or stock < 1 or (ship and String(snapshot.get("free_home_pad", "")).is_empty()))
+		if _page in ["infantry", "armor"]:
+			var item := String(offer.item_id)
+			var slot := "armor" if item.begins_with("armor_") else ("backpack" if item == "backpack" else "weapon_1")
+			_button(row, "Ausruesten", _request.bind("inventory_equip", {"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
+	if _page == "commodities":
+		_label(_content, "Ankauf aus dem gelandeten Schiffslager / je 1 Einheit")
+		for item: String in snapshot.get("buy_orders", {}):
+			var price := int(snapshot.buy_orders[item])
+			_button(_content, "%s verkaufen / %d Cr" % [item, price], _request.bind("sell", {"item_id":item,"quantity":1}), _cargo(item) < 1)
+
+func _cargo(item: String) -> int:
+	return int(Dictionary(Dictionary(_snapshot.get("inventory", {})).get("craft:" + String(_snapshot.get("craft_id", "")), {})).get("items", {}).get(item, 0))
+
+func _can_equip(item: String) -> bool:
+	for person: Dictionary in _snapshot.get("people", []):
+		if person.unit_id == _person: return bool(person.equipment_allowed) and _cargo(item) > 0
+	return false
+
+func _select_page(page: String) -> void:
+	_page = page
+	_signature = ""
+	refresh(_snapshot)
+
+func _request(operation: String, payload: Dictionary) -> void:
+	var data := payload.duplicate(true)
+	data["craft_id"] = String(_snapshot.get("craft_id", ""))
+	var result: Dictionary = _adapter.call("request_operation", operation, data)
+	_status.text = String(result.get("message", "Vorgang abgeschlossen" if result.get("ok", false) else result.get("reason", "Nicht verfuegbar")))
+	_signature = ""
+	refresh(_adapter.call("get_polisa_snapshot"))
+
+func _label(parent: Node, value: String) -> Label:
+	var label := Label.new()
+	label.text = value
+	parent.add_child(label)
+	return label
+
+func _button(parent: Node, value: String, action: Callable, disabled := false) -> void:
+	var button := Button.new()
+	button.text = value
+	button.disabled = disabled
+	button.pressed.connect(action)
+	parent.add_child(button)
