@@ -1,0 +1,21 @@
+{
+  "status": "frozen after relevant-input fingerprint review;12/0+compile0; unwired",
+  "files": [
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "f525de360abfeb31e8f4766dda53e29ccb6ec9f45892f4ac348493a490319bc0"
+    },
+    {
+      "path": "docs/tasks/PREPARED_SUPPLY_ROUTE_FUEL_2026_11_11.md",
+      "sha256": "f32be61337ff48555cc4773588fe0c03f7bf3bfe5f8b41ce6c38b10828e54c8f"
+    },
+    {
+      "path": "docs/dev/prepared_supply_route_fuel_contract.md",
+      "sha256": "ca1f02705d2ad5d4873b910eae37379447d634a779f00e38ccedc3b081ac42f1"
+    },
+    {
+      "path": "docs/qa/prepared_supply_route_fuel_20261111/check.gd",
+      "sha256": "3df04d94c27d9b8083e926abe8b34903ee2fffa7080bc6940bd33826745b7c02"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Default unbound and UIboolean authority cannot prepare or mutate
+PASS: Exact capability binds once and setup consumes no global RNG
+PASS: Prepare is pure; invalid route and nonboolean reserve proof reject
+PASS: Prepared commit exactly matches old Fuel/Revision/Receipt behavior and retains Resourceowner
+PASS: Replay precedes insufficient reserve/route gates; conflicting ID never writes
+PASS: Seal/owner/objectidentity reject tampered and foreign candidates atomically
+PASS: Changed revision/Fuel invalidates pending candidate without further writes
+PASS: Unrelated noop receipt stays valid; same requested ID consumed by real noop becomes stale without revision
+PASS: Other craft/container setup stays valid; selected craft fuel absence or reregistration change becomes stale without revision
+PASS: Unrelated route stays valid; selected reverse-reserve change invalidates preparation and fresh gate
+PASS: Configure resets capability and invalidates candidates even for equal restored gameplay
+PASS: Candidate and validated patch are detached; private no-fail tail uses only checked copy
+PREPARED_SUPPLY_ROUTE_FUEL checks=12 failures=0
