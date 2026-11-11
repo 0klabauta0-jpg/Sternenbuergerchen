@@ -227,6 +227,10 @@ Verifier und diese Statusdokumentation.
   Registry-/Sperrprüfung12/12, alte Registry-, Roottakt- und Batchprüfung
   grün. Das Orbitlayout des Parallelchats 9874511c4 ist als be6b9cc74
   integriert; keine Freigabe des noch fehlenden Bereichswechsels.
+- AP04a lokale Aufnahmefixture: `SpaceCombatState` kann ausdrücklich markierte
+  Testschiffe in getrennten lokalen Bereichen aufnehmen und verhindert dort
+  Mehrfachbelegung. Prüfung7/7; normale lokale Produktaufnahme bleibt gesperrt
+  und die Fixture ersetzt keine Pflichtrotten-/Reiseprüfung.
 - AP04a Grenzen: separater `space_area_grid` prüft axiale Zellen über die
   vorhandene Offsetkonvertierung gegen strategische256×256 oder lokale
   Orbitlayout512×256-Grenzen; das strategische Grid bleibt unverändert.

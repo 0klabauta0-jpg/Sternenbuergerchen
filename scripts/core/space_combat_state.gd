@@ -9,11 +9,12 @@ var _indexed_revisions: Dictionary = {}
 var _flight_controls: Dictionary = {}
 var _flight_status: Dictionary = {}
 
-func admit_actor(definition: Dictionary, flight: RefCounted) -> Dictionary:
+func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture: bool = false) -> Dictionary:
 	# Occupancy and sweep callers still use strategic bounds. Fail closed until
 	# the complete local-area admission and navigation path is connected.
 	if flight != null and flight.get_snapshot().get("coordinate_frame", "strategic") != "strategic":
-		return {"ok":false, "reason":"local_area_not_ready"}
+		if not allow_local_fixture or not String(definition.get("craft_id", "")).begins_with("space_fixture_"):
+			return {"ok":false, "reason":"local_area_not_ready"}
 	var craft_id: String = String(definition.get("craft_id", ""))
 	var faction: String = String(definition.get("faction_id", ""))
 	var domain: String = String(definition.get("control_domain", ""))
@@ -29,7 +30,8 @@ func admit_actor(definition: Dictionary, flight: RefCounted) -> Dictionary:
 	if not unique.has(Vector2i.ZERO):
 		return {"ok": false, "reason": "invalid_footprint"}
 	var initial_cells: Array[Vector2i] = _occupied_cells(flight.get_snapshot(), footprint)
-	if initial_cells.is_empty() or not _registry.query_cells(initial_cells).is_empty():
+	var area_id: String = String(flight.get_snapshot().get("space_area_id", ""))
+	if initial_cells.is_empty() or not _registry.query_cells(initial_cells, area_id).is_empty():
 		return {"ok": false, "reason": "occupied_or_invalid_footprint"}
 	if not _registry.register_actor(craft_id, flight):
 		return {"ok": false, "reason": "duplicate_or_invalid_actor"}
