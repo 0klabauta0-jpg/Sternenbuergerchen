@@ -33,6 +33,13 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Korrektur zur produktiven Anflugtransaktion: Der Parallelstand `eb251eb23`
+  liefert die nebenwirkungsfreie `preview_departure`; Root verwendet sie vor
+  jeder Ownerveröffentlichung. Adaptertoken und äußerer Anflugbeleg stehen vor
+  Commit-Signalen; ein verschachteltes Replay markiert auch `travel_result`
+  und löst keinen zweiten Szenenübergang aus. Gezielter Reentranztest und
+  Preview-Ownerprüfung grün; das ist noch keine native Boarding-Abnahme.
+
 - Produktiver Adapter/Anflug: Der gebundene Singleplayer-Adapter lässt Root
   Boarding-/Ziel-/Padprüfung erneut ausführen. Root bereitet Fuel, Campaign
   und optional den echten Travel-Anflug gemeinsam vor und veröffentlicht

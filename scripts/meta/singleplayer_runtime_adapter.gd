@@ -561,6 +561,9 @@ func authorize_departure(craft_id: String, approach_request_id: String = "") -> 
 	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id)
 	if not result.get("ok", false): return result
 	_departure_token_by_craft[craft_id] = token
+	if approach_request_id.is_empty():
+		_simulation.publish_singleplayer_departure_events(self, token)
+		if _campaign_mode and not result.get("replayed", false): observe_campaign_progress()
 	return result
 
 func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
@@ -835,6 +838,8 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return departure
 		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
+		_simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
+		if _campaign_mode and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":
 				_space_encounter.start_encounter(craft_id)
