@@ -272,6 +272,8 @@ var _fixture_surface_group_serial := 0
 var _local_return_receipts: Dictionary = {}
 var _local_return_latest_by_craft: Dictionary = {}
 var _warp_entry_searches: Dictionary = {}
+var _warp_entry_receipts: Dictionary = {}
+var _warp_entry_latest_by_craft: Dictionary = {}
 
 func prepare_space_area_transition(craft_id: String, area_id: String, target_pose: Dictionary, expected_flight_revision: int, expected_travel_revision: int, authority_context: Dictionary) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
@@ -515,6 +517,16 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
 	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or not adapter.has_method("preview_space_warp_entry"): return {"ok":false, "reason":"adapter_required"}
 	if not is_finite(delta) or delta <= 0.0 or delta > 60.0 or _singleplayer_space_travel_owner == null or _ship_equipment_owner == null: return {"ok":false, "reason":"invalid_entry_context"}
+	var latest_id := String(_warp_entry_latest_by_craft.get(craft_id, ""))
+	var current_flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if not latest_id.is_empty() and current_flight != null and current_flight.get_snapshot().get("motion_mode") == "tactical" and _singleplayer_space_travel_owner.get_craft_snapshot(craft_id).get("phase") == "orbit":
+		var receipt: Dictionary = _warp_entry_receipts[latest_id]
+		if receipt.fleet != _singleplayer_space_travel_owner or receipt.flight != current_flight or receipt.equipment != _ship_equipment_owner or current_flight.get_snapshot().get("space_area_id") != receipt.context.target_area_id: return {"ok":false, "reason":"owner_changed"}
+		var replay_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
+		if not replay_check.get("ok", false) or not replay_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
+		var replay: Dictionary = receipt.result.duplicate(true)
+		replay["replayed"] = true; replay.travel_result["replayed"] = true
+		return replay
 	var pilot_context: Dictionary = adapter.preview_space_warp_entry(craft_id)
 	if not pilot_context.get("ok", false): _warp_entry_searches.erase(craft_id); return pilot_context
 	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
@@ -533,7 +545,7 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 		_warp_entry_searches.erase(craft_id)
 		return {"ok":false, "reason":"entry_context_changed"}
 	if state.is_empty():
-		if _warp_entry_searches.size() >= 64: return {"ok":false, "reason":"entry_capacity"}
+		if _warp_entry_searches.size() >= 64 or _warp_entry_receipts.size() >= 1024: return {"ok":false, "reason":"entry_capacity"}
 		var profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(craft_id)
 		if not profile.get("ok", false): return profile
 		if not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_mass_mismatch"}
@@ -577,7 +589,20 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 	_space_combat_state._publish_new_local_admission(admission)
 	var arrival: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
 	_warp_entry_searches.erase(craft_id)
-	return {"ok":true, "status":"complete", "space_area_id":layout.body_map_id, "travel_result":arrival}
+	var result := {"ok":true, "status":"complete", "space_area_id":layout.body_map_id, "travel_result":arrival, "receipt_id":id, "replayed":false}
+	var command := {"contract_category":"singleplayer_space_travel", "operation":"advance", "payload":payload.duplicate(true), "request_id":id}
+	_warp_entry_receipts[id] = {"fleet":_singleplayer_space_travel_owner, "flight":flight, "equipment":_ship_equipment_owner, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":result.duplicate(true), "command":command, "event_published":false}
+	_warp_entry_latest_by_craft[craft_id] = id
+	return result
+
+func publish_singleplayer_warp_entry_event(adapter: Node, receipt_id: String) -> void:
+	if _should_skip_local_tick_processing() or _departure_adapter == null or _departure_adapter.get_ref() != adapter or not _warp_entry_receipts.has(receipt_id): return
+	var receipt: Dictionary = _warp_entry_receipts[receipt_id]
+	if receipt.event_published or receipt.fleet != _singleplayer_space_travel_owner or receipt.equipment != _ship_equipment_owner: return
+	var verified: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
+	if not verified.get("ok", false) or not verified.get("replayed", false): return
+	receipt.event_published = true
+	singleplayer_command_committed.emit(receipt.command.duplicate(true), receipt.result.travel_result.duplicate(true))
 
 func preview_singleplayer_local_return_fuel(adapter: Node, craft_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}

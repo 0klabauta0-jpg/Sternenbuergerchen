@@ -33,6 +33,12 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Warpankunft-Ownerpfad speichert jetzt einen Completionreceipt vor dem
+  optionalen Observerabschluss. Gleiche Wiederholung und reentrante
+  Benachrichtigung buchen/platzieren nicht erneut; Fleet prüft den konkreten
+  Travelowner. Gezielter Test grün. Der produktive Tickanschluss bleibt bis
+  zum gesicherten lokalen Warpabflug ausdrücklich offen.
+
 - Wiederanflug nach Abbruch nutzt den schiffseigenen bezahlten Abflugbeleg,
   sofern Root den passenden bestätigten Abbruch und Reiseowner verifiziert.
   Regression: A bricht ab, ein anderer Schiffstransfer erhöht die globale

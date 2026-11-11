@@ -34,6 +34,15 @@ func _initialize() -> void:
 	for cell: Vector2i in state.get_indexed_actor_cells("ship"): assert(LAYOUT.ENTRY_BAND.has_point(GRID.to_offset(cell)))
 	assert(state.get_metadata("ship").footprint_hexes == [Vector2i.ZERO, Vector2i(1, 0)])
 	assert(not sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer").is_empty())
+	pilot.aboard = false
+	var arrived: Dictionary = flight.get_snapshot()
+	var repeated: Dictionary = sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0)
+	assert(repeated.replayed and repeated.travel_result.replayed and flight.get_snapshot() == arrived)
+	var observed := []
+	sim.singleplayer_command_committed.connect(func(_command: Dictionary, _result: Dictionary): observed.append(sim.advance_singleplayer_warp_entry(adapter, "ship", 3.0).get("replayed", false)))
+	sim.publish_singleplayer_warp_entry_event(adapter, result.receipt_id)
+	sim.publish_singleplayer_warp_entry_event(adapter, result.receipt_id)
+	assert(observed == [true] and flight.get_snapshot() == arrived)
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("SPACE_WARP_ENTRY_OWNER passed")
 	quit(0)
