@@ -33,6 +33,11 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Reise-Replay prüft zusätzlich den ursprünglichen Fleet-Kandidaten und dessen
+  Einzel-Travelowner-Epoche. Ein Reset desselben Owners mit unveränderter
+  Flight-Referenz wird sowohl produktiv als auch in der Gruppenfixture
+  abgewiesen; beide gezielten Regressionen bestanden.
+
 - Korrektur zur produktiven Anflugtransaktion: Der Parallelstand `eb251eb23`
   liefert die nebenwirkungsfreie `preview_departure`; Root verwendet sie vor
   jeder Ownerveröffentlichung. Adaptertoken und äußerer Anflugbeleg stehen vor

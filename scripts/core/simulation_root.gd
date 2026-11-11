@@ -94,6 +94,9 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 		if receipt.craft_id != craft_id or receipt.approach_request_id != approach_request_id: return {"ok":false, "reason":"request_id_conflict"}
 		if receipt.supply != _singleplayer_supply_owner or receipt.campaign != _singleplayer_campaign_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
 		if not approach_request_id.is_empty() and (receipt.fleet != _singleplayer_space_travel_owner or _singleplayer_space_travel_owner == null or receipt.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id)): return {"ok":false, "reason":"owner_changed"}
+		if not approach_request_id.is_empty():
+			var travel_replay: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.travel_candidate, receipt.travel_context)
+			if not travel_replay.get("ok", false) or not travel_replay.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		var replay: Dictionary = receipt.result.duplicate(true)
 		replay["replayed"] = true
 		if replay.has("travel_result"): replay.travel_result["replayed"] = true
@@ -170,7 +173,7 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	if not travel_context.is_empty():
 		var travel_command := {"contract_category":"singleplayer_space_travel", "operation":"begin_approach", "payload":travel_context.payload.duplicate(true), "request_id":approach_request_id}
 		events.append({"command":travel_command, "result":result.travel_result})
-	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "events":events.duplicate(true), "events_published":false}
+	_departure_group_receipts[request_id] = {"craft_id":craft_id, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "travel_candidate":travel_candidate.duplicate(true), "travel_context":travel_context.duplicate(true), "events":events.duplicate(true), "events_published":false}
 	return result
 
 func publish_singleplayer_departure_events(adapter: Node, request_id: String) -> void:
@@ -453,6 +456,8 @@ func commit_fixture_surface_group(bundle: Dictionary, context: Dictionary) -> Di
 		if prior.fleet != _singleplayer_space_travel_owner or prior.supply != _singleplayer_supply_owner or prior.campaign != _singleplayer_campaign_owner: return {"ok":false, "reason":"owner_changed"}
 		if prior.flight != _singleplayer_space_travel_owner.get_flight_state(bundle.craft_id): return {"ok":false, "reason":"owner_changed"}
 		if prior.fleet_epoch != _singleplayer_space_travel_owner.get("_space_area_epoch") or prior.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or prior.campaign_epoch != _singleplayer_campaign_owner.get("_departure_preparation_epoch"): return {"ok":false, "reason":"owner_changed"}
+		var travel_replay: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(prior.travel_candidate, prior.travel_context)
+		if not travel_replay.get("ok", false) or not travel_replay.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		return {"ok":true, "replayed":true}
 	if _fixture_surface_group_receipts.size() >= 128: return {"ok":false, "reason":"fixture_capacity"}
 	var fuel: Dictionary = bundle.fuel_command
@@ -504,7 +509,7 @@ func commit_fixture_surface_group(bundle: Dictionary, context: Dictionary) -> Di
 	_singleplayer_supply_owner._publish_prepared_route_fuel(supply_candidate, sv)
 	_singleplayer_campaign_owner._publish_prepared_departure(campaign_candidate, cv)
 	_singleplayer_space_travel_owner._publish_prepared_space_area_transition(travel_candidate, tv)
-	_fixture_surface_group_receipts[bundle.request_id] = {"signature":signature, "flight":flight, "fleet":_singleplayer_space_travel_owner, "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch"), "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch")}
+	_fixture_surface_group_receipts[bundle.request_id] = {"signature":signature, "flight":flight, "fleet":_singleplayer_space_travel_owner, "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch"), "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "travel_candidate":travel_candidate.duplicate(true), "travel_context":travel_context.duplicate(true)}
 	return {"ok":true, "replayed":false}
 
 func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
