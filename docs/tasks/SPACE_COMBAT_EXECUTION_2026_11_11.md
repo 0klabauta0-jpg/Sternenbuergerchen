@@ -239,6 +239,13 @@ Verifier und diese Statusdokumentation.
   Freigabe. Die echten Tail- und Rootinvarianten sind vor Produktanschluss
   noch gemeinsam zu reviewen; insbesondere lokaler Travel-Snapshot/Projektion,
   Root-Kontextbesitz, Rollback-/Fehlergrenzen und Events sind nicht abgenommen.
+- AP04a Ersteintrittsfixture: Ein vorhandenes Flugobjekt muss vor einem
+  Warpabschluss nicht künstlich im Kampfindex registriert sein. Die Fixture
+  prüft einen expliziten Test-Footprint vor und nimmt das identische Objekt
+  erst im Übergang in den lokalen Index auf. Eine zwischenzeitliche Aufnahme
+  wird vor Mutation abgewiesen; gezielte Prüfung9/9, bereits registrierter
+  Reise- und Fakeownerfall grün. Footprintquelle und Aufnahmeautorität sind
+  noch Fixturewerte, nicht produktiver Rumpf-/Ownershipcontract.
 - AP04a Eintrittsverteilung: reiner deterministischer Allocator plant für
   mehrere Testschiffe getrennte vollständige Footprints im Eintrittsband,
   berücksichtigt bestehende Bereichsbelegung und verändert keinen Owner.
