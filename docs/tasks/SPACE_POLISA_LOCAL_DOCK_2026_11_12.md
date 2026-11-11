@@ -49,7 +49,9 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
 
 ## Root-/Fleet-Grenze
 
-- **Anflug:** Ein expliziter Stationsauftrag nennt Schiff und `target_id`.
+- **Anflug:** Der bestehende Movebefehl führt zum Dockgate; er erzeugt keinen
+  neuen Docknavigationsjob und keine eigene Reservierungswahrheit. Ein späterer
+  ausdrücklicher Dockcommit nennt Schiff, `target_id` und Layoutrevision.
   Root validiert aktuellen Glut-2-Area-/Flight-/Wingowner, Layoutrevision,
   vollständigen Schiffsfootprint, Gate- und Claimzustand sowie echte Pilot-/
   Crew- und bestehende Visit-/Pad-/Fuel-Voraussetzungen. Die Navigation bleibt
@@ -57,7 +59,7 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   Gate bereitet Root den vorhandenen Stationsbesuch und den Fleet-Übergang
   gemeinsam vor; alle Validierungen vor der synchronen Publikation. Retry mit
   gleicher Request-ID ist idempotent; Fehler verändern keinen Owner.
-- **Abbruch:** Vor der Commitgrenze wird nur der Anflugauftrag beendet; Schiff,
+- **Abbruch:** Vor der Commitgrenze wird nur der vorhandene Moveauftrag beendet; Schiff,
   Flugpose, Rotte und lokale Area bleiben erhalten. Nur eigene Claims werden
   freigegeben. Keine Visit-/Pad-/Fuel-Buchung und kein zweiter Pilotstatus.
   Nach erfolgreichem Commit gilt der bereits bestehende Visit-/Abreisepfad,
@@ -81,16 +83,17 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   auf. Diese Transaktion bereitet Supply (`prepare_route_fuel`), Campaign
   (`prepare_departure`) und Fleet (`prepare_space_area_transition`) vor und
   speichert `_departure_group_receipts`; das Root-Event folgt nach Commit.
-  Für lokales Polisa erhält genau dieser Pfad eine **separate Stationsgate-**
-  **prüfung** statt `preview_surface_deactivation`. Der Gameplayort bleibt
-  `location_id=polisa`, der Gatekontext bindet zusätzlich `target_id` und
-  Layoutrevision. Der resultierende Fleet-Übergang bleibt `begin_approach`;
-  `finish_space_approach` und der bestehende Visit-/Padablauf bleiben erhalten.
+  Für lokales Polisa wird ein separater Dockcommit mit eigener Stationsgate-
+  prüfung vorbereitet; er darf nicht `preview_surface_deactivation` benutzen.
+  Der Gameplayort bleibt `location_id=polisa`; der Kontext bindet zusätzlich
+  `target_id` und Layoutrevision. Eine neue Fleetoperation
+  `begin_station_dock` führt in die bestehende Visit-Übergangsphase `approach`;
+  `finish_space_approach` und der Visit-/Padablauf bleiben erhalten.
   `preview_departure` und tatsächliche Wirtschaftskandidaten werden erneut
   gelesen; ein Navigationauftrag allein belastet weder Supply noch Campaign.
 - `singleplayer_space_travel_state.gd::_prepare_space_area_transition_state`
   kennt bereits strategisches `begin_approach` für Polisa und den lokalen
-  Oberflächenzweig. Ein eigener lokaler Stationszweig muss Glut-2-Area,
+  Oberflächenzweig. Die neue Operation `begin_station_dock` muss Glut-2-Area,
   Stationstarget und Gatebeleg prüfen; er darf `surface_location_id` nicht
   umdeuten. Fleet bindet denselben unveränderten Kontext mittels
   `bind_space_area_transition_context`, prüft Kandidat und Owner-Epoche mit
@@ -98,6 +101,11 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   mit `_publish_prepared_space_area_transition`. Die vorhandenen Fleet- und
   Root-Receipts binden Request, Operation, Schiff, Context und Owner; ein
   Replay darf keine zweite Deaktivierung oder Fuel-/Campaignbuchung auslösen.
+  Ihr Context enthält exakt `operation=begin_station_dock`, Schiff, Polisa,
+  Ziel-ID, Layoutrevision und erwartete Ownerrevisionen; Dock-Request- und
+  Context-IDs erhalten den eigenen Präfix `station-dock:`. Rückkehr erhält
+  analog `undock_station` und `station-undock:`. Legacy-`begin_approach`-,
+  `enter_orbit`- und Receipt-IDs werden weder umgedeutet noch wiederverwendet.
 - `enter_space_orbit` routet heute strategische Polisa-Abreise über
   `commit_singleplayer_station_orbit` und lokale Oberflächenrückkehr über
   `commit_singleplayer_local_return`. Ein expliziter **lokaler** Stationszweig
@@ -109,7 +117,7 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   gesondert an echte Visit-/Equipment-/Pilotowner zu binden; fehlt dieser
   Nachweis, bleibt diese Variante abgewiesen und der Legacyweg erhalten.
 - Vor Commit abgebrochene Navigation ist ein lokaler Move-/Claimabbruch. Nach
-  `begin_approach` verwendet ein Abbruch die bestehende schiffsgebundene
+  `begin_station_dock` verwendet ein Abbruch die bestehende schiffsgebundene
   Cancel-/Returnquittung und deren bereits bezahlten Abflug; kein pauschales
   Fuel-Rollback. Ein späterer Reapproach prüft Gate, Pilot und Ziel neu und
   verwendet den konkreten alten Abflugbeleg ohne erneute Routenbuchung.
@@ -117,8 +125,10 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   liegt bei `space_combat_state.gd`. Stationsblock und Körpermaske einmal pro
   Area/Layoutrevision aufbereiten und im bestehenden Index-/Claimsweg nutzen,
   nicht pro Bewegungstick oder in UI neu aufbauen. Root ergänzt ausschließlich
-  für die passende Area im `get_space_area_snapshot`-DTO die lesbare Ziel-ID
-  und Layoutrevision; daraus entsteht weder ein Auftrag noch eine Freigabe.
+  für die passende Area im `get_space_area_snapshot`-DTO genau
+  `dock_targets:[{target_id:"polisa_station_dock",revision:"polisa_glut2_dock_v1"}]`,
+  sobald der statische Block-/Gatevertrag dort tatsächlich gilt. Keine Gate-
+  koordinaten als Befugnis: Root prüft tatsächliche Flight-/Footprintpräsenz.
 
 Die hier genannten Erweiterungen sind **geplant**, nicht bereits implementiert.
 Vor dem ersten Codepaket den von Parent gelieferten Deskriptorstand übernehmen
