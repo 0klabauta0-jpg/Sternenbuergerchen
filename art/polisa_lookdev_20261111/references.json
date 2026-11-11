@@ -1,0 +1,35 @@
+[
+  {
+    "path": "art\\polisa_lookdev_20261111\\references\\port_olisar_official.jpg",
+    "url": "https://static.robertsspaceindustries.com/galactapedia/upload/43778f99-9ce7-4bc5-8ab7-621a386625ea",
+    "sha256": "e0db6347286a0c1dbbe7c0b10730d6d06a4d3340d38bee925c7efb73acb64e6b",
+    "status": "external design reference only; no mesh imported"
+  },
+  {
+    "path": "art\\polisa_lookdev_20261111\\references\\port_olisar_side.webp",
+    "url": "https://media.starcitizen.tools/thumb/a/a0/Port_Olisar_Side.jpg/1280px-Port_Olisar_Side.jpg.webp",
+    "sha256": "af28135f0427c01b6dff70a4b69c825704d2776ab5177cf971103481d7e72e05",
+    "status": "external design reference only; no mesh imported"
+  },
+  {
+    "path": "art\\polisa_lookdev_20261111\\references\\port_olisar_hub.webp",
+    "url": "https://media.starcitizen.tools/thumb/c/c1/Port_Olisar_main_hub.png/1280px-Port_Olisar_main_hub.png.webp",
+    "sha256": "250c0734d4d10223e2fb8f80b31c9b72d4adc1263952a13e832125c8b66f4d9d",
+    "status": "external design reference only; no mesh imported"
+  },
+  {
+    "path": "output/native_glut_maps/polisa_native_54.png",
+    "sha256": "b125946293e88f728bff563a6687db7289833a381b71ff78aacaeb3641e11acd",
+    "status": "original native station; opened"
+  },
+  {
+    "path": "scripts/terrain/polisa_station_visual.gd",
+    "sha256": "6d6b0c337c3e810034e66ef97f30f5291088774bbe985a8c91b80121e442296d",
+    "status": "unchanged functional station visual source"
+  },
+  {
+    "path": "maps/polisa_station.json",
+    "sha256": "89e8c121a2109c90490868869206ef4ac923207f665fe4c368e799f5a536a6b4",
+    "status": "unchanged authoritative deck and marker source"
+  }
+]

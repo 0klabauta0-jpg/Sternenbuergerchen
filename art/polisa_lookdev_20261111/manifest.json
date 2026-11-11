@@ -1,0 +1,73 @@
+{
+  "schema": "sternenbuergerchen.polisa_lookdev.v1",
+  "status": "separate_native_visual_candidate",
+  "revision": "R02",
+  "engine": "Godot4.6.2 D3D12 Forward+",
+  "gpu_window_released": true,
+  "user_style_approval": false,
+  "native_gameplay_acceptance": false,
+  "metrics": {
+    "collision_nodes": 0,
+    "mesh_nodes": 8,
+    "metrics": {
+      "collision_nodes": 0,
+      "dynamic_lights": 0,
+      "mesh_nodes": 8,
+      "primitive_boxes": 238,
+      "triangles": 7116
+    },
+    "triangles": 7116
+  },
+  "deck_invariants": {
+    "tiles": 867,
+    "walkable": 807,
+    "tile_records_identical": true,
+    "only_change": "place_presentation.props[0].path",
+    "source_sha256": "89e8c121a2109c90490868869206ef4ac923207f665fe4c368e799f5a536a6b4"
+  },
+  "native_run": {
+    "label": "r02",
+    "exit_code": 0,
+    "errors": 0,
+    "warnings": 0,
+    "hidden_parent_visible": false,
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\output\\native_glut_maps\\polisa_lookdev_candidate\\profiles\\r02",
+    "arguments": [
+      "--display-driver",
+      "windows",
+      "--rendering-driver",
+      "d3d12",
+      "--rendering-method",
+      "forward_plus",
+      "--audio-driver",
+      "Dummy",
+      "--single-window",
+      "--resolution",
+      "1280x720",
+      "--wid",
+      "37557502",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110",
+      "--script",
+      "res://output/native_glut_maps/polisa_lookdev_candidate/capture_candidate.gd",
+      "--",
+      "continue-chapter",
+      "1x"
+    ]
+  },
+  "source_files": {
+    "art/polisa_lookdev_20261111/polisa_station_visual_candidate.gd": "3d591f57e160dd1d0bc07eb5fe4994ef1bcd10e11f3acce51cb6632ca7104015",
+    "art/polisa_lookdev_20261111/polisa_station_visual_candidate.tscn": "a8b5a1af83a56f6310e84ba815515c4b33e93c7e0a07c600e718e8a354a57dda",
+    "art/polisa_lookdev_20261111/TASK.md": "0a5d5bd4eb09fe895192eb3c619409b83a63aa8ccd72a78154a3a485fd634a66",
+    "art/polisa_lookdev_20261111/README.md": "fb67283c851524cda2b17cdb97fffae37ce43a55034a6d536155dca91881723d",
+    "art/polisa_lookdev_20261111/references.json": "96926fbb6c06bf7545b1c05cda55d6864bafa4721a9256a7004d16f1500eb40c",
+    "output/native_glut_maps/polisa_lookdev_candidate/polisa_station_candidate.json": "25dd4610c26a7a31f9df0d6087162f045c8524260382f522b8a6ea1cd47cff13",
+    "output/native_glut_maps/polisa_lookdev_candidate/capture_candidate.gd": "d54369212fde9d2dfd36e7db19586efaaf1d9f33f2278788e048c8f1490dfe60",
+    "output/native_glut_maps/polisa_lookdev_candidate/polisa_overview.png": "652d7ee4bbfdb95f22f917512912e108f75cfd3095018eb6c8216665f85516a0",
+    "output/native_glut_maps/polisa_lookdev_candidate/polisa_hall.png": "8375da7649c960d35c558fd90e2595b182f26977035ba8fbbf509ac2a16e1cbd",
+    "output/native_glut_maps/polisa_lookdev_candidate/r02.log": "ecc32ad58461d0c611cc6b16b480c7a15de44541167120dd8b05cca77cf589b2",
+    "output/native_glut_maps/polisa_lookdev_candidate/r02.json": "f8914ba186c0b18230a46e5548614a09ce69ac02f78cca9921290be7ff02399f",
+    "output/native_glut_maps/polisa_lookdev_candidate/native_metrics.json": "df2647c325ebf534d3d0bb5ade761eb3d3bae560d16a713230515086ea2649e6",
+    "output/native_glut_maps/polisa_lookdev_candidate/deck_invariants.json": "00c471c430fd597c7bbd7ecc5354f8550ccd2a81dfbe379c5f681cd927f825f0"
+  }
+}

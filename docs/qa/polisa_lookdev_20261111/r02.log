@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+POLISA_LOOKDEV_CAPTURE res://output/native_glut_maps/polisa_lookdev_candidate/polisa_overview.png error=0
+POLISA_LOOKDEV_CAPTURE res://output/native_glut_maps/polisa_lookdev_candidate/polisa_hall.png error=0
+POLISA_LOOKDEV_METRICS {"collision_nodes":0,"mesh_nodes":8,"metrics":{"collision_nodes":0,"dynamic_lights":0,"mesh_nodes":8,"primitive_boxes":238,"triangles":7116},"triangles":7116}
+PASS: polisa lookdev

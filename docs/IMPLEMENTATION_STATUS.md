@@ -12122,3 +12122,5 @@ geoeffnet. GrosseReise-/Shop-/SaveContinueabnahme ausdruecklichspaeter.
 Schiffswaffen/Komponenten-Einbau und lokaleStations-Schiffsabholung bleiben
 konkreteoffeneAusbauschritte, keine alsfertigverkaufteFunktion.
 KreativePolisa-Modellrevision ist eigener Folgeschritt. KeineMain-/EXE.
+
+Polisa R02-Visual integriert: tragender Unterbau, segmentierte Ringe, offene Halle und ausgearbeitete Pads;7116Tris/8Meshgruppen. Zwei native Kandidatenansichten von Root geoeffnet, Deck/Navigation unveraendert. Stil-/Reise-/Shopabnahme weiterhin offen. art/polisa_lookdev_20261111, docs/qa/polisa_lookdev_20261111.

@@ -1,0 +1,7 @@
+{
+  "production_script": "scripts/terrain/polisa_station_visual.gd",
+  "sha256": "48fe28de140be048d9def2c2b667bf367d537a4dff1fb38bb568307ff019a417",
+  "candidate_source_sha256": "3d591f57e160dd1d0bc07eb5fe4994ef1bcd10e11f3acce51cb6632ca7104015",
+  "change": "comment only; scene/map path unchanged",
+  "native_gameplay_acceptance": false
+}
