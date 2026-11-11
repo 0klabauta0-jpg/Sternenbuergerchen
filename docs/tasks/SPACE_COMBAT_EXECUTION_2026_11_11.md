@@ -177,6 +177,10 @@ Verifier und diese Statusdokumentation.
 
 ## Risiken / offene Punkte
 
+- Parallelcommit 615327eaf (Bewegungsschuss und Root) als 4bf5d3d41
+  integriert; Statuskonflikt mit Erhalt beider Einträge gelöst. Bewegungs-
+  schuss, Bodenkonsumenten, Rootfixture, Bereichsbatch und Raumtakt geprüft
+  und grün; keine vollständige native Freigabe.
 - Parallelcommit 6a3f9c535 (Boden-Gruppen-/3D-Bewegungsleser und Root) als
   73ddde704 integriert. Bodenbewegung, Konsumenten, Raumtakt, Bereichsflug
   und Eintrittsvorschau gezielt grün; keine umfassende native Abnahme.
