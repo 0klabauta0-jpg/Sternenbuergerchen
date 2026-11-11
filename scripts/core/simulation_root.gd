@@ -338,6 +338,18 @@ func preview_surface_approach(craft_id: String, location_id: String, expected_fl
 	if not at_gate: return {"ok":false, "reason":"not_at_approach_gate"}
 	return {"ok":true, "craft_id":craft_id, "location_id":location_id, "space_area_id":snapshot.space_area_id, "wing_id":wing_id, "flight_revision":snapshot.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "layout_revision":layout.revision, "footprint_cells":cells}
 
+func preview_surface_deactivation(craft_id: String, location_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	var gate: Dictionary = preview_surface_approach(craft_id, location_id, expected_flight_revision, expected_travel_revision, expected_area_revision, expected_wing_revision, authority_context)
+	if not gate.get("ok", false): return gate
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	var proposal := {"expected_revision":expected_flight_revision, "motion_mode":"inactive"}
+	var tick := tick_counter + 1
+	var validation: Dictionary = flight.validate_space_activity_transition(proposal, tick)
+	if not validation.get("ok", false): return validation
+	gate["activity_proposal"] = proposal
+	gate["activity_tick"] = tick
+	return gate
+
 func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictionary, power: Dictionary, authority_context: Dictionary) -> Dictionary:
 	if authority_context.get("runtime_authorized") != true:
 		return {"ok": false, "reason": "runtime_authority_required"}
