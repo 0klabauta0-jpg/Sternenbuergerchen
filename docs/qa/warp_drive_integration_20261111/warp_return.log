@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual Economy records340-point Cutlass purchase/refund entitlement
+PASS: Real Supply buys paid Hemera for refundable craft
+PASS: Real Equipment installs Hemera and returns Odyssey
+PASS: Existing transfer unloads Odyssey; craft cargo is truly empty
+PASS: Actual return_ship path refuses installed paid upgrade before refund
+PASS: Rejected return leaves Flow/Supply/Travel/Equipment/Economy byte-equivalent
+PASS: Standard drive can be moved back for reinstallation
+PASS: Standard drive restored through real Root/Supply/Equipment
+PASS: Paid upgrade safely unloaded before craft return
+PASS: Restored standard drive retains real install history; return stays explicitly blocked
+PASS: Existing callback returns genuinely unmodified empty ship and refunds once
+PASS: Unmodified ship is removed from Equipment, Supply and Travel without ghost
+PASS: Historical craft and paid component remain present and accessible
+PASS: Existing unmodified refund receipt remains idempotent
+WARP_SKIRMISH_RETURN checks=14 failures=0

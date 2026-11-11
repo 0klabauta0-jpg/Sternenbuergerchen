@@ -1,0 +1,46 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Shipped sourced Warp catalog has correct qualities and finite positive ratio
+PASS: Explicit Cutlass defaults Odyssey; generic legacy remains baseline without slot
+PASS: Component purchase cannot use global inventory fallback without real craft cargo
+PASS: Unsourced legacy cannot buy a supposedly usable Warp part
+PASS: Missing purchased part leaves both owners unchanged
+PASS: Real finite-stock purchase160Cr goes to exact craft cargo
+PASS: Purchase request replay charges once
+PASS: Wrong service/airborne evidence rejects atomically {"craft_busy":true}
+PASS: Wrong service/airborne evidence rejects atomically {"station_service_verified":false}
+PASS: Wrong service/airborne evidence rejects atomically {"location_id":"homebase"}
+PASS: Wrong slot rejects without cargo mutation
+PASS: Fractional expected revision never truncates into authority
+PASS: Actual Root publishes only after fitted Hemera and returned Odyssey agree
+PASS: Install consumes purchased part with no second charge
+PASS: Install replay never consumes or returns twice
+PASS: Conflicting ID is rejected before owner mutation
+PASS: Stale expected revision is rejected
+PASS: Same installed part does not manufacture a returned copy
+PASS: Actual Root+Travel uses equipped owner ratio and ignores UI effect
+PASS: Other craft keeps its own full baseline duration
+PASS: Returned Odyssey can be installed back through real owners
+PASS: Later equipment change cannot alter already-started duration
+PASS: Two real travel owners arrive at different fitted durations
+PASS: Next jump reads new fitted Odyssey
+PASS: Travel replay preserves frozen duration and progress
+PASS: Invalid trusted effect fails before any travel write
+PASS: Full cargo permits net1-for1 replacement and returns old drive
+PASS: Real Supply validates component request receipts on JSON restore
+PASS: Equipment+Supply JSON roundtrip preserves history and installed identity
+PASS: Rejected equipment tampering leaves live state intact: catalog
+PASS: Rejected equipment tampering leaves live state intact: foreign
+PASS: Rejected equipment tampering leaves live state intact: item
+PASS: Rejected equipment tampering leaves live state intact: receipt
+PASS: Rejected equipment tampering leaves live state intact: effect
+PASS: Rejected equipment tampering leaves live state intact: missing-history
+PASS: Supply itself rejects forged component receipt
+PASS: Cross-owner component conservation rejects duplicated cargo
+PASS: Deleting equipment subsection cannot erase paid install history
+PASS: Actual CheckpointStore accepts old home checkpoint without equipment or new offer
+PASS: Actual CheckpointStore accepts new fitted home checkpoint JSON
+PASS: Actual CheckpointStore rejects removed equipment section after installation
+PASS: Actual CheckpointStore rejects model mismatch before runtime restore
+WARP_DRIVE_SLICE checks=42 failures=0

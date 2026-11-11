@@ -1,0 +1,58 @@
+[
+  {
+    "name": "warp_slice",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "WARP_DRIVE_SLICE checks=42 failures=0"
+    ]
+  },
+  {
+    "name": "warp_return",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "WARP_SKIRMISH_RETURN checks=14 failures=0"
+    ]
+  },
+  {
+    "name": "root_binding",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "WARP_ROOT_BINDING checks=7 failures=0"
+    ]
+  },
+  {
+    "name": "local_service",
+    "exit": 0,
+    "clean": true,
+    "summary": [
+      "LOCAL_SERVICE_CONTEXT checks=30 failures=0"
+    ]
+  },
+  {
+    "name": "root_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  },
+  {
+    "name": "starter_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  },
+  {
+    "name": "star_map_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  },
+  {
+    "name": "home_presenter_compile",
+    "exit": 0,
+    "clean": true,
+    "summary": []
+  }
+]

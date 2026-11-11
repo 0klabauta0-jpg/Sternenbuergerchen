@@ -146,3 +146,5 @@ docs/qa/parallel_location_integration_20261111/** -text whitespace=-blank-at-eof
 output/native_glut_maps/parallel_location_view_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/tabletop_restplan_integration_20261111/motion_projection/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/tabletop_restplan_integration_20261111/motion_stop/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/warp_drive_slot_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/warp_drive_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol

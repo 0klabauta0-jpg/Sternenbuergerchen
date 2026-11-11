@@ -1,0 +1,69 @@
+{
+  "status": "frozen after return_ship review correction; domain42/0 + real return path14/0; touched sources compile0; no broad acceptance",
+  "files": [
+    {
+      "path": "scripts/core/singleplayer_ship_equipment_state.gd",
+      "sha256": "4feac521ce62e4ae93dc6afb4b26aec259ba1f43fce35be1b2dce117ada54a96"
+    },
+    {
+      "path": "scripts/mission/ship_equipment_catalog.gd",
+      "sha256": "6032e6cd35c3ce3cb060c3fabfb4d0ceb805d2fb8dc5a33531e3363499dbad9e"
+    },
+    {
+      "path": "data/singleplayer/ship_equipment.json",
+      "sha256": "0b00425009573d3f98878ef812558b5d6e768ca329a88f9bceda0111737a287e"
+    },
+    {
+      "path": "scripts/core/singleplayer_space_travel_state.gd",
+      "sha256": "298f46ef8caf05dc3e131ce8b5d6089730e57ae5fa92fd8d5fc62f6b158ac79e"
+    },
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "5dde2eb90e303358664cd09a5508aeba1b649612672f5b3d642e98b2ce5cc962"
+    },
+    {
+      "path": "scripts/mission/singleplayer_supply_command_contract.gd",
+      "sha256": "ee217a9cf089f2099bb3e139705a77497d55cd68a7ad19a5f6caf49306674dfc"
+    },
+    {
+      "path": "scripts/mission/inventory_transfer_contract.gd",
+      "sha256": "291d823a442668200456f1a9b80e3211d148fce1ff58d1edd9dd6ff72ecc2439"
+    },
+    {
+      "path": "scripts/meta/campaign_checkpoint_store.gd",
+      "sha256": "3dc7c63a834b6882de5a7f68876411b6adb2e4eff7bb54c528196a529d9936e1"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "de58f7bf31007c7f6fd9d7f29b7c0e54a735fe258e8f77f0f6e099a55aec22a3"
+    },
+    {
+      "path": "scripts/ui/polisa_station_screen.gd",
+      "sha256": "4bf386d4dc9358f0c401c352def6e00ddaa8cae0820eccce20b6f085aa1b9152"
+    },
+    {
+      "path": "data/singleplayer/trade_offers.json",
+      "sha256": "8a7bfdb0848baf5343041ed358047eb44dd387ab59b927fff9533d0e8e319130"
+    },
+    {
+      "path": "scripts/tests/warp_drive_slice_check.gd",
+      "sha256": "ff49685a7c118dbabc72fbd31f71ec1bdc018908eb8b33cb34796be0f64466d1"
+    },
+    {
+      "path": "docs/tasks/WARP_DRIVE_SLOT_2026_11_11.md",
+      "sha256": "c50e867ba42220f12534aa5f02de54bd2ca17e670f854207b46954b77d622b34"
+    },
+    {
+      "path": "docs/dev/warp_drive_slot_contract.md",
+      "sha256": "075a2f174ce54ac88d281f85215e357c64759ae579b969d1c23dea704e5b0fa2"
+    },
+    {
+      "path": "docs/tasks/QUANTUM_DRIVE_SLICE_AUDIT_2026_11_11.md",
+      "sha256": "5d5447e710a438b4703b68c985c4a153cfb890a7a587a2cc25f4194866ae191a"
+    },
+    {
+      "path": "scripts/tests/warp_skirmish_return_check.gd",
+      "sha256": "287094e617a6ae20caa4e29c57dd822c0f61a3b8e7bf1d705885e679bb53d822"
+    }
+  ]
+}

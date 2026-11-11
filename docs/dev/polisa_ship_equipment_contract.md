@@ -1,6 +1,19 @@
-# Polisa ship equipment: pending owner and consumer boundary
+# Polisa ship equipment and local pickup boundary
 
-Status: concrete follow-up contract, not implemented ship equipment.
+Status: first functional Cutlass Warp slot implemented on the isolated taskbranch.
+Odyssey C / Hemera A, finite cargo purchase, separate atomic installation,
+actual per-craft travel-duration consumer and validated home checkpoint.
+Quality D to A follows warp_drive_quality_contract.md. Weapon slots and local
+ship pickup remain open. The earlier audits below record the implementation
+boundary; they are not a claim of native end-to-end acceptance.
+
+Small integrated checks:42 Warp/Store,14 Skirmish return,7 Root trust-boundary,
+30 local-service regression; four Root-owned files freshly compile. Independent
+review found and corrected JSON numeric roundtrip and return-lifecycle gaps.
+Skirmish return after any drive-install history is explicitly blocked until
+a receipt-consistent retrofit retirement path exists; untouched ships unregister
+and refund normally. No large native/flight/save/performance acceptance yet.
+Evidence: docs/qa/warp_drive_integration_20261111 and warp_drive_slot_20261111.
 
 ## Read-only follow-up audit / 2026-11-11
 The smallest repeatedly reachable consumer is quantum travel duration:

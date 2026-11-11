@@ -12285,3 +12285,24 @@ PolisaR08istvomNutzergestalterischfreigegeben; keineweitereGrafikrunde. Vollstae
 Profilreadout6308e6f02 zeigt exakte Erfahrungsvorlagen oder individuelles Profil sowie vorhandene Profilwirkungen, ohne neue Werteformel. Recycling/Workbench84dd481b1 integriert: Recyclingforschung100Cr nach Industrie und gefertigtem Bergungswerkzeug; zwei salvage aus Basislager plus20Cr ergeben bestehenden12Slot-Rucksack. Kleine Quellproben24/0Profil und27/0Recycling, Root Compile und25statische Workbenchchecks; Balance und native Gesamt-/Saveabnahme offen. AP5-Readprojektion3095c11b0 und Stop-/Zentrierkernfd8ed553a integriert/geprueft, Root/Ground Compile0; keine Actor-/Kartenaktivierung.
 
 Neuer Nutzerauftrag parallele Orte: Flow bietet reinen Ansichtswechsel zu Heimat/Sternkarte/geladenen Orten und getrennte Serviceschiffwahl. Hintergrundankunft erhaelt fremden View; bestehende Driverzeiten bleiben je Ort. Gleichorts-Admission und terminaler Hintergrundcallback projizieren aktuellen Controller-/Setupzustand statt alter Planung. Polisa braucht explizites reales Serviceschiff mit erneuter Commandpruefung; veralteter Ortsintent wird abgewiesen. Werkstattzugang haengt am lebenden gebundenen Basisowner/gebauter Einrichtung, nicht an Rueckkehr aller Schiffe. Upload nur aus tatsaechlich lokalen Containern/Personen. Review korrigierte zusaetzlich verbrauchenden Piloten-Erfolgsgetter. Frische kleine Integrationsproben44/0View,30/0Service und Flow/Adapter Compile0, finaler Deltareview ohne Restblocker. Kein echter Mehrort-Kampf-/Transport-/Handels-/Save-/Performancebeleg. Checkpoint und allgemeiner waiting_pad-Handoff bleiben heimatgebunden; separater Crew-Faehrbetrieb nicht durch Navigation freigegeben. QA parallel_location_integration_20261111, Task PARALLEL_LOCATION_OPERATIONS_2026_11_11. Keine Main-/EXE-Integration.
+
+## 2026-11-11: erster funktionaler Warp-Antrieb
+Nutzername Warp-Antrieb/Warp-Sprung, Qualitaetsfolge D schwach bis A hochwertig
+als3dcb24c3b gesichert. Datierte Erkul-Referenz und konkreter lokaler7-Pad-
+Abholtask2fca7f90d. Ein echter Slot fuer explizit kanonische Cutlass: Odyssey C
+Default, Hemera A160Cr/Bestand4 vorlaeufig. Eigener Root-gebundener Equipmentowner,
+Kauf ins reale Schiffslager, atomarer separater Einbau mit Altteilrueckgabe,
+vorhandener Travelconsumer friert Dauer bei Sprungstart ein (Hemera238314/326114
+der konfigurierten Basisdauer). Keine UI-Wirkung oder neue Uhr, kein SC-Flugmodell.
+Neue Kampagne benennt ihren Starter explizit als Cutlass; unbekannte Altmodelle
+bleiben Baseline1 ohne geratenen Slot. Versionierter optionaler Equipmentteil
+im weiterhin heimatgebundenen Checkpoint, Supplybelege/Installhistory/Fleet/
+Komponentenbilanz vor Restore validiert. JSON-Floatrevisionen und bezahlter
+Upgradeverlust bei Skirmishrueckgabe im Reviewablauf korrigiert. Umgeruestete
+Schiffe bleiben auch nach Rueckbau vorlaeufig rueckgabegesperrt; unveraenderte
+Schiffe werden vollstaendig abgemeldet/erstattet. Frisch42/0 Warp+Store,14/0
+Return,7/0 Root und30/0 Service, vier Root-eigene Compilechecks0; unabh.
+Deltareview ohne Restblocker. Tabletop-Rootdateibesitz abgestimmt, keine seiner
+Hex-/Move-/Tick-/Actorbodies veraendert. Grosse native Bedien-/Reise-/Save-/
+Performanceabnahme, Waffen, lokale Schiffsabholung und Retrofit-Retirement offen.
+Keine Main-/EXE-Integration. QA warp_drive_integration_20261111.

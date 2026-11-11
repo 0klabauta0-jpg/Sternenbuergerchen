@@ -128,6 +128,16 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		fleet_ids.append(ship_id)
 	for purchased_id: String in station.ships:
 		if not fleet_ids.has(purchased_id): return {"ok":false,"reason":"checkpoint_missing_purchased_ship"}
+	var equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
+	var equipment_definitions: Array = []
+	for ship: Dictionary in fleet: equipment_definitions.append(ship.definition)
+	var equipment_validation: Dictionary
+	if payload.has("ship_equipment"):
+		if typeof(payload.ship_equipment) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_equipment_state"}
+		equipment_validation = equipment.restore_state(payload.ship_equipment, equipment_definitions, payload.supply.requests, payload.supply.get("inventory", {}))
+	else:
+		equipment_validation = equipment.validate_legacy(equipment_definitions, payload.supply.requests, payload.supply.get("inventory", {}))
+	if not equipment_validation.get("ok", false): return equipment_validation
 	if String(fleet[0].definition.get("craft_id","")) != String(craft.definition.craft_id) or JSON.stringify(fleet[0].definition,"",true) != JSON.stringify(craft.definition,"",true) or String(fleet[0].get("pilot_id","")) != String(craft.pilot_id): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
 	if payload.has("location_resources"):
 		if typeof(payload.location_resources) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_resource_checkpoint"}

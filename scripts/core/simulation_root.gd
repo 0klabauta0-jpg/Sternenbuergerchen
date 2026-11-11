@@ -57,6 +57,11 @@ var _singleplayer_campaign_owner: RefCounted
 var _singleplayer_supply_owner: RefCounted
 var _campaign_onboarding_owner: RefCounted
 var _singleplayer_space_travel_owner: RefCounted
+var _ship_equipment_owner: RefCounted
+
+
+func configure_ship_equipment(owner: RefCounted) -> void:
+	_ship_equipment_owner = owner
 
 
 func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null, travel: RefCounted = null) -> void:
@@ -168,6 +173,19 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 	if owner == null:
 		return {"ok": false, "reason": "singleplayer_owner_unavailable"}
 	var context: Dictionary = authority_context.duplicate(true)
+	# These capabilities and the travel effect come only from the bound owner.
+	# A UI payload or stale adapter projection cannot supply installed parts.
+	context.erase("prepare_ship_component_install")
+	context.erase("commit_ship_component_install")
+	if String(command.get("contract_category", "")) == "singleplayer_supply" and String(command.get("operation", "")) == "station_install_ship_component":
+		if _ship_equipment_owner == null:
+			return {"ok": false, "reason": "ship_equipment_unavailable", "message": "Warp-Werkstatt nicht verfuegbar"}
+		context["prepare_ship_component_install"] = Callable(_ship_equipment_owner, "prepare_install")
+		context["commit_ship_component_install"] = Callable(_ship_equipment_owner, "commit_prepared_install")
+	if String(command.get("contract_category", "")) == "singleplayer_space_travel" and String(command.get("operation", "")) == "start_quantum":
+		var craft_id := String(Dictionary(command.get("payload", {})).get("craft_id", ""))
+		var effect: Dictionary = _ship_equipment_owner.call("get_quantum_effect", craft_id) if _ship_equipment_owner != null else {}
+		context["quantum_duration_multiplier"] = float(effect.get("quantum_duration_multiplier", 1.0))
 	var equipment_commit: bool = String(command.get("contract_category", "")) == "singleplayer_supply" and String(command.get("operation", "")) == "inventory_equip"
 	var unit_id: String = String(Dictionary(command.get("payload", {})).get("unit_id", ""))
 	if equipment_commit:

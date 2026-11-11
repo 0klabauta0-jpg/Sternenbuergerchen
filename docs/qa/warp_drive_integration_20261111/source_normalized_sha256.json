@@ -1,0 +1,18 @@
+{
+  "scripts/core/simulation_root.gd": "86aa8e64746a1f7456aa6d469955bfdb3f0ad461ab09ea8d74043cc0522d9e32",
+  "scripts/core/singleplayer_ship_equipment_state.gd": "fc2b060629284caa5c0fafb505e03266b660c0aa3f738343a7d5aa7f4c49ca53",
+  "scripts/core/singleplayer_space_travel_state.gd": "c4a369b7830659d1bc24c6c733fe25119968f96231029c98b86b224285841fb8",
+  "scripts/core/singleplayer_supply_state.gd": "58dda3bc3ed165e3fe5bc951caeecc9bde497408bd9d1bc97e0ec8454de290a0",
+  "scripts/meta/campaign_checkpoint_store.gd": "0de6ebb98a9295d47b50a88acc8f0cee48df151d39e9817a7ed4e9f0695f078b",
+  "scripts/meta/campaign_start_configuration.gd": "b368803587fa6809b953c1a1ada92912506dc9ada69b17443f9274396abdaecc",
+  "scripts/meta/singleplayer_runtime_adapter.gd": "c3e3eca6c288f738690f0d0c421a1ae720da4c2ab5318d1ff1d03797d88f7fe3",
+  "scripts/mission/ship_equipment_catalog.gd": "190170a84fb47a50c7e76b0785e8d5a1c60aea8109d9efe32f675508f9f6dea2",
+  "scripts/mission/inventory_transfer_contract.gd": "974a4487de68baedad0b22d4cc1c4a4121f4a82d16d37526db793760ff1e566e",
+  "scripts/mission/singleplayer_supply_command_contract.gd": "61b56feb496e3697c0d2c673cda6ef89901d393fe5c8111f8666b0c56121091c",
+  "scripts/ui/polisa_station_screen.gd": "11d5211d9112219ff7e0818302c7b26815d77c6fdbccf68e6caf1cd09329b9ce",
+  "scripts/tests/warp_root_binding_check.gd": "693b2c71ba6e0fd6c3699c5a5e7fab1499ed55e75882ba37123d5bd8554762d0",
+  "scripts/tests/warp_drive_slice_check.gd": "6a8140ccb49b4f59ece8ce7f3f66860247d2463608018bd0afb384dbb2045f90",
+  "scripts/tests/warp_skirmish_return_check.gd": "2804b5e5837d904dc5f55616adaf61c152d48067f3ca018128e84d2654dc1115",
+  "data/singleplayer/ship_equipment.json": "1568d5fc5bf6addf20f0a6f6cf4f974f38a1adc0f402fba9217adb2d66e13dfb",
+  "data/singleplayer/trade_offers.json": "6c40e6f31506bee76842e75f45006e643ea5bdbee068b86fc5f87adb270f56d3"
+}

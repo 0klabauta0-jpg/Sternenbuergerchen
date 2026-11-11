@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "reference": "res://data/reference/erkul_quantum_components_20261111.json",
+  "player_term": "Warp-Antrieb",
+  "quality_order": [
+    "D",
+    "C",
+    "B",
+    "A"
+  ],
+  "models": {
+    "cutlass": {
+      "slot_id": "quantum_drive",
+      "size": 2,
+      "default_item_id": "warp_odyssey",
+      "compatible_item_ids": [
+        "warp_odyssey",
+        "warp_hemera"
+      ]
+    }
+  },
+  "items": {
+    "warp_odyssey": {
+      "name": "Odyssey",
+      "quality": "C",
+      "size": 2,
+      "quantum_duration_multiplier": 1.0
+    },
+    "warp_hemera": {
+      "name": "Hemera",
+      "quality": "A",
+      "size": 2,
+      "quantum_duration_multiplier": 0.730768994891357
+    }
+  },
+  "effect_note": "Vereinfachte relative Spiel-Reisedauer aus datierten Geschwindigkeitsreferenzen; kein Star-Citizen-Flugmodell."
+}
