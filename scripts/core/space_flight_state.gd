@@ -11,6 +11,8 @@ var _motion_mode := "grounded"
 var _mass := 1.0
 var _revision := 0
 var _tick := -1
+var _space_area_id := ""
+var _coordinate_frame := "strategic"
 
 func configure(craft_id: String, pose: Dictionary) -> Dictionary:
 	if craft_id.strip_edges().is_empty() or not _valid_pose(pose):
@@ -23,6 +25,8 @@ func configure(craft_id: String, pose: Dictionary) -> Dictionary:
 	_assist_mode = String(pose.get("assist_mode", "coupled"))
 	_motion_mode = String(pose.get("motion_mode", "grounded"))
 	_mass = float(pose.get("mass", 1.0))
+	_space_area_id = String(pose.get("space_area_id", ""))
+	_coordinate_frame = String(pose.get("coordinate_frame", "strategic"))
 	_revision = 0
 	_tick = -1
 	return {"ok": true}
@@ -30,7 +34,8 @@ func configure(craft_id: String, pose: Dictionary) -> Dictionary:
 func get_snapshot() -> Dictionary:
 	return {"craft_id": _craft_id, "position_plane": _position, "velocity_plane": _velocity,
 		"heading_rad": _heading, "angular_velocity": _angular_velocity, "assist_mode": _assist_mode,
-		"motion_mode": _motion_mode, "mass": _mass, "revision": _revision, "tick": _tick}
+		"motion_mode": _motion_mode, "mass": _mass, "revision": _revision, "tick": _tick,
+		"space_area_id": _space_area_id, "coordinate_frame": _coordinate_frame}
 
 func bind_craft(craft_id: String, allow_rebind: bool = false) -> bool:
 	if craft_id.strip_edges().is_empty() or (not allow_rebind and _craft_id != "__unassigned__" and _craft_id != craft_id):
@@ -51,6 +56,8 @@ func validate_motion(proposal: Dictionary, tick: int) -> Dictionary:
 		return {"ok": false, "reason": "stale_tick"}
 	if proposal.get("expected_revision", -1) != _revision:
 		return {"ok": false, "reason": "stale_revision"}
+	if proposal.get("space_area_id", _space_area_id) != _space_area_id or proposal.get("coordinate_frame", _coordinate_frame) != _coordinate_frame:
+		return {"ok": false, "reason": "area_transition_required"}
 	var next := get_snapshot()
 	next.merge(proposal, true)
 	if not _valid_pose(next):
@@ -83,4 +90,10 @@ static func _valid_pose(pose: Dictionary) -> bool:
 		var value: Variant = pose.get(key, 1.0 if key == "mass" else 0.0)
 		if typeof(value) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(value)): return false
 	if float(pose.get("mass", 1.0)) <= 0.0: return false
+	var area: Variant = pose.get("space_area_id", "")
+	var frame: Variant = pose.get("coordinate_frame", "strategic")
+	if typeof(area) != TYPE_STRING or typeof(frame) != TYPE_STRING: return false
+	if frame == "strategic" and not String(area).is_empty(): return false
+	if frame == "local" and String(area).strip_edges().is_empty(): return false
+	if frame not in ["strategic", "local"]: return false
 	return pose.get("assist_mode", "coupled") in ["coupled", "decoupled"] and pose.get("motion_mode", "grounded") in ["grounded", "travel", "tactical"]

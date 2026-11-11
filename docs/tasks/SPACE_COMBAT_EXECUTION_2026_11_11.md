@@ -183,6 +183,12 @@ Verifier und diese Statusdokumentation.
   Prüffälle: `docs/tasks/SPACE_ORBIT_WING_HANDOFF_2026_11_11.md`; AP04a im
   Plan. Aktuelle Implementierung erfüllt diese Vorgaben noch nicht; konkrete
   API und gemeinsam berührte Produktdateien vor Änderung abstimmen.
+- AP04a Bereichskennung: Flightstate führt `space_area_id` und
+  `coordinate_frame`; alte Zustände bleiben strategisch/ohne Bereich. Lokale
+  Zustände benötigen eine Bereichs-ID; normale Motioncommits können den
+  Rahmen nicht wechseln. Gezielte Prüfung8/8, Raumtakt-/Guidance- und
+  Fleettravelprüfungen grün. Noch keine Bereichstransition, lokaler Index
+  oder Produktanbindung; Layout-/Reisegate stammen vom parallelen Chat.
 - AP04 Pflichtrotte Owner-Vorstufe: `ensure_flying_wings` ergänzt fehlende
   Einzelrotten nach vollständiger atomarer Vorprüfung, erhält vorhandene
   Mitgliedschaften und bleibt beim Wiederholen unverändert. Fehlender Pilot
