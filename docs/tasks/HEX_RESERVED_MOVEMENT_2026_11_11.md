@@ -43,3 +43,37 @@ Facingregression24/0. View-/Actor-/Commandanbindung ist damit noch nicht erfolgt
 Frischer Review schloss Nichtregional-0-Sentinelregression mit33/1→53/0.
 Höhenskala ist nun reiner Readparameter aus vorhandenem Darstellungsowner,
 keine neue Konfigurationsvoraussetzung oder gespeicherte Ground-Wahrheit.
+
+Nächster Ownerkern: `stop_units` nimmt eine Gruppe interner Stoppabsichten
+atomar an. Aus den kanonischen zukünftigen Zellintervallen wird die transitive
+Abhängigkeit auf die nun dauerhaft gehaltenen aktuellen Zellen bestimmt.
+Alle betroffenen Routen werden zusammen zurückgenommen; andere Routen bleiben.
+Vergangene Posthandoff-Quellzellen begründen keine neue Abhängigkeit.
+Betroffene Figuren behalten ihre aktuellen exklusiven Felder. Eine angefangene
+halbe Bewegung wird innerhalb dieses Feldes stetig zum Zentrum zurückgeführt,
+statt den Actor zu teleportieren oder Verwundete mehrere Felder weiterlaufen
+zu lassen. Diese deterministische Zentrierphase liegt beim selben Ground-Owner,
+beansprucht keine fremde Kante und zählt bis zum Ende weiterhin als Bewegung.
+Neue zugesagte Segmente starten frühestens danach. Wiederholung verlängert die
+Phase nicht. Release/Kontextwechsel räumen auch diesen Zustand.
+
+Stoppindex entsteht einmal pro gebündeltem Ereignis aus aktiven Routen und
+deren höchstens drei Übergängen; kein SceneTree-/Vollkartenscan. Root soll
+Stoppabsichten vor Planung und nach Effects bündeln. Read-/Rendercalls treffen
+keine Stoppentscheidung. AP7 muss die neue Zentrierphase beim Restore erhalten
+oder vor Aktivierung als nicht unterstützten Stand ausdrücklich zurückweisen.
+
+Neue abgestimmte Ortsgrenze: Heimatbasis, Polisa und mehrere Missionen behalten
+ihre eigenen weiter tickenden Runtimes. Ein bloßer Ansichts-/Auswahlwechsel ist
+kein Stoppgrund und darf weder configure/clear noch erneute Zulassung auslösen.
+AP5 liest seine zum Owner gehörende Registry, nicht die gerade dargestellte Karte.
+Kleine Zwei-Root-/Vierfelderprobe sichert ausschließlich diesen Read-/Stopp-
+Isolationsvertrag; die tatsächliche MetaLayerFlow-/UIanbindung liegt beim
+koordinierenden Chat und wird dadurch nicht als abgeschlossen behauptet.
+
+Stoppkern-Ergebnis: MovementStop34/0, RootOwner56/0, Projektion56/0,
+ReservationOwner36/0, Planer26/0, Korridorintegration15/0, Nachbarn23/0,
+Ortsisolation9/0. Enger frischer Review: Commitmaskierung der Refreshrevision,
+Weltstart nach Metricänderung und Float-Ceil-Zentrierdauer reproduziert und
+geschlossen. Intrinsischer Offset, reine advance-Refreshmarke und exakte
+Integerticks. Noch keine echten Command-/Wunden-/Viewproducer angeschlossen.

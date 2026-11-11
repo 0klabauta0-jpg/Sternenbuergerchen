@@ -66,6 +66,38 @@ View muss seine bestehende `_get_3d_height_step()` samt Mapping-/Regionalfallbac
 weiter ein gültiger Nichtregional-Sentinel und kein Zulassungsfehler.
 Actor-/Viewanbindung, echte Commands und tatsächliche Zielankunft folgen AP5.
 
+`stop_units(unit_ids,reason)` und Root-`stop_hex_ground_units` sind interne
+autoritative, atomare Stoppgrenzen. Zukunftsintervalle aktiver Routen bestimmen
+die transitive Abhängigkeit auf die jetzt dauerhaft gehaltenen aktuellen
+Felder. Alle betroffenen Zusagen werden zusammen zurückgenommen; unabhängige
+Routen bleiben. Vergangene Posthandoff-Quellen begründen keine neue Abhängigkeit.
+
+Angefangene Bewegung zentriert innerhalb des aktuell besessenen Hex. Diese
+`movement_state.phase=centering` zählt bis zum Ende als Bewegung, hat keinen
+Feldwechsel und erlaubt neue Segmente erst nach ihrem Ende. Phasendauer besteht
+aus exakten Integer-Tickdifferenzen; Wiederholung verlängert sie nicht.
+Intrinsischer axialer Offset hält den Renderpfad auch bei geänderter Metrik im
+eigenen Feld. Release und Kontextwechsel entfernen Phase und Geometrie.
+Planersnapshots validieren Typen und aktive ganzzahlige Zentrierdeadline.
+
+Segmentgeometrie wird beim Commit rein abgeleitet vorbereitet und bleibt für
+sicheren Stopp nach Terraininvalidierung lesbar. Readcalls bauen keinen Cache.
+Terrainrevision stoppt illegale Routen samt Abhängigkeiten vor Handoff und
+erneuert weiterhin legale Profile. Metrikänderungen erhöhen jetzt auch bei
+gleicher Topologie die Registryrevision. Ein bloßer Commit verbraucht keine
+noch ausstehende Geometrieauffrischung. Geometrie bleibt privater Cache und
+darf nicht als zweite gespeicherte Gameplaywahrheit exportiert werden.
+
+Rootadapter prüft Authority und synchronen Tick, publiziert Ereignisse; echte
+Command-/Verwundungsproducer müssen erst im weiteren AP5 angeschlossen werden.
+Zentrierphase selbst muss AP7 beim Save/Restore ausdrücklich unterstützen.
+
+Ortsruntimes bleiben beim bloßen Ansichtswechsel bestehen und ticken weiter.
+Viewread ist weder Stop noch configure/clear/admit/release. Jeder Root nutzt
+seine eigene Ground-/Registryinstanz; die aktuelle Ansicht besitzt keinen
+Gameplayzustand. Kleine Zwei-Ownerprobe sichert diese Grenze, keine vollständige
+MetaLayerFlow-/UI-/Transportabnahme.
+
 ## Reine Sicht
 
 `HexVisibilityQuery.classify_candidate` prüft Hex-Registry, vorhandene Zellen,

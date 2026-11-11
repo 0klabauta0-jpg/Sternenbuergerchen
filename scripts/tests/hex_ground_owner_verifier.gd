@@ -47,7 +47,7 @@ func _run() -> void:
 	root.add_child(sim)
 	var map = MAP.new()
 	_check(map.has_method("get_tactical_grid_rules") and map.has_method("set_tactical_grid_rules")
-		and sim.has_method("configure_hex_ground_runtime") and sim.has_method("get_hex_unit_state") and sim.has_method("commit_hex_ground_plan"),
+		and sim.has_method("configure_hex_ground_runtime") and sim.has_method("get_hex_unit_state") and sim.has_method("commit_hex_ground_plan") and sim.has_method("stop_hex_ground_units"),
 		"versioned MapData and SimulationRoot owner APIs exist")
 	if failed > 0:
 		sim.free()
@@ -136,6 +136,7 @@ func _run() -> void:
 	var denied_before := denied.get_hex_ground_planning_snapshot()
 	denied.deny = true
 	_check(not denied.configure_hex_ground_runtime(legacy,terrain).ok and not denied.admit_hex_ground_units(_batch([])).ok,"authority policy rejects configuration and admission")
+	_check(not denied.call("stop_hex_ground_units",PackedStringArray(["a"]),"denied").ok and denied.get_hex_ground_planning_snapshot()==denied_before,"authority policy rejects coupled stops without mutation")
 	denied.release_hex_ground_unit("a","denied")
 	_check(denied.get_hex_ground_planning_snapshot()==denied_before,"authority policy rejects release without mutation")
 	var denied_plan:Dictionary=RESOLVER.build_hex_plan([],denied.get_hex_ground_planning_snapshot(),terrain)
@@ -148,6 +149,7 @@ func _run() -> void:
 	square.free()
 	terrain.free()
 	_check_runtime_door_navigation(sim)
+	_check_runtime_ground_stop(sim,loaded)
 	sim.free()
 	_finish()
 
@@ -171,6 +173,23 @@ func _check_runtime_door_navigation(sim: Node) -> void:
 	_check(sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i(-1,0)),terrain.grid_to_world(Vector2i.ZERO),terrain) and not sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i.ZERO),terrain.grid_to_world(Vector2i(0,1)),terrain),"actual Root stepguard admits open ramp axis and rejects lateral cliff")
 	terrain.set_runtime_tile_overrides([{"grid_position":Vector2i.ZERO,"walkable_override":false}])
 	_check(not pathfinder.can_traverse_step(Vector2i.ZERO,Vector2i(1,0),terrain) and not sim._is_local_avoidance_transition_walkable(terrain.grid_to_world(Vector2i(-1,0)),terrain.grid_to_world(Vector2i.ZERO),terrain),"closed runtime door blocks source and destination step guards")
+	terrain.free()
+
+func _check_runtime_ground_stop(sim: Node, map_data: RefCounted) -> void:
+	var terrain=REGISTRY.new()
+	terrain.configure_iso_grid(Vector2.ZERO,64,32,"hex_axial_v1")
+	terrain.register_tile(TILE.new({"tile_id":"ramp","grid_position":Vector2i.ZERO,"ramp_direction":0,"explicit_hex_ramps":true}))
+	terrain.register_tile(TILE.new({"tile_id":"upper","grid_position":Vector2i.RIGHT,"height_level":1,"explicit_hex_ramps":true}))
+	sim.configure_hex_ground_runtime(map_data,terrain)
+	sim.admit_hex_ground_units(_batch([{"unit_id":"a","grid":Vector2i.ZERO}]))
+	var plan:Dictionary=RESOLVER.build_hex_plan([{"unit_id":"a","command_id":"root_stop","priority":0,"path_grid_points":[Vector2i.ZERO,Vector2i.RIGHT],"duration_ticks_by_step":[8]}],sim.get_hex_ground_planning_snapshot(),terrain)
+	sim.commit_hex_ground_plan(plan,int(plan.expected_revision))
+	for i in range(3):sim._physics_process(0.0)
+	var before:Dictionary=sim.get_hex_motion_projection("a",0.0)
+	var stopped:Dictionary=sim.call("stop_hex_ground_units",PackedStringArray(["a"]),"new_order")
+	_check(stopped.ok and stopped.affected_unit_ids==["a"] and sim.get_hex_motion_projection("a",0.0)==before and not sim.get_hex_ground_events().is_empty(),"root stop publishes cancellation while projection remains continuous")
+	sim._physics_process(0.0)
+	_check(sim.get_hex_unit_state("a").grid==Vector2i.ZERO and sim.get_hex_unit_state("a").movement_state.phase=="centering","root clock centers a stopped unit without executing old handoff")
 	terrain.free()
 
 func _finish() -> void:
