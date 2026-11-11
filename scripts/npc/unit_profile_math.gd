@@ -6,6 +6,8 @@ const GENERALIST_SPECIALTY: String = "Generalist"
 const SECONDARY_SPECIALTY_MIN_SCORE: float = 0.65
 const SECONDARY_SPECIALTY_MAX_DISTANCE: float = 0.05
 const SPECIALTY_MIN_SCORE: float = 0.55
+const MOVING_SHOT_FACTOR_MIN: float = 0.65
+const MOVING_SHOT_FACTOR_MAX: float = 0.95
 
 const ROLE_ALIASES := {
 	"field_captain": "section_lead",
@@ -110,6 +112,7 @@ static func build_character_bundle(data: Dictionary) -> Dictionary:
 	var damage_taken_multiplier: float = toughness_to_damage_taken_multiplier(float(core_values.get("toughness", 0.0))) * contact_stability_to_damage_taken_multiplier(float(behavior_axes.get("contact_stability", 0.0)))
 	var combat_effects: Dictionary = {
 		"hit_chance_multiplier": accuracy_multiplier,
+		"moving_shot_accuracy_multiplier": accuracy_to_moving_shot_multiplier(float(core_values.get("accuracy",0.0))),
 		"speed_multiplier": speed_multiplier,
 		"hit_modifier": order_fidelity_to_hit_modifier(float(behavior_axes.get("order_fidelity", 0.0))) + autonomy_to_hit_modifier(float(behavior_axes.get("autonomy", 0.0))),
 		"evasion_modifier": signature_control_to_evasion_modifier(float(behavior_axes.get("signature_control", 0.0))),
@@ -152,6 +155,11 @@ static func initiative_to_speed_multiplier(score: float) -> float:
 
 static func accuracy_to_hit_chance_multiplier(score: float) -> float:
 	return 0.5 + clampf(score, 0.0, 1.0)
+
+
+static func accuracy_to_moving_shot_multiplier(score:float) -> float:
+	var skill:float=clampf(score,0.0,1.0) if is_finite(score) else 0.5
+	return lerpf(MOVING_SHOT_FACTOR_MIN,MOVING_SHOT_FACTOR_MAX,skill)
 
 
 static func base_speed_to_speed_multiplier(score: float) -> float:
