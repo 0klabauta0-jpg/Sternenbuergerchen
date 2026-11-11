@@ -50,6 +50,18 @@ Flight-/Rottenowner im Weltraumkampf-Chat abgestimmt. Bisherige Drei-Marker-Reis
 bleibt bis zum vollständigen Anschluss produktiv. Vertrag:
 `docs/dev/orbital_approach_contract.md`. Große Tests bleiben später.
 
+### AP5 Bewegungsschuss und lokale Profilsnapshots — 11.11.2026
+
+Vorläufiger Skillfaktor0.65..0.95 aus Coreaccuracy senkt bei tatsächlicher
+Groundbewegung inklusive Zentrierung die vorhandene Trefferchance; stationär/
+Legacy Faktor1, keine zusätzliche Würfelung. TestUnit optiert explizit in einen
+kanonischen Profilread je Beteiligtem/Effect ein; andere Actors behalten alte
+Einzelgetter ohne unbenötigte Rollen-/Skillreads. Neue Effects lesen frisch.
+MovingShot65/0, MoveConsumers65/0, SightConsumers39/0, Guards und enger Review
+grün; QA hex_moving_shot_20261111. Balance vorläufig, keine Gefechts-/Leistungs-
+abnahme oder aktive Karte. AP5 Türguard/Backoff und AP6–8 bleiben offen.
+
+
 ### AP5 Gruppenankunft und 3DProxyleser — 11.11.2026
 
 Fireteam-Start, laufende Position, Formationsanker und Ankunft lesen im Hexpfad

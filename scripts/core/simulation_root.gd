@@ -1,6 +1,7 @@
 class_name SimulationRoot
 extends Node
 
+const UNIT_PROFILE_MATH_SCRIPT=preload("res://scripts/npc/unit_profile_math.gd")
 const PERSONNEL_LOADOUT_STATE = preload("res://scripts/core/personnel_loadout_state.gd")
 var _personnel_loadout_owner: RefCounted = PERSONNEL_LOADOUT_STATE.new()
 
@@ -4179,6 +4180,15 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		return
 
 	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
+	var attacker_profile:Dictionary=_get_damage_profile_snapshot(attacker_unit)
+	var target_profile:Dictionary=attacker_profile if unit==attacker_unit else _get_damage_profile_snapshot(unit)
+	var attacker_hit_modifier:float=float(attacker_profile.hit_modifier) if attacker_profile.has("hit_modifier") else _extract_unit_hit_modifier(attacker_unit)
+	var target_evasion_modifier:float=float(target_profile.evasion_modifier) if target_profile.has("evasion_modifier") else _extract_unit_evasion_modifier(unit)
+	var height_modifier:float=_extract_height_accuracy_modifier(attacker_unit,unit)
+	var attacker_ground:Dictionary=get_hex_unit_state(attacker_unit_id)
+	var attacker_moving:bool=not attacker_ground.is_empty() and bool(attacker_ground.movement_state.moving)
+	var moving_shot_factor:float=_get_moving_shot_accuracy_multiplier(attacker_unit,attacker_profile) if attacker_moving else 1.0
+	var shot_state:Dictionary={"attacker_moving":attacker_moving,"moving_shot_accuracy_multiplier":moving_shot_factor}
 	var target_cover_score: float = _extract_effective_cover_score(unit)
 	if effect.has("target_cover_override"):
 		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
@@ -4187,22 +4197,23 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var target_cover_ratio: float = _normalize_cover_score_for_combat(target_cover_score)
 	var attacker_cover_ratio: float = _normalize_cover_score_for_combat(attacker_cover_score)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
-	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
+	hit_chance *= maxf(float(attacker_profile.hit_chance_multiplier),0.0) if attacker_profile.has("hit_chance_multiplier") else _extract_unit_accuracy_multiplier(attacker_unit)
 	hit_chance = clampf(
 		hit_chance
 		+ attacker_attack_bonus
-		+ _extract_unit_hit_modifier(attacker_unit)
-		+ _extract_height_accuracy_modifier(attacker_unit, unit)
+		+ attacker_hit_modifier
+		+ height_modifier
 		+ (attacker_cover_ratio * ATTACKER_COVER_HIT_BONUS_FACTOR)
-		- _extract_unit_evasion_modifier(unit)
+		- target_evasion_modifier
 		- (target_cover_ratio * TARGET_COVER_HIT_PENALTY_FACTOR),
 		HIT_CHANCE_MIN,
 		HIT_CHANCE_MAX
 	)
+	hit_chance=clampf(hit_chance*moving_shot_factor,HIT_CHANCE_MIN,HIT_CHANCE_MAX)
 	var roll: float = _extract_damage_roll(effect)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
 	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_ratio * TARGET_COVER_DAMAGE_PENALTY_FACTOR), DAMAGE_MULTIPLIER_MIN)
-	damage_multiplier *= _extract_unit_damage_taken_multiplier(unit)
+	damage_multiplier *= maxf(float(target_profile.damage_taken_multiplier),0.0) if target_profile.has("damage_taken_multiplier") else _extract_unit_damage_taken_multiplier(unit)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
 	if not bool(damage_model.call("resolve_hit", hit_chance, roll)):
 		_emit_damage_effect_resolution(_build_damage_effect_resolution(
@@ -4220,7 +4231,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 			attacker_cover_ratio,
 			target_cover_score,
 			target_cover_ratio,
-			is_friendly_fire
+			is_friendly_fire,
+			shot_state
 		))
 		return
 
@@ -4241,7 +4253,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 			attacker_cover_ratio,
 			target_cover_score,
 			target_cover_ratio,
-			is_friendly_fire
+			is_friendly_fire,
+			shot_state
 		))
 		return
 
@@ -4251,9 +4264,11 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"attacker_unit_id": attacker_unit_id,
 		"attacker_team_id": attacker_team_id,
 		"attacker_attack_bonus": attacker_attack_bonus,
-		"attacker_profile_hit_modifier": _extract_unit_hit_modifier(attacker_unit),
-		"target_profile_evasion_modifier": _extract_unit_evasion_modifier(unit),
-		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
+		"attacker_profile_hit_modifier": attacker_hit_modifier,
+		"target_profile_evasion_modifier": target_evasion_modifier,
+		"height_accuracy_modifier": height_modifier,
+		"attacker_moving":attacker_moving,
+		"moving_shot_accuracy_multiplier":moving_shot_factor,
 		"target_cover_score": target_cover_score,
 		"target_cover_ratio": target_cover_ratio,
 		"attacker_cover_score": attacker_cover_score,
@@ -4290,7 +4305,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		attacker_cover_ratio,
 		target_cover_score,
 		target_cover_ratio,
-		is_friendly_fire
+		is_friendly_fire,
+		shot_state
 	))
 
 
@@ -4309,7 +4325,8 @@ func _build_damage_effect_resolution(
 	attacker_cover_ratio: float,
 	target_cover_score: float,
 	target_cover_ratio: float,
-	is_friendly_fire: bool
+	is_friendly_fire: bool,
+	shot_state:Dictionary={}
 ) -> Dictionary:
 	var target_health_points: int = -1
 	var target_vital_state: String = ""
@@ -4331,6 +4348,8 @@ func _build_damage_effect_resolution(
 		"hit": did_hit,
 		"outcome": "hit" if did_hit else "miss",
 		"hit_chance_resolved": hit_chance,
+		"attacker_moving":bool(shot_state.get("attacker_moving",false)),
+		"moving_shot_accuracy_multiplier":float(shot_state.get("moving_shot_accuracy_multiplier",1.0)),
 		"roll": roll,
 		"base_damage": base_damage,
 		"damage_resolved": resolved_damage,
@@ -4628,6 +4647,27 @@ func _extract_float(value: Variant, fallback: float) -> float:
 		return float(value)
 
 	return fallback
+
+
+func _get_damage_profile_snapshot(unit) -> Dictionary:
+	# Per-effect only: a later effect must see new skill/loadout/leadership values.
+	# Explicit opt-in preserves existing individual-getter precedence elsewhere.
+	if is_instance_valid(unit) and unit.has_method("get_damage_profile_snapshot"):
+		var raw:Variant=unit.call("get_damage_profile_snapshot")
+		if typeof(raw)==TYPE_DICTIONARY:return Dictionary(raw).duplicate(false)
+	return {}
+
+
+func _get_moving_shot_accuracy_multiplier(unit,profile:Dictionary) -> float:
+	if profile.has("moving_shot_accuracy_multiplier"):
+		return clampf(float(profile.moving_shot_accuracy_multiplier),0.0,1.0)
+	var accuracy:=0.5
+	var core:Dictionary={}
+	if is_instance_valid(unit) and unit.has_method("get_character_profile_bundle"):
+		core=Dictionary(Dictionary(unit.call("get_character_profile_bundle")).get("core_values",{}))
+	if core.has("accuracy"):accuracy=float(core.accuracy)
+	elif is_instance_valid(unit) and unit.has_method("get_accuracy_skill"):accuracy=float(unit.call("get_accuracy_skill"))
+	return UNIT_PROFILE_MATH_SCRIPT.accuracy_to_moving_shot_multiplier(accuracy)
 
 
 func _extract_unit_hit_modifier(unit) -> float:

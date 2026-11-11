@@ -436,3 +436,11 @@ separatem Körperwinkel und bestehender Höhenskalierung, keine zweite Glättung
 Consumer65/0, Movement42/0, Security34/0; Review schloss vier reproduzierte
 Randfälle. QA hex_move_consumers_20261111. Kein nativer Renderer-/Spielgefühltest.
 Offen AP5: Türmutationsguard, Bewegungsschuss, Rücksetzausführung; AP6–8 folgen.
+
+AP5-Bewegungsschuss ergänzt: kanonischer Coreaccuracy-Faktor0.65..0.95 als
+vorläufige Balance, nur bei Groundbewegung inklusive Zentrierung. TestUnit
+optiert in lokalen einmaligen Effectprofilread ein, Legacygetters bleiben mit
+alter Präzedenz/benötigten Rollenreads. MovingShot65/0, MoveConsumers65/0,
+SightConsumers39/0, enger Review geschlossen; QA hex_moving_shot_20261111.
+Keine zusätzliche Würfelung oder gemessene Performanceabnahme. Weiter AP5
+Türguard und Rücksetzausführung; Lifecycle/Save/Authority/Kandidat AP6–8 folgen.
