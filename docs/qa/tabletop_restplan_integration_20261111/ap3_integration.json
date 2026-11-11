@@ -1,0 +1,15 @@
+{
+  "source_commit": "2a0ffeef8",
+  "integration_commit": "2ff978d1a",
+  "scope": "partial AP3; no map activation",
+  "files": {
+    "scripts/tests/mission_combat_loop_driver.gd": {
+      "exit": 0,
+      "sha256": "6f511d698f7a735e4fafaf2b7d920e184503223ef441eb412c920a209eb9a7c7"
+    },
+    "scripts/tests/mission_test_setup.gd": {
+      "exit": 0,
+      "sha256": "03147fe7be13a9e0a315bba3b9f633b492fdca8f87467a97fbd593c196eeaff8"
+    }
+  }
+}

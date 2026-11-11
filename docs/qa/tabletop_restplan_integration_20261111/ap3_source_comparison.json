@@ -1,0 +1,15 @@
+{
+  "scope": "saved AP3 scripts equal source commit blobs",
+  "files": {
+    "scripts/core/fog_of_war_system.gd": true,
+    "scripts/core/hex_detection_state.gd": true,
+    "scripts/core/hex_sight_runtime_adapter.gd": true,
+    "scripts/core/simulation_root.gd": true,
+    "scripts/tactical/combat_fire_decision_resolver.gd": true,
+    "scripts/tests/hex_detection_verifier.gd": true,
+    "scripts/tests/hex_sight_consumers_verifier.gd": true,
+    "scripts/tests/mission_combat_loop_driver.gd": true,
+    "scripts/tests/mission_test_setup.gd": true,
+    "scripts/tests/run_hex_tactical_check.py": true
+  }
+}

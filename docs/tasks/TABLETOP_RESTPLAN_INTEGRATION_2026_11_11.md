@@ -27,3 +27,7 @@ Aktivierung braucht erst konsistente Owner, Sicht-/Schuss-/FoW-Verbraucher, Faci
 
 ## Gesicherte Integration
 AP1 814faabac nach unabhaengigem statischem Review konfliktfrei als 7b532a316 uebernommen. SimulationRoot und TerrainMapData im gemeinsamen Stand check-only Exit0. Die frueheren 39/0 sind AP1-Quellbelege, keine erneut ausgefuehrte Integrationsmatrix. Version3 bleibt erhalten; kein Kartenfile aktiviert. Nachweise docs/qa/tabletop_restplan_integration_20261111.
+
+AP3-Reader 2a0ffeef8 nach unabhaengigem Review konfliktfrei als 2ff978d1a uebernommen. Driver/Setup im gemeinsamen Stand jeweils Compile0; keine erneute Consumer-/Gefechtmatrix. Neue Karten bleiben inaktiv. Sicherung/Facing/Overwatch und AP4-8 werden abgestimmt weiterbearbeitet.
+
+Restpakete integriert: Bergungswerkzeug-Forschung 1f676bfbc (kleine Industrie22/0, Schutz24/0), Polisa-Tank-/Frachtservice538eb737e (kleine11/0), Workbench-Baseline ba4135069 (27 statische Datenpruefungen, kein neuer Browsertest). Sourcechecks ersetzen keine native Gesamtbedienung. Schiffswaffen/-komponenten und lokale Stationsabholung bleiben ausdruecklich offen.

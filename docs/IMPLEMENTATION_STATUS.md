@@ -12162,3 +12162,11 @@ Polisa R02-Visual integriert: tragender Unterbau, segmentierte Ringe, offene Hal
 Tabletop-Foundation gezielt integriert22dc4cb61+0bc338151 nach unabhaengigem statischem Review; gemeinsamerCombatVisibilityCache check-only0. NeueHexhelfer noch ohne aktiveOwner-/Consumerumschaltung; derenAP1/AP3 bleibenimTabletopChat. KeineerneuteGefecht-/FPS-Abnahme.
 
 Editor-Rampenabschluss: nichtmutierende3D-Hoehenpinselvorschau (Hexbreite, Richtungspfeil, gemeinsamePatch-/Profilquelle), OncePerStrokegegenmehrfachesAnhebenueberlappenderFelder, passiverUIRelease-/HideHook. Rampen-RayPickingaufH+.5angeglichen. EngeEditorprobe12/12inklCameraRay/UndoRedo,3EditorCompile0+ViewCompile0; unabhaengigerReviewohneBlocker. KeinGPU-/Mauslayout-/Gefechts-/FPS-Nachweis; grosseTestsaufNutzerwunschspaeter.
+
+
+## 2026-11-11: abgestimmte Tabletop- und Restplanintegration
+AP1 (7b532a316) und erstes AP3-Readerpaket (2ff978d1a) wurden nach unabhaengigem statischem Review konfliktfrei zusammengefuehrt. Root/MapData sowie Driver/Setup kompilieren im gemeinsamen Stand. Terrainversion3, Rampen H+0.5 und vorbereitete Terrainuebergabe bleiben erhalten. Keine Karte wurde aktiviert: Sicherung/Facing/Overwatch, Bewegung/Reservierungen und Lifecycle-/Save-/Netzgrenzen folgen im Tabletop-Chat. Die Quellchecks30/25/39 sind dessen kleine Paketbelege, keine neue native Abnahme hier.
+
+Die Forschungsfortsetzung (1f676bfbc) bietet nach Werkstatt und tatsaechlich gefertigtem Mining-Tool die Bergungswerkzeug-Entwicklung160Cr und getrennte Fertigung40Cr. Bestehende Supply-/Rucksack-/Wrackpfade werden genutzt; kein neues Supply-State. Kleine Industrieprobe22/0 und Schutzprobe24/0, Kosten initial, native Bergung offen. Workbench ba4135069 zeigt die vier integrierten Entwicklungen und getrennten Herstellungsaktionen;21Knoten, alte IDs und lokale Nutzerentwuerfe erhalten, nur statischer Datencheck27/0.
+
+Polisa-Service538eb737e zeigt Tank und Fracht, fordert bis10 tatsaechlich fehlende Treibstoffeinheiten an und prueft Service-/Adapterverlust vor dem Command. KleineProbe11/0, bestehender Supplyowner unveraendert. Schiffswaffen/-komponenten sowie lokale Stationsabholung bleiben offen; verbindliche Anschlussgrenzen in polisa_ship_equipment_contract.md. Grosse Tests bleiben auf Nutzerwunsch spaeter. Taskstand isoliert, keine Main-/EXE-Integration.

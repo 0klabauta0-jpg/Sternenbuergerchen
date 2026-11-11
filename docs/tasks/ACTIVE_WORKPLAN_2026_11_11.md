@@ -13,14 +13,18 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 - **Gelaende und Editor integriert:** A/B/C bleiben 512x256. H0-H8-Plateaus,
   breite gerichtete Hex-Rampen, geschlossene Eckanschluesse und Editor mit
   3D-Pinselvorschau, sechs Richtungen, Undo/Redo und Save. Gesichert bis c8c7b7d3b.
-- **Tabletop-Integration:** Foundation und AP1 sind nach statischem Review im
-  Taskstand (22dc4cb61/0bc338151/7b532a316). AP3-Verbraucher werden im abgestimmten
+- **Tabletop-Integration:** Foundation, AP1 und das erste AP3-Readerpaket sind nach statischem Review im
+  Taskstand (22dc4cb61/0bc338151/7b532a316/2ff978d1a). Kontakt, Schusspruefung und
+  FoW teilen die logische Sicht. Sicherung/Facing/Overwatch werden im abgestimmten
   Tabletop-Chat vervollstaendigt. Kartenaktivierung erst nach den weiteren
   Bewegungs-/Lifecycle-Vertraegen; bisher keine Aktivierung.
 - **Forschungsfortsetzung:** Industrie/Bergungswerkzeug auf vorhandenen
-  Forschungs-, Herstellungs- und Ortsressourcen-Ownern in Bearbeitung.
+  Forschungs-, Herstellungs- und Ortsressourcen-Ownern integriert (1f676bfbc).
+  Werkstatt und gefertigtes Mining-Tool -> Entwicklung160Cr -> Einzelwerkzeug40Cr.
+  Planungs-Workbench an den Ist-Stand angeglichen (ba4135069).
 - **Polisa:** Funktionskandidat und R02-Visual integriert; Tankservice und
-  Frachttransparenz werden ergaenzt. Schiffskomponenten brauchen noch echte
+  Frachttransparenz sind ergaenzt (538eb737e): fehlende Tankmenge und Preis,
+  echter Schiffslagerbestand, kontrollierter Service-/Adapterverlust. Schiffskomponenten brauchen noch echte
   Runtime-Verwaltung; dazu konkreter Anschlussvertrag statt funktionslosem Kauf.
 - **Pruefumfang:** Nur notwendige enge Compile-/Domainkontrollen jetzt.
   Grosse Gefechts-, Performance-, Save-/Netzwerk- und Bedienmatrizen spaeter.
@@ -37,7 +41,7 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 | Punkte-Skirmish |1000/1500Budget,3Erfahrungsstufen, Personalpakete/Rekrutieren/Entlassen, Infrastruktur und aktuell spielbare Schiffe | Finale Balance und gesamtes vereinfachtes Charakterwertesystem |
 | Charakterdarstellung | Kompakte Rollen, Status, Badges; 3Erfahrungsstufen, Detailwerte aufklappbar | Neues Wertemodell, keine abgeschafften internen Faehigkeitsachsen behaupten |
 | Portraets | Gezeichnete Varianten im Katalog statt der verworfenen neuen Fotovarianten | Persoenliche Bild-/Varianzabnahme |
-| Kampagne | Bestehende5Auftraege und erster Runtime-Schutzforschungszweig4e44521fd | Weitere Industrie-/Fahrzeugforschung, native Forschungs-/Save-Abnahme |
+| Kampagne | Bestehende5Auftraege, Schutzforschung und Bergungswerkzeug-Industriezweig | Rohstoffverarbeitung, Fahrzeug-/Flottenforschung; native Forschungs-/Bergungs-/Save-Abnahme |
 | Kampagnenplanung | Lokale editierbare `docs/reports/campaign_research_workbench.html`, Voraussetzungen/Belohnungen/Notizen/Export | Hosting oder automatische Uebernahme in Spielstaende |
 
 ## Anderer Chat: abstimmen, nicht parallel neu erfinden
@@ -156,3 +160,20 @@ oder IMPLEMENTATION_STATUS-Edit durch diesen Teilagenten; Root integriert.
 Editorgrundlage5204312c0 bleibt aktiv. Jetzt echte nichtmutierende 3D-Hoehenpinselvorschau und gleichmaessige breite Striche (jedes Feld pro Strich nur einmal); Details im EXPLICIT_HEX_RAMP_EDITOR_2026_11_11. Polisa-Funktionskandidat a7f771143 und VisualR02 f06ae7f69 integriert; native Spielwegabnahme offen. Grosse Tests bleiben zurueckgestellt.
 
 Editor-Anschluss umgesetzt: echte3D-Vorschau mitCap/Umriss/Aufwaertspfeil, gemeinsamePatchplanung, einmaligeHoehenaenderungproStrich, UI-Release-/Hide-Behandlung und korrigierteRampenauswahl. KleineProbe12/12, dreiEditorScriptsCompile0 undViewCompile0, unabhaengigerFinalreviewohneBlocker. NativeMaus-/Layout-/Farbabnahme undgrosseTests bleibenoffen.
+
+## Naechste offene Implementierungspunkte
+
+1. Tabletop-AP3 um Sicherung/Facing/Overwatch vervollstaendigen, dann
+   zeitliche Belegung/Reservierung und Bewegung (AP4/5) sowie Lifecycle-/Save-/
+   Netzgrenzen (AP6-8) im dortigen Chat fortsetzen und gesicherte Pakete integrieren.
+   Keine Kartenaktivierung aufgrund bloss vollstaendiger Reader.
+2. Vereinfachtes Werte-/Faehigkeitsmodell erst gegen diese stabilen Verbraucher
+   abgleichen; die vorhandenen drei Erfahrungsprofile ersetzen nicht automatisch
+   alle internen Achsen.
+3. Schiffswaffen/-komponenten und lokale Stationsabholung brauchen einen echten
+   Owner, Verbraucher und Persistenz. Konkrete Grenzen stehen in
+   polisa_ship_equipment_contract.md; beides ist weiterhin nicht implementiert.
+4. Verarbeitung und Fahrzeug-/Flottenforschung bleiben weitere Design-/Content-
+   schritte. Neue Fahrzeugmodelle bleiben wie beauftragt zurueckgestellt.
+5. Danach die ausdruecklich verschobene grosse Abnahme auf dem gemeinsamen Stand;
+   Main und EXE sind nach wie vor separate Schritte.
