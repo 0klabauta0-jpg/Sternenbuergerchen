@@ -2,6 +2,11 @@
 
 Diese Uebersicht ersetzt die offenen Listen in der historischen Fortschreibung darunter.
 
+Aktueller Bewegungsnachtrag: Gruppenankunft/3D-View aus 5a8544fea jetzt als
+6a3f9c535 integriert, enger gemeinsamer Consumerlauf 65/0 mit Guards grün.
+Diese beiden Punkte sind erledigt; Türguard, Bewegungsschuss, Backoff und
+AP6–8 bleiben beim Tabletop-Chat. Native Animation und große Tests später.
+
 - **Neue Orbitvorgabe:** genau ein gemeinsamer Bereich pro Stern/Planet/Mond,
   lokal 512 × 256; strategische Karte 256 × 256. Oben mittig ein großer Körperbogen
   nominal 256 Felder breit und höchstens vier tief, Ankunft unten, Oberfläche erst

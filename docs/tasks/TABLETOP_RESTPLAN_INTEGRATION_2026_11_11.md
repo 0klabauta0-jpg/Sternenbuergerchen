@@ -1,5 +1,16 @@
 # Tabletop-Abstimmung und Restplan-Integration
 
+## Neuester AP5-Anschluss: Gruppen und 3D-View
+
+5a8544fea nach unabhängigem Review als 6a3f9c535 auf 9874511c4 integriert.
+Logische Gruppenankunft und Formationsanker lesen denselben Ortsroot;
+View übernimmt stetige Höhe, Phase und committete Richtung ohne zweite Glättung.
+Nur additive Statusdokumentation konfliktbehaftet, beide Abschnitte erhalten.
+Frischer isolierter gemeinsamer Consumerlauf 65/0 einschließlich 42 Grundchecks;
+Profil-/Canary-/Sourceguards grün. Keine native Darstellung oder aktive Karte.
+QA: `docs/qa/tabletop_restplan_integration_20261111/move_consumers/`.
+Noch offen: Türguard, Bewegungsschuss, Backoff, AP6–8 und spätere große Abnahme.
+
 ## Aktueller Stand nach Polisa-Freigabe
 AP1-3, Facing/Sicherung und AP4-Owner samt Sparse-Grantfix sind integriert.
 Vollstaendiger Korridorcache04dc691bb wurde nach unabhaengigem Review als
