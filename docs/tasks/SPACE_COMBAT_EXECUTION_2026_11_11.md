@@ -69,6 +69,9 @@ Verifier und diese Statusdokumentation.
   Orbit-Gesamtverifier Start, Boarding, Abheben, Warp-Abbruch und Neustart:
   26/30; vier alte Satelliten-Orbitannahmen scheiterten, zudem fehlte ein
   importiertes Schiffsmodell. Das ist keine vollständige Orbitfreigabe.
+- AP01 Phasengrenze: Spieleraufnahme während Quantum abgelehnt; ein im
+  taktischen Modus befindlicher Flugzustand weist neue Reisecommands zurück;
+  Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Rootcheck14/14.
 - AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität und
   tatsächlicher Adapter-/Root-/Ansichtswechselcheck bei30/60/144Render-FPS,
   und vollständiger Reiselauf.

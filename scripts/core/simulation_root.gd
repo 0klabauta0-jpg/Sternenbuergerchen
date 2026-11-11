@@ -86,10 +86,14 @@ func admit_space_actor(definition: Dictionary, authority_context: Dictionary) ->
 	if definition.control_domain == "player":
 		if _singleplayer_space_travel_owner == null or not _singleplayer_space_travel_owner.has_method("get_flight_state"):
 			return {"ok": false, "reason": "flight_unavailable"}
+		if String(_singleplayer_space_travel_owner.get_snapshot(craft_id).get("phase", "")) not in ["orbit", "stopped"]:
+			return {"ok": false, "reason": "travel_active"}
 		flight = _singleplayer_space_travel_owner.get_flight_state(craft_id)
 		if flight == null or SPACE_GRID.cell_at(Vector2(flight.get_snapshot().position_plane) / SPACE_GRID.EXTENT) != cell:
 			return {"ok": false, "reason": "flight_position_mismatch"}
 	else:
+		if _singleplayer_space_travel_owner != null and _singleplayer_space_travel_owner.has_method("get_flight_state") and _singleplayer_space_travel_owner.get_flight_state(craft_id) != null:
+			return {"ok": false, "reason": "craft_identity_conflict"}
 		flight = SPACE_FLIGHT_STATE.new()
 		if not flight.configure(craft_id, {"position_plane": SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "motion_mode": "tactical"}).ok:
 			return {"ok": false, "reason": "invalid_actor"}

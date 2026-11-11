@@ -28,15 +28,26 @@ func _initialize() -> void:
 	if fleet.get_flight_state("npc1") != null or root.get_space_actor("npc1") == null: failed += 1
 	if root.admit_space_actor(enemy, {"runtime_authorized":true}).get("ok", false): failed += 1
 	var player := {"craft_id":"a", "faction_id":"player", "control_domain":"player", "start_hex":GRID.cell_at(GRID.pair(snap.position))}
+	if root.admit_space_actor(player, {"runtime_authorized":true}).get("reason") != "travel_active": failed += 1
+	for i in range(121): root._physics_process(1.0 / 60.0)
+	snap = fleet.get_snapshot("a")
+	player.start_hex = GRID.cell_at(GRID.pair(snap.position))
 	if not root.admit_space_actor(player, {"runtime_authorized":true}).get("ok", false): failed += 1
 	if root.get_space_actor("a") != fleet.get_flight_state("a"): failed += 1
+	var player_flight: RefCounted = fleet.get_flight_state("a")
+	var flight_snap: Dictionary = player_flight.get_snapshot()
+	player_flight.commit_motion({"expected_revision":flight_snap.revision, "motion_mode":"tactical"}, 1)
+	var reject_travel: Dictionary = fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":{"craft_id":"a", "target_orbit_id":"moon_orbit"}, "request_id":"new"})
+	if reject_travel.get("reason") != "combat_active": failed += 1
+	var spoof := {"craft_id":"a", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(4,4)}
+	if root.admit_space_actor(spoof, {"runtime_authorized":true}).get("reason") != "craft_identity_conflict": failed += 1
 	var invalid := {"craft_id":"npc2", "faction_id":"enemy", "control_domain":"enemy", "start_hex":Vector2i(9999,9999)}
 	if root.admit_space_actor(invalid, {"runtime_authorized":true}).get("reason") != "invalid_actor_cell": failed += 1
 	var at_30 := _simulate_frames(30)
 	if not is_equal_approx(at_30, _simulate_frames(60)) or not is_equal_approx(at_30, _simulate_frames(144)): failed += 1
 	root.free()
 	adapter.free()
-	print("SPACE_COMBAT_AP01_TICK passed=", 11 - failed, " failed=", failed)
+	print("SPACE_COMBAT_AP01_TICK passed=", 14 - failed, " failed=", failed)
 	quit(1 if failed else 0)
 
 func _simulate_frames(frame_count: int) -> float:
