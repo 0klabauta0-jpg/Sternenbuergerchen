@@ -227,10 +227,11 @@ Verifier und diese Statusdokumentation.
 - AP04a Eintrittsverteilung: reiner deterministischer Allocator plant für
   mehrere Testschiffe getrennte vollständige Footprints im Eintrittsband,
   berücksichtigt bestehende Bereichsbelegung und verändert keinen Owner.
-  Gezielte Prüfung6/6. Nicht angebunden; Suche bei dichtem Band kann bis zum
-  vollständigen Durchlauf aufwendig werden und braucht vor Produktfreigabe
-  begrenzte/inkrementelle Ausführung und Messung. Commit muss Belegung erneut
-  prüfen; Vorschau reserviert noch keine Felder.
+  Gezielte Prüfung6/6. Eine neue inkrementelle Suche bearbeitet höchstens256
+  Kandidaten pro Aufruf, prüft Flugrevisionen und erkennt zwischenzeitliche
+  Belegung; gezielte Suche6/6. Der synchrone Wrapper ist nur für Fixtures.
+  Produktanbindung, tatsächliche Kostenmessung und erneute Commitprüfung der
+  Belegung fehlen; Vorschau reserviert keine Felder.
 - AP04a Reviewkorrektur: Eintrittsvorschau prüft das **gesamte** Footprint im
   Eintrittsband, nicht nur den Anker (8/8). Erfolgreiche Fixtureübergänge
   verlassen den begrenzten Pool offener Tokens; Replayquittungen liegen
