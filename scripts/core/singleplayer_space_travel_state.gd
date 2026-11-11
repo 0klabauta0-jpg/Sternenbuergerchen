@@ -349,6 +349,28 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
 	var operation := String(context.operation)
+	if operation == "start_quantum":
+		if _phase != "orbit": return _reject("orbit_required", "Lokaler Warpstart braucht den vorhandenen Orbit")
+		var current_flight: Dictionary = _flight.get_snapshot()
+		if current_flight.get("coordinate_frame") != "local" or current_flight.get("motion_mode") != "tactical" or current_flight.get("space_area_id") != context.source_area_id or not String(context.target_area_id).is_empty(): return _reject("local_flight_required", "Lokaler Flugzustand passt nicht")
+		var source_orbit: Dictionary = Dictionary(_definition.get("orbits", {})).get(_orbit_id, {})
+		var source_body: Dictionary = Dictionary(_definition.get("bodies", {})).get(String(source_orbit.get("body_id", "")), {})
+		var expected_layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(String(source_body.get("id", "")))
+		if not expected_layout.get("ok", false) or expected_layout.body_map_id != context.source_area_id or source_body.get("position") != context.origin_position: return _reject("area_body_mismatch", "Strategischer Ursprung passt nicht zum lokalen Koerper")
+		var target_id := String(payload.get("target_orbit_id", ""))
+		var target_orbit: Dictionary = Dictionary(_definition.get("orbits", {})).get(target_id, {})
+		var target_marker := String(payload.get("target_orbit_marker_id", GRID.ORBIT_MARKER_IDS[0]))
+		var marker: Dictionary = GRID.orbit_marker(target_orbit, target_marker)
+		if marker.is_empty(): return _reject("unknown_orbit_marker", "Zielorbit oder Marker unbekannt")
+		if String(target_orbit.get("body_id", "")) == String(source_body.get("id", "")): return _reject("already_in_orbit", "Schiff ist bereits an diesem Koerper")
+		var duration := float(_definition.jump_duration_seconds) * float(context.warp_multiplier)
+		if not is_finite(duration) or duration <= 0.0: return _reject("invalid_warp_effect", "Warp-Reisedauer ungueltig")
+		var origin := Vector2(float(context.origin_position[0]), float(context.origin_position[1]))
+		var destination: Vector2 = GRID.normalized(GRID.cell_from_record(marker))
+		var control: Vector2 = GRID.route_control(origin, destination)
+		var warp_candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"next":{"phase":"quantum","orbit_id":"","orbit_marker_id":"","target_orbit_id":target_id,"target_orbit_marker_id":target_marker,"location_id":"","elapsed_seconds":0.0,"progress":0.0,"revision":_revision + 1},"warp":{"origin":origin,"destination":destination,"control":control,"route_hexes":GRID.route(origin, control, destination),"duration":duration,"heading":GRID.route_heading(origin, control, destination, 0.0)}}
+		warp_candidate["seal"] = _sign_space_area_state(warp_candidate)
+		return warp_candidate
 	# Existing strategic approach has no local Flight/index transition. Stage
 	# its phase change so departure fuel, campaign and travel publish together.
 	if operation == "begin_approach" and String(context.source_area_id).is_empty() and String(context.target_area_id).is_empty():
@@ -453,6 +475,13 @@ func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
 	_elapsed_seconds = float(next.elapsed_seconds)
 	_progress = float(next.progress)
 	_route_hexes.clear()
+	if candidate.has("warp"):
+		var warp: Dictionary = candidate.warp
+		_origin_position = warp.origin
+		_route_destination = warp.destination
+		_route_control = warp.control
+		_route_hexes.assign(warp.route_hexes)
+		_active_jump_duration_seconds = float(warp.duration)
 	_revision = int(next.revision)
 	var context: Dictionary = candidate.context
 	var result := {"ok":true,"phase":_phase,"revision":_revision,"craft_id":_craft_id,

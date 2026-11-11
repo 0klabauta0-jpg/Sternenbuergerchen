@@ -128,7 +128,7 @@ func _has_space_area_authority(authority: Object = null) -> bool:
 	return _space_area_authority != null and is_instance_valid(_space_area_authority.get_ref()) and (authority == null or _space_area_authority.get_ref() == authority)
 
 func _valid_space_area_context(context: Dictionary) -> bool:
-	if context.size() != 9: return false
+	if context.size() != (11 if context.get("operation") == "start_quantum" else 9): return false
 	for key in ["request_id","request_signature","operation","source_area_id","target_area_id","context_id","expected_phase"]:
 		if typeof(context.get(key)) != TYPE_STRING: return false
 	for key in ["request_id","request_signature","context_id","expected_phase"]:
@@ -140,6 +140,14 @@ func _valid_space_area_context(context: Dictionary) -> bool:
 		return payload.size() == 2 and typeof(payload.get("delta_seconds")) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(payload.delta_seconds))
 	if context.operation == "begin_approach":
 		return payload.size() == 2 and typeof(payload.get("location_id")) == TYPE_STRING and not String(payload.location_id).is_empty()
+	if context.operation == "start_quantum":
+		if payload.size() not in [2, 3] or typeof(payload.get("target_orbit_id")) != TYPE_STRING or String(payload.target_orbit_id).is_empty() or (payload.has("target_orbit_marker_id") and typeof(payload.target_orbit_marker_id) != TYPE_STRING): return false
+		for key in payload:
+			if key not in ["craft_id", "target_orbit_id", "target_orbit_marker_id"]: return false
+		if typeof(context.get("origin_position")) != TYPE_ARRAY or context.origin_position.size() != 2 or typeof(context.get("warp_multiplier")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(context.warp_multiplier)) or float(context.warp_multiplier) <= 0.0: return false
+		for value in context.origin_position:
+			if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)): return false
+		return true
 	return context.operation == "enter_orbit" and payload.size() == 1
 
 func bind_space_area_transition_context(context: Dictionary, authority: Object) -> Dictionary:

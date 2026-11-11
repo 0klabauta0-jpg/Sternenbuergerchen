@@ -888,6 +888,16 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 	if craft_id != String(snapshot.get("craft_id", "")) or craft_id.is_empty():
 		return _reject("craft_mismatch", "Schiff gehoert nicht zur aktiven Reise")
 	if operation in ["space_start_quantum", "space_abort_quantum"]:
+		var flight: RefCounted = _travel.get_flight_state(craft_id)
+		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
+			var warp_command := data.duplicate(true); warp_command["request_id"] = owner_request_id
+			var departure: Dictionary = _simulation.commit_singleplayer_warp_departure(self, warp_command)
+			if not departure.get("ok", false): return departure
+			var warp_result: Dictionary = departure.travel_result.duplicate(true)
+			if departure.get("replayed", false): warp_result["replayed"] = true
+			_remember_space_operation(request_id, signature, warp_result)
+			if not departure.get("replayed", false): call_deferred("_publish_warp_departure_event", String(departure.receipt_id))
+			return warp_result
 		var result := _commit("singleplayer_space_travel", "start_quantum" if operation == "space_start_quantum" else "abort_quantum", data, owner_request_id)
 		return _remember_space_operation(request_id, signature, result)
 	if operation == "space_begin_approach":
@@ -929,6 +939,12 @@ func _remember_space_operation(request_id: String, signature: String, result: Di
 	if bool(result.get("ok", false)):
 		_space_operation_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
 	return result
+
+func _publish_warp_departure_event(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_warp_departure_event(self, receipt_id)
+
+func _publish_warp_entry_event(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_warp_entry_event(self, receipt_id)
 
 func export_campaign_checkpoint() -> Dictionary:
 	if not _campaign_mode or not _travel.all_grounded():

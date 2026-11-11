@@ -90,6 +90,28 @@ func validate_deactivation(craft_id: String, expected_flight_revision: int, expe
 		return {"ok":false, "reason":"stale_spatial_index"}
 	return {"ok":true, "craft_id":craft_id, "flight":flight}
 
+func validate_local_departure(craft_id: String, proposal: Dictionary, tick: int, expected_area_revision: int) -> Dictionary:
+	var flight: RefCounted = _registry.get_actor(craft_id)
+	if flight == null: return {"ok":false, "reason":"unknown_actor"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.get("coordinate_frame") != "local" or snapshot.get("motion_mode") != "tactical" or get_area_revision(snapshot.space_area_id) != expected_area_revision: return {"ok":false, "reason":"departure_context_changed"}
+	var cells: Array[Vector2i] = preview_footprint(snapshot, _metadata[craft_id].footprint_hexes)
+	if cells.is_empty() or not _registry.actor_cells_match(craft_id, snapshot.space_area_id, cells): return {"ok":false, "reason":"stale_spatial_index"}
+	for claimant in query_navigation_claims(cells, snapshot.space_area_id):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
+	var movement: Dictionary = flight.validate_area_transition(proposal, tick)
+	if not movement.get("ok", false) or movement.next_pose.get("coordinate_frame") != "strategic" or not String(movement.next_pose.get("space_area_id", "")).is_empty() or movement.next_pose.get("motion_mode") != "travel": return {"ok":false, "reason":"invalid_transition"}
+	return {"ok":true, "craft_id":craft_id, "flight":flight}
+
+func _publish_local_departure(validation: Dictionary) -> void:
+	var craft_id: String = validation.craft_id
+	_remove_navigation_claim(craft_id)
+	_registry._publish_unregister_actor(craft_id)
+	_metadata.erase(craft_id)
+	_indexed_revisions.erase(craft_id)
+	_flight_controls.erase(craft_id)
+	_flight_status.erase(craft_id)
+
 func _publish_deactivation(validation: Dictionary) -> void:
 	# Root-private synchronous tail after fresh validation of every participant.
 	var craft_id: String = validation.craft_id

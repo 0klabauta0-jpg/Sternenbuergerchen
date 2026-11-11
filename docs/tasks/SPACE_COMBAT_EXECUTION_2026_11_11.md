@@ -33,6 +33,18 @@ Verifier und diese Statusdokumentation.
 
 ## Lokale Prüfung / Fortschritt
 
+- Lokaler Warpabflug: Fleet/Travel bereiten den Warpstart mit dem aus dem
+  Quellkörper abgeleiteten strategischen Ursprung und installiertem Warp-Effekt
+  vor. Root prüft Pilot, Rotte, vollständige lokale Belegung und Flight-/Travel-
+  Revision, entfernt den lokalen Actor und veröffentlicht Route und Flight
+  synchron; die Rotte bleibt erhalten. Adapterauftrag und reentrant sicherer
+  Receipt sind angeschlossen. Gezielt geprüft: tatsächliche Owner/Adapter,
+  falsches Ziel, fehlender Pilot, Wiederholung und Ownerzyklus mit anschließender
+  manuell aufgerufener Warpankunft im unteren Eintrittsband. Pilot im Test ist
+  ein Testdouble. Der automatische Ankunftstick bleibt weiterhin V2/strategisch,
+  bis der getrennte Polisa-Dockpfad und die Rottenpflicht beim normalen Start
+  abgesichert sind; keine V3- oder UI-Freigabe.
+
 - Warpankunft-Ownerpfad speichert jetzt einen Completionreceipt vor dem
   optionalen Observerabschluss. Gleiche Wiederholung und reentrante
   Benachrichtigung buchen/platzieren nicht erneut; Fleet prüft den konkreten
