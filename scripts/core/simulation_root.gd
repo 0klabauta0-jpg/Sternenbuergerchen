@@ -1985,11 +1985,11 @@ func _process(_delta: float) -> void:
 
 # Commands are committed before effects on every authoritative physics tick.
 func _physics_process(delta: float) -> void:
+	if _should_skip_local_tick_processing():
+		return
 	if _space_runtime_tick.is_valid():
 		_space_runtime_tick.call(delta)
 		_space_combat_state.sync_moved_actors()
-	if _should_skip_local_tick_processing():
-		return
 
 	_last_tick_delta = maxf(delta, 0.0)
 	var profile_enabled: bool = runtime_tick_budget_debug_enabled
