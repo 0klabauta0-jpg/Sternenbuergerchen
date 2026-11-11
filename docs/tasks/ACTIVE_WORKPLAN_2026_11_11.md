@@ -52,7 +52,8 @@ Draftvalidator getrennt, V3 sechs einzelne Koerperorbits einschliesslich Sonne,
 Polisa zusaetzlich als Stationsziel. LiveJSON bleibt V2. Noch offen:
 Wiederanflug nach Abbruch ist mit Source878801344 plus Mehrschiff-Fix21ec46ff5
 integriert und frisch privat geprueft. Unverdrahteter Warpankunft-Owner8990daabd
-ebenfalls integriert/geprueft; Completionreceipt/Observeraf0bd88f4 im Review.
+ebenfalls integriert/geprueft; Completionreceipt/Observeraf0bd88f4 als855036033
+nach engem Review integriert und privat im gemeinsamen Stand bestanden.
 Noch offen: produktiver lokaler Warp-Eintritt UND sichere Warp-Abreise sowie abgestimmter
 Live-V3-/Einmarkerwechsel. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
