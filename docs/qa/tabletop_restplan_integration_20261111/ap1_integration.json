@@ -1,0 +1,10 @@
+{
+  "scripts/core/simulation_root.gd": {
+    "exit": 0,
+    "sha256": "4f3a673a63bda924d1a67896f0bdb45e46190d3bf105c4840ed2bad2c11f3066"
+  },
+  "scripts/terrain/terrain_map_data.gd": {
+    "exit": 0,
+    "sha256": "4129979fcf9746be0fd02c7fa9239560810760f3368e1af4e456a6d7b952879e"
+  }
+}

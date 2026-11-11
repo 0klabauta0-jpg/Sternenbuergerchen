@@ -5,23 +5,25 @@ Der Nutzer moechte die offenen Arbeiten parallel bis zu einem nachvollziehbaren
 Abschluss voranbringen. Grosse Tests sollen jetzt entfallen und spaeter gebuendelt
 stattfinden. Karten/Hoehen bleiben ausdruecklich Teil des Auftrags. Dieser Plan
 baut auf dem noch nicht nach Main integrierten Taskbranch
-`task/native-glut-maps-20261110`, gesichert bis `e55206832`, auf.
+`task/native-glut-maps-20261110`, mit Editorabschluss `c8c7b7d3b`, auf.
 Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 
-## Jetzt in Arbeit (getrennte Besitzbereiche)
+## Aktueller Arbeitsstand
 
-1. **Hex-Rampen und Plateaus:** explizite gerichtete Rampenzelle statt automatischem
-   H1-Aufstieg. Vertrag `docs/dev/explicit_hex_ramps_contract.md`; gemeinsame
-   Map-/Tile-/Navigation-Wahrheit und Darstellung/Picking/FoW muessen folgen.
-   Normale Plateauklippen bleiben unpassierbar. Groessere Bewegungsabnahme spaeter.
-2. **Kartenkomposition:** A/B/C weiterhin je512x256. Zusammenhaengende Hochflaechen,
-   Steilklippen, erkennbare Aufstiege und ruhige Wege nach den vorhandenen
-   Glut-Referenzen. Kreativer Agent liefert getrennte Kandidaten; alte Karten,
-   Missionsmarker, Pad-/Objektfootprints und Quellen erhalten. Erst nach Sichtung
-   integrieren, nicht jeden Kandidaten als fertige Karte ausweisen.
-3. **Bedienhilfe:** Escape-Menue erhaelt eine erreichbare Kartensteuerung.
-   Tatsachliche vorhandene Kamera-/Zoom-Bindings nachlesen, keine neuen Befehle
-   und keine geaenderte Eingabebelegung. Details im folgenden Taskabschnitt.
+- **Gelaende und Editor integriert:** A/B/C bleiben 512x256. H0-H8-Plateaus,
+  breite gerichtete Hex-Rampen, geschlossene Eckanschluesse und Editor mit
+  3D-Pinselvorschau, sechs Richtungen, Undo/Redo und Save. Gesichert bis c8c7b7d3b.
+- **Tabletop-Integration:** Foundation und AP1 sind nach statischem Review im
+  Taskstand (22dc4cb61/0bc338151/7b532a316). AP3-Verbraucher werden im abgestimmten
+  Tabletop-Chat vervollstaendigt. Kartenaktivierung erst nach den weiteren
+  Bewegungs-/Lifecycle-Vertraegen; bisher keine Aktivierung.
+- **Forschungsfortsetzung:** Industrie/Bergungswerkzeug auf vorhandenen
+  Forschungs-, Herstellungs- und Ortsressourcen-Ownern in Bearbeitung.
+- **Polisa:** Funktionskandidat und R02-Visual integriert; Tankservice und
+  Frachttransparenz werden ergaenzt. Schiffskomponenten brauchen noch echte
+  Runtime-Verwaltung; dazu konkreter Anschlussvertrag statt funktionslosem Kauf.
+- **Pruefumfang:** Nur notwendige enge Compile-/Domainkontrollen jetzt.
+  Grosse Gefechts-, Performance-, Save-/Netzwerk- und Bedienmatrizen spaeter.
 
 ## Bereits integriert im Taskstand
 
@@ -40,7 +42,7 @@ Historische QA-Zahlen unten sind Belege dieses Standes, keine neuen Testlaeufe.
 
 ## Anderer Chat: abstimmen, nicht parallel neu erfinden
 
-`Tabletop-Faktoren fuer Performance pruefen` untersucht Sicht-/Erkennungsdaten,
+`Tabletop-Faktoren fuer Performance pruefen` implementiert abgestimmt Sicht-/Erkennungsdaten,
 Zielsuche, Skill-/Auftragsreaktionen, Wuerfelmodell und logische Hexbelegung.
 EinNPCproFeld ist Nutzerziel; Zeitfenster/Vorfahrt sind noch Entwurfsdetails.
 Die dortigen Square-Diagnosen sind keine FPS-Abnahme aktueller512x256Karten.

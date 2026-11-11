@@ -99,3 +99,6 @@ docs/qa/polisa_station_20261111/** -text whitespace=blank-at-eol,blank-at-eof,sp
 # Preserve exact hashes of frozen Polisa lookdev sources and native evidence.
 art/polisa_lookdev_20261111/** -text
 docs/qa/polisa_lookdev_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
+
+# Keep bounded Tabletop integration logs byte-stable.
+docs/qa/tabletop_restplan_integration_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
