@@ -72,9 +72,12 @@ Verifier und diese Statusdokumentation.
 - AP01 Phasengrenze: Spieleraufnahme während Quantum abgelehnt; ein im
   taktischen Modus befindlicher Flugzustand weist neue Reisecommands zurück;
   Gegneraufnahme kann keine Spieler-Craft-ID übernehmen. Rootcheck14/14.
-- AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität und
-  tatsächlicher Adapter-/Root-/Ansichtswechselcheck bei30/60/144Render-FPS,
-  und vollständiger Reiselauf.
+- AP01 echter Ansichtswechsel: reale Kampagne, Auftrag, Boarding, Abflug,
+  Warp, Heimatansicht während der Reise, Sternkarte und Abbruch; gezielter
+  headless Szenenlauf11/11, Exit0, keine Fehler. Beleg:
+  `docs/qa/orbit_quantum_20261109/raw/space-ap01-real-view-r3-23aabac5dd254f1cb7429e7c8e0aa636/space_combat_ap01_view_verifier.log`.
+- AP01 weiterhin offen: vollständige Bewegungstakt-Exklusivität, echter
+  Ansichtswechsel bei30/60/144Render-FPS und vollständiger Reiselauf.
 - AP02 erster reiner Resolver: gekoppeltes seitliches Gegensteuern,
   ausgekoppeltes Gleiten, getrennte Bugdrehung, Masse-/Schubwirkung und
   gemeinsames Achsbudget. Kleiner Verifier5/5. Nur Fixtureparameter;
