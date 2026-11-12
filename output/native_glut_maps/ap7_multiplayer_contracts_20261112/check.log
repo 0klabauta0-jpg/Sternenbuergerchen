@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS actual INT1 snapshot keeps existing normalised shape
+PASS unknown or malformed explicit version rejects before any normalisation
+PASS missing version remains explicit LegacyV1 compatibility
+PASS existing out-of-order guard and source immutability remain
+PASS legitimate Move target/facing intent remains accepted
+PASS actual Ground plus targeted sight/reservation keys reject at top and nested Dictionary/Array levels
+PASS real CommanderIntent and nested intent geometry/unrelated metadata retain compatibility
+PASS excessive nesting rejects clearly without silent cutoff
+PASS excessive payload nodes reject clearly without skipping late values
+PASS bounded raw walk rejects a cycle before deep-copy/category parsing
+AP7_MULTIPLAYER_CONTRACT_RESULT checks=10 failures=0 full_ap7=false
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-b51991781dea426c8c3b538425048b8c

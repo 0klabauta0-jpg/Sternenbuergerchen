@@ -93,6 +93,15 @@ const FORBIDDEN_STATE_KEYS: PackedStringArray = [
 	"vfx_events",
 	"sfx_events",
 ]
+# Targeted AP7 host facts only; unrelated legacy metadata stays compatible.
+const FORBIDDEN_HEX_AUTHORITY_KEYS: PackedStringArray = [
+	"hex_ground", "hex_state", "units_by_id", "occupant_by_grid",
+	"reservation_schema_version", "committed_segments", "committed_corridor_grants",
+	"admission_slots_by_grid", "_hex_lifecycle", "reservations",
+	"visibility", "visibility_state", "visible", "detection_state",
+]
+const MAX_AUTHORITY_PAYLOAD_DEPTH := 16
+const MAX_AUTHORITY_PAYLOAD_NODES := 4096
 const FORBIDDEN_LZ_SOURCES: PackedStringArray = [
 	"scenario",
 	"mission_scenario",
@@ -108,6 +117,10 @@ static func is_allowed_role(role_id: String) -> bool:
 func validate(command_dict: Dictionary, context: Dictionary = {}) -> Dictionary:
 	if typeof(command_dict) != TYPE_DICTIONARY:
 		return _reject("command_not_dictionary")
+
+	# Inspect raw containers before deep copy, including malformed cyclic graphs.
+	var authority_payload: Dictionary = _validate_hex_authority_payload(command_dict)
+	if not authority_payload.get("accepted",false): return authority_payload
 
 	var command: Dictionary = command_dict.duplicate(true)
 	var forbidden_key: String = _find_forbidden_state_key(command)
@@ -435,6 +448,29 @@ func _extract_command_type(command: Dictionary) -> String:
 	if command.has("type"):
 		return String(command.get("type", "")).strip_edges().to_lower()
 	return ""
+
+
+func _validate_hex_authority_payload(command: Dictionary) -> Dictionary:
+	var pending: Array = [{"value":command,"depth":0}]
+	var nodes := 1
+	while not pending.is_empty():
+		var item: Dictionary = pending.pop_back()
+		var depth: int = item.depth
+		if depth > MAX_AUTHORITY_PAYLOAD_DEPTH: return _reject("authority_payload_depth_limit")
+		var value: Variant = item.value
+		if value is Dictionary:
+			for raw_key in value:
+				var key: String = String(raw_key).strip_edges() if typeof(raw_key) in [TYPE_STRING,TYPE_STRING_NAME] else ""
+				if FORBIDDEN_HEX_AUTHORITY_KEYS.has(key): return _reject("state_mutation_key:%s" % key)
+				nodes += 1
+				if nodes > MAX_AUTHORITY_PAYLOAD_NODES: return _reject("authority_payload_node_limit")
+				pending.append({"value":value[raw_key],"depth":depth+1})
+		elif value is Array:
+			for child in value:
+				nodes += 1
+				if nodes > MAX_AUTHORITY_PAYLOAD_NODES: return _reject("authority_payload_node_limit")
+				pending.append({"value":child,"depth":depth+1})
+	return {"accepted":true}
 
 
 func _find_forbidden_state_key(command: Dictionary) -> String:

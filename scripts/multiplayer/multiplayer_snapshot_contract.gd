@@ -45,6 +45,11 @@ func validate_for_apply(snapshot: Dictionary, last_applied_tick: int) -> Diction
 	if typeof(snapshot) != TYPE_DICTIONARY:
 		return _reject("snapshot_not_dictionary")
 
+	# Validate the received declaration before the builder stamps our version.
+	# Versionless local/legacy V1 payloads remain a deliberate compatibility path.
+	if snapshot.has("schema_version") and (typeof(snapshot.schema_version) != TYPE_INT or snapshot.schema_version != SCHEMA_VERSION):
+		return _reject("unsupported_snapshot_version")
+
 	var normalized_snapshot: Dictionary = build_state_snapshot(snapshot)
 	var tick: int = int(normalized_snapshot.get("tick", 0))
 	if tick <= last_applied_tick:
