@@ -145,6 +145,43 @@ func get_assigned_entity()->Node:
 	return _current_entity if is_instance_valid(_current_entity) else null
 
 
+## Inprocess setup barrier; this is the same existing membership model.
+func prepare_unit_member_changes(removals:Array,additions:Array,preferred_entity:Node=null)->Dictionary:
+	var members:Array=_assigned_units.duplicate(false)
+	for unit in removals:members.erase(unit)
+	var added:Array=[]
+	for unit in additions:
+		if not is_instance_valid(unit) or not unit is Node or unit.is_queued_for_deletion() or not _is_assignable_unit(unit):return {"ok":false,"reason":"invalid_leader_member"}
+		if not members.has(unit):members.append(unit);added.append(unit)
+	var entity:Node=get_assigned_entity()
+	if removals.has(entity):entity=null
+	if entity==null and preferred_entity!=null and members.has(preferred_entity):entity=preferred_entity
+	return {"ok":true,"source_members":_assigned_units.duplicate(false),"source_entity":_current_entity,"members":members,"entity":entity,"added":added,"entity_changed":entity!=_current_entity}
+
+
+func validate_unit_member_changes(model:Dictionary)->bool:
+	return model.get("ok",false) and _assigned_units==model.source_members and _current_entity==model.source_entity
+
+
+func _publish_unit_member_changes(model:Dictionary)->void:
+	_assigned_units=Array(model.members).duplicate(false)
+	_current_entity=model.entity
+
+
+func finalize_unit_member_changes(model:Dictionary,guard:Callable=Callable())->void:
+	var lifetime:WeakRef=weakref(self)
+	for unit in model.added:
+		if not _unit_member_publication_current(model,guard):return
+		unit_member_added.emit(unit)
+		if not is_instance_valid(lifetime.get_ref()):return
+	if bool(model.entity_changed) and _unit_member_publication_current(model,guard):assigned.emit(model.entity)
+
+
+func _unit_member_publication_current(model:Dictionary,guard:Callable)->bool:
+	if is_queued_for_deletion() or _assigned_units!=model.members or _current_entity!=model.entity:return false
+	return guard.is_null() or (guard.is_valid() and bool(guard.call()))
+
+
 func assign_current_ftl_task_to_unit() -> bool:
 	if _current_entity == null or not _is_assignable_unit(_current_entity):
 		push_warning("RuntimeLeader.assign_current_ftl_task_to_unit expects an assigned unit-like node.")
