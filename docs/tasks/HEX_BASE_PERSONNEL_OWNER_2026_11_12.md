@@ -66,3 +66,27 @@ unverändert, Hexwalk berechnet dort keinen zweiten Weg.
 Configure legt Ground erst nach Restorestatus/-position an; kleine Fixture prüft
 die tatsächliche nachfolgende Presence-/Walkgrenze, nicht die große Basiskarte.
 Boarding/Aussteigen, Setup/Respawn und AP7 bleiben offen, AP6 noch nicht vollständig.
+
+## Nächster Teil: reale Boarding-/Aussteigegrenze
+
+Die bestehende Boardinggruppe erhält vollständige unterschiedliche Annäherungshexes
+innerhalb zweier Felder des Padankers. Der bestehende Transportowner entscheidet
+weiter über Payload und Boardingzeit. Bis zu dessen tatsächlicher Bestätigung
+bleiben Personen physisch am Boden; erst danach wird ihr Groundclaim freigegeben.
+Bereits an Bord befindliche Personen werden nicht erneut als Ground benutzt.
+
+Aussteigen prüft die ganze Gruppe und merkt freie verbundene Plätze im Ground
+vor, bevor der vorhandene Payloadowner angefragt wird. Bei Platzmangel oder
+abgelehnter Payloadänderung bleiben Bordstatus und Claims konsistent, ohne
+Teleport auf denselben Padpunkt. Bereits am Boden wartende Boardingpersonen
+behalten beim Abbruch ihr tatsächliches Hex. RemoteHandoff-Methoden des Parent
+bleiben unverändert. Kleine bekannte Transportfixture prüft den tatsächlichen
+Basis-/Rootpfad; keine volle Kampagne oder neue Reise-/Payloadwahrheit.
+
+Dieser zweite Teil ist mit Boarding53/0 und Basisowner63/0 geprüft,
+QA `hex_base_boarding_20261112`. Unabhängiger Review schloss Piloten als eigene
+Fireteammitglieder mit RED51/2→GREEN53/0: bereits ausgestiegene Personen sperren
+den Rest nicht; vollständige Fireteams reservieren ihre Plätze in einem Vorgang.
+Remote-Rekrutierungsbindung räumt vorhandenen lokalen Ground. Parent behält
+alle zusätzlichen RemoteHandoff-/Reise-/Landingpadmethoden.
+MissionSetup/Respawn, taktisches Member-Retirement und AP7/8 bleiben nächste Teile.
