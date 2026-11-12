@@ -112,6 +112,12 @@ Pilotenzuordnung, ein ausstehender Boardingvorgang oder ein fehlender
 Transportowner verweigern die Aktion. Der Owner-Verifier verwendet hierfür
 einen Transport-Testdouble; ein nativer End-to-End-Nachweis bleibt offen.
 
+Die Bodenansicht liest den atmosphärischen Flugzustand nun direkt aus der
+gemeinsamen Fluginstanz: Ein taktisch über diesem Ort fliegendes Schiff gilt
+nicht zugleich als geparkt und wird nicht als Bodenhindernis ausgegeben. Das
+allein führt keinen Start oder keine Landung durch. Die Prüfung verwendet eine
+im Test zugelassene Fluginstanz; der produktive Zustandswechsel bleibt offen.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

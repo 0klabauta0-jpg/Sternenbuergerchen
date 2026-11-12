@@ -13922,6 +13922,8 @@ func _should_keep_campaign_dropship_landed() -> bool:
 func _is_parked_campaign_dropship(craft_id: String) -> bool:
 	if not _should_keep_campaign_dropship_landed():
 		return false
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation != null and simulation.has_method("is_air_support_craft_airborne") and simulation.call("is_air_support_craft_airborne", craft_id): return false
 	if _is_active_drop_sequence_for_craft(craft_id):
 		return _drop_sequence_phase == DROP_SEQUENCE_COMPLETE and _drop_sequence_position.is_equal_approx(_drop_sequence_lz_position)
 	var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
@@ -37168,6 +37170,7 @@ func get_ground_ship_blocked_cells(ignore_craft_id:String="")->Dictionary:
 	for card in _get_mission_dropship_card_entries():
 		var id:String=String(card.get("craft_id",""))
 		if not ignore_craft_id.is_empty() and id==ignore_craft_id:continue
+		if simulation_root != null and simulation_root.has_method("is_air_support_craft_airborne") and simulation_root.call("is_air_support_craft_airborne",id):continue
 		var sequence:Dictionary=_parallel_drop_sequences_by_craft.get(id,{})
 		if _is_active_drop_sequence_for_craft(id):sequence=_capture_active_drop_sequence()
 		var phase:String=String(sequence.get("phase",card.get("state","")))

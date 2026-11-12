@@ -72,6 +72,7 @@ func _initialize() -> void:
 	var vision = Vision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
 	var transport = Transport.new(); transport.name = "TacticalController"; mission.add_child(transport)
 	var grounded_fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
+	assert(not mission_root.is_air_support_craft_airborne("ship"))
 	assert(mission_root.preview_air_support_ground_fire(grounded_fire).reason == "aircraft_not_flying")
 	var attack := {"craft_id":"ship", "target_unit_id":"enemy", "request_id":"air-order"}
 	assert(adapter.request_operation("air_support_attack_order", attack).reason == "aircraft_not_flying")
@@ -81,6 +82,7 @@ func _initialize() -> void:
 	var combat: RefCounted = source.get("_space_combat_state")
 	var admission: Dictionary = combat.validate_new_local_admission({"craft_id":"ship", "faction_id":"player", "control_domain":"player", "footprint_hexes":[Vector2i.ZERO]}, flight, proposal, 1)
 	assert(transition.ok and admission.ok); flight._publish_area_transition(transition); combat._publish_new_local_admission(admission)
+	assert(mission_root.is_air_support_craft_airborne("ship"))
 	var stats: Dictionary = equipment.get_space_combat_stats("ship"); assert(combat.bind_ship_systems("ship", stats, stats.hull_capacity).ok)
 	var fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(mission_root.preview_air_support_ground_fire(fire).reason == "attack_order_required")

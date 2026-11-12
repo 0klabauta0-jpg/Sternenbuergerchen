@@ -86,6 +86,16 @@ func _resolve_air_support_craft(craft_id: String) -> Dictionary:
 	if flight == null or wing_id.is_empty() or equipment.get_snapshot(craft_id).is_empty(): return {"ok":false, "reason":"craft_not_ready"}
 	return {"ok":true, "flight":flight, "fleet":fleet, "wings":wings, "combat":combat, "equipment":equipment, "wing_id":wing_id}
 
+func is_air_support_craft_airborne(craft_id: String) -> bool:
+	# Read the shared Flight; even a stale combat index must not make an
+	# atmospheric aircraft available for boarding on the ground.
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	var fleet: RefCounted = source.get("_singleplayer_space_travel_owner") if is_instance_valid(source) else null
+	var flight: RefCounted = fleet.get_flight_state(craft_id) if fleet != null else null
+	if flight == null: return false
+	var pose: Dictionary = flight.get_snapshot()
+	return pose.get("coordinate_frame") == "local" and pose.get("motion_mode") == "tactical" and pose.get("space_area_id") == "atmosphere:" + _air_support_location_id
+
 func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
 	# The transport owner verifies actual boarding and pending deployment.
 	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
