@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 tatsächliche spätere Wellen — 12.11.2026
+
+Vollständige gestagte Gruppe erhält erst Groundfelder, dann Lookup, Phasenzähler
+und Projektion. Platzmangel wartet mit begrenztem revisionsabhängigem Retry,
+akzeptierte Schiffsflächen bleiben gesperrt. Alte Root-/Actorbindings und
+Callback-Reinitialisierung können keine alte Aktivierung/Endmeldung veröffentlichen.
+Wellen60/0, direkter Setupnachbar62/0, Guards grün; QA hex_mission_waves_20261112.
+Slotwechsel, Respawn, Member-Retirement und AP7/8 folgen. Keine große Abnahme,
+Kartenaktivierung, Main oder EXE.
+
 ### AP6 tatsächlicher initialer Missionssetup — 12.11.2026
 
 Setup bindet Root vor Actoraktivierung und verwendet atomare begrenzte

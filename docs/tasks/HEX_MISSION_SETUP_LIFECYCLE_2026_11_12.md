@@ -65,3 +65,19 @@ Initiale Gruppenadmission und begrenztes revisionsabhängiges Warten sind damit
 angeschlossen. Laufende Slot-/Identitätsänderungen, spätere Wellenaktivierung
 und Respawn sind noch keine Lieferung dieses ersten Teilpakets. Readonly-
 Authorityfixture ersetzt keine reale Multiplayerabnahme. Keine Produktionsflags.
+
+## Geprüfter zweiter Teil: tatsächliche Wellen
+
+EnemyWaveController nimmt die vollständige nächste Welle über Root auf und
+registriert die gestagten Actors erst nach dem Groundcommit. Zähler und sichtbare
+Publikation folgen, dann erst Wellenmeldungen. Voll belegte Gruppen warten mit
+kurzem revisionsabhängigem Retry; akzeptierte fremde Schiffsflächen sind weitere
+Planereingaben. Initialisierung räumt vorherigen Feldbesitz, alte konkrete Root-
+und Actorbindungen bleiben ungültig. Reinitialisierung/Entfernen und Kontext-
+wechsel während Publikation setzen weder neue Timer zurück noch senden alte
+Abschlussmeldungen. Legacyaktivierung bleibt erhalten.
+
+Wellen60/0, direkter Setupnachbar62/0, Originale/Hashes unter
+`docs/qa/hex_mission_waves_20261112`. Laufende Slot-/Identitätsänderungen, Respawn
+und taktisches Member-Retirement bleiben weitere Lifecyclepakete. Keine große
+Abnahme oder native Leistungsbehauptung aus diesen kleinen Contractchecks.

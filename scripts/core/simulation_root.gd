@@ -735,7 +735,7 @@ func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2
 
 ## One initial/staged group with authored per-actor anchors. Root alone owns the
 ## final placement; a wave owner may defer presentation until its phase commits.
-func admit_hex_ground_setup_actors(candidates:Array[Dictionary],allow_staged:bool=false,publish:bool=true)->Dictionary:
+func admit_hex_ground_setup_actors(candidates:Array[Dictionary],allow_staged:bool=false,publish:bool=true,excluded_cells:Array[Vector2i]=[])->Dictionary:
 	var ids:=PackedStringArray()
 	for entry in candidates:
 		if not entry.get("unit_id") is String:return {"ok":false,"reason":"invalid_admission_unit"}
@@ -743,7 +743,12 @@ func admit_hex_ground_setup_actors(candidates:Array[Dictionary],allow_staged:boo
 		if entry.has("identity") and not _is_current_hex_payload({"unit_id":entry.unit_id,"_hex_lifecycle":entry.identity}):return {"ok":false,"reason":"stale_hex_lifecycle"}
 	var checked:Dictionary=_validate_hex_ground_actor_group(ids,allow_staged)
 	if not checked.ok:return checked
-	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_anchored_group(candidates,_hex_ground_registry,_hex_ground_runtime.build_planning_snapshot())
+	if excluded_cells.size()>4096:return {"ok":false,"reason":"footprint_budget"}
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var blocked:Dictionary={}
+	for grid in excluded_cells:blocked[grid]=true
+	snapshot["external_admission_blocked_grids"]=blocked
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_anchored_group(candidates,_hex_ground_registry,snapshot)
 	if not plan.ok:return plan
 	var placements:Array[Dictionary]=[]
 	placements.assign(plan.placements)
