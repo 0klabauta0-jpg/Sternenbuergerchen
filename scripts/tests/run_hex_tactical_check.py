@@ -41,6 +41,7 @@ CASES = {
     "ship_producer": ("hex_ground_ship_producer_verifier.gd", "HEX_GROUND_SHIP_PRODUCER_PASS"),
     "base_personnel": ("hex_base_personnel_owner_verifier.gd", "HEX_BASE_PERSONNEL_OWNER_PASS"),
     "base_boarding": ("hex_base_boarding_verifier.gd", "HEX_BASE_BOARDING_PASS"),
+    "base_unboard_transaction": ("hex_base_unboard_transaction_verifier.gd", "HEX_BASE_UNBOARD_TRANSACTION_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -86,7 +87,7 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case in {"movement", "movement_consumers"}:
@@ -97,11 +98,11 @@ def main() -> int:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "backoff":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
+        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction"}:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
+        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction"}:
             pending.append("scripts/tests/hex_ground_lifecycle_verifier.gd")
-        if args.case in {"base_personnel", "base_boarding"}:
+        if args.case in {"base_personnel", "base_boarding", "base_unboard_transaction"}:
             pending.extend([script_path,"scripts/tests/hex_base_personnel_owner_verifier.gd","scripts/core/base_personnel_runtime.gd"])
         if args.case == "ship_footprint":
             pending.extend(["scripts/mission/polisa_ground_body_profile.gd","scripts/mission/polisa_station_craft_runtime.gd"])
@@ -114,6 +115,8 @@ def main() -> int:
                 pending.append("scripts/mission/hex_ground_deployment_adapter.gd")
         if args.case in {"deployment_controller", "ship_producer"}:
             pending.extend(["scripts/tests/hex_deployment_phase_verifier.gd","scripts/tests/mission_tactical_sandbox_controller.gd"])
+        if args.case == "base_unboard_transaction":
+            pending.extend([script_path,"scripts/tests/hex_base_boarding_verifier.gd","scripts/meta/homebase_screen.gd"])
         if args.case == "ship_producer":
             pending.extend([script_path,"scripts/tests/hex_deployment_controller_verifier.gd"])
             paths.append("data/frontier_ship_visual_catalog.json")
@@ -140,18 +143,18 @@ def main() -> int:
                 continue
             visited.add(relative)
             paths.append(relative)
-            if args.case in {"deployment_controller", "ship_producer"} and Path(relative).suffix not in {".gd", ".tscn", ".tres", ".gdshader"}:
+            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction"} and Path(relative).suffix not in {".gd", ".tscn", ".tres", ".gdshader"}:
                 continue
             code = (source / relative).read_text(encoding="utf-8-sig")
             pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"', code))
-            if args.case in {"deployment_controller", "ship_producer"}:
+            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction"}:
                 pending.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
                 pending.extend(re.findall(r'path="res://([^\"]+)"', code))
                 pending.extend(re.findall(r'extends\s+"res://([^\"]+)"', code))
             if args.case == "movement_consumers":
                 paths.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
         paths.append("data/terrain_tile_catalog.json")
-        if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer"}:
+        if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction"}:
             paths.extend(["addons/limboai/bin/limboai.gdextension",
                           "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll"])
     paths = list(dict.fromkeys(paths))
@@ -168,7 +171,7 @@ def main() -> int:
     config = ('config_version=5\n[application]\nconfig/name=' + json.dumps(app_name)
               + '\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n')
     (project / "project.godot").write_text(config, encoding="utf-8")
-    if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer"}:
+    if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction"}:
         (project / ".godot").mkdir(exist_ok=True)
         (project / ".godot/extension_list.cfg").write_text(
             'res://addons/limboai/bin/limboai.gdextension\n', encoding="utf-8")

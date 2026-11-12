@@ -16,6 +16,7 @@ class Screen extends Node:
 	var unboard_requests:=0
 	var members:=PackedStringArray(["base_person"])
 	var pilot_id:="other"
+	var prepared_unboard:Dictionary={}
 	func _operations_craft_busy(_craft:String)->bool:return false
 	func _operations_payload_craft_for_team(_team:String)->String:return payload_craft
 	func _get_member_unit_ids_for_fireteam(_team:String)->PackedStringArray:return members.duplicate()
@@ -32,6 +33,20 @@ class Screen extends Node:
 			payload_craft=""
 		return {"ok":true}
 	func _are_homebase_payload_fireteams_boarded(_teams:PackedStringArray)->bool:return boarding_ready
+	func prepare_base_unboard(craft:String,team:String)->Dictionary:
+		unboard_requests+=1
+		if reject_unboard:return {"ok":false,"reason":"fixture_unboard_denied"}
+		var handle=RefCounted.new()
+		prepared_unboard={"handle":handle,"before":payload_craft,"craft_id":craft,"fireteam_id":team}
+		return {"ok":true,"prepared":handle,"craft_id":craft,"fireteam_id":team}
+	func validate_prepared_base_unboard(handle:RefCounted)->Dictionary:
+		return {"ok":prepared_unboard.get("handle")==handle and payload_craft==prepared_unboard.get("before"),"prepared_id":handle.get_instance_id()}
+	func _publish_prepared_base_unboard(_handle:RefCounted,_validation:Dictionary)->Dictionary:
+		payload_craft=""
+		return {"ok":true}
+	func finalize_base_unboard(_handle:RefCounted)->Dictionary:
+		prepared_unboard={}
+		return {"ok":true}
 
 func _finish()->void:
 	if failed==0:
