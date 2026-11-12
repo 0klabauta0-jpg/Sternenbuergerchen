@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 tatsächlicher Respawnverbund — 12.11.2026
+
+Rootticket bindet Timerbeginn/Actor/Manager/Lifecycle. Belegtes Ziel wartet bei
+null, Queue meldet keinen Abschluss. Ground verlegt die bestehende Belegung
+atomar, räumt nur eigene Zusagen und liest akzeptierte Schiffsmasken. Medizin,
+Timer und Receipt stehen vor ersten Pose-/Vital-/Runtimecallbacks vollständig.
+Neue Schäden, Lebenszyklen oder Managerpfade stoppen alte Folgemeldungen.
+Respawn76/0, direkter Actorvertrag24/0, Reservationsowner36/0, Guards/enge Reviews
+grün; QA hex_respawn_transaction_20261112. Slotidentität, Crew-/Visit-/Member-
+Retirement und AP7/8 folgen; keine Produktionskennung, Main, EXE oder große Abnahme.
+
 ### AP6 Wellenretirement nach Integrationsreview — 12.11.2026
 
 Vorherige Mitglieder werden bei leerer/neuer Initialisierung ebenfalls von Feld,

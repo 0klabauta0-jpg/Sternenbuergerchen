@@ -84,13 +84,17 @@ func request_respawn(unit_id: String, team_id: String, spawn_type: String = "") 
 
 	if _pending_respawns.has(unit_id):
 		return false
+	if not _should_process_locally():return false
+	var simulation:Node=get_node_or_null(simulation_root_path)
+	if simulation!=null and simulation.has_method("is_hex_ground_runtime_required") and simulation.is_hex_ground_runtime_required():
+		return bool(simulation.begin_hex_respawn(self,unit_id,team_id,_normalize_respawn_type(spawn_type)).get("ok",false))
 
 	var unit = _resolve_unit(unit_id)
 	if unit == null:
 		return false
 
 	if unit.has_method("begin_respawn"):
-		unit.call("begin_respawn")
+		if unit.call("begin_respawn")==false:return false
 
 	var normalized_spawn_type: String = _normalize_respawn_type(spawn_type)
 	var respawn_time: float = get_respawn_time(normalized_spawn_type)
@@ -113,11 +117,26 @@ func _physics_process(delta: float) -> void:
 
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null:
+		for unit_id in _pending_respawns.keys():
+			if _pending_respawns[unit_id].has("hex_ticket"):_pending_respawns.erase(unit_id)
 		return
 
 	var completed_ids: PackedStringArray = []
-	for unit_id in _pending_respawns:
+	for unit_id in _pending_respawns.keys():
+		if not _pending_respawns.has(unit_id):continue
 		var entry: Dictionary = _pending_respawns[unit_id]
+		if entry.has("hex_ticket"):
+			var bound_root=entry.root.get_ref()
+			if not is_instance_valid(bound_root) or bound_root!=simulation_root:
+				_pending_respawns.erase(unit_id)
+				continue
+			var receipt:Dictionary=bound_root.get_hex_respawn_receipt(entry.hex_ticket)
+			if not receipt.get("ok",false) or receipt.get("status","") in ["stale","cancelled"]:
+				_pending_respawns.erase(unit_id)
+				continue
+			entry.time_remaining=maxf(float(entry.time_remaining)-maxf(delta,0.0),0.0)
+			if entry.time_remaining<=0.0:bound_root.enqueue_hex_respawn(entry.hex_ticket,get_spawn_position(entry.team_id))
+			continue
 		entry["time_remaining"] = maxf(float(entry["time_remaining"]) - delta, 0.0)
 
 		if entry["time_remaining"] > 0.0:
@@ -139,6 +158,27 @@ func _physics_process(delta: float) -> void:
 	for completed_id in completed_ids:
 		_pending_respawns.erase(completed_id)
 		unit_respawn_completed.emit(completed_id)
+
+
+## Assignment-only tails called by the validated Root transaction.
+func _publish_hex_respawn_begin(unit_id:String,entry:Dictionary)->void:
+	_pending_respawns[unit_id]=entry
+
+
+func _finalize_hex_respawn_started(unit_id:String,ticket:String)->void:
+	if not _pending_respawns.has(unit_id) or _pending_respawns[unit_id].get("hex_ticket","")!=ticket:return
+	var entry:Dictionary=_pending_respawns[unit_id]
+	if entry.started:return
+	entry.started=true
+	unit_respawn_started.emit(unit_id,entry.respawn_time)
+
+
+func _publish_hex_respawn_complete(unit_id:String,ticket:String)->void:
+	if _pending_respawns.has(unit_id) and _pending_respawns[unit_id].get("hex_ticket","")==ticket:_pending_respawns.erase(unit_id)
+
+
+func _finalize_hex_respawn_completed(unit_id:String,_ticket:String)->void:
+	if not _pending_respawns.has(unit_id):unit_respawn_completed.emit(unit_id)
 
 
 func _resolve_unit(unit_id: String):
@@ -165,6 +205,7 @@ func _normalize_respawn_type(value: String) -> String:
 
 func _should_process_locally() -> bool:
 	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root!=null and simulation_root.has_method("_should_skip_local_tick_processing") and simulation_root.call("_should_skip_local_tick_processing"):return false
 	if simulation_root == null:
 		return true
 

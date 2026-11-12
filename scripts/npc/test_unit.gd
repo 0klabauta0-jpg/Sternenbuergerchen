@@ -1844,6 +1844,9 @@ func finalize_actor_respawn(prepared:RefCounted)->Dictionary:
 	record.phase="finalized" # Before pose notifications or any signal/reentry.
 	var lifetime:WeakRef=weakref(self)
 	if not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	# Root may advance lifecycle in its silent commit. Seal that resulting identity
+	# at this barrier; later callbacks may not publish into another lifecycle.
+	record["finalize_identity"]=Dictionary(record.owner.get_ref()._hex_payload_identity(unit_id)).duplicate(true)
 	if record.transition=="complete":global_position=record.world_position
 	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
 	_apply_vital_visual()
@@ -1859,7 +1862,11 @@ func finalize_actor_respawn(prepared:RefCounted)->Dictionary:
 	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
 	if record.transition=="begin":show_event_text("RESPAWNING",Color(0.7,0.9,1.0,1.0),1.8)
 	else:show_event_text("RESPAWN",Color(0.5,1.0,0.7,1.0),2.0)
-	return {"ok":true,"replayed":false}
+	return {"ok":true,"replayed":false,"context_changed":not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record)}
+
+func is_actor_respawn_publication_current(prepared:RefCounted)->bool:
+	var record:Dictionary=_actor_respawn_record(prepared)
+	return not record.is_empty() and record.phase=="finalized" and _actor_respawn_can_finalize(record)
 
 func _actor_respawn_record(prepared:RefCounted)->Dictionary:
 	if prepared==null or not _prepared_actor_respawns.has(prepared.get_instance_id()):return {}
@@ -1871,6 +1878,7 @@ func _actor_respawn_can_finalize(record:Dictionary)->bool:
 	if not _actor_respawn_owner_matches(owner):return false
 	# Respawn may legitimately advance the per-unit lifecycle, never its world.
 	if owner._hex_payload_identity(unit_id).get("context",-1)!=record.source.lifecycle.context:return false
+	if record.has("finalize_identity") and owner._hex_payload_identity(unit_id)!=record.finalize_identity:return false
 	return not is_queued_for_deletion() and owner.get_unit_registry().get_instance_id()==record.registry_id and _actor_respawn_models_valid() and _actor_respawn_frame_valid() and get_parent().get_instance_id()==record.parent_id and _actor_respawn_model_stamp()==record.post_models
 
 func _actor_respawn_owner_matches(owner:Node)->bool:
