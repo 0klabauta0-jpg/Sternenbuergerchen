@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Medical-Abschlussconsumer — 12.11.2026
+
+Separater achtzeiliger Parent4377-Guard auch in Source verbunden: echter früherer
+Completedsubscriber verletzt den Actor erneut; nachfolgender Driver erhält neuen
+Downlinger und sendet kein altes READY. Legitimer Fitfall unverändert. Frischer
+vollständiger Sourceverbund4/0 mit allen Guards, QA hex_medical_consumer_join_20261112.
+Originaler und korrigierter Sparseaufbau transparent archiviert. Keine Suite-
+wiederholung, native Abnahme oder Rootrollbackbehauptung; Slot-/FMC-Lifecycle folgt.
+
 ### AP6 tatsächliche Visitcrew und synchrones Retirement — 12.11.2026
 
 Root übernimmt Boarding-/Retiregruppen vor Controller- und Sichtpublikation.
