@@ -12,6 +12,7 @@ var _orbit_canvas: Control
 var _orbit_button: Button
 var _system_button: Button
 var _orbit_center: Button
+var _orbit_auto: Button
 var _station_dock: Button
 var _orbit_craft_id := ""
 var _orbit_visible := false
@@ -117,6 +118,9 @@ func _build() -> void:
 	_orbit_center = _button("OrbitRecenter", "Schiff zentrieren", func(): _orbit_canvas.call("recenter_selected"))
 	_orbit_center.hide()
 	map_views.add_child(_orbit_center)
+	_orbit_auto = _button("OrbitAutomatic", "Durchflug: an", _toggle_orbit_automatic)
+	_orbit_auto.tooltip_text = "Automatischen Orbitdurchflug für dieses Schiff ein- oder ausschalten."
+	map_views.add_child(_orbit_auto)
 	_station_dock = _button("BeginStationDock", "Polisa andocken", _begin_station_dock)
 	_station_dock.hide()
 	_station_dock.disabled = true
@@ -240,7 +244,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close, _view_homebase, _system_button, _orbit_button, _orbit_center, _station_dock] + _sites.values() + _orbit_target_buttons:
+	for button in [_abort, _approach, _land, _close, _view_homebase, _system_button, _orbit_button, _orbit_center, _orbit_auto, _station_dock] + _sites.values() + _orbit_target_buttons:
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -332,6 +336,9 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_runtime = snapshot.duplicate(true) if not snapshot.is_empty() else (Dictionary(_provider.call()) if _provider.is_valid() else {})
 	_wing_panel.refresh(_runtime)
 	var travel: Dictionary = _runtime.get("space_travel", {})
+	_orbit_auto.text = "Durchflug: an" if travel.get("orbit_transit_automatic", true) else "Durchflug: aus"
+	_orbit_auto.visible = bool(travel.get("orbit_transit_available", false))
+	_orbit_auto.disabled = String(travel.get("craft_id", "")).is_empty() or not _orbit_auto.visible
 	var phase: String = String(travel.get("phase", "grounded"))
 	var fleet_signature:=JSON.stringify(_runtime.get("crafts",[]))
 	if String(_fleet_selector.get_meta("fleet_signature",""))!=fleet_signature:
@@ -480,9 +487,20 @@ func _on_orbit_move_requested(craft_id: String, target_hex: Vector2i) -> void:
 	_move_sequence += 1
 	_send("space_move",{"craft_id":craft_id,"target_hex":target_hex,"request_id":"orbit-ui:%s:%d" % [_move_session,_move_sequence]})
 
+func _toggle_orbit_automatic() -> void:
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var craft_id := String(travel.get("craft_id", ""))
+	if craft_id.is_empty(): return
+	_send("space_set_orbit_automatic", {"craft_id":craft_id, "enabled":not bool(travel.get("orbit_transit_automatic", true))})
+
 func _phase_text(travel: Dictionary, preparation: Dictionary = {}) -> String:
 	var phase := String(travel.get("phase", "grounded"))
 	if phase == "orbit":
+		var transit: Dictionary = travel.get("orbit_transit", {})
+		if transit.get("status") == "flying":
+			return "Orbitdurchflug → " + ("Planet" if transit.get("direction") == "inbound" else "Weltraum / System")
+		if transit.get("status") == "manual" and not String(transit.get("reason", "")).is_empty():
+			return "Orbitdurchflug angehalten · manuelle Steuerung verfügbar"
 		if String(preparation.get("status", "")) == "failed": return "Ortskarte konnte nicht vorbereitet werden · Zurück im Orbit."
 		if String(preparation.get("status", "")) == "cancelled": return "Anflug abgebrochen · Zurück im Orbit."
 	match phase:

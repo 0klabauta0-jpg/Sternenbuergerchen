@@ -1,0 +1,6 @@
+{
+  "planet": ["fortified_outpost"],
+  "glut_1a": ["satellite_crash"],
+  "glut_1b": ["trade_outpost"],
+  "moon": ["homebase"]
+}

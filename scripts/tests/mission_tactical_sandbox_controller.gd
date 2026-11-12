@@ -13374,10 +13374,11 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or simulation == null or simulation.get("_air_support_source") == null or String(get_parent().get_meta("location_id", "")) == "polisa": return
 	var craft_id := String(card.get("craft_id", ""))
 	if craft_id.is_empty(): return
-	var row := HBoxContainer.new()
+	var row := GridContainer.new()
 	row.name = "AirSupportCardRow"
+	row.columns = 3
 	host.add_child(row)
-	for item in [["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"]]:
+	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
 
 
@@ -13387,9 +13388,17 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 	if simulation == null: return
 	var result := {"ok":false, "reason":"invalid_action"}
 	match action:
+		"pilot_board":
+			var pilot_id := String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+			result = request_campaign_crew_boarding(craft_id, "", pilot_id)
 		"start": result = simulation.request_air_support_takeoff(craft_id)
 		"land": result = simulation.request_air_support_landing(craft_id)
 		"cease": result = simulation.request_air_support_cease_fire(craft_id, "ui-air-stop:%d" % Time.get_ticks_usec())
+		"radar":
+			result = simulation.get_air_support_radar_contacts(craft_id)
+			if result.get("ok", false):
+				var contacts: Array = result.get("contacts", [])
+				result["message"] = "Luftradar: keine Kontakte" if contacts.is_empty() else "Luftradar: %d Kontakt(e)" % contacts.size()
 		"move":
 			if _has_selected_tile: result = simulation.request_air_support_move({"craft_id":craft_id, "target_hex":_selected_tile_grid_position, "request_id":"ui-air-move:%d" % Time.get_ticks_usec()})
 			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
@@ -13399,7 +13408,7 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 			else:
 				var token := "ui-air-fire:%d" % Time.get_ticks_usec()
 				result = simulation.request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":target, "request_id":token + ":order"})
-	_last_command_text = "Schiffbefehl ausgeführt" if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
+	_last_command_text = String(result.get("message", "Schiffbefehl ausgeführt")) if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
 	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
 
@@ -13974,7 +13983,7 @@ func _campaign_unit_near_boarding_ship(craft_id:String,unit_position:Vector2,shi
 	# Hex admission places a whole group on distinct cells outside the hull.
 	return point.distance_to(closest)<=3.0
 
-func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "") -> Dictionary:
+func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "", boarding_pilot_id: String = "") -> Dictionary:
 	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
 	var live_polisa_visit:bool=String(get_parent().get_meta("location_id",""))=="polisa" and String(visit.get("craft_id",""))==craft_id and not craft_id.is_empty()
 	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id) and not live_polisa_visit:return {"ok":true}
@@ -13984,9 +13993,13 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 	if hex_required and not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
 	var simulation:Node=get_node_or_null("../SimulationRoot")
 	var pilot_id: String = String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+	if not boarding_pilot_id.is_empty() and (boarding_pilot_id != pilot_id or not boarding_fireteam_id.is_empty()): return {"ok":false, "reason":"invalid_pilot_boarding"}
 	var flight_guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
 	if String(flight_guard.get("reason", "")) == "pilot_unavailable": return flight_guard
 	var relevant_crew:Array=_campaign_craft_crew(craft_id)
+	if not boarding_pilot_id.is_empty():
+		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_unit_id"))==boarding_pilot_id)
+		if relevant_crew.is_empty(): return {"ok":false, "reason":"pilot_unavailable"}
 	if not boarding_fireteam_id.is_empty():
 		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==boarding_fireteam_id)
 		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehÃƒÂ¶rt nicht zu diesem Schiff"}
@@ -13994,7 +14007,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 	for unit in relevant_crew:
 		var id:String=String(unit.call("get_unit_id"))
 		has_ground_crew = has_ground_crew or _deployed_unit_ids.has(id) or (hex_required and not simulation.get_hex_unit_state(id).is_empty())
-	if not has_ground_crew and not boarding_fireteam_id.is_empty():
+	if not has_ground_crew and (not boarding_fireteam_id.is_empty() or not boarding_pilot_id.is_empty()):
 		if relevant_crew.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):
 			return {"ok":true,"message":"Trupp an Bord"}
 		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfÃƒÂ¼gbar"}
@@ -15891,6 +15904,9 @@ func _refresh_world_overlays() -> void:
 	_refresh_meta_transfer_route_overlay()
 
 
+var _air_radar_projection_cache: Dictionary = {}
+var _air_radar_projection_expires_ms := 0
+
 func _build_mission_dropship_visual_entries(primary_visible: bool, primary_position: Vector2) -> Array:
 	var entries: Array = []
 	var seen_craft_ids: Dictionary = {}
@@ -15934,6 +15950,23 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 	var cargo_entry: Dictionary = _build_mission_cargo_touchdown_visual_entry(entries.size())
 	if not cargo_entry.is_empty():
 		entries.append(cargo_entry)
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	var radar_seen := {}
+	if Time.get_ticks_msec() >= _air_radar_projection_expires_ms:
+		_air_radar_projection_cache.clear()
+		_air_radar_projection_expires_ms = Time.get_ticks_msec() + 500
+	if simulation != null:
+		for card: Dictionary in cards:
+			var craft_id := String(card.get("craft_id", ""))
+			if not _air_radar_projection_cache.has(craft_id):
+				_air_radar_projection_cache[craft_id] = simulation.get_air_support_radar_contacts(craft_id)
+			var radar: Dictionary = _air_radar_projection_cache[craft_id]
+			if not radar.get("ok", false): continue
+			for contact: Dictionary in radar.get("projections", []):
+				var id := String(contact.get("craft_id", ""))
+				if id.is_empty() or radar_seen.has(id): continue
+				radar_seen[id] = true
+				entries.append({"craft_id":"radar:" + id, "radar_contact":true, "dropship_visible":true, "dropship_position":contact.position, "show_lz_marker":false, "show_approach_vector":false, "team_id":get_local_command_team_id()})
 	return entries
 
 
