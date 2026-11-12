@@ -69,6 +69,15 @@ mit Spielerbefehlen oder dem Flugtick verbunden. Ein isolierter Test mit echten
 Hex- und Schadensownern prüft Treffer, Friendly Fire, Replay, ID-Konflikt,
 Fehlschuss und das Entfernen einer eingebordeten Einheit aus dem Bodenindex.
 
+Der Root-interne Pilotenpfad liest inzwischen den Schiffstyp aus dem Equipment-
+Owner und `dropship_piloting` beziehungsweise `fighter_piloting` aus dem
+registrierten Pilotenprofil, berechnet damit die gestreute Einschlagzelle und
+verwendet den Boden-Schadenspfad. Gleiche Ereignisse treffen höchstens einmal;
+ein fehlender oder ungültiger Skill wird abgewiesen. Ein Ownercheck nutzt
+echte Equipment- und Bodenowner und ein Profilfixture. Zuordnung des Piloten
+zum Schiff, Sicht, Feuerauftrag, Waffenkosten und Flugzustand muss der noch
+fehlende produktive Aufrufer prüfen. Das ist noch kein spielbarer Feuerbefehl.
+
 ## Nutzerfestlegung: bodennahes Repeaterfeuer
 
 Ein Angriff kann auf eine sichtbare gegnerische Einheit oder ein markiertes
@@ -98,7 +107,9 @@ Radius 10 umfasst 331 Felder und etwa 21 Felder Breite; dies ist eine
 vorläufige spielbare Interpretation der groben 20-mal-20-Vorstellung, keine
 festgelegte Balance. Kartenrand wird nicht künstlich nach innen geklemmt.
 Der Baustein ist noch nicht an Pilot, Bodenziele, Sicht, Feuerzyklus oder
-Anzeige angeschlossen und bewirkt noch keine Luftunterstützung im Spiel.
+Anzeige angeschlossen und bewirkt noch keine Luftunterstützung im Spiel. Der
+oben beschriebene Root-Pilotenpfad ist ausschließlich intern und noch nicht
+an einen produktiven Flug- oder Feuerbefehl gebunden.
 
 ## Vorbereiteter Flugregel-Baustein
 
@@ -108,3 +119,10 @@ ohne Mutation zurück. Bisherige Aufrufe ohne Kontext behalten `space` und beide
 Modi. Der produktive Bodenkarten-Owner liefert den Kontext noch nicht; deshalb
 ist dies keine aktivierte oder global erzwungene Atmosphärenregel. Der kleine
 Atmosphärencheck und bestehende AP02-Flugresolvercheck liefen jeweils Exit 0.
+
+Fortschreibung: Der gemeinsame Flugtick und die interne Flugsteuerung werten
+für registrierte Bereiche mit `atmosphere:` nun den Atmosphärenkontext aus;
+Zulassung und Bewegungscommit weisen ausgekoppelte Zustände zurück. Die Prüfung
+verwendet ein lokal registriertes Testschiff. Die Bodenmission erzeugt oder
+bindet diesen Bereich noch nicht, und die gemeinsame räumliche Navigation ist
+für Bodenkarten weiterhin nicht aktiviert.

@@ -108,6 +108,7 @@ func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture
 	if flight != null and flight.get_snapshot().get("coordinate_frame", "strategic") != "strategic":
 		if not allow_local_fixture or not String(definition.get("craft_id", "")).begins_with("space_fixture_"):
 			return {"ok":false, "reason":"local_area_not_ready"}
+	if flight != null and String(flight.get_snapshot().get("space_area_id", "")).begins_with("atmosphere:") and flight.get_snapshot().get("assist_mode") != "coupled": return {"ok":false, "reason":"atmosphere_requires_coupled"}
 	var craft_id: String = String(definition.get("craft_id", ""))
 	if _inactive_actors.has(craft_id): return {"ok":false, "reason":"already_inactive"}
 	var faction: String = String(definition.get("faction_id", ""))
@@ -156,6 +157,7 @@ func validate_new_local_admission(definition: Dictionary, flight: RefCounted, pr
 	if typeof(craft_id) != TYPE_STRING or String(craft_id).strip_edges().is_empty() or typeof(faction) != TYPE_STRING or String(faction).strip_edges().is_empty() or domain not in ["player", "neutral", "enemy"] or typeof(footprint) != TYPE_ARRAY or _metadata.has(craft_id) or _inactive_actors.has(craft_id) or not _registry.can_register_actor(craft_id, flight): return {"ok":false, "reason":"invalid_actor"}
 	var movement: Dictionary = flight.validate_area_transition(proposal, tick)
 	if not movement.get("ok", false) or movement.next_pose.get("coordinate_frame") != "local" or movement.next_pose.get("motion_mode") != "tactical": return {"ok":false, "reason":"invalid_transition"}
+	if String(movement.next_pose.get("space_area_id", "")).begins_with("atmosphere:") and movement.next_pose.get("assist_mode") != "coupled": return {"ok":false, "reason":"atmosphere_requires_coupled"}
 	var cells: Array[Vector2i] = preview_footprint(movement.next_pose, footprint)
 	var area_id := String(movement.next_pose.space_area_id)
 	if cells.is_empty() or not _registry.query_cells(cells, area_id).is_empty() or not query_navigation_claims(cells, area_id).is_empty(): return {"ok":false, "reason":"occupied_or_invalid_footprint"}

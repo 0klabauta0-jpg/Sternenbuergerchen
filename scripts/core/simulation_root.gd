@@ -410,6 +410,7 @@ const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
 const SPACE_TARGETING = preload("res://scripts/tactical/space_targeting_resolver.gd")
 const SPACE_WEAPON = preload("res://scripts/tactical/space_weapon_resolver.gd")
+const AIR_GROUND_DISPERSION = preload("res://scripts/mission/air_support_dispersion.gd")
 const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 const SPACE_COMPONENT_SYSTEMS = preload("res://scripts/tactical/space_component_systems.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
@@ -1686,7 +1687,9 @@ func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictio
 	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 	if flight == null or flight.get_snapshot().motion_mode != "tactical":
 		return {"ok": false, "reason": "not_tactical"}
-	var validation: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), intent, hull, power, 0.0)
+	var flight_pose: Dictionary = flight.get_snapshot()
+	var environment := "atmosphere" if String(flight_pose.get("space_area_id", "")).begins_with("atmosphere:") else "space"
+	var validation: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight_pose, intent, hull, power, 0.0, environment)
 	if not validation.get("ok", false):
 		return validation
 	_space_combat_state.set_flight_control(craft_id, {"intent":intent, "hull":hull, "power":power})
@@ -1787,7 +1790,9 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				_space_combat_state.set_flight_status(craft_id, guidance)
 				continue
 			intent = guidance.intent
-		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(flight.get_snapshot(), intent, control.hull, control.power, delta)
+		var current_pose: Dictionary = flight.get_snapshot()
+		var environment := "atmosphere" if String(current_pose.get("space_area_id", "")).begins_with("atmosphere:") else "space"
+		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(current_pose, intent, control.hull, control.power, delta, environment)
 		if not proposal.get("ok", false):
 			_space_combat_state.set_flight_status(craft_id, proposal)
 			continue
@@ -1903,6 +1908,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		var snapshot: Dictionary = flight.get_snapshot()
 		if snapshot.coordinate_frame != area.coordinate_frame or snapshot.space_area_id != area.space_area_id:
 			return {"ok":false, "reason":"area_mismatch"}
+		if String(snapshot.space_area_id).begins_with("atmosphere:") and proposal.get("assist_mode", snapshot.assist_mode) != "coupled": return {"ok":false, "reason":"atmosphere_requires_coupled"}
 		if area.coordinate_frame == "local" and (authority_context.get("fixture") != true or not String(id).begins_with("space_fixture_")):
 			var own_control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
 			if authority_context.get("internal_flight_tick") != self or not own_control.get("singleplayer_move", false): return {"ok":false, "reason":"local_area_not_ready"}
@@ -2478,6 +2484,7 @@ var _bottleneck_reservation_debug_snapshot: Dictionary = {}
 var _last_damage_effect_resolution: Dictionary = {}
 var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
 var _air_ground_impact_receipts: Dictionary = {}
+var _piloted_air_ground_receipts: Dictionary = {}
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
 var _hex_ground_context_revision := 0
@@ -2561,6 +2568,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 
 func _clear_hex_movement_context() -> void:
 	_air_ground_impact_receipts.clear()
+	_piloted_air_ground_receipts.clear()
 	for id in _hex_ground_runtime.get_unit_ids():_clear_hex_actor_metadata(String(id))
 	_hex_movement_runtime.clear()
 	_hex_visual_unit_ids.clear()
@@ -2602,6 +2610,39 @@ func _commit_air_ground_impact(event: Dictionary) -> Dictionary:
 	_air_ground_impact_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
 	if not target_id.is_empty():
 		_apply_damage_effect({"effect_type":"damage", "unit_id":target_id, "attacker_unit_id":event.pilot_id, "attacker_team_id":event.team_id, "allow_friendly_fire":true, "damage":event.damage, "hit_chance":1.0, "roll_override":0.0})
+	return result
+
+func _commit_piloted_air_ground_impact(event: Dictionary) -> Dictionary:
+	# Root-private tail. The future flight coordinator must validate that this
+	# assigned pilot is aboard the aircraft and that aim/weapon/fire are legal.
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
+	if event.size() != 7 or typeof(event.get("event_id")) != TYPE_STRING or String(event.event_id).strip_edges().is_empty() or typeof(event.get("craft_id")) != TYPE_STRING or String(event.craft_id).strip_edges().is_empty() or typeof(event.get("pilot_id")) != TYPE_STRING or String(event.pilot_id).strip_edges().is_empty() or typeof(event.get("team_id")) != TYPE_STRING or String(event.team_id).strip_edges().is_empty() or typeof(event.get("aim_hex")) != TYPE_VECTOR2I or typeof(event.get("seed")) != TYPE_INT or typeof(event.get("damage")) != TYPE_INT or int(event.damage) <= 0: return {"ok":false, "reason":"invalid_impact"}
+	var id: String = event.event_id
+	var signature := var_to_str(event)
+	if _piloted_air_ground_receipts.has(id):
+		var previous: Dictionary = _piloted_air_ground_receipts[id]
+		if previous.signature != signature: return {"ok":false, "reason":"event_id_conflict"}
+		var replay: Dictionary = previous.result.duplicate(true); replay["replayed"] = true; return replay
+	if _piloted_air_ground_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	if _ship_equipment_owner == null: return {"ok":false, "reason":"equipment_unavailable"}
+	var equipment: Dictionary = _ship_equipment_owner.get_snapshot(event.craft_id)
+	var model := String(equipment.get("model_id", ""))
+	var skill_key := "dropship_piloting" if model == "cutlass" else ("fighter_piloting" if model == "buccaneer" else "")
+	if skill_key.is_empty(): return {"ok":false, "reason":"unsupported_aircraft"}
+	var pilot = _resolve_unit(event.pilot_id)
+	if not is_instance_valid(pilot) or not pilot.has_method("get_character_profile_bundle"): return {"ok":false, "reason":"pilot_profile_unavailable"}
+	var profile: Variant = pilot.call("get_character_profile_bundle")
+	if typeof(profile) != TYPE_DICTIONARY or typeof(profile.get("platform_values")) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_profile_unavailable"}
+	var skill: Variant = profile.platform_values.get(skill_key)
+	if typeof(skill) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(skill)) or float(skill) < 0.0 or float(skill) > 1.0: return {"ok":false, "reason":"pilot_skill_unavailable"}
+	var scattered: Dictionary = AIR_GROUND_DISPERSION.resolve(event.aim_hex, float(skill), event.seed)
+	if not scattered.get("ok", false): return scattered
+	var impact := {"event_id":"piloted:" + id, "impact_hex":scattered.impact_hex, "pilot_id":event.pilot_id, "team_id":event.team_id, "damage":event.damage}
+	var result: Dictionary = _commit_air_ground_impact(impact)
+	if not result.get("ok", false): return result
+	result["aim_hex"] = event.aim_hex
+	result["radius"] = scattered.radius
+	_piloted_air_ground_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
 	return result
 
 
