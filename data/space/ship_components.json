@@ -11,7 +11,9 @@
     "shield_s1": {"name":"Schildgenerator S1", "class":"shield", "size":1, "mass":0.10, "power_demand":0.40, "capacity":24.0, "recharge_rate":3.0, "recovery_delay":4.0},
     "shield_s2": {"name":"Schildgenerator S2", "class":"shield", "size":2, "mass":0.20, "power_demand":0.70, "capacity":48.0, "recharge_rate":5.0, "recovery_delay":5.0},
     "power_s1": {"name":"Kraftwerk S1", "class":"power", "size":1, "mass":0.10, "output":2.0},
-    "power_s2": {"name":"Kraftwerk S2", "class":"power", "size":2, "mass":0.20, "output":3.0}
+    "power_s1_plus": {"name":"Kraftwerk S1 verstärkt", "class":"power", "size":1, "mass":0.14, "output":2.6},
+    "power_s2": {"name":"Kraftwerk S2", "class":"power", "size":2, "mass":0.20, "output":3.0},
+    "power_s2_plus": {"name":"Kraftwerk S2 verstärkt", "class":"power", "size":2, "mass":0.30, "output":3.8}
   },
   "models": {
     "buccaneer": {"slots": {"weapon_1":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "weapon_2":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "shield":{"class":"shield","max_size":1}, "power":{"class":"power","max_size":1}}, "default_slots":{"weapon_1":"repeater_s3","weapon_2":"repeater_s3","shield":"shield_s1","power":"power_s1"}, "flight_demand":0.8},

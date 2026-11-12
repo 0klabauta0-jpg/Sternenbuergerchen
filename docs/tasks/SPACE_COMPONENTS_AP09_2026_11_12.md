@@ -58,3 +58,6 @@ für sein tatsächliches Schiff/Modell. Diese installiert nichts, nimmt keine
 Inventaränderung vor und verändert Schema oder Quittungen nicht. Kandidat,
 veraltete Revision und unbekanntes Schiff gezielt geprüft; vorhandene
 Warp-/Checkpointprüfung erneut 42/42. Produktiver Einbau bleibt offen.
+Verstärkte vorläufige Kraftwerksvarianten gleicher Slotgröße zeigen im reinen
+Resolver mehr Schildladeleistung bei höherer Masse; gezielter Prüfungslauf
+Exit 0. Ein tatsächlicher Kraftwerkstausch ist weiterhin nicht implementiert.

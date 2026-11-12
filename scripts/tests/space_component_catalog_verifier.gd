@@ -40,6 +40,10 @@ func _initialize() -> void:
 	assert(not SYSTEMS.consume_weapon(base, fired.state, 13.0).ok)
 	var tick: Dictionary = SYSTEMS.advance(base, fired.state, 5.0)
 	assert(tick.ok and is_equal_approx(tick.state.shield, 2.25) and tick.state.weapon_energy == 20.0)
+	var stronger := light.duplicate(true); stronger.power = "power_s1_plus"
+	var upgraded: Dictionary = CATALOG.effective_stats("buccaneer", stronger)
+	var boosted: Dictionary = SYSTEMS.advance(upgraded, fired.state, 5.0)
+	assert(upgraded.ok and is_equal_approx(upgraded.power.shield_fraction, 1.0) and boosted.ok and boosted.state.shield > tick.state.shield and upgraded.mass > base.mass)
 	assert(not SYSTEMS.advance(base, fired.state, -1.0).ok and hit.state.weapon_energy == 20.0)
 	var owner = EQUIPMENT.new()
 	assert(owner.configure([{"craft_id":"pilot_ship", "model_id":"buccaneer"}]).ok)
