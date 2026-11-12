@@ -103,6 +103,21 @@ func validate_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
 		return {"ok":false, "reason":"same_area"}
 	return {"ok":true, "next_pose":next, "tick":tick}
 
+func validate_surface_air_transition(proposal: Dictionary, tick: int) -> Dictionary:
+	# Root-private preflight for a local sortie. The caller must validate the
+	# actual landing, boarding, index and saved return pose before publication.
+	if _craft_id.is_empty() or tick <= _tick: return {"ok":false, "reason":"stale_tick"}
+	if proposal.get("expected_revision", -1) != _revision: return {"ok":false, "reason":"stale_revision"}
+	var next := get_snapshot()
+	next.merge(proposal, true)
+	if not _valid_pose(next): return {"ok":false, "reason":"invalid_pose"}
+	var leaving_ground := (_motion_mode == "grounded" and _coordinate_frame == "strategic") or (_motion_mode == "inactive" and _coordinate_frame == "local")
+	var entering_air: bool = next.motion_mode == "tactical" and next.coordinate_frame == "local" and String(next.space_area_id).begins_with("atmosphere:") and next.assist_mode == "coupled"
+	var leaving_air := _motion_mode == "tactical" and _coordinate_frame == "local" and _space_area_id.begins_with("atmosphere:")
+	var entering_ground: bool = (next.motion_mode == "grounded" and next.coordinate_frame == "strategic" and String(next.space_area_id).is_empty()) or (next.motion_mode == "inactive" and next.coordinate_frame == "local" and not String(next.space_area_id).begins_with("atmosphere:"))
+	if not ((leaving_ground and entering_air) or (leaving_air and entering_ground)): return {"ok":false, "reason":"invalid_surface_air_transition"}
+	return {"ok":true, "next_pose":next, "tick":tick}
+
 func commit_area_transition(proposal: Dictionary, tick: int) -> Dictionary:
 	var validation := validate_area_transition(proposal, tick)
 	if not validation.ok: return validation

@@ -163,6 +163,22 @@ func validate_new_local_admission(definition: Dictionary, flight: RefCounted, pr
 	if cells.is_empty() or not _registry.query_cells(cells, area_id).is_empty() or not query_navigation_claims(cells, area_id).is_empty(): return {"ok":false, "reason":"occupied_or_invalid_footprint"}
 	return {"ok":true, "craft_id":craft_id, "flight":flight, "area_id":area_id, "cells":cells.duplicate(), "indexed_revision":int(movement.next_pose.revision) + 1, "metadata":{"faction_id":faction, "control_domain":domain, "footprint_hexes":footprint.duplicate()}}
 
+func validate_surface_air_admission(craft_id: String, flight: RefCounted, movement: Dictionary, footprint: Array) -> Dictionary:
+	if not movement.get("ok", false) or flight == null or not _registry.can_register_actor(craft_id, flight): return {"ok":false, "reason":"invalid_actor"}
+	var inactive: RefCounted = _inactive_actors.get(craft_id)
+	if inactive != null and inactive != flight: return {"ok":false, "reason":"invalid_actor"}
+	if inactive == null and _metadata.has(craft_id): return {"ok":false, "reason":"invalid_actor"}
+	var metadata: Dictionary = _metadata.get(craft_id, {"faction_id":"player", "control_domain":"player", "footprint_hexes":footprint.duplicate()})
+	if metadata.get("control_domain") != "player" or metadata.get("footprint_hexes") != footprint: return {"ok":false, "reason":"aircraft_metadata_changed"}
+	var next: Dictionary = movement.next_pose
+	var cells: Array[Vector2i] = preview_footprint(next, footprint)
+	if cells.is_empty() or not _registry.query_cells(cells, next.space_area_id).is_empty() or not query_navigation_claims(cells, next.space_area_id).is_empty(): return {"ok":false, "reason":"occupied_or_invalid_footprint"}
+	return {"ok":true, "craft_id":craft_id, "flight":flight, "area_id":next.space_area_id, "cells":cells, "indexed_revision":int(next.revision) + 1, "metadata":metadata.duplicate(true), "was_inactive":inactive != null}
+
+func _publish_surface_air_admission(validation: Dictionary) -> void:
+	_inactive_actors.erase(validation.craft_id)
+	_publish_new_local_admission(validation)
+
 func _publish_new_local_admission(validation: Dictionary) -> void:
 	# Root-private tail following Flight preflight and a synchronous wing commit.
 	_registry._publish_register_actor_cells(validation.craft_id, validation.flight, validation.area_id, validation.cells)

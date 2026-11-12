@@ -118,6 +118,17 @@ nicht zugleich als geparkt und wird nicht als Bodenhindernis ausgegeben. Das
 allein führt keinen Start oder keine Landung durch. Die Prüfung verwendet eine
 im Test zugelassene Fluginstanz; der produktive Zustandswechsel bleibt offen.
 
+Fortschreibung: Der Missionsadapter bietet vorbereitete Start- und
+Rücklandungsoperationen auf derselben Fleet-Fluginstanz. Start prüft unter
+anderem den vorhandenen Piloten-, Boden- und Equipmentowner und indiziert das
+Schiff im gekoppelten atmosphärischen Bereich. Die Rücklandung ist vorerst nur
+am ursprünglichen Landeplatz möglich und prüft dessen Bodenbelegung erneut;
+der vorherige strategische oder inaktive Orbitzustand wird wiederhergestellt.
+Ein isolierter Test nutzt echte Flug-, Kampf- und Missionsowner sowie einen
+Transport-Testdouble und prüft Start, Rücklandung und Ablehnung bei belegtem
+Platz. Es gibt noch keine Bedienung, Bewegung oder Save/Load-Absicherung für
+diesen Pfad; er ist deshalb noch kein spielbarer Einsatzablauf.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

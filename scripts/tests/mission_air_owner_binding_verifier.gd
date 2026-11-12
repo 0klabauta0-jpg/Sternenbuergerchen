@@ -29,8 +29,13 @@ class Vision extends Node:
 		return PackedStringArray(["enemy"]) if visible else PackedStringArray()
 class Transport extends Node:
 	var boarded := true
+	var landing_clear := true
+	var landing_position := Vector2.ZERO
 	func get_campaign_air_support_pilot_guard(_craft_id: String) -> Dictionary:
 		return {"ok":true, "pilot_unit_id":"pilot"} if boarded else {"ok":false, "reason":"pilot_boarding_pending"}
+	func _is_parked_campaign_dropship(_craft_id: String) -> bool: return true
+	func _campaign_landed_craft_position(_craft_id: String) -> Vector2: return landing_position
+	func _ground_ship_touchdown_ready(_id: String, _position: Vector2, _visual: bool) -> bool: return landing_clear
 
 func _initialize() -> void:
 	var flow = Flow.new(); root.add_child(flow)
@@ -71,19 +76,35 @@ func _initialize() -> void:
 	var enemy_placements: Array[Dictionary] = [{"unit_id":"enemy", "grid":Vector2i(3,0)}]; assert(mission_root.admit_hex_ground_units(enemy_placements).ok)
 	var vision = Vision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
 	var transport = Transport.new(); transport.name = "TacticalController"; mission.add_child(transport)
+	for q in range(5, 16):
+		for r in range(5, 16): terrain.register_tile(TILE.new({"tile_id":"air:%d:%d" % [q,r], "grid_position":Vector2i(q,r), "explicit_hex_ramps":true}))
+	transport.landing_position = terrain.grid_to_world(Vector2i(10,10))
 	var grounded_fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(not mission_root.is_air_support_craft_airborne("ship"))
 	assert(mission_root.preview_air_support_ground_fire(grounded_fire).reason == "aircraft_not_flying")
 	var attack := {"craft_id":"ship", "target_unit_id":"enemy", "request_id":"air-order"}
 	assert(adapter.request_operation("air_support_attack_order", attack).reason == "aircraft_not_flying")
 	var flight: RefCounted = fleet.get_flight_state("ship")
+	var initial_pose: Dictionary = flight.get_snapshot()
+	transport.boarded = false
+	assert(not adapter.request_operation("air_support_takeoff", {"craft_id":"ship"}).ok and flight.get_snapshot() == initial_pose)
+	transport.boarded = true
+	assert(adapter.request_operation("air_support_takeoff", {"craft_id":"ship"}).ok)
+	assert(mission_root.is_air_support_craft_airborne("ship"))
+	var airborne_pose: Dictionary = flight.get_snapshot()
+	transport.landing_clear = false
+	assert(not adapter.request_operation("air_support_landing", {"craft_id":"ship"}).ok and flight.get_snapshot() == airborne_pose)
+	transport.landing_clear = true
+	assert(adapter.request_operation("air_support_landing", {"craft_id":"ship"}).ok)
+	assert(not mission_root.is_air_support_craft_airborne("ship") and flight.get_snapshot().motion_mode == initial_pose.motion_mode and flight.get_snapshot().position_plane == initial_pose.position_plane)
 	var proposal := {"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site", "position_plane":GRID.HEX.axial_to_plane(Vector2.ZERO), "motion_mode":"tactical", "heading_rad":0.0, "assist_mode":"coupled"}
-	var transition: Dictionary = flight.validate_area_transition(proposal, 1)
+	var transition_tick: int = flight.get_snapshot().tick + 1
+	var transition: Dictionary = flight.validate_area_transition(proposal, transition_tick)
 	var combat: RefCounted = source.get("_space_combat_state")
-	var admission: Dictionary = combat.validate_new_local_admission({"craft_id":"ship", "faction_id":"player", "control_domain":"player", "footprint_hexes":[Vector2i.ZERO]}, flight, proposal, 1)
+	var admission: Dictionary = combat.validate_new_local_admission({"craft_id":"ship", "faction_id":"player", "control_domain":"player", "footprint_hexes":[Vector2i.ZERO]}, flight, proposal, transition_tick)
 	assert(transition.ok and admission.ok); flight._publish_area_transition(transition); combat._publish_new_local_admission(admission)
 	assert(mission_root.is_air_support_craft_airborne("ship"))
-	var stats: Dictionary = equipment.get_space_combat_stats("ship"); assert(combat.bind_ship_systems("ship", stats, stats.hull_capacity).ok)
+	var stats: Dictionary = equipment.get_space_combat_stats("ship"); assert(combat.ensure_ship_systems("ship", stats).ok)
 	var fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(mission_root.preview_air_support_ground_fire(fire).reason == "attack_order_required")
 	var wings: RefCounted = source.get("_space_wing_state"); var wing_id: String = wings.get_craft_wing("ship", "singleplayer")
@@ -131,7 +152,7 @@ func _initialize() -> void:
 	var conflict := shot.duplicate(); conflict.weapon_slot = "weapon_2"
 	assert(adapter.request_operation("air_support_ground_fire", conflict).reason == "request_id_conflict")
 	combat.get("_ship_systems").ship.cooldowns.weapon_1 = 0.0
-	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "heading_rad":PI}, 2).ok)
+	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "heading_rad":PI}, flight.get_snapshot().tick + 1).ok)
 	assert(mission_root.preview_air_support_ground_fire(fire).reason == "outside_fire_arc")
 	flow._assigned_aircraft_pilot_by_craft.ship = "other_pilot"
 	var wrong_pilot := event.duplicate(); wrong_pilot.event_id = "shared-2"

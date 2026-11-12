@@ -38,6 +38,30 @@ Nutzerentscheidungen und keine bereits abgenommene Balance.
 
 ## 2. Karte, Maßstab und Darstellung
 
+### Ergänzung 12.11.2026: Orientierung und automatischer Durchflug
+
+Die Planetenseite liegt oben, der Übergang ins Sternsystem unten. Vom Planeten
+kommende Schiffe erreichen die Orbitalkarte oben und fliegen zum unteren Rand;
+bei Ankunft aus dem System verläuft der Weg vom unteren Rand nach oben. Wenn
+der automatische Durchflug nicht abgeschaltet ist, fliegt der Pilot bei freiem
+Weg selbstständig durch. Ein optionales Asteroidenfeld kann die Passage
+erschweren: gute und mittlere Piloten sollen sie grundsätzlich bewältigen,
+schlechte können einen Asteroiden streifen. Wahrscheinlichkeiten, Hindernis-
+verhalten und Unterbrechung durch Begegnungen sind noch spielerisch festzulegen.
+Polisa bleibt direkt anfliegbar und erhält dadurch keine Orbitkarte.
+
+Der untere Ausgang soll farblich erkennbar sein. Oberhalb der Karte dürfen ein
+stilisierter Planet und ein kurzer Schriftzug die Planetenseite erklären;
+auch die Richtung zum Weltraum soll außerhalb der Karte beschriftet sein.
+Diese Elemente sind Darstellung und keine zusätzlichen Spielfelder.
+
+Radarreichweite und Sicht sind getrennte Aufklärungsgrundlagen. Auf Raumkarten
+erfasst Radar Schiffe innerhalb seiner Reichweite; auf Bodenkarten ist das
+Fliegerradar ausdrücklich Luft-Luft-Radar und erfasst keine Bodenziele.
+Erfasste Kontakte müssen aus den zuständigen Sensor- und Sichtownern kommen;
+Radar ist keine globale Kenntnis aller Einheiten. Konkrete Sensorregeln sind offen.
+Dieser Abschnitt beschreibt Nutzerfestlegungen, noch keine geprüfte Umsetzung.
+
 Die strategische Sternkarte behält 256×256 Hexfelder. Jeder Stern, Planet und
 Mond erhält einen gemeinsamen lokalen Orbitbereich von 512×256 Hexfeldern;
 dieser ist auch der Raum für Reise, Begegnung und Kampf. Pro Körper gibt es
