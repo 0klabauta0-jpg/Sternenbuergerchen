@@ -1,0 +1,21 @@
+{
+  "case": "polisa_dock_owner",
+  "exit_code": 0,
+  "clean_log": true,
+  "real_profile_unchanged": true,
+  "source_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/space_polisa_fleet_dock_verifier.gd": "7429084c01ce9937e7f439614c6db02e475d0b4230851a14dd4f139951fc6cb1",
+    "scripts/core/strategic_hex_grid.gd": "4872952d87ba59ef3a7c49cd44b0220867d4a0985c053c27151457e3cfaecc3c",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/core/singleplayer_fleet_travel_state.gd": "d8d46a13be6d715bc70b5f1da8e5bcf3ce933e0e6023f5d0312fca691899bccd",
+    "scripts/core/singleplayer_space_travel_state.gd": "9be23d91c9341f2be847d42f7bf510796b84fc572c1aeef7e248995811f389de",
+    "scripts/mission/orbit_approach_layout.gd": "7532d3088b524837cfd900b411e23542316cf0efdb5b4c9b92bb12b93d90a092",
+    "scripts/core/space_flight_state.gd": "d5dab39870ac4a3288a73a7f82802ccecc61032f118af96e3587553cb6984905",
+    "scripts/mission/polisa_station_dock_layout.gd": "16ef4cd0887407dc7d268bdf156b065f53c96cadb8de8489a26e6ceb554fc460",
+    "scripts/mission/orbit_destination_catalog.gd": "6f4bad23de01208f170bca4ad37b2e58338ed8ea751943345c573e30d133b705",
+    "data/singleplayer/star_system.json": "61001acdcbc044beee59d917554825682ba53b3ce3591fb3aac15e97d2dddf3a"
+  }
+}

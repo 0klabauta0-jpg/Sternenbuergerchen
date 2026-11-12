@@ -19,7 +19,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "warp_cycle":"scripts/tests/space_warp_product_cycle_verifier.gd",
           "home_launch":"scripts/tests/space_home_launch_wing_verifier.gd",
           "regular_polisa_pilot":"scripts/tests/polisa_regular_visit_pilot_guard_verifier.gd",
-          "v3_reader":"scripts/tests/space_v3_product_reader_verifier.gd"}
+          "v3_reader":"scripts/tests/space_v3_product_reader_verifier.gd",
+          "polisa_mask":"scripts/tests/space_polisa_static_mask_verifier.gd",
+          "polisa_dock_owner":"scripts/tests/space_polisa_fleet_dock_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)

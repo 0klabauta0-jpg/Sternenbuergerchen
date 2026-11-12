@@ -1,0 +1,20 @@
+{
+  "case": "polisa_mask",
+  "exit_code": 0,
+  "clean_log": true,
+  "real_profile_unchanged": true,
+  "source_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/space_polisa_static_mask_verifier.gd": "cb1a9908a635df8c8658b4d2e4a7fba45fd11b857fbe9feca927966f7a4e0758",
+    "scripts/core/space_flight_state.gd": "d5dab39870ac4a3288a73a7f82802ccecc61032f118af96e3587553cb6984905",
+    "scripts/core/space_combat_state.gd": "01527400fe7f41f0daaab2eeacdbc80293c304edadbcaea3e991c54470cfcdc4",
+    "scripts/core/space_area_grid.gd": "79ec9e6ccb158e036e48ca72755679466c5411c9251d98df4330c8184f7e28e2",
+    "scripts/mission/polisa_station_dock_layout.gd": "16ef4cd0887407dc7d268bdf156b065f53c96cadb8de8489a26e6ceb554fc460",
+    "scripts/mission/orbit_approach_layout.gd": "7532d3088b524837cfd900b411e23542316cf0efdb5b4c9b92bb12b93d90a092",
+    "scripts/core/strategic_hex_grid.gd": "4872952d87ba59ef3a7c49cd44b0220867d4a0985c053c27151457e3cfaecc3c",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/core/space_ship_registry.gd": "3c118f486fcd254a7173ecca6b582021b399c90d49b5dbc5115b6cadd9a9fda0"
+  }
+}
