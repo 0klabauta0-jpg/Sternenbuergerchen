@@ -2,6 +2,11 @@ extends "res://scripts/tests/orbit_quantum_flow_verifier.gd"
 ## Real campaign route; no injected map, ship, pilot, cargo or travel state.
 
 func _run() -> void:
+	var isolated_root := OS.get_environment("POLISA_TEST_PROFILE").simplify_path().replace("\\", "/").to_lower()
+	var user_dir := OS.get_user_data_dir().simplify_path().replace("\\", "/").to_lower()
+	if isolated_root.is_empty() or not user_dir.begins_with(isolated_root + "/"):
+		printerr("FAIL: Test requires an isolated POLISA_TEST_PROFILE")
+		quit(1); return
 	load("res://scripts/meta/game_start_contract.gd").request_start(self, "campaign", "new")
 	_flow = load("res://scenes/meta/meta_layer_test.tscn").instantiate()
 	root.add_child(_flow)
