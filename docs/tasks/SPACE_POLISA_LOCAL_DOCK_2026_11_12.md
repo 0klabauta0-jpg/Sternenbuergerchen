@@ -166,8 +166,13 @@ Stationsvisit-/Pilotguard, Equipmentprofil, Flight-/Fleetowner, Pflichtrotte
 und freien vollständigen Footprint am Stationsgate. Die kleine Kaufprobe nutzt
 echte Kauf-/Equipment-/Travelowner und Pilot-/Flowfixtures und prüft auch
 fehlenden Piloten, fremden Besucher und ein belegtes Gate. Es werden weder
-Flight noch Index, Rotte, Fuel oder Reise publiziert; die atomare Erstaufnahme
-und ein echter AP6-Visitnachweis bleiben offen.
+Flight noch Index, Rotte, Fuel oder Reise publiziert. Der explizite Adapter-
+Ownerpfad `enter_purchased_station_local_orbit` bereitet inzwischen Flight,
+Index, Fleet, Pflichtrotte und Rückflugfuel gemeinsam vor und publiziert sie
+atomar; sein Replaytoken leitet sich vom echten Kaufbeleg ab. Die enge
+Kaufprobe prüft blockiertes Gate, Aufnahme, Fuel, Rotte, Replay und Events.
+Der Legacy-Start wählt diesen Pfad noch nicht; UI-Integration und echter
+AP6-Visitnachweis bleiben offen.
 
 ## Akzeptanz, Prüfung und Risiken
 

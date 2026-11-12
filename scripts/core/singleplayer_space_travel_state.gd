@@ -397,6 +397,15 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		return home_candidate
 	if String(payload.get("craft_id", "")) != _craft_id or _craft_id.is_empty(): return _reject("craft_mismatch", "Schiff passt nicht zur Reise")
 	if _requests.has(String(context.request_id)): return _reject("request_id_already_used", "Anfrage wurde bereits ausserhalb dieses Uebergangs verwendet")
+	if operation == "depart_station_purchase":
+		var layout: Dictionary = STATION_DOCK.build()
+		var current_flight: Dictionary = _flight.get_snapshot()
+		if not layout.get("ok", false) or payload.get("target_id") != layout.target_id or payload.get("layout_revision") != layout.revision or payload.get("location_id") != layout.station_id: return _reject("station_layout_changed", "Stationsziel passt nicht")
+		if _phase != "surface" or _location_id != "polisa" or Dictionary(_definition.get("location_orbits", {})).get("polisa") != "polisa_orbit": return _reject("station_phase_changed", "Stationsreise passt nicht")
+		if current_flight.get("craft_id") != _craft_id or current_flight.get("coordinate_frame") != "strategic" or current_flight.get("motion_mode") == "tactical" or not String(current_flight.get("space_area_id", "")).is_empty() or not String(context.source_area_id).is_empty() or context.target_area_id != layout.area_id: return _reject("station_flight_changed", "Stationsflugzustand passt nicht")
+		var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"next":{"phase":"orbit","orbit_id":"polisa_orbit","orbit_marker_id":_orbit_marker_id if not _orbit_marker_id.is_empty() else GRID.ORBIT_MARKER_IDS[0],"target_orbit_id":"","target_orbit_marker_id":"","location_id":"","elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		candidate["seal"] = _sign_space_area_state(candidate)
+		return candidate
 	if operation in ["begin_station_dock", "undock_station"]:
 		var layout: Dictionary = STATION_DOCK.build()
 		var current_flight: Dictionary = _flight.get_snapshot()
