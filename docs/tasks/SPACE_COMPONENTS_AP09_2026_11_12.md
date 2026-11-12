@@ -53,3 +53,8 @@ Versionierung und UI-/Supply-Anbindung fehlen weiterhin. Eine reine Vorschau
 für den bestehenden Flugresolver zeigt, dass dieselbe Schubabsicht mit mehr
 Komponentenmasse schwächer beschleunigt; der produktive Root liefert diese
 Werte bislang nicht. Gezielt mit dem echten Flugresolver geprüft, Exit 0.
+Der bestehende Equipment-Owner bietet eine revisionsgebundene Kandidatenvorschau
+für sein tatsächliches Schiff/Modell. Diese installiert nichts, nimmt keine
+Inventaränderung vor und verändert Schema oder Quittungen nicht. Kandidat,
+veraltete Revision und unbekanntes Schiff gezielt geprüft; vorhandene
+Warp-/Checkpointprüfung erneut 42/42. Produktiver Einbau bleibt offen.

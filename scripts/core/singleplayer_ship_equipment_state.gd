@@ -1,6 +1,7 @@
 extends RefCounted
 ## Installed identities only. Cargo, credits and request replay belong to Supply.
 const CATALOG = preload("res://scripts/mission/ship_equipment_catalog.gd")
+const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 var _crafts: Dictionary = {}
 var _revision := 0
 var _installs: Dictionary = {}
@@ -36,6 +37,18 @@ func get_snapshot(craft_id: String = "") -> Dictionary:
 func get_quantum_effect(craft_id: String) -> Dictionary:
 	var installed := String(Dictionary(_crafts.get(craft_id, {})).get("slots", {}).get("quantum_drive", ""))
 	return {"quantum_duration_multiplier":CATALOG.multiplier(installed), "item_id":installed, "equipment_revision":_revision}
+
+func preview_space_components(craft_id: String, slots: Dictionary, expected_revision: int) -> Dictionary:
+	# Candidate only: never install defaults, transfer inventory or change the
+	# saved schema. The existing equipment owner supplies model and revision.
+	if expected_revision != _revision: return _reject("equipment_changed")
+	if not _crafts.has(craft_id): return _reject("unknown_craft")
+	var model_id := String(_crafts[craft_id].get("model_id", ""))
+	var stats: Dictionary = SPACE_COMPONENTS.effective_stats(model_id, slots)
+	if not stats.get("ok", false): return stats
+	var flight: Dictionary = SPACE_COMPONENTS.flight_inputs(model_id, slots)
+	if not flight.get("ok", false): return flight
+	return {"ok":true, "preview_only":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "slots":slots.duplicate(true), "stats":stats, "flight":flight}
 
 func get_space_flight_profile(craft_id: String) -> Dictionary:
 	if not _crafts.has(craft_id): return {"ok":false, "reason":"unknown_craft"}
