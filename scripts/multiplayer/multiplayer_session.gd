@@ -621,9 +621,11 @@ func _receive_rejoin_rejected(message: String) -> void:
 
 
 @rpc("any_peer", "reliable")
-func notify_mission_runtime_ready() -> void:
+func notify_mission_runtime_ready(runtime_context: Dictionary = {}) -> void:
 	if not _is_authority_session() or not _mission_started:
 		return
+	if runtime_context != _multiplayer_runtime_context:
+		return # An old READY must not unblock a new/restarted mission.
 	var peer_id: int = multiplayer.get_remote_sender_id()
 	if peer_id <= HOST_PEER_ID or not _reconnect_tokens_by_peer_id.has(peer_id):
 		return

@@ -1154,6 +1154,40 @@ func _get_combat_visibility_cache_audit() -> Dictionary:
 	}
 
 
+## Read only CURRENT host sight; contacts may contain remembered observations
+## and are deliberately not used as the authority for peer publication.
+func get_multiplayer_visible_unit_ids(team: String) -> PackedStringArray:
+	var visible := PackedStringArray()
+	if not _runs_local_authority or team.is_empty(): return visible
+	var units: Array = _get_friendly_combat_units()+_get_enemy_combat_units()
+	var seen: Dictionary={}
+	for observer in units:
+		if not is_instance_valid(observer) or not observer.has_method("get_team_id") or String(observer.call("get_team_id"))!=team: continue
+		for target in units:
+			if not is_instance_valid(target) or not target.has_method("get_unit_id") or not target.has_method("get_team_id") or String(target.call("get_team_id"))==team: continue
+			var id: String=String(target.call("get_unit_id"))
+			if not seen.has(id) and _has_valid_los(observer,target):
+				seen[id]=true
+				visible.append(id)
+	visible.sort()
+	return visible
+
+
+func _network_runtime_context() -> Dictionary:
+	var root = get_node_or_null(simulation_root_path)
+	return root.call("get_multiplayer_runtime_context") if root!=null and root.has_method("get_multiplayer_runtime_context") else {}
+
+
+func _legacy_network_wire_allowed() -> bool:
+	var root = get_node_or_null(simulation_root_path)
+	return root!=null and root.has_method("uses_legacy_multiplayer_wire") and bool(root.call("uses_legacy_multiplayer_wire"))
+
+
+func _accept_network_runtime_context(context: Dictionary) -> bool:
+	var root = get_node_or_null(simulation_root_path)
+	return root!=null and root.has_method("accepts_multiplayer_runtime_context") and bool(root.call("accepts_multiplayer_runtime_context",context))
+
+
 func get_contact_snapshot() -> Array:
 	if not _runs_local_authority:
 		return _remote_contact_snapshot.duplicate(true)
@@ -1687,7 +1721,8 @@ func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
 
 
 @rpc("authority", "reliable")
-func _receive_mission_result(mission_result: Dictionary) -> void:
+func _receive_mission_result(mission_result: Dictionary, runtime_context: Dictionary = {}) -> void:
+	if not _accept_network_runtime_context(runtime_context): return
 	if _runs_local_authority:
 		return
 
@@ -1707,8 +1742,11 @@ func _receive_remote_event(
 	unit_id: String = "",
 	event_color: Color = DEFAULT_EVENT_COLOR,
 	duration_seconds: float = EVENT_DEFAULT_DURATION,
-	unit_event_text: String = ""
+	unit_event_text: String = "",
+	runtime_context: Dictionary = {}
 ) -> void:
+	if not _accept_network_runtime_context(runtime_context): return
+	if not runtime_context.is_empty(): return # Scoped events arrive through the filtered Root snapshot.
 	if _runs_local_authority:
 		return
 
@@ -3984,6 +4022,8 @@ func _broadcast_remote_event(
 	if not _can_broadcast_to_clients():
 		return
 
+	if not _legacy_network_wire_allowed(): return
+
 	var payload: Dictionary = Dictionary(_remote_event_bridge.call("build_event_payload", event_text, unit_id, event_color, duration_seconds, unit_event_text))
 	_receive_remote_event.rpc(
 		String(payload.get("event_text", "")),
@@ -4160,7 +4200,17 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 	_update_status_label("resolved")
 	_update_winner_label()
 	if _can_broadcast_to_clients():
-		_receive_mission_result.rpc(_mission_result)
+		var runtime_context: Dictionary = _network_runtime_context()
+		if _legacy_network_wire_allowed():
+			_receive_mission_result.rpc(_mission_result)
+		elif not runtime_context.is_empty():
+			var root = get_node_or_null(simulation_root_path)
+			# Publish the final raw result before asking the same Root filter.
+			root.call("set_multiplayer_snapshot_context",{"mission_result":_mission_result})
+			for peer_id in root.call("_get_snapshot_recipient_peer_ids"):
+				var projected: Dictionary=root.call("project_multiplayer_state_for_peer",peer_id)
+				if projected.get("ok",false):
+					_receive_mission_result.rpc_id(peer_id,projected.snapshot.get("mission_result",{}),runtime_context)
 	combat_resolved.emit(get_mission_result())
 
 

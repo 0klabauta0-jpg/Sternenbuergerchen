@@ -3345,7 +3345,212 @@ func get_authoritative_fire_rule_snapshot() -> Array:
 	return result
 
 
+# Session identity is assigned by the verified Lobby before scene activation.
+# No gameplay, sight or transport ownership is stored in this projection binding.
+const VISIBLE_MULTIPLAYER_PROJECTION = preload("res://scripts/multiplayer/multiplayer_visible_snapshot_projection.gd")
+var _multiplayer_runtime_context: Dictionary = {}
+var _multiplayer_runtime_context_required: bool = false
+var _multiplayer_local_team: String = ""
+var _multiplayer_raw_snapshot_context: Dictionary = {}
+var _multiplayer_replica_visible_ids: Dictionary = {}
+var _multiplayer_has_full_projection: bool = false
+var _multiplayer_presence_guard_active: bool = false
+
+
+func validate_multiplayer_runtime_context_binding(context: Dictionary, local_team: String) -> Dictionary:
+	if not _valid_multiplayer_runtime_context(context) or local_team.is_empty() or local_team != local_team.strip_edges().to_lower():
+		return {"ok":false,"reason":"invalid_multiplayer_runtime_context"}
+	if not _multiplayer_runtime_context.is_empty() and context != _multiplayer_runtime_context:
+		return {"ok":false,"reason":"multiplayer_runtime_context_already_bound"}
+	return {"ok":true}
+
+
+func bind_multiplayer_runtime_context(context: Dictionary, local_team: String) -> Dictionary:
+	var validation: Dictionary=validate_multiplayer_runtime_context_binding(context,local_team)
+	if not validation.ok: return validation
+	_multiplayer_runtime_context_required=true
+	if not _multiplayer_runtime_context.is_empty():
+		if context != _multiplayer_runtime_context:
+			return {"ok":false,"reason":"multiplayer_runtime_context_already_bound"}
+		if _multiplayer_local_team != local_team:
+			_multiplayer_replica_visible_ids.clear()
+			_multiplayer_has_full_projection=false
+			_incoming_snapshot_chunks_by_tick.clear()
+		_multiplayer_local_team = local_team
+		refresh_multiplayer_replica_presence()
+		return {"ok":true}
+	_multiplayer_runtime_context = context.duplicate(true)
+	_multiplayer_local_team = local_team
+	_incoming_snapshot_chunks_by_tick.clear()
+	_last_applied_snapshot_tick = -1
+	_last_applied_vital_tick_by_unit_id.clear()
+	_multiplayer_replica_visible_ids.clear()
+	_multiplayer_has_full_projection = false
+	refresh_multiplayer_replica_presence()
+	return {"ok":true}
+
+
+func clear_multiplayer_runtime_context() -> void:
+	_multiplayer_runtime_context_required = requires_multiplayer_runtime_context()
+	_multiplayer_runtime_context.clear()
+	_multiplayer_local_team = ""
+	_multiplayer_snapshot_context.clear()
+	_multiplayer_raw_snapshot_context.clear()
+	_last_server_state.clear()
+	_multiplayer_replica_visible_ids.clear()
+	_multiplayer_has_full_projection = false
+	_incoming_snapshot_chunks_by_tick.clear()
+	refresh_multiplayer_replica_presence()
+
+
+func get_multiplayer_runtime_context() -> Dictionary:
+	return _multiplayer_runtime_context.duplicate(true)
+
+
+func _valid_multiplayer_runtime_context(context: Dictionary) -> bool:
+	for key in context:
+		if key not in ["schema","runtime_token","map_id","map_hash","scenario_hash"] or not context[key] is String:
+			return false
+	if context.get("schema") != "multiplayer.runtime_context.v1": return false
+	var token: String = context.get("runtime_token","")
+	var map_hash: String = context.get("map_hash","")
+	var map_id: String = context.get("map_id","")
+	if token.length()!=32 or not token.is_valid_hex_number(false) or map_hash.length()!=64 or not map_hash.is_valid_hex_number(false): return false
+	if map_id.is_empty() or map_id.length()>256 or map_id!=map_id.strip_edges(): return false
+	if context.has("scenario_hash"):
+		var scenario: String=context.scenario_hash
+		if scenario.length()!=64 or not scenario.is_valid_hex_number(false): return false
+	return true
+
+
+func requires_multiplayer_runtime_context() -> bool:
+	if _multiplayer_runtime_context_required or is_hex_ground_runtime_required(): return true
+	# Clients do not configure the authoritative Ground owner. The actual loaded
+	# map declaration must still prevent a contextless Hex client/host downgrade.
+	var setup = get_parent().get_node_or_null("MissionSetup") if get_parent()!=null else null
+	var map = setup.get("_loaded_terrain_map_data") if setup!=null else null
+	return map!=null and map.has_method("get_tactical_grid_rules") and String(map.call("get_tactical_grid_rules"))=="hex_tactical_v1"
+
+
+func uses_legacy_multiplayer_wire() -> bool:
+	return not requires_multiplayer_runtime_context() and _multiplayer_runtime_context.is_empty()
+
+
+func accepts_multiplayer_runtime_context(context: Dictionary) -> bool:
+	if _multiplayer_runtime_context.is_empty(): return context.is_empty() and uses_legacy_multiplayer_wire()
+	return context == _multiplayer_runtime_context
+
+
+func _multiplayer_wire_ready() -> bool:
+	return not _multiplayer_runtime_context.is_empty() or uses_legacy_multiplayer_wire()
+
+
+func submit_multiplayer_command(command: Dictionary) -> void:
+	if _has_active_multiplayer_peer() and not multiplayer.is_server():
+		if not _multiplayer_wire_ready(): return
+		request_command.rpc_id(1,command,_multiplayer_runtime_context.duplicate(true))
+	else:
+		request_command(command,_multiplayer_runtime_context.duplicate(true))
+
+
+func _multiplayer_replica_mode() -> bool:
+	return requires_multiplayer_runtime_context() and is_inside_tree() and _has_active_multiplayer_peer() and not multiplayer.is_server()
+
+
+# Registry/Known union only. Source calls this again after actor admission;
+# no SceneTree traversal, no gameplay registration/removal or selection mutation.
+func refresh_multiplayer_replica_presence() -> void:
+	if not _multiplayer_replica_mode() or _multiplayer_presence_guard_active: return
+	_multiplayer_presence_guard_active = true
+	var units: Dictionary = _known_units_by_id.duplicate()
+	var registry = _get_unit_registry()
+	if registry != null and registry.has_method("get_all_units"):
+		for unit in registry.call("get_all_units"):
+			if is_instance_valid(unit) and unit.has_method("get_unit_id"):
+				units[String(unit.call("get_unit_id"))] = unit
+	for id in units:
+		var actor = units[id]
+		if not is_instance_valid(actor) or not actor is CanvasItem: continue
+		var guard: Callable = Callable(self,"_on_multiplayer_replica_visibility_changed").bind(actor.get_instance_id(),String(id))
+		if not actor.visibility_changed.is_connected(guard): actor.visibility_changed.connect(guard)
+		if not _multiplayer_replica_actor_allowed(actor,String(id)): actor.hide()
+	_multiplayer_presence_guard_active = false
+
+
+func _multiplayer_replica_actor_allowed(actor: Node, id: String) -> bool:
+	if _multiplayer_runtime_context.is_empty(): return false
+	if _multiplayer_has_full_projection: return _multiplayer_replica_visible_ids.has(id)
+	return actor.has_method("get_team_id") and String(actor.call("get_team_id")) == _multiplayer_local_team
+
+
+func _on_multiplayer_replica_visibility_changed(instance_id: int, id: String) -> void:
+	if not _multiplayer_replica_mode() or _multiplayer_presence_guard_active: return
+	var actor = instance_from_id(instance_id)
+	if not is_instance_valid(actor) or not actor is CanvasItem or not actor.visible: return
+	if not _multiplayer_replica_actor_allowed(actor,id):
+		_multiplayer_presence_guard_active = true
+		actor.hide()
+		_multiplayer_presence_guard_active = false
+
+
+func _get_multiplayer_visibility_context(raw: Dictionary, team: String) -> Dictionary:
+	var own := PackedStringArray()
+	var known: Dictionary = {}
+	var fireteams: Dictionary = {}
+	# Assigned teams/fireteams remain authoritative while all their actors are
+	# embarked (and therefore absent from the current ground registry snapshot).
+	for peer_id in _peer_fireteam_assignments:
+		var assigned_team: String=get_peer_team(int(peer_id))
+		if assigned_team.is_empty(): continue
+		for ft in _peer_fireteam_assignments[peer_id]:
+			if fireteams.has(ft) and fireteams[ft]!=assigned_team: return {}
+			fireteams[ft]=assigned_team
+	for unit: Dictionary in raw.get("units",[]):
+		var id: String=String(unit.get("unit_id",""))
+		var unit_team: String=String(unit.get("team_id",""))
+		known[id]=unit_team
+		if unit_team==team: own.append(id)
+		var ft: String=String(unit.get("fireteam_id",""))
+		if not ft.is_empty():
+			if fireteams.has(ft) and fireteams[ft]!=unit_team: return {}
+			fireteams[ft]=unit_team
+	var driver = get_parent().get_node_or_null("CombatLoopDriver") if get_parent()!=null else null
+	if driver==null or not driver.has_method("get_multiplayer_visible_unit_ids"): return {}
+	var visible := PackedStringArray()
+	for id in driver.call("get_multiplayer_visible_unit_ids",team):
+		if known.has(id) and not visible.has(id): visible.append(id)
+	var crafts: Dictionary = {}
+	for card: Dictionary in raw.get("dropship",{}).get("mission_drop_cards",[]):
+		var craft: String=String(card.get("craft_id",""))
+		var teams: Dictionary={}
+		for id in Array(card.get("embarked_unit_ids",[]))+[card.get("pilot_unit_id","")]:
+			if known.has(id): teams[known[id]]=true
+		for ft in card.get("boarded_fireteam_ids",[]):
+			if fireteams.has(ft): teams[fireteams[ft]]=true
+		var explicit: String=String(card.get("team_id",""))
+		if not explicit.is_empty(): teams[explicit]=true
+		if not craft.is_empty() and teams.size()==1: crafts[craft]=teams.keys()[0]
+	var assets: Dictionary={}
+	for asset: Dictionary in raw.get("air_asset_status",[]):
+		if not String(asset.get("asset_id","")).is_empty() and not String(asset.get("team_id","")).is_empty():
+			assets[asset.asset_id]=asset.team_id
+	return {"reference_provenance":"host_raw","own_unit_ids":own,"visible_unit_ids":visible,"fireteam_team_ids":fireteams,"craft_team_ids":crafts,"asset_team_ids":assets}
+
+
+func project_multiplayer_state_for_peer(peer_id: int, raw_state: Dictionary = {}) -> Dictionary:
+	if _multiplayer_runtime_context.is_empty(): return {"ok":false,"reason":"multiplayer_runtime_context_required"}
+	var raw: Dictionary = raw_state if not raw_state.is_empty() else _build_raw_multiplayer_tick_state()
+	var team: String=get_peer_team(peer_id)
+	var context: Dictionary=_get_multiplayer_visibility_context(raw,team)
+	if context.is_empty(): return {"ok":false,"reason":"current_team_visibility_unavailable"}
+	var projected: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,context)
+	if projected.get("ok",false): projected["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+	return projected
+
+
 func set_multiplayer_snapshot_context(context: Dictionary) -> void:
+	for key in context:
+		_multiplayer_raw_snapshot_context[key] = context[key].duplicate(true) if context[key] is Dictionary or context[key] is Array else context[key]
 	var normalized_context: Dictionary = Dictionary(_multiplayer_snapshot_contract.call("normalize_display_context", context))
 	var next_context: Dictionary = _multiplayer_snapshot_context.duplicate(true)
 	if context.has("dropship"):
@@ -3385,6 +3590,7 @@ func set_multiplayer_snapshot_context(context: Dictionary) -> void:
 
 func clear_multiplayer_snapshot_context() -> void:
 	_multiplayer_snapshot_context.clear()
+	_multiplayer_raw_snapshot_context.clear()
 
 
 func get_multiplayer_snapshot_debug_snapshot() -> Dictionary:
@@ -3474,7 +3680,12 @@ func get_objective_status():
 
 
 @rpc("any_peer", "reliable")
-func request_command(command_dict: Dictionary) -> void:
+func request_command(command_dict: Dictionary, runtime_context: Dictionary = {}) -> void:
+	# Existing in-process authority callers are trusted; remote RPCs must carry
+	# the exact session identity, including when the caller omits the argument.
+	if not accepts_multiplayer_runtime_context(runtime_context):
+		if not runtime_context.is_empty() or not is_inside_tree() or multiplayer.get_remote_sender_id() != 0:
+			return
 	if not is_server_authoritative:
 		enqueue_command(command_dict)
 		return
@@ -3503,12 +3714,14 @@ func request_command(command_dict: Dictionary) -> void:
 
 
 @rpc("authority", "reliable")
-func _receive_network_command_result(result: Dictionary) -> void:
+func _receive_network_command_result(result: Dictionary, runtime_context: Dictionary = {}) -> void:
+	if not accepts_multiplayer_runtime_context(runtime_context): return
 	_last_network_command_result = result.duplicate(true)
 	network_command_result_received.emit(_last_network_command_result.duplicate(true))
 
 
 func _send_network_command_result(peer_id: int, result: Dictionary, command: Dictionary) -> void:
+	if not _multiplayer_wire_ready(): return
 	var payload: Dictionary = {
 		"schema": "sternenbuergerchen.network_command_result.v1",
 		"accepted": bool(result.get("accepted", false)),
@@ -3528,9 +3741,9 @@ func _send_network_command_result(peer_id: int, result: Dictionary, command: Dic
 		"ui_sets_gameplay_truth": false,
 	}
 	if _has_active_multiplayer_peer() and multiplayer.is_server() and peer_id > 1:
-		_receive_network_command_result.rpc_id(peer_id, payload)
+		_receive_network_command_result.rpc_id(peer_id, payload, _multiplayer_runtime_context.duplicate(true))
 		return
-	_receive_network_command_result(payload)
+	_receive_network_command_result(payload, _multiplayer_runtime_context.duplicate(true))
 
 
 func validate_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
@@ -3619,7 +3832,8 @@ func _receive_tick_state(state_dict: Dictionary) -> void:
 
 
 @rpc("authority", "unreliable")
-func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, raw_size: int, compressed: bool, chunk: PackedByteArray) -> void:
+func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, raw_size: int, compressed: bool, chunk: PackedByteArray, runtime_context: Dictionary = {}) -> void:
+	if not accepts_multiplayer_runtime_context(runtime_context): return
 	if tick < 0 or chunk_count <= 0 or chunk_count > SNAPSHOT_MAX_CHUNK_COUNT or chunk_index < 0 or chunk_index >= chunk_count or raw_size <= 0 or raw_size > SNAPSHOT_MAX_RAW_BYTES:
 		_snapshot_transport_reassembly_failure_count += 1
 		return
@@ -3694,7 +3908,9 @@ func _prune_incoming_snapshot_chunks(_latest_tick: int) -> void:
 
 
 @rpc("authority", "reliable")
-func _receive_vital_state_updates(vital_updates: Array) -> void:
+func _receive_vital_state_updates(vital_updates: Array, runtime_context: Dictionary = {}, recipient_team: String = "") -> void:
+	if not accepts_multiplayer_runtime_context(runtime_context): return
+	if not _multiplayer_runtime_context.is_empty() and recipient_team != _multiplayer_local_team: return
 	for vital_update in vital_updates:
 		if typeof(vital_update) != TYPE_DICTIONARY:
 			continue
@@ -3936,11 +4152,32 @@ func _is_peer_allowed_for_team(peer_id: int, team_id: String) -> bool:
 
 
 func _broadcast_tick_state() -> void:
+	if not _multiplayer_wire_ready(): return
 	if _snapshot_broadcast_paused or not is_server_authoritative or not _has_active_multiplayer_peer() or not multiplayer.is_server():
 		return
 
 	var recipient_peer_ids: PackedInt32Array = _get_snapshot_recipient_peer_ids()
 	if recipient_peer_ids.is_empty():
+		return
+	if not _multiplayer_runtime_context.is_empty():
+		var raw: Dictionary = _build_raw_multiplayer_tick_state()
+		var updates: Array = _build_vital_state_updates()
+		var projections: Dictionary={}
+		var reliable_by_team: Dictionary={}
+		for peer_id in recipient_peer_ids:
+			var team: String=get_peer_team(peer_id)
+			if not projections.has(team):
+				var visibility: Dictionary=_get_multiplayer_visibility_context(raw,team)
+				var team_projection: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,visibility)
+				if team_projection.get("ok",false): team_projection["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+				projections[team]=team_projection
+				reliable_by_team[team]=VISIBLE_MULTIPLAYER_PROJECTION.new().project_reliable_vitals(updates,raw,team,visibility) if not updates.is_empty() else {}
+			var projected: Dictionary=projections[team]
+			if not projected.get("ok",false): continue
+			_broadcast_tick_state_chunks(projected,PackedInt32Array([peer_id]))
+			var reliable: Dictionary=reliable_by_team[team]
+			if reliable.get("ok",false):
+				_receive_vital_state_updates.rpc_id(peer_id,reliable.vital_updates,_multiplayer_runtime_context.duplicate(true),team)
 		return
 	var state_dict: Dictionary = _build_tick_state()
 	_broadcast_tick_state_chunks(state_dict, recipient_peer_ids)
@@ -3952,6 +4189,7 @@ func _broadcast_tick_state() -> void:
 
 
 func _broadcast_tick_state_chunks(state_dict: Dictionary, recipient_peer_ids: PackedInt32Array) -> void:
+	if not _multiplayer_wire_ready(): return
 	var pack_started_usec: int = Time.get_ticks_usec()
 	var raw_bytes: PackedByteArray = var_to_bytes(state_dict)
 	if raw_bytes.size() > SNAPSHOT_MAX_RAW_BYTES:
@@ -3974,7 +4212,7 @@ func _broadcast_tick_state_chunks(state_dict: Dictionary, recipient_peer_ids: Pa
 		var chunk: PackedByteArray = wire_bytes.slice(start_offset, end_offset)
 		_snapshot_transport_last_max_chunk_payload_bytes = maxi(_snapshot_transport_last_max_chunk_payload_bytes, chunk.size())
 		for peer_id in recipient_peer_ids:
-			_receive_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk)
+			_receive_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk, _multiplayer_runtime_context.duplicate(true))
 	_snapshot_transport_last_pack_usec = Time.get_ticks_usec() - pack_started_usec
 
 
@@ -3988,34 +4226,34 @@ func _get_snapshot_recipient_peer_ids() -> PackedInt32Array:
 
 
 func _build_tick_state() -> Dictionary:
-	var snapshot_context: Dictionary = Dictionary(_multiplayer_snapshot_context).duplicate(true)
-	return Dictionary(
-		_multiplayer_snapshot_contract.call(
-			"build_state_snapshot",
-			{
-				"tick": tick_counter,
-				"units": _build_unit_snapshots(),
-				"vital_updates": _build_all_vital_state_snapshots(),
-				"objective": _build_objective_snapshot(),
-				"dropship": snapshot_context.get("dropship", {}),
-				"contacts": snapshot_context.get("contacts", []),
-				"enemy_security": snapshot_context.get("enemy_security", []),
-				"enemy_team_tactics": snapshot_context.get("enemy_team_tactics", []),
-				"character_gameplay": snapshot_context.get("character_gameplay", []),
-				"fire_events": snapshot_context.get("fire_events", []),
-				"feedback_bubbles": snapshot_context.get("feedback_bubbles", []),
-				"fireteam_tactical": snapshot_context.get("fireteam_tactical", []),
-				"commander_intents": snapshot_context.get("commander_intents", []),
-				"fireteam_plan_status": snapshot_context.get("fireteam_plan_status", []),
-				"communication_events": snapshot_context.get("communication_events", []),
-				"tactical_rules": _build_authoritative_tactical_rules_snapshot(snapshot_context.get("tactical_rules", [])),
-				"breakout_states": snapshot_context.get("breakout_states", []),
-				"air_asset_status": _build_air_asset_status_snapshots(snapshot_context.get("air_asset_status", [])),
-				"mission_interactions": snapshot_context.get("mission_interactions", {}),
-				"mission_result": snapshot_context.get("mission_result", {}),
-			}
-		)
-	)
+	return Dictionary(_multiplayer_snapshot_contract.call("build_state_snapshot",_build_raw_multiplayer_tick_state()))
+
+
+func _build_raw_multiplayer_tick_state() -> Dictionary:
+	var snapshot_context: Dictionary = _multiplayer_raw_snapshot_context.duplicate(true)
+	return {
+		"schema_version":1,"snapshot_type":"state","transfer_mode":"unreliable",
+		"tick": tick_counter,
+		"units": _build_unit_snapshots(),
+		"vital_updates": _build_all_vital_state_snapshots(),
+		"objective": _build_objective_snapshot(),
+		"dropship": snapshot_context.get("dropship", {}),
+		"contacts": snapshot_context.get("contacts", []),
+		"enemy_security": snapshot_context.get("enemy_security", []),
+		"enemy_team_tactics": snapshot_context.get("enemy_team_tactics", []),
+		"character_gameplay": snapshot_context.get("character_gameplay", []),
+		"fire_events": snapshot_context.get("fire_events", []),
+		"feedback_bubbles": snapshot_context.get("feedback_bubbles", []),
+		"fireteam_tactical": snapshot_context.get("fireteam_tactical", []),
+		"commander_intents": snapshot_context.get("commander_intents", []),
+		"fireteam_plan_status": snapshot_context.get("fireteam_plan_status", []),
+		"communication_events": snapshot_context.get("communication_events", []),
+		"tactical_rules": _build_authoritative_tactical_rules_snapshot(snapshot_context.get("tactical_rules", [])),
+		"breakout_states": snapshot_context.get("breakout_states", []),
+		"air_asset_status": _build_air_asset_status_snapshots(snapshot_context.get("air_asset_status", snapshot_context.get("air_asset_statuses", []))),
+		"mission_interactions": snapshot_context.get("mission_interactions", {}),
+		"mission_result": snapshot_context.get("mission_result", {}),
+	}
 
 
 func _build_unit_snapshots() -> Array:
@@ -4231,6 +4469,25 @@ func _build_unit_vital_update(unit) -> Dictionary:
 
 
 func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
+	var apply_context: Dictionary=_multiplayer_runtime_context.duplicate(true)
+	var full_projection: bool = false
+	if state_dict.get("schema_version") == 2:
+		if state_dict.get("ok") != true or state_dict.get("projection_schema") != "multiplayer.visible_state.v1" or state_dict.get("projection_scope") != "full_recipient_state" or state_dict.get("recipient_team") != _multiplayer_local_team or not state_dict.get("runtime_context") is Dictionary or not accepts_multiplayer_runtime_context(state_dict.runtime_context) or _multiplayer_runtime_context.is_empty() or not state_dict.get("snapshot") is Dictionary:
+			return {"accepted":false,"reason":"invalid_recipient_projection"}
+		var inner: Dictionary=state_dict.snapshot
+		if typeof(state_dict.get("schema_version"))!=TYPE_INT or typeof(state_dict.get("tick"))!=TYPE_INT or typeof(inner.get("tick"))!=TYPE_INT or state_dict.tick!=inner.tick:
+			return {"accepted":false,"reason":"projection_tick_conflict"}
+		if typeof(inner.get("schema_version"))!=TYPE_INT or inner.schema_version!=1 or inner.get("snapshot_type")!="state" or inner.get("transfer_mode")!="unreliable" or not inner.get("units") is Array:
+			return {"accepted":false,"reason":"invalid_recipient_snapshot"}
+		var ids: Dictionary={}
+		for entry in inner.units:
+			if not entry is Dictionary or not entry.get("unit_id") is String or entry.unit_id.is_empty() or ids.has(entry.unit_id):
+				return {"accepted":false,"reason":"invalid_recipient_units"}
+			ids[entry.unit_id]=true
+		state_dict=inner.duplicate(true)
+		full_projection=true
+	elif requires_multiplayer_runtime_context():
+		return {"accepted":false,"reason":"recipient_projection_required"}
 	if typeof(state_dict) != TYPE_DICTIONARY:
 		_last_snapshot_reject_reason = "snapshot_not_dictionary"
 		return {
@@ -4246,14 +4503,23 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 		return validation
 
 	var snapshot: Dictionary = Dictionary(validation.get("snapshot", {})).duplicate(true)
+	if full_projection:
+		_multiplayer_replica_visible_ids.clear()
+		for entry: Dictionary in snapshot.get("units",[]):
+			if entry.get("visible",true): _multiplayer_replica_visible_ids[entry.unit_id]=true
+		_multiplayer_has_full_projection=true
+		refresh_multiplayer_replica_presence()
+		if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 	_last_applied_snapshot_tick = int(snapshot.get("tick", _last_applied_snapshot_tick))
 	_snapshot_apply_count += 1
 	_last_snapshot_reject_reason = ""
 	_emit_snapshot_audio_events(snapshot)
+	if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 
 	var objective_dict: Variant = snapshot.get("objective", {})
 	if typeof(objective_dict) == TYPE_DICTIONARY:
 		_apply_remote_objective_state(objective_dict)
+		if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 
 	var unit_snapshots: Variant = snapshot.get("units", [])
 	if not (unit_snapshots is Array):
@@ -4278,9 +4544,11 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 			_copy_current_remote_vitals(unit, unit_snapshot)
 		if unit.has_method("apply_remote_snapshot"):
 			unit.call("apply_remote_snapshot", unit_snapshot)
+			if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 			continue
 
 		_apply_remote_snapshot_fallback(unit, unit_snapshot)
+		if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 
 	for vital_update in Array(snapshot.get("vital_updates", [])):
 		var unit_id: String = String(vital_update.get("unit_id", ""))

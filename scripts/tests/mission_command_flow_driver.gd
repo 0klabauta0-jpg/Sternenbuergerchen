@@ -163,4 +163,4 @@ func _enqueue_unit_command(simulation_root: Node, command_dict: Dictionary) -> v
 		simulation_root.call("request_command", command_dict)
 		return
 
-	simulation_root.rpc_id(1, "request_command", command_dict)
+	simulation_root.call("submit_multiplayer_command", command_dict)

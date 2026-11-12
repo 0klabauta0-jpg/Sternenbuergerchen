@@ -2688,7 +2688,7 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 			_apply_network_dropship_command_result(result.merged({"source_context": "mission_dropship_ui", "craft_id": normalized_craft_id, "command_id": String(command.get("command_id", ""))}, true))
 			return false
 	else:
-		simulation_root.rpc_id(1, "request_command", command)
+		simulation_root.call("submit_multiplayer_command", command)
 	_last_command_text = "%s %s -> HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id]
 	_update_ui()
 	return true
@@ -2730,7 +2730,7 @@ func request_network_authoritative_fireteam_intent(fireteam_id: String, command_
 		if not bool(result.get("accepted", false)):
 			return false
 	else:
-		simulation_root.rpc_id(1, "request_command", command)
+		simulation_root.call("submit_multiplayer_command", command)
 	_last_command_text = "%s %s -> HOST" % [normalized_command_type.to_upper(), normalized_fireteam_id.to_upper()]
 	_update_ui()
 	return true
@@ -3025,7 +3025,7 @@ func _try_submit_connected_client_mission_interaction() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 	}
 	_replace_next_orders_for_fireteams(PackedStringArray([fireteam_id]), int(intent.get("phase", _get_live_order_phase_index())))
-	simulation_root.rpc_id(1, "request_command", command)
+	simulation_root.call("submit_multiplayer_command", command)
 	_last_command_text = pending_line
 	_refresh_order_visuals()
 	_update_ui()
@@ -3135,7 +3135,7 @@ func _request_network_authoritative_fire_rules(fireteam_ids: PackedStringArray, 
 			if bool(result.get("accepted", false)):
 				accepted_count += 1
 		else:
-			simulation_root.rpc_id(1, "request_command", command)
+			simulation_root.call("submit_multiplayer_command", command)
 			accepted_count += 1
 	if accepted_count <= 0:
 		return false
