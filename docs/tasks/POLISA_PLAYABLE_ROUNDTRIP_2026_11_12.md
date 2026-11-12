@@ -101,4 +101,29 @@ erneuten Anflug, Freigabe, erhaltene Rückkehrposition, Warp und Heimlandung.
 Er simuliert weder die tatsächliche Landepadkarte noch Einkauf, Aussteigen
 oder Boarding. Ein erster Lauf ohne Klassenindex hatte Autoloadfehler und ist
 kein gültiger Nachweis. Eine native Sichtprüfung und der zusammenhängende
-Produktionsdurchlauf bleiben offen; das Liveflag ist weiterhin ausgeschaltet.
+Produktionsdurchlauf blieben zu diesem Zeitpunkt offen; das Liveflag ist weiterhin ausgeschaltet.
+
+## Fortsetzung: tatsächlicher Kampagnenweg
+
+Arbeitsbasis ist der noch nicht auf main integrierte Parallelstand `62a14dd76`.
+Der echte Polisa-Durchlauf zeigte zwei Fehler: Die Transportprojektion verlor
+die tatsächlich vorhandene Modell-ID vor der Missionskarte, und der primäre
+Abflug löschte die Crewbindung vor dem synchronen Return-Callback. Der Flow
+reicht nun vorhandene Identitätsfelder aus der Fleetdefinition durch. Der
+Controller hält beim Abschluss die tatsächliche Sequenzbindung für den
+Return-Callback kurz im vorhandenen sequenzgebundenen Index und entfernt sie
+nur, wenn noch exakt dieselbe Bindung dort liegt. Guards und Owner bleiben
+unverändert; fehlende Modellidentität wird nicht erraten.
+
+Der Flag-off-Kampagnendurchlauf `polisa_real_roundtrip_verifier.gd` prüft mit
+echter Szene, Crew und Supply den Flug nach Polisa, Padwahl, Landung, Ausstieg,
+Kauf, 3D-Aufzugsknoten, Boarding, Abflug, Quantum und Heimatlandung samt Ware.
+Der Heimat-Boardingweg wird dabei mit dem vorhandenen Debug-Takt beschleunigt.
+Der Durchlauf ist headless: Er belegt keine visuelle oder manuelle Bedienabnahme
+und keine Freigabe des weiterhin ausgeschalteten lokalen Orbitpfads. Die
+Aufzugbewegung stellt die bereits gebuchte Ware dar, keine physikalische oder
+verzögerte Übergabe. Der abschließende Lauf mit allen Crewmitgliedern und dem
+echten Tankvorgang endete 25/25, Exit 0. Ergänzend: Boarding-/Retirementfixture
+37/37, Tankservice 11/11 sowie lokaler Landungs-Owner und Aufzug jeweils Exit 0.
+Nötig bleibt die gemeinsame Integration und deren Prüfung auf dem fortgeschriebenen
+Parallelstand.
