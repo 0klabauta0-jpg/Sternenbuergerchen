@@ -563,14 +563,14 @@ func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_d
 		return fuel_gate
 	return {"ok": true, "departure": departure}
 
-func authorize_departure(craft_id: String, approach_request_id: String = "") -> Dictionary:
+func authorize_departure(craft_id: String, approach_request_id: String = "", station_dock: bool = false) -> Dictionary:
 	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")
 	var binding: Dictionary = _simulation.configure_departure_adapter(self)
 	if not binding.get("ok", false): return binding
 	var token: String = "departure:%s:%s:%d" % [_request_session, craft_id, int(_flow.get("_transfer_sequence")) + 1]
 	var previous := String(_departure_token_by_craft.get(craft_id, ""))
 	if not approach_request_id.is_empty() and _simulation.has_confirmed_cancelled_departure(self, craft_id, previous): token = previous
-	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id)
+	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id, station_dock)
 	if not result.get("ok", false): return result
 	_departure_token_by_craft[craft_id] = token
 	if approach_request_id.is_empty():
@@ -949,8 +949,10 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return warp_result
 		var result := _commit("singleplayer_space_travel", "start_quantum" if operation == "space_start_quantum" else "abort_quantum", data, owner_request_id)
 		return _remember_space_operation(request_id, signature, result)
-	if operation == "space_begin_approach":
+	if operation in ["space_begin_approach", "space_begin_station_dock"]:
 		var location_id := String(data.get("location_id", ""))
+		var station_dock := operation == "space_begin_station_dock"
+		if station_dock and (location_id != "polisa" or data.get("target_id") != "polisa_station_dock" or data.get("layout_revision") != "polisa_glut2_dock_v1"): return _reject("station_layout_changed", "Stationsziel passt nicht")
 		if not _in_destination_orbit(snapshot, location_id):
 			return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
 		if _campaign_mode:
@@ -961,7 +963,7 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return _reject("destination_mismatch", "Den gewünschten Ort im zugehörigen Orbit auswählen")
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
-		var departure := authorize_departure(craft_id, owner_request_id)
+		var departure := authorize_departure(craft_id, ("station-dock:" + owner_request_id) if station_dock else owner_request_id, station_dock)
 		if not departure.get("ok", false):
 			return departure
 		var result: Dictionary = departure.travel_result
