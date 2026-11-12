@@ -16,6 +16,17 @@ Taskbranch task/native-glut-maps-20261110; keine Arbeit direkt auf Main.
 A/B/C bleiben 512x256, strategische Sternkarte256x256, lokale Orbitbereiche512x256.
 PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt.
 
+Codezwischenstand 12.11.: AP6 fertig (33e6ba73a/bc2f2886b), begrenzter
+AP8-Verbund fertig vorbereitet (76f05f57c), AP7-Netzblock integriert (95e22ad14).
+Der AP7-Root-/Store-/Loaderblock wird noch aus Tabletop uebernommen. Neue gemeinsame
+Pruefungen bewusst erst nach dessen Codeabschluss; AP8-Boundedgate ist von AP9
+(echte Peers, grosse Karten, native Darstellung/Leistung) getrennt.
+
+Polisa-Direktanflug bleibt ohne lokale Orbitpflicht erhalten. Schiffskarten-
+Identitaet und synchroner Crew-Rueckfluguebergang sind als cb95c5e02 korrigiert;
+echter Source-Headlessrundlauf25/0 samt isoliertem Runner als bec556119 vorhanden.
+Noch kein frischer Rundlauf im anschliessend erweiterten Parent oder Sichturteil.
+
 ## Bewegung: AP5 bis AP8
 
 - AP5-Codepfade zusammengefuehrt: Commands/Actorbewegung, Gruppen-/3D-Verbraucher,
