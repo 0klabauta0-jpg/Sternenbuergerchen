@@ -428,7 +428,7 @@ func _walk_hex(id:String,target:Vector2,action:Dictionary)->Dictionary:
 	state_changed.emit()
 	return {"ok":true,"pending":true}
 
-func _cancel(id: String) -> void:
+func _cancel(id: String,publish_state:bool=true) -> void:
 	for craft in _board_groups.keys():
 		if Array(_board_groups[craft].ids).has(id):
 			var group: Dictionary = _board_groups[craft]
@@ -449,7 +449,7 @@ func _cancel(id: String) -> void:
 	state.idle_seconds=0.0
 	state.manual_priority_seconds=MANUAL_PRIORITY_SECONDS
 	_sim.call("_discard_pending_move_commands_for_unit", id)
-	state_changed.emit()
+	if publish_state:state_changed.emit()
 func _unit_is_home(id: String) -> bool:
 	if not _states.has(id): return false
 	var craft:=String(_states[id].get("craft_id",""))
@@ -578,25 +578,39 @@ func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 			aboard.append(member)
 		elif String(_states[member].status)!="boarding" or not physical:return _reject("inconsistent_base_ground_presence","Person ist nicht am Schiff verfuegbar")
 	var admission_id:=""
+	var payload_prepared:RefCounted
+	var payload_validation:Dictionary={}
 	if not aboard.is_empty():
 		var ticket:Dictionary=_sim.prepare_base_ground_deployment(self,aboard,_terrain.world_to_grid(_pad_world(craft)))
 		if not ticket.ok:return ticket
 		admission_id=String(ticket.admission_id)
 	if (pilot!=id or whole) and not String(_screen.call("_operations_payload_craft_for_team",team)).is_empty():
-		var data:Dictionary=payload.duplicate(true)
-		data.fireteam_id=team
-		data.craft_id=craft
-		var result:Dictionary=_screen.call("_request_operation_from_base","unboard",data)
+		for method in ["prepare_base_unboard","validate_prepared_base_unboard","_publish_prepared_base_unboard","finalize_base_unboard"]:
+			if not _screen.has_method(method):
+				if not admission_id.is_empty():_sim.cancel_hex_ground_deployment(admission_id,"base_transport_prepare_unavailable")
+				return _reject("base_transport_prepare_unavailable","Aussteigen ist noch nicht vorbereitet")
+		var result:Dictionary=_screen.call("prepare_base_unboard",craft,team)
 		if not result.get("ok",false):
 			if not admission_id.is_empty():_sim.cancel_hex_ground_deployment(admission_id,"base_transport_denied")
 			return result
+		payload_prepared=result.prepared
+		payload_validation=_screen.call("validate_prepared_base_unboard",payload_prepared)
+		if not payload_validation.ok:
+			if not admission_id.is_empty():_sim.cancel_hex_ground_deployment(admission_id,"base_transport_changed")
+			return payload_validation
 	if not admission_id.is_empty():
-		var committed:Dictionary=_sim.commit_base_ground_deployment(self,admission_id)
+		var committed:Dictionary=_sim.commit_base_ground_deployment(self,admission_id,false)
 		if not committed.ok:
 			_sim.cancel_hex_ground_deployment(admission_id,"base_deployment_changed")
 			return committed
-	for member in leaving:_cancel(member)
+	# No fallible owner work or public callbacks between these model tails. The
+	# Screen prepared contract publishes only already-validated value assignments.
+	if payload_prepared!=null:_screen.call("_publish_prepared_base_unboard",payload_prepared,payload_validation)
+	for member in leaving:_cancel(member,false)
 	_board_groups.erase(craft)
+	_sim.call("_publish_base_ground_actors",leaving)
+	state_changed.emit()
+	if payload_prepared!=null:_screen.call("finalize_base_unboard",payload_prepared)
 	return {"ok":true}
 
 

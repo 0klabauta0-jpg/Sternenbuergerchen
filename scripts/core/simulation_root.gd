@@ -146,7 +146,7 @@ func prepare_base_ground_deployment(owner:Node,unit_ids:PackedStringArray,anchor
 	return result
 
 
-func commit_base_ground_deployment(owner:Node,admission_id:String)->Dictionary:
+func commit_base_ground_deployment(owner:Node,admission_id:String,publish_actor_projection:bool=true)->Dictionary:
 	var ticket:Dictionary=get_hex_ground_deployment(admission_id)
 	if not ticket.ok:return ticket
 	var ids:PackedStringArray=ticket.remaining_unit_ids
@@ -160,10 +160,18 @@ func commit_base_ground_deployment(owner:Node,admission_id:String)->Dictionary:
 	var committed:Dictionary=_hex_ground_runtime.admit_units(placements,admission_id)
 	if not committed.ok:return committed
 	for id in ids:
-		checked.actors[id].set_meta("dropship_embarked",false)
 		_hex_visual_unit_ids[id]=true
-	_project_hex_ground_actors(0.0)
+	if publish_actor_projection:_publish_base_ground_actors(ids)
 	return committed
+
+
+## Presentation follows the complete multi-owner model publication. In particular,
+## no Actor metadata or transform is sent between Ground and Base/Payload tails.
+func _publish_base_ground_actors(unit_ids:PackedStringArray)->void:
+	for id in unit_ids:
+		var actor=_resolve_known_unit_for_contract(id)
+		if is_instance_valid(actor) and _hex_ground_runtime.has_unit(id):actor.set_meta("dropship_embarked",false)
+	_project_hex_ground_actors(0.0)
 
 signal tick_processed(tick: int)
 signal hex_ground_events_committed(events: Array[Dictionary])

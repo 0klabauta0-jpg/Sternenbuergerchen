@@ -90,3 +90,24 @@ den Rest nicht; vollständige Fireteams reservieren ihre Plätze in einem Vorgan
 Remote-Rekrutierungsbindung räumt vorhandenen lokalen Ground. Parent behält
 alle zusätzlichen RemoteHandoff-/Reise-/Landingpadmethoden.
 MissionSetup/Respawn, taktisches Member-Retirement und AP7/8 bleiben nächste Teile.
+
+## Integrationsbefund: gemeinsame Ausstiegspublikation
+
+Parentreview lehnt die Unboard-Publikationsgrenze von `f0c65cf74` vor Integration
+ab: Der tatsächliche Screen entfernt Payload und emittiert synchron ein Signal,
+bevor Ground noch fallibel committet. Ein Observer kann das Ticket invalidieren.
+Außerdem dürfen einzelne `_cancel`-Signale keine teilweise umgestellte Basisgruppe
+zeigen. Nachweis über tatsächlichen HomebaseScreen-Signalweg, nicht nur FakeScreen.
+
+Korrektur: Alle Owner vorbereiten/validieren, falliblen Groundcommit ohne
+Actorprojektion vorziehen, anschließend Payload und gesamte Basisgruppe still
+publizieren. Erst danach Actorprojektion und je ein bestehendes Gruppensignal.
+Parent liefert additive stille Screen-Payloadgrenze; Root/Basis bleiben hier.
+Bis zum Fix ist `f0c65cf74` ein nicht freigegebener Integrationskandidat.
+
+Fix nun am tatsächlichen Screen belegt: RED42/2→GREEN44/0, Boarding53/0 und
+Basisowner63/0 danach. Screen und Basis zeigen in beiden Observerfällen exakt
+eine vollständige Gruppe, auch bei synchronem Ticketcancel. Der additive
+Screenvertrag `7855ee949` wurde als `f47e66c1e` übernommen. Nachgeholter Fix
+ersetzt die beanstandete Pub-Grenze, ursprünglichen Commit nur gemeinsam damit
+integrieren. QA `hex_base_unboard_transaction_20261112`, keine breite Abnahme.

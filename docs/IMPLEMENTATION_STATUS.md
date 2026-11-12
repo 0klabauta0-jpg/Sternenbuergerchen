@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Ausstieg am tatsächlichen Screen atomar publiziert — 12.11.2026
+
+Integrationsreview fand im zuvor nur mit Transportfixture geprüften Ausstieg
+einen echten synchronen Signalzwischenzustand. Neuer additiver Screen-Prepare-/
+Assignmenttail und stille Root-/Basisgruppengrenze veröffentlichen erst das
+vollständige Modell, danach Actorprojektion und Gruppensignale. Tatsächlicher
+vollständiger Screen mit normalem und Ticketcancel-Observer: RED42/2→GREEN44/0;
+Boarding53/0 und Owner63/0 danach, Guards grün. QA
+hex_base_unboard_transaction_20261112. Ein Importabsturz vor Runtime bleibt als
+ungültiger Versuch dokumentiert. `f0c65cf74` nur mit diesem Fix integrieren.
+MissionSetup/Respawn/Member-Retirement sowie AP7/8 weiterhin offen, keine große Probe.
+
 ### AP6 Basisboarding und vollständiger Ausstieg — 12.11.2026
 
 Bestehende Boardinggruppen erhalten unterschiedliche nahe Padhexes; Ground wird
