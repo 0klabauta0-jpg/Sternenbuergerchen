@@ -1,0 +1,96 @@
+extends "res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd"
+## Actual deployed campaign, checkpoint, scene destruction and continue.
+func _run() -> void:
+ if OS.get_environment("POLISA_TEST_PROFILE").is_empty():
+  printerr("isolated test profile required")
+  quit(1)
+  return
+ _configure_entry()
+ _flow = FLOW.instantiate(); root.add_child(_flow)
+ await process_frame
+ _screen = _flow.get_node("HomebaseScreen")
+ _runtime = _flow.get("_singleplayer_runtime")
+ if not await _prepare_initial_base(): await _finish(); return
+ var craft: Dictionary = _screen.call("get_operations_snapshot").get("selected_craft", {})
+ _craft_id = String(craft.get("id", "")); _pilot_id = String(craft.get("pilot_id", ""))
+ var payload: Array = craft.get("payload_fireteam_ids", [])
+ if not _check(not _craft_id.is_empty() and not payload.is_empty(), "real craft and team exist"): await _finish(); return
+ _team_id = String(payload[0])
+ for team: Dictionary in Array(_screen.call("get_operations_snapshot").get("fireteams", [])):
+  if String(team.get("id", "")) == _team_id:
+   for member: Dictionary in Array(team.get("members", [])): _crew_ids.append(String(member.id))
+ if not _check(_screen.call("request_operation", "accept_job", {"job_id":"satellite_recovery", "request_id":"save-test:accept"}).get("ok", false), "real job accepted"): await _finish(); return
+ if not _check(_screen.call("request_operation", "select_destination", {"location_id":"satellite_crash", "job_id":"satellite_recovery", "request_id":"save-test:dest"}).get("ok", false), "real destination selected"): await _finish(); return
+ if not await _launch_and_land("satellite_recovery", "res://maps/satellite_crash_site.json"): await _finish(); return
+ var mission: Node = _flow.get("_active_mission")
+ var units: Node = mission.get_node("UnitRegistry")
+ var before := {}
+ for person in units.get_all_units():
+  if person != null and person.get("unit_id") in ["campaign_leader","campaign_pilot"]:
+   before[String(person.unit_id)] = {"position":person.global_position,"health":person.get_health(),"vital":person.get_vital_state()}
+ if not _check(before.size() == 2, "both actual people present at destination"): await _finish(); return
+ var ctl = mission.get_node("TacticalController")
+ var previous: Dictionary = ctl.export_transport_checkpoint()
+ print("ACTUAL_TRANSPORT_BEFORE ",previous.get("schema",previous.get("reason","none")))
+ var transport = load("C:/Users/bjoer/.codex/worktrees/open-functions-release-20261112/SternenBuergerchen/scripts/mission/transport_checkpoint.gd")
+ var captured: Dictionary = transport.capture(ctl)
+ print("ACTUAL_TRANSPORT_AFTER ",captured.get("schema",captured.get("reason","none")))
+ if not _check(captured.get("schema") == "mission_transport_checkpoint.v1", "same actual landed controller exports corrected transport checkpoint"):
+  await _finish(); return
+ var sim: Node = mission.get_node("SimulationRoot")
+ var bindings := {"actors":{},"simulation_root":sim,"visits":mission.get_meta("singleplayer_visit_identities",{}),"craft_identities":{},"pilot_bindings":{}}
+ for card in ctl.get("_mission_drop_cards"):
+  var craft_id: String = card.get("craft_id", "")
+  bindings.craft_identities[craft_id] = {"model_id":card.get("model_id", "")}
+  bindings.pilot_bindings[craft_id] = card.get("pilot_unit_id", "")
+  for id in ctl._campaign_craft_crew_ids(craft_id): bindings.actors[id] = sim._resolve_known_unit_for_contract(id)
+ var prepared: Dictionary = transport.prepare(ctl, JSON.parse_string(JSON.stringify(captured,"",true,true)), bindings)
+ if not _check(prepared.ok,"same actual landed controller prepares JSON transport checkpoint"):
+  print("ACTUAL_TRANSPORT_PREPARE_FAILURE ",prepared); await _finish(); return
+ var validated: Dictionary = transport.validate(ctl,prepared.candidate,bindings)
+ if not _check(validated.ok,"actual Actor and canonical pilot bindings validate before publication"):
+  print("ACTUAL_TRANSPORT_VALIDATE_FAILURE ",validated); await _finish(); return
+ transport.publish(ctl,prepared.candidate)
+ var after: Dictionary = transport.capture(ctl)
+ _diff(captured,after,"checkpoint")
+ _check(_same(after,captured),"actual grounded transport owner matches after JSON roundtrip (float tolerance <=1e-12)")
+ _check(ctl.get("_drop_sequence_phase") == "complete","actual ship stays landed without arrival restart")
+ for id in bindings.actors:
+  _check(sim._resolve_known_unit_for_contract(id) == bindings.actors[id],"actual Actor identity preserved "+String(id))
+ print("TRANSPORT_TRUE_LANDING_PASS" if _failed==0 else "TRANSPORT_TRUE_LANDING_FAIL")
+ await _finish()
+func _diff(a: Variant, b: Variant, path: String) -> void:
+ if a == b: return
+ if a is Dictionary and b is Dictionary:
+  for key in a:
+   if not b.has(key): print("ROUNDTRIP_MISSING ",path,".",key)
+   else: _diff(a[key],b[key],path+"."+String(key))
+  for key in b:
+   if not a.has(key): print("ROUNDTRIP_EXTRA ",path,".",key)
+ elif a is Array and b is Array and a.size()==b.size():
+  for index in a.size(): _diff(a[index],b[index],path+"["+str(index)+"]")
+ else: print("ROUNDTRIP_DIFF ",path," from=",a," (",type_string(typeof(a)),") to=",b," (",type_string(typeof(b)),")")
+func _same(a: Variant,b: Variant) -> bool:
+ if typeof(a)!=typeof(b): return false
+ if a is Dictionary:
+  if a.size()!=b.size():return false
+  for key in a:
+   if not b.has(key) or not _same(a[key],b[key]):return false
+  return true
+ if a is Array:
+  if a.size()!=b.size():return false
+  for index in a.size():
+   if not _same(a[index],b[index]):return false
+  return true
+ if a is float: return abs(a-b)<=0.000000000001
+ return a==b
+func _finish() -> void:
+ if is_instance_valid(_flow): _flow.queue_free()
+ await process_frame
+ print("CAMPAIGN_ACTIVE_CONTINUE passed=%d failed=%d" % [_passed,_failed])
+ if _failed == 0: print("CAMPAIGN_ACTIVE_CONTINUE_PASS")
+ quit(1 if _failed else 0)
+
+
+
+
