@@ -35,6 +35,15 @@ Radar-/Orbitresolver und gezielte Verifier. Große gemeinsame Dateien nicht
 als Ganzes portieren. Sichtbarkeit, Mehrfachbelegung und Landekollision auf
 Legacykarten sowie Persistenz- und Indexvalidierung sind ausdrücklich offen.
 
+Stand: Der Radarowner verwendet vorläufig die bereits im Raumkampf vorhandene
+Reichweite 12. Bodenradar fragt ausschließlich Schiffe im gleichen Fluggebiet
+ab und projiziert erkannte Kontakte als generischen Marker. Eine technische
+Headless-Prüfung ersetzt keine visuelle Spielabnahme. Ein Luft-Luft-Feuerbefehl
+von der Bodenkarte, regulärer Beschuss einer echten Szenariowache und der
+automatische Orbitdurchflug sind noch nicht nachgewiesen. Im privaten Hex-
+Versuch meldete der Bewegungsowner beim Rückweg `unreachable_target`; die
+Produktionskarte bleibt unverändert im Legacy-Modus.
+
 ## Entwurf für portable aktive Sorties
 
 Ein versionierter Sortie-Datensatz braucht je `craft_id` die `location_id`,
