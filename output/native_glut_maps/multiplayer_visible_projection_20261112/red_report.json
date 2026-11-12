@@ -1,0 +1,37 @@
+{
+  "passed": false,
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "commands": [
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\6d76876cf1a54266ba76514eff491dd0",
+      "--script",
+      "res://scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\6d76876cf1a54266ba76514eff491dd0",
+      "--script",
+      "res://scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    1
+  ],
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\6d76876cf1a54266ba76514eff491dd0",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-11906ecc54984873a3eb938422185930",
+  "source_sha256": {
+    "scripts/multiplayer/multiplayer_roster_contract.gd": "d96118e1f4b00fbccd054a2375c8084c22960d9b0ecae9c69f6089a2d01b5914",
+    "scripts/multiplayer/multiplayer_snapshot_contract.gd": "fbe2a8e643c180dcceac387d22642039e16532fb880693ae1848130df6fc4c8f",
+    "scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd": "9f670a05252faec857257d422815cfa30e87214a7775f703b2ce95ce93c78e05",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  }
+}

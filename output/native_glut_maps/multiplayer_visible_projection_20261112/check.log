@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-0dd7f415e51749959cfc5545ff36cf70
+PASS pure visible projection helper exists
+PASS valid two-team Host facts accepted
+PASS own intent retained; visible enemy display only; hidden unit absent
+PASS contacts route by observing fireteam, not target team
+PASS own free target area and skills retained; hidden target position and enemy plan omitted
+PASS fire event removes hidden target and coupled position without losing own muzzle activity
+PASS owned transport/air UI survives with hidden crossreferences removed
+PASS reliable and unreliable vitals use the identical visibility filter
+PASS full projection envelope cannot masquerade as legacy partial snapshot
+PASS actual Driver unit-shaped team_states retain own debrief without enemy IDs
+PASS security assignments and tactics maps preserve own data while removing hidden keys and coupled focus
+PASS every existing plan/rule/communication/breakout/bubble list preserves own row and omits enemy internals
+PASS projection is detached and inputs unchanged
+PASS unknown version/team/missing proof fails closed
+PASS missing original Host reference provenance rejects lossy DTO input
+PASS visible enemy cannot inherit private per-unit plans through an owned group row
+PASS explicit own uncrewed craft survives; conflicting or unknown provenance cannot infer top ship geometry
+PASS own fireteam-only readout and packed own membership survive optional missing identities
+PASS actual V1 status-event position cannot survive hidden target/attacker while unlinked own effects remain
+PASS visible enemy preserves actual TestUnit scalar display reader fields without private intent or profile
+MULTIPLAYER_VISIBLE_PROJECTION passed=20 failed=0 wired=false

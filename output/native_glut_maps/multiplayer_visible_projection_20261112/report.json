@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "commands": [
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\5a556cc9d3884be5823f8973717a5170",
+      "--script",
+      "res://scripts/multiplayer/multiplayer_visible_snapshot_projection.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\5a556cc9d3884be5823f8973717a5170",
+      "--script",
+      "res://scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\5a556cc9d3884be5823f8973717a5170",
+      "--script",
+      "res://scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_visible_projection_checks\\5a556cc9d3884be5823f8973717a5170",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0dd7f415e51749959cfc5545ff36cf70",
+  "source_sha256": {
+    "scripts/multiplayer/multiplayer_roster_contract.gd": "d96118e1f4b00fbccd054a2375c8084c22960d9b0ecae9c69f6089a2d01b5914",
+    "scripts/multiplayer/multiplayer_snapshot_contract.gd": "fbe2a8e643c180dcceac387d22642039e16532fb880693ae1848130df6fc4c8f",
+    "scripts/multiplayer/multiplayer_visible_snapshot_projection.gd": "6a2a862c261e0dada1e627b884c068e997d5a68a6958012506d973e0e3ca7f1e",
+    "scripts/tests/multiplayer_visible_snapshot_projection_verifier.gd": "ec64900a97e2b4be8d04ed72c4f0eb106eee3d706d1f455e21aae4407dd62877",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  }
+}
