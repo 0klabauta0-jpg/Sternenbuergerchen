@@ -31,6 +31,12 @@ func _run() -> void:
  if not _check(before.size() == 2, "both actual people present at destination"): await _finish(); return
  var before_elapsed: float = mission.get_node("CombatLoopDriver").call("_get_duration_seconds")
  var before_campaign: Dictionary = _flow.call("get_singleplayer_snapshot")
+ var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
+ if capture == null:
+  _check(false,"active mission owner capture exists")
+  await _finish(); return
+ var captured: Dictionary = capture.capture_components(_flow,_runtime)
+ if not _check(captured.get("ok",false),"actual mission owners capture together"): print("CAPTURE_FAILURE ",captured); await _finish(); return
  var campaign = _flow.get("_campaign_start")
  if not campaign.has_method("save_active_checkpoint"):
   _check(false,"active mission checkpoint path exists")
