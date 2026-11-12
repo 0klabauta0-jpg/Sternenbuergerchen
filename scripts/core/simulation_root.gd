@@ -266,6 +266,7 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	var travel_validation := {}
 	var flight_validation := {}
 	var actor_validation := {}
+	var station_landing := false
 	var flight: RefCounted
 	if not approach_request_id.is_empty():
 		if _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"travel_unavailable"}
@@ -274,11 +275,14 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 		var pose: Dictionary = flight.get_snapshot()
 		var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
 		var area_id := String(pose.get("space_area_id", ""))
+		station_landing = not station_dock and departure.get("destination_location_id") == "polisa" and pose.get("coordinate_frame") == "local"
 		if pose.get("coordinate_frame") == "local":
 			var area_revision: int = _space_combat_state.get_area_revision(area_id)
 			var gate_preview: Dictionary
 			if station_dock:
 				gate_preview = preview_station_dock_deactivation(craft_id, "polisa_station_dock", "polisa_glut2_dock_v1", pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true,"actor_id":"singleplayer"})
+			elif station_landing:
+				gate_preview = preview_station_landing_deactivation(craft_id, pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true,"actor_id":"singleplayer"})
 			else:
 				gate_preview = preview_surface_deactivation(craft_id, String(departure.destination_location_id), pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true,"actor_id":"singleplayer"})
 			if not gate_preview.get("ok", false): return gate_preview
@@ -289,7 +293,7 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 		var fleet_bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
 		if not fleet_bound.get("ok", false): return fleet_bound
 		var travel_payload := {"craft_id":craft_id, "location_id":String(departure.destination_location_id)}
-		var travel_operation := "begin_station_dock" if station_dock else "begin_approach"
+		var travel_operation := "begin_station_dock" if station_dock else ("begin_station_landing" if station_landing else "begin_approach")
 		if station_dock: travel_payload.merge({"target_id":"polisa_station_dock", "layout_revision":"polisa_glut2_dock_v1"})
 		travel_context = {"request_id":approach_request_id,"request_signature":JSON.stringify({"operation":travel_operation,"payload":travel_payload}, "", true),"operation":travel_operation,"payload":travel_payload,"source_area_id":area_id,"target_area_id":area_id,"expected_travel_revision":travel.get("revision", -1),"expected_phase":"orbit","context_id":("station-dock:" if station_dock else "departure:") + request_id}
 		var context_bound: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
@@ -318,7 +322,7 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	if not travel_context.is_empty():
 		var travel_command := {"contract_category":"singleplayer_space_travel", "operation":travel_context.operation, "payload":travel_context.payload.duplicate(true), "request_id":approach_request_id}
 		events.append({"command":travel_command, "result":result.travel_result})
-	_departure_group_receipts[request_id] = {"craft_id":craft_id, "station_dock":station_dock, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "travel_candidate":travel_candidate.duplicate(true), "travel_context":travel_context.duplicate(true), "events":events.duplicate(true), "events_published":false}
+	_departure_group_receipts[request_id] = {"craft_id":craft_id, "station_dock":station_dock, "station_landing":station_landing, "approach_request_id":approach_request_id, "result":result.duplicate(true), "supply":_singleplayer_supply_owner, "campaign":_singleplayer_campaign_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "campaign_epoch":_singleplayer_campaign_owner.get("_departure_preparation_epoch"), "fleet":_singleplayer_space_travel_owner if not travel_context.is_empty() else null, "fleet_epoch":_singleplayer_space_travel_owner.get("_space_area_epoch") if not travel_context.is_empty() else -1, "flight":flight, "travel_candidate":travel_candidate.duplicate(true), "travel_context":travel_context.duplicate(true), "events":events.duplicate(true), "events_published":false}
 	return result
 
 func _commit_singleplayer_reapproach(adapter: Node, craft_id: String, request_id: String, approach_request_id: String, receipt: Dictionary) -> Dictionary:
@@ -338,9 +342,12 @@ func _commit_singleplayer_reapproach(adapter: Node, craft_id: String, request_id
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
 	var area_revision: int = _space_combat_state.get_area_revision(String(pose.space_area_id))
 	var station_dock: bool = bool(receipt.get("station_dock", false))
+	var station_landing: bool = bool(receipt.get("station_landing", false))
 	var preview: Dictionary
 	if station_dock:
 		preview = preview_station_dock_deactivation(craft_id, "polisa_station_dock", "polisa_glut2_dock_v1", pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
+	elif station_landing:
+		preview = preview_station_landing_deactivation(craft_id, pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	else:
 		preview = preview_surface_deactivation(craft_id, String(gate.departure.destination_location_id), pose.revision, travel.get("revision", -1), area_revision, _space_wing_state.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not preview.get("ok", false): return preview
@@ -348,7 +355,7 @@ func _commit_singleplayer_reapproach(adapter: Node, craft_id: String, request_id
 	var av: Dictionary = _space_combat_state.validate_deactivation(craft_id, pose.revision, area_revision)
 	if not fv.get("ok", false) or not av.get("ok", false): return {"ok":false, "reason":"space_deactivation_invalid"}
 	var payload := {"craft_id":craft_id, "location_id":String(gate.departure.destination_location_id)}
-	var operation := "begin_station_dock" if station_dock else "begin_approach"
+	var operation := "begin_station_dock" if station_dock else ("begin_station_landing" if station_landing else "begin_approach")
 	if station_dock: payload.merge({"target_id":"polisa_station_dock", "layout_revision":"polisa_glut2_dock_v1"})
 	var context := {"request_id":approach_request_id,"request_signature":JSON.stringify({"operation":operation,"payload":payload}, "", true),"operation":operation,"payload":payload,"source_area_id":pose.space_area_id,"target_area_id":pose.space_area_id,"expected_travel_revision":travel.revision,"expected_phase":"orbit","context_id":("station-dock:" if station_dock else "reapproach:") + approach_request_id}
 	var bound: Dictionary = _singleplayer_space_travel_owner.bind_space_area_transition_context(context, self)
@@ -1164,8 +1171,9 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "inactive" or travel.get("phase") != ("approach" if is_cancel else "surface") or route.get("origin_location_id") != travel.get("location_id"): return {"ok":false, "reason":"return_context_changed"}
 	var departure_receipt: Dictionary = _departure_group_receipts.get(String(gate.outward_token), {})
 	var station_dock: bool = travel.location_id == "polisa" and bool(departure_receipt.get("station_dock", false))
-	if travel.location_id == "polisa" and not station_dock: return {"ok":false, "reason":"station_dock_receipt_required"}
-	if station_dock:
+	var station_landing: bool = travel.location_id == "polisa" and bool(departure_receipt.get("station_landing", false))
+	if travel.location_id == "polisa" and not station_dock and not station_landing: return {"ok":false, "reason":"station_departure_receipt_required"}
+	if station_dock or station_landing:
 		if departure_receipt.get("craft_id") != craft_id or departure_receipt.get("fleet") != _singleplayer_space_travel_owner or departure_receipt.get("flight") != flight: return {"ok":false, "reason":"owner_changed"}
 		var dock_check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(departure_receipt.travel_candidate, departure_receipt.travel_context)
 		if not dock_check.get("ok", false) or not dock_check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
@@ -1183,14 +1191,14 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	var chosen := {}
 	var context := {"runtime_authorized":true, "actor_id":"singleplayer"}
 	# At most 256 gates, checked only on a return request, in stable order.
-	var gate_offsets: Array = [SPACE_AREA_GRID.station_dock_layout().get("dock_gate")] if station_dock else layout.gate_cells
+	var gate_offsets: Array = [SPACE_AREA_GRID.station_dock_layout().get("dock_gate")] if station_dock else ([SPACE_GRID.to_offset(SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane)))] if station_landing else layout.gate_cells)
 	for offset in gate_offsets:
 		if typeof(offset) != TYPE_VECTOR2I: return {"ok":false, "reason":"station_layout_changed"}
-		var target := {"position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(SPACE_GRID.from_offset(offset))), "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}
+		var target := {"position_plane":pose.position_plane if station_landing else SPACE_GRID.HEX.axial_to_plane(Vector2(SPACE_GRID.from_offset(offset))), "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}
 		var proposal := target.duplicate(true); proposal.merge({"expected_revision":pose.revision, "motion_mode":"tactical"}, true)
 		if not _space_combat_state.preview_reactivation(craft_id, proposal, tick_counter + 1).get("ok", false): continue
 		var candidate: Dictionary
-		if station_dock:
+		if station_dock or station_landing:
 			if _space_wing_state.get_craft_wing(craft_id, "singleplayer").is_empty(): return {"ok":false, "reason":"wing_required"}
 			candidate = {"ok":true, "activity_proposal":proposal, "activity_tick":tick_counter + 1}
 		else:
@@ -1207,9 +1215,10 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	var bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
 	if not bound.get("ok", false): return bound
 	var payload := {"craft_id":craft_id}
-	var operation := "undock_station" if station_dock else "enter_orbit"
+	var operation := "undock_station" if station_dock else ("depart_station_landing" if station_landing else "enter_orbit")
 	if station_dock: payload.merge({"location_id":"polisa", "target_id":"polisa_station_dock", "layout_revision":"polisa_glut2_dock_v1"})
-	var transition_id := ("station-undock:" + key) if station_dock else key
+	if station_landing: payload["location_id"] = "polisa"
+	var transition_id := ("station-undock:" + key) if station_dock else (("station-landing-return:" + key) if station_landing else key)
 	var travel_context := {"request_id":transition_id, "request_signature":JSON.stringify({"operation":operation, "payload":payload}, "", true), "operation":operation, "payload":payload, "source_area_id":pose.space_area_id, "target_area_id":pose.space_area_id, "expected_travel_revision":travel.revision, "expected_phase":String(travel.phase), "context_id":transition_id}
 	bound = _singleplayer_space_travel_owner.bind_space_area_transition_context(travel_context, self)
 	if not bound.get("ok", false): return bound
@@ -1339,7 +1348,7 @@ func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
 		actors.append({"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)})
 	return {"ok":true, "space_area_id":area_id, "area_revision":_space_combat_state.get_area_revision(area_id), "actors":actors, "dock_targets":SPACE_AREA_GRID.dock_targets(area_id)}
 
-func preview_station_dock(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+func preview_station_dock(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary, require_dock_gate: bool = true) -> Dictionary:
 	# Read-only gate evidence; never a reservation or boarding authorization.
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
@@ -1364,15 +1373,15 @@ func preview_station_dock(craft_id: String, target_id: String, layout_revision: 
 	if wing_id.is_empty(): return {"ok":false, "reason":"wing_required"}
 	var cells: Array[Vector2i] = _space_combat_state.preview_footprint(pose, metadata.get("footprint_hexes", []))
 	if cells.is_empty() or not _space_combat_state.actor_cells_match(craft_id, layout.area_id, cells): return {"ok":false, "reason":"stale_spatial_index"}
-	if SPACE_GRID.from_offset(layout.dock_gate) not in cells: return {"ok":false, "reason":"not_at_station_gate"}
+	if require_dock_gate and SPACE_GRID.from_offset(layout.dock_gate) not in cells: return {"ok":false, "reason":"not_at_station_gate"}
 	for occupant in _space_combat_state.query_cells(cells, layout.area_id):
 		if occupant != craft_id: return {"ok":false, "reason":"occupied"}
 	for claimant in _space_combat_state.query_navigation_claims(cells, layout.area_id):
 		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	return {"ok":true, "craft_id":craft_id, "target_id":target_id, "layout_revision":layout.revision, "space_area_id":layout.area_id, "wing_id":wing_id, "flight_revision":pose.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "footprint_cells":cells}
 
-func preview_station_dock_deactivation(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
-	var gate: Dictionary = preview_station_dock(craft_id, target_id, layout_revision, expected_flight_revision, expected_travel_revision, expected_area_revision, expected_wing_revision, authority_context)
+func preview_station_dock_deactivation(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary, require_dock_gate: bool = true) -> Dictionary:
+	var gate: Dictionary = preview_station_dock(craft_id, target_id, layout_revision, expected_flight_revision, expected_travel_revision, expected_area_revision, expected_wing_revision, authority_context, require_dock_gate)
 	if not gate.get("ok", false): return gate
 	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 	var proposal := {"expected_revision":expected_flight_revision, "motion_mode":"inactive"}
@@ -1384,6 +1393,11 @@ func preview_station_dock_deactivation(craft_id: String, target_id: String, layo
 	gate["activity_proposal"] = proposal
 	gate["activity_tick"] = tick
 	return gate
+
+func preview_station_landing_deactivation(craft_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	# The destination is the station visit. Landing occurs on its existing map;
+	# the distinct optional space dock gate is not required for this operation.
+	return preview_station_dock_deactivation(craft_id, "polisa_station_dock", "polisa_glut2_dock_v1", expected_flight_revision, expected_travel_revision, expected_area_revision, expected_wing_revision, authority_context, false)
 
 func preview_surface_approach(craft_id: String, location_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
 	# Read-only geometric evidence, never authorization or a reservation.
