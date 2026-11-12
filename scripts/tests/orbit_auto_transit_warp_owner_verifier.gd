@@ -45,6 +45,15 @@ func _initialize() -> void:
 	var gate: Dictionary = sim.preview_surface_approach("ship", "satellite_crash", flight.get_snapshot().revision, fleet.get_craft_snapshot("ship").revision, combat.get_area_revision(flight.get_snapshot().space_area_id), wings.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not gate.get("ok", false): print("CUTLASS_GATE_FAILURE ", gate)
 	assert(gate.ok)
+	assert(sim.start_singleplayer_orbit_transit(adapter, "ship", "satellite_crash", "outbound", "real-cutlass-return").ok)
+	for step in range(5000):
+		sim.tick_counter = flight.get_snapshot().tick + 1
+		sim._advance_space_flights(0.1, sim.tick_counter)
+		if sim.get_space_flight_status("ship").get("reason") == "arrived": break
+	assert(sim.get_space_flight_status("ship").get("reason") == "arrived")
+	var warp: Dictionary = sim.preview_warp_departure("ship", "moon_orbit", flight.get_snapshot().revision, fleet.get_craft_snapshot("ship").revision, combat.get_area_revision(flight.get_snapshot().space_area_id), wings.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
+	if not warp.get("ok", false): print("CUTLASS_WARP_GATE_FAILURE ", warp)
+	assert(warp.ok)
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("ORBIT_AUTO_TRANSIT_WARP_OWNER passed")
 	quit()

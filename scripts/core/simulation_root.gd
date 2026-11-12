@@ -1810,6 +1810,7 @@ func start_singleplayer_orbit_transit(adapter: Node, craft_id: String, location_
 	control["orbit_auto_location_id"] = location_id
 	control["orbit_auto_direction"] = direction
 	_space_combat_state.set_flight_control(craft_id, control)
+	_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"transit"})
 	return {"ok":true, "target_hex":plan.target_hex, "direction":direction}
 
 func stop_singleplayer_orbit_transit(adapter: Node, craft_id: String) -> Dictionary:
@@ -1898,6 +1899,9 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		if flight == null or flight.get_snapshot().motion_mode != "tactical":
 			if control.get("singleplayer_move", false) or control.get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
 			continue
+		# A synchronous area admission can publish at this same root tick just
+		# before the flight phase. Keep the command for the next newer tick.
+		if int(flight.get_snapshot().get("tick", -1)) >= tick: continue
 		if control.get("air_support_move", false):
 			var mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
 			if not is_instance_valid(mission) or not mission._air_support_motion_context_valid(craft_id, self, control.equipment_snapshot):

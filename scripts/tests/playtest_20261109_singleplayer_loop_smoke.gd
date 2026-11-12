@@ -241,7 +241,9 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 		print("APPROACH_RESULT:", approach)
 		_dump("approach")
 		return false
-	_check(_flow.get("_active_mission") == null and String(_space().get("phase", "")) == "approach", "Explicit approach shows departure from star map before map instantiation")
+	var approach_phase := String(_space().get("phase", ""))
+	var transit: Dictionary = Dictionary(_space().get("orbit_transit", {}))
+	_check(_flow.get("_active_mission") == null and (approach_phase == "approach" or (approach.get("pending", false) and approach_phase == "orbit" and transit.get("status") == "flying")), "Explicit approach waits for orbit transit or begins before map instantiation")
 	if not await _wait(func(): return _flow.get("_active_mission") != null, 12000, scenario_id + " actual mission instance exists"):
 		_dump("mission_creation")
 		return false

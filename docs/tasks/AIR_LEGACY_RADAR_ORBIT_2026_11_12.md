@@ -44,13 +44,20 @@ automatische Orbitdurchflug sind noch nicht nachgewiesen. Im privaten Hex-
 Versuch meldete der Bewegungsowner beim Rückweg `unreachable_target`; die
 Produktionskarte bleibt unverändert im Legacy-Modus.
 
-Ein eigenständiger Routenplaner schlägt inzwischen einen freien geraden Weg
-vom unteren Eintrittsband zu einem oberen Planetentor beziehungsweise zurück
-vor und lehnt erkannte Kontakte oder versperrte Wege ab. Er ist noch nicht an
-Ankunft, Flugtick oder Bedienung angeschlossen; automatische Fortsetzung,
-Abschaltung, Änderung während des Flugs, Pilotenfolgen und Persistenz fehlen.
-Polisa benötigt weiter den direkten Reiseweg und darf keinen solchen Auftrag
-erhalten. Der Planer allein ist kein Durchflugnachweis.
+Ein Routenplaner schlägt einen freien geraden Weg vom unteren Eintrittsband
+zu einem oberen Planetentor beziehungsweise zurück vor und lehnt erkannte
+Kontakte oder versperrte Wege ab. Der Flugowner führt den Weg im Opt-in über
+seine normalen Bewegungsticks aus; Abschalten und neue Kontakte lösen Bremsen
+aus. Zielort und Wartestatus sind pro Schiff gebunden. Ein regulärer 1x-Lauf
+mit Opt-in erreichte nach tatsächlichem Durchflug die Satellitenmission und
+bestand den Dropship-Flug mit 49/49 Prüfungen. Die Gegenrichtung bis zum
+Warp-Gate ist bisher im Ownerfixture geprüft. Polisa behält den direkten Weg.
+
+Der neue Pfad bleibt standardmäßig ausgeschaltet, bis lokale Flight-,
+Transit-, Receipt- und Bedienzustände mit Save/Continue gemeinsam abgesichert
+sind; die Auswahl ist derzeit nicht dauerhaft gespeichert. Ein Szenariogefecht
+und eine visuelle Abnahme sind noch offen. Pilotenabhängige Hindernisfolgen
+sind noch nicht implementiert.
 
 Die explizite Oberflächenzuordnung erlaubt mehrere reale Orte am selben
 Planeten: `satellite_crash`, `trade_outpost` und `fortified_outpost`. Ihre

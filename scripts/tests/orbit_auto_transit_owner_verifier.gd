@@ -29,6 +29,8 @@ func _initialize() -> void:
 	if not result.get("ok", false): print("ORBIT_AUTO_TRANSIT_START ", result)
 	assert(result.ok and GRID.to_offset(result.target_hex).y < 10)
 	var before: Vector2 = flight.get_snapshot().position_plane
+	sim._advance_space_flights(0.1, flight.get_snapshot().tick)
+	assert(flight.get_snapshot().position_plane == before and combat.get_flight_controls().has(id))
 	sim._advance_space_flights(0.1, flight.get_snapshot().tick + 1)
 	assert(flight.get_snapshot().position_plane != before)
 	assert(sim.stop_singleplayer_orbit_transit(adapter, id).ok)
