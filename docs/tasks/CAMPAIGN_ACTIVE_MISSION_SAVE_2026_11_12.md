@@ -23,3 +23,6 @@ Ein begrenzter typisierter JSON-Codec sowie vorbereitete Flug-, Reise-, strategi
 
 ## Personenmodelle
 Echte Registry-Actors koennen Identitaet, medizinischen Zustand, Runtime-/UnitCommand und Kontaktzustand vorbereiten. Die gespeicherte Position muss dem separat vorbereiteten Bodenowner entsprechen; der Actor-Teil erzeugt keine zweite Positionswahrheit. Ein Batch validiert alle Actors vor signalbehafteter Finalisierung; Tests zeigen, dass ein zwischenzeitlich veraenderter zweiter Actor auch die Aenderung des ersten verhindert. Boden-, Bewegungs-, Transport- und Missionstimer sind dadurch noch nicht als Gesamteinsatz gespeichert.
+
+## Gesamttest als Ausgangspunkt
+`campaign_active_mission_continue_verifier.gd` verwendet die echte Kampagnenvorbereitung, Flug, Satellitenanflug und Landung mit beiden Originalpersonen. Isolierter RED-Lauf: 31 bestanden, ein Fehler beim bislang fehlenden aktiven Checkpointpfad. Der Test verlangt anschliessend Szenenabbau, normales Continue und die Wiederherstellung der Personen und des Schiffes am Einsatzort. Dieser RED-Test ist keine Funktionsfreigabe.
