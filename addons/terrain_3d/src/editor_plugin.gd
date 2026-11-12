@@ -29,6 +29,7 @@ var region_gizmo: RegionGizmo
 var current_region_position: Vector2
 var mouse_global_position: Vector3 = Vector3.ZERO
 var godot_editor_window: Window # The Godot Editor window
+var _thumbnail_refresh_timer: Timer
 
 
 func _init() -> void:
@@ -49,13 +50,19 @@ func _enter_tree() -> void:
 
 	region_gizmo = RegionGizmo.new()
 
-	scene_changed.connect(_on_scene_changed)
-
 	asset_dock = load(ASSET_DOCK).instantiate()
 	asset_dock.initialize(self)
+	# Own delayed scene refreshes so editor shutdown can cancel them.
+	_thumbnail_refresh_timer = Timer.new()
+	_thumbnail_refresh_timer.one_shot = true
+	_thumbnail_refresh_timer.wait_time = 2.0
+	_thumbnail_refresh_timer.timeout.connect(_update_scene_thumbnails)
+	add_child(_thumbnail_refresh_timer)
+	scene_changed.connect(_on_scene_changed)
 
 
 func _exit_tree() -> void:
+	_thumbnail_refresh_timer.stop()
 	asset_dock.remove_dock(true)
 	asset_dock.queue_free()
 	ui.queue_free()
@@ -392,8 +399,12 @@ func _on_scene_changed(scene_root: Node) -> void:
 		node.editor_setup(self)
 
 	asset_dock.update_assets()
-	await get_tree().create_timer(2).timeout
-	asset_dock.update_thumbnails()
+	_thumbnail_refresh_timer.start()
+
+
+func _update_scene_thumbnails() -> void:
+	if is_inside_tree() and is_instance_valid(asset_dock):
+		asset_dock.update_thumbnails()
 
 		
 func is_terrain_valid(p_terrain: Terrain3D = null) -> bool:

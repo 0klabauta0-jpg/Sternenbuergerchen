@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\verification\\20261112T144627Z-pid36424",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.031,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\verification\\20261112T144627Z-pid36424\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-12T14:46:27.266592+00:00",
+  "finished_at": "2026-11-12T14:46:27.847463+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\verification\\20261112T144627Z-pid36424\\logs\\engine-check-package-contract.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\scripts\\tests\\bugfix_release_export_mission_runtime_dependencies.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.544,
+      "name": "package-contract",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\verification\\20261112T144627Z-pid36424\\logs\\check-package-contract.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\verification\\20261112T144627Z-pid36424\\logs\\engine-check-package-contract.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}
