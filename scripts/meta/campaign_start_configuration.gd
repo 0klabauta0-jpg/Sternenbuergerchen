@@ -115,7 +115,7 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	# every Hex export, so deduplication alone cannot bound export/hash/disk work.
 	# Keep safety checks above unconditional; an explicit save can bypass only time.
 	var simulation: Node = runtime.get("_simulation")
-	var hex_export := is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required()
+	var hex_export: bool = is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required()
 	if hex_export:
 		var now: int = Time.get_ticks_msec()
 		var scope := "%s:%s:%s" % [runtime.get_instance_id(), simulation.get_instance_id(), simulation.get_hex_ground_context_revision()]
