@@ -6,7 +6,7 @@ Source62b1454af uebernommen: bestehende gebundene Bodygeometrie wird mit
 Registrymetrik auf ganze Hexfelder gerastert (Randkontakt inklusive). Maximal4096
 Kandidaten vor Iteration, keine Teilmaske bei Fehler. Root nimmt optionale
 Ausschlussfelder nur in den Planungssnapshot auf. Enger unabhaengiger Review ohne
-Blocker. Konkreter Schiffsconsumer, Profilproducer und spaetere Revalidierung
+Blocker; frische gemeinsame Rasterprobe52/0 samt Guards. Konkreter Schiffsconsumer, Profilproducer und spaetere Revalidierung
 bleiben offen; keine Kartenaktivierung oder AP6-Gesamtfreigabe.
 
 ## Aktuell im isolierten Integrationsstand — 12.11.2026
@@ -14,8 +14,8 @@ bleiben offen; keine Kartenaktivierung oder AP6-Gesamtfreigabe.
 Verbindliche aktuelle Offenliste: `docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md`.
 Die chronologischen Eintraege darunter enthalten auch ueberholte Zwischenstaende.
 AP5 ist auf Codeebene integriert. AP6a/b einschliesslich Root-Actorbindungsfix
-0535b3b2f sind zusammengefuehrt und privat mit zuletzt88/0 geprueft. AP6c
-Controller/Setup/Basis und AP7 laufen weiter; AP8 wird als kleiner Teilablauf
+0535b3b2f sind zusammengefuehrt und privat mit zuletzt88/0 geprueft. AP6-Transportphasen sind als058fc6e5f mit95/0 und73/0 integriert. AP6c
+Footprintconsumer/Profilproducer/Setup/Basis und AP7 laufen weiter; AP8 wird als kleiner Teilablauf
 vorbereitet und ist noch nicht abgeschlossen. Grosse AP9-Abnahme spaeter.
 
 Orbit: vorbereitete Wirtschaft und produktive Abflug-/Anflug-/Rueckkehr-/

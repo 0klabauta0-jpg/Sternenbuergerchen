@@ -28,8 +28,12 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Konkrete Transportphasen Sourcee4b3e4cb8 sind als058fc6e5f integriert, frisch
   privat95/0 Phasen und73/0 echter kontrollierter Controller samt Guards.
   Crew-/Visitfilter und verbleibende Team-/Solo-Pilotregeln im Merge erhalten.
-  Tabletop bearbeitet noch fremde Schiffsfootprints, regulaere Profilbindung,
-  Setup und Basisaktionen; dieses weitere WIP noch nicht importiert.
+  Fremde Bodyflaechen als begrenzter Raster Source62b1454af sind alsd9059a590
+  integriert, frisch52/0 mit Guards. Noch kein konkreter Footprintconsumer.
+  Parent55ccb737a reicht echte Homebase-Craftherkunft durch (4/0); b9f194d9e
+  liefert geplante/aktuelle Landedgeometrie und stabiles gebundenes Render-Yaw
+  (7/0, zwei Compiles0). Unabhaengige Reviews ohne engen Blocker. Tabletop
+  bearbeitet konkrete Footprint-/Landeproducer, Setup und Basisaktionen weiter.
 - AP7 Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
@@ -74,7 +78,15 @@ integriert, frische private Entry-/Gatezyklusproben samt Guards bestanden.
 Noch offen: gemeinsame Aktivierung, lokaler getrennter Stationsdockpfad sowie
 abgestimmter Live-V3-/Einmarkerwechsel. Polisa-Profilhook244a7354a verlangt noch
 den AP6c-Bindungsproducer regulaerer Besucher auch fuer bisherige Kaufwege.
-Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
+Polisa-Maske und vorbereitete getrennte Fleet-/Traveloperationen sind bis
+Sourcee1559e440 integriert; private Masken-/Ownerproben bestanden. Lesende echte
+Gate-/Deaktivierungspruefungen5d4fa0cdd/ee3aafe16 als338d1e333/93da77676
+integriert, frisch privat bestanden. Das erzeugt keine Dock-/Visit-/Fuelmutation.
+Lesende Dockoverlayd1ba65920 ist vorbereitet, Root-DTO/produktive Dockcommands
+fehlen noch. Space baut die atomare Dock-/Undock-/Cancel-/Wiederanfluggruppe;
+Parent verdrahtet UI erst nach deren Integration. Bekannte Grenzen und Hashes:
+docs/qa/orbit_owner_integration_20261111/parent_polisa_dock_staging und
+parent_polisa_gate. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
 
 ## Erhaltene weitere Pakete
