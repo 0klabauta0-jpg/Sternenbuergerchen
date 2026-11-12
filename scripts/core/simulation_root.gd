@@ -2477,6 +2477,7 @@ var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
 var _bottleneck_reservation_debug_snapshot: Dictionary = {}
 var _last_damage_effect_resolution: Dictionary = {}
 var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
+var _air_ground_impact_receipts: Dictionary = {}
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
 var _hex_ground_context_revision := 0
@@ -2559,6 +2560,7 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 
 
 func _clear_hex_movement_context() -> void:
+	_air_ground_impact_receipts.clear()
 	for id in _hex_ground_runtime.get_unit_ids():_clear_hex_actor_metadata(String(id))
 	_hex_movement_runtime.clear()
 	_hex_visual_unit_ids.clear()
@@ -2577,6 +2579,30 @@ func _clear_hex_actor_metadata(unit_id:String) -> void:
 
 func get_hex_movement_readout(unit_id:String) -> Dictionary:
 	return _hex_movement_runtime.get_readout(unit_id) if is_hex_ground_runtime_active() else {}
+
+func _commit_air_ground_impact(event: Dictionary) -> Dictionary:
+	# Root-private tail: a future air-fire coordinator must first validate the
+	# real craft, pilot, order, visibility, weapon and seeded dispersion. Never
+	# forward an event from a client or a visual directly to this method.
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
+	if event.size() != 5 or typeof(event.get("event_id")) != TYPE_STRING or String(event.event_id).strip_edges().is_empty() or typeof(event.get("impact_hex")) != TYPE_VECTOR2I or typeof(event.get("pilot_id")) != TYPE_STRING or String(event.pilot_id).strip_edges().is_empty() or typeof(event.get("team_id")) != TYPE_STRING or String(event.team_id).strip_edges().is_empty() or typeof(event.get("damage")) != TYPE_INT or int(event.damage) <= 0: return {"ok":false, "reason":"invalid_impact"}
+	var signature := var_to_str(event)
+	var id: String = event.event_id
+	if _air_ground_impact_receipts.has(id):
+		var previous: Dictionary = _air_ground_impact_receipts[id]
+		if previous.signature != signature: return {"ok":false, "reason":"event_id_conflict"}
+		var replay: Dictionary = previous.result.duplicate(true); replay["replayed"] = true; return replay
+	if _air_ground_impact_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var target_id: String = _hex_ground_runtime.get_occupant_at(event.impact_hex)
+	if not target_id.is_empty():
+		var target = _resolve_unit(target_id)
+		if not is_instance_valid(target) or not target.has_method("apply_damage") or _hex_ground_runtime.get_unit_grid(target_id) != event.impact_hex: return {"ok":false, "reason":"ground_actor_unavailable"}
+	var result := {"ok":true, "replayed":false, "impact_hex":event.impact_hex, "unit_id":target_id}
+	# Store first: damage-resolution signals may re-enter the Root.
+	_air_ground_impact_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	if not target_id.is_empty():
+		_apply_damage_effect({"effect_type":"damage", "unit_id":target_id, "attacker_unit_id":event.pilot_id, "attacker_team_id":event.team_id, "allow_friendly_fire":true, "damage":event.damage, "hit_chance":1.0, "roll_override":0.0})
+	return result
 
 
 func get_hex_movement_audit_snapshot() -> Dictionary:

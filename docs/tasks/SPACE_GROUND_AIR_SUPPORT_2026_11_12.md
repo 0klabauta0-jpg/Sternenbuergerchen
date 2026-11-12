@@ -59,6 +59,16 @@ produktiven Schritt müssen derselbe Flug- und Rottenowner, reale Crewbindung,
 atmosphärische Kartenkoordinaten, Landungsübergang und Bodentreffer gemeinsam
 gebunden werden. Die übrigen Akzeptanzpunkte oben sind weiterhin offen.
 
+Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
+autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
+Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere
+Felder als Fehlschuss und verbucht eine Ereignis-ID höchstens einmal. Der
+aufrufende Flugkampf muss Schiff, Pilot, Auftrag, Sicht, Waffe, Energie und
+Streuung weiterhin vorab selbst prüfen; dieser interne Pfad ist noch nicht
+mit Spielerbefehlen oder dem Flugtick verbunden. Ein isolierter Test mit echten
+Hex- und Schadensownern prüft Treffer, Friendly Fire, Replay, ID-Konflikt,
+Fehlschuss und das Entfernen einer eingebordeten Einheit aus dem Bodenindex.
+
 ## Nutzerfestlegung: bodennahes Repeaterfeuer
 
 Ein Angriff kann auf eine sichtbare gegnerische Einheit oder ein markiertes

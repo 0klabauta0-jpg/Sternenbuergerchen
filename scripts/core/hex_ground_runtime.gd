@@ -226,6 +226,10 @@ func get_unit_ids() -> Array:
 func get_unit_grid(unit_id:String) -> Variant:
 	return _units_by_id[unit_id].grid if has_unit(unit_id) else null
 
+func get_occupant_at(grid: Vector2i) -> String:
+	# Read the authoritative committed cell, not an interpolated actor position.
+	return String(_occupant_by_grid.get(grid, "")) if _is_configured() else ""
+
 
 func has_motion_commitments(unit_id: String) -> bool:
 	return _segments_by_unit_id.has(unit_id) or _centering_by_unit_id.has(unit_id)
