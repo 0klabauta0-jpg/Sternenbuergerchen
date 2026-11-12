@@ -590,6 +590,37 @@ func publish_singleplayer_space_launch_event(adapter: Node, request_id: String) 
 	if receipt.has("fuel_event"): singleplayer_command_committed.emit(receipt.fuel_event.command.duplicate(true), receipt.fuel_event.result.duplicate(true))
 	singleplayer_command_committed.emit(receipt.command.duplicate(true), receipt.result.travel_result.duplicate(true))
 
+func preview_station_purchase_local_admission(adapter: Node, craft_id: String) -> Dictionary:
+	# Read-only first admission. No fabricated prior local actor or departure.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or not adapter.has_method("preview_station_orbit_departure"): return {"ok":false, "reason":"adapter_required"}
+	if _singleplayer_space_travel_owner == null or _singleplayer_supply_owner == null or _ship_equipment_owner == null: return {"ok":false, "reason":"owner_unavailable"}
+	var purchase: Dictionary = _singleplayer_supply_owner.get_station_ship_purchase(craft_id)
+	if purchase.get("craft_id") != craft_id or purchase.get("origin_kind") != "local_station_purchase" or purchase.get("origin_location_id") != "polisa" or String(purchase.get("origin_receipt_id", "")).is_empty(): return {"ok":false, "reason":"station_purchase_required"}
+	var visit: Dictionary = adapter.preview_station_orbit_departure(craft_id)
+	if not visit.get("ok", false): return visit
+	if visit.get("outward_token") != "local-purchase:" + String(purchase.origin_receipt_id) or typeof(visit.get("route")) != TYPE_DICTIONARY or visit.route.get("craft_id") != craft_id or visit.route.get("origin_location_id") != "polisa" or visit.route.get("destination_location_id") != "homebase": return {"ok":false, "reason":"purchase_visit_mismatch"}
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or _space_combat_state.get_actor(craft_id) != null or _space_combat_state.get_inactive_actor(craft_id) != null: return {"ok":false, "reason":"actor_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	if pose.get("craft_id") != craft_id or pose.get("coordinate_frame") != "strategic" or pose.get("motion_mode") == "tactical" or not String(pose.get("space_area_id", "")).is_empty() or travel.get("phase") != "surface" or travel.get("location_id") != "polisa": return {"ok":false, "reason":"station_birth_changed"}
+	var profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(craft_id)
+	if not profile.get("ok", false): return profile
+	if profile.get("model_id") != purchase.get("model_id"): return {"ok":false, "reason":"equipment_purchase_mismatch"}
+	var layout: Dictionary = SPACE_AREA_GRID.station_dock_layout()
+	if not layout.get("ok", false): return {"ok":false, "reason":"station_layout_changed"}
+	var target: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(SPACE_GRID.from_offset(layout.dock_gate)))
+	var proposal := {"expected_revision":pose.revision, "coordinate_frame":"local", "space_area_id":layout.area_id, "position_plane":target, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0, "heading_rad":0.0, "mass":profile.mass, "motion_mode":"tactical"}
+	var tick := tick_counter + 1
+	var definition := {"craft_id":craft_id, "faction_id":"player", "control_domain":"player", "footprint_hexes":profile.footprint_hexes}
+	var admission: Dictionary = _space_combat_state.validate_new_local_admission(definition, flight, proposal, tick)
+	if not admission.get("ok", false): return admission
+	var wing: Dictionary = _space_wing_state.preview_flying_wings("singleplayer", [craft_id], visit.owned_crafts, visit.craft_pilots)
+	if not wing.get("ok", false): return wing
+	return {"ok":true, "craft_id":craft_id, "purchase_receipt_id":purchase.origin_receipt_id, "target_id":layout.target_id, "layout_revision":layout.revision, "space_area_id":layout.area_id, "flight_revision":pose.revision, "travel_revision":travel.revision, "area_revision":_space_combat_state.get_area_revision(layout.area_id), "wing_revision":wing.expected_revision, "equipment_revision":profile.equipment_revision, "footprint_cells":admission.cells.duplicate()}
+
 func commit_singleplayer_station_orbit(adapter: Node, craft_id: String, request_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
