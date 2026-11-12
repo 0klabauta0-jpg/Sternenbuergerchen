@@ -1,7 +1,7 @@
 extends RefCounted
 ## Root-private receipt projection. No owner commands, binding, signals or awaits.
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
-const BLOCKED := ["_local_return_receipts", "_local_return_latest_by_craft", "_warp_entry_receipts", "_warp_entry_latest_by_craft", "_warp_departure_receipts", "_warp_entry_searches", "_warp_completion_intents", "_space_move_receipts", "_space_fire_receipts", "_fixture_area_receipts", "_fixture_surface_group_receipts", "_fixture_area_tokens", "_fixture_area_requests", "_fixture_area_blockers"]
+const BLOCKED := ["_local_return_receipts", "_local_return_latest_by_craft", "_warp_entry_receipts", "_warp_entry_latest_by_craft", "_warp_departure_receipts", "_warp_entry_searches", "_warp_completion_intents", "_space_move_receipts", "_space_fire_receipts", "_fixture_area_receipts", "_fixture_surface_group_receipts", "_fixture_area_tokens", "_fixture_area_requests", "_fixture_area_blockers", "_air_ground_impact_receipts", "_air_support_move_receipts", "_campaign_space_return_receipts", "_campaign_space_entry_searches", "_campaign_space_entry_origins", "_piloted_air_ground_receipts", "_air_ground_fire_receipts", "_air_ground_order_receipts"]
 const LAUNCH_FIELDS := ["craft_id", "context", "result", "command", "event_published"]
 const DEPARTURE_FIELDS := ["craft_id", "station_dock", "station_landing", "approach_request_id", "result", "travel_context", "events", "events_published"]
 class Prepared extends RefCounted:
@@ -40,7 +40,19 @@ static func capture(root: Node, bindings: Dictionary) -> Dictionary:
 	return {"schema":"root_receipt_checkpoint.v1", "value":encoded.value}
 
 static func prepare(root: Node, state: Dictionary, bindings: Dictionary) -> Dictionary:
-	if not _empty(root) or state.size() != 2 or state.get("schema") != "root_receipt_checkpoint.v1": return _bad("receipt_checkpoint_invalid")
+	return _prepare(root, state, bindings, false)
+
+static func prepare_prebinding(root: Node, state: Dictionary, bindings: Dictionary) -> Dictionary:
+	# Explicit global-world replacement only. Existing completed maps must first
+	# prove their own old owner bindings; ordinary prepare still refuses overwrite.
+	if not _stable(root): return _bad("receipt_checkpoint_invalid")
+	if not _empty(root):
+		var old := capture(root, _root_bindings(root))
+		if old.get("schema") != "root_receipt_checkpoint.v1": return _bad("receipt_old_root_unconfirmed")
+	return _prepare(root, state, bindings, true)
+
+static func _prepare(root: Node, state: Dictionary, bindings: Dictionary, prebinding: bool) -> Dictionary:
+	if not _stable(root) or (not prebinding and not _empty(root)) or state.size() != 2 or state.get("schema") != "root_receipt_checkpoint.v1": return _bad("receipt_checkpoint_invalid")
 	var decoded := CODEC.decode_value(state.get("value"))
 	if not decoded.ok or not decoded.value is Dictionary: return _bad("receipt_checkpoint_invalid")
 	var rebuilt := _rebuild(root, decoded.value, bindings)
@@ -49,13 +61,23 @@ static func prepare(root: Node, state: Dictionary, bindings: Dictionary) -> Dict
 		if _records[key].handle.get_ref() == null: _records.erase(key)
 	if _records.size() >= 32: return _bad("receipt_prepare_capacity")
 	var handle := Prepared.new()
-	_records[handle.get_instance_id()] = {"handle":weakref(handle), "root":weakref(root), "bindings":bindings.duplicate(), "stamp":_owner_stamp(bindings), "data":decoded.value.duplicate(true), "rebuilt":rebuilt}
+	_records[handle.get_instance_id()] = {"handle":weakref(handle), "root":weakref(root), "root_stamp":_root_stamp(root), "bindings":bindings.duplicate(), "stamp":_owner_stamp(bindings), "data":decoded.value.duplicate(true), "rebuilt":rebuilt}
 	return {"ok":true, "candidate":handle}
 
 static func validate(root: Node, candidate: RefCounted, bindings: Dictionary) -> Dictionary:
 	if candidate == null or not _records.has(candidate.get_instance_id()): return _bad("receipt_candidate_unknown")
 	var record: Dictionary = _records[candidate.get_instance_id()]
 	if record.handle.get_ref() != candidate or record.root.get_ref() != root or not _empty(root) or not _bound(root, bindings) or record.bindings != bindings: return _bad("receipt_candidate_stale")
+	return _validate_fresh(root, record, bindings)
+
+static func validate_prebinding(root: Node, candidate: RefCounted, bindings: Dictionary) -> Dictionary:
+	if candidate == null or not _records.has(candidate.get_instance_id()): return _bad("receipt_candidate_unknown")
+	var record: Dictionary = _records[candidate.get_instance_id()]
+	if record.handle.get_ref() != candidate or record.root.get_ref() != root or not _stable(root) or record.bindings != bindings or record.root_stamp != _root_stamp(root): return _bad("receipt_candidate_stale")
+	return _validate_fresh(root, record, bindings)
+
+static func _validate_fresh(root: Node, record: Dictionary, bindings: Dictionary) -> Dictionary:
+	if not _owners(root, bindings): return _bad("receipt_candidate_stale")
 	if record.stamp != _owner_stamp(bindings): return _bad("receipt_candidate_stale")
 	var rebuilt := _rebuild(root, record.data, bindings)
 	if not rebuilt.ok: return rebuilt
@@ -135,6 +157,27 @@ static func _owners(root: Node, bindings: Dictionary) -> bool:
 
 static func _owner_stamp(bindings: Dictionary) -> Dictionary:
 	return {"fleet":bindings.fleet.export_checkpoint_state(), "supply":bindings.supply.export_state(), "campaign":bindings.campaign.export_state(), "equipment":bindings.equipment.export_state()}
+
+static func _root_bindings(root: Node) -> Dictionary:
+	var adapter: Variant = root.get("_departure_adapter")
+	return {"fleet":root.get("_singleplayer_space_travel_owner"), "supply":root.get("_singleplayer_supply_owner"), "campaign":root.get("_singleplayer_campaign_owner"), "equipment":root.get("_ship_equipment_owner"), "adapter":adapter.get_ref() if adapter is WeakRef else null}
+
+static func _root_stamp(root: Node) -> Dictionary:
+	var bindings := _root_bindings(root)
+	var state := {}
+	var epochs := {}
+	# Old state remains live and read-only until the global publication tail.
+	for field in ["fleet", "supply", "campaign", "equipment"]:
+		var owner: Variant = bindings[field]
+		if is_instance_valid(owner):
+			if field == "fleet" and owner.has_method("export_checkpoint_state"):
+				state[field] = owner.export_checkpoint_state()
+				epochs[field] = owner.get("_space_area_epoch")
+			elif owner.has_method("export_state"):
+				state[field] = owner.export_state()
+				if field == "supply": epochs[field] = owner.get("_route_prepare_epoch")
+				if field == "campaign": epochs[field] = owner.get("_departure_preparation_epoch")
+	return {"bindings":bindings, "onboarding":root.get("_campaign_onboarding_owner"), "state":state, "epochs":epochs, "launch":root.get("_launch_receipts").duplicate(true), "departure":root.get("_departure_group_receipts").duplicate(true)}
 
 static func _bound(root: Node, bindings: Dictionary) -> bool:
 	return _owners(root,bindings) and root.get("_singleplayer_space_travel_owner") == bindings.fleet and root.get("_singleplayer_supply_owner") == bindings.supply and root.get("_singleplayer_campaign_owner") == bindings.campaign and root.get("_ship_equipment_owner") == bindings.equipment and root.get("_departure_adapter") != null and root.get("_departure_adapter").get_ref() == bindings.adapter

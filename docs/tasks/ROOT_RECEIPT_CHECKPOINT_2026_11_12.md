@@ -64,3 +64,54 @@ Two existing scene UID-to-path fallback warnings remain. No Script/Parse/Compile
 ERROR or resource/ObjectDB leak lines in either bounded run. git diff --check
 passes. No whole-mission Continue, local-space/Radar receipt restoration, native
 visual approval, broad test suite or EXE claim follows from this owner proof.
+
+## Additive existing-HomeRoot prebinding join
+
+The global mission transaction retains its actual HomeRoot because personnel/UI
+hold that identity. Two additive APIs support final validation BEFORE the global
+owner assignment tail: prepare_prebinding(root,state,bindings) and
+validate_prebinding(root,candidate,bindings). Ordinary prepare still refuses
+nonempty target launch/departure maps; existing postbinding validate is unchanged.
+
+Explicit prepare_prebinding additionally accepts supported, confirmed, finalized
+OLD receipts: their capture must pass with the Root's actual old owners first.
+Neither occupancy nor a specific count is assumed. The opaque candidate keeps
+an immutable runtime-only stamp of the OLD Root owner pointers, adapter,
+onboarding pointer, complete owner exports, epochs and both old receipt maps.
+validate_prebinding requires this exact actual Root baseline to remain unchanged
+and repeats the complete new detached owner/replay/request/snapshot checks.
+It therefore permits the still-old Root pointers, without publishing new ones.
+
+Caller order: bind authority of detached restored owners to the retained Root;
+prepare_prebinding; validate every global candidate, including
+validate_prebinding; then enter one synchronous signal-/await-free tail that
+configures all new Root owners/equipment/adapter and calls publish. No fallible
+checks or observer callbacks belong between these assignments. publish consumes
+the opaque handle and replaces the two maps only as that explicit world restore.
+
+Focused actual-owner fixture: scripts/tests/root_receipt_prebinding_verifier.gd.
+Godot4.6.2 on HEAD8f53fa068, isolated APPDATA
+tmp/open-functions-release/receipt-prebinding-profile,60s hardlimit: exit0,
+ROOT_RECEIPT_PREBINDING passed=29 failed=0 and ROOT_RECEIPT_PREBINDING_PASS.
+Logs: docs/qa/open_functions_release_20261112/root-receipt-prebinding{,.stderr}.log.
+No warnings, Script/Parse/Compile/ERROR or resource/ObjectDB leak lines.
+
+This small fixture commits a real Root/Fleet/Flight launch through a minimal
+fixture adapter, captures a finalized occupied old Root, restores fresh Fleet
+owners via the real checkpoint API and checks prebinding atomicity. Changing old
+owner content, old owner pointer, old receipt publication, new detached owner
+content or target Root rejects. The final bind/publish tail preserves exact
+semantic checkpoint and real replay, without owner effects/signals. Empty-target
+ordinary prepare and its existing postbinding validate also remain verified.
+No map or native journey is run for this additive check; prior 68/0 true-journey
+evidence remains bound to its documented earlier source. Complete new-world
+Continue belongs to the Companion integration gate.
+
+Final guard review additionally rejects all eight actual Air/Encounter maps:
+_air_ground_impact_receipts, _air_support_move_receipts,
+_campaign_space_return_receipts, _campaign_space_entry_searches,
+_campaign_space_entry_origins, _piloted_air_ground_receipts,
+_air_ground_fire_receipts and _air_ground_order_receipts. The same small owner
+fixture injects one unsupported entry into each map and proves that capture and
+explicit prebinding both fail closed. Final focused rerun29/0, exit0, stderr
+empty; no new serialized receipt kind and no true-journey rerun.

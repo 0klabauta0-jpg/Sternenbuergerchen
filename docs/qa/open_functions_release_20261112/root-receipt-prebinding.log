@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual Root commits launch through real Fleet/Flight owners
+PASS: actual finalized old Root launch captures
+PASS: real Fleet restore creates fresh detached owners
+PASS: ordinary prepare still refuses existing committed receipts
+PASS: explicit world restore prepares against occupied old Root
+PASS: prepare preserves old live Root owners and receipts
+PASS: prebinding validates detached new owners with old Root unchanged
+PASS: postbinding API still refuses old Root bindings
+PASS: old Root owner content change rejects prebinding
+PASS: old Root owner pointer change rejects prebinding
+PASS: old Root receipt change rejects prebinding
+PASS: explicit prepare refuses unfinished old Root receipt
+PASS: detached new owner mutation rejects prebinding
+PASS: foreign target Root rejects candidate
+PASS: restored exact old/new baseline validates immediately before tail
+PASS: published prebinding candidate is consumed
+PASS: same actual launch replays through fresh Root bindings
+PASS: publication and replay repeat no owner writes or events
+PASS: new receipt maps retain exact original semantic checkpoint
+PASS: unsupported air/encounter map rejects capture and prebinding: _air_ground_impact_receipts
+PASS: unsupported air/encounter map rejects capture and prebinding: _air_support_move_receipts
+PASS: unsupported air/encounter map rejects capture and prebinding: _campaign_space_return_receipts
+PASS: unsupported air/encounter map rejects capture and prebinding: _campaign_space_entry_searches
+PASS: unsupported air/encounter map rejects capture and prebinding: _campaign_space_entry_origins
+PASS: unsupported air/encounter map rejects capture and prebinding: _piloted_air_ground_receipts
+PASS: unsupported air/encounter map rejects capture and prebinding: _air_ground_fire_receipts
+PASS: unsupported air/encounter map rejects capture and prebinding: _air_ground_order_receipts
+PASS: ordinary empty target gains compatible prebinding validation
+PASS: existing postbinding validation remains compatible
+ROOT_RECEIPT_PREBINDING passed=29 failed=0
+ROOT_RECEIPT_PREBINDING_PASS
