@@ -1,0 +1,45 @@
+{
+  "base": "ad2924beb",
+  "status": "implementation_candidate_gameplay_verification_deferred_by_user_until_AP7_AP8",
+  "historical_baseline": "runtime_selection-3f63fa43744745f2a8755db4cdc641a5:13/0 before additional callback repros",
+  "historical_red": "runtime_selection-ba9e8a62b88e4343983c49e2921019a7:13/3; all three fixes applied afterward, not gameplay-rerun",
+  "syntax_only": {
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\hex-ground-foundation-20261111\\.godot\\selection_syntax\\edd1f0ade6064982a4bc86f61e9b72fd\\project",
+      "--check-only",
+      "--script",
+      "res://scripts/tests/hex_runtime_selection_verifier.gd"
+    ],
+    "no_gameplay_assertions": true
+  },
+  "source_sha256": {
+    "scripts/core/simulation_root.gd": "34a69f96f3aa016b2e3c0439e3322809aca8e045b81cfd896de0c79f9f2692d9",
+    "scripts/registries/unit_registry.gd": "451c2b8bf52ebf5dbbd988b4ed1554657f833c5efcad820e2b1dcde0b276ac42",
+    "scripts/ftl/runtime_leader.gd": "ddab974fe7b112b60ce0517f5cf1ca48d5369d509fb0c694d01de898a9853600",
+    "scripts/npc/test_unit.gd": "267f783f8655df473cb7175ee688fe92d5da9b778727d83fcf2a1a8f8f2a7cf2",
+    "scripts/tests/mission_test_setup.gd": "a0fa1460d948e6ea95d27cd94b1a5b9d0744cde5e0026c6a8339a9a6c233ff10",
+    "scripts/tests/hex_runtime_selection_verifier.gd": "026dcd3454084aa5362e44ae20bf0357b8a97220162b40d15ffd87cef6e46744",
+    "scripts/tests/run_hex_tactical_check.py": "56dde8b43baa94f0a740476d5b7d3423b65318084c5414b0a186c48d0ffe40b3"
+  },
+  "attempts": [
+    {
+      "run": "runtime_selection-22ad9e299c13481ba02b1ee2702120b7",
+      "passed": false,
+      "exit_code": 1
+    },
+    {
+      "run": "runtime_selection-3f63fa43744745f2a8755db4cdc641a5",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "run": "runtime_selection-ba9e8a62b88e4343983c49e2921019a7",
+      "passed": false,
+      "exit_code": 1
+    }
+  ]
+}

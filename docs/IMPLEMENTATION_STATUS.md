@@ -1,5 +1,24 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 RuntimeSelection implementiert; Verbundprüfung gebündelt — 12.11.2026
+
+Hexauswahl gleicht Personen nach ID ab, erhält bestehende Actors/Health/Claims/
+Aufträge und retiert nur entfernte/umbenannte IDs. Neue direkte Personen nutzen
+Rootadmission; Deferred/Client bleiben verborgen. Actor-/Known-/Registrymodelle
+stehen vor Identitäts-/Runtimesignalen, alte gepufferte Requests sind an ihren
+konkreten Root/Kontext/Registry/Leader gebunden. UnitRegistry ergänzt nur einen
+atomaren Lookupbatch; RuntimeLeader entfernt exakt den betroffenen Node.
+Gearrefresh ist kein Szenarioreset. Reine Identitysetter bleiben außerhalb der
+vorbereiteten Roottransaktion wie bisher unmittelbar wirksam.
+
+Evidenzstand: erster tatsächlicher Basisslice6/7→13/0; anschließend drei konkrete
+Callback-/Ownerrepros13/3. Diese drei Fehler sind im Code korrigiert, dessen
+GDScriptclosure syntaktisch geprüft ist. Keine erneute Gameplayprüfung nach diesen
+Fixes: neuer Nutzerauftrag bündelt Tests nach den zusammenhängenden AP7-/AP8-
+Codeblöcken. QA hex_runtime_selection_20261112 hält diese Grenze ausdrücklich
+fest. AP6-Codepaket abgeschlossen; gemeinsame Abnahme, AP7 und AP8 noch offen.
+Keine Produktionsaktivierung, Main oder EXE.
+
 ### AP6 Mitglieder laufender Aufträge — 12.11.2026
 
 FMC und bestehende Controllerexecutions halten konkrete Root-/Kontext-/Actor-/

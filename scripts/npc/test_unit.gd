@@ -45,13 +45,14 @@ signal damage_applied(amount, health_points, hit_context)
 signal healed_applied(amount, health_points, heal_context)
 signal vital_status_changed(vital_status)
 signal identity_changed()
+var _identity_model_write_only:=false
 
 @export var unit_id: String = "unit_test_001":
 	set(value):
 		if unit_id == value:
 			return
 		unit_id = value
-		identity_changed.emit()
+		if not _identity_model_write_only:identity_changed.emit()
 @export var display_name: String = "Test Unit"
 @export var portrait_path: String = ""
 @export var callsign: String = ""
@@ -70,14 +71,14 @@ signal identity_changed()
 		if team_id == value:
 			return
 		team_id = value
-		identity_changed.emit()
+		if not _identity_model_write_only:identity_changed.emit()
 @export var fireteam_id: String = "":
 	set(value):
 		var normalized_id: String = _normalize_fireteam_id(value)
 		if fireteam_id == normalized_id:
 			return
 		fireteam_id = normalized_id
-		identity_changed.emit()
+		if not _identity_model_write_only:identity_changed.emit()
 @export var max_health_points: int = 100
 @export_range(0.0, 1.0, 0.01) var skill_accuracy: float = 0.5
 @export_range(0.0, 1.0, 0.01) var skill_speed: float = 0.5
@@ -536,7 +537,7 @@ func get_target_position():
 	return _runtime_status.target_position
 
 
-func apply_identity_config(identity_config: Dictionary) -> void:
+func apply_identity_config(identity_config: Dictionary, publish_visuals:bool=true) -> void:
 	var should_rebuild_identity_data: bool = _character_profile_bundle.is_empty()
 	var should_refresh_visuals: bool = false
 	var profile_keys := {
@@ -677,6 +678,7 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if should_rebuild_identity_data:
 		_rebuild_identity_data()
+	if not publish_visuals:return
 	if should_refresh_visuals:
 		_refresh_weapon_visual()
 	_refresh_readability()
@@ -1904,3 +1906,104 @@ func _actor_respawn_binding(owner:Node)->Dictionary:
 
 func _actor_respawn_model_stamp()->Dictionary:
 	return {"unit_id":unit_id,"team_id":team_id,"fireteam_id":fireteam_id,"max_health_points":max_health_points,"vital_id":_vital_status.get_instance_id(),"vital":_vital_status.to_dict().duplicate(true),"runtime_id":_runtime_status.get_instance_id(),"runtime":_runtime_status.to_dict().duplicate(true),"command_id":_current_unit_command.get_instance_id() if _current_unit_command!=null else 0,"command":_current_unit_command.to_dict().duplicate(true) if _current_unit_command!=null else {},"contact_active":_contact_active,"contact_target":_contact_target_id,"damage":_last_damage_context.duplicate(true),"manager_id":_respawn_manager.get_instance_id() if is_instance_valid(_respawn_manager) else 0,"terrain_id":_terrain_registry.get_instance_id() if is_instance_valid(_terrain_registry) else 0}
+
+
+# Selection changes identity/command models only. Medical state is never reset.
+class PreparedRuntimeIdentity extends RefCounted:
+	pass
+var _prepared_runtime_identities:Dictionary={}
+
+func prepare_runtime_identity_change(owner:Node,config:Dictionary,reset_command:bool,dependencies:Dictionary={})->Dictionary:
+	if not _runtime_identity_owner_matches(owner) or not _actor_respawn_models_valid():return {"ok":false,"reason":"identity_actor_unbound"}
+	var next_id:String=String(config.get("unit_id",unit_id))
+	var next_team:String=String(config.get("team_id",team_id))
+	if next_id.is_empty() or next_id!=next_id.strip_edges() or next_team.is_empty() or next_team!=next_team.strip_edges():return {"ok":false,"reason":"invalid_identity"}
+	var fields:Dictionary={}
+	for property in get_property_list():fields[String(property.name)]=int(property.type)
+	var aliases:Dictionary={"armor":"armor_id","weapon_1":"weapon_1_id","weapon_2":"weapon_2_id"}
+	for key in config:
+		var field:String=String(aliases.get(key,key))
+		if not fields.has(field):continue
+		var value:Variant=config[key]
+		match fields[field]:
+			TYPE_STRING:
+				if not value is String:return {"ok":false,"reason":"invalid_identity_config"}
+			TYPE_FLOAT,TYPE_INT:
+				if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)):return {"ok":false,"reason":"invalid_identity_config"}
+			TYPE_BOOL:
+				if not value is bool:return {"ok":false,"reason":"invalid_identity_config"}
+			TYPE_PACKED_STRING_ARRAY:
+				if not value is Array and not value is PackedStringArray:return {"ok":false,"reason":"invalid_identity_config"}
+				for entry in value:
+					if not entry is String:return {"ok":false,"reason":"invalid_identity_config"}
+	var runtime:RefCounted=_build_runtime_status("idle") if reset_command else UNIT_RUNTIME_STATUS_SCRIPT.from_dict(_runtime_status.to_dict())
+	runtime.unit_id=next_id;runtime.team_id=next_team;runtime.fireteam_id=_normalize_fireteam_id(String(config.get("fireteam_id",fireteam_id)))
+	if not runtime.is_valid():return {"ok":false,"reason":"invalid_identity_runtime"}
+	for provider in dependencies.values():
+		if provider!=null and (not is_instance_valid(provider) or not provider is Node or provider.is_queued_for_deletion()):return {"ok":false,"reason":"invalid_identity_dependency"}
+	for key in _prepared_runtime_identities.keys():
+		if _prepared_runtime_identities[key].handle.get_ref()==null:_prepared_runtime_identities.erase(key)
+	if _prepared_runtime_identities.size()>=32:return {"ok":false,"reason":"identity_prepare_capacity"}
+	var handle:=PreparedRuntimeIdentity.new()
+	_prepared_runtime_identities[handle.get_instance_id()]={"handle":weakref(handle),"owner":weakref(owner),"registry_id":owner.get_unit_registry().get_instance_id(),"source":_actor_respawn_model_stamp(),"source_life":owner._hex_payload_identity(unit_id),"parent_id":get_parent().get_instance_id(),"config":config.duplicate(true),"runtime":runtime,"reset":reset_command,"phase":"prepared","dependencies":dependencies.duplicate()}
+	return {"ok":true,"prepared":handle}
+
+func validate_runtime_identity_change(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_runtime_identity_record(prepared)
+	if record.is_empty() or record.phase!="prepared":return {"ok":false,"reason":"unknown_identity_change"}
+	var owner:Node=record.owner.get_ref()
+	if not _runtime_identity_owner_matches(owner) or owner.get_unit_registry().get_instance_id()!=record.registry_id or owner._hex_payload_identity(unit_id)!=record.source_life or _actor_respawn_model_stamp()!=record.source or get_parent().get_instance_id()!=record.parent_id:return {"ok":false,"reason":"identity_context_changed"}
+	return {"ok":true,"owner_id":owner.get_instance_id(),"unit_id":String(record.config.get("unit_id",unit_id)),"reset":bool(record.reset)}
+
+## Whole owner transaction validates all handles before this model-only tail.
+func _publish_runtime_identity_change(prepared:RefCounted,_validation:Dictionary)->void:
+	var record:Dictionary=_prepared_runtime_identities[prepared.get_instance_id()]
+	_identity_model_write_only=true
+	apply_identity_config(record.config,false) # Existing normalization; no visuals/signals.
+	_identity_model_write_only=false
+	_runtime_status=record.runtime
+	if record.dependencies.has("respawn_manager"):_respawn_manager=record.dependencies.respawn_manager
+	if record.dependencies.has("terrain_registry"):_terrain_registry=record.dependencies.terrain_registry
+	if record.reset:
+		_current_unit_command=null
+		_contact_active=false
+		_contact_target_id=""
+	record.phase="published"
+	record["post_models"]=_actor_respawn_model_stamp()
+
+func finalize_runtime_identity_change(prepared:RefCounted,publication_guard:Callable=Callable())->Dictionary:
+	var record:Dictionary=_runtime_identity_record(prepared)
+	if record.is_empty():return {"ok":false,"reason":"unknown_identity_change"}
+	if record.phase=="finalized":return {"ok":true,"replayed":true}
+	if record.phase!="published":return {"ok":false,"reason":"identity_not_published"}
+	record.phase="finalized"
+	record["guard"]=publication_guard
+	var owner:Node=record.owner.get_ref()
+	if not _runtime_identity_owner_matches(owner):return {"ok":true,"context_changed":true}
+	record["post_life"]=owner._hex_payload_identity(unit_id)
+	var lifetime:WeakRef=weakref(self)
+	if not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	if record.reset:remove_meta("post_drop_security_active")
+	if record.source.unit_id!=unit_id or record.source.team_id!=team_id or record.source.fireteam_id!=fireteam_id:
+		identity_changed.emit()
+		if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	runtime_status_changed.emit(_runtime_status)
+	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	_refresh_weapon_visual()
+	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	_refresh_readability()
+	return {"ok":true,"context_changed":not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record)}
+
+func _runtime_identity_record(prepared:RefCounted)->Dictionary:
+	if prepared==null:return {}
+	var record:Dictionary=_prepared_runtime_identities.get(prepared.get_instance_id(),{})
+	return record if not record.is_empty() and record.handle.get_ref()==prepared else {}
+
+func _runtime_identity_owner_matches(owner:Node)->bool:
+	return is_instance_valid(owner) and not owner.is_queued_for_deletion() and is_inside_tree() and not is_queued_for_deletion() and owner.has_method("_hex_payload_identity") and owner.has_method("get_unit_registry") and is_instance_valid(owner.get_parent()) and owner.get_parent().is_ancestor_of(self) and is_instance_valid(owner.get_unit_registry())
+
+func _runtime_identity_publication_current(record:Dictionary)->bool:
+	var owner:Node=record.owner.get_ref()
+	var guard:Callable=record.get("guard",Callable())
+	if not guard.is_null() and (not guard.is_valid() or not bool(guard.call())):return false
+	return _runtime_identity_owner_matches(owner) and owner.get_unit_registry().get_instance_id()==record.registry_id and get_parent().get_instance_id()==record.parent_id and _actor_respawn_model_stamp()==record.post_models and owner._hex_payload_identity(unit_id)==record.post_life
