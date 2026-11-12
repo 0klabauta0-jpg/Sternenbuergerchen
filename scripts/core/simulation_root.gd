@@ -2073,6 +2073,8 @@ const HEX_ADMISSION_SCRIPT=preload("res://scripts/mission/hex_ground_admission.g
 var _hex_deployment_serial:=0
 var _last_hex_lifecycle_resolution:Dictionary={}
 var _hex_unit_lifecycle_revision:Dictionary={}
+var _hex_respawn_records:Dictionary={}
+var _hex_respawn_sequence:=0
 
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
@@ -2434,6 +2436,174 @@ func _publish_hex_setup_actors(unit_ids:PackedStringArray,publication_guard:Call
 
 func get_hex_ground_revision()->int:
 	return int(_hex_ground_runtime.get("_revision")) if is_hex_ground_runtime_active() else -1
+
+
+func _hex_respawn_actor(manager:Node,unit_id:String,team_id:String)->Dictionary:
+	var checked:Dictionary=_validate_hex_ground_actor_group(PackedStringArray([unit_id]))
+	if not checked.ok:return checked
+	if int(_hex_ground_runtime.get_current_tick())!=tick_counter:return {"ok":false,"reason":"hex_clock_unsynced"}
+	if not is_instance_valid(manager) or manager.is_queued_for_deletion() or manager.get_script()!=preload("res://scripts/core/respawn_manager.gd"):return {"ok":false,"reason":"respawn_manager_unbound"}
+	if manager.simulation_root_path.is_empty() or manager.unit_registry_path.is_empty() or manager.get_node_or_null(manager.simulation_root_path)!=self or manager.get_node_or_null(manager.unit_registry_path)!=get_unit_registry() or not get_parent().is_ancestor_of(manager):return {"ok":false,"reason":"respawn_manager_unbound"}
+	var actor:Node=checked.actors[unit_id]
+	if not _hex_ground_runtime.has_unit(unit_id) or _hex_ground_runtime.has_pending_admission(unit_id) or bool(actor.get_meta("dropship_embarked",false)):return {"ok":false,"reason":"respawn_ground_unavailable"}
+	if not actor.has_method("prepare_actor_respawn") or not actor.has_method("get_team_id") or String(actor.call("get_team_id"))!=team_id or actor.get("_respawn_manager")!=manager:return {"ok":false,"reason":"respawn_actor_unbound"}
+	return {"ok":true,"actor":actor}
+
+
+## Timer creation and its medical BEGIN form one model transaction.
+func begin_hex_respawn(manager:Node,unit_id:String,team_id:String,spawn_type:String)->Dictionary:
+	var checked:Dictionary=_hex_respawn_actor(manager,unit_id,team_id)
+	if not checked.ok:return checked
+	if manager.has_pending_respawn(unit_id):return {"ok":false,"reason":"respawn_already_pending"}
+	for key in _hex_respawn_records.keys():
+		if _hex_respawn_records.size()<256:break
+		var old:Dictionary=_hex_respawn_records[key]
+		if old.status=="committed" or not _hex_respawn_binding(old).ok:_hex_respawn_records.erase(key)
+	if _hex_respawn_records.size()>=256:return {"ok":false,"reason":"respawn_ticket_capacity"}
+	var actor:Node=checked.actor
+	var prepared:Dictionary=actor.call("prepare_actor_respawn",self,"begin")
+	if not prepared.ok:return prepared
+	var validation:Dictionary=actor.call("validate_prepared_actor_respawn",prepared.prepared)
+	if not validation.ok:return validation
+	var respawn_time:float=manager.get_respawn_time(spawn_type)
+	var next_sequence:int=_hex_respawn_sequence+1
+	var ticket:String="hex_respawn:%d:%d"%[get_instance_id(),next_sequence]
+	var manager_entry:Dictionary={"hex_ticket":ticket,"root":weakref(self),"time_remaining":respawn_time,"respawn_time":respawn_time,"team_id":team_id,"spawn_type":spawn_type,"started":false}
+	var stopped:Dictionary=_hex_ground_runtime.stop_units(PackedStringArray([unit_id]),"respawn_begin")
+	if not stopped.ok:return stopped
+	# From the first Ground write onward: assignment-only owner tails, no signals.
+	_hex_movement_runtime.mark_external_stop(PackedStringArray(stopped.affected_unit_ids),"respawn_begin")
+	_hex_movement_runtime.release_unit(unit_id)
+	_hex_unit_lifecycle_revision[unit_id]=int(_hex_unit_lifecycle_revision.get(unit_id,0))+1
+	_hex_facing_pending.erase(unit_id)
+	_discard_pending_move_commands_for_unit(unit_id)
+	_hex_respawn_sequence=next_sequence
+	var record:Dictionary={"ticket":ticket,"unit_id":unit_id,"team_id":team_id,"manager":weakref(manager),"actor":weakref(actor),"identity":_hex_payload_identity(unit_id),"status":"pending","reason":"","in_flight":false,"last_stamp":"","completion_published":false}
+	_hex_respawn_records[ticket]=record
+	actor.call("_publish_prepared_actor_respawn",prepared.prepared,validation)
+	manager.call("_publish_hex_respawn_begin",unit_id,manager_entry)
+	var owner_ref:WeakRef=weakref(self)
+	var finalized:Dictionary=actor.call("finalize_actor_respawn",prepared.prepared)
+	var owner=owner_ref.get_ref()
+	if finalized.get("ok",false) and not finalized.get("context_changed",false) and is_instance_valid(owner) and not owner.is_queued_for_deletion() and owner._hex_respawn_binding(record).ok and actor.call("is_actor_respawn_publication_current",prepared.prepared):
+		manager.call("_finalize_hex_respawn_started",unit_id,ticket)
+	return {"ok":true,"ticket":ticket}
+
+
+func _hex_respawn_binding(record:Dictionary)->Dictionary:
+	var manager:Node=record.manager.get_ref()
+	if not _is_current_hex_payload({"unit_id":record.unit_id,"_hex_lifecycle":record.identity}):return {"ok":false,"reason":"stale_hex_respawn"}
+	var checked:Dictionary=_hex_respawn_actor(manager,record.unit_id,record.team_id)
+	if not checked.ok:return checked
+	if checked.actor!=record.actor.get_ref() or not manager.has_pending_respawn(record.unit_id) or manager._pending_respawns[record.unit_id].get("hex_ticket","")!=record.ticket:return {"ok":false,"reason":"stale_hex_respawn"}
+	return checked
+
+
+func get_hex_respawn_receipt(ticket:String)->Dictionary:
+	if not _hex_respawn_records.has(ticket):return {"ok":false,"status":"stale","reason":"unknown_hex_respawn"}
+	var record:Dictionary=_hex_respawn_records[ticket]
+	# Successful lifecycle advancement does not invalidate its historical receipt.
+	if record.status!="committed" and not _hex_respawn_binding(record).ok:return {"ok":false,"status":"stale","unit_id":record.unit_id}
+	return {"ok":true,"status":record.status,"reason":record.reason,"unit_id":record.unit_id,"ticket":ticket}
+
+
+## Same accepted physical producer as deployment/waves; no new ship geometry.
+func _get_hex_respawn_ship_mask()->Dictionary:
+	var producer:Node=get_node_or_null("../TacticalController")
+	if producer==null:return {"ok":true,"source_signature":"","blocked_cells":[]}
+	if not producer.has_method("get_ground_ship_blocked_cells"):return {"ok":false,"reason":"respawn_ship_mask_unavailable"}
+	var mask:Dictionary=producer.call("get_ground_ship_blocked_cells")
+	if not mask.get("ok",false) or int(mask.get("registry_id",0))!=_hex_ground_registry.get_instance_id() or not mask.get("blocked_cells") is Array or mask.blocked_cells.size()>4096:return {"ok":false,"reason":"respawn_ship_mask_unavailable"}
+	for grid in mask.blocked_cells:
+		if not grid is Vector2i:return {"ok":false,"reason":"respawn_ship_mask_unavailable"}
+	return mask
+
+
+func _hex_respawn_retry_stamp(target:Vector2i,mask:Dictionary)->String:
+	return str([get_hex_ground_revision(),_hex_ground_registry.get_revision(),target,mask.get("source_signature","")])
+
+
+func enqueue_hex_respawn(ticket:String,world_position:Vector2)->Dictionary:
+	if not _hex_respawn_records.has(ticket):return {"ok":false,"reason":"unknown_hex_respawn"}
+	var record:Dictionary=_hex_respawn_records[ticket]
+	if record.status=="committed":return {"ok":true,"status":"committed"}
+	if record.status in ["stale","cancelled"]:return {"ok":false,"status":record.status,"reason":record.reason}
+	var checked:Dictionary=_hex_respawn_binding(record)
+	if not checked.ok:return checked
+	if not world_position.is_finite():return {"ok":false,"reason":"invalid_respawn_position"}
+	if record.in_flight:return {"ok":true,"status":"queued"}
+	var target:Vector2i=_hex_ground_registry.call("world_to_grid",world_position)
+	var mask:Dictionary=_get_hex_respawn_ship_mask()
+	if not mask.ok:
+		record.status="blocked"
+		record.reason=mask.reason
+		return mask
+	var stamp:String=_hex_respawn_retry_stamp(target,mask)
+	if stamp==record.last_stamp:return {"ok":true,"status":"blocked"}
+	record.last_stamp=stamp
+	if mask.blocked_cells.has(target):
+		record.status="blocked"
+		record.reason="respawn_ship_blocked"
+		return {"ok":true,"status":"blocked"}
+	record.in_flight=true
+	record.status="queued"
+	enqueue_effect({"effect_type":"respawn","unit_id":record.unit_id,"priority":10,"spawn_position":world_position,"_hex_respawn_ticket":ticket,"_hex_lifecycle":record.identity.duplicate(true)})
+	return {"ok":true,"status":"queued"}
+
+
+func _apply_hex_respawn_effect(effect:Dictionary)->void:
+	var ticket:String=String(effect.get("_hex_respawn_ticket",""))
+	if not _hex_respawn_records.has(ticket):return
+	var record:Dictionary=_hex_respawn_records[ticket]
+	if record.status=="committed" or not record.in_flight:return
+	record.in_flight=false
+	var checked:Dictionary=_hex_respawn_binding(record)
+	if not checked.ok:return
+	var actor:Node=checked.actor
+	var target:Vector2i=_hex_ground_registry.call("world_to_grid",effect.spawn_position)
+	var mask:Dictionary=_get_hex_respawn_ship_mask()
+	if not mask.ok or mask.blocked_cells.has(target):
+		record.status="blocked"
+		record.reason=mask.get("reason","respawn_ship_blocked")
+		if mask.ok:record.last_stamp=_hex_respawn_retry_stamp(target,mask)
+		return
+	var world:Vector2=_hex_ground_registry.call("grid_to_world",target)
+	var prepared:Dictionary=actor.call("prepare_actor_respawn",self,"complete",world)
+	if not prepared.ok:
+		record.status="stale"
+		record.reason=prepared.reason
+		return
+	var validation:Dictionary=actor.call("validate_prepared_actor_respawn",prepared.prepared)
+	if not validation.ok:return
+	var moved:Dictionary=_hex_ground_runtime.relocate_unit(record.unit_id,target,get_hex_ground_revision())
+	if not moved.ok:
+		record.status="blocked"
+		record.reason=moved.reason
+		return
+	var id:String=record.unit_id
+	_hex_movement_runtime.release_unit(id)
+	_hex_unit_lifecycle_revision[id]=int(_hex_unit_lifecycle_revision.get(id,0))+1
+	_hex_facing_pending.erase(id)
+	_discard_pending_move_commands_for_unit(id)
+	_hex_visual_unit_ids[id]=true
+	actor.call("_publish_prepared_actor_respawn",prepared.prepared,validation)
+	var manager:Node=record.manager.get_ref()
+	manager.call("_publish_hex_respawn_complete",id,ticket)
+	record.status="committed"
+	record.reason=""
+	var committed_identity:Dictionary=_hex_payload_identity(id)
+	var owner_ref:WeakRef=weakref(self)
+	var finalized:Dictionary=actor.call("finalize_actor_respawn",prepared.prepared)
+	var owner=owner_ref.get_ref()
+	if not finalized.get("ok",false) or finalized.get("context_changed",false) or not is_instance_valid(owner) or owner.is_queued_for_deletion() or not owner._is_current_hex_payload({"unit_id":id,"_hex_lifecycle":committed_identity}):return
+	manager=record.manager.get_ref()
+	if not is_instance_valid(manager) or manager.is_queued_for_deletion():return
+	owner._project_hex_ground_actors(0.0)
+	owner=owner_ref.get_ref()
+	manager=record.manager.get_ref()
+	if is_instance_valid(owner) and not owner.is_queued_for_deletion() and owner._is_current_hex_payload({"unit_id":id,"_hex_lifecycle":committed_identity}) and owner._hex_respawn_actor(manager,id,record.team_id).ok and actor.call("is_actor_respawn_publication_current",prepared.prepared) and not record.completion_published:
+		record.completion_published=true
+		manager.call("_finalize_hex_respawn_completed",id,ticket)
 
 
 func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
@@ -6427,6 +6597,9 @@ func _extract_unit_damage_taken_multiplier(unit) -> float:
 
 
 func _apply_respawn_effect(effect: Dictionary) -> void:
+	if is_hex_ground_runtime_required() or effect.has("_hex_respawn_ticket"):
+		_apply_hex_respawn_effect(effect)
+		return
 	var unit_id: String = String(effect.get("unit_id", ""))
 	if unit_id.is_empty():
 		push_warning("SimulationRoot respawn effect expects a non-empty unit_id.")

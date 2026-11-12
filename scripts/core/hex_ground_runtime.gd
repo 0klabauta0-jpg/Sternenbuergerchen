@@ -350,6 +350,41 @@ func release_unit(unit_id: String, _reason: String) -> void:
 	_revision += 1
 
 
+## Respawn moves an existing claim without ever exposing a release/admit gap.
+## It cancels only this member's promises, never another cohort member's route.
+func relocate_unit(unit_id:String,target:Vector2i,expected_revision:int)->Dictionary:
+	if not _is_configured() or expected_revision!=_revision:return _reject("respawn_revision_conflict")
+	if not _units_by_id.has(unit_id) or _admission_id_by_unit.has(unit_id):return _reject("respawn_unit_unavailable",unit_id)
+	if _occupant_by_grid.has(target) and _occupant_by_grid[target]!=unit_id:return _reject("cell_occupied",unit_id)
+	if _admission_slots_by_grid.has(target):return _reject("cell_reserved",unit_id)
+	if not bool(_registry.call("is_walkable",target)):return _reject("cell_unwalkable",unit_id)
+	var tile=_registry.call("get_tile_at_grid",target)
+	if tile==null or not tile.is_valid() or not is_finite(float(_registry.call("get_stand_height_at",target))):return _reject("invalid_respawn_tile",unit_id)
+	for id in _segments_by_unit_id:
+		if id==unit_id:continue
+		for segment in _segments_by_unit_id[id]:
+			if int(segment.start_tick)+int(segment.duration_ticks)>_tick and target in [segment.from_grid,segment.to_grid]:return _reject("cell_reserved",unit_id)
+	var source:Vector2i=_units_by_id[unit_id].grid
+	for grant in _corridor_grants:
+		# The unchanged, already held field grants no new passage access. Actual
+		# foreign edge promises above remain hard blockers even in this case.
+		if target==source or not grant.cells.has(target):continue
+		for member in grant.unit_ids:
+			if member!=unit_id:return _reject("cell_reserved",unit_id)
+	_occupant_by_grid.erase(source)
+	_occupant_by_grid[target]=unit_id
+	_units_by_id[unit_id].grid=target
+	_units_by_id[unit_id].movement_state={"moving":false}
+	_segments_by_unit_id.erase(unit_id)
+	_centering_by_unit_id.erase(unit_id)
+	_motion_geometry_by_unit_id.erase(unit_id)
+	for grant in _corridor_grants:grant.unit_ids.erase(unit_id)
+	_prune_corridor_grants()
+	_revision+=1
+	_units_by_id[unit_id].state_revision=_revision
+	return {"ok":true,"grid":target,"revision":_revision}
+
+
 ## Only the owning SimulationRoot commits accepted runtime intents here.
 func commit_facing(unit_id: String, direction: int) -> bool:
 	if not _is_configured() or not _units_by_id.has(unit_id) or direction < 0 or direction > 5:
