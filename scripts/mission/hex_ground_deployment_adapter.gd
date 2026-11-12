@@ -5,7 +5,7 @@ extends RefCounted
 ## the caller owns its unload timer/index and publishes only phase=committed.
 const EFFECTS=preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
 
-func advance_phase(simulation_root:Node,sequence:Dictionary,anchor_world:Vector2)->Dictionary:
+func advance_phase(simulation_root:Node,sequence:Dictionary,anchor_world:Vector2,obstacle_source:Callable=Callable())->Dictionary:
 	if not is_instance_valid(simulation_root) or not anchor_world.is_finite():return _waiting("invalid_deployment_context")
 	var units:Variant=sequence.get("units",[])
 	var index:int=int(sequence.get("unit_index",0))
@@ -42,7 +42,15 @@ func advance_phase(simulation_root:Node,sequence:Dictionary,anchor_world:Vector2
 	if not ticket.ok:
 		var registry:Node=simulation_root.call("get_hex_ground_terrain_registry")
 		if not is_instance_valid(registry):return _waiting("deployment_terrain_unavailable")
-		ticket=simulation_root.call("prepare_hex_ground_deployment",ids,registry.call("world_to_grid",anchor_world))
+		var excluded:Array[Vector2i]=[]
+		if obstacle_source.is_valid():
+			var mask:Variant=obstacle_source.call(String(sequence.get("craft_id","")))
+			if not mask is Dictionary or not bool(mask.get("ok",false)):return _waiting(String(mask.get("reason","ground_ship_geometry_unbound")) if mask is Dictionary else "ground_ship_geometry_unbound")
+			if int(mask.get("registry_id",0))!=registry.get_instance_id() or not mask.get("blocked_cells") is Array or mask.blocked_cells.size()>4096:return _waiting("ground_ship_registry_unavailable")
+			for grid in mask.blocked_cells:
+				if not grid is Vector2i:return _waiting("ground_ship_registry_unavailable")
+				excluded.append(grid)
+		ticket=simulation_root.call("prepare_hex_ground_deployment",ids,registry.call("world_to_grid",anchor_world),excluded)
 		if not ticket.ok:return _waiting(String(ticket.get("reason","deployment_waiting_space")))
 		admission_id=ticket.admission_id
 		receipt={"admission_id":admission_id}

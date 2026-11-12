@@ -71,3 +71,26 @@ Gruppenanker sowie abweichender Registryursprung/-maßstab geprüft.
 Noch offen: konkrete Auswahl/Cache der Schiffslandestände, Consumer an den
 Aussteigephasen, Landeclaimguard und einmalige reguläre Profilbindung. Keine
 Produktionsaktivierung durch diesen reinen Daten-/Planungsteilschritt.
+
+## Zweiter geprüfter Teil: tatsächlicher Producer und Consumer
+
+Auswahl akzeptierter Landestände, begrenzter abgeleiteter Cache und tatsächlicher
+Consumer sind angeschlossen. Nur ausgewählte, noch nicht akzeptierte wartende
+LZ zählen nicht als physischer Rumpf. Fehlende Profile tatsächlich vorhandener
+Schiffe werden weiterhin geschlossen abgelehnt. Neues Profil erst nach allen
+normalen Startguards; Replays binden es nicht aus veränderter Kamera neu.
+
+Hexlandungen prüfen das endgültige LZ gegen fremde akzeptierte Körper und alle
+Rootclaims. Beide Touchdownpfade wiederholen diese aktuelle Claimprüfung, ohne
+das angenommene Profil neu zu binden. Abgeleitete Einzelraster sind begrenzt
+gecacht. Ein NPC, der nach dem Start in die Fläche läuft, hält den Touchdown an.
+Die Maske ist hier eine Eingabe der Gruppenadmission und Landungsprüfung;
+allgemeine Schiffskörper als dauerhafte Ground-Navigationsblocker sind damit
+noch nicht eingeführt.
+
+Enger Producer66/0, Transportcontrollerregression73/0; Reviewbefunde mit
+tatsächlichem RED62/4→GREEN66/0 geschlossen. QA `hex_ship_producer_20261112`.
+Der gemeinsame Parent besitzt den tatsächlichen Renderergetter (`b9f194d9e`)
+und den Kartenidentitätspfad (`55ccb737a`); die Sourcefixture liefert eine bekannte
+Projektion. Älteren Renderer hier nicht breiter migriert. Gemeinsamer Anschluss,
+Setup/Base, AP7/8 und spätere große Abnahme bleiben ausdrücklich getrennt.

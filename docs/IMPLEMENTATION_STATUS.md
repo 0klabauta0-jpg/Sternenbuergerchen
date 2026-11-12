@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Schiffsproducer, Gruppenausstieg und Touchdownclaims — 12.11.2026
+
+Tatsächlicher Controller liest akzeptierte Schiffskörper kamerafrei aus gebundenen
+Profilen und übergibt begrenzte Sperrmasken an neue Ausstiegstickets. Neue reguläre
+Landungen binden ihr Profil erst nach Startguards, auch in LegacyPolisa. Endgültige
+Hex-LZ und beide Touchdownpfade prüfen aktuelle NPCclaims und Fremdkörper.
+Producer66/0, Transportcontrollerregression73/0, Quellen-/Profilguards grün;
+enger Review schloss drei konkrete P2 mit RED/GREEN, QA hex_ship_producer_20261112.
+Tatsächliche Rendererquelle ist Parentgetter b9f194d9e; diese Sourceprobe verwendet
+bekannte Projektionsdaten. Gemeinsamer Anschluss, Setup/Base und AP7/8 folgen.
+Kein Main, Produktionsflag, EXE oder große Lastprobe.
+
 ### AP6 begrenzter Schiffsflächenraster als Planereingabe — 12.11.2026
 
 Vorhandenes gebundenes Bodyprofil wird lokal auf ganze Hexflächen abgeleitet;
