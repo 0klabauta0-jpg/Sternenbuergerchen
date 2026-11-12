@@ -68,6 +68,8 @@ func _initialize() -> void:
 	var vision = Vision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
 	var grounded_fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(mission_root.preview_air_support_ground_fire(grounded_fire).reason == "aircraft_not_flying")
+	var attack := {"craft_id":"ship", "target_unit_id":"enemy", "request_id":"air-order"}
+	assert(adapter.request_operation("air_support_attack_order", attack).reason == "aircraft_not_flying")
 	var flight: RefCounted = fleet.get_flight_state("ship")
 	var proposal := {"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site", "position_plane":GRID.HEX.axial_to_plane(Vector2.ZERO), "motion_mode":"tactical", "heading_rad":0.0, "assist_mode":"coupled"}
 	var transition: Dictionary = flight.validate_area_transition(proposal, 1)
@@ -78,8 +80,14 @@ func _initialize() -> void:
 	var fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(mission_root.preview_air_support_ground_fire(fire).reason == "attack_order_required")
 	var wings: RefCounted = source.get("_space_wing_state"); var wing_id: String = wings.get_craft_wing("ship", "singleplayer")
-	var order := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-order", "expected_revision":wings.get_snapshot().revision, "payload":{"wing_ids":[wing_id], "verb":"attack_target", "target_id":"enemy", "fire_rule":"free"}}
-	assert(wings.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":["enemy"], "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site"}).ok)
+	vision.visible = false
+	assert(adapter.request_operation("air_support_attack_order", attack).reason == "target_not_visible")
+	vision.visible = true
+	assert(adapter.request_operation("air_support_attack_order", attack).ok)
+	assert(adapter.request_operation("air_support_attack_order", attack).replayed)
+	var conflicting_attack := attack.duplicate(); conflicting_attack.target_unit_id = "target"
+	assert(adapter.request_operation("air_support_attack_order", conflicting_attack).reason == "request_id_conflict")
+	assert(wings.get_snapshot().wings[wing_id].order.target_id == "enemy")
 	var snapshot_before: Dictionary = combat.get_ship_systems("ship")
 	assert(mission_root.preview_air_support_ground_fire(fire).ok and combat.get_ship_systems("ship") == snapshot_before)
 	pilot.set_meta("dropship_embarked", false); assert(mission_root.preview_air_support_ground_fire(fire).reason == "pilot_not_aboard"); pilot.set_meta("dropship_embarked", true)

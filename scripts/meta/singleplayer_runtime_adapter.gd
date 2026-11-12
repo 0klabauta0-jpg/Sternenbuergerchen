@@ -366,6 +366,14 @@ func sync_space_wings() -> Dictionary:
 	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "air_support_attack_order":
+		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
+		var mission: Node = _flow.call("get_active_mission")
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		var order_command := payload.duplicate(true)
+		order_command["request_id"] = _request_id("air-support-order", payload)
+		return mission_root.request_air_support_attack_order(order_command)
 	if operation == "air_support_ground_fire":
 		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
 		var mission: Node = _flow.call("get_active_mission")

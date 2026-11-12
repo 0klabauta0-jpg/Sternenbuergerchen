@@ -97,6 +97,15 @@ Rückflugguard verlangt unverändert die gesamte Crew. Die neue Prüfung allein
 startet noch kein Schiff; die transaktionale Übernahme in den atmosphärischen
 Flugowner und die Rücklandung bleiben offen.
 
+Ein Bodenangriff lässt sich nun vom Singleplayer-Adapter als Angriff einer
+bereits tatsächlich fliegenden Rotte beim gemeinsamen Rottenowner setzen.
+Der Missionsroot prüft Flugindex, gekoppelten Atmosphärenzustand, lebenden
+Piloten an Bord und ein aktuell sichtbares gegnerisches Bodenziel. Wiederholte
+Auftrags-IDs ändern den Rottenauftrag nicht erneut; abweichende Zielangaben
+mit derselben ID werden abgelehnt. Die Prüfung nutzt weiterhin eine im Test
+gesetzte Flugzulassung. Kartenbedienung, kontinuierlicher Feuerzyklus und der
+echte Start bleiben offen.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

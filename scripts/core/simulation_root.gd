@@ -86,6 +86,43 @@ func _resolve_air_support_craft(craft_id: String) -> Dictionary:
 	if flight == null or wing_id.is_empty() or equipment.get_snapshot(craft_id).is_empty(): return {"ok":false, "reason":"craft_not_ready"}
 	return {"ok":true, "flight":flight, "fleet":fleet, "wings":wings, "combat":combat, "equipment":equipment, "wing_id":wing_id}
 
+func request_air_support_attack_order(command: Dictionary) -> Dictionary:
+	# The target and wing are resolved from live mission owners, not the UI.
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
+	for key in ["craft_id", "target_unit_id", "request_id"]:
+		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty() or String(command[key]).length() > 128: return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.request_id
+	if _air_ground_order_receipts.has(id):
+		var prior: Dictionary = _air_ground_order_receipts[id]
+		if prior.craft_id != command.craft_id or prior.target_unit_id != command.target_unit_id: return {"ok":false, "reason":"request_id_conflict"}
+		var replay: Dictionary = prior.result.duplicate(true); replay["replayed"] = true; return replay
+	if _air_ground_order_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var binding: Dictionary = _resolve_air_support_craft(command.craft_id)
+	if not binding.get("ok", false): return binding
+	var pose: Dictionary = binding.flight.get_snapshot()
+	if binding.combat.get_actor(command.craft_id) != binding.flight or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("assist_mode") != "coupled" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id: return {"ok":false, "reason":"aircraft_not_flying"}
+	var cells: Array[Vector2i] = binding.combat.preview_actor_cells(command.craft_id, {})
+	if cells.is_empty() or not binding.combat.actor_cells_match(command.craft_id, pose.space_area_id, cells): return {"ok":false, "reason":"stale_aircraft_index"}
+	var adapter: Node = _air_support_adapter.get_ref()
+	var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
+	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
+	if typeof(pilots) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_unavailable"}
+	var pilot = _resolve_unit(String(pilots.get(command.craft_id, "")))
+	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id"): return {"ok":false, "reason":"pilot_not_aboard"}
+	var target = _resolve_unit(command.target_unit_id)
+	if not is_instance_valid(target) or typeof(_hex_ground_runtime.get_unit_grid(command.target_unit_id)) != TYPE_VECTOR2I or not target.has_method("get_health") or int(target.call("get_health")) <= 0 or not target.has_method("get_team_id"): return {"ok":false, "reason":"target_unavailable"}
+	var team := String(pilot.call("get_team_id"))
+	if team.is_empty() or String(target.call("get_team_id")) == team: return {"ok":false, "reason":"not_hostile"}
+	var driver: Node = get_parent().get_node_or_null("CombatLoopDriver") if get_parent() != null else null
+	if driver == null or not driver.has_method("get_multiplayer_visible_unit_ids") or not driver.call("get_multiplayer_visible_unit_ids", team).has(command.target_unit_id): return {"ok":false, "reason":"target_not_visible"}
+	var revision: int = binding.wings.get_snapshot().revision
+	var order := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-ground-order:" + id, "expected_revision":revision, "payload":{"wing_ids":[binding.wing_id], "verb":"attack_target", "target_id":command.target_unit_id, "fire_rule":"free"}}
+	var result: Dictionary = binding.wings.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":[command.target_unit_id], "coordinate_frame":"local", "space_area_id":pose.space_area_id})
+	if result.get("ok", false): _air_ground_order_receipts[id] = {"craft_id":command.craft_id, "target_unit_id":command.target_unit_id, "result":result.duplicate(true)}
+	return result
+
 func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	# Read-only. Visibility and installed equipment come from live owners; the
 	# UI supplies only identities, never pilot skill, position, or damage.
@@ -2636,6 +2673,7 @@ var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
 var _air_ground_impact_receipts: Dictionary = {}
 var _piloted_air_ground_receipts: Dictionary = {}
 var _air_ground_fire_receipts: Dictionary = {}
+var _air_ground_order_receipts: Dictionary = {}
 var _air_ground_rng_state := 1
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
@@ -2722,6 +2760,7 @@ func _clear_hex_movement_context() -> void:
 	_air_ground_impact_receipts.clear()
 	_piloted_air_ground_receipts.clear()
 	_air_ground_fire_receipts.clear()
+	_air_ground_order_receipts.clear()
 	_air_ground_rng_state = 1
 	for id in _hex_ground_runtime.get_unit_ids():_clear_hex_actor_metadata(String(id))
 	_hex_movement_runtime.clear()
