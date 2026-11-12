@@ -1,6 +1,7 @@
 extends SceneTree
 const CATALOG = preload("res://scripts/mission/space_component_catalog.gd")
 const SYSTEMS = preload("res://scripts/tactical/space_component_systems.gd")
+const FLIGHT = preload("res://scripts/tactical/space_flight_resolver.gd")
 
 func _initialize() -> void:
 	var light := CATALOG.default_loadout("buccaneer")
@@ -12,6 +13,14 @@ func _initialize() -> void:
 	var smaller := light.duplicate(true); smaller.weapon_1 = "repeater_s1"
 	var light_stats: Dictionary = CATALOG.effective_stats("buccaneer", smaller)
 	assert(light_stats.ok and light_stats.mass < base.mass)
+	var heavy_inputs: Dictionary = CATALOG.flight_inputs("buccaneer", light)
+	var light_inputs: Dictionary = CATALOG.flight_inputs("buccaneer", smaller)
+	var flight := {"position_plane":Vector2.ZERO,"velocity_plane":Vector2.ZERO,"heading_rad":0.0,"angular_velocity":0.0,"mass":heavy_inputs.mass}
+	var thrust := {"forward":1.0,"lateral":0.0,"turn":0.0}
+	var heavy_step: Dictionary = FLIGHT.step(flight, thrust, heavy_inputs.hull, heavy_inputs.power, 1.0)
+	flight.mass = light_inputs.mass
+	var light_step: Dictionary = FLIGHT.step(flight, thrust, light_inputs.hull, light_inputs.power, 1.0)
+	assert(heavy_step.ok and light_step.ok and light_step.velocity_plane.x > heavy_step.velocity_plane.x)
 	var oversize := light.duplicate(true); oversize.weapon_1 = "repeater_s4"
 	assert(CATALOG.validate_loadout("buccaneer", oversize).reason == "wrong_component_size")
 	var wrong := light.duplicate(true); wrong.shield = "power_s1"

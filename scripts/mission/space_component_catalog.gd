@@ -66,6 +66,16 @@ static func effective_stats(model_id: String, slots: Dictionary) -> Dictionary:
 	# Reserve values are provisional game balance, not claims about any ship.
 	return {"ok":true, "model_id":model_id, "mass":mass, "weapons":weapons, "shield":shield, "weapon_reserve":{"capacity":20.0, "recharge_rate":4.0}, "power":{"output":output, "flight_fraction":flight_allocation / float(model.flight_demand), "weapon_fraction":weapon_allocation / weapon_demand if weapon_demand > 0.0 else 0.0, "shield_fraction":shield_allocation / shield_demand if shield_demand > 0.0 else 0.0}}
 
+static func flight_inputs(model_id: String, slots: Dictionary) -> Dictionary:
+	# Projection only; the equipment owner must select installed IDs and bind
+	# its revision before SimulationRoot uses these values for actual flight.
+	var stats := effective_stats(model_id, slots)
+	if not stats.ok: return stats
+	var base := WARP_CATALOG.flight_profile(model_id)
+	for field in ["main_thrust", "reverse_thrust", "side_thrust", "turn_acceleration"]:
+		if not _positive(base.get(field)): return _reject("flight_profile_unavailable")
+	return {"ok":true, "mass":float(stats.mass), "hull":{"main_thrust":float(base.main_thrust), "reverse_thrust":float(base.reverse_thrust), "side_thrust":float(base.side_thrust), "turn_acceleration":float(base.turn_acceleration)}, "power":{"thrust_fraction":float(stats.power.flight_fraction)}}
+
 static func _positive(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) > 0.0
 

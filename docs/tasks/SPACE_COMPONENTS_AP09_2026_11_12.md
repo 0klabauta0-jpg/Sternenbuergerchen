@@ -49,4 +49,7 @@ persistierte Komponentenbilanz und kein Consumer: AP09 bleibt offen. Werte,
 Slots und Reserve sind vorläufige Spielannahmen, keine SC-Leistungsdaten.
 Gezielte gebündelte Prüfung: Komponentenresolver Exit 0, bestehender
 Warp-/Savevertrag 42/42. Anpassung der Schubwerte, Root-Tick, AP8-Schaden,
-Versionierung und UI-/Supply-Anbindung fehlen weiterhin.
+Versionierung und UI-/Supply-Anbindung fehlen weiterhin. Eine reine Vorschau
+für den bestehenden Flugresolver zeigt, dass dieselbe Schubabsicht mit mehr
+Komponentenmasse schwächer beschleunigt; der produktive Root liefert diese
+Werte bislang nicht. Gezielt mit dem echten Flugresolver geprüft, Exit 0.
