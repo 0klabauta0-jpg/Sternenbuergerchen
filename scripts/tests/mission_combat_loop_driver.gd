@@ -809,10 +809,6 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 	var complete: bool = bool(payload.get("complete", false)) or (duration_seconds <= 0.0 and bool(payload.get("can_complete_zero_duration", false))) or (duration_seconds > 0.0 and hold_seconds + 0.001 >= duration_seconds)
 	if complete and (interaction_id == "ship_return" or String(payload.get("step_id", "")) == "return_to_ship") and not _has_actual_campaign_return_craft():
 		return {"accepted": false, "complete": false, "reason": "return_craft_not_at_authored_pad"}
-	var resources: Node=get_parent().get_node_or_null("LocationResources")
-	if resources!=null:
-		var gate: Dictionary=resources.call("accept_progress",payload,complete)
-		if not bool(gate.get("accepted",false)): return gate
 	var progress: float = 1.0 if complete else clampf(float(payload.get("progress", 0.0)), 0.0, 1.0)
 	if duration_seconds > 0.0:
 		progress = 1.0 if complete else clampf(hold_seconds / duration_seconds, 0.0, 1.0)
@@ -837,6 +833,13 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+	var door_guard: Dictionary = _validate_hex_door_transition(interaction_id, state)
+	if not bool(door_guard.get("ok", false)):
+		return door_guard
+	var resources: Node=get_parent().get_node_or_null("LocationResources")
+	if resources!=null:
+		var gate: Dictionary=resources.call("accept_progress",payload,complete)
+		if not bool(gate.get("accepted",false)): return gate
 	var previous_state: Dictionary = Dictionary(_mission_interaction_runtime_states.get(interaction_id, {}))
 	var previous_progress_bucket: int = int(round(float(previous_state.get("progress", -1.0)) * 100.0))
 	var next_progress_bucket: int = int(round(progress * 100.0))
@@ -851,6 +854,37 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 		_apply_in_progress_mission_interaction_state(state)
 	_refresh_mission_interaction_door_runtime_overrides()
 	return state.duplicate(true)
+
+
+func _validate_hex_door_transition(interaction_id:String,state:Dictionary) -> Dictionary:
+	var previous:Dictionary=Dictionary(_mission_interaction_runtime_states.get(interaction_id,{}))
+	var next_name:String="complete" if bool(state.get("complete",false)) else String(state.get("state",""))
+	var previous_name:String="complete" if bool(previous.get("complete",false)) else String(previous.get("state",""))
+	# Only a change from traversable to blocked needs a new passage proof.
+	if MISSION_INTERACTION_DOOR_RUNTIME_SCRIPT.resolve_door_state(next_name,float(state.get("progress",0.0)))=="open" or MISSION_INTERACTION_DOOR_RUNTIME_SCRIPT.resolve_door_state(previous_name,float(previous.get("progress",0.0)))!="open":return {"ok":true}
+	var bindings:Array=[]
+	for binding in _mission_interaction_door_bindings:
+		if String(binding.get("interaction_id",""))==interaction_id:bindings.append(binding)
+	if bindings.is_empty():return {"ok":true}
+	var owner=get_node_or_null(simulation_root_path)
+	var terrain_map_data=_get_mission_interaction_door_runtime_map_data()
+	var requires_hex:bool=terrain_map_data!=null and terrain_map_data.has_method("get_tactical_grid_rules") and String(terrain_map_data.call("get_tactical_grid_rules"))=="hex_tactical_v1"
+	if owner==null or not owner.has_method("is_hex_ground_runtime_active") or not bool(owner.call("is_hex_ground_runtime_active")):
+		return {"ok":false,"accepted":false,"interaction_id":interaction_id,"reason":"hex_door_owner_unavailable","read_only":true} if requires_hex else {"ok":true}
+	var registry=_get_terrain_registry()
+	var candidate:Dictionary=MISSION_INTERACTION_DOOR_RUNTIME_SCRIPT.build_runtime_snapshot(bindings,{interaction_id:state},terrain_map_data,registry)
+	var rejection:Dictionary={"ok":false,"accepted":false,"interaction_id":interaction_id,"reason":"hex_door_geometry_unresolved","read_only":true,"ui_sets_gameplay_truth":false}
+	if int(candidate.get("unresolved_marker_count",0))>0 or candidate.get("overrides",[]).is_empty() or not owner.has_method("can_block_hex_ground_cells"):return rejection
+	var cells:Array=[]
+	for override in candidate.overrides:
+		if not bool(override.get("walkable_override",false)):cells.append(override.grid_position)
+	var guard:Dictionary=owner.call("can_block_hex_ground_cells",cells,registry)
+	if not bool(guard.get("ok",false)) or not bool(guard.get("can_block",false)):
+		rejection.reason=String(guard.get("reason","hex_door_claimed"))
+		rejection["blocked_cells"]=Array(guard.get("blocked_cells",[])).duplicate(true)
+		return rejection
+	return {"ok":true}
+
 
 
 func _has_actual_campaign_return_craft() -> bool:
