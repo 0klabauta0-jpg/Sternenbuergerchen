@@ -1,0 +1,30 @@
+extends SceneTree
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
+func _initialize() -> void:
+ var source = FLIGHT.new()
+ assert(source.configure("ship_1", {"position_plane": Vector2(2, 3), "velocity_plane": Vector2(1, -1), "motion_mode": "tactical", "coordinate_frame":"local", "space_area_id":"orbit:test"}).ok)
+ if not source.has_method("export_checkpoint_state") or not source.has_method("prepare_checkpoint_restore"):
+  printerr("missing flight checkpoint APIs")
+  quit(1)
+  return
+ var exported: Dictionary = source.export_checkpoint_state()
+ var decoded: Dictionary = JSON.parse_string(JSON.stringify(exported))
+ var target = FLIGHT.new()
+ assert(target.configure("ship_1", {"position_plane":Vector2.ZERO}).ok)
+ var initial: Dictionary = target.get_snapshot()
+ var invalid: Dictionary = decoded.duplicate(true)
+ invalid.position_plane = ["bad", 2]
+ assert(not target.prepare_checkpoint_restore(invalid).ok)
+ assert(target.get_snapshot() == initial)
+ assert(not target.prepare_checkpoint_restore(decoded.merged({"craft_id":"other"}, true)).ok)
+ var prepared: Dictionary = target.prepare_checkpoint_restore(decoded)
+ assert(prepared.ok and target.get_snapshot() == initial)
+ assert(target.commit_checkpoint_restore(prepared.prepared).ok)
+ assert(target.get_snapshot() == source.get_snapshot())
+ assert(not target.commit_checkpoint_restore(prepared.prepared).ok)
+ var stale: Dictionary = target.prepare_checkpoint_restore(decoded)
+ assert(stale.ok)
+ assert(target.configure("other", {"position_plane":Vector2.ZERO}).ok)
+ assert(not target.commit_checkpoint_restore(stale.prepared).ok)
+ print("SPACE_FLIGHT_CHECKPOINT_PASS")
+ quit(0)
