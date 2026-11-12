@@ -120,6 +120,26 @@ Missionen, Beschuss und ein nutzbares Shopangebot sind damit nicht nachgewiesen.
 
 ## Ziel- und Schussvorschau: AP07/AP08-Vorstufe
 
+### Kampagnenprobe: Buccaneer-Rettung
+
+Die vorhandene Mission `buccaneer_rescue` dient als erste echte Probe des
+gemeinsamen Raumkampfs: eigene Kräfte bekämpfen die feindliche Cutlass und
+schützen die zunächst neutrale Buccaneer; die Rettung und Kampagnenbelohnung
+folgen erst nach bestätigter Ausschaltung. Die Mission beschreibt beide
+Schiffe bereits unter `space_encounter`, verwendet aber derzeit in
+`campaign_space_encounter.gd` einen eigenen vereinfachten Dauerschaden und
+keine tatsächlichen Flug-, Waffen- oder Schild-Owner.
+
+Für den Anschluss müssen Missionsstart und -ende die realen Schiffe samt
+Fraktionen in den gemeinsamen Bereich übernehmen, sichtbare Gegner und
+Rottenaufträge zugänglich machen, den Kampftick samt Schild/Hülle und
+Zerstörung verwenden und das tatsächliche Ergebnis an die bestehenden
+Missionsgates übergeben. Die neutrale Buccaneer darf nicht als Feind behandelt
+werden; Querschläger und Verlust müssen berücksichtigt werden. Der bisherige
+Kampagnenablauf und die Rettungsbelohnung brauchen eine Regression. Erst ein
+durchgehender Lauf über die echte Mission belegt den Anschluss; Fixture-Gegner
+oder blosse Missionsmetadaten genügen nicht. Dieser Anschluss ist noch offen.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf

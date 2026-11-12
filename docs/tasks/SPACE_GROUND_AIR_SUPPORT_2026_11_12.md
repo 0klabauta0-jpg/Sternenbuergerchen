@@ -43,6 +43,28 @@ Konkrete Integrationsdateien vor Änderung mit dem Parallelchat abstimmen. Neue
 Zielmodelle und Umgebungseingaben noch nicht implementiert; aktuelle Visuals
 stellen keine Luftkampf- oder freie Flugfähigkeit dar.
 
+## Nutzerfestlegung: bodennahes Repeaterfeuer
+
+Ein Angriff kann auf eine sichtbare gegnerische Einheit oder ein markiertes
+feindliches Zielgebiet befohlen werden. Einzelne Lasertreffer streuen um das
+Ziel: geringer Pilotenskill bedeutet ein sehr grosses Gefahrengebiet (als
+grobe Spielvorstellung etwa 20 mal 20 Hexfelder); mit steigendem Skill wird es
+kleiner. Bei maximalem Skill bleiben das Zielfeld und seine sechs direkten
+Nachbarn mögliche Trefforte. Auch dort sind Fehlschüsse und Treffer auf andere
+Einheiten möglich. Die Laser sollen als Folge einzelner Schüsse wirken und
+sichtbar sein, nicht als garantierter Flächenschaden. Exakte Verteilung,
+Skalierung und Taktung sind durch Spieltests zu bestimmen; 20 mal 20 ist kein
+festgelegtes exaktes Hexradiusmass.
+
+Der Skill muss aus dem autoritativen Profil des tatsächlich zugewiesenen Piloten
+und dem passenden Schiffstyp stammen (vorhanden: `dropship_piloting`,
+`fighter_piloting`, `freighter_piloting`); keine eigene UI-Wahrheit und kein
+vom Client vorgegebener Skill. Zufall und Treffereignisse sind reproduzierbar,
+treffen nur belegte Felder und werden durch den Bodencombat-Owner angewandt.
+Gebiet, Sicht und Risiko eigener/neutraler Einheiten sind vor dem Befehl
+verständlich darzustellen. Das ist ein Zielvertrag, noch keine implementierte
+oder balancierte Waffenwirkung.
+
 ## Vorbereiteter Flugregel-Baustein
 
 Der bestehende zustandslose Flugresolver kann den vom autoritativen Aufrufer
