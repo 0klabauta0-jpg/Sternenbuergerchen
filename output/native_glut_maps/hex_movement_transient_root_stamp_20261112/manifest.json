@@ -1,0 +1,12 @@
+{
+  "scope": "Only Movement Savepack transient actual Root lifecycle metadata handling",
+  "checks": "9/0",
+  "red_run": "movement_root_stamp-099b2f86c4e2459095b0ce4fede761e7",
+  "green_run": "movement_root_stamp-65e725b0e9744eb9b1751509342e4bfc",
+  "sha256": {
+    "scripts/core/hex_movement_command_runtime.gd": "b824f4ec7f1ddb98e4905d7524db22da24f7173fabe37ffc7000deb223ebfb30",
+    "docs/tasks/HEX_MOVEMENT_TRANSIENT_ROOT_STAMP_2026_11_12.md": "6e0f78c52a293fb8cdfc5048f52aa9825229e1d3ab7090872599ca185b4227f6",
+    "output/native_glut_maps/hex_movement_transient_root_stamp_20261112/check.gd": "3e357ac7fb604cd604be7905dd13c76b8adb67bcb8d39571898b59de8cc4d75f",
+    "output/native_glut_maps/hex_movement_transient_root_stamp_20261112/run.py": "7877dbf7708071a1ff579857674a7decc6d6209156cff16b8503b326a2868ad2"
+  }
+}

@@ -656,9 +656,16 @@ func _save_command_kind(key:String)->String:
 
 func _save_pack_command(command:Dictionary)->Dictionary:
 	if command.size()>80:return _save_reject("movement_save_command_budget")
+	if command.has("_hex_lifecycle"):
+		var stamp:Variant=command._hex_lifecycle
+		if not _save_keys(stamp,["context","lifecycle","actor"]):return _save_reject("movement_save_invalid_lifecycle")
+		for key in ["context","lifecycle","actor"]:
+			if typeof(stamp[key])!=TYPE_INT or stamp[key]<(1 if key=="actor" else 0):return _save_reject("movement_save_invalid_lifecycle")
+		if not _owner().has_method("_is_current_hex_payload") or not _owner().call("_is_current_hex_payload",command):return _save_reject("movement_save_stale_lifecycle")
 	var fields:Array=[];var keys:Array=command.keys();keys.sort()
 	for key in keys:
 		if typeof(key)!=TYPE_STRING:return _save_reject("movement_save_unsupported_command_field")
+		if key=="_hex_lifecycle":continue # Validated above; never persist inprocess identities.
 		var kind:=_save_command_kind(key)
 		if kind.is_empty():return _save_reject("movement_save_unsupported_command_field")
 		var value:Variant=command[key]
