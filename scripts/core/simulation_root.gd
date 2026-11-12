@@ -54,7 +54,7 @@ func request_base_personnel_command(operation: String, payload: Dictionary) -> D
 
 ## Internal base-owner capability. A base projection is deliberately not a
 ## tactical command actor; it may only use this exact configured owner/registry.
-func _validate_base_ground_people(owner:Node,unit_ids:PackedStringArray)->Dictionary:
+func _validate_base_ground_people(owner:Node,unit_ids:PackedStringArray,require_physical:bool=true)->Dictionary:
 	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
 	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
 	if not is_instance_valid(owner) or owner!=_base_personnel_owner or owner.get_parent()!=get_parent():return {"ok":false,"reason":"wrong_base_owner"}
@@ -66,7 +66,7 @@ func _validate_base_ground_people(owner:Node,unit_ids:PackedStringArray)->Dictio
 	var states:Dictionary=owner.get("_states")
 	for id in unit_ids:
 		if id.is_empty() or id!=id.strip_edges() or actors.has(id) or not states.has(id):return {"ok":false,"reason":"invalid_base_person"}
-		if String(states[id].get("status",""))=="aboard" or not bool(owner.call("_unit_is_home",id)):return {"ok":false,"reason":"base_person_not_on_ground"}
+		if require_physical and (String(states[id].get("status",""))=="aboard" or not bool(owner.call("_unit_is_home",id))):return {"ok":false,"reason":"base_person_not_on_ground"}
 		var actor:Node=registry.call("get_unit",id)
 		if not is_instance_valid(actor) or actor.get_parent()!=owner or actor.get_script()!=BASE_PERSONNEL_ACTOR_SCRIPT or owner.call("get_actor",id)!=actor or _known_units_by_id.get(id)!=actor or actor.is_queued_for_deletion():return {"ok":false,"reason":"base_actor_unbound"}
 		if String(actor.call("get_unit_id"))!=id:return {"ok":false,"reason":"base_actor_identity"}
@@ -97,6 +97,73 @@ func request_base_ground_move(owner:Node,id:String,target:Vector2,token:String)-
 	var checked:Dictionary=_validate_base_ground_move(owner,id,target,token)
 	if not checked.ok:return checked
 	return _hex_movement_runtime.stage_move({"type":"move_to_position","source_command_type":"base_personnel","unit_id":id,"target_position":target,"command_token":token,"move_speed_factor":1.0},checked.actors[id])
+
+
+func plan_base_ground_approaches(owner:Node,unit_ids:PackedStringArray,anchor:Vector2i)->Dictionary:
+	var checked:Dictionary=_validate_base_ground_people(owner,unit_ids)
+	if not checked.ok:return checked
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	for id in unit_ids:
+		if not snapshot.units_by_id.has(id):return {"ok":false,"reason":"base_person_not_admitted"}
+		var grid:Vector2i=snapshot.units_by_id[id].grid
+		snapshot.units_by_id.erase(id)
+		if snapshot.occupant_by_grid.get(grid)==id:snapshot.occupant_by_grid.erase(grid)
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor,_hex_ground_registry,snapshot,19)
+	if not plan.ok:return plan
+	for entry in plan.placements:
+		if HEX_GRID_SCRIPT.distance(anchor,entry.grid)>2:return {"ok":false,"reason":"boarding_approach_unavailable"}
+	return plan
+
+
+func release_base_ground_people(owner:Node,unit_ids:PackedStringArray,reason:String)->Dictionary:
+	if unit_ids.is_empty():return {"ok":true}
+	if reason.is_empty():return {"ok":false,"reason":"invalid_base_release"}
+	var checked:Dictionary=_validate_base_ground_people(owner,unit_ids,false)
+	if not checked.ok:return checked
+	for id in unit_ids:
+		_discard_pending_move_commands_for_unit(id)
+		release_hex_ground_unit(id,reason)
+		checked.actors[id].set_meta("dropship_embarked",true)
+	return {"ok":true}
+
+
+func prepare_base_ground_deployment(owner:Node,unit_ids:PackedStringArray,anchor:Vector2i)->Dictionary:
+	var checked:Dictionary=_validate_base_ground_people(owner,unit_ids,false)
+	if not checked.ok:return checked
+	var states:Dictionary=owner.get("_states")
+	for id in unit_ids:
+		if String(states[id].status)!="aboard" or not bool(owner.call("_unit_is_home",id)):return {"ok":false,"reason":"base_person_not_aboard_home"}
+	if _hex_deployment_serial>=HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:return {"ok":false,"reason":"admission_serial_exhausted"}
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor,_hex_ground_registry,snapshot)
+	if not plan.ok:return plan
+	_hex_deployment_serial+=1
+	var admission_id:String="hex_admission:%d:%d"%[_hex_ground_context_revision,_hex_deployment_serial]
+	var placements:Array[Dictionary]=[]
+	placements.assign(plan.placements)
+	var result:Dictionary=_hex_ground_runtime.reserve_admission_group(admission_id,placements,snapshot.revision)
+	if result.ok:_hex_movement_runtime.notify_ground_events([{"event_type":"hex_admission_prepared"}])
+	return result
+
+
+func commit_base_ground_deployment(owner:Node,admission_id:String)->Dictionary:
+	var ticket:Dictionary=get_hex_ground_deployment(admission_id)
+	if not ticket.ok:return ticket
+	var ids:PackedStringArray=ticket.remaining_unit_ids
+	var checked:Dictionary=_validate_base_ground_people(owner,ids,false)
+	if not checked.ok:return checked
+	var states:Dictionary=owner.get("_states")
+	for id in ids:
+		if String(states[id].status)!="aboard" or not bool(owner.call("_unit_is_home",id)):return {"ok":false,"reason":"base_person_not_aboard_home"}
+	var placements:Array[Dictionary]=[]
+	placements.assign(ticket.placements)
+	var committed:Dictionary=_hex_ground_runtime.admit_units(placements,admission_id)
+	if not committed.ok:return committed
+	for id in ids:
+		checked.actors[id].set_meta("dropship_embarked",false)
+		_hex_visual_unit_ids[id]=true
+	_project_hex_ground_actors(0.0)
+	return committed
 
 signal tick_processed(tick: int)
 signal hex_ground_events_committed(events: Array[Dictionary])

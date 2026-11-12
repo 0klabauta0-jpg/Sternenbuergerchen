@@ -40,6 +40,7 @@ CASES = {
     "ship_footprint": ("hex_ground_ship_footprint_verifier.gd", "HEX_GROUND_SHIP_FOOTPRINT_PASS"),
     "ship_producer": ("hex_ground_ship_producer_verifier.gd", "HEX_GROUND_SHIP_PRODUCER_PASS"),
     "base_personnel": ("hex_base_personnel_owner_verifier.gd", "HEX_BASE_PERSONNEL_OWNER_PASS"),
+    "base_boarding": ("hex_base_boarding_verifier.gd", "HEX_BASE_BOARDING_PASS"),
 }
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 ERROR = re.compile(r"^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use", re.M)
@@ -85,7 +86,7 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case in {"movement", "movement_consumers"}:
@@ -96,12 +97,12 @@ def main() -> int:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "backoff":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel"}:
+        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel"}:
+        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding"}:
             pending.append("scripts/tests/hex_ground_lifecycle_verifier.gd")
-        if args.case == "base_personnel":
-            pending.extend([script_path,"scripts/core/base_personnel_runtime.gd"])
+        if args.case in {"base_personnel", "base_boarding"}:
+            pending.extend([script_path,"scripts/tests/hex_base_personnel_owner_verifier.gd","scripts/core/base_personnel_runtime.gd"])
         if args.case == "ship_footprint":
             pending.extend(["scripts/mission/polisa_ground_body_profile.gd","scripts/mission/polisa_station_craft_runtime.gd"])
             if (source / "scripts/mission/hex_ground_ship_footprint.gd").exists():

@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Basisboarding und vollständiger Ausstieg — 12.11.2026
+
+Bestehende Boardinggruppen erhalten unterschiedliche nahe Padhexes; Ground wird
+erst nach Bestätigung des bestehenden Transportowners freigegeben. Aussteigen
+merkt die vollständige Gruppe vor Payloadänderung vor und committet sie atomar.
+Platzmangel lässt Personen an Bord; Ablehnung räumt Slots. Eigenes Pilotmitglied
+und Remote-Rekrutierungsbindung klein geprüft. Boarding53/0, Basisowner63/0,
+Guards/Review grün; QA hex_base_boarding_20261112. Transportowner als bekannte
+Fixture, kein voller Kampagnenlauf. Parent Remote-/Reisegates bleiben erhalten.
+MissionSetup/Respawn, taktisches Member-Retirement und AP7/8 bleiben offen;
+keine Produktionskarte, Main, EXE oder große Probe.
+
 ### AP6 Basisowner-Kern und gemeinsame Hexbewegung — 12.11.2026
 
 Echte Baseactors erhalten einen separaten exact owner-/Registry-/Known-gebundenen

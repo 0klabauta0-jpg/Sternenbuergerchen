@@ -236,6 +236,9 @@ func mark_recruit_remote(unit_id: String, craft_id: String) -> Dictionary:
 	if not _states.has(unit_id) or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty():
 		return _reject("invalid_recruit_craft", "Rekrut oder Aufnahmeschiff fehlt")
 	_cancel(unit_id)
+	if _requires_hex_ground():
+		var released:Dictionary=_sim.release_base_ground_people(self,PackedStringArray([unit_id]),"remote_transport_binding")
+		if not released.ok:return released
 	_states[unit_id].status = "aboard"
 	_states[unit_id].craft_id = craft_id
 	state_changed.emit()
@@ -491,24 +494,36 @@ func _board_team(craft: String, payload: Dictionary) -> Dictionary:
 	if not ids.has(pilot):
 		ids.append(pilot)
 	var previously_aboard: Dictionary = {}
+	var walking:=PackedStringArray()
 	for id in ids:
 		if not _unit_is_home(String(id)): return _reject("unit_away","Person ist nicht an der Basis")
 		if _states[id].status == "aboard":
 			if _states[id].craft_id != craft:
 				return _reject("unit_aboard_other_craft", "Person ist bereits in einem anderen Schiff")
 			previously_aboard[id] = _states[id].duplicate(true)
+		else:walking.append(String(id))
+	var approaches:Dictionary={}
+	if _requires_hex_ground() and not walking.is_empty():
+		var planned:Dictionary=_sim.plan_base_ground_approaches(self,walking,_terrain.world_to_grid(_pad_world(craft)))
+		if not planned.ok:return planned
+		for entry in planned.placements:approaches[entry.unit_id]=_terrain.grid_to_world(entry.grid)
 	# Preflight every actor before mutating any movement intent.
 	for id in ids:
 		if _states[id].status == "aboard" and _states[id].craft_id == craft:
 			continue
 		var target := _pad_world(craft)
-		var path: Array = _navigation_graph.call("find_world_path", get_actor(id).position, target)
-		if (path.is_empty() and get_actor(id).position.distance_to(target) > 0.5) or (not path.is_empty() and Vector2(path[-1]).distance_to(target) > 0.5):
-			return _reject("target_unreachable", "Kein begehbarer Weg zum Schiff")
+		if _requires_hex_ground():
+			target=approaches[String(id)]
+			var checked:Dictionary=_sim.call("_validate_base_ground_move",self,String(id),target,"base_board_preflight")
+			if not checked.ok:return checked
+		else:
+			var path: Array = _navigation_graph.call("find_world_path", get_actor(id).position, target)
+			if (path.is_empty() and get_actor(id).position.distance_to(target) > 0.5) or (not path.is_empty() and Vector2(path[-1]).distance_to(target) > 0.5):
+				return _reject("target_unreachable", "Kein begehbarer Weg zum Schiff")
 	for id in ids:
 		if _states[id].status == "aboard" and _states[id].craft_id == craft:
 			continue
-		var result := _walk(id, _pad_world(craft), {"type":"crew_board","craft_id":craft})
+		var result := _walk(id, approaches.get(String(id),_pad_world(craft)), {"type":"crew_board","craft_id":craft})
 		if not result.ok:
 			_board_groups.erase(craft)
 			return result
@@ -524,6 +539,7 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 		return _reject("craft_mismatch", "Person ist in einem anderen Schiff")
 	if bool(_screen.call("_operations_craft_busy", craft)):
 		return _reject("craft_busy", "Schiff ist unterwegs")
+	if _requires_hex_ground():return _unboard_hex(id,craft,payload)
 	if String(_screen.call("_get_assigned_pilot_id", craft)) != id and not String(_screen.call("_operations_payload_craft_for_team", String(_screen.call("_get_fireteam_id_for_unit", id)))).is_empty():
 		var data: Dictionary = payload.duplicate(true)
 		data.fireteam_id = String(_screen.call("_get_fireteam_id_for_unit", id))
@@ -541,6 +557,49 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 			get_actor(String(member)).position = _pad_world(craft)
 	_board_groups.erase(craft)
 	return {"ok":true}
+
+
+func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
+	if not _sim.is_hex_ground_runtime_active():return _reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit")
+	var team:String=String(_screen.call("_get_fireteam_id_for_unit",id))
+	var pilot:String=String(_screen.call("_get_assigned_pilot_id",craft))
+	var whole:bool=bool(payload.get("whole_fireteam",false)) and not team.is_empty()
+	var members:PackedStringArray=PackedStringArray([id]) if team.is_empty() or (pilot==id and not whole) else _screen.call("_get_member_unit_ids_for_fireteam",team)
+	var leaving:=PackedStringArray()
+	for member in members:
+		if _states.has(member) and String(_states[member].get("craft_id",""))==craft and String(_states[member].status) in ["aboard","boarding"]:leaving.append(member)
+	if not leaving.has(id):return _reject("craft_mismatch","Person ist nicht an Bord dieses Heimschiffs")
+	var aboard:=PackedStringArray()
+	for member in leaving:
+		if not _states.has(member) or String(_states[member].craft_id)!=craft or not _unit_is_home(member):return _reject("craft_mismatch","Person ist nicht an Bord dieses Heimschiffs")
+		var physical:bool=not _sim.get_hex_unit_state(member).is_empty()
+		if String(_states[member].status)=="aboard":
+			if physical:return _reject("inconsistent_base_ground_presence","Bordperson hat noch eine Bodenbelegung")
+			aboard.append(member)
+		elif String(_states[member].status)!="boarding" or not physical:return _reject("inconsistent_base_ground_presence","Person ist nicht am Schiff verfuegbar")
+	var admission_id:=""
+	if not aboard.is_empty():
+		var ticket:Dictionary=_sim.prepare_base_ground_deployment(self,aboard,_terrain.world_to_grid(_pad_world(craft)))
+		if not ticket.ok:return ticket
+		admission_id=String(ticket.admission_id)
+	if (pilot!=id or whole) and not String(_screen.call("_operations_payload_craft_for_team",team)).is_empty():
+		var data:Dictionary=payload.duplicate(true)
+		data.fireteam_id=team
+		data.craft_id=craft
+		var result:Dictionary=_screen.call("_request_operation_from_base","unboard",data)
+		if not result.get("ok",false):
+			if not admission_id.is_empty():_sim.cancel_hex_ground_deployment(admission_id,"base_transport_denied")
+			return result
+	if not admission_id.is_empty():
+		var committed:Dictionary=_sim.commit_base_ground_deployment(self,admission_id)
+		if not committed.ok:
+			_sim.cancel_hex_ground_deployment(admission_id,"base_deployment_changed")
+			return committed
+	for member in leaving:_cancel(member)
+	_board_groups.erase(craft)
+	return {"ok":true}
+
+
 func _on_tick(_tick: int) -> void:
 	_rest_elapsed+=maxf(float(_sim.call("get_last_tick_delta")),0.0)
 	for id in _states:
@@ -567,6 +626,7 @@ func _on_tick(_tick: int) -> void:
 			"terminal":
 				terminal_ready.emit(id, String(action.terminal_id))
 			"pilot_board":
+				if _requires_hex_ground() and not _sim.release_base_ground_people(self,PackedStringArray([String(id)]),"embarked").ok:continue
 				state.status = "aboard"
 				state.craft_id = action.craft_id
 			"crew_board":
@@ -604,6 +664,11 @@ func _on_tick(_tick: int) -> void:
 			group.committed = true
 		var teams := PackedStringArray([String(group.payload.fireteam_id)])
 		if bool(_screen.call("_are_homebase_payload_fireteams_boarded", teams)):
+			if _requires_hex_ground():
+				var physical:=PackedStringArray()
+				for id in group.ids:
+					if not _sim.get_hex_unit_state(String(id)).is_empty():physical.append(String(id))
+				if not _sim.release_base_ground_people(self,physical,"embarked").ok:continue
 			for id in group.ids:
 				_states[id].status = "aboard"
 				_states[id].craft_id = craft
