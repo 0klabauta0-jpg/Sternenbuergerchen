@@ -741,6 +741,146 @@ func _is_configured() -> bool:
 	return is_instance_valid(_registry) and not _map_id.is_empty() and _registry.has_method("get_grid_topology") and String(_registry.call("get_grid_topology"))==TOPOLOGY
 
 
+## AP7 PART ONLY: canonical host save values, never a peer/planning snapshot.
+## Pending deployment and passage promises require a later coordinated schema.
+func export_state() -> Dictionary:
+	var blocked := _save_context_issue()
+	if not blocked.is_empty(): return _reject(blocked)
+	if _units_by_id.size()>64: return _reject("ground_save_unit_budget")
+	var units:Array=[]
+	var centers:Array=[]
+	var ids:Array=_units_by_id.keys();ids.sort()
+	for id in ids:
+		var unit:Dictionary=_units_by_id[id]
+		units.append({"unit_id":id,"grid":[unit.grid.x,unit.grid.y],"facing_dir":unit.facing_dir,"posture_key":unit.posture_key})
+		if _centering_by_unit_id.has(id):
+			var center:Dictionary=_centering_by_unit_id[id]
+			centers.append({"unit_id":id,"offset_axial":[center.offset_axial.x,center.offset_axial.y],"stand_height_logical":center.stand_height_logical,"start_tick":center.start_tick,"duration_ticks":center.duration_ticks})
+	var segments:Array=[]
+	for segment in _all_segments():
+		segments.append({"unit_id":segment.unit_id,"command_id":segment.command_id,"from_grid":[segment.from_grid.x,segment.from_grid.y],"to_grid":[segment.to_grid.x,segment.to_grid.y],"start_tick":segment.start_tick,"duration_ticks":segment.duration_ticks,"handoff_tick":segment.handoff_tick})
+	var state:Dictionary={"schema":"hex_ground_v1","map_id":_map_id,"topology":TOPOLOGY,"tick":_tick,"terrain_revision":_terrain_revision(),"units":units,"active_segments":segments,"centering":centers}
+	var checked:Dictionary=_save_candidate(state)
+	return state if checked.ok else _reject(String(checked.reason))
+
+
+func restore_state(state:Dictionary) -> Dictionary:
+	var blocked := _save_context_issue()
+	if not blocked.is_empty(): return _reject(blocked)
+	var checked:Dictionary=_save_candidate(state)
+	if not checked.ok:return _reject(String(checked.reason))
+	var candidate=checked.candidate
+	# All validation/geometry construction finished. Preserve this owner object and
+	# registry binding; publish no signals and invoke no fallible owner operation.
+	_tick=candidate._tick
+	_units_by_id=candidate._units_by_id
+	_occupant_by_grid=candidate._occupant_by_grid
+	_segments_by_unit_id=candidate._segments_by_unit_id
+	_centering_by_unit_id=candidate._centering_by_unit_id
+	_motion_geometry_by_unit_id=candidate._motion_geometry_by_unit_id
+	_corridor_grants=[]
+	_reservation_terrain_revision=candidate._reservation_terrain_revision
+	_topology_revalidation_pending=false
+	_revision+=1
+	for id in _units_by_id:_units_by_id[id].state_revision=_revision
+	return {"ok":true,"unit_count":_units_by_id.size(),"tick":_tick,"revision":_revision}
+
+
+func _save_context_issue() -> String:
+	if not _is_configured():return "ground_save_not_configured"
+	if _reservation_terrain_revision != _terrain_revision():return "ground_save_terrain_revalidation_pending"
+	if not _admission_by_id.is_empty() or not _admission_slots_by_grid.is_empty() or not _admission_id_by_unit.is_empty():return "ground_save_pending_admission"
+	for grant in _corridor_grants:
+		if PLANNER._hex_grant_active(grant,_units_by_id,_segments_by_unit_id):return "ground_save_corridor_commitments_unsupported"
+	if _topology_revalidation_pending:return "ground_save_topology_pending"
+	return ""
+
+
+func _save_candidate(state:Dictionary) -> Dictionary:
+	if not _save_keys(state,["schema","map_id","topology","tick","terrain_revision","units","active_segments","centering"]) or state.schema!="hex_ground_v1":return _reject("invalid_ground_save_schema")
+	if not _save_id(state.map_id) or state.map_id!=_map_id or state.topology!=TOPOLOGY:return _reject("ground_save_map_mismatch")
+	if not _save_integer(state.tick,0,MAX_TICK) or not _save_integer(state.terrain_revision,0,MAX_TICK) or int(state.terrain_revision)!=_terrain_revision():return _reject("ground_save_terrain_context")
+	if typeof(state.units)!=TYPE_ARRAY or state.units.size()>64 or typeof(state.active_segments)!=TYPE_ARRAY or state.active_segments.size()>256 or typeof(state.centering)!=TYPE_ARRAY or state.centering.size()>64:return _reject("ground_save_budget")
+	var candidate=get_script().new()
+	candidate.configure(_registry,_map_id,int(state.tick))
+	var placements:Array[Dictionary]=[]
+	for value in state.units:
+		if not _save_keys(value,["unit_id","grid","facing_dir","posture_key"]) or not _save_id(value.unit_id) or not _save_id(value.posture_key) or not _save_integer(value.facing_dir,0,5):return _reject("invalid_ground_save_unit")
+		var cell:Dictionary=_save_grid(value.grid)
+		if not cell.ok:return cell
+		placements.append({"unit_id":String(value.unit_id),"grid":cell.grid,"facing_dir":int(value.facing_dir),"posture_key":String(value.posture_key)})
+	var admitted:Dictionary=candidate.admit_units(placements)
+	if not admitted.ok:return _reject("ground_save_"+String(admitted.reason))
+	var schedules:Dictionary={}
+	for id in candidate._units_by_id:schedules[id]=[]
+	for value in state.active_segments:
+		if not _save_keys(value,["unit_id","command_id","from_grid","to_grid","start_tick","duration_ticks","handoff_tick"]) or not _save_id(value.unit_id) or not _save_id(value.command_id) or not schedules.has(value.unit_id):return _reject("invalid_ground_save_segment")
+		for key in ["start_tick","handoff_tick"]:
+			if not _save_integer(value[key],0,MAX_TICK):return _reject("invalid_ground_save_segment_time")
+		if not _save_integer(value.duration_ticks,1,1000000) or int(value.start_tick)>MAX_TICK-int(value.duration_ticks):return _reject("invalid_ground_save_segment_time")
+		var source:Dictionary=_save_grid(value.from_grid);var target:Dictionary=_save_grid(value.to_grid)
+		if not source.ok or not target.ok:return _reject("invalid_ground_save_grid")
+		var segment:Dictionary={"unit_id":String(value.unit_id),"command_id":String(value.command_id),"from_grid":source.grid,"to_grid":target.grid,"start_tick":int(value.start_tick),"duration_ticks":int(value.duration_ticks),"handoff_tick":int(value.handoff_tick)}
+		if not PLANNER._hex_valid_segment(segment):return _reject("invalid_ground_save_segment")
+		schedules[segment.unit_id].append(segment)
+		if schedules[segment.unit_id].size()>4:return _reject("ground_save_horizon")
+	for value in state.centering:
+		if not _save_keys(value,["unit_id","offset_axial","stand_height_logical","start_tick","duration_ticks"]) or not _save_id(value.unit_id) or not candidate._units_by_id.has(value.unit_id) or candidate._centering_by_unit_id.has(value.unit_id):return _reject("invalid_ground_save_centering")
+		if not _save_integer(value.start_tick,0,int(state.tick)) or not _save_integer(value.duration_ticks,1,1000000) or int(value.start_tick)>MAX_TICK-int(value.duration_ticks) or int(value.start_tick)+int(value.duration_ticks)<=int(state.tick):return _reject("invalid_ground_save_centering_time")
+		if typeof(value.offset_axial)!=TYPE_ARRAY or value.offset_axial.size()!=2 or not _save_number(value.offset_axial[0],0.500001) or not _save_number(value.offset_axial[1],0.500001) or not _save_number(value.stand_height_logical,1000000.0):return _reject("invalid_ground_save_centering_offset")
+		var offset:=Vector2(float(value.offset_axial[0]),float(value.offset_axial[1]))
+		if offset.is_zero_approx() or absf(offset.x+offset.y)>0.500001 or not (is_zero_approx(offset.x) or is_zero_approx(offset.y) or is_zero_approx(offset.x+offset.y)):return _reject("invalid_ground_save_centering_offset")
+		candidate._centering_by_unit_id[String(value.unit_id)]={"offset_axial":offset,"stand_height_logical":float(value.stand_height_logical),"start_tick":int(value.start_tick),"duration_ticks":int(value.duration_ticks)}
+	for id in schedules:
+		schedules[id].sort_custom(func(a:Dictionary,b:Dictionary)->bool:return a.start_tick<b.start_tick)
+		if not PLANNER._hex_valid_schedule(schedules[id],candidate._units_by_id[id].grid,candidate._tick,_registry):return _reject("invalid_ground_save_schedule",id)
+		var future_count:=0
+		for segment in schedules[id]:
+			if segment.handoff_tick>candidate._tick:future_count+=1
+			var center:Dictionary=candidate._centering_by_unit_id.get(id,{})
+			if not center.is_empty() and segment.start_tick<int(center.start_tick)+int(center.duration_ticks):return _reject("ground_save_centering_overlap",id)
+			var geometry:Dictionary=candidate._build_motion_geometry(segment)
+			if geometry.is_empty():return _reject("invalid_ground_save_geometry",id)
+			if not candidate._motion_geometry_by_unit_id.has(id):candidate._motion_geometry_by_unit_id[id]={}
+			candidate._motion_geometry_by_unit_id[id][segment.start_tick]=geometry
+		if future_count>3:return _reject("ground_save_horizon",id)
+		if not schedules[id].is_empty():candidate._segments_by_unit_id[id]=schedules[id]
+	var index:Dictionary=PLANNER._hex_index(candidate._units_by_id,schedules,candidate._tick)
+	for id in schedules:
+		var conflict:String=PLANNER._hex_conflict(id,candidate._units_by_id[id].grid,schedules[id],candidate._tick,index)
+		if not conflict.is_empty():return _reject("ground_save_"+conflict,id)
+	# Only the open-area subset is lossless without a canonical passage schema.
+	# Existing policy queries are bounded/cached; incomplete topology fails closed.
+	var policy:Dictionary=candidate._validate_new_corridor_policy(schedules,[])
+	if not policy.ok:return _reject("ground_save_"+String(policy.reason))
+	if _terrain_revision()!=int(state.terrain_revision):return _reject("ground_save_terrain_context")
+	return {"ok":true,"candidate":candidate}
+
+
+func _save_keys(value:Variant,keys:Array) -> bool:
+	if typeof(value)!=TYPE_DICTIONARY or value.size()!=keys.size():return false
+	for key in keys:
+		if not value.has(key):return false
+	return true
+
+
+func _save_id(value:Variant) -> bool:
+	return typeof(value)==TYPE_STRING and not String(value).is_empty() and String(value)==String(value).strip_edges() and String(value).length()<=256
+
+
+func _save_integer(value:Variant,minimum:int,maximum:int) -> bool:
+	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and float(value)==floorf(float(value)) and float(value)>=minimum and float(value)<=maximum
+
+
+func _save_number(value:Variant,maximum:float) -> bool:
+	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and absf(float(value))<=maximum
+
+
+func _save_grid(value:Variant) -> Dictionary:
+	if typeof(value)!=TYPE_ARRAY or value.size()!=2 or not _save_integer(value[0],-2147480000,2147480000) or not _save_integer(value[1],-2147480000,2147480000):return _reject("invalid_ground_save_grid")
+	return {"ok":true,"grid":Vector2i(int(value[0]),int(value[1]))}
+
+
 func _terrain_revision() -> int:
 	if is_instance_valid(_registry) and _registry.has_method("get_revision"):
 		return int(_registry.call("get_revision"))
