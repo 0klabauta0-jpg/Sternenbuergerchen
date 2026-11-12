@@ -1,0 +1,33 @@
+{
+  "baseline": "2bfebc601",
+  "baseline_blob_matches": {
+    "scripts/registries/unit_registry.gd": true,
+    "scripts/meta/meta_layer_flow.gd": true,
+    "scripts/tests/mission_tactical_sandbox_controller.gd": true,
+    "scripts/core/hex_ground_runtime.gd": true,
+    "scripts/core/simulation_root.gd": true
+  },
+  "private_source_sha256_before": {
+    "scripts/registries/unit_registry.gd": "29D95B0509D048C5E295B61C72592949EDDE172B8AEA763C452BAF98F09BBC80",
+    "scripts/meta/meta_layer_flow.gd": "69A849802DA93BDE9E12739FB56E8CF5933DA7656B75485AAE66A88369AA8612",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "B95C9E358ED951D4792930CAD3F46AA76751E0FFDC5C04C0AAEC84F226175689",
+    "scripts/core/hex_ground_runtime.gd": "C37FB487FD7717989C0AC32C9FCFEB1346CC3D4DC58B3B20F9109E051564E47C",
+    "scripts/core/simulation_root.gd": "C2006BCB5C097A75C30D079D037FA643D65B8D88F62058D49663DAB45698FDC1"
+  },
+  "private_source_sha256_after": {
+    "scripts/registries/unit_registry.gd": "29D95B0509D048C5E295B61C72592949EDDE172B8AEA763C452BAF98F09BBC80",
+    "scripts/meta/meta_layer_flow.gd": "69A849802DA93BDE9E12739FB56E8CF5933DA7656B75485AAE66A88369AA8612",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "B95C9E358ED951D4792930CAD3F46AA76751E0FFDC5C04C0AAEC84F226175689",
+    "scripts/core/hex_ground_runtime.gd": "C37FB487FD7717989C0AC32C9FCFEB1346CC3D4DC58B3B20F9109E051564E47C",
+    "scripts/core/simulation_root.gd": "C2006BCB5C097A75C30D079D037FA643D65B8D88F62058D49663DAB45698FDC1"
+  },
+  "private_sources_unchanged": true,
+  "test_sha256": "6B5CA40341945B6807D251B8D10F7E3A7A9D6C140FE1CB60519EE3BC95E26570",
+  "test_unchanged": true,
+  "private_project": "C:\\Users\\bjoer\\AppData\\Local\\Temp\\sb-ap6-visit-48094b44f5fc46a288f6cb1e438daef6",
+  "private_appdata": "C:\\Users\\bjoer\\.codex\\worktrees\\space-combat-plan-20261111\\SternenBuergerchen\\docs\\qa\\polisa_visit_board_retire_20261112\\red\\private-profile",
+  "real_profile_hash_measured": false,
+  "exit_code": 1,
+  "expected_red": true,
+  "note": "RED is intentional until AP6 boarding and retirement owners are fixed; actor and view/card inputs are fixtures."
+}
