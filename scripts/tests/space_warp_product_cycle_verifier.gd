@@ -5,6 +5,8 @@ const EQUIPMENT = preload("res://scripts/core/singleplayer_ship_equipment_state.
 const ADAPTER = preload("res://scripts/meta/singleplayer_runtime_adapter.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
+const COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 class FlowFixture extends Node:
 	var _assigned_aircraft_pilot_by_craft := {"ship":"pilot"}
 	var _last_mission_result := {}
@@ -46,6 +48,31 @@ func _initialize() -> void:
 	var flight = fleet.get_flight_state("ship")
 	var systems: Dictionary = sim.get("_space_combat_state").get_ship_systems("ship")
 	assert(not systems.is_empty() and systems.state.shield == equipment.get_space_combat_stats("ship").shield.capacity)
+	var source_cell: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(flight.get_snapshot().position_plane))
+	var enemy_cell := source_cell + Vector2i(3,0)
+	var enemy = FLIGHT.new(); assert(enemy.configure("space_fixture_enemy", {"coordinate_frame":"local", "space_area_id":flight.get_snapshot().space_area_id, "motion_mode":"tactical", "position_plane":GRID.HEX.axial_to_plane(Vector2(enemy_cell))}).ok)
+	var combat: RefCounted = sim.get("_space_combat_state")
+	assert(combat.admit_actor({"craft_id":"space_fixture_enemy", "faction_id":"enemy", "control_domain":"enemy", "start_hex":enemy_cell, "footprint_hexes":[Vector2i.ZERO]}, enemy, true).ok)
+	assert(combat.bind_ship_systems("space_fixture_enemy", COMPONENTS.effective_stats("buccaneer", COMPONENTS.default_loadout("buccaneer")), 100.0).ok)
+	var wing_owner: RefCounted = sim.get("_space_wing_state")
+	var own_wing: String = wing_owner.get_craft_wing("ship", "singleplayer")
+	var fire := {"request_id":"fixture-shot", "craft_id":"ship", "target_id":"space_fixture_enemy", "weapon_slot":"weapon_1"}
+	assert(not sim.request_singleplayer_space_fire(fire, {}).ok)
+	assert(adapter.request_operation("space_fire", fire).reason == "attack_order_required")
+	var order := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"fixture-order", "expected_revision":wing_owner.get_snapshot().revision, "payload":{"wing_ids":[own_wing], "verb":"attack_target", "target_id":"space_fixture_enemy", "fire_rule":"free"}}
+	assert(wing_owner.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "owned_crafts":["ship"], "craft_pilots":{"ship":"pilot"}, "known_targets":["space_fixture_enemy"], "coordinate_frame":"local", "space_area_id":flight.get_snapshot().space_area_id}).ok)
+	pilot.aboard = false
+	assert(adapter.request_operation("space_fire", fire).reason == "pilot_not_aboard")
+	pilot.aboard = true
+	var shot: Dictionary = adapter.request_operation("space_fire", fire)
+	if not shot.get("ok", false): print("FIRE_DIAGNOSTIC: ", shot)
+	assert(shot.ok and shot.impact.shield_damage == 4.0 and combat.get_ship_systems("space_fixture_enemy").state.shield == 20.0)
+	assert(adapter.request_operation("space_fire", fire).replayed and combat.get_ship_systems("space_fixture_enemy").state.shield == 20.0)
+	var conflict := fire.duplicate(); conflict.weapon_slot = "weapon_2"
+	assert(adapter.request_operation("space_fire", conflict).reason == "request_id_conflict")
+	var rapid := fire.duplicate(); rapid.request_id = "rapid-shot"
+	assert(not adapter.request_operation("space_fire", rapid).ok and combat.get_ship_systems("space_fixture_enemy").state.shield == 20.0)
+	assert(combat.remove_actor("space_fixture_enemy"))
 	# Fixture injury: verify an actual warp transition cannot silently repair it.
 	sim.get("_space_combat_state").get("_ship_systems").ship.state.hull = 77.0
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().motion_mode == "tactical" and flight.get_snapshot().space_area_id == "orbit_approach:planet")

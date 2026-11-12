@@ -221,6 +221,9 @@ func sync_space_wings() -> Dictionary:
 	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "space_fire":
+		if _simulation == null: return _reject("runtime_unavailable", "Weltraumsimulation ist nicht bereit")
+		return _simulation.request_singleplayer_space_fire(payload.duplicate(true), {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if operation == "space_move":
 		if _simulation == null: return _reject("runtime_unavailable", "Weltraumsimulation ist nicht bereit")
 		return _simulation.request_singleplayer_space_move(payload.duplicate(true))

@@ -146,9 +146,13 @@ Waffenenergie, Feuerrate, Replay, Konflikt und Regeneration.
 Der Root bindet beim Eintritt eigener Schiffe in den lokalen Orbit inzwischen
 die Werte des Equipment-Owners und taktet deren Systeme mit dem Raumflug. Die
 eigene Bereichsprojektion enthält den Zustand; bestehender Hüllenschaden bleibt
-bei einem Orbitwechsel erhalten. Der Root leitet noch keine autoritativen
-Feuerbefehle oder Treffer weiter. Kontaktsicht, Waffentakt im Produkt, Tod,
-Save-Lifecycle, Multiplayer und UI sind weiterhin offen. Diese Vorstufe ist
+bei einem Orbitwechsel erhalten. Ein einzelner Feuerbefehl kann über den
+Singleplayer-Adapter den Root erreichen: Der Root prüft Besitz, Rottenauftrag,
+Feindstatus, Kontakt, Geometrie und Waffe und verbucht den Treffer einmalig.
+Der Test verwendet einen künstlich registrierten Gegner und einen direkt im
+Owner gesetzten Auftrag. Produktive Gegner, Bedienung, automatischer Waffentakt,
+Tod, Save-Lifecycle, Multiplayer und Luftunterstützung sind weiterhin offen.
+Diese Vorstufe ist
 kein spielbarer Raum- oder Luftkampf; die Produktsperre bleibt bestehen.
 
 Gebündelte Prüfung auf dem Folgebranch: lokaler Warpzyklus einschließlich

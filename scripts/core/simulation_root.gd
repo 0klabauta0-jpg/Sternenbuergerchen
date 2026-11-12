@@ -193,6 +193,8 @@ func configure_ship_equipment(owner: RefCounted) -> void:
 func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null, travel: RefCounted = null) -> void:
 	if _singleplayer_space_travel_owner != travel:
 		_space_move_receipts.clear()
+		_space_fire_receipts.clear()
+		_space_fire_rng = 1
 	if _singleplayer_campaign_owner != campaign or _singleplayer_supply_owner != supply:
 		_departure_group_receipts.clear()
 		_departure_adapter = null
@@ -403,8 +405,12 @@ const SPACE_AREA_TRANSITION = preload("res://scripts/tactical/space_area_transit
 const SPACE_ORBIT_ENTRY_SEARCH = preload("res://scripts/tactical/space_orbit_entry_search.gd")
 const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
+const SPACE_TARGETING = preload("res://scripts/tactical/space_targeting_resolver.gd")
+const SPACE_WEAPON = preload("res://scripts/tactical/space_weapon_resolver.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
+var _space_fire_receipts: Dictionary = {}
+var _space_fire_rng: int = 1
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 var _fixture_area_tokens: Dictionary = {}
 var _fixture_area_receipts: Dictionary = {}
@@ -656,6 +662,82 @@ func admit_space_actor(definition: Dictionary, authority_context: Dictionary) ->
 
 func get_space_actor(craft_id: String) -> RefCounted:
 	return _space_combat_state.get_actor(craft_id)
+
+func request_singleplayer_space_fire(command: Dictionary, authority_context: Dictionary) -> Dictionary:
+	# Server-only command. Contacts, ownership, order and shot geometry are
+	# rebuilt here from live owners; no client visibility or damage is trusted.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if authority_context.get("runtime_authorized") != true or authority_context.get("actor_id") != "singleplayer": return {"ok":false, "reason":"runtime_authority_required"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	for field in ["request_id", "craft_id", "target_id", "weapon_slot"]:
+		if typeof(command.get(field)) != TYPE_STRING or String(command[field]).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_command"}
+	if command.size() != 4: return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.request_id
+	var signature := JSON.stringify(command, "", true)
+	if _space_fire_receipts.has(id):
+		var prior: Dictionary = _space_fire_receipts[id]
+		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
+		var replay: Dictionary = prior.result.duplicate(true); replay["replayed"] = true; return replay
+	if _space_fire_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var shooter: RefCounted = _space_combat_state.get_actor(command.craft_id)
+	var target: RefCounted = _space_combat_state.get_actor(command.target_id)
+	if shooter == null or target == null or _singleplayer_space_travel_owner == null or _singleplayer_space_travel_owner.get_flight_state(command.craft_id) != shooter: return {"ok":false, "reason":"unknown_actor"}
+	if _base_personnel_owner == null or not _base_personnel_owner.is_pilot_aboard(command.craft_id): return {"ok":false, "reason":"pilot_not_aboard"}
+	var pose: Dictionary = shooter.get_snapshot()
+	var target_pose: Dictionary = target.get_snapshot()
+	if pose.get("motion_mode") != "tactical" or target_pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != target_pose.get("space_area_id"): return {"ok":false, "reason":"different_area"}
+	var wing_id: String = _space_wing_state.get_craft_wing(command.craft_id, "singleplayer")
+	var wing: Dictionary = _space_wing_state.get_snapshot().wings.get(wing_id, {})
+	var order: Dictionary = wing.get("order", {})
+	if order.get("verb") != "attack_target" or order.get("target_id") != command.target_id: return {"ok":false, "reason":"attack_order_required"}
+	var target_metadata: Dictionary = _space_combat_state.get_metadata(command.target_id)
+	if target_metadata.get("control_domain") != "enemy": return {"ok":false, "reason":"not_hostile"}
+	if target_metadata.get("faction_id") == _space_combat_state.get_metadata(command.craft_id).get("faction_id"): return {"ok":false, "reason":"not_hostile"}
+	var source_systems: Dictionary = _space_combat_state.get_ship_systems(command.craft_id)
+	var target_systems: Dictionary = _space_combat_state.get_ship_systems(command.target_id)
+	if source_systems.is_empty() or target_systems.is_empty() or float(target_systems.state.hull) <= 0.0: return {"ok":false, "reason":"systems_unavailable"}
+	var weapon := {}
+	for candidate: Dictionary in source_systems.stats.weapons:
+		if candidate.get("slot_id") == command.weapon_slot: weapon = candidate.duplicate(true); break
+	if weapon.is_empty(): return {"ok":false, "reason":"unknown_weapon"}
+	weapon["accuracy"] = 1.0 # Provisional deterministic start; no client accuracy.
+	var area_id := String(pose.space_area_id)
+	var ids: Array = _space_combat_state.get_area_actor_ids(area_id)
+	if ids.size() > 256: return {"ok":false, "reason":"contact_capacity"}
+	var actors := {}
+	for actor_id: String in ids:
+		var actor: RefCounted = _space_combat_state.get_actor(actor_id)
+		if actor == null: continue
+		var p: Dictionary = actor.get_snapshot()
+		var metadata: Dictionary = _space_combat_state.get_metadata(actor_id)
+		actors[actor_id] = {"id":actor_id, "position":p.position_plane, "heading_rad":p.heading_rad, "faction_id":metadata.faction_id, "area_id":area_id, "sensor_range":12.0}
+	if not actors.has(command.craft_id) or not actors.has(command.target_id): return {"ok":false, "reason":"unknown_actor"}
+	var opaque: Array = []
+	if area_id.begins_with("orbit_approach:"):
+		var layout: Dictionary = ORBIT_LAYOUT.build(area_id.trim_prefix("orbit_approach:").uri_decode())
+		if not layout.get("ok", false) or layout.body_map_id != area_id: return {"ok":false, "reason":"invalid_area"}
+		for cell in layout.body_cells: opaque.append(SPACE_GRID.from_offset(cell))
+	var world := {"actors":actors, "opaque_cells":opaque}
+	var contacts: Dictionary = SPACE_TARGETING.collect_contacts(world, String(actors[command.craft_id].faction_id))
+	if not contacts.get("ok", false): return contacts
+	world["known_targets"] = contacts.contacts
+	world["hostile_factions"] = [target_metadata.faction_id]
+	var start := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))
+	var end := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(target_pose.position_plane))
+	var occupied := {}
+	for cell: Vector2i in SPACE_GRID.HEX.line(start, end):
+		if not SPACE_AREA_GRID.contains(cell, pose): return {"ok":false, "reason":"line_blocked"}
+		var query: Array[Vector2i] = [cell]
+		occupied[cell] = _space_combat_state.query_cells(query, area_id)
+	world["occupants_by_cell"] = occupied
+	var proposal: Dictionary = SPACE_WEAPON.resolve_shot(actors[command.craft_id], actors[command.target_id], weapon, order, world, id, _space_fire_rng)
+	if not proposal.get("ok", false): return proposal
+	var hit: Dictionary = _space_combat_state._commit_ship_impact(proposal.event)
+	if not hit.get("ok", false): return hit
+	_space_fire_rng = int(proposal.rng_state)
+	var result := {"ok":true, "replayed":false, "event":proposal.event.duplicate(true), "impact":hit.duplicate(true)}
+	_space_fire_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	return result
 
 func _bind_owned_space_systems(craft_id: String) -> Dictionary:
 	# The actual equipment owner, not a command payload, supplies combat data.
