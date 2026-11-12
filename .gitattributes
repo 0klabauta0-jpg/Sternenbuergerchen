@@ -178,3 +178,4 @@ docs/qa/hex_mission_wave_retirement_20261112/** -text whitespace=-blank-at-eof,c
 docs/qa/hex_respawn_transaction_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_visit_board_retire_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_visit_board_retire_20261112/*.patch -text -whitespace
+docs/qa/hex_execution_members_20261112/** -text whitespace=-blank-at-eof,cr-at-eol

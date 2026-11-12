@@ -148,6 +148,77 @@ func get_state_snapshot() -> Array:
 	return snapshot
 
 
+## Scope belongs to this execution only, never to the persistent team roster.
+func capture_hex_execution_scope(units:Array,simulation_root)->Dictionary:
+	if not _uses_hex_movement_owner(simulation_root):return {}
+	var scope:Dictionary={"schema":"hex_execution_scope.v1","root":weakref(simulation_root),"members":{}}
+	for unit in units:
+		if not is_instance_valid(unit) or not unit.has_method("get_unit_id"):continue
+		var id:String=String(unit.call("get_unit_id"))
+		var binding:Dictionary=simulation_root.call("get_hex_actor_execution_binding",id)
+		if not binding.is_empty() and int(binding.actor)==unit.get_instance_id():scope.members[id]=binding
+	return scope
+
+
+func filter_hex_execution_scope(scope:Dictionary,units:Array,simulation_root)->Array:
+	if scope.is_empty():return units
+	var owner=scope.get("root")
+	if not owner is WeakRef or owner.get_ref()!=simulation_root or not _uses_hex_movement_owner(simulation_root):
+		scope["members"]={}
+		return []
+	var candidates:Dictionary={}
+	for unit in units:
+		if is_instance_valid(unit) and unit.has_method("get_unit_id"):candidates[String(unit.call("get_unit_id"))]=unit
+	var members:Dictionary=scope.get("members",{})
+	for id in members.keys():
+		var unit=candidates.get(id)
+		var current:Dictionary=simulation_root.call("get_hex_actor_execution_binding",id)
+		if not is_instance_valid(unit) or current.is_empty() or current!=members[id] or int(current.actor)!=unit.get_instance_id() or (unit.has_method("get_vital_state") and String(unit.call("get_vital_state"))!="fit"):
+			members.erase(id)
+	var result:Array=[]
+	for unit in units:
+		if is_instance_valid(unit) and unit.has_method("get_unit_id") and members.has(String(unit.call("get_unit_id"))):result.append(unit)
+	return result
+
+
+func _execution_member_records(state:Dictionary,units:Array,leader,simulation_root)->Array:
+	if not state.has("hex_execution_scope") and _uses_hex_movement_owner(simulation_root):return []
+	var scoped:Array=filter_hex_execution_scope(state.get("hex_execution_scope",{}),units,simulation_root)
+	var records:Array=_build_member_records(scoped,leader)
+	if state.has("hex_execution_scope"):_prune_hex_execution_members(state,_packed_unit_ids(records))
+	return records
+
+
+func _prune_hex_execution_members(state:Dictionary,allowed:PackedStringArray)->void:
+	var had_movers:bool=not PackedStringArray(state.get("current_moving_unit_ids",PackedStringArray())).is_empty()
+	for key in ["current_moving_unit_ids","current_covering_unit_ids","movement_sequence","contact_halt_unit_ids"]:
+		var retained:PackedStringArray=PackedStringArray()
+		for id in PackedStringArray(state.get(key,PackedStringArray())):
+			if allowed.has(id):retained.append(id)
+		if state.has(key):state[key]=retained
+	var groups:Array=[]
+	for group in Array(state.get("group_cycle",[])):
+		var retained:PackedStringArray=PackedStringArray()
+		for id in PackedStringArray(group):
+			if allowed.has(id):retained.append(id)
+		if not retained.is_empty():groups.append(retained)
+	if groups.size()!=Array(state.get("group_cycle",[])).size():state["next_group_index"]=0
+	state["group_cycle"]=groups
+	if had_movers and PackedStringArray(state.get("current_moving_unit_ids",PackedStringArray())).is_empty() and not allowed.is_empty():state["hex_retired_moving_stage"]=true
+	for key in ["current_target_positions","contact_halt_targets"]:
+		var targets:Dictionary=state.get(key,{})
+		for id in targets.keys():
+			if not allowed.has(String(id)):targets.erase(id)
+	if not allowed.has(String(state.get("leader_unit_id",""))):state["leader_unit_id"]="" if allowed.is_empty() else allowed[0]
+	var context:Dictionary=state.get("contact_halt_context",{})
+	for key in ["contact_cover_decisions"]:
+		if not context.has(key):continue
+		var retained:Array=[]
+		for entry in Array(context[key]):
+			if entry is Dictionary and allowed.has(String(entry.get("unit_id",""))):retained.append(entry)
+		context[key]=retained
+
+
 func start_execution(
 	fireteam_id: String,
 	command_type: String,
@@ -163,7 +234,10 @@ func start_execution(
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() or simulation_root == null:
 		return {"started": false}
-	var member_records: Array = _build_member_records(units, leader)
+	var scope:Dictionary=execution_options.get("hex_execution_scope",capture_hex_execution_scope(units,simulation_root))
+	var scoped_units:Array=filter_hex_execution_scope(scope,units,simulation_root)
+	if not scope.is_empty() and not scoped_units.has(leader):leader=null if scoped_units.is_empty() else scoped_units[0]
+	var member_records: Array = _build_member_records(scoped_units, leader)
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"started": false}
@@ -253,6 +327,7 @@ func start_execution(
 		"next_group_index": 0,
 		"simplified_due_to_losses": (not _uses_baseline_direct_team_movement(normalized_command_type)) and effective_style != doctrine_style,
 	}
+	if not scope.is_empty():state["hex_execution_scope"]=scope
 	match effective_style:
 		ADVANCE_STYLE_RUSH:
 			state["movement_sequence"] = _packed_unit_ids(member_records)
@@ -279,7 +354,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 	var state: Dictionary = Dictionary(_execution_by_fireteam.get(normalized_fireteam_id, {}))
 	if state.is_empty():
 		return {}
-	var member_records: Array = _build_member_records(units, leader)
+	var member_records: Array = _execution_member_records(state,units,leader,simulation_root)
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"finished": true, "movement_state": {}}
@@ -754,7 +829,7 @@ func update_tactical_stance(fireteam_id: String, tactical_stance: String, units:
 		return {"updated": false, "reason": "no_active_execution"}
 	if simulation_root == null:
 		return {"updated": false, "reason": "missing_simulation_root", "movement_state": _build_public_state(state)}
-	var member_records: Array = _build_member_records(units, leader)
+	var member_records: Array = _execution_member_records(state,units,leader,simulation_root)
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"updated": false, "reason": "no_members", "finished": true, "movement_state": {}}
@@ -784,7 +859,7 @@ func update_fire_rule(fireteam_id: String, fire_rule: String, units: Array, lead
 		return {"updated": false, "reason": "no_active_execution"}
 	if simulation_root == null:
 		return {"updated": false, "reason": "missing_simulation_root", "movement_state": _build_public_state(state)}
-	var member_records: Array = _build_member_records(units, leader)
+	var member_records: Array = _execution_member_records(state,units,leader,simulation_root)
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"updated": false, "reason": "no_members", "finished": true, "movement_state": {}}
@@ -1335,6 +1410,11 @@ func _resolve_stage_navigation_weights(state: Dictionary) -> Dictionary:
 
 func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root, terrain_registry = null) -> void:
 	if simulation_root == null:
+		return
+	if bool(state.get("hex_retired_moving_stage",false)) and not bool(state.get("contact_halt_active",false)):
+		state.erase("hex_retired_moving_stage")
+		state["stage_index"]=int(state.get("stage_index",0))+1
+		_issue_stage(state,member_records,simulation_root,terrain_registry)
 		return
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
 	if moving_unit_ids.is_empty():

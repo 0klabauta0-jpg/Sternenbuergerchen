@@ -496,3 +496,27 @@ Kleiner Raster-/Rootcase52/0 einschließlich42 Moveprüfungen, alle Guards und
 geschlossener enger Review; QA hex_ship_footprint_raster_20261112. Konkrete
 Schiffsquellen/Cache, Transportconsumer, Landeclaims und regulärer Profilproducer
 sind noch ein Folgeteil. Keine Produktionskarte oder große Leistungsabnahme.
+
+## AP6 Empfänger laufender Aufträge
+
+Ein laufender Hexauftrag bindet seine Empfänger einmal an Rootinstanz, Kontext,
+Actor und dessen Root-Lifecyclegeneration. Groundpräsenz und Registrylookup
+müssen weiterhin übereinstimmen. Boarding, Actorersatz und Readmission nehmen
+keine neue Präsenz in den alten Auftrag auf. Reissue, Stance-/Feuerregelwechsel
+und Kontaktstopp verwenden ausschließlich die verbliebenen Empfänger.
+
+Die Bindung liegt privat in bestehenden Execution-Dictionaries. Automatische
+Wegpunkt-/Area-Fortsetzungen, Unterbrechung und Rückkehr vererben sie; ein
+Scope mit null verbliebenen Mitgliedern ist terminal. Neue explizite Befehle
+dürfen neue Präsenzen aufnehmen. Truppübergreifende Crew eines bestehenden
+Schiffsrückkehrauftrags wird einmal als return_crew innerhalb derselben Hülle
+gebunden. Kein erneuter Vollroster-Capture beim automatischen Wiederaufnehmen.
+Solche Instanzbindungen gehören weder in Planmetadata noch in portable
+Snapshots. Sie ersetzen weder Registry noch Personal-/Visitmitgliedschaft.
+
+Retirement entfernt nur eigene Ziele und Gruppenmitglieder. Leere Vorrückgruppen
+entfallen; verbleibende Deckungsmitglieder können weiter vorrücken. Vollständiges
+Execution-Clear räumt FMC und betroffene Koordination auf; ein verbleibender
+Coverpartner setzt sein ursprüngliches Ziel mit seinem ursprünglichen Scope fort.
+Ungekennzeichnete Legacybewegung bleibt erhalten; ein alter Legacyauftrag darf
+beim Wechsel in einen Hexkontext keine neuen Empfängerbindungen erwerben.
