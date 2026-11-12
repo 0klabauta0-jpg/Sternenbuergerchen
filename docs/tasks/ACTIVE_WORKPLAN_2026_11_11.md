@@ -58,7 +58,8 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Reiner V2-Fullscope-Publishfilter0134f53ae ist reviewed (20/0), noch unverdrahtet.
   Root-Lifecyclecommandstempel werden im portablen Movementexport nur nach
   echter Rootvalidierung ausgelassen (2eab1f01b,9/0). Session-/Lobbylaufzeitkontext
-  entsteht separat; Rootbinder, Hostpublisher und Receiver folgen bei Tabletop.
+  ist reviewed und vorbereitet (30/0 nach echtem Snapshotreject-RED24/3);
+  Rootbinder, Hostpublisher und Receiver folgen bei Tabletop.
   Er benoetigt originale Hostdaten mit Kopplungsreferenzen; nach verlustbehafteter
   V1-Normalisierung ist keine sichere Positionszuordnung mehr moeglich.
   Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-

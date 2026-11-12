@@ -15,6 +15,7 @@ const DEFAULT_PORT: int = 7777
 const DEFAULT_ADDRESS: String = "127.0.0.1"
 const DEFAULT_MAX_PLAYERS: int = 2
 const HOST_PEER_ID: int = 1
+const RUNTIME_CONTEXT_SCHEMA: String = "multiplayer.runtime_context.v1"
 
 const STATE_IDLE: String = "idle"
 const STATE_HOSTING: String = "hosting"
@@ -62,6 +63,7 @@ var _last_status_text: String = "Ready. Host or join a local test session."
 var _last_error: String = ""
 var _mission_started: bool = false
 var _last_start_assignments: Dictionary = {}
+var _multiplayer_runtime_context: Dictionary = {}
 var _pending_rejoin_identities_by_token: Dictionary = {}
 var _reconnect_tokens_by_peer_id: Dictionary = {}
 var _local_reconnect_token: String = ""
@@ -168,18 +170,23 @@ func request_start_mission() -> bool:
 	if not can_start_mission():
 		return false
 
+	var runtime_context: Dictionary = _create_multiplayer_runtime_context()
+	if not runtime_context.is_empty() and not _is_valid_runtime_context(runtime_context):
+		return false
+	_multiplayer_runtime_context = runtime_context
 	_mission_started = true
 	_connection_state = STATE_MISSION
 	_last_start_assignments = build_session_assignments()
 	_last_status_text = "Mission starting..."
 	_emit_snapshot()
-	_receive_start_mission.rpc(_last_start_assignments)
+	_send_start_assignments()
 	mission_start_requested.emit(_last_start_assignments.duplicate(true))
 	return true
 
 
 func complete_mission() -> void:
 	_mission_started = false
+	_multiplayer_runtime_context.clear()
 	if _connection_state == STATE_MISSION:
 		_connection_state = STATE_HOSTING if _is_authority_session() else STATE_JOINED
 	for peer_id in _peers_by_id.keys():
@@ -238,7 +245,7 @@ func get_session_snapshot() -> Dictionary:
 
 
 func build_session_assignments() -> Dictionary:
-	return {
+	var assignments: Dictionary = {
 		"peer_teams": get_peer_team_assignments(),
 		"peer_roles": get_peer_role_assignments(),
 		"peer_fireteams": get_peer_fireteam_assignments(),
@@ -248,6 +255,64 @@ func build_session_assignments() -> Dictionary:
 		"selected_map_path": _selected_map_path,
 		"lobby_setup": get_lobby_setup_snapshot(),
 	}
+	if not _multiplayer_runtime_context.is_empty():
+		assignments["multiplayer_runtime_context"] = get_multiplayer_runtime_context()
+	return assignments
+
+
+func get_multiplayer_runtime_context() -> Dictionary:
+	return _multiplayer_runtime_context.duplicate(true)
+
+
+func _create_multiplayer_runtime_context() -> Dictionary:
+	var verification: Dictionary = MAP_MANIFEST_SCRIPT.call("verify_manifest", _host_map_manifest)
+	if not bool(verification.get("valid", false)):
+		return {} # Legacy starts without a manifest do not acquire a fabricated identity.
+	var manifest: Dictionary = verification["manifest"]
+	var context: Dictionary = {
+		"schema": RUNTIME_CONTEXT_SCHEMA,
+		"runtime_token": Crypto.new().generate_random_bytes(16).hex_encode(),
+		"map_id": manifest["map_id"],
+		"map_hash": manifest["map_hash"],
+	}
+	if not String(manifest.get("scenario_hash", "")).is_empty():
+		context["scenario_hash"] = manifest["scenario_hash"]
+	return context
+
+
+func _is_valid_runtime_context(value: Variant) -> bool:
+	return _is_valid_runtime_context_for_manifest(value, _host_map_manifest)
+
+
+func _is_valid_runtime_context_for_manifest(value: Variant, raw_manifest: Dictionary) -> bool:
+	if typeof(value) != TYPE_DICTIONARY:
+		return false
+	var context: Dictionary = value
+	for key in context:
+		if key not in ["schema", "runtime_token", "map_id", "map_hash", "scenario_hash"] or typeof(context[key]) != TYPE_STRING:
+			return false
+	if context.get("schema") != RUNTIME_CONTEXT_SCHEMA:
+		return false
+	var token: String = context.get("runtime_token", "")
+	if token.length() != 32 or not token.is_valid_hex_number(false):
+		return false
+	var verification: Dictionary = MAP_MANIFEST_SCRIPT.call("verify_manifest", raw_manifest)
+	if not bool(verification.get("valid", false)):
+		return false
+	var manifest: Dictionary = verification["manifest"]
+	if context.get("map_id") != manifest["map_id"] or context.get("map_hash") != manifest["map_hash"]:
+		return false
+	var scenario_hash: String = String(manifest.get("scenario_hash", ""))
+	if scenario_hash.is_empty():
+		return not context.has("scenario_hash")
+	return scenario_hash.length() == 64 and scenario_hash.is_valid_hex_number(false) and context.get("scenario_hash") == scenario_hash
+
+
+func _send_start_assignments(peer_id: int = 0) -> void:
+	if peer_id > 0:
+		_receive_start_mission.rpc_id(peer_id, _last_start_assignments)
+	else:
+		_receive_start_mission.rpc(_last_start_assignments)
 
 
 func get_team_readability_snapshot() -> Dictionary:
@@ -499,7 +564,7 @@ func request_update_player_setup(setup: Dictionary) -> void:
 	_emit_snapshot()
 	_broadcast_snapshot()
 	if rebound:
-		_receive_start_mission.rpc_id(peer_id, _last_start_assignments)
+		_send_start_assignments(peer_id)
 
 
 @rpc("any_peer", "reliable")
@@ -523,7 +588,8 @@ func _receive_session_snapshot(snapshot: Dictionary) -> void:
 	if _is_authority_session():
 		return
 
-	_apply_authority_snapshot(snapshot)
+	if not _apply_authority_snapshot(snapshot):
+		return
 	if _mission_started:
 		mission_assignments_changed.emit(Dictionary(snapshot.get("assignments", {})).duplicate(true))
 	_emit_snapshot()
@@ -535,7 +601,10 @@ func _receive_start_mission(assignments: Dictionary) -> void:
 		return
 	if not bool(_map_transfer_state.get("can_start_client", false)):
 		return
+	if assignments.has("multiplayer_runtime_context") and not _is_valid_runtime_context(assignments["multiplayer_runtime_context"]):
+		return
 
+	_multiplayer_runtime_context = Dictionary(assignments.get("multiplayer_runtime_context", {})).duplicate(true)
 	_mission_started = true
 	_connection_state = STATE_MISSION
 	_last_start_assignments = assignments.duplicate(true)
@@ -652,6 +721,7 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 	_last_status_text = "Ready. Host or join a local test session."
 	_mission_started = false
 	_last_start_assignments.clear()
+	_multiplayer_runtime_context.clear()
 	_pending_rejoin_identities_by_token.clear()
 	_reconnect_tokens_by_peer_id.clear()
 	_host_map_manifest.clear()
@@ -862,11 +932,21 @@ func _broadcast_snapshot() -> void:
 	_receive_session_snapshot.rpc(get_session_snapshot())
 
 
-func _apply_authority_snapshot(snapshot: Dictionary) -> void:
+func _apply_authority_snapshot(snapshot: Dictionary) -> bool:
+	if typeof(snapshot.get("assignments", {})) != TYPE_DICTIONARY:
+		return false
+	var assignments: Dictionary = snapshot.get("assignments", {})
+	# Validate against the proposed manifest before the existing offer/consent path writes it.
+	var proposed_manifest: Variant = snapshot.get("map_manifest", _host_map_manifest)
+	if assignments.has("multiplayer_runtime_context"):
+		if typeof(proposed_manifest) != TYPE_DICTIONARY or not _is_valid_runtime_context_for_manifest(assignments["multiplayer_runtime_context"], proposed_manifest):
+			return false
 	if snapshot.has("map_manifest"):
 		_apply_incoming_host_map_manifest(snapshot["map_manifest"])
 	_last_status_text = String(snapshot.get("status_text", _last_status_text))
 	_mission_started = bool(snapshot.get("mission_started", _mission_started)) and bool(_map_transfer_state.get("can_start_client", false))
+	if not _mission_started or assignments.get("multiplayer_runtime_context", {}) != _multiplayer_runtime_context:
+		_multiplayer_runtime_context.clear()
 	var roster_snapshot: Dictionary = Dictionary(snapshot.get("roster", {}))
 	if roster_snapshot.has("roster_mode"):
 		roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_snapshot.get("roster_mode", roster_mode)))
@@ -884,6 +964,7 @@ func _apply_authority_snapshot(snapshot: Dictionary) -> void:
 		peer_data["fireteam_ids"] = _normalize_fireteam_ids(peer_data.get("fireteam_ids", PackedStringArray()))
 		peer_data = _apply_peer_roster_identity(peer_id, peer_data, bool(peer_data.get("is_host", peer_id == HOST_PEER_ID)))
 		_peers_by_id[peer_id] = peer_data
+	return true
 
 
 func _apply_incoming_host_map_manifest(value: Variant) -> void:

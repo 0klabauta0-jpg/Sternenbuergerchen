@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ca7b115a029c46dd8da48d55cfa9c464
+PASS getter and assignments never mint before start
+PASS actual successful host start
+PASS exact identity DTO without paths
+PASS actual start assignment carries context
+PASS getter detached
+PASS assignment detached
+PASS actual reliable receive adopts same context
+PASS rejoin assignment and pure reads preserve token
+PASS actual active receive rejects atomically including signals, manifest, token and assignments; changed_manifest=same
+PASS actual active receive rejects atomically including signals, manifest, token and assignments; changed_manifest=different
+PASS actual active receive rejects atomically including signals, manifest, token and assignments; changed_manifest=mismatch
+PASS actual active receive rejects atomically including signals, manifest, token and assignments; changed_manifest=empty_completion
+PASS actual active valid receive still publishes accepted assignment
+PASS different valid snapshot token forwards assignments but never binds runtime
+PASS only reliable start accepts the new runtime context
+PASS reject invalid present schema before activation
+PASS reject invalid present map_hash before activation
+PASS reject invalid present scenario_hash before activation
+PASS reject invalid present runtime_token before activation
+PASS reject unknown context fields
+PASS snapshot cannot preactivate invalid present context
+PASS completion retires runtime
+PASS next actual start new token
+PASS reset clears context
+PASS missing context preserves legacy receive
+PASS present context without accepted manifest rejected
+PASS explicit empty or malformed context rejects
+PASS explicit empty or malformed context rejects
+PASS explicit empty or malformed context rejects
+PASS no manifest legacy host still starts without invented identity
+MULTIPLAYER_RUNTIME_CONTEXT passed=30 failed=0

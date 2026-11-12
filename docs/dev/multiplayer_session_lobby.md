@@ -43,3 +43,24 @@ Der Lobby-Adapter uebergibt diese Daten beim Missionsstart an `SimulationRoot`:
 - Lobby-Screen erzeugt den Session-Adapter
 
 Der echte Host/Join-LAN-Test bleibt manuell, weil zwei Godot-Instanzen und ein freier UDP-Port benoetigt werden.
+
+## Vorbereiteter Laufzeitkontext (AP7, 12.11.2026)
+
+Die Session reicht bei vorhandenem akzeptiertem Mapmanifest im zuverlaessigen
+Startassignment `multiplayer_runtime_context` weiter. Schema ist
+`multiplayer.runtime_context.v1`, mit `runtime_token`, `map_id`, `map_hash` und
+optionalem `scenario_hash`. Lokale Cachepfade sind keine Runtimeidentitaet.
+Ein erfolgreicher neuer Hoststart erzeugt den Token; Rejoin behaelt ihn, Ende
+und Reset loeschen ihn. Session und Lobby liefern nur kopierende Getter.
+
+Ein explizit vorhandener ungueltiger Kontext wird vor Aktivierung oder
+Manifestmutation abgewiesen. Abgewiesene Snapshots erzeugen auch bei bereits
+aktiver Mission keine Assignment-/Snapshotsignale. Fehlender Kontext bleibt
+Legacy; ohne gueltiges Manifest wird keine Identity erfunden. Die bestehende
+Datei-/Downloadpruefung bleibt zustaendig fuer den Inhaltsnachweis.
+
+Dieser Baustein ruft noch keinen Rootbinder auf. Ein gepruefter Snapshot kann
+einen neuen Assignmenttoken tragen; der Sessiongetter bleibt bis zum reliable
+Start leer. Der folgende Rootanschluss muss Startbindung und laufende
+Assignmentaenderung unterscheiden. Sender-/Receiverbindung und echte Peers
+sind noch offen; siehe Task MULTIPLAYER_RUNTIME_CONTEXT_2026_11_12.md.

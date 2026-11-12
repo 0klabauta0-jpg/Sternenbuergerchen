@@ -771,6 +771,12 @@ func get_session_snapshot() -> Dictionary:
 	return Dictionary(_session.call("get_session_snapshot")).duplicate(true)
 
 
+func get_multiplayer_runtime_context() -> Dictionary:
+	if not is_instance_valid(_session) or not _session.has_method("get_multiplayer_runtime_context"):
+		return {}
+	return Dictionary(_session.call("get_multiplayer_runtime_context")).duplicate(true)
+
+
 func get_lobby_ui_snapshot() -> Dictionary:
 	var session_snapshot: Dictionary = get_session_snapshot()
 	return {

@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "import_exit": 0,
+  "commands": [
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_runtime_context_checks\\ae80a68f71ba4aa3a1dcc52f52197fb9",
+      "--script",
+      "res://scripts/multiplayer/multiplayer_session.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_runtime_context_checks\\ae80a68f71ba4aa3a1dcc52f52197fb9",
+      "--script",
+      "res://scripts/tests/multiplayer_runtime_context_verifier.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_runtime_context_checks\\ae80a68f71ba4aa3a1dcc52f52197fb9",
+      "--script",
+      "res://scripts/tests/multiplayer_runtime_context_verifier.gd"
+    ]
+  ],
+  "exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\multiplayer_runtime_context_checks\\ae80a68f71ba4aa3a1dcc52f52197fb9",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ca7b115a029c46dd8da48d55cfa9c464",
+  "source_sha256": {
+    "scripts/core/weapon_data.gd": "a16f41e1c8b5556ea05eb7f7321653bebd0c49efdbf7902f8a5805633e418240",
+    "scripts/mission/mission_interaction_point_binding.gd": "e18782b7ddcd7e81bd8b969e3099aa07569028d35192f4a61c9b367cb37756f2",
+    "scripts/mission/mission_multiplayer_team_ownership_contract.gd": "6e08b6ba96900696ab16188112b7f799d3bf5c39b4689cc3c994591824a0a720",
+    "scripts/mission/mission_scenario_vertical_slice_contract.gd": "737f5a240eee3c4b7297361bd5a655d2aaea9121c10abdf19271783201c99529",
+    "scripts/multiplayer/multiplayer_map_manifest.gd": "e40ee1230a585d52f470622eb3909c0fbf331efbdd1c4d9a1baea91b5b24818f",
+    "scripts/multiplayer/multiplayer_roster_contract.gd": "d96118e1f4b00fbccd054a2375c8084c22960d9b0ecae9c69f6089a2d01b5914",
+    "scripts/multiplayer/multiplayer_session.gd": "a22560727d0b32d61af3b8aa3995e06e277e3c011c496ed4c5bcd21bfcc01b9a",
+    "scripts/tactical/enemy_team_tactics_profile.gd": "285b3fdd5417cafa82293213b7713e8ffd15ce14e976a68d73639a975495526b",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_map_data.gd": "4129979fcf9746be0fd02c7fa9239560810760f3368e1af4e456a6d7b952879e",
+    "scripts/terrain/terrain_marker_catalog.gd": "489fa41494980dab339ee4a84b8fed9f10226902ea1c56a2efc505a23fd87fb2",
+    "scripts/terrain/terrain_texture_catalog.gd": "9c33921d0390c62e45aa7e87da216d88370417123cb33fcf44ddf8c95772fb7f",
+    "scripts/terrain/terrain_tile_catalog.gd": "58374699895c000c3280f00424ac114e407df6834b0e8257a277b5d1da50a0c5",
+    "scripts/terrain/terrain_tile_data.gd": "7a01c1c15b33192643e8bb42285a03faaa6d8bc30d07466ccb46bd6696901bff",
+    "scripts/tests/multiplayer_runtime_context_verifier.gd": "8841146de443a520d4e13a8f885649676e8c2a908d9cd1d5694ef0c6f8d7d1e4",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  }
+}
