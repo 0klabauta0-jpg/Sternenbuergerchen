@@ -4,6 +4,7 @@ extends RefCounted
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const ORBIT_CATALOG = preload("res://scripts/mission/orbit_destination_catalog.gd")
+const ORBIT_SURFACE_LOCATIONS = preload("res://scripts/mission/orbit_surface_locations.gd")
 const STATION_DOCK = preload("res://scripts/mission/polisa_station_dock_layout.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
@@ -495,7 +496,7 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	var body_id := String(orbit_definition.get("body_id", ""))
 	var body: Dictionary = Dictionary(_definition.get("bodies", {})).get(body_id, {})
 	if body.is_empty() or String(body.get("id", "")) != body_id: return _reject("unbound_target_body", "Zielkoerper ist nicht kanonisch gebunden")
-	if operation == "begin_approach" and (String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != next_location):
+	if operation == "begin_approach" and not ORBIT_SURFACE_LOCATIONS.contains(body, next_location):
 		return _reject("body_surface_mismatch", "Koerper weist diesen Ort nicht als Oberflaeche aus")
 	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
 	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
