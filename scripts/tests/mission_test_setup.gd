@@ -822,6 +822,8 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
 	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
 		return
+	if enemy_wave_controller.has_method("set_hex_ground_required"):
+		enemy_wave_controller.call("set_hex_ground_required",_hex_setup_required)
 	_apply_scenario_wave_config(enemy_wave_controller)
 	if enemy_wave_controller.has_method("set_patrol_paths"):
 		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())

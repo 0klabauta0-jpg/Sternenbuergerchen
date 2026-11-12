@@ -24,6 +24,16 @@ var _time_until_next_wave: float = 0.0
 var _status_label: Label = null
 var _all_waves_complete_emitted: bool = false
 var _overlay_visible: bool = true
+var _hex_required_hint:=false
+var _hex_wave_required:=false
+var _hex_wave_root_id:=0
+var _hex_wave_context:=-1
+var _hex_wave_slots:Array[Dictionary]=[]
+var _hex_wave_generation:=0
+var _hex_wave_last_stamp:=""
+var _hex_wave_attempts:=0
+var _hex_wave_error:Dictionary={}
+var _hex_publishing_wave:=false
 
 
 func _ready() -> void:
@@ -31,12 +41,24 @@ func _ready() -> void:
 
 
 func initialize_enemy_units(enemy_units: Array) -> void:
+	_hex_wave_generation+=1
+	var generation:int=_hex_wave_generation
+	var lifetime:WeakRef=weakref(self)
+	_hex_publishing_wave=false
+	_hex_wave_slots.clear()
+	_hex_wave_last_stamp=""
+	_hex_wave_attempts=0
+	_hex_wave_error.clear()
+	var simulation:Node=_get_simulation_root()
+	_hex_wave_required=_hex_required_hint or (simulation!=null and simulation.has_method("is_hex_ground_runtime_required") and simulation.is_hex_ground_runtime_required())
+	_hex_wave_root_id=simulation.get_instance_id() if _hex_wave_required and simulation!=null else 0
+	_hex_wave_context=simulation.get_hex_ground_context_revision() if _hex_wave_required and simulation!=null else -1
 	_enemy_units.clear()
 	_spawn_positions_by_unit_id.clear()
 	_current_wave_number = 0
 	_all_waves_complete_emitted = false
 	for enemy_unit in enemy_units:
-		if enemy_unit == null or not enemy_unit.has_method("get_unit_id"):
+		if not is_instance_valid(enemy_unit) or not enemy_unit.has_method("get_unit_id"):
 			continue
 
 		_enemy_units.append(enemy_unit)
@@ -46,6 +68,13 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 
 		_apply_enemy_tactics(enemy_unit)
 		_deactivate_enemy_unit(enemy_unit)
+		var owner=lifetime.get_ref()
+		if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return
+		if _hex_wave_required and is_instance_valid(simulation) and simulation.is_hex_ground_runtime_active() and enemy_unit is Node2D:
+			if not Vector2(_spawn_positions_by_unit_id[unit_id]).is_finite():
+				_hex_wave_error={"ok":false,"reason":"invalid_wave_spawn_position"}
+				return
+			_hex_wave_slots.append({"unit_id":unit_id,"grid":simulation.get_hex_ground_terrain_registry().world_to_grid(_spawn_positions_by_unit_id[unit_id]),"identity":simulation.call("_hex_payload_identity",unit_id)})
 		if _patrol_paths_by_unit_id.has(unit_id) and enemy_unit.has_method("set_patrol_path"):
 			enemy_unit.call("set_patrol_path", Array(_patrol_paths_by_unit_id.get(unit_id, [])).duplicate(true))
 
@@ -55,9 +84,7 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 		return
 
 	if _time_until_next_wave <= 0.0 and _should_process_locally():
-		_start_next_wave()
-		if not are_all_waves_started():
-			_time_until_next_wave = maxf(wave_delay_seconds, 0.0)
+		if not _attempt_scheduled_wave():return
 
 	_refresh_status_label()
 
@@ -133,17 +160,27 @@ func _process(delta: float) -> void:
 		_refresh_status_label()
 		return
 
-	_start_next_wave()
-	if not are_all_waves_started():
-		_time_until_next_wave = maxf(wave_delay_seconds, 0.0)
+	if not _attempt_scheduled_wave():return
 
 	_refresh_status_label()
 
 
-func _start_next_wave() -> void:
+func _attempt_scheduled_wave()->bool:
+	var generation:int=_hex_wave_generation
+	var owner_ref:WeakRef=weakref(self)
+	var started:bool=_start_next_wave()
+	var owner=owner_ref.get_ref()
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return false
+	if not owner.are_all_waves_started():owner._time_until_next_wave=maxf(owner.wave_delay_seconds,0.0) if started else 0.1
+	return true
+
+
+func _start_next_wave() -> bool:
 	var total_wave_count: int = get_total_wave_count()
-	if total_wave_count <= 0 or _current_wave_number >= total_wave_count:
-		return
+	if total_wave_count <= 0 or _current_wave_number >= total_wave_count or _hex_publishing_wave:
+		return false
+	var simulation:Node=_get_simulation_root()
+	if _hex_wave_required or (simulation!=null and simulation.has_method("is_hex_ground_runtime_required") and simulation.is_hex_ground_runtime_required()):return _start_hex_wave(simulation)
 
 	_current_wave_number += 1
 	var wave_start_index: int = (_current_wave_number - 1) * max(units_per_wave, 1)
@@ -156,6 +193,73 @@ func _start_next_wave() -> void:
 	if are_all_waves_started() and not _all_waves_complete_emitted:
 		_all_waves_complete_emitted = true
 		all_waves_complete.emit()
+	return true
+
+
+func set_hex_ground_required(required:bool)->void:
+	_hex_required_hint=required
+
+
+func get_hex_wave_status()->Dictionary:
+	return {"required":_hex_wave_required,"attempts":_hex_wave_attempts,"error":_hex_wave_error.duplicate(true)}
+
+
+func _start_hex_wave(simulation:Node)->bool:
+	if not is_instance_valid(simulation) or simulation.get_instance_id()!=_hex_wave_root_id or simulation.get_hex_ground_context_revision()!=_hex_wave_context:
+		_hex_wave_error={"ok":false,"reason":"stale_hex_wave_context"}
+		return false
+	if not simulation.is_hex_ground_runtime_active() or simulation.call("_should_skip_local_tick_processing"):return false
+	var start:int=_current_wave_number*maxi(units_per_wave,1)
+	var finish:int=mini(start+maxi(units_per_wave,1),_enemy_units.size())
+	if _hex_wave_slots.size()!=_enemy_units.size():return false
+	var candidates:Array[Dictionary]=[]
+	var ids:=PackedStringArray()
+	for index in range(start,finish):
+		var slot:Dictionary=_hex_wave_slots[index]
+		var actor=_enemy_units[index]
+		if not is_instance_valid(actor) or actor!=simulation.call("_resolve_known_unit_for_contract",slot.unit_id) or not simulation.call("_is_current_hex_payload",{"unit_id":slot.unit_id,"_hex_lifecycle":slot.identity}):
+			_hex_wave_error={"ok":false,"reason":"stale_hex_wave_actor"}
+			return false
+		candidates.append(slot)
+		ids.append(slot.unit_id)
+	var excluded:Array[Vector2i]=[]
+	var ship_signature:String=""
+	var producer:Node=get_node_or_null("../TacticalController")
+	if producer!=null and producer.has_method("get_ground_ship_blocked_cells"):
+		var mask:Dictionary=producer.call("get_ground_ship_blocked_cells")
+		if not mask.get("ok",false) or int(mask.get("registry_id",0))!=simulation.get_hex_ground_terrain_registry().get_instance_id():
+			_hex_wave_error={"ok":false,"reason":"wave_ship_footprint_unavailable"}
+			return false
+		excluded.assign(mask.blocked_cells)
+		ship_signature=String(mask.get("source_signature",""))
+	var stamp:String=str([_current_wave_number,simulation.get_hex_ground_revision(),simulation.get_hex_ground_terrain_registry().get_revision(),ship_signature])
+	if stamp==_hex_wave_last_stamp:return false
+	_hex_wave_last_stamp=stamp
+	_hex_wave_attempts+=1
+	var result:Dictionary=simulation.admit_hex_ground_setup_actors(candidates,true,false,excluded)
+	_hex_wave_error={} if result.ok else result.duplicate(true)
+	if not result.ok:return false
+	_current_wave_number+=1
+	_hex_publishing_wave=true
+	var generation:int=_hex_wave_generation
+	var number:int=_current_wave_number
+	var owner_ref:WeakRef=weakref(self)
+	var simulation_ref:WeakRef=weakref(simulation)
+	simulation.call("_publish_hex_setup_actors",ids)
+	var owner=owner_ref.get_ref()
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return true
+	var bound_simulation=simulation_ref.get_ref()
+	if not is_instance_valid(bound_simulation) or bound_simulation.is_queued_for_deletion() or owner._get_simulation_root()!=bound_simulation or bound_simulation.get_hex_ground_context_revision()!=owner._hex_wave_context:return true
+	owner.wave_started.emit(number)
+	owner=owner_ref.get_ref()
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return true
+	bound_simulation=simulation_ref.get_ref()
+	if not is_instance_valid(bound_simulation) or bound_simulation.is_queued_for_deletion() or owner._get_simulation_root()!=bound_simulation or bound_simulation.get_hex_ground_context_revision()!=owner._hex_wave_context:return true
+	owner._hex_publishing_wave=false
+	if owner.are_all_waves_started() and not owner._all_waves_complete_emitted:
+		owner._all_waves_complete_emitted=true
+		owner.all_waves_complete.emit()
+	return true
 
 
 func _activate_enemy_unit(enemy_unit) -> void:
@@ -190,8 +294,11 @@ func _deactivate_enemy_unit(enemy_unit) -> void:
 		return
 
 	var unit_id: String = String(enemy_unit.call("get_unit_id"))
+	var simulation:Node=_get_simulation_root()
+	if simulation!=null and simulation.has_method("is_hex_ground_runtime_active") and simulation.is_hex_ground_runtime_active() and simulation.call("_resolve_known_unit_for_contract",unit_id)==enemy_unit:
+		simulation.release_hex_ground_unit(unit_id,"wave_staged")
 	var unit_registry = _get_unit_registry()
-	if unit_registry != null and unit_registry.has_method("unregister_unit"):
+	if unit_registry != null and unit_registry.has_method("unregister_unit") and unit_registry.call("get_unit",unit_id)==enemy_unit:
 		unit_registry.call("unregister_unit", unit_id)
 
 	if enemy_unit.has_method("deactivate_for_wave"):
@@ -291,12 +398,18 @@ func _remove_status_label() -> void:
 		_status_label = null
 
 
-func _should_process_locally() -> bool:
+func _get_simulation_root()->Node:
 	var simulation_root = null
 	if not simulation_root_path.is_empty():
 		simulation_root = get_node_or_null(simulation_root_path)
 	elif get_parent() != null:
 		simulation_root = get_parent().get_node_or_null("SimulationRoot")
+	return simulation_root
+
+
+func _should_process_locally() -> bool:
+	var simulation_root:Node=_get_simulation_root()
+	if simulation_root!=null and simulation_root.has_method("_should_skip_local_tick_processing") and simulation_root.call("_should_skip_local_tick_processing"):return false
 
 	if simulation_root == null:
 		return true
