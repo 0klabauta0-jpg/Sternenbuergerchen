@@ -26,6 +26,7 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "polisa_atomic":"scripts/tests/space_polisa_atomic_dock_verifier.gd",
           "polisa_birth":"scripts/tests/polisa_local_pickup_backend_check.gd",
           "polisa_birth_reentrant":"scripts/tests/polisa_local_pickup_backend_check.gd",
+          "polisa_birth_retry":"scripts/tests/polisa_local_pickup_backend_check.gd",
           "polisa_cycle":"scripts/tests/space_polisa_owner_cycle_verifier.gd",
           "sun_cycle":"scripts/tests/space_sun_local_cycle_verifier.gd"}
 script=fixtures[case]
@@ -63,6 +64,7 @@ user=Path(os.environ["APPDATA"])/"Godot/app_userdata"/app
 env=dict(os.environ,SB_REVIEW2_USER_DIR=str(user))
 if case == "polisa_birth": env["SB_TEST_LOCAL_BIRTH"] = "1"
 if case == "polisa_birth_reentrant": env["SB_TEST_LOCAL_BIRTH"] = "2"
+if case == "polisa_birth_retry": env["SB_TEST_LOCAL_BIRTH"] = "3"
 engine=shutil.which("godot_console.exe")
 with (run/"output.log").open("w",encoding="utf-8") as out:
     imported=subprocess.run([engine,"--headless","--editor","--path",str(project),"--import","--quit"],env=env,stdout=out,stderr=subprocess.STDOUT,timeout=45)
