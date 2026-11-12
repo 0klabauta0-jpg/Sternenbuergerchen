@@ -204,11 +204,11 @@ static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dic
 	if not primary is Dictionary or not primary.get("fireteam_definitions", []) is Array:
 		return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
 	for definition in primary.get("fireteam_definitions", []):
-		if not definition is Dictionary or not definition.get("member_unit_ids") is Array:
+		if not definition is Dictionary or typeof(definition.get("member_unit_ids")) not in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
 			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
 		var team_id := String(definition.get("id", ""))
 		if team_id.is_empty() or team_id != team_id.strip_edges().to_lower(): return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
-		definitions[team_id] = definition.member_unit_ids
+		definitions[team_id] = Array(definition.member_unit_ids)
 	var assigned_teams: Dictionary = {}
 	for craft_id in payload.hex_tactical.transport:
 		var transport: Variant = payload.hex_tactical.transport[craft_id]
