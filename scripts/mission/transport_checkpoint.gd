@@ -1,6 +1,7 @@
 extends RefCounted
 ## Pure transport checkpoint preparation. Global transaction owns publication order.
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+const BODY_PROFILE = preload("res://scripts/mission/polisa_ground_body_profile.gd")
 const FIELDS = [
 	"_mission_drop_source", "_mission_drop_craft_id", "_mission_drop_display_name",
 	"_mission_drop_title_text", "_mission_drop_texture_path", "_mission_drop_state",
@@ -31,7 +32,7 @@ static func capture(owner: Node) -> Dictionary:
 		var id: String = card.get("craft_id", "")
 		if id.is_empty() or data.craft_identities.has(id): return bad("transport_craft_duplicate")
 		data.craft_identities[id] = {"model_id":card.get("model_id", "")}
-	var encoded := CODEC.encode_value(data)
+	var encoded := encode_data(data)
 	if not encoded.ok: return encoded
 	var actors := {}
 	for craft in data.visits:
@@ -69,16 +70,18 @@ static func prepare(owner: Node, state: Dictionary, bindings: Dictionary) -> Dic
 	var decoded := CODEC.decode_value(state.get("value"))
 	if not decoded.ok or not decoded.value is Dictionary: return bad("transport_value_invalid")
 	var data: Dictionary = decoded.value
+	var geometry := decode_geometry(data)
+	if not geometry.ok: return geometry
 	# Check bounded codec values before handing nested dictionaries to validation.
 	var checked := validate_data(owner, data, bindings)
 	if not checked.ok: return checked
-	var canonical := {"schema":"mission_transport_checkpoint.v1", "value":CODEC.encode_value(data).value}
+	var canonical := {"schema":"mission_transport_checkpoint.v1", "value":encode_data(data).value}
 	var candidate := {"data":data, "bindings":bindings.duplicate(true), "binding_stamp":binding_stamp(bindings), "state":canonical, "owner":owner, "baseline":owner_stamp(owner)}
 	return {"ok":true, "candidate":candidate}
 
 static func validate(owner: Node, candidate: Dictionary, bindings: Dictionary) -> Dictionary:
 	if candidate.get("owner") != owner or candidate.get("bindings") != bindings or binding_stamp(bindings) != candidate.get("binding_stamp") or owner_stamp(owner) != candidate.get("baseline"): return bad("transport_candidate_stale")
-	var encoded := CODEC.encode_value(candidate.get("data"))
+	var encoded := encode_data(candidate.get("data", {}))
 	if not encoded.ok or {"schema":"mission_transport_checkpoint.v1", "value":encoded.value} != candidate.get("state"): return bad("transport_candidate_changed")
 	return validate_data(owner, candidate.data, bindings)
 
@@ -103,6 +106,10 @@ static func validate_data(owner: Node, data: Dictionary, bindings: Dictionary) -
 		if card.get("state", "") in ["inbound", "landed", "unloading", "outbound", "to_mission", "to_homebase", "to_fob"]: return bad("transport_transition_pending")
 		cards[craft] = card
 	if cards.size() != data.craft_identities.size(): return bad("transport_craft_missing")
+	for craft in data.fields._field_landing_by_craft:
+		var landing: Variant = data.fields._field_landing_by_craft[craft]
+		if not cards.has(craft) or not landing is Dictionary: return bad("transport_landing_invalid")
+		if landing.has("ground_body_profile") and not BODY_PROFILE.read_bound(cards[craft], landing.ground_body_profile).ok: return bad("transport_landing_invalid")
 	if bindings.has("pilot_bindings"):
 		if not bindings.pilot_bindings is Dictionary: return bad("transport_pilot_binding_invalid")
 		for craft in cards:
@@ -201,6 +208,37 @@ static func owner_stamp(owner: Node) -> Dictionary:
 	var fields := {}
 	for field in FIELDS: fields[field] = owner.get(field)
 	return {"fields":fields.duplicate(true), "primary":owner.call("_capture_active_drop_sequence"), "parallel":Dictionary(owner.get("_parallel_drop_sequences_by_craft")).duplicate(true), "visits":Dictionary(owner.get_parent().get_meta("singleplayer_visit_identities", {})).duplicate(true)}
+
+## Only this existing profile slot contains 3D values; never deserialize objects.
+static func encode_data(data: Dictionary) -> Dictionary:
+	var wire := data.duplicate(true)
+	var landings: Variant = wire.get("fields", {}).get("_field_landing_by_craft", {})
+	if not landings is Dictionary: return bad("transport_landing_invalid")
+	for craft in landings:
+		if not landings[craft] is Dictionary: return bad("transport_landing_invalid")
+		var profile: Variant = landings[craft].get("ground_body_profile")
+		if profile == null: continue
+		if not profile is Dictionary or not profile.get("bounds") is AABB: return bad("transport_landing_invalid")
+		var bounds: AABB = profile.bounds
+		profile["bounds"] = {"transport_aabb_v1":[bounds.position.x,bounds.position.y,bounds.position.z,bounds.size.x,bounds.size.y,bounds.size.z]}
+	return CODEC.encode_value(wire)
+
+static func decode_geometry(data: Dictionary) -> Dictionary:
+	if not data.get("fields") is Dictionary: return bad("transport_fields_invalid")
+	var landings: Variant = data.fields.get("_field_landing_by_craft")
+	if not landings is Dictionary: return bad("transport_landing_invalid")
+	for craft in landings:
+		if not landings[craft] is Dictionary: return bad("transport_landing_invalid")
+		var profile: Variant = landings[craft].get("ground_body_profile")
+		if profile == null: continue
+		if not profile is Dictionary or not profile.get("bounds") is Dictionary: return bad("transport_landing_invalid")
+		var bounds: Dictionary = profile.bounds
+		if bounds.size() != 1 or not bounds.get("transport_aabb_v1") is Array or bounds.transport_aabb_v1.size() != 6: return bad("transport_landing_invalid")
+		for number in bounds.transport_aabb_v1:
+			if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)): return bad("transport_landing_invalid")
+		var a: Array = bounds.transport_aabb_v1
+		profile["bounds"] = AABB(Vector3(a[0],a[1],a[2]),Vector3(a[3],a[4],a[5]))
+	return {"ok":true}
 
 static func publish(owner: Node, candidate: Dictionary) -> void:
 	var data: Dictionary = candidate.data

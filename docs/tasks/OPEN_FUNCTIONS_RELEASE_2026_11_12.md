@@ -130,3 +130,12 @@ Godot4.6.2, isoliertes APPDATA tmp/open-functions-release/transport-profile,
 60s-Hardlimit, vollstaendige Logs transport-checkpoint{,.stderr}.log unter
 docs/qa/open_functions_release_20261112. Dieser Nachweis ist kein nativer
 Gesamtmissions-, Flug-, Save-Continue- oder EXE-Nachweis; Companion prueft den Join.
+
+Transport-Geometrienachtrag: Der echte polisa_ground_body_profile-Vertrag besitzt
+native AABB-Bounds. Ausschliesslich im bekannten ground_body_profile.bounds-Slot
+werden diese lokal als sechs endliche Zahlen unter transport_aabb_v1 codiert und
+nach Decode wieder als native AABB aufgebaut. Bestehendes read_bound prueft danach
+positive Ausdehnung, Craft/Modell und tatsaechliche Assetidentitaet. Keine globale
+Codec-Erweiterung. Frischer Verifier46/0, exit0; echtes TerrainMap3DView-
+get_station_craft_body_projection mit realem Schiffsmesh und from_projection-
+Builder, exakter Geometrie-Roundtrip sowie fuenf korrupte Bounds-/Asset-Faelle.

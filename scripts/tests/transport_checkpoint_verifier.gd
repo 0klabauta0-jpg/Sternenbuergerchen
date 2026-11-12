@@ -57,8 +57,42 @@ func _initialize() -> void:
 	source.host.free()
 	target.host.free()
 	_multicraft()
+	_geometry()
 	print("TRANSPORT_CHECKPOINT checks=%d failures=%d" % [checks, failures])
 	quit(1 if failures else 0)
+
+func _geometry() -> void:
+	var rig := fixture()
+	var view = load("res://scripts/terrain/terrain_map_3d_view.gd").new()
+	var craft: Dictionary = rig.controller.get("_mission_drop_cards")[0]
+	var projection: Dictionary = view.get_station_craft_body_projection(craft)
+	var built: Dictionary = load("res://scripts/mission/polisa_ground_body_profile.gd").from_projection(craft, projection)
+	_check(built.ok and built.profile.bounds is AABB, "actual ship mesh projection builds native AABB profile")
+	if built.ok:
+		rig.controller.set("_field_landing_by_craft", {"craft":{"resolved_lz_position":Vector2.ZERO,"ground_body_profile":built.profile}})
+		var state: Dictionary = rig.controller.export_transport_checkpoint()
+		_check(state.has("value"), "actual bounds encode in transport profile slot")
+		if state.has("value"):
+			var parsed: Dictionary = JSON.parse_string(JSON.stringify(state))
+			var result: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(parsed, bind(rig))
+			_check(result.ok, "actual projected mesh bounds survive JSON prepare")
+			if result.ok:
+				_check(result.candidate.data.fields._field_landing_by_craft.craft.ground_body_profile.bounds == built.profile.bounds, "candidate restores exact native AABB")
+				_check(rig.controller.validate_transport_checkpoint_candidate(result.candidate, bind(rig)).ok, "geometry-bearing candidate globally validates")
+				rig.controller._publish_transport_checkpoint(result.candidate)
+				_check(rig.controller.export_transport_checkpoint() == state, "actual mesh profile exact owner roundtrip")
+			for kind in ["missing", "type", "size", "negative", "foreign_asset"]:
+				var data: Dictionary = CODEC.decode_value(state.value).value
+				var profile: Dictionary = data.fields._field_landing_by_craft.craft.ground_body_profile
+				match kind:
+					"missing": profile.erase("bounds")
+					"type": profile.bounds = Vector2.ZERO
+					"size": profile.bounds.transport_aabb_v1.pop_back()
+					"negative": profile.bounds.transport_aabb_v1[3] = -1.0
+					"foreign_asset": profile.asset_id = "foreign"
+				_check(not rig.controller.prepare_transport_checkpoint_candidate({"schema":state.schema,"value":CODEC.encode_value(data).value}, bind(rig)).ok, "malformed projected bounds reject " + kind)
+	view.free()
+	rig.host.free()
 
 func _multicraft() -> void:
 	var source := fixture()
