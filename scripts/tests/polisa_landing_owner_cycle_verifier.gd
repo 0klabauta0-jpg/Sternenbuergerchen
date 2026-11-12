@@ -48,6 +48,9 @@ func _initialize() -> void:
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(campaign, supply, null, fleet)
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":id,"model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flight = fleet.get_flight_state(id)
+	# This owner fixture bypasses Root launch; carry the real loadout mass.
+	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision,"mass":equipment.get_space_flight_profile(id).mass},flight.get_snapshot().tick+1).ok)
+	sim.tick_counter = flight.get_snapshot().tick
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = AdapterFixture.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._campaign = campaign; flow.adapter = adapter
 	adapter._space_route_requested = true; pilot.aboard = true

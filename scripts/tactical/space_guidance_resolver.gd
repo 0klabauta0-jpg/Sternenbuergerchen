@@ -17,7 +17,12 @@ static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, powe
 	if mass <= 0.0 or minf(main, minf(reverse, side)) <= 0.0 or fraction <= 0.0:
 		return {"ok":false, "reason":"insufficient_thrust"}
 	var displacement: Vector2 = goal.target_plane - flight.position_plane
-	var desired_velocity: Vector2 = displacement.limit_length(5.0) * 0.8
+	# A heavier fitted ship needs more distance to stop. Limit approach speed
+	# using the weakest available translational brake, with margin for one tick
+	# and diagonal steering near blocked gates.
+	var braking_acceleration := minf(main, minf(reverse, side)) * fraction / mass
+	var safe_speed := sqrt(2.0 * braking_acceleration * displacement.length()) * 0.45
+	var desired_velocity: Vector2 = (displacement.limit_length(5.0) * 0.8).limit_length(safe_speed)
 	# Stronger velocity damping avoids overshooting a gate whose far edge is
 	# immediately blocked by the body, including asymmetric ship thrusters.
 	var desired_force: Vector2 = (desired_velocity - flight.velocity_plane) * (4.0 * mass)

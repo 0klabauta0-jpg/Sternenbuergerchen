@@ -39,13 +39,20 @@ AP8-Basis. Änderungsstand und Ergebnisse hier fortschreiben.
 Ein geprüfter Katalog allein ist noch keine installierbare Komponente und kein
 funktionsfähiges Kampfsystem. Die Balance muss im Spiel erprobt werden.
 
+Nächster begrenzter Schritt: autoritative, katalogversionierte Startausrüstung
+im vorhandenen Equipment-Owner führen und ihre Masse und Schubversorgung an
+den vorhandenen Flugleser geben. Version-1-Warp-Saves nach erfolgreicher alter
+Validierung auf die festen Startslots migrieren. Version 2 muss Modell, Slots
+und Katalogversion prüfen; frei veränderte Slots bleiben bis zur eigentlichen
+Supply-/Einbautransaktion abgewiesen. Keine Komponentenkäufe freischalten.
+
 ## Stand 12.11.
 
 Vorläufiger Katalog für S1–S5, zwei Rümpfe und Schild/Kraftwerk sowie reine
 Prüfung, Leistungs- und Massenvorschau ergänzt. Ein separater zustandsloser
 Resolver berechnet Treffer zuerst auf Schild, Waffenenergie und verzögerte,
-leistungsabhängige Regeneration als Vorschläge. Keine Installation, keine
-persistierte Komponentenbilanz und kein Consumer: AP09 bleibt offen. Werte,
+leistungsabhängige Regeneration als Vorschläge. Zum damaligen Stand gab es keine
+Installation, persistierte Komponentenbilanz oder Consumer. Werte,
 Slots und Reserve sind vorläufige Spielannahmen, keine SC-Leistungsdaten.
 Gezielte gebündelte Prüfung: Komponentenresolver Exit 0, bestehender
 Warp-/Savevertrag 42/42. Anpassung der Schubwerte, Root-Tick, AP8-Schaden,
@@ -61,3 +68,23 @@ Warp-/Checkpointprüfung erneut 42/42. Produktiver Einbau bleibt offen.
 Verstärkte vorläufige Kraftwerksvarianten gleicher Slotgröße zeigen im reinen
 Resolver mehr Schildladeleistung bei höherer Masse; gezielter Prüfungslauf
 Exit 0. Ein tatsächlicher Kraftwerkstausch ist weiterhin nicht implementiert.
+
+## Startausrüstung und Flugleser
+
+Der vorhandene Equipment-Owner führt die festen Startslots bekannter Rümpfe.
+Sein v2-Zustand speichert die Katalogversion und diese Slots; bei v1-Restore
+werden nach erfolgreicher Warp-/Supplyprüfung die festen Startslots ergänzt.
+Abweichende oder manipulierte v2-Slots werden abgewiesen, bis ein quittierter
+Einbau- und Bilanzpfad existiert. Der Flugleser liest die resultierende Masse
+und das verfügbare Schubbudget; Root überträgt die Masse bei Heimatstart und
+Polisa-Abflug zusammen mit der autoritativen Reisepose. Der strenge spätere
+Massengleichheitsguard bleibt bestehen. Guidance berücksichtigt den Bremsweg
+der tatsächlich schwereren Schiffe. Keine Waffen-/Schildwirkung im Spiel,
+kein Einbau/Kauf/Upgrade und keine vollständige AP09-Abnahme.
+
+Gezielt geprüft: Owner-v1-Migration/v2-JSON und Manipulationsschutz, Heimatstart
+mit Owner-Masse, Warp-/Heimflugzyklus und Polisa-Landungsowner (beide Letzteren
+mit ausdrücklich an echten Start angepasster Fixture), Guidance 5/5,
+Warp-/Savevertrag 42/42 und AP02 8/8. Der direkte echte Polisa-Rundflug lief
+mit isoliertem Profil 25/25, Exit 0, keine Fehler. Dieser Stand basiert auf
+`9fc5dba20` und ist noch nicht mit dem weiterlaufenden Parallelstand getestet.

@@ -22,6 +22,11 @@ func _initialize() -> void:
 	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"planet_orbit"}, "inbound").ok)
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(null, null, null, fleet)
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
+	# This fixture bypasses Root launch; reproduce the already-authorized
+	# launch mass before testing the actual warp-entry guard.
+	var fixture_flight = fleet.get_flight_state("ship")
+	assert(fixture_flight.commit_motion({"expected_revision":fixture_flight.get_snapshot().revision,"mass":equipment.get_space_flight_profile("ship").mass},fixture_flight.get_snapshot().tick+1).ok)
+	sim.tick_counter = fixture_flight.get_snapshot().tick
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = ADAPTER.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._space_route_requested = true
 	sim.configure_base_personnel(pilot)

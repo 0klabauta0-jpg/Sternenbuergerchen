@@ -3,17 +3,25 @@ extends RefCounted
 const CATALOG = preload("res://scripts/mission/ship_equipment_catalog.gd")
 const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 var _crafts: Dictionary = {}
+var _space_loadouts: Dictionary = {}
 var _revision := 0
 var _installs: Dictionary = {}
 var _seal := str(Time.get_ticks_usec()) + ":" + str(randi())
 func configure(definitions: Array) -> Dictionary:
 	var candidate := {}
+	var space_candidate := {}
 	for raw: Variant in definitions:
 		if typeof(raw) != TYPE_DICTIONARY: return _reject("invalid_craft")
 		var id := String(raw.get("craft_id", ""))
 		if id.is_empty() or candidate.has(id): return _reject("invalid_craft")
 		candidate[id] = _initial(raw)
+		var model_id := String(raw.get("model_id", ""))
+		var slots := SPACE_COMPONENTS.default_loadout(model_id)
+		if not slots.is_empty():
+			if not SPACE_COMPONENTS.validate_loadout(model_id, slots).get("ok", false): return _reject("invalid_space_catalog")
+			space_candidate[id] = slots
 	_crafts = candidate
+	_space_loadouts = space_candidate
 	_revision = 0
 	_installs.clear()
 	return {"ok":true}
@@ -25,15 +33,20 @@ func register_craft(definition: Dictionary) -> Dictionary:
 	var id := String(definition.get("craft_id", ""))
 	if id.is_empty(): return _reject("invalid_craft")
 	if _crafts.has(id): return {"ok":String(_crafts[id].model_id) == String(definition.get("model_id", ""))}
+	var model_id := String(definition.get("model_id", ""))
+	var slots := SPACE_COMPONENTS.default_loadout(model_id)
+	if not slots.is_empty() and not SPACE_COMPONENTS.validate_loadout(model_id, slots).get("ok", false): return _reject("invalid_space_catalog")
 	_crafts[id] = _initial(definition)
+	if not slots.is_empty(): _space_loadouts[id] = slots
 	return {"ok":true}
 func get_snapshot(craft_id: String = "") -> Dictionary:
 	if not craft_id.is_empty():
 		if not _crafts.has(craft_id): return {}
 		var result: Dictionary = _crafts[craft_id].duplicate(true)
+		if _space_loadouts.has(craft_id): result["space_loadout"] = _space_loadouts[craft_id].duplicate(true)
 		result.merge({"craft_id":craft_id, "revision":_revision})
 		return result
-	return {"schema_version":1, "catalog_version":1, "revision":_revision, "crafts":_crafts.duplicate(true)}
+	return {"schema_version":2, "catalog_version":1, "space_catalog_version":1, "revision":_revision, "crafts":_crafts.duplicate(true), "space_loadouts":_space_loadouts.duplicate(true)}
 func get_quantum_effect(craft_id: String) -> Dictionary:
 	var installed := String(Dictionary(_crafts.get(craft_id, {})).get("slots", {}).get("quantum_drive", ""))
 	return {"quantum_duration_multiplier":CATALOG.multiplier(installed), "item_id":installed, "equipment_revision":_revision}
@@ -68,7 +81,20 @@ func get_space_flight_profile(craft_id: String) -> Dictionary:
 		if footprint.has(cell): return {"ok":false, "reason":"invalid_flight_profile"}
 		footprint.append(cell)
 	if not footprint.has(Vector2i.ZERO): return {"ok":false, "reason":"invalid_flight_profile"}
-	return {"ok":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "mass":float(profile.mass), "footprint_hexes":footprint, "hull":{"main_thrust":float(profile.main_thrust), "reverse_thrust":float(profile.reverse_thrust), "side_thrust":float(profile.side_thrust), "turn_acceleration":float(profile.turn_acceleration)}, "power":{"thrust_fraction":float(profile.thrust_fraction)}}
+	var mass := float(profile.mass)
+	var hull := {"main_thrust":float(profile.main_thrust), "reverse_thrust":float(profile.reverse_thrust), "side_thrust":float(profile.side_thrust), "turn_acceleration":float(profile.turn_acceleration)}
+	var power := {"thrust_fraction":float(profile.thrust_fraction)}
+	if _space_loadouts.has(craft_id):
+		var effective: Dictionary = SPACE_COMPONENTS.flight_inputs(model_id, _space_loadouts[craft_id])
+		if not effective.get("ok", false): return _reject("invalid_space_loadout")
+		mass = float(effective.mass); hull = effective.hull; power = effective.power
+	return {"ok":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "mass":mass, "footprint_hexes":footprint, "hull":hull, "power":power}
+
+func get_space_combat_stats(craft_id: String) -> Dictionary:
+	if not _crafts.has(craft_id) or not _space_loadouts.has(craft_id): return _reject("space_loadout_unavailable")
+	var result: Dictionary = SPACE_COMPONENTS.effective_stats(String(_crafts[craft_id].model_id), _space_loadouts[craft_id])
+	if result.get("ok", false): result.merge({"craft_id":craft_id, "equipment_revision":_revision})
+	return result
 func prepare_install(craft_id: String, slot_id: String, item_id: String, expected_revision: int) -> Dictionary:
 	if expected_revision != _revision: return _reject("equipment_changed")
 	if not _crafts.has(craft_id) or not CATALOG.compatible(String(_crafts[craft_id].model_id), slot_id, item_id): return _reject("incompatible_component")
@@ -100,7 +126,10 @@ func restore_state(data: Dictionary, definitions: Array, supply_requests: Dictio
 	var fresh = get_script().new()
 	var configured: Dictionary = fresh.configure(definitions)
 	if not configured.ok: return configured
-	if data.size() != 5 or data.get("schema_version") != 1 or data.get("catalog_version") != 1 or not _integer(data.get("revision")) or typeof(data.get("crafts")) != TYPE_DICTIONARY or typeof(data.get("installs")) != TYPE_DICTIONARY: return _reject("invalid_equipment_state")
+	if not _integer(data.get("schema_version")): return _reject("invalid_equipment_state")
+	var version := int(data.schema_version)
+	if version not in [1, 2] or data.size() != (5 if version == 1 else 7) or data.get("catalog_version") != 1 or not _integer(data.get("revision")) or typeof(data.get("crafts")) != TYPE_DICTIONARY or typeof(data.get("installs")) != TYPE_DICTIONARY: return _reject("invalid_equipment_state")
+	if version == 2 and (data.get("space_catalog_version") != 1 or typeof(data.get("space_loadouts")) != TYPE_DICTIONARY or data.space_loadouts != fresh._space_loadouts): return _reject("invalid_space_loadout")
 	if data.installs.size() != int(data.revision): return _reject("invalid_equipment_history")
 	var receipts: Array = data.installs.values()
 	for raw: Variant in receipts:
@@ -135,6 +164,7 @@ func restore_state(data: Dictionary, definitions: Array, supply_requests: Dictio
 	if fresh.get_snapshot().crafts != data.crafts or fresh._revision != int(data.revision): return _reject("equipment_state_mismatch")
 	if not _component_balance(fresh._crafts, supply_requests, inventory): return _reject("component_balance_mismatch")
 	_crafts = fresh._crafts.duplicate(true)
+	_space_loadouts = fresh._space_loadouts.duplicate(true)
 	_installs = fresh._installs.duplicate(true)
 	_revision = fresh._revision
 	return {"ok":true}
@@ -183,4 +213,5 @@ func unregister_unmodified_craft(craft_id: String) -> Dictionary:
 	if not allowed.get("ok", false): return allowed
 	# Lifecycle-only removal; installation revision/history remains unchanged.
 	_crafts.erase(craft_id)
+	_space_loadouts.erase(craft_id)
 	return {"ok":true}

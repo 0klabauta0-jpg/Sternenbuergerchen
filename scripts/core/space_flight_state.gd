@@ -49,15 +49,19 @@ func commit_travel_pose(position: Vector2, heading: float) -> bool:
 	_publish_travel_pose(prepared)
 	return true
 
-func validate_travel_pose(expected_revision: int, position: Vector2, heading: float) -> Dictionary:
+func validate_travel_pose(expected_revision: int, position: Vector2, heading: float, mass: Variant = null) -> Dictionary:
 	if expected_revision != _revision: return {"ok":false, "reason":"stale_revision"}
 	if _coordinate_frame != "strategic" or _motion_mode == "tactical" or not is_finite(position.x) or not is_finite(position.y) or not is_finite(heading):
 		return {"ok":false, "reason":"invalid_travel_pose"}
-	return {"ok":true, "position":position, "heading":heading}
+	if mass != null and (typeof(mass) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(mass)) or float(mass) <= 0.0): return {"ok":false, "reason":"invalid_mass"}
+	var result := {"ok":true, "position":position, "heading":heading}
+	if mass != null: result["mass"] = float(mass)
+	return result
 
 func _publish_travel_pose(prepared: Dictionary) -> void:
 	_position = prepared.position
 	_heading = prepared.heading
+	if prepared.has("mass"): _mass = float(prepared.mass)
 	_revision += 1
 
 func validate_motion(proposal: Dictionary, tick: int) -> Dictionary:
