@@ -26,7 +26,7 @@ class Person extends Node2D:
 class Vision extends Node:
 	var visible := true
 	func get_multiplayer_visible_unit_ids(_team: String) -> PackedStringArray:
-		return PackedStringArray(["enemy"]) if visible else PackedStringArray()
+		return PackedStringArray(["enemy", "local_enemy"]) if visible else PackedStringArray()
 class Transport extends Node:
 	var boarded := true
 	var landing_clear := true
@@ -91,6 +91,31 @@ func _initialize() -> void:
 	transport.boarded = true
 	assert(adapter.request_operation("air_support_takeoff", {"craft_id":"ship"}).ok)
 	assert(mission_root.is_air_support_craft_airborne("ship"))
+	var local_enemy = Person.new(); local_enemy.unit_id = "local_enemy"; local_enemy.team = "red"; mission.add_child(local_enemy); units.register_unit("local_enemy", local_enemy); mission_root.register_known_unit("local_enemy", local_enemy)
+	var local_placements: Array[Dictionary] = [{"unit_id":"local_enemy", "grid":Vector2i(13,10)}]; assert(mission_root.admit_hex_ground_units(local_placements).ok)
+	vision.visible = false
+	assert(not adapter.request_operation("air_support_attack_order", {"craft_id":"ship", "target_unit_id":"local_enemy"}).ok)
+	vision.visible = true
+	assert(adapter.request_operation("air_support_attack_order", {"craft_id":"ship", "target_unit_id":"local_enemy"}).ok)
+	var energy_before_auto: float = source.get("_space_combat_state").get_ship_systems("ship").state.weapon_energy
+	mission_root.tick_counter += 1
+	mission_root._advance_air_support_orders(0.2)
+	assert(source.get("_space_combat_state").get_ship_systems("ship").state.weapon_energy < energy_before_auto)
+	assert(mission_root.request_air_support_cease_fire("ship", "cease-test").ok)
+	var energy_after_stop: float = source.get("_space_combat_state").get_ship_systems("ship").state.weapon_energy
+	mission_root.tick_counter += 1; mission_root._advance_air_support_orders(0.2)
+	assert(source.get("_space_combat_state").get_ship_systems("ship").state.weapon_energy == energy_after_stop)
+	var origin: Vector2 = flight.get_snapshot().position_plane
+	assert(not adapter.request_operation("air_support_move", {"craft_id":"ship", "target_hex":Vector2i(300,300)}).ok)
+	assert(adapter.request_operation("air_support_move", {"craft_id":"ship", "target_hex":Vector2i(11,10)}).ok)
+	for t in range(1, 31): source._advance_space_flights(0.1, flight.get_snapshot().tick + 1)
+	assert(flight.get_snapshot().position_plane.distance_to(origin) > 0.01)
+	assert(Vector2(mission_root.get_air_support_world_pose("ship").position).distance_to(transport.landing_position) > 0.01)
+	assert(not adapter.request_operation("air_support_landing", {"craft_id":"ship"}).ok)
+	assert(adapter.request_operation("air_support_move", {"craft_id":"ship", "target_hex":Vector2i(10,10)}).ok)
+	for t in range(1, 1001):
+		source._advance_space_flights(0.05, flight.get_snapshot().tick + 1)
+		if flight.get_snapshot().position_plane.distance_to(origin) < 0.1 and flight.get_snapshot().velocity_plane.length() < 0.1: break
 	var airborne_pose: Dictionary = flight.get_snapshot()
 	transport.landing_clear = false
 	assert(not adapter.request_operation("air_support_landing", {"craft_id":"ship"}).ok and flight.get_snapshot() == airborne_pose)

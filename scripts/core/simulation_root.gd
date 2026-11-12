@@ -35,6 +35,8 @@ var _air_support_source: WeakRef
 var _air_support_adapter: WeakRef
 var _air_support_location_id := ""
 var _air_support_sorties: Dictionary = {}
+var _air_support_move_receipts: Dictionary = {}
+var _air_support_fire_poll := 0.0
 var _skirmish_economy_owner: RefCounted
 var _skirmish_transaction: Callable
 
@@ -96,6 +98,20 @@ func is_air_support_craft_airborne(craft_id: String) -> bool:
 	if flight == null: return false
 	var pose: Dictionary = flight.get_snapshot()
 	return pose.get("coordinate_frame") == "local" and pose.get("motion_mode") == "tactical" and pose.get("space_area_id") == "atmosphere:" + _air_support_location_id
+
+func get_air_support_world_pose(craft_id: String) -> Dictionary:
+	if not is_air_support_craft_airborne(craft_id) or not is_instance_valid(_hex_ground_registry): return {}
+	var source: Node = _air_support_source.get_ref()
+	var flight: RefCounted = source.get("_singleplayer_space_travel_owner").get_flight_state(craft_id)
+	var pose: Dictionary = flight.get_snapshot()
+	var axial: Vector2 = SPACE_GRID.HEX.plane_to_axial(pose.position_plane)
+	var origin: Vector2 = _hex_ground_registry.call("grid_to_world", Vector2i.ZERO)
+	var q: Vector2 = Vector2(_hex_ground_registry.call("grid_to_world", Vector2i(1, 0))) - origin
+	var r: Vector2 = Vector2(_hex_ground_registry.call("grid_to_world", Vector2i(0, 1))) - origin
+	return {"position":origin + q * axial.x + r * axial.y, "heading_rad":pose.heading_rad}
+
+func get_air_support_ground_target(grid: Vector2i) -> String:
+	return _hex_ground_runtime.get_occupant_at(grid) if is_hex_ground_runtime_active() else ""
 
 func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
 	# The transport owner verifies actual boarding and pending deployment.
@@ -186,6 +202,69 @@ func request_air_support_landing(craft_id: String) -> Dictionary:
 	_air_support_sorties.erase(craft_id)
 	return {"ok":true, "craft_id":craft_id}
 
+func request_air_support_move(command: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
+	if is_processing_tick or command.size() != 3 or typeof(command.get("craft_id")) != TYPE_STRING or typeof(command.get("target_hex")) != TYPE_VECTOR2I or typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.craft_id
+	var signature := SPACE_COMMAND_CONTRACT.request_signature(command)
+	if _air_support_move_receipts.has(command.request_id):
+		if _air_support_move_receipts[command.request_id] != signature: return {"ok":false, "reason":"request_id_conflict"}
+		return {"ok":true, "replayed":true}
+	if _air_support_move_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	if not _air_support_sorties.has(id): return {"ok":false, "reason":"sortie_unavailable"}
+	var binding: Dictionary = _resolve_air_support_craft(id)
+	if not binding.get("ok", false): return binding
+	var pilot: Dictionary = _resolve_air_support_pilot(id)
+	if not pilot.get("ok", false): return pilot
+	var source: Node = _air_support_source.get_ref()
+	if not is_instance_valid(source) or source.get("is_processing_tick") or _air_support_sorties[id].source.get_ref() != source or binding.flight != _air_support_sorties[id].flight or not is_air_support_craft_airborne(id): return {"ok":false, "reason":"sortie_context_changed"}
+	var pose: Dictionary = binding.flight.get_snapshot()
+	var target_plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(command.target_hex))
+	var cells: Array[Vector2i] = binding.combat.preview_actor_cells(id, {"position_plane":target_plane})
+	if cells.is_empty() or not _air_support_cells_on_map(cells): return {"ok":false, "reason":"invalid_target"}
+	for occupant in binding.combat.query_cells(cells, pose.space_area_id):
+		if occupant != id: return {"ok":false, "reason":"occupied"}
+	for claimant in binding.combat.query_navigation_claims(cells, pose.space_area_id):
+		if claimant != id: return {"ok":false, "reason":"navigation_claimed"}
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(id)
+	if not profile.get("ok", false) or not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_profile_changed"}
+	var goal := {"target_plane":target_plane}
+	var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(pose, goal, profile.hull, profile.power)
+	if not guidance.get("ok", false): return guidance
+	var claim: Dictionary = binding.combat.record_navigation_claim(id, pose.space_area_id, cells)
+	if not claim.get("ok", false): return claim
+	binding.combat.set_flight_control(id, {"goal":goal, "hull":profile.hull, "power":profile.power, "air_support_move":true, "mission_root":weakref(self), "equipment_snapshot":binding.equipment.get_snapshot(id), "area_id":pose.space_area_id})
+	_air_support_move_receipts[command.request_id] = signature
+	return {"ok":true, "replayed":false}
+
+func _air_support_cells_on_map(cells: Array) -> bool:
+	if not is_hex_ground_runtime_active() or not is_instance_valid(_hex_ground_registry): return false
+	for cell in cells:
+		if typeof(cell) != TYPE_VECTOR2I or _hex_ground_registry.call("get_tile_at_grid", cell) == null: return false
+	return not cells.is_empty()
+
+func _air_support_motion_context_valid(craft_id: String, source: Node, equipment_snapshot: Dictionary) -> bool:
+	if _air_support_source == null or _air_support_source.get_ref() != source or not _air_support_sorties.has(craft_id) or not is_air_support_craft_airborne(craft_id): return false
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	return binding.get("ok", false) and binding.flight == _air_support_sorties[craft_id].flight and binding.equipment.get_snapshot(craft_id) == equipment_snapshot and _resolve_air_support_pilot(craft_id).get("ok", false)
+
+func _advance_air_support_orders(delta: float) -> void:
+	if _air_support_sorties.is_empty(): return
+	_air_support_fire_poll -= maxf(delta, 0.0)
+	if _air_support_fire_poll > 0.0: return
+	_air_support_fire_poll = 0.2
+	for craft_id in _air_support_sorties.keys():
+		var binding: Dictionary = _resolve_air_support_craft(craft_id)
+		if not binding.get("ok", false) or not is_air_support_craft_airborne(craft_id): continue
+		var wing: Dictionary = binding.wings.get_snapshot().wings.get(binding.wing_id, {})
+		var order: Dictionary = wing.get("order", {})
+		if order.get("verb") != "attack_target" or order.get("fire_rule") != "free": continue
+		var systems: Dictionary = binding.combat.get_ship_systems(craft_id)
+		for weapon: Dictionary in systems.get("stats", {}).get("weapons", []):
+			var slot := String(weapon.get("slot_id", ""))
+			if slot.is_empty(): continue
+			request_air_support_ground_fire({"craft_id":craft_id, "target_unit_id":String(order.get("target_id", "")), "weapon_slot":slot, "request_id":"auto-air:%s:%d:%s" % [craft_id, tick_counter, slot]})
+
 func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	# The target and wing are resolved from live mission owners, not the UI.
 	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
@@ -219,6 +298,17 @@ func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	var result: Dictionary = binding.wings.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":[command.target_unit_id], "coordinate_frame":"local", "space_area_id":pose.space_area_id})
 	if result.get("ok", false): _air_ground_order_receipts[id] = {"craft_id":command.craft_id, "target_unit_id":command.target_unit_id, "result":result.duplicate(true)}
 	return result
+
+func request_air_support_cease_fire(craft_id: String, request_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing() or is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return binding
+	var snapshot: Dictionary = binding.wings.get_snapshot()
+	var order: Dictionary = Dictionary(snapshot.wings.get(binding.wing_id, {})).get("order", {})
+	if order.is_empty(): return {"ok":true, "already_stopped":true}
+	if order.get("verb") != "attack_target": return {"ok":false, "reason":"no_attack_order"}
+	var command := {"contract_category":"space_combat", "operation":"order_cancel", "request_id":request_id, "expected_revision":snapshot.revision, "payload":{"wing_id":binding.wing_id, "order_id":String(order.get("order_id", ""))}}
+	return binding.wings.apply_command(command, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical"})
 
 func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	# Read-only. Visibility and installed equipment come from live owners; the
@@ -2051,8 +2141,19 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 		var control: Dictionary = controls[craft_id]
 		if flight == null or flight.get_snapshot().motion_mode != "tactical":
-			if control.get("singleplayer_move", false): _space_combat_state.clear_flight_control(craft_id)
+			if control.get("singleplayer_move", false) or control.get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
 			continue
+		if control.get("air_support_move", false):
+			var mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
+			if not is_instance_valid(mission) or not mission._air_support_motion_context_valid(craft_id, self, control.equipment_snapshot):
+				_space_combat_state.clear_flight_control(craft_id)
+				_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":"movement_context_changed"})
+				continue
+			var air_pose: Dictionary = flight.get_snapshot()
+			if air_pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and air_pose.velocity_plane.length() < 0.02:
+				_space_combat_state.clear_flight_control(craft_id)
+				_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"arrived"})
+				continue
 		if control.get("singleplayer_move", false):
 			var pose: Dictionary = flight.get_snapshot()
 			var live_equipment: Dictionary = _ship_equipment_owner.get_snapshot(craft_id) if _ship_equipment_owner != null else {}
@@ -2071,6 +2172,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				_space_combat_state.set_flight_status(craft_id, guidance)
 				continue
 			intent = guidance.intent
+			if control.get("air_support_move", false): intent["assist_mode"] = "coupled"
 		var current_pose: Dictionary = flight.get_snapshot()
 		var environment := "atmosphere" if String(current_pose.get("space_area_id", "")).begins_with("atmosphere:") else "space"
 		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(current_pose, intent, control.hull, control.power, delta, environment)
@@ -2092,13 +2194,13 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var result: Dictionary = commit_space_fleet_motion(proposals, tick, group.world, {"runtime_authorized":true, "fixture":true, "internal_flight_tick":self})
 		if not result.get("ok", false):
 			for proposal in proposals:
-				if Dictionary(controls.get(proposal.craft_id, {})).get("singleplayer_move", false): _space_combat_state.clear_flight_control(proposal.craft_id)
+				if Dictionary(controls.get(proposal.craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(proposal.craft_id, {})).get("air_support_move", false): _space_combat_state.clear_flight_control(proposal.craft_id)
 				_space_combat_state.set_flight_status(proposal.craft_id, result)
 			continue
 		for craft_id in result.accepted:
 			_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
 		for craft_id in result.rejected:
-			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false): _space_combat_state.clear_flight_control(craft_id)
+			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(craft_id, {})).get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
 			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
@@ -2192,7 +2294,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		if String(snapshot.space_area_id).begins_with("atmosphere:") and proposal.get("assist_mode", snapshot.assist_mode) != "coupled": return {"ok":false, "reason":"atmosphere_requires_coupled"}
 		if area.coordinate_frame == "local" and (authority_context.get("fixture") != true or not String(id).begins_with("space_fixture_")):
 			var own_control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
-			if authority_context.get("internal_flight_tick") != self or not own_control.get("singleplayer_move", false): return {"ok":false, "reason":"local_area_not_ready"}
+			if authority_context.get("internal_flight_tick") != self or not (own_control.get("singleplayer_move", false) or own_control.get("air_support_move", false)): return {"ok":false, "reason":"local_area_not_ready"}
 		if proposal.get("motion_mode", "tactical") != "tactical":
 			return {"ok": false, "reason": "invalid_motion_mode"}
 		var valid: Dictionary = flight.validate_motion(proposal, tick)
@@ -2202,8 +2304,8 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 	var navigation_world: Dictionary = world.duplicate(true)
 	if area.coordinate_frame == "local":
 		var local_id := String(area.space_area_id)
-		if not local_id.begins_with("orbit_approach:"): return {"ok":false, "reason":"invalid_area"}
-		if not _fixture_area_blockers.has(local_id):
+		if not local_id.begins_with("orbit_approach:") and not local_id.begins_with("atmosphere:"): return {"ok":false, "reason":"invalid_area"}
+		if local_id.begins_with("orbit_approach:") and not _fixture_area_blockers.has(local_id):
 			var body_id := local_id.trim_prefix("orbit_approach:").uri_decode()
 			var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
 			if not layout.get("ok", false) or layout.body_map_id != local_id: return {"ok":false, "reason":"invalid_area"}
@@ -2212,7 +2314,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 			_fixture_area_blockers[local_id] = body_cells
 		if typeof(navigation_world.get("blocked_cells", [])) != TYPE_ARRAY: return {"ok":false, "reason":"invalid_world"}
 		var blockers: Array = navigation_world.get("blocked_cells", []).duplicate()
-		blockers.append_array(_fixture_area_blockers[local_id])
+		if local_id.begins_with("orbit_approach:"): blockers.append_array(_fixture_area_blockers[local_id])
 		navigation_world["blocked_cells"] = blockers
 	var clearance: Dictionary = SPACE_NAVIGATION.resolve_motion(actors, proposals, navigation_world)
 	if not clearance.get("ok", false): return clearance
@@ -2222,6 +2324,13 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 	for id in ids:
 		var swept_cells: Array[Vector2i] = []
 		swept_cells.assign(clearance.swept_cells[id])
+		if String(area.space_area_id).begins_with("atmosphere:"):
+			var control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
+			var mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
+			if not control.get("air_support_move", false) or not is_instance_valid(mission) or not mission._air_support_cells_on_map(swept_cells):
+				clearance.rejected[id] = "map_edge"
+				accepted.erase(id)
+				continue
 		for claimant in _space_combat_state.query_navigation_claims(swept_cells, String(area.space_area_id)):
 			if claimant != id:
 				clearance.rejected[id] = "navigation_claimed"
@@ -4863,6 +4972,7 @@ func _physics_process(delta: float) -> void:
 	tick_counter += 1
 	if _space_runtime_tick.is_valid():
 		_advance_space_flights(delta, tick_counter)
+	_advance_air_support_orders(delta)
 	is_processing_tick = true
 	_hex_boundary_facing.clear()
 	_begin_navigation_budget_tick()

@@ -129,6 +129,18 @@ Transport-Testdouble und prüft Start, Rücklandung und Ablehnung bei belegtem
 Platz. Es gibt noch keine Bedienung, Bewegung oder Save/Load-Absicherung für
 diesen Pfad; er ist deshalb noch kein spielbarer Einsatzablauf.
 
+Fortschreibung: Der vorbereitete Flug kann über den gemeinsamen Flugtick auf
+ein markiertes Bodenhex gelenkt werden; Kartenfelder und Pilotenbindung werden
+erneut geprüft, in der Atmosphäre bleibt die Steuerung gekoppelt. Die
+Dropshipkarte bietet Start, Bewegung, Landung, Feuer und Feuerstopp. Ein
+Rottenangriff wiederholt Einzelschüsse bei gültiger Sicht und Waffenfreigabe;
+der Schiffskampfowner verwaltet weiterhin Energiekosten und Feuerrate. Die
+Darstellung liest die Position der gemeinsamen Fluginstanz. Ein isolierter
+Ownercheck deckt Flug vom Landeplatz und zurück, Feuer, Feuerstopp und die
+Landeplatzsperre ab. Der Transport ist darin ein Testdouble; native Bedienung,
+Save/Load und der gesamte reguläre Missionseinsatz sind noch nicht belegt.
+Radar und automatischer Orbitdurchflug sind weitere offene Pakete.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

@@ -13223,6 +13223,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	var payload_ids: Array = _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))
 	host.set_meta("mission_dropship_passenger_content", true)
 	_append_mission_dropship_card_command_row(host, card)
+	_append_air_support_card_row(host, card)
 	var content_changed := _refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
 	var feedback_label := host.get_node_or_null("MissionDropshipCardFeedbackLabel") as Label
@@ -13357,6 +13358,41 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 		"drop"
 	)
 	row.add_child(drop_button)
+
+
+func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if host == null or host.get_node_or_null("AirSupportCardRow") != null or simulation == null or simulation.get("_air_support_source") == null or String(get_parent().get_meta("location_id", "")) == "polisa": return
+	var craft_id := String(card.get("craft_id", ""))
+	if craft_id.is_empty(): return
+	var row := HBoxContainer.new()
+	row.name = "AirSupportCardRow"
+	host.add_child(row)
+	for item in [["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"]]:
+		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
+
+
+func _on_air_support_card_action(craft_id: String, action: String) -> void:
+	if not _can_issue_local_commands(): return
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null: return
+	var result := {"ok":false, "reason":"invalid_action"}
+	match action:
+		"start": result = simulation.request_air_support_takeoff(craft_id)
+		"land": result = simulation.request_air_support_landing(craft_id)
+		"cease": result = simulation.request_air_support_cease_fire(craft_id, "ui-air-stop:%d" % Time.get_ticks_usec())
+		"move":
+			if _has_selected_tile: result = simulation.request_air_support_move({"craft_id":craft_id, "target_hex":_selected_tile_grid_position, "request_id":"ui-air-move:%d" % Time.get_ticks_usec()})
+			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
+		"fire":
+			var target: String = simulation.get_air_support_ground_target(_selected_tile_grid_position) if _has_selected_tile else ""
+			if target.is_empty(): result = {"ok":false, "reason":"Sichtbaren Gegner markieren"}
+			else:
+				var token := "ui-air-fire:%d" % Time.get_ticks_usec()
+				result = simulation.request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":target, "request_id":token + ":order"})
+	_last_command_text = "Schiffbefehl ausgeführt" if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
+	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
+	_refresh_mission_dropship_panel()
 
 
 func _refresh_mission_dropship_card_command_row(host: VBoxContainer, card: Dictionary) -> bool:
@@ -15883,6 +15919,11 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		ship_position = _coerce_vector2_value(card.get("drop_sequence_position", ship_position), ship_position)
 	elif card.has("dropship_position"):
 		ship_position = _coerce_vector2_value(card.get("dropship_position", ship_position), ship_position)
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	var air_pose: Dictionary = simulation.get_air_support_world_pose(craft_id) if simulation != null and simulation.has_method("get_air_support_world_pose") else {}
+	if not air_pose.is_empty():
+		ship_position = air_pose.position
+		state = DROP_SEQUENCE_INBOUND
 	var target_position: Vector2 = _get_mission_dropship_card_target_position(card, index, state, ship_position)
 	var has_lz: bool = bool(card.get("has_lz_position", false))
 	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position if is_selected else Vector2.ZERO), _lz_position if is_selected else Vector2.ZERO)
