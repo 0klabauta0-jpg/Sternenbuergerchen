@@ -170,6 +170,16 @@ Dies umfasst weder den produktiven Reiseeintritt noch gegnerisches Feuer oder
 den Rückweg des lokal gebundenen Schiffs. Der produktive Missionsstart bleibt
 auf dem alten Ablauf. Bodenkarten-Luftunterstützung bleibt ebenfalls offen.
 
+Der gebundene Testpfad ergänzt nun Gegenfeuer der Cutlass auf das eigene
+Schiff nach dem Angriffsbefehl. Auch diese Schüsse durchlaufen die vorhandene
+Sicht-, Winkel-, Raumindex-, Waffen-, Schild- und Hüllenprüfung; ein anderes
+Schiff in der Schusslinie kann abgefangen werden. Ein kurzer Austausch im
+Warpfixture bestätigt Treffer auf beide Schilde. Für den anschliessenden
+isolierten Siegtest wird die feindliche Feuerrate testseitig angehalten;
+das ist kein Balancing- oder echter Missionsdurchlauf. Beschuss der neutralen
+Buccaneer vor Eingreifen, Bewegung/KI und das produktive Start-/Rückwegstück
+bleiben offen.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf

@@ -2063,6 +2063,46 @@ func advance_campaign_space_fire(authority_context: Dictionary) -> void:
 		var slot := String(weapon.slot_id)
 		if float(systems.cooldowns.get(slot, 0.0)) > 0.0: continue
 		request_singleplayer_space_fire({"request_id":"campaign-shot:%s:%d:%s" % [craft_id, tick_counter, slot], "craft_id":craft_id, "target_id":"hostile_cutlass", "weapon_slot":slot}, {"runtime_authorized":true, "actor_id":"singleplayer"})
+	_advance_campaign_hostile_fire(craft_id)
+
+func _advance_campaign_hostile_fire(craft_id: String) -> void:
+	# This is called only from the bound encounter tick, never from a UI payload.
+	var hostile: RefCounted = _space_combat_state.get_actor("hostile_cutlass")
+	var player: RefCounted = _space_combat_state.get_actor(craft_id)
+	var source: Dictionary = _space_combat_state.get_ship_systems("hostile_cutlass")
+	var target_systems: Dictionary = _space_combat_state.get_ship_systems(craft_id)
+	if hostile == null or player == null or source.is_empty() or target_systems.is_empty() or float(source.state.hull) <= 0.0 or float(target_systems.state.hull) <= 0.0: return
+	var a: Dictionary = hostile.get_snapshot(); var b: Dictionary = player.get_snapshot()
+	if a.coordinate_frame != "local" or a.space_area_id != b.space_area_id: return
+	var layout: Dictionary = ORBIT_LAYOUT.build(String(a.space_area_id).trim_prefix("orbit_approach:").uri_decode())
+	if not layout.get("ok", false) or layout.body_map_id != a.space_area_id: return
+	var opaque: Array = []
+	for cell in layout.body_cells: opaque.append(SPACE_GRID.from_offset(cell))
+	var hostile_faction := String(_space_combat_state.get_metadata("hostile_cutlass").get("faction_id", ""))
+	var player_faction := String(_space_combat_state.get_metadata(craft_id).get("faction_id", ""))
+	if hostile_faction.is_empty() or player_faction.is_empty() or hostile_faction == player_faction: return
+	var shooter := {"id":"hostile_cutlass", "position":a.position_plane, "heading_rad":a.heading_rad, "faction_id":hostile_faction, "area_id":a.space_area_id, "sensor_range":12.0}
+	var target := {"id":craft_id, "position":b.position_plane, "heading_rad":b.heading_rad, "faction_id":player_faction, "area_id":b.space_area_id}
+	var contacts: Dictionary = SPACE_TARGETING.collect_contacts({"actors":{"hostile_cutlass":shooter, craft_id:target}, "opaque_cells":opaque}, hostile_faction)
+	if not contacts.get("ok", false) or not contacts.contacts.has(craft_id): return
+	var start := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(a.position_plane))
+	var end := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(b.position_plane))
+	var occupied := {}
+	for cell: Vector2i in SPACE_GRID.HEX.line(start, end):
+		if not SPACE_AREA_GRID.contains(cell, a): return
+		var query: Array[Vector2i] = [cell]
+		occupied[cell] = _space_combat_state.query_cells(query, a.space_area_id)
+	var world := {"known_targets":contacts.contacts, "hostile_factions":[player_faction], "opaque_cells":opaque, "occupants_by_cell":occupied}
+	for item: Dictionary in source.stats.weapons:
+		if float(_space_combat_state.get_ship_systems(craft_id).state.hull) <= 0.0: break
+		var slot := String(item.slot_id)
+		if float(source.cooldowns.get(slot, 0.0)) > 0.0: continue
+		var weapon: Dictionary = item.duplicate(true); weapon["accuracy"] = 1.0
+		var event_id := "campaign-hostile:%d:%s" % [tick_counter, slot]
+		var proposal: Dictionary = SPACE_WEAPON.resolve_shot(shooter, target, weapon, {"fire_rule":"free"}, world, event_id, _space_fire_rng)
+		if not proposal.get("ok", false): continue
+		var committed: Dictionary = _space_combat_state._commit_ship_impact(proposal.event)
+		if committed.get("ok", false) and not committed.get("replayed", false): _space_fire_rng = int(proposal.rng_state)
 
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if command.get("contract_category") == "space_combat" and _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}

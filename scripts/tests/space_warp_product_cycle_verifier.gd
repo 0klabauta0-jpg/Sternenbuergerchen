@@ -84,9 +84,15 @@ func _initialize() -> void:
 	assert(not adapter.request_operation("campaign_space_engage", {"target_id":"buccaneer"}).ok)
 	assert(adapter.request_operation("campaign_space_engage", {}).ok)
 	var before_shield: float = combat.get_ship_systems("hostile_cutlass").state.shield
+	var player_shield: float = combat.get_ship_systems("ship").state.shield
 	sim.tick_counter += 1
 	adapter.advance_space_travel(0.1)
 	assert(combat.get_ship_systems("hostile_cutlass").state.shield < before_shield)
+	assert(combat.get_ship_systems("ship").state.shield < player_shield)
+	# Isolate the victory path after proving reciprocal fire; balancing the
+	# damaged fixture ship against a fresh Cutlass is a separate gameplay task.
+	for weapon: Dictionary in combat.get_ship_systems("hostile_cutlass").stats.weapons:
+		combat.get("_ship_systems").hostile_cutlass.cooldowns[weapon.slot_id] = 1000.0
 	assert(encounter.apply_command({"contract_category":"campaign_space", "operation":"advance", "payload":{"delta_seconds":1.0}}, {"runtime_authorized":true}).ok)
 	assert(encounter.get_snapshot().cutlass_hull == combat.get_ship_systems("hostile_cutlass").state.hull)
 	for step in range(40):
