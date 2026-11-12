@@ -20,6 +20,7 @@ func plan_group(unit_ids:PackedStringArray,anchor_grid:Vector2i,terrain_registry
 			return rejected
 		ids[id]=true
 	var blocked:Dictionary=ground_snapshot.occupant_by_grid.duplicate()
+	for grid in ground_snapshot.get("external_admission_blocked_grids",{}):blocked[grid]=true
 	var now:int=int(ground_snapshot.get("current_tick",0))
 	for segment in ground_snapshot.get("committed_segments",[]):
 		if int(segment.start_tick)+int(segment.duration_ticks)>now:

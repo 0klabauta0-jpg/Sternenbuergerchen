@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+## AP6: begrenzter Schiffskoerperraster integriert — 12.11.2026
+
+Source62b1454af uebernommen: bestehende gebundene Bodygeometrie wird mit
+Registrymetrik auf ganze Hexfelder gerastert (Randkontakt inklusive). Maximal4096
+Kandidaten vor Iteration, keine Teilmaske bei Fehler. Root nimmt optionale
+Ausschlussfelder nur in den Planungssnapshot auf. Enger unabhaengiger Review ohne
+Blocker. Konkreter Schiffsconsumer, Profilproducer und spaetere Revalidierung
+bleiben offen; keine Kartenaktivierung oder AP6-Gesamtfreigabe.
+
 ## Aktuell im isolierten Integrationsstand — 12.11.2026
 
 Verbindliche aktuelle Offenliste: `docs/tasks/ACTIVE_WORKPLAN_2026_11_11.md`.

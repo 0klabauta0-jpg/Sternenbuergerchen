@@ -2042,10 +2042,15 @@ func _validate_hex_ground_actor_group(unit_ids:PackedStringArray,allow_staged:bo
 	return {"ok":true,"actors":actors}
 
 
-func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2i)->Dictionary:
+func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2i,excluded_cells:Array[Vector2i]=[])->Dictionary:
 	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
 	if not checked.ok:return checked
-	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor_grid,_hex_ground_registry,_hex_ground_runtime.build_planning_snapshot())
+	if excluded_cells.size()>4096:return {"ok":false,"reason":"footprint_budget"}
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var blocked:Dictionary={}
+	for grid in excluded_cells:blocked[grid]=true
+	snapshot["external_admission_blocked_grids"]=blocked
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor_grid,_hex_ground_registry,snapshot)
 	if not plan.ok:return plan
 	var placements:Array[Dictionary]=[]
 	placements.assign(plan.placements)
@@ -2072,11 +2077,15 @@ func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
 	return {"ok":true,"embarked_unit_ids":unit_ids.duplicate()}
 
 
-func prepare_hex_ground_deployment(unit_ids:PackedStringArray,anchor_grid:Vector2i)->Dictionary:
+func prepare_hex_ground_deployment(unit_ids:PackedStringArray,anchor_grid:Vector2i,excluded_cells:Array[Vector2i]=[])->Dictionary:
 	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids,true)
 	if not checked.ok:return checked
 	if _hex_deployment_serial>=HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:return {"ok":false,"reason":"admission_serial_exhausted"}
 	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	if excluded_cells.size()>4096:return {"ok":false,"reason":"footprint_budget"}
+	var blocked:Dictionary={}
+	for grid in excluded_cells:blocked[grid]=true
+	snapshot["external_admission_blocked_grids"]=blocked
 	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor_grid,_hex_ground_registry,snapshot)
 	if not plan.ok:return plan
 	_hex_deployment_serial+=1
