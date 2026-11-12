@@ -25,7 +25,16 @@ Tests werden laut Nutzer erst nach dem zusammenhaengenden Codeblock gebuendelt. 
 ## Codeblock / Freeze
 Produktblock fertig, bewusst noch ohne Compile/Testlauf. bind_multiplayer_runtime_context(context,recipient_team) liefert {ok,reason}; akzeptiert keinen neuen Token auf bereits gebundenem Root. Commands senden den Kontext als separaten RPCparameter, nicht im Commander-/Hexpayload. Lokale bestehende Autoritaetsaufrufe bleiben lokal; Remoteaufrufe ohne exakten Token reject. Fullscope-Envelope wird vor V1-Builder/Apply explizit validiert; fremde Anfangsactors und spaetere Wiederanzeige bleiben ueber Registry/Known-Visualgate verborgen. TerrainMap3DView._is_unit_base_world_visible liest tatsaechlich CanvasItem.visible. Sicht/Projektion einmal pro Team je Broadcast; keine dauerhafte zweite Sichtwahrheit. Zugewiesene Fireteams liefern Teamprovenienz auch wenn deren Personen gerade alle eingeschifft sind.
 
-Offen fuer Sourceintegration: Admissionvisualhook und Resetclear; keine Peer-/Nativefreigabe. Session-READY vergleicht exakt mit bereits vorhandener Sessionkennung. Bestehende versionslose/manifestlose Legacywege bleiben erhalten. Tests laut ausdruecklicher Arbeitssteuerung spaeter gebuendelt.
+Admissionvisualhooks sind nach Initialsetup und RuntimeSelection integriert.
+Der bestehende Lobby-Lifecycle ersetzt bzw. zerstoert den kompletten MissionRoot;
+es gibt derzeit keinen produktiven Wiederverwendungs-/Resetcaller. Daher wird
+clear_multiplayer_runtime_context nicht kuenstlich ins initiale Mapconfigure
+eingefuegt: der vor add_child gebundene Kontext muss dort erhalten bleiben.
+Ein kuenftiger echter Root-Reuse muss vor Neubindung explizit clear aufrufen;
+der kleine AP8-Fall prueft die vorhandene Clear-/Closed-API direkt.
+Keine Peer-/Nativefreigabe. Session-READY vergleicht exakt mit bereits vorhandener
+Sessionkennung. Versionslose/manifestlose Legacywege bleiben erhalten;
+Pruefung erfolgt laut Arbeitssteuerung spaeter gebuendelt.
 
 ### Abschluss der Wire-Abweisungsgrenze
 Ein erfolgreich gebundener Root behaelt nach clear einen sticky required/closed Zustand. Ohne neue gueltige Bindung lehnen Commands vom Netz, Snapshot/Chunks/Vitals/Results und Driverereignisse ab und senden keine Legacydaten. Auch ein tatsaechlich als hex_tactical_v1 deklarierter geladener MissionSetup-Mapkontext erfordert die Kennung, obwohl Clients keinen autoritativen Ground konfigurieren. Echte nie gebundene/deklarierte Legacywege bleiben kontextlos. validate_multiplayer_runtime_context_binding ist reiner Preflight; Lobby ermittelt das lokale Zielteam vor den Tabellenwrites und prueft den Binder dort. Aktiver Assignmentcallback bricht bei false vor Perspective/Selection ab. Kein Testlauf in diesem Abschlussblock.
