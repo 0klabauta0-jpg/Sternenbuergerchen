@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "status": "provisional_internal_balance_not_live_loadout",
+  "reference_note": "Repeatergroessen und Namen als Referenz; alle Werte sind eigene vorlaeufige Spielwerte.",
+  "items": {
+    "repeater_s1": {"name":"Bulldog", "class":"repeater", "size":1, "mass":0.05, "power_demand":0.20, "range":8.0, "damage":2.0, "shots_per_second":3.0},
+    "repeater_s2": {"name":"Badger", "class":"repeater", "size":2, "mass":0.09, "power_demand":0.30, "range":9.0, "damage":3.0, "shots_per_second":2.8},
+    "repeater_s3": {"name":"Panther", "class":"repeater", "size":3, "mass":0.16, "power_demand":0.45, "range":10.0, "damage":4.0, "shots_per_second":2.5},
+    "repeater_s4": {"name":"Rhino", "class":"repeater", "size":4, "mass":0.28, "power_demand":0.65, "range":11.0, "damage":6.0, "shots_per_second":2.2},
+    "repeater_s5": {"name":"Galdereen", "class":"repeater", "size":5, "mass":0.45, "power_demand":0.90, "range":12.0, "damage":8.0, "shots_per_second":2.0},
+    "shield_s1": {"name":"Schildgenerator S1", "class":"shield", "size":1, "mass":0.10, "power_demand":0.40, "capacity":24.0, "recharge_rate":3.0, "recovery_delay":4.0},
+    "shield_s2": {"name":"Schildgenerator S2", "class":"shield", "size":2, "mass":0.20, "power_demand":0.70, "capacity":48.0, "recharge_rate":5.0, "recovery_delay":5.0},
+    "power_s1": {"name":"Kraftwerk S1", "class":"power", "size":1, "mass":0.10, "output":2.0},
+    "power_s2": {"name":"Kraftwerk S2", "class":"power", "size":2, "mass":0.20, "output":3.0}
+  },
+  "models": {
+    "buccaneer": {"slots": {"weapon_1":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "weapon_2":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "shield":{"class":"shield","max_size":1}, "power":{"class":"power","max_size":1}}, "default_slots":{"weapon_1":"repeater_s3","weapon_2":"repeater_s3","shield":"shield_s1","power":"power_s1"}, "flight_demand":0.8},
+    "cutlass": {"slots": {"weapon_1":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "weapon_2":{"class":"repeater","max_size":3,"arc_degrees":20.0}, "weapon_3":{"class":"repeater","max_size":2,"arc_degrees":20.0}, "weapon_4":{"class":"repeater","max_size":2,"arc_degrees":20.0}, "shield":{"class":"shield","max_size":2}, "power":{"class":"power","max_size":2}}, "default_slots":{"weapon_1":"repeater_s3","weapon_2":"repeater_s3","weapon_3":"repeater_s2","weapon_4":"repeater_s2","shield":"shield_s2","power":"power_s2"}, "flight_demand":1.0}
+  }
+}
