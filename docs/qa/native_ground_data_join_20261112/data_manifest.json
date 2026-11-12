@@ -1,0 +1,97 @@
+{
+  "source_commit": "1b924b640",
+  "maps": {
+    "A": {
+      "path": "maps/satellite_crash_site.json",
+      "cells": 131072,
+      "offset_columns": [
+        -170,
+        341
+      ],
+      "rows": [
+        -108,
+        147
+      ],
+      "sha256": "dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2",
+      "source_and_deterministic_byte_match": true,
+      "semantic_ids_preserved": true,
+      "ramps": 75,
+      "object_types": [
+        "frontier_scene_solid",
+        "glut_sandstone_04",
+        "ground_flat",
+        "resource_wreck_solid",
+        "spacekit_satellite_dish_detailed",
+        "station_container_wide"
+      ],
+      "special_visual_owners": {
+        "resource_wreck_solid": "existing local resource runtime visual owner",
+        "frontier_scene_solid": "existing authored place structure footprint"
+      },
+      "legacy_sha256": "2344344cf504e943be97c80307c6ffc6de8578d222ff29ba4549a8679a5168f8"
+    },
+    "B": {
+      "path": "maps/trade_outpost.json",
+      "cells": 131072,
+      "offset_columns": [
+        -170,
+        341
+      ],
+      "rows": [
+        -108,
+        147
+      ],
+      "sha256": "2913cf9d60624efc08d6b77d4a55c83f139bef297b0ae5693796b2aa58525053",
+      "source_and_deterministic_byte_match": true,
+      "semantic_ids_preserved": true,
+      "ramps": 85,
+      "object_types": [
+        "frontier_scene_solid",
+        "glut_sandstone_04",
+        "ground_flat",
+        "spacekit_rock_large_a"
+      ],
+      "special_visual_owners": {
+        "frontier_scene_solid": "existing authored place structure footprint"
+      },
+      "legacy_sha256": "8798718d7697dd86ee479ed2cb73e7cd208bb51d59627ea63bbe186bef59cd8d"
+    },
+    "C": {
+      "path": "maps/fortified_outpost.json",
+      "cells": 131072,
+      "offset_columns": [
+        -170,
+        341
+      ],
+      "rows": [
+        -108,
+        147
+      ],
+      "sha256": "b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286",
+      "source_and_deterministic_byte_match": true,
+      "semantic_ids_preserved": true,
+      "ramps": 65,
+      "object_types": [
+        "frontier_scene_solid",
+        "glut_bridge_deck",
+        "glut_sandstone_04",
+        "ground_flat",
+        "spacekit_rock_large_a"
+      ],
+      "special_visual_owners": {
+        "glut_bridge_deck": "existing regional procedural bridge surface",
+        "frontier_scene_solid": "existing authored place structure footprint"
+      },
+      "legacy_sha256": "feae3f580f71db48254a61c3ba43efea4aa1eb2e80bc971d93245bd09cb1540e"
+    }
+  },
+  "dependencies": {
+    "res://Assets/curated/glut_regional/sandstone_04.glb": true,
+    "res://Assets/kenney_space-kit/Models/GLTF format/terrain.glb": true,
+    "res://Assets/curated/kenney/space_station/models/container-wide.glb": true,
+    "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_detailed.glb": true,
+    "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeA.glb": true
+  },
+  "scope": "offline data/authoring check; no native battle/performance/style acceptance",
+  "sandstone_sha256": "c88b18317764b3fc46e9cdd46bfe4127bae060dc0c493ef156f295833528b35a"
+}

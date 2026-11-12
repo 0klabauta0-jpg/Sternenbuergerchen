@@ -258,7 +258,7 @@ func _rotation_degrees_from_grid_map_orientation(grid_map: GridMap, orientation:
 
 func _apply_authoring_overrides(tile_data, placement: Dictionary, type_id: String, transform_owner_by_grid: Dictionary, warnings: Array[String]) -> void:
 	if placement.has("height_level"):
-		tile_data.height_level = clampi(int(placement.get("height_level", tile_data.height_level)), 0, 2)
+		tile_data.height_level = clampi(int(placement.get("height_level", tile_data.height_level)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	if placement.has("edge_type"):
 		tile_data.edge_type = String(placement.get("edge_type", tile_data.edge_type)).strip_edges().to_lower()
 	if placement.has("surface_type"):

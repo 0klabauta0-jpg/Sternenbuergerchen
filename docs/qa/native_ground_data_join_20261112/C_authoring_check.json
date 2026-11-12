@@ -1,0 +1,215 @@
+{
+  "zone": "C",
+  "status": "PASS",
+  "tiles": 131072,
+  "height_histogram": {
+    "0": 34860,
+    "1": 5493,
+    "2": 11635,
+    "3": 60,
+    "4": 39736,
+    "5": 80,
+    "6": 17085,
+    "7": 30,
+    "8": 22093
+  },
+  "ramp_cells": 65,
+  "reachable_cells": 76046,
+  "marker_checks": [
+    {
+      "id": "objective_point",
+      "axial": [
+        131,
+        34
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "ship_return",
+      "axial": [
+        7,
+        11
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "spawn_alpha",
+      "axial": [
+        7,
+        11
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "spawn_bravo",
+      "axial": [
+        17,
+        14
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "spawn_enemy_defense",
+      "axial": [
+        130,
+        36
+      ],
+      "reachable_adjacent": true
+    },
+    {
+      "id": "outpost_chip",
+      "axial": [
+        131,
+        34
+      ],
+      "reachable_adjacent": true
+    }
+  ],
+  "bridge_cells": 108,
+  "preserved_object_cells": 250,
+  "persistent_footprint_changes": 0,
+  "isolated_objectless_h1": 0,
+  "resource_checks": [],
+  "new_rock_prop_budget": 72,
+  "stairs": [
+    {
+      "id": "main_lower",
+      "start_axial": [
+        40,
+        46
+      ],
+      "end_axial": [
+        54,
+        46
+      ],
+      "bottom": 0,
+      "top": 2,
+      "direction": 0,
+      "directions": [
+        0,
+        0
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 10,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "main_upper",
+      "start_axial": [
+        73,
+        46
+      ],
+      "end_axial": [
+        87,
+        46
+      ],
+      "bottom": 2,
+      "top": 4,
+      "direction": 0,
+      "directions": [
+        0,
+        0
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 10,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "flank_lower",
+      "start_axial": [
+        69,
+        -12
+      ],
+      "end_axial": [
+        83,
+        -12
+      ],
+      "bottom": 0,
+      "top": 2,
+      "direction": 0,
+      "directions": [
+        0,
+        0
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 10,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "flank_upper",
+      "start_axial": [
+        96,
+        -12
+      ],
+      "end_axial": [
+        110,
+        -12
+      ],
+      "bottom": 2,
+      "top": 4,
+      "direction": 0,
+      "directions": [
+        0,
+        0
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 10,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "citadel_overlook",
+      "start_axial": [
+        149,
+        40
+      ],
+      "end_axial": [
+        161,
+        14
+      ],
+      "bottom": 4,
+      "top": 8,
+      "direction": 2,
+      "directions": [
+        2,
+        1,
+        1,
+        2
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 20,
+      "flat_cells_between_rises": 5
+    },
+    {
+      "id": "curved_corner_band",
+      "start_axial": [
+        138,
+        50
+      ],
+      "end_axial": [
+        141,
+        48
+      ],
+      "bottom": 4,
+      "top": 5,
+      "direction": 2,
+      "directions": [
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "band_width_hex": 5,
+      "ramp_cells": 5,
+      "flat_cells_between_rises": 0,
+      "corner_axial": [
+        139,
+        48
+      ],
+      "profile": "shared_midheight_side_edges"
+    }
+  ],
+  "failures": [],
+  "scope": "offline data authoring check; no native gameplay/performance acceptance",
+  "map_sha256": "b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286"
+}

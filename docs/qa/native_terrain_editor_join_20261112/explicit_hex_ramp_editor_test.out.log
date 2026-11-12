@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Explicit map exposes plateau/ramp controls
+PASS: Editor offers all six upward directions
+PASS: Visible Apply changes entire selection through one patch transaction
+PASS: Selected ramp band is one undo step
+PASS: Editor owner notifies terrain revision after shape edits
+PASS: Selection rotation changes direction and preserves lower height
+PASS: Terrain rotation never changes object yaw
+PASS: Undo preserves rule flags and restores direction
+PASS: Redo reapplies the same selected band
+PASS: Undo and redo retain the selected band
+PASS: Height edit retains direction and clamps lower ramp height to7
+PASS: Legacy hill reconciliation does not rewrite explicit ramp terrain
+PASS: Building substrate snapshot keeps ramp fields
+PASS: Building substrate restoration conserves ramp direction
+PASS: Building placement rejects ramp substrate
+PASS: Wide height brush paints exactly the seven-cell hex footprint
+PASS: Hex brush excludes square-only corner cell
+PASS: Editor-authored direction survives real map save/reload
+PASS: Legacy map is not silently migrated and hides new controls
+EXPLICIT_HEX_RAMP_EDITOR 19 passed, 0 failed
