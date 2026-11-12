@@ -4,6 +4,7 @@ extends RefCounted
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
 const STATION_CRAFT = preload("res://scripts/mission/polisa_station_craft_runtime.gd")
 const SHIP_COMPONENTS = preload("res://scripts/mission/ship_equipment_catalog.gd")
+const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
 var _inventory: Dictionary = {}
@@ -151,7 +152,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 		return _reject("ship_service_required", "Schiffe beim Schiffshaendler kaufen")
 	if SHIP_COMPONENTS.known(String(offer.get("item_id", ""))) and not SHIP_COMPONENTS.compatible(String(context.get("ship_component_model_id", "")), "quantum_drive", String(offer.item_id)):
 		return _reject("incompatible_component", "Dieses Schiff hat keinen belegten Warp-Antriebsplatz")
-	if SHIP_COMPONENTS.known(String(offer.get("item_id", ""))):
+	if SHIP_COMPONENTS.known(String(offer.get("item_id", ""))) or SPACE_COMPONENTS.known(String(offer.get("item_id", ""))):
 		var component_craft := String(context.get("craft_id", ""))
 		if not _fuel_by_craft_id.has(component_craft) or not _inventory.has("craft:"+component_craft): return _reject("inventory_access", "Schiffslager für den Antrieb fehlt")
 	var blueprint := String(offer.get("required_blueprint", ""))
@@ -311,7 +312,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
-	if not _valid_component_requests(data.requests, data.stock_by_offer_id): return _reject("invalid_component_receipts", "Warp-Einbaubelege ungültig")
+	if not _valid_component_requests(data.requests, data.stock_by_offer_id, fresh._definitions): return _reject("invalid_component_receipts", "Komponentenbelege ungültig")
 	var station_receipts: Dictionary = fresh.validate_station_receipts(data.requests)
 	if not station_receipts.get("ok", false): return station_receipts
 	var research: Variant = data.get("research_receipts", {})
@@ -783,14 +784,14 @@ func _install_ship_component(payload: Dictionary, context: Dictionary, request_i
 	var source := String(payload.get("source_container_id", ""))
 	var item_id := String(payload.get("item_id", ""))
 	var revision: Variant = payload.get("expected_equipment_revision")
-	if not _fuel_by_craft_id.has(craft_id) or source != "craft:"+craft_id or not _inventory.has(source) or not SHIP_COMPONENTS.known(item_id) or not _valid_nonnegative_integer(revision): return _reject("invalid_component_install", "Schiff, Antrieb oder Lager ungültig")
+	if not _fuel_by_craft_id.has(craft_id) or source != "craft:"+craft_id or not _inventory.has(source) or (not SHIP_COMPONENTS.known(item_id) and not SPACE_COMPONENTS.known(item_id)) or not _valid_nonnegative_integer(revision): return _reject("invalid_component_install", "Schiff, Komponente oder Lager ungültig")
 	var prepare: Callable = context.get("prepare_ship_component_install", Callable())
 	var commit: Callable = context.get("commit_ship_component_install", Callable())
 	if not prepare.is_valid() or not commit.is_valid(): return _reject("equipment_unavailable", "Antriebswerkstatt nicht verbunden")
 	var prepared: Dictionary = prepare.call(craft_id, String(payload.get("slot_id", "")), item_id, int(revision))
 	if not prepared.get("ok", false): return prepared
 	var previous := String(prepared.get("previous_item_id", ""))
-	if not SHIP_COMPONENTS.known(previous): return _reject("invalid_component_install", "Ausgebauter Antrieb unbekannt")
+	if not SHIP_COMPONENTS.known(previous) and not SPACE_COMPONENTS.known(previous): return _reject("invalid_component_install", "Ausgebaute Komponente unbekannt")
 	var candidate: Dictionary = _inventory[source].duplicate(true)
 	if int(candidate.items.get(item_id, 0)) < 1: return _reject("insufficient_items", "Gekaufter Antrieb fehlt im Schiffslager")
 	candidate.items[item_id] -= 1
@@ -805,30 +806,36 @@ func _install_ship_component(payload: Dictionary, context: Dictionary, request_i
 	_revision += 1
 	installed["source_container_id"] = source
 	installed["cost"] = 0
-	installed["message"] = "Warp-Antrieb eingebaut / bisherigen Antrieb im Schiffslager verstaut"
+	installed["message"] = "Komponente eingebaut / bisherige Komponente im Schiffslager verstaut"
 	return installed
 
-func _valid_component_requests(requests: Dictionary, stock: Dictionary = {}) -> bool:
-	var purchased := 0
+func _valid_component_requests(requests: Dictionary, stock: Dictionary = {}, definitions: Dictionary = {}) -> bool:
+	var purchased := {}
 	for id: String in requests:
 		var entry: Dictionary = requests[id]
 		var result: Dictionary = entry.get("result", {})
-		if String(result.get("operation", "")) == "buy" and SHIP_COMPONENTS.known(String(result.get("item_id", ""))):
+		var item_id := String(result.get("item_id", ""))
+		if String(result.get("operation", "")) == "buy" and (SHIP_COMPONENTS.known(item_id) or SPACE_COMPONENTS.known(item_id)):
 			var purchase: Variant = JSON.parse_string(String(entry.get("signature", "")))
 			if typeof(purchase) != TYPE_DICTIONARY: return false
 			var args: Dictionary = purchase.get("payload", {})
-			if args.get("offer_id") != "polisa_warp_hemera" or result.get("item_id") != "warp_hemera" or not _valid_positive_integer(args.get("quantity")) or result.get("quantity") != args.quantity or result.get("cost") != int(args.quantity)*160 or result.get("container_id") != "craft:"+String(args.get("craft_id", "")): return false
-			purchased += int(args.quantity)
+			var offer_id := String(args.get("offer_id", ""))
+			var offer: Dictionary = Dictionary(definitions.get("offers", {})).get(offer_id, {})
+			if offer.is_empty() or offer.get("item_id") != item_id or (offer_id != "polisa_warp_hemera" and offer_id != "polisa_component_" + item_id) or not _valid_positive_integer(args.get("quantity")) or result.get("quantity") != args.quantity or result.get("cost") != int(args.quantity)*int(offer.get("unit_price", 0)) or result.get("container_id") != "craft:"+String(args.get("craft_id", "")): return false
+			purchased[offer_id] = int(purchased.get(offer_id, 0)) + int(args.quantity)
 		if String(result.get("operation", "")) != "station_install_ship_component": continue
 		var parsed: Variant = JSON.parse_string(String(entry.get("signature", "")))
 		if typeof(parsed) != TYPE_DICTIONARY: return false
 		var args: Dictionary = parsed.get("payload", {})
 		for key in ["craft_id", "slot_id", "item_id", "source_container_id"]:
 			if typeof(args.get(key)) != TYPE_STRING or result.get(key) != args[key]: return false
-		if args.slot_id != "quantum_drive" or args.source_container_id != "craft:"+String(args.craft_id) or not SHIP_COMPONENTS.known(args.item_id) or not SHIP_COMPONENTS.known(String(result.get("previous_item_id", ""))) or args.item_id == result.previous_item_id or not _valid_nonnegative_integer(args.get("expected_equipment_revision")) or result.get("previous_equipment_revision") != args.expected_equipment_revision or result.get("equipment_revision") != int(args.expected_equipment_revision)+1 or result.get("cost") != 0: return false
-	if purchased > 4: return false
-	if stock.has("polisa_warp_hemera") and int(stock.polisa_warp_hemera) != 4-purchased: return false
-	if purchased > 0 and not stock.has("polisa_warp_hemera"): return false
+		var old_id := String(result.get("previous_item_id", ""))
+		var known_pair: bool = (SHIP_COMPONENTS.known(args.item_id) and SHIP_COMPONENTS.known(old_id) and args.slot_id == "quantum_drive") or (SPACE_COMPONENTS.known(args.item_id) and SPACE_COMPONENTS.known(old_id) and args.slot_id != "quantum_drive")
+		if not known_pair or args.source_container_id != "craft:"+String(args.craft_id) or args.item_id == old_id or not _valid_nonnegative_integer(args.get("expected_equipment_revision")) or result.get("previous_equipment_revision") != args.expected_equipment_revision or result.get("equipment_revision") != int(args.expected_equipment_revision)+1 or result.get("cost") != 0: return false
+	for offer_id: String in purchased:
+		if not stock.has(offer_id) or int(stock[offer_id]) != int(definitions.offers[offer_id].stock) - int(purchased[offer_id]): return false
+	for offer_id: String in stock:
+		if (offer_id == "polisa_warp_hemera" or offer_id.begins_with("polisa_component_")) and int(stock[offer_id]) != int(definitions.offers[offer_id].stock) - int(purchased.get(offer_id, 0)): return false
 	return true
 
 

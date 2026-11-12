@@ -185,6 +185,17 @@
         "polisa"
       ]
     },
+    "polisa_component_repeater_s1": {"id":"polisa_component_repeater_s1", "item_id":"repeater_s1", "name":"Bulldog S1", "unit_price":60, "stock":6, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_repeater_s2": {"id":"polisa_component_repeater_s2", "item_id":"repeater_s2", "name":"Badger S2", "unit_price":90, "stock":6, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_repeater_s3": {"id":"polisa_component_repeater_s3", "item_id":"repeater_s3", "name":"Panther S3", "unit_price":120, "stock":6, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_repeater_s4": {"id":"polisa_component_repeater_s4", "item_id":"repeater_s4", "name":"Rhino S4", "unit_price":180, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_repeater_s5": {"id":"polisa_component_repeater_s5", "item_id":"repeater_s5", "name":"Galdereen S5", "unit_price":240, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_shield_s1": {"id":"polisa_component_shield_s1", "item_id":"shield_s1", "name":"Schildgenerator S1", "unit_price":90, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_shield_s2": {"id":"polisa_component_shield_s2", "item_id":"shield_s2", "name":"Schildgenerator S2", "unit_price":150, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_power_s1": {"id":"polisa_component_power_s1", "item_id":"power_s1", "name":"Kraftwerk S1", "unit_price":80, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_power_s1_plus": {"id":"polisa_component_power_s1_plus", "item_id":"power_s1_plus", "name":"Kraftwerk S1 verstärkt", "unit_price":140, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_power_s2": {"id":"polisa_component_power_s2", "item_id":"power_s2", "name":"Kraftwerk S2", "unit_price":140, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
+    "polisa_component_power_s2_plus": {"id":"polisa_component_power_s2_plus", "item_id":"power_s2_plus", "name":"Kraftwerk S2 verstärkt", "unit_price":220, "stock":4, "category":"ship_equipment", "location_ids":["polisa"]},
     "polisa_warp_hemera": {
       "id": "polisa_warp_hemera",
       "item_id": "warp_hemera",

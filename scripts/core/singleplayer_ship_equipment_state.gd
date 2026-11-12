@@ -97,8 +97,16 @@ func get_space_combat_stats(craft_id: String) -> Dictionary:
 	return result
 func prepare_install(craft_id: String, slot_id: String, item_id: String, expected_revision: int) -> Dictionary:
 	if expected_revision != _revision: return _reject("equipment_changed")
-	if not _crafts.has(craft_id) or not CATALOG.compatible(String(_crafts[craft_id].model_id), slot_id, item_id): return _reject("incompatible_component")
-	var previous := String(_crafts[craft_id].slots.get(slot_id, ""))
+	if not _crafts.has(craft_id): return _reject("incompatible_component")
+	var previous := ""
+	if slot_id == "quantum_drive":
+		if not CATALOG.compatible(String(_crafts[craft_id].model_id), slot_id, item_id): return _reject("incompatible_component")
+		previous = String(_crafts[craft_id].slots.get(slot_id, ""))
+	else:
+		if not _space_loadouts.has(craft_id) or not Dictionary(_space_loadouts[craft_id]).has(slot_id) or not SPACE_COMPONENTS.known(item_id): return _reject("incompatible_component")
+		var candidate: Dictionary = _space_loadouts[craft_id].duplicate(true)
+		previous = String(candidate[slot_id]); candidate[slot_id] = item_id
+		if not SPACE_COMPONENTS.validate_loadout(String(_crafts[craft_id].model_id), candidate).get("ok", false): return _reject("incompatible_component")
 	if previous == item_id: return _reject("already_installed")
 	var prepared := {"ok":true, "craft_id":craft_id, "slot_id":slot_id, "item_id":item_id, "previous_item_id":previous, "previous_equipment_revision":_revision, "equipment_revision":_revision+1}
 	prepared["seal"] = _sign(prepared)
@@ -114,7 +122,10 @@ func commit_prepared_install(prepared: Dictionary, request_id: String) -> Dictio
 	var receipt := prepared.duplicate(true)
 	receipt.erase("seal")
 	receipt["request_id"] = request_id
-	_crafts[String(prepared.craft_id)].slots[String(prepared.slot_id)] = String(prepared.item_id)
+	if String(prepared.slot_id) == "quantum_drive":
+		_crafts[String(prepared.craft_id)].slots[String(prepared.slot_id)] = String(prepared.item_id)
+	else:
+		_space_loadouts[String(prepared.craft_id)][String(prepared.slot_id)] = String(prepared.item_id)
 	_revision += 1
 	_installs[request_id] = receipt.duplicate(true)
 	return receipt
@@ -129,7 +140,7 @@ func restore_state(data: Dictionary, definitions: Array, supply_requests: Dictio
 	if not _integer(data.get("schema_version")): return _reject("invalid_equipment_state")
 	var version := int(data.schema_version)
 	if version not in [1, 2] or data.size() != (5 if version == 1 else 7) or data.get("catalog_version") != 1 or not _integer(data.get("revision")) or typeof(data.get("crafts")) != TYPE_DICTIONARY or typeof(data.get("installs")) != TYPE_DICTIONARY: return _reject("invalid_equipment_state")
-	if version == 2 and (data.get("space_catalog_version") != 1 or typeof(data.get("space_loadouts")) != TYPE_DICTIONARY or data.space_loadouts != fresh._space_loadouts): return _reject("invalid_space_loadout")
+	if version == 2 and (data.get("space_catalog_version") != 1 or typeof(data.get("space_loadouts")) != TYPE_DICTIONARY): return _reject("invalid_space_loadout")
 	if data.installs.size() != int(data.revision): return _reject("invalid_equipment_history")
 	var receipts: Array = data.installs.values()
 	for raw: Variant in receipts:
@@ -162,12 +173,21 @@ func restore_state(data: Dictionary, definitions: Array, supply_requests: Dictio
 		canonical["equipment_revision"] = int(receipt.equipment_revision)
 		if committed != canonical: return _reject("invalid_equipment_history")
 	if fresh.get_snapshot().crafts != data.crafts or fresh._revision != int(data.revision): return _reject("equipment_state_mismatch")
-	if not _component_balance(fresh._crafts, supply_requests, inventory): return _reject("component_balance_mismatch")
+	if version == 2 and fresh._space_loadouts != data.space_loadouts: return _reject("invalid_space_loadout")
+	if version == 1 and fresh._space_loadouts != _default_space_loadouts_for(definitions): return _reject("invalid_equipment_history")
+	if not _component_balance(fresh._crafts, fresh._space_loadouts, supply_requests, inventory): return _reject("component_balance_mismatch")
 	_crafts = fresh._crafts.duplicate(true)
 	_space_loadouts = fresh._space_loadouts.duplicate(true)
 	_installs = fresh._installs.duplicate(true)
 	_revision = fresh._revision
 	return {"ok":true}
+
+func _default_space_loadouts_for(definitions: Array) -> Dictionary:
+	var defaults := {}
+	for definition: Dictionary in definitions:
+		var slots := SPACE_COMPONENTS.default_loadout(String(definition.get("model_id", "")))
+		if not slots.is_empty(): defaults[String(definition.get("craft_id", ""))] = slots
+	return defaults
 func validate_legacy(definitions: Array, supply_requests: Dictionary, inventory: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
 	var result: Dictionary = fresh.configure(definitions)
@@ -175,26 +195,38 @@ func validate_legacy(definitions: Array, supply_requests: Dictionary, inventory:
 	for entry: Dictionary in supply_requests.values():
 		if String(Dictionary(entry.get("result", {})).get("operation", "")) == "station_install_ship_component": return _reject("missing_equipment_state")
 	# New component ownership cannot be hidden by deleting the save subsection.
-	if not _component_balance(fresh._crafts, supply_requests, inventory): return _reject("component_balance_mismatch")
+	if not _component_balance(fresh._crafts, fresh._space_loadouts, supply_requests, inventory): return _reject("component_balance_mismatch")
 	return {"ok":true}
-func _component_balance(crafts: Dictionary, requests: Dictionary, inventory: Dictionary) -> bool:
+func _component_balance(crafts: Dictionary, space_loadouts: Dictionary, requests: Dictionary, inventory: Dictionary) -> bool:
 	var expected := {"warp_odyssey":0, "warp_hemera":0}
 	var actual := {"warp_odyssey":0, "warp_hemera":0}
+	for item_id: String in SPACE_COMPONENTS.ITEMS:
+		expected[item_id] = 0; actual[item_id] = 0
 	for craft: Dictionary in crafts.values():
 		if not Dictionary(craft.slots).is_empty(): expected.warp_odyssey += 1
+		for item_id: String in SPACE_COMPONENTS.default_loadout(String(craft.model_id)).values(): expected[item_id] += 1
 		for item_id: String in craft.slots.values():
 			if not CATALOG.known(item_id): return false
 			actual[item_id] += 1
+	for slots: Dictionary in space_loadouts.values():
+		for item_id: String in slots.values():
+			if not SPACE_COMPONENTS.known(item_id): return false
+			actual[item_id] += 1
+	var offers: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/trade_offers.json"))).get("offers", {})
 	for entry: Dictionary in requests.values():
 		var result: Dictionary = entry.get("result", {})
-		if String(result.get("operation", "")) != "buy" or not CATALOG.known(String(result.get("item_id", ""))): continue
+		var item_id := String(result.get("item_id", ""))
+		if String(result.get("operation", "")) != "buy" or (not CATALOG.known(item_id) and not SPACE_COMPONENTS.known(item_id)): continue
 		var parsed: Variant = JSON.parse_string(String(entry.get("signature", "")))
 		if typeof(parsed) != TYPE_DICTIONARY or parsed.get("operation") != "buy": return false
 		var args: Dictionary = parsed.get("payload", {})
-		if String(args.get("offer_id", "")) != "polisa_warp_hemera" or result.get("item_id") != "warp_hemera" or not _integer(args.get("quantity")) or int(args.quantity) < 1 or result.get("quantity") != args.quantity or result.get("cost") != int(args.quantity)*160: return false
-		expected.warp_hemera += int(args.quantity)
+		var offer_id := String(args.get("offer_id", ""))
+		var offer: Dictionary = offers.get(offer_id, {})
+		if offer.is_empty() or offer.get("item_id") != item_id or (offer_id != "polisa_warp_hemera" and offer_id != "polisa_component_" + item_id) or not _integer(args.get("quantity")) or int(args.quantity) < 1 or result.get("quantity") != args.quantity or result.get("cost") != int(args.quantity)*int(offer.get("unit_price", 0)): return false
+		expected[item_id] += int(args.quantity)
 	for container: Dictionary in inventory.values():
 		for item_id: String in CATALOG.ITEMS: actual[item_id] += int(Dictionary(container.get("items", {})).get(item_id, 0))
+		for item_id: String in SPACE_COMPONENTS.ITEMS: actual[item_id] += int(Dictionary(container.get("items", {})).get(item_id, 0))
 	return expected == actual
 func _integer(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0 and float(value) == floor(float(value)) and float(value) <= 2147483647

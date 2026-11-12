@@ -88,3 +88,26 @@ mit ausdrücklich an echten Start angepasster Fixture), Guidance 5/5,
 Warp-/Savevertrag 42/42 und AP02 8/8. Der direkte echte Polisa-Rundflug lief
 mit isoliertem Profil 25/25, Exit 0, keine Fehler. Dieser Stand basiert auf
 `9fc5dba20` und ist noch nicht mit dem weiterlaufenden Parallelstand getestet.
+
+## Komponenten-Transaktion: Ownerpfad
+
+Der vorhandene Supply-/Equipment-Einbaupfad kann nun auch passende Repeater,
+Schilde und Kraftwerke gegen einen real gekauften Gegenstand im Schiffslager
+tauschen. Er prüft Slot und Größe, Lage, Bestand und Revision vor Mutation;
+das ausgebaute Teil geht in dasselbe Lager. Warp- und Kampfkomponenten teilen
+Revisionsfolge und Einbaubelege. Restore spielt die Belege erneut ab und prüft
+die Komponentenbilanz über Startausrüstung, Käufe und alle Container; alte
+Warp-Saves bleiben akzeptiert. Der produktive Adapter weist Kauf und Einbau
+dieser Komponenten ausdrücklich ab, bis sie tatsächlich im Gefecht wirken. Es
+gibt deshalb noch keinen nutzbaren Shop-Einbau für diese Bauteile.
+
+Gezielte Ownerprüfung für Kauf, echten Root-/Supply-/Equipment-Tausch,
+unzulässigen Service/Slot, Replay, JSON-Restore und manipulierte Ausrüstung
+bestand; realer CheckpointStore validiert den ausgerüsteten Zustand. Bestehende
+Warp-/Saveprüfung 42/42. Ein Test des Stationspanels mit einem ausdrücklich
+freigeschalteten Testadapter bestand; ein solcher Adapter ist kein Produktpfad.
+Ein verstärktes Kraftwerk ist noch kein wirksames Upgrade, weil Schild- und
+Waffenverbraucher fehlen; deshalb ist dieser Shopweg weiterhin gesperrt. Der
+experimentelle Polisa-Rundflug vor Aktivierung dieser Sperre erreichte 27/27;
+er ersetzt keine Prüfung des gesperrten Produktpfads und ist kein Nachweis für
+fertige Waffen-/Schildwirkung.

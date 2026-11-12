@@ -304,6 +304,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 				_flow.call("_on_homebase_mission_selection_changed",scenario)
 		return result
 	if operation in ["station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
+		if operation == "station_install_ship_component" and load("res://scripts/mission/space_component_catalog.gd").known(String(data.get("item_id", ""))):
+			return _reject("component_not_available", "Diese Schiffskomponente ist noch nicht verfügbar")
 		var craft_id := String(data.get("craft_id", ""))
 		var context := _service_context(craft_id)
 		if String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst am Stationsschalter anmelden")
@@ -329,6 +331,12 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			_screen.call("_emit_homebase_fireteam_context_changed")
 		return result
 	if operation in ["buy", "refuel", "sell"]:
+		if operation == "buy":
+			var offered: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id", "")), {})
+			var component_catalog = load("res://scripts/mission/space_component_catalog.gd")
+			var component_id := String(offered.get("item_id", ""))
+			if component_catalog.known(component_id):
+				return _reject("component_not_available", "Diese Schiffskomponente ist noch nicht verfügbar")
 		if _campaign_mode and operation == "buy":
 			var offer: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id","")),{})
 			var item := String(offer.get("item_id",""))

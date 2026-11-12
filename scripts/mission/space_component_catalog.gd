@@ -2,6 +2,12 @@ extends RefCounted
 ## Pure provisional AP09 catalog. It owns no installed equipment or inventory.
 const PATH := "res://data/space/ship_components.json"
 const WARP_CATALOG = preload("res://scripts/mission/ship_equipment_catalog.gd")
+const ITEMS := ["repeater_s1", "repeater_s2", "repeater_s3", "repeater_s4", "repeater_s5", "shield_s1", "shield_s2", "power_s1", "power_s1_plus", "power_s2", "power_s2_plus"]
+
+static func known(id: String) -> bool: return ITEMS.has(id)
+
+static func item(id: String) -> Dictionary:
+	return Dictionary(Dictionary(definition().get("items", {})).get(id, {})).duplicate(true)
 
 static func definition() -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(PATH))
