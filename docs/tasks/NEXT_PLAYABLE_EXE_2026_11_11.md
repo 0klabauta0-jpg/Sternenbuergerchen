@@ -38,15 +38,21 @@ für den vollständigen Tabletopmodus aktiviert.
 
 1. AP5-Code einschließlich Backoff ist integriert. AP6 enthält Gruppenplätze,
    Transportphasen und gebundene Schiffsflächen samt tatsächlichem Renderjoin.
-   Noch Setup und Basisaktionen zusammenführen; AP6 nicht pauschal abschließen.
+   Basiskern, atomare Boarding-/Unboardpublikation, InitialSetup und Wellen sind
+   integriert. Noch Respawnmanager-/Groundverbund, Memberidentitaet und echter
+   Visit-/Crew-Retireanschluss; AP6 nicht pauschal abschliessen.
 2. AP7: Ground-Roundtrip und Command-/Versionsgrenzen sind teilweise integriert;
-   Passagezusagen, ursprüngliche Bewegungsabsichten, tatsächliche Base-/Checkpoint-
-   Bindung und empfängerbezogene Sichtprojektion vervollständigen. Home-only-
-   Speichergrenzen erhalten. Danach den kleinen AP8-Ablauf vervollständigen.
+   Passagezusagen und urspruengliche Bewegungsabsichten besitzen vorbereitete
+   Restorepatches. Tatsaechliche Base-/Checkpointbindung, Hostpublisher und
+   Receiverkontext fehlen noch; reiner Sichtfilter ist integriert, Sessionkontext
+   in Anschlussarbeit. Home-only-
+   Speichergrenzen erhalten. AP8 hat einen echten 12-Feld-Passageroundtrip (15/0),
+   bleibt ohne Rootcheckpoint/Publisher/Receiver ausdruecklich teilweise.
 3. Orbit: gemeinsame Flight-/Travel-/Economyübergänge, getrennte Stationsdockung
    und Kauf-Erstaufnahme sind als Ownerpfade integriert. Noch produktive lokale
-   Reise-/Visit-/Kaufroute paarig verbinden und Katalog V3 samt Einmarkerwechsel
-   vorbereitet abstimmen. Lokaler Automatismus bleibt bis dahin ausgeschaltet,
+   Visit-/Crewroute nachweisen: die gepaarten Adapter und Kauf-Replays sind
+   integriert, der echte gemeinsame Polisa-Besuch steht aus. Katalog V3 samt
+   Einmarkerwechsel ist vorbereitet und getrennt geprueft. Lokaler Automatismus bleibt bis dahin ausgeschaltet,
    Livekatalog V2. Private Ownerzyklen ersetzen keinen echten Stationsbesuch.
 4. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle
    Kampagne/Gefechtsmatrix. Aktivierung und offene Grenzen dokumentieren;
