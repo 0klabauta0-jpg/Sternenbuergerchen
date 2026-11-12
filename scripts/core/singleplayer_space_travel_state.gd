@@ -360,6 +360,16 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if _phase != String(context.get("expected_phase", "")): return _reject("travel_phase_changed", "Reisephase hat sich geaendert")
 	var payload: Dictionary = context.get("payload", {})
 	var operation := String(context.operation)
+	if operation == "end_campaign_encounter":
+		var current_flight: Dictionary = _flight.get_snapshot()
+		var orbit := String(Dictionary(_definition.get("location_orbits", {})).get("distress_orbit", ""))
+		var body_id := String(Dictionary(Dictionary(_definition.get("orbits", {})).get(orbit, {})).get("body_id", ""))
+		var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
+		if _phase != "approach" or _location_id != "distress_orbit" or payload.get("location_id") != "distress_orbit" or payload.get("craft_id") != _craft_id or orbit != _orbit_id: return _reject("encounter_travel_changed", "Rettungsreise passt nicht")
+		if not layout.get("ok", false) or current_flight.get("coordinate_frame") != "local" or current_flight.get("motion_mode") != "tactical" or current_flight.get("space_area_id") != layout.body_map_id or context.source_area_id != layout.body_map_id or context.target_area_id != layout.body_map_id: return _reject("encounter_flight_changed", "Kampfflug passt nicht zum Rettungsorbit")
+		var candidate := {"ok":true,"owner_instance_id":get_instance_id(),"owner_epoch":_space_area_epoch,"expected_revision":expected_revision,"context":context.duplicate(true),"flight_binding":_space_area_flight_binding(current_flight),"next":{"phase":"orbit","orbit_id":orbit,"orbit_marker_id":_orbit_marker_id,"target_orbit_id":"","target_orbit_marker_id":"","location_id":"","elapsed_seconds":_elapsed_seconds,"progress":_progress,"revision":_revision + 1}}
+		candidate["seal"] = _sign_space_area_state(candidate)
+		return candidate
 	if operation == "launch_to_orbit":
 		var id := String(payload.get("craft_id", ""))
 		var current_flight: Dictionary = _flight.get_snapshot()

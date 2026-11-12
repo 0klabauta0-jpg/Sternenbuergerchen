@@ -194,6 +194,7 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	if _singleplayer_space_travel_owner != travel:
 		_space_move_receipts.clear()
 		_space_fire_receipts.clear()
+		_campaign_space_return_receipts.clear()
 		_space_fire_rng = 1
 	if _singleplayer_campaign_owner != campaign or _singleplayer_supply_owner != supply:
 		_departure_group_receipts.clear()
@@ -412,6 +413,7 @@ const SPACE_COMPONENT_SYSTEMS = preload("res://scripts/tactical/space_component_
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_fire_receipts: Dictionary = {}
+var _campaign_space_return_receipts: Dictionary = {}
 var _space_fire_rng: int = 1
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 var _fixture_area_tokens: Dictionary = {}
@@ -1966,6 +1968,47 @@ func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) 
 	if ids.get("hostile") != "hostile_cutlass" or ids.get("neutral") != "neutral_buccaneer": return {"ok":false, "reason":"invalid_encounter_actors"}
 	if _singleplayer_space_travel_owner.get_flight_state(ids.player) != _space_combat_state.get_actor(ids.player): return {"ok":false, "reason":"not_owned"}
 	return _space_encounter_owner.bind_combat_owner(_space_combat_state, ids)
+
+func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _singleplayer_space_travel_owner == null or _space_encounter_owner == null: return {"ok":false, "reason":"adapter_required"}
+	if _campaign_space_return_receipts.has(request_id):
+		var receipt: Dictionary = _campaign_space_return_receipts[request_id]
+		if receipt.craft_id != craft_id: return {"ok":false, "reason":"request_id_conflict"}
+		if receipt.fleet != _singleplayer_space_travel_owner or receipt.encounter != _space_encounter_owner or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}
+		var check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
+		if not check.get("ok", false) or not check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
+		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
+	if _campaign_space_return_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	if request_id.strip_edges().is_empty() or encounter.get("craft_id") != craft_id or encounter.get("phase") not in ["victory", "defeat", "aborted"] or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return {"ok":false, "reason":"encounter_not_complete"}
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or _space_combat_state.get_actor(craft_id) != flight: return {"ok":false, "reason":"player_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	for id in ["hostile_cutlass", "neutral_buccaneer"]:
+		var actor: RefCounted = _space_combat_state.get_actor(id)
+		if actor == null or actor.get_snapshot().get("space_area_id") != pose.get("space_area_id"): return {"ok":false, "reason":"contact_unavailable"}
+	var bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
+	if not bound.get("ok", false): return bound
+	var payload := {"craft_id":craft_id, "location_id":"distress_orbit"}
+	var context := {"request_id":request_id, "request_signature":JSON.stringify({"operation":"end_campaign_encounter", "payload":payload}, "", true), "operation":"end_campaign_encounter", "payload":payload, "source_area_id":String(pose.space_area_id), "target_area_id":String(pose.space_area_id), "expected_travel_revision":travel.revision, "expected_phase":"approach", "context_id":"encounter-return:" + request_id}
+	bound = _singleplayer_space_travel_owner.bind_space_area_transition_context(context, self)
+	if not bound.get("ok", false): return bound
+	var candidate: Dictionary = _singleplayer_space_travel_owner.prepare_space_area_transition(craft_id, travel.revision, context.source_area_id, context.target_area_id, context)
+	var validation: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(candidate, context) if candidate.get("ok", false) else candidate
+	if not validation.get("ok", false) or validation.get("replayed", false):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
+		return {"ok":false, "reason":"travel_validation_failed"}
+	# Validation above establishes that both contacts exist; no callbacks occur
+	# before the authoritative travel state is published.
+	_space_combat_state.remove_actor("hostile_cutlass")
+	_space_combat_state.remove_actor("neutral_buccaneer")
+	var result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, validation)
+	var completed := {"ok":true, "replayed":false, "travel_result":result}
+	_campaign_space_return_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "encounter":_space_encounter_owner, "flight":flight, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":completed.duplicate(true)}
+	return completed
 
 func admit_campaign_space_contacts(craft_id: String, authority_context: Dictionary) -> Dictionary:
 	# Only a live owned player flight can anchor this encounter. The player

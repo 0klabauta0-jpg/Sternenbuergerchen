@@ -180,6 +180,16 @@ das ist kein Balancing- oder echter Missionsdurchlauf. Beschuss der neutralen
 Buccaneer vor Eingreifen, Bewegung/KI und das produktive Start-/Rückwegstück
 bleiben offen.
 
+Für den Rückweg existiert nun ein vorbereiteter Root-/Fleet-Übergang
+`end_campaign_encounter`: Nach einem beendeten gebundenen Gefecht wird die
+Reisephase vom Rettungsanflug zurück auf Orbit gesetzt, das eigene Schiff bleibt
+im selben lokalen Flug und beide Missionskontakte werden aus der Kampfregistry
+entfernt. Identische Rückkehranfragen sind wiederholbar, abweichende IDs werden
+abgewiesen. Ein Test verwendet dafür eine echte Fleet-Reise, danach aber einen
+explizit zugelassenen lokalen Testflug und einen Testabbruch. Der normale
+Missionsstart und `_finish_space_encounter_result` nutzen den Übergang noch
+nicht; Treibstoff, Ergebnis und Rettung sind damit nicht end-to-end verbunden.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf
