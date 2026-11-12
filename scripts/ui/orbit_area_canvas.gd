@@ -243,7 +243,7 @@ func _draw() -> void:
 	for id: String in _actors:
 		var actor: Dictionary = _actors[id]
 		var selected := id == _selected
-		var color := Color("f2c47c") if selected else Color("91e4ee")
+		var color := Color("f2c47c") if selected else (Color("f17b72") if actor.get("radar_contact", false) else Color("91e4ee"))
 		for cell in actor.get("footprint_cells",[]):
 			if cell is Vector2i:
 				draw_colored_polygon(_polygon(cell),Color(color,0.2))
