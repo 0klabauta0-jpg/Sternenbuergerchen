@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (8 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-Orbit-f69b6645435f41e6b1c24e3c07cdc98d
+PASS Ground exposes canonical save APIs
+PASS JSON roundtrip preserves facing and prehandoff segment progress
+PASS Rebuilt commitments perform identical handoff
+PASS Posthandoff active segment restores
+PASS Duplicate occupancy rejects atomically
+PASS Unknown schema rejects without mutation
+PASS Foreign map rejects without mutation
+PASS Invalid segment times reject without mutation
+PASS Future segment cannot claim stationary occupant after restore
+PASS Export contains detached primitive values
+PASS Restored owner does not alias input dictionaries
+PASS Centering phase survives JSON roundtrip
+PASS Restored centering finishes at same deadline
+PASS Pending admission is explicitly unsupported
+PASS Active whole passage promise survives JSON restore
+PASS V2 missing passage field rejects atomically
+PASS Partial passage rejects atomically
+PASS Overlapping passage promises reject
+PASS Foreign cohort member rejects
+PASS Duplicate cohort member rejects
+PASS Posthandoff passage edge restores identical motion
+PASS Stationary passage member retains whole active promise
+PASS Passage export is detached
+PASS Explicit legacy v1 open subset remains compatible
+PASS Restore rejects corridor segments without lossless passage schema
+PASS Whole accepted cohort retains member outside passage
+PASS Nonmember monotone clearing survives without cohort extension
+PASS Clearing posthandoff edge remains valid against inherited cohort
+PASS Reversed noncanonical passage order rejects
+PASS Overflow passage coordinate rejects before Vector2i
+PASS Cold multicomponent restore shares one64 node budget without partial publish
+PASS Bounded retry completes remaining topology and restores both whole components
+PASS Terrain change before Ground tick blocks export instead of changing saved height
+PASS Terrain-unrevalidated live receiver rejects restore before candidate mutation
+PASS Existing Ground revalidation restores legal raised plateau roundtrip
+HEX_GROUND_SAVE_STATE passed=35 failed=0

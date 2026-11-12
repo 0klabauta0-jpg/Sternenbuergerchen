@@ -1,0 +1,18 @@
+{
+  "case": "ground_save",
+  "exit_code": 0,
+  "clean_log": true,
+  "real_profile_unchanged": true,
+  "source_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/hex_ground_save_state_verifier.gd": "4027b8f34180175ed24b0b78f26c3735c08f0b4c34f6a29e39232c06933288a3",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "1dd9c7d2c460718252dd9b370fe6e64100d23cdc7f290221dba99cca7390e01c",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_tile_data.gd": "7a01c1c15b33192643e8bb42285a03faaa6d8bc30d07466ccb46bd6696901bff",
+    "scripts/terrain/terrain_registry.gd": "c12952855ed41a709e56249f904fb0aba2a6094f9300e15bc154e747b3c4edbb",
+    "scripts/terrain/hex_corridor_topology_cache.gd": "b9bfc3dcda3b0e040df6253ed4a22f2c52d5d9ba9a948641990d6c4b16d24cc3",
+    "scripts/core/hex_ground_runtime.gd": "c9e259d94973927c197b5824c31469725710f1bcbdeb21363ab317c694ea80a3"
+  }
+}
