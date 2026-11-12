@@ -769,7 +769,7 @@ func validate_prepared_restore(prepared:RefCounted)->Dictionary:
 	return {"ok":true,"prepared_id":prepared.get_instance_id()}
 
 # Root validates every participant, then Ground/Movement/Base tails, then projects.
-func _publish_prepared_restore(prepared:RefCounted,_validation:Dictionary)->Dictionary:
+func _publish_prepared_restore(prepared:RefCounted,_validation:Dictionary,target_root_context:int=-1)->Dictionary:
 	var record:Dictionary=_checkpoint_prepared[prepared.get_instance_id()]
 	_states=record.patch.states
 	_beds=record.patch.beds
@@ -777,6 +777,7 @@ func _publish_prepared_restore(prepared:RefCounted,_validation:Dictionary)->Dict
 	_poll_seconds=record.patch.poll_seconds
 	_rest_elapsed=record.patch.rest_elapsed
 	record.phase="published"
+	if target_root_context>=0:record.context=target_root_context
 	_checkpoint_epoch+=1
 	return {"ok":true}
 
@@ -841,7 +842,7 @@ func _checkpoint_grid_frame()->Dictionary:
 
 func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Dictionary:
 	if not _checkpoint_keys(state,["version","map_id","topology","grid_frame","sequence","poll_seconds","rest_elapsed","units"]) or not _checkpoint_int(state.version,2,2):return _checkpoint_reject("base_checkpoint_invalid_version")
-	if target==null or target.get_script()!=_sim._hex_ground_runtime.get_script() or target._registry!=_terrain:return _checkpoint_reject("base_checkpoint_target_ground")
+	if target==null or target.get_script()!=_sim._hex_ground_runtime.get_script() or target._registry.get_script()!=_terrain.get_script() or target._registry.get_checkpoint_grid_frame()!=_terrain.get_checkpoint_grid_frame():return _checkpoint_reject("base_checkpoint_target_ground")
 	var ground:Dictionary=target.build_planning_snapshot()
 	if typeof(state.map_id)!=TYPE_STRING or state.map_id!=ground.map_id or state.topology!="hex_axial_v1" or state.topology!=_terrain.get_grid_topology() or movement.get("schema")!="hex_movement_v1" or movement.get("map_id")!=ground.map_id or movement.get("terrain_revision")!=ground.terrain_revision or movement.get("tick")!=ground.current_tick:return _checkpoint_reject("base_checkpoint_map_context")
 	if not _checkpoint_keys(state.grid_frame,["origin","q","r"]):return _checkpoint_reject("base_checkpoint_grid_frame")
@@ -852,7 +853,7 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		if Vector2(float(state.grid_frame[key][0]),float(state.grid_frame[key][1]))!=Vector2(float(current_frame[key][0]),float(current_frame[key][1])):return _checkpoint_reject("base_checkpoint_grid_frame")
 	if not _checkpoint_int(state.sequence,0,1000000000000) or not _checkpoint_number(state.poll_seconds) or not _checkpoint_number(state.rest_elapsed):return _checkpoint_reject("base_checkpoint_invalid_clock")
 	if typeof(state.units)!=TYPE_DICTIONARY or state.units.size()!=_states.size() or state.units.size()>64:return _checkpoint_reject("base_checkpoint_unit_set")
-	var movement_proof:Dictionary=_sim._hex_movement_runtime._save_validate(movement,target)
+	var movement_proof:Dictionary=_sim._hex_movement_runtime._save_validate(movement,target,target._registry)
 	if not movement_proof.ok:return _checkpoint_reject("base_checkpoint_movement_target")
 	var intents:Dictionary={};var max_sequence:=0
 	for intent in movement.accepted_intents:
@@ -939,7 +940,7 @@ func _checkpoint_transport_context(state:Dictionary)->Dictionary:
 	return result
 
 func _checkpoint_home_craft(craft_id:String)->bool:
-	if not _checkpoint_id(craft_id) or not _flow.has_method("_find_homebase_aircraft_definition") or Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).is_empty() or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))!="homebase" or not Dictionary(_flow.call("_find_pending_mission_craft_transfer",craft_id)).is_empty() or not get_parent().has_method("get_space_travel_snapshot"):return false
+	if not _checkpoint_id(craft_id) or not _flow.has_method("_find_homebase_aircraft_definition") or Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).is_empty() or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,"")) not in ["homebase","waiting_pad"] or not Dictionary(_flow.call("_find_pending_mission_craft_transfer",craft_id)).is_empty() or not get_parent().has_method("get_space_travel_snapshot"):return false
 	return Dictionary(get_parent().call("get_space_travel_snapshot",craft_id)).get("phase")=="grounded"
 func _checkpoint_token_sequence(token:Variant)->int:
 	if not _checkpoint_id(token) or not String(token).begins_with("base:"):return -1

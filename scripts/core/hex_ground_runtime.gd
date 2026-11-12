@@ -844,7 +844,7 @@ func _save_context_issue() -> String:
 
 
 ## Cold, trusted inprocess preparation. The handle contains no writable patch.
-func prepare_restore_state(state:Dictionary)->Dictionary:
+func prepare_restore_state(state:Dictionary,target_registry:Node=null)->Dictionary:
 	var blocked:=_save_context_issue()
 	if not blocked.is_empty():return _reject(blocked)
 	for key in _prepared_restores.keys():
@@ -852,7 +852,7 @@ func prepare_restore_state(state:Dictionary)->Dictionary:
 		if record.handle.get_ref()==null or record.epoch!=_restore_binding_epoch:_prepared_restores.erase(key)
 	if _prepared_restores.size()>=32:return _reject("ground_restore_prepare_capacity")
 	var source_stamp:=_restore_value_stamp()
-	var checked:Dictionary=_save_candidate(state)
+	var checked:Dictionary=_save_candidate(state,target_registry)
 	if not checked.ok:return checked
 	if source_stamp!=_restore_value_stamp():return _reject("ground_restore_context_changed")
 	var candidate=checked.candidate
@@ -885,6 +885,7 @@ func validate_prepared_restore(prepared:RefCounted)->Dictionary:
 
 
 func publish_prepared_restore(prepared:RefCounted)->Dictionary:
+	if prepared!=null and _prepared_restores.has(prepared.get_instance_id()) and _prepared_restores[prepared.get_instance_id()].candidate._registry!=_registry:return _reject("ground_restore_joint_publish_required")
 	var validation:=validate_prepared_restore(prepared)
 	if not validation.ok:return validation
 	return _publish_prepared_restore(prepared,validation)
@@ -916,16 +917,17 @@ func _restore_value_stamp()->String:
 		_admission_by_id,_admission_slots_by_grid,_admission_id_by_unit]).hex_encode().sha256_text()
 
 
-func _save_candidate(state:Dictionary) -> Dictionary:
+func _save_candidate(state:Dictionary,target_registry:Node=null) -> Dictionary:
+	var registry:Node=target_registry if target_registry!=null else _registry
 	var keys:Array=["schema","map_id","topology","tick","terrain_revision","units","active_segments","centering"]
 	if state.get("schema")=="hex_ground_v2":keys.append("passage_commitments")
 	elif state.get("schema")!="hex_ground_v1":return _reject("invalid_ground_save_schema")
 	if not _save_keys(state,keys):return _reject("invalid_ground_save_schema")
 	if not _save_id(state.map_id) or state.map_id!=_map_id or state.topology!=TOPOLOGY:return _reject("ground_save_map_mismatch")
-	if not _save_integer(state.tick,0,MAX_TICK) or not _save_integer(state.terrain_revision,0,MAX_TICK) or int(state.terrain_revision)!=_terrain_revision():return _reject("ground_save_terrain_context")
+	if not _save_integer(state.tick,0,MAX_TICK) or not _save_integer(state.terrain_revision,0,MAX_TICK) or int(state.terrain_revision)!=int(registry.call("get_revision")):return _reject("ground_save_terrain_context")
 	if typeof(state.units)!=TYPE_ARRAY or state.units.size()>64 or typeof(state.active_segments)!=TYPE_ARRAY or state.active_segments.size()>256 or typeof(state.centering)!=TYPE_ARRAY or state.centering.size()>64:return _reject("ground_save_budget")
 	var candidate=get_script().new()
-	candidate.configure(_registry,_map_id,int(state.tick))
+	candidate.configure(registry,_map_id,int(state.tick))
 	var placements:Array[Dictionary]=[]
 	for value in state.units:
 		if not _save_keys(value,["unit_id","grid","facing_dir","posture_key"]) or not _save_id(value.unit_id) or not _save_id(value.posture_key) or not _save_integer(value.facing_dir,0,5):return _reject("invalid_ground_save_unit")
@@ -956,7 +958,7 @@ func _save_candidate(state:Dictionary) -> Dictionary:
 		candidate._centering_by_unit_id[String(value.unit_id)]={"offset_axial":offset,"stand_height_logical":float(value.stand_height_logical),"start_tick":int(value.start_tick),"duration_ticks":int(value.duration_ticks)}
 	for id in schedules:
 		schedules[id].sort_custom(func(a:Dictionary,b:Dictionary)->bool:return a.start_tick<b.start_tick)
-		if not PLANNER._hex_valid_schedule(schedules[id],candidate._units_by_id[id].grid,candidate._tick,_registry):return _reject("invalid_ground_save_schedule",id)
+		if not PLANNER._hex_valid_schedule(schedules[id],candidate._units_by_id[id].grid,candidate._tick,registry):return _reject("invalid_ground_save_schedule",id)
 		var future_count:=0
 		for segment in schedules[id]:
 			if segment.handoff_tick>candidate._tick:future_count+=1
@@ -981,7 +983,7 @@ func _save_candidate(state:Dictionary) -> Dictionary:
 		if not issue.is_empty():return _reject("ground_save_"+issue,id)
 	var policy:Dictionary=candidate._validate_new_corridor_policy(schedules,candidate._corridor_grants)
 	if not policy.ok:return _reject("ground_save_"+String(policy.reason))
-	if _terrain_revision()!=int(state.terrain_revision):return _reject("ground_save_terrain_context")
+	if int(registry.call("get_revision"))!=int(state.terrain_revision):return _reject("ground_save_terrain_context")
 	return {"ok":true,"candidate":candidate}
 
 
