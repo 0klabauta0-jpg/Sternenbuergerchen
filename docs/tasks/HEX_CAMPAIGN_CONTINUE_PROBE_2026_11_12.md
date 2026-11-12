@@ -31,3 +31,11 @@ keine Script-/Parse-/Teardownfehler, Quellen- und echtes Profil unverändert,
 private Canary vorhanden. Report liegt unter .godot/hex_campaign_continue/.
 Vorbereitung ist ausdrücklich kein bestandener Lauf. Keine Performance-/Peer-/
 Native-/Main-/EXE-Abnahme; große Performanceprüfungen folgen später.
+
+Erste tatsächliche Parentprobe: FineMap, neuer Kampagnenstart, tatsächliche
+Registry und echtes Pilotboarding bestanden; Save wird rot bei
+invalid_hex_checkpoint_transport (PackedStringArray aus bestehendem
+PersonnelLoadoutState gegen neue Array-only-Eingangsprüfung). Metawriter
+korrigiert diesen Produkteingang. Im Test außerdem fehlenden rein visuellen
+FOB-Refresh-Override ergänzt; keine Bord-/Roster-/Ownerlogik ersetzt.
+Source-/echtesProfil-/Canaryguards der roten Probe waren erfolgreich.
