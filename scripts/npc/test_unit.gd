@@ -2076,3 +2076,77 @@ func finalize_mission_vital_restore(handle: RefCounted) -> Dictionary:
 	if not is_instance_valid(lifetime.get_ref()): return {"ok":true, "context_changed":true}
 	if is_inside_tree() and not is_queued_for_deletion(): _refresh_readability()
 	return {"ok":true}
+
+const MISSION_CHECKPOINT_VALUE_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+class PreparedMissionActor extends RefCounted:
+	pass
+var _prepared_mission_actors: Dictionary = {}
+
+func export_mission_actor_checkpoint() -> Dictionary:
+	if not _actor_respawn_models_valid() or not global_position.is_finite(): return {"ok":false, "reason":"actor_checkpoint_unavailable"}
+	var raw := {"position":global_position, "vital":_vital_status.to_dict(), "runtime":_runtime_status.to_dict(), "command":_current_unit_command.to_dict() if _current_unit_command != null else {}, "contact_active":_contact_active, "contact_target":_contact_target_id, "damage":_last_damage_context.duplicate(true)}
+	var encoded := MISSION_CHECKPOINT_VALUE_CODEC.encode_value(raw)
+	if not encoded.ok: return encoded
+	return {"schema":"mission_actor_checkpoint.v1", "unit_id":unit_id, "team_id":team_id, "fireteam_id":fireteam_id, "max_health":max_health_points, "payload":encoded.value}
+
+# expected_position must come from the independently prepared ground owner,
+# never from UI or from this actor snapshot itself.
+func prepare_mission_actor_restore(owner: Node, state: Dictionary, expected_position: Vector2) -> Dictionary:
+	if state.size() != 6 or not state.has_all(["schema", "unit_id", "team_id", "fireteam_id", "max_health", "payload"]) or state.schema != "mission_actor_checkpoint.v1" or state.unit_id != unit_id or state.team_id != team_id or state.fireteam_id != fireteam_id or state.max_health != max_health_points or not expected_position.is_finite(): return {"ok":false, "reason":"invalid_actor_checkpoint"}
+	var decoded := MISSION_CHECKPOINT_VALUE_CODEC.decode_value(state.payload)
+	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_actor_checkpoint"}
+	var data: Dictionary = decoded.value
+	if data.size() != 7 or not data.has_all(["position", "vital", "runtime", "command", "contact_active", "contact_target", "damage"]) or not data.position is Vector2 or not data.position.is_finite() or data.position.distance_to(expected_position) > 0.01 or not data.vital is Dictionary or not data.runtime is Dictionary or not data.command is Dictionary or typeof(data.contact_active) != TYPE_BOOL or typeof(data.contact_target) != TYPE_STRING or not data.damage is Dictionary: return {"ok":false, "reason":"invalid_actor_checkpoint"}
+	var runtime = UNIT_RUNTIME_STATUS_SCRIPT.from_dict(data.runtime)
+	if not runtime.is_valid() or runtime.unit_id != unit_id or runtime.team_id != team_id or runtime.fireteam_id != fireteam_id or JSON.stringify(runtime.to_dict(), "", true) != JSON.stringify(data.runtime, "", true): return {"ok":false, "reason":"invalid_actor_runtime"}
+	var command: RefCounted = null
+	if not data.command.is_empty() and String(data.vital.get("state", "")) != "fit": return {"ok":false, "reason":"invalid_actor_command"}
+	if not data.command.is_empty():
+		command = UNIT_COMMAND_SCRIPT.from_dict(data.command)
+		if not command.is_valid() or command.unit_id != unit_id or command.team_id != team_id or JSON.stringify(command.to_dict(), "", true) != JSON.stringify(data.command, "", true): return {"ok":false, "reason":"invalid_actor_command"}
+	var identity: Dictionary = prepare_runtime_identity_change(owner, {"unit_id":unit_id, "team_id":team_id, "fireteam_id":fireteam_id}, true)
+	if not identity.get("ok", false): return identity
+	var vital: Dictionary = prepare_mission_vital_restore(owner, data.vital)
+	if not vital.get("ok", false): return vital
+	var identity_record: Dictionary = _runtime_identity_record(identity.prepared)
+	identity_record.runtime = runtime
+	identity_record["checkpoint_command"] = command
+	for key in _prepared_mission_actors.keys():
+		if _prepared_mission_actors[key].handle.get_ref() == null: _prepared_mission_actors.erase(key)
+	if _prepared_mission_actors.size() >= 32: return {"ok":false, "reason":"actor_checkpoint_capacity"}
+	var handle := PreparedMissionActor.new()
+	_prepared_mission_actors[handle.get_instance_id()] = {"handle":weakref(handle), "identity":identity.prepared, "vital":vital.prepared, "data":data, "position":global_position, "phase":"prepared"}
+	return {"ok":true, "prepared":handle}
+
+func validate_mission_actor_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _prepared_mission_actors.has(handle.get_instance_id()): return {"ok":false, "reason":"actor_checkpoint_unknown"}
+	var record: Dictionary = _prepared_mission_actors[handle.get_instance_id()]
+	if record.phase != "prepared" or record.handle.get_ref() != handle or global_position != record.position: return {"ok":false, "reason":"actor_checkpoint_changed"}
+	var identity: Dictionary = validate_runtime_identity_change(record.identity)
+	if not identity.get("ok", false): return identity
+	return validate_mission_vital_restore(record.vital)
+
+func _publish_mission_actor_restore(handle: RefCounted, validation: Dictionary) -> void:
+	var record: Dictionary = _prepared_mission_actors[handle.get_instance_id()]
+	_publish_runtime_identity_change(record.identity, validation)
+	_contact_active = record.data.contact_active
+	_contact_target_id = record.data.contact_target
+	_last_damage_context = record.data.damage
+	_publish_mission_vital_restore(record.vital, validation)
+	_runtime_identity_record(record.identity)["post_models"] = _actor_respawn_model_stamp()
+	record.phase = "published"
+
+func finalize_mission_actor_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _prepared_mission_actors.has(handle.get_instance_id()): return {"ok":false, "reason":"actor_checkpoint_unknown"}
+	var record: Dictionary = _prepared_mission_actors[handle.get_instance_id()]
+	if record.phase != "published" or record.handle.get_ref() != handle: return {"ok":false, "reason":"actor_checkpoint_changed"}
+	_prepared_mission_actors.erase(handle.get_instance_id())
+	var lifetime: WeakRef = weakref(self)
+	var identity: Dictionary = finalize_runtime_identity_change(record.identity)
+	if not is_instance_valid(lifetime.get_ref()): return {"ok":true, "context_changed":true}
+	if not identity.get("ok", false) or identity.get("context_changed", false): return identity
+	if _current_unit_command != null and String(_current_unit_command.get("source_task_type")).strip_edges().to_lower() == "post_drop_360_security":
+		set_meta("post_drop_security_active", true)
+	else:
+		remove_meta("post_drop_security_active")
+	return finalize_mission_vital_restore(record.vital)

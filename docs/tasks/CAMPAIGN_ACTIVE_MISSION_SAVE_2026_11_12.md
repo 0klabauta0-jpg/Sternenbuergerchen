@@ -20,3 +20,6 @@ Flugowner: versionierter JSON-Export und vorbereiteter Restore auf identischem C
 
 ## Ownerbausteine in Arbeit
 Ein begrenzter typisierter JSON-Codec sowie vorbereitete Flug-, Reise-, strategische Flotten-, Rotten-, Schiffssystem- und Vitalmodell-Teile sind gesondert geprueft. Die Teil-Restores validieren Identitaeten und enthalten keine allgemeine Speicherfreigabe. Lokale Raum-/Atmosphaerenbereiche und Area-Bindungen werden durch den strategischen Flottenpfad noch abgewiesen; fehlende Missions-/Transport-/Combatindex-/Sortie-/Gesamttransaktionsdaten bleiben offen. Warp-Reise wurde mit Zwischenstand, Fortsetzung und Request-Replay geprueft; Schiffssystemtest verwendet tatsaechlichen Schaden und Replay. Kein aktiver Einsatzcheckpoint und kein EXE-Export.
+
+## Personenmodelle
+Echte Registry-Actors koennen Identitaet, medizinischen Zustand, Runtime-/UnitCommand und Kontaktzustand vorbereiten. Die gespeicherte Position muss dem separat vorbereiteten Bodenowner entsprechen; der Actor-Teil erzeugt keine zweite Positionswahrheit. Ein Batch validiert alle Actors vor signalbehafteter Finalisierung; Tests zeigen, dass ein zwischenzeitlich veraenderter zweiter Actor auch die Aenderung des ersten verhindert. Boden-, Bewegungs-, Transport- und Missionstimer sind dadurch noch nicht als Gesamteinsatz gespeichert.
