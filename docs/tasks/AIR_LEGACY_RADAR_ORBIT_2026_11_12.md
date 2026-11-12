@@ -93,6 +93,15 @@ hat SHA-256 `aa6841f32b7cdd00fe7506d8c4960eb4a76fe41416633f12e3e50770b2c7618`.
 Der Store-Read ist kein Szenen-Continue; der B-Auftrag wurde nicht erfüllt.
 Ein nativer Sichttest und lokales Flight-/Automatik-Save/Load bleiben offen.
 
+## Ausstehende Befehle während Orbitdurchflug
+
+Ein vorgemerkter Oberflächenanflug gehört ausschließlich zu einem laufenden
+Einflug; ein vorgemerkter Warp gehört ausschließlich zu einem laufenden
+Ausflug. Pro Schiff dürfen die beiden vorgemerkten Befehle nicht zugleich
+existieren. Wiederholungen desselben Befehls bleiben idempotent; widersprüchliche
+Anfragen werden mit einer nachvollziehbaren Ablehnung beantwortet. Die Prüfung
+bleibt auf den vorhandenen Reiseadapter begrenzt und verändert keine Flugphysik.
+
 Die kanonische Oberflächenzuordnung ordnet `satellite_crash` Glut 1a,
 `trade_outpost` Glut 1b und `fortified_outpost` Glut 1 zu. Ihre Szenarien
 verweisen auf die zugehörigen Karten. `distress_orbit` und `polisa` sind keine

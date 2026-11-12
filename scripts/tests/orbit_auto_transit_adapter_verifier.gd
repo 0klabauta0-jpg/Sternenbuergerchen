@@ -40,6 +40,13 @@ func _initialize() -> void:
 		adapter.advance_space_travel(3.0)
 		if fleet.get_craft_snapshot("ship").phase == "orbit" and sim.get_space_actor("ship") != null: break
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and adapter._surface_orbit_intents.ship.status == "flying")
+	var approach := {"craft_id":"ship", "location_id":location_id}
+	var warp_request := {"craft_id":"ship", "target_orbit_id":"moon_orbit"}
+	assert(adapter._request_space_operation("space_start_quantum", warp_request, "inbound-warp").get("reason") == "orbit_direction_conflict")
+	assert(adapter._request_space_operation("space_begin_approach", approach, "inbound-approach").get("pending", false))
+	assert(adapter._request_space_operation("space_begin_approach", approach, "inbound-approach").get("pending", false))
+	assert(adapter._request_space_operation("space_start_quantum", warp_request, "cross-warp").get("reason") == "approach_pending")
+	assert(not adapter._surface_orbit_intents.ship.has("pending_warp"))
 	for step in range(10):
 		sim.tick_counter = flight.get_snapshot().tick + 1
 		sim._advance_space_flights(0.1, sim.tick_counter)
@@ -64,10 +71,16 @@ func _initialize() -> void:
 	adapter._surface_orbit_intents.ship.direction = "outbound"
 	adapter._surface_orbit_intents.ship.status = "starting"
 	var request := {"craft_id":"ship", "target_orbit_id":"moon_orbit"}
+	assert(adapter._request_space_operation("space_begin_approach", approach, "outbound-approach").get("reason") == "orbit_direction_conflict")
+	adapter._surface_orbit_intents.ship.status = "flying"
+	assert(adapter._request_space_operation("space_begin_approach", approach, "flying-outbound-approach").get("reason") == "orbit_direction_conflict")
 	assert(adapter._request_space_operation("space_start_quantum", request, "queued").get("pending", false))
 	assert(adapter._request_space_operation("space_start_quantum", request, "queued").get("pending", false))
+	assert(adapter._request_space_operation("space_begin_approach", approach, "cross-approach").get("reason") == "warp_pending")
+	assert(not adapter._surface_orbit_intents.ship.has("pending_approach"))
 	var changed := request.duplicate(); changed["target_orbit_marker_id"] = "orbit_2"
 	assert(adapter._request_space_operation("space_start_quantum", changed, "queued").get("reason") == "request_id_conflict")
+	adapter._surface_orbit_intents.ship.status = "starting"
 	assert(adapter.request_operation("space_set_orbit_automatic", {"craft_id":"ship", "enabled":false}).ok)
 	assert(not adapter.get_space_travel_snapshot("ship").orbit_transit_automatic)
 	assert(adapter._surface_orbit_intents.ship.status == "manual" and not adapter._surface_orbit_intents.ship.has("pending_warp"))

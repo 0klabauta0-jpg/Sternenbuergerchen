@@ -1527,7 +1527,9 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var flight: RefCounted = _travel.get_flight_state(craft_id)
 		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
 			var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-			if transit.get("direction") == "outbound" and transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
+			if transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
+				if transit.has("pending_approach"): return _reject("approach_pending", "Vorgemerkten Anflug zuerst abschließen oder abbrechen")
+				if transit.get("direction") != "outbound": return _reject("orbit_direction_conflict", "Während des Einflugs ist kein Warp vorgemerkt")
 				var target := String(data.get("target_orbit_id", ""))
 				if not Dictionary(snapshot.get("orbits", {})).has(target) or target == String(snapshot.get("orbit_id", "")): return _reject("unknown_orbit", "Sprungziel passt nicht")
 				var previous: Dictionary = transit.get("pending_warp", {})
@@ -1566,7 +1568,10 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
 		var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-		if not station_dock and not station_landing and transit.get("location_id") == location_id and transit.get("status") == "flying":
+		if not station_dock and not station_landing and transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
+			if transit.has("pending_warp"): return _reject("warp_pending", "Vorgemerkten Warp zuerst abschließen oder abbrechen")
+			if transit.get("direction") != "inbound": return _reject("orbit_direction_conflict", "Während des Ausflugs ist kein Anflug vorgemerkt")
+			if transit.get("location_id") != location_id: return _reject("destination_mismatch", "Anflugziel passt nicht zum Orbitdurchflug")
 			if data.size() != 2: return _reject("invalid_command", "Anflugauftrag enthält unbekannte Angaben")
 			var previous: Dictionary = transit.get("pending_approach", {})
 			if not previous.is_empty() and String(previous.request_id) != request_id: return _reject("approach_pending", "Anflug ist bereits vorgemerkt")
