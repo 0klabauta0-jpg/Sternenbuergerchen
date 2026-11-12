@@ -41,7 +41,8 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Screenpublikation, echte Screenprobe46/0 und Boarding53/0.
   Initiales MissionSetup Source306 als125a905b4 integriert, frisch62/0 plus
   Owner56/0 und Actornachbar24/0; erwartete Schema-Rejectwarnungen dokumentiert.
-  Wellen785+c4f sind in enger Review, anschliessend Import. ActorMedicalaf56
+  Wellen785+c4f sind als e2522cb38/2bfebc601 integriert, frisch64/0 plus
+  Setup62/0; alte Membership und Reentrypublikation sind abgesichert. ActorMedicalaf56
   stellt vorbereitete stille Gesundheits-/Befehls-/Kontaktpatches bereit (24/0);
   Root-/Ground-/Respawnmanagerverbund Sourceffac ist als1e0c2b5af integriert,
   frisch76/0 samt Guards. Reentryschaden, Managerpfadwechsel und akzeptierte
