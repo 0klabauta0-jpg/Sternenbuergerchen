@@ -14,10 +14,13 @@ class Pilot extends Node:
 	func is_pilot_aboard(_id: String) -> bool: return true
 
 func _initialize() -> void:
+	var trade := "--trade" in OS.get_cmdline_user_args()
+	var location_id := "trade_outpost" if trade else "satellite_crash"
+	var target_orbit := "glut_1b_orbit" if trade else "glut_1a_orbit"
 	var fleet = FLEET.new(); assert(fleet.configure().ok); fleet.register_craft("ship")
 	assert(fleet.apply_command({"contract_category":"singleplayer_space_travel", "operation":"launch_to_orbit", "payload":{"craft_id":"ship"}, "request_id":"launch"}, {"runtime_authorized":true}).ok)
 	var campaign = CAMPAIGN.new(); assert(campaign.configure().ok)
-	assert(campaign.apply_command({"contract_category":"singleplayer_campaign", "operation":"select_destination", "payload":{"location_id":"satellite_crash"}, "request_id":"select"}, {}).ok)
+	assert(campaign.apply_command({"contract_category":"singleplayer_campaign", "operation":"select_destination", "payload":{"location_id":location_id}, "request_id":"select"}, {}).ok)
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(campaign, null, null, fleet)
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flight: RefCounted = fleet.get_flight_state("ship")
@@ -27,12 +30,12 @@ func _initialize() -> void:
 	adapter._simulation = sim; adapter._campaign = campaign; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._space_route_requested = true
 	sim.configure_base_personnel(pilot); assert(sim.configure_departure_adapter(adapter).ok)
 	assert(not adapter._surface_orbit_path_enabled)
-	adapter._record_surface_orbit_intent("ship", "planet_orbit")
+	adapter._record_surface_orbit_intent("ship", target_orbit)
 	assert(adapter._surface_orbit_intents.is_empty())
 	adapter._surface_orbit_path_enabled = true
-	var start: Dictionary = adapter._request_space_operation("space_start_quantum", {"craft_id":"ship", "target_orbit_id":"planet_orbit"}, "warp")
+	var start: Dictionary = adapter._request_space_operation("space_start_quantum", {"craft_id":"ship", "target_orbit_id":target_orbit}, "warp")
 	if not start.get("ok", false): print("ADAPTER_WARP_START ", start)
-	assert(start.ok and adapter._surface_orbit_intents.ship.location_id == "satellite_crash")
+	assert(start.ok and adapter._surface_orbit_intents.ship.location_id == location_id)
 	for step in range(65):
 		adapter.advance_space_travel(3.0)
 		if fleet.get_craft_snapshot("ship").phase == "orbit" and sim.get_space_actor("ship") != null: break

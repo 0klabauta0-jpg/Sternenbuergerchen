@@ -67,11 +67,14 @@ regulärem Missionsabbruch und physisch eingeboardeter Originalcrew bestand
 38/38 Prüfungen bis zur tatsächlichen Heimatlandung des ursprünglichen Schiffs.
 Dieser Lauf ist kein Abschluss des Satellitenziels und kein Save/Load-Nachweis.
 
-Die explizite Oberflächenzuordnung erlaubt mehrere reale Orte am selben
-Planeten: `satellite_crash`, `trade_outpost` und `fortified_outpost`. Ihre
-Szenarien verweisen auf die zugehörigen vorhandenen Karten. `distress_orbit`
-und `polisa` sind keine Planetoberflächen. Hin- und Rückübergangsprüfung
-nutzen diese Zuordnung zusammen mit der bestehenden Orbit-/Bodyprüfung.
+Die kanonische Oberflächenzuordnung ordnet `satellite_crash` Glut 1a,
+`trade_outpost` Glut 1b und `fortified_outpost` Glut 1 zu. Ihre Szenarien
+verweisen auf die zugehörigen Karten. `distress_orbit` und `polisa` sind keine
+Planetoberflächen. Die im Parallelchat wiederhergestellten Sternsystemdaten
+müssen dazu gemeinsam integriert werden. Hin- und Rückübergangsprüfung nutzen
+diese Zuordnung zusammen mit der bestehenden Orbit-/Bodyprüfung. Die oben
+genannten 1×-Läufe basieren auf Main `95abade90` mit damaliger abweichender
+Orbitzuordnung und beweisen noch keinen Flug zu den neu gebundenen Monden.
 
 ## Entwurf für portable aktive Sorties
 

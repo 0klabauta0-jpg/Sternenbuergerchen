@@ -27,7 +27,8 @@ func _run() -> void:
 	if not await _wait(func(): return controller.call("get_campaign_pilot_flight_guard", _craft_id).get("ok", false), 12000, "actual crew boards before aborting visit"): await _finish(); return
 	var departure: Dictionary = _runtime.call("request_operation", "return_homebase", {"craft_id":_craft_id})
 	if not _check(departure.get("ok", false), "actual return command accepts aborted visit"): print("RETURN_RESULT ", departure); await _finish(); return
-	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 45000, "actual departure returns ship to local planet orbit"): await _finish(); return
+	var destination_orbit := String(Dictionary(_space().get("location_orbits", {})).get("satellite_crash", ""))
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == destination_orbit, 45000, "actual departure returns ship to local destination orbit"): await _finish(); return
 	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id":_craft_id, "target_orbit_id":"moon_orbit"})
 	if not _check(jump.get("ok", false), "actual homeward warp command accepted"): print("HOME_WARP_RESULT ", jump); await _finish(); return
 	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "moon_orbit", 180000, "actual outbound orbit transit and homeward warp reach moon"): await _finish(); return

@@ -15,7 +15,7 @@ class Pilot extends Node:
 func _initialize() -> void:
 	var fleet = FLEET.new(); assert(fleet.configure().ok); fleet.register_craft("ship")
 	assert(_travel(fleet, "launch_to_orbit", {"craft_id":"ship"}, "launch").ok)
-	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"planet_orbit"}, "warp").ok)
+	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"glut_1a_orbit"}, "warp").ok)
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(null, null, null, fleet)
 	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship", "model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	# The fixture begins after launch; publish the same equipment-derived mass
