@@ -1,0 +1,12 @@
+{
+  "scope": "AP7 ground-only part; no Root/MP/Base integration",
+  "checks": "19/0",
+  "green_run": "ground_save-0cf5b7e6c33541d8b87a368687fa193e",
+  "sha256": {
+    "scripts/core/hex_ground_runtime.gd": "9c93bd1624916232f8c4b4d4f189f4f7e6ebdaae5dd7ab5eda0f6f18a5b59d3f",
+    "scripts/tests/hex_ground_save_state_verifier.gd": "f4a626258ea31f2d40886e0736b3207fbabfa85168e73b9c744da0a3ecfa4ad0",
+    "docs/tasks/HEX_GROUND_SAVE_STATE_PART_2026_11_12.md": "254b553b967adc69c67bcd0c4500cd88bcc280272a935fbf63e6266226f12303",
+    "output/native_glut_maps/hex_ground_save_state_20261112/run.py": "3ac3a1f02f362489a3757cdcce51159d62ae9a2abbe4549f152b3f7170161b2f"
+  },
+  "terrain_review_red_run": "ground_save-b5b0aa92e47246e0ac51beb336d87fc0"
+}
