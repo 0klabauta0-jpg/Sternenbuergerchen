@@ -257,7 +257,10 @@ func _request(operation: String, payload: Dictionary) -> void:
 	var result: Dictionary = _adapter.call("request_operation", operation, data)
 	_status.text = String(result.get("message", "Vorgang abgeschlossen" if result.get("ok", false) else result.get("reason", "Nicht verfuegbar")))
 	if operation == "buy" and result.get("ok", false) and not result.get("replayed", false) and result.get("container_id") == "craft:" + String(data.get("craft_id", "")):
-		_status.text = "Frachtaufzug: Lieferung ins Schiff bestätigt"
+		var shown := false
+		if is_instance_valid(_adapter) and _adapter.has_method("show_polisa_cargo_delivery"):
+			shown = bool(_adapter.call("show_polisa_cargo_delivery", String(data.get("craft_id", "")), String(result.get("request_id", ""))))
+		_status.text = "Frachtaufzug lädt das Schiff" if shown else "Ware im Schiffslager bestätigt"
 		_cargo_lift.call("show_delivery")
 	_signature = ""
 	refresh(_adapter.call("get_polisa_snapshot"))

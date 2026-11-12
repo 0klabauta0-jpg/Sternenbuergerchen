@@ -328,6 +328,9 @@ func _build_pad(pad:Dictionary)->void:
 	var small:=String(pad["class"])=="S"
 	# Hull and every beacon stay within the exact authored deck footprint.
 	_chamfered_shell(s,.35 if small else .55,-.30,-1.1,c,HULL)
+	# Recessed cargo-lift hatch; appearance only, no new deck collision or nav.
+	_box(Vector3(1.8,.025,1.45),Vector3(c.x+1.15,.055,c.y),DARK)
+	for z:float in [-.62,.62]:_box(Vector3(1.6,.025,.06),Vector3(c.x+1.15,.075,c.y+z),CYAN)
 	var inset:=.28 if small else .4
 	for sign_value:float in [-1,1]:
 		_box(Vector3(s.x-.5,.015,.08),Vector3(c.x,.045,c.y+sign_value*(s.y*.5-inset)),YELLOW)
