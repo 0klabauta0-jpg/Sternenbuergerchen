@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### Kampagnen-Continue, Mondkarten und Windows-Paket — 12.11.2026
+Gemeinsamer Source-Main `0eb7845b859bf49d76b7a16137ba46282dab236d`: regulärer stabiler Kampagnen-Einsatzsave und Continue auf Glut 1a mit echter Bergung, Heimflug und Upload 80/0; gezielte Regressionen 10/10. Zwei echte Rundflüge auf 512×256-Mondkarten 84/0 (B als Besuch abgebrochen). Details: `docs/qa/campaign_active_continue_20261112/README.md` und `docs/qa/two_moon_native_roundtrips_20261112/`.
+
+Windows-Paket: `C:/dev/SternenBuergerchen-builds/2026-11-12-open-functions-main-r01/Sternenbuergerchen.exe`, gebaut aus obigem Source-Pin. Release-EXE headless exit 0; zusätzlich auf einem nie aktivierten privaten Desktop 30 gerenderte Hauptmenüframes, exit 0, ohne Maus-/Tastatureingaben. Karten und Mondzuordnung wurden aus dem Release-PCK lesend geprüft. Paketbelege und Hashes stehen unter `C:/dev/SternenBuergerchen-builds/2026-11-12-open-functions-main-r01/verification/README.md`. Das ist kein vollständiger EXE-Spieldurchlauf und kein Performance-/Multiplayer-Gate. Orbitautomatik bleibt standardmäßig aus; Dateisave während des Orbitflugs bleibt offen. Diese Eintragung aktualisiert ältere Statusangaben unten.
+
 ### Kampagnenhilfe, Anwerbung und gemeinsame Grundlagen — 12.11.2026
 Gezielte Main-Integration von Kampagnenhilfe, Anwerbung mit Vergleich, Shuttle, Fracht und modularen Basisräumen sowie abgestimmten AP7-/Autosave- und Weltraumgrundlagen. Nachweise und Grenzen: docs/tasks/CHAT_CAMPAIGN_MAIN_INTEGRATION_2026_11_12.md. Experimenteller Hex-Rückweg, Luftstart, getrennter Netzwerkbetrieb und Missions-Save sind nicht abgenommen; kein EXE-Export.
 

@@ -66,3 +66,7 @@ Orbitautomatik bleibt standardmaessig aus; ein Dateisave waehrend des lokalen
 Orbitflugs ist nicht nachgewiesen und bleibt gesperrt. Die bisherige private
 Testenv-Schranke fuer den belegten stabilen Slice ist entfernt. Keine Aussage
 ueber umfassende visuelle, Performance- oder Multiplayerabnahme.
+
+
+## Exportnachweis nach Mainintegration
+Das Windows-Paket `C:/dev/SternenBuergerchen-builds/2026-11-12-open-functions-main-r01/Sternenbuergerchen.exe` wurde aus Source-Main `0eb7845b859bf49d76b7a16137ba46282dab236d` gebaut. Echte Release-EXE: headless Start exit 0; isolierter, nie aktivierter Windows-Desktop ohne Maus-/Tastatureingaben: D3D12, 30 Hauptmenüframes gerendert, exit 0. Der Paketreader bestätigte drei 512×256-Karten und A/B-Mondzuordnungen. `verification/README.md` im Paket enthält Hashes, Verlauf und Grenzen. Kein vollständiger EXE-Spiel- oder Performancetest. Orbit bleibt default aus; laufender Orbit-Dateisave ist nicht freigegeben. Dieser reine Dokuabschluss ändert den gepinnten Paket-Source nicht.
