@@ -1,0 +1,239 @@
+--- a/scripts/tests/mission_tactical_sandbox_controller.gd
++++ b/scripts/tests/mission_tactical_sandbox_controller.gd
+@@ -13649,6 +13649,8 @@
+ 	var live_polisa_visit := String(get_parent().get_meta("location_id", "")) == "polisa" and String(visit.get("craft_id", "")) == craft_id and not craft_id.is_empty()
+ 	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id) and not live_polisa_visit:
+ 		return {"ok": true}
++	var crew_scope:Dictionary=_validate_campaign_craft_crew_scope(craft_id)
++	if not crew_scope.ok:return crew_scope
+ 	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+ 	var pilot_id: String = String(card.get("pilot_unit_id", ""))
+ 	if pilot_id.is_empty():
+@@ -13659,6 +13661,9 @@
+ 	if _deployed_unit_ids.has(pilot_id) or not bool(pilot.get_meta("dropship_embarked", false)):
+ 		return {"ok": false, "reason": "pilot_not_aboard", "message": "Pilot muss zum Schiff zurueck und wieder einsteigen"}
+ 	var simulation: Node = get_node_or_null("../SimulationRoot")
++	if _requires_hex_deployment_owner():
++		if not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
++		if not simulation.get_hex_unit_state(pilot_id).is_empty() or simulation.has_hex_pending_admission(pilot_id):return {"ok":false,"reason":"pilot_boarding_pending"}
+ 	for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
+ 		if String(effect.get("unit_id", "")) == pilot_id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]:
+ 			return {"ok": false, "reason": "pilot_boarding_pending", "message": "Pilot steigt ein"}
+@@ -13670,6 +13675,7 @@
+ 		var member = _get_campaign_sortie_unit(id)
+ 		if member == null or int(member.call("get_health")) <= 0: return {"ok":false,"reason":"crew_unavailable"}
+ 		if _deployed_unit_ids.has(id) or not bool(member.get_meta("dropship_embarked", false)) or not aboard.has(id): return {"ok":false,"reason":"pilot_not_aboard" if id == pilot_id else "crew_not_aboard"}
++		if _requires_hex_deployment_owner() and (not simulation.get_hex_unit_state(id).is_empty() or simulation.has_hex_pending_admission(id)):return {"ok":false,"reason":"crew_deployment_pending"}
+ 		for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
+ 			if String(effect.get("unit_id", "")) == id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]: return {"ok":false,"reason":"pilot_boarding_pending"}
+ 	return {"ok": true, "pilot_unit_id": pilot_id}
+@@ -13696,6 +13702,8 @@
+ func assign_campaign_pilot(craft_id: String, unit_id: String) -> Dictionary:
+ 	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
+ 		return {"ok": false, "reason": "craft_not_landed"}
++	var crew_scope:Dictionary=_validate_campaign_craft_crew_scope(craft_id,unit_id)
++	if not crew_scope.ok:return crew_scope
+ 	if not _campaign_craft_crew_ids(craft_id).has(unit_id): return {"ok":false,"reason":"pilot_not_assigned_to_craft"}
+ 	var active_visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
+ 	for other: Dictionary in _get_mission_dropship_card_entries():
+@@ -13744,21 +13752,29 @@
+ 
+ 
+ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "") -> Dictionary:
+-	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id): return {"ok": true}
++	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
++	var live_polisa_visit:bool=String(get_parent().get_meta("location_id",""))=="polisa" and String(visit.get("craft_id",""))==craft_id and not craft_id.is_empty()
++	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id) and not live_polisa_visit:return {"ok":true}
++	var crew_scope:Dictionary=_validate_campaign_craft_crew_scope(craft_id)
++	if not crew_scope.ok:return crew_scope
++	var hex_required:bool=_requires_hex_deployment_owner()
++	if hex_required and not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
++	var simulation:Node=get_node_or_null("../SimulationRoot")
+ 	var pilot_id: String = String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+ 	var flight_guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
+ 	if String(flight_guard.get("reason", "")) == "pilot_unavailable": return flight_guard
+ 	var relevant_crew:Array=_campaign_craft_crew(craft_id)
+ 	if not boarding_fireteam_id.is_empty():
+ 		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==boarding_fireteam_id)
+-		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehört nicht zu diesem Schiff"}
++		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehÃƒÂ¶rt nicht zu diesem Schiff"}
+ 	var has_ground_crew := false
+ 	for unit in relevant_crew:
+-		has_ground_crew = has_ground_crew or _deployed_unit_ids.has(String(unit.call("get_unit_id")))
++		var id:String=String(unit.call("get_unit_id"))
++		has_ground_crew = has_ground_crew or _deployed_unit_ids.has(id) or (hex_required and not simulation.get_hex_unit_state(id).is_empty())
+ 	if not has_ground_crew and not boarding_fireteam_id.is_empty():
+ 		if relevant_crew.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):
+ 			return {"ok":true,"message":"Trupp an Bord"}
+-		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfügbar"}
++		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfÃƒÂ¼gbar"}
+ 	if bool(flight_guard.get("ok", false)) and not has_ground_crew: return flight_guard
+ 	if not _is_parked_campaign_dropship(craft_id):
+ 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
+@@ -13767,17 +13783,29 @@
+ 	for unit in relevant_crew:
+ 		if unit == null or not unit.has_method("get_unit_id"): continue
+ 		var id: String = String(unit.call("get_unit_id"))
+-		if not _deployed_unit_ids.has(id): continue
++		if not _deployed_unit_ids.has(id) and not (hex_required and not simulation.get_hex_unit_state(id).is_empty()):continue
+ 		if not unit is Node2D or int(unit.call("get_health")) <= 0:
+ 			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
+-		if (unit as Node2D).global_position.distance_to(ship_position) > CAMPAIGN_BOARDING_RADIUS:
++		var unit_position:Vector2=(unit as Node2D).global_position
++		if hex_required:
++			var ground:Dictionary=simulation.get_hex_unit_state(id)
++			if ground.is_empty():return {"ok":false,"reason":"crew_ground_unavailable"}
++			unit_position=simulation.get_hex_ground_terrain_registry().grid_to_world(ground.grid)
++		if unit_position.distance_to(ship_position) > CAMPAIGN_BOARDING_RADIUS:
+ 			return {"ok": false, "reason": "pilot_not_at_ship" if id == pilot_id else "crew_not_at_ship", "message": "Alle Bodenpersonen muessen zuerst zum Schiff zuruecklaufen"}
+ 		crew.append(unit)
+ 	if crew.is_empty(): return flight_guard
++	var boarding_scope:String=_campaign_boarding_scope_signature(craft_id)
+ 	# Validate the whole group before any mutation. SimulationRoot commits presence.
++	var embarked:Dictionary={}
++	if hex_required:
++		var ids:=PackedStringArray()
++		for unit in crew:ids.append(String(unit.call("get_unit_id")))
++		embarked=simulation.embark_hex_ground_actor_group(ids,false)
++		if not embarked.ok:return embarked
+ 	for unit in crew:
+ 		var id: String = String(unit.call("get_unit_id"))
+-		_enqueue_dropship_embark_effect(unit, id, ship_position)
++		if not hex_required:_enqueue_dropship_embark_effect(unit,id,ship_position)
+ 		_deployed_unit_ids.erase(id)
+ 		_deployed_unit_positions.erase(id)
+ 		_embarked_unit_ids[id] = true
+@@ -13789,6 +13817,18 @@
+ 	if craft_id == _mission_drop_craft_id: _mission_drop_passenger_count = _campaign_craft_crew_ids(craft_id).size()
+ 	_store_active_drop_sequence_card()
+ 	_store_selected_mission_dropship_plan()
++	if hex_required:
++		var owner_ref:WeakRef=weakref(self)
++		var root_ref:WeakRef=weakref(simulation)
++		simulation.call("_publish_hex_embarked_actors",embarked)
++		var owner=owner_ref.get_ref()
++		var bound_root=root_ref.get_ref()
++		if not is_instance_valid(owner) or owner.is_queued_for_deletion() or not is_instance_valid(bound_root) or owner.get_node_or_null("../SimulationRoot")!=bound_root or not bound_root.call("_hex_embark_receipt_current",embarked) or owner._campaign_boarding_scope_signature(craft_id)!=boarding_scope:return {"ok":false,"reason":"boarding_context_changed"}
++		owner._emit_planning_state_changed()
++		bound_root=root_ref.get_ref()
++		owner=owner_ref.get_ref()
++		if not is_instance_valid(owner) or owner.is_queued_for_deletion() or not is_instance_valid(bound_root) or owner.get_node_or_null("../SimulationRoot")!=bound_root or not bound_root.call("_hex_embark_receipt_current",embarked) or owner._campaign_boarding_scope_signature(craft_id)!=boarding_scope:return {"ok":false,"reason":"boarding_context_changed"}
++		return {"ok":true,"message":"Trupp an Bord"}
+ 	_emit_planning_state_changed()
+ 	return {"ok": false, "reason": "pilot_boarding_pending", "message": "Team steigt ein; Pilot uebernimmt seinen Posten"}
+ 
+@@ -37109,18 +37149,38 @@
+ 
+ const FLIGHT_MOTION = preload("res://scripts/terrain/mission_flight_visual.gd")
+ 
+-func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray) -> void:
++func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray,retirement_binding:Dictionary={}) -> Dictionary:
+ 	# Called only after the travel owner commits this craft's surface exit.
+ 	# Reuse embark effects so departed actors cannot keep simulating in place.
+ 	var position:=_campaign_landed_craft_position(craft_id)
+ 	if not position.is_finite(): position=Vector2.ZERO
++	var hex_required:bool=_requires_hex_deployment_owner()
++	var simulation:Node=get_node_or_null("../SimulationRoot")
++	var binding:Dictionary={}
++	var embarked:Dictionary={}
++	if hex_required:
++		binding=_location_craft_retirement_binding(craft_id,unit_ids)
++		if not retirement_binding.is_empty() and retirement_binding!=binding:return {"ok":false,"status":"stale","reason":"stale_retirement_binding","retirement_binding":retirement_binding.duplicate(true)}
++		if not _has_live_hex_deployment_owner():return {"ok":false,"status":"waiting","reason":"hex_ground_unavailable","retirement_binding":binding}
++		var crew_scope:Dictionary=_validate_campaign_craft_crew_scope(craft_id)
++		if not crew_scope.ok:return {"ok":false,"status":"stale","reason":crew_scope.reason,"retirement_binding":binding}
++		var owned:PackedStringArray=_campaign_craft_crew_ids(craft_id)
++		var ids:=PackedStringArray()
++		for id in unit_ids:
++			if not owned.has(id):return {"ok":false,"status":"stale","reason":"foreign_visit_member","retirement_binding":binding}
++			var actor=simulation.call("_resolve_known_unit_for_contract",id)
++			if not simulation.get_hex_unit_state(id).is_empty() or _deployed_unit_ids.has(id) or (is_instance_valid(actor) and not bool(actor.get_meta("dropship_embarked",false))):
++				if not ids.has(id):ids.append(id)
++		if not ids.is_empty():
++			embarked=simulation.embark_hex_ground_actor_group(ids,false)
++			if not embarked.ok:return {"ok":false,"status":"waiting","reason":embarked.get("reason","retirement_pending"),"retirement_binding":binding}
+ 	var teams: PackedStringArray=[]
+ 	for id in unit_ids:
+-		var unit: Node=_find_friendly_unit_by_id(id)
++		var unit: Node=simulation.call("_resolve_known_unit_for_contract",id) if hex_required else _find_friendly_unit_by_id(id)
+ 		if unit!=null:
+ 			var team:=String(unit.call("get_fireteam_id"))
+ 			if not teams.has(team): teams.append(team)
+-			if _deployed_unit_ids.has(id) or (_has_live_hex_deployment_owner() and not Dictionary(get_node_or_null("../SimulationRoot").call("get_hex_unit_state",id)).is_empty()): _enqueue_dropship_embark_effect(unit,id,position)
++			if not hex_required and _deployed_unit_ids.has(id):_enqueue_dropship_embark_effect(unit,id,position)
+ 		_deployed_unit_ids.erase(id); _deployed_unit_positions.erase(id); _embarked_unit_ids.erase(id)
+ 	for team in teams:
+ 		var local_team_remains := false
+@@ -37143,7 +37203,18 @@
+ 			card.embarked_unit_ids=[]; card.boarded_fireteam_ids=[]; card.queued_fireteam_ids=[]
+ 	if _mission_drop_craft_id==craft_id:
+ 		_mission_drop_state="ready"; _has_lz_position=false; _drop_ship_requested=false; _mission_drop_passenger_count=0
+-	_refresh_world_overlays()
++	var post_binding:Dictionary=_location_craft_retirement_binding(craft_id,unit_ids) if hex_required else {}
++	var owner_ref:WeakRef=weakref(self)
++	if not embarked.is_empty():
++		simulation.call("_publish_hex_embarked_actors",embarked)
++		var owner=owner_ref.get_ref()
++		if not is_instance_valid(owner) or owner.is_queued_for_deletion():return {"ok":false,"status":"stale","reason":"retirement_view_removed","historical_committed":true,"retirement_binding":binding}
++		if not owner._location_craft_retirement_current(craft_id,unit_ids,post_binding):return {"ok":false,"status":"stale","reason":"retirement_context_changed","historical_committed":true,"retirement_binding":binding}
++		owner._refresh_world_overlays()
++	else:_refresh_world_overlays()
++	var owner=owner_ref.get_ref()
++	if hex_required and (not is_instance_valid(owner) or owner.is_queued_for_deletion() or not owner._location_craft_retirement_current(craft_id,unit_ids,post_binding)):return {"ok":false,"status":"stale","reason":"retirement_context_changed","historical_committed":true,"retirement_binding":binding}
++	return {"ok":true,"status":"committed"}
+ 
+ 
+ # Station admission reuses the existing local transport owner. No independent fleet.
+@@ -37227,6 +37298,7 @@
+ 
+ func _campaign_craft_crew_ids(craft_id: String) -> PackedStringArray:
+ 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
++	if not _validate_campaign_craft_crew_scope(craft_id).ok:return PackedStringArray()
+ 	if visits.has(craft_id):
+ 		var ids := PackedStringArray(Dictionary(visits[craft_id]).get("unit_ids", []))
+ 		var pilot := String(_find_raw_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+@@ -37304,3 +37376,44 @@
+ 	if not String(_find_raw_mission_dropship_card_entry(craft_id).get("station_pad_id", "")).is_empty(): return true
+ 	var visit: Dictionary = Dictionary(get_parent().get_meta("singleplayer_visit_identities", {})).get(craft_id, {})
+ 	return String(visit.get("origin_kind", "")) == "local_station_purchase"
++
++
++func _location_craft_retirement_binding(craft_id:String,unit_ids:PackedStringArray)->Dictionary:
++	var simulation:Node=get_node_or_null("../SimulationRoot")
++	var actors:Dictionary={}
++	var lifecycles:Dictionary={}
++	for id in unit_ids:
++		var actor=simulation.call("_resolve_known_unit_for_contract",id) if is_instance_valid(simulation) else null
++		actors[id]=actor.get_instance_id() if is_instance_valid(actor) else 0
++		lifecycles[id]=simulation.call("_hex_payload_identity",id).get("lifecycle",-1) if is_instance_valid(simulation) else -1
++	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
++	return {"root_id":simulation.get_instance_id() if is_instance_valid(simulation) else 0,"root_context":simulation.get_hex_ground_context_revision() if is_instance_valid(simulation) else -1,"actors":actors,"lifecycles":lifecycles,"visit_signature":JSON.stringify([craft_id,Array(unit_ids),visit],"",true).sha256_text()}
++
++
++func _location_craft_retirement_current(craft_id:String,unit_ids:PackedStringArray,binding:Dictionary)->bool:
++	if _location_craft_retirement_binding(craft_id,unit_ids)!=binding:return false
++	if not _validate_campaign_craft_crew_scope(craft_id).ok:return false
++	var simulation:Node=get_node_or_null("../SimulationRoot")
++	if not is_instance_valid(simulation) or simulation.is_queued_for_deletion() or not simulation.is_hex_ground_runtime_active():return false
++	for id in unit_ids:
++		if not simulation.get_hex_unit_state(id).is_empty() or simulation.has_hex_pending_admission(id):return false
++	return true
++
++
++func _validate_campaign_craft_crew_scope(craft_id:String,proposed_pilot:String="")->Dictionary:
++	var visits:Dictionary=get_parent().get_meta("singleplayer_visit_identities",{})
++	var own:PackedStringArray=PackedStringArray(Dictionary(visits.get(craft_id,{})).get("unit_ids",[]))
++	var pilot:String=proposed_pilot if not proposed_pilot.is_empty() else String(_find_raw_mission_dropship_card_entry(craft_id).get("pilot_unit_id",""))
++	for other_id in visits:
++		if String(other_id)==craft_id:continue
++		for id in PackedStringArray(Dictionary(visits[other_id]).get("unit_ids",[])):
++			if own.has(id):return {"ok":false,"reason":"ambiguous_visit_member"}
++			if not pilot.is_empty() and id==pilot:return {"ok":false,"reason":"pilot_owned_by_other_visit"}
++	return {"ok":true}
++
++
++func _campaign_boarding_scope_signature(craft_id:String)->String:
++	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
++	var card:Dictionary=_find_raw_mission_dropship_card_entry(craft_id)
++	var sequence:Dictionary=_capture_active_drop_sequence() if _is_active_drop_sequence_for_craft(craft_id) else Dictionary(_parallel_drop_sequences_by_craft.get(craft_id,{}))
++	return JSON.stringify([craft_id,visit,Array(_campaign_craft_crew_ids(craft_id)),card.get("pilot_unit_id",""),card.get("model_id",""),card.get("station_pad_id",""),sequence.get("phase",""),sequence.get("lz_position")],"",true).sha256_text()

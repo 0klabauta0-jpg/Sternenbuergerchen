@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 tatsächliche Visitcrew und synchrones Retirement — 12.11.2026
+
+Root übernimmt Boarding-/Retiregruppen vor Controller- und Sichtpublikation.
+Fremde Visitcrew/Piloten sowie neue Owner-/Visit-/Lebenszyklen stoppen alte
+Fortsetzungen; andere Schiffe und lokale FT-Pläne bleiben erhalten. Hexdistanz
+liest Feldmitte, Legacyqueue bleibt. Source-Root/Controller plus ausdrücklich
+privater tatsächlicher Parent-Flow1645bc28a37/0; Deploymentnachbar95/0,
+Guards/enge Reviews grün. Echter Registry-Ausfall/gebundene Reparatur schließt
+Ground, Controller und Flow gemeinsam ab. QA hex_visit_board_retire_20261112.
+Keine Source-Flow-/Space-/Stationsdatei übernommen. Slotidentität, FMC-Member-
+Retirement und AP7/8 folgen; keine Produktionskennung, Main, EXE oder große Abnahme.
+
 ### AP6 tatsächlicher Respawnverbund — 12.11.2026
 
 Rootticket bindet Timerbeginn/Actor/Manager/Lifecycle. Belegtes Ziel wartet bei

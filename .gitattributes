@@ -114,3 +114,4 @@ docs/qa/hex_mission_setup_core_20261112/** -text whitespace=-blank-at-eof,cr-at-
 docs/qa/hex_mission_waves_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_mission_wave_retirement_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_respawn_transaction_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_visit_board_retire_20261112/** -text whitespace=-blank-at-eof,cr-at-eol

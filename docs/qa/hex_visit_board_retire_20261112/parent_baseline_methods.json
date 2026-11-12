@@ -1,0 +1,12 @@
+{
+  "ref": "2bfebc601",
+  "methods": {
+    "get_campaign_pilot_flight_guard": "0b748695e8776364ee7e07d6d797c26a5fd13fc8f70c4492ffc320eaae721ae2",
+    "request_campaign_crew_boarding": "5d976719a5d7bc419137eea226804c614e0139bd6f256a7f6b94455c0f642286",
+    "retire_location_craft_visit": "028e2bc15d78c3b560a5ecf05823e066c8b814b166d6cd98f2cca3b4d24446aa",
+    "_campaign_craft_crew_ids": "bf736f9c31847534fd20d7ff443fa6bc2f5380f9718b8fb795904d43bda51be1",
+    "_campaign_craft_crew": "f411a7fb74539123e314843e6a75bb4c60b52e531cd6e8ca64bc37937b0be89b",
+    "_requires_exact_station_crew": "234ded438c5c6ad460dfb69a16aa40c3a9816debf26bc0bdf823e797c67f0323",
+    "assign_campaign_pilot": "b0e07b77c3bda1709a7633e05a4b4d0a18c4cc3394612aa20056c1db7bdace1e"
+  }
+}

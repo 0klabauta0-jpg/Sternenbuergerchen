@@ -952,15 +952,44 @@ func _apply_hex_respawn_effect(effect:Dictionary)->void:
 		manager.call("_finalize_hex_respawn_completed",id,ticket)
 
 
-func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:
+func embark_hex_ground_actor_group(unit_ids:PackedStringArray,publish:bool=true)->Dictionary:
+	if is_queued_for_deletion():return {"ok":false,"reason":"hex_owner_exiting"}
 	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids,true)
 	if not checked.ok:return checked
 	for id in unit_ids:
 		_discard_pending_move_commands_for_unit(id)
 		release_hex_ground_unit(id,"embarked")
-	for id in unit_ids:checked.actors[id].set_meta("dropship_embarked",true)
-	for id in unit_ids:checked.actors[id].visible=false
-	return {"ok":true,"embarked_unit_ids":unit_ids.duplicate()}
+	var identities:Dictionary={}
+	for id in unit_ids:identities[id]=_hex_payload_identity(id)
+	var receipt:Dictionary={"ok":true,"root_id":get_instance_id(),"embarked_unit_ids":unit_ids.duplicate(),"identities":identities}
+	if publish:_publish_hex_embarked_actors(receipt)
+	return receipt
+
+
+func _hex_embark_receipt_current(receipt:Dictionary)->bool:
+	if is_queued_for_deletion() or receipt.get("root_id",0)!=get_instance_id() or not is_hex_ground_runtime_active():return false
+	for id in receipt.embarked_unit_ids:
+		if not _is_current_hex_payload({"unit_id":id,"_hex_lifecycle":receipt.identities[id]}) or _hex_ground_runtime.has_unit(id):return false
+	return true
+
+
+func _publish_hex_embarked_actors(receipt:Dictionary)->void:
+	if not _hex_embark_receipt_current(receipt):return
+	for id in receipt.embarked_unit_ids:
+		var actor=_resolve_known_unit_for_contract(id)
+		if is_instance_valid(actor):actor.set_meta("dropship_embarked",true)
+	var lifetime:WeakRef=weakref(self)
+	for id in receipt.embarked_unit_ids:
+		var owner=lifetime.get_ref()
+		if not is_instance_valid(owner) or owner.is_queued_for_deletion():return
+		# One re-entered member must not strand the remaining committed members.
+		if not owner._is_current_hex_payload({"unit_id":id,"_hex_lifecycle":receipt.identities[id]}) or not owner.get_hex_unit_state(id).is_empty():continue
+		var actor=owner._resolve_known_unit_for_contract(id)
+		if is_instance_valid(actor):actor.visible=false
+
+
+func has_hex_pending_admission(unit_id:String)->bool:
+	return is_hex_ground_runtime_active() and _hex_ground_runtime.has_pending_admission(unit_id)
 
 
 func prepare_hex_ground_deployment(unit_ids:PackedStringArray,anchor_grid:Vector2i,excluded_cells:Array[Vector2i]=[])->Dictionary:
