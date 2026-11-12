@@ -2,6 +2,7 @@ extends RefCounted
 ## One atomic home checkpoint, independent of the editable Skirmish profile.
 const DEFAULT_PATH := "user://campaigns/introduction/checkpoint_v1.json"
 const MAX_BYTES := 4 * 1024 * 1024
+const HEX_CHECKPOINT_CONTRACT := "res://scripts/core/hex_checkpoint_transaction.gd"
 static func validate_payload(payload: Dictionary) -> Dictionary:
 	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 4 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
@@ -13,6 +14,9 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			if unit.has(field) and typeof(unit[field]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_roster_field"}
 		ids.append(unit.unit_id)
+	if payload.has("hex_tactical"):
+		var hex_validation := _validate_hex_payload(payload, ids)
+		if not hex_validation.get("ok", false): return hex_validation
 	if payload.has("base_personnel"):
 		if typeof(payload.craft.get("definition")) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_campaign_craft"}
@@ -172,6 +176,50 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
 
 	return {"ok":true}
+
+static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dictionary:
+	# V2 has no free-position mirror. Reject before any Legacy normalization.
+	if payload.has("base_personnel") or typeof(payload.hex_tactical) != TYPE_DICTIONARY:
+		return {"ok":false,"reason":"invalid_hex_checkpoint_mirror"}
+	if not ResourceLoader.exists(HEX_CHECKPOINT_CONTRACT):
+		return {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	var contract = load(HEX_CHECKPOINT_CONTRACT)
+	var checked: Dictionary = contract.validate_shape(payload.hex_tactical)
+	if not checked.get("ok", false): return checked
+	var base: Dictionary = payload.hex_tactical.base_personnel
+	if base.get("version") != 2 or typeof(base.get("units")) != TYPE_DICTIONARY or base.units.size() != roster_ids.size():
+		return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
+	for id in base.units:
+		if not roster_ids.has(id) or typeof(base.units[id]) != TYPE_DICTIONARY:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
+	var ships: Dictionary = {}
+	var fleet: Variant = payload.get("fleet", [])
+	if not fleet is Array: return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+	for ship in fleet:
+		if not ship is Dictionary or not ship.get("definition") is Dictionary:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		ships[String(ship.definition.get("craft_id", ""))] = ship
+	var definitions: Dictionary = {}
+	var primary: Variant = payload.get("craft", {})
+	if not primary is Dictionary or not primary.get("fireteam_definitions", []) is Array:
+		return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+	for definition in primary.get("fireteam_definitions", []):
+		if not definition is Dictionary or not definition.get("member_unit_ids") is Array:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		var team_id := String(definition.get("id", ""))
+		if team_id.is_empty() or team_id != team_id.strip_edges().to_lower(): return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		definitions[team_id] = definition.member_unit_ids
+	var assigned_teams: Dictionary = {}
+	for craft_id in payload.hex_tactical.transport:
+		var transport: Variant = payload.hex_tactical.transport[craft_id]
+		if not ships.has(craft_id) or not transport is Dictionary or transport.size() != 3 or transport.get("home") != true or not transport.get("teams") is Dictionary or transport.get("pilot") != ships[craft_id].get("pilot_id", "") or ships[craft_id].get("location", "homebase") not in ["homebase", "waiting_pad"]:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		for team in transport.teams:
+			if assigned_teams.has(team) or not definitions.has(team) or JSON.stringify(transport.teams[team]) != JSON.stringify(definitions[team]):
+				return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+			assigned_teams[team] = craft_id
+	return {"ok":true}
+
 static func _valid_path(path: String) -> bool:
 	return path.begins_with("user://campaigns/") and not path.contains("..") and path.ends_with(".json")
 static func load_checkpoint(path: String = DEFAULT_PATH) -> Dictionary:

@@ -16,6 +16,12 @@ func configure(flow: Node, request: Dictionary) -> void:
 		if not bool(loaded.get("ok", false)):
 			error_message = "Kampagnenstand konnte nicht geladen werden. Zurueck zum Menue."
 			return
+		if loaded.payload.has("hex_tactical"):
+			var adapter = load("res://scripts/meta/singleplayer_runtime_adapter.gd")
+			var preflight: Dictionary = adapter.preflight_campaign_hex_checkpoint(flow, loaded.payload)
+			if not preflight.get("ok", false):
+				error_message = "Hex-Kampagnenstand passt nicht zur aktuellen Heimatbasis: " + String(preflight.get("reason", "checkpoint_invalid"))
+				return
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 	var roster: Array = Array(checkpoint.get("roster", _initial_roster())).duplicate(true)
 	flow.set("_all_team_units", roster)

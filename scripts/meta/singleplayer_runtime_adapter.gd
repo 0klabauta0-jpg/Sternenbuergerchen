@@ -7,6 +7,80 @@ const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 
+# Disposable future-input projection, not a live UI/gameplay owner. Actual Root,
+# BasePersonnel, BaseActors, terrain and registry perform all candidate validation.
+class HexCheckpointReadContext extends Node:
+	var _all_team_units: Array = []
+	var _aircraft_location_by_craft: Dictionary = {}
+	var definitions: Array = []
+	var pilots: Dictionary = {}
+	var payload_teams: Dictionary = {}
+	var member_reader: Control
+	func is_campaign_start() -> bool: return true
+	func _find_homebase_aircraft_definition(id: String) -> Dictionary:
+		for definition: Dictionary in definitions:
+			if definition.get("craft_id") == id: return definition.duplicate(true)
+		return {}
+	func _find_pending_mission_craft_transfer(_id: String) -> Dictionary: return {}
+	func get_space_travel_snapshot(id: String = "") -> Dictionary:
+		return {"phase":"grounded"} if id.is_empty() or _aircraft_location_by_craft.has(id) else {}
+	func _get_assigned_pilot_id(id: String) -> String: return String(pilots.get(id, ""))
+	func _get_homebase_direct_payload_fireteam_ids_for_craft_raw(id: String) -> PackedStringArray:
+		return PackedStringArray(payload_teams.get(id, []))
+	func _get_member_unit_ids_for_fireteam(id: String) -> PackedStringArray:
+		return member_reader.call("_get_member_unit_ids_for_fireteam", id)
+
+static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -> Dictionary:
+	var store = load("res://scripts/meta/campaign_checkpoint_store.gd")
+	var shape: Dictionary = store.validate_payload(payload)
+	if not shape.get("ok", false): return shape
+	if not payload.has("hex_tactical"): return {"ok":true,"legacy":true}
+	if not is_instance_valid(flow) or flow.is_queued_for_deletion() or not flow.is_inside_tree(): return {"ok":false,"reason":"checkpoint_candidate_tree_unavailable"}
+	var navigation = load("res://scripts/meta/base_interior_navigation.gd")
+	var map = navigation.load_map("res://maps/campaign_intro_base.json")
+	# Only the authored, already opted-in navigation map can authorize Hex loading.
+	if map == null or map.get_grid_topology() != "hex_axial_v1" or String(map.get_tactical_grid_rules()).is_empty():
+		return {"ok":false,"reason":"checkpoint_base_not_hex_enabled"}
+	var candidate := HexCheckpointReadContext.new()
+	candidate.name = "HexCheckpointCandidate"
+	candidate._all_team_units = Array(payload.roster).duplicate(true)
+	var fleet: Array = payload.get("fleet", [{"definition":payload.craft.definition,"pilot_id":payload.craft.pilot_id,"location":"homebase"}])
+	for ship: Dictionary in fleet:
+		var id := String(ship.definition.craft_id)
+		candidate.definitions.append(ship.definition.duplicate(true))
+		candidate.pilots[id] = String(ship.get("pilot_id", ""))
+		candidate._aircraft_location_by_craft[id] = String(ship.get("location", "homebase"))
+	for id in payload.hex_tactical.transport:
+		candidate.payload_teams[id] = Dictionary(payload.hex_tactical.transport[id].teams).keys()
+	candidate.member_reader = load("res://scripts/meta/homebase_screen.gd").new()
+	candidate.member_reader.set("_fireteam_definitions", Array(payload.craft.get("fireteam_definitions", [])).duplicate(true))
+	candidate.set_meta("campaign_pad2_built", bool(payload.campaign.get("progress", {}).get("second_pad_built", false)))
+	var supply = SUPPLY.new()
+	var restored: Dictionary = supply.restore_state(payload.supply)
+	if not restored.get("ok", false):
+		candidate.member_reader.free(); candidate.free()
+		return restored
+	if supply.get_station_home_pads() > 2: candidate.set_meta("skirmish_infrastructure", {"pads":supply.get_station_home_pads()})
+	# No main scene or live Flow configure. The new isolated subtree is freed
+	# synchronously, without a tick, whether candidate preparation succeeds or fails.
+	flow.get_tree().root.add_child(candidate)
+	var simulation: Node = SIM.new()
+	candidate.add_child(simulation)
+	simulation.set_physics_process(false)
+	var base: Node = load("res://scripts/core/base_personnel_runtime.gd").new()
+	candidate.add_child(base)
+	base.configure(candidate, candidate, simulation, {})
+	simulation.set_physics_process(false)
+	var result: Dictionary
+	if not simulation.has_method("prepare_hex_checkpoint_restore"):
+		result = {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	else:
+		result = simulation.call("prepare_hex_checkpoint_restore", payload.hex_tactical)
+		if result.get("ok", false): result = simulation.call("validate_prepared_hex_checkpoint_restore", result.prepared)
+	candidate.member_reader.free()
+	candidate.free()
+	return result
+
 var _base_personnel: Node
 var _flow: Node
 var _screen: Control
@@ -82,7 +156,10 @@ func configure(flow: Node, screen: Control) -> void:
 		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
 		_base_personnel.name = "BasePersonnelRuntime"
 		add_child(_base_personnel)
-		_base_personnel.configure(_flow, _screen, _simulation, Dictionary(_flow.get("_campaign_start").get("checkpoint")) if _campaign_mode else {})
+		var base_checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint")) if _campaign_mode else {}
+		# V2 is restored by Root only, never by Base.configure's Legacy position loader.
+		_base_personnel.configure(_flow, _screen, _simulation, {} if base_checkpoint.has("hex_tactical") else base_checkpoint)
+		if base_checkpoint.has("hex_tactical"): _simulation.set_physics_process(false)
 		_screen.call("configure_base_personnel_bridge", _base_personnel)
 	var inventory_units: Array = []
 	var inventory_crafts: Array = []
@@ -98,6 +175,18 @@ func configure(flow: Node, screen: Control) -> void:
 			stock = {}
 		_supply.call("configure_preset_supply", {"credits": int(_flow.get_meta("skirmish_start_credits", 1000)), "stock": stock})
 	sync_crafts()
+	if _campaign_mode:
+		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
+		if checkpoint.has("hex_tactical"):
+			var continue_context := _capture_hex_continue_context(checkpoint)
+			var loaded_hex: Dictionary = _restore_campaign_hex_checkpoint(checkpoint)
+			if not _hex_continue_context_current(continue_context, bool(loaded_hex.get("committed", false))) or loaded_hex.get("context_changed", false): return
+			if not loaded_hex.get("ok", false):
+				_flow.get("_campaign_start").set("error_message", "Hex-Kampagnenstand konnte nicht wiederhergestellt werden: " + String(loaded_hex.get("reason", "checkpoint_invalid")))
+				_simulation.set_physics_process(false)
+				_flow.call_deferred("_campaign_load_failed")
+				return
+			_simulation.set_physics_process(true)
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
 	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)
@@ -118,6 +207,51 @@ func configure(flow: Node, screen: Control) -> void:
 		for item: Dictionary in catalog: item["slot_count"] = maxi(int(item.get("slot_count",4)),inventory_units.size())
 	if _skirmish_economy != null:
 		_screen.set("_operations_mode", "base")
+
+func _restore_campaign_hex_checkpoint(checkpoint: Dictionary) -> Dictionary:
+	if not _simulation.has_method("prepare_hex_checkpoint_restore") or _base_personnel == null:
+		return {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	# Restore the existing transport owner from the validated future roster first.
+	# No new payload owner: all changes use HomebaseScreen's existing methods.
+	var craft: Dictionary = checkpoint.craft
+	var context := _capture_hex_continue_context(checkpoint)
+	_screen.call("setup_roster", Array(_flow.get("_all_team_units")), PackedStringArray(craft.get("staged_unit_ids", [])))
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	_screen.call("set_fireteam_context", PackedStringArray(craft.get("staged_fireteam_ids", [])), Array(craft.get("fireteam_definitions", [])), false)
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	_screen.call("set_transport_state", Array(_flow.get("_homebase_aircraft_definitions")), Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")), [], [], Dictionary(_flow.get("_aircraft_location_by_craft")), Dictionary(_flow.get("_selected_aircraft_cargo_by_craft")), Dictionary(_flow.get("_loaded_aircraft_cargo_by_craft")), [])
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	for definition: Dictionary in craft.get("fireteam_definitions", []):
+		_screen.call("_remove_homebase_direct_payload_fireteam", String(definition.id))
+	var state: Dictionary = checkpoint.hex_tactical
+	for craft_id in state.transport:
+		for team in state.transport[craft_id].teams:
+			var all_aboard: bool = not Array(state.transport[craft_id].teams[team]).is_empty()
+			for id in state.transport[craft_id].teams[team]:
+				var person: Dictionary = state.base_personnel.units.get(id, {})
+				all_aboard = all_aboard and person.get("status") == "aboard" and person.get("craft_id") == craft_id
+			if all_aboard:
+				_screen.call("seed_homebase_direct_launch_payload", String(craft_id), PackedStringArray([team]), true)
+			else:
+				_screen.call("_add_homebase_direct_payload_fireteam_to_craft", String(team), String(craft_id))
+			if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	var prepared: Dictionary = _simulation.call("prepare_hex_checkpoint_restore", state)
+	if not prepared.get("ok", false): return prepared
+	var checked: Dictionary = _simulation.call("validate_prepared_hex_checkpoint_restore", prepared.prepared)
+	if not checked.get("ok", false): return checked
+	# Root coordinates all silent owner tails and guards final model publication.
+	return _simulation.call("commit_hex_checkpoint_restore", prepared.prepared)
+
+func _capture_hex_continue_context(checkpoint: Dictionary) -> Dictionary:
+	return {"adapter":weakref(self),"flow":weakref(_flow),"screen":weakref(_screen),"simulation":weakref(_simulation),"base":weakref(_base_personnel),"root_context":_simulation.get_hex_ground_context_revision(),"start":_flow.get("_campaign_start"),"checkpoint":JSON.stringify(checkpoint,"",true)}
+
+func _hex_continue_context_current(context: Dictionary, published: bool = false) -> bool:
+	var adapter = context.adapter.get_ref()
+	if not is_instance_valid(adapter) or adapter.is_queued_for_deletion(): return false
+	for name in ["flow","screen","simulation","base"]:
+		var node = context[name].get_ref()
+		if not is_instance_valid(node) or node.is_queued_for_deletion() or not node.is_inside_tree() or adapter.get("_" + ("base_personnel" if name == "base" else name)) != node: return false
+	return adapter._flow.get("_campaign_start") == context.start and JSON.stringify(context.start.get("checkpoint"),"",true) == context.checkpoint and adapter._simulation.get("_base_personnel_owner") == adapter._base_personnel and adapter._simulation.get_hex_ground_context_revision() == int(context.root_context) + (1 if published else 0)
 
 func _request_id(prefix: String, payload: Dictionary) -> String:
 	var supplied: String = String(payload.get("request_id", "")).strip_edges()
@@ -1029,6 +1163,12 @@ func _publish_warp_entry_event(receipt_id: String) -> void:
 func export_campaign_checkpoint() -> Dictionary:
 	if not _campaign_mode or not _travel.all_grounded():
 		return {}
+	var hex_checkpoint: Dictionary = {}
+	if _simulation.is_hex_ground_runtime_required():
+		if not _simulation.has_method("export_hex_checkpoint_state"): return {}
+		var exported: Dictionary = _simulation.call("export_hex_checkpoint_state")
+		if not exported.get("ok", false): return {}
+		hex_checkpoint = exported.state
 	var state: Dictionary = _campaign.export_state()
 	state["departures_by_craft_id"] = {}
 	state["selected_location_id"] = "homebase"
@@ -1038,7 +1178,10 @@ func export_campaign_checkpoint() -> Dictionary:
 		resources[id] = {"version":1,"location_id":id,"sites":_supply.call("get_location_resources",id).export_state()}
 	for id in _resource_owners:
 		if is_instance_valid(_resource_owners[id]): resources[id] = _resource_owners[id].call("export_state")
-	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "base_personnel": _base_personnel.export_state() if _base_personnel != null else {},"location_resources":resources,"ship_equipment":_ship_equipment.export_state()}
+	var payload := {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "location_resources":resources,"ship_equipment":_ship_equipment.export_state()}
+	if not hex_checkpoint.is_empty(): payload["hex_tactical"] = hex_checkpoint
+	else: payload["base_personnel"] = _base_personnel.export_state() if _base_personnel != null else {}
+	return payload
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
@@ -1063,6 +1206,9 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 
 func get_world_checkpoint_guard() -> Dictionary:
 	if not _travel.all_grounded(): return _reject("world_active","Speichern gesperrt: mindestens ein Schiff ist noch unterwegs oder an einem anderen Ort")
+	if _simulation != null and _simulation.is_hex_ground_runtime_required():
+		if not _simulation.has_method("get_hex_checkpoint_guard"): return _reject("hex_checkpoint_api_unavailable", "Hex-Speicherowner nicht verfügbar")
+		return _simulation.call("get_hex_checkpoint_guard")
 	return {"ok":true}
 
 func _field_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
