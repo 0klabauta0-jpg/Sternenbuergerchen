@@ -586,8 +586,13 @@ func publish_singleplayer_space_launch_event(adapter: Node, request_id: String) 
 	var valid: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
 	if not valid.get("ok", false) or not valid.get("replayed", false): return
 	if receipt.has("supply") and (receipt.supply != _singleplayer_supply_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch")): return
+	if receipt.has("equipment") and receipt.equipment != _ship_equipment_owner: return
 	receipt.event_published = true
 	if receipt.has("fuel_event"): singleplayer_command_committed.emit(receipt.fuel_event.command.duplicate(true), receipt.fuel_event.result.duplicate(true))
+	if receipt.fleet != _singleplayer_space_travel_owner or (receipt.has("supply") and (receipt.supply != _singleplayer_supply_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch"))) or (receipt.has("equipment") and receipt.equipment != _ship_equipment_owner): return
+	if receipt.flight != _singleplayer_space_travel_owner.get_flight_state(receipt.craft_id): return
+	valid = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
+	if not valid.get("ok", false) or not valid.get("replayed", false): return
 	singleplayer_command_committed.emit(receipt.command.duplicate(true), receipt.result.travel_result.duplicate(true))
 
 func preview_station_purchase_local_admission(adapter: Node, craft_id: String) -> Dictionary:
