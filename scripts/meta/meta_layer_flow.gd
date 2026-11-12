@@ -4216,6 +4216,7 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 		mission_instance.set_meta("location_id",location_id)
 		_location_registry.register_location(location_id,mission_instance)
 		_remember_location(mission_instance)
+		_singleplayer_runtime.call("bind_mission_air_support", mission_instance)
 		if _singleplayer_runtime.has_method("register_location_resources"):
 			_singleplayer_runtime.call("register_location_resources", mission_instance, location_id)
 	_sync_active_homebase_direct_selection_from_mission_setup()
@@ -8259,6 +8260,7 @@ func focus_location(location_id: String) -> Dictionary:
 	if instance==null: return {"ok":false,"reason":"location_not_loaded","message":"An diesem Ort ist noch keine Laufzeitinstanz geladen"}
 	if _active_mission!=null: _remember_location(_active_mission)
 	_enter_location_context(instance)
+	_singleplayer_runtime.call("bind_mission_air_support", instance)
 	_show_mission()
 	return {"ok":true}
 

@@ -31,6 +31,9 @@ func request_personnel_loadout_command(operation: String, payload: Dictionary) -
 			_personnel_loadout_owner.call("set_slot", String(payload.get("unit_id", "")), String(payload.get("key", "")), String(payload.get("value", "")))
 
 var _base_personnel_owner: Node
+var _air_support_source: WeakRef
+var _air_support_adapter: WeakRef
+var _air_support_location_id := ""
 var _skirmish_economy_owner: RefCounted
 var _skirmish_transaction: Callable
 
@@ -45,6 +48,43 @@ func request_skirmish_command(command: Dictionary) -> Dictionary:
 
 func configure_base_personnel(owner: Node) -> void:
 	_base_personnel_owner = owner
+
+func bind_air_support_source(source: Node, adapter: Node, location_id: String) -> Dictionary:
+	# Internal read-through capability. The fleet/wing/equipment owners stay on
+	# the campaign Root; the mission Root never creates another ship state.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if not is_instance_valid(source) or source == self or not is_instance_valid(adapter) or location_id.strip_edges().is_empty(): return {"ok":false, "reason":"invalid_air_source"}
+	if source.get("_departure_adapter") == null or source.get("_departure_adapter").get_ref() != adapter or adapter.get("_simulation") != source: return {"ok":false, "reason":"adapter_required"}
+	var flow: Node = adapter.get("_flow")
+	var mission := get_parent()
+	if not is_instance_valid(flow) or not is_instance_valid(mission) or not flow.has_method("get_active_mission") or flow.call("get_active_mission") != mission or not flow.is_ancestor_of(mission) or String(mission.get_meta("location_id", "")) != location_id: return {"ok":false, "reason":"mission_context_changed"}
+	if _air_support_source != null and (_air_support_source.get_ref() != source or _air_support_adapter == null or _air_support_adapter.get_ref() != adapter or _air_support_location_id != location_id): return {"ok":false, "reason":"air_source_already_bound"}
+	_air_support_source = weakref(source)
+	_air_support_adapter = weakref(adapter)
+	_air_support_location_id = location_id
+	return {"ok":true}
+
+func _resolve_air_support_craft(craft_id: String) -> Dictionary:
+	# References are for Root-internal use only; callers revalidate presence on
+	# every operation and must not use this as proof of airborne status.
+	if craft_id.strip_edges().is_empty() or _air_support_source == null or _air_support_adapter == null: return {"ok":false, "reason":"air_source_unavailable"}
+	var source: Node = _air_support_source.get_ref()
+	var adapter: Node = _air_support_adapter.get_ref()
+	if not is_instance_valid(source) or not is_instance_valid(adapter) or source.get("_departure_adapter") == null or source.get("_departure_adapter").get_ref() != adapter or adapter.get("_simulation") != source: return {"ok":false, "reason":"air_source_changed"}
+	var flow: Node = adapter.get("_flow")
+	var mission := get_parent()
+	if not is_instance_valid(flow) or not is_instance_valid(mission) or String(mission.get_meta("location_id", "")) != _air_support_location_id or not flow.is_ancestor_of(mission): return {"ok":false, "reason":"mission_context_changed"}
+	var locations: Variant = flow.get("_craft_location_runtime")
+	if typeof(locations) != TYPE_DICTIONARY or String(locations.get(craft_id, "")) != _air_support_location_id: return {"ok":false, "reason":"craft_not_at_location"}
+	var fleet: RefCounted = source.get("_singleplayer_space_travel_owner")
+	var equipment: RefCounted = source.get("_ship_equipment_owner")
+	var wings: RefCounted = source.get("_space_wing_state")
+	var combat: RefCounted = source.get("_space_combat_state")
+	if fleet == null or equipment == null or wings == null or combat == null: return {"ok":false, "reason":"air_owner_unavailable"}
+	var flight: RefCounted = fleet.get_flight_state(craft_id)
+	var wing_id: String = wings.get_craft_wing(craft_id, "singleplayer")
+	if flight == null or wing_id.is_empty() or equipment.get_snapshot(craft_id).is_empty(): return {"ok":false, "reason":"craft_not_ready"}
+	return {"ok":true, "flight":flight, "fleet":fleet, "wings":wings, "combat":combat, "equipment":equipment, "wing_id":wing_id}
 
 func request_base_personnel_command(operation: String, payload: Dictionary) -> Dictionary:
 	if not is_instance_valid(_base_personnel_owner):
@@ -2624,13 +2664,24 @@ func _commit_piloted_air_ground_impact(event: Dictionary) -> Dictionary:
 		if previous.signature != signature: return {"ok":false, "reason":"event_id_conflict"}
 		var replay: Dictionary = previous.result.duplicate(true); replay["replayed"] = true; return replay
 	if _piloted_air_ground_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
-	if _ship_equipment_owner == null: return {"ok":false, "reason":"equipment_unavailable"}
-	var equipment: Dictionary = _ship_equipment_owner.get_snapshot(event.craft_id)
+	var equipment_owner: RefCounted = _ship_equipment_owner
+	var shared := {}
+	if _air_support_source != null:
+		shared = _resolve_air_support_craft(event.craft_id)
+		if not shared.get("ok", false): return shared
+		equipment_owner = shared.equipment
+	if equipment_owner == null: return {"ok":false, "reason":"equipment_unavailable"}
+	var equipment: Dictionary = equipment_owner.get_snapshot(event.craft_id)
 	var model := String(equipment.get("model_id", ""))
 	var skill_key := "dropship_piloting" if model == "cutlass" else ("fighter_piloting" if model == "buccaneer" else "")
 	if skill_key.is_empty(): return {"ok":false, "reason":"unsupported_aircraft"}
 	var pilot = _resolve_unit(event.pilot_id)
 	if not is_instance_valid(pilot) or not pilot.has_method("get_character_profile_bundle"): return {"ok":false, "reason":"pilot_profile_unavailable"}
+	if not shared.is_empty():
+		var adapter: Node = _air_support_adapter.get_ref()
+		var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
+		var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
+		if typeof(pilots) != TYPE_DICTIONARY or String(pilots.get(event.craft_id, "")) != event.pilot_id or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0: return {"ok":false, "reason":"pilot_not_aboard"}
 	var profile: Variant = pilot.call("get_character_profile_bundle")
 	if typeof(profile) != TYPE_DICTIONARY or typeof(profile.get("platform_values")) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_profile_unavailable"}
 	var skill: Variant = profile.platform_values.get(skill_key)

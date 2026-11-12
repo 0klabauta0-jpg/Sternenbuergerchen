@@ -343,6 +343,12 @@ func _home_pad_for(craft_id: String) -> String:
 func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
+func bind_mission_air_support(mission: Node) -> Dictionary:
+	if not is_instance_valid(_flow) or not is_instance_valid(mission) or _flow.call("get_active_mission") != mission or not _flow.is_ancestor_of(mission): return {"ok":false, "reason":"mission_context_changed"}
+	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
+	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
+	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+
 func get_campaign_entry_feedback() -> Dictionary:
 	return _encounter_entry_feedback.duplicate(true)
 

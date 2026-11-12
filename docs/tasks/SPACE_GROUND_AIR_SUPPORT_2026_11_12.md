@@ -47,9 +47,11 @@ stellen keine Luftkampf- oder freie Flugfähigkeit dar.
 
 Die isolierte Arbeitsbasis `task/space-air-parent-20261112` führt den Stand
 `1b924b640` mit dem Raumkampfstand `99d82f999` zusammen; der Fünf-Minuten-
-Autosave bleibt erhalten. Sechs gezielte Ownerprüfungen liefen dort ohne Fehler.
-Der Godot-Ressourcenimport wurde nach dem Klassenindex bewusst nicht vollständig
-ausgeführt; eine vollständige Szenen-/Grafikprüfung ist daher nicht belegt.
+Autosave bleibt erhalten. Der Godot-Ressourcenimport wurde nachgeholt; die
+Referenzdatei `art/polisa_lookdev_20261111/references/port_olisar_official.jpg`
+meldete dabei einen Importfehler. Der anschliessend wiederholte Polisa-Rundflug
+bestand 25/25 ohne Laufzeitfehler und ohne Änderungen der überwachten Quellen.
+Eine vollständige Szenen-/Grafikprüfung ist damit nicht belegt.
 
 Der gemeinsame Flugowner liegt bislang im übergeordneten Reise-Root, während
 eine Bodenmission ihren eigenen SimulationRoot und ihre Hex-Registry besitzt.
@@ -58,6 +60,19 @@ oder den visuellen Luftlayer als bereits kampfbereit gelten. Für den nächsten
 produktiven Schritt müssen derselbe Flug- und Rottenowner, reale Crewbindung,
 atmosphärische Kartenkoordinaten, Landungsübergang und Bodentreffer gemeinsam
 gebunden werden. Die übrigen Akzeptanzpunkte oben sind weiterhin offen.
+
+Der reguläre Aufbau einer dauerhaften Singleplayer-Bodenmission bindet deren
+SimulationRoot jetzt an den vorhandenen übergeordneten Raumkampf-Root. Der
+missionsinterne Zugriff prüft Ort und Identität jedes Mal neu und liefert
+Referenzen auf die bestehende Fleet-Fluginstanz sowie Rotten-, Kampf- und
+Equipmentowner; er erzeugt keine zweite Schiffswahrheit. Auch bereits
+vorhandene Missionsorte werden beim erneuten Betreten gebunden. Der vorbereitete
+Piloten-/Bodentrefferpfad kann darüber das tatsächliche Schiffsequipment lesen
+und weist eine abweichende Pilotenzuordnung oder einen nicht eingebordeten bzw.
+flugunfähigen Piloten ab. Ein Fixture mit zwei realen Roots und echten Ownern
+prüft Identität, Ortswechsel, Pilotensperre, Treffer und Replay. Das Nachschlagen
+allein startet keinen Atmosphärenflug und erteilt keinen Spieler-Feuerbefehl;
+die entsprechenden Aufträge, Sicht-/Waffenfreigaben und Darstellung sind offen.
 
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
