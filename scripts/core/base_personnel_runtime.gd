@@ -5,6 +5,7 @@ extends Node
 signal terminal_ready(unit_id: String, terminal_id: String)
 signal state_changed
 const ACTOR = preload("res://scripts/core/base_personnel_actor.gd")
+const HEX_ADMISSION=preload("res://scripts/mission/hex_ground_admission.gd")
 const NAV_PATH := "res://scripts/meta/base_interior_navigation.gd"
 var _flow: Node
 var _screen: Node
@@ -24,6 +25,8 @@ const AUTOMATIC_REST_IDLE_SECONDS := 20.0
 const MANUAL_PRIORITY_SECONDS := 30.0
 var _source_layout: Dictionary = {}
 var _building_blockers: Dictionary = {}
+var _hex_required:=false
+var _hex_admission_waiting:=false
 const BUILDING_BOUNDS := {
 	"habitat": Rect2(7.0, 2.0, 10.0, 6.3),
 	"workshop": Rect2(22.0, 2.0, 11.0, 6.5),
@@ -104,6 +107,9 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 				_states[id].status = "sleeping"
 				_states[id].bed_id = String(bed.id)
 				_beds[bed.id] = id
+	_hex_required=not String(map_data.get_tactical_grid_rules()).is_empty()
+	var configured:Dictionary=_sim.configure_hex_ground_runtime(map_data,_terrain)
+	if configured.ok:_sync_hex_ground_presence()
 	_sim.tick_processed.connect(_on_tick)
 	_sim.set_physics_process(true)
 
@@ -136,7 +142,47 @@ func sync_roster() -> void:
 		_registry.register_unit(id, actor)
 		_sim.register_known_unit(id, actor)
 		_states[id] = {"unit_id":id,"name":String(profile.get("display_name",id)),"role":String(profile.get("role_name","")),"status":"outside","craft_id":"","bed_id":"","action":{},"last_result":{}}
+	_sync_hex_ground_presence()
 	state_changed.emit()
+
+
+func _requires_hex_ground()->bool:
+	return _hex_required or _sim.is_hex_ground_runtime_required()
+
+
+## Called only after existing roster/restore metadata is complete. Aboard and
+## remote identities remain transport people and never receive a base cell.
+func _sync_hex_ground_presence()->Dictionary:
+	_hex_admission_waiting=false
+	if not _requires_hex_ground():return {"ok":true,"legacy":true}
+	if not _sim.is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_unavailable"}
+	var candidates:Array[Dictionary]=[]
+	for id in _states:
+		var state:Dictionary=_states[id]
+		if String(state.status)=="aboard" or not _unit_is_home(String(id)):continue
+		if not _sim.get_hex_unit_state(String(id)).is_empty():continue
+		var actor:Node2D=get_actor(String(id))
+		if not is_instance_valid(actor) or not actor.global_position.is_finite():return {"ok":false,"reason":"invalid_base_position"}
+		candidates.append({"unit_id":String(id),"grid":_terrain.world_to_grid(actor.global_position)})
+	if candidates.is_empty():return {"ok":true}
+	_hex_admission_waiting=true
+	var plan:Dictionary=HEX_ADMISSION.new().plan_anchored_group(candidates,_terrain,_sim.get_hex_ground_planning_snapshot())
+	if not plan.ok:return plan
+	var placements:Array[Dictionary]=[]
+	placements.assign(plan.placements)
+	var admitted:Dictionary=_sim.admit_base_ground_people(self,placements)
+	if not admitted.ok:return admitted
+	_hex_admission_waiting=false
+	for placement in placements:
+		var state:Dictionary=_states[placement.unit_id]
+		if String(state.status)=="sleeping":
+			var bed:Dictionary=_find_layout("beds",String(state.bed_id))
+			if bed.is_empty() or _terrain.world_to_grid(_world(bed.grid))!=placement.grid:
+				_beds.erase(String(state.bed_id))
+				state.bed_id=""
+				state.status="outside"
+				state.rest_automatic=false
+	return admitted
 
 
 func validate_dismiss(unit_id: String) -> Dictionary:
@@ -344,6 +390,8 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 	return _reject("unknown_operation", "Basisaktion nicht verfuegbar")
 
 func _walk(id: String, target: Vector2, action: Dictionary) -> Dictionary:
+	if not target.is_finite():return _reject("invalid_target", "Ungueltiges Bewegungsziel")
+	if _requires_hex_ground():return _walk_hex(id,target,action)
 	var grid: Vector2i = _terrain.world_to_grid(target)
 	if not _terrain.is_walkable(grid):
 		return _reject("target_blocked", "Ziel ist nicht begehbar")
@@ -359,6 +407,24 @@ func _walk(id: String, target: Vector2, action: Dictionary) -> Dictionary:
 	_sim.enqueue_command({"type":"move_to_position","unit_id":id,"target_position":resolved,"command_token":"base:%d" % _sequence,"requeue_until_target":true,"path":path})
 	state_changed.emit()
 	return {"ok":true,"pending":true}
+
+
+func _walk_hex(id:String,target:Vector2,action:Dictionary)->Dictionary:
+	var token:String="base:%d"%(_sequence+1)
+	var checked:Dictionary=_sim.call("_validate_base_ground_move",self,id,target,token)
+	if not checked.ok:return checked
+	var resolved:Vector2=_terrain.grid_to_world(_terrain.world_to_grid(target))
+	_cancel(id)
+	var accepted:Dictionary=_sim.request_base_ground_move(self,id,resolved,token)
+	if not accepted.ok:return accepted
+	_sequence+=1
+	_states[id].status="moving"
+	_states[id].action=action.duplicate(true)
+	_states[id].action.target=resolved
+	_states[id].action.command_token=token
+	state_changed.emit()
+	return {"ok":true,"pending":true}
+
 func _cancel(id: String) -> void:
 	for craft in _board_groups.keys():
 		if Array(_board_groups[craft].ids).has(id):
@@ -483,8 +549,15 @@ func _on_tick(_tick: int) -> void:
 		if state.status != "moving":
 			continue
 		var action: Dictionary = state.action
-		if get_actor(id).position.distance_to(action.target) > 0.5:
-			continue
+		if _requires_hex_ground():
+			var readout:Dictionary=_sim.get_hex_movement_readout(String(id))
+			var failed_navigation:bool=readout.get("status","")=="blocked" and readout.get("reason","")=="unreachable_target"
+			if readout.get("source_command_id","")==action.get("command_token","") and (readout.get("status","")=="canceled" or failed_navigation):
+				_cancel(String(id))
+				state.last_result={"ok":false,"reason":String(readout.get("reason","base_move_aborted"))}
+				continue
+			if not _sim.has_hex_position_arrived(String(id),action.target,String(action.get("command_token",""))):continue
+		elif get_actor(id).position.distance_to(action.target) > 0.5:continue
 		state.status = "outside"
 		state.action = {}
 		match String(action.type):
@@ -505,6 +578,7 @@ func _on_tick(_tick: int) -> void:
 	if _poll_seconds < 0.2:
 		return
 	_poll_seconds = 0.0
+	if _hex_admission_waiting:_sync_hex_ground_presence()
 	advance_automatic_rest(_rest_elapsed)
 	_rest_elapsed=0.0
 	for craft in _board_groups.keys():

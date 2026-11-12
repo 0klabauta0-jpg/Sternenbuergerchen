@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Basisowner-Kern und gemeinsame Hexbewegung — 12.11.2026
+
+Echte Baseactors erhalten einen separaten exact owner-/Registry-/Known-gebundenen
+Rootzugang; kein taktisches Commandinterface wird ergänzt. Begrenzte atomare
+Ankerplanung bewahrt eindeutige gespeicherte Felder und folgt expliziten Rampen.
+Admission erst nach Restorestatus; Bord-/Fernpersonen ohne Ground. Basewalk
+nutzt tokenisierte Rootbewegung, Ankunft/Abbruch und bestehenden Bettowner.
+Base63/0, Lifecycle64/0, Guards und enger Review grün; QA hex_base_owner_20261112.
+Großer Configurepfad statisch kontrolliert; Produktionsmaps unverändert.
+Boarding/Ausstieg, Setup/Respawn und AP7/8 bleiben weitere Pakete, AP6 noch offen.
+
 ### AP6 Schiffsproducer, Gruppenausstieg und Touchdownclaims — 12.11.2026
 
 Tatsächlicher Controller liest akzeptierte Schiffskörper kamerafrei aus gebundenen
