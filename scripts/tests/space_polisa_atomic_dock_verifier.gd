@@ -21,6 +21,9 @@ class PilotFixture extends Node:
 	func is_pilot_aboard(_id: String) -> bool: return aboard
 class AdapterFixture extends "res://scripts/meta/singleplayer_runtime_adapter.gd":
 	var gate := {}
+	var emit_progress := false
+	func observe_campaign_progress() -> void:
+		if emit_progress: _simulation.singleplayer_command_committed.emit({"operation":"onboarding_fixture"}, {})
 	func preview_departure(_id: String) -> Dictionary: return gate.duplicate(true)
 	func preview_reapproach(_id: String) -> Dictionary: return gate.duplicate(true)
 	func _built_home_pad_ids() -> Array: return ["homebase_pad_01"]
@@ -120,9 +123,10 @@ func _verify_reentrant_finish() -> void:
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = AdapterFixture.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._campaign = campaign; flow.adapter = adapter
 	adapter.gate = {"ok":true,"departure":{"craft_id":id,"origin_location_id":"homebase","destination_location_id":"polisa","landing_pad_id":"homebase_pad_01","job_id":""}}
+	adapter._campaign_mode = true; adapter.emit_progress = true
 	var observed: Array = []
 	sim.singleplayer_command_committed.connect(func(command: Dictionary, _result: Dictionary):
-		if command.operation == "begin_station_dock":
+		if command.operation == "onboarding_fixture":
 			observed.append(flow._space_approaches.has(id))
 			assert(adapter.finish_space_approach(id).ok)
 			flow._space_approaches.erase(id))
