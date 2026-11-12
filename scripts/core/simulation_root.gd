@@ -1105,6 +1105,20 @@ func preview_station_dock(craft_id: String, target_id: String, layout_revision: 
 		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
 	return {"ok":true, "craft_id":craft_id, "target_id":target_id, "layout_revision":layout.revision, "space_area_id":layout.area_id, "wing_id":wing_id, "flight_revision":pose.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "footprint_cells":cells}
 
+func preview_station_dock_deactivation(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	var gate: Dictionary = preview_station_dock(craft_id, target_id, layout_revision, expected_flight_revision, expected_travel_revision, expected_area_revision, expected_wing_revision, authority_context)
+	if not gate.get("ok", false): return gate
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	var proposal := {"expected_revision":expected_flight_revision, "motion_mode":"inactive"}
+	var tick := tick_counter + 1
+	var flight_check: Dictionary = flight.validate_space_activity_transition(proposal, tick)
+	if not flight_check.get("ok", false): return flight_check
+	var actor_check: Dictionary = _space_combat_state.validate_deactivation(craft_id, expected_flight_revision, expected_area_revision)
+	if not actor_check.get("ok", false): return actor_check
+	gate["activity_proposal"] = proposal
+	gate["activity_tick"] = tick
+	return gate
+
 func preview_surface_approach(craft_id: String, location_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
 	# Read-only geometric evidence, never authorization or a reservation.
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
