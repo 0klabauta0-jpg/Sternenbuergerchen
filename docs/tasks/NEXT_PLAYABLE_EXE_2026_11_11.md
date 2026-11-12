@@ -39,8 +39,9 @@ für den vollständigen Tabletopmodus aktiviert.
 1. AP5-Code einschließlich Backoff ist integriert. AP6 enthält Gruppenplätze,
    Transportphasen und gebundene Schiffsflächen samt tatsächlichem Renderjoin.
    Basiskern, atomare Boarding-/Unboardpublikation, InitialSetup und Wellen sind
-   integriert. Noch Respawnmanager-/Groundverbund, Memberidentitaet und echter
-   Visit-/Crew-Retireanschluss; AP6 nicht pauschal abschliessen.
+   integriert. Respawnmanager-/Groundverbund76/0 und dessen Consumer4/0 sowie
+   echter Flow-/Visit-/Crew-Retireanschluss37/0 sind gemeinsam gesichert. Noch
+   Slot-/FMC-Memberlifecycle; AP6 nicht pauschal abschliessen.
 2. AP7: Ground-Roundtrip und Command-/Versionsgrenzen sind teilweise integriert;
    Passagezusagen und urspruengliche Bewegungsabsichten besitzen vorbereitete
    Restorepatches. Tatsaechliche Base-/Checkpointbindung, Hostpublisher und

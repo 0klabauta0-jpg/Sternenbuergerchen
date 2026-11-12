@@ -46,12 +46,15 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Root-/Ground-/Respawnmanagerverbund Sourceffac ist als1e0c2b5af integriert,
   frisch76/0 samt Guards. Reentryschaden, Managerpfadwechsel und akzeptierte
   Schiffsflaechen schliessen alte Folgeevents aus. Member-/Crew-/Visitretirement
-  bleiben bei Tabletop; echte Polisa-REDprobea859/1358 bestaetigt die Kanten.
+  sind bis Sourceaa4 selektiv als0055b08fe integriert: frischer tatsaechlicher
+  Parent-Flow/Controller/Rootverbund37/0, Deploymentnachbar95/0, alle Guards gruen
+  und keine gepinnten Fremdquellen. Slot-/FMC-Lifecycle bleibt bei Tabletop.
   Flowcaller fuer gebundenes Surface-Retirement ist reviewed (18/0 an
   kontrollierter Receiptgrenze): eigener Pendingmarker vor Deferredcall,
   Waiting/Retry, per-Craft-Admission-/Saveguard, Homefortsetzung und letzter
   Abschlussobserver; Preflight vor LegacyFuelwrite. Controller3arg/Rootpaarung
-  folgt separat. Driver-Completed-Consumerrest e41 ist mit acht Guardzeilen
+  ist bis0055b08fe tatsaechlich gemeinsam geprueft (37/0). Driver-Completed-
+  Consumerrest e41 ist mit acht Guardzeilen
   geschlossen: actualRootgebundener RED3/1 -> GREEN4/0 samt positiver Fitkontrolle,
   Compile/Quellen-/Profil-/Canaryguards gruen; Linger/READY nur fuer aktuell fit
   und am Boden gebundene Person. Legacy und sonstiger Driver unveraendert.
