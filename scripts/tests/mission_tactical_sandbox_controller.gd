@@ -5333,7 +5333,7 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 		selected_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		header.add_child(selected_marker)
 		header.move_child(selected_marker, 0)
-	selected_marker.text = "â—†"
+	selected_marker.text = "◆"
 	selected_marker.visible = selected
 	TACTICAL_UI_THEME_SCRIPT._override_color(selected_marker, "font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED)
 	TACTICAL_UI_THEME_SCRIPT._override_font_size(selected_marker, "font_size", int(metrics.body_font_size))
@@ -5437,7 +5437,7 @@ func _native_a5_team_status(snapshot: Dictionary, inactive: bool) -> String:
 		return "%d Feindkontakt%s" % [contacts, "e" if contacts != 1 else ""]
 	var counts := Dictionary(Dictionary(snapshot.get("member_status", {})).get("counts", {}))
 	if int(counts.get("busy", 0)) > 0:
-		return "Auftrag wird ausgefÃ¼hrt"
+		return "Auftrag wird ausgeführt"
 	if int(counts.get("down", 0)) > 0:
 		return "Verluste im Trupp"
 	if String(snapshot.get("readiness_state", "unavailable")) in ["high", "medium"]:
@@ -13763,7 +13763,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 	var relevant_crew:Array=_campaign_craft_crew(craft_id)
 	if not boarding_fireteam_id.is_empty():
 		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==boarding_fireteam_id)
-		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehÃ¶rt nicht zu diesem Schiff"}
+		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehört nicht zu diesem Schiff"}
 	var has_ground_crew := false
 	for unit in relevant_crew:
 		var id:String=String(unit.call("get_unit_id"))
@@ -13771,7 +13771,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 	if not has_ground_crew and not boarding_fireteam_id.is_empty():
 		if relevant_crew.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):
 			return {"ok":true,"message":"Trupp an Bord"}
-		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfÃ¼gbar"}
+		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfügbar"}
 	if bool(flight_guard.get("ok", false)) and not has_ground_crew: return flight_guard
 	if not _is_parked_campaign_dropship(craft_id):
 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
@@ -13842,7 +13842,7 @@ func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
 
 func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
 	if not _can_deploy_parked_campaign_crew(craft_id):
-		return {"ok":false,"reason":"deployment_unavailable","message":"Absetzen braucht ein gelandetes Schiff mit KrÃ¤ften an Bord"}
+		return {"ok":false,"reason":"deployment_unavailable","message":"Absetzen braucht ein gelandetes Schiff mit Kräften an Bord"}
 	var crew:Array=[]
 	var embarked:Dictionary={}
 	for unit in _get_campaign_sortie_units():
@@ -14453,19 +14453,19 @@ func _build_mission_dropship_base_title_text(card: Dictionary = {}) -> String:
 		var card_title: String = String(card.get("title_text", "")).strip_edges()
 		if card_title.is_empty():
 			card_title = String(card.get("display_name", "Dropship")).strip_edges()
-		return "%s Ã‚Â· %s" % [card_title, air_suffix] if not air_suffix.is_empty() else card_title
+		return "%s Â· %s" % [card_title, air_suffix] if not air_suffix.is_empty() else card_title
 	if not _mission_drop_title_text.is_empty():
-		return "%s Ã‚Â· %s" % [_mission_drop_title_text, air_suffix] if not air_suffix.is_empty() else _mission_drop_title_text
+		return "%s Â· %s" % [_mission_drop_title_text, air_suffix] if not air_suffix.is_empty() else _mission_drop_title_text
 	var craft_name: String = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
 	if not air_suffix.is_empty():
-		return "%s Ã‚Â· %s" % [craft_name, air_suffix]
+		return "%s Â· %s" % [craft_name, air_suffix]
 	match _mission_drop_state:
 		"waiting":
-			return "%s Â· MAP" % craft_name
+			return "%s · MAP" % craft_name
 		"to_mission":
-			return "%s Â· HANDOVER" % craft_name
+			return "%s · HANDOVER" % craft_name
 		"to_fob":
-			return "%s Â· RETURN" % craft_name
+			return "%s · RETURN" % craft_name
 		_:
 			return craft_name
 
@@ -16401,7 +16401,7 @@ func _apply_native_a5_hud_layout() -> void:
 	})
 	var source := get_node_or_null(command_feedback_label_path) as Label
 	var order_text := "Auftrag: Keine Befehle geplant"
-	var target_text := "Ziel auswÃ¤hlen"
+	var target_text := "Ziel auswählen"
 	var detail_text := ""
 	if source != null:
 		detail_text = source.text
@@ -16417,9 +16417,9 @@ func _apply_native_a5_hud_layout() -> void:
 		var waypoint_count := _count_selected_phase_waypoints()
 		var area_count := _count_selected_area_orders()
 		if waypoint_count > 0 or area_count > 0:
-			order_text = "Auftrag: %d Wegpunkte Â· %d Gebiete" % [waypoint_count, area_count]
+			order_text = "Auftrag: %d Wegpunkte · %d Gebiete" % [waypoint_count, area_count]
 	if _selected_fireteam_ids.is_empty():
-		order_text = "Auftrag: Fireteam auswÃ¤hlen"
+		order_text = "Auftrag: Fireteam auswählen"
 	var team_header := _build_native_team_header()
 	NATIVE_A5_HUD_LAYOUT_SCRIPT.refresh(self, {
 		"visible": _tactical_ui_visible,
@@ -16499,21 +16499,21 @@ func _build_native_player_readout_context() -> Dictionary:
 
 func _build_native_team_header() -> Dictionary:
 	if _selected_fireteam_ids.is_empty():
-		return {"title": "Kein Fireteam ausgewÃ¤hlt", "summary": "Fireteam links oder auf der Karte auswÃ¤hlen"}
+		return {"title": "Kein Fireteam ausgewählt", "summary": "Fireteam links oder auf der Karte auswählen"}
 	var member_ids: Dictionary = {}
 	for fireteam_id in _selected_fireteam_ids:
 		for unit in _get_fireteam_units(String(fireteam_id), true):
 			if unit != null and unit.has_method("get_unit_id"):
 				member_ids[String(unit.call("get_unit_id"))] = true
 	if _selected_fireteam_ids.size() > 1:
-		return {"title": "Alle Fireteams" if _is_all_fireteams_selected() else "%d Fireteams" % _selected_fireteam_ids.size(), "summary": "%d Teams Â· %d Operatoren" % [_selected_fireteam_ids.size(), member_ids.size()]}
+		return {"title": "Alle Fireteams" if _is_all_fireteams_selected() else "%d Fireteams" % _selected_fireteam_ids.size(), "summary": "%d Teams · %d Operatoren" % [_selected_fireteam_ids.size(), member_ids.size()]}
 	var fireteam_id := String(_selected_fireteam_ids[0])
 	var members := _get_fireteam_units(fireteam_id, true)
 	if not members.is_empty() and _filter_ground_fireteam_card_units(members).is_empty():
 		return {"title": _get_fireteam_display_label(fireteam_id), "summary": "Fireteam im Dropship"}
 	var lead = _resolve_fireteam_leader_for_behavior(fireteam_id)
 	var lead_name := String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "nicht zugewiesen"
-	return {"title": _get_fireteam_display_label(fireteam_id), "summary": "%d Operatoren Â· FTL %s" % [member_ids.size(), lead_name]}
+	return {"title": _get_fireteam_display_label(fireteam_id), "summary": "%d Operatoren · FTL %s" % [member_ids.size(), lead_name]}
 
 
 func _on_native_fire_rule_selected(index: int) -> void:
@@ -36902,12 +36902,12 @@ var _selected_team_boarding_requests:Dictionary={}
 func get_selected_team_boarding_snapshot() -> Dictionary:
 	var team:=String(_get_selected_fireteam_id())
 	var craft:=String(Dictionary(get_parent().get_meta("singleplayer_mission_identity",{})).get("craft_id",_mission_drop_craft_id))
-	var result:Dictionary={"can_board":false,"craft_id":craft,"fireteam_id":team,"message":"Einen Trupp auswÃ¤hlen"}
+	var result:Dictionary={"can_board":false,"craft_id":craft,"fireteam_id":team,"message":"Einen Trupp auswählen"}
 	if _selected_fireteam_ids.size()!=1:return result
 	if not _can_issue_local_commands():result.message="Keine Befehlsberechtigung";return result
-	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfÃ¼gbar";return result
+	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfügbar";return result
 	var units:Array=_get_campaign_sortie_units().filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==team)
-	if units.is_empty():result.message="Trupp gehÃ¶rt nicht zu diesem Schiff";return result
+	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result
 	if _selected_team_boarding_requests.has(team):result.message="Trupp geht zum Schiff / steigt ein";return result
 	if units.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):result.message="Trupp an Bord";return result
 	if units.any(func(unit:Node):return int(unit.call("get_health"))<=0):result.message="Nicht alle Truppmitglieder sind boardingbereit";return result
@@ -37099,7 +37099,7 @@ func _ground_ship_touchdown_ready(craft_id:String,position:Vector2,visual_only:b
 	var craft:Dictionary=_find_mission_dropship_card_entry(craft_id)
 	var bound:Dictionary=HEX_SHIP_PROFILE_SCRIPT.read_bound(craft,Dictionary(_field_landing_by_craft.get(craft_id,{})).get("ground_body_profile"))
 	if not bound.ok or not _check_ground_ship_landing_site(craft,position,bound.profile).ok:
-		_last_command_text="LandeflÃ¤che belegt: Anflug wartet"
+		_last_command_text="Landefläche belegt: Anflug wartet"
 		return false
 	return true
 
