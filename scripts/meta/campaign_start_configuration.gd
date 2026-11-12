@@ -115,7 +115,8 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	# every Hex export, so deduplication alone cannot bound export/hash/disk work.
 	# Keep safety checks above unconditional; an explicit save can bypass only time.
 	var simulation: Node = runtime.get("_simulation")
-	if is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required():
+	var hex_export := is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required()
+	if hex_export:
 		var now: int = Time.get_ticks_msec()
 		var scope := "%s:%s:%s" % [runtime.get_instance_id(), simulation.get_instance_id(), simulation.get_hex_ground_context_revision()]
 		if not force and scope == _hex_export_scope and now - _hex_export_msec < HEX_AUTOSAVE_INTERVAL_MSEC:
@@ -123,6 +124,9 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 		_hex_export_scope = scope
 		_hex_export_msec = now
 	var payload: Dictionary = runtime.call("export_campaign_checkpoint")
+	# First export may build the map fingerprint. Give the next frame a complete
+	# cooldown after that work, rather than spending its interval during export.
+	if hex_export: _hex_export_msec = Time.get_ticks_msec()
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}
 	payload["roster"] = Array(flow.get("_all_team_units")).duplicate(true)
