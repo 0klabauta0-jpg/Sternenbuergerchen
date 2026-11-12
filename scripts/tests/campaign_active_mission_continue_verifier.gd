@@ -29,6 +29,8 @@ func _run() -> void:
   if person != null and person.get("unit_id") in ["campaign_leader","campaign_pilot"]:
    before[String(person.unit_id)] = {"position":person.global_position,"health":person.get_health(),"vital":person.get_vital_state()}
  if not _check(before.size() == 2, "both actual people present at destination"): await _finish(); return
+ var before_elapsed: float = mission.get_node("CombatLoopDriver").call("_get_duration_seconds")
+ var before_campaign: Dictionary = _flow.call("get_singleplayer_snapshot")
  var campaign = _flow.get("_campaign_start")
  if not campaign.has_method("save_active_checkpoint"):
   _check(false,"active mission checkpoint path exists")
@@ -40,13 +42,18 @@ func _run() -> void:
  START.request_start(self,"campaign","continue")
  _flow = FLOW.instantiate(); root.add_child(_flow)
  await process_frame
- if not await _wait(func(): return is_instance_valid(_flow.get("_active_mission")), 60000, "actual mission is reconstructed on continue"): await _finish(); return
+ if not await _wait(func(): return is_instance_valid(_flow.get("_active_mission")) and bool(_flow.get_meta("campaign_active_restore_complete", false)), 60000, "actual mission is reconstructed on continue"): await _finish(); return
  var restored: Node = _flow.get("_active_mission")
  var restored_units: Node = restored.get_node("UnitRegistry")
  for id in before:
   var person = restored_units.get_unit(id)
   _check(is_instance_valid(person) and person.global_position.distance_to(before[id].position) < 0.1 and person.get_health()==before[id].health and person.get_vital_state()==before[id].vital, "same person, location and health restored: " + id)
  _check(String(_flow.call("get_singleplayer_snapshot").space_travel.phase) == "surface", "craft remains at actual mission surface")
+ var after_campaign: Dictionary = _flow.call("get_singleplayer_snapshot")
+ _check(after_campaign.supply.credits == before_campaign.supply.credits and after_campaign.supply.fuel_by_craft_id == before_campaign.supply.fuel_by_craft_id, "credits and craft fuel survive continue")
+ _check(String(after_campaign.campaign.jobs.satellite_recovery.status) == "active", "accepted mission remains active without paying twice")
+ var after_elapsed: float = restored.get_node("CombatLoopDriver").call("_get_duration_seconds")
+ _check(after_elapsed >= before_elapsed - 0.1 and after_elapsed < before_elapsed + 10.0, "mission clock survives process reconstruction")
  await _finish()
 
 func _finish() -> void:

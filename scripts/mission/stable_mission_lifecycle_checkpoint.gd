@@ -15,6 +15,13 @@ func _guard(sim: Node, driver: Node) -> Dictionary:
 		if not value is Dictionary or not value.is_empty(): return _reject("mission_lifecycle_unsupported")
 	for actor in sim.get_unit_registry().get_all_units():
 		if not is_instance_valid(actor) or not actor.has_method("get_team_id") or String(actor.get_team_id()) != driver.friendly_team_id: return _reject("mission_combat_unsupported")
+		if not actor.has_method("get_current_unit_command"): return _reject("mission_actor_unsupported")
+		var command: RefCounted = actor.get_current_unit_command()
+		if command != null and String(command.get("command_type")) != "hold_position": return _reject("mission_movement_pending")
+	var controller: Node = sim.get_parent().get_node_or_null("TacticalController") if is_instance_valid(sim.get_parent()) else null
+	if controller != null:
+		var movement: Variant = controller.get("_fireteam_movement_controller")
+		if movement == null or not movement.has_method("get_state_snapshot") or not movement.get_state_snapshot().is_empty(): return _reject("mission_movement_pending")
 	return {"ok":true}
 
 func _snapshot_fields(sim: Node, driver: Node) -> Dictionary:

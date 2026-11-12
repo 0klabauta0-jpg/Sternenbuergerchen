@@ -17,6 +17,15 @@ func _run() -> void:
  var owner = script.new()
  var saved: Dictionary = JSON.parse_string(JSON.stringify(owner.export_state(rig.sim,driver)))
  _check(saved.get("ok",false),"stable legacy lifecycle captures")
+ var actor = rig.actors.a
+ var moving = load("res://scripts/npc/unit_command.gd").new()
+ moving.command_type = "move_to_position"
+ moving.unit_id = actor.unit_id
+ moving.team_id = actor.team_id
+ moving.target_position = Vector2(200,0)
+ actor._current_unit_command = moving
+ _check(not owner.export_state(rig.sim,driver).get("ok",false),"active movement cannot be silently omitted")
+ actor._current_unit_command = null
  rig.sim.tick_counter += 4
  driver._current_tick = rig.sim.tick_counter
  var before: int = rig.sim.tick_counter
