@@ -855,6 +855,8 @@ func enter_purchased_station_local_orbit(craft_id: String) -> Dictionary:
 
 func enter_space_orbit(craft_id: String) -> Dictionary:
 	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
+	if _local_warp_arrival_enabled and _simulation != null and _simulation.is_station_purchase_local_admission_current(craft_id):
+		return enter_purchased_station_local_orbit(craft_id)
 	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") in ["surface", "approach"]) or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
 		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
 		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
