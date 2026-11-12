@@ -9,6 +9,7 @@ const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const DISPERSION = preload("res://scripts/mission/air_support_dispersion.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 class Flow extends Node:
 	var _active_mission: Node
 	var _craft_location_runtime := {"ship":"moon_site"}
@@ -93,6 +94,16 @@ func _initialize() -> void:
 	assert(adapter.request_operation("air_support_takeoff", {"craft_id":"ship"}).ok)
 	assert(flight.get_snapshot().tick == source.tick_counter)
 	assert(mission_root.is_air_support_craft_airborne("ship"))
+	# Isolated sensor fixture: a registered airborne enemy, not a ground unit.
+	var radar_target = FLIGHT.new(); assert(radar_target.configure("radar_enemy", {"position_plane":Vector2.ZERO}).ok)
+	var radar_pose := {"expected_revision":radar_target.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site", "position_plane":GRID.HEX.axial_to_plane(Vector2(13,12)), "motion_mode":"tactical", "assist_mode":"coupled"}
+	var radar_transition: Dictionary = radar_target.validate_area_transition(radar_pose, 1)
+	var radar_combat: RefCounted = source.get("_space_combat_state")
+	var radar_admission: Dictionary = radar_combat.validate_new_local_admission({"craft_id":"radar_enemy", "faction_id":"red", "control_domain":"enemy", "footprint_hexes":[Vector2i.ZERO]}, radar_target, radar_pose, 1)
+	assert(radar_transition.ok and radar_admission.ok)
+	radar_target._publish_area_transition(radar_transition); radar_combat._publish_new_local_admission(radar_admission)
+	var radar: Dictionary = mission_root.get_air_support_radar_contacts("ship")
+	assert(radar.ok and radar.contacts == ["radar_enemy"] and radar.projections.size() == 1 and radar.projections[0].position.is_equal_approx(terrain.grid_to_world(Vector2i(13,12))))
 	var local_enemy = Person.new(); local_enemy.unit_id = "local_enemy"; local_enemy.team = "red"; mission.add_child(local_enemy); units.register_unit("local_enemy", local_enemy); mission_root.register_known_unit("local_enemy", local_enemy)
 	var local_placements: Array[Dictionary] = [{"unit_id":"local_enemy", "grid":Vector2i(13,10)}]; assert(mission_root.admit_hex_ground_units(local_placements).ok)
 	vision.visible = false

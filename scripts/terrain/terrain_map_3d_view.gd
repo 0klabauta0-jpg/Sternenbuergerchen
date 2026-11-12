@@ -7724,6 +7724,7 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 	var entries: Array = Array(payload.get("dropship_visuals", []))
 	for index in range(entries.size()):
 		var entry: Dictionary = Dictionary(entries[index])
+		parts.append("radar:%s" % str(bool(entry.get("radar_contact", false))))
 		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
 			_get_dropship_visual_id(entry, index),
 			String(entry.get("state", "")).strip_edges().to_lower(),
@@ -11216,6 +11217,12 @@ func _rebuild_drop_visuals() -> void:
 		if is_cargo_visual:
 			_add_cargo_touchdown_status_label(entry, visual_id, ship_position)
 		if not bool(entry.get("dropship_visible", false)):
+			continue
+		if bool(entry.get("radar_contact", false)):
+			var marker := _add_label3d(_drop_root, "◇ LUFTKONTAKT", _world_to_air_layer_3d_position_for_payload(entry, ship_position, 0.92), "AirRadar_%s" % _sanitize_node_name(visual_id), Color(1.0, 0.66, 0.2), 16)
+			marker.set_meta("dropship_visual_mode", "texture")
+			marker.set_meta("dropship_extra_y_offset", 0.92)
+			_dropship_visual_nodes_by_id[visual_id] = marker
 			continue
 		if _air_layer_allows_air_visual_for_payload(entry, ship_position):
 			var visual_node := _add_dropship_proxy(ship_position, entry, visual_id)
