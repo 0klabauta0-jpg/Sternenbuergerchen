@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6ea4142028a34cb2a1d227e81894d62e
+PASS no inferred overlay without exact current Root target revision
+PASS exact target DTO selects only shared detached station geometry
+PASS explicit offset-to-axial-to-plane projection and gate picking
+PASS station block suppresses Move; gate sends only existing ID/cell intent, no docking action
+PASS ship pose update retains static descriptor/plane cache and source values
+PASS camera changes only projection; shared dock geometry remains cached
+PASS wrong revision or other area immediately removes station drawing
+PASS cached redraw restores without selecting ship or granting docking authority; DTO copy detached
+FAIL station hull covers both odd/even-row side-boundary hexes
+POLISA_DOCK_OVERLAY_RESULT checks=9 failures=1 docking_commands=false visual_approved=false

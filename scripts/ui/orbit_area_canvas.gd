@@ -4,6 +4,7 @@ const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const AREA = preload("res://scripts/core/space_area_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
+const DOCK = preload("res://scripts/mission/polisa_station_dock_layout.gd")
 const TILT := 0.72
 const MIN_ZOOM := 0.6
 const MAX_ZOOM := 48.0
@@ -19,6 +20,9 @@ var _zoom := 1.0
 var _pan := Vector2.ZERO
 var _dragging := false
 var _static_layer: Control
+var _dock_cache: Dictionary = {}
+var _dock_projection: Dictionary = {}
+var _dock_visible := false
 
 func _ready() -> void:
 	clip_contents = true
@@ -62,8 +66,55 @@ func set_projection(snapshot: Dictionary, selected_craft_id: String = "", body_v
 		static_changed = static_changed or not _layout.is_empty()
 		_layout = {}
 		_body_mask.clear()
+	static_changed = _sync_dock_projection(_snapshot) or static_changed
 	if static_changed and is_instance_valid(_static_layer): _static_layer.queue_redraw()
 	queue_redraw()
+
+## Read-only target display. Never derives a target from body/area alone.
+func _sync_dock_projection(snapshot: Dictionary) -> bool:
+	var was_visible := _dock_visible
+	var targets: Variant = snapshot.get("dock_targets")
+	var expected := {"target_id":"polisa_station_dock","revision":DOCK.REVISION}
+	_dock_visible = snapshot.get("ok") == true and _layout.get("body_map_id") == DOCK.AREA_ID and snapshot.get("space_area_id") == DOCK.AREA_ID and targets is Array and targets.size() == 1 and targets[0] is Dictionary and targets[0] == expected
+	if not _dock_visible:
+		_dock_projection = {}
+		return was_visible
+	var key := DOCK.AREA_ID + ":" + DOCK.REVISION
+	if not _dock_cache.has(key):
+		var descriptor: Dictionary = DOCK.build()
+		if not descriptor.get("ok",false):
+			_dock_cache[key] = {"ok":false}
+		else:
+			_dock_cache[key] = _build_dock_draw_projection(descriptor)
+	if not _dock_cache[key].get("ok",false):
+		_dock_visible = false
+		_dock_projection = {}
+		return was_visible
+	_dock_projection = _dock_cache[key]
+	return not was_visible
+
+func _build_dock_draw_projection(descriptor: Dictionary) -> Dictionary:
+	var block: Rect2i = descriptor.station_block
+	var hull_points := PackedVector2Array()
+	# Offset-row parity shifts alternate rows. Use the actual perimeter,
+	# not just four corner cells, so the hull encloses both row parities.
+	var perimeter: Array[Vector2i] = []
+	for x in range(block.position.x,block.end.x):
+		perimeter.append(Vector2i(x,block.position.y))
+		perimeter.append(Vector2i(x,block.end.y-1))
+	for y in range(block.position.y+1,block.end.y-1):
+		perimeter.append(Vector2i(block.position.x,y))
+		perimeter.append(Vector2i(block.end.x-1,y))
+	for offset: Vector2i in perimeter:
+		# Descriptor cells are offsets. Flight/Hex geometry is axial.
+		var axial := GRID.from_offset(offset)
+		hull_points.append_array(HEX.corners(HEX.axial_to_plane(Vector2(axial))))
+	var station_polygon := Geometry2D.convex_hull(hull_points)
+	if station_polygon.size() > 1 and station_polygon[0] == station_polygon[-1]: station_polygon.resize(station_polygon.size()-1)
+	var gate_axial := GRID.from_offset(descriptor.dock_gate)
+	return {"ok":true,"descriptor":descriptor,"station_polygon_plane":station_polygon,
+		"anchor_plane":HEX.axial_to_plane(Vector2(GRID.from_offset(descriptor.station_anchor))),
+		"gate_axial":gate_axial,"gate_polygon_plane":HEX.corners(HEX.axial_to_plane(Vector2(gate_axial)))}
 
 func get_projection() -> Dictionary:
 	return _snapshot.duplicate(true)
@@ -113,6 +164,7 @@ func recenter_selected() -> bool:
 func request_move_at(point: Vector2) -> bool:
 	if _selected.is_empty() or not _actors.has(_selected) or _layout.is_empty() or not _finite_vector(point): return false
 	var target := screen_to_hex(point)
+	if _dock_visible and Rect2i(_dock_projection.descriptor.station_block).has_point(GRID.to_offset(target)): return false
 	if not AREA.contains(target,{"coordinate_frame":"local","space_area_id":_snapshot.space_area_id}) or _body_mask.has(target): return false
 	move_requested.emit(_selected,target)
 	return true
@@ -165,6 +217,27 @@ func _draw_static() -> void:
 		if _scale() >= 5: _outline(_polygon(cell),Color(0.57,0.89,0.93,0.6),_static_layer)
 		else: _static_layer.draw_circle(hex_to_screen(cell),0.8,Color("91e4ee"))
 
+	_draw_station_target()
+
+func _screen_polygon(plane_points: PackedVector2Array) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	for point: Vector2 in plane_points: result.append(plane_to_screen(point))
+	return result
+
+func _draw_station_target() -> void:
+	if not _dock_visible: return
+	var station := _screen_polygon(_dock_projection.station_polygon_plane)
+	_static_layer.draw_colored_polygon(station,Color(0.12,0.25,0.30,0.92))
+	_outline(station,Color("91e4ee"),_static_layer)
+	var anchor := plane_to_screen(_dock_projection.anchor_plane)
+	_static_layer.draw_string(ThemeDB.fallback_font,anchor+Vector2(-18,4),"Polisa",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("b0c8d5"))
+	var gate := _screen_polygon(_dock_projection.gate_polygon_plane)
+	_static_layer.draw_colored_polygon(gate,Color(0.95,0.77,0.49,0.2))
+	_outline(gate,Color("f2c47c"),_static_layer)
+	var gate_center := hex_to_screen(_dock_projection.gate_axial)
+	_static_layer.draw_circle(gate_center,maxf(2.0,_scale()*0.15),Color("f2c47c"))
+	_static_layer.draw_string(ThemeDB.fallback_font,gate_center+Vector2(8,4),"Dockgate",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("f2c47c"))
+
 func _draw() -> void:
 	if _layout.is_empty(): return
 	for id: String in _actors:
@@ -183,7 +256,7 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([point+forward*radius,point-forward*radius*0.65+side*radius*0.65,point-forward*radius*0.3,point-forward*radius*0.65-side*radius*0.65]),color)
 		draw_string(ThemeDB.fallback_font,point+Vector2(10,-10),id,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("b0c8d5"))
 	var name: String = str(_body_visual.get("name",_layout.body_id))
-	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Â· Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
+	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Ã‚Â· Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
