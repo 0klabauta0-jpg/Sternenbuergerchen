@@ -43,7 +43,10 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Owner56/0 und Actornachbar24/0; erwartete Schema-Rejectwarnungen dokumentiert.
   Wellen785+c4f sind in enger Review, anschliessend Import. ActorMedicalaf56
   stellt vorbereitete stille Gesundheits-/Befehls-/Kontaktpatches bereit (24/0);
-  Root-/Ground-/Respawnmanagerverbund und Member-Retirement bleiben bei Tabletop.
+  Root-/Ground-/Respawnmanagerverbund Sourceffac ist als1e0c2b5af integriert,
+  frisch76/0 samt Guards. Reentryschaden, Managerpfadwechsel und akzeptierte
+  Schiffsflaechen schliessen alte Folgeevents aus. Member-/Crew-/Visitretirement
+  bleiben bei Tabletop; echte Polisa-REDprobea859/1358 bestaetigt die Kanten.
 - AP7 Ground524fd61d1 plusPassage8d333eb95: atomarer kanonischer Roundtrip mit
   Terrainrevalidierungsgrenze und ganzen aktiven Kohorten;35/0 nach gemeinsamem
   64-Topologiebudgetfix und unabhaengigem Review. PendingAdmissions bleiben
