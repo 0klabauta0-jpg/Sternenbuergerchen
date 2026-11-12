@@ -194,6 +194,24 @@ dem strategischen Pfad. Eine zweite isolierte Projektkopie mit V3-Produktdaten
 prüft Sonnenorbit-Lokaleintritt, Ablehnung eines Sonnenoberflächenziels und
 Warpabflug. Kein echter AP6-Visit, UI- oder nativer Gesamtnachweis.
 
+AP6-Probe `polisa_real_visit_board_retire_probe.gd` ist absichtlich RED gegen
+Parentstand `2bfebc601`: in privater Projekt-/Profilkopie 4 PASS / 3 FAIL.
+Sie nutzt echten Flow-Visit, TacticalController-Bodies, SimulationRoot,
+HexGround, UnitRegistry und einen registrierten Testactor mit akzeptiertem
+Bewegungsauftrag. Der reguläre Noncampaign-Visit meldet Boarding-Erfolg ohne
+Rootübergang; beim Retire verschwindet die Controllerprojektion vor der
+Rootfreigabe. Root entfernt nach Tick Ground/Movement und behält die Actor-ID.
+Darstellungs-/Cardlookup und Actorimplementierung sind Fixtures, keine echte
+Stationsszene oder AP6-Gesamtabnahme. Der Controllerfix gehört dem Tabletopchat;
+dieser Test ist vor dessen Anschluss erwartungsgemäß rot und nicht Teil einer
+allgemeinen grünen Testsuite.
+Reproduktion: Parentstand `2bfebc601` in eine private Godot-Projektkopie mit
+dessen Scripts, Szenen, referenzierten Assets/Importen und LimboAI-Extension
+übernehmen, diese Probe ergänzen und mit eigenem `APPDATA` headless als
+`--script res://scripts/tests/polisa_real_visit_board_retire_probe.gd` starten.
+Die hier verwendete temporäre Kopie liegt unter
+`%TEMP%/sb-ap6-visit-48094b44f5fc46a288f6cb1e438daef6`.
+
 ## Akzeptanz, Prüfung und Risiken
 
 Kleine Layoutprobe: deterministische Revision/Koordinaten, Gate im Bounds und
