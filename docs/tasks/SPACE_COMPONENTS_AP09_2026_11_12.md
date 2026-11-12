@@ -111,3 +111,9 @@ Waffenverbraucher fehlen; deshalb ist dieser Shopweg weiterhin gesperrt. Der
 experimentelle Polisa-Rundflug vor Aktivierung dieser Sperre erreichte 27/27;
 er ersetzt keine Prüfung des gesperrten Produktpfads und ist kein Nachweis für
 fertige Waffen-/Schildwirkung.
+
+Nach Aktivierung der Kauf-/Einbausperre lief der echte Polisa-Rundflug mit
+isoliertem Profil erneut 25/25, Exit 0 und ohne Fehler. Der Runner überwacht
+nun zusätzlich die beteiligten Equipment-, Supply-, Inventar- und Katalogquellen;
+keine der überwachten Quellen änderte sich während dieses Laufs. Atmosphärische
+Missionen, Beschuss und ein nutzbares Shopangebot sind damit nicht nachgewiesen.
