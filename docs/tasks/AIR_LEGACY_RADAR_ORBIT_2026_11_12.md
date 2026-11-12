@@ -44,6 +44,14 @@ automatische Orbitdurchflug sind noch nicht nachgewiesen. Im privaten Hex-
 Versuch meldete der Bewegungsowner beim Rückweg `unreachable_target`; die
 Produktionskarte bleibt unverändert im Legacy-Modus.
 
+Ein eigenständiger Routenplaner schlägt inzwischen einen freien geraden Weg
+vom unteren Eintrittsband zu einem oberen Planetentor beziehungsweise zurück
+vor und lehnt erkannte Kontakte oder versperrte Wege ab. Er ist noch nicht an
+Ankunft, Flugtick oder Bedienung angeschlossen; automatische Fortsetzung,
+Abschaltung, Änderung während des Flugs, Pilotenfolgen und Persistenz fehlen.
+Polisa benötigt weiter den direkten Reiseweg und darf keinen solchen Auftrag
+erhalten. Der Planer allein ist kein Durchflugnachweis.
+
 ## Entwurf für portable aktive Sorties
 
 Ein versionierter Sortie-Datensatz braucht je `craft_id` die `location_id`,
