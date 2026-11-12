@@ -1,0 +1,14 @@
+{
+  "recorded_from_tool_output_not_original_engine_log": [
+    {
+      "phase": "closure discovery before engine",
+      "error": "FileNotFoundError: scripts/ui/game_settings_contract.gd",
+      "profile_and_runtime_guard": "no complete report/canary, not counted as product RED"
+    },
+    {
+      "phase": "first evidence packaging",
+      "error": "KeyError: scripts/ui/game_settings_contract.gd",
+      "cause": "medical_consumer resolved sparse Git dependencies but copy gate only allowed polisa_visit; first runtime 4/0 superseded by fully copied final 4/0"
+    }
+  ]
+}

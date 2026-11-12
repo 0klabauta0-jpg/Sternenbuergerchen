@@ -16,5 +16,8 @@ Original-Parentberichte sind keine Sourcefreigabe; frischer Bericht/Hashes im ZI
 und Manifest. Fehlende Sparseabhängigkeiten aus unveränderlichem Source-HEAD im
 privaten Projekt; Provenienz je Datei ausgewiesen. Ein erster Aufbau endete vor
 Engine/Report wegen fehlender physischer Sparseabhängigkeit game_settings_contract;
-äußerer Fehlerlog archiviert, kein Produkt-RED. Enger Wiederaufbau grün.
+Toolbefund in setup_failures.json dokumentiert, kein Produkt-RED. Beim ersten
+Packen zeigte sich zusätzlich eine unvollständige Sparsekopierschranke: erster
+Runtimepass4/0 deckte nicht alle deklarierten Dateien ab. Korrigiert und mit
+vollständig kopierter Closure erneut4/0; finale Provenienz für jede Datei geprüft.
 Keine breite Regression, Peer-/native/GPU-/EXEabnahme. FMC-/Slotlifecycle folgt.

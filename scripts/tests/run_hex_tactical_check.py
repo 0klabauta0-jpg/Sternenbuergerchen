@@ -197,7 +197,7 @@ def main() -> int:
     hashes = {}
     for relative in paths:
         origin = source / relative
-        if not origin.is_file() and args.case != "polisa_visit":
+        if not origin.is_file() and args.case not in {"polisa_visit", "medical_consumer"}:
             continue  # Missing implementation is a clean assertion in the RED verifier.
         target = project / relative
         target.parent.mkdir(parents=True, exist_ok=True)
