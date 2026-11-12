@@ -74,6 +74,34 @@ Der Fallback darf nur für ein tatsächlich als `mission` geführtes Schiff
 gelten; explizite Location-Registry-Bindungen behalten Vorrang. Ein gezielter
 Test deckt alte Instanz, Missionsbesitz und explizite neue Bindung ab.
 
+## Reale Zweimond-Rundflüge, kombinierter Stand
+
+Der isolierte 1×-Lauf auf Source `2f37621a69a328c908b5d9cd1ab236ec80b2a61c`
+bestand 84/84. Er nutzte die bestätigten Sternsystemdaten `21c7c23b` und die
+512×256-Karten aus `3f5e2c21` sowie ein ausdrücklich aktiviertes Orbit-Opt-in.
+Auf Glut 1a wurde der Satellit durch echten Lauf und zeitgesteuertes Use
+geborgen, das ursprüngliche Schiff flog heim und der Chip wurde hochgeladen.
+Ein echter Heimat-Checkpoint wurde danach gespeichert und über den Store
+gelesen. Der dadurch freigeschaltete Besuch auf Glut 1b wurde nach Landung
+und echtem Boarding regulär abgebrochen; das ursprüngliche Schiff flog heim.
+Personen, Positionen, Gesundheit und Fortschritt wurden nicht gepatcht.
+
+Das Ergebnisprotokoll liegt unter
+`C:/Users/bjoer/AppData/Local/Temp/codex-two-moon-native-fixed-503c8fc727e54ef1bf660c8504c185aa/roundtrips.log`.
+Der unveränderte Checkpoint `source_a_upload_checkpoint.json` im selben Profil
+hat SHA-256 `aa6841f32b7cdd00fe7506d8c4960ebe4a76fe41416633f12e3e50770b2c7618`.
+Der Store-Read ist kein Szenen-Continue; der B-Auftrag wurde nicht erfüllt.
+Ein nativer Sichttest und lokales Flight-/Automatik-Save/Load bleiben offen.
+
+## Ausstehende Befehle während Orbitdurchflug
+
+Ein vorgemerkter Oberflächenanflug gehört ausschließlich zu einem laufenden
+Einflug; ein vorgemerkter Warp gehört ausschließlich zu einem laufenden
+Ausflug. Pro Schiff dürfen die beiden vorgemerkten Befehle nicht zugleich
+existieren. Wiederholungen desselben Befehls bleiben idempotent; widersprüchliche
+Anfragen werden mit einer nachvollziehbaren Ablehnung beantwortet. Die Prüfung
+bleibt auf den vorhandenen Reiseadapter begrenzt und verändert keine Flugphysik.
+
 Die kanonische Oberflächenzuordnung ordnet `satellite_crash` Glut 1a,
 `trade_outpost` Glut 1b und `fortified_outpost` Glut 1 zu. Ihre Szenarien
 verweisen auf die zugehörigen Karten. `distress_orbit` und `polisa` sind keine
