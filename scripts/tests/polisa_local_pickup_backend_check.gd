@@ -182,12 +182,13 @@ func run() -> void:
 	assert(space_state.admit_actor({"craft_id":"space_fixture_birth_blocker", "faction_id":"enemy", "control_domain":"enemy", "start_hex":dock_cell, "footprint_hexes":[Vector2i.ZERO]}, blocked_flight, true).ok)
 	check(not adapter._simulation.preview_station_purchase_local_admission(adapter, id).get("ok", false), "Occupied station gate blocks first admission")
 	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2"]:
-		check(not adapter.enter_purchased_station_local_orbit(id).get("ok", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before, "Blocked first admission leaves fuel and birth unchanged")
+		adapter._local_warp_arrival_enabled = true
+		check(not adapter.enter_space_orbit(id).get("ok", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before, "Blocked first admission leaves fuel and birth unchanged")
 	assert(space_state.remove_actor("space_fixture_birth_blocker"))
 	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2"]:
 		var events: Array = []
 		adapter._simulation.singleplayer_command_committed.connect(func(command: Dictionary, _result: Dictionary): events.append(command.operation))
-		var admitted: Dictionary = adapter.enter_purchased_station_local_orbit(id)
+		var admitted: Dictionary = adapter.enter_space_orbit(id)
 		check(admitted.get("ok", false) and space_state.get_actor(id) == adapter._travel.get_flight_state(id) and adapter._travel.get_craft_snapshot(id).orbit_id == "polisa_orbit", "Purchased craft enters actual local station area atomically")
 		check(adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "First admission charges return fuel once and binds real flying wing")
 		check(adapter.enter_purchased_station_local_orbit(id).get("replayed", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0, "Purchase-owned admission receipt replays without duplicate fuel")

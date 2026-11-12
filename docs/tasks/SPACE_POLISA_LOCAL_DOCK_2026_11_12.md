@@ -171,8 +171,19 @@ Ownerpfad `enter_purchased_station_local_orbit` bereitet inzwischen Flight,
 Index, Fleet, Pflichtrotte und Rückflugfuel gemeinsam vor und publiziert sie
 atomar; sein Replaytoken leitet sich vom echten Kaufbeleg ab. Die enge
 Kaufprobe prüft blockiertes Gate, Aufnahme, Fuel, Rotte, Replay und Events.
-Der Legacy-Start wählt diesen Pfad noch nicht; UI-Integration und echter
-AP6-Visitnachweis bleiben offen.
+Der Legacy-Start wählt diesen Pfad bei ausgeschaltetem Lokalschalter nicht;
+UI-Integration und echter AP6-Visitnachweis bleiben offen.
+
+Gepaarter vorbereiteter Adapteranschluss: Wenn das bestehende standardmäßig
+ausgeschaltete `_local_warp_arrival_enabled` im Test aktiv ist, nutzt auch
+Polisa den lokalen Warpabschluss; ein tatsächlich auf Polisa gekaufter Craft
+nutzt beim bestehenden `enter_space_orbit` die lokale Kauf-Erstaufnahme.
+Andere und ausgeschaltete Legacywege bleiben bestehen. Der vorhandene
+Flow setzt erst nach erfolgreichem Ownercommit den Standort auf `starmap` und
+plant `_finish_space_surface_departure` anschließend deferred; dessen echter
+Visit-/Crew-Retirepfad bleibt unverändert. Lokal- und Legacyproben grün, aber
+Flow-/Pilotfixtures und kein echter AP6-/nativer Retirenachweis. Flag und
+produktives JSON bleiben unverändert.
 
 Eine private Ownerzyklusprobe verbindet Quantumabschluss direkt über Root mit
 Glut-2-Lokaleintritt, Move zum Stationsgate, Dock/Cancel/Reapproach, Visitphase,

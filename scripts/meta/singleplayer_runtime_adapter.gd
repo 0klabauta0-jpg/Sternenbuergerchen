@@ -754,9 +754,8 @@ func advance_space_travel(delta: float) -> void:
 		else:
 			for progress: Dictionary in _travel.get_active_quantum_progress():
 				var craft_id := String(progress.craft_id)
-				var is_station: bool = progress.target_orbit_id == "polisa_orbit"
 				var completing: bool = _simulation.is_singleplayer_warp_entry_pending(craft_id) or float(progress.elapsed_seconds) + step >= float(progress.duration_seconds)
-				if is_station or not completing:
+				if not completing:
 					_commit("singleplayer_space_travel", "advance", {"craft_id":craft_id, "delta_seconds":step}, "", {"runtime_authorized":true})
 				else:
 					var arrival: Dictionary = _simulation.advance_singleplayer_warp_entry(self, craft_id, step)
@@ -861,6 +860,9 @@ func enter_space_orbit(craft_id: String) -> Dictionary:
 		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
 		return result
 	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
+		var purchase: Dictionary = get_station_ship_purchase(craft_id)
+		if _local_warp_arrival_enabled and purchase.get("origin_kind") == "local_station_purchase":
+			return enter_purchased_station_local_orbit(craft_id)
 		var request_id := _request_id("station-orbit", {})
 		var result: Dictionary = _simulation.commit_singleplayer_station_orbit(self, craft_id, request_id)
 		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)

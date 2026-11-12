@@ -51,14 +51,14 @@ func _initialize() -> void:
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var adapter = AdapterFixture.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._base_personnel = pilot; adapter._campaign = campaign; flow.adapter = adapter
 	adapter._space_route_requested = true; pilot.aboard = true
+	assert(not adapter._local_warp_arrival_enabled); adapter._local_warp_arrival_enabled = true
 	adapter._pad_by_craft[id] = "homebase_pad_01"
 	sim.configure_base_personnel(pilot)
 	assert(sim.configure_departure_adapter(adapter).ok)
-	var arrival := {}
 	for attempt in 65:
-		arrival = sim.advance_singleplayer_warp_entry(adapter, id, 3.0)
-		if arrival.get("status") == "complete": break
-	assert(arrival.get("ok",false) and arrival.get("status") == "complete" and flight.get_snapshot().space_area_id == "orbit_approach:glut_2")
+		adapter.advance_space_travel(3.0)
+		if sim.get_space_actor(id) != null: break
+	assert(sim.get_space_actor(id) == flight and flight.get_snapshot().space_area_id == "orbit_approach:glut_2")
 	var state = sim.get("_space_combat_state")
 	var gate: Vector2i = GRID.from_offset(Vector2i(256,133))
 	# Limit this owner probe to the final movement leg; no whole-map soak.
