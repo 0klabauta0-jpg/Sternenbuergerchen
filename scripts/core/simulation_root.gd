@@ -195,6 +195,8 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 		_space_move_receipts.clear()
 		_space_fire_receipts.clear()
 		_campaign_space_return_receipts.clear()
+		_campaign_space_entry_searches.clear()
+		_campaign_space_entry_origins.clear()
 		_space_fire_rng = 1
 	if _singleplayer_campaign_owner != campaign or _singleplayer_supply_owner != supply:
 		_departure_group_receipts.clear()
@@ -414,6 +416,8 @@ const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_fire_receipts: Dictionary = {}
 var _campaign_space_return_receipts: Dictionary = {}
+var _campaign_space_entry_searches: Dictionary = {}
+var _campaign_space_entry_origins: Dictionary = {}
 var _space_fire_rng: int = 1
 var _space_wing_state: RefCounted = SPACE_WING_STATE.new()
 var _fixture_area_tokens: Dictionary = {}
@@ -2026,6 +2030,94 @@ func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: S
 	_campaign_space_return_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "supply":_singleplayer_supply_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "encounter":_space_encounter_owner, "flight":flight, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":completed.duplicate(true)}
 	return completed
 
+func advance_campaign_space_entry(adapter: Node, craft_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _space_encounter_owner == null or _singleplayer_space_travel_owner == null or _ship_equipment_owner == null: return {"ok":false, "reason":"entry_unavailable"}
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	if encounter.get("phase") != "entering" or encounter.get("craft_id") != craft_id or travel.get("phase") != "approach" or travel.get("location_id") != "distress_orbit": return {"ok":false, "reason":"entry_context_changed"}
+	var tokens: Variant = adapter.get("_departure_token_by_craft")
+	if typeof(tokens) != TYPE_DICTIONARY: return {"ok":false, "reason":"departure_unavailable"}
+	var departure: Dictionary = _departure_group_receipts.get(String(tokens.get(craft_id, "")), {})
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or departure.get("craft_id") != craft_id or departure.get("flight") != flight or departure.get("fleet") != _singleplayer_space_travel_owner or Dictionary(departure.get("result", {})).get("departure", {}).get("destination_location_id") != "distress_orbit": return {"ok":false, "reason":"departure_unavailable"}
+	var pilot: Dictionary = adapter.preview_space_warp_entry(craft_id)
+	if not pilot.get("ok", false): return pilot
+	if _space_combat_state.get_actor(craft_id) == flight:
+		var retry: Dictionary = admit_campaign_space_contacts(craft_id, {"runtime_authorized":true})
+		if retry.get("ok", false): _campaign_space_entry_origins.erase(craft_id)
+		return retry
+	if _space_combat_state.get_actor(craft_id) != null or _space_combat_state.get_inactive_actor(craft_id) != null: return {"ok":false, "reason":"actor_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("coordinate_frame") != "strategic" or not String(pose.get("space_area_id", "")).is_empty(): return {"ok":false, "reason":"strategic_flight_required"}
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(String(travel.get("orbit_id", "")), {})
+	var body_id := String(orbit.get("body_id", ""))
+	var profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(craft_id)
+	var stats: Dictionary = _ship_equipment_owner.get_space_combat_stats(craft_id)
+	if not profile.get("ok", false) or not stats.get("ok", false) or not is_equal_approx(float(profile.mass), float(pose.mass)) or not SPACE_COMPONENT_SYSTEMS.initial(stats, float(stats.get("hull_capacity", 0.0))).get("ok", false): return {"ok":false, "reason":"equipment_unavailable"}
+	var existing: Dictionary = _space_combat_state.get_ship_systems(craft_id)
+	if not existing.is_empty():
+		var prior: Dictionary = existing.stats.duplicate(true); var current := stats.duplicate(true)
+		prior.erase("equipment_revision"); current.erase("equipment_revision")
+		if prior != current: return {"ok":false, "reason":"systems_refit_required"}
+	var state: Dictionary = _campaign_space_entry_searches.get(craft_id, {})
+	if not state.is_empty() and (state.flight != flight or state.flight_revision != pose.revision or state.travel_revision != travel.revision or state.stats != stats or state.body_id != body_id):
+		_campaign_space_entry_searches.erase(craft_id)
+		return {"ok":false, "reason":"entry_context_changed"}
+	if state.is_empty():
+		var search = SPACE_ORBIT_ENTRY_SEARCH.new()
+		var started: Dictionary = search.begin(body_id, [{"craft_id":craft_id, "flight":flight, "footprint_hexes":profile.footprint_hexes, "entry_heading":0.0}], _space_combat_state)
+		if not started.get("ok", false): return started
+		state = {"search":search, "flight":flight, "flight_revision":pose.revision, "travel_revision":travel.revision, "stats":stats.duplicate(true), "body_id":body_id, "footprint":profile.footprint_hexes.duplicate()}
+		_campaign_space_entry_searches[craft_id] = state
+	var found: Dictionary = state.search.advance(256)
+	if not found.get("ok", false): _campaign_space_entry_searches.erase(craft_id); return found
+	if found.status == "pending": return {"ok":true, "status":"pending"}
+	var target := {"position_plane":found.allocations[craft_id].position_plane, "heading_rad":0.0, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}
+	var tick := tick_counter + 1
+	var geometry: Dictionary = SPACE_AREA_TRANSITION.preview(flight, pose.revision, body_id, target, state.footprint, _space_combat_state, tick)
+	if not geometry.get("ok", false): _campaign_space_entry_searches.erase(craft_id); return geometry
+	var wing: Dictionary = _space_wing_state.preview_flying_wings("singleplayer", [craft_id], pilot.owned_crafts, pilot.craft_pilots)
+	if not wing.get("ok", false): _campaign_space_entry_searches.erase(craft_id); return wing
+	var admission: Dictionary = _space_combat_state.validate_new_local_admission({"craft_id":craft_id, "faction_id":"player", "control_domain":"player", "footprint_hexes":state.footprint}, flight, geometry.proposal, tick)
+	var movement: Dictionary = flight.validate_area_transition(geometry.proposal, tick)
+	if not admission.get("ok", false) or not movement.get("ok", false): _campaign_space_entry_searches.erase(craft_id); return {"ok":false, "reason":"admission_invalid"}
+	var committed: Dictionary = _space_wing_state.ensure_flying_wings("singleplayer", [craft_id], pilot.owned_crafts, pilot.craft_pilots, wing.expected_revision)
+	if not committed.get("ok", false): _campaign_space_entry_searches.erase(craft_id); return committed
+	_campaign_space_entry_origins[craft_id] = {"flight":flight, "position":pose.position_plane, "heading":pose.heading_rad}
+	flight._publish_area_transition(movement)
+	_space_combat_state._publish_new_local_admission(admission)
+	var bound: Dictionary = _bind_owned_space_systems(craft_id)
+	assert(bound.get("ok", false))
+	_campaign_space_entry_searches.erase(craft_id)
+	var admitted: Dictionary = admit_campaign_space_contacts(craft_id, {"runtime_authorized":true})
+	if admitted.get("ok", false): _campaign_space_entry_origins.erase(craft_id)
+	return admitted
+
+func cancel_campaign_space_entry(adapter: Node, craft_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick or _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _space_encounter_owner == null or _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"entry_unavailable"}
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	if encounter.get("phase") != "entering" or encounter.get("craft_id") != craft_id: return {"ok":false, "reason":"entry_context_changed"}
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null: return {"ok":false, "reason":"player_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("coordinate_frame") == "local":
+		var origin: Dictionary = _campaign_space_entry_origins.get(craft_id, {})
+		if origin.get("flight") != flight or _space_combat_state.get_actor(craft_id) != flight: return {"ok":false, "reason":"entry_origin_changed"}
+		var tick := tick_counter + 1
+		var proposal := {"expected_revision":pose.revision, "coordinate_frame":"strategic", "space_area_id":"", "position_plane":origin.position, "heading_rad":origin.heading, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0, "motion_mode":"travel"}
+		var movement: Dictionary = flight.validate_area_transition(proposal, tick)
+		var departure: Dictionary = _space_combat_state.validate_local_departure(craft_id, proposal, tick, _space_combat_state.get_area_revision(pose.space_area_id))
+		if not movement.get("ok", false) or not departure.get("ok", false): return {"ok":false, "reason":"entry_cancel_invalid"}
+		flight._publish_area_transition(movement)
+		_space_combat_state._publish_local_departure(departure)
+	elif pose.get("coordinate_frame") != "strategic" or _space_combat_state.get_actor(craft_id) != null: return {"ok":false, "reason":"entry_cancel_invalid"}
+	_campaign_space_entry_searches.erase(craft_id)
+	_campaign_space_entry_origins.erase(craft_id)
+	return {"ok":true}
+
 func admit_campaign_space_contacts(craft_id: String, authority_context: Dictionary) -> Dictionary:
 	# Only a live owned player flight can anchor this encounter. The player
 	# transition and the campaign start remain separate prerequisite actions.
@@ -2033,7 +2125,7 @@ func admit_campaign_space_contacts(craft_id: String, authority_context: Dictiona
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
 	if _space_encounter_owner == null or _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"encounter_unavailable"}
 	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
-	if encounter.get("phase") != "combat" or encounter.get("craft_id") != craft_id or _space_encounter_owner.get("_combat_owner") != null: return {"ok":false, "reason":"invalid_encounter"}
+	if encounter.get("phase") not in ["combat", "entering"] or encounter.get("craft_id") != craft_id or _space_encounter_owner.get("_combat_owner") != null: return {"ok":false, "reason":"invalid_encounter"}
 	var player: RefCounted = _space_combat_state.get_actor(craft_id)
 	if player == null or _singleplayer_space_travel_owner.get_flight_state(craft_id) != player or _space_combat_state.get_ship_systems(craft_id).is_empty(): return {"ok":false, "reason":"player_unavailable"}
 	var player_metadata: Dictionary = _space_combat_state.get_metadata(craft_id)

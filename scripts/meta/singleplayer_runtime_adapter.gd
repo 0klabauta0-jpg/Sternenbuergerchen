@@ -17,6 +17,8 @@ var _onboarding: RefCounted
 var _travel: RefCounted
 var _ship_equipment: RefCounted
 var _space_encounter: RefCounted
+var _encounter_entry_delay := 0.0
+var _encounter_entry_feedback: Dictionary = {}
 var _skirmish_economy: RefCounted
 var _recruit_candidate_signature := ""
 var _recruit_candidates: Array = []
@@ -207,6 +209,9 @@ func _home_pad_for(craft_id: String) -> String:
 func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
+func get_campaign_entry_feedback() -> Dictionary:
+	return _encounter_entry_feedback.duplicate(true)
+
 func sync_space_wings() -> Dictionary:
 	if _simulation == null or not is_instance_valid(_flow):
 		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
@@ -265,6 +270,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	data.erase("request_id")
 	if operation in ["campaign_space_engage","campaign_space_rescue","campaign_space_retreat"]:
 		var op := String(operation).trim_prefix("campaign_space_")
+		if op == "retreat" and _space_encounter != null and _space_encounter.get_snapshot().get("phase") == "entering":
+			var canceled: Dictionary = _simulation.cancel_campaign_space_entry(self, String(_space_encounter.get_snapshot().get("craft_id", "")))
+			if not canceled.get("ok", false): return canceled
 		if op == "engage" and _space_encounter != null and _space_encounter.get("_combat_owner") != null:
 			if String(data.get("target_id", "cutlass")) != "cutlass": return _reject("invalid_hostile_target", "Nur die feindliche Cutlass kann angegriffen werden")
 			var ordered: Dictionary = _simulation.request_campaign_space_engage(String(_space_encounter.get_snapshot().get("craft_id", "")), {"runtime_authorized":true})
@@ -779,6 +787,11 @@ func advance_space_travel(delta: float) -> void:
 						if not arrival.get("replayed", false): call_deferred("_publish_warp_entry_event", String(arrival.receipt_id))
 					else:
 						_warp_arrival_feedback[craft_id] = {"status":"searching" if arrival.get("ok", false) else "waiting", "reason":String(arrival.get("reason", ""))}
+	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase", "")) == "entering":
+		_encounter_entry_delay -= maxf(delta, 0.0)
+		if _encounter_entry_delay <= 0.0:
+			_encounter_entry_delay = 0.25
+			_encounter_entry_feedback = _simulation.advance_campaign_space_entry(self, String(_space_encounter.get_snapshot().get("craft_id", "")))
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
 		_simulation.advance_campaign_space_fire({"runtime_authorized":true})
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
@@ -1003,7 +1016,9 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":
-				_space_encounter.start_encounter(craft_id)
+				_space_encounter.start_encounter(craft_id, true)
+				_encounter_entry_delay = 0.0
+				_encounter_entry_feedback.clear()
 				_flow.call("_refresh_homebase_screen")
 			else:
 				_flow.call("_begin_space_approach", craft_id, departure.departure)

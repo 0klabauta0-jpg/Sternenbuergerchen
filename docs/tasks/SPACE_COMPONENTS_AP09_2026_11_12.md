@@ -201,6 +201,27 @@ zustellung und Fehlerfeedback sind nicht durchgehend geprüft. Der reguläre
 Missionsstart ruft die Kampfanbindung weiterhin nicht auf; dies ist noch keine
 produktiv verbundene Mission.
 
+Fortschreibung: Der reguläre Anflug nach `distress_orbit` startet jetzt die
+Phase `entering`; der Adapter sucht getaktet einen freien lokalen Eintritt und
+der Root lässt dieselbe Fluginstanz, deren tatsächliche Komponenten und beide
+Missionskontakte zu. Erst nach erfolgreicher Bindung beginnt der gemeinsame
+Kampftick. Der Vorbereitungszustand kann abgebrochen werden; ein bereits lokal
+zugelassener Spielerflug wird dazu auf seine strategische Ausgangsposition
+zurückgeführt. Während der Platzsuche findet kein alter Dauerschaden statt.
+Ein gezielter Eintrittstest benutzt den Fleet-Reiseowner und einen synthetischen
+Abflugbeleg; ein echter Kampagnenlauf sowie die vollständige Ergebnis- und
+Rückflugabnahme stehen noch aus. Bodenkarten-Luftunterstützung ist offen.
+
+Gezielter realer Missionslauf: Im isolierten Spielprofil wurden die vorherigen
+Kapitel im Test freigeschaltet; danach liefen echtes Boarding, Start, Warp,
+Notrufanflug, Registrierung, Feuergefecht, Rettung, bestätigter Missionsabschluss
+und Pilotenzugang, Rückflug sowie tatsächliche Heimankunft über reguläre
+Runtimebefehle: 20/20, Exit 0. Das ist kein vollständiger Kampagnenlauf und
+keine visuelle Abnahme. Der parallel gestartete vollständige Kampagnenlauf
+erreichte den Notruf nicht: In der ersten Bodenmission lief die Einheit beim
+Satellitenziel in ein Zeitlimit (30 bestanden, 1 fehlgeschlagen). Der Befund
+liegt vor der hier geänderten Raumbegegnung und bleibt separat zu prüfen.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf

@@ -41,8 +41,14 @@ func refresh() -> void:
 	var state:Dictionary=Dictionary(_runtime.call("get_snapshot").get("space_encounter",{}))
 	visible=not state.is_empty() and String(state.get("phase","")) not in ["aborted","defeat","victory"]
 	if not visible:return
+	if state.phase == "entering":
+		var feedback: Dictionary = _runtime.call("get_campaign_entry_feedback") if _runtime.has_method("get_campaign_entry_feedback") else {}
+		_status.text = "Der Kampfbereich wird vorbereitet." if feedback.is_empty() or feedback.get("ok", false) else "Der Kampfbereich ist noch nicht bereit. Du kannst den Anflug abbrechen."
+		_attack.disabled = true; _rescue.disabled = true; _retreat.disabled = false
+		return
 	_status.text="Cutlass · FEINDLICH · Hülle %d\nBuccaneer · NEUTRAL · Hülle %d\nEigenes Schiff · Hülle %d\n%s" % [int(state.cutlass_hull),int(state.buccaneer_hull),int(state.player_hull),"Feind zerstört. Pilot kontaktieren." if state.phase=="rescue_ready" else "Feuergefecht läuft." if state.engaging else "Die Buccaneer braucht Hilfe!"]
 	_attack.disabled=state.phase!="combat" or bool(state.engaging)
 	_rescue.disabled=state.phase!="rescue_ready"
+	_retreat.disabled=false
 	for index in _visuals.size():
 		_visuals[index].position.z=sin(float(state.seconds)*0.5+index*2)*2

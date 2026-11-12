@@ -7,7 +7,7 @@ var _combat_ids: Dictionary = {}
 func bind_combat_owner(owner: RefCounted, ids: Dictionary) -> Dictionary:
 	# Called by SimulationRoot after it has admitted the actual encounter ships.
 	# No health or faction values are accepted from the UI.
-	if _state.is_empty() or _state.phase != "combat" or _combat_owner != null or owner == null or not ids.has_all(["player", "hostile", "neutral"]): return {"ok":false, "reason":"invalid_encounter"}
+	if _state.is_empty() or _state.phase not in ["combat", "entering"] or _combat_owner != null or owner == null or not ids.has_all(["player", "hostile", "neutral"]): return {"ok":false, "reason":"invalid_encounter"}
 	if String(ids.player) != String(_state.craft_id) or ids.values().size() != 3 or ids.player == ids.hostile or ids.player == ids.neutral or ids.hostile == ids.neutral: return {"ok":false, "reason":"invalid_encounter_actors"}
 	var area := ""
 	for role in ["player", "hostile", "neutral"]:
@@ -23,14 +23,16 @@ func bind_combat_owner(owner: RefCounted, ids: Dictionary) -> Dictionary:
 	if owner.get_metadata(String(ids.player)).get("faction_id") == owner.get_metadata(String(ids.hostile)).get("faction_id"): return {"ok":false, "reason":"invalid_factions"}
 	_combat_owner = owner
 	_combat_ids = ids.duplicate(true)
+	_state.phase = "combat"
 	return {"ok":true}
-func start_encounter(craft_id: String) -> Dictionary:
+func start_encounter(craft_id: String, prepare_combat: bool = false) -> Dictionary:
 	if craft_id.is_empty(): return {"ok":false,"reason":"unknown_craft"}
 	if not _state.is_empty() and String(_state.get("phase","")) not in ["aborted","defeat"]:
 		return {"ok":false,"reason":"encounter_already_started"}
 	_combat_owner = null
 	_combat_ids.clear()
 	_state={"phase":"combat","craft_id":craft_id,"player_hull":240.0,"cutlass_hull":180.0,"buccaneer_hull":150.0,"engaging":false,"seconds":0.0,"resolved":false,"revision":1,"enemy":"Cutlass","neutral":"Buccaneer"}
+	if prepare_combat: _state.phase = "entering"
 	return {"ok":true}
 func get_snapshot() -> Dictionary:
 	return _state.duplicate(true)
