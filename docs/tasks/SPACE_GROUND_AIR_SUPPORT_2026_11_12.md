@@ -42,3 +42,12 @@ Flight-/Wing-/Order-/Combatowners, Boden- und Landecontracts sowie Dropship-UI.
 Konkrete Integrationsdateien vor Änderung mit dem Parallelchat abstimmen. Neue
 Zielmodelle und Umgebungseingaben noch nicht implementiert; aktuelle Visuals
 stellen keine Luftkampf- oder freie Flugfähigkeit dar.
+
+## Vorbereiteter Flugregel-Baustein
+
+Der bestehende zustandslose Flugresolver kann den vom autoritativen Aufrufer
+gelieferten Kontext `atmosphere` prüfen und weist ausgekoppelte Absichten dort
+ohne Mutation zurück. Bisherige Aufrufe ohne Kontext behalten `space` und beide
+Modi. Der produktive Bodenkarten-Owner liefert den Kontext noch nicht; deshalb
+ist dies keine aktivierte oder global erzwungene Atmosphärenregel. Der kleine
+Atmosphärencheck und bestehende AP02-Flugresolvercheck liefen jeweils Exit 0.

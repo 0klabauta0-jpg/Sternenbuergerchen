@@ -1,7 +1,11 @@
 extends RefCounted
 ## Pure planar thrust proposal; all strengths are fixture/catalog inputs.
 
-static func step(flight: Dictionary, intent: Dictionary, hull: Dictionary, power: Dictionary, dt: float) -> Dictionary:
+## environment comes from the authoritative caller, never a client command.
+## Existing five-argument callers remain in space until ground integration.
+static func step(flight: Dictionary, intent: Dictionary, hull: Dictionary, power: Dictionary, dt: float, environment: String = "space") -> Dictionary:
+	if environment not in ["space", "atmosphere"]:
+		return {"ok": false, "reason": "invalid_flight_environment"}
 	if not is_finite(dt) or dt < 0.0 or typeof(flight.get("position_plane")) != TYPE_VECTOR2 or typeof(flight.get("velocity_plane")) != TYPE_VECTOR2:
 		return {"ok": false, "reason": "invalid_state"}
 	if not flight.position_plane.is_finite() or not flight.velocity_plane.is_finite():
@@ -29,6 +33,8 @@ static func step(flight: Dictionary, intent: Dictionary, hull: Dictionary, power
 	var assist: String = String(intent.get("assist_mode", flight.get("assist_mode", "coupled")))
 	if assist not in ["coupled", "decoupled"]:
 		return {"ok": false, "reason": "invalid_assist_mode"}
+	if environment == "atmosphere" and assist != "coupled":
+		return {"ok": false, "reason": "atmosphere_requires_coupled"}
 	var velocity: Vector2 = flight.velocity_plane
 	var axis := Vector2.from_angle(heading)
 	var axis_side := axis.orthogonal()
