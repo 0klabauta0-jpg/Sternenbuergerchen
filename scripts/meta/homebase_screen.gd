@@ -7950,6 +7950,10 @@ func _build_homebase_mission_drop_cards(payload_fireteam_ids: PackedStringArray,
 				"passenger_count": payload_unit_ids.size() if is_payload_craft and payload_ready else 0,
 			}
 		)
+		# Preserve authored provenance; missing legacy identity stays unknown.
+		for field: String in ["model_id", "craft_type", "visual_asset_id", "crew_capacity"]:
+			if craft_def.has(field):
+				cards[-1][field] = craft_def[field]
 	return cards
 
 

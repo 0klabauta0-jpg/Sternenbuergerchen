@@ -1,0 +1,11 @@
+{
+  "scope": "Only HomebaseScreen._build_homebase_mission_drop_cards",
+  "checks": "4/0",
+  "green_run": "drop_card-894bf00e769347bcb108598c3222d077",
+  "sha256": {
+    "scripts/meta/homebase_screen.gd": "77a3807d2e3092add588a3b5d863e164d0dc7ab2431fb064c05189f582727855",
+    "docs/tasks/HOMEBASE_DROP_CARD_CRAFT_IDENTITY_2026_11_12.md": "eb95f4afe4f7952785c6d41a503bdff6d49acd3647b7ec1530baf1083d5c4aff",
+    "output/native_glut_maps/homebase_drop_card_identity_20261112/check.gd": "25e9cdd4626bef52449d5ed7422004dbb8fdfa0958f90b6f862545ea3e56b885",
+    "output/native_glut_maps/homebase_drop_card_identity_20261112/run.py": "822dedbd499067e851c122c99d504500445e73185fb209fd2f819aa250ea0bca"
+  }
+}
