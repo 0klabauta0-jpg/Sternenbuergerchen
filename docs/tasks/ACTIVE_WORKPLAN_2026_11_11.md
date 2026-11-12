@@ -83,15 +83,14 @@ Stationsstart bisSource605/ed/a9 sind als9c293ac8d integriert; drei frische priv
 Lifecycleproben samt Guards bestanden. Automatischer lokaler Warptick ist als
 standardmaessig ausgeschaltete Vorstufe vorhanden; Retryfix61af7ec9a als8d50f8172
 integriert, frische private Entry-/Gatezyklusproben samt Guards bestanden.
-Noch offen: gemeinsame Aktivierung, lokaler getrennter Stationsdockpfad sowie
-abgestimmter Live-V3-/Einmarkerwechsel. Polisa-Profilhook244a7354a verlangt noch
-den AP6c-Bindungsproducer regulaerer Besucher auch fuer bisherige Kaufwege.
+Noch offen: gemeinsame Aktivierung und abgestimmter Live-V3-/Einmarkerwechsel
+sowie echte Besuchs-/Reiseverknuepfung. Der fuer Polisa-Profilhook244a7354a
+benoetigte regulaere Bindungsproducer ist jetzt mit AP6-Source6a integriert.
 Polisa-Maske und vorbereitete getrennte Fleet-/Traveloperationen sind bis
 Sourcee1559e440 integriert; private Masken-/Ownerproben bestanden. Lesende echte
 Gate-/Deaktivierungspruefungen5d4fa0cdd/ee3aafe16 als338d1e333/93da77676
 integriert, frisch privat bestanden. Das erzeugt keine Dock-/Visit-/Fuelmutation.
-Lesende Dockoverlayd1ba65920 ist vorbereitet, Root-DTO/produktive Dockcommands
-fehlen noch. Space baut die atomare Dock-/Undock-/Cancel-/Wiederanfluggruppe;
+Lesende Dockoverlayd1ba65920 liest das inzwischen vorhandene Root-Dock-DTO.
 Dock-/Undockea831 mitCallbackfixes a906/b1d sind als2eaf34cbb/ffdd3cc2e/
 b0aa558b0 integriert; frische gemeinsame Dock-/SurfaceCancelproben gruen.
 UI785b73306 bietet expliziten Dockcommand nur bei aktuellem RootDTO (10/0).

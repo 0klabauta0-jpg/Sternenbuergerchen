@@ -36,17 +36,22 @@ für den vollständigen Tabletopmodus aktiviert.
 
 ## Erforderliche Schritte vor diesem Kandidaten
 
-1. Türschutz ist als 26303641d integriert. Tabletop liefert Backoff und kleinstes konsistentes
-   Aufnahme-/Freigabe-/Lifecyclepaket. Gesicherte Schritte prüfen/integrieren;
-   explizite Kartenaktivierung erst nach diesen Voraussetzungen.
-2. Orbit: echten Travelkandidaten mit kanonischem Flightbereich/Rootübergang
-   verbinden, danach vorbereitete Departure-/Supply-/Campaignänderungen.
-   Ein Orbitziel je Körper samt Daten-/Markeranpassung und lokaler Ansicht.
-   Warp unten → lokaler Flug → erreichbarer oberer Saum → Oberfläche muss
-   durchgängig funktionieren. Ein Fixturebeweis allein genügt nicht.
-3. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle
-   Kampagne/Gefechtsmatrix. Aktivierung und noch offene Grenzen dokumentieren.
-4. Nach konkretem Kandidatenstatus Nutzer vor dem Build fragen. Erst nach dessen
+1. AP5-Code einschließlich Backoff ist integriert. AP6 enthält Gruppenplätze,
+   Transportphasen und gebundene Schiffsflächen samt tatsächlichem Renderjoin.
+   Noch Setup und Basisaktionen zusammenführen; AP6 nicht pauschal abschließen.
+2. AP7: Ground-Roundtrip und Command-/Versionsgrenzen sind teilweise integriert;
+   Passagezusagen, ursprüngliche Bewegungsabsichten, tatsächliche Base-/Checkpoint-
+   Bindung und empfängerbezogene Sichtprojektion vervollständigen. Home-only-
+   Speichergrenzen erhalten. Danach den kleinen AP8-Ablauf vervollständigen.
+3. Orbit: gemeinsame Flight-/Travel-/Economyübergänge, getrennte Stationsdockung
+   und Kauf-Erstaufnahme sind als Ownerpfade integriert. Noch produktive lokale
+   Reise-/Visit-/Kaufroute paarig verbinden und Katalog V3 samt Einmarkerwechsel
+   vorbereitet abstimmen. Lokaler Automatismus bleibt bis dahin ausgeschaltet,
+   Livekatalog V2. Private Ownerzyklen ersetzen keinen echten Stationsbesuch.
+4. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle
+   Kampagne/Gefechtsmatrix. Aktivierung und offene Grenzen dokumentieren;
+   große Produktionskartenaktivierung und AP9 bleiben gesondert zurückgestellt.
+5. Nach konkretem Kandidatenstatus Nutzer vor dem Build fragen. Erst nach dessen
    Zustimmung Export aus sauberem gesichertem Quellstand in neuen eigenen Paketordner;
    vorhandene Pakete nicht überschreiben. EXE, PCK und benötigte DLLs zusammen,
    Provenienz mit Commit/Hashes, kleine echte Paketstartprüfung.
