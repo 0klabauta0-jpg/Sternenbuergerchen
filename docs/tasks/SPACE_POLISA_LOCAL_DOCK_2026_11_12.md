@@ -174,6 +174,15 @@ Kaufprobe prüft blockiertes Gate, Aufnahme, Fuel, Rotte, Replay und Events.
 Der Legacy-Start wählt diesen Pfad noch nicht; UI-Integration und echter
 AP6-Visitnachweis bleiben offen.
 
+Eine private Ownerzyklusprobe verbindet Quantumabschluss direkt über Root mit
+Glut-2-Lokaleintritt, Move zum Stationsgate, Dock/Cancel/Reapproach, Visitphase,
+Undock, Warp zum Mond und Heimatlandung. Für kurze Laufzeit setzt die Fixture
+das Schiff vor beiden Gates jeweils auf den Beginn der letzten Flugstrecke;
+Pilot-/Visit-/Flow sind Fixtures. Der produktive Polisa-Warptick bleibt auf
+dem strategischen Pfad. Eine zweite isolierte Projektkopie mit V3-Produktdaten
+prüft Sonnenorbit-Lokaleintritt, Ablehnung eines Sonnenoberflächenziels und
+Warpabflug. Kein echter AP6-Visit, UI- oder nativer Gesamtnachweis.
+
 ## Akzeptanz, Prüfung und Risiken
 
 Kleine Layoutprobe: deterministische Revision/Koordinaten, Gate im Bounds und
