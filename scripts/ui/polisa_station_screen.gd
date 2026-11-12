@@ -1,6 +1,7 @@
 extends Control
 const SKIN = preload("res://scripts/ui/base_management_skin.gd")
 const MENU_ICONS = preload("res://scripts/ui/menu_equipment_icons.gd")
+const CARGO_LIFT_FEEDBACK = preload("res://scripts/ui/polisa_cargo_lift_feedback.gd")
 ## Read-only station projection. All purchases and equipment use runtime commands.
 var _adapter: Node
 var _snapshot: Dictionary = {}
@@ -19,6 +20,7 @@ var _craft_picker: OptionButton
 var _credits: Label
 var _catalog: Dictionary = {}
 var _armor_images: Dictionary = {}
+var _cargo_lift: Control
 
 func configure(adapter: Node) -> void:
 	_adapter = adapter
@@ -48,6 +50,8 @@ func configure(adapter: Node) -> void:
 	_button(menu, "Rückflug vorbereiten", _request.bind("return_homebase", {}))
 	_status = _label(menu, "")
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_cargo_lift = CARGO_LIFT_FEEDBACK.new()
+	menu.add_child(_cargo_lift)
 	var shop := PanelContainer.new()
 	shop.name = "Shop"
 	shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -252,6 +256,9 @@ func _request(operation: String, payload: Dictionary) -> void:
 	data["service_location_id"] = "polisa"
 	var result: Dictionary = _adapter.call("request_operation", operation, data)
 	_status.text = String(result.get("message", "Vorgang abgeschlossen" if result.get("ok", false) else result.get("reason", "Nicht verfuegbar")))
+	if operation == "buy" and result.get("ok", false) and not result.get("replayed", false) and result.get("container_id") == "craft:" + String(data.get("craft_id", "")):
+		_status.text = "Frachtaufzug: Lieferung ins Schiff bestätigt"
+		_cargo_lift.call("show_delivery")
 	_signature = ""
 	refresh(_adapter.call("get_polisa_snapshot"))
 

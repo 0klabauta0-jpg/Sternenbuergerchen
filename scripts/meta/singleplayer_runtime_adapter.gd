@@ -965,6 +965,8 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 	if operation in ["space_begin_approach", "space_begin_station_dock"]:
 		var location_id := String(data.get("location_id", ""))
 		var station_dock := operation == "space_begin_station_dock"
+		var approach_flight: RefCounted = _travel.get_flight_state(craft_id)
+		var station_landing: bool = not station_dock and location_id == "polisa" and approach_flight != null and approach_flight.get_snapshot().get("coordinate_frame") == "local"
 		if station_dock and (location_id != "polisa" or data.get("target_id") != "polisa_station_dock" or data.get("layout_revision") != "polisa_glut2_dock_v1"): return _reject("station_layout_changed", "Stationsziel passt nicht")
 		if not _in_destination_orbit(snapshot, location_id):
 			return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
@@ -981,16 +983,16 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return departure
 		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
-		if not station_dock: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
-		if _campaign_mode and not station_dock and not departure.get("replayed", false): observe_campaign_progress()
+		if not station_dock and not station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
+		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":
 				_space_encounter.start_encounter(craft_id)
 				_flow.call("_refresh_homebase_screen")
 			else:
 				_flow.call("_begin_space_approach", craft_id, departure.departure)
-		if _campaign_mode and station_dock and not departure.get("replayed", false): observe_campaign_progress()
-		if station_dock: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
+		if _campaign_mode and (station_dock or station_landing) and not departure.get("replayed", false): observe_campaign_progress()
+		if station_dock or station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		return result
 	if operation == "space_land_homebase":
 		var flight: RefCounted = _travel.get_flight_state(craft_id)
