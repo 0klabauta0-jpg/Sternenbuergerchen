@@ -742,7 +742,7 @@ func _is_configured() -> bool:
 
 
 ## AP7 PART ONLY: canonical host save values, never a peer/planning snapshot.
-## Pending deployment and passage promises require a later coordinated schema.
+## Pending deployment still requires a coordinated admission schema.
 func export_state() -> Dictionary:
 	var blocked := _save_context_issue()
 	if not blocked.is_empty(): return _reject(blocked)
@@ -759,7 +759,15 @@ func export_state() -> Dictionary:
 	var segments:Array=[]
 	for segment in _all_segments():
 		segments.append({"unit_id":segment.unit_id,"command_id":segment.command_id,"from_grid":[segment.from_grid.x,segment.from_grid.y],"to_grid":[segment.to_grid.x,segment.to_grid.y],"start_tick":segment.start_tick,"duration_ticks":segment.duration_ticks,"handoff_tick":segment.handoff_tick})
-	var state:Dictionary={"schema":"hex_ground_v1","map_id":_map_id,"topology":TOPOLOGY,"tick":_tick,"terrain_revision":_terrain_revision(),"units":units,"active_segments":segments,"centering":centers}
+	var commitments:Array=[]
+	for grant in _corridor_grants:
+		if not PLANNER._hex_grant_active(grant,_units_by_id,_segments_by_unit_id):continue
+		var cells:Array=[]
+		for cell in grant.cells:cells.append([cell.x,cell.y])
+		var members:Array=grant.unit_ids.duplicate();members.sort()
+		commitments.append({"cells":cells,"unit_ids":members})
+	commitments.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return JSON.stringify(a.cells)<JSON.stringify(b.cells))
+	var state:Dictionary={"schema":"hex_ground_v2","passage_commitments":commitments,"map_id":_map_id,"topology":TOPOLOGY,"tick":_tick,"terrain_revision":_terrain_revision(),"units":units,"active_segments":segments,"centering":centers}
 	var checked:Dictionary=_save_candidate(state)
 	return state if checked.ok else _reject(String(checked.reason))
 
@@ -778,7 +786,7 @@ func restore_state(state:Dictionary) -> Dictionary:
 	_segments_by_unit_id=candidate._segments_by_unit_id
 	_centering_by_unit_id=candidate._centering_by_unit_id
 	_motion_geometry_by_unit_id=candidate._motion_geometry_by_unit_id
-	_corridor_grants=[]
+	_corridor_grants=candidate._corridor_grants
 	_reservation_terrain_revision=candidate._reservation_terrain_revision
 	_topology_revalidation_pending=false
 	_revision+=1
@@ -790,14 +798,15 @@ func _save_context_issue() -> String:
 	if not _is_configured():return "ground_save_not_configured"
 	if _reservation_terrain_revision != _terrain_revision():return "ground_save_terrain_revalidation_pending"
 	if not _admission_by_id.is_empty() or not _admission_slots_by_grid.is_empty() or not _admission_id_by_unit.is_empty():return "ground_save_pending_admission"
-	for grant in _corridor_grants:
-		if PLANNER._hex_grant_active(grant,_units_by_id,_segments_by_unit_id):return "ground_save_corridor_commitments_unsupported"
 	if _topology_revalidation_pending:return "ground_save_topology_pending"
 	return ""
 
 
 func _save_candidate(state:Dictionary) -> Dictionary:
-	if not _save_keys(state,["schema","map_id","topology","tick","terrain_revision","units","active_segments","centering"]) or state.schema!="hex_ground_v1":return _reject("invalid_ground_save_schema")
+	var keys:Array=["schema","map_id","topology","tick","terrain_revision","units","active_segments","centering"]
+	if state.get("schema")=="hex_ground_v2":keys.append("passage_commitments")
+	elif state.get("schema")!="hex_ground_v1":return _reject("invalid_ground_save_schema")
+	if not _save_keys(state,keys):return _reject("invalid_ground_save_schema")
 	if not _save_id(state.map_id) or state.map_id!=_map_id or state.topology!=TOPOLOGY:return _reject("ground_save_map_mismatch")
 	if not _save_integer(state.tick,0,MAX_TICK) or not _save_integer(state.terrain_revision,0,MAX_TICK) or int(state.terrain_revision)!=_terrain_revision():return _reject("ground_save_terrain_context")
 	if typeof(state.units)!=TYPE_ARRAY or state.units.size()>64 or typeof(state.active_segments)!=TYPE_ARRAY or state.active_segments.size()>256 or typeof(state.centering)!=TYPE_ARRAY or state.centering.size()>64:return _reject("ground_save_budget")
@@ -849,12 +858,53 @@ func _save_candidate(state:Dictionary) -> Dictionary:
 	for id in schedules:
 		var conflict:String=PLANNER._hex_conflict(id,candidate._units_by_id[id].grid,schedules[id],candidate._tick,index)
 		if not conflict.is_empty():return _reject("ground_save_"+conflict,id)
-	# Only the open-area subset is lossless without a canonical passage schema.
-	# Existing policy queries are bounded/cached; incomplete topology fails closed.
-	var policy:Dictionary=candidate._validate_new_corridor_policy(schedules,[])
+	var grants_result:Dictionary=candidate._save_passage_commitments(state.get("passage_commitments",[]),schedules)
+	if not grants_result.ok:return grants_result
+	# Existing commitments must precede policy: nonmembers may monotonically clear.
+	candidate._corridor_grants=grants_result.grants
+	for id in schedules:
+		var issue:String=PLANNER._hex_grant_conflict(id,schedules[id],candidate._corridor_grants)
+		if not issue.is_empty():return _reject("ground_save_"+issue,id)
+	var policy:Dictionary=candidate._validate_new_corridor_policy(schedules,candidate._corridor_grants)
 	if not policy.ok:return _reject("ground_save_"+String(policy.reason))
 	if _terrain_revision()!=int(state.terrain_revision):return _reject("ground_save_terrain_context")
 	return {"ok":true,"candidate":candidate}
+
+
+func _save_passage_commitments(values:Variant,schedules:Dictionary) -> Dictionary:
+	if typeof(values)!=TYPE_ARRAY or values.size()>64:return _reject("ground_save_passage_budget")
+	var grants:Array[Dictionary]=[]
+	var occupied:Dictionary={}
+	var total:=0
+	var remaining_nodes:=64
+	for value in values:
+		if not _save_keys(value,["cells","unit_ids"]) or typeof(value.cells)!=TYPE_ARRAY or value.cells.size()<2 or typeof(value.unit_ids)!=TYPE_ARRAY or value.unit_ids.is_empty() or value.unit_ids.size()>64:return _reject("invalid_ground_save_passage")
+		total+=value.cells.size()
+		if total>4096:return _reject("ground_save_passage_budget")
+		var cells:Array=[]
+		for pair in value.cells:
+			var parsed:Dictionary=_save_grid(pair)
+			if not parsed.ok or occupied.has(parsed.get("grid")):return _reject("ground_save_passage_overlap")
+			cells.append(parsed.grid);occupied[parsed.grid]=true
+		var members:Array=[]
+		for id in value.unit_ids:
+			if not _save_id(id) or not _units_by_id.has(id) or members.has(id):return _reject("invalid_ground_save_passage_member")
+			members.append(String(id))
+		members.sort()
+		if not _registry.has_method("get_hex_corridor_topology"):return _reject("ground_save_passage_topology_missing")
+		var proof:Dictionary=_registry.call("get_hex_corridor_topology",[cells[0]],remaining_nodes)
+		remaining_nodes=maxi(0,remaining_nodes-int(proof.get("processed_nodes",0)))
+		if not proof.get("ok",false) or not proof.get("query_complete",false) or proof.get("registry_id")!=_registry.get_instance_id() or proof.get("terrain_revision")!=_terrain_revision():return _reject("ground_save_passage_topology_pending")
+		var whole:=false
+		for component in proof.get("corridors",[]):
+			if component.get("directed",false) and component.get("cells")==cells:whole=true;break
+		if not whole:return _reject("ground_save_passage_incomplete")
+		var issue:=_corridor_geometry_issue(cells,true)
+		if not issue.is_empty():return _reject("ground_save_"+issue)
+		grants.append({"cells":cells,"unit_ids":members})
+	var valid:=_validate_grants(grants,schedules)
+	if not valid.ok:return _reject("ground_save_"+String(valid.reason))
+	return {"ok":true,"grants":grants}
 
 
 func _save_keys(value:Variant,keys:Array) -> bool:

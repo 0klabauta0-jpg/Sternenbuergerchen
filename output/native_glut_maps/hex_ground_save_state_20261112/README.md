@@ -1,4 +1,12 @@
+> Historische v1-Teilpruefung unten. Aktueller Produktfreeze: hex_ground_v2 mit
+> Passagezusagen und explizitem v1-Legacyoffenpfad;33/0. Siehe
+> ../hex_ground_passage_save_20261112/README.md und manifest.json dort.
+
 # AP7-TEIL: Ground-Speicherwerte
+
+Historischer erster Teil aus524fd61d1. Der gemeinsame Verifier/Runner wurde fuer
+`../hex_ground_passage_save_20261112/` erweitert; aktuelle Passageversion und
+35/0-Evidenz dort. Die folgenden19/0 beschreiben den damaligen Teilumfang.
 
 Produktfreeze: `scripts/core/hex_ground_runtime.gd` ausschliesslich neue
 export_state/restore_state plus private Validatoren; eigener Verifier

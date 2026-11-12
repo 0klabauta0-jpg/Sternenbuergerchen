@@ -23,6 +23,11 @@ while pending:
     target=project/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
     hashes[relative]=hashlib.sha256(origin.read_bytes()).hexdigest()
     pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.(?:gd|gdshader))"',code))
+if "--baseline" in sys.argv:
+    relative="scripts/core/hex_ground_runtime.gd"
+    baseline=subprocess.run(["git","show","524fd61d1:"+relative],cwd=source,capture_output=True,check=True).stdout
+    (project/relative).write_bytes(baseline)
+    (run/"baseline.json").write_text(json.dumps({"commit":"524fd61d1","file":relative,"sha256":hashlib.sha256(baseline).hexdigest()}))
 for origin in (source/"data").rglob("*.json"):
     target=project/origin.relative_to(source);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
 (project/"project.godot").write_text('config_version=5\n[application]\nconfig/name='+json.dumps(app)+'\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n',encoding="utf-8")
@@ -35,7 +40,7 @@ with (run/"output.log").open("w",encoding="utf-8") as out:
 log=(run/"output.log").read_text(encoding="utf-8",errors="replace")
 unchanged=before==fingerprint(profile)
 stable=all(hashlib.sha256((source/p).read_bytes()).hexdigest()==h for p,h in hashes.items())
-success="HEX_GROUND_SAVE_STATE passed=19 failed=0" in log
+success="HEX_GROUND_SAVE_STATE passed=35 failed=0" in log
 clean=success and not re.search(r'^(?:ERROR:|SCRIPT ERROR:)|ObjectDB instances leaked|resources still in use',log,re.M)
 isolated=(user/"review2_isolation_canary.json").is_file()
 report={"case":case,"exit_code":result.returncode,"clean_log":clean,"real_profile_unchanged":unchanged,"source_unchanged":stable,"private_canary":isolated,"source_sha256":hashes}

@@ -1,0 +1,13 @@
+{
+  "scope": "Canonical host Ground passage roundtrip; no Root/Checkpoint/MP integration",
+  "checks": "35/0",
+  "green_run": "../hex_ground_save_state_20261112/ground_save-79934f009aea446fafaa3561671a4415",
+  "red_baseline": "../hex_ground_save_state_20261112/ground_save-e10452a2c6ed4ba28c2a14c6813e1fe4",
+  "sha256": {
+    "scripts/core/hex_ground_runtime.gd": "c9e259d94973927c197b5824c31469725710f1bcbdeb21363ab317c694ea80a3",
+    "scripts/tests/hex_ground_save_state_verifier.gd": "4027b8f34180175ed24b0b78f26c3735c08f0b4c34f6a29e39232c06933288a3",
+    "docs/tasks/HEX_GROUND_PASSAGE_SAVE_2026_11_12.md": "b84600ad536e29d6099b1be38701d1e11c737b297b1f17dbe6e5fb3e781f0549",
+    "output/native_glut_maps/hex_ground_save_state_20261112/run.py": "02d87f6a235ec39ee5c0bd3fcd73045482804199cff9f096b64a90386ec6b251"
+  },
+  "budget_review_red": "../hex_ground_save_state_20261112/ground_save-3908ff96faee483eb43746477239aa57"
+}
