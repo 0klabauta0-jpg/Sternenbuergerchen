@@ -1,0 +1,13 @@
+{
+  "scope": "AP7 host accepted intents; no Root/Checkpoint/Actor-command integration",
+  "checks": "30/0",
+  "red_run": "movement_save-37bc00436e794c6e9cb30ab9327b9ae0",
+  "green_run": "movement_save-cd8e50bbbe384056ac8ddb12ef68aeed",
+  "sha256": {
+    "scripts/core/hex_movement_command_runtime.gd": "3d3a5b0cc0fcc3609edcbaa1523e9a3a7b63450932bc9be92142d0204866fb32",
+    "scripts/tests/hex_movement_save_state_verifier.gd": "84fd2a4753614a85932e8a4b84e93920f44ddd0c208539fe1c349cf03a43cf07",
+    "docs/tasks/HEX_MOVEMENT_ACCEPTED_INTENT_SAVE_2026_11_12.md": "e38e23ac1802081cd2fe1b65309b26ed13505ed7386db4ff1e3238111da4ec4f",
+    "output/native_glut_maps/hex_movement_save_state_20261112/run.py": "62497e2dcd38b0e0ea144aee0edb58b629b28670596857f93d4ffb268b316d7d"
+  },
+  "review_red_run": "movement_save-6bdc322d565246e79b9cd9f01323336e"
+}
