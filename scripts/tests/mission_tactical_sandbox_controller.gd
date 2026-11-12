@@ -38004,6 +38004,22 @@ func finalize_station_craft_update() -> void:
 	_refresh_mission_dropship_panel()
 	_refresh_world_overlays()
 
+## Stable transport checkpoint is published only by the global mission transaction.
+const TRANSPORT_CHECKPOINT = preload("res://scripts/mission/transport_checkpoint.gd")
+
+func export_transport_checkpoint() -> Dictionary:
+	return TRANSPORT_CHECKPOINT.capture(self)
+
+func prepare_transport_checkpoint_candidate(state: Dictionary, bindings: Dictionary) -> Dictionary:
+	return TRANSPORT_CHECKPOINT.prepare(self, state, bindings)
+
+func validate_transport_checkpoint_candidate(candidate: Dictionary, bindings: Dictionary) -> Dictionary:
+	return TRANSPORT_CHECKPOINT.validate(self, candidate, bindings)
+
+func _publish_transport_checkpoint(candidate: Dictionary) -> void:
+	TRANSPORT_CHECKPOINT.publish(self, candidate)
+
+
 func _campaign_craft_crew_ids(craft_id: String) -> PackedStringArray:
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
 	if not _validate_campaign_craft_crew_scope(craft_id).ok:return PackedStringArray()

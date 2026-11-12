@@ -84,3 +84,49 @@ APIs für den Join:
   Ausrüstung an Candidate binden, Systems vorbereiten/prüfen, erst im gemeinsamen
   signal-/await-freien Veröffentlichungsteil übernehmen. Keine Live-Publikation
   in Registry-/Navigation-Vorbereitung, kein neuer Root-/UI-State in diesem Patch.
+
+## Delegierter Transport-Checkpoint: Join-Vertrag
+Additive Methoden am echten Mission-Tactical-Controller delegieren an
+scripts/mission/transport_checkpoint.gd. Kein Flug-/Radar-/Root-/Actor-Verhalten
+wird hier umgeschrieben. Schema mission_transport_checkpoint.v1 verwendet den
+gemeinsamen typisierten Codec. Crew kommt aus singleplayer_visit_identities und
+dem tatsaechlich zugewiesenen Kartenpiloten; Actor-Referenzen in Primär- und
+Parallelsequenzen werden als Unit-IDs gespeichert und an echte Ziel-Actors gebunden.
+
+APIs: export_transport_checkpoint(); prepare_transport_checkpoint_candidate(state,
+bindings) -> {ok,candidate}; validate_transport_checkpoint_candidate(candidate,
+bindings) -> {ok}; _publish_transport_checkpoint(candidate) -> void.
+bindings enthaelt actors={unit_id:restaurierter Actor}, simulation_root=zugehoeriger
+Ziel-Root, visits=kanonische restaurierte Besuchsidentitaeten und
+craft_identities={craft_id:{model_id:kanonisches Modell aus Schiff-/Inventarowner}}.
+Fuer die gemeinsame Transaktion zusaetzlich presence_bindings={unit_id:bool embarked}
+mit exakt allen lokalen Crew-/Pilot-IDs und pilot_bindings={craft_id:pilot_id} aus
+dem bereits validierten Flow-Pilotowner liefern. Ohne presence_bindings verlangt
+Prepare bereits passende Actor-Metadaten; Capture prueft diese immer tatsaechlich.
+Prepare/Validate schreiben nichts. Publish setzt dropship_embarked-Metadaten erst
+im gemeinsamen signal-/await-freien Veroeffentlichungsteil. Position, Sichtbarkeit,
+Runtime-Registrierung, Inventar und Actor-Spielzustand bleiben beim Companion.
+
+Die deaktivierte neue Missionsinstanz muss bereits die echten restaurierten Actors
+im richtigen Root-Lookup binden. Parent-Metadaten campaign_ground_pilot_id,
+singleplayer_mission_identity, location_id und MissionSetup-Szenario sowie
+selected_team_unit_ids/selected_team_fireteam_ids/selected_team_unit_configs,
+selected_fireteam_definitions und member_loadouts sind Teil des Companion-Joins.
+Vor dem Umschalten alle Ownerkandidaten erneut validieren; dann Transport intern
+publizieren. Complete-Sequenz, Position=LZ, Karten, Landungsprojektion und Bootstrap-
+Flags werden direkt wiederhergestellt: kein Drop-/Arrival-/Bootstrap-Aufruf.
+Danach bestehende UI-/World-Projektion gezielt finalisieren. Physische Root-/Hex-
+Präsenz und Claim-Restauration bleiben eigene globale Gates, kein UI-Ersatz.
+
+Bewusst abgewiesen: laufender An-/Abflug, Landen/Unloading, Hex-Admission,
+Aufsitzen/Rueckweg und ausstehende Boarding-/Deployment-Effekte. Keine stille
+Verwerfung laufender Aktionen. Getrennte Primär-/Parallelschemata bewahren echte
+Polisa-parked_sequence-Felder sowie progress/service_reentry. Kandidaten pruefen
+Zielowner-Frische, Actor-Identitaet/Lifecycle, Crew-/Pilot-/Schiffsbindungen.
+
+Gezielter realer Controller/SimulationRoot/TestUnit-Ownerverifier einschliesslich
+echtem Polisa-parked_sequence-Builder: scripts/tests/transport_checkpoint_verifier.gd.
+Godot4.6.2, isoliertes APPDATA tmp/open-functions-release/transport-profile,
+60s-Hardlimit, vollstaendige Logs transport-checkpoint{,.stderr}.log unter
+docs/qa/open_functions_release_20261112. Dieser Nachweis ist kein nativer
+Gesamtmissions-, Flug-, Save-Continue- oder EXE-Nachweis; Companion prueft den Join.
