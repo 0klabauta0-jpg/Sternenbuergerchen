@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SternenBürgerchen · Kampagne & Forschung</title>
+<!-- Derived from _html_workbench_template.html. Offline design notes only. -->
+<style>
+:root{color-scheme:dark;--bg:#0b2027;--panel:#15333b;--line:#35535b;--text:#eee9d9;--muted:#a6bebf;--gold:#efbd6b;--cyan:#80d7cf;--green:#a6d397;--bad:#ff9d8b;font-family:'Segoe UI',sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);line-height:1.5}button,input,select,textarea{font:inherit}button{cursor:pointer;background:#203e46;color:var(--text);border:1px solid #557078;border-radius:6px;padding:9px 13px;min-height:42px}button:hover,button[aria-pressed=true]{border-color:var(--gold);background:#31505a}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button.primary{background:var(--gold);color:#162c30;border-color:var(--gold);font-weight:650}header{padding:30px 32px 20px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,#21434a,#102c35)}.eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-size:12px;font-weight:700}h1{font-size:clamp(29px,3vw,44px);margin:4px 0}h2{font-size:21px;margin:0}h3{font-size:17px;margin:0}p{color:var(--muted);margin:7px 0 15px}.topline,.actions,.filters,.facts{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.topline{justify-content:space-between}.tag{display:inline-block;font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid var(--line);color:var(--muted)}.tag.proposal{color:var(--gold);border-style:dashed}.tag.actual{color:var(--cyan)}.facts{margin-top:20px}.fact{padding:10px 15px;background:#0b242baa;border:1px solid var(--line);border-radius:7px;min-width:150px}.fact strong{display:block;font-size:24px;color:var(--text)}.fact span{font-size:12px;color:var(--muted)}nav{display:flex;gap:8px;margin-top:20px}main{padding:22px 24px 45px}.intro{max-width:940px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px}.map-wrap{min-width:0}.filters{margin-bottom:12px}.filters input{flex:1 1 210px;min-width:100px}.filters select{width:auto}.graph-scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;background:radial-gradient(circle,#37616c44 1px,transparent 1px) 0 0/22px 22px,#0c252d;max-height:920px}.graph{position:relative;display:flex;gap:38px;align-items:flex-start;padding:28px 26px;min-height:420px;width:max-content;min-width:100%}.edges{position:absolute;inset:0;pointer-events:none;overflow:visible}.column{position:relative;width:244px;flex:0 0 244px;display:grid;gap:15px}.column-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);height:24px}.node{position:relative;width:244px;text-align:left;padding:13px 14px;background:#15353e;border:1px solid #45646d;border-left:4px solid var(--cyan);box-shadow:0 4px 14px #0002}.node.proposal{border-left-color:var(--gold);border-top-style:dashed}.node.selected{outline:2px solid var(--gold);outline-offset:3px}.node.done{border-left-color:var(--green);background:#254139}.node .kind{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:4px}.node strong{display:block;font-size:16px;line-height:1.3;margin:7px 0}.node .reward{font-size:12px;color:var(--muted);display:block}.node .status{display:block;color:var(--cyan);font-size:12px;margin-top:9px}.node.done .status{color:var(--green)}.node.locked .status{color:#b9b7ac}.node .origin{font-size:10px;letter-spacing:.05em;color:var(--gold)}.editor,.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px}.editor{align-self:start;position:sticky;top:14px;max-height:calc(100vh - 28px);overflow:auto}.editor h2{margin-bottom:10px}label{display:block;color:var(--muted);font-size:13px;margin-top:12px}input,select,textarea{display:block;border:1px solid #4e6972;border-radius:5px;background:#0c262e;color:var(--text);padding:9px;width:100%;min-height:40px}textarea{resize:vertical;min-height:80px}.checks{max-height:210px;overflow:auto;border:1px solid var(--line);padding:4px 10px;border-radius:5px}.checks label{display:flex;gap:8px;align-items:start;margin:0;padding:6px 0;color:var(--text)}input[type=checkbox]{width:18px;min-height:18px;margin:3px 0;flex:0 0 18px}.editor .actions{margin-top:14px}.note{font-size:12px;color:var(--muted)}.alert{color:var(--bad);white-space:pre-line;font-size:13px;margin:10px 0}.message{min-height:24px;color:var(--cyan);font-size:13px}.panel[hidden]{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:16px}.card h3{color:var(--gold)}a{color:var(--cyan)}.sources{font-family:Consolas,monospace;font-size:12px;overflow-wrap:anywhere}.source-row{border-bottom:1px solid var(--line);padding:10px 0}.source-row small{color:var(--muted);display:block}footer{padding:18px 24px;border-top:1px solid var(--line);background:#102b33}footer .actions{margin-bottom:10px}#jsonOutput{min-height:95px;font:12px Consolas,monospace}details{margin-top:12px}summary{cursor:pointer;color:var(--muted)}.editor .source{font-size:11px;overflow-wrap:anywhere;color:var(--muted)}#mobileHint{display:none}.danger{color:var(--bad)}.legend{font-size:12px;color:var(--muted);margin:12px 0}.legend b{color:var(--cyan)}
+@media(max-width:1050px){.workspace{grid-template-columns:minmax(0,1fr)}.editor{position:static;max-height:none;display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.editor .full{grid-column:1/-1}#mobileHint{display:block}.graph-scroll{max-height:600px}}@media(max-width:600px){header{padding:22px 16px}main{padding:16px 12px}.editor{display:block}.fact{min-width:125px;flex:1}nav{flex-wrap:wrap}.topline{gap:15px}.column,.node{width:220px;flex-basis:220px}footer{padding:16px 12px}}
+</style>
+</head>
+<body data-report-id="campaign_research_20261111" data-report-schema="sternenbuergerchen.html_workbench.v1">
+<header>
+ <div class="topline"><div><div class="eyebrow">SternenBürgerchen / Entwurfswerkstatt</div><h1>Kampagne & Forschung</h1><p>Was kommt davor? Was öffnet sich danach? Und was bekommt die Crew dafür?</p></div><div class="actions"><button id="addNode" class="primary">+ Schritt hinzufügen</button><button id="exportTop">JSON exportieren</button></div></div>
+ <div class="tag actual">Ist-Baseline: 11.11.2026</div> <span class="tag proposal">Fortsetzung als Vorschlag</span>
+ <div class="facts"><div class="fact"><strong id="nodeCount">–</strong><span>Schritte im Entwurf</span></div><div class="fact"><strong id="readyCount">–</strong><span>im Planspiel als Nächstes möglich</span></div><div class="fact"><strong id="doneCount">–</strong><span>im Plan abgeschlossen</span></div><div class="fact"><strong id="creditCount">–</strong><span>Credits im Plan · ohne Fuel / Handel / Materialbilanz</span></div></div>
+ <nav aria-label="Bereiche"><button data-tab="plan" aria-pressed="true">Kampagnenkarte</button><button data-tab="design" aria-pressed="false">Forschung & Entscheidungen</button><button data-tab="sources" aria-pressed="false">Ist-Stand & Quellen</button></nav>
+</header>
+<main>
+ <section id="plan" class="panel"><p class="intro">Klicke einen Schritt an und ändere rechts seine Voraussetzungen, Belohnung oder Kosten. Pfeile bedeuten: <b>Dieser Schritt muss zuerst erledigt sein.</b> Der geänderte Plan wird lokal vorgemerkt. Über „Im Plan abschließen“ kannst du die Folge durchspielen.</p>
+ <div class="workspace"><div class="map-wrap"><div class="filters"><input id="search" type="search" placeholder="Schritt suchen …" aria-label="Schritt suchen"><select id="filter" aria-label="Schrittart"><option value="all">Alle Schritte</option><option value="mission">Aufträge</option><option value="research">Baupläne & Forschung</option><option value="base">Basis & Personal</option><option value="proposal">Nur Vorschläge</option></select><button id="clearProgress">Planspiel zurücksetzen</button></div><div id="issues" class="alert" role="status"></div><div class="graph-scroll" id="graphScroll"><div class="graph" id="graph"></div></div><div class="legend"><b>Durchgezogener Rand:</b> vorhandener Spielpfad · <span style="color:var(--gold)">Gestrichelt:</span> vorgeschlagene Fortsetzung · Grün: im Plan erledigt. Bei Filtern können Vorgänger ausgeblendet sein.</div><p id="mobileHint" class="note">Die Karte lässt sich seitlich scrollen. Nach Auswahl findest du den Editor direkt darunter.</p></div>
+ <aside class="editor" aria-label="Schritt bearbeiten"><div class="full"><div id="nodeOrigin" class="tag"></div><h2 id="editorHeading">Schritt bearbeiten</h2><div id="editorSource" class="source"></div></div>
+ <label>Titel<input id="nodeTitle" maxlength="160"></label><label>Bereich<select id="nodeKind"><option value="mission">Auftrag</option><option value="research">Bauplan / Forschung</option><option value="base">Basis / Personal</option></select></label>
+ <label class="full">Was passiert hier?<textarea id="nodeDescription" maxlength="6000"></textarea></label><label class="full">Was gibt es dafür?<textarea id="nodeReward" maxlength="2000"></textarea></label>
+ <label>Kosten · Credits<input id="nodeCost" type="number" min="0" max="10000000" step="1"></label><label>Credit-Belohnung<input id="nodeCredits" type="number" min="0" max="10000000" step="1"></label>
+ <div class="full"><label>Das muss davor passieren</label><div id="prerequisites" class="checks"></div></div>
+ <label>Entscheidung<select id="nodeDecision"><option value="offen">Offen</option><option value="behalten">So übernehmen</option><option value="aendern">Noch ändern</option><option value="verwerfen">Nicht übernehmen</option></select></label><label>Playtest<select id="nodeTest"><option value="offen">Noch offen</option><option value="gut">Gut spielbar</option><option value="unklar">Unklar</option><option value="problem">Problem</option></select></label>
+ <label class="full">Notizen zu diesem Schritt<textarea id="nodeNote" maxlength="12000"></textarea></label><div class="actions full"><button id="saveNode" class="primary">Änderungen übernehmen</button><button id="completeNode">Im Plan abschließen</button><button id="undoNode">Abschluss zurücknehmen</button><button id="deleteNode" class="danger">Schritt entfernen</button></div><p class="note full">Vorschläge werden durch eine Entscheidung auf dieser Seite noch nicht zur Spielfunktion. Der Export enthält den vollständigen Plan.</p>
+ </aside></div></section>
+ <section id="design" class="panel" hidden><div class="intro"><h2>Forschung soll die nächste Expedition ermöglichen</h2><p>Mein Vorschlag: In Einsätzen Daten oder Baupläne finden, an der Basis neue Möglichkeiten entwickeln und anschließend konkrete Ausrüstung herstellen. So wächst der Baum aus der Kampagne heraus. Entwicklung und Herstellung haben unterschiedliche Kosten.</p></div><div class="grid">
+ <article class="card"><h3>Schutz & Ausrüstung</h3><p>Leichte Rüstung → mittlere Rüstung → schwere Rüstung. Jede Stufe bekommt eine erkennbare Rolle und sichtbare 3D-Ausrüstung. Schwerere Ausrüstung soll nicht automatisch in jeder Situation besser sein.</p></article>
+ <article class="card"><h3>Industrie & Versorgung</h3><p>Ist: gefertigtes Mining-Tool → Bergungswerkzeug entwickeln → einzeln herstellen. Rohstoffverarbeitung und Folgeaufträge für Prospector und Vulture bleiben Vorschläge.</p></article>
+ <article class="card"><h3>Mobilität & Flotte</h3><p>Buccaneer-Rettung und zweites Pad → Flottenwerkstatt → Komponenten und Frachteraufträge. Bodenfahrzeuge erhalten einen eigenen Zweig: Cyclone als Jeep, Nova als Panzer.</p></article>
+ <article class="card"><h3>Was möchtest du übernehmen?</h3><label>Forschungsmodell<select data-export-key="design.model"><option value="blueprints">Baupläne bergen, an der Basis entwickeln</option><option value="missions">Nur durch Auftragsbelohnungen freischalten</option><option value="mixed">Baupläne plus Forschungsressourcen</option></select></label><label>Fortschritt<select data-export-key="design.branching"><option value="branches">Nach dem Einstieg mehrere freie Zweige</option><option value="linear">Weiterhin feste Reihenfolge</option></select></label><label>Entscheidungsstand<select data-export-key="design.decision"><option value="offen">Vorschlag prüfen</option><option value="uebernehmen">Grundidee übernehmen</option><option value="umbauen">Grundidee ändern</option></select></label></article>
+ <article class="card"><h3>Test / Entscheidung</h3><label><input type="checkbox" data-export-key="tests.sequence"> Reihenfolge verständlich</label><label><input type="checkbox" data-export-key="tests.rewards"> Belohnungen sinnvoll</label><label><input type="checkbox" data-export-key="tests.choice"> Genug freie Entscheidungen</label><label>Deine Forschungs-Idee<textarea data-export-key="design.notes" placeholder="Was soll man wann bekommen? Was fehlt nach der fünften Mission?"></textarea></label></article>
+ <article class="card"><h3>Globale Notizen</h3><label>Notizen zur Kampagne<textarea id="globalNotes" data-export-key="campaign.notes" style="min-height:210px" placeholder="Zum Beispiel: erst Bergungsauftrag, dann Werkstatt …"></textarea></label></article>
+ </div></section>
+ <section id="sources" class="panel" hidden><div class="grid"><article class="card"><h2>Was existiert im Spiel?</h2><p>Fünf Kampagnenaufträge, ihre Reihenfolge und Belohnungen, Werkstatt-/Schutz-/Bergungsentwicklung, sechs Einzelrezepte, Personal-/Kisteninteraktionen und das zweite Landepad. Entwicklung und Herstellung sind getrennte Schritte. Diese Seite bündelt die Schritte; einzelne Ortsinteraktionen bleiben im Spiel feiner geregelt.</p><p>Schutz- und Bergungsentwicklung sind im Taskstand integriert; ihre Kosten sind erste Balancewerte. Rohstoffverarbeitung, Fahrzeug- und Flottenforschung bleiben Vorschläge. Native Gesamtprüfung und endgültige Balance stehen aus.</p><p>Die Credit-Anzeige ist eine Planungshilfe. Sie berücksichtigt die hier abgeschlossenen Knoten, keine Flugkosten, Handelskäufe oder wiederholte Produktion.</p><label>Start-Credits im Planspiel<input type="number" id="initialCredits" min="0" max="10000000"></label><button id="resetAll" style="margin-top:14px">Entwurf auf Ausgangsstand zurücksetzen</button></article><article class="card"><h2>Datierte Ausgangsquellen</h2><p>Aus dem Arbeitsbranch nachgezogen bis 1f676bfbc. Weitere Spieländerungen aktualisieren diese Datei nicht automatisch. Vorhandene lokale Entwürfe und Notizen bleiben erhalten; die neue Baseline gilt für frische Pläne oder den ausdrücklichen Reset.</p><div id="sourceList" class="sources"></div></article><article class="card"><h2>So gibst du den Plan weiter</h2><p>„JSON exportieren“ lädt einen vollständigen Stand herunter. Du kannst ihn später wieder importieren oder mir geben. Ein Export verändert weder Projektdateien noch Spielstände. Lokale Vormerkung hängt vom Browser ab; ein JSON-Export ist die verlässliche Sicherung.</p><p id="baselineInfo" class="note"></p></article></div></section>
+</main>
+<footer><div class="actions"><button id="exportJsonButton" class="primary">JSON exportieren</button><button id="copyJsonButton">JSON anzeigen / kopieren</button><label style="margin:0">JSON importieren<input id="importJsonInput" type="file" accept="application/json,.json"></label></div><div id="message" class="message" aria-live="polite"></div><details><summary>Exporttext anzeigen</summary><textarea id="jsonOutput" readonly aria-label="Exportiertes JSON"></textarea></details></footer>
+<script id="baseline" type="application/json">
+{
+  "version": 1,
+  "date": "2026-11-11",
+  "initial_credits": 500,
+  "nodes": [
+    {
+      "id": "satellite_recovery",
+      "title": "Satellitendaten bergen",
+      "kind": "mission",
+      "requires": [],
+      "reward": "150 Credits · Bauplan: Leichte Rüstung",
+      "cost": 0,
+      "description": "Satelliten-Absturzstelle finden → Satellitendaten bergen → Datenträger zur Heimatbasis bringen und hochladen",
+      "proposal": false,
+      "credits": 150,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/jobs.json#satellite_recovery",
+      "home_upload": true
+    },
+    {
+      "id": "craft_light_armor",
+      "title": "Leichte Rüstung herstellen",
+      "kind": "research",
+      "requires": [
+        "satellite_recovery"
+      ],
+      "reward": "1 × Leichte Rüstung",
+      "cost": 20,
+      "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.light_armor"
+    },
+    {
+      "id": "outpost_recovery",
+      "title": "Ersten Außenposten sichern",
+      "kind": "mission",
+      "requires": [
+        "satellite_recovery"
+      ],
+      "reward": "100 Credits",
+      "cost": 0,
+      "description": "Außenposten sichern → Kiste bergen und zum Schiff zurückbringen",
+      "proposal": false,
+      "credits": 100,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/jobs.json#outpost_recovery",
+      "home_upload": false
+    },
+    {
+      "id": "benit_delivery",
+      "title": "C-Benit zum Satelliten-Handelsposten liefern",
+      "kind": "mission",
+      "requires": [
+        "outpost_recovery",
+        "recruit_outpost",
+        "load_crate"
+      ],
+      "reward": "100 Credits · Bauplan: Hand-Mining-Tool",
+      "cost": 0,
+      "description": "C-Benit zum Handelsposten liefern → Zum Schiff zurückkehren",
+      "proposal": false,
+      "credits": 100,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/jobs.json#benit_delivery",
+      "home_upload": false
+    },
+    {
+      "id": "craft_mining_tool",
+      "title": "Hand-Mining-Tool herstellen",
+      "kind": "research",
+      "requires": [
+        "benit_delivery"
+      ],
+      "reward": "1 × Hand-Mining-Tool",
+      "cost": 30,
+      "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.mining_tool"
+    },
+    {
+      "id": "outpost_chip_recovery",
+      "title": "Chip aus gesichertem Außenposten bergen",
+      "kind": "mission",
+      "requires": [
+        "benit_delivery"
+      ],
+      "reward": "250 Credits · Bauplan: Sturmgewehr",
+      "cost": 0,
+      "description": "Außenposten sichern → Datenträger bergen → Zur Heimatbasis bringen und hochladen",
+      "proposal": false,
+      "credits": 250,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/jobs.json#outpost_chip_recovery",
+      "home_upload": true
+    },
+    {
+      "id": "craft_assault_rifle",
+      "title": "Sturmgewehr herstellen",
+      "kind": "research",
+      "requires": [
+        "outpost_chip_recovery"
+      ],
+      "reward": "1 × Sturmgewehr",
+      "cost": 60,
+      "description": "Bauplan ist mit Auftragsabschluss freigeschaltet. Einzelanfertigung an der Heimatbasis; erneute Herstellung kostet erneut Credits.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "scripts/core/singleplayer_supply_state.gd#CAMPAIGN_RECIPES.assault_rifle"
+    },
+    {
+      "id": "buccaneer_rescue",
+      "title": "Buccaneer im Weltraum retten",
+      "kind": "mission",
+      "requires": [
+        "outpost_chip_recovery"
+      ],
+      "reward": "300 Credits",
+      "cost": 0,
+      "description": "Feindliche Cutlass besiegen → Neutrale Buccaneer retten",
+      "proposal": false,
+      "credits": 300,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/jobs.json#buccaneer_rescue",
+      "home_upload": false
+    },
+    {
+      "id": "recruit_outpost",
+      "title": "Person am Außenposten aufnehmen",
+      "kind": "base",
+      "requires": [
+        "outpost_recovery"
+      ],
+      "reward": "Zusätzliche Person",
+      "cost": 0,
+      "description": "Für den nächsten Lieferauftrag erforderlich. Im Spiel bereits nach dem Sichern des noch aktiven Außenpostens möglich; diese Übersicht bündelt den Ausflug bis zum Abschluss.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "load_crate",
+      "title": "C-Benit-Kiste verladen",
+      "kind": "base",
+      "requires": [
+        "outpost_recovery"
+      ],
+      "reward": "Lieferfracht an Bord",
+      "cost": 0,
+      "description": "Auftrag abschließen und die vorhandene Kiste am Ort wirklich verladen. Voraussetzung für die Annahme des Lieferauftrags.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "recruit_pilot",
+      "title": "Geretteten Piloten aufnehmen",
+      "kind": "base",
+      "requires": [
+        "buccaneer_rescue"
+      ],
+      "reward": "Pilot für die Buccaneer",
+      "cost": 0,
+      "description": "Bestätigte Ortsinteraktion nach der erfolgreichen Rettung.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "second_pad",
+      "title": "Zweites Landepad bauen",
+      "kind": "base",
+      "requires": [
+        "recruit_pilot"
+      ],
+      "reward": "Zusätzliches Landepad",
+      "cost": 100,
+      "description": "Nach der Pilotenrettung an der Heimatbasis bauen. Vorhandener Preis aus SingleplayerSupplyState._campaign_build.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "workshop_research",
+      "title": "Werkstatt zur Entwicklung ausbauen",
+      "kind": "base",
+      "requires": [
+        "outpost_chip_recovery"
+      ],
+      "reward": "Werkstattentwicklung: Schutz- und Bergungszweig verfügbar",
+      "cost": 180,
+      "description": "Geborgene Daten nach dem Heim-Upload in der vorhandenen Werkstatt nutzbar machen. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.workshop_research"
+    },
+    {
+      "id": "research_medium",
+      "title": "Mittlere Rüstung entwickeln",
+      "kind": "research",
+      "requires": [
+        "craft_light_armor",
+        "workshop_research"
+      ],
+      "reward": "Bauplan: mittlere Rüstung · Einzelherstellung separat 40 Cr",
+      "cost": 120,
+      "description": "Eine leichte Rüstung tatsächlich fertigen, dann das mittlere Schutzpaket entwickeln. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_medium"
+    },
+    {
+      "id": "research_heavy",
+      "title": "Schwere Rüstung entwickeln",
+      "kind": "research",
+      "requires": [
+        "research_medium"
+      ],
+      "reward": "Bauplan: schwere Rüstung · Einzelherstellung separat 80 Cr",
+      "cost": 240,
+      "description": "Auf der entwickelten mittleren Rüstung aufbauen. Jede Rüstung danach einzeln fertigen. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_heavy"
+    },
+    {
+      "id": "research_industry",
+      "title": "Bergungswerkzeug entwickeln",
+      "kind": "research",
+      "requires": [
+        "craft_mining_tool",
+        "workshop_research"
+      ],
+      "reward": "Bauplan: Bergungswerkzeug · Einzelherstellung separat 40 Cr",
+      "cost": 160,
+      "description": "Entwickle nach einem selbst gefertigten Hand-Mining-Tool das Bergungswerkzeug. Damit können markierte Wracks geborgen werden. Jedes Werkzeug wird einzeln hergestellt. Entwicklung einmal bezahlen; kein fertiger Gegenstand als Gratisbelohnung. Kosten sind erste Balancewerte. Weitergehende Rohstoffverarbeitung und Folgeaufträge für Vulture/Prospector bleiben Vorschläge.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_industry"
+    },
+    {
+      "id": "research_ground",
+      "title": "Bodenfahrzeuge erschließen",
+      "kind": "research",
+      "requires": [
+        "workshop_research"
+      ],
+      "reward": "Cyclone-/Nova-Aufträge",
+      "cost": 180,
+      "description": "Vorschlag: Cyclone ist ein Jeep, Nova ein Panzer. Fahrer, Standfläche und tatsächlicher Fahrzeugtransport müssen vor dem Kauf spielbar integriert sein.",
+      "proposal": true,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "research_flight",
+      "title": "Flottenwerkstatt und Frachtausbau",
+      "kind": "research",
+      "requires": [
+        "second_pad",
+        "workshop_research"
+      ],
+      "reward": "Komponenten- und Frachteraufträge",
+      "cost": 220,
+      "description": "Vorschlag: Nach der Buccaneer-Rettung geht die Kampagne über Schiffskomponenten und spezialisierte Folgeaufträge weiter. Keine kostenlose Flotte.",
+      "proposal": true,
+      "credits": 0,
+      "note": "",
+      "decision": "offen"
+    },
+    {
+      "id": "craft_medium_armor",
+      "title": "Mittlere Rüstung herstellen",
+      "kind": "research",
+      "requires": [
+        "research_medium"
+      ],
+      "reward": "1 × mittlere Rüstung",
+      "cost": 40,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.medium_armor"
+    },
+    {
+      "id": "craft_heavy_armor",
+      "title": "Schwere Rüstung herstellen",
+      "kind": "research",
+      "requires": [
+        "research_heavy"
+      ],
+      "reward": "1 × schwere Rüstung",
+      "cost": 80,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.heavy_armor"
+    },
+    {
+      "id": "craft_salvage_tool",
+      "title": "Bergungswerkzeug herstellen",
+      "kind": "research",
+      "requires": [
+        "research_industry"
+      ],
+      "reward": "1 × Bergungswerkzeug",
+      "cost": 40,
+      "description": "Nach der Entwicklung einzeln an der Heimatbasis fertigen. Jede weitere Herstellung kostet erneut Credits; das Planspiel zählt hier ein Stück. Preis ist ein erster Balancewert.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.salvage_tool"
+    },
+    {
+      "id": "research_recycling",
+      "title": "Bergungsgut zu AusrÃ¼stung verarbeiten",
+      "kind": "research",
+      "requires": [
+        "research_industry",
+        "craft_salvage_tool"
+      ],
+      "reward": "Bauplan: Rucksack-Recycling; Einzelherstellung separat",
+      "cost": 100,
+      "description": "Nach einem selbst gefertigten Bergungswerkzeug die Verarbeitung von Bergungsgut entwickeln. Danach je Rucksack zwei Bergungsgut aus dem Basislager und 20 Credits einsetzen; die Entwicklung liefert keinen fertigen Rucksack. Erste Balancewerte; Entwicklung einmal bezahlen, kein Gratisgegenstand.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#nodes.research_recycling"
+    },
+    {
+      "id": "craft_backpack_recycling",
+      "title": "Rucksack aus Bergungsgut herstellen",
+      "kind": "research",
+      "requires": [
+        "research_recycling"
+      ],
+      "reward": "1 Rucksack mit 12 Inventarplätzen",
+      "cost": 20,
+      "description": "Je Rucksack 2 Bergungsgut aus dem Basislager und 20 Cr. Im Spiel separat wiederholbar; hier nur ein abschließbarer Planungsschritt. Das Planspiel führt keine Materialbilanz und verändert keinen Spielstand.",
+      "proposal": false,
+      "credits": 0,
+      "note": "",
+      "decision": "offen",
+      "source": "data/singleplayer/research.json#fabrication.backpack_recycling"
+    }
+  ],
+  "source_hashes": {
+    "data/singleplayer/jobs.json": "a07db8f538eae28b5c24ae5ed0477526ae8692df39131e6313729e7fe3d9f641",
+    "data/singleplayer/job_briefings.json": "2f7843113da912f3548ea095883aeb4df788d5095385275f0f220ed9810a63a2",
+    "data/singleplayer/trade_offers.json": "ed36effcaa46e5db9e040e79418dd25a5b8873a26ca0a5373fb7a3b854e35bbd",
+    "scripts/core/singleplayer_supply_state.gd": "3c339a171f147b158c9f2099323e2b1fea4bda8c6b1225d0c2f8a1ac064a46d0",
+    "scripts/core/singleplayer_campaign_state.gd": "c56edc6bffce6da6e71c6f4363b552b06db6e4f8a5fe75a9dd1598764c59b934",
+    "data/singleplayer/research.json": "3f5adde1feef874da72b6c4aea5b94987d3ebb9adec84718d2407fcc391a6e03",
+    "scripts/mission/campaign_research_catalog.gd": "ac1c3017d036fb4ffee01662d5096774d7f0ce69ebf4fadf1a156b8993942756"
+  },
+  "design": "Bauplan bergen → an der Basis entwickeln → einzelne Ausrüstung fertigen",
+  "scope": "Ist-Baseline nach Recyclingintegration: fünf Aufträge, fünf Entwicklungsschritte und sieben Einzelrezepte. Weitergehende Verarbeitung sowie Fahrzeug-/Flottenfortsetzung bleiben Vorschläge. Erste Balancewerte, keine native Gesamtfreigabe. Einmalige Planungsknoten ohne vollständige Material-/Produktionssimulation oder Spielstandsänderung."
+}
+</script>
+<script>
+'use strict';
+(()=>{
+ const baseline=JSON.parse(document.getElementById('baseline').textContent), schema='sternenbuergerchen.html_workbench.v1', reportId='campaign_research_20261111', key=reportId+'.v1';
+ const $=id=>document.getElementById(id), clone=x=>JSON.parse(JSON.stringify(x));
+ const kinds={mission:'Auftrag',research:'Bauplan / Forschung',base:'Basis / Personal'};
+ let state={nodes:clone(baseline.nodes),done:[],initial_credits:baseline.initial_credits,controls:{}},selected=state.nodes[0].id,sequence=0,tab='plan',draftDirty=false;
+ const originals=new Map(baseline.nodes.map(n=>[n.id,n]));
+ const say=text=>{$('message').textContent=text;};
+ function validState(s){
+  if(!s||!Array.isArray(s.nodes)||s.nodes.length<1||s.nodes.length>200)throw Error('Der Plan benötigt 1 bis 200 Schritte.');
+  const ids=new Set();for(const n of s.nodes){
+   if(!n||typeof n.id!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(n.id)||ids.has(n.id))throw Error('Schrittkennung fehlt oder ist doppelt.');ids.add(n.id);
+   if(typeof n.title!=='string'||!n.title.trim()||n.title.length>160||!kinds[n.kind]||!Array.isArray(n.requires)||n.requires.length>200||n.requires.some(r=>typeof r!=='string'))throw Error('Ungültige Schrittdefinition.');
+   for(const f of ['cost','credits'])if(!Number.isSafeInteger(n[f])||n[f]<0||n[f]>10000000)throw Error('Kosten / Credits müssen ganze, nichtnegative Zahlen sein.');
+   for(const f of ['reward','description','note'])if(typeof n[f]!=='string'||n[f].length>12000)throw Error('Ungültiger Text im Schritt.');
+   if(typeof n.proposal!=='boolean'||!['offen','behalten','aendern','verwerfen'].includes(n.decision))throw Error('Ungültiger Entscheidungsstand.');
+  }
+  if(!Array.isArray(s.done)||s.done.some(id=>!ids.has(id))||!Number.isSafeInteger(s.initial_credits)||s.initial_credits<0||s.initial_credits>10000000)throw Error('Ungültiger Planspielstand.');
+  if(s.nodes.some(n=>n.requires.some(id=>!ids.has(id))))throw Error('Eine Voraussetzung verweist auf einen fehlenden Schritt.');
+  if(!s.controls||typeof s.controls!=='object'||Array.isArray(s.controls))throw Error('Ungültige Notizfelder.');
+  return true;
+ }
+ function analysis(){
+  const map=new Map(state.nodes.map(n=>[n.id,n])),layers=new Map(),active=[],cycles=new Set();
+  function visit(id){if(layers.has(id))return layers.get(id);const at=active.indexOf(id);if(at>=0){active.slice(at).forEach(x=>cycles.add(x));return 0;}active.push(id);let level=0;for(const r of map.get(id).requires)level=Math.max(level,visit(r)+1);active.pop();layers.set(id,Math.min(level,199));return level;}
+  state.nodes.forEach(n=>visit(n.id));
+  const done=new Set(state.done),ready=new Set(state.nodes.filter(n=>!done.has(n.id)&&!cycles.has(n.id)&&n.requires.every(id=>done.has(id))).map(n=>n.id));
+  return {map,layers,cycles,done,ready};
+ }
+ function pruneDone(){const cycleSet=analysis().cycles;state.done=state.done.filter(id=>!cycleSet.has(id));let changed=true;while(changed){changed=false;state.done=state.done.filter(id=>{const n=state.nodes.find(x=>x.id===id),ok=n&&n.requires.every(r=>state.done.includes(r));if(!ok)changed=true;return ok;});}}
+ function persist(){try{localStorage.setItem(key,JSON.stringify(state));}catch(_e){say('Lokale Vormerkung nicht verfügbar. Bitte JSON exportieren.');}}
+ function controlSnapshot(){const result={};document.querySelectorAll('[data-export-key]').forEach(e=>result[e.dataset.exportKey]=e.type==='checkbox'?e.checked:e.value);return result;}
+ function applyControls(){document.querySelectorAll('[data-export-key]').forEach(e=>{const v=state.controls[e.dataset.exportKey];if(v!==undefined){if(e.type==='checkbox')e.checked=v===true;else e.value=String(v);}});}
+ function nodeModified(n){const o=originals.get(n.id);return !o||['title','kind','reward','credits','cost','description','requires'].some(f=>JSON.stringify(n[f])!==JSON.stringify(o[f]));}
+ function renderGraph(){
+  const a=analysis(),search=$('search').value.toLocaleLowerCase('de'),filter=$('filter').value,graph=$('graph');graph.replaceChildren();
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('edges');graph.append(svg);
+  const defs=document.createElementNS(svg.namespaceURI,'defs'),marker=document.createElementNS(svg.namespaceURI,'marker');marker.id='arrow';marker.setAttribute('viewBox','0 0 10 10');marker.setAttribute('refX','9');marker.setAttribute('refY','5');marker.setAttribute('markerWidth','6');marker.setAttribute('markerHeight','6');marker.setAttribute('orient','auto-start-reverse');const tip=document.createElementNS(svg.namespaceURI,'path');tip.setAttribute('d','M 0 0 L 10 5 L 0 10 z');tip.setAttribute('fill','#6b9396');marker.append(tip);defs.append(marker);svg.append(defs);
+  const visible=state.nodes.filter(n=>(filter==='all'||(filter==='proposal'?n.proposal:n.kind===filter))&&[n.title,n.reward,n.description].join(' ').toLocaleLowerCase('de').includes(search));
+  const levels=[...new Set(visible.map(n=>a.layers.get(n.id)))].sort((a,b)=>a-b);
+  for(const level of levels){const col=document.createElement('div');col.className='column';const head=document.createElement('div');head.className='column-label';head.textContent='Stufe '+(level+1);col.append(head);graph.append(col);
+   for(const n of visible.filter(n=>a.layers.get(n.id)===level)){const b=document.createElement('button');b.className='node'+(n.proposal?' proposal':'')+(selected===n.id?' selected':'')+(a.done.has(n.id)?' done':a.ready.has(n.id)?'':' locked');b.dataset.nodeId=n.id;b.setAttribute('aria-pressed',String(selected===n.id));
+    const kind=document.createElement('span');kind.className='kind';kind.textContent=kinds[n.kind];b.append(kind);const title=document.createElement('strong');title.textContent=n.title;b.append(title);const reward=document.createElement('span');reward.className='reward';reward.textContent=n.reward||'Belohnung noch offen';b.append(reward);const status=document.createElement('span');status.className='status';status.textContent=a.cycles.has(n.id)?'↻ Kreis in den Voraussetzungen':a.done.has(n.id)?'✓ Im Plan erledigt':a.ready.has(n.id)?'● Als Nächstes möglich':'○ Wartet auf Vorgänger';b.append(status);const origin=document.createElement('span');origin.className='origin';origin.textContent=(n.proposal?'VORSCHLAG':'IST-BASELINE')+(nodeModified(n)?' · GEÄNDERT':'')+(n.cost?' · '+n.cost+' Cr':'');b.append(origin);b.addEventListener('click',()=>{if(!saveDraftIfDirty())return;selected=n.id;render();});col.append(b);}
+  }
+  if(!visible.length){const empty=document.createElement('p');empty.textContent='Keine passenden Schritte.';graph.append(empty);}
+  $('nodeCount').textContent=state.nodes.length;$('readyCount').textContent=a.ready.size;$('doneCount').textContent=a.done.size;
+  $('creditCount').textContent=(state.initial_credits+state.nodes.filter(n=>a.done.has(n.id)).reduce((sum,n)=>sum+n.credits-n.cost,0)).toLocaleString('de-DE');
+  $('issues').textContent=a.cycles.size?'Kreis in den Voraussetzungen: '+[...a.cycles].map(id=>a.map.get(id).title).join(' → ')+'. Bitte eine Verbindung im Editor lösen.':'';
+  requestAnimationFrame(drawEdges);
+ }
+ function drawEdges(){const graph=$('graph'),svg=graph.querySelector('svg'),bounds=graph.getBoundingClientRect();if(!svg)return;svg.querySelectorAll('.edge').forEach(e=>e.remove());svg.setAttribute('width',graph.scrollWidth);svg.setAttribute('height',graph.scrollHeight);const buttons=new Map([...graph.querySelectorAll('[data-node-id]')].map(b=>[b.dataset.nodeId,b]));
+  for(const n of state.nodes){const dest=buttons.get(n.id);if(!dest)continue;const d=dest.getBoundingClientRect();for(const r of n.requires){const src=buttons.get(r);if(!src)continue;const s=src.getBoundingClientRect(),x1=s.right-bounds.left,y1=s.top+s.height/2-bounds.top,x2=d.left-bounds.left,y2=d.top+d.height/2-bounds.top,path=document.createElementNS(svg.namespaceURI,'path');path.classList.add('edge');const bend=Math.max(18,(x2-x1)*.5);path.setAttribute('d',`M${x1},${y1} C${x1+bend},${y1} ${x2-bend},${y2} ${x2},${y2}`);path.setAttribute('fill','none');path.setAttribute('stroke',(n.id===selected||r===selected)?'#e7b96e':'#52757d');path.setAttribute('stroke-width',(n.id===selected||r===selected)?'2':'1.2');path.setAttribute('marker-end','url(#arrow)');svg.append(path);}}
+ }
+ function fillEditor(){const n=state.nodes.find(x=>x.id===selected);if(!n)return;const a=analysis();$('editorHeading').textContent=n.title;$('nodeOrigin').textContent=(n.proposal?'Vorschlag':'Vorhandener Spielpfad')+(nodeModified(n)?' · im Entwurf geändert':'');$('nodeOrigin').className='tag '+(n.proposal?'proposal':'actual');$('editorSource').textContent=n.source||'Neuer Entwurfsschritt';
+  for(const [id,field] of [['nodeTitle','title'],['nodeKind','kind'],['nodeDescription','description'],['nodeReward','reward'],['nodeCost','cost'],['nodeCredits','credits'],['nodeDecision','decision'],['nodeNote','note']])$(id).value=n[field];$('nodeTest').value=n.test||'offen';
+  const checks=$('prerequisites');checks.replaceChildren();for(const other of state.nodes){if(other.id===n.id)continue;const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.value=other.id;check.checked=n.requires.includes(other.id);check.addEventListener('change',()=>draftDirty=true);label.append(check,document.createTextNode(other.title));checks.append(label);}
+  $('completeNode').disabled=!a.ready.has(n.id);$('undoNode').disabled=!a.done.has(n.id);$('deleteNode').disabled=state.nodes.length===1;draftDirty=false;
+ }
+ function saveDraftIfDirty(){if(draftDirty)return saveNode();return true;}
+ function saveNode(){const title=$('nodeTitle').value.trim(),cost=Number($('nodeCost').value),credits=Number($('nodeCredits').value);if(!title||![cost,credits].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=10000000)){say('Bitte einen Titel und ganze, nichtnegative Creditwerte eingeben.');return false;}
+  const n=state.nodes.find(x=>x.id===selected);Object.assign(n,{title,kind:$('nodeKind').value,description:$('nodeDescription').value,reward:$('nodeReward').value,cost,credits,requires:[...$('prerequisites').querySelectorAll('input:checked')].map(e=>e.value),decision:$('nodeDecision').value,test:$('nodeTest').value,note:$('nodeNote').value});pruneDone();draftDirty=false;persist();render();say('Änderungen im lokalen Entwurf übernommen.');return true;
+ }
+ function render(){renderGraph();fillEditor();$('initialCredits').value=state.initial_credits;}
+ function exportPayload(){if(!saveDraftIfDirty())return null;state.controls=controlSnapshot();persist();const a=analysis();return {schema,report_id:reportId,title:document.title,exported_at:new Date().toISOString(),controls:clone(state.controls),notes:{global:state.controls['campaign.notes']||'',nodes:Object.fromEntries(state.nodes.map(n=>[n.id,n.note]))},active_choices:{design:state.controls['design.model']||'blueprints'},computed:{ready:[...a.ready],done:[...a.done],cycles:[...a.cycles],projected_credits:state.initial_credits+state.nodes.filter(n=>a.done.has(n.id)).reduce((s,n)=>s+n.credits-n.cost,0)},metadata:{date:baseline.date,source_hashes:baseline.source_hashes,baseline_nodes:baseline.nodes,scope:baseline.scope},plan:clone(state)};}
+ async function writeExport(download){const payload=exportPayload();if(!payload)return;const text=JSON.stringify(payload,null,2);$('jsonOutput').value=text;if(download){const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=reportId+'_'+payload.exported_at.replace(/[:.]/g,'-')+'_'+(++sequence)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('JSON-Download gestartet. Der Exporttext steht zusätzlich unten.');}else{try{await navigator.clipboard.writeText(text);say('JSON kopiert.');}catch(_e){$('jsonOutput').closest('details').open=true;$('jsonOutput').focus();$('jsonOutput').select();say('JSON ist markiert und kann kopiert werden.');}}}
+ $('saveNode').addEventListener('click',saveNode);['nodeTitle','nodeKind','nodeDescription','nodeReward','nodeCost','nodeCredits','nodeDecision','nodeTest','nodeNote'].forEach(id=>$(id).addEventListener('input',()=>draftDirty=true));
+ $('completeNode').addEventListener('click',()=>{if(!saveDraftIfDirty())return;const a=analysis();if(a.ready.has(selected)){state.done.push(selected);persist();render();}});
+ $('undoNode').addEventListener('click',()=>{if(!saveDraftIfDirty())return;state.done=state.done.filter(id=>id!==selected);pruneDone();persist();render();say('Abschluss und davon abhängige Abschlüsse zurückgenommen.');});
+ $('clearProgress').addEventListener('click',()=>{if(!saveDraftIfDirty())return;state.done=[];persist();render();say('Planspiel zurückgesetzt; dein Entwurf bleibt erhalten.');});
+ $('addNode').addEventListener('click',()=>{if(!saveDraftIfDirty())return;if(state.nodes.length>=200){say('Maximal 200 Schritte möglich.');return;}const id='custom_'+Date.now()+'_'+(++sequence);state.nodes.push({id,title:'Neuer Schritt',kind:'research',requires:[selected],reward:'Belohnung festlegen',cost:0,credits:0,description:'',note:'',proposal:true,decision:'offen'});selected=id;persist();render();$('nodeTitle').focus();$('nodeTitle').select();});
+ $('deleteNode').addEventListener('click',()=>{const n=state.nodes.find(x=>x.id===selected);if(state.nodes.length<=1||!confirm('Schritt „'+n.title+'“ und seine Verbindungen entfernen?'))return;state.nodes=state.nodes.filter(x=>x.id!==selected);state.nodes.forEach(x=>x.requires=x.requires.filter(r=>r!==selected));state.done=state.done.filter(id=>id!==selected);selected=state.nodes[0].id;pruneDone();persist();render();});
+ $('search').addEventListener('input',renderGraph);$('filter').addEventListener('change',renderGraph);window.addEventListener('resize',drawEdges);
+ document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{if(!saveDraftIfDirty())return;tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==tab);if(tab==='plan')requestAnimationFrame(drawEdges);}));
+ document.querySelectorAll('[data-export-key]').forEach(e=>e.addEventListener('input',()=>{state.controls=controlSnapshot();persist();}));
+ $('initialCredits').addEventListener('change',()=>{const n=Number($('initialCredits').value);if(Number.isSafeInteger(n)&&n>=0&&n<=10000000){state.initial_credits=n;persist();renderGraph();}else{say('Start-Credits sind ungültig.');$('initialCredits').value=state.initial_credits;}});
+ ['exportJsonButton','exportTop'].forEach(id=>$(id).addEventListener('click',()=>writeExport(true)));$('copyJsonButton').addEventListener('click',()=>writeExport(false));
+ $('importJsonInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>5000000)throw Error('Datei ist zu groß.');const payload=JSON.parse(await file.text());if(payload.schema!==schema||payload.report_id!==reportId)throw Error('Diese Datei gehört nicht zu dieser Kampagnen-Workbench.');const next=clone(payload.plan);validState(next);if(!confirm('Den aktuellen lokalen Entwurf durch den importierten Stand ersetzen?'))return;state=next;selected=state.nodes[0].id;draftDirty=false;pruneDone();applyControls();persist();render();say('Plan importiert.');}catch(error){say('Import abgelehnt: '+error.message+' Der bisherige Entwurf bleibt erhalten.');}finally{e.target.value='';}});
+ $('resetAll').addEventListener('click',()=>{if(!confirm('Alle lokalen Änderungen, Notizen und Planspielabschlüsse zurücksetzen?'))return;state={nodes:clone(baseline.nodes),done:[],initial_credits:baseline.initial_credits,controls:{}};selected=state.nodes[0].id;document.querySelectorAll('[data-export-key]').forEach(e=>{if(e.type==='checkbox')e.checked=false;else if(e.tagName==='SELECT')e.selectedIndex=0;else e.value='';});draftDirty=false;persist();render();say('Ausgangsstand wiederhergestellt.');});
+ window.addEventListener('beforeunload',e=>{if(draftDirty){e.preventDefault();e.returnValue='';}});
+ for(const [path,hash] of Object.entries(baseline.source_hashes)){const row=document.createElement('div');row.className='source-row';row.textContent=path;const small=document.createElement('small');small.textContent='SHA-256 '+hash;row.append(small);$('sourceList').append(row);}
+ $('baselineInfo').textContent='Quelle: Taskbranch task/native-glut-maps-20261110 · abgeleitet aus _html_workbench_template.html · Stand '+baseline.date+'.';
+ try{const stored=localStorage.getItem(key);if(stored){const next=JSON.parse(stored);validState(next);state=next;selected=state.nodes[0].id;pruneDone();say('Dein lokal vorgemerkter Entwurf wurde wiederhergestellt.');}}catch(_e){say('Lokale Vormerkung nicht verfügbar oder ungültig; Ausgangsstand geladen.');}
+ applyControls();render();
+})();
+</script>
+</body></html>

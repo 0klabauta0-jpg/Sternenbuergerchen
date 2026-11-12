@@ -4,6 +4,7 @@ const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui
 
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
+const HELP_SERVICE_SCRIPT: GDScript = preload("res://scripts/ui/contextual_help_service.gd")
 const SETTINGS_SCREEN_SCRIPT: GDScript = preload("res://scripts/ui/settings_screen.gd")
 
 const MAIN_MENU_SCENE_PATH: String = "res://scenes/ui/main_menu.tscn"
@@ -19,6 +20,7 @@ var _audio_event_bus = null
 var _overlay_root: Control = null
 var _menu_panel: PanelContainer = null
 var _settings_panel: PanelContainer = null
+var _controls_panel: PanelContainer = null
 var _status_label: Label = null
 var _save_button: Button = null
 var _load_button: Button = null
@@ -59,7 +61,7 @@ func _handle_escape_input(event: InputEvent) -> void:
 		return
 	if key_event.keycode != KEY_ESCAPE:
 		return
-	if is_settings_visible():
+	if is_settings_visible() or is_controls_visible():
 		_show_menu_panel()
 	else:
 		toggle_menu()
@@ -116,11 +118,28 @@ func is_settings_visible() -> bool:
 	return _overlay_root != null and _overlay_root.visible and _settings_panel != null and _settings_panel.visible
 
 
+func is_controls_visible() -> bool:
+	return _overlay_root != null and _overlay_root.visible and _controls_panel != null and _controls_panel.visible
+
+
+func open_controls() -> void:
+	_ensure_overlay()
+	_menu_panel.hide()
+	_settings_panel.hide()
+	_controls_panel.show()
+	_overlay_root.show()
+	var back := _controls_panel.find_child("ControlsBackButton", true, false) as Button
+	if back != null:
+		back.grab_focus()
+	_play_ui_sfx("click", "escape_controls_open")
+
+
 func open_settings() -> void:
 	_ensure_overlay()
 	_draft_settings = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings", _settings_config_path)).duplicate(true)
 	_refresh_settings_controls()
 	_menu_panel.visible = false
+	_controls_panel.visible = false
 	_settings_panel.visible = true
 	_overlay_root.visible = true
 	_set_status("Einstellungen")
@@ -288,18 +307,21 @@ func _build_overlay() -> void:
 	_settings_panel = _build_settings_panel()
 	_settings_panel.visible = false
 	_overlay_root.add_child(_settings_panel)
+	_controls_panel = _build_controls_panel()
+	_controls_panel.hide()
+	_overlay_root.add_child(_controls_panel)
 	_refresh_action_buttons()
 
 
 func _build_menu_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "EscapeMenuPanel"
-	panel.custom_minimum_size = Vector2(360.0, 430.0)
+	panel.custom_minimum_size = Vector2(360.0, 490.0)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -180.0
-	panel.offset_top = -215.0
+	panel.offset_top = -245.0
 	panel.offset_right = 180.0
-	panel.offset_bottom = 215.0
+	panel.offset_bottom = 245.0
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 18)
@@ -329,10 +351,56 @@ func _build_menu_panel() -> PanelContainer:
 
 	_add_menu_button(vbox, "ResumeButton", "Weiter", close_menu)
 	_add_menu_button(vbox, "SettingsButton", "Einstellungen", open_settings)
+	var controls_button := _add_menu_button(vbox, "ControlsButton", "Kartensteuerung", open_controls)
+	controls_button.set_meta("help_id", "shell.map_controls")
 	_save_button = _add_menu_button(vbox, "SaveMissionButton", "Mission speichern", _on_save_pressed)
 	_load_button = _add_menu_button(vbox, "LoadMissionButton", "Mission laden", _on_load_pressed)
 	_main_menu_button = _add_menu_button(vbox, "MainMenuButton", "Hauptmenue", _on_main_menu_pressed)
 	_quit_button = _add_menu_button(vbox, "QuitButton", "Spiel beenden", request_quit_game)
+	return panel
+
+
+func _build_controls_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "EscapeControlsPanel"
+	panel.set_meta("help_id", "shell.map_controls")
+	panel.custom_minimum_size = Vector2(560.0, 510.0)
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -280.0
+	panel.offset_top = -255.0
+	panel.offset_right = 280.0
+	panel.offset_bottom = 255.0
+	var margin := MarginContainer.new()
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 18)
+	panel.add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 12)
+	margin.add_child(column)
+	# The existing catalog remains the only text source. Build once, no runtime
+	# input interception or gameplay state is added by this reference page.
+	var help = HELP_SERVICE_SCRIPT.new()
+	help.load_catalog()
+	var entry: Dictionary = help.get_entry("shell.map_controls")
+	var heading := Label.new()
+	heading.text = String(entry.get("title", "Kartensteuerung"))
+	heading.add_theme_font_size_override("font_size", 22)
+	column.add_child(heading)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 12)
+	scroll.add_child(content)
+	for line: String in entry.get("detail_lines", []):
+		var label := Label.new()
+		label.text = line
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_font_size_override("font_size", 16)
+		content.add_child(label)
+	_add_menu_button(column, "ControlsBackButton", "Zurück zum Spielmenü", _show_menu_panel)
 	return panel
 
 
@@ -431,6 +499,7 @@ func _add_menu_button(parent: Control, button_name: String, text: String, callba
 func _show_menu_panel() -> void:
 	_menu_panel.visible = true
 	_settings_panel.visible = false
+	_controls_panel.visible = false
 	_refresh_action_buttons()
 	_set_status("Escape · Einsätze laufen weiter")
 

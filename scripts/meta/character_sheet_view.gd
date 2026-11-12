@@ -170,10 +170,12 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	_add_post_mission_award_alert(sheet, model, profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
 	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
-	var suitability_host := _overview_section(overview, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
+	var suitability_host := _overview_section(overview, "EINSATZNIVEAU", "CharacterSuitabilityOverview")
 	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
-	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
-	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
+	var experience_readout: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_experience_readout(profile)
+	var experience := _overview_label(suitability_host, "PrimarySuitability", String(experience_readout.label), 16)
+	experience.tooltip_text = String(experience_readout.detail_text)
+	_overview_label(suitability_host, "PrimarySuitabilityReason", String(primary.get("label", "Einsatzprofil")), 13)
 	var social := HBoxContainer.new()
 	social.name = "CharacterTraitsAndRelationships"
 	social.add_theme_constant_override("separation", 10)
@@ -190,6 +192,10 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
+	if not String(experience_readout.effects_text).is_empty():
+		var effects := _overview_label(values, "ProfileContribution", String(experience_readout.effects_text), 13)
+		effects.tooltip_text = String(experience_readout.effects_detail)
+		experience.tooltip_text += "\n\n" + String(experience_readout.effects_text) + "\n" + String(experience_readout.effects_detail)
 	var metric_columns:=HBoxContainer.new();metric_columns.add_theme_constant_override("separation",10);values.add_child(metric_columns)
 	var core_column:=VBoxContainer.new();core_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(core_column)
 	var auxiliary_column:=VBoxContainer.new();auxiliary_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;metric_columns.add_child(auxiliary_column)

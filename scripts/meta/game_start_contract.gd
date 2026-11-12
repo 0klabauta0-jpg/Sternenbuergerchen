@@ -1,12 +1,13 @@
 extends RefCounted
 ## One-shot UI-to-Flow request; contains no gameplay or checkpoint state.
 const META_KEY: StringName = &"game_start_request_v1"
+const POINTS = preload("res://scripts/meta/skirmish_points_catalog.gd")
 
 static func clear_start(tree: SceneTree) -> void:
 	if tree != null and tree.root != null and tree.root.has_meta(META_KEY):
 		tree.root.remove_meta(META_KEY)
 
-static func request_start(tree: SceneTree, mode: String, action: String = "new", preset_id: String = "") -> Dictionary:
+static func request_start(tree: SceneTree, mode: String, action: String = "new", preset_id: String = "", points_draft: Dictionary = {}) -> Dictionary:
 	clear_start(tree)
 	if tree == null or tree.root == null:
 		return {"ok": false, "reason": "missing_tree"}
@@ -16,6 +17,13 @@ static func request_start(tree: SceneTree, mode: String, action: String = "new",
 		return {"ok":false,"reason":"invalid_skirmish_preset"}
 	var request := {"mode": mode, "action": action}
 	if not preset_id.is_empty(): request["preset_id"] = preset_id
+	if not points_draft.is_empty():
+		if mode != "skirmish" or not preset_id.is_empty():
+			return {"ok": false, "reason": "invalid_skirmish_points_start"}
+		var purchase := POINTS.evaluate(points_draft)
+		if not purchase.ok:
+			return purchase
+		request["points_draft"] = points_draft.duplicate(true)
 	tree.root.set_meta(META_KEY, request)
 	return {"ok": true}
 
@@ -38,4 +46,8 @@ static func consume_start(tree: SceneTree) -> Dictionary:
 		if mode != "skirmish" or typeof(value.preset_id) != TYPE_STRING or value.preset_id not in ["early", "mid", "late"]:
 			return fallback
 		result["preset_id"] = value.preset_id
+	if value.has("points_draft"):
+		if mode != "skirmish" or value.has("preset_id") or not value.points_draft is Dictionary or not POINTS.evaluate(value.points_draft).ok:
+			return fallback
+		result["points_draft"] = value.points_draft.duplicate(true)
 	return result
