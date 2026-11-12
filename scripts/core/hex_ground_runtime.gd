@@ -25,6 +25,11 @@ var _motion_geometry_by_unit_id: Dictionary = {}
 var _admission_by_id: Dictionary = {}
 var _admission_slots_by_grid: Dictionary = {}
 var _admission_id_by_unit: Dictionary = {}
+var _restore_binding_epoch := 0
+var _prepared_restores: Dictionary = {}
+
+class PreparedGroundRestore extends RefCounted:
+	pass
 
 
 func configure(registry: Node, map_id: String, tick: int) -> void:
@@ -720,6 +725,7 @@ func _prune_corridor_grants() -> void:
 
 
 func clear() -> void:
+	_restore_binding_epoch += 1
 	_registry = null
 	_map_id = ""
 	_tick = 0
@@ -800,6 +806,79 @@ func _save_context_issue() -> String:
 	if not _admission_by_id.is_empty() or not _admission_slots_by_grid.is_empty() or not _admission_id_by_unit.is_empty():return "ground_save_pending_admission"
 	if _topology_revalidation_pending:return "ground_save_topology_pending"
 	return ""
+
+
+## Cold, trusted inprocess preparation. The handle contains no writable patch.
+func prepare_restore_state(state:Dictionary)->Dictionary:
+	var blocked:=_save_context_issue()
+	if not blocked.is_empty():return _reject(blocked)
+	for key in _prepared_restores.keys():
+		var record:Dictionary=_prepared_restores[key]
+		if record.handle.get_ref()==null or record.epoch!=_restore_binding_epoch:_prepared_restores.erase(key)
+	if _prepared_restores.size()>=32:return _reject("ground_restore_prepare_capacity")
+	var source_stamp:=_restore_value_stamp()
+	var checked:Dictionary=_save_candidate(state)
+	if not checked.ok:return checked
+	if source_stamp!=_restore_value_stamp():return _reject("ground_restore_context_changed")
+	var candidate=checked.candidate
+	var patch:Dictionary={"tick":candidate._tick,"units":candidate._units_by_id.duplicate(true),
+		"occupants":candidate._occupant_by_grid.duplicate(true),"segments":candidate._segments_by_unit_id.duplicate(true),
+		"centering":candidate._centering_by_unit_id.duplicate(true),"geometry":candidate._motion_geometry_by_unit_id.duplicate(true),
+		"grants":candidate._corridor_grants.duplicate(true),"terrain_revision":candidate._reservation_terrain_revision,
+		"revision":_revision+1}
+	for id in patch.units:patch.units[id].state_revision=patch.revision
+	var handle:=PreparedGroundRestore.new()
+	_prepared_restores[handle.get_instance_id()]={"handle":weakref(handle),"epoch":_restore_binding_epoch,
+		"source_stamp":source_stamp,"candidate":candidate,"target_stamp":candidate._restore_value_stamp(),"patch":patch}
+	return {"ok":true,"prepared":handle}
+
+
+func get_prepared_restore_ground(prepared:RefCounted)->RefCounted:
+	if not validate_prepared_restore(prepared).ok:return null
+	return _prepared_restores[prepared.get_instance_id()].candidate
+
+
+func validate_prepared_restore(prepared:RefCounted)->Dictionary:
+	if prepared==null or not _prepared_restores.has(prepared.get_instance_id()):return _reject("unknown_ground_restore")
+	var record:Dictionary=_prepared_restores[prepared.get_instance_id()]
+	if record.handle.get_ref()!=prepared or record.epoch!=_restore_binding_epoch:return _reject("ground_restore_owner_changed")
+	var blocked:=_save_context_issue()
+	if not blocked.is_empty():return _reject(blocked)
+	if record.source_stamp!=_restore_value_stamp():return _reject("ground_restore_context_changed")
+	if record.target_stamp!=record.candidate._restore_value_stamp():return _reject("ground_restore_candidate_changed")
+	return {"ok":true,"prepared_id":prepared.get_instance_id()}
+
+
+func publish_prepared_restore(prepared:RefCounted)->Dictionary:
+	var validation:=validate_prepared_restore(prepared)
+	if not validation.ok:return validation
+	return _publish_prepared_restore(prepared,validation)
+
+
+func _publish_prepared_restore(prepared:RefCounted,_validation:Dictionary)->Dictionary:
+	# Root-private tail: all owners validated, no callbacks or fallible checks here.
+	var patch:Dictionary=_prepared_restores[prepared.get_instance_id()].patch
+	_tick=patch.tick
+	_units_by_id=patch.units
+	_occupant_by_grid=patch.occupants
+	_segments_by_unit_id=patch.segments
+	_centering_by_unit_id=patch.centering
+	_motion_geometry_by_unit_id=patch.geometry
+	_corridor_grants=patch.grants
+	_reservation_terrain_revision=patch.terrain_revision
+	_topology_revalidation_pending=false
+	_revision=patch.revision
+	_prepared_restores.erase(prepared.get_instance_id())
+	return {"ok":true,"unit_count":_units_by_id.size(),"tick":_tick,"revision":_revision}
+
+
+func _restore_value_stamp()->String:
+	# Full value fingerprint also catches no-revision pending admission changes.
+	return var_to_bytes([get_instance_id(),_restore_binding_epoch,
+		_registry.get_instance_id() if is_instance_valid(_registry) else 0,_map_id,_revision,_tick,_terrain_revision(),
+		_units_by_id,_occupant_by_grid,_segments_by_unit_id,_corridor_grants,_reservation_terrain_revision,
+		_topology_revalidation_pending,_centering_by_unit_id,_motion_geometry_by_unit_id,
+		_admission_by_id,_admission_slots_by_grid,_admission_id_by_unit]).hex_encode().sha256_text()
 
 
 func _save_candidate(state:Dictionary) -> Dictionary:

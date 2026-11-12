@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-1bcc972d94f344118b2d2116c0adef63
+PASS Prepare validates detached target without live writes
+PASS Target Ground is detached and exposes actual restored values
+PASS Mutating caller save dictionary cannot alter preparation
+PASS Public publish updates original owner after validation
+PASS Retained target Ground cannot mutate published live values
+PASS Consumed handle cannot publish twice
+PASS Foreign owners and forged handles fail closed
+PASS Live revision race rejects without partial write
+PASS Live tick race invalidates preparation
+PASS Mutation of borrowed target Ground invalidates preparation
+PASS Same-object same-map reconfigure invalidates old handles
+PASS Terrain revision race rejects before publication
+PASS Existing save validator rejects duplicate cell/identity atomically
+PASS Validated private tail publishes prepared values for later Root grouping
+HEX_GROUND_PREPARED_RESTORE passed=14 failed=0

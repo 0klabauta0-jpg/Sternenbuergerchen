@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "exit_codes": {
+    "import.log": 0,
+    "ground_compile.log": 0,
+    "check.log": 0
+  },
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "full_ap7": false,
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\.godot\\ground_prepared_checks\\68b00e1c6cad4927a013ca92f67bae0c",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1bcc972d94f344118b2d2116c0adef63",
+  "source_sha256": {
+    "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll": "401d9751dc88ea0cce899cf42d4b8e2fc1a1c1caed56f958550459e199571aa8",
+    "addons/limboai/bin/limboai.gdextension": "e616dece245ad0e8b8d7403e681a52e142b2d94fdd850fa5eb24a06976170ee9",
+    "scripts/core/hex_ground_runtime.gd": "c37fb487fd7717989c0ac32c9fcfeb1346cc3d4dc58b3b20f9109e051564e47c",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "1dd9c7d2c460718252dd9b370fe6e64100d23cdc7f290221dba99cca7390e01c",
+    "scripts/terrain/hex_corridor_topology_cache.gd": "b9bfc3dcda3b0e040df6253ed4a22f2c52d5d9ba9a948641990d6c4b16d24cc3",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_registry.gd": "c12952855ed41a709e56249f904fb0aba2a6094f9300e15bc154e747b3c4edbb",
+    "scripts/terrain/terrain_tile_data.gd": "7a01c1c15b33192643e8bb42285a03faaa6d8bc30d07466ccb46bd6696901bff",
+    "scripts/tests/hex_ground_prepared_restore_verifier.gd": "41798dee18d3b794c6501139dd658ed6e091cc2e13d7adeba74692ab80597818",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  }
+}
