@@ -86,6 +86,115 @@ func _resolve_air_support_craft(craft_id: String) -> Dictionary:
 	if flight == null or wing_id.is_empty() or equipment.get_snapshot(craft_id).is_empty(): return {"ok":false, "reason":"craft_not_ready"}
 	return {"ok":true, "flight":flight, "fleet":fleet, "wings":wings, "combat":combat, "equipment":equipment, "wing_id":wing_id}
 
+func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
+	# Read-only. Visibility and installed equipment come from live owners; the
+	# UI supplies only identities, never pilot skill, position, or damage.
+	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
+	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
+	for key in ["craft_id", "target_unit_id", "weapon_slot"]:
+		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_command"}
+	var binding: Dictionary = _resolve_air_support_craft(command.craft_id)
+	if not binding.get("ok", false): return binding
+	var flight: RefCounted = binding.flight
+	var pose: Dictionary = flight.get_snapshot()
+	if binding.combat.get_actor(command.craft_id) != flight or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("assist_mode") != "coupled" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id: return {"ok":false, "reason":"aircraft_not_flying"}
+	var indexed_cells: Array[Vector2i] = binding.combat.preview_actor_cells(command.craft_id, {})
+	if indexed_cells.is_empty() or not binding.combat.actor_cells_match(command.craft_id, pose.space_area_id, indexed_cells): return {"ok":false, "reason":"stale_aircraft_index"}
+	var wing: Dictionary = binding.wings.get_snapshot().wings.get(binding.wing_id, {})
+	var order: Dictionary = wing.get("order", {})
+	if order.get("verb") != "attack_target" or order.get("target_id") != command.target_unit_id or order.get("fire_rule") != "free": return {"ok":false, "reason":"attack_order_required"}
+	var adapter: Node = _air_support_adapter.get_ref()
+	var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
+	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
+	if typeof(pilots) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_unavailable"}
+	var pilot_id := String(pilots.get(command.craft_id, ""))
+	var pilot = _resolve_unit(pilot_id) if not pilot_id.is_empty() else null
+	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id") or not pilot.has_method("get_character_profile_bundle"): return {"ok":false, "reason":"pilot_not_aboard"}
+	var target = _resolve_unit(command.target_unit_id)
+	var target_grid: Variant = _hex_ground_runtime.get_unit_grid(command.target_unit_id)
+	if not is_instance_valid(target) or typeof(target_grid) != TYPE_VECTOR2I or not target.has_method("get_team_id") or not target.has_method("get_health") or int(target.call("get_health")) <= 0: return {"ok":false, "reason":"target_unavailable"}
+	var team := String(pilot.call("get_team_id"))
+	if team.is_empty() or String(target.call("get_team_id")) == team: return {"ok":false, "reason":"not_hostile"}
+	var driver: Node = get_parent().get_node_or_null("CombatLoopDriver") if get_parent() != null else null
+	if driver == null or not driver.has_method("get_multiplayer_visible_unit_ids") or not driver.call("get_multiplayer_visible_unit_ids", team).has(command.target_unit_id): return {"ok":false, "reason":"target_not_visible"}
+	var systems: Dictionary = binding.combat.get_ship_systems(command.craft_id)
+	var installed: Dictionary = binding.equipment.get_space_combat_stats(command.craft_id)
+	if systems.is_empty() or not installed.get("ok", false) or float(systems.state.hull) <= 0.0: return {"ok":false, "reason":"systems_unavailable"}
+	var previous: Dictionary = systems.stats.duplicate(true); var current := installed.duplicate(true)
+	previous.erase("equipment_revision"); current.erase("equipment_revision")
+	if previous != current: return {"ok":false, "reason":"systems_refit_required"}
+	var weapon := {}
+	for entry: Dictionary in systems.stats.weapons:
+		if entry.get("slot_id") == command.weapon_slot: weapon = entry; break
+	if weapon.is_empty() or float(systems.cooldowns.get(command.weapon_slot, 0.0)) > 0.0 or not SPACE_COMPONENT_SYSTEMS.consume_weapon(systems.stats, systems.state, 1.0).get("ok", false): return {"ok":false, "reason":"weapon_unavailable"}
+	var delta: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(target_grid)) - pose.position_plane
+	if delta.length_squared() <= 0.000001 or delta.length() > float(weapon.range): return {"ok":false, "reason":"out_of_range"}
+	if absf(wrapf(delta.angle() - float(pose.heading_rad), -PI, PI)) > deg_to_rad(float(weapon.arc_degrees) * 0.5): return {"ok":false, "reason":"outside_fire_arc"}
+	var skill_key := "dropship_piloting" if installed.get("model_id") == "cutlass" else ("fighter_piloting" if installed.get("model_id") == "buccaneer" else "")
+	var profile: Variant = pilot.call("get_character_profile_bundle")
+	if skill_key.is_empty() or typeof(profile) != TYPE_DICTIONARY or typeof(profile.get("platform_values")) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_skill_unavailable"}
+	var skill: Variant = profile.platform_values.get(skill_key)
+	if typeof(skill) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(skill)) or float(skill) < 0.0 or float(skill) > 1.0: return {"ok":false, "reason":"pilot_skill_unavailable"}
+	var spread: Dictionary = AIR_GROUND_DISPERSION.preview(target_grid, float(skill))
+	return {"ok":true, "craft_id":command.craft_id, "target_unit_id":command.target_unit_id, "weapon_slot":command.weapon_slot, "pilot_id":pilot_id, "team_id":team, "aim_hex":target_grid, "radius":spread.radius}
+
+func request_air_support_ground_fire(command: Dictionary) -> Dictionary:
+	# A command contains identities only. All authority, visibility, weapon
+	# values and seeded deviation are rebuilt from owners on the host.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if command.size() != 4 or typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).strip_edges().is_empty() or String(command.request_id).length() > 128: return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.request_id
+	var signature := var_to_str(command)
+	if _air_ground_fire_receipts.has(id):
+		var prior: Dictionary = _air_ground_fire_receipts[id]
+		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
+		var replay: Dictionary = prior.result.duplicate(true); replay["replayed"] = true; return replay
+	if _air_ground_fire_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var request := command.duplicate(true); request.erase("request_id")
+	var checked: Dictionary = preview_air_support_ground_fire(request)
+	if not checked.get("ok", false): return checked
+	var binding: Dictionary = _resolve_air_support_craft(checked.craft_id)
+	if not binding.get("ok", false): return binding
+	var systems: Dictionary = binding.combat.get_ship_systems(checked.craft_id)
+	var weapon := {}
+	for entry: Dictionary in systems.stats.weapons:
+		if entry.slot_id == checked.weapon_slot: weapon = entry; break
+	if weapon.is_empty() or typeof(weapon.get("damage")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.damage)) or float(weapon.damage) <= 0.0 or float(weapon.damage) != floorf(float(weapon.damage)): return {"ok":false, "reason":"weapon_unavailable"}
+	var pilot = _resolve_unit(checked.pilot_id)
+	var equipment: Dictionary = binding.equipment.get_snapshot(checked.craft_id)
+	var key := "dropship_piloting" if equipment.get("model_id") == "cutlass" else "fighter_piloting"
+	var skill: float = float(Dictionary(pilot.call("get_character_profile_bundle")).platform_values[key])
+	var next_seed := (_air_ground_rng_state * 1103515245 + 12345) & 0x7fffffff
+	var scatter: Dictionary = AIR_GROUND_DISPERSION.resolve(checked.aim_hex, skill, next_seed)
+	if not scatter.get("ok", false): return scatter
+	var impact_id := "air-fire-impact:" + id
+	var weapon_id := "air-fire-weapon:" + id
+	var ship_receipts: Dictionary = binding.combat.get("_ship_impact_receipts")
+	if _air_ground_impact_receipts.has(impact_id) or ship_receipts.has(weapon_id): return {"ok":false, "reason":"event_id_conflict"}
+	if _air_ground_impact_receipts.size() >= 4096 or ship_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var occupant: String = _hex_ground_runtime.get_occupant_at(scatter.impact_hex)
+	if not occupant.is_empty():
+		var target = _resolve_unit(occupant)
+		if not is_instance_valid(target) or not target.has_method("apply_damage") or _hex_ground_runtime.get_unit_grid(occupant) != scatter.impact_hex: return {"ok":false, "reason":"ground_actor_unavailable"}
+	var ship_event := {"id":weapon_id, "shooter_id":checked.craft_id, "weapon_slot":checked.weapon_slot, "hit_craft_id":"", "damage":0.0}
+	var spent: Dictionary = binding.combat._commit_ship_impact(ship_event)
+	if not spent.get("ok", false): return spent
+	var plane: Vector2 = binding.flight.get_snapshot().position_plane
+	var axial: Vector2 = SPACE_GRID.HEX.plane_to_axial(plane)
+	var ground_origin: Vector2 = _hex_ground_registry.call("grid_to_world", Vector2i.ZERO)
+	var q_axis: Vector2 = Vector2(_hex_ground_registry.call("grid_to_world", Vector2i(1, 0))) - ground_origin
+	var r_axis: Vector2 = Vector2(_hex_ground_registry.call("grid_to_world", Vector2i(0, 1))) - ground_origin
+	var visual := {"event_id":id, "craft_id":checked.craft_id, "weapon_slot":checked.weapon_slot, "origin_plane":plane, "impact_hex":scatter.impact_hex, "attacker_position":ground_origin + q_axis * axial.x + r_axis * axial.y, "target_position":_hex_ground_registry.call("grid_to_world", scatter.impact_hex), "aim_position":_hex_ground_registry.call("grid_to_world", checked.aim_hex), "tick":tick_counter}
+	var result := {"ok":true, "replayed":false, "event":visual.duplicate(true)}
+	# Store before ground damage emits signals so re-entry cannot shoot twice.
+	_air_ground_fire_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	_air_ground_rng_state = next_seed
+	var applied: Dictionary = _commit_air_ground_impact({"event_id":impact_id, "impact_hex":scatter.impact_hex, "pilot_id":checked.pilot_id, "team_id":checked.team_id, "damage":int(weapon.damage)})
+	assert(applied.get("ok", false))
+	air_support_ground_fired.emit(visual.duplicate(true))
+	return result
+
 func request_base_personnel_command(operation: String, payload: Dictionary) -> Dictionary:
 	if not is_instance_valid(_base_personnel_owner):
 		return {"ok":false,"reason":"base_personnel_unavailable"}
@@ -2351,6 +2460,7 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 	singleplayer_command_committed.emit(command.duplicate(true), result.duplicate(true))
 	return result
 signal damage_effect_resolved(result: Dictionary)
+signal air_support_ground_fired(event: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal dropship_command_committed(command: Dictionary)
 signal commander_intent_committed(command: Dictionary)
@@ -2525,6 +2635,8 @@ var _last_damage_effect_resolution: Dictionary = {}
 var _hex_ground_runtime = HEX_GROUND_RUNTIME_SCRIPT.new()
 var _air_ground_impact_receipts: Dictionary = {}
 var _piloted_air_ground_receipts: Dictionary = {}
+var _air_ground_fire_receipts: Dictionary = {}
+var _air_ground_rng_state := 1
 var _hex_ground_registry: Node
 var _hex_ground_enabled := false
 var _hex_ground_context_revision := 0
@@ -2609,6 +2721,8 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 func _clear_hex_movement_context() -> void:
 	_air_ground_impact_receipts.clear()
 	_piloted_air_ground_receipts.clear()
+	_air_ground_fire_receipts.clear()
+	_air_ground_rng_state = 1
 	for id in _hex_ground_runtime.get_unit_ids():_clear_hex_actor_metadata(String(id))
 	_hex_movement_runtime.clear()
 	_hex_visual_unit_ids.clear()

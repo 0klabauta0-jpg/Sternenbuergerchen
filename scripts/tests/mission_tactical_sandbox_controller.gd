@@ -2312,6 +2312,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var simulation_root := get_node_or_null("../SimulationRoot")
 	if simulation_root == null:
 		return
+	var air_fire_callable := Callable(self, "_on_air_support_ground_fired")
+	if simulation_root.has_signal("air_support_ground_fired") and not simulation_root.is_connected("air_support_ground_fired", air_fire_callable):
+		simulation_root.connect("air_support_ground_fired", air_fire_callable)
 	var committed_callable := Callable(self, "_on_authoritative_fire_rule_committed")
 	if simulation_root.has_signal("fire_rule_committed") and not simulation_root.is_connected("fire_rule_committed", committed_callable):
 		simulation_root.connect("fire_rule_committed", committed_callable)
@@ -2327,6 +2330,12 @@ func _connect_fire_rule_authority_signals() -> void:
 	var result_callable := Callable(self, "_on_network_command_result_received")
 	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
 		simulation_root.connect("network_command_result_received", result_callable)
+
+
+func _on_air_support_ground_fired(event: Dictionary) -> void:
+	var view: Node = _get_primary_3d_view()
+	if is_instance_valid(view) and view.has_method("show_air_support_laser"):
+		view.call("show_air_support_laser", event)
 
 
 func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:

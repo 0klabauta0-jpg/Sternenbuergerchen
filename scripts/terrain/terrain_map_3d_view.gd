@@ -883,6 +883,7 @@ var _selection_root: Node3D = null
 var _unit_root: Node3D = null
 var _order_root: Node3D = null
 var _weapon_fire_feedback_root: Node3D = null
+var _air_support_laser_root: Node3D = null
 var _contact_root: Node3D = null
 var _contact_density_root: Node3D = null
 var _drop_root: Node3D = null
@@ -16145,6 +16146,25 @@ func _world_to_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
 
 func _world_to_surface_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
 	return _world_to_3d_position(world_position, _get_world_surface_y(world_position) + y_offset)
+
+func show_air_support_laser(event: Dictionary) -> bool:
+	# Presentation only: Root emits this after a committed, visible shot.
+	var source: Variant = event.get("attacker_position")
+	var target: Variant = event.get("target_position")
+	var aim: Variant = event.get("aim_position")
+	if not is_inside_tree() or not is_instance_valid(_world_root) or typeof(source) != TYPE_VECTOR2 or typeof(target) != TYPE_VECTOR2 or typeof(aim) != TYPE_VECTOR2 or not source.is_finite() or not target.is_finite() or not aim.is_finite(): return false
+	if not _fow_is_world_position_currently_visible(source) and not _fow_is_world_position_currently_visible(aim): return false
+	if not is_instance_valid(_air_support_laser_root) or _air_support_laser_root.get_parent() != _world_root:
+		_air_support_laser_root = Node3D.new(); _air_support_laser_root.name = "AirSupportLasers"; _world_root.add_child(_air_support_laser_root)
+	if _air_support_laser_root.get_child_count() >= 32: return false
+	var laser := Node3D.new(); _air_support_laser_root.add_child(laser)
+	var start := _world_to_surface_3d_position(source, 5.0)
+	var finish := _world_to_surface_3d_position(target, 0.35)
+	_add_wide_line3d(laser, start, finish, Color(1.0, 0.12, 0.05, 0.45), "Glow", 0.18)
+	_add_wide_line3d(laser, start, finish, Color(1.0, 0.75, 0.45, 1.0), "Core", 0.055)
+	get_tree().create_timer(0.18).timeout.connect(Callable(laser, "queue_free"), CONNECT_ONE_SHOT)
+	_request_viewport_redraw(true, 250)
+	return true
 
 func play_polisa_cargo_lift(craft_id: String, world_position: Vector2) -> bool:
 	# Presentation only: caller supplies the real parked ship position after a

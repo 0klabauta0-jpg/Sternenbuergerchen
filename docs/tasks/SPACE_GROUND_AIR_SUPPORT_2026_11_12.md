@@ -74,6 +74,21 @@ prüft Identität, Ortswechsel, Pilotensperre, Treffer und Replay. Das Nachschla
 allein startet keinen Atmosphärenflug und erteilt keinen Spieler-Feuerbefehl;
 die entsprechenden Aufträge, Sicht-/Waffenfreigaben und Darstellung sind offen.
 
+Fortschreibung: Für ein bereits im gemeinsamen Owner als atmosphärisch
+fliegend registriertes Schiff bietet der Missions-Root eine tatsächliche
+Einzelschussoperation. Sie prüft den eigenen Rottenangriff, lebenden und
+eingebordeten Piloten, ein aktuell durch den Kampfowner sichtbares feindliches
+Hexziel, Ausrüstungsstand, Energie, Feuerrate, Reichweite und Waffenwinkel.
+Danach verbraucht der Schiffskampfowner Waffenenergie, die Pilotenstreuung
+bestimmt die Einschlagzelle und der Bodenowner erhält gegebenenfalls Schaden.
+Replays verursachen weder weiteren Verbrauch noch weitere Treffer. Ein
+bestätigtes Ereignis wird an die 3D-Ansicht weitergeleitet, die einen kurzen,
+begrenzt gehaltenen Laser unter Beachtung der Sichtbarkeit darstellt. Die
+Adapteroperation ist vorhanden; ein Spielerbutton und das Erteilen des
+Rottenauftrags auf der Bodenkarte fehlen weiterhin. Der Testflug wird direkt
+im Owner vorbereitet und belegt keinen echten Start, keine Manöver und keine
+visuelle Nutzerabnahme.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

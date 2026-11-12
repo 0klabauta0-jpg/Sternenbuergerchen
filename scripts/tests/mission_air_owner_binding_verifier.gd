@@ -8,6 +8,7 @@ const TERRAIN = preload("res://scripts/terrain/terrain_registry.gd")
 const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const DISPERSION = preload("res://scripts/mission/air_support_dispersion.gd")
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 class Flow extends Node:
 	var _active_mission: Node
 	var _craft_location_runtime := {"ship":"moon_site"}
@@ -16,11 +17,16 @@ class Flow extends Node:
 class Person extends Node2D:
 	var unit_id := ""
 	var health := 100
+	var team := "blue"
 	func get_unit_id() -> String: return unit_id
-	func get_team_id() -> String: return "blue"
+	func get_team_id() -> String: return team
 	func get_health() -> int: return health
 	func get_character_profile_bundle() -> Dictionary: return {"platform_values":{"dropship_piloting":1.0}}
 	func apply_damage(amount: int, _context: Dictionary = {}) -> bool: health -= amount; return true
+class Vision extends Node:
+	var visible := true
+	func get_multiplayer_visible_unit_ids(_team: String) -> PackedStringArray:
+		return PackedStringArray(["enemy"]) if visible else PackedStringArray()
 
 func _initialize() -> void:
 	var flow = Flow.new(); root.add_child(flow)
@@ -56,6 +62,55 @@ func _initialize() -> void:
 	assert(hit.ok and hit.unit_id == "target" and target.health < 100)
 	var after: int = target.health
 	assert(mission_root._commit_piloted_air_ground_impact(event).replayed and target.health == after)
+	terrain.register_tile(TILE.new({"tile_id":"enemy", "grid_position":Vector2i(3,0), "explicit_hex_ramps":true}))
+	var enemy = Person.new(); enemy.unit_id = "enemy"; enemy.team = "red"; mission.add_child(enemy); units.register_unit("enemy", enemy); mission_root.register_known_unit("enemy", enemy)
+	var enemy_placements: Array[Dictionary] = [{"unit_id":"enemy", "grid":Vector2i(3,0)}]; assert(mission_root.admit_hex_ground_units(enemy_placements).ok)
+	var vision = Vision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
+	var grounded_fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
+	assert(mission_root.preview_air_support_ground_fire(grounded_fire).reason == "aircraft_not_flying")
+	var flight: RefCounted = fleet.get_flight_state("ship")
+	var proposal := {"expected_revision":flight.get_snapshot().revision, "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site", "position_plane":GRID.HEX.axial_to_plane(Vector2.ZERO), "motion_mode":"tactical", "heading_rad":0.0, "assist_mode":"coupled"}
+	var transition: Dictionary = flight.validate_area_transition(proposal, 1)
+	var combat: RefCounted = source.get("_space_combat_state")
+	var admission: Dictionary = combat.validate_new_local_admission({"craft_id":"ship", "faction_id":"player", "control_domain":"player", "footprint_hexes":[Vector2i.ZERO]}, flight, proposal, 1)
+	assert(transition.ok and admission.ok); flight._publish_area_transition(transition); combat._publish_new_local_admission(admission)
+	var stats: Dictionary = equipment.get_space_combat_stats("ship"); assert(combat.bind_ship_systems("ship", stats, stats.hull_capacity).ok)
+	var fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
+	assert(mission_root.preview_air_support_ground_fire(fire).reason == "attack_order_required")
+	var wings: RefCounted = source.get("_space_wing_state"); var wing_id: String = wings.get_craft_wing("ship", "singleplayer")
+	var order := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-order", "expected_revision":wings.get_snapshot().revision, "payload":{"wing_ids":[wing_id], "verb":"attack_target", "target_id":"enemy", "fire_rule":"free"}}
+	assert(wings.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":["enemy"], "coordinate_frame":"local", "space_area_id":"atmosphere:moon_site"}).ok)
+	var snapshot_before: Dictionary = combat.get_ship_systems("ship")
+	assert(mission_root.preview_air_support_ground_fire(fire).ok and combat.get_ship_systems("ship") == snapshot_before)
+	pilot.set_meta("dropship_embarked", false); assert(mission_root.preview_air_support_ground_fire(fire).reason == "pilot_not_aboard"); pilot.set_meta("dropship_embarked", true)
+	vision.visible = false; assert(mission_root.preview_air_support_ground_fire(fire).reason == "target_not_visible"); vision.visible = true
+	var wrong_slot := fire.duplicate(); wrong_slot.weapon_slot = "invalid"
+	assert(mission_root.preview_air_support_ground_fire(wrong_slot).reason == "weapon_unavailable")
+	combat.get("_ship_systems").ship.cooldowns.weapon_1 = 1.0
+	assert(mission_root.preview_air_support_ground_fire(fire).reason == "weapon_unavailable")
+	combat.get("_ship_systems").ship.cooldowns.weapon_1 = 0.0
+	enemy.team = "blue"; assert(mission_root.preview_air_support_ground_fire(fire).reason == "not_hostile"); enemy.team = "red"
+	var fire_seed := -1
+	for candidate in range(100):
+		var next_seed: int = (candidate * 1103515245 + 12345) & 0x7fffffff
+		if DISPERSION.resolve(Vector2i(3,0), 1.0, next_seed).impact_hex == Vector2i(3,0): fire_seed = candidate; break
+	assert(fire_seed >= 0); mission_root.set("_air_ground_rng_state", fire_seed)
+	var events: Array = []; mission_root.air_support_ground_fired.connect(func(value: Dictionary): events.append(value))
+	var shot := fire.duplicate(); shot.request_id = "air-shot-1"
+	var energy_before: float = combat.get_ship_systems("ship").state.weapon_energy
+	vision.visible = false
+	assert(adapter.request_operation("air_support_ground_fire", shot).reason == "target_not_visible" and enemy.health == 100 and combat.get_ship_systems("ship").state.weapon_energy == energy_before and events.is_empty())
+	vision.visible = true
+	var shot_result: Dictionary = adapter.request_operation("air_support_ground_fire", shot)
+	assert(shot_result.ok and enemy.health < 100 and combat.get_ship_systems("ship").state.weapon_energy == energy_before - 1.0 and events.size() == 1)
+	assert(events[0].attacker_position is Vector2 and events[0].target_position is Vector2 and events[0].aim_position is Vector2)
+	var enemy_after: int = enemy.health
+	assert(adapter.request_operation("air_support_ground_fire", shot).replayed and enemy.health == enemy_after and events.size() == 1)
+	var conflict := shot.duplicate(); conflict.weapon_slot = "weapon_2"
+	assert(adapter.request_operation("air_support_ground_fire", conflict).reason == "request_id_conflict")
+	combat.get("_ship_systems").ship.cooldowns.weapon_1 = 0.0
+	assert(flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "heading_rad":PI}, 2).ok)
+	assert(mission_root.preview_air_support_ground_fire(fire).reason == "outside_fire_arc")
 	flow._assigned_aircraft_pilot_by_craft.ship = "other_pilot"
 	var wrong_pilot := event.duplicate(); wrong_pilot.event_id = "shared-2"
 	assert(mission_root._commit_piloted_air_ground_impact(wrong_pilot).reason == "pilot_not_aboard" and target.health == after)
