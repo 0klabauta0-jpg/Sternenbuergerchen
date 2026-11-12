@@ -13378,7 +13378,7 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	row.name = "AirSupportCardRow"
 	row.columns = 3
 	host.add_child(row)
-	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"]]:
+	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
 
 
@@ -13394,6 +13394,11 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 		"start": result = simulation.request_air_support_takeoff(craft_id)
 		"land": result = simulation.request_air_support_landing(craft_id)
 		"cease": result = simulation.request_air_support_cease_fire(craft_id, "ui-air-stop:%d" % Time.get_ticks_usec())
+		"radar":
+			result = simulation.get_air_support_radar_contacts(craft_id)
+			if result.get("ok", false):
+				var contacts: Array = result.get("contacts", [])
+				result["message"] = "Luftradar: keine Kontakte" if contacts.is_empty() else "Luftradar: %d Kontakt(e)" % contacts.size()
 		"move":
 			if _has_selected_tile: result = simulation.request_air_support_move({"craft_id":craft_id, "target_hex":_selected_tile_grid_position, "request_id":"ui-air-move:%d" % Time.get_ticks_usec()})
 			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
@@ -13403,7 +13408,7 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 			else:
 				var token := "ui-air-fire:%d" % Time.get_ticks_usec()
 				result = simulation.request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":target, "request_id":token + ":order"})
-	_last_command_text = "Schiffbefehl ausgeführt" if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
+	_last_command_text = String(result.get("message", "Schiffbefehl ausgeführt")) if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
 	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
 

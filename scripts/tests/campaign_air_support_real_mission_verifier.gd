@@ -51,6 +51,10 @@ func _run() -> void:
 	_check(airborne, "actual dropship card starts the fleet flight")
 	print("AIR_PROBE_START airborne=", airborne, " feedback=", controller.get("_last_command_text"), " before=", before)
 	if not airborne: await _finish(); return
+	var radar_button: Button = _air_button(mission, "air_radar")
+	if not _check(radar_button != null and radar_button.is_visible_in_tree() and not radar_button.disabled, "actual air radar control available"): await _finish(); return
+	radar_button.pressed.emit()
+	_check(String(controller.get("_last_command_text")) == "Luftradar: keine Kontakte", "air radar reports no aircraft in the regular mission")
 	var flight: RefCounted = _runtime.get("_travel").get_flight_state(_craft_id)
 	var origin: Vector2 = flight.get_snapshot().position_plane
 	var terrain: Node = controller.call("_get_terrain_registry")
