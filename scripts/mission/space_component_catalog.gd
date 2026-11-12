@@ -70,7 +70,7 @@ static func effective_stats(model_id: String, slots: Dictionary) -> Dictionary:
 	var weapon_allocation := minf(available, weapon_demand)
 	var shield_allocation := minf(maxf(0.0, available - weapon_allocation), shield_demand)
 	# Reserve values are provisional game balance, not claims about any ship.
-	return {"ok":true, "model_id":model_id, "mass":mass, "weapons":weapons, "shield":shield, "weapon_reserve":{"capacity":20.0, "recharge_rate":4.0}, "power":{"output":output, "flight_fraction":flight_allocation / float(model.flight_demand), "weapon_fraction":weapon_allocation / weapon_demand if weapon_demand > 0.0 else 0.0, "shield_fraction":shield_allocation / shield_demand if shield_demand > 0.0 else 0.0}}
+	return {"ok":true, "model_id":model_id, "mass":mass, "hull_capacity":100.0, "weapons":weapons, "shield":shield, "weapon_reserve":{"capacity":20.0, "recharge_rate":4.0}, "power":{"output":output, "flight_fraction":flight_allocation / float(model.flight_demand), "weapon_fraction":weapon_allocation / weapon_demand if weapon_demand > 0.0 else 0.0, "shield_fraction":shield_allocation / shield_demand if shield_demand > 0.0 else 0.0}}
 
 static func flight_inputs(model_id: String, slots: Dictionary) -> Dictionary:
 	# Projection only; the equipment owner must select installed IDs and bind

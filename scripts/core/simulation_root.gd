@@ -657,6 +657,14 @@ func admit_space_actor(definition: Dictionary, authority_context: Dictionary) ->
 func get_space_actor(craft_id: String) -> RefCounted:
 	return _space_combat_state.get_actor(craft_id)
 
+func _bind_owned_space_systems(craft_id: String) -> Dictionary:
+	# The actual equipment owner, not a command payload, supplies combat data.
+	if _ship_equipment_owner == null or _singleplayer_space_travel_owner == null or _space_combat_state.get_actor(craft_id) == null or _space_combat_state.get_actor(craft_id) != _singleplayer_space_travel_owner.get_flight_state(craft_id):
+		return {"ok":false, "reason":"equipment_owner_unavailable"}
+	var stats: Dictionary = _ship_equipment_owner.get_space_combat_stats(craft_id)
+	if not stats.get("ok", false): return stats
+	return _space_combat_state.ensure_ship_systems(craft_id, stats)
+
 func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 	return _space_combat_state.query_cells(cells)
 
@@ -829,6 +837,7 @@ func commit_station_purchase_local_admission(adapter: Node, craft_id: String) ->
 	var fuel_result: Dictionary = _singleplayer_supply_owner._publish_prepared_route_fuel(fuel_candidate, sv)
 	flight._publish_area_transition(movement)
 	_space_combat_state._publish_new_local_admission(admission)
+	_bind_owned_space_systems(craft_id)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
 	var result := {"ok":true,"replayed":false,"receipt_id":id,"travel_result":travel_result}
 	var command := {"contract_category":"singleplayer_space_travel","operation":"depart_station_purchase","payload":payload,"request_id":id}
@@ -1111,6 +1120,7 @@ func advance_singleplayer_warp_entry(adapter: Node, craft_id: String, delta: flo
 		return committed_wing
 	flight._publish_area_transition(movement)
 	_space_combat_state._publish_new_local_admission(admission)
+	_bind_owned_space_systems(craft_id)
 	var arrival: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
 	_warp_entry_searches.erase(craft_id)
 	_warp_completion_intents.erase(craft_id)
@@ -1357,7 +1367,10 @@ func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
 		if wing_id.is_empty(): continue
 		var pose: Dictionary = flight.get_snapshot()
 		if pose.get("space_area_id") != area_id or pose.get("motion_mode") != "tactical": continue
-		actors.append({"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)})
+		var entry := {"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)}
+		var systems: Dictionary = _space_combat_state.get_ship_systems(craft_id)
+		if not systems.is_empty(): entry["systems"] = systems.state.duplicate(true)
+		actors.append(entry)
 	return {"ok":true, "space_area_id":area_id, "area_revision":_space_combat_state.get_area_revision(area_id), "actors":actors, "dock_targets":SPACE_AREA_GRID.dock_targets(area_id)}
 
 func preview_station_dock(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary, require_dock_gate: bool = true) -> Dictionary:
@@ -1655,6 +1668,7 @@ func set_space_fixture_goal(craft_id: String, goal: Dictionary, hull: Dictionary
 	return {"ok":true}
 
 func _advance_space_flights(delta: float, tick: int) -> void:
+	_space_combat_state.advance_ship_systems(delta)
 	var controls: Dictionary = _space_combat_state.get_flight_controls()
 	var ids: Array = controls.keys()
 	ids.sort()

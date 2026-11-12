@@ -44,6 +44,10 @@ func _initialize() -> void:
 	pilot.aboard = true
 	assert(_arrive(sim, adapter))
 	var flight = fleet.get_flight_state("ship")
+	var systems: Dictionary = sim.get("_space_combat_state").get_ship_systems("ship")
+	assert(not systems.is_empty() and systems.state.shield == equipment.get_space_combat_stats("ship").shield.capacity)
+	# Fixture injury: verify an actual warp transition cannot silently repair it.
+	sim.get("_space_combat_state").get("_ship_systems").ship.state.hull = 77.0
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().motion_mode == "tactical" and flight.get_snapshot().space_area_id == "orbit_approach:planet")
 	var wing: String = sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer")
 	assert(not wing.is_empty())
@@ -59,6 +63,7 @@ func _initialize() -> void:
 	sim.tick_counter = flight.get_snapshot().tick
 	assert(_arrive(sim, adapter))
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().space_area_id == "orbit_approach:moon" and flight.get_snapshot().motion_mode == "tactical")
+	assert(sim.get("_space_combat_state").get_ship_systems("ship").state.hull == 77.0)
 	assert(is_zero_approx(flight.get_snapshot().heading_rad))
 	for cell: Vector2i in sim.get("_space_combat_state").get_indexed_actor_cells("ship"): assert(LAYOUT.ENTRY_BAND.has_point(GRID.to_offset(cell)))
 	assert(sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer") == wing)

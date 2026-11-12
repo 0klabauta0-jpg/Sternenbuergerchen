@@ -29,6 +29,16 @@ func bind_ship_systems(craft_id: String, stats: Dictionary, hull_capacity: float
 func get_ship_systems(craft_id: String) -> Dictionary:
 	return Dictionary(_ship_systems.get(craft_id, {})).duplicate(true)
 
+func ensure_ship_systems(craft_id: String, stats: Dictionary) -> Dictionary:
+	if not _metadata.has(craft_id): return {"ok":false, "reason":"unknown_actor"}
+	if not _ship_systems.has(craft_id): return bind_ship_systems(craft_id, stats, float(stats.get("hull_capacity", 0.0)))
+	var existing: Dictionary = _ship_systems[craft_id].stats.duplicate(true)
+	var incoming := stats.duplicate(true)
+	# Warp-slot revisions do not alter combat hardware; retain shield/hull on
+	# orbit transitions. A changed combat configuration needs explicit refit.
+	existing.erase("equipment_revision"); incoming.erase("equipment_revision")
+	return {"ok":true} if existing == incoming else {"ok":false, "reason":"systems_refit_required"}
+
 func _commit_ship_impact(event: Dictionary) -> Dictionary:
 	# Private owner tail for a Root-resolved shot; never pass a client event here.
 	var id: Variant = event.get("id")
@@ -190,7 +200,6 @@ func _publish_local_departure(validation: Dictionary) -> void:
 	_indexed_revisions.erase(craft_id)
 	_flight_controls.erase(craft_id)
 	_flight_status.erase(craft_id)
-	_ship_systems.erase(craft_id)
 
 func _publish_deactivation(validation: Dictionary) -> void:
 	# Root-private synchronous tail after fresh validation of every participant.
@@ -266,6 +275,7 @@ func remove_actor(craft_id: String) -> bool:
 	_indexed_revisions.erase(craft_id)
 	_flight_controls.erase(craft_id)
 	_flight_status.erase(craft_id)
+	_ship_systems.erase(craft_id)
 	return true
 
 func query_cells(cells: Array[Vector2i], area_id: String = "") -> Array[String]:

@@ -143,8 +143,16 @@ aufgelöste Ereignisse erhalten. Ein isolierter Ownerlauf verbindet den
 Schussvorschlag mit einem freundlichen Abfangziel und prüft Schild, Hülle,
 Waffenenergie, Feuerrate, Replay, Konflikt und Regeneration.
 
-Der Root initialisiert diese Systeme noch nicht produktiv, steuert ihren Tick
-nicht und leitet keine autoritativen Feuerbefehle oder Treffer weiter. Kontakt-
-sicht, Waffentakt, Energieverbrauch, Tod, Save-Lifecycle, Multiplayer und UI
-sind weiterhin offen. Diese Vorstufe ist kein spielbarer Raum- oder Luftkampf;
-die Produktsperre für neue Komponenten bleibt bestehen.
+Der Root bindet beim Eintritt eigener Schiffe in den lokalen Orbit inzwischen
+die Werte des Equipment-Owners und taktet deren Systeme mit dem Raumflug. Die
+eigene Bereichsprojektion enthält den Zustand; bestehender Hüllenschaden bleibt
+bei einem Orbitwechsel erhalten. Der Root leitet noch keine autoritativen
+Feuerbefehle oder Treffer weiter. Kontaktsicht, Waffentakt im Produkt, Tod,
+Save-Lifecycle, Multiplayer und UI sind weiterhin offen. Diese Vorstufe ist
+kein spielbarer Raum- oder Luftkampf; die Produktsperre bleibt bestehen.
+
+Gebündelte Prüfung auf dem Folgebranch: lokaler Warpzyklus einschließlich
+Ownerbindung und Hüllenerhalt, Schild-/Schussowner, Zielresolver,
+Bereichsregistry 15/15 und Komponenteneinbau jeweils Exit 0. Der Warpzyklus
+verwendet eine Fixture und setzt den Schaden für die Übergangsprüfung gezielt.
+Der lokale Orbitweg bleibt im Produktflag ausgeschaltet.
