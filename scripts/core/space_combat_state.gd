@@ -474,3 +474,152 @@ func set_flight_status(craft_id: String, status: Dictionary) -> void:
 
 func get_flight_status(craft_id: String) -> Dictionary:
 	return Dictionary(_flight_status.get(craft_id, {})).duplicate(true)
+
+
+# Snapshot preparation is detached. Only the world transaction may publish it.
+const NAVIGATION_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+const NAVIGATION_GUIDANCE = preload("res://scripts/tactical/space_guidance_resolver.gd")
+const NAVIGATION_FLIGHT = preload("res://scripts/tactical/space_flight_resolver.gd")
+
+func export_navigation_checkpoint() -> Dictionary:
+	var index: Dictionary = _registry.export_checkpoint_index()
+	if index.get("schema") != "space_registry_checkpoint.v1": return _navigation_bad()
+	var poses := {}
+	for id in _metadata:
+		var actor: RefCounted = _registry.get_actor(id)
+		if actor == null: actor = _inactive_actors.get(id)
+		if actor == null: return _navigation_bad()
+		poses[id] = actor.get_snapshot()
+		if not _inactive_actors.has(id) and (int(_indexed_revisions.get(id, -1)) != int(poses[id].revision) or not _registry.actor_cells_match(id, poses[id].space_area_id, preview_footprint(poses[id], _metadata[id].footprint_hexes))): return _navigation_bad()
+	var controls := _flight_controls.duplicate(true)
+	for id in controls:
+		var control: Dictionary = controls[id]
+		if control.has("mission_root"):
+			if control.get("air_support_move") != true or not control.mission_root is WeakRef or not is_instance_valid(control.mission_root.get_ref()): return _navigation_bad()
+			control.erase("mission_root")
+		if control.has("equipment_owner_id"):
+			if control.get("singleplayer_move") != true or typeof(control.equipment_owner_id) != TYPE_INT or control.equipment_owner_id == 0: return _navigation_bad()
+			control.erase("equipment_owner_id")
+	var claims := {}
+	for id in _navigation_claims:
+		claims[id] = {"area_id":_navigation_claims[id].area_id, "cells":_navigation_claims[id].cells.keys()}
+	var inactive: Array = _inactive_actors.keys()
+	inactive.sort()
+	var encoded := NAVIGATION_CODEC.encode_value({"metadata":_metadata, "indexed_revisions":_indexed_revisions, "flight_snapshots":poses, "controls":controls, "status":_flight_status, "claims":claims, "claim_revisions":_claim_revisions, "inactive":inactive})
+	if not encoded.ok: return _navigation_bad()
+	return {"schema":"space_navigation_checkpoint.v1", "registry":index, "payload":encoded.value}
+
+
+static func prepare_navigation_checkpoint_candidate(state: Dictionary, flights: Dictionary, control_bindings: Dictionary = {}) -> Dictionary:
+	if state.size() != 3 or not state.has_all(["schema", "registry", "payload"]) or state.schema != "space_navigation_checkpoint.v1" or not state.registry is Dictionary or flights.size() > 4096: return _navigation_bad()
+	var decoded := NAVIGATION_CODEC.decode_value(state.payload)
+	if not decoded.ok or not decoded.value is Dictionary: return _navigation_bad()
+	var data: Dictionary = decoded.value
+	var maps := ["metadata", "indexed_revisions", "flight_snapshots", "controls", "status", "claims", "claim_revisions"]
+	if data.size() != 8 or not data.has_all(maps + ["inactive"]) or not data.inactive is Array: return _navigation_bad()
+	for key in maps:
+		if not data[key] is Dictionary or data[key].size() > 4096: return _navigation_bad()
+	var registry_proposal: Dictionary = REGISTRY.prepare_checkpoint_candidate(state.registry, flights)
+	if not registry_proposal.get("ok", false): return _navigation_bad()
+	var candidate: RefCounted = load("res://scripts/core/space_combat_state.gd").new()
+	candidate._registry = registry_proposal.candidate
+	var inactive := {}
+	for id in data.inactive:
+		if typeof(id) != TYPE_STRING or inactive.has(id) or not flights.has(id) or candidate._registry.get_actor(id) != null: return _navigation_bad()
+		inactive[id] = true
+	if data.metadata.size() != state.registry.actors.size() + inactive.size() or data.flight_snapshots.size() != data.metadata.size() or data.indexed_revisions.size() != state.registry.actors.size(): return _navigation_bad()
+	var owners := {}
+	for id in data.metadata:
+		if typeof(id) != TYPE_STRING or id.strip_edges().is_empty() or not flights.has(id) or not flights[id] is RefCounted or not flights[id].has_method("get_snapshot") or not data.flight_snapshots.has(id): return _navigation_bad()
+		var actor: RefCounted = flights[id]
+		var pose: Dictionary = actor.get_snapshot()
+		if owners.has(actor.get_instance_id()) or pose.get("craft_id") != id or data.flight_snapshots[id] != pose: return _navigation_bad()
+		owners[actor.get_instance_id()] = true
+		var metadata: Variant = data.metadata[id]
+		if not metadata is Dictionary or metadata.size() != 3 or not metadata.has_all(["faction_id", "control_domain", "footprint_hexes"]) or typeof(metadata.faction_id) != TYPE_STRING or metadata.faction_id.strip_edges().is_empty() or metadata.control_domain not in ["player", "neutral", "enemy"] or not metadata.footprint_hexes is Array: return _navigation_bad()
+		var cells: Array[Vector2i] = candidate.preview_footprint(pose, metadata.footprint_hexes)
+		if cells.is_empty(): return _navigation_bad()
+		if inactive.has(id):
+			if pose.get("motion_mode") != "inactive" or pose.get("coordinate_frame") != "local": return _navigation_bad()
+			candidate._inactive_actors[id] = actor
+		else:
+			if pose.get("motion_mode") == "inactive" or candidate._registry.get_actor(id) != actor or data.indexed_revisions.get(id, -1) != pose.revision or not candidate._registry.actor_cells_match(id, pose.space_area_id, cells): return _navigation_bad()
+	for area in data.claim_revisions:
+		if typeof(area) != TYPE_STRING or typeof(data.claim_revisions[area]) != TYPE_INT or data.claim_revisions[area] < 0: return _navigation_bad()
+	for id in data.claims:
+		var claim: Variant = data.claims[id]
+		var actor: RefCounted = candidate._registry.get_actor(id)
+		if actor == null or not claim is Dictionary or claim.size() != 2 or not claim.has_all(["area_id", "cells"]) or typeof(claim.area_id) != TYPE_STRING or not claim.cells is Array or claim.cells.is_empty() or claim.cells.size() > 512 or claim.area_id != actor.get_snapshot().space_area_id or int(data.claim_revisions.get(claim.area_id, 0)) <= 0: return _navigation_bad()
+		var cells: Array[Vector2i] = []
+		for cell in claim.cells:
+			if typeof(cell) != TYPE_VECTOR2I or cells.has(cell): return _navigation_bad()
+			cells.append(cell)
+		for occupant in candidate._registry.query_cells(cells, claim.area_id):
+			if occupant != id: return _navigation_bad()
+		if not candidate.query_navigation_claims(cells, claim.area_id).is_empty() or not candidate.record_navigation_claim(id, claim.area_id, cells).get("ok", false): return _navigation_bad()
+	for id in data.controls:
+		var actor: RefCounted = candidate._registry.get_actor(id)
+		if actor == null or not data.controls[id] is Dictionary: return _navigation_bad()
+		var control: Dictionary = data.controls[id].duplicate(true)
+		var pose: Dictionary = actor.get_snapshot()
+		if not _navigation_control_valid(control, pose): return _navigation_bad()
+		if control.get("singleplayer_move", false) or control.get("air_support_move", false):
+			var context: Variant = control_bindings.get(id, {})
+			if not context is Dictionary or not context.get("equipment_owner") is Object or not is_instance_valid(context.equipment_owner) or not context.equipment_owner.has_method("get_snapshot") or context.equipment_owner.get_snapshot(id) != control.equipment_snapshot or control.area_id != pose.space_area_id: return _navigation_bad()
+			if not context.equipment_owner.has_method("get_space_flight_profile"): return _navigation_bad()
+			var profile: Dictionary = context.equipment_owner.get_space_flight_profile(id)
+			if not profile.get("ok", false) or profile.hull != control.hull or profile.power != control.power or profile.footprint_hexes != data.metadata[id].footprint_hexes or not is_equal_approx(float(profile.mass), float(pose.mass)): return _navigation_bad()
+			if not data.claims.has(id): return _navigation_bad()
+			var target_cells: Array[Vector2i] = candidate.preview_footprint(pose.merged({"position_plane":control.goal.target_plane}, true), data.metadata[id].footprint_hexes)
+			if target_cells.is_empty() or target_cells.size() != data.claims[id].cells.size(): return _navigation_bad()
+			for cell in target_cells:
+				if not data.claims[id].cells.has(cell): return _navigation_bad()
+			if control.get("singleplayer_move", false): control["equipment_owner_id"] = context.equipment_owner.get_instance_id()
+			else:
+				if not context.get("mission_root") is Node or not is_instance_valid(context.mission_root) or not context.mission_root.has_method("_air_support_motion_context_valid"): return _navigation_bad()
+				control["mission_root"] = weakref(context.mission_root)
+		candidate._flight_controls[id] = control
+	for id in data.status:
+		if candidate._registry.get_actor(id) == null or not data.status[id] is Dictionary: return _navigation_bad()
+	candidate._metadata = data.metadata.duplicate(true)
+	candidate._indexed_revisions = data.indexed_revisions.duplicate(true)
+	candidate._flight_status = data.status.duplicate(true)
+	candidate._claim_revisions = data.claim_revisions.duplicate(true)
+	return {"ok":true, "candidate":candidate}
+
+
+func validate_navigation_checkpoint_candidate(state: Dictionary, control_bindings: Dictionary = {}) -> Dictionary:
+	# The world transaction calls this again immediately before its publish tail.
+	var flights := {}
+	for id in _metadata:
+		flights[id] = _registry.get_actor(id) if not _inactive_actors.has(id) else _inactive_actors[id]
+	var validated := prepare_navigation_checkpoint_candidate(state, flights, control_bindings)
+	if not validated.get("ok", false): return _navigation_bad()
+	return {"ok":true} if validated.candidate.export_navigation_checkpoint() == export_navigation_checkpoint() else _navigation_bad()
+
+
+static func _navigation_control_valid(control: Dictionary, pose: Dictionary) -> bool:
+	var allowed := ["goal", "intent", "hull", "power", "singleplayer_move", "air_support_move", "equipment_snapshot", "area_id"]
+	for key in control:
+		if not allowed.has(key): return false
+	if pose.get("motion_mode") != "tactical" or not control.get("hull") is Dictionary or not control.get("power") is Dictionary or control.has("goal") == control.has("intent"): return false
+	for key in ["singleplayer_move", "air_support_move"]:
+		if control.has(key) and typeof(control[key]) != TYPE_BOOL: return false
+	if control.get("singleplayer_move", false) and control.get("air_support_move", false): return false
+	var intent: Dictionary = {}
+	if control.has("goal"):
+		if not control.goal is Dictionary: return false
+		var guidance: Dictionary = NAVIGATION_GUIDANCE.resolve(pose, control.goal, control.hull, control.power)
+		if not guidance.get("ok", false): return false
+		intent = guidance.intent
+	else:
+		if not control.intent is Dictionary: return false
+		intent = control.intent
+	if control.get("singleplayer_move", false) or control.get("air_support_move", false):
+		if not control.has("goal") or not control.get("equipment_snapshot") is Dictionary or typeof(control.get("area_id")) != TYPE_STRING: return false
+	if control.get("air_support_move", false): intent = intent.merged({"assist_mode":"coupled"}, true)
+	return NAVIGATION_FLIGHT.step(pose, intent, control.hull, control.power, 0.0, "atmosphere" if String(pose.space_area_id).begins_with("atmosphere:") else "space").get("ok", false)
+
+
+static func _navigation_bad() -> Dictionary:
+	return {"ok":false, "reason":"invalid_navigation_checkpoint"}

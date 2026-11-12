@@ -52,3 +52,35 @@ Leaks; Report package-contract-report.json im selben QA-Verzeichnis.
 Der Erstimport überschritt bei96% das300s-Limit; Resume beendete die ausstehenden
 Assetimporte. Dieser abgebrochene Erstlauf zählt nicht als erfolgreicher Gate.
 Noch kein EXE-Export oder allgemeiner nativer Editor-/Spielnachweis.
+
+## Abgestimmter zusätzlicher Save-Baustein
+Companion hat Root explizit den Registry-/Navigations-Checkpoint übertragen:
+space_ship_registry.gd und additive Navigation-APIs in space_combat_state.gd,
+mit kleinen eigenen Verifiern. Der bereits getrennte Systems-Checkpoint bleibt
+beim Companion; Codec-Abhängigkeit wird als dessen Commit übernommen.
+Registrykandidaten binden tatsächliche restaurierte Flugowner; Pose, Footprint,
+Belegung, Revisionen und Claims müssen übereinstimmen. Vorbereitung mutiert keine
+Live-Welt. Runtimebezüge in Aufträgen werden ausdrücklich neu gebunden und bei
+fehlendem/falschem Kontext abgewiesen. Erst die globale Missionstransaktion beim
+Companion veröffentlicht den Kandidaten; dieser Teil allein schaltet kein Save frei.
+
+Registry35/0 und Navigation17/0 unter Godot4.6.2, isoliertes Profil, je60s-Limit,
+keine Script-/Parse-/Compile-/ERROR-/Leakzeilen. Logs/Report im QA-Verzeichnis.
+Unabhängiges lesendes Review: keine kritischen/wichtigen Befunde. Der danach
+ergänzte Air-Rebind-Fall bindet echte separat erzeugte SimulationRoot-Instanzen;
+er ist ein Owner-Test und kein physischer Flug-/Gesamtmissionsnachweis.
+
+APIs für den Join:
+- Registry export_checkpoint_index() und static prepare_checkpoint_candidate(state, flights).
+- Combat export_navigation_checkpoint() und static
+  prepare_navigation_checkpoint_candidate(state, flights, control_bindings = {}).
+- candidate.validate_navigation_checkpoint_candidate(state, control_bindings = {})
+  unmittelbar vor der globalen Publikation wiederholt Frische/Bindungen prüfen.
+- control_bindings pro craft enthält equipment_owner und für Luftaufträge
+  mission_root. Diese Owner müssen von der Gesamttransaktion zuvor fachlich
+  restauriert/validiert sein. Ausrüstungs-Snapshot, Masse, Hull/Power und Footprint
+  werden abgeglichen; alte Prozess-IDs/WeakRefs werden nicht deserialisiert.
+- Systems-Checkpoint bleibt separat: legitime Hardware aus restaurierter
+  Ausrüstung an Candidate binden, Systems vorbereiten/prüfen, erst im gemeinsamen
+  signal-/await-freien Veröffentlichungsteil übernehmen. Keine Live-Publikation
+  in Registry-/Navigation-Vorbereitung, kein neuer Root-/UI-State in diesem Patch.
