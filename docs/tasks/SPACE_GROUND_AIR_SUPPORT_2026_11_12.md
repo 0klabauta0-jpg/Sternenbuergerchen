@@ -141,6 +141,34 @@ Landeplatzsperre ab. Der Transport ist darin ein Testdouble; native Bedienung,
 Save/Load und der gesamte reguläre Missionseinsatz sind noch nicht belegt.
 Radar und automatischer Orbitdurchflug sind weitere offene Pakete.
 
+## Reguläre Missionsprüfung 12.11.2026
+
+Der isolierte Headless-Kampagnenlauf verwendete die tatsächlichen beiden
+Kampagnenpersonen, den regulären Basistransport, Quantumreise, Anflug,
+Kartenlandung und Boarding. Nach der Landung wurde der Kampagnen-Checkpoint
+wie vorgesehen als unterwegs abgewiesen. Der Startbefehl für die Luftunter-
+stützung wurde anschließend mit `ground_unavailable` abgewiesen: Die reguläre
+Satellitenkarte hat Hexgeometrie, aktiviert aber den separaten
+`hex_tactical_v1`-Bodenowner nicht. Der Luftpfad setzt diesen Owner derzeit
+voraus. Das ist ein reproduzierter Integrationsfehler, kein Nachweis für
+funktionierende Bedienung oder Save/Load. Die erste Testfrist von zwölf
+Sekunden reichte für die echte Ortsvorbereitung nicht; mit einer längeren
+Frist erreichte der Lauf die Mission und den oben genannten Fehler.
+
+Die vorhandene Kampagnen-Checkpointfunktion speichert nur zu Hause; der
+allgemeine Missionsslot speichert lediglich den Szenenpfad. Ein laufender
+Dropship-Einsatz lässt sich damit nicht wiederherstellen. Für eine Umsetzung
+müssen Flug-, Transport-, Boden-, Kampf- und Missionszustand gemeinsam und
+ohne zweite Wahrheit gespeichert und validiert wiederhergestellt werden.
+
+Im gleichen Lauf war nach Öffnen der realen Detailschaltfläche die Luftzeile
+zunächst nicht vorhanden: Der Passagier-Refresh entfernte sie unmittelbar
+wieder. Die Korrektur erhält diese Zeile. Der erneute reguläre Hintergrundlauf
+fand und betätigte den sichtbaren Startknopf; er scheiterte anschließend wie
+oben beschrieben an `ground_unavailable` (35 Prüfungen bestanden, eine rot).
+Die ältere Mehrschiff-UI-Prüfung meldet 59/61; dieselben zwei Fehler traten
+auch mit dem unveränderten Controller aus `531ff6b9a` auf.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

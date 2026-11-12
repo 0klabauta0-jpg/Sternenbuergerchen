@@ -13250,7 +13250,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return content_changed
 	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
 	for child in host.get_children():
-		if child.name == "MissionDropshipCardCommandRow" or child.name == "MissionDropshipCardFeedbackLabel":
+		if child.name in ["MissionDropshipCardCommandRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
 			continue
 		host.remove_child(child)
 		child.queue_free()
