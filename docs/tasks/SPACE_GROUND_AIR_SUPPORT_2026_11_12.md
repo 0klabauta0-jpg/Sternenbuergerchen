@@ -43,6 +43,22 @@ Konkrete Integrationsdateien vor Änderung mit dem Parallelchat abstimmen. Neue
 Zielmodelle und Umgebungseingaben noch nicht implementiert; aktuelle Visuals
 stellen keine Luftkampf- oder freie Flugfähigkeit dar.
 
+## Abgleich mit dem aktuellen Bodenstand
+
+Die isolierte Arbeitsbasis `task/space-air-parent-20261112` führt den Stand
+`1b924b640` mit dem Raumkampfstand `99d82f999` zusammen; der Fünf-Minuten-
+Autosave bleibt erhalten. Sechs gezielte Ownerprüfungen liefen dort ohne Fehler.
+Der Godot-Ressourcenimport wurde nach dem Klassenindex bewusst nicht vollständig
+ausgeführt; eine vollständige Szenen-/Grafikprüfung ist daher nicht belegt.
+
+Der gemeinsame Flugowner liegt bislang im übergeordneten Reise-Root, während
+eine Bodenmission ihren eigenen SimulationRoot und ihre Hex-Registry besitzt.
+Das Dropship darf deshalb nicht durch einen frei erfundenen zweiten Flugzustand
+oder den visuellen Luftlayer als bereits kampfbereit gelten. Für den nächsten
+produktiven Schritt müssen derselbe Flug- und Rottenowner, reale Crewbindung,
+atmosphärische Kartenkoordinaten, Landungsübergang und Bodentreffer gemeinsam
+gebunden werden. Die übrigen Akzeptanzpunkte oben sind weiterhin offen.
+
 ## Nutzerfestlegung: bodennahes Repeaterfeuer
 
 Ein Angriff kann auf eine sichtbare gegnerische Einheit oder ein markiertes
