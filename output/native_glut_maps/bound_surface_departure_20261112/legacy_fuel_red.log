@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-Orbit-7e261e8e5bcf4ffd8118287bc376be37
+PASS waiting publishes neither location nor remember nor aborted
+PASS initial two argument call
+PASS pending gates exact craft and save without freezing parallel visitors
+PASS approach rejects before first Flowwrite
+PASS actual timer returns unchanged opaque binding and retains marker
+PASS commit alone publishes previous completion tail exactly once
+PASS no repeated completion
+PASS stale visit preserves fresh transfer and owners
+PASS stale root_context preserves fresh transfer and owners
+PASS stale root_instance preserves fresh transfer and owners
+PASS void compatible only legacy hex=false
+PASS void compatible only legacy hex=true
+PASS completion observer cannot have new visit overwritten by old tail
+PASS early HomeLanding stays in exact pending record without membership restore
+PASS bound HomeLanding completes before final aborted observer without later old tail
+PASS positive Travelreceipt immediately captures marker before deferred initial callback
+PASS deferred initial callback cannot capture a newer visit
+FAIL failed retirement preflight runs before any legacy return fuel debit
+BOUND_SURFACE_DEPARTURE checks=18 failures=1

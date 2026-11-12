@@ -1,0 +1,776 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (431 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | BackgroundImageCatalog[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AudioEventBus[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AudioEventContract[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AudioEventPlayerPool[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AirAssetThreatResolver[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AdHocOrder[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AreaOrder[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | CommanderCommand[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | CommanderIntent[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | CommandToFTLTaskTranslator[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | FireteamBehaviorProfile[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | FireteamOrderPlan[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | FireteamWaypoint[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | LoadoutContract[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | LoadoutModifierResolver[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | PhaseState[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | UnitLoadoutModifiers[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | DamageModel[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | EventRouter[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | FogOfWarModeContract[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | FogOfWarSystem[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | HexDetectionState[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | HexSightRuntimeAdapter[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | HexVisibilityQuery[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | LineOfSightSystem[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | ObjectiveStatus[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | PersonnelLoadoutState[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | RespawnManager[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | SimulationRoot[39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | UpdateManager[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | MapBuilderSceneImporter[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | MapBuilderWorkbench[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | MapEditorAdjacencyDebugOverlay[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | MapEditorHeightTool[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | MapEditorMarkerTool[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | MapEditorPatrolPreview[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | MapEditorPatrolTool[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | MapEditorPrimaryViewAdapter[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | MapEditorTilePropertyOverlay[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | FTLRuntimeStatus[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | FTLTask[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | RuntimeLeader[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | AircraftManager[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | AirAssetRecoveryState[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | BaseInteriorNavigation[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | CharacterGameplayResolver[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | CharacterSheetFormatter[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | CharacterSheetView[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | DebriefTestScreen[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | DropLightLayoutContract[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | FireteamCohesionResolver[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | FOBAvailableDropPanel[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | FOBDropPanel[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | FOBFireteamCard[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | FOBTestScreen[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | HomebaseCardPool[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | HomebaseFireteamDropTarget[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | HomebaseRosterDropPanel[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | HomebaseTestScreen[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | HomebaseTeamDropPanel[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | HomebaseUnitDropTarget[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | MetaUISkin[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | MetaUnitProfile[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | MetaUnitProfileBuilder[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | MetaUserologyContract[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | MissionProgressionResolver[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | NPCCompactCard[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | NPCRankBadgeResolver[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | PersonnelEventModel[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | PersonnelEventResolver[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | PlayerRosterStore[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | PortraitIdentityCatalog[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | RosterRelationshipModel[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | StartRosterGenerator[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | TeamNameGenerator[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | TransportCraftCardUI[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | UIBlockLabels[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | AirAssetStatus[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | CombatVisibilityCache[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | DecisionOverlayPlayabilitySmoke[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | DropshipLZAccuracyContract[39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | FirstDecisionMicroScenarioPolish[39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | HexGroundAdmission[39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | HexGroundDeploymentAdapter[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | HexGroundShipFootprint[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | MissionBriefingMinimapOverlayPresenter[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | MissionBriefingMinimapVisualPresenter[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | MissionBriefingPanelPresenter[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | MissionCargoTouchdownBridge[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | MissionCombatAuthorityContract[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | MissionCombatRemoteEventBridge[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | MissionCombatResolutionResolver[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | MissionCommandInputGuard[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | MissionDropshipEffectAdapter[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | MissionFireteamRuntimeState[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionDoorMultiplayerAuthority[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionDoorRuntimeCollisionLOS[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionMultiplayerCommand[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionObjectiveGate[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionObjectReaction[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionPointBinding[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionRuntimeUseState[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionUseFeedback[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | MissionInteractionVisualState[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | MissionMultiplayerDoorFeedbackCapture[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | MissionMultiplayerTeamOwnershipContract[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | MissionPrimaryViewBridge[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MissionScenarioData[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MissionScenarioRuntimeGates[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MissionScenarioVerticalSliceContract[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MissionTeamChipPresenter[39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | OrderPreviewThreatOverlayPlaytestScenario[39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | PreMissionReadinessPresenter[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoExecutionHook[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoGoSmoke[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayabilitySmoke[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopAcceptanceSlice[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopChoiceConfirmSmoke[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopChoiceHook[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopExtension[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopHudWiring[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveAcceptanceSlice[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveChoiceHook[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveConfirmSmoke[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveHudWiring[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveOutcomeSlice[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectivePlayabilitySlice[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRealWindowCapture[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopAcceptanceSlice[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopIntegratedPlaytest[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayabilitySlice[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayerFeelFindings[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayerFeelPolish[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlaytestSlice[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopRealWindowCapture[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopRuntimePolish[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopVisualFindings[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopVisualPolish[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundTripSmoke[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRuntimeButtons[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveVisualPolish[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopNextMicroObjective[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopOutcomePlayabilitySlice[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopOutcomeRealWindowCapture[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopOutcomeVisualPolish[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopRuntimeChoiceButtons[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioAcceptanceSlice[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioDeliveryReview[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactAcceptanceSlice[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactIntegratedPlaytest[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactPlayabilitySlice[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactPlayerFeelFindings[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactPlayerFeelPolish[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRealWindowCapture[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRuntimeHook[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRuntimeSmoke[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactVisualFindings[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactVisualPolish[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioHandoffPacket[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioIntegratedPlayerFeelFindings[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioIntegratedPlaytest[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioNextPlayableSlicePlan[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioOutcomeSlice[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayabilitySlice[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayerFeelFindings[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayerFeelPolish[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRealWindowCapture[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioReleaseCandidateAcceptance[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioReleaseCandidatePlaytest[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRuntimeHook[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRuntimeSmoke[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioShipReadinessReview[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioSmallGameAcceptanceSlice[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioStitch[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioTesterRun[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioTesterRunAcceptance[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioVisibleShipSmoke[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopScenarioVisualFindings[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlayerLoopVisualPolish[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPlaytest[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoPolish[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoRuntimeButton[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionLoopTwoVisualPolish[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstDecisionNextPlayableLoop[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeCombatFocalElegancePolish[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeCombatMarkerScaleWorldNoisePolish[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFinalReadabilityFollowupFix[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFinalWorldReadFollowupFix[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireDirectionImpactClarityPolish[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireLaneLabelClusterPolish[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireLaneReadabilityPolish[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireLaneWorldReadAcceptancePolish[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireLaneWorldReadFinalPolish[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFireLaneWorldReadMicroPolish[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupFixPlayerPolish[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuning[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupFix[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupSecondFix[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupPlayerPolishTuning[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupPlayerPolishTuningFinalReadabilityPolish[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeFollowupWorldReadPlayerPolish[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeHudDensityAndFireVisualPolish[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeRealWindowHudSourceSync[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | ReleaseFirstExchangeWorldCombatFocalHierarchyPolish[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | StationReentryHostClientNextOrderSync[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | StationReentryPerformanceFeelPass[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | StationReentryReleaseCandidateRealWindowFirefightSightReview[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | StationReentryReleaseCandidateVisibleFirefightFindings[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | StationScenarioRouteCuePolish[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | TacticalDecisionClarityScenarioReturn[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | MultiplayerCommandContract[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | MultiplayerMapManifest[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | MultiplayerRosterContract[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSession[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSnapshotContract[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | TestUnit[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | UnitProfileMath[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | UnitRosterPresets[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | UnitRuntimeStatus[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | UnitSkills[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | UnitTrait[39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | UnitVitalStatus[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | FTLRegistry[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | UnitRegistry[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | FireteamSelectionAdapter[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | ContactDensityOverlay[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | ContactMapOverlay[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | FireteamOrderVisualizer[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | AdHocOrderController[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | AreaOrderResolver[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | CombatFireDecisionResolver[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | CombatReadabilityPresenter[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | CommsLinesResolver[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | ContactApproachResolver[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | ContactTracker[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | EnemyBehaviorOrchestrator[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | EnemyLimboBehaviorAdapter[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | EnemyTeamTacticsProfile[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | FireteamBehaviorResolver[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | FireteamCoordinationManager[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | FireteamExecutionPlan[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | FireteamMovementController[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | FireteamRuntimeExecutionPathContract[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | FireteamSecurityController[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | FlankVulnerabilityResolver[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | FTLReadinessSnapshotContract[39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | LocalAvoidanceResolver[39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | MedicSupportResolver[39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | MissionHudReadModel[39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | MissionRuntimeIndex[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | MultiFireteamPlanResolver[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | OverwatchController[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | TacticalBreakoutResolver[39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | TacticalCommandRules[39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | TacticalCommunicationEvent[39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | TacticalCommunicationResolver[39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | TacticalDecisionThreatAnalyzer[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | TacticalEventLog[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | TacticalStanceController[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | WaypointIntentPreviewResolver[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | FrontierArtProfile[39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | HPANavigationGraph[39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | HPAPathfinder[39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | TerrainMap3DView[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | TerrainMapData[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | TerrainMapRenderer[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | TerrainMarkerCatalog[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainTextureCatalog[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | TerrainTruthAudit[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | MissionMapCameraController[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | TacticalInputController[39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | PhaseController[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | CommandButton[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | ProgressLine[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | StatusBadge[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | TacticalCard[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | ComicBubbleRuntimeGate[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | ComicBubbleSettings[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | ComicBubbleTextResolver[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | ComicBubbleVisualContract[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | ContextualHelpPopup[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | ContextualHelpService[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | FireteamleaderFeedbackBubbleResolver[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | FireteamMemberStatusRow[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | FTLReadinessGauge[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | GameSettingsContract[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | HoverScrollBehavior[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | MissionBriefingMinimapVisual[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | MissionCommandHierarchyContract[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | MissionControlStatePresenter[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | NativeUIIcons[39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | NPCThoughtBubbleResolver[39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | ReferencePanelFrame[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | SelectedFireteamDecisionPresenter[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | SettingsScreen[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  99% ] [90m[1mupdate_scripts_classes[22m | TacticalEventLogPanel[39m[0m
+[  99% ] [90m[1mupdate_scripts_classes[22m | TacticalHudLanguagePresenter[39m[0m
+[  99% ] [90m[1mupdate_scripts_classes[22m | TacticalUITheme[39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (87 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_30_03.png[39m[0m
+[   1% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_31_30.png[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_34_25.png[39m[0m
+[   3% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_37_07.png[39m[0m
+[   4% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_41_47.png[39m[0m
+[   5% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_42_41.png[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_43_50.png[39m[0m
+[   7% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_46_53.png[39m[0m
+[   9% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_49_28.png[39m[0m
+[  10% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 5, 2026, 22_54_19.png[39m[0m
+[  11% ] [90m[1m_update_scan_actions[22m | Use AI Image Apr 6, 2026, 00_19_16.png[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | cutlass_01.glb[39m[0m
+[  13% ] [90m[1m_update_scan_actions[22m | colormap.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | computer.glb[39m[0m
+[  15% ] [90m[1m_update_scan_actions[22m | container-wide.glb[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | colormap.png[39m[0m
+[  18% ] [90m[1m_update_scan_actions[22m | door-single-closed.glb[39m[0m
+[  19% ] [90m[1m_update_scan_actions[22m | door-single-half.glb[39m[0m
+[  20% ] [90m[1m_update_scan_actions[22m | door-single.glb[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | computer.png[39m[0m
+[  22% ] [90m[1m_update_scan_actions[22m | door-single-closed.png[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | door-single-half.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | door-single.png[39m[0m
+[  26% ] [90m[1m_update_scan_actions[22m | dice_sword_attack.png[39m[0m
+[  27% ] [90m[1m_update_scan_actions[22m | move_prompt.png[39m[0m
+[  28% ] [90m[1m_update_scan_actions[22m | pointer_triangle.png[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | sword_attack.png[39m[0m
+[  30% ] [90m[1m_update_scan_actions[22m | target_marker.png[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | frontier_outpost_main_20261101.png[39m[0m
+[  32% ] [90m[1m_update_scan_actions[22m | sternenbuerger_main_menu_bg.jpeg[39m[0m
+[  34% ] [90m[1m_update_scan_actions[22m | crew_a.png[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | armor_light.svg[39m[0m
+[  36% ] [90m[1m_update_scan_actions[22m | benit.svg[39m[0m
+[  37% ] [90m[1m_update_scan_actions[22m | chip.svg[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | icons_01.png[39m[0m
+[  39% ] [90m[1m_update_scan_actions[22m | icon_defend.png[39m[0m
+[  40% ] [90m[1m_update_scan_actions[22m | icon_dropship_v2.png[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | icon_flank_v2.png[39m[0m
+[  43% ] [90m[1m_update_scan_actions[22m | icon_loadout.png[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | icon_move.png[39m[0m
+[  45% ] [90m[1m_update_scan_actions[22m | icon_take.png[39m[0m
+[  46% ] [90m[1m_update_scan_actions[22m | BarlowCondensed-Bold.ttf[39m[0m
+[  47% ] [90m[1m_update_scan_actions[22m | cutlass_ref03_preview.png[39m[0m
+[  48% ] [90m[1m_update_scan_actions[22m | astronautA_SW.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | astronautB_SW.png[39m[0m
+[  51% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_NE.png[39m[0m
+[  52% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_NW.png[39m[0m
+[  53% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_SE.png[39m[0m
+[  54% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_SW.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | corridor_wall_NE.png[39m[0m
+[  56% ] [90m[1m_update_scan_actions[22m | corridor_wall_NW.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | corridor_wall_SE.png[39m[0m
+[  59% ] [90m[1m_update_scan_actions[22m | corridor_wall_SW.png[39m[0m
+[  60% ] [90m[1m_update_scan_actions[22m | craft_cargoA_NE.png[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | craft_speederA_NE.png[39m[0m
+[  62% ] [90m[1m_update_scan_actions[22m | craft_speederB_NE.png[39m[0m
+[  63% ] [90m[1m_update_scan_actions[22m | craft_speederB_NW.png[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | craft_speederB_SE.png[39m[0m
+[  65% ] [90m[1m_update_scan_actions[22m | craft_speederB_SW.png[39m[0m
+[  67% ] [90m[1m_update_scan_actions[22m | craft_speederD_NE.png[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | platform_center_SE.png[39m[0m
+[  69% ] [90m[1m_update_scan_actions[22m | platform_large_NW.png[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | rock_largeB_SW.png[39m[0m
+[  71% ] [90m[1m_update_scan_actions[22m | rock_SW.png[39m[0m
+[  72% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_NE.png[39m[0m
+[  73% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_NW.png[39m[0m
+[  75% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_SE.png[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_SW.png[39m[0m
+[  77% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_NE.png[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_NW.png[39m[0m
+[  79% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_SE.png[39m[0m
+[  80% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_SW.png[39m[0m
+[  81% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_NE.png[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_NW.png[39m[0m
+[  84% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_SE.png[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_SW.png[39m[0m
+[  86% ] [90m[1m_update_scan_actions[22m | terrain_side_NE.png[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | terrain_side_NW.png[39m[0m
+[  88% ] [90m[1m_update_scan_actions[22m | terrain_side_SE.png[39m[0m
+[  89% ] [90m[1m_update_scan_actions[22m | terrain_side_SW.png[39m[0m
+[  90% ] [90m[1m_update_scan_actions[22m | terrain_SW.png[39m[0m
+[  92% ] [90m[1m_update_scan_actions[22m | craft_speederB.png[39m[0m
+[  93% ] [90m[1m_update_scan_actions[22m | bg_desert_explosion_base.jpg[39m[0m
+[  94% ] [90m[1m_update_scan_actions[22m | blaster-a.png[39m[0m
+[  95% ] [90m[1m_update_scan_actions[22m | blaster-b.png[39m[0m
+[  96% ] [90m[1m_update_scan_actions[22m | rocketlauncherModern.png[39m[0m
+[  97% ] [90m[1m_update_scan_actions[22m | sniper.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (87 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   1% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   3% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   4% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   5% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   6% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   7% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   9% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  10% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  11% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  12% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  13% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  15% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  18% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  19% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  20% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  22% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  26% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  28% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  30% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  31% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  34% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  36% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  37% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  39% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  43% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  45% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  46% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  53% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  54% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  56% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  60% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  62% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  63% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  65% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  68% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  69% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  71% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  73% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  75% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  77% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  79% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  80% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  81% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  84% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  86% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  87% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  90% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  92% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  93% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  95% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  96% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  97% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | BarlowCondensed-Bold.ttf[39m[0m
+[   1% ] [90m[1mreimport[22m | BarlowCondensed-Bold.ttf[39m[0m
+[   2% ] [90m[1mreimport[22m | terrain_rampLarge_NE.png[39m[0m
+[   3% ] [90m[1mreimport[22m | rock_SW.png[39m[0m
+[   4% ] [90m[1mreimport[22m | rock_largeB_SW.png[39m[0m
+[   5% ] [90m[1mreimport[22m | platform_large_NW.png[39m[0m
+[   6% ] [90m[1mreimport[22m | platform_center_SE.png[39m[0m
+[   7% ] [90m[1mreimport[22m | craft_speederD_NE.png[39m[0m
+[   9% ] [90m[1mreimport[22m | craft_speederB_SW.png[39m[0m
+[  10% ] [90m[1mreimport[22m | craft_speederB_SE.png[39m[0m
+[  11% ] [90m[1mreimport[22m | craft_speederB_NW.png[39m[0m
+[  12% ] [90m[1mreimport[22m | craft_speederB_NE.png[39m[0m
+[  13% ] [90m[1mreimport[22m | craft_speederA_NE.png[39m[0m
+[  14% ] [90m[1mreimport[22m | craft_cargoA_NE.png[39m[0m
+[  15% ] [90m[1mreimport[22m | corridor_wall_SW.png[39m[0m
+[  17% ] [90m[1mreimport[22m | corridor_wall_SE.png[39m[0m
+[  18% ] [90m[1mreimport[22m | corridor_wall_NW.png[39m[0m
+[  19% ] [90m[1mreimport[22m | corridor_wall_NE.png[39m[0m
+[  20% ] [90m[1mreimport[22m | corridor_wallCorner_SW.png[39m[0m
+[  21% ] [90m[1mreimport[22m | corridor_wallCorner_SE.png[39m[0m
+[  22% ] [90m[1mreimport[22m | corridor_wallCorner_NW.png[39m[0m
+[  23% ] [90m[1mreimport[22m | corridor_wallCorner_NE.png[39m[0m
+[  25% ] [90m[1mreimport[22m | astronautB_SW.png[39m[0m
+[  26% ] [90m[1mreimport[22m | sniper.png[39m[0m
+[  27% ] [90m[1mreimport[22m | rocketlauncherModern.png[39m[0m
+[  28% ] [90m[1mreimport[22m | blaster-b.png[39m[0m
+[  29% ] [90m[1mreimport[22m | blaster-a.png[39m[0m
+[  30% ] [90m[1mreimport[22m | bg_desert_explosion_base.jpg[39m[0m
+[  31% ] [90m[1mreimport[22m | craft_speederB.png[39m[0m
+[  32% ] [90m[1mreimport[22m | terrain_SW.png[39m[0m
+[  34% ] [90m[1mreimport[22m | terrain_side_SW.png[39m[0m
+[  35% ] [90m[1mreimport[22m | terrain_side_SE.png[39m[0m
+[  36% ] [90m[1mreimport[22m | terrain_side_NW.png[39m[0m
+[  37% ] [90m[1mreimport[22m | terrain_side_NE.png[39m[0m
+[  38% ] [90m[1mreimport[22m | terrain_sideCorner_SW.png[39m[0m
+[  39% ] [90m[1mreimport[22m | terrain_sideCorner_SE.png[39m[0m
+[  40% ] [90m[1mreimport[22m | terrain_sideCorner_NW.png[39m[0m
+[  42% ] [90m[1mreimport[22m | terrain_sideCorner_NE.png[39m[0m
+[  43% ] [90m[1mreimport[22m | terrain_sideCliff_SW.png[39m[0m
+[  44% ] [90m[1mreimport[22m | terrain_sideCliff_SE.png[39m[0m
+[  45% ] [90m[1mreimport[22m | terrain_sideCliff_NW.png[39m[0m
+[  46% ] [90m[1mreimport[22m | terrain_sideCliff_NE.png[39m[0m
+[  47% ] [90m[1mreimport[22m | terrain_rampLarge_SW.png[39m[0m
+[  48% ] [90m[1mreimport[22m | terrain_rampLarge_SE.png[39m[0m
+[  50% ] [90m[1mreimport[22m | terrain_rampLarge_NW.png[39m[0m
+[  51% ] [90m[1mreimport[22m | dice_sword_attack.png[39m[0m
+[  52% ] [90m[1mreimport[22m | door-single.png[39m[0m
+[  53% ] [90m[1mreimport[22m | door-single-half.png[39m[0m
+[  54% ] [90m[1mreimport[22m | door-single-closed.png[39m[0m
+[  55% ] [90m[1mreimport[22m | computer.png[39m[0m
+[  56% ] [90m[1mreimport[22m | colormap.png[39m[0m
+[  57% ] [90m[1mreimport[22m | colormap.png[39m[0m
+[  59% ] [90m[1mreimport[22m | Use AI Image Apr 6, 2026, 00_19_16.png[39m[0m
+[  60% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_54_19.png[39m[0m
+[  61% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_49_28.png[39m[0m
+[  62% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_46_53.png[39m[0m
+[  63% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_43_50.png[39m[0m
+[  64% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_42_41.png[39m[0m
+[  65% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_41_47.png[39m[0m
+[  67% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_37_07.png[39m[0m
+[  68% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_34_25.png[39m[0m
+[  69% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_31_30.png[39m[0m
+[  70% ] [90m[1mreimport[22m | Use AI Image Apr 5, 2026, 22_30_03.png[39m[0m
+[  71% ] [90m[1mreimport[22m | astronautA_SW.png[39m[0m
+[  72% ] [90m[1mreimport[22m | cutlass_ref03_preview.png[39m[0m
+[  73% ] [90m[1mreimport[22m | icon_take.png[39m[0m
+[  75% ] [90m[1mreimport[22m | icon_move.png[39m[0m
+[  76% ] [90m[1mreimport[22m | icon_loadout.png[39m[0m
+[  77% ] [90m[1mreimport[22m | icon_flank_v2.png[39m[0m
+[  78% ] [90m[1mreimport[22m | icon_dropship_v2.png[39m[0m
+[  79% ] [90m[1mreimport[22m | icon_defend.png[39m[0m
+[  80% ] [90m[1mreimport[22m | icons_01.png[39m[0m
+[  81% ] [90m[1mreimport[22m | chip.svg[39m[0m
+[  82% ] [90m[1mreimport[22m | benit.svg[39m[0m
+[  84% ] [90m[1mreimport[22m | armor_light.svg[39m[0m
+[  85% ] [90m[1mreimport[22m | crew_a.png[39m[0m
+[  86% ] [90m[1mreimport[22m | sternenbuerger_main_menu_bg.jpeg[39m[0m
+[  87% ] [90m[1mreimport[22m | frontier_outpost_main_20261101.png[39m[0m
+[  88% ] [90m[1mreimport[22m | target_marker.png[39m[0m
+[  89% ] [90m[1mreimport[22m | sword_attack.png[39m[0m
+[  90% ] [90m[1mreimport[22m | pointer_triangle.png[39m[0m
+[  92% ] [90m[1mreimport[22m | computer.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  93% ] [90m[1mreimport[22m | cutlass_01.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  94% ] [90m[1mreimport[22m | container-wide.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  95% ] [90m[1mreimport[22m | door-single-closed.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  96% ] [90m[1mreimport[22m | door-single-half.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  97% ] [90m[1mreimport[22m | door-single.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  98% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (87 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-Orbit-f72843bcfe93427db659025e20f534f4
+PASS waiting publishes neither location nor remember nor aborted
+PASS initial two argument call
+PASS pending gates exact craft and save without freezing parallel visitors
+PASS approach rejects before first Flowwrite
+PASS actual timer returns unchanged opaque binding and retains marker
+PASS commit alone publishes previous completion tail exactly once
+PASS no repeated completion
+PASS stale visit preserves fresh transfer and owners
+PASS stale root_context preserves fresh transfer and owners
+PASS stale root_instance preserves fresh transfer and owners
+PASS void compatible only legacy hex=false
+PASS void compatible only legacy hex=true
+FAIL completion observer cannot have new visit overwritten by old tail
+BOUND_SURFACE_DEPARTURE checks=13 failures=1

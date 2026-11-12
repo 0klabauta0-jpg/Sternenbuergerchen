@@ -47,6 +47,12 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   frisch76/0 samt Guards. Reentryschaden, Managerpfadwechsel und akzeptierte
   Schiffsflaechen schliessen alte Folgeevents aus. Member-/Crew-/Visitretirement
   bleiben bei Tabletop; echte Polisa-REDprobea859/1358 bestaetigt die Kanten.
+  Flowcaller fuer gebundenes Surface-Retirement ist reviewed (18/0 an
+  kontrollierter Receiptgrenze): eigener Pendingmarker vor Deferredcall,
+  Waiting/Retry, per-Craft-Admission-/Saveguard, Homefortsetzung und letzter
+  Abschlussobserver; Preflight vor LegacyFuelwrite. Controller3arg/Rootpaarung
+  folgt separat. Driver-Completed-Consumerrest e41 ist konkret rot reproduziert
+  und an Tabletop zur kleinen Folgekorrrektur uebergeben.
 - AP7 Ground524fd61d1 plusPassage8d333eb95: atomarer kanonischer Roundtrip mit
   Terrainrevalidierungsgrenze und ganzen aktiven Kohorten;35/0 nach gemeinsamem
   64-Topologiebudgetfix und unabhaengigem Review. PendingAdmissions bleiben
