@@ -230,7 +230,7 @@ func _component_balance(crafts: Dictionary, space_loadouts: Dictionary, requests
 	return expected == actual
 func _integer(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0 and float(value) == floor(float(value)) and float(value) <= 2147483647
-func _reject(reason: String) -> Dictionary: return {"ok":false, "reason":reason, "message":"Warp-Antrieb: " + reason}
+func _reject(reason: String) -> Dictionary: return {"ok":false, "reason":reason, "message":"Schiffskomponente: " + reason}
 
 
 func validate_craft_return(craft_id: String) -> Dictionary:
