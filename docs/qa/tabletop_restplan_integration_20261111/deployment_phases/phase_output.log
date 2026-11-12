@@ -1,0 +1,178 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (59 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AdHocOrder[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AreaOrder[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | CommanderCommand[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | CommanderIntent[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | LoadoutContract[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | DamageModel[39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | HexDetectionState[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | HexVisibilityQuery[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | LineOfSightSystem[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | ObjectiveStatus[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | PersonnelLoadoutState[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | SimulationRoot[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | CombatVisibilityCache[39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | HexGroundAdmission[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | HexGroundDeploymentAdapter[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | MissionDropshipEffectAdapter[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | MultiplayerCommandContract[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | MultiplayerRosterContract[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSnapshotContract[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | UnitProfileMath[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | UnitRegistry[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | EnemyTeamTacticsProfile[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | LocalAvoidanceResolver[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | HPANavigationGraph[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | HPAPathfinder[39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | TerrainMapData[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | TerrainMarkerCatalog[39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | TerrainTextureCatalog[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | TerrainTruthAudit[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ff8f1cd53b3e4d4a99a148f1ad321839
+PASS: real Root exposes actual hex movement and arrival contract
+PASS: actual queued commands commit hex segments instead of free movement
+PASS: unadmitted actor never falls back to legacy movement
+PASS: fractional actor projection changes neither gameplay state nor combat RNG
+PASS: unadmitted presentation actor cannot capture a hex objective
+PASS: rejected nonfinite target cannot replace the accepted actor command or token
+PASS: objective capture reads committed hex at handoff instead of render position
+PASS: logical fields remain exclusive throughout a faster follower and slower leader
+PASS: actor positions always follow the owner despite enabled legacy avoidance and spacing
+PASS: handoff to destination is not premature arrival before edge completion
+PASS: both real commands finish at their requested ground goals
+PASS: finished actors stand at authoritative goal centers
+PASS: waiting behind another unit does not rebuild unchanged routes
+PASS: warm reservation attempts reuse terrain timing profiles instead of rereading whole routes
+PASS: actual movement keeps bounded navigation and reservation work
+PASS: arrival reads reject stale command identity and missing units
+PASS: stationary facing commit refreshes actor projection after movement ends
+PASS: zero navigation admission keeps the goal pending without free movement
+PASS: real Hold cancels the accepted goal and never resumes its old continuation
+PASS: real damage producer stops motion and future promises while wounded unit keeps its hex
+PASS: another real goal routes around a downed ground occupant in available space
+PASS: unflagged legacy context retains its old continuous move path
+PASS: real projected movement starts with canonical facing in direction0
+PASS: real direction0 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction1
+PASS: real direction1 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction2
+PASS: real direction2 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction3
+PASS: real direction3 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction4
+PASS: real direction4 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction5
+PASS: real direction5 reaches its actual ground center
+PASS: all six projected directions use equal physical step durations
+PASS: actual ramp goal completes bidirectionally: (1, 0)
+PASS: actual ramp goal completes bidirectionally: (-1, 0)
+PASS: ramp cliff cannot become a render-position shortcut or repeated blind route search
+PASS: hidden location executes its own real goal while another location holds the same local ID
+PASS: actual command and actor projections stay scoped to their owning registry
+PASS: blocked follower has a cached route before its first accepted promise
+PASS: Hold before first ground commit releases navigation and timing caches
+PASS: pure group planner finds four distinct cells without changing owner
+PASS: actual Root admits complete registered group atomically
+PASS: admitted actors publish committed logical placement
+PASS: downed NPC retains its ground field
+PASS: group embark clears cells and accepted movement together
+PASS: embark retains real actor identity while removing ground presence
+PASS: real unregister releases once and repeated remove is a no-op
+PASS: three free fields cannot partially admit four people
+PASS: duplicate group identity is rejected
+PASS: group search obeys explicit expansion budget
+PASS: missing actor rejects complete root transaction before writes
+PASS: plain base projection cannot become a mission actor
+PASS: foreign actor cannot overwrite the owning root lookup
+PASS: foreign root rejects same-ID shared actor outside its mission subtree
+PASS: failed foreign admission preserves the other location
+PASS: admission follows longitudinal ramp and matching lateral ramp, never plateau cliff
+PASS: invalid H8 ramp cannot be an admission anchor
+PASS: complete corridor grant blocks admission beyond its immediate promised steps
+PASS: edge fixture reaches after-handoff before segment end
+PASS: admission cannot occupy vacated source while edge is still active
+PASS: group planner cannot enter an active edge from its vacated endpoint
+PASS: preparation reserves all group slots without pretending aboard people are on ground
+PASS: door mutation respects pending deployment slot
+PASS: direct admission cannot steal a pending slot
+PASS: one real deploy effect consumes only its owned slot
+PASS: visual and aboard state follow individual committed unload phase
+PASS: wrong deployment ticket changes neither slots nor person presence
+PASS: actual navigation cannot move a ground actor into pending deployment slots
+PASS: owner independently rejects forged motion across pending admission slot
+PASS: abort releases only remaining aboard slots, keeps deployed ground people
+PASS: actual embark effect releases ground through lifecycle owner
+PASS: cancel wakes original waiting movement after reserved slot is released
+PASS: cancelled slots can be planned again without losing crew
+PASS: context change invalidates old deployment tickets
+PASS: staged real mission actor can reserve a slot before runtime registration
+PASS: actual deploy activates staged actor only after its slot commits
+PASS: invalidated entry cancels group slots before queued deploy can publish a person
+PASS: old context queued move and embark cannot mutate a newly admitted person
+PASS: queued previous lifecycle embark cannot hide a readmitted actor in same context
+PASS: actual actor tree exit releases its ground and registry without polling
+PASS: explicit cleanup after tree exit is idempotent and has no stale move
+PASS: stale registry key rejects staged replacement before any ground write
+PASS: actual pending NPC removal cancels whole remaining group without losing aboard peer
+PASS: internal release with empty legacy reason still clears pending slots
+PASS: registry-only actor needs explicit Root lifecycle binding before admission
+PASS: existing unload sequence can use a Root-confirmed phase bridge
+PASS: enqueueing unload never publishes deployment before Root commit
+PASS: render polling never duplicates a pending unload effect
+PASS: fixture person can move away before controller reads its unload completion
+PASS: commit receipt survives movement without letting bridge own sequence progress
+PASS: next unload phase retains its independently reserved slot
+PASS: last real effect confirms completion after ticket slots are fully consumed
+PASS: existing sequence owner determines end of unloading
+RESULTS: 95 passed, 0 failed
+HEX_DEPLOYMENT_PHASE_PASS

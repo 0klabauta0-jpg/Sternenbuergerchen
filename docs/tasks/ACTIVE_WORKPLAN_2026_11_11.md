@@ -25,8 +25,11 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   AP6b-Gruppenvormerkungen Sourcea74514742 plus Bindungsfix0535b3b2f sind als
   68ca862aa/0a63027d7 integriert; frische gemeinsame Slotpruefung88/0 mit Guards.
   Registry-only-Actor ohne Root-Exitbindung wird vor Admission abgewiesen.
-  Tabletop arbeitet jetzt an AP6c-Controllersequenz, produktivem Setup-/
-  Deployadapter und Basisaktionen; dieses WIP noch nicht importiert.
+  Konkrete Transportphasen Sourcee4b3e4cb8 sind als058fc6e5f integriert, frisch
+  privat95/0 Phasen und73/0 echter kontrollierter Controller samt Guards.
+  Crew-/Visitfilter und verbleibende Team-/Solo-Pilotregeln im Merge erhalten.
+  Tabletop bearbeitet noch fremde Schiffsfootprints, regulaere Profilbindung,
+  Setup und Basisaktionen; dieses weitere WIP noch nicht importiert.
 - AP7 Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
