@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (13 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | UnitRegistry[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-Orbit-ab65f5efbec847f29c164c138e4dad10
+PASS Movement exposes separated prepared restore APIs
+PASS Actual BaseActors and registered accepted intents export without NPC capabilities
+PASS Preparation leaves existing accepted intent untouched
+PASS JSON restore preserves stable source and internal command IDs
+PASS Original midcell world target and legitimate UnitCommand intent preserved
+PASS Published preparation cannot replay after owner epoch changes
+PASS Invalid schema rejects without losing old intent
+PASS Overflow target rejects before grid cast
+PASS Duplicate accepted unit rejects
+PASS Root context reset invalidates preparation
+PASS Ground revision changes invalidate preparation
+PASS Known A preferred over Registry rebound B still invalidates preparation
+PASS Registered actor must expose the exact canonical unit ID
+PASS Unavailable actual UnitRegistry fails closed without fallback to Known
+PASS Sameobject configure cannot reuse previous prepared authority
+PASS Wait age/retry deadline preserved while derived paths and searches rebuild
+PASS Pending stop is explicit saveguard rather than discarded queue
+PASS Export has no alias into live command intent
+PASS Prepared handle has detached input without public mutable patch
+PASS Target Ground candidate may prepare but cannot accidentally publish against live Ground
+PASS Joint prevalidation supports Ground-first silent Movementtail without late callbacks
+PASS Empty intents cannot discard actual target Ground horizon; both owners unchanged
+PASS Subset missing moving member rejects without losing existing intents
+PASS Pure stop centering remains restorable without move intents
+PASS Actual tick and Planner produce accepted backoff recovery
+PASS Real backoff retains original goal, waitage, clearance and cohort IDs
+PASS Real Ground handoff proves passage after actual waiting_clearance
+PASS Seen passage roundtrips and watcher index is rebuilt from canonical waiters
+PASS Recovery cannot bind waiter to a different command
+PASS Restored real backoff completes both original goal intents
+HEX_MOVEMENT_SAVE_STATE passed=30 failed=0
