@@ -17,6 +17,9 @@ func _initialize() -> void:
 	var bad: Dictionary = context.duplicate(true); bad.payload.layout_revision = "old"
 	assert(not fleet.bind_space_area_transition_context(bad, authority).ok)
 	assert(fleet.bind_space_area_transition_context(context, authority).ok)
+	assert(flight.configure("other", {"coordinate_frame":"local", "space_area_id":"orbit_approach:glut_2", "motion_mode":"tactical", "position_plane":GRID.HEX.axial_to_plane(Vector2(gate))}).ok)
+	assert(not fleet.prepare_space_area_transition("ship", context.expected_travel_revision, context.source_area_id, context.target_area_id, context).ok)
+	assert(flight.configure("ship", {"coordinate_frame":"local", "space_area_id":"orbit_approach:glut_2", "motion_mode":"tactical", "position_plane":GRID.HEX.axial_to_plane(Vector2(gate))}).ok)
 	var candidate: Dictionary = fleet.prepare_space_area_transition("ship", context.expected_travel_revision, context.source_area_id, context.target_area_id, context)
 	assert(candidate.ok and fleet.validate_prepared_space_area_transition(candidate, context).ok)
 	assert(fleet.commit_prepared_space_area_transition(candidate, context).ok)
