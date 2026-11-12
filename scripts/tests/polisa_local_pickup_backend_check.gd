@@ -181,7 +181,22 @@ func run() -> void:
 	var space_state: RefCounted = adapter._simulation.get("_space_combat_state")
 	assert(space_state.admit_actor({"craft_id":"space_fixture_birth_blocker", "faction_id":"enemy", "control_domain":"enemy", "start_hex":dock_cell, "footprint_hexes":[Vector2i.ZERO]}, blocked_flight, true).ok)
 	check(not adapter._simulation.preview_station_purchase_local_admission(adapter, id).get("ok", false), "Occupied station gate blocks first admission")
+	if OS.get_environment("SB_TEST_LOCAL_BIRTH") == "1":
+		check(not adapter.enter_purchased_station_local_orbit(id).get("ok", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before, "Blocked first admission leaves fuel and birth unchanged")
 	assert(space_state.remove_actor("space_fixture_birth_blocker"))
+	if OS.get_environment("SB_TEST_LOCAL_BIRTH") == "1":
+		var events: Array = []
+		adapter._simulation.singleplayer_command_committed.connect(func(command: Dictionary, _result: Dictionary): events.append(command.operation))
+		var admitted: Dictionary = adapter.enter_purchased_station_local_orbit(id)
+		check(admitted.get("ok", false) and space_state.get_actor(id) == adapter._travel.get_flight_state(id) and adapter._travel.get_craft_snapshot(id).orbit_id == "polisa_orbit", "Purchased craft enters actual local station area atomically")
+		check(adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "First admission charges return fuel once and binds real flying wing")
+		check(adapter.enter_purchased_station_local_orbit(id).get("replayed", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0, "Purchase-owned admission receipt replays without duplicate fuel")
+		adapter._simulation.publish_singleplayer_space_launch_event(adapter, String(admitted.get("receipt_id", "")))
+		var event_count := events.size()
+		adapter._simulation.publish_singleplayer_space_launch_event(adapter, String(admitted.get("receipt_id", "")))
+		check("depart_station_purchase" in events and events.size() == event_count, "Admission events publish once after owner commit")
+		finish(adapter,flow)
+		return
 	check(adapter.authorize_return(id,"first-return").get("deferred",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before,"Station return previews fuel without charging early")
 	check(adapter.enter_space_orbit(id).ok and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "Boarded Polisa departure charges once and creates the flying wing")
 	check(adapter.authorize_return(id,"second-return").get("replayed",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Local purchase return debit is once regardless UI request IDs")

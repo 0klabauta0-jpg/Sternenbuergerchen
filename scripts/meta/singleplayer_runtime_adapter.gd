@@ -845,6 +845,15 @@ func _publish_space_launch_event(request_id: String) -> void:
 func finish_space_approach(craft_id: String) -> Dictionary:
 	return _commit("singleplayer_space_travel", "finish_approach", {"craft_id": craft_id}, _request_id("approach-finish", {}), {"runtime_authorized": true})
 
+func enter_purchased_station_local_orbit(craft_id: String) -> Dictionary:
+	# Explicit owner path, deliberately not selected by the legacy UI route.
+	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")
+	var binding: Dictionary = _simulation.configure_departure_adapter(self)
+	if not binding.get("ok", false): return binding
+	var result: Dictionary = _simulation.commit_station_purchase_local_admission(self, craft_id)
+	if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_space_launch_event", String(result.receipt_id))
+	return result
+
 func enter_space_orbit(craft_id: String) -> Dictionary:
 	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
 	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") in ["surface", "approach"]) or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
