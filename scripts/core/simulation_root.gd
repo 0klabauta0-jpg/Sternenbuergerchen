@@ -7585,7 +7585,23 @@ func get_air_support_radar_contacts(craft_id: String) -> Dictionary:
 	if not binding.get("ok", false) or not is_air_support_craft_airborne(craft_id): return {"ok":false, "reason":"aircraft_not_flying"}
 	var source: Node = _air_support_source.get_ref()
 	if not is_instance_valid(source): return {"ok":false, "reason":"air_source_unavailable"}
-	return source.get_space_radar_contacts(craft_id)
+	var result: Dictionary = source.get_space_radar_contacts(craft_id)
+	if not result.get("ok", false): return result
+	var terrain: Node = _air_ground_registry()
+	if terrain == null: return {"ok":false, "reason":"ground_unavailable"}
+	var origin: Vector2 = terrain.call("grid_to_world", Vector2i.ZERO)
+	var q: Vector2 = Vector2(terrain.call("grid_to_world", Vector2i(1, 0))) - origin
+	var r: Vector2 = Vector2(terrain.call("grid_to_world", Vector2i(0, 1))) - origin
+	var projections: Array = []
+	for contact_id: String in result.contacts:
+		var target: RefCounted = binding.combat.get_actor(contact_id)
+		if target == null: continue
+		var pose: Dictionary = target.get_snapshot()
+		if pose.get("space_area_id") != result.space_area_id: continue
+		var axial: Vector2 = SPACE_GRID.HEX.plane_to_axial(pose.position_plane)
+		projections.append({"craft_id":contact_id, "position":origin + q * axial.x + r * axial.y})
+	result["projections"] = projections
+	return result
 
 func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
 	# The transport owner verifies actual boarding and pending deployment.

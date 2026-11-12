@@ -15904,6 +15904,9 @@ func _refresh_world_overlays() -> void:
 	_refresh_meta_transfer_route_overlay()
 
 
+var _air_radar_projection_cache: Dictionary = {}
+var _air_radar_projection_expires_ms := 0
+
 func _build_mission_dropship_visual_entries(primary_visible: bool, primary_position: Vector2) -> Array:
 	var entries: Array = []
 	var seen_craft_ids: Dictionary = {}
@@ -15947,6 +15950,23 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 	var cargo_entry: Dictionary = _build_mission_cargo_touchdown_visual_entry(entries.size())
 	if not cargo_entry.is_empty():
 		entries.append(cargo_entry)
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	var radar_seen := {}
+	if Time.get_ticks_msec() >= _air_radar_projection_expires_ms:
+		_air_radar_projection_cache.clear()
+		_air_radar_projection_expires_ms = Time.get_ticks_msec() + 500
+	if simulation != null:
+		for card: Dictionary in cards:
+			var craft_id := String(card.get("craft_id", ""))
+			if not _air_radar_projection_cache.has(craft_id):
+				_air_radar_projection_cache[craft_id] = simulation.get_air_support_radar_contacts(craft_id)
+			var radar: Dictionary = _air_radar_projection_cache[craft_id]
+			if not radar.get("ok", false): continue
+			for contact: Dictionary in radar.get("projections", []):
+				var id := String(contact.get("craft_id", ""))
+				if id.is_empty() or radar_seen.has(id): continue
+				radar_seen[id] = true
+				entries.append({"craft_id":"radar:" + id, "radar_contact":true, "dropship_visible":true, "dropship_position":contact.position, "show_lz_marker":false, "show_approach_vector":false, "team_id":get_local_command_team_id()})
 	return entries
 
 
