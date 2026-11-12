@@ -7,6 +7,7 @@ const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
+const ENCOUNTER = preload("res://scripts/core/campaign_space_encounter.gd")
 class FlowFixture extends Node:
 	var _assigned_aircraft_pilot_by_craft := {"ship":"pilot"}
 	var _last_mission_result := {}
@@ -73,6 +74,15 @@ func _initialize() -> void:
 	var rapid := fire.duplicate(); rapid.request_id = "rapid-shot"
 	assert(not adapter.request_operation("space_fire", rapid).ok and combat.get_ship_systems("space_fixture_enemy").state.shield == 20.0)
 	assert(combat.remove_actor("space_fixture_enemy"))
+	var encounter = ENCOUNTER.new(); assert(encounter.start_encounter("ship").ok)
+	sim.configure_space_encounter(encounter)
+	assert(not sim.admit_campaign_space_contacts("ship", {}).ok)
+	assert(sim.admit_campaign_space_contacts("ship", {"runtime_authorized":true}).ok)
+	assert(combat.get_actor("hostile_cutlass") != null and combat.get_actor("neutral_buccaneer") != null)
+	assert(not sim.admit_campaign_space_contacts("ship", {"runtime_authorized":true}).ok)
+	assert(encounter.apply_command({"contract_category":"campaign_space", "operation":"advance", "payload":{"delta_seconds":1.0}}, {"runtime_authorized":true}).ok)
+	assert(encounter.get_snapshot().cutlass_hull == combat.get_ship_systems("hostile_cutlass").state.hull)
+	assert(combat.remove_actor("hostile_cutlass") and combat.remove_actor("neutral_buccaneer"))
 	# Fixture injury: verify an actual warp transition cannot silently repair it.
 	sim.get("_space_combat_state").get("_ship_systems").ship.state.hull = 77.0
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and flight.get_snapshot().motion_mode == "tactical" and flight.get_snapshot().space_area_id == "orbit_approach:planet")

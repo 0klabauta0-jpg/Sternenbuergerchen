@@ -150,6 +150,17 @@ Ownercheck verwendet echte Kampfowner mit Testschiffen. Missionsstart,
 produktive Schiffszulassung, Feuerbefehle und Rückweg rufen die Bindung noch
 nicht auf; die reguläre Mission verwendet weiterhin ihren bisherigen Ablauf.
 
+Weiterer Zwischenstand: `admit_campaign_space_contacts` kann bei einem bereits
+lokal zugelassenen, bemannten Spielerschiff die feindliche Cutlass und neutrale
+Buccaneer mit Katalogkomponenten auf freien Feldern in dessen Bereich zulassen
+und die Ergebnisbrücke binden. Die Eignung und beide Zulassungen werden vor der
+Veröffentlichung geprüft. Ein Warpzyklus-Test ruft diesen Pfad ausdrücklich
+mit einem bereits im lokalen Orbit stehenden Testschiff auf. Der normale
+Missionsstart ruft ihn weiterhin nicht auf: dafür fehlen ein atomarer Übergang
+der bestehenden Reise samt Rückweg und ein echter Feuerauftrag im Missions-UI.
+Die Mission bleibt deshalb auf dem bisherigen Ablauf; es wurde keine produktive
+Umstellung oder spielbare Raumkampfmission nachgewiesen.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf

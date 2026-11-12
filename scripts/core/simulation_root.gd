@@ -407,6 +407,8 @@ const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
 const SPACE_TARGETING = preload("res://scripts/tactical/space_targeting_resolver.gd")
 const SPACE_WEAPON = preload("res://scripts/tactical/space_weapon_resolver.gd")
+const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
+const SPACE_COMPONENT_SYSTEMS = preload("res://scripts/tactical/space_component_systems.gd")
 const SPACE_WING_STATE = preload("res://scripts/core/space_wing_state.gd")
 var _space_combat_state: RefCounted = SPACE_COMBAT_STATE.new()
 var _space_fire_receipts: Dictionary = {}
@@ -1964,6 +1966,58 @@ func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) 
 	if ids.get("hostile") != "hostile_cutlass" or ids.get("neutral") != "neutral_buccaneer": return {"ok":false, "reason":"invalid_encounter_actors"}
 	if _singleplayer_space_travel_owner.get_flight_state(ids.player) != _space_combat_state.get_actor(ids.player): return {"ok":false, "reason":"not_owned"}
 	return _space_encounter_owner.bind_combat_owner(_space_combat_state, ids)
+
+func admit_campaign_space_contacts(craft_id: String, authority_context: Dictionary) -> Dictionary:
+	# Only a live owned player flight can anchor this encounter. The player
+	# transition and the campaign start remain separate prerequisite actions.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if _space_encounter_owner == null or _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"encounter_unavailable"}
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	if encounter.get("phase") != "combat" or encounter.get("craft_id") != craft_id or _space_encounter_owner.get("_combat_owner") != null: return {"ok":false, "reason":"invalid_encounter"}
+	var player: RefCounted = _space_combat_state.get_actor(craft_id)
+	if player == null or _singleplayer_space_travel_owner.get_flight_state(craft_id) != player or _space_combat_state.get_ship_systems(craft_id).is_empty(): return {"ok":false, "reason":"player_unavailable"}
+	var player_metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	if player_metadata.get("control_domain") != "player" or player_metadata.get("faction_id") == "hostile" or not is_instance_valid(_base_personnel_owner) or not _base_personnel_owner.is_pilot_aboard(craft_id): return {"ok":false, "reason":"player_unavailable"}
+	for id in ["hostile_cutlass", "neutral_buccaneer"]:
+		if _space_combat_state.get_actor(id) != null or _space_combat_state.get_inactive_actor(id) != null or not _space_combat_state.get_ship_systems(id).is_empty(): return {"ok":false, "reason":"contact_already_exists"}
+	var pose: Dictionary = player.get_snapshot()
+	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or not String(pose.get("space_area_id", "")).begins_with("orbit_approach:"): return {"ok":false, "reason":"invalid_encounter_area"}
+	var layout: Dictionary = ORBIT_LAYOUT.build(String(pose.space_area_id).trim_prefix("orbit_approach:").uri_decode())
+	if not layout.get("ok", false) or layout.body_map_id != pose.space_area_id: return {"ok":false, "reason":"invalid_encounter_area"}
+	var center: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))
+	var candidates: Array[Vector2i] = []
+	for ring in range(3, 9):
+		for q in range(-ring, ring + 1):
+			for r in range(-ring, ring + 1):
+				var cell := center + Vector2i(q, r)
+				if SPACE_GRID.HEX.distance(center, cell) != ring or not SPACE_AREA_GRID.contains(cell, pose) or layout.body_cells.has(SPACE_GRID.to_offset(cell)): continue
+				var query: Array[Vector2i] = [cell]
+				if not _space_combat_state.query_cells(query, pose.space_area_id).is_empty() or not _space_combat_state.query_navigation_claims(query, pose.space_area_id).is_empty(): continue
+				candidates.append(cell)
+	if candidates.size() < 2: return {"ok":false, "reason":"no_encounter_space"}
+	var prepared: Array[Dictionary] = []
+	var specs := [{"id":"hostile_cutlass", "model":"cutlass", "domain":"enemy", "faction":"hostile"}, {"id":"neutral_buccaneer", "model":"buccaneer", "domain":"neutral", "faction":"neutral"}]
+	for i in range(specs.size()):
+		var spec: Dictionary = specs[i]
+		var stats: Dictionary = SPACE_COMPONENTS.effective_stats(spec.model, SPACE_COMPONENTS.default_loadout(spec.model))
+		if not stats.get("ok", false) or not SPACE_COMPONENT_SYSTEMS.initial(stats, float(stats.get("hull_capacity", 0.0))).get("ok", false): return {"ok":false, "reason":"invalid_ship_components"}
+		var flight: RefCounted = SPACE_FLIGHT_STATE.new()
+		if not flight.configure(spec.id, {"position_plane":Vector2.ZERO}).get("ok", false): return {"ok":false, "reason":"invalid_ship"}
+		var target: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(candidates[i]))
+		var proposal := {"expected_revision":0, "coordinate_frame":"local", "space_area_id":pose.space_area_id, "position_plane":target, "motion_mode":"tactical", "heading_rad":(pose.position_plane-target).angle(), "mass":stats.mass}
+		var transition: Dictionary = flight.validate_area_transition(proposal, tick_counter + 1)
+		var admission: Dictionary = _space_combat_state.validate_new_local_admission({"craft_id":spec.id, "faction_id":spec.faction, "control_domain":spec.domain, "footprint_hexes":[Vector2i.ZERO]}, flight, proposal, tick_counter + 1)
+		if not transition.get("ok", false) or not admission.get("ok", false): return {"ok":false, "reason":"contact_admission_failed"}
+		prepared.append({"flight":flight, "transition":transition, "admission":admission, "stats":stats, "id":spec.id})
+	for entry: Dictionary in prepared:
+		entry.flight._publish_area_transition(entry.transition)
+		_space_combat_state._publish_new_local_admission(entry.admission)
+		var installed: Dictionary = _space_combat_state.bind_ship_systems(entry.id, entry.stats, float(entry.stats.hull_capacity))
+		assert(installed.get("ok", false))
+	var binding: Dictionary = bind_campaign_space_combat({"player":craft_id, "hostile":"hostile_cutlass", "neutral":"neutral_buccaneer"}, authority_context)
+	assert(binding.get("ok", false))
+	return {"ok":true, "hostile":"hostile_cutlass", "neutral":"neutral_buccaneer"}
 
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if command.get("contract_category") == "space_combat" and _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
