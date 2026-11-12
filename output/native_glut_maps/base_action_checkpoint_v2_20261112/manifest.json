@@ -1,0 +1,19 @@
+{
+  "scope": "Separate Base V2 host checkpoint kernel + read-only Movement candidate state getter; no Root/Store/Loader activation",
+  "checks": "30/0",
+  "red_run": "base_checkpoint-8c748beed4d440c28f36f0319e09334e",
+  "green_run": "base_checkpoint-309d4429ead849f8b5d6c129c01f5fe3",
+  "sha256": {
+    "scripts/core/base_personnel_runtime.gd": "735dc3e8fb7131dc20ea255e3426975a21ee18669dd3f87c6b13d9a022b4f137",
+    "scripts/core/hex_movement_command_runtime.gd": "bb21586fd924404ff27a4b46a023d482d42573ae199ba954de8d9aefdbc5edfe",
+    "docs/tasks/BASE_ACTION_CHECKPOINT_V2_2026_11_12.md": "f171956148ce233cee243cb7b941041fcb851ebf41f8fef6e1133f0a0e48bc60",
+    "output/native_glut_maps/base_action_checkpoint_v2_20261112/check.gd": "586a40a74427169ec9e313db57dbc06f713dfbecd1aa6ac41ea707ded40b4c69",
+    "output/native_glut_maps/base_action_checkpoint_v2_20261112/run.py": "37a22d9861c75c71dfaf5e09b779af602e361364f4fbae4d18d1a975d7858227"
+  },
+  "binding_review_red_run": "base_checkpoint-c6fb417118d84ddcb621506ec454d363",
+  "not_product_red_harness_runs": [
+    "base_checkpoint-32f3fc72e7ba4840bac4fc3ffa17be55",
+    "base_checkpoint-b1c7fd4451eb4942b672447e2082d929"
+  ],
+  "evidence_boundary": "Explicit mutation between actual saved-midmove Root reprojection and finalize; no native Canvas callback claim"
+}
