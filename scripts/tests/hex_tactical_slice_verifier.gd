@@ -34,6 +34,11 @@ class SliceDriver extends DRIVER:
 		set_process(false)
 		set_physics_process(false)
 
+class SliceRoot extends SIM:
+	var refuse_authority := false
+	func _should_skip_local_tick_processing() -> bool:
+		return refuse_authority or super._should_skip_local_tick_processing()
+
 class MapCarrier extends Node:
 	var _loaded_terrain_map_data: RefCounted
 
@@ -47,6 +52,61 @@ func _door(open: bool) -> Dictionary:
 	return {"interaction_id":"door","interaction_type":"door","state":"complete" if open else "interrupted","complete":open,"duration_seconds":2.0,"hold_seconds":2.0 if open else 0.0,"team_id":"blue"}
 func _move(id: String,point: Vector2) -> Dictionary:
 	return {"type":"move_to_position","unit_id":id,"team_id":"blue","target_position":point,"command_token":"slice_"+id,"requeue_until_target":true}
+
+func _roundtrip_running_passage(sim: Node, actors: Dictionary) -> bool:
+	var ground = sim.get("_hex_ground_runtime")
+	var movement = sim.get("_hex_movement_runtime")
+	var ground_state: Dictionary=ground.export_state()
+	var movement_state: Dictionary=movement.export_state()
+	var exported: bool=ground_state.get("schema")=="hex_ground_v2" and not ground_state.get("passage_commitments",[]).is_empty() and not ground_state.get("active_segments",[]).is_empty() and movement_state.get("schema")=="hex_movement_v1" and movement_state.get("accepted_intents",[]).size()==2
+	_check(exported,"actual running ramp passage exports whole Ground promises and both Movement intents")
+	if not exported:
+		print("JOINT_EXPORT_REJECT ground=",ground_state.get("reason","")," movement=",movement_state.get("reason",""))
+		for id in ["leader","follower"]:
+			var order: Dictionary=movement.get("_orders").get(id,{})
+			for key in order.get("command",{}):
+				if typeof(key)!=TYPE_STRING or String(movement.call("_save_command_kind",String(key))).is_empty(): print("JOINT_UNSUPPORTED_COMMAND_FIELD unit=",id," key=",key," key_type=",typeof(key)," value_type=",typeof(order.command[key]))
+		return false
+	var actor_positions := {}
+	var projections := {}
+	var readouts := {}
+	for id in actors:
+		actor_positions[id]=actors[id].position
+		projections[id]=ground.get_motion_projection(id,0.0)
+	for id in ["leader","follower"]: readouts[id]=movement.get_readout(id)
+	var ground_prepare: Dictionary=ground.prepare_restore_state(JSON.parse_string(JSON.stringify(ground_state)))
+	var target = ground.get_prepared_restore_ground(ground_prepare.prepared) if ground_prepare.get("ok",false) else null
+	var movement_prepare: Dictionary=movement.prepare_restore_state(JSON.parse_string(JSON.stringify(movement_state)),target) if target!=null else {"ok":false}
+	var prepared: bool=ground_prepare.get("ok",false) and target!=null and movement_prepare.get("ok",false)
+	_check(prepared and ground.export_state()==ground_state,"both real prepared handles validate a detached target without changing live Ground")
+	if not prepared:
+		print("JOINT_PREPARE_REJECT ground=",ground_prepare.get("reason","")," movement=",movement_prepare.get("reason",""))
+		return false
+	# Exercise actual policy guards only; this is not a real multiplayer peer.
+	sim.refuse_authority=true
+	var facing: Dictionary=sim.queue_hex_facing_intent("follower",2,"slice_refused","security_assignment")
+	var stopped: Dictionary=sim.stop_hex_ground_units(PackedStringArray(["follower"]),"slice_refused")
+	sim.release_hex_ground_unit("follower","slice_refused")
+	sim.refuse_authority=false
+	_check(facing.get("reason")=="not_authority" and stopped.get("reason")=="not_authority" and ground.export_state()==ground_state,"actual Root facing/stop/release authority gates leave running passage unchanged")
+	var ground_validation: Dictionary=ground.validate_prepared_restore(ground_prepare.prepared)
+	var movement_validation: Dictionary=movement.validate_prepared_restore(movement_prepare.prepared)
+	var valid: bool=ground_validation.get("ok",false) and movement_validation.get("ok",false)
+	_check(valid,"ALL real owner validations finish before the first restore write")
+	if not valid: return false
+	# No getters, callbacks or checks between the two prevalidated silent tails.
+	var ground_result: Dictionary=ground._publish_prepared_restore(ground_prepare.prepared,ground_validation)
+	var movement_result: Dictionary=movement._publish_prepared_restore(movement_prepare.prepared,movement_validation)
+	_check(ground_result.get("ok",false) and movement_result.get("ok",false) and sim.get("_hex_ground_runtime")==ground and sim.get("_hex_movement_runtime")==movement,"Ground-first Movement-second tails retain the same actual Root component owners")
+	var same: bool=ground.export_state()==ground_state
+	for id in actors:
+		var after: Dictionary=ground.get_motion_projection(id,0.0)
+		same=same and actors[id].position==actor_positions[id] and after.get("position_world")==projections[id].get("position_world") and after.get("stand_height_logical")==projections[id].get("stand_height_logical")
+	for id in ["leader","follower"]:
+		var after: Dictionary=movement.get_readout(id)
+		same=same and after.get("command_id")==readouts[id].get("command_id") and after.get("goal_grid")==readouts[id].get("goal_grid")
+	_check(same,"roundtrip keeps motion, half-height, cohorts, original goals and actor poses without manual repositioning")
+	return same and ground_result.get("ok",false) and movement_result.get("ok",false)
 
 func _run() -> void:
 	var fixture := Node.new()
@@ -70,7 +130,7 @@ func _run() -> void:
 	var units = UNITS.new()
 	units.name = "UnitRegistry"
 	fixture.add_child(units)
-	var sim = SIM.new()
+	var sim = SliceRoot.new()
 	sim.name = "SimulationRoot"
 	sim.unit_registry_path = NodePath("../UnitRegistry")
 	sim.terrain_registry_path = NodePath("../TerrainRegistry")
@@ -115,11 +175,20 @@ func _run() -> void:
 	var shot_current := false
 	var close_guarded := false
 	var detected_grid := Vector2i(-1,-1)
+	var roundtrip_attempted := false
+	var roundtrip_done := false
 	for i in range(256):
 		sim._physics_process(0.1)
 		driver._current_tick = sim.tick_counter
 		driver._advance_detection_timers()
 		var state: Dictionary = sim.get_hex_ground_planning_snapshot()
+		if not roundtrip_attempted and state.units_by_id.leader.grid==Vector2i(3,0) and not state.committed_corridor_grants.is_empty():
+			for segment in state.committed_segments:
+				if segment.unit_id=="leader" and segment.start_tick<state.current_tick and state.current_tick<segment.start_tick+segment.duration_ticks:
+					roundtrip_attempted=true
+					roundtrip_done=_roundtrip_running_passage(sim,actors)
+					state=sim.get_hex_ground_planning_snapshot()
+					break
 		exclusive = exclusive and state.occupant_by_grid.size() == 3 and state.units_by_id.follower.grid != state.units_by_id.leader.grid
 		for id in ["leader","follower"]:
 			var unit: Dictionary = state.units_by_id[id]
@@ -139,13 +208,14 @@ func _run() -> void:
 	_check(close_guarded,"real door producer refuses closure through active passage claims")
 	_check(detected and detected_grid != Vector2i.ZERO and shot_current,"logical field/facing change triggers real detection; shot resolver reads current sight")
 	_check(sim.has_hex_destination_arrived("follower","slice_follower") and sim.has_hex_destination_arrived("leader","slice_leader"),"both actual movement commands report completed arrivals")
+	_check(roundtrip_done,"one actual in-flight passage roundtrip continued through the existing consumer chain")
 	sim.queue_hex_facing_intent("follower",3,"slice_rear","security_assignment")
 	sim._physics_process(0.1)
 	driver._current_tick = sim.tick_counter
 	driver._advance_detection_timers()
 	_check(not FIRE.is_target_attackable(actors.follower,actors.target,context) and not driver._is_detection_complete("follower","target"),"post-arrival logical turn invalidates detection and shot permission immediately")
-	var ground: Object = sim.get("_hex_ground_runtime")
-	print("AP7_PENDING export_state=",ground.has_method("export_state")," restore_state=",ground.has_method("restore_state")," checkpoint_peer_owner=not_verified")
+	print("AP7_PARTIAL ground_v2_movement_v1_joint=",roundtrip_done," root_checkpoint=false host_publication=false receiver=false real_peer=false")
+	if roundtrip_done and failed==0: print("AP7_JOINT_PASSAGE_ROUNDTRIP_READY")
 	fixture.free()
 	print("HEX_TACTICAL_SLICE_PARTIAL checks=%d failures=%d full_ap8=false"%[passed+failed,failed])
 	if failed == 0: print("HEX_TACTICAL_SLICE_PARTIAL_READY")

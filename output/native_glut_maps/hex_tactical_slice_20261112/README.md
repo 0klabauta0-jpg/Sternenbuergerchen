@@ -1,3 +1,7 @@
+Historischer erster8/0-Teil ausae1b543f7. Der aktuelle Fixturecode wurde fuer
+`../ap8_joint_passage_roundtrip_20261112/` erweitert (15/0, weiterhinPARTIAL).
+Die folgenden Belege beschreiben den damaligen Quellstand.
+
 # AP8 tactical slice — partial only, frozen
 
 Only new files: scripts/tests/hex_tactical_slice_verifier.gd, own task HEX_TACTICAL_SLICE_PARTIAL_2026_11_12.md and this QA package. Base2f47421c0. No Runtime/runner/shared-doc edits, no git add/commit or live map activation.
