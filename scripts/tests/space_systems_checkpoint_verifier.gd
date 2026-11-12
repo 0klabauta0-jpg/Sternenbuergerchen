@@ -31,6 +31,12 @@ func _initialize() -> void:
  bad.payload = codec.encode_value(data).value
  assert(not target.prepare_systems_checkpoint_restore(bad).ok)
  assert(target.get_ship_systems("a") == original)
+ bad = saved.duplicate(true)
+ data = codec.decode_value(bad.payload).value
+ data.systems.a.state.hull_capacity = 999.0
+ bad.payload = codec.encode_value(data).value
+ assert(not target.prepare_systems_checkpoint_restore(bad).ok)
+ assert(target.get_ship_systems("a") == original)
  var prepared: Dictionary = target.prepare_systems_checkpoint_restore(saved)
  assert(prepared.ok and target.get_ship_systems("a") == original)
  if not target.has_method("validate_systems_checkpoint_restore"):

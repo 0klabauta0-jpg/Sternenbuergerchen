@@ -88,6 +88,23 @@ func test_control_rebind() -> bool:
 	var restored: Dictionary = prepare(saved,bindings,{id:{"equipment_owner":restored_equipment}})
 	if not check(restored.get("ok",false), "equipment owner context rebinds"): return false
 	if not check(restored.candidate.get_flight_controls()[id].equipment_owner_id == restored_equipment.get_instance_id(), "saved process identity replaced"): return false
+	var orbit_control: Dictionary = source.get_flight_controls()[id]
+	orbit_control["orbit_auto_transit"] = true
+	orbit_control["orbit_auto_location_id"] = "satellite_crash"
+	orbit_control["orbit_auto_direction"] = "inbound"
+	assert(source.set_flight_control(id,orbit_control))
+	var orbit_saved: Dictionary = JSON.parse_string(JSON.stringify(source.export_navigation_checkpoint(),"",true,true))
+	var orbit_restored: Dictionary = prepare(orbit_saved,bindings,{id:{"equipment_owner":restored_equipment}})
+	if not check(orbit_restored.get("ok",false) and orbit_restored.candidate.get_flight_controls()[id].get("orbit_auto_transit")==true, "stable orbit transit control rebinds with its equipment"): return false
+	var invalid_orbit: Dictionary = CODEC.decode_value(orbit_saved.payload).value
+	invalid_orbit.controls[id]["orbit_auto_braking"] = true
+	var forged_orbit := orbit_saved.duplicate(true)
+	forged_orbit.payload = CODEC.encode_value(invalid_orbit).value
+	if not check(not prepare(forged_orbit,bindings,{id:{"equipment_owner":restored_equipment}}).get("ok",false), "transient braking control is rejected"): return false
+	orbit_control.erase("orbit_auto_transit")
+	orbit_control.erase("orbit_auto_location_id")
+	orbit_control.erase("orbit_auto_direction")
+	assert(source.set_flight_control(id,orbit_control))
 	var mutated: Dictionary = CODEC.decode_value(saved.payload).value
 	mutated.controls[id].hull.main_thrust *= 2.0
 	var bad := saved.duplicate(true)

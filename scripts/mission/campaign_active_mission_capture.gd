@@ -7,11 +7,21 @@ const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const ACTORS = preload("res://scripts/mission/mission_actor_checkpoint_batch.gd")
 const GROUND = preload("res://scripts/mission/legacy_ground_checkpoint.gd")
 const LIFECYCLE = preload("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
+const ROOT_RECEIPTS = preload("res://scripts/mission/root_receipt_checkpoint.gd")
 
 static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if not is_instance_valid(flow) or not is_instance_valid(runtime) or not flow.has_method("is_campaign_start") or not flow.is_campaign_start() or runtime.get("_flow") != flow: return _reject("campaign_unavailable")
 	var world_guard: Dictionary = runtime.get_world_checkpoint_guard()
 	if not world_guard.get("ok",false) and world_guard.get("reason") != "world_active": return world_guard
+	# The home hex owner has independent occupancy/movement/base state. The
+	# generic world guard stops at travel first, so it cannot establish that
+	# these participants are captured by this surface-only checkpoint.
+	var encounter: RefCounted = runtime.get("_space_encounter")
+	if encounter == null or not Dictionary(encounter.get("_state")).is_empty() or not Dictionary(runtime.get("_service_pad_reservation")).is_empty(): return _reject("world_service_unsupported")
+	var home_sim: Node = runtime.get("_simulation")
+	if not is_instance_valid(home_sim) or home_sim.is_hex_ground_runtime_required(): return _reject("home_hex_checkpoint_unsupported")
+	for resource in Dictionary(runtime.get("_resource_owners")).values():
+		if not is_instance_valid(resource) or not Dictionary(resource.get("_active")).is_empty() or not Dictionary(resource.get("_pending")).is_empty(): return _reject("resource_activity_unsupported")
 	var mission: Node = flow.get("_active_mission")
 	if not is_instance_valid(mission) or mission.is_queued_for_deletion(): return _reject("mission_unavailable")
 	var locations: Array = flow.get_location_runtime_snapshot()
@@ -52,7 +62,7 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	start.get_script()._migrate_known_main_starter(identity_home)
 	var run: Dictionary = start.get_script().resolve_checkpoint_run_id(identity_home,false)
 	if not run.get("ok",false) or run.id != String(start.get("campaign_run_id")): return _reject("campaign_run_mismatch")
-	var home_digest := JSON.stringify(home.payload,"",true,true).sha256_text()
+	var home_digest := FileAccess.get_sha256(HOME_STORE.DEFAULT_PATH)
 	var roster: Array = Array(flow.get("_all_team_units")).duplicate(true)
 	var roster_ids: Array = []
 	for person in roster:
@@ -62,13 +72,34 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	for person in home.payload.roster: home_ids.append(person.unit_id)
 	roster_ids.sort(); home_ids.sort()
 	if roster_ids != home_ids or home.payload.craft.definition.get("craft_id") != craft_id: return _reject("home_checkpoint_mismatch")
+	# Scene setup must not reconstruct older equipment or team definitions.
+	var home_craft: Dictionary = home.payload.craft
+	var current_loadouts: Dictionary = setup.get("member_loadouts")
+	var saved_loadouts: Dictionary = home_craft.get("member_loadouts", {})
+	for id in active_ids:
+		if current_loadouts.get(id) != saved_loadouts.get(id) or not current_loadouts.has(id): return _reject("mission_loadout_changed")
+	if JSON.stringify(setup.get("selected_fireteam_definitions"),"",true) != JSON.stringify(home_craft.get("fireteam_definitions",[]),"",true): return _reject("mission_fireteams_changed")
+	var base: Node = runtime.get("_base_personnel")
+	if not is_instance_valid(base) or not base.has_method("export_state"): return _reject("home_personnel_unavailable")
+	var base_states: Dictionary = base.get("_states")
+	if base_states.size()!=active_ids.size(): return _reject("home_personnel_unsupported")
+	for id in active_ids:
+		var person: Variant = base_states.get(id)
+		if not person is Dictionary or person.get("status")!="aboard" or person.get("craft_id")!=craft_id or not Dictionary(person.get("action",{})).is_empty(): return _reject("home_personnel_unsupported")
+	var base_state: Dictionary = base.export_state()
+	if base_state.get("version")!=1 or not base_state.get("units") is Dictionary or base_state.units.size()!=active_ids.size(): return _reject("home_personnel_unsupported")
 	var campaign: RefCounted = runtime.get("_campaign")
 	var supply: RefCounted = runtime.get("_supply")
 	var onboarding: RefCounted = runtime.get("_onboarding")
 	var equipment: RefCounted = runtime.get("_ship_equipment")
 	var market: RefCounted = runtime.get("_polisa_market")
 	if campaign == null or supply == null or onboarding == null or equipment == null or market == null: return _reject("campaign_owner_unavailable")
+	var pad_bindings: Dictionary = runtime.get("_pad_by_craft")
+	var token_bindings: Dictionary = runtime.get("_departure_token_by_craft")
+	if pad_bindings.size()!=1 or token_bindings.size()!=1 or typeof(pad_bindings.get(craft_id))!=TYPE_STRING or String(pad_bindings[craft_id]).is_empty() or token_bindings.get(craft_id)!=identity.departure_token: return _reject("mission_route_binding_mismatch")
 	var campaign_state: Dictionary = campaign.export_state()
+	var route: Dictionary = campaign_state.get("departures_by_craft_id",{}).get(craft_id,{})
+	if route.get("landing_pad_id") != pad_bindings[craft_id] or not runtime._built_home_pad_ids().has(pad_bindings[craft_id]): return _reject("mission_route_binding_mismatch")
 	var job: Dictionary = campaign_state.get("jobs",{}).get(identity.job_id,{})
 	var place: Dictionary = campaign_state.get("locations",{}).get(identity.location_id,{})
 	if job.get("status") != "active" or job.get("scenario_id") != identity.scenario_id or job.get("location_id") != identity.location_id or String(setup.get("map_file_path")) != String(place.get("map_file_path","")) or String(setup.get("scenario_file_path")) != "res://data/mission_scenarios/" + String(identity.scenario_id) + ".json": return _reject("mission_scenario_mismatch")
@@ -99,6 +130,15 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var ground := GROUND.new()
 	var ground_state: Dictionary = ground.export_positions(sim,terrain,active_ids)
 	if not ground_state.get("ok",false): return ground_state
+	var selected: Dictionary = flow.call("_get_selected_mission_definition")
+	var mission_config := {"time_limit_seconds":float(driver.get("mission_time_limit_seconds")),"win_condition":String(driver.get("win_condition"))}
+	var scenario: Variant = setup.get("_mission_scenario")
+	if scenario == null: return _reject("mission_configuration_mismatch")
+	var scenario_limit := float(scenario.get("time_limit_seconds"))
+	var expected_limit := scenario_limit if scenario_limit>0.0 else float(selected.get("time_limit_seconds",1200.0))
+	var scenario_win := String(scenario.get("win_condition")).strip_edges().to_lower()
+	var expected_win := scenario_win if not scenario_win.is_empty() else String(selected.get("win_condition",""))
+	if selected.get("mission_id")!=identity.scenario_id or expected_limit!=mission_config.time_limit_seconds or expected_win!=mission_config.win_condition: return _reject("mission_configuration_mismatch")
 	var lifecycle := LIFECYCLE.new()
 	var lifecycle_state: Dictionary = lifecycle.export_state(sim,driver)
 	if not lifecycle_state.get("ok",false): return lifecycle_state
@@ -116,9 +156,12 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var wings: Dictionary = wing.export_checkpoint_state()
 	for pair in [[navigation,"space_navigation_checkpoint.v1"],[systems,"space_systems_checkpoint.v1"],[wings,"space_wing_checkpoint.v1"]]:
 		if pair[0].get("schema") != pair[1]: return pair[0] if pair[0].get("ok",true)==false else _reject("space_checkpoint_unavailable")
+	var receipt_bindings := {"fleet":travel,"supply":supply,"campaign":campaign,"equipment":equipment,"adapter":runtime}
+	var root_receipts: Dictionary = ROOT_RECEIPTS.capture(root,receipt_bindings)
+	if root_receipts.get("schema") != "root_receipt_checkpoint.v1": return root_receipts if root_receipts.get("ok",true)==false else _reject("root_receipt_checkpoint_unavailable")
 	var requests := CODEC.encode_value(Dictionary(runtime.get("_space_operation_requests")))
 	if not requests.ok: return requests
-	return {"ok":true,"complete":false,"missing":["root_receipts","world_transaction","restore_scene"],"components":{"home":home.payload,"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"space_requests":requests.value}}
+	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":{"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config}}
 
 static func _reject(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}

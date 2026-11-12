@@ -20,6 +20,9 @@ func _guard(sim: Node, driver: Node) -> Dictionary:
 		if command != null and String(command.get("command_type")) != "hold_position": return _reject("mission_movement_pending")
 	var controller: Node = sim.get_parent().get_node_or_null("TacticalController") if is_instance_valid(sim.get_parent()) else null
 	if controller != null:
+		for field in ["_order_plans_by_key", "_area_orders_by_id"]:
+			var plans: Variant = controller.get(field)
+			if not plans is Dictionary or not plans.is_empty(): return _reject("mission_planned_orders_unsupported")
 		var movement: Variant = controller.get("_fireteam_movement_controller")
 		if movement == null or not movement.has_method("get_state_snapshot") or not movement.get_state_snapshot().is_empty(): return _reject("mission_movement_pending")
 	return {"ok":true}

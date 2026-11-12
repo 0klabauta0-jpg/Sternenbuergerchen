@@ -2,6 +2,12 @@ extends "res://scripts/tests/hex_runtime_selection_verifier.gd"
 const DRIVER = preload("res://scripts/tests/mission_combat_loop_driver.gd")
 class QuietDriver extends DRIVER:
  func _ready() -> void: set_process(false); set_physics_process(false)
+class StillMovement extends RefCounted:
+ func get_state_snapshot() -> Array: return []
+class QuietController extends Node:
+ var _order_plans_by_key := {}
+ var _area_orders_by_id := {}
+ var _fireteam_movement_controller = StillMovement.new()
 func _run() -> void:
  var script = load("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
  if script == null: _check(false,"stable lifecycle helper exists"); done(); return
@@ -17,6 +23,17 @@ func _run() -> void:
  var owner = script.new()
  var saved: Dictionary = JSON.parse_string(JSON.stringify(owner.export_state(rig.sim,driver)))
  _check(saved.get("ok",false),"stable legacy lifecycle captures")
+ var controller := QuietController.new()
+ controller.name = "TacticalController"
+ rig.scene.add_child(controller)
+ _check(owner.export_state(rig.sim,driver).get("ok",false),"empty planned orders remain savable")
+ controller._order_plans_by_key["ft1|phase"] = {"waypoints":[Vector2(40,20)]}
+ _check(owner.export_state(rig.sim,driver).get("reason","")=="mission_planned_orders_unsupported","planned movement cannot be silently omitted")
+ _check(not owner.prepare_restore(rig.sim,driver,saved).get("ok",false),"restore rejects a target with planned movement")
+ controller._order_plans_by_key.clear()
+ controller._area_orders_by_id["area"] = {"command":"defend"}
+ _check(owner.export_state(rig.sim,driver).get("reason","")=="mission_planned_orders_unsupported","planned area order cannot be silently omitted")
+ controller._area_orders_by_id.clear()
  var actor = rig.actors.a
  var moving = load("res://scripts/npc/unit_command.gd").new()
  moving.command_type = "move_to_position"

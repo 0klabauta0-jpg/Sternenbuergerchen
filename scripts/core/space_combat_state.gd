@@ -500,6 +500,7 @@ func prepare_systems_checkpoint_restore(state: Dictionary) -> Dictionary:
 		var entry: Dictionary = data.systems[id]
 		if entry.size() != 3 or not entry.has_all(["stats", "state", "cooldowns"]) or not entry.stats is Dictionary or not entry.state is Dictionary or not entry.cooldowns is Dictionary or JSON.stringify(entry.stats, "", true) != JSON.stringify(_ship_systems[id].stats, "", true): return {"ok":false, "reason":"invalid_systems_checkpoint"}
 		if not SHIP_SYSTEMS.advance(entry.stats, entry.state, 0.0).get("ok", false): return {"ok":false, "reason":"invalid_systems_checkpoint"}
+		if not is_equal_approx(float(entry.state.hull_capacity), float(_ship_systems[id].state.hull_capacity)): return {"ok":false, "reason":"invalid_systems_checkpoint"}
 		var slots := {}
 		for weapon in entry.stats.get("weapons", []):
 			if weapon is Dictionary and typeof(weapon.get("slot_id")) == TYPE_STRING: slots[weapon.slot_id] = true
@@ -661,13 +662,20 @@ func validate_navigation_checkpoint_candidate(state: Dictionary, control_binding
 
 
 static func _navigation_control_valid(control: Dictionary, pose: Dictionary) -> bool:
-	var allowed := ["goal", "intent", "hull", "power", "singleplayer_move", "air_support_move", "equipment_snapshot", "area_id"]
+	var allowed := ["goal", "intent", "hull", "power", "singleplayer_move", "air_support_move", "equipment_snapshot", "area_id", "orbit_auto_transit", "orbit_auto_braking", "orbit_auto_location_id", "orbit_auto_direction"]
 	for key in control:
 		if not allowed.has(key): return false
 	if pose.get("motion_mode") != "tactical" or not control.get("hull") is Dictionary or not control.get("power") is Dictionary or control.has("goal") == control.has("intent"): return false
 	for key in ["singleplayer_move", "air_support_move"]:
 		if control.has(key) and typeof(control[key]) != TYPE_BOOL: return false
 	if control.get("singleplayer_move", false) and control.get("air_support_move", false): return false
+	var orbit_fields := ["orbit_auto_transit", "orbit_auto_braking", "orbit_auto_location_id", "orbit_auto_direction"]
+	var has_orbit := false
+	for field in orbit_fields: has_orbit = has_orbit or control.has(field)
+	if has_orbit:
+		# A separately validated Intent owner binds this route to its exact
+		# craft/location. Braking is transient and is not yet restorable.
+		if control.get("orbit_auto_transit") != true or control.has("orbit_auto_braking") or control.get("singleplayer_move") != true or control.get("air_support_move",false) or typeof(control.get("orbit_auto_location_id")) != TYPE_STRING or String(control.orbit_auto_location_id).is_empty() or control.get("orbit_auto_direction") not in ["inbound","outbound"] or not String(pose.get("space_area_id","")).begins_with("orbit_approach:"): return false
 	var intent: Dictionary = {}
 	if control.has("goal"):
 		if not control.goal is Dictionary: return false

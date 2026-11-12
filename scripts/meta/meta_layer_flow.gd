@@ -362,6 +362,41 @@ func _ready() -> void:
 	call_deferred("_apply_release_start_mission_deeplink")
 	call_deferred("_apply_release_lz_drop_preview_deeplink")
 	call_deferred("_apply_release_first_go_firefight_deeplink")
+	if is_campaign_start() and _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
+		call_deferred("_restore_private_active_campaign")
+
+
+# The path is reachable only in the isolated verifier until every owner and
+# the full resume/return scenario have passed together.
+func _restore_private_active_campaign() -> void:
+	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") != "1" or _campaign_start == null or not bool(_campaign_start.get("active_restore_in_progress")): return
+	var data: Dictionary = _campaign_start.get("active_pending")
+	var factory = load("res://scripts/mission/campaign_active_scene_preflight.gd")
+	var created: Dictionary = factory.instantiate_scene(data,_campaign_start.get("checkpoint"))
+	if not created.get("ok",false):
+		set_meta("campaign_active_restore_error",created)
+		return
+	var scene: Node = created.scene
+	scene.hide()
+	scene.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_ALWAYS
+	scene.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_ALWAYS
+	_get_mission_host().add_child(scene)
+	for i in range(5): await get_tree().physics_frame
+	if not is_inside_tree() or not is_instance_valid(scene): return
+	scene.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_DISABLED
+	scene.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_DISABLED
+	var transaction = load("res://scripts/mission/campaign_active_world_transaction.gd")
+	var prepared: Dictionary = transaction.prepare(data,_singleplayer_runtime,scene)
+	if not prepared.get("ok",false):
+		set_meta("campaign_active_restore_error",prepared)
+		scene.queue_free()
+		return
+	var result: Dictionary = transaction.commit(prepared,data)
+	if not result.get("ok",false):
+		set_meta("campaign_active_restore_error",result)
+		if _active_mission != scene: scene.queue_free()
+		return
+	_campaign_start.set("active_restore_in_progress",false)
 
 
 func _process(_delta: float) -> void:

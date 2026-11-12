@@ -10,10 +10,13 @@ var checkpoint: Dictionary = {}
 var last_save_signature := ""
 var error_message := ""
 var campaign_run_id := ""
+var active_pending: Dictionary = {}
+var active_restore_in_progress := false
 var _hex_export_scope := ""
 var _hex_export_msec: int = -1
 
 func configure(flow: Node, request: Dictionary) -> void:
+	var run_source: Dictionary = {}
 	entry = request.duplicate(true)
 	if String(request.get("action", "new")) == "continue":
 		var loaded: Dictionary = STORE.load_checkpoint()
@@ -28,7 +31,24 @@ func configure(flow: Node, request: Dictionary) -> void:
 				return
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 		_migrate_known_main_starter(checkpoint)
-	var run: Dictionary = resolve_checkpoint_run_id(checkpoint, String(request.get("action", "new")) != "continue")
+		run_source = checkpoint.duplicate(true)
+		# Private verifier gate: ordinary players cannot open unfinished active saves.
+		if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1":
+			var active_store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
+			if FileAccess.file_exists(active_store.DEFAULT_PATH):
+				var bootstrap = load("res://scripts/mission/campaign_active_bootstrap_validation.gd")
+				var active: Dictionary = active_store.load_checkpoint(bootstrap.validate)
+				if not active.get("ok",false):
+					# A newer home save makes an older active checkpoint ineligible.
+					# It is ignored, while malformed active data still fails closed.
+					if active.get("reason") != "active_home_mismatch":
+						error_message = "Aktiver Teststand ist ungueltig; Heimatstand bleibt erhalten."
+						return
+				else:
+					active_pending = active.payload.components
+					active_restore_in_progress = true
+					checkpoint["base_personnel"] = active_pending.base_personnel.duplicate(true)
+	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, String(request.get("action", "new")) != "continue")
 	if not run.get("ok", false):
 		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
 		return
@@ -131,6 +151,7 @@ func _hex_save_throttled(scope: String, now: int, force: bool) -> bool:
 	return not force and scope == _hex_export_scope and now - _hex_export_msec < HEX_AUTOSAVE_INTERVAL_MSEC
 
 func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dictionary:
+	if active_restore_in_progress: return {"ok":false,"reason":"active_restore_pending"}
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
 	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")
@@ -185,3 +206,23 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	if result.get("ok", false):
 		last_save_signature = signature
 	return result
+
+
+# Not connected to user-facing autosave until the complete end-to-end gate is green.
+func save_active_checkpoint(flow: Node, runtime: Node, _force: bool = false) -> Dictionary:
+	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") != "1": return {"ok":false,"reason":"active_checkpoint_not_ready"}
+	var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
+	var collected: Dictionary = capture.capture_components(flow,runtime)
+	if not collected.get("ok",false): return collected
+	var normalizer = load("res://scripts/mission/campaign_active_json_normalizer.gd")
+	var normalized: Dictionary = normalizer.normalize(collected.components)
+	if not normalized.get("ok",false): return normalized
+	var payload := {"schema":"campaign_active_checkpoint.v1", "components":normalized.value}
+	# Validate in the exact persisted numeric domain on the first and second
+	# store pass; all values were already explicitly checked as JSON-native.
+	var wire: Variant = JSON.parse_string(JSON.stringify(payload,"",true,true))
+	if not wire is Dictionary: return {"ok":false,"reason":"active_json_roundtrip_failed"}
+	payload = wire
+	var validator = load("res://scripts/mission/campaign_active_checkpoint_validation.gd")
+	var store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
+	return store.save_checkpoint(payload,func(value: Dictionary) -> Dictionary: return validator.validate_live(value,flow,runtime))
