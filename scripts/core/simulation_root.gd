@@ -3,6 +3,7 @@ extends Node
 
 const UNIT_PROFILE_MATH_SCRIPT=preload("res://scripts/npc/unit_profile_math.gd")
 const PERSONNEL_LOADOUT_STATE = preload("res://scripts/core/personnel_loadout_state.gd")
+const BASE_PERSONNEL_ACTOR_SCRIPT=preload("res://scripts/core/base_personnel_actor.gd")
 var _personnel_loadout_owner: RefCounted = PERSONNEL_LOADOUT_STATE.new()
 
 
@@ -49,6 +50,53 @@ func request_base_personnel_command(operation: String, payload: Dictionary) -> D
 	if not is_instance_valid(_base_personnel_owner):
 		return {"ok":false,"reason":"base_personnel_unavailable"}
 	return _base_personnel_owner.call("apply_operation", operation, payload.duplicate(true))
+
+
+## Internal base-owner capability. A base projection is deliberately not a
+## tactical command actor; it may only use this exact configured owner/registry.
+func _validate_base_ground_people(owner:Node,unit_ids:PackedStringArray)->Dictionary:
+	if _should_skip_local_tick_processing():return {"ok":false,"reason":"not_authority"}
+	if not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_inactive"}
+	if not is_instance_valid(owner) or owner!=_base_personnel_owner or owner.get_parent()!=get_parent():return {"ok":false,"reason":"wrong_base_owner"}
+	if unit_ids.is_empty() or unit_ids.size()>64:return {"ok":false,"reason":"invalid_base_group"}
+	var registry:Node=get_unit_registry()
+	if not is_instance_valid(registry) or owner.call("get_unit_registry")!=registry or owner.call("get_simulation_root")!=self or owner.call("get_terrain_registry")!=_hex_ground_registry:return {"ok":false,"reason":"wrong_base_registry"}
+	if get_parent()==get_tree().root or not get_parent().is_ancestor_of(registry):return {"ok":false,"reason":"invalid_base_scope"}
+	var actors:Dictionary={}
+	var states:Dictionary=owner.get("_states")
+	for id in unit_ids:
+		if id.is_empty() or id!=id.strip_edges() or actors.has(id) or not states.has(id):return {"ok":false,"reason":"invalid_base_person"}
+		if String(states[id].get("status",""))=="aboard" or not bool(owner.call("_unit_is_home",id)):return {"ok":false,"reason":"base_person_not_on_ground"}
+		var actor:Node=registry.call("get_unit",id)
+		if not is_instance_valid(actor) or actor.get_parent()!=owner or actor.get_script()!=BASE_PERSONNEL_ACTOR_SCRIPT or owner.call("get_actor",id)!=actor or _known_units_by_id.get(id)!=actor or actor.is_queued_for_deletion():return {"ok":false,"reason":"base_actor_unbound"}
+		if String(actor.call("get_unit_id"))!=id:return {"ok":false,"reason":"base_actor_identity"}
+		actors[id]=actor
+	return {"ok":true,"actors":actors}
+
+
+func admit_base_ground_people(owner:Node,placements:Array[Dictionary])->Dictionary:
+	var ids:=PackedStringArray()
+	for entry in placements:
+		if not entry.get("unit_id") is String:return {"ok":false,"reason":"invalid_base_person"}
+		ids.append(entry.unit_id)
+	var checked:Dictionary=_validate_base_ground_people(owner,ids)
+	if not checked.ok:return checked
+	return admit_hex_ground_units(placements)
+
+
+func _validate_base_ground_move(owner:Node,id:String,target:Vector2,token:String)->Dictionary:
+	var checked:Dictionary=_validate_base_ground_people(owner,PackedStringArray([id]))
+	if not checked.ok:return checked
+	if not target.is_finite() or token.is_empty() or token.length()>128:return {"ok":false,"reason":"invalid_base_move"}
+	if not _hex_ground_runtime.has_unit(id):return {"ok":false,"reason":"base_person_not_admitted"}
+	if not _hex_ground_registry.call("is_walkable",_hex_ground_registry.call("world_to_grid",target)):return {"ok":false,"reason":"target_blocked"}
+	return checked
+
+
+func request_base_ground_move(owner:Node,id:String,target:Vector2,token:String)->Dictionary:
+	var checked:Dictionary=_validate_base_ground_move(owner,id,target,token)
+	if not checked.ok:return checked
+	return _hex_movement_runtime.stage_move({"type":"move_to_position","source_command_type":"base_personnel","unit_id":id,"target_position":target,"command_token":token,"move_speed_factor":1.0},checked.actors[id])
 
 signal tick_processed(tick: int)
 signal hex_ground_events_committed(events: Array[Dictionary])

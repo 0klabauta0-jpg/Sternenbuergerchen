@@ -27,3 +27,11 @@ medizinischen/Beduerfnisowner.
 Akzeptanz: zwei reservierte unterschiedliche Betten, tatsaechlicher Gang/Schlaf,
 manuelles Aufwecken und Bewegung, Schalter aus verhindert neuen Bettweg,
 Schalterzustand ueber Save/Continue, Bedienung ueber NPC und Operationsmenue.
+
+Hexkandidat: Basisabsichten und Bettvormerkung bleiben hier; physische Belegung
+und Bewegung liegen beim gemeinsamen Root/Ground. Ein eigener an den echten
+Basisowner gebundener Zugang erlaubt Baseactors ohne taktische Commandmethoden.
+Erst tokenisierte tatsächliche Rootankunft beendet den Bettweg. Abbruch oder
+statisch gescheiterte Navigation geben Aktion und Bettvormerkung frei; vorläufiges
+Warten hinter belegten Feldern bleibt ein laufender Weg. Ein freier Renderstand
+ist kein Ankunftsbeleg. Produktionsbasiskarten sind noch nicht aktiviert.
