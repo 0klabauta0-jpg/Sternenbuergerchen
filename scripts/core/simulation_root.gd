@@ -606,6 +606,70 @@ func get_hex_actor_execution_binding(unit_id:String)->Dictionary:
 	return result
 
 
+## Setup owns requested selection; Root commits exact actor/index lifetimes.
+func commit_hex_actor_identity_changes(requester:Node,changes:Array[Dictionary],presentation_only:bool=false)->Dictionary:
+	if presentation_only:
+		if not _should_skip_local_tick_processing() or is_hex_ground_runtime_active():return {"ok":false,"reason":"invalid_presentation_owner"}
+	elif _should_skip_local_tick_processing() or not is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_identity_owner_inactive"}
+	var scope:Node=get_parent()
+	var registry=get_unit_registry()
+	if scope==null or scope==get_tree().root or not is_instance_valid(requester) or not scope.is_ancestor_of(requester) or not requester.has_method("_get_simulation_root") or requester.call("_get_simulation_root")!=self:return {"ok":false,"reason":"invalid_identity_requester"}
+	if registry==null or not scope.is_ancestor_of(registry) or not registry.has_method("apply_lookup_bindings") or not registry.has_method("get_unit") or changes.size()>64:return {"ok":false,"reason":"identity_registry_unavailable"}
+	var actors:Dictionary={}
+	var targets:Dictionary={}
+	var operations:Dictionary={}
+	var validations:Array[Dictionary]=[]
+	for change in changes:
+		var actor:Variant=change.get("actor")
+		var old_id:String=String(change.get("old_id",""))
+		var next_id:String=String(change.get("next_id",""))
+		if not is_instance_valid(actor) or not actor is Node2D or actor.is_queued_for_deletion() or not scope.is_ancestor_of(actor) or actors.has(actor.get_instance_id()) or old_id.is_empty() or next_id.is_empty() or targets.has(next_id):return {"ok":false,"reason":"invalid_identity_group"}
+		if not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=old_id or not actor.has_method("validate_runtime_identity_change"):return {"ok":false,"reason":"identity_actor_mismatch"}
+		var known:Variant=_known_units_by_id.get(old_id)
+		var registered:Variant=registry.get_unit(old_id)
+		if (known!=null and known!=actor) or (registered!=null and registered!=actor) or (is_hex_ground_runtime_active() and _hex_ground_runtime.has_unit(old_id) and known!=actor):return {"ok":false,"reason":"identity_source_conflict"}
+		var checked:Dictionary=actor.call("validate_runtime_identity_change",change.get("prepared"))
+		if not checked.get("ok",false):return checked
+		if checked.get("owner_id",0)!=get_instance_id() or checked.get("unit_id","")!=next_id or checked.get("reset",false)!=bool(change.get("reset",false)):return {"ok":false,"reason":"identity_prepared_mismatch"}
+		validations.append(checked)
+		actors[actor.get_instance_id()]=true;targets[next_id]=true
+		if not bool(change.get("reset",false)):
+			if old_id!=next_id:return {"ok":false,"reason":"identity_reset_required"}
+			continue
+		if operations.has(old_id):return {"ok":false,"reason":"identity_index_overlap"}
+		operations[old_id]={"unit_id":old_id,"expected":registered,"next":null}
+		if next_id!=old_id:
+			if _known_units_by_id.has(next_id) or registry.has_unit(next_id) or operations.has(next_id):return {"ok":false,"reason":"identity_target_conflict"}
+			operations[next_id]={"unit_id":next_id,"expected":null,"next":null}
+		if bool(change.get("register_new",false)):operations[next_id].next=actor
+	var index_changes:Array[Dictionary]=[]
+	for operation in operations.values():index_changes.append(operation)
+	# Last fallible operation; this API has no callbacks and changes indexes only.
+	var swapped:Dictionary=registry.call("apply_lookup_bindings",index_changes)
+	if not swapped.get("ok",false):return swapped
+	for change in changes:
+		if bool(change.get("reset",false)):unregister_known_unit(String(change.old_id))
+	for index in range(changes.size()):changes[index].actor.call("_publish_runtime_identity_change",changes[index].prepared,validations[index])
+	for change in changes:
+		if bool(change.get("reset",false)) and bool(change.get("known_new",false)):register_known_unit(String(change.next_id),change.actor)
+	var receipt:Dictionary={"ok":true,"root_id":get_instance_id(),"registry_id":registry.get_instance_id(),"context":_hex_ground_context_revision,"actors":{},"identities":{}}
+	for change in changes:
+		receipt.actors[change.next_id]=change.actor.get_instance_id()
+		receipt.identities[change.next_id]=_hex_payload_identity(String(change.next_id))
+	return receipt
+
+
+func is_hex_actor_identity_commit_current(receipt:Dictionary)->bool:
+	if receipt.get("root_id",0)!=get_instance_id() or receipt.get("context",-1)!=_hex_ground_context_revision or is_queued_for_deletion():return false
+	var registry=get_unit_registry()
+	if not is_instance_valid(registry) or registry.get_instance_id()!=receipt.get("registry_id",0):return false
+	for id in Dictionary(receipt.get("identities",{})):
+		if _hex_payload_identity(id)!=receipt.identities[id]:return false
+		var actor:Variant=instance_from_id(int(receipt.actors[id]))
+		if not is_instance_valid(actor) or actor.is_queued_for_deletion() or not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=id:return false
+	return true
+
+
 func get_hex_motion_projection(unit_id: String, interpolation_fraction: float, height_step_world: float = 1.0) -> Dictionary:
 	return _hex_ground_runtime.get_motion_projection(unit_id,interpolation_fraction,height_step_world) if is_hex_ground_runtime_active() else {}
 

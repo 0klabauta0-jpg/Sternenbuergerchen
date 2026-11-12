@@ -32,6 +32,7 @@ CASES = {
     "movement_consumers": ("hex_movement_consumers_verifier.gd", "HEX_MOVEMENT_CONSUMERS_PASS"),
     "execution_members": ("hex_execution_members_verifier.gd", "HEX_EXECUTION_MEMBERS_PASS"),
     "execution_controller": ("hex_execution_controller_verifier.gd", "HEX_EXECUTION_CONTROLLER_PASS"),
+    "runtime_selection": ("hex_runtime_selection_verifier.gd", "HEX_RUNTIME_SELECTION_PASS"),
     "moving_shot": ("hex_moving_shot_verifier.gd", "HEX_MOVING_SHOT_PASS"),
     "door_guard": ("hex_door_guard_verifier.gd", "HEX_DOOR_GUARD_PASS"),
     "backoff": ("hex_backoff_execution_verifier.gd", "HEX_BACKOFF_EXECUTION_PASS"),
@@ -84,7 +85,7 @@ def main() -> int:
             data = origin.read_bytes()
             workspace_hashes[relative] = hashlib.sha256(data).hexdigest()
             return data
-        if args.case in {"polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             for ref in [resolved_head] + ([parent_ref] if args.case == "polisa_visit" else []):
                 result = subprocess.run(["git", "show", ref + ":" + relative], cwd=source,
                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -118,12 +119,12 @@ def main() -> int:
     ]
     if args.case == "reservation":
         paths.append("scripts/tactical/bottleneck_reservation_resolver.gd")
-    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "execution_members", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "actor_prepared", "polisa_visit", "medical_consumer", "execution_controller"}:
+    if args.case in {"owner", "consumers", "facing", "security", "locations", "movement", "movement_consumers", "execution_members", "moving_shot", "door_guard", "backoff", "lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "actor_prepared", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
         # Only the real owner's bounded preload closure; no game autoloads/scenes.
         pending = ["scripts/core/simulation_root.gd", "scripts/terrain/terrain_map_data.gd"]
         if args.case == "actor_prepared":
             pending.append(script_path)
-        if args.case in {"polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             pending.extend([script_path, "scripts/meta/meta_layer_flow.gd",
                             "scripts/tests/mission_tactical_sandbox_controller.gd"])
         if args.case in {"movement", "movement_consumers"}:
@@ -139,11 +140,11 @@ def main() -> int:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd","scripts/tests/mission_combat_loop_driver.gd"])
         if args.case == "backoff":
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"lifecycle", "admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             pending.extend(["scripts/tests/hex_movement_verifier.gd","scripts/registries/unit_registry.gd"])
-        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"admission_slots", "deployment_phase", "deployment_controller", "ship_footprint", "ship_producer", "base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             pending.append("scripts/tests/hex_ground_lifecycle_verifier.gd")
-        if args.case in {"base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"base_personnel", "base_boarding", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             pending.extend([script_path,"scripts/tests/hex_base_personnel_owner_verifier.gd","scripts/core/base_personnel_runtime.gd"])
         if args.case == "ship_footprint":
             pending.extend(["scripts/mission/polisa_ground_body_profile.gd","scripts/mission/polisa_station_craft_runtime.gd"])
@@ -156,7 +157,7 @@ def main() -> int:
                 pending.append("scripts/mission/hex_ground_deployment_adapter.gd")
         if args.case in {"deployment_controller", "ship_producer"}:
             pending.extend(["scripts/tests/hex_deployment_phase_verifier.gd","scripts/tests/mission_tactical_sandbox_controller.gd"])
-        if args.case in {"mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             pending.extend([script_path,"scripts/tests/mission_test_setup.gd","scripts/registries/ftl_registry.gd"])
         if args.case == "base_unboard_transaction":
             pending.extend([script_path,"scripts/tests/hex_base_boarding_verifier.gd","scripts/meta/homebase_screen.gd"])
@@ -186,25 +187,25 @@ def main() -> int:
                 continue
             visited.add(relative)
             paths.append(relative)
-            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"} and Path(relative).suffix not in {".gd", ".tscn", ".tres", ".gdshader"}:
+            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"} and Path(relative).suffix not in {".gd", ".tscn", ".tres", ".gdshader"}:
                 continue
             code = read_source(relative).decode("utf-8-sig")
             pending.extend(re.findall(r'(?:preload|load)\(\s*"res://([^\"]+\.gd)"', code))
-            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+            if args.case in {"deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
                 pending.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
                 pending.extend(re.findall(r'path="res://([^\"]+)"', code))
                 pending.extend(re.findall(r'extends\s+"res://([^\"]+)"', code))
             if args.case == "movement_consumers":
                 paths.extend(re.findall(r'preload\(\s*"res://([^\"]+)"', code))
         paths.append("data/terrain_tile_catalog.json")
-        if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+        if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             paths.extend(["addons/limboai/bin/limboai.gdextension",
                           "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll"])
     paths = list(dict.fromkeys(paths))
     hashes = {}
     for relative in paths:
         origin = source / relative
-        if not origin.is_file() and args.case not in {"polisa_visit", "medical_consumer", "execution_controller"}:
+        if not origin.is_file() and args.case not in {"polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
             continue  # Missing implementation is a clean assertion in the RED verifier.
         target = project / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -215,7 +216,7 @@ def main() -> int:
     config = ('config_version=5\n[application]\nconfig/name=' + json.dumps(app_name)
               + '\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n')
     (project / "project.godot").write_text(config, encoding="utf-8")
-    if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller"}:
+    if args.case in {"consumers", "door_guard", "deployment_controller", "ship_producer", "base_unboard_transaction", "mission_setup", "mission_wave", "respawn", "polisa_visit", "medical_consumer", "execution_controller", "runtime_selection"}:
         (project / ".godot").mkdir(exist_ok=True)
         (project / ".godot/extension_list.cfg").write_text(
             'res://addons/limboai/bin/limboai.gdextension\n', encoding="utf-8")

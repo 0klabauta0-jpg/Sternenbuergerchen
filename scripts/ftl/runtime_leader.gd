@@ -134,6 +134,17 @@ func get_assigned_unit_count() -> int:
 	return _assigned_units.size()
 
 
+func remove_unit_member(unit:Node)->bool:
+	var found:bool=_assigned_units.has(unit)
+	_assigned_units.erase(unit)
+	if _current_entity==unit:_current_entity=null
+	return found
+
+
+func get_assigned_entity()->Node:
+	return _current_entity if is_instance_valid(_current_entity) else null
+
+
 func assign_current_ftl_task_to_unit() -> bool:
 	if _current_entity == null or not _is_assignable_unit(_current_entity):
 		push_warning("RuntimeLeader.assign_current_ftl_task_to_unit expects an assigned unit-like node.")

@@ -520,3 +520,29 @@ Execution-Clear räumt FMC und betroffene Koordination auf; ein verbleibender
 Coverpartner setzt sein ursprüngliches Ziel mit seinem ursprünglichen Scope fort.
 Ungekennzeichnete Legacybewegung bleibt erhalten; ein alter Legacyauftrag darf
 beim Wechsel in einen Hexkontext keine neuen Empfängerbindungen erwerben.
+
+## AP6 RuntimeSelection als Personenabgleich
+
+RuntimeSelection ist ein Abgleich vorhandener Personen, kein Szenarioreset.
+Umordnen derselben IDs erhält Actor, Health, Feld, Auftrag und Lifecycle. Auch
+gestagte bekannte Personen werden wiederverwendet. preserve_existing steuert
+Gearrefresh, refresh_existing_ids benennt expliziten Gear-/Fireteamrefresh.
+Nur entfernte oder tatsächlich umbenannte Slots verlieren ihre vorherigen
+Ground-/Move-/Lookup-/Commandbindungen. Der Identityreset heilt nicht und
+ersetzt kein medizinisches Modell.
+
+Root validiert alle vorbereiteten Actoränderungen und den vollständigen
+Registrylookupbatch vor Modellwrites. Der Registrybatch ist eine reine
+Indexoperation ohne Signale oder Gameplaymutationen. Identitätssetter werden
+ausschließlich in der vorbereiteten Modellphase stummgeschaltet; nach vollständigen
+Actor-/Known-/Registrybindings publiziert Finalize identity_changed für den
+vorhandenen RuntimeIndex und anschließend Runtime-/Visualfeedback. Andere
+Identitätsanwendungen behalten ihre unmittelbaren Signale.
+
+Neue direkt aktive Personen bleiben bis Rootadmission verborgen. Deferredpersonen
+bleiben Known ohne RuntimeRegistry/Ground; deklarierte Clients erhalten nur
+verborgene Visualbindings. Gepufferte Auswahl gehört zur konkreten Rootinstanz,
+Registry, Leader, Kontext und den bei Aufnahme vorhandenen Actorleben. Ein
+Ownerwechsel darf sie nicht in einer neuen Mission anwenden. Der Statusleser
+meldet applying/queued für die späteren Checkpoint-Stabilitätsgates; er enthält
+keine private Bindung und keine zweite Gameplaywahrheit.

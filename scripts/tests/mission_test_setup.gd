@@ -121,6 +121,11 @@ var _hex_setup_pending_root_id:=0
 var _hex_setup_last_stamp:=""
 var _hex_setup_elapsed:=0.0
 var _hex_setup_attempts:=0
+var _hex_selection_applying:=false
+var _hex_selection_pending:Dictionary={}
+var _hex_selection_active_signature:=""
+var _hex_selection_active_binding:Dictionary={}
+var _hex_selection_result:Dictionary={}
 
 
 func _ready() -> void:
@@ -337,6 +342,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 	_ensure_primary_3d_view(visual_unit_nodes)
 	if not _hex_setup_presentation_only:_initialize_fog_of_war(visual_unit_nodes, terrain_registry)
 	_is_initialized = true
+	if _hex_setup_presentation_only and simulation_root.has_method("refresh_multiplayer_replica_presence"):simulation_root.call("refresh_multiplayer_replica_presence")
 
 
 func get_hex_setup_status()->Dictionary:
@@ -399,6 +405,12 @@ func _retry_hex_setup_admission()->void:
 
 
 func _process(delta: float) -> void:
+	if not _hex_selection_applying and not _hex_selection_pending.is_empty():
+		var request:Dictionary=_hex_selection_pending
+		_hex_selection_pending={}
+		var lifetime:WeakRef=weakref(self)
+		_run_hex_selection_request(request)
+		if not is_instance_valid(lifetime.get_ref()):return
 	if _hex_setup_presentation_only:return
 	if not _hex_setup_pending.is_empty():
 		_hex_setup_elapsed+=maxf(delta,0.0)
@@ -461,6 +473,21 @@ func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
 
 func apply_runtime_selection_contract(preserve_existing: bool = false, refresh_existing_ids: PackedStringArray = PackedStringArray()) -> void:
 	if not _is_initialized:
+		return
+	if _hex_setup_required:
+		var request:Dictionary={"preserve":preserve_existing,"refresh":refresh_existing_ids.duplicate(),"inputs":_hex_selection_inputs()}
+		request["signature"]=JSON.stringify(request)
+		request["binding"]=_hex_selection_owner_binding()
+		if _hex_selection_applying:
+			if request.signature!=_hex_selection_active_signature or not _hex_selection_owner_current(_hex_selection_active_binding):_hex_selection_pending=request
+			return
+		var lifetime:WeakRef=weakref(self)
+		_run_hex_selection_request(request)
+		if not is_instance_valid(lifetime.get_ref()):return
+		if not _hex_selection_pending.is_empty():
+			var next:Dictionary=_hex_selection_pending
+			_hex_selection_pending={}
+			_run_hex_selection_request(next)
 		return
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var unit_registry = get_node_or_null(unit_registry_path)
@@ -529,6 +556,204 @@ func apply_runtime_selection_contract(preserve_existing: bool = false, refresh_e
 		var ftl_registry = get_node_or_null(ftl_registry_path)
 		if ftl_registry != null and ftl_registry.has_method("has_ftl") and ftl_registry.has_method("register_ftl") and not bool(ftl_registry.call("has_ftl", team_id)):
 			ftl_registry.call("register_ftl", team_id, runtime_leader)
+
+
+func get_runtime_selection_status()->Dictionary:
+	var result:Dictionary=_hex_selection_result.duplicate(true)
+	result["applying"]=_hex_selection_applying
+	result["queued"] = not _hex_selection_pending.is_empty()
+	return result
+
+
+func _hex_selection_inputs()->Dictionary:
+	return {"ids":selected_team_unit_ids.duplicate(),"fireteams":selected_team_fireteam_ids.duplicate(),"configs":selected_team_unit_configs.duplicate(true),"definitions":selected_fireteam_definitions.duplicate(true),"team":team_id,"defer":defer_friendly_runtime_activation,"allow_full":allow_full_roster_when_selection_empty,"loadouts":member_loadouts.duplicate(true)}
+
+
+func _hex_selection_owner_binding()->Dictionary:
+	var simulation:Node=_get_simulation_root()
+	var registry:Node=get_node_or_null(unit_registry_path)
+	var leader:Node=get_node_or_null(runtime_leader_path)
+	if simulation==null or registry==null or leader==null:return {}
+	var binding:Dictionary={"root":weakref(simulation),"registry":weakref(registry),"leader":weakref(leader),"context":simulation.get_hex_ground_context_revision(),"actors":[]}
+	var paths:Array=_friendly_unit_slot_paths if not _friendly_unit_slot_paths.is_empty() else _build_current_friendly_unit_slot_paths()
+	for path in paths:
+		var actor:Node=get_node_or_null(path)
+		if actor==null or not actor.has_method("get_unit_id"):return {}
+		var id:String=String(actor.call("get_unit_id"))
+		binding.actors.append({"actor":weakref(actor),"unit_id":id,"identity":simulation._hex_payload_identity(id)})
+	return binding
+
+
+func _hex_selection_owner_current(binding:Dictionary)->bool:
+	if binding.is_empty():return false
+	var simulation:Node=binding.root.get_ref()
+	if not is_instance_valid(simulation) or simulation.is_queued_for_deletion() or simulation!=_get_simulation_root() or simulation.get_hex_ground_context_revision()!=binding.context:return false
+	var registry:Node=binding.registry.get_ref()
+	var leader:Node=binding.leader.get_ref()
+	if not is_instance_valid(registry) or registry.is_queued_for_deletion() or registry!=get_node_or_null(unit_registry_path) or registry!=simulation.get_unit_registry() or not is_instance_valid(leader) or leader.is_queued_for_deletion() or leader!=get_node_or_null(runtime_leader_path):return false
+	for entry in binding.actors:
+		var actor:Node=entry.actor.get_ref()
+		if not is_instance_valid(actor) or actor.is_queued_for_deletion() or String(actor.call("get_unit_id"))!=entry.unit_id or simulation._hex_payload_identity(entry.unit_id)!=entry.identity:return false
+	return true
+
+
+func _run_hex_selection_request(request:Dictionary)->void:
+	if not _hex_selection_owner_current(request.get("binding",{})):
+		_hex_selection_result={"ok":false,"reason":"selection_context_changed"}
+		return
+	var inputs:Dictionary=request.inputs
+	selected_team_unit_ids=inputs.ids;selected_team_fireteam_ids=inputs.fireteams
+	selected_team_unit_configs=inputs.configs;selected_fireteam_definitions=inputs.definitions
+	team_id=inputs.team;defer_friendly_runtime_activation=inputs.defer
+	allow_full_roster_when_selection_empty=inputs.allow_full;member_loadouts=inputs.loadouts
+	_hex_selection_applying=true
+	_hex_selection_active_signature=String(request.signature)
+	_hex_selection_active_binding=request.binding
+	var lifetime:WeakRef=weakref(self)
+	var result:Dictionary=_apply_hex_runtime_selection(bool(request.preserve),PackedStringArray(request.refresh))
+	if not is_instance_valid(lifetime.get_ref()):return
+	_hex_selection_result=result
+	_hex_selection_applying=false
+	_hex_selection_active_signature=""
+	_hex_selection_active_binding={}
+
+
+func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:PackedStringArray)->Dictionary:
+	var simulation:Node=_get_simulation_root()
+	var registry:Node=get_node_or_null(unit_registry_path)
+	var leader:Node=get_node_or_null(runtime_leader_path)
+	if simulation==null or registry==null or leader==null or simulation.get_unit_registry()!=registry:return {"ok":false,"reason":"selection_owner_unavailable"}
+	if not _hex_setup_presentation_only and not simulation.is_hex_ground_runtime_active():return {"ok":false,"reason":"selection_hex_inactive"}
+	if not registry.has_method("apply_lookup_bindings") or not leader.has_method("remove_unit_member") or not leader.has_method("get_assigned_entity"):return {"ok":false,"reason":"selection_lookup_api_unavailable"}
+	var ftls:Node=get_node_or_null(ftl_registry_path)
+	if ftls!=null and ftls.has_method("get_ftl") and ftls.call("has_ftl",team_id) and ftls.call("get_ftl",team_id)!=leader:return {"ok":false,"reason":"selection_ftl_conflict"}
+	var paths:Array=_friendly_unit_slot_paths.duplicate()
+	if paths.is_empty():paths=_build_current_friendly_unit_slot_paths()
+	if paths.size()>64 or selected_team_unit_ids.size()>paths.size():return {"ok":false,"reason":"selection_capacity"}
+	var pool:Array=[]
+	var by_id:Dictionary={}
+	for path in paths:
+		var actor:Node=get_node_or_null(path)
+		if actor==null or not actor is Node2D or not actor.has_method("prepare_runtime_identity_change") or not actor.has_method("get_unit_id"):return {"ok":false,"reason":"selection_actor_unavailable"}
+		var id:String=String(actor.call("get_unit_id"))
+		if id.is_empty() or by_id.has(id):return {"ok":false,"reason":"selection_actor_alias"}
+		var known:Variant=simulation._known_units_by_id.get(id)
+		var indexed:Variant=registry.get_unit(id)
+		if (known!=null and known!=actor) or (indexed!=null and indexed!=actor):return {"ok":false,"reason":"selection_source_conflict"}
+		pool.append(actor);by_id[id]=actor
+	var desired:PackedStringArray=PackedStringArray()
+	var seen:Dictionary={}
+	for index in range(paths.size()):
+		if not _is_friendly_slot_enabled(index):continue
+		var id:String=_get_selected_unit_id_for_friendly_slot(index,String(pool[index].call("get_unit_id")))
+		if selected_team_unit_ids.is_empty() and id.begins_with("__unused_friendly_slot_"):continue
+		if id.is_empty() or id!=id.strip_edges() or id.begins_with("__unused_friendly_slot_") or seen.has(id):return {"ok":false,"reason":"selection_duplicate_or_invalid_id"}
+		seen[id]=true;desired.append(id)
+		var actor:Variant=by_id.get(id)
+		if (registry.has_unit(id) and registry.get_unit(id)!=actor) or (simulation._known_units_by_id.has(id) and simulation._known_units_by_id[id]!=actor):return {"ok":false,"reason":"selection_target_conflict"}
+	var chosen:Dictionary={}
+	var assignments:Array[Dictionary]=[]
+	for id in desired:
+		if by_id.has(id):chosen[by_id[id].get_instance_id()]=true
+	for index in range(desired.size()):
+		var id:String=desired[index]
+		var actor:Variant=by_id.get(id)
+		if actor==null:
+			for candidate in pool:
+				if not chosen.has(candidate.get_instance_id()):actor=candidate;break
+			if actor==null:return {"ok":false,"reason":"selection_capacity"}
+			chosen[actor.get_instance_id()]=true
+		var same:bool=String(actor.call("get_unit_id"))==id and String(actor.call("get_team_id"))==team_id and simulation._known_units_by_id.get(id)==actor
+		assignments.append({"actor":actor,"unit_id":id,"index":index,"same":same})
+	var changes:Array[Dictionary]=[]
+	var direct:Array=[]
+	var marker:Marker2D=_resolve_marker(spawn_alpha_path)
+	var spawn_index:=0
+	_build_unit_loadout_modifiers()
+	for entry in assignments:
+		var actor:Node2D=entry.actor
+		var id:String=entry.unit_id
+		var reset:bool=not bool(entry.same)
+		if reset or not preserve_existing or refresh_existing_ids.has(id):
+			var config:Dictionary={}
+			if reset:
+				config=UNIT_ROSTER_PRESETS_SCRIPT.get_preset(id,team_id).duplicate(true)
+				config.merge(_get_selected_unit_config(id),true)
+			config.merge(_get_fob_loadout_identity_config(id,team_id),true)
+			config.merge({"unit_id":id,"team_id":team_id,"fireteam_id":_get_fireteam_id_for_friendly_slot(int(entry.index),id,team_id)},true)
+			var dependencies:Dictionary={}
+			if not terrain_registry_path.is_empty():dependencies["terrain_registry"]=get_node_or_null(terrain_registry_path)
+			if not respawn_manager_path.is_empty():dependencies["respawn_manager"]=get_node_or_null(respawn_manager_path)
+			var prepared:Dictionary=actor.call("prepare_runtime_identity_change",simulation,config,reset,dependencies)
+			if not prepared.get("ok",false):return prepared
+			changes.append({"actor":actor,"old_id":String(actor.call("get_unit_id")),"next_id":id,"prepared":prepared.prepared,"reset":reset,"known_new":true,"register_new":_hex_setup_presentation_only or not defer_friendly_runtime_activation})
+		if reset and not defer_friendly_runtime_activation and not _hex_setup_presentation_only:
+			var position:Vector2=marker.global_position+_get_friendly_spawn_offset(spawn_index) if marker!=null else actor.global_position
+			if not position.is_finite():return {"ok":false,"reason":"selection_invalid_spawn"}
+			direct.append({"actor":actor,"position":position})
+			spawn_index+=1
+	for index in range(pool.size()):
+		var actor:Node=pool[index]
+		if chosen.has(actor.get_instance_id()):continue
+		var old_id:String=String(actor.call("get_unit_id"))
+		var config:Dictionary={"unit_id":"__unused_friendly_slot_%d"%index,"team_id":"team_unused","fireteam_id":"","display_name":"Unused Friendly Slot","is_fireteam_lead":false}
+		var prepared:Dictionary=actor.call("prepare_runtime_identity_change",simulation,config,true)
+		if not prepared.get("ok",false):return prepared
+		changes.append({"actor":actor,"old_id":old_id,"next_id":config.unit_id,"prepared":prepared.prepared,"reset":true,"known_new":false,"register_new":false})
+	var committed:Dictionary=simulation.commit_hex_actor_identity_changes(self,changes,_hex_setup_presentation_only)
+	if not committed.get("ok",false):return committed
+	for actor in pool:
+		var id:String=String(actor.call("get_unit_id"))
+		committed.actors[id]=actor.get_instance_id()
+		committed.identities[id]=simulation._hex_payload_identity(id)
+	var scope:Dictionary={"root":weakref(simulation),"receipt":committed,"signature":_hex_selection_active_signature,"inputs":JSON.stringify(_hex_selection_inputs()),"owner":_hex_selection_owner_binding()}
+	_hex_selection_active_binding=scope.owner
+	var guard:Callable=Callable(self,"_hex_selection_scope_current").bind(scope)
+	for change in changes:
+		if change.reset:leader.remove_unit_member(change.actor)
+	for change in changes:
+		if change.reset:
+			change.actor.set_meta("dropship_embarked",false)
+			change.actor.visible=false
+			if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+	for change in changes:
+		change.actor.call("finalize_runtime_identity_change",change.prepared,guard)
+		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+	for entry in direct:
+		entry.actor.global_position=entry.position
+		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+	var admission:Array=[]
+	for entry in assignments:
+		var actor:Node=entry.actor
+		var id:String=entry.unit_id
+		if use_2_5d_primary_view:_hide_legacy_unit_visual_children(actor)
+		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+		if _hex_setup_presentation_only:
+			actor.visible=false
+			continue
+		if registry.get_unit(id)!=actor:continue # Existing staged/aboard persons remain staged.
+		leader.add_unit_member(actor)
+		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+		if not bool(entry.same) or not preserve_existing or refresh_existing_ids.has(id):_enqueue_initial_loadout_effect(simulation,id)
+		if simulation.get_hex_unit_state(id).is_empty() and not bool(actor.get_meta("dropship_embarked",false)):admission.append(actor)
+	if not admission.is_empty():_admit_hex_setup_nodes(admission)
+	if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+	if _hex_setup_presentation_only and simulation.has_method("refresh_multiplayer_replica_presence"):
+		simulation.call("refresh_multiplayer_replica_presence")
+		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+	if leader.get_assigned_entity()==null:
+		for entry in assignments:
+			if registry.get_unit(entry.unit_id)==entry.actor and not simulation.get_hex_unit_state(entry.unit_id).is_empty():
+				leader.assign(entry.actor)
+				if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
+				if ftls!=null and ftls.has_method("has_ftl") and not ftls.call("has_ftl",team_id):ftls.call("register_ftl",team_id,leader)
+				break
+	return {"ok":true,"status":"waiting_admission" if not _hex_setup_pending.is_empty() else "committed","pending_count":_hex_setup_pending.size()}
+
+
+func _hex_selection_scope_current(scope:Dictionary)->bool:
+	var owner:Node=scope.root.get_ref()
+	return not is_queued_for_deletion() and _hex_selection_pending.is_empty() and _hex_selection_active_signature==scope.signature and JSON.stringify(_hex_selection_inputs())==scope.inputs and _hex_selection_owner_current(scope.owner) and is_instance_valid(owner) and owner==_get_simulation_root() and owner.is_hex_actor_identity_commit_current(scope.receipt)
 
 
 func _build_current_friendly_unit_slot_paths() -> Array:
@@ -1556,34 +1781,20 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 
 
 func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) -> void:
-	if unit_team_id != team_id:
-		return
-	if unit == null or not unit.has_method("apply_identity_config"):
-		return
-	var is_configured_lead: bool = _is_configured_fireteam_lead(unit_id)
-	if member_loadouts.is_empty():
-		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
-		return
-	if not member_loadouts.has(unit_id):
-		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
-		return
+	if unit==null or not unit.has_method("apply_identity_config"):return
+	var config:Dictionary=_get_fob_loadout_identity_config(unit_id,unit_team_id)
+	if not config.is_empty():unit.call("apply_identity_config",config)
 
-	var loadout: Dictionary = member_loadouts[unit_id]
-	if typeof(loadout) != TYPE_DICTIONARY or loadout.is_empty():
-		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
-		return
 
-	var config: Dictionary = {}
-	if loadout.has("weapon_1"):
-		config["weapon_1_id"] = String(loadout["weapon_1"])
-	if loadout.has("weapon_2"):
-		config["weapon_2_id"] = String(loadout["weapon_2"])
-	if loadout.has("armor"):
-		config["armor"] = String(loadout["armor"])
-	config["is_fireteam_lead"] = bool(loadout.get("is_fireteam_lead", is_configured_lead))
-
-	if not config.is_empty():
-		unit.call("apply_identity_config", config)
+func _get_fob_loadout_identity_config(unit_id:String,unit_team_id:String)->Dictionary:
+	if unit_team_id!=team_id:return {}
+	var config:Dictionary={"is_fireteam_lead":_is_configured_fireteam_lead(unit_id)}
+	var loadout:Variant=member_loadouts.get(unit_id,{})
+	if not loadout is Dictionary or loadout.is_empty():return config
+	for pair in [["weapon_1","weapon_1_id"],["weapon_2","weapon_2_id"],["armor","armor"]]:
+		if loadout.has(pair[0]):config[pair[1]]=String(loadout[pair[0]])
+	config.is_fireteam_lead=bool(loadout.get("is_fireteam_lead",config.is_fireteam_lead))
+	return config
 
 
 func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_team_id: String) -> String:
