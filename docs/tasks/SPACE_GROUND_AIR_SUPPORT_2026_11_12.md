@@ -65,6 +65,15 @@ Gebiet, Sicht und Risiko eigener/neutraler Einheiten sind vor dem Befehl
 verständlich darzustellen. Das ist ein Zielvertrag, noch keine implementierte
 oder balancierte Waffenwirkung.
 
+Zwischenstand: `air_support_dispersion.gd` berechnet zustandslos ein axiales
+Hexgebiet mit vorläufig Radius 10 bei Skill 0 und Radius 1 bei Skill 1 und
+wählt mit einem übergebenen Seed ein einzelnes Feld gleichverteilt daraus.
+Radius 10 umfasst 331 Felder und etwa 21 Felder Breite; dies ist eine
+vorläufige spielbare Interpretation der groben 20-mal-20-Vorstellung, keine
+festgelegte Balance. Kartenrand wird nicht künstlich nach innen geklemmt.
+Der Baustein ist noch nicht an Pilot, Bodenziele, Sicht, Feuerzyklus oder
+Anzeige angeschlossen und bewirkt noch keine Luftunterstützung im Spiel.
+
 ## Vorbereiteter Flugregel-Baustein
 
 Der bestehende zustandslose Flugresolver kann den vom autoritativen Aufrufer
