@@ -39,3 +39,12 @@ PersonnelLoadoutState gegen neue Array-only-Eingangsprüfung). Metawriter
 korrigiert diesen Produkteingang. Im Test außerdem fehlenden rein visuellen
 FOB-Refresh-Override ergänzt; keine Bord-/Roster-/Ownerlogik ersetzt.
 Source-/echtesProfil-/Canaryguards der roten Probe waren erfolgreich.
+
+Zweite Parentprobe: tatsächlicher Save/Load/Continue, erste Hiddenpublikation und
+Transport erfolgreich. Rohes Variant-Dictionarygleichsetzen der frischen Modelle
+mit geparstem JSON ist kein portabler Vergleich: beispielsweise gespeichertes
+Baseframe r.y10.9281997680664 entspricht tatsächlichem Vector2-Wert
+10.928199768066406. Fixture vergleicht jetzt vollständige reserialisierte/
+geparste Werte gegen die gespeicherten Werte, ohne Felder oder Terrainrevision
+auszunehmen. Bei Misserfolg werden ausschließlich dann konkrete Vorher-/Nachher-
+Daten pro Tick/RNG/Base/Ground ausgegeben. Produktverträge unverändert.

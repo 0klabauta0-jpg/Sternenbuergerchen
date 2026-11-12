@@ -103,7 +103,13 @@ func _positive()->void:
 	_check(publications==[true],"first restored Base state_changed sees aboard person already hidden and absent from Ground")
 	var after:Dictionary=resumed._simulation.export_hex_checkpoint_state()
 	if not _check(after.get("ok",false),"fresh actual runtime exports after Continue"):print(after);return
-	_check(resumed._simulation!=sim and after.state.tick==payload.hex_tactical.tick and after.state.rng_state==payload.hex_tactical.rng_state and after.state.base_personnel==payload.hex_tactical.base_personnel and after.state.ground==payload.hex_tactical.ground,"fresh owners preserve clock, exact RNG, Base actions and canonical Ground")
+	# Compare the exact portable JSON domain to the previously parsed file.
+	# This retains every field/revision, while removing JSON number-type/float
+	# formatting differences from in-memory Vector2-derived frame coordinates.
+	var persisted:Dictionary=JSON.parse_string(JSON.stringify(after.state))
+	var checks:Dictionary={"fresh_owner":resumed._simulation!=sim,"tick":persisted.tick==payload.hex_tactical.tick,"rng":persisted.rng_state==payload.hex_tactical.rng_state,"base":persisted.base_personnel==payload.hex_tactical.base_personnel,"ground":persisted.ground==payload.hex_tactical.ground}
+	if checks.values().has(false):print("CONTINUE_DIFF ",JSON.stringify({"checks":checks,"before":payload.hex_tactical,"after":persisted}))
+	_check(not checks.values().has(false),"fresh owners preserve clock, exact RNG, Base actions and canonical Ground")
 	_check(second.get_node("HomebaseScreen")._get_assigned_pilot_id(craft)==pilot and after.state.transport==payload.hex_tactical.transport,"Continue retains existing real pilot/transport ownership")
 
 func _legacy_negative()->void:
