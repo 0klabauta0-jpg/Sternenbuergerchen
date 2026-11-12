@@ -51,13 +51,12 @@ func _run() -> void:
 	canvas.call("set_travel_snapshot", travel)
 	await process_frame
 	_check(float(canvas.call("get_camera_snapshot").zoom) > 1.0, "Initial view is closer than the complete overview")
-	var expected_markers := 0
-	for orbit: Dictionary in definitions.orbits.values(): expected_markers += Array(orbit.get("markers", [])).size()
-	_check(expected_markers == 15 and int(canvas.call("get_camera_snapshot").orbit_marker_count) == expected_markers, "Three actual markers for each of five authored approach orbits")
+	var expected_markers: int = definitions.orbits.size()
+	_check(int(canvas.call("get_camera_snapshot").orbit_marker_count) == expected_markers, "One visible marker for each approach orbit")
 	for body: Dictionary in definitions.bodies.values():
 		_check(Rect2(Vector2.ZERO, canvas.size).has_point(canvas.map_to_screen(GRID.pair(body.position))), "Initial view shows " + String(body.name))
 	for orbit_id in definitions.orbits:
-		for marker: Dictionary in definitions.orbits[orbit_id].markers:
+		for marker: Dictionary in Array(definitions.orbits[orbit_id].markers).slice(0, 1):
 			var cursor: Vector2 = canvas.map_to_screen(GRID.normalized(GRID.cell_from_record(marker)))
 			var count := targets.size()
 			_move(cursor, Vector2.ZERO)
@@ -101,12 +100,12 @@ func _run() -> void:
 	var center: Vector2 = canvas.map_to_screen(GRID.pair(planet.position))
 	canvas.zoom_at(center, 8.0)
 	canvas.pan_by(canvas.size * 0.5 - center)
-	var marker_cell := GRID.cell_from_record(definitions.orbits.planet_orbit.markers[2])
+	var marker_cell := GRID.cell_from_record(definitions.orbits.planet_orbit.markers[0])
 	cursor = canvas.map_to_screen(GRID.normalized(marker_cell))
 	_move(cursor, Vector2.ZERO)
 	_button(cursor, MOUSE_BUTTON_LEFT, true)
 	_button(cursor, MOUSE_BUTTON_LEFT, false)
-	_check(targets.size() == count_before + 1 and targets.back() == "planet_orbit/orbit_3", "Zoomed and panned marker uses the same picking transform")
+	_check(targets.size() == count_before + 1 and targets.back() == "planet_orbit/orbit_1", "Zoomed and panned marker uses the same picking transform")
 	count_before = targets.size()
 	var old_ring_cell := GRID.cell_from_record(planet) + GRID.HEX.DIRECTIONS[0] * int(planet.ring_radius)
 	for cell in [old_ring_cell, GRID.cell_from_record(planet)]:

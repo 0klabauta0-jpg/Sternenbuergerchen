@@ -25,6 +25,7 @@ var _built := false
 var _canvas: Control
 var _status: Label
 var _selection: Label
+var _job_guidance: Label
 var _locks: Label
 var _boundary: Label
 var _error: Label
@@ -96,7 +97,7 @@ func _build() -> void:
 	heading.add_child(_close)
 	_view_homebase = _button("ViewHomebase", "Basis ansehen", func(): _send("open_location_view", {"location_id":"homebase"}))
 	heading.add_child(_view_homebase)
-	column.add_child(_label("GLUT-SYSTEM  ·  256 × 256 HEXFELDER", 12, Color("789baa")))
+	column.add_child(_label("BÖRNER-SYSTEM  ·  256 × 256 HEXFELDER", 12, Color("789baa")))
 	var body := HBoxContainer.new()
 	body.name = "SystemAndDetails"
 	body.add_theme_constant_override("separation", 12)
@@ -136,6 +137,7 @@ func _build() -> void:
 	_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_canvas.orbit_requested.connect(_jump)
 	_canvas.location_selected.connect(_select)
+	_canvas.craft_selected.connect(_on_map_craft_selected)
 	system_column.add_child(_canvas)
 	_orbit_canvas = ORBIT_CANVAS.new()
 	_orbit_canvas.name = "LocalOrbitMap"
@@ -158,6 +160,7 @@ func _build() -> void:
 	detail_style.set_border_width_all(1)
 	_details.add_theme_stylebox_override("panel", detail_style)
 	body.add_child(_details)
+	body.move_child(_details, 0)
 	var detail_scroll := ScrollContainer.new()
 	detail_scroll.name = "DetailsScroll"
 	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -171,6 +174,8 @@ func _build() -> void:
 	information.name = "DestinationInformation"
 	information.add_theme_constant_override("separation", 10)
 	inset.add_child(information)
+	_close.reparent(information)
+	_view_homebase.reparent(information)
 	_fleet_selector=OptionButton.new()
 	_fleet_selector.name="FleetCraftSelector"
 	information.add_child(_fleet_selector)
@@ -178,6 +183,9 @@ func _build() -> void:
 	_visit_list=VBoxContainer.new()
 	_visit_list.name="LoadedLocations"
 	information.add_child(_label("ZIEL & ANFLUG", 13, Color("70c8d0")))
+	_job_guidance = _label("", 14, Color("f2ca86"))
+	_job_guidance.name = "AcceptedJobGuidance"
+	information.add_child(_job_guidance)
 	_status = _label("", 15)
 	_status.name = "TravelStatus"
 	information.add_child(_status)
@@ -289,7 +297,7 @@ func _sync_orbit_targets(travel: Dictionary) -> void:
 			label.autowrap_mode = TextServer.AUTOWRAP_OFF
 			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(label)
-			for marker: Dictionary in orbit.get("markers", []):
+			for marker: Dictionary in Array(orbit.get("markers", [])).slice(0, 1):
 				var id := String(marker.id)
 				var number := id.get_slice("_", 1)
 				var button := _button("OrbitMarker_%s_%s" % [orbit_id, id], number, _jump.bind(orbit_id, id))
@@ -393,6 +401,19 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_sync_sites(locations)
 	var selected: String = String(campaign.get("selected_location_id", ""))
 	var location_orbits: Dictionary = travel.get("location_orbits", {})
+	var accepted_locations := {}
+	var guidance: PackedStringArray = []
+	for job_data: Dictionary in Dictionary(campaign.get("jobs", {})).values():
+		if String(job_data.get("status", "")) not in ["accepted", "active"]: continue
+		var job_location := String(job_data.get("location_id", ""))
+		if job_location.is_empty(): continue
+		accepted_locations[job_location] = true
+		var job_orbit := String(location_orbits.get(job_location, ""))
+		var job_body := String(Dictionary(Dictionary(travel.get("orbits", {})).get(job_orbit, {})).get("body_id", ""))
+		var body_name := String(Dictionary(Dictionary(travel.get("bodies", {})).get(job_body, {})).get("name", job_orbit))
+		guidance.append("Auftrag: %s\nZiel: %s · Orbit %s" % [String(job_data.get("title", "Auftrag")), String(Dictionary(locations.get(job_location, {})).get("name", job_location)), body_name])
+	_job_guidance.text = "\n".join(guidance)
+	_job_guidance.visible = not guidance.is_empty()
 	var marker_locations: Dictionary={}
 	var reasons: PackedStringArray = []
 	for id in _sites:
@@ -403,7 +424,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var required_orbit := String(location_orbits.get(id, "planet_orbit" if location_orbits.is_empty() else ""))
 		var at_site_orbit: bool = phase == "orbit" and not required_orbit.is_empty() and orbit == required_orbit
 		button.disabled = not at_site_orbit or not reason.is_empty()
-		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"reason":reason,"region_position":location.get("region_position",[])}
+		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"accepted_job":accepted_locations.has(id),"reason":reason,"region_position":location.get("region_position",[])}
 		button.tooltip_text = reason if not reason.is_empty() else ("Zielort auswaehlen. Erst der Anflug laedt die Karte." if at_site_orbit else "Erst den Orbit dieses Zielorts erreichen.")
 		if not reason.is_empty():
 			reasons.append(String(location.get("name", id)) + ": " + reason)
@@ -426,6 +447,18 @@ func _on_fleet_craft_selected(index: int) -> void:
 	_orbit_craft_id = String(_fleet_selector.get_item_metadata(index))
 	_orbit_availability_signature = ""
 	_send("space_focus_craft", {"craft_id":_orbit_craft_id})
+
+func _on_map_craft_selected(craft_id: String) -> void:
+	_canvas.call("set_selected_ship", craft_id)
+	var leader := craft_id
+	for wing: Dictionary in Dictionary(Dictionary(_runtime.get("space_wings", {})).get("wings", {})).values():
+		if craft_id in Array(wing.get("craft_ids", [])):
+			var wing_leader := String(wing.get("leader_craft_id", ""))
+			if not wing_leader.is_empty(): leader = wing_leader
+			break
+	_orbit_craft_id = leader
+	_orbit_availability_signature = ""
+	_send("space_focus_craft", {"craft_id":leader})
 
 func _refresh_orbit_projection() -> void:
 	var projection: Dictionary = {}

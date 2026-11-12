@@ -1,5 +1,8 @@
 # IMPLEMENTATION_STATUS
 
+### Sternkarte: erster Spieltest-Schritt ‚Äî 12.11.2026
+Sternkartensteuerung links, ein sichtbarer Orbitmarker je K√∂rper bei unver√§ndertem V2-Reiseowner, Auftragszielhinweis, einzelnes Schiff und Rottenf√ºhrung fokussierbar, Rechtsklick auf Marker sowie B√∂rner/Mare-Nostrum-Anzeigen. Isolierter echter Kampagnenweg bis zur Landung 31/0; gezielte Karten- und Kamerapr√ºfungen bestanden. Rotten-Mehrfachauswahl, Reichweite, Zwei-Mond-Migration und Basisgestaltung bleiben offen; kein nativer Sichtcheck oder EXE. Details: `docs/tasks/PLAYTEST_2026_11_12_starmap_base.md`.
+
 ### Auftragsannahme und freie Overlayfl‰che ó 12.11.2026
 Erster Auftrag ¸ber echte Controlklicks reproduziert: Auﬂenklickfl‰che fing die
 Eingabe ab. Aktives Flyout nun auch in der GUI-Geschwisterfolge vor der Fl‰che.

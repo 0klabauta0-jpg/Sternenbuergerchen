@@ -4,7 +4,7 @@
   "bodies": {
     "sun": {
       "id": "sun",
-      "name": "Glut",
+      "name": "Börner",
       "hex": [
         64,
         128
@@ -22,7 +22,7 @@
     },
     "planet": {
       "id": "planet",
-      "name": "Glut 1",
+      "name": "Mare Nostrum",
       "hex": [
         144,
         93
@@ -40,7 +40,7 @@
     },
     "glut_1a": {
       "id": "glut_1a",
-      "name": "Glut 1a",
+      "name": "Mare Nostrum A",
       "hex": [
         143,
         77
@@ -58,7 +58,7 @@
     },
     "glut_1b": {
       "id": "glut_1b",
-      "name": "Glut 1b",
+      "name": "Mare Nostrum B",
       "hex": [
         164,
         104
@@ -76,7 +76,7 @@
     },
     "moon": {
       "id": "moon",
-      "name": "Glut 1c · Heimatbasis",
+      "name": "Mare Nostrum C · Heimatbasis",
       "hex": [
         109,
         139
@@ -94,7 +94,7 @@
     },
     "glut_2": {
       "id": "glut_2",
-      "name": "Glut 2",
+      "name": "Börner II",
       "radius": 4.0,
       "ring_radius": 7,
       "color": "aebdb9",
@@ -135,7 +135,7 @@
   "orbits": {
     "moon_orbit": {
       "id": "moon_orbit",
-      "name": "Glut 1c · Heimatmondorbit",
+      "name": "Mare Nostrum C · Heimatmondorbit",
       "body_id": "moon",
       "position": [
         0.685546875,
@@ -171,7 +171,7 @@
     },
     "planet_orbit": {
       "id": "planet_orbit",
-      "name": "Glut 1 · Planetenorbit",
+      "name": "Mare Nostrum · Planetenorbit",
       "body_id": "planet",
       "position": [
         0.755859375,
@@ -259,7 +259,7 @@
         0.720703125,
         0.30078125
       ],
-      "name": "Glut 1a · Mondorbit"
+      "name": "Mare Nostrum A · Mondorbit"
     },
     "glut_1b_orbit": {
       "id": "glut_1b_orbit",
@@ -295,11 +295,11 @@
         0.83203125,
         0.40625
       ],
-      "name": "Glut 1b · Mondorbit"
+      "name": "Mare Nostrum B · Mondorbit"
     },
     "polisa_orbit": {
       "id": "polisa_orbit",
-      "name": "Glut 2 / Polisa",
+      "name": "Börner II / Polisa",
       "body_id": "glut_2",
       "location_id": "polisa",
       "markers": [

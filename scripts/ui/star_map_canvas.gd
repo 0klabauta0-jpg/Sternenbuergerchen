@@ -5,9 +5,11 @@ const WORLD = preload("res://scripts/ui/star_map_world_view.gd")
 const SYSTEM = preload("res://scripts/core/singleplayer_space_travel_state.gd")
 signal orbit_requested(orbit_id: String, marker_id: String)
 signal location_selected(location_id: String)
+signal craft_selected(craft_id: String)
 var _location_buttons: Dictionary={}
 var _locations: Dictionary={}
 var _travel: Dictionary = {}
+var _selected_ship_id := ""
 var _body_labels: Dictionary = {}
 var _bodies: Dictionary = {}
 var _orbits: Dictionary = {}
@@ -97,6 +99,7 @@ func _set_orbits(orbits: Dictionary) -> void:
 	var marker_count := 1 if _catalog_version == 3 else 3
 	var valid := not expected.is_empty() and orbits.size() == expected.size()
 	var projected_cells := {}
+	var seen_cells := {}
 	if valid:
 		for id: String in expected:
 			var orbit: Variant = orbits.get(id)
@@ -114,10 +117,12 @@ func _set_orbits(orbits: Dictionary) -> void:
 					valid = false
 					break
 				var cell := GRID.cell_from_record(marker)
-				if projected_cells.has(cell):
+				if seen_cells.has(cell):
 					valid = false
 					break
-				projected_cells[cell] = {"orbit_id":id,"marker_id":marker.id}
+				seen_cells[cell] = true
+				if index == 0:
+					projected_cells[cell] = {"orbit_id":id,"marker_id":marker.id}
 			if not valid: break
 	if valid:
 		_orbits = orbits.duplicate(true)
@@ -197,10 +202,34 @@ func _gui_input(event: InputEvent) -> void:
 	if _handle_gui_event(event):
 		accept_event()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var craft_id := craft_at(event.position)
+		if not craft_id.is_empty():
+			craft_selected.emit(craft_id)
+			accept_event()
+			return
 		var target := orbit_marker_at(event.position)
 		if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
 			orbit_requested.emit(target.orbit_id, target.marker_id)
 			accept_event()
+
+func craft_at(point: Vector2) -> String:
+	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
+	var closest := ""
+	var distance := 144.0
+	for id in routes:
+		var route: Dictionary = routes[id]
+		if String(id).is_empty() or String(route.get("phase", "grounded")) in ["grounded", "surface"]: continue
+		var position: Variant = route.get("position", [])
+		if not position is Array or position.size() != 2: continue
+		var candidate := point.distance_squared_to(map_to_screen(GRID.pair(position)))
+		if candidate < distance:
+			distance = candidate
+			closest = String(id)
+	return closest
+
+func set_selected_ship(craft_id: String) -> void:
+	_selected_ship_id = craft_id
+	queue_redraw()
 
 
 func orbit_marker_at(point: Vector2) -> Dictionary:
@@ -240,6 +269,12 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
 			var point: Vector2 = get_global_transform_with_canvas().affine_inverse() * event.global_position
 			if Rect2(Vector2.ZERO, size).has_point(point):
+				if event.button_index == MOUSE_BUTTON_RIGHT:
+					var target := orbit_marker_at(point)
+					if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
+						orbit_requested.emit(target.orbit_id, target.marker_id)
+						get_viewport().set_input_as_handled()
+						return
 				_drag_button = event.button_index
 				_drag_position = point
 				# Intercept before Button receives press and captures GUI mouse focus.
@@ -311,8 +346,13 @@ func _draw() -> void:
 	_draw_warp_effect()
 	_draw_cutlass_exhaust()
 	draw_texture_rect(_world.get_texture(), Rect2(Vector2.ZERO, size), false)
+	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
+	if not _selected_ship_id.is_empty() and routes.has(_selected_ship_id):
+		var route: Dictionary = routes[_selected_ship_id]
+		if String(route.get("phase", "grounded")) not in ["grounded", "surface"] and route.get("position") is Array and route.position.size() == 2:
+			draw_arc(map_to_screen(GRID.pair(route.position)), 12.0, 0.0, TAU, 24, Color("f2c47c"), 2.0, true)
 	if not _body_labels.has("sun_orbit"):
-		draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), "Glut", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
+		draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), String(_bodies.sun.get("name", "Stern")), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
 	for id in _location_buttons:
 		var body: Dictionary = _body_for_location(id)
 		if body.is_empty():
@@ -321,6 +361,10 @@ func _draw() -> void:
 		var selected: bool = _locations[id].get("selected", false)
 		draw_colored_polygon(hex, Color(0.12, 0.57, 0.67, 0.42))
 		_outline(hex, Color("e8fff8") if selected else Color("91e4ee"))
+		if bool(_locations[id].get("accepted_job", false)):
+			var point := _hex_center(hex)
+			draw_line(point + Vector2(0, -5), point + Vector2(0, -20), Color("f2c47c"), 2.0)
+			draw_string(ThemeDB.fallback_font, point + Vector2(-5, -22), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("f2c47c"))
 		if _camera_zoom >= 3.0:
 			var letter: String = {"satellite_crash": "A", "trade_outpost": "B", "fortified_outpost": "C"}.get(id, "")
 			draw_string(ThemeDB.fallback_font, _hex_center(hex) + Vector2(-4, 4), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ebfaff"))
