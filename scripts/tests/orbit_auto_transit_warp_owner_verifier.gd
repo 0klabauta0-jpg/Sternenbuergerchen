@@ -45,6 +45,10 @@ func _initialize() -> void:
 	var gate: Dictionary = sim.preview_surface_approach("ship", "satellite_crash", flight.get_snapshot().revision, fleet.get_craft_snapshot("ship").revision, combat.get_area_revision(flight.get_snapshot().space_area_id), wings.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not gate.get("ok", false): print("CUTLASS_GATE_FAILURE ", gate)
 	assert(gate.ok)
+	adapter._surface_orbit_path_enabled = true
+	adapter._surface_orbit_intents["ship"] = {"location_id":"satellite_crash", "direction":"outbound", "status":"arrived"}
+	var premature: Dictionary = sim.commit_singleplayer_warp_departure(adapter, {"craft_id":"ship", "target_orbit_id":"moon_orbit", "request_id":"before-exit"})
+	assert(premature.get("reason") == "space_exit_band_required" and fleet.get_craft_snapshot("ship").phase == "orbit")
 	assert(sim.start_singleplayer_orbit_transit(adapter, "ship", "satellite_crash", "outbound", "real-cutlass-return").ok)
 	for step in range(5000):
 		sim.tick_counter = flight.get_snapshot().tick + 1
@@ -54,6 +58,8 @@ func _initialize() -> void:
 	var warp: Dictionary = sim.preview_warp_departure("ship", "moon_orbit", flight.get_snapshot().revision, fleet.get_craft_snapshot("ship").revision, combat.get_area_revision(flight.get_snapshot().space_area_id), wings.get_snapshot().revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not warp.get("ok", false): print("CUTLASS_WARP_GATE_FAILURE ", warp)
 	assert(warp.ok)
+	assert(sim.commit_singleplayer_warp_departure(adapter, {"craft_id":"ship", "target_orbit_id":"moon_orbit", "request_id":"after-exit"}).ok)
+	assert(fleet.get_craft_snapshot("ship").phase == "quantum")
 	adapter.free(); pilot.free(); flow.free(); sim.free()
 	print("ORBIT_AUTO_TRANSIT_WARP_OWNER passed")
 	quit()

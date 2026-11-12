@@ -1394,7 +1394,9 @@ func enter_space_orbit(craft_id: String) -> Dictionary:
 		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
 		if result.get("ok", false) and not result.get("replayed", false):
 			call_deferred("_publish_local_return_events", String(result.receipt_id))
-			if not origin_location.is_empty() and origin_location != "polisa": call_deferred("_start_surface_orbit_outbound", craft_id, origin_location)
+			if _surface_orbit_path_enabled and not origin_location.is_empty() and origin_location != "polisa":
+				_surface_orbit_intents[craft_id] = {"location_id":origin_location, "target_orbit_id":String(_travel.get_craft_snapshot(craft_id).get("orbit_id", "")), "direction":"outbound", "status":"starting"}
+				call_deferred("_start_surface_orbit_outbound", craft_id, origin_location)
 		return result
 	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
 		var purchase: Dictionary = get_station_ship_purchase(craft_id)
@@ -1456,12 +1458,15 @@ func _start_surface_orbit_outbound(craft_id: String, location_id: String) -> voi
 	if not _surface_orbit_path_enabled or _simulation == null or _travel == null: return
 	var travel: Dictionary = _travel.get_craft_snapshot(craft_id)
 	var orbit_id := String(travel.get("orbit_id", ""))
-	var intent := {"location_id":location_id, "target_orbit_id":orbit_id, "direction":"outbound", "status":"manual"}
-	_surface_orbit_intents[craft_id] = intent
-	if _surface_orbit_auto_disabled.has(craft_id): return
+	var intent: Dictionary = _surface_orbit_intents.get(craft_id, {})
+	if intent.get("location_id") != location_id or intent.get("direction") != "outbound": return
+	intent["target_orbit_id"] = orbit_id
+	intent["status"] = "manual"
+	if _surface_orbit_auto_disabled.has(craft_id): intent.erase("pending_warp"); return
 	var result: Dictionary = _simulation.start_singleplayer_orbit_transit(self, craft_id, location_id, "outbound", _request_id("orbit-transit", {"craft_id":craft_id}))
 	intent["status"] = "flying" if result.get("ok", false) else "manual"
 	intent["reason"] = String(result.get("reason", ""))
+	if not result.get("ok", false): intent.erase("pending_warp")
 
 func _record_surface_orbit_intent(craft_id: String, target_orbit_id: String) -> void:
 	_surface_orbit_intents.erase(craft_id)
@@ -1477,6 +1482,9 @@ func _record_surface_orbit_intent(craft_id: String, target_orbit_id: String) -> 
 	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(String(orbit.get("body_id", "")), {})
 	if not ORBIT_SURFACES.contains(body, location_id): return
 	_surface_orbit_intents[craft_id] = {"location_id":location_id, "target_orbit_id":target_orbit_id, "status":"warp"}
+
+func requires_surface_orbit_exit_band(craft_id: String) -> bool:
+	return _surface_orbit_path_enabled and not Dictionary(_surface_orbit_intents.get(craft_id, {})).is_empty()
 
 func _request_space_operation(operation: String, data: Dictionary, request_id: String) -> Dictionary:
 	var snapshot := get_space_travel_snapshot(String(data.get("craft_id","")))
@@ -1515,12 +1523,13 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var flight: RefCounted = _travel.get_flight_state(craft_id)
 		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
 			var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-			if transit.get("direction") == "outbound" and transit.get("status") == "flying":
+			if transit.get("direction") == "outbound" and transit.get("status") in ["starting", "flying"]:
 				var target := String(data.get("target_orbit_id", ""))
 				if not Dictionary(snapshot.get("orbits", {})).has(target) or target == String(snapshot.get("orbit_id", "")): return _reject("unknown_orbit", "Sprungziel passt nicht")
 				var previous: Dictionary = transit.get("pending_warp", {})
 				if not previous.is_empty() and String(previous.request_id) != request_id: return _reject("warp_pending", "Sprung ist bereits vorgemerkt")
-				transit["pending_warp"] = {"request_id":request_id, "payload":data.duplicate(true)}
+				if not previous.is_empty() and String(previous.get("signature", "")) != signature: return _reject("request_id_conflict", "Anfrage-ID bereits anders verwendet")
+				transit["pending_warp"] = {"request_id":request_id, "signature":signature, "payload":data.duplicate(true)}
 				return {"ok":true, "pending":true, "message":"Orbitdurchflug läuft; Sprung folgt am Weltraumrand"}
 			var warp_command := data.duplicate(true); warp_command["request_id"] = owner_request_id
 			var departure: Dictionary = _simulation.commit_singleplayer_warp_departure(self, warp_command)
@@ -1554,9 +1563,11 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
 		var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
 		if not station_dock and not station_landing and transit.get("location_id") == location_id and transit.get("status") == "flying":
+			if data.size() != 2: return _reject("invalid_command", "Anflugauftrag enthält unbekannte Angaben")
 			var previous: Dictionary = transit.get("pending_approach", {})
 			if not previous.is_empty() and String(previous.request_id) != request_id: return _reject("approach_pending", "Anflug ist bereits vorgemerkt")
-			transit["pending_approach"] = {"request_id":request_id}
+			if not previous.is_empty() and String(previous.get("signature", "")) != signature: return _reject("request_id_conflict", "Anfrage-ID bereits anders verwendet")
+			transit["pending_approach"] = {"request_id":request_id, "signature":signature}
 			return {"ok":true, "pending":true, "message":"Orbitdurchflug läuft; Anflug folgt am Planetentor"}
 		var departure := authorize_departure(craft_id, ("station-dock:" + owner_request_id) if station_dock else owner_request_id, station_dock)
 		if not departure.get("ok", false):

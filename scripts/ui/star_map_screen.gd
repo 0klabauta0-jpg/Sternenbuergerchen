@@ -337,7 +337,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_wing_panel.refresh(_runtime)
 	var travel: Dictionary = _runtime.get("space_travel", {})
 	_orbit_auto.text = "Durchflug: an" if travel.get("orbit_transit_automatic", true) else "Durchflug: aus"
-	_orbit_auto.disabled = String(travel.get("craft_id", "")).is_empty() or not bool(travel.get("orbit_transit_available", false))
+	_orbit_auto.visible = bool(travel.get("orbit_transit_available", false))
+	_orbit_auto.disabled = String(travel.get("craft_id", "")).is_empty() or not _orbit_auto.visible
 	var phase: String = String(travel.get("phase", "grounded"))
 	var fleet_signature:=JSON.stringify(_runtime.get("crafts",[]))
 	if String(_fleet_selector.get_meta("fleet_signature",""))!=fleet_signature:

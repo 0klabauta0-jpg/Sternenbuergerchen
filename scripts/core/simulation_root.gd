@@ -1117,6 +1117,13 @@ func commit_singleplayer_warp_departure(adapter: Node, command: Dictionary) -> D
 	var wing_revision: int = _space_wing_state.get_snapshot().revision
 	var preview: Dictionary = preview_warp_departure(command.craft_id, command.target_orbit_id, pose.revision, travel.get("revision", -1), area_revision, wing_revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not preview.get("ok", false): return preview
+	if adapter.has_method("requires_surface_orbit_exit_band") and adapter.requires_surface_orbit_exit_band(command.craft_id):
+		var area_layout: Dictionary = ORBIT_LAYOUT.build(String(pose.space_area_id).trim_prefix("orbit_approach:").uri_decode())
+		if not area_layout.get("ok", false) or area_layout.body_map_id != pose.space_area_id: return {"ok":false, "reason":"invalid_area"}
+		var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(command.craft_id, {})
+		if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
+		for cell in cells:
+			if not area_layout.entry_band.has_point(SPACE_GRID.to_offset(cell)): return {"ok":false, "reason":"space_exit_band_required", "message":"Zum Sprung zuerst den unteren Weltraumrand erreichen"}
 	var orbit: Dictionary = Dictionary(travel.orbits).get(String(travel.orbit_id), {})
 	var body: Dictionary = Dictionary(travel.bodies).get(String(orbit.get("body_id", "")), {})
 	var payload := {"craft_id":command.craft_id, "target_orbit_id":command.target_orbit_id}
@@ -1791,10 +1798,8 @@ func start_singleplayer_orbit_transit(adapter: Node, craft_id: String, location_
 	var radar: Dictionary = get_space_radar_contacts(craft_id)
 	if not radar.get("ok", false): return radar
 	if not Array(radar.contacts).is_empty(): return {"ok":false, "reason":"contact_detected"}
-	# Automatic transit only starts in an otherwise empty indexed area. Existing
-	# collision and swept-footprint checks remain authoritative during movement.
-	var actors: Array = _space_combat_state.get_area_actor_ids(pose.space_area_id)
-	if actors.size() != 1 or actors[0] != craft_id: return {"ok":false, "reason":"area_not_clear"}
+	# The radar decides which distant contacts are known. The existing
+	# collision and swept-footprint owner remains authoritative for all actors.
 	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
 	var start := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))
 	var plan: Dictionary = ORBIT_AUTO_TRANSIT.plan(pose.space_area_id, start, direction, Array(metadata.get("footprint_hexes", [])), [], radar.contacts)
@@ -1922,8 +1927,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				continue
 			if control.get("orbit_auto_transit", false) and tick % 5 == 0:
 				var radar: Dictionary = get_space_radar_contacts(craft_id)
-				var area_actors: Array = _space_combat_state.get_area_actor_ids(pose.space_area_id)
-				if not radar.get("ok", false) or not Array(radar.get("contacts", [])).is_empty() or area_actors.size() != 1:
+				if not radar.get("ok", false) or not Array(radar.get("contacts", [])).is_empty():
 					control["goal"] = {"target_plane":pose.position_plane}
 					control["orbit_auto_transit"] = false
 					control["orbit_auto_braking"] = true

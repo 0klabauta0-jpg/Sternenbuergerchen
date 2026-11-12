@@ -20,7 +20,7 @@ func _run() -> void:
 	assert(button.text == "Durchflug: aus")
 	runtime.space_travel.orbit_transit_available = false
 	view.refresh()
-	assert(button.disabled)
+	assert(button.disabled and not button.visible)
 	view.queue_free(); await process_frame
 	print("ORBIT_AUTO_TRANSIT_UI passed")
 	quit()

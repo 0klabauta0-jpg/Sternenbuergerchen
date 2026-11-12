@@ -55,9 +55,17 @@ Warp-Gate ist bisher im Ownerfixture geprüft. Polisa behält den direkten Weg.
 
 Der neue Pfad bleibt standardmäßig ausgeschaltet, bis lokale Flight-,
 Transit-, Receipt- und Bedienzustände mit Save/Continue gemeinsam abgesichert
-sind; die Auswahl ist derzeit nicht dauerhaft gespeichert. Ein Szenariogefecht
+sind; die Auswahl ist derzeit nicht dauerhaft gespeichert und die Bedienung
+im Standardpfad ausgeblendet. Ein Szenariogefecht
 und eine visuelle Abnahme sind noch offen. Pilotenabhängige Hindernisfolgen
 sind noch nicht implementiert.
+
+Ein weiterer realer Rückrundlauf erreichte Landung und Bewegungsbefehl zum
+Satelliten, aber die Interaktion wurde innerhalb 45 Sekunden nicht benutzbar.
+Die Ursache ist nicht geklärt. Ein separater realer 1×-Lauf mit Orbit-Opt-in,
+regulärem Missionsabbruch und physisch eingeboardeter Originalcrew bestand
+38/38 Prüfungen bis zur tatsächlichen Heimatlandung des ursprünglichen Schiffs.
+Dieser Lauf ist kein Abschluss des Satellitenziels und kein Save/Load-Nachweis.
 
 Die explizite Oberflächenzuordnung erlaubt mehrere reale Orte am selben
 Planeten: `satellite_crash`, `trade_outpost` und `fortified_outpost`. Ihre

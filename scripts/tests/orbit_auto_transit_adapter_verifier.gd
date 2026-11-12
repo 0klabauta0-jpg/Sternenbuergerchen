@@ -56,6 +56,15 @@ func _initialize() -> void:
 			print("ORBIT_AUTO_TRAVEL_SECONDS ", float(step + 1) * 0.1)
 			break
 	assert(adapter._surface_orbit_intents.ship.status == "arrived")
+	# Exercise the narrow callback window between real local-return publication
+	# and its deferred outbound control without altering the Flight object.
+	adapter._surface_orbit_intents.ship.direction = "outbound"
+	adapter._surface_orbit_intents.ship.status = "starting"
+	var request := {"craft_id":"ship", "target_orbit_id":"moon_orbit"}
+	assert(adapter._request_space_operation("space_start_quantum", request, "queued").get("pending", false))
+	assert(adapter._request_space_operation("space_start_quantum", request, "queued").get("pending", false))
+	var changed := request.duplicate(); changed["target_orbit_marker_id"] = "orbit_2"
+	assert(adapter._request_space_operation("space_start_quantum", changed, "queued").get("reason") == "request_id_conflict")
 	assert(adapter.request_operation("space_set_orbit_automatic", {"craft_id":"ship", "enabled":false}).ok)
 	assert(not adapter.get_space_travel_snapshot("ship").orbit_transit_automatic)
 	assert(campaign.apply_command({"contract_category":"singleplayer_campaign", "operation":"select_destination", "payload":{"location_id":"polisa"}, "request_id":"select-polisa"}, {}).ok)
