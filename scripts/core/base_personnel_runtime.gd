@@ -561,6 +561,8 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 
 func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 	if not _sim.is_hex_ground_runtime_active():return _reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit")
+	var owner_lifetime:WeakRef=weakref(self)
+	var screen_lifetime:WeakRef=weakref(_screen)
 	var team:String=String(_screen.call("_get_fireteam_id_for_unit",id))
 	var pilot:String=String(_screen.call("_get_assigned_pilot_id",craft))
 	var whole:bool=bool(payload.get("whole_fireteam",false)) and not team.is_empty()
@@ -609,8 +611,14 @@ func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 	for member in leaving:_cancel(member,false)
 	_board_groups.erase(craft)
 	_sim.call("_publish_base_ground_actors",leaving)
-	state_changed.emit()
-	if payload_prepared!=null:_screen.call("finalize_base_unboard",payload_prepared)
+	var publishing_owner:Node=owner_lifetime.get_ref()
+	if is_instance_valid(publishing_owner) and not publishing_owner.is_queued_for_deletion():publishing_owner.emit_signal("state_changed")
+	# Public observers may free/replace either projection owner. The model is
+	# already committed; never send this historical handle to a replacement.
+	var live_owner:Node=owner_lifetime.get_ref()
+	var live_screen:Node=screen_lifetime.get_ref()
+	if payload_prepared!=null and is_instance_valid(live_owner) and not live_owner.is_queued_for_deletion() and is_instance_valid(live_screen) and not live_screen.is_queued_for_deletion() and live_owner.get("_screen")==live_screen:
+		live_screen.call("finalize_base_unboard",payload_prepared)
 	return {"ok":true}
 
 
