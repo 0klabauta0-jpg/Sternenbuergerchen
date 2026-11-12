@@ -43,6 +43,22 @@ func run() -> void:
   root.get_texture().get_image().save_png(output)
  var ok: bool = panel.selected_wing_ids().size() == 2
  var canvas: Control = view.find_child("SystemMap",true,false)
+ panel.select_wing(String(ids[0]), false)
+ await process_frame
+ var grid = load("res://scripts/core/strategic_hex_grid.gd")
+ var ship_pos: Vector2 = canvas.call("map_to_screen",grid.pair(fleet.get_craft_snapshot("a").position))
+ var local_start := ship_pos - Vector2(25,25)
+ var local_end := ship_pos + Vector2(25,25)
+ var drag_start: Vector2 = canvas.get_global_transform_with_canvas() * local_start
+ var drag_end: Vector2 = canvas.get_global_transform_with_canvas() * local_end
+ var press := InputEventMouseButton.new(); press.button_index = MOUSE_BUTTON_LEFT; press.pressed = true; press.position = drag_start; press.global_position = drag_start
+ root.push_input(press, true)
+ var motion := InputEventMouseMotion.new(); motion.position = drag_end; motion.global_position = drag_end; motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+ root.push_input(motion, true)
+ var release := InputEventMouseButton.new(); release.button_index = MOUSE_BUTTON_LEFT; release.pressed = false; release.position = drag_end; release.global_position = drag_end
+ root.push_input(release, true)
+ await process_frame
+ ok = ok and panel.selected_wing_ids().size() == 2
  var orbit: Dictionary = canvas.call("get_orbit_definitions").glut_1a_orbit
  var cell = load("res://scripts/core/strategic_hex_grid.gd").cell_from_record(orbit.markers[0])
  var target: Vector2 = canvas.get_global_transform_with_canvas() * canvas.call("map_to_screen",load("res://scripts/core/strategic_hex_grid.gd").normalized(cell))

@@ -145,6 +145,7 @@ func _build() -> void:
 	_canvas.orbit_requested.connect(_jump)
 	_canvas.location_selected.connect(_select)
 	_canvas.craft_selected.connect(_on_map_craft_selected)
+	_canvas.crafts_box_selected.connect(func(ids: Array, additive: bool): _wing_panel.select_for_crafts(ids, additive))
 	system_column.add_child(_canvas)
 	_orbit_canvas = ORBIT_CANVAS.new()
 	_orbit_canvas.name = "LocalOrbitMap"

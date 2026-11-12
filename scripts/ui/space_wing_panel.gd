@@ -126,6 +126,20 @@ func select_for_craft(craft_id: String) -> void:
 			break
 	_rebuild_cards()
 
+func select_for_crafts(craft_ids: Array, additive: bool = false) -> void:
+	var wings: Dictionary = Dictionary(_snapshot.get("space_wings", {})).get("wings", {})
+	if not additive: _selected_wings.clear()
+	for id in wings:
+		for craft_id in Array(Dictionary(wings[id]).get("craft_ids", [])):
+			if craft_id in craft_ids:
+				_selected_wings[id] = true
+				break
+	if _selected_wings.size() == 1:
+		var id: String = String(_selected_wings.keys()[0])
+		var leader := String(Dictionary(wings[id]).get("leader_craft_id", ""))
+		if not leader.is_empty(): wing_focus_requested.emit(leader)
+	_rebuild_cards()
+
 func select_wing(id: String, additive: bool = false) -> void:
 	var wings: Dictionary = Dictionary(_snapshot.get("space_wings", {})).get("wings", {})
 	if not wings.has(id): return

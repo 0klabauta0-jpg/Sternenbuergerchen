@@ -40,3 +40,6 @@ Einklappbare linke Rottenreiter, Klick/Strg und Rahmenwahl im Reiterbereich; Sel
 
 ## Fortsetzung: integrierte und native Rottenprobe
 Echte Sternkarten-Controls, zwei Reiseowner, SimulationRoot und Runtimeadapter: Auswahl und Gruppensprung durch native Mausereignisse 3/0, auch auf nicht aktiviertem Windows-Desktop; Aufnahme und Grenzen unter `docs/qa/starmap_wings_20261112/`. Karten fahren vertikal auf. Alt zeigt echte Hin-/Rueckflug-Fuelgates ab Heimatbasis; Warp selbst kostet weiterhin keinen Treibstoff. Basisansicht liest Heimatmondbezeichnung aus Systemdaten. Erster realer Kampagnenflug nach diesen Aenderungen 31/0. Weiter offen bleiben seitliche Flyouts, Rahmenselektion direkt auf der Sternkarte, Sprungtreibstoff und geometrische Reichweite, Zwei-Mond-Migration und Kenney-Bauteile/Icons. Historischer Basisverifier 107/97 wegen ueberholtem Fixture; keine breite Basisfreigabe.
+
+## Auswahlrahmen auf der Sternkarte
+Linkes Ziehen erfasst sichtbare Schiffspositionen und waehlt die zugeordneten Rotten, Strg ergaenzt. Der integrierte Zwei-Owner-Test waehlt beide Schiffe zusaetzlich per Rahmen und startet danach den Gruppensprung; headless und native GPU-Probe bestanden. Noch offen: seitliche statt vertikale Rotten-Flyouts, Quantum-Treibstoff/Reichweite, Zwei-Mond-Migration, Kenney-Bauteile und Icons.

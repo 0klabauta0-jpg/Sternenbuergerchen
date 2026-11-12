@@ -6,10 +6,15 @@ const SYSTEM = preload("res://scripts/core/singleplayer_space_travel_state.gd")
 signal orbit_requested(orbit_id: String, marker_id: String)
 signal location_selected(location_id: String)
 signal craft_selected(craft_id: String)
+signal crafts_box_selected(craft_ids: Array, additive: bool)
 var _location_buttons: Dictionary={}
 var _locations: Dictionary={}
 var _travel: Dictionary = {}
 var _selected_ship_id := ""
+var _selection_active := false
+var _selection_start := Vector2.ZERO
+var _selection_end := Vector2.ZERO
+var _selection_additive := false
 var _body_labels: Dictionary = {}
 var _bodies: Dictionary = {}
 var _orbits: Dictionary = {}
@@ -204,13 +209,19 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		var craft_id := craft_at(event.position)
 		if not craft_id.is_empty():
-			craft_selected.emit(craft_id)
-			accept_event()
-			return
-		var target := orbit_marker_at(event.position)
-		if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
-			orbit_requested.emit(target.orbit_id, target.marker_id)
-			accept_event()
+			if event.ctrl_pressed: crafts_box_selected.emit([craft_id], true)
+			else: craft_selected.emit(craft_id)
+		else:
+			var target := orbit_marker_at(event.position)
+			if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
+				orbit_requested.emit(target.orbit_id, target.marker_id)
+				accept_event()
+				return
+		_selection_start = event.position
+		_selection_end = event.position
+		_selection_additive = event.ctrl_pressed
+		_selection_active = true
+		accept_event()
 
 func craft_at(point: Vector2) -> String:
 	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
@@ -264,6 +275,26 @@ func _handle_gui_event(event: InputEvent) -> bool:
 func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree():
 		_drag_button = 0
+		_selection_active = false
+		return
+	if _selection_active:
+		if event is InputEventMouseMotion:
+			_selection_end = get_global_transform_with_canvas().affine_inverse() * event.global_position
+			queue_redraw()
+		elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+			_selection_end = get_global_transform_with_canvas().affine_inverse() * event.global_position
+			_selection_active = false
+			if _selection_start.distance_to(_selection_end) >= 6.0:
+				var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
+				var selected: Array = []
+				var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
+				for id in routes:
+					var route: Dictionary = routes[id]
+					var pos: Variant = route.get("position", [])
+					if not String(id).is_empty() and String(route.get("phase", "grounded")) not in ["grounded", "surface"] and pos is Array and pos.size() == 2 and box.has_point(map_to_screen(GRID.pair(pos))): selected.append(String(id))
+				crafts_box_selected.emit(selected, _selection_additive)
+			queue_redraw()
+			get_viewport().set_input_as_handled()
 		return
 	if _drag_button == 0:
 		if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]:
@@ -368,6 +399,10 @@ func _draw() -> void:
 		if _camera_zoom >= 3.0:
 			var letter: String = {"satellite_crash": "A", "trade_outpost": "B", "fortified_outpost": "C"}.get(id, "")
 			draw_string(ThemeDB.fallback_font, _hex_center(hex) + Vector2(-4, 4), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ebfaff"))
+	if _selection_active and _selection_start.distance_to(_selection_end) >= 6.0:
+		var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
+		draw_rect(box, Color(0.3, 0.85, 0.95, 0.18), true)
+		draw_rect(box, Color("77dce9"), false, 1.0)
 
 
 func _draw_orbit_markers() -> void:

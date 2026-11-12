@@ -1,5 +1,9 @@
 # IMPLEMENTATION_STATUS
 
+### Rottenauswahl und Reichweitenhinweis — 12.11.2026
+Links einklappbare Rottenkarten, Strg-/Rahmenselektion auch auf der Sternkarte und Gruppenbefehle ueber bestehende Reiseowner. Native und headless Testszene mit zwei Reiseownern 3/0; Alt zeigt vorhandene Ortsrouten-Treibstoffpruefung, Warp bleibt kostenlos. Heimatbasis nennt den Heimatmond. Nachweise und offene Punkte: `docs/qa/starmap_wings_20261112/README.md`; seitliche Flyouts, Sprungtreibstoff, Zwei-Mond-Migration und Kenney-Baukasten bleiben offen. Kein vollstaendiger Mehrschiff-Spielstand oder EXE.
+
+
 ### Sternkarte: erster Spieltest-Schritt — 12.11.2026
 Sternkartensteuerung links, ein sichtbarer Orbitmarker je Körper bei unverändertem V2-Reiseowner, Auftragszielhinweis, einzelnes Schiff und Rottenführung fokussierbar, Rechtsklick auf Marker sowie Börner/Mare-Nostrum-Anzeigen. Isolierter echter Kampagnenweg bis zur Landung 31/0; gezielte Karten- und Kameraprüfungen bestanden. Rotten-Mehrfachauswahl, Reichweite, Zwei-Mond-Migration und Basisgestaltung bleiben offen; kein nativer Sichtcheck oder EXE. Details: `docs/tasks/PLAYTEST_2026_11_12_starmap_base.md`.
 
