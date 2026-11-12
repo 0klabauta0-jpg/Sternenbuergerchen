@@ -1,0 +1,73 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: real craft and team exist
+PASS: real job accepted
+PASS: real destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+ROOT_RECEIPT_COUNTS launch=1 departure=1
+PASS: actual journey produced one launch and departure receipt
+ROOT_RECEIPT_CAPTURE root_receipt_checkpoint.v1
+PASS: actual finalized Root receipts export
+PASS: actual landed Fleet checkpoint exports
+PASS: actual Fleet checkpoint restores detached owners
+PASS: legitimate fresh Supply restores real request receipts
+PASS: legitimate fresh Campaign restores real departure and requests
+PASS: legitimate fresh Equipment restores canonical loadouts
+PASS: restored Fleet authority binds target Root
+PASS: restored Supply authority binds target Root
+PASS: restored Campaign authority binds target Root
+ROOT_RECEIPT_PREPARE ok
+PASS: JSON Root receipt candidate prepares before owner publication
+PASS: preparation changes no owner or Root receipts
+PASS: validation rejects unpublished Root owner bindings
+PASS: actual adapter binds target Root
+PASS: final owner bindings and fresh replay candidates validate
+PASS: changed owner pointer rejects stale candidate
+PASS: unpublished launch rejects checkpoint
+PASS: unpublished departure rejects checkpoint
+PASS: forged Fleet result rejects checkpoint
+PASS: unmatched fuel request rejects checkpoint
+PASS: unmatched approach rejects checkpoint
+PASS: changed underlying fuel signature rejects stale candidate
+PASS: restored legitimate request validates again
+PASS: published candidate cannot be reused
+PASS: committed target receipts cannot be silently overwritten
+ROOT_RECEIPT_REPLAY launch=true departure=true
+PASS: same real launch request replays after fresh-owner restoration
+PASS: same real departure request replays after fresh-owner restoration
+PASS: replays repeat no fuel, Campaign or Flight mutation
+PASS: finalized events are not published twice
+PASS: same launch with foreign craft rejects
+PASS: changed station flags reject
+PASS: restored Root semantic checkpoint exactly matches actual source
+PASS: capture rejects unfinished event publication
+PASS: capture fails closed on unsupported committed receipts
+ROOT_RECEIPT_TRUE_JOURNEY_PASS
+ROOT_RECEIPT_CHECKPOINT passed=64 failed=0
