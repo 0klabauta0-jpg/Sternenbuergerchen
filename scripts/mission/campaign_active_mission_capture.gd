@@ -46,6 +46,13 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if not active_ids.has(pilot): return _reject("mission_crew_unsupported")
 	var home: Dictionary = HOME_STORE.load_checkpoint()
 	if not home.get("ok",false): return home
+	var start = flow.get("_campaign_start")
+	if start == null: return _reject("campaign_owner_unavailable")
+	var identity_home: Dictionary = home.payload.duplicate(true)
+	start.get_script()._migrate_known_main_starter(identity_home)
+	var run: Dictionary = start.get_script().resolve_checkpoint_run_id(identity_home,false)
+	if not run.get("ok",false) or run.id != String(start.get("campaign_run_id")): return _reject("campaign_run_mismatch")
+	var home_digest := JSON.stringify(home.payload,"",true,true).sha256_text()
 	var roster: Array = Array(flow.get("_all_team_units")).duplicate(true)
 	var roster_ids: Array = []
 	for person in roster:
@@ -111,7 +118,7 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 		if pair[0].get("schema") != pair[1]: return pair[0] if pair[0].get("ok",true)==false else _reject("space_checkpoint_unavailable")
 	var requests := CODEC.encode_value(Dictionary(runtime.get("_space_operation_requests")))
 	if not requests.ok: return requests
-	return {"ok":true,"complete":false,"missing":["root_receipts","world_transaction","restore_scene"],"components":{"home":home.payload,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"space_requests":requests.value}}
+	return {"ok":true,"complete":false,"missing":["root_receipts","world_transaction","restore_scene"],"components":{"home":home.payload,"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"space_requests":requests.value}}
 
 static func _reject(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}

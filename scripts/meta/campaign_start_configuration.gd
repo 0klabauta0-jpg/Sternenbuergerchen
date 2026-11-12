@@ -9,6 +9,7 @@ var entry: Dictionary = {}
 var checkpoint: Dictionary = {}
 var last_save_signature := ""
 var error_message := ""
+var campaign_run_id := ""
 var _hex_export_scope := ""
 var _hex_export_msec: int = -1
 
@@ -27,6 +28,11 @@ func configure(flow: Node, request: Dictionary) -> void:
 				return
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 		_migrate_known_main_starter(checkpoint)
+	var run: Dictionary = resolve_checkpoint_run_id(checkpoint, String(request.get("action", "new")) != "continue")
+	if not run.get("ok", false):
+		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
+		return
+	campaign_run_id = run.id
 	var roster: Array = Array(checkpoint.get("roster", _initial_roster())).duplicate(true)
 	flow.set("_all_team_units", roster)
 	flow.set("_available_team_units", roster.duplicate(true))
@@ -76,6 +82,22 @@ func configure(flow: Node, request: Dictionary) -> void:
 		for person: Dictionary in roster:
 			loadouts[String(person.unit_id)] = {"armor":"suit","weapon_1":"pistol","weapon_2":"medictool"}
 	flow.get_node("HomebaseScreen").call("restore_personnel_loadouts", loadouts)
+
+# Existing campaigns without a run ID receive a deterministic migration ID;
+# new campaigns use fresh entropy so an earlier active save cannot reappear.
+static func resolve_checkpoint_run_id(payload: Dictionary, fresh: bool) -> Dictionary:
+	if fresh:
+		var bytes := Crypto.new().generate_random_bytes(32)
+		if bytes.size() != 32: return {"ok":false, "reason":"run_identity_unavailable"}
+		return {"ok":true,"id":bytes.hex_encode()}
+	if payload.has("campaign_run_id"):
+		var value: Variant = payload.campaign_run_id
+		if typeof(value) != TYPE_STRING or value.length() != 64: return {"ok":false,"reason":"invalid_run_identity"}
+		for letter in value:
+			if not String(letter) in "0123456789abcdef": return {"ok":false,"reason":"invalid_run_identity"}
+		return {"ok":true,"id":value}
+	if payload.is_empty(): return {"ok":false,"reason":"invalid_run_identity"}
+	return {"ok":true,"id":("legacy:" + JSON.stringify(payload, "", true, true)).sha256_text()}
 
 static func _migrate_known_main_starter(payload: Dictionary) -> bool:
 	# Exactly the historically authored Main starter, whose role already resolves
@@ -141,6 +163,7 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	if hex_export: _hex_export_msec = Time.get_ticks_msec()
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}
+	payload["campaign_run_id"] = campaign_run_id
 	payload["roster"] = Array(flow.get("_all_team_units")).duplicate(true)
 	payload["craft"] = {
 		"definition": Dictionary(crafts[0]).duplicate(true),

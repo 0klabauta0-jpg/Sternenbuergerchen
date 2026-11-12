@@ -32,3 +32,6 @@ Legacy-Positionen und Actor-Modelle werden in isolierter Vorbereitung gemeinsam 
 
 ## Echter Mehr-Owner-Capture
 Der echte Landefall wird durch einen read-only Collector gegen die aktuell gebundenen Campaign-, Supply-, Onboarding-, Equipment-, Markt-, Fleet-, Space-, Missions-, Transport-, Actor- und LegacyGround-Owner erfasst. Homecheckpoint und echte Orts-/Pilot-/Crewidentitaeten werden gegengeprueft. Isolierter Gesamttest: 32 Checks bestanden, eine erwartete Fehlermeldung fuer den noch fehlenden aktiven Speicherpfad. Der Collector kennzeichnet sich selbst mit `complete=false`: Rootbelege, Welttransaktion und Scene-Restore fehlen. Die getrennte Aktivdatei testet atomare Ablage/Domainvalidator und schuetzt explizit den Home-Pfad, ist aber nicht als aktiver Kampagnensave verdrahtet.
+
+## Kampagnenkennung
+Neue Kampagnen erhalten eine zufaellige persistierte Run-ID; bestehende Homecheckpoints ohne Kennung behalten einen deterministischen Migrationswert. Ein Aktivstand wird spaeter an diese Kennung und den letzten Homecheckpoint-Hash gebunden. Run-ID-Negativtest und alter Home-Continue bestehen; Auswahl und Restore des aktiven Umschlags sind noch nicht angeschlossen.
