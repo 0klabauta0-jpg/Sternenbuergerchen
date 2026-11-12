@@ -5782,6 +5782,11 @@ func _build_transport_craft_states() -> Array:
 			"mission_transit_to_fob": mission_phase == "to_fob",
 			"mission_transit_to_homebase": mission_phase == "to_homebase",
 		}
+		# Transport cards project the actual fleet identity; do not infer a model
+		# from a role for older definitions that have no authored identity.
+		for identity_field: String in ["model_id", "visual_asset_id", "crew_capacity"]:
+			if craft_def.has(identity_field):
+				craft_state[identity_field] = craft_def[identity_field]
 		if not recovery_patch.is_empty():
 			craft_state.merge(recovery_patch, true)
 		craft_states.append(craft_state)
@@ -6916,7 +6921,7 @@ func _build_homebase_direct_mission_drop_card_snapshot(craft_id: String, next_st
 	if display_name.is_empty():
 		display_name = "Dropship"
 	var queued_fireteam_ids: Array = Array(_mission_planning_state.get("drop_queued_fireteam_ids", [])).duplicate()
-	return {
+	var card := {
 		"craft_id": craft_id,
 		"display_name": display_name,
 		"title_text": String(_mission_planning_state.get("mission_drop_title_text", display_name)).strip_edges(),
@@ -6935,6 +6940,11 @@ func _build_homebase_direct_mission_drop_card_snapshot(craft_id: String, next_st
 		"boarded_fireteam_ids": queued_fireteam_ids.duplicate(),
 		"queued_fireteam_ids": queued_fireteam_ids.duplicate(),
 	}
+	var definition := _find_homebase_aircraft_definition(craft_id)
+	for identity_field: String in ["model_id", "craft_type", "visual_asset_id", "crew_capacity"]:
+		if definition.has(identity_field):
+			card[identity_field] = definition[identity_field]
+	return card
 
 
 func _apply_selected_mission_drop_card_override(drop_state: Dictionary) -> Dictionary:

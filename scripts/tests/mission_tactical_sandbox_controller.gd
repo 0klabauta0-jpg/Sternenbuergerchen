@@ -35832,6 +35832,14 @@ func _update_primary_drop_sequence(delta: float) -> void:
 			if _drop_sequence_position.distance_to(exit_position) <= 2.0:
 				_drop_ship_cooldown_remaining = DROP_SHIP_RECALL_COOLDOWN_SECONDS
 				var completed_craft_id: String = _drop_sequence_craft_id.strip_edges()
+				# Keep the actual per-ship embark binding through the synchronous
+				# return callback. The cleared sequence must not erase pilot proof
+				# before Flow asks the travel owner to commit the departure.
+				var return_binding: Dictionary = _capture_active_drop_sequence()
+				return_binding["phase"] = ""
+				var hold_binding := not completed_craft_id.is_empty() and not _parallel_drop_sequences_by_craft.has(completed_craft_id)
+				if hold_binding:
+					_parallel_drop_sequences_by_craft[completed_craft_id] = return_binding
 				var completed_selected: bool = _is_active_drop_sequence_for_craft(_mission_drop_craft_id)
 				var return_state: String = _get_mission_drop_return_state(completed_craft_id)
 				if completed_selected:
@@ -35856,6 +35864,8 @@ func _update_primary_drop_sequence(delta: float) -> void:
 				_last_command_text = "DROPSHIP CLEARED"
 				_store_selected_mission_dropship_plan()
 				_emit_planning_state_changed()
+				if hold_binding and is_same(_parallel_drop_sequences_by_craft.get(completed_craft_id), return_binding):
+					_parallel_drop_sequences_by_craft.erase(completed_craft_id)
 				_update_ui()
 				_refresh_world_overlays()
 			_refresh_world_overlays()
