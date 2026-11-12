@@ -9478,3 +9478,134 @@ func _clear_container(container: Node) -> void:
 	for child in container.get_children():
 		container.remove_child(child)
 		child.queue_free()
+
+
+# Cold staging/projection bridge only. Runtime Ground/Base remains authoritative.
+class PreparedBaseUnboard extends RefCounted:
+	pass
+var _prepared_base_unboards:Dictionary={}
+var _base_unboard_generation:=0
+
+func prepare_base_unboard(craft_id:String,fireteam_id:String)->Dictionary:
+	if not _base_unboard_id(craft_id) or not _base_unboard_id(fireteam_id) or _normalize_fireteam_id(fireteam_id)!=fireteam_id:return {"ok":false,"reason":"invalid_base_unboard_identity"}
+	var built:Dictionary=_base_unboard_projection(craft_id,fireteam_id)
+	if not built.ok:return built
+	for key in _prepared_base_unboards.keys():
+		if _prepared_base_unboards[key].handle.get_ref()==null:_prepared_base_unboards.erase(key)
+	if _prepared_base_unboards.size()>=32:return {"ok":false,"reason":"base_unboard_prepare_capacity"}
+	var handle:=PreparedBaseUnboard.new()
+	_prepared_base_unboards[handle.get_instance_id()]={"handle":weakref(handle),"generation":_base_unboard_generation,"phase":"prepared","craft_id":craft_id,"fireteam_id":fireteam_id,"source":built.context,"post_context":built.post_context,"patch":built.patch}
+	var result:Dictionary=built.source_data.duplicate(true)
+	result["ok"]=true;result["prepared"]=handle
+	return result
+
+func validate_prepared_base_unboard(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_base_unboard_record(prepared)
+	if record.is_empty():return {"ok":false,"reason":"unknown_base_unboard"}
+	if record.phase!="prepared":return {"ok":false,"reason":"base_unboard_already_published"}
+	if record.generation!=_base_unboard_generation or _base_unboard_context(record.craft_id,record.fireteam_id)!=record.source:return {"ok":false,"reason":"base_unboard_context_changed"}
+	return {"ok":true,"prepared_id":prepared.get_instance_id()}
+
+# Trusted joint-tail use only, after every participant validated before any write.
+# No signals, callbacks, refresh, sanitize, rebuild or fallible owner operation.
+func _publish_prepared_base_unboard(prepared:RefCounted,_validation:Dictionary)->Dictionary:
+	var record:Dictionary=_prepared_base_unboards[prepared.get_instance_id()]
+	_homebase_dropship_staged_fireteam_ids_by_craft=record.patch.by_craft
+	_homebase_direct_boarding_state_by_fireteam_id=record.patch.boarding
+	_homebase_dropship_staged_fireteam_ids=record.patch.legacy_ids
+	_homebase_dropship_payload_craft_id=record.patch.active_craft
+	record.phase="published"
+	_base_unboard_generation+=1
+	return {"ok":true}
+
+func finalize_base_unboard(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_base_unboard_record(prepared)
+	if record.is_empty():return {"ok":false,"reason":"unknown_base_unboard"}
+	if record.phase=="finalized":return {"ok":true,"replayed":true}
+	if record.phase!="published":return {"ok":false,"reason":"base_unboard_not_published"}
+	if _base_unboard_context(record.craft_id,record.fireteam_id)!=record.post_context:
+		record.phase="finalized"
+		return {"ok":true,"context_changed":true,"emitted":false}
+	# Mark before emission: a synchronous observer may reenter or reset this screen.
+	record.phase="finalized"
+	var lifetime:WeakRef=weakref(self)
+	_emit_homebase_fireteam_context_changed()
+	if not is_instance_valid(lifetime.get_ref()):return {"ok":true,"context_changed":true}
+	if is_queued_for_deletion() or _base_unboard_context(record.craft_id,record.fireteam_id)!=record.post_context:return {"ok":true,"context_changed":true}
+	if is_inside_tree():_rebuild_ui()
+	return {"ok":true,"replayed":false}
+
+func _base_unboard_record(prepared:RefCounted)->Dictionary:
+	if prepared==null or not _prepared_base_unboards.has(prepared.get_instance_id()):return {}
+	var record:Dictionary=_prepared_base_unboards[prepared.get_instance_id()]
+	return record if record.handle.get_ref()==prepared else {}
+
+func _base_unboard_context(craft_id:String,fireteam_id:String)->Dictionary:
+	var personnel:Node=get_base_personnel_runtime()
+	return {"screen_id":get_instance_id(),"manager_id":_aircraft_manager.get_instance_id(),"base_bridge_id":personnel.get_instance_id() if is_instance_valid(personnel) else 0,
+		"selected_aircraft_id":_aircraft_manager.get_selected_aircraft_id(),"selected_units":_selected_unit_ids.duplicate(),"selected_fireteams":_selected_fireteam_ids.duplicate(),"fireteam_definitions":_fireteam_definitions.duplicate(true),
+		"by_craft":_homebase_dropship_staged_fireteam_ids_by_craft.duplicate(true),"boarding":_homebase_direct_boarding_state_by_fireteam_id.duplicate(true),"legacy_ids":_homebase_dropship_staged_fireteam_ids.duplicate(),"active_craft":_homebase_dropship_payload_craft_id,
+		"craft_definition":_get_aircraft_definition_by_id(craft_id).duplicate(true),"member_ids":_get_member_unit_ids_for_fireteam(fireteam_id).duplicate()}
+
+func _base_unboard_projection(craft_id:String,fireteam_id:String)->Dictionary:
+	var craft:Dictionary=_get_aircraft_definition_by_id(craft_id)
+	if craft.is_empty():return {"ok":false,"reason":"base_unboard_unknown_craft"}
+	if _selected_unit_ids.size()>256 or _selected_unit_ids.size()!=_selected_fireteam_ids.size() or _fireteam_definitions.size()>64 or _homebase_dropship_staged_fireteam_ids_by_craft.size()>64:return {"ok":false,"reason":"base_unboard_context_budget"}
+	var definitions:Dictionary={}
+	for value in _fireteam_definitions:
+		if typeof(value)!=TYPE_DICTIONARY or not _base_unboard_id(value.get("id",null)) or definitions.has(value.id):return {"ok":false,"reason":"base_unboard_ambiguous_fireteam"}
+		definitions[value.id]=value
+	if not definitions.has(fireteam_id):return {"ok":false,"reason":"base_unboard_unknown_fireteam"}
+	var members:PackedStringArray=_get_member_unit_ids_for_fireteam(fireteam_id)
+	if members.is_empty() or members.size()>64:return {"ok":false,"reason":"base_unboard_members_missing"}
+	var seen_units:Dictionary={}
+	for id in members:
+		if not _base_unboard_id(id) or seen_units.has(id):return {"ok":false,"reason":"base_unboard_ambiguous_members"}
+		seen_units[id]=true
+	var next_by_craft:Dictionary={};var seen_teams:Dictionary={};var aggregate:PackedStringArray=[]
+	var keys:Array=_homebase_dropship_staged_fireteam_ids_by_craft.keys()
+	for key in keys:
+		if not _base_unboard_id(key):return {"ok":false,"reason":"base_unboard_ambiguous_payload"}
+	keys.sort()
+	var found:=false
+	for key in keys:
+		if not _base_unboard_id(key):return {"ok":false,"reason":"base_unboard_ambiguous_payload"}
+		var raw:Variant=_homebase_dropship_staged_fireteam_ids_by_craft[key]
+		if not (raw is PackedStringArray or raw is Array) or raw.size()>64:return {"ok":false,"reason":"base_unboard_ambiguous_payload"}
+		var next:PackedStringArray=[]
+		for team in raw:
+			if not _base_unboard_id(team) or not definitions.has(team) or seen_teams.has(team):return {"ok":false,"reason":"base_unboard_ambiguous_payload"}
+			seen_teams[team]=true
+			if team==fireteam_id:
+				if key!=craft_id:return {"ok":false,"reason":"base_unboard_foreign_craft"}
+				found=true
+			else:next.append(team)
+		if key!=craft_id or not next.is_empty():next_by_craft[key]=next
+	if not found:return {"ok":false,"reason":"base_unboard_payload_missing"}
+	for key in next_by_craft:
+		for team in next_by_craft[key]:
+			if not _get_member_unit_ids_for_fireteam(team).is_empty() and not aggregate.has(team):aggregate.append(team)
+	var boarding:Dictionary=_homebase_direct_boarding_state_by_fireteam_id.duplicate(true)
+	if boarding.has(fireteam_id):
+		if typeof(boarding[fireteam_id])!=TYPE_DICTIONARY or boarding[fireteam_id].get("craft_id")!=craft_id:return {"ok":false,"reason":"base_unboard_boarding_context"}
+		boarding.erase(fireteam_id)
+	var active:String=_homebase_dropship_payload_craft_id
+	if aggregate.is_empty():active=""
+	elif not active.is_empty():
+		var active_valid:=false
+		for team in next_by_craft.get(active,PackedStringArray()):
+			if aggregate.has(team):active_valid=true
+		if not active_valid:
+			active=""
+			for key in next_by_craft:
+				for team in next_by_craft[key]:
+					if aggregate.has(team):active=key;break
+				if not active.is_empty():break
+	var context:Dictionary=_base_unboard_context(craft_id,fireteam_id)
+	var post:Dictionary=context.duplicate(true)
+	post.by_craft=next_by_craft.duplicate(true);post.boarding=boarding.duplicate(true);post.legacy_ids=aggregate.duplicate();post.active_craft=active
+	return {"ok":true,"context":context,"post_context":post,"patch":{"by_craft":next_by_craft,"boarding":boarding,"legacy_ids":aggregate,"active_craft":active},
+		"source_data":{"craft_id":craft_id,"fireteam_id":fireteam_id,"source_craft_id":craft_id,"source_fireteam_id":fireteam_id,"unit_ids":members.duplicate(),"removed_fireteam_ids":PackedStringArray([fireteam_id]),"removed_unit_ids":members.duplicate(),"fireteam_definition":Dictionary(definitions[fireteam_id]).duplicate(true)}}
+
+func _base_unboard_id(value:Variant)->bool:
+	return typeof(value)==TYPE_STRING and not String(value).is_empty() and String(value)==String(value).strip_edges() and String(value).length()<=256

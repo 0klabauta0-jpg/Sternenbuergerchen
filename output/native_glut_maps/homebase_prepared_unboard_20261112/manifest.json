@@ -1,0 +1,12 @@
+{
+  "scope": "Additive prepared Screen projection bridge only; Root/Base runtime integration remains Source-owned",
+  "checks": "18/0",
+  "red_run": "prepared_unboard-64fb5e04bbd24a05a4cea168e4e2a34d",
+  "green_run": "prepared_unboard-cda5a78f8ab544c7b4000272f7fe9baf",
+  "sha256": {
+    "scripts/meta/homebase_screen.gd": "3ea8feda6f4968eb4aa85f01847768954d87414faafc2ef610a7fd2ab7897047",
+    "docs/tasks/HOMEBASE_PREPARED_UNBOARD_PROJECTION_2026_11_12.md": "587214a73280f9e81c8fc23aedc4f3a6a8a130124fa018c5dc0e468790244a60",
+    "output/native_glut_maps/homebase_prepared_unboard_20261112/check.gd": "dae83b92c4ae36f331c179ff3488dd28b66401d9eb509f864e0e627a7638b605",
+    "output/native_glut_maps/homebase_prepared_unboard_20261112/run.py": "31e7f4130816bbee2f877cbf3ddb414c4adb5c5b739bda655c50f72dac97f110"
+  }
+}
