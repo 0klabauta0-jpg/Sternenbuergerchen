@@ -30,6 +30,13 @@ func _run() -> void:
 	_flow.call("_show_homebase")
 	var uploaded: Dictionary = _runtime.call("request_operation", "campaign_upload", {"job_id":"satellite_recovery"})
 	if not _check(uploaded.get("ok", false) and String(_campaign().jobs.satellite_recovery.status) == "completed", "real recovered chip uploaded at home"): print("UPLOAD_RESULT ", uploaded); await _finish(); return
+	var checkpoint: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
+	print("REAL_UPLOAD_CHECKPOINT ", checkpoint)
+	if checkpoint.get("ok", false):
+		var loaded: Dictionary = STORE.load_checkpoint()
+		var loaded_campaign: Dictionary = Dictionary(loaded.get("payload", {})).get("campaign", {})
+		var loaded_jobs: Dictionary = loaded_campaign.get("jobs", {})
+		_check(loaded.get("ok", false) and String(Dictionary(loaded_jobs.get("satellite_recovery", {})).get("status", "")) == "completed", "real home checkpoint retains completed satellite job")
 	var fuel: float = float(_supply().fuel_by_craft_id[_craft_id])
 	if fuel < 100.0 and not _check(_runtime.call("request_operation", "refuel", {"craft_id":_craft_id, "amount":100.0-fuel}).get("ok", false), "actual ship refueled"): await _finish(); return
 	if not await _prepare_sortie_base(): await _finish(); return

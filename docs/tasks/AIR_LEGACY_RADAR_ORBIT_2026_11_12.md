@@ -67,6 +67,13 @@ regulärem Missionsabbruch und physisch eingeboardeter Originalcrew bestand
 38/38 Prüfungen bis zur tatsächlichen Heimatlandung des ursprünglichen Schiffs.
 Dieser Lauf ist kein Abschluss des Satellitenziels und kein Save/Load-Nachweis.
 
+Beim anschließenden Zweimondlauf lieferte der unindizierte
+`get_mission_for_craft`-Fallback während des zweiten Flugs noch die aktive
+Instanz der ersten Karte, obwohl das Schiff dort nicht mehr anwesend war.
+Der Fallback darf nur für ein tatsächlich als `mission` geführtes Schiff
+gelten; explizite Location-Registry-Bindungen behalten Vorrang. Ein gezielter
+Test deckt alte Instanz, Missionsbesitz und explizite neue Bindung ab.
+
 Die kanonische Oberflächenzuordnung ordnet `satellite_crash` Glut 1a,
 `trade_outpost` Glut 1b und `fortified_outpost` Glut 1 zu. Ihre Szenarien
 verweisen auf die zugehörigen Karten. `distress_orbit` und `polisa` sind keine

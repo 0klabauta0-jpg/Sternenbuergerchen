@@ -98,6 +98,7 @@ func _air_button(mission: Node, action: String) -> Button:
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 	if label.ends_with("actual mission instance exists"):
 		# The actual coupled Cutlass now crosses the 256-row orbit on normal ticks.
+		var expected_location := String(_campaign().get("selected_location_id", ""))
 		var diagnostic := "--orbit-diagnostic" in OS.get_cmdline_user_args()
 		var deadline := Time.get_ticks_msec() + (25000 if diagnostic else maxi(milliseconds, 180000))
 		var source: Node = _runtime.get("_simulation")
@@ -108,7 +109,7 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 		var reported := false
 		while Time.get_ticks_msec() < deadline:
 			var mission: Node = _flow.call("get_mission_for_craft", _craft_id)
-			if is_instance_valid(mission):
+			if is_instance_valid(mission) and not expected_location.is_empty() and String(mission.get_meta("location_id", "")) == expected_location:
 				_flow.call("focus_location", String(mission.get_meta("location_id", "")))
 				return _check(true, label)
 			if not reported and Time.get_ticks_msec() >= report_at:
