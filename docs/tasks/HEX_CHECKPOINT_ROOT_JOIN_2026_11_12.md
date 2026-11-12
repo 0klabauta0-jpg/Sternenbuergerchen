@@ -107,3 +107,7 @@ Erster tatsächlicher AP8verbund: alle 38 Funktionsassertions erfolgreich,
 Abschlussguard wegen eines RefCounted-Predelete-Selbstaufrufs ausdrücklich rot.
 Cleanup jetzt direkt in _notification statt Methodendispatch auf abbauendes self.
 Keine Gameplayänderung; sauberer Lauf erst nach gemeinsamer Wiederholung.
+
+## Gemeinsamer begrenzter Abschluss 12.11.2026
+
+Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.

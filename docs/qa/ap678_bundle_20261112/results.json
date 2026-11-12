@@ -1,0 +1,42 @@
+{
+  "schema": "ap678_bounded_results.v1",
+  "status": "bounded_checks_passed",
+  "product_head": "c73a2ba030f7f4c09233ca6ef0bd9ca034becef8",
+  "native_acceptance": false,
+  "real_peer_acceptance": false,
+  "production_activation": false,
+  "main_integration": false,
+  "exe_created": false,
+  "runs": [
+    {
+      "name": "runtime_selection",
+      "head": "33d0d23509d69b4b661df807a2f62626e5cb782f",
+      "status": "passed",
+      "report": "bundle/01-runtime_selection/child_report.json",
+      "sha256": "2c89bb8f3d2ddddb5d081e172909b5e5863e9c3bb33651ea523b32b1fc7bed25"
+    },
+    {
+      "name": "base_checkpoint",
+      "head": "33d0d23509d69b4b661df807a2f62626e5cb782f",
+      "status": "passed",
+      "report": "bundle/02-base_checkpoint/child_report.json",
+      "sha256": "6d26e40da714dfbbc78f39a5effe10e1df265b7f52f680b683641003ab7f9fd4"
+    },
+    {
+      "name": "ap8_network_owner_join",
+      "head": "33d0d23509d69b4b661df807a2f62626e5cb782f",
+      "status": "passed",
+      "report": "bundle/03-ap8_network_owner_join/child_report.json",
+      "sha256": "a78d4bc8f911f4991cea61173817edc93a7bb91a3844437a5e1ac20d0b2b7d6d"
+    },
+    {
+      "name": "campaign_continue",
+      "head": "c73a2ba030f7f4c09233ca6ef0bd9ca034becef8",
+      "status": "passed",
+      "report": "campaign_continue/report.json",
+      "sha256": "17efd9fd9af8a2f0c474693352cd2d568aa59abda99975632ab59d397f765ced"
+    }
+  ],
+  "provenance_note": "Selection/Base/AP8 ran at 33d0d2350; subsequent product changes touched only CampaignStart/Store, verified by the later actual Continue case. Original reports and their commit boundaries are preserved; no synthetic single-run claim.",
+  "archive_sha256": "a4d3e271cdeb0353933cfb94f582943bb9b54560511b79e99aba4b5a061a2e52"
+}

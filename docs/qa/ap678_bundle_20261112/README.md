@@ -1,84 +1,26 @@
-# Vorbereiteter AP6/AP7/AP8-Prüfblock
+# AP6–AP8: begrenzter Integrationsabschluss
 
-**Noch nicht ausgeführt.** Dieser Ordner enthält Plan und Aufrufhilfe, keine
-grüne Gameplayevidenz. Codeblöcke zuerst abschließen und gemeinsam einfrieren.
+Die vier erforderlichen kleinen Fälle sind bestanden. Originalberichte und vollständige Logs liegen unverändert in `evidence.zip`, Zuordnung und Hashes in `results.json`.
 
-Plan anzeigen, ohne Godot oder Ergebnisdateien zu starten:
+| Fall | Ergebnis | Tatsächlicher Stand |
+| --- | --- | --- |
+| RuntimeSelection / Actor / Registry / Leader | 16/0 | 33d0d2350 |
+| Baseaktionscheckpoint V2 | 30/0 | 33d0d2350 |
+| 12-Felder-Ablauf mit Rootcheckpoint und Host/Receiver | 38/0 | 33d0d2350 |
+| Echter Campaign-Save/Continue | 17/0 positiv + 3/0 Legacy-Reject | c73a2ba03 |
 
-```powershell
-python scripts/tests/run_ap678_bundle.py
-```
+Alle Kindprozesse Exit0, vollständige Logs ohne Enginefehler/Leaks; Quell-, Originalprofil- und private Canaryguards sind grün. Der erste Wrapperbericht bleibt historisch `partial_pending`, weil damals die zusätzliche Storeprobe fehlte. Ihr danach tatsächlich bestandener Bericht schließt diese Lücke. Nach dem Dreierlauf wurden nur CampaignStart/Store-Produktpfade geändert; diese prüft der anschließende neue Ownerfall. Es wurde kein einzelner gemeinsamer Lauf am späteren Commit erfunden und keine unnötige unveränderte Testmatrix wiederholt.
 
-Erst für den später autorisierten gemeinsamen Lauf:
+Die Kampagnenprobe verwendet echte Flow/Start/Store/Screen/Adapter/Base/Root-Owner. Unterdrückt sind nur unbenutzte UI-Start-/Renderloops. Der Pilot läuft tatsächlich zum Pad und steigt ein; Save und frisches Continue erhalten ihn bereits vor dem ersten Basissignal verborgen und ohne Groundpräsenz. Tick, exakter RNGstring, Baseaktionen und Ground werden in der tatsächlichen persistierten JSONdomain verglichen. Autosave begrenzt Export/Hash/Schreiben, während der tatsächliche Roottick weiterläuft; expliziter Save umgeht nur den Takt.
 
-```powershell
-python scripts/tests/run_ap678_bundle.py --execute
-```
+Nur die private positive Kopie der echten384x392/16x8-Basisnavigation erhält `tactical_grid_rules`; im zweiten Prozess müssen exakte Originalbytes denselben Hexsave vor Flowwrites ablehnen. Originalkarte und Spielerprofil bleiben unverändert. Dies ist kein Save-Aktivator.
 
-Der Wrapper ruft ausschließlich die im Manifest genannten vorhandenen isolierten
-Runner mit aktuellen Workspacequellen auf. Keine `--flow-ref`-Abhängigkeit, keine
-historische Gesamtmatrix und keine Hauptszene. Die Fälle laufen nacheinander;
-je Fall gilt eine äußere 240-Sekunden-Grenze einschließlich privater Projektkopie
-und der bereits enger begrenzten Import-/Scriptprozesse des Kindrunners. Bei
-Timeout wird dessen Prozessbaum beendet und kein weiterer Fall gestartet.
+AP8 verbindet auf zwölf Feldern Bewegung/Rampe/Tür/Sicht/Facing/Schussprüfung/Ankunft, Rootrestore sowie tatsächliche Sender und Empfänger. Nur der Netzwerktransport ist kontrolliert (`MultiplayerAPIExtension`); keine echten Peers, kein LAN-/Downloadnachweis, keine native Darstellung oder Leistungsaussage. Große A/B/C-Karten und AP9 bleiben im bisherigen Modus. Live-Sternkatalog V2 und ausgeschalteter lokaler Warpautomatismus bleiben erhalten.
 
-Default: neuer AP6-Selectionpfad, unmittelbar betroffener BaseV2-Nachbar und
-eingefrorener AP8-Netz-/Rootcheckpoint-Verbund. Dieser letzte Fall ruft
-`scripts/tests/run_ap8_network_owner_join.py` auf. Er verwendet dieselben echten
-Root-APIs export/prepare/validate/commit(false)/finalize während der Bewegung und
-verbindet Hostpublikation, Receiver und Runtimelebenszeit auf höchstens zwölf
-Feldern. Fehlende Root-APIs führen zum Fehler, nicht zu einem Dummy-Pass.
-Keine zweite Root-Harness oder historische Prepared-Einzelmatrix.
+Historische Fehlversuche wurden nicht als bestanden gewertet: veraltete Leaderfixture, tatsächlicher RefCounted-Teardownfehler, fehlende reine Fixture-UIunterdrückung, tatsächliche Packed-Member-Eingangsabweichung, Cooldownbeginn vor erstem Export sowie roher Float32/JSON-Vergleich. Die eindeutigen Korrekturen sind in den Tasks und Gitcommits festgehalten; spätere grüne Berichte ersetzen diese nicht rückwirkend.
 
-Der eigene aktuelle AP8-Report muss `ap8_bounded_ready`, `root_checkpoint`,
-`host_publication`, `receiver`, `runtime_lifetime`, `source_unchanged`,
-`real_profile_unchanged` und `private_canary` jeweils als true ausweisen. Seine
-Erzeugung bleibt bis zum späteren Lauf offen. `real_peer=false` und
-`native_acceptance=false` sind AP9-/Nativegrenzen und keine Ablehnung des
-begrenzten AP8-Kandidaten. Der Wrapper archiviert gegebenenfalls vorhandene
-feste AP8-Ergebnisse vor dem Aufruf und kopiert den frischen Originalreport.
+## Wiederholung bei einem neuen konkreten Anlass
 
-Einzig die getrennte Source-Store-/Loaderintegration und deren eigener Beleg
-bleiben `pending`. Sie fehlen nicht im in-place Rootcheckpointtest, sondern sind
-eine separate AP7-Produktgrenze. Der frühere AP8-Partialpass wird nicht als Ersatz
-für den neuen Verbund aufgerufen.
+`python scripts/tests/run_ap678_bundle.py` zeigt nur den Plan; `--execute` startet die vier Fälle seriell, `--extended` zusätzlich ältere Nachbarn. Die Referenz für diese Abnahme sind die archivierten tatsächlich ausgeführten Einzelberichte, nicht ein erneuter Lauf des nun um Continue ergänzten Manifests. Der Base-Spezialrunner liegt als vorhandenes lokales QA-Artefakt unter `output/native_glut_maps/base_action_checkpoint_v2_20261112/run.py`; die übrigen Runner sind getrackt. Fehlende Artefakte werden klar abgewiesen.
 
-Nur mit zusätzlichem ausdrücklichem `--extended` werden bereits früher geprüfte
-Missionstart-/Wellen-/Medizin-/FMC-/Visit-/Unboard- und Movement-/Ground-Nachbarn
-aufgenommen. Diese Liste ist für spätere konkrete Regressionsanlässe vorbereitet
-und gehört nicht zum jetzigen Defaultauftrag. Auch `--extended` allein führt
-ohne `--execute` keinen Prozess aus.
-
-## Ergebnisse und Grenzen
-
-Späterer neuer Report: `output/native_glut_maps/ap678_bundle_20261112/<uuid>/report.json`.
-Er enthält HEAD, Manifest-/Wrapperhash, Engineversion, genaue Commands,
-Originalreportpfade/-hashes, Exitcodes, Laufzeiten, kopierte Originallogs und die
-von den Kindrunnern tatsächlich geprüften Quellhashes. Ein Ergebnis gilt nur mit
-Exit 0, frischem Kindreport und allen vorgeschriebenen Pass-/Profil-/Canary-/
-Quellguards. Enginefehler/Leaks in vollständigen Kindlogs lehnen es zusätzlich
-ab. Historische Reports oder fremde Gitpins werden nicht als Parentpass gelesen.
-
-Exitcodes: 0 = alle ausgewählten Checks bestanden und keine pending-Anbindung;
-1 = fehlgeschlagen/blockiert; 2 = ausgewählte Checks bestanden, aber weitere
-explizite Pflichtanbindungen noch pending. Bei Fehler endet der Block und listet
-die nicht gestarteten Fälle. Keine automatische Wiederholung oder Baselinepflege.
-Falls ein später ergänzter Spezialrunner feste QA-Dateien überschreibt, müssen
-diese im Manifest unter `archive_before` genannt werden; der Wrapper archiviert
-sie vor dem Aufruf. Die jetzigen ausgewählten Runner erzeugen UUID-Ergebnisse.
-
-Ein selektiver Pass ist keine uneingeschränkte AP7/AP8-, Multiplayer-, Native-,
-Performance- oder große Kartenabnahme. Die bisherigen `full_ap7`/`full_ap8`-Felder
-des Wrapperreports bleiben false; der konkrete begrenzte AP8-Status steht im
-kopierten aktuellen AP8-Originalreport unter `ap8_bounded_ready` und wird durch
-das Manifest zwingend geprüft. Ein Store-/Loader-pending bedeutet keine fehlende
-Peerabnahme des begrenzten AP8-Falls.
-Die Tests verwenden echte Owner mit den jeweils dokumentierten kontrollierten
-Fixturegrenzen. Keine Animation-/Pfad-/Rundflugbehauptung aus Headlesslogs.
-
-## Vorbereitung geprüft
-
-Nur Python-AST, JSON, Eindeutigkeit und vorhandene Command-/Fixturepfade werden
-statisch gelesen. Weder Wrapper noch Godot noch Kindrunner wurden gestartet.
-Aktuelle Source-APIs können nach dem Freeze weitere konkrete Pfad-/Fallaufnahme
-erfordern; diese wird im Manifest kenntlich ergänzt, nicht still übersprungen.
+Keine Mainintegration oder EXE. Vor jedem Export ist die ausdrückliche Nutzerfreigabe erforderlich.

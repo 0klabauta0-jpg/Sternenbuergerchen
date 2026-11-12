@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+## 12.11.2026: AP6–AP8 begrenzt abgeschlossen
+
+AP6-Lifecycle/Selection, AP7-Root-/Store-/Continue-/Netzanschluss und AP8-12-Felder-Kandidat sind integriert. Kleine Fälle16/0,30/0,38/0 und CampaignContinue17/0+3/0; vollständige Belege unter `docs/qa/ap678_bundle_20261112/README.md`. Große AP9-/Native-/Peer-/Performanceabnahme und Kartenaktivierung bleiben zurückgestellt. Kein Mainmerge, keine EXE; Nutzer vor Export fragen. Spätere Weltraum-AP09-Pakete bleiben getrennt.
+
+
 ### AP6 RuntimeSelection implementiert; Verbundprüfung gebündelt — 12.11.2026
 
 Hexauswahl gleicht Personen nach ID ab, erhält bestehende Actors/Health/Claims/

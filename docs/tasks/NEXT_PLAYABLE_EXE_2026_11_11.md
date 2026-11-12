@@ -34,42 +34,22 @@ Diese Liste bedeutet implementiert im isolierten Taskstand, nicht vollständige
 native Spielweg-/Performance-/Saveabnahme. Neue Produktionskarten sind noch nicht
 für den vollständigen Tabletopmodus aktiviert.
 
-## Erforderliche Schritte vor diesem Kandidaten
+## Aktueller Kandidatenstand / erforderlicher nächster Schritt
 
-1. AP5-Code einschließlich Backoff ist integriert. AP6 enthält Gruppenplätze,
-   Transportphasen und gebundene Schiffsflächen samt tatsächlichem Renderjoin.
-   Basiskern, atomare Boarding-/Unboardpublikation, InitialSetup und Wellen sind
-   integriert. Respawnmanager-/Groundverbund76/0 und dessen Consumer4/0 sowie
-   echter Flow-/Visit-/Crew-Retireanschluss37/0 sind gemeinsam gesichert. Noch
-   Laufende FMC-Mitglieder sind48/0 zusammengefuehrt. Actoridentitaets-
-   und Runtime-Selectionabschluss samt stiller Leaderbarriere sind als
-   33e6ba73a/bc2f2886b integriert. AP6-Code fertig, gemeinsame Pruefung folgt
-   nach AP7/AP8; vorhandene Einzelbelege sind keine Gesamtfreigabe.
-2. AP7: Ground-Roundtrip und Command-/Versionsgrenzen sind teilweise integriert;
-   Passagezusagen und urspruengliche Bewegungsabsichten besitzen vorbereitete
-   Restorepatches. Hostpublisher, Rootbinder, Receiver und alle relevanten
-   Netznachrichten sind als95e22ad14 verdrahtet, Pruefung noch ausstehend.
-   Tatsaechliche Base-/Rootcheckpoint-/Store-/Loaderbindung in Anschlussarbeit.
-   Home-only-
-   Speichergrenzen erhalten. AP8 hat einen echten 12-Feld-Passageroundtrip (15/0),
-   wird um echten Rootcheckpoint-/Publisher-/Receiververbund ergaenzt und
-   bleibt bis zur gemeinsamen Pruefung ausdruecklich teilweise.
-3. Orbit: gemeinsame Flight-/Travel-/Economyübergänge, getrennte Stationsdockung
-   und Kauf-Erstaufnahme sind als Ownerpfade integriert. Noch produktive lokale
-   Visit-/Crewroute nachweisen: die gepaarten Adapter und Kauf-Replays sind
-   integriert, der echte gemeinsame Polisa-Besuch steht aus. Pad-Anflug und
-   Rueckkehr6b1e36faa sowie sichtbare projektive 3D-Frachtplattform49000d7f6
-   sind integriert; keine doppelte Supplybuchung und keine native Sichtabnahme.
-   Katalog V3 samt
-   Einmarkerwechsel ist vorbereitet und getrennt geprueft. Lokaler Automatismus bleibt bis dahin ausgeschaltet,
-   Livekatalog V2. Private Ownerzyklen ersetzen keinen echten Stationsbesuch.
-4. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle
-   Kampagne/Gefechtsmatrix. Aktivierung und offene Grenzen dokumentieren;
-   große Produktionskartenaktivierung und AP9 bleiben gesondert zurückgestellt.
-5. Nach konkretem Kandidatenstatus Nutzer vor dem Build fragen. Erst nach dessen
-   Zustimmung Export aus sauberem gesichertem Quellstand in neuen eigenen Paketordner;
-   vorhandene Pakete nicht überschreiben. EXE, PCK und benötigte DLLs zusammen,
-   Provenienz mit Commit/Hashes, kleine echte Paketstartprüfung.
+AP6–AP8 sind fertig integriert und begrenzt geprüft: Selection16/0, Base30/0,
+AP8-Root-/Netzverbund38/0 und tatsächlicher CampaignContinue17/0+3/0.
+Quellen/Profil/Canary und vollständige Logs grün. Genaue Commit- und Fixturegrenzen:
+`docs/qa/ap678_bundle_20261112/README.md`. Der begrenzte AP8-Kandidat braucht
+keine echten Peers; reale Peer-/native-/Produktionskartenabnahme gehört AP9.
+
+Polisa-Direktanflug und Crew-Rückflugfix sind integriert, Source-Rundlauf25/0
+vorhanden. Katalog V2 und lokales Warpflag false bleiben erhalten. Neue
+AP09-Weltraum-/Komponentenpakete aus dem anderen Chat sind getrennte Folgearbeit.
+
+Jetzt Nutzer vor dem Build fragen. Zustimmung gilt für einen konkreten
+Testkandidaten mit den benannten Grenzen, nicht für Mainintegration oder
+Produktionskartenaktivierung. Danach neuer Paketordner, EXE/PCK/DLLs zusammen,
+Commit-/Hashprovenienz und kleiner echter Paketstart. Noch kein Export erfolgt.
 
 ## Exportbestand / Dateien / Prüfung
 

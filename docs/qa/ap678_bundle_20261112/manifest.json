@@ -61,14 +61,27 @@
         "output/native_glut_maps/ap8_network_owner_join_20261112/report.json",
         "output/native_glut_maps/ap8_network_owner_join_20261112/output.log"
       ]
-    }
-  ],
-  "pending": [
+    },
     {
-      "name": "ap7_store_loader_integration",
-      "reason": "Separate Source Store/Loader product integration and its own evidence are pending. The bounded AP8 in-place Root checkpoint join is included above; do not construct a second Root harness."
+      "name": "campaign_continue",
+      "argv": [
+        "scripts/tests/run_hex_campaign_continue.py",
+        "--execute"
+      ],
+      "timeout_seconds": 360,
+      "report_glob": ".godot/hex_campaign_continue/*/report.json",
+      "true_fields": [
+        "passed",
+        "source_unchanged",
+        "real_profile_unchanged",
+        "private_canary"
+      ],
+      "logs": [
+        "output.log"
+      ]
     }
   ],
+  "pending": [],
   "extended_checks": [
     {
       "name": "mission_setup",

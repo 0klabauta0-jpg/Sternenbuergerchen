@@ -28,3 +28,7 @@ Der zusammenhaengende Fixtureblock ist vorbereitet, nicht ausgefuehrt und nicht 
 
 ### Bounded-AP8-Semantik und getrackter Runner
 Der bestehende12Felderablauf inklusive Rootcheckpoint+Hostpublisher+Receiver ist der begrenzte AP8-Kandidat. Dessen Endmarker AP8_BOUNDED_CANDIDATE_READY setzt nach spaeterem realem Durchlauf ap8_bounded_ready=true. Echte Peers/native/Produktionskarten gehoeren AP9; kein kuenstliches weiteres AP8-Hindernis. Eigene repo-faehige Runnerimplementierung liegt scripts/tests/run_ap8_network_owner_join.py, Vorbereitungsevidenz docs/qa/ap8_network_owner_join_20261112; keine alten ignorierten Outputpakete pauschal sichern. Bis zum angeordneten Lauf sind Manifestwerte explizit null/ausstehend, keine behauptete Abnahme.
+
+## Gemeinsamer begrenzter Abschluss 12.11.2026
+
+Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.

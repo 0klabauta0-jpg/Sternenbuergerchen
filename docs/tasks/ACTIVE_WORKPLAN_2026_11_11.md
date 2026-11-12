@@ -1,3 +1,34 @@
+# Aktueller Arbeitsplan — Abschluss AP6 bis AP8 am 12.11.2026
+
+## Ziel, Ergebnis und Arbeitsbasis
+
+Die priorisierten AP6, AP7 und AP8 sind im isolierten Taskstand fertig integriert und mit den vereinbarten kleinen Funktionsfällen geprüft. Arbeitsbranch `task/native-glut-maps-20261110`, keine Mainintegration. Produktstand der letzten Speicherprüfung: c73a2ba03. Große Tests bleiben ausdrücklich für später; vor JEDEM EXE-Build den Nutzer fragen. Kein Build beauftragt oder erzeugt.
+
+| Paket | Fertiger Umfang | Kleine Prüfung |
+| --- | --- | --- |
+| AP6 | Zulassung, echte Schiffsflächen, Base/Boarding, Setup/Wellen/Respawn, laufende Mitglieder, Crew/Visits und atomare RuntimeSelection/Actor-/Registry-/Leadermodelle | neue Selection16/0; frühere konkrete Ownerbelege bleiben erhalten |
+| AP7 | gemeinsame Terrain/Ground/Movement/Base/Tick/RNG-Transaktion; Campaign-Store/Continue mit echtem Candidate vor Livewrites; Hostpublisher/Receiver und laufzeitgebundene Commands/Vitals/READY/Resultate | Base30/0, Root/Net im AP8-Fall; CampaignContinue17/0+3/0 |
+| AP8 | opt-in 12-Felder-Kandidat verbindet Rampe/Tür, Bewegung, Facing/Sicht/Schussprüfung/Ankunft, laufenden Rootcheckpoint und echte Sender-/Empfängerpfade |38/0, bounded bereit |
+
+Autosave exportiert/hasht/schreibt Hexzustand nach unveränderten Safetygates höchstens einmal pro Sekunde; die Simulation wird nicht gedrosselt. Ein expliziter Save umgeht nur den Zeitabstand. Ungültige/unbekannte Hexblöcke werden vor Liveconfigure abgewiesen; kein Save aktiviert Karten. Bestehende Home-/Away-/Pendinggates bleiben erhalten.
+
+Belege und genaue Commitgrenzen: `docs/qa/ap678_bundle_20261112/README.md`, `results.json`, `evidence.zip`. Alle vier Fälle haben saubere Logs und Quell-/Originalprofil-/Canaryguards. Es sind echte getrennte begrenzte Läufe, keine native oder uneingeschränkte Mehrspielerabnahme.
+
+## Erhaltene Grenzen und nächste Schritte
+
+- A/B/C512x256, strategische Sternkarte256x256, lokale Orbits512x256. Produktionskartenaktivierung und große AP9-Prüfung sind weiter zurückgestellt: natives Gefecht, FPS/Framezeiten, reale Peers und große Lifecyclematrix sind nicht abgenommen.
+- Terrain/Editor, R07 Körper/Rüstung, gezeichnete Porträts, PolisaR08 und vorhandene Punkte-/Forschungs-/Companionarbeit bleiben erhalten. Neue Fahrzeugmodelle sind zurückgestellt.
+- Polisa ist direkt ohne lokale Orbitpflicht anfliegbar. Pad-Anflug, Schiffskartenidentität, synchroner Crew-Rückflugübergang und sichtbare projektive Frachtplattform sind integriert. Sourcebeleg echter Flag-off-Headlessrundlauf25/0, noch keine gemeinsame native Sichtabnahme.
+- Live-Sternkatalog bleibt V2, lokaler Warpautomatismus bleibt false. V3/Einmarkerwechsel und lokale Orbitaktivierung sind nicht still freigeschaltet.
+- Weltraumkampf-/Komponenten-/Waffen-/Schild-/Luftunterstützungspakete aus dem anderen Chat bleiben separat und sind keine nachträgliche AP6–8-Abschlussvoraussetzung. Weitere Forschung/Modelle/interne Wertevereinfachung bleiben benannte Folgearbeit.
+- Nächster konkreter Schritt: Nutzer vor der Test-EXE fragen; Export erst nach Zustimmung aus gesichertem Stand in einen neuen Paketordner. Siehe `NEXT_PLAYABLE_EXE_2026_11_11.md`.
+
+Relevante Verträge: `hex_tactical_runtime_contract.md`, `orbital_approach_contract.md`, `parallel_location_operations_contract.md`; konkrete Checkpoint-/Meta-/Netz-/AP8-Tasks unter `docs/tasks/`. Gameplaywahrheit bleibt bei den bestehenden Runtimeownern.
+
+---
+
+## Historischer Zwischenstand (durch obigen Abschluss ersetzt)
+
 # Aktueller Arbeitsplan — 11.11.2026
 
 Diese Uebersicht ist der aktuelle Stand. Die Fortschreibung unter der Trennlinie

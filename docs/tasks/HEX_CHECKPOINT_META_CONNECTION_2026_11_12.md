@@ -74,3 +74,7 @@ unverändert getaktet; der erste Save läuft sofort. Optionales force=true umgeh
 nur das Zeitintervall, niemals Home-/Away-/Pending-/Rootguards. Legacy bleibt
 unverändert. Die vorhandene eine Storeprobe prüft Folgesave und expliziten Save
 ohne zusätzliche Performance-Testreihe.
+
+## Gemeinsamer begrenzter Abschluss 12.11.2026
+
+Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.

@@ -38,3 +38,7 @@ Pruefung erfolgt laut Arbeitssteuerung spaeter gebuendelt.
 
 ### Abschluss der Wire-Abweisungsgrenze
 Ein erfolgreich gebundener Root behaelt nach clear einen sticky required/closed Zustand. Ohne neue gueltige Bindung lehnen Commands vom Netz, Snapshot/Chunks/Vitals/Results und Driverereignisse ab und senden keine Legacydaten. Auch ein tatsaechlich als hex_tactical_v1 deklarierter geladener MissionSetup-Mapkontext erfordert die Kennung, obwohl Clients keinen autoritativen Ground konfigurieren. Echte nie gebundene/deklarierte Legacywege bleiben kontextlos. validate_multiplayer_runtime_context_binding ist reiner Preflight; Lobby ermittelt das lokale Zielteam vor den Tabellenwrites und prueft den Binder dort. Aktiver Assignmentcallback bricht bei false vor Perspective/Selection ab. Kein Testlauf in diesem Abschlussblock.
+
+## Gemeinsamer begrenzter Abschluss 12.11.2026
+
+Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.

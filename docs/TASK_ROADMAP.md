@@ -1,5 +1,10 @@
 # TASK_ROADMAP
 
+## 12.11.2026: AP6–AP8 begrenzt abgeschlossen
+
+AP6-Lifecycle/Selection, AP7-Root-/Store-/Continue-/Netzanschluss und AP8-12-Felder-Kandidat sind integriert. Kleine Fälle16/0,30/0,38/0 und CampaignContinue17/0+3/0; vollständige Belege unter `docs/qa/ap678_bundle_20261112/README.md`. Große AP9-/Native-/Peer-/Performanceabnahme und Kartenaktivierung bleiben zurückgestellt. Kein Mainmerge, keine EXE; Nutzer vor Export fragen. Spätere Weltraum-AP09-Pakete bleiben getrennt.
+
+
 Aktueller Integrationsstatus vom12.11.2026: AP5-Code integriert, AP6a/b mit
 Actorbindungsfix und frischer gemeinsamer88/0-Pruefung integriert. AP6c sowie
 AP7/8 laufen weiter, AP9-grosse Tests bleiben verschoben. Orbitowner-/UIanschluss

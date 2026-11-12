@@ -47,3 +47,7 @@ verwenden teilweise feste QA-Logpfade und zählen konkrete Assertions: sie könn
 nach den neuen Codeblöcken berechtigt rot werden. Keine automatische Anpassung
 oder Wiederholung. Der kommende AP8-Netzrunner und Root-Checkpointanschluss
 werden erst mit den tatsächlichen APIs ergänzt.
+
+## Gemeinsamer begrenzter Abschluss 12.11.2026
+
+Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.
