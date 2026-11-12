@@ -34,3 +34,24 @@ Registries und Bodenschadenspfade, Flug-/Combat-Owner, Missionscontroller,
 Radar-/Orbitresolver und gezielte Verifier. Große gemeinsame Dateien nicht
 als Ganzes portieren. Sichtbarkeit, Mehrfachbelegung und Landekollision auf
 Legacykarten sowie Persistenz- und Indexvalidierung sind ausdrücklich offen.
+
+## Entwurf für portable aktive Sorties
+
+Ein versionierter Sortie-Datensatz braucht je `craft_id` die `location_id`,
+`previous_pose` mit den von der Landung benötigten Flugfeldern,
+`landing_position`, `landing_grid` und `was_inactive`. Die aktuelle Flugpose
+gehört separat dem Flight-Owner. Objekt-Referenzen, WeakRefs und Instanz-IDs
+sind nicht portabel. Bewegung, Feuerauftrag, Waffenzustand und Cooldowns,
+RNG und die zugehörigen Move-, Order-, Fire- und Impact-Receipts müssen
+konsistent erhalten oder bei aktiver Funktion ausdrücklich abgelehnt werden.
+Identität und Boarding der originalen Crew, Pilotenzuordnung, Missionsidentität
+und laufende Drop-Sequenzen sind mit den jeweiligen Ownern abzugleichen.
+
+Vorgeschlagene Restore-Reihenfolge: Szenario und originale Unit-Registries
+vorbereiten; Fleet, Ausrüstung, Pilot und Boarding sowie Flugpose validieren;
+denselben Fleet-Flugowner mit Wing, Combat-Systemen und Raumindex binden;
+anschließend die Missionssimulation mit Source und Adapter verbinden und die
+Sortie-Referenzen neu aufbauen; Navigation, Feuer und UI zuletzt vorbereiten.
+Alle beteiligten Owner müssen vor gemeinsamer Veröffentlichung Identitäten,
+Revisionen, Atmosphäre und Landeplatz prüfen. Bei Fehlern darf kein partieller
+Restore veröffentlicht werden. Dies ist ein Entwurf, kein getesteter Vertrag.
