@@ -1,0 +1,99 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS satellite_crash_site load valid
+PASS satellite_crash_site loaded all131072 cells
+PASS satellite_crash_site SaveAs
+PASS satellite_crash_site root map_name
+PASS satellite_crash_site root grid_topology
+PASS satellite_crash_site root grid_size
+PASS satellite_crash_site root grid_origin
+PASS satellite_crash_site root tile_size
+PASS satellite_crash_site root terrain_visual_theme_id
+PASS satellite_crash_site root mission_slot_count
+PASS satellite_crash_site root patrol_paths
+PASS satellite_crash_site root singleplayer_site
+PASS satellite_crash_site root place_world
+PASS satellite_crash_site root place_presentation
+PASS satellite_crash_site root regional_terrain_version
+PASS satellite_crash_site root regional_height_step
+PASS satellite_crash_site root terrain_height_rules
+PASS satellite_crash_site marker ID count
+PASS satellite_crash_site marker semantic/rounded position spawn_alpha
+PASS satellite_crash_site marker semantic/rounded position spawn_bravo
+PASS satellite_crash_site marker semantic/rounded position objective_point
+PASS satellite_crash_site marker semantic/rounded position satellite_data
+PASS satellite_crash_site marker semantic/rounded position ship_return
+PASS satellite_crash_site marker semantic/rounded position trade_service
+PASS satellite_crash_site reload all cells
+PASS satellite_crash_site reload unique coordinates
+PASS satellite_crash_site coordinates/heights/ramps/object IDs preserved
+PASS satellite_crash_site second SaveAs
+PASS satellite_crash_site canonical marker/enemy normalization stable
+NATIVE_GROUND_MAP satellite_crash_site cells=131072 ramps=75 source_sha256=dba90c3c1018e1641ce1d709c02d8882ecbdb2ba1ed2fa3d36c6a0f50c539da2
+PASS satellite_crash_site source unchanged
+PASS trade_outpost load valid
+PASS trade_outpost loaded all131072 cells
+PASS trade_outpost SaveAs
+PASS trade_outpost root grid_origin
+PASS trade_outpost root grid_size
+PASS trade_outpost root grid_topology
+PASS trade_outpost root map_name
+PASS trade_outpost root mission_slot_count
+PASS trade_outpost root patrol_paths
+PASS trade_outpost root place_presentation
+PASS trade_outpost root place_world
+PASS trade_outpost root singleplayer_site
+PASS trade_outpost root terrain_visual_theme_id
+PASS trade_outpost root tile_size
+PASS trade_outpost root regional_terrain_version
+PASS trade_outpost root regional_height_step
+PASS trade_outpost root terrain_height_rules
+PASS trade_outpost marker ID count
+PASS trade_outpost marker semantic/rounded position objective_point
+PASS trade_outpost marker semantic/rounded position ship_return
+PASS trade_outpost marker semantic/rounded position spawn_alpha
+PASS trade_outpost marker semantic/rounded position spawn_bravo
+PASS trade_outpost marker semantic/rounded position trade_service
+PASS trade_outpost marker semantic/rounded position recover_crate
+PASS trade_outpost marker semantic/rounded position spawn_enemy_defense
+PASS trade_outpost marker semantic/rounded position recruit_contact
+PASS trade_outpost reload all cells
+PASS trade_outpost reload unique coordinates
+PASS trade_outpost coordinates/heights/ramps/object IDs preserved
+PASS trade_outpost second SaveAs
+PASS trade_outpost canonical marker/enemy normalization stable
+NATIVE_GROUND_MAP trade_outpost cells=131072 ramps=85 source_sha256=2913cf9d60624efc08d6b77d4a55c83f139bef297b0ae5693796b2aa58525053
+PASS trade_outpost source unchanged
+PASS fortified_outpost load valid
+PASS fortified_outpost loaded all131072 cells
+PASS fortified_outpost SaveAs
+PASS fortified_outpost root grid_origin
+PASS fortified_outpost root grid_size
+PASS fortified_outpost root grid_topology
+PASS fortified_outpost root map_name
+PASS fortified_outpost root mission_slot_count
+PASS fortified_outpost root patrol_paths
+PASS fortified_outpost root place_presentation
+PASS fortified_outpost root place_world
+PASS fortified_outpost root singleplayer_site
+PASS fortified_outpost root terrain_visual_theme_id
+PASS fortified_outpost root tile_size
+PASS fortified_outpost root regional_terrain_version
+PASS fortified_outpost root regional_height_step
+PASS fortified_outpost root terrain_height_rules
+PASS fortified_outpost marker ID count
+PASS fortified_outpost marker semantic/rounded position objective_point
+PASS fortified_outpost marker semantic/rounded position ship_return
+PASS fortified_outpost marker semantic/rounded position spawn_alpha
+PASS fortified_outpost marker semantic/rounded position spawn_bravo
+PASS fortified_outpost marker semantic/rounded position spawn_enemy_defense
+PASS fortified_outpost marker semantic/rounded position outpost_chip
+PASS fortified_outpost reload all cells
+PASS fortified_outpost reload unique coordinates
+PASS fortified_outpost coordinates/heights/ramps/object IDs preserved
+PASS fortified_outpost second SaveAs
+PASS fortified_outpost canonical marker/enemy normalization stable
+NATIVE_GROUND_MAP fortified_outpost cells=131072 ramps=65 source_sha256=b09ec0ff3adb06c5caa3af7f70fd24a6f137dfe263abed67f8a9e8b968f00286
+PASS fortified_outpost source unchanged
+NATIVE_GROUND_SAVE_RELOAD checks=92 failures=0

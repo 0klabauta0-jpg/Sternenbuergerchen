@@ -2,7 +2,7 @@ extends RefCounted
 ## Cold authoring transactions on MapData. No UI or live-simulation ownership.
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const CATALOG_PATH := "res://data/frontier_building_visual_catalog.json"
-const FIELDS := ["type_id","object_type_id","walkable","blocks_los","cover_value","height_level","surface_type","edge_type","object_height","object_rotation_degrees","object_scale"]
+const FIELDS := ["type_id","object_type_id","walkable","blocks_los","cover_value","height_level","ramp_direction","explicit_hex_ramps","regional_grade","surface_type","edge_type","object_height","object_rotation_degrees","object_scale"]
 static var _catalog: Dictionary = {}
 
 static func catalog() -> Dictionary:
@@ -117,6 +117,8 @@ static func plan(map, action: String, payload: Dictionary) -> Dictionary:
 	if map==null: return _error("Keine Karte geladen.")
 	if map.has_authoring_metadata("homebase_exploration"): return _error("Basisraeume besitzen separate Feinnavigation und bleiben hier geschuetzt.")
 	if not map.get_authored_visual_layout_id().is_empty(): return _error("Festes GM01-Ensemble bleibt geschuetzt.")
+	var regional_step: float = map.get_regional_height_step()
+	var height_step := regional_step if regional_step > 0.0 else 0.5
 	var before: Dictionary=map.get_place_presentation()
 	var after: Dictionary=before.duplicate(true)
 	var props: Array=Array(after.get("props",[])).duplicate(true)
@@ -154,7 +156,7 @@ static func plan(map, action: String, payload: Dictionary) -> Dictionary:
 		if anchor==null: return _error("Gebaeude liegt ausserhalb der Karte.")
 		var point:=plane(map,grid)
 		edited.center=[point.x,point.y]
-		edited.elevation=float(anchor.height_level)*.5
+		edited.elevation = float(anchor.height_level) * height_step
 	if action=="rotate": edited.rotation_degrees=float(edited.get("rotation_degrees",0.0))+float(payload.get("delta_degrees",90.0))
 	if action=="remove": props.remove_at(index)
 	else:
@@ -172,8 +174,9 @@ static func plan(map, action: String, payload: Dictionary) -> Dictionary:
 			var tile=map.get_tile_at_grid(grid)
 			if tile==null: return _error("Gebaeude reicht ueber den Kartenrand.")
 			var substrate: Dictionary=base.get(key,fields(tile))
+			if bool(substrate.get("explicit_hex_ramps", false)) and int(substrate.get("ramp_direction", -1)) >= 0: return _error("Gebaeude braucht ein Plateau, keine Rampe.")
 			if not bool(substrate.walkable) or not String(substrate.object_type_id).is_empty() or String(substrate.surface_type)=="water": return _error("Gebaeude kollidiert mit Terrain oder einem Objekt.")
-			if not is_equal_approx(float(substrate.height_level)*.5,float(edited.elevation)): return _error("Gebaeude braucht einen ebenen Untergrund.")
+			if not is_equal_approx(float(substrate.height_level) * height_step,float(edited.elevation)): return _error("Gebaeude braucht einen ebenen Untergrund.")
 			if protected.has(key) and not old_cells.has(key): return _error("Gebaeude wuerde Marker oder Patrouille blockieren.")
 		props[index]=edited
 	var new_cells:=_occupied(props)

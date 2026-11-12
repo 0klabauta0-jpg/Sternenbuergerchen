@@ -1,0 +1,299 @@
+WorkerThreadPool: 16 threads, 12 max low-priority.
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Unrecognized output string "misc2" in mapping:
+030000008a2e0000dd10000000000000,Hand Held Legend GC Ultimate,a:b0,b:b2,back:b17,dpdown:b5,dpleft:b6,dpright:b7,dpup:b4,guide:b18,leftshoulder:b10,leftstick:b8,lefttrigger:a3,leftx:a0,lefty:a1,misc1:b19,misc2:b24,paddle1:b13,paddle2:b12,rightshoulder:b11,rightstick:b9,righttrigger:a4,rightx:a2,righty:a5,start:b16,x:b1,y:b3,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000000d0f00000202000000000000,Horipad O Nintendo Switch 2 Controller,a:b1,b:b0,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,misc1:b13,misc2:b14,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b2,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000000d0f00009601000000000000,Horipad Steam,a:b0,b:b1,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,misc2:b2,paddle1:b5,paddle2:b15,paddle3:b18,paddle4:b19,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a3,righty:a4,start:b11,x:b3,y:b4,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000007e0500006920000000000000,Nintendo Switch 2 Pro Controller,a:b0,b:b1,back:b14,dpdown:b8,dpleft:b10,dpright:b9,dpup:b11,guide:b16,leftshoulder:b12,leftstick:b15,lefttrigger:b13,leftx:a0,lefty:a1~,misc1:b17,misc2:b20,paddle1:b18,paddle2:b19,rightshoulder:b4,rightstick:b7,righttrigger:b5,rightx:a2,righty:a3~,start:b6,x:b2,y:b3,platform:Windows,
+Using "default" pen tablet driver...
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+CORE API HASH: 4039755037
+EDITOR API HASH: 223528947
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: res://tmp/open-functions-release/profile/Godot/editor_settings-4.6.tres
+EditorSettings: Load OK!
+EditorTheme: Generating new theme for the config '3810048042'.
+EditorTheme: Generating new icons.
+EditorTheme: Generating new fonts.
+EditorTheme: Generating new styles.
+Loading resource: res://addons/limboai/icons/LimboAI.svg
+Loading resource: res://.godot/imported/LimboAI.svg-06efe3b51f2fc280e33c37672e174b5e.editor.ctex
+Loading resource: C:/Users/bjoer/AppData/Local/Godot/editor_doc_cache-4.6.res
+Loaded system CA certificates
+Loading resource: res://addons/limboai/icons/BehaviorTree.svg
+Loading resource: res://.godot/imported/BehaviorTree.svg-9b40a8b5e1feb368d9f11b0fb1785cca.editor.ctex
+Loading resource: res://addons/limboai/icons/LimboPercent.svg
+Loading resource: res://.godot/imported/LimboPercent.svg-00733fc19fb3bbe7f8396b1f07a89da0.editor.ctex
+Loading resource: res://addons/limboai/icons/LimboExtractSubtree.svg
+Loading resource: res://.godot/imported/LimboExtractSubtree.svg-84e8d198d3be4b2b8d625d3621368079.editor.ctex
+Loading resource: res://addons/limboai/icons/LimboSelectAll.svg
+Loading resource: res://.godot/imported/LimboSelectAll.svg-db7b91d0d0b530b8e41c9d3772e60fab.editor.ctex
+Loading resource: res://addons/limboai/icons/LimboDeselectAll.svg
+Loading resource: res://.godot/imported/LimboDeselectAll.svg-72ebb41c0238cae163a7bf3fc821e6ad.editor.ctex
+Loading resource: res://addons/limboai/icons/LimboExtraClock.svg
+Loading resource: res://.godot/imported/LimboExtraClock.svg-840321103249948265bce58e6fb69483.editor.ctex
+Loading resource: res://addons/limboai/icons/BTAlwaysSucceed.svg
+Loading resource: res://.godot/imported/BTAlwaysSucceed.svg-c8181e2fd85d1e2ad00a6c8e813e7a94.editor.ctex
+Loading resource: res://addons/limboai/icons/BTAlwaysFail.svg
+Loading resource: res://.godot/imported/BTAlwaysFail.svg-9a4e083bd8ff0d6d8240b50ae0d4cea0.editor.ctex
+Class 'ActionBanner' is not exposed, skipping.
+Class 'BlackboardPlanEditor' is not exposed, skipping.
+Class 'CompatScreenSelect' is not exposed, skipping.
+Class 'CompatShortcutBin' is not exposed, skipping.
+Class 'CompatWindowWrapper' is not exposed, skipping.
+Class 'EditorInspectorPluginBBParam' is not exposed, skipping.
+Class 'EditorInspectorPluginBBPlan' is not exposed, skipping.
+Class 'EditorInspectorPluginPropertyPath' is not exposed, skipping.
+Class 'EditorInspectorPluginVariableName' is not exposed, skipping.
+Class 'EditorPropertyBBParam' is not exposed, skipping.
+Class 'EditorPropertyPropertyPath' is not exposed, skipping.
+Class 'EditorPropertyVariableName' is not exposed, skipping.
+Class 'LimboAIEditor' is not exposed, skipping.
+Class 'LimboAIEditorPlugin' is not exposed, skipping.
+Class 'LimboDebuggerPlugin' is not exposed, skipping.
+Class 'LimboDebuggerTab' is not exposed, skipping.
+Class 'ModeSwitchButton' is not exposed, skipping.
+Class 'OwnerPicker' is not exposed, skipping.
+Class 'TaskButton' is not exposed, skipping.
+Class 'TaskPalette' is not exposed, skipping.
+Class 'TaskPaletteSection' is not exposed, skipping.
+Class 'TaskTree' is not exposed, skipping.
+Class 'TreeSearch' is not exposed, skipping.
+Class 'TreeSearchPanel' is not exposed, skipping.
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Projektinitialisierung (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Lese Dateistrucktur …[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Globale Klassennamen laden …[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifiziere GDExtensions…[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Autoload-Skripte erzeugen …[39m[0m
+Loading resource: res://scripts/ui/global_escape_menu.gd
+Loading resource: res://addons/netfox/network-time.gd
+Loading resource: res://addons/netfox/network-events.gd
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Plugins initialisieren…[39m[0m
+Loading resource: res://addons/godot_mcp/plugin.gd
+[Godot MCP] Plugin loading...
+[MCP] Connecting to ws://127.0.0.1:6505...
+[Godot MCP] Plugin loaded - connecting to MCP server...
+Loading resource: res://addons/netfox.internals/plugin.gd
+Loading resource: res://addons/netfox/netfox.gd
+Loading resource: res://addons/netfox/rollback/rollback-synchronizer.gd
+Loading resource: res://addons/netfox/icons/rollback-synchronizer.svg
+Loading resource: res://.godot/imported/rollback-synchronizer.svg-99c6071e1009de5a35a481b2f486c380.editor.ctex
+Loading resource: res://addons/netfox/state-synchronizer.gd
+Loading resource: res://addons/netfox/icons/state-synchronizer.svg
+Loading resource: res://.godot/imported/state-synchronizer.svg-9cb9447ba79f114a58e468a24d17b860.editor.ctex
+Loading resource: res://addons/netfox/tick-interpolator.gd
+Loading resource: res://addons/netfox/icons/tick-interpolator.svg
+Loading resource: res://.godot/imported/tick-interpolator.svg-c60124cd7d287f516c89a6022efef330.editor.ctex
+Loading resource: res://addons/netfox/rewindable-action.gd
+Loading resource: res://addons/netfox/icons/rewindable-action.svg
+Loading resource: res://.godot/imported/rewindable-action.svg-2eb32b564a2fe4ecb8b77ec5b55683ab.editor.ctex
+Loading resource: res://addons/netfox/rollback/predictive-synchronizer.gd
+Loading resource: res://addons/netfox/icons/predictive-synchronizer.svg
+Loading resource: res://.godot/imported/predictive-synchronizer.svg-c1a256fe714777cb768d64b354a43e2b.editor.ctex
+Loading resource: res://addons/terrain_3d/src/editor_plugin.gd
+Loading resource: res://addons/terrain_3d/menu/bake_lod_dialog.tscn
+Loading resource: res://addons/terrain_3d/menu/bake_lod_dialog.gd
+Loading resource: res://addons/terrain_3d/icons/region_add.svg
+Loading resource: res://.godot/imported/region_add.svg-a05dc161a452dd3e024f9835a737d9f0.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/region_remove.svg
+Loading resource: res://.godot/imported/region_remove.svg-5710e8aeb34f1eaa06e637634f4a7d16.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/height_add.svg
+Loading resource: res://.godot/imported/height_add.svg-9e680ce71fa4c541748e081b99167369.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/height_sub.svg
+Loading resource: res://.godot/imported/height_sub.svg-1a14a9bb856f3db0faa02dba3c807b50.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/height_smooth.svg
+Loading resource: res://.godot/imported/height_smooth.svg-d8fc43572f5984eef64c886a49988c06.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/height_flat.svg
+Loading resource: res://.godot/imported/height_flat.svg-be726a006bf06e05a7a8867510f3996e.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/height_slope.svg
+Loading resource: res://.godot/imported/height_slope.svg-e20540c5538d0c57a9d229a772b3d1b3.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/texture_paint.svg
+Loading resource: res://.godot/imported/texture_paint.svg-72da4fd2096377e625a8fe09cdacb0e4.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/texture_spray.svg
+Loading resource: res://.godot/imported/texture_spray.svg-326fee11cf418653e621bc222a470861.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/autoshader.svg
+Loading resource: res://.godot/imported/autoshader.svg-9998e61bbc6afd5b134b767acd17a425.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/color_paint.svg
+Loading resource: res://.godot/imported/color_paint.svg-2a416ebf35da04135017e5c6ef53ea57.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/wetness.svg
+Loading resource: res://.godot/imported/wetness.svg-9b2ddec096ab7734492b77b20c75c82b.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/holes.svg
+Loading resource: res://.godot/imported/holes.svg-a7cb97bb50d7879cd274646e207b9213.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/navigation.svg
+Loading resource: res://.godot/imported/navigation.svg-1e4cf210c589be8d2911c522d4a17d78.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/multimesh.svg
+Loading resource: res://.godot/imported/multimesh.svg-5487b93b04ddbaae37b5d3e91f10750b.editor.ctex
+Loading resource: res://addons/terrain_3d/icons/picker_checked.svg
+Loading resource: res://.godot/imported/picker_checked.svg-81f35b6ae38bccc8aa9e7ae22b530168.editor.ctex
+Loading resource: res://addons/terrain_3d/src/asset_dock.tscn
+Loading resource: res://addons/terrain_3d/src/asset_dock.gd
+Loading resource: res://addons/asset_placer/asset_placer_plugin.gd
+Loading resource: res://addons/asset_placer/ui/components/asset_resource_preview.tscn
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:3 - ext_resource, invalid UID: uid://dacpe4563g5x2 - using text path instead: res://addons/asset_placer/ui/components/asset_resource_preview.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+Loading resource: res://addons/asset_placer/ui/components/asset_resource_preview.gd
+Loading resource: res://addons/asset_placer/icon.png
+Loading resource: res://.godot/imported/icon.png-7770fcbefdc198ae88466c5d3f27bcdd.ctex
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:5 - ext_resource, invalid UID: uid://dephufwlu765k - using text path instead: res://addons/asset_placer/ui/components/asset_thumbnail.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+Loading resource: res://addons/asset_placer/ui/components/asset_thumbnail.gd
+Loading resource: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:3 - ext_resource, invalid UID: uid://b4c5hlcpl1sor - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+Loading resource: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.gd
+Loading resource: res://addons/asset_placer/ui/asset_collections_window/components/collection_circle.svg
+Loading resource: res://.godot/imported/collection_circle.svg-58f9a699e495398e354775c9c0f88a1d.ctex
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:4 - ext_resource, invalid UID: uid://dmicn3kmr620j - using text path instead: res://addons/asset_placer/utils/system_icon.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+Loading resource: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.tscn
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.tscn:3 - ext_resource, invalid UID: uid://b6ywapljcr4hk - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+Loading resource: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.gd
+Loading resource: res://addons/map_builder_workbench/map_builder_workbench_plugin.gd
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Dateiscan starten …[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Globale Klassen registrieren … (56 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | MapBuilderSceneImporter[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | MapEditorHeightTool[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | CharacterSheetFormatter[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | CharacterSheetView[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | TestUnit[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | UnitVitalStatus[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | FrontierArtProfile[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | TacticalInputController[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Aktionen scannen … (2 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | sandstone_04.glb[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | crew_l_drawn_20261111.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Assets (erneut) importieren (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Dateien zum Neuimport vorbereiten …[39m[0m
+[  33% ] [90m[1mreimport[22m | Dateien zum Neuimport vorbereiten …[39m[0m
+[   0% ] [90m[1mreimport[22m | Vor-Neuimport-Operationen ausführen …[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | Started Szenen zum Neuladen vorbereiten (1 steps)[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | Szene [leer] wird analysiert[39m[0m
+[  50% ] [90m[1mpreload_reimporting_scene[22m | Vorbereitung abgeschlossen.[39m[0m
+[92m[ DONE ][39m [1mpreload_reimporting_scene[22m
+[0m
+[   0% ] [90m[1mreimport[22m | crew_l_drawn_20261111.png[39m[0m
+EditorFileSystem: Importing file: res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png
+EditorFileSystem: "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png" import took 320 ms.
+[  33% ] [90m[1mreimport[22m | sandstone_04.glb[39m[0m
+EditorFileSystem: Importing file: res://Assets/curated/glut_regional/sandstone_04.glb
+[   0% ] [90m[1mimport[22m | Started Szene importieren (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importiere Szene…[39m[0m
+glTF: Total buffers: 1
+glTF: Total buffer views: 6
+glTF: Total accessors: 6
+Total materials: 2
+glTF: Parsing mesh: 0
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+WARNING: glTF import: Buffer view byte stride should be declared for vertex attributes. Assuming packed data and reading anyway.
+glTF: Total meshes: 1
+glTF: Creating mesh for: GlutSandstone04
+LOD Generation: Triangles 71, vertices 107 (merged 107)
+  LOD stop: got 71 triangles when asking for 35
+LOD Generation: Triangles 29, vertices 49 (merged 49)
+  LOD stop: got 29 triangles when asking for 14
+[   1% ] [90m[1mimport[22m | Eigenes Skript wird ausgeführt …[39m[0m
+[  99% ] [90m[1mimport[22m | Speichern …[39m[0m
+Saving scene to: res://.godot/imported/sandstone_04.glb-d1d240bd35af3b0381c5f5fd5f73daa0.scn
+[92m[ DONE ][39m [1mimport[22m
+[0m
+EditorFileSystem: "res://Assets/curated/glut_regional/sandstone_04.glb" import took 62 ms.
+[  66% ] [90m[1mreimport[22m | Asset-Import fertigstellen …[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Assets (erneut) importieren (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Nach-Neuimport-Operationen ausführen …[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Editor laden (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Editor-Layout laden …[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Docks laden …[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Öffne Szenen neu…[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Zentrales Editor-Layout laden …[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Pluginfensterlayout laden …[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editorlayout bereit.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Loading resource: res://scenes/ui/main_menu.tscn
+Loading resource: res://scripts/ui/main_menu_screen.gd
+Loading resource: res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg
+Loading resource: res://.godot/imported/sternenbuerger_main_menu_bg.jpeg-a7a8efa4b33437f23176650526548776.ctex
+Unloading addon: res://addons/godot_mcp/plugin.cfg
+[Godot MCP] Plugin unloading...
+[Godot MCP] Plugin unloaded
+Unloading addon: res://addons/netfox.internals/plugin.cfg
+Unloading addon: res://addons/netfox/plugin.cfg
+Unloading addon: res://addons/terrain_3d/plugin.cfg
+Unloading addon: res://addons/asset_placer/plugin.cfg
+Unloading addon: res://addons/map_builder_workbench/plugin.cfg
+Script docs haven't been properly loaded or regenerated, so don't save them to disk.
+EditorSettings: Save OK!
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+Orphan StringName: Node (static: 9, total: 10)
+StringName: 1 unclaimed string names at exit.

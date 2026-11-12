@@ -5,6 +5,7 @@ uniform vec4 line_color : source_color = vec4(0.23, 0.14, 0.07, 0.27);
 uniform float world_line_width = 0.04;
 uniform float cell_size = 1.0;
 uniform float minimum_pixel_width = 1.3;
+uniform float distant_contrast_floor = 0.08;
 varying float cell_pixels;
 
 void vertex() {
@@ -21,7 +22,7 @@ void vertex() {
 void fragment() {
 	float edge_distance = min(UV.x, 1.0 - UV.x);
 	float pixel_coverage = smoothstep(0.0, max(fwidth(UV.x), 0.00001), edge_distance);
-	float distant_contrast = mix(0.08, 1.0, smoothstep(8.0, 26.0, cell_pixels));
+	float distant_contrast = mix(distant_contrast_floor, 1.0, smoothstep(8.0, 26.0, cell_pixels));
 	ALBEDO = line_color.rgb;
 	ALPHA = line_color.a * pixel_coverage * distant_contrast;
 }

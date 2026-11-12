@@ -105,7 +105,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"walkable": bool(entry.get("walkable", true)),
 			"blocks_los": bool(entry.get("blocks_los", false)),
 			"cover_value": clampi(int(entry.get("cover_value", 0)), 0, 100),
-			"height_level": clampi(int(entry.get("height_level", 0)), 0, 2),
+			"height_level": clampi(int(entry.get("height_level", 0)), 0, TerrainTileData.MAX_HEIGHT_LEVEL),
 			"object_height": clampi(int(entry.get("object_height", 0)), 0, 3),
 			"edge_type": String(entry.get("edge_type", "cliff")),
 			"preserve_hill_fields": bool(entry.get("preserve_hill_fields", false)),

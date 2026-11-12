@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Two actual map chunks contain meshes and instance buffers
+PASS: Explicit map lifetime and expected chunk set
+PASS: Missing resource chunks are not ready
+PASS: Real static chunk resources captured
+PASS: Partial prefill exposes real progress
+PASS: Cached descriptors contain no scene Nodes
+PASS: Measured resource/descriptor payload stays within the bound
+PASS: Repeated capture is idempotent
+PASS: Ready only after every expected chunk is captured
+FAIL: Real fixture includes ramp caps, cliff faces and hex grid geometry
+TERRAIN_CACHE_PROP_RESULT { "ok": true, "unchanged": false, "geometry_payload_bytes_added": 286212, "descriptor_payload_bytes_added": 18028 }
+PASS: Actual authored static rock prop chunk is captured
+PASS: Allowlisted rendering metadata is retained on actual prop
+PASS: Prop descriptors retain no source scene nodes or owners
+PASS: Real prop mesh/material/transform fingerprint survives script-free restore
+PASS: Actual multi-cell authored visual owner exists outside chunk cache
+PASS: Terrain resource cache excludes the actual multi-cell owner Node
+PASS: Chunk restore never replaces picking/interaction owner bindings
+PASS: Restored static chunk is off-tree and awaits existing FoW publication
+PASS: Static geometry/material/transform/flags fingerprint is preserved
+PASS: Original Mesh and material resources are reused exactly
+PASS: Rendering flags and culling margin are restored
+PASS: MultiMesh buffer resource is reused rather than rebuilt
+PASS: Actual original vertex/index arrays are unchanged
+TERRAIN_CACHE_BUFFER_FLOATS 0
+PASS: Actual whole-map expected set cannot report ready after one chunk
+PASS: Resources survive original chunk/view deletion
+PASS: Repeat restore still uses the same geometry resource
+PASS: Script-bearing dynamic content is rejected without a partial entry
+PASS: FoW projection is not captured as static geometry
+PASS: Owner/projection metadata is rejected: visual_owner
+PASS: Owner/projection metadata is rejected: tile_owner
+PASS: Owner/projection metadata is rejected: interaction_id
+PASS: Owner/projection metadata is rejected: fog_visible
+PASS: Oversized capture is rejected before retaining any resources
+PASS: Map context rejects additional objects instead of retaining a Node
+PASS: Malformed lifetime request preserves a valid cache
+PASS: Context invalidates old resources: map_id
+PASS: Context invalidates old resources: terrain_revision
+PASS: Context invalidates old resources: art_revision
+PASS: Context invalidates old resources: grid_revision
+PASS: Explicit lifetime end releases cache ownership
+PASS: Cache clear never frees caller-owned instances
+TERRAIN_CACHE_MEASURED 79728 bytes first real chunk; budget=8388608
+TERRAIN_CHUNK_RESOURCE_CACHE 40 passed, 1 failed

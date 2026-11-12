@@ -3190,6 +3190,14 @@
 			"scale": 1.0,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0
+		},
+		"glut_sandstone_04": {
+			"layer": "object",
+			"source_id": "cengizhaneren_glut_sandstone",
+			"model_path": "res://Assets/curated/glut_regional/sandstone_04.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		}
 	}
 }
