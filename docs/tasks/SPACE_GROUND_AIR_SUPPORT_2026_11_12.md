@@ -106,6 +106,12 @@ mit derselben ID werden abgelehnt. Die Prüfung nutzt weiterhin eine im Test
 gesetzte Flugzulassung. Kartenbedienung, kontinuierlicher Feuerzyklus und der
 echte Start bleiben offen.
 
+Feuerauftrag und Einzelschuss fragen nun zusätzlich den vorhandenen
+Missions-Transportowner nach dem lokalen Piloten-Boarding. Eine abweichende
+Pilotenzuordnung, ein ausstehender Boardingvorgang oder ein fehlender
+Transportowner verweigern die Aktion. Der Owner-Verifier verwendet hierfür
+einen Transport-Testdouble; ein nativer End-to-End-Nachweis bleibt offen.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere

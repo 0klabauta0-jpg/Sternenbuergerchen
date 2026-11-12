@@ -27,6 +27,10 @@ class Vision extends Node:
 	var visible := true
 	func get_multiplayer_visible_unit_ids(_team: String) -> PackedStringArray:
 		return PackedStringArray(["enemy"]) if visible else PackedStringArray()
+class Transport extends Node:
+	var boarded := true
+	func get_campaign_air_support_pilot_guard(_craft_id: String) -> Dictionary:
+		return {"ok":true, "pilot_unit_id":"pilot"} if boarded else {"ok":false, "reason":"pilot_boarding_pending"}
 
 func _initialize() -> void:
 	var flow = Flow.new(); root.add_child(flow)
@@ -66,6 +70,7 @@ func _initialize() -> void:
 	var enemy = Person.new(); enemy.unit_id = "enemy"; enemy.team = "red"; mission.add_child(enemy); units.register_unit("enemy", enemy); mission_root.register_known_unit("enemy", enemy)
 	var enemy_placements: Array[Dictionary] = [{"unit_id":"enemy", "grid":Vector2i(3,0)}]; assert(mission_root.admit_hex_ground_units(enemy_placements).ok)
 	var vision = Vision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
+	var transport = Transport.new(); transport.name = "TacticalController"; mission.add_child(transport)
 	var grounded_fire := {"craft_id":"ship", "target_unit_id":"enemy", "weapon_slot":"weapon_1"}
 	assert(mission_root.preview_air_support_ground_fire(grounded_fire).reason == "aircraft_not_flying")
 	var attack := {"craft_id":"ship", "target_unit_id":"enemy", "request_id":"air-order"}
@@ -83,6 +88,9 @@ func _initialize() -> void:
 	vision.visible = false
 	assert(adapter.request_operation("air_support_attack_order", attack).reason == "target_not_visible")
 	vision.visible = true
+	transport.boarded = false
+	assert(adapter.request_operation("air_support_attack_order", attack).reason == "pilot_boarding_pending")
+	transport.boarded = true
 	assert(adapter.request_operation("air_support_attack_order", attack).ok)
 	assert(adapter.request_operation("air_support_attack_order", attack).replayed)
 	var conflicting_attack := attack.duplicate(); conflicting_attack.target_unit_id = "target"
@@ -90,6 +98,10 @@ func _initialize() -> void:
 	assert(wings.get_snapshot().wings[wing_id].order.target_id == "enemy")
 	var snapshot_before: Dictionary = combat.get_ship_systems("ship")
 	assert(mission_root.preview_air_support_ground_fire(fire).ok and combat.get_ship_systems("ship") == snapshot_before)
+	transport.boarded = false; assert(mission_root.preview_air_support_ground_fire(fire).reason == "pilot_boarding_pending"); transport.boarded = true
+	flow._assigned_aircraft_pilot_by_craft.ship = "someone_else"
+	assert(mission_root.preview_air_support_ground_fire(fire).reason == "pilot_assignment_changed")
+	flow._assigned_aircraft_pilot_by_craft.ship = "pilot"
 	pilot.set_meta("dropship_embarked", false); assert(mission_root.preview_air_support_ground_fire(fire).reason == "pilot_not_aboard"); pilot.set_meta("dropship_embarked", true)
 	vision.visible = false; assert(mission_root.preview_air_support_ground_fire(fire).reason == "target_not_visible"); vision.visible = true
 	var wrong_slot := fire.duplicate(); wrong_slot.weapon_slot = "invalid"

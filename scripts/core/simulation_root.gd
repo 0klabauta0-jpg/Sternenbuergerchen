@@ -86,6 +86,21 @@ func _resolve_air_support_craft(craft_id: String) -> Dictionary:
 	if flight == null or wing_id.is_empty() or equipment.get_snapshot(craft_id).is_empty(): return {"ok":false, "reason":"craft_not_ready"}
 	return {"ok":true, "flight":flight, "fleet":fleet, "wings":wings, "combat":combat, "equipment":equipment, "wing_id":wing_id}
 
+func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
+	# The transport owner verifies actual boarding and pending deployment.
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	if controller == null or not controller.has_method("get_campaign_air_support_pilot_guard"): return {"ok":false, "reason":"boarding_owner_unavailable"}
+	var guard: Dictionary = controller.call("get_campaign_air_support_pilot_guard", craft_id)
+	if not guard.get("ok", false): return guard
+	var adapter: Node = _air_support_adapter.get_ref() if _air_support_adapter != null else null
+	var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
+	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
+	var pilot_id := String(guard.get("pilot_unit_id", ""))
+	if typeof(pilots) != TYPE_DICTIONARY or pilot_id.is_empty() or String(pilots.get(craft_id, "")) != pilot_id: return {"ok":false, "reason":"pilot_assignment_changed"}
+	var pilot = _resolve_unit(pilot_id)
+	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id"): return {"ok":false, "reason":"pilot_not_aboard"}
+	return {"ok":true, "pilot_id":pilot_id, "pilot":pilot}
+
 func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	# The target and wing are resolved from live mission owners, not the UI.
 	if _should_skip_local_tick_processing() or not is_hex_ground_runtime_active(): return {"ok":false, "reason":"ground_unavailable"}
@@ -105,12 +120,9 @@ func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	if binding.combat.get_actor(command.craft_id) != binding.flight or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("assist_mode") != "coupled" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id: return {"ok":false, "reason":"aircraft_not_flying"}
 	var cells: Array[Vector2i] = binding.combat.preview_actor_cells(command.craft_id, {})
 	if cells.is_empty() or not binding.combat.actor_cells_match(command.craft_id, pose.space_area_id, cells): return {"ok":false, "reason":"stale_aircraft_index"}
-	var adapter: Node = _air_support_adapter.get_ref()
-	var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
-	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
-	if typeof(pilots) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_unavailable"}
-	var pilot = _resolve_unit(String(pilots.get(command.craft_id, "")))
-	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id"): return {"ok":false, "reason":"pilot_not_aboard"}
+	var pilot_check: Dictionary = _resolve_air_support_pilot(command.craft_id)
+	if not pilot_check.get("ok", false): return pilot_check
+	var pilot = pilot_check.pilot
 	var target = _resolve_unit(command.target_unit_id)
 	if not is_instance_valid(target) or typeof(_hex_ground_runtime.get_unit_grid(command.target_unit_id)) != TYPE_VECTOR2I or not target.has_method("get_health") or int(target.call("get_health")) <= 0 or not target.has_method("get_team_id"): return {"ok":false, "reason":"target_unavailable"}
 	var team := String(pilot.call("get_team_id"))
@@ -140,13 +152,11 @@ func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	var wing: Dictionary = binding.wings.get_snapshot().wings.get(binding.wing_id, {})
 	var order: Dictionary = wing.get("order", {})
 	if order.get("verb") != "attack_target" or order.get("target_id") != command.target_unit_id or order.get("fire_rule") != "free": return {"ok":false, "reason":"attack_order_required"}
-	var adapter: Node = _air_support_adapter.get_ref()
-	var flow: Node = adapter.get("_flow") if is_instance_valid(adapter) else null
-	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
-	if typeof(pilots) != TYPE_DICTIONARY: return {"ok":false, "reason":"pilot_unavailable"}
-	var pilot_id := String(pilots.get(command.craft_id, ""))
-	var pilot = _resolve_unit(pilot_id) if not pilot_id.is_empty() else null
-	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id") or not pilot.has_method("get_character_profile_bundle"): return {"ok":false, "reason":"pilot_not_aboard"}
+	var pilot_check: Dictionary = _resolve_air_support_pilot(command.craft_id)
+	if not pilot_check.get("ok", false): return pilot_check
+	var pilot_id: String = pilot_check.pilot_id
+	var pilot = pilot_check.pilot
+	if not pilot.has_method("get_character_profile_bundle"): return {"ok":false, "reason":"pilot_skill_unavailable"}
 	var target = _resolve_unit(command.target_unit_id)
 	var target_grid: Variant = _hex_ground_runtime.get_unit_grid(command.target_unit_id)
 	if not is_instance_valid(target) or typeof(target_grid) != TYPE_VECTOR2I or not target.has_method("get_team_id") or not target.has_method("get_health") or int(target.call("get_health")) <= 0: return {"ok":false, "reason":"target_unavailable"}
