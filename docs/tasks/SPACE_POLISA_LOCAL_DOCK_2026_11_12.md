@@ -144,6 +144,9 @@ Fleet und Travel bereiten jetzt getrennte `begin_station_dock`-/
 Owner-Test deckt Phasenwechsel, ungültige Revision und Replay ab. Der Test
 setzt den lokalen Flightzustand als Fixture; Root-, Boarding-, Fuel- und
 Adaptertransaktion sind noch nicht angeschlossen oder dadurch nachgewiesen.
+Root kann das tatsächliche Stationsgate nun lesend anhand von Flight-, Travel-,
+Area-, Wing-, Index- und Claimrevisionen prüfen. Die Probe deckt Gatepräsenz,
+fehlende Gatepräsenz und veraltete Revision ab. Sie autorisiert keinen Besuch.
 
 ## Akzeptanz, Prüfung und Risiken
 

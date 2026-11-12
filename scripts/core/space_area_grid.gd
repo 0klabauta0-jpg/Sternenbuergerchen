@@ -11,8 +11,11 @@ static func _station_contract() -> Dictionary:
 		if not layout.get("ok", false):
 			_station_geometry = {"ok":false}
 		else:
-			_station_geometry = {"ok":true, "area_id":layout.area_id, "revision":layout.revision, "target_id":layout.target_id, "block":layout.station_block}
+			_station_geometry = {"ok":true, "area_id":layout.area_id, "revision":layout.revision, "target_id":layout.target_id, "block":layout.station_block, "dock_gate":layout.dock_gate}
 	return _station_geometry
+
+static func station_dock_layout() -> Dictionary:
+	return _station_contract().duplicate(true)
 
 static func dock_targets(area_id: String) -> Array:
 	if area_id != STATION.AREA_ID: return []
