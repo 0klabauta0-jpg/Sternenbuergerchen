@@ -8,7 +8,8 @@ func _initialize() -> void:
 	assert(_travel(fleet, "launch_to_orbit", {"craft_id":"ship"}, "launch").ok)
 	assert(_travel(fleet, "start_quantum", {"craft_id":"ship", "target_orbit_id":"polisa_orbit"}, "warp").ok)
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(null, null, null, fleet)
-	var adapter = ADAPTER.new(); adapter._simulation = sim; adapter._travel = fleet; adapter._local_warp_arrival_enabled = true
+	var adapter = ADAPTER.new(); adapter._simulation = sim; adapter._travel = fleet
+	assert(not adapter._local_warp_arrival_enabled)
 	adapter.advance_space_travel(3.0)
 	assert(fleet.get_craft_snapshot("ship").phase == "orbit" and fleet.get_craft_snapshot("ship").orbit_id == "polisa_orbit")
 	assert(fleet.get_flight_state("ship").get_snapshot().coordinate_frame == "strategic" and sim.get_space_actor("ship") == null)
