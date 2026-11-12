@@ -13655,7 +13655,7 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 
 
 # Campaign pilot is a real sortie member. Assignment alone never authorizes flight.
-func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
+func get_campaign_pilot_flight_guard(craft_id: String, require_all_crew: bool = true) -> Dictionary:
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
 	var visit: Dictionary = visits.get(craft_id, {})
 	var live_polisa_visit := String(get_parent().get_meta("location_id", "")) == "polisa" and String(visit.get("craft_id", "")) == craft_id and not craft_id.is_empty()
@@ -13684,6 +13684,7 @@ func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
 	var sequence: Dictionary = _capture_active_drop_sequence() if _is_active_drop_sequence_for_craft(craft_id) else Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
 	var aboard: Dictionary = sequence.get("embarked_unit_ids", {})
 	for id in ownership:
+		if not require_all_crew and id != pilot_id: continue
 		var member = _get_campaign_sortie_unit(id)
 		if member == null or int(member.call("get_health")) <= 0: return {"ok":false,"reason":"crew_unavailable"}
 		if _deployed_unit_ids.has(id) or not bool(member.get_meta("dropship_embarked", false)) or not aboard.has(id): return {"ok":false,"reason":"pilot_not_aboard" if id == pilot_id else "crew_not_aboard"}
@@ -13691,6 +13692,15 @@ func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
 		for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
 			if String(effect.get("unit_id", "")) == id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]: return {"ok":false,"reason":"pilot_boarding_pending"}
 	return {"ok": true, "pilot_unit_id": pilot_id}
+
+
+func get_campaign_air_support_pilot_guard(craft_id: String) -> Dictionary:
+	# A local support sortie may leave the ground team behind; travel still
+	# uses the default all-crew guard. Never accept its compatibility shortcut.
+	var result: Dictionary = get_campaign_pilot_flight_guard(craft_id, false)
+	if result.get("ok", false) and String(result.get("pilot_unit_id", "")).is_empty():
+		return {"ok":false,"reason":"pilot_presence_unknown"}
+	return result
 
 
 func _get_campaign_sortie_unit(unit_id: String) -> Node:

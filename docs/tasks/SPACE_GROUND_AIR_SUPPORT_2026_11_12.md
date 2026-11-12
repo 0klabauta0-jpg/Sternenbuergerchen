@@ -89,6 +89,14 @@ Rottenauftrags auf der Bodenkarte fehlen weiterhin. Der Testflug wird direkt
 im Owner vorbereitet und belegt keinen echten Start, keine Manöver und keine
 visuelle Nutzerabnahme.
 
+Für einen lokalen Unterstützungsflug gibt es jetzt am bestehenden
+Transportowner eine eigene Pilotenprüfung: Der tatsächlich zugewiesene Pilot
+muss flugfähig, eindeutig zugeordnet und vollständig eingebordet sein. Andere
+Truppmitglieder dürfen auf der Bodenkarte bleiben. Der bisherige Reise- und
+Rückflugguard verlangt unverändert die gesamte Crew. Die neue Prüfung allein
+startet noch kein Schiff; die transaktionale Übernahme in den atmosphärischen
+Flugowner und die Rücklandung bleiben offen.
+
 Ein Root-interner Einschlagpfad liest jetzt das belegte Hexfeld direkt aus dem
 autoritativen Bodenowner und gibt einen belegten Treffer an den vorhandenen
 Schadenspfad. Er erlaubt auch Treffer auf eigene Einheiten, behandelt leere
