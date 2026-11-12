@@ -147,6 +147,9 @@ Adaptertransaktion sind noch nicht angeschlossen oder dadurch nachgewiesen.
 Root kann das tatsächliche Stationsgate nun lesend anhand von Flight-, Travel-,
 Area-, Wing-, Index- und Claimrevisionen prüfen. Die Probe deckt Gatepräsenz,
 fehlende Gatepräsenz und veraltete Revision ab. Sie autorisiert keinen Besuch.
+Eine weitere lesende Vorstufe validiert die Flight-/Indexdeaktivierung am
+Stationgate; Token-, Cancel-/Reapproach-, Economy- und Visittransaktion müssen
+noch zusammengeführt werden, bevor ein Dockcommit zugänglich gemacht wird.
 
 ## Akzeptanz, Prüfung und Risiken
 

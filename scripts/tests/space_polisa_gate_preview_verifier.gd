@@ -21,6 +21,9 @@ func _initialize() -> void:
 	var a: int = state.get_area_revision("orbit_approach:glut_2"); var w: int = wings.get_snapshot().revision
 	var before: Dictionary = flight.get_snapshot()
 	assert(sim.preview_station_dock(id,"polisa_station_dock","polisa_glut2_dock_v1",f,t,a,w,auth).ok)
+	sim.tick_counter = 1
+	var staged: Dictionary = sim.preview_station_dock_deactivation(id,"polisa_station_dock","polisa_glut2_dock_v1",f,t,a,w,auth)
+	assert(staged.ok and staged.activity_proposal.motion_mode == "inactive")
 	assert(flight.get_snapshot() == before)
 	assert(sim.preview_station_dock(id,"polisa_station_dock","old",f,t,a,w,auth).reason == "station_layout_changed")
 	assert(sim.preview_station_dock(id,"polisa_station_dock","polisa_glut2_dock_v1",f,t,a-1,w,auth).reason == "stale_area_revision")
