@@ -48,7 +48,11 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Schiffsflaechen schliessen alte Folgeevents aus. Member-/Crew-/Visitretirement
   sind bis Sourceaa4 selektiv als0055b08fe integriert: frischer tatsaechlicher
   Parent-Flow/Controller/Rootverbund37/0, Deploymentnachbar95/0, alle Guards gruen
-  und keine gepinnten Fremdquellen. Slot-/FMC-Lifecycle bleibt bei Tabletop.
+  und keine gepinnten Fremdquellen. Laufende FMC-/Controller-Mitglieder bis
+  Sourcead292 als8f266bdb0 integriert: frisch48/0 und Move/View65/0 samt Guards.
+  Automatische Fortsetzungen erben Lebenszeit, terminale Gruppen bleiben beendet,
+  unveraenderte Partner behalten Ziele. Runtime-Selection/Actoridentitaetsreset
+  und zugehoerige Registry-/Leaderindexbereinigung folgen bei Tabletop.
   Flowcaller fuer gebundenes Surface-Retirement ist reviewed (18/0 an
   kontrollierter Receiptgrenze): eigener Pendingmarker vor Deferredcall,
   Waiting/Retry, per-Craft-Admission-/Saveguard, Homefortsetzung und letzter
