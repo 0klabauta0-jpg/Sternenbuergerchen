@@ -1,0 +1,21 @@
+{
+  "before": "eb880baf5",
+  "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+  "ascii_skeleton_unchanged": true,
+  "old_sha256": "f03d27048db032286a09c862afff46fbd86a1b7d37b549bab34961a1f1bfe15e",
+  "corrected_sha256": "2113dd6f386564703795b6d8a230883a0417b778cea9087642ab34e99bfa6edc",
+  "unrelated_functions_restored_exactly_from": "ffac078d4",
+  "restored_functions": [
+    "_apply_native_a5_fireteam_card",
+    "_native_a5_team_status",
+    "request_campaign_crew_deployment",
+    "_build_mission_dropship_base_title_text",
+    "_apply_native_a5_hud_layout",
+    "_build_native_team_header",
+    "get_selected_team_boarding_snapshot",
+    "_ground_ship_touchdown_ready"
+  ],
+  "task_messages_corrected": 2,
+  "cause": "Windows implicit Path.read_text locale decoding in ad hoc source helper; use explicit utf-8 thereafter",
+  "runtime_tests": "no new runtime behavior; existing37/0 remains historical exact-hash record, no artifact rewrite"
+}
