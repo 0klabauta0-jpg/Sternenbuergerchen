@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 begrenzter Schiffsflächenraster als Planereingabe — 12.11.2026
+
+Vorhandenes gebundenes Bodyprofil wird lokal auf ganze Hexflächen abgeleitet;
+Registrymaßstab und Randkontakt geprüft, maximal4096 Kandidaten vor Loop.
+Rootgruppen können diese Ausschlüsse atomar berücksichtigen. Raster52/0 inklusive
+42 Movefälle, Guards und Review grün; QA hex_ship_footprint_raster_20261112.
+Konkrete Schiffsauswahl/Cache, Consumer, Landeclaims und reguläre Profilbindung
+noch offen; danach Setup/Base und AP7/8. Keine Produktionsaktivierung/EXE/Lastmatrix.
+
 ### AP6 konkrete Aussteigephasen an Rootcommit gebunden — 12.11.2026
 
 Primäre/parallele Sequenzen und geparkter Crewbutton benutzen echte einzelne

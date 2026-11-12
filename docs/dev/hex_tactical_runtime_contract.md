@@ -474,3 +474,25 @@ Controllerscript wird mit seiner tatsächlichen Preloadclosure geladen, keine
 Quellkörperextraktion. Keine Hauptszene, große Karte, native Darstellung oder
 Performancefreigabe. Fremde Schiffsfootprints und deren bindender regulärer
 Landeproducer sowie Setup/Base sind weitere AP6-Teile; noch keine Kartenaktivierung.
+
+## AP6 reine Schiffsfläche als Eingabe der Gruppenzulassung
+
+HexGroundShipFootprint validiert das zum Craft/Modell/Asset gebundene Profil und
+verwendet den vorhandenen polisa_station_craft_runtime.projected_body-Vertrag.
+Dessen Rect liegt in unverzerrter X/Z-Ebene; Rastergrenzen werden über tatsächliche
+Registryumrechnung bestimmt. HexGrid.corners und die tatsächliche Registrybasis
+liefern die Zellfläche. Einmal berechnete SAT-Achsen/Intervalle schließen auch
+Randkontakt ein, keine reine Mittelpunktprobe und keine alternative Schiffsformel.
+
+Maximal4096 lokale Rasterkandidaten, Budget-/Koordinatenfehler vor der Iteration
+ohne abgeschnittene freie Teilfläche. Nur vorhandene Kartenfelder werden als
+Maskeneinträge ausgegeben; unbekannte Felder bleiben schon im Terrain unbegehbar.
+Rootadmission und Deploymentvorbereitung akzeptieren optional höchstens4096
+zusätzliche Ausschlussfelder. Diese Maske ist eine abgeleitete Planereingabe,
+keine Belegungswahrheit oder zweite Schiffsregistry; die atomare Groundprüfung
+für tatsächliche Zellen/Claims bleibt bestehen.
+
+Kleiner Raster-/Rootcase52/0 einschließlich42 Moveprüfungen, alle Guards und
+geschlossener enger Review; QA hex_ship_footprint_raster_20261112. Konkrete
+Schiffsquellen/Cache, Transportconsumer, Landeclaims und regulärer Profilproducer
+sind noch ein Folgeteil. Keine Produktionskarte oder große Leistungsabnahme.

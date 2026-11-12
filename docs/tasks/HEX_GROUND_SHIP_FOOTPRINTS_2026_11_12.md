@@ -59,3 +59,15 @@ Profile werden ausschließlich gebunden gelesen. Der vorhandene Parent besitzt d
 beiden lokalen Kauf-Admitbodies, Space besitzt Pilot-/Reisegates. Deren aktuelle
 Crew-/Visitregeln werden beim Integrationspatch nicht ersetzt. Abgeleitete Sperren
 werden am vorhandenen Owner gecacht, nicht als per-frame Kartenrebuild erzeugt.
+
+## Erster geprüfter Teil: Raster und Rootausschluss
+
+Reiner Bodyraster und optionale Root-Ausschlussmaske:52/0 einschließlich42
+vorhandener Moveprüfungen, alle Guards und enger Review ohne Befund. Kanonischer
+gebundener Profil-/Bodyvertrag, Mittelpunkt verfehlter Randübertritt, Randkontakt,
+Budget vor Loop, falsche Craftbindung, tatsächlicher Rootumweg und blockierter
+Gruppenanker sowie abweichender Registryursprung/-maßstab geprüft.
+
+Noch offen: konkrete Auswahl/Cache der Schiffslandestände, Consumer an den
+Aussteigephasen, Landeclaimguard und einmalige reguläre Profilbindung. Keine
+Produktionsaktivierung durch diesen reinen Daten-/Planungsteilschritt.

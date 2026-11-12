@@ -104,3 +104,4 @@ docs/qa/hex_ground_admission_20261111/** -text whitespace=-blank-at-eof,cr-at-eo
 docs/qa/hex_admission_slots_20261111/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_admission_binding_fix_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 docs/qa/hex_deployment_phases_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
+docs/qa/hex_ship_footprint_raster_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
