@@ -969,13 +969,14 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
 		if not station_dock: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
-		if _campaign_mode and not departure.get("replayed", false): observe_campaign_progress()
+		if _campaign_mode and not station_dock and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":
 				_space_encounter.start_encounter(craft_id)
 				_flow.call("_refresh_homebase_screen")
 			else:
 				_flow.call("_begin_space_approach", craft_id, departure.departure)
+		if _campaign_mode and station_dock and not departure.get("replayed", false): observe_campaign_progress()
 		if station_dock: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		return result
 	if operation == "space_land_homebase":
