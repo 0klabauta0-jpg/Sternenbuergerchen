@@ -22,11 +22,26 @@ je Fall gilt eine äußere 240-Sekunden-Grenze einschließlich privater Projektk
 und der bereits enger begrenzten Import-/Scriptprozesse des Kindrunners. Bei
 Timeout wird dessen Prozessbaum beendet und kein weiterer Fall gestartet.
 
-Default: nur neuer AP6-Selectionpfad und unmittelbar betroffener BaseV2-Nachbar.
-BaseV2 enthält den Preparedverbund; deshalb keine zusätzliche historische
-Prepared-Einzelmatrix. Rootcheckpoint und AP8-Netzverbund stehen noch im Manifest
-unter `pending`. Sie werden nach dem tatsächlichen API-/Fixturefreeze ergänzt.
-Der frühere AP8-Partialpass wird nicht als Ersatz dafür aufgerufen.
+Default: neuer AP6-Selectionpfad, unmittelbar betroffener BaseV2-Nachbar und
+eingefrorener AP8-Netz-/Rootcheckpoint-Verbund. Dieser letzte Fall ruft
+`scripts/tests/run_ap8_network_owner_join.py` auf. Er verwendet dieselben echten
+Root-APIs export/prepare/validate/commit(false)/finalize während der Bewegung und
+verbindet Hostpublikation, Receiver und Runtimelebenszeit auf höchstens zwölf
+Feldern. Fehlende Root-APIs führen zum Fehler, nicht zu einem Dummy-Pass.
+Keine zweite Root-Harness oder historische Prepared-Einzelmatrix.
+
+Der eigene aktuelle AP8-Report muss `ap8_bounded_ready`, `root_checkpoint`,
+`host_publication`, `receiver`, `runtime_lifetime`, `source_unchanged`,
+`real_profile_unchanged` und `private_canary` jeweils als true ausweisen. Seine
+Erzeugung bleibt bis zum späteren Lauf offen. `real_peer=false` und
+`native_acceptance=false` sind AP9-/Nativegrenzen und keine Ablehnung des
+begrenzten AP8-Kandidaten. Der Wrapper archiviert gegebenenfalls vorhandene
+feste AP8-Ergebnisse vor dem Aufruf und kopiert den frischen Originalreport.
+
+Einzig die getrennte Source-Store-/Loaderintegration und deren eigener Beleg
+bleiben `pending`. Sie fehlen nicht im in-place Rootcheckpointtest, sondern sind
+eine separate AP7-Produktgrenze. Der frühere AP8-Partialpass wird nicht als Ersatz
+für den neuen Verbund aufgerufen.
 
 Nur mit zusätzlichem ausdrücklichem `--extended` werden bereits früher geprüfte
 Missionstart-/Wellen-/Medizin-/FMC-/Visit-/Unboard- und Movement-/Ground-Nachbarn
@@ -52,8 +67,12 @@ Falls ein später ergänzter Spezialrunner feste QA-Dateien überschreibt, müss
 diese im Manifest unter `archive_before` genannt werden; der Wrapper archiviert
 sie vor dem Aufruf. Die jetzigen ausgewählten Runner erzeugen UUID-Ergebnisse.
 
-Ein selektiver Pass ist keine vollständige AP7/AP8-, Multiplayer-, Native-,
-Performance- oder große Kartenabnahme; entsprechende Reportfelder bleiben false.
+Ein selektiver Pass ist keine uneingeschränkte AP7/AP8-, Multiplayer-, Native-,
+Performance- oder große Kartenabnahme. Die bisherigen `full_ap7`/`full_ap8`-Felder
+des Wrapperreports bleiben false; der konkrete begrenzte AP8-Status steht im
+kopierten aktuellen AP8-Originalreport unter `ap8_bounded_ready` und wird durch
+das Manifest zwingend geprüft. Ein Store-/Loader-pending bedeutet keine fehlende
+Peerabnahme des begrenzten AP8-Falls.
 Die Tests verwenden echte Owner mit den jeweils dokumentierten kontrollierten
 Fixturegrenzen. Keine Animation-/Pfad-/Rundflugbehauptung aus Headlesslogs.
 

@@ -36,16 +36,37 @@
       "logs": [
         "output.log"
       ]
+    },
+    {
+      "name": "ap8_network_owner_join",
+      "argv": [
+        "scripts/tests/run_ap8_network_owner_join.py"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": "output/native_glut_maps/ap8_network_owner_join_20261112/report.json",
+      "true_fields": [
+        "ap8_bounded_ready",
+        "root_checkpoint",
+        "host_publication",
+        "receiver",
+        "runtime_lifetime",
+        "source_unchanged",
+        "real_profile_unchanged",
+        "private_canary"
+      ],
+      "logs": [
+        "output.log"
+      ],
+      "archive_before": [
+        "output/native_glut_maps/ap8_network_owner_join_20261112/report.json",
+        "output/native_glut_maps/ap8_network_owner_join_20261112/output.log"
+      ]
     }
   ],
   "pending": [
     {
-      "name": "ap7_root_checkpoint",
-      "reason": "Source Root/Checkpoint API and actual isolated fixture command not frozen yet."
-    },
-    {
-      "name": "ap8_network_joint",
-      "reason": "AP8 agent is implementing the actual network slice; command and guard contract requested."
+      "name": "ap7_store_loader_integration",
+      "reason": "Separate Source Store/Loader product integration and its own evidence are pending. The bounded AP8 in-place Root checkpoint join is included above; do not construct a second Root harness."
     }
   ],
   "extended_checks": [
