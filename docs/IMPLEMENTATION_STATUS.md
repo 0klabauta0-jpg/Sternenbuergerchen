@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Wellenretirement nach Integrationsreview — 12.11.2026
+
+Vorherige Mitglieder werden bei leerer/neuer Initialisierung ebenfalls von Feld,
+Registry und Sicht entfernt. Reinitialisierung während synchroner Actoränderung
+wartet bis zu deren Ende; Rootpub bindet die Wellen-Generation vor jeder Sicht-
+freigabe. Tatsächliche Repros60/3→64/0, Setupnachbar62/0, Guards grün;
+QA hex_mission_wave_retirement_20261112. 785cbd715 benötigt diesen Folgefix.
+Slotidentität/Medical/Retirement und AP7/8 bleiben anschließend offen; keine EXE.
+
 ### AP6 tatsächliche spätere Wellen — 12.11.2026
 
 Vollständige gestagte Gruppe erhält erst Groundfelder, dann Lookup, Phasenzähler

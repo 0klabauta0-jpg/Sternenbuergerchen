@@ -81,3 +81,15 @@ Wellen60/0, direkter Setupnachbar62/0, Originale/Hashes unter
 `docs/qa/hex_mission_waves_20261112`. Laufende Slot-/Identitätsänderungen, Respawn
 und taktisches Member-Retirement bleiben weitere Lifecyclepakete. Keine große
 Abnahme oder native Leistungsbehauptung aus diesen kleinen Contractchecks.
+
+## Integrationsreview: bisherige Mitglieder und Actorstaging
+
+785cbd715 nur zusammen mit dem Folgefix verwenden: initialize([]) muss auch
+bisherige Feld-/Registry-/Sichtbindungen räumen. Die tatsächliche medizinische
+Actor-Deaktivierung publiziert synchron; ein Callback darf denselben Actor nicht
+innen neu aktivieren, bevor der äußere Actoraufruf seine Sichtbarkeit zurücksetzt.
+Initialisierung deshalb serialisiert/identisch zusammengefasst, alte und neue
+Mitgliedschaft vor Slotaufbau vollständig deaktiviert. Laufende Rootpub liest
+einen Generationguard, damit Restactors nach Reset nicht sichtbar werden.
+Kleine echte Repros60/3→63/0, Kontextrestart63/1→64/0, Setup62/0; QA
+`hex_mission_wave_retirement_20261112`. Keine breite Folgeprüfung.

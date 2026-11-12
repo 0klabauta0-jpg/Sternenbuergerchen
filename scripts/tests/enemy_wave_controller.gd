@@ -34,6 +34,10 @@ var _hex_wave_last_stamp:=""
 var _hex_wave_attempts:=0
 var _hex_wave_error:Dictionary={}
 var _hex_publishing_wave:=false
+var _initializing_waves:=false
+var _initialization_target:Array=[]
+var _pending_initialization:Dictionary={}
+var _draining_initialization:=false
 
 
 func _ready() -> void:
@@ -41,6 +45,37 @@ func _ready() -> void:
 
 
 func initialize_enemy_units(enemy_units: Array) -> void:
+	# Medical staging emits synchronously. Finish that Actor call before any new
+	# generation may admit the same body; repeated identical intents coalesce.
+	if _initializing_waves or _hex_publishing_wave:
+		if _initializing_waves and enemy_units==_initialization_target:return
+		if not _pending_initialization.is_empty() and _pending_initialization.units==enemy_units:return
+		_pending_initialization={"units":enemy_units.duplicate()}
+		_hex_wave_generation+=1
+		return
+	_initializing_waves=true
+	_initialization_target=enemy_units.duplicate()
+	var lifetime:WeakRef=weakref(self)
+	_initialize_enemy_units(enemy_units)
+	var owner=lifetime.get_ref()
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion():return
+	owner._initializing_waves=false
+	owner._initialization_target.clear()
+	owner._drain_wave_initialization()
+
+
+func _drain_wave_initialization()->void:
+	if _initializing_waves or _hex_publishing_wave or _draining_initialization or _pending_initialization.is_empty():return
+	_draining_initialization=true
+	var incoming:Array=_pending_initialization.units
+	_pending_initialization={}
+	var lifetime:WeakRef=weakref(self)
+	initialize_enemy_units(incoming)
+	var owner=lifetime.get_ref()
+	if is_instance_valid(owner) and not owner.is_queued_for_deletion():owner._draining_initialization=false
+
+
+func _initialize_enemy_units(enemy_units:Array)->void:
 	_hex_wave_generation+=1
 	var generation:int=_hex_wave_generation
 	var lifetime:WeakRef=weakref(self)
@@ -53,6 +88,16 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 	_hex_wave_required=_hex_required_hint or (simulation!=null and simulation.has_method("is_hex_ground_runtime_required") and simulation.is_hex_ground_runtime_required())
 	_hex_wave_root_id=simulation.get_instance_id() if _hex_wave_required and simulation!=null else 0
 	_hex_wave_context=simulation.get_hex_ground_context_revision() if _hex_wave_required and simulation!=null else -1
+	var retirees:Array=_enemy_units.duplicate()
+	for actor in enemy_units:
+		if is_instance_valid(actor) and not retirees.has(actor):retirees.append(actor)
+	# Old membership is retained until all its Actor callbacks finish. A queued
+	# reset cannot strand untouched members, including newly supplied slots.
+	for actor in retirees:
+		if is_instance_valid(actor):_deactivate_enemy_unit(actor)
+		var owner=lifetime.get_ref()
+		if not is_instance_valid(owner) or owner.is_queued_for_deletion():return
+	if generation!=_hex_wave_generation:return
 	_enemy_units.clear()
 	_spawn_positions_by_unit_id.clear()
 	_current_wave_number = 0
@@ -67,9 +112,6 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 			_spawn_positions_by_unit_id[unit_id] = (enemy_unit as Node2D).global_position
 
 		_apply_enemy_tactics(enemy_unit)
-		_deactivate_enemy_unit(enemy_unit)
-		var owner=lifetime.get_ref()
-		if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return
 		if _hex_wave_required and is_instance_valid(simulation) and simulation.is_hex_ground_runtime_active() and enemy_unit is Node2D:
 			if not Vector2(_spawn_positions_by_unit_id[unit_id]).is_finite():
 				_hex_wave_error={"ok":false,"reason":"invalid_wave_spawn_position"}
@@ -146,6 +188,9 @@ func are_all_waves_started() -> bool:
 
 func _process(delta: float) -> void:
 	if preview_mode:
+		return
+	if not _pending_initialization.is_empty():
+		_drain_wave_initialization()
 		return
 	if not _should_process_locally():
 		_refresh_status_label()
@@ -245,14 +290,25 @@ func _start_hex_wave(simulation:Node)->bool:
 	var number:int=_current_wave_number
 	var owner_ref:WeakRef=weakref(self)
 	var simulation_ref:WeakRef=weakref(simulation)
-	simulation.call("_publish_hex_setup_actors",ids)
+	simulation.call("_publish_hex_setup_actors",ids,Callable(self,"_can_publish_hex_wave").bind(generation))
 	var owner=owner_ref.get_ref()
-	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return true
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion():return true
+	if generation!=owner._hex_wave_generation:
+		owner._hex_publishing_wave=false
+		owner._drain_wave_initialization()
+		return true
 	var bound_simulation=simulation_ref.get_ref()
-	if not is_instance_valid(bound_simulation) or bound_simulation.is_queued_for_deletion() or owner._get_simulation_root()!=bound_simulation or bound_simulation.get_hex_ground_context_revision()!=owner._hex_wave_context:return true
+	if not is_instance_valid(bound_simulation) or bound_simulation.is_queued_for_deletion() or owner._get_simulation_root()!=bound_simulation or bound_simulation.get_hex_ground_context_revision()!=owner._hex_wave_context:
+		owner._hex_publishing_wave=false
+		owner._drain_wave_initialization()
+		return true
 	owner.wave_started.emit(number)
 	owner=owner_ref.get_ref()
-	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or generation!=owner._hex_wave_generation:return true
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion():return true
+	owner._hex_publishing_wave=false
+	if generation!=owner._hex_wave_generation:
+		owner._drain_wave_initialization()
+		return true
 	bound_simulation=simulation_ref.get_ref()
 	if not is_instance_valid(bound_simulation) or bound_simulation.is_queued_for_deletion() or owner._get_simulation_root()!=bound_simulation or bound_simulation.get_hex_ground_context_revision()!=owner._hex_wave_context:return true
 	owner._hex_publishing_wave=false
@@ -260,6 +316,10 @@ func _start_hex_wave(simulation:Node)->bool:
 		owner._all_waves_complete_emitted=true
 		owner.all_waves_complete.emit()
 	return true
+
+
+func _can_publish_hex_wave(generation:int)->bool:
+	return not is_queued_for_deletion() and generation==_hex_wave_generation and _pending_initialization.is_empty()
 
 
 func _activate_enemy_unit(enemy_unit) -> void:

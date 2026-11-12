@@ -15,6 +15,9 @@ func _finish()->void:
 	_test_wave_publication_context()
 	_test_later_wave()
 	_test_staging_callback()
+	_test_retire_membership()
+	_test_same_actor_staging_restart()
+	_test_retire_from_visibility()
 	_test_legacy_wave()
 	print("RESULTS: %d passed, %d failed"%[passed,failed])
 	if failed==0:print("HEX_MISSION_WAVE_PASS")
@@ -112,6 +115,8 @@ func _test_wave_publication_context()->void:
 		if rig.actors.enemy.visible:rig.sim.configure_hex_ground_runtime(rig.map,rig.terrain))
 	wave._process(5.0)
 	_check(events.is_empty() and rig.sim.get_hex_unit_state("enemy").is_empty(),"context replaced by actor projection cannot publish a retired wave event")
+	wave.initialize_enemy_units([])
+	_check(not wave._hex_publishing_wave and wave._pending_initialization.is_empty(),"context-cancelled publication allows a subsequent explicit wave initialization")
 	rig.scene.free()
 
 func _test_later_wave()->void:
@@ -144,6 +149,41 @@ func _test_staging_callback()->void:
 			wave.initialize_enemy_units([]))
 	wave.initialize_enemy_units([rig.actors.enemy])
 	_check(invoked==[true] and wave._enemy_units.is_empty() and wave._hex_wave_slots.is_empty() and wave._spawn_positions_by_unit_id.is_empty() and wave._time_until_next_wave==5.0,"actual actor staging callback cannot append retired slots after a reinitialization")
+	rig.scene.free()
+
+func _test_retire_membership()->void:
+	var rig:Dictionary=_admission_rig([Vector2i.ZERO,Vector2i(1,0)])
+	var wave:Node=_waves(rig,["a","b"])
+	wave.initialize_enemy_units([])
+	_check(rig.sim.get_hex_ground_planning_snapshot().units_by_id.is_empty() and not rig.units.has_unit("a") and not rig.units.has_unit("b") and not rig.actors.a.visible and not rig.actors.b.visible,"empty wave reinitialization retires previous physical membership and both projections")
+	rig.scene.free()
+
+func _test_same_actor_staging_restart()->void:
+	var rig:Dictionary=_admission_rig([Vector2i.ZERO])
+	var wave:Node=_waves(rig,["enemy"])
+	wave.first_wave_delay_seconds=5.0
+	var events:Array=[]
+	rig.actors.enemy.runtime_status_changed.connect(func(_status):
+		if events.is_empty():
+			events.append(true)
+			wave.first_wave_delay_seconds=0.0
+			wave.initialize_enemy_units([rig.actors.enemy]))
+	wave.initialize_enemy_units([rig.actors.enemy])
+	_check(events==[true] and wave.get_current_wave_number()==1 and not rig.sim.get_hex_unit_state("enemy").is_empty() and rig.units.get_unit("enemy")==rig.actors.enemy and rig.actors.enemy.visible,"same-actor restart during medical staging cannot hide a newly admitted actor")
+	rig.scene.free()
+
+func _test_retire_from_visibility()->void:
+	var rig:Dictionary=_admission_rig([Vector2i.ZERO,Vector2i(1,0)])
+	var wave:Node=_waves(rig,["a","b"])
+	wave.first_wave_delay_seconds=5.0
+	wave.initialize_enemy_units([rig.actors.a,rig.actors.b])
+	var shown_b:Array=[]
+	rig.actors.a.visibility_changed.connect(func():
+		if rig.actors.a.visible:wave.initialize_enemy_units([]))
+	rig.actors.b.visibility_changed.connect(func():
+		if rig.actors.b.visible:shown_b.append(true))
+	wave._process(5.0)
+	_check(rig.sim.get_hex_ground_planning_snapshot().units_by_id.is_empty() and not rig.units.has_unit("a") and not rig.units.has_unit("b") and not rig.actors.a.visible and not rig.actors.b.visible and shown_b.is_empty(),"visibility callback retires whole old membership without showing a remaining stale actor")
 	rig.scene.free()
 
 func _test_wave_context()->void:

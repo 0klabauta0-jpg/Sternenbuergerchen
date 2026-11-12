@@ -763,14 +763,17 @@ func admit_hex_ground_setup_actors(candidates:Array[Dictionary],allow_staged:boo
 	return result
 
 
-func _publish_hex_setup_actors(unit_ids:PackedStringArray)->void:
+func _publish_hex_setup_actors(unit_ids:PackedStringArray,publication_guard:Callable=Callable())->void:
 	var context:int=_hex_ground_context_revision
+	var guarded:bool=publication_guard.is_valid()
+	if guarded and not publication_guard.call():return
 	for id in unit_ids:
 		var actor=_resolve_known_unit_for_contract(id)
 		if is_instance_valid(actor) and _hex_ground_runtime.has_unit(id):actor.set_meta("dropship_embarked",false)
 	_project_hex_ground_actors(0.0)
 	for id in unit_ids:
 		if context!=_hex_ground_context_revision:return
+		if guarded and (not publication_guard.is_valid() or not publication_guard.call()):return
 		var actor=_resolve_known_unit_for_contract(id)
 		if is_instance_valid(actor) and _hex_ground_runtime.has_unit(id):actor.visible=true
 
