@@ -1138,6 +1138,20 @@ func grant_resource_result(owner: Node, receipt: Dictionary) -> Dictionary:
 	return collect_location_resource(owner,location,String(receipt.get("site_id","")),String(receipt.get("unit_id","")))
 
 func _finish_space_encounter_result() -> void:
+	if _space_encounter.get("_combat_owner") != null:
+		var pending: Dictionary = _space_encounter.peek_completed_result()
+		if pending.is_empty(): return
+		var bound_craft := String(pending.craft_id)
+		var token := String(_departure_token_by_craft.get(bound_craft, ""))
+		var returned: Dictionary = _simulation.commit_campaign_space_return(self, bound_craft, "encounter-return:" + token)
+		if not returned.get("ok", false): return
+		var bound_result: Dictionary = _space_encounter.get_completed_result()
+		if bound_result.is_empty(): return
+		record_mission_result(bound_result,{"craft_id":bound_craft,"job_id":"buccaneer_rescue","scenario_id":"buccaneer_rescue"})
+		if String(bound_result.result) == "victory":
+			_request_campaign_action("campaign_recruit",{"craft_id":bound_craft,"kind":"pilot"},_request_id("rescue-recruit",{}))
+		_flow.call("_refresh_homebase_screen")
+		return
 	var result: Dictionary = _space_encounter.get_completed_result()
 	if result.is_empty(): return
 	var craft_id := String(result.craft_id)

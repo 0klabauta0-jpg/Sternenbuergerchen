@@ -85,8 +85,14 @@ func _advance_bound_combat(delta: float) -> Dictionary:
 	elif values.hostile <= 0.0: _state.phase = "rescue_ready"
 	_state.revision += 1
 	return {"ok":true, "snapshot":get_snapshot()}
-func get_completed_result() -> Dictionary:
+func peek_completed_result() -> Dictionary:
 	if _state.is_empty() or bool(_state.resolved) or String(_state.phase) not in ["victory","defeat","aborted"]: return {}
-	_state.resolved=true
 	var victory:=String(_state.phase)=="victory"
 	return {"result":String(_state.phase),"scenario_id":"buccaneer_rescue","craft_id":String(_state.craft_id),"mission_scenario_runtime_gates":{"all_gates_complete":victory,"completed_step_ids":["enemy_cutlass_destroyed","rescue_buccaneer"] if victory else []},"space_encounter":get_snapshot()}
+
+func get_completed_result() -> Dictionary:
+	var result := peek_completed_result()
+	if result.is_empty(): return {}
+	_state.resolved = true
+	result.space_encounter = get_snapshot()
+	return result

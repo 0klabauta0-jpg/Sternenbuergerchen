@@ -190,6 +190,17 @@ explizit zugelassenen lokalen Testflug und einen Testabbruch. Der normale
 Missionsstart und `_finish_space_encounter_result` nutzen den Übergang noch
 nicht; Treibstoff, Ergebnis und Rettung sind damit nicht end-to-end verbunden.
 
+Fortschreibung: Im bereits gebundenen Pfad bereitet der Root jetzt den
+Rückflugtreibstoff zusammen mit dem Reiseübergang vor und veröffentlicht beide
+erst nach erfolgreicher Prüfung. Die Adapter-Ergebnisübergabe liest den Ausgang
+vorher nur und konsumiert ihn erst nach dieser Transaktion. Ohne Treibstoff
+bleiben Kontakte, Reisephase und Ergebnis erhalten; Replay belastet den Tank
+nicht erneut. Der Test nutzt einen synthetischen Abflugbeleg und ein lokal
+vorbereitetes Testschiff. Ein echter Kampagnenabflug, Ergebnis-/Belohnungs-
+zustellung und Fehlerfeedback sind nicht durchgehend geprüft. Der reguläre
+Missionsstart ruft die Kampfanbindung weiterhin nicht auf; dies ist noch keine
+produktiv verbundene Mission.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf

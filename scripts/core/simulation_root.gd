@@ -1972,17 +1972,23 @@ func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) 
 func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
-	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _singleplayer_space_travel_owner == null or _space_encounter_owner == null: return {"ok":false, "reason":"adapter_required"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter or _singleplayer_space_travel_owner == null or _singleplayer_supply_owner == null or _space_encounter_owner == null: return {"ok":false, "reason":"adapter_required"}
 	if _campaign_space_return_receipts.has(request_id):
 		var receipt: Dictionary = _campaign_space_return_receipts[request_id]
 		if receipt.craft_id != craft_id: return {"ok":false, "reason":"request_id_conflict"}
-		if receipt.fleet != _singleplayer_space_travel_owner or receipt.encounter != _space_encounter_owner or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}
+		if receipt.fleet != _singleplayer_space_travel_owner or receipt.supply != _singleplayer_supply_owner or receipt.supply_epoch != _singleplayer_supply_owner.get("_route_prepare_epoch") or receipt.encounter != _space_encounter_owner or receipt.flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"owner_changed"}
 		var check: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(receipt.candidate, receipt.context)
 		if not check.get("ok", false) or not check.get("replayed", false): return {"ok":false, "reason":"owner_changed"}
 		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
 	if _campaign_space_return_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
 	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
 	if request_id.strip_edges().is_empty() or encounter.get("craft_id") != craft_id or encounter.get("phase") not in ["victory", "defeat", "aborted"] or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return {"ok":false, "reason":"encounter_not_complete"}
+	var tokens: Variant = adapter.get("_departure_token_by_craft")
+	if typeof(tokens) != TYPE_DICTIONARY: return {"ok":false, "reason":"departure_unavailable"}
+	var departure_id := String(tokens.get(craft_id, ""))
+	var departure_receipt: Dictionary = _departure_group_receipts.get(departure_id, {})
+	if departure_id.is_empty() or departure_receipt.get("craft_id") != craft_id or Dictionary(departure_receipt.get("result", {})).get("departure", {}).get("destination_location_id") != "distress_orbit": return {"ok":false, "reason":"departure_unavailable"}
+	if departure_receipt.get("supply") != _singleplayer_supply_owner or departure_receipt.get("supply_epoch") != _singleplayer_supply_owner.get("_route_prepare_epoch") or departure_receipt.get("fleet") != _singleplayer_space_travel_owner or departure_receipt.get("flight") != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"departure_owner_changed"}
 	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
 	if flight == null or _space_combat_state.get_actor(craft_id) != flight: return {"ok":false, "reason":"player_unavailable"}
 	var pose: Dictionary = flight.get_snapshot()
@@ -2001,13 +2007,23 @@ func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: S
 	if not validation.get("ok", false) or validation.get("replayed", false):
 		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
 		return {"ok":false, "reason":"travel_validation_failed"}
+	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self):
+		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
+		return {"ok":false, "reason":"supply_authority_unavailable"}
+	var fuel_command := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":{"craft_id":craft_id, "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, "request_id":"return:" + departure_id + ":fuel"}
+	var fuel_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel_command, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":false})
+	var fuel_validation: Dictionary = _singleplayer_supply_owner.validate_prepared_route_fuel(fuel_candidate, self) if fuel_candidate.get("ok", false) else fuel_candidate
+	if not fuel_validation.get("ok", false) or fuel_validation.get("patch", {}).get("mode") != "apply":
+		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
+		return {"ok":false, "reason":String(fuel_validation.get("reason", "fuel_validation_failed"))}
 	# Validation above establishes that both contacts exist; no callbacks occur
 	# before the authoritative travel state is published.
 	_space_combat_state.remove_actor("hostile_cutlass")
 	_space_combat_state.remove_actor("neutral_buccaneer")
+	var fuel_result: Dictionary = _singleplayer_supply_owner._publish_prepared_route_fuel(fuel_candidate, fuel_validation)
 	var result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, validation)
-	var completed := {"ok":true, "replayed":false, "travel_result":result}
-	_campaign_space_return_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "encounter":_space_encounter_owner, "flight":flight, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":completed.duplicate(true)}
+	var completed := {"ok":true, "replayed":false, "travel_result":result, "fuel_result":fuel_result}
+	_campaign_space_return_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "supply":_singleplayer_supply_owner, "supply_epoch":_singleplayer_supply_owner.get("_route_prepare_epoch"), "encounter":_space_encounter_owner, "flight":flight, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":completed.duplicate(true)}
 	return completed
 
 func admit_campaign_space_contacts(craft_id: String, authority_context: Dictionary) -> Dictionary:
