@@ -9,7 +9,15 @@ class Controller extends Node:
 	var pilot_ready := false
 	func _is_parked_campaign_dropship(_id: String) -> bool: return true
 	func get_campaign_pilot_flight_guard(_id: String) -> Dictionary: return {"ok":pilot_ready,"reason":"pilot_not_aboard", "pilot_unit_id":"pilot" if pilot_ready else ""}
+class PilotFixture extends Node:
+	func is_pilot_aboard(_id: String) -> bool: return true
+class LocalDockAdapter extends "res://scripts/meta/singleplayer_runtime_adapter.gd":
+	var dock_departure := {}
+	func preview_departure(_id: String) -> Dictionary: return {"ok":true, "departure":dock_departure.duplicate(true)}
+	func _built_home_pad_ids() -> Array: return ["homebase_pad_01", "homebase_pad_02"]
 class SetupFlow extends Node:
+	var _space_approaches := {}
+	var _transfer_sequence := 0
 	var _homebase_aircraft_definitions: Array = [{"craft_id":"visitor","craft_type":"dropship","model_id":"cutlass"}]
 	var _aircraft_location_by_craft := {"visitor":"mission"}
 	var _assigned_aircraft_pilot_by_craft := {}
@@ -67,7 +75,7 @@ func fingerprint(adapter, flow) -> String:
 	return JSON.stringify([adapter._supply.export_state(),adapter._ship_equipment.export_state(),adapter._travel.get_snapshot(),adapter._pad_by_craft,flow._homebase_aircraft_definitions,flow._aircraft_location_by_craft,flow.admitted,flow.commits],"",true)
 func payload() -> Dictionary: return {"craft_id":"visitor","offer_id":"polisa_ship_cutlass","delivery_mode":"local","service_location_id":"polisa","request_id":"local-buy"}
 func run() -> void:
-	var adapter = ADAPTER.new()
+	var adapter = LocalDockAdapter.new() if OS.get_environment("SB_TEST_LOCAL_BIRTH") == "3" else ADAPTER.new()
 	var flow := SetupFlow.new()
 	flow.adapter = adapter
 	flow.mission = Node.new()
@@ -181,17 +189,29 @@ func run() -> void:
 	var space_state: RefCounted = adapter._simulation.get("_space_combat_state")
 	assert(space_state.admit_actor({"craft_id":"space_fixture_birth_blocker", "faction_id":"enemy", "control_domain":"enemy", "start_hex":dock_cell, "footprint_hexes":[Vector2i.ZERO]}, blocked_flight, true).ok)
 	check(not adapter._simulation.preview_station_purchase_local_admission(adapter, id).get("ok", false), "Occupied station gate blocks first admission")
-	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2"]:
+	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2", "3"]:
 		adapter._local_warp_arrival_enabled = true
 		check(not adapter.enter_space_orbit(id).get("ok", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before, "Blocked first admission leaves fuel and birth unchanged")
 	assert(space_state.remove_actor("space_fixture_birth_blocker"))
-	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2"]:
+	if OS.get_environment("SB_TEST_LOCAL_BIRTH") in ["1", "2", "3"]:
 		var events: Array = []
 		adapter._simulation.singleplayer_command_committed.connect(func(command: Dictionary, _result: Dictionary): events.append(command.operation))
 		var admitted: Dictionary = adapter.enter_space_orbit(id)
 		check(admitted.get("ok", false) and space_state.get_actor(id) == adapter._travel.get_flight_state(id) and adapter._travel.get_craft_snapshot(id).orbit_id == "polisa_orbit", "Purchased craft enters actual local station area atomically")
 		check(adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "First admission charges return fuel once and binds real flying wing")
-		check(adapter.enter_purchased_station_local_orbit(id).get("replayed", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0, "Purchase-owned admission receipt replays without duplicate fuel")
+		check(adapter.enter_space_orbit(id).get("replayed", false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before - 10.0, "Public return replays current purchase admission without duplicate fuel")
+		if OS.get_environment("SB_TEST_LOCAL_BIRTH") == "3":
+			var pilot := PilotFixture.new(); adapter._base_personnel = pilot
+			adapter.dock_departure = {"craft_id":id,"origin_location_id":"homebase","destination_location_id":"polisa","landing_pad_id":"homebase_pad_02","job_id":""}
+			assert(adapter._campaign.apply_command({"contract_category":"singleplayer_campaign","operation":"select_destination","payload":{"location_id":"polisa","job_id":""},"request_id":"select-polisa"}).ok)
+			adapter._simulation.tick_counter = adapter._travel.get_flight_state(id).get_snapshot().tick
+			var dock: Dictionary = adapter.authorize_departure(id, "station-dock:later", true)
+			check(dock.get("ok", false), "Purchased craft performs later real station dock transaction")
+			flow._space_approaches[id] = {"identity":{"craft_id":id,"location_id":"polisa","departure_token":adapter._departure_token_by_craft[id]}}
+			adapter._simulation.tick_counter = adapter._travel.get_flight_state(id).get_snapshot().tick
+			var cancel: Dictionary = adapter.enter_space_orbit(id)
+			check(cancel.get("ok", false) and not cancel.get("replayed", false) and not adapter._simulation.is_station_purchase_local_admission_current(id), "Later real dock cancellation routes to its own receipt instead of birth replay")
+			pilot.free(); finish(adapter,flow); return
 		var replacement_equipment = EQUIPMENT.new(); assert(replacement_equipment.configure([]).ok)
 		adapter._simulation.configure_ship_equipment(replacement_equipment)
 		adapter._simulation.publish_singleplayer_space_launch_event(adapter, String(admitted.get("receipt_id", "")))

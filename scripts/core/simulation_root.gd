@@ -626,6 +626,18 @@ func preview_station_purchase_local_admission(adapter: Node, craft_id: String) -
 	if not wing.get("ok", false): return wing
 	return {"ok":true, "craft_id":craft_id, "purchase_receipt_id":purchase.origin_receipt_id, "target_id":layout.target_id, "layout_revision":layout.revision, "space_area_id":layout.area_id, "flight_revision":pose.revision, "travel_revision":travel.revision, "area_revision":_space_combat_state.get_area_revision(layout.area_id), "wing_revision":wing.expected_revision, "equipment_revision":profile.equipment_revision, "footprint_cells":admission.cells.duplicate()}
 
+func is_station_purchase_local_admission_current(craft_id: String) -> bool:
+	if _singleplayer_supply_owner == null or _singleplayer_space_travel_owner == null: return false
+	var purchase: Dictionary = _singleplayer_supply_owner.get_station_ship_purchase(craft_id)
+	if purchase.get("craft_id") != craft_id or purchase.get("origin_kind") != "local_station_purchase" or String(purchase.get("origin_receipt_id", "")).is_empty(): return false
+	var id := "station-birth:" + String(purchase.origin_receipt_id) + ":" + craft_id
+	var receipt: Dictionary = _launch_receipts.get(id, {})
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if receipt.is_empty() or flight == null or receipt.get("flight") != flight or receipt.get("fleet") != _singleplayer_space_travel_owner or _space_combat_state.get_actor(craft_id) != flight: return false
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	return pose.get("coordinate_frame") == "local" and pose.get("motion_mode") == "tactical" and pose.get("space_area_id") == "orbit_approach:glut_2" and travel.get("phase") == "orbit" and travel.get("orbit_id") == "polisa_orbit" and travel.get("revision") == Dictionary(receipt.get("result", {}).get("travel_result", {})).get("revision")
+
 func commit_station_purchase_local_admission(adapter: Node, craft_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
