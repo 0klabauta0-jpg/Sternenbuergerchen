@@ -171,3 +171,36 @@ mit absolut <=1e-12, alle anderen Typen/Werte/IDs exakt. Vorher-/Default-Precisi
 und Full-Precision-Diagnoselogs bleiben separat erhalten. Dies ändert keine Actor-
 Positionen/HP/Bewegung/Zeiten oder Aktionen für einen künstlichen Pass. Kein
 vollständiges Missions-Save/Continue und kein EXE-Nachweis aus dieser Transportprobe.
+
+## Nachtrag: korrekte Monde und lokale Orbitpersistenz
+Der Nutzer verlangt nun den echten Rundflug mit korrigierter Zuordnung und den
+vollen nativen Karten: Satellitenort A auf Glut1a, Handelsposten B auf Glut1b,
+beide 512×256. Der Nachweis umfasst regulären A-Auftrag, Heimflug, Datenabgabe,
+dadurch legitime B-Freischaltung, B-Besuch und normalen Rückweg. Frühere
+planet_orbit-/96×98-Rundflüge gelten dafür ausdrücklich nicht als Ersatz.
+
+Der neue lokale Orbitweg bleibt standardmäßig ausgeschaltet; Polisa behält den
+direkten Reiseweg. Eine gespeicherte Nutzereinstellung darf die Rollout-Sperre
+nicht aktivieren. Vor Freigabe müssen lokale Flugposition, Bewegung/Steuerung,
+Reiseabsicht, Navigationsbindung und Automatik-Einstellung gemeinsam über echtes
+Datei-Save und Scene-Continue erhalten bleiben. Deferred Übergangsfenster werden
+bis zu einer ausdrücklich geprüften Fortsetzungssemantik abgewiesen. Einzeln
+grüne Ownerverifier erfüllen diesen Gesamtpfad nicht.
+
+Stand des aktuellen echten Rundflugs: A einschließlich Satelliten-Use und
+Heimupload bestanden. Beim Warten auf B lieferte ein Legacy-Fallback noch die
+alte A-Mission. Der Weltraumchat reproduzierte die falsche API-Zuordnung,
+begrenzte den Fallback anhand des autoritativen Craft-Standorts (2f37621a6) und
+wiederholt den regulären Gesamtlauf. Dieser Zwischenstand ist kein B-Pass.
+Companion besitzt weiterhin die einzige Mainintegration sowie die globale
+Scene-/Storetransaktion. Root ergänzt einen getrennten Orbitabsichts-Helper und
+exportiert erst den sauberen gemeinsamen Stand. Größere Gefechts-, Performance-
+und Netzwerkprüfungen bleiben auf Wunsch später.
+
+Aktueller gezielter Rundflug abgeschlossen: Source2f37621a6, normale1×,
+84/0 und Exit0. A tatsächlich erledigt und hochgeladen; B dadurch regulär
+freigeschaltet, gelandet und nach realem Wiederboarding abgebrochen, danach
+physisch heimgekehrt. Beide Karten512×256 auf den richtigen eigenen Monden.
+Unveränderte Log-/Checkpointbelege mit SHA und ausdrücklichen Grenzen unter
+docs/qa/two_moon_native_roundtrips_20261112. Dies ersetzt den oben genannten
+Zwischenstand, aber keine B-Auftragserfüllung oder lokales Scene-Continue.
