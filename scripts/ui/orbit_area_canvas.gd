@@ -200,6 +200,16 @@ func _camera_changed() -> void:
 func _draw_static() -> void:
 	_static_layer.draw_rect(Rect2(Vector2.ZERO,size),Color("060e18"))
 	if _layout.is_empty(): return
+	var body_color := Color("866349")
+	if _body_visual.get("color") is Color: body_color = _body_visual.color
+	var upper_center := hex_to_screen(GRID.from_offset(Vector2i(256, 0)))
+	var planet_radius := 90.0 * _scale()
+	_static_layer.draw_circle(upper_center - Vector2(0, planet_radius + 3.0), planet_radius, Color(body_color, 0.45))
+	_static_layer.draw_string(ThemeDB.fallback_font, upper_center + Vector2(-30, -8), "Planet", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("c4d7de"))
+	var lower_left := hex_to_screen(GRID.from_offset(Vector2i(0, 255)))
+	var lower_right := hex_to_screen(GRID.from_offset(Vector2i(511, 255)))
+	_static_layer.draw_line(lower_left, lower_right, Color("6ac8ee"), 2.0, true)
+	_static_layer.draw_string(ThemeDB.fallback_font, (lower_left + lower_right) * 0.5 + Vector2(-60, 17), "Weltraum / System", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8ed7f1"))
 	var grid := get_visible_grid_projection()
 	var bounds: Rect2i = grid.offset_bounds
 	for y in range(bounds.position.y,bounds.end.y,grid.stride):
@@ -207,8 +217,6 @@ func _draw_static() -> void:
 			var cell := GRID.from_offset(Vector2i(x,y))
 			if grid.stride == 1: _outline(_polygon(cell),Color(0.25,0.48,0.58,0.22),_static_layer)
 			else: _static_layer.draw_circle(hex_to_screen(cell),0.7,Color(0.25,0.48,0.58,0.3))
-	var body_color := Color("866349")
-	if _body_visual.get("color") is Color: body_color = _body_visual.color
 	for cell: Vector2i in _body_mask:
 		var point := hex_to_screen(cell)
 		if Rect2(Vector2(-8,-8),size+Vector2(16,16)).has_point(point): _static_layer.draw_colored_polygon(_polygon(cell),body_color)
