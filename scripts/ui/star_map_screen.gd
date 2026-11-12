@@ -11,6 +11,7 @@ var _orbit_canvas: Control
 var _orbit_button: Button
 var _system_button: Button
 var _orbit_center: Button
+var _station_dock: Button
 var _orbit_craft_id := ""
 var _orbit_visible := false
 var _orbit_availability_signature := ""
@@ -115,6 +116,12 @@ func _build() -> void:
 	_orbit_center = _button("OrbitRecenter", "Schiff zentrieren", func(): _orbit_canvas.call("recenter_selected"))
 	_orbit_center.hide()
 	map_views.add_child(_orbit_center)
+	_station_dock = _button("BeginStationDock", "Polisa andocken", _begin_station_dock)
+	_station_dock.hide()
+	_station_dock.disabled = true
+	_station_dock.tooltip_text = "Dockauftrag senden; Gate, Besatzung und Besuch werden vom Spiel geprueft."
+	map_views.add_child(_station_dock)
+	visibility_changed.connect(_refresh_station_dock_button)
 	_move_session = "%d:%d" % [get_instance_id(),Time.get_ticks_usec()]
 	_canvas = CANVAS.new()
 	_canvas.name = "SystemMap"
@@ -232,7 +239,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close, _view_homebase, _system_button, _orbit_button, _orbit_center] + _sites.values() + _orbit_target_buttons:
+	for button in [_abort, _approach, _land, _close, _view_homebase, _system_button, _orbit_button, _orbit_center, _station_dock] + _sites.values() + _orbit_target_buttons:
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -419,6 +426,23 @@ func _refresh_orbit_projection() -> void:
 	_orbit_button.disabled = not available
 	_orbit_button.tooltip_text = "Lokalen Orbit ansehen" if available else "Schiff explizit auswählen; benötigt einen aktiven lokalen Orbitbereich."
 	if _orbit_visible and not available: _show_system_view()
+	_refresh_station_dock_button()
+
+func _refresh_station_dock_button() -> void:
+	if not is_instance_valid(_station_dock) or not is_instance_valid(_orbit_canvas): return
+	var projection: Dictionary = _orbit_canvas.call("get_projection")
+	var targets: Variant = projection.get("dock_targets")
+	var expected := {"target_id":"polisa_station_dock","revision":"polisa_glut2_dock_v1"}
+	var available: bool = is_visible_in_tree() and _orbit_visible and _commands.is_valid() and _area_provider.is_valid() and not _orbit_craft_id.is_empty() and String(_orbit_canvas.call("get_selected_craft_id")) == _orbit_craft_id and projection.get("ok") == true and projection.get("space_area_id") == "orbit_approach:glut_2" and targets is Array and targets.size() == 1 and targets[0] is Dictionary and targets[0] == expected
+	_station_dock.visible = available
+	_station_dock.disabled = not available
+
+func _begin_station_dock() -> void:
+	# Re-read the provider at click time; a displayed target is never a permit.
+	_refresh_orbit_projection()
+	if _station_dock.disabled or not _station_dock.is_visible_in_tree(): return
+	_move_sequence += 1
+	_send("space_begin_station_dock", {"craft_id":_orbit_craft_id,"location_id":"polisa","target_id":"polisa_station_dock","layout_revision":"polisa_glut2_dock_v1","request_id":"station-dock-ui:%s:%d" % [_move_session,_move_sequence]})
 
 func _orbit_body_visual(projection: Dictionary) -> Dictionary:
 	var area_id := String(projection.get("space_area_id",""))
@@ -435,6 +459,7 @@ func _show_orbit_view() -> void:
 	_orbit_target_list.hide()
 	_orbit_canvas.show()
 	_orbit_center.show()
+	_refresh_station_dock_button()
 	_elapsed = 0.0
 
 func _show_system_view() -> void:
@@ -443,6 +468,7 @@ func _show_system_view() -> void:
 	_orbit_target_list.show()
 	_orbit_canvas.hide()
 	_orbit_center.hide()
+	_refresh_station_dock_button()
 	_elapsed = 0.0
 
 func _on_orbit_move_requested(craft_id: String, target_hex: Vector2i) -> void:
@@ -536,7 +562,7 @@ func _send(operation: String, payload: Dictionary = {}) -> void:
 		return
 	var result: Variant = _commands.call(operation, payload)
 	_error.text = String(Dictionary(result).get("message", "Aktion wurde abgelehnt.")) if result is Dictionary and not bool(result.get("ok", false)) else ""
-	if operation == "space_move":
+	if operation in ["space_move", "space_begin_station_dock"]:
 		_refresh_orbit_projection()
 		_error.visible = not _error.text.is_empty()
 	else: refresh()

@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-fe341bb249b8466dac320f1f30d5c615
+PASS actual Screen builds dock button
+PASS no automatic craft selection or dock command
+PASS explicit selected local Root actor enables button in orbit view
+PASS button uses actual command handler with exact fields; no gameplay mutation
+PASS distinct explicit requests use distinct IDs
+PASS click rechecks fresh DTO before sending stale revision
+PASS system view cannot request dock
+PASS removed actor closes local view and disables stale request
+PASS hidden Screen cannot request dock
+PASS missing Area provider fails closed
+POLISA_DOCK_UI_RESULT checks=10 failures=0 native_approved=false
