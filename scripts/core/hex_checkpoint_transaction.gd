@@ -241,7 +241,11 @@ func _discard(id:int)->void:
 
 func _notification(what:int)->void:
 	if what==NOTIFICATION_PREDELETE:
-		for id in _prepared.keys():_discard(id)
+		# RefCounted script teardown cannot dispatch another method on self.
+		for record in _prepared.values():
+			var registry:Node=record.registry.get_ref()
+			if is_instance_valid(registry):registry.discard_checkpoint_preparation_id(record.terrain.get_instance_id())
+		_prepared.clear()
 
 static func _portable_transport(witness:Dictionary)->Dictionary:
 	var result:Dictionary=witness.duplicate(true)
