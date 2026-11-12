@@ -1,6 +1,7 @@
 class_name TestUnit
 extends Node2D
 
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
@@ -1968,6 +1969,7 @@ func _publish_runtime_identity_change(prepared:RefCounted,_validation:Dictionary
 		_current_unit_command=null
 		_contact_active=false
 		_contact_target_id=""
+	if record.has("checkpoint_command"):_current_unit_command=record.checkpoint_command
 	record.phase="published"
 	record["post_models"]=_actor_respawn_model_stamp()
 
@@ -2007,3 +2009,26 @@ func _runtime_identity_publication_current(record:Dictionary)->bool:
 	var guard:Callable=record.get("guard",Callable())
 	if not guard.is_null() and (not guard.is_valid() or not bool(guard.call())):return false
 	return _runtime_identity_owner_matches(owner) and owner.get_unit_registry().get_instance_id()==record.registry_id and get_parent().get_instance_id()==record.parent_id and _actor_respawn_model_stamp()==record.post_models and owner._hex_payload_identity(unit_id)==record.post_life
+
+
+## Tactical command projection only; medical persistence remains its own owner.
+func prepare_hex_checkpoint_runtime(owner:Node,command_data:Dictionary)->Dictionary:
+	var result:Dictionary=prepare_runtime_identity_change(owner,{"unit_id":unit_id,"team_id":team_id,"fireteam_id":fireteam_id},true)
+	if not result.get("ok",false):return result
+	var record:Dictionary=_runtime_identity_record(result.prepared)
+	if command_data.is_empty():
+		record["checkpoint_command"]=null
+		return result
+	var normalized:Dictionary=command_data.duplicate(true)
+	if not normalized.has("command_type"):normalized.command_type=normalized.get("type","")
+	var command=UNIT_COMMAND_SCRIPT.from_dict(normalized)
+	if not command.is_valid() or command.unit_id!=unit_id or command.team_id!=team_id:return {"ok":false,"reason":"checkpoint_actor_command"}
+	var runtime_data:Dictionary=command.to_dict()
+	runtime_data["status"]=_map_unit_command_to_status(String(command.command_type))
+	runtime_data["active_command_type"]=command.command_type
+	runtime_data["fireteam_id"]=fireteam_id
+	var runtime=UNIT_RUNTIME_STATUS_SCRIPT.from_dict(runtime_data)
+	if not runtime.is_valid():return {"ok":false,"reason":"checkpoint_actor_runtime"}
+	record.runtime=runtime
+	record["checkpoint_command"]=command
+	return result

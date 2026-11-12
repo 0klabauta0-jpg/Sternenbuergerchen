@@ -2274,6 +2274,35 @@ func get_hex_actor_execution_binding(unit_id:String)->Dictionary:
 	return result
 
 
+var _hex_checkpoint_transaction:RefCounted
+
+func _get_hex_checkpoint_transaction()->RefCounted:
+	if _hex_checkpoint_transaction==null:_hex_checkpoint_transaction=preload("res://scripts/core/hex_checkpoint_transaction.gd").new(self)
+	return _hex_checkpoint_transaction
+
+func get_hex_checkpoint_guard()->Dictionary:
+	return _get_hex_checkpoint_transaction().guard()
+
+func export_hex_checkpoint_state()->Dictionary:
+	return _get_hex_checkpoint_transaction().export_state()
+
+func prepare_hex_checkpoint_restore(state:Dictionary)->Dictionary:
+	return _get_hex_checkpoint_transaction().prepare(state)
+
+func validate_prepared_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
+	return _get_hex_checkpoint_transaction().validate(prepared)
+
+func commit_hex_checkpoint_restore(prepared:RefCounted,publish:bool=true)->Dictionary:
+	return _get_hex_checkpoint_transaction().commit(prepared,publish)
+
+func finalize_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
+	return _get_hex_checkpoint_transaction().finalize(prepared)
+
+func restore_hex_checkpoint_state(state:Dictionary)->Dictionary:
+	var prepared:Dictionary=prepare_hex_checkpoint_restore(state)
+	return commit_hex_checkpoint_restore(prepared.prepared) if prepared.get("ok",false) else prepared
+
+
 ## Setup owns requested selection; Root commits exact actor/index lifetimes.
 func commit_hex_actor_identity_changes(requester:Node,changes:Array[Dictionary],presentation_only:bool=false)->Dictionary:
 	if presentation_only:

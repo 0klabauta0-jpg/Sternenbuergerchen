@@ -502,7 +502,7 @@ func export_state()->Dictionary:
 	var checked:Dictionary=_save_validate(state,_ground)
 	return state if checked.ok else checked
 
-func prepare_restore_state(state:Dictionary,target_ground=null)->Dictionary:
+func prepare_restore_state(state:Dictionary,target_ground=null,target_registry:Node=null)->Dictionary:
 	var issue:=_save_context_issue()
 	if not issue.is_empty():return _save_reject(issue)
 	for key in _save_prepared_restores.keys():
@@ -510,12 +510,12 @@ func prepare_restore_state(state:Dictionary,target_ground=null)->Dictionary:
 		if old.handle.get_ref()==null or old.epoch!=_save_binding_epoch:_save_prepared_restores.erase(key)
 	if _save_prepared_restores.size()>=32:return _save_reject("movement_restore_prepare_capacity")
 	var target=target_ground if target_ground!=null else _ground
-	var checked:Dictionary=_save_validate(state,target)
+	var checked:Dictionary=_save_validate(state,target,target_registry)
 	if not checked.ok:return checked
 	var binding:Dictionary=_save_live_binding()
 	if not binding.ok:return binding
 	var prepared:=PreparedMovementRestore.new()
-	_save_prepared_restores[prepared.get_instance_id()]={"handle":weakref(prepared),"epoch":_save_binding_epoch,"state":state.duplicate(true),"binding":binding,"target_ground":target,"target_binding":_save_ground_binding(target),"orders":checked.orders,"watchers":checked.watchers,"serial":int(state.serial),"traffic_epoch":_traffic_epoch+1}
+	_save_prepared_restores[prepared.get_instance_id()]={"handle":weakref(prepared),"epoch":_save_binding_epoch,"state":state.duplicate(true),"binding":binding,"target_ground":target,"target_registry":target_registry,"target_binding":_save_ground_binding(target),"orders":checked.orders,"watchers":checked.watchers,"serial":int(state.serial),"traffic_epoch":_traffic_epoch+1}
 	return {"ok":true,"prepared":prepared}
 
 func validate_prepared_restore(prepared:RefCounted)->Dictionary:
@@ -526,7 +526,7 @@ func validate_prepared_restore(prepared:RefCounted)->Dictionary:
 	if not issue.is_empty():return _save_reject(issue)
 	var binding:Dictionary=_save_live_binding()
 	if not binding.ok or binding!=record.binding or _save_ground_binding(record.target_ground)!=record.target_binding:return _save_reject("movement_restore_stale_context")
-	var checked:Dictionary=_save_validate(record.state,record.target_ground)
+	var checked:Dictionary=_save_validate(record.state,record.target_ground,record.target_registry)
 	if not checked.ok:return checked
 	return {"ok":true,"prepared_id":prepared.get_instance_id()}
 
@@ -585,11 +585,12 @@ func _save_ground_binding(ground)->Dictionary:
 		actors[id]=actor.get_instance_id() if is_instance_valid(actor) else 0
 	return {"actors":actors,"id":ground.get_instance_id(),"map_id":snap.map_id,"revision":snap.revision,"tick":snap.current_tick,"terrain_revision":snap.terrain_revision}
 
-func _save_validate(state:Dictionary,target)->Dictionary:
+func _save_validate(state:Dictionary,target,target_registry:Node=null)->Dictionary:
+	var registry:Node=target_registry if target_registry!=null else _registry
 	if not _save_keys(state,["schema","map_id","terrain_revision","tick","serial","accepted_intents"]) or state.schema!="hex_movement_v1":return _save_reject("invalid_movement_save_schema")
-	if target==null or not is_instance_valid(target) or target.get_script()!=_ground.get_script() or target._registry!=_registry:return _save_reject("movement_save_ground_unbound")
+	if target==null or not is_instance_valid(target) or target.get_script()!=_ground.get_script() or target._registry!=registry:return _save_reject("movement_save_ground_unbound")
 	var snap:Dictionary=target.build_planning_snapshot()
-	if not _save_text(state.map_id,false) or state.map_id!=snap.map_id or not _save_integer(state.terrain_revision,0,1000000000000) or int(state.terrain_revision)!=snap.terrain_revision or int(state.terrain_revision)!=int(_registry.call("get_revision")) or target._reservation_terrain_revision!=snap.terrain_revision:return _save_reject("movement_save_map_context")
+	if not _save_text(state.map_id,false) or state.map_id!=snap.map_id or not _save_integer(state.terrain_revision,0,1000000000000) or int(state.terrain_revision)!=snap.terrain_revision or int(state.terrain_revision)!=int(registry.call("get_revision")) or target._reservation_terrain_revision!=snap.terrain_revision:return _save_reject("movement_save_map_context")
 	if not _save_integer(state.tick,0,1000000000000) or int(state.tick)!=snap.current_tick or not _save_integer(state.serial,0,1000000000000):return _save_reject("movement_save_clock_context")
 	if typeof(state.accepted_intents)!=TYPE_ARRAY or state.accepted_intents.size()>64:return _save_reject("movement_save_budget")
 	var orders:Dictionary={};var commands:Dictionary={};var watchers:Dictionary={}
@@ -606,8 +607,8 @@ func _save_validate(state:Dictionary,target)->Dictionary:
 		if not goal.ok or not command.ok:return _save_reject("invalid_movement_save_command")
 		var cmd:Dictionary=command.command
 		if cmd.get("unit_id")!=value.unit_id or not cmd.has("target_position"):return _save_reject("movement_save_goal_mismatch")
-		var axial:Vector2=_registry.call("world_to_grid_float",cmd.target_position)
-		if not axial.is_finite() or absf(axial.x)>2147470000.0 or absf(axial.y)>2147470000.0 or _registry.call("world_to_grid",cmd.target_position)!=goal.value:return _save_reject("movement_save_goal_mismatch")
+		var axial:Vector2=registry.call("world_to_grid_float",cmd.target_position)
+		if not axial.is_finite() or absf(axial.x)>2147470000.0 or absf(axial.y)>2147470000.0 or registry.call("world_to_grid",cmd.target_position)!=goal.value:return _save_reject("movement_save_goal_mismatch")
 		var token:String=String(cmd.get("command_token",cmd.get("command_id","")))
 		if value.source_command_id!=(token if not token.is_empty() else value.command_id):return _save_reject("movement_save_source_command_mismatch")
 		if not _save_text(value.reason,true) or not value.status in ["active","canceled","arrived","waiting_clearance","blocked","waiting_speed","path_pending","waiting_reservation","yielding"]:return _save_reject("invalid_movement_save_status")
@@ -631,7 +632,7 @@ func _save_validate(state:Dictionary,target)->Dictionary:
 			continue
 		if not _save_keys(recovery,["phase","goal_grid","clearance_grid","waiters"]) or not recovery.phase in ["moving","waiting_clearance"] or typeof(recovery.waiters)!=TYPE_ARRAY or recovery.waiters.is_empty() or recovery.waiters.size()>64:return _save_reject("invalid_movement_save_recovery")
 		var goal:Dictionary=_save_vector(recovery.goal_grid,true);var clearance:Dictionary=_save_vector(recovery.clearance_grid,true)
-		if not goal.ok or not clearance.ok or goal.value==clearance.value or not _registry.call("is_walkable",goal.value) or not _registry.call("is_walkable",clearance.value):return _save_reject("invalid_movement_save_clearance")
+		if not goal.ok or not clearance.ok or goal.value==clearance.value or not registry.call("is_walkable",goal.value) or not registry.call("is_walkable",clearance.value):return _save_reject("invalid_movement_save_clearance")
 		var pose:Dictionary=target.read_unit(value.unit_id)
 		if recovery.phase=="waiting_clearance" and (value.status!="waiting_clearance" or pose.grid!=goal.value or pose.route_state.has_commitments or pose.movement_state.moving):return _save_reject("invalid_movement_save_clearance_phase")
 		if recovery.phase=="moving" and value.status not in ["yielding","active","waiting_reservation","path_pending","blocked","waiting_speed"]:return _save_reject("invalid_movement_save_clearance_phase")

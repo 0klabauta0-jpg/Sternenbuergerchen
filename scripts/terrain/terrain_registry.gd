@@ -28,6 +28,9 @@ var _hex_neighbor_cache_cursor := 0
 var _hex_neighbor_cache_hits := 0
 var _hex_neighbor_cache_builds := 0
 var _hex_corridor_topology_cache = HEX_CORRIDOR_CACHE_SCRIPT.new()
+var _checkpoint_prepared:Dictionary={}
+var _checkpoint_fingerprint_revision:=-1
+var _checkpoint_fingerprint:=""
 
 
 func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float, grid_topology: String = "square8") -> void:
@@ -226,6 +229,106 @@ func get_runtime_tile_override(grid_pos: Vector2i) -> Dictionary:
 	if not _runtime_tile_overrides.has(grid_pos):
 		return {}
 	return Dictionary(_runtime_tile_overrides.get(grid_pos, {})).duplicate(true)
+
+
+func get_checkpoint_grid_frame()->Dictionary:
+	return {"topology":_grid_topology,"origin":[_grid_origin_world.x,_grid_origin_world.y],"half_width":_half_tile_width,"half_height":_half_tile_height}
+
+
+func get_checkpoint_map_fingerprint()->String:
+	if _checkpoint_fingerprint_revision==_revision:return _checkpoint_fingerprint
+	var rows:Array=[]
+	for tile in get_sorted_tiles():
+		rows.append([tile.grid_position.x,tile.grid_position.y,tile.height_level,tile.ramp_direction,tile.explicit_hex_ramps,tile.walkable,tile.blocks_los,tile.cover_value,tile.object_height,tile.surface_type,tile.regional_grade])
+	_checkpoint_fingerprint=JSON.stringify([get_checkpoint_grid_frame(),rows]).sha256_text()
+	_checkpoint_fingerprint_revision=_revision
+	return _checkpoint_fingerprint
+
+
+func export_checkpoint_overrides()->Array:
+	var result:Array=[]
+	var grids:Array=_runtime_tile_overrides.keys()
+	grids.sort_custom(func(a:Vector2i,b:Vector2i)->bool:return a.x<b.x or (a.x==b.x and a.y<b.y))
+	for grid in grids:
+		var value:Dictionary=_runtime_tile_overrides[grid].duplicate(true)
+		value.grid_position=[grid.x,grid.y]
+		result.append(value)
+	return result
+
+
+class PreparedCheckpointTerrain extends RefCounted:
+	pass
+
+func prepare_checkpoint_overrides(values:Array)->Dictionary:
+	if values.size()>4096:return {"ok":false,"reason":"checkpoint_terrain_budget"}
+	var overrides:Dictionary={}
+	for value in values:
+		if not value is Dictionary or not value.get("grid_position") is Array or value.grid_position.size()!=2:return {"ok":false,"reason":"checkpoint_terrain_shape"}
+		for number in value.grid_position:
+			if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)) or float(number)!=floorf(float(number)) or absf(float(number))>2147470000.0:return {"ok":false,"reason":"checkpoint_terrain_grid"}
+		var grid:=Vector2i(int(value.grid_position[0]),int(value.grid_position[1]))
+		if overrides.has(grid) or not _tiles.has(grid):return {"ok":false,"reason":"checkpoint_terrain_cell"}
+		var parsed:Dictionary={"grid_position":grid}
+		for key in value:
+			match key:
+				"grid_position":pass
+				"walkable_override","blocks_los_override":
+					if not value[key] is bool:return {"ok":false,"reason":"checkpoint_terrain_value"}
+					parsed[key]=value[key]
+				"object_height_override","cover_value_override":
+					var maximum:int=3 if key=="object_height_override" else 100
+					if typeof(value[key]) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value[key])) or float(value[key])!=floorf(float(value[key])) or value[key]<0 or value[key]>maximum:return {"ok":false,"reason":"checkpoint_terrain_value"}
+					parsed[key]=int(value[key])
+				"source_interaction_id","source_runtime_visual_state":
+					if not value[key] is String or value[key].length()>256 or value[key]!=value[key].strip_edges():return {"ok":false,"reason":"checkpoint_terrain_value"}
+					parsed[key]=value[key]
+				_:return {"ok":false,"reason":"checkpoint_terrain_field"}
+		overrides[grid]=parsed
+	for id in _checkpoint_prepared.keys():
+		if _checkpoint_prepared[id].handle.get_ref()==null:discard_checkpoint_preparation_id(id)
+	if _checkpoint_prepared.size()>=32:return {"ok":false,"reason":"checkpoint_terrain_capacity"}
+	var target=get_script().new()
+	target._tiles=_tiles.duplicate(false);target._tile_id_lookup=_tile_id_lookup.duplicate(false)
+	target._grid_origin_world=_grid_origin_world;target._half_tile_width=_half_tile_width;target._half_tile_height=_half_tile_height;target._grid_topology=_grid_topology
+	target._runtime_tile_overrides=overrides
+	target._revision=_revision+(0 if overrides==_runtime_tile_overrides else 1)
+	var handle:=PreparedCheckpointTerrain.new()
+	_checkpoint_prepared[handle.get_instance_id()]={"handle":weakref(handle),"source_revision":_revision,"fingerprint":get_checkpoint_map_fingerprint(),"target":target}
+	return {"ok":true,"prepared":handle}
+
+
+func get_checkpoint_target_registry(prepared:RefCounted)->Node:
+	if not validate_checkpoint_preparation(prepared).get("ok",false):return null
+	return _checkpoint_prepared[prepared.get_instance_id()].target
+
+
+func validate_checkpoint_preparation(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_checkpoint_prepared.get(prepared.get_instance_id(),{}) if prepared!=null else {}
+	if record.is_empty() or record.handle.get_ref()!=prepared or record.source_revision!=_revision or record.fingerprint!=get_checkpoint_map_fingerprint() or not is_instance_valid(record.target):return {"ok":false,"reason":"checkpoint_terrain_changed"}
+	return {"ok":true}
+
+
+func _publish_checkpoint_preparation(prepared:RefCounted)->void:
+	var target=_checkpoint_prepared[prepared.get_instance_id()].target
+	for grid in _runtime_tile_overrides:_dirty_grid_lookup[grid]=true
+	for grid in target._runtime_tile_overrides:_dirty_grid_lookup[grid]=true
+	_runtime_tile_overrides=target._runtime_tile_overrides.duplicate(true)
+	_revision=target._revision
+	_hex_neighbor_cache={};_hex_neighbor_cache_keys=[];_hex_neighbor_cache_cursor=0
+	_cover_radius_index_dirty=true
+	_checkpoint_fingerprint_revision=-1
+
+
+func discard_checkpoint_preparation_id(id:int)->void:
+	if not _checkpoint_prepared.has(id):return
+	var target=_checkpoint_prepared[id].target
+	_checkpoint_prepared.erase(id)
+	if is_instance_valid(target):target.free()
+
+
+func _notification(what:int)->void:
+	if what==NOTIFICATION_PREDELETE:
+		for id in _checkpoint_prepared.keys():discard_checkpoint_preparation_id(id)
 
 
 func get_tile_by_id(tile_id: String):
