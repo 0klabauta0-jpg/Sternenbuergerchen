@@ -25,7 +25,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "polisa_gate":"scripts/tests/space_polisa_gate_preview_verifier.gd",
           "polisa_atomic":"scripts/tests/space_polisa_atomic_dock_verifier.gd",
           "polisa_birth":"scripts/tests/polisa_local_pickup_backend_check.gd",
-          "polisa_birth_reentrant":"scripts/tests/polisa_local_pickup_backend_check.gd"}
+          "polisa_birth_reentrant":"scripts/tests/polisa_local_pickup_backend_check.gd",
+          "polisa_cycle":"scripts/tests/space_polisa_owner_cycle_verifier.gd",
+          "sun_cycle":"scripts/tests/space_sun_local_cycle_verifier.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)
@@ -53,7 +55,7 @@ while pending:
 for origin in (source/"data").rglob("*.json"):
     target=project/origin.relative_to(source);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(origin,target)
 project_settings='config_version=5\n[application]\nconfig/name='+json.dumps(app)+'\n[autoload]\nReview2Isolation="*res://scripts/tests/review2_isolated_user_guard.gd"\n'
-if case == "v3_reader":
+if case in {"v3_reader", "sun_cycle"}:
     # Only this newly created private project permits the fixture's catalog writes.
     project_settings+='[space_reader_probe]\nisolated=true\n'
 (project/"project.godot").write_text(project_settings,encoding="utf-8")
