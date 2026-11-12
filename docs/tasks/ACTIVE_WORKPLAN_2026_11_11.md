@@ -51,8 +51,10 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   kontrollierter Receiptgrenze): eigener Pendingmarker vor Deferredcall,
   Waiting/Retry, per-Craft-Admission-/Saveguard, Homefortsetzung und letzter
   Abschlussobserver; Preflight vor LegacyFuelwrite. Controller3arg/Rootpaarung
-  folgt separat. Driver-Completed-Consumerrest e41 ist konkret rot reproduziert
-  und an Tabletop zur kleinen Folgekorrrektur uebergeben.
+  folgt separat. Driver-Completed-Consumerrest e41 ist mit acht Guardzeilen
+  geschlossen: actualRootgebundener RED3/1 -> GREEN4/0 samt positiver Fitkontrolle,
+  Compile/Quellen-/Profil-/Canaryguards gruen; Linger/READY nur fuer aktuell fit
+  und am Boden gebundene Person. Legacy und sonstiger Driver unveraendert.
 - AP7 Ground524fd61d1 plusPassage8d333eb95: atomarer kanonischer Roundtrip mit
   Terrainrevalidierungsgrenze und ganzen aktiven Kohorten;35/0 nach gemeinsamem
   64-Topologiebudgetfix und unabhaengigem Review. PendingAdmissions bleiben
