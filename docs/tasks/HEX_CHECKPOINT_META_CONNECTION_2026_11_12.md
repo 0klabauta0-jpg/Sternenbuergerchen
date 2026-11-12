@@ -69,7 +69,7 @@ Inplacefall ersetzt diesen zusätzlichen Store-/Loadernachweis nicht.
 Der bestehende Flow ruft Autosave pro Frame auf. Tick/RNG/Basetimer machen neue
 Hexsignaturen fortlaufend unterschiedlich. Deshalb erfolgt Hexexport samt Hash
 und Dateischreiben nach allen unveränderten Safetygates höchstens einmal je
-1000ms, gebunden an tatsächlichen Runtime-/Root-/Kontext. Simulation bleibt
+300000ms (fünf Minuten), gebunden an tatsächlichen Runtime-/Root-/Kontext. Simulation bleibt
 unverändert getaktet; der erste Save läuft sofort. Optionales force=true umgeht
 nur das Zeitintervall, niemals Home-/Away-/Pending-/Rootguards. Legacy bleibt
 unverändert. Die vorhandene eine Storeprobe prüft Folgesave und expliziten Save
@@ -78,3 +78,15 @@ ohne zusätzliche Performance-Testreihe.
 ## Gemeinsamer begrenzter Abschluss 12.11.2026
 
 Code integriert; kleine Funktionsfälle Selection16/0, Base30/0, AP8-Root/Net38/0 und CampaignContinue17/0+3/0 mit sauberen Logs/Quell-/Profil-/Canaryguards. Originalberichte, genaue Commitgrenzen und Fixtureeinschränkungen: `docs/qa/ap678_bundle_20261112/README.md`. Dieser spätere Nachweis ersetzt den obigen Codefreeze-/Vorbereitungsstatus; keine AP9-/Native-/echtePeer-/Leistungsfreigabe, kein Mainmerge oder EXE.
+
+## Nutzerkorrektur: Speicherabstand
+
+Der automatische Hexsave soll deutlich seltener erfolgen. Abstand von einer
+Sekunde auf fünf Minuten erhöht. Erster Save und explizites force=true bleiben
+sofort möglich; sämtliche Sicherheitsgates und Simulationstakte bleiben erhalten.
+Nur vorhandene Intervallkonstante geändert; bestehende einzelne Continueprobe
+zur Regression, keine neuen Testfälle oder Performance-Testreihe.
+
+Vorhandene Continueprobe nach Umstellung erneut erfolgreich: 17/0 + 3/0,
+Exit0, sauberer Log, Source-/Originalprofil-/Canaryguards grün. Report:
+`.godot/hex_campaign_continue/f6c4a0800d7b46438e8c68727258f020/report.json`.

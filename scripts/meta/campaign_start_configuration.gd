@@ -4,7 +4,7 @@ extends RefCounted
 const PRESETS = preload("res://scripts/npc/unit_roster_presets.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const BASE_MAP := "res://maps/campaign_intro_base.json"
-const HEX_AUTOSAVE_INTERVAL_MSEC := 1000
+const HEX_AUTOSAVE_INTERVAL_MSEC := 5 * 60 * 1000
 var entry: Dictionary = {}
 var checkpoint: Dictionary = {}
 var last_save_signature := ""
