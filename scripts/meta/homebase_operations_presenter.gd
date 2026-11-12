@@ -29,6 +29,7 @@ var _nav: Dictionary = {}
 var _columns: Dictionary = {}
 var _selectors: Dictionary = {}
 var _workspace: Control
+var _homebase_location: Label
 var _roster_list: VBoxContainer
 var _search: LineEdit
 var _sort_selector: OptionButton
@@ -178,6 +179,10 @@ func _build() -> void:
 	THEME.style_section_heading(title, 30)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
+	_homebase_location = _label("", 16, MUTED)
+	_homebase_location.name = "HomebaseLocation"
+	_homebase_location.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	header.add_child(_homebase_location)
 	_workflow = HBoxContainer.new()
 	_workflow.name = "PreparationSequence"
 	_workflow.add_theme_constant_override("separation", 24)
@@ -797,6 +802,10 @@ func refresh() -> void:
 	_update_team(team, Array(snapshot.get("fireteams", [])))
 	_update_equipment(focused, Dictionary(snapshot.get("loadout_options", {})))
 	var singleplayer: Dictionary=snapshot.get("singleplayer",{})
+	var bodies: Dictionary = Dictionary(singleplayer.get("space_travel", {})).get("bodies", {})
+	var home_body := String(Dictionary(bodies.get("moon", {})).get("name", ""))
+	_homebase_location.text = "Standort: " + home_body if not home_body.is_empty() else ""
+	_homebase_location.visible = _mode == "base" and not home_body.is_empty()
 	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
 	_inventory_panel.visible=not inventory.is_empty()
 	_identity_row.visible=inventory.is_empty()

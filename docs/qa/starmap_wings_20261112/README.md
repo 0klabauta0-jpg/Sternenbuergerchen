@@ -1,0 +1,7 @@
+# Rottenauswahl und Gruppenreise – 12.11.2026
+
+`playtest_20261112_group_real_adapter.gd` verwendet die echte Sternkartenansicht, zwei separate Reiseowner, SimulationRoot und den Runtimeadapter. Zwei durch Mausereignisse selektierte Rotten erhalten ueber einen Rechtsklick auf den Orbitmarker jeweils einen echten Quantumauftrag. Headless und nativ auf einem nicht aktivierten Windows-Desktop: 3/0. `selected_wings.png` zeigt den nativen Testzustand, nicht einen regulaeren mit zwei gekauften Schiffen gespielten Spielstand. Keine manuelle Nutzerabnahme. Gruppen-Teilablehnungen sind mit synthetischem Command-Handler geprueft, nicht im vollstaendigen Spielstand.
+
+Alt zeigt eine Projektion der vom Supply-Owner geprueften Hin-/Rueckflugkosten von der Heimatbasis. Warp selbst hat derzeit keine Treibstoffkosten, keine geometrische Reichweite und wird nicht wegen dieser Vorschau gesperrt. `playtest_20261112_fuel_reach.gd` und `playtest_20261112_alt_reach.gd` bestanden. Heimatstandortanzeige: `playtest_20261112_base_location.gd` bestanden; kein nativer Sichtbeleg dafuer. Realer einzelner Kampagnenflug mit Bordmannschaft, Warp und Landung: 31/0 im isolierten Profil, zwei bekannte UID-Pfadfallback-Warnungen.
+
+Alter `reference_polish_r3_20261106_homebase_verifier.gd`: 107/97, mit Scriptfehlern; sein synthetischer Owner stellt `_character_sheet_open` nicht bereit. Kein bestandener Basisregressionstest. Alter `space_travel_state_verifier.gd` setzt den historischen Zwei-Koerper-Katalog voraus und ist nicht aktuell.

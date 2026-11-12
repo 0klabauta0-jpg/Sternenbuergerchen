@@ -298,11 +298,20 @@ func _request_id(prefix: String, payload: Dictionary) -> String:
 func _commit(category: String, operation: String, payload: Dictionary, request_id: String, context: Dictionary = {}) -> Dictionary:
 	return _simulation.request_singleplayer_command({"contract_category": category, "operation": operation, "payload": payload, "request_id": request_id}, context)
 
+func _fuel_reachability(craft_id: String, locations: Dictionary) -> Dictionary:
+	var result := {}
+	if _supply == null or craft_id.is_empty(): return result
+	for id in locations:
+		if String(id) == "homebase": continue
+		result[id] = _supply.preview_route_fuel({"craft_id":craft_id, "origin_location_id":"homebase", "destination_location_id":String(id)}, {"departure_authorized":true, "require_return_reserve":true})
+	return result
+
 func get_snapshot() -> Dictionary:
 	if _simulation == null:
 		return {}
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var travel: Dictionary = get_space_travel_snapshot()
+	travel["fuel_reachability"] = _fuel_reachability(String(travel.get("craft_id", "")), Dictionary(campaign.get("locations", {})))
 	var economy: Dictionary = _skirmish_economy.get_snapshot() if _skirmish_economy != null else {}
 	if not economy.is_empty(): economy["recruits"] = _get_skirmish_recruits(economy)
 	var crafts: Array = []

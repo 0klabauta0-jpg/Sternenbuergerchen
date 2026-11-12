@@ -26,6 +26,8 @@ var _canvas: Control
 var _status: Label
 var _selection: Label
 var _job_guidance: Label
+var _fuel_help: Label
+var _show_fuel_help := false
 var _locks: Label
 var _boundary: Label
 var _error: Label
@@ -64,6 +66,11 @@ func _process(delta: float) -> void:
 		_elapsed = 0.0
 		if _orbit_visible: _refresh_orbit_projection()
 		else: refresh()
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_ALT and not event.echo:
+		_show_fuel_help = event.pressed and is_visible_in_tree()
+		_update_fuel_help()
 
 func _build() -> void:
 	_built = true
@@ -186,6 +193,10 @@ func _build() -> void:
 	_job_guidance = _label("", 14, Color("f2ca86"))
 	_job_guidance.name = "AcceptedJobGuidance"
 	information.add_child(_job_guidance)
+	_fuel_help = _label("", 13, Color("f2ca86"))
+	_fuel_help.name = "FuelReachability"
+	_fuel_help.hide()
+	information.add_child(_fuel_help)
 	_status = _label("", 15)
 	_status.name = "TravelStatus"
 	information.add_child(_status)
@@ -399,6 +410,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_close.visible = phase in ["grounded", "orbit", "quantum", "stopped"]
 	_close.text = "Abflug zur Sternkarte vorbereiten" if phase == "grounded" else "Trupp & Ausrüstung"
 	var campaign: Dictionary = _runtime.get("campaign", {})
+	_update_fuel_help()
 	var locations: Dictionary = campaign.get("locations", {})
 	_sync_sites(locations)
 	var selected: String = String(campaign.get("selected_location_id", ""))
@@ -444,6 +456,20 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_land.visible = phase == "orbit" and orbit == "moon_orbit"
 	_boundary.visible = _approach.visible or phase == "approach"
 	_error.visible = not _error.text.is_empty()
+
+func _update_fuel_help() -> void:
+	if _fuel_help == null: return
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var reach: Dictionary = travel.get("fuel_reachability", {})
+	var locations: Dictionary = Dictionary(_runtime.get("campaign", {})).get("locations", {})
+	var lines: PackedStringArray = ["TREIBSTOFF · Hin- und Rückflug ab Heimatbasis", "Sprung selbst verbraucht derzeit keinen Treibstoff."]
+	for id in reach:
+		var outcome: Dictionary = reach[id]
+		var name := String(Dictionary(locations.get(id, {})).get("name", id))
+		lines.append(("✓ " if bool(outcome.get("ok", false)) else "✕ ") + name + ("" if bool(outcome.get("ok", false)) else " · " + String(outcome.get("message", "Nicht verfügbar"))))
+	if reach.is_empty(): lines.append("Für dieses Schiff liegen keine Routendaten vor.")
+	_fuel_help.text = "\n".join(lines)
+	_fuel_help.visible = _show_fuel_help and is_visible_in_tree()
 
 func _on_fleet_craft_selected(index: int) -> void:
 	_orbit_craft_id = String(_fleet_selector.get_item_metadata(index))
