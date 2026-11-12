@@ -2077,9 +2077,7 @@ var _hex_unit_lifecycle_revision:Dictionary={}
 
 ## Called by the owning map runtime, never interpreted from a UI/network payload.
 ## Validate before replacing the current context, so failed loads preserve it.
-func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) -> Dictionary:
-	if _should_skip_local_tick_processing():
-		return {"ok": false, "reason": "not_authority"}
+static func validate_hex_ground_map_data(map_data:RefCounted)->Dictionary:
 	if map_data == null or not map_data.has_method("get_tactical_grid_rules") or not map_data.has_method("get_grid_topology") or not map_data.has_method("has_load_issue"):
 		return {"ok": false, "reason": "invalid_map_data"}
 	if bool(map_data.call("has_load_issue")):
@@ -2087,8 +2085,19 @@ func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) 
 	if not map_data.has_method("get_map_name") or not map_data.has_method("get_grid_size"):
 		return {"ok": false, "reason": "invalid_map_context"}
 	var map_size: Variant = map_data.call("get_grid_size")
-	if String(map_data.call("get_map_name")).strip_edges().is_empty() or typeof(map_size) != TYPE_VECTOR2I or map_size.x <= 0 or map_size.y <= 0 or tick_counter < 0 or tick_counter > HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:
+	if String(map_data.call("get_map_name")).strip_edges().is_empty() or typeof(map_size) != TYPE_VECTOR2I or map_size.x <= 0 or map_size.y <= 0:
 		return {"ok": false, "reason": "invalid_map_context"}
+	var rules:String=String(map_data.call("get_tactical_grid_rules"))
+	if not rules.is_empty() and (rules!="hex_tactical_v1" or String(map_data.call("get_grid_topology"))!=HEX_GROUND_RUNTIME_SCRIPT.TOPOLOGY):return {"ok":false,"reason":"unsupported_tactical_grid_rules"}
+	return {"ok":true}
+
+
+func configure_hex_ground_runtime(map_data: RefCounted, terrain_registry: Node) -> Dictionary:
+	if _should_skip_local_tick_processing():
+		return {"ok": false, "reason": "not_authority"}
+	var map_context:Dictionary=validate_hex_ground_map_data(map_data)
+	if not map_context.ok:return map_context
+	if tick_counter<0 or tick_counter>HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:return {"ok":false,"reason":"invalid_map_context"}
 	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_grid_topology") or String(terrain_registry.call("get_grid_topology")) != String(map_data.call("get_grid_topology")):
 		return {"ok": false, "reason": "invalid_terrain_registry"}
 	var rules := String(map_data.call("get_tactical_grid_rules"))
@@ -2376,6 +2385,47 @@ func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2
 	for id in unit_ids:checked.actors[id].visible=true
 	result.placements=plan.placements
 	return result
+
+
+## One initial/staged group with authored per-actor anchors. Root alone owns the
+## final placement; a wave owner may defer presentation until its phase commits.
+func admit_hex_ground_setup_actors(candidates:Array[Dictionary],allow_staged:bool=false,publish:bool=true)->Dictionary:
+	var ids:=PackedStringArray()
+	for entry in candidates:
+		if not entry.get("unit_id") is String:return {"ok":false,"reason":"invalid_admission_unit"}
+		ids.append(entry.unit_id)
+		if entry.has("identity") and not _is_current_hex_payload({"unit_id":entry.unit_id,"_hex_lifecycle":entry.identity}):return {"ok":false,"reason":"stale_hex_lifecycle"}
+	var checked:Dictionary=_validate_hex_ground_actor_group(ids,allow_staged)
+	if not checked.ok:return checked
+	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_anchored_group(candidates,_hex_ground_registry,_hex_ground_runtime.build_planning_snapshot())
+	if not plan.ok:return plan
+	var placements:Array[Dictionary]=[]
+	placements.assign(plan.placements)
+	var result:Dictionary=_hex_ground_runtime.admit_units(placements)
+	if not result.ok:return result
+	var registry:Node=get_unit_registry()
+	for id in ids:
+		if not registry.has_unit(id):registry.register_unit(id,checked.actors[id])
+		_hex_visual_unit_ids[id]=true
+	if publish:_publish_hex_setup_actors(ids)
+	result.placements=plan.placements
+	return result
+
+
+func _publish_hex_setup_actors(unit_ids:PackedStringArray)->void:
+	var context:int=_hex_ground_context_revision
+	for id in unit_ids:
+		var actor=_resolve_known_unit_for_contract(id)
+		if is_instance_valid(actor) and _hex_ground_runtime.has_unit(id):actor.set_meta("dropship_embarked",false)
+	_project_hex_ground_actors(0.0)
+	for id in unit_ids:
+		if context!=_hex_ground_context_revision:return
+		var actor=_resolve_known_unit_for_contract(id)
+		if is_instance_valid(actor) and _hex_ground_runtime.has_unit(id):actor.visible=true
+
+
+func get_hex_ground_revision()->int:
+	return int(_hex_ground_runtime.get("_revision")) if is_hex_ground_runtime_active() else -1
 
 
 func embark_hex_ground_actor_group(unit_ids:PackedStringArray)->Dictionary:

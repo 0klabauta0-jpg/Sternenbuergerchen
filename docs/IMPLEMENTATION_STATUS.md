@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 tatsächlicher initialer Missionssetup — 12.11.2026
+
+Setup bindet Root vor Actoraktivierung und verwendet atomare begrenzte
+Ankerplanung. Defer bleibt ohne Ground; Platzmangel wartet mit Lifecycle-,
+konkreter Rootinstanz- und Revisionsbindung. Fehlerhafte Mapkontexte werden vor
+Registrymutation/Fallback geprüft. Legacyclients behalten ihre Initialisierung,
+deklarierte Hexclients erhalten nur verborgene Präsentationslookups.
+Setup62/0, Rootowner56/0, Guards/Review grün; QA hex_mission_setup_core_20261112.
+Spätere Wellen, Slot-/Identitätsänderungen, Respawn, Member-Retirement und
+AP7/8 folgen. Keine reale Peer-, Produktionskarten- oder große Performanceabnahme.
+
 ### AP6 Screenlebensdauer nach Gruppenpublikation — 12.11.2026
 
 Zusätzlicher Integrationsbefund: Ein Basisobserver kann den Screen direkt nach

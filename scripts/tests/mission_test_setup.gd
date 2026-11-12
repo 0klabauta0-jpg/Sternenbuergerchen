@@ -12,6 +12,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
 const FOG_OF_WAR_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_system.gd")
 const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const SIMULATION_ROOT_SCRIPT=preload("res://scripts/core/simulation_root.gd")
 
 const FOW_UPDATE_INTERVAL_SECONDS: float = 0.10
 const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
@@ -110,6 +111,16 @@ var _fog_requested_static_signature: String = ""
 var _fog_pending_visibility_started_msec: int = 0
 var _fog_update_elapsed: float = 0.0
 var _friendly_unit_slot_paths: Array[NodePath] = []
+var _hex_setup_required:=false
+var _hex_setup_presentation_only:=false
+var _hex_setup_error:Dictionary={}
+var _terrain_setup_error:Dictionary={}
+var _hex_setup_pending:Array[Dictionary]=[]
+var _hex_setup_pending_context:=-1
+var _hex_setup_pending_root_id:=0
+var _hex_setup_last_stamp:=""
+var _hex_setup_elapsed:=0.0
+var _hex_setup_attempts:=0
 
 
 func _ready() -> void:
@@ -188,8 +199,26 @@ func apply_cmdline_fog_viewer_team_override(args: Array = []) -> Dictionary:
 func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: Node, ftl_registry: Node, simulation_root: Node) -> void:
 	if _is_initialized:
 		return
-	var runtime_unit_paths: Array = _build_runtime_unit_paths()
 	var terrain_registry = _setup_terrain_registry()
+	if not _terrain_setup_error.is_empty():
+		_hex_setup_error=_terrain_setup_error.duplicate(true)
+		return
+	if _loaded_terrain_map_data!=null:
+		_hex_setup_required=not String(_loaded_terrain_map_data.get_tactical_grid_rules()).is_empty()
+		var configured:Dictionary=simulation_root.configure_hex_ground_runtime(_loaded_terrain_map_data,terrain_registry)
+		_hex_setup_presentation_only=_hex_setup_required and configured.get("reason","")=="not_authority"
+		if not configured.ok and configured.get("reason","")!="not_authority":
+			_hex_setup_error=configured.duplicate(true)
+			return
+		_hex_setup_error={}
+	elif simulation_root.is_hex_ground_runtime_required():
+		_hex_setup_error={"ok":false,"reason":"hex_map_unavailable"}
+		return
+	else:
+		_hex_setup_required=false
+		_hex_setup_presentation_only=false
+		_hex_setup_error={}
+	var runtime_unit_paths: Array = _build_runtime_unit_paths()
 	_build_unit_loadout_modifiers()
 	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
 	var spawn_bravo_marker := _resolve_marker(spawn_bravo_path)
@@ -272,13 +301,14 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 				enemy_spawn_index += 1
 
 			if unit is CanvasItem:
-				unit.visible = true
+				unit.visible = not _hex_setup_required
 
 			if terrain_registry != null and unit.has_method("refresh_terrain_readability"):
 				unit.call("refresh_terrain_readability")
 
 		if unit_team_id == team_id:
 			if defer_friendly_runtime_activation:
+				if _hex_setup_required:unit.set_meta("dropship_embarked",true)
 				if unit is CanvasItem:
 					unit.visible = false
 			else:
@@ -303,12 +333,78 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
+	_admit_hex_setup_nodes(visual_unit_nodes)
 	_ensure_primary_3d_view(visual_unit_nodes)
-	_initialize_fog_of_war(visual_unit_nodes, terrain_registry)
+	if not _hex_setup_presentation_only:_initialize_fog_of_war(visual_unit_nodes, terrain_registry)
 	_is_initialized = true
 
 
+func get_hex_setup_status()->Dictionary:
+	return {"required":_hex_setup_required,"presentation_only":_hex_setup_presentation_only,"pending_count":_hex_setup_pending.size(),"attempts":_hex_setup_attempts,"error":_hex_setup_error.duplicate(true)}
+
+
+func _admit_hex_setup_nodes(nodes:Array)->void:
+	if not _hex_setup_required or _hex_setup_presentation_only:return
+	var simulation:Node=_get_simulation_root()
+	if simulation==null or not simulation.is_hex_ground_runtime_active():return
+	var registry:Node=simulation.get_unit_registry()
+	var combined:Dictionary={}
+	if _hex_setup_pending_root_id==simulation.get_instance_id() and _hex_setup_pending_context==simulation.get_hex_ground_context_revision():
+		for entry in _hex_setup_pending:combined[entry.unit_id]=entry
+	for unit in nodes:
+		if not is_instance_valid(unit) or not unit is Node2D or not unit.has_method("get_unit_id"):continue
+		var id:String=String(unit.call("get_unit_id"))
+		if registry.get_unit(id)!=unit or not simulation.get_hex_unit_state(id).is_empty() or bool(unit.get_meta("dropship_embarked",false)):continue
+		if not unit.global_position.is_finite():
+			_hex_setup_error={"ok":false,"reason":"invalid_setup_position"}
+			return
+		combined[id]={"unit_id":id,"grid":simulation.get_hex_ground_terrain_registry().world_to_grid(unit.global_position),"identity":simulation.call("_hex_payload_identity",id)}
+	_hex_setup_pending.clear()
+	for entry in combined.values():_hex_setup_pending.append(entry)
+	_hex_setup_pending_context=simulation.get_hex_ground_context_revision()
+	_hex_setup_pending_root_id=simulation.get_instance_id()
+	_hex_setup_last_stamp=""
+	_retry_hex_setup_admission()
+
+
+func _retry_hex_setup_admission()->void:
+	if _hex_setup_pending.is_empty() or _hex_setup_presentation_only:return
+	var simulation:Node=_get_simulation_root()
+	if simulation==null:return
+	if _hex_setup_pending_root_id!=simulation.get_instance_id() or _hex_setup_pending_context!=simulation.get_hex_ground_context_revision():
+		_hex_setup_pending.clear()
+		return
+	if not simulation.is_hex_ground_runtime_active():return
+	var registry:Node=simulation.get_unit_registry()
+	var current:Array[Dictionary]=[]
+	for entry in _hex_setup_pending:
+		if simulation.call("_is_current_hex_payload",{"unit_id":entry.unit_id,"_hex_lifecycle":entry.identity}) and registry.get_unit(entry.unit_id)!=null and not bool(registry.get_unit(entry.unit_id).get_meta("dropship_embarked",false)):current.append(entry)
+	if current.size()!=_hex_setup_pending.size():_hex_setup_last_stamp=""
+	_hex_setup_pending=current
+	if current.is_empty():return
+	var stamp:String=str([simulation.get_hex_ground_context_revision(),simulation.get_hex_ground_revision(),simulation.get_hex_ground_terrain_registry().get_revision()])
+	if stamp==_hex_setup_last_stamp:return
+	_hex_setup_last_stamp=stamp
+	var ids:=PackedStringArray()
+	for entry in current:ids.append(entry.unit_id)
+	var checked:Dictionary=simulation.call("_validate_hex_ground_actor_group",ids)
+	if not checked.ok:
+		_hex_setup_error=checked
+		return
+	for actor in checked.actors.values():actor.visible=false
+	_hex_setup_attempts+=1
+	var admitted:Dictionary=simulation.admit_hex_ground_setup_actors(current)
+	_hex_setup_error={} if admitted.ok else admitted.duplicate(true)
+	if admitted.ok:_hex_setup_pending.clear()
+
+
 func _process(delta: float) -> void:
+	if _hex_setup_presentation_only:return
+	if not _hex_setup_pending.is_empty():
+		_hex_setup_elapsed+=maxf(delta,0.0)
+		if _hex_setup_elapsed>=0.1:
+			_hex_setup_elapsed=0.0
+			_retry_hex_setup_admission()
 	if _fog_of_war_system == null or _terrain_3d_view == null:
 		return
 	if String(fog_of_war_mode).strip_edges().to_lower() == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
@@ -939,6 +1035,7 @@ func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
 
 
 func _setup_terrain_registry():
+	_terrain_setup_error={}
 	if terrain_registry_path.is_empty():
 		return null
 
@@ -951,6 +1048,7 @@ func _setup_terrain_registry():
 
 	if _try_load_terrain_from_json(terrain_registry):
 		return terrain_registry
+	if not _terrain_setup_error.is_empty():return null
 
 	_setup_terrain_from_hardcode(terrain_registry)
 	return terrain_registry
@@ -963,6 +1061,17 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	var terrain_map_data = _loaded_terrain_map_data
 	if terrain_map_data == null or _loaded_terrain_map_path != map_file_path:
 		terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
+	if terrain_map_data!=null and terrain_map_data.has_load_issue():
+		_terrain_setup_error={"ok":false,"reason":"map_load_issue"}
+		return false
+	if terrain_map_data!=null:
+		var context:Dictionary=SIMULATION_ROOT_SCRIPT.validate_hex_ground_map_data(terrain_map_data)
+		if not context.ok:
+			_terrain_setup_error=context
+			return false
+		if not String(terrain_map_data.get_tactical_grid_rules()).is_empty() and terrain_map_data.get_tiles().is_empty():
+			_terrain_setup_error={"ok":false,"reason":"hex_map_empty"}
+			return false
 	if terrain_map_data == null or terrain_map_data.call("get_tiles").is_empty():
 		return false
 	_loaded_terrain_map_data = terrain_map_data
