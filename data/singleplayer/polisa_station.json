@@ -1,0 +1,33 @@
+{
+  "id": "polisa",
+  "name": "POLISA",
+  "categories": [
+    {
+      "id": "explore",
+      "name": "Landestation"
+    },
+    {
+      "id": "infantry",
+      "name": "Handwaffen"
+    },
+    {
+      "id": "armor",
+      "name": "Rüstung"
+    },
+    {
+      "id": "ship_equipment",
+      "name": "Schiffswaffen & Ausrüstung"
+    },
+    {
+      "id": "ships",
+      "name": "Schiffe"
+    },
+    {
+      "id": "commodities",
+      "name": "Warenhändler"
+    }
+  ],
+  "ship_equipment_unavailable": "Schiffskomponenten sind noch nicht als spielbare Ausrüstung integriert. Hier werden keine wirkungslosen Teile verkauft.",
+  "ship_delivery": "Lieferung zur Heimatbasis. Ein gebautes freies Heimatpad ist erforderlich.",
+  "prices_status": "Erste Balancewerte; keine finale Preisfreigabe."
+}

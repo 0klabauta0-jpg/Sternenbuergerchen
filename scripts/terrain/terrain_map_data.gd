@@ -6,6 +6,7 @@ const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/t
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+const TACTICAL_GRID_RULES_V1 := "hex_tactical_v1"
 
 var _map_name: String = ""
 var _terrain_visual_theme_id: String = ""
@@ -38,14 +39,15 @@ static func load_from_file(path: String) -> TerrainMapData:
 		push_warning("TerrainMapData could not open map file for reading: %s" % path)
 		return terrain_map_data
 
-	var file_text: String = file.get_as_text()
+	var raw := file.get_buffer(file.get_length())
+	if raw.has(0):
+		push_warning("TerrainMapData found NUL bytes in map file: %s" % path)
+		return terrain_map_data
+	var file_text := raw.get_string_from_utf8()
+	raw = PackedByteArray()
 	if file_text.strip_edges().is_empty():
 		push_warning("TerrainMapData found an empty map file: %s" % path)
 		return terrain_map_data
-	if _contains_nul_codepoint(file_text):
-		push_warning("TerrainMapData found NUL bytes in map file: %s" % path)
-		return terrain_map_data
-
 	var parsed_json: Variant = JSON.parse_string(file_text)
 	if typeof(parsed_json) != TYPE_DICTIONARY:
 		push_warning("TerrainMapData expected a Dictionary JSON root in: %s" % path)
@@ -67,6 +69,12 @@ static func load_from_file(path: String) -> TerrainMapData:
 		push_warning(terrain_map_data._load_issue_message)
 		return terrain_map_data
 	terrain_map_data._grid_topology = topology
+	if not terrain_map_data._get_tactical_grid_rules_issue().is_empty():
+		# Loading stops before canonical data/tiles are populated. Editing the
+		# flag later cannot repair this truncated object or make it saveable.
+		terrain_map_data._load_issue_message = terrain_map_data._get_tactical_grid_rules_issue()
+		push_warning(terrain_map_data.get_load_issue_message())
+		return terrain_map_data
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
 	terrain_map_data._terrain_visual_theme_id = _normalize_optional_id(String(root_dict.get("terrain_visual_theme_id", root_dict.get("surface_visual_theme_id", ""))))
 	terrain_map_data._authored_visual_layout_id = _normalize_optional_id(String(root_dict.get("authored_visual_layout_id", "")))
@@ -82,6 +90,8 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._patrol_paths = _coerce_patrol_dictionary(root_dict.get("patrol_paths", {}))
 	terrain_map_data._enemy_team_configs = _coerce_enemy_team_config_dictionary(root_dict.get("enemy_team_configs", {}), terrain_map_data._grid_size)
 
+	var explicit_ramps := topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and String(root_dict.get("terrain_height_rules", "")) == TERRAIN_TILE_DATA_SCRIPT.EXPLICIT_HEIGHT_RULES
+	var regional_grade := topology == HEX_GRID_SCRIPT.TOPOLOGY_ID and terrain_map_data.get_regional_height_step() > 0.0
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
 		var tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
@@ -108,17 +118,19 @@ static func load_from_file(path: String) -> TerrainMapData:
 			if typeof(tile_entry) != TYPE_DICTIONARY:
 				continue
 
-			var normalized_tile_entry: Dictionary = tile_entry.duplicate(true)
+			var normalized_tile_entry: Dictionary = tile_entry
 			var grid_position: Vector2i = _coerce_vector2i(normalized_tile_entry.get("grid_position", Vector2i.ZERO))
 			normalized_tile_entry["grid_position"] = grid_position
 			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
 			_normalize_legacy_object_layer_tile(normalized_tile_entry, tile_catalog)
 
+			normalized_tile_entry["explicit_hex_ramps"] = explicit_ramps
 			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", normalized_tile_entry)
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
 				continue
 
+			tile_data.regional_grade = regional_grade
 			terrain_map_data._tiles.append(tile_data)
 			if not terrain_map_data._tiles_by_grid.has(tile_data.grid_position):
 				terrain_map_data._tiles_by_grid[tile_data.grid_position] = tile_data
@@ -192,6 +204,8 @@ static func create_empty(
 
 
 func save_to_file(path: String) -> Error:
+	if has_load_issue():
+		return ERR_INVALID_DATA
 	if path.is_empty():
 		return ERR_INVALID_PARAMETER
 
@@ -250,6 +264,8 @@ func save_to_file(path: String) -> Error:
 			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
 			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
 		}
+		if int(tile_dict.get("ramp_direction", -1)) >= 0:
+			serialized_tile["ramp_direction"] = int(tile_dict.ramp_direction)
 		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
 		if not object_type_id.is_empty():
 			serialized_tile["object_type_id"] = object_type_id
@@ -271,11 +287,11 @@ func get_tiles() -> Array:
 
 
 func has_load_issue() -> bool:
-	return not _load_issue_message.is_empty()
+	return not _load_issue_message.is_empty() or not _get_tactical_grid_rules_issue().is_empty()
 
 
 func get_load_issue_message() -> String:
-	return _load_issue_message
+	return _load_issue_message if not _load_issue_message.is_empty() else _get_tactical_grid_rules_issue()
 
 
 func get_tile_at_grid(grid_position: Vector2i):
@@ -594,13 +610,6 @@ static func _coerce_vector2(value: Variant) -> Vector2:
 	return Vector2.ZERO
 
 
-static func _contains_nul_codepoint(text: String) -> bool:
-	for index in range(text.length()):
-		if text.unicode_at(index) == 0:
-			return true
-	return false
-
-
 static func _coerce_marker_dictionary(value: Variant) -> Dictionary:
 	var result: Dictionary = {}
 	if typeof(value) != TYPE_DICTIONARY:
@@ -739,3 +748,38 @@ func has_authoring_metadata(key: String) -> bool:
 
 func set_place_presentation(presentation: Dictionary) -> void:
 	_place_presentation = presentation.duplicate(true)
+
+
+func get_regional_height_step() -> float:
+	if int(_extension_metadata.get("regional_terrain_version", 0)) not in [2, 3]:
+		return 0.0
+	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)
+
+
+func get_terrain_height_rules() -> String:
+	return String(_extension_metadata.get("terrain_height_rules", ""))
+
+
+func get_tactical_grid_rules() -> String:
+	var value: Variant = _extension_metadata.get("tactical_grid_rules", "")
+	return value if typeof(value) == TYPE_STRING else ""
+
+
+func set_tactical_grid_rules(value: String) -> void:
+	if value.is_empty():
+		_extension_metadata.erase("tactical_grid_rules")
+	else:
+		_extension_metadata["tactical_grid_rules"] = value
+
+
+func _get_tactical_grid_rules_issue() -> String:
+	var value: Variant = _extension_metadata.get("tactical_grid_rules", "")
+	if typeof(value) != TYPE_STRING:
+		return "tactical_grid_rules must be a String"
+	if String(value).is_empty():
+		return ""
+	if String(value) != TACTICAL_GRID_RULES_V1:
+		return "Unsupported tactical_grid_rules '%s'" % String(value)
+	if _grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return "tactical_grid_rules '%s' requires hex_axial_v1" % String(value)
+	return ""

@@ -1,0 +1,43 @@
+{
+  "images": [
+    {
+      "item_id": "armor_light",
+      "path": "Assets/curated/ui/polisa_armor/light_turnaround.png",
+      "source": "art/armor_orc_morozov_20261111/light_turnaround_ai_r04.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997",
+      "display_region": [
+        55,
+        20,
+        395,
+        790
+      ],
+      "status": "approved 2D modeling target reused as product illustration, not native model proof"
+    },
+    {
+      "item_id": "armor_medium",
+      "path": "Assets/curated/ui/polisa_armor/medium_turnaround.png",
+      "source": "art/armor_orc_morozov_20261111/medium_turnaround_ai_r04.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8",
+      "display_region": [
+        55,
+        20,
+        395,
+        790
+      ],
+      "status": "approved 2D modeling target reused as product illustration, not native model proof"
+    },
+    {
+      "item_id": "armor_heavy",
+      "path": "Assets/curated/ui/polisa_armor/heavy_turnaround.png",
+      "source": "art/armor_orc_morozov_20261111/heavy_turnaround_ai_r04.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e",
+      "display_region": [
+        55,
+        20,
+        395,
+        790
+      ],
+      "status": "approved 2D modeling target reused as product illustration, not native model proof"
+    }
+  ]
+}

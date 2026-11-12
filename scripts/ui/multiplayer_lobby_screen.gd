@@ -771,6 +771,12 @@ func get_session_snapshot() -> Dictionary:
 	return Dictionary(_session.call("get_session_snapshot")).duplicate(true)
 
 
+func get_multiplayer_runtime_context() -> Dictionary:
+	if not is_instance_valid(_session) or not _session.has_method("get_multiplayer_runtime_context"):
+		return {}
+	return Dictionary(_session.call("get_multiplayer_runtime_context")).duplicate(true)
+
+
 func get_lobby_ui_snapshot() -> Dictionary:
 	var session_snapshot: Dictionary = get_session_snapshot()
 	return {
@@ -1252,10 +1258,12 @@ func _on_session_mission_start_requested(assignments: Dictionary) -> void:
 
 
 func _on_session_mission_assignments_changed(assignments: Dictionary) -> void:
-	_last_start_assignments = assignments.duplicate(true)
 	if has_active_mission():
-		_apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments)
+		if not _apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments): return
+		_last_start_assignments = assignments.duplicate(true)
 		_apply_local_mission_fireteam_perspective(_active_mission, assignments)
+	else:
+		_last_start_assignments = assignments.duplicate(true)
 	_apply_session_snapshot(get_session_snapshot())
 
 
@@ -1286,12 +1294,17 @@ func _launch_mission(assignments: Dictionary) -> void:
 		map_path = String(map_transfer.get("local_path", map_transfer.get("cache_path", "")))
 	if not map_path.is_empty():
 		mission_instance.get_node("MissionSetup").set("map_file_path", map_path)
-	_apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments)
+	if not _apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments):
+		mission_instance.free()
+		return
 	var startup_combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
 	if startup_combat_driver != null and startup_combat_driver.has_method("set_combat_startup_grace_ticks"):
 		startup_combat_driver.call("set_combat_startup_grace_ticks", PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS)
 	_mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	var replica_root: Node=mission_instance.get_node_or_null("SimulationRoot")
+	if replica_root!=null and replica_root.has_method("refresh_multiplayer_replica_presence"):
+		replica_root.call("refresh_multiplayer_replica_presence")
 	initialize_multiplayer_mission_dropships(mission_instance, assignments, bool(get_session_snapshot().get("is_host", false)))
 	_apply_local_mission_fireteam_perspective(mission_instance, assignments)
 	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
@@ -1300,7 +1313,7 @@ func _launch_mission(assignments: Dictionary) -> void:
 		if not combat_driver.is_connected("combat_resolved", resolved_callable):
 			combat_driver.connect("combat_resolved", resolved_callable)
 	if not bool(get_session_snapshot().get("is_host", false)):
-		_session.rpc_id(1, "notify_mission_runtime_ready")
+		_session.rpc_id(1, "notify_mission_runtime_ready", get_multiplayer_runtime_context())
 	_set_lobby_panel_visible(false)
 
 
@@ -1370,9 +1383,26 @@ func _on_product_mission_resolved(_mission_result: Dictionary) -> void:
 	_session.call("complete_mission")
 
 
-func _apply_session_assignments_to_simulation_root(simulation_root: Node, assignments: Dictionary) -> void:
-	if simulation_root == null:
-		return
+func _apply_session_assignments_to_simulation_root(simulation_root: Node, assignments: Dictionary) -> bool:
+	if simulation_root == null: return false
+	for key in ["peer_teams","peer_roles","peer_fireteams"]:
+		if not assignments.get(key,{}) is Dictionary: return false
+	var context: Dictionary={}
+	var local_team: String=""
+	if assignments.has("multiplayer_runtime_context"):
+		if not assignments.multiplayer_runtime_context is Dictionary or assignments.multiplayer_runtime_context != get_multiplayer_runtime_context():
+			return false # A snapshot alone cannot activate/rebind a runtime token.
+		context=assignments.multiplayer_runtime_context
+		if context.is_empty() or not simulation_root.has_method("validate_multiplayer_runtime_context_binding") or not simulation_root.has_method("bind_multiplayer_runtime_context"): return false
+		var local_id: int=multiplayer.get_unique_id() if multiplayer.multiplayer_peer!=null else 1
+		# Match the existing Root team-table normalization without writing it.
+		for raw_id in assignments.get("peer_teams",{}):
+			if int(raw_id)==local_id:
+				local_team=String(assignments.peer_teams[raw_id]).strip_edges()
+		if local_id==1 and local_team.is_empty(): local_team="team_alpha"
+		if not bool(Dictionary(simulation_root.call("validate_multiplayer_runtime_context_binding",context,local_team)).get("ok",false)): return false
+	elif simulation_root.has_method("uses_legacy_multiplayer_wire") and not bool(simulation_root.call("uses_legacy_multiplayer_wire")):
+		return false # Missing context cannot downgrade a bound/declared Hex runtime.
 	simulation_root.set("is_server_authoritative", true)
 	if simulation_root.has_method("set_peer_team_assignments"):
 		simulation_root.call("set_peer_team_assignments", Dictionary(assignments.get("peer_teams", {})).duplicate(true))
@@ -1380,6 +1410,9 @@ func _apply_session_assignments_to_simulation_root(simulation_root: Node, assign
 		simulation_root.call("set_peer_role_assignments", Dictionary(assignments.get("peer_roles", {})).duplicate(true))
 	if simulation_root.has_method("set_peer_fireteam_assignments"):
 		simulation_root.call("set_peer_fireteam_assignments", Dictionary(assignments.get("peer_fireteams", {})).duplicate(true))
+	if not context.is_empty():
+		return bool(Dictionary(simulation_root.call("bind_multiplayer_runtime_context",context,local_team)).get("ok",false))
+	return true
 
 
 func _refresh_from_session() -> void:

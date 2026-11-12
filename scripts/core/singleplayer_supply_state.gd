@@ -2,15 +2,23 @@ extends RefCounted
 ## Long-lived domain owner. SimulationRoot supplies trusted service/runtime context.
 
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
+const STATION_CRAFT = preload("res://scripts/mission/polisa_station_craft_runtime.gd")
+const SHIP_COMPONENTS = preload("res://scripts/mission/ship_equipment_catalog.gd")
+const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
+const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
+const MODULAR = preload("res://scripts/core/campaign_modular_plan.gd")
 var _inventory: Dictionary = {}
 var _location_resources: Dictionary = {}
+var _modular_capacity_baseline := -1
+var _modular_plan_cache: Dictionary = {}
+var _modular_plan_cache_revision := -1
 
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
 const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
 
 static func get_campaign_recipe(blueprint_id:String)->Dictionary:
-	return Dictionary(CAMPAIGN_RECIPES.get(blueprint_id,{})).duplicate(true)
+	return Dictionary(CAMPAIGN_RECIPES[blueprint_id]).duplicate(true) if CAMPAIGN_RECIPES.has(blueprint_id) else RESEARCH.fabrication(blueprint_id)
 
 var _definitions: Dictionary = {}
 var _credits: int = 0
@@ -19,7 +27,17 @@ var _fuel_by_craft_id: Dictionary = {}
 var _stock_by_offer_id: Dictionary = {}
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
+var _research_receipts: Dictionary = {}
+var _research_snapshot_cache: Dictionary = {}
+var _research_snapshot_revision := -1
+var _station_purchase_cache_revision := -1
+var _station_purchase_cache: Dictionary = {}
 var _revision: int = 0
+# Opt-in in-process capability for the UNWIRED prepared departure seam.
+var _route_prepare_authority: WeakRef
+var _route_prepare_bound := false
+var _route_prepare_epoch := 0
+var _route_prepare_seal_key := ""
 
 func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH)) if definitions.is_empty() else definitions
@@ -36,10 +54,14 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	for cost in Dictionary(data.get("route_fuel_costs", {})).values():
 		if not _valid_nonnegative_number(cost):
 			return _reject("invalid_supply_data", "Routenkosten ungueltig")
+	_reset_route_fuel_preparation()
+	_station_purchase_cache_revision = -1
 	_definitions = data
 	_credits = int(data.initial_credits)
 	_item_quantities.clear()
 	_inventory.clear()
+	_modular_capacity_baseline = -1
+	_modular_plan_cache_revision = -1
 	_location_resources.clear()
 	var resources: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/location_resources.json"))
 	for place in resources:
@@ -49,6 +71,8 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_stock_by_offer_id.clear()
 	_requests.clear()
 	_reward_receipts.clear()
+	_research_receipts.clear()
+	_research_snapshot_revision = -1
 	_revision = 0
 	for offer_id in Dictionary(data.get("offers", {})):
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
@@ -68,7 +92,18 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+
+func get_research_snapshot() -> Dictionary:
+	if _research_snapshot_revision != _revision:
+		_research_snapshot_cache = RESEARCH.build_snapshot(_research_receipts, _reward_receipts, _requests, _credits)
+		var fabrication := {}
+		var recipes: Array = CAMPAIGN_RECIPES.keys()
+		recipes.append_array(RESEARCH.definitions().get("fabrication", {}).keys())
+		for id: String in recipes: fabrication[id] = preview_campaign_fabrication(id)
+		_research_snapshot_cache["fabrication"] = fabrication
+		_research_snapshot_revision = _revision
+	return _research_snapshot_cache.duplicate(true)
 
 func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if not COMMANDS.validate_command(command) or _definitions.is_empty():
@@ -85,15 +120,29 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 	var result: Dictionary
 	match String(command.operation):
 		"collect_resource": result = _collect_resource(payload, authority_context)
+		"station_install_ship_component": result = _install_ship_component(payload, authority_context, request_id)
 		"inventory_transfer": result = _inventory_transfer(payload, authority_context)
+		"cargo_transfer_start":
+			result = {"ok":true} if authority_context.get("cargo_transfer_authorized",false) == true else _reject("cargo_transfer_untrusted","Frachtauftrag nicht bestätigt")
 		"inventory_equip": result = _inventory_equip(payload, authority_context)
 		"buy": result = _buy(payload, authority_context)
+		"station_buy_ship": result = _station_buy_ship(payload, authority_context, request_id)
+		"station_recruit_reserve": result = _reserve_station_recruit(payload, authority_context)
+		"station_recruit_finalize": result = _finalize_station_recruit(payload, authority_context)
+		"station_recruit_cancel": result = _cancel_station_recruit(payload, authority_context)
+		"station_build_home_pad": result = _station_build_home_pad(authority_context)
 		"refuel": result = _refuel(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
 		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
+		"campaign_research": result = _campaign_research(payload, authority_context, request_id)
 		"campaign_fabricate": result = _campaign_fabricate(payload, authority_context)
 		"campaign_build": result = _campaign_build(payload, authority_context)
+		"campaign_build_bed": result = _campaign_build_bed(payload, authority_context)
+		"campaign_build_housing": result = _campaign_build_housing(payload, authority_context)
+		"campaign_build_room": result = _campaign_build_modular(payload, authority_context, false)
+		"campaign_place_room_bed": result = _campaign_build_modular(payload, authority_context, true)
+		"campaign_set_room_door": result = _campaign_set_room_door(payload, authority_context)
 		"sell": result = _sell(payload, authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
@@ -102,12 +151,29 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
 	return result
 
+func get_purchase_receipt(request_id: String) -> Dictionary:
+	# Visual clients may read only the confirmed result, never mutate inventory.
+	var entry: Dictionary = _requests.get(request_id, {})
+	var result: Dictionary = entry.get("result", {})
+	if result.get("operation") != "buy" or result.get("request_id") != request_id: return {}
+	return result.duplicate(true)
+
 func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location_id: String = String(context.get("location_id", ""))
 	var offer_id: String = String(payload.get("offer_id", ""))
 	var offer: Dictionary = Dictionary(Dictionary(_definitions.get("offers", {})).get(offer_id, {}))
 	if offer.is_empty():
 		return _reject("unknown_offer", "Angebot unbekannt")
+	if String(offer.get("kind", "")) == "ship":
+		return _reject("ship_service_required", "Schiffe beim Schiffshaendler kaufen")
+	if SHIP_COMPONENTS.known(String(offer.get("item_id", ""))) and not SHIP_COMPONENTS.compatible(String(context.get("ship_component_model_id", "")), "quantum_drive", String(offer.item_id)):
+		return _reject("incompatible_component", "Dieses Schiff hat keinen belegten Warp-Antriebsplatz")
+	if SHIP_COMPONENTS.known(String(offer.get("item_id", ""))) or SPACE_COMPONENTS.known(String(offer.get("item_id", ""))):
+		var component_craft := String(context.get("craft_id", ""))
+		if not _fuel_by_craft_id.has(component_craft) or not _inventory.has("craft:"+component_craft): return _reject("inventory_access", "Schiffslager für den Antrieb fehlt")
+	var blueprint := String(offer.get("required_blueprint", ""))
+	if bool(context.get("require_blueprints", false)) and not blueprint.is_empty() and not _blueprints().has(blueprint):
+		return _reject("blueprint_locked", "Zuerst den passenden Bauplan freischalten")
 	if bool(context.get("craft_busy", true)):
 		return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
 	if not _has_service(location_id, "trade") or not Array(offer.get("location_ids", [])).has(location_id):
@@ -120,7 +186,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var price: int = int(offer.get("unit_price", 0))
 	if price <= 0 or quantity > _credits / price:
 		return _reject("insufficient_credits", "Credits reichen nicht")
-	var destination := "craft:"+String(context.get("craft_id",""))
+	var destination := "station:polisa:lift" if location_id == "polisa" and bool(context.get("cargo_lift_delivery",false)) else "craft:"+String(context.get("craft_id",""))
 	var purchased_items: Dictionary = _item_quantities
 	if not _inventory.is_empty():
 		if not _inventory.has(destination): return _reject("inventory_access","Lieferziel fehlt")
@@ -218,7 +284,7 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources()}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -262,23 +328,51 @@ func restore_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	if not _valid_component_requests(data.requests, data.stock_by_offer_id, fresh._definitions): return _reject("invalid_component_receipts", "Komponentenbelege ungültig")
+	if not _valid_recruit_requests(data.requests): return _reject("invalid_recruit_receipts", "Anwerbungsbelege ungültig")
+	if not _valid_campaign_bed_requests(data.requests): return _reject("invalid_bed_receipts", "Bettenbelege ungültig")
+	var modular_replay: Dictionary = MODULAR.replay(data.requests)
+	if not modular_replay.get("ok", false): return modular_replay
+	var station_receipts: Dictionary = fresh.validate_station_receipts(data.requests)
+	if not station_receipts.get("ok", false): return station_receipts
+	var research: Variant = data.get("research_receipts", {})
+	if not _valid_campaign_fabrication_requests(data.requests):
+		return _reject("invalid_fabrication_receipts", "Herstellungsbelege widersprechen dem Rezept")
+	if not RESEARCH.validate_receipts(research, data.reward_receipts, data.requests):
+		return _reject("invalid_research_receipts", "Entwicklungsbelege widersprechen ihren Voraussetzungen")
 	var containers: Variant = data.get("inventory", {})
 	if typeof(containers)!=TYPE_DICTIONARY:
 		return _reject("invalid_inventory", "Container fehlen")
 	for id in containers:
-		if not (String(id)=="base:homebase" or String(id).begins_with("craft:") or (String(id).begins_with("unit:") and String(id).ends_with(":backpack"))) or not INVENTORY.valid_container(containers[id]):
+		var personal := String(id).begins_with("unit:") and String(id).ends_with(":backpack")
+		var container: Variant = containers[id]
+		if not (String(id) in ["base:homebase","station:polisa:lift"] or String(id).begins_with("craft:") or personal) or not INVENTORY.valid_container(container):
 			return _reject("invalid_inventory", "Container ungueltig")
+		if not personal and container.has("armor_chip_capacity"):
+			return _reject("invalid_inventory", "Rüstungsplatz gehört zu einer Person")
 	if containers.has("base:homebase") and Dictionary(containers["base:homebase"].items)!=Dictionary(data.item_quantities):
 		return _reject("invalid_inventory", "Basislager widerspricht Kaufbestand")
+	var modular_baseline: Variant = data.get("modular_capacity_baseline", -1)
+	var storage_count := 0
+	for room: Dictionary in modular_replay.plan.rooms:
+		if room.type == "storage": storage_count += 1
+	if storage_count > 0:
+		if not _valid_nonnegative_integer(modular_baseline) or not containers.has("base:homebase") or int(containers["base:homebase"].capacity) != int(modular_baseline) + storage_count * MODULAR.STORAGE_CAPACITY:
+			return _reject("invalid_modular_capacity", "Lagerkapazität widerspricht den Raumbelegen")
+	elif modular_baseline != -1:
+		return _reject("invalid_modular_capacity", "Unerwartete Lagerbasis")
 	var resources: Variant=data.get("location_resources",{})
 	if typeof(resources)!=TYPE_DICTIONARY: return _reject("invalid_resources","Ortsressourcen ungueltig")
 	for place in resources:
 		if not fresh._location_resources.has(place) or typeof(resources[place])!=TYPE_DICTIONARY or not fresh._location_resources[place].restore_state(resources[place]): return _reject("invalid_resources","Ortsressourcen ungueltig")
+	_reset_route_fuel_preparation()
 	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
 	_item_quantities = data.item_quantities.duplicate(true)
 	_inventory = containers.duplicate(true)
+	_modular_capacity_baseline = int(modular_baseline)
+	_modular_plan_cache_revision = -1
 	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
 	_fuel_by_craft_id = data.fuel_by_craft_id.duplicate(true)
 	_stock_by_offer_id = fresh._stock_by_offer_id.duplicate(true)
@@ -289,10 +383,15 @@ func restore_state(data: Dictionary) -> Dictionary:
 		_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id])
 	_requests = data.requests.duplicate(true)
 	_reward_receipts = data.reward_receipts.duplicate(true)
+	_research_receipts = research.duplicate(true)
+	_research_snapshot_revision = -1
 	_revision = int(data.revision)
+	_station_purchase_cache_revision = -1
 	return {"ok":true}
 
-func configure_inventory(unit_ids: Array, craft_ids: Array) -> void:
+func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
+	if not _inventory.has("station:polisa:lift"):
+		_inventory["station:polisa:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("base:homebase"):
 		_inventory["base:homebase"]={"capacity":200,"items":_item_quantities}
 		for item in INVENTORY.START_STOCK:
@@ -302,7 +401,18 @@ func configure_inventory(unit_ids: Array, craft_ids: Array) -> void:
 		if not _inventory.has(key): _inventory[key]={"capacity":48,"items":{}}
 	for id in unit_ids:
 		var key := "unit:"+String(id)+":backpack"
-		if not _inventory.has(key): _inventory[key]={"capacity":12,"items":{}}
+		if not _inventory.has(key):
+			_inventory[key] = {"capacity": 0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY, "items": {}}
+			if campaign_personnel:
+				_inventory[key].armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
+		elif campaign_personnel and not _inventory[key].has("armor_chip_capacity"):
+			# Existing checkpoints already granted this bag. Keep every saved
+			# item, including the previously capacity-exempt second chip.
+			var bag: Dictionary = _inventory[key]
+			bag.armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
+			bag.capacity = maxi(int(bag.capacity), INVENTORY.backpack_slots_used(bag))
+	# The fabrication projection also depends on this cold-initialized storage.
+	_research_snapshot_revision = -1
 
 func _inventory_access(id: String, context: Dictionary) -> bool:
 	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
@@ -319,7 +429,12 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	var from: Dictionary = _inventory[source].items
 	var to: Dictionary = _inventory[target].items
 	if int(from.get(item,0))<amount: return _reject("insufficient_items", "Bestand reicht nicht")
-	if INVENTORY.used(to)+amount>int(_inventory[target].capacity): return _reject("container_full", "Zielcontainer ist voll")
+	if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(to.get(item, 0)) + amount > 1:
+		return _reject("duplicate_quest_cargo", "Auftragsfracht bereits vorhanden")
+	var destination: Dictionary = _inventory[target]
+	var fits := INVENTORY.has_space(destination, item, amount) if destination.has("armor_chip_capacity") else INVENTORY.used(to) + amount <= int(destination.capacity)
+	if not fits:
+		return _reject("container_full", "Kein freier Platz im Zielcontainer")
 	from[item]=int(from[item])-amount
 	if from[item]==0: from.erase(item)
 	to[item]=int(to.get(item,0))+amount
@@ -333,14 +448,17 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var item := String(payload.get("item_id",""))
 	if String(payload.get("unit_id",""))!=String(context.get("unit_id","")) or not context.has("loadout") or not _inventory_access(source,context):
 		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
-	var unequip := item=="none" and slot=="weapon_2"
+	if slot == "backpack":
+		return _change_backpack(String(payload.unit_id), source, item, context)
+	var unequip := (item == "none" and slot == "weapon_2") or (item == "suit" and slot == "armor")
 	if not unequip and not INVENTORY.compatible(item,slot): return _reject("incompatible_slot", "Gegenstand passt nicht in diesen Slot")
 	var from: Dictionary = _inventory[source].items
 	if not unequip and int(from.get(item,0))<1: return _reject("insufficient_items", "Gegenstand nicht vorhanden")
 	var loadout: Dictionary = Dictionary(context.loadout).duplicate(true)
 	var previous: String = INVENTORY.item_from_slot(slot,String(loadout.get(slot,"none")))
 	var returns_item := previous!="none" and INVENTORY.known(previous)
-	if INVENTORY.used(from)-(0 if unequip else 1)+(1 if returns_item else 0)>int(_inventory[source].capacity): return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
+	if INVENTORY.backpack_slots_used(_inventory[source]) - (0 if unequip else 1) + (1 if returns_item else 0) > int(_inventory[source].capacity):
+		return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
 	if not unequip:
 		from[item]=int(from[item])-1
 		if from[item]==0: from.erase(item)
@@ -348,6 +466,38 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
 	_revision+=1
 	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}
+
+func _change_backpack(unit_id: String, source: String, item: String, context: Dictionary) -> Dictionary:
+	var personal := "unit:" + unit_id + ":backpack"
+	if not _inventory_access(personal, context) or not _inventory[personal].has("armor_chip_capacity"):
+		return _reject("inventory_access", "Rucksackslot ist hier nicht verfügbar")
+	if item not in ["backpack", "none"]:
+		return _reject("incompatible_slot", "Gegenstand passt nicht in den Rucksackslot")
+	var bag: Dictionary = _inventory[personal]
+	var wearing := int(bag.capacity) > 0
+	var removing := item == "none"
+	if wearing != removing:
+		return _reject("equipment_unchanged", "Kein Rucksack angelegt" if removing else "Ein Rucksack ist bereits angelegt")
+	var storage: Dictionary = _inventory[source]
+	var stock: Dictionary = storage.items
+	if removing:
+		if INVENTORY.backpack_slots_used(bag) > 0:
+			return _reject("backpack_not_empty", "Rucksack vor dem Ablegen leeren")
+		if source == personal or not INVENTORY.has_space(storage, "backpack", 1):
+			return _reject("container_full", "Kein Platz für den abgelegten Rucksack")
+		stock["backpack"] = int(stock.get("backpack", 0)) + 1
+		bag.capacity = 0
+	else:
+		var count := int(stock.get("backpack", 0))
+		if count < 1:
+			return _reject("insufficient_items", "Rucksack nicht vorhanden")
+		if count == 1:
+			stock.erase("backpack")
+		else:
+			stock["backpack"] = count - 1
+		bag.capacity = INVENTORY.BACKPACK_CAPACITY
+	_revision += 1
+	return {"ok": true, "loadout": Dictionary(context.loadout).duplicate(true), "message": "Rucksack abgelegt" if removing else "Rucksack angelegt"}
 
 func get_location_resources(location_id: String) -> RefCounted:
 	return _location_resources.get(location_id)
@@ -362,7 +512,8 @@ func preview_resource_collection(location_id: String,site_id: String,unit_id: St
 	if int(site.remaining)<=0: return _reject("depleted","Bereits geborgen")
 	var bag: Dictionary=_inventory.get("unit:"+unit_id+":backpack",{})
 	if int(Dictionary(bag.get("items",{})).get(site.required_tool,0))<1: return _reject("tool_missing","Miningwerkzeug fehlt" if site.required_tool=="mining_tool" else "Bergungswerkzeug fehlt")
-	if INVENTORY.used(bag.items)+int(site.remaining)>int(bag.capacity): return _reject("container_full","Rucksack voll – am Schiff umladen")
+	if not INVENTORY.has_space(bag, String(site.item_id), int(site.remaining)):
+		return _reject("container_full", "Rucksack voll – am Schiff umladen")
 	return {"ok":true}
 func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	var place:=String(payload.get("location_id","")); var id:=String(payload.get("site_id","")); var unit:=String(payload.get("unit_id",""))
@@ -376,15 +527,22 @@ func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	return {"ok":true,"item_id":site.item_id,"quantity":quantity,"message":"Geborgen: %d" % quantity}
 
 func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
-	var left:=saved.duplicate(true); var right:=current.duplicate(true)
-	var old_offers: Variant=left.get("offers")
-	if typeof(old_offers)!=TYPE_DICTIONARY: return false
-	for id in Dictionary(right.get("offers",{})):
-		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply"]: return false
+	var left := saved.duplicate(true)
+	var right := current.duplicate(true)
+	var old_offers: Variant = left.get("offers")
+	if typeof(old_offers) != TYPE_DICTIONARY: return false
+	for id: String in Dictionary(right.get("offers", {})):
+		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply","backpack_supply"] and not id.begins_with("polisa_"): return false
 	for id in old_offers:
-		if not Dictionary(right.get("offers",{})).has(id) or JSON.stringify(old_offers[id],"",true)!=JSON.stringify(right.offers[id],"",true): return false
+		if not Dictionary(right.get("offers", {})).has(id) or JSON.stringify(old_offers[id], "", true) != JSON.stringify(right.offers[id], "", true): return false
 	left.erase("offers"); right.erase("offers")
-	return JSON.stringify(left,"",true)==JSON.stringify(right,"",true)
+	# Additive station data preserves the exact old economy and existing routes.
+	if not Dictionary(left.get("service_locations", {})).has("polisa"):
+		right.service_locations.erase("polisa")
+	for route: String in Dictionary(right.get("route_fuel_costs", {})).keys():
+		if route.contains("polisa") and not Dictionary(left.get("route_fuel_costs", {})).has(route): right.route_fuel_costs.erase(route)
+	if not left.has("commodity_buy_orders"): right.erase("commodity_buy_orders")
+	return JSON.stringify(left, "", true) == JSON.stringify(right, "", true)
 
 
 func configure_start_inventory(mode: String) -> void:
@@ -403,12 +561,73 @@ func configure_preset_supply(preset: Dictionary) -> void:
 	_inventory["base:homebase"].items = _item_quantities
 	_revision += 1
 
+
+func receive_skirmish_equipment(item: String) -> Dictionary:
+	if not INVENTORY.known(item) or not _inventory.has("base:homebase"):
+		return _reject("invalid_item", "Gegenstand fehlt")
+	var storage: Dictionary = _inventory["base:homebase"]
+	if not INVENTORY.has_space(storage, item, 1):
+		return _reject("container_full", "Das Basislager ist voll")
+	storage.items[item] = int(storage.items.get(item, 0)) + 1
+	_revision += 1
+	return {"ok": true, "message": "Ausrüstung ins Basislager geliefert"}
+
+
+func remove_skirmish_craft(craft_id: String) -> void:
+	_fuel_by_craft_id.erase(craft_id)
+	_inventory.erase("craft:" + craft_id)
+	_revision += 1
+
+
+func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> Dictionary:
+	var storage: Dictionary = _inventory["base:homebase"]
+	var bag_key := "unit:" + unit_id + ":backpack"
+	var bag: Dictionary = _inventory.get(bag_key, {"items": {}, "capacity": 0})
+	var returned: Dictionary = Dictionary(bag.items).duplicate()
+	if int(bag.capacity) > 0:
+		returned["backpack"] = int(returned.get("backpack", 0)) + 1
+	for slot: String in ["armor", "weapon_1", "weapon_2"]:
+		var item := INVENTORY.item_from_slot(slot, String(loadout.get(slot, "none")))
+		if INVENTORY.known(item): returned[item] = int(returned.get(item, 0)) + 1
+	if INVENTORY.used(storage.items) + INVENTORY.used(returned) > int(storage.capacity):
+		return _reject("container_full", "Für die abgegebene Ausrüstung fehlt Lagerplatz")
+	for item: String in returned:
+		if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(storage.items.get(item, 0)) + int(returned[item]) > 1:
+			return _reject("duplicate_quest_cargo", "Auftragsfracht bereits im Lager")
+	for item: String in returned:
+		storage.items[item] = int(storage.items.get(item, 0)) + int(returned[item])
+	_inventory.erase(bag_key)
+	_revision += 1
+	return {"ok": true}
+
 func _blueprints() -> Array:
 	var result: Array = []
 	for receipt: Dictionary in _reward_receipts.values():
 		var id := String(Dictionary(receipt.get("reward",{})).get("blueprint_id",""))
 		if not id.is_empty() and not result.has(id): result.append(id)
+	for id: String in _research_receipts:
+		var node: Dictionary = RESEARCH.definitions().get("nodes", {}).get(id, {})
+		var blueprint := String(node.get("blueprint_id", ""))
+		if not blueprint.is_empty() and not result.has(blueprint): result.append(blueprint)
 	return result
+
+func _campaign_research(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if not bool(context.get("campaign_authorized", false)):
+		return _reject("campaign_only", "Entwicklung gehört zur Kampagne")
+	if not bool(context.get("at_home", false)):
+		return _reject("home_required", "Entwicklung nur an der Heimatbasis")
+	var id := String(payload.get("research_id", ""))
+	var node: Dictionary = get_research_snapshot().nodes.get(id, {})
+	if node.is_empty(): return _reject("unknown_research", "Entwicklung unbekannt")
+	if bool(node.developed):
+		return {"ok": true, "changed": false, "cost": 0, "research_id": id, "message": "Bereits entwickelt; keine weiteren Kosten"}
+	if not bool(node.available): return _reject("research_locked", String(node.message))
+	var receipt := {"schema_version": 1, "research_id": id, "request_id": request_id, "cost": int(node.cost)}
+	_credits -= int(node.cost)
+	_research_receipts[id] = receipt
+	_revision += 1
+	return {"ok": true, "changed": true, "cost": int(node.cost), "research_id": id,
+		"development_receipt": receipt.duplicate(true), "message": "Entwicklung abgeschlossen. Einzelstücke jetzt in der Werkstatt herstellen."}
 
 func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)): return _reject("untrusted_cargo","Kein bestaetigter Bergungs-/Lieferbeleg")
@@ -419,25 +638,65 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var amount := int(raw)
 	var items: Dictionary = _inventory[container].items
 	if int(items.get(item,0))+amount<0: return _reject("missing_cargo","Benoetigte Fracht fehlt")
-	if INVENTORY.RESERVED_QUEST_ITEMS.has(item):
-		if int(items.get(item,0))+amount>1: return _reject("duplicate_quest_cargo","Auftragsfracht bereits vorhanden")
-	elif INVENTORY.used(items)+amount>int(_inventory[container].capacity): return _reject("container_full","Kein Platz fuer Fracht")
+	if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and int(items.get(item, 0)) + amount > 1:
+		return _reject("duplicate_quest_cargo", "Auftragsfracht bereits vorhanden")
+	if amount > 0 and not INVENTORY.has_space(_inventory[container], item, amount):
+		return _reject("container_full", "Kein freier Platz für Fracht")
 	items[item]=int(items.get(item,0))+amount
 	if items[item]==0: items.erase(item)
 	_revision+=1
 	return {"ok":true,"message":"Fracht bestaetigt","item_id":item,"amount":amount}
 
+func preview_campaign_fabrication(blueprint: String) -> Dictionary:
+	# Inventory/credit projection only. The command still checks runtime home access.
+	var recipe := get_campaign_recipe(blueprint)
+	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
+	if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
+	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary:
+		return _reject("invalid_recipe", "Herstellungsrezept ungültig")
+	var inputs: Dictionary = recipe.get("inputs", {})
+	var after := INVENTORY.used(_item_quantities)
+	for item: String in inputs:
+		if not INVENTORY.known(item) or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not INVENTORY.positive_integer(inputs[item]): return _reject("invalid_recipe", "Materialrezept ungültig")
+		if int(_item_quantities.get(item, 0)) < int(inputs[item]):
+			return _reject("missing_materials", "Im Basislager fehlen: %d × %s" % [int(inputs[item]), RESEARCH.item_label(item)])
+		after -= int(inputs[item])
+	if _credits < int(recipe.cost): return _reject("insufficient_credits", "Credits reichen nicht")
+	if after + 1 > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
+	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true)}
+
 func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
 	var blueprint := String(payload.get("blueprint_id",""))
-	var recipe:Dictionary=get_campaign_recipe(blueprint)
-	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
-	if _credits<int(recipe.cost): return _reject("insufficient_credits","Credits reichen nicht")
-	if INVENTORY.used(_item_quantities)>=int(_inventory["base:homebase"].capacity): return _reject("container_full","Basislager voll")
-	_credits-=int(recipe.cost)
-	_item_quantities[recipe.item]=int(_item_quantities.get(recipe.item,0))+1
-	_revision+=1
-	return {"ok":true,"message":"Gegenstand hergestellt","item_id":recipe.item}
+	var quote := preview_campaign_fabrication(blueprint)
+	if not quote.ok: return quote
+	# All checks precede the first mutation. The one Supply owner commits everything.
+	for item: String in quote.inputs:
+		_item_quantities[item] -= int(quote.inputs[item])
+		if _item_quantities[item] == 0: _item_quantities.erase(item)
+	_credits -= int(quote.cost)
+	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + 1
+	_revision += 1
+	var result := {"ok":true,"message":"Gegenstand hergestellt","item_id":quote.item_id}
+	# Preserve legacy receipt shape; only material recipes need the new exact ledger.
+	if not Dictionary(quote.inputs).is_empty():
+		result.merge({"recipe_id":blueprint,"cost":quote.cost,"materials_consumed":quote.inputs.duplicate(true)})
+	return result
+
+func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
+	for request: Dictionary in requests.values():
+		var signature: Variant = JSON.parse_string(String(request.get("signature", "{}")))
+		if not signature is Dictionary or signature.get("operation") != "campaign_fabricate": continue
+		var id := String(Dictionary(signature.get("payload", {})).get("blueprint_id", ""))
+		var recipe := get_campaign_recipe(id)
+		var receipt: Dictionary = request.get("result", {})
+		if recipe.is_empty() or receipt.get("item_id") != recipe.get("item"): return false
+		var inputs: Dictionary = recipe.get("inputs", {})
+		if not inputs.is_empty():
+			if receipt.get("recipe_id") != id or receipt.get("cost") != recipe.cost or receipt.get("materials_consumed") != inputs: return false
+		elif receipt.has("recipe_id") or receipt.has("materials_consumed"):
+			return false # New material fields cannot be relabelled as a legacy recipe.
+	return true
 
 func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)) or not bool(context.get("at_home",false)): return _reject("home_required","Ausbau nur an der Heimatbasis")
@@ -445,17 +704,504 @@ func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 	_credits-=100; _revision+=1
 	return {"ok":true,"message":"Landepad gebaut"}
 
+func get_modular_base() -> Dictionary:
+	if _modular_plan_cache_revision != _revision:
+		var replay: Dictionary = MODULAR.replay(_requests)
+		_modular_plan_cache = Dictionary(replay.get("plan", MODULAR.empty())).duplicate(true)
+		_modular_plan_cache_revision = _revision
+	return _modular_plan_cache.duplicate(true)
+
+func _campaign_build_modular(payload: Dictionary, context: Dictionary, is_bed: bool) -> Dictionary:
+	if context.get("at_home") != true or context.get("campaign_authorized") != true:
+		return _reject("modular_build_unavailable", "Bau nur in der Heimatbasis verfügbar")
+	var replay: Dictionary = MODULAR.replay(_requests)
+	if not replay.get("ok", false): return replay
+	var plan: Dictionary = replay.plan
+	var valid: Dictionary = MODULAR.validate_bed(plan, payload) if is_bed else MODULAR.validate_room(plan, payload)
+	if not valid.get("ok", false): return valid
+	var cost := MODULAR.BED_COST if is_bed else int(MODULAR.ROOM_COST[payload.type])
+	if _credits < cost: return _reject("insufficient_credits", "Nicht genug Credits")
+	var candidate: Dictionary = plan.duplicate(true)
+	var result: Dictionary = {"ok":true,"sequence":int(replay.sequence)+1,"cost":cost}
+	if is_bed:
+		result["bed_id"] = "modular_bed_%04d" % (candidate.beds.size()+1)
+		candidate.beds.append({"id":result.bed_id,"room_id":payload.room_id,"slot":int(payload.slot)})
+	else:
+		result["room_id"] = "room_%04d" % (candidate.rooms.size()+1)
+		result["door_schema"] = 1
+		MODULAR.append_room(candidate, {"id":result.room_id,"type":payload.type,"x":int(payload.x),"y":int(payload.y),"rotation":int(payload.rotation)}, true)
+	var key := "modular_bed_validator" if is_bed else "modular_room_validator"
+	var validator: Callable = context.get(key, Callable())
+	if not validator.is_valid(): return _reject("modular_validator_unavailable", "Bauplatzprüfung nicht verfügbar")
+	var placement: Variant = validator.call(candidate.duplicate(true))
+	if typeof(placement) != TYPE_DICTIONARY or not bool(placement.get("ok", false)):
+		return placement if typeof(placement) == TYPE_DICTIONARY else _reject("modular_site_invalid", "Bauplatz nicht verfügbar")
+	if not is_bed and payload.type == "storage":
+		if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
+		if _modular_capacity_baseline < 0: _modular_capacity_baseline = int(_inventory["base:homebase"].capacity)
+		_inventory["base:homebase"].capacity = int(_inventory["base:homebase"].capacity) + MODULAR.STORAGE_CAPACITY
+	_credits -= cost
+	_revision += 1
+	result["message"] = "Bett gebaut" if is_bed else "Raum gebaut"
+	return result
+
+func _campaign_set_room_door(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if context.get("at_home") != true or context.get("campaign_authorized") != true:
+		return _reject("modular_build_unavailable", "Türbau nur in der Heimatbasis verfügbar")
+	var replay: Dictionary = MODULAR.replay(_requests)
+	if not replay.get("ok", false): return replay
+	var plan: Dictionary = replay.plan
+	var valid: Dictionary = MODULAR.validate_door(plan, payload)
+	if not valid.get("ok", false): return valid
+	var candidate := plan.duplicate(true)
+	MODULAR.apply_door(candidate, payload)
+	var validator: Callable = context.get("modular_room_validator", Callable())
+	if not validator.is_valid(): return _reject("modular_validator_unavailable", "Türprüfung nicht verfügbar")
+	var placement: Variant = validator.call(candidate.duplicate(true))
+	if typeof(placement) != TYPE_DICTIONARY or not placement.get("ok", false):
+		return placement if typeof(placement) == TYPE_DICTIONARY else _reject("modular_site_invalid", "Tür kann nicht geändert werden")
+	_revision += 1
+	return {"ok":true, "sequence":int(replay.sequence)+1, "cost":0, "room_id":payload.room_id, "side":int(payload.side), "open":bool(payload.open), "message":"Türöffnung gebaut" if payload.open else "Türöffnung entfernt"}
+
+func get_campaign_housing_count() -> int:
+	var count := 0
+	var legacy_beds := 2
+	for entry: Dictionary in _requests.values():
+		var result: Dictionary = entry.get("result", {})
+		if result.get("operation") == "campaign_build_housing": count = maxi(count, int(result.get("housing_count", 0)))
+		if result.get("operation") == "campaign_build_bed" and not result.has("housing_version"): legacy_beds = maxi(legacy_beds, int(result.get("bed_count", 2)))
+	return maxi(count, ceili(float(legacy_beds - 2) / 2.0))
+
+func _campaign_build_housing(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not payload.is_empty(): return _reject("invalid_housing_request", "Ungültiger Bauauftrag")
+	if context.get("campaign_authorized") != true or context.get("at_home") != true: return _reject("home_required", "Unterkunftsbau nur an der Heimatbasis")
+	var count := get_campaign_housing_count()
+	if count >= 9: return _reject("housing_limit", "Alle Unterkunftsbauplätze sind belegt")
+	if _credits < 500: return _reject("insufficient_credits", "Eine Unterkunft kostet 500 Credits")
+	var builder: Callable = context.get("campaign_housing_builder", Callable())
+	if not builder.is_valid(): return _reject("base_unavailable", "Bauplatz ist nicht verfügbar")
+	var result: Dictionary = builder.call(count + 1)
+	if not result.get("ok", false): return result
+	if result.get("housing_count") != count + 1: return _reject("housing_build_mismatch", "Unterkunftsbau konnte nicht bestätigt werden")
+	_credits -= 500; _revision += 1
+	return {"ok":true,"housing_count":count + 1,"cost":500,"message":"Unterkunft gebaut"}
+
+func get_campaign_bed_count() -> int:
+	var count := 2 + 2 * get_campaign_housing_count()
+	for entry: Dictionary in _requests.values():
+		var result: Dictionary = entry.get("result", {})
+		if result.get("operation") == "campaign_build_bed": count = maxi(count, int(result.get("bed_count", 2)))
+	return count
+
+func _campaign_build_bed(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not payload.is_empty(): return _reject("invalid_bed_request", "Ungültiger Bauauftrag")
+	if context.get("campaign_authorized") != true or context.get("at_home") != true: return _reject("home_required", "Bettbau nur an der Heimatbasis")
+	var count := get_campaign_bed_count()
+	if count >= 20: return _reject("bed_limit", "Die Bettenkapazität ist vollständig ausgebaut")
+	if count >= 2 + 2 * get_campaign_housing_count(): return _reject("housing_required", "Zuerst eine weitere Unterkunft bauen")
+	if _credits < 100: return _reject("insufficient_credits", "Ein weiteres Bett kostet 100 Credits")
+	var builder: Callable = context.get("campaign_bed_builder", Callable())
+	if not builder.is_valid(): return _reject("base_unavailable", "Bauplatz ist nicht verfügbar")
+	var result: Dictionary = builder.call(count + 1)
+	if not result.get("ok", false): return result
+	if result.get("bed_count") != count + 1: return _reject("bed_build_mismatch", "Bettbau konnte nicht bestätigt werden")
+	_credits -= 100
+	_revision += 1
+	return {"ok":true,"bed_count":count + 1,"cost":100,"housing_version":1,"message":"Zusätzliches Bett gebaut"}
+
+func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
+	var counts: Array[int] = []
+	var houses: Array[int] = []
+	for entry: Dictionary in requests.values():
+		var result: Dictionary = entry.get("result", {})
+		if result.get("operation") == "campaign_build_housing":
+			var housing_signature: Variant = JSON.parse_string(String(entry.get("signature", "")))
+			if typeof(housing_signature) != TYPE_DICTIONARY or not Dictionary(housing_signature.get("payload", {})).is_empty(): return false
+			if not _valid_nonnegative_integer(result.get("housing_count")) or result.get("cost") != 500: return false
+			var house := int(result.housing_count)
+			if house < 1 or house > 9 or houses.has(house): return false
+			houses.append(house)
+		if result.get("operation") != "campaign_build_bed": continue
+		var signature: Variant = JSON.parse_string(String(entry.get("signature", "")))
+		if typeof(signature) != TYPE_DICTIONARY or not Dictionary(signature.get("payload", {})).is_empty(): return false
+		if not _valid_nonnegative_integer(result.get("bed_count")) or result.get("cost") != 100: return false
+		var count := int(result.bed_count)
+		if count < 3 or count > 20 or counts.has(count): return false
+		counts.append(count)
+	counts.sort()
+	for i in range(counts.size()):
+		if counts[i] != i + 3: return false
+	return true
+
 func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location := String(context.get("location_id",""))
 	if not _has_service(location,"trade") or bool(context.get("craft_busy",true)): return _reject("trade_unavailable","Handel nicht erreichbar")
 	var wanted := "c_benit" if location=="satellite_crash" else "b_benit"
 	var item := String(payload.get("item_id",""))
+	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted:15})
+	var price := int(orders.get(item, 0))
 	var container := "craft:"+String(context.get("craft_id",""))
-	if item!=wanted or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
+	if price <= 0 or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
 	var quantity := int(payload.quantity)
 	var items: Dictionary = _inventory[container].items
 	if int(items.get(item,0))<quantity: return _reject("insufficient_items","Bestand reicht nicht")
 	items[item]-=quantity
 	if items[item]==0: items.erase(item)
-	_credits+=quantity*15; _revision+=1
-	return {"ok":true,"message":"Rohstoff verkauft"}
+	_credits+=quantity*price; _revision+=1
+	return {"ok":true,"message":"Waren verkauft","item_id":item,"quantity":quantity,"proceeds":quantity*price}
+
+
+func _reserve_station_recruit(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if context.get("station_service_verified", false) != true or context.get("location_id") != "polisa": return _reject("station_service_required", "Anwerbung nur auf Polisa")
+	var quote_callback: Callable = context.get("recruit_quote", Callable())
+	if not quote_callback.is_valid(): return _reject("recruit_unavailable", "Anwerbung nicht bereit")
+	var offer_id := String(payload.get("offer_id", ""))
+	var quote: Dictionary = quote_callback.call(offer_id)
+	if not quote.get("ok", false): return quote
+	var unit_id := String(quote.get("unit_id", ""))
+	var profile: Variant = quote.get("profile")
+	if offer_id.is_empty() or quote.get("offer_id") != offer_id or not unit_id.begins_with("polisa_recruit_") or typeof(profile) != TYPE_DICTIONARY or String(profile.get("unit_id", "")) != unit_id or not _valid_nonnegative_integer(quote.get("price")) or int(quote.price) < 1: return _reject("invalid_recruit_quote", "Angebot ungültig")
+	for entry: Dictionary in _requests.values():
+		var previous: Dictionary = entry.get("result", {})
+		if previous.get("operation") == "station_recruit_reserve" and (previous.get("unit_id") == unit_id or previous.get("offer_id") == offer_id): return _reject("recruit_already_hired", "Person bereits angefragt")
+	if _credits < int(quote.price): return _reject("insufficient_credits", "Credits reichen nicht")
+	_credits -= int(quote.price)
+	_revision += 1
+	return {"ok":true,"state":"pending","unit_id":unit_id,"offer_id":offer_id,"cost":int(quote.price),"location_id":"polisa","profile":profile.duplicate(true)}
+
+func get_recruit_reservation(request_id: String) -> Dictionary:
+	var entry: Dictionary = _requests.get(request_id, {})
+	var result: Dictionary = entry.get("result", {})
+	return result.duplicate(true) if result.get("operation") == "station_recruit_reserve" else {}
+
+func get_recruitment_records() -> Dictionary:
+	var result := {}
+	for entry: Dictionary in _requests.values():
+		var receipt: Dictionary = entry.get("result", {})
+		if receipt.get("operation") == "station_recruit_reserve": result[String(receipt.get("offer_id", ""))] = {"state":"pending","reservation_id":String(receipt.get("request_id", ""))}
+	for entry: Dictionary in _requests.values():
+		var receipt: Dictionary = entry.get("result", {})
+		if receipt.get("operation") in ["station_recruit_finalize", "station_recruit_cancel"]:
+			result[String(receipt.get("offer_id", ""))] = {"state":"hired" if receipt.get("operation") == "station_recruit_finalize" else "cancelled","reservation_id":String(receipt.get("reservation_id", ""))}
+	return result
+
+func has_pending_recruitments() -> bool:
+	for record: Dictionary in get_recruitment_records().values():
+		if record.get("state") == "pending": return true
+	return false
+
+func _finalize_station_recruit(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var reservation_id := String(payload.get("reservation_id", ""))
+	var reserve: Dictionary = Dictionary(_requests.get(reservation_id, {})).get("result", {})
+	if reserve.get("operation") != "station_recruit_reserve" or reserve.get("state") != "pending": return _reject("reservation_missing", "Anwerbung nicht vorgemerkt")
+	for entry: Dictionary in _requests.values():
+		var previous: Dictionary = entry.get("result", {})
+		if previous.get("operation") in ["station_recruit_finalize", "station_recruit_cancel"] and previous.get("reservation_id") == reservation_id: return _reject("recruit_already_hired", "Anwerbung bereits abgeschlossen")
+	var verify: Callable = context.get("recruit_verify", Callable())
+	if not verify.is_valid(): return _reject("recruit_unavailable", "Personenaufnahme nicht verfügbar")
+	var evidence: Dictionary = verify.call(String(reserve.unit_id), reservation_id)
+	if not evidence.get("ok", false): return _reject("admission_pending", "Personenaufnahme noch nicht bestätigt")
+	_revision += 1
+	return {"ok":true,"reservation_id":reservation_id,"unit_id":reserve.unit_id,"offer_id":reserve.offer_id,"cost":reserve.cost,"location_id":"polisa"}
+
+func _cancel_station_recruit(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var reservation_id := String(payload.get("reservation_id", ""))
+	var reserve: Dictionary = Dictionary(_requests.get(reservation_id, {})).get("result", {})
+	if reserve.get("operation") != "station_recruit_reserve": return _reject("reservation_missing", "Anwerbung nicht vorgemerkt")
+	for entry: Dictionary in _requests.values():
+		var previous: Dictionary = entry.get("result", {})
+		if previous.get("operation") in ["station_recruit_finalize", "station_recruit_cancel"] and previous.get("reservation_id") == reservation_id: return _reject("recruit_already_hired", "Anwerbung bereits abgeschlossen")
+	var verify: Callable = context.get("recruit_cancel_verify", Callable())
+	if not verify.is_valid() or not Dictionary(verify.call(String(reserve.unit_id), reservation_id)).get("ok", false): return _reject("admission_pending", "Aufnahme muss zuerst sicher beendet werden")
+	_credits += int(reserve.cost)
+	_revision += 1
+	return {"ok":true,"reservation_id":reservation_id,"unit_id":reserve.unit_id,"offer_id":reserve.offer_id,"cost":reserve.cost,"location_id":"polisa"}
+
+func _valid_recruit_requests(requests: Dictionary) -> bool:
+	var seen_units := {}
+	var seen_offers := {}
+	var reservations := {}
+	var finalizations := {}
+	for request_id: String in requests:
+		var entry: Dictionary = requests[request_id]
+		var result: Dictionary = entry.get("result", {})
+		var operation := String(result.get("operation", ""))
+		if operation in ["station_recruit_finalize", "station_recruit_cancel"]:
+			var reservation_id := String(result.get("reservation_id", ""))
+			var final_signature: Variant = JSON.parse_string(String(entry.get("signature", "")))
+			if reservation_id.is_empty() or finalizations.has(reservation_id) or typeof(final_signature) != TYPE_DICTIONARY or String(final_signature.get("payload", {}).get("reservation_id", "")) != reservation_id: return false
+			finalizations[reservation_id] = result
+			continue
+		if operation != "station_recruit_reserve": continue
+		var signature: Variant = JSON.parse_string(String(entry.get("signature", "")))
+		var unit_id := String(result.get("unit_id", ""))
+		var offer_id := String(result.get("offer_id", ""))
+		if typeof(signature) != TYPE_DICTIONARY or String(signature.get("payload", {}).get("offer_id", "")) != offer_id or unit_id.is_empty() or offer_id.is_empty() or seen_units.has(unit_id) or seen_offers.has(offer_id) or result.get("location_id") != "polisa" or not _valid_nonnegative_integer(result.get("cost")) or int(result.cost) < 1: return false
+		seen_units[unit_id] = true
+		seen_offers[offer_id] = true
+		if operation == "station_recruit_reserve":
+			if result.get("state") != "pending" or typeof(result.get("profile")) != TYPE_DICTIONARY or String(result.profile.get("unit_id", "")) != unit_id: return false
+			reservations[request_id] = result
+	for reservation_id: String in finalizations:
+		if not reservations.has(reservation_id): return false
+		var reserve: Dictionary = reservations[reservation_id]
+		var completed: Dictionary = finalizations[reservation_id]
+		for field in ["unit_id", "offer_id", "cost", "location_id"]:
+			if completed.get(field) != reserve.get(field): return false
+	return true
+
+func _station_buy_ship(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if String(context.get("location_id", "")) != "polisa" or bool(context.get("craft_busy", true)) or context.get("station_service_verified", false) != true:
+		return _reject("station_service_required", "Schiffskauf erst nach dem Andocken in Polisa")
+	var offer_id := String(payload.get("offer_id", ""))
+	var offer: Dictionary = Dictionary(_definitions.get("offers", {})).get(offer_id, {})
+	if String(offer.get("kind", "")) != "ship" or not Array(offer.get("location_ids", [])).has("polisa"):
+		return _reject("unknown_offer", "Dieses Schiff wird hier nicht verkauft")
+	var price := int(offer.get("unit_price", 0))
+	if price <= 0 or _credits < price: return _reject("insufficient_credits", "Credits reichen nicht")
+	if int(_stock_by_offer_id.get(offer_id, 0)) < 1: return _reject("insufficient_stock", "Schiff derzeit ausverkauft")
+	var delivery_mode := String(payload.get("delivery_mode", "homebase"))
+	if delivery_mode not in ["homebase", "local"]: return _reject("invalid_delivery_mode", "Lieferart ungültig")
+	var fulfillment: Callable = context.get("station_local_ship_fulfillment" if delivery_mode == "local" else "station_ship_fulfillment", Callable())
+	if not fulfillment.is_valid(): return _reject("fleet_unavailable", "Flottenübergabe nicht verfügbar")
+	# All failure gates precede the callback's publication tail and wallet debit.
+	var result: Dictionary = fulfillment.call(offer.duplicate(true), request_id, String(payload.get("requested_station_pad_id", ""))) if delivery_mode == "local" else fulfillment.call(offer.duplicate(true), request_id)
+	if not bool(result.get("ok", false)): return result
+	_credits -= price
+	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - 1
+	_revision += 1
+	result["cost"] = price
+	result["offer_id"] = offer_id
+	result["message"] = "Schiff gekauft / unbemannt auf Polisa bereit" if delivery_mode == "local" else "Schiff gekauft / Lieferung zur Heimatbasis bestaetigt"
+	return result
+
+
+func get_station_home_pads() -> int:
+	var count := 2
+	for receipt: Dictionary in _requests.values():
+		var result: Dictionary = receipt.get("result", {})
+		if result.get("operation", "") == "station_build_home_pad": count = maxi(count, int(result.get("home_pad_count", 2)))
+	return mini(count, 6)
+
+
+func _station_build_home_pad(context: Dictionary) -> Dictionary:
+	if context.get("station_service_verified", false) != true or String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst in Polisa andocken")
+	if context.get("second_pad_built", false) != true: return _reject("base_progress_required", "Zuerst den zweiten Heimatlandeplatz in der Kampagne fertigstellen")
+	var count := get_station_home_pads()
+	if count >= 6: return _reject("pad_limit", "Alle sechs Heimatbauplaetze sind ausgebaut")
+	if _credits < 200: return _reject("insufficient_credits", "Landeplatzbau kostet 200 Credits")
+	var builder: Callable = context.get("station_pad_builder", Callable())
+	if not builder.is_valid(): return _reject("base_unavailable", "Heimatbauplatz nicht verfuegbar")
+	var result: Dictionary = builder.call(count + 1)
+	if not result.get("ok", false): return result
+	_credits -= 200
+	_revision += 1
+	return {"ok":true,"home_pad_count":count + 1,"cost":200,"message":"Heimatlandeplatz gebaut"}
+
+
+func validate_station_receipts(requests: Dictionary) -> Dictionary:
+	var pads: Array = []
+	var ships := {}
+	var used_pads: Array = []
+	for request_id: String in requests:
+		var receipt: Dictionary = requests[request_id]
+		var result: Dictionary = receipt.get("result", {})
+		var signature: Dictionary = JSON.parse_string(String(receipt.get("signature", "{}")))
+		if result.get("operation", "") == "station_build_home_pad":
+			if not _valid_nonnegative_integer(result.get("home_pad_count")): return _reject("invalid_station_pad_receipt", "Landeplatzanzahl ungueltig")
+			var count := int(result.home_pad_count)
+			if count < 3 or count > 6 or pads.has(count) or result.get("cost") != 200: return _reject("invalid_station_pad_receipt", "Landeplatzbeleg ungueltig")
+			pads.append(count)
+		elif result.get("operation", "") == "station_buy_ship":
+			var offer_id := String(signature.get("payload", {}).get("offer_id", ""))
+			var offer: Dictionary = Dictionary(_definitions.get("offers", {})).get(offer_id, {})
+			var model := String(offer.get("model_id", ""))
+			var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
+			var pad := String(result.get("landing_pad_id", ""))
+			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or used_pads.has(pad) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
+			var mode := String(signature.get("payload", {}).get("delivery_mode", "homebase"))
+			if mode not in ["homebase", "local"]: return _reject("invalid_station_ship_receipt", "Lieferart ungültig")
+			var local_pad := String(result.get("acquisition_pad_id", ""))
+			if mode == "local":
+				if result.get("receipt_schema_version") != 2 or result.get("delivery_location_id") != "polisa" or result.get("origin_kind") != "local_station_purchase" or result.get("origin_location_id") != "polisa" or result.get("origin_receipt_id") != request_id or result.get("pad_fit_revision") != 1 or not STATION_CRAFT.receipt_pad_compatible(model, local_pad) or local_pad not in ["polisa_pad_01", "polisa_pad_02", "polisa_pad_03", "polisa_pad_04", "polisa_pad_05", "polisa_pad_06", "polisa_pad_07"]: return _reject("invalid_local_purchase_receipt", "Lokaler Erwerbsbeleg ungültig")
+				var requested_pad := String(signature.get("payload", {}).get("requested_station_pad_id", ""))
+				if not requested_pad.is_empty() and requested_pad != local_pad: return _reject("invalid_local_purchase_receipt", "Erwerbspad widerspricht Kaufauftrag")
+			elif result.get("delivery_location_id") != "homebase" or result.has("origin_kind") or result.has("acquisition_pad_id") or result.has("receipt_schema_version"):
+				return _reject("invalid_station_ship_receipt", "Heimatlieferbeleg ungültig")
+			ships[id] = {"craft_id":id,"model_id":model,"craft_type":String(offer.craft_type),"pad":pad,"landing_pad_id":pad,"delivery_mode":mode,"delivery_location_id":"polisa" if mode == "local" else "homebase","acquisition_pad_id":local_pad,"origin_kind":"local_station_purchase" if mode == "local" else "home_delivery","origin_location_id":"polisa" if mode == "local" else "homebase","origin_receipt_id":request_id}
+			used_pads.append(pad)
+	pads.sort()
+	for index in range(pads.size()):
+		if pads[index] != index + 3: return _reject("invalid_station_pad_sequence", "Landeplatzbaubelege unvollstaendig")
+	var capacity := 2 + pads.size()
+	for ship: Dictionary in ships.values():
+		if int(String(ship.pad).trim_prefix("homebase_pad_")) > capacity: return _reject("unbuilt_station_delivery_pad", "Lieferlandeplatz nicht gebaut")
+	return {"ok":true,"capacity":capacity,"ships":ships}
+
+
+func _install_ship_component(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if String(context.get("location_id", "")) != "polisa" or context.get("station_service_verified") != true or bool(context.get("craft_busy", true)): return _reject("station_service_required", "Warp-Einbau erst nach dem Andocken in Polisa")
+	var craft_id := String(payload.get("craft_id", ""))
+	var source := String(payload.get("source_container_id", ""))
+	var item_id := String(payload.get("item_id", ""))
+	var revision: Variant = payload.get("expected_equipment_revision")
+	if not _fuel_by_craft_id.has(craft_id) or source != "craft:"+craft_id or not _inventory.has(source) or (not SHIP_COMPONENTS.known(item_id) and not SPACE_COMPONENTS.known(item_id)) or not _valid_nonnegative_integer(revision): return _reject("invalid_component_install", "Schiff, Komponente oder Lager ungültig")
+	var prepare: Callable = context.get("prepare_ship_component_install", Callable())
+	var commit: Callable = context.get("commit_ship_component_install", Callable())
+	if not prepare.is_valid() or not commit.is_valid(): return _reject("equipment_unavailable", "Antriebswerkstatt nicht verbunden")
+	var prepared: Dictionary = prepare.call(craft_id, String(payload.get("slot_id", "")), item_id, int(revision))
+	if not prepared.get("ok", false): return prepared
+	var previous := String(prepared.get("previous_item_id", ""))
+	if not SHIP_COMPONENTS.known(previous) and not SPACE_COMPONENTS.known(previous): return _reject("invalid_component_install", "Ausgebaute Komponente unbekannt")
+	var candidate: Dictionary = _inventory[source].duplicate(true)
+	if int(candidate.items.get(item_id, 0)) < 1: return _reject("insufficient_items", "Gekaufter Antrieb fehlt im Schiffslager")
+	candidate.items[item_id] -= 1
+	if int(candidate.items[item_id]) == 0: candidate.items.erase(item_id)
+	candidate.items[previous] = int(candidate.items.get(previous, 0)) + 1
+	if not INVENTORY.valid_container(candidate): return _reject("container_full", "Ausgebauter Antrieb passt nicht ins Schiffslager")
+	# Bound owner callback may reject without writing. After success only no-fail
+	# candidate assignments follow, without signals, awaits or UI callbacks.
+	var installed: Dictionary = commit.call(prepared, request_id)
+	if not installed.get("ok", false): return installed
+	_inventory[source] = candidate
+	_revision += 1
+	installed["source_container_id"] = source
+	installed["cost"] = 0
+	installed["message"] = "Komponente eingebaut / bisherige Komponente im Schiffslager verstaut"
+	return installed
+
+func _valid_component_requests(requests: Dictionary, stock: Dictionary = {}, definitions: Dictionary = {}) -> bool:
+	var purchased := {}
+	for id: String in requests:
+		var entry: Dictionary = requests[id]
+		var result: Dictionary = entry.get("result", {})
+		var item_id := String(result.get("item_id", ""))
+		if String(result.get("operation", "")) == "buy" and (SHIP_COMPONENTS.known(item_id) or SPACE_COMPONENTS.known(item_id)):
+			var purchase: Variant = JSON.parse_string(String(entry.get("signature", "")))
+			if typeof(purchase) != TYPE_DICTIONARY: return false
+			var args: Dictionary = purchase.get("payload", {})
+			var offer_id := String(args.get("offer_id", ""))
+			var offer: Dictionary = Dictionary(definitions.get("offers", {})).get(offer_id, {})
+			if offer.is_empty() or offer.get("item_id") != item_id or (offer_id != "polisa_warp_hemera" and offer_id != "polisa_component_" + item_id) or not _valid_positive_integer(args.get("quantity")) or result.get("quantity") != args.quantity or result.get("cost") != int(args.quantity)*int(offer.get("unit_price", 0)) or result.get("container_id") not in ["craft:"+String(args.get("craft_id", "")),"station:polisa:lift"]: return false
+			purchased[offer_id] = int(purchased.get(offer_id, 0)) + int(args.quantity)
+		if String(result.get("operation", "")) != "station_install_ship_component": continue
+		var parsed: Variant = JSON.parse_string(String(entry.get("signature", "")))
+		if typeof(parsed) != TYPE_DICTIONARY: return false
+		var args: Dictionary = parsed.get("payload", {})
+		for key in ["craft_id", "slot_id", "item_id", "source_container_id"]:
+			if typeof(args.get(key)) != TYPE_STRING or result.get(key) != args[key]: return false
+		var old_id := String(result.get("previous_item_id", ""))
+		var known_pair: bool = (SHIP_COMPONENTS.known(args.item_id) and SHIP_COMPONENTS.known(old_id) and args.slot_id == "quantum_drive") or (SPACE_COMPONENTS.known(args.item_id) and SPACE_COMPONENTS.known(old_id) and args.slot_id != "quantum_drive")
+		if not known_pair or args.source_container_id != "craft:"+String(args.craft_id) or args.item_id == old_id or not _valid_nonnegative_integer(args.get("expected_equipment_revision")) or result.get("previous_equipment_revision") != args.expected_equipment_revision or result.get("equipment_revision") != int(args.expected_equipment_revision)+1 or result.get("cost") != 0: return false
+	for offer_id: String in purchased:
+		if not stock.has(offer_id) or int(stock[offer_id]) != int(definitions.offers[offer_id].stock) - int(purchased[offer_id]): return false
+	for offer_id: String in stock:
+		if (offer_id == "polisa_warp_hemera" or offer_id.begins_with("polisa_component_")) and int(stock[offer_id]) != int(definitions.offers[offer_id].stock) - int(purchased.get(offer_id, 0)): return false
+	return true
+
+
+func get_station_ship_purchase(craft_id: String) -> Dictionary:
+	# Derived immutable receipt projection; no second location/occupancy truth.
+	if _station_purchase_cache_revision != _revision:
+		var validated := validate_station_receipts(_requests)
+		_station_purchase_cache = validated.get("ships", {}) if validated.get("ok", false) else {}
+		_station_purchase_cache_revision = _revision
+	return Dictionary(_station_purchase_cache.get(craft_id, {})).duplicate(true)
+
+
+func _reset_route_fuel_preparation() -> void:
+	_route_prepare_authority = null
+	_route_prepare_bound = false
+	_route_prepare_epoch += 1
+	_route_prepare_seal_key = ""
+
+func bind_route_fuel_preparation_authority(authority: Object) -> bool:
+	if not is_instance_valid(authority): return false
+	if _route_prepare_bound:
+		return _route_prepare_authority != null and _route_prepare_authority.get_ref() == authority
+	_route_prepare_authority = weakref(authority)
+	_route_prepare_bound = true
+	# No global RNG use: authority object identity is the access capability;
+	# this private per-binding seal only protects prepared data from alteration.
+	_route_prepare_seal_key = "%s:%s:%s" % [get_instance_id(), _route_prepare_epoch, Time.get_ticks_usec()]
+	return true
+
+func _has_route_fuel_authority(authority: Variant) -> bool:
+	return typeof(authority) == TYPE_OBJECT and is_instance_valid(authority) and _route_prepare_bound and _route_prepare_authority != null and _route_prepare_authority.get_ref() == authority
+
+func _route_fuel_input_fingerprint(command: Dictionary, flags: Dictionary) -> String:
+	var payload: Dictionary = command.payload
+	var craft_id := String(payload.get("craft_id", ""))
+	var route := String(payload.get("origin_location_id", "")) + ">" + String(payload.get("destination_location_id", ""))
+	var reverse := String(payload.get("destination_location_id", "")) + ">" + String(payload.get("origin_location_id", ""))
+	var routes: Dictionary = _definitions.get("route_fuel_costs", {})
+	var request_id := String(command.request_id).strip_edges()
+	var inputs := {"revision":_revision,"bind_epoch":_route_prepare_epoch,
+		"craft_id":craft_id,"fuel_present":_fuel_by_craft_id.has(craft_id),"fuel":_fuel_by_craft_id.get(craft_id),
+		"route":route,"route_present":routes.has(route),"route_cost":routes.get(route),
+		"reserve_required":bool(flags.require_return_reserve),
+		"request_id":request_id,"receipt_present":_requests.has(request_id),"receipt":_requests.get(request_id)}
+	if bool(flags.require_return_reserve):
+		inputs.merge({"reverse_route":reverse,"reverse_present":routes.has(reverse),"reverse_cost":routes.get(reverse)})
+	# O(1) selected inputs: unrelated receipts, craft registrations, offers and
+	# inventory configuration are not consumed by preview_route_fuel.
+	return JSON.stringify(inputs, "", true).sha256_text()
+
+func _sign_prepared_route_fuel(candidate: Dictionary) -> String:
+	var content := candidate.duplicate(true)
+	content.erase("seal")
+	return (_route_prepare_seal_key + JSON.stringify(content, "", true)).sha256_text()
+
+func prepare_route_fuel(command: Dictionary, trusted_context: Dictionary = {}) -> Dictionary:
+	if not _has_route_fuel_authority(trusted_context.get("route_fuel_authority")):
+		return _reject("route_preparation_authority_required", "Routenvorbereitung benötigt gebundene Laufzeitberechtigung")
+	if not COMMANDS.validate_command(command) or _definitions.is_empty() or String(command.get("operation", "")) != "consume_route_fuel": return _reject("invalid_command", "Nur Routentreibstoff kann vorbereitet werden")
+	var request_id := String(command.request_id).strip_edges()
+	var signature := JSON.stringify({"operation":command.operation,"payload":command.payload}, "", true)
+	var mode := "apply"
+	var result := {}
+	if _requests.has(request_id):
+		if String(_requests[request_id].signature) != signature: return _reject("request_id_conflict", "Anfrage-ID bereits anders verwendet")
+		mode = "replay"
+		result = Dictionary(_requests[request_id].result).duplicate(true)
+		result["replayed"] = true
+	var flags := {"departure_authorized":typeof(trusted_context.get("departure_authorized")) == TYPE_BOOL and trusted_context.get("departure_authorized") == true, "require_return_reserve":typeof(trusted_context.get("require_return_reserve", false)) == TYPE_BOOL and trusted_context.get("require_return_reserve", false) == true}
+	if mode == "apply":
+		if typeof(trusted_context.get("departure_authorized")) != TYPE_BOOL or typeof(trusted_context.get("require_return_reserve", false)) != TYPE_BOOL: return _reject("invalid_route_context", "Routenberechtigung ungültig")
+		result = preview_route_fuel(command.payload, flags)
+		if not result.get("ok", false): return result
+		result["request_id"] = request_id
+		result["operation"] = "consume_route_fuel"
+	var candidate := {"ok":true,"candidate_schema":1,"owner_id":get_instance_id(),"bind_epoch":_route_prepare_epoch,"expected_revision":_revision,"input_fingerprint":_route_fuel_input_fingerprint(command, flags),"command":command.duplicate(true),"flags":flags,"mode":mode,"result":result.duplicate(true)}
+	if mode == "apply": candidate["fuel_after"] = maxf(float(_fuel_by_craft_id[String(command.payload.get("craft_id", ""))]) - float(result.fuel_cost), 0.0)
+	candidate["seal"] = _sign_prepared_route_fuel(candidate)
+	return candidate
+
+func validate_prepared_route_fuel(candidate: Dictionary, authority: Object) -> Dictionary:
+	if not _has_route_fuel_authority(authority): return _reject("route_preparation_authority_required", "Routenvorbereitung benötigt gebundene Laufzeitberechtigung")
+	if candidate.get("ok") != true or candidate.get("candidate_schema") != 1 or candidate.get("owner_id") != get_instance_id() or candidate.get("bind_epoch") != _route_prepare_epoch or String(candidate.get("seal", "")) != _sign_prepared_route_fuel(candidate): return _reject("invalid_prepared_route", "Routenvorbereitung ungültig")
+	if candidate.get("expected_revision") != _revision or String(candidate.get("input_fingerprint", "")) != _route_fuel_input_fingerprint(candidate.command, candidate.flags): return _reject("stale_prepared_route", "Versorgungsstand hat sich geändert")
+	var cmd: Dictionary = candidate.command
+	var result: Dictionary = Dictionary(candidate.result).duplicate(true)
+	var patch := {"mode":String(candidate.mode),"result":result}
+	if String(candidate.mode) == "apply":
+		patch.merge({"craft_id":String(cmd.payload.get("craft_id", "")),"fuel_after":float(candidate.fuel_after),"request_id":String(cmd.request_id).strip_edges(),"receipt":{"signature":JSON.stringify({"operation":cmd.operation,"payload":cmd.payload}, "", true),"result":result.duplicate(true)}})
+	# Detached validation output is the immutable-by-contract tail input. The
+	# publisher never dereferences caller-mutatable candidate dictionaries.
+	return {"ok":true,"patch":patch}
+
+func commit_prepared_route_fuel(candidate: Dictionary, authority: Object) -> Dictionary:
+	var validation := validate_prepared_route_fuel(candidate, authority)
+	if not validation.get("ok", false): return validation
+	return _publish_prepared_route_fuel(candidate, validation)
+
+func _publish_prepared_route_fuel(_candidate: Dictionary, validation: Dictionary) -> Dictionary:
+	# INTERNAL no-fail tail. Only a synchronous owning coordinator may pass a
+	# fresh successful validation after checking ALL participating owners. No
+	# intervening writes/reentry/await are permitted. Public callers use commit.
+	var patch: Dictionary = validation.patch
+	if String(patch.mode) == "apply":
+		_fuel_by_craft_id[String(patch.craft_id)] = float(patch.fuel_after)
+		_revision += 1
+		_requests[String(patch.request_id)] = Dictionary(patch.receipt).duplicate(true)
+	return Dictionary(patch.result).duplicate(true)

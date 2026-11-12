@@ -1,0 +1,107 @@
+{
+  "schema": "sternenbuergerchen.homebase_visual_coherence.v1",
+  "date": "2026-11-12",
+  "status": "native candidate; personal visual acceptance pending",
+  "source_state": "working tree at manifest creation; UI changed concurrently, not an immutable whole-scene closure",
+  "renderer": "Godot 4.6.2 OpenGL Compatibility",
+  "resolution": [
+    1280,
+    720
+  ],
+  "hidden_desktop": true,
+  "visual_checks": 21,
+  "pins": [
+    {
+      "path": "Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+      "sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6"
+    },
+    {
+      "path": "Assets/kenney_space-kit/Models/GLTF format/rock_largeA.glb",
+      "sha256": "13b2bf393fcd7ca8c73d8a2a731da0be6c2c2b4e67ef0ae826e816c0d8733f2f"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e"
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/references/aussenposten_stilstudie.png",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd"
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "sha256": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92"
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_dressing.gd",
+      "sha256": "9b38642dec0cba10f0f167076dafc9dfec1af616c27ad46819752cc229a1cecd"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_profile.gd",
+      "sha256": "06467f981a73674857ae1ef0bfeeead15a7e74492fbf3fee24500fa34ac8ee36"
+    },
+    {
+      "path": "scripts/terrain/hex_ground_batch.gd",
+      "sha256": "55a9651e23488901cd67947150ce07d06a2c31c979a657925be9f9a934b374d9"
+    },
+    {
+      "path": "scripts/terrain/homebase_rock_visual.gd",
+      "sha256": "9a6374e095f2fa56881a28a48d12f35d11e2f93599011de20dcbd59948e918da"
+    },
+    {
+      "path": "scripts/terrain/homebase_rock_rules.gd",
+      "sha256": "29e84e4cd13dc3b2e9a997ed53146c21a1d427e1dff746afd96d71bd1d305000"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "d6e1cc8bf0eeaebe1e7804a100ba476f94b51915964f1d61e07372b288fb82f1"
+    },
+    {
+      "path": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "ebda123757af05b4e48e132b9f173b0fd66d95ab73258fb2e6f3237eea79a430"
+    },
+    {
+      "path": "art/homebase_ui_study_20261112/sidebar_study.png",
+      "sha256": "efdfa08e6fb226f38f80e0782d1c023c832b71775ae99c015cc9339eb8fd6ee0"
+    },
+    {
+      "path": "art/homebase_ui_study_20261112/icon_study.png",
+      "sha256": "eb8e3d825c000bba8243c268483ec3eb1bc5b28786678dcb6bd549656d85fb20"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/after_overview.png",
+      "sha256": "b1a36f32a2e24c8e9e4e2c487c0576faf066d6e30a34f46ada800c84463b9927"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/after_paths.png",
+      "sha256": "6e8c927350a95571d6779766f86982735680766a7c21157673c5a73753a6fd8c"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/after_rocks.png",
+      "sha256": "e44aab1c9d0a56a4db1bdd7bac9e4b4c76f3bd5942bd0b6f762edbec52187827"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/before_overview.png",
+      "sha256": "f065bc9f2af17823564c1fa01aa32947776681bdb6cf438cc74ca431c72d25d4"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/before_rocks.png",
+      "sha256": "25de33a095209913f7d82b9ca4b6579d0c5324aeb2887926ec72c8c56160a33b"
+    },
+    {
+      "path": "docs/qa/homebase_visual_coherence_20261112/native/earlier_square_path.png",
+      "sha256": "e1b195ce739b079d99308ad27242dcda920cc470c0362c08670b46044a278c77"
+    }
+  ]
+}

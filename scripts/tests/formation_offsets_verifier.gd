@@ -30,7 +30,8 @@ func _test_single_unit_keeps_anchor() -> void:
 	var target: Vector2 = Vector2(200.0, 100.0)
 	var resolved: Vector2 = leader.call("_derive_target_position", _make_task(target), unit, "move_to_position", "move")
 	_assert(resolved.distance_to(target) <= 0.01, "Single unit keeps original target anchor")
-	unit.queue_free()
+	leader.free()
+	unit.free()
 
 
 func _test_fireteam_members_get_distinct_targets() -> void:
@@ -49,9 +50,10 @@ func _test_fireteam_members_get_distinct_targets() -> void:
 	_assert(wing_a_target.distance_to(target) > 1.0, "First wing gets offset target")
 	_assert(wing_b_target.distance_to(target) > 1.0, "Second wing gets offset target")
 	_assert(wing_a_target.distance_to(wing_b_target) > 1.0, "Wing targets do not stack")
-	lead_unit.queue_free()
-	wing_a.queue_free()
-	wing_b.queue_free()
+	leader.free()
+	lead_unit.free()
+	wing_a.free()
+	wing_b.free()
 
 
 func _test_lead_gets_center_slot_even_if_added_later() -> void:
@@ -67,9 +69,10 @@ func _test_lead_gets_center_slot_even_if_added_later() -> void:
 	var resolved_wing: Vector2 = leader.call("_derive_target_position", _make_task(target), wing_a, "move_to_position", "move")
 	_assert(resolved_lead.distance_to(target) <= 0.01, "Lead is centered even when added after another unit")
 	_assert(resolved_wing.distance_to(target) > 1.0, "Non-lead receives formation offset")
-	wing_a.queue_free()
-	lead_unit.queue_free()
-	wing_b.queue_free()
+	leader.free()
+	wing_a.free()
+	lead_unit.free()
+	wing_b.free()
 
 
 func _make_task(target_position: Vector2):

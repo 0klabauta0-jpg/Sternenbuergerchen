@@ -20,6 +20,9 @@ const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const INTERACTION_RADIUS: float = 1.8
 const BASE_NAV: GDScript = preload("res://scripts/meta/base_interior_navigation.gd")
+const TACTICAL_THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const TACTICAL_ICONS: GDScript = preload("res://scripts/ui/native_ui_icons.gd")
+const RANK_BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 
 var _personnel_owner: WeakRef
 var _personnel_command: Callable
@@ -27,10 +30,19 @@ var _selected_person_id: String = ""
 var _person_visuals: Dictionary = {}
 var _person_panel: VBoxContainer
 var _person_selector: OptionButton
+var _person_portrait: TextureRect
+var _portrait_person_id := ""
+var _person_badges: HBoxContainer
+var _badge_signature := ""
+var _other_people: HBoxContainer
+var _other_people_scroll: ScrollContainer
+var _other_people_signature := ""
 var _person_state: Label
 var _person_feedback: Label
 var _person_buttons: Dictionary = {}
+var _move_armed := false
 var _personnel_ui_elapsed: float = 0.0
+var _camera_anchor: Node2D
 var _navigation_data
 var _navigation_graph: RefCounted
 
@@ -46,9 +58,18 @@ func configure_personnel_runtime(owner: Node, command: Callable) -> void:
 	var previous: Node = _personnel_runtime()
 	if previous != null and previous.is_connected("terminal_ready", _personnel_terminal_ready):
 		previous.disconnect("terminal_ready", _personnel_terminal_ready)
+	if previous != null and previous.is_connected("state_changed", _personnel_state_changed):
+		previous.disconnect("state_changed", _personnel_state_changed)
 	_personnel_owner = weakref(owner) if owner != null else null
 	if owner != null:
 		owner.connect("terminal_ready", _personnel_terminal_ready)
+		owner.connect("state_changed", _personnel_state_changed)
+
+
+func _personnel_state_changed() -> void:
+	if _initialized:
+		_update_personnel_visuals()
+		if _authored_stage != null: _sync_capacity_visuals(_authored_stage)
 
 
 func _personnel_terminal_ready(unit_id: String, terminal_id: String) -> void:
@@ -111,6 +132,7 @@ func _select_person(id: String) -> bool:
 	if owner == null or owner.call("get_actor", id) == null:
 		return false
 	_selected_person_id = id
+	_move_armed = false
 	_selected_world_craft_id = ""
 	world_selection_changed.emit("person",id)
 	_manual_camera = false
@@ -146,52 +168,132 @@ func _build_personnel_controls() -> void:
 	_person_panel = VBoxContainer.new()
 	_person_panel.name = "BasePersonnelActions"
 	add_child(_person_panel)
-	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_person_panel.offset_left = 24.0
-	_person_panel.offset_right = 424.0
-	_person_panel.offset_top = -298.0
-	_person_panel.offset_bottom = -24.0
+	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	var dock := PanelContainer.new()
+	dock.name = "BaseCommandDock"
+	dock.add_theme_stylebox_override("panel", TACTICAL_THEME.build_flat_stylebox(Color("071f29"), Color("2e7b8a"), 6, 1, Vector4(8, 6, 8, 6)))
+	_person_panel.add_child(dock)
+	var dock_row := HBoxContainer.new()
+	dock_row.add_theme_constant_override("separation", 12)
+	dock.add_child(dock_row)
+	var selection := VBoxContainer.new()
+	selection.name = "SelectedPersonCard"
+	selection.custom_minimum_size.x = 240
+	selection.add_theme_constant_override("separation", 3)
+	dock_row.add_child(selection)
+	var caption := Label.new()
+	caption.text = "AUSGEWÄHLTE PERSON"
+	caption.add_theme_font_size_override("font_size", 15)
+	caption.add_theme_color_override("font_color", Color("ffd348"))
+	selection.add_child(caption)
+	var identity := HBoxContainer.new()
+	identity.add_theme_constant_override("separation", 6)
+	selection.add_child(identity)
+	_person_portrait = TextureRect.new()
+	_person_portrait.name = "SelectedPersonPortrait"
+	_person_portrait.custom_minimum_size = Vector2(50, 62)
+	_person_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_person_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_person_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	identity.add_child(_person_portrait)
+	var details := VBoxContainer.new()
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.add_theme_constant_override("separation", 3)
+	identity.add_child(details)
 	_person_selector = OptionButton.new()
 	_person_selector.tooltip_text = "Person auswählen – auch Besatzung an Bord"
 	_person_selector.item_selected.connect(func(index: int): _select_person(String(_person_selector.get_item_metadata(index))))
-	_person_panel.add_child(_person_selector)
-	var name_row:=HBoxContainer.new(); _person_panel.add_child(name_row)
+	_person_selector.add_theme_font_size_override("font_size", 15)
+	details.add_child(_person_selector)
+	var name_row:=HBoxContainer.new(); details.add_child(name_row)
 	var name_input:=LineEdit.new(); name_input.name="RenamePerson"; name_input.placeholder_text="Neuer Name"; name_input.max_length=48; name_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL; name_row.add_child(name_input)
-	var rename:=Button.new(); rename.text="Umbenennen"; name_row.add_child(rename)
+	var rename:=Button.new(); rename.text="OK"; rename.tooltip_text="Neuen Namen übernehmen"; name_row.add_child(rename)
 	rename.pressed.connect(func(): _personnel_action("base_rename",{"display_name":name_input.text}); name_input.clear())
 	_person_state = Label.new()
-	_person_panel.add_child(_person_state)
+	_person_state.add_theme_font_size_override("font_size", 15)
+	details.add_child(_person_state)
+	_person_badges = HBoxContainer.new()
+	_person_badges.name = "SelectedPersonBadges"
+	_person_badges.add_theme_constant_override("separation", 4)
+	details.add_child(_person_badges)
 	var rest := CheckButton.new()
 	rest.name = "AutomaticRest"
 	rest.text = "Automatisch ruhen"
 	rest.tooltip_text = "Bei Leerlauf zu einem freien Bett gehen. Aus: nach manuellen Befehlen stehen bleiben."
 	rest.toggled.connect(func(enabled: bool): _personnel_action("base_auto_rest", {"enabled":enabled}))
-	_person_panel.add_child(rest)
+	rest.add_theme_font_size_override("font_size", 14)
+	details.add_child(rest)
 	_person_buttons["auto_rest"] = rest
+	var commands := VBoxContainer.new()
+	commands.add_theme_constant_override("separation", 3)
+	dock_row.add_child(commands)
+	dock_row.move_child(commands, 0)
+	var commands_title := Label.new()
+	commands_title.text = "BASISBEFEHLE"
+	commands_title.add_theme_font_size_override("font_size", 15)
+	commands_title.add_theme_color_override("font_color", Color("a8c0ca"))
+	commands.add_child(commands_title)
 	var actions := GridContainer.new()
-	actions.columns = 3
-	_person_panel.add_child(actions)
-	for spec: Array in [["base_board", "Einsteigen"], ["base_unboard", "Aussteigen"], ["equipment", "Ausrüsten"], ["base_sleep", "Schlafen"], ["base_wake", "Aufwecken"], ["details", "Details"], ["pilot", "Pilot übernehmen"], ["base_cancel", "Abbrechen"]]:
+	actions.columns = 5
+	commands.add_child(actions)
+	for spec: Array in [["move", "Bewegen"], ["base_board", "Einsteigen"], ["base_unboard", "Aussteigen"], ["equipment", "Ausrüsten"], ["details", "Details"], ["base_sleep", "Schlafen"], ["base_wake", "Aufwecken"], ["pilot", "Pilot"], ["base_cancel", "Abbrechen"]]:
 		var operation: String = String(spec[0])
 		var button := Button.new()
 		button.text = String(spec[1])
 		var tips: Dictionary = {"base_board":"Zum Schiff gehen und bestaetigt einsteigen. Truppmitglieder verwenden den bestehenden Trupp-Payload.", "base_unboard":"Das verfuegbare Schiff verlassen. Die Pilotenplatzzuweisung bleibt erhalten.", "equipment":"Vorhandene Personalausruestung fuer diese Person oeffnen.", "base_sleep":"Ein freies Bett reservieren und zu Fuss aufsuchen. Fuehrt keine Sofortheilung aus.", "base_wake":"Aufwecken und Bett freigeben.", "details":"Das vorhandene Charakterblatt dieser Person oeffnen.", "pilot":"Dieser Person den Pilotenplatz zuweisen. Eine Truppperson zuerst im Truppmenue freigeben.", "base_cancel":"Den laufenden Basisweg abbrechen und die Bettreservierung freigeben."}
 		button.tooltip_text = String(tips.get(operation, ""))
-		button.custom_minimum_size = Vector2(128, 36)
+		TACTICAL_THEME.style_action_tile(button)
+		button.custom_minimum_size = Vector2(75, 58)
+		button.add_theme_font_size_override("font_size", 14)
+		var icons := {"move":"move", "base_board":"dropship", "equipment":"loadout", "base_cancel":"order_delete"}
+		if icons.has(operation):
+			button.icon = TACTICAL_ICONS.get_icon(String(icons[operation]))
+			button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			button.expand_icon = true
+		if operation == "move": button.tooltip_text = "Bewegen: Ziel mit Linksklick auswählen. Rechtsklick funktioniert weiterhin."
 		button.pressed.connect(func():
-			if operation == "equipment":
+			if operation == "move":
+				_move_armed = true
+				_person_feedback.text = "Bewegen: Ziel auf dem Boden anklicken."
+				_host.grab_focus()
+			elif operation == "equipment":
 				_personnel_action("focus_unit")
 				_personnel_action("navigate", {"mode": "personnel"})
 			else:
 				_personnel_action(operation))
 		actions.add_child(button)
 		_person_buttons[operation] = button
+	var others := VBoxContainer.new()
+	others.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dock_row.add_child(others)
+	var others_label := Label.new()
+	others_label.text = "WEITERE PERSONEN"
+	others_label.add_theme_font_size_override("font_size", 12)
+	others.add_child(others_label)
+	_other_people_scroll = ScrollContainer.new()
+	_other_people_scroll.custom_minimum_size = Vector2(100, 90)
+	_other_people_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_other_people_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	others.add_child(_other_people_scroll)
+	_other_people = HBoxContainer.new()
+	_other_people_scroll.add_child(_other_people)
 	_person_feedback = Label.new()
 	_person_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_person_feedback.custom_minimum_size.x = 390
-	_person_panel.add_child(_person_feedback)
+	others.add_child(_person_feedback)
 	_hint.text = "NPC anklicken · Rechtsklick Ziel · E Konsole"
+	_resize_personnel_panel()
 	_update_personnel_controls()
+
+
+func _resize_personnel_panel() -> void:
+	if _person_panel == null: return
+	var viewport_size := get_viewport_rect().size
+	var origin := global_position
+	_person_panel.offset_left = -origin.x
+	_person_panel.offset_right = viewport_size.x - (origin.x + size.x)
+	_person_panel.offset_bottom = viewport_size.y - (origin.y + size.y)
+	_person_panel.offset_top = _person_panel.offset_bottom - maxf(180.0, _person_panel.get_combined_minimum_size().y)
 
 
 func _update_personnel_controls() -> void:
@@ -199,6 +301,16 @@ func _update_personnel_controls() -> void:
 		return
 	_person_panel.visible = _active and not _pad_preview and not _selected_person_id.is_empty()
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	_refresh_person_cards(units)
+	for person: Dictionary in units:
+		var id := String(person.unit_id)
+		if not _person_visuals.has(id): continue
+		var actor: Node = _personnel_runtime().call("get_actor", id)
+		var armor_id := String(actor.call("get_armor_id"))
+		var model: Node3D = _person_visuals[id].model
+		if String(model.get_meta("worn_armor_id", "")) != armor_id:
+			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(model, armor_id)
+			_view.call("_request_viewport_redraw")
 	if _person_selector.item_count != units.size():
 		_person_selector.clear()
 		for person: Dictionary in units:
@@ -214,15 +326,105 @@ func _update_personnel_controls() -> void:
 		var labels: Dictionary = {"outside": "In der Basis", "moving": "Unterwegs", "sleeping": "Schläft", "aboard": "An Bord", "boarding": "Geht zum Schiff", "away": "Im Einsatz"}
 		_person_state.text = String(labels.get(status, status))
 		(_person_buttons.base_board as Button).disabled = status in ["aboard", "away"]
+		(_person_buttons.move as Button).disabled = status in ["aboard", "away", "boarding"]
 		(_person_buttons.auto_rest as CheckButton).set_pressed_no_signal(bool(person.get("auto_rest_enabled",true)))
 		(_person_buttons.base_unboard as Button).disabled = status != "aboard"
 		(_person_buttons.base_wake as Button).disabled = status != "sleeping"
 		(_person_buttons.base_sleep as Button).disabled = status in ["aboard", "sleeping", "away"]
 
 
+func _portrait_for_person(id: String) -> Texture2D:
+	var owner := _personnel_runtime()
+	if owner == null: return null
+	var screen: Node = owner.get("_screen")
+	if not is_instance_valid(screen) or not screen.has_method("_get_profile_portrait_path"): return null
+	var path := String(screen.call("_get_profile_portrait_path", id))
+	return load(path) as Texture2D if not path.is_empty() and ResourceLoader.exists(path) else null
+
+
+func _refresh_person_cards(units: Array) -> void:
+	if _person_portrait == null or _other_people == null: return
+	_refresh_person_badges()
+	if _portrait_person_id != _selected_person_id:
+		_person_portrait.texture = _portrait_for_person(_selected_person_id)
+		_portrait_person_id = _selected_person_id
+	var signature := _selected_person_id
+	for person: Dictionary in units:
+		signature += "|%s:%s" % [String(person.get("unit_id", "")), String(person.get("name", ""))]
+	if signature == _other_people_signature: return
+	_other_people_signature = signature
+	for child in _other_people.get_children():
+		_other_people.remove_child(child)
+		child.queue_free()
+	for person: Dictionary in units:
+		var id := String(person.get("unit_id", ""))
+		if id.is_empty() or id == _selected_person_id: continue
+		var card := Button.new()
+		card.name = "SelectPerson_" + id.validate_node_name()
+		card.text = String(person.get("name", id))
+		card.tooltip_text = "Person auswählen: " + card.text
+		card.icon = _portrait_for_person(id)
+		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		card.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		card.expand_icon = true
+		TACTICAL_THEME.style_action_tile(card)
+		card.custom_minimum_size = Vector2(88, 85)
+		card.add_theme_constant_override("icon_max_width", 42)
+		card.add_theme_font_size_override("font_size", 12)
+		card.pressed.connect(_select_person.bind(id))
+		_other_people.add_child(card)
+
+
+func _refresh_person_badges() -> void:
+	if _person_badges == null: return
+	var owner := _personnel_runtime()
+	var screen: Node = owner.get("_screen") if owner != null else null
+	var profile: Variant = null
+	if is_instance_valid(screen):
+		var profiles: Dictionary = screen.get("_profiles_by_id")
+		profile = profiles.get(_selected_person_id)
+		if profile == null and screen.has_method("_get_available_unit_data"):
+			profile = screen.call("_get_available_unit_data", _selected_person_id)
+	var badges: Array = RANK_BADGES.get_badges_for_profile(profile) if profile != null else []
+	var signature := _selected_person_id + JSON.stringify(badges)
+	if signature == _badge_signature: return
+	_badge_signature = signature
+	for child in _person_badges.get_children():
+		_person_badges.remove_child(child)
+		child.queue_free()
+	for badge: Dictionary in badges:
+		var path := String(badge.get("path", ""))
+		if path.is_empty() or not ResourceLoader.exists(path): continue
+		var icon := TextureRect.new()
+		icon.name = "RankBadge_" + String(badge.get("badge_id", "")).validate_node_name()
+		icon.custom_minimum_size = Vector2(24, 24)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture = load(path)
+		icon.tooltip_text = RANK_BADGES.format_badge_tooltip(badge)
+		_person_badges.add_child(icon)
+	call_deferred("_resize_personnel_panel")
+
+
 func _update_personnel_visuals() -> void:
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
-	if _authored_stage!=null and units.size()>_person_visuals.size():_build_personnel_visuals(_authored_stage)
+	var current_ids := {}
+	var needs_visuals := false
+	for person: Dictionary in units:
+		current_ids[String(person.unit_id)] = true
+		needs_visuals = needs_visuals or not _person_visuals.has(String(person.unit_id))
+	for id in _person_visuals.keys():
+		if current_ids.has(id): continue
+		var entry: Dictionary = _person_visuals[id]
+		entry.model.queue_free()
+		entry.marker.queue_free()
+		_person_visuals.erase(id)
+	if not current_ids.has(_selected_person_id):
+		_selected_person_id = String(units[0].unit_id) if not units.is_empty() else ""
+		_avatar = _personnel_runtime().call("get_actor", _selected_person_id) if not _selected_person_id.is_empty() else _camera_anchor
+		_model = null
+	if _authored_stage != null and needs_visuals: _build_personnel_visuals(_authored_stage)
+	if _person_visuals.has(_selected_person_id): _model = _person_visuals[_selected_person_id].model
 	for person: Dictionary in units:
 		var id: String = String(person.unit_id)
 		if not _person_visuals.has(id):
@@ -236,21 +438,29 @@ func _update_personnel_visuals() -> void:
 		model.visible = status not in ["aboard", "away"] and not _pad_preview
 		(entry.marker as Node3D).visible = model.visible
 		var plane: Vector3 = _view.call("_world_to_3d_position", actor.position, 0.0)
-		var position_3d: Vector3 = plane + Vector3.UP * BASE_NAV.standing_y(plane)
+		var position_3d: Vector3 = plane + Vector3.UP * _standing_y(plane)
 		var sleeping_rotation: float = model.rotation.y
+		var field_bunk := false
 		if status == "sleeping":
 			for bed: Dictionary in _layout.get("beds", []):
 				if String(bed.id) == String(person.get("bed_id", "")) and bed.has("sleep_plane"):
 					position_3d = _plane_position(bed.sleep_plane) + Vector3.UP * float(bed.get("sleep_y", 0.4))
 					sleeping_rotation = float(bed.get("rotation_y", 0.0))
+					field_bunk = String(bed.get("visual_kind", "")) == "field_bunk"
+					if field_bunk: position_3d += Vector3(0, 0, 0.35).rotated(Vector3.UP, sleeping_rotation)
+					elif String(bed.get("visual_kind", "")) == "modular_bed":
+						# The authored sleeper's pivot is at the bed's foot end, not its
+						# geometric centre. Preserve the original habitat's 0.36 m offset.
+						position_3d += Vector3(0, 0, 0.36).rotated(Vector3.UP, float(int(bed.get("room_rotation", 0))) * PI * 0.5)
 		var previous: Vector2 = entry.previous
 		var moving: bool = previous.is_finite() and actor.position.distance_squared_to(previous) > 0.00001
 		var displacement: Vector3 = position_3d - model.position
 		model.position = position_3d
-		model.rotation.z = PI * 0.5 if status == "sleeping" else 0.0
+		model.rotation.x = -PI * 0.5 if status == "sleeping" and field_bunk else 0.0
+		model.rotation.z = PI * 0.5 if status == "sleeping" and not field_bunk else 0.0
 		if status == "sleeping":
 			model.rotation.y = sleeping_rotation
-		if moving:
+		if moving and status != "sleeping":
 			model.rotation.y = atan2(displacement.x, displacement.z)
 			if id == _selected_person_id and not _manual_camera:
 				_view.call("focus_world_position", actor.position)
@@ -285,6 +495,7 @@ var _terminal_labels: Dictionary = {}
 var _layout: Dictionary = {}
 var _asset_sources: Array[Dictionary] = []
 var _structure_visual_nodes: Dictionary = {}
+var _asset_visual_nodes: Dictionary = {}
 var _structure_visual_records: Dictionary = {}
 var _refuel_service_available: bool = false
 var _map_bounds: Rect2
@@ -374,10 +585,17 @@ func set_transport_snapshot(snapshot: Dictionary) -> void:
 	# Presentation cache only. Actual membership, pad occupancy and phase arrive
 	# from the runtime adapter; this scene never creates or moves a real craft.
 	_refuel_service_available = not Dictionary(snapshot.get("supply", {})).is_empty()
+	var economy: Dictionary = snapshot.get("skirmish_economy", {})
+	if not economy.is_empty():
+		_refuel_service_available = int(economy.infrastructure.get("workshop", 0)) > 0 and not Array(snapshot.get("crafts", [])).is_empty()
 	for terminal in _terminals:
 		if String(terminal.get("id", "")) == "refuel":
 			terminal["enabled"] = _refuel_service_available
+			if not economy.is_empty(): terminal["title"] = "Auftanken"
 	var crafts: Array = Array(snapshot.get("crafts", [])).duplicate(true)
+	var shuttle: Dictionary = Dictionary(snapshot.get("space_travel", {})).get("service_shuttle_home", {})
+	if String(shuttle.get("phase", "")) in ["inbound", "landed", "departing"] and not String(shuttle.get("craft_id", "")).is_empty():
+		crafts.append({"craft_id":String(shuttle.craft_id),"landing_pad_id":String(shuttle.get("landing_pad_id", "")),"craft_type":"dropship","model_id":"cutlass","display_name":"Stationsshuttle","location_id":"homebase","visible_on_pad":true,"service_only":true,"pad_visual":Dictionary(shuttle.get("pad_visual", {})).duplicate(true)})
 	var signature: String = JSON.stringify(crafts, "", true)
 	if signature == _transport_signature:
 		return
@@ -504,6 +722,7 @@ func set_active(active: bool) -> void:
 	var was_preview: bool = _pad_preview
 	_pad_preview = false
 	_active = active
+	if not active: _move_armed = false
 	if not is_node_ready():
 		return
 	visible = active
@@ -548,6 +767,8 @@ func _on_visibility_changed() -> void:
 func _initialize_runtime() -> void:
 	_layout = BASE_NAV.layout(_map_path)
 	_map_data = MAP_SCRIPT.load_from_file(_map_path)
+	if _map_path == CAMPAIGN_MAP_PATH:
+		preload("res://scripts/terrain/homebase_rock_rules.gd").apply_coarse(_map_data)
 	var personnel: Node = _personnel_runtime()
 	if personnel != null: _layout = Dictionary(personnel.call("get_snapshot").get("layout",_layout)).duplicate(true)
 	# The campaign owner already loaded its fine movement map. The view only
@@ -593,6 +814,11 @@ func _initialize_runtime() -> void:
 		_units.call("register_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
 		_sim.call("register_known_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
 	else:
+		_camera_anchor = Node2D.new()
+		_camera_anchor.name = "EmptyBaseCameraAnchor"
+		_runtime.add_child(_camera_anchor)
+		_camera_anchor.position = _world_at_grid(_layout.get("avatar_spawn_grid", [36, 40]))
+		_avatar = _camera_anchor
 		var people: Array = personnel.call("get_snapshot").get("units", [])
 		if not people.is_empty():
 			_selected_person_id = String(people[0].unit_id)
@@ -601,13 +827,15 @@ func _initialize_runtime() -> void:
 	_view.name = "Primary3DView"
 	_runtime.add_child(_view)
 	_view.call("set_frontier_art_enabled", true)
-	_view.call("set_hex_grid_visible", false)
+	_view.call("set_homebase_visuals_enabled", true)
+	_view.call("set_hex_grid_visible", true)
 	_view.call("set_authoring_markers_visible",false)
 	_view.call("configure_from_map", _map_data)
-	_view.set("_camera_size", 16.0)
+	var points_base := not Dictionary(_layout.get("paid_infrastructure", {})).is_empty()
+	_view.set("_camera_size", 26.0 if points_base else 16.0)
 	_view.set("_camera_yaw_degrees", 24.0)
 	_view.set("_camera_pitch_degrees", VIEW_SCRIPT.DEFAULT_CAMERA_PITCH_DEGREES)
-	_view.call("focus_world_position", _avatar.position)
+	_view.call("focus_world_position", _world_at_grid([68, 52]) if points_base else _avatar.position)
 	var world: Node3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot") as Node3D
 	var stage := Node3D.new()
 	_authored_stage = stage
@@ -623,6 +851,8 @@ func _initialize_runtime() -> void:
 		if visual != null:
 			stage.add_child(visual)
 			visual.position = _plane_position(asset.get("plane", [0.0, 0.0]))
+			visual.visible = bool(asset.get("built", true))
+			_asset_visual_nodes[String(asset.id)] = visual
 			if String(asset.get("id", "")) in ["habitat_cutaway_01", "freihafen_hall_01"]:
 				# Furnished cutaway sources are the user's base target. Navigation
 				# remains in MapData; source meshes are never replaced or rewritten.
@@ -630,6 +860,10 @@ func _initialize_runtime() -> void:
 				_structure_visual_nodes[id] = visual
 				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
+	var paths := preload("res://scripts/terrain/frontier_art_dressing.gd").new()
+	paths.name = "HomebaseBuiltPaths"
+	stage.add_child(paths)
+	paths.build_homebase_paths(_layout, _view.get("_frontier_art_profile"))
 	_sync_capacity_visuals(stage)
 	# Natural authored geology replaces the former decorative block fence.
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
@@ -682,6 +916,26 @@ func _load_visual(source: Dictionary) -> Node3D:
 func _world_at_grid(raw_grid: Variant) -> Vector2:
 	var grid: Array = Array(raw_grid)
 	return _terrain.call("grid_to_world", Vector2i(int(grid[0]), int(grid[1])))
+
+
+func _standing_y(plane: Vector3) -> float:
+	var module_geometry := preload("res://scripts/meta/modular_base_geometry.gd")
+	var relative := Vector2(plane.x, plane.z) - module_geometry.ORIGIN
+	var cell := Vector2i(roundi(relative.x / module_geometry.ROOM_SIZE), roundi(relative.y / module_geometry.ROOM_SIZE))
+	if _modular_floor_cells.has(cell):
+		var local := (relative - Vector2(cell) * module_geometry.ROOM_SIZE).abs()
+		if local.x <= module_geometry.HALF_ROOM and local.y <= module_geometry.HALF_ROOM:
+			return preload("res://scripts/meta/modular_base_room_visual.gd").FLOOR_SKIN
+	for housing: Dictionary in Array(_layout.get("campaign_housing", [])):
+		var delta: Array = housing.get("nav_delta", [])
+		if delta.size() != 2: continue
+		var offset: Vector3 = BASE_NAV.plane_at_grid(Vector2i(int(delta[0]), int(delta[1])))
+		if Rect2(10.6 + offset.x, 4.10 + offset.z, 3.8, 3.92).has_point(Vector2(plane.x, plane.z)): return 0.165
+	var infrastructure: Dictionary = _layout.get("paid_infrastructure", {})
+	if not infrastructure.is_empty():
+		if int(infrastructure.get("habitat", 0)) == 0 and plane.x < 20.0: return 0.0
+		if int(infrastructure.get("workshop", 0)) == 0 and plane.x >= 20.0: return 0.0
+	return BASE_NAV.standing_y(plane)
 
 
 func _visual_bounds(visual: Node3D) -> AABB:
@@ -761,6 +1015,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			_manual_camera = true
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			_move_armed = false
 			var context := get_base_world_context(event.position)
 			if not context.is_empty():
 				activate_base_world_context(event.position)
@@ -770,7 +1025,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			var target: Variant = _view.call("screen_to_world_plane_position", local)
 			if typeof(target) == TYPE_VECTOR2:
 				var plane: Vector3 = _view.call("_world_to_3d_position", Vector2(target), 0.0)
-				target = _view.call("screen_to_world_plane_position", local, BASE_NAV.standing_y(plane))
+				target = _view.call("screen_to_world_plane_position", local, _standing_y(plane))
 				request_walk_to(Vector2(target))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -778,6 +1033,16 @@ func _on_world_gui_input(event: InputEvent) -> void:
 			_view.call("zoom_camera_at_screen_position", 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0, event.position * Vector2(_viewport.size) / _host.size.max(Vector2.ONE))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
+			if _move_armed:
+				_move_armed = false
+				var local: Vector2 = event.position * Vector2(_viewport.size) / _host.size.max(Vector2.ONE)
+				var target: Variant = _view.call("screen_to_world_plane_position", local)
+				if typeof(target) == TYPE_VECTOR2:
+					var plane: Vector3 = _view.call("_world_to_3d_position", Vector2(target), 0.0)
+					target = _view.call("screen_to_world_plane_position", local, _standing_y(plane))
+					request_walk_to(Vector2(target))
+				_host.accept_event()
+				return
 			if _select_person_at(event.position):
 				if event.double_click: _personnel_action("details")
 				_host.accept_event()
@@ -803,7 +1068,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		request_terminal(_nearby_terminal)
 		get_viewport().set_input_as_handled()
 	elif event.pressed and not event.echo and key == KEY_ESCAPE:
-		exploration_exit_requested.emit()
+		if _move_armed:
+			_move_armed = false
+			_person_feedback.text = "Bewegungsauswahl abgebrochen."
+		else: exploration_exit_requested.emit()
 		get_viewport().set_input_as_handled()
 
 
@@ -886,6 +1154,7 @@ func _build_terminals(stage: Node3D) -> void:
 		if String(terminal.get("id", "")) == "flightdeck": terminal["title"] = "Flugdeck"
 		if String(terminal.get("id", "")) == "refuel":
 			terminal["enabled"] = _refuel_service_available
+			if not Dictionary(_layout.get("paid_infrastructure", {})).is_empty(): terminal["title"] = "Auftanken"
 		terminal["world_position"] = _world_at_grid(terminal["grid"])
 		_terminals.append(terminal)
 		var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", terminal["world_position"], 0.0)
@@ -898,6 +1167,7 @@ func _build_terminals(stage: Node3D) -> void:
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.modulate = Color("eaf2df")
 		label.position = position_3d + Vector3(0.0, 0.95, 0.0)
+		label.visible = bool(terminal.get("enabled", true))
 		stage.add_child(label)
 		_terminal_labels[String(terminal["id"])] = label
 
@@ -952,8 +1222,9 @@ func _build_landing_pads(stage: Node3D) -> void:
 		var pad_size: Array = Array(pad["size"])
 		visual.call("build", Vector2(float(center[0]), float(center[1])), Vector2(float(pad_size[0]), float(pad_size[1])), String(pad["designation"]) if bool(pad.get("built",true)) else "BAUPLATZ · PAD 02")
 		if not bool(pad.get("built",true)): visual.scale.y=0.15
-		# Deck top coincides with authored ground height; no hidden visual step.
-		visual.position.y = float(pad.get("surface_y", 0.0)) - PAD_SCRIPT.DECK_HEIGHT
+		# A 12 mm render separation avoids coplanar pad/ground fighting. The
+		# authoritative walk surface and ship/person standing heights stay put.
+		visual.position.y = float(pad.get("surface_y", 0.0)) - PAD_SCRIPT.DECK_HEIGHT + 0.012
 
 
 func _build_boundary_rocks(stage: Node3D) -> void:
@@ -1107,16 +1378,81 @@ func _get_structure_visual_snapshot() -> Dictionary:
 	return result
 
 
-var _capacity_visual_count: int = -1
+var _modular_floor_cells: Dictionary = {}
+func _sync_modular_room_visuals(stage: Node3D, plan: Dictionary) -> void:
+	var old := stage.get_node_or_null("ModularRooms")
+	if old != null:
+		stage.remove_child(old)
+		old.queue_free()
+	var group := Node3D.new()
+	group.name = "ModularRooms"
+	stage.add_child(group)
+	var room_visual := preload("res://scripts/meta/modular_base_room_visual.gd")
+	_modular_floor_cells.clear()
+	for room: Dictionary in Array(plan.get("rooms", [])):
+		_modular_floor_cells[Vector2i(int(room.get("x", 0)), int(room.get("y", 0)))] = true
+		group.add_child(room_visual.build(room, _map_data, _view))
+	for bed: Dictionary in Array(_layout.get("beds", [])):
+		if String(bed.get("visual_kind", "")) != "modular_bed": continue
+		var plane: Array = bed.get("sleep_plane", [])
+		if plane.size() != 2: continue
+		var visual := Node3D.new()
+		visual.name = String(bed.get("id", "bed"))
+		visual.position = Vector3(float(plane[0]), 0, float(plane[1]))
+		visual.rotation.y = float(int(bed.get("room_rotation", 0))) * PI * 0.5
+		group.add_child(visual)
+		var original_bed := MeshInstance3D.new()
+		original_bed.mesh = preload("res://scripts/meta/original_habitat_bed_mesh.gd").mesh()
+		visual.add_child(original_bed)
+
+
+var _capacity_visual_signature: String = ""
 func _sync_capacity_visuals(stage: Node3D) -> void:
 	var personnel: Node = _personnel_runtime()
 	if personnel == null: return
 	var layout: Dictionary = personnel.call("get_snapshot").get("layout",{})
-	var count := Array(layout.get("beds",[])).size()*100+Array(layout.get("landing_pads",[])).size()
-	if Array(layout.get("landing_pads",[])).size()>1 and bool(layout.landing_pads[1].get("built",true)):count+=10000
-	if count==_capacity_visual_count:return
-	_capacity_visual_count=count
+	var signature := JSON.stringify([layout.get("capacity", {}), layout.get("paid_infrastructure", {}), layout.get("landing_pads", []), layout.get("modular_base", {})])
+	if signature == _capacity_visual_signature: return
+	_capacity_visual_signature = signature
 	_layout=layout.duplicate(true)
+	_sync_modular_room_visuals(stage, Dictionary(layout.get("modular_base", {})))
+	for asset: Dictionary in layout.get("assets", []):
+		var id := String(asset.id)
+		if id.begins_with("campaign_habitat_") and not _asset_visual_nodes.has(id):
+			var housing: Node3D = _load_visual(asset)
+			if housing != null:
+				stage.add_child(housing)
+				housing.position = _plane_position(asset.plane)
+				_asset_visual_nodes[id] = housing
+		if _asset_visual_nodes.has(id): _asset_visual_nodes[id].visible = bool(asset.get("built", true))
+		if not _structure_visual_nodes.has(id): continue
+		var built := bool(asset.get("built", true))
+		_structure_visual_nodes[id].visible = built
+		var plot_name := "ConstructionPlot_" + id
+		var plot: Node3D = stage.get_node_or_null(plot_name)
+		if not built and plot == null:
+			plot = Node3D.new()
+			plot.name = plot_name
+			stage.add_child(plot)
+			plot.position = _plane_position(asset.plane)
+			var dimensions := Vector2(7.5, 5.5) if id == "habitat_cutaway_01" else Vector2(9.0, 5.5)
+			for side: float in [-1.0, 1.0]:
+				_box(plot, Vector3(dimensions.x, 0.025, 0.07), Vector3(0, 0.015, side * dimensions.y * 0.5), Color("d6ba71"))
+				_box(plot, Vector3(0.07, 0.025, dimensions.y), Vector3(side * dimensions.x * 0.5, 0.015, 0), Color("d6ba71"))
+			var label := Label3D.new()
+			label.text = "BAUPLATZ · HABITAT" if id == "habitat_cutaway_01" else "BAUPLATZ · WERKHALLE"
+			label.font_size = 32
+			label.pixel_size = 0.006
+			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			label.position.y = 0.3
+			plot.add_child(label)
+		if plot != null: plot.visible = not built
+	for terminal: Dictionary in _terminals:
+		for updated: Dictionary in layout.get("terminals", []):
+			if String(terminal.id) == String(updated.id):
+				terminal["enabled"] = bool(updated.get("enabled", true))
+				if _terminal_labels.has(String(terminal.id)):
+					_terminal_labels[String(terminal.id)].visible = bool(terminal.enabled)
 	for bed: Dictionary in Array(layout.get("beds",[])):
 		if String(bed.get("visual_kind",""))!="field_bunk" or stage.has_node(String(bed.id)):continue
 		var owner:=Node3D.new(); owner.name=String(bed.id); stage.add_child(owner)
@@ -1149,6 +1485,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED: _resize_personnel_panel()
 	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT,NOTIFICATION_EXIT_TREE]:
 		_camera_dragging=false
 		_clear_base_context()
@@ -1159,10 +1496,13 @@ func get_base_world_context(point: Vector2) -> Dictionary:
 	for key in _screen_world_labels:
 		var label: Label=_screen_world_labels[key]
 		if not label.visible or not Rect2(label.position,label.size).has_point(point): continue
-		if String(key).begins_with("ship:"): return {"id":String(key).trim_prefix("ship:"),"kind":"ship","label":"Einsteigen"}
+		if String(key).begins_with("ship:"):
+			var ship_id := String(key).trim_prefix("ship:")
+			if not bool(_find_projected_craft(ship_id).get("service_only", false)): return {"id":ship_id,"kind":"ship","label":"Einsteigen"}
 	var candidates: Array=[]
 	for id in _craft_visuals:
 		var entry: Dictionary=_craft_visuals[id]
+		if bool(_find_projected_craft(String(id)).get("service_only", false)): continue
 		var pad: Dictionary=_pad_definition(String(entry.landing_pad_id))
 		if pad.is_empty(): continue
 		candidates.append({"id":id,"kind":"ship","label":"Einsteigen","screen_position":Vector2(_view.call("world_to_screen_position",_world_at_grid(pad.grid)))*scale})
@@ -1230,6 +1570,7 @@ func _refresh_screen_world_labels() -> void:
 		(_terminal_labels[id] as Label3D).hide()
 	for terminal: Dictionary in _terminals:
 		if overview_labels and String(terminal.id) not in ["personnel","team","flightdeck"]: continue
+		if not bool(terminal.get("enabled", true)) and not Dictionary(_layout.get("paid_infrastructure", {})).is_empty(): continue
 		entries.append({"id":"terminal:"+String(terminal.id),"text":String(terminal.title),"position":terminal.world_position})
 	for id in _craft_visuals:
 		var craft: Dictionary=_craft_visuals[id]

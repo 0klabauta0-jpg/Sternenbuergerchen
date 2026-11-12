@@ -1,0 +1,25 @@
+# Heimatbasis: hohe Felsen und benachbarte Deckung
+
+## Ziel und Anlass
+Der Nutzer wuenscht einen hohen zentralen Felsen auf einem Hexfeld, hoeher als eine Person, mit hexfoermiger Oberseite; benachbarte Felder sollen halbhohe Formen darstellen. Die Oberseite muss nicht begehbar sein. Sicht, Deckung, Begehbarkeit und Hoehe sollen mit der sichtbaren Geometrie uebereinstimmen und nicht allein aus ihr abgeleitet werden.
+
+## Gepruefter Iststand
+`campaign_intro_base.json` enthaelt u. a. Felsen auf (10,-7), (12,-8) und (16,-8) mit `spacekit_rock_large_a`, `blocks_los=true`, `object_height=0`, `cover_value=0`, unbegehbar. Der Objektkatalog beschreibt fuer diesen Typ abweichend Hoehe 1 und Deckung 60. Der Basis-Personalruntime laedt hingegen `base_interior_navigation.json` mit einem feineren Raster; die genannten Zahlenkoordinaten dort sind keine Felsfelder. Kartenkoordinaten duerfen daher nicht direkt gleichgesetzt werden. Der Renderer verwendet ein gemapptes Felsmodell; seine Optik bestimmt keine Simulationsdaten.
+
+`terrain_height_hill_rules.md` definiert `height_level + object_height` als Blockerhoehe und `cover_value` als getrennten Wert. `combat_fire_decision_resolver.gd` bezeichnet Deckung 35 bis 69 als `partial_cover`; dies ist keine bereits belegte allgemeine Halbierung von Sicht auf benachbarten Feldern. Ein guter Bildnachweis der Formen beweist nicht den Sicht- oder Kampfzustand.
+
+Beide Karten nutzen denselben Ursprung `(1536,64)` und Halbzellmasse `(64,32)` bzw. `(16,8)`: die Mittelpunkte der drei groben Felsen entsprechen exakt den feinen Zellen `(40,-28)`, `(48,-32)` und `(64,-32)`. In jedem Fall sind Zentrum und zwei der sechs direkten Feinnachbarn bereits unbegehbar und LOS-blockierend bei Objekthoehe 0; die anderen vier Nachbarn sind begehbar und deckungslos. Ein grobes Hex umfasst mehr als nur diese eine feine Zelle; blosse Aenderung der 4x-Zentren liesse die uebrige bestehende Blockerflaeche inkonsistent. Das aktuelle Tilemodell besitzt eine Bodenhoehe und eine Objektblockerhoehe, aber keine unabhaengig begehbare zweite Oberflaeche ueber einem zugleich soliden hohen Felsen. Fuer eine echte obere Plattform ist deshalb ein entsprechender Simulations-/Navigationsvertrag erforderlich.
+
+## Umfang, Contracts und Architekturfrage
+Einen gemeinsamen, deterministischen Zuordnungsweg zwischen sichtbaren groben Hexfeldern, feiner Basisnavigation und Terrain-/Kampfowner verwenden. Zentralfeld und benachbarte halbhohe Formen brauchen explizite Regeln fuer Begehbarkeit, Hoehe, Deckung und Sicht. Kein UI- oder Renderer-State als zweite Wahrheit. Nutzervorgaben zu zentraler Hoehe und benachbarten Formen sind verbindlich; Coverwerte und Interaktionen muessen anhand bestehender Kampfregeln und eines reproduzierbaren Spielbeispiels geprueft werden. Bestehende Missionskarten ohne diese Felsgruppe bleiben unveraendert.
+
+## Akzeptanz und lokale Pruefung
+Zentrale Form ist hoeher als die Personenfigur und besitzt die gewuenschte obere Hexflaeche; benachbarte Formen sind sichtbar halbhoch. Tatsaechliche Bewegungs-/Hoehen- und LOS-Abfragen fuer Basis und beteiligten Kampfpfad stimmen mit diesen Feldern ueberein; Tests decken zentral blockierte Sicht, seitliche freie/teilweise Sicht, begehbare und gesperrte Felder sowie Hoehenunterschiede ab. Verdeckte gerenderte Aufnahmen von mehreren Winkeln belegen Darstellung, ohne Desktopuebernahme. Keine Schlussfolgerung zur Simulation allein aus einem Bild.
+
+## Betroffene Bereiche und Risiken
+Basiskarten-/Generatorpfad, TerrainRegistry-/Mapping, gegebenenfalls LOS-/Deckungsowner, Felsvisuals und gezielte Godot-Verifier. Risiken sind doppelte Geometriewahrheit, globale Aenderung alter Karten, Performance durch Nachbarabfragen im Hotpath sowie fehlende Verbindung zwischen Hoehenplattform und begehbarer Navigation. Kein ungeprueftes Umschreiben aller gleichartigen Felsen.
+
+## Begrenzte Umsetzung
+Das Regelset `scripts/terrain/homebase_rock_rules.gd` definiert die drei genannten zentralen Hexfelder und je die groben Nachbarfelder links und rechts als gemeinsame Quelle. Zentralfelder sind unbegehbar, blockieren LOS mit Objekthoehe 2; die begehbaren Nachbarfelder behalten freies LOS und erhalten Deckung 60 (bestehender Combat-Zustand `partial_cover`) und Objekthoehe 1. Fuer die feine Basisnavigation werden diese Felder beim Laden einmalig durch deterministisches axiales Runden auf das 4x-Raster uebertragen; bereits vorhandene andere Blockaden werden nicht freigeschaltet. Die visuelle Darstellung liest dieselben Feldkoordinaten und Hoehen. Die Werte definieren keine prozentuale Sichtwahrscheinlichkeit: Sicht ist im bestehenden Owner binaer, Teildeckung ein getrennter Kampfwert.
+
+`homebase_rock_rules_verifier.gd` prueft grosse und feine Felder sowie tatsaechliches LOS durch zentrale und seitliche Felder und den Combat-Deckungszustand (31/0). Andere Karten und andere Felsen erhalten die Regeln nicht. Eine begehbare obere Plattform und eine neue probabilistische Sichtregel gehoeren nicht zu dieser begrenzten Umsetzung.

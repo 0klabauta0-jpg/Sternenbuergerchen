@@ -7,6 +7,85 @@ const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 
+# Disposable future-input projection, not a live UI/gameplay owner. Actual Root,
+# BasePersonnel, BaseActors, terrain and registry perform all candidate validation.
+class HexCheckpointReadContext extends Node:
+	var _all_team_units: Array = []
+	var _aircraft_location_by_craft: Dictionary = {}
+	var definitions: Array = []
+	var pilots: Dictionary = {}
+	var payload_teams: Dictionary = {}
+	var member_reader: Control
+	func is_campaign_start() -> bool: return true
+	func _find_homebase_aircraft_definition(id: String) -> Dictionary:
+		for definition: Dictionary in definitions:
+			if definition.get("craft_id") == id: return definition.duplicate(true)
+		return {}
+	func _find_pending_mission_craft_transfer(_id: String) -> Dictionary: return {}
+	func get_space_travel_snapshot(id: String = "") -> Dictionary:
+		return {"phase":"grounded"} if id.is_empty() or _aircraft_location_by_craft.has(id) else {}
+	func _get_assigned_pilot_id(id: String) -> String: return String(pilots.get(id, ""))
+	func _get_homebase_direct_payload_fireteam_ids_for_craft_raw(id: String) -> PackedStringArray:
+		return PackedStringArray(payload_teams.get(id, []))
+	func _get_member_unit_ids_for_fireteam(id: String) -> PackedStringArray:
+		return member_reader.call("_get_member_unit_ids_for_fireteam", id)
+
+static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -> Dictionary:
+	var store = load("res://scripts/meta/campaign_checkpoint_store.gd")
+	var shape: Dictionary = store.validate_payload(payload)
+	if not shape.get("ok", false): return shape
+	if not payload.has("hex_tactical"): return {"ok":true,"legacy":true}
+	if not is_instance_valid(flow) or flow.is_queued_for_deletion() or not flow.is_inside_tree(): return {"ok":false,"reason":"checkpoint_candidate_tree_unavailable"}
+	var navigation = load("res://scripts/meta/base_interior_navigation.gd")
+	var map = navigation.load_map("res://maps/campaign_intro_base.json")
+	# Only the authored, already opted-in navigation map can authorize Hex loading.
+	if map == null or map.get_grid_topology() != "hex_axial_v1" or String(map.get_tactical_grid_rules()).is_empty():
+		return {"ok":false,"reason":"checkpoint_base_not_hex_enabled"}
+	var candidate := HexCheckpointReadContext.new()
+	candidate.name = "HexCheckpointCandidate"
+	candidate._all_team_units = Array(payload.roster).duplicate(true)
+	var fleet: Array = payload.get("fleet", [{"definition":payload.craft.definition,"pilot_id":payload.craft.pilot_id,"location":"homebase"}])
+	for ship: Dictionary in fleet:
+		var id := String(ship.definition.craft_id)
+		candidate.definitions.append(ship.definition.duplicate(true))
+		candidate.pilots[id] = String(ship.get("pilot_id", ""))
+		candidate._aircraft_location_by_craft[id] = String(ship.get("location", "homebase"))
+	for id in payload.hex_tactical.transport:
+		candidate.payload_teams[id] = Dictionary(payload.hex_tactical.transport[id].teams).keys()
+	candidate.member_reader = load("res://scripts/meta/homebase_screen.gd").new()
+	candidate.member_reader.set("_fireteam_definitions", Array(payload.craft.get("fireteam_definitions", [])).duplicate(true))
+	candidate.set_meta("campaign_pad2_built", bool(payload.campaign.get("progress", {}).get("second_pad_built", false)))
+	var supply = SUPPLY.new()
+	var restored: Dictionary = supply.restore_state(payload.supply)
+	if not restored.get("ok", false):
+		candidate.member_reader.free(); candidate.free()
+		return restored
+	candidate.set_meta("campaign_built_beds", supply.get_campaign_bed_count())
+	candidate.set_meta("campaign_built_housing", supply.get_campaign_housing_count())
+	if supply.get_station_home_pads() > 2: candidate.set_meta("skirmish_infrastructure", {"pads":supply.get_station_home_pads()})
+	# No main scene or live Flow configure. The new isolated subtree is freed
+	# synchronously, without a tick, whether candidate preparation succeeds or fails.
+	flow.get_tree().root.add_child(candidate)
+	var simulation: Node = SIM.new()
+	candidate.add_child(simulation)
+	simulation.set_physics_process(false)
+	var base: Node = load("res://scripts/core/base_personnel_runtime.gd").new()
+	candidate.add_child(base)
+	if base.has_method("set_initial_modular_base"):
+		base.call("set_initial_modular_base", Dictionary(supply.get_supply_snapshot().get("modular_base", {})))
+	base.configure(candidate, candidate, simulation, {})
+	simulation.set_physics_process(false)
+	var result: Dictionary
+	if not simulation.has_method("prepare_hex_checkpoint_restore"):
+		result = {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	else:
+		result = simulation.call("prepare_hex_checkpoint_restore", payload.hex_tactical)
+		if result.get("ok", false): result = simulation.call("validate_prepared_hex_checkpoint_restore", result.prepared)
+	candidate.member_reader.free()
+	candidate.free()
+	return result
+
+
 var _base_personnel: Node
 var _flow: Node
 var _screen: Control
@@ -15,10 +94,28 @@ var _campaign: RefCounted
 var _supply: RefCounted
 var _onboarding: RefCounted
 var _travel: RefCounted
+var _polisa_shuttle: RefCounted
+var _polisa_shuttle_dispatcher: RefCounted
+var _polisa_shuttle_home: RefCounted
+var _cargo_transfer = preload("res://scripts/core/automatic_cargo_transfer.gd").new()
+var _service_pad_reservation: Dictionary = {}
+var _shuttle_return_poll := 0.0
+var _shuttle_home_retry := 0.0
+var _polisa_market = preload("res://scripts/meta/polisa_recruitment_market.gd").new()
+var _polisa_recruit_pending: Dictionary = {}
+var _polisa_resident_retry_msec := 0
+var _ship_equipment: RefCounted
 var _space_encounter: RefCounted
+var _encounter_entry_delay := 0.0
+var _encounter_entry_feedback: Dictionary = {}
+var _skirmish_economy: RefCounted
+var _recruit_candidate_signature := ""
+var _recruit_candidates: Array = []
 var _resource_owners: Dictionary = {}
 var _campaign_mode := false
 var _space_route_requested := false
+var _local_warp_arrival_enabled := false
+var _warp_arrival_feedback: Dictionary = {}
 var _request_session := str(Time.get_unix_time_from_system()) + ":" + str(randi())
 var _sequence: int = 0
 var _pad_by_craft: Dictionary = {}
@@ -31,6 +128,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_screen = screen
 	_campaign = CAMPAIGN.new()
 	_supply = SUPPLY.new()
+	_cargo_transfer.configure(Callable(self,"_validate_cargo_transfer"),Callable(self,"_cargo_inventory"),Callable(self,"_transfer_cargo_item"))
 	_travel = TRAVEL.new()
 	_travel.configure()
 	_space_encounter = load("res://scripts/core/campaign_space_encounter.gd").new()
@@ -49,37 +147,82 @@ func configure(flow: Node, screen: Control) -> void:
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
 	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding, _travel)
+	_simulation.configure_departure_adapter(self)
+	_ship_equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
+	_ship_equipment.configure(Array(_flow.get("_homebase_aircraft_definitions")))
+	_simulation.call("configure_ship_equipment", _ship_equipment)
+	if _flow.has_meta("skirmish_points_budget"):
+		_skirmish_economy = load("res://scripts/core/skirmish_economy_state.gd").new()
+		_skirmish_economy.configure(int(_flow.get_meta("skirmish_points_budget")))
+		_simulation.configure_skirmish_economy(_skirmish_economy, _apply_skirmish_transaction)
 	_screen.call("bind_personnel_loadout_simulation", _simulation, Array(_flow.get("_all_team_units")))
 
 	_simulation.call("configure_space_encounter",_space_encounter)
+	_simulation.call("configure_space_runtime_tick", Callable(self, "advance_space_travel"))
 	if _campaign_mode:
 		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
 		if not checkpoint.is_empty():
 			_campaign.restore_state(checkpoint.campaign)
 			_supply.restore_state(checkpoint.supply)
 			_onboarding.restore_state(checkpoint.onboarding)
+			if checkpoint.has("polisa_recruitment_market") and not _polisa_market.restore_state(checkpoint.polisa_recruitment_market).get("ok", false):
+				push_error("Invalid Polisa recruitment market checkpoint")
+				return
+			if checkpoint.has("ship_equipment"):
+				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, Array(_flow.get("_homebase_aircraft_definitions")), checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
+				if not equipment_restore.get("ok", false):
+					push_error("Invalid Warp equipment checkpoint")
+					return
+	if _campaign_mode:
+		_flow.set_meta("campaign_built_beds", _supply.get_campaign_bed_count())
+		_flow.set_meta("campaign_built_housing", _supply.get_campaign_housing_count())
 	if _campaign_mode or _flow.has_meta("skirmish_preset_id"):
 		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
 		_base_personnel.name = "BasePersonnelRuntime"
 		add_child(_base_personnel)
-		_base_personnel.configure(_flow, _screen, _simulation, Dictionary(_flow.get("_campaign_start").get("checkpoint")) if _campaign_mode else {})
+		if _campaign_mode and _base_personnel.has_method("set_initial_modular_base"):
+			_base_personnel.call("set_initial_modular_base", Dictionary(_supply.get_supply_snapshot().get("modular_base", {})))
+		var base_checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint")) if _campaign_mode else {}
+		_base_personnel.configure(_flow, _screen, _simulation, {} if base_checkpoint.has("hex_tactical") else base_checkpoint)
+		if base_checkpoint.has("hex_tactical"): _simulation.set_physics_process(false)
+		if _campaign_mode and not base_checkpoint.has("hex_tactical") and _base_personnel.has_method("sync_modular_base"):
+			_base_personnel.call("sync_modular_base", Dictionary(_supply.get_supply_snapshot().get("modular_base", {})))
 		_screen.call("configure_base_personnel_bridge", _base_personnel)
+		if _campaign_mode: _configure_polisa_shuttle()
 	var inventory_units: Array = []
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units,inventory_crafts)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_economy != null)
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
 		var count := inventory_units.size()
-		_supply.call("configure_preset_supply",{"credits":int(_flow.get_meta("skirmish_start_credits",1000)),"stock":{"armor_heavy":maxi(2,count/2),"armor_medium":maxi(2,count/2),"rifle":count,"pistol":count,"medictool":maxi(2,count/4),"mining_tool":2,"salvage_tool":2}})
+		var stock := {"armor_heavy":maxi(2,count/2),"armor_medium":maxi(2,count/2),"rifle":count,"pistol":count,"medictool":maxi(2,count/4),"mining_tool":2,"salvage_tool":2}
+		if _flow.get_meta("skirmish_preset_id") == "points":
+			stock = {}
+		_supply.call("configure_preset_supply", {"credits": int(_flow.get_meta("skirmish_start_credits", 1000)), "stock": stock})
 	sync_crafts()
+	if _campaign_mode:
+		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
+		if checkpoint.has("hex_tactical"):
+			var continue_context := _capture_hex_continue_context(checkpoint)
+			var loaded_hex: Dictionary = _restore_campaign_hex_checkpoint(checkpoint)
+			if not _hex_continue_context_current(continue_context, bool(loaded_hex.get("committed", false))) or loaded_hex.get("context_changed", false): return
+			if not loaded_hex.get("ok", false):
+				_flow.get("_campaign_start").set("error_message", "Hex-Kampagnenstand konnte nicht wiederhergestellt werden: " + String(loaded_hex.get("reason", "checkpoint_invalid")))
+				_simulation.set_physics_process(false)
+				_flow.call_deferred("_campaign_load_failed")
+				return
+			_simulation.set_physics_process(true)
+	if _campaign_mode and is_instance_valid(_base_personnel):
+		_base_personnel.reconcile_restored_ship_overlap(Dictionary(_flow.get("_campaign_start").get("checkpoint")))
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
 	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)
 	for entry in [
 		{"mission_id": "satellite_recovery", "mission_name": "Satellitenbergung", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
+		{"mission_id": "polisa_visit", "mission_name": "Polisa besuchen", "map_file_path": "res://maps/polisa_station.json", "scenario_file_path": "res://data/mission_scenarios/polisa_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
 		{"mission_id": "trade_outpost_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"}]:
 		catalog.append(entry)
 	for job: Dictionary in Dictionary(_campaign.get_campaign_snapshot().jobs).values():
@@ -92,6 +235,53 @@ func configure(flow: Node, screen: Control) -> void:
 	_flow.set("_mission_catalog", catalog)
 	if _flow.has_meta("skirmish_preset_id"):
 		for item: Dictionary in catalog: item["slot_count"] = maxi(int(item.get("slot_count",4)),inventory_units.size())
+	if _skirmish_economy != null:
+		_screen.set("_operations_mode", "base")
+
+func _restore_campaign_hex_checkpoint(checkpoint: Dictionary) -> Dictionary:
+	if not _simulation.has_method("prepare_hex_checkpoint_restore") or _base_personnel == null:
+		return {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	# Restore the existing transport owner from the validated future roster first.
+	# No new payload owner: all changes use HomebaseScreen's existing methods.
+	var craft: Dictionary = checkpoint.craft
+	var context := _capture_hex_continue_context(checkpoint)
+	_screen.call("setup_roster", Array(_flow.get("_all_team_units")), PackedStringArray(craft.get("staged_unit_ids", [])))
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	_screen.call("set_fireteam_context", PackedStringArray(craft.get("staged_fireteam_ids", [])), Array(craft.get("fireteam_definitions", [])), false)
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	_screen.call("set_transport_state", Array(_flow.get("_homebase_aircraft_definitions")), Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")), [], [], Dictionary(_flow.get("_aircraft_location_by_craft")), Dictionary(_flow.get("_selected_aircraft_cargo_by_craft")), Dictionary(_flow.get("_loaded_aircraft_cargo_by_craft")), [])
+	if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	for definition: Dictionary in craft.get("fireteam_definitions", []):
+		_screen.call("_remove_homebase_direct_payload_fireteam", String(definition.id))
+	var state: Dictionary = checkpoint.hex_tactical
+	for craft_id in state.transport:
+		for team in state.transport[craft_id].teams:
+			var all_aboard: bool = not Array(state.transport[craft_id].teams[team]).is_empty()
+			for id in state.transport[craft_id].teams[team]:
+				var person: Dictionary = state.base_personnel.units.get(id, {})
+				all_aboard = all_aboard and person.get("status") == "aboard" and person.get("craft_id") == craft_id
+			if all_aboard:
+				_screen.call("seed_homebase_direct_launch_payload", String(craft_id), PackedStringArray([team]), true)
+			else:
+				_screen.call("_add_homebase_direct_payload_fireteam_to_craft", String(team), String(craft_id))
+			if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	var prepared: Dictionary = _simulation.call("prepare_hex_checkpoint_restore", state)
+	if not prepared.get("ok", false): return prepared
+	var checked: Dictionary = _simulation.call("validate_prepared_hex_checkpoint_restore", prepared.prepared)
+	if not checked.get("ok", false): return checked
+	# Root coordinates all silent owner tails and guards final model publication.
+	return _simulation.call("commit_hex_checkpoint_restore", prepared.prepared)
+
+func _capture_hex_continue_context(checkpoint: Dictionary) -> Dictionary:
+	return {"adapter":weakref(self),"flow":weakref(_flow),"screen":weakref(_screen),"simulation":weakref(_simulation),"base":weakref(_base_personnel),"root_context":_simulation.get_hex_ground_context_revision(),"start":_flow.get("_campaign_start"),"checkpoint":JSON.stringify(checkpoint,"",true)}
+
+func _hex_continue_context_current(context: Dictionary, published: bool = false) -> bool:
+	var adapter = context.adapter.get_ref()
+	if not is_instance_valid(adapter) or adapter.is_queued_for_deletion(): return false
+	for name in ["flow","screen","simulation","base"]:
+		var node = context[name].get_ref()
+		if not is_instance_valid(node) or node.is_queued_for_deletion() or not node.is_inside_tree() or adapter.get("_" + ("base_personnel" if name == "base" else name)) != node: return false
+	return adapter._flow.get("_campaign_start") == context.start and JSON.stringify(context.start.get("checkpoint"),"",true) == context.checkpoint and adapter._simulation.get("_base_personnel_owner") == adapter._base_personnel and adapter._simulation.get_hex_ground_context_revision() == int(context.root_context) + (1 if published else 0)
 
 func _request_id(prefix: String, payload: Dictionary) -> String:
 	var supplied: String = String(payload.get("request_id", "")).strip_edges()
@@ -108,12 +298,14 @@ func get_snapshot() -> Dictionary:
 		return {}
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var travel: Dictionary = get_space_travel_snapshot()
+	var economy: Dictionary = _skirmish_economy.get_snapshot() if _skirmish_economy != null else {}
+	if not economy.is_empty(): economy["recruits"] = _get_skirmish_recruits(economy)
 	var crafts: Array = []
 	var service_contexts: Dictionary = {}
 	var launch_readiness: Dictionary = {}
 	for definition in Array(_flow.get("_homebase_aircraft_definitions")):
 		var id: String = String(definition.get("craft_id", ""))
-		var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(id, {}))
+		var departure: Dictionary = _craft_visit_binding(id)
 		var transfer: Dictionary = _flow.call("_find_pending_mission_craft_transfer", id)
 		var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(id, "homebase"))
 		var projected: Dictionary = definition.duplicate(true)
@@ -129,7 +321,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -138,8 +330,12 @@ func sync_crafts() -> void:
 		return
 	if _campaign_mode:
 		_flow.set_meta("campaign_pad2_built",bool(_campaign.get_campaign_snapshot().progress.second_pad_built))
+	if _campaign_mode and _supply.get_station_home_pads() > 2:
+		_flow.set_meta("skirmish_infrastructure", {"pads":_supply.get_station_home_pads()})
+		if _base_personnel != null: _base_personnel.call("_refresh_capacity")
 	var actual: Dictionary = {}
 	for definition in Array(_flow.get("_homebase_aircraft_definitions")):
+		if _ship_equipment != null: _ship_equipment.register_craft(definition)
 		var craft_id: String = String(definition.get("craft_id", ""))
 		if not craft_id.is_empty():
 			actual[craft_id] = true
@@ -149,24 +345,25 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units,actual.keys())
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_economy != null)
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
 		if _pad_by_craft.has(craft_id):
 			continue
 		var pads: Array = HOME_PADS.duplicate()
-		if _flow.has_meta("skirmish_preset_id") and _base_personnel != null:
+		if (_flow.has_meta("skirmish_preset_id") or _campaign_mode) and _base_personnel != null:
 			pads.clear()
 			for actual_pad: Dictionary in Array(_base_personnel.get_snapshot().get("layout",{}).get("landing_pads",[])):
 				pads.append(String(actual_pad.get("id","")))
 		for pad in pads:
 			if _campaign_mode and pad == "homebase_pad_02" and not bool(_campaign.get_campaign_snapshot().progress.second_pad_built): continue
-			if not _pad_by_craft.values().has(pad):
+			if not _pad_by_craft.values().has(pad) and String(_service_pad_reservation.get("pad_id", "")) != pad:
 				_pad_by_craft[craft_id] = pad
 				break
 
 	if _base_personnel != null: _base_personnel.call("_refresh_capacity")
+	sync_space_wings()
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
@@ -174,11 +371,119 @@ func _home_pad_for(craft_id: String) -> String:
 func get_base_personnel_runtime() -> Node:
 	return _base_personnel
 
+func bind_mission_air_support(mission: Node) -> Dictionary:
+	if not is_instance_valid(_flow) or not is_instance_valid(mission) or _flow.call("get_active_mission") != mission or not _flow.is_ancestor_of(mission): return {"ok":false, "reason":"mission_context_changed"}
+	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
+	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
+	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+
+func get_campaign_entry_feedback() -> Dictionary:
+	return _encounter_entry_feedback.duplicate(true)
+
+func sync_space_wings() -> Dictionary:
+	if _simulation == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	var definitions: Variant = _flow.get("_homebase_aircraft_definitions")
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(definitions) != TYPE_ARRAY or typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var craft_ids: Array = []
+	for definition in definitions:
+		if typeof(definition) == TYPE_DICTIONARY and typeof(definition.get("craft_id")) == TYPE_STRING:
+			craft_ids.append(definition.craft_id)
+	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
+
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "cargo_transfer_cancel":return _cargo_transfer.cancel()
+	if operation == "cargo_transfer_all":
+		var source:=String(payload.get("source_container_id",""));var target:=String(payload.get("destination_container_id",""))
+		var id:=_request_id("cargo-transfer",payload)
+		var started:Dictionary=_cargo_transfer.start(id,source,target)
+		if not started.get("ok",false) or started.get("replayed",false):return started
+		var receipt:Dictionary=_commit("singleplayer_supply","cargo_transfer_start",{"source":source,"target":target},"cargo-order:"+id,{"cargo_transfer_authorized":true})
+		if not receipt.get("ok",false) or receipt.get("replayed",false):
+			_cargo_transfer.cancel()
+			return receipt
+		return started
+	if operation == "station_shuttle_cancel": return cancel_polisa_service_departure(String(payload.get("craft_id", "")))
+	if operation == "station_recruit_open": return _open_polisa_recruitment(payload)
+	if operation == "station_recruit_hire": return _request_polisa_recruitment(payload)
+	if operation == "station_claim_resident":
+		var craft_id := String(payload.get("craft_id", ""))
+		var unit_id := String(payload.get("unit_id", ""))
+		if String(_service_context(craft_id).get("location_id", "")) != "polisa" or _base_personnel == null: return _reject("station_service_required", "Eigenes Schiff zuerst auf Polisa bereitstellen")
+		var states: Dictionary = _base_personnel.get("_states")
+		if not unit_id.begins_with("polisa_recruit_") or String(Dictionary(states.get(unit_id, {})).get("status", "")) != "station": return _reject("resident_unavailable", "Person ist nicht auf Polisa verfügbar")
+		var controller := get_polisa_globe_controller()
+		if controller == null or not controller.has_method("claim_polisa_resident"): return _reject("resident_unavailable", "Personalübernahme nicht verfügbar")
+		return controller.call("claim_polisa_resident", unit_id, craft_id)
+	if operation == "air_support_move":
+		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
+		var mission: Node = _flow.call("get_active_mission")
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		var move_command := payload.duplicate(true)
+		move_command["request_id"] = _request_id("air-support-move", payload)
+		return mission_root.request_air_support_move(move_command)
+	if operation in ["air_support_takeoff", "air_support_landing"]:
+		if payload.size() != 1 or typeof(payload.get("craft_id")) != TYPE_STRING: return _reject("invalid_command", "Schiff fehlt")
+		var mission: Node = _flow.call("get_active_mission") if is_instance_valid(_flow) else null
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		return mission_root.request_air_support_takeoff(payload.craft_id) if operation == "air_support_takeoff" else mission_root.request_air_support_landing(payload.craft_id)
+	if operation == "air_support_attack_order":
+		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
+		var mission: Node = _flow.call("get_active_mission")
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		var order_command := payload.duplicate(true)
+		order_command["request_id"] = _request_id("air-support-order", payload)
+		return mission_root.request_air_support_attack_order(order_command)
+	if operation == "air_support_ground_fire":
+		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
+		var mission: Node = _flow.call("get_active_mission")
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		var fire_command := payload.duplicate(true)
+		fire_command["request_id"] = _request_id("air-support-fire", payload)
+		return mission_root.request_air_support_ground_fire(fire_command)
+	if operation == "space_fire":
+		if _simulation == null: return _reject("runtime_unavailable", "Weltraumsimulation ist nicht bereit")
+		return _simulation.request_singleplayer_space_fire(payload.duplicate(true), {"runtime_authorized":true, "actor_id":"singleplayer"})
+	if operation == "space_move":
+		if _simulation == null: return _reject("runtime_unavailable", "Weltraumsimulation ist nicht bereit")
+		return _simulation.request_singleplayer_space_move(payload.duplicate(true))
+	if operation == "space_wing_command":
+		if typeof(payload.get("command")) != TYPE_DICTIONARY:
+			return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+		return _request_space_wing_command(payload.command)
+	if operation == "select_location_view_craft":
+		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
+	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+		var live_context := _service_context(String(payload.get("craft_id", "")))
+		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
+			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
+	if operation.begins_with("skirmish_"):
+		var data := payload.duplicate(true)
+		var request_id := _request_id(operation, data)
+		data.erase("request_id")
+		var result: Dictionary = _simulation.request_skirmish_command({"operation": operation.trim_prefix("skirmish_"), "payload": data, "request_id": request_id})
+		if bool(result.get("ok", false)):
+			_flow.call("_refresh_homebase_screen")
+		return result
 	if operation.begins_with("base_"):
 		return _base_personnel.request_operation(operation, payload) if _base_personnel != null else _reject("base_unavailable", "Basisaktion nur in Kampagne")
 	if _simulation == null:
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
+	if operation in ["station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+		var target := String(payload.get("craft_id", ""))
+		if String(_service_context(target).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")
+		if operation == "station_board_crew":
+			return _flow.call("board_polisa_craft_crew", target) if _flow.has_method("board_polisa_craft_crew") else _reject("crew_boarding_unavailable", "Einsteigen nicht verfügbar")
+		if operation == "station_deploy_crew":
+			return _flow.call("deploy_polisa_craft_crew", target) if _flow.has_method("deploy_polisa_craft_crew") else _reject("crew_handoff_unavailable", "Besatzungsübergabe nicht verfügbar")
+		if String(payload.get("target_craft_id", "")) != target or typeof(payload.get("unit_ids")) != TYPE_ARRAY: return _reject("invalid_crew_handoff", "Besatzungsauswahl ungültig")
+		return _flow.call("handoff_polisa_station_crew", String(payload.get("source_craft_id", "")), target, PackedStringArray(payload.unit_ids), String(payload.get("pilot_id", "")), _request_id("station-handoff", payload)) if _flow.has_method("handoff_polisa_station_crew") else _reject("crew_handoff_unavailable", "Besatzungsübergabe nicht verfügbar")
 	if operation == "buy" and _campaign_mode and String(payload.get("offer_id","")) == "mining_tool_supply" and not Array(_supply.get_supply_snapshot().get("blueprints",[])).has("mining_tool"):
 		return _reject("blueprint_locked","Miningwerkzeug nach dem Blueprint aus Mission 3 verfügbar")
 	var data: Dictionary = payload.duplicate(true)
@@ -186,10 +491,17 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	data.erase("request_id")
 	if operation in ["campaign_space_engage","campaign_space_rescue","campaign_space_retreat"]:
 		var op := String(operation).trim_prefix("campaign_space_")
+		if op == "retreat" and _space_encounter != null and _space_encounter.get_snapshot().get("phase") == "entering":
+			var canceled: Dictionary = _simulation.cancel_campaign_space_entry(self, String(_space_encounter.get_snapshot().get("craft_id", "")))
+			if not canceled.get("ok", false): return canceled
+		if op == "engage" and _space_encounter != null and _space_encounter.get("_combat_owner") != null:
+			if String(data.get("target_id", "cutlass")) != "cutlass": return _reject("invalid_hostile_target", "Nur die feindliche Cutlass kann angegriffen werden")
+			var ordered: Dictionary = _simulation.request_campaign_space_engage(String(_space_encounter.get_snapshot().get("craft_id", "")), {"runtime_authorized":true})
+			if not ordered.get("ok", false): return ordered
 		var result := _commit("campaign_space",op,data,request_id)
 		_finish_space_encounter_result()
 		return result
-	if operation in ["campaign_upload","campaign_recruit","campaign_load_crate","campaign_deliver","campaign_build_pad","campaign_fabricate"]:
+	if operation in ["campaign_upload","campaign_recruit","campaign_load_crate","campaign_deliver","campaign_build_pad","campaign_build_bed","campaign_build_housing","campaign_build_room","campaign_place_room_bed","campaign_set_room_door","campaign_fabricate","campaign_research"]:
 		return _request_campaign_action(operation,data,request_id)
 	if operation=="focus_location":
 		return _flow.call("focus_location",String(data.get("location_id","")))
@@ -211,9 +523,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if operation == "select_destination" and not Dictionary(_flow.call("_find_pending_mission_craft_transfer",String(data.get("craft_id",_travel.get_snapshot().craft_id)))).is_empty():
 			return _reject("craft_in_transit", "Zielwechsel erst nach dem laufenden Flug")
 		if operation == "select_destination":
-			var travel: Dictionary = _travel.get_snapshot()
-			if String(travel.phase) != "grounded" and not (String(travel.phase) == "orbit" and String(travel.orbit_id) == "planet_orbit"):
-				return _reject("planet_orbit_required", "Zielort erst im Planetenorbit waehlen; laufenden Anflug oder Ortsbesuch zuerst beenden")
+			var travel: Dictionary = _travel.get_snapshot(String(data.get("craft_id", "")))
+			if String(travel.phase) != "grounded" and not _in_destination_orbit(travel, String(data.get("location_id", ""))):
+				return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
 
 		var campaign_operation: String = "fail_job" if operation == "abandon_job" else operation
 		if _campaign_mode and operation == "accept_job" and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get(String(data.get("job_id", "")), {})).get("status", "")) == "failed":
@@ -227,17 +539,40 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 				var scenario := String(selected_job.get("scenario_id",String(snap.locations[location_id].scenario_file_path).get_file().get_basename()))
 				_flow.call("_on_homebase_mission_selection_changed",scenario)
 		return result
+	if operation in ["station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
+		if operation == "station_install_ship_component" and load("res://scripts/mission/space_component_catalog.gd").known(String(data.get("item_id", ""))):
+			return _reject("component_not_available", "Diese Schiffskomponente ist noch nicht verfügbar")
+		var craft_id := String(data.get("craft_id", ""))
+		var context := _service_context(craft_id)
+		if String(context.get("location_id", "")) != "polisa": return _reject("station_service_required", "Zuerst am Stationsschalter anmelden")
+		context["station_service_verified"] = true
+		context["station_ship_fulfillment"] = _fulfill_polisa_ship
+		context["station_local_ship_fulfillment"] = _fulfill_polisa_local_ship
+		context["station_pad_builder"] = _build_polisa_home_pad
+		context["second_pad_built"] = _campaign_mode and bool(_campaign.get_campaign_snapshot().progress.second_pad_built)
+		var result := _commit("singleplayer_supply", operation, data, request_id, context)
+		if result.get("ok", false):
+			if operation == "station_buy_ship" and String(data.get("delivery_mode", "homebase")) == "local" and not bool(result.get("replayed", false)): _flow.call("finalize_polisa_local_ship_purchase", String(result.get("craft_id", "")))
+			_flow.call("_refresh_homebase_screen")
+		return result
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
 		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
 		if context.is_empty(): return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
 		var result := _commit("singleplayer_supply",operation,data,request_id,context)
 		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
-			if _base_personnel!=null: _base_personnel.call("claim_manual_control",unit_id)
+			if _base_personnel!=null and not bool(context.get("station_context", false)): _base_personnel.call("claim_manual_control",unit_id)
+			if bool(context.get("station_context", false)): _project_polisa_loadout(unit_id, String(data.get("craft_id", "")), Dictionary(result.get("loadout", {})))
 			_screen.call("_refresh_personnel_loadout_projection")
 			_screen.call("_emit_homebase_fireteam_context_changed")
 		return result
 	if operation in ["buy", "refuel", "sell"]:
+		if operation == "buy":
+			var offered: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id", "")), {})
+			var component_catalog = load("res://scripts/mission/space_component_catalog.gd")
+			var component_id := String(offered.get("item_id", ""))
+			if component_catalog.known(component_id):
+				return _reject("component_not_available", "Diese Schiffskomponente ist noch nicht verfügbar")
 		if _campaign_mode and operation == "buy":
 			var offer: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id","")),{})
 			var item := String(offer.get("item_id",""))
@@ -248,6 +583,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if context.is_empty():
 			return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
 		context["craft_id"]=craft_id
+		context["require_blueprints"]=_campaign_mode
+		context["cargo_lift_delivery"]=_campaign_mode and String(context.get("location_id",""))=="polisa"
+		context["ship_component_model_id"] = String(_ship_equipment.get_snapshot(craft_id).get("model_id", "")) if _ship_equipment != null else ""
 		var result: Dictionary = _commit("singleplayer_supply", operation, data, request_id, context)
 		if result.get("ok", false) and _campaign_mode and String(context.get("location_id", "")) == "trade_outpost":
 			_observe({"trade_used": true, "bought": operation == "buy", "refueled": operation == "refuel"})
@@ -257,13 +595,134 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			return {"ok": true}
 		return validate_space_launch(String(data.get("craft_id", "")))
 	if operation == "return_homebase":
+		if _cargo_transfer.blocks_craft(String(data.get("craft_id",""))):return _reject("cargo_transfer_active","Frachttransfer zuerst abschließen oder abbrechen")
 		if not _flow.has_method("_request_singleplayer_return"):
 			return _reject("return_unavailable", "Rueckflug noch nicht verfuegbar")
+		if _polisa_shuttle_dispatcher != null:
+			var service: Dictionary = request_polisa_service_departure(String(data.get("craft_id", "")))
+			if not service.get("ok", false) or service.get("handled", false): return service
 		return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")))
 	return _reject("unknown_operation", "Kampagnenaktion nicht verfuegbar")
 
+
+func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dictionary:
+	match operation:
+		"build":
+			var result: Dictionary = _base_personnel.build_infrastructure(String(payload.item_id), payload.infrastructure)
+			if bool(result.get("ok", false)): sync_crafts()
+			return result
+		"equipment":
+			return _supply.receive_skirmish_equipment(String(payload.item_id))
+		"person":
+			var candidates: Array = _get_skirmish_recruits(_skirmish_economy.get_snapshot())
+			var index: Variant = payload.get("candidate_index", 0)
+			if typeof(index) != TYPE_INT or index < 0 or index >= candidates.size():
+				return _reject("unknown_candidate", "Personenvorschlag bitte erneut auswählen")
+			var setup = load("res://scripts/meta/skirmish_start_configuration.gd").new()
+			var person: Dictionary = candidates[index].profile.duplicate(true)
+			person.unit_id = String(payload.unit_id)
+			setup._apply_points_profile(person, payload, payload.role == "pilot", false)
+			var result: Dictionary = _flow.call("register_campaign_recruit", person)
+			if bool(result.get("ok", false)):
+				_simulation.request_personnel_loadout_command("configure_roster", {"roster": [person]})
+				_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": person.unit_id,
+					"loadout": {"armor": person.armor, "weapon_1": person.weapon_1, "weapon_2": person.weapon_2}})
+				result["message"] = "%s rekrutiert" % String(person.display_name)
+			return result
+		"dismiss":
+			var id := String(payload.unit_id)
+			var check: Dictionary = _base_personnel.validate_dismiss(id)
+			if not bool(check.get("ok", false)): return check
+			var returned: Dictionary = _supply.return_skirmish_person_equipment(id, _simulation.get_personnel_loadout_state().get_loadout(id))
+			if not bool(returned.get("ok", false)): return returned
+			_simulation.request_base_personnel_command("base_cancel", {"unit_id": id})
+			_screen.call("request_operation", "remove", {"unit_id": id})
+			_base_personnel.remove_person(id)
+			_simulation.get_personnel_loadout_state().remove_unit(id)
+			_flow.call("remove_skirmish_person", id)
+			return {"ok": true, "message": "Personalpreis erstattet · Ausrüstung im Basislager"}
+		"ship":
+			var snapshot: Dictionary = _skirmish_economy.get_snapshot()
+			if Array(_flow.get("_homebase_aircraft_definitions")).size() >= int(snapshot.infrastructure.pads):
+				return _reject("no_free_pad", "Zuerst einen freien Landeplatz bauen")
+			var entry: Dictionary = load("res://scripts/meta/skirmish_points_catalog.gd").SHIPS[payload.item_id]
+			var craft: Dictionary = _flow.call("_build_homebase_aircraft_definition", String(entry.type), 1)
+			craft.merge({"craft_id": payload.craft_id, "model_id": payload.item_id, "display_name": entry.name}, true)
+			var definitions: Array = _flow.get("_homebase_aircraft_definitions")
+			definitions.append(craft)
+			var locations: Dictionary = _flow.get("_aircraft_location_by_craft")
+			locations[payload.craft_id] = "homebase"
+			sync_crafts()
+			return {"ok": true, "craft_id": payload.craft_id, "message": "%s auf dem Landeplatz bereit" % entry.name}
+		"return_ship":
+			var id := String(payload.craft_id)
+			if _ship_equipment != null:
+				var equipment_return: Dictionary = _ship_equipment.validate_craft_return(id)
+				if not equipment_return.get("ok", false): return equipment_return
+			if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", id)).is_empty() or String(_flow.get("_aircraft_location_by_craft").get(id, "")) != "homebase" or String(get_space_travel_snapshot(id).get("phase", "grounded")) != "grounded":
+				return _reject("craft_away", "Schiff zuerst an der Basis landen")
+			if Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).has(id):
+				return _reject("craft_occupied", "Pilotenzuweisung zuerst lösen")
+			if bool(_flow.call("_has_active_homebase_pilot_transfer", id)) or bool(_flow.call("_has_active_homebase_cargo_load", id)) or Dictionary(_flow.get("_loaded_aircraft_cargo_by_craft")).has(id):
+				return _reject("craft_loaded", "Schiff zuerst vollständig entladen")
+			for person: Dictionary in _base_personnel.get_snapshot().units:
+				if String(person.get("craft_id", "")) == id: return _reject("craft_occupied", "Schiff zuerst vollständig räumen")
+			var inventory: Dictionary = _supply.get_supply_snapshot().get("inventory", {})
+			if not Dictionary(inventory.get("craft:" + id, {}).get("items", {})).is_empty():
+				return _reject("craft_loaded", "Schiffsfracht zuerst entladen")
+			if _ship_equipment != null:
+				var equipment_removed: Dictionary = _ship_equipment.unregister_unmodified_craft(id)
+				if not equipment_removed.get("ok", false): return equipment_removed
+			_flow.call("remove_skirmish_craft", id)
+			_supply.remove_skirmish_craft(id)
+			_travel.unregister_craft(id)
+			sync_crafts()
+			return {"ok": true, "message": "Schiff zurückgegeben"}
+	return _reject("unknown_operation", "Punkteaktion fehlt")
+
+
+func _get_skirmish_recruits(economy: Dictionary) -> Array:
+	var used := {}
+	for unit: Dictionary in Array(_flow.get("_all_team_units")):
+		used[String(unit.get("portrait_id", ""))] = true
+	var signature := JSON.stringify([economy.next_person_id, used.keys()])
+	if signature != _recruit_candidate_signature:
+		_recruit_candidate_signature = signature
+		_recruit_candidates.clear()
+		var packages := [
+			{"role": "operator", "experience": "junior", "armor": "light", "weapon": "rifle"},
+			{"role": "medic", "experience": "trained", "armor": "light", "weapon": "rifle"},
+			{"role": "pilot", "experience": "junior", "armor": "light", "weapon": "pistol"}]
+		var setup = load("res://scripts/meta/skirmish_start_configuration.gd").new()
+		for index in range(packages.size()):
+			var profile: Dictionary = setup.build_points_person(packages[index], "%s_offer_%d" % [economy.next_person_id, index], used)
+			used[String(profile.portrait_id)] = true
+			_recruit_candidates.append({"profile": profile, "configuration": packages[index]})
+	return _recruit_candidates.duplicate(true)
+
 func _has_active_transit() -> bool:
 	return not Array(_flow.get("_pending_mission_craft_transfers")).is_empty()
+
+func _validate_cargo_transfer(source:String,target:String)->Dictionary:
+	if not _campaign_mode or source==target:return _reject("cargo_invalid_route","Frachtweg ungültig")
+	var craft_count:=0
+	for container:String in [source,target]:
+		if container=="station:polisa:lift":continue
+		if not container.begins_with("craft:"):return _reject("cargo_invalid_route","Nur lokale Schiffe und Frachtaufzug")
+		var craft:=container.trim_prefix("craft:")
+		if String(_service_context(craft).get("location_id",""))!="polisa":return _reject("cargo_ship_unavailable","Schiff muss auf Port Olisar gelandet sein")
+		craft_count+=1
+	if craft_count<1:return _reject("cargo_invalid_route","Schiff auswählen")
+	return {"ok":true}
+
+func _cargo_inventory()->Dictionary:
+	return Dictionary(_supply.get_supply_snapshot().get("inventory",{})) if _supply!=null else {}
+
+func _transfer_cargo_item(source:String,target:String,item:String,quantity:int,id:String)->Dictionary:
+	return _commit("singleplayer_supply","inventory_transfer",{"source_container_id":source,"destination_container_id":target,"item_id":item,"amount":quantity},"cargo-step:"+id,{"accessible_containers":[source,target],"cargo_transfer_authorized":true})
+
+func has_active_cargo_transfer(craft_id:String)->bool:
+	return _cargo_transfer.blocks_craft(craft_id)
 
 func _service_context(craft_id: String) -> Dictionary:
 	if craft_id.is_empty() or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty():
@@ -272,15 +731,25 @@ func _service_context(craft_id: String) -> Dictionary:
 		return {}
 	var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, ""))
 	if location == "homebase":
-		if _home_pad_for(craft_id).is_empty():
+		if _home_pad_for(craft_id).is_empty() or not _craft_grounded_at_home(craft_id):
 			return {}
 		return {"location_id": "homebase", "craft_busy": false}
-	var departure: Dictionary = Dictionary(_campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {}))
+	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
+	if routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) not in ["grounded", "surface"]: return {}
+	var departure: Dictionary = _craft_visit_binding(craft_id)
 	var place_id := String(departure.get("destination_location_id",""))
+	if location == "mission" and place_id == "polisa":
+		var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+		if controller == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
+		# Station-wide service menu after actual docking; walking to the counter is optional.
+		return {"location_id":"polisa", "craft_busy":false, "station_service_verified":true}
 	if location == "mission" and place_id in ["trade_outpost","satellite_crash"]:
 		var card: Dictionary = _flow.call("_find_mission_drop_card_in_planning_state",craft_id)
 		if String(card.get("state",card.get("mission_drop_state",""))) not in ["landed","unloading","complete"]: return {}
 		var mission: Node = _flow.call("get_mission_for_craft",craft_id)
+		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+		if controller == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
 		var driver: Node = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
 		if driver == null or not driver.has_method("get_mission_interaction_runtime_states"): return {}
 		var states: Dictionary = driver.call("get_mission_interaction_runtime_states")
@@ -289,18 +758,35 @@ func _service_context(craft_id: String) -> Dictionary:
 
 	return {}
 
+func _in_destination_orbit(travel: Dictionary, location_id: String) -> bool:
+	var orbit := String(Dictionary(travel.get("location_orbits", {})).get(location_id, ""))
+	return not orbit.is_empty() and location_id != "homebase" and String(travel.get("phase", "")) == "orbit" and String(travel.get("orbit_id", "")) == orbit
+
 func validate_departure(craft_id: String) -> Dictionary:
+	return _validate_departure_gates(craft_id, true)
+
+func preview_departure(craft_id: String) -> Dictionary:
+	# Preparation must not recover chips or publish onboarding commands.
+	# This is a read projection, not a transferable authorization receipt.
+	return _validate_departure_gates(craft_id, false)
+
+func preview_reapproach(craft_id: String) -> Dictionary:
+	return _validate_departure_gates(craft_id, false, true)
+
+func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_departure: bool = false) -> Dictionary:
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	var travel: Dictionary = get_space_travel_snapshot(craft_id)
-	var in_planet_orbit := String(travel.get("craft_id", "")) == craft_id and String(travel.get("phase", "")) == "orbit" and String(travel.get("orbit_id", "")) == "planet_orbit"
+
 	if _campaign_mode:
-		observe_campaign_progress()
+		if observe_progress:
+			observe_campaign_progress()
 		var stage: int = int(_onboarding.get_snapshot().stage_index)
-		if stage == 0:
+		if stage == 0 and not _selected_destination_is_free_visit():
 			return _reject("preparation_incomplete", "Zuerst Satellitenauftrag annehmen, Ziel waehlen und Boarding abschliessen")
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var destination: String = String(selected.selected_location_id)
+	var in_destination_orbit := String(travel.get("craft_id", "")) == craft_id and _in_destination_orbit(travel, destination)
 	if _campaign_mode:
 		var gate: Dictionary = _campaign_operation_gate("select_destination", {"location_id": destination})
 		if not gate.ok:
@@ -323,18 +809,23 @@ func validate_departure(craft_id: String) -> Dictionary:
 		return _reject("destination_unavailable", "Karte oder Szenario fuer diesen Zielort fehlt")
 	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty():
 		return _reject("craft_busy", "Schiff ist bereits unterwegs")
-	if not in_planet_orbit and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase":
+	if not in_destination_orbit and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase":
 		return _reject("craft_unavailable", "Schiff steht nicht auf seinem Startpad")
-	if _screen == null or (not in_planet_orbit and not bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id))) or String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, "")).is_empty():
+	if _screen == null or (not in_destination_orbit and not bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id))) or String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, "")).is_empty():
 		return _reject("launch_payload_missing", "Pilot, Trupp und abgeschlossenes Boarding fehlen")
 	var definition: Dictionary = _flow.call("_find_homebase_aircraft_definition", craft_id)
-	if definition.is_empty() or (not in_planet_orbit and not bool(_screen.call("_can_send_craft", definition, craft_id))) or (in_planet_orbit and not bool(_flow.call("_has_mission_start_payload"))):
+	if definition.is_empty() or (not in_destination_orbit and not bool(_screen.call("_can_send_craft", definition, craft_id))) or (in_destination_orbit and not bool(_flow.call("_has_mission_start_payload"))):
 		return _reject("launch_payload_invalid", "Schiff und Payload sind nicht startbereit")
 	var selected_job:=String(selected.selected_job_id)
 	for binding: Dictionary in Dictionary(selected.get("departures_by_craft_id",{})).values():
 		if String(binding.get("job_id",""))==selected_job and String(binding.get("craft_id",""))!=craft_id: selected_job=""
 	var departure: Dictionary = {"craft_id": craft_id, "origin_location_id": "homebase", "destination_location_id": destination, "landing_pad_id": pad, "job_id": selected_job}
-	var campaign_gate: Dictionary = _campaign.validate_departure(departure, {"departure_authorized": true})
+	if reuse_departure:
+		var existing: Dictionary = Dictionary(selected.get("departures_by_craft_id", {})).get(craft_id, {})
+		if existing != departure: return _reject("departure_changed", "Abflugbindung passt nicht mehr zum Ziel")
+		if not selected_job.is_empty() and (selected_job_definition.get("status") != "active" or selected_job_definition.get("craft_id") != craft_id): return _reject("job_changed", "Auftrag ist nicht mehr diesem Schiff zugeordnet")
+		return {"ok":true, "departure":departure}
+	var campaign_gate: Dictionary = _campaign.validate_departure(departure, {"departure_authorized": true, "built_home_pad_ids":_built_home_pad_ids()})
 	if not campaign_gate.get("ok", false):
 		return campaign_gate
 	var fuel_gate: Dictionary = _supply.preview_route_fuel(departure, {"departure_authorized": true, "require_return_reserve": true})
@@ -342,29 +833,26 @@ func validate_departure(craft_id: String) -> Dictionary:
 		return fuel_gate
 	return {"ok": true, "departure": departure}
 
-func authorize_departure(craft_id: String) -> Dictionary:
-	var validation: Dictionary = validate_departure(craft_id)
-	if not validation.get("ok", false):
-		return validation
-	var departure: Dictionary = validation.departure
+func authorize_departure(craft_id: String, approach_request_id: String = "", station_dock: bool = false) -> Dictionary:
+	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")
+	var binding: Dictionary = _simulation.configure_departure_adapter(self)
+	if not binding.get("ok", false): return binding
 	var token: String = "departure:%s:%s:%d" % [_request_session, craft_id, int(_flow.get("_transfer_sequence")) + 1]
-	var fuel: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", departure, token + ":fuel", {"departure_authorized": true, "require_return_reserve": true})
-	if not fuel.get("ok", false):
-		return fuel
-	var bound: Dictionary = _commit("singleplayer_campaign", "bind_departure", departure, token, {"departure_authorized": true})
-	if not bound.get("ok", false):
-		return bound
-	if not String(departure.job_id).is_empty():
-		var activated: Dictionary = _commit("singleplayer_campaign", "activate_job", {"job_id": departure.job_id, "craft_id": craft_id}, token + ":active", {"departure_authorized": true})
-		if not activated.get("ok", false):
-			return activated
+	var previous := String(_departure_token_by_craft.get(craft_id, ""))
+	if not approach_request_id.is_empty() and _simulation.has_confirmed_cancelled_departure(self, craft_id, previous): token = previous
+	var result: Dictionary = _simulation.commit_singleplayer_departure(self, craft_id, token, approach_request_id, station_dock)
+	if not result.get("ok", false): return result
 	_departure_token_by_craft[craft_id] = token
-	return {"ok": true, "departure": departure}
+	if approach_request_id.is_empty():
+		_simulation.publish_singleplayer_departure_events(self, token)
+		if _campaign_mode and not result.get("replayed", false): observe_campaign_progress()
+	return result
 
-func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
+func preview_return(craft_id: String) -> Dictionary:
+	# Read-only live visit and pilot check; no fuel or transfer mutation.
 	if Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty() or _home_pad_for(craft_id).is_empty():
 		return _reject("unknown_craft", "Kein reales Schiff mit Rueckkehrpad")
-	var binding: Dictionary = Dictionary(_campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {}))
+	var binding: Dictionary = _craft_visit_binding(craft_id)
 	if binding.is_empty():
 		return _reject("no_campaign_departure", "Kein ortsgebundener Abflug fuer dieses Schiff")
 	var transfer: Dictionary = _flow.call("_find_pending_mission_craft_transfer", craft_id)
@@ -373,7 +861,7 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	# the same fixed-route cost model instead of inventing distance-based fuel.
 	if location != "mission" and String(transfer.get("phase", "")) != "to_mission":
 		return _reject("craft_not_remote", "Schiff ist nicht im Ausflug")
-	if _campaign_mode and location == "mission":
+	if (_campaign_mode or bool(binding.get("local_origin", false))) and location == "mission":
 		var mission: Node = _flow.call("get_mission_for_craft",craft_id)
 		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
 		if controller == null:
@@ -382,14 +870,24 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 		if not bool(pilot_guard.get("ok", false)):
 			return pilot_guard
 	var route := {"craft_id": craft_id, "origin_location_id": String(binding.destination_location_id), "destination_location_id": "homebase"}
-	var outward_token: String = String(_departure_token_by_craft.get(craft_id, ""))
+	var outward_token: String = "local-purchase:"+String(binding.get("origin_receipt_id", "")) if bool(binding.get("local_origin", false)) else String(_departure_token_by_craft.get(craft_id, ""))
 	if outward_token.is_empty():
 		return _reject("no_departure_receipt", "Bestaetigter Abflugbeleg fehlt")
+	return {"ok":true, "route":route, "outward_token":outward_token}
+
+func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
+	var preview: Dictionary = preview_return(craft_id)
+	if not preview.get("ok", false): return preview
+	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface":
+		return _simulation.preview_singleplayer_local_return_fuel(self, craft_id)
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
+		return _simulation.preview_singleplayer_local_return_fuel(self, craft_id)
 	# One return per accepted outward trip, regardless of whether the request
 	# came from a UI retry, automatic debrief, or the transport hook itself.
 	# Owner replay occurs before fuel validation, so a repeated success remains
 	# valid even if its original debit left less than another route's cost.
-	var result: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", route, "return:" + outward_token + ":fuel", {"departure_authorized": true})
+	var result: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", preview.route, "return:" + String(preview.outward_token) + ":fuel", {"departure_authorized": true})
 	if not request_id.is_empty():
 		result["return_request_id"] = request_id
 	return result
@@ -417,11 +915,14 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 			if not Array(gates.get("completed_step_ids",[])).has(step): return
 		if bool(job.get("home_upload",false)):
 			var item_id:String="satellite_chip" if job_id=="satellite_recovery" else "outpost_chip"
-			# Existing saves/result integrations may still recover directly into cargo.
-			# A chip already picked up by the real leader must never be granted twice.
-			if _find_campaign_chip_container(item_id,craft_id).is_empty():
-				var granted := _campaign_cargo(craft_id,item_id,1,"chip:"+job_id)
-				if not bool(granted.get("ok",false)): return
+			if _find_campaign_chip_container(item_id, craft_id).is_empty():
+				# Live objectives must produce a carried chip first. Preserve the
+				# legacy result-only handoff when no live mission exists.
+				if _flow.call("get_mission_for_craft", craft_id) != null:
+					return
+				var granted := _campaign_cargo(craft_id, item_id, 1, "chip:" + job_id)
+				if not bool(granted.get("ok", false)):
+					return
 		if job_id == "outpost_recovery":
 			var granted := _campaign_cargo(craft_id,"c_benit_crate",1,"load:"+job_id)
 			if not bool(granted.get("ok",false)): return
@@ -444,6 +945,7 @@ func _campaign_operation_gate(operation: String, payload: Dictionary) -> Diction
 		var location: String = String(payload.get("location_id", ""))
 		var jobs: Dictionary = _campaign.get_campaign_snapshot().jobs
 		if location == "homebase": return {"ok":true}
+		if bool(Dictionary(_campaign.get_campaign_snapshot().locations.get(location, {})).get("free_visit", false)): return {"ok":true}
 		for job: Dictionary in jobs.values():
 			if String(job.location_id) == location and not bool(job.get("locked",false)):
 				return {"ok":true}
@@ -458,34 +960,303 @@ func observe_campaign_progress() -> void:
 	if not _campaign_mode:
 		return
 	_recover_secured_campaign_chips()
+	# One fresh progress projection after recovery; never retain it across calls.
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
+	var jobs: Dictionary = campaign.jobs
 	var at_home := _flow.get("_active_mission") == null and not _has_active_transit()
 	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
 		at_home = at_home and String(location) == "homebase"
-	var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
-	var craft_id: String = String(selected_craft.get("id", ""))
-	var ready := not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
-	ready = ready and (_base_personnel == null or (_base_personnel.is_pilot_aboard(craft_id) and bool(_base_personnel.get_payload_presence(craft_id).all_aboard)))
-	var job: Dictionary = Dictionary(campaign.jobs.get("satellite_recovery", {}))
-	var service := _service_context(craft_id)
-	var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(craft_id, {}))
-	var progress: Dictionary = campaign.get("progress",{})
-	_observe({"base_ready":at_home and ready and String(job.get("status","")) == "accepted","satellite_uploaded":String(job.get("status","")) == "completed","outpost_completed":_job_complete("outpost_recovery"),"outpost_recruited":bool(progress.get("recruited_outpost",false)),"crate_loaded":bool(progress.get("crate_loaded",false)),"delivery_completed":_job_complete("benit_delivery"),"outpost_chip_uploaded":_job_complete("outpost_chip_recovery"),"rescue_completed":_job_complete("buccaneer_rescue"),"pilot_recruited":bool(progress.get("recruited_pilot",false)),"second_pad_built":bool(progress.get("second_pad_built",false))})
+	var job: Dictionary = Dictionary(jobs.get("satellite_recovery", {}))
+	var ready := false
+	# This full UI projection is only needed when base_ready can become true.
+	if at_home and String(job.get("status", "")) == "accepted":
+		var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
+		var craft_id: String = String(selected_craft.get("id", ""))
+		ready = not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
+		ready = ready and (_base_personnel == null or (_base_personnel.is_pilot_aboard(craft_id) and bool(_base_personnel.get_payload_presence(craft_id).all_aboard)))
+	var progress: Dictionary = campaign.get("progress", {})
+	_observe({
+		"base_ready": ready,
+		"satellite_uploaded": String(job.get("status", "")) == "completed",
+		"outpost_completed": String(Dictionary(jobs.get("outpost_recovery", {})).get("status", "")) == "completed",
+		"outpost_recruited": bool(progress.get("recruited_outpost", false)),
+		"crate_loaded": bool(progress.get("crate_loaded", false)),
+		"delivery_completed": String(Dictionary(jobs.get("benit_delivery", {})).get("status", "")) == "completed",
+		"outpost_chip_uploaded": String(Dictionary(jobs.get("outpost_chip_recovery", {})).get("status", "")) == "completed",
+		"rescue_completed": String(Dictionary(jobs.get("buccaneer_rescue", {})).get("status", "")) == "completed",
+		"pilot_recruited": bool(progress.get("recruited_pilot", false)),
+		"second_pad_built": bool(progress.get("second_pad_built", false))})
 
 func get_space_travel_snapshot(craft_id: String = "") -> Dictionary:
 	if _travel == null:
 		return {}
 	var snapshot: Dictionary = _travel.get_snapshot(craft_id)
+	var service := _service_shuttle_snapshot()
+	if not service.is_empty(): snapshot["service_shuttle"] = service
+	if _polisa_shuttle_dispatcher != null:
+		var dispatch: Dictionary = _polisa_shuttle_dispatcher.get_snapshot()
+		dispatch["waiting_for_pad"] = String(dispatch.get("phase", "")) in ["pilot_pending", "walk_pending", "approaching", "taking_off"] and _service_pad_reservation.is_empty()
+		snapshot["service_shuttle_dispatch"] = dispatch
+	if _polisa_shuttle_home != null: snapshot["service_shuttle_home"] = _polisa_shuttle_home.get_snapshot()
+	if _warp_arrival_feedback.has(String(snapshot.get("craft_id", ""))): snapshot["arrival_feedback"] = Dictionary(_warp_arrival_feedback[snapshot.craft_id]).duplicate(true)
 	snapshot["enabled"] = is_campaign_mission() or String(snapshot.phase) != "grounded"
 	snapshot["result_summary"] = String(Dictionary(_flow.get("_last_mission_result")).get("result", ""))
 	return snapshot
 
+func _service_shuttle_snapshot() -> Dictionary:
+	return _polisa_shuttle.get_snapshot() if _polisa_shuttle != null else {}
+
+func request_polisa_service_departure(craft_id: String) -> Dictionary:
+	if _cargo_transfer.blocks_craft(craft_id):return _reject("cargo_transfer_active","Frachttransfer zuerst abschließen oder abbrechen")
+	if _polisa_shuttle_dispatcher == null: return {"ok":true,"handled":false}
+	var state: Dictionary = _polisa_shuttle_dispatcher.get_snapshot()
+	if String(state.get("source_craft_id", "")) == craft_id and String(state.get("phase", "")) == "player_departure_pending":
+		return {"ok":true,"handled":false}
+	var request: Dictionary = _polisa_shuttle_dispatcher.request_departure(craft_id)
+	if request.get("ok", false) and request.get("handled", false):
+		var shuttle_id := String(_polisa_shuttle_dispatcher.get_snapshot().get("craft_id", ""))
+		if not shuttle_id.is_empty():
+			var pad: Dictionary = _reserve_service_home_pad(shuttle_id)
+			if not pad.get("ok", false): request["message"] = "Shuttle wartet auf einen freien Heimatlandeplatz"
+	return request
+
+func cancel_polisa_service_departure(craft_id: String) -> Dictionary:
+	if _polisa_shuttle_dispatcher == null: return _reject("shuttle_unavailable", "Keine Shuttlefahrt in Vorbereitung")
+	var before: Dictionary = _polisa_shuttle_dispatcher.get_snapshot()
+	if String(before.get("source_craft_id", "")) != craft_id: return _reject("shuttle_context_changed", "Das vorbereitende Schiff stimmt nicht überein")
+	var result: Dictionary = _polisa_shuttle_dispatcher.cancel_before_transfer()
+	if result.get("ok", false) and not result.get("pending", false):
+		_release_service_home_pad(String(before.get("craft_id", "")), String(_service_pad_reservation.get("pad_id", "")))
+		if _polisa_shuttle_dispatcher.has_method("ack_cancelled"): _polisa_shuttle_dispatcher.ack_cancelled()
+		result["message"] = "Shuttlefahrt abgebrochen"
+	elif result.get("ok", false):
+		result["message"] = "Shuttlefahrt wird sicher abgebrochen"
+	else:
+		result["message"] = "Shuttlefahrt kann in diesem Zustand nicht sicher abgebrochen werden"
+	return result
+
+func _configure_polisa_shuttle() -> Dictionary:
+	if _polisa_shuttle_dispatcher != null: return {"ok":true}
+	var home = load("res://scripts/core/polisa_shuttle_home_lifecycle.gd").new()
+	var home_result: Dictionary = home.configure(_reserve_service_home_pad, _validate_service_home_pad, _release_service_home_pad)
+	if not home_result.get("ok", false): return home_result
+	var owner = load("res://scripts/core/polisa_shuttle_service.gd").new()
+	var dispatcher = load("res://scripts/mission/polisa_shuttle_dispatcher.gd").new()
+	var result: Dictionary = dispatcher.configure(_flow, _base_personnel, owner, _verify_polisa_service_evidence)
+	if not result.get("ok", false): return result
+	_polisa_shuttle_home = home
+	_polisa_shuttle = owner
+	_polisa_shuttle_dispatcher = dispatcher
+	return {"ok":true}
+
+func _verify_polisa_service_evidence(kind: String, person_id: String, craft_id: String, receipt: Dictionary) -> bool:
+	if kind == "landing_home" and _polisa_shuttle_home != null:
+		return _polisa_shuttle_home.verify_landing(craft_id, receipt)
+	if kind == "disembark_home" and _polisa_shuttle_home != null:
+		return _polisa_shuttle_home.verify_passenger_exit(craft_id, person_id, receipt)
+	if kind == "shuttle_retired_home" and _polisa_shuttle_home != null:
+		var controller := get_polisa_globe_controller()
+		return _polisa_shuttle_home.verify_departure(craft_id, Dictionary(receipt.get("departure", {}))) and is_instance_valid(controller) and controller.has_method("verify_polisa_service_home_cleanup") and bool(controller.call("verify_polisa_service_home_cleanup", person_id, craft_id, Dictionary(receipt.get("station_cleanup", {}))))
+	if kind == "boarding_home" and _polisa_shuttle_home != null and _base_personnel != null:
+		return _polisa_shuttle_home.verify_departure(craft_id, Dictionary(receipt.get("departure", {}))) and _base_personnel.verify_polisa_shuttle_return_board_receipt(Dictionary(receipt.get("boarding", {})))
+	if kind in ["landing_polisa", "disembark_polisa"]:
+		var controller := get_polisa_globe_controller()
+		return is_instance_valid(controller) and controller.has_method("verify_polisa_service_arrival") and bool(controller.call("verify_polisa_service_arrival", kind, person_id, craft_id, receipt))
+	if kind == "shuttle_retired_polisa" and _base_personnel != null:
+		var states: Dictionary = _base_personnel.get("_states")
+		var controller := get_polisa_globe_controller()
+		return String(Dictionary(states.get(person_id, {})).get("status", "")) == "station" and is_instance_valid(controller) and controller.has_method("verify_polisa_service_retirement") and bool(controller.call("verify_polisa_service_retirement", person_id, craft_id, receipt))
+	return false
+
+func _advance_polisa_shuttle_home(delta: float) -> void:
+	if _polisa_shuttle == null or _polisa_shuttle_home == null: return
+	var service: Dictionary = _polisa_shuttle.get_snapshot()
+	var phase := String(service.get("phase", ""))
+	var home: Dictionary = _polisa_shuttle_home.get_snapshot()
+	_shuttle_home_retry = maxf(0.0, _shuttle_home_retry - maxf(delta, 0.0))
+	if phase == "to_station" and home.get("phase") == "departed":
+		_polisa_shuttle_home.release()
+		return
+	if phase == "home_landing_required":
+		if home.get("phase") == "idle":
+			if _shuttle_home_retry > 0.0: return
+			_shuttle_home_retry = 0.5
+			var started: Dictionary = _polisa_shuttle_home.begin(String(service.get("craft_id", "")), String(service.get("person_id", "")))
+			if not started.get("ok", false): return
+		_polisa_shuttle_home.advance(clampf(delta, 0.0, 60.0))
+		var receipt: Dictionary = _polisa_shuttle_home.landing_receipt()
+		if not receipt.is_empty(): _polisa_shuttle.confirm_landing(receipt)
+	elif phase == "home_disembark_required" and _base_personnel != null:
+		if _shuttle_home_retry > 0.0: return
+		_shuttle_home_retry = 0.5
+		var person := String(service.get("person_id", ""))
+		var ticket: Dictionary = _polisa_shuttle_home.prepare_passenger_exit(person)
+		var layout: Dictionary = _base_personnel.get_snapshot().get("layout", {})
+		var raw: Array = layout.get("avatar_spawn_grid", [])
+		for interior: Dictionary in layout.get("interiors", []):
+			if String(interior.get("id", "")) == "habitat_cutaway_01" and interior.get("door_grid") is Array:
+				raw = interior.door_grid
+				break
+		if not ticket.is_empty() and raw.size() == 2:
+			_base_personnel.admit_polisa_shuttle_home(person, ticket, Vector2i(int(raw[0]), int(raw[1])))
+	elif phase == "settled":
+		var craft := String(service.get("craft_id", ""))
+		if home.get("phase") == "landed": _polisa_shuttle_home.begin_departure(craft)
+		_polisa_shuttle_home.advance(clampf(delta, 0.0, 60.0))
+		var departed: Dictionary = _polisa_shuttle_home.departure_receipt()
+		if not departed.is_empty():
+			var controller := get_polisa_globe_controller()
+			if not is_instance_valid(controller) or not controller.has_method("retire_polisa_service_after_home"): return
+			var cleaned: Dictionary = controller.call("retire_polisa_service_after_home", craft, String(service.get("person_id", "")), _polisa_shuttle, _base_personnel)
+			if cleaned.get("ok", false) and _polisa_shuttle.retire_home({"departure":departed,"station_cleanup":cleaned}).get("ok", false): _polisa_shuttle_home.release()
+	elif phase == "return_boarding_required" and _base_personnel != null:
+		var person := String(service.get("person_id", ""))
+		var craft := String(service.get("craft_id", ""))
+		var request_id := "polisa-service-return:" + craft
+		var pad_id := String(home.get("landing_pad_id", ""))
+		var layout: Dictionary = _base_personnel.get_snapshot().get("layout", {})
+		var pad_grid: Array = []
+		for pad: Dictionary in layout.get("landing_pads", []):
+			if String(pad.get("id", "")) == pad_id: pad_grid = pad.get("interaction_grid", pad.get("grid", [])); break
+		if pad_grid.size() != 2: return
+		if home.get("phase") == "landed":
+			_shuttle_return_poll = maxf(0.0, _shuttle_return_poll - maxf(delta, 0.0))
+			if _shuttle_return_poll > 0.0: return
+			_shuttle_return_poll = 0.25
+			_base_personnel.request_polisa_shuttle_return_board(person, craft, Vector2i(int(pad_grid[0]), int(pad_grid[1])), request_id)
+		var boarding: Dictionary = _base_personnel.get_polisa_shuttle_return_board_receipt(person, craft, request_id)
+		if boarding.is_empty(): return
+		if home.get("phase") == "landed": _polisa_shuttle_home.begin_departure(craft)
+		_polisa_shuttle_home.advance(clampf(delta, 0.0, 60.0))
+		var departed: Dictionary = _polisa_shuttle_home.departure_receipt()
+		if not departed.is_empty() and _polisa_shuttle.begin_return({"boarding":boarding,"departure":departed}).get("ok", false): _polisa_shuttle_home.release()
+	elif phase in ["station_landing_required", "station_disembark_required"]:
+		var controller := get_polisa_globe_controller()
+		if not is_instance_valid(controller) or not controller.has_method("get_polisa_service_arrival"): return
+		var craft := String(service.get("craft_id", ""))
+		var person := String(service.get("person_id", ""))
+		if phase == "station_landing_required":
+			if not controller.has_method("begin_polisa_service_return_landing"): return
+			var arrival: Dictionary = controller.call("begin_polisa_service_return_landing", craft, person, _polisa_shuttle)
+			if not arrival.get("ok", false): return
+			var landing: Dictionary = controller.call("get_polisa_service_arrival", craft, "landing_polisa")
+			if not landing.is_empty(): _polisa_shuttle.confirm_station_landing(landing)
+		else:
+			var exit_receipt: Dictionary = controller.call("get_polisa_service_arrival", craft, "disembark_polisa")
+			if not exit_receipt.is_empty(): _polisa_shuttle.confirm_station_disembark(exit_receipt)
+	elif phase == "returned":
+		var controller := get_polisa_globe_controller()
+		if not is_instance_valid(controller) or not controller.has_method("retire_polisa_service_ship"): return
+		var craft := String(service.get("craft_id", ""))
+		var person := String(service.get("person_id", ""))
+		var exit_receipt: Dictionary = controller.call("get_polisa_service_arrival", craft, "disembark_polisa")
+		if exit_receipt.is_empty(): return
+		var retired: Dictionary = controller.call("retire_polisa_service_ship", craft, person, exit_receipt)
+		if retired.get("ok", false): _polisa_shuttle.retire_station(retired)
+
+func get_space_area_projection(craft_id: String) -> Dictionary:
+	if craft_id.strip_edges().is_empty() or _simulation == null or _travel == null: return {"ok":false, "reason":"unknown_craft"}
+	var flight: RefCounted = _travel.get_flight_state(craft_id)
+	if flight == null or _simulation.get_space_actor(craft_id) != flight: return {"ok":false, "reason":"unknown_craft"}
+	var snapshot: Dictionary = flight.get_snapshot()
+	if snapshot.get("coordinate_frame") != "local" or snapshot.get("motion_mode") != "tactical" or String(snapshot.get("space_area_id", "")).is_empty(): return {"ok":false, "reason":"not_active_local"}
+	var projection: Dictionary = _simulation.get_space_area_snapshot(snapshot.space_area_id, "singleplayer")
+	if not projection.get("ok", false): return projection
+	for actor: Dictionary in projection.actors:
+		if actor.get("craft_id") == craft_id: return projection
+	return {"ok":false, "reason":"not_owned"}
+
+func preview_space_warp_entry(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_flow) or _travel == null or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(craft_id)) != TYPE_STRING or String(pilots[craft_id]).is_empty(): return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var routes: Dictionary = _travel.get_snapshot().get("routes", {})
+	if not routes.has(craft_id): return _reject("unknown_craft", "Schiff ist nicht in der eigenen Flotte")
+	return {"ok":true, "owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
+
 func advance_space_travel(delta: float) -> void:
+	_cargo_transfer.advance(delta)
+	_advance_polisa_recruitment()
+	_restore_polisa_residents()
+	if _polisa_shuttle_dispatcher != null:
+		var dispatch: Dictionary = _polisa_shuttle_dispatcher.get_snapshot()
+		var phase := String(dispatch.get("phase", ""))
+		var can_advance := true
+		if phase in ["pilot_pending", "walk_pending", "approaching", "taking_off"]:
+			can_advance = _reserve_service_home_pad(String(dispatch.get("craft_id", ""))).get("ok", false)
+		if can_advance: _polisa_shuttle_dispatcher.advance(clampf(delta, 0.0, 60.0))
+		var after: Dictionary = _polisa_shuttle_dispatcher.get_snapshot()
+		if String(after.get("phase", "")) == "cancelled":
+			_release_service_home_pad(String(after.get("craft_id", "")), String(_service_pad_reservation.get("pad_id", "")))
+			_polisa_shuttle_dispatcher.ack_cancelled()
+	if _polisa_shuttle != null:
+		_polisa_shuttle.advance(clampf(delta, 0.0, 60.0))
+		_advance_polisa_shuttle_home(delta)
 	if _travel != null and _travel.is_quantum_active():
-		_commit("singleplayer_space_travel", "advance", {"delta_seconds": minf(delta, 60.0)}, "", {"runtime_authorized": true})
+		var step := minf(delta, 60.0)
+		if not _local_warp_arrival_enabled or step <= 0.0:
+			_commit("singleplayer_space_travel", "advance", {"delta_seconds":step}, "", {"runtime_authorized":true})
+		else:
+			for progress: Dictionary in _travel.get_active_quantum_progress():
+				var craft_id := String(progress.craft_id)
+				var completing: bool = _simulation.is_singleplayer_warp_entry_pending(craft_id) or float(progress.elapsed_seconds) + step >= float(progress.duration_seconds)
+				if not completing:
+					_commit("singleplayer_space_travel", "advance", {"craft_id":craft_id, "delta_seconds":step}, "", {"runtime_authorized":true})
+				else:
+					var arrival: Dictionary = _simulation.advance_singleplayer_warp_entry(self, craft_id, step)
+					if arrival.get("ok", false) and arrival.get("status") == "complete":
+						_warp_arrival_feedback.erase(craft_id)
+						if not arrival.get("replayed", false): call_deferred("_publish_warp_entry_event", String(arrival.receipt_id))
+					else:
+						_warp_arrival_feedback[craft_id] = {"status":"searching" if arrival.get("ok", false) else "waiting", "reason":String(arrival.get("reason", ""))}
+	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase", "")) == "entering":
+		_encounter_entry_delay -= maxf(delta, 0.0)
+		if _encounter_entry_delay <= 0.0:
+			_encounter_entry_delay = 0.25
+			_encounter_entry_feedback = _simulation.advance_campaign_space_entry(self, String(_space_encounter.get_snapshot().get("craft_id", "")))
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
+		_simulation.advance_campaign_space_fire({"runtime_authorized":true})
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
 		_finish_space_encounter_result()
+
+func _request_space_wing_command(command: Dictionary) -> Dictionary:
+	if _simulation == null or _travel == null or not is_instance_valid(_flow):
+		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")
+	if command.get("contract_category") != "space_combat" or typeof(command.get("payload")) != TYPE_DICTIONARY:
+		return _reject("invalid_command", "Rottenauftrag ist ungueltig")
+	var operation := String(command.get("operation", ""))
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_rename", "wing_leader_set"]:
+		return _reject("unsupported_operation", "Dieser Rottenauftrag ist noch nicht verfuegbar")
+	var prior: Dictionary = _simulation.check_space_wing_replay(command, "singleplayer")
+	if prior.get("found", false):
+		return prior.result
+	var routes: Dictionary = _travel.get_snapshot().get("routes", {})
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if typeof(pilots) != TYPE_DICTIONARY:
+		return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var payload: Dictionary = command.payload
+	var wing_id: String = String(payload.get("wing_id", ""))
+	var wings: Dictionary = _simulation.get_space_wing_snapshot().get("wings", {})
+	var affected: Dictionary = {}
+	if wings.has(wing_id):
+		for id in wings[wing_id].craft_ids: affected[id] = true
+	for key in ["craft_id", "leader_craft_id"]:
+		if typeof(payload.get(key)) == TYPE_STRING and not String(payload[key]).is_empty():
+			affected[payload[key]] = true
+	var phase := "grounded"
+	for id in affected:
+		if not routes.has(id): return _reject("unknown_craft", "Schiff ist nicht in der eigenen Flotte")
+		var craft_phase: String = String(_travel.get_snapshot(id).get("phase", ""))
+		var flight: RefCounted = _travel.get_flight_state(id)
+		if flight != null and flight.get_snapshot().motion_mode == "tactical":
+			phase = "tactical"
+		elif craft_phase in ["orbit", "stopped"] and phase != "tactical":
+			phase = "orbit"
+		elif craft_phase != "grounded":
+			return _reject("craft_busy", "Schiff ist auf einem nicht unterbrechbaren Flug oder Anflug")
+	var context := {"authorized":true, "actor_id":"singleplayer", "phase":phase,
+		"owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
+	return _simulation.request_singleplayer_command(command.duplicate(true), context)
 
 func validate_space_launch(craft_id: String, observe_progress: bool = true) -> Dictionary:
 	if String(_travel.get_snapshot(craft_id).phase) != "grounded":
@@ -502,27 +1273,100 @@ func validate_space_launch(craft_id: String, observe_progress: bool = true) -> D
 	if _campaign_mode:
 		if observe_progress:
 			observe_campaign_progress()
-		if int(_onboarding.get_snapshot().stage_index) == 0 and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get("satellite_recovery", {})).get("status", "")) != "accepted":
+		if int(_onboarding.get_snapshot().stage_index) == 0 and not _selected_destination_is_free_visit() and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get("satellite_recovery", {})).get("status", "")) != "accepted":
 			return _reject("job_required", "Satellitenauftrag im Mobilgerät annehmen")
 	return {"ok": true}
 
 func launch_to_moon_orbit(craft_id: String) -> Dictionary:
-	var gate := validate_space_launch(craft_id)
-	if not gate.get("ok", false):
-		return gate
-	var result := _commit("singleplayer_space_travel", "launch_to_orbit", {"craft_id": craft_id}, _request_id("orbit-launch", {}), {"runtime_authorized": true})
+	var request_id := _request_id("orbit-launch", {})
+	var result: Dictionary = _simulation.commit_singleplayer_space_launch(self, craft_id, request_id)
 	if result.get("ok", false):
 		_flow.get("_aircraft_location_by_craft")[craft_id] = "starmap"
 		# Publish the lifecycle change before any stale preparation callback can
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
+		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		return result.travel_result
 	return result
+
+func _publish_space_launch_event(request_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_space_launch_event(self, request_id)
 
 func finish_space_approach(craft_id: String) -> Dictionary:
 	return _commit("singleplayer_space_travel", "finish_approach", {"craft_id": craft_id}, _request_id("approach-finish", {}), {"runtime_authorized": true})
 
+func enter_purchased_station_local_orbit(craft_id: String) -> Dictionary:
+	# Explicit owner path, deliberately not selected by the legacy UI route.
+	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")
+	var binding: Dictionary = _simulation.configure_departure_adapter(self)
+	if not binding.get("ok", false): return binding
+	var result: Dictionary = _simulation.commit_station_purchase_local_admission(self, craft_id)
+	if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_space_launch_event", String(result.receipt_id))
+	return result
+
 func enter_space_orbit(craft_id: String) -> Dictionary:
+	var flight: RefCounted = _travel.get_flight_state(craft_id) if _travel != null else null
+	if _local_warp_arrival_enabled and _simulation != null and _simulation.is_station_purchase_local_admission_current(craft_id):
+		return enter_purchased_station_local_orbit(craft_id)
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "local" and ((flight.get_snapshot().get("motion_mode") == "inactive" and _travel.get_craft_snapshot(craft_id).get("phase") in ["surface", "approach"]) or (flight.get_snapshot().get("motion_mode") == "tactical" and _travel.get_craft_snapshot(craft_id).get("phase") == "orbit")):
+		var result: Dictionary = _simulation.commit_singleplayer_local_return(self, craft_id)
+		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_local_return_events", String(result.receipt_id))
+		return result
+	if flight != null and flight.get_snapshot().get("coordinate_frame") == "strategic" and _travel.get_craft_snapshot(craft_id).get("phase") == "surface" and _travel.get_craft_snapshot(craft_id).get("location_id") == "polisa":
+		var purchase: Dictionary = get_station_ship_purchase(craft_id)
+		if _local_warp_arrival_enabled and purchase.get("origin_kind") == "local_station_purchase":
+			return enter_purchased_station_local_orbit(craft_id)
+		var request_id := _request_id("station-orbit", {})
+		var result: Dictionary = _simulation.commit_singleplayer_station_orbit(self, craft_id, request_id)
+		if result.get("ok", false) and not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		return result.travel_result if result.get("ok", false) else result
 	return _commit("singleplayer_space_travel", "enter_orbit", {"craft_id": craft_id}, _request_id("orbit-return", {}), {"runtime_authorized": true})
+
+func preview_station_orbit_departure(craft_id: String) -> Dictionary:
+	var visit: Dictionary = preview_return(craft_id)
+	if not visit.get("ok", false): return visit
+	if visit.route.get("origin_location_id") != "polisa": return _reject("station_visit_required", "Schiff ist nicht bei Polisa")
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+	if controller == null or not controller.has_method("get_campaign_pilot_flight_guard"): return _reject("pilot_presence_unknown", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilot: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
+	if not pilot.get("ok", false): return pilot
+	var pilot_id := String(pilot.get("pilot_unit_id", ""))
+	var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+	if pilot_id.is_empty() or typeof(pilots) != TYPE_DICTIONARY: return _reject("pilot_state_unavailable", "Pilotenzuordnung ist nicht verfuegbar")
+	var actual: Dictionary = pilots.duplicate(true); actual[craft_id] = pilot_id
+	return {"ok":true, "owned_crafts":Dictionary(_travel.get_snapshot().routes).keys(), "craft_pilots":actual, "route":visit.route.duplicate(true), "outward_token":visit.outward_token}
+
+func preview_space_home_landing(craft_id: String) -> Dictionary:
+	if _service_pad_blocks_craft(craft_id): return _reject("pad_busy", "Heimatpad ist vorübergehend vom Stationsshuttle belegt")
+	if not is_instance_valid(_flow) or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	if _home_pad_for(craft_id).is_empty() or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty(): return _reject("pad_unavailable", "Heimatpad ist nicht verfuegbar")
+	return {"ok":true}
+
+func preview_local_surface_return(craft_id: String) -> Dictionary:
+	var preview: Dictionary = preview_return(craft_id)
+	if not preview.get("ok", false): return preview
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+	if controller == null or not controller.has_method("get_campaign_pilot_flight_guard"): return _reject("pilot_presence_unknown", "Pilotanwesenheit ist nicht bestaetigt")
+	var pilot: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
+	if not pilot.get("ok", false): return pilot
+	return preview
+
+func preview_local_approach_cancel(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_flow) or _travel == null or _base_personnel == null or not _base_personnel.is_pilot_aboard(craft_id): return _reject("pilot_not_aboard", "Pilotanwesenheit ist nicht bestaetigt")
+	var approaches: Variant = _flow.get("_space_approaches")
+	var travel: Dictionary = _travel.get_craft_snapshot(craft_id)
+	if typeof(approaches) != TYPE_DICTIONARY or not approaches.has(craft_id) or travel.get("phase") != "approach": return _reject("approach_not_active", "Kein aktiver Anflug")
+	var entry: Variant = approaches[craft_id]
+	if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("identity")) != TYPE_DICTIONARY or entry.identity.get("craft_id") != craft_id or entry.identity.get("location_id") != travel.get("location_id"): return _reject("approach_context_changed", "Anflug passt nicht zum Schiff und Ziel")
+	var token := String(_departure_token_by_craft.get(craft_id, ""))
+	if token.is_empty(): return _reject("no_departure_receipt", "Bestaetigter Abflugbeleg fehlt")
+	if entry.identity.get("departure_token") != token: return _reject("approach_context_changed", "Abflugbeleg passt nicht zum Anflug")
+	return {"ok":true, "route":{"craft_id":craft_id, "origin_location_id":String(travel.location_id), "destination_location_id":"homebase"}, "outward_token":token}
+
+func _publish_local_return_events(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_local_return_events(self, receipt_id)
 
 func _request_space_operation(operation: String, data: Dictionary, request_id: String) -> Dictionary:
 	var snapshot := get_space_travel_snapshot(String(data.get("craft_id","")))
@@ -558,38 +1402,76 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 	if craft_id != String(snapshot.get("craft_id", "")) or craft_id.is_empty():
 		return _reject("craft_mismatch", "Schiff gehoert nicht zur aktiven Reise")
 	if operation in ["space_start_quantum", "space_abort_quantum"]:
+		var flight: RefCounted = _travel.get_flight_state(craft_id)
+		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
+			var warp_command := data.duplicate(true); warp_command["request_id"] = owner_request_id
+			var departure: Dictionary = _simulation.commit_singleplayer_warp_departure(self, warp_command)
+			if not departure.get("ok", false): return departure
+			var warp_result: Dictionary = departure.travel_result.duplicate(true)
+			if departure.get("replayed", false): warp_result["replayed"] = true
+			_remember_space_operation(request_id, signature, warp_result)
+			if not departure.get("replayed", false): call_deferred("_publish_warp_departure_event", String(departure.receipt_id))
+			return warp_result
 		var result := _commit("singleplayer_space_travel", "start_quantum" if operation == "space_start_quantum" else "abort_quantum", data, owner_request_id)
 		return _remember_space_operation(request_id, signature, result)
-	if operation == "space_begin_approach":
-		if String(snapshot.phase) != "orbit" or String(snapshot.orbit_id) != "planet_orbit":
-			return _reject("planet_orbit_required", "Zuerst den Planetenorbit erreichen")
+	if operation in ["space_begin_approach", "space_begin_station_dock"]:
 		var location_id := String(data.get("location_id", ""))
+		var station_dock := operation == "space_begin_station_dock"
+		var approach_flight: RefCounted = _travel.get_flight_state(craft_id)
+		var station_landing: bool = not station_dock and location_id == "polisa" and approach_flight != null and approach_flight.get_snapshot().get("coordinate_frame") == "local"
+		if station_dock and (location_id != "polisa" or data.get("target_id") != "polisa_station_dock" or data.get("layout_revision") != "polisa_glut2_dock_v1"): return _reject("station_layout_changed", "Stationsziel passt nicht")
+		if not _in_destination_orbit(snapshot, location_id):
+			return _reject("destination_orbit_required", "Erst den Orbit des Zielorts erreichen.")
 		if _campaign_mode:
 			var tutorial_gate := _campaign_operation_gate("select_destination", data)
 			if not tutorial_gate.get("ok", false):
 				return tutorial_gate
 		if location_id != String(_campaign.get_campaign_snapshot().selected_location_id) or not Dictionary(_campaign.get_campaign_snapshot().locations).has(location_id) or location_id == "homebase":
-			return _reject("destination_mismatch", "Den gewuenschten Zielort im Planetenorbit auswaehlen")
+			return _reject("destination_mismatch", "Den gewünschten Ort im zugehörigen Orbit auswählen")
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
-		var departure := authorize_departure(craft_id)
+		var departure := authorize_departure(craft_id, ("station-dock:" + owner_request_id) if station_dock else owner_request_id, station_dock)
 		if not departure.get("ok", false):
 			return departure
-		var result := _commit("singleplayer_space_travel", "begin_approach", {"craft_id": craft_id, "location_id": location_id}, owner_request_id, {"runtime_authorized": true})
+		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
+		if not station_dock and not station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
+		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			if location_id == "distress_orbit":
-				_space_encounter.start_encounter(craft_id)
+				_space_encounter.start_encounter(craft_id, true)
+				_encounter_entry_delay = 0.0
+				_encounter_entry_feedback.clear()
 				_flow.call("_refresh_homebase_screen")
 			else:
 				_flow.call("_begin_space_approach", craft_id, departure.departure)
+		if _campaign_mode and (station_dock or station_landing) and not departure.get("replayed", false): observe_campaign_progress()
+		if station_dock or station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		return result
 	if operation == "space_land_homebase":
+		if _service_pad_blocks_craft(craft_id): return _reject("pad_busy", "Heimatpad ist vorübergehend vom Stationsshuttle belegt")
+		if is_instance_valid(_base_personnel) and _base_personnel.has_method("preview_home_craft_arrival"):
+			var safe:Dictionary=_base_personnel.preview_home_craft_arrival(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)),_home_pad_for(craft_id))
+			if not safe.get("ok",false):return _reject(String(safe.get("reason","home_pad_occupied")),"Landung wartet: Personen oder laufende Wege am Heimatlandeplatz")
+		var flight: RefCounted = _travel.get_flight_state(craft_id)
+		if flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
+			var landing: Dictionary = _simulation.commit_singleplayer_home_landing(self, craft_id, owner_request_id)
+			if not landing.get("ok", false): return landing
+			var landing_result: Dictionary = landing.travel_result.duplicate(true)
+			if landing.get("replayed", false): landing_result["replayed"] = true
+			_remember_space_operation(request_id, signature, landing_result)
+			if not landing.get("replayed", false):
+				_space_route_requested = false
+				_flow.call("_finish_space_home_landing", craft_id)
+				if is_instance_valid(_base_personnel) and _base_personnel.has_method("_refresh_home_craft_blockers"):_base_personnel.call("_refresh_home_craft_blockers")
+				call_deferred("_publish_space_launch_event", String(landing.receipt_id))
+			return landing_result
 		var result := _commit("singleplayer_space_travel", "land_homebase", {"craft_id": craft_id}, owner_request_id, {"runtime_authorized": true})
 		_remember_space_operation(request_id, signature, result)
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
 			_space_route_requested = false
 			_flow.call("_finish_space_home_landing", craft_id)
+			if is_instance_valid(_base_personnel) and _base_personnel.has_method("_refresh_home_craft_blockers"):_base_personnel.call("_refresh_home_craft_blockers")
 		return result
 	return _reject("unknown_operation", "Reiseaktion nicht verfuegbar")
 
@@ -598,9 +1480,21 @@ func _remember_space_operation(request_id: String, signature: String, result: Di
 		_space_operation_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
 	return result
 
+func _publish_warp_departure_event(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_warp_departure_event(self, receipt_id)
+
+func _publish_warp_entry_event(receipt_id: String) -> void:
+	if _simulation != null: _simulation.publish_singleplayer_warp_entry_event(self, receipt_id)
+
 func export_campaign_checkpoint() -> Dictionary:
 	if not _campaign_mode or not _travel.all_grounded():
 		return {}
+	var hex_checkpoint: Dictionary = {}
+	if _simulation.is_hex_ground_runtime_required():
+		if not _simulation.has_method("export_hex_checkpoint_state"): return {}
+		var exported: Dictionary = _simulation.call("export_hex_checkpoint_state")
+		if not exported.get("ok", false): return {}
+		hex_checkpoint = exported.state
 	var state: Dictionary = _campaign.export_state()
 	state["departures_by_craft_id"] = {}
 	state["selected_location_id"] = "homebase"
@@ -610,7 +1504,10 @@ func export_campaign_checkpoint() -> Dictionary:
 		resources[id] = {"version":1,"location_id":id,"sites":_supply.call("get_location_resources",id).export_state()}
 	for id in _resource_owners:
 		if is_instance_valid(_resource_owners[id]): resources[id] = _resource_owners[id].call("export_state")
-	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "base_personnel": _base_personnel.export_state() if _base_personnel != null else {},"location_resources":resources}
+	var payload := {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "location_resources":resources,"ship_equipment":_ship_equipment.export_state(),"polisa_recruitment_market":_polisa_market.export_state()}
+	if not hex_checkpoint.is_empty(): payload["hex_tactical"] = hex_checkpoint
+	else: payload["base_personnel"] = _base_personnel.export_state() if _base_personnel != null else {}
+	return payload
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
@@ -634,7 +1531,16 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	return {"accessible_containers":access,"unit_id":unit_id}
 
 func get_world_checkpoint_guard() -> Dictionary:
+	if not bool(_cargo_transfer.get_snapshot().get("checkpoint_safe",true)):return _reject("cargo_transfer_active","Speichern wartet auf den Frachttransfer oder seinen Abbruch")
+	if _supply != null and _supply.has_pending_recruitments(): return _reject("recruitment_pending", "Speichern wartet auf den Abschluss der Anwerbung")
+	if _polisa_shuttle_dispatcher != null and String(_polisa_shuttle_dispatcher.get_snapshot().get("phase", "")) not in ["idle", "complete"]:
+		return _reject("shuttle_pending", "Speichern wartet auf die Vorbereitung des Shuttletransports")
+	if _polisa_shuttle != null and not bool(_service_shuttle_snapshot().get("checkpoint_safe", false)):
+		return _reject("shuttle_active", "Speichern wartet auf den Abschluss des Shuttletransports")
 	if not _travel.all_grounded(): return _reject("world_active","Speichern gesperrt: mindestens ein Schiff ist noch unterwegs oder an einem anderen Ort")
+	if _simulation != null and _simulation.is_hex_ground_runtime_required():
+		if not _simulation.has_method("get_hex_checkpoint_guard"): return _reject("hex_checkpoint_api_unavailable", "Hex-Speicherowner nicht verfügbar")
+		return _simulation.call("get_hex_checkpoint_guard")
 	return {"ok":true}
 
 func _field_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
@@ -643,16 +1549,29 @@ func _field_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
 	if mission==null: return {}
 	var controller: Node=mission.get_node("TacticalController")
 	if not Dictionary(controller.get("_deployed_unit_ids")).has(unit_id): return {}
+	var unit: Node=controller.call("_find_friendly_unit_by_id",unit_id)
+	if unit==null or (unit.has_method("get_vital_state") and unit.get_vital_state()!="fit"): return {}
+	var station_local := false
+	if String(_service_context(craft_id).get("location_id", "")) == "polisa":
+		var visits: Dictionary = mission.get_meta("singleplayer_visit_identities", {})
+		var visit: Dictionary = visits.get(craft_id, {})
+		var station_simulation: Node = mission.get_node_or_null("SimulationRoot")
+		var registry: Node = mission.get_node_or_null("UnitRegistry")
+		station_local = Array(visit.get("unit_ids", [])).has(unit_id) and registry != null and registry.get_unit(unit_id) == unit and station_simulation != null and not Dictionary(station_simulation.get_hex_unit_state(unit_id)).is_empty()
 	var card: Dictionary=controller.call("_find_mission_dropship_card_entry",craft_id)
 	var team:=String(controller.call("_get_deployed_unit_fireteam_id",unit_id))
-	if not Array(card.get("queued_fireteam_ids",[])).has(team) and not Array(card.get("boarded_fireteam_ids",[])).has(team) and not Array(card.get("embarked_unit_ids",[])).has(unit_id):
+	if not station_local and not Array(card.get("queued_fireteam_ids",[])).has(team) and not Array(card.get("boarded_fireteam_ids",[])).has(team) and not Array(card.get("embarked_unit_ids",[])).has(unit_id):
 		# Once disembarked, the original card retains its assigned fireteams.
 		var members: Array=Array(_flow.call("_find_mission_drop_card_in_planning_state",craft_id).get("embarked_unit_ids",[]))
 		if not members.has(unit_id): return {}
-	var unit: Node=controller.call("_find_friendly_unit_by_id",unit_id)
-	if unit==null or (unit.has_method("get_vital_state") and unit.get_vital_state()!="fit"): return {}
 	var access: Array=["unit:"+unit_id+":backpack"]
 	if controller.call("_is_parked_campaign_dropship",craft_id) and unit.position.distance_to(controller.call("_campaign_landed_craft_position",craft_id))<=128.0: access.append("craft:"+craft_id)
+	if String(_service_context(craft_id).get("location_id", "")) == "polisa":
+		var service_position: Vector2 = controller.get_node("../TerrainRegistry").call("grid_to_world", Vector2i.ZERO) if controller.get_node_or_null("../TerrainRegistry") != null else Vector2.ZERO
+		var near_ship: bool = controller.call("_is_parked_campaign_dropship", craft_id) and unit.position.distance_to(controller.call("_campaign_landed_craft_position", craft_id)) <= 128.0
+		if near_ship or unit.position.distance_to(service_position) <= 128.0:
+			if not access.has("craft:"+craft_id): access.append("craft:"+craft_id)
+			return {"accessible_containers":access, "unit_id":unit_id, "equipment_allowed":true, "station_context":true}
 	return {"accessible_containers":access,"unit_id":unit_id,"equipment_allowed":false}
 func get_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
 	return _inventory_context(unit_id,craft_id).duplicate(true)
@@ -688,6 +1607,20 @@ func grant_resource_result(owner: Node, receipt: Dictionary) -> Dictionary:
 	return collect_location_resource(owner,location,String(receipt.get("site_id","")),String(receipt.get("unit_id","")))
 
 func _finish_space_encounter_result() -> void:
+	if _space_encounter.get("_combat_owner") != null:
+		var pending: Dictionary = _space_encounter.peek_completed_result()
+		if pending.is_empty(): return
+		var bound_craft := String(pending.craft_id)
+		var token := String(_departure_token_by_craft.get(bound_craft, ""))
+		var returned: Dictionary = _simulation.commit_campaign_space_return(self, bound_craft, "encounter-return:" + token)
+		if not returned.get("ok", false): return
+		var bound_result: Dictionary = _space_encounter.get_completed_result()
+		if bound_result.is_empty(): return
+		record_mission_result(bound_result,{"craft_id":bound_craft,"job_id":"buccaneer_rescue","scenario_id":"buccaneer_rescue"})
+		if String(bound_result.result) == "victory":
+			_request_campaign_action("campaign_recruit",{"craft_id":bound_craft,"kind":"pilot"},_request_id("rescue-recruit",{}))
+		_flow.call("_refresh_homebase_screen")
+		return
 	var result: Dictionary = _space_encounter.get_completed_result()
 	if result.is_empty(): return
 	var craft_id := String(result.craft_id)
@@ -746,25 +1679,47 @@ func _all_at_home() -> bool:
 func _request_campaign_action(operation: String, payload: Dictionary, request_id: String) -> Dictionary:
 	if not _campaign_mode and operation not in ["campaign_upload","campaign_fabricate"]: return _reject("campaign_only","Diese Aktion gehört zur Kampagne")
 	var snapshot: Dictionary = _campaign.get_campaign_snapshot()
-	var craft_id := String(payload.get("craft_id",get_space_travel_snapshot().get("craft_id","")))
-	if craft_id.is_empty():
-		var definitions: Array = _flow.get("_homebase_aircraft_definitions")
-		if not definitions.is_empty(): craft_id = String(definitions[0].craft_id)
+	var craft_id := String(payload.get("craft_id", ""))
 	var at_home := _all_at_home()
+	if operation in ["campaign_build_room", "campaign_place_room_bed", "campaign_set_room_door"]:
+		if not _has_live_base_owner() or not _base_personnel.has_method("validate_modular_base") or not _base_personnel.has_method("sync_modular_base"):
+			return _reject("base_unavailable", "Raumbau an der Heimatbasis ist nicht verfügbar")
+		var validator := Callable(_base_personnel, "validate_modular_base")
+		var context := {"at_home": true, "campaign_authorized": true, "modular_room_validator": validator, "modular_bed_validator": validator, "modular_door_validator": validator}
+		var result := _commit("singleplayer_supply", operation, payload, request_id, context)
+		if bool(result.get("ok", false)):
+			_base_personnel.call("sync_modular_base", Dictionary(_supply.get_supply_snapshot().get("modular_base", {})))
+			_base_personnel.state_changed.emit()
+			_flow.call("_refresh_homebase_screen")
+		return result
+	if operation == "campaign_build_housing":
+		if not _has_live_base_owner(): return _reject("base_unavailable", "Heimatbasis nicht verfügbar")
+		var result := _commit("singleplayer_supply", operation, {}, request_id, {"at_home":true,"campaign_authorized":true,"campaign_housing_builder":Callable(_base_personnel, "build_campaign_housing")})
+		if bool(result.get("ok", false)):
+			_base_personnel.state_changed.emit()
+			_flow.call("_refresh_homebase_screen")
+		return result
+	if operation == "campaign_build_bed":
+		if not _has_live_base_owner(): return _reject("base_unavailable", "Heimatbasis nicht verfügbar")
+		var result := _commit("singleplayer_supply", operation, {}, request_id, {"at_home":true,"campaign_authorized":true,"campaign_bed_builder":Callable(_base_personnel, "build_campaign_bed")})
+		if bool(result.get("ok", false)):
+			_base_personnel.state_changed.emit()
+			_flow.call("_refresh_homebase_screen")
+		return result
 	if operation == "campaign_upload":
-		if not at_home: return _reject("upload_requires_home","Zur Heimatbasis zurückkehren und am Terminal hochladen")
+		if not _has_live_base_owner(): return _reject("upload_requires_home","Lokales Basisterminal nicht verfügbar")
 		var job_id := String(payload.get("job_id",""))
 		if job_id.is_empty():
 			for id in snapshot.jobs:
-				if String(snapshot.jobs[id].status) == "pending_upload":
+				if String(snapshot.jobs[id].status) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if String(id) == "satellite_recovery" else "outpost_chip").is_empty():
 					job_id = String(id)
 					break
 		var job: Dictionary = snapshot.jobs.get(job_id,{})
 		if String(job.get("status","")) != "pending_upload": return _reject("no_chip","Kein geborgener Chip zum Hochladen")
 		craft_id = String(job.get("craft_id",craft_id))
 		var item_id := "satellite_chip" if job_id == "satellite_recovery" else "outpost_chip"
-		var container:String=_find_campaign_chip_container(item_id,craft_id)
-		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt in Rucksack, Schiff oder Basislager")
+		var container:String=_find_local_campaign_chip_container(item_id)
+		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt bei der Person, im Schiff oder im Basislager")
 		var cargo := _commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":item_id,"amount":-1},"campaign-cargo:upload:"+job_id,{"campaign_authorized":true})
 		if not bool(cargo.get("ok",false)): return cargo
 		var result := _commit("singleplayer_campaign","upload_job",{"job_id":job_id},"upload:"+job_id,{"at_home":true})
@@ -773,8 +1728,8 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 			_commit("singleplayer_supply","apply_reward",{"completion_id":receipt.completion_id},"reward:"+String(receipt.completion_id),{"completion_receipt":receipt})
 		observe_campaign_progress()
 		return result
-	if operation == "campaign_fabricate":
-		return _commit("singleplayer_supply","campaign_fabricate",payload,request_id,{"at_home":at_home,"campaign_authorized":true})
+	if operation in ["campaign_fabricate", "campaign_research"]:
+		return _commit("singleplayer_supply",operation,payload,request_id,{"at_home":_home_workshop_available(),"campaign_authorized":true})
 	if operation == "campaign_build_pad":
 		if bool(snapshot.progress.second_pad_built): return {"ok":true,"changed":false,"message":"Zweites Landepad bereits gebaut"}
 		if not at_home or not bool(snapshot.progress.recruited_pilot): return _reject("pad_not_ready","Nach der Rettung zur Heimatbasis zurückkehren")
@@ -792,6 +1747,9 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		var pilot := String(payload.get("kind","outpost")) == "pilot"
 		var key := "recruited_pilot" if pilot else "recruited_outpost"
 		if bool(snapshot.progress.get(key,false)): return {"ok":true,"changed":false,"message":"Person bereits im Team"}
+		var job_craft := String(Dictionary(snapshot.jobs.get("buccaneer_rescue" if pilot else "outpost_recovery", {})).get("craft_id", ""))
+		if craft_id.is_empty() or craft_id != job_craft: return _reject("recruit_craft_required", "Das Schiff des zugehörigen Auftrags auswählen")
+		if pilot and not _has_verified_pilot_rescue(craft_id): return _reject("rescue_not_here", "Bestätigte Rettung dieses Schiffs fehlt")
 		var outpost_cleared := false
 		if not pilot:
 			var mission: Node = _flow.call("get_mission_for_craft",craft_id)
@@ -817,7 +1775,8 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 	if operation == "campaign_load_crate":
 		if bool(snapshot.progress.crate_loaded): return {"ok":true,"changed":false}
 		if not _job_complete("outpost_recovery"): return _reject("crate_not_ready","Kiste zuerst am Außenposten bergen")
-		if not at_home and String(_service_context(craft_id).get("location_id","")) != "trade_outpost": return _reject("crate_not_here","Kiste am gesicherten Außenposten oder nach Rückkehr übernehmen")
+		var job_craft := String(Dictionary(snapshot.jobs.get("outpost_recovery", {})).get("craft_id", ""))
+		if craft_id.is_empty() or craft_id != job_craft or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
 		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,"load:outpost_recovery")
 		if not bool(cargo.get("ok",false)): return cargo
 		return _commit("singleplayer_campaign","load_crate",{},"load:outpost_recovery",{"runtime_authorized":true})
@@ -832,3 +1791,446 @@ func preview_resource_collection(location_id: String, site_id: String, unit_id: 
 func collect_location_resource(owner: Node, location_id: String, site_id: String, unit_id: String) -> Dictionary:
 	if _resource_owners.get(location_id) != owner: return _reject("unknown_resource_owner","Unbestätigte Rohstoffquelle")
 	return _commit("singleplayer_supply","collect_resource",{"location_id":location_id,"site_id":site_id,"unit_id":unit_id},"resource:"+location_id+":"+site_id,{"resource_authorized":true,"unit_id":unit_id,"location_id":location_id,"use_complete":true,"within_radius":true})
+
+
+func _polisa_free_home_pad() -> String:
+	var pads: Array = HOME_PADS.duplicate()
+	if (_skirmish_economy != null or _campaign_mode) and _base_personnel != null:
+		pads.clear()
+		for pad: Dictionary in _base_personnel.get_snapshot().get("layout", {}).get("landing_pads", []):
+			if bool(pad.get("built", true)): pads.append(String(pad.get("id", "")))
+	for pad: String in pads:
+		if _campaign_mode and pad == "homebase_pad_02" and not bool(_campaign.get_campaign_snapshot().progress.second_pad_built): continue
+		if not pad.is_empty() and not _pad_by_craft.values().has(pad) and String(_service_pad_reservation.get("pad_id", "")) != pad: return pad
+	return ""
+
+func _reserve_service_home_pad(craft_id: String) -> Dictionary:
+	if craft_id.strip_edges().is_empty(): return _reject("pad_busy", "Kein freier Shuttlelandeplatz")
+	if not _service_pad_reservation.is_empty():
+		if String(_service_pad_reservation.get("craft_id", "")) == craft_id and _validate_service_home_pad(craft_id, String(_service_pad_reservation.get("pad_id", ""))):
+			return {"ok":true,"craft_id":craft_id,"pad_id":String(_service_pad_reservation.pad_id),"replayed":true}
+		return _reject("pad_busy", "Kein freier Shuttlelandeplatz")
+	var pad := _polisa_free_home_pad()
+	if pad.is_empty() and is_instance_valid(_flow) and _travel != null:
+		for candidate: String in _built_home_pad_ids():
+			if _service_can_borrow_pad(candidate): pad = candidate; break
+	if pad.is_empty(): return _reject("pad_busy", "Shuttle wartet auf einen freien Landeplatz")
+	if is_instance_valid(_base_personnel) and _base_personnel.has_method("preview_home_craft_arrival"):
+		var checked:Dictionary=_base_personnel.preview_home_craft_arrival({"craft_id":craft_id,"model_id":"cutlass","craft_type":"dropship"},pad)
+		if not checked.get("ok",false):return _reject(String(checked.get("reason","home_pad_occupied")),"Shuttle wartet: Personen oder laufende Wege am Heimatlandeplatz")
+	_service_pad_reservation = {"craft_id":craft_id,"pad_id":pad}
+	if is_instance_valid(_base_personnel) and _base_personnel.has_method("_refresh_home_craft_blockers"):_base_personnel.call("_refresh_home_craft_blockers")
+	return {"ok":true,"craft_id":craft_id,"pad_id":pad}
+
+func _validate_service_home_pad(craft_id: String, pad_id: String) -> bool:
+	if _service_pad_reservation != {"craft_id":craft_id,"pad_id":pad_id}: return false
+	if _pad_by_craft.values().has(pad_id) and not _service_can_borrow_pad(pad_id): return false
+	if _base_personnel != null and not _built_home_pad_ids().has(pad_id): return false
+	return not pad_id.is_empty()
+
+func _service_can_borrow_pad(pad_id: String) -> bool:
+	if not is_instance_valid(_flow) or _travel == null: return false
+	for id: String in _pad_by_craft:
+		if String(_pad_by_craft[id]) != pad_id: continue
+		var location := String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(id, ""))
+		if location not in ["mission", "starmap"] or not Dictionary(_flow.call("_find_pending_mission_craft_transfer", id)).is_empty(): return false
+		if _craft_grounded_at_home(id): return false
+	return true
+
+func _service_pad_blocks_craft(craft_id: String) -> bool:
+	var pad := _home_pad_for(craft_id)
+	return not pad.is_empty() and pad == String(_service_pad_reservation.get("pad_id", ""))
+
+func _release_service_home_pad(craft_id: String, pad_id: String) -> void:
+	if _service_pad_reservation == {"craft_id":craft_id,"pad_id":pad_id}:
+		_service_pad_reservation.clear()
+		if is_instance_valid(_base_personnel) and _base_personnel.has_method("_refresh_home_craft_blockers"):_base_personnel.call("_refresh_home_craft_blockers")
+
+
+func _fulfill_polisa_ship(offer: Dictionary, request_id: String) -> Dictionary:
+	var kind := String(offer.get("craft_type", ""))
+	var model := String(offer.get("model_id", ""))
+	if kind not in ["dropship", "fighter"] or model not in ["cutlass", "buccaneer"]: return _reject("unsupported_craft", "Schiff noch nicht spielbar")
+	var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
+	if not Dictionary(_flow.call("_find_homebase_aircraft_definition", id)).is_empty(): return _reject("craft_already_registered", "Schiffsbeleg bereits vorhanden")
+	var pad := _polisa_free_home_pad()
+	if pad.is_empty(): return _reject("no_free_home_pad", "Lieferung braucht ein gebautes freies Heimatpad")
+	var craft: Dictionary = _flow.call("_build_homebase_aircraft_definition", kind, 1)
+	craft.merge({"craft_id":id,"model_id":model,"display_name":String(offer.get("name", model))}, true)
+	# All validation precedes the first fleet write. No new pad is fabricated.
+	var definitions: Array = _flow.get("_homebase_aircraft_definitions")
+	definitions.append(craft)
+	_flow.get("_aircraft_location_by_craft")[id] = "homebase"
+	_pad_by_craft[id] = pad
+	sync_crafts()
+	return {"ok":true,"craft_id":id,"delivery_location_id":"homebase","landing_pad_id":pad}
+
+
+func _project_polisa_loadout(unit_id: String, craft_id: String, loadout: Dictionary) -> void:
+	if loadout.is_empty(): return
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	if mission == null: return
+	var registry: Node = mission.get_node_or_null("UnitRegistry")
+	var setup: Node = mission.get_node_or_null("MissionSetup")
+	var simulation: Node = mission.get_node_or_null("SimulationRoot")
+	var unit: Node = registry.call("get_unit", unit_id) if registry != null else null
+	if unit == null or setup == null or simulation == null: return
+	# Existing mission lifecycle bridge projects the committed owner loadout,
+	# preserving actor identity, progress, transform, unit ID and current orders.
+	var members: Dictionary = setup.get("member_loadouts")
+	members[unit_id] = loadout.duplicate(true)
+	setup.set("member_loadouts", members)
+	setup.call("_apply_fob_loadout_override", unit, unit_id, String(unit.get("team_id")))
+	setup.call("_build_unit_loadout_modifiers")
+	setup.call("_enqueue_initial_loadout_effect", simulation, unit_id)
+	var planning: Dictionary = _flow.get("_mission_planning_state")
+	var planning_loadouts: Dictionary = planning.get("member_loadouts", {})
+	planning_loadouts[unit_id] = loadout.duplicate(true)
+	planning["member_loadouts"] = planning_loadouts
+
+
+func get_polisa_globe_controller() -> Node:
+	if not is_instance_valid(_flow): return null
+	var registry = _flow.get("_location_registry")
+	var mission: Node = registry.get_location("polisa") if registry != null else null
+	return mission.get_node_or_null("TacticalController") if is_instance_valid(mission) else null
+
+func _restore_polisa_residents() -> void:
+	if not _campaign_mode or _base_personnel == null or not _base_personnel.has_station_recruits(): return
+	if _polisa_shuttle != null and String(_polisa_shuttle.get_snapshot().get("phase", "")) != "idle": return
+	var now := Time.get_ticks_msec()
+	if now < _polisa_resident_retry_msec: return
+	_polisa_resident_retry_msec = now + 1000
+	var controller: Node = get_polisa_globe_controller()
+	if controller == null or not controller.has_method("get_polisa_resident_spawn_grid") or not controller.has_method("register_polisa_resident"): return
+	var mission: Node = controller.get_parent()
+	var setup: Node = mission.get_node_or_null("MissionSetup") if is_instance_valid(mission) else null
+	var registry: Node = mission.get_node_or_null("UnitRegistry") if is_instance_valid(mission) else null
+	if setup == null or registry == null or not setup.has_method("request_polisa_recruit_admission"): return
+	var visits: Dictionary = mission.get_meta("singleplayer_visit_identities", {})
+	var visit_ids := {}
+	for visit: Dictionary in visits.values():
+		for id in Array(visit.get("unit_ids", [])): visit_ids[String(id)] = true
+	var states: Dictionary = _base_personnel.get("_states")
+	var residents: Dictionary = mission.get_meta("singleplayer_station_personnel", {})
+	var station_simulation: Node = mission.get_node_or_null("SimulationRoot")
+	for profile: Dictionary in Array(_flow.get("_all_team_units")):
+		var id := String(profile.get("unit_id", ""))
+		if not id.begins_with("polisa_recruit_") or String(Dictionary(states.get(id, {})).get("status", "")) != "station" or visit_ids.has(id): continue
+		if residents.has(id) and is_instance_valid(registry.get_unit(id)) and station_simulation != null and not Dictionary(station_simulation.get_hex_unit_state(id)).is_empty(): continue
+		var pending := false
+		for item: Dictionary in _polisa_recruit_pending.values():
+			if String(item.get("unit_id", "")) == id: pending = true; break
+		if pending: continue
+		if registry.get_unit(id) == null:
+			var spawn: Dictionary = controller.call("get_polisa_resident_spawn_grid")
+			if not spawn.get("ok", false) or typeof(spawn.get("spawn_grid")) != TYPE_VECTOR2I: return
+			var result: Dictionary = setup.call("request_polisa_recruit_admission", profile, spawn.spawn_grid)
+			if not result.get("ok", false): return
+		if registry.get_unit(id) != null:
+			controller.call("register_polisa_resident", id)
+		return
+
+func _polisa_recruit_context(craft_id: String, expected_recruiter: String) -> Dictionary:
+	if not _campaign_mode or String(_service_context(craft_id).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")
+	var controller: Node = get_polisa_globe_controller()
+	if controller == null or not controller.has_method("get_polisa_globe_recruiter"): return _reject("globe_unavailable", "Globus ist nicht erreichbar")
+	var interaction: Dictionary = controller.call("get_polisa_globe_recruiter")
+	if not interaction.get("ok", false): return _reject(String(interaction.get("reason", "globe_unavailable")), "Eine eigene Person muss am Globus stehen")
+	if not expected_recruiter.is_empty() and String(interaction.get("unit_id", "")) != expected_recruiter: return _reject("recruiter_changed", "Person am Globus erneut auswählen")
+	interaction["controller"] = controller
+	return interaction
+
+func _open_polisa_recruitment(payload: Dictionary) -> Dictionary:
+	var craft_id := String(payload.get("craft_id", ""))
+	var context := _polisa_recruit_context(craft_id, String(payload.get("unit_id", "")))
+	if not context.get("ok", false): return context
+	var recruiter: Dictionary = {}
+	var occupied := {}
+	for profile: Dictionary in Array(_flow.get("_all_team_units")):
+		occupied[String(profile.get("portrait_id", ""))] = true
+		if String(profile.get("unit_id", "")) == String(context.unit_id): recruiter = profile
+	if recruiter.is_empty(): return _reject("recruiter_unavailable", "Person ist nicht im eigenen Personal")
+	var progress: Dictionary = _campaign.export_state().get("completion_receipts", {})
+	return _polisa_market.open("campaign:" + str(progress.size()), recruiter, occupied)
+
+func get_polisa_recruitment_snapshot() -> Dictionary:
+	var market: Dictionary = _polisa_market.snapshot()
+	var records: Dictionary = _supply.get_recruitment_records() if _supply != null else {}
+	var offers: Array = []
+	for offer: Dictionary in market.get("offers", []):
+		if not records.has(String(offer.get("id", ""))): offers.append(offer.duplicate(true))
+	var capacity: Dictionary = _base_personnel.get_recruitment_bed_capacity() if _base_personnel != null else {"ok":false}
+	return {"offers":offers,"recruiter_id":String(market.get("recruiter_id", "")),"credits":int(_supply.get_supply_snapshot().get("credits", 0)),"beds":int(capacity.get("beds", 0)),"roster_size":int(capacity.get("roster_size", 0)),"capacity_available":bool(capacity.get("ok", false)),"pending":not _polisa_recruit_pending.is_empty()}
+
+func _request_polisa_recruitment(payload: Dictionary) -> Dictionary:
+	var craft_id := String(payload.get("craft_id", ""))
+	var recruiter_id := String(payload.get("recruiter_id", ""))
+	var context := _polisa_recruit_context(craft_id, recruiter_id)
+	if not context.get("ok", false): return context
+	if recruiter_id.is_empty() or recruiter_id != String(_polisa_market.snapshot().get("recruiter_id", "")): return _reject("market_changed", "Angebot am Globus erneut öffnen")
+	var offer_id := String(payload.get("offer_id", ""))
+	var quote: Dictionary = _polisa_market.quote(offer_id)
+	if not quote.get("ok", false): return quote
+	var mission: Node = context.controller.get_parent()
+	var setup: Node = mission.get_node_or_null("MissionSetup") if is_instance_valid(mission) else null
+	if setup == null or not setup.has_method("request_polisa_recruit_admission"): return _reject("recruit_unavailable", "Personenaufnahme derzeit nicht verfügbar")
+	var reservation_id := "polisa-hire:" + offer_id
+	var supply_context := {"location_id":"polisa","station_service_verified":true,"recruit_quote":Callable(_polisa_market,"quote")}
+	var reservation := _commit("singleplayer_supply", "station_recruit_reserve", {"offer_id":offer_id}, reservation_id, supply_context)
+	if not reservation.get("ok", false): return reservation
+	if reservation.get("replayed", false): return _reject("recruit_already_hired", "Diese Person wurde bereits angefragt")
+	_polisa_recruit_pending[reservation_id] = {"unit_id":String(quote.unit_id),"profile":quote.profile.duplicate(true),"mission":weakref(mission),"craft_id":craft_id,"spawn_grid":context.spawn_grid}
+	var admission: Dictionary = setup.call("request_polisa_recruit_admission", quote.profile, context.spawn_grid)
+	if not admission.get("ok", false):
+		_polisa_recruit_pending[reservation_id]["admission_failed"] = true
+		var cancel_context := {"recruit_cancel_verify":Callable(self,"_verify_polisa_recruit_absent").bind(weakref(mission))}
+		var cancelled := _commit("singleplayer_supply", "station_recruit_cancel", {"reservation_id":reservation_id}, "cancel:"+reservation_id, cancel_context)
+		if not cancelled.get("ok", false): return _reject("admission_pending", "Aufnahme wird geprüft; Credits bleiben reserviert")
+		_polisa_recruit_pending.erase(reservation_id)
+		return admission
+	_advance_polisa_recruitment()
+	return {"ok":true,"unit_id":String(quote.unit_id),"message":"Person aufgenommen" if not _polisa_recruit_pending.has(reservation_id) else "Personenaufnahme läuft"}
+
+func _verify_polisa_recruit_absent(unit_id: String, _reservation_id: String, mission_ref: WeakRef) -> Dictionary:
+	var mission: Node = mission_ref.get_ref() if mission_ref != null else null
+	if not is_instance_valid(mission): return {"ok":false}
+	var registry: Node = mission.get_node_or_null("UnitRegistry")
+	var simulation: Node = mission.get_node_or_null("SimulationRoot")
+	return {"ok":registry != null and simulation != null and registry.get_unit(unit_id) == null and not simulation._known_units_by_id.has(unit_id)}
+
+func _verify_polisa_recruit_admitted(unit_id: String, reservation_id: String) -> Dictionary:
+	if not _polisa_recruit_pending.has(reservation_id): return {"ok":false}
+	var pending: Dictionary = _polisa_recruit_pending[reservation_id]
+	var mission: Node = pending.mission.get_ref()
+	var setup: Node = mission.get_node_or_null("MissionSetup") if is_instance_valid(mission) else null
+	if setup == null or String(pending.unit_id) != unit_id: return {"ok":false}
+	return setup.call("get_polisa_recruit_admission", unit_id)
+
+func _verify_polisa_recruit_abandoned(unit_id: String, reservation_id: String) -> Dictionary:
+	if not _polisa_recruit_pending.has(reservation_id) or not is_instance_valid(_flow): return {"ok":false}
+	for profile: Dictionary in Array(_flow.get("_all_team_units")):
+		if String(profile.get("unit_id", "")) == unit_id: return {"ok":false}
+	if _base_personnel != null and Dictionary(_base_personnel.get("_states")).has(unit_id): return {"ok":false}
+	var locations = _flow.get("_location_registry")
+	if locations == null: return {"ok":false}
+	for location_id: String in locations.location_ids():
+		var location: Node = locations.get_location(location_id)
+		if not is_instance_valid(location): continue
+		var registry: Node = location.get_node_or_null("UnitRegistry")
+		var simulation: Node = location.get_node_or_null("SimulationRoot")
+		if registry == null or simulation == null: return {"ok":false}
+		if registry.get_unit(unit_id) != null or simulation._known_units_by_id.has(unit_id): return {"ok":false}
+	return {"ok":true}
+
+func has_pending_polisa_recruit(craft_id: String) -> bool:
+	if craft_id.is_empty(): return false
+	for pending: Dictionary in _polisa_recruit_pending.values():
+		if String(pending.get("craft_id", "")) == craft_id: return true
+	return false
+
+func _advance_polisa_recruitment() -> void:
+	for reservation_id: String in _polisa_recruit_pending.keys():
+		var pending: Dictionary = _polisa_recruit_pending[reservation_id]
+		var mission: Node = pending.mission.get_ref()
+		if not is_instance_valid(mission):
+			var replacement: Node = _flow.call("get_mission_for_craft", String(pending.craft_id)) if is_instance_valid(_flow) and _flow.has_method("get_mission_for_craft") else null
+			if is_instance_valid(replacement) and String(replacement.get_meta("location_id", "")) == "polisa":
+				var replacement_setup: Node = replacement.get_node_or_null("MissionSetup")
+				if replacement_setup != null and replacement_setup.has_method("request_polisa_recruit_admission") and typeof(pending.get("spawn_grid")) == TYPE_VECTOR2I:
+					var recovered: Dictionary = replacement_setup.call("request_polisa_recruit_admission", pending.profile, pending.spawn_grid)
+					if recovered.get("ok", false):
+						pending.mission = weakref(replacement)
+						continue
+			var cancellation := _commit("singleplayer_supply", "station_recruit_cancel", {"reservation_id":reservation_id}, "cancel:"+reservation_id, {"recruit_cancel_verify":Callable(self,"_verify_polisa_recruit_abandoned")})
+			if cancellation.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
+			continue
+		if pending.get("admission_failed", false):
+			var cancellation := _commit("singleplayer_supply", "station_recruit_cancel", {"reservation_id":reservation_id}, "cancel:"+reservation_id, {"recruit_cancel_verify":Callable(self,"_verify_polisa_recruit_absent").bind(weakref(mission))})
+			if cancellation.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
+			continue
+		var setup: Node = mission.get_node_or_null("MissionSetup")
+		var controller: Node = mission.get_node_or_null("TacticalController")
+		if setup == null or controller == null or not controller.has_method("register_polisa_recruit_person"): continue
+		if not Dictionary(setup.call("get_polisa_recruit_admission", String(pending.unit_id))).get("ok", false):
+			var status: Dictionary = setup.call("get_runtime_selection_status")
+			var now := Time.get_ticks_msec()
+			if status.get("historical_committed", false) and setup.has_method("retry_polisa_recruit_admission") and now >= int(pending.get("retry_after_msec", 0)):
+				pending.retry_after_msec = now + 1000
+				setup.call("retry_polisa_recruit_admission", String(pending.unit_id))
+			continue
+		var registered: Dictionary = controller.call("register_polisa_recruit_person", String(pending.unit_id), String(pending.craft_id))
+		if not registered.get("ok", false): continue
+		var profile: Dictionary = pending.profile.duplicate(true)
+		profile["recruit_location"] = "polisa"
+		var roster: Dictionary = _flow.call("register_campaign_recruit", profile)
+		if not roster.get("ok", false): continue
+		_supply.configure_inventory([String(pending.unit_id)], [], true)
+		var already_configured: bool = _simulation.get_personnel_loadout_state().has_unit(String(pending.unit_id))
+		_simulation.request_personnel_loadout_command("configure_roster", {"roster":[profile]})
+		if not already_configured:
+			_simulation.request_personnel_loadout_command("set_loadout", {"unit_id":String(pending.unit_id),"loadout":{"armor":profile.get("armor", "suit"),"weapon_1":profile.get("weapon_1", "pistol"),"weapon_2":profile.get("weapon_2", "none")}})
+		var result := _commit("singleplayer_supply", "station_recruit_finalize", {"reservation_id":reservation_id}, "final:"+reservation_id, {"recruit_verify":Callable(self,"_verify_polisa_recruit_admitted")})
+		if result.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
+
+func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
+	if snapshot.is_empty(): snapshot = get_snapshot()
+	var view: Dictionary = snapshot.get("location_view", {})
+	var craft_id := String(view.get("craft_id", "")) if String(view.get("location_id", "")) == "polisa" else ""
+	var contexts: Dictionary = snapshot.get("service_contexts_by_craft_id", {})
+	var local_crafts: Array = []
+	for craft: Dictionary in snapshot.get("crafts", []):
+		if String(Dictionary(contexts.get(String(craft.get("craft_id", "")), {})).get("location_id", "")) == "polisa":
+			local_crafts.append({"craft_id":String(craft.craft_id), "name":String(craft.get("display_name", craft.craft_id))})
+	if not local_crafts.any(func(craft: Dictionary): return String(craft.craft_id) == craft_id): craft_id = ""
+	var supply: Dictionary = snapshot.get("supply", {})
+	var offers := {}
+	for id: String in supply.get("offers", {}):
+		var offer: Dictionary = supply.offers[id]
+		if Array(offer.get("location_ids", [])).has("polisa"): offers[id] = offer
+	var people: Array = []
+	var station_residents: Array = []
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id) if not craft_id.is_empty() else null
+	var registry: Node = mission.get_node_or_null("UnitRegistry") if mission != null else null
+	var residents: Dictionary = mission.get_meta("singleplayer_station_personnel", {}) if mission != null else {}
+	for profile: Dictionary in Array(_flow.get("_all_team_units")):
+		var id := String(profile.get("unit_id", ""))
+		if registry == null or registry.call("get_unit", id) == null: continue
+		var access := _inventory_context(id, craft_id)
+		people.append({"unit_id":id,"name":String(profile.get("display_name", id)),"equipment_allowed":bool(access.get("equipment_allowed", false)),"loadout":_simulation.get_personnel_loadout_state().get_loadout(id)})
+		if residents.has(id): station_residents.append({"unit_id":id,"name":String(profile.get("display_name", id))})
+	var local_capability: Dictionary = _flow.call("get_polisa_local_ship_purchase_capability") if _flow.has_method("get_polisa_local_ship_purchase_capability") else {"available":false,"message":"Lokale Ausgabe noch nicht verfügbar"}
+	var crew_handoff: Dictionary = _flow.call("get_polisa_crew_handoff_snapshot", craft_id) if not craft_id.is_empty() and _flow.has_method("get_polisa_crew_handoff_snapshot") else {}
+	return {"service_dispatch":_polisa_shuttle_dispatcher.get_snapshot() if _polisa_shuttle_dispatcher != null else {},"crew_handoff":crew_handoff,"local_pickup_available":bool(local_capability.get("available", false)),"local_pickup_reason":String(local_capability.get("message", "")),"equipment":_ship_equipment.get_snapshot(craft_id) if _ship_equipment != null and not craft_id.is_empty() else {},"local_crafts":local_crafts,"selection_required":craft_id.is_empty() and not local_crafts.is_empty(),"craft_id":craft_id,"craft_name":String(Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).get("display_name",craft_id)),"service_ready":String(Dictionary(contexts.get(craft_id, {})).get("location_id", ""))=="polisa",
+		"fuel":float(Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, 0.0)),"fuel_registered":Dictionary(supply.get("fuel_by_craft_id", {})).has(craft_id),
+		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
+		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
+		"people":people,"station_residents":station_residents,"blueprints":supply.get("blueprints", []),"require_blueprints":_campaign_mode,"revision":int(supply.get("revision", 0)),
+		"cargo_transfer":_cargo_transfer.get_snapshot(),"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})}
+
+
+func _build_polisa_home_pad(count: int) -> Dictionary:
+	if _base_personnel == null: return _reject("base_unavailable", "Heimatbasis nicht geladen")
+	return _base_personnel.call("build_campaign_landing_pad", count)
+
+
+func _built_home_pad_ids() -> Array:
+	var pads: Array = []
+	if _base_personnel == null: return HOME_PADS.duplicate()
+	for pad: Dictionary in _base_personnel.get_snapshot().get("layout", {}).get("landing_pads", []):
+		if bool(pad.get("built", true)): pads.append(String(pad.id))
+	return pads
+
+
+func _selected_destination_is_free_visit() -> bool:
+	var campaign: Dictionary = _campaign.get_campaign_snapshot()
+	return bool(Dictionary(campaign.locations.get(String(campaign.selected_location_id), {})).get("free_visit", false))
+
+
+func _craft_grounded_at_home(craft_id: String) -> bool:
+	if _flow == null or _travel == null: return false
+	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase": return false
+	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty(): return false
+	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
+	return routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) == "grounded"
+
+func _has_live_base_owner() -> bool:
+	return is_instance_valid(_base_personnel) and _base_personnel.is_inside_tree() and _base_personnel.get_parent() == self and is_instance_valid(_simulation) and _simulation.get("_base_personnel_owner") == _base_personnel and String(Dictionary(_base_personnel.call("get_snapshot")).get("runtime_authority", "")) == "SimulationRoot"
+
+func _home_workshop_available() -> bool:
+	if not _has_live_base_owner():
+		# Legacy non-campaign sessions never created a BasePersonnel owner.
+		return not _campaign_mode and _base_personnel == null and _all_at_home()
+	for asset: Dictionary in Dictionary(_base_personnel.call("get_snapshot")).get("layout", {}).get("assets", []):
+		if String(asset.get("id", "")) == "freihafen_hall_01" and bool(asset.get("built", true)): return true
+	return false
+
+func _find_local_campaign_chip_container(item_id: String) -> String:
+	if not _has_live_base_owner(): return ""
+	var allowed: Array[String] = ["base:homebase"]
+	for craft: Dictionary in Array(_flow.get("_homebase_aircraft_definitions")):
+		var id := String(craft.get("craft_id", ""))
+		if _craft_grounded_at_home(id): allowed.append("craft:" + id)
+	for person: Dictionary in Dictionary(_base_personnel.call("get_snapshot")).get("units", []):
+		var status := String(person.get("status", "away"))
+		var craft_id := String(person.get("craft_id", ""))
+		if status != "away" and (craft_id.is_empty() or _craft_grounded_at_home(craft_id)):
+			allowed.append("unit:" + String(person.get("unit_id", "")) + ":backpack")
+	var inventory: Dictionary = _supply.get_supply_snapshot().get("inventory", {})
+	for container: String in allowed:
+		if int(Dictionary(inventory.get(container, {})).get("items", {}).get(item_id, 0)) > 0: return container
+	return ""
+
+func _home_services_snapshot() -> Dictionary:
+	var local_jobs: Array[String] = []
+	for id: String in _campaign.get_campaign_snapshot().get("jobs", {}):
+		var job: Dictionary = _campaign.get_campaign_snapshot().jobs[id]
+		if String(job.get("status", "")) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip").is_empty(): local_jobs.append(id)
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "all_at_home":_all_at_home()}
+
+func _has_verified_pilot_rescue(craft_id: String) -> bool:
+	# get_completed_result consumes its delivery flag before automatic recruitment.
+	# The authoritative read-only state retains the exact victorious craft.
+	if _space_encounter == null: return false
+	var encounter: Dictionary = _space_encounter.get_snapshot()
+	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
+
+
+func show_polisa_cargo_delivery(craft_id: String, request_id: String) -> bool:
+	# Read the real Supply receipt and live visit; the visual does not move goods.
+	if _supply == null or not is_instance_valid(_flow) or request_id.is_empty(): return false
+	var receipt: Dictionary = _supply.get_purchase_receipt(request_id)
+	if receipt.is_empty() or receipt.get("container_id") != "craft:" + craft_id or String(_service_context(craft_id).get("location_id", "")) != "polisa": return false
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if is_instance_valid(mission) else null
+	if controller == null or not controller.has_method("_campaign_landed_craft_position") or not controller.has_method("_get_primary_3d_view"): return false
+	var position: Variant = controller.call("_campaign_landed_craft_position", craft_id)
+	var view: Variant = controller.call("_get_primary_3d_view")
+	if typeof(position) != TYPE_VECTOR2 or not position.is_finite() or not is_instance_valid(view) or not view.has_method("play_polisa_cargo_lift"): return false
+	return bool(view.call("play_polisa_cargo_lift", craft_id, position))
+
+func get_station_ship_purchase(craft_id: String) -> Dictionary:
+	return _supply.get_station_ship_purchase(craft_id) if _supply != null else {}
+
+func _craft_visit_binding(craft_id: String) -> Dictionary:
+	var existing: Dictionary = _campaign.get_campaign_snapshot().departures_by_craft_id.get(craft_id, {})
+	if not existing.is_empty(): return existing.duplicate(true)
+	var purchase := get_station_ship_purchase(craft_id)
+	if purchase.get("origin_kind") != "local_station_purchase" or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "mission": return {}
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	if mission == null or String(mission.get_meta("location_id", "")) != "polisa": return {}
+	return {"local_origin":true,"craft_id":craft_id,"job_id":"","origin_location_id":"polisa","destination_location_id":"polisa","landing_pad_id":String(purchase.landing_pad_id),"origin_receipt_id":String(purchase.origin_receipt_id)}
+
+func _fulfill_polisa_local_ship(offer: Dictionary, request_id: String, requested_pad_id: String = "") -> Dictionary:
+	var kind := String(offer.get("craft_type", ""))
+	var model := String(offer.get("model_id", ""))
+	if kind not in ["dropship", "fighter"] or model not in ["cutlass", "buccaneer"]: return _reject("unsupported_craft", "Schiff noch nicht spielbar")
+	if not _flow.has_method("prepare_polisa_local_ship_purchase") or not _flow.has_method("commit_polisa_local_ship_purchase") or not _flow.has_method("finalize_polisa_local_ship_purchase"): return _reject("local_pickup_unavailable", "Lokale Ausgabe nicht verfügbar")
+	var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
+	if not Dictionary(_flow.call("_find_homebase_aircraft_definition", id)).is_empty(): return _reject("craft_already_registered", "Schiffsbeleg bereits vorhanden")
+	var home_pad := _polisa_free_home_pad()
+	if home_pad.is_empty(): return _reject("no_free_home_pad", "Ein gebautes freies Rückkehrpad an der Heimatbasis wird benötigt")
+	var craft: Dictionary = _flow.call("_build_homebase_aircraft_definition", kind, 1)
+	craft.merge({"craft_id":id,"model_id":model,"display_name":String(offer.get("name", model))}, true)
+	var flow_candidate: Dictionary = _flow.call("prepare_polisa_local_ship_purchase", craft.duplicate(true), request_id, requested_pad_id)
+	if not flow_candidate.get("ok", false): return flow_candidate
+	if typeof(flow_candidate.get("craft_definition")) != TYPE_DICTIONARY: return _reject("invalid_local_craft", "Schiffsübergabe unvollständig")
+	craft = Dictionary(flow_candidate.craft_definition).duplicate(true)
+	if String(craft.get("craft_id", "")) != id or String(craft.get("model_id", "")) != model: return _reject("invalid_local_craft", "Schiffsidentität hat sich geändert")
+	var acquisition_pad := String(flow_candidate.get("acquisition_pad_id", ""))
+	if not load("res://scripts/mission/polisa_station_craft_runtime.gd").receipt_pad_compatible(model, acquisition_pad) or (not requested_pad_id.is_empty() and acquisition_pad != requested_pad_id): return _reject("invalid_local_pad", "Erwerbspad ungültig")
+	var travel_candidate: Dictionary = _travel.prepare_surface_registration(id, "polisa", "local-purchase:"+request_id+":surface")
+	if not travel_candidate.get("ok", false): return travel_candidate
+	var travel_validation: Dictionary = _travel.validate_surface_registration(travel_candidate)
+	if not travel_validation.get("ok", false): return travel_validation
+	# This is the last fallible owner commit. Its contract forbids partial writes,
+	# signals/await/reentry; all following publications are prepared assignments.
+	var admitted: Dictionary = _flow.call("commit_polisa_local_ship_purchase", flow_candidate)
+	if not admitted.get("ok", false): return admitted
+	_travel.call("_publish_surface_registration", travel_candidate)
+	var definitions: Array = _flow.get("_homebase_aircraft_definitions")
+	definitions.append(craft)
+	_flow.get("_aircraft_location_by_craft")[id] = "mission"
+	_pad_by_craft[id] = home_pad
+	sync_crafts()
+	return {"ok":true,"receipt_schema_version":2,"craft_id":id,"delivery_location_id":"polisa","landing_pad_id":home_pad,"acquisition_pad_id":acquisition_pad,"pad_fit_revision":1,"origin_kind":"local_station_purchase","origin_location_id":"polisa","origin_receipt_id":request_id}

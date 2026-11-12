@@ -2797,3 +2797,39 @@ func _build_take_doctrine_snapshot(state: Dictionary) -> Dictionary:
 		"engagement_range_policy": String(modifiers.get("engagement_range_policy", "")),
 		"engagement_range_factor": float(modifiers.get("engagement_range_factor", 1.0)),
 	}
+
+
+func capture_hex_execution_scope(units:Array,simulation_root)->Dictionary:
+	if not _uses_hex_movement_owner(simulation_root):return {}
+	var scope:Dictionary={"schema":"hex_execution_scope.v1","root":weakref(simulation_root),"members":{}}
+	for unit in units:
+		if not is_instance_valid(unit) or not unit.has_method("get_unit_id"):continue
+		var id:String=String(unit.call("get_unit_id"))
+		var binding:Dictionary=simulation_root.call("get_hex_actor_execution_binding",id)
+		if not binding.is_empty() and int(binding.actor)==unit.get_instance_id():scope.members[id]=binding
+	return scope
+
+
+func filter_hex_execution_scope(scope:Dictionary,units:Array,simulation_root)->Array:
+	if scope.is_empty():return units
+	var owner=scope.get("root")
+	if not owner is WeakRef or owner.get_ref()!=simulation_root or not _uses_hex_movement_owner(simulation_root):
+		scope["members"]={}
+		return []
+	var candidates:Dictionary={}
+	for unit in units:
+		if is_instance_valid(unit) and unit.has_method("get_unit_id"):candidates[String(unit.call("get_unit_id"))]=unit
+	var members:Dictionary=scope.get("members",{})
+	for id in members.keys():
+		var unit=candidates.get(id)
+		var current:Dictionary=simulation_root.call("get_hex_actor_execution_binding",id)
+		if not is_instance_valid(unit) or current.is_empty() or current!=members[id] or int(current.actor)!=unit.get_instance_id() or (unit.has_method("get_vital_state") and String(unit.call("get_vital_state"))!="fit"):
+			members.erase(id)
+	var result:Array=[]
+	for unit in units:
+		if is_instance_valid(unit) and unit.has_method("get_unit_id") and members.has(String(unit.call("get_unit_id"))):result.append(unit)
+	return result
+
+
+func _uses_hex_movement_owner(simulation_root) -> bool:
+	return is_instance_valid(simulation_root) and simulation_root.has_method("is_hex_ground_runtime_active") and bool(simulation_root.call("is_hex_ground_runtime_active"))

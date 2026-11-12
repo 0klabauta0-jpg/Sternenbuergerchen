@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-12",
+  "status": "native revised task candidate; no user approval",
+  "renderer": "OpenGL Compatibility",
+  "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+  "resolution": [
+    1280,
+    720
+  ],
+  "wall_thickness_m": 0.16,
+  "floor_grid_source": "TerrainMapData coarse hex_axial_v1",
+  "visual_verifier": {
+    "passed": 39,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "capture_exit_code": 0,
+  "opened_images": 8,
+  "pose_room_rotations": [
+    0,
+    1
+  ],
+  "awake_xz_tilt": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "files": [
+    {
+      "path": "scripts/meta/modular_base_room_visual.gd",
+      "sha256": "ce10f21d56f1d50b412a0280b36ce65c92048eb61ab700a1ca14b2048bcf34a3"
+    },
+    {
+      "path": "scripts/meta/explorable_homebase.gd",
+      "sha256": "aadb7fccfabde0b6253c42663465594fe6af086dd3307046d4bb3a39a08853b3"
+    },
+    {
+      "path": "scripts/meta/modular_base_geometry.gd",
+      "sha256": "48ed9b95b7d387f7cf1ea41fffbd7668e533beba2a89e31a823fc64e8bb709bb"
+    },
+    {
+      "path": "scripts/meta/original_habitat_bed_mesh.gd",
+      "sha256": "7dc129e3e89198f86ba82614d83c20e6177d3dc2dacfc9310ab6c32d3b920cfe"
+    },
+    {
+      "path": "scripts/tests/modular_base_room_visual_verifier.gd",
+      "sha256": "a0044b72371e87262f670814374b3403078df60588cbe40cc82b106d7ab20d1f"
+    },
+    {
+      "path": "scripts/tests/modular_base_room_visual_capture.gd",
+      "sha256": "e30384ab174103f597f058ced65d92e447c59974c718e395ccc533996826d9b1"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/habitat_cutaway_01.glb",
+      "sha256": "4d0132905e4c7e91023fd632b0b6103044e9855d42a1528b72d459da7e41b4be"
+    },
+    {
+      "path": "scripts/terrain/hex_grid.gd",
+      "sha256": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d"
+    },
+    {
+      "path": "shaders/terrain/hex_grid_coverage.gdshader",
+      "sha256": "741c040539a7671c299ba2d5b26293a216ad2ecebd6529a505d58e3a3e16da65"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/qa/base_real_personnel_20261109/habitat_cutaway_01_material.png",
+      "sha256": "05b6190dadd0cef92029579a1b5fb5141508cfec4b4352d2dcdf5c04291cf86d"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/hidden_desktop_run.py",
+      "sha256": "1c2e3f8cf70bb3e7d46f37d8c71d58050b5c295d44e08cd673a514720c7352e5"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/awake_original_beds_r0_posefix.png",
+      "sha256": "bed617db518a73547ad239851be223dba406157f2357adfd1a34704ca5fed753"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/awake_original_beds_r1_posefix.png",
+      "sha256": "3be5a4310dc93efca7f80398efa0c76a31290eec914fec5ca82974d654a54606"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/door_added_r0.png",
+      "sha256": "2df87db8fa3e8ec98029ba677c6c9566d3d7cae96b68b7d4ddb257fdbcae0e4c"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/door_removed_r0.png",
+      "sha256": "4637fcd98368b7ca94c76960006cf670def8eb16663baf99a65fd3bb677a40e0"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/sleeping_original_beds_r0_posefix.png",
+      "sha256": "84787ed1b3c24771c9d787618c4062988517ba34da20c50de5e02952b761e409"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/sleeping_original_beds_r1_posefix.png",
+      "sha256": "8f6abc680813324cf941c6ddc6bd699383a0970413ee7c846e9dd85f21dd08cd"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/three_modules_front_posefix.png",
+      "sha256": "4df767e7fae9bbe918d23da989b556f7255031e7927b8d450954eab965354bd5"
+    },
+    {
+      "path": "docs/qa/modular_base_hex_revision_20261112/native/three_modules_rear_posefix.png",
+      "sha256": "b11435c9a1fe143f01e09440ba7556f99fbfd16454ae69d2e29386bd5383b024"
+    }
+  ]
+}

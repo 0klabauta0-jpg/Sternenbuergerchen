@@ -33,6 +33,279 @@
       "location_ids": [
         "trade_outpost"
       ]
+    },
+    "polisa_pistol": {
+      "id": "polisa_pistol",
+      "item_id": "pistol",
+      "name": "Pistole",
+      "unit_price": 30,
+      "stock": 6,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_smg": {
+      "id": "polisa_smg",
+      "item_id": "smg",
+      "name": "Maschinenpistole",
+      "unit_price": 70,
+      "stock": 6,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_rifle": {
+      "id": "polisa_rifle",
+      "item_id": "rifle",
+      "name": "Sturmgewehr",
+      "unit_price": 100,
+      "stock": 6,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_medictool": {
+      "id": "polisa_medictool",
+      "item_id": "medictool",
+      "name": "Sanitaetswerkzeug",
+      "unit_price": 50,
+      "stock": 6,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_armor_light": {
+      "id": "polisa_armor_light",
+      "item_id": "armor_light",
+      "name": "Leichte Ruestung",
+      "unit_price": 55,
+      "stock": 6,
+      "category": "armor",
+      "location_ids": [
+        "polisa"
+      ],
+      "required_blueprint": "light_armor"
+    },
+    "polisa_armor_medium": {
+      "id": "polisa_armor_medium",
+      "item_id": "armor_medium",
+      "name": "Mittlere Ruestung",
+      "unit_price": 110,
+      "stock": 6,
+      "category": "armor",
+      "location_ids": [
+        "polisa"
+      ],
+      "required_blueprint": "medium_armor"
+    },
+    "polisa_armor_heavy": {
+      "id": "polisa_armor_heavy",
+      "item_id": "armor_heavy",
+      "name": "Schwere Ruestung",
+      "unit_price": 180,
+      "stock": 6,
+      "category": "armor",
+      "location_ids": [
+        "polisa"
+      ],
+      "required_blueprint": "heavy_armor"
+    },
+    "polisa_backpack": {
+      "id": "polisa_backpack",
+      "item_id": "backpack",
+      "name": "Rucksack",
+      "unit_price": 40,
+      "stock": 6,
+      "category": "armor",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ore": {
+      "id": "polisa_ore",
+      "item_id": "ore",
+      "name": "Erz",
+      "unit_price": 8,
+      "stock": 12,
+      "category": "commodities",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_salvage": {
+      "id": "polisa_salvage",
+      "item_id": "salvage",
+      "name": "Bergungsmaterial",
+      "unit_price": 12,
+      "stock": 12,
+      "category": "commodities",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ship_cutlass": {
+      "id": "polisa_ship_cutlass",
+      "item_id": "ship:cutlass",
+      "name": "Entermesser / Cutlass",
+      "unit_price": 850,
+      "stock": 2,
+      "category": "ships",
+      "kind": "ship",
+      "craft_type": "dropship",
+      "model_id": "cutlass",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ship_buccaneer": {
+      "id": "polisa_ship_buccaneer",
+      "item_id": "ship:buccaneer",
+      "name": "Buccaneer",
+      "unit_price": 650,
+      "stock": 2,
+      "category": "ships",
+      "kind": "ship",
+      "craft_type": "fighter",
+      "model_id": "buccaneer",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_repeater_s1": {
+      "id": "polisa_component_repeater_s1",
+      "item_id": "repeater_s1",
+      "name": "Bulldog S1",
+      "unit_price": 60,
+      "stock": 6,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_repeater_s2": {
+      "id": "polisa_component_repeater_s2",
+      "item_id": "repeater_s2",
+      "name": "Badger S2",
+      "unit_price": 90,
+      "stock": 6,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_repeater_s3": {
+      "id": "polisa_component_repeater_s3",
+      "item_id": "repeater_s3",
+      "name": "Panther S3",
+      "unit_price": 120,
+      "stock": 6,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_repeater_s4": {
+      "id": "polisa_component_repeater_s4",
+      "item_id": "repeater_s4",
+      "name": "Rhino S4",
+      "unit_price": 180,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_repeater_s5": {
+      "id": "polisa_component_repeater_s5",
+      "item_id": "repeater_s5",
+      "name": "Galdereen S5",
+      "unit_price": 240,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_shield_s1": {
+      "id": "polisa_component_shield_s1",
+      "item_id": "shield_s1",
+      "name": "Schildgenerator S1",
+      "unit_price": 90,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_shield_s2": {
+      "id": "polisa_component_shield_s2",
+      "item_id": "shield_s2",
+      "name": "Schildgenerator S2",
+      "unit_price": 150,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_power_s1": {
+      "id": "polisa_component_power_s1",
+      "item_id": "power_s1",
+      "name": "Kraftwerk S1",
+      "unit_price": 80,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_power_s1_plus": {
+      "id": "polisa_component_power_s1_plus",
+      "item_id": "power_s1_plus",
+      "name": "Kraftwerk S1 verstärkt",
+      "unit_price": 140,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_power_s2": {
+      "id": "polisa_component_power_s2",
+      "item_id": "power_s2",
+      "name": "Kraftwerk S2",
+      "unit_price": 140,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_component_power_s2_plus": {
+      "id": "polisa_component_power_s2_plus",
+      "item_id": "power_s2_plus",
+      "name": "Kraftwerk S2 verstärkt",
+      "unit_price": 220,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_warp_hemera": {
+      "id": "polisa_warp_hemera",
+      "item_id": "warp_hemera",
+      "name": "Hemera · Warp-Antrieb A",
+      "unit_price": 160,
+      "stock": 4,
+      "category": "ship_equipment",
+      "location_ids": [
+        "polisa"
+      ]
     }
   },
   "service_locations": {
@@ -48,7 +321,11 @@
       "refuel"
     ],
     "fortified_outpost": [],
-    "distress_orbit": []
+    "distress_orbit": [],
+    "polisa": [
+      "trade",
+      "refuel"
+    ]
   },
   "route_fuel_costs": {
     "homebase>satellite_crash": 12.0,
@@ -60,7 +337,9 @@
     "homebase>fortified_outpost": 10.0,
     "fortified_outpost>homebase": 10.0,
     "homebase>distress_orbit": 10.0,
-    "distress_orbit>homebase": 10.0
+    "distress_orbit>homebase": 10.0,
+    "homebase>polisa": 10.0,
+    "polisa>homebase": 10.0
   },
   "benit_buy_orders": {
     "satellite_crash": {
@@ -68,6 +347,15 @@
     },
     "trade_outpost": {
       "b_benit": 12
+    }
+  },
+  "commodity_buy_orders": {
+    "polisa": {
+      "ore": 6,
+      "salvage": 9,
+      "a_benit": 15,
+      "b_benit": 15,
+      "c_benit": 15
     }
   }
 }

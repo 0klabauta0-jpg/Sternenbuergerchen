@@ -2,44 +2,180 @@
   "id": "starter_system",
   "jump_duration_seconds": 3.0,
   "bodies": {
-    "moon": {
-      "id": "moon",
-      "name": "Glut I · Mondbasis",
-      "orbit_id": "moon_orbit",
-      "position": [
-        0.18,
-        0.7
+    "sun": {
+      "id": "sun",
+      "name": "Glut",
+      "hex": [
+        64,
+        128
       ],
-      "radius": 0.04
+      "position": [
+        0.5,
+        0.5
+      ],
+      "radius": 5.0,
+      "ring_radius": 0,
+      "color": "ffad4a",
+      "surface_location_id": "",
+      "parent_id": "",
+      "orbit_id": ""
     },
     "planet": {
       "id": "planet",
-      "name": "Glut",
-      "orbit_id": "planet_orbit",
-      "position": [
-        0.8,
-        0.28
+      "name": "Glut 1",
+      "hex": [
+        144,
+        93
       ],
-      "radius": 0.09
+      "position": [
+        0.744140625,
+        0.36328125
+      ],
+      "radius": 3.0,
+      "ring_radius": 6,
+      "color": "a36039",
+      "surface_location_id": "fortified_outpost",
+      "parent_id": "sun",
+      "orbit_id": "planet_orbit"
+    },
+    "glut_1a": {
+      "id": "glut_1a",
+      "name": "Glut 1a",
+      "hex": [
+        143,
+        77
+      ],
+      "position": [
+        0.708984375,
+        0.30078125
+      ],
+      "radius": 1.2,
+      "ring_radius": 3,
+      "color": "998679",
+      "surface_location_id": "",
+      "parent_id": "planet",
+      "orbit_id": "glut_1a_orbit"
+    },
+    "glut_1b": {
+      "id": "glut_1b",
+      "name": "Glut 1b",
+      "hex": [
+        164,
+        104
+      ],
+      "position": [
+        0.84375,
+        0.40625
+      ],
+      "radius": 1.2,
+      "ring_radius": 3,
+      "color": "5786a3",
+      "surface_location_id": "",
+      "parent_id": "planet",
+      "orbit_id": "glut_1b_orbit"
+    },
+    "moon": {
+      "id": "moon",
+      "name": "Glut 1c · Heimatbasis",
+      "hex": [
+        109,
+        139
+      ],
+      "position": [
+        0.697265625,
+        0.54296875
+      ],
+      "radius": 1.2,
+      "ring_radius": 3,
+      "color": "c4a071",
+      "surface_location_id": "homebase",
+      "parent_id": "planet",
+      "orbit_id": "moon_orbit"
+    },
+    "glut_2": {
+      "id": "glut_2",
+      "name": "Glut 2",
+      "radius": 4.0,
+      "ring_radius": 7,
+      "color": "aebdb9",
+      "surface_location_id": "",
+      "parent_id": "sun",
+      "orbit_id": "polisa_orbit",
+      "description": "Unbewohnter Planet. Noch keine Oberflaechenorte.",
+      "hex": [
+        76,
+        43
+      ],
+      "position": [
+        0.380859375,
+        0.16796875
+      ]
+    },
+    "polisa": {
+      "id": "polisa",
+      "name": "Polisa",
+      "kind": "station",
+      "radius": 0.85,
+      "ring_radius": 0,
+      "color": "c5c7b8",
+      "surface_location_id": "polisa",
+      "parent_id": "glut_2",
+      "orbit_id": "",
+      "description": "Freie Handelsstation",
+      "hex": [
+        85,
+        48
+      ],
+      "position": [
+        0.42578125,
+        0.18750000000000003
+      ]
     }
   },
   "orbits": {
     "moon_orbit": {
       "id": "moon_orbit",
-      "name": "Glut I · Mondorbit",
+      "name": "Glut 1c · Heimatmondorbit",
       "body_id": "moon",
       "position": [
-        0.18,
-        0.7
+        0.685546875,
+        0.54296875
+      ],
+      "hex": [
+        106,
+        139
+      ],
+      "markers": [
+        {
+          "id": "orbit_1",
+          "hex": [
+            106,
+            139
+          ]
+        },
+        {
+          "id": "orbit_2",
+          "hex": [
+            109,
+            142
+          ]
+        },
+        {
+          "id": "orbit_3",
+          "hex": [
+            112,
+            136
+          ]
+        }
       ]
     },
     "planet_orbit": {
       "id": "planet_orbit",
-      "name": "Glut · Planetenorbit",
+      "name": "Glut 1 · Planetenorbit",
       "body_id": "planet",
       "position": [
-        0.8,
-        0.28
+        0.755859375,
+        0.38671875
       ],
       "encounter_slots": [
         {
@@ -60,6 +196,154 @@
           "angle_degrees": 270,
           "available": false
         }
+      ],
+      "hex": [
+        144,
+        99
+      ],
+      "markers": [
+        {
+          "id": "orbit_1",
+          "hex": [
+            144,
+            99
+          ]
+        },
+        {
+          "id": "orbit_2",
+          "hex": [
+            150,
+            87
+          ]
+        },
+        {
+          "id": "orbit_3",
+          "hex": [
+            138,
+            93
+          ]
+        }
+      ]
+    },
+    "glut_1a_orbit": {
+      "id": "glut_1a_orbit",
+      "body_id": "glut_1a",
+      "hex": [
+        146,
+        77
+      ],
+      "markers": [
+        {
+          "id": "orbit_1",
+          "hex": [
+            146,
+            77
+          ]
+        },
+        {
+          "id": "orbit_2",
+          "hex": [
+            143,
+            74
+          ]
+        },
+        {
+          "id": "orbit_3",
+          "hex": [
+            140,
+            80
+          ]
+        }
+      ],
+      "position": [
+        0.720703125,
+        0.30078125
+      ],
+      "name": "Glut 1a · Mondorbit"
+    },
+    "glut_1b_orbit": {
+      "id": "glut_1b_orbit",
+      "body_id": "glut_1b",
+      "hex": [
+        161,
+        104
+      ],
+      "markers": [
+        {
+          "id": "orbit_1",
+          "hex": [
+            161,
+            104
+          ]
+        },
+        {
+          "id": "orbit_2",
+          "hex": [
+            164,
+            107
+          ]
+        },
+        {
+          "id": "orbit_3",
+          "hex": [
+            167,
+            101
+          ]
+        }
+      ],
+      "position": [
+        0.83203125,
+        0.40625
+      ],
+      "name": "Glut 1b · Mondorbit"
+    },
+    "polisa_orbit": {
+      "id": "polisa_orbit",
+      "name": "Glut 2 / Polisa",
+      "body_id": "glut_2",
+      "location_id": "polisa",
+      "markers": [
+        {
+          "id": "orbit_1",
+          "hex": [
+            83,
+            43
+          ],
+          "position": [
+            0.408203125,
+            0.16796875
+          ]
+        },
+        {
+          "id": "orbit_2",
+          "hex": [
+            76,
+            36
+          ],
+          "position": [
+            0.3671875,
+            0.140625
+          ]
+        },
+        {
+          "id": "orbit_3",
+          "hex": [
+            69,
+            50
+          ],
+          "position": [
+            0.3671875,
+            0.1953125
+          ]
+        }
+      ],
+      "hex": [
+        83,
+        43
+      ],
+      "position": [
+        0.408203125,
+        0.16796875
       ]
     }
   },
@@ -68,6 +352,12 @@
     "satellite_crash": "planet_orbit",
     "trade_outpost": "planet_orbit",
     "fortified_outpost": "planet_orbit",
-    "distress_orbit": "planet_orbit"
-  }
+    "distress_orbit": "planet_orbit",
+    "polisa": "polisa_orbit"
+  },
+  "version": 2,
+  "grid_size": [
+    256,
+    256
+  ]
 }

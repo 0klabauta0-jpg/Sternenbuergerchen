@@ -1,0 +1,278 @@
+extends RefCounted
+## Command-owned wing membership; pilot/craft ownership is supplied by runtime.
+const CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
+const MAX_MEMBERS := 6
+var _wings: Dictionary = {}
+var _craft_wings: Dictionary = {}
+var _receipts: Dictionary = {}
+var _revision := 0
+
+func get_snapshot() -> Dictionary:
+	var wings: Dictionary = _wings.duplicate(true)
+	for id in wings:
+		wings[id].erase("owner_id")
+		wings[id]["active"] = not String(wings[id].leader_craft_id).is_empty()
+	return {"revision": _revision, "wings": wings}
+
+func get_craft_wing(craft_id: String, actor_id: String) -> String:
+	var wing_id: String = String(_craft_wings.get(craft_id, ""))
+	if wing_id.is_empty() or not _wings.has(wing_id) or _wings[wing_id].owner_id != actor_id:
+		return ""
+	return wing_id
+
+func preview_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+	# The isolated candidate shares no mutable state with the live owner.
+	var candidate = get_script().new()
+	candidate._wings = _wings.duplicate(true)
+	candidate._craft_wings = _craft_wings.duplicate(true)
+	candidate._revision = _revision
+	var result: Dictionary = candidate.ensure_flying_wings(actor_id, flying_crafts, owned_crafts, pilots)
+	if result.get("ok", false): result["expected_revision"] = _revision
+	return result
+
+func reconcile_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary) -> Dictionary:
+	# Publish reconciliation and missing singleton wings together; an invalid
+	# pilot map or flying craft cannot leave a half-reconciled live owner.
+	var candidate = get_script().new()
+	candidate._wings = _wings.duplicate(true)
+	candidate._craft_wings = _craft_wings.duplicate(true)
+	candidate._revision = _revision
+	var reconciled: Dictionary = candidate.reconcile_crafts(actor_id, owned_crafts, pilots)
+	if not reconciled.get("ok", false): return reconciled
+	var ensured: Dictionary = candidate.ensure_flying_wings(actor_id, flying_crafts, owned_crafts, pilots)
+	if not ensured.get("ok", false): return ensured
+	var changed: bool = bool(reconciled.get("changed", false)) or bool(ensured.get("changed", false))
+	if changed:
+		_wings = candidate._wings
+		_craft_wings = candidate._craft_wings
+		_revision = candidate._revision
+	return {"ok":true, "changed":changed, "revision":_revision, "wing_by_craft":ensured.wing_by_craft.duplicate(true)}
+
+func ensure_flying_wings(actor_id: String, flying_crafts: Array, owned_crafts: Array, pilots: Dictionary, expected_revision: int = -1) -> Dictionary:
+	# Lifecycle preflight: build the entire candidate before changing membership.
+	if expected_revision >= 0 and expected_revision != _revision: return _reject("stale_revision")
+	if actor_id.strip_edges().is_empty(): return _reject("invalid_actor")
+	var requested := {}
+	for craft in flying_crafts:
+		if typeof(craft) != TYPE_STRING or String(craft).strip_edges().is_empty() or requested.has(craft):
+			return _reject("invalid_craft")
+		if not owned_crafts.has(craft): return _reject("not_owned")
+		if _craft_wings.has(craft) and _wings[_craft_wings[craft]].owner_id != actor_id:
+			return _reject("not_owned")
+		requested[craft] = true
+	var existing: Array = []
+	for wing in _wings.values():
+		if wing.owner_id == actor_id:
+			for craft in wing.craft_ids: existing.append(craft)
+	for craft in requested:
+		if not existing.has(craft): existing.append(craft)
+	var seen_pilots := {}
+	for craft in existing:
+		var pilot: Variant = pilots.get(craft, "")
+		if typeof(pilot) != TYPE_STRING: return _reject("invalid_pilot_mapping")
+		if String(pilot).strip_edges().is_empty(): continue
+		if seen_pilots.has(pilot): return _reject("pilot_already_assigned")
+		seen_pilots[pilot] = true
+	var candidate: Dictionary = _wings.duplicate(true)
+	var membership: Dictionary = _craft_wings.duplicate()
+	var ids: Array = requested.keys()
+	ids.sort()
+	var changed := false
+	for craft in ids:
+		if membership.has(craft): continue
+		var base: String = "solo:" + craft
+		var wing_id := base
+		var suffix := 1
+		while candidate.has(wing_id):
+			wing_id = "%s:%d" % [base, suffix]
+			suffix += 1
+		var leader: String = craft if not String(pilots.get(craft, "")).strip_edges().is_empty() else ""
+		candidate[wing_id] = {"wing_id":wing_id, "name":wing_id, "owner_id":actor_id, "craft_ids":[craft], "leader_craft_id":leader}
+		membership[craft] = wing_id
+		changed = true
+	if changed:
+		_wings = candidate
+		_craft_wings = membership
+		_revision += 1
+	var wing_by_craft := {}
+	for craft in ids: wing_by_craft[craft] = _craft_wings[craft]
+	return {"ok":true, "changed":changed, "revision":_revision, "wing_by_craft":wing_by_craft}
+
+func transfer_craft(actor_id: String, craft_id: String, destination_id: String, pilots: Dictionary) -> Dictionary:
+	# Internal owner operation; command authority and phase must be checked by caller.
+	if actor_id.strip_edges().is_empty() or not _craft_wings.has(craft_id) or not _wings.has(destination_id):
+		return _reject("unknown_wing_or_craft")
+	var source_id: String = _craft_wings[craft_id]
+	if _wings[source_id].owner_id != actor_id or _wings[destination_id].owner_id != actor_id:
+		return _reject("not_owned")
+	if source_id == destination_id: return _reject("already_member")
+	if _wings[destination_id].craft_ids.size() >= MAX_MEMBERS: return _reject("wing_full")
+	var ready: Array = []
+	for craft in _wings[source_id].craft_ids:
+		if typeof(pilots.get(craft, "")) != TYPE_STRING: return _reject("invalid_pilot_mapping")
+		if craft != craft_id and not String(pilots.get(craft, "")).strip_edges().is_empty(): ready.append(craft)
+	var candidate: Dictionary = _wings.duplicate(true)
+	candidate[source_id].craft_ids.erase(craft_id)
+	if candidate[source_id].craft_ids.is_empty():
+		candidate.erase(source_id)
+	elif candidate[source_id].leader_craft_id == craft_id:
+		ready.sort()
+		candidate[source_id].leader_craft_id = "" if ready.is_empty() else ready[0]
+	candidate[destination_id].craft_ids.append(craft_id)
+	if String(candidate[destination_id].leader_craft_id).is_empty() and not String(pilots.get(craft_id, "")).strip_edges().is_empty():
+		candidate[destination_id].leader_craft_id = craft_id
+	_wings = candidate
+	_craft_wings[craft_id] = destination_id
+	_revision += 1
+	return {"ok":true, "revision":_revision}
+
+func check_replay(command: Dictionary, actor_id: String) -> Dictionary:
+	if typeof(command.get("request_id")) != TYPE_STRING or String(command.request_id).is_empty():
+		return {"found": false}
+	var receipts: Dictionary = _receipts.get(actor_id, {})
+	if not receipts.has(command.request_id):
+		return {"found": false}
+	if not CONTRACT._finite(command):
+		return {"found": true, "result": _reject("invalid_payload")}
+	if CONTRACT._has_authority_key(command):
+		return {"found": true, "result": _reject("untrusted_authority")}
+	var receipt: Dictionary = receipts[command.request_id]
+	if receipt.signature != CONTRACT.request_signature(command):
+		return {"found": true, "result": _reject("request_id_conflict")}
+	var result: Dictionary = receipt.result.duplicate(true)
+	result["replayed"] = true
+	return {"found": true, "result": result}
+
+func reconcile_crafts(actor_id: String, valid_crafts: Array, pilots: Dictionary) -> Dictionary:
+	var candidate: Dictionary = _wings.duplicate(true)
+	var seen_pilots := {}
+	var changed := false
+	var ids: Array = candidate.keys()
+	ids.sort()
+	for id in ids:
+		if candidate[id].owner_id != actor_id: continue
+		var retained: Array = []
+		var ready: Array = []
+		var crafts: Array = candidate[id].craft_ids.duplicate()
+		for craft in crafts:
+			if not valid_crafts.has(craft):
+				changed = true
+				continue
+			retained.append(craft)
+			var pilot: Variant = pilots.get(craft, "")
+			if typeof(pilot) != TYPE_STRING: return _reject("invalid_pilot_mapping")
+			if String(pilot).strip_edges().is_empty(): continue
+			if seen_pilots.has(pilot): return _reject("pilot_already_assigned")
+			seen_pilots[pilot] = true
+			ready.append(craft)
+		if retained.is_empty():
+			candidate.erase(id)
+			changed = true
+			continue
+		candidate[id].craft_ids = retained
+		var leader: String = String(candidate[id].leader_craft_id)
+		if not ready.has(leader):
+			ready.sort()
+			candidate[id].leader_craft_id = "" if ready.is_empty() else ready[0]
+			changed = true
+	if not changed: return {"ok": true, "changed": false, "revision": _revision}
+	_wings = candidate
+	_craft_wings.clear()
+	for id in _wings:
+		for craft in _wings[id].craft_ids: _craft_wings[craft] = id
+	_revision += 1
+	return {"ok": true, "changed": true, "revision": _revision}
+
+func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
+	var actor: Variant = context.get("actor_id")
+	if typeof(actor) != TYPE_STRING or String(actor).strip_edges().is_empty() or context.get("authorized") != true:
+		return _reject("authority_required")
+	var operation: String = String(command.get("operation", ""))
+	if operation not in ["wing_create", "wing_assign", "wing_remove", "wing_transfer", "wing_rename", "wing_leader_set", "order_issue", "order_cancel"]:
+		return _reject("unsupported_operation")
+	var owned: Array = []
+	var members: Dictionary = {}
+	for wing_id in _wings:
+		if _wings[wing_id].owner_id == actor:
+			owned.append(wing_id)
+			members[wing_id] = _wings[wing_id].craft_ids.duplicate()
+	var validation_context := context.duplicate(true)
+	validation_context["revision"] = _revision
+	validation_context["owned_wings"] = owned
+	validation_context["wing_members"] = members
+	validation_context["receipts"] = _receipts.get(actor, {})
+	var checked: Dictionary = CONTRACT.validate(command, validation_context)
+	if not checked.get("ok", false) or checked.get("replayed", false):
+		return checked
+	var payload: Dictionary = command.payload
+	var id: String = String(payload.get("wing_id", ""))
+	match operation:
+		"wing_create":
+			if _wings.has(id): return _reject("wing_exists")
+			_wings[id] = {"wing_id": id, "name": id, "owner_id": actor, "craft_ids": [], "leader_craft_id": ""}
+		"wing_assign":
+			var craft: String = payload.craft_id
+			if _craft_wings.has(craft): return _reject("craft_already_assigned")
+			if _wings[id].craft_ids.size() >= MAX_MEMBERS: return _reject("wing_full")
+			var pilots: Variant = context.get("craft_pilots")
+			if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(craft)) != TYPE_STRING or String(pilots[craft]).strip_edges().is_empty():
+				return _reject("pilot_missing")
+			for other_craft in _craft_wings:
+				if typeof(pilots.get(other_craft)) != TYPE_STRING or String(pilots[other_craft]).is_empty():
+					return _reject("pilot_mapping_incomplete")
+				if pilots[other_craft] == pilots[craft]: return _reject("pilot_already_assigned")
+			_wings[id].craft_ids.append(craft)
+			_craft_wings[craft] = id
+			if String(_wings[id].leader_craft_id).is_empty(): _wings[id].leader_craft_id = craft
+		"wing_remove":
+			var craft: String = payload.craft_id
+			if not _wings[id].craft_ids.has(craft): return _reject("not_member")
+			if typeof(context.get("flying_crafts", [])) != TYPE_ARRAY: return _reject("invalid_flying_crafts")
+			if context.get("flying_crafts", []).has(craft): return _reject("craft_flying")
+			_wings[id].craft_ids.erase(craft)
+			_craft_wings.erase(craft)
+			if _wings[id].craft_ids.is_empty():
+				_wings.erase(id)
+			elif _wings[id].leader_craft_id == craft:
+				var pilots: Variant = context.get("craft_pilots")
+				var ready: Array = []
+				if typeof(pilots) == TYPE_DICTIONARY:
+					for candidate in _wings[id].craft_ids:
+						if typeof(pilots.get(candidate)) == TYPE_STRING and not String(pilots[candidate]).strip_edges().is_empty(): ready.append(candidate)
+				ready.sort()
+				_wings[id].leader_craft_id = "" if ready.is_empty() else ready[0]
+		"wing_rename":
+			_wings[id].name = String(payload.name).strip_edges()
+		"wing_leader_set":
+			var pilots: Variant = context.get("craft_pilots")
+			if typeof(pilots) != TYPE_DICTIONARY or typeof(pilots.get(payload.leader_craft_id)) != TYPE_STRING or String(pilots[payload.leader_craft_id]).strip_edges().is_empty():
+				return _reject("pilot_missing")
+			_wings[id].leader_craft_id = payload.leader_craft_id
+		"wing_transfer":
+			if typeof(context.get("craft_pilots")) != TYPE_DICTIONARY: return _reject("invalid_pilot_mapping")
+			var transferred: Dictionary = transfer_craft(actor, payload.craft_id, id, context.craft_pilots)
+			if not transferred.get("ok", false): return transferred
+		"order_issue":
+			# Preflight all wings before replacing any current order.
+			for wing_id in payload.wing_ids:
+				if String(_wings[wing_id].leader_craft_id).is_empty(): return _reject("wing_inactive")
+			var order: Dictionary = payload.duplicate(true)
+			order.erase("wing_ids")
+			order["order_id"] = command.request_id
+			if not order.has("stance"): order["stance"] = "normal"
+			if not order.has("fire_rule"): order["fire_rule"] = "hold"
+			if not order.has("contact_response"): order["contact_response"] = "observe"
+			for wing_id in payload.wing_ids:
+				_wings[wing_id]["order"] = order.duplicate(true)
+		"order_cancel":
+			var current: Dictionary = _wings[id].get("order", {})
+			if current.is_empty() or current.get("order_id") != payload.order_id: return _reject("order_mismatch")
+			_wings[id]["order"] = {}
+	if operation != "wing_transfer": _revision += 1
+	var result := {"ok": true, "reason": "", "revision": _revision, "replayed": false}
+	if not _receipts.has(actor): _receipts[actor] = {}
+	_receipts[actor][command.request_id] = {"signature": checked.signature, "result": result.duplicate(true)}
+	return result
+
+func _reject(reason: String) -> Dictionary:
+	return {"ok": false, "reason": reason, "revision": _revision, "replayed": false}

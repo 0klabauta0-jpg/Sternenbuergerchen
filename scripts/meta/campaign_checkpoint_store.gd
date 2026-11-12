@@ -2,8 +2,9 @@ extends RefCounted
 ## One atomic home checkpoint, independent of the editable Skirmish profile.
 const DEFAULT_PATH := "user://campaigns/introduction/checkpoint_v1.json"
 const MAX_BYTES := 4 * 1024 * 1024
+const HEX_CHECKPOINT_CONTRACT := "res://scripts/core/hex_checkpoint_transaction.gd"
 static func validate_payload(payload: Dictionary) -> Dictionary:
-	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 4 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
+	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 64 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
 	var ids: Array = []
 	for unit in payload.roster:
@@ -13,6 +14,9 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			if unit.has(field) and typeof(unit[field]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_roster_field"}
 		ids.append(unit.unit_id)
+	if payload.has("hex_tactical"):
+		var hex_validation := _validate_hex_payload(payload, ids)
+		if not hex_validation.get("ok", false): return hex_validation
 	if payload.has("base_personnel"):
 		if typeof(payload.craft.get("definition")) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_campaign_craft"}
@@ -26,8 +30,9 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			var unit: Dictionary = base.units[id]
 			for field in ["auto_rest_enabled","rest_automatic"]:
 				if unit.has(field) and typeof(unit[field])!=TYPE_BOOL: return {"ok":false,"reason":"invalid_auto_rest_setting"}
-			if typeof(unit.get("position")) != TYPE_ARRAY or unit.position.size() != 2 or not String(unit.get("status", "")) in ["outside","sleeping","aboard"]:
+			if typeof(unit.get("position")) != TYPE_ARRAY or unit.position.size() != 2 or not String(unit.get("status", "")) in ["outside","sleeping","aboard","station"]:
 				return {"ok":false,"reason":"invalid_base_position"}
+			if unit.status == "station" and (not String(id).begins_with("polisa_recruit_") or unit.get("location_id") != "polisa" or not String(unit.get("craft_id", "")).is_empty() or not String(unit.get("bed_id", "")).is_empty()): return {"ok":false,"reason":"invalid_station_personnel"}
 			for number in unit.position:
 				if typeof(number) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(number)):
 					return {"ok":false,"reason":"invalid_base_position"}
@@ -107,19 +112,60 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		var result: Dictionary = pair[0].restore_state(pair[1])
 		if not result.get("ok", false):
 			return result
+	var recruit_receipts := {}
+	var recruit_reservations := {}
+	var recruit_finalized := {}
+	for receipt: Dictionary in Dictionary(payload.supply.get("requests", {})).values():
+		var entry: Dictionary = receipt.get("result", {})
+		if entry.get("operation") == "station_recruit_reserve": recruit_reservations[String(entry.get("request_id", ""))] = true
+		if entry.get("operation") in ["station_recruit_finalize", "station_recruit_cancel"]: recruit_finalized[String(entry.get("reservation_id", ""))] = true
+		if entry.get("operation") == "station_recruit_finalize":
+			var recruit_id := String(entry.get("unit_id", ""))
+			if not recruit_id.begins_with("polisa_recruit_") or not ids.has(recruit_id): return {"ok":false,"reason":"checkpoint_recruit_receipt_mismatch"}
+			recruit_receipts[recruit_id] = true
+	for reservation_id: String in recruit_reservations:
+		if not recruit_finalized.has(reservation_id): return {"ok":false,"reason":"checkpoint_recruit_admission_pending"}
+	for id: String in ids:
+		if id.begins_with("polisa_recruit_") and not payload.has("base_personnel"): return {"ok":false,"reason":"checkpoint_recruit_presence_missing"}
+		if id.begins_with("polisa_recruit_") and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
+		if ids.size() > 4 and id not in [String(leader.get("unit_id", "")), String(pilot.get("unit_id", "")), "campaign_outpost_recruit", "campaign_rescue_pilot"] and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
+	if payload.has("polisa_recruitment_market"):
+		if typeof(payload.polisa_recruitment_market) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_recruit_market"}
+		var market = load("res://scripts/meta/polisa_recruitment_market.gd").new()
+		if not market.restore_state(payload.polisa_recruitment_market).get("ok", false): return {"ok":false,"reason":"invalid_recruit_market"}
+		var market_recruiter := String(market.snapshot().get("recruiter_id", ""))
+		if not market_recruiter.is_empty() and not ids.has(market_recruiter): return {"ok":false,"reason":"invalid_recruit_market_owner"}
 	if not payload.campaign.departures_by_craft_id.is_empty() or String(payload.campaign.selected_location_id) != "homebase":
 		return {"ok":false,"reason":"checkpoint_not_home"}
 	for job in payload.campaign.jobs.values():
 		if String(job.status) == "active":
 			return {"ok":false,"reason":"checkpoint_active_job"}
 	var fleet: Variant = payload.get("fleet",[{"definition":craft.definition,"pilot_id":craft.pilot_id,"location":"homebase"}])
-	if typeof(fleet) != TYPE_ARRAY or fleet.is_empty() or fleet.size() > 2: return {"ok":false,"reason":"invalid_campaign_fleet"}
+	var station: Dictionary = supply.validate_station_receipts(payload.supply.requests)
+	if not station.get("ok", false): return station
+	if int(station.capacity) > 2 and not bool(payload.campaign.get("progress", {}).get("second_pad_built", false)): return {"ok":false,"reason":"checkpoint_pad_progress_mismatch"}
+	if typeof(fleet) != TYPE_ARRAY or fleet.is_empty() or fleet.size() > int(station.capacity): return {"ok":false,"reason":"invalid_campaign_fleet"}
 	var fleet_ids: Array = []
 	for ship in fleet:
 		if typeof(ship) != TYPE_DICTIONARY or typeof(ship.get("definition")) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_campaign_fleet"}
 		var ship_id := String(ship.definition.get("craft_id",""))
 		if ship_id.is_empty() or fleet_ids.has(ship_id) or String(ship.get("pilot_id","")) not in ([""]+ids) or String(ship.get("location","homebase")) not in ["homebase","waiting_pad"]: return {"ok":false,"reason":"invalid_campaign_fleet"}
+		if ship_id.begins_with("polisa_"):
+			var purchased: Dictionary = station.ships.get(ship_id, {})
+			if purchased.is_empty() or String(ship.definition.get("model_id", "")) != String(purchased.model_id) or String(ship.definition.get("craft_type", "")) != String(purchased.craft_type): return {"ok":false,"reason":"checkpoint_unverified_station_ship"}
 		fleet_ids.append(ship_id)
+	for purchased_id: String in station.ships:
+		if not fleet_ids.has(purchased_id): return {"ok":false,"reason":"checkpoint_missing_purchased_ship"}
+	var equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
+	var equipment_definitions: Array = []
+	for ship: Dictionary in fleet: equipment_definitions.append(ship.definition)
+	var equipment_validation: Dictionary
+	if payload.has("ship_equipment"):
+		if typeof(payload.ship_equipment) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_equipment_state"}
+		equipment_validation = equipment.restore_state(payload.ship_equipment, equipment_definitions, payload.supply.requests, payload.supply.get("inventory", {}))
+	else:
+		equipment_validation = equipment.validate_legacy(equipment_definitions, payload.supply.requests, payload.supply.get("inventory", {}))
+	if not equipment_validation.get("ok", false): return equipment_validation
 	if String(fleet[0].definition.get("craft_id","")) != String(craft.definition.craft_id) or JSON.stringify(fleet[0].definition,"",true) != JSON.stringify(craft.definition,"",true) or String(fleet[0].get("pilot_id","")) != String(craft.pilot_id): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
 	if payload.has("location_resources"):
 		if typeof(payload.location_resources) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_resource_checkpoint"}
@@ -150,9 +196,53 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if not payload.campaign.completion_receipts.has(String(sequence[index])+":completed"): return {"ok":false,"reason":"checkpoint_progress_mismatch"}
 	var progress: Dictionary = payload.campaign.get("progress",{})
 	if ids.has("campaign_outpost_recruit") != bool(progress.get("recruited_outpost",false)) or ids.has("campaign_rescue_pilot") != bool(progress.get("recruited_pilot",false)): return {"ok":false,"reason":"checkpoint_roster_progress_mismatch"}
-	if bool(progress.get("recruited_pilot",false)) != (fleet_ids.size() == 2): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
+	var original_fleet_count := fleet_ids.size() - Dictionary(station.ships).size()
+	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
 
 	return {"ok":true}
+static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dictionary:
+	# V2 has no free-position mirror. Reject before any Legacy normalization.
+	if payload.has("base_personnel") or typeof(payload.hex_tactical) != TYPE_DICTIONARY:
+		return {"ok":false,"reason":"invalid_hex_checkpoint_mirror"}
+	if not ResourceLoader.exists(HEX_CHECKPOINT_CONTRACT):
+		return {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
+	var contract = load(HEX_CHECKPOINT_CONTRACT)
+	var checked: Dictionary = contract.validate_shape(payload.hex_tactical)
+	if not checked.get("ok", false): return checked
+	var base: Dictionary = payload.hex_tactical.base_personnel
+	if base.get("version") != 2 or typeof(base.get("units")) != TYPE_DICTIONARY or base.units.size() != roster_ids.size():
+		return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
+	for id in base.units:
+		if not roster_ids.has(id) or typeof(base.units[id]) != TYPE_DICTIONARY:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
+	var ships: Dictionary = {}
+	var fleet: Variant = payload.get("fleet", [])
+	if not fleet is Array: return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+	for ship in fleet:
+		if not ship is Dictionary or not ship.get("definition") is Dictionary:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		ships[String(ship.definition.get("craft_id", ""))] = ship
+	var definitions: Dictionary = {}
+	var primary: Variant = payload.get("craft", {})
+	if not primary is Dictionary or not primary.get("fireteam_definitions", []) is Array:
+		return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+	for definition in primary.get("fireteam_definitions", []):
+		if not definition is Dictionary or typeof(definition.get("member_unit_ids")) not in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		var team_id := String(definition.get("id", ""))
+		if team_id.is_empty() or team_id != team_id.strip_edges().to_lower(): return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		definitions[team_id] = Array(definition.member_unit_ids)
+	var assigned_teams: Dictionary = {}
+	for craft_id in payload.hex_tactical.transport:
+		var transport: Variant = payload.hex_tactical.transport[craft_id]
+		if not ships.has(craft_id) or not transport is Dictionary or transport.size() != 3 or transport.get("home") != true or not transport.get("teams") is Dictionary or transport.get("pilot") != ships[craft_id].get("pilot_id", "") or ships[craft_id].get("location", "homebase") not in ["homebase", "waiting_pad"]:
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		for team in transport.teams:
+			if assigned_teams.has(team) or not definitions.has(team) or JSON.stringify(transport.teams[team]) != JSON.stringify(definitions[team]):
+				return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+			assigned_teams[team] = craft_id
+	return {"ok":true}
+
 static func _valid_path(path: String) -> bool:
 	return path.begins_with("user://campaigns/") and not path.contains("..") and path.ends_with(".json")
 static func load_checkpoint(path: String = DEFAULT_PATH) -> Dictionary:

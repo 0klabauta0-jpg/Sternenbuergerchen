@@ -24,6 +24,11 @@ func has_unit(unit_id: String) -> bool:
 	return _loadouts.has(unit_id) or _defaults.has(unit_id)
 
 
+func remove_unit(unit_id: String) -> void:
+	_loadouts.erase(unit_id)
+	_defaults.erase(unit_id)
+
+
 func get_snapshot() -> Dictionary:
 	return _loadouts.duplicate(true)
 

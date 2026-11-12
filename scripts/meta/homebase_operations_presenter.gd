@@ -6,6 +6,7 @@ const BASE_SCENE: PackedScene = preload("res://scenes/meta/explorable_homebase.t
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const DRAG_SURFACE: GDScript = preload("res://scripts/meta/operations_drag_surface.gd")
 const BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const NAV_ICONS: GDScript = preload("res://scripts/ui/native_ui_icons.gd")
 const INK := Color("08232e")
 const PANEL := Color("102f3b")
 const CREAM := Color("f4f2e9")
@@ -13,7 +14,7 @@ const MUTED := Color("a8c0ca")
 const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
-const EQUIPMENT_LABELS: Dictionary = {"light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
+const EQUIPMENT_LABELS: Dictionary = {"suit": "Anzug", "light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_backdrop.gd")
 
 var _screen: WeakRef
@@ -74,6 +75,9 @@ var _mission_selector: OptionButton
 var _mission_name: Label
 var _feedback: Label
 var _base: Control
+var _skirmish_shop: Control
+var _skirmish_shop_toggle: Button
+var _skirmish_shop_open := true
 var _focused_id: String = ""
 var _craft_id: String = ""
 var _fireteam_id: String = ""
@@ -197,6 +201,13 @@ func _build() -> void:
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
 		button.custom_minimum_size.y = 46
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.add_theme_font_override("font", THEME.get_heading_font())
+		button.add_theme_font_size_override("font_size", 17)
+		var icon_ids := {"base":"nav_home", "personnel":"nav_person", "squad":"nav_team", "mission":"dropship", "map":"nav_planet", "jobs":"nav_mobile"}
+		button.icon = NAV_ICONS.get_icon(String(icon_ids.get(key, "")))
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 24)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if key == "base":
 			_base_navigation_group = VBoxContainer.new()
@@ -227,6 +238,14 @@ func _build() -> void:
 			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
 	var nav_spacer := Control.new()
+	_skirmish_shop_toggle = _button("Aufbau & Einkauf", false)
+	_skirmish_shop_toggle.name = "ToggleSkirmishShop"
+	nav.add_child(_skirmish_shop_toggle)
+	_skirmish_shop_toggle.hide()
+	_skirmish_shop_toggle.pressed.connect(func():
+		_skirmish_shop_open = not _skirmish_shop.visible
+		_act("navigate", {"mode": "base"})
+		refresh())
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)
 	var detail_button: Button = _button("Charakterdetails", false)
@@ -258,6 +277,15 @@ func _build() -> void:
 	_base.call("set_active", false)
 	_base.connect("terminal_open_requested", _terminal_requested)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
+	_skirmish_shop = load("res://scripts/ui/skirmish_base_shop.gd").new()
+	_skirmish_shop.name = "SkirmishBaseShop"
+	_skirmish_shop.call("configure", _singleplayer_snapshot, _singleplayer_request)
+	_workspace.add_child(_skirmish_shop)
+	_skirmish_shop.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	_skirmish_shop.offset_right = 360
+	_skirmish_shop.resized.connect(_layout_base_surface)
+	_skirmish_shop.z_index = 1
+	_skirmish_shop.hide()
 	_job_board = load("res://scripts/meta/singleplayer_job_board_presenter.gd").new()
 	_workspace.add_child(_job_board)
 	_job_board.call("configure", _owner_screen() if _owner_screen() != null else get_parent())
@@ -732,6 +760,10 @@ func refresh() -> void:
 		var expected:String="squad" if _flyout_kind=="inventory" else ("jobs" if _flyout_kind=="jobs" else "services")
 		if _mode!=expected:_right_flyout_active=false
 	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
+	var points_base := not Dictionary(snapshot.get("singleplayer", {}).get("skirmish_economy", {})).is_empty()
+	_skirmish_shop_toggle.visible = points_base
+	_skirmish_shop.visible = points_base and _mode == "base" and _skirmish_shop_open
+	if _skirmish_shop.visible: _skirmish_shop.call("refresh")
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
 		_nav[key].tooltip_text = "" if campaign_ready else "Noch nicht verfügbar"
@@ -753,7 +785,8 @@ func refresh() -> void:
 	if changed_mode or _refresh_count == 1:
 		for key in _nav:
 			var button: Button = _nav[key]
-			button.add_theme_stylebox_override("normal", _style(Color("15505d") if key == _mode else PANEL, CYAN if key == _mode else Color("2b5361")))
+			THEME.style_command_button(button, "selected" if key == _mode else "neutral")
+			button.add_theme_font_size_override("font_size", 17)
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
 		_workflow.visible = _mode != "base" and not _right_flyout_active
@@ -1151,6 +1184,7 @@ func _layout_workspace_flyout()->void:
 		return
 	var panel:=_workspace_flyout_panel()
 	var width:float=minf(_workspace.size.x,clampf(_workspace.size.x*.72,720,1040))
+	if _flyout_kind == "build": width = minf(_workspace.size.x, clampf(_workspace.size.x * 0.38, 380.0, 500.0))
 	if _flyout_kind=="inventory":width=minf(_workspace.size.x,840)
 	for column:Control in _columns.values():column.visible=column==panel
 	_reference_stage.hide()
@@ -1226,6 +1260,8 @@ func _layout_base_surface() -> void:
 	if (_mode == "base" or _right_flyout_active) and is_visible_in_tree():
 		_reference_stage.hide()
 		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		if _skirmish_shop != null and _skirmish_shop.visible:
+			_base.offset_left = _skirmish_shop.size.x + 12
 		_base.call("set_active", true)
 	elif has_preview and String(_ship_preview_context.get("kind", "")) == "base_pad":
 		_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
@@ -1252,11 +1288,14 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		var context: Dictionary = travel.duplicate(true)
 		context["kind"] = "space"
 		var orbit: String = String(travel.get("orbit_id", ""))
+		var orbits: Dictionary = travel.get("orbits", {})
+		var orbit_name := String(Dictionary(orbits.get(orbit, {})).get("name", "Orbit"))
+		var target_name := String(Dictionary(orbits.get(String(travel.get("target_orbit_id", "")), {})).get("name", "Zielorbit"))
 		match phase:
-			"orbit": context["caption"] = "Im Weltraum · " + ("Mondorbit" if orbit == "moon_orbit" else "Planetenorbit")
-			"quantum": context["caption"] = "Quantum-Sprung → %s · %d %%" % ["Mondorbit" if String(travel.get("target_orbit_id", "")) == "moon_orbit" else "Planetenorbit", roundi(float(travel.get("progress", 0.0)) * 100)]
+			"orbit": context["caption"] = "Im Weltraum · " + orbit_name
+			"quantum": context["caption"] = "Warp-Sprung → %s · %d %%" % [target_name, roundi(float(travel.get("progress", 0.0)) * 100)]
 			"stopped": context["caption"] = "Im Weltraum · Sprung abgebrochen, Position gehalten"
-			"approach": context["caption"] = "Ortsanflug · Planetenorbit wird verlassen"
+			"approach": context["caption"] = "Ortsanflug · %s wird verlassen" % orbit_name
 		return context
 	if not Dictionary(craft.get("pad_visual",{})).is_empty():
 		return {"kind":"base_pad","phase":String(craft.pad_visual.phase),"craft_id":_craft_id,"landing_pad_id":String(craft.get("landing_pad_id","")),"caption":"Mondbasis · An-/Abflug am tatsächlichen Landepad"}

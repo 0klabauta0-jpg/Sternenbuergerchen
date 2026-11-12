@@ -42,7 +42,13 @@ func _run() -> void:
 		sim.call("_physics_process",0.05)
 		if runtime.get_snapshot().units[0].status == "sleeping": break
 	_check(runtime.get_snapshot().units[0].status=="sleeping","real navigation arrives at reserved bed")
-	_check(not runtime.request_operation("base_move",{"unit_id":leader,"target_position":runtime.get_actor(pilot).position}).ok,"sleep blocks incompatible movement")
+	_check(runtime.request_operation("base_move",{"unit_id":leader,"target_position":runtime.get_actor(pilot).position}).ok,"manual movement interrupts sleeping")
+	runtime.request_operation("base_cancel", {"unit_id":leader})
+	_check(runtime.request_operation("base_sleep", {"unit_id":leader,"bed_id":String(beds[0].id)}).ok, "person can return to bed after manual movement")
+	for i in range(3000):
+		sim.call("_physics_process", 0.05)
+		if runtime.get_snapshot().units[0].status == "sleeping": break
+	_check(runtime.get_snapshot().units[0].status == "sleeping", "person sleeps again before checkpoint")
 	_check(Array(flow.get("_all_team_units")) == initial_roster,"sleep never mutates medical roster values")
 	var sleep_save: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint",flow,adapter)
 	_check(sleep_save.get("ok",false),"sleeping base checkpoint saves at actual bed arrival")
@@ -140,6 +146,7 @@ func _run() -> void:
 	swapped.craft.pilot_id = leader
 	swapped.craft.staged_unit_ids = [pilot]
 	swapped.craft.fireteam_definitions = [{"id":"ft1","lead_unit_id":pilot,"member_unit_ids":[pilot]}]
+	if swapped.has("fleet") and not swapped.fleet.is_empty(): swapped.fleet[0] = swapped.craft.duplicate(true)
 	_check(store.validate_payload(swapped).ok,"checkpoint accepts any actual roster person as pilot and other person as leader")
 	var invalid: Dictionary = store.load_checkpoint().payload.duplicate(true)
 	invalid.base_personnel.units.campaign_pilot.position[0] = "bad"

@@ -21,6 +21,11 @@ const ORDER_GLYPHS: Dictionary = {
 	"order_delete": '<path d="M10 13h28M19 7h10l2 6M14 13l2 28h16l2-28M21 20v14m6-14v14"/>',
 	"order_sort": '<path d="M12 8v32m-6-7 6 7 6-7M25 12h15M25 24h11M25 36h7"/>',
 	"order_go": '<path d="m15 7 25 17-25 17z" fill="#163335" stroke="#163335"/>',
+	"nav_home": '<path d="M6 22 24 8l18 14M10 20v20h28V20M19 40V27h10v13"/>',
+	"nav_person": '<circle cx="24" cy="15" r="7"/><path d="M10 39c0-9 6-14 14-14s14 5 14 14z"/>',
+	"nav_team": '<circle cx="17" cy="16" r="6"/><circle cx="33" cy="16" r="6"/><path d="M5 38c0-8 5-13 12-13s12 5 12 13M27 26c8-3 16 3 16 12"/>',
+	"nav_planet": '<circle cx="24" cy="24" r="13"/><path d="M10 31C3 35 3 40 8 40c6 1 18-4 27-11s12-13 9-15c-2-2-6-1-10 0"/>',
+	"nav_mobile": '<rect x="14" y="5" width="20" height="38" rx="3"/><path d="M20 10h8M21 37h6"/>',
 }
 
 static func get_icon(icon_id: String) -> Texture2D:

@@ -108,7 +108,7 @@ func _test_patrol_binding_validation() -> void:
 		},
 	]
 	var invalid_binding = MISSION_SCENARIO_DATA_SCRIPT.new(invalid_binding_data)
-	_assert(_validation_has_error(invalid_binding, "target_id is not an enemy id or map spawn/patrol id"), "Validation reports patrol bindings that target no known enemy or spawn id")
+	_assert(_validation_has_error(invalid_binding, "target_id is not an enemy"), "Validation reports patrol bindings that target no known enemy, group or spawn id")
 
 
 func _test_lz_fields_are_rejected_and_not_serialized() -> void:

@@ -26,7 +26,14 @@ func _run() -> void:
 	await process_frame
 	check(view.find_child("FortifiedDestination",true,false) != null,"Fourth mission location is visible in actual UI")
 	check(view.find_child("DistressDestination",true,false) != null,"Space rescue location is visible in actual UI")
-	check(Dictionary(view.get("_sites")).size() == 4,"All four external locations rendered")
+	var sites: Dictionary = view.get("_sites")
+	for location_id in ["satellite_crash", "trade_outpost", "fortified_outpost", "distress_orbit", "polisa"]:
+		check(sites.has(location_id), "Existing or new destination rendered: " + location_id)
+	check(sites.size() == 5, "Only the four Main destinations and the added station are rendered")
+	if sites.has("polisa"):
+		check(not sites.polisa.disabled, "Polisa is available as a free visit")
+		sites.polisa.pressed.emit()
+		check(not calls.is_empty() and calls.back().payload.location_id == "polisa" and calls.back().payload.job_id == "", "Actual UI selects Polisa without fabricating a job")
 	check(view.find_child("TradeDestination",true,false).disabled,"Future outpost locked by real prerequisite")
 	check(not view.find_child("SatelliteDestination",true,false).disabled,"First location available despite obsolete stage2 hint")
 	runtime.campaign.jobs.satellite_recovery.status = "completed"

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "catalog_id": "campaign_research_v1",
+  "balance_status": "initial_workbench_values_not_final",
+  "nodes": {
+    "workshop_research": {
+      "title": "Werkstatt zur Entwicklung ausbauen",
+      "cost": 180,
+      "requires_jobs": [
+        "outpost_chip_recovery"
+      ],
+      "requires_research": [],
+      "requires_fabricated": {},
+      "blueprint_id": "",
+      "description": "Geborgene Daten nach dem Heim-Upload in der vorhandenen Werkstatt nutzbar machen."
+    },
+    "research_medium": {
+      "title": "Mittlere Rüstung entwickeln",
+      "cost": 120,
+      "requires_jobs": [],
+      "requires_research": [
+        "workshop_research"
+      ],
+      "requires_fabricated": {
+        "light_armor": "armor_light"
+      },
+      "blueprint_id": "medium_armor",
+      "description": "Eine leichte Rüstung tatsächlich fertigen, dann das mittlere Schutzpaket entwickeln.",
+      "requires_fabricated_labels": {
+        "light_armor": "eine leichte Rüstung"
+      }
+    },
+    "research_heavy": {
+      "title": "Schwere Rüstung entwickeln",
+      "cost": 240,
+      "requires_jobs": [],
+      "requires_research": [
+        "research_medium"
+      ],
+      "requires_fabricated": {},
+      "blueprint_id": "heavy_armor",
+      "description": "Auf der entwickelten mittleren Rüstung aufbauen. Jede Rüstung danach einzeln fertigen."
+    },
+    "research_industry": {
+      "title": "Bergungswerkzeug entwickeln",
+      "cost": 160,
+      "requires_jobs": [],
+      "requires_research": [
+        "workshop_research"
+      ],
+      "requires_fabricated": {
+        "mining_tool": "mining_tool"
+      },
+      "requires_fabricated_labels": {
+        "mining_tool": "ein Hand-Mining-Tool"
+      },
+      "blueprint_id": "salvage_tool",
+      "description": "Entwickle nach einem selbst gefertigten Hand-Mining-Tool das Bergungswerkzeug. Damit können markierte Wracks geborgen werden. Jedes Werkzeug wird einzeln hergestellt."
+    },
+    "research_recycling": {
+      "title": "Bergungsgut zu Ausrüstung verarbeiten",
+      "cost": 100,
+      "requires_jobs": [],
+      "requires_research": [
+        "research_industry"
+      ],
+      "requires_fabricated": {
+        "salvage_tool": "salvage_tool"
+      },
+      "requires_fabricated_labels": {
+        "salvage_tool": "ein Bergungswerkzeug"
+      },
+      "blueprint_id": "backpack_recycling",
+      "description": "Nach einem selbst gefertigten Bergungswerkzeug die Verarbeitung von Bergungsgut entwickeln. Danach je Rucksack zwei Bergungsgut aus dem Basislager und 20 Credits einsetzen; die Entwicklung liefert keinen fertigen Rucksack."
+    }
+  },
+  "fabrication": {
+    "medium_armor": {
+      "item": "armor_medium",
+      "cost": 40
+    },
+    "heavy_armor": {
+      "item": "armor_heavy",
+      "cost": 80
+    },
+    "salvage_tool": {
+      "item": "salvage_tool",
+      "cost": 40
+    },
+    "backpack_recycling": {
+      "item": "backpack",
+      "cost": 20,
+      "inputs": {
+        "salvage": 2
+      }
+    }
+  }
+}

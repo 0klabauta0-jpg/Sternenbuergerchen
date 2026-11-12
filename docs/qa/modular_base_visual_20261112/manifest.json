@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-12",
+  "status": "native task candidate; no user approval",
+  "renderer": "OpenGL Compatibility",
+  "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+  "resolution": [
+    1280,
+    720
+  ],
+  "visual_verifier": {
+    "passed": 27,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "native_capture_exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "files": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/qa/base_real_personnel_20261109/habitat_cutaway_01_material.png",
+      "sha256": "05b6190dadd0cef92029579a1b5fb5141508cfec4b4352d2dcdf5c04291cf86d"
+    },
+    {
+      "path": "Assets/curated/base_access_20261109/habitat_cutaway_01.glb",
+      "sha256": "4d0132905e4c7e91023fd632b0b6103044e9855d42a1528b72d459da7e41b4be"
+    },
+    {
+      "path": "scripts/meta/modular_base_room_visual.gd",
+      "sha256": "4a2fc0d463f6a133ae04b98c1f087f9dcea32d66d3a07a726ebf5e11f9457aac"
+    },
+    {
+      "path": "scripts/meta/explorable_homebase.gd",
+      "sha256": "167ba46496ebd7ad3a8cbf1bde1838cacda204587e0cf6ef915472f4a38f3cb4"
+    },
+    {
+      "path": "scripts/meta/modular_base_geometry.gd",
+      "sha256": "91c4e8cd24ee9666dd16ce9934622b71635fafaac87b40dad3db47051f9b7189"
+    },
+    {
+      "path": "scripts/meta/original_habitat_bed_mesh.gd",
+      "sha256": "7dc129e3e89198f86ba82614d83c20e6177d3dc2dacfc9310ab6c32d3b920cfe"
+    },
+    {
+      "path": "scripts/tests/modular_base_room_visual_verifier.gd",
+      "sha256": "090d7700af8ee3c54730dd7c82fb0e06d5f78ce253b8167c7d9c72af62750f25"
+    },
+    {
+      "path": "scripts/tests/modular_base_room_visual_capture.gd",
+      "sha256": "ef047a94b88e57f336611e44c71d48278a2cb8d74e725ee53bb7cc1bde650ef1"
+    },
+    {
+      "path": "scripts/tests/campaign_modular_native_capture.gd",
+      "sha256": "cd7ff2e6a54f2ad57f2e12b8cd62ae9e93b0828f4d3cdc8e4d2d031c94b06a9c"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/build_ui.png",
+      "sha256": "221289cba468933432018bdd768ce6313c44bb624d5db485a4982070fb6d1f40"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/connected_rooms.png",
+      "sha256": "303127bc783d371bd9c78647409341bc70d33faca4eed4a55aa5c4b846c655cc"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/modular_bed.png",
+      "sha256": "b9c1acc335406e14e2f531249a68b19e915cfb4c6ad76baa7bd3d81c1fc2662f"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/original_beds.png",
+      "sha256": "a71e3be18de0e87757156e7dfb7da4113aa7607d18ffa9ce83dd5c63d6615d4c"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/sleeping_original_beds.png",
+      "sha256": "e4700d967a81d9a99d34fe97ae8a0405201c01b09e1da058e88262359d89c79f"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/three_modules_front.png",
+      "sha256": "4d46138177fb4c4111355f60e0fe15fdcc7a16ce00f0d72e69f02dcac56635a8"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/three_modules_rear.png",
+      "sha256": "01b988bc4fbc2361509a755f0f8a80c39b17f1abbc839aa9c28ed02fa43c342b"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/hidden_desktop_run.py",
+      "sha256": "1c2e3f8cf70bb3e7d46f37d8c71d58050b5c295d44e08cd673a514720c7352e5"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/awake_original_beds_r0_posefix.png",
+      "sha256": "673c86b6a25ee74ab9d013f853b60277333675957831377ea1ecaddab26d0b4c"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/awake_original_beds_r1_posefix.png",
+      "sha256": "b5450644ae70e4e076a64745ff2eacb7f2eafce61b275bff0d3e4e3093698266"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/sleeping_original_beds_r0_posefix.png",
+      "sha256": "573097a916132735deb5e7f2379cc17b18b67fe3e116278a6a038e4fa766e379"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/sleeping_original_beds_r1_posefix.png",
+      "sha256": "b7f4875f68dddbffd51ca09c75fac265c0e3eb82544bb974ceac5c41bd7bbdf6"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/three_modules_front_posefix.png",
+      "sha256": "7136b662775b2df59ffdcbc9962b1fa063c03a1aabe990e33eecc835b60df863"
+    },
+    {
+      "path": "docs/qa/modular_base_visual_20261112/native/three_modules_rear_posefix.png",
+      "sha256": "57674b04d7ef9b8460f322dc9ba42068a7dc311eaefac7a5739cdeb40d16e82f"
+    }
+  ],
+  "pose_capture": {
+    "exit_code": 0,
+    "room_rotations": [
+      0,
+      1
+    ],
+    "actual_sleep_arrival": true,
+    "actual_wake_actions": true,
+    "awake_xz_tilt": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "all_four_closeups_opened": true
+  }
+}

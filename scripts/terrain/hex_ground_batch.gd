@@ -20,16 +20,16 @@ func mesh_for(height: float, radius: float) -> CylinderMesh:
 	_meshes[key] = mesh
 	return mesh
 
-func queue_tile(center: Vector3, color: Color, cell_size: float, material: Material) -> void:
-	var bottom_y := -0.09
+func queue_tile(center: Vector3, color: Color, cell_size: float, material: Material, deck: bool = false) -> void:
+	var bottom_y := center.y - 0.14 if deck else -0.09
 	var height := maxf(center.y - bottom_y, 0.035)
 	var key := "%0.4f:%s" % [height, color.to_html()]
 	if not _groups.has(key):
-		_groups[key] = {"mesh":mesh_for(height, cell_size / sqrt(3.0)), "material":material, "transforms":[]}
+		_groups[key] = {"mesh":mesh_for(height, cell_size / sqrt(3.0)), "material":material, "transforms":[], "top_y":center.y}
 	var position := Vector3(center.x, bottom_y + height * 0.5, center.z)
 	_groups[key]["transforms"].append(Transform3D(Basis.IDENTITY, position))
 
-func flush(parent: Node3D) -> Dictionary:
+func flush(parent: Node3D, cast_flat_ground_shadows: bool = true) -> Dictionary:
 	var tile_count := 0
 	var instance_count := 0
 	for group in _groups.values():
@@ -44,6 +44,10 @@ func flush(parent: Node3D) -> Dictionary:
 		instance.name = "HexGroundBatch_%d" % instance_count
 		instance.multimesh = multimesh
 		instance.material_override = group["material"]
+		if not cast_flat_ground_shadows and is_zero_approx(float(group["top_y"])):
+			# Flush H0 columns cannot cast a useful terrain shadow. Their repeated
+			# coplanar caps produce diagonal self-shadow acne in Compatibility.
+			instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		parent.add_child(instance)
 		tile_count += transforms.size()
 		instance_count += 1

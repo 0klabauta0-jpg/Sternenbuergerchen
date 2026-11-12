@@ -1,5 +1,8 @@
 # IMPLEMENTATION_STATUS
 
+### Kampagnenhilfe, Anwerbung und gemeinsame Grundlagen — 12.11.2026
+Gezielte Main-Integration von Kampagnenhilfe, Anwerbung mit Vergleich, Shuttle, Fracht und modularen Basisräumen sowie abgestimmten AP7-/Autosave- und Weltraumgrundlagen. Nachweise und Grenzen: docs/tasks/CHAT_CAMPAIGN_MAIN_INTEGRATION_2026_11_12.md. Experimenteller Hex-Rückweg, Luftstart, getrennter Netzwerkbetrieb und Missions-Save sind nicht abgenommen; kein EXE-Export.
+
 ### Personal-/Basis-UI: Mainintegration — 10.11.2026
 Beauftragte Fast-forward-Integration der fünf Taskcommits5df2d3b6f bis2ea460017
 auf Main1e3cca237. Produktbaum identisch zu2ea460017; nur Integrationsdokumentation

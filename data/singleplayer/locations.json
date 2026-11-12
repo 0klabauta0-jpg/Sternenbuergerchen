@@ -79,5 +79,31 @@
       "distress_rendezvous_01"
     ],
     "services": []
+  },
+  "polisa": {
+    "id": "polisa",
+    "name": "Polisa / Freie Raumstation",
+    "region_position": [
+      0.42578125,
+      0.18750000000000003
+    ],
+    "map_file_path": "res://maps/polisa_station.json",
+    "scenario_file_path": "res://data/mission_scenarios/polisa_visit.json",
+    "landing_pad_ids": [
+      "polisa_pad_01",
+      "polisa_pad_02",
+      "polisa_pad_03",
+      "polisa_pad_04",
+      "polisa_pad_05",
+      "polisa_pad_06",
+      "polisa_pad_07"
+    ],
+    "services": [
+      "trade",
+      "refuel",
+      "equipment",
+      "ships"
+    ],
+    "free_visit": true
   }
 }

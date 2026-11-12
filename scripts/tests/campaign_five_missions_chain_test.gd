@@ -80,6 +80,46 @@ func _initialize() -> void:
 	var validated: Dictionary = store.validate_payload(JSON.parse_string(JSON.stringify(checkpoint)))
 	if not validated.ok: printerr("CHECKPOINT: ",validated)
 	check(validated.ok,"four-person two-ship final checkpoint")
+	var expanded := checkpoint.duplicate(true)
+	var hired: Dictionary = Dictionary(roster[0]).duplicate(true)
+	hired.unit_id = "polisa_recruit_test"
+	expanded.roster.append(hired)
+	expanded["base_personnel"] = {"version":1,"units":{}}
+	for person: Dictionary in expanded.roster:
+		expanded.base_personnel.units[person.unit_id] = {"position":[0,0],"status":"outside","craft_id":"","bed_id":""}
+	check(not store.validate_payload(expanded).ok,"checkpoint rejects recruited person without receipt")
+	var reserve_sig := JSON.stringify({"operation":"station_recruit_reserve","payload":{"offer_id":"offer-test"}}, "", true)
+	expanded.supply.requests["reserve-test"] = {"signature":reserve_sig,"result":{"ok":true,"operation":"station_recruit_reserve","request_id":"reserve-test","offer_id":"offer-test","unit_id":"polisa_recruit_test","cost":300,"location_id":"polisa","state":"pending","profile":{"unit_id":"polisa_recruit_test"}}}
+	check(not store.validate_payload(expanded).ok,"checkpoint rejects incomplete reservation")
+	var final_sig := JSON.stringify({"operation":"station_recruit_finalize","payload":{"reservation_id":"reserve-test"}}, "", true)
+	expanded.supply.requests["final-test"] = {"signature":final_sig,"result":{"ok":true,"operation":"station_recruit_finalize","request_id":"final-test","reservation_id":"reserve-test","offer_id":"offer-test","unit_id":"polisa_recruit_test","cost":300,"location_id":"polisa"}}
+	check(store.validate_payload(expanded).ok,"checkpoint accepts final verified recruitment")
+	var missing_presence := expanded.duplicate(true)
+	missing_presence.erase("base_personnel")
+	check(not store.validate_payload(missing_presence).ok,"recruited roster requires persistent personnel presence")
+	var remote := expanded.duplicate(true)
+	remote["base_personnel"] = {"version":1,"units":{}}
+	for person: Dictionary in remote.roster:
+		remote.base_personnel.units[person.unit_id] = {"position":[0,0],"status":"outside","craft_id":"","bed_id":""}
+	remote.base_personnel.units.polisa_recruit_test = {"position":[0,0],"status":"station","location_id":"polisa","craft_id":"","bed_id":""}
+	check(store.validate_payload(JSON.parse_string(JSON.stringify(remote))).ok,"checkpoint preserves recruited person at Polisa")
+	remote.base_personnel.units.polisa_recruit_test.location_id="unknown"
+	check(not store.validate_payload(remote).ok,"checkpoint rejects invalid remote location")
+	var market = load("res://scripts/meta/polisa_recruitment_market.gd").new()
+	market.open("campaign:5",roster[0],{})
+	expanded["polisa_recruitment_market"] = market.export_state()
+	check(store.validate_payload(expanded).ok,"checkpoint accepts stable recruit market")
+	var market_roundtrip: Dictionary = store.validate_payload(JSON.parse_string(JSON.stringify(expanded)))
+	if not market_roundtrip.ok: printerr("MARKET_CHECKPOINT: ",market_roundtrip)
+	check(market_roundtrip.ok,"market and recruit survive JSON checkpoint roundtrip")
+	var corrupted_market := expanded.duplicate(true)
+	corrupted_market.polisa_recruitment_market.offers[0].price = 1
+	check(not store.validate_payload(corrupted_market).ok,"checkpoint rejects altered recruit market")
+	expanded.erase("polisa_recruitment_market")
+	expanded.supply.requests.erase("reserve-test")
+	expanded.supply.requests.erase("final-test")
+	expanded.roster[4].unit_id = "unverified_person"
+	check(not store.validate_payload(expanded).ok,"checkpoint rejects unverified fifth person")
 	checkpoint["location_resources"] = {"fortified_outpost":{"version":1,"location_id":"fortified_outpost","sites":{}}}
 	check(store.validate_payload(checkpoint).ok,"known fortified location may retain an empty resource owner")
 	var unknown_resource := checkpoint.duplicate(true)

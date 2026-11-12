@@ -10,6 +10,71 @@ var _paths: Array = []
 var _entrance_ramps: Array = []
 var _apron_rect := Rect2()
 var _cutaway_thresholds: Array[Node3D] = []
+var _homebase_paths: bool = false
+
+func build_homebase_paths(layout: Dictionary, profile: RefCounted) -> void:
+	# Read-only, low dressing on existing walkable ground. No footprint or
+	# collision is registered: ankle-sized gravel does not invent blockers.
+	_homebase_paths = true
+	var doors: Dictionary = {}
+	var built: Dictionary = {}
+	for asset: Dictionary in layout.get("assets", []):
+		built[String(asset.id)] = bool(asset.get("built", true))
+	for interior: Dictionary in layout.get("interiors", []):
+		if not built.get(String(interior.id), true): continue
+		var raw: Array = interior.get("door_grid", [])
+		if raw.size() != 2: continue
+		var plane: Vector3 = preload("res://scripts/meta/base_interior_navigation.gd").plane_at_grid(Vector2i(int(raw[0]), int(raw[1])))
+		doors[String(interior.id)] = Vector2(plane.x, plane.z + 0.18)
+	if not doors.has("habitat_cutaway_01") or not doors.has("freihafen_hall_01"): return
+	var habitat: Vector2 = doors.habitat_cutaway_01
+	var hall: Vector2 = doors.freihafen_hall_01
+	var spine_z := maxf(habitat.y, hall.y) + 2.4
+	var built_pads: Array[Dictionary] = []
+	var spine_end := hall.x - 1.0
+	for pad: Dictionary in layout.get("landing_pads", []):
+		if not bool(pad.get("built",true)): continue
+		var center: Array = pad.plane
+		var size_value: Array = pad["size"]
+		var front := Vector2(float(center[0]),float(center[1])-float(size_value[1])*0.5)
+		if front.x < habitat.x or front.x > hall.x + 8.0: continue
+		built_pads.append({"id":String(pad.id),"front":front})
+		spine_end = maxf(spine_end,front.x-1.0)
+	# The main lane leaves the real doorway and turns gradually into the
+	# frontage. Branches merge tangentially; no rectangular right-angle caps.
+	_path([habitat,habitat+Vector2(0,0.8),Vector2(habitat.x+0.2,spine_z-0.7),Vector2(habitat.x+1.0,spine_z-0.1),Vector2(habitat.x+2.0,spine_z),Vector2(spine_end-1.0,spine_z),Vector2(spine_end,spine_z)],1.10,true,"home_spine")
+	_path([hall,hall+Vector2(0,0.8),Vector2(hall.x-0.2,spine_z-0.7),Vector2(hall.x-1.0,spine_z),Vector2(hall.x-2.0,spine_z)],1.10,false,"home_hall")
+	for pad: Dictionary in built_pads:
+		var front: Vector2 = pad.front
+		_path([front,front+Vector2(0,-0.6),Vector2(front.x-0.2,spine_z+0.55),Vector2(front.x-1.0,spine_z),Vector2(front.x-2.0,spine_z)],1.10,false,"home_"+pad.id)
+	_finish_paths()
+	_add_path_guides()
+	var transforms: Array[Transform3D] = []
+	for path: Dictionary in _paths:
+		var samples: PackedVector2Array = path.samples
+		for index in range(4,samples.size()-4,9):
+			var direction := (samples[index+1]-samples[index-1]).normalized()
+			var normal := Vector2(-direction.y,direction.x)
+			for side in [-1.0,1.0]:
+				var point: Vector2 = samples[index]+normal*(float(path.width)*0.5+0.12+0.04*sin(float(index)))*side
+				if not _guide_clear(point,path): continue
+				var scale_value := Vector3(0.75+0.20*sin(float(index)),0.42,0.64)
+				transforms.append(Transform3D(Basis(Vector3.UP,float(index)*0.74).scaled(scale_value),Vector3(point.x,0.0,point.y)))
+	if not transforms.is_empty():
+		var multi := MultiMesh.new()
+		multi.transform_format = MultiMesh.TRANSFORM_3D
+		multi.mesh = _boulder_mesh(0.15,37)
+		multi.instance_count = transforms.size()
+		for index in range(transforms.size()): multi.set_instance_transform(index,transforms[index])
+		var stones := MultiMeshInstance3D.new()
+		stones.name = "LowPathShoulderStones"
+		stones.multimesh = multi
+		stones.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		stones.material_override = profile.material_for(Color("b56b46"),true)
+		add_child(stones)
+	set_meta("homebase_path_count",_paths.size())
+	set_meta("path_shoulder_stone_count",transforms.size())
+	set_meta("visual_only",true)
 
 func build(profile,access_anchors: Dictionary = {}) -> Array[Rect2]:
 	_access = ACCESS.defaults().merged(access_anchors,true)
@@ -124,8 +189,8 @@ func _paving_material(color: String) -> ShaderMaterial:
 	material.shader = GROUND_SHADER
 	material.set_shader_parameter("base_color",Color(color))
 	material.set_shader_parameter("paved_surface",true)
-	material.set_shader_parameter("authored_paving_wear",true)
-	if _paths.size()==4:
+	material.set_shader_parameter("authored_paving_wear",not _homebase_paths)
+	if not _homebase_paths and _paths.size()==4:
 		for spec in [["wear_service_span",_paths[0]["points"][2],_paths[0]["points"][3]],["wear_hall_span",_paths[2]["points"][0],_paths[2]["points"].back()],["wear_utility_span",_paths[3]["points"][1],_paths[3]["points"][2]]]:
 			material.set_shader_parameter(spec[0],Vector4(spec[1].x,spec[1].y,spec[2].x,spec[2].y))
 	return material
@@ -244,6 +309,7 @@ func _finish_paths() -> void:
 		instance.set_meta("path_layer",color)
 		instance.mesh = surface.commit()
 		instance.material_override = _paving_material(color)
+		if _homebase_paths: instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(instance)
 
 func _add_entrance_ramp(label: String,anchor: Dictionary,width: float) -> void:

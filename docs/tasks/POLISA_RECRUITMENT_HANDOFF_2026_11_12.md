@@ -1,0 +1,17 @@
+# Polisa-Anwerbung: Bausteine und fehlende Integration
+
+## Iststand
+`scripts/meta/polisa_recruit_offers.gd` berechnet aus einer Angebotskennung und dem Profil eines Anwerbers vier deterministische, hochpreisige Profile. Fuehrung und Sprachqualitaet beeinflussen Erfahrung und Spezialisierung. `scripts/ui/polisa_recruitment_view.gd` zeigt Karten, Charakterboegen, Vergleich und eine Warnung, wenn der uebergebene Bestand an gebauten Betten nicht reicht. Das UI entsendet ausschliesslich einen Kaufwunsch; ohne ausdrueckliche Freigabe ist der Kauf gesperrt. Diese Bausteine sind nicht in die Station eingebunden und weder Gameplay-Owner noch Zusage, dass Anwerbung funktioniert.
+
+## Offene Schritte
+1. Einen autorisierten Globus-Use mit lokal anwesender, lebender eigener Person, Distanz und aktueller Ortsidentitaet einfuehren. Die Globusgeometrie ist derzeit Teil von `polisa_station_visual.gd`; ein Spielinteraktionsowner muss nachgewiesen werden.
+2. Einen Kampagnenowner fuer zeitlich stabile Angebote mit einmaligen Identitaeten, Spieler-/Ortsbindung und speicherbarer Angebotsgeneration schaffen. Angebotsdaten aus dem Snapshot duerfen nicht als Kaufpreis oder Profil vertraut werden. Aktualisierung und Wiederholungsregeln definieren.
+3. Einen vorbereiteten, atomaren Prozess fuer Credits-Buchung und lokale Personenaufnahme schaffen. Geld liegt im Supply-Owner, der zugrunde liegende Auftrag muss in `SimulationRoot` autorisiert und wiederholbar sein. Keine Teilbuchung bei unzureichenden Credits, veralteter Auswahl, Ortswechsel, doppelter Anfrage oder gescheiterter Aufnahme.
+4. Den neuen NPC wirklich auf Polisa in die laufende Missionsinstanz aufnehmen: derzeit initialisiert `mission_test_setup.gd` freundliche Personen aus vorplatzierten Slots. Eine Aufnahme muss Identitaet, Profil, UnitRegistry, SimulationRoot, Hex-Bodenbelegung, Anzeige, Gruppen- und Boardingzuordnung gemeinsam validieren. `register_campaign_recruit` allein ist ungeeignet, weil `sync_roster` einen Basisakteur erzeugt; `mark_recruit_remote` bildet nur einen bereits bestaetigten Schiffstransport ab.
+5. Gebaute Bettenzahl aus einem autoritativen Basisausbau-Snapshot liefern. `base_capacity_layout.gd` ergaenzt heute im unbezahlten Modus Feldbetten automatisch bis zur Rosterzahl; diese Ergaenzung darf keine gebaute Kapazitaet vortaeuschen. Fehlendes Bett warnt, verhindert den Kauf aber nicht.
+6. Stationsperson und Boardingbeleg mit dem echten Shuttle-Owner verbinden; keine Simulation durch blossen Timer. Die Fuenf-Minuten-Regel, Basisankunft, Auftrag/Bett, Rueckreise und unterschiedliche Situation mit vorhandenem Spielerschiff brauchen echte Orts- und Lebenszyklusbelege.
+7. Checkpoints mit mehr als vier Personen und Kaufbelegen nachvollziehbar erweitern; alte Basisstaende und Missionsrekruten bleiben gueltig. Aufenthalte abseits der Basis und aktive Transporte duerfen nicht still zu Heimatstaenden umgewandelt werden.
+8. Danach View am Globus verbinden und echte Integration fuer Kauf, doppelte Anfragen, Geldmangel, Skillunterschiede, Ausruesten, Boarding, Shuttle, Bettenmangel und Save/Restore testen; native Oberflaeche und sichtbarer Flug brauchen gesonderten Spieltest.
+
+## Lokale Pruefung
+`python scripts/tests/verify_polisa_recruitment.py` startet beide getrennten Godot-Verifier fuer Angebotsgenerator und UI-Komponente. Der Wrapper betrachtet auch Godot-Fehlermeldungen als Fehlschlag, selbst wenn der Prozess mit Code 0 endet. Die Tests beweisen keine spielbare Anwerbung, keinen Globus-Use, keinen Geldtransfer und keinen Flug.

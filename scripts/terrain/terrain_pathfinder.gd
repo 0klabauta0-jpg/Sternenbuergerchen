@@ -164,6 +164,76 @@ class StablePathFrontier:
 			_indices[Vector2i(_entries[index].grid)] = index
 
 
+class RegionalHexSearch:
+	extends RefCounted
+	# Owned by one queued move. The caller checks the live registry revision
+	# before each slice, so no frontier can span two terrain revisions.
+	var source: Vector2i
+	var goal: Vector2i
+	var revision: int
+	var options: Dictionary
+	var cost_options: Dictionary
+	var registry_id: int
+	var finished: bool = false
+	var path: Array = []
+	var expanded_count: int = 0
+	var started_usec: int = Time.get_ticks_usec()
+	var last_slice_usec: int = 0
+	var work_usec: int = 0
+	var max_slice_usec: int = 0
+	var _frontier := StablePathFrontier.new()
+	var _came_from: Dictionary = {}
+	var _cost_by_grid: Dictionary = {}
+	var _nearest: Vector2i
+	var _nearest_distance: int
+	var _minimum_cost: float
+
+	func _init(start: Vector2i, target: Vector2i, terrain_revision: int, query_options: Dictionary, registry) -> void:
+		source = start
+		goal = target
+		revision = terrain_revision
+		registry_id = registry.get_instance_id()
+		cost_options = query_options.duplicate(true)
+		options = query_options.duplicate(false)
+		options[STEP_COST_CONTEXT_OPTION] = StepCostContext.new(registry)
+		_nearest = start
+		_nearest_distance = HEX_GRID_SCRIPT.distance(start, target)
+		_minimum_cost = MIN_SURFACE_PATH_COST
+		if bool(options.get("cover_aware_enabled", false)):
+			_minimum_cost = maxf(MIN_COVER_AWARE_STEP_COST, _minimum_cost - maxf(float(options.get("cover_weight", 0.0)), 0.0))
+		_cost_by_grid[start] = 0.0
+		_frontier.offer(start, _nearest_distance * _minimum_cost)
+
+	func advance(pathfinder, registry, expansion_limit: int) -> int:
+		var used := 0
+		while used < expansion_limit and not _frontier.is_empty():
+			var current := _frontier.pop_lowest()
+			used += 1
+			var distance: int = HEX_GRID_SCRIPT.distance(current, goal)
+			if distance < _nearest_distance:
+				_nearest_distance = distance
+				_nearest = current
+			if current == goal:
+				break
+			var current_cost: float = _cost_by_grid[current]
+			for direction: Vector2i in HEX_GRID_SCRIPT.DIRECTIONS:
+				var neighbor := current + direction
+				var known_cost: float = _cost_by_grid.get(neighbor, INF)
+				if current_cost + _minimum_cost >= known_cost:
+					continue
+				var next_cost: float = current_cost + pathfinder.get_step_cost(current, neighbor, registry, options)
+				if next_cost >= known_cost:
+					continue
+				_cost_by_grid[neighbor] = next_cost
+				_came_from[neighbor] = current
+				_frontier.offer(neighbor, next_cost + HEX_GRID_SCRIPT.distance(neighbor, goal) * _minimum_cost)
+		expanded_count += used
+		finished = _nearest == goal or _frontier.is_empty()
+		if finished:
+			path = pathfinder._reconstruct_path(_came_from, _nearest)
+		return used
+
+
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
 	return find_path_with_options(from_grid, to_grid, registry, {})
 
@@ -341,7 +411,8 @@ func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array:
 	var path: Array = [current]
 	while came_from.has(current):
 		current = came_from[current]
-		path.push_front(current)
+		path.append(current)
+	path.reverse()
 
 	return path
 
@@ -364,6 +435,8 @@ func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i, registry = null, opt
 
 
 func _is_neighbor_walkable_scoped(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary) -> bool:
+	var blockers:Dictionary=options.get("blocked_grids",{})
+	if blockers.has(neighbor_grid):return false
 	var context_variant: Variant = options.get(STEP_COST_CONTEXT_OPTION, null)
 	if context_variant is StepCostContext:
 		var context := context_variant as StepCostContext
@@ -402,24 +475,9 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	if current_tile == null or neighbor_tile == null:
 		return false
 
-	if registry.has_method("is_walkable"):
-		if not bool(registry.call("is_walkable", neighbor_grid)):
-			return false
-	elif not bool(neighbor_tile.walkable):
-		return false
-
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
-	if height_difference == 0:
-		return true
-
-	# Determine edge_type of the higher tile — it controls traversability
-	var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-	var edge_type: String = String(higher_tile.edge_type)
-
-	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-		return true  # slopes are always traversable
-	else:
-		return false
+	var current_walkable: bool = bool(registry.call("is_walkable", current_grid)) if registry.has_method("is_walkable") else bool(current_tile.walkable)
+	var neighbor_walkable: bool = bool(registry.call("is_walkable", neighbor_grid)) if registry.has_method("is_walkable") else bool(neighbor_tile.walkable)
+	return TERRAIN_TILE_DATA_SCRIPT.allows_registry_step(current_tile, neighbor_tile, current_walkable, neighbor_walkable)
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -447,16 +505,13 @@ func _compute_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registr
 	if not _is_neighbor_walkable_scoped(current_grid, neighbor_grid, registry, options):
 		return INF
 
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
+	var height_difference: float = absf(TERRAIN_TILE_DATA_SCRIPT.stand_height(neighbor_tile) - TERRAIN_TILE_DATA_SCRIPT.stand_height(current_tile))
 	var surface_cost: float = TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(neighbor_tile.surface_type))
 
 	# Slopes cost more per height level than flat terrain
 	var base_cost: float = surface_cost
 	if height_difference > 0:
-		var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-		var edge_type: String = String(higher_tile.edge_type)
-		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-			base_cost = surface_cost + (float(height_difference) * 1.0)
+		base_cost += float(height_difference)
 
 	var components: Dictionary = _get_target_cost_components(neighbor_grid, registry, options)
 	if bool(options.get("cover_aware_enabled", false)):

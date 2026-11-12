@@ -40,6 +40,7 @@ func _wait(predicate: Callable, milliseconds: int) -> bool:
 	return false
 
 func _run() -> void:
+	load("res://scripts/meta/game_start_contract.gd").request_start(self, "campaign", "new")
 	_flow = load("res://scenes/meta/meta_layer_test.tscn").instantiate()
 	root.add_child(_flow)
 	await process_frame
@@ -52,7 +53,22 @@ func _run() -> void:
 		return
 	_request("accept_job", {"job_id": "satellite_recovery"})
 	_request("select_destination", {"location_id": "satellite_crash", "job_id": "satellite_recovery"})
-	_screen.call("_debug_advance_homebase_direct_boarding", 30.0)
+	var personnel: Node = _runtime.call("get_base_personnel_runtime")
+	if personnel == null:
+		_check(false, "Campaign exposes authoritative base personnel")
+		await _finish()
+		return
+	var rejected_start: Dictionary = _request("start")
+	_check(not bool(rejected_start.get("ok", false)), "Start rejects physically absent pilot")
+	var boarding: Dictionary = _request("base_board", {"fireteam_id": "ft1", "whole_fireteam": true})
+	_check(bool(boarding.get("ok", false)), "Public command starts physical crew boarding")
+	var sim: Node = personnel.call("get_simulation_root")
+	for tick in range(3000):
+		sim.call("_physics_process", 0.05)
+		_screen.call("_debug_advance_homebase_direct_boarding", 0.05)
+		if personnel.call("is_pilot_aboard", _craft_id) and _screen.call("_has_homebase_direct_launch_payload_for_craft", _craft_id):
+			break
+	_check(bool(personnel.call("is_pilot_aboard", _craft_id)), "Pilot physically arrives aboard before launch")
 	var before: Dictionary = _snapshot()
 	_check(not _request("space_advance", {"delta_seconds": 3.0, "runtime_authorized": true}).get("ok", false), "UI cannot inject trusted travel ticks")
 	var unauthorized: Dictionary = _runtime.get("_simulation").call("request_singleplayer_command", {"contract_category": "singleplayer_space_travel", "operation": "launch_to_orbit", "payload": {"craft_id": _craft_id, "runtime_authorized": true}, "request_id": "forged-launch"})
@@ -96,7 +112,9 @@ func _run() -> void:
 	_check(bool(duplicate.get("ok", false)) and _snapshot().supply == bound.supply and _snapshot().campaign == bound.campaign and _space() == bound.space_travel, "Repeated approach acknowledges once without another fuel debit or activation")
 	var conflicting: Dictionary = _request("space_begin_approach", {"location_id": "trade_outpost", "request_id": "safety:approach"})
 	_check(not bool(conflicting.get("ok", false)) and String(conflicting.get("reason", "")) == "request_id_conflict" and _snapshot().supply == bound.supply and _snapshot().campaign == bound.campaign, "Same approach ID with different destination is rejected without mutations")
-	_check(await _wait(func(): return _flow.get("_active_mission") != null, 12000), "Accepted approach eventually instantiates actual map")
+	var arrived: bool = await _wait(func(): return _flow.get("_active_mission") != null, 12000)
+	if not arrived: print("APPROACH_DIAG ", _flow.call("get_surface_preparation_snapshot", _craft_id))
+	_check(arrived, "Accepted approach eventually instantiates actual map")
 	await _finish()
 
 func _finish() -> void:

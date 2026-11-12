@@ -171,7 +171,7 @@ func is_valid() -> bool:
 	return bool(validate().get("valid", false))
 
 
-func validate() -> Dictionary:
+func validate(referenced_map = null) -> Dictionary:
 	var errors: PackedStringArray = _load_issues.duplicate()
 	if scenario_id.is_empty():
 		errors.append("scenario_id is required")
@@ -188,7 +188,7 @@ func validate() -> Dictionary:
 	if mission_slot_count_override != -1 and mission_slot_count_override < 1:
 		errors.append("mission_slot_count_override must be unset or >= 1")
 
-	var terrain_map_data = _load_referenced_map(errors)
+	var terrain_map_data = _load_referenced_map(errors, referenced_map)
 	_validate_objective(terrain_map_data, errors)
 	var enemy_ids: PackedStringArray = _validate_enemy_groups(terrain_map_data, errors)
 	_validate_wave_config(errors)
@@ -355,10 +355,10 @@ func _coerce_win_condition(value: Variant) -> String:
 	return String(value).strip_edges().to_lower()
 
 
-func _load_referenced_map(errors: PackedStringArray):
+func _load_referenced_map(errors: PackedStringArray, referenced_map = null):
 	if map_file_path.is_empty() or not FileAccess.file_exists(map_file_path):
 		return null
-	var terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
+	var terrain_map_data = referenced_map if referenced_map != null else TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
 	if terrain_map_data == null:
 		errors.append("map_file_path could not be loaded: %s" % map_file_path)
 		return null

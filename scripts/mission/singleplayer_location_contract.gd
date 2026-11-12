@@ -28,4 +28,6 @@ static func normalize_location(raw: Dictionary) -> Dictionary:
 			return {}
 		if not services.has(service):
 			services.append(service)
-	return {"id": id, "name": String(raw.name), "region_position": position.duplicate(), "map_file_path": map_path, "scenario_file_path": scenario_path, "landing_pad_ids": pads, "services": services}
+	var result := {"id": id, "name": String(raw.name), "region_position": position.duplicate(), "map_file_path": map_path, "scenario_file_path": scenario_path, "landing_pad_ids": pads, "services": services}
+	if raw.get("free_visit", false) == true: result["free_visit"] = true
+	return result

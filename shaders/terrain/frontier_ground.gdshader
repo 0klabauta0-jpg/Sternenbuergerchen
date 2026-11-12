@@ -3,6 +3,8 @@ render_mode diffuse_burley, specular_disabled;
 
 uniform vec4 base_color : source_color = vec4(0.76, 0.49, 0.30, 1.0);
 uniform bool surface_blending = false;
+// Opt-in location palette; existing mission and station materials keep their route.
+uniform bool homebase_palette = false;
 uniform sampler2D surface_mask : filter_linear, repeat_disable;
 uniform vec4 surface_bounds = vec4(0.0,0.0,1.0,1.0);
 uniform vec4 world_to_grid = vec4(1.0,0.0,0.0,1.0);
@@ -146,6 +148,15 @@ void fragment() {
 		float road_wear = broad_patch(p*4.0)*0.16;
 		earth = mix(earth,vec3(0.46,0.47,0.39),road*(1.0-road_wear));
 		earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
+		if (homebase_palette) {
+			// Muted rust and dusty compacted soil share the existing rock family.
+			// Saved surface weights still describe exactly the same cells.
+			// The base uses built paths, not a paint map of road/sand tiles.
+			// Gentle continuous sediment remains independent of tile boundaries.
+			earth = mix(vec3(0.57,0.315,0.21),vec3(0.62,0.36,0.235),region);
+			earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
+			value = mix(0.95,1.045,smoothstep(0.10,0.88,patch));
+		}
 		// Several scales of world-space sand, broken crust and sparse gravel.
 		// Anti-aliased grains stay quiet in overview, rather than stippling every hex.
 		float gravel_zone=smoothstep(0.48,0.76,broad_patch(p*0.53+vec2(4.3,7.1)));
@@ -159,14 +170,16 @@ void fragment() {
 		// once that diameter no longer covers even one screen pixel.
 		float grain_visibility=1.0-smoothstep(0.12,0.4,grain_footprint);
 		float pebble=(1.0-smoothstep(0.15-grain_edge,0.15+grain_edge,grain_distance))*gravel_zone*grain_visibility;
-		float crust_zone=smoothstep(0.45,0.72,broad_patch(p*0.85+vec2(6.7,2.1)))*(1.0-road);
+		float crust_zone=smoothstep(0.45,0.72,broad_patch(p*0.85+vec2(6.7,2.1)))*(homebase_palette ? 1.0 : 1.0-road);
 		float crack_field=abs(broad_patch(p*2.6+warp)-0.51);
 		float crack_edge=max(fwidth(crack_field),0.009);
 		float fissure=(1.0-smoothstep(0.018-crack_edge,0.045+crack_edge,crack_field))*crust_zone;
-		float shoulder=(1.0-smoothstep(0.025,0.11,abs(weights.r-0.62)))*broad_patch(p*3.0);
-		earth*=1.0-fissure*0.14-shoulder*0.09;
-		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*0.38);
-		pigment = pow(earth,vec3(2.2));
+		float shoulder=homebase_palette ? 0.0 : (1.0-smoothstep(0.025,0.11,abs(weights.r-0.62)))*broad_patch(p*3.0);
+		earth*=1.0-fissure*(homebase_palette ? 0.055 : 0.14)-shoulder*0.09;
+		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*(homebase_palette ? 0.22 : 0.38));
+		// Compatibility lights sRGB output directly. Its homebase palette must
+		// not receive the linear-renderer decode a second time.
+		pigment = homebase_palette && OUTPUT_IS_SRGB ? earth : pow(earth,vec3(2.2));
 		float relief=pebble*0.012-fissure*0.006+broad_patch(p*16.0)*0.003*detail_visibility(p*16.0);
 		vec3 surface_dx=dFdx(ground_world_position);
 		vec3 surface_dy=dFdy(ground_world_position);

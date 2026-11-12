@@ -3,6 +3,7 @@ extends RefCounted
 const DATA_PATH := "res://data/skirmish/prepared_starts.json"
 const GENERATOR = preload("res://scripts/meta/start_roster_generator.gd")
 const RELATIONSHIPS = preload("res://scripts/meta/roster_relationship_model.gd")
+const POINTS = preload("res://scripts/meta/skirmish_points_catalog.gd")
 const PRESET_IDS := ["early", "mid", "late"]
 
 static func get_presets() -> Dictionary:
@@ -90,3 +91,66 @@ func configure(flow: Node, request: Dictionary) -> Dictionary:
 	flow.get_node("HomebaseScreen").call("restore_personnel_loadouts", result.member_loadouts.duplicate(true))
 	flow.call("_ensure_singleplayer_release_homebase_direct_drop_source")
 	return result
+
+
+func build_points_person(person: Dictionary, unit_id: String, used_portraits: Dictionary) -> Dictionary:
+	var generated := GENERATOR.generate_start_roster(unit_id, 20, "skirmish_points")
+	var unit: Dictionary = generated.units[0].duplicate(true)
+	var portraits = load("res://scripts/meta/portrait_identity_catalog.gd")
+	var catalog: Dictionary = portraits.load_catalog()
+	var preferred: Dictionary = catalog.entries_by_id.get(String(unit.portrait_id), {})
+	var group: String = GENERATOR.get_authored_first_name_group(String(unit.display_name).get_slice(" ", 0))
+	for number in range(45, 49):
+		var candidate: Dictionary = catalog.entries_by_id.get("char_portrait_%03d" % number, {})
+		if not candidate.is_empty() and candidate.presentation_group == group and not used_portraits.has(candidate.id):
+			preferred = candidate
+			break
+	var entry: Dictionary = portraits.select_generated_entry(preferred,
+		group, used_portraits)
+	unit.unit_id = unit_id
+	unit.player_profile_id = "skirmish_points"
+	unit.portrait_id = String(entry.get("id", unit.portrait_id))
+	unit.portrait_path = String(entry.get("path", unit.portrait_path))
+	unit.fireteam_id = ""
+	_apply_points_profile(unit, person, person.role == "pilot", false)
+	return unit
+
+
+## Explicit editor action: reuse the points profile, but return only ability fields.
+## Opening an existing roster or selecting a dropdown never calls this method.
+
+
+func _apply_points_profile(unit: Dictionary, person: Dictionary, is_pilot: bool, leads_team: bool) -> void:
+	var experience: Dictionary = POINTS.EXPERIENCE[person.experience]
+	var skill: float = experience.value
+	unit.role_name = POINTS.ROLES[person.role].name
+	unit.role_id = {"operator": "security_guard", "medic": "combat_medic",
+		"engineer": "combat_engineer", "pilot": "dropship_pilot"}[person.role]
+	unit.roster_role_category = person.role
+	unit.trait_ids = []
+	unit.relationship_links = []
+	unit.is_fireteam_lead = leads_team
+	unit.specialty_text = POINTS.ROLES[person.role].label
+	unit.armor = person.armor
+	unit.armor_id = person.armor
+	unit.weapon_1 = person.weapon
+	unit.weapon_1_id = person.weapon
+	unit.weapon_2 = "medictool" if person.role == "medic" else "none"
+	unit.weapon_2_id = unit.weapon_2
+	unit.loadout_summary = "%s · %s · %s" % [experience.label, POINTS.WEAPONS[person.weapon].label, POINTS.ARMOR[person.armor].label]
+	unit.skill_values = {"accuracy": skill, "speed": skill, "toughness": skill,
+		"leadership": skill if leads_team else 0.3, "awareness": skill, "recognition": skill,
+		"stealth": skill, "discipline": skill}
+	unit.communication_values = {"speech_quality": skill, "speech_quantity": 0.5}
+	unit.behavior_axes = {"initiative": skill, "order_fidelity": skill, "signature_control": skill,
+		"contact_stability": skill, "autonomy": skill}
+	unit.platform_values = {"dropship_piloting": skill if is_pilot else 0.0,
+		"fighter_piloting": skill if is_pilot else 0.0, "freighter_piloting": skill if is_pilot else 0.0,
+		"ground_vehicle_handling": 0.0}
+	for id: String in unit.skill_values:
+		unit["skill_" + id] = unit.skill_values[id]
+		unit[id] = unit.skill_values[id]
+	unit.speech_quality = skill
+	unit.speech_quantity = 0.5
+	for id: String in unit.platform_values:
+		unit[id] = unit.platform_values[id]

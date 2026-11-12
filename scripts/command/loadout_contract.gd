@@ -8,18 +8,20 @@ const DEFAULT_PRIMARY_WEAPON_ID := "rifle"
 const DEFAULT_SECONDARY_WEAPON_ID := "none"
 const DEFAULT_FOB_WEAPON_ID := "smg"
 
-const ARMOR_IDS: Array = ["light", "medium", "heavy"]
+const ARMOR_IDS: Array = ["suit", "light", "medium", "heavy"]
 const HOMEBASE_PRIMARY_WEAPON_IDS: Array = ["pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
 const HOMEBASE_SECONDARY_WEAPON_IDS: Array = ["none", "pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
 const FOB_WEAPON_IDS: Array = ["pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool", "none"]
 
 const ARMOR_LABELS: Dictionary = {
+	"suit": "Anzug",
 	"light": "Light",
 	"medium": "Medium",
 	"heavy": "Heavy",
 }
 
 const COMPACT_ARMOR_LABELS: Dictionary = {
+	"suit": "Anzug",
 	"light": "L",
 	"medium": "M",
 	"heavy": "H",
@@ -54,7 +56,7 @@ static func normalize_armor_id(value: String, fallback: String = DEFAULT_ARMOR_I
 	match normalized_value:
 		"standard", "std", "default":
 			return fallback_id
-		"light", "medium", "heavy":
+		"suit", "light", "medium", "heavy":
 			return normalized_value
 		_:
 			return fallback_id

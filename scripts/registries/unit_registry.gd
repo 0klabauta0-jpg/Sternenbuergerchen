@@ -33,7 +33,8 @@ func get_unit(unit_id: String) -> Node:
 	if unit_id.is_empty():
 		return null
 
-	return _units_by_id.get(unit_id, null)
+	var unit:Variant=_units_by_id.get(unit_id,null)
+	return unit if is_instance_valid(unit) else null
 
 
 func has_unit(unit_id: String) -> bool:
@@ -49,3 +50,21 @@ func get_all_units() -> Array:
 
 func clear() -> void:
 	_units_by_id.clear()
+
+
+## Atomic index update only; gameplay and actor transitions remain with Root.
+func apply_lookup_bindings(changes:Array[Dictionary])->Dictionary:
+	if changes.size()>128:return {"ok":false,"reason":"lookup_batch_capacity"}
+	var ids:Dictionary={}
+	for change in changes:
+		var id:String=String(change.get("unit_id",""))
+		if id.is_empty() or id!=id.strip_edges() or ids.has(id):return {"ok":false,"reason":"invalid_lookup_batch"}
+		ids[id]=true
+		var expected:Variant=change.get("expected")
+		if get_unit(id)!=expected or (expected==null and has_unit(id)):return {"ok":false,"reason":"lookup_binding_changed","unit_id":id}
+		var next:Variant=change.get("next")
+		if next!=null and (not is_instance_valid(next) or not next is Node or next.is_queued_for_deletion()):return {"ok":false,"reason":"invalid_lookup_target"}
+	for change in changes:
+		if change.get("next")==null:_units_by_id.erase(change.unit_id)
+		else:_units_by_id[change.unit_id]=change.next
+	return {"ok":true}
