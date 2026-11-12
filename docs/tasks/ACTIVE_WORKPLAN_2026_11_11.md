@@ -34,7 +34,13 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   liefert geplante/aktuelle Landedgeometrie und stabiles gebundenes Render-Yaw
   (7/0, zwei Compiles0). Unabhaengige Reviews ohne engen Blocker. Tabletop
   bearbeitet konkrete Footprint-/Landeproducer, Setup und Basisaktionen weiter.
-- AP7 Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
+- AP7 Groundteil524fd61d1: kanonischer offener Bewegung-/Centeringroundtrip,
+  atomar im selben Groundobjekt,19/0 nach Terrainguardfix+unabhaengigem Review.
+  Aktive Corridorgrants/pendingAdmissions noch Saveguard; kanonische Hostsave-
+  Passagezusagen werden im naechsten Teil ergaenzt. MPContract0bef0e658 prueft
+  explizite Version vor Normalisierung und verbietet Client-Groundstate rekursiv;
+  10/0 plus20/0 betroffener Nachbar, zwei Compiles0. Keine Peer-Sichtfilter dadurch.
+  Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
 - AP8 danach: kleiner opt-in Integrationsslice gemaess Hexplan, keine globale
@@ -84,7 +90,13 @@ Gate-/Deaktivierungspruefungen5d4fa0cdd/ee3aafe16 als338d1e333/93da77676
 integriert, frisch privat bestanden. Das erzeugt keine Dock-/Visit-/Fuelmutation.
 Lesende Dockoverlayd1ba65920 ist vorbereitet, Root-DTO/produktive Dockcommands
 fehlen noch. Space baut die atomare Dock-/Undock-/Cancel-/Wiederanfluggruppe;
-Parent verdrahtet UI erst nach deren Integration. Bekannte Grenzen und Hashes:
+Dock-/Undockea831 mitCallbackfixes a906/b1d sind als2eaf34cbb/ffdd3cc2e/
+b0aa558b0 integriert; frische gemeinsame Dock-/SurfaceCancelproben gruen.
+UI785b73306 bietet expliziten Dockcommand nur bei aktuellem RootDTO (10/0).
+Kauf-Erstaufnahme e040/1dab+a3c als25e4664d5/8d568332d/0cf33d103,
+privat42/0 plus42/0 reentrant, nur explizite OwnerAPI; Kauf-UI-/Flowroute und
+echter AP6Besuch bleiben offen. Space bereitet gemeinsamen PolisaWarpownerzyklus
+vor, keine produktive Teilumschaltung. Bekannte Grenzen und Hashes:
 docs/qa/orbit_owner_integration_20261111/parent_polisa_dock_staging und
 parent_polisa_gate. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.

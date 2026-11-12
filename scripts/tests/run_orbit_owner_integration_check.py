@@ -23,7 +23,9 @@ fixtures={"prepared":"docs/qa/orbit_owner_integration_20261111/prepared_owner_ch
           "polisa_mask":"scripts/tests/space_polisa_static_mask_verifier.gd",
           "polisa_dock_owner":"scripts/tests/space_polisa_fleet_dock_verifier.gd",
           "polisa_gate":"scripts/tests/space_polisa_gate_preview_verifier.gd",
-          "polisa_atomic":"scripts/tests/space_polisa_atomic_dock_verifier.gd"}
+          "polisa_atomic":"scripts/tests/space_polisa_atomic_dock_verifier.gd",
+          "polisa_birth":"scripts/tests/polisa_local_pickup_backend_check.gd",
+          "polisa_birth_reentrant":"scripts/tests/polisa_local_pickup_backend_check.gd"}
 script=fixtures[case]
 run=source/"output/native_glut_maps/orbit_owner_integration_20261111"/(case+"-"+uuid.uuid4().hex)
 project=run/"project";project.mkdir(parents=True)
@@ -57,6 +59,8 @@ if case == "v3_reader":
 (project/"project.godot").write_text(project_settings,encoding="utf-8")
 user=Path(os.environ["APPDATA"])/"Godot/app_userdata"/app
 env=dict(os.environ,SB_REVIEW2_USER_DIR=str(user))
+if case == "polisa_birth": env["SB_TEST_LOCAL_BIRTH"] = "1"
+if case == "polisa_birth_reentrant": env["SB_TEST_LOCAL_BIRTH"] = "2"
 engine=shutil.which("godot_console.exe")
 with (run/"output.log").open("w",encoding="utf-8") as out:
     imported=subprocess.run([engine,"--headless","--editor","--path",str(project),"--import","--quit"],env=env,stdout=out,stderr=subprocess.STDOUT,timeout=45)
