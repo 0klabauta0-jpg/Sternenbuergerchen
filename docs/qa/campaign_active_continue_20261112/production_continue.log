@@ -1,0 +1,90 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: real craft and team exist
+PASS: real job accepted
+PASS: real destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Selected destination has an orbit
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches destination orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach waits for orbit transit or begins before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: both actual people present at destination
+PASS: actual mission owners capture together
+PASS: actual campaign owners prepare in a detached world
+PASS: world preflight leaves actual supply unchanged
+PASS: active world prepares against the existing root without replacing it
+PASS: live preflight retains home root identity
+PASS: prebinding does not publish new owners or mutate live supply
+PASS: mismatched departure token is rejected before publication
+PASS: inconsistent home personnel state is rejected before publication
+PASS: rejected world candidates leave live owners untouched
+PASS: fresh unpublished mission scene can be instantiated
+PASS: fresh mission actors, ground, lifecycle and ship prepare together
+PASS: unpublished scene candidates remain valid
+PASS: real mission and strategic world preflight against the existing root
+PASS: joined owners and root bindings remain fresh
+PASS: actual live world and scene pass private checkpoint validation
+JSON_NATIVE_ISSUE 
+PASS: actual active mission checkpoint saved
+PASS: actual saved file contains mission lifecycle
+PASS: saved time reflects the actual save rather than earlier preflight
+PASS: actual mission reconstruction reaches a decision
+PASS: actual mission is reconstructed on continue
+PASS: same person, location and health restored: campaign_leader
+PASS: same person, location and health restored: campaign_pilot
+PASS: craft remains at actual mission surface
+PASS: credits and craft fuel survive continue
+PASS: accepted mission remains active without paying twice
+PASS: mission clock survives process reconstruction
+PASS: mission time limit and victory rule survive continue
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: restored mission reaches verified return or upload state
+PASS: restored crew actually reaches departure orbit
+PASS: restored ship accepts homeward warp
+PASS: restored ship reaches home orbit
+PASS: restored ship accepts home landing
+PASS: restored crew actually returns and lands at home
+PASS: actual recovered chip uploads at home after continue
+PASS: new home checkpoint saves after real upload
+PASS: successful home save preserves the previous active file
+PASS: normal continue chooses the newer home checkpoint over the stale active file
+PASS: stale active file remains untouched
+CAMPAIGN_ACTIVE_CONTINUE passed=80 failed=0
+CAMPAIGN_ACTIVE_CONTINUE_PASS

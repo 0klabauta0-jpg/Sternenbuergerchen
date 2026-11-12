@@ -143,6 +143,7 @@ var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roste
 var _singleplayer_runtime: Node
 var _game_start_request: Dictionary = {}
 var _campaign_start: RefCounted
+var _active_autosave_next_msec: int = 0
 var _campaign_tutorial: Control
 var _active_singleplayer_identity: Dictionary = {}
 var _location_registry = preload("res://scripts/mission/location_runtime_registry.gd").new()
@@ -252,6 +253,8 @@ func _ready() -> void:
 	_singleplayer_runtime.name = "SingleplayerRuntime"
 	add_child(_singleplayer_runtime)
 	_singleplayer_runtime.call("configure", self, homebase_screen)
+	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1" and OS.get_environment("CAMPAIGN_ACTIVE_TEST_ORBIT") == "1":
+		_singleplayer_runtime.set("_surface_orbit_path_enabled",true)
 	var encounter_layer := CanvasLayer.new()
 	encounter_layer.layer=95
 	encounter_layer.name="CampaignSpaceEncounterLayer"
@@ -363,18 +366,18 @@ func _ready() -> void:
 	call_deferred("_apply_release_lz_drop_preview_deeplink")
 	call_deferred("_apply_release_first_go_firefight_deeplink")
 	if is_campaign_start() and _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
-		call_deferred("_restore_private_active_campaign")
+		call_deferred("_restore_active_campaign")
 
 
-# The path is reachable only in the isolated verifier until every owner and
-# the full resume/return scenario have passed together.
-func _restore_private_active_campaign() -> void:
-	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") != "1" or _campaign_start == null or not bool(_campaign_start.get("active_restore_in_progress")): return
+# Reconstruct into a hidden scene and publish only after every owner validates.
+func _restore_active_campaign() -> void:
+	if _campaign_start == null or not bool(_campaign_start.get("active_restore_in_progress")): return
 	var data: Dictionary = _campaign_start.get("active_pending")
 	var factory = load("res://scripts/mission/campaign_active_scene_preflight.gd")
 	var created: Dictionary = factory.instantiate_scene(data,_campaign_start.get("checkpoint"))
 	if not created.get("ok",false):
 		set_meta("campaign_active_restore_error",created)
+		call_deferred("_campaign_load_failed")
 		return
 	var scene: Node = created.scene
 	scene.hide()
@@ -390,11 +393,13 @@ func _restore_private_active_campaign() -> void:
 	if not prepared.get("ok",false):
 		set_meta("campaign_active_restore_error",prepared)
 		scene.queue_free()
+		call_deferred("_campaign_load_failed")
 		return
 	var result: Dictionary = transaction.commit(prepared,data)
 	if not result.get("ok",false):
 		set_meta("campaign_active_restore_error",result)
 		if _active_mission != scene: scene.queue_free()
+		call_deferred("_campaign_load_failed")
 		return
 	_campaign_start.set("active_restore_in_progress",false)
 
@@ -436,6 +441,14 @@ func _process(_delta: float) -> void:
 			if profile_enabled:
 				scopes["observe_campaign_usec"] = Time.get_ticks_usec() - scope_started_usec
 				scope_started_usec = Time.get_ticks_usec()
+			if is_instance_valid(_active_mission) and not bool(_campaign_start.get("active_restore_in_progress")):
+				var now := Time.get_ticks_msec()
+				if _active_autosave_next_msec == 0: _active_autosave_next_msec = now + 300000
+				elif now >= _active_autosave_next_msec:
+					var auto_result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime)
+					set_meta("campaign_active_autosave_result",auto_result)
+					_active_autosave_next_msec = now + (300000 if auto_result.get("ok",false) else 30000)
+			else: _active_autosave_next_msec = 0
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
 			if bool(saved.get("ok", false)) or String(saved.get("reason", "")) not in ["away_from_checkpoint", "preparation_in_progress"]:
 				set_meta("campaign_checkpoint_result", saved)
@@ -8125,6 +8138,20 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
 
+
+# The escape menu invokes the owning campaign saver, never the generic
+# scene-path-only mission slot.
+func request_campaign_save() -> Dictionary:
+	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
+	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
+	if result.get("ok",false):
+		result["message"] = "Kampagne gespeichert."
+		if is_instance_valid(_active_mission): _active_autosave_next_msec = Time.get_ticks_msec() + 300000
+	else:
+		var reason := String(result.get("reason",""))
+		var messages := {"mission_planned_orders_unsupported":"Geplante Befehle zuerst ausführen oder entfernen.","mission_movement_pending":"Speichern wartet, bis die Bewegung abgeschlossen ist.","mission_lifecycle_busy":"Speichern wartet, bis der Einsatz ruhig ist.","mission_combat_unsupported":"Während eines Gefechts kann dieser Einsatz noch nicht gespeichert werden.","away_from_checkpoint":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","world_active":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","mission_travel_mismatch":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","shuttle_active":"Speichern wartet auf den Abschluss des Shuttleflugs.","shuttle_pending":"Speichern wartet auf den Shuttletransport.","cargo_transfer_active":"Speichern wartet auf den Frachttransfer.","recruitment_pending":"Speichern wartet auf die Anwerbung.","home_hex_checkpoint_unsupported":"Dieser Heimatbasisstand kann während eines Einsatzes noch nicht gespeichert werden.","multiple_locations_unsupported":"Speichern mit mehreren aktiven Orten wird noch nicht unterstützt.","active_restore_pending":"Der Einsatz wird noch geladen."}
+		result["message"] = messages.get(reason,"Dieser Einsatz kann momentan nicht sicher gespeichert werden.")
+	return result
 
 func is_campaign_start() -> bool:
 	return String(_game_start_request.get("mode", "skirmish")) == "campaign"

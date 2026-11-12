@@ -15,11 +15,12 @@ const SPACE = preload("res://scripts/core/space_combat_state.gd")
 const WINGS = preload("res://scripts/core/space_wing_state.gd")
 const RECEIPTS = preload("res://scripts/mission/root_receipt_checkpoint.gd")
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
 
 static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -> Dictionary:
-	var keys := ["home_sha256", "campaign_run_id", "identity", "pilot_id", "active_ids", "roster", "campaign", "supply", "onboarding", "equipment", "market", "fleet", "navigation", "systems", "wings", "actors", "ground", "lifecycle", "transport", "root_receipts", "space_requests", "route_bindings", "base_personnel", "mission_config"]
+	var keys := ["home_sha256", "campaign_run_id", "identity", "pilot_id", "active_ids", "roster", "campaign", "supply", "onboarding", "equipment", "market", "fleet", "navigation", "systems", "wings", "actors", "ground", "lifecycle", "transport", "root_receipts", "space_requests", "route_bindings", "base_personnel", "mission_config", "orbit_intent"]
 	if data.size()!=keys.size() or not data.has_all(keys) or not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return _bad("invalid_active_checkpoint")
-	for key in ["identity","campaign","supply","onboarding","equipment","market","fleet","navigation","systems","wings","actors","ground","lifecycle","transport","root_receipts"]:
+	for key in ["identity","campaign","supply","onboarding","equipment","market","fleet","navigation","systems","wings","actors","ground","lifecycle","transport","root_receipts","orbit_intent"]:
 		if not data[key] is Dictionary: return _bad("invalid_active_checkpoint")
 	if typeof(data.home_sha256)!=TYPE_STRING or data.home_sha256.length()!=64 or data.home_sha256!=FileAccess.get_sha256(HOME.DEFAULT_PATH) or typeof(data.campaign_run_id)!=TYPE_STRING or not data.roster is Array or not data.active_ids is Array or typeof(data.pilot_id)!=TYPE_STRING: return _bad("active_home_mismatch")
 	var home: Dictionary = HOME.load_checkpoint()
@@ -163,11 +164,20 @@ static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -
 	if not checked.get("ok",false):
 		if owned_root: root.free()
 		return checked
+	var orbit_bindings := {"simulation_root":adapter.get("_simulation"),"fleet":fleet,"combat":space,"campaign":campaign,"space_operation_requests":requests.value}
+	var orbit: Dictionary = ORBIT.prepare(adapter,data.orbit_intent,orbit_bindings)
+	if not orbit.get("ok",false):
+		if owned_root: root.free()
+		return orbit
+	checked = ORBIT.validate(adapter,orbit.candidate,orbit_bindings)
+	if not checked.get("ok",false):
+		if owned_root: root.free()
+		return checked
 	checked = space.validate_navigation_checkpoint_candidate(data.navigation,control_bindings)
 	if not checked.get("ok",false):
 		if owned_root: root.free()
 		return checked
-	return {"ok":true,"root":root,"owned_root":owned_root,"fleet":fleet,"campaign":campaign,"supply":supply,"onboarding":onboarding,"equipment":equipment,"market":market,"space":space,"wing":wing,"bindings":bindings,"receipt_candidate":receipt.candidate,"navigation":data.navigation,"control_bindings":control_bindings,"space_requests":requests.value,"route_bindings":route_bindings.duplicate(true)}
+	return {"ok":true,"root":root,"owned_root":owned_root,"fleet":fleet,"campaign":campaign,"supply":supply,"onboarding":onboarding,"equipment":equipment,"market":market,"space":space,"wing":wing,"bindings":bindings,"receipt_candidate":receipt.candidate,"navigation":data.navigation,"control_bindings":control_bindings,"space_requests":requests.value,"route_bindings":route_bindings.duplicate(true),"orbit_bindings":orbit_bindings,"orbit_candidate":orbit.candidate}
 
 static func _bad(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}

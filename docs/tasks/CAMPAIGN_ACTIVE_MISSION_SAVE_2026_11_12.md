@@ -46,3 +46,23 @@ Ein privater, ausschliesslich per `CAMPAIGN_ACTIVE_TEST_ONLY=1` zugaenglicher Pf
 
 ## Echter Legacy-Continue und Heimupload bestanden
 Isolierter Lauf `output/active_complete_trial_10/20261112T170733Z-pid23940/metadata/report.json`: 73/0, Runner 1/1 PASS. Echte Kampagne mit laufender Mission wurde separat gespeichert, regulaer fortgesetzt, die beiden Originalpersonen samt Position/HP und Schiff/Wirtschaft/Uhr rekonstruiert, der Satellit nach echtem Marsch und Use gesichert und der Rueckkehrpunkt benutzt. Anschliessend pending_upload, echter Heimwarp und Heimatlandung, abschliessend tatsaechlicher Chipupload. Szenariodatei setzt das 2400-s-Limit vor dem Katalogwert. Noch keine Freigabe: nur `CAMPAIGN_ACTIVE_TEST_ONLY=1`, Legacy-Boden/strategischer Pfad, kein Nachweis fuer 512-Kartenjoin, lokale Orbitfortsetzung, Gegner/Interaktionen in Zwischenzustaenden oder Mehrortwelt. Die echten Source- und Testprofile sind isoliert; keine Positions-/Zeitmanipulation. Gezielte Tests: geplante Auftraege 11/0, Navigation mit stabiler Orbitcontrol 19/0, JSON-Normalizer PASS, Root-Prebinding 29/0.
+
+## Gemeinsamer Produktpfad und Grenzen
+Nach kontrolliertem Join der Mond-/512-Karten und Orbitowner wurde der regulaere
+Pausenmenue-Save ohne Testenv in einem echten Kampagnenablauf geprueft: 80/0,
+Runner 1/1 PASS. Die beiden Personen, Zeit, Schiff und Wirtschaft wurden beim
+Continue erhalten; nach echtem Satelliten-Use, Rueckweg, Heimwarp und Landung
+wurde der Chip tatsaechlich hochgeladen. Ein danach gespeicherter Homecheckpoint
+hat beim erneuten Continue Vorrang vor der alten Active-Datei, die bytegleich
+erhalten bleibt. Ein simulierter fehlgeschlagener Homewrite liess sie ebenfalls
+unveraendert. Zehn gezielte Regressionschecks bestehen; Details und Grenzen in
+`docs/qa/campaign_active_continue_20261112/README.md`.
+
+Der erlaubte aktive Slice ist ausdruecklich eng: ein stabiler Landeplatz auf
+Legacy-Boden, eine unveraenderte Crew und Heimatbasis, keine laufenden Aktionen
+oder nicht ausgefuehrten Planbefehle. Die Escape-Speicherung meldet Sperren in
+der Spielersprache; ein fuenfminuetiger Autosave verwendet dieselben Guards.
+Orbitautomatik bleibt standardmaessig aus; ein Dateisave waehrend des lokalen
+Orbitflugs ist nicht nachgewiesen und bleibt gesperrt. Die bisherige private
+Testenv-Schranke fuer den belegten stabilen Slice ist entfernt. Keine Aussage
+ueber umfassende visuelle, Performance- oder Multiplayerabnahme.

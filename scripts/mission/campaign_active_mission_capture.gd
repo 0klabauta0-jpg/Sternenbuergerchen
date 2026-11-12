@@ -8,6 +8,7 @@ const ACTORS = preload("res://scripts/mission/mission_actor_checkpoint_batch.gd"
 const GROUND = preload("res://scripts/mission/legacy_ground_checkpoint.gd")
 const LIFECYCLE = preload("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
 const ROOT_RECEIPTS = preload("res://scripts/mission/root_receipt_checkpoint.gd")
+const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
 
 static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if not is_instance_valid(flow) or not is_instance_valid(runtime) or not flow.has_method("is_campaign_start") or not flow.is_campaign_start() or runtime.get("_flow") != flow: return _reject("campaign_unavailable")
@@ -161,7 +162,10 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if root_receipts.get("schema") != "root_receipt_checkpoint.v1": return root_receipts if root_receipts.get("ok",true)==false else _reject("root_receipt_checkpoint_unavailable")
 	var requests := CODEC.encode_value(Dictionary(runtime.get("_space_operation_requests")))
 	if not requests.ok: return requests
-	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":{"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config}}
+	var orbit_bindings := {"simulation_root":root,"fleet":travel,"combat":space,"campaign":campaign,"space_operation_requests":Dictionary(runtime.get("_space_operation_requests"))}
+	var orbit: Dictionary = ORBIT.capture(runtime,orbit_bindings)
+	if orbit.get("schema")!="orbit_intent_checkpoint.v1": return orbit if orbit.get("ok",true)==false else _reject("orbit_checkpoint_unavailable")
+	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":{"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config,"orbit_intent":orbit}}
 
 static func _reject(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}

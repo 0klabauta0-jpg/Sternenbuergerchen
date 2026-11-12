@@ -101,6 +101,10 @@ func test_control_rebind() -> bool:
 	var forged_orbit := orbit_saved.duplicate(true)
 	forged_orbit.payload = CODEC.encode_value(invalid_orbit).value
 	if not check(not prepare(forged_orbit,bindings,{id:{"equipment_owner":restored_equipment}}).get("ok",false), "transient braking control is rejected"): return false
+	invalid_orbit = CODEC.decode_value(orbit_saved.payload).value
+	invalid_orbit.controls[id]["orbit_auto_transit"] = 1
+	forged_orbit.payload = CODEC.encode_value(invalid_orbit).value
+	if not check(not prepare(forged_orbit,bindings,{id:{"equipment_owner":restored_equipment}}).get("ok",false), "integer orbit flag is rejected"): return false
 	orbit_control.erase("orbit_auto_transit")
 	orbit_control.erase("orbit_auto_location_id")
 	orbit_control.erase("orbit_auto_direction")

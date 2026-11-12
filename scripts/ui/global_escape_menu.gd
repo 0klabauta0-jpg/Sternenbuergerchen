@@ -172,6 +172,8 @@ func save_current_mission_slot() -> Dictionary:
 	var current_scene := tree.current_scene if tree != null else null
 	if current_scene == null:
 		return _save_result(false, "no_current_scene")
+	if current_scene.has_method("is_campaign_start") and current_scene.call("is_campaign_start") and current_scene.has_method("request_campaign_save"):
+		return current_scene.call("request_campaign_save")
 	var scene_path: String = String(current_scene.scene_file_path).strip_edges()
 	if scene_path.is_empty():
 		return _save_result(false, "scene_path_missing")
@@ -191,6 +193,7 @@ func save_current_mission_slot() -> Dictionary:
 
 
 func load_mission_slot(change_scene: bool = true) -> Dictionary:
+	if _is_campaign_context(): return {"ok":false,"reason":"campaign_continue_from_main_menu","message":"Kampagne im Hauptmenü über Fortsetzen laden."}
 	var slot: Dictionary = get_save_slot_snapshot()
 	if not bool(slot.get("exists", false)):
 		return _load_result(false, "missing_save")
@@ -514,7 +517,10 @@ func _refresh_action_buttons() -> void:
 		_save_button.disabled = not _can_save_current_scene()
 		_save_button.tooltip_text = "" if not _save_button.disabled else "Im Hauptmenue gibt es noch keine laufende Mission zum Speichern."
 	if _load_button != null:
-		_load_button.disabled = not bool(get_save_slot_snapshot().get("exists", false))
+		var campaign := _is_campaign_context()
+		_load_button.disabled = campaign or not bool(get_save_slot_snapshot().get("exists", false))
+		_load_button.text = "Im Hauptmenü fortsetzen" if campaign else "Mission laden"
+		_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else ""
 	if _main_menu_button != null:
 		_main_menu_button.disabled = _is_current_scene_main_menu()
 
@@ -572,7 +578,7 @@ func _on_settings_apply_pressed() -> void:
 func _on_save_pressed() -> void:
 	var result: Dictionary = save_current_mission_slot()
 	_play_ui_sfx("confirm" if bool(result.get("ok", false)) else "warning", "save_mission_slot")
-	_set_status("Mission saved" if bool(result.get("ok", false)) else "Save not available")
+	_set_status(String(result.get("message", "Mission saved" if bool(result.get("ok", false)) else "Save not available")))
 
 
 func _on_load_pressed() -> void:
@@ -593,6 +599,12 @@ func _can_save_current_scene() -> bool:
 		return false
 	var scene_path: String = String(current_scene.scene_file_path).strip_edges()
 	return not scene_path.is_empty() and scene_path != MAIN_MENU_SCENE_PATH
+
+
+func _is_campaign_context() -> bool:
+	var tree := get_tree()
+	var current_scene := tree.current_scene if tree != null else null
+	return current_scene != null and current_scene.has_method("is_campaign_start") and bool(current_scene.call("is_campaign_start"))
 
 
 func _is_current_scene_main_menu() -> bool:

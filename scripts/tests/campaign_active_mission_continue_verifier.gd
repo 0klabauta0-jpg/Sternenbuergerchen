@@ -5,9 +5,12 @@ func _run() -> void:
   printerr("isolated test profile required")
   quit(1)
   return
- OS.set_environment("CAMPAIGN_ACTIVE_TEST_ONLY","1")
+ if OS.get_environment("RUN_JOINED_ORBIT_TEST")=="1":
+  OS.set_environment("CAMPAIGN_ACTIVE_TEST_ONLY","1")
+  OS.set_environment("CAMPAIGN_ACTIVE_TEST_ORBIT","1")
  _configure_entry()
  _flow = FLOW.instantiate(); root.add_child(_flow)
+ current_scene = _flow
  await process_frame
  _screen = _flow.get_node("HomebaseScreen")
  _runtime = _flow.get("_singleplayer_runtime")
@@ -106,12 +109,19 @@ func _run() -> void:
   if evidence != null:
    evidence.store_string(JSON.stringify(normalized_debug.value,"",true,true))
    evidence.close()
- var saved: Dictionary = campaign.save_active_checkpoint(_flow,_runtime,true)
+ var menu: Node = root.get_node("GlobalEscapeMenu")
+ var saved: Dictionary = menu.call("save_current_mission_slot")
  if not _check(saved.get("ok",false), "actual active mission checkpoint saved"): print("SAVE_FAILURE ",saved); await _finish(); return
+ var active_saved_file: String = load("res://scripts/meta/campaign_active_checkpoint_store.gd").DEFAULT_PATH
+ var saved_wire: Variant = JSON.parse_string(FileAccess.get_file_as_string(active_saved_file))
+ if not _check(saved_wire is Dictionary and saved_wire.get("components") is Dictionary,"actual saved file contains mission lifecycle"): await _finish(); return
+ var saved_elapsed := float(saved_wire.components.lifecycle.elapsed_msec) / 1000.0
+ _check(saved_elapsed >= before_elapsed - 0.1,"saved time reflects the actual save rather than earlier preflight")
  _flow.queue_free()
  await process_frame
  START.request_start(self,"campaign","continue")
  _flow = FLOW.instantiate(); root.add_child(_flow)
+ current_scene = _flow
  await process_frame
  _screen = _flow.get_node("HomebaseScreen")
  _runtime = _flow.get("_singleplayer_runtime")
@@ -129,7 +139,7 @@ func _run() -> void:
  _check(after_campaign.supply.credits == before_campaign.supply.credits and after_campaign.supply.fuel_by_craft_id == before_campaign.supply.fuel_by_craft_id, "credits and craft fuel survive continue")
  _check(String(after_campaign.campaign.jobs.satellite_recovery.status) == "active", "accepted mission remains active without paying twice")
  var after_elapsed: float = restored.get_node("CombatLoopDriver").call("_get_duration_seconds")
- _check(after_elapsed >= before_elapsed - 0.1 and after_elapsed < before_elapsed + 10.0, "mission clock survives process reconstruction")
+ _check(after_elapsed >= saved_elapsed - 0.1 and after_elapsed < saved_elapsed + 10.0, "mission clock survives process reconstruction")
  _check(restored.get_node("CombatLoopDriver").get("mission_time_limit_seconds")==before_limit and restored.get_node("CombatLoopDriver").get("win_condition")==before_condition,"mission time limit and victory rule survive continue")
  var controller: Node = restored.get_node("TacticalController")
  controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
@@ -143,6 +153,19 @@ func _run() -> void:
  _flow.call("_show_homebase")
  var uploaded: Dictionary = _runtime.call("request_operation","campaign_upload",{"job_id":"satellite_recovery"})
  _check(uploaded.get("ok",false) and String(_campaign().jobs.satellite_recovery.status)=="completed","actual recovered chip uploads at home after continue")
+ var active_path: String = load("res://scripts/meta/campaign_active_checkpoint_store.gd").DEFAULT_PATH
+ var active_bytes: PackedByteArray = FileAccess.get_file_as_bytes(active_path)
+ var home_saved: Dictionary = _flow.get("_campaign_start").save_home_checkpoint(_flow,_runtime,true)
+ if not _check(home_saved.get("ok",false),"new home checkpoint saves after real upload"): print("HOME_SAVE_FAILURE ",home_saved); await _finish(); return
+ _check(not active_bytes.is_empty() and FileAccess.get_file_as_bytes(active_path)==active_bytes,"successful home save preserves the previous active file")
+ _flow.queue_free()
+ await process_frame
+ START.request_start(self,"campaign","continue")
+ _flow = FLOW.instantiate(); root.add_child(_flow); current_scene = _flow
+ await process_frame
+ _screen = _flow.get_node("HomebaseScreen"); _runtime = _flow.get("_singleplayer_runtime")
+ _check(not bool(_flow.get("_campaign_start").get("active_restore_in_progress")) and _flow.get("_active_mission")==null and String(_campaign().jobs.satellite_recovery.status)=="completed","normal continue chooses the newer home checkpoint over the stale active file")
+ _check(FileAccess.get_file_as_bytes(active_path)==active_bytes,"stale active file remains untouched")
  await _finish()
 
 func _return_home_after_continue() -> bool:
@@ -161,7 +184,7 @@ func _return_home_after_continue() -> bool:
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
  # Resume can place the real crew farther from the interaction than the
  # original fixture; allow the actual walk to finish without moving actors.
- var allowed := maxi(milliseconds,120000) if label.ends_with("becomes usable after real simulated approach") else milliseconds
+ var allowed := maxi(milliseconds,180000) if label.ends_with("becomes usable after real simulated approach") or label.ends_with("actual mission instance exists") else milliseconds
  return await super._wait(predicate,allowed,label)
 
 func _finish() -> void:

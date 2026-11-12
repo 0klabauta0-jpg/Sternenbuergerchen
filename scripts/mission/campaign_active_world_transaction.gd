@@ -1,9 +1,10 @@
 extends RefCounted
-## Internal, unpublished cross-owner preparation. There is deliberately no
-## commit entry point until the HomePersonnel and Flow bindings are included.
+## Prepared cross-owner world and mission transaction. All owners validate
+## immediately before the synchronous publication tail.
 const WORLD = preload("res://scripts/mission/campaign_active_restore_preflight.gd")
 const SCENE = preload("res://scripts/mission/campaign_active_scene_preflight.gd")
 const RECEIPTS = preload("res://scripts/mission/root_receipt_checkpoint.gd")
+const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
 
 static func prepare(data: Dictionary, adapter: Node, scene: Node) -> Dictionary:
 	if not is_instance_valid(adapter): return _bad("campaign_unavailable")
@@ -25,16 +26,17 @@ static func validate(candidate: Dictionary) -> Dictionary:
 	if not is_instance_valid(adapter) or not is_instance_valid(root) or adapter.get("_simulation") != root or candidate.get("adapter_stamp") != _stamp_adapter(adapter): return _bad("campaign_candidate_stale")
 	var world: Dictionary = candidate.get("world",{})
 	if world.is_empty() or world.campaign.export_state()!=candidate.campaign or world.supply.export_state()!=candidate.supply or world.onboarding.export_state()!=candidate.onboarding or world.equipment.export_state()!=candidate.equipment or world.market.export_state()!=candidate.market or world.wing.export_checkpoint_state()!=candidate.wings or world.space.export_systems_checkpoint()!=candidate.systems: return _bad("campaign_candidate_stale")
-	var checked: Dictionary = RECEIPTS.validate_prebinding(root,world.receipt_candidate,world.bindings)
+	var checked: Dictionary = ORBIT.validate(adapter,world.orbit_candidate,world.orbit_bindings)
+	if not checked.get("ok",false): return checked
+	checked = RECEIPTS.validate_prebinding(root,world.receipt_candidate,world.bindings)
 	if not checked.get("ok",false): return checked
 	checked = world.space.validate_navigation_checkpoint_candidate(world.navigation,world.control_bindings)
 	if not checked.get("ok",false): return checked
 	return SCENE.validate(candidate.scene)
 
 # The caller holds the scene frozen and has installed it under the hidden
-# mission host. This entry point remains private to the isolated verifier.
+# mission host. The caller must have completed all bootstrap checks.
 static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
-	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") != "1": return _bad("active_checkpoint_not_ready")
 	var checked := validate(candidate)
 	if not checked.get("ok",false): return checked
 	var adapter: Node = candidate.adapter
@@ -64,6 +66,7 @@ static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
 	adapter.set("_pad_by_craft",{craft:world.route_bindings.pad})
 	adapter.set("_departure_token_by_craft",{craft:world.route_bindings.departure_token})
 	RECEIPTS.publish(root,world.receipt_candidate)
+	ORBIT.publish(adapter,world.orbit_candidate)
 	SCENE.publish(candidate.scene)
 	flow.set("_active_singleplayer_identity",identity.duplicate(true))
 	flow.set("_craft_location_runtime",{craft:location})

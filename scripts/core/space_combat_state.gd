@@ -675,7 +675,7 @@ static func _navigation_control_valid(control: Dictionary, pose: Dictionary) -> 
 	if has_orbit:
 		# A separately validated Intent owner binds this route to its exact
 		# craft/location. Braking is transient and is not yet restorable.
-		if control.get("orbit_auto_transit") != true or control.has("orbit_auto_braking") or control.get("singleplayer_move") != true or control.get("air_support_move",false) or typeof(control.get("orbit_auto_location_id")) != TYPE_STRING or String(control.orbit_auto_location_id).is_empty() or control.get("orbit_auto_direction") not in ["inbound","outbound"] or not String(pose.get("space_area_id","")).begins_with("orbit_approach:"): return false
+		if typeof(control.get("orbit_auto_transit")) != TYPE_BOOL or control.get("orbit_auto_transit") != true or control.has("orbit_auto_braking") or control.get("singleplayer_move") != true or control.get("air_support_move",false) or typeof(control.get("orbit_auto_location_id")) != TYPE_STRING or String(control.orbit_auto_location_id).is_empty() or typeof(control.get("orbit_auto_direction")) != TYPE_STRING or control.get("orbit_auto_direction") not in ["inbound","outbound"] or not String(pose.get("space_area_id","")).begins_with("orbit_approach:"): return false
 	var intent: Dictionary = {}
 	if control.has("goal"):
 		if not control.goal is Dictionary: return false

@@ -32,22 +32,19 @@ func configure(flow: Node, request: Dictionary) -> void:
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 		_migrate_known_main_starter(checkpoint)
 		run_source = checkpoint.duplicate(true)
-		# Private verifier gate: ordinary players cannot open unfinished active saves.
-		if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1":
-			var active_store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
-			if FileAccess.file_exists(active_store.DEFAULT_PATH):
-				var bootstrap = load("res://scripts/mission/campaign_active_bootstrap_validation.gd")
-				var active: Dictionary = active_store.load_checkpoint(bootstrap.validate)
-				if not active.get("ok",false):
-					# A newer home save makes an older active checkpoint ineligible.
-					# It is ignored, while malformed active data still fails closed.
-					if active.get("reason") != "active_home_mismatch":
-						error_message = "Aktiver Teststand ist ungueltig; Heimatstand bleibt erhalten."
-						return
-				else:
-					active_pending = active.payload.components
-					active_restore_in_progress = true
-					checkpoint["base_personnel"] = active_pending.base_personnel.duplicate(true)
+		var active_store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
+		if FileAccess.file_exists(active_store.DEFAULT_PATH):
+			var bootstrap = load("res://scripts/mission/campaign_active_bootstrap_validation.gd")
+			var active: Dictionary = active_store.load_checkpoint(bootstrap.validate)
+			if not active.get("ok",false):
+				# A newer home save supersedes an older active file without deletion.
+				if active.get("reason") != "active_home_mismatch":
+					error_message = "Einsatzstand ist ungueltig; der Heimatstand bleibt erhalten."
+					return
+			else:
+				active_pending = active.payload.components
+				active_restore_in_progress = true
+				checkpoint["base_personnel"] = active_pending.base_personnel.duplicate(true)
 	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, String(request.get("action", "new")) != "continue")
 	if not run.get("ok", false):
 		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
@@ -208,9 +205,7 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	return result
 
 
-# Not connected to user-facing autosave until the complete end-to-end gate is green.
 func save_active_checkpoint(flow: Node, runtime: Node, _force: bool = false) -> Dictionary:
-	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") != "1": return {"ok":false,"reason":"active_checkpoint_not_ready"}
 	var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
 	var collected: Dictionary = capture.capture_components(flow,runtime)
 	if not collected.get("ok",false): return collected
