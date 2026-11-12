@@ -2032,3 +2032,47 @@ func prepare_hex_checkpoint_runtime(owner:Node,command_data:Dictionary)->Diction
 	record.runtime=runtime
 	record["checkpoint_command"]=command
 	return result
+
+# Medical model portion of an enclosing mission checkpoint transaction.
+# Coordinates, tactical commands, transport and timers remain separate owners.
+class PreparedMissionVital extends RefCounted:
+	pass
+var _prepared_mission_vitals: Dictionary = {}
+
+func prepare_mission_vital_restore(owner: Node, data: Dictionary) -> Dictionary:
+	if not _runtime_identity_owner_matches(owner) or owner.get_unit_registry().get_unit(unit_id) != self or not _actor_respawn_models_valid(): return {"ok":false, "reason":"mission_vital_actor_unbound"}
+	var candidate: Dictionary = UNIT_VITAL_STATUS_SCRIPT.prepare_checkpoint_value(data, max_health_points)
+	if not candidate.get("ok", false): return candidate
+	for key in _prepared_mission_vitals.keys():
+		if _prepared_mission_vitals[key].handle.get_ref() == null: _prepared_mission_vitals.erase(key)
+	if _prepared_mission_vitals.size() >= 32: return {"ok":false, "reason":"mission_vital_capacity"}
+	var handle := PreparedMissionVital.new()
+	_prepared_mission_vitals[handle.get_instance_id()] = {"handle":weakref(handle), "owner":weakref(owner), "registry_id":owner.get_unit_registry().get_instance_id(), "source":_actor_respawn_model_stamp(), "life":owner._hex_payload_identity(unit_id), "model":candidate.model, "phase":"prepared"}
+	return {"ok":true, "prepared":handle}
+
+func validate_mission_vital_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _prepared_mission_vitals.has(handle.get_instance_id()): return {"ok":false, "reason":"mission_vital_unknown"}
+	var record: Dictionary = _prepared_mission_vitals[handle.get_instance_id()]
+	var owner: Node = record.owner.get_ref()
+	if record.phase != "prepared" or record.handle.get_ref() != handle or not _runtime_identity_owner_matches(owner) or owner.get_unit_registry().get_instance_id() != record.registry_id or owner.get_unit_registry().get_unit(unit_id) != self or owner._hex_payload_identity(unit_id) != record.life or _actor_respawn_model_stamp() != record.source: return {"ok":false, "reason":"mission_vital_context_changed"}
+	return {"ok":true}
+
+func _publish_mission_vital_restore(handle: RefCounted, _validation: Dictionary) -> void:
+	var record: Dictionary = _prepared_mission_vitals[handle.get_instance_id()]
+	_vital_status = record.model
+	record.phase = "published"
+	record["post_models"] = _actor_respawn_model_stamp()
+
+func finalize_mission_vital_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _prepared_mission_vitals.has(handle.get_instance_id()): return {"ok":false, "reason":"mission_vital_unknown"}
+	var record: Dictionary = _prepared_mission_vitals[handle.get_instance_id()]
+	var owner: Node = record.owner.get_ref()
+	if record.phase != "published" or record.handle.get_ref() != handle or not _runtime_identity_owner_matches(owner) or owner.get_unit_registry().get_unit(unit_id) != self or _actor_respawn_model_stamp() != record.post_models: return {"ok":false, "reason":"mission_vital_context_changed"}
+	_prepared_mission_vitals.erase(handle.get_instance_id())
+	var lifetime: WeakRef = weakref(self)
+	_apply_vital_visual()
+	if not is_instance_valid(lifetime.get_ref()): return {"ok":true, "context_changed":true}
+	vital_status_changed.emit(_vital_status)
+	if not is_instance_valid(lifetime.get_ref()): return {"ok":true, "context_changed":true}
+	if is_inside_tree() and not is_queued_for_deletion(): _refresh_readability()
+	return {"ok":true}

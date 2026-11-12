@@ -13,10 +13,12 @@ var _revision := 0
 var _tick := -1
 var _space_area_id := ""
 var _coordinate_frame := "strategic"
+var _checkpoint_epoch := 0
 
 func configure(craft_id: String, pose: Dictionary) -> Dictionary:
 	if craft_id.strip_edges().is_empty() or not _valid_pose(pose):
 		return {"ok": false, "reason": "invalid_pose"}
+	_checkpoint_epoch += 1
 	_craft_id = craft_id
 	_position = pose.position_plane
 	_velocity = pose.get("velocity_plane", Vector2.ZERO)
@@ -219,16 +221,25 @@ func prepare_checkpoint_restore(data: Dictionary) -> Dictionary:
 	if not _valid_pose(pose) or _flight_checkpoint_preparations.size() >= 32:
 		return {"ok":false, "reason":"invalid_flight_checkpoint"}
 	var handle := PreparedFlightCheckpoint.new()
-	_flight_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source_snapshot":get_snapshot(), "pose":pose}
+	_flight_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source_snapshot":get_snapshot(), "source_epoch":_checkpoint_epoch, "pose":pose}
 	return {"ok":true, "prepared":handle}
 
+func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _flight_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"flight_checkpoint_unknown"}
+	var prepared: Dictionary = _flight_checkpoint_preparations[handle.get_instance_id()]
+	if prepared.handle.get_ref() != handle or prepared.source_snapshot != get_snapshot() or prepared.source_epoch != _checkpoint_epoch: return {"ok":false, "reason":"flight_checkpoint_changed"}
+	return {"ok":true}
+
 func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
-	if handle == null or not _flight_checkpoint_preparations.has(handle.get_instance_id()):
-		return {"ok":false, "reason":"flight_checkpoint_unknown"}
+	var checked := validate_checkpoint_restore(handle)
+	if not checked.ok: return checked
+	_publish_checkpoint_restore(handle)
+	return {"ok":true}
+
+# Only after every participant in the enclosing transaction has validated.
+func _publish_checkpoint_restore(handle: RefCounted) -> void:
 	var prepared: Dictionary = _flight_checkpoint_preparations[handle.get_instance_id()]
 	_flight_checkpoint_preparations.erase(handle.get_instance_id())
-	if prepared.handle.get_ref() != handle or prepared.source_snapshot != get_snapshot():
-		return {"ok":false, "reason":"flight_checkpoint_changed"}
 	var pose: Dictionary = prepared.pose
 	_position = pose.position_plane
 	_velocity = pose.velocity_plane
@@ -241,4 +252,4 @@ func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
 	_coordinate_frame = pose.coordinate_frame
 	_revision = int(pose.revision)
 	_tick = int(pose.tick)
-	return {"ok":true}
+	_checkpoint_epoch += 1

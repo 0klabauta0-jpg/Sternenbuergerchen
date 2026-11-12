@@ -17,3 +17,6 @@ CampaignCheckpointStore, SingleplayerRuntimeAdapter, MetaLayerFlow, ggf. zustän
 
 ## Zwischenstand 12.11.2026
 Flugowner: versionierter JSON-Export und vorbereiteter Restore auf identischem Craftowner; ungueltige/fremde und stale Zustandsdaten werden ohne Publikation abgelehnt. Headless Roundtrip/Negativtest sowie sechs Nachbarpruefungen bestanden. Dies ist ausschliesslich ein Ownerbaustein: Es gibt weiterhin keinen aktiven Missions-Save/Continue, und die bestehenden Schutzsperren bleiben aktiv. Insbesondere Fleet, Combat, Wing, Air-Sortie, Crew, Missionszustand und atomarer Gesamt-Commit fehlen noch. Luft-Task liefert das endgueltige Sortie-Schema und Restore-Reihenfolge nach Pruefung.
+
+## Ownerbausteine in Arbeit
+Ein begrenzter typisierter JSON-Codec sowie vorbereitete Flug-, Reise-, strategische Flotten-, Rotten-, Schiffssystem- und Vitalmodell-Teile sind gesondert geprueft. Die Teil-Restores validieren Identitaeten und enthalten keine allgemeine Speicherfreigabe. Lokale Raum-/Atmosphaerenbereiche und Area-Bindungen werden durch den strategischen Flottenpfad noch abgewiesen; fehlende Missions-/Transport-/Combatindex-/Sortie-/Gesamttransaktionsdaten bleiben offen. Warp-Reise wurde mit Zwischenstand, Fortsetzung und Request-Replay geprueft; Schiffssystemtest verwendet tatsaechlichen Schaden und Replay. Kein aktiver Einsatzcheckpoint und kein EXE-Export.

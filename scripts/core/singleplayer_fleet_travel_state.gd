@@ -269,3 +269,37 @@ func _space_area_receipt_owner_valid(receipt: Dictionary, craft_id: String) -> b
 
 func _area_reject(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}
+
+# Construct a detached fleet for a world-level restore transaction. The caller
+# must rebind Root, combat and all area authorities before publishing it.
+func export_checkpoint_state() -> Dictionary:
+	if not _space_area_contexts.is_empty() or not _space_area_bindings.is_empty(): return {"ok":false, "reason":"fleet_area_bindings_unavailable"}
+	var crafts := {}
+	for id in _owners:
+		var flight: Dictionary = _owners[id].get_flight_state().get_snapshot()
+		if flight.get("coordinate_frame") != "strategic": return {"ok":false, "reason":"fleet_local_area_unsupported"}
+		var state: Dictionary = _owners[id].export_checkpoint_state()
+		if state.get("ok", true) == false: return state
+		crafts[id] = state
+	return {"schema":"space_fleet_checkpoint.v1", "focus":_focus, "crafts":crafts}
+
+func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Dictionary:
+	if state.size() != 3 or not state.has_all(["schema", "focus", "crafts"]) or state.schema != "space_fleet_checkpoint.v1" or typeof(state.focus) != TYPE_STRING or not state.crafts is Dictionary or state.crafts.size() > 64 or state.crafts.size() != expected_crafts.size(): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+	if (state.crafts.is_empty() and not state.focus.is_empty()) or (not state.crafts.is_empty() and not state.crafts.has(state.focus)): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+	var seen := {}
+	for id in expected_crafts:
+		if typeof(id) != TYPE_STRING or id.strip_edges().is_empty() or seen.has(id) or not state.crafts.has(id): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		seen[id] = true
+	var candidate = get_script().new()
+	var configured: Dictionary = candidate.configure()
+	if not configured.get("ok", false): return configured
+	for id in expected_crafts:
+		if not state.crafts[id] is Dictionary or not state.crafts[id].get("flight") is Dictionary or state.crafts[id].flight.get("coordinate_frame") != "strategic": return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		candidate.register_craft(id)
+		var owner: RefCounted = candidate._owners[id]
+		var prepared: Dictionary = owner.prepare_checkpoint_restore(state.crafts[id])
+		if not prepared.get("ok", false): return prepared
+		var restored: Dictionary = owner.commit_checkpoint_restore(prepared.prepared)
+		if not restored.get("ok", false): return restored
+	candidate._focus = state.focus
+	return {"ok":true, "candidate":candidate}
