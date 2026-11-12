@@ -56,3 +56,17 @@ func _apply_dict(data: Dictionary) -> void:
 		var raw_ticks: Variant = data["bleedout_ticks"]
 		if typeof(raw_ticks) == TYPE_INT or typeof(raw_ticks) == TYPE_FLOAT:
 			bleedout_ticks = int(raw_ticks)
+
+## Creates a validated detached medical model; the authoritative mission
+## transaction must verify actor identity before publishing it.
+static func prepare_checkpoint_value(data: Dictionary, max_health: int) -> Dictionary:
+	if max_health <= 0 or data.size() != 3 or not data.has_all(["state", "health_points", "bleedout_ticks"]) or typeof(data.state) != TYPE_STRING or not is_allowed_state(data.state):
+		return {"ok":false, "reason":"invalid_vital_checkpoint"}
+	for key in ["health_points", "bleedout_ticks"]:
+		var value: Variant = data[key]
+		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or floor(float(value)) != float(value) or float(value) < 0 or float(value) > 1000000000.0:
+			return {"ok":false, "reason":"invalid_vital_checkpoint"}
+	if int(data.health_points) > max_health: return {"ok":false, "reason":"invalid_vital_checkpoint"}
+	var candidate := from_dict(data)
+	if not candidate.is_valid(): return {"ok":false, "reason":"invalid_vital_checkpoint"}
+	return {"ok":true, "model":candidate}

@@ -13,10 +13,12 @@ var _revision := 0
 var _tick := -1
 var _space_area_id := ""
 var _coordinate_frame := "strategic"
+var _checkpoint_epoch := 0
 
 func configure(craft_id: String, pose: Dictionary) -> Dictionary:
 	if craft_id.strip_edges().is_empty() or not _valid_pose(pose):
 		return {"ok": false, "reason": "invalid_pose"}
+	_checkpoint_epoch += 1
 	_craft_id = craft_id
 	_position = pose.position_plane
 	_velocity = pose.get("velocity_plane", Vector2.ZERO)
@@ -186,3 +188,68 @@ static func _valid_pose(pose: Dictionary) -> bool:
 	if frame not in ["strategic", "local"]: return false
 	if pose.get("motion_mode", "grounded") == "inactive" and frame != "local": return false
 	return pose.get("assist_mode", "coupled") in ["coupled", "decoupled"] and pose.get("motion_mode", "grounded") in ["grounded", "travel", "tactical", "inactive"]
+
+# Detached preparations	are scoped to this owner and cannot be replayed after
+# another commit. They do not publish flight state until the caller commits.
+class PreparedFlightCheckpoint extends RefCounted:
+	pass
+var _flight_checkpoint_preparations: Dictionary = {}
+
+func export_checkpoint_state() -> Dictionary:
+	var data := get_snapshot()
+	data["schema"] = "space_flight_checkpoint.v1"
+	data["position_plane"] = [_position.x, _position.y]
+	data["velocity_plane"] = [_velocity.x, _velocity.y]
+	return data
+
+func prepare_checkpoint_restore(data: Dictionary) -> Dictionary:
+	var keys := ["schema", "craft_id", "position_plane", "velocity_plane", "heading_rad", "angular_velocity", "assist_mode", "motion_mode", "mass", "revision", "tick", "space_area_id", "coordinate_frame"]
+	if data.size() != keys.size() or not data.has_all(keys) or data.schema != "space_flight_checkpoint.v1" or data.craft_id != _craft_id or _craft_id.is_empty():
+		return {"ok":false, "reason":"invalid_flight_checkpoint"}
+	var pose := data.duplicate(true)
+	for key in ["position_plane", "velocity_plane"]:
+		var v: Variant = data[key]
+		if not v is Array or v.size() != 2 or typeof(v[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(v[1]) not in [TYPE_INT, TYPE_FLOAT]:
+			return {"ok":false, "reason":"invalid_flight_checkpoint"}
+		pose[key] = Vector2(float(v[0]), float(v[1]))
+	for key in ["revision", "tick"]:
+		var value: Variant = data[key]
+		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) != floor(float(value)) or float(value) < (-1 if key == "tick" else 0) or float(value) > 1000000000000.0:
+			return {"ok":false, "reason":"invalid_flight_checkpoint"}
+	for id in _flight_checkpoint_preparations.keys():
+		if _flight_checkpoint_preparations[id].handle.get_ref() == null: _flight_checkpoint_preparations.erase(id)
+	if not _valid_pose(pose) or _flight_checkpoint_preparations.size() >= 32:
+		return {"ok":false, "reason":"invalid_flight_checkpoint"}
+	var handle := PreparedFlightCheckpoint.new()
+	_flight_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source_snapshot":get_snapshot(), "source_epoch":_checkpoint_epoch, "pose":pose}
+	return {"ok":true, "prepared":handle}
+
+func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _flight_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"flight_checkpoint_unknown"}
+	var prepared: Dictionary = _flight_checkpoint_preparations[handle.get_instance_id()]
+	if prepared.handle.get_ref() != handle or prepared.source_snapshot != get_snapshot() or prepared.source_epoch != _checkpoint_epoch: return {"ok":false, "reason":"flight_checkpoint_changed"}
+	return {"ok":true}
+
+func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	var checked := validate_checkpoint_restore(handle)
+	if not checked.ok: return checked
+	_publish_checkpoint_restore(handle)
+	return {"ok":true}
+
+# Only after every participant in the enclosing transaction has validated.
+func _publish_checkpoint_restore(handle: RefCounted) -> void:
+	var prepared: Dictionary = _flight_checkpoint_preparations[handle.get_instance_id()]
+	_flight_checkpoint_preparations.erase(handle.get_instance_id())
+	var pose: Dictionary = prepared.pose
+	_position = pose.position_plane
+	_velocity = pose.velocity_plane
+	_heading = float(pose.heading_rad)
+	_angular_velocity = float(pose.angular_velocity)
+	_assist_mode = pose.assist_mode
+	_motion_mode = pose.motion_mode
+	_mass = float(pose.mass)
+	_space_area_id = pose.space_area_id
+	_coordinate_frame = pose.coordinate_frame
+	_revision = int(pose.revision)
+	_tick = int(pose.tick)
+	_checkpoint_epoch += 1

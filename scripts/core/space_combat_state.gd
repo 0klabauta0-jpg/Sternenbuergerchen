@@ -475,6 +475,68 @@ func set_flight_status(craft_id: String, status: Dictionary) -> void:
 func get_flight_status(craft_id: String) -> Dictionary:
 	return Dictionary(_flight_status.get(craft_id, {})).duplicate(true)
 
+# This covers only bound combat hardware, not the complete encounter, area
+# registry, navigation claims, or flight bindings. The world transaction must
+# reconstruct and validate those independently before publishing this block.
+const CHECKPOINT_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+class PreparedSystemsCheckpoint extends RefCounted:
+	pass
+var _systems_checkpoint_preparations: Dictionary = {}
+
+func export_systems_checkpoint() -> Dictionary:
+	var encoded := CHECKPOINT_CODEC.encode_value({"systems":_ship_systems.duplicate(true), "receipts":_ship_impact_receipts.duplicate(true)})
+	if not encoded.ok: return encoded
+	return {"schema":"space_systems_checkpoint.v1", "payload":encoded.value}
+
+func prepare_systems_checkpoint_restore(state: Dictionary) -> Dictionary:
+	if state.size() != 2 or not state.has_all(["schema", "payload"]) or state.schema != "space_systems_checkpoint.v1": return {"ok":false, "reason":"invalid_systems_checkpoint"}
+	var decoded := CHECKPOINT_CODEC.decode_value(state.payload)
+	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_systems_checkpoint"}
+	var data: Dictionary = decoded.value
+	if data.size() != 2 or not data.has_all(["systems", "receipts"]) or not data.systems is Dictionary or not data.receipts is Dictionary or data.systems.size() != _ship_systems.size() or data.receipts.size() > 4096: return {"ok":false, "reason":"invalid_systems_checkpoint"}
+	var actors := {}
+	for id in data.systems:
+		if typeof(id) != TYPE_STRING or not _ship_systems.has(id) or _registry.get_actor(id) == null or not data.systems[id] is Dictionary: return {"ok":false, "reason":"invalid_systems_checkpoint"}
+		var entry: Dictionary = data.systems[id]
+		if entry.size() != 3 or not entry.has_all(["stats", "state", "cooldowns"]) or not entry.stats is Dictionary or not entry.state is Dictionary or not entry.cooldowns is Dictionary or JSON.stringify(entry.stats, "", true) != JSON.stringify(_ship_systems[id].stats, "", true): return {"ok":false, "reason":"invalid_systems_checkpoint"}
+		if not SHIP_SYSTEMS.advance(entry.stats, entry.state, 0.0).get("ok", false): return {"ok":false, "reason":"invalid_systems_checkpoint"}
+		var slots := {}
+		for weapon in entry.stats.get("weapons", []):
+			if weapon is Dictionary and typeof(weapon.get("slot_id")) == TYPE_STRING: slots[weapon.slot_id] = true
+		for slot in entry.cooldowns:
+			var value: Variant = entry.cooldowns[slot]
+			if typeof(slot) != TYPE_STRING or not slots.has(slot) or typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) < 0.0: return {"ok":false, "reason":"invalid_systems_checkpoint"}
+		actors[id] = _registry.get_actor(id).get_instance_id()
+	for id in data.receipts:
+		var receipt: Variant = data.receipts[id]
+		if typeof(id) != TYPE_STRING or id.is_empty() or not receipt is Dictionary or typeof(receipt.get("signature")) != TYPE_STRING or not receipt.get("result") is Dictionary: return {"ok":false, "reason":"invalid_systems_checkpoint"}
+	for id in _systems_checkpoint_preparations.keys():
+		if _systems_checkpoint_preparations[id].handle.get_ref() == null: _systems_checkpoint_preparations.erase(id)
+	if _systems_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"systems_checkpoint_capacity"}
+	var handle := PreparedSystemsCheckpoint.new()
+	_systems_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":export_systems_checkpoint(), "actors":actors, "data":data}
+	return {"ok":true, "prepared":handle}
+
+func validate_systems_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _systems_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"systems_checkpoint_unknown"}
+	var prepared: Dictionary = _systems_checkpoint_preparations[handle.get_instance_id()]
+	if prepared.handle.get_ref() != handle or prepared.source != export_systems_checkpoint(): return {"ok":false, "reason":"systems_checkpoint_changed"}
+	for id in prepared.actors:
+		var actor: RefCounted = _registry.get_actor(id)
+		if actor == null or actor.get_instance_id() != prepared.actors[id]: return {"ok":false, "reason":"systems_checkpoint_changed"}
+	return {"ok":true}
+
+func commit_systems_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	var checked := validate_systems_checkpoint_restore(handle)
+	if not checked.ok: return checked
+	_publish_systems_checkpoint_restore(handle)
+	return {"ok":true}
+
+func _publish_systems_checkpoint_restore(handle: RefCounted) -> void:
+	var prepared: Dictionary = _systems_checkpoint_preparations[handle.get_instance_id()]
+	_systems_checkpoint_preparations.erase(handle.get_instance_id())
+	_ship_systems = prepared.data.systems
+	_ship_impact_receipts = prepared.data.receipts
 
 # Snapshot preparation is detached. Only the world transaction may publish it.
 const NAVIGATION_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")

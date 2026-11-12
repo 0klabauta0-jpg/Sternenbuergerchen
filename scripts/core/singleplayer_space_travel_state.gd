@@ -572,3 +572,86 @@ func _publish_prepared_space_area_state(candidate: Dictionary) -> Dictionary:
 func _space_area_flight_binding(snapshot: Dictionary) -> Dictionary:
 	return {"owner_instance_id":_flight.get_instance_id(),"craft_id":String(snapshot.get("craft_id", "")),"revision":int(snapshot.get("revision", -1)),
 		"coordinate_frame":String(snapshot.get("coordinate_frame", "")),"space_area_id":String(snapshot.get("space_area_id", "")),"motion_mode":String(snapshot.get("motion_mode", ""))}
+
+# A travel checkpoint keeps the true per-craft owner and its flight owner.
+# It remains unwired to campaign saves until the enclosing world transaction
+# can validate all locations, craft, combat and personnel together.
+const CHECKPOINT_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+class PreparedTravelCheckpoint extends RefCounted:
+	pass
+var _travel_checkpoint_preparations: Dictionary = {}
+
+func _checkpoint_raw_state() -> Dictionary:
+	return {"phase":_phase, "craft_id":_craft_id, "orbit_id":_orbit_id, "orbit_marker_id":_orbit_marker_id, "origin_position":_origin_position, "target_orbit_id":_target_orbit_id, "target_orbit_marker_id":_target_orbit_marker_id, "duration":_active_jump_duration_seconds, "elapsed":_elapsed_seconds, "progress":_progress, "location_id":_location_id, "revision":_revision, "requests":_requests.duplicate(true), "route_hexes":_route_hexes.duplicate(), "route_control":_route_control, "route_destination":_route_destination}
+
+func export_checkpoint_state() -> Dictionary:
+	if _phase == "approach": return {"ok":false, "reason":"travel_transition_pending"}
+	var encoded := CHECKPOINT_CODEC.encode_value(_checkpoint_raw_state())
+	if not encoded.ok: return encoded
+	return {"schema":"space_travel_checkpoint.v1", "craft_id":_flight.get_snapshot().craft_id, "system_fingerprint":JSON.stringify(_definition, "", true).sha256_text(), "travel":encoded.value, "flight":_flight.export_checkpoint_state()}
+
+func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
+	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or state.system_fingerprint != JSON.stringify(_definition, "", true).sha256_text() or not state.flight is Dictionary:
+		return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	var decoded := CHECKPOINT_CODEC.decode_value(state.travel)
+	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	var data: Dictionary = decoded.value
+	var keys := ["phase", "craft_id", "orbit_id", "orbit_marker_id", "origin_position", "target_orbit_id", "target_orbit_marker_id", "duration", "elapsed", "progress", "location_id", "revision", "requests", "route_hexes", "route_control", "route_destination"]
+	if data.size() != keys.size() or not data.has_all(keys) or data.phase not in ["grounded", "orbit", "quantum", "stopped", "surface"] or data.craft_id not in ["", state.craft_id] or not data.requests is Dictionary or not data.route_hexes is Array or not data.origin_position is Vector2 or not data.route_control is Vector2 or not data.route_destination is Vector2:
+		return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	for key in ["orbit_id", "orbit_marker_id", "target_orbit_id", "target_orbit_marker_id", "location_id"]:
+		if typeof(data[key]) != TYPE_STRING: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	for key in ["duration", "elapsed", "progress"]:
+		if typeof(data[key]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(data[key])): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if float(data.duration) <= 0 or float(data.elapsed) < 0 or float(data.progress) < 0 or float(data.progress) > 1 or typeof(data.revision) != TYPE_INT or data.revision < 0: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	for point in [data.origin_position, data.route_control, data.route_destination]:
+		if not is_finite(point.x) or not is_finite(point.y): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	for cell in data.route_hexes:
+		if not cell is Vector2i: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if data.phase != "grounded" and data.craft_id != state.craft_id: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if data.phase == "grounded" and (data.location_id != "homebase" or not data.orbit_id.is_empty()): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if data.phase == "surface" and (data.location_id.is_empty() or not Dictionary(_definition.location_orbits).has(data.location_id)): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if data.phase == "orbit" and not Dictionary(_definition.orbits).has(data.orbit_id): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if data.phase == "quantum":
+		if not Dictionary(_definition.orbits).has(data.target_orbit_id) or data.route_hexes.is_empty() or float(data.elapsed) >= float(data.duration) or not is_equal_approx(float(data.progress), float(data.elapsed) / float(data.duration)) or not data.orbit_id.is_empty() or not data.location_id.is_empty(): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+		var marker := GRID.orbit_marker(_definition.orbits[data.target_orbit_id], data.target_orbit_marker_id)
+		if marker.is_empty(): return {"ok":false, "reason":"invalid_travel_checkpoint"}
+		var destination: Vector2 = GRID.normalized(GRID.cell_from_record(marker))
+		var control: Vector2 = GRID.route_control(data.origin_position, destination)
+		if destination.distance_to(data.route_destination) > 0.00001 or control.distance_to(data.route_control) > 0.00001 or GRID.route(data.origin_position, control, destination) != data.route_hexes: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+		var expected_position: Vector2 = GRID.route_point(data.origin_position, control, destination, float(data.progress)) * GRID.EXTENT
+		var pose: Variant = state.flight.get("position_plane")
+		if state.flight.get("coordinate_frame") != "strategic" or not pose is Array or pose.size() != 2 or typeof(pose[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(pose[1]) not in [TYPE_INT, TYPE_FLOAT] or expected_position.distance_to(Vector2(pose[0], pose[1])) > 0.01: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	for id in data.requests:
+		if typeof(id) != TYPE_STRING or not data.requests[id] is Dictionary or typeof(data.requests[id].get("signature")) != TYPE_STRING or not data.requests[id].get("result") is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	var flight_prepared: Dictionary = _flight.prepare_checkpoint_restore(state.flight)
+	if not flight_prepared.get("ok", false): return flight_prepared
+	for id in _travel_checkpoint_preparations.keys():
+		if _travel_checkpoint_preparations[id].handle.get_ref() == null: _travel_checkpoint_preparations.erase(id)
+	if _travel_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"travel_checkpoint_capacity"}
+	var handle := PreparedTravelCheckpoint.new()
+	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":export_checkpoint_state(), "data":data, "flight":flight_prepared.prepared}
+	return {"ok":true, "prepared":handle}
+
+func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _travel_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"travel_checkpoint_unknown"}
+	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
+	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state(): return {"ok":false, "reason":"travel_checkpoint_changed"}
+	return _flight.validate_checkpoint_restore(prepared.flight)
+
+func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	var checked := validate_checkpoint_restore(handle)
+	if not checked.ok: return checked
+	_publish_checkpoint_restore(handle)
+	return {"ok":true}
+
+func _publish_checkpoint_restore(handle: RefCounted) -> void:
+	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
+	_travel_checkpoint_preparations.erase(handle.get_instance_id())
+	_flight._publish_checkpoint_restore(prepared.flight)
+	var data: Dictionary = prepared.data
+	_phase = data.phase; _craft_id = data.craft_id; _orbit_id = data.orbit_id; _orbit_marker_id = data.orbit_marker_id
+	_origin_position = data.origin_position; _target_orbit_id = data.target_orbit_id; _target_orbit_marker_id = data.target_orbit_marker_id
+	_active_jump_duration_seconds = float(data.duration); _elapsed_seconds = float(data.elapsed); _progress = float(data.progress)
+	_location_id = data.location_id; _revision = data.revision; _requests = data.requests
+	_route_hexes.assign(data.route_hexes); _route_control = data.route_control; _route_destination = data.route_destination

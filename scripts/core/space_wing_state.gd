@@ -276,3 +276,65 @@ func apply_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:
 
 func _reject(reason: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "revision": _revision, "replayed": false}
+
+# Campaign checkpoint preparation never publishes until the transaction owner
+# has validated the corresponding craft, pilot and other owner snapshots.
+class PreparedWingCheckpoint extends RefCounted:
+	pass
+var _wing_checkpoint_preparations: Dictionary = {}
+
+const CHECKPOINT_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+
+func export_checkpoint_state() -> Dictionary:
+	var encoded := CHECKPOINT_CODEC.encode_value({"revision":_revision, "wings":_wings.duplicate(true), "receipts":_receipts.duplicate(true)})
+	if not encoded.ok: return {"ok":false, "reason":"wing_checkpoint_not_portable"}
+	return {"schema":"space_wing_checkpoint.v1", "payload":encoded.value}
+
+func prepare_checkpoint_restore(state: Dictionary, actor_id: String, owned_crafts: Array) -> Dictionary:
+	if state.size() != 2 or not state.has_all(["schema", "payload"]) or state.schema != "space_wing_checkpoint.v1" or actor_id.strip_edges().is_empty(): return {"ok":false, "reason":"invalid_wing_checkpoint"}
+	var decoded := CHECKPOINT_CODEC.decode_value(state.payload)
+	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_wing_checkpoint"}
+	state = decoded.value
+	if state.size() != 3 or not state.has_all(["revision", "wings", "receipts"]) or not state.wings is Dictionary or not state.receipts is Dictionary: return {"ok":false, "reason":"invalid_wing_checkpoint"}
+	if typeof(state.revision) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(state.revision)) or float(state.revision) != floor(float(state.revision)) or float(state.revision) < 0 or float(state.revision) > 1000000000000.0:
+		return {"ok":false, "reason":"invalid_wing_checkpoint"}
+	var membership := {}
+	for id in state.wings:
+		var wing: Variant = state.wings[id]
+		if typeof(id) != TYPE_STRING or id.strip_edges().is_empty() or not wing is Dictionary or not wing.has_all(["wing_id", "name", "owner_id", "craft_ids", "leader_craft_id"]) or wing.wing_id != id or wing.owner_id != actor_id or typeof(wing.name) != TYPE_STRING or typeof(wing.leader_craft_id) != TYPE_STRING or not wing.craft_ids is Array or wing.craft_ids.size() > MAX_MEMBERS:
+			return {"ok":false, "reason":"invalid_wing_checkpoint"}
+		if not wing.leader_craft_id.is_empty() and not wing.craft_ids.has(wing.leader_craft_id): return {"ok":false, "reason":"invalid_wing_checkpoint"}
+		for craft in wing.craft_ids:
+			if typeof(craft) != TYPE_STRING or craft.strip_edges().is_empty() or not owned_crafts.has(craft) or membership.has(craft): return {"ok":false, "reason":"invalid_wing_checkpoint"}
+			membership[craft] = id
+	for owner in state.receipts:
+		if owner != actor_id or not state.receipts[owner] is Dictionary: return {"ok":false, "reason":"invalid_wing_checkpoint"}
+		for id in state.receipts[owner]:
+			var receipt: Variant = state.receipts[owner][id]
+			if typeof(id) != TYPE_STRING or id.is_empty() or not receipt is Dictionary or typeof(receipt.get("signature")) != TYPE_STRING or not receipt.get("result") is Dictionary: return {"ok":false, "reason":"invalid_wing_checkpoint"}
+	for id in _wing_checkpoint_preparations.keys():
+		if _wing_checkpoint_preparations[id].handle.get_ref() == null: _wing_checkpoint_preparations.erase(id)
+	if _wing_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"wing_checkpoint_capacity"}
+	var handle := PreparedWingCheckpoint.new()
+	_wing_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":export_checkpoint_state(), "state":state.duplicate(true), "membership":membership}
+	return {"ok":true, "prepared":handle}
+
+func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	if handle == null or not _wing_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"wing_checkpoint_unknown"}
+	var prepared: Dictionary = _wing_checkpoint_preparations[handle.get_instance_id()]
+	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state(): return {"ok":false, "reason":"wing_checkpoint_changed"}
+	return {"ok":true}
+
+func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
+	var checked := validate_checkpoint_restore(handle)
+	if not checked.ok: return checked
+	_publish_checkpoint_restore(handle)
+	return {"ok":true}
+
+func _publish_checkpoint_restore(handle: RefCounted) -> void:
+	var prepared: Dictionary = _wing_checkpoint_preparations[handle.get_instance_id()]
+	_wing_checkpoint_preparations.erase(handle.get_instance_id())
+	_wings = prepared.state.wings
+	_craft_wings = prepared.membership
+	_receipts = prepared.state.receipts
+	_revision = int(prepared.state.revision)
