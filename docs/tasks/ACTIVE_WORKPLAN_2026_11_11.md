@@ -35,13 +35,26 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   (7/0, zwei Compiles0). Unabhaengige Reviews ohne engen Blocker. Konkreter
   Sourceproducer6a+d184 als7fd42e2b6/e0f58b924 integriert, frisch66/0 und73/0
   Controller samt Guards. Echter Controller/Cutlassgetter/Renderjoin6/0 als
-  7eff857f5 gesichert. Tabletop bearbeitet Setup und Basisaktionen weiter.
-- AP7 Groundteil524fd61d1: kanonischer offener Bewegung-/Centeringroundtrip,
-  atomar im selben Groundobjekt,19/0 nach Terrainguardfix+unabhaengigem Review.
-  Aktive Corridorgrants/pendingAdmissions noch Saveguard; kanonische Hostsave-
-  Passagezusagen werden im naechsten Teil ergaenzt. MPContract0bef0e658 prueft
+  7eff857f5 gesichert. Basiskern Sourcecd830 alsf8238ee28 integriert, frisch63/0
+  plus64/0 Lifecycle. Remotehandoff-/Padmethoden erhalten. Boarding/Unboardf0c
+  noch nicht importiert: echter Screen-Callback vor Groundcommit und einzelne
+  Base-Signale brauchen gemeinsame stille Gruppenpublikation. Neue Screen-
+  Prepared-Bruecke entsteht im Parent; Root/Base-Tail bei Tabletop. Danach
+  MissionSetup/Respawn und LiveMember-Retirement weiter zusammenfuehren.
+- AP7 Ground524fd61d1 plusPassage8d333eb95: atomarer kanonischer Roundtrip mit
+  Terrainrevalidierungsgrenze und ganzen aktiven Kohorten;35/0 nach gemeinsamem
+  64-Topologiebudgetfix und unabhaengigem Review. PendingAdmissions bleiben
+  klarer Saveguard. GroundPrepared b431a350b (14/0) und AcceptedMovementintents
+  f24656107 (30/0) erlauben allValidate vor Ground-/Movementtails; Originalziele,
+  Wartealter und Backoff werden semantisch erhalten, keine Queue-/Cachedumps.
+  Echte Known-/Registryidentitaet und fehlende Intents gegen Groundcommitments
+  sind nach Review abgesichert. Noch kein Root-/Checkpointanschluss daraus.
+  MPContract0bef0e658 prueft
   explizite Version vor Normalisierung und verbietet Client-Groundstate rekursiv;
   10/0 plus20/0 betroffener Nachbar, zwei Compiles0. Keine Peer-Sichtfilter dadurch.
+  Neuer reiner V2-Fullscope-Publishfilter ist in Review, noch unverdrahtet.
+  Er benoetigt originale Hostdaten mit Kopplungsreferenzen; nach verlustbehafteter
+  V1-Normalisierung ist keine sichere Positionszuordnung mehr moeglich.
   Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
@@ -95,9 +108,12 @@ Dock-/Undockea831 mitCallbackfixes a906/b1d sind als2eaf34cbb/ffdd3cc2e/
 b0aa558b0 integriert; frische gemeinsame Dock-/SurfaceCancelproben gruen.
 UI785b73306 bietet expliziten Dockcommand nur bei aktuellem RootDTO (10/0).
 Kauf-Erstaufnahme e040/1dab+a3c als25e4664d5/8d568332d/0cf33d103,
-privat42/0 plus42/0 reentrant, nur explizite OwnerAPI; Kauf-UI-/Flowroute und
-echter AP6Besuch bleiben offen. Space bereitet gemeinsamen PolisaWarpownerzyklus
-vor, keine produktive Teilumschaltung. Bekannte Grenzen und Hashes:
+privat42/0 plus42/0 reentrant. Source069+036 als42cf96602/8570e1da0 verbindet
+Polisa-Ankunft und oeffentlichen Kaufabflug hinter weiterhin ausgeschaltetem
+Lokalflag; frische oeffentliche Retryprobe42/0 plusgepaarter PolisaOwnerzyklus
+bestanden. Echter AP6-/Crew-/UI-/Retirenachweis und gemeinsame Aktivierung
+bleiben offen. Sun-V3-Ownerzyklus in privater Datenkopie bestanden, Original-
+JSONhash unveraendert. Keine produktive Teilumschaltung. Bekannte Belege:
 docs/qa/orbit_owner_integration_20261111/parent_polisa_dock_staging und
 parent_polisa_gate. Keine Teilumschaltung mit Einbahnweg. Sonnenorbit
 hat keine erfundene Oberflaeche; Polisa bleibt separater Dockpfad.
