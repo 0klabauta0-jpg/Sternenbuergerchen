@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Screenlebensdauer nach Gruppenpublikation — 12.11.2026
+
+Zusätzlicher Integrationsbefund: Ein Basisobserver kann den Screen direkt nach
+dem vollständigen Commit freigeben oder ersetzen. Der Caller finalisiert nur
+den vorab schwach gebundenen, weiter lebenden und zugeordneten Screen; das
+bestätigte Modell bleibt erfolgreich. Echter Ersatzscreen-RED44/1→GREEN46/0
+einschließlich tatsächlicher Freigabe, Boardingnachbar53/0 und Guards grün.
+QA hex_base_unboard_lifetime_20261112. AP6 Setup/Respawn/Member-Retirement
+und AP7/8 bleiben offen; keine Produktionsaktivierung oder große Abnahme.
+
 ### AP6 Ausstieg am tatsächlichen Screen atomar publiziert — 12.11.2026
 
 Integrationsreview fand im zuvor nur mit Transportfixture geprüften Ausstieg

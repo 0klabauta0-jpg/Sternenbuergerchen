@@ -111,3 +111,15 @@ eine vollständige Gruppe, auch bei synchronem Ticketcancel. Der additive
 Screenvertrag `7855ee949` wurde als `f47e66c1e` übernommen. Nachgeholter Fix
 ersetzt die beanstandete Pub-Grenze, ursprünglichen Commit nur gemeinsam damit
 integrieren. QA `hex_base_unboard_transaction_20261112`, keine breite Abnahme.
+
+Integrationsnachprüfung nach `d2466d512`: Ein Basisobserver kann nach dem
+vollständigen Commit den Screen freigeben oder ersetzen. Die nachfolgende
+Finalisierung darf dann weder einen ungültigen Screen noch den Ersatz mit dem
+alten Handle ansprechen. Vor Publikation den vorbereiteten Screen schwach binden;
+nach dem Basisereignis nur denselben lebenden, weiter zugeordneten Screen
+finalisieren. Das bestätigte Modell bleibt erfolgreich, kein Rollback nach Signal.
+
+Lebensdauerfix: tatsächliche Screenfreigabe reproduziert den Produktfehler;
+separater sauberer Ersatzscreen-RED44/1→GREEN46/0, Boardingnachbar53/0.
+QA `hex_base_unboard_lifetime_20261112`, WeakRef- und Zuordnungsprüfung vor
+nachfolgender Finalisierung. Originale Modelle bleiben erfolgreich committet.
