@@ -735,3 +735,9 @@ func _save_vector(value:Variant,grid:bool)->Dictionary:
 	return {"ok":true,"value":Vector2i(int(value[0]),int(value[1])) if grid else Vector2(float(value[0]),float(value[1]))}
 func _save_pair(value:Variant)->Array:return [value.x,value.y]
 func _save_reject(reason:String)->Dictionary:return {"ok":false,"reason":reason}
+
+
+# Canonical host intent target only; never expose the private runtime patch.
+func get_prepared_restore_state(prepared:RefCounted)->Dictionary:
+	if not validate_prepared_restore(prepared).ok:return {}
+	return Dictionary(_save_prepared_restores[prepared.get_instance_id()].state).duplicate(true)

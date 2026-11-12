@@ -760,3 +760,257 @@ func build_campaign_landing_pad(count: int) -> Dictionary:
 			var path_plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(point))
 			if bounds.has_point(Vector2(path_plane.x, path_plane.z)): return _reject("construction_path_occupied", "Laufenden Weg ueber den Bauplatz abschliessen")
 	return build_infrastructure("landing_pad", infrastructure)
+
+
+# AP7 host checkpoint V2. Existing export_state/configure remain legacy V1.
+class PreparedBaseCheckpoint extends RefCounted:
+	pass
+var _checkpoint_prepared:Dictionary={}
+var _checkpoint_epoch:=0
+
+func export_checkpoint_state()->Dictionary:
+	var issue:=_checkpoint_issue()
+	if not issue.is_empty():return _checkpoint_reject(issue)
+	var ground=_sim._hex_ground_runtime
+	var movement:Dictionary=_sim._hex_movement_runtime.export_state()
+	if movement.get("schema")!="hex_movement_v1":return _checkpoint_reject("base_checkpoint_movement_unavailable")
+	var units:Dictionary={};var ids:Array=_states.keys();ids.sort()
+	for id in ids:
+		var current:Dictionary=_states[id]
+		var action:Dictionary=Dictionary(current.action).duplicate(true)
+		if not action.is_empty():
+			if typeof(action.get("target"))!=TYPE_VECTOR2:return _checkpoint_reject("base_checkpoint_invalid_action")
+			action.target=[action.target.x,action.target.y]
+			if action.get("type")=="sleep":action.automatic=bool(action.get("automatic",false))
+		units[id]={"status":current.status,"craft_id":current.craft_id,"bed_id":current.bed_id,"action":action,"auto_rest_enabled":current.get("auto_rest_enabled",true),"rest_automatic":current.get("rest_automatic",false),"idle_seconds":current.get("idle_seconds",0.0),"manual_priority_seconds":current.get("manual_priority_seconds",0.0)}
+	var snapshot:Dictionary=ground.build_planning_snapshot()
+	var state:Dictionary={"version":2,"map_id":snapshot.map_id,"topology":_terrain.get_grid_topology(),"grid_frame":_checkpoint_grid_frame(),"sequence":_sequence,"poll_seconds":_poll_seconds,"rest_elapsed":_rest_elapsed,"units":units}
+	var checked:Dictionary=_checkpoint_candidate(state,ground,movement)
+	if not checked.ok:return checked
+	if checked.beds!=_beds:return _checkpoint_reject("base_checkpoint_beds_inconsistent")
+	return state
+
+func prepare_restore_state(state:Dictionary,ground_prepared:RefCounted,movement_prepared:RefCounted)->Dictionary:
+	var issue:=_checkpoint_issue()
+	if not issue.is_empty():return _checkpoint_reject(issue)
+	var target=_sim._hex_ground_runtime.get_prepared_restore_ground(ground_prepared)
+	var movement:Dictionary=_sim._hex_movement_runtime.get_prepared_restore_state(movement_prepared)
+	if target==null or movement.is_empty():return _checkpoint_reject("base_checkpoint_prepared_context")
+	var checked:Dictionary=_checkpoint_candidate(state,target,movement)
+	if not checked.ok:return checked
+	for key in _checkpoint_prepared.keys():
+		var old:Dictionary=_checkpoint_prepared[key]
+		if old.handle.get_ref()==null or old.epoch!=_checkpoint_epoch:_checkpoint_prepared.erase(key)
+	if _checkpoint_prepared.size()>=32:return _checkpoint_reject("base_checkpoint_prepare_capacity")
+	var handle:=PreparedBaseCheckpoint.new()
+	var patch:Dictionary={"states":checked.states,"beds":checked.beds,"sequence":int(state.sequence),"poll_seconds":float(state.poll_seconds),"rest_elapsed":float(state.rest_elapsed)}
+	_checkpoint_prepared[handle.get_instance_id()]={"handle":weakref(handle),"epoch":_checkpoint_epoch,"phase":"prepared","source":_checkpoint_binding(),"ground_prepared":ground_prepared,"movement_prepared":movement_prepared,"target":target,"movement":movement,"transport":_checkpoint_transport_context(state),"state":state.duplicate(true),"patch":patch,"post_models":patch.duplicate(true),"context":_sim.get_hex_ground_context_revision(),"sim_id":_sim.get_instance_id(),"registry_id":_registry.get_instance_id(),"terrain_id":_terrain.get_instance_id()}
+	return {"ok":true,"prepared":handle}
+
+func validate_prepared_restore(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_checkpoint_record(prepared)
+	if record.is_empty():return _checkpoint_reject("unknown_base_checkpoint")
+	if record.phase!="prepared" or record.epoch!=_checkpoint_epoch:return _checkpoint_reject("base_checkpoint_consumed")
+	var issue:=_checkpoint_issue()
+	if not issue.is_empty():return _checkpoint_reject(issue)
+	if record.source!=_checkpoint_binding() or record.transport!=_checkpoint_transport_context(record.state):return _checkpoint_reject("base_checkpoint_context_changed")
+	var target=_sim._hex_ground_runtime.get_prepared_restore_ground(record.ground_prepared)
+	var movement:Dictionary=_sim._hex_movement_runtime.get_prepared_restore_state(record.movement_prepared)
+	if target==null or target!=record.target or movement!=record.movement:return _checkpoint_reject("base_checkpoint_prepared_context")
+	var checked:Dictionary=_checkpoint_candidate(record.state,target,movement)
+	if not checked.ok:return checked
+	return {"ok":true,"prepared_id":prepared.get_instance_id()}
+
+# Root validates every participant, then Ground/Movement/Base tails, then projects.
+func _publish_prepared_restore(prepared:RefCounted,_validation:Dictionary)->Dictionary:
+	var record:Dictionary=_checkpoint_prepared[prepared.get_instance_id()]
+	_states=record.patch.states
+	_beds=record.patch.beds
+	_sequence=record.patch.sequence
+	_poll_seconds=record.patch.poll_seconds
+	_rest_elapsed=record.patch.rest_elapsed
+	record.phase="published"
+	_checkpoint_epoch+=1
+	return {"ok":true}
+
+func finalize_prepared_restore(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_checkpoint_record(prepared)
+	if record.is_empty():return _checkpoint_reject("unknown_base_checkpoint")
+	if record.phase=="finalized":return {"ok":true,"replayed":true}
+	if record.phase!="published":return _checkpoint_reject("base_checkpoint_not_published")
+	record.phase="finalized"
+	# Actor projection is explicitly SourceRoot-owned and must precede this signal.
+	if not _checkpoint_owner_bound() or _flow.get_instance_id()!=record.source.flow_id or _screen.get_instance_id()!=record.source.screen_id or _flow.is_inside_tree()!=record.source.flow_in_tree or _screen.is_inside_tree()!=record.source.screen_in_tree or _sim.get_instance_id()!=record.sim_id or _registry.get_instance_id()!=record.registry_id or _terrain.get_instance_id()!=record.terrain_id or _sim.get_hex_ground_context_revision()!=record.context or _checkpoint_models()!=record.post_models or _checkpoint_actor_ids()!=record.source.actors or record.transport!=_checkpoint_transport_context(record.state):return {"ok":true,"context_changed":true}
+	state_changed.emit()
+	return {"ok":true,"replayed":false}
+
+func _checkpoint_record(prepared:RefCounted)->Dictionary:
+	if prepared==null or not _checkpoint_prepared.has(prepared.get_instance_id()):return {}
+	var record:Dictionary=_checkpoint_prepared[prepared.get_instance_id()]
+	return record if record.handle.get_ref()==prepared else {}
+
+func _checkpoint_owner_bound()->bool:
+	for node in [self,_sim,_registry,_terrain,_flow,_screen]:
+		if not is_instance_valid(node) or node.is_queued_for_deletion():return false
+	if not is_inside_tree() or not _sim.is_inside_tree() or not _registry.is_inside_tree() or not _terrain.is_inside_tree():return false
+	return _sim.get("_base_personnel_owner")==self and get_parent()==_sim.get_parent() and _sim.get_unit_registry()==_registry and _sim.get("_hex_ground_registry")==_terrain and _sim.is_hex_ground_runtime_active()
+
+func _checkpoint_issue()->String:
+	if not _checkpoint_owner_bound():return "base_checkpoint_owner_unbound"
+	if _states.is_empty() or _states.size()>64:return "base_checkpoint_unit_budget"
+	if _committing_transport or not _board_groups.is_empty():return "base_checkpoint_transport_pending"
+	if _hex_admission_waiting:return "base_checkpoint_admission_pending"
+	var ground_issue:String=_sim._hex_ground_runtime._save_context_issue()
+	if not ground_issue.is_empty():return "base_checkpoint_"+ground_issue
+	for current in _states.values():
+		if typeof(current)!=TYPE_DICTIONARY:return "base_checkpoint_invalid_unit"
+		if current.get("status")=="boarding" or Dictionary(current.get("action",{})).get("type") in ["crew_board","pilot_board"]:return "base_checkpoint_transport_pending"
+	return ""
+
+func _checkpoint_models()->Dictionary:
+	return {"states":_states.duplicate(true),"beds":_beds.duplicate(true),"sequence":_sequence,"poll_seconds":_poll_seconds,"rest_elapsed":_rest_elapsed}
+
+func _checkpoint_live_actor(id:String)->Node2D:
+	var actor:Node2D=get_actor(id)
+	if not is_instance_valid(actor) or actor.is_queued_for_deletion() or not actor.is_inside_tree() or actor.get_script()!=ACTOR or actor.get_parent()!=self or actor.get_unit_id()!=id or _sim._resolve_known_unit_for_contract(id)!=actor:return null
+	return actor
+
+func _checkpoint_actor_ids()->Dictionary:
+	var actors:Dictionary={}
+	for id in _states:
+		var actor:Node2D=_checkpoint_live_actor(id)
+		actors[id]=actor.get_instance_id() if actor!=null else 0
+	return actors
+
+func _checkpoint_binding()->Dictionary:
+	var actors:Dictionary=_checkpoint_actor_ids()
+	return {"owner_id":get_instance_id(),"epoch":_checkpoint_epoch,"sim_id":_sim.get_instance_id(),"flow_id":_flow.get_instance_id(),"screen_id":_screen.get_instance_id(),"flow_in_tree":_flow.is_inside_tree(),"screen_in_tree":_screen.is_inside_tree(),"registry_id":_registry.get_instance_id(),"terrain_id":_terrain.get_instance_id(),"context":_sim.get_hex_ground_context_revision(),"ground_revision":_sim._hex_ground_runtime.build_planning_snapshot().revision,"terrain_revision":_terrain.get_revision(),"actors":actors,"layout":_layout.duplicate(true),"models":_checkpoint_models()}
+
+func _checkpoint_grid_frame()->Dictionary:
+	var origin:Vector2=_terrain.grid_to_world(Vector2i.ZERO)
+	var q:Vector2=_terrain.grid_to_world(Vector2i.RIGHT)-origin
+	var r:Vector2=_terrain.grid_to_world(Vector2i.DOWN)-origin
+	return {"origin":[origin.x,origin.y],"q":[q.x,q.y],"r":[r.x,r.y]}
+
+func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Dictionary:
+	if not _checkpoint_keys(state,["version","map_id","topology","grid_frame","sequence","poll_seconds","rest_elapsed","units"]) or not _checkpoint_int(state.version,2,2):return _checkpoint_reject("base_checkpoint_invalid_version")
+	if target==null or target.get_script()!=_sim._hex_ground_runtime.get_script() or target._registry!=_terrain:return _checkpoint_reject("base_checkpoint_target_ground")
+	var ground:Dictionary=target.build_planning_snapshot()
+	if typeof(state.map_id)!=TYPE_STRING or state.map_id!=ground.map_id or state.topology!="hex_axial_v1" or state.topology!=_terrain.get_grid_topology() or movement.get("schema")!="hex_movement_v1" or movement.get("map_id")!=ground.map_id or movement.get("terrain_revision")!=ground.terrain_revision or movement.get("tick")!=ground.current_tick:return _checkpoint_reject("base_checkpoint_map_context")
+	if not _checkpoint_keys(state.grid_frame,["origin","q","r"]):return _checkpoint_reject("base_checkpoint_grid_frame")
+	for key in ["origin","q","r"]:
+		if not _checkpoint_pair(state.grid_frame[key]):return _checkpoint_reject("base_checkpoint_grid_frame")
+	var current_frame:Dictionary=_checkpoint_grid_frame()
+	for key in ["origin","q","r"]:
+		if Vector2(float(state.grid_frame[key][0]),float(state.grid_frame[key][1]))!=Vector2(float(current_frame[key][0]),float(current_frame[key][1])):return _checkpoint_reject("base_checkpoint_grid_frame")
+	if not _checkpoint_int(state.sequence,0,1000000000000) or not _checkpoint_number(state.poll_seconds) or not _checkpoint_number(state.rest_elapsed):return _checkpoint_reject("base_checkpoint_invalid_clock")
+	if typeof(state.units)!=TYPE_DICTIONARY or state.units.size()!=_states.size() or state.units.size()>64:return _checkpoint_reject("base_checkpoint_unit_set")
+	var movement_proof:Dictionary=_sim._hex_movement_runtime._save_validate(movement,target)
+	if not movement_proof.ok:return _checkpoint_reject("base_checkpoint_movement_target")
+	var intents:Dictionary={};var max_sequence:=0
+	for intent in movement.accepted_intents:
+		intents[intent.unit_id]=intent
+		if String(intent.source_command_id).begins_with("base:"):
+			var serial:=_checkpoint_token_sequence(intent.source_command_id)
+			if serial<0:return _checkpoint_reject("base_checkpoint_invalid_token")
+			max_sequence=maxi(max_sequence,serial)
+	if int(state.sequence)<max_sequence:return _checkpoint_reject("base_checkpoint_sequence_reuse")
+	var states:Dictionary={};var beds:Dictionary={};var tokens:Dictionary={}
+	for id in state.units:
+		if not _checkpoint_id(id) or not _states.has(id):return _checkpoint_reject("base_checkpoint_unit_set")
+		var actor:Node2D=_checkpoint_live_actor(id)
+		if actor==null:return _checkpoint_reject("base_checkpoint_actor_unbound")
+		var value:Variant=state.units[id]
+		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
+		var action:Dictionary={}
+		if value.status=="aboard":
+			if not _checkpoint_home_craft(value.craft_id) or not _checkpoint_craft_member(id,value.craft_id) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
+		else:
+			if not value.craft_id.is_empty() or not target.has_unit(id):return _checkpoint_reject("base_checkpoint_ground_presence")
+		if value.status=="moving":
+			var kind:Variant=value.action.get("type")
+			var keys:Array=["type","target","command_token"]
+			if kind=="sleep":keys.append_array(["bed_id","automatic"])
+			elif kind=="terminal":keys.append("terminal_id")
+			elif kind!="move":return _checkpoint_reject("base_checkpoint_invalid_action")
+			if not _checkpoint_keys(value.action,keys) or not _checkpoint_pair(value.action.target) or not _checkpoint_id(value.action.command_token) or _checkpoint_token_sequence(value.action.command_token)<1 or _checkpoint_token_sequence(value.action.command_token)>int(state.sequence) or tokens.has(value.action.command_token) or not intents.has(id):return _checkpoint_reject("base_checkpoint_action_token")
+			tokens[value.action.command_token]=true
+			var intent:Dictionary=intents[id];var fields:Dictionary={}
+			for field in intent.command_intent:fields[field.key]=field.value
+			var point:=Vector2(float(value.action.target[0]),float(value.action.target[1]))
+			if intent.source_command_id!=value.action.command_token or fields.get("source_command_type")!="base_personnel" or fields.get("command_type",fields.get("type"))!="move_to_position" or fields.get("unit_id")!=id or not _checkpoint_pair(fields.get("target_position")) or point!=Vector2(float(fields.target_position[0]),float(fields.target_position[1])):return _checkpoint_reject("base_checkpoint_action_mismatch")
+			var axial:Vector2=_terrain.world_to_grid_float(point)
+			if not axial.is_finite() or absf(axial.x)>2147470000.0 or absf(axial.y)>2147470000.0:return _checkpoint_reject("base_checkpoint_action_mismatch")
+			var goal:Vector2i=_terrain.world_to_grid(point)
+			if not _checkpoint_pair(intent.goal_grid) or not _checkpoint_int(intent.goal_grid[0],-2147480000,2147480000) or not _checkpoint_int(intent.goal_grid[1],-2147480000,2147480000) or Vector2i(int(intent.goal_grid[0]),int(intent.goal_grid[1]))!=goal:return _checkpoint_reject("base_checkpoint_action_mismatch")
+			action={"type":String(kind),"target":point,"command_token":String(value.action.command_token)}
+			if kind=="sleep":
+				if typeof(value.action.automatic)!=TYPE_BOOL or value.action.bed_id!=value.bed_id:return _checkpoint_reject("base_checkpoint_bed_mismatch")
+				action.bed_id=value.bed_id;action.automatic=value.action.automatic
+			elif kind=="terminal":
+				var terminal:Dictionary=_find_layout("terminals",String(value.action.terminal_id))
+				if not _checkpoint_id(value.action.terminal_id) or terminal.is_empty() or not bool(terminal.get("enabled",true)) or _world(terminal.grid)!=point:return _checkpoint_reject("base_checkpoint_terminal_mismatch")
+				action.terminal_id=String(value.action.terminal_id)
+		elif not value.action.is_empty():return _checkpoint_reject("base_checkpoint_action_status")
+		if value.status=="sleeping" or action.get("type")=="sleep":
+			var bed:Dictionary=_find_layout("beds",value.bed_id)
+			if not _checkpoint_id(value.bed_id) or bed.is_empty() or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
+			if value.status=="sleeping":
+				var pose:Dictionary=target.read_unit(id)
+				if pose.grid!=_terrain.world_to_grid(_world(bed.grid)) or pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
+			elif action.target!=_world(bed.grid):return _checkpoint_reject("base_checkpoint_bed_mismatch")
+			beds[value.bed_id]=id
+		elif not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_bed_mismatch")
+		if intents.has(id):
+			var intent:Dictionary=intents[id]
+			if intent.status not in ["arrived","canceled"] and value.status!="moving":return _checkpoint_reject("base_checkpoint_missing_action")
+		var restored:Dictionary=_states[id].duplicate(true)
+		for key in ["status","craft_id","bed_id","auto_rest_enabled","rest_automatic"]:restored[key]=value[key]
+		restored.action=action;restored.idle_seconds=float(value.idle_seconds);restored.manual_priority_seconds=float(value.manual_priority_seconds);restored.last_result={}
+		states[id]=restored
+	for id in target.get_unit_ids():
+		if not states.has(id) or states[id].status=="aboard":return _checkpoint_reject("base_checkpoint_ground_presence")
+	return {"ok":true,"states":states,"beds":beds}
+
+func _checkpoint_craft_member(id:String,craft_id:String)->bool:
+	if not _screen.has_method("_get_assigned_pilot_id") or not _screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw") or not _screen.has_method("_get_member_unit_ids_for_fireteam"):return false
+	if _screen.call("_get_assigned_pilot_id",craft_id)==id:return true
+	for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft_id):
+		if PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",String(team))).has(id):return true
+	return false
+
+func _checkpoint_transport_context(state:Dictionary)->Dictionary:
+	var result:Dictionary={}
+	for value in state.units.values():
+		if not value is Dictionary or String(value.get("craft_id","")).is_empty():continue
+		var craft:String=String(value.craft_id)
+		if result.has(craft):continue
+		var teams:Dictionary={}
+		if _screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw"):
+			for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft):teams[String(team)]=PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",String(team))).duplicate()
+		result[craft]={"pilot":_screen.call("_get_assigned_pilot_id",craft) if _screen.has_method("_get_assigned_pilot_id") else "","teams":teams,"home":_checkpoint_home_craft(craft)}
+	return result
+
+func _checkpoint_home_craft(craft_id:String)->bool:
+	if not _checkpoint_id(craft_id) or not _flow.has_method("_find_homebase_aircraft_definition") or Dictionary(_flow.call("_find_homebase_aircraft_definition",craft_id)).is_empty() or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))!="homebase" or not Dictionary(_flow.call("_find_pending_mission_craft_transfer",craft_id)).is_empty() or not get_parent().has_method("get_space_travel_snapshot"):return false
+	return Dictionary(get_parent().call("get_space_travel_snapshot",craft_id)).get("phase")=="grounded"
+func _checkpoint_token_sequence(token:Variant)->int:
+	if not _checkpoint_id(token) or not String(token).begins_with("base:"):return -1
+	var suffix:String=String(token).substr(5)
+	if not suffix.is_valid_int() or suffix.length()>13:return -1
+	var serial:=int(suffix)
+	return serial if serial>=1 and serial<=1000000000000 and token=="base:%d"%serial else -1
+func _checkpoint_keys(value:Variant,keys:Array)->bool:
+	if typeof(value)!=TYPE_DICTIONARY or value.size()!=keys.size():return false
+	for key in keys:
+		if not value.has(key):return false
+	return true
+func _checkpoint_id(value:Variant)->bool:return typeof(value)==TYPE_STRING and not String(value).is_empty() and value==String(value).strip_edges() and String(value).length()<=256
+func _checkpoint_int(value:Variant,minimum:int,maximum:int)->bool:return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and float(value)==floorf(float(value)) and float(value)>=minimum and float(value)<=maximum
+func _checkpoint_number(value:Variant)->bool:return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and float(value)>=0.0 and float(value)<=1000000000000.0
+func _checkpoint_pair(value:Variant)->bool:
+	if typeof(value)!=TYPE_ARRAY or value.size()!=2:return false
+	for number in value:
+		if typeof(number) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(number)) or absf(float(number))>1000000000000.0:return false
+	return true
+func _checkpoint_reject(reason:String)->Dictionary:return {"ok":false,"reason":reason}

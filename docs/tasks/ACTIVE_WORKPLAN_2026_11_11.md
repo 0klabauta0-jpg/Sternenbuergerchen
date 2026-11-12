@@ -63,6 +63,12 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   echter Rootvalidierung ausgelassen (2eab1f01b,9/0). Session-/Lobbylaufzeitkontext
   ist reviewed und vorbereitet (30/0 nach echtem Snapshotreject-RED24/3);
   Rootbinder, Hostpublisher und Receiver folgen bei Tabletop.
+  Neuer additiver Baseaktions-CheckpointV2 ist reviewed (30/0): echte Sleep-/
+  Terminalabsichten, Originaltoken, Sequenz/Timer, abgeleitete Betten und
+  tatsaechliche Pilot-/Payloadmitgliedschaft; Gridframe bindet feine Navigation.
+  Kontrollierte APIboundary-RED24/6 geschlossen, kein Nativecallbacknachweis.
+  Legacyexport/configure/Walk/Tick/Board/Remote/Pad unveraendert; Root-/Store-/
+  Startloaderverdrahtung bleibt Sourceowned und noch offen.
   Er benoetigt originale Hostdaten mit Kopplungsreferenzen; nach verlustbehafteter
   V1-Normalisierung ist keine sichere Positionszuordnung mehr moeglich.
   Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
