@@ -424,6 +424,12 @@ ein Order besitzt mehrere `wing_ids` und explizite Rollen `escort/intercept/atta
 
 **Abnahme M2:** Durchgehendes Eskortengefecht; Rollen und Rückkehr funktionieren, keine magische Aggro.
 
+**Erweiterung 12.11.:** Luftunterstützung und gemeinsame Bedienung auf Bodenmaps
+werden nach den gemeinsamen Ownergrundlagen in
+`docs/tasks/SPACE_GROUND_AIR_SUPPORT_2026_11_12.md` paketiert. Eine einzelne
+Cutlass ist auch dort eine Rotte; Planetoidenatmosphäre erlaubt nur coupled.
+Diese Erweiterung ist noch nicht implementiert und ersetzt keine AP6–8-Abnahme.
+
 ## AP11 — J-Hook, Ausweichstoß und Feuerziehen
 
 **Dateien:** Neu `scripts/tactical/space_maneuver_resolver.gd`,

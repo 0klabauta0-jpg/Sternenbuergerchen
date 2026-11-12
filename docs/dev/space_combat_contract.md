@@ -48,6 +48,11 @@ Nur am Saum ist der Weiteranflug auf eine Oberflächenkarte erlaubt. Bei nicht
 landbaren Körpern bleibt ein Oberflächenanflug ausgeschlossen. Blockaden
 entstehen im Raum, nicht durch eine gesperrte Auswahl einzelner Marker.
 
+**Nutzerfestlegung 12.11.:** Polisa ist direkt anfliegbar; ein Besuch oder
+Rückflug benötigt keine vorgeschaltete lokale Orbitkarte. Der Landepadweg
+und die bestehende strategische Reise bleiben dafür gültig. Ein separates
+Stationsdock darf bestehen bleiben, ist aber keine Landevoraussetzung.
+
 Diese Festlegung ersetzt die frühere Annahme einer alleinigen Sternkarte und
 den Abschnitt „Orbitmarker“ des Reisevertrags als Zielvorgabe; die alte
 Markerbedienung ist im aktuellen Produktstand noch vorhanden. Die räumliche
@@ -65,6 +70,30 @@ Schiffe dürfen sich optisch neigen und rollen. Ihre spielwirksame Lage bleibt
 auf einer Ebene; Höhe, Rollen oder Effektausdehnung vergeben keine unsichtbaren
 Treffer-/Ausweichvorteile. Die Fassrollen- und Quadstrafe-Varianten werden
 entsprechend adaptiert, keine vollständigen räumlichen Schraubenbahnen.
+
+### Luftunterstützung auf Bodenkarten (Nutzerfestlegung 12.11.)
+
+Dieselben Schiffe und Rotten können eine Bodenmission aus der Luft begleiten:
+Das eingesetzte Dropship und ein zusätzliches Kampfschiff können Luftziele und
+zulässige Bodenziele bekämpfen. Ein einzelnes fliegendes Dropship, ausdrücklich
+auch die bisherige Cutlass, ist eine Einerschiffsrotte. Ein begleitendes Schiff
+behält seine eigene eindeutige Rottenzuordnung und kann einen gemeinsamen
+Schutz- oder Unterstützungsauftrag erhalten. Pilot, Schiff, Bewaffnung, Aufträge
+und Flugzustand bleiben dieselben autoritativen Identitäten wie im Weltraum.
+
+Es gibt dieselbe Flug- und Auftragslogik mit passenden Umgebungseingaben,
+keinen zweiten Luftkampfsimulator. In der Atmosphäre von Planetoiden ist nur
+gekoppelter Flug zulässig; ausgekoppeltes Fliegen bleibt im Weltraum möglich.
+Der bestehende `mission_air`-Layer ist zunächst reine Darstellung; Sichtbarkeit,
+Waffenwinkel, Luft-/Bodenziel und Schaden müssen explizit aus den jeweiligen
+autoritativen Contracts kommen. Gebundene Boden-Footprints und Landeclaims gelten
+bei echtem Bodenkontakt und beim Ein-/Ausstieg, nicht für jedes überflogene Feld.
+
+Flieger-/Dropshipbrief und Schiffskarten sollen wie Fireteams Auftrag, Ziel,
+Haltung und Feuerregel anbieten sowie Lande-/Transportbefehle erhalten. Die UI
+zeigt erlaubte Befehle und deren Gründe, liest Zustand und sendet Commands; sie
+führt keine zweite Rotten-, Flug- oder Kampfwahrheit. Die Begrenzung auf eine
+Kampfebene bleibt erhalten; optische Höhe allein ist kein Trefferbonus.
 
 ## 3. Rotten und gemeinsame Aufträge
 
