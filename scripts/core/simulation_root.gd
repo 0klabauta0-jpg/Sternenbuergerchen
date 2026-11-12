@@ -445,6 +445,7 @@ const SPACE_GUIDANCE_RESOLVER = preload("res://scripts/tactical/space_guidance_r
 const SPACE_AREA_TRANSITION = preload("res://scripts/tactical/space_area_transition_resolver.gd")
 const SPACE_ORBIT_ENTRY_SEARCH = preload("res://scripts/tactical/space_orbit_entry_search.gd")
 const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
+const ORBIT_SURFACE_LOCATIONS = preload("res://scripts/mission/orbit_surface_locations.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
 const SPACE_TARGETING = preload("res://scripts/tactical/space_targeting_resolver.gd")
 const SPACE_WEAPON = preload("res://scripts/tactical/space_weapon_resolver.gd")
@@ -1611,7 +1612,7 @@ func preview_surface_approach(craft_id: String, location_id: String, expected_fl
 	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
 	var body_id := String(orbit.get("body_id", ""))
 	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
-	if String(body.get("id", "")) != body_id or String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != location_id:
+	if String(body.get("id", "")) != body_id or not ORBIT_SURFACE_LOCATIONS.contains(body, location_id):
 		return {"ok":false, "reason":"not_surface_destination"}
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
 	if not layout.get("ok", false) or layout.body_map_id != snapshot.space_area_id: return {"ok":false, "reason":"area_body_mismatch"}
@@ -1671,7 +1672,7 @@ func preview_surface_reactivation(craft_id: String, location_id: String, target_
 	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
 	var body_id := String(orbit.get("body_id", ""))
 	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
-	if body_id.is_empty() or String(body.get("id", "")) != body_id or String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != location_id:
+	if body_id.is_empty() or String(body.get("id", "")) != body_id or not ORBIT_SURFACE_LOCATIONS.contains(body, location_id):
 		return {"ok":false, "reason":"not_surface_destination"}
 	var layout: Dictionary = ORBIT_LAYOUT.build(body_id)
 	if not layout.get("ok", false) or layout.body_map_id != snapshot.space_area_id: return {"ok":false, "reason":"area_body_mismatch"}

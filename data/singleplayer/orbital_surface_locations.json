@@ -1,0 +1,4 @@
+{
+  "planet": ["satellite_crash", "trade_outpost", "fortified_outpost"],
+  "moon": ["homebase"]
+}
