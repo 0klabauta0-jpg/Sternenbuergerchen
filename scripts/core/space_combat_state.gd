@@ -23,7 +23,7 @@ func bind_ship_systems(craft_id: String, stats: Dictionary, hull_capacity: float
 	if _ship_systems.has(craft_id): return {"ok":false, "reason":"systems_already_bound"}
 	var initial: Dictionary = SHIP_SYSTEMS.initial(stats, hull_capacity)
 	if not initial.get("ok", false): return initial
-	_ship_systems[craft_id] = {"stats":stats.duplicate(true), "state":initial.state.duplicate(true)}
+	_ship_systems[craft_id] = {"stats":stats.duplicate(true), "state":initial.state.duplicate(true), "cooldowns":{}}
 	return {"ok":true}
 
 func get_ship_systems(craft_id: String) -> Dictionary:
@@ -41,25 +41,43 @@ func _commit_ship_impact(event: Dictionary) -> Dictionary:
 	if _ship_impact_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
 	var shooter: Variant = event.get("shooter_id")
 	var target: Variant = event.get("hit_craft_id")
-	if typeof(shooter) != TYPE_STRING or typeof(target) != TYPE_STRING or not _metadata.has(shooter): return {"ok":false, "reason":"invalid_event"}
+	var slot: Variant = event.get("weapon_slot")
+	if typeof(shooter) != TYPE_STRING or typeof(target) != TYPE_STRING or typeof(slot) != TYPE_STRING or not _metadata.has(shooter) or not _ship_systems.has(shooter): return {"ok":false, "reason":"invalid_event"}
 	if typeof(event.get("damage")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(event.damage)) or float(event.damage) < 0.0: return {"ok":false, "reason":"invalid_event"}
+	var source: Dictionary = _ship_systems[shooter]
+	if _registry.get_actor(shooter) == null or float(source.state.hull) <= 0.0: return {"ok":false, "reason":"shooter_unavailable"}
+	var weapon := {}
+	for entry: Dictionary in source.stats.get("weapons", []):
+		if entry.get("slot_id") == slot: weapon = entry; break
+	if weapon.is_empty() or float(source.cooldowns.get(slot, 0.0)) > 0.0 or typeof(weapon.get("shots_per_second")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.shots_per_second)) or float(weapon.shots_per_second) <= 0.0: return {"ok":false, "reason":"weapon_unavailable"}
+	if not String(target).is_empty() and not is_equal_approx(float(event.damage), float(weapon.damage)): return {"ok":false, "reason":"weapon_damage_mismatch"}
+	var consumed: Dictionary = SHIP_SYSTEMS.consume_weapon(source.stats, source.state, 1.0)
+	if not consumed.ok: return consumed
 	var result := {"ok":true, "replayed":false, "hit_craft_id":target, "shield_damage":0.0, "hull_damage":0.0}
+	var hit_state := {}
 	if not String(target).is_empty():
 		if not _ship_systems.has(target) or not _metadata.has(target) or _registry.get_actor(shooter) == null or _registry.get_actor(target) == null: return {"ok":false, "reason":"target_unavailable"}
 		if _registry.get_actor(shooter).get_snapshot().space_area_id != _registry.get_actor(target).get_snapshot().space_area_id: return {"ok":false, "reason":"different_area"}
 		var current: Dictionary = _ship_systems[target]
 		var hit: Dictionary = SHIP_SYSTEMS.apply_hit(current.stats, current.state, float(event.damage))
 		if not hit.ok: return hit
-		current.state = hit.state
+		hit_state = hit.state
 		result.shield_damage = hit.shield_damage; result.hull_damage = hit.hull_damage
 	elif float(event.damage) != 0.0:
 		return {"ok":false, "reason":"invalid_event"}
+	# Both proposals are complete before publishing either side. A self-hit is
+	# not accepted here; Root's future resolver must use the actual beam index.
+	if target == shooter: return {"ok":false, "reason":"invalid_event"}
+	source.state = consumed.state
+	source.cooldowns[slot] = 1.0 / float(weapon.shots_per_second)
+	if not String(target).is_empty(): _ship_systems[target].state = hit_state
 	_ship_impact_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
 	return result
 
 func advance_ship_systems(delta: float) -> Dictionary:
 	if not is_finite(delta) or delta < 0.0: return {"ok":false, "reason":"invalid_tick"}
 	var proposals := {}
+	var cooldown_proposals := {}
 	for craft_id: String in _ship_systems:
 		if _registry.get_actor(craft_id) == null: continue
 		var current: Dictionary = _ship_systems[craft_id]
@@ -67,7 +85,11 @@ func advance_ship_systems(delta: float) -> Dictionary:
 		var step: Dictionary = SHIP_SYSTEMS.advance(current.stats, current.state, delta)
 		if not step.ok: return step
 		proposals[craft_id] = step.state
+		var timers: Dictionary = current.cooldowns.duplicate(true)
+		for slot: String in timers: timers[slot] = maxf(0.0, float(timers[slot]) - delta)
+		cooldown_proposals[craft_id] = timers
 	for craft_id: String in proposals: _ship_systems[craft_id].state = proposals[craft_id]
+	for craft_id: String in cooldown_proposals: _ship_systems[craft_id].cooldowns = cooldown_proposals[craft_id]
 	return {"ok":true}
 
 func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture: bool = false) -> Dictionary:

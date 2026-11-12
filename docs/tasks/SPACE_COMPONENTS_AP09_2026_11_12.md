@@ -135,12 +135,13 @@ und Guidanceprüfungen liefen gebündelt ohne Fehler.
 
 Der bestehende `SpaceCombatState` kann für einen bereits registrierten Akteur
 Komponentenwerte binden, Treffer zuerst auf Schild und anschließend Hülle
-verbuchen, dieselbe Ereignis-ID einmalig behandeln und die Regeneration als
-gebündelten Tick anwenden. Er erzeugt keinen eigenen Flug- oder Equipmentowner.
+verbuchen, den gebundenen Waffenslot mit Reserve und Feuerrate prüfen, dieselbe
+Ereignis-ID einmalig behandeln und die Regeneration als gebündelten Tick
+anwenden. Er erzeugt keinen eigenen Flug- oder Equipmentowner.
 Der interne Trefferpfad darf ausschließlich vertrauenswürdige, durch Root
 aufgelöste Ereignisse erhalten. Ein isolierter Ownerlauf verbindet den
 Schussvorschlag mit einem freundlichen Abfangziel und prüft Schild, Hülle,
-Replay, Konflikt und Regeneration.
+Waffenenergie, Feuerrate, Replay, Konflikt und Regeneration.
 
 Der Root initialisiert diese Systeme noch nicht produktiv, steuert ihren Tick
 nicht und leitet keine autoritativen Feuerbefehle oder Treffer weiter. Kontakt-

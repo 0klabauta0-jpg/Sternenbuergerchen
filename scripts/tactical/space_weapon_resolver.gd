@@ -7,7 +7,7 @@ static func resolve_shot(shooter: Dictionary, target: Dictionary, weapon: Dictio
 	if event_id.strip_edges().is_empty() or rng_state < 0 or rng_state > 2147483647: return {"ok":false, "reason":"invalid_event"}
 	var allowed := TARGETING.evaluate_target(shooter, target, weapon, order, world)
 	if not allowed.ok: return allowed
-	if typeof(weapon.get("damage")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.damage)) or float(weapon.damage) <= 0.0 or typeof(weapon.get("accuracy")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.accuracy)) or float(weapon.accuracy) < 0.0 or float(weapon.accuracy) > 1.0: return {"ok":false,"reason":"invalid_weapon"}
+	if typeof(weapon.get("slot_id")) != TYPE_STRING or String(weapon.slot_id).is_empty() or typeof(weapon.get("damage")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.damage)) or float(weapon.damage) <= 0.0 or typeof(weapon.get("accuracy")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(weapon.accuracy)) or float(weapon.accuracy) < 0.0 or float(weapon.accuracy) > 1.0: return {"ok":false,"reason":"invalid_weapon"}
 	var indexed: Variant = world.get("occupants_by_cell")
 	if typeof(indexed) != TYPE_DICTIONARY or typeof(shooter.get("id")) != TYPE_STRING: return {"ok":false,"reason":"invalid_index"}
 	var line: Array = HEX.line(HEX.round_axial(HEX.plane_to_axial(shooter.position)), HEX.round_axial(HEX.plane_to_axial(target.position)))
@@ -29,4 +29,4 @@ static func resolve_shot(shooter: Dictionary, target: Dictionary, weapon: Dictio
 	if first.is_empty() or not found_target: return {"ok":false,"reason":"target_not_indexed"}
 	var next_rng: int = (rng_state * 1103515245 + 12345) & 0x7fffffff
 	var hit := float(next_rng) / 2147483648.0 < float(weapon.accuracy)
-	return {"ok":true, "event":{"id":event_id, "shooter_id":shooter.id, "aimed_target_id":target.id, "hit_craft_id":first if hit else "", "damage":float(weapon.damage) if hit else 0.0, "origin":shooter.position, "destination":impact_position if hit else target.position}, "rng_state":next_rng}
+	return {"ok":true, "event":{"id":event_id, "shooter_id":shooter.id, "weapon_slot":weapon.slot_id, "aimed_target_id":target.id, "hit_craft_id":first if hit else "", "damage":float(weapon.damage) if hit else 0.0, "origin":shooter.position, "destination":impact_position if hit else target.position}, "rng_state":next_rng}

@@ -9,7 +9,7 @@ func _initialize() -> void:
 	var target := {"id":"c", "position":HEX.axial_to_plane(Vector2(3,0)), "heading_rad":0.0, "faction_id":"red", "area_id":"area", "sensor_range":10.0}
 	var actors := {"a":shooter, "b":friend, "c":target}
 	var world := {"actors":actors, "known_targets":["c"], "hostile_factions":["red"], "opaque_cells":[], "occupants_by_cell":{Vector2i(0,0):["a"], Vector2i(1,0):["b"], Vector2i(3,0):["c"]}}
-	var weapon := {"range":10.0, "arc_degrees":60.0, "damage":4.0, "accuracy":1.0}
+	var weapon := {"slot_id":"weapon_1", "range":10.0, "arc_degrees":60.0, "damage":4.0, "accuracy":1.0}
 	assert(TARGETING.collect_contacts(world,"blue").contacts.has("c"))
 	assert(TARGETING.evaluate_target(shooter,target,weapon,{"fire_rule":"free"},world).ok)
 	var hidden := world.duplicate(true); hidden.known_targets = []
