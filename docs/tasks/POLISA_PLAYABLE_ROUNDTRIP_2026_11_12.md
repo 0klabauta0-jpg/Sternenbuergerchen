@@ -55,11 +55,11 @@ keine zweite Buchung oder weitere Cargo-Wahrheit einführen.
 Arbeitsstand: Der lokale Polisa-Anflug besitzt separate vorbereitete Reise-
 operationen; nach Anflugabbruch und Abflug wird die vorher gehaltene Orbitpose
 erneut auf freien Footprint/Claims geprüft. Der existierende Kartenflow und
-seine Padwahl bleiben zuständig. Im Polisa-Menü zeigt eine kurze Aufzugsgrafik
-einen bereits bestätigten Kauf ins gewählte Schiffslager; sie ist eine reine
-UI-Animation, kein physischer Lastenaufzug und verzögert die Supplybuchung
-nicht. Funktion und Gestaltung sind noch nicht durch einen Test oder Playtest
-belegt. Bestehendes Dock und Liveflag bleiben unverändert.
+seine Padwahl bleiben zuständig. Neben der kurzen Aufzugsgrafik im Menü wurde
+inzwischen der unten beschriebene 3D-Aufzug ergänzt. Beide stellen einen bereits
+bestätigten Kauf dar und verzögern die Supplybuchung nicht. Funktion und
+Gestaltung sind noch nicht durch einen Playtest belegt. Bestehendes Dock und
+Liveflag bleiben unverändert.
 
 ## Physischer Aufzug: kleiner Umsetzungsschnitt
 
@@ -89,3 +89,16 @@ Warenbuchung oder Physiksimulation. Ein nativer Vorher-/Nachhervergleich und
 die tatsächliche Sichtprüfung stehen noch aus.
 AP6-Arbeiten laufen parallel; Parentstand und spätere Integration abgleichen.
 Ein headless Verlauf ist keine optische Freigabe oder Multiplayerabnahme.
+
+## Gebündelte lokale Prüfung vom 12.11.
+
+Nach Erzeugung des Godot-Klassenindexes liefen mit isoliertem APPDATA
+`polisa_cargo_lift_check.gd` und `polisa_landing_owner_cycle_verifier.gd`
+jeweils mit Exit 0. Ersterer prüft den echten Supply-Kaufbeleg,
+Wiederholungsschutz und die Lebensdauer der 3D-Animation. Letzterer prüft mit
+Fixture-Pilot und Fixture-Flow den lokalen Anflug ohne Dockpflicht, Abbruch,
+erneuten Anflug, Freigabe, erhaltene Rückkehrposition, Warp und Heimlandung.
+Er simuliert weder die tatsächliche Landepadkarte noch Einkauf, Aussteigen
+oder Boarding. Ein erster Lauf ohne Klassenindex hatte Autoloadfehler und ist
+kein gültiger Nachweis. Eine native Sichtprüfung und der zusammenhängende
+Produktionsdurchlauf bleiben offen; das Liveflag ist weiterhin ausgeschaltet.
