@@ -130,15 +130,14 @@ eine andere Revision oder ungültige Geometrie lehnt die Transaktion ab.
   sobald der statische Block-/Gatevertrag dort tatsächlich gilt. Keine Gate-
   koordinaten als Befugnis: Root prüft tatsächliche Flight-/Footprintpräsenz.
 
-Die hier genannten Erweiterungen sind **geplant**, nicht bereits implementiert.
-Vor dem ersten Codepaket den von Parent gelieferten Deskriptorstand übernehmen
-und dessen Schema prüfen; keine Controller- oder AP6-Bodies berühren.
+Die folgende Statusangabe unterscheidet implementierte Ownerpfade von noch
+ausstehender Integration und Spielwegabnahme; keine Controller- oder
+AP6-Bodies wurden in diesem Paket geändert.
 
 Stand: Der geprüfte Deskriptor ist selektiv übernommen. `space_area_grid.gd`
 cached dessen Glut-2-Stationsblock einmal und wendet ihn auf lokale Bounds-/
 Footprint-/Claimprüfungen an. Eine enge Prüfung für Block, freies Gate, andere
-Area, unveränderliche Projektion und echte Claimvalidierung ist grün. Root-DTO,
-Dock-/Undocktransaktionen und produktive UI-Anbindung sind weiterhin offen.
+Area, unveränderliche Projektion und echte Claimvalidierung ist grün.
 Fleet und Travel bereiten jetzt getrennte `begin_station_dock`-/
 `undock_station`-Kandidaten mit Ziel- und Layoutbindung vor; ein isolierter
 Owner-Test deckt Phasenwechsel, ungültige Revision und Replay ab. Der Test
@@ -148,8 +147,18 @@ Root kann das tatsächliche Stationsgate nun lesend anhand von Flight-, Travel-,
 Area-, Wing-, Index- und Claimrevisionen prüfen. Die Probe deckt Gatepräsenz,
 fehlende Gatepräsenz und veraltete Revision ab. Sie autorisiert keinen Besuch.
 Eine weitere lesende Vorstufe validiert die Flight-/Indexdeaktivierung am
-Stationgate; Token-, Cancel-/Reapproach-, Economy- und Visittransaktion müssen
-noch zusammengeführt werden, bevor ein Dockcommit zugänglich gemacht wird.
+Stationgate. Der getrennte Dock-/Undockpfad verbindet inzwischen vorhandene
+Root-/Fleet-/Flight-/Supply-/Campaign-Owner, schiffsspezifische Token,
+Abbruch, Wiederanflug und verzögerte Ereignisse. Public-Adapterauftrag:
+`space_begin_station_dock` mit `craft_id`, `location_id=polisa`,
+`target_id=polisa_station_dock`, `layout_revision=polisa_glut2_dock_v1`
+und optionaler `request_id`; Rückweg über vorhandenes `enter_space_orbit`.
+Root-AreaDTO: `dock_targets` mit Ziel-ID und Revision. Eine begrenzte
+Ownerprobe prüft Abbruch, Wiederanflug ohne zweite Hinbuchung, Pilot fehlt,
+belegtes Gate, Rückflug-Fuel und Replay/Events. Pilot und Visit sind darin
+Fixtures: echter Stationsbesuch, AP6-Boarding, UI und native Abnahme offen.
+Neu auf Polisa erworbene Schiffe ohne eigenen inaktiven Spaceactor bleiben
+ausdrücklich außerhalb dieses Pfades. Kein Flag- oder Live-JSON-Wechsel.
 
 ## Akzeptanz, Prüfung und Risiken
 
