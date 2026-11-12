@@ -225,6 +225,8 @@ func _build() -> void:
 	information.add_child(_visit_list)
 	_wing_panel = WING_PANEL.new()
 	information.add_child(_wing_panel)
+	information.move_child(_wing_panel, 3)
+	_wing_panel.wing_focus_requested.connect(_on_map_craft_selected)
 	_wing_panel.configure(_provider, _commands)
 	_style_buttons()
 	resized.connect(_layout_details)
@@ -450,6 +452,7 @@ func _on_fleet_craft_selected(index: int) -> void:
 
 func _on_map_craft_selected(craft_id: String) -> void:
 	_canvas.call("set_selected_ship", craft_id)
+	if _wing_panel != null: _wing_panel.select_for_craft(craft_id)
 	var leader := craft_id
 	for wing: Dictionary in Dictionary(Dictionary(_runtime.get("space_wings", {})).get("wings", {})).values():
 		if craft_id in Array(wing.get("craft_ids", [])):
@@ -581,6 +584,23 @@ func _craft_id() -> String:
 	return String(Dictionary(runtime.get("space_travel", {})).get("craft_id", ""))
 
 func _jump(orbit_id: String, marker_id: String) -> void:
+	var selected: Array = _wing_panel.selected_wing_ids() if _wing_panel != null else []
+	if not selected.is_empty() and _commands.is_valid():
+		var wings: Dictionary = Dictionary(_runtime.get("space_wings", {})).get("wings", {})
+		var sent := {}
+		var failures: PackedStringArray = []
+		for wing_id in selected:
+			for id in Array(Dictionary(wings.get(wing_id, {})).get("craft_ids", [])):
+				var craft_id := String(id)
+				if craft_id.is_empty() or sent.has(craft_id): continue
+				sent[craft_id] = true
+				var result: Variant = _commands.call("space_start_quantum", {"craft_id":craft_id, "target_orbit_id":orbit_id, "target_orbit_marker_id":marker_id})
+				if not result is Dictionary or not bool(result.get("ok", false)):
+					failures.append(craft_id + ": " + (String(result.get("message", "Sprung abgelehnt")) if result is Dictionary else "Sprung abgelehnt"))
+		refresh()
+		_error.text = "\n".join(failures) if not failures.is_empty() else ("Keine Schiffe in der Auswahl." if sent.is_empty() else "")
+		_error.visible = not _error.text.is_empty()
+		return
 	_send("space_start_quantum", {"craft_id": _craft_id(), "target_orbit_id": orbit_id, "target_orbit_marker_id": marker_id})
 
 func _select(location_id: String) -> void:
