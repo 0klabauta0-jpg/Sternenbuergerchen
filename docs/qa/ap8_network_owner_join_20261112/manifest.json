@@ -1,0 +1,47 @@
+{
+  "schema": "sternenbuergerchen.ap8_network_owner_join.prepared.v1",
+  "status": "prepared_unexecuted",
+  "executed": false,
+  "compile_executed": false,
+  "passed": null,
+  "failed": null,
+  "real_peer": false,
+  "root_checkpoint": null,
+  "checkpoint_join_status": "implemented_requires_source_import_unexecuted",
+  "transport": "controlled_multiplayer_api_extension",
+  "command": "python scripts/tests/run_ap8_network_owner_join.py",
+  "report": "output/native_glut_maps/ap8_network_owner_join_20261112/report.json",
+  "report_exists_by_this_delivery": false,
+  "required_markers": [
+    "HEX_TACTICAL_SLICE_PARTIAL_READY",
+    "AP7_JOINT_PASSAGE_ROUNDTRIP_READY",
+    "AP8_NETWORK_OWNER_JOIN_READY",
+    "AP7_ROOT_CHECKPOINT_JOIN_READY",
+    "AP8_BOUNDED_CANDIDATE_READY"
+  ],
+  "required_guards": [
+    "source_unchanged",
+    "real_profile_unchanged",
+    "private_canary"
+  ],
+  "product_flags_changed": false,
+  "product_code_changed": false,
+  "ap8_bounded_ready": null,
+  "native_acceptance": false,
+  "required_success_fields": [
+    "ap8_bounded_ready",
+    "root_checkpoint",
+    "host_publication",
+    "receiver",
+    "runtime_lifetime",
+    "source_unchanged",
+    "real_profile_unchanged",
+    "private_canary"
+  ],
+  "required_exit_code": 0,
+  "runner": "scripts/tests/run_ap8_network_owner_join.py",
+  "verifiers": [
+    "scripts/tests/hex_tactical_slice_verifier.gd",
+    "scripts/tests/hex_tactical_network_join.gd"
+  ]
+}
