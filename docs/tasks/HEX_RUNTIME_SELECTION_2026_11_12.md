@@ -91,3 +91,14 @@ die drei Korrekturen nur syntaktisch geprüft, Gameplaynachprüfung gemeinsam na
 AP7-/AP8-Codeblöcken. Client, vollständiger Platzmangel, zusätzliche Caller- und
 medizinische Nachbarabnahme sind noch Teil dieser gebündelten Prüfung. Keine
 vollständige AP6-Verifikationsfreigabe oder gemessene Performanceverbesserung.
+
+## Notwendige Leader-Publikationskorrektur beim Import
+
+Parentimport stellte fest: Remove vor Actorfinalize und späteres signalgebendes
+Add enthielt noch keine vollständige Leadergruppe beim ersten Actorereignis.
+Der bestehende Leader bereitet jetzt genau seine geänderte Membership-/Entity-
+Modellgruppe vor, validiert sie vor Rootcommit und publiziert sie ohne Signale
+unmittelbar nach Rootmodellen. Erst danach folgen Actorfinalize und nach der
+vollständigen Gruppe die bisherigen unit_member_added/assigned-Signale mit Guard.
+Keine zweite Membership, keine Änderungen an FTL-Commandbodies. Kein weiterer
+Gameplaytest; weiterhin gebündelt nach AP8.

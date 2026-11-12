@@ -1,0 +1,12 @@
+{
+  "kind": "syntax_only_no_gameplay_assertions",
+  "exit_code": 0,
+  "source_sha256": {
+    "scripts/core/simulation_root.gd": "34a69f96f3aa016b2e3c0439e3322809aca8e045b81cfd896de0c79f9f2692d9",
+    "scripts/core/hex_movement_command_runtime.gd": "0b04fff116cf684fddf4d627d7b0223c9b2dff8f0d9c8e9b4ae25e43545a33bb",
+    "scripts/core/base_personnel_runtime.gd": "6e78df9bf3119bc1d05600bf7d39c6aa2473a15561222e2b0125cd497df408b6",
+    "scripts/ftl/runtime_leader.gd": "1e2a0794e79d26b8aa01c7773f79a7610bc478645d52077c78d9009b8b5a684c",
+    "scripts/tests/mission_test_setup.gd": "ca3ac31e67eb837e8189483e73a4372850368b715af1fe4784f276ff5c903fa3",
+    "scripts/npc/test_unit.gd": "267f783f8655df473cb7175ee688fe92d5da9b778727d83fcf2a1a8f8f2a7cf2"
+  }
+}

@@ -624,7 +624,7 @@ func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:Pa
 	var leader:Node=get_node_or_null(runtime_leader_path)
 	if simulation==null or registry==null or leader==null or simulation.get_unit_registry()!=registry:return {"ok":false,"reason":"selection_owner_unavailable"}
 	if not _hex_setup_presentation_only and not simulation.is_hex_ground_runtime_active():return {"ok":false,"reason":"selection_hex_inactive"}
-	if not registry.has_method("apply_lookup_bindings") or not leader.has_method("remove_unit_member") or not leader.has_method("get_assigned_entity"):return {"ok":false,"reason":"selection_lookup_api_unavailable"}
+	if not registry.has_method("apply_lookup_bindings") or not leader.has_method("prepare_unit_member_changes") or not leader.has_method("finalize_unit_member_changes"):return {"ok":false,"reason":"selection_lookup_api_unavailable"}
 	var ftls:Node=get_node_or_null(ftl_registry_path)
 	if ftls!=null and ftls.has_method("get_ftl") and ftls.call("has_ftl",team_id) and ftls.call("get_ftl",team_id)!=leader:return {"ok":false,"reason":"selection_ftl_conflict"}
 	var paths:Array=_friendly_unit_slot_paths.duplicate()
@@ -700,8 +700,22 @@ func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:Pa
 		var prepared:Dictionary=actor.call("prepare_runtime_identity_change",simulation,config,true)
 		if not prepared.get("ok",false):return prepared
 		changes.append({"actor":actor,"old_id":old_id,"next_id":config.unit_id,"prepared":prepared.prepared,"reset":true,"known_new":false,"register_new":false})
+	var removals:Array=[]
+	for change in changes:
+		if change.reset:removals.append(change.actor)
+	var additions:Array=[]
+	var preferred_entity:Node=null
+	if not _hex_setup_presentation_only:
+		for entry in assignments:
+			var active:bool=(not bool(entry.same) and not defer_friendly_runtime_activation) or (bool(entry.same) and registry.get_unit(entry.unit_id)==entry.actor and not bool(entry.actor.get_meta("dropship_embarked",false)))
+			if active:
+				additions.append(entry.actor)
+				if preferred_entity==null:preferred_entity=entry.actor
+	var member_model:Dictionary=leader.call("prepare_unit_member_changes",removals,additions,preferred_entity)
+	if not member_model.get("ok",false) or not leader.call("validate_unit_member_changes",member_model):return {"ok":false,"reason":"selection_leader_changed"}
 	var committed:Dictionary=simulation.commit_hex_actor_identity_changes(self,changes,_hex_setup_presentation_only)
 	if not committed.get("ok",false):return committed
+	leader.call("_publish_unit_member_changes",member_model)
 	for actor in pool:
 		var id:String=String(actor.call("get_unit_id"))
 		committed.actors[id]=actor.get_instance_id()
@@ -709,8 +723,6 @@ func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:Pa
 	var scope:Dictionary={"root":weakref(simulation),"receipt":committed,"signature":_hex_selection_active_signature,"inputs":JSON.stringify(_hex_selection_inputs()),"owner":_hex_selection_owner_binding()}
 	_hex_selection_active_binding=scope.owner
 	var guard:Callable=Callable(self,"_hex_selection_scope_current").bind(scope)
-	for change in changes:
-		if change.reset:leader.remove_unit_member(change.actor)
 	for change in changes:
 		if change.reset:
 			change.actor.set_meta("dropship_embarked",false)
@@ -732,8 +744,6 @@ func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:Pa
 			actor.visible=false
 			continue
 		if registry.get_unit(id)!=actor:continue # Existing staged/aboard persons remain staged.
-		leader.add_unit_member(actor)
-		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
 		if not bool(entry.same) or not preserve_existing or refresh_existing_ids.has(id):_enqueue_initial_loadout_effect(simulation,id)
 		if simulation.get_hex_unit_state(id).is_empty() and not bool(actor.get_meta("dropship_embarked",false)):admission.append(actor)
 	if not admission.is_empty():_admit_hex_setup_nodes(admission)
@@ -741,13 +751,9 @@ func _apply_hex_runtime_selection(preserve_existing:bool,refresh_existing_ids:Pa
 	if _hex_setup_presentation_only and simulation.has_method("refresh_multiplayer_replica_presence"):
 		simulation.call("refresh_multiplayer_replica_presence")
 		if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
-	if leader.get_assigned_entity()==null:
-		for entry in assignments:
-			if registry.get_unit(entry.unit_id)==entry.actor and not simulation.get_hex_unit_state(entry.unit_id).is_empty():
-				leader.assign(entry.actor)
-				if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
-				if ftls!=null and ftls.has_method("has_ftl") and not ftls.call("has_ftl",team_id):ftls.call("register_ftl",team_id,leader)
-				break
+	if ftls!=null and not additions.is_empty() and ftls.has_method("has_ftl") and not ftls.call("has_ftl",team_id):ftls.call("register_ftl",team_id,leader)
+	leader.call("finalize_unit_member_changes",member_model,guard)
+	if not guard.is_valid() or not guard.call():return {"ok":false,"reason":"selection_context_changed","historical_committed":true}
 	return {"ok":true,"status":"waiting_admission" if not _hex_setup_pending.is_empty() else "committed","pending_count":_hex_setup_pending.size()}
 
 

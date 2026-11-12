@@ -39,3 +39,10 @@ Für den getrennten Parent-Netzblock ist der optionale Hook
 und Selectiontail vorgesehen. Er betrifft ausschließlich Clientpräsentation;
 hier existiert noch kein neuer Netzsender/-receiver. Bootstrap-/Checkpoint- und
 Netzintegration erfolgen als AP7, anschließend AP8 und gebündelte Prüfungen.
+
+Importfollowup: Die Leadergruppe wird jetzt ebenfalls als vollständiges stilles
+Modell vor Actorereignissen gesetzt. Vorher waren neue Members erst durch spätere
+signalgebende Addaufrufe hinzugekommen. Das wurde als unmittelbar notwendiger
+Publikationsfix geschlossen, ohne neue Gameplay-/Reviewrunde.
+`leader_barrier_followup.json`/`.log` sind ausschließlich Syntaxbelege und aktuelle
+Dateihashes; ursprüngliche Manifest-/Gameplaybelege bleiben unverändert.
