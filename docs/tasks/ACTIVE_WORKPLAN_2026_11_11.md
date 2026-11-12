@@ -29,11 +29,13 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   privat95/0 Phasen und73/0 echter kontrollierter Controller samt Guards.
   Crew-/Visitfilter und verbleibende Team-/Solo-Pilotregeln im Merge erhalten.
   Fremde Bodyflaechen als begrenzter Raster Source62b1454af sind alsd9059a590
-  integriert, frisch52/0 mit Guards. Noch kein konkreter Footprintconsumer.
+  integriert, frisch52/0 mit Guards.
   Parent55ccb737a reicht echte Homebase-Craftherkunft durch (4/0); b9f194d9e
   liefert geplante/aktuelle Landedgeometrie und stabiles gebundenes Render-Yaw
-  (7/0, zwei Compiles0). Unabhaengige Reviews ohne engen Blocker. Tabletop
-  bearbeitet konkrete Footprint-/Landeproducer, Setup und Basisaktionen weiter.
+  (7/0, zwei Compiles0). Unabhaengige Reviews ohne engen Blocker. Konkreter
+  Sourceproducer6a+d184 als7fd42e2b6/e0f58b924 integriert, frisch66/0 und73/0
+  Controller samt Guards. Echter Controller/Cutlassgetter/Renderjoin6/0 als
+  7eff857f5 gesichert. Tabletop bearbeitet Setup und Basisaktionen weiter.
 - AP7 Groundteil524fd61d1: kanonischer offener Bewegung-/Centeringroundtrip,
   atomar im selben Groundobjekt,19/0 nach Terrainguardfix+unabhaengigem Review.
   Aktive Corridorgrants/pendingAdmissions noch Saveguard; kanonische Hostsave-
