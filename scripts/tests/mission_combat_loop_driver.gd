@@ -151,6 +151,7 @@ var _resolver_target_evaluation_count: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
+var _checkpoint_elapsed_offset_msec: int = 0
 var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
 var _mission_result_condition_override: String = ""
@@ -4153,11 +4154,18 @@ func _get_enemy_team_id() -> String:
 	return ""
 
 
+# Only a validated checkpoint transaction may call this before mission ticks resume.
+func restore_checkpoint_elapsed_time(elapsed_msec: int) -> Dictionary:
+	if elapsed_msec < 0 or elapsed_msec > 2678400000: return {"ok":false, "reason":"invalid_mission_elapsed"}
+	_mission_started_at_msec = maxi(Time.get_ticks_msec(), 1)
+	_checkpoint_elapsed_offset_msec = elapsed_msec
+	return {"ok":true}
+
 func _get_duration_seconds() -> float:
 	if _mission_started_at_msec == 0:
 		return 0.0
 
-	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec) / 1000.0, 0.0)
+	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec + _checkpoint_elapsed_offset_msec) / 1000.0, 0.0)
 
 
 func get_remaining_time_limit_seconds() -> float:
@@ -5775,5 +5783,5 @@ func reset_for_location_job(scenario_path: String) -> void:
 	# Reset only job execution, never the retained world, its units or Supply.
 	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
-	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec()
+	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec(); _checkpoint_elapsed_offset_msec=0
 	configure_scenario_runtime_gates_from_file(scenario_path)

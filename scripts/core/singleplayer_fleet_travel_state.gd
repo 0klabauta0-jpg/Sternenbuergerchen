@@ -272,8 +272,22 @@ func _area_reject(reason: String) -> Dictionary:
 
 # Construct a detached fleet for a world-level restore transaction. The caller
 # must rebind Root, combat and all area authorities before publishing it.
+const FLEET_CHECKPOINT_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 func export_checkpoint_state() -> Dictionary:
-	if not _space_area_contexts.is_empty() or not _space_area_bindings.is_empty(): return {"ok":false, "reason":"fleet_area_bindings_unavailable"}
+	if not _space_area_contexts.is_empty() or not _space_area_context_serials.is_empty(): return {"ok":false, "reason":"fleet_area_transition_pending"}
+	if _space_area_bindings.size() != _space_area_receipts.size(): return {"ok":false, "reason":"fleet_area_receipts_incomplete"}
+	var receipts := {}
+	for id in _space_area_bindings:
+		if typeof(id) != TYPE_STRING or not _space_area_receipts.has(id): return {"ok":false, "reason":"fleet_area_receipts_incomplete"}
+		var receipt: Dictionary = _space_area_receipts[id]
+		var binding := String(_space_area_bindings[id])
+		var context: Variant = JSON.parse_string(binding)
+		if not context is Dictionary or context.get("request_id") != id or receipt.get("context_binding") != binding or not receipt.get("result") is Dictionary: return {"ok":false, "reason":"fleet_area_receipts_incomplete"}
+		var craft_id := String(Dictionary(context.get("payload", {})).get("craft_id", ""))
+		if not _space_area_receipt_owner_valid(receipt, craft_id): return {"ok":false, "reason":"fleet_area_receipts_incomplete"}
+		var encoded := FLEET_CHECKPOINT_CODEC.encode_value(receipt.result)
+		if not encoded.ok: return encoded
+		receipts[id] = {"binding":binding, "result":encoded.value}
 	var crafts := {}
 	for id in _owners:
 		var flight: Dictionary = _owners[id].get_flight_state().get_snapshot()
@@ -281,10 +295,10 @@ func export_checkpoint_state() -> Dictionary:
 		var state: Dictionary = _owners[id].export_checkpoint_state()
 		if state.get("ok", true) == false: return state
 		crafts[id] = state
-	return {"schema":"space_fleet_checkpoint.v1", "focus":_focus, "crafts":crafts}
+	return {"schema":"space_fleet_checkpoint.v1", "focus":_focus, "crafts":crafts, "receipts":receipts}
 
 func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Dictionary:
-	if state.size() != 3 or not state.has_all(["schema", "focus", "crafts"]) or state.schema != "space_fleet_checkpoint.v1" or typeof(state.focus) != TYPE_STRING or not state.crafts is Dictionary or state.crafts.size() > 64 or state.crafts.size() != expected_crafts.size(): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+	if state.size() != 4 or not state.has_all(["schema", "focus", "crafts", "receipts"]) or state.schema != "space_fleet_checkpoint.v1" or typeof(state.focus) != TYPE_STRING or not state.crafts is Dictionary or not state.receipts is Dictionary or state.receipts.size() > 4096 or state.crafts.size() > 64 or state.crafts.size() != expected_crafts.size(): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 	if (state.crafts.is_empty() and not state.focus.is_empty()) or (not state.crafts.is_empty() and not state.crafts.has(state.focus)): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 	var seen := {}
 	for id in expected_crafts:
@@ -301,5 +315,20 @@ func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Di
 		if not prepared.get("ok", false): return prepared
 		var restored: Dictionary = owner.commit_checkpoint_restore(prepared.prepared)
 		if not restored.get("ok", false): return restored
+	for id in state.receipts:
+		var receipt: Variant = state.receipts[id]
+		if typeof(id) != TYPE_STRING or id.is_empty() or not receipt is Dictionary or receipt.size()!=2 or typeof(receipt.get("binding")) != TYPE_STRING: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		var context: Variant = JSON.parse_string(receipt.binding)
+		if not context is Dictionary or context.get("request_id") != id or not context.get("payload") is Dictionary: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		var revision: Variant = context.get("expected_travel_revision")
+		if typeof(revision) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(revision)) or floor(float(revision)) != float(revision): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		context.expected_travel_revision = int(revision)
+		if not candidate._valid_space_area_context(context) or JSON.stringify(context, "", true) != receipt.binding: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		var craft_id := String(context.payload.craft_id)
+		if not candidate._owners.has(craft_id): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		var decoded := FLEET_CHECKPOINT_CODEC.decode_value(receipt.get("result"))
+		if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		candidate._space_area_bindings[id] = receipt.binding
+		candidate._space_area_receipts[id] = {"context_binding":receipt.binding,"result":decoded.value,"travel_owner_instance_id":candidate._owners[craft_id].get_instance_id(),"travel_owner_epoch":int(candidate._owners[craft_id].get("_space_area_epoch"))}
 	candidate._focus = state.focus
 	return {"ok":true, "candidate":candidate}
