@@ -3,6 +3,7 @@ extends RefCounted
 const REGISTRY = preload("res://scripts/core/space_ship_registry.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const AREA = preload("res://scripts/core/space_area_grid.gd")
+const SHIP_SYSTEMS = preload("res://scripts/tactical/space_component_systems.gd")
 var _registry: RefCounted = REGISTRY.new()
 var _metadata: Dictionary = {}
 var _indexed_revisions: Dictionary = {}
@@ -12,6 +13,62 @@ var _navigation_claims: Dictionary = {}
 var _claim_cells: Dictionary = {}
 var _claim_revisions: Dictionary = {}
 var _inactive_actors: Dictionary = {}
+var _ship_systems: Dictionary = {}
+var _ship_impact_receipts: Dictionary = {}
+
+func bind_ship_systems(craft_id: String, stats: Dictionary, hull_capacity: float) -> Dictionary:
+	# SimulationRoot supplies actual equipment stats. A repeat must never repair
+	# or refill an existing ship; refit/lifecycle rebinding is a later contract.
+	if not _metadata.has(craft_id): return {"ok":false, "reason":"unknown_actor"}
+	if _ship_systems.has(craft_id): return {"ok":false, "reason":"systems_already_bound"}
+	var initial: Dictionary = SHIP_SYSTEMS.initial(stats, hull_capacity)
+	if not initial.get("ok", false): return initial
+	_ship_systems[craft_id] = {"stats":stats.duplicate(true), "state":initial.state.duplicate(true)}
+	return {"ok":true}
+
+func get_ship_systems(craft_id: String) -> Dictionary:
+	return Dictionary(_ship_systems.get(craft_id, {})).duplicate(true)
+
+func _commit_ship_impact(event: Dictionary) -> Dictionary:
+	# Private owner tail for a Root-resolved shot; never pass a client event here.
+	var id: Variant = event.get("id")
+	if typeof(id) != TYPE_STRING or String(id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_event"}
+	var signature := var_to_str(event)
+	if _ship_impact_receipts.has(id):
+		var receipt: Dictionary = _ship_impact_receipts[id]
+		if receipt.signature != signature: return {"ok":false, "reason":"event_id_conflict"}
+		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
+	if _ship_impact_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var shooter: Variant = event.get("shooter_id")
+	var target: Variant = event.get("hit_craft_id")
+	if typeof(shooter) != TYPE_STRING or typeof(target) != TYPE_STRING or not _metadata.has(shooter): return {"ok":false, "reason":"invalid_event"}
+	if typeof(event.get("damage")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(event.damage)) or float(event.damage) < 0.0: return {"ok":false, "reason":"invalid_event"}
+	var result := {"ok":true, "replayed":false, "hit_craft_id":target, "shield_damage":0.0, "hull_damage":0.0}
+	if not String(target).is_empty():
+		if not _ship_systems.has(target) or not _metadata.has(target) or _registry.get_actor(shooter) == null or _registry.get_actor(target) == null: return {"ok":false, "reason":"target_unavailable"}
+		if _registry.get_actor(shooter).get_snapshot().space_area_id != _registry.get_actor(target).get_snapshot().space_area_id: return {"ok":false, "reason":"different_area"}
+		var current: Dictionary = _ship_systems[target]
+		var hit: Dictionary = SHIP_SYSTEMS.apply_hit(current.stats, current.state, float(event.damage))
+		if not hit.ok: return hit
+		current.state = hit.state
+		result.shield_damage = hit.shield_damage; result.hull_damage = hit.hull_damage
+	elif float(event.damage) != 0.0:
+		return {"ok":false, "reason":"invalid_event"}
+	_ship_impact_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	return result
+
+func advance_ship_systems(delta: float) -> Dictionary:
+	if not is_finite(delta) or delta < 0.0: return {"ok":false, "reason":"invalid_tick"}
+	var proposals := {}
+	for craft_id: String in _ship_systems:
+		if _registry.get_actor(craft_id) == null: continue
+		var current: Dictionary = _ship_systems[craft_id]
+		if float(current.state.hull) <= 0.0: continue
+		var step: Dictionary = SHIP_SYSTEMS.advance(current.stats, current.state, delta)
+		if not step.ok: return step
+		proposals[craft_id] = step.state
+	for craft_id: String in proposals: _ship_systems[craft_id].state = proposals[craft_id]
+	return {"ok":true}
 
 func admit_actor(definition: Dictionary, flight: RefCounted, allow_local_fixture: bool = false) -> Dictionary:
 	# Occupancy and sweep callers still use strategic bounds. Fail closed until
@@ -111,6 +168,7 @@ func _publish_local_departure(validation: Dictionary) -> void:
 	_indexed_revisions.erase(craft_id)
 	_flight_controls.erase(craft_id)
 	_flight_status.erase(craft_id)
+	_ship_systems.erase(craft_id)
 
 func _publish_deactivation(validation: Dictionary) -> void:
 	# Root-private synchronous tail after fresh validation of every participant.

@@ -130,3 +130,20 @@ autoritativ gefilterten Kontaktindex, dem Root-Kampftick, Feuerzyklen, Schaden,
 Replaybelegen oder der UI verbunden und erzeugen keinen spielbaren Beschuss.
 Der kleine Ziel-/Schusscheck und bestehende Komponenten-, Einbau-, Atmosphären-
 und Guidanceprüfungen liefen gebündelt ohne Fehler.
+
+## Schildzustand im Kampfowner: begrenzter Anschluss
+
+Der bestehende `SpaceCombatState` kann für einen bereits registrierten Akteur
+Komponentenwerte binden, Treffer zuerst auf Schild und anschließend Hülle
+verbuchen, dieselbe Ereignis-ID einmalig behandeln und die Regeneration als
+gebündelten Tick anwenden. Er erzeugt keinen eigenen Flug- oder Equipmentowner.
+Der interne Trefferpfad darf ausschließlich vertrauenswürdige, durch Root
+aufgelöste Ereignisse erhalten. Ein isolierter Ownerlauf verbindet den
+Schussvorschlag mit einem freundlichen Abfangziel und prüft Schild, Hülle,
+Replay, Konflikt und Regeneration.
+
+Der Root initialisiert diese Systeme noch nicht produktiv, steuert ihren Tick
+nicht und leitet keine autoritativen Feuerbefehle oder Treffer weiter. Kontakt-
+sicht, Waffentakt, Energieverbrauch, Tod, Save-Lifecycle, Multiplayer und UI
+sind weiterhin offen. Diese Vorstufe ist kein spielbarer Raum- oder Luftkampf;
+die Produktsperre für neue Komponenten bleibt bestehen.
