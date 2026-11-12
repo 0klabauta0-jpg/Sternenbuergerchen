@@ -20,6 +20,7 @@ class Fob extends "res://scripts/meta/fob_screen.gd":
 	func _ready()->void:pass
 	func _process(_delta:float)->void:pass
 	func _refresh_ui_state()->void:pass
+	func _refresh_dropship_status_ui()->void:pass
 
 var passed:=0
 var failed:=0
