@@ -60,5 +60,32 @@ einen bereits bestätigten Kauf ins gewählte Schiffslager; sie ist eine reine
 UI-Animation, kein physischer Lastenaufzug und verzögert die Supplybuchung
 nicht. Funktion und Gestaltung sind noch nicht durch einen Test oder Playtest
 belegt. Bestehendes Dock und Liveflag bleiben unverändert.
+
+## Physischer Aufzug: kleiner Umsetzungsschnitt
+
+Die gewünschte Darstellung ist eine sichtbare Plattform mit Frachtkiste am
+gelandeten Schiff, die aus dem Deck hochfährt und die Kiste zum Schiff bringt.
+Die Nutzerfreigabe von Polisa R08 bleibt gestalterische Referenz; native
+Bestandsansicht `docs/qa/polisa_r08_20261111/polisa_r08_station_near.png`,
+SHA-256 `9e0cbc6ea76624f9f3d414ae69aaf5660db276b41b7c22aa83bbcfed449044a7`.
+Eigenes Ziel: kleine kantige dunkelgraue Plattform, gelb markierte Kiste und
+türkise Statusleuchten, passend zu Pad und Stationspalette. Die Geometrie wird
+als editierbares Godot-Skript erzeugt, ohne neues Fremdmodell oder Kollision.
+
+Nur ein erfolgreicher Supply-Kaufbeleg für das tatsächlich ausgewählte und
+geparkte Polisa-Schiff startet die temporäre 3D-Projektion an der vom
+TacticalController gelesenen Schiffsposition. Supply hat die Ware bereits
+einmalig gebucht; die Animation erzeugt keine Fracht, keine Reservierung und
+keine zweite Buchung und bleibt bei Replay aus. Fehlende Ansicht/Position darf
+den bestätigten Kauf nicht rückgängig machen. Mehrere Käufe dürfen keine
+unbegrenzte Zahl an Visualknoten erzeugen. Bestehende R08-Geometrie und
+Kollisions-/Navigationsdaten bleiben erhalten. Native Sichtprüfung und
+gemeinsamer Spielweg folgen gebündelt; bis dahin keine optische Abnahme.
+Der Kandidat ergänzt auf jedem R08-Pad eine flache Luke ohne neue Kollision.
+Bei bestätigtem Kauf fährt eine 3D-Plattform mit Kiste hoch und zum Schiff;
+ein weiterer Kauf startet denselben pro Schiff begrenzten Effekt neu. Die Ware
+ist bereits durch Supply gebucht; die sichtbare Bewegung ist keine verzögerte
+Warenbuchung oder Physiksimulation. Ein nativer Vorher-/Nachhervergleich und
+die tatsächliche Sichtprüfung stehen noch aus.
 AP6-Arbeiten laufen parallel; Parentstand und spätere Integration abgleichen.
 Ein headless Verlauf ist keine optische Freigabe oder Multiplayerabnahme.

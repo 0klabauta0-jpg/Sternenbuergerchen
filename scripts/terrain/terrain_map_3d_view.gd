@@ -16146,6 +16146,23 @@ func _world_to_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
 func _world_to_surface_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
 	return _world_to_3d_position(world_position, _get_world_surface_y(world_position) + y_offset)
 
+func play_polisa_cargo_lift(craft_id: String, world_position: Vector2) -> bool:
+	# Presentation only: caller supplies the real parked ship position after a
+	# confirmed purchase. One bounded transient model per ship, no collisions.
+	if not _orbital_station_view or craft_id.strip_edges().is_empty() or not world_position.is_finite() or not is_instance_valid(_world_root): return false
+	var node_name := "PolisaCargoLift_" + craft_id.validate_node_name()
+	var lift: Node3D = _world_root.get_node_or_null(NodePath(node_name))
+	if lift == null:
+		lift = load("res://scripts/terrain/polisa_cargo_lift_visual.gd").new()
+		lift.name = node_name
+		_world_root.add_child(lift)
+	# The node _ready implementation must not own the stable per-craft key.
+	lift.name = node_name
+	lift.position = _world_to_surface_3d_position(world_position, 0.0)
+	lift.call("play_delivery")
+	_request_viewport_redraw(true, 3200)
+	return true
+
 
 func _get_world_surface_y(world_position: Vector2) -> float:
 	var cell := _world_to_grid_position(world_position)

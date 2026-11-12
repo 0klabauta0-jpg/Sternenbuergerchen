@@ -1423,6 +1423,19 @@ func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
 
 
+func show_polisa_cargo_delivery(craft_id: String, request_id: String) -> bool:
+	# Read the real Supply receipt and live visit; the visual does not move goods.
+	if _supply == null or not is_instance_valid(_flow) or request_id.is_empty(): return false
+	var receipt: Dictionary = _supply.get_purchase_receipt(request_id)
+	if receipt.is_empty() or receipt.get("container_id") != "craft:" + craft_id or String(_service_context(craft_id).get("location_id", "")) != "polisa": return false
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id)
+	var controller: Node = mission.get_node_or_null("TacticalController") if is_instance_valid(mission) else null
+	if controller == null or not controller.has_method("_campaign_landed_craft_position") or not controller.has_method("_get_primary_3d_view"): return false
+	var position: Variant = controller.call("_campaign_landed_craft_position", craft_id)
+	var view: Variant = controller.call("_get_primary_3d_view")
+	if typeof(position) != TYPE_VECTOR2 or not position.is_finite() or not is_instance_valid(view) or not view.has_method("play_polisa_cargo_lift"): return false
+	return bool(view.call("play_polisa_cargo_lift", craft_id, position))
+
 func get_station_ship_purchase(craft_id: String) -> Dictionary:
 	return _supply.get_station_ship_purchase(craft_id) if _supply != null else {}
 

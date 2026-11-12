@@ -134,6 +134,13 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
 	return result
 
+func get_purchase_receipt(request_id: String) -> Dictionary:
+	# Visual clients may read only the confirmed result, never mutate inventory.
+	var entry: Dictionary = _requests.get(request_id, {})
+	var result: Dictionary = entry.get("result", {})
+	if result.get("operation") != "buy" or result.get("request_id") != request_id: return {}
+	return result.duplicate(true)
+
 func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location_id: String = String(context.get("location_id", ""))
 	var offer_id: String = String(payload.get("offer_id", ""))
