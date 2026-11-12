@@ -36,11 +36,14 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Sourceproducer6a+d184 als7fd42e2b6/e0f58b924 integriert, frisch66/0 und73/0
   Controller samt Guards. Echter Controller/Cutlassgetter/Renderjoin6/0 als
   7eff857f5 gesichert. Basiskern Sourcecd830 alsf8238ee28 integriert, frisch63/0
-  plus64/0 Lifecycle. Remotehandoff-/Padmethoden erhalten. Boarding/Unboardf0c
-  noch nicht importiert: echter Screen-Callback vor Groundcommit und einzelne
-  Base-Signale brauchen gemeinsame stille Gruppenpublikation. Neue Screen-
-  Prepared-Bruecke entsteht im Parent; Root/Base-Tail bei Tabletop. Danach
-  MissionSetup/Respawn und LiveMember-Retirement weiter zusammenfuehren.
+  plus64/0 Lifecycle. Remotehandoff-/Padmethoden erhalten. Gemeinsames
+  Boarding/Unboard ist bis3694d35e6/f838c739e integriert: stille Gruppen- und
+  Screenpublikation, echte Screenprobe46/0 und Boarding53/0.
+  Initiales MissionSetup Source306 als125a905b4 integriert, frisch62/0 plus
+  Owner56/0 und Actornachbar24/0; erwartete Schema-Rejectwarnungen dokumentiert.
+  Wellen785+c4f sind in enger Review, anschliessend Import. ActorMedicalaf56
+  stellt vorbereitete stille Gesundheits-/Befehls-/Kontaktpatches bereit (24/0);
+  Root-/Ground-/Respawnmanagerverbund und Member-Retirement bleiben bei Tabletop.
 - AP7 Ground524fd61d1 plusPassage8d333eb95: atomarer kanonischer Roundtrip mit
   Terrainrevalidierungsgrenze und ganzen aktiven Kohorten;35/0 nach gemeinsamem
   64-Topologiebudgetfix und unabhaengigem Review. PendingAdmissions bleiben
@@ -52,7 +55,10 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   MPContract0bef0e658 prueft
   explizite Version vor Normalisierung und verbietet Client-Groundstate rekursiv;
   10/0 plus20/0 betroffener Nachbar, zwei Compiles0. Keine Peer-Sichtfilter dadurch.
-  Neuer reiner V2-Fullscope-Publishfilter ist in Review, noch unverdrahtet.
+  Reiner V2-Fullscope-Publishfilter0134f53ae ist reviewed (20/0), noch unverdrahtet.
+  Root-Lifecyclecommandstempel werden im portablen Movementexport nur nach
+  echter Rootvalidierung ausgelassen (2eab1f01b,9/0). Session-/Lobbylaufzeitkontext
+  entsteht separat; Rootbinder, Hostpublisher und Receiver folgen bei Tabletop.
   Er benoetigt originale Hostdaten mit Kopplungsreferenzen; nach verlustbehafteter
   V1-Normalisierung ist keine sichere Positionszuordnung mehr moeglich.
   Restore-/Authoritygrenzen folgen abgestimmt mit vorhandenen Checkpoint-
@@ -60,8 +66,10 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
 - AP8 danach: kleiner opt-in Integrationsslice gemaess Hexplan, keine globale
   Aktivierung der grossen A/B/C-Karten. AP6 bis AP8 sind NICHT abgeschlossen.
-  Teilfixtureae1b543f7 verbindet auf12Hexes echte Bewegung/Rampe/Tuer/Sicht/
-  Schusspruefung/Ankunft,8/0; AP7Restore fehlt, daher ausdruecklich full_ap8=false.
+  Teilfixture8f3b18a2e verbindet auf12Hexes echte Bewegung/Rampe/Tuer/Sicht/
+  Schusspruefung/Ankunft samt Ground-/Movement-Passageroundtrip,15/0.
+  Rootcheckpoint, Hostpublisher, Receiver und echte Peers fehlen weiterhin:
+  ausdruecklich full_ap8=false. Keine grosse Kartenaktivierung.
 
 Belege: docs/qa/tabletop_restplan_integration_20261111; aktueller Hexplan
 unter docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md.

@@ -1,0 +1,235 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (71 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AdHocOrder[39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | AreaOrder[39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | CommanderCommand[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | CommanderIntent[39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | LoadoutContract[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | DamageModel[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | ObjectiveStatus[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | PersonnelLoadoutState[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | RespawnManager[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | SimulationRoot[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | HexGroundAdmission[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | MultiplayerCommandContract[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | MultiplayerRosterContract[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSnapshotContract[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | TestUnit[39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | UnitProfileMath[39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | UnitRuntimeStatus[39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | UnitSkills[39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | UnitTrait[39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | UnitVitalStatus[39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | UnitRegistry[39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | EnemyTeamTacticsProfile[39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | LocalAvoidanceResolver[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | HPANavigationGraph[39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | HPAPathfinder[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | TerrainMapData[39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | TerrainMarkerCatalog[39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | TerrainTextureCatalog[39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (33 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | cutlass_01.glb[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | colormap.png[39m[0m
+[   5% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_NE.png[39m[0m
+[   8% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_NW.png[39m[0m
+[  11% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_SE.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | corridor_wallCorner_SW.png[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | corridor_wall_NE.png[39m[0m
+[  20% ] [90m[1m_update_scan_actions[22m | corridor_wall_NW.png[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | corridor_wall_SE.png[39m[0m
+[  26% ] [90m[1m_update_scan_actions[22m | corridor_wall_SW.png[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | rock_largeB_SW.png[39m[0m
+[  32% ] [90m[1m_update_scan_actions[22m | rock_SW.png[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_NE.png[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_NW.png[39m[0m
+[  41% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_SE.png[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | terrain_rampLarge_SW.png[39m[0m
+[  47% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_NE.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_NW.png[39m[0m
+[  52% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_SE.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | terrain_sideCliff_SW.png[39m[0m
+[  58% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_NE.png[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_NW.png[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_SE.png[39m[0m
+[  67% ] [90m[1m_update_scan_actions[22m | terrain_sideCorner_SW.png[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | terrain_side_NE.png[39m[0m
+[  73% ] [90m[1m_update_scan_actions[22m | terrain_side_NW.png[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | terrain_side_SE.png[39m[0m
+[  79% ] [90m[1m_update_scan_actions[22m | terrain_side_SW.png[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | terrain_SW.png[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | blaster-a.png[39m[0m
+[  88% ] [90m[1m_update_scan_actions[22m | blaster-b.png[39m[0m
+[  91% ] [90m[1m_update_scan_actions[22m | rocketlauncherModern.png[39m[0m
+[  94% ] [90m[1m_update_scan_actions[22m | sniper.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (33 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   5% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   8% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  11% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  20% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  26% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  41% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  58% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  73% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  79% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | sniper.png[39m[0m
+[   2% ] [90m[1mreimport[22m | rocketlauncherModern.png[39m[0m
+[   5% ] [90m[1mreimport[22m | blaster-b.png[39m[0m
+[   8% ] [90m[1mreimport[22m | blaster-a.png[39m[0m
+[  11% ] [90m[1mreimport[22m | terrain_SW.png[39m[0m
+[  14% ] [90m[1mreimport[22m | terrain_side_SW.png[39m[0m
+[  17% ] [90m[1mreimport[22m | terrain_side_SE.png[39m[0m
+[  20% ] [90m[1mreimport[22m | terrain_side_NW.png[39m[0m
+[  23% ] [90m[1mreimport[22m | terrain_side_NE.png[39m[0m
+[  26% ] [90m[1mreimport[22m | terrain_sideCorner_SW.png[39m[0m
+[  29% ] [90m[1mreimport[22m | terrain_sideCorner_SE.png[39m[0m
+[  32% ] [90m[1mreimport[22m | terrain_sideCorner_NW.png[39m[0m
+[  35% ] [90m[1mreimport[22m | terrain_sideCorner_NE.png[39m[0m
+[  38% ] [90m[1mreimport[22m | terrain_sideCliff_SW.png[39m[0m
+[  41% ] [90m[1mreimport[22m | terrain_sideCliff_SE.png[39m[0m
+[  44% ] [90m[1mreimport[22m | terrain_sideCliff_NW.png[39m[0m
+[  47% ] [90m[1mreimport[22m | colormap.png[39m[0m
+[  50% ] [90m[1mreimport[22m | corridor_wallCorner_NE.png[39m[0m
+[  52% ] [90m[1mreimport[22m | corridor_wallCorner_NW.png[39m[0m
+[  55% ] [90m[1mreimport[22m | corridor_wallCorner_SE.png[39m[0m
+[  58% ] [90m[1mreimport[22m | corridor_wallCorner_SW.png[39m[0m
+[  61% ] [90m[1mreimport[22m | corridor_wall_NE.png[39m[0m
+[  64% ] [90m[1mreimport[22m | corridor_wall_NW.png[39m[0m
+[  67% ] [90m[1mreimport[22m | corridor_wall_SE.png[39m[0m
+[  70% ] [90m[1mreimport[22m | corridor_wall_SW.png[39m[0m
+[  73% ] [90m[1mreimport[22m | rock_largeB_SW.png[39m[0m
+[  76% ] [90m[1mreimport[22m | rock_SW.png[39m[0m
+[  79% ] [90m[1mreimport[22m | terrain_rampLarge_NE.png[39m[0m
+[  82% ] [90m[1mreimport[22m | terrain_rampLarge_NW.png[39m[0m
+[  85% ] [90m[1mreimport[22m | terrain_rampLarge_SE.png[39m[0m
+[  88% ] [90m[1mreimport[22m | terrain_rampLarge_SW.png[39m[0m
+[  91% ] [90m[1mreimport[22m | terrain_sideCliff_NE.png[39m[0m
+[  94% ] [90m[1mreimport[22m | cutlass_01.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  97% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (33 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-Orbit-94a902da022e481da2ec4860215037fa
+PASS Real TestUnit exposes additive prepared medical bridge
+PASS Prepare uses real models without mutating vitals/runtime/command/pose
+PASS No medical callbacks before actor publication
+PASS BEGIN publishes every actual actor model silently and leaves WORLDposition unchanged
+PASS BEGIN preserves legacy lastDamage and does not mutate previous model objects
+PASS BEGIN actual signal order/reentry and existing visual angle with unchanged WORLDposition
+PASS Consumed BEGIN cannot publish or emit twice
+PASS COMPLETE model tail has neither signals nor pose notifications
+PASS COMPLETE projects canonical WORLDposition under transformed parent
+PASS COMPLETE preserves legacy vital then runtime order with fully consistent models
+PASS Actual Canvas transform notifications occur only after model barrier
+PASS Fit actor is ineligible for either medical transition
+PASS Inplace real Vitals mutation invalidates preparation
+PASS Inplace real Command mutation invalidates preparation
+PASS Actual Root lifecycle change invalidates actor preparation
+PASS Another real Root without exact registry binding cannot prepare actor
+PASS Opaque preparation cannot be used on a different real actor
+PASS Existing real bleedout also eligible for BEGIN
+PASS Nonfinite WORLDposition rejects before any model write
+PASS Real reentrant damage prevents stale remaining runtime event or reset
+PASS Lifecycle-only Root change permits legitimate respawn finalize
+PASS Same Root and Registry rebound before finalize suppresses old WORLDpose and all events
+PASS Context rebound inside COMPLETE first callback suppresses stale remaining event and pose
+PASS Context rebound inside BEGIN first callback suppresses stale vital event
+ACTOR_PREPARED_RESPAWN passed=24 failed=0

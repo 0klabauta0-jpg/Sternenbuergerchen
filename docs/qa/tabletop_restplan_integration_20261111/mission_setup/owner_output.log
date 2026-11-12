@@ -1,0 +1,165 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (55 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | AdHocOrder[39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | AreaOrder[39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | CommanderCommand[39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | CommanderIntent[39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | LoadoutContract[39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | DamageModel[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | HexDetectionState[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | HexGroundRuntime[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | HexMovementCommandRuntime[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | HexVisibilityQuery[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | LineOfSightSystem[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | ObjectiveStatus[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | PersonnelLoadoutState[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | SimulationRoot[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | CombatVisibilityCache[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | HexGroundAdmission[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | MultiplayerCommandContract[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | MultiplayerRosterContract[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | MultiplayerSnapshotContract[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | UnitCommand[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | UnitProfileMath[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | BottleneckReservationResolver[39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | EnemyTeamTacticsProfile[39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | LocalAvoidanceResolver[39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | HexCorridorTopologyCache[39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | HexGrid[39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | HPANavigationGraph[39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | HPAPathfinder[39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | TerrainMapData[39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | TerrainMarkerCatalog[39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | TerrainPathfinder[39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | TerrainRegistry[39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | TerrainTextureCatalog[39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | TerrainTileCatalog[39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | TerrainTileData[39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | TerrainTruthAudit[39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-93043491f2d04368bcaf40d980149d94
+PASS: versioned MapData and SimulationRoot owner APIs exist
+PASS: missing flag remains legacy
+PASS: nonregional height sentinel cannot reject a valid tactical hex map
+PASS: legacy does not activate ground runtime
+PASS: inactive owner rejects admission
+WARNING: Unsupported tactical_grid_rules 'hex_tactical_v2'
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] load_from_file (res://scripts/terrain/terrain_map_data.gd:76)
+       [1] _write_map (res://scripts/tests/hex_ground_owner_verifier.gd:43)
+       [2] _run (res://scripts/tests/hex_ground_owner_verifier.gd:68)
+PASS: invalid tactical metadata reports load issue
+PASS: invalid map cannot configure owner
+PASS: aborted load remains invalid after changing its version flag
+WARNING: tactical_grid_rules must be a String
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] load_from_file (res://scripts/terrain/terrain_map_data.gd:76)
+       [1] _write_map (res://scripts/tests/hex_ground_owner_verifier.gd:43)
+       [2] _run (res://scripts/tests/hex_ground_owner_verifier.gd:68)
+PASS: invalid tactical metadata reports load issue
+PASS: invalid map cannot configure owner
+PASS: aborted load remains invalid after changing its version flag
+WARNING: tactical_grid_rules must be a String
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] load_from_file (res://scripts/terrain/terrain_map_data.gd:76)
+       [1] _write_map (res://scripts/tests/hex_ground_owner_verifier.gd:43)
+       [2] _run (res://scripts/tests/hex_ground_owner_verifier.gd:68)
+PASS: invalid tactical metadata reports load issue
+PASS: invalid map cannot configure owner
+PASS: aborted load remains invalid after changing its version flag
+WARNING: tactical_grid_rules 'hex_tactical_v1' requires hex_axial_v1
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] load_from_file (res://scripts/terrain/terrain_map_data.gd:76)
+       [1] _write_map (res://scripts/tests/hex_ground_owner_verifier.gd:43)
+       [2] _run (res://scripts/tests/hex_ground_owner_verifier.gd:68)
+PASS: invalid tactical metadata reports load issue
+PASS: invalid map cannot configure owner
+PASS: aborted load remains invalid after changing its version flag
+PASS: regional v3 compatibility preserved
+PASS: flagged map saved
+PASS: tactical and ramp metadata roundtrip
+PASS: explicit valid context activates owner
+PASS: owner admits exclusive placement
+PASS: owner reads precise ramp stand height
+PASS: root projection accepts renderer height scale without changing logical half-height
+PASS: planning snapshot reads current owner tick
+PASS: read snapshot cannot mutate or silently synchronize the movement clock
+PASS: actual root physics synchronizes the ground clock and permits atomic commit
+PASS: root accepts real ramp traversal promises
+PASS: root clock keeps source ownership before midpoint
+PASS: root publishes authoritative midpoint field change
+PASS: root retains the active edge until its actual end
+PASS: null map preserves active context
+PASS: empty or missing legacy map cannot clear active context
+PASS: empty or missing legacy map cannot clear active context
+WARNING: Unsupported tactical_grid_rules 'future'
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] load_from_file (res://scripts/terrain/terrain_map_data.gd:76)
+       [1] _write_map (res://scripts/tests/hex_ground_owner_verifier.gd:43)
+       [2] _run (res://scripts/tests/hex_ground_owner_verifier.gd:116)
+PASS: failed configure preserves active context
+PASS: mismatched registry preserves active context
+PASS: owner read cannot mutate state or create IDs
+PASS: owner releases placement
+PASS: removing opt-in cleanly selects legacy
+PASS: setter cannot silently accept unknown version
+PASS: invalid tactical metadata cannot be saved
+PASS: valid setter repairs tactical metadata issue
+PASS: authority fixture starts with valid owner state
+PASS: authority policy rejects configuration and admission
+PASS: authority policy rejects coupled stops without mutation
+PASS: authority policy rejects release without mutation
+PASS: authority policy rejects reservation commit without mutation
+PASS: square map without tactical flag remains valid
+PASS: setter enforces hex topology too
+PASS: actual Astar accepts an opened runtime ramp door in both directions
+PASS: runtime passability never opens a ramp flank
+PASS: actual HPA crosses a cluster portal through the opened ramp door
+PASS: actual Root stepguard admits open ramp axis and rejects lateral cliff
+PASS: closed runtime door blocks source and destination step guards
+PASS: root stop publishes cancellation while projection remains continuous
+PASS: root clock centers a stopped unit without executing old handoff
+RESULTS: 56 passed, 0 failed
+HEX_GROUND_OWNER_PASS
