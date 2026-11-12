@@ -80,8 +80,21 @@ func _initialize() -> void:
 	assert(sim.admit_campaign_space_contacts("ship", {"runtime_authorized":true}).ok)
 	assert(combat.get_actor("hostile_cutlass") != null and combat.get_actor("neutral_buccaneer") != null)
 	assert(not sim.admit_campaign_space_contacts("ship", {"runtime_authorized":true}).ok)
+	adapter._space_encounter = encounter
+	assert(not adapter.request_operation("campaign_space_engage", {"target_id":"buccaneer"}).ok)
+	assert(adapter.request_operation("campaign_space_engage", {}).ok)
+	var before_shield: float = combat.get_ship_systems("hostile_cutlass").state.shield
+	sim.tick_counter += 1
+	adapter.advance_space_travel(0.1)
+	assert(combat.get_ship_systems("hostile_cutlass").state.shield < before_shield)
 	assert(encounter.apply_command({"contract_category":"campaign_space", "operation":"advance", "payload":{"delta_seconds":1.0}}, {"runtime_authorized":true}).ok)
 	assert(encounter.get_snapshot().cutlass_hull == combat.get_ship_systems("hostile_cutlass").state.hull)
+	for step in range(40):
+		if encounter.get_snapshot().phase != "combat": break
+		assert(combat.advance_ship_systems(0.5).ok)
+		sim.tick_counter += 1
+		adapter.advance_space_travel(0.5)
+	assert(encounter.get_snapshot().phase == "rescue_ready" and combat.get_ship_systems("neutral_buccaneer").state.hull > 0.0)
 	assert(combat.remove_actor("hostile_cutlass") and combat.remove_actor("neutral_buccaneer"))
 	# Fixture injury: verify an actual warp transition cannot silently repair it.
 	sim.get("_space_combat_state").get("_ship_systems").ship.state.hull = 77.0

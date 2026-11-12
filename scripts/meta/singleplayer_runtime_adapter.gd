@@ -265,6 +265,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	data.erase("request_id")
 	if operation in ["campaign_space_engage","campaign_space_rescue","campaign_space_retreat"]:
 		var op := String(operation).trim_prefix("campaign_space_")
+		if op == "engage" and _space_encounter != null and _space_encounter.get("_combat_owner") != null:
+			if String(data.get("target_id", "cutlass")) != "cutlass": return _reject("invalid_hostile_target", "Nur die feindliche Cutlass kann angegriffen werden")
+			var ordered: Dictionary = _simulation.request_campaign_space_engage(String(_space_encounter.get_snapshot().get("craft_id", "")), {"runtime_authorized":true})
+			if not ordered.get("ok", false): return ordered
 		var result := _commit("campaign_space",op,data,request_id)
 		_finish_space_encounter_result()
 		return result
@@ -776,6 +780,7 @@ func advance_space_travel(delta: float) -> void:
 					else:
 						_warp_arrival_feedback[craft_id] = {"status":"searching" if arrival.get("ok", false) else "waiting", "reason":String(arrival.get("reason", ""))}
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
+		_simulation.advance_campaign_space_fire({"runtime_authorized":true})
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
 		_finish_space_encounter_result()
 

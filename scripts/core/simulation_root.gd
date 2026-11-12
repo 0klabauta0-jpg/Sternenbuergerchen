@@ -1996,6 +1996,13 @@ func admit_campaign_space_contacts(craft_id: String, authority_context: Dictiona
 				if not _space_combat_state.query_cells(query, pose.space_area_id).is_empty() or not _space_combat_state.query_navigation_claims(query, pose.space_area_id).is_empty(): continue
 				candidates.append(cell)
 	if candidates.size() < 2: return {"ok":false, "reason":"no_encounter_space"}
+	# Prefer a visible approach in front of the player; the repeater's real arc
+	# still decides whether an individual shot can be fired.
+	var forward := Vector2.from_angle(float(pose.heading_rad))
+	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		var da: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(a)) - pose.position_plane
+		var db: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(b)) - pose.position_plane
+		return da.normalized().dot(forward) > db.normalized().dot(forward))
 	var prepared: Array[Dictionary] = []
 	var specs := [{"id":"hostile_cutlass", "model":"cutlass", "domain":"enemy", "faction":"hostile"}, {"id":"neutral_buccaneer", "model":"buccaneer", "domain":"neutral", "faction":"neutral"}]
 	for i in range(specs.size()):
@@ -2018,6 +2025,44 @@ func admit_campaign_space_contacts(craft_id: String, authority_context: Dictiona
 	var binding: Dictionary = bind_campaign_space_combat({"player":craft_id, "hostile":"hostile_cutlass", "neutral":"neutral_buccaneer"}, authority_context)
 	assert(binding.get("ok", false))
 	return {"ok":true, "hostile":"hostile_cutlass", "neutral":"neutral_buccaneer"}
+
+func request_campaign_space_engage(craft_id: String, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if _space_encounter_owner == null or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return {"ok":false, "reason":"encounter_not_bound"}
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	if encounter.get("phase") != "combat" or encounter.get("craft_id") != craft_id: return {"ok":false, "reason":"invalid_encounter"}
+	var player: RefCounted = _space_combat_state.get_actor(craft_id)
+	var enemy: RefCounted = _space_combat_state.get_actor("hostile_cutlass")
+	if player == null or enemy == null or _singleplayer_space_travel_owner == null or _singleplayer_space_travel_owner.get_flight_state(craft_id) != player or not is_instance_valid(_base_personnel_owner) or not _base_personnel_owner.is_pilot_aboard(craft_id): return {"ok":false, "reason":"player_unavailable"}
+	var pose: Dictionary = player.get_snapshot(); var target: Dictionary = enemy.get_snapshot()
+	if pose.space_area_id != target.space_area_id or pose.coordinate_frame != "local": return {"ok":false, "reason":"different_area"}
+	var layout: Dictionary = ORBIT_LAYOUT.build(String(pose.space_area_id).trim_prefix("orbit_approach:").uri_decode())
+	if not layout.get("ok", false) or layout.body_map_id != pose.space_area_id: return {"ok":false, "reason":"invalid_encounter_area"}
+	var opaque: Array = []
+	for cell in layout.body_cells: opaque.append(SPACE_GRID.from_offset(cell))
+	var own_faction := String(_space_combat_state.get_metadata(craft_id).get("faction_id", ""))
+	var enemy_faction := String(_space_combat_state.get_metadata("hostile_cutlass").get("faction_id", ""))
+	var actors := {craft_id:{"id":craft_id, "position":pose.position_plane, "heading_rad":pose.heading_rad, "faction_id":own_faction, "area_id":pose.space_area_id, "sensor_range":12.0}, "hostile_cutlass":{"id":"hostile_cutlass", "position":target.position_plane, "heading_rad":target.heading_rad, "faction_id":enemy_faction, "area_id":target.space_area_id}}
+	var contacts: Dictionary = SPACE_TARGETING.collect_contacts({"actors":actors, "opaque_cells":opaque}, own_faction)
+	if not contacts.get("ok", false) or not contacts.contacts.has("hostile_cutlass"): return {"ok":false, "reason":"unknown_target"}
+	var wing_id: String = _space_wing_state.get_craft_wing(craft_id, "singleplayer")
+	if wing_id.is_empty(): return {"ok":false, "reason":"wing_required"}
+	var rev: int = _space_wing_state.get_snapshot().revision
+	var command := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"campaign-attack:%s:%d" % [craft_id, rev], "expected_revision":rev, "payload":{"wing_ids":[wing_id], "verb":"attack_target", "target_id":"hostile_cutlass", "fire_rule":"free"}}
+	return _space_wing_state.apply_command(command, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":contacts.contacts, "coordinate_frame":"local", "space_area_id":pose.space_area_id})
+
+func advance_campaign_space_fire(authority_context: Dictionary) -> void:
+	if _should_skip_local_tick_processing() or authority_context.get("runtime_authorized") != true or _space_encounter_owner == null or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return
+	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
+	if encounter.get("phase") != "combat" or encounter.get("engaging") != true: return
+	var craft_id := String(encounter.get("craft_id", ""))
+	var systems: Dictionary = _space_combat_state.get_ship_systems(craft_id)
+	if systems.is_empty(): return
+	for weapon: Dictionary in systems.stats.weapons:
+		var slot := String(weapon.slot_id)
+		if float(systems.cooldowns.get(slot, 0.0)) > 0.0: continue
+		request_singleplayer_space_fire({"request_id":"campaign-shot:%s:%d:%s" % [craft_id, tick_counter, slot], "craft_id":craft_id, "target_id":"hostile_cutlass", "weapon_slot":slot}, {"runtime_authorized":true, "actor_id":"singleplayer"})
 
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if command.get("contract_category") == "space_combat" and _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}

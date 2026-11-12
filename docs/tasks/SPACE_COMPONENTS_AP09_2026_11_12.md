@@ -161,6 +161,15 @@ der bestehenden Reise samt Rückweg und ein echter Feuerauftrag im Missions-UI.
 Die Mission bleibt deshalb auf dem bisherigen Ablauf; es wurde keine produktive
 Umstellung oder spielbare Raumkampfmission nachgewiesen.
 
+Im bereits gebundenen Testpfad setzt der Missionsbefehl `engage` nun einen
+Rottenangriff auf die feindliche Cutlass. Der Adapter lässt im Kampftick die
+installierten Waffen über den bestehenden Root-Schussweg feuern; Sensoren,
+Feuerwinkel, Energie, Feuerrate und Schild-/Hüllenwirkung gelten dabei weiter.
+Der Warpfixture-Test erreicht die Rettungsphase durch echte Treffereignisse.
+Dies umfasst weder den produktiven Reiseeintritt noch gegnerisches Feuer oder
+den Rückweg des lokal gebundenen Schiffs. Der produktive Missionsstart bleibt
+auf dem alten Ablauf. Bodenkarten-Luftunterstützung bleibt ebenfalls offen.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf
