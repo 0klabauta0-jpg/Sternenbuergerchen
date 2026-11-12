@@ -1,0 +1,5 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-22fa702649774a79a5e033f8bec3ba90
+MEDICAL_COMPLETED_CONSUMER_ORDER {"broadcasts":["a DOWN","a RESPAWNING","a DOWN","a RESPAWN READY"],"event":"a RESPAWN READY","order":["first_subscriber","driver"],"proof":{"linger_after":false,"linger_before":true,"medical":true},"reproduced":true,"vital":"down"}
+MEDICAL_COMPLETED_CONSUMER_RED_REPRODUCED
