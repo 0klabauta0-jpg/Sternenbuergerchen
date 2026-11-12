@@ -1955,6 +1955,16 @@ func configure_space_runtime_tick(callback: Callable) -> void:
 func configure_space_encounter(owner: RefCounted) -> void:
 	_space_encounter_owner = owner
 
+func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) -> Dictionary:
+	# Admission is a separate transaction; bind only existing authoritative
+	# actors and the exact fleet flight, never client-provided health data.
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if _space_encounter_owner == null or _singleplayer_space_travel_owner == null or typeof(ids.get("player")) != TYPE_STRING: return {"ok":false, "reason":"encounter_unavailable"}
+	if ids.get("hostile") != "hostile_cutlass" or ids.get("neutral") != "neutral_buccaneer": return {"ok":false, "reason":"invalid_encounter_actors"}
+	if _singleplayer_space_travel_owner.get_flight_state(ids.player) != _space_combat_state.get_actor(ids.player): return {"ok":false, "reason":"not_owned"}
+	return _space_encounter_owner.bind_combat_owner(_space_combat_state, ids)
+
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if command.get("contract_category") == "space_combat" and _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	# Only the owning runtime adapter supplies authority_context. UI payload is

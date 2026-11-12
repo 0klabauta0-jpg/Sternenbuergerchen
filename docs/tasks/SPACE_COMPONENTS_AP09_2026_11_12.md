@@ -140,6 +140,16 @@ Kampagnenablauf und die Rettungsbelohnung brauchen eine Regression. Erst ein
 durchgehender Lauf über die echte Mission belegt den Anschluss; Fixture-Gegner
 oder blosse Missionsmetadaten genügen nicht. Dieser Anschluss ist noch offen.
 
+Zwischenstand: `SimulationRoot.bind_campaign_space_combat` kann eine laufende
+Begegnung an drei bereits registrierte Raumkampfschiffe binden. Der Missionsowner
+liest dann deren Hülle aus `SpaceCombatState`, beendet das Gefecht erst bei
+tatsächlich zerstörter Cutlass und wertet Verlust des eigenen Schiffes oder der
+neutralen Buccaneer als Niederlage. Fehlende oder getrennte Akteure ergeben
+keinen Sieg; der gebundene Pfad verursacht selbst keinen Dauerschaden. Der
+Ownercheck verwendet echte Kampfowner mit Testschiffen. Missionsstart,
+produktive Schiffszulassung, Feuerbefehle und Rückweg rufen die Bindung noch
+nicht auf; die reguläre Mission verwendet weiterhin ihren bisherigen Ablauf.
+
 Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
 Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
 deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf
