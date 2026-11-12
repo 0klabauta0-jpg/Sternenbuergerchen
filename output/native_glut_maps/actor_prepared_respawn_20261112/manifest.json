@@ -1,0 +1,13 @@
+{
+  "scope": "Additive actual Actor prepared medical models; Source Root/Ground/Manager join separate",
+  "checks": "24/0",
+  "red_run": "actor_respawn-1789dc73b403493a8e23e2480e5c6789",
+  "green_run": "actor_respawn-168309dc325241249aaf454cbe9d582d",
+  "sha256": {
+    "scripts/npc/test_unit.gd": "32239fb95889d6134f855a37cac4d4bd22baa0e67b11884b506de4d8777b05fa",
+    "docs/tasks/ACTOR_PREPARED_RESPAWN_2026_11_12.md": "078afbc3abb9ff91fe84d71c402a11fa59ef21dc89bfa950007f3b7eff4b6efe",
+    "output/native_glut_maps/actor_prepared_respawn_20261112/check.gd": "ab7d3d5868f38e631699f4387ce65637b0c5f8af122ce09a833cc3bce75f050b",
+    "output/native_glut_maps/actor_prepared_respawn_20261112/run.py": "42536d5634c4157d44eb0816b209bfa8e4d4afa781d0073f0e8dfdc486d8b1b7"
+  },
+  "review_red_run": "actor_respawn-779403e5bc3a4b6d888fead5f4cd1199"
+}

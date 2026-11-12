@@ -1781,3 +1781,118 @@ func _coerce_trait_ids(value: Variant) -> PackedStringArray:
 
 func _get_behavior_axis(axis_name: String) -> float:
 	return clampf(float(Dictionary(_character_profile_bundle.get("behavior_axes", {})).get(axis_name, 0.0)), 0.0, 1.0)
+
+
+# Prepared medical actor model transition. Root owns ticket/ground/manager commit.
+class PreparedActorRespawn extends RefCounted:
+	pass
+var _prepared_actor_respawns:Dictionary={}
+var _actor_respawn_epoch:=0
+
+func prepare_actor_respawn(owner:Node,transition:String,world_position:Vector2=Vector2.ZERO)->Dictionary:
+	if transition not in ["begin","complete"] or not world_position.is_finite():return {"ok":false,"reason":"invalid_actor_respawn_transition"}
+	if not _actor_respawn_owner_matches(owner):return {"ok":false,"reason":"actor_respawn_owner_unbound"}
+	if not _actor_respawn_models_valid():return {"ok":false,"reason":"actor_respawn_invalid_models"}
+	var source_state:String=String(_vital_status.state)
+	if source_state not in (["down","bleedout"] if transition=="begin" else ["down","bleedout","respawning"]):return {"ok":false,"reason":"actor_respawn_not_eligible"}
+	if not _actor_respawn_frame_valid():return {"ok":false,"reason":"actor_respawn_invalid_frame"}
+	for key in _prepared_actor_respawns.keys():
+		var old:Dictionary=_prepared_actor_respawns[key]
+		if old.handle.get_ref()==null or old.epoch!=_actor_respawn_epoch:_prepared_actor_respawns.erase(key)
+	if _prepared_actor_respawns.size()>=32:return {"ok":false,"reason":"actor_respawn_prepare_capacity"}
+	var runtime:RefCounted=_build_runtime_status("idle")
+	var vital:RefCounted=_build_vital_status("respawning" if transition=="begin" else "fit",get_health() if transition=="begin" else max_health_points,int(_vital_status.bleedout_ticks) if transition=="begin" else 0)
+	if not runtime.is_valid() or not vital.is_valid():return {"ok":false,"reason":"actor_respawn_invalid_patch"}
+	var source:Dictionary=_actor_respawn_binding(owner)
+	var post:Dictionary=_actor_respawn_model_stamp()
+	post.runtime_id=runtime.get_instance_id();post.runtime=runtime.to_dict().duplicate(true)
+	post.vital_id=vital.get_instance_id();post.vital=vital.to_dict().duplicate(true)
+	post.command_id=0;post.command={};post.contact_active=false;post.contact_target=""
+	var damage:Dictionary=_last_damage_context.duplicate(true) if transition=="begin" else {}
+	post.damage=damage.duplicate(true)
+	var handle:=PreparedActorRespawn.new()
+	_prepared_actor_respawns[handle.get_instance_id()]={"handle":weakref(handle),"owner":weakref(owner),"epoch":_actor_respawn_epoch,"phase":"prepared","transition":transition,"source":source,"post_models":post,"runtime":runtime,"vital":vital,"damage":damage,"world_position":world_position,"parent_id":get_parent().get_instance_id(),"registry_id":owner.get_unit_registry().get_instance_id()}
+	return {"ok":true,"prepared":handle}
+
+func validate_prepared_actor_respawn(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_actor_respawn_record(prepared)
+	if record.is_empty():return {"ok":false,"reason":"unknown_actor_respawn"}
+	if record.phase!="prepared" or record.epoch!=_actor_respawn_epoch:return {"ok":false,"reason":"actor_respawn_already_published"}
+	var owner:Node=record.owner.get_ref()
+	if not _actor_respawn_owner_matches(owner) or not _actor_respawn_models_valid() or not _actor_respawn_frame_valid() or _actor_respawn_binding(owner)!=record.source:return {"ok":false,"reason":"actor_respawn_context_changed"}
+	return {"ok":true,"prepared_id":prepared.get_instance_id()}
+
+# Call only after the whole Root transaction validates before any model writes.
+# Pose/Visual setters may notify Canvas observers and therefore belong to finalize.
+func _publish_prepared_actor_respawn(prepared:RefCounted,_validation:Dictionary)->Dictionary:
+	var record:Dictionary=_prepared_actor_respawns[prepared.get_instance_id()]
+	_runtime_status=record.runtime
+	_vital_status=record.vital
+	_current_unit_command=null
+	_contact_active=false
+	_contact_target_id=""
+	_last_damage_context=record.damage
+	record.phase="published"
+	_actor_respawn_epoch+=1
+	return {"ok":true}
+
+func finalize_actor_respawn(prepared:RefCounted)->Dictionary:
+	var record:Dictionary=_actor_respawn_record(prepared)
+	if record.is_empty():return {"ok":false,"reason":"unknown_actor_respawn"}
+	if record.phase=="finalized":return {"ok":true,"replayed":true}
+	if record.phase!="published":return {"ok":false,"reason":"actor_respawn_not_published"}
+	record.phase="finalized" # Before pose notifications or any signal/reentry.
+	var lifetime:WeakRef=weakref(self)
+	if not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	if record.transition=="complete":global_position=record.world_position
+	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	_apply_vital_visual()
+	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	# Existing medical event order, with every model already complete beforehand.
+	if record.transition=="begin":runtime_status_changed.emit(_runtime_status)
+	else:vital_status_changed.emit(_vital_status)
+	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	if record.transition=="begin":vital_status_changed.emit(_vital_status)
+	else:runtime_status_changed.emit(_runtime_status)
+	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	_refresh_readability()
+	if not is_instance_valid(lifetime.get_ref()) or not _actor_respawn_can_finalize(record):return {"ok":true,"context_changed":true}
+	if record.transition=="begin":show_event_text("RESPAWNING",Color(0.7,0.9,1.0,1.0),1.8)
+	else:show_event_text("RESPAWN",Color(0.5,1.0,0.7,1.0),2.0)
+	return {"ok":true,"replayed":false}
+
+func _actor_respawn_record(prepared:RefCounted)->Dictionary:
+	if prepared==null or not _prepared_actor_respawns.has(prepared.get_instance_id()):return {}
+	var record:Dictionary=_prepared_actor_respawns[prepared.get_instance_id()]
+	return record if record.handle.get_ref()==prepared else {}
+
+func _actor_respawn_can_finalize(record:Dictionary)->bool:
+	var owner:Node=record.owner.get_ref()
+	if not _actor_respawn_owner_matches(owner):return false
+	# Respawn may legitimately advance the per-unit lifecycle, never its world.
+	if owner._hex_payload_identity(unit_id).get("context",-1)!=record.source.lifecycle.context:return false
+	return not is_queued_for_deletion() and owner.get_unit_registry().get_instance_id()==record.registry_id and _actor_respawn_models_valid() and _actor_respawn_frame_valid() and get_parent().get_instance_id()==record.parent_id and _actor_respawn_model_stamp()==record.post_models
+
+func _actor_respawn_owner_matches(owner:Node)->bool:
+	if not is_instance_valid(owner) or owner.is_queued_for_deletion() or not is_inside_tree():return false
+	for method in ["get_unit_registry","_resolve_known_unit_for_contract","_hex_payload_identity"]:
+		if not owner.has_method(method):return false
+	var registry=owner.get_unit_registry()
+	return is_instance_valid(registry) and registry.has_method("get_unit") and registry.get_unit(unit_id)==self and owner._resolve_known_unit_for_contract(unit_id)==self and is_instance_valid(owner.get_parent()) and owner.get_parent().is_ancestor_of(self)
+
+func _actor_respawn_frame_valid()->bool:
+	if not global_position.is_finite() or not is_instance_valid(get_parent()):return false
+	var parent=get_parent()
+	if parent is Node2D:
+		var frame:Transform2D=parent.global_transform
+		return frame.is_finite() and absf(frame.determinant())>0.000001
+	return true
+
+func _actor_respawn_models_valid()->bool:
+	return is_instance_valid(_vital_status) and _vital_status.get_script()==UNIT_VITAL_STATUS_SCRIPT and _vital_status.is_valid() and is_instance_valid(_runtime_status) and _runtime_status.get_script()==UNIT_RUNTIME_STATUS_SCRIPT and _runtime_status.is_valid() and (_current_unit_command==null or (_current_unit_command.has_method("to_dict") and _current_unit_command.has_method("is_valid") and _current_unit_command.is_valid()))
+
+func _actor_respawn_binding(owner:Node)->Dictionary:
+	return {"actor_id":get_instance_id(),"owner_id":owner.get_instance_id(),"registry_id":owner.get_unit_registry().get_instance_id(),"lifecycle":Dictionary(owner._hex_payload_identity(unit_id)).duplicate(true),"parent_id":get_parent().get_instance_id(),"world_transform":global_transform,"parent_transform":get_parent().global_transform if get_parent() is Node2D else Transform2D.IDENTITY,"models":_actor_respawn_model_stamp()}
+
+func _actor_respawn_model_stamp()->Dictionary:
+	return {"unit_id":unit_id,"team_id":team_id,"fireteam_id":fireteam_id,"max_health_points":max_health_points,"vital_id":_vital_status.get_instance_id(),"vital":_vital_status.to_dict().duplicate(true),"runtime_id":_runtime_status.get_instance_id(),"runtime":_runtime_status.to_dict().duplicate(true),"command_id":_current_unit_command.get_instance_id() if _current_unit_command!=null else 0,"command":_current_unit_command.to_dict().duplicate(true) if _current_unit_command!=null else {},"contact_active":_contact_active,"contact_target":_contact_target_id,"damage":_last_damage_context.duplicate(true),"manager_id":_respawn_manager.get_instance_id() if is_instance_valid(_respawn_manager) else 0,"terrain_id":_terrain_registry.get_instance_id() if is_instance_valid(_terrain_registry) else 0}
