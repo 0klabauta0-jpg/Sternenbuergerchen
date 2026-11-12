@@ -3867,6 +3867,14 @@ func _connect_wave_controller_signals() -> void:
 
 
 func _on_unit_respawn_completed(unit_id: String) -> void:
+	# Earlier subscribers may already have downed or retired this completed actor.
+	var owner:Node=get_node_or_null(simulation_root_path)
+	if owner!=null and owner.has_method("is_hex_ground_runtime_required") and owner.call("is_hex_ground_runtime_required"):
+		if owner.is_queued_for_deletion():return
+		var bound:Dictionary=owner.call("_validate_hex_ground_actor_group",PackedStringArray([unit_id]))
+		if not bound.get("ok",false):return
+		var actor:Node=bound.actors[unit_id]
+		if not actor.has_method("get_vital_state") or actor.call("get_vital_state")!="fit" or bool(actor.get_meta("dropship_embarked",false)) or owner.call("get_hex_unit_state",unit_id).is_empty():return
 	_queued_bleedout_by_unit_id.erase(unit_id)
 	_clear_down_state_linger(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)

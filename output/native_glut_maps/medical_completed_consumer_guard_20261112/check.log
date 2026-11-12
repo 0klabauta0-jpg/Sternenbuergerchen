@@ -1,0 +1,10 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5c0b0d70b0b741109fa162cc5a469428
+PASS: Real Root commit and genuine Down metadata reach ordered subscribers intervene=true
+PASS: Driver preserves new Down or legitimately publishes Fit READY/cleanup intervene=true
+CONSUMER_CASE {"broadcasts":["a DOWN","a RESPAWNING","a DOWN"],"event":"a DOWN","intervene":true,"proof":{"linger_after":true,"linger_before":true,"medical":true},"vital":"down"}
+PASS: Real Root commit and genuine Down metadata reach ordered subscribers intervene=false
+PASS: Driver preserves new Down or legitimately publishes Fit READY/cleanup intervene=false
+CONSUMER_CASE {"broadcasts":["a DOWN","a RESPAWNING","a RESPAWN READY"],"event":"a RESPAWN READY","intervene":false,"proof":{"linger_after":false,"linger_before":true,"medical":true},"vital":"fit"}
+MEDICAL_COMPLETED_CONSUMER_GUARD passed=4 failed=0
