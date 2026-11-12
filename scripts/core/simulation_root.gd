@@ -1073,6 +1073,38 @@ func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
 		actors.append({"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)})
 	return {"ok":true, "space_area_id":area_id, "area_revision":_space_combat_state.get_area_revision(area_id), "actors":actors}
 
+func preview_station_dock(craft_id: String, target_id: String, layout_revision: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
+	# Read-only gate evidence; never a reservation or boarding authorization.
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	var actor_id: Variant = authority_context.get("actor_id")
+	if typeof(actor_id) != TYPE_STRING or String(actor_id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_actor"}
+	var layout: Dictionary = SPACE_AREA_GRID.station_dock_layout()
+	if not layout.get("ok", false) or target_id != layout.target_id or layout_revision != layout.revision: return {"ok":false, "reason":"station_layout_changed"}
+	if _singleplayer_space_travel_owner == null: return {"ok":false, "reason":"travel_unavailable"}
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null or flight != _singleplayer_space_travel_owner.get_flight_state(craft_id): return {"ok":false, "reason":"unknown_actor"}
+	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	if metadata.get("control_domain") != "player": return {"ok":false, "reason":"not_owned"}
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("craft_id") != craft_id or pose.get("revision") != expected_flight_revision: return {"ok":false, "reason":"stale_flight_revision"}
+	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != layout.area_id: return {"ok":false, "reason":"station_area_required"}
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	if travel.get("revision") != expected_travel_revision: return {"ok":false, "reason":"stale_travel_revision"}
+	if travel.get("phase") != "orbit" or travel.get("orbit_id") != "polisa_orbit" or Dictionary(travel.get("location_orbits", {})).get("polisa") != "polisa_orbit": return {"ok":false, "reason":"station_orbit_required"}
+	if _space_combat_state.get_area_revision(layout.area_id) != expected_area_revision: return {"ok":false, "reason":"stale_area_revision"}
+	if _space_wing_state.get_snapshot().revision != expected_wing_revision: return {"ok":false, "reason":"stale_wing_revision"}
+	var wing_id: String = _space_wing_state.get_craft_wing(craft_id, actor_id)
+	if wing_id.is_empty(): return {"ok":false, "reason":"wing_required"}
+	var cells: Array[Vector2i] = _space_combat_state.preview_footprint(pose, metadata.get("footprint_hexes", []))
+	if cells.is_empty() or not _space_combat_state.actor_cells_match(craft_id, layout.area_id, cells): return {"ok":false, "reason":"stale_spatial_index"}
+	if SPACE_GRID.from_offset(layout.dock_gate) not in cells: return {"ok":false, "reason":"not_at_station_gate"}
+	for occupant in _space_combat_state.query_cells(cells, layout.area_id):
+		if occupant != craft_id: return {"ok":false, "reason":"occupied"}
+	for claimant in _space_combat_state.query_navigation_claims(cells, layout.area_id):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
+	return {"ok":true, "craft_id":craft_id, "target_id":target_id, "layout_revision":layout.revision, "space_area_id":layout.area_id, "wing_id":wing_id, "flight_revision":pose.revision, "travel_revision":travel.revision, "area_revision":expected_area_revision, "wing_revision":expected_wing_revision, "footprint_cells":cells}
+
 func preview_surface_approach(craft_id: String, location_id: String, expected_flight_revision: int, expected_travel_revision: int, expected_area_revision: int, expected_wing_revision: int, authority_context: Dictionary) -> Dictionary:
 	# Read-only geometric evidence, never authorization or a reservation.
 	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
