@@ -15832,7 +15832,7 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	elif has_lz and state == DROP_SEQUENCE_OUTBOUND:
 		heading_origin = lz_position
 	var show_lz_marker: bool = has_lz and bool(card.get("show_lz_marker", _should_show_lz_marker_for_state(state)))
-	return {
+	var result := {
 		"craft_id": craft_id,
 		"model_id": String(card.get("model_id", "")),
 		"craft_type": String(card.get("craft_type", "")),
@@ -15861,6 +15861,13 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"team_id": get_local_command_team_id(),
 		"selected": is_selected,
 	}
+
+	if state in [DROP_SEQUENCE_LANDED,DROP_SEQUENCE_UNLOADING,DROP_SEQUENCE_COMPLETE]:
+		var profile_contract = preload("res://scripts/mission/polisa_ground_body_profile.gd")
+		var landing: Dictionary = _field_landing_by_craft.get(craft_id,{})
+		var bound: Dictionary = profile_contract.read_bound(card,landing.get("ground_body_profile"))
+		if bound.get("ok",false): result["ground_body_profile"] = bound.profile
+	return result
 
 
 func _should_show_mission_dropship_body_for_state(state: String) -> bool:

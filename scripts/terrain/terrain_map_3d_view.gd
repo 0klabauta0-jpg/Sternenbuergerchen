@@ -12204,6 +12204,11 @@ func _get_dropship_rotation_y(world_position: Vector2) -> float:
 
 
 func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: Vector2) -> float:
+	if String(payload.get("state","")).strip_edges().to_lower() in ["landed","unloading","complete"]:
+		var profile_contract = preload("res://scripts/mission/polisa_ground_body_profile.gd")
+		var bound: Dictionary = profile_contract.read_bound(payload,payload.get("ground_body_profile"))
+		# Stored yaw is the TOTAL applied model rotation, including asset offset.
+		if bound.get("ok",false): return float(bound.profile.yaw_degrees)
 	if typeof(payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(payload.get("dropship_target_position", world_position))
 		var heading_origin: Vector2 = Vector2(payload.get("flight_heading_origin", world_position))
@@ -12246,6 +12251,36 @@ func get_station_craft_body_projection(craft: Dictionary) -> Dictionary:
 		"model_scale":float(entry.get("scale",0.0)),"cell_size":_get_3d_cell_size(),
 		"yaw_degrees":wrapf(-_camera_yaw_degrees + float(entry.get("root_rotation_y_degrees",0.0)),0.0,360.0),
 		"model_id":String(craft.get("model_id","")),"asset_id":String(entry.get("asset_id",""))}
+
+
+func get_landed_craft_body_projection(craft: Dictionary, payload: Dictionary, world_position: Vector2) -> Dictionary:
+	var profile_contract = preload("res://scripts/mission/polisa_ground_body_profile.gd")
+	if String(payload.get("state","")).strip_edges().to_lower() not in ["landed","unloading","complete"] or not world_position.is_finite():
+		return {"ok":false,"reason":"craft_not_landed"}
+	if typeof(craft.get("craft_id")) != TYPE_STRING or String(craft.craft_id).is_empty() or payload.get("craft_id") != craft.craft_id or payload.get("model_id") != craft.get("model_id"):
+		return {"ok":false,"reason":"landed_craft_identity_mismatch"}
+	var bound: Dictionary = profile_contract.read_bound(craft,payload.get("ground_body_profile"))
+	if not bound.get("ok",false):
+		# A regular arrival supplies the real incoming heading. Do not freeze a
+		# camera fallback into new physical ground geometry when it is absent.
+		var origin: Variant = payload.get("flight_heading_origin")
+		var target: Variant = payload.get("dropship_target_position")
+		if not origin is Vector2 or not target is Vector2 or not origin.is_finite() or not target.is_finite() or origin.distance_squared_to(target) <= 0.0001:
+			return {"ok":false,"reason":"landed_heading_unavailable"}
+	for key in ["flight_heading_origin","dropship_target_position","lz_position"]:
+		if payload.has(key) and (not payload[key] is Vector2 or not Vector2(payload[key]).is_finite()):
+			return {"ok":false,"reason":"invalid_landed_heading"}
+	var projection: Dictionary = get_station_craft_body_projection(craft)
+	if not projection.get("ok",false): return projection
+	var rendered_asset := _get_frontier_dropship_visual_entry(payload)
+	if rendered_asset.is_empty() or rendered_asset.get("asset_id") != projection.get("asset_id"):
+		return {"ok":false,"reason":"landed_craft_identity_mismatch"}
+	projection["yaw_degrees"] = _get_dropship_rotation_y_for_payload(payload,world_position)
+	var checked: Dictionary = profile_contract.from_projection(craft,projection)
+	if not checked.get("ok",false): return checked
+	return {"ok":true,"model_id":checked.profile.model_id,"asset_id":checked.profile.asset_id,
+		"bounds":checked.profile.bounds,"model_scale":checked.profile.model_scale,
+		"cell_size":checked.profile.cell_size,"yaw_degrees":checked.profile.yaw_degrees}
 
 
 func _maybe_emit_unit_step_sfx(
