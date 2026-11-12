@@ -91,3 +91,7 @@ Checkpoint und passendem reinem Roster-/Transportprojektionskontext.
 Codeprüfung: `git diff --check` ohne Befund. Ausführung und Gameplayprüfungen
 ausdrücklich bis Zusammenführung mit Loader/Netz/AP8 zurückgestellt. Kein
 Testbestanden-, Performance-, Main-, EXE- oder Integrationsfreigabestatus.
+
+Vor gemeinsamem Testfreeze: Transport-Witness erst nach erfolgreicher strikter
+Baseprepare lesen, damit ein unvollständiger V2-Block strukturiert abgewiesen
+wird. Die Reihenfolge aller Modellmutationen bleibt unverändert.

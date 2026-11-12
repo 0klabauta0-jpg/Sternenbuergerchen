@@ -101,13 +101,13 @@ func prepare(state:Dictionary)->Dictionary:
 		if not is_instance_valid(owner._base_personnel_owner):
 			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
 			return _reject("checkpoint_base_owner_missing")
-		if state.transport!=_portable_transport(owner._base_personnel_owner._checkpoint_transport_context(state.base_personnel)):
-			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
-			return _reject("checkpoint_transport_mismatch")
 		base=owner._base_personnel_owner.prepare_restore_state(state.base_personnel,ground.prepared,movement.prepared)
 		if not base.ok:
 			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
 			return base
+		if state.transport!=_portable_transport(owner._base_personnel_owner._checkpoint_transport_context(state.base_personnel)):
+			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
+			return _reject("checkpoint_transport_mismatch")
 	elif is_instance_valid(owner._base_personnel_owner):
 		registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
 		return _reject("checkpoint_base_missing")
