@@ -1,0 +1,220 @@
+{
+  "schema": "ap678_bounded_bundle.v1",
+  "checks": [
+    {
+      "name": "runtime_selection",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "runtime_selection"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/runtime_selection-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "base_checkpoint",
+      "argv": [
+        "output/native_glut_maps/base_action_checkpoint_v2_20261112/run.py"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": "output/native_glut_maps/base_action_checkpoint_v2_20261112/base_checkpoint-*/report.json",
+      "true_fields": [
+        "clean_log",
+        "source_unchanged",
+        "real_profile_unchanged",
+        "private_canary"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    }
+  ],
+  "pending": [
+    {
+      "name": "ap7_root_checkpoint",
+      "reason": "Source Root/Checkpoint API and actual isolated fixture command not frozen yet."
+    },
+    {
+      "name": "ap8_network_joint",
+      "reason": "AP8 agent is implementing the actual network slice; command and guard contract requested."
+    }
+  ],
+  "extended_checks": [
+    {
+      "name": "mission_setup",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "mission_setup"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/mission_setup-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "mission_wave",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "mission_wave"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/mission_wave-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "respawn",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "respawn"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/respawn-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "medical_consumer",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "medical_consumer"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/medical_consumer-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "execution_controller",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "execution_controller"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/execution_controller-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "polisa_visit",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "polisa_visit"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/polisa_visit-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "base_unboard_transaction",
+      "argv": [
+        "scripts/tests/run_hex_tactical_check.py",
+        "--case",
+        "base_unboard_transaction"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": ".godot/hex_tactical_checks/base_unboard_transaction-*/report.json",
+      "true_fields": [
+        "passed",
+        "sources_unchanged",
+        "real_profile_unchanged",
+        "isolated"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "movement_save",
+      "argv": [
+        "output/native_glut_maps/hex_movement_save_state_20261112/run.py"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": "output/native_glut_maps/hex_movement_save_state_20261112/movement_save-*/report.json",
+      "true_fields": [
+        "clean_log",
+        "source_unchanged",
+        "real_profile_unchanged",
+        "private_canary"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    },
+    {
+      "name": "ground_save",
+      "argv": [
+        "output/native_glut_maps/hex_ground_save_state_20261112/run.py"
+      ],
+      "timeout_seconds": 240,
+      "report_glob": "output/native_glut_maps/hex_ground_save_state_20261112/ground_save-*/report.json",
+      "true_fields": [
+        "clean_log",
+        "source_unchanged",
+        "real_profile_unchanged",
+        "private_canary"
+      ],
+      "logs": [
+        "output.log"
+      ]
+    }
+  ]
+}
