@@ -52,7 +52,7 @@ PASS: unpublished scene candidates remain valid
 PASS: real mission and strategic world preflight against the existing root
 PASS: joined owners and root bindings remain fresh
 PASS: actual live world and scene pass private checkpoint validation
-JSON_NATIVE_ISSUE 
+JSON_NATIVE_ISSUE
 PASS: actual active mission checkpoint saved
 PASS: actual saved file contains mission lifecycle
 PASS: saved time reflects the actual save rather than earlier preflight
