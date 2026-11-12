@@ -411,6 +411,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 				if restart.get("ok", false): current["status"] = "flying"; current.erase("reason")
 		else:
 			_surface_orbit_auto_disabled[id] = true
+			var current: Dictionary = _surface_orbit_intents.get(id, {})
+			current.erase("pending_approach")
+			current.erase("pending_warp")
+			if current.get("status") == "starting": current["status"] = "manual"; current["reason"] = "automatic_disabled"
 			if _simulation != null: _simulation.stop_singleplayer_orbit_transit(self, id)
 		return {"ok":true, "enabled":payload.enabled}
 	if operation == "cargo_transfer_cancel":return _cargo_transfer.cancel()
@@ -1459,7 +1463,7 @@ func _start_surface_orbit_outbound(craft_id: String, location_id: String) -> voi
 	var travel: Dictionary = _travel.get_craft_snapshot(craft_id)
 	var orbit_id := String(travel.get("orbit_id", ""))
 	var intent: Dictionary = _surface_orbit_intents.get(craft_id, {})
-	if intent.get("location_id") != location_id or intent.get("direction") != "outbound": return
+	if intent.get("location_id") != location_id or intent.get("direction") != "outbound" or intent.get("status") != "starting": return
 	intent["target_orbit_id"] = orbit_id
 	intent["status"] = "manual"
 	if _surface_orbit_auto_disabled.has(craft_id): intent.erase("pending_warp"); return
@@ -1523,7 +1527,7 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var flight: RefCounted = _travel.get_flight_state(craft_id)
 		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
 			var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-			if transit.get("direction") == "outbound" and transit.get("status") in ["starting", "flying"]:
+			if transit.get("direction") == "outbound" and transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
 				var target := String(data.get("target_orbit_id", ""))
 				if not Dictionary(snapshot.get("orbits", {})).has(target) or target == String(snapshot.get("orbit_id", "")): return _reject("unknown_orbit", "Sprungziel passt nicht")
 				var previous: Dictionary = transit.get("pending_warp", {})

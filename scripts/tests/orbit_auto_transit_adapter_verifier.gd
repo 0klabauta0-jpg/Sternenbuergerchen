@@ -70,6 +70,8 @@ func _initialize() -> void:
 	assert(adapter._request_space_operation("space_start_quantum", changed, "queued").get("reason") == "request_id_conflict")
 	assert(adapter.request_operation("space_set_orbit_automatic", {"craft_id":"ship", "enabled":false}).ok)
 	assert(not adapter.get_space_travel_snapshot("ship").orbit_transit_automatic)
+	assert(adapter._surface_orbit_intents.ship.status == "manual" and not adapter._surface_orbit_intents.ship.has("pending_warp"))
+	assert(adapter._request_space_operation("space_start_quantum", request, "disabled-warp").get("reason") == "space_exit_band_required")
 	assert(campaign.apply_command({"contract_category":"singleplayer_campaign", "operation":"select_destination", "payload":{"location_id":"polisa"}, "request_id":"select-polisa"}, {}).ok)
 	adapter._record_surface_orbit_intent("ship", "polisa_orbit")
 	assert(not adapter._surface_orbit_intents.has("ship"))
