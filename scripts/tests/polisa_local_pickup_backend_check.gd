@@ -3,6 +3,8 @@ const ADAPTER = preload("res://scripts/meta/singleplayer_runtime_adapter.gd")
 const SIM = preload("res://scripts/core/simulation_root.gd")
 const EQUIPMENT = preload("res://scripts/core/singleplayer_ship_equipment_state.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
+const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 class Controller extends Node:
 	var pilot_ready := false
 	func _is_parked_campaign_dropship(_id: String) -> bool: return true
@@ -166,6 +168,20 @@ func run() -> void:
 	check(adapter.preview_return(id).ok and fingerprint(adapter, flow) == before_preview, "Boarded pilot preview does not debit fuel or mutate visit")
 	var fuel_before: float = adapter._supply.get_supply_snapshot().fuel_by_craft_id[id]
 	check(adapter._simulation.configure_departure_adapter(adapter).ok, "Station return binds the actual runtime adapter")
+	var birth_before := fingerprint(adapter, flow)
+	var birth: Dictionary = adapter._simulation.preview_station_purchase_local_admission(adapter, id)
+	check(birth.get("ok", false) and birth.get("target_id") == "polisa_station_dock" and fingerprint(adapter, flow) == birth_before, "Actual purchase receipt, live pilot fixture, equipment and free station gate permit read-only local first-admission preview")
+	check(adapter._simulation.preview_station_purchase_local_admission(adapter, "visitor").get("reason") == "station_purchase_required", "Existing visitor cannot claim a fabricated local purchase birth")
+	controller.pilot_ready = false
+	check(not adapter._simulation.preview_station_purchase_local_admission(adapter, id).get("ok", false) and fingerprint(adapter, flow) == birth_before, "Missing pilot blocks local first admission without owner mutations")
+	controller.pilot_ready = true
+	var blocked_flight = FLIGHT.new()
+	var dock_cell: Vector2i = GRID.from_offset(Vector2i(256,133))
+	assert(blocked_flight.configure("space_fixture_birth_blocker", {"coordinate_frame":"local", "space_area_id":"orbit_approach:glut_2", "motion_mode":"tactical", "position_plane":GRID.HEX.axial_to_plane(Vector2(dock_cell))}).ok)
+	var space_state: RefCounted = adapter._simulation.get("_space_combat_state")
+	assert(space_state.admit_actor({"craft_id":"space_fixture_birth_blocker", "faction_id":"enemy", "control_domain":"enemy", "start_hex":dock_cell, "footprint_hexes":[Vector2i.ZERO]}, blocked_flight, true).ok)
+	check(not adapter._simulation.preview_station_purchase_local_admission(adapter, id).get("ok", false), "Occupied station gate blocks first admission")
+	assert(space_state.remove_actor("space_fixture_birth_blocker"))
 	check(adapter.authorize_return(id,"first-return").get("deferred",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before,"Station return previews fuel without charging early")
 	check(adapter.enter_space_orbit(id).ok and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0 and not adapter._simulation.get("_space_wing_state").get_craft_wing(id,"singleplayer").is_empty(), "Boarded Polisa departure charges once and creates the flying wing")
 	check(adapter.authorize_return(id,"second-return").get("replayed",false) and adapter._supply.get_supply_snapshot().fuel_by_craft_id[id] == fuel_before-10.0,"Local purchase return debit is once regardless UI request IDs")

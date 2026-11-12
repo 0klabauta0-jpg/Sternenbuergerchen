@@ -160,6 +160,15 @@ Fixtures: echter Stationsbesuch, AP6-Boarding, UI und native Abnahme offen.
 Neu auf Polisa erworbene Schiffe ohne eigenen inaktiven Spaceactor bleiben
 ausdrücklich außerhalb dieses Pfades. Kein Flag- oder Live-JSON-Wechsel.
 
+Für einen lokalen Kauf gibt es zusätzlich die lesende Rootvorprüfung
+`preview_station_purchase_local_admission`: Sie bindet echten Supplykauf,
+Stationsvisit-/Pilotguard, Equipmentprofil, Flight-/Fleetowner, Pflichtrotte
+und freien vollständigen Footprint am Stationsgate. Die kleine Kaufprobe nutzt
+echte Kauf-/Equipment-/Travelowner und Pilot-/Flowfixtures und prüft auch
+fehlenden Piloten, fremden Besucher und ein belegtes Gate. Es werden weder
+Flight noch Index, Rotte, Fuel oder Reise publiziert; die atomare Erstaufnahme
+und ein echter AP6-Visitnachweis bleiben offen.
+
 ## Akzeptanz, Prüfung und Risiken
 
 Kleine Layoutprobe: deterministische Revision/Koordinaten, Gate im Bounds und
