@@ -593,6 +593,19 @@ func get_hex_unit_state(unit_id: String) -> Dictionary:
 	return _hex_ground_runtime.read_unit(unit_id) if is_hex_ground_runtime_active() else {}
 
 
+## Read-only lifetime of an admitted actor; never an admission or command token.
+func get_hex_actor_execution_binding(unit_id:String)->Dictionary:
+	if not is_hex_ground_runtime_active() or not _hex_ground_runtime.has_unit(unit_id):return {}
+	var actor=_known_units_by_id.get(unit_id,null)
+	var registry=get_unit_registry()
+	if not is_instance_valid(actor) or actor.is_queued_for_deletion() or not actor.is_inside_tree():return {}
+	if registry==null or not registry.has_method("get_unit") or registry.call("get_unit",unit_id)!=actor:return {}
+	if not actor.has_method("get_unit_id") or String(actor.call("get_unit_id"))!=unit_id or bool(actor.get_meta("dropship_embarked",false)):return {}
+	var result:Dictionary=_hex_payload_identity(unit_id)
+	result["root_id"]=get_instance_id()
+	return result
+
+
 func get_hex_motion_projection(unit_id: String, interpolation_fraction: float, height_step_world: float = 1.0) -> Dictionary:
 	return _hex_ground_runtime.get_motion_projection(unit_id,interpolation_fraction,height_step_world) if is_hex_ground_runtime_active() else {}
 

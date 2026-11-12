@@ -118,3 +118,4 @@ docs/qa/hex_visit_board_retire_20261112/** -text whitespace=-blank-at-eof,cr-at-
 docs/qa/hex_visit_board_retire_20261112/*.patch -text -whitespace
 docs/qa/hex_medical_consumer_join_20261112/** -text whitespace=-blank-at-eof,cr-at-eol
 output/native_glut_maps/medical_completed_consumer_guard_20261112/** -text -whitespace
+docs/qa/hex_execution_members_20261112/** -text whitespace=-blank-at-eof,cr-at-eol

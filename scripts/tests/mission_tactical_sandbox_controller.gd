@@ -2793,6 +2793,7 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 		behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
 	_phase_execution_by_fireteam[fireteam_id] = {
+		"hex_execution_scope":_new_hex_execution_scope(fireteam_id),
 		"phase": phase_index,
 		"waypoint_index": 0,
 		"hold_elapsed": 0.0,
@@ -3242,6 +3243,7 @@ func get_active_area_defense_snapshot() -> Array:
 		var state: Dictionary = Dictionary(_area_defense_execution_by_fireteam.get(fireteam_id_variant, {})).duplicate(true)
 		if state.is_empty():
 			continue
+		state.erase("hex_execution_scope")
 		result.append(state)
 	return result
 
@@ -3254,6 +3256,7 @@ func get_active_area_attack_snapshot() -> Array:
 		var state: Dictionary = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id_variant, {})).duplicate(true)
 		if state.is_empty():
 			continue
+		state.erase("hex_execution_scope")
 		result.append(state)
 	return result
 
@@ -20520,6 +20523,7 @@ func _interrupt_plan_for_suppression(fireteam_id: String) -> void:
 	if waypoint_index >= 0 and waypoint_index < plan.waypoints.size():
 		plan.waypoints[waypoint_index].status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_INTERRUPTED
 	plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_INTERRUPTED
+	_ad_hoc_resume_state_by_fireteam[fireteam_id]={"phase":phase_index,"waypoint_index":waypoint_index,"hex_execution_scope":execution_state.get("hex_execution_scope")}
 	_phase_execution_by_fireteam.erase(fireteam_id)
 	_area_defense_execution_by_fireteam.erase(fireteam_id)
 	_area_attack_execution_by_fireteam.erase(fireteam_id)
@@ -30546,6 +30550,7 @@ func _find_first_phase_execution_for_fireteams(fireteam_ids: Array) -> Dictionar
 		var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 		if execution_state.is_empty():
 			continue
+		execution_state.erase("hex_execution_scope")
 		execution_state["fireteam_id"] = fireteam_id
 		return execution_state
 	return {}
@@ -32233,7 +32238,7 @@ func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2,
 		return false
 	var member_positions: Dictionary = Dictionary(receipt.get("member_positions", {}))
 	var checked_count: int = 0
-	for unit in _get_fireteam_units(fireteam_id, true):
+	for unit in _hex_execution_units(fireteam_id,Dictionary(execution_state.get("hex_execution_scope",{}))):
 		if not unit is Node2D or (unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit"):
 			continue
 		var unit_id: String = String(unit.call("get_unit_id"))
@@ -32261,14 +32266,14 @@ func _try_start_stationary_interaction(fireteam_id: String, waypoint, phase_inde
 	if String(Dictionary(waypoint.metadata).get("interaction_id","")) == "ship_return" and not _campaign_return_crew_near(_campaign_return_context(),CAMPAIGN_BOARDING_RADIUS):
 		return false
 	var positions: Dictionary = {}
-	for member in _get_fireteam_units(fireteam_id, true):
+	for member in _hex_execution_units(fireteam_id,Dictionary(execution_state.get("hex_execution_scope",{}))):
 		if member is Node2D and member.has_method("get_unit_id") and (not member.has_method("get_vital_state") or String(member.call("get_vital_state")) == "fit"):
 			positions[String(member.call("get_unit_id"))] = (member as Node2D).global_position
 	var candidate := execution_state.duplicate(true)
 	candidate["interaction_arrival_receipt"] = {"waypoint_id":String(waypoint.waypoint_id),"target_position":candidate.resolved_target_position,"member_positions":positions,"stationary_use":true}
 	if not _is_interaction_arrival_receipt_valid(fireteam_id, Vector2(candidate.resolved_target_position), candidate):
 		return false
-	if not _issue_fireteam_hold_current_positions(fireteam_id, phase_index, "mission-use:"+String(waypoint.waypoint_id)):
+	if not _issue_fireteam_hold_current_positions(fireteam_id, phase_index, "mission-use:"+String(waypoint.waypoint_id),execution_state.get("hex_execution_scope")):
 		return false
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null:
@@ -32307,7 +32312,16 @@ func _campaign_return_crew_near(context: Dictionary, radius: float) -> bool:
 func _start_campaign_return_gather(waypoint, execution_state: Dictionary) -> bool:
 	if String(Dictionary(waypoint.metadata).get("interaction_id","")) != "ship_return": return false
 	var context := _campaign_return_context()
-	if context.is_empty() or _campaign_return_crew_near(context,112.0): return false
+	if context.is_empty():return false
+	var simulation_root=get_node_or_null("../SimulationRoot")
+	if simulation_root!=null and simulation_root.call("is_hex_ground_runtime_active"):
+		_ensure_fireteam_movement_controller()
+		var scope:Dictionary=execution_state.get("hex_execution_scope",{})
+		if scope.is_empty():scope=_fireteam_movement_controller.call("capture_hex_execution_scope",[],simulation_root)
+		if not scope.has("return_crew"):scope["return_crew"]=_fireteam_movement_controller.call("capture_hex_execution_scope",context.crew,simulation_root)
+		execution_state["hex_execution_scope"]=scope
+		context.crew=_fireteam_movement_controller.call("filter_hex_execution_scope",scope.return_crew,context.crew,simulation_root)
+	if _campaign_return_crew_near(context,112.0):return false
 	var simulation := get_node_or_null("../SimulationRoot")
 	var terrain: Node = _get_terrain_registry()
 	if simulation == null or terrain == null: return false
@@ -32370,10 +32384,11 @@ func _try_replace_arrived_computer_approach(fireteam_id: String, phase_index: in
 		# Remove the superseded approach rather than marking physical movement done.
 		approach.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_CANCELLED
 		plan.waypoints.remove_at(active_index)
+		var inherited_scope:Variant=execution.get("hex_execution_scope")
 		_phase_execution_by_fireteam.erase(fireteam_id)
 		_ensure_fireteam_movement_controller()
 		if _fireteam_movement_controller != null: _fireteam_movement_controller.call("reset_fireteam",fireteam_id)
-		return _activate_next_waypoint_for_plan(plan,fireteam_id,index-1)
+		return _activate_next_waypoint_for_plan(plan,fireteam_id,index-1,inherited_scope)
 	return false
 
 
@@ -32466,9 +32481,9 @@ func _try_continue_active_area_attack(fireteam_id: String) -> bool:
 		_refresh_order_visuals()
 		_refresh_fireteam_status_panel()
 		return true
-	var started_next_area: bool = _activate_next_attack_area_order(normalized_fireteam_id, phase_index)
+	var started_next_area: bool = _activate_next_attack_area_order(normalized_fireteam_id, phase_index,execution_state.get("hex_execution_scope"))
 	if not started_next_area:
-		started_next_area = _activate_next_area_order_or_default(normalized_fireteam_id, phase_index)
+		started_next_area = _activate_next_area_order_or_default(normalized_fireteam_id, phase_index,execution_state.get("hex_execution_scope"))
 	if started_next_area:
 		_last_command_text = "NEXT AREA %s" % normalized_fireteam_id.to_upper()
 	else:
@@ -32536,36 +32551,72 @@ func _find_next_attack_area_order(fireteam_id: String):
 	return null if candidates.is_empty() else candidates[0]
 
 
-func _activate_next_defend_area_order(fireteam_id: String, phase_index: int) -> bool:
+## Concrete receiver lifetimes stay in the existing execution dictionaries only.
+func _new_hex_execution_scope(fireteam_id:String,inherited_scope:Variant=null)->Dictionary:
+	if inherited_scope is Dictionary and not inherited_scope.is_empty():return inherited_scope
+	_ensure_fireteam_movement_controller()
+	return _fireteam_movement_controller.call("capture_hex_execution_scope",_get_fireteam_units(fireteam_id,true),get_node_or_null("../SimulationRoot"))
+
+
+func _hex_execution_units(fireteam_id:String,scope:Dictionary)->Array:
+	_ensure_fireteam_movement_controller()
+	return _fireteam_movement_controller.call("filter_hex_execution_scope",scope,_get_fireteam_units(fireteam_id,true),get_node_or_null("../SimulationRoot"))
+
+
+func _current_hex_execution_scope(fireteam_id:String)->Variant:
+	for states in [_ad_hoc_execution_by_fireteam,_phase_execution_by_fireteam,_area_defense_execution_by_fireteam,_area_attack_execution_by_fireteam]:
+		var state:Dictionary=states.get(fireteam_id,{})
+		if state.has("hex_execution_scope"):return state.hex_execution_scope
+	return null
+
+
+func _refresh_hex_execution_members(fireteam_id:String,state:Dictionary)->bool:
+	if not state.has("hex_execution_scope"):return true
+	var units:Array=_hex_execution_units(fireteam_id,state.hex_execution_scope)
+	var ids:Dictionary={}
+	for unit in units:ids[String(unit.call("get_unit_id"))]=true
+	for key in ["assignments","approach_assignments"]:
+		if not state.has(key):continue
+		var retained:Array=[]
+		for assignment in Array(state[key]):
+			if assignment is Dictionary and ids.has(String(assignment.get("unit_id",""))):retained.append(assignment)
+		state[key]=retained
+	return not units.is_empty()
+
+
+func _activate_next_defend_area_order(fireteam_id: String, phase_index: int, inherited_scope:Variant=null) -> bool:
 	var area_order = _find_next_defend_area_order(fireteam_id)
 	if area_order == null:
 		return false
-	return _start_defend_area_order(fireteam_id, area_order, phase_index)
+	return _start_defend_area_order(fireteam_id, area_order, phase_index,inherited_scope)
 
 
-func _activate_next_attack_area_order(fireteam_id: String, phase_index: int) -> bool:
+func _activate_next_attack_area_order(fireteam_id: String, phase_index: int, inherited_scope:Variant=null) -> bool:
 	var area_order = _find_next_attack_area_order(fireteam_id)
 	if area_order == null:
 		return false
-	return _start_attack_area_order(fireteam_id, area_order, phase_index)
+	return _start_attack_area_order(fireteam_id, area_order, phase_index,inherited_scope)
 
 
-func _activate_next_area_order_or_default(fireteam_id: String, phase_index: int) -> bool:
-	if _activate_next_defend_area_order(fireteam_id, phase_index):
+func _activate_next_area_order_or_default(fireteam_id: String, phase_index: int, inherited_scope:Variant=null) -> bool:
+	if _activate_next_defend_area_order(fireteam_id, phase_index,inherited_scope):
 		return true
-	if _activate_next_attack_area_order(fireteam_id, phase_index):
+	if _activate_next_attack_area_order(fireteam_id, phase_index,inherited_scope):
 		return true
-	return _apply_default_fireteam_behavior(fireteam_id, phase_index)
+	return _apply_default_fireteam_behavior(fireteam_id, phase_index,inherited_scope)
 
 
-func _start_defend_area_order(fireteam_id: String, area_order, phase_index: int) -> bool:
+func _start_defend_area_order(fireteam_id: String, area_order, phase_index: int, inherited_scope:Variant=null) -> bool:
 	if area_order == null or not _is_fireteam_runtime_active(fireteam_id):
 		return false
 	_ensure_area_order_resolver()
 	if _area_order_resolver == null:
 		return false
-	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
+	var units: Array = _hex_execution_units(fireteam_id,execution_scope)
+	if units.is_empty():return false
 	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if not units.has(leader):leader=null if units.is_empty() else units[0]
 	var resolution: Dictionary = Dictionary(_area_order_resolver.call("resolve_defend_area", area_order, units, leader, _get_terrain_registry()))
 	if resolution.is_empty():
 		return false
@@ -32587,13 +32638,14 @@ func _start_defend_area_order(fireteam_id: String, area_order, phase_index: int)
 	var issued_count: int = 0
 	for assignment_variant in assignments:
 		var assignment: Dictionary = Dictionary(assignment_variant)
-		if _issue_area_defense_unit_command(fireteam_id, assignment, phase_index, false, String(area_order.area_order_id)):
+		if _issue_area_defense_unit_command(fireteam_id, assignment, phase_index, false, String(area_order.area_order_id),execution_scope):
 			issued_count += 1
 	if issued_count <= 0:
 		_set_active_behavior_profile(fireteam_id, null)
 		return false
 	area_order.status = AREA_ORDER_SCRIPT.STATUS_ACTIVE
 	_area_defense_execution_by_fireteam[fireteam_id] = {
+		"hex_execution_scope": execution_scope,
 		"fireteam_id": fireteam_id,
 		"phase": phase_index,
 		"area_order_id": String(area_order.area_order_id),
@@ -32609,14 +32661,17 @@ func _start_defend_area_order(fireteam_id: String, area_order, phase_index: int)
 	return true
 
 
-func _start_attack_area_order(fireteam_id: String, area_order, phase_index: int) -> bool:
+func _start_attack_area_order(fireteam_id: String, area_order, phase_index: int, inherited_scope:Variant=null) -> bool:
 	if area_order == null or not _is_fireteam_runtime_active(fireteam_id):
 		return false
 	_ensure_area_order_resolver()
 	if _area_order_resolver == null:
 		return false
-	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
+	var units: Array = _hex_execution_units(fireteam_id,execution_scope)
+	if units.is_empty():return false
 	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if not units.has(leader):leader=null if units.is_empty() else units[0]
 	var resolution: Dictionary = Dictionary(_area_order_resolver.call("resolve_attack_area", area_order, units, leader, _get_terrain_registry()))
 	if resolution.is_empty():
 		return false
@@ -32642,13 +32697,14 @@ func _start_attack_area_order(fireteam_id: String, area_order, phase_index: int)
 	var issued_count: int = 0
 	for assignment_variant in assignments:
 		var assignment: Dictionary = Dictionary(assignment_variant)
-		if _issue_area_attack_unit_command(fireteam_id, assignment, phase_index, false, String(area_order.area_order_id), command_type):
+		if _issue_area_attack_unit_command(fireteam_id, assignment, phase_index, false, String(area_order.area_order_id), command_type,execution_scope):
 			issued_count += 1
 	if issued_count <= 0:
 		_set_active_behavior_profile(fireteam_id, null)
 		return false
 	area_order.status = AREA_ORDER_SCRIPT.STATUS_ACTIVE
 	_area_attack_execution_by_fireteam[fireteam_id] = {
+		"hex_execution_scope": execution_scope,
 		"fireteam_id": fireteam_id,
 		"phase": phase_index,
 		"area_order_id": String(area_order.area_order_id),
@@ -32670,14 +32726,15 @@ func _start_attack_area_order(fireteam_id: String, area_order, phase_index: int)
 func _complete_waypoint_and_activate_next(fireteam_id: String, plan, waypoint_index: int) -> bool:
 	if plan == null or waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
 		return false
+	var inherited_scope:Variant=_current_hex_execution_scope(fireteam_id)
 	var next_waypoint_index: int = _complete_and_remove_waypoint_from_plan(plan, waypoint_index)
 	_phase_execution_by_fireteam.erase(fireteam_id)
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
 	if next_waypoint_index < 0:
-		return _activate_next_area_order_or_default(fireteam_id, int(plan.phase))
-	return _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index)
+		return _activate_next_area_order_or_default(fireteam_id, int(plan.phase),inherited_scope)
+	return _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index,inherited_scope)
 
 
 func _get_shared_selected_tactical_stance() -> String:
@@ -33174,14 +33231,18 @@ func _notify_flank_initiated(fireteam_id: String, rough_target_position: Vector2
 	)
 
 
-func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> bool:
+func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int, inherited_scope:Variant=null) -> bool:
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
 	if not _is_fireteam_runtime_active(fireteam_id):
 		_set_active_behavior_profile(fireteam_id, null)
 		return false
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
+	var execution_units:Array=_hex_execution_units(fireteam_id,execution_scope)
+	if execution_units.is_empty():return false
 	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if not execution_units.has(leader):leader=execution_units[0]
 	if leader == null or not (leader is Node2D):
 		_set_active_behavior_profile(fireteam_id, null)
 		return false
@@ -33198,7 +33259,7 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 	metadata["security_direction_angle"] = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
 	behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
-	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index):
+	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index,"",execution_scope):
 		_mirror_flow_driver_order_for_fireteam(fireteam_id, anchor_position, "defend", phase_index)
 		_record_fireteamleader_feedback_for_fireteam(fireteam_id, "defend", "cover", "auto_defend_after_order")
 		_last_command_text = "DEF 360 %s" % fireteam_id.to_upper()
@@ -33246,12 +33307,23 @@ func _clear_fireteam_runtime_execution_for_post_drop(fireteam_id: String) -> voi
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller!=null:_fireteam_movement_controller.call("reset_fireteam",normalized_fireteam_id)
 	_phase_execution_by_fireteam.erase(normalized_fireteam_id)
 	_ad_hoc_execution_by_fireteam.erase(normalized_fireteam_id)
 	_ad_hoc_resume_state_by_fireteam.erase(normalized_fireteam_id)
 	_area_defense_execution_by_fireteam.erase(normalized_fireteam_id)
 	_area_attack_execution_by_fireteam.erase(normalized_fireteam_id)
 	_suppression_interrupt_pending_by_fireteam.erase(normalized_fireteam_id)
+	for key in _active_coordination_by_id.keys():
+		var assignment:Dictionary=_active_coordination_by_id[key]
+		if String(assignment.get("advance_fireteam_id",""))!=normalized_fireteam_id and String(assignment.get("cover_fireteam_id",""))!=normalized_fireteam_id:continue
+		_active_coordination_by_id.erase(key)
+		for other_id in [String(assignment.get("advance_fireteam_id","")),String(assignment.get("cover_fireteam_id",""))]:
+			var other:Dictionary=_phase_execution_by_fireteam.get(other_id,{})
+			if bool(other.get("hex_coordination_cover",false)):
+				other.erase("hex_coordination_cover")
+				other["hex_coordination_resume"]=true
 
 
 func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase_index: int, anchor_position: Vector2) -> bool:
@@ -33500,12 +33572,13 @@ func _clear_fireteam_security_facing_meta(fireteam_id: String) -> void:
 			(unit as Node).remove_meta("security_facing_active")
 
 
-func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int, token_prefix: String = "") -> bool:
+func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int, token_prefix: String = "", inherited_scope:Variant=null) -> bool:
 	var simulation_root = get_node_or_null("../SimulationRoot")
 	if simulation_root == null:
 		return false
 	var modifiers: Dictionary = _get_fireteam_behavior_stance_modifiers("defend", fireteam_id)
-	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
+	var units: Array = _hex_execution_units(fireteam_id,execution_scope)
 	units.sort_custom(Callable(self, "_sort_unit_nodes_for_cards"))
 	var sector_count: int = maxi(units.size(), 1)
 	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
@@ -33691,7 +33764,9 @@ func _apply_fireteam_coordination_for_phase(phase_index: int) -> void:
 		var cover_fireteam_id: String = String(assignment.get("cover_fireteam_id", "")).strip_edges().to_lower()
 		if cover_fireteam_id.is_empty():
 			continue
-		_phase_execution_by_fireteam.erase(cover_fireteam_id)
+		var cover_state:Dictionary=_phase_execution_by_fireteam.get(cover_fireteam_id,{})
+		if not Dictionary(cover_state.get("hex_execution_scope",{})).is_empty():cover_state["hex_coordination_cover"]=true
+		else:_phase_execution_by_fireteam.erase(cover_fireteam_id)
 		_issue_cover_hold_for_fireteam(cover_fireteam_id, phase_index)
 		_active_coordination_by_id[coordination_id] = assignment
 		if event_router != null and event_router.has_method("request_fireteam_coordination"):
@@ -33705,6 +33780,10 @@ func _issue_cover_hold_for_fireteam(fireteam_id: String, phase_index: int) -> vo
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
+	var execution_scope:Variant=_current_hex_execution_scope(fireteam_id)
+	if execution_scope is Dictionary and not execution_scope.is_empty():
+		_issue_fireteam_hold_current_positions(fireteam_id,phase_index,"",execution_scope)
+		return
 	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
 	if anchor == null:
 		return
@@ -33735,7 +33814,7 @@ func _notify_fireteam_ready_for_coordination(fireteam_id: String) -> void:
 		var waypoint_index: int = int(execution_state.get("waypoint_index", plan.active_waypoint_index))
 		if waypoint_index < 0:
 			waypoint_index = 0
-		_activate_next_waypoint_for_plan(plan, next_advancing_fireteam_id, waypoint_index)
+		_activate_next_waypoint_for_plan(plan, next_advancing_fireteam_id, waypoint_index,execution_state.get("hex_execution_scope"))
 
 
 func _record_bounding_rotation_feedback(rotated_assignment: Dictionary, ready_fireteam_id: String, phase_index: int) -> void:
@@ -33835,6 +33914,7 @@ func _interrupt_active_plan_for_ad_hoc(fireteam_id: String) -> bool:
 	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, active_phase_index), null)
 	var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 	var resume_state: Dictionary = {
+		"hex_execution_scope":_current_hex_execution_scope(fireteam_id),
 		"phase": active_phase_index,
 		"waypoint_index": int(execution_state.get("waypoint_index", -1)),
 	}
@@ -33870,13 +33950,19 @@ func _start_ad_hoc_order_for_fireteam(fireteam_id: String, order_type: String, t
 		"phase": active_phase_index,
 		"waypoint_index": int(Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).get("waypoint_index", -1)),
 	})).duplicate(true)
-	var order_dict: Dictionary = Dictionary(_ad_hoc_order_controller.call("issue_order", fireteam_id, order_type, execution_target, active_phase_index, true, resume_state))
+	var portable_resume:Dictionary=resume_state.duplicate(true)
+	portable_resume.erase("hex_execution_scope")
+	var order_dict: Dictionary = Dictionary(_ad_hoc_order_controller.call("issue_order", fireteam_id, order_type, execution_target, active_phase_index, true, portable_resume))
 	if order_dict.is_empty():
 		return false
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id)
+	_ad_hoc_execution_by_fireteam[fireteam_id]={"hex_execution_scope":execution_scope}
 	if not _issue_ad_hoc_order_for_fireteam(fireteam_id, order_dict):
+		_ad_hoc_execution_by_fireteam.erase(fireteam_id)
 		_ad_hoc_order_controller.call("cancel_order", fireteam_id, "issue_failed")
 		return false
 	_ad_hoc_execution_by_fireteam[fireteam_id] = {
+		"hex_execution_scope":execution_scope,
 		"target_position": execution_target,
 		"hold_elapsed": 0.0,
 		"order_type": order_type,
@@ -33884,10 +33970,12 @@ func _start_ad_hoc_order_for_fireteam(fireteam_id: String, order_type: String, t
 	return true
 
 
-func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index: int) -> bool:
+func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index: int, inherited_scope:Variant=null) -> bool:
 	if plan == null or waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_COMPLETED if plan != null else FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
 		return false
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
+	if not execution_scope.is_empty() and _hex_execution_units(fireteam_id,execution_scope).is_empty():return false
 	plan.active_waypoint_index = waypoint_index
 	plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_ACTIVE
 	var waypoint = plan.waypoints[waypoint_index]
@@ -33909,6 +33997,7 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		if typeof(behavior_metadata.get("resolved_target_position", null)) == TYPE_VECTOR2:
 			resolved_target_position = Vector2(behavior_metadata.get("resolved_target_position", waypoint.target_position))
 	_phase_execution_by_fireteam[fireteam_id] = {
+		"hex_execution_scope": execution_scope,
 		"phase": int(plan.phase),
 		"waypoint_index": waypoint_index,
 		"hold_elapsed": 0.0,
@@ -33937,6 +34026,9 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 		return false
 	if waypoint == null or typeof(waypoint.target_position) != TYPE_VECTOR2:
 		return false
+	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,_current_hex_execution_scope(fireteam_id))
+	var execution_units:Array=_hex_execution_units(fireteam_id,execution_scope)
+	if execution_units.is_empty():return false
 	var target_position: Vector2 = waypoint.target_position
 	var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
 	var requires_mission_tactical_path: bool = _requires_mission_tactical_behavior_path(command_type)
@@ -33961,11 +34053,11 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 				phase_index,
 				target_position,
 				behavior_profile,
-				_get_fireteam_units(fireteam_id, true),
+				execution_units,
 				_resolve_fireteam_leader_for_behavior(fireteam_id),
 				simulation_root,
 				_get_terrain_registry(),
-				{"center_partial_formation": get_parent().has_meta("campaign_ground_pilot_id")}
+				{"center_partial_formation": get_parent().has_meta("campaign_ground_pilot_id"),"hex_execution_scope":execution_scope}
 			)
 		)
 		_record_command_commit_timing_scope(timing, "movement_start_and_arguments_usec", scope_started_usec, true)
@@ -34194,6 +34286,11 @@ func _update_area_defense_execution(_delta: float) -> void:
 	var did_change: bool = false
 	for fireteam_id in _area_defense_execution_by_fireteam.keys().duplicate():
 		var state: Dictionary = Dictionary(_area_defense_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if not _refresh_hex_execution_members(String(fireteam_id),state):
+			_area_defense_execution_by_fireteam.erase(fireteam_id)
+			did_change=true
+			continue
+		_area_defense_execution_by_fireteam[fireteam_id]=state
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
 			continue
 		if not _are_area_defense_assignments_reached(state):
@@ -34228,12 +34325,14 @@ func _are_area_defense_assignments_reached(state: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "") -> bool:
+func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", execution_scope:Variant=null) -> bool:
+	var scope:Dictionary=_new_hex_execution_scope(fireteam_id,execution_scope if execution_scope!=null else _current_hex_execution_scope(fireteam_id))
+	var allowed:Array=_hex_execution_units(fireteam_id,scope)
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
 	var unit = _find_friendly_unit_by_id(unit_id)
-	if unit == null:
+	if unit == null or not allowed.has(unit):
 		return false
 	var modifiers: Dictionary = _get_fireteam_behavior_stance_modifiers("defend", fireteam_id)
 	var command = UNIT_COMMAND_SCRIPT.new()
@@ -34289,6 +34388,11 @@ func _update_area_attack_execution(_delta: float) -> void:
 	var did_engage_area: bool = false
 	for fireteam_id in _area_attack_execution_by_fireteam.keys().duplicate():
 		var state: Dictionary = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if not _refresh_hex_execution_members(String(fireteam_id),state):
+			_area_attack_execution_by_fireteam.erase(fireteam_id)
+			did_change=true
+			continue
+		_area_attack_execution_by_fireteam[fireteam_id]=state
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
 			continue
 		var status: String = String(state.get("status", "approaching")).strip_edges().to_lower()
@@ -34385,8 +34489,9 @@ func _build_attack_area_occupation_assignments(fireteam_id: String, state: Dicti
 	var area_order = _area_orders_by_id.get(String(state.get("area_order_id", "")), null)
 	if area_order == null:
 		return []
-	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var units: Array = _hex_execution_units(fireteam_id,Dictionary(state.get("hex_execution_scope",{})))
 	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if not units.has(leader):leader=null if units.is_empty() else units[0]
 	var resolution: Dictionary = Dictionary(_area_order_resolver.call("resolve_occupy_area", area_order, units, leader, _get_terrain_registry()))
 	return Array(resolution.get("assignments", [])).duplicate(true)
 
@@ -34413,12 +34518,14 @@ func _is_attack_area_cleared(target_area: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take") -> bool:
+func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take", execution_scope:Variant=null) -> bool:
+	var scope:Dictionary=_new_hex_execution_scope(fireteam_id,execution_scope if execution_scope!=null else _current_hex_execution_scope(fireteam_id))
+	var allowed:Array=_hex_execution_units(fireteam_id,scope)
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
 	var unit = _find_friendly_unit_by_id(unit_id)
-	if unit == null:
+	if unit == null or not allowed.has(unit):
 		return false
 	var normalized_source_command_type: String = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.call("normalize_behavior_command_type", source_command_type)
 	var modifiers: Dictionary = _get_fireteam_behavior_stance_modifiers(normalized_source_command_type, fireteam_id)
@@ -34471,6 +34578,11 @@ func _update_active_phase_execution(delta: float) -> void:
 		if _ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", String(fireteam_id))):
 			continue
 		var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if not _refresh_hex_execution_members(String(fireteam_id),execution_state):
+			_clear_fireteam_runtime_execution_for_post_drop(String(fireteam_id))
+			did_change=true
+			continue
+		if bool(execution_state.get("hex_coordination_cover",false)):continue
 		var phase_index: int = int(execution_state.get("phase", -1))
 		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), phase_index), null)
 		if plan == null:
@@ -34490,8 +34602,15 @@ func _update_active_phase_execution(delta: float) -> void:
 				_fireteam_movement_controller.call("reset_fireteam", String(fireteam_id))
 			continue
 		var waypoint = plan.waypoints[waypoint_index]
+		if bool(execution_state.get("hex_coordination_resume",false)):
+			execution_state.erase("hex_coordination_resume")
+			_phase_execution_by_fireteam[fireteam_id]=execution_state
+			_issue_waypoint_for_fireteam(String(fireteam_id),waypoint,phase_index,_resolve_fireteam_behavior_profile(String(fireteam_id),String(waypoint.command_type),waypoint.target_position))
+			continue
 		if bool(execution_state.get("campaign_return_gather",false)):
 			var return_context := _campaign_return_context()
+			var scope:Dictionary=execution_state.get("hex_execution_scope",{})
+			if scope.has("return_crew") and not return_context.is_empty():return_context.crew=_fireteam_movement_controller.call("filter_hex_execution_scope",scope.return_crew,return_context.crew,get_node_or_null("../SimulationRoot"))
 			if not _campaign_return_crew_near(return_context,112.0):
 				# A previously queued automatic security Hold can commit after the
 				# first gathering Move. Reclaim only the explicit return intention
@@ -34553,7 +34672,7 @@ func _update_active_phase_execution(delta: float) -> void:
 			continue
 		if bool(movement_result.get("finished", false)) and waypoint_target_reached and execution_state.has("interaction_waypoint_id"):
 			var member_positions: Dictionary = {}
-			for member in _get_fireteam_units(String(fireteam_id), true):
+			for member in _hex_execution_units(String(fireteam_id),Dictionary(execution_state.get("hex_execution_scope",{}))):
 				if member is Node2D and member.has_method("get_unit_id"):
 					member_positions[String(member.call("get_unit_id"))] = (member as Node2D).global_position
 			execution_state["interaction_arrival_receipt"] = {"waypoint_id": String(waypoint.waypoint_id), "target_position": resolved_target_position, "member_positions": member_positions}
@@ -34575,14 +34694,14 @@ func _update_active_phase_execution(delta: float) -> void:
 			_fireteam_movement_controller.call("reset_fireteam", String(fireteam_id))
 		_notify_fireteam_ready_for_coordination(String(fireteam_id))
 		if next_waypoint_index < 0:
-			if _activate_next_defend_area_order(String(fireteam_id), phase_index):
+			if _activate_next_defend_area_order(String(fireteam_id), phase_index,execution_state.get("hex_execution_scope")):
 				pass
-			elif _activate_next_attack_area_order(String(fireteam_id), phase_index):
+			elif _activate_next_attack_area_order(String(fireteam_id), phase_index,execution_state.get("hex_execution_scope")):
 				pass
-			elif _apply_default_fireteam_behavior(String(fireteam_id), phase_index):
+			elif _apply_default_fireteam_behavior(String(fireteam_id), phase_index,execution_state.get("hex_execution_scope")):
 				did_apply_default_defense = true
 		else:
-			_activate_next_waypoint_for_plan(plan, String(fireteam_id), next_waypoint_index)
+			_activate_next_waypoint_for_plan(plan, String(fireteam_id), next_waypoint_index,execution_state.get("hex_execution_scope"))
 		did_change = true
 	if not did_change:
 		return
@@ -34672,6 +34791,10 @@ func _update_ad_hoc_execution(delta: float) -> void:
 				_fireteam_movement_controller.call("reset_fireteam", String(fireteam_id))
 			continue
 		var execution_state: Dictionary = Dictionary(_ad_hoc_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if not _refresh_hex_execution_members(String(fireteam_id),execution_state):
+			_return_fireteam_to_plan(String(fireteam_id),false)
+			did_change=true
+			continue
 		var order_type: String = String(order_dict.get("order_type", ""))
 		if order_type == AD_HOC_ORDER_SCRIPT.ORDER_TYPE_HOLD_TILL_LAST_MAN:
 			if _count_fit_units_for_fireteam(String(fireteam_id)) <= 0:
@@ -34743,6 +34866,8 @@ func _count_fit_units_for_fireteam(fireteam_id: String) -> int:
 
 
 func _return_fireteam_to_plan(fireteam_id: String, manual_return: bool) -> bool:
+	var inherited_scope:Variant=Dictionary(_ad_hoc_resume_state_by_fireteam.get(fireteam_id,{})).get("hex_execution_scope")
+	if inherited_scope==null:inherited_scope=_current_hex_execution_scope(fireteam_id)
 	_ensure_ad_hoc_order_controller()
 	var had_active_ad_hoc: bool = _ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", fireteam_id))
 	if had_active_ad_hoc:
@@ -34764,7 +34889,7 @@ func _return_fireteam_to_plan(fireteam_id: String, manual_return: bool) -> bool:
 		if plan != null:
 			plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_COMPLETED
 			_remove_empty_completed_order_plan(plan)
-		return _activate_next_area_order_or_default(fireteam_id, active_phase_index) or had_active_ad_hoc
+		return _activate_next_area_order_or_default(fireteam_id, active_phase_index,inherited_scope) or had_active_ad_hoc
 	var next_pending_index: int = -1
 	for waypoint_index in range(plan.waypoints.size()):
 		var waypoint_status: String = String(plan.waypoints[waypoint_index].status)
@@ -34775,8 +34900,8 @@ func _return_fireteam_to_plan(fireteam_id: String, manual_return: bool) -> bool:
 	if next_pending_index < 0:
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_COMPLETED
 		_remove_empty_completed_order_plan(plan)
-		return _activate_next_area_order_or_default(fireteam_id, active_phase_index) or had_active_ad_hoc
-	var resumed: bool = _activate_next_waypoint_for_plan(plan, fireteam_id, next_pending_index) or had_active_ad_hoc
+		return _activate_next_area_order_or_default(fireteam_id, active_phase_index,inherited_scope) or had_active_ad_hoc
+	var resumed: bool = _activate_next_waypoint_for_plan(plan, fireteam_id, next_pending_index,inherited_scope) or had_active_ad_hoc
 	_apply_fireteam_coordination_for_phase(active_phase_index)
 	return resumed
 

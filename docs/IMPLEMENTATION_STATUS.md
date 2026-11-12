@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### AP6 Mitglieder laufender Aufträge — 12.11.2026
+
+FMC und bestehende Controllerexecutions halten konkrete Root-/Kontext-/Actor-/
+Lifecyclebindungen. Boarding und Readmission beleben alte Aufträge nicht wieder;
+verbleibende Mitglieder behalten Ziel und Gruppenfortsetzung. Automatische
+Waypoints, Area-/Computer-USE, Suppression-/AdHoc-Rückkehr und Koordination
+vererben die zulässigen Empfänger. Schiffsrückkehr bindet ihre tatsächliche
+truppübergreifende Crew innerhalb desselben privaten Scopes. Neue explizite
+Aufträge können neue Präsenzen aufnehmen; portable Projektionen enthalten die
+Instanzbindungen nicht. Tatsächlicher kleiner Verbund48/0, Move/View-Nachbar65/0,
+alle Guards und enger unabhängiger Review. QA hex_execution_members_20261112.
+RuntimeSelection und AP7/8 bleiben offen; keine Produktionsaktivierung,
+große Tests, Main oder EXE.
+
 ### AP6 Medical-Abschlussconsumer — 12.11.2026
 
 Separater achtzeiliger Parent4377-Guard auch in Source verbunden: echter früherer
