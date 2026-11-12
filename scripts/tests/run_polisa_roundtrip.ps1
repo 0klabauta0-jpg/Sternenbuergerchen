@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $gitRoot = (& git -C $projectRoot rev-parse --show-toplevel).Trim()
 if ($LASTEXITCODE -ne 0 -or (Resolve-Path $gitRoot).Path -ne $projectRoot) { throw 'Unexpected project source root' }
-$sourcePaths = @('scripts/meta/meta_layer_flow.gd', 'scripts/meta/singleplayer_runtime_adapter.gd', 'scripts/tests/mission_tactical_sandbox_controller.gd', 'scripts/tests/polisa_real_roundtrip_verifier.gd', 'scripts/core/simulation_root.gd')
+$sourcePaths = @('scripts/meta/meta_layer_flow.gd', 'scripts/meta/singleplayer_runtime_adapter.gd', 'scripts/tests/mission_tactical_sandbox_controller.gd', 'scripts/tests/polisa_real_roundtrip_verifier.gd', 'scripts/core/simulation_root.gd', 'scripts/core/singleplayer_ship_equipment_state.gd', 'scripts/core/singleplayer_supply_state.gd', 'scripts/mission/space_component_catalog.gd', 'scripts/mission/inventory_transfer_contract.gd', 'data/singleplayer/trade_offers.json', 'data/space/ship_components.json')
 $before = @{}
 foreach ($path in $sourcePaths) { $before[$path] = (Get-FileHash -LiteralPath (Join-Path $projectRoot $path) -Algorithm SHA256).Hash }
 $profile = Join-Path ([IO.Path]::GetTempPath()) ('codex-polisa-' + [guid]::NewGuid().ToString('N'))

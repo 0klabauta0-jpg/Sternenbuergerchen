@@ -162,6 +162,7 @@ func _valid_space_area_context(context: Dictionary) -> bool:
 	if context.operation in ["begin_station_dock", "undock_station", "depart_station_purchase"]:
 		return payload.size() == 4 and payload.get("location_id") == "polisa" and payload.get("target_id") == "polisa_station_dock" and payload.get("layout_revision") == "polisa_glut2_dock_v1"
 	if context.operation in ["launch_to_orbit", "land_homebase"]: return payload.size() == 1
+	if context.operation == "end_campaign_encounter": return payload.size() == 2 and payload.get("location_id") == "distress_orbit"
 	if context.operation == "start_quantum":
 		if payload.size() not in [2, 3] or typeof(payload.get("target_orbit_id")) != TYPE_STRING or String(payload.target_orbit_id).is_empty() or (payload.has("target_orbit_marker_id") and typeof(payload.target_orbit_marker_id) != TYPE_STRING): return false
 		for key in payload:

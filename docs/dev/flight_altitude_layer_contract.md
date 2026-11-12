@@ -3,6 +3,11 @@
 ## Zweck
 `mission_air` ist ein Anzeige- und Missionsstatus-Layer fuer Dropship-/Flieger-Visuals. Er ist bewusst getrennt von Terrain-`height_level`.
 
+Die am 12.11. gewünschte Luftunterstützung ist eine Erweiterung des bestehenden
+gemeinsamen Flug-/Rotten-/Kampfowners; sie ist hiermit noch nicht implementiert.
+Der Layer selbst bleibt Darstellung. Details und Pakete stehen in
+`space_combat_contract.md` und `../tasks/SPACE_GROUND_AIR_SUPPORT_2026_11_12.md`.
+
 ## Terrain-Grenze
 - Terrain-`height_level` beschreibt die begehbare/LOS-relevante Oberflaeche eines Tiles.
 - Air-Visuals werden relativ zur aktuellen Terrainoberflaeche positioniert, aber setzen keine Walkability, Cover, LOS oder Objekt-Hoehe.

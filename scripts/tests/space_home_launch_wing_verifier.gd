@@ -2,6 +2,7 @@ extends SceneTree
 const ROOT = preload("res://scripts/core/simulation_root.gd")
 const FLEET = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const ADAPTER = preload("res://scripts/meta/singleplayer_runtime_adapter.gd")
+const EQUIPMENT = preload("res://scripts/core/singleplayer_ship_equipment_state.gd")
 class FlowFixture extends Node:
 	var _assigned_aircraft_pilot_by_craft := {"ship":"pilot"}
 	var _aircraft_location_by_craft := {"ship":"homebase"}
@@ -20,6 +21,7 @@ class ScreenFixture extends Control:
 func _initialize() -> void:
 	var fleet = FLEET.new(); assert(fleet.configure().ok); fleet.register_craft("ship")
 	var sim = ROOT.new(); sim.configure_singleplayer_owners(null, null, null, fleet)
+	var equipment = EQUIPMENT.new(); assert(equipment.configure([{"craft_id":"ship","model_id":"cutlass"}]).ok); sim.configure_ship_equipment(equipment)
 	var flow = FlowFixture.new(); var pilot = PilotFixture.new(); var screen = ScreenFixture.new(); var adapter = ADAPTER.new()
 	adapter._simulation = sim; adapter._travel = fleet; adapter._flow = flow; adapter._screen = screen; adapter._base_personnel = pilot; adapter._pad_by_craft["ship"] = "homebase_pad_01"
 	assert(sim.configure_departure_adapter(adapter).ok)
@@ -28,6 +30,7 @@ func _initialize() -> void:
 	pilot.aboard = true
 	var result: Dictionary = adapter.launch_to_moon_orbit("ship")
 	assert(result.ok and fleet.get_craft_snapshot("ship").phase == "orbit" and flow._aircraft_location_by_craft.ship == "starmap")
+	assert(is_equal_approx(float(flight.get_snapshot().mass), float(equipment.get_space_flight_profile("ship").mass)))
 	assert(not sim.get("_space_wing_state").get_craft_wing("ship", "singleplayer").is_empty())
 	var id: String = sim.get("_launch_receipts").keys()[0]
 	var after: Dictionary = flight.get_snapshot()

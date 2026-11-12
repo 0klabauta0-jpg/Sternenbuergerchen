@@ -148,6 +148,7 @@ func _remaining_missions() -> void:
 		_return_orbit = "planet_orbit"
 		if not await _wait(func():return String(_space().phase)=="orbit" and String(_space().orbit_id)==_return_orbit,10000,"arrive at distress orbit"):return
 		_check(_runtime.call("request_operation","space_begin_approach",{"craft_id":_craft_id,"location_id":"distress_orbit"}).get("ok",false),"arrive encounter")
+		if not await _wait(func():return String(_runtime.call("get_snapshot").space_encounter.get("phase",""))=="combat",10000,"combat actors admitted"):return
 		_check(_runtime.call("request_operation","campaign_space_engage",{}).get("ok",false),"engage actual hostile Cutlass")
 		if not await _wait(func():return String(_runtime.call("get_snapshot").space_encounter.get("phase",""))=="rescue_ready",20000,"actual tick combat destroys Cutlass"):return
 		_check(_runtime.call("request_operation","campaign_space_rescue",{}).get("ok",false),"actual neutral rescued")

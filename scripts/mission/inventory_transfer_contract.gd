@@ -1,6 +1,7 @@
 extends RefCounted
 ## Item identities and pure bounded-container validation; no gameplay mutation.
 const SHIP_COMPONENTS = preload("res://scripts/mission/ship_equipment_catalog.gd")
+const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 const LOADOUT = preload("res://scripts/command/loadout_contract.gd")
 const DATA_CHIP_ITEMS := ["satellite_chip", "outpost_chip"]
 const RESERVED_QUEST_ITEMS := ["satellite_chip","outpost_chip","c_benit_crate"]
@@ -8,7 +9,7 @@ const ARMOR_CHIP_CAPACITY := 1
 const BACKPACK_CAPACITY := 12
 const START_STOCK := {"armor_light":2,"armor_medium":2,"armor_heavy":2,"smg":2,"rifle":2,"medictool":1,"mining_tool":1,"salvage_tool":1}
 static func known(item: String) -> bool:
-	return SHIP_COMPONENTS.known(item) or item in ["armor_light","armor_medium","armor_heavy","ore","salvage","a_benit","b_benit","c_benit","satellite_chip","outpost_chip","c_benit_crate","mining_tool","salvage_tool","backpack"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
+	return SHIP_COMPONENTS.known(item) or SPACE_COMPONENTS.known(item) or item in ["armor_light","armor_medium","armor_heavy","ore","salvage","a_benit","b_benit","c_benit","satellite_chip","outpost_chip","c_benit_crate","mining_tool","salvage_tool","backpack"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
 static func compatible(item: String, slot: String) -> bool:
 	return item in ["armor_light","armor_medium","armor_heavy"] if slot=="armor" else (slot in ["weapon_1","weapon_2"] and LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item))
 static func item_from_slot(slot: String, value: String) -> String:
