@@ -52,6 +52,12 @@ Abschaltung, Änderung während des Flugs, Pilotenfolgen und Persistenz fehlen.
 Polisa benötigt weiter den direkten Reiseweg und darf keinen solchen Auftrag
 erhalten. Der Planer allein ist kein Durchflugnachweis.
 
+Die explizite Oberflächenzuordnung erlaubt mehrere reale Orte am selben
+Planeten: `satellite_crash`, `trade_outpost` und `fortified_outpost`. Ihre
+Szenarien verweisen auf die zugehörigen vorhandenen Karten. `distress_orbit`
+und `polisa` sind keine Planetoberflächen. Hin- und Rückübergangsprüfung
+nutzen diese Zuordnung zusammen mit der bestehenden Orbit-/Bodyprüfung.
+
 ## Entwurf für portable aktive Sorties
 
 Ein versionierter Sortie-Datensatz braucht je `craft_id` die `location_id`,
