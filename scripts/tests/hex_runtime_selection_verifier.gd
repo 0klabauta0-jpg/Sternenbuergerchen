@@ -105,6 +105,10 @@ func _test_owner_changes()->void:
 		var rig:Dictionary=_selection_rig()
 		var old_position:Vector2=rig.actors.a.global_position
 		var callback_once:Array=[false]
+		var membership_at_callback:Array=[]
+		var late_leader_signals:Array=[]
+		rig.leader.unit_member_added.connect(func(_unit):late_leader_signals.append("member"))
+		rig.leader.assigned.connect(func(_unit):late_leader_signals.append("assigned"))
 		var replacement:Node
 		if mode=="queued_root":
 			replacement=SIM.new()
@@ -122,13 +126,15 @@ func _test_owner_changes()->void:
 				rig.setup.selected_team_unit_ids=PackedStringArray(["b"])
 				rig.setup.apply_runtime_selection_contract(true)
 				rig.setup.simulation_root_path=rig.setup.get_path_to(replacement)
-			else:rig.sim.unit_registry_path=rig.sim.get_path_to(replacement))
+			else:
+				membership_at_callback.append(rig.leader.get_assigned_units()==[rig.actors.a] and rig.leader.get_assigned_entity()==rig.actors.a)
+				rig.sim.unit_registry_path=rig.sim.get_path_to(replacement))
 		rig.setup.selected_team_unit_ids=PackedStringArray(["c"])
 		rig.setup.apply_runtime_selection_contract(true)
 		if mode=="queued_root":
 			_check(replacement.get_hex_ground_planning_snapshot().units_by_id.is_empty() and replacement._resolve_known_unit_for_contract("b")==null and rig.actors.a.unit_id=="c","reentrant queued selection cannot cross into a replacement Root with equal numeric context")
 		else:
-			_check(rig.actors.a.global_position==old_position and not rig.leader.get_assigned_units().has(rig.actors.a),"registry replacement during identity publication stops cached pose and leader tails")
+			_check(membership_at_callback==[true] and rig.leader.get_assigned_units()==[rig.actors.a] and rig.actors.a.global_position==old_position and late_leader_signals.is_empty(),"complete leader model precedes callbacks; registry replacement stops cached pose and public leader tails")
 		rig.scene.free()
 
 func _test_removed_selection()->void:

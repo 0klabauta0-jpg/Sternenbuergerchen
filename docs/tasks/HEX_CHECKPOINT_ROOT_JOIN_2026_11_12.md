@@ -95,3 +95,10 @@ Testbestanden-, Performance-, Main-, EXE- oder Integrationsfreigabestatus.
 Vor gemeinsamem Testfreeze: Transport-Witness erst nach erfolgreicher strikter
 Baseprepare lesen, damit ein unvollständiger V2-Block strukturiert abgewiesen
 wird. Die Reihenfolge aller Modellmutationen bleibt unverändert.
+
+Gemeinsamer erster Selectionlauf auf Parent6193: 15/1 bei sauberem Compile.
+Einzige alte Assertion erwartete Leaderentfernung nach bereits abgeschlossener
+Modellphase. Fixture jetzt am tatsächlichen Vertrag: vollständige Leadermodelle
+stehen schon im ersten Identitätscallback; Registrytausch stoppt anschließende
+Pose- und öffentliche Leadersignale. Produktguards unverändert. Neuer Lauf im
+gemeinsamen Parentbündel, keine separate Testmatrix.
