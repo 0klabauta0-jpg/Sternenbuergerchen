@@ -276,6 +276,7 @@ func _build() -> void:
 	_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_base.call("set_active", false)
 	_base.connect("terminal_open_requested", _terminal_requested)
+	_base.connect("command_dock_geometry_changed", _on_command_dock_geometry_changed)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
 	_skirmish_shop = load("res://scripts/ui/skirmish_base_shop.gd").new()
 	_skirmish_shop.name = "SkirmishBaseShop"
@@ -1174,6 +1175,22 @@ func is_workspace_flyout_open()->bool:
 	return _right_flyout_active
 
 
+func get_overlay_safe_rect() -> Rect2:
+	var safe := get_viewport_rect()
+	if _base != null:
+		var dock: Rect2 = _base.call("get_command_dock_rect")
+		if dock.has_area() and safe.intersects(dock):
+			safe.size.y = maxf(0.0, minf(safe.end.y, dock.position.y - 8.0) - safe.position.y)
+	return safe
+
+
+func _on_command_dock_geometry_changed() -> void:
+	call_deferred("_layout_workspace_flyout")
+	var screen := _owner_screen()
+	if screen != null and bool(screen.get("_character_sheet_open")):
+		screen.call_deferred("_apply_character_popup_rect")
+
+
 func _layout_workspace_flyout()->void:
 	if _flyout_scrim==null:return
 	_flyout_scrim.visible=_right_flyout_active;_flyout_close.visible=_right_flyout_active
@@ -1183,12 +1200,17 @@ func _layout_workspace_flyout()->void:
 		for node:Control in [_services_view,_job_board]:node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		return
 	var panel:=_workspace_flyout_panel()
+	# GUI picking follows sibling order, not CanvasItem z_index.
+	# Keep the displayed flyout ahead of the outside-click scrim for input too.
+	_workspace.move_child(panel, _workspace.get_child_count() - 1)
+	_workspace.move_child(_flyout_close, _workspace.get_child_count() - 1)
 	var width:float=minf(_workspace.size.x,clampf(_workspace.size.x*.72,720,1040))
 	if _flyout_kind == "build": width = minf(_workspace.size.x, clampf(_workspace.size.x * 0.38, 380.0, 500.0))
 	if _flyout_kind=="inventory":width=minf(_workspace.size.x,840)
 	for column:Control in _columns.values():column.visible=column==panel
 	_reference_stage.hide()
-	panel.z_index=2;panel.set_anchors_preset(Control.PRESET_TOP_LEFT);panel.size=Vector2(width,_workspace.size.y)
+	var available_height: float = maxf(1.0, minf(_workspace.size.y, get_overlay_safe_rect().end.y - _workspace.global_position.y))
+	panel.z_index=2;panel.set_anchors_preset(Control.PRESET_TOP_LEFT);panel.size=Vector2(width,available_height)
 	if _flyout_tween==null or not _flyout_tween.is_running():panel.position=Vector2.ZERO
 	_flyout_close.position=Vector2(width-44,8);_flyout_close.size=Vector2(34,30)
 

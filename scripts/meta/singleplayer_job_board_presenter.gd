@@ -27,9 +27,14 @@ func configure(screen: Control) -> void:
 	_screen = weakref(screen)
 	name = "JobBoard"
 	add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	var layout := VBoxContainer.new()
+	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.add_theme_constant_override("separation", 8)
+	add_child(layout)
 	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	add_child(scroll)
+	layout.add_child(scroll)
 	var alignment := HBoxContainer.new()
 	alignment.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(alignment)
@@ -70,7 +75,8 @@ func configure(screen: Control) -> void:
 	_actions.name = "JobActions"
 	_actions.add_theme_constant_override("h_separation", 8)
 	_actions.add_theme_constant_override("v_separation", 8)
-	_content.add_child(_actions)
+	# Keep the real actions reachable while long briefing text scrolls above.
+	layout.add_child(_actions)
 	_accept = _button("AcceptJob", "Auftrag annehmen")
 	SKIN.button(_accept,true)
 	_accept.pressed.connect(func(): _request("accept_job", {"job_id": _job_id}))

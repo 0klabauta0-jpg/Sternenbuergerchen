@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### Auftragsannahme und freie Overlayfläche — 12.11.2026
+Erster Auftrag über echte Controlklicks reproduziert: Außenklickfläche fing die
+Eingabe ab. Aktives Flyout nun auch in der GUI-Geschwisterfolge vor der Fläche.
+Smart Mobile und Details reservieren die sichtbare Basisleiste; Annahme bleibt
+außerhalb des scrollenden Briefings erreichbar. Detailspalten passen einschließlich
+Schließen-Knopf in den Viewport. Headless24/0 und privater nativer Godotlauf24/0
+bei1920×1080 und1280×720, ohne Nutzerdesktopbedienung. Nachweise:
+`docs/qa/job_app_safe_area_20261112/README.md`. Keine breite Spiel-/Performancefreigabe.
+
 ### Kampagnen-Continue, Mondkarten und Windows-Paket â€” 12.11.2026
 Gemeinsamer Source-Main `0eb7845b859bf49d76b7a16137ba46282dab236d`: regulÃ¤rer stabiler Kampagnen-Einsatzsave und Continue auf Glut 1a mit echter Bergung, Heimflug und Upload 80/0; gezielte Regressionen 10/10. Zwei echte RundflÃ¼ge auf 512Ã—256-Mondkarten 84/0 (B als Besuch abgebrochen). Details: `docs/qa/campaign_active_continue_20261112/README.md` und `docs/qa/two_moon_native_roundtrips_20261112/`.
 

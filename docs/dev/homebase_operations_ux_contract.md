@@ -102,3 +102,13 @@ Teams. Individualausstieg des Piloten entfernt weder FT-Mitgliedschaft noch
 Anjas Boarding. Physische Anwesenheit wird separat als An Bord/Nicht an Bord
 angezeigt; tatsÃ¤chlicher Wiedereinstieg bleibt Voraussetzung des Abhebens.
 Legacyansichten ohne physischen Basisowner behalten ihre bisherige ExklusivitÃ¤t.
+
+
+## Bedienfläche über dem Basisband — 12.11.2026
+Smart Mobile und Charakterdetails berücksichtigen die tatsächliche sichtbare
+Basisbefehlsleiste und enden mindestens acht Pixel darüber. Lange Briefings und
+Charakterinhalte scrollen; die Auftragsaktionen und der Schließen-Knopf bleiben
+erreichbar. Die Charakterspalten passen in den Viewport, ohne die Figur pauschal
+zu verkleinern. Das aktive Seitenfenster liegt auch in der GUI-Eingabereihenfolge
+vor der Außenklickfläche. Auswahl und Detailöffnung des ersten Auftrags schließen
+die App nicht; Annahme läuft über den bestehenden Campaigncommand.

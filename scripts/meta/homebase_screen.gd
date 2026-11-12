@@ -2032,6 +2032,10 @@ func _apply_r4_preparation_visuals(layout: Dictionary) -> void:
 
 func get_native_r2_layout_snapshot() -> Dictionary:
 	var viewport_size := Vector2i(get_viewport_rect().size)
+	var character_bottom: int = viewport_size.y - 12
+	if _operations_presenter != null:
+		var safe: Rect2 = _operations_presenter.call("get_overlay_safe_rect")
+		character_bottom = mini(character_bottom, floori(safe.end.y))
 	var usable_width := viewport_size.x - 64
 	var roster_width := int(round(float(usable_width) * 0.25 / 8.0)) * 8
 	var team_width := int(round(float(usable_width) * 0.28 / 8.0)) * 8
@@ -2048,7 +2052,7 @@ func get_native_r2_layout_snapshot() -> Dictionary:
 		"roster": Rect2i(16, work_top, roster_width, work_height),
 		"fireteams": Rect2i(32 + roster_width, work_top, team_width, team_height),
 		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, transport_height),
-		"character_popup": Rect2i(viewport_size.x - mini(1500, viewport_size.x - 24) - 12, 12, mini(1500, viewport_size.x - 24), viewport_size.y - 24),
+		"character_popup": Rect2i(viewport_size.x - mini(1500, viewport_size.x - 24) - 12, 12, mini(1500, viewport_size.x - 24), maxi(1, character_bottom - 12)),
 		"briefing_details_open": _r2_briefing_details_open,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -2764,7 +2768,15 @@ func _apply_character_popup_rect() -> void:
 	popup.set_meta("homebase_character_popup_rect", rect)
 	var inventory_scroll:=popup.find_child("CharacterInventoryScroll",true,false) as Control
 	if inventory_scroll != null:
-		inventory_scroll.custom_minimum_size.x = PERSONNEL_INVENTORY_PANEL.get_preferred_character_column_width(get_viewport_rect().size.x)
+		var preferred: float = PERSONNEL_INVENTORY_PANEL.get_preferred_character_column_width(get_viewport_rect().size.x)
+		var stats := popup.find_child("PopupScroll", true, false) as Control
+		var columns := popup.find_child("CharacterDetailsColumns", true, false) as HBoxContainer
+		var margin := popup.find_child("PopupMargin", true, false) as MarginContainer
+		var panel := popup.get_node("PopupPanel") as PanelContainer
+		var style: StyleBox = panel.get_theme_stylebox("panel")
+		var padding: float = margin.get_theme_constant("margin_left") + margin.get_theme_constant("margin_right") + style.get_content_margin(SIDE_LEFT) + style.get_content_margin(SIDE_RIGHT)
+		var available: float = rect.size.x - padding - columns.get_theme_constant("separation") - stats.get_combined_minimum_size().x
+		inventory_scroll.custom_minimum_size.x = minf(preferred, maxf(360.0, available))
 
 
 func _disable_legacy_homebase_window(path: String, meta_key: String) -> void:
@@ -5975,6 +5987,7 @@ func _update_character_sheet() -> void:
 	)
 
 	_update_character_inventory()
+	call_deferred("_apply_character_popup_rect")
 
 
 func _on_character_inventory_operation(operation: String, payload: Dictionary) -> void:

@@ -4,6 +4,7 @@ extends Control
 signal terminal_open_requested(id: String)
 signal world_selection_changed(kind: String, id: String)
 signal exploration_exit_requested
+signal command_dock_geometry_changed
 
 const MAP_PATH: String = "res://maps/homebase_frontier_exploration.json"
 const CAMPAIGN_MAP_PATH: String = "res://maps/campaign_intro_base.json"
@@ -167,6 +168,8 @@ func _select_person_at(point: Vector2) -> bool:
 func _build_personnel_controls() -> void:
 	_person_panel = VBoxContainer.new()
 	_person_panel.name = "BasePersonnelActions"
+	_person_panel.resized.connect(func(): command_dock_geometry_changed.emit())
+	_person_panel.visibility_changed.connect(func(): command_dock_geometry_changed.emit())
 	add_child(_person_panel)
 	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	var dock := PanelContainer.new()
@@ -284,6 +287,10 @@ func _build_personnel_controls() -> void:
 	_hint.text = "NPC anklicken · Rechtsklick Ziel · E Konsole"
 	_resize_personnel_panel()
 	_update_personnel_controls()
+
+
+func get_command_dock_rect() -> Rect2:
+	return _person_panel.get_global_rect() if _person_panel != null and _person_panel.is_visible_in_tree() else Rect2()
 
 
 func _resize_personnel_panel() -> void:

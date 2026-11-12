@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] run (res://scripts/tests/job_app_safe_area_verifier.gd:36)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] run (res://scripts/tests/job_app_safe_area_verifier.gd:36)
+RECTS (1920, 1080) workspace=[P: (194.0, 84.0), S: (1710.0, 944.0)] app=[P: (194.0, 84.0), S: (1040.0, 799.0)] dock=[P: (0.0, 891.0), S: (1920.0, 189.0)] accept=[P: (194.0, 84.0), S: (166.0, 43.0)]
+PASS: Smart Mobile opens
+CLICK @Button@2039 point=(706.0, 268.5) hovered=/root/MetaLayerTest/HomebaseScreen/OperationsRoot/@MarginContainer@204/@VBoxContainer@205/@HBoxContainer@211/Workspace/JobBoard/@VBoxContainer@526/@ScrollContainer@529/@HBoxContainer@530/MobileDevice/Content/@GridContainer@535/@VBoxContainer@536/@VBoxContainer@546/@Button@2039
+PASS: real title click keeps app open and expands first job
+PASS: periodic refresh retains app
+PASS: Smart Mobile remains above base bottom band
+PASS: accept action remains above bottom band
+PASS: accept action stays inside the visible app
+DETAIL_RECT [P: (408.0, 12.0), S: (1500.0, 871.0)] panel=[P: (408.0, 12.0), S: (1500.0, 871.0)]
+DETAIL_MIN PopupScroll min=(646.0, 0.0) rect=[P: (422.0, 66.0), S: (646.0, 803.0)]
+DETAIL_MIN CharacterInventoryScroll min=(812.0, 0.0) rect=[P: (1082.0, 66.0), S: (812.0, 803.0)]
+DETAIL_MIN PopupHeaderRow min=(203.0, 32.0) rect=[P: (422.0, 26.0), S: (1472.0, 32.0)]
+PASS: character details remain above bottom band
+PASS: actual details panel stays above band
+PASS: details including close control fit viewport width
+CLICK ClosePopupButton point=(1855.0, 42.0) hovered=/root/MetaLayerTest/HomebaseScreen/CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupHeaderRow/ClosePopupButton
+PASS: actual details close button stays usable
+RECTS (1280, 720) workspace=[P: (194.0, 84.0), S: (1070.0, 584.0)] app=[P: (194.0, 84.0), S: (770.4, 439.0)] dock=[P: (0.0, 531.0), S: (1280.0, 189.0)] accept=[P: (194.0, 480.0), S: (166.0, 43.0)]
+PASS: Smart Mobile opens
+CLICK @Button@2039 point=(389.0, 268.5) hovered=/root/MetaLayerTest/HomebaseScreen/OperationsRoot/@MarginContainer@204/@VBoxContainer@205/@HBoxContainer@211/Workspace/JobBoard/@VBoxContainer@526/@ScrollContainer@529/@HBoxContainer@530/MobileDevice/Content/@GridContainer@535/@VBoxContainer@536/@VBoxContainer@546/@Button@2039
+PASS: real title click keeps app open and expands first job
+PASS: periodic refresh retains app
+PASS: Smart Mobile remains above base bottom band
+PASS: accept action remains above bottom band
+PASS: accept action stays inside the visible app
+DETAIL_RECT [P: (12.0, 12.0), S: (1256.0, 511.0)] panel=[P: (12.0, 12.0), S: (1256.0, 511.0)]
+DETAIL_MIN PopupScroll min=(646.0, 0.0) rect=[P: (26.0, 66.0), S: (646.0, 443.0)]
+DETAIL_MIN CharacterInventoryScroll min=(568.0, 0.0) rect=[P: (686.0, 66.0), S: (568.0, 443.0)]
+DETAIL_MIN PopupHeaderRow min=(203.0, 32.0) rect=[P: (26.0, 26.0), S: (1228.0, 32.0)]
+PASS: character details remain above bottom band
+PASS: actual details panel stays above band
+PASS: details including close control fit viewport width
+CLICK ClosePopupButton point=(1215.0, 42.0) hovered=/root/MetaLayerTest/HomebaseScreen/CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupHeaderRow/ClosePopupButton
+PASS: actual details close button stays usable
+CLICK AcceptJob point=(277.0, 501.5) hovered=/root/MetaLayerTest/HomebaseScreen/OperationsRoot/@MarginContainer@204/@VBoxContainer@205/@HBoxContainer@211/Workspace/JobBoard/@VBoxContainer@526/JobActions/AcceptJob
+PASS: actual accept button reaches campaign owner
+PASS: accept keeps selected job visible
+CLICK CloseBaseFlyout point=(937.4, 112.0) hovered=/root/MetaLayerTest/HomebaseScreen/OperationsRoot/@MarginContainer@204/@VBoxContainer@205/@HBoxContainer@211/Workspace/CloseBaseFlyout
+PASS: explicit app close remains functional
+SCRIM_PRESS (1054.0, 40.0)
+PASS: outside click still closes the app
+JOB_APP_SAFE_AREA checks=24 failed=0
+JOB_APP_SAFE_AREA_PASS
