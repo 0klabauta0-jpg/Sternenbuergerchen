@@ -446,6 +446,7 @@ const SPACE_AREA_TRANSITION = preload("res://scripts/tactical/space_area_transit
 const SPACE_ORBIT_ENTRY_SEARCH = preload("res://scripts/tactical/space_orbit_entry_search.gd")
 const ORBIT_LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const ORBIT_SURFACE_LOCATIONS = preload("res://scripts/mission/orbit_surface_locations.gd")
+const ORBIT_AUTO_TRANSIT = preload("res://scripts/mission/orbit_auto_transit_planner.gd")
 const SPACE_COMMAND_CONTRACT = preload("res://scripts/mission/space_combat_command_contract.gd")
 const SPACE_TARGETING = preload("res://scripts/tactical/space_targeting_resolver.gd")
 const SPACE_WEAPON = preload("res://scripts/tactical/space_weapon_resolver.gd")
@@ -1116,6 +1117,13 @@ func commit_singleplayer_warp_departure(adapter: Node, command: Dictionary) -> D
 	var wing_revision: int = _space_wing_state.get_snapshot().revision
 	var preview: Dictionary = preview_warp_departure(command.craft_id, command.target_orbit_id, pose.revision, travel.get("revision", -1), area_revision, wing_revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not preview.get("ok", false): return preview
+	if adapter.has_method("requires_surface_orbit_exit_band") and adapter.requires_surface_orbit_exit_band(command.craft_id):
+		var area_layout: Dictionary = ORBIT_LAYOUT.build(String(pose.space_area_id).trim_prefix("orbit_approach:").uri_decode())
+		if not area_layout.get("ok", false) or area_layout.body_map_id != pose.space_area_id: return {"ok":false, "reason":"invalid_area"}
+		var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(command.craft_id, {})
+		if cells.is_empty(): return {"ok":false, "reason":"invalid_footprint"}
+		for cell in cells:
+			if not area_layout.entry_band.has_point(SPACE_GRID.to_offset(cell)): return {"ok":false, "reason":"space_exit_band_required", "message":"Zum Sprung zuerst den unteren Weltraumrand erreichen"}
 	var orbit: Dictionary = Dictionary(travel.orbits).get(String(travel.orbit_id), {})
 	var body: Dictionary = Dictionary(travel.bodies).get(String(orbit.get("body_id", "")), {})
 	var payload := {"craft_id":command.craft_id, "target_orbit_id":command.target_orbit_id}
@@ -1773,6 +1781,55 @@ func set_space_flight_control(craft_id: String, intent: Dictionary, hull: Dictio
 func get_space_flight_status(craft_id: String) -> Dictionary:
 	return _space_combat_state.get_flight_status(craft_id)
 
+func start_singleplayer_orbit_transit(adapter: Node, craft_id: String, location_id: String, direction: String, request_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing() or is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_required"}
+	if _singleplayer_space_travel_owner == null or location_id == "polisa" or request_id.is_empty(): return {"ok":false, "reason":"invalid_context"}
+	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
+	if flight == null or _space_combat_state.get_actor(craft_id) != flight: return {"ok":false, "reason":"not_owned"}
+	var pose: Dictionary = flight.get_snapshot()
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	var orbit_id := String(Dictionary(travel.get("location_orbits", {})).get(location_id, ""))
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
+	var body_id := String(orbit.get("body_id", ""))
+	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
+	if travel.get("phase") != "orbit" or String(travel.get("orbit_id", "")) != orbit_id or body_id.is_empty() or not ORBIT_SURFACE_LOCATIONS.contains(body, location_id) or pose.get("space_area_id") != "orbit_approach:" + body_id.uri_encode(): return {"ok":false, "reason":"invalid_surface_context"}
+	if not is_instance_valid(_base_personnel_owner) or not _base_personnel_owner.is_pilot_aboard(craft_id): return {"ok":false, "reason":"pilot_not_aboard"}
+	var radar: Dictionary = get_space_radar_contacts(craft_id)
+	if not radar.get("ok", false): return radar
+	if not Array(radar.contacts).is_empty(): return {"ok":false, "reason":"contact_detected"}
+	# The radar decides which distant contacts are known. The existing
+	# collision and swept-footprint owner remains authoritative for all actors.
+	var metadata: Dictionary = _space_combat_state.get_metadata(craft_id)
+	var start := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))
+	var plan: Dictionary = ORBIT_AUTO_TRANSIT.plan(pose.space_area_id, start, direction, Array(metadata.get("footprint_hexes", [])), [], radar.contacts)
+	if not plan.get("ok", false): return plan
+	var line: Array[Vector2i] = SPACE_GRID.HEX.line(start, plan.target_hex)
+	for claimant in _space_combat_state.query_navigation_claims(line, pose.space_area_id):
+		if claimant != craft_id: return {"ok":false, "reason":"navigation_claimed"}
+	var result: Dictionary = request_singleplayer_space_move({"craft_id":craft_id, "target_hex":plan.target_hex, "request_id":request_id})
+	if not result.get("ok", false) or result.get("replayed", false): return result
+	var control: Dictionary = _space_combat_state.get_flight_controls().get(craft_id, {})
+	if control.is_empty(): return {"ok":false, "reason":"control_unavailable"}
+	control["orbit_auto_transit"] = true
+	control["orbit_auto_location_id"] = location_id
+	control["orbit_auto_direction"] = direction
+	_space_combat_state.set_flight_control(craft_id, control)
+	_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"transit"})
+	return {"ok":true, "target_hex":plan.target_hex, "direction":direction}
+
+func stop_singleplayer_orbit_transit(adapter: Node, craft_id: String) -> Dictionary:
+	if _departure_adapter == null or not is_instance_valid(adapter) or _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_required"}
+	var control: Dictionary = _space_combat_state.get_flight_controls().get(craft_id, {})
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null or not control.get("orbit_auto_transit", false): return {"ok":false, "reason":"not_auto_transit"}
+	control["goal"] = {"target_plane":flight.get_snapshot().position_plane}
+	control["orbit_auto_transit"] = false
+	control["orbit_auto_braking"] = true
+	_space_combat_state.release_navigation_claim(craft_id)
+	_space_combat_state.set_flight_control(craft_id, control)
+	return {"ok":true}
+
 func request_singleplayer_space_move(command: Dictionary) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	# The adapter supplies only this strict payload; all authority is read here.
@@ -1847,6 +1904,9 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		if flight == null or flight.get_snapshot().motion_mode != "tactical":
 			if control.get("singleplayer_move", false) or control.get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
 			continue
+		# A synchronous area admission can publish at this same root tick just
+		# before the flight phase. Keep the command for the next newer tick.
+		if int(flight.get_snapshot().get("tick", -1)) >= tick: continue
 		if control.get("air_support_move", false):
 			var mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
 			if not is_instance_valid(mission) or not mission._air_support_motion_context_valid(craft_id, self, control.equipment_snapshot):
@@ -1865,9 +1925,17 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				_space_combat_state.clear_flight_control(craft_id)
 				_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":"movement_context_changed"})
 				continue
+			if control.get("orbit_auto_transit", false) and tick % 5 == 0:
+				var radar: Dictionary = get_space_radar_contacts(craft_id)
+				if not radar.get("ok", false) or not Array(radar.get("contacts", [])).is_empty():
+					control["goal"] = {"target_plane":pose.position_plane}
+					control["orbit_auto_transit"] = false
+					control["orbit_auto_braking"] = true
+					_space_combat_state.release_navigation_claim(craft_id)
+					_space_combat_state.set_flight_control(craft_id, control)
 			if pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and pose.velocity_plane.length() < 0.02:
 				_space_combat_state.clear_flight_control(craft_id)
-				_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"arrived"})
+				_space_combat_state.set_flight_status(craft_id, {"ok":not control.get("orbit_auto_braking", false), "reason":"interrupted" if control.get("orbit_auto_braking", false) else "arrived"})
 				continue
 		var intent: Dictionary = control.get("intent", {})
 		if control.has("goal"):

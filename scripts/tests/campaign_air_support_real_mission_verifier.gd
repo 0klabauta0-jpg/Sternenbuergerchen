@@ -7,6 +7,7 @@ func _run() -> void:
 	await process_frame
 	_screen = _flow.get_node("HomebaseScreen")
 	_runtime = _flow.get("_singleplayer_runtime")
+	if "--orbit-opt-in" in OS.get_cmdline_user_args(): _runtime.set("_surface_orbit_path_enabled", true)
 	if not await _prepare_initial_base(): await _finish(); return
 	var craft: Dictionary = _screen.call("get_operations_snapshot").get("selected_craft", {})
 	_craft_id = String(craft.get("id", "")); _pilot_id = String(craft.get("pilot_id", ""))
@@ -96,13 +97,26 @@ func _air_button(mission: Node, action: String) -> Button:
 
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 	if label.ends_with("actual mission instance exists"):
-		var deadline := Time.get_ticks_msec() + maxi(milliseconds, 60000)
+		# The actual coupled Cutlass now crosses the 256-row orbit on normal ticks.
+		var expected_location := String(_campaign().get("selected_location_id", ""))
+		var diagnostic := "--orbit-diagnostic" in OS.get_cmdline_user_args()
+		var deadline := Time.get_ticks_msec() + (25000 if diagnostic else maxi(milliseconds, 180000))
+		var source: Node = _runtime.get("_simulation")
+		var flight: RefCounted = _runtime.get("_travel").get_flight_state(_craft_id)
+		var beginning: Dictionary = flight.get_snapshot()
+		var start_tick: int = source.tick_counter
+		var report_at := Time.get_ticks_msec() + 25000
+		var reported := false
 		while Time.get_ticks_msec() < deadline:
 			var mission: Node = _flow.call("get_mission_for_craft", _craft_id)
-			if is_instance_valid(mission):
+			if is_instance_valid(mission) and not expected_location.is_empty() and String(mission.get_meta("location_id", "")) == expected_location:
 				_flow.call("focus_location", String(mission.get_meta("location_id", "")))
 				return _check(true, label)
+			if not reported and Time.get_ticks_msec() >= report_at:
+				reported = true
+				print("ORBIT_REAL_MIDPOINT ", {"start_tick":start_tick,"end_tick":source.tick_counter,"start_pose":beginning,"end_pose":flight.get_snapshot(),"flight_status":source.get_space_flight_status(_craft_id),"intent":_runtime.get("_surface_orbit_intents")})
 			await physics_frame
+		print("ORBIT_REAL_PROGRESS ", {"start_tick":start_tick,"end_tick":source.tick_counter,"travel":_space(),"start_pose":beginning,"end_pose":flight.get_snapshot(),"flight_status":source.get_space_flight_status(_craft_id),"controls":source.get("_space_combat_state").get_flight_controls(),"intent":_runtime.get("_surface_orbit_intents"),"physics":source.is_physics_processing()})
 		return _check(false, "TIMEOUT " + label)
 	return await super._wait(predicate, milliseconds, label)
 

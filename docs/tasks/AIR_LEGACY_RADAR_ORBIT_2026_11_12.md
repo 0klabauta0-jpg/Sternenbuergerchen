@@ -44,19 +44,72 @@ automatische Orbitdurchflug sind noch nicht nachgewiesen. Im privaten Hex-
 Versuch meldete der Bewegungsowner beim Rückweg `unreachable_target`; die
 Produktionskarte bleibt unverändert im Legacy-Modus.
 
-Ein eigenständiger Routenplaner schlägt inzwischen einen freien geraden Weg
-vom unteren Eintrittsband zu einem oberen Planetentor beziehungsweise zurück
-vor und lehnt erkannte Kontakte oder versperrte Wege ab. Er ist noch nicht an
-Ankunft, Flugtick oder Bedienung angeschlossen; automatische Fortsetzung,
-Abschaltung, Änderung während des Flugs, Pilotenfolgen und Persistenz fehlen.
-Polisa benötigt weiter den direkten Reiseweg und darf keinen solchen Auftrag
-erhalten. Der Planer allein ist kein Durchflugnachweis.
+Ein Routenplaner schlägt einen freien geraden Weg vom unteren Eintrittsband
+zu einem oberen Planetentor beziehungsweise zurück vor und lehnt erkannte
+Kontakte oder versperrte Wege ab. Der Flugowner führt den Weg im Opt-in über
+seine normalen Bewegungsticks aus; Abschalten und neue Kontakte lösen Bremsen
+aus. Zielort und Wartestatus sind pro Schiff gebunden. Ein regulärer 1x-Lauf
+mit Opt-in erreichte nach tatsächlichem Durchflug die Satellitenmission und
+bestand den Dropship-Flug mit 49/49 Prüfungen. Die Gegenrichtung bis zum
+Warp-Gate ist bisher im Ownerfixture geprüft. Polisa behält den direkten Weg.
 
-Die explizite Oberflächenzuordnung erlaubt mehrere reale Orte am selben
-Planeten: `satellite_crash`, `trade_outpost` und `fortified_outpost`. Ihre
-Szenarien verweisen auf die zugehörigen vorhandenen Karten. `distress_orbit`
-und `polisa` sind keine Planetoberflächen. Hin- und Rückübergangsprüfung
-nutzen diese Zuordnung zusammen mit der bestehenden Orbit-/Bodyprüfung.
+Der neue Pfad bleibt standardmäßig ausgeschaltet, bis lokale Flight-,
+Transit-, Receipt- und Bedienzustände mit Save/Continue gemeinsam abgesichert
+sind; die Auswahl ist derzeit nicht dauerhaft gespeichert und die Bedienung
+im Standardpfad ausgeblendet. Ein Szenariogefecht
+und eine visuelle Abnahme sind noch offen. Pilotenabhängige Hindernisfolgen
+sind noch nicht implementiert.
+
+Ein weiterer realer Rückrundlauf erreichte Landung und Bewegungsbefehl zum
+Satelliten, aber die Interaktion wurde innerhalb 45 Sekunden nicht benutzbar.
+Die Ursache ist nicht geklärt. Ein separater realer 1×-Lauf mit Orbit-Opt-in,
+regulärem Missionsabbruch und physisch eingeboardeter Originalcrew bestand
+38/38 Prüfungen bis zur tatsächlichen Heimatlandung des ursprünglichen Schiffs.
+Dieser Lauf ist kein Abschluss des Satellitenziels und kein Save/Load-Nachweis.
+
+Beim anschließenden Zweimondlauf lieferte der unindizierte
+`get_mission_for_craft`-Fallback während des zweiten Flugs noch die aktive
+Instanz der ersten Karte, obwohl das Schiff dort nicht mehr anwesend war.
+Der Fallback darf nur für ein tatsächlich als `mission` geführtes Schiff
+gelten; explizite Location-Registry-Bindungen behalten Vorrang. Ein gezielter
+Test deckt alte Instanz, Missionsbesitz und explizite neue Bindung ab.
+
+## Reale Zweimond-Rundflüge, kombinierter Stand
+
+Der isolierte 1×-Lauf auf Source `2f37621a69a328c908b5d9cd1ab236ec80b2a61c`
+bestand 84/84. Er nutzte die bestätigten Sternsystemdaten `21c7c23b` und die
+512×256-Karten aus `3f5e2c21` sowie ein ausdrücklich aktiviertes Orbit-Opt-in.
+Auf Glut 1a wurde der Satellit durch echten Lauf und zeitgesteuertes Use
+geborgen, das ursprüngliche Schiff flog heim und der Chip wurde hochgeladen.
+Ein echter Heimat-Checkpoint wurde danach gespeichert und über den Store
+gelesen. Der dadurch freigeschaltete Besuch auf Glut 1b wurde nach Landung
+und echtem Boarding regulär abgebrochen; das ursprüngliche Schiff flog heim.
+Personen, Positionen, Gesundheit und Fortschritt wurden nicht gepatcht.
+
+Das Ergebnisprotokoll liegt unter
+`C:/Users/bjoer/AppData/Local/Temp/codex-two-moon-native-fixed-503c8fc727e54ef1bf660c8504c185aa/roundtrips.log`.
+Der unveränderte Checkpoint `source_a_upload_checkpoint.json` im selben Profil
+hat SHA-256 `aa6841f32b7cdd00fe7506d8c4960ebe4a76fe41416633f12e3e50770b2c7618`.
+Der Store-Read ist kein Szenen-Continue; der B-Auftrag wurde nicht erfüllt.
+Ein nativer Sichttest und lokales Flight-/Automatik-Save/Load bleiben offen.
+
+## Ausstehende Befehle während Orbitdurchflug
+
+Ein vorgemerkter Oberflächenanflug gehört ausschließlich zu einem laufenden
+Einflug; ein vorgemerkter Warp gehört ausschließlich zu einem laufenden
+Ausflug. Pro Schiff dürfen die beiden vorgemerkten Befehle nicht zugleich
+existieren. Wiederholungen desselben Befehls bleiben idempotent; widersprüchliche
+Anfragen werden mit einer nachvollziehbaren Ablehnung beantwortet. Die Prüfung
+bleibt auf den vorhandenen Reiseadapter begrenzt und verändert keine Flugphysik.
+
+Die kanonische Oberflächenzuordnung ordnet `satellite_crash` Glut 1a,
+`trade_outpost` Glut 1b und `fortified_outpost` Glut 1 zu. Ihre Szenarien
+verweisen auf die zugehörigen Karten. `distress_orbit` und `polisa` sind keine
+Planetoberflächen. Die im Parallelchat wiederhergestellten Sternsystemdaten
+müssen dazu gemeinsam integriert werden. Hin- und Rückübergangsprüfung nutzen
+diese Zuordnung zusammen mit der bestehenden Orbit-/Bodyprüfung. Die oben
+genannten 1×-Läufe basieren auf Main `95abade90` mit damaliger abweichender
+Orbitzuordnung und beweisen noch keinen Flug zu den neu gebundenen Monden.
 
 ## Entwurf für portable aktive Sorties
 

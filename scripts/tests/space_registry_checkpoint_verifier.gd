@@ -89,3 +89,6 @@ func _points(values: Array) -> Array[Vector2i]:
 	var typed: Array[Vector2i] = []
 	typed.assign(values)
 	return typed
+
+
+

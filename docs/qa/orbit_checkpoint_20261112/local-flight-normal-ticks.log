@@ -1,0 +1,131 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual Root launch uses real Fleet/Flight/Equipment
+PASS: actual strategic launch receipt captures before local travel
+PASS: historical three-field projection preserves actual strategic launch history
+PASS: historical strategic receipt projection validates exact real owners
+PASS: real strategic bootstrap starts quantum
+PASS: actual bounded Root warp-entry producer admits local Flight
+PASS: actual Root move producer creates canonical dedup receipt
+PASS: actual stable local/quantum Fleet exports
+PASS: typed JSON restores detached actual Flight/Travel owners
+PASS: detached Fleet preparation preserves receiver
+PASS: restored Fleet and Flight identities are fresh
+PASS: complete semantic Fleet checkpoint survives roundtrip
+PASS: wrong canonical orbit body rejects
+PASS: local grounded mode rejects
+PASS: local position outside current map bounds rejects
+PASS: unsupported atmosphere flight rejects
+PASS: surface phase cannot retain tactical Flight
+PASS: changed travel body cannot retain previous local area
+PASS: actual local Travel can prepare read-only surface transition candidate
+PASS: fresh area candidate validates before checkpoint restore
+PASS: same legitimate Travel state prepares restore
+PASS: same legitimate checkpoint restores silently
+PASS: old signed area candidate rejects after same-value restore epoch change
+PASS: fractional Flight monotonic field rejects: tick
+PASS: fractional Flight monotonic field rejects: revision
+PASS: unknown coordinate frame rejects
+PASS: untyped velocity wire rejects
+PASS: unexpected runtime identity field rejects
+PASS: all corrupt restore preparations leave receiver untouched
+PASS: standalone actual Travel checkpoint prepares
+PASS: same-value reconfigure invalidates pending Travel restore by epoch
+PASS: completed actual local receipts capture
+PASS: real Fleet checkpoint creates fresh local/strategic Flight owners
+PASS: JSON receipt projection prepares detached real owners
+PASS: missing expanded checkpoint map rejects: move
+PASS: missing expanded checkpoint map rejects: warp_entry
+PASS: missing expanded checkpoint map rejects: warp_departure
+PASS: missing expanded checkpoint map rejects: local_return
+PASS: missing expanded checkpoint map rejects: warp_latest
+PASS: missing expanded checkpoint map rejects: return_latest
+PASS: stripping all local maps cannot masquerade as historical checkpoint
+PASS: old Root prebinding stamp prepares before export failure
+PASS: actual Fleet API binds separate unfinished old-owner context
+PASS: unfinished context makes actual old Fleet export fail
+PASS: capture explicitly rejects failed owner export
+PASS: prebinding prepare rejects failed old-owner export
+PASS: old Root stamp failure explicitly rejects validation
+PASS: actual Fleet API binds unfinished detached-owner context
+PASS: prepare explicitly rejects failed detached-owner export
+PASS: failed new-owner export cannot act as constant freshness stamp
+PASS: removing unfinished context restores exact valid detached stamp
+PASS: unfinished warp-entry event rejects
+PASS: dangling latest index rejects
+PASS: noncanonical move receipt rejects
+PASS: forged Fleet result rejects
+PASS: unsupported station-birth family remains fail closed
+PASS: actual capture refuses unsupported station launch producer shape
+PASS: pending/unsupported source map rejects: _warp_entry_searches
+PASS: pending/unsupported source map rejects: _warp_completion_intents
+PASS: pending/unsupported source map rejects: _space_fire_receipts
+PASS: pending/unsupported source map rejects: _air_ground_order_receipts
+PASS: fresh bindings validate before receipt publication
+PASS: target latest-index mutation invalidates prepared candidate
+PASS: exact target baseline validates again
+PASS: receipt publication changes no actual owner
+PASS: semantic recapture equals original local receipt checkpoint
+PASS: occupied local receipt maps cannot silently overwrite
+LOCAL_FLIGHT_FLEET_CHECKPOINT_STAGE phase=orbit
+PASS: actual warp entry replays with original nested replay semantics
+PASS: actual move replays after fresh owner restore
+PASS: changed target with same move ID conflicts
+PASS: restored receipt replays mutate no owners or published events
+LOCAL_WARP_DEPARTURE_RESULT { "ok": true, "replayed": false, "receipt_id": "orbit-receipt-warp-out", "travel_result": { "ok": true, "phase": "quantum", "revision": 5, "craft_id": "a", "source_area_id": "orbit_approach:glut_1a", "target_area_id": "" } }
+PASS: actual local-to-strategic warp-departure producer commits
+PASS: actual stable local/quantum Fleet exports
+PASS: typed JSON restores detached actual Flight/Travel owners
+PASS: detached Fleet preparation preserves receiver
+PASS: restored Fleet and Flight identities are fresh
+PASS: complete semantic Fleet checkpoint survives roundtrip
+PASS: fractional Flight monotonic field rejects: tick
+PASS: fractional Flight monotonic field rejects: revision
+PASS: unknown coordinate frame rejects
+PASS: untyped velocity wire rejects
+PASS: unexpected runtime identity field rejects
+PASS: all corrupt restore preparations leave receiver untouched
+PASS: standalone actual Travel checkpoint prepares
+PASS: same-value reconfigure invalidates pending Travel restore by epoch
+PASS: completed actual local receipts capture
+PASS: real Fleet checkpoint creates fresh local/strategic Flight owners
+PASS: JSON receipt projection prepares detached real owners
+PASS: missing expanded checkpoint map rejects: move
+PASS: missing expanded checkpoint map rejects: warp_entry
+PASS: missing expanded checkpoint map rejects: warp_departure
+PASS: missing expanded checkpoint map rejects: local_return
+PASS: missing expanded checkpoint map rejects: warp_latest
+PASS: missing expanded checkpoint map rejects: return_latest
+PASS: stripping all local maps cannot masquerade as historical checkpoint
+PASS: old Root prebinding stamp prepares before export failure
+PASS: actual Fleet API binds separate unfinished old-owner context
+PASS: unfinished context makes actual old Fleet export fail
+PASS: capture explicitly rejects failed owner export
+PASS: prebinding prepare rejects failed old-owner export
+PASS: old Root stamp failure explicitly rejects validation
+PASS: actual Fleet API binds unfinished detached-owner context
+PASS: prepare explicitly rejects failed detached-owner export
+PASS: failed new-owner export cannot act as constant freshness stamp
+PASS: removing unfinished context restores exact valid detached stamp
+PASS: unfinished warp-entry event rejects
+PASS: dangling latest index rejects
+PASS: noncanonical move receipt rejects
+PASS: forged Fleet result rejects
+PASS: unsupported station-birth family remains fail closed
+PASS: actual capture refuses unsupported station launch producer shape
+PASS: pending/unsupported source map rejects: _warp_entry_searches
+PASS: pending/unsupported source map rejects: _warp_completion_intents
+PASS: pending/unsupported source map rejects: _space_fire_receipts
+PASS: pending/unsupported source map rejects: _air_ground_order_receipts
+PASS: fresh bindings validate before receipt publication
+PASS: target latest-index mutation invalidates prepared candidate
+PASS: exact target baseline validates again
+PASS: receipt publication changes no actual owner
+PASS: semantic recapture equals original local receipt checkpoint
+PASS: occupied local receipt maps cannot silently overwrite
+LOCAL_FLIGHT_FLEET_CHECKPOINT_STAGE phase=quantum
+PASS: actual warp departure replays through fresh Fleet candidate
+PASS: warp departure replay repeats no Flight/Travel mutation
+ROOT_LOCAL_ORBIT_RECEIPTS passed=123 failed=0
+ROOT_LOCAL_ORBIT_RECEIPTS_PASS

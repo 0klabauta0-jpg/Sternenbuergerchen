@@ -115,3 +115,23 @@ _air_ground_fire_receipts and _air_ground_order_receipts. The same small owner
 fixture injects one unsupported entry into each map and proves that capture and
 explicit prebinding both fail closed. Final focused rerun29/0, exit0, stderr
 empty; no new serialized receipt kind and no true-journey rerun.
+
+## Fail-closed expanded map and export-stamp review fixes (unrun)
+
+The expanded local receipt wire now requires exactly all nine fields: the three
+historical fields plus all six ORBIT_MAPS. Missing individual maps are rejected;
+there is no implicit empty map inside partial new payloads. Historical three-field
+payloads are accepted only with actual strategic Flight poses and Fleet receipt
+history consisting exclusively of fully covered launch_to_orbit/begin_approach
+contexts with empty source and target areas. Any local history, warp advance/
+departure/return or unsupported receipt prevents stripping the six local maps
+and presenting the value as a historical checkpoint.
+
+Capture and prepare explicitly reject failed owner exports. Both the detached
+new-owner stamp and the retained old-Root stamp reject export failure instead of
+comparing constant error dictionaries. Final validation repeats the same guard.
+The focused local verifier adds missing-map/all-map-stripping negatives, a real
+strategic Root launch converted to the historical three-field form, and actual
+unfinished Fleet context bindings that force export failure on old and detached
+new owners. These changes were statically reviewed/diffchecked only: NO Godot
+started while Companion/Root own the runner; no passing runtime claim yet.

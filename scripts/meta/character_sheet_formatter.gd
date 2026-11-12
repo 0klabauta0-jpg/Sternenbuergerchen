@@ -8,6 +8,7 @@ const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/r
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
+const EXPERIENCE_CONFIG: GDScript = preload("res://scripts/meta/skirmish_start_configuration.gd")
 const CORE_ORDER: Array = [
 	["accuracy", "Accuracy"],
 	["speed", "Speed"],
@@ -79,6 +80,40 @@ const VALUE_HELP_TEXTS: Dictionary = {
 	"platform_values.freighter_piloting": "Frachterwert aus Belastbarkeit, Erkennen, Disziplin, Kommunikation und Verhalten, sofern keine Vorgabe gespeichert ist.",
 	"platform_values.fighter_piloting": "Jägerwert aus Tempo, Treffsicherheit, Wahrnehmung, Disziplin und Verhalten, sofern keine Vorgabe gespeichert ist.",
 }
+
+
+static func get_experience_label(profile) -> String:
+	return String(build_experience_readout(profile).label)
+
+
+static func build_experience_readout(profile) -> Dictionary:
+	if profile == null:
+		return {"label": "Keine Einschätzung", "detail_text": "Kein Profil vorhanden.", "effects_text": "", "effects_detail": "", "profile_effects": {}}
+	var data: Dictionary = profile.to_dict()
+	var match: Dictionary = EXPERIENCE_CONFIG.new().match_experience_template(data)
+	var detail := "Die Fähigkeiten sind individuell zusammengestellt. Die drei Erfahrungsstufen sind auswählbare Vorlagen; sie werden hier nicht aus einem Mittelwert geraten."
+	if bool(match.matches_template):
+		detail = "Alle vier Fähigkeitsgruppen entsprechen dieser Vorlage. Das beschreibt die aktuellen Werte, nicht die Herkunft oder Ausbildung der Person."
+	var effects := _read_profile_effects(data)
+	var effects_text := ""
+	if not effects.is_empty():
+		effects_text = "Profilanteil: Tempo %+d %% · Treffermultiplikator %+d %% · Schadenseingang %+d %%" % [int(round((float(effects.speed_multiplier) - 1.0) * 100.0)), int(round((float(effects.hit_chance_multiplier) - 1.0) * 100.0)), int(round((float(effects.damage_taken_multiplier) - 1.0) * 100.0))]
+	return {"label": String(match.label), "detail_text": detail, "effects_text": effects_text, "effects_detail": "Nur die Wirkung der bereits effektiven Profilwerte nach der bestehenden Profilberechnung. Ausrüstung, Gelände, Zustand und Einsatzregeln bestimmen zusätzlich die tatsächliche Laufzeitwirkung. Trefferangabe ist ein Multiplikator, keine Trefferwahrscheinlichkeit.", "profile_effects": effects}
+
+
+static func _read_profile_effects(data: Dictionary) -> Dictionary:
+	# UnitProfileMath's established input uses flat core/communication fields.
+	# Project the canonical effective groups; do not reapply trait bonuses.
+	var metric_input := data.duplicate(true)
+	for group: String in ["skill_values", "communication_values", "behavior_axes", "platform_values"]:
+		var values: Dictionary = data.get(group, {})
+		var fields: Array = {"skill_values": CORE_ORDER, "communication_values": COMMUNICATION_ORDER, "behavior_axes": BEHAVIOR_ORDER, "platform_values": PLATFORM_ORDER}[group]
+		for field: Array in fields:
+			var value: Variant = values.get(String(field[0]))
+			if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)):
+				return {}
+			metric_input[String(field[0])] = float(value)
+	return Dictionary(UNIT_PROFILE_MATH_SCRIPT.build_character_bundle(metric_input).combat_effects).duplicate(true)
 
 
 static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:

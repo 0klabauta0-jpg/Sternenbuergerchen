@@ -8287,7 +8287,7 @@ func _location_timer_view_projection(instance: Node, cached: Dictionary) -> Dict
 func get_mission_for_craft(craft_id: String) -> Node:
 	var location_id:=String(_craft_location_runtime.get(craft_id,""))
 	if not location_id.is_empty(): return _location_registry.get_location(location_id)
-	return _active_mission if String(_active_singleplayer_identity.get("craft_id",""))==craft_id else null
+	return _active_mission if String(_aircraft_location_by_craft.get(craft_id,""))=="mission" and String(_active_singleplayer_identity.get("craft_id",""))==craft_id else null
 
 func get_location_runtime_snapshot() -> Array:
 	var result: Array=[]

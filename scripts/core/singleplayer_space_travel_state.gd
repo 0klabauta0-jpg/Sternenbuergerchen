@@ -4,6 +4,7 @@ extends RefCounted
 
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const ORBIT_CATALOG = preload("res://scripts/mission/orbit_destination_catalog.gd")
+const ORBIT_SURFACE_LOCATIONS = preload("res://scripts/mission/orbit_surface_locations.gd")
 const STATION_DOCK = preload("res://scripts/mission/polisa_station_dock_layout.gd")
 const FLIGHT = preload("res://scripts/core/space_flight_state.gd")
 const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
@@ -495,7 +496,7 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	var body_id := String(orbit_definition.get("body_id", ""))
 	var body: Dictionary = Dictionary(_definition.get("bodies", {})).get(body_id, {})
 	if body.is_empty() or String(body.get("id", "")) != body_id: return _reject("unbound_target_body", "Zielkoerper ist nicht kanonisch gebunden")
-	if operation == "begin_approach" and (String(body.get("kind", "")) == "station" or String(body.get("surface_location_id", "")) != next_location):
+	if operation == "begin_approach" and not ORBIT_SURFACE_LOCATIONS.contains(body, next_location):
 		return _reject("body_surface_mismatch", "Koerper weist diesen Ort nicht als Oberflaeche aus")
 	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
 	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
@@ -586,9 +587,12 @@ func _checkpoint_raw_state() -> Dictionary:
 
 func export_checkpoint_state() -> Dictionary:
 	if _phase == "approach": return {"ok":false, "reason":"travel_transition_pending"}
-	var encoded := CHECKPOINT_CODEC.encode_value(_checkpoint_raw_state())
+	var data := _checkpoint_raw_state()
+	var flight: Dictionary = _flight.export_checkpoint_state()
+	if flight.get("schema") != "space_flight_checkpoint.v1" or not _checkpoint_frame_consistent(data, flight): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
+	var encoded := CHECKPOINT_CODEC.encode_value(data)
 	if not encoded.ok: return encoded
-	return {"schema":"space_travel_checkpoint.v1", "craft_id":_flight.get_snapshot().craft_id, "system_fingerprint":JSON.stringify(_definition, "", true).sha256_text(), "travel":encoded.value, "flight":_flight.export_checkpoint_state()}
+	return {"schema":"space_travel_checkpoint.v1", "craft_id":_flight.get_snapshot().craft_id, "system_fingerprint":JSON.stringify(_definition, "", true).sha256_text(), "travel":encoded.value, "flight":flight}
 
 func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
 	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or state.system_fingerprint != JSON.stringify(_definition, "", true).sha256_text() or not state.flight is Dictionary:
@@ -603,7 +607,7 @@ func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
 		if typeof(data[key]) != TYPE_STRING: return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	for key in ["duration", "elapsed", "progress"]:
 		if typeof(data[key]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(data[key])): return {"ok":false, "reason":"invalid_travel_checkpoint"}
-	if float(data.duration) <= 0 or float(data.elapsed) < 0 or float(data.progress) < 0 or float(data.progress) > 1 or typeof(data.revision) != TYPE_INT or data.revision < 0: return {"ok":false, "reason":"invalid_travel_checkpoint"}
+	if float(data.duration) <= 0 or float(data.elapsed) < 0 or float(data.progress) < 0 or float(data.progress) > 1 or typeof(data.revision) != TYPE_INT or data.revision < 0 or data.revision > 1000000000000: return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	for point in [data.origin_position, data.route_control, data.route_destination]:
 		if not is_finite(point.x) or not is_finite(point.y): return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	for cell in data.route_hexes:
@@ -626,17 +630,41 @@ func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
 		if typeof(id) != TYPE_STRING or not data.requests[id] is Dictionary or typeof(data.requests[id].get("signature")) != TYPE_STRING or not data.requests[id].get("result") is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	var flight_prepared: Dictionary = _flight.prepare_checkpoint_restore(state.flight)
 	if not flight_prepared.get("ok", false): return flight_prepared
+	if not _checkpoint_frame_consistent(data, state.flight): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
+	var source: Dictionary = export_checkpoint_state()
+	if source.get("schema") != "space_travel_checkpoint.v1": return {"ok":false, "reason":"travel_checkpoint_source_unstable"}
 	for id in _travel_checkpoint_preparations.keys():
 		if _travel_checkpoint_preparations[id].handle.get_ref() == null: _travel_checkpoint_preparations.erase(id)
 	if _travel_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"travel_checkpoint_capacity"}
 	var handle := PreparedTravelCheckpoint.new()
-	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":export_checkpoint_state(), "data":data, "flight":flight_prepared.prepared}
+	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":source, "source_epoch":_space_area_epoch, "data":data, "flight":flight_prepared.prepared}
 	return {"ok":true, "prepared":handle}
+
+func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary) -> bool:
+	if flight.get("coordinate_frame") == "strategic":
+		# Existing strategic producers may retain grounded mode during travel.
+		return flight.get("space_area_id") == "" and flight.get("motion_mode") in ["grounded", "travel"]
+	if flight.get("coordinate_frame") != "local" or data.phase not in ["orbit", "surface"] or flight.get("motion_mode") != ("tactical" if data.phase == "orbit" else "inactive"): return false
+	if not data.location_id.is_empty() and data.phase == "orbit": return false
+	if not data.target_orbit_id.is_empty() or not data.target_orbit_marker_id.is_empty() or not data.route_hexes.is_empty(): return false
+	var orbit: Dictionary = Dictionary(_definition.get("orbits", {})).get(data.orbit_id, {})
+	var body_id: String = String(orbit.get("body_id", ""))
+	var body: Dictionary = Dictionary(_definition.get("bodies", {})).get(body_id, {})
+	if body.is_empty() or body.get("id") != body_id or GRID.orbit_marker(orbit, data.orbit_marker_id).is_empty(): return false
+	var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
+	if not layout.get("ok", false) or flight.get("space_area_id") != layout.body_map_id: return false
+	if data.phase == "surface" and (Dictionary(_definition.location_orbits).get(data.location_id) != data.orbit_id or not ORBIT_SURFACE_LOCATIONS.contains(body, data.location_id)): return false
+	var pair: Variant = flight.get("position_plane")
+	if not pair is Array or pair.size() != 2 or typeof(pair[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(pair[1]) not in [TYPE_INT, TYPE_FLOAT]: return false
+	var position := Vector2(float(pair[0]), float(pair[1]))
+	if not is_finite(position.x) or not is_finite(position.y): return false
+	var cell: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(position))
+	return layout.map_bounds.has_point(GRID.to_offset(cell)) and float(flight.get("tick", -1)) >= 0.0 and float(flight.get("revision", 0)) > 0.0
 
 func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
 	if handle == null or not _travel_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"travel_checkpoint_unknown"}
 	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
-	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state(): return {"ok":false, "reason":"travel_checkpoint_changed"}
+	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state() or prepared.source_epoch != _space_area_epoch: return {"ok":false, "reason":"travel_checkpoint_changed"}
 	return _flight.validate_checkpoint_restore(prepared.flight)
 
 func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
@@ -649,6 +677,8 @@ func _publish_checkpoint_restore(handle: RefCounted) -> void:
 	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
 	_travel_checkpoint_preparations.erase(handle.get_instance_id())
 	_flight._publish_checkpoint_restore(prepared.flight)
+	_space_area_epoch += 1
+	_space_area_seal = str(get_instance_id()) + ":" + str(_space_area_epoch) + ":" + str(Time.get_ticks_usec())
 	var data: Dictionary = prepared.data
 	_phase = data.phase; _craft_id = data.craft_id; _orbit_id = data.orbit_id; _orbit_marker_id = data.orbit_marker_id
 	_origin_position = data.origin_position; _target_orbit_id = data.target_orbit_id; _target_orbit_marker_id = data.target_orbit_marker_id

@@ -290,8 +290,6 @@ func export_checkpoint_state() -> Dictionary:
 		receipts[id] = {"binding":binding, "result":encoded.value}
 	var crafts := {}
 	for id in _owners:
-		var flight: Dictionary = _owners[id].get_flight_state().get_snapshot()
-		if flight.get("coordinate_frame") != "strategic": return {"ok":false, "reason":"fleet_local_area_unsupported"}
 		var state: Dictionary = _owners[id].export_checkpoint_state()
 		if state.get("ok", true) == false: return state
 		crafts[id] = state
@@ -308,7 +306,7 @@ func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Di
 	var configured: Dictionary = candidate.configure()
 	if not configured.get("ok", false): return configured
 	for id in expected_crafts:
-		if not state.crafts[id] is Dictionary or not state.crafts[id].get("flight") is Dictionary or state.crafts[id].flight.get("coordinate_frame") != "strategic": return {"ok":false, "reason":"invalid_fleet_checkpoint"}
+		if not state.crafts[id] is Dictionary or not state.crafts[id].get("flight") is Dictionary: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 		candidate.register_craft(id)
 		var owner: RefCounted = candidate._owners[id]
 		var prepared: Dictionary = owner.prepare_checkpoint_restore(state.crafts[id])

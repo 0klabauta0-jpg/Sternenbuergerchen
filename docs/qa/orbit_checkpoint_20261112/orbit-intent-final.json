@@ -1,0 +1,14 @@
+{
+  "name": "orbit-intent-final",
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen",
+    "--script",
+    "res://scripts/tests/orbit_intent_checkpoint_verifier.gd"
+  ],
+  "exit_code": 0,
+  "elapsed": 2.011,
+  "profile": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\profile-orbit-intent-final"
+}

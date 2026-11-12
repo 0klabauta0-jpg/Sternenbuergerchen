@@ -1,6 +1,9 @@
 extends Node2D
 
+const HEX_GRID_SCRIPT = preload("res://scripts/terrain/hex_grid.gd")
 const BUILDING_AUTHORING = preload("res://scripts/editor/building_layout_authoring.gd")
+var _regional_authoring_status: Dictionary = {}
+var _regional_authoring_status_key: Array = []
 var _building_move_id := ""
 var _building_feedback_text := "Gebäude: Vorlage in der Palette wählen oder ein Gebäude auswählen."
 
@@ -204,6 +207,14 @@ var _is_refreshing_property_controls: bool = false
 var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _undo_stack: Array[Dictionary] = []
+var _ramp_redo_stack: Array[Dictionary] = []
+var _height_preview: Node3D
+var _height_preview_world := Vector2.ZERO
+var _height_preview_has_world := false
+var _height_stroke_visited: Dictionary = {}
+var _ramp_brush_shape_chosen: bool = false
+var _ramp_brush_enabled: bool = false
+var _ramp_brush_direction: int = 0
 var _active_undo_transaction: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
@@ -424,7 +435,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var key_event := event as InputEventKey
 		if key_event.pressed and not key_event.echo and key_event.ctrl_pressed and key_event.physical_keycode == KEY_Z:
-			_undo_last_change()
+			if key_event.shift_pressed and _uses_explicit_hex_terrain(): _redo_explicit_terrain_change()
+			else: _undo_last_change()
 			return
 		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_DELETE:
 			if not _building_id_at_selected().is_empty():
@@ -477,6 +489,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				if _is_painting:
 					commit_undo_transaction()
 				_is_painting = false
+				_height_stroke_visited.clear()
+				_hide_explicit_height_preview()
 				_last_painted_grid = Vector2i(-1, -1)
 				return
 			if _is_pointer_over_control():
@@ -545,7 +559,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					camera.position -= mouse_motion.relative * camera.zoom
 			return
 		var needs_paint_position: bool = _is_painting and (_height_tool_enabled or _eraser_tool_enabled or (_is_brush_enabled() and _has_selected_type()))
-		var needs_preview_position: bool = not _is_pointer_over_control() and (_is_network_dragging or _patrol_tool_enabled or _is_brush_enabled())
+		var needs_preview_position: bool = not _is_pointer_over_control() and (_is_network_dragging or _patrol_tool_enabled or _is_brush_enabled() or (_height_tool_enabled and _uses_explicit_hex_terrain()))
 		if not needs_paint_position and not needs_preview_position:
 			_queue_patrol_route_preview_hide()
 			_queue_hover_preview_hide()
@@ -567,7 +581,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_queue_hover_preview_hide()
 			_queue_patrol_route_preview_update(world_position)
 			return
-		if _is_brush_enabled() and not _is_pointer_over_control():
+		if (_is_brush_enabled() or (_height_tool_enabled and _uses_explicit_hex_terrain())) and not _is_pointer_over_control():
 			_queue_patrol_route_preview_hide()
 			_queue_hover_preview_update(world_position)
 			return
@@ -711,6 +725,8 @@ func _reject_fixed_authored_layout_edit() -> bool:
 
 
 func _load_map(path: String) -> void:
+	_hide_explicit_height_preview()
+	_height_preview_has_world = false
 	_building_move_id=""
 	_current_map_path = path
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", path)
@@ -1273,11 +1289,15 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
 			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
+			if _uses_explicit_hex_terrain() and HEX_GRID_SCRIPT.distance(center_grid, target_grid) > radius: continue
 			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
 			if target_tile == null:
 				continue
 
-			var patch: Dictionary = Dictionary(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("build_height_patch", int(target_tile.height_level), _height_tool_mode, _height_tool_edge_type, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE))
+			if _uses_explicit_hex_terrain():
+				if _height_stroke_visited.has(target_grid): continue
+				_height_stroke_visited[target_grid] = true
+			var patch: Dictionary = MAP_EDITOR_HEIGHT_TOOL_SCRIPT.build_tile_height_patch(target_tile, _height_tool_mode, _height_tool_edge_type, _ramp_brush_shape_chosen, _ramp_brush_enabled, _ramp_brush_direction)
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
 				changed_grids.append(target_grid)
@@ -1292,7 +1312,8 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 
 	_set_selected_grid_position(center_grid)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
-	_queue_hover_preview_hide()
+	if _uses_explicit_hex_terrain(): _queue_hover_preview_update(world_position)
+	else: _queue_hover_preview_hide()
 
 
 func _apply_eraser_at_world_position(world_position: Vector2) -> void:
@@ -1492,6 +1513,9 @@ func _populate_height_mode_options(option_button: OptionButton) -> void:
 	option_button.set_item_metadata(3, HEIGHT_TOOL_MODE_SET_1)
 	option_button.add_item("H=2")
 	option_button.set_item_metadata(4, HEIGHT_TOOL_MODE_SET_2)
+	for level in range(3, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL + 1):
+		option_button.add_item("H=%d" % level)
+		option_button.set_item_metadata(option_button.item_count - 1, "set_%d" % level)
 	for index in range(option_button.item_count):
 		if String(option_button.get_item_metadata(index)) == _height_tool_mode:
 			option_button.select(index)
@@ -1529,10 +1553,12 @@ func _update_height_topbar_state() -> void:
 		mode_option.disabled = not _height_tool_enabled
 	var edge_option := _get_height_edge_option_button()
 	if edge_option != null:
-		edge_option.disabled = not _height_tool_enabled
+		edge_option.disabled = not _height_tool_enabled or _uses_explicit_hex_terrain()
 
 
 func _clear_height_tool() -> void:
+	_height_stroke_visited.clear()
+	_hide_explicit_height_preview()
 	_height_tool_enabled = false
 	var height_button := _get_height_tool_button()
 	if height_button != null and height_button.button_pressed:
@@ -3153,6 +3179,8 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 			patrol_button.button_pressed = false
 		_clear_patrol_route_preview(true)
 		_is_painting = false
+		_height_stroke_visited.clear()
+		_hide_explicit_height_preview()
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
@@ -3185,6 +3213,8 @@ func _on_brush_tool_toggled(pressed: bool) -> void:
 		_clear_patrol_route_preview(true)
 	else:
 		_is_painting = false
+		_height_stroke_visited.clear()
+		_hide_explicit_height_preview()
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
@@ -3217,6 +3247,8 @@ func _on_eraser_tool_toggled(pressed: bool) -> void:
 		_clear_patrol_route_preview(true)
 	else:
 		_is_painting = false
+		_height_stroke_visited.clear()
+		_hide_explicit_height_preview()
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
@@ -3283,6 +3315,7 @@ func _on_clear_patrol_pressed() -> void:
 
 
 func _refresh_property_panel() -> void:
+	_refresh_explicit_ramp_controls()
 	_refresh_building_controls()
 	var tile_data = _get_selected_tile()
 	var tile_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel") as Label
@@ -3345,6 +3378,7 @@ func _refresh_property_panel() -> void:
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
+	height_spinbox.max_value = float(TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL - 1 if tile_data.explicit_hex_ramps and tile_data.ramp_direction >= 0 else TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	height_spinbox.value = int(tile_data.height_level)
 	surface_option_button.select(_find_surface_option_index(String(tile_data.surface_type)))
 	if edge_type_option_button != null:
@@ -3394,6 +3428,9 @@ func _build_tile_truth_inspector_snapshot(tile_data) -> Dictionary:
 	entry["grid_position"] = tile_data.grid_position
 	entry["world_position"] = tile_data.world_position
 	entry["truth_label"] = truth_label
+	entry["ramp_direction"] = int(tile_data.ramp_direction)
+	entry["explicit_hex_ramps"] = bool(tile_data.explicit_hex_ramps)
+	entry["logical_stand_height"] = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data)
 	entry["truth_issue_count"] = _get_variant_count(entry.get("issues", PackedStringArray()))
 	entry["combat_los_uses_segment_policy"] = bool(policy.get("combat_los_uses_segment_policy", false))
 	entry["combat_los_policy_source"] = String(policy.get("combat_los_policy_source", ""))
@@ -3814,7 +3851,7 @@ func _refresh_authoring_status_controls() -> void:
 	var status_panel := get_node_or_null("UI/PropertyPanel/Margin/VBox/AuthoringStatusPanel") as VBoxContainer
 	if status_panel == null:
 		return
-	var snapshot: Dictionary = get_map_editor_usability_snapshot(false)
+	var snapshot: Dictionary = _authoring_status_snapshot()
 	var validation: Dictionary = Dictionary(snapshot.get("validation", {}))
 	var manifest: Dictionary = Dictionary(snapshot.get("map_manifest", {}))
 	var tool_label := status_panel.get_node_or_null("AuthoringToolStatusLabel") as Label
@@ -3839,6 +3876,22 @@ func _refresh_authoring_status_controls() -> void:
 	if manifest_label != null:
 		manifest_label.text = "MP Map: %s" % String(manifest.get("state", "not_ready")).replace("_", " ")
 		manifest_label.tooltip_text = "MP Map: multiplayer/mission-map readiness state derived from the current map manifest."
+
+
+func _authoring_status_snapshot() -> Dictionary:
+	if _terrain_map_data == null or float(_terrain_map_data.call("get_regional_height_step")) <= 0.0:
+		return get_map_editor_usability_snapshot(false)
+	var key := [_terrain_map_data, _current_map_path, _current_scenario_path, _dirty, _scenario_dirty]
+	if _regional_authoring_status.is_empty() or _regional_authoring_status_key != key:
+		_regional_authoring_status_key = key
+		_regional_authoring_status = get_authoring_validation_snapshot(false)
+	return {
+		"active_tool": _get_active_authoring_tool(),
+		"brush_radius": _get_brush_radius(),
+		"selected_grid": _selected_grid_position,
+		"validation": _regional_authoring_status,
+		"map_manifest": _regional_authoring_status.get("sections", {}).get("multiplayer", {}),
+	}
 
 
 func _build_authoring_validation_tooltip(validation: Dictionary) -> String:
@@ -4468,6 +4521,7 @@ func _build_mission_scenario_info_text() -> String:
 
 
 func _mark_scenario_dirty(is_dirty: bool) -> void:
+	_regional_authoring_status.clear()
 	_scenario_dirty = is_dirty
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 	var panel := _get_mission_scenario_panel()
@@ -4695,6 +4749,8 @@ func set_authoring_tool(tool_id: String) -> bool:
 	if select_button != null:
 		select_button.button_pressed = _selection_tool_enabled
 	_is_painting = false
+	_height_stroke_visited.clear()
+	_hide_explicit_height_preview()
 	_last_painted_grid = Vector2i(-1, -1)
 	if _patrol_tool_enabled:
 		preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
@@ -5014,11 +5070,13 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 	return {
 		"undo_redo_scope": "tile_transaction_stack_v3",
 		"undo_transactional": true,
+		"terrain_height_rules": _terrain_map_data.get_terrain_height_rules() if _terrain_map_data != null else "",
+		"terrain_mode_owned_by_map": true,
 		"undo_available": not _undo_stack.is_empty(),
 		"undo_depth": _undo_stack.size(),
 		"undo_limit": MAX_UNDO_STACK_SIZE,
 		"active_undo_transaction": not _active_undo_transaction.is_empty(),
-		"redo_available": false,
+		"redo_available": _uses_explicit_hex_terrain() and not _ramp_redo_stack.is_empty(),
 		"editor_ui_refresh_batched": true,
 		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO | EDITOR_UI_REFRESH_PATROL_PREVIEW),
 		"patrol_route_preview_visual_only": true,
@@ -5030,6 +5088,7 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 			"blocks_los",
 			"cover_value",
 			"height_level",
+			"ramp_direction",
 			"object_height",
 			"surface_type",
 			"edge_type",
@@ -5068,6 +5127,7 @@ func _get_active_authoring_tool() -> String:
 
 func _get_brush_footprint_tile_count() -> int:
 	var radius: int = _get_brush_radius()
+	if _uses_explicit_hex_terrain() and _height_tool_enabled: return 1 + 3 * radius * (radius + 1)
 	return (radius * 2 + 1) * (radius * 2 + 1)
 
 
@@ -5094,6 +5154,9 @@ func _build_selected_tile_context() -> Dictionary:
 		"blocks_los": bool(tile_data.blocks_los),
 		"cover_value": int(tile_data.cover_value),
 		"height_level": int(tile_data.height_level),
+		"ramp_direction": int(tile_data.ramp_direction),
+		"explicit_hex_ramps": bool(tile_data.explicit_hex_ramps),
+		"regional_grade": bool(tile_data.regional_grade),
 		"object_height": int(tile_data.object_height),
 		"object_rotation_degrees": _get_tile_object_rotation_degrees(tile_data),
 		"object_rotatable": _tile_has_rotatable_object(tile_data),
@@ -5217,6 +5280,11 @@ func _validate_authoring_hills(errors: Array, warnings: Array) -> Dictionary:
 			continue
 		var height_level: int = int(tile_data.height_level)
 		var edge_type: String = String(tile_data.edge_type)
+		if _uses_explicit_hex_terrain():
+			if height_level > 0 or tile_data.ramp_direction >= 0: hill_tile_count += 1
+			if not tile_data.is_valid(): errors.append("invalid_explicit_ramp:%s" % String(tile_data.tile_id))
+			if int(tile_data.object_height) > 0: blocker_object_count += 1
+			continue
 		if int(tile_data.object_height) > 0:
 			blocker_object_count += 1
 		if height_level <= 0:
@@ -6350,6 +6418,8 @@ func _on_height_tool_toggled(pressed: bool) -> void:
 		if brush_button != null and brush_button.button_pressed:
 			brush_button.button_pressed = false
 		_is_painting = false
+		_height_stroke_visited.clear()
+		_hide_explicit_height_preview()
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 		_clear_patrol_route_preview(true)
@@ -6841,7 +6911,7 @@ func _set_property_controls_enabled(is_enabled: bool) -> void:
 	_get_surface_option_button().disabled = not is_enabled
 	var edge_type_btn := _get_edge_type_option_button()
 	if edge_type_btn != null:
-		edge_type_btn.disabled = not is_enabled
+		edge_type_btn.disabled = not is_enabled or _uses_explicit_hex_terrain()
 
 
 func _refresh_object_rotation_controls(tile_data) -> void:
@@ -7543,10 +7613,15 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	var next_walkable: bool = bool(patch.get("walkable", tile_data.walkable))
 	var next_blocks_los: bool = bool(patch.get("blocks_los", tile_data.blocks_los))
 	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
-	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
+	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	var next_object_height: int = clampi(int(patch.get("object_height", tile_data.object_height)), 0, 3)
 	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
 	var next_edge_type: String = String(patch.get("edge_type", tile_data.edge_type))
+	var next_ramp_direction: int = int(patch.get("ramp_direction", tile_data.ramp_direction))
+	if tile_data.explicit_hex_ramps:
+		if next_ramp_direction < -1 or next_ramp_direction > 5: return false
+		if next_ramp_direction >= 0: next_height_level = mini(next_height_level, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL - 1)
+		next_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE if next_ramp_direction >= 0 else TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
 
 	var changed: bool = (
 		tile_data.walkable != next_walkable
@@ -7556,6 +7631,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 		or int(tile_data.object_height) != next_object_height
 		or String(tile_data.surface_type) != next_surface_type
 		or String(tile_data.edge_type) != next_edge_type
+		or int(tile_data.ramp_direction) != next_ramp_direction
 	)
 	if not changed:
 		return false
@@ -7568,6 +7644,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	tile_data.object_height = next_object_height
 	tile_data.surface_type = next_surface_type
 	tile_data.edge_type = next_edge_type
+	tile_data.ramp_direction = next_ramp_direction
 	if _should_clear_type_id_for_patch(tile_data, patch):
 		tile_data.type_id = ""
 	return true
@@ -7597,6 +7674,11 @@ func _should_clear_type_id_for_patch(tile_data, patch: Dictionary) -> bool:
 
 
 func _refresh_reconciled_height_edges(changed_grids: Array[Vector2i], preferred_edge_type: String) -> void:
+	if _uses_explicit_hex_terrain():
+		for grid in changed_grids:
+			_refresh_tile_visual(_terrain_map_data.get_tile_at_grid(grid), false)
+		_refresh_dirty_visual_neighborhoods(changed_grids)
+		return
 	var refresh_lookup: Dictionary = {}
 	var visual_seed_lookup: Dictionary = {}
 	for grid_position in changed_grids:
@@ -7622,6 +7704,7 @@ func _refresh_reconciled_height_edges(changed_grids: Array[Vector2i], preferred_
 
 
 func _reconcile_height_edges_around(grid_position: Vector2i, preferred_edge_type: String = "") -> Array[Vector2i]:
+	if _uses_explicit_hex_terrain(): return []
 	if _terrain_map_data == null:
 		return []
 	var positions: Array[Vector2i] = [grid_position]
@@ -7665,6 +7748,7 @@ func _resolve_auto_height_edge_type(tile_data, preferred_edge_type: String = "")
 
 
 func _reconcile_lower_neighbor_cliff_visuals_around(seed_grids: Array[Vector2i]) -> Array[Vector2i]:
+	if _uses_explicit_hex_terrain(): return []
 	if _terrain_map_data == null or seed_grids.is_empty():
 		return []
 
@@ -7818,6 +7902,7 @@ func _is_auto_cliff_visual_tile(tile_data) -> bool:
 
 
 func begin_undo_transaction(action_name: String) -> void:
+	_height_stroke_visited.clear()
 	if not _active_undo_transaction.is_empty():
 		commit_undo_transaction()
 	_active_undo_transaction = {
@@ -7858,10 +7943,12 @@ func commit_undo_transaction() -> void:
 	undo_transaction.erase("grid_lookup")
 	_push_undo_entry(undo_transaction)
 	_active_undo_transaction.clear()
+	_height_stroke_visited.clear()
 
 
 func cancel_empty_undo_transaction() -> void:
 	_active_undo_transaction.clear()
+	_height_stroke_visited.clear()
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
 
@@ -7893,6 +7980,11 @@ func _append_tile_state_to_transaction(transaction: Dictionary, tile_data) -> vo
 
 
 func _push_undo_entry(undo_state: Dictionary) -> void:
+	if undo_state.is_empty(): return
+	_ramp_redo_stack.clear()
+	if _uses_explicit_hex_terrain():
+		undo_state["selected_grids_before"] = _selected_grids.duplicate()
+		undo_state["selected_primary_before"] = _selected_grid_position
 	if undo_state.is_empty():
 		return
 	_undo_stack.append(undo_state)
@@ -7937,6 +8029,9 @@ func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
 		tile_data.height_level = restored_tile.height_level
 		tile_data.surface_type = restored_tile.surface_type
 		tile_data.edge_type = restored_tile.edge_type
+		tile_data.ramp_direction = restored_tile.ramp_direction
+		tile_data.explicit_hex_ramps = restored_tile.explicit_hex_ramps
+		tile_data.regional_grade = restored_tile.regional_grade
 		tile_data.object_height = restored_tile.object_height
 		tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
 		tile_data.object_scale = restored_tile.object_scale
@@ -7949,6 +8044,7 @@ func get_undo_debug_snapshot() -> Dictionary:
 	var top_entry: Dictionary = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
 	return {
 		"undo_depth": _undo_stack.size(),
+		"redo_depth": _ramp_redo_stack.size(),
 		"active_transaction": not _active_undo_transaction.is_empty(),
 		"active_tile_state_count": Array(_active_undo_transaction.get("tile_states", [])).size() if not _active_undo_transaction.is_empty() else 0,
 		"top_action_name": String(top_entry.get("action_name", "")).strip_edges(),
@@ -7964,6 +8060,7 @@ func _undo_last_change() -> void:
 		return
 
 	var undo_state: Dictionary = Dictionary(_undo_stack.pop_back())
+	if _uses_explicit_hex_terrain(): _ramp_redo_stack.append(_capture_inverse_terrain_transaction(undo_state))
 	_last_undo_state = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
 	var restored_grids: Array[Vector2i] = _restore_tile_from_undo_state(undo_state)
 	if restored_grids.is_empty():
@@ -7978,17 +8075,24 @@ func _undo_last_change() -> void:
 	var grid_position: Vector2i = Vector2i(restored_grids[restored_grids.size() - 1])
 	if undo_state.has("building_selection_before"): grid_position=undo_state.building_selection_before
 	_set_selected_grid_position(grid_position)
+	_restore_explicit_terrain_selection(undo_state)
 	_mark_dirty(true)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _clear_undo_history() -> void:
+	_hide_explicit_height_preview()
+	_height_preview_has_world = false
 	_undo_stack.clear()
+	_ramp_redo_stack.clear()
+	_ramp_brush_shape_chosen = false
 	_last_undo_state.clear()
 	_active_undo_transaction.clear()
+	_height_stroke_visited.clear()
 
 
 func _refresh_top_bar() -> void:
+	_refresh_explicit_ramp_controls()
 	var title_label := get_node_or_null("UI/TopBar/Margin/HBox/TitleLabel") as Label
 	var path_label := get_node_or_null("UI/TopBar/Margin/HBox/PathLabel") as Label
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
@@ -8018,6 +8122,8 @@ func _refresh_top_bar() -> void:
 
 
 func _mark_dirty(is_dirty: bool) -> void:
+	_queue_height_preview_refresh()
+	_regional_authoring_status.clear()
 	_dirty = is_dirty
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
@@ -8091,11 +8197,12 @@ func _populate_brush_size_options() -> void:
 
 
 func _configure_property_height_spinbox() -> void:
+	_ensure_explicit_ramp_controls()
 	var height_spinbox := _get_height_spinbox()
 	if height_spinbox == null:
 		return
 	height_spinbox.min_value = 0.0
-	height_spinbox.max_value = 2.0
+	height_spinbox.max_value = float(TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
 	height_spinbox.step = 1.0
 
 
@@ -10091,6 +10198,8 @@ func get_dirty_neighborhood_debug_snapshot() -> Dictionary:
 
 
 func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
+	if _uses_explicit_hex_terrain() and not seed_grids.is_empty() and _terrain_registry != null:
+		_terrain_registry.notify_tile_data_changed(seed_grids)
 	if seed_grids.is_empty():
 		_last_dirty_neighborhood_snapshot = {
 			"seed_count": 0,
@@ -10206,6 +10315,7 @@ func _refresh_cliff_overlay_at(grid_position: Vector2i) -> bool:
 
 
 func _create_cliff_overlays_for_tile(tile_data) -> void:
+	if _uses_explicit_hex_terrain(): return
 	if tile_data == null or _terrain_map_data == null:
 		return
 
@@ -10570,6 +10680,11 @@ func _rebuild_grid_overlay() -> void:
 # --- Hover Preview ---
 
 func _update_hover_preview(world_position: Vector2) -> void:
+	if _height_tool_enabled and _uses_explicit_hex_terrain() and _get_primary_3d_view() != null:
+		if _hover_preview != null: _hover_preview.hide()
+		_update_explicit_height_preview(world_position)
+		return
+	_hide_explicit_height_preview()
 	if _get_primary_3d_view() != null:
 		_hide_hover_preview()
 		return
@@ -10608,6 +10723,184 @@ func _update_hover_preview(world_position: Vector2) -> void:
 
 
 func _hide_hover_preview() -> void:
+	_hide_explicit_height_preview()
 	_hover_grid_position = Vector2i(-1, -1)
 	if _hover_preview != null:
 		_hover_preview.visible = false
+
+
+func _uses_explicit_hex_terrain() -> bool:
+	return _terrain_map_data != null and _terrain_map_data.has_method("get_terrain_height_rules") \
+		and _terrain_map_data.get_terrain_height_rules() == TERRAIN_TILE_DATA_SCRIPT.EXPLICIT_HEIGHT_RULES \
+		and _terrain_map_data.get_grid_topology() == HEX_GRID_SCRIPT.TOPOLOGY_ID
+
+
+func _ensure_explicit_ramp_controls() -> void:
+	var host := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if host == null or host.has_node("ExplicitRampControls"): return
+	var panel := VBoxContainer.new(); panel.name = "ExplicitRampControls"; host.add_child(panel)
+	var row := host.get_node_or_null("HeightRow")
+	if row != null: host.move_child(panel, row.get_index() + 1)
+	var title := Label.new(); title.text = "Hex-Terrain · Pinsel / Auswahl"; panel.add_child(title)
+	var shape := OptionButton.new(); shape.name = "Shape"; shape.add_item("Plateau"); shape.add_item("Rampe"); panel.add_child(shape)
+	shape.item_selected.connect(func(index: int): _ramp_brush_shape_chosen = true; _ramp_brush_enabled = index == 1; _refresh_explicit_ramp_controls())
+	var direction := OptionButton.new(); direction.name = "Direction"
+	for index in range(6): direction.add_item("Aufwärts D%d · %s" % [index, str(HEX_GRID_SCRIPT.DIRECTIONS[index])])
+	panel.add_child(direction)
+	direction.item_selected.connect(func(index: int): _ramp_brush_shape_chosen = true; _ramp_brush_direction = index; _queue_height_preview_refresh())
+	var apply := Button.new(); apply.name = "Apply"; apply.text = "Auf Auswahl anwenden"; panel.add_child(apply)
+	apply.pressed.connect(_apply_explicit_terrain_selection)
+	var rotations := HBoxContainer.new(); panel.add_child(rotations)
+	for delta in [-1, 1]:
+		var rotate := Button.new(); rotate.name = "RotateLeft" if delta < 0 else "RotateRight"; rotate.text = "Auswahl −60°" if delta < 0 else "Auswahl +60°"; rotations.add_child(rotate)
+		rotate.pressed.connect(_rotate_explicit_terrain_selection.bind(delta))
+	var redo := Button.new(); redo.name = "Redo"; redo.text = "Wiederholen · Strg+Umschalt+Z"; panel.add_child(redo)
+	redo.pressed.connect(_redo_explicit_terrain_change)
+	var hint := Label.new(); hint.text = "Höhe = unteres Rampenende. Höhenpinsel nutzt Anheben/Absenken oder H=0…8. Auswahl drehen erhält jede untere Höhe."; hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; panel.add_child(hint)
+
+
+func _refresh_explicit_ramp_controls() -> void:
+	_queue_height_preview_refresh()
+	_ensure_explicit_ramp_controls()
+	var panel := get_node_or_null("UI/PropertyPanel/Margin/VBox/ExplicitRampControls") as VBoxContainer
+	if panel == null: return
+	panel.visible = _uses_explicit_hex_terrain()
+	if not panel.visible: return
+	var blocked := _is_fixed_authored_layout()
+	var selected = _get_selected_tile()
+	if not _ramp_brush_shape_chosen and selected != null:
+		_ramp_brush_enabled = selected.ramp_direction >= 0
+		if _ramp_brush_enabled: _ramp_brush_direction = selected.ramp_direction
+	var shape := panel.get_node("Shape") as OptionButton; shape.select(1 if _ramp_brush_enabled else 0); shape.disabled = blocked
+	var direction := panel.get_node("Direction") as OptionButton; direction.select(_ramp_brush_direction); direction.disabled = blocked or not _ramp_brush_enabled
+	(panel.get_node("Redo") as Button).disabled = blocked or _ramp_redo_stack.is_empty()
+	(panel.get_node("Apply") as Button).disabled = blocked or selected == null
+	for child in panel.find_children("Rotate*", "Button", true, false): child.disabled = blocked or selected == null
+	var edge := _get_height_edge_option_button()
+	if edge != null: edge.disabled = true; edge.tooltip_text = "Explizite Hexkarten: Plateau und gerichtete Rampe im Eigenschaftenbereich wählen."
+
+
+func _explicit_terrain_selection() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for grid in _selected_grids:
+		if _terrain_map_data.get_tile_at_grid(Vector2i(grid)) != null: result.append(Vector2i(grid))
+	if result.is_empty() and _get_selected_tile() != null: result.append(_get_selected_tile().grid_position)
+	return result
+
+
+func _apply_explicit_terrain_selection() -> void:
+	if not _uses_explicit_hex_terrain() or _reject_fixed_authored_layout_edit(): return
+	var grids := _explicit_terrain_selection()
+	var height := int(_get_height_spinbox().value)
+	var patch := {"height_level": height, "ramp_direction": _ramp_brush_direction if _ramp_brush_enabled else -1}
+	_apply_explicit_terrain_transaction(grids, patch, 0)
+
+
+func _rotate_explicit_terrain_selection(delta: int) -> void:
+	if not _uses_explicit_hex_terrain() or _reject_fixed_authored_layout_edit(): return
+	_apply_explicit_terrain_transaction(_explicit_terrain_selection(), {}, delta)
+
+
+func _apply_explicit_terrain_transaction(grids: Array[Vector2i], patch: Dictionary, rotation_delta: int) -> void:
+	var owns_undo := _ensure_undo_transaction("hex_terrain_shape")
+	var changed: Array[Vector2i] = []
+	for grid in grids:
+		var tile = _terrain_map_data.get_tile_at_grid(grid)
+		if tile == null: continue
+		var next := patch.duplicate()
+		if rotation_delta != 0:
+			if tile.ramp_direction < 0: continue
+			next["ramp_direction"] = posmod(tile.ramp_direction + rotation_delta, 6)
+		if _apply_tile_patch(tile, next): changed.append(grid)
+	if changed.is_empty():
+		if owns_undo: cancel_empty_undo_transaction()
+		return
+	_refresh_reconciled_height_edges(changed, TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)
+	if owns_undo: commit_undo_transaction()
+	_mark_dirty(true)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
+
+
+func _capture_inverse_terrain_transaction(transaction: Dictionary) -> Dictionary:
+	var result := {"action_name": transaction.get("action_name", "hex_terrain"), "tile_states": [], "selected_grids_before": _selected_grids.duplicate(), "selected_primary_before": _selected_grid_position}
+	var states: Array = transaction.get("tile_states", [])
+	if states.is_empty() and transaction.has("tile_dict"): states = [{"grid_position": transaction.get("grid_position", Vector2i(-1,-1))}]
+	for state in states:
+		var grid: Vector2i = state.grid_position
+		var tile = _terrain_map_data.get_tile_at_grid(grid)
+		if tile != null: result.tile_states.append({"grid_position": grid, "tile_dict": tile.to_dict()})
+	if transaction.has("place_presentation_before"):
+		result["place_presentation_before"] = _terrain_map_data.get_place_presentation()
+		result["building_selection_before"] = _selected_grid_position
+	return result
+
+
+func _redo_explicit_terrain_change() -> void:
+	if not _uses_explicit_hex_terrain() or _reject_fixed_authored_layout_edit() or _ramp_redo_stack.is_empty(): return
+	var redo: Dictionary = _ramp_redo_stack.pop_back()
+	var inverse := _capture_inverse_terrain_transaction(redo)
+	var restored := _restore_tile_from_undo_state(redo)
+	if restored.is_empty(): return
+	_undo_stack.append(inverse)
+	while _undo_stack.size() > MAX_UNDO_STACK_SIZE: _undo_stack.pop_front()
+	_last_undo_state = inverse
+	_restore_explicit_terrain_selection(redo)
+	for grid in restored: _refresh_tile_visual(_terrain_map_data.get_tile_at_grid(grid), false)
+	_refresh_dirty_visual_neighborhoods(restored)
+	_mark_dirty(true)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
+
+
+func _restore_explicit_terrain_selection(transaction: Dictionary) -> void:
+	if not _uses_explicit_hex_terrain() or not transaction.has("selected_grids_before"): return
+	_selected_grids.clear()
+	for grid in transaction.selected_grids_before:
+		if _terrain_map_data.get_tile_at_grid(Vector2i(grid)) != null: _selected_grids.append(Vector2i(grid))
+	_selected_grid_position = transaction.get("selected_primary_before", Vector2i(-1,-1))
+
+
+func _hide_explicit_height_preview() -> void:
+	if is_instance_valid(_height_preview): _height_preview.hide()
+
+
+func _queue_height_preview_refresh() -> void:
+	if _height_preview_has_world and _height_tool_enabled and _uses_explicit_hex_terrain() and not _is_pointer_over_control():
+		_queue_hover_preview_update(_height_preview_world)
+
+
+func _update_explicit_height_preview(world_position: Vector2) -> void:
+	if not _height_tool_enabled or not _uses_explicit_hex_terrain() or _is_fixed_authored_layout() or _is_pointer_over_control():
+		_hide_explicit_height_preview()
+		return
+	var view = _get_primary_3d_view()
+	var root: Node3D = view.get("_world_root") if view != null else null
+	var tile = _resolve_tile_at_world_position(world_position)
+	if root == null or tile == null:
+		_hide_explicit_height_preview()
+		return
+	_height_preview_world = world_position
+	_height_preview_has_world = true
+	var helper = load("res://scripts/editor/map_editor_height_preview.gd")
+	if not is_instance_valid(_height_preview) or _height_preview.is_queued_for_deletion() or _height_preview.get_parent() != root:
+		_height_preview = helper.new()
+		_height_preview.name = "EditorHeightGhost"
+		root.add_child(_height_preview)
+	var planned: Dictionary = helper.plan(_terrain_map_data, Vector2i(tile.grid_position), _get_brush_radius(), _height_tool_mode, _height_tool_edge_type, _ramp_brush_shape_chosen, _ramp_brush_enabled, _ramp_brush_direction, Callable(self, "_building_owns_grid"), _height_stroke_visited)
+	_height_preview.call("show_plan", view, planned)
+
+
+func _input(event: InputEvent) -> void:
+	# Observe before STOP controls consume input; never claim the GUI event.
+	if not _height_tool_enabled or not _uses_explicit_hex_terrain(): return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and _is_painting:
+		commit_undo_transaction()
+		_is_painting = false
+		_height_stroke_visited.clear()
+		_last_painted_grid = Vector2i(-1,-1)
+		_hide_explicit_height_preview()
+	if event is InputEventMouseMotion and is_instance_valid(_height_preview) and _height_preview.visible:
+		call_deferred("_hide_height_preview_over_ui")
+
+
+func _hide_height_preview_over_ui() -> void:
+	if _is_pointer_over_control(): _hide_explicit_height_preview()

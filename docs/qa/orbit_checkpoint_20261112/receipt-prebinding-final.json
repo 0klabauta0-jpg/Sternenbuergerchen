@@ -1,0 +1,14 @@
+{
+  "name": "receipt-prebinding-final",
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen",
+    "--script",
+    "res://scripts/tests/root_receipt_prebinding_verifier.gd"
+  ],
+  "exit_code": 0,
+  "elapsed": 1.61,
+  "profile": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\profile-receipt-prebinding-final"
+}

@@ -20,11 +20,11 @@ var homebase_palette: bool = false
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
 
-func surface_material_for(surface_type: String) -> ShaderMaterial:
-	return material_for(surface_color(surface_type),false,surface_type=="road")
+func surface_material_for(surface_type: String, slope_softening: float = 0.0) -> ShaderMaterial:
+	return material_for(surface_color(surface_type), false, surface_type == "road", slope_softening)
 
-func material_for(color: Color, rock: bool = false, paved: bool = false) -> ShaderMaterial:
-	var key := "%s:%s:%s" % [color.to_html(), str(rock),str(paved)]
+func material_for(color: Color, rock: bool = false, paved: bool = false, slope_softening: float = 0.0) -> ShaderMaterial:
+	var key := "%s:%s:%s:%0.2f" % [color.to_html(), str(rock), str(paved), slope_softening]
 	if _materials.has(key):
 		return _materials[key]
 	var material := ShaderMaterial.new()
@@ -32,6 +32,7 @@ func material_for(color: Color, rock: bool = false, paved: bool = false) -> Shad
 	material.set_shader_parameter("base_color", color)
 	material.set_shader_parameter("rock_strata", rock)
 	material.set_shader_parameter("paved_surface", paved)
+	material.set_shader_parameter("slope_normal_softening", slope_softening)
 	# Location-specific wear belongs to authored dressing, never generic maps.
 	material.set_shader_parameter("authored_paving_wear", false)
 	_apply_blend(material,rock)

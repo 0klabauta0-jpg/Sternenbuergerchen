@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual accepted Root movement batch produces empty success reason
+PASS: actual accepted Root step keeps adapter flying
+PASS: original stable flying pending approach captures with actual Root controls
+PASS: typed JSON prepares against fresh real owner identities
+PASS: prepare mutates neither adapter maps nor Flight/navigation
+PASS: fresh candidate validates before publication
+PASS: changed old adapter owner pointer rejects
+PASS: changed restored owner status rejects
+PASS: unsafe status rejects: starting
+PASS: unsafe status rejects: completing
+PASS: unsafe status rejects: unknown
+PASS: malformed pending field rejects: pending_warp
+PASS: malformed pending field rejects: pending_approach
+PASS: pending restore requires canonical future replay map
+PASS: forged pending signature rejects
+PASS: empty pending request ID rejects
+PASS: already replayed pending request ID rejects
+PASS: wire cannot activate capability
+PASS: false disable entry rejects
+PASS: unmatched canonical route rejects
+PASS: intent alone cannot manufacture arrived state
+PASS: actual Root deferred window rejects: _warp_entry_searches
+PASS: actual Root deferred window rejects: _warp_completion_intents
+PASS: actual Root deferred window rejects: _campaign_space_entry_searches
+PASS: actual Root deferred window rejects: _campaign_space_entry_origins
+PASS: unchanged actual owners validate immediately before tail
+PASS: true opt-in source never enables false target capability
+PASS: published route intent matches exact semantic source
+PASS: publication performs no Flight/navigation effects
+PASS: published handle cannot be reused
+PASS: real adapter automatic-disable command accepted
+PASS: actual auto braking window rejects capture
+PASS: settled actual manual/off state captures
+PASS: actual disabled preference retained
+PASS: original producer flying pending warp captures
+PASS: stable outbound pending warp prepares without owner commands
+PASS: unknown/current pending warp target rejects: fake
+PASS: unknown/current pending warp target rejects: glut_1a_orbit
+PASS: unknown pending warp marker rejects
+ORBIT_INTENT_CHECKPOINT passed=39 failed=0
+ORBIT_INTENT_CHECKPOINT_PASS

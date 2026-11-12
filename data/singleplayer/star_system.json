@@ -52,7 +52,7 @@
       "radius": 1.2,
       "ring_radius": 3,
       "color": "998679",
-      "surface_location_id": "",
+      "surface_location_id": "satellite_crash",
       "parent_id": "planet",
       "orbit_id": "glut_1a_orbit"
     },
@@ -70,7 +70,7 @@
       "radius": 1.2,
       "ring_radius": 3,
       "color": "5786a3",
-      "surface_location_id": "",
+      "surface_location_id": "trade_outpost",
       "parent_id": "planet",
       "orbit_id": "glut_1b_orbit"
     },
@@ -349,8 +349,8 @@
   },
   "location_orbits": {
     "homebase": "moon_orbit",
-    "satellite_crash": "planet_orbit",
-    "trade_outpost": "planet_orbit",
+    "satellite_crash": "glut_1a_orbit",
+    "trade_outpost": "glut_1b_orbit",
     "fortified_outpost": "planet_orbit",
     "distress_orbit": "planet_orbit",
     "polisa": "polisa_orbit"

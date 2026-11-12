@@ -3183,6 +3183,27 @@
       ],
       "target_audience": "new_player",
       "manual_review": false
+    },
+    {
+      "help_id": "shell.map_controls",
+      "screen_id": "shell",
+      "area_id": "map_controls",
+      "status": "ready",
+      "title": "Kartensteuerung",
+      "compact_lines": [
+        "Kamera und Zoom für Einsatz und Sternkarte.",
+        "Diese Referenz ändert keine Tastenbelegung."
+      ],
+      "detail_lines": [
+        "EINSATZ · Kamera verschieben: W/A/S/D oder Pfeiltasten. Alternativ die mittlere Maustaste über der Karte halten und ziehen.",
+        "EINSATZ · Zoomen: Mausrad direkt über der Karte. Der Kartenausschnitt unter dem Zeiger bleibt dabei im Blick.",
+        "EINSATZ · Kamera drehen: Q / E. Das dreht die Ansicht und erteilt dem Trupp keinen Blick- oder Bewegungsbefehl.",
+        "STERNKARTE · Ausschnitt verschieben: mittlere oder rechte Maustaste halten und ziehen. Zoomen: Mausrad über der Karte.",
+        "Zurück: Escape führt von dieser Hilfe ins Spielmenü. Dort mit Weiter ins Spiel zurückkehren.",
+        "Das Spielmenü pausiert den Einsatz nicht. Diese Seite erklärt die vorhandene Bedienung; sie ist kein Editor für Tastenbelegungen."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
     }
   ]
 }
