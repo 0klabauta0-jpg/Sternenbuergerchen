@@ -535,8 +535,10 @@ Root validiert alle vorbereiteten Actoränderungen und den vollständigen
 Registrylookupbatch vor Modellwrites. Der Registrybatch ist eine reine
 Indexoperation ohne Signale oder Gameplaymutationen. Identitätssetter werden
 ausschließlich in der vorbereiteten Modellphase stummgeschaltet; nach vollständigen
-Actor-/Known-/Registrybindings publiziert Finalize identity_changed für den
-vorhandenen RuntimeIndex und anschließend Runtime-/Visualfeedback. Andere
+Actor-/Known-/Registrybindings und der still publizierten vollständigen
+Leader-Membership-/Entitygruppe publiziert Finalize identity_changed für den
+vorhandenen RuntimeIndex und anschließend Runtime-/Visualfeedback. Erst nach
+dieser vollständigen Gruppe folgen die bisherigen guarded Leadersignale. Andere
 Identitätsanwendungen behalten ihre unmittelbaren Signale.
 
 Neue direkt aktive Personen bleiben bis Rootadmission verborgen. Deferredpersonen
