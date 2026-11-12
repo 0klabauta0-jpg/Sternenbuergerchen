@@ -117,3 +117,16 @@ isoliertem Profil erneut 25/25, Exit 0 und ohne Fehler. Der Runner überwacht
 nun zusätzlich die beteiligten Equipment-, Supply-, Inventar- und Katalogquellen;
 keine der überwachten Quellen änderte sich während dieses Laufs. Atmosphärische
 Missionen, Beschuss und ein nutzbares Shopangebot sind damit nicht nachgewiesen.
+
+## Ziel- und Schussvorschau: AP07/AP08-Vorstufe
+
+Zustandslose Resolver prüfen vorbereitete indexierte Kandidaten, Sensorreichweite,
+Bereich, Deckung, Feindstatus, Feuerregel, Waffenwinkel und Reichweite. Ein
+deterministischer Schussvorschlag berücksichtigt den ersten indexierten Rumpf
+einschließlich freundlicher Abfangtreffer und hält die Ereignisgeometrie fest.
+Unbekannte Ziele, ungedecktes Antwortfeuer, falscher Winkel und fehlender
+Zielindex werden abgewiesen. Diese Funktionen sind noch nicht mit einem
+autoritativ gefilterten Kontaktindex, dem Root-Kampftick, Feuerzyklen, Schaden,
+Replaybelegen oder der UI verbunden und erzeugen keinen spielbaren Beschuss.
+Der kleine Ziel-/Schusscheck und bestehende Komponenten-, Einbau-, Atmosphären-
+und Guidanceprüfungen liefen gebündelt ohne Fehler.
