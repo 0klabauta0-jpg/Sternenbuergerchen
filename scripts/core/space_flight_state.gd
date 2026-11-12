@@ -197,6 +197,7 @@ var _flight_checkpoint_preparations: Dictionary = {}
 
 func export_checkpoint_state() -> Dictionary:
 	var data := get_snapshot()
+	if not _valid_checkpoint_pose(data): return {"ok":false, "reason":"unsupported_flight_checkpoint"}
 	data["schema"] = "space_flight_checkpoint.v1"
 	data["position_plane"] = [_position.x, _position.y]
 	data["velocity_plane"] = [_velocity.x, _velocity.y]
@@ -216,13 +217,22 @@ func prepare_checkpoint_restore(data: Dictionary) -> Dictionary:
 		var value: Variant = data[key]
 		if typeof(value) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(value)) or float(value) != floor(float(value)) or float(value) < (-1 if key == "tick" else 0) or float(value) > 1000000000000.0:
 			return {"ok":false, "reason":"invalid_flight_checkpoint"}
+		pose[key] = int(value)
 	for id in _flight_checkpoint_preparations.keys():
 		if _flight_checkpoint_preparations[id].handle.get_ref() == null: _flight_checkpoint_preparations.erase(id)
-	if not _valid_pose(pose) or _flight_checkpoint_preparations.size() >= 32:
+	if not _valid_checkpoint_pose(pose) or _flight_checkpoint_preparations.size() >= 32:
 		return {"ok":false, "reason":"invalid_flight_checkpoint"}
 	var handle := PreparedFlightCheckpoint.new()
 	_flight_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source_snapshot":get_snapshot(), "source_epoch":_checkpoint_epoch, "pose":pose}
 	return {"ok":true, "prepared":handle}
+
+static func _valid_checkpoint_pose(pose: Dictionary) -> bool:
+	if not _valid_pose(pose): return false
+	# Flight remains reusable for local fixture arenas. Travel owns canonical
+	# system/body/phase validation; atmosphere requires another save contract.
+	if pose.coordinate_frame == "local":
+		return pose.motion_mode in ["tactical", "inactive"] and not String(pose.space_area_id).begins_with("atmosphere:")
+	return pose.motion_mode in ["grounded", "travel"]
 
 func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
 	if handle == null or not _flight_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"flight_checkpoint_unknown"}

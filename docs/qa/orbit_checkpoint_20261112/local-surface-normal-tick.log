@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual launch begins surface owner fixture
+PASS: actual owner quantum starts toward surface body
+PASS: actual warp entry admits canonical local Flight
+PASS: actual footprint has an unblocked surface gate target
+PASS: actual Root accepts movement to surface gate
+LOCAL_SURFACE_FLIGHT_STEPS 1610 gate=ok
+PASS: real movement reaches actual surface gate without pose changes
+PASS: real Root departure deactivates the actual Flight
+PASS: terminal intent alone cannot authorize unfinished approach
+PASS: unfinished approach remains unsaveable
+PASS: actual owner finish_approach produces stable local surface
+PASS: actual inactive producer preserves velocity and angular velocity
+PASS: actual inactive surface Fleet exports
+PASS: actual inactive surface Flight restores detached owners
+PASS: inactive pose and owner request receipts roundtrip exactly
+PASS: inactive surface cannot restore tactical mode
+PASS: surface location outside actual body rejects
+PASS: actual inactive surface accepts fixture terminal inbound projection
+PASS: surface intent fixture obtains detached actual Fleet checkpoint
+PASS: surface intent fixture reconstructs detached inactive Combat binding
+PASS: typed surface intent prepares against fresh inactive Flight identities
+PASS: fresh terminal surface intent validates
+PASS: surface intent preparation changes no owners or capability
+PASS: inactive Flight cannot manufacture terminal arrival: { "direction": "outbound" }
+PASS: inactive Flight cannot manufacture terminal arrival: { "status": "flying" }
+PASS: inactive Flight cannot manufacture terminal arrival: { "location_id": "trade_outpost" }
+PASS: inactive Flight cannot manufacture terminal arrival: { "pending_approach": {  } }
+PASS: foreign inactive identity invalidates prepared surface intent
+PASS: matching pose with foreign inactive Flight rejects new preparation
+PASS: exact inactive identity restoration validates without commands
+LOCAL_SURFACE_RETURN_RESULT { "ok": true, "replayed": false, "receipt_id": "local-return:surface-checkpoint-departure:a" }
+PASS: actual Root reactivates surface Flight through fuel-backed local return
+LOCAL_RETURN_CAPTURE { "ok": false, "reason": "receipt_owner_unavailable" }
+LOCAL_SURFACE_FLEET_CHECKPOINT passed=30 failed=1

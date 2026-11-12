@@ -1,0 +1,4 @@
+SCRIPT ERROR: Parse Error: Identifier "ORBIT_LAYOUT" not declared in the current scope.
+   at: GDScript::reload (res://scripts/mission/root_receipt_checkpoint.gd:412)
+SCRIPT ERROR: Parse Error: Identifier "SPACE_GRID" not declared in the current scope.
+   at: GDScript::reload (res://scripts/mission/root_receipt_checkpoint.gd:415)

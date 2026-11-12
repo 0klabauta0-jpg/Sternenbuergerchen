@@ -1,0 +1,14 @@
+{
+  "name": "local-surface-canonical-cache-fixed",
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen",
+    "--script",
+    "res://scripts/tests/local_surface_fleet_checkpoint_verifier.gd"
+  ],
+  "exit_code": 0,
+  "elapsed": 5.625,
+  "profile": "C:\\Users\\bjoer\\.codex\\worktrees\\open-functions-release-20261112\\SternenBuergerchen\\tmp\\open-functions-release\\profile-local-surface-canonical-cache-fixed"
+}

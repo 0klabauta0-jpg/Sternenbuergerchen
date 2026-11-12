@@ -84,6 +84,12 @@ static func _check_data(data: Dictionary, bindings: Dictionary, requests: Varian
 		if intent.status == "warp":
 			if intent.size() != 3 or travel.get("phase") != "quantum" or travel.get("target_orbit_id") != intent.target_orbit_id or pose.get("coordinate_frame") != "strategic" or actor != null or not control.is_empty(): return _bad("orbit_warp_mismatch")
 			continue
+		if travel.get("phase") == "surface":
+			# The real approach producer retains its terminal inbound intent after
+			# deactivation clears Combat status. The inactive Flight binding and
+			# canonical surface/area, rather than the intent alone, prove arrival.
+			if intent.status != "arrived" or intent.get("direction") != "inbound" or travel.get("location_id") != intent.location_id or travel.get("orbit_id") != intent.target_orbit_id or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "inactive" or pose.get("space_area_id") != "orbit_approach:" + String(body.get("id","")).uri_encode() or actor != null or bindings.combat.get_inactive_actor(craft) != flight or not control.is_empty(): return _bad("orbit_surface_arrival_unconfirmed")
+			continue
 		if intent.get("direction") not in ["inbound","outbound"] or travel.get("phase") != "orbit" or travel.get("orbit_id") != intent.target_orbit_id or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "orbit_approach:" + String(body.get("id","")).uri_encode() or actor != flight: return _bad("orbit_local_mismatch")
 		var status: Dictionary = bindings.combat.get_flight_status(craft)
 		if intent.status == "flying":
@@ -125,7 +131,7 @@ static func _bindings_valid(bindings: Dictionary) -> bool:
 	if not bindings.simulation_root is Node: return false
 	for method in ["get_snapshot","get_craft_snapshot","get_flight_state"]:
 		if not bindings.fleet.has_method(method): return false
-	for method in ["get_flight_controls","get_flight_status","get_actor"]:
+	for method in ["get_flight_controls","get_flight_status","get_actor","get_inactive_actor"]:
 		if not bindings.combat.has_method(method): return false
 	return bindings.campaign.has_method("get_campaign_snapshot")
 
@@ -150,7 +156,7 @@ static func _owner_stamp(bindings: Dictionary) -> Dictionary:
 	var flights := {}
 	for craft in snapshot.get("routes",{}):
 		var flight: RefCounted = bindings.fleet.get_flight_state(craft)
-		flights[craft] = {"owner":flight,"pose":flight.get_snapshot() if flight != null else {},"actor":bindings.combat.get_actor(craft),"status":bindings.combat.get_flight_status(craft)}
+		flights[craft] = {"owner":flight,"pose":flight.get_snapshot() if flight != null else {},"actor":bindings.combat.get_actor(craft),"inactive_actor":bindings.combat.get_inactive_actor(craft),"status":bindings.combat.get_flight_status(craft)}
 	return {"fleet":snapshot,"flights":flights,"controls":bindings.combat.get_flight_controls(),"campaign":bindings.campaign.get_campaign_snapshot(), "requests":bindings.get("space_operation_requests").duplicate(true) if bindings.has("space_operation_requests") else null}
 
 static func _keys(value: Dictionary, fields: Array) -> bool:

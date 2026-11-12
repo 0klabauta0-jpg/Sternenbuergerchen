@@ -111,3 +111,9 @@ Navigation/Fleet local serialization and global activation remain separate gates
 Read-only review found/fixed normal reason-empty status; the Pendingproducer
 cross-direction conflict was corrected separately by385368575 with its own
 focused proof. No broad runtime, performance, native renderer or EXE acceptance.
+
+Terminale tatsächliche Surfaceankunft ist ergänzt: arrived/inbound/noPending,
+kanonischer Ort/Orbit/Bereich, local/inactive und get_inactive_actor==FleetFlight,
+kein aktiver Actor/Control. Inactive-Identität ist in Bindings und Frischestamp.
+Tatsächlicher Surface-/Return-Ownerverifier33/0 und erneut OrbitIntent39/0,
+exit0, stderrleer. Full Scene-Continue bleibt unabhängig beim Companion.
