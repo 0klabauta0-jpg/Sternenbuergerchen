@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: real craft and team exist
+PASS: real job accepted
+PASS: real destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: both actual people present at destination
+ACTUAL_TRANSPORT_BEFORE invalid_checkpoint_value
+ACTUAL_TRANSPORT_AFTER mission_transport_checkpoint.v1
+PASS: same actual landed controller exports corrected transport checkpoint
+PASS: same actual landed controller prepares JSON transport checkpoint
+PASS: actual Actor and canonical pilot bindings validate before publication
+PASS: actual ship stays landed without arrival restart
+PASS: actual Actor identity preserved campaign_leader
+PASS: actual Actor identity preserved campaign_pilot
+TRANSPORT_TRUE_LANDING_FAIL
+CAMPAIGN_ACTIVE_CONTINUE passed=37 failed=1

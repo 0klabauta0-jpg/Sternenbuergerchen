@@ -139,3 +139,35 @@ positive Ausdehnung, Craft/Modell und tatsaechliche Assetidentitaet. Keine globa
 Codec-Erweiterung. Frischer Verifier46/0, exit0; echtes TerrainMap3DView-
 get_station_craft_body_projection mit realem Schiffsmesh und from_projection-
 Builder, exakter Geometrie-Roundtrip sowie fuenf korrupte Bounds-/Asset-Faelle.
+
+Transport-Nachtrag echter Satellitenweg: Derselbe reguläre Orbit-/Anflug-/Drop-
+Ablauf reproduzierte invalid_checkpoint_value nach vollständigem Deployment.
+Die rekursive reine Typdiagnose meldete exakt
+fields._field_landing_by_craft.dropship_1.&ok als StringName-Schlüssel.
+Der bestehende Nicht-Hex-Pfad erzeugt ihn durch landing.ok=true. Nur dieser bekannte
+Schlüssel wird jetzt explizit als String auf Wire plus
+transport_ok_key_kind_v1=StringName gespeichert und beim Decode mit ursprünglichem
+Schlüsseltyp wiederhergestellt. Unbekannte StringName-Schlüssel bleiben gesperrt.
+Keine generische Stringifizierung und keine globale Codecänderung. Der fokussierte
+Ownerverifier prüft55/0 einschließlich ursprünglichem Assignment, Typerhalt,
+korruptem Marker/Wert und weiter gesperrten fremden StringName-Schlüsseln.
+
+Echter Nachweis nach Fix: regulärer Basis-/Boarding-/Orbit-/Quantum-/Anflug-/Drop-
+Weg mit unveränderten echten Actors im Companion-Checkout; korrigierter Helper
+wurde per absolutem load aus dem Root-Worktree am selben tatsächlichen Controller
+geprüft, ohne Companion-Produktdateien zu ändern. Altes Controllerexport scheitert
+reproduziert, korrigiertes Capture liefert mission_transport_checkpoint.v1.
+JSON Prepare/Validate und interne Veröffentlichung erhalten Grounded-Phase und
+beide ursprünglichen Actoridentitäten:38/0, exit0, TRANSPORT_TRUE_LANDING_PASS.
+Profil transport-value-verified, APPDATA unter tmp/open-functions-release,90s-Limit.
+Logs transport-true-landing-verified{,.stderr}.log und exakter Probequelltext
+transport-true-landing-probe.gd.txt im bestehenden QA-Ordner. Zwei bekannte Szenen-
+UID-Pfadfallbackwarnungen; keine Script-/Parse-/Compile-/ERROR-/Leakzeilen.
+
+Genauigkeitsgrenze ausdrücklich erhalten: Ein zusätzlicher bitexakter Vergleich
+fand allein lz_accuracy_radius im letzten Floatbit abweichend nach JSON-Parsing,
+auch mit full_precision=true. Der echte abschließende Vergleich bindet Zahlen
+mit absolut <=1e-12, alle anderen Typen/Werte/IDs exakt. Vorher-/Default-Precision-
+und Full-Precision-Diagnoselogs bleiben separat erhalten. Dies ändert keine Actor-
+Positionen/HP/Bewegung/Zeiten oder Aktionen für einen künstlichen Pass. Kein
+vollständiges Missions-Save/Continue und kein EXE-Nachweis aus dieser Transportprobe.

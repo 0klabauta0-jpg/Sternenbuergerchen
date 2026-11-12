@@ -58,8 +58,36 @@ func _initialize() -> void:
 	target.host.free()
 	_multicraft()
 	_geometry()
+	_landing_key()
 	print("TRANSPORT_CHECKPOINT checks=%d failures=%d" % [checks, failures])
 	quit(1 if failures else 0)
+
+func _landing_key() -> void:
+	var rig := fixture()
+	var landing: Dictionary = {"resolved_lz_position":Vector2.ZERO}
+	landing.ok = true # Exact non-hex _prepare_ground_ship_landing assignment.
+	_check(typeof(landing.keys()[1]) == TYPE_STRING_NAME, "actual landing.ok assignment creates StringName key")
+	rig.controller.set("_field_landing_by_craft", {"craft":landing})
+	var state: Dictionary = rig.controller.export_transport_checkpoint()
+	_check(state.has("value"), "known StringName landing ok key exports")
+	if state.has("value"):
+		var result: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(JSON.parse_string(JSON.stringify(state)),bind(rig))
+		_check(result.ok, "known StringName landing ok key prepares")
+		if result.ok:
+			var restored: Dictionary = result.candidate.data.fields._field_landing_by_craft.craft
+			_check(typeof(restored.keys()[1]) == TYPE_STRING_NAME and restored[&"ok"] == true, "native known StringName key restored explicitly")
+			_check(rig.controller.validate_transport_checkpoint_candidate(result.candidate,bind(rig)).ok, "StringName key candidate validates")
+			rig.controller._publish_transport_checkpoint(result.candidate)
+			_check(rig.controller.export_transport_checkpoint() == state, "StringName key exact owner roundtrip")
+		for kind in ["wrong_kind","wrong_value"]:
+			var data: Dictionary = CODEC.decode_value(state.value).value
+			if kind == "wrong_kind": data.fields._field_landing_by_craft.craft.transport_ok_key_kind_v1 = "Object"
+			else: data.fields._field_landing_by_craft.craft.ok = "true"
+			_check(not rig.controller.prepare_transport_checkpoint_candidate({"schema":state.schema,"value":CODEC.encode_value(data).value},bind(rig)).ok,"reject malformed landing key " + kind)
+	landing[&"foreign"] = true
+	rig.controller.set("_field_landing_by_craft", {"craft":landing})
+	_check(not rig.controller.export_transport_checkpoint().get("ok",true), "unknown StringName keys still fail closed")
+	rig.host.free()
 
 func _geometry() -> void:
 	var rig := fixture()

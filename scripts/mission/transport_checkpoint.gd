@@ -216,6 +216,17 @@ static func encode_data(data: Dictionary) -> Dictionary:
 	if not landings is Dictionary: return bad("transport_landing_invalid")
 	for craft in landings:
 		if not landings[craft] is Dictionary: return bad("transport_landing_invalid")
+		var landing: Dictionary = landings[craft]
+		if landing.has("transport_ok_key_kind_v1"): return bad("transport_landing_invalid")
+		# Existing non-hex landing.ok=true creates a StringName key. Preserve
+		# that one known key kind explicitly; all other unsupported keys fail.
+		for key in landing.keys():
+			if typeof(key) == TYPE_STRING_NAME and key == &"ok":
+				if not landing[key] is bool: return bad("transport_landing_invalid")
+				var ok: bool = landing[key]
+				landing.erase(key)
+				landing["ok"] = ok
+				landing["transport_ok_key_kind_v1"] = "StringName"
 		var profile: Variant = landings[craft].get("ground_body_profile")
 		if profile == null: continue
 		if not profile is Dictionary or not profile.get("bounds") is AABB: return bad("transport_landing_invalid")
@@ -229,6 +240,13 @@ static func decode_geometry(data: Dictionary) -> Dictionary:
 	if not landings is Dictionary: return bad("transport_landing_invalid")
 	for craft in landings:
 		if not landings[craft] is Dictionary: return bad("transport_landing_invalid")
+		var landing: Dictionary = landings[craft]
+		if landing.has("transport_ok_key_kind_v1"):
+			if landing.transport_ok_key_kind_v1 != "StringName" or not landing.get("ok") is bool: return bad("transport_landing_invalid")
+			var ok: bool = landing["ok"]
+			landing.erase("ok")
+			landing.erase("transport_ok_key_kind_v1")
+			landing[&"ok"] = ok
 		var profile: Variant = landings[craft].get("ground_body_profile")
 		if profile == null: continue
 		if not profile is Dictionary or not profile.get("bounds") is Dictionary: return bad("transport_landing_invalid")
