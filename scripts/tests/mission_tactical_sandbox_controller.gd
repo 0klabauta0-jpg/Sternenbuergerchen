@@ -27,6 +27,8 @@ const MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT: GDScript = preload("res://script
 const COMMAND_FEEDBACK_DIAGNOSTICS_SCRIPT: GDScript = preload("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
 const HEX_DEPLOYMENT_ADAPTER_SCRIPT=preload("res://scripts/mission/hex_ground_deployment_adapter.gd")
+const HEX_SHIP_FOOTPRINT_SCRIPT=preload("res://scripts/mission/hex_ground_ship_footprint.gd")
+const HEX_SHIP_PROFILE_SCRIPT=preload("res://scripts/mission/polisa_ground_body_profile.gd")
 const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
 const MISSION_RUNTIME_INDEX_SCRIPT: GDScript = preload("res://scripts/tactical/mission_runtime_index.gd")
 const MISSION_HUD_READ_MODEL_SCRIPT: GDScript = preload("res://scripts/tactical/mission_hud_read_model.gd")
@@ -641,6 +643,10 @@ var _drop_sequence_phase: String = ""
 var _drop_sequence_units: Array = []
 var _drop_sequence_unit_index: int = 0
 var _drop_sequence_hex_admission:Dictionary={}
+var _hex_ship_footprint_cache:Dictionary={}
+var _hex_ship_body_cells_cache:Dictionary={}
+var _hex_ship_footprint_raster_jobs:=0
+var _hex_ship_footprint_cache_hits:=0
 var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
 var _drop_sequence_fireteam_name: String = "ALL"
@@ -35504,13 +35510,14 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
+	var pending_landing:Dictionary={}
 	if _should_keep_campaign_dropship_landed():
 		if not _has_lz_position: return false
 		var validation: Dictionary = _resolve_campaign_field_lz()
 		if not bool(validation.ok):
 			_last_command_text = String(validation.get("message", "Landeflaeche ist nicht frei"))
 			return false
-		_field_landing_by_craft[_mission_drop_craft_id] = validation
+		pending_landing=validation
 	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
 		_handoff_active_drop_sequence_to_card()
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
@@ -35534,6 +35541,7 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 			return false
 		if pending_units.is_empty():
 			return false
+		if not pending_landing.is_empty():_field_landing_by_craft[_mission_drop_craft_id]=pending_landing
 		_prepare_drop_sequence_context()
 		_embark_units_for_drop(pending_units)
 		_drop_sequence_units = pending_units
@@ -35554,6 +35562,11 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 		return true
 	if pending_units.is_empty():
 		return false
+	var landing:Dictionary=_prepare_ground_ship_landing(_mission_drop_craft_id,pending_landing)
+	if not bool(landing.get("ok",false)):
+		_last_command_text=String(landing.get("message","Landeplatz ist noch nicht bereit"))
+		return false
+	if landing.has("resolved_lz_position"):_field_landing_by_craft[_mission_drop_craft_id]=landing
 	_prepare_drop_sequence_context()
 	_embark_units_for_drop(pending_units)
 	_drop_sequence_units = pending_units
@@ -35610,7 +35623,7 @@ func _update_primary_drop_sequence(delta: float) -> void:
 			if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 				_mission_drop_progress = _build_active_drop_sequence_progress_value()
 			_store_active_drop_sequence_card()
-			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or _drop_sequence_timer >= 1.25):
+			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or _drop_sequence_timer >= 1.25) and _ground_ship_touchdown_ready(_drop_sequence_craft_id,_drop_sequence_lz_position,_drop_sequence_visual_only):
 				_drop_sequence_position = _drop_sequence_lz_position
 				_drop_sequence_phase = DROP_SEQUENCE_LANDED
 				_drop_sequence_timer = 0.0
@@ -35738,7 +35751,7 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 			sequence["position"] = position
 			if _should_keep_campaign_dropship_landed() and position.distance_to(lz_position) <= 2.0:
 				sequence["timer"] = float(sequence.get("timer",0.0)) + delta
-			if position.distance_to(lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or float(sequence.get("timer",0.0)) >= 1.25):
+			if position.distance_to(lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or float(sequence.get("timer",0.0)) >= 1.25) and _ground_ship_touchdown_ready(String(sequence.get("craft_id","")),lz_position,bool(sequence.get("visual_only",false))):
 				sequence["position"] = lz_position
 				sequence["phase"] = DROP_SEQUENCE_LANDED
 				sequence["timer"] = 0.0
@@ -35937,7 +35950,7 @@ func _advance_hex_drop_unit(sequence:Dictionary)->void:
 	var simulation_root:Node=get_node_or_null("../SimulationRoot")
 	var lz:Vector2=_coerce_vector2_value(sequence.get("lz_position",Vector2.ZERO),Vector2.ZERO)
 	var approach:String=_sanitize_approach_angle_name(String(sequence.get("approach_angle","NW")))
-	var result:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new().advance_phase(simulation_root,sequence,lz+_get_unload_offset(0,approach))
+	var result:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new().advance_phase(simulation_root,sequence,lz+_get_unload_offset(0,approach),Callable(self,"get_ground_ship_blocked_cells"))
 	if result.phase=="queued":
 		_enqueue_initial_loadout_effect_for_unit(result.unit_id)
 		return
@@ -36945,6 +36958,123 @@ func request_immediate_move_from_screen(screen_position: Vector2) -> bool:
 
 var _field_landing_by_craft: Dictionary = {}
 const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
+
+func get_ground_ship_footprint_audit()->Dictionary:
+	return {"raster_jobs":_hex_ship_footprint_raster_jobs,"cache_hits":_hex_ship_footprint_cache_hits}
+
+
+## Read-only physical inputs from the existing accepted landing/sequence owner.
+## No camera query for an already represented ship, and no orbit flight poses.
+func get_ground_ship_blocked_cells(ignore_craft_id:String="")->Dictionary:
+	var registry:Node=_get_terrain_registry()
+	var simulation_root:Node=get_node_or_null("../SimulationRoot")
+	if _has_live_hex_deployment_owner():registry=simulation_root.call("get_hex_ground_terrain_registry")
+	if not is_instance_valid(registry) or not registry.has_method("get_grid_topology") or registry.call("get_grid_topology")!="hex_axial_v1":return {"ok":false,"reason":"ground_ship_registry_unavailable"}
+	var records:Array=[]
+	for card in _get_mission_dropship_card_entries():
+		var id:String=String(card.get("craft_id",""))
+		if not ignore_craft_id.is_empty() and id==ignore_craft_id:continue
+		var sequence:Dictionary=_parallel_drop_sequences_by_craft.get(id,{})
+		if _is_active_drop_sequence_for_craft(id):sequence=_capture_active_drop_sequence()
+		var phase:String=String(sequence.get("phase",card.get("state","")))
+		if phase in ["outbound","to_homebase","homebase","starmap","ready"]:continue
+		var landing:Dictionary=_field_landing_by_craft.get(id,{})
+		var position:Variant=null
+		if _is_parked_campaign_dropship(id):position=_campaign_landed_craft_position(id)
+		elif not sequence.is_empty() or _field_landing_by_craft.has(id):position=sequence.get("lz_position",landing.get("resolved_lz_position",card.get("lz_position")))
+		else:continue
+		if id.is_empty() or not position is Vector2 or not position.is_finite():return {"ok":false,"reason":"ground_ship_position_unavailable"}
+		var checked:Dictionary=HEX_SHIP_PROFILE_SCRIPT.read_bound(card,landing.get("ground_body_profile"))
+		if not checked.ok:return checked
+		records.append({"craft_id":id,"model_id":String(card.get("model_id","")),"position":position,"profile":checked.profile})
+	var signature:String=JSON.stringify([registry.get_instance_id(),registry.call("get_revision"),ignore_craft_id,records],"",true).sha256_text()
+	if signature==String(_hex_ship_footprint_cache.get("signature","")):
+		_hex_ship_footprint_cache_hits+=1
+		return Dictionary(_hex_ship_footprint_cache.result).duplicate(true)
+	var cells:Dictionary={}
+	for record in records:
+		var raster:Dictionary=_get_bound_ground_ship_cells(registry,{"craft_id":record.craft_id,"model_id":record.model_id},record.position,record.profile)
+		if not raster.ok:return raster
+		for grid in raster.blocked_cells:cells[grid]=true
+		if cells.size()>4096:return {"ok":false,"reason":"footprint_budget"}
+	var ordered:Array[Vector2i]=[]
+	ordered.assign(cells.keys())
+	ordered.sort_custom(func(a:Vector2i,b:Vector2i)->bool:return a.x<b.x or (a.x==b.x and a.y<b.y))
+	var result:Dictionary={"ok":true,"registry_id":registry.get_instance_id(),"source_signature":signature,"blocked_cells":ordered}
+	_hex_ship_footprint_cache={"signature":signature,"result":result}
+	return result.duplicate(true)
+
+
+func _get_bound_ground_ship_cells(registry:Node,craft:Dictionary,position:Vector2,profile:Dictionary)->Dictionary:
+	var signature:String=JSON.stringify([registry.get_instance_id(),registry.call("get_revision"),craft.get("craft_id"),craft.get("model_id"),position,profile],"",true).sha256_text()
+	if _hex_ship_body_cells_cache.has(signature):return Dictionary(_hex_ship_body_cells_cache[signature]).duplicate(true)
+	_hex_ship_footprint_raster_jobs+=1
+	var result:Dictionary=HEX_SHIP_FOOTPRINT_SCRIPT.new().cells_for_body(registry,craft,position,profile)
+	if result.ok:
+		if _hex_ship_body_cells_cache.size()>=64:_hex_ship_body_cells_cache.clear()
+		_hex_ship_body_cells_cache[signature]=result.duplicate(true)
+	return result
+
+
+func _read_ground_ship_landing_projection(craft:Dictionary,position:Vector2,approach:String)->Dictionary:
+	var view=_get_primary_3d_view()
+	if view==null or not view.has_method("get_landed_craft_body_projection"):return {"ok":false,"reason":"ground_ship_geometry_unbound"}
+	var payload:Dictionary={"craft_id":String(craft.get("craft_id","")),"model_id":String(craft.get("model_id","")),"state":"landed","dropship_target_position":position,"flight_heading_origin":_get_drop_staging_position_for_lz(position,approach)}
+	if craft.has("visual_asset_id"):payload.visual_asset_id=craft.visual_asset_id
+	return view.call("get_landed_craft_body_projection",craft,payload,position)
+
+
+## Candidate only: actual owner write follows all normal start guards and this
+## complete validation. Existing represented ships never enter this bind path.
+func _prepare_ground_ship_landing(craft_id:String,candidate:Dictionary)->Dictionary:
+	var landing:Dictionary=candidate.duplicate(true)
+	if not _requires_hex_deployment_owner() and String(get_parent().get_meta("location_id",""))!="polisa":
+		landing.ok=true
+		return landing
+	if _requires_hex_deployment_owner() and not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
+	var position:Variant=landing.get("resolved_lz_position",_lz_position)
+	if not position is Vector2 or not position.is_finite():return {"ok":false,"reason":"ground_ship_position_unavailable"}
+	var craft:Dictionary=_find_mission_dropship_card_entry(craft_id)
+	var approach:String=_sanitize_approach_angle_name(String(craft.get("approach_angle",_get_approach_angle_name())))
+	var projection:Dictionary=_read_ground_ship_landing_projection(craft,position,approach)
+	var checked:Dictionary=HEX_SHIP_PROFILE_SCRIPT.from_projection(craft,projection)
+	if not checked.ok:return checked
+	var site:Dictionary=_check_ground_ship_landing_site(craft,position,checked.profile)
+	if not site.ok:return site
+	landing["ok"]=true
+	landing["requested_lz_position"]=landing.get("requested_lz_position",_lz_position)
+	landing["resolved_lz_position"]=position
+	landing["ground_body_profile"]=checked.profile
+	return landing
+
+
+func _check_ground_ship_landing_site(craft:Dictionary,position:Vector2,profile:Dictionary)->Dictionary:
+	if not _requires_hex_deployment_owner():return {"ok":true}
+	if not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
+	var simulation_root:Node=get_node_or_null("../SimulationRoot")
+	var registry:Node=simulation_root.call("get_hex_ground_terrain_registry")
+	var raster:Dictionary=_get_bound_ground_ship_cells(registry,craft,position,profile)
+	if not raster.ok:return raster
+	var foreign:Dictionary=get_ground_ship_blocked_cells(String(craft.get("craft_id","")))
+	if not foreign.ok:return foreign
+	var foreign_cells:Dictionary={}
+	for grid in foreign.blocked_cells:foreign_cells[grid]=true
+	for grid in raster.blocked_cells:
+		if foreign_cells.has(grid):return {"ok":false,"reason":"ground_landing_occupied","message":"Landeplatz ist belegt"}
+	for start in range(0,raster.blocked_cells.size(),64):
+		var claims:Dictionary=simulation_root.call("can_block_hex_ground_cells",raster.blocked_cells.slice(start,start+64),registry)
+		if not claims.ok or not claims.can_block:return {"ok":false,"reason":"ground_landing_occupied","message":"Landeplatz ist belegt"}
+	return {"ok":true}
+
+
+func _ground_ship_touchdown_ready(craft_id:String,position:Vector2,visual_only:bool)->bool:
+	if visual_only or not _requires_hex_deployment_owner():return true
+	var craft:Dictionary=_find_mission_dropship_card_entry(craft_id)
+	var bound:Dictionary=HEX_SHIP_PROFILE_SCRIPT.read_bound(craft,Dictionary(_field_landing_by_craft.get(craft_id,{})).get("ground_body_profile"))
+	if not bound.ok or not _check_ground_ship_landing_site(craft,position,bound.profile).ok:
+		_last_command_text="Landefläche belegt: Anflug wartet"
+		return false
+	return true
 
 func _campaign_occupied_landing_positions() -> Array:
 	var result: Array = []

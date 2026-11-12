@@ -1,13 +1,25 @@
 # IMPLEMENTATION_STATUS
 
-## AP6: begrenzter Schiffskoerperraster integriert — 12.11.2026
+### AP6 Schiffsproducer, Gruppenausstieg und Touchdownclaims — 12.11.2026
+
+Tatsächlicher Controller liest akzeptierte Schiffskörper kamerafrei aus gebundenen
+Profilen und übergibt begrenzte Sperrmasken an neue Ausstiegstickets. Neue reguläre
+Landungen binden ihr Profil erst nach Startguards, auch in LegacyPolisa. Endgültige
+Hex-LZ und beide Touchdownpfade prüfen aktuelle NPCclaims und Fremdkörper.
+Producer66/0, Transportcontrollerregression73/0, Quellen-/Profilguards grün;
+enger Review schloss drei konkrete P2 mit RED/GREEN, QA hex_ship_producer_20261112.
+Tatsächliche Rendererquelle ist Parentgetter b9f194d9e; diese Sourceprobe verwendet
+bekannte Projektionsdaten. Gemeinsamer Anschluss, Setup/Base und AP7/8 folgen.
+Kein Main, Produktionsflag, EXE oder große Lastprobe.
+
+### AP6 begrenzter Schiffsflächenraster als Planereingabe — 12.11.2026
 
 Source62b1454af uebernommen: bestehende gebundene Bodygeometrie wird mit
 Registrymetrik auf ganze Hexfelder gerastert (Randkontakt inklusive). Maximal4096
 Kandidaten vor Iteration, keine Teilmaske bei Fehler. Root nimmt optionale
 Ausschlussfelder nur in den Planungssnapshot auf. Enger unabhaengiger Review ohne
-Blocker; frische gemeinsame Rasterprobe52/0 samt Guards. Konkreter Schiffsconsumer, Profilproducer und spaetere Revalidierung
-bleiben offen; keine Kartenaktivierung oder AP6-Gesamtfreigabe.
+Blocker; frische gemeinsame Rasterprobe52/0 samt Guards. Der darueber genannte
+Producer schliesst den konkreten Anschluss an; keine Kartenaktivierung oder AP6-Gesamtfreigabe.
 
 ## Aktuell im isolierten Integrationsstand — 12.11.2026
 
