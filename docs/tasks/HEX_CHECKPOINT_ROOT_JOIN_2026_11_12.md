@@ -102,3 +102,8 @@ Modellphase. Fixture jetzt am tatsächlichen Vertrag: vollständige Leadermodell
 stehen schon im ersten Identitätscallback; Registrytausch stoppt anschließende
 Pose- und öffentliche Leadersignale. Produktguards unverändert. Neuer Lauf im
 gemeinsamen Parentbündel, keine separate Testmatrix.
+
+Erster tatsächlicher AP8verbund: alle 38 Funktionsassertions erfolgreich,
+Abschlussguard wegen eines RefCounted-Predelete-Selbstaufrufs ausdrücklich rot.
+Cleanup jetzt direkt in _notification statt Methodendispatch auf abbauendes self.
+Keine Gameplayänderung; sauberer Lauf erst nach gemeinsamer Wiederholung.
