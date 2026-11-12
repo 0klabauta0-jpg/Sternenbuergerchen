@@ -41,19 +41,26 @@ für den vollständigen Tabletopmodus aktiviert.
    Basiskern, atomare Boarding-/Unboardpublikation, InitialSetup und Wellen sind
    integriert. Respawnmanager-/Groundverbund76/0 und dessen Consumer4/0 sowie
    echter Flow-/Visit-/Crew-Retireanschluss37/0 sind gemeinsam gesichert. Noch
-   Laufende FMC-Mitglieder sind48/0 zusammengefuehrt. Noch Actoridentitaets-
-   und Runtime-Selectionabschluss; AP6 nicht pauschal abschliessen.
+   Laufende FMC-Mitglieder sind48/0 zusammengefuehrt. Actoridentitaets-
+   und Runtime-Selectionabschluss samt stiller Leaderbarriere sind als
+   33e6ba73a/bc2f2886b integriert. AP6-Code fertig, gemeinsame Pruefung folgt
+   nach AP7/AP8; vorhandene Einzelbelege sind keine Gesamtfreigabe.
 2. AP7: Ground-Roundtrip und Command-/Versionsgrenzen sind teilweise integriert;
    Passagezusagen und urspruengliche Bewegungsabsichten besitzen vorbereitete
-   Restorepatches. Tatsaechliche Base-/Checkpointbindung, Hostpublisher und
-   Receiverkontext fehlen noch; reiner Sichtfilter ist integriert, Sessionkontext
-   in Anschlussarbeit. Home-only-
+   Restorepatches. Hostpublisher, Rootbinder, Receiver und alle relevanten
+   Netznachrichten sind als95e22ad14 verdrahtet, Pruefung noch ausstehend.
+   Tatsaechliche Base-/Rootcheckpoint-/Store-/Loaderbindung in Anschlussarbeit.
+   Home-only-
    Speichergrenzen erhalten. AP8 hat einen echten 12-Feld-Passageroundtrip (15/0),
-   bleibt ohne Rootcheckpoint/Publisher/Receiver ausdruecklich teilweise.
+   wird um echten Rootcheckpoint-/Publisher-/Receiververbund ergaenzt und
+   bleibt bis zur gemeinsamen Pruefung ausdruecklich teilweise.
 3. Orbit: gemeinsame Flight-/Travel-/Economyübergänge, getrennte Stationsdockung
    und Kauf-Erstaufnahme sind als Ownerpfade integriert. Noch produktive lokale
    Visit-/Crewroute nachweisen: die gepaarten Adapter und Kauf-Replays sind
-   integriert, der echte gemeinsame Polisa-Besuch steht aus. Katalog V3 samt
+   integriert, der echte gemeinsame Polisa-Besuch steht aus. Pad-Anflug und
+   Rueckkehr6b1e36faa sowie sichtbare projektive 3D-Frachtplattform49000d7f6
+   sind integriert; keine doppelte Supplybuchung und keine native Sichtabnahme.
+   Katalog V3 samt
    Einmarkerwechsel ist vorbereitet und getrennt geprueft. Lokaler Automatismus bleibt bis dahin ausgeschaltet,
    Livekatalog V2. Private Ownerzyklen ersetzen keinen echten Stationsbesuch.
 4. Enge gemeinsame Start-/Aufnahme-/Bewegungs-/Reise-/Rückkehrprüfung, ohne volle

@@ -6,8 +6,10 @@ bleibt als Historie erhalten und ist keine neue Offenliste.
 ## Aktiver Auftrag und Grenzen
 
 AP5 bis AP8 selbststaendig mit dem Tabletop-Chat weiterfuehren; Orbitanschluss mit
-dem Weltraumkampf-Chat abstimmen. Nur kleine notwendige Integrationspruefungen.
-Grosse AP9-Tests spaeter. Vor JEDEM EXE-Build den Nutzer ausdruecklich fragen.
+dem Weltraumkampf-Chat abstimmen. Neueste Prioritaet: AP6, AP7 und AP8 als
+zusammenhaengende Codebloecke fertigstellen, danach notwendige Pruefungen buendeln.
+Keine weiteren Detail-Testschleifen dazwischen. Grosse AP9-Tests spaeter.
+Vor JEDEM EXE-Build den Nutzer ausdruecklich fragen.
 Kein Build beauftragt, keine Mainintegration. Isolierter noch nicht integrierter
 Taskbranch task/native-glut-maps-20261110; keine Arbeit direkt auf Main.
 
@@ -53,7 +55,10 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   Sourcead292 als8f266bdb0 integriert: frisch48/0 und Move/View65/0 samt Guards.
   Automatische Fortsetzungen erben Lebenszeit, terminale Gruppen bleiben beendet,
   unveraenderte Partner behalten Ziele. Runtime-Selection/Actoridentitaetsreset
-  und zugehoerige Registry-/Leaderindexbereinigung folgen bei Tabletop.
+  und zugehoerige Registry-/Leaderindexbereinigung sind als33e6ba73a/bc2f2886b
+  integriert. Vollstaendige stille Leadermodelle stehen vor Actorcallbacks.
+  AP6-Codeblock fertig; neue Selection-/Leaderpruefung bewusst bis nach AP8
+  gebuendelt zurueckgestellt, noch keine gemeinsame Verifikationsfreigabe.
   Flowcaller fuer gebundenes Surface-Retirement ist reviewed (18/0 an
   kontrollierter Receiptgrenze): eigener Pendingmarker vor Deferredcall,
   Waiting/Retry, per-Craft-Admission-/Saveguard, Homefortsetzung und letzter
@@ -74,11 +79,14 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   MPContract0bef0e658 prueft
   explizite Version vor Normalisierung und verbietet Client-Groundstate rekursiv;
   10/0 plus20/0 betroffener Nachbar, zwei Compiles0. Keine Peer-Sichtfilter dadurch.
-  Reiner V2-Fullscope-Publishfilter0134f53ae ist reviewed (20/0), noch unverdrahtet.
+  Reiner V2-Fullscope-Publishfilter0134f53ae ist reviewed (20/0).
   Root-Lifecyclecommandstempel werden im portablen Movementexport nur nach
   echter Rootvalidierung ausgelassen (2eab1f01b,9/0). Session-/Lobbylaufzeitkontext
   ist reviewed und vorbereitet (30/0 nach echtem Snapshotreject-RED24/3);
-  Rootbinder, Hostpublisher und Receiver folgen bei Tabletop.
+  Rootbinder, Hostpublisher, Receiver und Command-/READY-/Vitals-/Resultkontext
+  sind als95e22ad14 im Parent verdrahtet; noch nicht gemeinsam ausgefuehrt.
+  Initiale Fullscopeabwesenheit und Sichtwechsel nutzen bestehende Registry/
+  Knownobjekte. Geloeschter Kontext bleibt geschlossen statt Legacyfallback.
   Neuer additiver Baseaktions-CheckpointV2 ist reviewed (30/0): echte Sleep-/
   Terminalabsichten, Originaltoken, Sequenz/Timer, abgeleitete Betten und
   tatsaechliche Pilot-/Payloadmitgliedschaft; Gridframe bindet feine Navigation.
@@ -91,11 +99,13 @@ PolisaR08 bleibt gestalterisch freigegeben; neue Fahrzeugmodelle zurueckgestellt
   und Netzwerkownern. Home-only-/Away-Savegates bleiben. Keine Serialisierung
   privater Claims/Recovery-/Reservierungslisten in Peerpayloads.
 - AP8 danach: kleiner opt-in Integrationsslice gemaess Hexplan, keine globale
-  Aktivierung der grossen A/B/C-Karten. AP6 bis AP8 sind NICHT abgeschlossen.
+  Aktivierung der grossen A/B/C-Karten. AP7/AP8 noch in Codearbeit;
+  AP6-Codeabschluss ist keine abschliessende gemeinsame Abnahme.
   Teilfixture8f3b18a2e verbindet auf12Hexes echte Bewegung/Rampe/Tuer/Sicht/
   Schusspruefung/Ankunft samt Ground-/Movement-Passageroundtrip,15/0.
-  Rootcheckpoint, Hostpublisher, Receiver und echte Peers fehlen weiterhin:
-  ausdruecklich full_ap8=false. Keine grosse Kartenaktivierung.
+  Rootcheckpoint-/Netzverbund im Slice wird jetzt vervollstaendigt:
+  bis zur tatsaechlichen gemeinsamen Pruefung weiterhin full_ap8=false.
+  Echte Peer-/Produktionskartenabnahme bleibt AP9.
 
 Belege: docs/qa/tabletop_restplan_integration_20261111; aktueller Hexplan
 unter docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md.
