@@ -4,10 +4,13 @@ extends RefCounted
 const PRESETS = preload("res://scripts/npc/unit_roster_presets.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const BASE_MAP := "res://maps/campaign_intro_base.json"
+const HEX_AUTOSAVE_INTERVAL_MSEC := 1000
 var entry: Dictionary = {}
 var checkpoint: Dictionary = {}
 var last_save_signature := ""
 var error_message := ""
+var _hex_export_scope := ""
+var _hex_export_msec: int = -1
 
 func configure(flow: Node, request: Dictionary) -> void:
 	entry = request.duplicate(true)
@@ -88,7 +91,7 @@ func _initial_roster() -> Array:
 	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": "", "armor":"suit", "armor_id":"suit", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
 	return [leader, pilot]
 
-func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
+func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dictionary:
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
 	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")
@@ -108,6 +111,17 @@ func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 	for ship: Dictionary in crafts:
 		if String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"")) not in ["homebase","waiting_pad"]:
 			return {"ok":false,"reason":"away_from_checkpoint"}
+	# The existing autosave caller runs each frame. Tick/RNG/Base timers change
+	# every Hex export, so deduplication alone cannot bound export/hash/disk work.
+	# Keep safety checks above unconditional; an explicit save can bypass only time.
+	var simulation: Node = runtime.get("_simulation")
+	if is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required():
+		var now: int = Time.get_ticks_msec()
+		var scope := "%s:%s:%s" % [runtime.get_instance_id(), simulation.get_instance_id(), simulation.get_hex_ground_context_revision()]
+		if not force and scope == _hex_export_scope and now - _hex_export_msec < HEX_AUTOSAVE_INTERVAL_MSEC:
+			return {"ok":true,"unchanged":true,"throttled":true}
+		_hex_export_scope = scope
+		_hex_export_msec = now
 	var payload: Dictionary = runtime.call("export_campaign_checkpoint")
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}

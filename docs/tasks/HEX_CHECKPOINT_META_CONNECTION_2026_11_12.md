@@ -63,3 +63,14 @@ positiven Hexfall wird eine bereits legitim opt-in gesetzte private Kopie der
 echten384x392/16x8-BaseNavigation benötigt; die unveränderte Legacykarte mit
 explizitem Hexblock ist ein verpflichtender Reject. Der vorbereitete AP8-Root-
 Inplacefall ersetzt diesen zusätzlichen Store-/Loadernachweis nicht.
+
+## Begrenzter Autosaveexport
+
+Der bestehende Flow ruft Autosave pro Frame auf. Tick/RNG/Basetimer machen neue
+Hexsignaturen fortlaufend unterschiedlich. Deshalb erfolgt Hexexport samt Hash
+und Dateischreiben nach allen unveränderten Safetygates höchstens einmal je
+1000ms, gebunden an tatsächlichen Runtime-/Root-/Kontext. Simulation bleibt
+unverändert getaktet; der erste Save läuft sofort. Optionales force=true umgeht
+nur das Zeitintervall, niemals Home-/Away-/Pending-/Rootguards. Legacy bleibt
+unverändert. Die vorhandene eine Storeprobe prüft Folgesave und expliziten Save
+ohne zusätzliche Performance-Testreihe.

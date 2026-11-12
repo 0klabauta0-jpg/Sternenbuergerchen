@@ -78,6 +78,12 @@ func _positive()->void:
 	if not _check(base._states[pilot].status=="aboard" and sim.get_hex_unit_state(pilot).is_empty() and bool(base.get_actor(pilot).get_meta("dropship_embarked",false)),"pilot physically boards through real movement and leaves Ground"):return
 	var saved:Dictionary=first._campaign_start.save_home_checkpoint(first,runtime)
 	if not _check(saved.get("ok",false),"actual campaign save writes the private atomic checkpoint"):print(saved);return
+	var saved_tick:int=sim.tick_counter
+	sim._physics_process(0.1)
+	var repeated:Dictionary=first._campaign_start.save_home_checkpoint(first,runtime)
+	_check(repeated.get("throttled",false) and sim.tick_counter==saved_tick+1,"automatic Hex export is bounded without throttling the actual simulation")
+	var forced:Dictionary=first._campaign_start.save_home_checkpoint(first,runtime,true)
+	if not _check(forced.get("ok",false) and not forced.get("throttled",false),"explicit save bypasses only the export interval"):return
 	var loaded:Dictionary=STORE.load_checkpoint()
 	if not _check(loaded.get("ok",false),"actual Store reads and validates the saved owner envelope"):print(loaded);return
 	var payload:Dictionary=loaded.payload
