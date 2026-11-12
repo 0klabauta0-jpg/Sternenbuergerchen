@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### Spielreview: Mehrschiff-Ownerfixes und technische Spielpfade — 12.11.2026
+
+Auf `task/game-review-fixes-20261112`, bewusst auf noch nicht integriertem
+Kampagnen-/Hexplanstand `cfddc129b`. Implizites Aussteigen verwendet das wirkliche
+Schiff der Person; Continue restauriert vollständige Team-Payloads pro Schiff.
+Szenenbookmark wird nicht länger als Mission-State-Save beschriftet. Vier
+überholte Testfixtures mit erhaltenen Negativgrenzen korrigiert.26/26 ausgewählte
+Runtimegates grün, darunter fünf reale Kampagnenaufträge230/0 und Mehrschiff-
+Nachbarregressionen147/0. Echter lokaler ENet-RPC-Transport31/0, mobiler
+Offlinebericht39/0. Fremdes Grafik-WIP erhalten. Kein Mainmerge/EXE-/GPU-/
+allgemeiner Performance-/Internet-MP-Abschluss. Orbitalbegegnung verwendet
+feste Hüllenschäden statt Boden-RNG; vollständige Hexsicht/Feldreservierung
+bleibt beim bestehenden Plan. Editorimport Exit0, aber ObjectDB-Leak beim
+Editorende (Ursache offen); finale Runtimegates ohne Fehler/Leaks.
+Evidenz: `docs/qa/game_review_20261112/README.md`.
+Bericht: `docs/reports/SPIELREVIEW_2026_11_12.html`.
+
 ### Hexsicht und Feldbelegung: konkreter Arbeitsplan — 11.11.2026
 
 Nur Planung auf `task/hex-sight-occupancy-plan-20261111`, bewusst auf dem

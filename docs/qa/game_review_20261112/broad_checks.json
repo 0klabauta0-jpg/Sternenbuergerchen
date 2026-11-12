@@ -1,0 +1,18 @@
+{"version":1,"checks":[
+{"name":"combat_rng_parity","script":"res://scripts/tests/game_review_combat_20261112_parity.gd","success_marker":"GAME_REVIEW_COMBAT_PARITY: 37 passed, 0 failed","timeout":60},
+{"name":"combat_rules_119","script":"res://scripts/tests/task_119_verifier.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"network_command_authority","script":"res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"snapshot_contract","script":"res://scripts/tests/task_168_multiplayer_snapshot_contract_verifier.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"two_peer_contract","script":"res://scripts/tests/task_169_multiplayer_two_client_playability_smoke.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"tactical_replication","script":"res://scripts/tests/task_281_tactical_command_multiplayer_authority_snapshot.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"hex_visibility","script":"res://scripts/tests/frontier_hex_visibility_verifier.gd","success_marker":"=== RESULTS:","timeout":60},
+{"name":"hex_foundation","script":"res://scripts/tests/frontier_hex_foundation_verifier.gd","success_marker":"=== RESULTS:","timeout":60},
+{"name":"hex_movement","script":"res://scripts/tests/frontier_hex_movement_verifier.gd","success_marker":"FRONTIER_HEX_MOVEMENT {","timeout":60},
+{"name":"hex_hpa_budget","script":"res://scripts/tests/gm01_hex_hpa_pruning_verifier.gd","success_marker":"GM01_HEX_HPA_PRUNING_ALL_PASS","timeout":120},
+{"name":"enet_connectivity","script":"res://scripts/tests/bugfix_multiplayer_enet_connectivity_smoke.gd","success_marker":"=== RESULTS: 3 passed, 0 failed","timeout":60},
+{"name":"graphics_entry","script":"res://scripts/tests/frontier_start_graphics_verifier.gd","success_marker":"FRONTIER_START_GRAPHICS_ALL_PASS","timeout":120},
+{"name":"inventory_transfers","script":"res://scripts/tests/playtest_20261110_inventory_transfer_verifier.gd","success_marker":"INVENTORY failures=0","timeout":60},
+{"name":"settings_controls","script":"res://scripts/tests/task_226_main_menu_settings_shell_display_audio_input_gameplay.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"escape_shell_legacy","script":"res://scripts/tests/task_391_global_escape_menu_button_sfx.gd","success_marker":"ALL TESTS PASSED","timeout":60},
+{"name":"shell_clarity_realtime","script":"res://scripts/tests/game_review_shell_20261112.gd","success_marker":"GAME_REVIEW_SHELL passed=13 failed=0","timeout":45}
+]}

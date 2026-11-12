@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Queued singleplayer/host resolution 0 has identical roll, hit, damage and vitals
+PASS: Server snapshot 0 mirrors committed health
+PASS: Snapshot 0 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 1 has identical roll, hit, damage and vitals
+PASS: Server snapshot 1 mirrors committed health
+PASS: Snapshot 1 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 2 has identical roll, hit, damage and vitals
+PASS: Server snapshot 2 mirrors committed health
+PASS: Snapshot 2 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 3 has identical roll, hit, damage and vitals
+PASS: Server snapshot 3 mirrors committed health
+PASS: Snapshot 3 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 4 has identical roll, hit, damage and vitals
+PASS: Server snapshot 4 mirrors committed health
+PASS: Snapshot 4 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 5 has identical roll, hit, damage and vitals
+PASS: Server snapshot 5 mirrors committed health
+PASS: Snapshot 5 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 6 has identical roll, hit, damage and vitals
+PASS: Server snapshot 6 mirrors committed health
+PASS: Snapshot 6 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 7 has identical roll, hit, damage and vitals
+PASS: Server snapshot 7 mirrors committed health
+PASS: Snapshot 7 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 8 has identical roll, hit, damage and vitals
+PASS: Server snapshot 8 mirrors committed health
+PASS: Snapshot 8 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 9 has identical roll, hit, damage and vitals
+PASS: Server snapshot 9 mirrors committed health
+PASS: Snapshot 9 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 10 has identical roll, hit, damage and vitals
+PASS: Server snapshot 10 mirrors committed health
+PASS: Snapshot 10 creates no mirror commands or effects
+PASS: Queued singleplayer/host resolution 11 has identical roll, hit, damage and vitals
+PASS: Server snapshot 11 mirrors committed health
+PASS: Snapshot 11 creates no mirror commands or effects
+PASS: Twelve applied snapshots consumed no mirror combat RNG draws
+GAME_REVIEW_COMBAT_PARITY: 37 passed, 0 failed

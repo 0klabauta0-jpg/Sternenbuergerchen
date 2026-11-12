@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: configure actual campaign owner
+PASS: configure actual supply owner
+PASS: fixture accepts satellite_recovery
+PASS: fixture departure satellite_recovery
+PASS: fixture activates satellite_recovery
+PASS: fixture completes satellite_recovery
+PASS: fixture rewards satellite_recovery
+PASS: fixture accepts outpost_recovery
+PASS: fixture departure outpost_recovery
+PASS: fixture activates outpost_recovery
+PASS: fixture completes outpost_recovery
+PASS: fixture rewards outpost_recovery
+PASS: fixture third person
+PASS: fixture loads crate
+PASS: fixture accepts benit_delivery
+PASS: fixture departure benit_delivery
+PASS: fixture activates benit_delivery
+PASS: fixture delivers crate
+PASS: fixture completes benit_delivery
+PASS: fixture rewards benit_delivery
+PASS: fixture accepts outpost_chip_recovery
+PASS: fixture departure outpost_chip_recovery
+PASS: fixture activates outpost_chip_recovery
+PASS: fixture completes outpost_chip_recovery
+PASS: fixture rewards outpost_chip_recovery
+PASS: fixture accepts buccaneer_rescue
+PASS: fixture departure buccaneer_rescue
+PASS: fixture activates buccaneer_rescue
+PASS: fixture completes buccaneer_rescue
+PASS: fixture rewards buccaneer_rescue
+PASS: fixture fourth person
+PASS: fixture second pad
+PASS: four-person two-ship checkpoint validates
+PASS: valid isolated checkpoint with requested crew presence
+PASS: first ship completed payload survives Continue
+FAIL: second ship completed payload survives Continue
+FIRST_LAUNCH { "ok": true }
+PASS: first ship launch readiness restored
+FAIL: second ship launch readiness restored
+PASS: select actual second-ship pilot in world panel
+PASS: explicit mismatching craft remains honored
+FAIL: world Aussteigen button exits actual second ship
+PASS: second-ship action leaves first pilot unchanged
+PASS: explicit matching craft still exits first ship
+PASS: valid isolated checkpoint with requested crew presence
+PASS: partial first team is never falsely restored as boarded
+FAIL: unrelated complete second-ship team survives partial-team restore
+PASS: partial first team cannot launch
+PASS: valid isolated checkpoint with requested crew presence
+PASS: outside second-team member is not invented aboard
+GAME_REVIEW_MULTICRAFT checks=49 failed=4

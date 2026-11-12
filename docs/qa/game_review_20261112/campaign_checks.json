@@ -1,0 +1,1 @@
+{"version":1,"checks":[{"name":"five_actual_sorties","script":"res://scripts/tests/campaign_five_actual_sorties_verifier.gd","success_marker":"SINGLEPLAYER_LOOP_RESULTS","timeout":600}]}

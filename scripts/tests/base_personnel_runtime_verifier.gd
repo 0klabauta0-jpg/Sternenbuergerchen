@@ -140,6 +140,8 @@ func _run() -> void:
 	swapped.craft.pilot_id = leader
 	swapped.craft.staged_unit_ids = [pilot]
 	swapped.craft.fireteam_definitions = [{"id":"ft1","lead_unit_id":pilot,"member_unit_ids":[pilot]}]
+	_check(not store.validate_payload(swapped).ok,"checkpoint rejects divergent primary craft and fleet pilot owners")
+	swapped.fleet[0].pilot_id = leader
 	_check(store.validate_payload(swapped).ok,"checkpoint accepts any actual roster person as pilot and other person as leader")
 	var invalid: Dictionary = store.load_checkpoint().payload.duplicate(true)
 	invalid.base_personnel.units.campaign_pilot.position[0] = "bad"

@@ -271,7 +271,11 @@ func _base_crew_ready() -> bool:
 	var personnel:Node=_runtime.call("get_base_personnel_runtime")
 	if personnel==null or not bool(personnel.call("is_pilot_aboard",_craft_id)):return false
 	var expected:Array=Array(_screen.call("_get_member_unit_ids_for_fireteam",_team_id))
-	if not expected.has(_pilot_id):expected.append(_pilot_id)
+	# The initial preparation runs before _run caches _pilot_id. Read the
+	# assigned pilot owner here, including subsequent sorties after recruitment.
+	var pilot_id:String=String(_screen.call("_get_assigned_pilot_id",_craft_id))
+	if pilot_id.is_empty():return false
+	if not expected.has(pilot_id):expected.append(pilot_id)
 	var people:Array=personnel.call("get_snapshot").get("units",[])
 	for id in expected:
 		var aboard:=false

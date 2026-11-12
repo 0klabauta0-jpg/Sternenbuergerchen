@@ -1,0 +1,1 @@
+{"version":1,"checks":[{"name":"shell_clarity_realtime","script":"res://scripts/tests/game_review_shell_20261112.gd","success_marker":"GAME_REVIEW_SHELL passed=13 failed=0","timeout":45}]}

@@ -1,0 +1,699 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+BASE_DIAGNOSTIC before {
+"groups": {},
+"paused": false,
+"payload": {
+"boarded_operator_count": 0,
+"boarding_progress_ratio": 0.0,
+"boarding_refresh_deferred_for_drag": false,
+"can_request_mission_start": false,
+"character_popup_visible": false,
+"direct_staging_enabled": true,
+"drop_ship_staged": false,
+"embarked_unit_ids": [],
+"fireteam_payload_statuses": [{
+"block_reason": "",
+"block_text": "",
+"boarded": false,
+"detail_text": "Kit edits only; not a launch payload",
+"fireteam_id": "ft1",
+"loadout_editing": true,
+"operator_count": 1,
+"payload_fireteam_count": 0,
+"payload_operator_count": 0,
+"queued": false,
+"status": "loadout_editing",
+"tooltip_text": "Kit edits only; not a launch payload",
+"visible_text": "Loadout editing | not boarded"
+}],
+"fireteams_panel_visible": false,
+"fixed_character_sheet_visible": false,
+"flightdeck_panel_visible": false,
+"homebase_direct_craft_block_reason": "",
+"homebase_direct_craft_block_text": "",
+"homebase_direct_craft_ready": true,
+"homebase_dispatch_target": "fob",
+"loadout_panel_visible": false,
+"member_loadouts": {},
+"mission_drop_craft_id": "dropship_1",
+"mission_drop_pilot_display_name": "Tomas Ibarra",
+"mission_drop_pilot_unit_id": "campaign_pilot",
+"payload_craft_id": "",
+"payload_fallback_seeded": false,
+"payload_fireteam_ids": [],
+"payload_fireteam_ids_by_craft": {},
+"payload_operator_count": 0,
+"payload_status_text": "Payload: 0 ops / 0 FT | no fireteam boarded",
+"selected_fireteam_ids": ["ft1"],
+"selected_unit_ids": ["campaign_leader"],
+"staged_fireteam_ids": [],
+"transport_craft_id": "dropship_1",
+"uses_fob_drop_panel_contract": true
+},
+"personnel": {
+"bed_occupants": {},
+"runtime_authority": "SimulationRoot",
+"units": [{
+"action": {},
+"bed_id": "",
+"craft_id": "",
+"last_result": {},
+"name": "Anja Voss",
+"role": "Fireteam Leader",
+"status": "outside",
+"unit_id": "campaign_leader",
+&"world_position": Vector2(1877.7437, 789.1282)
+}, {
+"action": {},
+"bed_id": "",
+"craft_id": "",
+"last_result": {},
+"name": "Tomas Ibarra",
+"role": "Dropship Pilot",
+"status": "outside",
+"unit_id": "campaign_pilot",
+&"world_position": Vector2(1901.7437, 801.1282)
+}]
+},
+"physics": true,
+"queue": [],
+"space": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"enabled": true,
+"focused_craft_id": "dropship_1",
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"result_summary": "",
+"revision": 0,
+"routes": {
+"dropship_1": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"revision": 0,
+"target_orbit_id": ""
+}
+},
+"target_orbit_id": ""
+},
+"tick": 7
+}
+PASS: Actual new campaign accepts complete crew walk
+BOARD_REQUEST { "ok": true, "pending": true }
+BASE_DIAGNOSTIC second_0 {
+"groups": {
+"dropship_1": {
+"committed": false,
+"ids": ["campaign_leader", "campaign_pilot"],
+"payload": {
+"craft_id": "dropship_1",
+"fireteam_id": "ft1"
+},
+"previously_aboard": {}
+}
+},
+"paused": false,
+"payload": {
+"boarded_operator_count": 0,
+"boarding_progress_ratio": 0.0,
+"boarding_refresh_deferred_for_drag": false,
+"can_request_mission_start": false,
+"character_popup_visible": false,
+"direct_staging_enabled": true,
+"drop_ship_staged": false,
+"embarked_unit_ids": [],
+"fireteam_payload_statuses": [{
+"block_reason": "",
+"block_text": "",
+"boarded": false,
+"detail_text": "Kit edits only; not a launch payload",
+"fireteam_id": "ft1",
+"loadout_editing": true,
+"operator_count": 1,
+"payload_fireteam_count": 0,
+"payload_operator_count": 0,
+"queued": false,
+"status": "loadout_editing",
+"tooltip_text": "Kit edits only; not a launch payload",
+"visible_text": "Loadout editing | not boarded"
+}],
+"fireteams_panel_visible": false,
+"fixed_character_sheet_visible": false,
+"flightdeck_panel_visible": false,
+"homebase_direct_craft_block_reason": "",
+"homebase_direct_craft_block_text": "",
+"homebase_direct_craft_ready": true,
+"homebase_dispatch_target": "fob",
+"loadout_panel_visible": false,
+"member_loadouts": {},
+"mission_drop_craft_id": "dropship_1",
+"mission_drop_pilot_display_name": "Tomas Ibarra",
+"mission_drop_pilot_unit_id": "campaign_pilot",
+"payload_craft_id": "",
+"payload_fallback_seeded": false,
+"payload_fireteam_ids": [],
+"payload_fireteam_ids_by_craft": {},
+"payload_operator_count": 0,
+"payload_status_text": "Payload: 0 ops / 0 FT | no fireteam boarded",
+"selected_fireteam_ids": ["ft1"],
+"selected_unit_ids": ["campaign_leader"],
+"staged_fireteam_ids": [],
+"transport_craft_id": "dropship_1",
+"uses_fob_drop_panel_contract": true
+},
+"personnel": {
+"bed_occupants": {},
+"runtime_authority": "SimulationRoot",
+"units": [{
+"action": {
+"craft_id": "dropship_1",
+&"target": Vector2(1946.3387, 1266.8306),
+"type": "crew_board"
+},
+"bed_id": "",
+"craft_id": "",
+"last_result": {},
+"name": "Anja Voss",
+"role": "Fireteam Leader",
+"status": "moving",
+"unit_id": "campaign_leader",
+&"world_position": Vector2(1877.7437, 789.1282)
+}, {
+"action": {
+"craft_id": "dropship_1",
+&"target": Vector2(1946.3387, 1266.8306),
+"type": "crew_board"
+},
+"bed_id": "",
+"craft_id": "",
+"last_result": {},
+"name": "Tomas Ibarra",
+"role": "Dropship Pilot",
+"status": "moving",
+"unit_id": "campaign_pilot",
+&"world_position": Vector2(1901.7437, 801.1282)
+}]
+},
+"physics": true,
+"queue": [{
+"command_token": "base:1",
+"path": [Vector2(1877.7437, 789.1282), Vector2(1871.8873, 800.05634), Vector2(1866.031, 810.9845), Vector2(1860.1746, 821.9127), Vector2(1854.3181, 832.84094), Vector2(1848.4617, 843.76917), Vector2(1842.6052, 854.6974), Vector2(1836.7489, 865.62555), Vector2(1830.8926, 876.5537), Vector2(1825.0361, 887.48193), Vector2(1819.1797, 898.41016), Vector2(1813.3232, 909.3384), Vector2(1807.4668, 920.2666), Vector2(1801.6105, 931.19476), Vector2(1795.754, 942.123), Vector2(1811.754, 950.123), Vector2(1827.754, 958.123), Vector2(1821.8977, 969.05115), Vector2(1816.0413, 979.9794), Vector2(1810.1848, 990.9076), Vector2(1804.3284, 1001.8358), Vector2(1798.472, 1012.764), Vector2(1814.472, 1020.764), Vector2(1808.6156, 1031.6921), Vector2(1802.7593, 1042.6204), Vector2(1796.9028, 1053.5486), Vector2(1791.0464, 1064.4768), Vector2(1785.19, 1075.405), Vector2(1779.3335, 1086.3333), Vector2(1773.4772, 1097.2615), Vector2(1767.6208, 1108.1896), Vector2(1761.7644, 1119.1178), Vector2(1755.908, 1130.046), Vector2(1750.0515, 1140.9742), Vector2(1766.0515, 1148.9742), Vector2(1782.0515, 1156.9742), Vector2(1798.0515, 1164.9742), Vector2(1814.0515, 1172.9742), Vector2(1830.0515, 1180.9742), Vector2(1846.0515, 1188.9742), Vector2(1862.0515, 1196.9742), Vector2(1878.0515, 1204.9742), Vector2(1894.0515, 1212.9742), Vector2(1910.0515, 1220.9742), Vector2(1926.0515, 1228.9742), Vector2(1942.0515, 1236.9742), Vector2(1936.1951, 1247.9025), Vector2(1930.3387, 1258.8306), Vector2(1946.3387, 1266.8306)],
+"requeue_until_target": true,
+"target_position": Vector2(1946.3387, 1266.8306),
+"type": "move_to_position",
+"unit_id": "campaign_leader"
+}, {
+"command_token": "base:2",
+"path": [Vector2(1893.7437, 797.1282), Vector2(1887.8873, 808.05634), Vector2(1882.031, 818.9845), Vector2(1876.1746, 829.9127), Vector2(1870.3181, 840.84094), Vector2(1864.4617, 851.76917), Vector2(1858.6052, 862.6974), Vector2(1852.7489, 873.62555), Vector2(1846.8926, 884.5537), Vector2(1841.0361, 895.48193), Vector2(1835.1797, 906.41016), Vector2(1829.3232, 917.3384), Vector2(1823.4668, 928.2666), Vector2(1817.6105, 939.19476), Vector2(1811.754, 950.123), Vector2(1827.754, 958.123), Vector2(1843.754, 966.123), Vector2(1837.8977, 977.05115), Vector2(1832.0413, 987.9794), Vector2(1826.1848, 998.9076), Vector2(1820.3284, 1009.8358), Vector2(1814.472, 1020.764), Vector2(1808.6156, 1031.6921), Vector2(1824.6156, 1039.6921), Vector2(1818.7593, 1050.6204), Vector2(1812.9028, 1061.5486), Vector2(1807.0464, 1072.4768), Vector2(1801.19, 1083.405), Vector2(1795.3335, 1094.3333), Vector2(1789.4772, 1105.2615), Vector2(1783.6208, 1116.1896), Vector2(1777.7644, 1127.1178), Vector2(1771.908, 1138.046), Vector2(1766.0515, 1148.9742), Vector2(1782.0515, 1156.9742), Vector2(1798.0515, 1164.9742), Vector2(1814.0515, 1172.9742), Vector2(1830.0515, 1180.9742), Vector2(1846.0515, 1188.9742), Vector2(1862.0515, 1196.9742), Vector2(1878.0515, 1204.9742), Vector2(1894.0515, 1212.9742), Vector2(1910.0515, 1220.9742), Vector2(1926.0515, 1228.9742), Vector2(1942.0515, 1236.9742), Vector2(1936.1951, 1247.9025), Vector2(1952.1951, 1255.9025), Vector2(1946.3387, 1266.8306)],
+"requeue_until_target": true,
+"target_position": Vector2(1946.3387, 1266.8306),
+"type": "move_to_position",
+"unit_id": "campaign_pilot"
+}],
+"space": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"enabled": true,
+"focused_craft_id": "dropship_1",
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"result_summary": "",
+"revision": 0,
+"routes": {
+"dropship_1": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"revision": 0,
+"target_orbit_id": ""
+}
+},
+"target_orbit_id": ""
+},
+"tick": 7
+}
+BASE_DIAGNOSTIC final {
+"groups": {},
+"paused": false,
+"payload": {
+"boarded_operator_count": 1,
+"boarding_progress_ratio": 1.0,
+"boarding_refresh_deferred_for_drag": false,
+"can_request_mission_start": true,
+"character_popup_visible": false,
+"direct_staging_enabled": true,
+"drop_ship_staged": true,
+"embarked_unit_ids": ["campaign_leader"],
+"fireteam_payload_statuses": [{
+"block_reason": "",
+"block_text": "",
+"boarded": true,
+"detail_text": "True mission payload",
+"fireteam_id": "ft1",
+"loadout_editing": true,
+"operator_count": 1,
+"payload_fireteam_count": 1,
+"payload_operator_count": 1,
+"queued": true,
+"status": "boarded",
+"tooltip_text": "True mission payload",
+"visible_text": "Flight Deck | boarded 1/1 NPC"
+}],
+"fireteams_panel_visible": false,
+"fixed_character_sheet_visible": false,
+"flightdeck_panel_visible": false,
+"homebase_direct_craft_block_reason": "",
+"homebase_direct_craft_block_text": "",
+"homebase_direct_craft_ready": true,
+"homebase_dispatch_target": "mission",
+"loadout_panel_visible": false,
+"member_loadouts": {
+"campaign_leader": {
+"armor": "light",
+"is_fireteam_lead": true,
+"weapon_1": "pistol",
+"weapon_2": "medictool"
+}
+},
+"mission_drop_craft_id": "dropship_1",
+"mission_drop_pilot_display_name": "Tomas Ibarra",
+"mission_drop_pilot_unit_id": "campaign_pilot",
+"payload_craft_id": "dropship_1",
+"payload_fallback_seeded": false,
+"payload_fireteam_ids": ["ft1"],
+"payload_fireteam_ids_by_craft": {
+"dropship_1": ["ft1"]
+},
+"payload_operator_count": 1,
+"payload_status_text": "Payload: 1 ops / 1 FT | Boarded 1/1 NPC | Flight Deck",
+"selected_fireteam_ids": ["ft1"],
+"selected_unit_ids": ["campaign_leader"],
+"staged_fireteam_ids": ["ft1"],
+"transport_craft_id": "dropship_1",
+"uses_fob_drop_panel_contract": true
+},
+"personnel": {
+"bed_occupants": {},
+"runtime_authority": "SimulationRoot",
+"units": [{
+"action": {},
+"bed_id": "",
+"craft_id": "dropship_1",
+"last_result": {},
+"name": "Anja Voss",
+"role": "Fireteam Leader",
+"status": "aboard",
+"unit_id": "campaign_leader",
+&"world_position": Vector2(1946.3387, 1266.8306)
+}, {
+"action": {},
+"bed_id": "",
+"craft_id": "dropship_1",
+"last_result": {},
+"name": "Tomas Ibarra",
+"role": "Dropship Pilot",
+"status": "aboard",
+"unit_id": "campaign_pilot",
+&"world_position": Vector2(1946.3387, 1266.8306)
+}]
+},
+"physics": true,
+"queue": [],
+"space": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"enabled": true,
+"focused_craft_id": "dropship_1",
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"result_summary": "",
+"revision": 0,
+"routes": {
+"dropship_1": {
+"bodies": {
+"moon": {
+"id": "moon",
+"name": "Glut I · Mondbasis",
+"orbit_id": "moon_orbit",
+"position": [0.18, 0.7],
+"radius": 0.04
+},
+"planet": {
+"id": "planet",
+"name": "Glut",
+"orbit_id": "planet_orbit",
+"position": [0.8, 0.28],
+"radius": 0.09
+}
+},
+"craft_id": "dropship_1",
+"duration_seconds": 3.0,
+"elapsed_seconds": 0.0,
+"location_id": "homebase",
+"location_orbits": {
+"distress_orbit": "planet_orbit",
+"fortified_outpost": "planet_orbit",
+"homebase": "moon_orbit",
+"satellite_crash": "planet_orbit",
+"trade_outpost": "planet_orbit"
+},
+"orbit_id": "",
+"orbits": {
+"moon_orbit": {
+"body_id": "moon",
+"id": "moon_orbit",
+"name": "Glut I · Mondorbit",
+"position": [0.18, 0.7]
+},
+"planet_orbit": {
+"body_id": "planet",
+"encounter_slots": [{
+"angle_degrees": 30.0,
+"available": false,
+"id": "planet_orbit_sector_01",
+"name": "Orbitbereich 1"
+}, {
+"angle_degrees": 150.0,
+"available": false,
+"id": "planet_orbit_sector_02",
+"name": "Orbitbereich 2"
+}, {
+"angle_degrees": 270.0,
+"available": false,
+"id": "planet_orbit_sector_03",
+"name": "Orbitbereich 3"
+}],
+"id": "planet_orbit",
+"name": "Glut · Planetenorbit",
+"position": [0.8, 0.28]
+}
+},
+"origin_position": [0.18, 0.7],
+"phase": "grounded",
+"position": [0.18, 0.7],
+"progress": 0.0,
+"revision": 0,
+"target_orbit_id": ""
+}
+},
+"target_orbit_id": ""
+},
+"tick": 234
+}
+PASS: Real people and payload complete boarding within bounded20s at4x
+GAME_REVIEW_CAMPAIGN_DIAGNOSTIC passed=2 failed=0
