@@ -9,6 +9,9 @@ const HEX=preload("res://scripts/terrain/hex_grid.gd")
 const MAX_NAV_JOBS:=4
 const MAX_NAV_EXPANSIONS:=96
 const MAX_PLAN_REQUESTS:=16
+# Producer diagnostics duplicate the effective UnitCommand fields. Retaining
+# them as accepted intent would introduce a second, divergent stance snapshot.
+const PRODUCER_DIAGNOSTIC_FIELDS := ["behavior_command_type","behavior_tactical_stance","behavior_speed_multiplier","behavior_sight_range_factor","behavior_cover_score_bonus","behavior_attack_bonus","behavior_movement_posture","behavior_weapon_posture","behavior_cover_priority_percent","behavior_aim_readiness_percent","engage_doctrine_id","engage_advance_mode","engage_target_policy","engage_buddy_teams","engage_fire_on_weapon_range","take_doctrine_id","take_advance_mode","take_target_policy","take_buddy_teams","take_area_control_required","local_avoidance_source"]
 var _save_binding_epoch:=0
 var _save_prepared_restores:Dictionary={}
 var _owner_ref:WeakRef
@@ -62,6 +65,7 @@ func stage_move(command:Dictionary,actor:Node2D)->Dictionary:
 	var previous:Dictionary=_orders.get(id,{})
 	var stored:Dictionary=command.duplicate(false)
 	for key in ["path","_regional_navigation_search","_regional_navigation_route"]:stored.erase(key)
+	for key in PRODUCER_DIAGNOSTIC_FIELDS:stored.erase(key)
 	if previous.is_empty() or previous.fingerprint!=fingerprint or previous.status=="canceled":
 		if not previous.is_empty():_clear_recovery(id,previous)
 		if _ground.has_motion_commitments(id):_pending_stops[id]="new_order"
@@ -316,6 +320,13 @@ func tick(delta:float)->void:
 		var own_blockers:Dictionary=blockers.duplicate()
 		own_blockers.erase(state.grid)
 		options["blocked_grids"]=own_blockers
+		# A stationary occupant cannot be crossed at the destination. Keep the
+		# accepted intent, but do not spend the shared path budget searching an
+		# impossible goal. Its release/movement changes blockers on the next tick.
+		if own_blockers.has(navigation_goal):
+			_clear_route(order)
+			order.status="waiting_reservation";order.reason="target_occupied"
+			continue
 		if order.status=="blocked" and order.terrain_revision==revision and order.blocker_signature==blocker_signature:
 			order.last_attempt_epoch=_traffic_epoch
 			continue
@@ -668,6 +679,9 @@ func _save_validate(state:Dictionary,target,target_registry:Node=null)->Dictiona
 	return {"ok":true,"orders":orders,"watchers":watchers}
 
 func _save_command_kind(key:String)->String:
+	if key=="security_mode":return "string"
+	if key=="security_radius_tiles":return "integer"
+	if key=="facing_angle":return "number"
 	if key in ["type","command_type","unit_id","team_id","fireteam_id","source_command_type","origin_command_type","command_id","command_token","fire_status","fire_rule","source_task_type","movement_posture","weapon_posture","posture_policy_id","engagement_range_policy","target_area_id"]:return "string"
 	if key in ["priority","phase","navigation_blocker_clearance_radius"]:return "integer"
 	if key in ["requeue_until_target","navigation_cover_aware","cover_aware_navigation","navigation_corridor_enabled","navigation_lane_enabled","local_avoidance_enabled"]:return "bool"
@@ -677,8 +691,17 @@ func _save_command_kind(key:String)->String:
 	if key in ["navigation_threat_positions","threat_positions","danger_positions","enemy_positions"]:return "vector2_array"
 	return ""
 
+func _save_security_fields_valid(command:Dictionary)->bool:
+	if command.has("security_mode"):
+		var mode:Variant=command.security_mode
+		if not mode is String or (not preload("res://scripts/tactical/tactical_command_rules.gd").ALLOWED_SECURITY_MODES.has(mode) and mode!="directional"):return false
+	if command.has("security_radius_tiles") and not _save_integer(command.security_radius_tiles,0,256):return false
+	if command.has("facing_angle") and (not _save_number(command.facing_angle) or absf(float(command.facing_angle))>TAU*2.0):return false
+	return true
+
 func _save_pack_command(command:Dictionary)->Dictionary:
 	if command.size()>80:return _save_reject("movement_save_command_budget")
+	if not _save_security_fields_valid(command):return _save_reject("movement_save_invalid_security_fields")
 	if command.has("_hex_lifecycle"):
 		var stamp:Variant=command._hex_lifecycle
 		if not _save_keys(stamp,["context","lifecycle","actor"]):return _save_reject("movement_save_invalid_lifecycle")
@@ -690,7 +713,7 @@ func _save_pack_command(command:Dictionary)->Dictionary:
 		if typeof(key)!=TYPE_STRING:return _save_reject("movement_save_unsupported_command_field")
 		if key=="_hex_lifecycle":continue # Validated above; never persist inprocess identities.
 		var kind:=_save_command_kind(key)
-		if kind.is_empty():return _save_reject("movement_save_unsupported_command_field")
+		if kind.is_empty():return {"ok":false,"reason":"movement_save_unsupported_command_field","field":key}
 		var value:Variant=command[key]
 		if kind=="vector2":
 			if typeof(value)!=TYPE_VECTOR2:return _save_reject("invalid_movement_save_vector")
@@ -735,6 +758,7 @@ func _save_unpack_command(fields:Variant)->Dictionary:
 					vectors.append(vector.value)
 				value=vectors
 		command[String(field.key)]=value
+	if not _save_security_fields_valid(command):return _save_reject("movement_save_invalid_security_fields")
 	var status:Dictionary=command.duplicate(false)
 	if not status.has("command_type"):status.command_type=status.get("type","")
 	if not SAVE_COMMAND.from_dict(status).is_valid():return _save_reject("invalid_movement_save_unit_command")

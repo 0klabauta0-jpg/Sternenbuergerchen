@@ -16,6 +16,7 @@ var _blend: Dictionary = {}
 var _blend_texture: ImageTexture
 var _world_to_grid := Vector4(1,0,0,1)
 var homebase_palette: bool = false
+var quiet_tactical_surface: bool = false
 
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
@@ -75,6 +76,7 @@ func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> 
 
 func _apply_blend(material: ShaderMaterial, rock: bool) -> void:
 	material.set_shader_parameter("homebase_palette", homebase_palette)
+	material.set_shader_parameter("quiet_tactical_surface", quiet_tactical_surface)
 	material.set_shader_parameter("surface_blending",not rock and not _blend.is_empty())
 	if rock or _blend.is_empty(): return
 	material.set_shader_parameter("surface_mask",_blend_texture)

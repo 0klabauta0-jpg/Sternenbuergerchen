@@ -19,6 +19,7 @@ const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
 
 static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -> Dictionary:
 	var keys := ["home_sha256", "campaign_run_id", "identity", "pilot_id", "active_ids", "roster", "campaign", "supply", "onboarding", "equipment", "market", "fleet", "navigation", "systems", "wings", "actors", "ground", "lifecycle", "transport", "root_receipts", "space_requests", "route_bindings", "base_personnel", "mission_config", "orbit_intent"]
+	if data.has("home_hex_tactical"): keys.append("home_hex_tactical")
 	if data.size()!=keys.size() or not data.has_all(keys) or not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return _bad("invalid_active_checkpoint")
 	for key in ["identity","campaign","supply","onboarding","equipment","market","fleet","navigation","systems","wings","actors","ground","lifecycle","transport","root_receipts","orbit_intent"]:
 		if not data[key] is Dictionary: return _bad("invalid_active_checkpoint")
@@ -27,7 +28,7 @@ static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -
 	if not home.get("ok",false): return home
 	var migrated: Dictionary = home.payload.duplicate(true)
 	START._migrate_known_main_starter(migrated)
-	if migrated.has("hex_tactical"): return _bad("home_hex_checkpoint_unsupported")
+	if migrated.has("hex_tactical") and not data.has("home_hex_tactical"): return _bad("active_home_hex_missing")
 	var run: Dictionary = START.resolve_checkpoint_run_id(migrated,false)
 	if not run.get("ok",false) or run.id!=data.campaign_run_id: return _bad("active_home_mismatch")
 	var identity: Dictionary = data.identity
@@ -47,6 +48,9 @@ static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -
 	active.sort()
 	if ids!=old_ids or active!=ids or not ids.has(data.pilot_id): return _bad("active_roster_mismatch")
 	var base: Variant = data.get("base_personnel")
+	if data.has("home_hex_tactical"):
+		var home_hex: Dictionary = preload("res://scripts/mission/campaign_hex_home_checkpoint.gd").validate(data.home_hex_tactical, base, craft_id)
+		if not home_hex.get("ok",false): return home_hex
 	if not base is Dictionary or base.size()!=2 or base.get("version")!=1 or not base.get("units") is Dictionary or base.units.size()!=active.size(): return _bad("active_base_personnel_invalid")
 	for id in active:
 		var person: Variant = base.units.get(id)

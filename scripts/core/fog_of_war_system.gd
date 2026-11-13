@@ -141,6 +141,10 @@ func should_show_dynamic_target(team_id: String, target_id: String) -> bool:
 	return is_visible(team_id, target_id)
 
 
+func get_visibility_revision(team_id: String) -> int:
+	return int(_visibility_revision_by_team.get(team_id, 0))
+
+
 func build_team_state_snapshot(team_id: String, peer_id: int = 0) -> Dictionary:
 	var snapshot: Dictionary = MODE_CONTRACT_SCRIPT.call(
 		"normalize_team_state",

@@ -93,6 +93,16 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Sichtbare Drag-Preview-Linien fuer Pipe, Wall und Cliff lesen ausschliesslich diesen Snapshot. Apply/Cancel/Toolwechsel muessen die Preview loeschen; echte Tile-Aenderungen passieren erst ueber den bestehenden Network-Apply-Pfad.
 
 ## Station Doors
+- `M+T` ergänzt das vorhandene Mauer-Ziehwerkzeug: ein Zug setzt die Mauer und
+  ein mittiges gerades Zweizellen-Tor. Die Vorschau markiert beide Torzellen.
+  Ganze Strecke und angrenzende Anschlüsse werden vor dem Schreiben geprüft;
+  unzulässige Belegung oder fehlende Assets erzeugen keine Teilmauer.
+- Rahmen/Blatt verwenden vorhandene Stationassets und genau ein bestehendes
+  Scenario-Interaktionsbinding mit `door_cells`. MapData besitzt den Marker;
+  Runtimezustand bleibt beim Mission-/SimulationRoot-Vertrag. Karte und Szenario
+  werden über ihre vorhandenen Speicheraktionen gespeichert.
+- Mauer, Marker und Binding teilen einen Undo-Schritt und das vorhandene
+  Hex-Redo. Andere Marker/Interaktionen werden dabei nicht zurückgesetzt.
 - Space-Station-Tueren werden im Editor als Authoring-States behandelt: Closed, Half und Open.
 - Quick-Brushes nutzen `station_wall_door`, `station_set_door_single_closed`, `station_set_door_single_half` und `station_set_door_single`.
 - Double-Door-Varianten (`station_set_door_double_closed`, `station_set_door_double_half`, `station_set_door_double`) bleiben im Authoring-Contract sichtbar und ueber die Palette nutzbar.

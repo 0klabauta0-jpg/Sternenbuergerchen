@@ -20,7 +20,12 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var encounter: RefCounted = runtime.get("_space_encounter")
 	if encounter == null or not Dictionary(encounter.get("_state")).is_empty() or not Dictionary(runtime.get("_service_pad_reservation")).is_empty(): return _reject("world_service_unsupported")
 	var home_sim: Node = runtime.get("_simulation")
-	if not is_instance_valid(home_sim) or home_sim.is_hex_ground_runtime_required(): return _reject("home_hex_checkpoint_unsupported")
+	if not is_instance_valid(home_sim): return _reject("home_owner_unavailable")
+	var home_hex: Dictionary = {}
+	if home_sim.is_hex_ground_runtime_required():
+		var exported_home: Dictionary = home_sim.export_hex_checkpoint_state()
+		if not exported_home.get("ok",false): return exported_home
+		home_hex = exported_home.state
 	for resource in Dictionary(runtime.get("_resource_owners")).values():
 		if not is_instance_valid(resource) or not Dictionary(resource.get("_active")).is_empty() or not Dictionary(resource.get("_pending")).is_empty(): return _reject("resource_activity_unsupported")
 	var mission: Node = flow.get("_active_mission")
@@ -89,6 +94,9 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 		if not person is Dictionary or person.get("status")!="aboard" or person.get("craft_id")!=craft_id or not Dictionary(person.get("action",{})).is_empty(): return _reject("home_personnel_unsupported")
 	var base_state: Dictionary = base.export_state()
 	if base_state.get("version")!=1 or not base_state.get("units") is Dictionary or base_state.units.size()!=active_ids.size(): return _reject("home_personnel_unsupported")
+	if not home_hex.is_empty():
+		var checked_home: Dictionary = preload("res://scripts/mission/campaign_hex_home_checkpoint.gd").validate(home_hex, base_state, craft_id)
+		if not checked_home.get("ok",false): return checked_home
 	var campaign: RefCounted = runtime.get("_campaign")
 	var supply: RefCounted = runtime.get("_supply")
 	var onboarding: RefCounted = runtime.get("_onboarding")
@@ -129,7 +137,13 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var actor_state: Dictionary = actors.export_actors(sim)
 	if not actor_state.get("ok",false): return actor_state
 	var ground := GROUND.new()
-	var ground_state: Dictionary = ground.export_positions(sim,terrain,active_ids)
+	var ground_state: Dictionary
+	if sim.is_hex_ground_runtime_active():
+		var exported: Dictionary = sim.export_hex_checkpoint_state()
+		if not exported.get("ok",false): return exported
+		ground_state = {"ok":true,"schema":"hex_mission_ground.v1","checkpoint":exported.state}
+	else:
+		ground_state = ground.export_positions(sim,terrain,active_ids)
 	if not ground_state.get("ok",false): return ground_state
 	var selected: Dictionary = flow.call("_get_selected_mission_definition")
 	var mission_config := {"time_limit_seconds":float(driver.get("mission_time_limit_seconds")),"win_condition":String(driver.get("win_condition"))}
@@ -165,7 +179,9 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var orbit_bindings := {"simulation_root":root,"fleet":travel,"combat":space,"campaign":campaign,"space_operation_requests":Dictionary(runtime.get("_space_operation_requests"))}
 	var orbit: Dictionary = ORBIT.capture(runtime,orbit_bindings)
 	if orbit.get("schema")!="orbit_intent_checkpoint.v1": return orbit if orbit.get("ok",true)==false else _reject("orbit_checkpoint_unavailable")
-	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":{"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config,"orbit_intent":orbit}}
+	var components := {"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config,"orbit_intent":orbit}
+	if not home_hex.is_empty(): components["home_hex_tactical"] = home_hex
+	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":components}
 
 static func _reject(reason: String) -> Dictionary:
 	return {"ok":false,"reason":reason}

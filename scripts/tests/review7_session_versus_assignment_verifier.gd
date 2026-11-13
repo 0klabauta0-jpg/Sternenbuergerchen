@@ -25,7 +25,7 @@ func _run_tests() -> void:
 
 
 func _test_versus(case: Dictionary) -> void:
-	var host: Node = _make_host()
+	var host: Node = _make_host(String(case["host"]))
 	host.call("set_lobby_player_setup", {"team_play_mode": "versus", "team_slot": case["host"]})
 	var assignments: Dictionary = Dictionary(host.call("build_session_assignments"))
 	_assert(String(Dictionary(assignments.get("peer_teams", {})).get(1, "")) == String(case["host"]), "Versus preserves the selected host side %s" % case["host"])
@@ -40,13 +40,13 @@ func _test_versus(case: Dictionary) -> void:
 
 
 func _test_coop(side: String) -> void:
-	var host: Node = _make_host()
+	var host: Node = _make_host(side)
 	host.call("set_lobby_player_setup", {"team_play_mode": "coop", "team_slot": side})
 	var assignments: Dictionary = Dictionary(host.call("build_session_assignments"))
 	var teams: Dictionary = Dictionary(assignments.get("peer_teams", {}))
 	_assert(String(teams.get(1, "")) == side and String(teams.get(2, "")) == side, "Coop keeps both peers on selected side %s" % side)
 	var fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
-	_assert(PackedStringArray(fireteams.get(1, [])) == PackedStringArray(["blue"]) and PackedStringArray(fireteams.get(2, [])) == PackedStringArray(["gold"]), "Coop keeps split non-overlapping Fireteams")
+	_assert(PackedStringArray(fireteams.get(1, [])) == PackedStringArray(["blue", "gold"]) and PackedStringArray(fireteams.get(2, [])) == PackedStringArray(["blue", "gold"]), "Coop gives both peers shared control of both Fireteams")
 	host.call("set_peer_ready_for_test", 1, true)
 	host.call("set_peer_ready_for_test", 2, true)
 	_assert(bool(host.call("can_start_mission")), "Ready same-side coop session remains startable")
@@ -76,9 +76,10 @@ func _test_same_side_rejected() -> void:
 	await process_frame
 
 
-func _make_host() -> Node:
+func _make_host(side: String = "team_alpha") -> Node:
 	var host: Node = SESSION_SCRIPT.new()
 	root.add_child(host)
+	host.call("set_lobby_player_setup", {"team_slot":side})
 	host.call("configure_host_state_for_test", [2])
 	return host
 

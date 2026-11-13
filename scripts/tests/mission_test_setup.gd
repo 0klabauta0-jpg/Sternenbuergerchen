@@ -10,6 +10,7 @@ const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/comman
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
+const MULTIPLAYER_TERRAIN_FOG = preload("res://scripts/multiplayer/multiplayer_terrain_fog_projection.gd")
 const FOG_OF_WAR_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_system.gd")
 const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const SIMULATION_ROOT_SCRIPT=preload("res://scripts/core/simulation_root.gd")
@@ -110,8 +111,15 @@ var _fog_requested_runtime_signature: String = ""
 var _fog_requested_static_signature: String = ""
 var _fog_pending_visibility_started_msec: int = 0
 var _fog_update_elapsed: float = 0.0
+var _fog_network_terrain_cache: Dictionary = {}
+var _fog_network_enabled: bool = false
+var _fog_replica_terrain: Dictionary = {}
+var _fog_replica_visible_ids := PackedStringArray()
+var _fog_other_team_work: Dictionary = {}
+var _fog_other_team_cursor: int = 0
 var _friendly_unit_slot_paths: Array[NodePath] = []
 var _hex_setup_required:=false
+var force_hex_tactical_runtime := false
 var _hex_setup_presentation_only:=false
 var _hex_setup_error:Dictionary={}
 var _terrain_setup_error:Dictionary={}
@@ -366,13 +374,37 @@ func _admit_hex_setup_nodes(nodes:Array)->void:
 		if not unit.global_position.is_finite():
 			_hex_setup_error={"ok":false,"reason":"invalid_setup_position"}
 			return
-		combined[id]={"unit_id":id,"grid":simulation.get_hex_ground_terrain_registry().world_to_grid(unit.global_position),"identity":simulation.call("_hex_payload_identity",id)}
+		var placement:Dictionary=_hex_setup_spawn_grid(unit,simulation.get_hex_ground_terrain_registry())
+		if not placement.get("ok",false):
+			_hex_setup_error=placement
+			return
+		combined[id]={"unit_id":id,"grid":placement.grid,"identity":simulation.call("_hex_payload_identity",id)}
 	_hex_setup_pending.clear()
 	for entry in combined.values():_hex_setup_pending.append(entry)
 	_hex_setup_pending_context=simulation.get_hex_ground_context_revision()
 	_hex_setup_pending_root_id=simulation.get_instance_id()
 	_hex_setup_last_stamp=""
 	_retry_hex_setup_admission()
+
+
+func _hex_setup_spawn_grid(unit:Node2D,terrain:Node)->Dictionary:
+	if not unit.has_method("get_team_id"):return {"ok":false,"reason":"invalid_setup_actor"}
+	var id:String=String(unit.call("get_unit_id"))
+	var friendly:bool=String(unit.call("get_team_id"))==team_id
+	var desired:Vector2i=terrain.world_to_grid(unit.global_position)
+	var marker:Marker2D=_resolve_marker(spawn_alpha_path if friendly else spawn_bravo_path)
+	var anchor:Vector2=marker.global_position if marker!=null else Vector2.INF
+	if not friendly:
+		var group:Dictionary=_find_scenario_enemy_group_for_unit(id)
+		if group.has("spawn_position") or not String(group.get("spawn_marker_id","")).is_empty():
+			anchor=_get_enemy_spawn_position(id,marker)
+	# Authored spawn anchors remain mandatory terrain facts. Legacy pixel offsets
+	# only describe the formation and may straddle a Hex wall after conversion.
+	if anchor.is_finite():
+		var anchor_grid:Vector2i=terrain.world_to_grid(anchor)
+		if not terrain.is_walkable(anchor_grid):return {"ok":false,"reason":"invalid_setup_spawn_anchor","unit_id":id,"grid":anchor_grid}
+		if not terrain.is_walkable(desired):desired=anchor_grid
+	return {"ok":true,"grid":desired}
 
 
 func _retry_hex_setup_admission()->void:
@@ -425,6 +457,7 @@ func _process(delta: float) -> void:
 		return
 	var frame_started_usec: int = Time.get_ticks_usec() if _fog_frame_timing_debug_enabled else 0
 	_advance_fog_of_war_visibility_work()
+	_advance_multiplayer_fog_work()
 	var advance_usec: int = Time.get_ticks_usec() - frame_started_usec if _fog_frame_timing_debug_enabled else 0
 	_fog_update_elapsed += delta
 	if _fog_update_elapsed < FOW_UPDATE_INTERVAL_SECONDS:
@@ -436,6 +469,7 @@ func _process(delta: float) -> void:
 	# The frame already serviced its bounded slice above. A newly requested
 	# sample starts next frame rather than doubling work after a completion.
 	_sync_fog_of_war_visual_state(false, false)
+	_sync_multiplayer_fog_work()
 	if _fog_frame_timing_debug_enabled:
 		_record_fog_frame_timing_debug_snapshot(frame_started_usec, advance_usec, Time.get_ticks_usec() - sync_started_usec)
 
@@ -1407,6 +1441,11 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	if terrain_map_data!=null and terrain_map_data.has_load_issue():
 		_terrain_setup_error={"ok":false,"reason":"map_load_issue"}
 		return false
+	if terrain_map_data != null and (force_hex_tactical_runtime or not preload("res://scripts/mission/productive_ground_maps.gd").is_historical_fixture(map_file_path)):
+		var imported: Dictionary = terrain_map_data.activate_hex_tactical_runtime()
+		if not imported.get("ok",false):
+			_terrain_setup_error = imported
+			return false
 	if terrain_map_data!=null:
 		var context:Dictionary=SIMULATION_ROOT_SCRIPT.validate_hex_ground_map_data(terrain_map_data)
 		if not context.ok:
@@ -1518,6 +1557,8 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 	if not view.is_inside_tree():
 		call_deferred("_configure_primary_3d_view", view, unit_nodes)
 		return
+	if _hex_setup_presentation_only:
+		view.call("set_fog_of_war_state", get_fog_of_war_runtime_snapshot())
 	if view.has_method("set_runtime_terrain_registry"):
 		view.call("set_runtime_terrain_registry", get_node_or_null(terrain_registry_path))
 	if view.has_method("set_authoring_markers_visible"): view.call("set_authoring_markers_visible",false)
@@ -1592,9 +1633,13 @@ func _frame_reference_mission_camera(view: Node) -> bool:
 func set_fog_of_war_mode(mode: String) -> void:
 	fog_of_war_mode = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", mode))
 	_sync_fog_of_war_visual_state(true)
+	if _fog_of_war_system != null: _sync_multiplayer_fog_work()
 
 
 func get_fog_of_war_runtime_snapshot() -> Dictionary:
+	if _hex_setup_presentation_only:
+		var replica: Dictionary = _fog_replica_terrain.duplicate(true) if not _fog_replica_terrain.is_empty() else FOG_OF_WAR_MODE_CONTRACT_SCRIPT.normalize_team_state({"team_id":_get_fog_viewer_team_id(),"mode":"unexplored_blackout"})
+		return MULTIPLAYER_TERRAIN_FOG.for_view(replica,_fog_replica_visible_ids)
 	var viewer_team_id: String = _get_fog_viewer_team_id()
 	if _fog_of_war_system == null:
 		return {
@@ -1623,7 +1668,94 @@ func _initialize_fog_of_war(unit_nodes: Array, terrain_registry) -> void:
 			_fog_observer_unit_nodes.append(unit)
 	fog_of_war_mode = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
 	_fog_of_war_system.call("set_mode_for_team", viewer_team_id, fog_of_war_mode)
+	_fog_network_terrain_cache.clear()
+	_fog_other_team_work.clear()
+	var root_owner = get_node_or_null("../SimulationRoot")
+	_fog_network_enabled = root_owner != null and not root_owner.get_multiplayer_runtime_context().is_empty()
+	_cache_multiplayer_terrain(viewer_team_id)
+	if _fog_network_enabled:
+		for unit in _fog_unit_nodes:
+			if unit == null or not unit.has_method("get_team_id"): continue
+			var other: String = String(unit.call("get_team_id")).strip_edges()
+			if other.is_empty() or other == viewer_team_id or _fog_other_team_work.has(other): continue
+			_fog_of_war_system.set_mode_for_team(other,fog_of_war_mode)
+			_fog_other_team_work[other] = {"pending":false,"signature":"","static":"","committed":""}
+			_cache_multiplayer_terrain(other)
 	call_deferred("_sync_fog_of_war_visual_state", true)
+
+
+func _cache_multiplayer_terrain(team: String) -> void:
+	if not _fog_network_enabled: return
+	var revision: int = _fog_of_war_system.get_visibility_revision(team)
+	var mode: String = _fog_of_war_system.get_mode_for_team(team)
+	var previous: Dictionary = _fog_network_terrain_cache.get(team,{})
+	if previous.get("visibility_revision",-1) == revision and previous.get("mode") == mode: return
+	_fog_network_terrain_cache[team] = MULTIPLAYER_TERRAIN_FOG.project(_fog_of_war_system.build_team_state_snapshot(team))
+
+func get_multiplayer_terrain_fog_revision(team: String) -> String:
+	var snapshot: Dictionary = _fog_network_terrain_cache.get(team,{})
+	return "%s:%s" % [snapshot.mode,snapshot.visibility_revision] if not snapshot.is_empty() else ""
+
+func get_multiplayer_terrain_fog_snapshot(team: String) -> Dictionary:
+	return Dictionary(_fog_network_terrain_cache.get(team,{})).duplicate(true)
+
+func reset_multiplayer_terrain_fog_projection(team: String) -> void:
+	_fog_replica_terrain.clear()
+	_fog_replica_visible_ids.clear()
+	# Before ready this records the authoritative binding for initial setup.
+	# A running host keeps its actual Fog owner; clients only reset projection.
+	if _fog_of_war_system == null and not team.is_empty(): fog_viewer_team_id = team
+	if _hex_setup_presentation_only and is_instance_valid(_terrain_3d_view):
+		_terrain_3d_view.set_fog_of_war_state(get_fog_of_war_runtime_snapshot())
+
+func apply_multiplayer_terrain_fog_snapshot(snapshot: Dictionary, visible_ids: PackedStringArray) -> void:
+	# Only Root calls this after schema, context, recipient and tick validation.
+	# Actor presence stays sourced from the unchanged recipient projection.
+	if not _hex_setup_presentation_only: return
+	if not snapshot.is_empty() and not MULTIPLAYER_TERRAIN_FOG.validate(snapshot,_get_fog_viewer_team_id()): return
+	visible_ids.sort()
+	var changed: bool = visible_ids != _fog_replica_visible_ids
+	_fog_replica_visible_ids = visible_ids
+	if not snapshot.is_empty() and snapshot != _fog_replica_terrain:
+		_fog_replica_terrain = snapshot.duplicate(true)
+		changed = true
+	if changed and is_instance_valid(_terrain_3d_view): _terrain_3d_view.set_fog_of_war_state(get_fog_of_war_runtime_snapshot())
+
+func _sync_multiplayer_fog_work() -> void:
+	for team: String in _fog_other_team_work:
+		var work: Dictionary = _fog_other_team_work[team]
+		var mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.normalize_mode(fog_of_war_mode)
+		_fog_of_war_system.set_mode_for_team(team,mode)
+		_cache_multiplayer_terrain(team)
+		var signature: String = _build_fog_runtime_signature(mode,true,team)
+		var static_signature: String = _build_fog_runtime_signature(mode,false,team)
+		if work.pending and work.get("static") == static_signature: continue
+		if not work.pending and work.committed == signature: continue
+		var requested: Dictionary = _fog_of_war_system.request_tile_visibility_update_for_team(team,_get_active_fog_observers(team),_fog_terrain_registry,_fog_of_war_los_system,fog_of_war_sight_range_world,{"work_budget_tiles":fog_of_war_work_budget_tiles,"hex_sight_adapter":_get_hex_sight_adapter()})
+		work.signature = signature
+		work["static"] = static_signature
+		work.pending = not requested.get("completed",false)
+		if not work.pending:
+			work.committed = signature
+			_cache_multiplayer_terrain(team)
+
+func _advance_multiplayer_fog_work() -> void:
+	# At most one extra team's bounded slice per frame, independent of peer count.
+	var teams: Array = _fog_other_team_work.keys()
+	if teams.is_empty(): return
+	_fog_other_team_cursor = (_fog_other_team_cursor + 1) % teams.size()
+	var team: String = teams[_fog_other_team_cursor]
+	var work: Dictionary = _fog_other_team_work[team]
+	if not work.pending: return
+	var mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.normalize_mode(fog_of_war_mode)
+	if _build_fog_runtime_signature(mode,false,team) != work.get("static"):
+		_sync_multiplayer_fog_work()
+		return
+	var update: Dictionary = _fog_of_war_system.process_pending_tile_visibility_work(team,fog_of_war_work_budget_tiles)
+	if update.get("completed",false):
+		work.pending = false
+		work.committed = work.signature
+		_cache_multiplayer_terrain(team)
 
 
 func _get_hex_sight_adapter():
@@ -1641,6 +1773,7 @@ func _sync_fog_of_war_visual_state(force: bool = false, advance_work: bool = tru
 	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
 	var viewer_team_id: String = _get_fog_viewer_team_id()
 	_fog_of_war_system.call("set_mode_for_team", viewer_team_id, mode)
+	_cache_multiplayer_terrain(viewer_team_id)
 	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		_fog_runtime_signature = "off"
 		_fog_requested_runtime_signature = ""
@@ -1714,6 +1847,7 @@ func _advance_fog_of_war_visibility_work() -> void:
 				_fog_visibility_work_debug_snapshot[key] = update[key]
 	if not bool(update.get("completed", false)):
 		return
+	_cache_multiplayer_terrain(viewer_team_id)
 	_fog_runtime_signature = _fog_requested_runtime_signature
 	_fog_requested_runtime_signature = ""
 	_fog_requested_static_signature = ""
@@ -1765,9 +1899,11 @@ func _sync_fog_dynamic_target_visibility() -> void:
 			})
 
 
-func _get_active_fog_observers() -> Array:
+func _get_active_fog_observers(team_override: String = "") -> Array:
 	var observers: Array = []
-	for observer in _fog_observer_unit_nodes:
+	var source: Array = _fog_observer_unit_nodes if team_override.is_empty() else _fog_unit_nodes
+	for observer in source:
+		if not team_override.is_empty() and (observer == null or not observer.has_method("get_team_id") or String(observer.call("get_team_id")) != team_override): continue
 		if observer == null or not (observer is Node2D):
 			continue
 		if observer is CanvasItem and not (observer as CanvasItem).visible:
@@ -1791,19 +1927,19 @@ func _get_effective_fog_sight_range_world(observer: Node) -> float:
 	return fog_of_war_sight_range_world * maxf(sight_range_factor, 0.0)
 
 
-func _build_fog_runtime_signature(mode: String, include_positions: bool = true) -> String:
+func _build_fog_runtime_signature(mode: String, include_positions: bool = true, team_override: String = "") -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	var hex_adapter = _get_hex_sight_adapter()
 	if hex_adapter != null and hex_adapter.is_active():
 		parts.append("hex_context:%s" % hex_adapter.get_context_key())
 	parts.append(mode)
-	parts.append(_get_fog_viewer_team_id())
+	parts.append(_get_fog_viewer_team_id() if team_override.is_empty() else team_override)
 	parts.append("base_sight:%s" % str(fog_of_war_sight_range_world))
 	if _fog_terrain_registry != null and _fog_terrain_registry.has_method("get_revision"):
 		parts.append("terrain_revision:%d" % int(_fog_terrain_registry.call("get_revision")))
 	# Only observer inputs affect terrain LOS. Enemy motion is handled by the
 	# separate dynamic-target refresh and cannot restart an unfinished full scan.
-	for unit in _get_active_fog_observers():
+	for unit in _get_active_fog_observers(team_override):
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
 			continue
 		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"

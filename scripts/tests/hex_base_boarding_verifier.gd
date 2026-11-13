@@ -89,6 +89,8 @@ func _test_station_shuttle_home_admission()->void:
 	rig.base._navigation_graph = null
 	rig.base._flow._all_team_units.append({"unit_id":"polisa_recruit_station","display_name":"Recruit","recruit_location":"polisa"})
 	rig.base.sync_roster()
+	rig.base._navigation_graph = Navigation.new()
+	rig.base._navigation_graph.terrain = rig.terrain
 	if not rig.base.has_method("admit_polisa_shuttle_home"):
 		_check(false,"base supports prepared shuttle arrival")
 		rig.scene.free()

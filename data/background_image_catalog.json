@@ -10,6 +10,24 @@
   },
   "backgrounds": [
     {
+      "background_id": "mission_satellite_recovery",
+      "res_path": "res://Assets/curated/mission_illustrations_20261113/satellite_recovery.png",
+      "source_file": "satellite_recovery.png",
+      "source_note": "User-requested crashed satellite on open red desert, generated with image_gen on 2026-11-13; original retained unchanged.",
+      "origin": "project_ai_generated_image",
+      "width": 1890,
+      "height": 832,
+      "file_size_bytes": 2588636,
+      "screen_hint": ["satellite_recovery_job", "satellite_crash_destination"],
+      "crop_anchor": "aspect_fit_center",
+      "dim_strength": 0.0,
+      "text_safe_zone": "separate_text_panel",
+      "import_profile": "ui_background_lossless_default",
+      "sha256": "7149b965a1723f1b7383f460948842e3f7176f7c9a85ebdec1e52faffcdbe352",
+      "reference_manifest": "res://Assets/curated/mission_illustrations_20261113/SOURCES.md",
+      "asset_status": "generated_original_native_ui_pending"
+    },
+    {
       "background_id": "main_menu_shell",
       "res_path": "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
       "source_file": "TASK_199 curated mainmenu background",

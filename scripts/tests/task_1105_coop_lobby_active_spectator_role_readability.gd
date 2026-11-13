@@ -32,7 +32,7 @@ func _run() -> void:
 	_assert(peer_text.contains("Kai | ZUSCHAUER | NICHT BEREIT"), "Waiting peer is visibly a spectator")
 	_assert(not peer_text.contains("#1") and not peer_text.contains("team_alpha") and not peer_text.contains("ready="), "Role block hides internal peer, team and readiness codes")
 	_assert(assignment_text.contains("COOP | 2 AKTIV | 1 ZUSCHAUER"), "Coop summary counts active and spectator seats")
-	_assert(assignment_text.contains("Fireteam frei"), "Coop summary explains premission spectator promotion")
+	_assert(not assignment_text.contains("Fireteam frei"), "Explicit spectators are not promised promotion through nonexistent exclusive slots")
 	_assert(int(readability.get("active_count", -1)) == 2 and int(readability.get("spectator_count", -1)) == 1, "Readability snapshot exposes compact seat counts")
 	_assert(String(readability.get("local_role_label", "")) == "AKTIV / GOLD", "Readability snapshot exposes the local role label")
 	_assert(not bool(readability.get("ui_sets_gameplay_truth", true)), "Role readability remains read-only UI data")

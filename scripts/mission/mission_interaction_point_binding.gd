@@ -7,6 +7,7 @@ const TYPE_COMPUTER: String = "computer"
 const TYPE_HOLD_ZONE: String = "hold_zone"
 const ALLOWED_TYPES: PackedStringArray = [TYPE_DOOR, TYPE_COMPUTER, TYPE_HOLD_ZONE]
 const ALLOWED_ORDERS: PackedStringArray = ["take", "hold", "defend", "operate", "breach"]
+const DOOR_FOOTPRINT = preload("res://scripts/mission/mission_door_footprint.gd")
 
 # Only the parse of identical file contents is reusable. Runtime context and
 # map validation are always rebuilt below, and the file is still read each time.
@@ -137,6 +138,9 @@ static func validate_bindings(bindings: Array, terrain_map_data = null) -> Dicti
 			errors.append("interaction_points[%d].duration_seconds must be >= 0" % index)
 		if float(binding.get("radius_world", 0.0)) <= 0.0:
 			errors.append("interaction_points[%d].radius_world must be > 0" % index)
+		var footprint := DOOR_FOOTPRINT.validate_binding(binding, terrain_map_data)
+		if not footprint.ok:
+			errors.append("interaction_points[%d].%s" % [index, String(footprint.reason)])
 	return {
 		"valid": errors.is_empty(),
 		"errors": errors,
@@ -183,6 +187,10 @@ static func _normalize_bindings(value: Array, source: String) -> Array:
 		}
 		if not objective_type.is_empty():
 			normalized["objective_type"] = objective_type
+		if raw.has("door_cells"):
+			# Preserve malformed authored values for validation; never silently
+			# discard them and fall back to a single unvalidated marker.
+			normalized["door_cells"] = raw.door_cells.duplicate(true) if raw.door_cells is Array or raw.door_cells is Dictionary else raw.door_cells
 		result.append(normalized)
 	return result
 

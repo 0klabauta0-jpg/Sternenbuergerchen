@@ -1,5 +1,7 @@
 extends SceneTree
 
+const ISOLATION_GUARD: GDScript = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
 const LOBBY_SCENE := preload("res://scenes/ui/multiplayer_lobby.tscn")
 const TARGET_VIEWPORT := Vector2(1280.0, 720.0)
 const TARGET_PANEL_SIZE := Vector2(720.0, 560.0)
@@ -9,6 +11,8 @@ var _failed := 0
 
 
 func _init() -> void:
+	if not ISOLATION_GUARD.require_isolated_user_data():
+		return
 	call_deferred("_run")
 
 

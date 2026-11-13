@@ -44,7 +44,18 @@ func _run() -> void:
   _check(false,"active mission owner capture exists")
   await _finish(); return
  var captured: Dictionary = capture.capture_components(_flow,_runtime)
+ if not captured.get("ok",false):
+  var mission_root: Node = mission.get_node("SimulationRoot")
+  var home_root: Node = _runtime.get("_simulation")
+  print("CAPTURE_INITIAL_WAIT ",captured," home_guard=",home_root.get_hex_checkpoint_guard()," mission_guard=",mission_root.get_hex_checkpoint_guard()," commands=",mission_root.command_queue," effects=",mission_root.effects_queue," facing=",mission_root._hex_facing_pending)
+  var stable_deadline := Time.get_ticks_msec()+30000
+  while not captured.get("ok",false) and Time.get_ticks_msec()<stable_deadline and String(captured.get("reason","")) in ["checkpoint_pending_work","checkpoint_clock_unsynced","checkpoint_pending_setup","mission_lifecycle_busy","mission_movement_pending","transport_transition_pending"]:
+   await create_timer(0.1).timeout
+   captured = capture.capture_components(_flow,_runtime)
  if not _check(captured.get("ok",false),"actual mission owners capture together"): print("CAPTURE_FAILURE ",captured); await _finish(); return
+ for id in before:
+  var person: Node2D = units.get_unit(id)
+  before[id] = {"position":person.global_position,"health":person.get_health(),"vital":person.get_vital_state()}
  var preflight = load("res://scripts/mission/campaign_active_restore_preflight.gd")
  if preflight == null:
   _check(false,"detached world restore preflight exists")
@@ -144,6 +155,13 @@ func _run() -> void:
  var controller: Node = restored.get_node("TacticalController")
  controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
  if not await _move_and_use(restored,"satellite_data","secure_satellite","res://maps/satellite_crash_site.json"): await _finish(); return
+ var access:Dictionary=controller.get_campaign_ground_ship_access(_craft_id)
+ var real_actor:Node=restored_units.get_unit(_crew_ids[0])
+ var claimed:Dictionary={"interaction_id":"ship_return","unit_id":_crew_ids[0],"team_id":real_actor.get_team_id(),"fireteam_id":real_actor.get_fireteam_id(),"target_position":Vector2(-9999,-9999),"interaction_radius_world":99999.0,"duration_seconds":0.0}
+ var host_resolution:Dictionary=restored.get_node("CombatLoopDriver")._resolve_host_network_interaction(claimed)
+ _check(host_resolution.get("accepted",false) and host_resolution.command.target_position==access.get("position") and host_resolution.command.interaction_radius_world==96.0 and host_resolution.command.duration_seconds>0.0,"actual host Return resolver ignores forged target radius and duration and shares physical access")
+ claimed.unit_id="foreign_missing_actor"
+ _check(not restored.get_node("CombatLoopDriver")._resolve_host_network_interaction(claimed).get("accepted",false),"actual host Return resolver rejects foreign actor after access projection")
  if not await _move_and_use(restored,"ship_return","return_to_ship","res://maps/satellite_crash_site.json"): await _finish(); return
  if not await _wait(func(): return String(Dictionary(_campaign().get("jobs",{})).get("satellite_recovery",{}).get("status","")) in ["pending_upload","completed"],45000,"restored mission reaches verified return or upload state"):
   var finished_driver: Node = restored.get_node("CombatLoopDriver")
@@ -182,10 +200,35 @@ func _return_home_after_continue() -> bool:
   return String(ship.get("location_id",""))=="homebase" and not bool(ship.get("busy",true)),60000,"restored crew actually returns and lands at home")
 
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
+ if label.ends_with("actual timed Use commits required runtime step") or label.ends_with("becomes usable after real simulated approach"):
+  var deadline := Time.get_ticks_msec() + (maxi(milliseconds,180000) if label.ends_with("becomes usable after real simulated approach") else milliseconds)
+  var next_trace := 0
+  while Time.get_ticks_msec() < deadline:
+   if bool(predicate.call()): return _check(true,label)
+   if Time.get_ticks_msec() >= next_trace:
+    _trace_active_interaction(label)
+    next_trace = Time.get_ticks_msec() + 5000
+   await physics_frame
+  _trace_active_interaction("TIMEOUT " + label)
+  return _check(false,"TIMEOUT " + label)
  # Resume can place the real crew farther from the interaction than the
  # original fixture; allow the actual walk to finish without moving actors.
  var allowed := maxi(milliseconds,180000) if label.ends_with("becomes usable after real simulated approach") or label.ends_with("actual mission instance exists") else milliseconds
  return await super._wait(predicate,allowed,label)
+
+func _trace_active_interaction(label: String) -> void:
+ var mission: Node = _flow.get("_active_mission")
+ if not is_instance_valid(mission): return
+ var controller: Node = mission.get_node("TacticalController")
+ var simulation: Node = mission.get_node("SimulationRoot")
+ var driver: Node = mission.get_node("CombatLoopDriver")
+ var units: Array = []
+ for id: String in _crew_ids:
+  var actor: Node = mission.get_node("UnitRegistry").get_unit(id)
+  if not is_instance_valid(actor): continue
+  var command = actor.call("get_current_unit_command")
+  units.append({"id":id,"position":actor.global_position,"ground":simulation.call("get_hex_unit_state",id),"vital":actor.call("get_vital_state"),"command":command.to_dict() if command != null and command.has_method("to_dict") else str(command)})
+ print("ACTIVE_USE_TRACE ",var_to_str({"label":label,"execution":controller.get("_phase_execution_by_fireteam"),"plans":controller.call("_serialize_order_plans"),"movement":controller.call("get_fireteam_movement_snapshot"),"use":controller.call("get_mission_interaction_runtime_use_state_snapshot"),"feedback":controller.call("get_mission_interaction_use_feedback_snapshot"),"runtime":driver.call("get_mission_interaction_runtime_states"),"units":units}))
 
 func _finish() -> void:
  if is_instance_valid(_flow): _flow.queue_free()

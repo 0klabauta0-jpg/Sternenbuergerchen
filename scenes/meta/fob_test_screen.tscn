@@ -225,7 +225,7 @@ theme_override_font_sizes/font_size = 13
 
 [node name="AvailableHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
 layout_mode = 2
-text = "Waehle links eine uebertragene Person aus, bevor sie einem Fireteam zugeordnet wird."
+text = "Zuerst links eine Person auswählen"
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 11
 
@@ -436,7 +436,8 @@ theme_override_font_sizes/font_size = 11
 
 [node name="LoadoutHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
 layout_mode = 2
-text = "Jedes Mitglied erhaelt Armor sowie zwei Waffen-Slots direkt in seiner eigenen Karte."
+text = "Ausrüstung pro Person"
+tooltip_text = "Rüstung und zwei Waffen direkt in der jeweiligen Personenkarte auswählen."
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 11
 

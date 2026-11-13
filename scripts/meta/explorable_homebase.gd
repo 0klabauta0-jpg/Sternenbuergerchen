@@ -11,6 +11,7 @@ const CAMPAIGN_MAP_PATH: String = "res://maps/campaign_intro_base.json"
 var _map_path: String = MAP_PATH
 const MAP_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
+const PERSONNEL_IDENTITY = preload("res://scripts/terrain/personnel_visual_identity.gd")
 const TERRAIN_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const UNITS_SCRIPT: GDScript = preload("res://scripts/registries/unit_registry.gd")
 const SIM_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
@@ -30,10 +31,13 @@ var _personnel_command: Callable
 var _selected_person_id: String = ""
 var _person_visuals: Dictionary = {}
 var _person_panel: VBoxContainer
-var _person_selector: OptionButton
+var _person_name: LineEdit
+var _name_person_id := ""
+var _name_dirty := false
+var _syncing_name := false
 var _person_portrait: TextureRect
 var _portrait_person_id := ""
-var _person_badges: HBoxContainer
+var _person_badges: VBoxContainer
 var _badge_signature := ""
 var _other_people: HBoxContainer
 var _other_people_scroll: ScrollContainer
@@ -105,6 +109,7 @@ func _build_personnel_visuals(stage: Node3D) -> void:
 		visual.name = "RosterPerson_" + id.validate_node_name()
 		visual.set_meta("unit_id", id)
 		stage.add_child(visual)
+		PERSONNEL_IDENTITY.apply_to_model(visual, {"portrait_path": _portrait_path_for_person(id)})
 		var players: Array[Node] = visual.find_children("*", "AnimationPlayer", true, false)
 		var player: AnimationPlayer = players[0] as AnimationPlayer if not players.is_empty() else null
 		var idle: String = ""
@@ -184,7 +189,7 @@ func _build_personnel_controls() -> void:
 	dock.add_child(dock_row)
 	var selection := VBoxContainer.new()
 	selection.name = "SelectedPersonCard"
-	selection.custom_minimum_size.x = 240
+	selection.custom_minimum_size.x = 300
 	selection.add_theme_constant_override("separation", 3)
 	dock_row.add_child(selection)
 	var caption := Label.new()
@@ -197,31 +202,34 @@ func _build_personnel_controls() -> void:
 	selection.add_child(identity)
 	_person_portrait = TextureRect.new()
 	_person_portrait.name = "SelectedPersonPortrait"
-	_person_portrait.custom_minimum_size = Vector2(50, 62)
+	_person_portrait.custom_minimum_size = Vector2(68, 88)
+	_person_portrait.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_person_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_person_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_person_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	identity.add_child(_person_portrait)
+	_person_badges = VBoxContainer.new()
+	_person_badges.name = "SelectedPersonBadges"
+	_person_badges.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_person_badges.add_theme_constant_override("separation", 4)
+	identity.add_child(_person_badges)
 	var details := VBoxContainer.new()
 	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	details.add_theme_constant_override("separation", 3)
 	identity.add_child(details)
-	_person_selector = OptionButton.new()
-	_person_selector.tooltip_text = "Person auswählen – auch Besatzung an Bord"
-	_person_selector.item_selected.connect(func(index: int): _select_person(String(_person_selector.get_item_metadata(index))))
-	_person_selector.add_theme_font_size_override("font_size", 15)
-	details.add_child(_person_selector)
-	var name_row:=HBoxContainer.new(); details.add_child(name_row)
-	var name_input:=LineEdit.new(); name_input.name="RenamePerson"; name_input.placeholder_text="Neuer Name"; name_input.max_length=48; name_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL; name_row.add_child(name_input)
-	var rename:=Button.new(); rename.text="OK"; rename.tooltip_text="Neuen Namen übernehmen"; name_row.add_child(rename)
-	rename.pressed.connect(func(): _personnel_action("base_rename",{"display_name":name_input.text}); name_input.clear())
+	_person_name = LineEdit.new()
+	_person_name.name = "SelectedPersonName"
+	_person_name.tooltip_text = "Name bearbeiten · Enter übernimmt den Namen"
+	_person_name.max_length = 48
+	_person_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_person_name.add_theme_font_size_override("font_size", 15)
+	_person_name.text_changed.connect(func(_text: String):
+		if not _syncing_name: _name_dirty = true)
+	_person_name.text_submitted.connect(_commit_person_name)
+	details.add_child(_person_name)
 	_person_state = Label.new()
 	_person_state.add_theme_font_size_override("font_size", 15)
 	details.add_child(_person_state)
-	_person_badges = HBoxContainer.new()
-	_person_badges.name = "SelectedPersonBadges"
-	_person_badges.add_theme_constant_override("separation", 4)
-	details.add_child(_person_badges)
 	var rest := CheckButton.new()
 	rest.name = "AutomaticRest"
 	rest.text = "Automatisch ruhen"
@@ -234,6 +242,9 @@ func _build_personnel_controls() -> void:
 	commands.add_theme_constant_override("separation", 3)
 	dock_row.add_child(commands)
 	dock_row.move_child(commands, 0)
+	var commands_separator := _personnel_separator("CommandsSelectionSeparator")
+	dock_row.add_child(commands_separator)
+	dock_row.move_child(commands_separator, 1)
 	var commands_title := Label.new()
 	commands_title.text = "BASISBEFEHLE"
 	commands_title.add_theme_font_size_override("font_size", 15)
@@ -271,7 +282,9 @@ func _build_personnel_controls() -> void:
 		actions.add_child(button)
 		_person_buttons[operation] = button
 	var others := VBoxContainer.new()
+	others.name = "OtherPeople"
 	others.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dock_row.add_child(_personnel_separator("SelectionPeopleSeparator"))
 	dock_row.add_child(others)
 	var others_label := Label.new()
 	others_label.text = "WEITERE PERSONEN"
@@ -287,9 +300,26 @@ func _build_personnel_controls() -> void:
 	_person_feedback = Label.new()
 	_person_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	others.add_child(_person_feedback)
-	_hint.text = "NPC anklicken · Rechtsklick Ziel · E Konsole"
+	_hint.tooltip_text = "Person anklicken · Rechtsklick Ziel · E Konsole"
 	_resize_personnel_panel()
 	_update_personnel_controls()
+
+func _personnel_separator(node_name: String) -> VSeparator:
+	var line := VSeparator.new()
+	line.name = node_name
+	var style := StyleBoxLine.new()
+	style.color = Color("41616b")
+	style.thickness = 1
+	style.vertical = true
+	line.add_theme_stylebox_override("separator", style)
+	return line
+
+func _commit_person_name(value: String) -> void:
+	if _name_person_id != _selected_person_id: return
+	var result: Dictionary = _personnel_action("base_rename", {"display_name":value})
+	if bool(result.get("ok", false)):
+		_name_dirty = false
+		_update_personnel_controls()
 
 
 func get_command_dock_rect() -> Rect2:
@@ -318,20 +348,23 @@ func _update_personnel_controls() -> void:
 		var actor: Node = _personnel_runtime().call("get_actor", id)
 		var armor_id := String(actor.call("get_armor_id"))
 		var model: Node3D = _person_visuals[id].model
+		if PERSONNEL_IDENTITY.apply_to_model(model, {"portrait_path": _portrait_path_for_person(id)}):
+			_view.call("_request_viewport_redraw")
 		if String(model.get_meta("worn_armor_id", "")) != armor_id:
 			preload("res://scripts/terrain/personnel_armor_visual.gd").apply_to_model(model, armor_id)
 			_view.call("_request_viewport_redraw")
-	if _person_selector.item_count != units.size():
-		_person_selector.clear()
-		for person: Dictionary in units:
-			_person_selector.add_item(String(person.get("name", person.get("display_name", person.unit_id))))
-			_person_selector.set_item_metadata(_person_selector.item_count - 1, String(person.unit_id))
 	for index in units.size():
 		var person: Dictionary = units[index]
-		_person_selector.set_item_text(index,String(person.get("name",person.get("display_name",person.unit_id))))
 		if String(person.unit_id) != _selected_person_id:
 			continue
-		_person_selector.select(index)
+		if _name_person_id != _selected_person_id:
+			_name_person_id = _selected_person_id
+			_name_dirty = false
+			_person_name.release_focus()
+		if not _name_dirty:
+			_syncing_name = true
+			_person_name.text = String(person.get("name", person.get("display_name", person.unit_id)))
+			_syncing_name = false
 		var status: String = String(person.get("status", "outside"))
 		var labels: Dictionary = {"outside": "In der Basis", "moving": "Unterwegs", "sleeping": "Schläft", "aboard": "An Bord", "boarding": "Geht zum Schiff", "away": "Im Einsatz"}
 		_person_state.text = String(labels.get(status, status))
@@ -343,12 +376,16 @@ func _update_personnel_controls() -> void:
 		(_person_buttons.base_sleep as Button).disabled = status in ["aboard", "sleeping", "away"]
 
 
-func _portrait_for_person(id: String) -> Texture2D:
+func _portrait_path_for_person(id: String) -> String:
 	var owner := _personnel_runtime()
-	if owner == null: return null
+	if owner == null: return ""
 	var screen: Node = owner.get("_screen")
-	if not is_instance_valid(screen) or not screen.has_method("_get_profile_portrait_path"): return null
-	var path := String(screen.call("_get_profile_portrait_path", id))
+	if not is_instance_valid(screen) or not screen.has_method("_get_profile_portrait_path"): return ""
+	return String(screen.call("_get_profile_portrait_path", id))
+
+
+func _portrait_for_person(id: String) -> Texture2D:
+	var path := _portrait_path_for_person(id)
 	return load(path) as Texture2D if not path.is_empty() and ResourceLoader.exists(path) else null
 
 
@@ -417,7 +454,7 @@ func _refresh_person_badges() -> void:
 
 
 func _update_personnel_visuals() -> void:
-	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	var units: Array = _personnel_runtime().call("get_visual_personnel_states")
 	var current_ids := {}
 	var needs_visuals := false
 	for person: Dictionary in units:
@@ -1323,7 +1360,9 @@ func _build_overlay() -> void:
 	_interact.pressed.connect(func(): request_terminal(_nearby_terminal))
 	panel.add_child(_interact)
 	_hint = Label.new()
-	_hint.text = "WASD gehen · Rechtsklick Ziel · E Konsole"
+	_hint.text = "?"
+	_hint.tooltip_text = "WASD gehen · Rechtsklick Ziel · E Konsole"
+	_hint.mouse_filter = Control.MOUSE_FILTER_STOP
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(_hint)
 	var exit := Button.new()

@@ -21,5 +21,6 @@ static func resolve(target: Vector2i, pilot_skill: float, seed_value: int) -> Di
 	if not area.ok: return area
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	var index := rng.randi_range(0, area.cells.size() - 1)
+	var roll := rng.randf()
+	var index := mini(floori(roll * area.cells.size()), area.cells.size() - 1)
 	return {"ok":true, "radius":area.radius, "impact_hex":area.cells[index]}

@@ -48,12 +48,24 @@ static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
 	var craft: String = identity.craft_id
 	var location: String = identity.location_id
 	if scene.get_parent()!=flow.call("_get_mission_host") or flow.get("_active_mission")!=null or not flow.get("_location_registry").location_ids().is_empty(): return _bad("active_flow_changed")
-	if not _base_state_matches(base.export_state(),data.base_personnel): return _bad("active_base_personnel_changed")
+	if data.has("home_hex_tactical"):
+		# Aboard people have no base Ground pose. Their hidden projection's old
+		# world position is not a second authoritative transport/position truth.
+		var actual_base: Dictionary = base.export_checkpoint_state()
+		if not preload("res://scripts/mission/checkpoint_value_codec.gd").equal_json_values(actual_base,data.home_hex_tactical.base_personnel):
+			var changed_fields: Array = []
+			for field in data.home_hex_tactical.base_personnel:
+				if actual_base.get(field) != data.home_hex_tactical.base_personnel[field]: changed_fields.append(field)
+			return {"ok":false,"reason":"active_base_personnel_changed","base_reason":actual_base.get("reason",""),"changed_fields":changed_fields}
+	elif not _base_state_matches(base.export_state(),data.base_personnel): return _bad("active_base_personnel_changed")
 	var world: Dictionary = candidate.world
 	# No awaits, callbacks, or emitted signals in this publication tail.
 	root.configure_singleplayer_owners(world.campaign,world.supply,world.onboarding,world.fleet)
 	root.configure_ship_equipment(world.equipment)
 	root.configure_departure_adapter(adapter)
+	if data.has("home_hex_tactical"):
+		var rng = preload("res://scripts/core/gameplay_rng_state.gd")
+		rng.publish(root, data.home_hex_tactical.get("rng_streams", rng.from_legacy(data.home_hex_tactical.rng_state)))
 	root.set("_space_combat_state",world.space)
 	root.set("_space_wing_state",world.wing)
 	adapter.set("_campaign",world.campaign)
@@ -92,6 +104,7 @@ static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
 	scene.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_INHERIT
 	scene.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_INHERIT
 	scene.show()
+	root.set_physics_process(true)
 	flow.call("_show_mission")
 	flow.set_meta("campaign_active_restore_complete",true)
 	return {"ok":true}

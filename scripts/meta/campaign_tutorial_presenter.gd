@@ -128,11 +128,17 @@ func _build_ui() -> void:
 	_guidance.focus_mode = Control.FOCUS_ALL
 
 func refresh() -> void:
+	if is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "inspection":
+		visible = false
+		return
 	if not is_instance_valid(_runtime) or not _runtime.has_method("get_snapshot") or _strip == null:
 		visible = false
 		return
 	var snapshot: Dictionary = _runtime.get_snapshot()
 	if String(snapshot.get("mode", "")) != "campaign":
+		visible = false
+		return
+	if is_instance_valid(_flow) and _flow.has_method("is_context_overlay_obscured") and _flow.is_context_overlay_obscured():
 		visible = false
 		return
 	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null

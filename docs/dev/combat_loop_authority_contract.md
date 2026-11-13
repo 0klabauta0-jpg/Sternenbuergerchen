@@ -1,5 +1,12 @@
 # Combat Loop Authority Contract
 
+## Erweiterung 13.11.2026: normalisierte Ownerwürfe
+Disziplin und Fehlidentifikation verwenden den vorhandenen Combat-PCG des
+autoritativen SimulationRoot. Readouts und Replikate würfeln nicht. Die unabhängigen
+Raum-/Luftzustände werden gemeinsam mit Combat gespeichert und bei Prepare/Commit
+auf Frische geprüft. Details, Seeds, Legacydefaults und Gates:
+[Produktive Hexwege und Zufallsdomänen](productive_hex_rollout_contract.md).
+
 ## Zweck
 TASK_162 trennt den multiplayer-relevanten Vertrag des Combat-Loops vom monolithischen Driver. `MissionCombatLoopDriver` orchestriert weiter die bestehende Mission, aber Snapshot-Keys, Mission-Result-Payloads, read-only UI-Events und erlaubte autoritative Effect-Typen liegen jetzt unter `scripts/mission/`.
 

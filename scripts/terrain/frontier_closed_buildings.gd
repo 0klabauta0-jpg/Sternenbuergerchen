@@ -273,7 +273,10 @@ func _route_material(instance: MeshInstance3D,label: String,color: String) -> vo
 		role = "roof"
 	elif "Portal" in label or "Buttress" in label or "Rib" in label or "Frame" in label or "Brow" in label or "Sill" in label:
 		role = "structure"
-	var key := "wear:"+color+":"+role
+	# Bounds are immutable mesh facts. Material variants avoid consuming one
+	# renderer instance-uniform block for every panel in repeated buildings.
+	var bounds := instance.get_aabb()
+	var key := "wear:"+color+":"+role+":"+var_to_str(bounds)
 	if not _materials.has(key):
 		var material := ShaderMaterial.new()
 		material.shader = WEAR_SHADER
@@ -283,11 +286,10 @@ func _route_material(instance: MeshInstance3D,label: String,color: String) -> vo
 		material.set_shader_parameter("pattern_seed",_wear_seed)
 		var strengths := {"paint":Vector4(0.60,0.40,0.70,0.28),"roof":Vector4(0.38,0.90,0.15,0.30),"structure":Vector4(0.46,0.40,0.32,0.58),"base":Vector4(0.95,0.12,0.30,0.28)}
 		material.set_shader_parameter("role_strength",strengths[role])
+		material.set_shader_parameter("wear_part_min",bounds.position)
+		material.set_shader_parameter("wear_part_max",bounds.end)
 		_materials[key] = material
 	instance.material_override = _materials[key]
-	var bounds := instance.get_aabb()
-	instance.set_instance_shader_parameter("wear_part_min",bounds.position)
-	instance.set_instance_shader_parameter("wear_part_max",bounds.end)
 	instance.set_meta("material_route","painterly_wear:"+role)
 
 func _material(color: String) -> StandardMaterial3D:

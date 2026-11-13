@@ -16,6 +16,15 @@ func _run() -> void:
 	_check(_screen.call("request_operation", "accept_job", {"job_id":"satellite_recovery", "request_id":"astra-fix:accept"}).get("ok", false), "actual campaign job accepted")
 	_check(_screen.call("request_operation", "select_destination", {"location_id":"satellite_crash", "job_id":"satellite_recovery", "request_id":"astra-fix:destination"}).get("ok", false), "actual mission selected")
 	if not await _launch_and_land("satellite_recovery", "res://maps/satellite_crash_site.json"): await _finish(); return
+	# Real Hex unloading queues the final admission/security movement. Wait for
+	# their owners to become saveable instead of freezing or cancelling them.
+	var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
+	var capture_ready: Dictionary = capture.capture_components(_flow,_runtime)
+	var capture_deadline := Time.get_ticks_msec()+30000
+	while not capture_ready.get("ok",false) and Time.get_ticks_msec()<capture_deadline and String(capture_ready.get("reason","")) in ["checkpoint_pending_work","checkpoint_clock_unsynced","checkpoint_pending_setup","mission_lifecycle_busy","mission_movement_pending","transport_transition_pending"]:
+		await create_timer(0.1).timeout
+		capture_ready = capture.capture_components(_flow,_runtime)
+	if not _check(capture_ready.get("ok",false),"real deployment and security movement reach a stable save boundary"): print("CAPTURE_FAILURE ",capture_ready); await _finish(); return
 	var home_before := FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
 	var saved: Dictionary = _flow.call("request_campaign_save")
 	if not _check(saved.get("ok", false), "deployed mission saves through actual owner"): print(saved); await _finish(); return
@@ -72,7 +81,11 @@ func _run() -> void:
 	var changed_sha := FileAccess.get_sha256(ACTIVE.DEFAULT_PATH)
 	var rejected = CONFIG.new()
 	var dummy := Node.new()
+	# The real detached Home preflight requires a live tree for its disposable
+	# candidate subtree. Reach that boundary before testing the corrupt Active.
+	root.add_child(dummy)
 	rejected.configure(dummy, {"mode":"campaign", "action":"continue"})
+	if not rejected.error_message.contains("Basisstand"): print("CORRUPT_ACTIVE_GUIDANCE_DIAGNOSTIC ", rejected.error_message)
 	_check(not rejected.error_message.is_empty() and rejected.error_message.contains("Basisstand"), "unretired corrupt active produces explicit recovery guidance")
 	_check(FileAccess.get_file_as_bytes(ACTIVE.DEFAULT_PATH) == changed and FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == old_home, "rejected normal Continue preserves home and corrupt artifact")
 	dummy.free()

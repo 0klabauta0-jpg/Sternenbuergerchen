@@ -122,7 +122,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		_selection.clear()
 		if _selected != null: _selected.text = "Gegenstand anklicken oder ziehen"
 	_unit_id=next_id; _craft_id=craft_id
-	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible,equipment_allowed,actor.get_instance_id() if actor!=null else 0])
+	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),unit.get("portrait_id",""),unit.get("portrait_path",""),_unit_id,craft_id,accessible,equipment_allowed,actor.get_instance_id() if actor!=null else 0])
 	if signature==_signature: return
 	_signature=signature
 	for child in _slots.get_children():
@@ -142,7 +142,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 	_remove_backpack.visible = has_armor_slot and equipment_allowed and int(_personal_storage.capacity) > 0
 	_remove_backpack.disabled = not accessible.has(personal_id)
 	_refresh_bag_preview()
-	_body_preview.call("update_actor",actor,loadout)
+	_body_preview.call("update_actor",actor,loadout,unit)
 	for spec in [["armor","Rüstung"],["weapon_1","Primär"],["weapon_2","Sekundär"]]:
 		var key: String=spec[0]
 		var item: String=ITEMS.item_from_slot(key,String(loadout.get(key,"none")))

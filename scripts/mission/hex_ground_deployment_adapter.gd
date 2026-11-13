@@ -31,6 +31,9 @@ func advance_phase(simulation_root:Node,sequence:Dictionary,anchor_world:Vector2
 		if committed.ok:
 			receipt.erase("pending_unit_id")
 			receipt.erase("sent_tick")
+			# Root has committed the final actor. The sequence no longer owns a
+			# pending admission; retaining its receipt would block stable saves.
+			if index == units.size()-1: sequence.erase("hex_admission")
 			committed.phase="committed"
 			return committed
 		if int(simulation_root.get("tick_counter"))<=int(receipt.get("sent_tick",-1)):return _waiting("deployment_effect_pending")

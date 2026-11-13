@@ -1,0 +1,10 @@
+{
+  "producer_case": "final_active_continue",
+  "producer_run": "f067bcb6fff1471cb1dd3cec1705eb62",
+  "source_snapshot": "bc16bf3b22a64d478a88411925f981a2",
+  "unaltered_files": {
+    "checkpoint_v1.json": "c346f73b218552e5851efdc35468a259f6a06d8ebd247d75ca5d810492e675cd",
+    "active_checkpoint_v1.json": "d6e7af966ae8e5da08858e0874c3775505c05cd007c029471f0c0b8ffa295181"
+  },
+  "scope": "Actual native Hex mission immediately after landing and before satellite interaction. Real private-profile pair; no forged owner state or edited Home hash."
+}

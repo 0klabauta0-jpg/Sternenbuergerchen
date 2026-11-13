@@ -6,6 +6,7 @@ const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const ACTIVE_STORE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
 const BASE_MAP := "res://maps/campaign_intro_base.json"
 const HEX_AUTOSAVE_INTERVAL_MSEC := 5 * 60 * 1000
+const HEX_AUTOSAVE_RETRY_MSEC := 1000
 var entry: Dictionary = {}
 var checkpoint: Dictionary = {}
 var last_save_signature := ""
@@ -15,6 +16,9 @@ var active_pending: Dictionary = {}
 var active_restore_in_progress := false
 var _hex_export_scope := ""
 var _hex_export_msec: int = -1
+var _hex_failed_scope := ""
+var _hex_failed_msec: int = -1
+var _hex_failed_result: Dictionary = {}
 var _retired_active_sha256 := ""
 var _retire_active_on_home_save := false
 
@@ -50,6 +54,8 @@ func configure(flow: Node, request: Dictionary) -> void:
 				active_pending = active.payload.components
 				active_restore_in_progress = true
 				checkpoint["base_personnel"] = active_pending.base_personnel.duplicate(true)
+				if active_pending.has("home_hex_tactical"):
+					checkpoint["hex_tactical"] = active_pending.home_hex_tactical.duplicate(true)
 	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, action == "new")
 	if not run.get("ok", false):
 		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
@@ -85,6 +91,10 @@ func configure(flow: Node, request: Dictionary) -> void:
 		fleet_definitions.append(ship.definition)
 		pilots[ship_id] = String(ship.get("pilot_id",""))
 		locations[ship_id] = String(ship.get("location","homebase"))
+	# The hidden Active-Continue bootstrap reconstructs the independently saved
+	# away-base owner before any scene/world publication or user input is allowed.
+	if active_restore_in_progress and active_pending.has("home_hex_tactical"):
+		locations[String(active_pending.identity.craft_id)] = "mission"
 	flow.set("_homebase_aircraft_definitions", fleet_definitions)
 	flow.set("_assigned_aircraft_pilot_by_craft", pilots)
 	flow.set("_aircraft_location_by_craft", locations)
@@ -158,7 +168,7 @@ func _initial_roster() -> Array:
 func _hex_save_throttled(scope: String, now: int, force: bool) -> bool:
 	return not force and scope == _hex_export_scope and now - _hex_export_msec < HEX_AUTOSAVE_INTERVAL_MSEC
 
-func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dictionary:
+func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 	if active_restore_in_progress: return {"ok":false,"reason":"active_restore_pending"}
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
@@ -175,21 +185,17 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	var crafts: Array = flow.get("_homebase_aircraft_definitions")
 	if crafts.is_empty():
 		return {"ok": false, "reason": "campaign_craft_count"}
-	var id: String = String(crafts[0].craft_id)
 	for ship: Dictionary in crafts:
 		if String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"")) not in ["homebase","waiting_pad"]:
 			return {"ok":false,"reason":"away_from_checkpoint"}
-	# Safety gates always run first; explicit saves bypass the interval only.
-	var simulation: Node = runtime.get("_simulation")
-	var hex_export: bool = is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required()
-	if hex_export:
-		var now := Time.get_ticks_msec()
-		var scope := "%s:%s:%s" % [runtime.get_instance_id(), simulation.get_instance_id(), simulation.get_hex_ground_context_revision()]
-		if _hex_save_throttled(scope, now, force): return {"ok":true,"unchanged":true,"throttled":true}
-		_hex_export_scope = scope
-		_hex_export_msec = now
+	return {"ok":true}
+
+func capture_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
+	var guard := get_home_checkpoint_guard(flow, runtime)
+	if not guard.get("ok", false): return guard
+	var crafts: Array = flow.get("_homebase_aircraft_definitions")
+	var id: String = String(crafts[0].craft_id)
 	var payload: Dictionary = runtime.call("export_campaign_checkpoint")
-	if hex_export: _hex_export_msec = Time.get_ticks_msec()
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}
 	payload["campaign_run_id"] = campaign_run_id
@@ -207,6 +213,27 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	payload["fleet"] = []
 	for ship: Dictionary in crafts:
 		payload.fleet.append({"definition":ship.duplicate(true),"pilot_id":String(Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(String(ship.craft_id),"")),"location":String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"homebase"))})
+	if not _retired_active_sha256.is_empty(): payload["retired_active_checkpoint_sha256"] = _retired_active_sha256
+	return {"ok":true,"payload":payload}
+
+func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dictionary:
+	var guard := get_home_checkpoint_guard(flow, runtime)
+	if not guard.get("ok", false): return guard
+	# Safety gates always run first; explicit saves bypass the interval only.
+	var simulation: Node = runtime.get("_simulation")
+	var hex_export: bool = is_instance_valid(simulation) and simulation.is_hex_ground_runtime_required()
+	var scope := ""
+	if hex_export:
+		var now := Time.get_ticks_msec()
+		scope = "%s:%s:%s" % [runtime.get_instance_id(), simulation.get_instance_id(), simulation.get_hex_ground_context_revision()]
+		if _hex_save_throttled(scope, now, force) and FileAccess.file_exists(STORE.DEFAULT_PATH): return {"ok":true,"unchanged":true,"throttled":true}
+		if not force and scope == _hex_failed_scope and now - _hex_failed_msec < HEX_AUTOSAVE_RETRY_MSEC:
+			var retry := _hex_failed_result.duplicate(true)
+			retry["retry_pending"] = true
+			return retry
+	var captured := capture_home_checkpoint(flow, runtime)
+	if not captured.get("ok", false): return _remember_hex_save_failure(scope,captured) if hex_export else captured
+	var payload: Dictionary = captured.payload
 	# Commit the exact superseded file identity WITH the new home checkpoint.
 	# If archiving fails or the process exits after the atomic home rename,
 	# Continue can still ignore only that retired artifact without parsing it.
@@ -214,16 +241,34 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	if not active_sha.is_empty(): _retired_active_sha256 = active_sha
 	if not _retired_active_sha256.is_empty(): payload["retired_active_checkpoint_sha256"] = _retired_active_sha256
 	var signature: String = JSON.stringify(payload, "", true).sha256_text()
-	if signature == last_save_signature:
+	if signature == last_save_signature and FileAccess.file_exists(STORE.DEFAULT_PATH):
+		if hex_export: _remember_hex_save_success(scope)
 		return {"ok": true, "unchanged": true}
 	var result: Dictionary = STORE.save_checkpoint(payload)
 	if result.get("ok", false):
+		if hex_export: _remember_hex_save_success(scope)
 		last_save_signature = signature
 		_retire_active_on_home_save = false
 		if not active_sha.is_empty():
 			var archived: Dictionary = ACTIVE_STORE.archive_checkpoint(active_sha)
 			result["active_archive"] = archived
 			if archived.get("ok", false): flow.set_meta("campaign_active_archive", archived)
+	return _remember_hex_save_failure(scope,result) if hex_export and not result.get("ok",false) else result
+
+func _remember_hex_save_success(scope: String) -> void:
+	_hex_export_scope = scope
+	_hex_export_msec = Time.get_ticks_msec()
+	_hex_failed_scope = ""
+	_hex_failed_result.clear()
+
+func _remember_hex_save_failure(scope: String, result: Dictionary) -> Dictionary:
+	# A newer failed explicit attempt supersedes an older successful interval.
+	if scope == _hex_export_scope:
+		_hex_export_scope = ""
+		_hex_export_msec = -1
+	_hex_failed_scope = scope
+	_hex_failed_msec = Time.get_ticks_msec()
+	_hex_failed_result = result.duplicate(true)
 	return result
 
 
@@ -243,3 +288,29 @@ func save_active_checkpoint(flow: Node, runtime: Node, _force: bool = false) -> 
 	var validator = load("res://scripts/mission/campaign_active_checkpoint_validation.gd")
 	var store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
 	return store.save_checkpoint(payload,func(value: Dictionary) -> Dictionary: return validator.validate_live(value,flow,runtime))
+
+
+func get_save_projection(flow: Node, runtime: Node) -> Dictionary:
+	var projection = load("res://scripts/meta/campaign_save_projection.gd")
+	var saved: Dictionary = projection.inspect_saved()
+	var result: Dictionary = saved.projection
+	var captured: Dictionary
+	var active := is_instance_valid(flow.get("_active_mission"))
+	if active_restore_in_progress:
+		captured = {"ok":false,"reason":"active_restore_pending"}
+	elif active:
+		var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
+		captured = capture.capture_components(flow, runtime)
+		if captured.get("ok", false):
+			var normalizer = load("res://scripts/mission/campaign_active_json_normalizer.gd")
+			var normalized: Dictionary = normalizer.normalize(captured.components)
+			captured = {"ok":true,"payload":{"schema":"campaign_active_checkpoint.v1","components":normalized.value}} if normalized.get("ok", false) else normalized
+	else:
+		captured = capture_home_checkpoint(flow, runtime)
+	result.can_save = bool(captured.get("ok", false))
+	result.save_blocked_reason = String(captured.get("reason", ""))
+	result.save_blocked_text = projection.blocked_text(result.save_blocked_reason)
+	var expected_kind := "mission" if active else "home"
+	var stored: Dictionary = saved.active if active else saved.home
+	result.has_unsaved_progress = not result.can_save or result.kind != expected_kind or not projection.equivalent(Dictionary(captured.get("payload", {})), Dictionary(stored.get("payload", {})), active)
+	return result

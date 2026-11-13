@@ -1,8 +1,11 @@
 # Hex Tactical Runtime V1
 
-Aktueller Integrationsstand: AP0–AP8 sind im Karten-Kandidaten1b924b640
+Historischer Integrationsstand: AP0–AP8 sind im Karten-Kandidaten1b924b640
 opt-in verbunden und begrenzt geprüft, siehe `docs/qa/ap678_bundle_20261112/`.
-Keine flächige Produktionskartenaktivierung oder vollständige AP9-Abnahme.
+Dieser damalige Stand enthielt keine flächige Produktionskartenaktivierung.
+Der neue Kandidat vom13.11. aktiviert die produktiven Wege und bindet Basis,
+Save und RNG gemäß [Produktionsvertrag](productive_hex_rollout_contract.md).
+Eine vollständige AP9-Abnahme folgt nur aus den tatsächlichen aktuellen Gates.
 Fortsetzung13.11.: `docs/tasks/HEX_RUNTIME_FOLLOWUP_2026_11_13.md`.
 Die folgenden Bausteinabschnitte dokumentieren zusätzlich ihren jeweiligen
 historischen Einführungsstand ab97e00aba14ced147b268113085854ac67dc764c5;

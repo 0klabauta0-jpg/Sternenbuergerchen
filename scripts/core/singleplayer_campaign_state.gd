@@ -104,23 +104,47 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
 	return result
 
-func _accept(payload: Dictionary) -> Dictionary:
-	var job_id: String = String(payload.get("job_id", ""))
+func _acceptance_gate(job_id: String) -> Dictionary:
 	if not _jobs.has(job_id):
 		return _reject("unknown_job", "Auftrag unbekannt")
-	var prior := String(_jobs[job_id].get("prerequisite_job_id",""))
-	if _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed":
+	var prior := String(_jobs[job_id].get("prerequisite_job_id", ""))
+	if _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior, {})).get("status", "")) != "completed":
 		return _reject("previous_job_required", "Zuerst den vorherigen Kampagnenauftrag abschließen")
 	if _enforce_sequence and job_id == "benit_delivery" and not (bool(_progress.recruited_outpost) and bool(_progress.crate_loaded)):
-		return _reject("outpost_preparation_required","Zuerst die Person am Handelsposten aufnehmen und die Kiste bergen")
-	var status: String = String(_jobs[job_id].status)
-	if status in ["accepted", "active"]:
-		return {"ok": true, "job_id": job_id, "already_accepted": true}
-	if status != "offered":
+		return _reject("outpost_preparation_required", "Zuerst die Person am Handelsposten aufnehmen und die Kiste bergen")
+	if String(_jobs[job_id].status) not in ["offered", "accepted", "active"]:
 		return _reject("job_closed", "Auftrag bereits abgeschlossen")
+	return {"ok":true}
+
+func get_job_availability(retry_allowed: bool = false) -> Dictionary:
+	# The adapter supplies its actual Home/transit gate. This read has no requests,
+	# revision changes or persisted projection fields.
+	var result := {}
+	for id: String in _jobs:
+		var status := String(_jobs[id].status)
+		var gate := _retry_gate(id) if status == "failed" else _acceptance_gate(id)
+		if status == "failed" and gate.ok and not retry_allowed:
+			gate = _reject("retry_requires_home", "Erst zur Basis zurückkehren, dann Auftrag erneut annehmen")
+		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok), "can_accept":status in ["offered", "failed"] and bool(gate.ok), "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
+	return result
+
+func validate_location_visit(location_id: String, retry_allowed: bool = false) -> Dictionary:
+	if not _locations.has(location_id): return _reject("unknown_location", "Zielort unbekannt")
+	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or not _enforce_sequence: return {"ok":true}
+	var availability := get_job_availability(retry_allowed)
+	for id: String in _jobs:
+		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible): return {"ok":true}
+	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
+
+func _accept(payload: Dictionary) -> Dictionary:
+	var job_id := String(payload.get("job_id", ""))
+	var gate := _acceptance_gate(job_id)
+	if not gate.ok: return gate
+	if String(_jobs[job_id].status) in ["accepted", "active"]:
+		return {"ok":true, "job_id":job_id, "already_accepted":true}
 	_jobs[job_id].status = "accepted"
 	_revision += 1
-	return {"ok": true, "job_id": job_id, "message": "Auftrag angenommen"}
+	return {"ok":true, "job_id":job_id, "message":"Auftrag angenommen"}
 
 func _select(payload: Dictionary) -> Dictionary:
 	var location_id: String = String(payload.get("location_id", ""))
@@ -269,10 +293,15 @@ func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
-func _retry_failed(payload: Dictionary) -> Dictionary:
-	var job_id := String(payload.get("job_id", ""))
+func _retry_gate(job_id: String) -> Dictionary:
 	if not _jobs.has(job_id) or String(_jobs[job_id].status) != "failed" or _completion_receipts.has(job_id + ":completed"):
 		return _reject("job_not_failed", "Nur fehlgeschlagene Auftraege erneut annehmen")
+	return {"ok":true}
+
+func _retry_failed(payload: Dictionary) -> Dictionary:
+	var job_id := String(payload.get("job_id", ""))
+	var gate := _retry_gate(job_id)
+	if not gate.ok: return gate
 	_jobs[job_id].status = "accepted"
 	_jobs[job_id].erase("craft_id")
 	for craft_id in _departures_by_craft_id.keys():

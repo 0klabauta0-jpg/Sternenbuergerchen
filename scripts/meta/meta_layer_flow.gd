@@ -163,6 +163,9 @@ var _singleplayer_services_toggle: Button
 var _singleplayer_services_open := false
 var _singleplayer_services_elapsed: float = 0.0
 var _star_map_screen: Control
+var _remote_inspection_screen: Control
+var _inspection_target: Dictionary = {} # View identity only, never knowledge.
+var _inspection_terrain_view: WeakRef
 var _space_approach_remaining: float = 0.0
 var _space_approach_craft_id: String = ""
 var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
@@ -307,6 +310,7 @@ func _ready() -> void:
 	_star_map_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"), Callable(self, "_get_star_map_area_projection"))
 	_star_map_screen.hide()
+	_bind_context_overlay_signals()
 	_ensure_meta_nav_timer_labels()
 
 	if not homebase_screen.selection_changed.is_connected(_on_homebase_selection_changed):
@@ -361,6 +365,10 @@ func _ready() -> void:
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
 	_show_homebase()
+	# The new run's durable baseline must exist before boarding or accepting a
+	# job closes the home-checkpoint guard. The normal timed autosave follows.
+	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
+		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
 	call_deferred("_sync_mission_host_visibility")
 	call_deferred("_apply_release_start_mission_deeplink")
 	call_deferred("_apply_release_lz_drop_preview_deeplink")
@@ -4278,6 +4286,7 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map, prepared_cache)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	_bind_context_overlay_signals()
 	if not location_id.is_empty():
 		mission_instance.set_meta("location_id",location_id)
 		_location_registry.register_location(location_id,mission_instance)
@@ -6082,6 +6091,7 @@ func _build_fob_profile_unit_subset(transport_craft_states: Array) -> Array:
 
 
 func _show_homebase(allow_remote_operations: bool = false) -> void:
+	_end_remote_inspection()
 	if _has_space_route_in_progress() and not allow_remote_operations:
 		_show_star_map()
 		return
@@ -6278,6 +6288,7 @@ func _show_map() -> void:
 
 
 func _show_mission() -> void:
+	_end_remote_inspection()
 	if _star_map_screen != null:
 		_star_map_screen.hide()
 	_current_meta_view = "mission"
@@ -6316,6 +6327,7 @@ func _can_open_mission_from_navigation() -> bool:
 
 
 func _show_debrief() -> void:
+	_end_remote_inspection()
 	if _star_map_screen != null:
 		_star_map_screen.hide()
 	_current_meta_view = "debrief"
@@ -7734,6 +7746,7 @@ func _is_space_craft_away(craft_id: String) -> bool:
 
 
 func _show_star_map() -> void:
+	_end_remote_inspection()
 	_current_meta_view = "star_map"
 	for screen in [_get_homebase_screen(), _get_fob_screen(), _get_debrief_screen()]:
 		if screen != null:
@@ -7883,6 +7896,10 @@ func _get_star_map_snapshot() -> Dictionary:
 	return result
 
 func _request_star_map_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "inspect_location":
+		return inspect_location_view(String(payload.get("location_id", "")))
+	if operation == "inspect_orbit":
+		return inspect_orbit_view(payload)
 	if operation == "open_location_view":
 		return open_location_view(String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
 	if operation == "space_cancel_approach":
@@ -8145,6 +8162,24 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 
 # The escape menu invokes the owning campaign saver, never the generic
 # scene-path-only mission slot.
+func get_campaign_save_projection() -> Dictionary:
+	var projection = load("res://scripts/meta/campaign_save_projection.gd")
+	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null:
+		var result: Dictionary = projection.inspect_saved().projection
+		result.save_blocked_reason = "campaign_unavailable"
+		result.save_blocked_text = projection.blocked_text("campaign_unavailable")
+		result.has_unsaved_progress = is_campaign_start()
+		return result
+	return _campaign_start.get_save_projection(self, _singleplayer_runtime)
+
+
+func get_exit_progress_projection() -> Dictionary:
+	if is_campaign_start(): return get_campaign_save_projection()
+	if is_instance_valid(_active_mission):
+		return {"summary":"Skirmish beginnt wieder von vorn. Der aktuelle Einsatzfortschritt wird nicht gespeichert.", "has_unsaved_progress":true, "can_save":false, "save_blocked_text":"Szenenstart merken speichert keinen Einsatzfortschritt."}
+	return {}
+
+
 func request_campaign_save() -> Dictionary:
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
@@ -8154,8 +8189,7 @@ func request_campaign_save() -> Dictionary:
 		if is_instance_valid(_active_mission): _active_autosave_next_msec = Time.get_ticks_msec() + 300000
 	else:
 		var reason := String(result.get("reason",""))
-		var messages := {"mission_planned_orders_unsupported":"Geplante Befehle zuerst ausführen oder entfernen.","mission_movement_pending":"Speichern wartet, bis die Bewegung abgeschlossen ist.","mission_lifecycle_busy":"Speichern wartet, bis der Einsatz ruhig ist.","mission_combat_unsupported":"Während eines Gefechts kann dieser Einsatz noch nicht gespeichert werden.","away_from_checkpoint":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","world_active":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","mission_travel_mismatch":"Während des Orbitflugs ist Speichern noch nicht verfügbar; der letzte sichere Stand bleibt erhalten.","shuttle_active":"Speichern wartet auf den Abschluss des Shuttleflugs.","shuttle_pending":"Speichern wartet auf den Shuttletransport.","cargo_transfer_active":"Speichern wartet auf den Frachttransfer.","recruitment_pending":"Speichern wartet auf die Anwerbung.","home_hex_checkpoint_unsupported":"Dieser Heimatbasisstand kann während eines Einsatzes noch nicht gespeichert werden.","multiple_locations_unsupported":"Speichern mit mehreren aktiven Orten wird noch nicht unterstützt.","active_restore_pending":"Der Einsatz wird noch geladen."}
-		result["message"] = messages.get(reason,"Dieser Einsatz kann momentan nicht sicher gespeichert werden.")
+		result["message"] = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason)
 	return result
 
 func is_campaign_start() -> bool:
@@ -8169,9 +8203,40 @@ func _campaign_load_failed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 
+func is_context_overlay_obscured() -> bool:
+	if is_instance_valid(_remote_inspection_screen) and _remote_inspection_screen.is_visible_in_tree(): return true
+	var popup := get_node_or_null("HomebaseScreen/CharacterSheetPopup") as Control
+	if popup != null and popup.is_visible_in_tree(): return true
+	var details: Control = _active_mission.get_node_or_null("TacticalUI/CharacterOverlay") if is_instance_valid(_active_mission) else null
+	if details != null and details.is_visible_in_tree(): return true
+	if _star_map_screen != null and _star_map_screen.is_visible_in_tree(): return true
+	var homebase := get_node_or_null("HomebaseScreen")
+	var presenter: Node = homebase.get("_operations_presenter") if homebase != null else null
+	return presenter != null and presenter.has_method("is_workspace_flyout_open") and presenter.is_workspace_flyout_open()
+
+
+func _bind_context_overlay_signals() -> void:
+	var controls: Array = [get_node_or_null("HomebaseScreen/CharacterSheetPopup"), _star_map_screen, _remote_inspection_screen]
+	var homebase := get_node_or_null("HomebaseScreen")
+	var presenter: Node = homebase.get("_operations_presenter") if homebase != null else null
+	if presenter != null: controls.append(presenter.get("_flyout_scrim"))
+	if is_instance_valid(_active_mission): controls.append(_active_mission.get_node_or_null("TacticalUI/CharacterOverlay"))
+	for control in controls:
+		if is_instance_valid(control) and not control.visibility_changed.is_connected(_on_context_overlay_visibility_changed):
+			control.visibility_changed.connect(_on_context_overlay_visibility_changed)
+
+
+func _on_context_overlay_visibility_changed() -> void:
+	# Visibility is existing UI state, not a second gameplay owner. Apply on the
+	# same event so a fast frame/capture cannot expose stale high CanvasLayers.
+	if not is_inside_tree() or is_queued_for_deletion(): return
+	_refresh_singleplayer_services()
+	if _campaign_tutorial != null: _campaign_tutorial.refresh()
+
+
 func _refresh_singleplayer_services() -> void:
-	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open")) and String(get_node("HomebaseScreen").get("_operations_mode")) != "services"
 	if _singleplayer_services == null or _singleplayer_runtime == null: return
+	var overlays_blocked := is_context_overlay_obscured()
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
 	var at_polisa := _current_meta_view == "mission" and String(get_location_view_snapshot().get("location_id", "")) == "polisa"
 	if at_polisa and _polisa_station_screen == null:
@@ -8179,14 +8244,14 @@ func _refresh_singleplayer_services() -> void:
 		_singleplayer_services.get_parent().add_child(_polisa_station_screen)
 		_polisa_station_screen.call("configure", _singleplayer_runtime)
 	if _polisa_station_screen != null:
-		_polisa_station_screen.visible = at_polisa
-		if at_polisa: _polisa_station_screen.call("refresh", _singleplayer_runtime.call("get_polisa_snapshot", snapshot))
+		_polisa_station_screen.visible = at_polisa and not overlays_blocked
+		if _polisa_station_screen.visible: _polisa_station_screen.call("refresh", _singleplayer_runtime.call("get_polisa_snapshot", snapshot))
 	var presenter: Node=get_node("HomebaseScreen").get("_operations_presenter")
 	var base: Node=presenter.get("_base") if presenter!=null else null
 	if base!=null and not base.is_connected("world_selection_changed",_on_base_world_selection_changed): base.connect("world_selection_changed",_on_base_world_selection_changed)
 	var at_home := _current_meta_view == "homebase" and presenter!=null and String(presenter.get("_mode"))=="base"
 	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
-	var service_available := (at_home or remote) and not at_polisa
+	var service_available := (at_home or remote) and not at_polisa and not overlays_blocked
 	if _singleplayer_services_toggle != null:
 		_singleplayer_services_toggle.visible = service_available
 		_singleplayer_services_toggle.text = "Versorgung schließen" if _singleplayer_services_open else "Versorgung öffnen"
@@ -8239,6 +8304,111 @@ func _finish_singleplayer_visit_if_returned() -> void:
 const LOCATION_CONTEXT_FIELDS := ["_active_mission","_mission_planning_state","_active_singleplayer_identity","_pending_campaign_mission_result","_selected_unit_ids","_selected_fireteam_ids","_selected_mission_id","_selected_mission_map_path","_active_mission_started_at_msec","_active_mission_time_limit_seconds"]
 
 ## These entry points change only the viewed projection and serviceship selection.
+func _end_remote_inspection() -> void:
+	if _inspection_terrain_view != null:
+		var view: Object = _inspection_terrain_view.get_ref()
+		if is_instance_valid(view): view.call("set_inspection_blackout", false)
+	_inspection_terrain_view = null
+	_inspection_target = {}
+	if is_instance_valid(_remote_inspection_screen): _remote_inspection_screen.hide()
+
+func inspect_location_view(location_id: String) -> Dictionary:
+	var snapshot := get_singleplayer_snapshot()
+	var locations: Dictionary = Dictionary(snapshot.get("campaign", {})).get("locations", {})
+	if not locations.has(location_id):
+		return {"ok":false, "reason":"unknown_location", "message":"Dieser Ort gehört nicht zur Sternkarte."}
+	if location_id == "homebase": return open_location_view(location_id)
+	var instance: Node = _location_registry.get_location(location_id)
+	if is_instance_valid(instance):
+		var setup := instance.get_node_or_null("MissionSetup")
+		var view: Node = setup.get("_terrain_3d_view") if setup != null else null
+		if is_instance_valid(view) and view.has_method("set_inspection_blackout"):
+			var focused := focus_location(location_id)
+			if not bool(focused.get("ok", false)): return focused
+			_inspection_target = {"kind":"location", "location_id":location_id}
+			_inspection_terrain_view = weakref(view)
+			view.call("set_inspection_blackout", true)
+			return {"ok":true, "inspection":get_remote_inspection_snapshot()}
+	return _show_remote_inspection({"kind":"location", "location_id":location_id})
+
+func inspect_orbit_view(payload: Dictionary) -> Dictionary:
+	var travel: Dictionary = get_singleplayer_snapshot().get("space_travel", {})
+	var body_id := String(payload.get("body_id", ""))
+	var orbit_id := String(payload.get("orbit_id", ""))
+	var marker_id := String(payload.get("marker_id", ""))
+	var orbit: Dictionary = Dictionary(travel.get("orbits", {})).get(orbit_id, {})
+	if not Dictionary(travel.get("bodies", {})).has(body_id) or orbit.get("body_id") != body_id:
+		return {"ok":false, "reason":"unknown_orbit", "message":"Dieser Orbit gehört nicht zum Himmelskörper."}
+	# Old route markers remain valid aliases, never separate orbit maps.
+	if not marker_id.is_empty():
+		var known_marker := false
+		for marker: Dictionary in Array(orbit.get("markers", [])):
+			known_marker = known_marker or String(marker.get("id", "")) == marker_id
+		if not known_marker:
+			return {"ok":false, "reason":"unknown_orbit_marker", "message":"Dieser Orbitalmarker ist nicht vorhanden."}
+	return _show_remote_inspection({"kind":"orbit", "body_id":body_id, "orbit_id":orbit_id})
+
+func _show_remote_inspection(target: Dictionary) -> Dictionary:
+	_end_remote_inspection()
+	_inspection_target = target.duplicate(true)
+	_current_meta_view = "inspection"
+	for screen in [_get_homebase_screen(), _get_fob_screen(), _get_debrief_screen(), _star_map_screen]:
+		if is_instance_valid(screen): screen.hide()
+	_sync_mission_host_visibility()
+	_set_navigation_visible(false)
+	if not is_instance_valid(_remote_inspection_screen):
+		_remote_inspection_screen = load("res://scripts/ui/remote_inspection_screen.gd").new()
+		var layer := get_node_or_null("StarMapLayer") as CanvasLayer
+		if layer == null:
+			layer = CanvasLayer.new()
+			layer.name = "StarMapLayer"
+			layer.layer = 90
+			add_child(layer)
+		layer.add_child(_remote_inspection_screen)
+		_remote_inspection_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_remote_inspection_screen.connect("back_requested", _show_star_map)
+		_bind_context_overlay_signals()
+	_remote_inspection_screen.call("configure", Callable(self, "_get_remote_inspection_projection"))
+	_remote_inspection_screen.show()
+	# A newly created Control starts visible, so show() need not emit a signal.
+	_on_context_overlay_visibility_changed()
+	return {"ok":true, "inspection":get_remote_inspection_snapshot()}
+
+func _get_remote_inspection_projection() -> Dictionary:
+	var display = preload("res://scripts/mission/campaign_display_catalog.gd")
+	var result := {"target":_inspection_target.duplicate(true), "area":{}}
+	if _inspection_target.get("kind") == "location":
+		var campaign: Dictionary = get_singleplayer_snapshot().get("campaign", {})
+		var location_id := String(_inspection_target.get("location_id", ""))
+		result["title"] = display.location_name(location_id, Dictionary(campaign.get("locations", {})).get(location_id, {}))
+		return result
+	# Only flight/route data while polling an orbit; never rebuild personnel,
+	# supply or the world-checkpoint guard for this view.
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot") if is_instance_valid(_singleplayer_runtime) else {}
+	var body_id := String(_inspection_target.get("body_id", ""))
+	var body: Dictionary = Dictionary(travel.get("bodies", {})).get(body_id, {})
+	result["title"] = display.body_name(body_id, body) + " · OM"
+	result["body_visual"] = {"name":display.body_name(body_id, body), "color":Color.from_string(String(body.get("color", "866349")), Color("866349"))}
+	var area_id := "orbit_approach:" + body_id.uri_encode()
+	var crafts: Array = Dictionary(travel.get("routes", {})).keys()
+	var current := String(travel.get("craft_id", ""))
+	if not current.is_empty() and not crafts.has(current): crafts.append(current)
+	for craft_id in crafts:
+		var projection := _get_star_map_area_projection(String(craft_id))
+		if projection.get("ok", false) and String(projection.get("space_area_id", "")) == area_id:
+			result["area"] = projection
+			break
+	return result
+
+func get_remote_inspection_snapshot() -> Dictionary:
+	var result := {"target":_inspection_target.duplicate(true), "view":_current_meta_view}
+	if _inspection_terrain_view != null:
+		var view: Object = _inspection_terrain_view.get_ref()
+		if is_instance_valid(view): result["terrain"] = view.call("get_inspection_blackout_snapshot")
+	elif is_instance_valid(_remote_inspection_screen):
+		result["screen"] = _remote_inspection_screen.call("get_inspection_snapshot")
+	return result
+
 func open_location_view(location_id: String, craft_id: String = "") -> Dictionary:
 	if location_id not in ["homebase", "star_map"] and _location_registry.get_location(location_id) == null:
 		return {"ok":false,"reason":"location_not_loaded","message":"An diesem Ort ist noch keine Laufzeitinstanz geladen"}
@@ -8266,6 +8436,7 @@ func select_location_view_craft(location_id: String, craft_id: String) -> Dictio
 
 func get_location_view_snapshot() -> Dictionary:
 	var location_id := "homebase" if _current_meta_view == "homebase" else ""
+	if _current_meta_view == "inspection": location_id = String(_inspection_target.get("location_id", ""))
 	if _current_meta_view == "mission" and is_instance_valid(_active_mission):
 		location_id = String(_active_mission.get_meta("location_id", ""))
 	var craft_id := String(_view_craft_by_location.get(location_id, ""))
@@ -8284,23 +8455,58 @@ func _get_view_travel_craft_id() -> String:
 
 func _capture_location_view_context() -> Dictionary:
 	var previous := {}
+	previous["_inspection_target"] = _inspection_target.duplicate(true)
+	previous["_inspection_terrain_view"] = _inspection_terrain_view
 	for key: String in LOCATION_CONTEXT_FIELDS:
 		var value: Variant = get(key)
+		if key == "_active_mission":
+			previous[key] = weakref(value) if is_instance_valid(value) else null
+			previous["_active_mission_location_id"] = String(value.get_meta("location_id", "")) if is_instance_valid(value) else ""
+			continue
 		previous[key] = value.duplicate(true) if value is Dictionary or value is Array else (value.duplicate() if value is PackedStringArray else value)
 	return previous
 
 func _restore_location_view_context(previous: Dictionary, view: String, updated_instance: Node) -> void:
-	var previous_instance: Node = previous.get("_active_mission")
-	if is_instance_valid(previous_instance) and previous_instance == updated_instance:
+	# A background callback can show another view and clear the current filter.
+	# Restore the caller's pre-callback view identity, never that transient state.
+	var inspected_target: Dictionary = previous.get("_inspection_target", {})
+	var inspected_view: WeakRef = previous.get("_inspection_terrain_view")
+	var previous_reference: WeakRef = previous.get("_active_mission")
+	var previous_instance: Node = previous_reference.get_ref() if previous_reference != null else null
+	if previous_instance != null and previous_instance.is_queued_for_deletion(): previous_instance = null
+	var retired: bool = previous_reference != null and previous_instance == null
+	var retired_location_id: String = String(previous.get("_active_mission_location_id", ""))
+	var live_replacement: bool = is_instance_valid(updated_instance) and not updated_instance.is_queued_for_deletion()
+	if live_replacement and (retired or previous_instance == updated_instance):
 		# Admission/callback may have changed this same live root while its UI was hidden.
-		# Reproject its current Controller/Setup; never replay stale pre-arrival planning.
-		_enter_location_context(previous_instance)
+		# A new visit can also retire that root. Reproject the current owner;
+		# never assign a freed Node or replay planning from the retired visit.
+		_enter_location_context(updated_instance)
 	else:
-		for key: String in LOCATION_CONTEXT_FIELDS: set(key, previous[key])
+		for key: String in LOCATION_CONTEXT_FIELDS:
+			set(key, previous_instance if key == "_active_mission" else previous[key])
+	if retired and view == "mission" and (not live_replacement or retired_location_id != String(updated_instance.get_meta("location_id", ""))):
+		if not retired_location_id.is_empty(): _show_remote_inspection({"kind":"location", "location_id":retired_location_id})
+		else: _show_star_map()
+		return
+	if retired and view == "mission" and inspected_target.get("kind") == "location" and inspected_target.get("location_id") == retired_location_id:
+		# The old view's WeakRef retires with its mission. Reapply inspection
+		# through the existing registry entry and its new terrain view.
+		inspect_location_view(retired_location_id)
+		return
 	match view:
-		"mission": _show_mission()
+		"mission":
+			_show_mission()
+			# A background callback temporarily rebinds context; it is not a user
+			# exit from the currently inspected location.
+			if inspected_view != null and is_instance_valid(inspected_view.get_ref()):
+				_inspection_target = inspected_target
+				_inspection_terrain_view = inspected_view
+				inspected_view.get_ref().call("set_inspection_blackout", true)
 		"homebase": _show_homebase(true)
 		"star_map": _show_star_map()
+		"inspection":
+			if not inspected_target.is_empty(): _show_remote_inspection(inspected_target)
 		"debrief": _show_debrief()
 		_:
 			_current_meta_view = view
@@ -8352,6 +8558,7 @@ func _enter_location_context(instance: Node) -> void:
 	var data: Dictionary=_location_contexts.get(id,{})
 	var timer := _location_timer_view_projection(instance, data)
 	_active_mission=instance
+	_bind_context_overlay_signals()
 	_active_mission_started_at_msec = int(timer.started_at_msec)
 	_active_mission_time_limit_seconds = float(timer.time_limit_seconds)
 	_active_singleplayer_identity=Dictionary(data.get("identity",instance.get_meta("singleplayer_mission_identity",{}))).duplicate(true)
@@ -8486,25 +8693,51 @@ func _restore_returning_visit_membership(craft_id: String) -> void:
 	_available_team_units=_merge_missing_units_by_id(_available_team_units,profiles)
 
 
-func register_campaign_recruit(profile: Dictionary, craft_definition: Dictionary = {}) -> Dictionary:
+func register_campaign_recruit(profile: Dictionary, craft_definition: Dictionary = {}, payload_craft_id: String = "") -> Dictionary:
 	var id := String(profile.get("unit_id",""))
 	if id.is_empty(): return {"ok":false,"reason":"invalid_recruit"}
 	for unit: Dictionary in _all_team_units:
 		if String(unit.get("unit_id",""))==id: return {"ok":true,"already_registered":true}
-	_all_team_units.append(profile.duplicate(true))
-	_available_team_units.append(profile.duplicate(true))
+	# Validate the actual transport before registering a person. A profile's
+	# fireteam_id is only a default, never proof of a loaded squad or pilot seat.
+	var new_craft_id := String(craft_definition.get("craft_id", ""))
+	if not craft_definition.is_empty() and (new_craft_id.is_empty() or not payload_craft_id.is_empty()):
+		return {"ok":false,"reason":"invalid_craft"}
+	if not craft_definition.is_empty() and not _find_homebase_aircraft_definition(new_craft_id).is_empty():
+		return {"ok":false,"reason":"recruit_craft_exists"}
+	var payload_team := ""
+	var home_screen: Node = _get_homebase_screen()
+	if not payload_craft_id.is_empty():
+		if home_screen == null or _find_homebase_aircraft_definition(payload_craft_id).is_empty():
+			return {"ok":false,"reason":"recruit_transport_unavailable"}
+		var loaded: PackedStringArray = home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", payload_craft_id)
+		for team: String in loaded:
+			if not PackedStringArray(home_screen.call("_get_member_unit_ids_for_fireteam", team)).is_empty():
+				payload_team = team
+				break
+		if payload_team.is_empty() or _homebase_staged_unit_ids.size() >= int(home_screen.call("_get_team_capacity")):
+			return {"ok":false,"reason":"recruit_payload_unavailable"}
+	var admitted := profile.duplicate(true)
+	if not payload_team.is_empty(): admitted.fireteam_id = payload_team
+	_all_team_units.append(admitted.duplicate(true))
+	_available_team_units.append(admitted.duplicate(true))
 	if not craft_definition.is_empty():
-		var craft_id := String(craft_definition.get("craft_id",""))
-		if craft_id.is_empty(): return {"ok":false,"reason":"invalid_craft"}
-		if _find_homebase_aircraft_definition(craft_id).is_empty(): _homebase_aircraft_definitions.append(craft_definition.duplicate(true))
-		_assigned_aircraft_pilot_by_craft[craft_id]=id
-		_aircraft_location_by_craft[craft_id]="homebase"
+		if _find_homebase_aircraft_definition(new_craft_id).is_empty(): _homebase_aircraft_definitions.append(craft_definition.duplicate(true))
+		_assigned_aircraft_pilot_by_craft[new_craft_id]=id
+		_aircraft_location_by_craft[new_craft_id]="homebase"
+	if not payload_team.is_empty():
+		_homebase_staged_unit_ids.append(id)
+		_homebase_staged_fireteam_ids.append(payload_team)
+		# This is a roster/transport commit, not a presentation refresh. Hidden
+		# homebase presenters may defer repainting, never this existing membership.
+		home_screen.call("setup_roster", _available_team_units, _homebase_staged_unit_ids)
+		home_screen.call("set_fireteam_context", _homebase_staged_fireteam_ids, [], false)
 	if _singleplayer_runtime != null:
 		_singleplayer_runtime.call("sync_crafts")
 		var personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
 		if personnel!=null: personnel.call("sync_roster")
 	_refresh_homebase_screen()
-	return {"ok":true,"unit_id":id}
+	return {"ok":true,"unit_id":id,"fireteam_id":payload_team}
 
 
 func remove_skirmish_person(unit_id: String) -> void:

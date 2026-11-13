@@ -10,8 +10,9 @@ uniform float pattern_seed = 3.2;
 uniform float wear_strength : hint_range(0.0, 1.0) = 1.0;
 // Dust, sun bleaching, directed wash, selective edge abrasion.
 uniform vec4 role_strength = vec4(0.55, 0.42, 0.50, 0.30);
-instance uniform vec3 wear_part_min = vec3(-0.5);
-instance uniform vec3 wear_part_max = vec3(0.5);
+// Immutable mesh bounds; shared material variants require no instance buffer.
+uniform vec3 wear_part_min = vec3(-0.5);
+uniform vec3 wear_part_max = vec3(0.5);
 varying vec3 building_position;
 varying vec3 surface_normal_world;
 varying vec3 part_position;
@@ -76,7 +77,7 @@ void fragment() {
 		* smoothstep(0.13, 0.66, relative_height) * role_strength.z;
 	paint *= 1.0 - run * 0.18 * wear_strength;
 	paint = mix(paint, dust_color.rgb * 0.90, run * 0.12 * wear_strength);
-	// Per-component instance bounds localize abrasion to a few physical edge areas.
+	// Per-component mesh bounds localize abrasion to a few physical edge areas.
 	vec3 half_size = max((wear_part_max - wear_part_min) * 0.5, vec3(0.0001));
 	vec3 center = (wear_part_min + wear_part_max) * 0.5;
 	vec3 distances = max(half_size - abs(part_position - center), vec3(0.0));

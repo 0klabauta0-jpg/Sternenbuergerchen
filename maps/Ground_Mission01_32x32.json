@@ -1,4 +1,5 @@
 {
+	"tactical_grid_rules": "hex_tactical_v1",
 	"authored_visual_layout_id": "gm01_frontier_outpost_v1",
 	"enemy_team_configs": {
 		"default": {

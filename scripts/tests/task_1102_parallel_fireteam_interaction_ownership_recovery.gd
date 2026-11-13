@@ -2,6 +2,7 @@ extends SceneTree
 
 const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
 const INTERACTION_COMMAND := preload("res://scripts/mission/mission_interaction_multiplayer_command.gd")
+const CONTEXT := preload("res://scripts/tests/review_interaction_fixture_context.gd")
 const ENET_PORT_START := 19681
 const ENET_PORT_END := 19691
 
@@ -67,17 +68,21 @@ func _test_parallel_ownership_and_rebind() -> void:
 	var client_peer_id: int = client_api.get_unique_id()
 	_configure_assignments(host_sim, client_peer_id, host_fireteam, client_fireteam)
 	_configure_assignments(client_sim, client_peer_id, host_fireteam, client_fireteam)
+	_assert(CONTEXT.bind_pair(host_scene, client_scene, "task1102_parallel"), "Both real Hex scenes bind the verified map session")
+	await _poll(host_api, client_api, 12)
 	client_sim.network_command_result_received.connect(_on_client_result)
 	host_sim.network_command_accepted.connect(_on_host_command_accepted)
 
-	var target_a := Vector2(160.0, 160.0)
-	var target_b := Vector2(320.0, 160.0)
+	# The test owns its two synthetic terminals, not the admitted actors' poses.
+	var target_a := CONTEXT.ground_position(host_scene, String(host_unit.call("get_unit_id")))
+	var target_b := CONTEXT.ground_position(host_scene, String(client_unit.call("get_unit_id")))
+	_assert(target_a.is_finite() and target_b.is_finite() and host_unit.global_position.is_equal_approx(target_a) and client_unit.global_position.is_equal_approx(target_b), "Terminal markers follow real authoritative Ground positions")
 	_configure_authored_interactions(host_scene, target_a, target_b)
 	_configure_authored_interactions(client_scene, target_a, target_b)
 	var host_command: Dictionary = _build_command("parallel_terminal_alpha", host_fireteam, String(host_unit.call("get_unit_id")), target_a, 120.0)
 	var client_command: Dictionary = _build_command("parallel_terminal_bravo", client_fireteam, String(client_unit.call("get_unit_id")), target_b, 120.0)
 	var host_result: Dictionary = Dictionary(host_sim.call("submit_network_command_for_peer", host_command, 1))
-	client_sim.rpc_id(1, "request_command", client_command)
+	client_sim.call("submit_multiplayer_command", client_command)
 	await _poll(host_api, client_api, 20)
 	_assert(bool(host_result.get("accepted", false)), "Host Fireteam starts its Interaction")
 	var pending: Dictionary = Dictionary(host_driver.call("get_pending_network_mission_interaction_snapshot"))
@@ -86,7 +91,7 @@ func _test_parallel_ownership_and_rebind() -> void:
 	_assert(_pending_owner(pending, "parallel_terminal_bravo") == client_fireteam, "Second Interaction keeps client Fireteam ownership")
 
 	var conflicting_command: Dictionary = _build_command("parallel_terminal_alpha", client_fireteam, String(client_unit.call("get_unit_id")), target_a, 120.0)
-	client_sim.rpc_id(1, "request_command", conflicting_command)
+	client_sim.call("submit_multiplayer_command", conflicting_command)
 	await _poll(host_api, client_api, 20)
 	var conflict_result: Dictionary = _last_result_for("parallel_terminal_alpha")
 	pending = Dictionary(host_driver.call("get_pending_network_mission_interaction_snapshot"))
@@ -94,8 +99,6 @@ func _test_parallel_ownership_and_rebind() -> void:
 	_assert(_pending_owner(pending, "parallel_terminal_alpha") == host_fireteam, "Rejected command cannot replace Interaction owner")
 	_assert(Vector2(Dictionary(Dictionary(pending.get("entries", {})).get("parallel_terminal_alpha", {})).get("target_position", Vector2.ZERO)).is_equal_approx(target_a), "Rejected command cannot rewrite Interaction target")
 
-	host_unit.global_position = target_a
-	client_unit.global_position = target_b
 	host_sim.call("_physics_process", 2.0)
 	host_sim.call("_physics_process", 0.016)
 	await _poll(host_api, client_api, 20)
@@ -109,7 +112,7 @@ func _test_parallel_ownership_and_rebind() -> void:
 	same_owner_spoof["command_type"] = "defend"
 	same_owner_spoof["target_position"] = Vector2(777.0, 777.0)
 	same_owner_spoof["duration_seconds"] = 0.0
-	client_sim.rpc_id(1, "request_command", same_owner_spoof)
+	client_sim.call("submit_multiplayer_command", same_owner_spoof)
 	await _poll(host_api, client_api, 20)
 	var canonical_client_result: Dictionary = _last_result_for("parallel_terminal_bravo")
 	_assert(bool(canonical_client_result.get("accepted", false)) and String(canonical_client_result.get("command_type", "")) == "take", "Client result confirms canonical command type instead of spoofed Same-Fireteam payload")

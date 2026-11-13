@@ -633,14 +633,22 @@ func _serialize_markers() -> Dictionary:
 			continue
 		var marker_record: Dictionary = _coerce_marker_record(marker_id, _markers.get(marker_id_variant, {}))
 		var marker_position: Vector2 = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", marker_record.get("position", Vector2.ZERO))
+		# Hex centers generally contain fractional world coordinates. Preserve
+		# those authored positions so exact door footprints survive save/load.
+		# Historical square maps retain their established integer serialization.
+		var marker_x: Variant = int(round(marker_position.x))
+		var marker_y: Variant = int(round(marker_position.y))
+		if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+			marker_x = marker_position.x
+			marker_y = marker_position.y
 		serialized_markers[marker_id] = {
 			"marker_type_id": String(marker_record.get("marker_type_id", marker_id)).strip_edges().to_lower(),
 			"name": String(marker_record.get("name", marker_id)).strip_edges(),
 			"placement_context": String(marker_record.get("placement_context", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_context", marker_id))).strip_edges().to_lower(),
 			"symbol": String(marker_record.get("symbol", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", marker_id))).strip_edges().to_lower(),
 			"color": TERRAIN_MARKER_CATALOG_SCRIPT.call("serialize_color", TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", marker_record.get("color", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id)), TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id))),
-			"x": int(round(marker_position.x)),
-			"y": int(round(marker_position.y)),
+			"x": marker_x,
+			"y": marker_y,
 		}
 
 	return serialized_markers
@@ -756,6 +764,14 @@ func get_regional_height_step() -> float:
 	return clampf(float(_extension_metadata.get("regional_height_step", 0.75)), 0.5, 1.0)
 
 
+## New-map authoring only; loading an existing map never calls this opt-in.
+func enable_explicit_hex_height_authoring() -> bool:
+	if get_grid_topology() != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return false
+	_extension_metadata["terrain_height_rules"] = TERRAIN_TILE_DATA_SCRIPT.EXPLICIT_HEIGHT_RULES
+	return true
+
+
 func get_terrain_height_rules() -> String:
 	return String(_extension_metadata.get("terrain_height_rules", ""))
 
@@ -770,6 +786,31 @@ func set_tactical_grid_rules(value: String) -> void:
 		_extension_metadata.erase("tactical_grid_rules")
 	else:
 		_extension_metadata["tactical_grid_rules"] = value
+
+
+## Explicit play/import boundary for a newly loaded custom map. File contents
+## stay untouched; historical imports still use load_from_file unchanged.
+func activate_hex_tactical_runtime() -> Dictionary:
+	if has_load_issue() or _map_name.is_empty() or _grid_size.x <= 0 or _grid_size.y <= 0 or _tiles.is_empty(): return {"ok":false,"reason":"map_load_issue"}
+	if _grid_topology == "square8":
+		for id in _markers: _markers[id].position = _legacy_world_to_hex_world(get_marker_position(id))
+		for id in _patrol_paths:
+			for index in range(_patrol_paths[id].size()): _patrol_paths[id][index] = _legacy_world_to_hex_world(Vector2(_patrol_paths[id][index]))
+		for prop: Dictionary in _place_presentation.get("props", []):
+			var center: Array = prop.get("center", [])
+			if center.size() == 2:
+				var plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2(float(center[0]),float(center[1])))
+				prop.center = [plane.x,plane.y]
+		_grid_topology = HEX_GRID_SCRIPT.TOPOLOGY_ID
+		for tile in _tiles: tile.world_position = _grid_to_world(tile.grid_position)
+	set_tactical_grid_rules(TACTICAL_GRID_RULES_V1)
+	return {"ok":true}
+
+
+func _legacy_world_to_hex_world(position: Vector2) -> Vector2:
+	var skew := Vector2((position.x-_grid_origin.x)/_tile_half_width,(position.y-_grid_origin.y)/_tile_half_height)
+	var plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2((skew.x+skew.y)*0.5,(skew.y-skew.x)*0.5))
+	return _grid_origin + Vector2((plane.x-plane.y)*_tile_half_width,(plane.x+plane.y)*_tile_half_height)
 
 
 func _get_tactical_grid_rules_issue() -> String:

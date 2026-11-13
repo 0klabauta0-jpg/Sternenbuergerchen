@@ -52,7 +52,8 @@ Der Contract lehnt Payloads ab, die Client-State als Wahrheit setzen wollen, unt
   Direkte interne `enqueue_command()`-Aufrufe behalten ihre Host-Policy-Werte.
 - Zielvektoren der geprüften Netzwerkabsichten müssen endlich sein.
 - Bei Missionsinteraktionen dienen Client-Metadaten nur als Hinweise. Der
-  CombatDriver bestimmt Markerposition, Radius, Dauer, Bedienart und Step/Gate
+  CombatDriver bestimmt über seine `MissionNetworkInteractionAuthority`
+  Markerposition, Radius, Dauer, Bedienart und Step/Gate
   aus dem geladenen Host-Szenario und `MissionSetup`-Kartenmodell. Unbekannte IDs,
   fehlende Marker, falsche Besitzer, unerfüllte Voraussetzungen und nicht mehr
   aktive Missionen/Bediener werden abgewiesen.
@@ -64,6 +65,16 @@ Der Contract lehnt Payloads ab, die Client-State als Wahrheit setzen wollen, unt
   localhost-ENet-RPCs und Produktionsowner mit privatem Testprofil.
 
 ## Testbarkeit
+
+### Gebundene Snapshot-Chunks
+Der unzuverlässige Chunktransport trägt bei bereits gebundenen Roots nur den
+32-stelligen Runtime-Token je Paket. Der bisher wiederholte vollständige
+Map-/Szenariokontext hatte im tatsächlichen Stationslauf 1408 Byte große Pakete
+bei 1392 Byte MTU erzeugt. Der vollständige Kontext bleibt im Snapshotkörper
+und wird nach Reassembly unverändert geprüft. Ein fremder Token darf keinen
+Reassemblypuffer anlegen; ein passender Token erlaubt keinen fremden Kontext
+im Snapshotkörper. Die ungebundene Legacyroute bleibt erhalten.
+
 `scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd` prueft:
 - erlaubter Move wird serverseitig enqueued
 - fremdes Team wird abgelehnt

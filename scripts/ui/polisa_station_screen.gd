@@ -124,7 +124,7 @@ func refresh(snapshot: Dictionary) -> void:
 		return
 	_label(_content, "Schiffslager: %s / %d Einheiten" % [String(snapshot.get("craft_name", snapshot.get("craft_id", "-"))), _cargo_total()])
 	if _page == "ships":
-		_label(_content, "Ein gebautes freies Heimatpad bleibt als Liefer- oder Rückkehrplatz reserviert.")
+		_label(_content, "Ein freies Heimatpad wird reserviert.")
 		var delivery := OptionButton.new()
 		delivery.add_item("Zur Heimatbasis liefern")
 		delivery.add_item("Hier auf Polisa übernehmen (unbemannt)")
@@ -132,13 +132,13 @@ func refresh(snapshot: Dictionary) -> void:
 		delivery.select(1 if _delivery_mode == "local" else 0)
 		_content.add_child(delivery)
 		delivery.item_selected.connect(func(index: int): _delivery_mode = "local" if index == 1 else "homebase"; _signature = ""; refresh(_snapshot))
-		if _delivery_mode == "local": _label(_content, "Pilot und Besatzung anschließend ausdrücklich zuweisen und an Bord bringen.")
+		if _delivery_mode == "local": _label(_content, "Unbemannt · Pilot und Besatzung noch zuweisen")
 		if not snapshot.get("local_pickup_available", false): _label(_content, String(snapshot.get("local_pickup_reason", "Lokale Ausgabe noch nicht verfügbar")))
 		if snapshot.get("campaign_mode", false):
 			_button(_content, "Heimatpad %d bauen / 200 Credits" % (int(snapshot.get("home_pad_count", 2)) + 1), _request.bind("station_build_home_pad", {}), int(snapshot.get("home_pad_count", 2)) >= 6)
 	if _page == "ships": _show_crew_handoff(snapshot)
 	if _page in ["infantry", "armor"]:
-		_label(_content, "Kauf ins gelandete Schiffslager. Ausrüstung für deine Personen auf der Station auswählen.")
+		_label(_content, "Kaufziel: gelandetes Schiffslager")
 		var people := OptionButton.new()
 		_content.add_child(people)
 		for person: Dictionary in snapshot.get("people", []):
@@ -198,7 +198,7 @@ func refresh(snapshot: Dictionary) -> void:
 			var equip := _button(actions, "Ausrüsten", _request.bind("inventory_equip", {"craft_id":String(snapshot.get("craft_id", "")),"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
 			equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _page == "commodities":
-		_label(_content, "Ankauf aus dem gelandeten Schiffslager / je 1 Einheit")
+		_label(_content, "Verkauf aus dem Schiffslager · je 1")
 		for item: String in snapshot.get("buy_orders", {}):
 			var price := int(snapshot.buy_orders[item])
 			_button(_content, "%s / Lager %d / 1 verkaufen fuer %d Cr" % [item, _cargo(item), price], _request.bind("sell", {"craft_id":String(_snapshot.get("craft_id", "")),"item_id":item,"quantity":1}), _cargo(item) < 1)
@@ -391,7 +391,7 @@ func _show_warp_equipment(snapshot: Dictionary) -> void:
 	var offer: Dictionary = snapshot.get("offers", {}).get("polisa_warp_hemera", {})
 	if not offer.is_empty():
 		_button(_content, "Hemera / Klasse A / 160 Cr kaufen · Bestand %d" % int(snapshot.get("stock", {}).get("polisa_warp_hemera", 0)), _request.bind("buy", {"craft_id":String(snapshot.get("craft_id", "")), "offer_id":"polisa_warp_hemera", "quantity":1}), int(snapshot.get("credits", 0)) < 160 or int(snapshot.get("stock", {}).get("polisa_warp_hemera", 0)) < 1)
-	_label(_content, "Kauf ins Schiffslager; Einbau separat. Bisheriger Antrieb kommt ins gleiche Lager zurück.")
+	_label(_content, "Einbau separat · alter Antrieb zurück ins Schiffslager")
 	for item_id: String in catalog.ITEMS:
 		var item: Dictionary = catalog.item(item_id)
 		var quantity := _cargo(item_id)
@@ -406,7 +406,7 @@ func _show_crew_handoff(snapshot: Dictionary) -> void:
 		var claim := _button(_content, "%s für dieses Schiff übernehmen" % String(resident.get("name", unit_id)), _request.bind("station_claim_resident", {"craft_id":String(snapshot.get("craft_id", "")),"unit_id":unit_id}))
 		claim.name = "ClaimResident_" + unit_id
 	_button(_content, "Besatzung einsteigen lassen", _request.bind("station_board_crew", {"craft_id":String(snapshot.get("craft_id", ""))}))
-	_label(_content, "Zum Übernehmen der Besatzung zuerst das Zielschiff oben auswählen.")
+	_label(_content, "Zielschiff oben auswählen")
 	var sources: Array = handoff.get("sources", [])
 	if sources.is_empty():
 		_label(_content, String(handoff.get("message", "Keine andere lokale Besatzung verfügbar.")))
@@ -425,7 +425,7 @@ func _show_crew_handoff(snapshot: Dictionary) -> void:
 	source_choice.item_selected.connect(func(index: int): _crew_source = String(source_choice.get_item_metadata(index)); _crew_pilot = ""; _signature = ""; refresh(_snapshot))
 	if selected.is_empty(): return
 	_button(_content, "Personen des Quellschiffs absetzen", _request.bind("station_deploy_crew", {"craft_id":_crew_source}))
-	_label(_content, "Personen müssen auf dem Stationsdeck zum Zielschiff gelangen. Die Übergabe ersetzt kein Einsteigen.")
+	_label(_content, "Nach der Übergabe noch zum Zielschiff gehen und einsteigen.")
 	var pilot_choice := OptionButton.new()
 	pilot_choice.add_item("Piloten auswählen")
 	pilot_choice.set_item_metadata(0, "")
@@ -439,7 +439,7 @@ func _show_crew_handoff(snapshot: Dictionary) -> void:
 			pilot_present = true
 	pilot_choice.item_selected.connect(func(index: int): _crew_pilot = String(pilot_choice.get_item_metadata(index)); _signature = ""; refresh(_snapshot))
 	var team := CheckBox.new()
-	team.text = "Trupp mitnehmen (ganze Besatzung des Quellbesuchs)"
+	team.text = "Ganze Besatzung mitnehmen"
 	team.button_pressed = _crew_take_team
 	_content.add_child(team)
 	team.toggled.connect(func(enabled: bool): _crew_take_team = enabled; _signature = ""; refresh(_snapshot))

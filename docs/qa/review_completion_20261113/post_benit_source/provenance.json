@@ -1,0 +1,13 @@
+{
+  "kind": "authentic_private_home_checkpoint",
+  "source_run": "efdc89a07ad74ee28e39083c271a3cb0",
+  "source_snapshot": "17a1ceea038b400bbbc32b90f62c483f",
+  "source_script": "campaign_five_actual_sorties_verifier.gd",
+  "source_private_profile": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-efdc89a07ad74ee28e39083c271a3cb0\\campaigns\\introduction\\checkpoint_v1.json",
+  "checkpoint_sha256": "354a4a9f6841b51a8d906878c2b263e6cbb55136cbd9939dfdac7ca038c5e789",
+  "last_completed_job": "benit_delivery",
+  "actual_prior_home_returns": 3,
+  "source_run_result": "198 passed / 1 failed: fourth-job approach+combat 60-second timeout",
+  "unchanged_source": true,
+  "purpose": "Two actual remaining sorties via normal Continue; not counted as another five-sortie run."
+}

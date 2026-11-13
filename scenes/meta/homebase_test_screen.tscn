@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://drb7o2mk2gxxa"]
 
-[ext_resource type="Script" uid="uid://dye1ybjacy442" path="res://scripts/meta/homebase_screen.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://va7te1c15i3j" path="res://scripts/meta/homebase_team_drop_panel.gd" id="2_v7pq4"]
+[ext_resource type="Script" uid="uid://c374gg5hwqd6p" path="res://scripts/meta/homebase_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://blr4wjstu62pg" path="res://scripts/meta/homebase_team_drop_panel.gd" id="2_v7pq4"]
 [ext_resource type="Script" path="res://scripts/meta/homebase_roster_drop_panel.gd" id="3_rosterdrop"]
 
 [node name="HomebaseScreen" type="Control" unique_id=931750808]

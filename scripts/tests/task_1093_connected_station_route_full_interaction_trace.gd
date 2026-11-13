@@ -2,6 +2,7 @@ extends SceneTree
 
 const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
 const INTERACTION_BINDINGS := preload("res://scripts/mission/mission_interaction_point_binding.gd")
+const CONTEXT := preload("res://scripts/tests/review_interaction_fixture_context.gd")
 const SCENARIO_PATH := "res://data/mission_scenarios/station_route_one_screen_multiplayer_drill.json"
 const ENET_PORT_START := 19461
 const ENET_PORT_END := 19471
@@ -63,6 +64,8 @@ func _test_full_route() -> void:
 	var peer_id := client_api.get_unique_id()
 	_configure(host_sim, peer_id, fireteam_id)
 	_configure(client_sim, peer_id, fireteam_id)
+	_assert(CONTEXT.bind_pair(host_scene, client_scene, "task1093_station_route"), "Both actual Station scenes bind the verified map session")
+	await _poll(host_api, client_api, 12)
 	var host_unit := _find_unit(host_scene, unit_id)
 	# Use the map already loaded by MissionSetup, not a separately loaded copy.
 	var map_data = host_scene.get_node("MissionSetup").get("_loaded_terrain_map_data")
@@ -76,19 +79,55 @@ func _test_full_route() -> void:
 		_assert(not binding.is_empty() and map_data != null and map_data.has_marker(String(binding.get("marker_id", ""))), "%s has a real authored Host marker" % step.interaction_id)
 		if binding.is_empty() or map_data == null or not map_data.has_marker(String(binding.get("marker_id", ""))):
 			continue
-		var target: Vector2 = map_data.get_marker_position(String(binding.marker_id), Vector2.ZERO)
+		# Door and computer now retain their actual authored positions. Travel
+		# crosses the real two-cell entrance after the connected Use opens it.
+		# AA/Cargo remain bounded routing probes at the actor's actual Ground cell.
+		var physical_step:bool=String(step.interaction_id) in ["station_route_drill_door","station_computer"]
+		var terrain:Node=host_scene.get_node("TerrainRegistry")
+		if String(step.interaction_id)=="station_route_drill_door":
+			_assert(not terrain.call("is_walkable",Vector2i(103,95)) and not terrain.call("is_walkable",Vector2i(104,95)),"Actual eastern frame and leaf are both closed before Use")
+			if not await _walk_to_grid(host_scene,host_api,client_api,unit_id,Vector2i(105,95),"door_outside"):break
+		elif String(step.interaction_id)=="station_computer":
+			_assert(terrain.call("is_walkable",Vector2i(103,95)) and terrain.call("is_walkable",Vector2i(104,95)),"Connected Door Use opens exactly the physical entrance")
+			if not await _walk_to_grid(host_scene,host_api,client_api,unit_id,Vector2i(104,95),"door_leaf"):break
+			if not await _walk_to_grid(host_scene,host_api,client_api,unit_id,Vector2i(103,95),"door_frame"):break
+			if not await _walk_to_grid(host_scene,host_api,client_api,unit_id,Vector2i(96,95),"computer_inside"):break
+		var actual_position:=CONTEXT.ground_position(host_scene, unit_id)
+		var target:Vector2=map_data.get_marker_position(String(binding.marker_id)) if physical_step else actual_position
+		_assert(actual_position.is_finite() and host_unit.global_position.is_equal_approx(actual_position), "%s uses the actual admitted Ground position" % step.interaction_id)
+		if not actual_position.is_finite() or not host_unit.global_position.is_equal_approx(actual_position):
+			print("STATION_ROUTE_ADMISSION ", {"unit_id":unit_id,"position":host_unit.global_position,"setup":host_scene.get_node("MissionSetup").call("get_hex_setup_status"),"pending":host_scene.get_node("MissionSetup").get("_hex_setup_pending"),"ground":host_sim.call("get_hex_unit_state",unit_id)})
+			# Preserve the failed precondition and clean up below. An absent Ground
+			# position must never become an infinite marker/rendering transform.
+			break
+		if not physical_step:
+			map_data.set_marker_position(String(binding.marker_id), target)
+			client_scene.get_node("MissionSetup").get("_loaded_terrain_map_data").set_marker_position(String(binding.marker_id), target)
 		step.merge({"accepted":true,"fireteam_id":fireteam_id,"target_position":target,"gate_id":binding.gate_id,"interaction_radius_world":float(binding.radius_world)}, true)
 		var command: Dictionary = Dictionary(client_controller.call("build_mission_interaction_multiplayer_network_command", step, unit_id, "team_alpha", target))
 		_assert(not command.is_empty() and String(command.get("source_context", "")) == "mission_interaction_use_intent_command", "%s projects to a neutral network command" % step.interaction_id)
-		client_sim.rpc_id(1, "request_command", command)
+		if String(step.interaction_id)=="station_route_drill_door":
+			var forged:=command.duplicate(true)
+			forged.door_cells=[{"x":0,"y":0}]
+			forged.target_position=Vector2.ZERO;forged.duration_seconds=0.0;forged.interaction_radius_world=9999.0
+			var resolved:Dictionary=host_driver.call("_resolve_host_network_interaction",forged)
+			var canonical:Dictionary=resolved.get("command",{})
+			_assert(resolved.get("accepted",false) and canonical.get("target_position")==target and canonical.get("duration_seconds")==2.0 and canonical.get("interaction_radius_world")==128.0,"Host ignores forged client target, duration and range for actual physical Door")
+			var projection:Dictionary=load("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd").build_runtime_snapshot([binding],{"station_route_drill_door":{"complete":true}},map_data,terrain)
+			var physical_cells:Array=[]
+			for override:Dictionary in projection.overrides:physical_cells.append(override.grid_position)
+			_assert(physical_cells.size()==2 and physical_cells.has(Vector2i(103,95)) and physical_cells.has(Vector2i(104,95)) and not physical_cells.has(Vector2i.ZERO),"Forged client footprint never changes the two authoritative Door cells")
+		client_sim.call("submit_multiplayer_command", command)
 		await _poll(host_api, client_api, 18)
-		if host_unit != null:
-			host_unit.global_position = target
 		host_sim.call("_physics_process", maxf(float(step.duration_seconds), 0.0) + 0.5)
 		host_sim.call("_physics_process", 0.016)
 		await _poll(host_api, client_api, 12)
 		var host_state := Dictionary(Dictionary(host_driver.call("get_mission_interaction_runtime_states")).get(step.interaction_id, {}))
 		var client_state := Dictionary(Dictionary(client_driver.call("get_mission_interaction_runtime_states")).get(step.interaction_id, {}))
+		if not bool(client_state.get("complete", false)):
+			var projected: Dictionary = host_sim.call("project_multiplayer_state_for_peer", peer_id)
+			print("STATION_ROUTE_INVALID_WIRE_FIELDS ", _invalid_wire_fields(host_sim.call("_build_raw_multiplayer_tick_state")))
+			print("STATION_ROUTE_REPLICATION ", {"interaction_id":step.interaction_id,"host":host_state,"client":client_state,"projection_ok":projected.get("ok",false),"projection_reason":projected.get("reason",""),"projected_interactions":Dictionary(projected.get("snapshot",{})).get("mission_interactions",{}),"host_transport":host_sim.call("get_snapshot_transport_debug_snapshot"),"client_transport":client_sim.call("get_snapshot_transport_debug_snapshot"),"client_apply":client_sim.call("get_multiplayer_snapshot_debug_snapshot")})
 		_assert(bool(host_state.get("complete", false)) and String(host_state.get("required_state", "")) == String(step.required_state), "%s completes from host Arrival/Hold" % step.interaction_id)
 		_assert(bool(client_state.get("complete", false)), "%s replicates to client" % step.interaction_id)
 	var host_gate := Dictionary(host_controller.call("get_mission_interaction_objective_gate_snapshot"))
@@ -101,6 +140,55 @@ func _test_full_route() -> void:
 	pair.client_peer.close()
 	pair.host_peer.close()
 	await process_frame
+
+
+func _walk_to_grid(scene:Node,host_api:MultiplayerAPI,client_api:MultiplayerAPI,unit_id:String,grid:Vector2i,label:String)->bool:
+	var sim:Node=scene.get_node("SimulationRoot")
+	var terrain:Node=scene.get_node("TerrainRegistry")
+	var target:Vector2=terrain.call("grid_to_world",grid)
+	if not bool(terrain.call("is_walkable",grid)):
+		_assert(false,"Actual station approach goal is walkable: "+label)
+		return false
+	var ids:=PackedStringArray([unit_id])
+	var targets:Dictionary={unit_id:target}
+	if label=="door_outside":
+		# Normal admission surrounds the lead actor with its seven teammates.
+		# Move the actual group together; a lone centre actor correctly cannot
+		# walk through stationary occupants. No actors or claims are relocated.
+		var leader:Node=_find_unit(scene,unit_id)
+		for id in sim.call("get_hex_ground_planning_snapshot").get("units_by_id",{}):
+			var actor:Node=_find_unit(scene,String(id))
+			if String(id)!=unit_id and is_instance_valid(actor) and actor.call("get_team_id")==leader.call("get_team_id"):
+				ids.append(String(id))
+		var planned:Dictionary=sim.call("plan_hex_ground_actor_approach",ids,target,128.0)
+		_assert(planned.get("ok",false),"Actual Root plans distinct legal outer-entrance goals for the full admitted crew")
+		if not planned.get("ok",false):print("STATION_GROUP_APPROACH ",planned);return false
+		targets=planned.targets
+		_assert(targets.get(unit_id)==target,"Original lead actor retains the exact authored exterior approach goal")
+		if targets.get(unit_id)!=target:return false
+	var tokens:Dictionary={}
+	for id in ids:
+		tokens[id]="station-physical:"+label+":"+id
+		sim.call("enqueue_command",{"type":"move_to_position","unit_id":id,"team_id":"team_alpha","target_position":targets[id],"command_token":tokens[id],"move_speed_factor":1.0,"requeue_until_target":true})
+	var arrived:=false
+	for tick in range(2400):
+		sim.call("_physics_process",0.1)
+		arrived=true
+		var all_terminal:=true
+		var progress:Dictionary={}
+		for id in ids:
+			var done:bool=sim.call("has_hex_position_arrived",id,targets[id],tokens[id])
+			var readout:Dictionary=sim.call("get_hex_movement_readout",id)
+			arrived=arrived and done
+			all_terminal=all_terminal and (done or (readout.get("status", "")=="blocked" and readout.get("reason", "")=="unreachable_target"))
+			if tick%200==0:progress[id]={"ground":sim.call("get_hex_unit_state",id),"movement":readout}
+		if tick%200==0:print("STATION_PHYSICAL_PROGRESS ",{"label":label,"tick":tick,"actors":progress})
+		if arrived or all_terminal:break
+		if tick%4==0:await _poll(host_api,client_api,1)
+	if not arrived:print("STATION_PHYSICAL_WALK ",{"label":label,"goal":grid,"ground":sim.call("get_hex_unit_state",unit_id),"movement":sim.call("get_hex_movement_readout",unit_id)})
+	_assert(arrived,"Actual Root movement reaches "+label+" with original tokens and no pending movement")
+	await _poll(host_api,client_api,4)
+	return arrived
 
 
 func _configure_scene(scene: Node) -> void:
@@ -161,6 +249,29 @@ func _create_pair() -> Dictionary:
 func _poll(host_api: MultiplayerAPI, client_api: MultiplayerAPI, count: int) -> void:
 	for _i in range(count):
 		host_api.poll(); client_api.poll(); await process_frame
+
+
+func _invalid_wire_fields(value: Variant, path: String = "raw", depth: int = 0) -> PackedStringArray:
+	var result := PackedStringArray()
+	if depth > 16:
+		return PackedStringArray([path + ":depth"])
+	match typeof(value):
+		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_STRING, TYPE_VECTOR2I:
+			pass
+		TYPE_FLOAT:
+			if not is_finite(value): result.append(path + ":nonfinite_float")
+		TYPE_VECTOR2:
+			if not value.is_finite(): result.append(path + ":nonfinite_vector")
+		TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY, TYPE_PACKED_VECTOR2_ARRAY:
+			for i in value.size():
+				result.append_array(_invalid_wire_fields(value[i], path + "[%d]" % i, depth + 1))
+		TYPE_DICTIONARY:
+			for key in value:
+				if typeof(key) not in [TYPE_STRING, TYPE_STRING_NAME]: result.append(path + ":nonstring_key")
+				else: result.append_array(_invalid_wire_fields(value[key], path + "." + String(key), depth + 1))
+		_:
+			result.append(path + ":type_%d" % typeof(value))
+	return result
 
 
 func _assert(condition: bool, message: String) -> void:

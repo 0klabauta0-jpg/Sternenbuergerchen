@@ -1,6 +1,7 @@
 extends SceneTree
 const START = preload("res://scripts/meta/campaign_start_configuration.gd")
 var failed := 0
+var passed := 0
 
 class FakeSimulation extends Node:
 	var required := true
@@ -32,6 +33,7 @@ func _init() -> void: call_deferred("run")
 func check(value: bool, message: String) -> void:
 	print(("PASS: " if value else "FAIL: ") + message)
 	if not value: failed += 1
+	else: passed += 1
 
 func run() -> void:
 	var start = START.new()
@@ -48,7 +50,7 @@ func run() -> void:
 	var first: Dictionary = start.save_home_checkpoint(flow, runtime)
 	check(first.get("reason") == "runtime_unavailable" and runtime.exports == 1, "first call attempts export")
 	var next: Dictionary = start.save_home_checkpoint(flow, runtime)
-	check(next.get("throttled", false) and runtime.exports == 1, "repeated autosave is throttled")
+	check(not next.get("ok",true) and next.get("retry_pending",false) and runtime.exports == 1 and start._hex_export_scope.is_empty(), "failed export has a short bounded retry and never claims a saved checkpoint")
 	var forced: Dictionary = start.save_home_checkpoint(flow, runtime, true)
 	check(forced.get("reason") == "runtime_unavailable" and runtime.exports == 2, "forced save bypasses interval")
 	runtime.guard = {"ok":false,"reason":"pending_cargo"}
@@ -69,6 +71,11 @@ func run() -> void:
 	runtime.travel = {"phase":"grounded"}
 	flow._aircraft_location_by_craft.probe = "polisa"
 	check(start.save_home_checkpoint(flow, runtime, true).get("reason") == "away_from_checkpoint" and runtime.exports == 2, "force does not bypass remote craft")
+	flow._aircraft_location_by_craft.probe = "homebase"
+	start._hex_failed_msec = Time.get_ticks_msec() - start.HEX_AUTOSAVE_RETRY_MSEC
+	var retried: Dictionary = start.save_home_checkpoint(flow,runtime)
+	check(retried.get("reason")=="runtime_unavailable" and not retried.get("retry_pending",false) and runtime.exports==3,"failed initialization retries at the short boundary without waiting five minutes")
 	runtime.free(); sim.free(); flow.free()
 	if failed == 0: print("CAMPAIGN_HEX_AUTOSAVE_INTERVAL_PASS")
+	print("CAMPAIGN_HEX_AUTOSAVE_INTERVAL passed=%d failed=%d" % [passed,failed])
 	quit(0 if failed == 0 else 1)

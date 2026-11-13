@@ -13,10 +13,16 @@ const FRONTIER_ART_PROFILE_SCRIPT: GDScript = preload("res://scripts/terrain/fro
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const MISSION_FLIGHT_VISUAL_SCRIPT: GDScript = preload("res://scripts/terrain/mission_flight_visual.gd")
 const HEX_GRID_COVERAGE_SHADER: Shader = preload("res://shaders/terrain/hex_grid_coverage.gdshader")
+const HEX_SURFACE_GRID = preload("res://scripts/terrain/hex_surface_grid_projection.gd")
+const HEX_FLOOR_ADAPTER = preload("res://scripts/terrain/hex_floor_model_adapter.gd")
+const CLIFF_FRACTURE = preload("res://scripts/terrain/regional_cliff_fracture.gd")
+const STATION_MODULE_PROJECTION = preload("res://scripts/terrain/station_module_projection.gd")
+const STATION_FLOOR_BOUNDARY = preload("res://scripts/terrain/station_floor_boundary.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 const FRONTIER_GM01_LAYOUT_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_gm01_layout.gd")
 const FRONTIER_REFERENCE_DRESSING_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_reference_dressing.gd")
+const PERSONNEL_IDENTITY = preload("res://scripts/terrain/personnel_visual_identity.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -952,6 +958,8 @@ var _mission_interaction_object_reaction_state_counts: Dictionary = {}
 var _mission_interaction_object_reaction_count: int = 0
 var _mission_interaction_object_reaction_visual_count: int = 0
 var _fog_of_war_state: Dictionary = {}
+var _inspection_blackout := false
+var _inspection_source_mode := "off"
 var _fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 var _fog_of_war_team_id: String = ""
 var _fog_of_war_state_signature: String = ""
@@ -1253,9 +1261,16 @@ var _show_authoring_markers := true
 var _place_dressing_root: Node3D
 var _place_dressing_signature := ""
 var _place_dressing_grids: Array[Vector2i]=[]
+var _arid_pebble_excluded_grids: Dictionary = {}
+var _arid_pebble_pad_bounds: Array[Rect2] = []
 var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
 var _active_grid_topology: String = "square8"
 var _hex_ground_batch = HEX_GROUND_BATCH_SCRIPT.new()
+var _station_module_projection = STATION_MODULE_PROJECTION.new()
+var _station_floor_boundary = STATION_FLOOR_BOUNDARY.new()
+var _station_door_visuals: Dictionary = {}
+var _station_door_registry_stamp := ""
+var _station_door_visual_apply_count := 0
 var _regional_tiles_by_chunk: Dictionary = {}
 var _regional_chunk_nodes: Dictionary = {}
 var _regional_requested_chunks: Dictionary = {}
@@ -1282,6 +1297,14 @@ var _orbital_station_view := false
 var _orbital_deck_owns_ground := false
 var _regional_height_step: float = 0.0
 var _hex_grid_visible: bool = true
+var _hex_grid_parents: Dictionary = {}
+var _hex_grid_dirty_chunks: Dictionary = {}
+var _hex_grid_all_dirty := false
+var _hex_grid_registry_stamp := ""
+var _hex_grid_model_support_cache: Dictionary = {}
+var _hex_grid_projection_build_count := 0
+var _hex_grid_model_sample_count := 0
+var _hex_floor_adapter = HEX_FLOOR_ADAPTER.new()
 
 
 func _ready() -> void:
@@ -1312,6 +1335,8 @@ func _process(delta: float) -> void:
 		scopes_usec["pending_fow_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_process_regional_pending_chunks()
+	_refresh_hex_grid_projection_if_needed()
+	_refresh_station_door_visuals_if_needed()
 	if profile_enabled:
 		scopes_usec["regional_chunks_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -1421,7 +1446,8 @@ func set_hex_grid_visible(enabled: bool) -> void:
 		return
 	_hex_grid_visible = enabled
 	if _terrain_map_data != null:
-		render_map()
+		_hex_grid_all_dirty = true
+		_refresh_hex_grid_projection_if_needed()
 
 
 func _uses_hex_grid() -> bool:
@@ -1504,6 +1530,8 @@ func _sync_authored_visual_layout() -> void:
 
 func set_runtime_terrain_registry(registry: Node) -> void:
 	_runtime_terrain_registry = weakref(registry) if registry != null else null
+	_hex_grid_all_dirty = true
+	_hex_grid_registry_stamp = ""
 	_fire_sector_los_cache_signature = ""
 	_fire_sector_los_cache.clear()
 	_dynamic_sources_dirty = true
@@ -1546,7 +1574,12 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 		_fire_sector_los_cache.clear()
 		_fire_sector_los_cache_signature = ""
 	_read_map_transform()
+	_configure_arid_pebble_exclusions()
 	_homebase_rock_heights.clear()
+	_station_module_projection.configure(_terrain_map_data)
+	_station_door_visuals.clear()
+	_station_door_registry_stamp = ""
+	_station_door_visual_apply_count = 0
 	if _homebase_visuals_enabled and _terrain_map_data != null and bool(_terrain_map_data.get_meta("homebase_rock_rules",false)):
 		var rules := preload("res://scripts/terrain/homebase_rock_rules.gd")
 		for formation: Dictionary in rules.formations():
@@ -1559,12 +1592,16 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 			_camera_size = clampf(initial_camera_size, 5.5, get_camera_zoom_limit() if _orbital_station_view else CAMERA_MAX_SIZE)
 		_update_camera_transform()
 	if _frontier_art_enabled and _terrain_map_data != null:
+		_frontier_art_profile.quiet_tactical_surface=_is_arid_terrain_visual_context()
 		var q_axis := _grid_to_3d_position(Vector2(1,0),0)
 		var r_axis := _grid_to_3d_position(Vector2(0,1),0)
 		_frontier_art_profile.configure_surface_blend(Array(_terrain_map_data.call("get_tiles")),Vector2(q_axis.x,q_axis.z),Vector2(r_axis.x,r_axis.z))
 	_sync_authored_visual_layout()
 	_sync_place_reference_dressing()
 	_clear_children(_map_root)
+	_hex_grid_parents.clear()
+	_hex_grid_dirty_chunks.clear()
+	_hex_grid_all_dirty = false
 	_clear_children(_marker_root)
 	_clear_children(_fow_root)
 	_clear_fow_overlay_runtime_cache()
@@ -1744,12 +1781,17 @@ func _build_terrain_visuals(tiles: Array, grid_tiles: Array) -> void:
 		_add_tile_visual(tile)
 	_flush_ground_model_batches()
 	if _uses_hex_grid():
-		var hex_counts: Dictionary = _hex_ground_batch.flush(_map_root, not _homebase_visuals_enabled)
+		var hex_counts: Dictionary = _hex_ground_batch.flush(_map_root, false)
 		_ground_multimesh_instance_count += int(hex_counts["batch_count"])
 		_ground_multimesh_tile_count += int(hex_counts["tile_count"])
 	_flush_surface_tint_batches()
 	_flush_static_prop_model_batches()
 	_add_tile_grid_lines(grid_tiles)
+	if _uses_hex_grid() and _regional_height_step <= 0.0:
+		var ramps: Array = []
+		for tile in visual_tiles:
+			if TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile): ramps.append(tile)
+		if not ramps.is_empty(): _add_regional_cliff_faces(ramps)
 	for tile in visual_tiles:
 		_add_height_edge_visuals(tile)
 	_flush_height_edge_model_batches()
@@ -2158,9 +2200,24 @@ func _set_contact_density_heatmap_enabled_internal(enabled: bool, force_rebuild:
 	return true
 
 
+func set_inspection_blackout(enabled: bool) -> void:
+	if _inspection_blackout == enabled: return
+	_inspection_blackout = enabled
+	var source := _fog_of_war_state.duplicate()
+	source["mode"] = _inspection_source_mode
+	set_fog_of_war_state(source)
+
+func get_inspection_blackout_snapshot() -> Dictionary:
+	return {"enabled":_inspection_blackout, "mode":_fog_of_war_mode,
+		"source_mode":_inspection_source_mode,
+		"terrain_knowledge":Dictionary(_fog_of_war_state.get("terrain_knowledge", {})).duplicate(true)}
+
 func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var complete_started_usec := Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var normalized_state: Dictionary = _normalize_fog_of_war_visual_state(fog_of_war_state)
+	_inspection_source_mode = String(normalized_state.get("mode", "off"))
+	if _inspection_blackout:
+		normalized_state["mode"] = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_UNEXPLORED_BLACKOUT
 	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
 	var same_context: bool = (
 		String(normalized_state.get("mode", "")) == _fog_of_war_mode
@@ -2182,6 +2239,8 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var previous_drop_admission_signature: String = _build_drop_fow_admission_signature()
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
+	if not unchanged_terrain:
+		_mark_hex_grid_visibility_dirty(old_knowledge, new_knowledge, same_context)
 	if not same_context and not _regional_tiles_by_chunk.is_empty():
 		if _is_fog_of_war_visual_filter_active():
 			_set_regional_overview(false)
@@ -2613,7 +2672,7 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 			var chunk := _get_ground_batch_chunk_position(tile_data.grid_position)
 			if _regional_requested_chunks.has(chunk) and not _visual_streaming_active_chunks.has(chunk):
 				continue
-		var profile := _regional_surface_profile(tile_data) if _regional_height_step > 0.0 else PackedFloat32Array()
+		var profile := _regional_surface_profile(tile_data) if _uses_hex_grid() else PackedFloat32Array()
 		if profile.is_empty():
 			var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
 			if screen_quad.size() < 3 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
@@ -3552,6 +3611,7 @@ func get_render_snapshot() -> Dictionary:
 		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
 		"hex_grid_visible": _uses_hex_grid() and _hex_grid_visible,
+		"hex_surface_grid": {"build_count":_hex_grid_projection_build_count,"model_sample_count":_hex_grid_model_sample_count,"cached_parents":_hex_grid_parents.size(),"height_following":true,"registry_read_only":true},
 		"hex_grid_edge_style": "warm_dual_contrast" if is_instance_valid(_authored_visual_layout_root) else "single_terrain_edge",
 		"hex_grid_width_world": 0.048 if is_instance_valid(_authored_visual_layout_root) else 0.010,
 		"tile_grid_line_effective_alpha": _get_tile_grid_line_color_for_release_polish(true).a,
@@ -4331,6 +4391,14 @@ func _build_regional_chunk(chunk: Vector2i, resources_only: bool = false) -> voi
 		parent.add_child(restored)
 		_regional_chunk_nodes[chunk] = restored
 		_regional_chunk_stats[chunk] = _terrain_resource_cache.get_chunk_render_counts(chunk)
+		# Cached terrain is shared; visibility/door projection belongs to this view.
+		_map_root = restored
+		_add_hex_grid_lines(_regional_tiles_by_chunk[chunk])
+		var restored_counts: Vector3i = _regional_chunk_stats[chunk]
+		restored_counts.z = int(_hex_grid_parents.get(restored.get_instance_id(), {}).get("line_count", 0))
+		_regional_chunk_stats[chunk] = restored_counts
+		_register_restored_station_door_visuals(restored)
+		_map_root = parent
 		# R02's static overlay layout belongs to the view, never to this resource cache.
 		_regional_fow_render_cache[chunk] = _build_fow_overlay_render_cache(_regional_tiles_by_chunk[chunk])
 		_terrain_resource_restore_count += 1
@@ -4480,7 +4548,7 @@ func _regional_ring_point(center: Vector3, index: int, rise: float, cell_size: f
 
 
 func _add_regional_cliff_faces(tiles: Array) -> void:
-	var material: Material = _frontier_art_profile.material_for(Color("874b3c"), true) if _frontier_art_enabled else _make_material(Color("874b3c"))
+	var material: Material = _frontier_art_profile.material_for(Color("a56847"), true) if _frontier_art_enabled else _make_material(Color("874b3c"))
 	var walls := SurfaceTool.new()
 	walls.begin(Mesh.PRIMITIVE_TRIANGLES)
 	walls.set_material(material)
@@ -4520,8 +4588,7 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 				var b := _regional_ring_point(center, (first + 2) % 12, 0.0, cell_size, height_step)
 				var base_a := Vector3(a.x, neighbor_y, a.z)
 				var base_b := Vector3(b.x, neighbor_y, b.z)
-				_add_regional_triangle(walls, a, base_a, b)
-				_add_regional_triangle(walls, b, base_a, base_b)
+				_append_cliff_face(walls,a,b,base_a,base_b,cell,edge*2,cell_size)
 				continue
 			for half in range(2):
 				var a := (first + half) % 12
@@ -4532,13 +4599,20 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 				var low_b: float = neighbor_y + (neighbor_profile[(opposite + 1 - half) % 12] * height_step if not neighbor_profile.is_empty() else 0.0)
 				var base_a := Vector3(top_a.x, minf(top_a.y, low_a), top_a.z)
 				var base_b := Vector3(top_b.x, minf(top_b.y, low_b), top_b.z)
-				_add_regional_triangle(walls, top_a, base_a, top_b)
-				_add_regional_triangle(walls, top_b, base_a, base_b)
+				_append_cliff_face(walls,top_a,top_b,base_a,base_b,cell,edge*2+half,cell_size)
 	_commit_regional_surface(walls, "RegionalCliffFaces")
 	for surface_type in ramps:
 		var ramp: SurfaceTool = ramps[surface_type]
 		ramp.generate_normals()
 		_commit_regional_surface(ramp, "RegionalRamps_" + String(surface_type))
+
+
+func _append_cliff_face(surface:SurfaceTool,a:Vector3,b:Vector3,base_a:Vector3,base_b:Vector3,cell:Vector2i,edge:int,cell_size:float)->void:
+	if _frontier_art_enabled and _regional_height_step>0.0:
+		CLIFF_FRACTURE.append_face(surface,a,b,base_a,base_b,cell.x*73856093 ^ cell.y*19349663 ^ edge*83492791,cell_size)
+	else:
+		_add_regional_triangle(surface,a,base_a,b)
+		_add_regional_triangle(surface,b,base_a,base_b)
 
 
 func _regional_ramp_material(tile, surface_type: String) -> Material:
@@ -4650,7 +4724,7 @@ func _add_tile_visual(tile_data) -> void:
 				_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), -0.025), floor_color, cell_size, _make_material(floor_color), true)
 				hex_color = Color("756858")
 				hex_material = _make_material(hex_color)
-			if not thin_cap or _regional_surface_profile(tile_data).is_empty():
+			if (not thin_cap and not TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile_data)) or _regional_surface_profile(tile_data).is_empty():
 				_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material, thin_cap)
 	elif owns_flat_ground:
 		pass # Continuous authored ground owns H0; saved tiles still own gameplay.
@@ -4675,6 +4749,7 @@ func _add_tile_visual(tile_data) -> void:
 	var external_visual: WeakRef = _external_terrain_object_visuals.get(tile_data.grid_position)
 	if external_visual != null and is_instance_valid(external_visual.get_ref()):
 		return
+	_queue_arid_ground_pebbles(tile_data, top_y)
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	if _homebase_rock_heights.has(tile_data.grid_position):
@@ -4697,7 +4772,11 @@ func _add_tile_visual(tile_data) -> void:
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	var structure_visual_type_id: String = _resolve_structure_tile_asset_type_id(type_id)
 	if not structure_visual_type_id.is_empty():
-		_add_object_visual(tile_data, top_y, structure_visual_type_id, true)
+		var legacy_cliff:String=_legacy_cliff_visual_kind(tile_data)
+		if legacy_cliff=="rock_blocker":
+			_add_object_visual(tile_data,top_y,"glut_sandstone_04",true)
+		elif legacy_cliff!="height_only":
+			_add_object_visual(tile_data, top_y, structure_visual_type_id, true)
 	var object_visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, "" if not structure_visual_type_id.is_empty() else type_id)
 	if not object_visual_type_id.is_empty():
 		_add_object_visual(tile_data, top_y, object_visual_type_id, true)
@@ -4780,15 +4859,23 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	var model_height: float = _get_normalized_model_height(model_instance)
 	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id) * _get_tile_object_scale(tile_data)
 	var visual_height: float = model_height * model_scale
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):
+		visual_height=HEX_FLOOR_ADAPTER.profile_height(_get_3d_cell_size())
 	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
 	var visual_top_y: float = top_y + surface_top_y_offset
 	var ground_y: float = visual_top_y
 	if visual_height > 0.001:
 		ground_y = visual_top_y - visual_height
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):ground_y=visual_top_y
 	ground_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y)
 	if _ground_surface_supports_tile_rotation(normalized_visual_type_id):
 		ground_root.rotation_degrees.y = _get_tile_object_rotation_degrees(tile_data)
 	ground_root.scale = Vector3.ONE * model_scale
+	ground_root.basis = _get_cell_module_visual_basis(normalized_visual_type_id) * ground_root.basis
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):
+		_hex_floor_adapter.adapt_model(model_instance,ground_root.basis,_get_local_visual_bounds(model_instance),_get_3d_cell_size())
+		_hex_floor_adapter.finish_model(model_instance)
+		_apply_station_floor_boundary(model_instance, tile_data)
 	ground_root.add_child(model_instance)
 	_map_root.add_child(ground_root)
 	_ground_mesh_count += 1
@@ -4821,18 +4908,34 @@ func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String =
 
 	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id) * _get_tile_object_scale(tile_data)
 	var visual_height: float = float(source.get("model_height", 0.0)) * model_scale
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):
+		visual_height=HEX_FLOOR_ADAPTER.profile_height(_get_3d_cell_size())
 	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
 	var visual_top_y: float = top_y + surface_top_y_offset
 	var ground_y: float = visual_top_y
 	if visual_height > 0.001:
 		ground_y = visual_top_y - visual_height
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):ground_y=visual_top_y
 	var rotation_y: float = 0.0
 	if _ground_surface_supports_tile_rotation(normalized_visual_type_id):
 		rotation_y = _get_tile_object_rotation_degrees(tile_data)
 	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
+	root_basis = _get_cell_module_visual_basis(normalized_visual_type_id) * root_basis
 	var root_transform := Transform3D(root_basis, _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y))
 	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
 	var instance_transform: Transform3D = root_transform * mesh_transform
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):
+		source = source.duplicate(false)
+		var size: Vector3 = Vector3(source.model_bounds.max)-Vector3(source.model_bounds.min)
+		var vertical:Vector2=Vector2(source.model_vertical)*root_basis.y.length()
+		source.mesh = _hex_floor_adapter.adapt_mesh(source.mesh,Transform3D(root_basis,Vector3.ZERO)*mesh_transform,root_basis,Vector2(size.x,size.z),_get_3d_cell_size(),vertical)
+		source.material_override=_hex_floor_adapter.finish_material(source.material_override)
+		source["cast_shadow"] = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		source_key += "|hex_floor:%d" % source.mesh.get_instance_id()
+		var floor_bounds: Rect2 = _station_module_projection.floor_bounds(_terrain_map_data, tile_data.grid_position, _get_3d_cell_size())
+		if floor_bounds.has_area():
+			source.material_override = _station_floor_boundary.material_for(source.material_override, floor_bounds, _frontier_art_profile.surface_color(String(tile_data.surface_type)))
+			if source.material_override != null: source_key += "|boundary:%d" % source.material_override.get_instance_id()
 	var chunk_position: Vector2i = _get_ground_batch_chunk_position(tile_data.grid_position)
 	var batch_key: String = "%s|rot:%0.3f|chunk:%d,%d" % [
 		source_key,
@@ -4886,6 +4989,7 @@ func _flush_ground_model_batches() -> void:
 		var instance := MultiMeshInstance3D.new()
 		instance.name = "GroundBatch_%s_%03d" % [String(batch.get("visual_type_id", "ground")), batch_index]
 		instance.multimesh = multimesh
+		instance.cast_shadow = int(source.get("cast_shadow", GeometryInstance3D.SHADOW_CASTING_SETTING_ON))
 		var material_override := source.get("material_override", null) as Material
 		if material_override != null:
 			instance.material_override = material_override
@@ -4938,6 +5042,8 @@ func _get_ground_batch_source(visual_type_id: String, material_override_color: C
 		"mesh_transform": Transform3D(mesh_entry.get("transform", Transform3D.IDENTITY)),
 		"material_override": material_override,
 		"model_height": _get_normalized_model_height(model_instance),
+		"model_vertical": _hex_floor_adapter.source_vertical(model_instance) if HEX_FLOOR_ADAPTER.supports(visual_type_id) else Vector2.ZERO,
+		"model_bounds": _get_local_visual_bounds(model_instance),
 		"surface_count": mesh.get_surface_count(),
 	}
 	model_instance.free()
@@ -5411,61 +5517,161 @@ func _add_tile_grid_lines(tiles: Array) -> void:
 
 
 func _add_hex_grid_lines(tiles: Array) -> void:
-	if not _hex_grid_visible:
+	# Grid contours depend on live FoW and walkability. The receiving view
+	# already rebuilds them after cache restore, so an actor-free whole-map
+	# prefill must not generate or retain a second full visible grid mesh.
+	if _terrain_resource_prefill_only:
+		_tile_grid_line_count = 0
 		return
+	if not is_instance_valid(_map_root):
+		return
+	_hex_grid_parents[_map_root.get_instance_id()] = {"parent":weakref(_map_root),"tiles":tiles}
+	var lines := _map_root.get_node_or_null("TileGridLines3D") as MeshInstance3D
+	if lines == null:
+		lines = MeshInstance3D.new()
+		lines.name = "TileGridLines3D"
+		lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_map_root.add_child(lines)
+	lines.visible = _hex_grid_visible
+	if not _hex_grid_visible: return
 	var authored := is_instance_valid(_authored_visual_layout_root)
 	var material := _make_hex_grid_material(authored)
 	var mesh := ImmediateMesh.new()
-	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
-	# One depth-tested coverage pass replaces two aliased subpixel cores.
-	# Topology stays fixed; the shader handles actual projected pixel coverage.
 	var edges: Dictionary = {}
-	var regional := _regional_height_step > 0.0
+	var outlines: Dictionary = {}
 	var line_count := 0
-	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
-		if _orbital_station_view and not tile.walkable: continue
-		var top: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + 0.008
-		if authored:
-			top = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
-		if _orbital_station_view:
-			# Station prop floors and flush markings sit above the raw H0 cap.
-			top = maxf(top, TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET)
-		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
-		var profile := _regional_surface_profile(tile) if regional else PackedFloat32Array()
-		for index in range(6):
-			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
-			var b := center + Vector3(corners[(index + 1) % 6].x, 0.0, corners[(index + 1) % 6].y)
-			if regional:
-				if index >= 3:
-					var neighbor = _render_tile_by_grid.get(tile.grid_position + HEX_GRID_SCRIPT.DIRECTIONS[(11 - index) % 6])
-					if neighbor != null and neighbor.height_level == tile.height_level and _regional_surface_profile(tile).is_empty() and _regional_surface_profile(neighbor).is_empty():
-						continue
-			else:
-				var edge_key: String = _get_grid_edge_key(a, b)
-				if edges.has(edge_key):
-					continue
-				edges[edge_key] = true
-			if profile.is_empty():
-				_add_hex_grid_coverage_quad(mesh, a, b, 0.04)
-				line_count += 1
-			else:
-				var midpoint := a.lerp(b, 0.5)
-				var first := index * 2
-				var step := _get_3d_height_step()
-				a.y += profile[first] * step
-				midpoint.y += profile[first + 1] * step
-				b.y += profile[(first + 2) % 12] * step
-				_add_hex_grid_coverage_quad(mesh, a, midpoint, 0.04)
-				_add_hex_grid_coverage_quad(mesh, midpoint, b, 0.04)
-				line_count += 2
-	mesh.surface_end()
-	var lines := MeshInstance3D.new()
-	lines.name = "TileGridLines3D"
+		if not _hex_grid_tile_admitted(tile): continue
+		var ring: PackedVector3Array = _hex_grid_outline_cached(tile, outlines)
+		for index in range(12):
+			var a: Vector3 = ring[index]
+			var b: Vector3 = ring[(index + 1) % 12]
+			var edge_key: String = _get_grid_edge_key(a, b)
+			if edges.has(edge_key): continue
+			# The neighbor owns the opposite half of a shared chunk boundary too.
+			if index >= 6:
+				var neighbor = _render_tile_by_grid.get(REGIONAL_SURFACE.neighbor_cell(tile.grid_position, index / 2))
+				if _hex_grid_tile_admitted(neighbor):
+					var other: PackedVector3Array = _hex_grid_outline_cached(neighbor, outlines)
+					var opposite: int = ((index / 2 + 3) % 6) * 2 + (1 - index % 2)
+					if edge_key == _get_grid_edge_key(other[opposite], other[(opposite + 1) % 12]): continue
+			edges[edge_key] = true
+			if line_count == 0: mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+			_add_hex_grid_coverage_quad(mesh, a, b, 0.04)
+			line_count += 1
+	if line_count > 0: mesh.surface_end()
 	lines.mesh = mesh
-	lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_map_root.add_child(lines)
+	_hex_grid_parents[_map_root.get_instance_id()]["line_count"] = line_count
+	_hex_grid_parents[_map_root.get_instance_id()]["signature"] = _hex_grid_geometry_signature(tiles)
+	_hex_grid_projection_build_count += 1
 	_tile_grid_line_count = line_count
+
+
+func _hex_grid_tile_admitted(tile) -> bool:
+	if tile == null: return false
+	var registry: Node = _get_runtime_terrain_registry()
+	if registry != null:
+		if not bool(registry.call("is_walkable",tile.grid_position)): return false
+	elif not tile.walkable:
+		return false
+	return not _is_fog_of_war_visual_filter_active() or _fow_visible_tile_grids.has(tile.grid_position)
+
+
+func _hex_grid_outline_cached(tile, cache: Dictionary) -> PackedVector3Array:
+	if not cache.has(tile.grid_position):
+		# Place dressing includes ground-painted aprons a few centimetres above
+		# terrain. Use the existing authored overlay clearance, not a new stand
+		# height or a depth-test bypass that would print lines through furniture.
+		var offset: float = FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006 if is_instance_valid(_authored_visual_layout_root) or is_instance_valid(_place_dressing_root) or _orbital_station_view else 0.012
+		cache[tile.grid_position] = HEX_SURFACE_GRID.outline(tile,_render_tile_by_grid,_get_3d_cell_size(),_get_3d_height_step(),_hex_grid_model_support_lift(tile),offset)
+	return cache[tile.grid_position]
+
+
+func _hex_grid_model_support_lift(tile) -> float:
+	if not _uses_hex_grid() or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile): return 0.0
+	var type_id: String = _resolve_tile_asset_type_id(String(tile.object_type_id),String(tile.type_id))
+	if type_id.is_empty(): return 0.0
+	var is_floor: bool = HEX_FLOOR_ADAPTER.supports(type_id)
+	var is_corridor: bool = type_id.begins_with("corridor_") or type_id.begins_with("spacekit_corridor_") or type_id.begins_with("modular_corridor")
+	if not is_floor and not is_corridor: return 0.0
+	if is_floor:
+		return maxf(0.0,HEX_FLOOR_ADAPTER.profile_height(_get_3d_cell_size())+_get_asset_position_offset(type_id).y)
+	if not _hex_grid_model_support_cache.has(type_id):
+		var scene: PackedScene = _get_asset_model_scene(type_id)
+		var support := 0.0
+		if scene != null:
+			var model := scene.instantiate() as Node3D
+			if model != null:
+				_normalize_asset_model_instance(model)
+				var bounds: Dictionary = _get_local_visual_bounds(model)
+				support = Vector3(bounds.max).y if is_floor and bool(bounds.get("valid",false)) else HEX_SURFACE_GRID.central_floor_height(model)
+				model.free()
+				_hex_grid_model_sample_count += 1
+		_hex_grid_model_support_cache[type_id] = support
+	return maxf(0.0,float(_hex_grid_model_support_cache[type_id]) * _get_asset_model_scale(type_id) * _get_tile_object_scale(tile) + _get_asset_y_offset(type_id) + _get_asset_position_offset(type_id).y)
+
+
+func _mark_hex_grid_visibility_dirty(previous: Dictionary, current: Dictionary, same_context: bool) -> void:
+	if not same_context:
+		_hex_grid_all_dirty = true
+		return
+	var old: Dictionary = _build_fow_grid_lookup(PackedStringArray(previous.get("visible_tile_ids",[])))
+	var next: Dictionary = _build_fow_grid_lookup(PackedStringArray(current.get("visible_tile_ids",[])))
+	for grid in old:
+		if not next.has(grid): _mark_hex_grid_cell_dirty(grid)
+	for grid in next:
+		if not old.has(grid): _mark_hex_grid_cell_dirty(grid)
+
+
+func _hex_grid_geometry_signature(tiles: Array) -> int:
+	var facts: Array = [_hex_grid_visible]
+	var seen: Dictionary = {}
+	for tile in tiles:
+		for grid in [tile.grid_position] + HEX_GRID_SCRIPT.neighbors(tile.grid_position):
+			if seen.has(grid): continue
+			seen[grid] = true
+			var candidate = _render_tile_by_grid.get(grid)
+			if candidate == null: continue
+			facts.append([grid,_hex_grid_tile_admitted(candidate),candidate.height_level,candidate.type_id,candidate.object_type_id,candidate.ramp_direction,candidate.explicit_hex_ramps,candidate.object_scale,candidate.object_rotation_degrees])
+	return hash(facts)
+
+
+func _mark_hex_grid_cell_dirty(grid: Vector2i) -> void:
+	_hex_grid_dirty_chunks[_get_ground_batch_chunk_position(grid)] = true
+	for neighbor in HEX_GRID_SCRIPT.neighbors(grid): _hex_grid_dirty_chunks[_get_ground_batch_chunk_position(neighbor)] = true
+
+
+func _refresh_hex_grid_projection_if_needed() -> void:
+	if not _uses_hex_grid() or _hex_grid_parents.is_empty(): return
+	var registry: Node = _get_runtime_terrain_registry()
+	var stamp := "%d:%d" % [registry.get_instance_id(),registry.call("get_revision")] if registry != null else "none"
+	if stamp != _hex_grid_registry_stamp:
+		# Root/HPA may consume the shared dirty list between view reads. A gap
+		# cannot treat the remaining last delta as a complete change history.
+		if registry == null or _hex_grid_registry_stamp.get_slice(":",0) != stamp.get_slice(":",0) or int(stamp.get_slice(":",1)) != int(_hex_grid_registry_stamp.get_slice(":",1)) + 1:
+			_hex_grid_all_dirty = true
+		_hex_grid_registry_stamp = stamp
+		var dirty: Array = registry.call("get_dirty_grid_positions") if registry != null else []
+		if dirty.is_empty(): _hex_grid_all_dirty = true
+		else:
+			for grid in dirty: _mark_hex_grid_cell_dirty(grid)
+	if not _hex_grid_all_dirty and _hex_grid_dirty_chunks.is_empty(): return
+	var original: Node3D = _map_root
+	for id in _hex_grid_parents.keys():
+		var record: Dictionary = _hex_grid_parents[id]
+		var parent = record.parent.get_ref()
+		if not is_instance_valid(parent) or parent.is_queued_for_deletion():
+			_hex_grid_parents.erase(id)
+			continue
+		var rebuild: bool = _hex_grid_all_dirty or _regional_tiles_by_chunk.is_empty()
+		if not rebuild and not record.tiles.is_empty(): rebuild = _hex_grid_dirty_chunks.has(_get_ground_batch_chunk_position(record.tiles[0].grid_position))
+		if rebuild and int(record.get("signature",-1)) != _hex_grid_geometry_signature(record.tiles):
+			_map_root = parent
+			_add_hex_grid_lines(record.tiles)
+	_map_root = original
+	_hex_grid_all_dirty = false
+	_hex_grid_dirty_chunks.clear()
+	_request_viewport_redraw()
 
 
 func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
@@ -5476,9 +5682,9 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
 	material.shader = HEX_GRID_COVERAGE_SHADER
-	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.27) if authored else Color(0.25, 0.15, 0.10, 0.30))
+	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.68) if authored else Color(0.25, 0.15, 0.10, 0.68))
 	if _regional_height_step > 0.0:
-		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.54))
+		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.68))
 	if _orbital_station_view:
 		material.set_shader_parameter("line_color", Color(0.015, 0.035, 0.05, 1.0))
 		material.set_shader_parameter("distant_contrast_floor", 0.85)
@@ -5488,6 +5694,9 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 		material.set_shader_parameter("distant_contrast_floor", 0.5)
 		material.set_shader_parameter("minimum_pixel_width", 1.8)
 	material.set_shader_parameter("world_line_width", 0.04)
+	if not _orbital_station_view and not _homebase_visuals_enabled:
+		material.set_shader_parameter("minimum_pixel_width", 1.8)
+		material.set_shader_parameter("distant_contrast_floor", 0.70)
 	material.set_shader_parameter("cell_size", _get_3d_cell_size())
 	_material_cache[key] = material
 	return material
@@ -6133,6 +6342,10 @@ func _queue_static_prop_model_batch(tile_data, top_y: float, visual_type_id: Str
 	var prop_position: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(normalized_visual_type_id)) + _get_asset_position_offset(normalized_visual_type_id)
 	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
 	var root_transform := Transform3D(root_basis, prop_position)
+	if _is_arid_station_stone(normalized_visual_type_id):
+		root_transform=_arid_stone_transform(root_transform,tile_data.grid_position)
+		source=source.duplicate(false)
+		source["material_override"]=_frontier_art_profile.material_for(Color("a56847"),true)
 	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
 	var instance_transform: Transform3D = root_transform * mesh_transform
 	var chunk_position: Vector2i = _get_ground_batch_chunk_position(tile_data.grid_position)
@@ -6166,7 +6379,81 @@ func _queue_static_prop_model_batch(tile_data, top_y: float, visual_type_id: Str
 		Vector3.ONE * model_scale,
 		"Asset_%s_%d_%d" % [normalized_visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
 	)
+	if _is_arid_station_stone(normalized_visual_type_id): _queue_arid_foot_pebbles(tile_data, top_y)
 	return true
+
+
+func _configure_arid_pebble_exclusions() -> void:
+	# Cold map configuration; no marker snapshots or tree scans per frame/tile.
+	_arid_pebble_excluded_grids.clear()
+	_arid_pebble_pad_bounds.clear()
+	if _terrain_map_data == null or not _is_arid_terrain_visual_context(): return
+	for marker_id: String in _terrain_map_data.get_marker_ids():
+		var cell: Vector2i = _world_to_grid_position(_terrain_map_data.get_marker_position(marker_id))
+		_arid_pebble_excluded_grids[cell] = true
+		for direction: Vector2i in HEX_GRID_SCRIPT.DIRECTIONS: _arid_pebble_excluded_grids[cell + direction] = true
+	for pad: Dictionary in _terrain_map_data.get_place_presentation().get("pads", []):
+		var center: Array = pad.get("center", [0, 0])
+		var size: Array = pad.get("size", [5, 4])
+		var extent := Vector2(float(size[0]), float(size[1]))
+		_arid_pebble_pad_bounds.append(Rect2(Vector2(float(center[0]), float(center[1])) - extent * 0.5, extent).grow(0.6))
+
+
+func _queue_arid_ground_pebbles(tile_data, top_y: float) -> void:
+	if not _uses_hex_grid() or not _is_arid_terrain_visual_context(): return
+	var cell: Vector2i = tile_data.grid_position
+	var seed: int = absi((cell.x * 73856093) ^ (cell.y * 19349663) ^ 571)
+	seed = ((seed ^ (seed >> 13)) & 0x7fffffff) * 1274126177
+	seed = (seed ^ (seed >> 16)) & 0x7fffffff
+	if seed % 97 != 0 or not _is_free_arid_pebble_cell(tile_data): return
+	_queue_arid_foot_pebbles(tile_data, top_y, seed)
+
+
+func _is_free_arid_pebble_cell(tile_data) -> bool:
+	if tile_data == null or _terrain_map_data == null: return false
+	if not tile_data.walkable or tile_data.blocks_los or tile_data.cover_value > 0 or tile_data.object_height > 0 or not String(tile_data.object_type_id).is_empty(): return false
+	if String(tile_data.type_id) not in ["ground_flat", "nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt"]: return false
+	if String(tile_data.surface_type) not in ["ground", "sand", "rock"] or tile_data.edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile_data): return false
+	if _homebase_rock_heights.has(tile_data.grid_position): return false
+	var external: WeakRef = _external_terrain_object_visuals.get(tile_data.grid_position)
+	if external != null and is_instance_valid(external.get_ref()): return false
+	if _arid_pebble_excluded_grids.has(tile_data.grid_position): return false
+	var plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2(tile_data.grid_position)) * _get_3d_cell_size()
+	for pad: Rect2 in _arid_pebble_pad_bounds:
+		if pad.has_point(plane): return false
+	for direction: Vector2i in HEX_GRID_SCRIPT.DIRECTIONS:
+		var neighbor = _terrain_map_data.get_tile_at_grid(tile_data.grid_position + direction)
+		if neighbor == null or neighbor.height_level != tile_data.height_level or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(neighbor): return false
+	return true
+
+
+func _queue_arid_foot_pebbles(tile_data, top_y: float, free_ground_seed: int = -1) -> void:
+	# Sparse foot dressing inside the same rock cell. No registry entry,
+	# collision, cover, scene-per-pebble or gameplay random draw is created.
+	var cell: Vector2i = tile_data.grid_position
+	var free_ground := free_ground_seed >= 0
+	var seed: int = free_ground_seed if free_ground else absi(cell.x * 17389 + cell.y * 7937 + 571)
+	if not free_ground and seed % 4 != 0: return
+	var source: Dictionary = _get_static_prop_batch_source("nature_rock_cover")
+	if source.is_empty(): return
+	source = source.duplicate(false)
+	source.material_override = _frontier_art_profile.material_for(Color("a56847"), true)
+	var chunk: Vector2i = _get_ground_batch_chunk_position(cell)
+	var key: String = "arid_foot_pebbles|chunk:%d,%d" % [chunk.x, chunk.y]
+	var batch: Dictionary = _static_prop_batch_requests.get(key, {})
+	if batch.is_empty(): batch = {"visual_type_id":"arid_foot_pebbles", "source":source, "transforms":[], "chunk_position":chunk}
+	var size: float = _get_3d_cell_size()
+	for index in range((1 if free_ground else 2) + (seed / 4) % 2):
+		var angle: float = deg_to_rad(float((seed / 7 + index * 137) % 360))
+		var radius: float = (0.27 + float((seed / 11 + index) % 9) * 0.012) * size
+		var scale: float = (0.035 + float((seed / 17 + index) % 5) * 0.006) * size
+		var center: Vector3 = _grid_to_3d_position(Vector2(cell), top_y)
+		center += Vector3(cos(angle) * radius, 0.0, sin(angle) * radius)
+		var profile: PackedFloat32Array = _regional_surface_profile(tile_data)
+		if not profile.is_empty(): center.y += REGIONAL_SURFACE.rise_at(Vector2(cos(angle), sin(angle)) * radius / size, profile) * _get_3d_height_step()
+		var transform := Transform3D(Basis(Vector3.UP, angle).scaled(Vector3(scale, scale * 0.6, scale * 0.85)), center)
+		batch.transforms.append(transform * Transform3D(source.get("mesh_transform", Transform3D.IDENTITY)))
+	_static_prop_batch_requests[key] = batch
 
 
 func _flush_static_prop_model_batches() -> void:
@@ -6255,6 +6542,10 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 	if model_instance == null:
 		return false
 	_normalize_asset_model_instance(model_instance)
+	if visual_type_id == "station_set_wall_door_center":
+		# This source is the overhead lintel (authored Y=.7..1), not a
+		# ground-standing prop. Preserve its authored elevation above the leaf.
+		model_instance.position.y = 0.0
 
 	var visual_root := Node3D.new()
 	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
@@ -6263,6 +6554,25 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 	if apply_tile_rotation:
 		visual_root.rotation_degrees.y += _get_tile_object_rotation_degrees(tile_data)
 	visual_root.scale = Vector3.ONE * (_get_asset_model_scale(visual_type_id) * _get_tile_object_scale(tile_data))
+	# Follow the actual row direction without shearing the imported wall/door
+	# body. Cell-owned floors use the separate targeted Hex-footprint projection.
+	var cell_basis: Basis = _get_cell_module_visual_basis(visual_type_id)
+	var station_spec:Dictionary=_station_module_projection.context(_terrain_map_data,visual_type_id,tile_data.grid_position)
+	if station_spec.is_empty():
+		visual_root.basis = _project_cell_module_model_basis(visual_type_id,visual_root.basis)
+	else:
+		visual_root.transform=STATION_MODULE_PROJECTION.transform(visual_root.transform,station_spec,_get_3d_cell_size())
+		if station_spec.has("corner_centering"):model_instance.position+=Vector3(station_spec.corner_centering)
+		var relative:Transform3D=visual_root.transform
+		relative.origin-=_grid_to_3d_position(Vector2(tile_data.grid_position),0.0)
+		_station_module_projection.clip_model(model_instance,relative,STATION_MODULE_PROJECTION.footprint_cells(_terrain_map_data,tile_data.grid_position),_get_3d_cell_size())
+	var cell_offset := _get_asset_position_offset(visual_type_id)
+	visual_root.position += cell_basis * cell_offset - cell_offset
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(visual_type_id):
+		# The old -4 cm offset compensated the original thick imported slab.
+		# The thin derived floor starts at the authored terrain surface instead.
+		visual_root.position.y=top_y+_get_asset_position_offset(visual_type_id).y
+		_hex_floor_adapter.adapt_model(model_instance,visual_root.basis,_get_local_visual_bounds(model_instance),_get_3d_cell_size())
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
@@ -6271,11 +6581,96 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 		_space_station_textured_surface_count += _apply_space_station_colormap_recursive(model_instance)
 	if not _has_model_mapping_for_type(visual_type_id) or (_homebase_visuals_enabled and visual_type_id.begins_with("spacekit_rock")):
 		_apply_map_asset_material_override(model_instance, visual_type_id)
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(visual_type_id):
+		_hex_floor_adapter.finish_model(model_instance)
+		_apply_station_floor_boundary(model_instance, tile_data)
+	if _is_arid_station_stone(visual_type_id):
+		visual_root.transform=_arid_stone_transform(visual_root.transform,tile_data.grid_position)
+		_apply_material_override_recursive(model_instance,_frontier_art_profile.material_for(Color("a56847"),true))
+		_queue_arid_foot_pebbles(tile_data, top_y)
+	if visual_type_id.begins_with("station_set_door"):
+		_register_station_door_visual(tile_data.grid_position, model_instance)
 	_asset_model_count += 1
 	if _static_prop_model_supports_multimesh(visual_type_id):
 		_static_prop_individual_model_count += 1
 	_register_nature_prop_visual(tile_data, visual_type_id, visual_root)
 	return true
+
+
+func _apply_station_floor_boundary(model: Node3D, tile_data) -> void:
+	var bounds: Rect2 = _station_module_projection.floor_bounds(_terrain_map_data, tile_data.grid_position, _get_3d_cell_size())
+	if bounds.has_area():
+		_station_floor_boundary.apply_model(model, bounds, _frontier_art_profile.surface_color(String(tile_data.surface_type)))
+
+
+func _register_station_door_visual(grid: Vector2i, model: Node3D) -> void:
+	_station_door_visuals[grid] = {"model":weakref(model), "authored_transform":model.transform, "state":""}
+	_station_door_registry_stamp = ""
+	# _process applies the projection after the chunk has been built/captured,
+	# before drawing. Static resources must never retain a half-open transform.
+
+
+func _register_restored_station_door_visuals(chunk: Node3D) -> void:
+	# Cold cache attachment, not a SceneTree frame scan. Existing node names
+	# carry the authored tile ID; no new serialized metadata/schema is needed.
+	for visual: Node in chunk.get_children():
+		if not String(visual.name).begins_with("Asset_station_set_door_") or visual.get_child_count() == 0: continue
+		var parts := String(visual.name).split("_")
+		var model := visual.get_child(0) as Node3D
+		if model != null and parts.size() >= 2 and parts[-1].is_valid_int() and parts[-2].is_valid_int():
+			_register_station_door_visual(Vector2i(int(parts[-2]), int(parts[-1])), model)
+
+
+func _refresh_station_door_visuals_if_needed() -> void:
+	if _station_door_visuals.is_empty(): return
+	var registry: Node = _get_runtime_terrain_registry()
+	var stamp: String = "%d:%d" % [registry.get_instance_id(), registry.call("get_revision")] if registry != null else "none"
+	if stamp == _station_door_registry_stamp: return
+	_station_door_registry_stamp = stamp
+	for grid: Vector2i in _station_door_visuals.keys():
+		var record: Dictionary = _station_door_visuals[grid]
+		var model: Node3D = record.model.get_ref()
+		if model == null:
+			_station_door_visuals.erase(grid)
+			continue
+		var override: Dictionary = registry.call("get_runtime_tile_override", grid) if registry != null else {}
+		var state: String = String(override.get("source_runtime_visual_state", "")) if not String(override.get("source_interaction_id", "")).is_empty() else ""
+		if state not in ["open", "half", "closed"]: state = ""
+		if state == record.state: continue
+		model.transform = record.authored_transform
+		# Change only the leaf child: its parent retains authoritative FoW hiding.
+		model.visible = state != "open"
+		if state == "half":
+			model.basis = Basis(model.basis.x * 0.5, model.basis.y, model.basis.z)
+			model.position.x -= 0.15
+		record.state = state
+		_station_door_visual_apply_count += 1
+	_request_viewport_redraw()
+
+
+func _project_cell_module_model_basis(visual_type_id:String,authored:Basis)->Basis:
+	var cell_basis:Basis=_get_cell_module_visual_basis(visual_type_id)
+	if cell_basis.is_equal_approx(Basis.IDENTITY):return authored
+	if HEX_FLOOR_ADAPTER.supports(visual_type_id) or visual_type_id.begins_with("spacekit_pipe_"):return cell_basis*authored
+	var axis:Vector3=(cell_basis*authored.x).normalized()
+	var up:Vector3=authored.y.normalized()
+	return Basis(axis*authored.x.length(),authored.y,axis.cross(up).normalized()*authored.z.length())
+
+
+func _get_cell_module_visual_basis(visual_type_id: String) -> Basis:
+	if not _uses_hex_grid():
+		return Basis.IDENTITY
+	var normalized := visual_type_id.strip_edges().to_lower()
+	var connected := normalized == "station_floor_panel"
+	for prefix in ["station_set_floor", "station_set_wall", "station_set_door", "station_set_balcony_floor", "station_set_balcony_rail", "station_wall", "modular_floor", "modular_wall", "modular_gate", "modular_corridor", "wall_straight", "wall_corner", "corridor_", "spacekit_corridor_", "spacekit_pipe_"]:
+		if normalized.begins_with(prefix):
+			connected = true
+			break
+	if not connected:
+		return Basis.IDENTITY
+	var q: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2.RIGHT)
+	var r: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2.DOWN)
+	return Basis(Vector3(q.x, 0.0, q.y), Vector3.UP, Vector3(r.x, 0.0, r.y))
 
 
 func _get_tile_object_rotation_degrees(tile_data) -> float:
@@ -6506,6 +6901,8 @@ func _rebuild_patrol_visuals() -> void:
 	_patrol_preview_segment_count = 0
 	if _terrain_map_data == null or _patrol_root == null:
 		return
+	if not _show_authoring_markers and _editor_patrol_preview_path_id.is_empty():
+		return # Authored patrols are gameplay data; their green editing lines are not.
 	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
 	for spawn_id_variant in patrol_paths.keys():
 		var path_id: String = String(spawn_id_variant).strip_edges()
@@ -6710,7 +7107,7 @@ func _rebuild_selection_visuals() -> void:
 		var depth_test: bool=managed_buildings and String(tile_data.object_type_id)=="frontier_scene_solid"
 		selection.material_override = _make_editor_selection_material(false,depth_test)
 		var selection_y: float = _get_grid_surface_y(grid_position) + TILE_SELECTION_SURFACE_Y_OFFSET
-		var profile := _regional_surface_profile(tile_data) if _regional_height_step > 0.0 else PackedFloat32Array()
+		var profile := _regional_surface_profile(tile_data) if _uses_hex_grid() else PackedFloat32Array()
 		if not profile.is_empty():
 			var cap := SurfaceTool.new()
 			cap.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -6734,7 +7131,7 @@ func _add_selection_border(grid_position: Vector2i, y_position: float, depth_tes
 	if _uses_hex_grid():
 		var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size / sqrt(3.0))
 		var tile = _render_tile_by_grid.get(grid_position)
-		var profile := _regional_surface_profile(tile) if tile != null and _regional_height_step > 0.0 else PackedFloat32Array()
+		var profile := _regional_surface_profile(tile) if tile != null else PackedFloat32Array()
 		for index in range(6):
 			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
 			var b := center + Vector3(corners[(index+1)%6].x, 0.0, corners[(index+1)%6].y)
@@ -12942,6 +13339,7 @@ func _build_unit_visual_input_signature(unit: Node) -> String:
 		String(unit.call("get_armor_id")) if unit != null and unit.has_method("get_armor_id") else "suit",
 		String(unit.call("get_weapon_1_id")) if unit != null and unit.has_method("get_weapon_1_id") else "",
 		String(unit.call("get_weapon_2_id")) if unit != null and unit.has_method("get_weapon_2_id") else "",
+		String(unit.call("get_portrait_path")) if unit != null and unit.has_method("get_portrait_path") else "",
 	])
 	if unit != null:
 		for meta_key in ["visual_archetype_id", "enemy_visual_archetype_id", "visual_archetype", "enemy_visual_archetype"]:
@@ -13258,7 +13656,28 @@ func _get_hex_unit_motion_visual(unit:Node) -> Dictionary:
 	var height:float=float(unit.get_meta("hex_ground_stand_height_logical"))
 	var facing:float=float(unit.get_meta("hex_ground_facing_angle"))
 	if not is_finite(height) or not is_finite(facing) or not (unit as Node2D).global_position.is_finite():return {}
-	return {"position":_world_to_3d_position((unit as Node2D).global_position,height*_get_3d_height_step()+0.06),"moving":bool(unit.get_meta("hex_ground_moving")),"facing_angle":facing}
+	var world_position: Vector2 = (unit as Node2D).global_position
+	var tile = _render_tile_by_grid.get(_world_to_grid_position(world_position))
+	var support: float = _hex_grid_model_support_lift(tile) if tile != null else 0.0
+	var segment: Dictionary = unit.get_meta("hex_ground_surface_segment",{})
+	if typeof(segment.get("from_axial"))==TYPE_VECTOR2 and typeof(segment.get("to_axial"))==TYPE_VECTOR2:
+		support=lerpf(_hex_model_support_at_axial(segment.from_axial),_hex_model_support_at_axial(segment.to_axial),clampf(float(segment.get("progress",0.0)),0.0,1.0))
+	return {"position":_world_to_3d_position(world_position,height*_get_3d_height_step()+support+0.06),"moving":bool(unit.get_meta("hex_ground_moving")),"facing_angle":facing}
+
+
+func _hex_model_support_at_axial(axial:Vector2)->float:
+	var cell:Vector2i=HEX_GRID_SCRIPT.round_axial(axial)
+	var tile=_render_tile_by_grid.get(cell)
+	var base:float=_hex_grid_model_support_lift(tile) if tile!=null else 0.0
+	var delta:Vector2=HEX_GRID_SCRIPT.axial_to_plane(axial-Vector2(cell))
+	if delta.is_zero_approx():return base
+	var closest:=Vector2i.ZERO
+	var progress:=0.0
+	for direction:Vector2i in HEX_GRID_SCRIPT.DIRECTIONS:
+		var projection:float=delta.dot(HEX_GRID_SCRIPT.axial_to_plane(Vector2(direction)))
+		if projection>progress:progress=projection;closest=direction
+	var adjacent=_render_tile_by_grid.get(cell+closest)
+	return lerpf(base,_hex_grid_model_support_lift(adjacent) if adjacent!=null else 0.0,clampf(progress,0.0,1.0))
 
 
 func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}, visible_contact_direction: Vector2 = Vector2.ZERO,hex_motion:Dictionary={}) -> float:
@@ -13345,9 +13764,9 @@ func _get_unit_world_direction_yaw(from_world_position: Vector2, to_world_positi
 	return wrapf(rad_to_deg(atan2(delta_grid.y, -delta_grid.x)), 0.0, 360.0)
 
 
-func _create_unit_proxy(unit: Node) -> Node3D:
+func _create_unit_proxy(unit: Node, identity: Dictionary = {}) -> Node3D:
 	var root := Node3D.new()
-	var unit_visual_entry: Dictionary = _get_unit_visual_entry(unit)
+	var unit_visual_entry: Dictionary = _get_unit_visual_entry(unit, identity)
 	var model_scene := _get_unit_model_scene(unit, unit_visual_entry)
 	if model_scene != null:
 		var model_instance := model_scene.instantiate() as Node3D
@@ -13361,6 +13780,7 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			root.set_meta("unit_model_scale", model_scale)
 			root.set_meta("unit_model_root_rotation_y_degrees", model_root.rotation_degrees.y)
 			var material_applied: bool = _apply_unit_visual_material(model_instance, unit_visual_entry)
+			root.set_meta("portrait_appearance", String(unit_visual_entry.get("portrait_appearance", "")))
 			if not material_applied and _unit_visual_entry_has_skin(unit_visual_entry):
 				_add_runtime_missing_asset_marker(
 					root,
@@ -15202,9 +15622,48 @@ func _make_space_station_colormap_material() -> StandardMaterial3D:
 	return material
 
 
+func _is_arid_station_visual_context()->bool:
+	return _terrain_map_data!=null and String(_terrain_map_data.call("get_map_name")) in ["station_outpost_64x64","station_outpost_192x192"]
+
+
+func _legacy_cliff_visual_kind(tile)->String:
+	if tile==null or not _uses_hex_grid() or not _is_arid_terrain_visual_context():return "keep"
+	if not String(tile.type_id).begins_with("cliff_") or tile.object_height>0 or not String(tile.object_type_id).is_empty():return "keep"
+	# These Square authoring ornaments do not describe the actual Hex edge.
+	# Preserve an independently blocked/LOS/cover cell as visible rock; only a
+	# functionless ornament can give way entirely to the real terrain faces.
+	return "rock_blocker" if not tile.walkable or tile.blocks_los or tile.cover_value>0 else "height_only"
+
+
+func _is_arid_terrain_visual_context()->bool:
+	if _terrain_map_data==null:return false
+	if _is_arid_station_visual_context():return true
+	if _terrain_map_data.get_terrain_visual_theme_id()!=FRONTIER_ART_PROFILE_SCRIPT.PROFILE_ID:return false
+	return _terrain_map_data.get_regional_height_step()>0.0 or _terrain_map_data.get_authored_visual_layout_id()==FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID or _terrain_map_data.get_map_name()=="frontier_workyard_24x20"
+
+
+func _is_arid_station_stone(type_id:String)->bool:
+	return _is_arid_terrain_visual_context() and type_id in ["nature_rock_cover","glut_sandstone_04"]
+
+
+func _arid_stone_transform(authored:Transform3D,grid:Vector2i)->Transform3D:
+	# Pure coordinate variation, evaluated only while building the cached chunk.
+	# Every real blocker remains represented, near its original cell center.
+	var seed:int=absi(grid.x*73856093 ^ grid.y*19349663)
+	var result:Transform3D=authored
+	result.basis=Basis(Vector3.UP,float(seed%360)*PI/180.0)*result.basis
+	result.basis=result.basis.scaled(Vector3(0.82+float(seed%19)*0.01,0.82+float((seed/19)%23)*0.01,0.82+float((seed/437)%19)*0.01))
+	result.origin+=Vector3(float(seed%17-8)*0.01,0.0,float((seed/17)%17-8)*0.01)
+	return result
+
+
 func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> String:
 	var normalized_object: String = object_type_id.strip_edges().to_lower()
 	if not normalized_object.is_empty():
+		# Authored desert station dressing only. Logical tree blocker/cover facts
+		# remain in TerrainRegistry; temperate and other catalog uses stay intact.
+		if normalized_object=="nature_tree_blocker" and _is_arid_station_visual_context():
+			return "glut_sandstone_04"
 		return normalized_object
 
 	var normalized_type: String = type_id.strip_edges().to_lower()
@@ -15228,6 +15687,8 @@ func _resolve_structure_tile_asset_type_id(type_id: String) -> String:
 	var normalized_type: String = type_id.strip_edges().to_lower()
 	if normalized_type.is_empty() or normalized_type == "ground_flat":
 		return ""
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_type):
+		return normalized_type # A wall/prop does not replace its authored floor layer.
 	var tile_catalog = _get_tile_catalog()
 	if tile_catalog != null and tile_catalog.has_method("is_structure_layer_type") and bool(tile_catalog.call("is_structure_layer_type", normalized_type)):
 		return normalized_type
@@ -15526,6 +15987,7 @@ func _get_asset_texture_pixel_size(visual_type_id: String) -> float:
 
 
 func _get_ground_surface_top_y_offset(visual_type_id: String) -> float:
+	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(visual_type_id):return 0.0
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
 	if mapped_entry.is_empty():
 		return 0.0
@@ -15687,7 +16149,17 @@ func _get_contact_color(detection_state: String, report_state: String = "current
 			return Color(1.0, 0.42, 0.34, 0.92)
 
 
-func _get_unit_visual_entry(unit: Node) -> Dictionary:
+func _get_unit_visual_entry(unit: Node, identity: Dictionary = {}) -> Dictionary:
+	var entry := _get_unit_visual_entry_without_identity(unit)
+	var appearance := PERSONNEL_IDENTITY.resolve(identity, unit)
+	if not appearance.is_empty() and not entry.is_empty():
+		entry = entry.duplicate(true)
+		entry["skin_path"] = PERSONNEL_IDENTITY.SOURCE_SKIN
+		entry["portrait_appearance"] = appearance
+	return entry
+
+
+func _get_unit_visual_entry_without_identity(unit: Node) -> Dictionary:
 	var mapping: Dictionary = _get_npc_unit_visual_mapping()
 	if mapping.is_empty():
 		return {}
@@ -16023,6 +16495,10 @@ func _unit_visual_entry_has_skin(unit_visual_entry: Dictionary) -> bool:
 
 
 func _apply_unit_visual_material(model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+	var identity_material: Material = PERSONNEL_IDENTITY.material_for(String(unit_visual_entry.get("portrait_appearance", "")))
+	if identity_material != null:
+		_apply_material_override_recursive(model_instance, identity_material)
+		return true
 	var skin_path: String = String(unit_visual_entry.get("skin_path", "")).strip_edges()
 	if skin_path.is_empty():
 		return true
@@ -16207,7 +16683,7 @@ func play_polisa_cargo_lift(craft_id: String, world_position: Vector2) -> bool:
 func _get_world_surface_y(world_position: Vector2) -> float:
 	var cell := _world_to_grid_position(world_position)
 	var height := _get_grid_surface_y(cell)
-	if _regional_height_step <= 0.0:
+	if not _uses_hex_grid():
 		return height
 	var tile = _render_tile_by_grid.get(cell)
 	if tile == null:
@@ -16216,7 +16692,7 @@ func _get_world_surface_y(world_position: Vector2) -> float:
 	if profile.is_empty():
 		return height
 	var offset: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(_world_to_grid_float(world_position) - Vector2(cell))
-	return height + REGIONAL_SURFACE.rise_at(offset, profile) * _regional_height_step
+	return height + REGIONAL_SURFACE.rise_at(offset, profile) * _get_3d_height_step()
 
 
 func _get_grid_surface_y(grid_position: Vector2i) -> float:
@@ -16227,7 +16703,7 @@ func _get_grid_surface_y(grid_position: Vector2i) -> float:
 	var tile_data = _render_tile_by_grid.get(grid_position, null)
 	if tile_data == null:
 		return 0.0
-	return TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) * _get_3d_height_step()
+	return TERRAIN_TILE_DATA_SCRIPT.stand_height(tile_data) * _get_3d_height_step() + _hex_grid_model_support_lift(tile_data)
 
 
 func _grid_to_3d_position(grid_position: Vector2, y_offset: float) -> Vector3:
@@ -16283,6 +16759,7 @@ func set_authoring_markers_visible(enabled: bool) -> void:
 	if _show_authoring_markers==enabled: return
 	_show_authoring_markers=enabled
 	_rebuild_marker_visuals()
+	_rebuild_patrol_visuals()
 
 
 # Whole-map static preparation runs in a hidden, actor-free approach view.
@@ -16349,16 +16826,20 @@ func _begin_terrain_resource_context(tiles: Array) -> bool:
 	digest.start(HashingContext.HASH_SHA256)
 	for tile in tiles:
 		digest.update(var_to_bytes([tile.grid_position, tile.type_id, tile.height_level, tile.surface_type, tile.edge_type,
-			tile.object_type_id, tile.object_height, tile.walkable, tile.blocks_los, tile.object_rotation_degrees, tile.object_scale, tile.explicit_hex_ramps, tile.ramp_direction]))
+			tile.object_type_id, tile.object_height, tile.walkable, tile.blocks_los, tile.cover_value, tile.object_rotation_degrees, tile.object_scale, tile.explicit_hex_ramps, tile.ramp_direction]))
 	var owned: Array = _external_terrain_object_visuals.keys()
 	owned.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x or (a.x == b.x and a.y < b.y))
 	digest.update(var_to_bytes(owned))
 	var terrain_revision := digest.finish().hex_encode()
 	var presentation: Dictionary = _terrain_map_data.call("get_place_presentation")
 	var art := [str(_active_terrain_visual_theme_id), _frontier_art_enabled, JSON.stringify(presentation, "", true),
+		FileAccess.get_sha256("res://scripts/terrain/station_floor_boundary.gd"), FileAccess.get_sha256("res://shaders/terrain/station_floor_boundary.gdshader"),
+		FileAccess.get_sha256("res://scripts/terrain/frontier_closed_buildings.gd"), FileAccess.get_sha256("res://shaders/terrain/frontier_building_wear.gdshader"),
+		FileAccess.get_sha256("res://scenes/terrain/frontier_habitat_exterior.tscn"), FileAccess.get_sha256("res://scenes/terrain/frontier_hall_exterior.tscn"),
+		FileAccess.get_sha256("res://shaders/terrain/frontier_ground.gdshader"),FileAccess.get_sha256("res://scripts/terrain/frontier_gm01_layout.gd"),
 		FileAccess.get_sha256("res://scripts/terrain/frontier_art_profile.gd"), FileAccess.get_sha256("res://scripts/terrain/frontier_place_props.gd"),
-		FileAccess.get_sha256("res://scripts/terrain/frontier_art_geology.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_ground_batch.gd"), FileAccess.get_sha256("res://scripts/terrain/regional_hex_surface.gd")]
-	var grid := [_active_grid_topology, _get_3d_cell_size(), _get_3d_height_step(), _get_3d_ground_thickness(), _get_3d_ground_fill(), _hex_grid_visible]
+		FileAccess.get_sha256("res://scripts/terrain/frontier_art_geology.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_ground_batch.gd"), FileAccess.get_sha256("res://scripts/terrain/regional_hex_surface.gd"), FileAccess.get_sha256("res://scripts/terrain/regional_cliff_fracture.gd"), FileAccess.get_sha256("res://scripts/terrain/station_module_projection.gd"), FileAccess.get_sha256("res://scripts/terrain/hex_floor_model_adapter.gd"), FileAccess.get_sha256("res://scripts/terrain/terrain_map_3d_view.gd")]
+	var grid := [_active_grid_topology, _get_3d_cell_size(), _get_3d_height_step(), _get_3d_ground_thickness(), _get_3d_ground_fill(), _hex_grid_visible,"surface_grid_v2",FileAccess.get_sha256("res://scripts/terrain/hex_surface_grid_projection.gd")]
 	var context := {"map_id": String(_terrain_map_data.call("get_map_name")), "terrain_revision": terrain_revision,
 		"art_revision": var_to_bytes(art).hex_encode().sha256_text(), "grid_revision": var_to_bytes(grid).hex_encode().sha256_text()}
 	if _terrain_resource_handoff_pending:

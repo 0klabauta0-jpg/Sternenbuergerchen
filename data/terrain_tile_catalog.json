@@ -5661,7 +5661,7 @@
 		},
 		{
 			"type_id": "glut_sandstone_04",
-			"display_name": "Glut-Sandsteinblock",
+			"display_name": "Börner-Sandsteinblock",
 			"palette_group": "nature_props",
 			"placement_layer": "object",
 			"walkable": false,

@@ -1,12 +1,13 @@
 extends Control
 ## One-built view over HomebaseTestScreen. Only focus, controls and render caches.
 
+const DISPLAY = preload("res://scripts/mission/campaign_display_catalog.gd")
 const PORTRAITS: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const BASE_SCENE: PackedScene = preload("res://scenes/meta/explorable_homebase.tscn")
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const DRAG_SURFACE: GDScript = preload("res://scripts/meta/operations_drag_surface.gd")
 const BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
-const NAV_ICONS: GDScript = preload("res://scripts/ui/native_ui_icons.gd")
+const NAV_ICONS: GDScript = preload("res://scripts/ui/homebase_navigation_icons.gd")
 const INK := Color("08232e")
 const PANEL := Color("102f3b")
 const CREAM := Color("f4f2e9")
@@ -181,6 +182,9 @@ func _build() -> void:
 	header.add_child(title)
 	_homebase_location = _label("", 16, MUTED)
 	_homebase_location.name = "HomebaseLocation"
+	# A header badge needs its text width. A wrapping, non-expanding HBox child
+	# otherwise shrinks to one glyph and displaces the entire base viewport.
+	_homebase_location.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_homebase_location.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	header.add_child(_homebase_location)
 	_workflow = HBoxContainer.new()
@@ -199,7 +203,7 @@ func _build() -> void:
 	outer.add_child(body)
 	var nav := VBoxContainer.new()
 	nav.custom_minimum_size.x = 166
-	nav.add_theme_constant_override("separation", 8)
+	nav.add_theme_constant_override("separation", 4)
 	body.add_child(nav)
 	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "mission", "label": "Flugdeck"}, {"id": "map", "label": "Sternkarte"}, {"id": "jobs", "label": "Smart Mobile"}]:
 		var key: String = String(item.id)
@@ -209,10 +213,9 @@ func _build() -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_override("font", THEME.get_heading_font())
 		button.add_theme_font_size_override("font_size", 17)
-		var icon_ids := {"base":"nav_home", "personnel":"nav_person", "squad":"nav_team", "mission":"dropship", "map":"nav_planet", "jobs":"nav_mobile"}
-		button.icon = NAV_ICONS.get_icon(String(icon_ids.get(key, "")))
+		button.icon = NAV_ICONS.get_icon(key)
 		button.expand_icon = true
-		button.add_theme_constant_override("icon_max_width", 24)
+		button.add_theme_constant_override("icon_max_width", 36)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if key == "base":
 			_base_navigation_group = VBoxContainer.new()
@@ -264,7 +267,8 @@ func _build() -> void:
 		_open_base_management("ship"))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
-	nav.move_child(_nav.jobs,nav.get_child_count()-1)
+	# Keep Smart Mobile with the other navigation entries. A bottom-pinned
+	# button sits underneath the full-width base command dock.
 	_workspace = Control.new()
 	_workspace.name = "Workspace"
 	_workspace.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -405,7 +409,8 @@ func _build_squad() -> void:
 		_slots.append(slot)
 		var focus: Button = slot.focus
 		focus.pressed.connect(_slot_pressed.bind(index))
-	_team_note = _label("Personal auswählen und zuweisen.", 15, MUTED)
+	_team_note = _label("", 15, MUTED)
+	_team_note.tooltip_text = "Person auf einen Platz ziehen · Trupp ins Schiff ziehen."
 	content.add_child(_team_note)
 	var row := HBoxContainer.new()
 	content.add_child(row)
@@ -515,7 +520,7 @@ func _build_equipment_palette(parent: Control) -> void:
 	_equipment_palette_flow.add_theme_constant_override("h_separation", 6)
 	_equipment_palette_flow.add_theme_constant_override("v_separation", 6)
 	_equipment_palette.add_child(_equipment_palette_flow)
-	_equipment_palette.add_child(_label("Auf einen passenden Ausrüstungsslot ziehen.", 13, MUTED))
+	_equipment_palette_flow.tooltip_text = "Auf einen passenden Ausrüstungsslot ziehen."
 
 
 func _update_equipment_palette() -> void:
@@ -803,8 +808,9 @@ func refresh() -> void:
 	_update_equipment(focused, Dictionary(snapshot.get("loadout_options", {})))
 	var singleplayer: Dictionary=snapshot.get("singleplayer",{})
 	var bodies: Dictionary = Dictionary(singleplayer.get("space_travel", {})).get("bodies", {})
-	var home_body := String(Dictionary(bodies.get("moon", {})).get("name", ""))
-	_homebase_location.text = "Standort: " + home_body if not home_body.is_empty() else ""
+	var home_body := DISPLAY.body_name("moon", bodies.moon) if bodies.has("moon") else ""
+	var home_location: Dictionary = Dictionary(Dictionary(singleplayer.get("campaign", {})).get("locations", {})).get("homebase", {})
+	_homebase_location.text = "Standort: %s · %s" % [DISPLAY.location_name("homebase", home_location), home_body] if not home_body.is_empty() else ""
 	_homebase_location.visible = _mode == "base" and not home_body.is_empty()
 	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
 	_inventory_panel.visible=not inventory.is_empty()
@@ -916,9 +922,10 @@ func _update_team(team: Dictionary, teams: Array) -> void:
 		var unit: Dictionary = Dictionary(members[index]) if index < members.size() else {}
 		_slots[index]["unit_id"] = String(unit.get("id", ""))
 		_fill_person(_slots[index], unit)
-	_team_note.text = "Trupp an Bord · zum Bearbeiten zurückholen" if bool(team.get("busy", false)) else "Person auf einen Platz ziehen · Trupp ins Schiff ziehen."
+	_team_note.text = "Trupp an Bord · zum Bearbeiten zurückholen" if bool(team.get("busy", false)) else ""
 	if members.size() > 4:
 		_team_note.text = "%d weitere Mitglieder in den Charakterdetails/Werkzeugen." % (members.size() - 4)
+	_team_note.visible = not _team_note.text.is_empty()
 
 
 func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
@@ -1165,6 +1172,8 @@ func _open_base_management(section: String) -> void:
 
 
 func _navigate_from_sidebar(mode:String)->void:
+	if mode != "base": _base_management_bar.hide()
+	if mode != "mission": _flight_management_bar.hide()
 	_right_flyout_active=mode=="jobs"
 	_flyout_kind=mode if _right_flyout_active else ""
 	_act("navigate",{"mode":mode})
@@ -1219,6 +1228,9 @@ func _layout_workspace_flyout()->void:
 	for column:Control in _columns.values():column.visible=column==panel
 	_reference_stage.hide()
 	var available_height: float = maxf(1.0, minf(_workspace.size.y, get_overlay_safe_rect().end.y - _workspace.global_position.y))
+	# The job dossier keeps its readable picture strip at either resolution;
+	# extra desktop height should not push its actions below a blank half-page.
+	if _flyout_kind == "jobs": available_height = minf(available_height, 500.0)
 	panel.z_index=2;panel.set_anchors_preset(Control.PRESET_TOP_LEFT);panel.size=Vector2(width,available_height)
 	if _flyout_tween==null or not _flyout_tween.is_running():panel.position=Vector2.ZERO
 	_flyout_close.position=Vector2(width-44,8);_flyout_close.size=Vector2(34,30)
@@ -1319,9 +1331,8 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		var context: Dictionary = travel.duplicate(true)
 		context["kind"] = "space"
 		var orbit: String = String(travel.get("orbit_id", ""))
-		var orbits: Dictionary = travel.get("orbits", {})
-		var orbit_name := String(Dictionary(orbits.get(orbit, {})).get("name", "Orbit"))
-		var target_name := String(Dictionary(orbits.get(String(travel.get("target_orbit_id", "")), {})).get("name", "Zielorbit"))
+		var orbit_name := DISPLAY.orbit_name(orbit, travel)
+		var target_name := DISPLAY.orbit_name(String(travel.get("target_orbit_id", "")), travel)
 		match phase:
 			"orbit": context["caption"] = "Im Weltraum · " + orbit_name
 			"quantum": context["caption"] = "Warp-Sprung → %s · %d %%" % [target_name, roundi(float(travel.get("progress", 0.0)) * 100)]
@@ -1334,7 +1345,7 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		return {"kind": "base_pad", "phase": "grounded", "craft_id": _craft_id, "landing_pad_id": String(craft.get("landing_pad_id", "")), "caption": "Mondbasis · Schiff auf seinem Landepad"}
 	var location_id: String = String(craft.get("location_id", ""))
 	var location: Dictionary = Dictionary(Dictionary(runtime.get("campaign", {})).get("locations", {})).get(location_id, {})
-	return {"kind": "location", "phase": phase if String(travel.get("craft_id", "")) == _craft_id else "", "craft_id": _craft_id, "caption": "Schiff am Zielort · " + String(location.get("name", "Position wird bestaetigt"))}
+	return {"kind": "location", "phase": phase if String(travel.get("craft_id", "")) == _craft_id else "", "craft_id": _craft_id, "caption": "Schiff am Zielort · " + DISPLAY.location_name(location_id, location)}
 
 
 func get_presentation_snapshot() -> Dictionary:

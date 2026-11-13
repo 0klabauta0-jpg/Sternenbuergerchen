@@ -21,6 +21,9 @@ func export_actors(owner: Node) -> Dictionary:
 	return {"ok":true, "schema":"mission_actor_batch.v1", "actors":actors}
 
 func prepare_restore(owner: Node, state: Dictionary, expected_positions: Dictionary) -> Dictionary:
+	for id in _preparations.keys():
+		if _preparations[id].handle.get_ref() == null: _preparations.erase(id)
+	if _preparations.size() >= 32: return _reject("actor_batch_capacity")
 	if not is_instance_valid(owner) or not owner.has_method("get_unit_registry") or state.size() != 3 or state.get("ok") != true or state.get("schema") != "mission_actor_batch.v1" or not state.get("actors") is Dictionary or state.actors.size() > 128 or expected_positions.size() != state.actors.size(): return _reject("invalid_actor_batch")
 	var registry: Node = owner.get_unit_registry()
 	if not is_instance_valid(registry) or registry.get_all_units().size() != state.actors.size(): return _reject("actor_registry_mismatch")
@@ -34,9 +37,6 @@ func prepare_restore(owner: Node, state: Dictionary, expected_positions: Diction
 		var prepared: Dictionary = actor.prepare_mission_actor_restore(owner, state.actors[id], expected_positions[id])
 		if not prepared.get("ok",false): return prepared
 		records.append({"actor":weakref(actor), "id":id, "handle":prepared.prepared})
-	for id in _preparations.keys():
-		if _preparations[id].handle.get_ref() == null: _preparations.erase(id)
-	if _preparations.size() >= 32: return _reject("actor_batch_capacity")
 	var handle := PreparedActors.new()
 	_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "owner":weakref(owner), "registry":weakref(registry), "records":records, "phase":"prepared"}
 	return {"ok":true, "prepared":handle}

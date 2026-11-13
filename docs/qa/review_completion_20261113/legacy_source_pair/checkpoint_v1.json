@@ -1,0 +1,968 @@
+{
+	"base_personnel": {
+		"units": {
+			"campaign_leader": {
+				"auto_rest_enabled": true,
+				"bed_id": "",
+				"craft_id": "",
+				"position": [
+					1911.62084960938,
+					1180.18957519531
+				],
+				"rest_automatic": false,
+				"status": "outside"
+			},
+			"campaign_pilot": {
+				"auto_rest_enabled": true,
+				"bed_id": "",
+				"craft_id": "",
+				"position": [
+					1911.62084960938,
+					1180.18957519531
+				],
+				"rest_automatic": false,
+				"status": "outside"
+			}
+		},
+		"version": 1
+	},
+	"campaign": {
+		"accepted_job_ids": [],
+		"completion_receipts": {
+
+		},
+		"departures_by_craft_id": {
+
+		},
+		"enforce_sequence": true,
+		"jobs": {
+			"benit_delivery": {
+				"description": "C-Benit zum Satelliten-Handelsposten liefern. Bestätigten Fortschritt im Auftrag verfolgen.",
+				"home_upload": false,
+				"id": "benit_delivery",
+				"location_id": "satellite_crash",
+				"locked": true,
+				"prerequisite_job_id": "outpost_recovery",
+				"required_step_ids": [
+					"deliver_benit",
+					"return_to_ship"
+				],
+				"reward": {
+					"blueprint_id": "mining_tool",
+					"credits": 100
+				},
+				"scenario_id": "benit_delivery",
+				"status": "offered",
+				"title": "C-Benit zum Satelliten-Handelsposten liefern"
+			},
+			"buccaneer_rescue": {
+				"description": "Buccaneer im Weltraum retten. Bestätigten Fortschritt im Auftrag verfolgen.",
+				"home_upload": false,
+				"id": "buccaneer_rescue",
+				"location_id": "distress_orbit",
+				"locked": true,
+				"prerequisite_job_id": "outpost_chip_recovery",
+				"required_step_ids": [
+					"enemy_cutlass_destroyed",
+					"rescue_buccaneer"
+				],
+				"reward": {
+					"blueprint_id": "",
+					"credits": 300
+				},
+				"scenario_id": "buccaneer_rescue",
+				"status": "offered",
+				"title": "Buccaneer im Weltraum retten"
+			},
+			"outpost_chip_recovery": {
+				"description": "Chip aus gesichertem Außenposten bergen. Bestätigten Fortschritt im Auftrag verfolgen.",
+				"home_upload": true,
+				"id": "outpost_chip_recovery",
+				"location_id": "fortified_outpost",
+				"locked": true,
+				"prerequisite_job_id": "benit_delivery",
+				"required_step_ids": [
+					"clear_outpost",
+					"secure_outpost_chip",
+					"return_to_ship"
+				],
+				"reward": {
+					"blueprint_id": "assault_rifle",
+					"credits": 250
+				},
+				"scenario_id": "outpost_chip_recovery",
+				"status": "offered",
+				"title": "Chip aus gesichertem Außenposten bergen"
+			},
+			"outpost_recovery": {
+				"description": "Ersten Außenposten sichern. Bestätigten Fortschritt im Auftrag verfolgen.",
+				"home_upload": false,
+				"id": "outpost_recovery",
+				"location_id": "trade_outpost",
+				"locked": true,
+				"prerequisite_job_id": "satellite_recovery",
+				"required_step_ids": [
+					"clear_outpost",
+					"recover_crate",
+					"return_to_ship"
+				],
+				"reward": {
+					"blueprint_id": "",
+					"credits": 100
+				},
+				"scenario_id": "outpost_recovery",
+				"status": "offered",
+				"title": "Ersten Außenposten sichern"
+			},
+			"satellite_recovery": {
+				"description": "Satellitendaten bergen. Bestätigten Fortschritt im Auftrag verfolgen.",
+				"home_upload": true,
+				"id": "satellite_recovery",
+				"location_id": "satellite_crash",
+				"locked": false,
+				"prerequisite_job_id": "",
+				"required_step_ids": [
+					"secure_satellite",
+					"return_to_ship"
+				],
+				"reward": {
+					"blueprint_id": "light_armor",
+					"credits": 150
+				},
+				"scenario_id": "satellite_recovery",
+				"status": "offered",
+				"title": "Satellitendaten bergen"
+			}
+		},
+		"locations": {
+			"distress_orbit": {
+				"id": "distress_orbit",
+				"landing_pad_ids": [
+					"distress_rendezvous_01"
+				],
+				"map_file_path": "res://maps/distress_orbit.json",
+				"name": "Notruf im Planetenorbit",
+				"region_position": [
+					0.91,
+					0.38
+				],
+				"scenario_file_path": "res://data/mission_scenarios/buccaneer_rescue.json",
+				"services": []
+			},
+			"fortified_outpost": {
+				"id": "fortified_outpost",
+				"landing_pad_ids": [
+					"fortified_pad_01"
+				],
+				"map_file_path": "res://maps/fortified_outpost.json",
+				"name": "Gesicherter Außenposten",
+				"region_position": [
+					0.5,
+					0.83
+				],
+				"scenario_file_path": "res://data/mission_scenarios/outpost_chip_recovery.json",
+				"services": []
+			},
+			"homebase": {
+				"id": "homebase",
+				"landing_pad_ids": [
+					"homebase_pad_01",
+					"homebase_pad_02"
+				],
+				"map_file_path": "res://maps/homebase_frontier_exploration.json",
+				"name": "Heimatbasis",
+				"region_position": [
+					0.2,
+					0.65
+				],
+				"scenario_file_path": "",
+				"services": [
+					"personnel",
+					"jobs",
+					"refuel"
+				]
+			},
+			"polisa": {
+				"free_visit": true,
+				"id": "polisa",
+				"landing_pad_ids": [
+					"polisa_pad_01",
+					"polisa_pad_02",
+					"polisa_pad_03",
+					"polisa_pad_04",
+					"polisa_pad_05",
+					"polisa_pad_06",
+					"polisa_pad_07"
+				],
+				"map_file_path": "res://maps/polisa_station.json",
+				"name": "Polisa / Freie Raumstation",
+				"region_position": [
+					0.42578125,
+					0.1875
+				],
+				"scenario_file_path": "res://data/mission_scenarios/polisa_visit.json",
+				"services": [
+					"trade",
+					"refuel",
+					"equipment",
+					"ships"
+				]
+			},
+			"satellite_crash": {
+				"id": "satellite_crash",
+				"landing_pad_ids": [
+					"satellite_pad_01"
+				],
+				"map_file_path": "res://maps/satellite_crash_site.json",
+				"name": "Satelliten-Absturzstelle",
+				"region_position": [
+					0.7,
+					0.25
+				],
+				"scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json",
+				"services": [
+					"trade",
+					"refuel"
+				]
+			},
+			"trade_outpost": {
+				"id": "trade_outpost",
+				"landing_pad_ids": [
+					"trade_pad_01"
+				],
+				"map_file_path": "res://maps/trade_outpost.json",
+				"name": "Handelsaussenposten",
+				"region_position": [
+					0.8,
+					0.75
+				],
+				"scenario_file_path": "res://data/mission_scenarios/outpost_recovery.json",
+				"services": [
+					"trade",
+					"refuel"
+				]
+			}
+		},
+		"progress": {
+			"crate_delivered": false,
+			"crate_loaded": false,
+			"recruited_outpost": false,
+			"recruited_pilot": false,
+			"second_pad_built": false
+		},
+		"requests": {
+
+		},
+		"revision": 0,
+		"schema_version": 1,
+		"selected_job_id": "",
+		"selected_location_id": "homebase"
+	},
+	"campaign_run_id": "426e92a2e8e41162fcedc1f8017b989eaaa6e789a510f1e86edacb125b4549eb",
+	"craft": {
+		"definition": {
+			"cargo_options": [],
+			"craft_id": "dropship_1",
+			"craft_type": "dropship",
+			"display_name": "Dropship 1",
+			"model_id": "cutlass",
+			"summary": "Single-pilot shuttle for the FOB corridor.",
+			"supports_cargo": false,
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png"
+		},
+		"fireteam_definitions": [
+			{
+				"id": "ft1",
+				"label": "FT1",
+				"lead_unit_id": "campaign_leader",
+				"loadout": "medium",
+				"member_loadouts": {
+					"campaign_leader": {
+						"armor": "suit",
+						"weapon_1": "pistol",
+						"weapon_2": "medictool"
+					}
+				},
+				"member_unit_ids": [
+					"campaign_leader"
+				],
+				"respawn_enabled": false
+			}
+		],
+		"loaded_cargo": {
+
+		},
+		"member_loadouts": {
+			"campaign_leader": {
+				"armor": "suit",
+				"weapon_1": "pistol",
+				"weapon_2": "medictool"
+			},
+			"campaign_pilot": {
+				"armor": "suit",
+				"weapon_1": "pistol",
+				"weapon_2": "medictool"
+			}
+		},
+		"pilot_id": "campaign_pilot",
+		"selected_cargo": {
+
+		},
+		"staged_fireteam_ids": [
+			"ft1"
+		],
+		"staged_unit_ids": [
+			"campaign_leader"
+		]
+	},
+	"fleet": [
+		{
+			"definition": {
+				"cargo_options": [],
+				"craft_id": "dropship_1",
+				"craft_type": "dropship",
+				"display_name": "Dropship 1",
+				"model_id": "cutlass",
+				"summary": "Single-pilot shuttle for the FOB corridor.",
+				"supports_cargo": false,
+				"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png"
+			},
+			"location": "homebase",
+			"pilot_id": "campaign_pilot"
+		}
+	],
+	"location_resources": {
+		"distress_orbit": {
+			"location_id": "distress_orbit",
+			"sites": {
+
+			},
+			"version": 1
+		},
+		"fortified_outpost": {
+			"location_id": "fortified_outpost",
+			"sites": {
+
+			},
+			"version": 1
+		},
+		"satellite_crash": {
+			"location_id": "satellite_crash",
+			"sites": {
+				"b_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"freighter_wreck_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"iron_ridge_01": {
+					"discovered": false,
+					"remaining": 8
+				}
+			},
+			"version": 1
+		},
+		"trade_outpost": {
+			"location_id": "trade_outpost",
+			"sites": {
+				"a_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"c_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				}
+			},
+			"version": 1
+		}
+	},
+	"onboarding": {
+		"facts": {
+
+		},
+		"revision": 0,
+		"schema_version": 2,
+		"stage_index": 0
+	},
+	"polisa_recruitment_market": {
+
+	},
+	"roster": [
+		{
+			"age_years": 34,
+			"armor": "suit",
+			"armor_id": "suit",
+			"biography_text": "Former dock security lead who rebuilt a scattered relief squad into a disciplined boarding cell.",
+			"callsign": "ROOK",
+			"display_name": "Anja Voss",
+			"fireteam_id": "ft1",
+			"homeworld": "Bastion-7",
+			"loadout_summary": "Command carbine, breaching charges, uplink slate",
+			"portrait_id": "char_portrait_004",
+			"portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
+			"role_id": "section_lead",
+			"role_name": "Fireteam Leader",
+			"roster_role_category": "operator",
+			"short_description": "Former dock security lead who rebuilt a scattered relief squad into a disciplined boarding cell.",
+			"skill_accuracy": 0.6,
+			"skill_leadership": 0.7,
+			"skill_speed": 0.4,
+			"skill_toughness": 0.5,
+			"specialty_text": "Small-unit command and breach timing",
+			"team_id": "team_alpha",
+			"trait_ids": [
+				"calm",
+				"steady"
+			],
+			"unit_id": "campaign_leader",
+			"weapon_1": "pistol",
+			"weapon_1_id": "pistol",
+			"weapon_2": "medictool",
+			"weapon_2_id": "medictool"
+		},
+		{
+			"age_years": 37,
+			"armor": "suit",
+			"armor_id": "suit",
+			"biography_text": "Measures plans by whether he can still get everyone home when the map starts lying.",
+			"callsign": "WAKE",
+			"display_name": "Tomas Ibarra",
+			"dropship_piloting": 0.7,
+			"fireteam_id": "",
+			"homeworld": "Dustfall",
+			"loadout_summary": "Vehicle rig, machine pistol, emergency tow kit",
+			"portrait_path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_54_19.png",
+			"role_id": "atv_recon_scout",
+			"role_name": "Dropship Pilot",
+			"roster_role_category": "pilot",
+			"short_description": "Measures plans by whether he can still get everyone home when the map starts lying.",
+			"skill_accuracy": 0.4,
+			"skill_leadership": 0.5,
+			"skill_speed": 0.7,
+			"skill_toughness": 0.5,
+			"specialty_text": "Extraction timing and route collapse",
+			"team_id": "team_alpha",
+			"trait_ids": [
+				"reckless",
+				"steady"
+			],
+			"unit_id": "campaign_pilot",
+			"weapon_1": "pistol",
+			"weapon_1_id": "pistol",
+			"weapon_2": "medictool",
+			"weapon_2_id": "medictool"
+		}
+	],
+	"schema_version": 1,
+	"ship_equipment": {
+		"catalog_version": 1,
+		"crafts": {
+			"dropship_1": {
+				"model_id": "cutlass",
+				"slots": {
+					"quantum_drive": "warp_odyssey"
+				}
+			}
+		},
+		"installs": {
+
+		},
+		"revision": 0,
+		"schema_version": 2,
+		"space_catalog_version": 1,
+		"space_loadouts": {
+			"dropship_1": {
+				"power": "power_s2",
+				"shield": "shield_s2",
+				"weapon_1": "repeater_s3",
+				"weapon_2": "repeater_s3",
+				"weapon_3": "repeater_s2",
+				"weapon_4": "repeater_s2"
+			}
+		}
+	},
+	"supply": {
+		"credits": 500,
+		"definitions": {
+			"benit_buy_orders": {
+				"satellite_crash": {
+					"c_benit": 12.0
+				},
+				"trade_outpost": {
+					"b_benit": 12.0
+				}
+			},
+			"commodity_buy_orders": {
+				"polisa": {
+					"a_benit": 15.0,
+					"b_benit": 15.0,
+					"c_benit": 15.0,
+					"ore": 6.0,
+					"salvage": 9.0
+				}
+			},
+			"fuel_capacity": 100.0,
+			"fuel_price_per_unit": 2.0,
+			"initial_credits": 500.0,
+			"initial_fuel": 60.0,
+			"offers": {
+				"medictool_supply": {
+					"id": "medictool_supply",
+					"item_id": "medictool",
+					"location_ids": [
+						"trade_outpost"
+					],
+					"name": "Sanitaetswerkzeug",
+					"stock": 4.0,
+					"unit_price": 50.0
+				},
+				"mining_tool_supply": {
+					"id": "mining_tool_supply",
+					"item_id": "mining_tool",
+					"location_ids": [
+						"trade_outpost"
+					],
+					"name": "Miningwerkzeug",
+					"stock": 4.0,
+					"unit_price": 35.0
+				},
+				"polisa_armor_heavy": {
+					"category": "armor",
+					"id": "polisa_armor_heavy",
+					"item_id": "armor_heavy",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Schwere Ruestung",
+					"required_blueprint": "heavy_armor",
+					"stock": 6.0,
+					"unit_price": 180.0
+				},
+				"polisa_armor_light": {
+					"category": "armor",
+					"id": "polisa_armor_light",
+					"item_id": "armor_light",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Leichte Ruestung",
+					"required_blueprint": "light_armor",
+					"stock": 6.0,
+					"unit_price": 55.0
+				},
+				"polisa_armor_medium": {
+					"category": "armor",
+					"id": "polisa_armor_medium",
+					"item_id": "armor_medium",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Mittlere Ruestung",
+					"required_blueprint": "medium_armor",
+					"stock": 6.0,
+					"unit_price": 110.0
+				},
+				"polisa_backpack": {
+					"category": "armor",
+					"id": "polisa_backpack",
+					"item_id": "backpack",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Rucksack",
+					"stock": 6.0,
+					"unit_price": 40.0
+				},
+				"polisa_component_power_s1": {
+					"category": "ship_equipment",
+					"id": "polisa_component_power_s1",
+					"item_id": "power_s1",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Kraftwerk S1",
+					"stock": 4.0,
+					"unit_price": 80.0
+				},
+				"polisa_component_power_s1_plus": {
+					"category": "ship_equipment",
+					"id": "polisa_component_power_s1_plus",
+					"item_id": "power_s1_plus",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Kraftwerk S1 verstärkt",
+					"stock": 4.0,
+					"unit_price": 140.0
+				},
+				"polisa_component_power_s2": {
+					"category": "ship_equipment",
+					"id": "polisa_component_power_s2",
+					"item_id": "power_s2",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Kraftwerk S2",
+					"stock": 4.0,
+					"unit_price": 140.0
+				},
+				"polisa_component_power_s2_plus": {
+					"category": "ship_equipment",
+					"id": "polisa_component_power_s2_plus",
+					"item_id": "power_s2_plus",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Kraftwerk S2 verstärkt",
+					"stock": 4.0,
+					"unit_price": 220.0
+				},
+				"polisa_component_repeater_s1": {
+					"category": "ship_equipment",
+					"id": "polisa_component_repeater_s1",
+					"item_id": "repeater_s1",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Bulldog S1",
+					"stock": 6.0,
+					"unit_price": 60.0
+				},
+				"polisa_component_repeater_s2": {
+					"category": "ship_equipment",
+					"id": "polisa_component_repeater_s2",
+					"item_id": "repeater_s2",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Badger S2",
+					"stock": 6.0,
+					"unit_price": 90.0
+				},
+				"polisa_component_repeater_s3": {
+					"category": "ship_equipment",
+					"id": "polisa_component_repeater_s3",
+					"item_id": "repeater_s3",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Panther S3",
+					"stock": 6.0,
+					"unit_price": 120.0
+				},
+				"polisa_component_repeater_s4": {
+					"category": "ship_equipment",
+					"id": "polisa_component_repeater_s4",
+					"item_id": "repeater_s4",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Rhino S4",
+					"stock": 4.0,
+					"unit_price": 180.0
+				},
+				"polisa_component_repeater_s5": {
+					"category": "ship_equipment",
+					"id": "polisa_component_repeater_s5",
+					"item_id": "repeater_s5",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Galdereen S5",
+					"stock": 4.0,
+					"unit_price": 240.0
+				},
+				"polisa_component_shield_s1": {
+					"category": "ship_equipment",
+					"id": "polisa_component_shield_s1",
+					"item_id": "shield_s1",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Schildgenerator S1",
+					"stock": 4.0,
+					"unit_price": 90.0
+				},
+				"polisa_component_shield_s2": {
+					"category": "ship_equipment",
+					"id": "polisa_component_shield_s2",
+					"item_id": "shield_s2",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Schildgenerator S2",
+					"stock": 4.0,
+					"unit_price": 150.0
+				},
+				"polisa_medictool": {
+					"category": "infantry",
+					"id": "polisa_medictool",
+					"item_id": "medictool",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Sanitaetswerkzeug",
+					"stock": 6.0,
+					"unit_price": 50.0
+				},
+				"polisa_ore": {
+					"category": "commodities",
+					"id": "polisa_ore",
+					"item_id": "ore",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Erz",
+					"stock": 12.0,
+					"unit_price": 8.0
+				},
+				"polisa_pistol": {
+					"category": "infantry",
+					"id": "polisa_pistol",
+					"item_id": "pistol",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Pistole",
+					"stock": 6.0,
+					"unit_price": 30.0
+				},
+				"polisa_rifle": {
+					"category": "infantry",
+					"id": "polisa_rifle",
+					"item_id": "rifle",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Sturmgewehr",
+					"stock": 6.0,
+					"unit_price": 100.0
+				},
+				"polisa_salvage": {
+					"category": "commodities",
+					"id": "polisa_salvage",
+					"item_id": "salvage",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Bergungsmaterial",
+					"stock": 12.0,
+					"unit_price": 12.0
+				},
+				"polisa_ship_buccaneer": {
+					"category": "ships",
+					"craft_type": "fighter",
+					"id": "polisa_ship_buccaneer",
+					"item_id": "ship:buccaneer",
+					"kind": "ship",
+					"location_ids": [
+						"polisa"
+					],
+					"model_id": "buccaneer",
+					"name": "Buccaneer",
+					"stock": 2.0,
+					"unit_price": 650.0
+				},
+				"polisa_ship_cutlass": {
+					"category": "ships",
+					"craft_type": "dropship",
+					"id": "polisa_ship_cutlass",
+					"item_id": "ship:cutlass",
+					"kind": "ship",
+					"location_ids": [
+						"polisa"
+					],
+					"model_id": "cutlass",
+					"name": "Entermesser / Cutlass",
+					"stock": 2.0,
+					"unit_price": 850.0
+				},
+				"polisa_smg": {
+					"category": "infantry",
+					"id": "polisa_smg",
+					"item_id": "smg",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Maschinenpistole",
+					"stock": 6.0,
+					"unit_price": 70.0
+				},
+				"polisa_warp_hemera": {
+					"category": "ship_equipment",
+					"id": "polisa_warp_hemera",
+					"item_id": "warp_hemera",
+					"location_ids": [
+						"polisa"
+					],
+					"name": "Hemera · Warp-Antrieb A",
+					"stock": 4.0,
+					"unit_price": 160.0
+				},
+				"salvage_tool_supply": {
+					"id": "salvage_tool_supply",
+					"item_id": "salvage_tool",
+					"location_ids": [
+						"trade_outpost"
+					],
+					"name": "Bergungswerkzeug",
+					"stock": 4.0,
+					"unit_price": 50.0
+				}
+			},
+			"route_fuel_costs": {
+				"distress_orbit>homebase": 10.0,
+				"fortified_outpost>homebase": 10.0,
+				"homebase>distress_orbit": 10.0,
+				"homebase>fortified_outpost": 10.0,
+				"homebase>polisa": 10.0,
+				"homebase>satellite_crash": 12.0,
+				"homebase>trade_outpost": 8.0,
+				"polisa>homebase": 10.0,
+				"satellite_crash>homebase": 12.0,
+				"satellite_crash>trade_outpost": 10.0,
+				"trade_outpost>homebase": 8.0,
+				"trade_outpost>satellite_crash": 10.0
+			},
+			"service_locations": {
+				"distress_orbit": [],
+				"fortified_outpost": [],
+				"homebase": [
+					"refuel"
+				],
+				"polisa": [
+					"trade",
+					"refuel"
+				],
+				"satellite_crash": [
+					"trade",
+					"refuel"
+				],
+				"trade_outpost": [
+					"trade",
+					"refuel"
+				]
+			}
+		},
+		"fuel_by_craft_id": {
+			"dropship_1": 60.0
+		},
+		"inventory": {
+			"base:homebase": {
+				"capacity": 200,
+				"items": {
+					"armor_light": 2,
+					"medictool": 1,
+					"pistol": 2
+				}
+			},
+			"craft:dropship_1": {
+				"capacity": 48,
+				"items": {
+
+				}
+			},
+			"station:polisa:lift": {
+				"capacity": 256,
+				"items": {
+
+				}
+			},
+			"unit:campaign_leader:backpack": {
+				"armor_chip_capacity": 1,
+				"capacity": 0,
+				"items": {
+
+				}
+			},
+			"unit:campaign_pilot:backpack": {
+				"armor_chip_capacity": 1,
+				"capacity": 0,
+				"items": {
+
+				}
+			}
+		},
+		"item_quantities": {
+			"armor_light": 2,
+			"medictool": 1,
+			"pistol": 2
+		},
+		"location_resources": {
+			"distress_orbit": {
+
+			},
+			"fortified_outpost": {
+
+			},
+			"satellite_crash": {
+				"b_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"freighter_wreck_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"iron_ridge_01": {
+					"discovered": false,
+					"remaining": 8
+				}
+			},
+			"trade_outpost": {
+				"a_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				},
+				"c_benit_01": {
+					"discovered": false,
+					"remaining": 8
+				}
+			}
+		},
+		"modular_capacity_baseline": -1,
+		"requests": {
+
+		},
+		"research_receipts": {
+
+		},
+		"revision": 1,
+		"reward_receipts": {
+
+		},
+		"schema_version": 1,
+		"stock_by_offer_id": {
+			"medictool_supply": 4,
+			"mining_tool_supply": 4,
+			"polisa_armor_heavy": 6,
+			"polisa_armor_light": 6,
+			"polisa_armor_medium": 6,
+			"polisa_backpack": 6,
+			"polisa_component_power_s1": 4,
+			"polisa_component_power_s1_plus": 4,
+			"polisa_component_power_s2": 4,
+			"polisa_component_power_s2_plus": 4,
+			"polisa_component_repeater_s1": 6,
+			"polisa_component_repeater_s2": 6,
+			"polisa_component_repeater_s3": 6,
+			"polisa_component_repeater_s4": 4,
+			"polisa_component_repeater_s5": 4,
+			"polisa_component_shield_s1": 4,
+			"polisa_component_shield_s2": 4,
+			"polisa_medictool": 6,
+			"polisa_ore": 12,
+			"polisa_pistol": 6,
+			"polisa_rifle": 6,
+			"polisa_salvage": 12,
+			"polisa_ship_buccaneer": 2,
+			"polisa_ship_cutlass": 2,
+			"polisa_smg": 6,
+			"polisa_warp_hemera": 4,
+			"salvage_tool_supply": 4
+		}
+	}
+}

@@ -83,6 +83,10 @@ func admit_base_ground_people(owner:Node,placements:Array[Dictionary])->Dictiona
 		ids.append(entry.unit_id)
 	var checked:Dictionary=_validate_base_ground_people(owner,ids)
 	if not checked.ok:return checked
+	var mask: Dictionary = _get_hex_respawn_ship_mask()
+	if not mask.get("ok", false): return mask
+	for entry in placements:
+		if mask.blocked_cells.has(entry.get("grid")): return {"ok":false,"reason":"base_clearance_blocked"}
 	return admit_hex_ground_units(placements)
 
 
@@ -92,6 +96,9 @@ func _validate_base_ground_move(owner:Node,id:String,target:Vector2,token:String
 	if not target.is_finite() or token.is_empty() or token.length()>128:return {"ok":false,"reason":"invalid_base_move"}
 	if not _hex_ground_runtime.has_unit(id):return {"ok":false,"reason":"base_person_not_admitted"}
 	if not _hex_ground_registry.call("is_walkable",_hex_ground_registry.call("world_to_grid",target)):return {"ok":false,"reason":"target_blocked"}
+	var mask: Dictionary = _get_hex_respawn_ship_mask()
+	if not mask.get("ok", false): return mask
+	if mask.blocked_cells.has(_hex_ground_registry.world_to_grid(target)): return {"ok":false,"reason":"target_blocked"}
 	return checked
 
 
@@ -105,6 +112,8 @@ func plan_base_ground_approaches(owner:Node,unit_ids:PackedStringArray,anchor:Ve
 	var checked:Dictionary=_validate_base_ground_people(owner,unit_ids)
 	if not checked.ok:return checked
 	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var clearance: Dictionary = _add_base_ground_clearance(snapshot)
+	if not clearance.ok: return clearance
 	for id in unit_ids:
 		if not snapshot.units_by_id.has(id):return {"ok":false,"reason":"base_person_not_admitted"}
 		var grid:Vector2i=snapshot.units_by_id[id].grid
@@ -137,6 +146,8 @@ func prepare_base_ground_deployment(owner:Node,unit_ids:PackedStringArray,anchor
 		if String(states[id].status)!="aboard" or not bool(owner.call("_unit_is_home",id)):return {"ok":false,"reason":"base_person_not_aboard_home"}
 	if _hex_deployment_serial>=HEX_GROUND_RUNTIME_SCRIPT.MAX_TICK:return {"ok":false,"reason":"admission_serial_exhausted"}
 	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var clearance: Dictionary = _add_base_ground_clearance(snapshot)
+	if not clearance.ok: return clearance
 	var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,anchor,_hex_ground_registry,snapshot)
 	if not plan.ok:return plan
 	_hex_deployment_serial+=1
@@ -2449,7 +2460,7 @@ func _clear_hex_movement_context() -> void:
 func _clear_hex_actor_metadata(unit_id:String) -> void:
 	var actor=_resolve_known_unit_for_contract(unit_id)
 	if not is_instance_valid(actor):return
-	for key in ["hex_ground_stand_height_logical","hex_ground_moving","hex_ground_facing_angle"]:
+	for key in ["hex_ground_stand_height_logical","hex_ground_moving","hex_ground_facing_angle","hex_ground_surface_segment"]:
 		if actor.has_meta(key):actor.remove_meta(key)
 
 
@@ -2534,6 +2545,7 @@ func _project_hex_ground_actors(fraction:float) -> void:
 		actor.set_meta("hex_ground_stand_height_logical",projection.stand_height_logical)
 		actor.set_meta("hex_ground_moving",projection.moving)
 		actor.set_meta("hex_ground_facing_angle",projection.facing_angle)
+		actor.set_meta("hex_ground_surface_segment",projection.surface_segment)
 		if not _hex_ground_runtime.has_motion_commitments(id):_hex_visual_unit_ids.erase(id)
 
 
@@ -2598,8 +2610,8 @@ func get_hex_checkpoint_guard()->Dictionary:
 func export_hex_checkpoint_state()->Dictionary:
 	return _get_hex_checkpoint_transaction().export_state()
 
-func prepare_hex_checkpoint_restore(state:Dictionary)->Dictionary:
-	return _get_hex_checkpoint_transaction().prepare(state)
+func prepare_hex_checkpoint_restore(state:Dictionary, actor_checkpoint:Dictionary={})->Dictionary:
+	return _get_hex_checkpoint_transaction().prepare(state, actor_checkpoint)
 
 func validate_prepared_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
 	return _get_hex_checkpoint_transaction().validate(prepared)
@@ -2797,6 +2809,53 @@ func _validate_hex_ground_actor_group(unit_ids:PackedStringArray,allow_staged:bo
 	return {"ok":true,"actors":actors}
 
 
+## Read-only goal planning for already admitted actors. Commands still travel
+## through the normal movement owner; no placement, reservation or pose is written.
+func plan_hex_ground_actor_approach(unit_ids:PackedStringArray,anchor_world:Vector2,radius:float,excluded_cells:Array[Vector2i]=[])->Dictionary:
+	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
+	if not checked.ok:return checked
+	if not anchor_world.is_finite() or not is_finite(radius) or radius<=0.0 or radius>128.0:return {"ok":false,"reason":"invalid_approach_radius"}
+	var snapshot:Dictionary=_hex_ground_runtime.build_planning_snapshot()
+	var clearance:Dictionary=_add_base_ground_clearance(snapshot)
+	if not clearance.ok:return clearance
+	for id in unit_ids:
+		if not snapshot.units_by_id.has(id):return {"ok":false,"reason":"approach_actor_not_admitted"}
+		var grid:Vector2i=snapshot.units_by_id[id].grid
+		snapshot.units_by_id.erase(id)
+		if snapshot.occupant_by_grid.get(grid)==id:snapshot.occupant_by_grid.erase(grid)
+	if excluded_cells.size()>64:return {"ok":false,"reason":"approach_exclusion_budget"}
+	for cell in excluded_cells:snapshot.external_admission_blocked_grids[cell]=true
+	var anchor:Vector2i=_hex_ground_registry.world_to_grid(anchor_world)
+	var blocked:Dictionary=snapshot.external_admission_blocked_grids
+	if blocked.has(anchor) or not _hex_ground_registry.is_walkable(anchor):return {"ok":false,"reason":"approach_anchor_blocked"}
+	# A waiting foreign crew member can occupy the access itself. Search legal
+	# neighboring anchors without erasing that actor, its reservation or any hull.
+	var candidates:Array[Vector2i]=[anchor]
+	var seen:Dictionary={anchor:true}
+	var cursor:=0
+	while cursor<candidates.size() and cursor<64:
+		var cell:Vector2i=candidates[cursor];cursor+=1
+		for next:Vector2i in _hex_ground_registry.get_legal_hex_neighbors(cell):
+			if seen.has(next) or blocked.has(next):continue
+			seen[next]=true
+			if _hex_ground_registry.grid_to_world(next).distance_to(anchor_world)>radius:
+				blocked[next]=true
+			elif candidates.size()<64:candidates.append(next)
+	var expanded:=0
+	for candidate in candidates:
+		if expanded>=64:break
+		var plan:Dictionary=HEX_ADMISSION_SCRIPT.new().plan_group(unit_ids,candidate,_hex_ground_registry,snapshot,64-expanded)
+		expanded+=int(plan.get("expanded",0))
+		if not plan.ok:continue
+		var targets:Dictionary={}
+		for entry in plan.placements:
+			var target:Vector2=_hex_ground_registry.grid_to_world(entry.grid)
+			if target.distance_to(anchor_world)>radius:break
+			targets[entry.unit_id]=target
+		if targets.size()==unit_ids.size():return {"ok":true,"targets":targets,"expanded":expanded}
+	return {"ok":false,"reason":"approach_space_unavailable","expanded":expanded}
+
+
 func admit_hex_ground_actor_group(unit_ids:PackedStringArray,anchor_grid:Vector2i,excluded_cells:Array[Vector2i]=[])->Dictionary:
 	var checked:Dictionary=_validate_hex_ground_actor_group(unit_ids)
 	if not checked.ok:return checked
@@ -2942,6 +3001,7 @@ func get_hex_respawn_receipt(ticket:String)->Dictionary:
 ## Same accepted physical producer as deployment/waves; no new ship geometry.
 func _get_hex_respawn_ship_mask()->Dictionary:
 	var producer:Node=get_node_or_null("../TacticalController")
+	if producer == null and is_instance_valid(_base_personnel_owner): producer = _base_personnel_owner
 	if producer==null:return {"ok":true,"source_signature":"","blocked_cells":[]}
 	if not producer.has_method("get_ground_ship_blocked_cells"):return {"ok":false,"reason":"respawn_ship_mask_unavailable"}
 	var mask:Dictionary=producer.call("get_ground_ship_blocked_cells")
@@ -2949,6 +3009,15 @@ func _get_hex_respawn_ship_mask()->Dictionary:
 	for grid in mask.blocked_cells:
 		if not grid is Vector2i:return {"ok":false,"reason":"respawn_ship_mask_unavailable"}
 	return mask
+
+
+func _add_base_ground_clearance(snapshot: Dictionary) -> Dictionary:
+	var mask: Dictionary = _get_hex_respawn_ship_mask()
+	if not mask.get("ok", false): return mask
+	var blocked := {}
+	for grid in mask.blocked_cells: blocked[grid] = true
+	snapshot["external_admission_blocked_grids"] = blocked
+	return {"ok":true}
 
 
 func _hex_respawn_retry_stamp(target:Vector2i,mask:Dictionary)->String:
@@ -3192,6 +3261,11 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 		_hex_facing_replay_keys[_hex_facing_replay_cursor] = replay_key
 		_hex_facing_replay_cursor = (_hex_facing_replay_cursor+1) % HEX_FACING_REPLAY_CAPACITY
 	_hex_facing_seen[replay_key] = true
+	# Security readouts renew their assignment IDs. A direction already owned
+	# by Ground does not create future work or keep stable saves permanently busy.
+	# Record the accepted ID first; competing and delayed turns retain their path.
+	if previous.is_empty() and ready_tick <= tick_counter + 1 and int(get_hex_unit_state(unit_id).facing_dir) == direction:
+		return {"ok":true,"replayed":false,"unchanged":true}
 	var resolved_ready := maxi(ready_tick,tick_counter+1)
 	if not previous.is_empty() and String(previous.get("order_key","")) == order_key and int(previous.get("priority",0)) == int(HEX_FACING_PRIORITIES[reason]) and int(previous.get("direction",-1)) == direction:
 		resolved_ready = mini(resolved_ready,int(previous["ready_tick"]))
@@ -3581,7 +3655,12 @@ func set_combat_rng_seed(seed_value: int) -> void:
 
 
 func get_next_combat_roll() -> float:
+	if is_inside_tree() and _should_skip_local_tick_processing(): return NAN
 	return _combat_rng.randf()
+
+
+func export_gameplay_rng_state() -> Dictionary:
+	return preload("res://scripts/core/gameplay_rng_state.gd").capture(self)
 
 
 func get_last_damage_effect_resolution() -> Dictionary:
@@ -3766,6 +3845,8 @@ func get_authoritative_fire_rule_snapshot() -> Array:
 
 # Session identity is assigned by the verified Lobby before scene activation.
 # No gameplay, sight or transport ownership is stored in this projection binding.
+const MULTIPLAYER_TERRAIN_FOG = preload("res://scripts/multiplayer/multiplayer_terrain_fog_projection.gd")
+var _multiplayer_terrain_fog_sent: Dictionary = {}
 const VISIBLE_MULTIPLAYER_PROJECTION = preload("res://scripts/multiplayer/multiplayer_visible_snapshot_projection.gd")
 var _multiplayer_runtime_context: Dictionary = {}
 var _multiplayer_runtime_context_required: bool = false
@@ -3792,6 +3873,7 @@ func bind_multiplayer_runtime_context(context: Dictionary, local_team: String) -
 		if context != _multiplayer_runtime_context:
 			return {"ok":false,"reason":"multiplayer_runtime_context_already_bound"}
 		if _multiplayer_local_team != local_team:
+			_reset_multiplayer_terrain_fog_binding(local_team)
 			_multiplayer_replica_visible_ids.clear()
 			_multiplayer_has_full_projection=false
 			_incoming_snapshot_chunks_by_tick.clear()
@@ -3799,6 +3881,7 @@ func bind_multiplayer_runtime_context(context: Dictionary, local_team: String) -
 		refresh_multiplayer_replica_presence()
 		return {"ok":true}
 	_multiplayer_runtime_context = context.duplicate(true)
+	_reset_multiplayer_terrain_fog_binding(local_team)
 	_multiplayer_local_team = local_team
 	_incoming_snapshot_chunks_by_tick.clear()
 	_last_applied_snapshot_tick = -1
@@ -3810,6 +3893,7 @@ func bind_multiplayer_runtime_context(context: Dictionary, local_team: String) -
 
 
 func clear_multiplayer_runtime_context() -> void:
+	_reset_multiplayer_terrain_fog_binding("")
 	_multiplayer_runtime_context_required = requires_multiplayer_runtime_context()
 	_multiplayer_runtime_context.clear()
 	_multiplayer_local_team = ""
@@ -3820,6 +3904,13 @@ func clear_multiplayer_runtime_context() -> void:
 	_multiplayer_has_full_projection = false
 	_incoming_snapshot_chunks_by_tick.clear()
 	refresh_multiplayer_replica_presence()
+
+
+func _reset_multiplayer_terrain_fog_binding(team: String) -> void:
+	_multiplayer_terrain_fog_sent.clear()
+	var setup = get_parent().get_node_or_null("MissionSetup") if get_parent() != null else null
+	if setup != null and setup.has_method("reset_multiplayer_terrain_fog_projection"):
+		setup.reset_multiplayer_terrain_fog_projection(team)
 
 
 func get_multiplayer_runtime_context() -> Dictionary:
@@ -3963,8 +4054,25 @@ func project_multiplayer_state_for_peer(peer_id: int, raw_state: Dictionary = {}
 	var context: Dictionary=_get_multiplayer_visibility_context(raw,team)
 	if context.is_empty(): return {"ok":false,"reason":"current_team_visibility_unavailable"}
 	var projected: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,context)
-	if projected.get("ok",false): projected["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+	if projected.get("ok",false):
+		projected["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+		_attach_multiplayer_terrain_fog(projected,team,false)
 	return projected
+
+
+func _attach_multiplayer_terrain_fog(projected: Dictionary, team: String, throttle: bool) -> void:
+	var setup = get_node_or_null("../MissionSetup")
+	if setup == null or not setup.has_method("get_multiplayer_terrain_fog_revision"): return
+	var revision: String = setup.get_multiplayer_terrain_fog_revision(team)
+	if revision.is_empty(): return
+	var context_key: String = String(_multiplayer_runtime_context.get("runtime_token","")) + "|" + team
+	var sent: Dictionary = _multiplayer_terrain_fog_sent.get(context_key,{})
+	var now: int = Time.get_ticks_msec()
+	# Repeat an unchanged revision at most once a second, repairing dropped
+	# unreliable packets and new/rejoined recipients without per-tick tile lists.
+	if throttle and sent.get("revision") == revision and now - int(sent.get("time",0)) < 1000: return
+	projected["terrain_fog"] = setup.get_multiplayer_terrain_fog_snapshot(team)
+	if throttle: _multiplayer_terrain_fog_sent[context_key] = {"revision":revision,"time":now}
 
 
 func set_multiplayer_snapshot_context(context: Dictionary) -> void:
@@ -4248,6 +4356,15 @@ func get_network_command_dedupe_debug_snapshot() -> Dictionary:
 @rpc("authority", "unreliable_ordered")
 func _receive_tick_state(state_dict: Dictionary) -> void:
 	_apply_remote_state(state_dict)
+
+
+@rpc("authority", "unreliable")
+func _receive_bound_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, raw_size: int, compressed: bool, chunk: PackedByteArray, runtime_token: String) -> void:
+	# The full map/scenario context is already bound to this Root and remains in
+	# the reassembled snapshot. Repeating it on every 1000-byte chunk exceeds MTU.
+	if _multiplayer_runtime_context.is_empty() or runtime_token != String(_multiplayer_runtime_context.get("runtime_token", "")):
+		return
+	_receive_tick_state_chunk(tick, chunk_index, chunk_count, raw_size, compressed, chunk, _multiplayer_runtime_context)
 
 
 @rpc("authority", "unreliable")
@@ -4593,6 +4710,7 @@ func _broadcast_tick_state() -> void:
 			var projected: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,visibility)
 			if not projected.get("ok",false): continue
 			projected["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+			_attach_multiplayer_terrain_fog(projected,team,true)
 			_broadcast_tick_state_chunks(projected,recipients_by_team[team])
 			var reliable: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_reliable_vitals(updates,raw,team,visibility) if not updates.is_empty() else {}
 			if reliable.get("ok",false):
@@ -4632,7 +4750,10 @@ func _broadcast_tick_state_chunks(state_dict: Dictionary, recipient_peer_ids: Pa
 		var chunk: PackedByteArray = wire_bytes.slice(start_offset, end_offset)
 		_snapshot_transport_last_max_chunk_payload_bytes = maxi(_snapshot_transport_last_max_chunk_payload_bytes, chunk.size())
 		for peer_id in recipient_peer_ids:
-			_receive_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk, _multiplayer_runtime_context.duplicate(true))
+			if _multiplayer_runtime_context.is_empty():
+				_receive_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk)
+			else:
+				_receive_bound_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk, String(_multiplayer_runtime_context.runtime_token))
 	_snapshot_transport_last_pack_usec = Time.get_ticks_usec() - pack_started_usec
 
 
@@ -4889,11 +5010,16 @@ func _build_unit_vital_update(unit) -> Dictionary:
 
 
 func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
+	var terrain_fog: Dictionary = {}
 	var apply_context: Dictionary=_multiplayer_runtime_context.duplicate(true)
 	var full_projection: bool = false
 	if state_dict.get("schema_version") == 2:
 		if state_dict.get("ok") != true or state_dict.get("projection_schema") != "multiplayer.visible_state.v1" or state_dict.get("projection_scope") != "full_recipient_state" or state_dict.get("recipient_team") != _multiplayer_local_team or not state_dict.get("runtime_context") is Dictionary or not accepts_multiplayer_runtime_context(state_dict.runtime_context) or _multiplayer_runtime_context.is_empty() or not state_dict.get("snapshot") is Dictionary:
 			return {"accepted":false,"reason":"invalid_recipient_projection"}
+		if state_dict.has("terrain_fog"):
+			if not MULTIPLAYER_TERRAIN_FOG.validate(state_dict.terrain_fog,_multiplayer_local_team):
+				return {"accepted":false,"reason":"invalid_terrain_fog_projection"}
+			terrain_fog = state_dict.terrain_fog
 		var inner: Dictionary=state_dict.snapshot
 		if typeof(state_dict.get("schema_version"))!=TYPE_INT or typeof(state_dict.get("tick"))!=TYPE_INT or typeof(inner.get("tick"))!=TYPE_INT or state_dict.tick!=inner.tick:
 			return {"accepted":false,"reason":"projection_tick_conflict"}
@@ -4933,6 +5059,10 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 	_last_applied_snapshot_tick = int(snapshot.get("tick", _last_applied_snapshot_tick))
 	_snapshot_apply_count += 1
 	_last_snapshot_reject_reason = ""
+	if full_projection:
+		var setup = get_node_or_null("../MissionSetup")
+		if setup != null and setup.has_method("apply_multiplayer_terrain_fog_snapshot"):
+			setup.apply_multiplayer_terrain_fog_snapshot(terrain_fog,PackedStringArray(_multiplayer_replica_visible_ids.keys()))
 	_emit_snapshot_audio_events(snapshot)
 	if not accepts_multiplayer_runtime_context(apply_context): return {"accepted":true,"context_changed":true}
 

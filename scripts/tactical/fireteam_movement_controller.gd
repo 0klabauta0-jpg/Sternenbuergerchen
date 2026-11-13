@@ -194,6 +194,7 @@ func start_execution(
 	var formation_preset: Dictionary = _get_workbench_formation_preset(normalized_command_type, tactical_stance)
 	var state: Dictionary = {
 		"center_partial_formation": bool(execution_options.get("center_partial_formation", false)),
+		"hex_approach_radius": float(execution_options.get("hex_approach_radius",0.0)),
 		"fireteam_id": normalized_fireteam_id,
 		"execution_id": _next_execution_id(normalized_fireteam_id),
 		"phase": phase_index,
@@ -289,7 +290,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 		}
 	if bool(state.get("contact_halt_active", false)):
 		_clear_engage_contact_halt_state(state)
-	if _are_current_targets_reached(state, member_records):
+	if _are_current_targets_reached(state, member_records, simulation_root):
 		state["completed_stage_count"] = int(state.get("completed_stage_count", 0)) + 1
 		var bound_event: Dictionary = {
 			"fireteam_id": normalized_fireteam_id,
@@ -300,7 +301,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 			"covering_unit_ids": PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray())),
 			"target_position": Vector2(state.get("current_anchor_target_position", state.get("final_target_position", Vector2.ZERO))),
 		}
-		if _is_execution_complete(state, member_records):
+		if _is_execution_complete(state, member_records, simulation_root):
 			_execution_by_fireteam.erase(normalized_fireteam_id)
 			bound_event["reason"] = BOUND_COMPLETE_REASON_FINAL
 			return {
@@ -844,6 +845,15 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 		_allow_trailing_slots_for_state(state),
 		state
 	)
+	var ground_approach:Dictionary={}
+	if float(state.get("hex_approach_radius",0.0))>0.0 and next_anchor_target.distance_squared_to(Vector2(state.final_target_position))<1.0 and simulation_root!=null and simulation_root.is_hex_ground_runtime_active():
+		var approach:Dictionary=simulation_root.plan_hex_ground_actor_approach(_packed_unit_ids(member_records),next_anchor_target,float(state.hex_approach_radius))
+		if not approach.get("ok",false):return {"started":false,"reason":approach.get("reason","approach_unavailable")}
+		ground_approach=approach.targets
+		formation_targets=ground_approach.duplicate()
+	if ground_approach.is_empty():
+		ground_approach=_resolve_occupied_hex_formation_targets(simulation_root,member_records,formation_targets,terrain_registry)
+		if not ground_approach.is_empty():formation_targets=ground_approach.duplicate()
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	var walkable_adjustment_count: int = 0
@@ -883,8 +893,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 		if not moving_unit_ids.has(unit_id):
 			continue
 		var move_target: Vector2 = Vector2(formation_targets.get(unit_id, next_anchor_target))
-		move_target = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, move_target)), move_target)
-		var target_resolution: Dictionary = _resolve_spacing_safe_stage_target(state, unit_id, move_target, accepted_moving_targets, terrain_registry)
+		if ground_approach.is_empty():move_target = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, move_target)), move_target)
+		var target_resolution: Dictionary = _resolve_spacing_safe_stage_target(state, unit_id, move_target, accepted_moving_targets, terrain_registry) if ground_approach.is_empty() else {"target_position":move_target}
 		var walkable_target: Vector2 = Vector2(target_resolution.get("target_position", move_target))
 		if bool(target_resolution.get("walkable_adjusted", false)):
 			walkable_adjustment_count += 1
@@ -990,7 +1000,7 @@ func _allow_trailing_slots_for_state(state: Dictionary) -> bool:
 	return true
 
 
-func _are_current_targets_reached(state: Dictionary, member_records: Array) -> bool:
+func _are_current_targets_reached(state: Dictionary, member_records: Array, simulation_root = null) -> bool:
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
 	if moving_unit_ids.is_empty():
 		return false
@@ -1003,12 +1013,17 @@ func _are_current_targets_reached(state: Dictionary, member_records: Array) -> b
 		if not (unit is Node2D):
 			return false
 		var target_position: Vector2 = Vector2(current_target_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO)))
-		if (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
+		if _uses_hex_movement_owner(simulation_root):
+			# A canonical Hex center need not be within the old pixel tolerance of
+			# its authored formation offset. Root owns both arrival and its token.
+			if not simulation_root.has_hex_position_arrived(unit_id,target_position,_build_stage_command_token(state,unit_id)):
+				return false
+		elif (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
 			return false
 	return true
 
 
-func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
+func _is_execution_complete(state: Dictionary, member_records: Array, simulation_root = null) -> bool:
 	var final_target_position: Vector2 = Vector2(state.get("final_target_position", Vector2.ZERO))
 	var current_anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", final_target_position))
 	if current_anchor_target_position.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
@@ -1020,9 +1035,36 @@ func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
 			return false
 		var unit_id: String = String(record.get("unit_id", ""))
 		var target_position: Vector2 = Vector2(final_targets.get(unit_id, final_target_position))
-		if (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
+		if _uses_hex_movement_owner(simulation_root):
+			# A canonical Hex center need not be within the old pixel tolerance of
+			# its authored formation offset. Root owns both arrival and its token.
+			if not simulation_root.has_hex_position_arrived(unit_id,target_position,_build_stage_command_token(state,unit_id)):
+				return false
+		elif (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
 			return false
 	return true
+
+
+## Preserve free formation slots; only foreign occupied goals borrow Root's
+## bounded neighboring approach planner, excluding every other assigned slot.
+func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Array,targets:Dictionary,terrain_registry)->Dictionary:
+	if simulation_root==null or terrain_registry==null or not simulation_root.is_hex_ground_runtime_active():return {}
+	var ids:PackedStringArray=_packed_unit_ids(member_records)
+	var snapshot:Dictionary=simulation_root.get_hex_ground_planning_snapshot()
+	var result:Dictionary=targets.duplicate()
+	var changed:=false
+	for id in ids:
+		var grid:Vector2i=terrain_registry.world_to_grid(result[id])
+		var occupant:String=String(snapshot.occupant_by_grid.get(grid,""))
+		if occupant.is_empty() or ids.has(occupant):continue
+		var excluded:Array[Vector2i]=[]
+		for other in result:
+			if other!=id:excluded.append(terrain_registry.world_to_grid(result[other]))
+		var plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),result[id],128.0,excluded)
+		if plan.get("ok",false):
+			result[id]=plan.targets[id]
+			changed=true
+	return result if changed else {}
 
 
 func _resolve_completion_targets(state: Dictionary, member_records: Array, final_target_position: Vector2) -> Dictionary:
@@ -1474,7 +1516,12 @@ func _build_bounding_groups(member_records: Array, leader_unit_id: String, leade
 		group_a.insert(0, leader_unit_id)
 	elif not leader_pushes_first and not leader_unit_id.is_empty() and not group_b.has(leader_unit_id) and not group_a.has(leader_unit_id):
 		group_b.insert(0, leader_unit_id)
-	return {"group_cycle": [group_a, group_b]}
+	# A one-person team still needs to finish its next bound. An empty buddy
+	# group cannot acknowledge a stage and must not become an execution phase.
+	var groups:Array=[]
+	if not group_a.is_empty():groups.append(group_a)
+	if not group_b.is_empty():groups.append(group_b)
+	return {"group_cycle": groups}
 
 
 func _build_caterpillar_groups(member_records: Array, leader_unit_id: String, leader_pushes_first: bool) -> Dictionary:

@@ -10,8 +10,8 @@ static func resolve_lz_command(requested_lz_position: Vector2, seed: String, pil
 	var radius: float = lerpf(MAX_V1_DEVIATION_RADIUS, MIN_V1_DEVIATION_RADIUS, skill)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed_to_int("%s:%.2f:%.2f:lz" % [seed.strip_edges(), pilot_skill, team_skill])
-	var angle: float = rng.randf_range(0.0, TAU)
-	var distance: float = rng.randf_range(0.0, radius)
+	var angle: float = rng.randf() * TAU
+	var distance: float = rng.randf() * radius
 	var offset := Vector2(cos(angle), sin(angle)) * distance
 	var resolved_lz_position: Vector2 = requested_lz_position + offset
 	return {

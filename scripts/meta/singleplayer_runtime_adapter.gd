@@ -13,7 +13,10 @@ const ORBIT_SURFACES = preload("res://scripts/mission/orbit_surface_locations.gd
 class HexCheckpointReadContext extends Node:
 	var _all_team_units: Array = []
 	var _aircraft_location_by_craft: Dictionary = {}
+	var _last_mission_result: Dictionary = {}
 	var definitions: Array = []
+	var _homebase_aircraft_definitions: Array:
+		get: return definitions
 	var pilots: Dictionary = {}
 	var payload_teams: Dictionary = {}
 	var member_reader: Control
@@ -67,15 +70,33 @@ static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -
 	# No main scene or live Flow configure. The new isolated subtree is freed
 	# synchronously, without a tick, whether candidate preparation succeeds or fails.
 	flow.get_tree().root.add_child(candidate)
+	# Use the existing adapter's real pad allocation in this disposable subtree.
+	# A facade with no pad owner cannot validate physical craft clearance.
+	var adapter: Node = load("res://scripts/meta/singleplayer_runtime_adapter.gd").new()
+	candidate.add_child(adapter)
+	adapter._flow = candidate
+	adapter._campaign_mode = true
+	adapter._campaign = CAMPAIGN.new()
+	var campaign_restored: Dictionary = adapter._campaign.restore_state(payload.campaign)
+	if not campaign_restored.get("ok",false):
+		candidate.member_reader.free(); candidate.free()
+		return campaign_restored
+	adapter._supply = supply
+	adapter._travel = TRAVEL.new()
+	adapter._travel.configure()
 	var simulation: Node = SIM.new()
-	candidate.add_child(simulation)
+	adapter.add_child(simulation)
+	adapter._simulation = simulation
 	simulation.set_physics_process(false)
 	var base: Node = load("res://scripts/core/base_personnel_runtime.gd").new()
-	candidate.add_child(base)
+	adapter.add_child(base)
+	adapter._base_personnel = base
 	if base.has_method("set_initial_modular_base"):
 		base.call("set_initial_modular_base", Dictionary(supply.get_supply_snapshot().get("modular_base", {})))
 	base.configure(candidate, candidate, simulation, {})
 	simulation.set_physics_process(false)
+	adapter.sync_crafts()
+	base._refresh_home_craft_blockers()
 	var result: Dictionary
 	if not simulation.has_method("prepare_hex_checkpoint_restore"):
 		result = {"ok":false,"reason":"hex_checkpoint_api_unavailable"}
@@ -189,7 +210,7 @@ func configure(flow: Node, screen: Control) -> void:
 			_base_personnel.call("set_initial_modular_base", Dictionary(_supply.get_supply_snapshot().get("modular_base", {})))
 		var base_checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint")) if _campaign_mode else {}
 		_base_personnel.configure(_flow, _screen, _simulation, {} if base_checkpoint.has("hex_tactical") else base_checkpoint)
-		if base_checkpoint.has("hex_tactical"): _simulation.set_physics_process(false)
+		if base_checkpoint.has("hex_tactical") or (_campaign_mode and bool(_flow.get("_campaign_start").get("active_restore_in_progress"))): _simulation.set_physics_process(false)
 		if _campaign_mode and not base_checkpoint.has("hex_tactical") and _base_personnel.has_method("sync_modular_base"):
 			_base_personnel.call("sync_modular_base", Dictionary(_supply.get_supply_snapshot().get("modular_base", {})))
 		_screen.call("configure_base_personnel_bridge", _base_personnel)
@@ -219,7 +240,7 @@ func configure(flow: Node, screen: Control) -> void:
 				_simulation.set_physics_process(false)
 				_flow.call_deferred("_campaign_load_failed")
 				return
-			_simulation.set_physics_process(true)
+			_simulation.set_physics_process(not bool(_flow.get("_campaign_start").get("active_restore_in_progress")))
 	if _campaign_mode and is_instance_valid(_base_personnel):
 		_base_personnel.reconcile_restored_ship_overlap(Dictionary(_flow.get("_campaign_start").get("checkpoint")))
 	if _screen.has_method("configure_singleplayer_bridge"):
@@ -310,6 +331,12 @@ func get_snapshot() -> Dictionary:
 	if _simulation == null:
 		return {}
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
+	var retry_allowed := _campaign_mode and bool(_retry_failed_home_gate().ok)
+	campaign["job_availability"] = _campaign.get_job_availability(retry_allowed)
+	var location_availability := {}
+	for location_id: String in campaign.locations:
+		location_availability[location_id] = _campaign.validate_location_visit(location_id, retry_allowed)
+	campaign["location_availability"] = location_availability
 	var travel: Dictionary = get_space_travel_snapshot()
 	travel["fuel_reachability"] = _fuel_reachability(String(travel.get("craft_id", "")), Dictionary(campaign.get("locations", {})))
 	var economy: Dictionary = _skirmish_economy.get_snapshot() if _skirmish_economy != null else {}
@@ -549,11 +576,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if not bool(gate.get("ok", false)):
 			return gate
 		if operation == "accept_job" and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get(String(data.get("job_id", "")), {})).get("status", "")) == "failed":
-			if _flow.get("_active_mission") != null or _has_active_transit():
-				return _reject("retry_requires_home", "Erst zur Basis zurueckkehren, dann Auftrag erneut annehmen")
-			for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
-				if String(location) != "homebase":
-					return _reject("retry_requires_home", "Erst zur Basis zurueckkehren, dann Auftrag erneut annehmen")
+			var retry_gate := _retry_failed_home_gate()
+			if not retry_gate.ok: return retry_gate
 	if operation in ["accept_job", "select_destination", "abandon_job"]:
 		if operation == "select_destination" and not Dictionary(_flow.call("_find_pending_mission_craft_transfer",String(data.get("craft_id",_travel.get_snapshot().craft_id)))).is_empty():
 			return _reject("craft_in_transit", "Zielwechsel erst nach dem laufenden Flug")
@@ -975,17 +999,18 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 	if not receipt.is_empty():
 		_commit("singleplayer_supply", "apply_reward", {"completion_id": receipt.completion_id}, "reward:" + String(receipt.completion_id), {"completion_receipt": receipt})
 
+func _retry_failed_home_gate() -> Dictionary:
+	if _flow == null or _flow.get("_active_mission") != null or _has_active_transit():
+		return _reject("retry_requires_home", "Erst zur Basis zurückkehren, dann Auftrag erneut annehmen")
+	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
+		if String(location) != "homebase":
+			return _reject("retry_requires_home", "Erst zur Basis zurückkehren, dann Auftrag erneut annehmen")
+	return {"ok":true}
+
 func _campaign_operation_gate(operation: String, payload: Dictionary) -> Dictionary:
 	if operation == "select_destination":
-		var location: String = String(payload.get("location_id", ""))
-		var jobs: Dictionary = _campaign.get_campaign_snapshot().jobs
-		if location == "homebase": return {"ok":true}
-		if bool(Dictionary(_campaign.get_campaign_snapshot().locations.get(location, {})).get("free_visit", false)): return {"ok":true}
-		for job: Dictionary in jobs.values():
-			if String(job.location_id) == location and not bool(job.get("locked",false)):
-				return {"ok":true}
-		return _reject("tutorial_locked","Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
-	return {"ok": true}
+		return _campaign.validate_location_visit(String(payload.get("location_id", "")), bool(_retry_failed_home_gate().ok))
+	return {"ok":true}
 
 func _observe(evidence: Dictionary) -> void:
 	if _onboarding != null:
@@ -1925,10 +1950,11 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		profile.merge({"unit_id":"campaign_rescue_pilot" if pilot else "campaign_outpost_recruit","display_name":"Mika Brandt" if pilot else "Robin Seidel","fireteam_id":"" if pilot else "ft1","armor":"light","armor_id":"light","weapon_1":"pistol","weapon_1_id":"pistol","weapon_2":"none","weapon_2_id":"none"},true)
 		var definition: Dictionary = _flow.call("_build_homebase_aircraft_definition","fighter",1) if pilot else {}
 		if pilot: definition.merge({"craft_id":"campaign_buccaneer_01","display_name":"Buccaneer","model_id":"buccaneer"},true)
-		var registered: Dictionary = _flow.call("register_campaign_recruit",profile,definition)
+		var registered: Dictionary = _flow.call("register_campaign_recruit",profile,definition,"" if pilot else craft_id)
 		if not bool(registered.get("ok",false)): return registered
 		if _base_personnel != null and _base_personnel.has_method("mark_recruit_remote"):
-			_base_personnel.call("mark_recruit_remote",String(profile.unit_id),String(definition.craft_id) if pilot else craft_id)
+			var boarded: Dictionary = _base_personnel.call("mark_recruit_remote",String(profile.unit_id),String(definition.craft_id) if pilot else craft_id)
+			if not boarded.get("ok",false): return boarded
 		var result := _commit("singleplayer_campaign","claim_recruit",{"kind":"pilot" if pilot else "outpost"},"recruit:"+key,{"runtime_authorized":true,"outpost_cleared":outpost_cleared})
 		if pilot: _flow.get("_aircraft_location_by_craft")[String(definition.craft_id)] = "waiting_pad"
 		sync_crafts()

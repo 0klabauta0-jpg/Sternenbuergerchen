@@ -1,7 +1,7 @@
 {
-  "satellite_recovery": {"body_id":"planet","body_kind":"Planet","site_label":"Suchgebiet auf Glut","objectives":["Satelliten-Absturzstelle finden","Satellitendaten bergen","Datenträger zur Heimatbasis bringen und hochladen"]},
-  "outpost_recovery": {"body_id":"planet","body_kind":"Planet","objectives":["Außenposten sichern","Kiste bergen und zum Schiff zurückbringen"]},
-  "benit_delivery": {"body_id":"planet","body_kind":"Planet","objectives":["C-Benit zum Handelsposten liefern","Zum Schiff zurückkehren"]},
-  "outpost_chip_recovery": {"body_id":"planet","body_kind":"Planet","objectives":["Außenposten sichern","Datenträger bergen","Zur Heimatbasis bringen und hochladen"]},
-  "buccaneer_rescue": {"body_id":"planet","body_kind":"Planet","site_label":"Notruf im Orbit von Glut","objectives":["Feindliche Cutlass besiegen","Neutrale Buccaneer retten"]}
+  "satellite_recovery": {"objectives":["Satelliten-Absturzstelle finden","Satellitendaten bergen","Datenträger zur Heimatbasis bringen und hochladen"]},
+  "outpost_recovery": {"objectives":["Außenposten sichern","Kiste bergen und zum Schiff zurückbringen"]},
+  "benit_delivery": {"objectives":["C-Benit zum Handelsposten liefern","Zum Schiff zurückkehren"]},
+  "outpost_chip_recovery": {"objectives":["Außenposten sichern","Datenträger bergen","Zur Heimatbasis bringen und hochladen"]},
+  "buccaneer_rescue": {"objectives":["Feindliche Cutlass besiegen","Neutrale Buccaneer retten"]}
 }

@@ -4,6 +4,13 @@ const DECK_HEIGHT := 0.16
 var footprint := Rect2()
 var _materials: Dictionary = {}
 
+func use_ground_painted_shadows() -> void:
+	# The B/C producer flattens this pad into ground paint. Native caster/inset
+	# A/B proves its thin layers cause self-shadow bands, not a depth conflict.
+	# Keep receiving shadows from actual ships/buildings/terrain.
+	for child in get_children():
+		if child is MeshInstance3D:child.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
 func build(center: Vector2, size: Vector2, designation: String, access_side: float = 1.0) -> Rect2:
 	position = Vector3(center.x,0.0,center.y)
 	footprint = Rect2(center-size*0.5,size)

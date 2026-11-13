@@ -116,7 +116,12 @@ static func prepare(scene: Node, data: Dictionary) -> Dictionary:
 	var transport_prepared: Dictionary = controller.prepare_transport_checkpoint_candidate(wire,bindings)
 	if not transport_prepared.get("ok",false): return transport_prepared
 	var ground = GROUND_ACTORS.new()
-	var gp: Dictionary = ground.prepare_restore(sim,terrain,data.get("ground",{}),data.get("actors",{}),active_sorted)
+	if data.get("ground",{}).get("schema") == "hex_mission_ground.v1":
+		var checkpoint: Variant = data.ground.get("checkpoint")
+		if not checkpoint is Dictionary: return _bad("active_hex_lifecycle_mismatch")
+		if checkpoint.get("tick") != data.get("lifecycle",{}).get("tick") or checkpoint.get("rng_state") != data.get("lifecycle",{}).get("rng"): return _bad("active_hex_lifecycle_mismatch")
+		if checkpoint.has("rng_streams") and checkpoint.rng_streams != data.get("lifecycle",{}).get("rng_streams"): return _bad("active_hex_lifecycle_mismatch")
+	var gp: Dictionary = ground.prepare_restore(sim,terrain,data.get("ground",{}),data.get("actors",{}),active_sorted,data.get("lifecycle",{}))
 	if not gp.get("ok",false): return gp
 	var lifecycle = LIFECYCLE.new()
 	var lp: Dictionary = lifecycle.prepare_restore(sim,driver,data.get("lifecycle",{}))

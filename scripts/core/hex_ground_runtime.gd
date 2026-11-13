@@ -244,10 +244,12 @@ func get_motion_projection(unit_id: String, interpolation_fraction: float, heigh
 	var position:Vector2=_registry.call("grid_to_world",grid)
 	var height:float=_registry.call("get_stand_height_at",grid)
 	var moving:=false
+	var surface_segment:Dictionary={"from_axial":Vector2(grid),"to_axial":Vector2(grid),"progress":0.0}
 	var centering:Dictionary=_centering_by_unit_id.get(unit_id,{})
 	if not centering.is_empty() and _tick<int(centering.start_tick)+int(centering.duration_ticks):
 		var progress:float=clampf((float(_tick-int(centering.start_tick))+clampf(interpolation_fraction,0.0,1.0))/float(centering.duration_ticks),0.0,1.0)
 		var offset:Vector2=Vector2(centering.offset_axial)*(1.0-progress)
+		surface_segment={"from_axial":Vector2(grid)+Vector2(centering.offset_axial),"to_axial":Vector2(grid),"progress":progress}
 		var axis_q:Vector2=Vector2(_registry.call("grid_to_world",grid+Vector2i(1,0)))-position
 		var axis_r:Vector2=Vector2(_registry.call("grid_to_world",grid+Vector2i(0,1)))-position
 		position+=axis_q*offset.x+axis_r*offset.y
@@ -262,6 +264,7 @@ func get_motion_projection(unit_id: String, interpolation_fraction: float, heigh
 		var source:Vector2=geometry.source_world
 		var target:Vector2=geometry.target_world
 		position=source.lerp(target,progress)
+		surface_segment={"from_axial":Vector2(segment.from_grid),"to_axial":Vector2(segment.to_grid),"progress":progress}
 		var low:float=geometry.source_height
 		var high:float=geometry.target_height
 		if geometry.explicit_ramps:
@@ -272,7 +275,7 @@ func get_motion_projection(unit_id: String, interpolation_fraction: float, heigh
 		break
 	var facing_step:Vector2i=HEX.DIRECTIONS[int(unit.facing_dir)]
 	var bearing:Vector2=Vector2(_registry.call("grid_to_world",grid+facing_step))-Vector2(_registry.call("grid_to_world",grid))
-	return {"position_world":position,"stand_height_logical":height,"stand_height_world":height*height_step_world,"facing_angle":bearing.angle(),"moving":moving}
+	return {"position_world":position,"stand_height_logical":height,"stand_height_world":height*height_step_world,"facing_angle":bearing.angle(),"moving":moving,"surface_segment":surface_segment}
 
 
 func _build_motion_geometry(segment: Dictionary) -> Dictionary:
@@ -979,6 +982,11 @@ func _save_candidate(state:Dictionary,target_registry:Node=null) -> Dictionary:
 	for id in schedules:
 		var conflict:String=PLANNER._hex_conflict(id,candidate._units_by_id[id].grid,schedules[id],candidate._tick,index)
 		if not conflict.is_empty():return _reject("ground_save_"+conflict,id)
+	# A detached restore registry has a cold derived topology cache. Rebuild
+	# only components touched by validated saved routes/grants before checking
+	# corridor policy; a zero-budget policy read cannot make that cache ready.
+	var topology_ready:Dictionary=candidate._prepare_saved_corridor_topology(schedules,state.get("passage_commitments",[]))
+	if not topology_ready.ok:return topology_ready
 	var grants_result:Dictionary=candidate._save_passage_commitments(state.get("passage_commitments",[]),schedules)
 	if not grants_result.ok:return grants_result
 	# Existing commitments must precede policy: nonmembers may monotonically clear.
@@ -990,6 +998,35 @@ func _save_candidate(state:Dictionary,target_registry:Node=null) -> Dictionary:
 	if not policy.ok:return _reject("ground_save_"+String(policy.reason))
 	if int(registry.call("get_revision"))!=int(state.terrain_revision):return _reject("ground_save_terrain_context")
 	return {"ok":true,"candidate":candidate}
+
+func _prepare_saved_corridor_topology(schedules:Dictionary,passages:Variant)->Dictionary:
+	if not _registry.has_method("get_hex_corridor_topology"):return {"ok":true}
+	var origins:Array=[]
+	for segments in schedules.values():
+		for segment in segments:
+			for grid in [segment.from_grid,segment.to_grid]:
+				if not origins.has(grid):origins.append(grid)
+	if not passages is Array or passages.size()>64:return _reject("ground_save_passage_budget")
+	var cells:=0
+	for passage in passages:
+		if not passage is Dictionary or not passage.get("cells") is Array or passage.cells.is_empty():return _reject("invalid_ground_save_passage")
+		cells+=passage.cells.size()
+		if cells>4096:return _reject("ground_save_passage_budget")
+		var parsed:Dictionary=_save_grid(passage.cells[0])
+		if not parsed.ok:return parsed
+		if not origins.has(parsed.grid):origins.append(parsed.grid)
+	if origins.is_empty():return {"ok":true}
+	# Checkpoint export/restore preparation; normal tick queries retain 64 nodes.
+	# No complete-map rebuild and no source occupancy/promise publication.
+	var remaining:=8192
+	while remaining>0:
+		var proof:Dictionary=_registry.call("get_hex_corridor_topology",origins,mini(64,remaining))
+		if not proof.get("ok",false) or proof.get("registry_id")!=_registry.get_instance_id() or proof.get("terrain_revision")!=_terrain_revision():return _reject("ground_save_invalid_corridor_topology")
+		if proof.get("query_complete",false):return {"ok":true}
+		var processed:=int(proof.get("processed_nodes",0))
+		if processed<=0:return _reject("ground_save_corridor_topology_pending")
+		remaining-=processed
+	return _reject("ground_save_corridor_topology_budget")
 
 
 func _save_passage_commitments(values:Variant,schedules:Dictionary) -> Dictionary:

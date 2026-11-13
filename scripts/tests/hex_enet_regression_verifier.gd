@@ -18,6 +18,13 @@ var resolutions:Array=[]
 class ObservedRoot extends SIM:
 	var received_envelopes:Array=[]
 	var wire_chunks:Dictionary={}
+	var compact_chunk_count:int=0
+	var max_compact_argument_bytes:int=0
+	@rpc("authority","unreliable")
+	func _receive_bound_tick_state_chunk(tick:int,index:int,count:int,raw_size:int,compressed:bool,chunk:PackedByteArray,runtime_token:String) -> void:
+		compact_chunk_count+=1
+		max_compact_argument_bytes=maxi(max_compact_argument_bytes,var_to_bytes([tick,index,count,raw_size,compressed,chunk,runtime_token]).size())
+		super._receive_bound_tick_state_chunk(tick,index,count,raw_size,compressed,chunk,runtime_token)
 	@rpc("authority","unreliable")
 	func _receive_tick_state_chunk(tick:int,index:int,count:int,raw_size:int,compressed:bool,chunk:PackedByteArray,runtime_context:Dictionary={}) -> void:
 		# Observe actual RPC bytes before product validation/normalization; never
@@ -186,6 +193,9 @@ func _run()->void:
 	var wire:Dictionary=client.sim.received_envelopes.back() if not client.sim.received_envelopes.is_empty() else {}
 	var intents:Array=wire.get("snapshot",{}).get("commander_intents",[])
 	_check(wire.get("runtime_context")==context and wire.get("recipient_team")=="blue" and _private_free(wire) and not _has_enemy(wire.get("snapshot",{})) and not intents.is_empty() and not intents[0].has("target_position") and not intents[0].has("target_unit_id"),"actual received ENet bytes exclude hidden enemy references before receiver normalization")
+	var full_chunk:=PackedByteArray()
+	full_chunk.resize(SIM.SNAPSHOT_CHUNK_PAYLOAD_BYTES)
+	_check(client.sim.compact_chunk_count>0 and client.sim.max_compact_argument_bytes+64<=1200 and var_to_bytes([1,0,256,8388608,true,full_chunk,String(context.runtime_token)]).size()+64<=1200,"actual compact chunk RPC and full-size payload leave reserved RPC overhead below 1200 bytes")
 	var client_rng:int=client.sim._combat_rng.state
 	var client_tick:int=client.sim.tick_counter
 	client.sim.enqueue_effect({"effect_type":"damage","unit_id":"own","attacker_unit_id":"own","damage":7,"hit_chance":1.0})
@@ -266,6 +276,20 @@ func _run()->void:
 	host.sim.rpc_id(client_id,"_receive_tick_state_chunk",9999,0,1,1,false,PackedByteArray([0]),wrong)
 	await _pump()
 	_check(snapshots.size()==before_snapshots and client.actors.own.vital.health_points==host.actors.own.vital.health_points and client.sim.get_snapshot_transport_debug_snapshot().pending_tick_count==0,"foreign-context real chunk/vitals RPC rejected before replica mutation")
+	host.sim.rpc_id(client_id,"_receive_bound_tick_state_chunk",9999,0,2,1,false,PackedByteArray([0]),String(wrong.runtime_token))
+	await _pump()
+	_check(client.sim.get_snapshot_transport_debug_snapshot().pending_tick_count==0 and snapshots.size()==before_snapshots,"foreign compact token is rejected before allocating a reassembly buffer")
+	var wrong_body:Dictionary=wire.duplicate(true)
+	wrong_body["tick"]=9999
+	wrong_body["snapshot"]["tick"]=9999
+	wrong_body["runtime_context"]=wrong
+	var wrong_bytes:PackedByteArray=var_to_bytes(wrong_body).compress(FileAccess.COMPRESSION_ZSTD)
+	var wrong_raw_size:int=var_to_bytes(wrong_body).size()
+	var wrong_count:int=(wrong_bytes.size()+SIM.SNAPSHOT_CHUNK_PAYLOAD_BYTES-1)/SIM.SNAPSHOT_CHUNK_PAYLOAD_BYTES
+	for index in range(wrong_count):
+		host.sim.rpc_id(client_id,"_receive_bound_tick_state_chunk",9999,index,wrong_count,wrong_raw_size,true,wrong_bytes.slice(index*SIM.SNAPSHOT_CHUNK_PAYLOAD_BYTES,mini((index+1)*SIM.SNAPSHOT_CHUNK_PAYLOAD_BYTES,wrong_bytes.size())),String(context.runtime_token))
+	await _pump()
+	_check(snapshots.size()==before_snapshots and client.sim.get_snapshot_transport_debug_snapshot().pending_tick_count==0,"matching compact token cannot bypass full snapshot-body runtime context")
 	host.sim.queue_hex_facing_intent("own",3,"enet_rear","security_assignment")
 	host.sim._physics_process(0.1)
 	await _pump()

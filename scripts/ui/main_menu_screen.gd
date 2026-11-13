@@ -1416,7 +1416,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		side_vbox.add_child(name_label)
 	name_label.text = "Teamname"
 	name_label.add_theme_font_size_override("font_size", 13)
-	name_label.tooltip_text = "Dieser Name gehoert zum lokalen Spieler-Roster und ist keine Missionswahrheit."
+	name_label.tooltip_text = "Name dieses Skirmish-Teams."
 	name_label.set_meta("help_id", "team_editor.team_name")
 	_team_editor_name_edit = side_vbox.get_node_or_null("TeamEditorNameEdit") as LineEdit
 	if _team_editor_name_edit == null:
@@ -1749,7 +1749,8 @@ func _refresh_team_library_status() -> void:
 			prefix = "Ausgewaehlt aktiv"
 		elif bool(selected_entry.get("archived", false)):
 			prefix = "Ausgewaehlt Archiv"
-		_team_library_status_label.text = "%s: %s | Bearbeiten oder Doppelklick oeffnet den Team-Editor." % [prefix, selected_name]
+		_team_library_status_label.text = "%s: %s" % [prefix, selected_name]
+		_team_library_status_label.tooltip_text = "Bearbeiten oder Doppelklick öffnet den Team-Editor."
 	if _team_library_delete_button != null:
 		var can_delete: bool = not selected_entry.is_empty() and bool(selected_entry.get("can_delete", false)) and not selected_active
 		_team_library_delete_button.disabled = not can_delete
@@ -1945,10 +1946,12 @@ func _refresh_team_editor_focus_controls(editor: Dictionary = {}) -> void:
 	var budget_available: int = int(normalized_editor.get("point_budget_available", 0))
 	if _team_editor_budget_label != null:
 		var policy: Dictionary = Dictionary(normalized_editor.get("point_budget_policy", {}))
-		_team_editor_budget_label.text = "Team-Fokus %d/%d | frei %d | NPC-Werte rechts separat | je Fokus %d-%d" % [
+		_team_editor_budget_label.text = "Fokus %d/%d · frei %d" % [
 			budget_used,
 			budget_max,
 			budget_available,
+		]
+		_team_editor_budget_label.tooltip_text = "Je Fokus %d–%d. Individuelle Personenwerte werden getrennt bearbeitet." % [
 			int(policy.get("min_per_stat", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MIN)),
 			int(policy.get("max_per_stat", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MAX)),
 		]
@@ -2094,7 +2097,8 @@ func _add_team_editor_experience_controls(host: VBoxContainer, unit: Dictionary)
 	)
 	var hint := Label.new()
 	hint.name = "TeamEditorExperienceHint"
-	hint.text = "Anwenden ersetzt Fähigkeiten, Verhalten, Kommunikation und Fahrzeugwerte; individuelle Einzelwerte werden überschrieben. Rolle, Person, Fortschritt und Ausrüstung bleiben erhalten."
+	hint.text = "Die Vorlage überschreibt individuelle Einzelwerte."
+	apply.tooltip_text = "Ersetzt Fähigkeiten, Verhalten, Kommunikation und Fahrzeugwerte. Rolle, Person, Fortschritt und Ausrüstung bleiben erhalten."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(hint)
 	var advanced := CheckButton.new()
@@ -3863,8 +3867,10 @@ func _campaign_checkpoint_exists() -> bool:
 
 
 func _on_campaign_pressed() -> void:
-	_campaign_continue_button.disabled = not bool(_load_campaign_checkpoint().get("ok", false))
-	_campaign_home_button.disabled = _campaign_continue_button.disabled
+	var projection: Dictionary = load("res://scripts/meta/campaign_save_projection.gd").inspect_saved(_load_campaign_checkpoint()).projection
+	_campaign_continue_button.disabled = not projection.continue_available
+	_campaign_home_button.disabled = not projection.home_available
+	_campaign_dialog.dialog_text = "Einführung mit Pilot und einem Leader.\n\nFortsetzen:\n" + String(projection.summary)
 	_campaign_dialog.popup_centered(Vector2i(760, 260))
 
 
@@ -3881,9 +3887,11 @@ func _on_campaign_dialog_action(action: StringName) -> void:
 
 func _on_campaign_continue_pressed() -> void:
 	# Revalidate on activation: the file may have changed while the dialog was open.
-	if not bool(_load_campaign_checkpoint().get("ok", false)):
+	var projection: Dictionary = load("res://scripts/meta/campaign_save_projection.gd").inspect_saved(_load_campaign_checkpoint()).projection
+	if not projection.continue_available:
 		_campaign_continue_button.disabled = true
-		_status_label.text = "Kein gueltiger Kampagnenstand vorhanden"
+		_status_label.text = String(projection.summary)
+		_campaign_dialog.dialog_text = String(projection.summary)
 		return
 	_campaign_dialog.hide()
 	_start_campaign("continue")

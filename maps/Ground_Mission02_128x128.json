@@ -1,4 +1,6 @@
 {
+	"tactical_grid_rules": "hex_tactical_v1",
+	"grid_topology": "hex_axial_v1",
 	"enemy_team_configs": {
 		"default": {
 			"advance_style": "probe",
@@ -122,148 +124,148 @@
 	},
 	"map_name": "GM02_128",
 	"markers": {
-		"objective_point": {
-			"color": {
-				"a": 0.98,
-				"b": 0.24,
-				"g": 0.86,
-				"r": 1.0
-			},
-			"marker_type_id": "objective_point",
-			"name": "Objective Relay",
-			"placement_context": "editor_only",
-			"symbol": "flag",
-			"x": 128,
-			"y": 5312
+	"objective_point": {
+		"color": {
+			"a": 0.98,
+			"b": 0.24,
+			"g": 0.86,
+			"r": 1.0
 		},
-		"objective_ridge_aa": {
-			"color": {
-				"a": 0.96,
-				"b": 0.92,
-				"g": 0.88,
-				"r": 0.86
-			},
-			"marker_type_id": "custom",
-			"name": "Objective Ridge AA Zone",
-			"placement_context": "editor_only",
-			"symbol": "warning",
-			"x": 256,
-			"y": 5760
-		},
-		"spawn_alpha": {
-			"color": {
-				"a": 0.98,
-				"b": 1.0,
-				"g": 0.78,
-				"r": 0.38
-			},
-			"marker_type_id": "spawn_alpha",
-			"name": "Spawn Alpha",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": -5632,
-			"y": 3840
-		},
-		"spawn_bravo": {
-			"color": {
-				"a": 0.98,
-				"b": 0.42,
-				"g": 0.56,
-				"r": 1.0
-			},
-			"marker_type_id": "spawn_bravo",
-			"name": "Spawn Bravo",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": 4800,
-			"y": 4576
-		},
-		"spawn_enemy_air_defense": {
-			"color": {
-				"a": 0.96,
-				"b": 0.92,
-				"g": 0.88,
-				"r": 0.86
-			},
-			"marker_type_id": "custom",
-			"name": "Enemy Air Defense",
-			"placement_context": "editor_only",
-			"symbol": "tower",
-			"x": 256,
-			"y": 5760
-		},
-		"spawn_enemy_defense": {
-			"color": {
-				"a": 0.96,
-				"b": 0.92,
-				"g": 0.88,
-				"r": 0.86
-			},
-			"marker_type_id": "custom",
-			"name": "Enemy Defense Team",
-			"placement_context": "editor_only",
-			"symbol": "shield",
-			"x": 512,
-			"y": 5120
-		},
-		"spawn_enemy_patrol": {
-			"color": {
-				"a": 0.96,
-				"b": 0.92,
-				"g": 0.88,
-				"r": 0.86
-			},
-			"marker_type_id": "custom",
-			"name": "Enemy Patrol Team",
-			"placement_context": "editor_only",
-			"symbol": "chevron",
-			"x": 2048,
-			"y": 5120
-		}
+		"marker_type_id": "objective_point",
+		"name": "Objective Relay",
+		"placement_context": "editor_only",
+		"symbol": "flag",
+		"x": 3455.098680939266,
+		"y": 6272.4506595303665
 	},
+	"objective_ridge_aa": {
+		"color": {
+			"a": 0.96,
+			"b": 0.92,
+			"g": 0.88,
+			"r": 0.86
+		},
+		"marker_type_id": "custom",
+		"name": "Objective Ridge AA Zone",
+		"placement_context": "editor_only",
+		"symbol": "warning",
+		"x": 3826.5449258860417,
+		"y": 6790.727537056979
+	},
+	"spawn_alpha": {
+		"color": {
+			"a": 0.98,
+			"b": 1.0,
+			"g": 0.78,
+			"r": 0.38
+		},
+		"marker_type_id": "spawn_alpha",
+		"name": "Spawn Alpha",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": -1412.2650875892232,
+		"y": 5058.132543794612
+	},
+	"spawn_bravo": {
+		"color": {
+			"a": 0.98,
+			"b": 0.42,
+			"g": 0.56,
+			"r": 1.0
+		},
+		"marker_type_id": "spawn_bravo",
+		"name": "Spawn Bravo",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 6179.528721365062,
+		"y": 4974.23563931747
+	},
+	"spawn_enemy_air_defense": {
+		"color": {
+			"a": 0.96,
+			"b": 0.92,
+			"g": 0.88,
+			"r": 0.86
+		},
+		"marker_type_id": "custom",
+		"name": "Enemy Air Defense",
+		"placement_context": "editor_only",
+		"symbol": "tower",
+		"x": 3826.5449258860417,
+		"y": 6790.727537056979
+	},
+	"spawn_enemy_defense": {
+		"color": {
+			"a": 0.96,
+			"b": 0.92,
+			"g": 0.88,
+			"r": 0.86
+		},
+		"marker_type_id": "custom",
+		"name": "Enemy Defense Team",
+		"placement_context": "editor_only",
+		"symbol": "shield",
+		"x": 3595.6524359924906,
+		"y": 6010.173782003754
+	},
+	"spawn_enemy_patrol": {
+		"color": {
+			"a": 0.96,
+			"b": 0.92,
+			"g": 0.88,
+			"r": 0.86
+		},
+		"marker_type_id": "custom",
+		"name": "Enemy Patrol Team",
+		"placement_context": "editor_only",
+		"symbol": "chevron",
+		"x": 4644.7599460989395,
+		"y": 5869.62002695053
+	}
+},
 	"mission_slot_count": 48,
 	"patrol_paths": {
-		"ground_patrol_route": [
-			{
-				"x": 2048,
-				"y": 5120
-			},
-			{
-				"x": 1280,
-				"y": 5248
-			},
-			{
-				"x": -384,
-				"y": 5056
-			},
-			{
-				"x": 128,
-				"y": 6080
-			},
-			{
-				"x": 256,
-				"y": 5760
-			}
-		],
-		"outer_probe_route": [
-			{
-				"x": -1664,
-				"y": 3776
-			},
-			{
-				"x": -2368,
-				"y": 4704
-			},
-			{
-				"x": -1536,
-				"y": 5376
-			},
-			{
-				"x": 128,
-				"y": 5312
-			}
-		]
-	},
+	"ground_patrol_route": [
+		{
+			"x": 4644.7599460989395,
+			"y": 5869.62002695053
+		},
+		{
+			"x": 4201.354939361307,
+			"y": 6091.322530319347
+		},
+		{
+			"x": 2943.098680939266,
+			"y": 6016.4506595303665
+		},
+		{
+			"x": 3941.9911708328173,
+			"y": 7181.004414583591
+		},
+		{
+			"x": 3826.5449258860417,
+			"y": 6790.727537056979
+		}
+	],
+	"outer_probe_route": [
+		{
+			"x": 1257.354939361307,
+			"y": 4619.322530319347
+		},
+		{
+			"x": 1364.8424225172257,
+			"y": 5781.578788741387
+		},
+		{
+			"x": 2359.139919148409,
+			"y": 6500.430040425796
+		},
+		{
+			"x": 3455.098680939266,
+			"y": 6272.4506595303665
+		}
+	]
+},
 	"terrain_visual_theme_id": "ground_mission_mixed_v1",
 	"tile_size": {
 		"half_height": 32,

@@ -5,6 +5,7 @@ uniform vec4 base_color : source_color = vec4(0.76, 0.49, 0.30, 1.0);
 uniform bool surface_blending = false;
 // Opt-in location palette; existing mission and station materials keep their route.
 uniform bool homebase_palette = false;
+uniform bool quiet_tactical_surface = false;
 uniform sampler2D surface_mask : filter_linear, repeat_disable;
 uniform vec4 surface_bounds = vec4(0.0,0.0,1.0,1.0);
 uniform vec4 world_to_grid = vec4(1.0,0.0,0.0,1.0);
@@ -184,12 +185,14 @@ void fragment() {
 		float crack_edge=max(fwidth(crack_field),0.009);
 		float fissure=(1.0-smoothstep(0.018-crack_edge,0.045+crack_edge,crack_field))*crust_zone;
 		float shoulder=homebase_palette ? 0.0 : (1.0-smoothstep(0.025,0.11,abs(weights.r-0.62)))*broad_patch(p*3.0);
-		earth*=1.0-fissure*(homebase_palette ? 0.055 : 0.14)-shoulder*0.09;
-		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*(homebase_palette ? 0.22 : 0.38));
-		// Compatibility lights sRGB output directly. Its homebase palette must
-		// not receive the linear-renderer decode a second time.
-		pigment = homebase_palette && OUTPUT_IS_SRGB ? earth : pow(earth,vec3(2.2));
-		float relief=pebble*0.012-fissure*0.006+broad_patch(p*16.0)*0.003*detail_visibility(p*16.0);
+		float detail_strength=quiet_tactical_surface ? 0.12 : 1.0;
+		earth*=1.0-(fissure*(homebase_palette ? 0.055 : 0.14)+shoulder*0.09)*detail_strength;
+		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*(homebase_palette ? 0.22 : 0.38)*detail_strength);
+		if (quiet_tactical_surface) { value=mix(0.975,1.025,patch); }
+		// These authored palette literals are sRGB in every location. Only a
+		// linear renderer needs decoding; double decoding made missions red/black.
+		pigment = OUTPUT_IS_SRGB ? earth : pow(earth,vec3(2.2));
+		float relief=(pebble*0.012-fissure*0.006+broad_patch(p*16.0)*0.003*detail_visibility(p*16.0))*detail_strength;
 		vec3 surface_dx=dFdx(ground_world_position);
 		vec3 surface_dy=dFdy(ground_world_position);
 		vec3 cross_x=cross(surface_dy,ground_world_normal);
@@ -198,6 +201,14 @@ void fragment() {
 		vec3 gradient=(dFdx(relief)*cross_x+dFdy(relief)*cross_y)/max(abs(determinant),0.000001)*sign(determinant);
 		vec3 detailed_normal=normalize(ground_world_normal-gradient*0.65);
 		NORMAL=normalize((VIEW_MATRIX*vec4(detailed_normal,0.0)).xyz);
+	}
+	if (quiet_tactical_surface && !rock_strata && !surface_blending && !marking_surface) {
+		pigment=mix(pigment,base_color.rgb,0.85);
+		value=mix(0.98,1.02,patch);
+	}
+	if (quiet_tactical_surface && !rock_strata && slope_normal_softening>0.0) {
+		// Keep the actual incline readable after suppressing incidental noise.
+		value*=1.0-0.18*smoothstep(0.05,0.32,ramp_incline);
 	}
 	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;

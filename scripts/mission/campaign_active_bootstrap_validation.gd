@@ -12,13 +12,16 @@ static func validate(payload: Dictionary) -> Dictionary:
 	if not loaded.get("ok",false): return loaded
 	var home: Dictionary = loaded.payload.duplicate(true)
 	START._migrate_known_main_starter(home)
-	if home.has("hex_tactical"): return _bad("home_hex_checkpoint_unsupported")
+	if home.has("hex_tactical") and not data.has("home_hex_tactical"): return _bad("active_home_hex_missing")
 	var run: Dictionary = START.resolve_checkpoint_run_id(home,false)
 	if not run.get("ok",false) or data.get("campaign_run_id")!=run.id or not data.get("identity") is Dictionary or not data.get("roster") is Array or not data.get("active_ids") is Array: return _bad("active_home_mismatch")
 	if JSON.stringify(data.roster,"",true)!=JSON.stringify(home.roster,"",true): return _bad("active_roster_changed")
 	var craft: String = data.identity.get("craft_id", "")
 	var home_craft: Variant = home.get("craft")
 	var base: Variant = data.get("base_personnel")
+	if data.has("home_hex_tactical"):
+		var home_hex: Dictionary = preload("res://scripts/mission/campaign_hex_home_checkpoint.gd").validate(data.home_hex_tactical, base, craft)
+		if not home_hex.get("ok",false): return home_hex
 	if not home_craft is Dictionary or not home_craft.get("definition") is Dictionary or home_craft.definition.get("craft_id")!=craft or craft.is_empty() or not base is Dictionary or base.size()!=2 or base.get("version")!=1 or not base.get("units") is Dictionary: return _bad("active_base_personnel_invalid")
 	var ids: Array = []
 	for person in data.roster:

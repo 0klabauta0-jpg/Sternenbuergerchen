@@ -1,4 +1,6 @@
 {
+	"tactical_grid_rules": "hex_tactical_v1",
+	"grid_topology": "hex_axial_v1",
 	"enemy_team_configs": {
 		"default": {
 			"advance_style": "hold",
@@ -34,81 +36,79 @@
 	},
 	"map_name": "test_mission_32x32_slots8",
 	"markers": {
-		"flank_anchor_left": {
-			"color": {
-				"a": 0.98,
-				"b": 0.6,
-				"g": 0.97,
-				"r": 0.61
-			},
-			"marker_type_id": "custom",
-			"name": "Flank Anchor Left",
-			"placement_context": "editor_only",
-			"symbol": "chevron",
-			"x": 128,
-			"y": 317
+	"flank_anchor_left": {
+		"color": {
+			"a": 0.98,
+			"b": 0.6,
+			"g": 0.97,
+			"r": 0.61
 		},
-		"flank_anchor_right": {
-			"color": {
-				"a": 0.98,
-				"b": 0.6,
-				"g": 0.97,
-				"r": 0.61
-			},
-			"marker_type_id": "custom",
-			"name": "Flank Anchor Right",
-			"placement_context": "editor_only",
-			"symbol": "chevron",
-			"x": 768,
-			"y": 317
-		},
-		"objective_point": {
-			"color": {
-				"a": 0.98,
-				"b": 0.24,
-				"g": 0.86,
-				"r": 1.0
-			},
-			"marker_type_id": "objective_point",
-			"name": "Objective",
-			"placement_context": "editor_only",
-			"symbol": "flag",
-			"x": 576,
-			"y": 925
-		},
-		"spawn_alpha": {
-			"color": {
-				"a": 0.98,
-				"b": 1.0,
-				"g": 0.78,
-				"r": 0.38
-			},
-			"marker_type_id": "spawn_alpha",
-			"name": "Spawn Alpha",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": -256,
-			"y": 1661
-		},
-		"spawn_bravo": {
-			"color": {
-				"a": 0.98,
-				"b": 0.42,
-				"g": 0.56,
-				"r": 1.0
-			},
-			"marker_type_id": "spawn_bravo",
-			"name": "Spawn Bravo",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": 704,
-			"y": 285
-		}
+		"marker_type_id": "custom",
+		"name": "Flank Anchor Left",
+		"placement_context": "editor_only",
+		"symbol": "chevron",
+		"x": 330.87187078897966,
+		"y": 375.56406460551017
 	},
+	"flank_anchor_right": {
+		"color": {
+			"a": 0.98,
+			"b": 0.6,
+			"g": 0.97,
+			"r": 0.61
+		},
+		"marker_type_id": "custom",
+		"name": "Flank Anchor Right",
+		"placement_context": "editor_only",
+		"symbol": "chevron",
+		"x": 768.0,
+		"y": 317.0
+	},
+	"objective_point": {
+		"color": {
+			"a": 0.98,
+			"b": 0.24,
+			"g": 0.86,
+			"r": 1.0
+		},
+		"marker_type_id": "objective_point",
+		"name": "Objective",
+		"placement_context": "editor_only",
+		"symbol": "flag",
+		"x": 1022.3181157357552,
+		"y": 1053.8409421321223
+	},
+	"spawn_alpha": {
+		"color": {
+			"a": 0.98,
+			"b": 1.0,
+			"g": 0.78,
+			"r": 0.38
+		},
+		"marker_type_id": "spawn_alpha",
+		"name": "Spawn Alpha",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 920.656850576082,
+		"y": 2000.671574711959
+	},
+	"spawn_bravo": {
+		"color": {
+			"a": 0.98,
+			"b": 0.42,
+			"g": 0.56,
+			"r": 1.0
+		},
+		"marker_type_id": "spawn_bravo",
+		"name": "Spawn Bravo",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 704.0,
+		"y": 285.0
+	}
+},
 	"mission_slot_count": 8,
-	"patrol_paths": {
-
-	},
+	"patrol_paths": {},
 	"tile_size": {
 		"half_height": 32,
 		"half_width": 64

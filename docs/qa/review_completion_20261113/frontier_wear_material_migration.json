@@ -1,0 +1,639 @@
+{
+  "schema": "frontier_wear_material_migration.v1",
+  "source": "unchanged derived exterior scenes; original binary models untouched",
+  "scenes": [
+    {
+      "path": "scenes/terrain/frontier_habitat_exterior.tscn",
+      "before_sha256": "1b0de6c3a4765b92c696b1f88855ee3a30940e9db8e729ccb35b6f3af766a5fd",
+      "after_sha256": "c51bb3f2466ebf342b5c50e5a63bac15cfb0e84994b1f10e62128bf9fc0840a3",
+      "unchanged_geometry_resources_sha256": "2ff1ab545d7bd28cb993306b252c0e3400a3915e511825950e0949f7c98877e8",
+      "mesh_parts": 44,
+      "shared_material_variants": 43,
+      "nodes": [
+        {
+          "node": "ExteriorShell",
+          "source_material": "ShaderMaterial_haas7",
+          "material": "ShaderMaterial_haas7",
+          "min": "Vector3(-1.185, 0.025, -1.2199999)",
+          "max": "Vector3(1.185, 0.93605757, 1.2199999)"
+        },
+        {
+          "node": "HabitatUpperCornice",
+          "source_material": "ShaderMaterial_02y45",
+          "material": "ShaderMaterial_02y45",
+          "min": "Vector3(-1.24, 0.8660575, -1.275)",
+          "max": "Vector3(1.24, 0.99605757, 1.275)"
+        },
+        {
+          "node": "HabitatRoofWell",
+          "source_material": "ShaderMaterial_nmsvp",
+          "material": "ShaderMaterial_nmsvp",
+          "min": "Vector3(-1.1274999, 0.9540576, -1.1624999)",
+          "max": "Vector3(1.1274999, 0.98905754, 1.1624999)"
+        },
+        {
+          "node": "HabitatWestRoof",
+          "source_material": "ShaderMaterial_llgqr",
+          "material": "ShaderMaterial_llgqr",
+          "min": "Vector3(-1.0626, 0.9810576, -1.0561249)",
+          "max": "Vector3(-0.21735, 1.0860575, 0.931875)"
+        },
+        {
+          "node": "HabitatRearRoof",
+          "source_material": "ShaderMaterial_kegdl",
+          "material": "ShaderMaterial_kegdl",
+          "min": "Vector3(-0.012075007, 0.9810576, -1.0437)",
+          "max": "Vector3(1.026375, 1.0710576, -0.07454997)"
+        },
+        {
+          "node": "HabitatFrontRoof",
+          "source_material": "ShaderMaterial_bfc1w",
+          "material": "ShaderMaterial_bfc1w",
+          "min": "Vector3(-0.012075007, 0.9810576, 0.062124997)",
+          "max": "Vector3(1.026375, 1.0460576, 0.85732496)"
+        },
+        {
+          "node": "ChannelEndManifold",
+          "source_material": "ShaderMaterial_c2v7q",
+          "material": "ShaderMaterial_c2v7q",
+          "min": "Vector3(-0.175375, 1.0035576, 0.64549994)",
+          "max": "Vector3(0.054625005, 1.0785576, 0.8455)"
+        },
+        {
+          "node": "HabitatLifeSupportBase",
+          "source_material": "ShaderMaterial_tvl86",
+          "material": "ShaderMaterial_tvl86",
+          "min": "Vector3(0.18112502, 1.0660576, -0.8386874)",
+          "max": "Vector3(0.881475, 1.1810576, -0.27956247)"
+        },
+        {
+          "node": "LifeSupportLouver",
+          "source_material": "ShaderMaterial_3dyv3",
+          "material": "ShaderMaterial_3dyv3",
+          "min": "Vector3(0.31395, 1.1855575, -0.69662493)",
+          "max": "Vector3(0.74865, 1.2025576, -0.66162497)"
+        },
+        {
+          "node": "@MeshInstance3D@18",
+          "source_material": "ShaderMaterial_3dyv3",
+          "material": "ShaderMaterial_3dyv3_bounds_09",
+          "min": "Vector3(0.31395, 1.1855575, -0.61662495)",
+          "max": "Vector3(0.74865, 1.2025576, -0.581625)"
+        },
+        {
+          "node": "@MeshInstance3D@19",
+          "source_material": "ShaderMaterial_3dyv3",
+          "material": "ShaderMaterial_3dyv3_bounds_10",
+          "min": "Vector3(0.31395, 1.1855575, -0.5366249)",
+          "max": "Vector3(0.74865, 1.2025576, -0.50162494)"
+        },
+        {
+          "node": "@MeshInstance3D@20",
+          "source_material": "ShaderMaterial_3dyv3",
+          "material": "ShaderMaterial_3dyv3_bounds_11",
+          "min": "Vector3(0.31395, 1.1855575, -0.45662495)",
+          "max": "Vector3(0.74865, 1.2025576, -0.42162493)"
+        },
+        {
+          "node": "HabitatRoofServicePlate",
+          "source_material": "ShaderMaterial_i5eue",
+          "material": "ShaderMaterial_i5eue",
+          "min": "Vector3(-0.905625, 1.0805575, 0.41184998)",
+          "max": "Vector3(-0.35017502, 1.1055576, 0.63185)"
+        },
+        {
+          "node": "DustSkirt",
+          "source_material": "ShaderMaterial_34uvm",
+          "material": "ShaderMaterial_34uvm",
+          "min": "Vector3(-1.225, 0, -1.26)",
+          "max": "Vector3(1.225, 0.127, 1.26)"
+        },
+        {
+          "node": "InsetFoundationBand",
+          "source_material": "ShaderMaterial_3otae",
+          "material": "ShaderMaterial_3otae",
+          "min": "Vector3(-1.23, 0.095, -1.265)",
+          "max": "Vector3(1.23, 0.17, 1.265)"
+        },
+        {
+          "node": "DoorFrame",
+          "source_material": "ShaderMaterial_i7rxq",
+          "material": "ShaderMaterial_i7rxq",
+          "min": "Vector3(-0.391875, -0.42785376, -0.07)",
+          "max": "Vector3(0.391875, 0.42785376, 0.07)"
+        },
+        {
+          "node": "ClosedDoor",
+          "source_material": "ShaderMaterial_sg3li",
+          "material": "ShaderMaterial_sg3li",
+          "min": "Vector3(-0.301875, -0.36285377, -0.0175)",
+          "max": "Vector3(0.301875, 0.36285377, 0.0175)"
+        },
+        {
+          "node": "PortalCastJamb",
+          "source_material": "ShaderMaterial_nsfi1",
+          "material": "ShaderMaterial_nsfi1",
+          "min": "Vector3(-0.431875, 0.005000025, 1.1974999)",
+          "max": "Vector3(-0.32187498, 0.9307076, 1.3974999)"
+        },
+        {
+          "node": "@MeshInstance3D@21",
+          "source_material": "ShaderMaterial_nsfi1",
+          "material": "ShaderMaterial_nsfi1_bounds_18",
+          "min": "Vector3(0.32187498, 0.005000025, 1.1974999)",
+          "max": "Vector3(0.431875, 0.9307076, 1.3974999)"
+        },
+        {
+          "node": "PortalLintel",
+          "source_material": "ShaderMaterial_nsfi1",
+          "material": "ShaderMaterial_nsfi1_bounds_19",
+          "min": "Vector3(-0.456875, 0.77820754, 1.1874999)",
+          "max": "Vector3(0.456875, 0.9232075, 1.4074999)"
+        },
+        {
+          "node": "EntranceStep",
+          "source_material": "ShaderMaterial_24m1h",
+          "material": "ShaderMaterial_24m1h",
+          "min": "Vector3(-0.416875, 0.012, 1.1704999)",
+          "max": "Vector3(0.416875, 0.057000004, 1.4404999)"
+        },
+        {
+          "node": "HabitatEntranceCanopy",
+          "source_material": "ShaderMaterial_ew1ex",
+          "material": "ShaderMaterial_ew1ex",
+          "min": "Vector3(-0.47187498, 0.89570755, 1.0625)",
+          "max": "Vector3(0.47187498, 0.97070754, 1.4524999)"
+        },
+        {
+          "node": "FrontWindowFrame",
+          "source_material": "ShaderMaterial_6d2fd",
+          "material": "ShaderMaterial_6d2fd",
+          "min": "Vector3(-0.25235, -0.16646875, -0.07)",
+          "max": "Vector3(0.25235, 0.16646875, 0.07)"
+        },
+        {
+          "node": "WindowDeepBrow",
+          "source_material": "ShaderMaterial_6d04g",
+          "material": "ShaderMaterial_6d04g",
+          "min": "Vector3(-1.091375, 0.6983787, 1.2004999)",
+          "max": "Vector3(-0.526675, 0.77837884, 1.3905)"
+        },
+        {
+          "node": "WindowDeepSill",
+          "source_material": "ShaderMaterial_8rqgd",
+          "material": "ShaderMaterial_8rqgd",
+          "min": "Vector3(-1.076375, 0.32294127, 1.1924999)",
+          "max": "Vector3(-0.541675, 0.3979413, 1.3625)"
+        },
+        {
+          "node": "FrontWindowFrameRight",
+          "source_material": "ShaderMaterial_6d2fd",
+          "material": "ShaderMaterial_6d2fd",
+          "min": "Vector3(-0.25235, -0.16646875, -0.07)",
+          "max": "Vector3(0.25235, 0.16646875, 0.07)"
+        },
+        {
+          "node": "@MeshInstance3D@24",
+          "source_material": "ShaderMaterial_6d04g",
+          "material": "ShaderMaterial_6d04g_bounds_25",
+          "min": "Vector3(0.526675, 0.6983787, 1.2004999)",
+          "max": "Vector3(1.091375, 0.77837884, 1.3905)"
+        },
+        {
+          "node": "@MeshInstance3D@25",
+          "source_material": "ShaderMaterial_8rqgd",
+          "material": "ShaderMaterial_8rqgd_bounds_26",
+          "min": "Vector3(0.541675, 0.32294127, 1.1924999)",
+          "max": "Vector3(1.076375, 0.3979413, 1.3625)"
+        },
+        {
+          "node": "InsetFacadeCassette",
+          "source_material": "ShaderMaterial_oowpe",
+          "material": "ShaderMaterial_oowpe",
+          "min": "Vector3(-1.24, 0.26293755, -1.130675)",
+          "max": "Vector3(-1.165, 0.76777756, -0.45972502)"
+        },
+        {
+          "node": "StructuralFacadeRib",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0",
+          "min": "Vector3(-1.2924999, 0.11569251, -1.2055249)",
+          "max": "Vector3(-1.1725, 0.7888126, -1.105525)"
+        },
+        {
+          "node": "@MeshInstance3D@27",
+          "source_material": "ShaderMaterial_agkrw",
+          "material": "ShaderMaterial_agkrw",
+          "min": "Vector3(-1.24, 0.26293755, -0.335475)",
+          "max": "Vector3(-1.165, 0.76777756, 0.335475)"
+        },
+        {
+          "node": "@MeshInstance3D@28",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0_bounds_30",
+          "min": "Vector3(-1.2924999, 0.11569251, -0.410325)",
+          "max": "Vector3(-1.1725, 0.7888126, -0.31032497)"
+        },
+        {
+          "node": "@MeshInstance3D@29",
+          "source_material": "ShaderMaterial_2dh5u",
+          "material": "ShaderMaterial_2dh5u",
+          "min": "Vector3(-1.24, 0.26293755, 0.459725)",
+          "max": "Vector3(-1.165, 0.76777756, 1.130675)"
+        },
+        {
+          "node": "@MeshInstance3D@30",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0_bounds_32",
+          "min": "Vector3(-1.2924999, 0.11569251, 0.38487497)",
+          "max": "Vector3(-1.1725, 0.7888126, 0.484875)"
+        },
+        {
+          "node": "ServiceAccessPlate",
+          "source_material": "ShaderMaterial_584x8",
+          "material": "ShaderMaterial_584x8",
+          "min": "Vector3(-1.2674999, 0.21560878, -0.74549997)",
+          "max": "Vector3(-1.1775, 0.41544127, -0.19879997)"
+        },
+        {
+          "node": "FoundationRepairPanel",
+          "source_material": "ShaderMaterial_7q6il",
+          "material": "ShaderMaterial_7q6il",
+          "min": "Vector3(-1.267, 0.044499997, 0.26092497)",
+          "max": "Vector3(-1.1719999, 0.1395, 0.88217497)"
+        },
+        {
+          "node": "@MeshInstance3D@31",
+          "source_material": "ShaderMaterial_oowpe",
+          "material": "ShaderMaterial_oowpe_bounds_35",
+          "min": "Vector3(1.165, 0.26293755, -1.130675)",
+          "max": "Vector3(1.24, 0.76777756, -0.45972502)"
+        },
+        {
+          "node": "@MeshInstance3D@32",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0_bounds_36",
+          "min": "Vector3(1.1725, 0.11569251, -1.2055249)",
+          "max": "Vector3(1.2924999, 0.7888126, -1.105525)"
+        },
+        {
+          "node": "@MeshInstance3D@33",
+          "source_material": "ShaderMaterial_agkrw",
+          "material": "ShaderMaterial_agkrw_bounds_37",
+          "min": "Vector3(1.165, 0.26293755, -0.335475)",
+          "max": "Vector3(1.24, 0.76777756, 0.335475)"
+        },
+        {
+          "node": "@MeshInstance3D@34",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0_bounds_38",
+          "min": "Vector3(1.1725, 0.11569251, -0.410325)",
+          "max": "Vector3(1.2924999, 0.7888126, -0.31032497)"
+        },
+        {
+          "node": "@MeshInstance3D@35",
+          "source_material": "ShaderMaterial_2dh5u",
+          "material": "ShaderMaterial_2dh5u_bounds_39",
+          "min": "Vector3(1.165, 0.26293755, 0.459725)",
+          "max": "Vector3(1.24, 0.76777756, 1.130675)"
+        },
+        {
+          "node": "@MeshInstance3D@36",
+          "source_material": "ShaderMaterial_24dj0",
+          "material": "ShaderMaterial_24dj0_bounds_40",
+          "min": "Vector3(1.1725, 0.11569251, 0.38487497)",
+          "max": "Vector3(1.2924999, 0.7888126, 0.484875)"
+        },
+        {
+          "node": "@MeshInstance3D@37",
+          "source_material": "ShaderMaterial_584x8",
+          "material": "ShaderMaterial_584x8_bounds_41",
+          "min": "Vector3(1.1775, 0.21560878, -0.74549997)",
+          "max": "Vector3(1.2674999, 0.41544127, -0.19879997)"
+        },
+        {
+          "node": "@MeshInstance3D@39",
+          "source_material": "ShaderMaterial_7q6il",
+          "material": "ShaderMaterial_7q6il_bounds_42",
+          "min": "Vector3(1.1719999, 0.044499997, 0.26092497)",
+          "max": "Vector3(1.267, 0.1395, 0.88217497)"
+        }
+      ],
+      "before_normalized_text_sha256": "1b0de6c3a4765b92c696b1f88855ee3a30940e9db8e729ccb35b6f3af766a5fd",
+      "before_source_snapshot": "c7461aab48744770875590197a4bda04"
+    },
+    {
+      "path": "scenes/terrain/frontier_hall_exterior.tscn",
+      "before_sha256": "98cff9bf44169feddf5f95a0ba9f8c73195b67e724e82d25c0d2a0a867fdc196",
+      "after_sha256": "d3f62efe0c2da41931e016b311569e198917d2303b7d5aa8a0628e9ee034a888",
+      "unchanged_geometry_resources_sha256": "c22d2f4c87ef40b0ef5ea6d93778c551e057e2b219f4e565d7ec410a68a77370",
+      "mesh_parts": 43,
+      "shared_material_variants": 43,
+      "nodes": [
+        {
+          "node": "ExteriorShell",
+          "source_material": "ShaderMaterial_p5u1o",
+          "material": "ShaderMaterial_p5u1o",
+          "min": "Vector3(-1.8375, 0.025, -1.19125)",
+          "max": "Vector3(1.8375, 1.5199999, 1.19125)"
+        },
+        {
+          "node": "IndustrialBayRoof",
+          "source_material": "ShaderMaterial_veudn",
+          "material": "ShaderMaterial_veudn",
+          "min": "Vector3(-1.8525, 1.1503999, -1.2412499)",
+          "max": "Vector3(1.0623751, 1.5949999, 1.2412499)"
+        },
+        {
+          "node": "HallTealRoofSheet",
+          "source_material": "ShaderMaterial_8bobb",
+          "material": "ShaderMaterial_8bobb",
+          "min": "Vector3(-1.7524999, 1.2103999, -1.1312499)",
+          "max": "Vector3(0.96237504, 1.609, 1.1312499)"
+        },
+        {
+          "node": "HallRoofCrossRib",
+          "source_material": "ShaderMaterial_31b72",
+          "material": "ShaderMaterial_31b72",
+          "min": "Vector3(-1.8345, 1.2053999, -0.86454993)",
+          "max": "Vector3(1.0443748, 1.6249999, -0.78954995)"
+        },
+        {
+          "node": "@MeshInstance3D@41",
+          "source_material": "ShaderMaterial_31b72",
+          "material": "ShaderMaterial_31b72_bounds_04",
+          "min": "Vector3(-1.8345, 1.2053999, -0.0375)",
+          "max": "Vector3(1.0443748, 1.6249999, 0.0375)"
+        },
+        {
+          "node": "@MeshInstance3D@42",
+          "source_material": "ShaderMaterial_31b72",
+          "material": "ShaderMaterial_31b72_bounds_05",
+          "min": "Vector3(-1.8345, 1.2053999, 0.78954995)",
+          "max": "Vector3(1.0443748, 1.6249999, 0.86454993)"
+        },
+        {
+          "node": "HallRoofRidgeCap",
+          "source_material": "ShaderMaterial_veudn",
+          "material": "ShaderMaterial_veudn_bounds_06",
+          "min": "Vector3(-0.6890625, 1.6049998, -1.23375)",
+          "max": "Vector3(-0.101062536, 1.6549999, 1.23375)"
+        },
+        {
+          "node": "OfficeRoofShoulder",
+          "source_material": "ShaderMaterial_ix35q",
+          "material": "ShaderMaterial_ix35q",
+          "min": "Vector3(0.9463124, 1.1363, -1.22375)",
+          "max": "Vector3(1.8099375, 1.2362999, 1.22375)"
+        },
+        {
+          "node": "OfficeRoofField",
+          "source_material": "ShaderMaterial_1b68j",
+          "material": "ShaderMaterial_1b68j",
+          "min": "Vector3(1.047375, 1.2212999, -0.94651246)",
+          "max": "Vector3(1.708875, 1.2413, 0.9265125)"
+        },
+        {
+          "node": "OfficeHVAC",
+          "source_material": "ShaderMaterial_rk05f",
+          "material": "ShaderMaterial_rk05f",
+          "min": "Vector3(1.1025, 1.2337999, -0.8635375)",
+          "max": "Vector3(1.65375, 1.3388, -0.40136248)"
+        },
+        {
+          "node": "DustSkirt",
+          "source_material": "ShaderMaterial_cmcla",
+          "material": "ShaderMaterial_cmcla",
+          "min": "Vector3(-1.855, 0, -1.23375)",
+          "max": "Vector3(1.855, 0.127, 1.23375)"
+        },
+        {
+          "node": "InsetFoundationBand",
+          "source_material": "ShaderMaterial_t06fb",
+          "material": "ShaderMaterial_t06fb",
+          "min": "Vector3(-1.86, 0.095, -1.23875)",
+          "max": "Vector3(1.86, 0.17, 1.23875)"
+        },
+        {
+          "node": "DoorFrame",
+          "source_material": "ShaderMaterial_7aiwe",
+          "material": "ShaderMaterial_7aiwe",
+          "min": "Vector3(-1.08225, -0.54274994, -0.07)",
+          "max": "Vector3(1.08225, 0.54274994, 0.07)"
+        },
+        {
+          "node": "ClosedDoor",
+          "source_material": "ShaderMaterial_p68sr",
+          "material": "ShaderMaterial_p68sr",
+          "min": "Vector3(-0.99224997, -0.47774997, -0.0175)",
+          "max": "Vector3(0.99224997, 0.47774997, 0.0175)"
+        },
+        {
+          "node": "PortalCastJamb",
+          "source_material": "ShaderMaterial_6olgo",
+          "material": "ShaderMaterial_6olgo",
+          "min": "Vector3(-1.4897499, 0.004999995, 1.1712499)",
+          "max": "Vector3(-1.37975, 1.1604999, 1.3712499)"
+        },
+        {
+          "node": "@MeshInstance3D@43",
+          "source_material": "ShaderMaterial_6olgo",
+          "material": "ShaderMaterial_6olgo_bounds_15",
+          "min": "Vector3(0.64475, 0.004999995, 1.1712499)",
+          "max": "Vector3(0.75475, 1.1604999, 1.3712499)"
+        },
+        {
+          "node": "PortalLintel",
+          "source_material": "ShaderMaterial_6olgo",
+          "material": "ShaderMaterial_6olgo_bounds_16",
+          "min": "Vector3(-1.51475, 1.0079999, 1.1612499)",
+          "max": "Vector3(0.7797499, 1.1529999, 1.3812499)"
+        },
+        {
+          "node": "EntranceStep",
+          "source_material": "ShaderMaterial_jelhu",
+          "material": "ShaderMaterial_jelhu",
+          "min": "Vector3(-1.47475, 0.012, 1.1442499)",
+          "max": "Vector3(0.7397499, 0.057000004, 1.4142499)"
+        },
+        {
+          "node": "BayStormHood",
+          "source_material": "ShaderMaterial_4gerk",
+          "material": "ShaderMaterial_4gerk",
+          "min": "Vector3(-1.54475, 1.1205, 1.0392499)",
+          "max": "Vector3(0.8097501, 1.2404999, 1.42925)"
+        },
+        {
+          "node": "BayButtress",
+          "source_material": "ShaderMaterial_6f7xu",
+          "material": "ShaderMaterial_6f7xu",
+          "min": "Vector3(-1.63975, 0.07349998, 1.1412499)",
+          "max": "Vector3(-1.4597499, 1.1025, 1.34125)"
+        },
+        {
+          "node": "@MeshInstance3D@46",
+          "source_material": "ShaderMaterial_6f7xu",
+          "material": "ShaderMaterial_6f7xu_bounds_20",
+          "min": "Vector3(0.72475004, 0.07349998, 1.1412499)",
+          "max": "Vector3(0.90475, 1.1025, 1.34125)"
+        },
+        {
+          "node": "FrontWindowFrame",
+          "source_material": "ShaderMaterial_mgl70",
+          "material": "ShaderMaterial_mgl70",
+          "min": "Vector3(-0.182, -0.17465, -0.07)",
+          "max": "Vector3(0.182, 0.17465, 0.07)"
+        },
+        {
+          "node": "WindowDeepBrow",
+          "source_material": "ShaderMaterial_5xtow",
+          "material": "ShaderMaterial_5xtow",
+          "min": "Vector3(-1.884125, 0.93874985, 1.1742499)",
+          "max": "Vector3(-1.460125, 1.0187501, 1.36425)"
+        },
+        {
+          "node": "WindowDeepSill",
+          "source_material": "ShaderMaterial_xmvpl",
+          "material": "ShaderMaterial_xmvpl",
+          "min": "Vector3(-1.869125, 0.5469499, 1.1662499)",
+          "max": "Vector3(-1.475125, 0.62195, 1.33625)"
+        },
+        {
+          "node": "FrontWindowFrameRight",
+          "source_material": "ShaderMaterial_mgl70",
+          "material": "ShaderMaterial_mgl70_bounds_24",
+          "min": "Vector3(-0.29225, -0.17465, -0.07)",
+          "max": "Vector3(0.29225, 0.17465, 0.07)"
+        },
+        {
+          "node": "@MeshInstance3D@47",
+          "source_material": "ShaderMaterial_5xtow",
+          "material": "ShaderMaterial_5xtow_bounds_25",
+          "min": "Vector3(1.1661249, 0.93874985, 1.1742499)",
+          "max": "Vector3(1.810625, 1.0187501, 1.36425)"
+        },
+        {
+          "node": "@MeshInstance3D@48",
+          "source_material": "ShaderMaterial_xmvpl",
+          "material": "ShaderMaterial_xmvpl_bounds_26",
+          "min": "Vector3(1.1811249, 0.5469499, 1.1662499)",
+          "max": "Vector3(1.795625, 0.62195, 1.33625)"
+        },
+        {
+          "node": "InsetFacadeCassette",
+          "source_material": "ShaderMaterial_lo8ga",
+          "material": "ShaderMaterial_lo8ga",
+          "min": "Vector3(-1.87, 0.38219997, -1.1067874)",
+          "max": "Vector3(-1.795, 1.0584, -0.45001245)"
+        },
+        {
+          "node": "StructuralFacadeRib",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h",
+          "min": "Vector3(-1.9224999, 0.16170001, -1.1811124)",
+          "max": "Vector3(-1.8025, 1.1025, -1.0811125)"
+        },
+        {
+          "node": "@MeshInstance3D@50",
+          "source_material": "ShaderMaterial_nc3wq",
+          "material": "ShaderMaterial_nc3wq",
+          "min": "Vector3(-1.87, 0.38219997, -0.3283875)",
+          "max": "Vector3(-1.795, 1.0584, 0.3283875)"
+        },
+        {
+          "node": "@MeshInstance3D@51",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h_bounds_30",
+          "min": "Vector3(-1.9224999, 0.16170001, -0.4027125)",
+          "max": "Vector3(-1.8025, 1.1025, -0.30271247)"
+        },
+        {
+          "node": "@MeshInstance3D@52",
+          "source_material": "ShaderMaterial_we7cj",
+          "material": "ShaderMaterial_we7cj",
+          "min": "Vector3(-1.87, 0.38219997, 0.45001245)",
+          "max": "Vector3(-1.795, 1.0584, 1.1067874)"
+        },
+        {
+          "node": "@MeshInstance3D@53",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h_bounds_32",
+          "min": "Vector3(-1.9224999, 0.16170001, 0.37568748)",
+          "max": "Vector3(-1.8025, 1.1025, 0.4756875)"
+        },
+        {
+          "node": "ServiceAccessPlate",
+          "source_material": "ShaderMaterial_jctjg",
+          "material": "ShaderMaterial_jctjg",
+          "min": "Vector3(-1.8974999, 0.30135, -0.72975)",
+          "max": "Vector3(-1.8075, 0.58065, -0.19459999)"
+        },
+        {
+          "node": "FoundationRepairPanel",
+          "source_material": "ShaderMaterial_qklm6",
+          "material": "ShaderMaterial_qklm6",
+          "min": "Vector3(-1.897, 0.044499997, 0.25541246)",
+          "max": "Vector3(-1.8019999, 0.1395, 0.86353743)"
+        },
+        {
+          "node": "@MeshInstance3D@54",
+          "source_material": "ShaderMaterial_lo8ga",
+          "material": "ShaderMaterial_lo8ga_bounds_35",
+          "min": "Vector3(1.795, 0.38219997, -1.1067874)",
+          "max": "Vector3(1.87, 1.0584, -0.45001245)"
+        },
+        {
+          "node": "@MeshInstance3D@55",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h_bounds_36",
+          "min": "Vector3(1.8025, 0.16170001, -1.1811124)",
+          "max": "Vector3(1.9224999, 1.1025, -1.0811125)"
+        },
+        {
+          "node": "@MeshInstance3D@56",
+          "source_material": "ShaderMaterial_nc3wq",
+          "material": "ShaderMaterial_nc3wq_bounds_37",
+          "min": "Vector3(1.795, 0.38219997, -0.3283875)",
+          "max": "Vector3(1.87, 1.0584, 0.3283875)"
+        },
+        {
+          "node": "@MeshInstance3D@57",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h_bounds_38",
+          "min": "Vector3(1.8025, 0.16170001, -0.4027125)",
+          "max": "Vector3(1.9224999, 1.1025, -0.30271247)"
+        },
+        {
+          "node": "@MeshInstance3D@58",
+          "source_material": "ShaderMaterial_we7cj",
+          "material": "ShaderMaterial_we7cj_bounds_39",
+          "min": "Vector3(1.795, 0.38219997, 0.45001245)",
+          "max": "Vector3(1.87, 1.0584, 1.1067874)"
+        },
+        {
+          "node": "@MeshInstance3D@59",
+          "source_material": "ShaderMaterial_ih21h",
+          "material": "ShaderMaterial_ih21h_bounds_40",
+          "min": "Vector3(1.8025, 0.16170001, 0.37568748)",
+          "max": "Vector3(1.9224999, 1.1025, 0.4756875)"
+        },
+        {
+          "node": "@MeshInstance3D@60",
+          "source_material": "ShaderMaterial_jctjg",
+          "material": "ShaderMaterial_jctjg_bounds_41",
+          "min": "Vector3(1.8075, 0.30135, -0.72975)",
+          "max": "Vector3(1.8974999, 0.58065, -0.19459999)"
+        },
+        {
+          "node": "@MeshInstance3D@62",
+          "source_material": "ShaderMaterial_qklm6",
+          "material": "ShaderMaterial_qklm6_bounds_42",
+          "min": "Vector3(1.8019999, 0.044499997, 0.25541246)",
+          "max": "Vector3(1.897, 0.1395, 0.86353743)"
+        }
+      ],
+      "before_normalized_text_sha256": "98cff9bf44169feddf5f95a0ba9f8c73195b67e724e82d25c0d2a0a867fdc196",
+      "before_source_snapshot": "c7461aab48744770875590197a4bda04"
+    }
+  ]
+}

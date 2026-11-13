@@ -24,14 +24,22 @@ func _ready()->void:
 	resized.connect(_render_once)
 	visibility_changed.connect(_render_once)
 
-func update_actor(actor:Node,loadout:Dictionary)->void:
-	var signature:=str(actor.get_instance_id() if actor!=null else 0)+JSON.stringify(loadout)
+func update_actor(actor:Node,loadout:Dictionary,identity:Dictionary={})->void:
+	var portrait_path := String(identity.get("portrait_path", ""))
+	if portrait_path.is_empty() and String(identity.get("portrait_id", "")).is_empty() and actor != null and actor.has_method("get_portrait_path"):
+		portrait_path = String(actor.call("get_portrait_path"))
+	var signature:=str(actor.get_instance_id() if actor!=null else 0)+JSON.stringify([loadout,identity.get("portrait_id",""),portrait_path])
 	if signature==_signature:return
 	_signature=signature
 	if is_instance_valid(_model):_model.free()
-	if actor==null:return
+	_model=null
+	if actor==null:
+		set_meta("preview_unit_id", "")
+		set_meta("preview_uses_existing_model", false)
+		_render_once()
+		return
 	var resolver:Node=VISUALS.new()
-	_model=resolver.call("_create_unit_proxy",actor)
+	_model=resolver.call("_create_unit_proxy",actor,identity)
 	resolver.free()
 	_scene.add_child(_model)
 	_model.process_mode=Node.PROCESS_MODE_DISABLED

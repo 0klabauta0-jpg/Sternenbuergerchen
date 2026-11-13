@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
+const CONTEXT := preload("res://scripts/tests/review_interaction_fixture_context.gd")
 const PORT := 19472
 var passed := 0
 var failed := 0
@@ -16,14 +17,26 @@ func run() -> void:
 	for _i in range(120): ha.poll(); ca.poll(); await process_frame
 	var hr := Node.new(); var cr := Node.new(); root.add_child(hr); root.add_child(cr)
 	set_multiplayer(ha, hr.get_path()); set_multiplayer(ca, cr.get_path())
-	var hs := MISSION_SCENE.instantiate(); var cs := MISSION_SCENE.instantiate(); hs.name="Mission"; cs.name="Mission"; hr.add_child(hs); cr.add_child(cs)
+	var hs := MISSION_SCENE.instantiate(); var cs := MISSION_SCENE.instantiate(); hs.name="Mission"; cs.name="Mission"
+	for scene in [hs, cs]:
+		scene.get_node("SimulationRoot").set("is_server_authoritative", true)
+		scene.get_node("MissionSetup").set("defer_friendly_runtime_activation", false)
+		scene.get_node("CombatLoopDriver").call("set_combat_startup_grace_ticks", 100000)
+	hr.add_child(hs); cr.add_child(cs)
 	for _i in range(12): ha.poll(); ca.poll(); await process_frame
 	var hsim := hs.get_node("SimulationRoot"); var csim := cs.get_node("SimulationRoot"); var cc := cs.get_node("TacticalController")
 	var fireteam := String(PackedStringArray(cc.call("_get_available_fireteam_ids"))[0]); var peer_id := ca.get_unique_id()
 	for sim in [hsim, csim]:
 		sim.set("is_server_authoritative", true); sim.call("set_peer_team_assignments", {1:"team_alpha",peer_id:"team_alpha"}); sim.call("set_peer_role",1,"host"); sim.call("set_peer_role",peer_id,"commander"); sim.call("set_peer_fireteam_assignments",{peer_id:[fireteam]})
+	_assert(CONTEXT.bind_pair(hs, cs, "task1094_go"), "Both real Hex scenes bind the verified map session")
+	for _i in range(12): ha.poll(); ca.poll(); await process_frame
 	cc.call("_set_selected_fireteams", PackedStringArray([fireteam]), false)
-	var target := Vector2(cs.get_node("MapRoot/objective_point").global_position)
+	var terrain = hs.get_node("MissionSetup").get("_loaded_terrain_map_data")
+	_assert(terrain != null and terrain.has_marker("objective_point"), "GO target is an authored Host map marker")
+	var target: Vector2 = terrain.get_marker_position("objective_point")
+	var slice := {"flow_steps":[{"step_id":"disable_air_defense", "objective_type":"air_defense_shutdown", "target_marker_id":"objective_point", "required_state":"aa_disabled", "min_hold_seconds":0.0}], "interaction_points":[{"interaction_id":"aa_shutdown_zone", "interaction_type":"hold_zone", "marker_id":"objective_point", "required_order":"take", "required_team":"team_alpha", "duration_seconds":0.0, "radius_world":160.0, "step_id":"disable_air_defense", "gate_id":"disable_air_defense", "required_state":"aa_disabled"}]}
+	for scene in [hs, cs]:
+		_assert(scene.get_node("CombatLoopDriver").call("configure_scenario_runtime_gates", slice), "Real interaction owner receives authored AA binding")
 	cc.set("_last_mission_interaction_use_intent_snapshot", {"accepted":true,"requires_go":true,"interaction_id":"aa_shutdown_zone","interaction_type":"hold_zone","fireteam_id":fireteam,"command_type":"take","required_order":"take","duration_seconds":0.0,"step_id":"disable_air_defense","gate_id":"disable_air_defense","required_state":"aa_disabled","target_position":target,"phase":0})
 	var before := int(Dictionary(hsim.call("get_network_command_contract_snapshot")).get("accepted_count",0))
 	_assert(bool(cc.call("execute_selected_fireteam_orders")), "Connected client GO sends Interaction request")

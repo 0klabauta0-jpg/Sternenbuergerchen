@@ -1979,22 +1979,21 @@ func finalize_runtime_identity_change(prepared:RefCounted,publication_guard:Call
 	if record.phase=="finalized":return {"ok":true,"replayed":true}
 	if record.phase!="published":return {"ok":false,"reason":"identity_not_published"}
 	record.phase="finalized"
-	record["guard"]=publication_guard
 	var owner:Node=record.owner.get_ref()
 	if not _runtime_identity_owner_matches(owner):return {"ok":true,"context_changed":true}
 	record["post_life"]=owner._hex_payload_identity(unit_id)
 	var lifetime:WeakRef=weakref(self)
-	if not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	if not _runtime_identity_publication_current(record,publication_guard):return {"ok":true,"context_changed":true}
 	if record.reset:remove_meta("post_drop_security_active")
 	if record.source.unit_id!=unit_id or record.source.team_id!=team_id or record.source.fireteam_id!=fireteam_id:
 		identity_changed.emit()
-		if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+		if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record,publication_guard):return {"ok":true,"context_changed":true}
 	runtime_status_changed.emit(_runtime_status)
-	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record,publication_guard):return {"ok":true,"context_changed":true}
 	_refresh_weapon_visual()
-	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record):return {"ok":true,"context_changed":true}
+	if not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record,publication_guard):return {"ok":true,"context_changed":true}
 	_refresh_readability()
-	return {"ok":true,"context_changed":not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record)}
+	return {"ok":true,"context_changed":not is_instance_valid(lifetime.get_ref()) or not _runtime_identity_publication_current(record,publication_guard)}
 
 func _runtime_identity_record(prepared:RefCounted)->Dictionary:
 	if prepared==null:return {}
@@ -2004,9 +2003,8 @@ func _runtime_identity_record(prepared:RefCounted)->Dictionary:
 func _runtime_identity_owner_matches(owner:Node)->bool:
 	return is_instance_valid(owner) and not owner.is_queued_for_deletion() and is_inside_tree() and not is_queued_for_deletion() and owner.has_method("_hex_payload_identity") and owner.has_method("get_unit_registry") and is_instance_valid(owner.get_parent()) and owner.get_parent().is_ancestor_of(self) and is_instance_valid(owner.get_unit_registry())
 
-func _runtime_identity_publication_current(record:Dictionary)->bool:
+func _runtime_identity_publication_current(record:Dictionary,guard:Callable=Callable())->bool:
 	var owner:Node=record.owner.get_ref()
-	var guard:Callable=record.get("guard",Callable())
 	if not guard.is_null() and (not guard.is_valid() or not bool(guard.call())):return false
 	return _runtime_identity_owner_matches(owner) and owner.get_unit_registry().get_instance_id()==record.registry_id and get_parent().get_instance_id()==record.parent_id and _actor_respawn_model_stamp()==record.post_models and owner._hex_payload_identity(unit_id)==record.post_life
 
@@ -2092,6 +2090,10 @@ func export_mission_actor_checkpoint() -> Dictionary:
 # expected_position must come from the independently prepared ground owner,
 # never from UI or from this actor snapshot itself.
 func prepare_mission_actor_restore(owner: Node, state: Dictionary, expected_position: Vector2) -> Dictionary:
+	# Release abandoned outer records before preparing their identity/vital owners.
+	for key in _prepared_mission_actors.keys():
+		if _prepared_mission_actors[key].handle.get_ref() == null: _prepared_mission_actors.erase(key)
+	if _prepared_mission_actors.size() >= 32: return {"ok":false, "reason":"actor_checkpoint_capacity"}
 	if state.size() != 6 or not state.has_all(["schema", "unit_id", "team_id", "fireteam_id", "max_health", "payload"]) or state.schema != "mission_actor_checkpoint.v1" or state.unit_id != unit_id or state.team_id != team_id or state.fireteam_id != fireteam_id or state.max_health != max_health_points or not expected_position.is_finite(): return {"ok":false, "reason":"invalid_actor_checkpoint"}
 	var decoded := MISSION_CHECKPOINT_VALUE_CODEC.decode_value(state.payload)
 	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_actor_checkpoint"}
@@ -2111,9 +2113,6 @@ func prepare_mission_actor_restore(owner: Node, state: Dictionary, expected_posi
 	var identity_record: Dictionary = _runtime_identity_record(identity.prepared)
 	identity_record.runtime = runtime
 	identity_record["checkpoint_command"] = command
-	for key in _prepared_mission_actors.keys():
-		if _prepared_mission_actors[key].handle.get_ref() == null: _prepared_mission_actors.erase(key)
-	if _prepared_mission_actors.size() >= 32: return {"ok":false, "reason":"actor_checkpoint_capacity"}
 	var handle := PreparedMissionActor.new()
 	_prepared_mission_actors[handle.get_instance_id()] = {"handle":weakref(handle), "identity":identity.prepared, "vital":vital.prepared, "data":data, "position":global_position, "phase":"prepared"}
 	return {"ok":true, "prepared":handle}

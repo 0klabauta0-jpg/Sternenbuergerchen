@@ -1,0 +1,743 @@
+{
+  "schema": "personnel_visual_palette.v1",
+  "purpose": "Read-only authored colors for canonical fictional portrait identities; no names, roles, gender inference or gameplay state. Existing stock mesh/UV/rig/equipment retained.",
+  "source_review": "All 12 original atlas images opened 2026-11-13; swatches approximate visible skin/hair/uniform colors under the unchanged native preview lights.",
+  "entries": {
+    "char_portrait_001": {
+      "skin": "#a5714e",
+      "hair": "#4d4942",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+        "sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_002": {
+      "skin": "#bf8863",
+      "hair": "#211c18",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+        "sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_003": {
+      "skin": "#b8805d",
+      "hair": "#38291f",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+        "sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_004": {
+      "skin": "#8b5636",
+      "hair": "#1a110d",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+        "sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_005": {
+      "skin": "#a77752",
+      "hair": "#a77752",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+        "sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_006": {
+      "skin": "#b58661",
+      "hair": "#a9a59b",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+        "sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_007": {
+      "skin": "#d39a79",
+      "hair": "#8a401d",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+        "sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_008": {
+      "skin": "#bf916d",
+      "hair": "#bcaa8c",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+        "sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_009": {
+      "skin": "#8e593a",
+      "hair": "#26221c",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+        "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_010": {
+      "skin": "#b6805d",
+      "hair": "#71523a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+        "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_011": {
+      "skin": "#b47e55",
+      "hair": "#1b1a18",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+        "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_012": {
+      "skin": "#b88561",
+      "hair": "#16191a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+        "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_013": {
+      "skin": "#d29b79",
+      "hair": "#8f3d1b",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+        "sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_014": {
+      "skin": "#875638",
+      "hair": "#221b16",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+        "sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_015": {
+      "skin": "#b78a65",
+      "hair": "#88867c",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+        "sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_016": {
+      "skin": "#a8714c",
+      "hair": "#32251d",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+        "sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_017": {
+      "skin": "#c49672",
+      "hair": "#18181a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+        "sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_018": {
+      "skin": "#805333",
+      "hair": "#b8b1a4",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+        "sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_019": {
+      "skin": "#c39270",
+      "hair": "#987343",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+        "sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_020": {
+      "skin": "#a2744f",
+      "hair": "#201917",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+        "sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_021": {
+      "skin": "#ae7850",
+      "hair": "#504438",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+        "sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_022": {
+      "skin": "#bf8b6c",
+      "hair": "#bf8b6c",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+        "sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_023": {
+      "skin": "#c18a64",
+      "hair": "#211a17",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+        "sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_024": {
+      "skin": "#bd8965",
+      "hair": "#7f3118",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+        "sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_025": {
+      "skin": "#925f3c",
+      "hair": "#a9a597",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+        "sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_026": {
+      "skin": "#bf8f6c",
+      "hair": "#1c1b18",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+        "sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_027": {
+      "skin": "#cf9b7a",
+      "hair": "#bca98a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+        "sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_028": {
+      "skin": "#aa7953",
+      "hair": "#49433a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+        "sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_029": {
+      "skin": "#b4825b",
+      "hair": "#77766f",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+        "sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_030": {
+      "skin": "#cd9675",
+      "hair": "#91613a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+        "sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_031": {
+      "skin": "#955d3c",
+      "hair": "#1d1814",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+        "sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_032": {
+      "skin": "#b2815d",
+      "hair": "#a9a59b",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+        "sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_033": {
+      "skin": "#9a663f",
+      "hair": "#9a663f",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+        "sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_034": {
+      "skin": "#bd8b69",
+      "hair": "#1a1917",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+        "sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_035": {
+      "skin": "#b78761",
+      "hair": "#916347",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+        "sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_036": {
+      "skin": "#8d5c3c",
+      "hair": "#1d1918",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+        "sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_037": {
+      "skin": "#d29c79",
+      "hair": "#8c603c",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+        "sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_038": {
+      "skin": "#b48258",
+      "hair": "#65605a",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+        "sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_039": {
+      "skin": "#ab7752",
+      "hair": "#28221e",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+        "sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_040": {
+      "skin": "#d29a75",
+      "hair": "#a26735",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+        "sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_041": {
+      "skin": "#b17f57",
+      "hair": "#615b50",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+        "sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_042": {
+      "skin": "#905d3f",
+      "hair": "#1a1714",
+      "cloth": "#2e494a",
+      "plate": "#d1c9ae",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+        "sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_045": {
+      "skin": "#c68a52",
+      "hair": "#442c1d",
+      "cloth": "#53533a",
+      "plate": "#c5af86",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          0,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_046": {
+      "skin": "#8b5636",
+      "hair": "#827c70",
+      "cloth": "#324a4b",
+      "plate": "#476265",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          627,
+          0,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_047": {
+      "skin": "#c18b58",
+      "hair": "#2b2722",
+      "cloth": "#313e46",
+      "plate": "#59727b",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          0,
+          627,
+          627,
+          627
+        ]
+      }
+    },
+    "char_portrait_048": {
+      "skin": "#bd8656",
+      "hair": "#b6a48b",
+      "cloth": "#193a36",
+      "plate": "#bda984",
+      "reference": {
+        "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_l_drawn_20261111.png",
+        "sha256": "28fd56efd17fa7a197b4245f205cc99c2eb1eb64feeaf77047e6d4fa716f5cc5",
+        "region": [
+          627,
+          627,
+          627,
+          627
+        ]
+      }
+    }
+  }
+}

@@ -1,17 +1,41 @@
 extends RefCounted
 ## Pure definition normalization; status is held only in CampaignState.
+const DISPLAY = preload("res://scripts/mission/campaign_display_catalog.gd")
 static var _issuer_catalog:Dictionary={}
 static var _briefings:Dictionary={}
-static var _bodies:Dictionary={}
+static var _system:Dictionary={}
+static var _job_definitions:Dictionary={}
+static var _location_definitions:Dictionary={}
 
-static func get_briefing(job_id:String)->Dictionary:
+static func get_briefing(job_id:String, campaign:Dictionary={}, travel:Dictionary={})->Dictionary:
 	if _briefings.is_empty():
 		var raw:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/job_briefings.json"))
 		if typeof(raw)==TYPE_DICTIONARY:_briefings=raw
-		var system:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/star_system.json"))
-		if typeof(system)==TYPE_DICTIONARY:_bodies=system.get("bodies",{})
+		var raw_system:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/star_system.json"))
+		if typeof(raw_system)==TYPE_DICTIONARY:_system=raw_system
+		var raw_jobs:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/jobs.json"))
+		if typeof(raw_jobs)==TYPE_DICTIONARY:_job_definitions=raw_jobs
+		var raw_locations:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/locations.json"))
+		if typeof(raw_locations)==TYPE_DICTIONARY:_location_definitions=raw_locations
 	var result:Dictionary=Dictionary(_briefings.get(job_id,{})).duplicate(true)
-	result["body_name"]=String(Dictionary(_bodies.get(String(result.get("body_id","")),{})).get("name",""))
+	if result.is_empty():return result
+	# A briefing is a readout of the same location/orbit chain as the star map.
+	# Optional snapshots keep the actual runtime authoritative; catalogs only
+	# support callers without a running campaign, such as content inspection.
+	var jobs:Dictionary=_job_definitions if campaign.is_empty() else Dictionary(campaign.get("jobs",{}))
+	var locations:Dictionary=_location_definitions if campaign.is_empty() else Dictionary(campaign.get("locations",{}))
+	var system:Dictionary=_system if travel.is_empty() else travel
+	var location_id:String=String(Dictionary(jobs.get(job_id,{})).get("location_id",""))
+	var orbit_id:String=String(Dictionary(system.get("location_orbits",{})).get(location_id,""))
+	var body_id:String=String(Dictionary(Dictionary(system.get("orbits",{})).get(orbit_id,{})).get("body_id",""))
+	var bodies:Dictionary=system.get("bodies",{})
+	var body:Dictionary=bodies.get(body_id,{})
+	var parent:Dictionary=bodies.get(String(body.get("parent_id","")),{})
+	var kind:String="Himmelskörper"
+	if body.get("kind","")=="station":kind="Raumstation"
+	elif body.get("parent_id","")=="sun":kind="Planet"
+	elif parent.get("parent_id","")=="sun":kind="Mond"
+	result.merge({"location_id":location_id,"orbit_id":orbit_id,"body_id":body_id,"body_name":DISPLAY.body_name(body_id,body),"body_kind":kind,"site_label":DISPLAY.location_name(location_id,Dictionary(locations.get(location_id,{})))},true)
 	return result
 
 static func get_issuer_for_job(job_id:String)->Dictionary:

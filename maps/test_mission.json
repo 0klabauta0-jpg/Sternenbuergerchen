@@ -1,4 +1,6 @@
 {
+	"tactical_grid_rules": "hex_tactical_v1",
+	"grid_topology": "hex_axial_v1",
 	"grid_origin": {
 		"x": 448,
 		"y": 157
@@ -9,8 +11,22 @@
 	},
 	"map_name": "test_mission",
 	"markers": {
-
+	"spawn_alpha": {
+		"x": 476.0206191045715,
+		"y": 558.9896904477142,
+		"marker_type_id": "spawn_alpha"
 	},
+	"spawn_bravo": {
+		"x": 704.0,
+		"y": 285.0,
+		"marker_type_id": "spawn_bravo"
+	},
+	"objective_point": {
+		"x": 610.2974966311838,
+		"y": 459.8512516844081,
+		"marker_type_id": "objective_point"
+	}
+},
 	"mission_slot_count": 3,
 	"tile_size": {
 		"half_height": 32,

@@ -1,4 +1,6 @@
 {
+	"tactical_grid_rules": "hex_tactical_v1",
+	"grid_topology": "hex_axial_v1",
 	"enemy_team_configs": {
 		"default": {
 			"advance_style": "hold",
@@ -67,192 +69,192 @@
 	},
 	"map_name": "fireteam_command_drill_24x24",
 	"markers": {
-		"drill_contact_line": {
-			"color": {
-				"a": 0.98,
-				"b": 1.0,
-				"g": 0.68,
-				"r": 0.86
-			},
-			"marker_type_id": "recon_note",
-			"name": "Likely Contact Line",
-			"placement_context": "editor_only",
-			"symbol": "triangle",
-			"x": 1536,
-			"y": 896
+	"drill_contact_line": {
+		"color": {
+			"a": 0.98,
+			"b": 1.0,
+			"g": 0.68,
+			"r": 0.86
 		},
-		"drill_defend_area": {
-			"color": {
-				"a": 0.95,
-				"b": 0.78,
-				"g": 0.94,
-				"r": 0.66
-			},
-			"marker_type_id": "defend",
-			"name": "Defend / Rally Area",
-			"placement_context": "mission_player",
-			"symbol": "circle",
-			"x": 1280,
-			"y": 896
-		},
-		"drill_flank_north": {
-			"color": {
-				"a": 0.95,
-				"b": 0.48,
-				"g": 0.84,
-				"r": 0.95
-			},
-			"marker_type_id": "flank",
-			"name": "North Flank Option",
-			"placement_context": "mission_player",
-			"symbol": "chevron",
-			"x": 1472,
-			"y": 736
-		},
-		"drill_flank_south": {
-			"color": {
-				"a": 0.95,
-				"b": 0.48,
-				"g": 0.84,
-				"r": 0.95
-			},
-			"marker_type_id": "flank",
-			"name": "South Flank Option",
-			"placement_context": "mission_player",
-			"symbol": "chevron",
-			"x": 1152,
-			"y": 1088
-		},
-		"drill_move_lane": {
-			"color": {
-				"a": 0.95,
-				"b": 1.0,
-				"g": 0.9,
-				"r": 0.72
-			},
-			"marker_type_id": "move",
-			"name": "Move Lane",
-			"placement_context": "mission_player",
-			"symbol": "chevron",
-			"x": 960,
-			"y": 864
-		},
-		"objective_point": {
-			"color": {
-				"a": 0.98,
-				"b": 0.24,
-				"g": 0.86,
-				"r": 1.0
-			},
-			"marker_type_id": "objective_point",
-			"name": "Objective Capture Point",
-			"placement_context": "editor_only",
-			"symbol": "flag",
-			"x": 1664,
-			"y": 896
-		},
-		"spawn_alpha": {
-			"color": {
-				"a": 0.98,
-				"b": 1.0,
-				"g": 0.78,
-				"r": 0.38
-			},
-			"marker_type_id": "spawn_alpha",
-			"name": "Friendly Drill Spawn",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": 512,
-			"y": 832
-		},
-		"spawn_bravo": {
-			"color": {
-				"a": 0.98,
-				"b": 1.0,
-				"g": 0.78,
-				"r": 0.38
-			},
-			"marker_type_id": "spawn_alpha",
-			"name": "Friendly Alternate Spawn",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": 576,
-			"y": 928
-		},
-		"spawn_enemy_drill": {
-			"color": {
-				"a": 0.98,
-				"b": 0.42,
-				"g": 0.56,
-				"r": 1.0
-			},
-			"marker_type_id": "spawn_bravo",
-			"name": "Red Drill Fireteam",
-			"placement_context": "editor_only",
-			"symbol": "diamond",
-			"x": 2048,
-			"y": 896
-		}
+		"marker_type_id": "recon_note",
+		"name": "Likely Contact Line",
+		"placement_context": "editor_only",
+		"symbol": "triangle",
+		"x": 2022.892489893551,
+		"y": 1036.5537550532244
 	},
+	"drill_defend_area": {
+		"color": {
+			"a": 0.95,
+			"b": 0.78,
+			"g": 0.94,
+			"r": 0.66
+		},
+		"marker_type_id": "defend",
+		"name": "Defend / Rally Area",
+		"placement_context": "mission_player",
+		"symbol": "circle",
+		"x": 1848.041238209143,
+		"y": 1059.9793808954284
+	},
+	"drill_flank_north": {
+		"color": {
+			"a": 0.95,
+			"b": 0.48,
+			"g": 0.84,
+			"r": 0.95
+		},
+		"marker_type_id": "flank",
+		"name": "North Flank Option",
+		"placement_context": "mission_player",
+		"symbol": "chevron",
+		"x": 1877.7437415779593,
+		"y": 853.1281292110203
+	},
+	"drill_flank_south": {
+		"color": {
+			"a": 0.95,
+			"b": 0.48,
+			"g": 0.84,
+			"r": 0.95
+		},
+		"marker_type_id": "flank",
+		"name": "South Flank Option",
+		"placement_context": "mission_player",
+		"symbol": "chevron",
+		"x": 1882.3387348403267,
+		"y": 1298.8306325798367
+	},
+	"drill_move_lane": {
+		"color": {
+			"a": 0.95,
+			"b": 1.0,
+			"g": 0.9,
+			"r": 0.72
+		},
+		"marker_type_id": "move",
+		"name": "Move Lane",
+		"placement_context": "mission_player",
+		"symbol": "chevron",
+		"x": 1609.1899865247349,
+		"y": 1051.4050067376324
+	},
+	"objective_point": {
+		"color": {
+			"a": 0.98,
+			"b": 0.24,
+			"g": 0.86,
+			"r": 1.0
+		},
+		"marker_type_id": "objective_point",
+		"name": "Objective Capture Point",
+		"placement_context": "editor_only",
+		"symbol": "flag",
+		"x": 2110.3181157357553,
+		"y": 1024.8409421321223
+	},
+	"spawn_alpha": {
+		"color": {
+			"a": 0.98,
+			"b": 1.0,
+			"g": 0.78,
+			"r": 0.38
+		},
+		"marker_type_id": "spawn_alpha",
+		"name": "Friendly Drill Spawn",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 1282.9131089981227,
+		"y": 1054.5434455009386
+	},
+	"spawn_bravo": {
+		"color": {
+			"a": 0.98,
+			"b": 1.0,
+			"g": 0.78,
+			"r": 0.38
+		},
+		"marker_type_id": "spawn_alpha",
+		"name": "Friendly Alternate Spawn",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 1387.4874831559187,
+		"y": 1162.2562584220407
+	},
+	"spawn_enemy_drill": {
+		"color": {
+			"a": 0.98,
+			"b": 0.42,
+			"g": 0.56,
+			"r": 1.0
+		},
+		"marker_type_id": "spawn_bravo",
+		"name": "Red Drill Fireteam",
+		"placement_context": "editor_only",
+		"symbol": "diamond",
+		"x": 2372.5949932623676,
+		"y": 989.7025033688162
+	}
+},
 	"mission_slot_count": 4,
 	"patrol_paths": {
-		"enemy_drill_echo_route": [
-			{
-				"x": 2112,
-				"y": 864
-			},
-			{
-				"x": 2112,
-				"y": 928
-			},
-			{
-				"x": 2240,
-				"y": 928
-			}
-		],
-		"enemy_drill_foxtrot_route": [
-			{
-				"x": 2112,
-				"y": 992
-			},
-			{
-				"x": 2112,
-				"y": 1056
-			},
-			{
-				"x": 1984,
-				"y": 992
-			}
-		],
-		"enemy_drill_golf_route": [
-			{
-				"x": 2240,
-				"y": 1056
-			},
-			{
-				"x": 2112,
-				"y": 1120
-			},
-			{
-				"x": 2112,
-				"y": 1056
-			}
-		],
-		"enemy_drill_watch_route": [
-			{
-				"x": 1920,
-				"y": 832
-			},
-			{
-				"x": 1792,
-				"y": 832
-			},
-			{
-				"x": 1792,
-				"y": 896
-			}
-		]
-	},
+	"enemy_drill_echo_route": [
+		{
+			"x": 2396.020619104572,
+			"y": 945.9896904477142
+		},
+		{
+			"x": 2436.5949932623676,
+			"y": 1021.7025033688162
+		},
+		{
+			"x": 2524.020619104572,
+			"y": 1009.9896904477142
+		}
+	],
+	"enemy_drill_foxtrot_route": [
+		{
+			"x": 2477.1693674201633,
+			"y": 1097.4153162899183
+		},
+		{
+			"x": 2517.7437415779596,
+			"y": 1173.1281292110202
+		},
+		{
+			"x": 2389.7437415779596,
+			"y": 1109.1281292110202
+		}
+	],
+	"enemy_drill_golf_route": [
+		{
+			"x": 2605.1693674201633,
+			"y": 1161.4153162899183
+		},
+		{
+			"x": 2558.3181157357553,
+			"y": 1248.8409421321223
+		},
+		{
+			"x": 2517.7437415779596,
+			"y": 1173.1281292110202
+		}
+	],
+	"enemy_drill_watch_route": [
+		{
+			"x": 2244.5949932623676,
+			"y": 925.7025033688162
+		},
+		{
+			"x": 2157.1693674201633,
+			"y": 937.4153162899183
+		},
+		{
+			"x": 2197.7437415779596,
+			"y": 1013.1281292110203
+		}
+	]
+},
 	"terrain_visual_theme_id": "ground_mission_mixed_v1",
 	"tile_size": {
 		"half_height": 32,

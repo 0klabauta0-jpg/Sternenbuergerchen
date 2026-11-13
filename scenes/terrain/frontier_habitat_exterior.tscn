@@ -13,6 +13,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.185, 0.025, -1.2199999)
+shader_parameter/wear_part_max = Vector3(1.185, 0.93605757, 1.2199999)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_24twa"]
 _surfaces = [{
@@ -34,6 +36,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.24, 0.8660575, -1.275)
+shader_parameter/wear_part_max = Vector3(1.24, 0.99605757, 1.275)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_1fcyn"]
 _surfaces = [{
@@ -55,6 +59,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(-1.1274999, 0.9540576, -1.1624999)
+shader_parameter/wear_part_max = Vector3(1.1274999, 0.98905754, 1.1624999)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_14mlk"]
 _surfaces = [{
@@ -76,6 +82,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(-1.0626, 0.9810576, -1.0561249)
+shader_parameter/wear_part_max = Vector3(-0.21735, 1.0860575, 0.931875)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_xv84l"]
 _surfaces = [{
@@ -97,6 +105,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(-0.012075007, 0.9810576, -1.0437)
+shader_parameter/wear_part_max = Vector3(1.026375, 1.0710576, -0.07454997)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_68jvr"]
 _surfaces = [{
@@ -118,6 +128,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(-0.012075007, 0.9810576, 0.062124997)
+shader_parameter/wear_part_max = Vector3(1.026375, 1.0460576, 0.85732496)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_bubvn"]
 _surfaces = [{
@@ -146,6 +158,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-0.175375, 1.0035576, 0.64549994)
+shader_parameter/wear_part_max = Vector3(0.054625005, 1.0785576, 0.8455)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_ca40m"]
 _surfaces = [{
@@ -167,6 +181,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(0.18112502, 1.0660576, -0.8386874)
+shader_parameter/wear_part_max = Vector3(0.881475, 1.1810576, -0.27956247)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_877n3"]
 _surfaces = [{
@@ -202,6 +218,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(0.31395, 1.1855575, -0.69662493)
+shader_parameter/wear_part_max = Vector3(0.74865, 1.2025576, -0.66162497)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_hl8no"]
 _surfaces = [{
@@ -253,6 +271,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.38, 0.9, 0.15, 0.3)
+shader_parameter/wear_part_min = Vector3(-0.905625, 1.0805575, 0.41184998)
+shader_parameter/wear_part_max = Vector3(-0.35017502, 1.1055576, 0.63185)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_w6qru"]
 _surfaces = [{
@@ -274,6 +294,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.95, 0.12, 0.3, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.225, 0, -1.26)
+shader_parameter/wear_part_max = Vector3(1.225, 0.127, 1.26)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_giqrg"]
 _surfaces = [{
@@ -295,6 +317,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.95, 0.12, 0.3, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.23, 0.095, -1.265)
+shader_parameter/wear_part_max = Vector3(1.23, 0.17, 1.265)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_jgd74"]
 _surfaces = [{
@@ -316,6 +340,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-0.391875, -0.42785376, -0.07)
+shader_parameter/wear_part_max = Vector3(0.391875, 0.42785376, 0.07)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wndfe"]
 size = Vector3(0.78375, 0.8557075, 0.14)
@@ -330,6 +356,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-0.301875, -0.36285377, -0.0175)
+shader_parameter/wear_part_max = Vector3(0.301875, 0.36285377, 0.0175)
 
 [sub_resource type="BoxMesh" id="BoxMesh_5pvjt"]
 size = Vector3(0.60375, 0.72570753, 0.035)
@@ -344,6 +372,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-0.431875, 0.005000025, 1.1974999)
+shader_parameter/wear_part_max = Vector3(-0.32187498, 0.9307076, 1.3974999)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_y6s5u"]
 _surfaces = [{
@@ -385,6 +415,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.95, 0.12, 0.3, 0.28)
+shader_parameter/wear_part_min = Vector3(-0.416875, 0.012, 1.1704999)
+shader_parameter/wear_part_max = Vector3(0.416875, 0.057000004, 1.4404999)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_if77n"]
 _surfaces = [{
@@ -450,6 +482,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-0.47187498, 0.89570755, 1.0625)
+shader_parameter/wear_part_max = Vector3(0.47187498, 0.97070754, 1.4524999)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_syn70"]
 _surfaces = [{
@@ -488,6 +522,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-0.25235, -0.16646875, -0.07)
+shader_parameter/wear_part_max = Vector3(0.25235, 0.16646875, 0.07)
 
 [sub_resource type="BoxMesh" id="BoxMesh_hykij"]
 size = Vector3(0.5047, 0.3329375, 0.14)
@@ -502,6 +538,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-1.091375, 0.6983787, 1.2004999)
+shader_parameter/wear_part_max = Vector3(-0.526675, 0.77837884, 1.3905)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_6sxke"]
 _surfaces = [{
@@ -523,6 +561,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-1.076375, 0.32294127, 1.1924999)
+shader_parameter/wear_part_max = Vector3(-0.541675, 0.3979413, 1.3625)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_6iu2x"]
 _surfaces = [{
@@ -587,6 +627,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.24, 0.26293755, -1.130675)
+shader_parameter/wear_part_max = Vector3(-1.165, 0.76777756, -0.45972502)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_x5npe"]
 _surfaces = [{
@@ -608,6 +650,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-1.2924999, 0.11569251, -1.2055249)
+shader_parameter/wear_part_max = Vector3(-1.1725, 0.7888126, -1.105525)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_pv8ww"]
 _surfaces = [{
@@ -629,6 +673,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.24, 0.26293755, -0.335475)
+shader_parameter/wear_part_max = Vector3(-1.165, 0.76777756, 0.335475)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_kushq"]
 _surfaces = [{
@@ -660,6 +706,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.24, 0.26293755, 0.459725)
+shader_parameter/wear_part_max = Vector3(-1.165, 0.76777756, 1.130675)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_s3rv2"]
 _surfaces = [{
@@ -691,6 +739,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.2674999, 0.21560878, -0.74549997)
+shader_parameter/wear_part_max = Vector3(-1.1775, 0.41544127, -0.19879997)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_1ck6w"]
 _surfaces = [{
@@ -719,6 +769,8 @@ shader_parameter/building_height = 1.0517501
 shader_parameter/pattern_seed = 3.2
 shader_parameter/wear_strength = null
 shader_parameter/role_strength = Vector4(0.95, 0.12, 0.3, 0.28)
+shader_parameter/wear_part_min = Vector3(-1.267, 0.044499997, 0.26092497)
+shader_parameter/wear_part_max = Vector3(-1.1719999, 0.1395, 0.88217497)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_ybk4c"]
 _surfaces = [{
@@ -813,6 +865,227 @@ _surfaces = [{
 "vertex_data": PackedByteArray("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/38AgP//////fwCA//////9/AID//////38AgP//////fwCA////v6qqqar///+/qqqpqv///7+qqqmq////v6qqqar///+/qqqpqv///7+qqqmq////f/9//7////9//3//v////3//f/+/////f/9//7////9//3//v////3//f/+//7//f1RVqar/v/9/VFWpqv+//39UVamq/7//f1RVqar/v/9/VFWpqv+//39UVamq/3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA/z//f6qqqar/P/9/qqqpqv8//3+qqqmq/z//f6qqqar/P/9/qqqpqv8//3+qqqmqAAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/v1RVqaoAAP+/VFWpqgAA/79UVamqAAD/v1RVqaoAAP+/VFWpqgAA/79UVamq/7///6oqVJX/v///qipUlf+///+qKlSV/7///6oqVJX/v///qipUlf+///+qKlSV/7//35kZmNn/v//fmRmY2f+//9+ZGZjZ/7//35kZmNn/v//fmRmY2f+//9+ZGZjZ/7//v1RVVNX/v/+/VFVU1f+//79UVVTV/7//v1RVVNX/v/+/VFVU1f+//79UVVTV/5//v+M4G8f/n/+/4zgbx/+f/7/jOBvH/5//v+M4G8f/n/+/4zgbx/+f/7/jOBvH/3//v1RVqqr/f/+/VFWqqv9//79UVaqq/3//v1RVqqr/f/+/VFWqqv9//79UVaqq/1//v1RVqqr/X/+/VFWqqv9f/79UVaqq/1//v1RVqqr/X/+/VFWqqv9f/79UVaqq/z//v1RVqqr/P/+/VFWqqv8//79UVaqq/z//v1RVqqr/P/+/VFWqqv8//79UVaqq/z//36oqjaP/P//fqiqNo/8//9+qKo2j/z//36oqjaP/P//fqiqNo/8//9+qKo2j/38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//38AAAAA/7//fwAAAAD/v/9/AAAAAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3/+/wAA/7//f/7/AAD/v/9//v8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3///wAA/7//f///AAD/v/9///8AAP+//3/+/wAA/7//f/7/AAD/v/9//v8AAP+//3///wAA/7//f///AAD/v/9///8AAP+/")
 }]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3dyv3_bounds_09"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.5254902, 0.58431375, 0.54509807, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(0.31395, 1.1855575, -0.61662495)
+shader_parameter/wear_part_max = Vector3(0.74865, 1.2025576, -0.581625)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3dyv3_bounds_10"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.5254902, 0.58431375, 0.54509807, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(0.31395, 1.1855575, -0.5366249)
+shader_parameter/wear_part_max = Vector3(0.74865, 1.2025576, -0.50162494)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3dyv3_bounds_11"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.5254902, 0.58431375, 0.54509807, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(0.31395, 1.1855575, -0.45662495)
+shader_parameter/wear_part_max = Vector3(0.74865, 1.2025576, -0.42162493)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nsfi1_bounds_18"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.33333334, 0.4392157, 0.4509804, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(0.32187498, 0.005000025, 1.1974999)
+shader_parameter/wear_part_max = Vector3(0.431875, 0.9307076, 1.3974999)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nsfi1_bounds_19"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.33333334, 0.4392157, 0.4509804, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-0.456875, 0.77820754, 1.1874999)
+shader_parameter/wear_part_max = Vector3(0.456875, 0.9232075, 1.4074999)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6d04g_bounds_25"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.76862746, 0.7607843, 0.654902, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(0.526675, 0.6983787, 1.2004999)
+shader_parameter/wear_part_max = Vector3(1.091375, 0.77837884, 1.3905)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8rqgd_bounds_26"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.3764706, 0.47058824, 0.45882353, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(0.541675, 0.32294127, 1.1924999)
+shader_parameter/wear_part_max = Vector3(1.076375, 0.3979413, 1.3625)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24dj0_bounds_30"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.56078434, 0.6117647, 0.5568628, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-1.2924999, 0.11569251, -0.410325)
+shader_parameter/wear_part_max = Vector3(-1.1725, 0.7888126, -0.31032497)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24dj0_bounds_32"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.56078434, 0.6117647, 0.5568628, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(-1.2924999, 0.11569251, 0.38487497)
+shader_parameter/wear_part_max = Vector3(-1.1725, 0.7888126, 0.484875)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_oowpe_bounds_35"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.7882353, 0.7647059, 0.6627451, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(1.165, 0.26293755, -1.130675)
+shader_parameter/wear_part_max = Vector3(1.24, 0.76777756, -0.45972502)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24dj0_bounds_36"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.56078434, 0.6117647, 0.5568628, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(1.1725, 0.11569251, -1.2055249)
+shader_parameter/wear_part_max = Vector3(1.2924999, 0.7888126, -1.105525)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_agkrw_bounds_37"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.7254902, 0.73333335, 0.63529414, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(1.165, 0.26293755, -0.335475)
+shader_parameter/wear_part_max = Vector3(1.24, 0.76777756, 0.335475)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24dj0_bounds_38"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.56078434, 0.6117647, 0.5568628, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(1.1725, 0.11569251, -0.410325)
+shader_parameter/wear_part_max = Vector3(1.2924999, 0.7888126, -0.31032497)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2dh5u_bounds_39"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.8352941, 0.79607844, 0.6901961, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(1.165, 0.26293755, 0.459725)
+shader_parameter/wear_part_max = Vector3(1.24, 0.76777756, 1.130675)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_24dj0_bounds_40"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.56078434, 0.6117647, 0.5568628, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.46, 0.4, 0.32, 0.58)
+shader_parameter/wear_part_min = Vector3(1.1725, 0.11569251, 0.38487497)
+shader_parameter/wear_part_max = Vector3(1.2924999, 0.7888126, 0.484875)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_584x8_bounds_41"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.3254902, 0.44313726, 0.45882353, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.6, 0.4, 0.7, 0.28)
+shader_parameter/wear_part_min = Vector3(1.1775, 0.21560878, -0.74549997)
+shader_parameter/wear_part_max = Vector3(1.2674999, 0.41544127, -0.19879997)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7q6il_bounds_42"]
+render_priority = 0
+shader = ExtResource("2_jd15q")
+shader_parameter/base_color = Color(0.4862745, 0.5058824, 0.4392157, 1)
+shader_parameter/dust_color = null
+shader_parameter/building_origin = Vector3(0, 0, 0)
+shader_parameter/building_height = 1.0517501
+shader_parameter/pattern_seed = 3.2
+shader_parameter/wear_strength = null
+shader_parameter/role_strength = Vector4(0.95, 0.12, 0.3, 0.28)
+shader_parameter/wear_part_min = Vector3(1.1719999, 0.044499997, 0.26092497)
+shader_parameter/wear_part_max = Vector3(1.267, 0.1395, 0.88217497)
+
 [node name="FrontierHabitatExterior" type="Node3D" unique_id=662501848]
 metadata/source_model = "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb"
 metadata/source_sha256 = "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
@@ -838,48 +1111,36 @@ metadata/access_anchor = {
 
 [node name="ExteriorShell" type="MeshInstance3D" parent="@Node3D@17" unique_id=2079246657]
 material_override = SubResource("ShaderMaterial_haas7")
-instance_shader_parameters/wear_part_max = Vector3(1.185, 0.93605757, 1.2199999)
-instance_shader_parameters/wear_part_min = Vector3(-1.185, 0.025, -1.2199999)
 mesh = SubResource("ArrayMesh_24twa")
 metadata/surface_role_label = "ExteriorShell"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="HabitatUpperCornice" type="MeshInstance3D" parent="@Node3D@17" unique_id=1444276105]
 material_override = SubResource("ShaderMaterial_02y45")
-instance_shader_parameters/wear_part_max = Vector3(1.24, 0.99605757, 1.275)
-instance_shader_parameters/wear_part_min = Vector3(-1.24, 0.8660575, -1.275)
 mesh = SubResource("ArrayMesh_1fcyn")
 metadata/surface_role_label = "HabitatUpperCornice"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="HabitatRoofWell" type="MeshInstance3D" parent="@Node3D@17" unique_id=1387585588]
 material_override = SubResource("ShaderMaterial_nmsvp")
-instance_shader_parameters/wear_part_max = Vector3(1.1274999, 0.98905754, 1.1624999)
-instance_shader_parameters/wear_part_min = Vector3(-1.1274999, 0.9540576, -1.1624999)
 mesh = SubResource("ArrayMesh_14mlk")
 metadata/surface_role_label = "HabitatRoofWell"
 metadata/material_route = "painterly_wear:roof"
 
 [node name="HabitatWestRoof" type="MeshInstance3D" parent="@Node3D@17" unique_id=1650260592]
 material_override = SubResource("ShaderMaterial_llgqr")
-instance_shader_parameters/wear_part_max = Vector3(-0.21735, 1.0860575, 0.931875)
-instance_shader_parameters/wear_part_min = Vector3(-1.0626, 0.9810576, -1.0561249)
 mesh = SubResource("ArrayMesh_xv84l")
 metadata/surface_role_label = "HabitatWestRoof"
 metadata/material_route = "painterly_wear:roof"
 
 [node name="HabitatRearRoof" type="MeshInstance3D" parent="@Node3D@17" unique_id=1399873294]
 material_override = SubResource("ShaderMaterial_kegdl")
-instance_shader_parameters/wear_part_max = Vector3(1.026375, 1.0710576, -0.07454997)
-instance_shader_parameters/wear_part_min = Vector3(-0.012075007, 0.9810576, -1.0437)
 mesh = SubResource("ArrayMesh_68jvr")
 metadata/surface_role_label = "HabitatRearRoof"
 metadata/material_route = "painterly_wear:roof"
 
 [node name="HabitatFrontRoof" type="MeshInstance3D" parent="@Node3D@17" unique_id=1511544949]
 material_override = SubResource("ShaderMaterial_bfc1w")
-instance_shader_parameters/wear_part_max = Vector3(1.026375, 1.0460576, 0.85732496)
-instance_shader_parameters/wear_part_min = Vector3(-0.012075007, 0.9810576, 0.062124997)
 mesh = SubResource("ArrayMesh_bubvn")
 metadata/surface_role_label = "HabitatFrontRoof"
 metadata/material_route = "painterly_wear:roof"
@@ -893,16 +1154,12 @@ metadata/material_route = "standard_or_emissive_preserved"
 
 [node name="ChannelEndManifold" type="MeshInstance3D" parent="@Node3D@17" unique_id=1689668117]
 material_override = SubResource("ShaderMaterial_c2v7q")
-instance_shader_parameters/wear_part_max = Vector3(0.054625005, 1.0785576, 0.8455)
-instance_shader_parameters/wear_part_min = Vector3(-0.175375, 1.0035576, 0.64549994)
 mesh = SubResource("ArrayMesh_ca40m")
 metadata/surface_role_label = "ChannelEndManifold"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="HabitatLifeSupportBase" type="MeshInstance3D" parent="@Node3D@17" unique_id=230609280]
 material_override = SubResource("ShaderMaterial_tvl86")
-instance_shader_parameters/wear_part_max = Vector3(0.881475, 1.1810576, -0.27956247)
-instance_shader_parameters/wear_part_min = Vector3(0.18112502, 1.0660576, -0.8386874)
 mesh = SubResource("ArrayMesh_877n3")
 metadata/surface_role_label = "HabitatLifeSupportBase"
 metadata/material_route = "painterly_wear:roof"
@@ -915,56 +1172,42 @@ metadata/material_route = "standard_or_emissive_preserved"
 
 [node name="LifeSupportLouver" type="MeshInstance3D" parent="@Node3D@17" unique_id=51416892]
 material_override = SubResource("ShaderMaterial_3dyv3")
-instance_shader_parameters/wear_part_max = Vector3(0.74865, 1.2025576, -0.66162497)
-instance_shader_parameters/wear_part_min = Vector3(0.31395, 1.1855575, -0.69662493)
 mesh = SubResource("ArrayMesh_hl8no")
 metadata/surface_role_label = "LifeSupportLouver"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@18" type="MeshInstance3D" parent="@Node3D@17" unique_id=1063472558]
-material_override = SubResource("ShaderMaterial_3dyv3")
-instance_shader_parameters/wear_part_max = Vector3(0.74865, 1.2025576, -0.581625)
-instance_shader_parameters/wear_part_min = Vector3(0.31395, 1.1855575, -0.61662495)
+material_override = SubResource("ShaderMaterial_3dyv3_bounds_09")
 mesh = SubResource("ArrayMesh_lt35j")
 metadata/surface_role_label = "LifeSupportLouver"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@19" type="MeshInstance3D" parent="@Node3D@17" unique_id=118043050]
-material_override = SubResource("ShaderMaterial_3dyv3")
-instance_shader_parameters/wear_part_max = Vector3(0.74865, 1.2025576, -0.50162494)
-instance_shader_parameters/wear_part_min = Vector3(0.31395, 1.1855575, -0.5366249)
+material_override = SubResource("ShaderMaterial_3dyv3_bounds_10")
 mesh = SubResource("ArrayMesh_andy4")
 metadata/surface_role_label = "LifeSupportLouver"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@20" type="MeshInstance3D" parent="@Node3D@17" unique_id=824475820]
-material_override = SubResource("ShaderMaterial_3dyv3")
-instance_shader_parameters/wear_part_max = Vector3(0.74865, 1.2025576, -0.42162493)
-instance_shader_parameters/wear_part_min = Vector3(0.31395, 1.1855575, -0.45662495)
+material_override = SubResource("ShaderMaterial_3dyv3_bounds_11")
 mesh = SubResource("ArrayMesh_2p5lu")
 metadata/surface_role_label = "LifeSupportLouver"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="HabitatRoofServicePlate" type="MeshInstance3D" parent="@Node3D@17" unique_id=2125181426]
 material_override = SubResource("ShaderMaterial_i5eue")
-instance_shader_parameters/wear_part_max = Vector3(-0.35017502, 1.1055576, 0.63185)
-instance_shader_parameters/wear_part_min = Vector3(-0.905625, 1.0805575, 0.41184998)
 mesh = SubResource("ArrayMesh_w6qru")
 metadata/surface_role_label = "HabitatRoofServicePlate"
 metadata/material_route = "painterly_wear:roof"
 
 [node name="DustSkirt" type="MeshInstance3D" parent="@Node3D@17" unique_id=1377193018]
 material_override = SubResource("ShaderMaterial_34uvm")
-instance_shader_parameters/wear_part_max = Vector3(1.225, 0.127, 1.26)
-instance_shader_parameters/wear_part_min = Vector3(-1.225, 0, -1.26)
 mesh = SubResource("ArrayMesh_giqrg")
 metadata/surface_role_label = "DustSkirt"
 metadata/material_route = "painterly_wear:base"
 
 [node name="InsetFoundationBand" type="MeshInstance3D" parent="@Node3D@17" unique_id=505697437]
 material_override = SubResource("ShaderMaterial_3otae")
-instance_shader_parameters/wear_part_max = Vector3(1.23, 0.17, 1.265)
-instance_shader_parameters/wear_part_min = Vector3(-1.23, 0.095, -1.265)
 mesh = SubResource("ArrayMesh_jgd74")
 metadata/surface_role_label = "InsetFoundationBand"
 metadata/material_route = "painterly_wear:base"
@@ -972,8 +1215,6 @@ metadata/material_route = "painterly_wear:base"
 [node name="DoorFrame" type="MeshInstance3D" parent="@Node3D@17" unique_id=1809035748]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43285376, 1.2874999)
 material_override = SubResource("ShaderMaterial_i7rxq")
-instance_shader_parameters/wear_part_max = Vector3(0.391875, 0.42785376, 0.07)
-instance_shader_parameters/wear_part_min = Vector3(-0.391875, -0.42785376, -0.07)
 mesh = SubResource("BoxMesh_wndfe")
 metadata/surface_role_label = "DoorFrame"
 metadata/material_route = "painterly_wear:structure"
@@ -981,40 +1222,30 @@ metadata/material_route = "painterly_wear:structure"
 [node name="ClosedDoor" type="MeshInstance3D" parent="@Node3D@17" unique_id=1859574785]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.43285376, 1.3675)
 material_override = SubResource("ShaderMaterial_sg3li")
-instance_shader_parameters/wear_part_max = Vector3(0.301875, 0.36285377, 0.0175)
-instance_shader_parameters/wear_part_min = Vector3(-0.301875, -0.36285377, -0.0175)
 mesh = SubResource("BoxMesh_5pvjt")
 metadata/surface_role_label = "ClosedDoor"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="PortalCastJamb" type="MeshInstance3D" parent="@Node3D@17" unique_id=2088433365]
 material_override = SubResource("ShaderMaterial_nsfi1")
-instance_shader_parameters/wear_part_max = Vector3(-0.32187498, 0.9307076, 1.3974999)
-instance_shader_parameters/wear_part_min = Vector3(-0.431875, 0.005000025, 1.1974999)
 mesh = SubResource("ArrayMesh_y6s5u")
 metadata/surface_role_label = "PortalCastJamb"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@21" type="MeshInstance3D" parent="@Node3D@17" unique_id=659924819]
-material_override = SubResource("ShaderMaterial_nsfi1")
-instance_shader_parameters/wear_part_max = Vector3(0.431875, 0.9307076, 1.3974999)
-instance_shader_parameters/wear_part_min = Vector3(0.32187498, 0.005000025, 1.1974999)
+material_override = SubResource("ShaderMaterial_nsfi1_bounds_18")
 mesh = SubResource("ArrayMesh_8nsqg")
 metadata/surface_role_label = "PortalCastJamb"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="PortalLintel" type="MeshInstance3D" parent="@Node3D@17" unique_id=1109293871]
-material_override = SubResource("ShaderMaterial_nsfi1")
-instance_shader_parameters/wear_part_max = Vector3(0.456875, 0.9232075, 1.4074999)
-instance_shader_parameters/wear_part_min = Vector3(-0.456875, 0.77820754, 1.1874999)
+material_override = SubResource("ShaderMaterial_nsfi1_bounds_19")
 mesh = SubResource("ArrayMesh_pdedt")
 metadata/surface_role_label = "PortalLintel"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="EntranceStep" type="MeshInstance3D" parent="@Node3D@17" unique_id=1753805419]
 material_override = SubResource("ShaderMaterial_24m1h")
-instance_shader_parameters/wear_part_max = Vector3(0.416875, 0.057000004, 1.4404999)
-instance_shader_parameters/wear_part_min = Vector3(-0.416875, 0.012, 1.1704999)
 mesh = SubResource("ArrayMesh_if77n")
 metadata/surface_role_label = "EntranceStep"
 metadata/material_route = "painterly_wear:base"
@@ -1054,8 +1285,6 @@ metadata/material_route = "standard_or_emissive_preserved"
 
 [node name="HabitatEntranceCanopy" type="MeshInstance3D" parent="@Node3D@17" unique_id=1650671672]
 material_override = SubResource("ShaderMaterial_ew1ex")
-instance_shader_parameters/wear_part_max = Vector3(0.47187498, 0.97070754, 1.4524999)
-instance_shader_parameters/wear_part_min = Vector3(-0.47187498, 0.89570755, 1.0625)
 mesh = SubResource("ArrayMesh_syn70")
 metadata/surface_role_label = "HabitatEntranceCanopy"
 metadata/material_route = "painterly_wear:paint"
@@ -1069,24 +1298,18 @@ metadata/material_route = "standard_or_emissive_preserved"
 [node name="FrontWindowFrame" type="MeshInstance3D" parent="@Node3D@17" unique_id=256911178]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.809025, 0.54691005, 1.2874999)
 material_override = SubResource("ShaderMaterial_6d2fd")
-instance_shader_parameters/wear_part_max = Vector3(0.25235, 0.16646875, 0.07)
-instance_shader_parameters/wear_part_min = Vector3(-0.25235, -0.16646875, -0.07)
 mesh = SubResource("BoxMesh_hykij")
 metadata/surface_role_label = "FrontWindowFrame"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="WindowDeepBrow" type="MeshInstance3D" parent="@Node3D@17" unique_id=1162833607]
 material_override = SubResource("ShaderMaterial_6d04g")
-instance_shader_parameters/wear_part_max = Vector3(-0.526675, 0.77837884, 1.3905)
-instance_shader_parameters/wear_part_min = Vector3(-1.091375, 0.6983787, 1.2004999)
 mesh = SubResource("ArrayMesh_6sxke")
 metadata/surface_role_label = "WindowDeepBrow"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="WindowDeepSill" type="MeshInstance3D" parent="@Node3D@17" unique_id=160869102]
 material_override = SubResource("ShaderMaterial_8rqgd")
-instance_shader_parameters/wear_part_max = Vector3(-0.541675, 0.3979413, 1.3625)
-instance_shader_parameters/wear_part_min = Vector3(-1.076375, 0.32294127, 1.1924999)
 mesh = SubResource("ArrayMesh_6iu2x")
 metadata/surface_role_label = "WindowDeepSill"
 metadata/material_route = "painterly_wear:structure"
@@ -1101,24 +1324,18 @@ metadata/material_route = "standard_or_emissive_preserved"
 [node name="FrontWindowFrameRight" type="MeshInstance3D" parent="@Node3D@17" unique_id=32886460]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.809025, 0.54691005, 1.2874999)
 material_override = SubResource("ShaderMaterial_6d2fd")
-instance_shader_parameters/wear_part_max = Vector3(0.25235, 0.16646875, 0.07)
-instance_shader_parameters/wear_part_min = Vector3(-0.25235, -0.16646875, -0.07)
 mesh = SubResource("BoxMesh_woqnc")
 metadata/surface_role_label = "FrontWindowFrameRight"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@24" type="MeshInstance3D" parent="@Node3D@17" unique_id=1369348343]
-material_override = SubResource("ShaderMaterial_6d04g")
-instance_shader_parameters/wear_part_max = Vector3(1.091375, 0.77837884, 1.3905)
-instance_shader_parameters/wear_part_min = Vector3(0.526675, 0.6983787, 1.2004999)
+material_override = SubResource("ShaderMaterial_6d04g_bounds_25")
 mesh = SubResource("ArrayMesh_hmp5a")
 metadata/surface_role_label = "WindowDeepBrow"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@25" type="MeshInstance3D" parent="@Node3D@17" unique_id=1621238607]
-material_override = SubResource("ShaderMaterial_8rqgd")
-instance_shader_parameters/wear_part_max = Vector3(1.076375, 0.3979413, 1.3625)
-instance_shader_parameters/wear_part_min = Vector3(0.541675, 0.32294127, 1.1924999)
+material_override = SubResource("ShaderMaterial_8rqgd_bounds_26")
 mesh = SubResource("ArrayMesh_m0yfm")
 metadata/surface_role_label = "WindowDeepSill"
 metadata/material_route = "painterly_wear:structure"
@@ -1147,56 +1364,42 @@ outline_size = 0
 
 [node name="InsetFacadeCassette" type="MeshInstance3D" parent="@Node3D@17" unique_id=497511361]
 material_override = SubResource("ShaderMaterial_oowpe")
-instance_shader_parameters/wear_part_max = Vector3(-1.165, 0.76777756, -0.45972502)
-instance_shader_parameters/wear_part_min = Vector3(-1.24, 0.26293755, -1.130675)
 mesh = SubResource("ArrayMesh_x5npe")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="StructuralFacadeRib" type="MeshInstance3D" parent="@Node3D@17" unique_id=1053783790]
 material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(-1.1725, 0.7888126, -1.105525)
-instance_shader_parameters/wear_part_min = Vector3(-1.2924999, 0.11569251, -1.2055249)
 mesh = SubResource("ArrayMesh_pv8ww")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@27" type="MeshInstance3D" parent="@Node3D@17" unique_id=272203868]
 material_override = SubResource("ShaderMaterial_agkrw")
-instance_shader_parameters/wear_part_max = Vector3(-1.165, 0.76777756, 0.335475)
-instance_shader_parameters/wear_part_min = Vector3(-1.24, 0.26293755, -0.335475)
 mesh = SubResource("ArrayMesh_kushq")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@28" type="MeshInstance3D" parent="@Node3D@17" unique_id=949893813]
-material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(-1.1725, 0.7888126, -0.31032497)
-instance_shader_parameters/wear_part_min = Vector3(-1.2924999, 0.11569251, -0.410325)
+material_override = SubResource("ShaderMaterial_24dj0_bounds_30")
 mesh = SubResource("ArrayMesh_ane86")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@29" type="MeshInstance3D" parent="@Node3D@17" unique_id=1081784733]
 material_override = SubResource("ShaderMaterial_2dh5u")
-instance_shader_parameters/wear_part_max = Vector3(-1.165, 0.76777756, 1.130675)
-instance_shader_parameters/wear_part_min = Vector3(-1.24, 0.26293755, 0.459725)
 mesh = SubResource("ArrayMesh_s3rv2")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@30" type="MeshInstance3D" parent="@Node3D@17" unique_id=383080427]
-material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(-1.1725, 0.7888126, 0.484875)
-instance_shader_parameters/wear_part_min = Vector3(-1.2924999, 0.11569251, 0.38487497)
+material_override = SubResource("ShaderMaterial_24dj0_bounds_32")
 mesh = SubResource("ArrayMesh_4oinu")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="ServiceAccessPlate" type="MeshInstance3D" parent="@Node3D@17" unique_id=807327662]
 material_override = SubResource("ShaderMaterial_584x8")
-instance_shader_parameters/wear_part_max = Vector3(-1.1775, 0.41544127, -0.19879997)
-instance_shader_parameters/wear_part_min = Vector3(-1.2674999, 0.21560878, -0.74549997)
 mesh = SubResource("ArrayMesh_1ck6w")
 metadata/surface_role_label = "ServiceAccessPlate"
 metadata/material_route = "painterly_wear:paint"
@@ -1210,64 +1413,48 @@ metadata/material_route = "standard_or_emissive_preserved"
 
 [node name="FoundationRepairPanel" type="MeshInstance3D" parent="@Node3D@17" unique_id=1746708268]
 material_override = SubResource("ShaderMaterial_7q6il")
-instance_shader_parameters/wear_part_max = Vector3(-1.1719999, 0.1395, 0.88217497)
-instance_shader_parameters/wear_part_min = Vector3(-1.267, 0.044499997, 0.26092497)
 mesh = SubResource("ArrayMesh_ybk4c")
 metadata/surface_role_label = "FoundationRepairPanel"
 metadata/material_route = "painterly_wear:base"
 
 [node name="@MeshInstance3D@31" type="MeshInstance3D" parent="@Node3D@17" unique_id=881051530]
-material_override = SubResource("ShaderMaterial_oowpe")
-instance_shader_parameters/wear_part_max = Vector3(1.24, 0.76777756, -0.45972502)
-instance_shader_parameters/wear_part_min = Vector3(1.165, 0.26293755, -1.130675)
+material_override = SubResource("ShaderMaterial_oowpe_bounds_35")
 mesh = SubResource("ArrayMesh_71rmi")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@32" type="MeshInstance3D" parent="@Node3D@17" unique_id=965652161]
-material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(1.2924999, 0.7888126, -1.105525)
-instance_shader_parameters/wear_part_min = Vector3(1.1725, 0.11569251, -1.2055249)
+material_override = SubResource("ShaderMaterial_24dj0_bounds_36")
 mesh = SubResource("ArrayMesh_wnlkm")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@33" type="MeshInstance3D" parent="@Node3D@17" unique_id=1587842297]
-material_override = SubResource("ShaderMaterial_agkrw")
-instance_shader_parameters/wear_part_max = Vector3(1.24, 0.76777756, 0.335475)
-instance_shader_parameters/wear_part_min = Vector3(1.165, 0.26293755, -0.335475)
+material_override = SubResource("ShaderMaterial_agkrw_bounds_37")
 mesh = SubResource("ArrayMesh_y7pgy")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@34" type="MeshInstance3D" parent="@Node3D@17" unique_id=206426814]
-material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(1.2924999, 0.7888126, -0.31032497)
-instance_shader_parameters/wear_part_min = Vector3(1.1725, 0.11569251, -0.410325)
+material_override = SubResource("ShaderMaterial_24dj0_bounds_38")
 mesh = SubResource("ArrayMesh_ks2ld")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@35" type="MeshInstance3D" parent="@Node3D@17" unique_id=745663643]
-material_override = SubResource("ShaderMaterial_2dh5u")
-instance_shader_parameters/wear_part_max = Vector3(1.24, 0.76777756, 1.130675)
-instance_shader_parameters/wear_part_min = Vector3(1.165, 0.26293755, 0.459725)
+material_override = SubResource("ShaderMaterial_2dh5u_bounds_39")
 mesh = SubResource("ArrayMesh_fx8ls")
 metadata/surface_role_label = "InsetFacadeCassette"
 metadata/material_route = "painterly_wear:paint"
 
 [node name="@MeshInstance3D@36" type="MeshInstance3D" parent="@Node3D@17" unique_id=977765130]
-material_override = SubResource("ShaderMaterial_24dj0")
-instance_shader_parameters/wear_part_max = Vector3(1.2924999, 0.7888126, 0.484875)
-instance_shader_parameters/wear_part_min = Vector3(1.1725, 0.11569251, 0.38487497)
+material_override = SubResource("ShaderMaterial_24dj0_bounds_40")
 mesh = SubResource("ArrayMesh_vra8w")
 metadata/surface_role_label = "StructuralFacadeRib"
 metadata/material_route = "painterly_wear:structure"
 
 [node name="@MeshInstance3D@37" type="MeshInstance3D" parent="@Node3D@17" unique_id=1077008335]
-material_override = SubResource("ShaderMaterial_584x8")
-instance_shader_parameters/wear_part_max = Vector3(1.2674999, 0.41544127, -0.19879997)
-instance_shader_parameters/wear_part_min = Vector3(1.1775, 0.21560878, -0.74549997)
+material_override = SubResource("ShaderMaterial_584x8_bounds_41")
 mesh = SubResource("ArrayMesh_1pdog")
 metadata/surface_role_label = "ServiceAccessPlate"
 metadata/material_route = "painterly_wear:paint"
@@ -1280,9 +1467,7 @@ metadata/surface_role_label = "ServiceAccessMarker"
 metadata/material_route = "standard_or_emissive_preserved"
 
 [node name="@MeshInstance3D@39" type="MeshInstance3D" parent="@Node3D@17" unique_id=182501878]
-material_override = SubResource("ShaderMaterial_7q6il")
-instance_shader_parameters/wear_part_max = Vector3(1.267, 0.1395, 0.88217497)
-instance_shader_parameters/wear_part_min = Vector3(1.1719999, 0.044499997, 0.26092497)
+material_override = SubResource("ShaderMaterial_7q6il_bounds_42")
 mesh = SubResource("ArrayMesh_11ix0")
 metadata/surface_role_label = "FoundationRepairPanel"
 metadata/material_route = "painterly_wear:base"

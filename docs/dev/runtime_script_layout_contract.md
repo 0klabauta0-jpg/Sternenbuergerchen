@@ -30,3 +30,19 @@ Eine spaetere Migration nach `scripts/simulation/` braucht einen eigenen Task un
 - Kein gleichzeitiges Verhalten-Refactoring.
 
 Bis dahin gilt: Ordnernamen sind Organisation, nicht Gameplay-Wahrheit. Die Wahrheit bleibt bei `SimulationRoot`, Runtime-Komponenten, Registries und den dokumentierten Contracts.
+
+## Interaktionsautorität · Reviewabschluss 13.11.2026
+
+`scripts/mission/mission_network_interaction_authority.gd` kapselt die
+hostseitige Bindungsauflösung, die exklusive Pending-Use-Belegung und deren
+Bedienzeit-/Abbruchlebenszyklus. Der CombatDriver besitzt genau eine Instanz;
+seine bisherigen Signal-/Preflight- und Snapshot-Einstiegspunkte delegieren.
+Die Komponente hält nur eine schwache Referenz auf den vorhandenen Driver.
+Unit-/Marker-/Gate-/Completion-Fakten liest sie dort beziehungsweise bei den
+bisherigen Registries; Ergebnisse gehen durch den bestehenden
+`update_mission_interaction_runtime_progress`-Commit. Keine zweite Unit- oder
+Missionswahrheit, keine zusätzliche Queue und kein SceneTree-Scan.
+
+Die vorhandenen echten ENet-/Stations-/Paralleltrupp-/Türprüfungen sichern die
+kompatible Schnittstelle. Ein Dateiumzug des gesamten Drivers gehört nicht zu
+dieser klar abgegrenzten Extraction.

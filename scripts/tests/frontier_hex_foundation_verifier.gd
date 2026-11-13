@@ -137,8 +137,11 @@ func _test_map_registry_paths() -> void:
 	_check(not hpa_path.is_empty() and not hpa_path.has(Vector2i(4, 1)) and _valid_hex_path(hpa_path), "Incremental HPA routes around changed blocked hex without square-only edges")
 	_check(Array(registry.call("get_grid_line", Vector2i(1, 1), Vector2i(6, 1))) == Array(_hex.call("line", Vector2i(1, 1), Vector2i(6, 1))), "Registry exposes topology-aware hex line")
 	var temp_path: String = "user://frontier_hex_roundtrip_%d.json" % Time.get_ticks_usec()
+	var marker_center: Vector2 = map_data.call("get_tile_at_grid",Vector2i(1,1)).world_position
+	map_data.call("set_marker","precise_hex_center","interaction_door",marker_center)
 	_check(int(map_data.call("save_to_file", temp_path)) == OK, "Hex map save succeeds")
 	var loaded = MAP_SCRIPT.call("load_from_file", temp_path)
+	_check(Vector2(loaded.call("get_marker_position","precise_hex_center")) == marker_center, "Existing Hex foundation roundtrip preserves exact noninteger marker center")
 	var preserved_positions: bool = String(loaded.call("get_grid_topology")) == HEX_TOPOLOGY
 	for tile in Array(loaded.call("get_tiles")):
 		preserved_positions = preserved_positions and Vector2(tile.world_position).is_equal_approx(Vector2(registry.call("grid_to_world", Vector2i(tile.grid_position))))
@@ -179,8 +182,20 @@ func _test_legacy() -> void:
 	var second: Array = Array(pathfinder.call("find_path", Vector2i(3, 3), Vector2i(5, 1), registry))
 	var score: Dictionary = pathfinder.call("score_path", first, registry)
 	_check(first == [Vector2i(3, 3), Vector2i(4, 4), Vector2i(5, 5)] and second == [Vector2i(3, 3), Vector2i(4, 2), Vector2i(5, 1)] and is_equal_approx(float(score.path_cost), 2.0 * sqrt(2.0)), "Both legacy baseline paths and diagonal cost remain unchanged")
-	var old_map = MAP_SCRIPT.call("load_from_file", "res://maps/station_outpost_64x64.json")
-	_check(String(old_map.call("get_grid_topology")) == "square8" and Array(old_map.call("get_tiles")).size() == 4096, "Unmodified old map without topology loads as square8")
+	# Station64 is now a productive authored Hex map. Keep this legacy-wire
+	# assertion against an actual topology-less file, not that migrated content.
+	var legacy_path := "user://frontier_legacy_no_topology_%d.json" % Time.get_ticks_usec()
+	var legacy_map = MAP_SCRIPT.call("create_empty", "legacy_wire_fixture", Vector2i(64,64), Vector2.ZERO)
+	legacy_map.call("save_to_file", legacy_path)
+	var legacy_wire: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(legacy_path))
+	legacy_wire.erase("grid_topology")
+	legacy_wire.erase("tactical_grid_rules")
+	var legacy_file := FileAccess.open(legacy_path, FileAccess.WRITE)
+	legacy_file.store_string(JSON.stringify(legacy_wire))
+	legacy_file.close()
+	var old_map = MAP_SCRIPT.call("load_from_file", legacy_path)
+	_check(String(old_map.call("get_grid_topology")) == "square8" and Array(old_map.call("get_tiles")).size() == 4096, "Actual legacy wire file without topology loads as square8")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(legacy_path))
 	_check(is_equal_approx(float(registry.call("get_movement_distance", Vector2.ZERO, Vector2(10, 20))), Vector2(10, 20).length()), "Legacy movement metric remains projected world distance")
 	registry.free()
 

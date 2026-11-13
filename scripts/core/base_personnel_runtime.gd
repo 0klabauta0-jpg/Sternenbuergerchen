@@ -77,12 +77,23 @@ func reconcile_restored_ship_overlap(checkpoint:Dictionary)->void:
 		if best.is_finite():actor.position=best
 
 func preview_home_craft_arrival(craft:Dictionary,pad_id:String)->Dictionary:
-	# Tactical base deployments retain their independent admission owner; this
-	# legacy graph guard is not a substitute for its hex-cell reservations.
-	if _requires_hex_ground():return {"ok":true,"legacy_graph_guard_applied":false}
 	var pad:=_find_layout("landing_pads",pad_id)
 	var body:Dictionary=HOME_CRAFT_FOOTPRINT.rect_for_craft(craft,pad)
 	if not body.get("ok",false):return {"ok":false,"reason":"home_craft_geometry_unavailable"}
+	if _requires_hex_ground():
+		if not _sim.is_hex_ground_runtime_active(): return {"ok":false,"reason":"hex_ground_unavailable"}
+		var snapshot: Dictionary = _sim.get_hex_ground_planning_snapshot()
+		var claimed: Dictionary = snapshot.occupant_by_grid.duplicate()
+		claimed.merge(snapshot.admission_slots_by_grid)
+		for segment: Dictionary in snapshot.committed_segments:
+			claimed[segment.from_grid] = true
+			claimed[segment.to_grid] = true
+		for grant: Dictionary in snapshot.committed_corridor_grants:
+			for cell in grant.get("cells", []): claimed[cell] = true
+		for cell: Vector2i in claimed:
+			var plane: Vector3 = load(NAV_PATH).plane_at_grid(cell)
+			if (body.rect as Rect2).has_point(Vector2(plane.x, plane.z)): return {"ok":false,"reason":"home_craft_pad_occupied"}
+		return {"ok":true}
 	for id in _states:
 		var state:Dictionary=_states[id]
 		if not _unit_is_home(String(id)) or String(state.get("status","")) in ["aboard","station"]:continue
@@ -98,6 +109,9 @@ func preview_home_craft_arrival(craft:Dictionary,pad_id:String)->Dictionary:
 ## Read the existing transport/pad owners. No UI or SceneTree discovery is used.
 func _refresh_home_craft_blockers() -> void:
 	if _navigation_graph == null or not _navigation_graph.has_method("set_craft_rectangles") or not is_instance_valid(_flow):return
+	# Rebuild only after an actual terrain revision; Hex movement itself never
+	# asks the legacy graph to search a second path.
+	_navigation_graph.configure_graph(_terrain)
 	var adapter := get_parent()
 	if not is_instance_valid(adapter):return
 	var reservations:Dictionary = Dictionary(adapter.get("_pad_by_craft"))
@@ -135,6 +149,12 @@ func _refresh_home_craft_blockers() -> void:
 	if added:
 		for id in _states:
 			if String(Dictionary(_states[id]).get("status",""))=="moving":_cancel(String(id),false)
+
+## Existing navigation geometry projected for the Root's shared Hex planner.
+## Pure read: geometry is refreshed only by the base owner's update/command paths.
+func get_ground_ship_blocked_cells() -> Dictionary:
+	if not _home_craft_geometry_valid or _navigation_graph == null or not _navigation_graph.has_method("get_ground_clearance_mask"): return {"ok":false,"reason":"base_clearance_unavailable"}
+	return _navigation_graph.get_ground_clearance_mask()
 
 func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionary = {}) -> void:
 	_flow = flow
@@ -432,6 +452,9 @@ func _sync_hex_ground_presence()->Dictionary:
 	_hex_admission_waiting=false
 	if not _requires_hex_ground():return {"ok":true,"legacy":true}
 	if not _sim.is_hex_ground_runtime_active():return {"ok":false,"reason":"hex_ground_unavailable"}
+	_refresh_home_craft_blockers()
+	var clearance: Dictionary = get_ground_ship_blocked_cells()
+	if not clearance.get("ok", false): return clearance
 	var candidates:Array[Dictionary]=[]
 	for id in _states:
 		var state:Dictionary=_states[id]
@@ -442,7 +465,11 @@ func _sync_hex_ground_presence()->Dictionary:
 		candidates.append({"unit_id":String(id),"grid":_terrain.world_to_grid(actor.global_position)})
 	if candidates.is_empty():return {"ok":true}
 	_hex_admission_waiting=true
-	var plan:Dictionary=HEX_ADMISSION.new().plan_anchored_group(candidates,_terrain,_sim.get_hex_ground_planning_snapshot())
+	var snapshot: Dictionary = _sim.get_hex_ground_planning_snapshot()
+	var blocked := {}
+	for cell in clearance.blocked_cells: blocked[cell] = true
+	snapshot["external_admission_blocked_grids"] = blocked
+	var plan:Dictionary=HEX_ADMISSION.new().plan_anchored_group(candidates,_terrain,snapshot)
 	if not plan.ok:return plan
 	var placements:Array[Dictionary]=[]
 	placements.assign(plan.placements)
@@ -718,6 +745,18 @@ func get_simulation_root() -> Node:
 	return _sim
 func get_actor(id: String) -> Node2D:
 	return _registry.get_unit(id) if _registry != null else null
+func get_visual_personnel_states() -> Array[Dictionary]:
+	# The view reads actor positions live. Do not clone action/result histories,
+	# layout or bed ownership for the per-frame pose/visibility projection.
+	var units: Array[Dictionary] = []
+	for id in _states:
+		var state: Dictionary = _states[id]
+		units.append({"unit_id": String(id), "name": String(state.get("name", id)),
+			"status": String(state.get("status", "outside")) if _unit_is_home(String(id)) else "away",
+			"bed_id": String(state.get("bed_id", ""))})
+	return units
+
+
 func get_snapshot() -> Dictionary:
 	var units: Array = []
 	for id in _states:
@@ -858,6 +897,12 @@ func _walk(id: String, target: Vector2, action: Dictionary) -> Dictionary:
 
 
 func _walk_hex(id:String,target:Vector2,action:Dictionary)->Dictionary:
+	_refresh_home_craft_blockers()
+	if not _home_craft_geometry_valid: return _reject("home_craft_geometry_unavailable", "Schiffsfläche ist noch nicht verfügbar")
+	# Existing boarding targets may lie inside a ship's conservative footprint.
+	# Resolve them through the same clearance graph used by legacy boarding.
+	if String(action.get("type","")) in ["pilot_board","crew_board","polisa_shuttle_return_board"] and not _navigation_graph.is_available_world(target):
+		target = _navigation_graph.nearest_available_world(target)
 	var token:String="base:%d"%(_sequence+1)
 	var checked:Dictionary=_sim.call("_validate_base_ground_move",self,id,target,token)
 	if not checked.ok:return checked
@@ -919,7 +964,7 @@ func _pad_world(craft_id: String = "") -> Vector2:
 	for pad in pads:
 		if String(pad.id) == pad_id:
 			var target:=_world(pad.get("interaction_grid", pad.grid))
-			return _navigation_graph.call("nearest_available_world",target) if _navigation_graph!=null and not _requires_hex_ground() and not _navigation_graph.call("is_available_world",target) else target
+			return _navigation_graph.call("nearest_available_world",target) if _navigation_graph!=null and not _navigation_graph.call("is_available_world",target) else target
 	return _world(pads[0].get("interaction_grid", pads[0].grid)) if not pads.is_empty() else _world(_layout.avatar_spawn_grid)
 func _board_team(craft: String, payload: Dictionary) -> Dictionary:
 	if not _at_home() or craft.is_empty() or bool(_screen.call("_operations_craft_busy", craft)):
@@ -1071,7 +1116,7 @@ func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 
 
 func _on_tick(_tick: int) -> void:
-	if not _requires_hex_ground():_refresh_home_craft_blockers()
+	_refresh_home_craft_blockers()
 	_rest_elapsed+=maxf(float(_sim.call("get_last_tick_delta")),0.0)
 	for id in _states:
 		if not _unit_is_home(String(id)): continue
@@ -1393,7 +1438,8 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
 		var action:Dictionary={}
 		if value.status=="aboard":
-			if not _checkpoint_home_craft(value.craft_id) or not _checkpoint_craft_member(id,value.craft_id) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
+			var home_member := _checkpoint_home_craft(value.craft_id) and _checkpoint_craft_member(id,value.craft_id)
+			if (not home_member and not _checkpoint_away_craft_member(id,value.craft_id,state)) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
 		else:
 			if not value.craft_id.is_empty() or not target.has_unit(id):return _checkpoint_reject("base_checkpoint_ground_presence")
 		if value.status=="moving":
@@ -1447,6 +1493,28 @@ func _checkpoint_craft_member(id:String,craft_id:String)->bool:
 	for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft_id):
 		if PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",String(team))).has(id):return true
 	return false
+
+
+func _checkpoint_away_craft_member(id:String,craft_id:String,state:Dictionary)->bool:
+	if not _checkpoint_id(craft_id) or not _flow.has_method("get_mission_for_craft") or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,"")) != "mission" or not Dictionary(_flow.call("_find_pending_mission_craft_transfer",craft_id)).is_empty(): return false
+	# Normal capture: the existing fleet owner and actual registered location
+	# agree, and the mission's transport owner still owns this exact crew member.
+	var travel: RefCounted = _sim.get("_singleplayer_space_travel_owner")
+	var mission: Node = _flow.call("get_mission_for_craft",craft_id)
+	if travel != null and is_instance_valid(mission):
+		var pose: Dictionary = travel.get_craft_snapshot(craft_id)
+		var controller: Node = mission.get_node_or_null("TacticalController")
+		return pose.get("phase") == "surface" and pose.get("location_id") == mission.get_meta("location_id","") and controller != null and controller.has_method("_campaign_craft_crew_ids") and PackedStringArray(controller.call("_campaign_craft_crew_ids",craft_id)).has(id)
+	# Hidden startup reconstruction: no live location exists yet. Accept only
+	# the exact file-backed Active-Continue component selected by the campaign
+	# restore owner, while this new Root is frozen. Full world/scene validation
+	# still precedes publication; this is never a live command permission.
+	var start: Variant = _flow.get("_campaign_start")
+	if start == null or start.get_script().resource_path != "res://scripts/meta/campaign_start_configuration.gd" or not bool(start.get("active_restore_in_progress")) or _sim.is_physics_processing() or _flow.get("_active_mission") != null: return false
+	var pending: Dictionary = start.get("active_pending")
+	if pending.get("identity",{}).get("craft_id") != craft_id or not Array(pending.get("active_ids",[])).has(id) or not preload("res://scripts/mission/checkpoint_value_codec.gd").equal_json_values(pending.get("home_hex_tactical",{}).get("base_personnel"),state): return false
+	var proof: Dictionary = load("res://scripts/mission/campaign_active_bootstrap_validation.gd").validate({"schema":"campaign_active_checkpoint.v1","components":pending})
+	return proof.get("ok",false)
 
 func _checkpoint_transport_context(state:Dictionary)->Dictionary:
 	var result:Dictionary={}

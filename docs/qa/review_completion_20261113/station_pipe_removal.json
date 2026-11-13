@@ -1,0 +1,2107 @@
+{
+  "revision": "station_pipes_removed_v1",
+  "maps": [
+    {
+      "map": "res://maps/station_outpost_64x64.json",
+      "before_sha256": "09db4af2ef675de00e6e6b05866ed08e73dc0441fd7d13dd69bf2126de39ab8b",
+      "after_sha256": "da51676d705570e83df094c940d0b8d8b540b1f1224e809c71d05a582709140d",
+      "removed_cells": [
+        {
+          "grid": [
+            35,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            35,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            36,
+            37
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            36,
+            38
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            36,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            37,
+            35
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            37,
+            36
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            37,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            38,
+            33
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            38,
+            34
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            38,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            41,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            42,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            43,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            44,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            45,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            46,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            47,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            48,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            49,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            50,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            51,
+            41
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            42
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            43
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            44
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            45
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            46
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            52,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            53,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            54,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        }
+      ],
+      "warehouse_and_terrain_preserved": true
+    },
+    {
+      "map": "res://maps/station_outpost_192x192.json",
+      "before_sha256": "fd05987f167b871fb5a0de8457dc4e4e65d0086fa8e80247363fa3471d7f8aba",
+      "after_sha256": "117d86447734bbe54b53f46f46f6a57dc89ee5ca61b887f5f96cc7c548d5a5b7",
+      "removed_cells": [
+        {
+          "grid": [
+            9,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            10,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            11,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            17
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            12,
+            18
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            19
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            20
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            21
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            22
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            12,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            13,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            14,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            15,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            16,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            17,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            18,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            19,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            20,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            21,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            22,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            23,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            23
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            24,
+            24
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            25
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            26
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            27
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            28
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            29
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            24,
+            30
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            33,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            34,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            35,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            36,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            37,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            38,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            161
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            39,
+            162
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            163
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            164
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            165
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            166
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            167
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            39,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            40,
+            73
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            40,
+            74
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            75
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            40,
+            77
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            78
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            79
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            80
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            81
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            82
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            83
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            84
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            85
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            86
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            87
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            40,
+            88
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            40,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            41,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            41,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            42,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            42,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            43,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            43,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            44,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            44,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            45,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            45,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            46,
+            76
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            46,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            47,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            48,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            49,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            50,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            51,
+            169
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            170
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            171
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            172
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            173
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            51,
+            174
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            52,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            53,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            54,
+            168
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            81,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            82,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            83,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            84,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            85,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            86,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            87,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            41
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            42
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            43
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            44
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            45
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            46
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            47
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            48
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            49
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            50
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            51
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            87,
+            52
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            53
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            87,
+            54
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            88,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            89,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            90,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            91,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            92,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            93,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            94,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            97,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            98,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            99,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            99,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            99,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            100,
+            101
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            100,
+            102
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            100,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            100,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            101,
+            99
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            101,
+            100
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            101,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            101,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            102,
+            97
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            102,
+            98
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            102,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            102,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            103,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            103,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            137
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            104,
+            138
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            139
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            104,
+            141
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            142
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            143
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            144
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            145
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            146
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            147
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            148
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            149
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            150
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            104,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            105,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            105,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            106,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            106,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            107,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            107,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            108,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            108,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            109,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            109,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            110,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            110,
+            140
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            111,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            112,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            113,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            114,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            115,
+            105
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            106
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            107
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            108
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            109
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            115,
+            110
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            116,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            117,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            118,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            137,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            138,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            139,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            145
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            140,
+            146
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            147
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            148
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            149
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            150
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            140,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            141,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            142,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            143,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            144,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            145,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            145,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            146,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            146,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            147,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            147,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            148,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            148,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            149,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            149,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            150,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            150,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            151,
+            104
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            105
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            106
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            107
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            108
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            109
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            110
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            111
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            112
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            113
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            114
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            115
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            151,
+            116
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            117
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            151,
+            118
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            151,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            151
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            152,
+            152
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            153
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            154
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            155
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            156
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            157
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            152,
+            158
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            153,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            154,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            155,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            156,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            157,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            158,
+            103
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            167,
+            33
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        },
+        {
+          "grid": [
+            167,
+            34
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            35
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            36
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            37
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            38
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            39
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            167,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            168,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            169,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            170,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            171,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            172,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            173,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            174,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            175,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            176,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            177,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            178,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_split"
+        },
+        {
+          "grid": [
+            179,
+            41
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            42
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            43
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            44
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            45
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            179,
+            46
+          ],
+          "object_type_id": "spacekit_pipe_end"
+        },
+        {
+          "grid": [
+            180,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            181,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_straight"
+        },
+        {
+          "grid": [
+            182,
+            40
+          ],
+          "object_type_id": "spacekit_pipe_corner"
+        }
+      ],
+      "warehouse_and_terrain_preserved": true
+    }
+  ]
+}

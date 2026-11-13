@@ -13970,18 +13970,11 @@ func _refresh_campaign_pilot_selector(card_panel: Control, card: Dictionary) -> 
 
 
 func _campaign_unit_near_boarding_ship(craft_id:String,unit_position:Vector2,ship_position:Vector2)->bool:
-	if unit_position.distance_to(ship_position)<=CAMPAIGN_BOARDING_RADIUS:return true
-	if String(get_parent().get_meta("location_id",""))!="polisa" or not _requires_hex_deployment_owner():return false
-	var craft:Dictionary=_find_mission_dropship_card_entry(craft_id)
-	var bound:Dictionary=HEX_SHIP_PROFILE_SCRIPT.read_bound(craft,Dictionary(_field_landing_by_craft.get(craft_id,{})).get("ground_body_profile"))
-	if not bound.ok:return false
-	var body:Dictionary=POLISA_CRAFT.projected_body(ship_position,bound.profile)
-	if not body.get("ok",false):return false
-	var rect:Rect2=body.footprint
-	var point:Vector2=POLISA_CRAFT.iso_to_plane(unit_position)
-	var closest:=Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))
-	# Hex admission places a whole group on distinct cells outside the hull.
-	return point.distance_to(closest)<=3.0
+	if _requires_hex_deployment_owner():
+		var access:Dictionary=get_campaign_ground_ship_access(craft_id)
+		return access.get("ok",false) and unit_position.distance_to(Vector2(access.position))<=CAMPAIGN_BOARDING_RADIUS
+	return unit_position.distance_to(ship_position)<=CAMPAIGN_BOARDING_RADIUS
+
 
 func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "", boarding_pilot_id: String = "") -> Dictionary:
 	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
@@ -15839,7 +15832,8 @@ func _refresh_world_overlays() -> void:
 			"lz_position": _lz_position,
 			"position": primary_dropship_position,
 			"target_position": primary_dropship_target,
-			"dropship_visuals": dropship_visuals,
+			# Texture-bearing visual entries belong only to the local view below.
+			# The wire contract reconstructs ships from the existing drop cards.
 			"progress": _build_mission_dropship_progress_value(),
 			"air_asset_status": get_air_asset_status_snapshot(),
 			"mission_drop_cards": _build_mission_drop_cards_snapshot(),
@@ -29976,7 +29970,13 @@ func _build_mission_interaction_runtime_use_state_snapshot_uncached() -> Diction
 		var identity := Dictionary(get_parent().get_meta("singleplayer_mission_identity", {}))
 		var craft_id := String(identity.get("craft_id", _mission_drop_craft_id))
 		if _is_parked_campaign_dropship(craft_id):
-			runtime_context["marker_positions"] = {"ship_return": _campaign_landed_craft_position(craft_id)}
+			var access:Dictionary=get_campaign_ground_ship_access(craft_id)
+			if access.get("ok",false):runtime_context["marker_positions"] = {"ship_return": access.position}
+			else:
+				binding_snapshot=binding_snapshot.duplicate(true)
+				for binding:Dictionary in Array(binding_snapshot.get("bindings",[])):
+					if String(binding.get("interaction_id",""))=="ship_return":
+						binding["blocked"]=true;binding["status"]="blocked";binding["blocked_reason"]=String(access.get("reason","ground_ship_access_unavailable"))
 	return Dictionary(MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT.call("build_snapshot", binding_snapshot, terrain_map_data, runtime_context)).duplicate(true)
 
 
@@ -31718,6 +31718,8 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2, append_mode: 
 
 func _create_waypoints_for_selected_fireteams(world_position: Vector2, replace_existing_next_order: bool = false, snap_to_tile_center: bool = true, refresh_visuals: bool = true) -> Array:
 	var waypoint_targets: Array = []
+	world_position = _campaign_ground_move_target(world_position)
+	if not world_position.is_finite():return waypoint_targets
 	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position) if snap_to_tile_center else world_position
 	if replace_existing_next_order:
 		_replace_next_orders_for_fireteams(_selected_fireteam_ids, _get_live_order_phase_index())
@@ -32623,14 +32625,18 @@ func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2,
 	var receipt: Dictionary = Dictionary(execution_state.get("interaction_arrival_receipt", {}))
 	if receipt.is_empty() or bool(execution_state.get("contact_halt_active", false)):
 		return false
-	if bool(receipt.get("stationary_use", false)) and not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty():
-		return false
+	if bool(receipt.get("stationary_use", false)):
+		if not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty():
+			return false
+		var stop_state := _hex_interaction_stop_state(fireteam_id,execution_state)
+		if bool(stop_state.get("active",false)) and (not bool(stop_state.get("ready",false)) or not bool(stop_state.get("in_radius",false))):
+			return false
 	if String(execution_state.get("interaction_id","")) == "ship_return" and not _campaign_return_crew_near(_campaign_return_context(),CAMPAIGN_BOARDING_RADIUS):
 		return false
 	if String(receipt.get("waypoint_id", "")) != String(execution_state.get("interaction_waypoint_id", "")) or not Vector2(receipt.get("target_position", Vector2.INF)).is_equal_approx(target):
 		return false
 	var radius: float = float(execution_state.get("interaction_hold_radius", 0.0))
-	var anchor: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+	var anchor: Variant = _calculate_current_fireteam_center_from_units(_hex_execution_units(fireteam_id,Dictionary(execution_state.get("hex_execution_scope",{}))),Vector2.INF)
 	if radius <= 0.0 or typeof(anchor) != TYPE_VECTOR2 or Vector2(anchor).distance_to(Vector2(execution_state.get("interaction_marker_position", target))) > radius:
 		return false
 	var member_positions: Dictionary = Dictionary(receipt.get("member_positions", {}))
@@ -32645,6 +32651,38 @@ func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2,
 	return checked_count > 0
 
 
+func _hex_interaction_stop_state(fireteam_id: String, execution_state: Dictionary) -> Dictionary:
+	var simulation = get_node_or_null("../SimulationRoot")
+	if simulation == null or not simulation.is_hex_ground_runtime_active():
+		return {"active":false}
+	var positions := Vector2.ZERO
+	var count := 0
+	var ready := true
+	var boarding_ready := true
+	var marker := Vector2(execution_state.get("interaction_marker_position",Vector2.INF))
+	var prefix := "mission-use:"+String(execution_state.get("interaction_waypoint_id",""))+":"
+	for member in _hex_execution_units(fireteam_id,Dictionary(execution_state.get("hex_execution_scope",{}))):
+		if not member is Node2D or (member.has_method("get_vital_state") and String(member.call("get_vital_state")) != "fit"):
+			continue
+		var id := String(member.call("get_unit_id"))
+		var ground:Dictionary=simulation.get_hex_unit_state(id)
+		var logical:Variant=simulation.get_hex_logical_unit_position(id)
+		if ground.is_empty() or not logical is Vector2:
+			return {"active":true,"ready":false,"in_radius":false}
+		positions += Vector2(logical)
+		count += 1
+		boarding_ready = boarding_ready and Vector2(logical).distance_to(marker) <= CAMPAIGN_BOARDING_RADIUS
+		var command = member.call("get_current_unit_command")
+		ready = ready and not bool(ground.movement_state.moving) and not bool(ground.route_state.has_commitments)
+		ready = ready and command != null and String(command.command_type)==UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION and String(command.command_token)==prefix+id
+	var radius := float(execution_state.get("interaction_hold_radius",0.0))
+	var in_radius := count>0 and radius>0.0 and marker.is_finite() and (positions/float(maxi(count,1))).distance_to(marker)<=radius
+	if String(execution_state.get("interaction_id",""))=="ship_return":
+		var current:Dictionary=_campaign_return_context()
+		in_radius = in_radius and boarding_ready and not current.is_empty() and Vector2(current.position).distance_squared_to(marker)<=0.01
+	return {"active":true,"ready":ready and count>0,"in_radius":in_radius}
+
+
 func _try_start_stationary_interaction(fireteam_id: String, waypoint, phase_index: int, execution_state: Dictionary) -> bool:
 	# A usable object already has an actual in-radius runtime team. Starting a
 	# fresh TAKE formation can send a buddy team behind an adjacent structure.
@@ -32656,12 +32694,44 @@ func _try_start_stationary_interaction(fireteam_id: String, waypoint, phase_inde
 		return false
 	var interaction_id := String(Dictionary(waypoint.metadata).get("interaction_id", ""))
 	var feedback := _resolve_mission_interaction_feedback_for_intent(get_mission_interaction_use_feedback_snapshot(), interaction_id)
-	if String(feedback.get("status", "")) != "usable" or not bool(feedback.get("can_prompt_use", false)):
+	var feedback_status := String(feedback.get("status",""))
+	var stop_state := _hex_interaction_stop_state(fireteam_id,execution_state)
+	var owns_progress := false
+	if bool(execution_state.get("interaction_progress_started",false)):
+		var driver = _get_mission_combat_loop_driver()
+		var progress:Dictionary=driver.get_mission_interaction_runtime_states().get(interaction_id,{}) if driver != null else {}
+		owns_progress = not bool(progress.get("complete",false)) and String(progress.get("fireteam_id",""))==fireteam_id and String(progress.get("team_id",""))==get_local_command_team_id()
+	# Feedback may include newer members outside this command's captured scope.
+	# An unlocked out-of-range Hex Use still has to pass its own canonical radius.
+	var continuing_stop := bool(stop_state.get("active",false)) and feedback_status=="out_of_range"
+	if not (feedback_status=="usable" or continuing_stop or (owns_progress and feedback_status in ["in_progress","out_of_range"])):
 		return false
 	if not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty():
 		return false
 	if String(Dictionary(waypoint.metadata).get("interaction_id","")) == "ship_return" and not _campaign_return_crew_near(_campaign_return_context(),CAMPAIGN_BOARDING_RADIUS):
 		return false
+	if bool(stop_state.get("active",false)):
+		if bool(execution_state.get("interaction_stop_pending",false)):
+			if not bool(stop_state.get("ready",false)):
+				return true
+			if not bool(stop_state.get("in_radius",false)):
+				# A committed stop may have crossed a handoff since its request.
+				# Resume the ordinary owner; never stretch the object's radius.
+				execution_state.erase("interaction_stop_pending")
+				return _issue_waypoint_for_fireteam(fireteam_id,waypoint,phase_index,_resolve_fireteam_behavior_profile(fireteam_id,String(waypoint.command_type),waypoint.target_position))
+		else:
+			# Rendering interpolation is not a stop receipt. An approaching actor
+			# must first own an in-radius field before requesting a Hex Hold.
+			if not bool(stop_state.get("in_radius",false)):
+				return false
+			if not _issue_fireteam_hold_current_positions(fireteam_id,phase_index,"mission-use:"+String(waypoint.waypoint_id),execution_state.get("hex_execution_scope")):
+				return false
+			_ensure_fireteam_movement_controller()
+			if _fireteam_movement_controller != null:
+				_fireteam_movement_controller.call("reset_fireteam",fireteam_id)
+			execution_state["interaction_stop_pending"]=true
+			execution_state["hold_elapsed"]=0.0
+			return true
 	var positions: Dictionary = {}
 	for member in _hex_execution_units(fireteam_id,Dictionary(execution_state.get("hex_execution_scope",{}))):
 		if member is Node2D and member.has_method("get_unit_id") and (not member.has_method("get_vital_state") or String(member.call("get_vital_state")) == "fit"):
@@ -32670,8 +32740,9 @@ func _try_start_stationary_interaction(fireteam_id: String, waypoint, phase_inde
 	candidate["interaction_arrival_receipt"] = {"waypoint_id":String(waypoint.waypoint_id),"target_position":candidate.resolved_target_position,"member_positions":positions,"stationary_use":true}
 	if not _is_interaction_arrival_receipt_valid(fireteam_id, Vector2(candidate.resolved_target_position), candidate):
 		return false
-	if not _issue_fireteam_hold_current_positions(fireteam_id, phase_index, "mission-use:"+String(waypoint.waypoint_id),execution_state.get("hex_execution_scope")):
+	if not bool(stop_state.get("active",false)) and not _issue_fireteam_hold_current_positions(fireteam_id, phase_index, "mission-use:"+String(waypoint.waypoint_id),execution_state.get("hex_execution_scope")):
 		return false
+	execution_state.erase("interaction_stop_pending")
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
@@ -32684,7 +32755,9 @@ func _campaign_return_context() -> Dictionary:
 	var identity: Dictionary = get_parent().get_meta("singleplayer_mission_identity",{})
 	var craft_id := String(identity.get("craft_id",_mission_drop_craft_id))
 	if not _is_parked_campaign_dropship(craft_id): return {}
-	var position := _campaign_landed_craft_position(craft_id)
+	var access:Dictionary=get_campaign_ground_ship_access(craft_id)
+	if not access.get("ok",false):return {}
+	var position:Vector2=access.position
 	if not is_finite(position.x) or not is_finite(position.y): return {}
 	var crew: Array = []
 	for unit in _get_campaign_sortie_units():
@@ -32722,6 +32795,14 @@ func _start_campaign_return_gather(waypoint, execution_state: Dictionary) -> boo
 	var simulation := get_node_or_null("../SimulationRoot")
 	var terrain: Node = _get_terrain_registry()
 	if simulation == null or terrain == null: return false
+	var approach_targets:Dictionary={}
+	if simulation.is_hex_ground_runtime_active():
+		var ids:=PackedStringArray()
+		for unit:Node2D in Array(context.crew):
+			if int(unit.call("get_health"))>0:ids.append(String(unit.call("get_unit_id")))
+		var plan:Dictionary=simulation.plan_hex_ground_actor_approach(ids,context.position,96.0)
+		if not plan.ok:return false
+		approach_targets=plan.targets
 	var commands: Array = []
 	for unit: Node2D in Array(context.crew):
 		if int(unit.call("get_health")) <= 0: continue
@@ -32733,10 +32814,15 @@ func _start_campaign_return_gather(waypoint, execution_state: Dictionary) -> boo
 		command.source_command_type = "move"
 		command.target_position = unit.global_position
 		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
-		if unit.global_position.distance_to(Vector2(context.position)) > 112.0:
+		var needs_move:bool=unit.global_position.distance_to(Vector2(context.position))>112.0
+		if approach_targets.has(command.unit_id):
+			var ground:Dictionary=simulation.get_hex_unit_state(command.unit_id)
+			needs_move=ground.grid!=terrain.world_to_grid(approach_targets[command.unit_id]) or ground.movement_state.moving or ground.route_state.has_commitments
+		if needs_move:
 			var direction := Vector2(context.position).direction_to(unit.global_position)
-			var found := false
-			for angle in [0.0,60.0,-60.0,120.0,-120.0,180.0]:
+			var found:bool=approach_targets.has(command.unit_id)
+			if found:command.target_position=approach_targets[command.unit_id]
+			for angle in ([] if found else [0.0,60.0,-60.0,120.0,-120.0,180.0]):
 				var desired := Vector2(context.position)+direction.rotated(deg_to_rad(angle))*56.0
 				var resolved: Dictionary = terrain.call("resolve_walkable_target",desired)
 				var target := Vector2(resolved.get("replacement_position",desired))
@@ -34371,6 +34457,7 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 	if plan == null or waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_COMPLETED if plan != null else FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
 		return false
+	if String(Dictionary(plan.waypoints[waypoint_index].metadata).get("interaction_id",""))=="ship_return" and get_parent().has_meta("campaign_ground_pilot_id") and _campaign_return_context().is_empty():return false
 	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,inherited_scope)
 	if not execution_scope.is_empty() and _hex_execution_units(fireteam_id,execution_scope).is_empty():return false
 	plan.active_waypoint_index = waypoint_index
@@ -34454,7 +34541,7 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 				_resolve_fireteam_leader_for_behavior(fireteam_id),
 				simulation_root,
 				_get_terrain_registry(),
-				{"center_partial_formation": get_parent().has_meta("campaign_ground_pilot_id"),"hex_execution_scope":execution_scope}
+				{"center_partial_formation": get_parent().has_meta("campaign_ground_pilot_id"),"hex_execution_scope":execution_scope,"hex_approach_radius":_campaign_ground_approach_radius(target_position)}
 			)
 		)
 		_record_command_commit_timing_scope(timing, "movement_start_and_arguments_usec", scope_started_usec, true)
@@ -35001,6 +35088,11 @@ func _update_active_phase_execution(delta: float) -> void:
 		var waypoint = plan.waypoints[waypoint_index]
 		if bool(execution_state.get("hex_coordination_resume",false)):
 			execution_state.erase("hex_coordination_resume")
+			# Cover replaced the old commands. Resume must establish fresh arrival
+			# and Hold receipts rather than wait for a superseded stop token.
+			execution_state.erase("interaction_stop_pending")
+			execution_state.erase("interaction_arrival_receipt")
+			execution_state["hold_elapsed"]=0.0
 			_phase_execution_by_fireteam[fireteam_id]=execution_state
 			_issue_waypoint_for_fireteam(String(fireteam_id),waypoint,phase_index,_resolve_fireteam_behavior_profile(String(fireteam_id),String(waypoint.command_type),waypoint.target_position))
 			continue
@@ -35061,7 +35153,13 @@ func _update_active_phase_execution(delta: float) -> void:
 			execution_state["hold_elapsed"] = 0.0
 			_phase_execution_by_fireteam[fireteam_id] = execution_state
 			if not had_movement_execution:
+				if bool(_hex_interaction_stop_state(String(fireteam_id),execution_state).get("active",false)):
+					execution_state.erase("interaction_stop_pending")
+					_issue_waypoint_for_fireteam(String(fireteam_id),waypoint,phase_index,_resolve_fireteam_behavior_profile(String(fireteam_id),String(waypoint.command_type),waypoint.target_position))
 				continue
+		if execution_state.has("interaction_waypoint_id") and String(Dictionary(waypoint.metadata).get("interaction_type",""))=="computer" and not execution_state.has("interaction_arrival_receipt") and bool(_hex_interaction_stop_state(String(fireteam_id),execution_state).get("active",false)):
+			_phase_execution_by_fireteam[fireteam_id]=execution_state
+			continue
 		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result, execution_state, had_movement_execution)
 		if had_movement_execution and not waypoint_target_reached:
 			continue
@@ -35080,6 +35178,8 @@ func _update_active_phase_execution(delta: float) -> void:
 		execution_state["hold_elapsed"] = float(execution_state.get("hold_elapsed", 0.0)) + delta
 		var required_hold: float = maxf(float(waypoint.hold_duration_seconds), 0.0)
 		var interaction_progress_complete: bool = required_hold <= 0.0 or float(execution_state.get("hold_elapsed", 0.0)) + 0.001 >= required_hold
+		if execution_state.has("interaction_waypoint_id"):
+			execution_state["interaction_progress_started"]=true
 		_publish_mission_interaction_runtime_progress_for_waypoint(String(fireteam_id), waypoint, execution_state, interaction_progress_complete)
 		if float(execution_state.get("hold_elapsed", 0.0)) + 0.001 < required_hold:
 			_phase_execution_by_fireteam[fireteam_id] = execution_state
@@ -37383,6 +37483,46 @@ func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
 			return select_mission_dropship_craft(craft_id)
 	return false
 
+# Derived geometry only. Same bounded exit projection as disembarkation;
+# no camera, occupancy, selected team, actor position or mutable gameplay value.
+var _campaign_ground_access_cache:Dictionary={}
+func get_campaign_ground_ship_access(craft_id:String)->Dictionary:
+	if not _is_parked_campaign_dropship(craft_id):return {"ok":false,"reason":"craft_not_landed"}
+	var position:Vector2=_campaign_landed_craft_position(craft_id)
+	if not _requires_hex_deployment_owner():return {"ok":position.is_finite(),"position":position}
+	if not _has_live_hex_deployment_owner():return {"ok":false,"reason":"hex_ground_unavailable"}
+	var simulation:Node=get_node_or_null("../SimulationRoot")
+	if simulation.is_air_support_craft_airborne(craft_id):return {"ok":false,"reason":"craft_not_landed"}
+	var registry:Node=simulation.get_hex_ground_terrain_registry()
+	var mask:Dictionary=get_ground_ship_blocked_cells()
+	if not mask.ok:return mask
+	var signature:String=str([craft_id,position,mask.source_signature])
+	if _campaign_ground_access_cache.get("signature","")==signature:return _campaign_ground_access_cache.result.duplicate(true)
+	var foreign:Dictionary=get_ground_ship_blocked_cells(craft_id)
+	if not foreign.ok:return foreign
+	var exit:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new()._exit_anchor(registry,registry.world_to_grid(position),mask.blocked_cells,foreign.blocked_cells)
+	if not exit.get("ok",false):return {"ok":false,"reason":"ground_ship_access_unavailable"}
+	var result:Dictionary={"ok":true,"position":registry.grid_to_world(exit.grid),"grid":exit.grid,"craft_id":craft_id,"source_signature":signature}
+	_campaign_ground_access_cache={"signature":signature,"result":result}
+	return result.duplicate(true)
+
+func _campaign_ground_move_target(position:Vector2)->Vector2:
+	if not _requires_hex_deployment_owner() or not get_parent().has_meta("campaign_ground_pilot_id"):return position
+	for card:Dictionary in _get_mission_dropship_card_entries():
+		var id:String=String(card.get("craft_id",""))
+		if not _is_parked_campaign_dropship(id):continue
+		if position.distance_squared_to(_campaign_landed_craft_position(id))>1.0:continue
+		var access:Dictionary=get_campaign_ground_ship_access(id)
+		return access.position if access.get("ok",false) else Vector2.INF
+	return position
+
+func _campaign_ground_approach_radius(position:Vector2)->float:
+	if not _has_live_hex_deployment_owner() or not get_parent().has_meta("campaign_ground_pilot_id"):return 0.0
+	for card:Dictionary in _get_mission_dropship_card_entries():
+		var access:Dictionary=get_campaign_ground_ship_access(String(card.get("craft_id","")))
+		if access.get("ok",false) and position.distance_squared_to(access.position)<=1.0:return 96.0
+	return 0.0
+
 func _campaign_landed_craft_position(craft_id: String) -> Vector2:
 	if _is_active_drop_sequence_for_craft(craft_id): return _drop_sequence_position
 	return _coerce_vector2_value(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("position", Vector2.INF), Vector2.INF)
@@ -37399,8 +37539,10 @@ func request_campaign_extraction(craft_id: String) -> Dictionary:
 			var team := String(unit.call("get_fireteam_id"))
 			if not teams.has(team): teams.append(team)
 	if not teams.is_empty():
+		var access:Dictionary=get_campaign_ground_ship_access(craft_id)
+		if not access.get("ok",false):return {"ok":false,"reason":access.get("reason","ground_ship_access_unavailable"),"message":"Zugang zum Schiff ist blockiert"}
 		_set_selected_fireteams(teams, false)
-		_create_waypoints_for_selected_fireteams(_campaign_landed_craft_position(craft_id), true)
+		if _create_waypoints_for_selected_fireteams(access.position, true).is_empty():return {"ok":false,"reason":"movement_blocked","message":"Rueckweg zum Schiff ist noch nicht bereit"}
 		if not execute_selected_fireteam_orders():
 			return {"ok": false, "reason": "movement_blocked", "message": "Rueckweg zum Schiff ist noch nicht bereit"}
 	_campaign_extraction_craft_id = craft_id
@@ -37442,6 +37584,7 @@ func get_selected_team_boarding_snapshot() -> Dictionary:
 	if _selected_fireteam_ids.size()!=1:return result
 	if not _can_issue_local_commands():result.message="Keine Befehlsberechtigung";return result
 	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfügbar";return result
+	if not get_campaign_ground_ship_access(craft).get("ok",false):result.message="Zugang zum Schiff ist blockiert";return result
 	var units:Array=_get_campaign_sortie_units().filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==team)
 	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result
 	if _selected_team_boarding_requests.has(team):result.message="Trupp geht zum Schiff / steigt ein";return result
@@ -37453,7 +37596,9 @@ func get_selected_team_boarding_snapshot() -> Dictionary:
 func request_selected_team_boarding() -> Dictionary:
 	var state:=get_selected_team_boarding_snapshot()
 	if not bool(state.can_board):return {"ok":false,"message":state.message}
-	_create_waypoints_for_selected_fireteams(_campaign_landed_craft_position(String(state.craft_id)),true)
+	var access:Dictionary=get_campaign_ground_ship_access(String(state.craft_id))
+	if not access.get("ok",false):return {"ok":false,"reason":access.get("reason","ground_ship_access_unavailable"),"message":"Zugang zum Schiff ist blockiert"}
+	if _create_waypoints_for_selected_fireteams(access.position,true).is_empty():return {"ok":false,"reason":"movement_blocked","message":"Rueckweg zum Schiff ist noch nicht bereit"}
 	if not execute_selected_fireteam_orders():return {"ok":false,"message":"Trupp zuerst absetzen oder laufende Landung beenden"}
 	_selected_team_boarding_requests[String(state.fireteam_id)]={"craft_id":String(state.craft_id),"elapsed":0.0,"poll":0.0}
 	_last_command_text="Aufsitzen: "+String(state.fireteam_id).to_upper()

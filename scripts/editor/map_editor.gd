@@ -2,6 +2,7 @@ extends Node2D
 
 const HEX_GRID_SCRIPT = preload("res://scripts/terrain/hex_grid.gd")
 const BUILDING_AUTHORING = preload("res://scripts/editor/building_layout_authoring.gd")
+const WALL_GATE_AUTHORING = preload("res://scripts/editor/wall_gate_authoring.gd")
 var _regional_authoring_status: Dictionary = {}
 var _regional_authoring_status_key: Array = []
 var _building_move_id := ""
@@ -149,6 +150,7 @@ const NETWORK_KIND_ROAD: String = "road"
 const NETWORK_KIND_RAIL: String = "rail"
 const NETWORK_KIND_PIPE: String = "pipe"
 const NETWORK_KIND_WALL: String = "wall"
+const NETWORK_KIND_WALL_GATE: String = "wall_gate"
 const NETWORK_KIND_CLIFF: String = "cliff"
 const NETWORK_DIR_N: int = 1
 const NETWORK_DIR_E: int = 2
@@ -906,8 +908,12 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 		normalized_grid_size,
 		DEFAULT_GRID_ORIGIN,
 		DEFAULT_HALF_TILE_WIDTH,
-		DEFAULT_HALF_TILE_HEIGHT
+		DEFAULT_HALF_TILE_HEIGHT,
+		3,
+		"hex_axial_v1"
 	)
+	_terrain_map_data.set_tactical_grid_rules("hex_tactical_v1")
+	_terrain_map_data.enable_explicit_hex_height_authoring()
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
@@ -1703,6 +1709,7 @@ func _ensure_runtime_builder_workbench_controls() -> void:
 	_ensure_runtime_builder_tool_button(tools, "road", "R", "Road: Strassenplatte als Brush waehlen.", true)
 	_ensure_runtime_builder_tool_button(tools, "pipe_line", "PI", "Pipe-Line: Ziehen setzt Pipelines fuer Energie, Oel, Rohstoffe oder Abwasser.", true)
 	_ensure_runtime_builder_tool_button(tools, "wall_line", "WL", "Wall-Line: Ziehen setzt modulare Waende als vorbereitete Segmentkette.", true)
+	_ensure_runtime_builder_tool_button(tools, "wall_gate", "M+T", "Mauer + Tor: Ziehen setzt eine Mauer mit mittigem Zweizellen-Tor. Die Vorschau zeigt das Tor; ein Undo nimmt alles zurück.", true)
 	_ensure_runtime_builder_tool_button(tools, "cliff_line", "CL", "Cliff-Line: Ziehen setzt vorbereitete Cliff-Segmente.", true)
 	_ensure_runtime_builder_tool_button(tools, "asset", "A", "Asset: Gebaeude-Asset als Brush waehlen; danach Palette fuer Varianten nutzen.", true)
 	_ensure_runtime_builder_tool_button(tools, "factory", "F", "Factory: Factory-Kit-Gebaeude als Brush waehlen.", true)
@@ -1801,6 +1808,8 @@ func activate_runtime_builder_tool(tool_id: String) -> bool:
 			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_PIPE)
 		"wall_line":
 			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_WALL)
+		"wall_gate":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_WALL_GATE)
 		"cliff_line":
 			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_CLIFF)
 		"asset":
@@ -1897,6 +1906,8 @@ func _runtime_builder_button_is_active(tool_id: String, active_tool: String) -> 
 			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_PIPE
 		"wall_line":
 			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_WALL
+		"wall_gate":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_WALL_GATE
 		"cliff_line":
 			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_CLIFF
 		"asset":
@@ -2113,6 +2124,8 @@ func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
 	var normalized_kind: String = kind.strip_edges().to_lower()
 	if path.is_empty() or not _network_tool_kind_is_valid(normalized_kind) or _terrain_map_data == null:
 		return false
+	if normalized_kind == NETWORK_KIND_WALL_GATE:
+		return _apply_wall_gate_path(path)
 	var candidate_lookup: Dictionary = _build_network_candidate_lookup(normalized_kind, path)
 	var candidate_grids: Array[Vector2i] = _sort_grid_lookup_keys(candidate_lookup)
 	if candidate_grids.is_empty():
@@ -2143,6 +2156,93 @@ func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
 	_last_network_apply_snapshot = _build_network_apply_snapshot(normalized_kind, path, changed_grids, candidate_grids)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 	return true
+
+
+func _apply_wall_gate_path(path: Array[Vector2i]) -> bool:
+	var gate: Dictionary = WALL_GATE_AUTHORING.plan(_terrain_map_data, path, _building_owns_grid, _terrain_registry.world_to_grid)
+	if not gate.get("ok",false):
+		_set_marker_feedback(String(gate.message))
+		return false
+	var candidate_lookup: Dictionary = _build_network_candidate_lookup(NETWORK_KIND_WALL, path)
+	var candidates: Array[Vector2i] = _sort_grid_lookup_keys(candidate_lookup)
+	var changes: Array = []
+	# Catalog application happens on detached tiles first. No partial wall can
+	# survive a rejected object, building, missing asset or existing binding.
+	for grid: Vector2i in candidates:
+		var source = _terrain_map_data.get_tile_at_grid(grid)
+		if source == null or _building_owns_grid(grid) or (not path.has(grid) and not WALL_GATE_AUTHORING.is_wall(source)):
+			_set_marker_feedback("Eine benachbarte Belegung verhindert den Maueranschluss.")
+			return false
+		var tile = TERRAIN_TILE_DATA_SCRIPT.from_dict(source.to_dict())
+		var piece: Dictionary = _resolve_network_piece_for_mask(NETWORK_KIND_WALL, _build_network_connection_mask(grid, NETWORK_KIND_WALL, candidate_lookup))
+		if grid == gate.frame or grid == gate.leaf:
+			if WALL_GATE_AUTHORING.is_wall(tile):
+				if not _tile_catalog.apply_type_to_tile(tile,"modular_floor"): return false
+			piece = {"type_id":WALL_GATE_AUTHORING.FRAME if grid == gate.frame else WALL_GATE_AUTHORING.LEAF,"rotation_degrees":gate.rotation_degrees}
+		if not _tile_catalog.apply_type_to_tile(tile,String(piece.type_id)): return false
+		tile.object_rotation_degrees = float(piece.rotation_degrees)
+		changes.append({"grid_position":grid,"tile_dict":tile.to_dict()})
+	var scenario = _ensure_mission_scenario()
+	var vertical: Dictionary = Dictionary(scenario.get("vertical_slice")).duplicate(true)
+	var points: Array = Array(vertical.get("interaction_points",[])).duplicate(true)
+	for point: Dictionary in points:
+		if String(point.get("marker_id","")) == gate.marker_id or String(point.get("interaction_id","")) == gate.marker_id:
+			_set_marker_feedback("Diese Torkennung wird bereits von einer Interaktion verwendet.")
+			return false
+	var binding := {"interaction_id":gate.marker_id,"display_name":"Tor","interaction_type":"door",
+		"marker_id":gate.marker_id,"required_order":"breach","duration_seconds":2.0,"radius_world":128.0,
+		"required_team":"team_alpha","required_state":String(gate.marker_id)+"_opened","door_cells":gate.door_cells.duplicate(true)}
+	begin_undo_transaction("wall_and_gate")
+	_active_undo_transaction["wall_gate_before"] = _capture_wall_gate_authoring(String(gate.marker_id))
+	for grid: Vector2i in candidates: _store_undo_state(_terrain_map_data.get_tile_at_grid(grid))
+	_restore_tile_from_undo_state({"tile_states":changes})
+	_terrain_map_data.set_marker(String(gate.marker_id),"interaction_door",_terrain_map_data.get_tile_at_grid(gate.leaf).world_position,{"name":"Tor"})
+	points.append(binding)
+	vertical["interaction_points"] = points
+	if not vertical.has("contract_version"): vertical["contract_version"] = 1
+	scenario.set("vertical_slice",vertical)
+	_mark_scenario_dirty(true)
+	_selected_marker_id = String(gate.marker_id)
+	for grid: Vector2i in candidates: _refresh_tile_visual(_terrain_map_data.get_tile_at_grid(grid),false)
+	_refresh_dirty_visual_neighborhoods(candidates)
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+	_refresh_mission_authoring_controls()
+	commit_undo_transaction()
+	_mark_dirty(true)
+	_set_selected_grid_position(path.back())
+	_last_network_apply_snapshot = _build_network_apply_snapshot(NETWORK_KIND_WALL_GATE,path,candidates,candidates)
+	_set_marker_feedback("Mauer und Tor erstellt. Karte und Szenario speichern.")
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
+	return true
+
+
+func _capture_wall_gate_authoring(marker_id: String) -> Dictionary:
+	var bindings: Array = []
+	if _mission_scenario != null:
+		for point: Dictionary in Array(Dictionary(_mission_scenario.get("vertical_slice")).get("interaction_points",[])):
+			if String(point.get("marker_id","")) == marker_id: bindings.append(point.duplicate(true))
+	return {"marker_id":marker_id,"marker":_terrain_map_data.get_marker_record(marker_id),"bindings":bindings}
+
+
+func _restore_wall_gate_authoring(state: Dictionary) -> void:
+	var marker_id := String(state.marker_id)
+	var marker: Dictionary = state.marker
+	_terrain_map_data.remove_marker(marker_id)
+	if not marker.is_empty(): _terrain_map_data.set_marker(marker_id,String(marker.marker_type_id),Vector2(marker.position),marker)
+	var scenario = _ensure_mission_scenario()
+	var vertical: Dictionary = Dictionary(scenario.get("vertical_slice")).duplicate(true)
+	var retained: Array = []
+	for point: Dictionary in Array(vertical.get("interaction_points",[])):
+		if String(point.get("marker_id","")) != marker_id: retained.append(point.duplicate(true))
+	retained.append_array(Array(state.bindings).duplicate(true))
+	vertical["interaction_points"] = retained
+	scenario.set("vertical_slice",vertical)
+	_mark_scenario_dirty(true)
+	if _selected_marker_id == marker_id and marker.is_empty(): _selected_marker_id = ""
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+	_refresh_mission_authoring_controls()
 
 
 func _apply_network_piece_to_tile(tile_data, piece: Dictionary) -> bool:
@@ -2281,7 +2381,7 @@ func _get_network_tool_definition(kind: String) -> Dictionary:
 				"split": "spacekit_pipe_split",
 				"cross": "spacekit_pipe_cross",
 			}
-		NETWORK_KIND_WALL:
+		NETWORK_KIND_WALL, NETWORK_KIND_WALL_GATE:
 			return {
 				"default_type_id": "modular_wall",
 				"straight": "modular_wall",
@@ -2302,6 +2402,7 @@ func _network_tool_kind_is_valid(kind: String) -> bool:
 		NETWORK_KIND_RAIL,
 		NETWORK_KIND_PIPE,
 		NETWORK_KIND_WALL,
+		NETWORK_KIND_WALL_GATE,
 		NETWORK_KIND_CLIFF,
 	].has(kind.strip_edges().to_lower())
 
@@ -2318,7 +2419,7 @@ func _tile_matches_network_kind(tile_data, kind: String) -> bool:
 			return object_type_id.begins_with("spacekit_rail") or type_id.begins_with("spacekit_rail")
 		NETWORK_KIND_PIPE:
 			return object_type_id.begins_with("spacekit_pipe") or type_id.begins_with("spacekit_pipe")
-		NETWORK_KIND_WALL:
+		NETWORK_KIND_WALL, NETWORK_KIND_WALL_GATE:
 			return type_id.begins_with("modular_wall") or type_id.begins_with("wall_") or type_id.begins_with("station_wall") or object_type_id.begins_with("modular_wall") or object_type_id.begins_with("station_wall")
 		NETWORK_KIND_CLIFF:
 			return type_id.begins_with("cliff_")
@@ -2412,7 +2513,7 @@ func _network_mask_to_direction_labels(mask: int) -> PackedStringArray:
 
 func _build_network_drag_tool_snapshot() -> Dictionary:
 	var definitions: Dictionary = {}
-	for kind in [NETWORK_KIND_ROAD, NETWORK_KIND_RAIL, NETWORK_KIND_PIPE, NETWORK_KIND_WALL, NETWORK_KIND_CLIFF]:
+	for kind in [NETWORK_KIND_ROAD, NETWORK_KIND_RAIL, NETWORK_KIND_PIPE, NETWORK_KIND_WALL, NETWORK_KIND_WALL_GATE, NETWORK_KIND_CLIFF]:
 		var definition: Dictionary = _get_network_tool_definition(kind)
 		var available: bool = true
 		for key in definition.keys():
@@ -2502,6 +2603,18 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 		segment_labels.append(_build_network_drag_preview_segment_label(index, from_grid, to_grid, from_world, to_world))
 	var candidate_lookup: Dictionary = _build_network_candidate_lookup(_network_tool_kind, path_grids)
 	var path_pieces: Array = _build_network_piece_snapshots(_network_tool_kind, path_grids, candidate_lookup)
+	if _network_tool_kind == NETWORK_KIND_WALL_GATE:
+		var gate: Dictionary = WALL_GATE_AUTHORING.plan(_terrain_map_data, path_grids, _building_owns_grid, _terrain_registry.world_to_grid)
+		if gate.get("ok",false):
+			for handle: Dictionary in handles:
+				if handle.grid == gate.frame or handle.grid == gate.leaf: handle.label = "Tor"
+			for piece: Dictionary in path_pieces:
+				if piece.grid == gate.frame or piece.grid == gate.leaf:
+					piece.type_id = WALL_GATE_AUTHORING.FRAME if piece.grid == gate.frame else WALL_GATE_AUTHORING.LEAF
+					piece.piece_key = "door"
+					piece.rotation_degrees = gate.rotation_degrees
+		else:
+			if not handles.is_empty(): handles.back().label = String(gate.message)
 	return {
 		"active": _network_drag_tool_enabled and path.size() > 0,
 		"dragging": _is_network_dragging,
@@ -2576,7 +2689,7 @@ func _get_network_drag_preview_color(kind: String) -> Color:
 	match kind.strip_edges().to_lower():
 		NETWORK_KIND_PIPE:
 			return Color(0.45, 0.9, 1.0, 0.9)
-		NETWORK_KIND_WALL:
+		NETWORK_KIND_WALL, NETWORK_KIND_WALL_GATE:
 			return Color(1.0, 0.84, 0.34, 0.92)
 		NETWORK_KIND_CLIFF:
 			return Color(1.0, 0.56, 0.32, 0.9)
@@ -2636,6 +2749,14 @@ func _build_network_apply_snapshot(kind: String, path: Array[Vector2i], changed_
 		candidate_lookup[Vector2i(grid_position)] = true
 	var candidate_pieces: Array = _build_network_piece_snapshots(kind, candidate_grids, candidate_lookup)
 	var changed_pieces: Array = _build_network_piece_snapshots(kind, changed_grids, candidate_lookup)
+	if kind == NETWORK_KIND_WALL_GATE:
+		for pieces: Array in [candidate_pieces, changed_pieces]:
+			for piece: Dictionary in pieces:
+				var tile = _terrain_map_data.get_tile_at_grid(piece.grid)
+				if tile != null and String(tile.object_type_id) in [WALL_GATE_AUTHORING.FRAME, WALL_GATE_AUTHORING.LEAF]:
+					piece.type_id = String(tile.object_type_id)
+					piece.piece_key = "door"
+					piece.rotation_degrees = float(tile.object_rotation_degrees)
 	return {
 		"kind": kind,
 		"path": path.duplicate(),
@@ -4739,6 +4860,7 @@ func create_live_test_scene_from_current_scenario():
 	var scene := packed_scene.instantiate()
 	var mission_setup := scene.get_node_or_null("MissionSetup")
 	if mission_setup != null:
+		mission_setup.set("force_hex_tactical_runtime", true)
 		mission_setup.set("scenario_file_path", save_path)
 	return scene
 
@@ -8066,6 +8188,8 @@ func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
 		tile_data.object_scale = restored_tile.object_scale
 		if undo_state.has("place_presentation_before"): _terrain_registry.register_tile(tile_data)
 		restored_grids.append(grid_position)
+	if undo_state.has("wall_gate_before"):
+		_restore_wall_gate_authoring(undo_state.wall_gate_before)
 	return restored_grids
 
 
@@ -10852,6 +10976,8 @@ func _apply_explicit_terrain_transaction(grids: Array[Vector2i], patch: Dictiona
 
 func _capture_inverse_terrain_transaction(transaction: Dictionary) -> Dictionary:
 	var result := {"action_name": transaction.get("action_name", "hex_terrain"), "tile_states": [], "selected_grids_before": _selected_grids.duplicate(), "selected_primary_before": _selected_grid_position}
+	if transaction.has("wall_gate_before"):
+		result["wall_gate_before"] = _capture_wall_gate_authoring(String(transaction.wall_gate_before.marker_id))
 	var states: Array = transaction.get("tile_states", [])
 	if states.is_empty() and transaction.has("tile_dict"): states = [{"grid_position": transaction.get("grid_position", Vector2i(-1,-1))}]
 	for state in states:

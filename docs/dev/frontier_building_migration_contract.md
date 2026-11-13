@@ -58,3 +58,14 @@ explizite historische Probe; sie ist kein aktueller Kampagnen-Render-Einstieg.
 Bereits vorhandene Hintergrund-PNGs werden durch einen Quellfix nicht neu
 exportiert. Bildvergleich und technische Importpruefung sind keine Nutzer-
 Stilabnahme oder allgemeine Releasefreigabe.
+
+## Wiederholte Gebäude und Renderergrenze
+Die Verschleißbounds eines Meshteils sind unveränderliche Materialdaten, keine
+Instanzuniforms. Der Livebuilder teilt identische Farb-/Rollen-/Boundsvarianten;
+die beiden abgeleiteten Exterior-TSCNs teilen diese Varianten über wiederholte
+Gebäude. Vorhandene Farb-, Höhen-, Seed- und Verschleißformeln bleiben identisch.
+Die Revision vom 13.11.2026 verschiebt nur die Parameterbindung, ohne Meshbytes,
+Node-Transforms, Originalmodelle, Terrainfakten oder Rendererlimits zu ändern.
+Die vollständige 192er-Karte enthält 783 betroffene Meshteile in 18 Gebäuden;
+alle bleiben sichtbar. Der native Nachweis muss die echte Karte laden und darf
+die Grenze nicht durch weniger Gebäude oder einen anderen Renderer umgehen.

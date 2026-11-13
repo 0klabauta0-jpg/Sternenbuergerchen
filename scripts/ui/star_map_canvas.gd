@@ -1,8 +1,10 @@
 extends Control
 ## Interactive projection of the strategic hex field and authoritative routes.
+const DISPLAY = preload("res://scripts/mission/campaign_display_catalog.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const WORLD = preload("res://scripts/ui/star_map_world_view.gd")
 const SYSTEM = preload("res://scripts/core/singleplayer_space_travel_state.gd")
+signal body_selected(body_id: String)
 signal orbit_requested(orbit_id: String, marker_id: String)
 signal location_selected(location_id: String)
 signal craft_selected(craft_id: String)
@@ -33,6 +35,8 @@ var _drag_position := Vector2.ZERO
 var _recenter: Button
 const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
+const MIN_ORBIT_RADIUS_PX := 10.0
+const MIN_LOCATION_DIAMETER_PX := 20.0
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(maxf(custom_minimum_size.x, 350), 250)
@@ -156,6 +160,8 @@ func _sync_body_labels() -> void:
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.add_theme_font_size_override("font_size",15)
 		label.add_theme_color_override("font_color",Color("b0c8d5"))
+		label.add_theme_color_override("font_outline_color", Color("060e18"))
+		label.add_theme_constant_override("outline_size", 4)
 		add_child(label)
 		_body_labels[id] = label
 
@@ -197,6 +203,19 @@ func pan_by(movement: Vector2) -> void:
 		_camera_pan += movement
 		_layout_buttons()
 
+func focus_body(body_id: String) -> void:
+	var body: Dictionary = _bodies.get(body_id, {})
+	if body.is_empty(): return
+	_initial_camera_framed = true
+	_camera_pan = (Vector2(0.5, 0.5) - GRID.pair(body.position)) * _screen_scale()
+	_layout_buttons()
+
+func body_at(point: Vector2) -> String:
+	for id: String in _bodies:
+		var body: Dictionary = _bodies[id]
+		if point.distance_to(map_to_screen(GRID.pair(body.position))) <= maxf(12.0, float(body.radius) * _pixels_per_unit()): return id
+	return ""
+
 func reset_camera() -> void:
 	_initial_camera_framed = true
 	_camera_zoom = 1.0
@@ -212,6 +231,11 @@ func _gui_input(event: InputEvent) -> void:
 			if event.ctrl_pressed: crafts_box_selected.emit([craft_id], true)
 			else: craft_selected.emit(craft_id)
 		else:
+			var body_id := body_at(event.position)
+			if not body_id.is_empty():
+				body_selected.emit(body_id)
+				accept_event()
+				return
 			var target := orbit_marker_at(event.position)
 			if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
 				orbit_requested.emit(target.orbit_id, target.marker_id)
@@ -247,7 +271,7 @@ func orbit_marker_at(point: Vector2) -> Dictionary:
 	var cell := screen_to_hex(point)
 	if _orbit_by_hex.has(cell):
 		return _orbit_by_hex[cell]
-	if _pixels_per_unit() * GRID.HEX.DEFAULT_RADIUS >= 6.0:
+	if _pixels_per_unit() * GRID.HEX.DEFAULT_RADIUS >= MIN_ORBIT_RADIUS_PX:
 		return {}
 	var closest: Dictionary = {}
 	var closest_distance := INF
@@ -347,7 +371,7 @@ func _layout_buttons() -> void:
 		var center := map_to_screen(GRID.pair(body.position))
 		var radius: float = float(body.radius) * _pixels_per_unit()
 		var label: Label = _body_labels[id]
-		label.text = String(body.name).get_slice(" · ", 0)
+		label.text = DISPLAY.body_name(String(body.id), body)
 		label.reset_size()
 		label.position = center + Vector2(label_directions.get(id,Vector2.LEFT if String(body.id) == "sun" else Vector2.DOWN)) * (radius + 24.0) - label.size * 0.5
 	_layout_location_buttons()
@@ -359,7 +383,15 @@ func _layout_buttons() -> void:
 
 func get_camera_snapshot() -> Dictionary:
 	return {"zoom": _camera_zoom, "pan": _camera_pan, "orbit_marker_count": _orbit_by_hex.size(),
-		"grid_size": GRID.SIZE, "cells": GRID.SIZE.x * GRID.SIZE.y}
+		"grid_size": GRID.SIZE, "cells": GRID.SIZE.x * GRID.SIZE.y, "grid_alpha": _grid_opacity(),
+		"minimum_orbit_radius_px": MIN_ORBIT_RADIUS_PX, "minimum_location_diameter_px": MIN_LOCATION_DIAMETER_PX}
+
+
+func _grid_opacity() -> float:
+	# Fade subpixel/dense lines in overview; preserve the cached mesh and full
+	# geometric precision when players zoom in to inspect individual cells.
+	var cell_radius_px := _pixels_per_unit() * GRID.HEX.DEFAULT_RADIUS
+	return lerpf(0.035, 0.20, smoothstep(2.0, 12.0, cell_radius_px))
 
 
 func _draw() -> void:
@@ -368,7 +400,7 @@ func _draw() -> void:
 		return
 	if _grid_mesh != null:
 		var scale_2d := _screen_scale()
-		draw_mesh(_grid_mesh, null, Transform2D(Vector2(scale_2d.x, 0), Vector2(0, scale_2d.y), map_to_screen(Vector2.ZERO)), Color(0.25, 0.48, 0.58, 0.25))
+		draw_mesh(_grid_mesh, null, Transform2D(Vector2(scale_2d.x, 0), Vector2(0, scale_2d.y), map_to_screen(Vector2.ZERO)), Color(0.25, 0.48, 0.58, _grid_opacity()))
 	for i in range(110):
 		var point := Vector2(float((i * 149 + 37) % 997) / 997.0 * size.x, float((i * 241 + 71) % 619) / 619.0 * size.y)
 		draw_circle(point, 0.55, Color(0.6, 0.72, 0.88, 0.25))
@@ -378,7 +410,6 @@ func _draw() -> void:
 		if not parent_id.is_empty():
 			var parent := GRID.pair(_bodies[parent_id].position)
 			_draw_orbit(parent, ((center - parent) * GRID.EXTENT).length())
-	_draw_orbit_markers()
 	var sun_center := map_to_screen(GRID.pair(_bodies.sun.position))
 	var sun_radius: float = float(_bodies.sun.radius) * _pixels_per_unit()
 	for factor in [2.6, 2.1, 1.65, 1.3]:
@@ -387,18 +418,30 @@ func _draw() -> void:
 	_draw_warp_effect()
 	_draw_cutlass_exhaust()
 	draw_texture_rect(_world.get_texture(), Rect2(Vector2.ZERO, size), false)
+	_draw_orbit_markers()
 	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
+	for id in routes:
+		var route: Dictionary = routes[id]
+		if String(id).is_empty() or String(route.get("phase", "grounded")) in ["grounded", "surface"]: continue
+		var position: Variant = route.get("position", [])
+		if not position is Array or position.size() != 2 or _pixels_per_unit() * 0.84 >= 10.0: continue
+		var point := map_to_screen(GRID.pair(position))
+		# Screen-space locator supplements the unchanged, correctly scaled ship.
+		var direction := (Vector2.from_angle(float(route.get("heading", 0.0))) * Vector2(1.0, WORLD.TILT)).normalized()
+		var side := direction.orthogonal()
+		draw_circle(point, 7.0, Color("060e18"))
+		draw_colored_polygon(PackedVector2Array([point + direction * 6.0, point - direction * 4.0 + side * 4.0, point - direction * 4.0 - side * 4.0]), Color("f2c47c") if String(id) == _selected_ship_id else Color("d4f2f5"))
 	if not _selected_ship_id.is_empty() and routes.has(_selected_ship_id):
 		var route: Dictionary = routes[_selected_ship_id]
 		if String(route.get("phase", "grounded")) not in ["grounded", "surface"] and route.get("position") is Array and route.position.size() == 2:
 			draw_arc(map_to_screen(GRID.pair(route.position)), 12.0, 0.0, TAU, 24, Color("f2c47c"), 2.0, true)
 	if not _body_labels.has("sun_orbit"):
-		draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), String(_bodies.sun.get("name", "Stern")), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
+		draw_string(ThemeDB.fallback_font, sun_center + Vector2(sun_radius + 7, -3), DISPLAY.body_name("sun", _bodies.sun), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("ffc87c"))
 	for id in _location_buttons:
 		var body: Dictionary = _body_for_location(id)
 		if body.is_empty():
 			continue
-		var hex: PackedVector2Array = _world.surface_hex(body)
+		var hex: PackedVector2Array = _location_marker_polygon(body)
 		var selected: bool = _locations[id].get("selected", false)
 		draw_colored_polygon(hex, Color(0.12, 0.57, 0.67, 0.42))
 		_outline(hex, Color("e8fff8") if selected else Color("91e4ee"))
@@ -418,19 +461,31 @@ func _draw() -> void:
 func _draw_orbit_markers() -> void:
 	for cell: Vector2i in _orbit_by_hex:
 		var target: Dictionary = _orbit_by_hex[cell]
-		var occupied: bool = target.orbit_id == _travel.get("orbit_id") and target.marker_id == _travel.get("orbit_marker_id")
-		var destination: bool = String(_travel.get("phase", "")) == "quantum" and target.orbit_id == _travel.get("target_orbit_id") and target.marker_id == _travel.get("target_orbit_marker_id")
+		# Legacy marker IDs are travel aliases of the same body orbit map.
+		var occupied: bool = target.orbit_id == _travel.get("orbit_id")
+		var destination: bool = String(_travel.get("phase", "")) == "quantum" and target.orbit_id == _travel.get("target_orbit_id")
 		var color := Color("f2c47c") if occupied or destination else Color("91e4ee")
 		var polygon := _orbit_marker_polygon(cell)
-		draw_colored_polygon(polygon, Color(color, 0.24))
+		draw_colored_polygon(polygon, Color("0d2935"))
 		_outline(polygon, color)
 		var center := map_to_screen(GRID.normalized(cell))
-		draw_string(ThemeDB.fallback_font, center + Vector2(-3, 4), String(target.marker_id).get_slice("_", 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 12 if _camera_zoom >= 3.0 else 10, color)
+		draw_string(ThemeDB.fallback_font, center + Vector2(-8, 3), "OM", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, color)
 
 
 func _orbit_marker_polygon(cell: Vector2i) -> PackedVector2Array:
-	var radius := maxf(GRID.HEX.DEFAULT_RADIUS, 6.0 / _pixels_per_unit())
+	var radius := maxf(GRID.HEX.DEFAULT_RADIUS, MIN_ORBIT_RADIUS_PX / _pixels_per_unit())
 	return _cell_polygon(cell, radius)
+
+
+func _location_marker_polygon(body: Dictionary) -> PackedVector2Array:
+	var polygon: PackedVector2Array = _world.surface_hex(body)
+	var center := _hex_center(polygon)
+	var radius := 0.0
+	for point in polygon: radius = maxf(radius, point.distance_to(center))
+	if radius > 0.0 and radius < MIN_LOCATION_DIAMETER_PX * 0.5:
+		for index in polygon.size():
+			polygon[index] = center + (polygon[index] - center) * (MIN_LOCATION_DIAMETER_PX * 0.5 / radius)
+	return polygon
 
 
 func _process(delta: float) -> void:
@@ -550,6 +605,7 @@ func _build_grid_mesh() -> void:
 
 
 func set_location_snapshot(locations: Dictionary) -> void:
+	if _locations == locations: return
 	_locations = locations.duplicate(true)
 	for id in _location_buttons.keys():
 		if not locations.has(id):
@@ -603,7 +659,7 @@ func _layout_location_buttons() -> void:
 	for id in _location_buttons:
 		var button: Button = _location_buttons[id]
 		var is_surface := not _body_for_location(id).is_empty()
-		var extent := clampf(_pixels_per_unit() * 1.8, 5.0, 18.0) if is_surface else 18.0
+		var extent := maxf(MIN_LOCATION_DIAMETER_PX, clampf(_pixels_per_unit() * 1.8, 5.0, 18.0)) if is_surface else 18.0
 		button.custom_minimum_size = Vector2.ONE * extent
 		button.size = Vector2.ONE * extent
 		button.position = map_to_screen(location_map_point(id)) - button.size * 0.5

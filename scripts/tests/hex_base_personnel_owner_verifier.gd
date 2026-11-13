@@ -11,6 +11,9 @@ class Flow extends Node:
 
 class Navigation extends RefCounted:
 	var searches:=0
+	var terrain: Node
+	func get_ground_clearance_mask() -> Dictionary:
+		return {"ok":true,"registry_id":terrain.get_instance_id(),"source_signature":"fixture_clearance","blocked_cells":[]}
 	func find_world_path(_from:Vector2,target:Vector2)->Array:
 		searches+=1
 		return [target]
@@ -40,6 +43,7 @@ func _base_rig()->Dictionary:
 	base._registry=rig.units
 	base._layout={"beds":[{"id":"bed","grid":[2,0]}]}
 	base._navigation_graph=Navigation.new()
+	base._navigation_graph.terrain=rig.terrain
 	rig.sim.configure_base_personnel(base)
 	rig.sim.tick_processed.connect(base._on_tick)
 	for id in ["base_person","other"]:

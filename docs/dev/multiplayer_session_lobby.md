@@ -15,7 +15,11 @@
 
 ## Ready und Start
 - Peers haben einen Ready-State.
-- Der Host kann erst starten, wenn `max_players` Peers verbunden und alle ready sind.
+- Der Host kann starten, wenn mindestens zwei Peers verbunden und alle verbundenen
+  Peers bereit sind. `max_players` ist ausschließlich die Verbindungskapazität.
+- Standardkapazität: 16, vor dem Hosten einstellbar von 2 bis 64. Dies ist eine
+  technische Gesamtschranke, keine feste Spielergrenze je Team und kein Nachweis
+  der Performance bei 64 Teilnehmern.
 - `request_start_mission()` ist server-authoritative. Clients koennen den Missionsstart nicht autoritativ ausloesen.
 - Der eigentliche Szenenwechsel bleibt im Lobby-Adapter; die Session emittiert nur `mission_start_requested(assignments)`.
 
@@ -24,6 +28,26 @@ Die Session liefert Zuordnungen fuer den TASK_166-Command-Contract:
 - Host Peer `1`: `team_alpha`, Rolle `host`, Fireteams `blue` und `gold`.
 - Joined Peer V1-Smoke: `team_bravo`, Rolle `commander`, Fireteam `red`.
 - Fuer reine Observer-Runden kann `MultiplayerSession.client_role_id` auf `spectator` gesetzt werden.
+
+### Gemeinsame Teamsteuerung (13.11.2026)
+- `coop`: alle aktiven Spieler steuern die Seite des Hosts gegen die Szenario-KI.
+- `versus` (PvP) und `coop_versus` (Koop-PvP): Spieler wählen Alpha oder Bravo;
+  zum Start müssen beide Seiten aktive Spieler haben. Weitere Spieler derselben
+  Seite erhalten ebenfalls Zugriff auf die bestehenden Fireteams dieser Seite.
+- Fireteams werden nicht exklusiv unter Peers aufgeteilt. Zusätzliche Peers
+  erzeugen keine neuen Units, Dropships oder Teams und werden nicht automatisch
+  zu Zuschauern. Die bestehenden Commander-/Fireteam-Commands bleiben vom Host
+  geprüft. Gegenläufige Befehle werden in der bestehenden Hostqueue verarbeitet.
+- Teamwahl wird vor dem Start auf der Authority normalisiert. Eine geänderte
+  Zuordnung entzieht die alte Bereitschaft; ein Moduswechsel setzt alle zurück.
+  Während einer laufenden Mission bleiben Team, Modus und Kapazität gesperrt.
+- Rejoin stellt die validierte frühere Identität wieder her. Der Weggang eines
+  einzelnen Mitclients beendet die Verbindungen der verbleibenden Spieler nicht.
+- `is_mission_peer_authenticated(peer_id)` ist eine reine Authority-Abfrage für
+  ortsspezifische READY-Nachrichten; sie erzeugt weder Zuordnungen noch State.
+- Kartenansicht und Auswahl bleiben lokal. Mehrere Karten benötigen jeweils
+  eigene manifestgeprüfte Runtimekontexte; der Einzelkartenkontext wird dafür
+  nicht gelockert. Umsetzung/Abnahme: `docs/tasks/SHARED_TEAM_MULTIMAP_2026_11_13.md`.
 
 Der Lobby-Adapter uebergibt diese Daten beim Missionsstart an `SimulationRoot`:
 - `set_peer_team_assignments(...)`
@@ -42,4 +66,6 @@ Der Lobby-Adapter uebergibt diese Daten beim Missionsstart an `SimulationRoot`:
 - Disconnect leert den Session-State
 - Lobby-Screen erzeugt den Session-Adapter
 
-Der echte Host/Join-LAN-Test bleibt manuell, weil zwei Godot-Instanzen und ein freier UDP-Port benoetigt werden.
+`shared_team_session_verifier.gd` ergänzt echte localhost-ENet-Session-RPCs mit
+sechs Peers, gemeinsamer Teamsteuerung, 3-gegen-3, freien Plätzen, Teamrechten,
+Disconnect und laufendem Rejoin. Das ersetzt keinen WAN-/Latenz-/Lasttest.

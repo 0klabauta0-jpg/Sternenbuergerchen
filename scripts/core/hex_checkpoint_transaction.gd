@@ -1,6 +1,8 @@
 extends RefCounted
 ## One Root-owned host checkpoint. Prepared components remain their own owners.
 const SCHEMA="hex_tactical_checkpoint.v1"
+const RNG = preload("res://scripts/core/gameplay_rng_state.gd")
+const ACTOR_BATCH = preload("res://scripts/mission/mission_actor_checkpoint_batch.gd")
 class PreparedCheckpoint extends RefCounted:
 	pass
 var _owner:WeakRef
@@ -44,11 +46,15 @@ func export_state()->Dictionary:
 		if base.get("version")!=2:return base
 		transport=_portable_transport(owner._base_personnel_owner._checkpoint_transport_context(base))
 	var state:Dictionary={"schema":SCHEMA,"map_id":ground.map_id,"grid_frame":registry.get_checkpoint_grid_frame(),"map_fingerprint":registry.get_checkpoint_map_fingerprint(),"tick":owner.tick_counter,"rng_state":str(owner._combat_rng.state),"terrain_overrides":registry.export_checkpoint_overrides(),"ground":ground,"movement":movement,"base_personnel":base,"transport":transport}
+	state["rng_streams"] = RNG.capture(owner)
 	checked=validate_shape(state)
 	return {"ok":true,"state":state} if checked.ok else checked
 
 static func validate_shape(state:Variant)->Dictionary:
 	var keys:Array=["schema","map_id","grid_frame","map_fingerprint","tick","rng_state","terrain_overrides","ground","movement","base_personnel","transport"]
+	if state is Dictionary and state.has("rng_streams"):
+		keys.append("rng_streams")
+		if not RNG.validate(state.rng_streams) or state.rng_streams.combat != state.get("rng_state"): return {"ok":false,"reason":"invalid_hex_checkpoint_rng"}
 	if not state is Dictionary or state.size()!=keys.size():return {"ok":false,"reason":"invalid_hex_checkpoint"}
 	for key in keys:
 		if not state.has(key):return {"ok":false,"reason":"invalid_hex_checkpoint"}
@@ -68,7 +74,7 @@ static func validate_shape(state:Variant)->Dictionary:
 	if not _valid_transport(state.transport):return {"ok":false,"reason":"invalid_hex_transport"}
 	return {"ok":true}
 
-func prepare(state:Dictionary)->Dictionary:
+func prepare(state:Dictionary, actor_checkpoint:Dictionary={})->Dictionary:
 	var checked:Dictionary=guard()
 	if not checked.ok:return checked
 	checked=validate_shape(state)
@@ -119,6 +125,27 @@ func prepare(state:Dictionary)->Dictionary:
 		if intent.status in ["arrived","canceled"]:continue
 		var unpacked:Dictionary=owner._hex_movement_runtime._save_unpack_command(intent.command_intent)
 		if unpacked.ok:commands[intent.unit_id]=unpacked.command
+	var full_actors: RefCounted = null
+	var full_actor_prepared: RefCounted = null
+	if not actor_checkpoint.is_empty():
+		# Active-Continue supports holds and proven completed movement. Moving payloads
+		# require interpolation/time capture and are deliberately not inferred.
+		if not commands.is_empty() or not ground_state.active_segments.is_empty():
+			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
+			return _reject("mission_movement_pending")
+		var positions := {}
+		for id in target_ground.get_unit_ids():
+			var projection: Dictionary = target_ground.get_motion_projection(id, 0.0)
+			if projection.is_empty() or projection.get("moving",false):
+				registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
+				return _reject("mission_movement_pending")
+			positions[id] = projection.position_world
+		full_actors = ACTOR_BATCH.new()
+		var actor_result: Dictionary = full_actors.prepare_restore(owner, actor_checkpoint, positions)
+		if not actor_result.get("ok", false):
+			registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
+			return actor_result
+		full_actor_prepared = actor_result.prepared
 	var actors:Dictionary={};var actor_models:Dictionary={};var registered:Dictionary={}
 	var actor_ids:Array=[];var source_identities:Dictionary={}
 	for id in owner._known_units_by_id:
@@ -134,7 +161,7 @@ func prepare(state:Dictionary)->Dictionary:
 		source_identities[id]=owner._hex_payload_identity(id)
 		actors[id]=actor.get_instance_id()
 		registered[id]=owner.get_unit_registry().get_unit(id)==actor
-		if actor.has_method("prepare_hex_checkpoint_runtime"):
+		if full_actors == null and actor.has_method("prepare_hex_checkpoint_runtime"):
 			var prepared_actor:Dictionary=actor.call("prepare_hex_checkpoint_runtime",owner,Dictionary(commands.get(id,{})))
 			if not prepared_actor.ok:
 				registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
@@ -142,6 +169,9 @@ func prepare(state:Dictionary)->Dictionary:
 			actor_models[id]=prepared_actor.prepared
 	var handle:=PreparedCheckpoint.new()
 	_prepared[handle.get_instance_id()]={"handle":weakref(handle),"phase":"prepared","state":state.duplicate(true),"terrain":terrain.prepared,"ground":ground.prepared,"movement":movement.prepared,"base":base.get("prepared"),"registry":weakref(registry),"base_owner":weakref(owner._base_personnel_owner) if is_instance_valid(owner._base_personnel_owner) else null,"context":owner.get_hex_ground_context_revision(),"unit_registry":owner.get_unit_registry().get_instance_id(),"actors":actors,"registered":registered,"source_identities":source_identities,"known_ids":owner._known_units_by_id.keys(),"actor_models":actor_models,"commands":commands,"source_rng":owner._combat_rng.state,"source_tick":owner.tick_counter}
+	_prepared[handle.get_instance_id()]["source_rng_streams"] = RNG.capture(owner)
+	_prepared[handle.get_instance_id()]["full_actors"] = full_actors
+	_prepared[handle.get_instance_id()]["full_actor_prepared"] = full_actor_prepared
 	return {"ok":true,"prepared":handle}
 
 func validate(prepared:RefCounted)->Dictionary:
@@ -151,6 +181,10 @@ func validate(prepared:RefCounted)->Dictionary:
 	if not checked.ok:return checked
 	var owner:Node=_owner.get_ref()
 	if record.registry.get_ref()!=owner.get_hex_ground_terrain_registry() or record.context!=owner.get_hex_ground_context_revision() or record.unit_registry!=owner.get_unit_registry().get_instance_id() or record.source_tick!=owner.tick_counter or record.source_rng!=owner._combat_rng.state:return _reject("checkpoint_context_changed")
+	if record.source_rng_streams != RNG.capture(owner): return _reject("checkpoint_context_changed")
+	if record.full_actors != null:
+		checked = record.full_actors.validate_restore(record.full_actor_prepared)
+		if not checked.get("ok", false): return checked
 	if owner._known_units_by_id.keys()!=record.known_ids:return _reject("checkpoint_actor_changed")
 	for id in record.actors:
 		if owner._hex_payload_identity(id)!=record.source_identities[id]:return _reject("checkpoint_actor_changed")
@@ -178,7 +212,7 @@ func commit(prepared:RefCounted,publish:bool=true)->Dictionary:
 	owner._hex_ground_runtime._publish_prepared_restore(record.ground,checked)
 	owner._hex_movement_runtime._publish_prepared_restore(record.movement,checked)
 	owner.tick_counter=int(record.state.tick)
-	owner._combat_rng.state=int(record.state.rng_state)
+	RNG.publish(owner, record.state.get("rng_streams", RNG.from_legacy(record.state.rng_state)))
 	owner._hex_ground_context_revision=next_context
 	owner.command_queue.clear();owner.effects_queue.clear()
 	owner._hex_facing_pending={};owner._hex_facing_seen={};owner._hex_boundary_facing={}
@@ -188,6 +222,7 @@ func commit(prepared:RefCounted,publish:bool=true)->Dictionary:
 	for id in owner._known_units_by_id:owner._hex_unit_lifecycle_revision[id]=int(owner._hex_unit_lifecycle_revision.get(id,0))+1
 	if record.base!=null:record.base_owner.get_ref()._publish_prepared_restore(record.base,checked,next_context)
 	for id in record.actor_models:owner._resolve_known_unit_for_contract(id)._publish_runtime_identity_change(record.actor_models[id],checked)
+	if record.full_actors != null: record.full_actors._publish_restore(record.full_actor_prepared, checked)
 	owner._hex_visual_unit_ids={}
 	for id in record.actors:owner._hex_visual_unit_ids[id]=true
 	owner._hex_projection_terrain_revision=-1
@@ -210,6 +245,9 @@ func finalize(prepared:RefCounted)->Dictionary:
 		elif record.base!=null:actor.visible=true
 		if not _publication_current(record):return {"ok":true,"committed":true,"context_changed":true}
 	owner._project_hex_ground_actors(0.0)
+	if record.full_actors != null:
+		var actors_final: Dictionary = record.full_actors.finalize_restore(record.full_actor_prepared)
+		if not actors_final.get("ok", false) or actors_final.get("context_changed", false): return {"ok":true,"committed":true,"context_changed":true}
 	for id in record.actor_models:
 		if not _publication_current(record):return {"ok":true,"committed":true,"context_changed":true}
 		owner._resolve_known_unit_for_contract(id).finalize_runtime_identity_change(record.actor_models[id],Callable(self,"_publication_current").bind(record))

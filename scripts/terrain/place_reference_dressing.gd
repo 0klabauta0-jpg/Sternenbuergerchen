@@ -32,6 +32,7 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		pad.call("build",Vector2(float(center[0]),float(center[1])),Vector2(float(size[0]),float(size[1])),String(spec.get("name","PAD")))
 		# Ground-painted apron: no raised platform or invented navigation surface.
 		pad.scale.y=.1; pad.position.y=.025
+		pad.call("use_ground_painted_shadows")
 	return {"root":root,"blockers":blockers}
 static func mesh_bounds(node: Node3D, root: Node3D) -> AABB:
 	var bounds:=AABB(); var initialized:=false

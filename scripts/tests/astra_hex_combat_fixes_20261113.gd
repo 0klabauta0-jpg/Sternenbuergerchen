@@ -249,15 +249,19 @@ func _test_diagnostic_purity() -> void:
 	f.registry.register_unit("enemy", f.enemy)
 	var selected_seed := -1
 	var expected_roll := -1.0
+	var probe := RandomNumberGenerator.new()
 	for candidate in range(1000):
-		seed(candidate)
-		var roll := randf()
+		probe.seed = candidate
+		var roll := probe.randf()
 		if roll < DRIVER.DISCIPLINE_BREAK_BASE_CHANCE:
 			selected_seed = candidate
 			expected_roll = roll
 			break
 	_check(selected_seed >= 0, "C8 seed triggers real discipline decision")
 	seed(selected_seed)
+	expected_roll = randf()
+	seed(selected_seed)
+	f.sim.set_combat_rng_seed(selected_seed)
 	var before := _state_for_read(f)
 	var context: Dictionary = f.driver._build_fire_decision_context()
 	var pair := {"attacker": f.own, "target": f.enemy, "attacker_id": "own", "target_id": "enemy"}

@@ -24,6 +24,13 @@ soweit sie Reihenfolge, Teamgröße, Schiffszahl und Belohnungszeitpunkt betreff
   Interaktion kann `campaign_recruit` den dritten NPC aufnehmen. Dies geschieht
   vor der letzten Rückkehrinteraktion, damit automatische Extraktion die
   Rekrutierung nicht unerreichbar macht. Ein erneuter Klick erzeugt keinen NPC.
+  Die Aufnahme ordnet den Rekruten dem bereits geladenen Trupp des tatsächlichen
+  Auftragsschiffs zu. Eine Profilzeichenfolge allein ist keine Truppzuordnung;
+  der vorhandene Homebase-Payload-/Rosterpfad übernimmt die Mitgliedschaft auch
+  bei verborgener Basisansicht. Der Rekrut bleibt während dieses Ausflugs an Bord
+  und nimmt ab dem nächsten Einsatz am bestehenden Trupp-Handoff teil. Fremde
+  Schiffe/Trupps werden nicht verändert. Der gerettete Buccaneer-Pilot erhält
+  ausschließlich seinen wirklichen Pilotenplatz, keine Bodentruppzuweisung.
 - Bestätigte Bergung auf Karte B übernimmt eine C-Benit-Kiste ins Schiff.
   Mission 3 darf nur mit der tatsächlichen Kiste im gewählten Schiff anfliegen;
   der bestätigte Liefer-Use konsumiert sie vor Abschluss. Der Mining-Blueprint

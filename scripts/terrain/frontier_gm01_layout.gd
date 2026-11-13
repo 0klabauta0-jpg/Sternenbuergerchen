@@ -26,6 +26,7 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 	root.set_meta("authored_visual_layout_id", LAYOUT_ID)
 	parent.add_child(root)
 	var profile := PROFILE.new()
+	profile.quiet_tactical_surface=true
 	var blockers: Array = []
 	var assets: Array = []
 	var anchors: Dictionary = {}
@@ -257,6 +258,9 @@ static func _ground(root: Node3D, profile, saved_ground_grids) -> MeshInstance3D
 	var grids: Array = get_authoring_grid_positions() if saved_ground_grids == null else saved_ground_grids
 	configure_ground_mesh(ground, grids, saved_ground_grids != null)
 	ground.material_override = profile.material_for(profile.surface_color("ground"))
+	# This flat receiver cannot cast useful terrain shadows; self-shadowing the
+	# coplanar hex triangles causes diagonal bands in Compatibility rendering.
+	ground.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(ground)
 	return ground
 

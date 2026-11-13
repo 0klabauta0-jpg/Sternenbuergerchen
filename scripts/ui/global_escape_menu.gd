@@ -36,12 +36,24 @@ var _modal_open: bool = false
 var _previous_focus: WeakRef = null
 var _suspended_input: Dictionary = {}
 var _panel_focus_controls: Array[Control] = []
+var _resume_label: Label
+var _exit_panel: PanelContainer
+var _exit_label: Label
+var _exit_save: Button
+var _exit_confirm: Button
+var _exit_action := ""
+var _exit_change_scene := true
+var _quit_tree: SceneTree
+var _quit_window: Window
+var _owns_window_close := false
+var _previous_auto_accept_quit := true
 
 
 func _ready() -> void:
 	name = "GlobalEscapeMenu"
 	layer = 1000
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_install_window_close_guard()
 	_ensure_audio_event_bus()
 	_build_overlay()
 	get_viewport().gui_focus_changed.connect(_on_gui_focus_changed)
@@ -50,6 +62,37 @@ func _ready() -> void:
 		if not tree.node_added.is_connected(_on_tree_node_added):
 			tree.node_added.connect(_on_tree_node_added)
 		call_deferred("_install_button_sfx_recursive", tree.root)
+
+
+func _install_window_close_guard() -> void:
+	var tree := get_tree()
+	# Only the actual autoload owns the main window. Standalone UI fixtures or
+	# embedded menu instances must not replace the application's quit policy.
+	if _owns_window_close or tree == null or tree.root.get_node_or_null("GlobalEscapeMenu") != self:
+		return
+	_quit_tree = tree
+	_quit_window = tree.root
+	_previous_auto_accept_quit = tree.auto_accept_quit
+	tree.auto_accept_quit = false
+	_quit_window.close_requested.connect(_on_window_close_requested)
+	_owns_window_close = true
+
+
+func _on_window_close_requested() -> void:
+	request_quit_game()
+
+
+func _exit_tree() -> void:
+	if not _owns_window_close:
+		return
+	if is_instance_valid(_quit_window) and _quit_window.close_requested.is_connected(_on_window_close_requested):
+		_quit_window.close_requested.disconnect(_on_window_close_requested)
+	# Restore our prior option only while our installed value remains in force.
+	if is_instance_valid(_quit_tree) and not _quit_tree.auto_accept_quit:
+		_quit_tree.auto_accept_quit = _previous_auto_accept_quit
+	_owns_window_close = false
+	_quit_tree = null
+	_quit_window = null
 
 
 func _input(event: InputEvent) -> void:
@@ -73,7 +116,9 @@ func _handle_escape_input(event: InputEvent) -> void:
 		return
 	if key_event.keycode != KEY_ESCAPE:
 		return
-	if is_settings_visible() or is_controls_visible():
+	if _exit_panel != null and _exit_panel.is_visible_in_tree():
+		_cancel_exit()
+	elif is_settings_visible() or is_controls_visible():
 		_show_menu_panel()
 	else:
 		toggle_menu()
@@ -104,7 +149,6 @@ func open_menu(status_text: String = "") -> void:
 	_begin_modal_input()
 	_overlay_root.visible = true
 	_show_menu_panel()
-	_refresh_action_buttons()
 	if not status_text.strip_edges().is_empty():
 		_set_status(status_text)
 	_play_ui_sfx("click", "escape_menu_open")
@@ -112,6 +156,7 @@ func open_menu(status_text: String = "") -> void:
 
 func close_menu() -> void:
 	_ensure_overlay()
+	_exit_action = ""
 	_end_modal_input(true)
 	_overlay_root.visible = false
 	_play_ui_sfx("cancel", "escape_menu_close")
@@ -229,7 +274,9 @@ func load_mission_slot(change_scene: bool = true) -> Dictionary:
 	return _load_result(true, "loaded", scene_path)
 
 
-func return_to_main_menu(change_scene: bool = true) -> Dictionary:
+func return_to_main_menu(change_scene: bool = true, confirmed: bool = false) -> Dictionary:
+	if not confirmed and _confirm_exit_if_needed("main_menu", change_scene):
+		return {"ok":false,"reason":"confirmation_required"}
 	_play_ui_sfx("cancel", "return_to_main_menu")
 	if change_scene and not _test_mode:
 		var tree := get_tree()
@@ -242,7 +289,9 @@ func return_to_main_menu(change_scene: bool = true) -> Dictionary:
 	return {"ok": true, "target_scene": MAIN_MENU_SCENE_PATH}
 
 
-func request_quit_game() -> Dictionary:
+func request_quit_game(confirmed: bool = false) -> Dictionary:
+	if not confirmed and _confirm_exit_if_needed("quit"):
+		return {"ok":false,"reason":"confirmation_required"}
 	_play_ui_sfx("cancel", "quit_game")
 	if _test_mode:
 		_quit_requested_for_tests = true
@@ -330,18 +379,21 @@ func _build_overlay() -> void:
 	_controls_panel = _build_controls_panel()
 	_controls_panel.hide()
 	_overlay_root.add_child(_controls_panel)
+	_exit_panel = _build_exit_panel()
+	_exit_panel.hide()
+	_overlay_root.add_child(_exit_panel)
 	_refresh_action_buttons()
 
 
 func _build_menu_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "EscapeMenuPanel"
-	panel.custom_minimum_size = Vector2(360.0, 490.0)
+	panel.custom_minimum_size = Vector2(460.0, 610.0)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.offset_left = -180.0
-	panel.offset_top = -245.0
-	panel.offset_right = 180.0
-	panel.offset_bottom = 245.0
+	panel.offset_left = -230.0
+	panel.offset_top = -305.0
+	panel.offset_right = 230.0
+	panel.offset_bottom = 305.0
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 18)
@@ -352,7 +404,7 @@ func _build_menu_panel() -> PanelContainer:
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "MenuVBox"
-	vbox.add_theme_constant_override("separation", 10)
+	vbox.add_theme_constant_override("separation", 6)
 	margin.add_child(vbox)
 
 	var title := Label.new()
@@ -367,7 +419,13 @@ func _build_menu_panel() -> PanelContainer:
 	_status_label.text = "Escape · Einsätze laufen weiter"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.add_theme_font_size_override("font_size", 12)
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_status_label)
+	_resume_label = Label.new()
+	_resume_label.name = "ResumableProgress"
+	_resume_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_resume_label.add_theme_font_size_override("font_size", 13)
+	vbox.add_child(_resume_label)
 
 	_add_menu_button(vbox, "ResumeButton", "Weiter", close_menu)
 	_add_menu_button(vbox, "SettingsButton", "Einstellungen", open_settings)
@@ -378,6 +436,78 @@ func _build_menu_panel() -> PanelContainer:
 	_main_menu_button = _add_menu_button(vbox, "MainMenuButton", "Hauptmenue", _on_main_menu_pressed)
 	_quit_button = _add_menu_button(vbox, "QuitButton", "Spiel beenden", request_quit_game)
 	return panel
+
+
+func _build_exit_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "UnsavedProgressConfirmation"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -270
+	panel.offset_right = 270
+	panel.offset_top = -200
+	panel.offset_bottom = 200
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 14)
+	panel.add_child(column)
+	_exit_label = Label.new()
+	_exit_label.name = "ExitProgressDescription"
+	_exit_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(_exit_label)
+	_add_menu_button(column, "CancelExitButton", "Zurück zum Spielmenü", _cancel_exit)
+	_exit_save = _add_menu_button(column, "SaveAndExitButton", "Speichern und verlassen", _save_and_exit)
+	_exit_confirm = _add_menu_button(column, "ConfirmExitButton", "Ohne Speichern verlassen", _confirm_exit)
+	return panel
+
+
+func _campaign_save_projection() -> Dictionary:
+	var scene := get_tree().current_scene
+	if scene != null and scene.has_method("get_exit_progress_projection"):
+		return scene.get_exit_progress_projection()
+	return scene.get_campaign_save_projection() if _is_campaign_context() and scene.has_method("get_campaign_save_projection") else {}
+
+
+func _confirm_exit_if_needed(action: String, change_scene: bool = true) -> bool:
+	var projection := _campaign_save_projection()
+	if projection.is_empty() or not projection.get("has_unsaved_progress", false): return false
+	_ensure_overlay()
+	_begin_modal_input()
+	_exit_action = action
+	_exit_change_scene = change_scene
+	_overlay_root.show()
+	_menu_panel.hide()
+	_settings_panel.hide()
+	_controls_panel.hide()
+	_exit_panel.show()
+	_exit_label.text = "Ungespeicherter Fortschritt\n\nBei Fortsetzen wird geladen:\n" + String(projection.get("summary", "Kein gültiger Stand vorhanden."))
+	var blocked := String(projection.get("save_blocked_text", ""))
+	if not blocked.is_empty(): _exit_label.text += "\n\n" + blocked
+	_exit_label.text += "\n\nEinsätze laufen auch während dieser Rückfrage weiter."
+	_exit_save.disabled = not projection.get("can_save", false)
+	_exit_save.text = "Speichern und beenden" if action == "quit" else "Speichern und zum Hauptmenü"
+	_exit_confirm.text = "Ohne Speichern beenden" if action == "quit" else "Ohne Speichern zum Hauptmenü"
+	_focus_panel(_exit_panel)
+	return true
+
+
+func _cancel_exit() -> void:
+	_exit_action = ""
+	_exit_panel.hide()
+	_show_menu_panel()
+
+
+func _confirm_exit() -> void:
+	var action := _exit_action
+	_exit_action = ""
+	if action == "quit": request_quit_game(true)
+	elif action == "main_menu": return_to_main_menu(_exit_change_scene, true)
+
+
+func _save_and_exit() -> void:
+	var result := save_current_mission_slot()
+	if result.get("ok", false): _confirm_exit()
+	else:
+		_exit_label.text = String(result.get("message", "Speichern fehlgeschlagen. Der bisherige Stand bleibt erhalten.")) + "\n\n" + String(_campaign_save_projection().get("summary", ""))
+		_focus_panel(_exit_panel, true)
 
 
 func _build_controls_panel() -> PanelContainer:
@@ -517,6 +647,7 @@ func _add_menu_button(parent: Control, button_name: String, text: String, callba
 
 
 func _show_menu_panel() -> void:
+	if _exit_panel != null: _exit_panel.hide()
 	_menu_panel.visible = true
 	_settings_panel.visible = false
 	_controls_panel.visible = false
@@ -618,6 +749,12 @@ func _ensure_overlay() -> void:
 
 func _refresh_action_buttons() -> void:
 	var campaign := _is_campaign_context()
+	if _resume_label != null:
+		var projection := _campaign_save_projection()
+		_resume_label.visible = not projection.is_empty()
+		if _resume_label.visible:
+			_resume_label.text = "Fortsetzen: " + String(projection.get("summary", "Kampagne wird vorbereitet."))
+			if not String(projection.get("save_blocked_text", "")).is_empty(): _resume_label.text += "\n" + String(projection.save_blocked_text)
 	if _save_button != null:
 		_save_button.disabled = not _can_save_current_scene()
 		_save_button.text = "Kampagne speichern" if campaign else "Szenenstart merken"
@@ -685,6 +822,7 @@ func _on_settings_apply_pressed() -> void:
 
 func _on_save_pressed() -> void:
 	var result: Dictionary = save_current_mission_slot()
+	_refresh_action_buttons()
 	_play_ui_sfx("confirm" if bool(result.get("ok", false)) else "warning", "save_mission_slot")
 	var saved_text := "Kampagne gespeichert." if _is_campaign_context() else "Szenenstart gemerkt. Fortschritt wird nicht gespeichert."
 	_set_status(String(result.get("message", saved_text if bool(result.get("ok", false)) else "Speichern ist hier nicht verfügbar.")))

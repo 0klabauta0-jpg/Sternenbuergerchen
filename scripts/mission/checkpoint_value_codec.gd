@@ -4,6 +4,29 @@ const MAX_DEPTH := 16
 const MAX_ITEMS := 4096
 const MAX_SAFE_INTEGER := 9007199254740991.0
 
+## Exact comparison across JSON's numeric representation, never an epsilon or
+## a field-dropping migration. Keep booleans, strings, structure and keys typed.
+static func equal_json_values(left: Variant, right: Variant, depth: int = 0) -> bool:
+	if depth > MAX_DEPTH: return false
+	var left_type := typeof(left)
+	var right_type := typeof(right)
+	if left_type in [TYPE_INT,TYPE_FLOAT] and right_type in [TYPE_INT,TYPE_FLOAT]:
+		if not is_finite(float(left)) or not is_finite(float(right)): return false
+		if (left_type == TYPE_INT and abs(float(left)) > MAX_SAFE_INTEGER) or (right_type == TYPE_INT and abs(float(right)) > MAX_SAFE_INTEGER): return false
+		return float(left) == float(right)
+	if left_type != right_type: return false
+	if left_type == TYPE_DICTIONARY:
+		if left.size() != right.size() or left.size() > MAX_ITEMS: return false
+		for key in left:
+			if typeof(key) != TYPE_STRING or not right.has(key) or not equal_json_values(left[key],right[key],depth+1): return false
+		return true
+	if left_type == TYPE_ARRAY:
+		if left.size() != right.size() or left.size() > MAX_ITEMS: return false
+		for index in range(left.size()):
+			if not equal_json_values(left[index],right[index],depth+1): return false
+		return true
+	return left_type in [TYPE_NIL,TYPE_BOOL,TYPE_STRING] and left == right
+
 static func encode_value(value: Variant, depth: int = 0) -> Dictionary:
 	if depth > MAX_DEPTH: return _bad()
 	match typeof(value):

@@ -44,12 +44,14 @@ func refresh() -> void:
 	visible=not state.is_empty() and not bool(state.get("resolved", false))
 	if not visible:return
 	if String(state.get("phase", "")) in ["aborted", "defeat", "victory"]:
-		_status.text = "Begegnung abgeschlossen. Die Rückkehr in den Orbit wird bestätigt; bei einer Verzögerung wird sie automatisch erneut versucht."
+		_status.text = "Begegnung beendet · Rückkehr in den Orbit läuft"
+		_status.tooltip_text = "Eine verzögerte Rückkehr wird automatisch erneut versucht."
 		_attack.disabled = true; _rescue.disabled = true; _retreat.disabled = true
 		return
 	if state.phase == "entering":
 		var feedback: Dictionary = _runtime.call("get_campaign_entry_feedback") if _runtime.has_method("get_campaign_entry_feedback") else {}
-		_status.text = "Der Kampfbereich wird vorbereitet." if feedback.is_empty() or feedback.get("ok", false) else "Der Kampfbereich ist noch nicht bereit. Du kannst den Anflug abbrechen."
+		_status.text = "Kampfbereich wird vorbereitet" if feedback.is_empty() or feedback.get("ok", false) else "Kampfbereich noch nicht bereit · Abbruch möglich"
+		_status.tooltip_text = ""
 		_attack.disabled = true; _rescue.disabled = true; _retreat.disabled = false
 		return
 	_status.text="Cutlass · FEINDLICH · Hülle %d\nBuccaneer · NEUTRAL · Hülle %d\nEigenes Schiff · Hülle %d\n%s" % [int(state.cutlass_hull),int(state.buccaneer_hull),int(state.player_hull),"Feind zerstört. Pilot kontaktieren." if state.phase=="rescue_ready" else "Feuergefecht läuft." if state.engaging else "Die Buccaneer braucht Hilfe!"]

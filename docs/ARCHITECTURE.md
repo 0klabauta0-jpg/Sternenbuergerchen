@@ -73,3 +73,20 @@ Details stehen in `docs/dev/runtime_script_layout_contract.md`.
 - server-authoritative vorbereitet
 - Testteams für V1
 - Host/Join statt Matchmaking
+
+Der aktuelle Review-Kandidat erweitert diese vorhandene Session um gemeinsame
+Teamsteuerung für Koop, PvP und Koop-PvP. `MultiplayerWorldRuntime` verwaltet nur
+den Lebenszyklus und Index unabhängiger Ortsinstanzen; jeder `SimulationRoot`
+behält seine eigene Autorität. Lokaler Kartenwechsel wechselt Präsentation und
+Eingabe, ohne andere Spieler umzuschalten oder Einheiten zu transportieren.
+Sessionauthentifizierung, geprüftes Manifest und ortsbezogenes READY begrenzen
+die Freigabe von Commands und Snapshots. Details und noch laufende Abnahme:
+`docs/dev/multiplayer_world_runtime_contract.md` und
+`docs/tasks/SHARED_TEAM_MULTIMAP_2026_11_13.md`.
+
+Die produktiven Karten- und Zufallswege des Review-Kandidaten sind in
+`docs/dev/productive_hex_rollout_contract.md` inventarisiert: 14 Spielkarten
+und drei Basisdateien, gespeicherte Zufallsdomänen und ausdrückliche historische
+Square-Kompatibilität. Runtime-Import, Aufnahme und Bewegung laufen über die
+vorhandenen Owner. Vollständige Kartenvorbereitung und Gameplay-Abnahme bleiben
+eigene Prüfschritte; eine Hexkennzeichnung allein gilt dafür nicht als Beleg.

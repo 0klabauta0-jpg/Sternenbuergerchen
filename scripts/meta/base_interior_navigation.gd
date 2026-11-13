@@ -38,6 +38,8 @@ var _craft_rectangles: Array[Rect2] = []
 var _modular_rooms: Array = []
 var _modular_beds: Array = []
 var _field_disabled: Array[int] = []
+var _clearance_revision := 0
+var _clearance_cells: Array[Vector2i] = []
 func set_modular_geometry(rooms: Array, beds: Array) -> void:
  _modular_rooms = rooms.duplicate(true)
  _modular_beds = beds.duplicate(true)
@@ -126,6 +128,19 @@ func _apply_field_beds() -> void:
     if rect.has_point(_graph.get_point_position(id)):
      _graph.set_point_disabled(id,true)
      _field_disabled.append(id)
+ _clearance_cells.clear()
+ var seen := {}
+ for point: int in _field_disabled:
+  var cell: Vector2i = _graph_terrain.world_to_grid(_graph_world[point])
+  if not seen.has(cell):
+   seen[cell] = true
+   _clearance_cells.append(cell)
+ _clearance_revision += 1
+
+func get_ground_clearance_mask() -> Dictionary:
+ if not is_instance_valid(_graph_terrain): return {"ok":false,"reason":"base_clearance_unavailable"}
+ return {"ok":true,"registry_id":_graph_terrain.get_instance_id(),"source_signature":str([_graph_revision,_clearance_revision]),"blocked_cells":_clearance_cells.duplicate()}
+
 func configure_graph(terrain) -> void:
  if terrain == _graph_terrain and _graph_revision == int(terrain.get_revision()): return
  var begin := Time.get_ticks_usec()

@@ -44,7 +44,7 @@
 			"group_id": "bravo_air_defense",
 			"display_name": "Bravo AA Watch",
 			"team_id": "team_bravo",
-			"spawn_marker_id": "factory_danger_zone",
+			"spawn_position": {"x": 9491.160538252981, "y": 8246.419730873509},
 			"enemy_ids": ["bravo_aa_01", "bravo_aa_02", "bravo_aa_03", "bravo_aa_04"],
 			"tactics": {
 				"profile_id": "sniper_watch",
@@ -113,7 +113,7 @@
 		"minimap_mode": "terrain_only",
 		"objectives": [
 			{"text": "AA ausschalten", "target_id": "factory_danger_zone"},
-			{"text": "Stationstuer oeffnen", "target_id": "objective_point"},
+			{"text": "Stationstuer oeffnen", "target_id": "station_entry_door"},
 			{"text": "Computer 18 Sekunden halten", "target_id": "objective_point"},
 			{"text": "Cargo-Abflug 12 Sekunden decken", "target_id": "spawn_alpha"}
 		],
@@ -142,7 +142,8 @@
 		],
 		"annotations": [
 			{"kind": "danger", "text": "AA", "target_id": "factory_danger_zone", "radius": 160.0},
-			{"kind": "objective", "text": "DOOR/COM", "target_id": "objective_point", "radius": 112.0},
+			{"kind": "objective", "text": "DOOR", "target_id": "station_entry_door", "radius": 112.0},
+			{"kind": "objective", "text": "COM", "target_id": "objective_point", "radius": 96.0},
 			{"kind": "route", "text": "CARGO", "target_id": "spawn_alpha", "radius": 128.0}
 		]
 	},
@@ -178,7 +179,7 @@
 			{
 				"step_id": "open_station_door",
 				"objective_type": "door_open",
-				"target_marker_id": "objective_point",
+				"target_marker_id": "station_entry_door",
 				"required_state": "door_open",
 				"min_hold_seconds": 2.0,
 				"operator_team_id": "team_alpha"
@@ -219,7 +220,8 @@
 				"interaction_id": "station_route_drill_door",
 				"display_name": "Station Door",
 				"interaction_type": "door",
-				"marker_id": "objective_point",
+				"marker_id": "station_entry_door",
+				"door_cells": [{"x": 103, "y": 95}, {"x": 104, "y": 95}],
 				"required_order": "breach",
 				"duration_seconds": 2.0,
 				"radius_world": 128.0,

@@ -11,6 +11,7 @@ const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multipl
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
 const MULTIPLAYER_DROPSHIP_BOOTSTRAP_SCRIPT: GDScript = preload("res://scripts/mission/multiplayer_dropship_bootstrap.gd")
+const MULTIPLAYER_WORLD_RUNTIME_SCRIPT = preload("res://scripts/multiplayer/multiplayer_world_runtime.gd")
 const CONTACT_APPROACH_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_approach_resolver.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
@@ -19,6 +20,7 @@ const LOBBY_BACKGROUND_ID: String = "multiplayer_lobby_hangar"
 const LOBBY_PANEL_SIZE: Vector2 = Vector2(720.0, 560.0)
 const TEAM_PLAY_MODE_COOP: String = "coop"
 const TEAM_PLAY_MODE_VERSUS: String = "versus"
+const TEAM_PLAY_MODE_COOP_VERSUS: String = "coop_versus"
 const CONNECTION_MODE_LAN: String = "lan"
 const CONNECTION_MODE_DIRECT_WAN: String = "direct_wan"
 const CONNECTION_MODE_UPNP: String = "upnp"
@@ -70,11 +72,18 @@ var _background_rect: TextureRect = null
 var _background_shade: ColorRect = null
 var _mission_host: Node = null
 var _active_mission: Node = null
+var _world_runtime: Node = null
+var _world_bar: CanvasLayer = null
+var _world_location_option: OptionButton = null
+var _world_open_map_option: OptionButton = null
+var _world_open_button: Button = null
+var _world_status: Label = null
 const PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS := 180
 var _player_name_edit: LineEdit = null
 var _player_roster_option: OptionButton = null
 var _player_team_option: OptionButton = null
 var _team_mode_option: OptionButton = null
+var _player_capacity_spin: SpinBox = null
 var _map_option: OptionButton = null
 var _connection_mode_option: OptionButton = null
 var _network_hint_label: Label = null
@@ -957,6 +966,14 @@ func _ensure_lobby_setup_controls() -> void:
 		_player_team_option = _add_setup_option(grid, "PlayerTeamOptionButton", "multiplayer.player_team")
 		_add_setup_label(grid, "Teammodus", "multiplayer.team_mode")
 		_team_mode_option = _add_setup_option(grid, "TeamModeOptionButton", "multiplayer.team_mode")
+		_add_setup_label(grid, "Spielerplätze", "multiplayer.team_mode")
+		_player_capacity_spin = SpinBox.new()
+		_player_capacity_spin.name = "PlayerCapacitySpinBox"
+		_player_capacity_spin.min_value = MULTIPLAYER_SESSION_SCRIPT.MIN_START_PLAYERS
+		_player_capacity_spin.max_value = MULTIPLAYER_SESSION_SCRIPT.MAX_SESSION_PLAYERS
+		_player_capacity_spin.value = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_MAX_PLAYERS
+		_player_capacity_spin.tooltip_text = "Gesamte Verbindungskapazität. Freie Plätze verhindern den Start nicht; Teams teilen sich ihre Steuerung."
+		grid.add_child(_player_capacity_spin)
 		_add_setup_label(grid, "Map", "multiplayer.map_select")
 		_map_option = _add_setup_option(grid, "MapOptionButton", "multiplayer.map_select")
 		_add_setup_label(grid, "Verbindung", "multiplayer.connection_mode")
@@ -976,6 +993,7 @@ func _ensure_lobby_setup_controls() -> void:
 		_player_roster_option = setup_panel.find_child("PlayerRosterOptionButton", true, false) as OptionButton
 		_player_team_option = setup_panel.find_child("PlayerTeamOptionButton", true, false) as OptionButton
 		_team_mode_option = setup_panel.find_child("TeamModeOptionButton", true, false) as OptionButton
+		_player_capacity_spin = setup_panel.find_child("PlayerCapacitySpinBox", true, false) as SpinBox
 		_map_option = setup_panel.find_child("MapOptionButton", true, false) as OptionButton
 		_connection_mode_option = setup_panel.find_child("ConnectionModeOptionButton", true, false) as OptionButton
 		_network_hint_label = setup_panel.find_child("NetworkHintLabel", true, false) as Label
@@ -1135,6 +1153,8 @@ func _connect_ui_signals() -> void:
 		_host_button.pressed.connect(_on_host_pressed)
 	if not _host_port_spin.value_changed.is_connected(_on_lobby_setup_changed):
 		_host_port_spin.value_changed.connect(_on_lobby_setup_changed)
+	if _player_capacity_spin != null and not _player_capacity_spin.value_changed.is_connected(_on_lobby_setup_changed):
+		_player_capacity_spin.value_changed.connect(_on_lobby_setup_changed)
 	if not _join_button.pressed.is_connected(_on_join_pressed):
 		_join_button.pressed.connect(_on_join_pressed)
 	if not _ready_button.pressed.is_connected(_on_ready_pressed):
@@ -1243,7 +1263,7 @@ func _on_map_reject_pressed() -> void:
 
 
 func _on_session_snapshot_changed(snapshot: Dictionary) -> void:
-	if has_active_mission() and not bool(snapshot.get("mission_started", false)):
+	if _world_runtime != null and not bool(snapshot.get("mission_started", false)):
 		_retire_active_mission()
 		_set_lobby_panel_visible(true)
 	_apply_session_snapshot(snapshot)
@@ -1252,27 +1272,18 @@ func _on_session_snapshot_changed(snapshot: Dictionary) -> void:
 func _on_session_mission_start_requested(assignments: Dictionary) -> void:
 	_mission_start_request_count += 1
 	_last_start_assignments = assignments.duplicate(true)
-	_launch_mission(assignments)
-	_status_label.text = "Mission running."
+	if _launch_mission(assignments): _status_label.text = "Mission running."
 	_refresh_lobby_controls(get_session_snapshot())
 
 
 func _on_session_mission_assignments_changed(assignments: Dictionary) -> void:
-	if has_active_mission():
-		if not _apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments): return
-		_last_start_assignments = assignments.duplicate(true)
-		_apply_local_mission_fireteam_perspective(_active_mission, assignments)
-	else:
-		_last_start_assignments = assignments.duplicate(true)
+	_last_start_assignments = assignments.duplicate(true)
+	if _world_runtime != null: _world_runtime.call("update_assignments", assignments)
 	_apply_session_snapshot(get_session_snapshot())
 
 
 func _on_session_rejoin_peer_block_changed(peer_id: int, blocked: bool) -> void:
-	if not has_active_mission():
-		return
-	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
-	if simulation_root != null and simulation_root.has_method("set_snapshot_peer_blocked"):
-		simulation_root.call("set_snapshot_peer_blocked", peer_id, blocked)
+	if _world_runtime != null: _world_runtime.call("on_peer_block_changed", peer_id, blocked)
 
 
 func _on_session_disconnected(_message: String) -> void:
@@ -1281,10 +1292,9 @@ func _on_session_disconnected(_message: String) -> void:
 	_refresh_from_session()
 
 
-func _launch_mission(assignments: Dictionary) -> void:
-	_release_active_mission()
+func _launch_mission(assignments: Dictionary) -> bool:
 	_ensure_mission_host()
-	var mission_instance: Node = MISSION_SCENE.instantiate()
+	_ensure_world_runtime()
 	var session_snapshot: Dictionary = get_session_snapshot()
 	var map_path: String = ""
 	if bool(session_snapshot.get("is_host", false)):
@@ -1292,29 +1302,87 @@ func _launch_mission(assignments: Dictionary) -> void:
 	else:
 		var map_transfer: Dictionary = Dictionary(session_snapshot.get("map_transfer", {}))
 		map_path = String(map_transfer.get("local_path", map_transfer.get("cache_path", "")))
-	if not map_path.is_empty():
-		mission_instance.get_node("MissionSetup").set("map_file_path", map_path)
-	if not _apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments):
-		mission_instance.free()
-		return
-	var startup_combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
-	if startup_combat_driver != null and startup_combat_driver.has_method("set_combat_startup_grace_ticks"):
-		startup_combat_driver.call("set_combat_startup_grace_ticks", PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS)
-	_mission_host.add_child(mission_instance)
-	_active_mission = mission_instance
-	var replica_root: Node=mission_instance.get_node_or_null("SimulationRoot")
-	if replica_root!=null and replica_root.has_method("refresh_multiplayer_replica_presence"):
-		replica_root.call("refresh_multiplayer_replica_presence")
-	initialize_multiplayer_mission_dropships(mission_instance, assignments, bool(get_session_snapshot().get("is_host", false)))
-	_apply_local_mission_fireteam_perspective(mission_instance, assignments)
-	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
-	if combat_driver != null and combat_driver.has_signal("combat_resolved"):
-		var resolved_callable := Callable(self, "_on_product_mission_resolved")
-		if not combat_driver.is_connected("combat_resolved", resolved_callable):
-			combat_driver.connect("combat_resolved", resolved_callable)
-	if not bool(get_session_snapshot().get("is_host", false)):
-		_session.rpc_id(1, "notify_mission_runtime_ready", get_multiplayer_runtime_context())
+	if not bool(_world_runtime.call("start_world", assignments, map_path)):
+		_status_label.text = "Kartenstart abgelehnt: ungültiger Missionskontext."
+		return false
 	_set_lobby_panel_visible(false)
+	_refresh_world_locations()
+	return true
+
+
+func _ensure_world_runtime() -> void:
+	if _world_runtime != null: return
+	_world_runtime = MULTIPLAYER_WORLD_RUNTIME_SCRIPT.new()
+	_world_runtime.name = "MultiplayerWorldRuntime"
+	add_child(_world_runtime)
+	_world_runtime.call("configure", _session, _mission_host)
+	_world_runtime.connect("locations_changed", _refresh_world_locations)
+	_world_runtime.connect("local_location_changed", func(_id: String, instance: Node): _active_mission = instance)
+	_world_runtime.connect("world_completed", func(): _session.call("complete_mission"))
+	_world_runtime.connect("location_error", func(reason: String):
+		if _world_status != null: _world_status.text = reason)
+	_world_bar = CanvasLayer.new()
+	_world_bar.name = "MultiplayerLocations"
+	_world_bar.layer = 40
+	_world_bar.visible = false
+	add_child(_world_bar)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(12, 8)
+	_world_bar.add_child(panel)
+	var row := HBoxContainer.new()
+	panel.add_child(row)
+	var label := Label.new()
+	label.text = "Ort ansehen:"
+	row.add_child(label)
+	_world_location_option = OptionButton.new()
+	_world_location_option.custom_minimum_size.x = 210
+	_world_location_option.tooltip_text = "Nur deine Ansicht wechseln. Einheiten und andere Spieler bleiben an ihrem Ort."
+	row.add_child(_world_location_option)
+	_world_location_option.item_selected.connect(func(index: int): select_multiplayer_location(String(_world_location_option.get_item_metadata(index))))
+	_world_open_map_option = OptionButton.new()
+	_world_open_map_option.custom_minimum_size.x = 180
+	row.add_child(_world_open_map_option)
+	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").playable_paths():
+		_world_open_map_option.add_item(path.get_file().get_basename())
+		_world_open_map_option.set_item_metadata(_world_open_map_option.item_count - 1, path)
+	_world_open_button = Button.new()
+	_world_open_button.text = "Ort öffnen"
+	_world_open_button.tooltip_text = "Host: weiteren gemeinsamen Einsatzort öffnen."
+	row.add_child(_world_open_button)
+	_world_open_button.pressed.connect(func():
+		var result: Dictionary = open_multiplayer_location(String(_world_open_map_option.get_item_metadata(_world_open_map_option.selected)))
+		_world_status.text = "Ort geöffnet" if bool(result.get("ok", false)) else "Nicht geöffnet: " + String(result.get("reason", "")))
+	_world_status = Label.new()
+	row.add_child(_world_status)
+
+
+func open_multiplayer_location(map_path: String, allowed_teams: PackedStringArray = PackedStringArray()) -> Dictionary:
+	if _world_runtime == null: return {"ok":false, "reason":"no_world"}
+	return _world_runtime.call("open_location", map_path, allowed_teams)
+
+
+func select_multiplayer_location(location_id: String) -> bool:
+	return _world_runtime != null and bool(_world_runtime.call("select_location", location_id))
+
+
+func get_multiplayer_location_rows() -> Array:
+	return _world_runtime.call("get_location_rows") if _world_runtime != null else []
+
+
+func _refresh_world_locations() -> void:
+	if _world_location_option == null: return
+	_world_location_option.clear()
+	for row: Dictionary in get_multiplayer_location_rows():
+		if bool(row.finished): continue
+		_world_location_option.add_item(String(row.title))
+		var index: int = _world_location_option.item_count - 1
+		_world_location_option.set_item_metadata(index, row.id)
+		_world_location_option.set_item_disabled(index, not bool(row.available))
+		if bool(row.selected): _world_location_option.select(index)
+	var host: bool = bool(get_session_snapshot().get("is_host", false))
+	_world_open_map_option.visible = host
+	_world_open_button.visible = host
+	_world_bar.visible = bool(get_session_snapshot().get("mission_started", false))
 
 
 func initialize_multiplayer_mission_dropships(mission_instance: Node, assignments: Dictionary, is_host: bool) -> bool:
@@ -1342,12 +1410,17 @@ func _apply_local_mission_fireteam_perspective(mission_instance: Node, assignmen
 
 
 func _release_active_mission() -> void:
-	if _active_mission != null and is_instance_valid(_active_mission):
+	if _world_runtime != null:
+		_world_runtime.call("clear_world")
+	elif _active_mission != null and is_instance_valid(_active_mission):
 		_active_mission.queue_free()
 	_active_mission = null
 
 
 func _retire_active_mission() -> void:
+	if _world_runtime != null:
+		_release_active_mission()
+		return
 	if not has_active_mission():
 		return
 	var retiring_mission: Node = _active_mission
@@ -1373,6 +1446,9 @@ func _set_lobby_panel_visible(visible: bool) -> void:
 
 
 func _on_product_mission_resolved(_mission_result: Dictionary) -> void:
+	if _world_runtime != null:
+		_world_runtime.call("finish_location", _world_runtime.call("get_selected_location_id"), _mission_result)
+		return
 	if not bool(get_session_snapshot().get("is_host", false)):
 		return
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
@@ -1465,6 +1541,16 @@ func _refresh_lobby_controls(snapshot: Dictionary) -> void:
 	for host_only_control in [_team_mode_option, _map_option]:
 		if host_only_control != null:
 			host_only_control.disabled = mission_started or has_active_peer
+	if _player_capacity_spin != null:
+		_player_capacity_spin.editable = not mission_started and not has_active_peer
+		if has_active_peer:
+			_player_capacity_spin.set_value_no_signal(int(snapshot.get("max_players", MULTIPLAYER_SESSION_SCRIPT.DEFAULT_MAX_PLAYERS)))
+	if has_active_peer:
+		_select_option_by_metadata(_team_mode_option, String(Dictionary(snapshot.get("assignments", {})).get("team_play_mode", TEAM_PLAY_MODE_COOP)))
+		if not is_host and _get_selected_option_metadata(_team_mode_option) == TEAM_PLAY_MODE_COOP and _player_team_option != null:
+			_player_team_option.disabled = true
+			var peer_teams: Dictionary = Dictionary(Dictionary(snapshot.get("assignments", {})).get("peer_teams", {}))
+			_select_option_by_metadata(_player_team_option, String(peer_teams.get(int(snapshot.get("local_peer_id", 0)), "team_alpha")))
 
 
 func _show_map_consent_prompt(manifest: Dictionary) -> void:
@@ -1526,9 +1612,9 @@ func _populate_team_options() -> void:
 	if _player_team_option == null:
 		return
 	_player_team_option.clear()
-	_player_team_option.add_item("Alpha / Spieler")
+	_player_team_option.add_item("Team Alpha")
 	_player_team_option.set_item_metadata(0, "team_alpha")
-	_player_team_option.add_item("Bravo / Gegner")
+	_player_team_option.add_item("Team Bravo")
 	_player_team_option.set_item_metadata(1, "team_bravo")
 	_player_team_option.select(0)
 
@@ -1537,10 +1623,13 @@ func _populate_team_mode_options() -> void:
 	if _team_mode_option == null:
 		return
 	_team_mode_option.clear()
-	_team_mode_option.add_item("Zusammen")
+	_team_mode_option.add_item("Koop gegen KI")
 	_team_mode_option.set_item_metadata(0, TEAM_PLAY_MODE_COOP)
-	_team_mode_option.add_item("Gegeneinander")
+	_team_mode_option.add_item("PvP")
 	_team_mode_option.set_item_metadata(1, TEAM_PLAY_MODE_VERSUS)
+	_team_mode_option.add_item("Koop-PvP")
+	_team_mode_option.set_item_metadata(2, TEAM_PLAY_MODE_COOP_VERSUS)
+	_team_mode_option.tooltip_text = "Koop: ein gemeinsames Team. PvP / Koop-PvP: Alpha gegen Bravo, mit gemeinsamer Steuerung innerhalb jedes Teams."
 	_team_mode_option.select(0)
 
 
@@ -1548,17 +1637,9 @@ func _populate_map_options() -> void:
 	if _map_option == null:
 		return
 	_map_option.clear()
-	var dir := DirAccess.open("res://maps")
-	if dir != null:
-		dir.list_dir_begin()
-		var file_name: String = dir.get_next()
-		while not file_name.is_empty():
-			if not dir.current_is_dir() and file_name.ends_with(".json"):
-				var path: String = "res://maps/%s" % file_name
-				_map_option.add_item(file_name.get_basename())
-				_map_option.set_item_metadata(_map_option.item_count - 1, path)
-			file_name = dir.get_next()
-		dir.list_dir_end()
+	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").playable_paths():
+		_map_option.add_item(path.get_file().get_basename())
+		_map_option.set_item_metadata(_map_option.item_count - 1, path)
 	if _map_option.item_count <= 0:
 		_map_option.add_item("Keine Map gefunden")
 		_map_option.set_item_metadata(0, "")
@@ -1598,11 +1679,8 @@ func _apply_roster_mode_snapshot(roster_snapshot: Dictionary) -> void:
 		if String(_roster_mode_option.get_item_metadata(index)) == mode:
 			_roster_mode_option.select(index)
 			break
-	_roster_mode_summary_label.text = "Roster: %s | local=%s | authority=%s" % [
-		String(roster_snapshot.get("roster_mode_label", MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("get_roster_mode_label", mode))),
-		str(bool(roster_snapshot.get("uses_local_roster", false))),
-		String(roster_snapshot.get("mission_authority", MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.CHARACTER_GAMEPLAY_AUTHORITY)),
-	]
+	_roster_mode_summary_label.text = String(roster_snapshot.get("roster_mode_label", MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("get_roster_mode_label", mode)))
+	_roster_mode_option.tooltip_text = "Verwendet dein lokales Team." if bool(roster_snapshot.get("uses_local_roster", false)) else "Verwendet das vom Host vorgegebene Team."
 
 
 func _apply_lobby_setup_to_session() -> void:
@@ -1628,6 +1706,7 @@ func _build_lobby_setup_snapshot_from_controls() -> Dictionary:
 		"roster_path": _get_selected_option_metadata(_player_roster_option),
 		"team_slot": _get_selected_option_metadata(_player_team_option),
 		"team_play_mode": _get_selected_option_metadata(_team_mode_option),
+		"max_players": int(_player_capacity_spin.value) if _player_capacity_spin != null else MULTIPLAYER_SESSION_SCRIPT.DEFAULT_MAX_PLAYERS,
 		"map_path": _get_selected_option_metadata(_map_option),
 		"connection_mode": _get_selected_option_metadata(_connection_mode_option),
 	}
@@ -1656,11 +1735,14 @@ func _refresh_connection_hint() -> void:
 	var mode: String = _get_selected_option_metadata(_connection_mode_option)
 	var port: int = int(_host_port_spin.value) if _host_port_spin != null else MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT
 	if mode == CONNECTION_MODE_UPNP:
-		_network_hint_label.text = "UPnP: Host versucht UDP-Port %d automatisch am Router zu oeffnen. Wenn der Router UPnP blockt: manuell freigeben oder VPN nutzen." % port
+		_network_hint_label.text = "Automatische Portfreigabe · UDP %d" % port
+		_connection_mode_option.tooltip_text = "Routerfreigabe per UPnP. Falls sie scheitert: Port manuell freigeben oder VPN nutzen."
 	elif mode == CONNECTION_MODE_DIRECT_WAN:
-		_network_hint_label.text = "Internet Direct IP: Host braucht UDP-Port %d in Firewall und Router weitergeleitet; Client nutzt die oeffentliche IP oder VPN." % port
+		_network_hint_label.text = "Host benötigt Portfreigabe · UDP %d" % port
+		_connection_mode_option.tooltip_text = "UDP-Port in Firewall und Router freigeben. Mitspieler verbinden sich über die öffentliche IP oder VPN."
 	else:
-		_network_hint_label.text = "LAN/VPN: beide Spieler muessen im selben lokalen Netz oder VPN sein. Fuer Internet Direct IP bitte Portfreigabe oder UPnP nutzen."
+		_network_hint_label.text = "Gleiches Netzwerk oder VPN erforderlich"
+		_connection_mode_option.tooltip_text = "Für eine direkte Internetverbindung stattdessen Portfreigabe oder UPnP wählen."
 
 
 func _refresh_settings_summary() -> void:
@@ -1706,10 +1788,8 @@ func _build_lobby_role_readability_snapshot(snapshot: Dictionary) -> Dictionary:
 	if peers.is_empty():
 		peer_lines[0] = "EINSATZROLLEN | -"
 	var mode: String = String(assignments.get("team_play_mode", TEAM_PLAY_MODE_COOP)).strip_edges().to_lower()
-	var mode_label: String = "VERSUS" if mode == TEAM_PLAY_MODE_VERSUS else "COOP"
+	var mode_label: String = "KOOP-PVP" if mode == TEAM_PLAY_MODE_COOP_VERSUS else ("VERSUS" if mode == TEAM_PLAY_MODE_VERSUS else "COOP")
 	var assignment_lines := PackedStringArray(["%s | %d AKTIV | %d ZUSCHAUER" % [mode_label, active_count, spectator_count]])
-	if mode == TEAM_PLAY_MODE_COOP and spectator_count > 0:
-		assignment_lines.append("Zuschauer ruecken vor dem Start nach, sobald ein Fireteam frei wird.")
 	return {
 		"schema": "lobby_role_readability_v1",
 		"ui_sets_gameplay_truth": false,

@@ -15,6 +15,6 @@ func _initialize()->void:
  check(ICONS.get_icon("mining_tool").region!=ICONS.get_icon("pistol").region,"yellow mining tool has its own illustration")
  check(ICONS.get_icon("rifle")==ICONS.get_icon("rifle"),"unchanged item reuses cached texture identity")
  var briefing:Dictionary=load("res://scripts/mission/singleplayer_job_contract.gd").get_briefing("satellite_recovery")
- check(briefing.body_name=="Glut" and briefing.body_kind=="Planet","briefing resolves actual star-system body")
+ check(briefing.body_name=="Neralis" and briefing.body_kind=="Mond","briefing resolves actual satellite destination body")
  check(briefing.objectives.has("Satelliten-Absturzstelle finden") and briefing.objectives.has("Satellitendaten bergen"),"finding location and recovering data are separate objectives")
  print("MENU_ICONS_BRIEFING checks=%d failures=%d"%[checks,failures]);quit(1 if failures else 0)

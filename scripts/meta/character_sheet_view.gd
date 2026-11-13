@@ -183,12 +183,14 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	var traits := _overview_section(social, "EIGENSCHAFTEN & WIRKUNG", "CharacterTraitOverview")
 	(traits.get_parent() as Control).size_flags_stretch_ratio = 0.92
 	_add_overview_traits(traits, model)
-	var relationships := _overview_section(social, "ZUSAMMENARBEIT", "CharacterRelationshipOverview")
-	for row: Dictionary in Array(model.get("relationship_overview_rows", [])):
-		_add_overview_relationship(relationships, row)
 	if Array(model.get("relationship_overview_rows", [])).is_empty():
-		_overview_label(relationships, "NoKnownRelationships", String(model.get("relationship_empty_text", "Noch keine Beziehung bekannt.")), 14)
+		# Empty relationships do not reserve half of the traits card. Keep the
+		# truthful empty state visible as one compact line below it.
+		_overview_label(sheet, "NoKnownRelationships", "Zusammenarbeit · " + String(model.get("relationship_empty_text", "Noch keine Beziehung bekannt.")), 14, true)
 	else:
+		var relationships := _overview_section(social, "ZUSAMMENARBEIT", "CharacterRelationshipOverview")
+		for row: Dictionary in Array(model.get("relationship_overview_rows", [])):
+			_add_overview_relationship(relationships, row)
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")

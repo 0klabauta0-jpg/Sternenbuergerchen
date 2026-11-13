@@ -3,6 +3,7 @@ extends RefCounted
 
 const SNAPSHOT_SCHEMA: String = "sternenbuergerchen.mission_interaction_door_runtime_collision_los.v1"
 const OPEN_PROGRESS_THRESHOLD: float = 0.85
+const FOOTPRINT = preload("res://scripts/mission/mission_door_footprint.gd")
 
 
 static func resolve_door_state(state: String, progress: float) -> String:
@@ -20,6 +21,7 @@ static func build_runtime_snapshot(bindings: Array, interaction_states: Dictiona
 	# Local selection, visual anchors, range labels and render availability are not.
 	var entries: Array = []
 	var unresolved_marker_ids: PackedStringArray = PackedStringArray()
+	var invalid_footprint_ids: PackedStringArray = PackedStringArray()
 	for binding_variant in bindings:
 		if typeof(binding_variant) != TYPE_DICTIONARY:
 			continue
@@ -33,19 +35,27 @@ static func build_runtime_snapshot(bindings: Array, interaction_states: Dictiona
 		if terrain_map_data == null or marker_id.is_empty() or not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
 			unresolved_marker_ids.append(marker_id)
 			continue
+		var footprint: Dictionary = FOOTPRINT.validate_binding(binding, terrain_map_data)
+		if not footprint.get("ok", false):
+			invalid_footprint_ids.append(interaction_id)
+			continue
 		var state: Dictionary = Dictionary(interaction_states.get(interaction_id, {}))
 		var state_name: String = "complete" if bool(state.get("complete", false)) else String(state.get("state", ""))
-		entries.append({
+		var entry := {
 			"interaction_id": interaction_id,
 			"marker_id": marker_id,
 			"object_kind": "door",
 			"world_position": Vector2(terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)),
 			"runtime_visual_state": resolve_door_state(state_name, clampf(float(state.get("progress", 0.0)), 0.0, 1.0)),
-		})
+		}
+		if binding.has("door_cells"): entry["door_cells"] = binding.door_cells.duplicate(true)
+		entries.append(entry)
 	var snapshot: Dictionary = build_snapshot({"schema": "sternenbuergerchen.mission_interaction_door_runtime_projection.v1", "entries": entries}, terrain_registry)
 	snapshot["runtime_authority"] = "MissionCombatLoopDriver interaction state"
 	snapshot["unresolved_marker_ids"] = unresolved_marker_ids
 	snapshot["unresolved_marker_count"] = unresolved_marker_ids.size()
+	snapshot["invalid_footprint_ids"] = invalid_footprint_ids
+	snapshot["invalid_footprint_count"] = invalid_footprint_ids.size()
 	return snapshot
 
 
@@ -65,7 +75,12 @@ static func build_snapshot(object_reaction_snapshot: Dictionary, terrain_registr
 			continue
 		state_counts[String(door_entry.get("runtime_visual_state", "closed"))] = int(state_counts.get(String(door_entry.get("runtime_visual_state", "closed")), 0)) + 1
 		door_entries.append(door_entry)
-		if door_entry.has("grid_position"):
+		if door_entry.has("door_cells"):
+			for cell: Vector2i in door_entry.door_cells:
+				var cell_entry := door_entry.duplicate()
+				cell_entry["grid_position"] = cell
+				overrides.append(_build_override(cell_entry))
+		elif door_entry.has("grid_position"):
 			overrides.append(_build_override(door_entry))
 	return {
 		"schema": SNAPSHOT_SCHEMA,
@@ -86,6 +101,14 @@ static func build_snapshot(object_reaction_snapshot: Dictionary, terrain_registr
 static func _build_door_entry(entry: Dictionary, terrain_registry) -> Dictionary:
 	var runtime_visual_state: String = _normalize_door_state(String(entry.get("runtime_visual_state", "")))
 	var grid_position: Variant = _resolve_grid_position(entry, terrain_registry)
+	var footprint := {}
+	if entry.has("door_cells"):
+		if terrain_registry == null: return {}
+		var marker: Variant = entry.get("world_position")
+		if marker == null and grid_position is Vector2i:
+			marker = terrain_registry.grid_to_world(grid_position)
+		footprint = FOOTPRINT.validate_cells(entry.door_cells, terrain_registry, marker)
+		if not footprint.get("ok", false): return {}
 	var result: Dictionary = {
 		"interaction_id": String(entry.get("interaction_id", "")).strip_edges(),
 		"marker_id": String(entry.get("marker_id", "")).strip_edges(),
@@ -102,6 +125,7 @@ static func _build_door_entry(entry: Dictionary, terrain_registry) -> Dictionary
 	}
 	if grid_position is Vector2i:
 		result["grid_position"] = Vector2i(grid_position)
+	if not footprint.is_empty(): result["door_cells"] = footprint.cells.duplicate()
 	return result
 
 

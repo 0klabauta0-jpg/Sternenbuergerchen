@@ -6,6 +6,15 @@ Dieser Contract beschreibt den ersten stabilen Authoring-Pfad fuer Missionsinter
 Ziel ist nicht, neue Runtime-Gameplay-Wahrheit in den Editor zu legen. Der Editor setzt sichtbare, speicherbare Anker. Die Mission-Runtime liest diese Anker spaeter ueber Scenario-/Terrain-Daten und fuehrt echte Befehle weiterhin ueber `SimulationRoot` und die bestehenden Command-/Gate-Pfade aus.
 
 ## Autoritaet
+Mehrzellige authored Türen können `door_cells: [{x,y}, ...]` an ihrem Binding
+führen (1–4 eindeutige, zusammenhängende echte Türzellen). Der Marker muss
+auf dem Zentrum einer dieser Zellen liegen. Form, Zuordnung, vorhandene
+Türasset-IDs und Nachbarschaft werden gegen die aktuelle Karte geprüft.
+Hostkanonisierung verwendet ausschließlich das Szenario-Binding; Clients
+bestimmen weder Footprint noch Radius. Ungültige Footprints öffnen keine Zelle.
+Closed/Half/Open betrifft genau die geprüften Rahmen-/Blattzellen, niemals
+einen Radius. Alte einteilige Bindings ohne dieses Feld bleiben kompatibel.
+
 - `TerrainMapData` speichert Markerpositionen und Tile-/Asset-Daten.
 - `TerrainMarkerCatalog` definiert authorbare Marker-Typen, Namen, Symbole und Farben.
 - Szenario-/Mission-Daten verbinden einen Marker optional mit einem Runtime-Gate, Objective oder Command.

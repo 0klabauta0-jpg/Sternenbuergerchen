@@ -28,14 +28,10 @@ func _run() -> void:
 	_check(not bool(state.ephemeral_commander) and state.registered_unit_count == 2, "World displays real two-person registry without extra commander")
 	var models: Dictionary = base.get("_person_visuals")
 	_check(models.has("campaign_leader") and models.has("campaign_pilot"), "Both selectable visuals carry canonical roster IDs")
-	var selector: OptionButton = base.get("_person_selector")
-	var pilot_index: int = -1
-	for index in selector.item_count:
-		if String(selector.get_item_metadata(index)) == "campaign_pilot":
-			pilot_index = index
-	_check(pilot_index >= 0, "Person selector includes actual pilot")
-	if pilot_index >= 0:
-		selector.item_selected.emit(pilot_index)
+	var pilot_card: Button = base.find_child("SelectPerson_campaign_pilot", true, false)
+	_check(pilot_card != null and pilot_card.is_visible_in_tree(), "Other-person card includes actual pilot")
+	if pilot_card != null:
+		pilot_card.pressed.emit()
 	_check(String(base.get("_selected_person_id")) == "campaign_pilot", "World selection targets pilot identity")
 	var buttons: Dictionary = base.get("_person_buttons")
 	(buttons.equipment as Button).pressed.emit()
