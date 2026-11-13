@@ -194,6 +194,21 @@ func _test_occupied_access()->void:
 	var resolved:Dictionary=movement._resolve_occupied_hex_formation_targets(rig.sim,records,desired,rig.terrain)
 	_check(not resolved.is_empty() and resolved.approach_b==free_target and resolved.approach_a!=anchor and resolved.approach_a!=free_target,"normal formation repairs foreign occupied goal while preserving and excluding free member goal")
 	_check(movement._resolve_occupied_hex_formation_targets(rig.sim,records,resolved,rig.terrain).is_empty() and desired.approach_a==anchor and rig.sim.get_hex_ground_planning_snapshot()==before,"free formation remains unchanged and repair mutates no Ground claims or input")
+	var take:=SpacingMovement.new()
+	var take_a=rig.units.get_unit("approach_a");var take_b=rig.units.get_unit("approach_b")
+	var cover_grid:Vector2i=rig.sim.get_hex_unit_state("approach_b").grid
+	take.forced_target=rig.terrain.grid_to_world(cover_grid)
+	var take_started:Dictionary=take.start_execution("take_test","take",0,rig.terrain.grid_to_world(Vector2i(6,4)),null,[take_a,take_b],take_a,rig.sim,rig.terrain)
+	var take_state:Dictionary=take._execution_by_fireteam["take_test"]
+	take_state.effective_style=take.ADVANCE_STYLE_BOUNDING;take_state.group_cycle=[PackedStringArray(["approach_a"]),PackedStringArray(["approach_b"])];take_state.next_group_index=0
+	var take_records:Array=take._build_member_records([take_a,take_b],take_a)
+	take._issue_stage(take_state,take_records,rig.sim,rig.terrain)
+	rig.sim._physics_process(0.1)
+	var take_readout:Dictionary=rig.sim.get_hex_movement_readout("approach_a")
+	print("TAKE_COVER_DIAGNOSTIC ",{"started":take_started,"cover":take_state.current_covering_unit_ids,"move":take_state.current_moving_unit_ids,"readout":take_readout,"cover_grid":cover_grid,"b":rig.sim.get_hex_unit_state("approach_b"),"targets":take_state.current_target_positions})
+	_check(take_started.get("started",false) and take_state.current_covering_unit_ids.has("approach_b") and take_readout.goal_grid!=cover_grid and rig.sim.get_hex_unit_state("approach_b").grid==cover_grid,"real TAKE bounding stage preserves holding cover member and assigns moving member a distinct legal goal")
+	for tick in range(180):rig.sim._physics_process(0.1)
+	_check(rig.sim.has_hex_destination_arrived("approach_a",String(take_readout.source_command_id)) and rig.sim.get_hex_unit_state("approach_b").grid==cover_grid,"actual TAKE moving member arrives without displacing its holding cover member")
 	var actual:=SpacingMovement.new();actual.forced_target=anchor
 	var first=rig.units.get_unit("approach_a");var second=rig.units.get_unit("approach_b")
 	var started:Dictionary=actual.start_execution("ft1","move",0,rig.terrain.grid_to_world(Vector2i(6,4)),null,[first,second],first,rig.sim,rig.terrain)

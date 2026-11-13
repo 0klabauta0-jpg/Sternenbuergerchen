@@ -907,7 +907,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 			var final_candidates:Dictionary=formation_targets.duplicate()
 			final_candidates.merge(accepted_moving_targets,true)
 			final_candidates[unit_id]=walkable_target
-			var repaired:Dictionary=_resolve_occupied_hex_formation_targets(simulation_root,member_records,final_candidates,terrain_registry)
+			var repaired:Dictionary=_resolve_occupied_hex_formation_targets(simulation_root,member_records,final_candidates,terrain_registry,moving_unit_ids)
 			if not repaired.is_empty():walkable_target=Vector2(repaired[unit_id])
 		move_target = walkable_target
 		accepted_moving_targets[unit_id] = move_target
@@ -1048,9 +1048,9 @@ func _is_execution_complete(state: Dictionary, member_records: Array, simulation
 	return true
 
 
-## Preserve free formation slots; only foreign occupied goals borrow Root's
+## Preserve free formation slots; stationary occupied goals borrow Root's
 ## bounded neighboring approach planner, excluding every other assigned slot.
-func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Array,targets:Dictionary,terrain_registry)->Dictionary:
+func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Array,targets:Dictionary,terrain_registry,moving_ids:PackedStringArray=PackedStringArray())->Dictionary:
 	if simulation_root==null or terrain_registry==null or not simulation_root.is_hex_ground_runtime_active():return {}
 	var ids:PackedStringArray=_packed_unit_ids(member_records)
 	var snapshot:Dictionary=simulation_root.get_hex_ground_planning_snapshot()
@@ -1059,10 +1059,18 @@ func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Arra
 	for id in ids:
 		var grid:Vector2i=terrain_registry.world_to_grid(result[id])
 		var occupant:String=String(snapshot.occupant_by_grid.get(grid,""))
-		if occupant.is_empty() or ids.has(occupant):continue
+		if occupant.is_empty() or occupant==id:continue
+		if ids.has(occupant) and moving_ids.has(occupant):
+			var occupied_state:Dictionary=simulation_root.get_hex_unit_state(occupant)
+			var route:Dictionary=occupied_state.get("route_state",{})
+			if route.get("has_commitments",false) and route.get("final_grid",grid)!=grid:continue
+
 		var excluded:Array[Vector2i]=[]
 		for other in result:
-			if other!=id:excluded.append(terrain_registry.world_to_grid(result[other]))
+			var other_grid:Vector2i=terrain_registry.world_to_grid(result[other])
+			# The occupant already blocks the desired anchor; duplicating it as
+			# an external exclusion would reject the whole neighbor search.
+			if other!=id and other_grid!=grid:excluded.append(other_grid)
 		var plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),result[id],128.0,excluded)
 		if plan.get("ok",false):
 			result[id]=plan.targets[id]

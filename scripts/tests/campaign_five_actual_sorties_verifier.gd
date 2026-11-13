@@ -23,7 +23,7 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 			await physics_frame
 		print("FIVE_SURFACE_PREPARATION ", _flow.call("get_surface_preparation_snapshot", _craft_id), " locations=", _flow.call("get_location_runtime_snapshot"), " travel=", _space())
 		return _check(false, "TIMEOUT " + label)
-	if label in ["actual combat defeats outpost guards","actual squad reaches outpost combat area"]:
+	if label in ["actual combat defeats outpost guards","actual squad reaches outpost combat area","actual ground squad gathers before enemy contact"]:
 		var deadline := Time.get_ticks_msec() + milliseconds
 		var next_trace := 0
 		while Time.get_ticks_msec() < deadline:
@@ -57,6 +57,7 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 			await physics_frame
 			# The real 512x256 trader return has a 129-cell path. The measured
 			# original 45s run still moved normally with seven cells remaining.
+			# Current long-map Uses already receive a bounded 180s approach budget.
 			# Extend only a proved long, still advancing owner route; short Uses,
 			# blocked/stationary routes and hold timers keep their original limit.
 			if Time.get_ticks_msec() >= deadline and not extended and _long_approach_is_progressing(latest, progress, Time.get_ticks_msec()):
@@ -223,15 +224,38 @@ func _remaining_missions() -> void:
 		var controller:Node=mission.get_node("TacticalController")
 		controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
 		if job!="benit_delivery":
+			# Protect the assigned pilot through the same real movement/boarding
+			# owner before committing the ground squad to a long combat route.
+			var sim:Node=mission.get_node("SimulationRoot")
+			var access:Dictionary=controller.get_campaign_ground_ship_access(_craft_id)
+			var pilot_plan:Dictionary=sim.plan_hex_ground_actor_approach(PackedStringArray([_pilot_id]),access.position,96.0) if access.get("ok",false) else {}
+			if not _check(pilot_plan.get("ok",false),"actual pilot receives legal ship access goal"):return
+			var pilot_token:="campaign-safe-pilot:"+job
+			sim.enqueue_command({"type":"move_to_position","unit_id":_pilot_id,"team_id":"team_alpha","target_position":pilot_plan.targets[_pilot_id],"command_token":pilot_token,"move_speed_factor":1.0,"source_command_type":"pilot_board"})
+			if not await _wait(func():return sim.has_hex_destination_arrived(_pilot_id,pilot_token),45000,"pilot actually walks back to ship access"):return
+			var boarding:Dictionary=controller.request_campaign_crew_boarding(_craft_id,"",_pilot_id)
+			if not _check(boarding.get("ok",false),"normal pilot-only boarding accepts"):print("PILOT_BOARDING ",boarding);return
+			if not await _wait(func():return controller.get_campaign_pilot_flight_guard(_craft_id,false).get("ok",false) and sim.get_hex_unit_state(_pilot_id).is_empty(),15000,"actual pilot is safely aboard before combat"):return
 			_check(bool(controller.call("set_selected_fireteams_fire_rule","free")),"commander orders weapons free")
 			var enemy_target:Vector2=MAP.load_from_file(map_path).get_marker_position("spawn_enemy_defense")
-			controller.call("_create_waypoints_for_selected_fireteams",enemy_target,true)
+			var rally:Vector2=Vector2(access.position).lerp(enemy_target,0.80)
+			controller.call("_create_waypoints_for_selected_fireteams",rally,true)
+			if not _check(controller.execute_selected_fireteam_orders(),"normal squad rally GO accepts"):return
+			if not await _wait(func():
+				var live:=0
+				for id in _crew_ids:
+					var actor=sim.call("_resolve_known_unit_for_contract",String(id))
+					if sim.get_hex_unit_state(String(id)).is_empty() or not is_instance_valid(actor) or actor.get_vital_state()!="fit":continue
+					live+=1
+					if actor.global_position.distance_to(rally)>400.0:return false
+				return live>=2,180000,"actual ground squad gathers before enemy contact"):
+				_trace_actual_combat("rally_timeout");return
+			if not _check(controller.issue_right_click_command_for_test(enemy_target,"take",false),"normal TAKE / ENGAGE plan accepts after rally"):return
 			_check(bool(controller.call("execute_selected_fireteam_orders")),"approach actual outpost guard")
 			# Actual 512x256 route exceeds the old compound 60s combat wait.
 			# Require real proximity first; combat retains its own original budget.
 			if not await _wait(func():
 				if PackedStringArray(mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot().get("completed_step_ids",[])).has("clear_outpost"):return true
-				var sim:Node=mission.get_node("SimulationRoot")
 				var active_ground_members:=0
 				for id in _crew_ids:
 					var actor=sim.call("_resolve_known_unit_for_contract",String(id))
