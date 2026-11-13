@@ -44,7 +44,8 @@ const { pathToFileURL } = require('node:url');
         check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Expanded fix explanation fits the phone viewport');
         await page.locator('[data-fixed-finding="C10"] summary').click();
       }
-      await page.locator('.review-detail summary').first().click();
+      const originalFinding = page.locator('details.review-detail').filter({has: page.locator('[data-export-key="astra.reviewed.C1"]')});
+      await originalFinding.locator('summary').click();
       await page.locator('[data-export-key="astra.reviewed.C1"]').check();
       check(await page.locator('[data-export-key="astra.reviewed.C1"]').isChecked(), 'Expanded finding supports a review decision');
       await page.getByText('Native Bildbelege ansehen', { exact: true }).click();
@@ -59,7 +60,7 @@ const { pathToFileURL } = require('node:url');
       }
       await page.setViewportSize({ width: 390, height: 844 });
       await page.getByText('Native Bildbelege ansehen', { exact: true }).click();
-      await page.locator('.review-detail summary').first().click();
+      await originalFinding.locator('summary').click();
     }
     await page.locator('[data-tab-target="decisions"]').click();
     await page.locator('[data-export-key="review.next_priority"]').selectOption('ui');

@@ -1,0 +1,148 @@
+{
+  "assets": [
+    {
+      "id": "starmap_navigation",
+      "title": "Sternkarte: System, Monde und Orte · 720p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Genau ein OM-Ansichtsknopf je Planet/Mond direkt im Ortsbaum und ein Kartenmarker je Körper. Volle individuelle Namen, Maus und Enter ohne Reise, gemeinsame Körper-Orbitansicht mit intern erhaltenen alten Reise-IDs. Missions-/Treibstoffangebote bleiben autoritativ gefiltert.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "reference": {
+        "path": "docs/qa/starmap_mobile_20261113/references/kursbuch_smart_mobile_concept_v3_native.png",
+        "sha256": "cdb1668732088b389c8837ee014793fa20ae2a99bc6d5b84653f727b295a8cdd",
+        "status": "ai_concept_not_native"
+      },
+      "before": {
+        "path": "docs/qa/review_completion_20261113/ui_after/e3834e982c2b469aabae5c93b06cfda8/images/ui_starmap_fuel_range.png",
+        "sha256": "bcc658421f72be19fa64d0fecd502bb378927bda2ef791a60d39cf86bf162a41",
+        "status": "native_godot_gl_compatibility_opened"
+      },
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/starmap_720.png",
+        "sha256": "d15ab92c5d2ff25597cf6e9d8095ca724ed347bea73bcb08ef904e3173d9b663",
+        "status": "native_godot_gl_compatibility_opened",
+        "source": "private_serial_capture_same_new_campaign",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      }
+    },
+    {
+      "id": "smart_mobile_jobs",
+      "title": "Smart Mobile: kompakte farbige Aufträge · 720p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Direktes Enter-Namensfeld für die ausgewählte Person, vergrößertes Porträt mit vertikalen Rangicons und zwei Trennern. Satellitenbild vollständig links über Zielen, Fakten obenbündig rechts, originale bunte Navigationsbilder. Footer kompakt und erreichbar.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "reference": {
+        "path": "docs/qa/starmap_mobile_20261113/references/kursbuch_smart_mobile_concept_v3_native.png",
+        "sha256": "cdb1668732088b389c8837ee014793fa20ae2a99bc6d5b84653f727b295a8cdd",
+        "status": "ai_concept_not_native"
+      },
+      "before": {
+        "path": "docs/qa/review_completion_20261113/ui_after/e3834e982c2b469aabae5c93b06cfda8/images/ui_job_app_footer.png",
+        "sha256": "aef1b364d9747b5a977e5164d53c1937435695b621e697a1a69d198000e412c1",
+        "status": "native_godot_gl_compatibility_opened"
+      },
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/smart_mobile_720.png",
+        "sha256": "81efaa3b916bdf6d415cc09e49bf2f65b051368ede33498c9821caefd7f4638d",
+        "status": "native_godot_gl_compatibility_opened",
+        "source": "private_serial_capture_same_new_campaign",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      }
+    },
+    {
+      "id": "starmap_navigation_1080",
+      "title": "Sternkarte: System, Monde und Orte · 1080p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Genau ein OM-Ansichtsknopf je Planet/Mond direkt im Ortsbaum und ein Kartenmarker je Körper. Volle individuelle Namen, Maus und Enter ohne Reise, gemeinsame Körper-Orbitansicht mit intern erhaltenen alten Reise-IDs. Missions-/Treibstoffangebote bleiben autoritativ gefiltert.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "reference": {
+        "path": "docs/qa/starmap_mobile_20261113/references/kursbuch_smart_mobile_concept_v3_native.png",
+        "sha256": "cdb1668732088b389c8837ee014793fa20ae2a99bc6d5b84653f727b295a8cdd",
+        "status": "ai_concept_not_native"
+      },
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/starmap_1080.png",
+        "sha256": "f07f091b0ba0592cb4a0c7058ac007274c6374ef0b86e1a61fad34c05b3a0ab2",
+        "status": "native_godot_gl_compatibility_opened",
+        "source": "private_serial_capture_same_new_campaign",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      },
+      "before": {
+        "unavailable_reason": "Für diese neue Ansicht beziehungsweise Auflösung wurde kein separater früherer nativer Stand aufgenommen. Vergleichsbilder anderer Ansichten werden nicht ersatzweise verwendet."
+      }
+    },
+    {
+      "id": "smart_mobile_jobs_1080",
+      "title": "Smart Mobile: kompakte farbige Aufträge · 1080p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Direktes Enter-Namensfeld für die ausgewählte Person, vergrößertes Porträt mit vertikalen Rangicons und zwei Trennern. Satellitenbild vollständig links über Zielen, Fakten obenbündig rechts, originale bunte Navigationsbilder. Footer kompakt und erreichbar.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "reference": {
+        "path": "docs/qa/starmap_mobile_20261113/references/kursbuch_smart_mobile_concept_v3_native.png",
+        "sha256": "cdb1668732088b389c8837ee014793fa20ae2a99bc6d5b84653f727b295a8cdd",
+        "status": "ai_concept_not_native"
+      },
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/smart_mobile_1080.png",
+        "sha256": "a052cfeb45b39c2033c986b720eaa05e8b30e50900bf7d2152d78a6a79b81285",
+        "status": "native_godot_gl_compatibility_opened",
+        "source": "private_serial_capture_same_new_campaign",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      },
+      "before": {
+        "unavailable_reason": "Für diese neue Ansicht beziehungsweise Auflösung wurde kein separater früherer nativer Stand aufgenommen. Vergleichsbilder anderer Ansichten werden nicht ersatzweise verwendet."
+      }
+    },
+    {
+      "id": "inspection_unknown_location_720",
+      "title": "Unbekannter Ort · 720p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Tatsächliche Ansicht per benachbartem Treebutton ohne Reise. Unbekannter Ort beziehungsweise gemeinsamer Körperorbit bleibt schwarz; kein Tutorial verdeckt die Ansicht. Klarer Rückweg zur Sternkarte.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/inspection_unknown_location_720.png",
+        "sha256": "8fb10ef8a77c6c6869a965cab0c588d760741cd44b2bf7128551a623aa1dc3a1",
+        "status": "native_godot_gl_compatibility_opened",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      },
+      "reference": {
+        "unavailable_reason": "Neue reine Inspektionsansicht ohne eigenes Bild-KI-Zielbild; Ziel ist die vorhandene autoritative Sicht beziehungsweise eine schwarze unbekannte Fläche."
+      },
+      "before": {
+        "unavailable_reason": "Für diese neue Ansicht beziehungsweise Auflösung wurde kein separater früherer nativer Stand aufgenommen. Vergleichsbilder anderer Ansichten werden nicht ersatzweise verwendet."
+      }
+    },
+    {
+      "id": "inspection_unknown_orbit_720",
+      "title": "Unbekannter Orbit · 720p",
+      "group": "ui",
+      "status": "native_fix_verified",
+      "change": "Tatsächliche Ansicht per benachbartem Treebutton ohne Reise. Unbekannter Ort beziehungsweise gemeinsamer Körperorbit bleibt schwarz; kein Tutorial verdeckt die Ansicht. Klarer Rückweg zur Sternkarte.",
+      "remaining": "Alle sechs nativen Bilder geöffnet und visuell geprüft; technischer Capturelauf 67/0 einschließlich tatsächlicher Home-Rückkehr. Keine persönliche Nutzerabnahme, FPS- oder WAN-Aussage.",
+      "after": {
+        "path": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/images/inspection_unknown_orbit_720.png",
+        "sha256": "a082736b5a3b1cc6166aee753e54689778338509263c2ac630bd9d36c2b1e1ce",
+        "status": "native_godot_gl_compatibility_opened",
+        "revision": "boerner_single_body_om_direct_name_left_dossier_colored_navigation_remote_overlay_restore"
+      },
+      "reference": {
+        "unavailable_reason": "Neue reine Inspektionsansicht ohne eigenes Bild-KI-Zielbild; Ziel ist die vorhandene autoritative Sicht beziehungsweise eine schwarze unbekannte Fläche."
+      },
+      "before": {
+        "unavailable_reason": "Für diese neue Ansicht beziehungsweise Auflösung wurde kein separater früherer nativer Stand aufgenommen. Vergleichsbilder anderer Ansichten werden nicht ersatzweise verwendet."
+      }
+    }
+  ],
+  "status": "six_native_images_visually_verified",
+  "capture_run": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb",
+  "native_result": {
+    "passed": 67,
+    "failed": 0,
+    "all_six_images_opened": true,
+    "visual_review": "Börner, ein OM je Körper, direkte Namensbearbeitung, linkes Satellitenmotiv, farbige Navigation und schwarze unbekannte Ansichten ohne Overlayleck in allen sechs nativen Bildern geprüft. Beide tatsächlichen Home-Rückkehrprüfungen bestanden."
+  }
+}

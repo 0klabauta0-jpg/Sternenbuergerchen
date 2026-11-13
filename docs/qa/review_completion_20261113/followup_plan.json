@@ -1,0 +1,51 @@
+[
+  {
+    "case": "final_base_clearance",
+    "script": "review_completion_base_clearance_verifier.gd",
+    "marker": "REVIEW_COMPLETION_BASE_CLEARANCE passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_command_save",
+    "script": "review_completion_command_save_verifier.gd",
+    "marker": "REVIEW_COMPLETION_COMMAND_SAVE passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_legacy_hex",
+    "script": "review_completion_legacy_hex_verifier.gd",
+    "marker": "REVIEW_COMPLETION_LEGACY_HEX passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_authentic_legacy",
+    "script": "review_completion_authentic_legacy_continue.gd",
+    "marker": "REVIEW_COMPLETION_AUTHENTIC_LEGACY_CONTINUE passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_home_save",
+    "script": "review_completion_home_save_verifier.gd",
+    "marker": "REVIEW_COMPLETION_HOME_SAVE passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_active_continue",
+    "script": "campaign_active_mission_continue_verifier.gd",
+    "marker": "CAMPAIGN_ACTIVE_CONTINUE passed=(\\d+) failed=(\\d+)",
+    "timeout": 540,
+    "native": false
+  },
+  {
+    "case": "ui_after",
+    "script": "review_completion_ui_capture.gd",
+    "marker": "REVIEW_COMPLETION_UI_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": true
+  }
+]

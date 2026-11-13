@@ -1,0 +1,34 @@
+{
+  "generator": "image_gen",
+  "date": "2026-11-13",
+  "native_implementation_verified": false,
+  "user_approved": false,
+  "files": [
+    {
+      "path": "docs/qa/hex_surface_design_20261113/references/user_rejected_station.png",
+      "sha256": "e85a4e0fca86453f14bbc01718ade3d17b094643a1df1b394dfbb06aed94ce43",
+      "role": "user_rejected_native_station"
+    },
+    {
+      "path": "docs/qa/hex_surface_design_20261113/references/user_rejected_test_scene.png",
+      "sha256": "7dceda55ec9822daca780574af0b1f871cd438ba5633ec34cb7323572e130043",
+      "role": "user_rejected_native_technical_fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "role": "existing_style_reference_not_exact_layout"
+    },
+    {
+      "path": "docs/qa/hex_surface_design_20261113/references/deck_revision_concept.png",
+      "sha256": "6c4e2797848700012c171047db6f095964bdad1b07450028bfd56171ec5cccac",
+      "role": "rejected_ai_concept_not_native"
+    },
+    {
+      "path": "docs/qa/hex_surface_design_20261113/references/deck_revision_prompt.txt",
+      "sha256": "26a587c1071d9173676b3774db7381f9c77e8b6da93d0e76667e30ea8635553a",
+      "role": "exact_generation_prompt"
+    }
+  ],
+  "status": "rejected_by_user_except_white_warehouse_reference"
+}

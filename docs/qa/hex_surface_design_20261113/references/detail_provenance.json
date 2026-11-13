@@ -1,0 +1,69 @@
+{
+  "generator": "built-in image_gen",
+  "date": "2026-11-13",
+  "studies": [
+    {
+      "id": "map_detail_proposal",
+      "decision": "proposal_pending",
+      "native_capture": false,
+      "files": [
+        {
+          "path": "docs/qa/hex_surface_design_20261113/references/map_detail_proposal.png",
+          "sha256": "f0dcaf519ac1adb190fe614240dc7271c3c85e8e692f458618581c1979ffb480"
+        },
+        {
+          "path": "docs/qa/hex_surface_design_20261113/references/map_detail_proposal_prompt.txt",
+          "sha256": "1bc526b0ecaf00f32803143a02314173a63db1146d2c7367b83ea829983827ea"
+        },
+        {
+          "path": "docs/qa/review_completion_20261113/maps_after/7aef3090831340a9a4dc9a96bb56fa5b/images/satellite_crash_site_arrival.png",
+          "sha256": "7921971339fc99880b025f3ad90aa4459f7d6a5df1e3cc05b52611b2d73c269d"
+        },
+        {
+          "path": "docs/qa/review_completion_20261113/hex_surface_after/985bbe319b1a4c07a5394c4279e55e12/images/actual_hill_ramp_hex_surface.png",
+          "sha256": "5cc56e331ecc593cb7100fb4fa6c733bd16edd7d480efcb6be58c2370a9eea34"
+        },
+        {
+          "path": "docs/qa/ui_native_r4_20261102/captures/mission_frontier_1280x720.png",
+          "sha256": "3686c68dc0e2b17b4bc4359ecac4a2915d3e7951f34e398dc4d286bbc3c0126a"
+        }
+      ]
+    },
+    {
+      "id": "cliff_detail_proposal",
+      "decision": "right_variant_selected_by_user",
+      "native_capture": false,
+      "files": [
+        {
+          "path": "docs/qa/hex_surface_design_20261113/references/cliff_detail_proposal.png",
+          "sha256": "d6965e1909ab616288b4c39aef0805fcd661ff99b3b3e5274ede20f33e330cbc"
+        },
+        {
+          "path": "docs/qa/hex_surface_design_20261113/references/cliff_detail_proposal_prompt.txt",
+          "sha256": "fc994160037a79ec0cc541d9eb408cebadcd6017e3c95e207b8c2b8fc27bc8e4"
+        },
+        {
+          "path": "docs/qa/review_completion_20261113/hex_surface_after/985bbe319b1a4c07a5394c4279e55e12/images/actual_hill_ramp_hex_surface.png",
+          "sha256": "5cc56e331ecc593cb7100fb4fa6c733bd16edd7d480efcb6be58c2370a9eea34"
+        },
+        {
+          "path": "docs/qa/review_completion_20261113/maps_after/7aef3090831340a9a4dc9a96bb56fa5b/images/fortified_outpost_objective.png",
+          "sha256": "080eba26d8e8b2dc336837116c019d4ff9df128470c077dc186c4e366a702272"
+        }
+      ]
+    }
+  ],
+  "latest_user_feedback": {
+    "path": "docs/qa/hex_surface_design_20261113/references/user_wall_angle_and_scatter_feedback.png",
+    "sha256": "71884ac97a8896de78b31fcab92fd4c7351d9c86c3af2ed3a14986700ac922e7",
+    "accepted": "white warehouse perspective; right broken-rock cliff style",
+    "corrections": [
+      "wall and corridor angle must match warehouse reference",
+      "readable ground and hill hex grid at normal zoom",
+      "identify unexplained brown strip and isolated object",
+      "less regular rock distribution",
+      "all desert rocks use coherent rust-earth palette",
+      "quieter ground; do not add proposed decorative stains without approval"
+    ]
+  }
+}

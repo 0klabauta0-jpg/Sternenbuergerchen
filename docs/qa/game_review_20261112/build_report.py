@@ -214,5 +214,12 @@ if fix_data:
     page = page.replace('Dessen Rückkehrübergang ist in C3 als defekt belegt.', 'Der in C3 belegte defekte Rückkehrübergang ist inzwischen korrigiert und getestet.')
     page = page.replace('Aktueller Abgleich: Kampf und Hex', 'Historischer Abgleich: Kampf und Hex')
     page = page.replace('Die neue Prüfung findet abweichende Sichtentscheidungen beim tatsächlichen Schuss und globale Disziplin-/Fehlidentifikationswürfe neben Roots gespeichertem Kampfwürfelzustand (C7/C8).', 'C7 vereinheitlicht inzwischen die Hexsicht beim Schuss; C8 entfernt Würfel- und Zustandsänderungen aus Diagnoselesen. Die umfassende Migration weiterer globaler Zufallsquellen bleibt eine separate Architekturentscheidung.')
+completion_builder = ROOT / 'docs/qa/review_completion_20261113/report_section.py'
+if completion_builder.exists():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('completion_report', completion_builder)
+    completion_report = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(completion_report)
+    page = completion_report.augment(page, ROOT)
 REPORT.write_text('\n'.join(line.rstrip() for line in page.splitlines()) + '\n', encoding='utf-8')
 print(json.dumps({'report': str(REPORT), 'checks': len(checks), 'passed': good}, ensure_ascii=False))

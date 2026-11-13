@@ -1,5 +1,9 @@
 # TASK_ROADMAP
 
+### Reviewabschluss — 14.11.2026
+
+Hex/Würfeln, gemeinsame Teams und parallele Ortsansichten, kompakte UI, Börners Einzel-OM je Himmelskörper sowie Stations-/Wüstenkorrekturen sind umgesetzt. Produktcommit 8368862217e70669dc2973e4b3d6eca93f9ef330. Gezielte Regressionen grün. Der vollständige Kampagnensieg bleibt unbestätigt. Drei tatsächliche Einsätze mit geschriebenen Heimständen sind nachgewiesen. Spätere Versuche zeigten Kampfverluste und zusätzliche Bewegungsblockaden. Die Blockaden sind gezielt behoben und regressionsgeprüft; ein erneuter vollständiger Erfolgslauf wurde zur Begrenzung des Aufwands nicht gestartet. Fehlgeschlagene Läufe werden nicht als bestanden mitgezählt. Nachweise: docs/qa/review_completion_20261113/summary.json; Bericht: docs/reports/SPIELREVIEW_2026_11_12.html. Keine neue EXE und keine pauschale WAN-/FPS-/Gestaltungsabnahme.
+
 ### Personal-/Basis-UI nach Main — 10.11.2026
 Beauftragte Integration der fünf Taskcommits5df2d3b6f bis2ea460017 auf Main1e3cca237,
 ohne Produktkonflikte/weitere Codeänderung. Frischer nativer Ausflug102/0,

@@ -1,0 +1,219 @@
+{
+  "schema": "sternenbuergerchen.station_module_coverage.v1",
+  "previous_central_only_audit": {
+    "station192_bound": 76,
+    "station192_unbound": 608
+  },
+  "maps": [
+    {
+      "path": "maps/station_outpost_64x64.json",
+      "sha256": "8cb26e2ddaaa67ae4157d5f4a95e9c9a4d0b276567301853c9dd26be56f7b3f6",
+      "station_wall_door_total": 76,
+      "warehouse_axes_bound_count": 76,
+      "not_uniquely_bound_count": 0,
+      "regions": [
+        {
+          "id": "station_0_0",
+          "count": 76,
+          "source_region": [
+            22,
+            23,
+            20,
+            18
+          ],
+          "row_anchor": 31,
+          "floor_boundary": [
+            24,
+            25,
+            39,
+            38
+          ]
+        }
+      ],
+      "unbound": [],
+      "status": "all_authored_regions_uniquely_bound_imported_bounds_and_selected_native_cameras_verified",
+      "source_snapshot": "bc620e4d57334503b3b69f3101953ee9"
+    },
+    {
+      "path": "maps/station_outpost_192x192.json",
+      "sha256": "3ece54e077b8c74917c2737c868e1a08338b038dfdb55f2796a20b2aa60278a9",
+      "station_wall_door_total": 684,
+      "warehouse_axes_bound_count": 684,
+      "not_uniquely_bound_count": 0,
+      "regions": [
+        {
+          "id": "station_0_0",
+          "count": 76,
+          "source_region": [
+            22,
+            23,
+            20,
+            18
+          ],
+          "row_anchor": 31,
+          "floor_boundary": [
+            24,
+            25,
+            39,
+            38
+          ]
+        },
+        {
+          "id": "station_1_0",
+          "count": 76,
+          "source_region": [
+            87,
+            22,
+            18,
+            20
+          ],
+          "row_anchor": 31,
+          "floor_boundary": [
+            89,
+            24,
+            102,
+            39
+          ]
+        },
+        {
+          "id": "station_2_0",
+          "count": 76,
+          "source_region": [
+            150,
+            23,
+            20,
+            18
+          ],
+          "row_anchor": 31,
+          "floor_boundary": [
+            152,
+            25,
+            167,
+            38
+          ]
+        },
+        {
+          "id": "station_0_1",
+          "count": 76,
+          "source_region": [
+            23,
+            86,
+            18,
+            20
+          ],
+          "row_anchor": 95,
+          "floor_boundary": [
+            25,
+            88,
+            38,
+            103
+          ]
+        },
+        {
+          "id": "station_1_1",
+          "count": 76,
+          "source_region": [
+            86,
+            87,
+            20,
+            18
+          ],
+          "row_anchor": 95,
+          "floor_boundary": [
+            88,
+            89,
+            103,
+            102
+          ]
+        },
+        {
+          "id": "station_2_1",
+          "count": 76,
+          "source_region": [
+            151,
+            86,
+            18,
+            20
+          ],
+          "row_anchor": 95,
+          "floor_boundary": [
+            153,
+            88,
+            166,
+            103
+          ]
+        },
+        {
+          "id": "station_0_2",
+          "count": 76,
+          "source_region": [
+            22,
+            151,
+            20,
+            18
+          ],
+          "row_anchor": 159,
+          "floor_boundary": [
+            24,
+            153,
+            39,
+            166
+          ]
+        },
+        {
+          "id": "station_1_2",
+          "count": 76,
+          "source_region": [
+            87,
+            150,
+            18,
+            20
+          ],
+          "row_anchor": 159,
+          "floor_boundary": [
+            89,
+            152,
+            102,
+            167
+          ]
+        },
+        {
+          "id": "station_2_2",
+          "count": 76,
+          "source_region": [
+            150,
+            151,
+            20,
+            18
+          ],
+          "row_anchor": 159,
+          "floor_boundary": [
+            152,
+            153,
+            167,
+            166
+          ]
+        }
+      ],
+      "unbound": [],
+      "status": "all_authored_regions_uniquely_bound_imported_bounds_and_selected_native_cameras_verified",
+      "source_snapshot": "bc620e4d57334503b3b69f3101953ee9"
+    }
+  ],
+  "source_freeze": "3583b7b4ec2a47a1b37996b20b778cf4",
+  "native_evidence": {
+    "path": "docs/qa/review_completion_20261113/station_ensembles_after/13cf6169f94b4e1fb9a48090d584b3bd",
+    "passed": 16,
+    "failed": 0,
+    "guards": {
+      "source_unchanged": true,
+      "real_profile_unchanged": true,
+      "private_canary": true
+    },
+    "snapshot": "bc620e4d57334503b3b69f3101953ee9",
+    "evidence_scope": "bounded_final_graphics_no_global_aesthetic_or_fps_acceptance",
+    "images_opened": 5,
+    "all_images_opened": true
+  },
+  "native_scope": "Five actual cameras: Station64 plus Station192 center and three outer orientations. Source/import tests cover all684 modules; captures do not claim every possible viewpoint."
+}

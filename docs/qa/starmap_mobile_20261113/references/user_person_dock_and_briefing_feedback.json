@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-13",
+  "path": "docs/qa/starmap_mobile_20261113/references/user_person_dock_and_briefing_feedback.png",
+  "sha256": "a1a14d527a41f8f9ffbff61ad16309804fe627068de8bab108383aae95f6dc81",
+  "status": "concrete_user_revision_requested",
+  "requirements": [
+    "edit current person name in place; Enter submits existing owner rename; no selector dropdown or second name row",
+    "person selection via portraits at right",
+    "selected portrait further left with rank and experience vertically at its right",
+    "two vertical separators between the three base dock blocks",
+    "satellite illustration left above objectives, metadata top aligned on its right",
+    "remove generic mission progress filler sentence",
+    "reuse existing colorful navigation icons, including personnel"
+  ]
+}

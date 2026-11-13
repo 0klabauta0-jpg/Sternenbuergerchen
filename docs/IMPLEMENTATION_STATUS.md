@@ -1,5 +1,9 @@
 # IMPLEMENTATION_STATUS
 
+### Reviewabschluss — 14.11.2026
+
+Hex/Würfeln, gemeinsame Teams und parallele Ortsansichten, kompakte UI, Börners Einzel-OM je Himmelskörper sowie Stations-/Wüstenkorrekturen sind umgesetzt. Produktcommit 8368862217e70669dc2973e4b3d6eca93f9ef330. Gezielte Regressionen grün. Der vollständige Kampagnensieg bleibt unbestätigt. Drei tatsächliche Einsätze mit geschriebenen Heimständen sind nachgewiesen. Spätere Versuche zeigten Kampfverluste und zusätzliche Bewegungsblockaden. Die Blockaden sind gezielt behoben und regressionsgeprüft; ein erneuter vollständiger Erfolgslauf wurde zur Begrenzung des Aufwands nicht gestartet. Fehlgeschlagene Läufe werden nicht als bestanden mitgezählt. Nachweise: docs/qa/review_completion_20261113/summary.json; Bericht: docs/reports/SPIELREVIEW_2026_11_12.html. Keine neue EXE und keine pauschale WAN-/FPS-/Gestaltungsabnahme.
+
 ### Reviewkorrekturen und zusätzlicher Ausfallfix — 13.11.2026
 
 C1–C9 behoben: Hostautorität für Commands/Interaktionen, vollständiger Raumkampf-

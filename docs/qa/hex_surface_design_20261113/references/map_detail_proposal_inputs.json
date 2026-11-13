@@ -1,0 +1,9 @@
+{
+  "status": "proposal_pending",
+  "tool": "built-in image_gen",
+  "inputs": [
+    "C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/qa/review_completion_20261113/maps_after/7aef3090831340a9a4dc9a96bb56fa5b/images/satellite_crash_site_arrival.png",
+    "C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/qa/review_completion_20261113/hex_surface_after/985bbe319b1a4c07a5394c4279e55e12/images/actual_hill_ramp_hex_surface.png",
+    "C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/qa/ui_native_r4_20261102/captures/mission_frontier_1280x720.png"
+  ]
+}

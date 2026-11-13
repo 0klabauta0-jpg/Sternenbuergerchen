@@ -1,0 +1,1029 @@
+{
+  "title": "Hexfelder, kompakte Menüs und höhengerechte Assets",
+  "description": "Hexnavigation, gespeicherte Würfe, kompakte Menüs, unabhängige Ortsansichten und die Karten-/Assetkorrekturen sind umgesetzt. Koop, PvP und Koop-PvP teilen Teamsteuerung auch an parallelen Orten. Der vollständige Kampagnensieg bleibt unbestätigt. Drei tatsächliche Einsätze mit geschriebenen Heimständen sind nachgewiesen. Spätere Versuche zeigten Kampfverluste und zusätzliche Bewegungsblockaden. Die Blockaden sind gezielt behoben und regressionsgeprüft; ein erneuter vollständiger Erfolgslauf wurde zur Begrenzung des Aufwands nicht gestartet. Fehlgeschlagene Läufe werden nicht als bestanden mitgezählt.",
+  "verification_note": "Private Godotprofile und nicht aktivierte Renderdesktops. Keine OS-Eingaben und keine Änderungen am echten Spielerprofil.",
+  "source": "Produktcommit 8368862217e70669dc2973e4b3d6eca93f9ef330 auf Mainbasis dc2ca9aca; abschließender Nachweisstand im Testindex.",
+  "areas": [
+    {
+      "id": "hex",
+      "title": "Hexnavigation und Kampf",
+      "status": "Umgesetzt und gezielt geprüft",
+      "change": "14 Missionskarten und drei Basiskarten verwenden die autoritative Hexlaufzeit. Eigene alte Karten werden beim Runtimeimport konvertiert; Originaldateien bleiben erhalten.",
+      "evidence": "Echte Starts, 30 Akteure pro Karte, Belegung, Bewegung, Sicht, Türen, Boarding und portable Saves.",
+      "limits": "Die Matrix prüft begrenzte Funktionsfälle; vollständige Missionsreisen werden zusätzlich separat geprüft."
+    },
+    {
+      "id": "rng",
+      "title": "Würfeln und Speicherung",
+      "status": "Umgesetzt und gezielt geprüft",
+      "change": "Treffer, Disziplin und Fehlidentifikation laufen über den gespeicherten Root-Zufall. Raum und Luft behalten ihre getrennten reproduzierbaren Sequenzen.",
+      "evidence": "0..1 intern, 0..100% in Anzeigen; Grenzwerte, Replikate, Readouts und Fortsetzung der nächsten Folge.",
+      "limits": "Kein D6- oder Balanceumbau; Navigation würfelt keine zufälligen Wege."
+    },
+    {
+      "id": "architecture",
+      "title": "Architektur und Kartenaufbau",
+      "status": "Umgesetzt und gezielt geprüft",
+      "change": "Hostinteraktionen sind aus dem großen Driver in eine eigene Runtimekomponente ausgelagert. UI und Visuals lesen die vorhandenen Owner. Die Basisanzeige nutzt schmale Projektionen. Beim Kartenaufbau entfällt ein doppelt gespeichertes Hexraster; die sichtbare Ansicht erzeugt weiterhin ihr eigenes Raster aus dem aktuellen Erkundungs- und Türzustand.",
+      "evidence": "Der gezielte Rastercache-Test besteht nach nachgewiesenem Fehler 12 Prüfungen. Alle 17 tatsächlichen Karten-/Basisstarts bestehen weitere 50 Prüfungen. Die drei großen Karten bereiten alle Abschnitte innerhalb des unveränderten 256-MiB-Limits vor und übergeben den Cache erfolgreich an eine neue Ansicht. Gemessene Nutzdaten: Satellit: 25,74 MB · Handel: 33,83 MB · Festung: 30,17 MB.",
+      "limits": "Die gemessenen Nutzdaten sind weder gesamter Arbeitsspeicher noch VRAM. Ladezeiten aus der automatisierten Fixture und die kleine CPU-Leseprobe sind keine Gesamtspiel-FPS-Messung."
+    },
+    {
+      "id": "multiplayer",
+      "title": "Gemeinsame Teams und parallele Karten",
+      "status": "Lokal mit echten Verbindungen geprüft",
+      "change": "Koop, PvP und Koop-PvP mit gemeinsamer Steuerung innerhalb jedes Teams. Die Verbindungskapazität ist einstellbar; freie Plätze verhindern den Start nicht. Jeder Spieler erhält seine eigene Kartenansicht und Auswahl.",
+      "evidence": "Sechs echte lokale ENet-Peers prüfen gemeinsame Teams, 3-gegen-3, Rechte und Rejoin (64 Assertions). Drei weitere echte Peers auf zwei gleichzeitig aktiven Karten prüfen unabhängige Ansicht, Auswahl, Kamera, Teamnebel, Rejoin und Ortsabschluss (113 Assertions). Die vollständige Terrainprojektion einer 512×256-Karte benötigt komprimiert 145.776 Byte in 146 Transportteilen unter unveränderten Grenzen.",
+      "limits": "Lokale Verbindungen belegen keine Internetlatenz oder Leistung großer Runden. Kapazität: standardmäßig 16 Verbindungen, technisch konfigurierbar bis 64; keine Grenze von fünf Personen pro Team."
+    },
+    {
+      "id": "ux",
+      "title": "Bedienung und Wiederaufnahme",
+      "status": "Umgesetzt und gezielt geprüft",
+      "change": "Gemeinsame Speicherinformationen und verlässliche Modalität; aufklappbarer System-/Planeten-/Mond-/Ortsbaum, individuelle Namen und tatsächliche Auftragsfreigaben. Kompakte Controls und eigene Typografie erhalten die farbigen Bilder. Das System heißt sichtbar Börner. Jeder Planet und Mond hat genau einen gemeinsamen OM-Knopf. Orts- und OM-Knöpfe öffnen Ansichten ohne Reise; unbekannte Bereiche bleiben schwarz, geladene Orte verwenden ihre vorhandenen FoW-Daten. Die Satellitenbergung hat ein eigenes passendes Bild.",
+      "evidence": "Owner-Regeln, Maus-/Tastaturauswahl im privaten Viewport, Fokus und stabile Rebuild-/Ressourcenzähler; echte 720p-/1080p-Ansichten werden separat geprüft.",
+      "limits": "Die Simulation läuft im Einsatzmenü weiterhin absichtlich weiter. Orbitansichten ohne anwesendes eigenes Schiff bleiben mangels gespeicherter Orbit-Wissensquelle schwarz."
+    },
+    {
+      "id": "graphics",
+      "title": "Karten, Boden und Assets",
+      "status": "Umgesetzt und nativ geprüft",
+      "change": "Sichtbare Hexkonturen folgen Hügeln, Rampen und begehbaren Decks. Dünne helle Bodenauflagen, saubere Wandanschlüsse und Türen behalten den freigegebenen Lagerhauswinkel; Boden bleibt unter Wänden und Props sichtbar und kann an Rändern rot/hell geteilt werden. Bruchsteinklippen, aride Gesteine und sparsame kleine Kiesel ergänzen die Wüste. Unnötige Rohre und die grüne Bauhilfe sind aus der normalen Stationsansicht entfernt; helle Flecken bleiben wie gewünscht.",
+      "evidence": "Alle neun Stationsensembles sind berücksichtigt. Die finale große Station lädt vollständig ohne Instanzparameterfehler; gezielte Bodenvergleiche bestätigen die beseitigten Schattenstreifen bei erhaltenem Wand-/Klippenschatten. Die Galerie zeigt geöffnete native Vergleiche und die zugehörigen Quellenprüfsummen; der Assetkatalog nennt tatsächliche Verwendungen.",
+      "limits": "Einige geschützte große Felsreihen bleiben regelmäßig. Schmalere helle Wände mit gelbem Streifen bleiben ein Auswahlvorschlag; Raumprops werden stilistisch erst später weiterbearbeitet. Originalmodelle, Schiffe und Rigs bleiben erhalten. Personenpaletten ersetzen keine neu modellierten Gesichter; das persönliche Gestaltungsurteil bleibt offen."
+    }
+  ],
+  "campaign_attempt": {
+    "scope": "Der vollständige Kampagnensieg bleibt unbestätigt. Drei tatsächliche Einsätze mit geschriebenen Heimständen sind nachgewiesen. Spätere Versuche zeigten Kampfverluste und zusätzliche Bewegungsblockaden. Die Blockaden sind gezielt behoben und regressionsgeprüft; ein erneuter vollständiger Erfolgslauf wurde zur Begrenzung des Aufwands nicht gestartet. Fehlgeschlagene Läufe werden nicht als bestanden mitgezählt.",
+    "report": "docs/qa/review_completion_20261113/diagnostic_post_benit_continue/2b4308910050444a848b7c233ae57614/report.json",
+    "accepted": false,
+    "assertions_excluded": 0
+  },
+  "map_preparation_measurements": [
+    {
+      "elapsed_ms": 1744,
+      "map": "res://maps/Ground_Mission01_32x32.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 9408,
+      "tiles": 9408
+    },
+    {
+      "elapsed_ms": 1799,
+      "map": "res://maps/Ground_Mission02_128x128.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 5184,
+      "tiles": 16384
+    },
+    {
+      "elapsed_ms": 203,
+      "map": "res://maps/fireteam_command_drill_24x24.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 576,
+      "tiles": 576
+    },
+    {
+      "elapsed_ms": 122,
+      "map": "res://maps/frontier_workyard_24x20.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 480,
+      "tiles": 480
+    },
+    {
+      "elapsed_ms": 1483,
+      "map": "res://maps/station_outpost_64x64.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 4096,
+      "tiles": 4096
+    },
+    {
+      "elapsed_ms": 3312,
+      "map": "res://maps/station_outpost_192x192.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 5184,
+      "tiles": 36864
+    },
+    {
+      "elapsed_ms": 161,
+      "map": "res://maps/wall_test_4x4.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 64,
+      "tiles": 64
+    },
+    {
+      "elapsed_ms": 13181,
+      "map": "res://maps/satellite_crash_site.json",
+      "mode": "whole_map_resource_prefill",
+      "state": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 401925274,
+        "memory_static_delta_bytes": 48891824,
+        "memory_static_peak_bytes": 450817098,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 25735804,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      },
+      "tiles": 131072
+    },
+    {
+      "elapsed_ms": 14173,
+      "map": "res://maps/trade_outpost.json",
+      "mode": "whole_map_resource_prefill",
+      "state": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 408576222,
+        "memory_static_delta_bytes": 53938500,
+        "memory_static_peak_bytes": 462514722,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 33834752,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      },
+      "tiles": 131072
+    },
+    {
+      "elapsed_ms": 14254,
+      "map": "res://maps/fortified_outpost.json",
+      "mode": "whole_map_resource_prefill",
+      "state": {
+        "expected_chunks": 2161,
+        "geometry_build_count": 2161,
+        "is_total_gpu_memory_measurement": false,
+        "max_payload_bytes": 268435456,
+        "memory_static_baseline_bytes": 408426094,
+        "memory_static_delta_bytes": 49742936,
+        "memory_static_peak_bytes": 458169030,
+        "prepared_chunks": 2161,
+        "progress": 1.0,
+        "ready": true,
+        "reason": "",
+        "resource_restore_count": 0,
+        "retained_payload_bytes": 30168824,
+        "retained_scene_nodes": 0,
+        "status": "ready"
+      },
+      "tiles": 131072
+    },
+    {
+      "elapsed_ms": 1269,
+      "map": "res://maps/polisa_station.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 2205,
+      "tiles": 4486
+    },
+    {
+      "elapsed_ms": 150,
+      "map": "res://maps/distress_orbit.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 576,
+      "tiles": 576
+    },
+    {
+      "elapsed_ms": 62,
+      "map": "res://maps/test_mission.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 64,
+      "tiles": 64
+    },
+    {
+      "elapsed_ms": 397,
+      "map": "res://maps/test_mission_32x32_slots8.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 1024,
+      "tiles": 1024
+    },
+    {
+      "elapsed_ms": 1151,
+      "map": "res://maps/campaign_intro_base.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 5184,
+      "tiles": 9408
+    },
+    {
+      "elapsed_ms": 1187,
+      "map": "res://maps/homebase_frontier_exploration.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 5184,
+      "tiles": 9408
+    },
+    {
+      "elapsed_ms": 6426,
+      "map": "res://maps/base_interior_navigation.json",
+      "mode": "normal_direct_renderer",
+      "rendered_tiles": 5184,
+      "tiles": 150528
+    }
+  ],
+  "assertions": 7290,
+  "checks": [
+    {
+      "name": "Würfelgrenzen und gespeicherte Zufallsfolgen",
+      "case": "final_rng",
+      "status": "bestanden",
+      "assertions": 42,
+      "run_id": "a370ca2c460946828f5af9d1f16406e3",
+      "report": "docs/qa/review_completion_20261113/final_rng/a370ca2c460946828f5af9d1f16406e3/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 4.9871503000031225
+    },
+    {
+      "name": "Legacy-Migration und atomare Owner-Grenzen",
+      "case": "final_legacy_hex",
+      "status": "bestanden",
+      "assertions": 26,
+      "run_id": "19052c2c2fff473080a1fa98b432498b",
+      "report": "docs/qa/review_completion_20261113/final_legacy_hex/19052c2c2fff473080a1fa98b432498b/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\cd59c5517ebc4e7caa5b3288999af8da",
+      "renderer": "headless",
+      "seconds": 4.976871299993945
+    },
+    {
+      "name": "Basiswege: Betten und geparkte Schiffe",
+      "case": "final_base_clearance",
+      "status": "bestanden",
+      "assertions": 12,
+      "run_id": "a54e9d6dfc61401c8ad60c8b7e2f820a",
+      "report": "docs/qa/review_completion_20261113/final_base_clearance/a54e9d6dfc61401c8ad60c8b7e2f820a/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b2aaadae76c74e40bcc835dbaf9e0758",
+      "renderer": "headless",
+      "seconds": 4.4622429000010015
+    },
+    {
+      "name": "Alle 14 Missions- und 3 Basiskarten",
+      "case": "final_maps",
+      "status": "bestanden",
+      "assertions": 296,
+      "run_id": "b51d96637a85422c855b311f8e02e635",
+      "report": "docs/qa/review_completion_20261113/final_maps/b51d96637a85422c855b311f8e02e635/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 45.22398399998201
+    },
+    {
+      "name": "Bedienung, Fokus, Ausstieg und Namensänderung",
+      "case": "final_ux",
+      "status": "bestanden",
+      "assertions": 99,
+      "run_id": "f5f122b3feda46eb9899261af6c3da7f",
+      "report": "docs/qa/review_completion_20261113/final_ux/f5f122b3feda46eb9899261af6c3da7f/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\3583b7b4ec2a47a1b37996b20b778cf4",
+      "renderer": "headless",
+      "seconds": 52.765665300001274
+    },
+    {
+      "name": "Personenpaletten, Assetquellen und importierte Bounds",
+      "case": "final_graphics",
+      "status": "bestanden",
+      "assertions": 519,
+      "run_id": "8827f4c969d84e34a4bcbdcbfa55d71e",
+      "report": "docs/qa/review_completion_20261113/final_graphics/8827f4c969d84e34a4bcbdcbfa55d71e/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 7.408075800020015
+    },
+    {
+      "name": "Schmale Basisdarstellung ohne Bewegungsverzug",
+      "case": "final_base_projection",
+      "status": "bestanden",
+      "assertions": 16,
+      "run_id": "8f243061361e41349108b07ef429a4d4",
+      "report": "docs/qa/review_completion_20261113/final_base_projection/8f243061361e41349108b07ef429a4d4/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\438bd2cd339f4fc88400a5839af9701b",
+      "renderer": "headless",
+      "seconds": 48.847066500005894
+    },
+    {
+      "name": "Autosave-Grenzen und Fehlerwiederholung",
+      "case": "final_autosave",
+      "status": "bestanden",
+      "assertions": 17,
+      "run_id": "903551f9faa24879b09f1e67b880c247",
+      "report": "docs/qa/review_completion_20261113/final_autosave/903551f9faa24879b09f1e67b880c247/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 2.912265100007062
+    },
+    {
+      "name": "Root-Checkpoint-Transaktion",
+      "case": "final_root_checkpoint",
+      "status": "bestanden",
+      "assertions": 10,
+      "run_id": "78b0217dc6ef46289adfb97c153af795",
+      "report": "docs/qa/review_completion_20261113/final_root_checkpoint/78b0217dc6ef46289adfb97c153af795/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 4.1821556000068085
+    },
+    {
+      "name": "Bewegungs- und Reservierungsfortsetzung",
+      "case": "final_movement_save",
+      "status": "bestanden",
+      "assertions": 30,
+      "run_id": "19948623c7f24c78959b1cbc0a87abd5",
+      "report": "docs/qa/review_completion_20261113/final_movement_save/19948623c7f24c78959b1cbc0a87abd5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 3.3175663000001805
+    },
+    {
+      "name": "Hostautorität und echte ENet-Kommandos",
+      "case": "final_network",
+      "status": "bestanden",
+      "assertions": 71,
+      "run_id": "61d7442c9ff840e7a27292e3981f0086",
+      "report": "docs/qa/review_completion_20261113/final_network/61d7442c9ff840e7a27292e3981f0086/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 5.684778699986055
+    },
+    {
+      "name": "Hex-Türen, Sicht und Bewegung",
+      "case": "final_door",
+      "status": "bestanden",
+      "assertions": 58,
+      "run_id": "37ea7fe64650476ba22e344a5055962c",
+      "report": "docs/qa/review_completion_20261113/final_door/37ea7fe64650476ba22e344a5055962c/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\f53d69efe7a34cca852799af19e1884d",
+      "renderer": "headless",
+      "seconds": 4.558333300010418
+    },
+    {
+      "name": "Verbundenes GO und Hostantwort",
+      "case": "final_connected",
+      "status": "bestanden",
+      "assertions": 10,
+      "run_id": "1d8d7082a5ee4745ab40ec7f9071874c",
+      "report": "docs/qa/review_completion_20261113/final_connected/1d8d7082a5ee4745ab40ec7f9071874c/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\12add1316c404c9fb1e1746a9090f31a",
+      "renderer": "headless",
+      "seconds": 18.190056200008257
+    },
+    {
+      "name": "Parallele Truppinteraktionen und Abbruch",
+      "case": "final_parallel",
+      "status": "bestanden",
+      "assertions": 32,
+      "run_id": "a7409bca98fb4de4aade30dc3dc9f0c5",
+      "report": "docs/qa/review_completion_20261113/final_parallel/a7409bca98fb4de4aade30dc3dc9f0c5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\12add1316c404c9fb1e1746a9090f31a",
+      "renderer": "headless",
+      "seconds": 19.799015299999155
+    },
+    {
+      "name": "Hex-Host und Replikat über echtes ENet",
+      "case": "final_hex_enet",
+      "status": "bestanden",
+      "assertions": 27,
+      "run_id": "559c65503cce469898b22b9ea0be926a",
+      "report": "docs/qa/review_completion_20261113/final_hex_enet/559c65503cce469898b22b9ea0be926a/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c7461aab48744770875590197a4bda04",
+      "renderer": "headless",
+      "seconds": 6.268587500002468
+    },
+    {
+      "name": "Echte Reise, Einsatzsave, Continue und Rückkehr",
+      "case": "final_active_continue",
+      "status": "bestanden",
+      "assertions": 81,
+      "run_id": "dce41faa44724429940553c31eeb60b6",
+      "report": "docs/qa/review_completion_20261113/final_active_continue/dce41faa44724429940553c31eeb60b6/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\938471ac5a6c41508e7223fbe28d353b",
+      "renderer": "headless",
+      "seconds": 336.00750649999827
+    },
+    {
+      "name": "Native Kartenansichten nach vollständigem Aufbau",
+      "case": "maps_after",
+      "status": "bestanden",
+      "assertions": 40,
+      "run_id": "cae55c4ff80241289d9fb5983163d564",
+      "report": "docs/qa/review_completion_20261113/maps_after/cae55c4ff80241289d9fb5983163d564/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 28.70950670001912
+    },
+    {
+      "name": "Native Ansichten aller 46 Personen",
+      "case": "personnel_after",
+      "status": "bestanden",
+      "assertions": 81,
+      "run_id": "a072eeb3c66d417db0f1a013223c706d",
+      "report": "docs/qa/review_completion_20261113/personnel_after/a072eeb3c66d417db0f1a013223c706d/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\438bd2cd339f4fc88400a5839af9701b",
+      "renderer": "gl_compatibility",
+      "seconds": 101.36470310000004
+    },
+    {
+      "name": "Native Basis-, Personen- und Sternkartenansichten",
+      "case": "graphics_after",
+      "status": "bestanden",
+      "assertions": 24,
+      "run_id": "c3aa86fb815f4272b0e81c030985ca9b",
+      "report": "docs/qa/review_completion_20261113/graphics_after/c3aa86fb815f4272b0e81c030985ca9b/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 42.47928790000151
+    },
+    {
+      "name": "Transportzustände nach Hexmigration",
+      "case": "final_transport",
+      "status": "bestanden",
+      "assertions": 55,
+      "run_id": "c85216722e6a4cf18cd22f723bb9e7e6",
+      "report": "docs/qa/review_completion_20261113/final_transport/c85216722e6a4cf18cd22f723bb9e7e6/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 11.396465600002557
+    },
+    {
+      "name": "Hex-Kampf, Schablonen und Würfelautorität",
+      "case": "final_combat",
+      "status": "bestanden",
+      "assertions": 234,
+      "run_id": "2fef30fb879e4528a11dfef02dee0e4d",
+      "report": "docs/qa/review_completion_20261113/final_combat/2fef30fb879e4528a11dfef02dee0e4d/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 4.8470132000074955
+    },
+    {
+      "name": "Anschlüsse modularer Boden- und Wandstücke",
+      "case": "final_station_visual",
+      "status": "bestanden",
+      "assertions": 158,
+      "run_id": "15a97a6972fc4698ab65c5a962d36a46",
+      "report": "docs/qa/review_completion_20261113/final_station_visual/15a97a6972fc4698ab65c5a962d36a46/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\e4f19bb0e448438eac9f5f204378e1d9",
+      "renderer": "headless",
+      "seconds": 8.234831799985841
+    },
+    {
+      "name": "Native Stations-, Landepad- und Sandboxansichten",
+      "case": "final_station_capture",
+      "status": "bestanden",
+      "assertions": 13,
+      "run_id": "b4e116cf3e6046bc911bc65d3c6b8428",
+      "report": "docs/qa/review_completion_20261113/final_station_capture/b4e116cf3e6046bc911bc65d3c6b8428/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 18.774641399999382
+    },
+    {
+      "name": "Native Kappen, Klippen und Rampenschatten",
+      "case": "final_regional_shadow",
+      "status": "bestanden",
+      "assertions": 12,
+      "run_id": "80d94eecc0a347f6b53629293083e3d5",
+      "report": "docs/qa/review_completion_20261113/final_regional_shadow/80d94eecc0a347f6b53629293083e3d5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1c1e48e1111b4b81b98546f181662bba",
+      "renderer": "gl_compatibility",
+      "seconds": 16.777499500007252
+    },
+    {
+      "name": "Stationssave mit frischem Korridorindex",
+      "case": "final_station_restore",
+      "status": "bestanden",
+      "assertions": 34,
+      "run_id": "7dde20a0a4cb4450b44600957ce70aa0",
+      "report": "docs/qa/review_completion_20261113/final_station_restore/7dde20a0a4cb4450b44600957ce70aa0/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 6.470348900009412
+    },
+    {
+      "name": "Rundumsicherung und gespeicherte Bewegungsbefehle",
+      "case": "final_command_save",
+      "status": "bestanden",
+      "assertions": 18,
+      "run_id": "9828ddce711d451a8d37b90de2af0127",
+      "report": "docs/qa/review_completion_20261113/final_command_save/9828ddce711d451a8d37b90de2af0127/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b07c5010b47b4d4c9f08caa8951b36d1",
+      "renderer": "headless",
+      "seconds": 4.741351699994993
+    },
+    {
+      "name": "Exakte Zahlenwerte über die JSON-Savegrenze",
+      "case": "final_checkpoint_numbers",
+      "status": "bestanden",
+      "assertions": 13,
+      "run_id": "e5695b68baf14c1e881edfab3a129db8",
+      "report": "docs/qa/review_completion_20261113/final_checkpoint_numbers/e5695b68baf14c1e881edfab3a129db8/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\12add1316c404c9fb1e1746a9090f31a",
+      "renderer": "headless",
+      "seconds": 2.772728800002369
+    },
+    {
+      "name": "Normaler Spielstart, Speicherfehler und kurzer Retry",
+      "case": "final_home_save",
+      "status": "bestanden",
+      "assertions": 22,
+      "run_id": "df5f0b3add734cb68fda772762b090c9",
+      "report": "docs/qa/review_completion_20261113/final_home_save/df5f0b3add734cb68fda772762b090c9/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc16bf3b22a64d478a88411925f981a2",
+      "renderer": "headless",
+      "seconds": 96.1174580000079
+    },
+    {
+      "name": "Echter alter Spielstand: Continue â†’ Hex-Save â†’ Continue",
+      "case": "final_authentic_legacy",
+      "status": "bestanden",
+      "assertions": 90,
+      "run_id": "febd1170c2594d7aba4f22d82251f8bb",
+      "report": "docs/qa/review_completion_20261113/final_authentic_legacy/febd1170c2594d7aba4f22d82251f8bb/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc16bf3b22a64d478a88411925f981a2",
+      "renderer": "headless",
+      "seconds": 95.89426889999595
+    },
+    {
+      "name": "Vorhandene Ausrüstungsicons in den Menüs",
+      "case": "final_menu_icons",
+      "status": "bestanden",
+      "assertions": 19,
+      "run_id": "26d96335a1d04d3985c10a25b77e5b94",
+      "report": "docs/qa/review_completion_20261113/final_menu_icons/26d96335a1d04d3985c10a25b77e5b94/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\f53d69efe7a34cca852799af19e1884d",
+      "renderer": "headless",
+      "seconds": 2.6294311999954516
+    },
+    {
+      "name": "Alle fünf Auftragsorte aus autoritativen Reisedaten",
+      "case": "final_job_briefing",
+      "status": "bestanden",
+      "assertions": 45,
+      "run_id": "416b6adba3c047b1a43b539f33a2de73",
+      "report": "docs/qa/review_completion_20261113/final_job_briefing/416b6adba3c047b1a43b539f33a2de73/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\f53d69efe7a34cca852799af19e1884d",
+      "renderer": "headless",
+      "seconds": 3.1080701000028057
+    },
+    {
+      "name": "Autoritative Hexaufnahme authored Stationsgruppen",
+      "case": "final_spawn",
+      "status": "bestanden",
+      "assertions": 6,
+      "run_id": "5c2925c04c1943c2af6e20e173532e92",
+      "report": "docs/qa/review_completion_20261113/final_spawn/5c2925c04c1943c2af6e20e173532e92/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc0ee1d6cc444052aade58891e720d76",
+      "renderer": "headless",
+      "seconds": 6.108854000005522
+    },
+    {
+      "name": "Lokale Hexinteraktionen, Reichweitengrenzen und Fortsetzung",
+      "case": "final_hex_use",
+      "status": "bestanden",
+      "assertions": 53,
+      "run_id": "9c8faee6214f4fe98764cba91036366c",
+      "report": "docs/qa/review_completion_20261113/final_hex_use/9c8faee6214f4fe98764cba91036366c/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\938471ac5a6c41508e7223fbe28d353b",
+      "renderer": "headless",
+      "seconds": 13.97459300000628
+    },
+    {
+      "name": "Kompakter Ortsbaum, Auftragsregeln und Auswahl",
+      "case": "final_starmap",
+      "status": "bestanden",
+      "assertions": 140,
+      "run_id": "ebe8e125875f483297acb31f6b87b6a4",
+      "report": "docs/qa/review_completion_20261113/final_starmap/ebe8e125875f483297acb31f6b87b6a4/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\3583b7b4ec2a47a1b37996b20b778cf4",
+      "renderer": "headless",
+      "seconds": 7.443567499998608
+    },
+    {
+      "name": "Hexböden, Rampenhöhen und Figurenauflage",
+      "case": "final_hex_surface",
+      "status": "bestanden",
+      "assertions": 245,
+      "run_id": "ddd7f196a6ff475bbe2175a4bbf4ab30",
+      "report": "docs/qa/review_completion_20261113/final_hex_surface/ddd7f196a6ff475bbe2175a4bbf4ab30/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 6.906512000015937
+    },
+    {
+      "name": "Kampagnenabschluss und alte Save-Nachbarn",
+      "case": "final_campaign",
+      "status": "bestanden",
+      "assertions": 67,
+      "run_id": "f75da58cc8b44e15b37a0e5f4ba0ccba",
+      "report": "docs/qa/review_completion_20261113/final_campaign/f75da58cc8b44e15b37a0e5f4ba0ccba/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\938471ac5a6c41508e7223fbe28d353b",
+      "renderer": "headless",
+      "seconds": 480.23499260000244
+    },
+    {
+      "name": "Native Sternkarte und Smart Mobile bei 720p und 1080p",
+      "case": "starmap_after",
+      "status": "bestanden",
+      "assertions": 67,
+      "run_id": "f7d7b2a709c1417c8510d78b172f4ffb",
+      "report": "docs/qa/review_completion_20261113/starmap_after/f7d7b2a709c1417c8510d78b172f4ffb/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\3583b7b4ec2a47a1b37996b20b778cf4",
+      "renderer": "gl_compatibility",
+      "seconds": 51.50260370000615
+    },
+    {
+      "name": "Native Hexlinien auf Hügeln, Rampen und Kenney-Böden",
+      "case": "hex_surface_after",
+      "status": "bestanden",
+      "assertions": 23,
+      "run_id": "48f1b28f5ab64bb59eb92671ea588301",
+      "report": "docs/qa/review_completion_20261113/hex_surface_after/48f1b28f5ab64bb59eb92671ea588301/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 33.6125624999986
+    },
+    {
+      "name": "Native Appfußleiste, Reichweite und Ausstiegsdialog",
+      "case": "ui_after",
+      "status": "bestanden",
+      "assertions": 26,
+      "run_id": "e3834e982c2b469aabae5c93b06cfda8",
+      "report": "docs/qa/review_completion_20261113/ui_after/e3834e982c2b469aabae5c93b06cfda8/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\2972d61ea6834f10ae817fc44d280870",
+      "renderer": "gl_compatibility",
+      "seconds": 65.25679390000005
+    },
+    {
+      "name": "Verbundene Stationsroute mit AA, Tür, Computer und Fracht",
+      "case": "final_station_route",
+      "status": "bestanden",
+      "assertions": 38,
+      "run_id": "474809ab4518429e902ef1309b27858d",
+      "report": "docs/qa/review_completion_20261113/final_station_route/474809ab4518429e902ef1309b27858d/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 165.74186549999285
+    },
+    {
+      "name": "Freigabefolge aller fünf Kampagnenaufträge",
+      "case": "final_campaign_chain",
+      "status": "bestanden",
+      "assertions": 64,
+      "run_id": "b58438e7391e4b6a9ccc0bad84b7c5e7",
+      "report": "docs/qa/review_completion_20261113/final_campaign_chain/b58438e7391e4b6a9ccc0bad84b7c5e7/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\86af42bae9c74b06be8340ee05f64531",
+      "renderer": "headless",
+      "seconds": 6.178844000009121
+    },
+    {
+      "name": "Actor-Checkpoint-Transaktion",
+      "case": "final_actor",
+      "status": "bestanden",
+      "assertions": 11,
+      "run_id": "8c24f9e56e99423c87e6ae1cae2cc21c",
+      "report": "docs/qa/review_completion_20261113/final_actor/8c24f9e56e99423c87e6ae1cae2cc21c/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b07c5010b47b4d4c9f08caa8951b36d1",
+      "renderer": "headless",
+      "seconds": 6.216446599995834
+    },
+    {
+      "name": "Atomare Actor-Batches",
+      "case": "final_actor_batch",
+      "status": "bestanden",
+      "assertions": 7,
+      "run_id": "31b3da5f61ac4bde984b438795ae9561",
+      "report": "docs/qa/review_completion_20261113/final_actor_batch/31b3da5f61ac4bde984b438795ae9561/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b07c5010b47b4d4c9f08caa8951b36d1",
+      "renderer": "headless",
+      "seconds": 6.51696660000016
+    },
+    {
+      "name": "Gesundheit und Actor-Checkpoint",
+      "case": "final_actor_vital",
+      "status": "bestanden",
+      "assertions": 6,
+      "run_id": "4105eac2fe09411aadd99ec72b857127",
+      "report": "docs/qa/review_completion_20261113/final_actor_vital/4105eac2fe09411aadd99ec72b857127/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b07c5010b47b4d4c9f08caa8951b36d1",
+      "renderer": "headless",
+      "seconds": 6.425404300010996
+    },
+    {
+      "name": "Stabile Missions- und Bewegungslebenszyklen",
+      "case": "final_lifecycle",
+      "status": "bestanden",
+      "assertions": 11,
+      "run_id": "28c15ccba3804e1ebf9d51cca5822d69",
+      "report": "docs/qa/review_completion_20261113/final_lifecycle/28c15ccba3804e1ebf9d51cca5822d69/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\b07c5010b47b4d4c9f08caa8951b36d1",
+      "renderer": "headless",
+      "seconds": 7.137129800001276
+    },
+    {
+      "name": "Deployment und tatsächliche Ankunft",
+      "case": "final_deployment",
+      "status": "bestanden",
+      "assertions": 10,
+      "run_id": "33acc50f2a39431a827f2bbf04322559",
+      "report": "docs/qa/review_completion_20261113/final_deployment/33acc50f2a39431a827f2bbf04322559/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1f5f2109a3dc4c25ab19b079819c1d9f",
+      "renderer": "headless",
+      "seconds": 6.225248200003989
+    },
+    {
+      "name": "Vorhandene taktische Bewegungsstile",
+      "case": "final_advance_styles",
+      "status": "bestanden",
+      "assertions": 37,
+      "run_id": "420bcdbd34264333aa7935ae6f175e92",
+      "report": "docs/qa/review_completion_20261113/final_advance_styles/420bcdbd34264333aa7935ae6f175e92/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\cfb585e758bc4c57bf35971e0bdf4583",
+      "renderer": "headless",
+      "seconds": 16.427472900002613
+    },
+    {
+      "name": "Bestehende Nehmen-Befehle und taktische Regeln",
+      "case": "final_take_doctrine",
+      "status": "bestanden",
+      "assertions": 31,
+      "run_id": "91ba0470f2cf4ae0b5bf52b446c6f0c2",
+      "report": "docs/qa/review_completion_20261113/final_take_doctrine/91ba0470f2cf4ae0b5bf52b446c6f0c2/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\cfb585e758bc4c57bf35971e0bdf4583",
+      "renderer": "headless",
+      "seconds": 2.7480309999955352
+    },
+    {
+      "name": "Echter Schiffsaccess, Teilankunft und Boarding",
+      "case": "final_ship_access",
+      "status": "bestanden",
+      "assertions": 36,
+      "run_id": "9b6ec5274a024828825a06684ca5edbd",
+      "report": "docs/qa/review_completion_20261113/final_ship_access/9b6ec5274a024828825a06684ca5edbd/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\d5417516be184d6c811f2120927a68f2",
+      "renderer": "headless",
+      "seconds": 75.52695909999602
+    },
+    {
+      "name": "Orts-/Orbitansicht ohne Reise und autoritativer FoW",
+      "case": "final_remote_inspection",
+      "status": "bestanden",
+      "assertions": 54,
+      "run_id": "a42e2a2382074fe38669e8d4f98c5fca",
+      "report": "docs/qa/review_completion_20261113/final_remote_inspection/a42e2a2382074fe38669e8d4f98c5fca/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\e4f19bb0e448438eac9f5f204378e1d9",
+      "renderer": "headless",
+      "seconds": 55.49065459999838
+    },
+    {
+      "name": "Stationwinkel, reale Hexhülle und unverändertes Lagerhaus",
+      "case": "final_station_layout",
+      "status": "bestanden",
+      "assertions": 76,
+      "run_id": "7c791f58668b4d8c8064945b679b65f1",
+      "report": "docs/qa/review_completion_20261113/final_station_layout/7c791f58668b4d8c8064945b679b65f1/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\d3bf7575ba754823a968b069010c8a41",
+      "renderer": "headless",
+      "seconds": 7.632152799982578
+    },
+    {
+      "name": "Bruchsteinklippen, Stationsachsen und gebundene Geometriekosten",
+      "case": "final_cliff_station",
+      "status": "bestanden",
+      "assertions": 3134,
+      "run_id": "4599c1fb17f7417fb720b0b153a382c0",
+      "report": "docs/qa/review_completion_20261113/final_cliff_station/4599c1fb17f7417fb720b0b153a382c0/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\d3bf7575ba754823a968b069010c8a41",
+      "renderer": "headless",
+      "seconds": 31.60852939999313
+    },
+    {
+      "name": "Sechs echte ENet-Peers, gemeinsame Teams und Rejoin",
+      "case": "final_shared_team",
+      "status": "bestanden",
+      "assertions": 64,
+      "run_id": "9a67cbf15daf4508adb8fc1cc4ee02f8",
+      "report": "docs/qa/review_completion_20261113/final_shared_team/9a67cbf15daf4508adb8fc1cc4ee02f8/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c30305d44d8440af968089208340bf49",
+      "renderer": "headless",
+      "seconds": 3.1847635000012815
+    },
+    {
+      "name": "PvP-Seitenwahl und gemeinsame Koop-Fireteams",
+      "case": "final_shared_team_legacy",
+      "status": "bestanden",
+      "assertions": 20,
+      "run_id": "30418dfd5ee34f27b87ba2f1e1715bf5",
+      "report": "docs/qa/review_completion_20261113/final_shared_team_legacy/30418dfd5ee34f27b87ba2f1e1715bf5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c30305d44d8440af968089208340bf49",
+      "renderer": "headless",
+      "seconds": 2.8027010999940103
+    },
+    {
+      "name": "Bedienbare Multiplayer-Lobby bei kleiner Auflösung",
+      "case": "final_lobby_layout",
+      "status": "bestanden",
+      "assertions": 10,
+      "run_id": "b917f715d04e4bba956520bcd5081640",
+      "report": "docs/qa/review_completion_20261113/final_lobby_layout/b917f715d04e4bba956520bcd5081640/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\177f3b04debb4c109f980fa756be3772",
+      "renderer": "gl_compatibility",
+      "seconds": 12.02252579999913
+    },
+    {
+      "name": "Parallele Karten und unabhängige Multiplayeransichten",
+      "case": "final_shared_team_multimap",
+      "status": "bestanden",
+      "assertions": 113,
+      "run_id": "9536986d299d4c1aa272fc5b19c211d5",
+      "report": "docs/qa/review_completion_20261113/final_shared_team_multimap/9536986d299d4c1aa272fc5b19c211d5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 29.442463199986378
+    },
+    {
+      "name": "Vollständige Kartenvorbereitung unter unverändertem Speicherlimit",
+      "case": "final_map_preparation",
+      "status": "bestanden",
+      "assertions": 50,
+      "run_id": "6bbd9f0122224b4ea1e488b4e3eb971a",
+      "report": "docs/qa/review_completion_20261113/final_map_preparation/6bbd9f0122224b4ea1e488b4e3eb971a/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 72.40147010001238
+    },
+    {
+      "name": "Mauer und Tor in einem Zug mit gemeinsamem Undo und Save",
+      "case": "final_editor_wall_gate",
+      "status": "bestanden",
+      "assertions": 42,
+      "run_id": "b4622fe180cd41eb81eac631193526e9",
+      "report": "docs/qa/review_completion_20261113/final_editor_wall_gate/b4622fe180cd41eb81eac631193526e9/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c7461aab48744770875590197a4bda04",
+      "renderer": "headless",
+      "seconds": 18.346696900000097
+    },
+    {
+      "name": "Statischer Cache ohne doppelte Live-Rasterdaten; Sicht und Türen erhalten",
+      "case": "final_grid_cache",
+      "status": "bestanden",
+      "assertions": 12,
+      "run_id": "3d9f9702e7cd4b55ae21974d715191cd",
+      "report": "docs/qa/review_completion_20261113/final_grid_cache/3d9f9702e7cd4b55ae21974d715191cd/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 4.487375400000019
+    },
+    {
+      "name": "Bündige Wände, passende Türblätter und dekorative Kiesel",
+      "case": "final_station_building",
+      "status": "bestanden",
+      "assertions": 282,
+      "run_id": "1b36648b56d942f3be69ed7b58702802",
+      "report": "docs/qa/review_completion_20261113/final_station_building/1b36648b56d942f3be69ed7b58702802/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 8.144624400010798
+    },
+    {
+      "name": "Native Schattenvergleiche bei gleicher Stationskamera",
+      "case": "station_shadow_after",
+      "status": "bestanden",
+      "assertions": 13,
+      "run_id": "8a04aea01cb24a188297d05befcfb3ce",
+      "report": "docs/qa/review_completion_20261113/station_shadow_after/8a04aea01cb24a188297d05befcfb3ce/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 14.276695700013079
+    },
+    {
+      "name": "Hexgrundlagen und präziser Marker-Dateiroundtrip",
+      "case": "final_hex_foundation",
+      "status": "bestanden",
+      "assertions": 42,
+      "run_id": "d501fac2a78648b5b0418e6c005e6cc6",
+      "report": "docs/qa/review_completion_20261113/final_hex_foundation/d501fac2a78648b5b0418e6c005e6cc6/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\1bdb119c79b843709265b49f9d329bee",
+      "renderer": "headless",
+      "seconds": 3.4109030999970855
+    },
+    {
+      "name": "Native Ansichten der kleinen Station und gedrehter Außenensembles",
+      "case": "station_ensembles_after",
+      "status": "bestanden",
+      "assertions": 16,
+      "run_id": "13cf6169f94b4e1fb9a48090d584b3bd",
+      "report": "docs/qa/review_completion_20261113/station_ensembles_after/13cf6169f94b4e1fb9a48090d584b3bd/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "gl_compatibility",
+      "seconds": 29.2652439000085
+    },
+    {
+      "name": "Unregelmäßige Felsgruppen mit erhaltenen Wegen und Blockerfakten",
+      "case": "final_station_nature",
+      "status": "bestanden",
+      "assertions": 15,
+      "run_id": "d447e001e33d49ba998d0549571e65c0",
+      "report": "docs/qa/review_completion_20261113/final_station_nature/d447e001e33d49ba998d0549571e65c0/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\d3bf7575ba754823a968b069010c8a41",
+      "renderer": "headless",
+      "seconds": 10.603908899996895
+    },
+    {
+      "name": "Teambezogene Sichtprojektion und verborgene Einheiten",
+      "case": "final_visible_projection",
+      "status": "bestanden",
+      "assertions": 20,
+      "run_id": "8a37bc2a06f043aa8e2d1e3095a165b5",
+      "report": "docs/qa/review_completion_20261113/final_visible_projection/8a37bc2a06f043aa8e2d1e3095a165b5/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c7461aab48744770875590197a4bda04",
+      "renderer": "headless",
+      "seconds": 2.8376064999902155
+    },
+    {
+      "name": "Bestehender Netzwerk-Snapshotvertrag",
+      "case": "final_snapshot_contract",
+      "status": "bestanden",
+      "assertions": 20,
+      "run_id": "68ae5fedc6cd46f2b58ebf7f5b087697",
+      "report": "docs/qa/review_completion_20261113/final_snapshot_contract/68ae5fedc6cd46f2b58ebf7f5b087697/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c7461aab48744770875590197a4bda04",
+      "renderer": "headless",
+      "seconds": 4.134473399986746
+    },
+    {
+      "name": "Erkundungsnebel und bestehende Renderer-Updates",
+      "case": "final_fog_overlay",
+      "status": "bestanden",
+      "assertions": 34,
+      "run_id": "91ca55d47a8040079c049c6aaf83273f",
+      "report": "docs/qa/review_completion_20261113/final_fog_overlay/91ca55d47a8040079c049c6aaf83273f/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\c7461aab48744770875590197a4bda04",
+      "renderer": "headless",
+      "seconds": 4.37380200001644
+    },
+    {
+      "name": "18 Gebäude mit geteilten Materialien ohne Instanzparameter-Limit",
+      "case": "final_building_material",
+      "status": "bestanden",
+      "assertions": 30,
+      "run_id": "f65a7f8a49f7408e8e0c9e2b56c59c60",
+      "report": "docs/qa/review_completion_20261113/final_building_material/f65a7f8a49f7408e8e0c9e2b56c59c60/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\bc620e4d57334503b3b69f3101953ee9",
+      "renderer": "headless",
+      "seconds": 5.748881300009089
+    },
+    {
+      "name": "Angeworbene Personen, tatsächliche Schiffsbesatzung und strenge Speicherprüfung",
+      "case": "final_recruit_transport",
+      "status": "bestanden",
+      "assertions": 23,
+      "run_id": "9d7ce18ca8df4c2695f124185b4d9033",
+      "report": "docs/qa/review_completion_20261113/final_recruit_transport/9d7ce18ca8df4c2695f124185b4d9033/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\17a1ceea038b400bbbc32b90f62c483f",
+      "renderer": "headless",
+      "seconds": 61.098395099979825
+    },
+    {
+      "name": "Belegtes Hexziel ohne Vollkartensuche, Freigabe und gespeicherter Bewegungsauftrag",
+      "case": "final_occupied_goal",
+      "status": "bestanden",
+      "assertions": 47,
+      "run_id": "7171d550f13740929aec93e98579adbf",
+      "report": "docs/qa/review_completion_20261113/final_occupied_goal/7171d550f13740929aec93e98579adbf/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\84ab596e5eb64297b027fa9554fb48aa",
+      "renderer": "headless",
+      "seconds": 3.9406726000015624
+    },
+    {
+      "name": "Besetzte Formationsziele und echte Hex-Interaktion",
+      "case": "final_formation_occupied",
+      "status": "bestanden",
+      "assertions": 58,
+      "run_id": "61dcc0177dd64dc1a20e0778a3cc85f7",
+      "report": "docs/qa/review_completion_20261113/final_formation_occupied/61dcc0177dd64dc1a20e0778a3cc85f7/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\100b0976aebc4b589d7064879b830eed",
+      "renderer": "headless",
+      "seconds": 14.454420200025197
+    },
+    {
+      "name": "Ausweichen bei geänderter Schiffsfläche und Fortsetzung beider Ziele",
+      "case": "final_backoff_ship",
+      "status": "bestanden",
+      "assertions": 33,
+      "run_id": "1e90240915c34435b2b556cc7d52da4b",
+      "report": "docs/qa/review_completion_20261113/final_backoff_ship/1e90240915c34435b2b556cc7d52da4b/report.json",
+      "source_snapshot": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\completion_snapshots\\426b67cb8e644cd891e199dbd1d9f46f",
+      "renderer": "headless",
+      "seconds": 2.957775600021705
+    }
+  ],
+  "gallery_entries": 46,
+  "gallery_unique_images": 105,
+  "product_commit": "8368862217e70669dc2973e4b3d6eca93f9ef330"
+}

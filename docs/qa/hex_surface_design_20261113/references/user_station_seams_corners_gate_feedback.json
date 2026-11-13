@@ -1,0 +1,30 @@
+{
+  "source": "C:\\Users\\bjoer\\AppData\\Local\\Temp\\codex-clipboard-985e4469-84f5-45fc-a6a3-2629fa741ab6.png",
+  "copy": "docs\\qa\\hex_surface_design_20261113\\references\\user_station_seams_corners_gate_feedback.png",
+  "sha256": "10c1b99fa5ab1153db3f46cf5a27a76c6b0b010f50fbaeac91fd04fd8fa1f6e1",
+  "kind": "user_screenshot_native_candidate",
+  "approved": [
+    "current warehouse-aligned wall axes",
+    "rock forms",
+    "current prop orientations"
+  ],
+  "revise": [
+    "flush wall joins",
+    "corner connectors",
+    "door offsets",
+    "prefer thinner light walls with yellow stripe",
+    "floor underneath walls",
+    "split red/light half-hex floor boundaries",
+    "less regular rock scatter",
+    "tiny decorative pebbles without gameplay effects",
+    "pipe continuity and warehouse connection",
+    "diagnose green line"
+  ],
+  "retain_for_now": [
+    "light ground flecks"
+  ],
+  "defer": [
+    "stylistic overhaul of other props"
+  ],
+  "date": "2026-11-13"
+}

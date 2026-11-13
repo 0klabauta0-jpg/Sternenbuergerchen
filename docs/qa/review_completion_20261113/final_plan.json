@@ -1,0 +1,519 @@
+[
+  {
+    "case": "final_rng",
+    "script": "review_completion_rng_verifier.gd",
+    "marker": "REVIEW_COMPLETION_RNG passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_legacy_hex",
+    "script": "review_completion_legacy_hex_verifier.gd",
+    "marker": "REVIEW_COMPLETION_LEGACY_HEX passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_base_clearance",
+    "script": "review_completion_base_clearance_verifier.gd",
+    "marker": "REVIEW_COMPLETION_BASE_CLEARANCE passed=(\\d+) failed=(\\d+)",
+    "timeout": 180
+  },
+  {
+    "case": "final_maps",
+    "script": "review_completion_maps_verifier.gd",
+    "marker": "REVIEW_COMPLETION_MAPS passed=(\\d+) failed=(\\d+)",
+    "timeout": 600,
+    "native": false
+  },
+  {
+    "case": "final_ux",
+    "script": "review_completion_ux_20261113.gd",
+    "marker": "REVIEW_COMPLETION_UX passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_graphics",
+    "script": "review_completion_graphics_fixes.gd",
+    "marker": "REVIEW_GRAPHICS_FIXES passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_base_projection",
+    "script": "review_completion_base_visual_projection.gd",
+    "marker": "REVIEW_BASE_VISUAL_PROJECTION passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_autosave",
+    "script": "campaign_hex_autosave_interval_verifier.gd",
+    "marker": "CAMPAIGN_HEX_AUTOSAVE_INTERVAL passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_root_checkpoint",
+    "script": "hex_root_checkpoint_integration_verifier.gd",
+    "marker": "HEX_ROOT_CHECKPOINT_INTEGRATION passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_movement_save",
+    "script": "hex_movement_save_state_verifier.gd",
+    "marker": "HEX_MOVEMENT_SAVE_STATE passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_network",
+    "script": "astra_network_fixes_20261113.gd",
+    "marker": "ASTRA_NETWORK_FIXES passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_door",
+    "script": "hex_door_guard_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_connected",
+    "script": "task_1094_connected_client_go_interaction_rpc_handoff.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_parallel",
+    "script": "task_1102_parallel_fireteam_interaction_ownership_recovery.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_hex_enet",
+    "script": "hex_enet_regression_verifier.gd",
+    "marker": "HEX_ENET_REGRESSION checks=(\\d+) failures=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_active_continue",
+    "script": "campaign_active_mission_continue_verifier.gd",
+    "marker": "CAMPAIGN_ACTIVE_CONTINUE passed=(\\d+) failed=(\\d+)",
+    "timeout": 540
+  },
+  {
+    "case": "maps_after",
+    "script": "review_completion_maps_capture.gd",
+    "marker": "REVIEW_MAPS_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "personnel_after",
+    "script": "review_completion_personnel_capture.gd",
+    "marker": "REVIEW_PERSONNEL_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "graphics_after",
+    "script": "review_completion_graphics_capture.gd",
+    "marker": "REVIEW_GRAPHICS_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "final_transport",
+    "script": "transport_checkpoint_verifier.gd",
+    "marker": "TRANSPORT_CHECKPOINT checks=(\\d+) failures=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_combat",
+    "script": "astra_hex_combat_fixes_20261113.gd",
+    "marker": "ASTRA_HEX_COMBAT_FIXES passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_station_visual",
+    "script": "review_completion_station_visual_verifier.gd",
+    "marker": "REVIEW_STATION_VISUAL passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_station_capture",
+    "script": "review_completion_station_capture.gd",
+    "marker": "REVIEW_STATION_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "final_regional_shadow",
+    "script": "review_completion_regional_shadow_capture.gd",
+    "marker": "REVIEW_REGIONAL_SHADOW_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "final_station_restore",
+    "script": "review_completion_station_restore_verifier.gd",
+    "marker": "REVIEW_COMPLETION_STATION_RESTORE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_command_save",
+    "script": "review_completion_command_save_verifier.gd",
+    "marker": "REVIEW_COMPLETION_COMMAND_SAVE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_checkpoint_numbers",
+    "script": "review_completion_checkpoint_numbers_verifier.gd",
+    "marker": "REVIEW_COMPLETION_CHECKPOINT_NUMBERS passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_home_save",
+    "script": "review_completion_home_save_verifier.gd",
+    "marker": "REVIEW_COMPLETION_HOME_SAVE passed=(\\d+) failed=(\\d+)",
+    "timeout": 600,
+    "native": false
+  },
+  {
+    "case": "final_authentic_legacy",
+    "script": "review_completion_authentic_legacy_continue.gd",
+    "marker": "REVIEW_COMPLETION_AUTHENTIC_LEGACY_CONTINUE passed=(\\d+) failed=(\\d+)",
+    "timeout": 600,
+    "native": false
+  },
+  {
+    "case": "final_menu_icons",
+    "script": "menu_equipment_icons_verifier.gd",
+    "marker": "MENU_ICONS_BRIEFING checks=(\\d+) failures=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_job_briefing",
+    "script": "review_completion_job_briefing_verifier.gd",
+    "marker": "REVIEW_COMPLETION_JOB_BRIEFING passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_spawn",
+    "script": "review_completion_spawn_verifier.gd",
+    "marker": "REVIEW_COMPLETION_SPAWN passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_hex_use",
+    "script": "review_completion_hex_use_verifier.gd",
+    "marker": "REVIEW_HEX_USE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_starmap",
+    "script": "starmap_smart_mobile_verifier.gd",
+    "marker": "STARMAP_SMART_MOBILE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_hex_surface",
+    "script": "review_completion_hex_surface_verifier.gd",
+    "marker": "REVIEW_HEX_SURFACE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_campaign",
+    "script": "astra_campaign_fixes_20261113.gd",
+    "marker": "ASTRA_CAMPAIGN_FIXES passed=(\\d+) failed=(\\d+)",
+    "timeout": 900,
+    "native": false
+  },
+  {
+    "case": "final_five_sorties",
+    "script": "campaign_five_actual_sorties_verifier.gd",
+    "marker": "SINGLEPLAYER_LOOP_RESULTS passed=(\\d+) failed=(\\d+)",
+    "timeout": 900,
+    "native": false
+  },
+  {
+    "case": "starmap_after",
+    "script": "starmap_smart_mobile_capture.gd",
+    "marker": "STARMAP_SMART_MOBILE_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "hex_surface_after",
+    "script": "review_completion_hex_surface_capture.gd",
+    "marker": "REVIEW_HEX_SURFACE_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "ui_after",
+    "script": "review_completion_ui_capture.gd",
+    "marker": "REVIEW_COMPLETION_UI_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "final_station_route",
+    "script": "task_1093_connected_station_route_full_interaction_trace.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_campaign_chain",
+    "script": "campaign_five_missions_chain_test.gd",
+    "marker": "CAMPAIGN_FIVE_CHAIN: (\\d+)/(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_actor",
+    "script": "mission_actor_checkpoint_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_actor_batch",
+    "script": "mission_actor_checkpoint_batch_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_actor_vital",
+    "script": "mission_actor_vital_checkpoint_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_lifecycle",
+    "script": "stable_mission_lifecycle_checkpoint_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_deployment",
+    "script": "polisa_actual_ground_deployment_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_advance_styles",
+    "script": "task_188_fireteam_advance_styles_map_readability.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_take_doctrine",
+    "script": "task_443_fireteam_take_behavior_control.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_ship_access",
+    "script": "review_completion_ship_access_verifier.gd",
+    "marker": "REVIEW_SHIP_ACCESS passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_remote_inspection",
+    "script": "remote_inspection_verifier.gd",
+    "marker": "REMOTE_INSPECTION passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": false
+  },
+  {
+    "case": "final_station_layout",
+    "script": "review_completion_station_layout_verifier.gd",
+    "marker": "REVIEW_STATION_LAYOUT passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_cliff_station",
+    "script": "review_completion_cliff_station_revision_verifier.gd",
+    "marker": "REVIEW_CLIFF_STATION passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_shared_team",
+    "script": "shared_team_session_verifier.gd",
+    "marker": "SHARED_TEAM_SESSION passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_shared_team_legacy",
+    "script": "review7_session_versus_assignment_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_lobby_layout",
+    "script": "task_1106_coop_lobby_layout_hardening.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 120,
+    "native": true
+  },
+  {
+    "case": "final_shared_team_multimap",
+    "script": "shared_team_multimap_enet_verifier.gd",
+    "marker": "SHARED_TEAM_MULTIMAP passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": false
+  },
+  {
+    "case": "final_map_preparation",
+    "script": "review_completion_map_preparation_verifier.gd",
+    "marker": "REVIEW_MAP_PREPARATION passed=(\\d+) failed=(\\d+)",
+    "timeout": 900,
+    "native": false
+  },
+  {
+    "case": "final_editor_wall_gate",
+    "script": "editor_wall_gate_verifier.gd",
+    "marker": "EDITOR_WALL_GATE passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_grid_cache",
+    "script": "review_completion_grid_cache_verifier.gd",
+    "marker": "REVIEW_GRID_CACHE passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_station_building",
+    "script": "review_completion_station_building_verifier.gd",
+    "marker": "REVIEW_STATION_BUILDING passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "station_shadow_after",
+    "script": "review_completion_station_shadow_capture.gd",
+    "marker": "REVIEW_STATION_SHADOW_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 240,
+    "native": true
+  },
+  {
+    "case": "final_hex_foundation",
+    "script": "frontier_hex_foundation_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "station_ensembles_after",
+    "script": "review_completion_station_ensembles_capture.gd",
+    "marker": "REVIEW_STATION_ENSEMBLES_CAPTURE passed=(\\d+) failed=(\\d+)",
+    "timeout": 300,
+    "native": true
+  },
+  {
+    "case": "final_station_nature",
+    "script": "station_nature_clusters_verifier.gd",
+    "marker": "STATION_NATURE_CLUSTERS passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_visible_projection",
+    "script": "multiplayer_visible_snapshot_projection_verifier.gd",
+    "marker": "MULTIPLAYER_VISIBLE_PROJECTION passed=(\\d+) failed=(\\d+)",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_snapshot_contract",
+    "script": "task_168_multiplayer_snapshot_contract_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_fog_overlay",
+    "script": "task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 120,
+    "native": false
+  },
+  {
+    "case": "final_building_material",
+    "script": "review_completion_building_material_verifier.gd",
+    "marker": "REVIEW_BUILDING_MATERIAL passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_recruit_transport",
+    "script": "campaign_recruit_transport_verifier.gd",
+    "marker": "CAMPAIGN_RECRUIT_TRANSPORT passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "diagnostic_post_benit_continue",
+    "script": "campaign_post_benit_continue_verifier.gd",
+    "marker": "CAMPAIGN_POST_BENIT_CONTINUE returns=\\d+ passed=(\\d+) failed=(\\d+)",
+    "timeout": 720,
+    "native": false,
+    "evidence_scope": "Diagnostic Continue from genuine third-home file; two remaining sorties, not another five-sortie acceptance."
+  },
+  {
+    "case": "final_occupied_goal",
+    "script": "hex_movement_verifier.gd",
+    "marker": "RESULTS: (\\d+) passed, (\\d+) failed",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_formation_occupied",
+    "script": "review_completion_hex_use_verifier.gd",
+    "marker": "REVIEW_HEX_USE passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  },
+  {
+    "case": "final_backoff_ship",
+    "script": "hex_movement_save_state_verifier.gd",
+    "marker": "HEX_MOVEMENT_SAVE_STATE passed=(\\d+) failed=(\\d+)",
+    "timeout": 180,
+    "native": false
+  }
+]

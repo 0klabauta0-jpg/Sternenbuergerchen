@@ -1,0 +1,456 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "spielreview_20261112",
+  "title": "SternenBürgerchen · Code, Architektur, UX und Gestaltung · Review 13.11.2026",
+  "exported_at": "2026-11-13T23:39:29.043Z",
+  "controls": {
+    "completion": {
+      "hex": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "rng": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "architecture": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "multiplayer": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "ux": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "graphics": {
+        "decision": "unchecked",
+        "note": ""
+      }
+    },
+    "graphics": {
+      "search": "",
+      "group": "all",
+      "stage": "after",
+      "satellite_crash_site": {
+        "decision": "revise",
+        "note": "Bodenvergleich: Schatten prüfen. ÄÖÜ"
+      },
+      "trade_outpost": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "fortified_outpost": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "polisa_station": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "Ground_Mission01_32x32": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "Ground_Mission02_128x128": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station_outpost_64x64": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "campaign_intro_base": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "terrain_flat": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "terrain_rocks": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "buildings_habitat": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "buildings_hall": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_anja": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_runtime": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "vehicles_cutlass": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "props_industry": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "star_map": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_01": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_02": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_03": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_04": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_05": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_06": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_07": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_08": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_09": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_10": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_11": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "personnel_catalog_12": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "regional_cap_shadow": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "surface_station_decks": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "surface_gm02_floors": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "surface_hill_ramp": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "surface_painted_pad": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "surface_raised_bridge": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station_h1_shadow": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station192_station_0_0": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station192_station_1_0": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station192_station_1_1": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "station192_station_2_2": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "starmap_navigation": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "smart_mobile_jobs": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "starmap_navigation_1080": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "smart_mobile_jobs_1080": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "inspection_unknown_location_720": {
+        "decision": "unchecked",
+        "note": ""
+      },
+      "inspection_unknown_orbit_720": {
+        "decision": "unchecked",
+        "note": ""
+      }
+    },
+    "terrain": {
+      "cliffs": {
+        "note": ""
+      },
+      "open_ground": {
+        "decision": "unchecked",
+        "note": ""
+      }
+    },
+    "kenney": {
+      "deko_barrels_nw": {
+        "note": ""
+      },
+      "factory_box_large": {
+        "note": ""
+      },
+      "factory_chimney_medium": {
+        "note": ""
+      },
+      "factory_conveyor": {
+        "note": ""
+      },
+      "factory_crane": {
+        "note": ""
+      },
+      "factory_detail_tank": {
+        "note": ""
+      },
+      "frontier_utility_fuel_01": {
+        "note": ""
+      },
+      "modular_floor": {
+        "note": ""
+      },
+      "modular_floor_raised": {
+        "note": ""
+      },
+      "nature_rock_cover": {
+        "note": ""
+      },
+      "rock_large": {
+        "note": ""
+      },
+      "rock_small": {
+        "note": ""
+      },
+      "spacekit_corridor_split": {
+        "note": ""
+      },
+      "spacekit_corridor_window": {
+        "note": ""
+      },
+      "spacekit_corridor_window_closed": {
+        "note": ""
+      },
+      "spacekit_machine_barrel_large": {
+        "note": ""
+      },
+      "spacekit_machine_wireless": {
+        "note": ""
+      },
+      "spacekit_rock_large_a": {
+        "note": ""
+      },
+      "spacekit_satellite_dish_detailed": {
+        "note": ""
+      },
+      "spacekit_turret_double": {
+        "note": ""
+      },
+      "spacekit_turret_single": {
+        "note": ""
+      },
+      "station_container_wide": {
+        "note": ""
+      },
+      "station_set_balcony_floor_center": {
+        "note": ""
+      },
+      "station_set_balcony_floor_corner": {
+        "note": ""
+      },
+      "station_set_chair": {
+        "note": ""
+      },
+      "station_set_chair_armrest": {
+        "note": ""
+      },
+      "station_set_chair_cushion": {
+        "note": ""
+      },
+      "station_set_computer_screen": {
+        "note": ""
+      },
+      "station_set_computer_system": {
+        "note": ""
+      },
+      "station_set_computer_wide": {
+        "note": "Computer: Anschluss prüfen."
+      },
+      "station_set_container_flat": {
+        "note": ""
+      },
+      "station_set_container_flat_open": {
+        "note": ""
+      },
+      "station_set_container_tall": {
+        "note": ""
+      },
+      "station_set_container_wide": {
+        "note": ""
+      },
+      "station_set_door_double_closed": {
+        "note": ""
+      },
+      "station_set_door_single": {
+        "note": ""
+      },
+      "station_set_door_single_closed": {
+        "note": ""
+      },
+      "station_set_door_single_half": {
+        "note": ""
+      },
+      "station_set_floor_detail": {
+        "note": ""
+      },
+      "station_set_floor_panel": {
+        "note": ""
+      },
+      "station_set_floor_panel_end": {
+        "note": ""
+      },
+      "station_set_floor_panel_straight": {
+        "note": ""
+      },
+      "station_set_structure_barrier": {
+        "note": ""
+      },
+      "station_set_table_display": {
+        "note": ""
+      },
+      "station_set_table_display_planet": {
+        "note": ""
+      },
+      "station_set_wall": {
+        "note": ""
+      },
+      "station_set_wall_corner": {
+        "note": ""
+      },
+      "station_set_wall_detail": {
+        "note": ""
+      },
+      "station_set_wall_door": {
+        "note": ""
+      },
+      "station_set_wall_door_center": {
+        "note": ""
+      },
+      "station_set_wall_door_edge": {
+        "note": ""
+      },
+      "station_set_wall_door_wide": {
+        "note": ""
+      },
+      "station_set_wall_switch": {
+        "note": ""
+      },
+      "station_set_wall_window": {
+        "note": ""
+      },
+      "station_wall": {
+        "note": ""
+      },
+      "station_wall_door": {
+        "note": ""
+      },
+      "wall_corner_ne": {
+        "note": ""
+      },
+      "wall_corner_nw": {
+        "note": ""
+      },
+      "wall_corner_se": {
+        "note": ""
+      },
+      "wall_corner_sw": {
+        "note": ""
+      },
+      "wall_straight_ne": {
+        "note": ""
+      },
+      "wall_straight_nw": {
+        "note": ""
+      },
+      "wall_straight_se": {
+        "note": ""
+      },
+      "wall_straight_sw": {
+        "note": ""
+      }
+    },
+    "astra": {
+      "reviewed": {
+        "C1": false,
+        "C2": false,
+        "C3": false,
+        "C4": false,
+        "C5": false,
+        "C6": false,
+        "C7": false,
+        "C8": false,
+        "C9": false
+      }
+    },
+    "review": {
+      "next_priority": "hex",
+      "read": false,
+      "playtest_status": "pending",
+      "comment": ""
+    }
+  },
+  "notes": {
+    "review": {
+      "notes": ""
+    }
+  },
+  "active_choices": {},
+  "computed": {},
+  "metadata": {
+    "url": "file:///C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/reports/SPIELREVIEW_2026_11_12.html",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+  }
+}

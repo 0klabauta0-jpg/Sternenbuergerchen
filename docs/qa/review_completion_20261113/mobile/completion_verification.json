@@ -1,0 +1,127 @@
+{
+  "checks": [
+    {
+      "ok": true,
+      "label": "Five implementation areas present"
+    },
+    {
+      "ok": true,
+      "label": "Map and asset groups have reviewable evidence"
+    },
+    {
+      "ok": true,
+      "label": "Both requested UI revisions have their own comparisons"
+    },
+    {
+      "ok": true,
+      "label": "Every entry has native after evidence; missing historical/reference images are explicitly explained"
+    },
+    {
+      "ok": true,
+      "label": "Gallery fits 320px"
+    },
+    {
+      "ok": true,
+      "label": "Gallery fits 390px"
+    },
+    {
+      "ok": true,
+      "label": "Gallery fits 768px"
+    },
+    {
+      "ok": true,
+      "label": "Gallery fits 1440px"
+    },
+    {
+      "ok": true,
+      "label": "Map filter keeps actual map entries"
+    },
+    {
+      "ok": true,
+      "label": "Map filter hides other groups"
+    },
+    {
+      "ok": true,
+      "label": "Search has a truthful empty result"
+    },
+    {
+      "ok": true,
+      "label": "Stage keeps asset selection: before"
+    },
+    {
+      "ok": true,
+      "label": "Comparison stage synchronized: before"
+    },
+    {
+      "ok": true,
+      "label": "Stage keeps asset selection: after"
+    },
+    {
+      "ok": true,
+      "label": "Comparison stage synchronized: after"
+    },
+    {
+      "ok": true,
+      "label": "Stage keeps asset selection: reference"
+    },
+    {
+      "ok": true,
+      "label": "Comparison stage synchronized: reference"
+    },
+    {
+      "ok": true,
+      "label": "Every linked reference, before and after image loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Native image opens in dialog"
+    },
+    {
+      "ok": true,
+      "label": "Full native image loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Image dialog closes with Escape"
+    },
+    {
+      "ok": true,
+      "label": "Selected Kenney usage catalog is present"
+    },
+    {
+      "ok": true,
+      "label": "Every selected Kenney source preview loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Asset catalog filters by exact source identifier"
+    },
+    {
+      "ok": true,
+      "label": "Export preserves workbench contract"
+    },
+    {
+      "ok": true,
+      "label": "Asset decision survives offline export"
+    },
+    {
+      "ok": true,
+      "label": "Asset note survives offline export"
+    },
+    {
+      "ok": true,
+      "label": "Comparison state is exported"
+    },
+    {
+      "ok": true,
+      "label": "Individual asset finding survives offline JSON export"
+    },
+    {
+      "ok": true,
+      "label": "No JavaScript errors"
+    }
+  ],
+  "errors": [],
+  "passed": 30,
+  "failed": 0
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "warehouse_axes_v1",
+  "maps": [
+    {
+      "map": "maps/station_outpost_64x64.json",
+      "before_sha256": "1a6cca24439de43771576e2be7129fb4f725410b7061fc6e4e2d135b974b85eb",
+      "after_sha256": "09db4af2ef675de00e6e6b05866ed08e73dc0441fd7d13dd69bf2126de39ab8b",
+      "changed_region_cells": 400,
+      "moved_points": [
+        "patrol:station_loop_route:0",
+        "patrol:station_loop_route:1",
+        "patrol:station_loop_route:2",
+        "patrol:station_loop_route:3"
+      ],
+      "pipe_extension_cells": [
+        [
+          38,
+          40
+        ],
+        [
+          39,
+          40
+        ],
+        [
+          40,
+          40
+        ],
+        [
+          41,
+          40
+        ]
+      ],
+      "original_tile_count": 4096,
+      "warehouse_payload_unchanged": true,
+      "outside_region_unchanged": true
+    },
+    {
+      "map": "maps/station_outpost_192x192.json",
+      "before_sha256": "1dd059257fbb50cd1933d9863710e8690186f6c968c5669830d4ab8e0bd69222",
+      "after_sha256": "fd05987f167b871fb5a0de8457dc4e4e65d0086fa8e80247363fa3471d7f8aba",
+      "changed_region_cells": 400,
+      "moved_points": [
+        "patrol:station_loop_route:0",
+        "patrol:station_loop_route:1",
+        "patrol:station_loop_route:2",
+        "patrol:station_loop_route:3"
+      ],
+      "pipe_extension_cells": [
+        [
+          102,
+          104
+        ],
+        [
+          103,
+          104
+        ],
+        [
+          104,
+          104
+        ],
+        [
+          105,
+          104
+        ]
+      ],
+      "original_tile_count": 36864,
+      "warehouse_payload_unchanged": true,
+      "outside_region_unchanged": true
+    }
+  ]
+}
