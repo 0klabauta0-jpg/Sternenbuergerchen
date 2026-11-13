@@ -851,9 +851,6 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 		if not approach.get("ok",false):return {"started":false,"reason":approach.get("reason","approach_unavailable")}
 		ground_approach=approach.targets
 		formation_targets=ground_approach.duplicate()
-	if ground_approach.is_empty():
-		ground_approach=_resolve_occupied_hex_formation_targets(simulation_root,member_records,formation_targets,terrain_registry)
-		if not ground_approach.is_empty():formation_targets=ground_approach.duplicate()
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	var walkable_adjustment_count: int = 0
@@ -906,6 +903,12 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 		var spacing_diagnostic: Dictionary = Dictionary(target_resolution.get("diagnostic", {}))
 		if not spacing_diagnostic.is_empty():
 			target_spacing_debug.append(spacing_diagnostic)
+		if ground_approach.is_empty():
+			var final_candidates:Dictionary=formation_targets.duplicate()
+			final_candidates.merge(accepted_moving_targets,true)
+			final_candidates[unit_id]=walkable_target
+			var repaired:Dictionary=_resolve_occupied_hex_formation_targets(simulation_root,member_records,final_candidates,terrain_registry)
+			if not repaired.is_empty():walkable_target=Vector2(repaired[unit_id])
 		move_target = walkable_target
 		accepted_moving_targets[unit_id] = move_target
 		formation_targets[unit_id] = move_target

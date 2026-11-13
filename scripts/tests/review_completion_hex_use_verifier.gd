@@ -6,6 +6,11 @@ const ACTOR=preload("res://scripts/npc/test_unit.gd")
 const WAYPOINT=preload("res://scripts/command/fireteam_waypoint.gd")
 const HUD=preload("res://scripts/tactical/mission_hud_read_model.gd")
 const INDEX=preload("res://scripts/tactical/mission_runtime_index.gd")
+class SpacingMovement extends "res://scripts/tactical/fireteam_movement_controller.gd":
+	var forced_target:Vector2
+	func _resolve_spacing_safe_stage_target(state:Dictionary,unit_id:String,desired_target:Vector2,accepted_targets:Dictionary,terrain_registry)->Dictionary:
+		if unit_id=="approach_a":return {"target_position":forced_target}
+		return super._resolve_spacing_safe_stage_target(state,unit_id,desired_target,accepted_targets,terrain_registry)
 class QuietController extends "res://scripts/tests/mission_tactical_sandbox_controller.gd":
 	var contact_fixture:Dictionary={}
 	var feedback_status:="usable"
@@ -189,6 +194,14 @@ func _test_occupied_access()->void:
 	var resolved:Dictionary=movement._resolve_occupied_hex_formation_targets(rig.sim,records,desired,rig.terrain)
 	_check(not resolved.is_empty() and resolved.approach_b==free_target and resolved.approach_a!=anchor and resolved.approach_a!=free_target,"normal formation repairs foreign occupied goal while preserving and excluding free member goal")
 	_check(movement._resolve_occupied_hex_formation_targets(rig.sim,records,resolved,rig.terrain).is_empty() and desired.approach_a==anchor and rig.sim.get_hex_ground_planning_snapshot()==before,"free formation remains unchanged and repair mutates no Ground claims or input")
+	var actual:=SpacingMovement.new();actual.forced_target=anchor
+	var first=rig.units.get_unit("approach_a");var second=rig.units.get_unit("approach_b")
+	var started:Dictionary=actual.start_execution("ft1","move",0,rig.terrain.grid_to_world(Vector2i(6,4)),null,[first,second],first,rig.sim,rig.terrain)
+	rig.sim._physics_process(0.1)
+	var a:Dictionary=rig.sim.get_hex_movement_readout("approach_a")
+	var b:Dictionary=rig.sim.get_hex_movement_readout("approach_b")
+	_check(started.get("started",false) and not a.is_empty() and not b.is_empty() and a.goal_grid!=Vector2i(3,2) and a.goal_grid!=b.goal_grid,"actual stage repairs final spacing result before issuing distinct Root movement goals")
+
 
 	rig.scene.free()
 

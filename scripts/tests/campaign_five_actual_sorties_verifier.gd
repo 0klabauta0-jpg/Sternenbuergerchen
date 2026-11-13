@@ -23,7 +23,7 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 			await physics_frame
 		print("FIVE_SURFACE_PREPARATION ", _flow.call("get_surface_preparation_snapshot", _craft_id), " locations=", _flow.call("get_location_runtime_snapshot"), " travel=", _space())
 		return _check(false, "TIMEOUT " + label)
-	if label == "actual combat defeats outpost guards":
+	if label in ["actual combat defeats outpost guards","actual squad reaches outpost combat area"]:
 		var deadline := Time.get_ticks_msec() + milliseconds
 		var next_trace := 0
 		while Time.get_ticks_msec() < deadline:
@@ -230,11 +230,15 @@ func _remaining_missions() -> void:
 			# Actual 512x256 route exceeds the old compound 60s combat wait.
 			# Require real proximity first; combat retains its own original budget.
 			if not await _wait(func():
+				if PackedStringArray(mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot().get("completed_step_ids",[])).has("clear_outpost"):return true
 				var sim:Node=mission.get_node("SimulationRoot")
+				var active_ground_members:=0
 				for id in _crew_ids:
 					var actor=sim.call("_resolve_known_unit_for_contract",String(id))
-					if not is_instance_valid(actor) or actor.global_position.distance_to(enemy_target)>640.0:return false
-				return true,180000,"actual squad reaches outpost combat area"):
+					if not is_instance_valid(actor) or sim.get_hex_unit_state(String(id)).is_empty() or String(actor.get_vital_state())!="fit":continue
+					active_ground_members+=1
+					if actor.global_position.distance_to(enemy_target)>640.0:return false
+				return active_ground_members>0,180000,"actual squad reaches outpost combat area"):
 				_dump("outpost_approach");return
 			if not await _wait(func():return PackedStringArray(mission.get_node("CombatLoopDriver").call("get_mission_scenario_runtime_gate_snapshot").get("completed_step_ids",[])).has("clear_outpost"),60000,"actual combat defeats outpost guards"):
 				_dump("outpost_combat");return
