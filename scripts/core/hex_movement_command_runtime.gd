@@ -324,6 +324,7 @@ func tick(delta:float)->void:
 		# accepted intent, but do not spend the shared path budget searching an
 		# impossible goal. Its release/movement changes blockers on the next tick.
 		if own_blockers.has(navigation_goal):
+			if not order.recovery.is_empty():_abort_recovery(id,order,"backoff_target_invalidated");continue
 			_clear_route(order)
 			order.status="waiting_reservation";order.reason="target_occupied"
 			continue
@@ -378,7 +379,9 @@ func tick(delta:float)->void:
 		_audit.plan_calls=1
 		# Stops above may change coupled occupancy; read one fresh joint snapshot.
 		snapshot=_ground.build_planning_snapshot()
-		var plan:Dictionary=PLANNER.build_hex_plan(requests,snapshot,_registry)
+		var ship_blockers:Dictionary={}
+		for cell in ship_mask.get("blocked_cells",[]):ship_blockers[cell]=true
+		var plan:Dictionary=PLANNER.build_hex_plan(requests,snapshot,_registry,{"blocked_grids":ship_blockers})
 		if plan.ok:
 			var result:Dictionary=owner.commit_hex_ground_plan(plan,int(plan.expected_revision))
 			if result.ok:

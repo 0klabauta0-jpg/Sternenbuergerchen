@@ -15,6 +15,8 @@ class Owner extends Node:
  var navigation_max_new_path_queries_per_tick:=4
  var units
  var ground
+ var blocked:Array=[]
+ func _get_hex_respawn_ship_mask()->Dictionary:return {"ok":true,"blocked_cells":blocked,"source_signature":str(blocked)}
  var resolve_calls:=0
  var known:Dictionary={}
  func get_hex_ground_context_revision()->int:return context
@@ -185,7 +187,30 @@ func run()->void:
    step(recovery_rig)
    if recovery_rig.movement.has_arrived("a","source-a") and recovery_rig.movement.has_arrived("b","source-b"):break
   check(recovery_rig.movement.has_arrived("a","source-a") and recovery_rig.movement.has_arrived("b","source-b"),"Restored real backoff completes both original goal intents")
- recovery_rig.owner.free();r.owner.free();finish()
+ recovery_rig.owner.free()
+ var dynamic:Dictionary=rig(true)
+ var recovery_id:=""
+ var blocked_goal:Vector2i
+ for i in range(20):
+  step(dynamic)
+  for id in dynamic.movement._orders:
+   var order:Dictionary=dynamic.movement._orders[id]
+   if not order.recovery.is_empty():recovery_id=id;blocked_goal=order.recovery.goal_grid
+  if not recovery_id.is_empty():break
+ check(not recovery_id.is_empty(),"Dynamic ship test starts actual Planner recovery")
+ if not recovery_id.is_empty():
+  dynamic.owner.blocked=[blocked_goal]
+  step(dynamic)
+  check(dynamic.movement._orders[recovery_id].recovery.is_empty() and dynamic.movement.get_readout(recovery_id).reason=="backoff_target_invalidated","New external blocker aborts pending recovery while preserving original intent")
+  var safe:=true
+  for i in range(400):
+   step(dynamic)
+   for id in dynamic.movement._orders:
+    var order:Dictionary=dynamic.movement._orders[id]
+    safe=safe and (order.recovery.is_empty() or order.recovery.goal_grid!=blocked_goal) and dynamic.ground.read_unit(id).grid!=blocked_goal
+   if dynamic.movement.has_arrived("a","source-a") and dynamic.movement.has_arrived("b","source-b"):break
+  check(safe and dynamic.movement.has_arrived("a","source-a") and dynamic.movement.has_arrived("b","source-b"),"Same accepted intents find legal backoff around external blocker and both actually arrive")
+ dynamic.owner.free();r.owner.free();finish()
 func finish()->void:
  print("HEX_MOVEMENT_SAVE_STATE passed=",passed," failed=",failed)
  quit(0 if failed==0 else 1)

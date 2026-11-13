@@ -489,6 +489,14 @@ static func build_hex_plan(requests: Array, ground_snapshot: Dictionary, terrain
 	var graph:Dictionary=_hex_local_graph(queue,terrain_registry)
 	var corridors:Array=topology.corridors
 	var admission_blocked:Dictionary=ground_snapshot.get("admission_slots_by_grid",{}).duplicate()
+	var external:Variant=options.get("blocked_grids",{})
+	if not external is Dictionary or external.size()>4096:
+		plan.reason="invalid_external_blockers";return plan
+	for grid in external:
+		if not grid is Vector2i:
+			plan.reason="invalid_external_blockers";return plan
+		admission_blocked[grid]=true
+
 	if not admission_blocked.is_empty():
 		# A closed corridor grant must not swallow a not-yet-used unload slot.
 		for cells in corridors:
