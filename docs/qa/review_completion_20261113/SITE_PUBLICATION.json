@@ -1,0 +1,23 @@
+{
+  "id": "appgdep_6af7a12a42f481918457a5a6504289e1",
+  "project_id": "appgprj_6af6b36c322c8191b942ee89bed48f40",
+  "title": "SternenBürgerchen – Spielreview",
+  "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_c9c6b36d03b4819186238f5b5486fbed",
+  "type": "publish",
+  "status": "succeeded",
+  "url": "https://sternenbuergerchen-spielreview.klabauta.chatgpt.site",
+  "has_mcp": false,
+  "screenshot_asset_pointer": null,
+  "provider_deployment_id": "release---6af6b3cfcd808191ba6a068478377c17",
+  "failure_message": null,
+  "env_set_revision": 0,
+  "updated_at": "2026-11-13T23:46:15.808358+00:00",
+  "site_source_commit": "f90db476bae9e8f76dfc8a457fe2b0d4e2d1e72c",
+  "game_main_at_publication": "02d683bc6954111b56dce5d96a4b58ee4bfeb2fe",
+  "product_commit": "836886221",
+  "local_site_checks": {
+    "passed": 53,
+    "failed": 0
+  },
+  "note": "Owner-private audience preserved. Publication succeeded; no live authenticated browser session claimed. Full five-mission successful campaign proof remains open."
+}
