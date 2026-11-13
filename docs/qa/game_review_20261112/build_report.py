@@ -41,6 +41,8 @@ perf_data = json.loads(perf_path.read_text(encoding='utf-8')) if perf_path.exist
 perf_section = ''
 review_path = ROOT / 'docs/qa/astra_review_20261113/summary.json'
 review_data = json.loads(review_path.read_text(encoding='utf-8')) if review_path.exists() else None
+fix_path = ROOT / 'docs/qa/astra_fixes_20261113/summary.json'
+fix_data = json.loads(fix_path.read_text(encoding='utf-8')) if fix_path.exists() else None
 review_section = ''
 if review_data:
     findings = ''
@@ -189,5 +191,28 @@ if review_data:
     old_space_end = page.index('</p>', old_space_start) + 4
     page = page[:old_space_start] + '<p><strong>Raumkampf als eigene Domäne:</strong> Main enthält inzwischen einen gebundenen Encounter-/SpaceCombat-Pfad mit echten Raumkampf-Ownern. Dessen Rückkehrübergang ist in C3 als defekt belegt. Daneben existiert ein vereinfachter ungebundener Legacy-Encounter. Beide sind von Boden-Unit-Schaden getrennt. Die frühere pauschale Aussage, die orbitale Begegnung verwende ausschließlich festen Schaden pro Sekunde, gilt deshalb nicht für den aktuellen Mainstand. Eine spielweit einheitliche Würfel-/Schablonenregel ist weiterhin nicht nachgewiesen.</p>' + page[old_space_end:]
     page = page.replace('<article class="card full"><h2>Kampf, Würfeln und Hexfelder</h2>', '<article class="card full warning"><h2>Aktueller Abgleich: Kampf und Hex</h2><p>Die neue Prüfung findet abweichende Sichtentscheidungen beim tatsächlichen Schuss und globale Disziplin-/Fehlidentifikationswürfe neben Roots gespeichertem Kampfwürfelzustand (C7/C8). Kein zweiter Boden-Schadensowner nachgewiesen; dennoch keine vollständig einheitlichen Regeln. Nur polisa_station.json trägt unter den geprüften Karten-JSONs ausdrücklich hex_tactical_v1. Die nachstehenden Aussagen gehören zum früheren Reviewumfang.</p></article><article class="card full"><h2>Kampf, Würfeln und Hexfelder · früherer Stand</h2>')
+if fix_data:
+    count_text = f'{int(fix_data["assertions"]):,}'.replace(',', '.')
+    fixed_rows = ''.join(f'<li data-fixed-finding="{esc(item["id"])}"><details><summary><strong>{esc(item["id"])} · {esc(item["title"])}</strong></summary><p>{esc(item["result"])}</p></details></li>' for item in fix_data['resolved'])
+    check_rows = ''.join(f'<li>{esc(item["name"])}: <strong>{int(item["assertions"])} Prüfungen, 0 Fehler</strong></li>' for item in fix_data['checks'])
+    fixes = f'''<article class="card full"><div class="eyebrow">FEHLERBEHEBUNG · 13. NOVEMBER 2026</div><h2>Alle neun bestätigten Codefehler behoben</h2><p><strong>{int(fix_data['assertions'])} Regressionen bestanden.</strong> Die Korrekturen wurden zusammen und gegen benachbarte Produktionspfade geprüft. Echte lokale ENet-Verbindungen, Kampagnenabläufe und native Godot-Eingabeverarbeitung; keine Desktopübernahme.</p><ul>{fixed_rows}</ul><h3>Prüfnachweise</h3><ul>{check_rows}</ul><p>{esc(fix_data['limits'])}</p><p><a href="../qa/astra_fixes_20261113/README.md">Korrekturen und genaue Nachweise</a> · <a href="../qa/astra_fixes_20261113/summary.json">Testindex</a> · <a href="../qa/astra_fixes_20261113/regression_evidence.zip">Regressionstests und Rohlogs</a></p></article>'''
+    page = page.replace(review_section, fixes + review_section)
+    page = page.replace(f'Review vom 12.11.: {good}/{len(checks)} bestanden', f'{count_text} Prüfungen bestanden')
+    page = page.replace('Ursprüngliche Reviewbasis cfddc129b · Mainintegration 6bdc3b5ef · Nachprüfung siehe unten.', f'Fixstand {esc(fix_data["product_commit"][:9])} · Basis Main 9fdeb866b · {len(fix_data["checks"])} Prüfläufe')
+    page = page.replace(f'{int(fix_data["assertions"])} Regressionen bestanden.', f'{count_text} Assertions in {len(fix_data["checks"])} Prüfläufen bestanden.')
+    page = page.replace('Neuer Review auf Main 9fdeb866b: neun offene Codebefunde sowie konkrete Vorschläge zu Architektur, Bedienbarkeit und Gestaltung.', 'Die neun bestätigten Codefehler sind behoben und mit Regressionstests abgesichert. Architektur- und Gestaltungsvorschläge bleiben separat dokumentiert.')
+    page = page.replace('<span class="pill warn">9 offen · 4 P1 / 5 P2</span>', '<span class="pill good">9 von 9 Codefehlern behoben</span>')
+    if len(fix_data['resolved']) > 9:
+        page = page.replace('Alle neun bestätigten Codefehler behoben', 'Neun Reviewfehler und ein weiterer Absturz behoben')
+        page = page.replace('Die neun bestätigten Codefehler sind behoben und mit Regressionstests abgesichert.', 'Die neun Reviewfehler und ein zusätzlich entdeckter Absturz bei vollständigem Truppausfall sind behoben und mit Regressionstests abgesichert.')
+    page = page.replace('NEUER REVIEW · 13. NOVEMBER 2026 · MAIN 9fdeb866b', 'URSPRÜNGLICHER REVIEW · MAIN 9fdeb866b')
+    page = page.replace('Vier Reviews. Neun offene Codebefunde.', 'Die ursprünglichen neun Befunde – inzwischen behoben')
+    page = page.replace('Diesmal wurden keine Spielfehler repariert und keine Assets verändert.', 'Dieser Abschnitt bewahrt den ursprünglichen Review. Die Korrekturen und aktuellen Nachweise stehen darüber; Assets wurden nicht verändert.')
+    page = page.replace('Die neuen Proben weisen offene Fehler nach.', 'Die folgenden ursprünglichen Proben wiesen die inzwischen behobenen Fehler nach.')
+    page = page.replace('Die aktuellen offenen Befunde stehen oben.', 'Die neueren Korrekturen und ihre Nachweise stehen oben.')
+    page = page.replace('sein Abschluss scheitert an C3.', 'sein damals in C3 defekter Abschluss ist jetzt korrigiert.')
+    page = page.replace('Dessen Rückkehrübergang ist in C3 als defekt belegt.', 'Der in C3 belegte defekte Rückkehrübergang ist inzwischen korrigiert und getestet.')
+    page = page.replace('Aktueller Abgleich: Kampf und Hex', 'Historischer Abgleich: Kampf und Hex')
+    page = page.replace('Die neue Prüfung findet abweichende Sichtentscheidungen beim tatsächlichen Schuss und globale Disziplin-/Fehlidentifikationswürfe neben Roots gespeichertem Kampfwürfelzustand (C7/C8).', 'C7 vereinheitlicht inzwischen die Hexsicht beim Schuss; C8 entfernt Würfel- und Zustandsänderungen aus Diagnoselesen. Die umfassende Migration weiterer globaler Zufallsquellen bleibt eine separate Architekturentscheidung.')
 REPORT.write_text('\n'.join(line.rstrip() for line in page.splitlines()) + '\n', encoding='utf-8')
 print(json.dumps({'report': str(REPORT), 'checks': len(checks), 'passed': good}, ensure_ascii=False))

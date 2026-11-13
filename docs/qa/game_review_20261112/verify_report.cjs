@@ -35,7 +35,15 @@ const { pathToFileURL } = require('node:url');
     await page.setViewportSize({ width: 390, height: 844 });
     if (await page.locator('[data-export-key="astra.reviewed.C1"]').count()) {
       await page.locator('[data-tab-target="overview"]').click();
-      check(await page.locator('[data-export-key^="astra.reviewed."]').count() === 9, 'All nine open findings are individually reviewable');
+      check(await page.locator('[data-export-key^="astra.reviewed."]').count() === 9, 'All nine original findings are individually reviewable');
+      if (await page.locator('[data-fixed-finding]').count()) {
+        check(await page.locator('[data-fixed-finding]').count() === 10, 'Nine review fixes and the additional regression finding have current results');
+        check(await page.getByText('9 von 9 Codefehlern behoben', {exact: true}).count() === 1, 'Current status distinguishes fixes from historical review');
+        await page.locator('[data-fixed-finding="C10"] summary').click();
+        check(await page.locator('[data-fixed-finding="C10"] p').isVisible(), 'Additional casualty fix can be expanded on a phone');
+        check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Expanded fix explanation fits the phone viewport');
+        await page.locator('[data-fixed-finding="C10"] summary').click();
+      }
       await page.locator('.review-detail summary').first().click();
       await page.locator('[data-export-key="astra.reviewed.C1"]').check();
       check(await page.locator('[data-export-key="astra.reviewed.C1"]').isChecked(), 'Expanded finding supports a review decision');
@@ -73,6 +81,7 @@ const { pathToFileURL } = require('node:url');
     check(errors.length === 0, 'No browser JavaScript errors');
     await page.locator('[data-tab-target="overview"]').click();
     await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: path.join(qa, 'report_top_390.png'), fullPage: false });
     await page.screenshot({ path: path.join(qa, 'report_mobile_390.png'), fullPage: true });
   } finally {
     fs.writeFileSync(path.join(qa, 'mobile_verification.json'), JSON.stringify({ assertions, errors, passed: assertions.filter(a => a.ok).length, failed: assertions.filter(a => !a.ok).length }, null, 2));

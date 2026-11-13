@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### Reviewkorrekturen und zusätzlicher Ausfallfix — 13.11.2026
+
+C1–C9 behoben: Hostautorität für Commands/Interaktionen, vollständiger Raumkampf-
+Rückweg, sichere Trennung von Einsatz-/Basisständen, expliziter Basis-Rollback,
+präzise Hexhöhe/-sicht, reine Diagnosen und modale Eingaben. Der vollständige
+Kampagnenlauf deckte zusätzlich C10 auf: rekursive Anführer-/Auswahlabfrage bei
+allen ausgefallenen Truppmitgliedern; ebenfalls behoben und abgesichert.
+Produktcommit 8252e85ef. 1.048 Assertions in 17 freigegebenen Godot-Läufen, zwei
+private inkrementelle Imports; Quell-/Originalprofilguards bestehen. Verworfene
+Fixture-, Rekursions- und Zeitlimitversuche bleiben getrennt dokumentiert.
+HTML offline/mobile samt JSON-Export: 53 Prüfungen. Kein EXE-/GPU-/WAN-Gesamtgate;
+Gestaltungsvorschläge bleiben separat offen. Task und Nachweise:
+docs/tasks/ASTRA_REVIEW_FIXES_2026_11_13.md; docs/qa/astra_fixes_20261113/.
+
+
 ### Vierfach-Review ohne Produktänderungen — 13.11.2026
 
 Main9fdeb866b erneut auf Code, Architektur, Usability und Gestaltung geprüft.

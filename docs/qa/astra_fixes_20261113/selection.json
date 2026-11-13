@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Netzwerkautorität und Interaktionen",
+    "report": "docs/qa/astra_fixes_20261113/network/d0a8e0b4a27f43e9a7c6bfae610c2f61/report.json"
+  },
+  {
+    "name": "Hexsicht, Schuss und reine Diagnosen",
+    "report": "docs/qa/astra_fixes_20261113/hex_combat/fb5356153dae4d9e889171d0b1a714b2/report.json"
+  },
+  {
+    "name": "Raumkampfabschluss und Adapter-Retry",
+    "report": "docs/qa/astra_fixes_20261113/encounter_return/4025d1a82c9a48568b09aefaf9fb7431/report.json"
+  },
+  {
+    "name": "Menüfokus und Eingabegesten",
+    "report": "docs/qa/astra_fixes_20261113/menu/97d2a2c481c84cbc917c039fd9dbfbce/report.json"
+  },
+  {
+    "name": "Anführer-/Auswahlrekursion",
+    "report": "docs/qa/astra_fixes_20261113/leader/8cc83b7929dd4d34ad58f52e14997686/report.json"
+  },
+  {
+    "name": "Einsatzsave, Niederlage und Basis-Recovery",
+    "report": "docs/qa/astra_fixes_20261113/campaign/4f4ab201c13f48ca80aa4267b4d30715/report.json"
+  },
+  {
+    "name": "Reguläres Continue und echte Heimkehr",
+    "report": "docs/qa/astra_fixes_20261113/active_continue/3bc96233b0064f47ba92b73511e6d07c/report.json"
+  },
+  {
+    "name": "Bestehender Netzwerkvertrag",
+    "report": "docs/qa/astra_fixes_20261113/network_contract/6b8d67e3660540b390fcdb39f945d50c/report.json"
+  },
+  {
+    "name": "Verbundene Stationsinteraktionen",
+    "report": "docs/qa/astra_fixes_20261113/connected_interactions/5d29f58c16724bdd8cdd6e5baad7ae97/report.json"
+  },
+  {
+    "name": "Parallele Truppinteraktionen",
+    "report": "docs/qa/astra_fixes_20261113/parallel_interactions/b40ca6540e2d4211923f3a84010653c9/report.json"
+  },
+  {
+    "name": "Bestehende Türautorität",
+    "report": "docs/qa/astra_fixes_20261113/door_authority/e4191b0be7894acf8593e746cd9c964c/report.json"
+  },
+  {
+    "name": "Hex-Sichtcache",
+    "report": "docs/qa/performance_review_20261113/hex_cache/after_c4d11f8781174f8b979abe4d8d4f2a8c/report.json"
+  },
+  {
+    "name": "Legacy-Kampf, 600 Ticks",
+    "report": "docs/qa/performance_review_20261113/legacy_visibility/after_a9999f5e36ab480889fe22aeba8cde80/report.json"
+  },
+  {
+    "name": "Frontier-LOS und Fog of War",
+    "report": "docs/qa/performance_review_20261113/frontier_visibility/after_219f9a1fd0ae4025baefe206774233a6/report.json"
+  },
+  {
+    "name": "Enger Encounter-Read und Abschlussanzeige",
+    "report": "docs/qa/performance_review_20261113/encounter_read/after_e03c786b30ff4eadaa7596b0378b04bd/report.json"
+  },
+  {
+    "name": "Echte Hex-ENet-Regression",
+    "report": "docs/qa/hex_enet_regression_20261113/449ad9b12504425ea2cac0592d451b28/report.json",
+    "count_pattern": "HEX_ENET_REGRESSION checks=(\\d+) failures=(\\d+)",
+    "script": "scripts/tests/hex_enet_regression_verifier.gd"
+  },
+  {
+    "name": "Hex-Bewegung und Save/Restore",
+    "report": "docs/qa/hex_enet_regression_20261113/d22fe4bfe09e4ddda54598a5379e298c/report.json",
+    "count_pattern": "HEX_MOVEMENT_SAVE_STATE passed=(\\d+) failed=(\\d+)",
+    "script": "scripts/tests/hex_movement_save_state_verifier.gd"
+  }
+]

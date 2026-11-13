@@ -1,0 +1,180 @@
+{
+  "date": "2026-11-13",
+  "product_commit": "8252e85ef22ecd7d43ee0e056b97ab5cf09c62e7",
+  "base_main": "9fdeb866b71749fe5d3154d4da35c6cf3f2c1611",
+  "resolved": [
+    {
+      "id": "C1",
+      "title": "Host bestimmt Laufzeitmodifikatoren",
+      "result": "Remote-Befehle enthalten nur Spielerabsichten; interne Befehle behalten ihre legitimen Modifikatoren."
+    },
+    {
+      "id": "C2",
+      "title": "Missionsinteraktionen bleiben beim Host",
+      "result": "Ziel, Radius, Dauer, Voraussetzungen und Bediener stammen aus dem geladenen Szenario. Abbruch, Ausfall, Einschiffung und konkurrierende Trupps sind geprüft."
+    },
+    {
+      "id": "C3",
+      "title": "Raumkampf erreicht einen vollständigen Abschluss",
+      "result": "Sieg, Rückzug und beide Verlustfälle wechseln atomar in den lokalen Orbit. Kraftstoff und Ergebnis werden einmal verbucht; ein vorübergehend abgelehnter Abschluss wird erneut versucht."
+    },
+    {
+      "id": "C4",
+      "title": "Alte beschädigte Einsatzstände blockieren keinen Neustart",
+      "result": "Neue Kampagnen trennen den alten Einsatzstand erst beim sicheren Basis-Commit ab. Seine Bytes bleiben im Archiv; ein unterbrochener Archivschritt macht den neuen Stand nicht unzugänglich."
+    },
+    {
+      "id": "C5",
+      "title": "Basis-Rückkehr lädt ausdrücklich die Basis",
+      "result": "Normales Fortsetzen erhält einen gültigen Einsatzstand. Debrief und bestätigte Wiederherstellung nutzen einen eigenen Basis-Intent; Speichertexte stimmen mit dem Verhalten überein."
+    },
+    {
+      "id": "C6",
+      "title": "Halbe Rampenhöhen bleiben präzise",
+      "result": "Sichthöhe 2,5 wird bis zum Hindernisvergleich erhalten. Beide Richtungen, Cache und unveränderte ganzzahlige Legacyfälle sind geprüft."
+    },
+    {
+      "id": "C7",
+      "title": "Tatsächliche Schüsse verwenden logische Hexsicht",
+      "result": "Richtung, Reichweite, Gelände und Zulassung folgen im aktiven Hexpfad dem vorhandenen Sichtadapter. Alle sechs Achsen und Legacy-Verhalten sind abgedeckt."
+    },
+    {
+      "id": "C8",
+      "title": "Diagnosen würfeln und mutieren nicht",
+      "result": "HUD-Lesen verändert weder Zufallszustand noch Cooldowns, Ereignisse oder Befehle. Tatsächliche Disziplinentscheidungen bleiben Teil der autoritativen Feuerwahl."
+    },
+    {
+      "id": "C9",
+      "title": "Spielmenü hält Eingaben und Fokus zusammen",
+      "result": "Menü, Einstellungen und Hilfe halten den Fokus. Kameratasten und unterbrochene Mausgesten lösen keine verdeckten Aktionen aus; Simulation und gültiger Fokus werden korrekt weitergeführt."
+    },
+    {
+      "id": "C10",
+      "title": "Vollständiger Truppausfall verursacht keine Rekursion",
+      "result": "Der vollständige Kampagnentest fand zusätzlich eine rekursive Anführer-/Auswahlabfrage. Ohne fitte Mitglieder gibt es keinen Verhaltens-Leader; der reine Anzeigeanker bleibt erhalten. Der tatsächliche CombatLoopDriver ist korrekt angebunden."
+    }
+  ],
+  "assertions": 1048,
+  "checks": [
+    {
+      "name": "Netzwerkautorität und Interaktionen",
+      "assertions": 71,
+      "report": "docs/qa/astra_fixes_20261113/network/d0a8e0b4a27f43e9a7c6bfae610c2f61/report.json",
+      "log_sha256": "68b7c0ff96772ed2a9791b0b38865666891277a9528feca7cef0f2969e9c675c"
+    },
+    {
+      "name": "Hexsicht, Schuss und reine Diagnosen",
+      "assertions": 234,
+      "report": "docs/qa/astra_fixes_20261113/hex_combat/fb5356153dae4d9e889171d0b1a714b2/report.json",
+      "log_sha256": "9e719b25b05475e394fc31842519af2ebf1624060616441240070a73f2a0b186"
+    },
+    {
+      "name": "Raumkampfabschluss und Adapter-Retry",
+      "assertions": 193,
+      "report": "docs/qa/astra_fixes_20261113/encounter_return/4025d1a82c9a48568b09aefaf9fb7431/report.json",
+      "log_sha256": "cc50109da2c277a04574867204c02ab3d0dc500a99df03f055f65aeb3cb844cb"
+    },
+    {
+      "name": "Menüfokus und Eingabegesten",
+      "assertions": 60,
+      "report": "docs/qa/astra_fixes_20261113/menu/97d2a2c481c84cbc917c039fd9dbfbce/report.json",
+      "log_sha256": "55b250956c0ba86ee91c4863335bc811fa72bd0b493188f99bdef1bec6359940"
+    },
+    {
+      "name": "Anführer-/Auswahlrekursion",
+      "assertions": 43,
+      "report": "docs/qa/astra_fixes_20261113/leader/8cc83b7929dd4d34ad58f52e14997686/report.json",
+      "log_sha256": "2cdf34d16dacf8db3a61659484ea02a3a06f5327189621e8278d220637efed35"
+    },
+    {
+      "name": "Einsatzsave, Niederlage und Basis-Recovery",
+      "assertions": 67,
+      "report": "docs/qa/astra_fixes_20261113/campaign/4f4ab201c13f48ca80aa4267b4d30715/report.json",
+      "log_sha256": "db4f3ea7583ec569b0cf9a45ffe8f65a8557b2d6de446ecff4c8165f5416c6d7"
+    },
+    {
+      "name": "Reguläres Continue und echte Heimkehr",
+      "assertions": 80,
+      "report": "docs/qa/astra_fixes_20261113/active_continue/3bc96233b0064f47ba92b73511e6d07c/report.json",
+      "log_sha256": "6ee801d010c8d7552ff632bd35e40eae8fede8d9cb547cb5058623c650e355bb"
+    },
+    {
+      "name": "Bestehender Netzwerkvertrag",
+      "assertions": 15,
+      "report": "docs/qa/astra_fixes_20261113/network_contract/6b8d67e3660540b390fcdb39f945d50c/report.json",
+      "log_sha256": "1975725ef395dbc9648425a7c2c2c5a1d4419f74f307edde1d28a3163fb229f3"
+    },
+    {
+      "name": "Verbundene Stationsinteraktionen",
+      "assertions": 23,
+      "report": "docs/qa/astra_fixes_20261113/connected_interactions/5d29f58c16724bdd8cdd6e5baad7ae97/report.json",
+      "log_sha256": "671ddff0d56bc35488bf6f48a52f6494a6cfd1200786642ca6221c08fd96a782"
+    },
+    {
+      "name": "Parallele Truppinteraktionen",
+      "assertions": 30,
+      "report": "docs/qa/astra_fixes_20261113/parallel_interactions/b40ca6540e2d4211923f3a84010653c9/report.json",
+      "log_sha256": "a34ae116eaf2af70c764385d079b4394555aae6de902889dc0d1f40d71f16d26"
+    },
+    {
+      "name": "Bestehende Türautorität",
+      "assertions": 42,
+      "report": "docs/qa/astra_fixes_20261113/door_authority/e4191b0be7894acf8593e746cd9c964c/report.json",
+      "log_sha256": "20ed974ace059afdb335f8dd65596fb252d53b193d5e99919f9407fd8bde1001"
+    },
+    {
+      "name": "Hex-Sichtcache",
+      "assertions": 27,
+      "report": "docs/qa/performance_review_20261113/hex_cache/after_c4d11f8781174f8b979abe4d8d4f2a8c/report.json",
+      "log_sha256": "4abccb224e7936deb7e39f60237dd2bc13fb6175f42ddee88386818bf0f94788"
+    },
+    {
+      "name": "Legacy-Kampf, 600 Ticks",
+      "assertions": 12,
+      "report": "docs/qa/performance_review_20261113/legacy_visibility/after_a9999f5e36ab480889fe22aeba8cde80/report.json",
+      "log_sha256": "8cfa2541de6ae6c63515abf5701a9e23f135ef348547f1ec6cc1fe9ccb7c3d86"
+    },
+    {
+      "name": "Frontier-LOS und Fog of War",
+      "assertions": 76,
+      "report": "docs/qa/performance_review_20261113/frontier_visibility/after_219f9a1fd0ae4025baefe206774233a6/report.json",
+      "log_sha256": "d6700ad9f242f12e258ce5b16e2e1694c307ce11f686de92c3378a31359220d1"
+    },
+    {
+      "name": "Enger Encounter-Read und Abschlussanzeige",
+      "assertions": 21,
+      "report": "docs/qa/performance_review_20261113/encounter_read/after_e03c786b30ff4eadaa7596b0378b04bd/report.json",
+      "log_sha256": "1db8a51e9ede0514ffdd36e7699cbe1ee5c1df32227d91c6e5a7a8a23c55d9a1"
+    },
+    {
+      "name": "Echte Hex-ENet-Regression",
+      "assertions": 24,
+      "report": "docs/qa/hex_enet_regression_20261113/449ad9b12504425ea2cac0592d451b28/report.json",
+      "log_sha256": "f1de89741c9e4a33f3f09103feb037dbaa1a19c4c3e841d6de6b03ea39b7d2ec"
+    },
+    {
+      "name": "Hex-Bewegung und Save/Restore",
+      "assertions": 30,
+      "report": "docs/qa/hex_enet_regression_20261113/d22fe4bfe09e4ddda54598a5379e298c/report.json",
+      "log_sha256": "7caa95b79beead78038424aa78e9abd2b18680c3beeb89035e5002834b251644"
+    }
+  ],
+  "limits": "Gezielte Headless- und lokale ENet-Prüfungen auf Godot 4.6.2; keine Desktopübernahme. Originalspielerprofile und Quellen blieben während der freigegebenen Läufe unverändert. Kein vollständiger menschlicher Kampagnendurchlauf, WAN-Test, neues GPU-/FPS-Gate oder EXE-Export. Gestaltungs- und größere Architekturvorschläge des ursprünglichen Reviews bleiben separat offen.",
+  "incidents": [
+    {
+      "run": "network/7cf83b5297f64421ae357c7581b3efe1",
+      "kind": "test_fixture",
+      "detail": "Ungültiger Testzugriff auf UnitRuntimeStatus-Feld; Runner blieb trotz 64/0 rot. Zugriff korrigiert, ausgelassene positive Fälle danach ausgeführt."
+    },
+    {
+      "run": "campaign/79b34e4c27994a3e901d8cef9c648f81",
+      "kind": "confirmed_product_defect_C10",
+      "detail": "Echter Stackoverflow bei vollständigem Truppausfall. Eigener Testprozess nach reproduziertem Fehler beendet; anschließend Resolver korrigiert und voller Kampagnenlauf erneut geprüft."
+    },
+    {
+      "run": "campaign/cd369ebd3dde49ff8db69c10ce76002b",
+      "kind": "time_budget",
+      "detail": "Nach C10-Fix ohne Enginefehler bis zum letzten Neustart fortgeschritten; 300-Sekunden-Grenze erreicht. Nicht als bestanden gewertet, vollständiger Wiederholungslauf mit 480 Sekunden Grenze."
+    }
+  ]
+}
