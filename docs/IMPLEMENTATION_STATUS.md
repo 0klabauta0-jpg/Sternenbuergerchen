@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Mainintegration Hex-Follow-up und Review — 13.11.2026
+
+Gezielter Port abMainb1f47750b statt Merge alter Kandidatenbäume. Trupp-ID im
+Movement-Savecodec erhalten; Driver nutzt vorhandenen opt-in Hex-Sichtadapter.
+Aussteigen an wirklichem Schiff und Legacy-Teamrestore je Schiff korrigiert.
+Save-UI unterscheidet aktuelle echte Kampagnensaves von Szenenbookmarks;
+Main-Missionssave-/Orbit-/Sternkartenpfade erhalten. Frischer Integrationsverbund:
+Hex/ENet24/0, MovementSave30/0, Mehrschiff57/0, Save-UI16/0, tatsächlicher aktiver
+Missionssave/Continue/Heimkehr80/0, insgesamt207/0. Alle Guards und Runtime-/
+Leakprüfungen grün. Kein Asset-/Map-/Shaderdelta, neue EXE oder vollständige
+AP9-/Native-/Internet-/FPSfreigabe. Voller Editorimport Exit1 am Fontreimport,
+Ursache offen; unveränderter bestehender Mainressourcencache für anschließende
+reale Runtimechecks verwendet. Evidenz docs/qa/main_hex_review_20261113/README.md
+und aktualisierter mobiler HTML-Spielreview. Vorhandene alte Dokumentbytes erhalten.
+
+
 ### Rottenauswahl und Reichweitenhinweis — 12.11.2026
 Links einklappbare Rottenkarten, Strg-/Rahmenselektion auch auf der Sternkarte und Gruppenbefehle ueber bestehende Reiseowner. Native und headless Testszene mit zwei Reiseownern 3/0; Alt zeigt vorhandene Ortsrouten-Treibstoffpruefung, Warp bleibt kostenlos. Heimatbasis nennt den Heimatmond. Nachweise und offene Punkte: `docs/qa/starmap_wings_20261112/README.md`; seitliche Flyouts, Sprungtreibstoff, Zwei-Mond-Migration und Kenney-Baukasten bleiben offen. Kein vollstaendiger Mehrschiff-Spielstand oder EXE.
 

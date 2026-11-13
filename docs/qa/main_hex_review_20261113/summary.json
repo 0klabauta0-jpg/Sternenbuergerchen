@@ -1,0 +1,45 @@
+{
+  "status": "integration_verified",
+  "base_main": "b1f47750b",
+  "branch": "task/main-integration-hex-review-20261113",
+  "checks": [
+    {
+      "name": "Hex/ENet plus Legacy-Sicht",
+      "assertions": 24,
+      "passed": true,
+      "report": "docs\\qa\\hex_enet_regression_20261113\\2579a31bed2940609bd83d4ede9eaea7\\report.json"
+    },
+    {
+      "name": "MovementSave",
+      "assertions": 30,
+      "passed": true,
+      "report": "docs\\qa\\hex_enet_regression_20261113\\878e790397764aa9ad9f0931e8465640\\report.json"
+    },
+    {
+      "name": "Mehrschiff-Owner",
+      "assertions": 57,
+      "passed": true,
+      "report": "docs\\qa\\main_hex_review_20261113\\multicraft\\main-hex-de153896a65e421dbc159d45ed0ffa09\\report.json"
+    },
+    {
+      "name": "Kampagnen- und Bookmark-UI",
+      "assertions": 16,
+      "passed": true,
+      "report": "docs\\qa\\main_hex_review_20261113\\save_ui\\9153725c5b394f3696dc5c9448457c5a\\report.json"
+    },
+    {
+      "name": "Echter aktiver Missionssave / Continue / Heimkehr",
+      "assertions": 80,
+      "passed": true,
+      "report": "docs\\qa\\main_hex_review_20261113\\active_continue\\main-hex-3cb6e4df67e9420db53008ce88ddb5ae\\report.json"
+    }
+  ],
+  "assertions": 207,
+  "passed": true,
+  "native_acceptance": false,
+  "new_exe": false,
+  "import_exit_code": 1,
+  "import_note": "Full editor import ended at font reimport without further diagnostic; unchanged Main assets; existing Main imported-resource cache reused, source unchanged. Runtime gates verified independently.",
+  "import_archive_sha256": "bce02d23457771688d5f7b307311399b631d1bfecbbf9a14ddfab524af151a79",
+  "publication": "Fast-forward main after verified integration; exact final commit recorded by Git"
+}

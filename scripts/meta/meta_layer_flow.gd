@@ -5238,20 +5238,23 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 		# A coherent home checkpoint may contain already boarded crew. Restore
 		# the existing payload owner too, rather than only hiding their visuals.
 		var saved_units: Dictionary = Dictionary(_campaign_start.get("checkpoint").get("base_personnel", {})).get("units", {})
-		var saved_craft: String = String(get_meta("singleplayer_bootstrap_craft_id", ""))
 		var campaign_screen: Node = _get_homebase_screen()
-		if campaign_screen != null and not saved_craft.is_empty():
-			var boarded_teams := PackedStringArray()
-			for team_id: String in _homebase_staged_fireteam_ids:
-				var members: PackedStringArray = campaign_screen.call("_get_member_unit_ids_for_fireteam", team_id)
-				var all_aboard: bool = not members.is_empty()
-				for id: String in members:
-					var person: Dictionary = saved_units.get(id, {})
-					all_aboard = all_aboard and String(person.get("status", "")) == "aboard" and String(person.get("craft_id", "")) == saved_craft
-				if all_aboard:
-					boarded_teams.append(team_id)
-			if not boarded_teams.is_empty():
-				campaign_screen.call("seed_homebase_direct_launch_payload", saved_craft, boarded_teams, true)
+		if campaign_screen != null:
+			var teams: Array = campaign_screen.call("_get_fireteam_definitions_snapshot")
+			for craft: Dictionary in _homebase_aircraft_definitions:
+				var saved_craft: String = String(craft.get("craft_id", ""))
+				var boarded_teams := PackedStringArray()
+				for definition: Dictionary in teams:
+					var team_id: String = String(definition.get("id", ""))
+					var members: PackedStringArray = campaign_screen.call("_get_member_unit_ids_for_fireteam", team_id)
+					var all_aboard: bool = not members.is_empty()
+					for id: String in members:
+						var person: Dictionary = saved_units.get(id, {})
+						all_aboard = all_aboard and String(person.get("status", "")) == "aboard" and String(person.get("craft_id", "")) == saved_craft
+					if all_aboard:
+						boarded_teams.append(team_id)
+				if not saved_craft.is_empty() and not boarded_teams.is_empty():
+					campaign_screen.call("seed_homebase_direct_launch_payload", saved_craft, boarded_teams, true)
 		return
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null or not homebase_screen.has_method("seed_homebase_direct_launch_payload"):

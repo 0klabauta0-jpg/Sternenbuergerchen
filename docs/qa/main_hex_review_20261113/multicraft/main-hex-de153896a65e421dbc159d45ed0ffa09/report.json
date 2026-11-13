@@ -1,0 +1,32 @@
+{
+  "case": "multicraft",
+  "passed": true,
+  "exit_code": 0,
+  "elapsed": 118.49511960000382,
+  "timed_out": false,
+  "assertions": 57,
+  "errors": [],
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/core/hex_movement_command_runtime.gd": "097968454d91a16979a8d2b8b278b8c63a12ca3217eb9eec33e021a945bd4218",
+    "scripts/core/simulation_root.gd": "a3b197043deac3d2ac583a1eb247863aa3036df3d52a5ca248866039cd1fd3c4",
+    "scripts/meta/explorable_homebase.gd": "f3acd535d1389db78da1010135f90b9bb8626ede31e859609904734b4ffc539f",
+    "scripts/meta/meta_layer_flow.gd": "4b8da7f8a0446880bf2864441aada932b75777d0cf013770ca84dbcfa8cda717",
+    "scripts/ui/global_escape_menu.gd": "65cb2584d823648a2ff60237d0e38049f416db965984d66f7e8157c6e56fa2b8",
+    "scripts/ui/main_menu_screen.gd": "a8ebfbeb752d93098ecf5a9e4a6ee748c003a9f61c39174264acfbeaaea3423b",
+    "scripts/tests/mission_combat_loop_driver.gd": "3c93aa5e62eca5c2f3cc8a01e099c6e68851e905225bf7ef5232d2f2083e1f28",
+    "scripts/tests/game_review_multicraft_20261112.gd": "8d9d283b0e18d3d402553cab3178c129b101f2328f76642679346dea8f4660b2"
+  },
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\main-hex-de153896a65e421dbc159d45ed0ffa09\\project",
+    "--script",
+    "res://scripts/tests/game_review_multicraft_20261112.gd"
+  ],
+  "private_user": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\main_hex_review_20261113\\multicraft\\main-hex-de153896a65e421dbc159d45ed0ffa09\\game_review_20261112_profiles\\Godot\\app_userdata\\SB-Codex-Review2-main-hex-de153896a65e421dbc159d45ed0ffa09",
+  "shared_import_cache_only": true
+}

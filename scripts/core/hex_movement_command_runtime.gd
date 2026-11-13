@@ -668,7 +668,7 @@ func _save_validate(state:Dictionary,target,target_registry:Node=null)->Dictiona
 	return {"ok":true,"orders":orders,"watchers":watchers}
 
 func _save_command_kind(key:String)->String:
-	if key in ["type","command_type","unit_id","team_id","source_command_type","origin_command_type","command_id","command_token","fire_status","fire_rule","source_task_type","movement_posture","weapon_posture","posture_policy_id","engagement_range_policy","target_area_id"]:return "string"
+	if key in ["type","command_type","unit_id","team_id","fireteam_id","source_command_type","origin_command_type","command_id","command_token","fire_status","fire_rule","source_task_type","movement_posture","weapon_posture","posture_policy_id","engagement_range_policy","target_area_id"]:return "string"
 	if key in ["priority","phase","navigation_blocker_clearance_radius"]:return "integer"
 	if key in ["requeue_until_target","navigation_cover_aware","cover_aware_navigation","navigation_corridor_enabled","navigation_lane_enabled","local_avoidance_enabled"]:return "bool"
 	if key in ["move_speed_factor","sight_range_factor","cover_score","attack_bonus","engagement_range_factor","contact_initiative_seconds","aim_readiness_percent","team_target_support_percent","navigation_exposure_weight","navigation_cover_weight","navigation_exposure_max_grid_distance","navigation_corridor_half_width_world","navigation_corridor_weight","navigation_lane_offset_world","navigation_lane_weight","navigation_blocker_clearance_weight"]:return "number"

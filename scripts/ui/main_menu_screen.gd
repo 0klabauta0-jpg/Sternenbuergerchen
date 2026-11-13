@@ -1104,7 +1104,7 @@ func _ensure_mission_save_load_buttons() -> void:
 	if _mission_save_button == null:
 		_mission_save_button = Button.new()
 		_mission_save_button.name = "MissionSaveButton"
-		_mission_save_button.text = "Mission speichern"
+		_mission_save_button.text = "Szenenstart merken"
 		_mission_save_button.custom_minimum_size = Vector2(176.0, 42.0)
 		_mission_save_button.focus_mode = Control.FOCUS_ALL
 		row.add_child(_mission_save_button)
@@ -1112,7 +1112,7 @@ func _ensure_mission_save_load_buttons() -> void:
 	if _mission_load_button == null:
 		_mission_load_button = Button.new()
 		_mission_load_button.name = "MissionLoadButton"
-		_mission_load_button.text = "Mission laden"
+		_mission_load_button.text = "Gemerkte Szene neu starten"
 		_mission_load_button.custom_minimum_size = Vector2(176.0, 42.0)
 		_mission_load_button.focus_mode = Control.FOCUS_ALL
 		row.add_child(_mission_load_button)
@@ -1137,8 +1137,8 @@ func _apply_release_first_play_polish() -> void:
 	_apply_release_secondary_button_polish(_settings_button, "secondary", "Anzeige, Audio und Eingabe anpassen.")
 	_apply_release_secondary_button_polish(_new_roster_button, "support", "Optional: neues Startteam erzeugen.")
 	_apply_release_secondary_button_polish(_team_editor_toggle_button, "support", "Optional: aktives Team bearbeiten.")
-	_apply_release_secondary_button_polish(_mission_save_button, "support", "Optionaler Mission-Slot, wenn eine Shell-Mission aktiv ist.")
-	_apply_release_secondary_button_polish(_mission_load_button, "support", "Optionaler Mission-Slot, wenn ein Save vorhanden ist.")
+	_apply_release_secondary_button_polish(_mission_save_button, "support", "Merkt nur die Szene; Fortschritt wird nicht gespeichert.")
+	_apply_release_secondary_button_polish(_mission_load_button, "support", "Startet die gemerkte Szene von vorn; kein gespeicherter Spielfortschritt.")
 
 
 func _apply_release_secondary_button_polish(button: Button, priority: String, tooltip: String) -> void:
@@ -1179,18 +1179,22 @@ func _build_release_first_play_button_style(background: Color, border: Color, bo
 func _refresh_mission_save_load_buttons() -> void:
 	var shell = _get_global_escape_shell()
 	var has_shell: bool = shell != null
+	var campaign: bool = has_shell and bool(shell.call("_is_campaign_context"))
 	var has_save_slot: bool = false
 	if has_shell:
 		var slot: Dictionary = Dictionary(shell.call("get_save_slot_snapshot"))
 		has_save_slot = bool(slot.get("exists", false))
 	if _mission_save_button != null:
 		_mission_save_button.visible = true
-		_mission_save_button.disabled = not has_shell
-		_mission_save_button.tooltip_text = "Speichert den aktuellen Mission-Shell-Slot." if has_shell else "Globales Shell-Menue ist nicht bereit."
+		_mission_save_button.disabled = not has_shell or not bool(shell.call("_can_save_current_scene"))
+		_mission_save_button.text = "Kampagne speichern" if campaign else "Szenenstart merken"
+		_mission_save_button.tooltip_text = "Speichert den Kampagnenstand über den vorhandenen Kampagnenowner." if campaign else "Merkt nur die Szene; Fortschritt wird nicht gespeichert."
+		if not has_shell: _mission_save_button.tooltip_text = "Globales Shell-Menü ist nicht bereit."
 	if _mission_load_button != null:
 		_mission_load_button.visible = true
-		_mission_load_button.disabled = not has_shell or not has_save_slot
-		_mission_load_button.tooltip_text = "Laedt den gespeicherten Mission-Shell-Slot." if has_save_slot else "Noch kein Mission-Shell-Slot vorhanden."
+		_mission_load_button.disabled = not has_shell or campaign or not has_save_slot
+		_mission_load_button.text = "Im Hauptmenü fortsetzen" if campaign else "Gemerkte Szene neu starten"
+		_mission_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else "Startet die gemerkte Szene von vorn; kein gespeicherter Spielfortschritt."
 
 
 func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
@@ -3779,7 +3783,8 @@ func _on_mission_save_pressed() -> void:
 		return
 	var result: Dictionary = Dictionary(shell.call("save_current_mission_slot"))
 	var ok: bool = bool(result.get("ok", false))
-	_status_label.text = "Mission gespeichert" if ok else "Keine laufende Mission"
+	var saved_text := "Kampagne gespeichert." if bool(shell.call("_is_campaign_context")) else "Szenenstart gemerkt. Fortschritt wird nicht gespeichert."
+	_status_label.text = String(result.get("message", saved_text if ok else "Keine laufende Szene zum Merken"))
 	_play_ui_sfx("confirm" if ok else "warning", "mission_save")
 	_refresh_mission_save_load_buttons()
 
@@ -3792,10 +3797,10 @@ func _on_mission_load_pressed() -> void:
 		return
 	var result: Dictionary = Dictionary(shell.call("load_mission_slot"))
 	if bool(result.get("ok", false)):
-		_status_label.text = "Mission laden"
+		_status_label.text = "Gemerkte Szene wird neu gestartet."
 		_play_ui_sfx("confirm", "mission_load")
 	else:
-		_status_label.text = "Keine Mission gespeichert"
+		_status_label.text = String(result.get("message", "Noch kein Szenenstart gemerkt"))
 		_play_ui_sfx("warning", "mission_load_missing")
 	_refresh_mission_save_load_buttons()
 

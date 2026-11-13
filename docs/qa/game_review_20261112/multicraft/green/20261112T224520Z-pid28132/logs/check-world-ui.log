@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: World displays real two-person registry without extra commander
+PASS: Both selectable visuals carry canonical roster IDs
+PASS: Person selector includes actual pilot
+PASS: World selection targets pilot identity
+PASS: World equipment button opens existing view focused on same pilot
+EQUIPMENT_REJECTION: { "ok": false, "reason": "insufficient_items", "message": "Gegenstand nicht vorhanden" }
+FAIL: Outside pilot equipment mutates existing loadout owner
+PASS: World right-click API sends real movement command
+PASS: Changing UI views does not stop commanded person movement
+PASS: No hidden commander registered after view changes
+BASE_PERSONNEL_WORLD_UI passed=8 failed=1

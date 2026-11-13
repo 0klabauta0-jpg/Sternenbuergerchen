@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132",
+  "project": "C:\\dev\\SternenBuergerchen",
+  "manifest": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.045,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-12T22:45:20.694353+00:00",
+  "finished_at": "2026-11-12T22:47:31.311748+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-multicraft.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\game_review_multicraft_20261112.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 48.943,
+      "name": "multicraft",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\check-multicraft.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-multicraft.log",
+      "passed": false,
+      "reasons": [
+        "exit 1"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-base-personnel.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\base_personnel_runtime_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 37.479,
+      "name": "base-personnel",
+      "marker_found": false,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\check-base-personnel.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-base-personnel.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "missing success marker"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-world-ui.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\base_personnel_world_ui_test.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 18.131,
+      "name": "world-ui",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\check-world-ui.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-world-ui.log",
+      "passed": false,
+      "reasons": [
+        "exit 1"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-preparation-continue.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\campaign_preparation_continue_test.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 26.0,
+      "name": "preparation-continue",
+      "marker_found": false,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\check-preparation-continue.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green\\20261112T224520Z-pid28132\\logs\\engine-check-preparation-continue.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "missing success marker"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 4,
+    "passed": 0,
+    "failed": 4
+  }
+}

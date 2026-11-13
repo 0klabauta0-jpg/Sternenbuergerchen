@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "exit_code": 0,
+  "engine": "4.6.2.stable.official.71f334935",
+  "case": "movement_save",
+  "real_enet": false,
+  "processes": 1,
+  "peers": 0,
+  "transport": "offline_neighbor",
+  "native_acceptance": false,
+  "lan_internet_acceptance": false,
+  "production_activation": false,
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll": "401d9751dc88ea0cce899cf42d4b8e2fc1a1c1caed56f958550459e199571aa8",
+    "addons/limboai/bin/limboai.gdextension": "e616dece245ad0e8b8d7403e681a52e142b2d94fdd850fa5eb24a06976170ee9",
+    "data/terrain_tile_catalog.json": "164179fa3c43ff9c2d94788dc057536c073fe9aaeb93fd2efd96606fd448b534",
+    "scripts/core/base_personnel_actor.gd": "8674d6ad3f0afac1a22efd872e3914ce9b911b554809e9743f8b5c36b8276afd",
+    "scripts/core/hex_ground_runtime.gd": "311ead21d85cd07011a2c1be3956c7d3b9f72114a898d45107ef3716a431021d",
+    "scripts/core/hex_movement_command_runtime.gd": "097968454d91a16979a8d2b8b278b8c63a12ca3217eb9eec33e021a945bd4218",
+    "scripts/npc/unit_command.gd": "a04f22488dd822d2a0b98e81d5005305ac647f709764220c7ce25ce38d211be4",
+    "scripts/registries/unit_registry.gd": "451c2b8bf52ebf5dbbd988b4ed1554657f833c5efcad820e2b1dcde0b276ac42",
+    "scripts/tactical/bottleneck_reservation_resolver.gd": "1dd9c7d2c460718252dd9b370fe6e64100d23cdc7f290221dba99cca7390e01c",
+    "scripts/terrain/hex_corridor_topology_cache.gd": "b9bfc3dcda3b0e040df6253ed4a22f2c52d5d9ba9a948641990d6c4b16d24cc3",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_pathfinder.gd": "b4e1cb5fa815be0348049c25f1feb8b6f9b14dc750099a428935e2abf79a29c8",
+    "scripts/terrain/terrain_registry.gd": "05dc5ce31ace03c6a173cf0d5eb3807a6a401f0bbd3ba810e5d088879ed689c0",
+    "scripts/terrain/terrain_tile_data.gd": "7a01c1c15b33192643e8bb42285a03faaa6d8bc30d07466ccb46bd6696901bff",
+    "scripts/tests/hex_movement_save_state_verifier.gd": "cf121e104c8c3c74e97bd3c6b0535482469ac3b0c3f489c2ccac383f3abd49c6",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513"
+  },
+  "private_project": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\hex_enet_regression\\878e790397764aa9ad9f0931e8465640\\project",
+  "private_user": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-878e790397764aa9ad9f0931e8465640",
+  "commands": [
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--editor",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\hex_enet_regression\\878e790397764aa9ad9f0931e8465640\\project",
+      "--import",
+      "--quit"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\hex_enet_regression\\878e790397764aa9ad9f0931e8465640\\project",
+      "--script",
+      "res://scripts/tests/hex_movement_save_state_verifier.gd",
+      "--check-only"
+    ],
+    [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\hex_enet_regression\\878e790397764aa9ad9f0931e8465640\\project",
+      "--script",
+      "res://scripts/tests/hex_movement_save_state_verifier.gd"
+    ]
+  ]
+}

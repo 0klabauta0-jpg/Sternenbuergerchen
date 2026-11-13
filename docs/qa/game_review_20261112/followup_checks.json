@@ -1,0 +1,9 @@
+{"version":1,"checks":[
+{"name":"hex_movement","script":"res://scripts/tests/frontier_hex_movement_verifier.gd","success_marker":"FRONTIER_HEX_MOVEMENT {","timeout":60},
+{"name":"hex_hpa_budget","script":"res://scripts/tests/gm01_hex_hpa_pruning_verifier.gd","success_marker":"GM01_HEX_HPA_PRUNING_ALL_PASS","timeout":120},
+{"name":"real_enet_combat","script":"res://scripts/tests/game_review_enet_20261112.gd","success_marker":"GAME_REVIEW_ENET: 31 passed, 0 failed","timeout":60},
+{"name":"campaign_chain","script":"res://scripts/tests/campaign_five_missions_chain_test.gd","success_marker":"CAMPAIGN_FIVE_CHAIN:","timeout":90},
+{"name":"space_encounter","script":"res://scripts/tests/campaign_space_encounter_verifier.gd","success_marker":"SPACE_ENCOUNTER failures=0","timeout":60},
+{"name":"skirmish_flow","script":"res://scripts/tests/skirmish_prepared_flow_test.gd","success_marker":"Prepared Skirmish flow:","timeout":90},
+{"name":"campaign_handoff","script":"res://scripts/tests/campaign_mission_handoff_test.gd","success_marker":"CAMPAIGN_HANDOFF failed=0","timeout":90}
+]}

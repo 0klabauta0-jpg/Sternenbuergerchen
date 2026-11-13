@@ -187,7 +187,7 @@ func save_current_mission_slot() -> Dictionary:
 	var error: Error = config.save(_mission_save_path)
 	if error != OK:
 		return _save_result(false, "save_failed", error)
-	_set_status("Mission slot saved")
+	_set_status("Szenenstart gemerkt. Fortschritt wird nicht gespeichert.")
 	_refresh_action_buttons()
 	return _save_result(true, "saved", OK, scene_path)
 
@@ -201,7 +201,7 @@ func load_mission_slot(change_scene: bool = true) -> Dictionary:
 	if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
 		return _load_result(false, "missing_scene", scene_path)
 	_last_loaded_scene_path = scene_path
-	_set_status("Loading mission slot")
+	_set_status("Gemerkte Szene wird neu gestartet.")
 	_play_ui_sfx("confirm", "load_mission_slot")
 	if change_scene and not _test_mode:
 		var tree := get_tree()
@@ -513,14 +513,16 @@ func _ensure_overlay() -> void:
 
 
 func _refresh_action_buttons() -> void:
+	var campaign := _is_campaign_context()
 	if _save_button != null:
 		_save_button.disabled = not _can_save_current_scene()
-		_save_button.tooltip_text = "" if not _save_button.disabled else "Im Hauptmenue gibt es noch keine laufende Mission zum Speichern."
+		_save_button.text = "Kampagne speichern" if campaign else "Szenenstart merken"
+		_save_button.tooltip_text = "Speichert den Kampagnenstand über den vorhandenen Kampagnenowner, sobald der Zustand sicher speicherbar ist." if campaign else "Merkt nur die Szene. Fortschritt, Positionen und Kampfzustand werden nicht gespeichert."
+		if _save_button.disabled: _save_button.tooltip_text = "Im Hauptmenü gibt es keine laufende Szene zum Merken."
 	if _load_button != null:
-		var campaign := _is_campaign_context()
 		_load_button.disabled = campaign or not bool(get_save_slot_snapshot().get("exists", false))
-		_load_button.text = "Im Hauptmenü fortsetzen" if campaign else "Mission laden"
-		_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else ""
+		_load_button.text = "Im Hauptmenü fortsetzen" if campaign else "Gemerkte Szene neu starten"
+		_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else "Startet die gemerkte Szene von vorn. Kein gespeicherter Spielfortschritt."
 	if _main_menu_button != null:
 		_main_menu_button.disabled = _is_current_scene_main_menu()
 
@@ -578,14 +580,15 @@ func _on_settings_apply_pressed() -> void:
 func _on_save_pressed() -> void:
 	var result: Dictionary = save_current_mission_slot()
 	_play_ui_sfx("confirm" if bool(result.get("ok", false)) else "warning", "save_mission_slot")
-	_set_status(String(result.get("message", "Mission saved" if bool(result.get("ok", false)) else "Save not available")))
+	var saved_text := "Kampagne gespeichert." if _is_campaign_context() else "Szenenstart gemerkt. Fortschritt wird nicht gespeichert."
+	_set_status(String(result.get("message", saved_text if bool(result.get("ok", false)) else "Speichern ist hier nicht verfügbar.")))
 
 
 func _on_load_pressed() -> void:
 	var result: Dictionary = load_mission_slot()
 	if not bool(result.get("ok", false)):
 		_play_ui_sfx("warning", "load_mission_slot_failed")
-		_set_status("Load not available")
+		_set_status(String(result.get("message", "Kein Szenenstart gemerkt.")))
 
 
 func _on_main_menu_pressed() -> void:

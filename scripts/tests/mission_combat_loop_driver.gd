@@ -2,6 +2,7 @@ extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const COMBAT_VISIBILITY_CACHE_SCRIPT: GDScript = preload("res://scripts/mission/combat_visibility_cache.gd")
+const HEX_SIGHT_ADAPTER_SCRIPT = preload("res://scripts/core/hex_sight_runtime_adapter.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
@@ -162,6 +163,12 @@ var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
+var _hex_sight_adapter = HEX_SIGHT_ADAPTER_SCRIPT.new()
+var _hex_adapter_initialized := false
+var _hex_adapter_owner_path: NodePath
+var _hex_adapter_cache_path: NodePath
+var _hex_adapter_arc := -1.0
+@export_range(0.0, 360.0, 1.0) var hex_sight_arc_degrees := 120.0
 var _discipline_break_cooldown: Dictionary = {}
 var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
@@ -1071,6 +1078,20 @@ func _get_combat_visibility_system():
 	if cache != null and cache.has_method("has_line_of_sight_between_nodes") and cache.has_method("has_line_of_sight_between_points"):
 		return cache
 	return _los_system
+
+
+func get_hex_sight_adapter() -> RefCounted:
+	if not _hex_adapter_initialized or simulation_root_path != _hex_adapter_owner_path or combat_visibility_cache_path != _hex_adapter_cache_path or hex_sight_arc_degrees != _hex_adapter_arc or not _hex_sight_adapter.has_runtime_dependencies():
+		_hex_sight_adapter.configure(get_node_or_null(simulation_root_path), _get_combat_visibility_system(), hex_sight_arc_degrees)
+		_hex_adapter_owner_path = simulation_root_path
+		_hex_adapter_cache_path = combat_visibility_cache_path
+		_hex_adapter_arc = hex_sight_arc_degrees
+		_hex_adapter_initialized = true
+	return _hex_sight_adapter
+
+
+func _query_current_visibility(attacker, target, range_world: float) -> Dictionary:
+	return get_hex_sight_adapter().query_units(attacker, target, range_world)
 
 
 func _get_combat_visibility_cache_audit() -> Dictionary:
@@ -3219,6 +3240,9 @@ func _has_valid_los(attacker, target) -> bool:
 	var los_range: float = _get_effective_range(target)
 	if _uses_weapon_range_for_contact_detection(attacker):
 		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
+	var logical: Dictionary = _query_current_visibility(attacker,target,los_range)
+	if bool(logical.get("handled",false)):
+		return bool(logical.get("visible",false))
 	return bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", attacker, target, los_range, _get_terrain_registry()))
 
 

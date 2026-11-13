@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_281 Tactical Command Multiplayer Authority Snapshot ===
+PASS: CommanderIntent is whitelisted for the owning commander peer
+PASS: CommanderIntent validation reports its category
+PASS: CommanderIntent rejects a foreign Fireteam for the commander peer
+PASS: Breakout confirm is whitelisted with fireteam ownership
+PASS: Air/LZ tactical command is whitelisted for the owning team
+PASS: Role override is rejected for non-host peers
+PASS: Role override is allowed for host authority
+PASS: Client tactical state mutation is rejected
+PASS: Editor/scenario LZ source is rejected for air commands
+PASS: Only accepted tactical commands are queued on the authority
+PASS: Snapshot carries commander intents as read-only display data
+PASS: Commander intents are sorted deterministically
+PASS: Snapshot carries fireteam plan status
+PASS: Plan status strips private/raw skill and metadata payloads
+PASS: Communication events are deduplicated by event ID
+PASS: Tactical rules are mirrored as compact fireteam entries
+PASS: Breakout states are deduplicated by breakout ID
+PASS: AirAssetStatus remains SimulationRoot-authoritative
+PASS: AirAsset VFX/SFX events are deduplicated
+PASS: Tactical snapshot payload remains compact
+PASS: Snapshot contains no raw asset/path payload offenders
+PASS: Snapshot canonical payload is stable despite input ordering
+PASS: Fire events are deduplicated before network apply
+PASS: SimulationRoot publishes authoritative AirAssetStatus
+PASS: Client accepts tactical authority snapshot
+PASS: Applying tactical snapshot enqueues no client commands or effects
+PASS: Client mirrors BreakoutState as server state
+PASS: Client mirrors AirAssetStatus as server state
+PASS: Snapshot fire SFX/VFX are emitted once through event IDs
+PASS: Task file marks TASK_281 implemented
+PASS: Task checklist is complete
+PASS: Implementation status has implemented TASK_281 section
+PASS: Roadmap marks TASK_281 implemented
+PASS: Dev contract documents authority boundary
+=== RESULTS: 34 passed, 0 failed ===
+ALL TESTS PASSED

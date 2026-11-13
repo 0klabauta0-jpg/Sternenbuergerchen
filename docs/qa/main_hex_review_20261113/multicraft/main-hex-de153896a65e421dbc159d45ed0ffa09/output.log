@@ -1,0 +1,970 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/qa/main_hex_review_20261113/multicraft/main-hex-de153896a65e421dbc159d45ed0ffa09/game_review_20261112_profiles/Godot/app_userdata/SB-Codex-Review2-main-hex-de153896a65e421dbc159d45ed0ffa09
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:78)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:78)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:78)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:78)
+PASS: configure actual campaign owner
+PASS: configure actual supply owner
+PASS: fixture accepts satellite_recovery
+PASS: fixture departure satellite_recovery
+PASS: fixture activates satellite_recovery
+PASS: fixture completes satellite_recovery
+PASS: fixture rewards satellite_recovery
+PASS: fixture accepts outpost_recovery
+PASS: fixture departure outpost_recovery
+PASS: fixture activates outpost_recovery
+PASS: fixture completes outpost_recovery
+PASS: fixture rewards outpost_recovery
+PASS: fixture third person
+PASS: fixture loads crate
+PASS: fixture accepts benit_delivery
+PASS: fixture departure benit_delivery
+PASS: fixture activates benit_delivery
+PASS: fixture delivers crate
+PASS: fixture completes benit_delivery
+PASS: fixture rewards benit_delivery
+PASS: fixture accepts outpost_chip_recovery
+PASS: fixture departure outpost_chip_recovery
+PASS: fixture activates outpost_chip_recovery
+PASS: fixture completes outpost_chip_recovery
+PASS: fixture rewards outpost_chip_recovery
+PASS: fixture accepts buccaneer_rescue
+PASS: fixture departure buccaneer_rescue
+PASS: fixture activates buccaneer_rescue
+PASS: fixture completes buccaneer_rescue
+PASS: fixture rewards buccaneer_rescue
+PASS: fixture fourth person
+PASS: fixture second pad
+PASS: four-person two-ship checkpoint validates
+PASS: valid isolated checkpoint with requested crew presence
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:89)
+PASS: first ship completed payload survives Continue
+PASS: second ship completed payload survives Continue
+PASS: first ship launch readiness restored
+PASS: second ship launch readiness restored
+PASS: restored second transport actually launches through authoritative travel owner
+PASS: real second-ship route reaches moon orbit
+PASS: second transport actually lands home before world exit checks
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #0, invalid UID: 'uid://ckxkq4boanos2' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #1, invalid UID: 'uid://dnujavhkcipur' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #2, invalid UID: 'uid://c7wv35ogolq30' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Graphite_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #3, invalid UID: 'uid://bgs8owcuow0yt' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Steel_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #4, invalid UID: 'uid://wuwtr3w42t12' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_PetrolShade_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #5, invalid UID: 'uid://dnkchuwpbhp3t' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #6, invalid UID: 'uid://bkfmwcvswsuop' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #7, invalid UID: 'uid://ctyp2nqvb132c' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Glass_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #8, invalid UID: 'uid://dmwurtdwc6e8y' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_WarmCore_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:102)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [7] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [8] _select_person (res://scripts/meta/explorable_homebase.gd:147)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:104)
+PASS: select actual second-ship pilot in world panel
+PASS: explicit mismatching craft remains honored
+PASS: world Aussteigen button exits actual second ship
+PASS: second-ship action leaves first pilot unchanged
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [7] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [8] _select_person (res://scripts/meta/explorable_homebase.gd:147)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:111)
+PASS: explicit matching craft still exits first ship
+PASS: valid isolated checkpoint with requested crew presence
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:119)
+PASS: partial first team is never falsely restored as boarded
+PASS: unrelated complete second-ship team survives partial-team restore
+PASS: partial first team cannot launch
+PASS: valid isolated checkpoint with requested crew presence
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:129)
+PASS: outside second-team member is not invented aboard
+PASS: valid isolated checkpoint with requested crew presence
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:139)
+PASS: team split between two actual ships has no invented complete payload
+PASS: valid isolated checkpoint with requested crew presence
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _open (res://scripts/tests/game_review_multicraft_20261112.gd:62)
+       [1] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [12] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] set_transport_state (res://scripts/meta/homebase_screen.gd:317)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5123)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _open (res://scripts/tests/game_review_multicraft_20261112.gd:63)
+       [11] _run (res://scripts/tests/game_review_multicraft_20261112.gd:146)
+PASS: natural Buccaneer fighter retains existing non-transport launch gate
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb': In external resource #0, invalid UID: 'uid://dj8ife4fov1my' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator_astroMaleA.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _build_personnel_visuals (res://scripts/meta/explorable_homebase.gd:102)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:907)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #0, invalid UID: 'uid://ckxkq4boanos2' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #1, invalid UID: 'uid://dnujavhkcipur' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #2, invalid UID: 'uid://c7wv35ogolq30' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Graphite_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #3, invalid UID: 'uid://bgs8owcuow0yt' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Steel_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #4, invalid UID: 'uid://wuwtr3w42t12' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_PetrolShade_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #5, invalid UID: 'uid://dnkchuwpbhp3t' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #6, invalid UID: 'uid://bkfmwcvswsuop' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #7, invalid UID: 'uid://ctyp2nqvb132c' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_Glass_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb': In external resource #8, invalid UID: 'uid://dmwurtdwc6e8y' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01_WarmCore_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _load_visual (res://scripts/meta/explorable_homebase.gd:915)
+       [1] _update_craft_projection (res://scripts/meta/explorable_homebase.gd:682)
+       [2] _initialize_runtime (res://scripts/meta/explorable_homebase.gd:909)
+       [3] set_active (res://scripts/meta/explorable_homebase.gd:741)
+       [4] _layout_base_surface (res://scripts/meta/homebase_operations_presenter.gd:1296)
+       [5] _layout_columns (res://scripts/meta/homebase_operations_presenter.gd:1143)
+       [6] refresh (res://scripts/meta/homebase_operations_presenter.gd:824)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:151)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9443)
+       [7] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [8] _select_person (res://scripts/meta/explorable_homebase.gd:147)
+       [9] _run (res://scripts/tests/game_review_multicraft_20261112.gd:153)
+PASS: actual Buccaneer pilot exits via implicit world action
+GAME_REVIEW_MULTICRAFT checks=57 failed=0

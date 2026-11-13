@@ -1,0 +1,31 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_391 Global Escape Menu Button SFX ===
+PASS: Global escape shell exposes its diagnostic contract
+PASS: Escape menu has Resume
+PASS: Escape menu has Settings
+PASS: Escape menu has Mission Save
+PASS: Escape menu has Mission Load
+PASS: Escape menu has Main Menu
+PASS: Escape menu has Quit
+PASS: Escape opens the global pause menu
+PASS: Escape closes the global pause menu
+PASS: Global shell installs SFX on dynamic buttons
+PASS: Dynamic button press emits UI SFX through the global shell
+PASS: Escape settings overlay saves through GameSettingsContract
+PASS: Escape settings persist master volume
+PASS: Escape settings persist SFX volume
+PASS: Escape settings persist UI volume
+PASS: Mission test scene loads for shell save contract
+PASS: Global shell saves current mission scene path
+PASS: Mission shell slot records the active scene path
+PASS: Global shell can load the saved scene path in test mode
+PASS: Quit action is routed through the global shell contract
+PASS: Main menu scene loads for mission slot controls
+PASS: Main menu exposes Mission speichern
+PASS: Main menu exposes Mission laden
+PASS: Main menu save is wired to the global shell slot
+PASS: Main menu load is wired to the global shell slot
+=== RESULTS: 25 passed, 0 failed ===
+ALL TESTS PASSED

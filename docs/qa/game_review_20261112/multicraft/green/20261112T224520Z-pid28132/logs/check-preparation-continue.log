@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Both actual base people begin outside
+PASS: New campaign begins outside without automatic boarding
+PASS: Create a second preparation group
+PASS: Move leader into second real group
+FAIL: Change actual campaign loadout
+PASS: Pilot can be unassigned at home
+PASS: Valid unfinished preparation saves without silently reverting
+PASS: Continue preserves intentionally unassigned pilot
+PASS: Continue preserves chosen second group
+FAIL: Continue preserves edited member equipment
+PASS: Preparation resume never creates additional NPCs
+PASS: Preparation checkpoint resumes before any orbital departure
+PASS: Continue preserves real outside presence without automatic boarding
+CAMPAIGN_PREPARATION failed=2

@@ -1,0 +1,481 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+REVIEW2_ISOLATED_USER_DATA C:/dev/SternenBuergerchen-worktrees/hex-enet-followup-20261113/docs/qa/main_hex_review_20261113/active_continue/main-hex-3cb6e4df67e9420db53008ce88ddb5ae/game_review_20261112_profiles/Godot/app_userdata/SB-Codex-Review2-main-hex-3cb6e4df67e9420db53008ce88ddb5ae
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:12)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:12)
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: real craft and team exist
+PASS: real job accepted
+PASS: real destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:90)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:396)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7742)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3990)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6443)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9428)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _launch_and_land (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:201)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:29)
+       [11] _prepare_initial_base (res://scripts/tests/campaign_intro_loop_smoke.gd:90)
+       [12] _board_actual_base_crew (res://scripts/tests/campaign_intro_loop_smoke.gd:99)
+       [13] _wait (res://scripts/tests/campaign_active_mission_continue_verifier.gd:188)
+       [14] _wait (res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd:51)
+       [15] _wait (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:364)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:90)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:396)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7742)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3990)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6443)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9428)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _launch_and_land (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:201)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:29)
+       [11] _prepare_initial_base (res://scripts/tests/campaign_intro_loop_smoke.gd:90)
+       [12] _board_actual_base_crew (res://scripts/tests/campaign_intro_loop_smoke.gd:99)
+       [13] _wait (res://scripts/tests/campaign_active_mission_continue_verifier.gd:188)
+       [14] _wait (res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd:51)
+       [15] _wait (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:364)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:90)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:396)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7742)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3990)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6443)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9428)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _launch_and_land (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:201)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:29)
+       [11] _prepare_initial_base (res://scripts/tests/campaign_intro_loop_smoke.gd:90)
+       [12] _board_actual_base_crew (res://scripts/tests/campaign_intro_loop_smoke.gd:99)
+       [13] _wait (res://scripts/tests/campaign_active_mission_continue_verifier.gd:188)
+       [14] _wait (res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd:51)
+       [15] _wait (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:364)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:90)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:396)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7742)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3990)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6443)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9428)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _launch_and_land (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:201)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:29)
+       [11] _prepare_initial_base (res://scripts/tests/campaign_intro_loop_smoke.gd:90)
+       [12] _board_actual_base_crew (res://scripts/tests/campaign_intro_loop_smoke.gd:99)
+       [13] _wait (res://scripts/tests/campaign_active_mission_continue_verifier.gd:188)
+       [14] _wait (res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd:51)
+       [15] _wait (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:364)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] update_ships (res://scripts/ui/star_map_world_view.gd:97)
+       [1] set_travel_snapshot (res://scripts/ui/star_map_canvas.gd:90)
+       [2] refresh (res://scripts/ui/star_map_screen.gd:396)
+       [3] _show_star_map (res://scripts/meta/meta_layer_flow.gd:7742)
+       [4] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3990)
+       [5] request_mission_start (res://scripts/meta/homebase_screen.gd:1900)
+       [6] _on_send_pilot_button_pressed (res://scripts/meta/homebase_screen.gd:6443)
+       [7] _request_operation_from_base (res://scripts/meta/homebase_screen.gd:9428)
+       [8] request_operation (res://scripts/meta/homebase_screen.gd:9297)
+       [9] _launch_and_land (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:201)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:29)
+       [11] _prepare_initial_base (res://scripts/tests/campaign_intro_loop_smoke.gd:90)
+       [12] _board_actual_base_crew (res://scripts/tests/campaign_intro_loop_smoke.gd:99)
+       [13] _wait (res://scripts/tests/campaign_active_mission_continue_verifier.gd:188)
+       [14] _wait (res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd:51)
+       [15] _wait (res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd:364)
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Selected destination has an orbit
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches destination orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach waits for orbit transit or begins before map instantiation
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:12592)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1763)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1536)
+PASS: satellite_recovery actual mission instance exists
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] refresh_hud (res://scripts/tests/mission_tactical_sandbox_controller.gd:4268)
+       [11] _process_batch (res://scripts/core/update_manager.gd:40)
+       [12] _process (res://scripts/core/update_manager.gd:30)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] refresh_hud (res://scripts/tests/mission_tactical_sandbox_controller.gd:4268)
+       [11] _process_batch (res://scripts/core/update_manager.gd:40)
+       [12] _process (res://scripts/core/update_manager.gd:30)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] refresh_hud (res://scripts/tests/mission_tactical_sandbox_controller.gd:4268)
+       [11] _process_batch (res://scripts/core/update_manager.gd:40)
+       [12] _process (res://scripts/core/update_manager.gd:30)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] refresh_hud (res://scripts/tests/mission_tactical_sandbox_controller.gd:4268)
+       [11] _process_batch (res://scripts/core/update_manager.gd:40)
+       [12] _process (res://scripts/core/update_manager.gd:30)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] refresh_hud (res://scripts/tests/mission_tactical_sandbox_controller.gd:4268)
+       [11] _process_batch (res://scripts/core/update_manager.gd:40)
+       [12] _process (res://scripts/core/update_manager.gd:30)
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: both actual people present at destination
+PASS: actual mission owners capture together
+PASS: actual campaign owners prepare in a detached world
+PASS: world preflight leaves actual supply unchanged
+PASS: active world prepares against the existing root without replacing it
+PASS: live preflight retains home root identity
+PASS: prebinding does not publish new owners or mutate live supply
+PASS: mismatched departure token is rejected before publication
+PASS: inconsistent home personnel state is rejected before publication
+PASS: rejected world candidates leave live owners untouched
+PASS: fresh unpublished mission scene can be instantiated
+PASS: fresh mission actors, ground, lifecycle and ship prepare together
+PASS: unpublished scene candidates remain valid
+PASS: real mission and strategic world preflight against the existing root
+PASS: joined owners and root bindings remain fresh
+PASS: actual live world and scene pass private checkpoint validation
+JSON_NATIVE_ISSUE 
+PASS: actual active mission checkpoint saved
+PASS: actual saved file contains mission lifecycle
+PASS: saved time reflects the actual save rather than earlier preflight
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:123)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:123)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:12592)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1763)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1536)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #0, invalid UID: 'uid://1juwjftba6k1' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4596)
+       [11] _update_ui_projection (res://scripts/tests/mission_tactical_sandbox_controller.gd:4462)
+       [12] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4319)
+       [13] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:20450)
+       [14] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3777)
+       [15] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1302)
+       [16] _connect_planning_state_bridge (res://scripts/meta/meta_layer_flow.gd:7367)
+       [17] commit (res://scripts/mission/campaign_active_world_transaction.gd:89)
+       [18] _restore_active_campaign (res://scripts/meta/meta_layer_flow.gd:398)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #1, invalid UID: 'uid://b153b17ax70jp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4596)
+       [11] _update_ui_projection (res://scripts/tests/mission_tactical_sandbox_controller.gd:4462)
+       [12] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4319)
+       [13] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:20450)
+       [14] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3777)
+       [15] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1302)
+       [16] _connect_planning_state_bridge (res://scripts/meta/meta_layer_flow.gd:7367)
+       [17] commit (res://scripts/mission/campaign_active_world_transaction.gd:89)
+       [18] _restore_active_campaign (res://scripts/meta/meta_layer_flow.gd:398)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #2, invalid UID: 'uid://dgyljbo4i8xm0' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4596)
+       [11] _update_ui_projection (res://scripts/tests/mission_tactical_sandbox_controller.gd:4462)
+       [12] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4319)
+       [13] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:20450)
+       [14] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3777)
+       [15] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1302)
+       [16] _connect_planning_state_bridge (res://scripts/meta/meta_layer_flow.gd:7367)
+       [17] commit (res://scripts/mission/campaign_active_world_transaction.gd:89)
+       [18] _restore_active_campaign (res://scripts/meta/meta_layer_flow.gd:398)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #3, invalid UID: 'uid://dn7knl5ebgqdp' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4596)
+       [11] _update_ui_projection (res://scripts/tests/mission_tactical_sandbox_controller.gd:4462)
+       [12] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4319)
+       [13] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:20450)
+       [14] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3777)
+       [15] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1302)
+       [16] _connect_planning_state_bridge (res://scripts/meta/meta_layer_flow.gd:7367)
+       [17] commit (res://scripts/mission/campaign_active_world_transaction.gd:89)
+       [18] _restore_active_campaign (res://scripts/meta/meta_layer_flow.gd:398)
+WARNING: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb': In external resource #4, invalid UID: 'uid://baavsksdvfgho' - using text path instead: 'res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:12278)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:12264)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:12255)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:12148)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:11228)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2239)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:15853)
+       [9] _refresh_runtime_mission_hud_surfaces_for_phase (res://scripts/tests/mission_tactical_sandbox_controller.gd:4641)
+       [10] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4596)
+       [11] _update_ui_projection (res://scripts/tests/mission_tactical_sandbox_controller.gd:4462)
+       [12] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4319)
+       [13] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:20450)
+       [14] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3777)
+       [15] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1302)
+       [16] _connect_planning_state_bridge (res://scripts/meta/meta_layer_flow.gd:7367)
+       [17] commit (res://scripts/mission/campaign_active_world_transaction.gd:89)
+       [18] _restore_active_campaign (res://scripts/meta/meta_layer_flow.gd:398)
+PASS: actual mission reconstruction reaches a decision
+PASS: actual mission is reconstructed on continue
+PASS: same person, location and health restored: campaign_leader
+PASS: same person, location and health restored: campaign_pilot
+PASS: craft remains at actual mission surface
+PASS: credits and craft fuel survive continue
+PASS: accepted mission remains active without paying twice
+PASS: mission clock survives process reconstruction
+PASS: mission time limit and victory rule survive continue
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: restored mission reaches verified return or upload state
+PASS: restored crew actually reaches departure orbit
+PASS: restored ship accepts homeward warp
+PASS: restored ship reaches home orbit
+PASS: restored ship accepts home landing
+PASS: restored crew actually returns and lands at home
+PASS: actual recovered chip uploads at home after continue
+PASS: new home checkpoint saves after real upload
+PASS: successful home save preserves the previous active file
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] _update_character_inventory (res://scripts/meta/homebase_screen.gd:6033)
+       [6] _update_character_sheet (res://scripts/meta/homebase_screen.gd:5989)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1938)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [11] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:164)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:15294)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:14265)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:13397)
+       [3] update_actor (res://scripts/ui/components/personnel_body_preview.gd:34)
+       [4] update_snapshot (res://scripts/ui/components/personnel_inventory_panel.gd:145)
+       [5] refresh (res://scripts/meta/homebase_operations_presenter.gd:817)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1945)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:258)
+       [8] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:5112)
+       [9] _ready (res://scripts/meta/meta_layer_flow.gd:355)
+       [10] _run (res://scripts/tests/campaign_active_mission_continue_verifier.gd:164)
+PASS: normal continue chooses the newer home checkpoint over the stale active file
+PASS: stale active file remains untouched
+CAMPAIGN_ACTIVE_CONTINUE passed=80 failed=0
+CAMPAIGN_ACTIVE_CONTINUE_PASS

@@ -84,7 +84,10 @@ func _personnel_action(operation: String, payload: Dictionary = {}) -> Dictionar
 		return {"ok": false, "reason": "no_person", "message": "Zuerst eine Person auswählen"}
 	var data: Dictionary = payload.duplicate(true)
 	data["unit_id"] = _selected_person_id
-	if not data.has("craft_id") and not _transport_projection.is_empty():
+	# The personnel owner resolves an exit from the selected person's real ship.
+	if operation == "base_unboard" and not data.has("craft_id"):
+		data["craft_id"] = ""
+	elif not data.has("craft_id") and not _transport_projection.is_empty():
 		data["craft_id"] = String(_transport_projection[0].get("craft_id", ""))
 	var result: Dictionary = _personnel_command.call(operation, data)
 	if _person_feedback != null:

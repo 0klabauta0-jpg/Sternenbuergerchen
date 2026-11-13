@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green-final\\20261112T224805Z-pid26708",
+  "project": "C:\\dev\\SternenBuergerchen",
+  "manifest": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.084,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green-final\\20261112T224805Z-pid26708\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "multicraft",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-12T22:48:05.832610+00:00",
+  "finished_at": "2026-11-12T22:49:11.228105+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green-final\\20261112T224805Z-pid26708\\logs\\engine-check-multicraft.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\game_review_multicraft_20261112.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 65.305,
+      "name": "multicraft",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green-final\\20261112T224805Z-pid26708\\logs\\check-multicraft.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\multicraft\\green-final\\20261112T224805Z-pid26708\\logs\\engine-check-multicraft.log",
+      "passed": false,
+      "reasons": [
+        "exit 1"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}

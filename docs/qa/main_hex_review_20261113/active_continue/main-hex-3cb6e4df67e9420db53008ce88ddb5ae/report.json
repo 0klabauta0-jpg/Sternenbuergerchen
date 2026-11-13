@@ -1,0 +1,32 @@
+{
+  "case": "active_continue",
+  "passed": true,
+  "exit_code": 0,
+  "elapsed": 220.0318513999955,
+  "timed_out": false,
+  "assertions": 80,
+  "errors": [],
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true,
+  "source_sha256": {
+    "scripts/core/hex_movement_command_runtime.gd": "097968454d91a16979a8d2b8b278b8c63a12ca3217eb9eec33e021a945bd4218",
+    "scripts/core/simulation_root.gd": "a3b197043deac3d2ac583a1eb247863aa3036df3d52a5ca248866039cd1fd3c4",
+    "scripts/meta/explorable_homebase.gd": "f3acd535d1389db78da1010135f90b9bb8626ede31e859609904734b4ffc539f",
+    "scripts/meta/meta_layer_flow.gd": "4b8da7f8a0446880bf2864441aada932b75777d0cf013770ca84dbcfa8cda717",
+    "scripts/ui/global_escape_menu.gd": "65cb2584d823648a2ff60237d0e38049f416db965984d66f7e8157c6e56fa2b8",
+    "scripts/ui/main_menu_screen.gd": "a8ebfbeb752d93098ecf5a9e4a6ee748c003a9f61c39174264acfbeaaea3423b",
+    "scripts/tests/mission_combat_loop_driver.gd": "3c93aa5e62eca5c2f3cc8a01e099c6e68851e905225bf7ef5232d2f2083e1f28",
+    "scripts/tests/campaign_active_mission_continue_verifier.gd": "dd950899c7ce40dfe7f112191ca842768abc6208b062b13103b12b19e7ac2c60"
+  },
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\main-hex-3cb6e4df67e9420db53008ce88ddb5ae\\project",
+    "--script",
+    "res://scripts/tests/campaign_active_mission_continue_verifier.gd"
+  ],
+  "private_user": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\main_hex_review_20261113\\active_continue\\main-hex-3cb6e4df67e9420db53008ce88ddb5ae\\game_review_20261112_profiles\\Godot\\app_userdata\\SB-Codex-Review2-main-hex-3cb6e4df67e9420db53008ce88ddb5ae",
+  "shared_import_cache_only": true
+}

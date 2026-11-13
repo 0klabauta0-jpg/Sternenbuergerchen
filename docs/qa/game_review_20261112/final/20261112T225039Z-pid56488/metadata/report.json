@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\final\\20261112T225039Z-pid56488",
+  "project": "C:\\dev\\SternenBuergerchen",
+  "manifest": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\followup_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.04,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\final\\20261112T225039Z-pid56488\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "campaign_chain",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-12T22:50:39.483234+00:00",
+  "finished_at": "2026-11-12T22:50:40.164134+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\final\\20261112T225039Z-pid56488\\logs\\engine-check-campaign_chain.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\campaign_five_missions_chain_test.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.639,
+      "name": "campaign_chain",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\final\\20261112T225039Z-pid56488\\logs\\check-campaign_chain.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\game_review_20261112\\final\\20261112T225039Z-pid56488\\logs\\engine-check-campaign_chain.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

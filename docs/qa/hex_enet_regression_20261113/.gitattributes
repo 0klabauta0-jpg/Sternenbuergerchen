@@ -1,0 +1,2 @@
+# Preserve captured bytes and their report hashes on every platform.
+*.log -text

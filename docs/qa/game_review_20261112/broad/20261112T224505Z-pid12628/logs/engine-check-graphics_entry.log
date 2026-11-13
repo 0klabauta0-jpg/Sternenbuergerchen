@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: default profile gate runs without the Frontier CLI flag
+PASS: normal project entry is the real main menu
+PASS: normal Singleplayer route retains the Meta Homebase flow
+PASS: the normal Singleplayer button still exists
+PASS: real main-menu background API chooses the restored original TASK199 image
+PASS: playable default mission remains Grid Sweep
+PASS: normal Meta default preserves the GM01 map and scenario
+PASS: default map remains a valid JSON dictionary
+PASS: GM01 explicitly selects the Frontier visual profile
+PASS: saved GM01 selects the real authored Outpost composition
+PASS: rebuilt default uses true Hex topology
+PASS: scenario, enemy groups, objectives and patrol rules remain byte-identical
+PASS: normal MapData loader selects true Hex
+PASS: default GM01 covers the displayed ground up to its edge with 9408 real Hex cells
+PASS: actual normal map/view path activates Frontier without a test flag
+PASS: profile activation comes from saved map data, not an explicit preview override
+PASS: normal renderer installs the saved Outpost, without the isolated art-preview scene
+PASS: separate authored Hex workyard remains available
+PASS: existing background catalog owns the restored original image path
+PASS: background provenance identifies the restored TASK199 artwork
+PASS: existing menu readability and image loading policy are preserved
+PASS: original TASK199 image actually exists
+PASS: catalog image hash matches the actual original JPEG bytes
+PASS: catalog image byte size is factual
+PASS: original background imports as a real Texture2D
+PASS: catalog dimensions match the real imported texture
+PASS: restored background links to its original-image source manifest
+PASS: restored original artwork bytes match the pre-change TASK199 source
+=== RESULTS: 28 passed, 0 failed ===
+FRONTIER_START_GRAPHICS_ALL_PASS
