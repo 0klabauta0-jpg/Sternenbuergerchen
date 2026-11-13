@@ -1,5 +1,13 @@
 # TASK_ROADMAP
 
+## 13.11.2026: begrenzter AP9-Peer-/Würfel-Regressionsanteil
+
+Echte lokale Hex-ENet-Regression22/0 und engster Movement-Save-Nachbar30/0;
+gültiges Trupp-ID-Feld im Savecodec erhalten, exakte RNGfortsetzung geprüft.
+AP0–8 bleiben vorhandener opt-in Kandidat, keine doppelte Implementierung.
+Große/native/AP9-/Produktionskarten-/Internetabnahme weiter offen. Task:
+`docs/tasks/HEX_RUNTIME_FOLLOWUP_2026_11_13.md`. Kein Mainmerge oder EXE.
+
 ## 12.11.2026: AP6–AP8 begrenzt abgeschlossen
 
 AP6-Lifecycle/Selection, AP7-Root-/Store-/Continue-/Netzanschluss und AP8-12-Felder-Kandidat sind integriert. Kleine Fälle16/0,30/0,38/0 und CampaignContinue17/0+3/0; vollständige Belege unter `docs/qa/ap678_bundle_20261112/README.md`. Große AP9-/Native-/Peer-/Performanceabnahme und Kartenaktivierung bleiben zurückgestellt. Kein Mainmerge, keine EXE; Nutzer vor Export fragen. Spätere Weltraum-AP09-Pakete bleiben getrennt.

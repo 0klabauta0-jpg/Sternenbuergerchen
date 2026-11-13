@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "assertions": 30,
+  "failures": 0,
+  "exit_code": 0,
+  "original_wrapper_report": "report.json",
+  "original_wrapper_status_preserved": "failed",
+  "correction": "Initial new wrapper expected nonexistent HEX_MOVEMENT_SAVE_STATE_PASS; owning existing verifier emits HEX_MOVEMENT_SAVE_STATE passed=30 failed=0. Raw successful run retained, no gameplay rerun. Runner now accepts actual strict summary.",
+  "log_sha256": "6ca703cc6618ff678a8ec03f57f6cbbc7c80f4b6a740bcbf51e82ed2aa00a7f5",
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true
+}

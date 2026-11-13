@@ -1,5 +1,15 @@
 # Hexsicht, Erkennung und Feldreservierung Implementation Plan
 
+## Ausführungsstand13.11.2026
+
+AP0–AP8 wurden inzwischen im getrennten Karten-Kandidaten integriert. Maßgeblich
+sind `docs/qa/ap678_bundle_20261112/README.md` und dessen exakte Commitgrenzen,
+nicht die historischen offenen Kästchen dieses ursprünglichen Arbeitsplans.
+Neuer Ausgangspunkt1b924b640; der reine Sourcezweig47fa17f51 ist überholt.
+Der Nutzerauftrag13.11. führt den begrenzten echten Peer-/Würfel-/Restoreanteil
+weiter, siehe `docs/tasks/HEX_RUNTIME_FOLLOWUP_2026_11_13.md`. Große native
+AP9-/GPU-/A/B/C-/Internetabnahme und Produktionskartenaktivierung bleiben offen.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Sicht und Erkennung auf verbindlichen Hexpositionen vereinfachen und

@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### Begrenzter echter Hex-Peer-/Würfelanschluss — 13.11.2026
+
+Auf task/hex-enet-followup-20261113, bewusst auf noch nicht integriertem
+Karten-/Hexkandidaten1b924b640. AP0–8 nicht erneut gebaut. Tatsächlicher ENetfall
+22/0 prüft Remotecommands, Hexbewegung, echte Raw-Envelope-Sichtgrenzen und
+Host-Damage/RNG; Root-JSON erhält sechs exakte Folgewerte. Gültige fireteam_id
+fehlte im Movement-Savecodec: genau dieses Stringfeld ergänzt, Typ-/Unknown-
+Reject erhalten. Engster bestehender Nachbar30/0; sein neuer Wrappermarker wurde
+bei erhaltenem Originalreport separat berichtigt, kein neuer Gameplaylauf.
+Alle finalen Quellen-/Profil-/Canaryguards grün, keine Enginefehler/Leaks;
+unabhängiger Review clean. QA hex_enet_regression_20261113. Kein Tickrewind/
+Rejoin-, vollständiger AP9-/Native-/FPS-/Internet-/Kartenaktivierungsabschluss,
+kein Mainmerge oder EXE. Keine neue Würfel-/Rüstungs-/Kampf- oder Orbitalbalance.
+
 ### Autosaveabstand nach Nutzerkorrektur — 12.11.2026
 
 Automatischer Hexsave jetzt alle fünf Minuten statt jede Sekunde. Erster Save und

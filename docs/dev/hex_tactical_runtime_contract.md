@@ -1,7 +1,12 @@
 # Hex Tactical Runtime V1
 
-Stand11.11.2026, Basis97e00aba14ced147b268113085854ac67dc764c5.
-Implementierte Bausteine; keine bereits aktivierte Missions-/Basisintegration.
+Aktueller Integrationsstand: AP0–AP8 sind im Karten-Kandidaten1b924b640
+opt-in verbunden und begrenzt geprüft, siehe `docs/qa/ap678_bundle_20261112/`.
+Keine flächige Produktionskartenaktivierung oder vollständige AP9-Abnahme.
+Fortsetzung13.11.: `docs/tasks/HEX_RUNTIME_FOLLOWUP_2026_11_13.md`.
+Die folgenden Bausteinabschnitte dokumentieren zusätzlich ihren jeweiligen
+historischen Einführungsstand ab97e00aba14ced147b268113085854ac67dc764c5;
+ihre damaligen „folgt AP…“-Hinweise sind keine aktuelle Gesamtstatusliste.
 Gesamtplan: `docs/superpowers/plans/2026-11-11-hex-sight-occupancy.md`.
 
 ## Besitz und Aktivierung
