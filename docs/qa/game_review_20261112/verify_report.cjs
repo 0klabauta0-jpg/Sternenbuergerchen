@@ -5,8 +5,8 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
 (async () => {
-  const qa = __dirname;
-  const report = path.resolve(qa, '../../reports/SPIELREVIEW_2026_11_12.html');
+  const qa = process.argv[3] ? path.resolve(process.argv[3]) : __dirname;
+  const report = path.resolve(__dirname, '../../reports/SPIELREVIEW_2026_11_12.html');
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
   await context.setOffline(true);

@@ -1,0 +1,26 @@
+{
+  "status": "bestanden — begrenzter Hex-/Peer-/Restoreanschluss",
+  "candidate_base": "1b924b640f589c7ca5dabcc2f2da752f315d3c4b",
+  "candidate_branch": "task/hex-enet-followup-20261113",
+  "historical_ap678": "Selection16/0, Base30/0, Slice38/0, Continue17/0+3/0; unterschiedliche belegte Commitgrenzen",
+  "checks": [
+    {
+      "name": "Echter ENet-Hex-/Authority-/RNGfall",
+      "result": "22/0, Exit 0, keine Enginefehler/Leaks; Quellen-, Profil- und Canaryguards grün",
+      "report": "candidate/3ac330df39b84c59bb23f3d6e07937c1/report.json"
+    },
+    {
+      "name": "Bestehender Movement-Save-Nachbar",
+      "result": "30/0, Exit 0; ursprünglich falscher Wrappermarker separat korrigiert, kein neuer Gameplaylauf",
+      "report": "candidate/bf01721d568b44f594791a39c2f094ca/reviewed_result.json"
+    }
+  ],
+  "production_activation": false,
+  "native_acceptance": false,
+  "internet_acceptance": false,
+  "passed": true,
+  "codec_fix": "fireteam_id als String speichern",
+  "verified_source_files": 90,
+  "independent_review": "clean; Runner-Markerbefund korrigiert",
+  "candidate_commit": "02e75d4f1"
+}

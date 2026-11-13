@@ -1,0 +1,2 @@
+# Preserve copied evidence bytes and their report hashes on every platform.
+*.log -text

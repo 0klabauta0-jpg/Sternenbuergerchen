@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Hex-Fortsetzung auf tatsächlichem Karten-Kandidaten — 13.11.2026
+
+Berichtbranch task/hex-review-report-20261113 bleibt auf Reviewfix8d0f9a597.
+Codefortsetzung separat auf task/hex-enet-followup-20261113, Basis1b924b640:
+dort sind AP0–8 bereits opt-in integriert. Neuer echter ENet-/Hex-/RNGfall22/0
+und Movement-Save-Nachbar30/0; gültige fireteam_id im Stringsavecodec ergänzt.
+Root-JSON erhält exakte sechs Folgewerte; keine Live-Session-Restorefreigabe.
+HTMLbericht aktualisiert und trennt historische26Reviewgates von dieser Basis.
+Keine gemeinsame Mainintegration, neue Balance, Produktionskartenaktivierung,
+EXE oder vollständige AP9-/Native-/FPS-/Internetabnahme. Evidenz:
+`docs/qa/hex_runtime_followup_20261113/README.md`.
+
 ### Spielreview: Mehrschiff-Ownerfixes und technische Spielpfade — 12.11.2026
 
 Auf `task/game-review-fixes-20261112`, bewusst auf noch nicht integriertem

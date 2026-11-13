@@ -1,0 +1,25 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "spielreview_20261112",
+  "title": "SternenBürgerchen · Spielreview / Hex-Fortsetzung 13.11.2026",
+  "exported_at": "2026-11-13T04:39:44.568Z",
+  "controls": {
+    "review": {
+      "next_priority": "ui",
+      "read": true,
+      "playtest_status": "pending",
+      "comment": "Handyprüfung: ÄÖÜ, Schiff 2"
+    }
+  },
+  "notes": {
+    "review": {
+      "notes": "Offline-Notiz"
+    }
+  },
+  "active_choices": {},
+  "computed": {},
+  "metadata": {
+    "url": "file:///C:/dev/SternenBuergerchen/docs/reports/SPIELREVIEW_2026_11_12.html",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+  }
+}
