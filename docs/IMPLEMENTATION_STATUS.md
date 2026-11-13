@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### Performance-Review: drei gemessene CPU-Fixes — 13.11.2026
+
+Auf Mainbasis 5196cc08b: Hexsicht nutzt begrenzten ticklokalen Terraincache,
+Snapshotpublisher packt einmal je Team, Encounterpanel liest schmalen Ownerstate.
+177 Regressionen grün einschließlich echtem ENet, 600-Tick-Kampfvergleich und
+tatsächlicher Kampagnenfixture; mobiler HTMLbericht 39/0. Je 30 lokale CPU-Samples:
+Hexmedian 4,330→2,591ms, Packen bei 96 Units/3 Teampeers 0,936→0,313ms. Keine
+FPS-/GPU-/Internet-/EXEabnahme. Grafik und Gameplay unverändert. Weitere
+Personenvisualsnapshots nur ungemessener Kandidat. Rohdaten und Grenzen:
+docs/qa/performance_review_20261113/README.md. Alte Dokumentbytes erhalten.
+
 ### Editorimport nach Mainintegration eingegrenzt — 13.11.2026
 
 Auf Mainbasis 6bdc3b5ef frischer Gesamtimport in vollständiger privater

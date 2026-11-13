@@ -1,0 +1,77 @@
+{
+  "case": "hex_cache",
+  "phase": "red",
+  "engine": "4.6.2.stable.official.71f334935",
+  "exit": 1,
+  "errors": [
+    "ERROR: Hex adapter must share tick-local terrain results"
+  ],
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\f5271b73d3ba4f858a601331aa0c9822\\project",
+    "--script",
+    "res://scripts/tests/performance_hex_cache_20261113.gd",
+    "--",
+    "--phase=red"
+  ],
+  "passed": false,
+  "assertions": 1,
+  "failed": 1,
+  "measurements": [
+    {
+      "metric": "hex_visibility_64_pairs_4_readers_cpu",
+      "pairs": 64,
+      "readers": 4,
+      "renderer": "headless",
+      "samples": [
+        4221,
+        4234,
+        4364,
+        4212,
+        4232,
+        4479,
+        4513,
+        4405,
+        4368,
+        4361,
+        4430,
+        4413,
+        4331,
+        5807,
+        5594,
+        4268,
+        4885,
+        4328,
+        4230,
+        4256,
+        4270,
+        4239,
+        4195,
+        5494,
+        4517,
+        4210,
+        4478,
+        4298,
+        4313,
+        4302
+      ],
+      "tick_local": true,
+      "unit": "usec"
+    }
+  ],
+  "source_sha256": {
+    "scripts/tests/performance_hex_cache_20261113.gd": "3dd29e2625d345f8bb8c7ef55f380fc0084f8ec77ba1baff27e856d4b279c82f",
+    "scripts/mission/combat_visibility_cache.gd": "c856bb974886caa6858f361bd24e9ea4ccf5ef5ad8a287ab21cf985d5fbe7eab",
+    "scripts/core/simulation_root.gd": "a3b197043deac3d2ac583a1eb247863aa3036df3d52a5ca248866039cd1fd3c4",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/hex_sight_runtime_adapter.gd": "78ec224f9eb1be786e4212bd68f2d60e4d6cbd35f94517c579956fc41f770e8b",
+    "scripts/meta/campaign_space_encounter_presenter.gd": "42885ed2ca97e8aee3b5d3f84a73c1e2d12e64e3a77a758052a3f34f20c51b6c",
+    "scripts/meta/singleplayer_runtime_adapter.gd": "7f63ceaeb536dac9a0a035226aafff7bb2da01132db5e492cad5eb5b767019ff",
+    "scripts/meta/explorable_homebase.gd": "f3acd535d1389db78da1010135f90b9bb8626ede31e859609904734b4ffc539f"
+  },
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true
+}

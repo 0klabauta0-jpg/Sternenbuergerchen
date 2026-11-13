@@ -8,10 +8,14 @@ extends Node
 ## decisions so it never becomes gameplay truth.
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const HEX_QUERY = preload("res://scripts/core/hex_visibility_query.gd")
+const HEX_ENTRY_CAPACITY := 4096
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _current_tick: int = -1
 var _results_by_key: Dictionary = {}
+var _hex_blockers_by_key: Dictionary = {}
+var _hex_actual_los_check_count := 0
 var _asked_pair_count: int = 0
 var _actual_los_check_count: int = 0
 var _cache_hit_count: int = 0
@@ -48,6 +52,8 @@ func begin_tick(simulation_tick: int) -> void:
 		return
 	_current_tick = simulation_tick
 	_results_by_key.clear()
+	_hex_blockers_by_key.clear()
+	_hex_actual_los_check_count = 0
 	_cache_key_reuse_by_pair.clear()
 	_asked_pair_count = 0
 	_actual_los_check_count = 0
@@ -112,7 +118,9 @@ func get_audit_snapshot() -> Dictionary:
 		"cache_status": "active",
 		"derived_only": true,
 		"current_tick": _current_tick,
-		"entry_count": _results_by_key.size(),
+		"entry_count": _results_by_key.size() + _hex_blockers_by_key.size(),
+		"hex_entry_count": _hex_blockers_by_key.size(),
+		"hex_actual_los_check_count": _hex_actual_los_check_count,
 		"asked_pair_count": _asked_pair_count,
 		"actual_los_check_count": _actual_los_check_count,
 		"cache_hit_count": _cache_hit_count,
@@ -120,6 +128,42 @@ func get_audit_snapshot() -> Dictionary:
 		"key_ordered_by_source_target": true,
 		"snapshot_serialized": false,
 	}
+
+
+## Only terrain is shared. Range and facing are evaluated on every read, and
+## logical endpoints/heights plus registry identity/revision bound reuse.
+func query_hex_visibility(observer: Dictionary, target: Dictionary, terrain_registry: Node, profile: Dictionary) -> Dictionary:
+	_asked_pair_count += 1
+	var result := HEX_QUERY.classify_candidate(observer, target, terrain_registry, profile)
+	if result.reason != "terrain_pending":
+		if result.reason == "out_of_range": _range_rejected_count += 1
+		return result
+	# A reader without a revision contract cannot safely share terrain results.
+	var cacheable := terrain_registry.has_method("get_revision") and _current_tick >= 0
+	var key := ""
+	if cacheable:
+		key = "%d:%d|%d,%d:%d|%d,%d:%d" % [terrain_registry.get_instance_id(), terrain_registry.call("get_revision"),
+			observer.grid.x, observer.grid.y, observer.stand_height_steps2,
+			target.grid.x, target.grid.y, target.stand_height_steps2]
+	var blocker: Vector2i
+	if cacheable and _hex_blockers_by_key.has(key):
+		_cache_hit_count += 1
+		blocker = _hex_blockers_by_key[key]
+	else:
+		_actual_los_check_count += 1
+		_hex_actual_los_check_count += 1
+		var heights := Vector2(float(observer.stand_height_steps2) * 0.5, float(target.stand_height_steps2) * 0.5)
+		blocker = _los_system.find_first_blocker_grid(observer.grid, target.grid, terrain_registry,
+			Vector2(observer.grid), Vector2(target.grid), false, heights)
+		if cacheable:
+			if _hex_blockers_by_key.size() >= HEX_ENTRY_CAPACITY: _hex_blockers_by_key.clear()
+			_hex_blockers_by_key[key] = blocker
+	result.terrain_checked = true
+	result.terrain_clear = blocker == LOS_SYSTEM_SCRIPT.NO_BLOCKER_GRID
+	result.visible = result.terrain_clear
+	result.reason = "visible" if result.visible else "terrain_blocked"
+	result["blocker_grid"] = blocker
+	return result
 
 
 func _resolve_terrain_occlusion(

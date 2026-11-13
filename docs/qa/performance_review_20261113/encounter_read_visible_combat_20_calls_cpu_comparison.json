@@ -1,0 +1,57 @@
+{
+  "metric": "encounter_read_visible_combat_20_calls_cpu",
+  "unit": "us",
+  "context": {
+    "calls_per_sample": 20,
+    "fixture": "actual_new_campaign",
+    "metric": "encounter_read_visible_combat_20_calls_cpu",
+    "phase": "visible_combat",
+    "renderer": "headless",
+    "sample_count": 30,
+    "startup_in_timing": false,
+    "tick_advanced": false,
+    "unit": "usec",
+    "warmup_calls_per_variant": 30,
+    "engine": "4.6.2.stable.official.71f334935",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+    "platform": "Windows x64",
+    "gpu_time": "unavailable",
+    "cache": "warmed",
+    "sequential": true
+  },
+  "before": {
+    "count": 30,
+    "mean": 11842.9,
+    "median": 11857.5,
+    "p95": 12204,
+    "max": 12210
+  },
+  "after": {
+    "count": 30,
+    "mean": 31.533333333333335,
+    "median": 31.0,
+    "p95": 38,
+    "max": 39
+  },
+  "change": {
+    "mean": {
+      "absolute": -11811.366666666667,
+      "percent": -99.73373638776538
+    },
+    "median": {
+      "absolute": -11826.5,
+      "percent": -99.73856209150327
+    },
+    "p95": {
+      "absolute": -12166,
+      "percent": -99.68862667977713
+    },
+    "max": {
+      "absolute": -12171,
+      "percent": -99.68058968058968
+    }
+  },
+  "notes": [
+    "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+  ]
+}

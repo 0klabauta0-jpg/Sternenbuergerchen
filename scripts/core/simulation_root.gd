@@ -4582,22 +4582,22 @@ func _broadcast_tick_state() -> void:
 	if not _multiplayer_runtime_context.is_empty():
 		var raw: Dictionary = _build_raw_multiplayer_tick_state()
 		var updates: Array = _build_vital_state_updates()
-		var projections: Dictionary={}
-		var reliable_by_team: Dictionary={}
+		var recipients_by_team: Dictionary={}
 		for peer_id in recipient_peer_ids:
 			var team: String=get_peer_team(peer_id)
-			if not projections.has(team):
-				var visibility: Dictionary=_get_multiplayer_visibility_context(raw,team)
-				var team_projection: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,visibility)
-				if team_projection.get("ok",false): team_projection["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
-				projections[team]=team_projection
-				reliable_by_team[team]=VISIBLE_MULTIPLAYER_PROJECTION.new().project_reliable_vitals(updates,raw,team,visibility) if not updates.is_empty() else {}
-			var projected: Dictionary=projections[team]
+			var team_peers: PackedInt32Array=recipients_by_team.get(team,PackedInt32Array())
+			team_peers.append(peer_id)
+			recipients_by_team[team]=team_peers
+		for team: String in recipients_by_team:
+			var visibility: Dictionary=_get_multiplayer_visibility_context(raw,team)
+			var projected: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_state(raw,team,visibility)
 			if not projected.get("ok",false): continue
-			_broadcast_tick_state_chunks(projected,PackedInt32Array([peer_id]))
-			var reliable: Dictionary=reliable_by_team[team]
+			projected["runtime_context"]=_multiplayer_runtime_context.duplicate(true)
+			_broadcast_tick_state_chunks(projected,recipients_by_team[team])
+			var reliable: Dictionary=VISIBLE_MULTIPLAYER_PROJECTION.new().project_reliable_vitals(updates,raw,team,visibility) if not updates.is_empty() else {}
 			if reliable.get("ok",false):
-				_receive_vital_state_updates.rpc_id(peer_id,reliable.vital_updates,_multiplayer_runtime_context.duplicate(true),team)
+				for peer_id in recipients_by_team[team]:
+					_receive_vital_state_updates.rpc_id(peer_id,reliable.vital_updates,_multiplayer_runtime_context.duplicate(true),team)
 		return
 	var state_dict: Dictionary = _build_tick_state()
 	_broadcast_tick_state_chunks(state_dict, recipient_peer_ids)

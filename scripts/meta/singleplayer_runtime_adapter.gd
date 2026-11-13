@@ -394,6 +394,9 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 func get_campaign_entry_feedback() -> Dictionary:
 	return _encounter_entry_feedback.duplicate(true)
 
+func get_space_encounter_snapshot() -> Dictionary:
+	return _space_encounter.get_snapshot() if _space_encounter != null else {}
+
 func sync_space_wings() -> Dictionary:
 	if _simulation == null or not is_instance_valid(_flow):
 		return _reject("runtime_unavailable", "Rottenverwaltung ist nicht bereit")

@@ -1,0 +1,311 @@
+{
+  "base_main": "5196cc08b",
+  "status": "three_measured_cpu_fixes_verified",
+  "checks": [
+    {
+      "name": "hex_cache",
+      "assertions": 27,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/hex_cache/after_5176863c381f4dde93718210a767f445/report.json"
+    },
+    {
+      "name": "snapshot_fanout",
+      "assertions": 11,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/snapshot_fanout/after_7b2b43955fe84ed589027065f06a27d4/report.json"
+    },
+    {
+      "name": "encounter_read",
+      "assertions": 18,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/encounter_read/after_b4ba2532ed034b49979856f64bb23b3c/report.json"
+    },
+    {
+      "name": "encounter_benchmark",
+      "assertions": 9,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/encounter_benchmark/after_b44115d049ef4935a8f556a08f820a25/report.json"
+    },
+    {
+      "name": "frontier_visibility",
+      "assertions": 76,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/frontier_visibility/after_f28ba777891e45e6a96663ca868eed61/report.json"
+    },
+    {
+      "name": "legacy_visibility",
+      "assertions": 12,
+      "passed": true,
+      "report": "docs/qa/performance_review_20261113/legacy_visibility/after_895e329750e44524bb866c13bee8944a/report.json"
+    },
+    {
+      "name": "existing_hex_enet",
+      "assertions": 24,
+      "passed": true,
+      "report": "docs/qa/hex_enet_regression_20261113/cd97c9088d7347e288f57d37545ba361/report.json"
+    }
+  ],
+  "assertions": 177,
+  "comparisons": [
+    {
+      "metric": "hex_visibility_64_pairs_4_readers_cpu",
+      "result": {
+        "metric": "hex_visibility_64_pairs_4_readers_cpu",
+        "unit": "us",
+        "context": {
+          "metric": "hex_visibility_64_pairs_4_readers_cpu",
+          "pairs": 64,
+          "readers": 4,
+          "renderer": "headless",
+          "tick_local": true,
+          "unit": "usec",
+          "engine": "4.6.2.stable.official.71f334935",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+          "platform": "Windows x64",
+          "gpu_time": "unavailable",
+          "cache": "warmed",
+          "sequential": true
+        },
+        "before": {
+          "count": 30,
+          "mean": 4474.9,
+          "median": 4329.5,
+          "p95": 5594,
+          "max": 5807
+        },
+        "after": {
+          "count": 30,
+          "mean": 2627.1,
+          "median": 2590.5,
+          "p95": 2776,
+          "max": 2790
+        },
+        "change": {
+          "mean": {
+            "absolute": -1847.7999999999997,
+            "percent": -41.29254285011955
+          },
+          "median": {
+            "absolute": -1739.0,
+            "percent": -40.16630095854025
+          },
+          "p95": {
+            "absolute": -2818,
+            "percent": -50.3754022166607
+          },
+          "max": {
+            "absolute": -3017,
+            "percent": -51.9545376270019
+          }
+        },
+        "notes": [
+          "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+        ]
+      },
+      "report": "hex_visibility_64_pairs_4_readers_cpu_comparison.json"
+    },
+    {
+      "metric": "same_team_3peers_96units_packing_cpu",
+      "result": {
+        "metric": "same_team_3peers_96units_packing_cpu",
+        "unit": "us",
+        "context": {
+          "compressed_bytes": 4008,
+          "metric": "same_team_3peers_96units_packing_cpu",
+          "peers": 3,
+          "raw_bytes": 52740,
+          "renderer": "headless",
+          "scope": "var_to_bytes_plus_ZSTD_without_RPC",
+          "unit": "usec",
+          "units": 96,
+          "engine": "4.6.2.stable.official.71f334935",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+          "platform": "Windows x64",
+          "gpu_time": "unavailable",
+          "cache": "warmed",
+          "sequential": true
+        },
+        "before": {
+          "count": 30,
+          "mean": 950.1666666666666,
+          "median": 935.5,
+          "p95": 1100,
+          "max": 1106
+        },
+        "after": {
+          "count": 30,
+          "mean": 315.8,
+          "median": 313.0,
+          "p95": 378,
+          "max": 396
+        },
+        "change": {
+          "mean": {
+            "absolute": -634.3666666666666,
+            "percent": -66.76372566216453
+          },
+          "median": {
+            "absolute": -622.5,
+            "percent": -66.54195617316942
+          },
+          "p95": {
+            "absolute": -722,
+            "percent": -65.63636363636364
+          },
+          "max": {
+            "absolute": -710,
+            "percent": -64.19529837251356
+          }
+        },
+        "notes": [
+          "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+        ]
+      },
+      "report": "same_team_3peers_96units_packing_cpu_comparison.json"
+    },
+    {
+      "metric": "encounter_read_hidden_idle_20_calls_cpu",
+      "result": {
+        "metric": "encounter_read_hidden_idle_20_calls_cpu",
+        "unit": "us",
+        "context": {
+          "calls_per_sample": 20,
+          "fixture": "actual_new_campaign",
+          "metric": "encounter_read_hidden_idle_20_calls_cpu",
+          "phase": "hidden_idle",
+          "renderer": "headless",
+          "sample_count": 30,
+          "startup_in_timing": false,
+          "tick_advanced": false,
+          "unit": "usec",
+          "warmup_calls_per_variant": 30,
+          "engine": "4.6.2.stable.official.71f334935",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+          "platform": "Windows x64",
+          "gpu_time": "unavailable",
+          "cache": "warmed",
+          "sequential": true
+        },
+        "before": {
+          "count": 30,
+          "mean": 13015.233333333334,
+          "median": 12427.5,
+          "p95": 16055,
+          "max": 17513
+        },
+        "after": {
+          "count": 30,
+          "mean": 14.4,
+          "median": 13.0,
+          "p95": 24,
+          "max": 26
+        },
+        "change": {
+          "mean": {
+            "absolute": -13000.833333333334,
+            "percent": -99.88936041612777
+          },
+          "median": {
+            "absolute": -12414.5,
+            "percent": -99.89539328102998
+          },
+          "p95": {
+            "absolute": -16031,
+            "percent": -99.85051385861102
+          },
+          "max": {
+            "absolute": -17487,
+            "percent": -99.8515388568492
+          }
+        },
+        "notes": [
+          "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+        ]
+      },
+      "report": "encounter_read_hidden_idle_20_calls_cpu_comparison.json"
+    },
+    {
+      "metric": "encounter_read_visible_combat_20_calls_cpu",
+      "result": {
+        "metric": "encounter_read_visible_combat_20_calls_cpu",
+        "unit": "us",
+        "context": {
+          "calls_per_sample": 20,
+          "fixture": "actual_new_campaign",
+          "metric": "encounter_read_visible_combat_20_calls_cpu",
+          "phase": "visible_combat",
+          "renderer": "headless",
+          "sample_count": 30,
+          "startup_in_timing": false,
+          "tick_advanced": false,
+          "unit": "usec",
+          "warmup_calls_per_variant": 30,
+          "engine": "4.6.2.stable.official.71f334935",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+          "platform": "Windows x64",
+          "gpu_time": "unavailable",
+          "cache": "warmed",
+          "sequential": true
+        },
+        "before": {
+          "count": 30,
+          "mean": 11842.9,
+          "median": 11857.5,
+          "p95": 12204,
+          "max": 12210
+        },
+        "after": {
+          "count": 30,
+          "mean": 31.533333333333335,
+          "median": 31.0,
+          "p95": 38,
+          "max": 39
+        },
+        "change": {
+          "mean": {
+            "absolute": -11811.366666666667,
+            "percent": -99.73373638776538
+          },
+          "median": {
+            "absolute": -11826.5,
+            "percent": -99.73856209150327
+          },
+          "p95": {
+            "absolute": -12166,
+            "percent": -99.68862667977713
+          },
+          "max": {
+            "absolute": -12171,
+            "percent": -99.68058968058968
+          }
+        },
+        "notes": [
+          "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+        ]
+      },
+      "report": "encounter_read_visible_combat_20_calls_cpu_comparison.json"
+    }
+  ],
+  "limits": [
+    "Headless CPU only; no GPU/FPS/network-latency acceptance.",
+    "96-unit packing probe excludes RPC and counts actual observed pack invocations.",
+    "Personnel visual snapshots remain an unmeasured candidate, not a confirmed fixed finding.",
+    "Early invalid harness attempts retained separately from valid red/green evidence."
+  ],
+  "raw_archive_sha256": "55f09beda9892265b1e42f44979051c4a65e6298f3cf61c8ecfff2d57beb739a",
+  "raw_log_sha256": {
+    "encounter_benchmark/after_b44115d049ef4935a8f556a08f820a25/output.log": "3cfde55a000dd4a46567876959b69b2233e0f4caae89eca7b6773d937618e27d",
+    "encounter_read/after_b4ba2532ed034b49979856f64bb23b3c/output.log": "9933cede213cfd3a2460b50efa72b2301241a078d5f5dbaa5907943f7052726b",
+    "encounter_read/red_081b4910861743b09b185fed8a7c730e/output.log": "f3794936965d545e53fca1b906e2c41d6dca98c62a076da42b761067aaab63c0",
+    "frontier_visibility/after_f28ba777891e45e6a96663ca868eed61/output.log": "9b92e49bcb2e984aae873de2d3a3cae01569697d36d14b0141b6fccf61842e36",
+    "hex_cache/after_5176863c381f4dde93718210a767f445/output.log": "f9471afb403925b7243fee6b465e99e436f5d81ba19911ab013ed95c2233fa8a",
+    "hex_cache/after_837891ddb2344e99a6c6f9703154f59c/output.log": "45c319e9a1d5280ecc0048f39e21257a9ed2e416d3822a7289166d7f52972cb6",
+    "hex_cache/after_c7b8a423b5994438931de7f80cf3a55b/output.log": "f9269c259d6c06da4d1df557cc927b33d6299fc3dc28916a688c62a083f95458",
+    "hex_cache/red_bff2bfe6fad44cf18b77f8c9f3708dc0/output.log": "f7526118d00329012b647bed2f6c2d30ccdde56c05ee295cb12850338043cfcd",
+    "hex_cache/red_f5271b73d3ba4f858a601331aa0c9822/output.log": "055d096c336eb146da3898488541bcbdef815ca0876be4b8b2b51cb2f08d31e1",
+    "legacy_visibility/after_895e329750e44524bb866c13bee8944a/output.log": "ed9a9a5a93fd8b56aa6f61cb1b4cbf4b5137b53dfffcfe0c32036ae3b419ed76",
+    "snapshot_fanout/after_7b2b43955fe84ed589027065f06a27d4/output.log": "7486f3cbce258c6586033d7c200b6ae0b024c22c83962e26dcc67079682dda3c",
+    "snapshot_fanout/red_7890fabf614e4e369b1337109ad95769/output.log": "2f38be37d20c5280f487c40691af96cccbc627f6cee56f78e16d673f7564ee05",
+    "snapshot_fanout/red_e26ed1d84bf34cfb9d43595019124dd4/output.log": "bb7a19ad7f2246bb64ee05fac5bfcb3378231363e1497060ec2e68caddf73063"
+  }
+}

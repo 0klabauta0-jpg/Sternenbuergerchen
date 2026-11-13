@@ -1,0 +1,55 @@
+{
+  "metric": "same_team_3peers_96units_packing_cpu",
+  "unit": "us",
+  "context": {
+    "compressed_bytes": 4008,
+    "metric": "same_team_3peers_96units_packing_cpu",
+    "peers": 3,
+    "raw_bytes": 52740,
+    "renderer": "headless",
+    "scope": "var_to_bytes_plus_ZSTD_without_RPC",
+    "unit": "usec",
+    "units": 96,
+    "engine": "4.6.2.stable.official.71f334935",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+    "platform": "Windows x64",
+    "gpu_time": "unavailable",
+    "cache": "warmed",
+    "sequential": true
+  },
+  "before": {
+    "count": 30,
+    "mean": 950.1666666666666,
+    "median": 935.5,
+    "p95": 1100,
+    "max": 1106
+  },
+  "after": {
+    "count": 30,
+    "mean": 315.8,
+    "median": 313.0,
+    "p95": 378,
+    "max": 396
+  },
+  "change": {
+    "mean": {
+      "absolute": -634.3666666666666,
+      "percent": -66.76372566216453
+    },
+    "median": {
+      "absolute": -622.5,
+      "percent": -66.54195617316942
+    },
+    "p95": {
+      "absolute": -722,
+      "percent": -65.63636363636364
+    },
+    "max": {
+      "absolute": -710,
+      "percent": -64.19529837251356
+    }
+  },
+  "notes": [
+    "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+  ]
+}

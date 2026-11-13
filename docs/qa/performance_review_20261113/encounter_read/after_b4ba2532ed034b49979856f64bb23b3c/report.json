@@ -1,0 +1,34 @@
+{
+  "case": "encounter_read",
+  "phase": "after",
+  "engine": "4.6.2.stable.official.71f334935",
+  "exit": 0,
+  "errors": [],
+  "command": [
+    "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\b4ba2532ed034b49979856f64bb23b3c\\project",
+    "--script",
+    "res://scripts/tests/performance_encounter_read_20261113.gd",
+    "--",
+    "--phase=after"
+  ],
+  "passed": true,
+  "assertions": 18,
+  "failed": 0,
+  "measurements": [],
+  "source_sha256": {
+    "scripts/tests/performance_encounter_read_20261113.gd": "58a1fdfbbdf73a3c438f309e8b89362a1dfb3c657edcebd3ad3c250827527846",
+    "scripts/mission/combat_visibility_cache.gd": "f385460a4c3b7d92a27f8105fc29f4d416ed5ee8d300062535b9d37f3eab285e",
+    "scripts/core/simulation_root.gd": "a3b197043deac3d2ac583a1eb247863aa3036df3d52a5ca248866039cd1fd3c4",
+    "scripts/core/hex_visibility_query.gd": "37aeabd5808a7bc4698a5e48bf09338844895a2413b9da8fa80421b6ce4954b8",
+    "scripts/core/hex_sight_runtime_adapter.gd": "78ec224f9eb1be786e4212bd68f2d60e4d6cbd35f94517c579956fc41f770e8b",
+    "scripts/meta/campaign_space_encounter_presenter.gd": "652afc0f47cfe2b64820a6920dbe3ab263b8740ea696449cc23b6561d2d4c97a",
+    "scripts/meta/singleplayer_runtime_adapter.gd": "0c43cf8c7a1743ef355fb66da1ca31b2613c02d21d45df2311b314469d5b4697",
+    "scripts/meta/explorable_homebase.gd": "f3acd535d1389db78da1010135f90b9bb8626ede31e859609904734b4ffc539f"
+  },
+  "source_unchanged": true,
+  "real_profile_unchanged": true,
+  "private_canary": true
+}

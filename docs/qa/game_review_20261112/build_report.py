@@ -36,6 +36,11 @@ main_section = ''
 import_path = ROOT / 'docs/qa/editor_import_font_20261113/summary.json'
 import_data = json.loads(import_path.read_text(encoding='utf-8')) if import_path.exists() else None
 import_section = ''
+perf_path = ROOT / 'docs/qa/performance_review_20261113/summary.json'
+perf_data = json.loads(perf_path.read_text(encoding='utf-8')) if perf_path.exists() else None
+perf_section = ''
+if perf_data:
+    perf_section = '''<article class="card full"><div class="eyebrow">PERFORMANCE-REVIEW · 13. NOVEMBER 2026</div><h2>Drei gemessene CPU-Probleme behoben</h2><p><strong>177 Regressionen ohne Fehler.</strong> Simulation/Hexsicht, Netzwerkverteilung und Begegnungsfenster geprüft. Qualität, Karten, Akteure und Spielregeln bleiben erhalten.</p><ul><li><strong>Hexsicht: 4,330 → 2,591 ms (−40 %).</strong> 64 gerichtete Paare mit vier Lesern pro Tick. Bisher fehlte der angebotene Cacheanschluss; Terrainantworten werden jetzt sicher innerhalb eines Ticks geteilt. Blickwinkel, Reichweite, Höhe, Zell- und Terrainänderungen bleiben korrekt.</li><li><strong>Snapshotpacken: 0,936 → 0,313 ms (−67 %).</strong> Drei Empfänger desselben Teams lösen nur noch einen Packvorgang aus. Vergleich mit 96 Units für Serialisierung/ZSTD; RPC-Zeit ist ausgeschlossen. Tatsächliche drei ENet-Clients prüfen Teamtrennung, gesperrte Empfänger und zuverlässige Zustandsmeldungen.</li><li><strong>Begegnungsfenster: 12,428 → 0,013 ms im verborgenen Zustand.</strong> Je 20 Leseaufrufe an einer echten kleinen Startkampagne. Sichtbar: 11,858 → 0,031 ms. Das Fenster liest nur noch seinen Encounterzustand statt der vollständigen Kampagne; Phasen, Buttons und Commands bleiben erhalten.</li></ul><p>Alle Angaben sind <strong>Mediane aus je 30 lokalen CPU-Samples</strong> nach Warmup. Gemessen auf Ryzen 7 7800X3D, Godot 4.6.2, Windows, Headless. Diese Verbesserungen einzelner Pfade sind keine Gesamtspiel-FPS- oder GPU-Zusage. Für den Begegnungsread entspricht die Einsparung etwa 0,6 ms pro Poll in der Startkampagne.</p><p>Zusätzlich bestanden: 600 Ticks Legacy-Kampf mit identischem Ergebnis, Frontier-LOS/FoW sowie vorhandene echte Hex-/ENet-/Checkpointprüfungen. Quellen und echte Spielerprofile bleiben unverändert. Frühe Fehler in Testfixtures sind getrennt von den bestätigten roten Produktrepros dokumentiert.</p><p><strong>Weiter offen:</strong> Personensnapshots in der Basisvisualisierung als ungemessener Kandidat, native GPU-/Framezeiten, große Kartenlast, Streaming, Autosave-I/O, Langzeit-Speicher und Internetlatenz. Keine neue EXE.</p><p><a href="../qa/performance_review_20261113/README.md">Performancebericht und genaue Prüfgrenzen</a> · <a href="../qa/performance_review_20261113/summary.json">Messwerte und Testindex</a></p></article>'''
 if import_data:
     import_section = '''<article class="card full"><div class="eyebrow">EDITOR-NACHPRÜFUNG · 13. NOVEMBER 2026</div><h2>Frischer Gesamtimport läuft durch</h2><p>Eine vollständige Quellkopie von Main <strong>6bdc3b5ef</strong> wurde mit leerem Cache und allen aktivierten Plugins importiert: <strong>Exit 0, 358 Sekunden, 21.074 erzeugte Importdateien</strong>. Alle 33.838 Originalquellen blieben unverändert; es wurde kein vorhandener Cache übernommen.</p><p><strong>Drei isolierte Fontproben bestanden.</strong> TTF und OTF werden geladen und zur Textmessung verwendet. Aus dem frisch erzeugten Gesamtcache wurden anschließend beide Fonts und das echte Hauptmenü erfolgreich geladen und das Menü instanziiert. Der Runtime-Profilguard und der Vergleich des echten Spielerprofils bestehen.</p><p>Der frühere Abbruch ist durch Windows als nativer Godot-Zugriffsfehler bestätigt. Er ist in diesen Proben <strong>nicht reproduziert</strong>; ein behobener sporadischer Absturz wird deshalb nicht behauptet. Fonts, Plugins und Engine wurden nicht auf Verdacht geändert. Beim Editorende bleibt eine Diagnose zu einem unbeanspruchten StringName; keine Script-/Enginefehler oder ObjectDB-Leakmeldung im neuen Import.</p><p>Der erste Gesamtimport setzt ein privates APPDATA, enthält aber noch keinen Vorher/Nachher-Vergleich des echten Profils. Der anschließende Runtimecheck besitzt diesen Vergleich und prüft den tatsächlichen user://-Pfad. Die neuen Runner sichern außerdem Zeitlimits samt Launcher-Kindprozess ab; ein echter Timeouttest besteht.</p><p><a href="../qa/editor_import_font_20261113/README.md">Diagnose, Rohlogs und genaue Prüfgrenzen</a></p></article>'''
 if main_data:
@@ -98,6 +103,7 @@ body = f'''
 </nav>
 <section id="overview" class="tab-panel active">
 <div class="grid">
+{perf_section}
 {import_section}
 {main_section}
 {hex_section}
@@ -154,5 +160,7 @@ if hex_data:
     page = page.replace('Spielreview 12.11.2026</title>', 'Spielreview / Hex-Fortsetzung 13.11.2026</title>')
 if main_data:
     page = page.replace('Hex: 22 neu + 30 Nachbar grün', 'Main: 207 Assertions grün')
+if perf_data:
+    page = page.replace('Main: 207 Assertions grün', 'Performance: 177 Prüfungen grün')
 REPORT.write_text('\n'.join(line.rstrip() for line in page.splitlines()) + '\n', encoding='utf-8')
 print(json.dumps({'report': str(REPORT), 'checks': len(checks), 'passed': good}, ensure_ascii=False))

@@ -37,8 +37,10 @@ func _process(delta:float) -> void:
 	if _clock<0.15:return
 	_clock=0; refresh()
 func refresh() -> void:
-	if _runtime==null:return
-	var state:Dictionary=Dictionary(_runtime.call("get_snapshot").get("space_encounter",{}))
+	if not is_instance_valid(_runtime):
+		hide()
+		return
+	var state:Dictionary=_runtime.call("get_space_encounter_snapshot")
 	visible=not state.is_empty() and String(state.get("phase","")) not in ["aborted","defeat","victory"]
 	if not visible:return
 	if state.phase == "entering":

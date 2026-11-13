@@ -1,0 +1,53 @@
+{
+  "metric": "hex_visibility_64_pairs_4_readers_cpu",
+  "unit": "us",
+  "context": {
+    "metric": "hex_visibility_64_pairs_4_readers_cpu",
+    "pairs": 64,
+    "readers": 4,
+    "renderer": "headless",
+    "tick_local": true,
+    "unit": "usec",
+    "engine": "4.6.2.stable.official.71f334935",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core / 16 logical",
+    "platform": "Windows x64",
+    "gpu_time": "unavailable",
+    "cache": "warmed",
+    "sequential": true
+  },
+  "before": {
+    "count": 30,
+    "mean": 4474.9,
+    "median": 4329.5,
+    "p95": 5594,
+    "max": 5807
+  },
+  "after": {
+    "count": 30,
+    "mean": 2627.1,
+    "median": 2590.5,
+    "p95": 2776,
+    "max": 2790
+  },
+  "change": {
+    "mean": {
+      "absolute": -1847.7999999999997,
+      "percent": -41.29254285011955
+    },
+    "median": {
+      "absolute": -1739.0,
+      "percent": -40.16630095854025
+    },
+    "p95": {
+      "absolute": -2818,
+      "percent": -50.3754022166607
+    },
+    "max": {
+      "absolute": -3017,
+      "percent": -51.9545376270019
+    }
+  },
+  "notes": [
+    "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+  ]
+}
