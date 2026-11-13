@@ -1,0 +1,365 @@
+{
+  "date": "2026-11-13",
+  "product_commit": "9fdeb866b71749fe5d3154d4da35c6cf3f2c1611",
+  "scope": "Code, Architektur, Bedienbarkeit und Gestaltung; Review ohne Produktänderungen",
+  "verdict": "Änderungen erforderlich",
+  "p1": 4,
+  "p2": 5,
+  "findings": [
+    {
+      "id": "C1",
+      "priority": "P1",
+      "title": "Clients können Kampf- und Bewegungswerte vorgeben",
+      "where": "scripts/multiplayer/multiplayer_command_contract.gd:200",
+      "detail": "Ein berechtigter Fireteam-Client übermittelt mit einem normalen hold_position auch attack_bonus, cover_score, move_speed_factor und sight_range_factor. Der Host übernimmt diese Werte in den tatsächlichen Unit-State.",
+      "evidence": "Echtes ENet: Hostwerte Angriff100, Deckung1000, Bewegung100 und Sicht50 nach Remote-Befehl. Synthetische kleine Szene, tatsächliche RPC-/Commandpipeline.",
+      "fix": "Remote-Payload auf Spielerabsichten begrenzen und interne Modifikatoren aus Host-Ownern bestimmen.",
+      "regression": "Manipulierte RPCs mit erlaubtem eigenen Team/Trupp ablehnen oder kanonisieren; Unitwerte sowie normale Befehle prüfen."
+    },
+    {
+      "id": "C2",
+      "priority": "P1",
+      "title": "Client kann Missionsinteraktion sofort abschließen",
+      "where": "scripts/tests/mission_combat_loop_driver.gd:683",
+      "detail": "Bei der ersten Interaktion fehlen hostseitiger Abgleich von Position, Radius, Dauer und Missionsschritt mit dem geladenen Szenario. Der Client liefert die später als Wahrheit verwendeten Angaben.",
+      "evidence": "Echter ENet-Client schließt das konfigurierte 30-Sekunden-Computerziel nach0,01Sekunden ab; Missionsgate wird vollständig erfüllt.",
+      "fix": "Host löst Interaktions-ID auf und bestimmt Ziel, Radius, Dauer, Voraussetzungen und Ergebnis selbst.",
+      "regression": "Erst-RPC mit Dauer0, fremdem Ziel, übergroßem Radius und erfundener Schritt-ID; gültiger Befehl und Konkurrenz bleiben korrekt."
+    },
+    {
+      "id": "C3",
+      "priority": "P1",
+      "title": "Orbitaler Kampfabschluss findet keinen gültigen Rückweg",
+      "where": "scripts/core/simulation_root.gd:8033",
+      "detail": "Root erzeugt end_campaign_encounter, aber weder Fleet-Validator noch vorbereiteter Reiseübergang unterstützen diese Operation. Der Adapter kehrt bei Ablehnung still zurück.",
+      "evidence": "Tatsächliche Root-/Adapter-/Fleet-/Combat-Owner, synthetisch vorbereitete Begegnung: Rückzug wird bestätigt, Rückkehr ergibt invalid_area_context; Encounter bleibt aborted/resolved=false, Reise bleibt approach. Kein vollständiger Fünf-Missionen-Durchlauf.",
+      "fix": "Einen vollständigen, ownergebundenen Abschlussübergang implementieren und Fehler sichtbar machen. Nur die Whitelist zu erweitern reicht nicht.",
+      "regression": "Gebundener Sieg, Rückzug und Niederlage bis Reisephase, Ergebnis, Fuel und wiederholbarem Commit."
+    },
+    {
+      "id": "C4",
+      "priority": "P1",
+      "title": "Alter beschädigter Einsatzsave blockiert neue Kampagne",
+      "where": "scripts/meta/campaign_start_configuration.gd:35",
+      "detail": "Ein vorhandener ungültiger active_checkpoint wird vor dem neuen Kampagnenkontext abgewiesen. Eine neue Kampagne mit gültigem Basisstand behält die alte Datei; Fortsetzen bleibt dadurch gesperrt.",
+      "evidence": "Echte neue Kampagne erfolgreich gespeichert, danach Fortsetzen wegen des absichtlich beschädigten privaten alten Einsatzstands abgebrochen. JSON-Parse-Diagnose gehört zur Reproduktion.",
+      "fix": "Neue Kampagne vom alten aktiven Slot trennen und einen expliziten Wiederherstellungsweg zum gültigen Basisstand anbieten; beschädigte Datei zur Diagnose erhalten.",
+      "regression": "Beschädigter und veralteter Einsatzslot + neue Kampagne + Save + Neustart/Continue; guter Basisstand darf nicht unerreichbar werden."
+    },
+    {
+      "id": "C5",
+      "priority": "P2",
+      "title": "Basis-Checkpoint-Aktion lädt stattdessen Einsatzsave",
+      "where": "scripts/meta/meta_layer_flow.gd:4234",
+      "detail": "Nach gescheiterter Extraktion verspricht der Debrief ausdrücklich den letzten sicheren Basisstand. Er startet jedoch allgemeines Continue, das einem passenden aktiven Einsatzsave Vorrang gibt.",
+      "evidence": "Echte Satellitenreise, aktiver Missionssave, Besatzungsverlust und tatsächlicher Debriefbutton: Mission wird auf der Oberfläche wiederhergestellt, Basisdatei bleibt unverändert.",
+      "fix": "Expliziten Basis-Rollback von normalem Continue unterscheiden.",
+      "regression": "Missionssave vor Niederlage erstellen und den tatsächlichen Debriefbutton bis zur Heimatbasis verfolgen."
+    },
+    {
+      "id": "C6",
+      "priority": "P2",
+      "title": "Sichtprüfung schneidet halbe Rampenhöhen ab",
+      "where": "scripts/core/los_system.gd:82",
+      "detail": "Die präzise Standhöhe2,5 wird im gemeinsamen LOS-Helper auf Integer2 verkürzt. Ein Hindernis mit Oberkante2 blockiert dann fälschlich die Sicht.",
+      "evidence": "Kanonische Rampen auf beiden Seiten liefern stand_height_steps2=5; reine Hexquery und Cache melden beide terrain_blocked.",
+      "fix": "Halbe Höhen bis zum abschließenden Vergleich erhalten.",
+      "regression": "Rampen2,5 und Hindernis2/3 in beiden Richtungen; erwartete Geometrie prüfen, nicht nur Cache gegen denselben fehlerhaften Helper."
+    },
+    {
+      "id": "C7",
+      "priority": "P2",
+      "title": "Schusspfad umgeht teilweise die logische Hexsicht",
+      "where": "scripts/tactical/combat_fire_decision_resolver.gd:334",
+      "detail": "Kontakte verwenden Ground-Facing und Hexadapter; tatsächliche Feuerentscheidung verwendet weiter Weltpositions-LOS. Ein Gegner mit gültiger Erkennungsverzögerung0 kann so ein rückwärtiges Ziel wählen.",
+      "evidence": "Tatsächlicher Driver/Root: Hexadapter outside_arc, Kontakt-LOS=false, trotzdem nichtleeres Angriffspaar enemy→own. Opt-in-Hexfixture, kein flächiger Nachweis auf allen Karten.",
+      "fix": "Sicht und Reichweite für aktive Hexkämpfe über denselben vorhandenen Adapter führen; Legacyfallback erhalten.",
+      "regression": "Rückwärtige Ziele bei0/positiver Erkennungsdauer, Richtungswechsel und alle sechs Hexachsen sowie Legacyfälle."
+    },
+    {
+      "id": "C8",
+      "priority": "P2",
+      "title": "HUD-Diagnose würfelt und verändert Kampfzustand",
+      "where": "scripts/tests/mission_combat_loop_driver.gd:2232",
+      "detail": "Ein öffentlicher Diagnosegetter ruft die mutierende Schusserlaubnis auf. Beim Wechsel von keinem Gegner zu vorhandenem Gegner kann Lesen einen Disziplinwurf, Cooldown und Ereignis auslösen.",
+      "evidence": "Öffentlicher Getter mit reproduzierbarem Seed13: Cooldown{}→{own:10} und Ereignis „own bricht Feuerstopp!“, ohne Schuss. Normaler HUD-Aufrufpfad im Controller nachverfolgt.",
+      "fix": "Reine Diagnose von autoritativer Entscheidung trennen; UI liest bereits ermittelte Resultate.",
+      "regression": "Beliebig viele Snapshotreads erhalten RNG, Cooldowns und Ereignisse, einschließlich leer→Gegner vorhanden."
+    },
+    {
+      "id": "C9",
+      "priority": "P2",
+      "title": "Enter aktiviert verdeckte Aktionen hinter Escape-Menü",
+      "where": "scripts/ui/global_escape_menu.gd:91",
+      "detail": "Das Overlay fängt Mausereignisse ab, übernimmt und begrenzt aber den Tastaturfokus nicht. Der zuvor fokussierte Button bleibt erreichbar.",
+      "evidence": "Tatsächliches Autoloadmenü per Viewport-Escape geöffnet; Fokus bleibt UnderlyingAction, Enter erzeugt1Buttonaktion bei weiterhin sichtbarem Menü. Nur lokale Test-Viewportevents, keine OS-Eingaben.",
+      "fix": "Menüfokus setzen und halten, vorherigen Fokus beim Schließen wiederherstellen; Gameplay-Hotkeys hinter Modal sperren. Echtzeit läuft absichtlich weiter.",
+      "regression": "Enter, Leertaste, Tab/Shift-Tab und Gameplay-Hotkeys hinter Menü, Einstellungen und Hilfe prüfen."
+    }
+  ],
+  "architecture": [
+    {
+      "title": "Absicht, Entscheidung und Anzeige konsequent trennen",
+      "text": "Die bestehenden Owner sind sinnvoll. Remote-Commands brauchen hostseitige Kanonisierung, und UI-Lesewege dürfen keine Würfe oder Mutationen auslösen. C1/C2/C8 sind konkrete Verletzungen dieser bereits dokumentierten Grenzen.",
+      "next": "Zuerst kleine Eingangs- und Read-only-Grenzen schließen; keine zweite Commandqueue und kein Architektur-Neubau."
+    },
+    {
+      "title": "Kampfregeln vereinheitlichen, Domänen getrennt lassen",
+      "text": "Kein zweiter unabhängiger Schadensowner im geprüften Bodenpfad. Es bestehen aber unterschiedliche Sichtentscheidungen und globale Disziplin-/Fehlidentifikationswürfe neben Roots gespeichertem Combat-RNG. Ein Hexraster aktiviert noch nicht automatisch hex_tactical_v1; unter den geprüften Karten-JSONs trägt nur polisa_station.json diese Kennung.",
+      "next": "Gemeinsamen Sicht-/Würfelvertrag bis zum realen Schuss und Checkpoint sichern. Boden- und Raumkampf müssen nicht dieselben Datenmodelle bekommen."
+    },
+    {
+      "title": "Übergangsstruktur klein zurückbauen und Main-Verträge pflegen",
+      "text": "Produktive Mission lädt weiterhin Driver/Controller unter scripts/tests. Die Ordner sind laut Vertrag bewusste Legacybrücken; Dateigröße allein ist kein Bug. Der Hexvertrag beschreibt außerdem16384persistenteLRU-Einträge, Main dagegen4096ticklokaleEinträge.",
+      "next": "Als ersten klaren Bereich Interaktionsautorität kapseln; Pfadkompatibilität erhalten. Dokumentation Main/Kandidat trennen. Integrationsprüfungen über RPC→Owner→Ergebnis und Save→Fehlschlag→Continue ergänzen."
+    }
+  ],
+  "visual": [
+    {
+      "title": "Personenstil und Wiedererkennung zusammenführen",
+      "text": "Detailliertes Anja-Porträt und stark vereinfachte Astronautenfigur wirken stilistisch und äußerlich wenig zusammengehörig. Das ist keine nachgewiesene Verwechslung der Runtime-ID.",
+      "next": "Zunächst eine Figur gegen dieselbe Zielvorlage abstimmen: Identität, Kopf-/Körperproportionen und Palette."
+    },
+    {
+      "title": "Sternkartenraster gegenüber Zielen zurücknehmen",
+      "text": "Das dichte Cyanraster konkurriert in der Gesamtansicht mit kleinen Orbitmarkern und Schiffszeichen.",
+      "next": "Rasterkontrast mit Zoom reduzieren; wichtige Marker behalten lesbare Bildschirmgröße. Vorhandenen Meshcache weiterverwenden."
+    },
+    {
+      "title": "Auftragsaktionen optisch zum Appfenster gehören lassen",
+      "text": "Die Aktionen stehen im nativen Bild außerhalb der dunklen Appkarte über der orangefarbenen Welt; darunter konkurriert das Basisband.",
+      "next": "Deckende Petrol-Fußleiste mit gemeinsamem Rahmen; die bereits korrigierte Erreichbarkeit außerhalb des Scrollbereichs erhalten."
+    },
+    {
+      "title": "Leere Beziehungskarte verkleinern",
+      "text": "„Noch keine Beziehung bekannt“ erhält fast das Gewicht der belegten Eigenschaftskarte, während andere Inhalte bei720p scrollen.",
+      "next": "Leeren Zustand als kurze Zeile oder geschlossenen Abschnitt; Platz für Figur und Ausrüstung statt kleinerer Schrift."
+    }
+  ],
+  "visual_images": [
+    {
+      "path": "docs/qa/job_app_safe_area_20261112/details-1280.png",
+      "label": "Charakterdetails · nativ1280×720 · 12.11.2026; historischer Integrationsstand",
+      "sha256": "bde5c083252e2222183646bd75249ed95b80414a0a874f0f68035b94c3eed619"
+    },
+    {
+      "path": "docs/qa/job_app_safe_area_20261112/mobile-1280.png",
+      "label": "Auftragsapp · nativ1280×720 · 12.11.2026; historischer Integrationsstand",
+      "sha256": "acc349746bb8fcf04b1025aca5aba0c5a6d810b3a1983a0f055dbee6b631d8f0"
+    },
+    {
+      "path": "docs/qa/starmap_wings_20261112/selected_wings.png",
+      "label": "Sternkarte · native Zwei-Owner-Testszene · 12.11.2026; kein erspielter Mehrschiff-Spielstand",
+      "sha256": "1c1d351d20f9d5ad2aec6e3accb1af12ad92723e099af6847b1e21617b96000f"
+    }
+  ],
+  "limits": "Gezielte Quellprüfung und sieben verwertbare private headless Reproduktionen; zusätzlich ein verworfener Fixturefehler. Keine Produktänderung, keine neue EXE, kein vollständiger Spiel-/WAN-/GPU-/FPS- oder menschlicher Usabilitytest. Visuelle Empfehlungen basieren auf historischen nativen Aufnahmen mit Quellabgleich. Bestehende grüne Regressionen werden nicht als Sicherheits- oder Gesamtfreigabe ausgegeben.",
+  "usability": [
+    {
+      "title": "Speichern und Fortsetzen eindeutig erklären",
+      "where": "scripts/ui/main_menu_screen.gd:3823",
+      "text": "Der Hauptdialog verspricht einen Basis-Neustart, obwohl ein Einsatzsave fortgesetzt werden kann. Tutorial und Sperrtexte unterscheiden die beiden Speicherarten ebenfalls nicht durchgehend.",
+      "next": "Gemeinsame lesende Projektion von Speicherart, Ort, Zeitpunkt und Sperrgrund. Vor dem Laden soll ein Spieler korrekt vorhersagen können, wo er weiterspielt."
+    },
+    {
+      "title": "Beim Beenden den erhaltenen Fortschritt zeigen",
+      "where": "scripts/ui/global_escape_menu.gd:216",
+      "text": "Hauptmenü und Beenden wirken unmittelbar. Gerade während einer nicht speicherbaren Reise zeigt das Menü nicht, welcher Stand später geladen wird.",
+      "next": "Letzten wiederaufnehmbaren Stand anzeigen; bei ausstehendem Fortschritt gezielt bestätigen lassen. Mit einem Spieler den Ausstieg während einer Reise prüfen."
+    },
+    {
+      "title": "Treibstoffanzeige auffindbar und anklickbar machen",
+      "where": "scripts/ui/star_map_screen.gd:70",
+      "text": "Die nützliche Hin-/Rückfluganzeige erscheint nur bei gehaltener Alt-Taste; ein sichtbarer Zugang fehlt.",
+      "next": "Fokussierbarer Schalter „Treibstoff & Reichweite“, Alt bleibt Abkürzung. Reiseplanung jeweils nur mit Maus und nur mit Tastatur prüfen."
+    },
+    {
+      "title": "Fokus und Modalität verlässlich führen",
+      "where": "scripts/ui/global_escape_menu.gd:91",
+      "text": "Der konkrete Fokusdurchgriff ist bereits CodebefundC9 und wird nicht doppelt gezählt. Ein Menü muss sichtbaren Fokus erhalten und ihn beim Schließen sinnvoll zurückgeben.",
+      "next": "Esc→Tab/Shift-Tab→Enter/Leertaste aus Crew-, Sternkarten- und Einsatzansicht prüfen. Die absichtlich weiterlaufende Echtzeitsimulation bleibt bestehen."
+    }
+  ],
+  "reproduction_runs": [
+    {
+      "run": "campaign_8252a543e8b14e21b3af017fbd15ebdc",
+      "case": "campaign",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [
+        "ERROR: Parse JSON failed. Error at line 0: Expected key"
+      ],
+      "markers": [
+        "ASTRA_FINDING_HOME_ROLLBACK {\"active_mission_restored\":true,\"home_file_unchanged\":true,\"travel_phase\":\"surface\"}",
+        "ASTRA_FINDING_STALE_ACTIVE {\"continue_error\":\"Einsatzstand ist ungueltig; der Heimatstand bleibt erhalten.\",\"corrupt_active_retained\":true,\"new_home_valid\":true}"
+      ],
+      "observation_checks": 40,
+      "classification": "reproduced_with_expected_json_error",
+      "report_sha256": "38dec1471b0148b13b1a3b0548049764c8181b4127e213da4ae1b49aa48a4c5d",
+      "log_sha256": "c2122635d4448e7c0eda437b9ba41b54e91e1e72a2fb701a694cbb68a7f6c748"
+    },
+    {
+      "run": "diagnostic_33d94e62e29b4c7e8b6e8696820ec930",
+      "case": "diagnostic",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "HEX_REVIEW_DIAGNOSTIC {\"actual_mutation\":true,\"cooldown_after\":{\"own\":10},\"cooldown_before\":{},\"event_after\":\"own bricht Feuerstopp!\",\"expected_no_mutation\":true,\"first_global_roll\":0.0344741269946098,\"readout\":{\"active_enemy_count\":1,\"active_friendly_count\":1,\"candidate\":{\"attack_quality_label\":\"open\",\"attacker_ready\":true,\"attacker_unit_id\":\"own\",\"candidate_pair_scan_count\":1,\"candidate_reason\":\"candidate_pending_detection_or_contact_state\",\"combat_attackable\":true,\"distance_world\":100.0,\"los_state\":\"clear\",\"range_state\":\"in_range\",\"target_receive_attack\":true,\"target_unit_id\":\"enemy\",\"weapon_id\":\"rifle\",\"weapon_range_world\":1800.0},\"contact_count\":0,\"detection_pending_count\":0,\"reason\":\"no_contact_pair\"},\"seed\":13}",
+        "HEX_REVIEW_DONE"
+      ],
+      "observation_checks": 0,
+      "classification": "reproduced",
+      "report_sha256": "05cef2103f763d3caba73333b7825cfec8e9ac7d3a589dacf91f240e763c9f4e",
+      "log_sha256": "33f5434a9d2d56e1d86e3743db454f7bbb3cab1981f73d8842a23269954d7e49"
+    },
+    {
+      "run": "encounter_return_e801065a5c574fc98ef7aec157f01c7a",
+      "case": "encounter_return",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "ASTRA_FINDING_ENCOUNTER_FLEET {\"ok\":false,\"reason\":\"invalid_area_context\"}",
+        "ASTRA_FINDING_ENCOUNTER_TRAVEL {\"message\":\"Operation gehoert nicht zu dieser vorbereiteten Grenze\",\"ok\":false,\"reason\":\"unsupported_area_operation\"}"
+      ],
+      "observation_checks": 6,
+      "classification": "reproduced",
+      "report_sha256": "0c15d646a19dd6d6d7edde990dc5a6f6235dca596c97ad9b11385b4abfe2a933",
+      "log_sha256": "286087a2febbb1e93274a62da9087c7f8db5758b9696b92c5ba64d3426f3814c"
+    },
+    {
+      "run": "encounter_root_4f731895ce434acc869e28d82cc16c14",
+      "case": "encounter_root",
+      "engine_exit": 1,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [
+        "SCRIPT ERROR: Invalid call. Nonexistent function 'get_campaign_snapshot' in base 'Nil'.",
+        "SCRIPT ERROR: Cannot call method 'call' on a null value."
+      ],
+      "markers": [
+        "ASTRA_FINDING_ENCOUNTER_ROOT {\"ok\":false,\"reason\":\"encounter_not_complete\"}",
+        "ASTRA_FINDING_ENCOUNTER_ADAPTER {\"pending_result\":false,\"phase\":\"aborted\",\"resolved\":true,\"travel_phase\":\"approach\"}"
+      ],
+      "observation_checks": 8,
+      "classification": "rejected_fixture_setup",
+      "report_sha256": "cca0352be6492b41c3a9b43ff5b8789af9719b4ca1d74f8f720a915b4d777fdf",
+      "log_sha256": "e67ce621f6bbc6707897b6e4df9769b3d2ba4492b3f744f74c520249a2e2cdd1"
+    },
+    {
+      "run": "encounter_root_dd49ad9612fc4af9af03f7b7f8d6fa3b",
+      "case": "encounter_root",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "ASTRA_FINDING_ENCOUNTER_ROOT {\"ok\":false,\"reason\":\"invalid_area_context\"}",
+        "ASTRA_FINDING_ENCOUNTER_ADAPTER {\"pending_result\":true,\"phase\":\"aborted\",\"resolved\":false,\"travel_phase\":\"approach\"}"
+      ],
+      "observation_checks": 17,
+      "classification": "reproduced",
+      "report_sha256": "b06b33665ac1650a4e66cc18ce771e628cde6a4516c60af13a2ef41aecca5047",
+      "log_sha256": "1c19dfb00403c94cf7fd0f2ac2bbb96dbc2383fce8c9c2f180af9b8994e6914d"
+    },
+    {
+      "run": "hex_166a6880dcbf4eb2af8cf862b6f126a3",
+      "case": "hex",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "HEX_REVIEW_RAMP {\"blocker_top\":2,\"cached\":{\"blocker_grid\":\"(1, 0)\",\"in_arc\":true,\"in_range\":true,\"reason\":\"terrain_blocked\",\"terrain_checked\":true,\"terrain_clear\":false,\"visible\":false},\"expected_visible\":true,\"observer_height_steps2\":5,\"pure\":{\"blocker_grid\":\"(1, 0)\",\"in_arc\":true,\"in_range\":true,\"reason\":\"terrain_blocked\",\"terrain_checked\":true,\"terrain_clear\":false,\"visible\":false},\"target_height_steps2\":5}",
+        "HEX_REVIEW_REAR_ATTACK {\"actual_attack_pair\":true,\"admitted\":{\"admitted_unit_ids\":[\"own\",\"enemy\"],\"ok\":true},\"chosen_attacker\":\"enemy\",\"chosen_target\":\"own\",\"configured\":{\"enabled\":true,\"ok\":true},\"contact_los\":false,\"detection_delay\":0,\"enemy_ground\":{\"facing_dir\":3,\"grid\":\"(0, 0)\",\"movement_state\":{\"moving\":false},\"posture_key\":\"standing\",\"route_state\":{\"has_commitments\":false},\"stand_height_steps2\":0,\"state_revision\":2,\"terrain_revision\":6,\"unit_id\":\"enemy\"},\"expected_no_attack_pair\":true,\"logical_visibility\":{\"handled\":true,\"in_arc\":false,\"in_range\":true,\"reason\":\"outside_arc\",\"terrain_checked\":false,\"terrain_clear\":false,\"visible\":false}}",
+        "HEX_REVIEW_OVERWATCH_DISABLED true",
+        "HEX_REVIEW_DONE"
+      ],
+      "observation_checks": 0,
+      "classification": "reproduced",
+      "report_sha256": "fc09c62a9747c2ca9edf5eaa984e42efda4992b9f5968eeb928adc87c9358d00",
+      "log_sha256": "bf5fbd1da43dc4586da89c074f4a7082cfdb6390b8c748de2415b6beccd90f9e"
+    },
+    {
+      "run": "network_f2e77c76302d4aa3aade559f2262aaab",
+      "case": "network",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "ASTRA_NETWORK_REVIEW {\"accepted_remote_commands\":2,\"checks\":9,\"failures\":0,\"manual_authority_steps\":true,\"objective_after\":{\"all_gates_complete\":true,\"completed_step_ids\":[\"review_station_upload\"],\"configured\":true,\"countdown\":{},\"gates\":[{\"blocked_by_step_id\":\"\",\"complete\":true,\"enemy_group_id\":\"\",\"hold_elapsed_seconds\":30.0,\"hold_required_seconds\":30.0,\"objective_type\":\"computer_hold\",\"operator_team_id\":\"team_alpha\",\"progress\":1.0,\"required_state\":\"uploaded\",\"requires_step_id\":\"\",\"status\":\"complete\",\"step_id\":\"review_station_upload\",\"target_marker_id\":\"remote_station\"}],\"runtime_authority\":\"MissionScenarioRuntimeGates\",\"ui_sets_gameplay_truth\":false},\"objective_before\":{\"all_gates_complete\":false,\"completed_step_ids\":[],\"configured\":true,\"countdown\":{\"countdown_seconds\":30.0,\"countdown_total_seconds\":30.0,\"timer_label\":\"COM\",\"timer_source\":\"scenario_computer_hold\",\"timer_state\":\"paused\"},\"gates\":[{\"blocked_by_step_id\":\"\",\"complete\":false,\"enemy_group_id\":\"\",\"hold_elapsed_seconds\":0.0,\"hold_required_seconds\":30.0,\"objective_type\":\"computer_hold\",\"operator_team_id\":\"team_alpha\",\"progress\":0.0,\"required_state\":\"uploaded\",\"requires_step_id\":\"\",\"status\":\"pending\",\"step_id\":\"review_station_upload\",\"target_marker_id\":\"remote_station\"}],\"runtime_authority\":\"MissionScenarioRuntimeGates\",\"ui_sets_gameplay_truth\":false},\"real_enet\":true,\"synthetic_content\":true,\"unit_modifiers_after\":{\"attack_bonus\":100.0,\"cover_score\":1000.0,\"move_speed_factor\":100.0,\"sight_range_factor\":50.0}}"
+      ],
+      "observation_checks": 9,
+      "classification": "reproduced",
+      "report_sha256": "488d9d5209fade297335a87ff8b163024fe022c357c782ca74bea0addb562080",
+      "log_sha256": "c089b8e8d8738b95ee89345970017141348df2ac8435391e2b69b8bbaa6e638f"
+    },
+    {
+      "run": "ui_a298dfb9990345f68f8ec221a03fda87",
+      "case": "ui",
+      "engine_exit": 0,
+      "guards": {
+        "source_unchanged": true,
+        "real_profile_unchanged": true,
+        "isolated_user_canary": true
+      },
+      "errors": [],
+      "markers": [
+        "UI_PROBE menu_visible=true focus=UnderlyingAction",
+        "UI_PROBE underlying_button_presses=1 expected=0 menu_visible=true",
+        "UI_PROBE_FINISHED"
+      ],
+      "observation_checks": 0,
+      "classification": "reproduced",
+      "report_sha256": "bbbb04ee46f071cd538507ee99a962cfd24ff579edff75037c0beded23f040ec",
+      "log_sha256": "e758afffb43b6b79cfd36258e8287085c14d851f0e54a51f42ad25f508f6df2d"
+    }
+  ],
+  "evidence_zip_sha256": "81c9b06c60b84994e9e5490275ee3f7900d12fd27d34ca76459865e3e5e8bb65",
+  "reference_images": [
+    "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+    "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+    "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+    "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png"
+  ],
+  "additional_images_viewed": [
+    "docs/qa/shared_personnel_equipment_20261110/images/inventory_1920.png",
+    "docs/qa/flight_polish_20261110/after_cruise.png",
+    "docs/qa/character_navigation_20261110/images/details_1280.png"
+  ],
+  "image_sha256": {
+    "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92",
+    "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png": "ff97752096c4af99b2fc97beefd5337e396451c9d3c16d926467d3157b95cc1a",
+    "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+    "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+    "docs/qa/shared_personnel_equipment_20261110/images/inventory_1920.png": "c99c9821faa570d19ca5bcaa906cb9528be038b5e9bc2b38981d6dac8ec2a659",
+    "docs/qa/flight_polish_20261110/after_cruise.png": "24d4143569afc6ebd345b66986aed7b51807d508439642cbbe286729a5e7528f",
+    "docs/qa/character_navigation_20261110/images/details_1280.png": "1e1c1a4ddc234fce7a2a235fa87ea76cef1fda06657db00a8912cc9b253d49f8"
+  }
+}

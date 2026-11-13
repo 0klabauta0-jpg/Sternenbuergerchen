@@ -1,0 +1,203 @@
+{
+  "assertions": [
+    {
+      "ok": true,
+      "label": "Report opens directly as a local file while offline"
+    },
+    {
+      "ok": true,
+      "label": "Tab overview works at width 320"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: overview, 320px"
+    },
+    {
+      "ok": true,
+      "label": "Tab coverage works at width 320"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: coverage, 320px"
+    },
+    {
+      "ok": true,
+      "label": "Tab evidence works at width 320"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: evidence, 320px"
+    },
+    {
+      "ok": true,
+      "label": "Tab decisions works at width 320"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: decisions, 320px"
+    },
+    {
+      "ok": true,
+      "label": "Tab overview works at width 390"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: overview, 390px"
+    },
+    {
+      "ok": true,
+      "label": "Tab coverage works at width 390"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: coverage, 390px"
+    },
+    {
+      "ok": true,
+      "label": "Tab evidence works at width 390"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: evidence, 390px"
+    },
+    {
+      "ok": true,
+      "label": "Tab decisions works at width 390"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: decisions, 390px"
+    },
+    {
+      "ok": true,
+      "label": "Tab overview works at width 768"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: overview, 768px"
+    },
+    {
+      "ok": true,
+      "label": "Tab coverage works at width 768"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: coverage, 768px"
+    },
+    {
+      "ok": true,
+      "label": "Tab evidence works at width 768"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: evidence, 768px"
+    },
+    {
+      "ok": true,
+      "label": "Tab decisions works at width 768"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: decisions, 768px"
+    },
+    {
+      "ok": true,
+      "label": "Tab overview works at width 1440"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: overview, 1440px"
+    },
+    {
+      "ok": true,
+      "label": "Tab coverage works at width 1440"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: coverage, 1440px"
+    },
+    {
+      "ok": true,
+      "label": "Tab evidence works at width 1440"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: evidence, 1440px"
+    },
+    {
+      "ok": true,
+      "label": "Tab decisions works at width 1440"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal overflow: decisions, 1440px"
+    },
+    {
+      "ok": true,
+      "label": "All nine open findings are individually reviewable"
+    },
+    {
+      "ok": true,
+      "label": "Expanded finding supports a review decision"
+    },
+    {
+      "ok": true,
+      "label": "Historical native screenshot loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Historical native screenshot loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Historical native screenshot loads offline"
+    },
+    {
+      "ok": true,
+      "label": "Expanded review and images fit 320px"
+    },
+    {
+      "ok": true,
+      "label": "Expanded review and images fit 390px"
+    },
+    {
+      "ok": true,
+      "label": "Expanded review and images fit 768px"
+    },
+    {
+      "ok": true,
+      "label": "Expanded review and images fit 1440px"
+    },
+    {
+      "ok": true,
+      "label": "Downloaded JSON uses the required workbench schema"
+    },
+    {
+      "ok": true,
+      "label": "Checkbox and selection survive JSON export"
+    },
+    {
+      "ok": true,
+      "label": "German text roundtrips exactly"
+    },
+    {
+      "ok": true,
+      "label": "Editable notes survive JSON export"
+    },
+    {
+      "ok": true,
+      "label": "New finding decision survives JSON export"
+    },
+    {
+      "ok": true,
+      "label": "Visible JSON fallback equals downloaded export"
+    },
+    {
+      "ok": true,
+      "label": "No browser JavaScript errors"
+    }
+  ],
+  "errors": [],
+  "passed": 49,
+  "failed": 0
+}

@@ -39,6 +39,20 @@ import_section = ''
 perf_path = ROOT / 'docs/qa/performance_review_20261113/summary.json'
 perf_data = json.loads(perf_path.read_text(encoding='utf-8')) if perf_path.exists() else None
 perf_section = ''
+review_path = ROOT / 'docs/qa/astra_review_20261113/summary.json'
+review_data = json.loads(review_path.read_text(encoding='utf-8')) if review_path.exists() else None
+review_section = ''
+if review_data:
+    findings = ''
+    for item in review_data['findings']:
+        findings += f'''<details class="review-detail"><summary><strong>{esc(item['priority'])} · {esc(item['title'])}</strong></summary><p>{esc(item['detail'])}</p><p><strong>Nachweis:</strong> {esc(item['evidence'])}</p><p><strong>Folgeschritt:</strong> {esc(item['fix'])}</p><p><strong>Regression:</strong> {esc(item['regression'])}</p><p class="source">{esc(item['id'])} · {esc(item['where'])}</p><label class="checkline"><input type="checkbox" data-export-key="astra.reviewed.{esc(item['id'])}"><span>Befund geprüft</span></label></details>'''
+    review_section = f'''<article class="card full warning"><div class="eyebrow">NEUER REVIEW · 13. NOVEMBER 2026 · MAIN 9fdeb866b</div><h2>Vier Reviews. Neun offene Codebefunde.</h2><p><strong>4 hohe Priorität (P1), 5 mittlere Priorität (P2).</strong> Zuerst Code geprüft und reproduziert, danach Architektur, Bedienbarkeit und Gestaltung. Diesmal wurden keine Spielfehler repariert und keine Assets verändert.</p><p>Die früheren grünen Einzeltests unten sind keine Gesamtfreigabe. Die neuen Proben weisen offene Fehler nach.</p><h3>1 · Code</h3>{findings}<p><a href="../reviews/ASTRA_REVIEW_2026_11_13.md">Vollständiger Review mit Quellen und Prüfgrenzen</a> · <a href="../qa/astra_review_20261113/summary.json">Strukturierte Evidenz</a> · <a href="../qa/astra_review_20261113/reproduction_evidence.zip">Rohlogs und Repro-Skripte herunterladen</a></p></article>'''
+    for heading, key in [('2 · Architektur', 'architecture'), ('3 · Bedienbarkeit', 'usability'), ('4 · Visuelle Gestaltung', 'visual')]:
+        items = ''.join(f'<details class="review-detail"><summary><strong>{esc(item["title"])}</strong></summary><p>{esc(item["text"])}</p><p><strong>Vorschlag:</strong> {esc(item["next"])}</p></details>' for item in review_data[key])
+        caveat = '<p>Historische native Aufnahmen vom10.–12.11. mit Quellabgleich und Originalzielen verglichen. Fachliche Gestaltungsvorschläge, keine frische Main- oder Nutzerabnahme.</p>' if key == 'visual' else ''
+        review_section += f'<article class="card full"><h2>{heading}</h2>{caveat}{items}</article>'
+    images = ''.join(f'<figure><img class="review-image" loading="lazy" src="../{esc(item["path"].removeprefix("docs/"))}" alt="{esc(item["label"])}"><figcaption>{esc(item["label"])}</figcaption></figure>' for item in review_data['visual_images'])
+    review_section += f'''<article class="card full"><h2>Prioritäten und Nachweisgrenzen</h2><ol><li>Multiplayer-Eingangsgrenzen schließen.</li><li>Kampfabschluss und Save-/Rollbackwahl sichern.</li><li>Sicht, Schuss und Zufallsentscheidung verbinden.</li><li>Fokus und Speicher-/Ausstiegshinweise verbessern.</li><li>Danach Personenstil und Sternkarte gezielt überarbeiten.</li></ol><p>{esc(review_data['limits'])}</p><p>Alle Quell- und Originalprofilguards blieben unverändert. Ein früher fehlerhafter Root-Testaufbau ist verworfen. Die absichtlich beschädigte private JSON-Datei erzeugt einen erwarteten Parserfehler; deshalb wird die Kampagnenprobe nicht als fehlerfreies Runtimegate ausgegeben.</p><details class="review-detail"><summary>Native Bildbelege ansehen</summary>{images}</details></article><article class="card full"><h2>Frühere Arbeiten und Nachweise</h2><p>Die folgenden Abschnitte dokumentieren frühere Fixes und ihre jeweiligen Testgrenzen. Die aktuellen offenen Befunde stehen oben.</p></article>'''
 if perf_data:
     perf_section = '''<article class="card full"><div class="eyebrow">PERFORMANCE-REVIEW · 13. NOVEMBER 2026</div><h2>Drei gemessene CPU-Probleme behoben</h2><p><strong>177 Regressionen ohne Fehler.</strong> Simulation/Hexsicht, Netzwerkverteilung und Begegnungsfenster geprüft. Qualität, Karten, Akteure und Spielregeln bleiben erhalten.</p><ul><li><strong>Hexsicht: 4,330 → 2,591 ms (−40 %).</strong> 64 gerichtete Paare mit vier Lesern pro Tick. Bisher fehlte der angebotene Cacheanschluss; Terrainantworten werden jetzt sicher innerhalb eines Ticks geteilt. Blickwinkel, Reichweite, Höhe, Zell- und Terrainänderungen bleiben korrekt.</li><li><strong>Snapshotpacken: 0,936 → 0,313 ms (−67 %).</strong> Drei Empfänger desselben Teams lösen nur noch einen Packvorgang aus. Vergleich mit 96 Units für Serialisierung/ZSTD; RPC-Zeit ist ausgeschlossen. Tatsächliche drei ENet-Clients prüfen Teamtrennung, gesperrte Empfänger und zuverlässige Zustandsmeldungen.</li><li><strong>Begegnungsfenster: 12,428 → 0,013 ms im verborgenen Zustand.</strong> Je 20 Leseaufrufe an einer echten kleinen Startkampagne. Sichtbar: 11,858 → 0,031 ms. Das Fenster liest nur noch seinen Encounterzustand statt der vollständigen Kampagne; Phasen, Buttons und Commands bleiben erhalten.</li></ul><p>Alle Angaben sind <strong>Mediane aus je 30 lokalen CPU-Samples</strong> nach Warmup. Gemessen auf Ryzen 7 7800X3D, Godot 4.6.2, Windows, Headless. Diese Verbesserungen einzelner Pfade sind keine Gesamtspiel-FPS- oder GPU-Zusage. Für den Begegnungsread entspricht die Einsparung etwa 0,6 ms pro Poll in der Startkampagne.</p><p>Zusätzlich bestanden: 600 Ticks Legacy-Kampf mit identischem Ergebnis, Frontier-LOS/FoW sowie vorhandene echte Hex-/ENet-/Checkpointprüfungen. Quellen und echte Spielerprofile bleiben unverändert. Frühe Fehler in Testfixtures sind getrennt von den bestätigten roten Produktrepros dokumentiert.</p><p><strong>Weiter offen:</strong> Personensnapshots in der Basisvisualisierung als ungemessener Kandidat, native GPU-/Framezeiten, große Kartenlast, Streaming, Autosave-I/O, Langzeit-Speicher und Internetlatenz. Keine neue EXE.</p><p><a href="../qa/performance_review_20261113/README.md">Performancebericht und genaue Prüfgrenzen</a> · <a href="../qa/performance_review_20261113/summary.json">Messwerte und Testindex</a></p></article>'''
 if import_data:
@@ -103,6 +117,7 @@ body = f'''
 </nav>
 <section id="overview" class="tab-panel active">
 <div class="grid">
+{review_section}
 {perf_section}
 {import_section}
 {main_section}
@@ -146,6 +161,7 @@ html{overflow-wrap:anywhere}body{font-size:16px}header{padding-top:36px}main{max
 .tab{flex:1;padding:12px 8px;min-height:48px}.results{display:grid;gap:10px}.result{padding:14px;background:#101a21;border-radius:8px}
 .result-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.badge{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:3px 9px}
 .badge.ok{color:var(--green)}.badge.warn{color:var(--accent)}small{display:block;margin-top:8px}a{color:var(--cyan)}
+.review-detail{padding:14px 0;border-top:1px solid var(--line)}.review-detail summary{cursor:pointer;min-height:44px;line-height:1.5}.review-image{width:100%;height:auto;display:block}figure{margin:18px 0}figcaption{font-size:13px;color:var(--muted);line-height:1.5}.pill.warn{color:var(--accent);border-color:#886945}
 label{display:block;margin-top:18px}button,input,select{min-height:44px}.toolbar{position:static;margin-top:12px}
 textarea,select{max-width:100%}.toolbar textarea{flex-basis:100%;min-width:0}code{white-space:pre-wrap}
 @media(max-width:480px){main{width:calc(100% - 24px)}header{padding:28px 16px 20px}.card{padding:17px}.tab{font-size:13px;padding:12px 5px}.finding{gap:10px}.pill{font-size:11px}.export-actions{width:100%}.export-actions button{flex:1}.toolbar{padding:16px}.result{padding:12px}}
@@ -162,5 +178,16 @@ if main_data:
     page = page.replace('Hex: 22 neu + 30 Nachbar grün', 'Main: 207 Assertions grün')
 if perf_data:
     page = page.replace('Main: 207 Assertions grün', 'Performance: 177 Prüfungen grün')
+if review_data:
+    page = page.replace('Spielreview &amp;<br>Fehlerbehebung', 'Code, Architektur<br>&amp; Spielerlebnis')
+    page = page.replace('Hex-Fortsetzung und ursprünglicher Spielreview. Neue und frühere Nachweise bleiben getrennt.', 'Neuer Review auf Main 9fdeb866b: neun offene Codebefunde sowie konkrete Vorschläge zu Architektur, Bedienbarkeit und Gestaltung.')
+    page = page.replace('<span class="pill good">Performance: 177 Prüfungen grün</span>', '<span class="pill warn">9 offen · 4 P1 / 5 P2</span>')
+    page = page.replace('Spielreview / Hex-Fortsetzung 13.11.2026</title>', 'Code, Architektur, UX und Gestaltung · Review 13.11.2026</title>')
+    page = page.replace('Was dieser Durchlauf belegt', 'Was die früheren Fixdurchläufe belegen')
+    page = page.replace('Ein spielweit einheitliches Würfel-/Schablonensystem ist daher ausdrücklich noch nicht erreicht.', 'Diese Aussage beschreibt den damaligen Reviewstand. Der neue Review auf Main findet inzwischen auch den gebundenen Raumkampfpfad; sein Abschluss scheitert an C3. Eine spielweite Vereinheitlichung ist weiterhin nicht nachgewiesen.')
+    old_space_start = page.index('<p><strong>Eine wichtige Ausnahme:</strong>')
+    old_space_end = page.index('</p>', old_space_start) + 4
+    page = page[:old_space_start] + '<p><strong>Raumkampf als eigene Domäne:</strong> Main enthält inzwischen einen gebundenen Encounter-/SpaceCombat-Pfad mit echten Raumkampf-Ownern. Dessen Rückkehrübergang ist in C3 als defekt belegt. Daneben existiert ein vereinfachter ungebundener Legacy-Encounter. Beide sind von Boden-Unit-Schaden getrennt. Die frühere pauschale Aussage, die orbitale Begegnung verwende ausschließlich festen Schaden pro Sekunde, gilt deshalb nicht für den aktuellen Mainstand. Eine spielweit einheitliche Würfel-/Schablonenregel ist weiterhin nicht nachgewiesen.</p>' + page[old_space_end:]
+    page = page.replace('<article class="card full"><h2>Kampf, Würfeln und Hexfelder</h2>', '<article class="card full warning"><h2>Aktueller Abgleich: Kampf und Hex</h2><p>Die neue Prüfung findet abweichende Sichtentscheidungen beim tatsächlichen Schuss und globale Disziplin-/Fehlidentifikationswürfe neben Roots gespeichertem Kampfwürfelzustand (C7/C8). Kein zweiter Boden-Schadensowner nachgewiesen; dennoch keine vollständig einheitlichen Regeln. Nur polisa_station.json trägt unter den geprüften Karten-JSONs ausdrücklich hex_tactical_v1. Die nachstehenden Aussagen gehören zum früheren Reviewumfang.</p></article><article class="card full"><h2>Kampf, Würfeln und Hexfelder · früherer Stand</h2>')
 REPORT.write_text('\n'.join(line.rstrip() for line in page.splitlines()) + '\n', encoding='utf-8')
 print(json.dumps({'report': str(REPORT), 'checks': len(checks), 'passed': good}, ensure_ascii=False))
