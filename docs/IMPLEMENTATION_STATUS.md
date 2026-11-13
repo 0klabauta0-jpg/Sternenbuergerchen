@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### Editorimport nach Mainintegration eingegrenzt — 13.11.2026
+
+Auf Mainbasis 6bdc3b5ef frischer Gesamtimport in vollständiger privater
+Quellkopie: Exit0, 358,12s, 21.074 Importdateien, 33.838 Originalquellen
+unverändert. Drei isolierte Fontproben, tatsächlicher Font-/Hauptmenüload aus
+frischem Cache und echter Launcher-/Kindprozess-Timeouttest bestanden.
+Mobiler HTMLbericht 39/0. Vorheriger nativer Godot-Crash durch Windows belegt,
+Ursache weiterhin unbewiesen; kein spekulativer Engine-/Plugin-/Assetfix.
+Eine StringName-Aufräumdiagnose bleibt. Genauere Profil-/Runnergrenzen und
+Rohlogs: docs/qa/editor_import_font_20261113/README.md. Keine EXE-/GPUabnahme.
+
 ### Mainintegration Hex-Follow-up und Review — 13.11.2026
 
 Gezielter Port abMainb1f47750b statt Merge alter Kandidatenbäume. Trupp-ID im

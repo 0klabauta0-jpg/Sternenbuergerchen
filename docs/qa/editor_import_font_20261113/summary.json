@@ -1,0 +1,29 @@
+{
+  "base": "6bdc3b5efcf50f43a7d9a953c97c12784c2c7cc3",
+  "status": "fresh_import_completed_native_crash_not_reproduced",
+  "font_cases_passed": 3,
+  "full_import_exit": 0,
+  "imported_files": 21074,
+  "fresh_cache_runtime_passed": true,
+  "timeout_tree_passed": true,
+  "source_unchanged": true,
+  "cleanup_diagnostics": [
+    "Orphan StringName: Node (static: 9, total: 10)",
+    "StringName: 1 unclaimed string names at exit."
+  ],
+  "native_crash_root_cause": "unproven; no speculative product change",
+  "archive_sha256": "2b9e3bdcb08b4e100be2af002dd7966bb0a819ac9216e97acca9ec79f187396d",
+  "raw_sha256": {
+    "full_78a93adc48004f428ac58269433eb93a/import.log": "e48fa3866e1947454fafa3245e4aec153f1e92e0c00402ecc47f6cee053956af",
+    "full_78a93adc48004f428ac58269433eb93a/godot.log": "545d18045183f870c04d62d61841cc49904fcfbff26ac4ddbb3803cf44b511a5",
+    "full_78a93adc48004f428ac58269433eb93a/runtime.log": "d317b09c9fbf84d457a27648d71cac6fe1f1b7600a24575d507b9418df6b7eeb",
+    "full_78a93adc48004f428ac58269433eb93a/sources.json": "331db0949184f2e423722a4d8c49942f85aba3d2042bbd8fa81f66a591bfdef6",
+    "eb6e3d13a376482490774eed5c255891/otf_original/import.log": "28d930992e7cff4e6b675b46d0a6cf840482d3790af9d53984c4ed9006251c83",
+    "eb6e3d13a376482490774eed5c255891/otf_original/verify.log": "d92f9c7fc8064c2271ed53e3393b841a0fb708ff2814b2f83048d47312a9217b",
+    "eb6e3d13a376482490774eed5c255891/ttf_defaults/import.log": "50daf52bbb5b14d4330ee7244de93e0529acb069124beaaf8f8049bd75318a9b",
+    "eb6e3d13a376482490774eed5c255891/ttf_defaults/verify.log": "bf38163e90b0c866405b012c58c04a2f817fd19f6bf3575f9f7c40a6ecafcbe6",
+    "eb6e3d13a376482490774eed5c255891/ttf_original/import.log": "bf7a1f277d55e10080f3b611c9400896c548a89439e5086ea5b5e247562f3730",
+    "eb6e3d13a376482490774eed5c255891/ttf_original/verify.log": "6ffd2ddf52399ae2ddd05fbd5b59fc57fd802812bc180f221c7470dcf55e792c",
+    "timeout_168185445dc54b97b98b6763ec465296/process.log": "28acd2e2b9f9afb09d040e910da755003e8f0ca45b624cd089046e863f1bc57f"
+  }
+}

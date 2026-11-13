@@ -33,9 +33,21 @@ hex_section = ''
 main_path = ROOT / 'docs/qa/main_hex_review_20261113/summary.json'
 main_data = json.loads(main_path.read_text(encoding='utf-8')) if main_path.exists() else None
 main_section = ''
+import_path = ROOT / 'docs/qa/editor_import_font_20261113/summary.json'
+import_data = json.loads(import_path.read_text(encoding='utf-8')) if import_path.exists() else None
+import_section = ''
+if import_data:
+    import_section = '''<article class="card full"><div class="eyebrow">EDITOR-NACHPRÜFUNG · 13. NOVEMBER 2026</div><h2>Frischer Gesamtimport läuft durch</h2><p>Eine vollständige Quellkopie von Main <strong>6bdc3b5ef</strong> wurde mit leerem Cache und allen aktivierten Plugins importiert: <strong>Exit 0, 358 Sekunden, 21.074 erzeugte Importdateien</strong>. Alle 33.838 Originalquellen blieben unverändert; es wurde kein vorhandener Cache übernommen.</p><p><strong>Drei isolierte Fontproben bestanden.</strong> TTF und OTF werden geladen und zur Textmessung verwendet. Aus dem frisch erzeugten Gesamtcache wurden anschließend beide Fonts und das echte Hauptmenü erfolgreich geladen und das Menü instanziiert. Der Runtime-Profilguard und der Vergleich des echten Spielerprofils bestehen.</p><p>Der frühere Abbruch ist durch Windows als nativer Godot-Zugriffsfehler bestätigt. Er ist in diesen Proben <strong>nicht reproduziert</strong>; ein behobener sporadischer Absturz wird deshalb nicht behauptet. Fonts, Plugins und Engine wurden nicht auf Verdacht geändert. Beim Editorende bleibt eine Diagnose zu einem unbeanspruchten StringName; keine Script-/Enginefehler oder ObjectDB-Leakmeldung im neuen Import.</p><p>Der erste Gesamtimport setzt ein privates APPDATA, enthält aber noch keinen Vorher/Nachher-Vergleich des echten Profils. Der anschließende Runtimecheck besitzt diesen Vergleich und prüft den tatsächlichen user://-Pfad. Die neuen Runner sichern außerdem Zeitlimits samt Launcher-Kindprozess ab; ein echter Timeouttest besteht.</p><p><a href="../qa/editor_import_font_20261113/README.md">Diagnose, Rohlogs und genaue Prüfgrenzen</a></p></article>'''
 if main_data:
     main_rows = ''.join('<li>' + esc(item['name']) + ': <strong>' + str(item['assertions']) + '/0</strong></li>' for item in main_data['checks'])
     main_section = f'''<article class="card full"><div class="eyebrow">MAININTEGRATION · 13. NOVEMBER 2026</div><h2>Aktuellen Main-Verbund geprüft</h2><p>Die passenden Änderungen wurden gezielt auf Mainbasis <strong>{esc(main_data['base_main'])}</strong> übertragen. Neuere Kampagnen-, Missionssave-, Orbit- und Sternkartenfunktionen bleiben erhalten. Ganze ältere Kandidatenbäume wurden nicht gemergt.</p><ul>{main_rows}</ul><p><strong>207 Assertions ohne Fehler</strong>, alle Quellen-/Profil-/Canaryguards grün. Der echte Missionslauf prüft Save, Fortsetzen, Heimkehr und Chipupload.</p><p>Eine frische rote Peerprüfung hat einen fehlenden Driveranschluss im alten Main aufgedeckt: Trotz aktuellem Hexfacing blieb ein rückwärtiger Gegner sichtbar. Der vorhandene Hex-Sichtadapter ist nun eng angebunden; Legacy-Sicht bleibt erhalten.</p><p>Die Save-UI unterscheidet echte Kampagnensaves von reinen Nichtkampagnen-Szenenbookmarks. Die früher pauschale Beschriftung wurde dafür an die aktuellen Mainowner angepasst.</p><p>Der vollständige Editorimport endete beim Fontreimport mit Exit1 ohne weitere Diagnose. Für die bestandenen tatsächlichen Runtimechecks wurden vorhandene reine Importcachedateien aus dem unveränderten Mainressourcenstand verwendet. Kein sauberer frischer Gesamtimport oder EXE-/GPU-Nachweis.</p><p><a href="../qa/main_hex_review_20261113/README.md">Frische Main-Evidenz, Portumfang und Grenzen</a></p></article>'''
+if main_data and import_data:
+    main_section = main_section.replace(
+        'Der vollständige Editorimport endete beim Fontreimport mit Exit1 ohne weitere Diagnose.',
+        'Bei der damaligen Mainintegration endete der Editorimport beim Fontreimport mit Exit1. Die neue Diagnose und der erfolgreiche frische Nachimport stehen oben.')
+    main_section = main_section.replace(
+        'Kein sauberer frischer Gesamtimport oder EXE-/GPU-Nachweis.',
+        'Dieser damalige Runtimeverbund allein war kein frischer Importnachweis. EXE-/GPU-Nachweise bleiben offen.')
 if hex_data:
     hex_rows = ''.join('<li>' + esc(item['name']) + ': ' + esc(item.get('result', 'noch offen')) + '</li>' for item in hex_data.get('checks', []))
     hex_section = f'''<article class="card full"><div class="eyebrow">FORTSETZUNG · 13. NOVEMBER 2026</div><h2>Hex: tatsächlichen Kandidaten weitergeführt</h2>
@@ -79,13 +91,14 @@ body = f'''
 <h1>Spielreview &amp;<br>Fehlerbehebung</h1>
 <p class="lead">{'Hex-Fortsetzung und ursprünglicher Spielreview. Neue und frühere Nachweise bleiben getrennt.' if hex_data else 'Drei konkrete Probleme korrigiert. Breite technische Prüfung ohne Übernahme von Maus, Tastatur oder Spielfenstern.'}</p>
 <div class="meta-row">{'<span class="pill good">Hex: 22 neu + 30 Nachbar grün</span>' if hex_data and hex_data.get('passed') else ''}<span class="pill">Review vom 12.11.: {good}/{len(checks)} bestanden</span><span class="pill">Godot 4.6.2</span><span class="pill">Headless</span></div>
-<p>Ursprüngliche Reviewbasis cfddc129b · neue Hexbasis siehe Fortsetzung · keine Mainintegration.</p></header>
+<p>Ursprüngliche Reviewbasis cfddc129b · {'Mainintegration 6bdc3b5ef · Nachprüfung siehe unten.' if main_data else 'neue Hexbasis siehe Fortsetzung · keine Mainintegration.'}</p></header>
 <main>
 <nav class="tabbar" aria-label="Berichtbereiche">
 <button class="tab active" data-tab-target="overview">Ergebnis</button><button class="tab" data-tab-target="coverage">Spielsysteme</button><button class="tab" data-tab-target="evidence">Tests</button><button class="tab" data-tab-target="decisions">Notizen</button>
 </nav>
 <section id="overview" class="tab-panel active">
 <div class="grid">
+{import_section}
 {main_section}
 {hex_section}
 <article class="card full"><h2>Was jetzt korrigiert ist</h2>

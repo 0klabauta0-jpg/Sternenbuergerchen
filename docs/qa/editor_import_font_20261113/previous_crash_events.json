@@ -1,0 +1,14 @@
+[
+  {
+    "TimeCreated": "2026-11-13T06:41:53.3351178+01:00",
+    "Id": 1001,
+    "ProviderName": "Windows Error Reporting",
+    "Message": "Fehlerbucket 1363720157838517419, Typ 4\r\nEreignisname: APPCRASH\r\nAntwort: Nicht verfügbar\r\nCAB-Datei-ID: 0\r\n\r\nProblemsignatur:\r\nP1: godot.exe\r\nP2: 4.6.2.0\r\nP3: 69cc372e\r\nP4: godot.exe\r\nP5: 4.6.2.0\r\nP6: 69cc372e\r\nP7: c0000005\r\nP8: 0000000003cde7c2\r\nP9: \r\nP10: \r\n\r\nAngefügte Dateien:\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\Temp\\WER7F8.tmp.dmp\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\Temp\\WER886.tmp.WERInternalMetadata.xml\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\Temp\\WER8A6.tmp.xml\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\Temp\\WER8A4.tmp.csv\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\Temp\\WER8D4.tmp.txt\r\n\r\nDiese Dateien befinden sich möglicherweise hier:\r\n\\\\?\\C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive\\AppCrash_godot.exe_cdf89dc9a131da6c4e49bf6431cf7853f0a943_e976d2aa_547c69dc-c2ae-4ae7-bcf1-e2d5e623aa90\r\n\r\nAnalysesymbol: \r\nEs wird erneut nach einer Lösung gesucht: 0\r\nBerichts-ID: 19fd5a06-2cc9-4098-93f0-8f89cd3e756d\r\nBerichtstatus: 268435456\r\nBucket mit Hash: 16a76e934bc5937822ece8421d0124ab\r\nCAB-Datei-Guid: 0"
+  },
+  {
+    "TimeCreated": "2026-11-13T06:41:51.7901388+01:00",
+    "Id": 1000,
+    "ProviderName": "Application Error",
+    "Message": "Name der fehlerhaften Anwendung: godot.exe, Version: 4.6.2.0, Zeitstempel: 0x69cc372e\r\nName des fehlerhaften Moduls: godot.exe, Version: 4.6.2.0, Zeitstempel: 0x69cc372e\r\nAusnahmecode: 0xc0000005\r\nFehleroffset: 0x0000000003cde7c2\r\nID des fehlerhaften Prozesses: 0x3dbc\r\nStartzeit der fehlerhaften Anwendung: 0x01dd7331673a8f66\r\nPfad der fehlerhaften Anwendung: C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot.exe\r\nPfad des fehlerhaften Moduls: C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot.exe\r\nBerichtskennung: 19fd5a06-2cc9-4098-93f0-8f89cd3e756d\r\nVollständiger Name des fehlerhaften Pakets: \r\nAnwendungs-ID, die relativ zum fehlerhaften Paket ist: "
+  }
+]

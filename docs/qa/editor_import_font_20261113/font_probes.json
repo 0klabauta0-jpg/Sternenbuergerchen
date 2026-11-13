@@ -1,0 +1,90 @@
+{
+  "engine": "4.6.2.stable.official.71f334935",
+  "cases": [
+    {
+      "case": "ttf_original",
+      "engine_version": "4.6.2.stable.official.71f334935",
+      "import_args": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\ttf_original",
+        "--editor",
+        "--import",
+        "--verbose"
+      ],
+      "import_timeout": 120,
+      "verify_timeout": 60,
+      "import_exit": 0,
+      "verify_exit": 0,
+      "seconds": 4.47,
+      "imported_files": [
+        "kenney_input_nintendo_gamecube.ttf-853bc3879937d021e49b6c5b5ab282c3.fontdata"
+      ],
+      "source_sha256": "f092b13460093ca7f76ca96f0a5934b87cf730ca45fd4d052cd620ab77be46f3",
+      "source_unchanged": true,
+      "passed": true,
+      "logs": "docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\ttf_original",
+      "metadata_sha256": "9f1e879f7dfd69a4b8ff8edc7e185271cc2a8a5869cf5f38c469796acd9b638e",
+      "real_profile_unchanged": true,
+      "errors": []
+    },
+    {
+      "case": "otf_original",
+      "engine_version": "4.6.2.stable.official.71f334935",
+      "import_args": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\otf_original",
+        "--editor",
+        "--import",
+        "--verbose"
+      ],
+      "import_timeout": 120,
+      "verify_timeout": 60,
+      "import_exit": 0,
+      "verify_exit": 0,
+      "seconds": 4.48,
+      "imported_files": [
+        "kenney_input_nintendo_gamecube.otf-84ef8537e68f46b2b3c89d8c5cfd94fc.fontdata"
+      ],
+      "source_sha256": "1b64119b74518d5a7f0c0a8d15187632d94f32ce9ae9a521fa8990b87ea08946",
+      "source_unchanged": true,
+      "passed": true,
+      "logs": "docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\otf_original",
+      "metadata_sha256": "0b709e0152cafb078444b0100c113257a14daa7d5d128f98ab54f60dd5ec0242",
+      "real_profile_unchanged": true,
+      "errors": []
+    },
+    {
+      "case": "ttf_defaults",
+      "engine_version": "4.6.2.stable.official.71f334935",
+      "import_args": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\ttf_defaults",
+        "--editor",
+        "--import",
+        "--verbose"
+      ],
+      "import_timeout": 120,
+      "verify_timeout": 60,
+      "import_exit": 0,
+      "verify_exit": 0,
+      "seconds": 4.57,
+      "imported_files": [
+        "kenney_input_nintendo_gamecube.ttf-853bc3879937d021e49b6c5b5ab282c3.fontdata"
+      ],
+      "source_sha256": "f092b13460093ca7f76ca96f0a5934b87cf730ca45fd4d052cd620ab77be46f3",
+      "source_unchanged": true,
+      "passed": true,
+      "logs": "docs\\qa\\editor_import_font_20261113\\local_runs\\eb6e3d13a376482490774eed5c255891\\ttf_defaults",
+      "metadata_sha256": "9f1e879f7dfd69a4b8ff8edc7e185271cc2a8a5869cf5f38c469796acd9b638e",
+      "real_profile_unchanged": true,
+      "errors": []
+    }
+  ],
+  "all_passed": true
+}
