@@ -1,0 +1,37 @@
+{
+  "status": "publication_failed_at_hosting_provider",
+  "project_id": "appgprj_6af6b36c322c8191b942ee89bed48f40",
+  "site_url": "https://sternenbuergerchen-spielreview.klabauta.chatgpt.site",
+  "product_commit": "8252e85ef22ecd7d43ee0e056b97ab5cf09c62e7",
+  "report_commit": "25823a1beee9b27631d157ca5cae3adeabe380e7",
+  "site_source_commit": "f66a36e3e49d888d88e6b398cee91b492c6d092d",
+  "site_archive": "C:/dev/SternenBuergerchen/tmp/sites/spielreview-20261113.tar.gz",
+  "latest_saved_version": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_75d71c1dfc6881918ceca7819e628e2e",
+  "local_browser_assertions": 53,
+  "site_package_browser_assertions": 53,
+  "audience": "owner_private_preserved",
+  "attempts": [
+    {
+      "deployment_id": "appgdep_6af72ad934808191ae36ac493995fef8",
+      "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_26378943673881919047f4391731904d",
+      "status": "failed",
+      "failure_message": "An unknown error has occurred. If this error persists, please file a report in workers-sdk (https://github.com/cloudflare/workers-sdk/issues) or reach out to your account team.",
+      "updated_at": "2026-11-13T15:21:14.387422+00:00"
+    },
+    {
+      "deployment_id": "appgdep_6af72b120efc819195c3d58970fbaafe",
+      "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_26378943673881919047f4391731904d",
+      "status": "failed",
+      "failure_message": "Failed to publish the built site.",
+      "updated_at": "2026-11-13T15:21:59.137432+00:00"
+    },
+    {
+      "deployment_id": "appgdep_6af72beffc6c8191a8a07561165043a1",
+      "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_75d71c1dfc6881918ceca7819e628e2e",
+      "status": "failed",
+      "failure_message": "Failed to publish the built site.",
+      "updated_at": "2026-11-13T15:25:40.521342+00:00"
+    }
+  ],
+  "next_step": "Retry deployment of the existing saved version after hosting recovery; do not create a new Site. The reduced package retains the full report and links the raw regression archive in the game repository."
+}

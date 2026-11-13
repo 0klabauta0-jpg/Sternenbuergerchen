@@ -72,3 +72,17 @@ Gezielte Headless- und lokale ENet-Prüfungen auf Godot 4.6.2; keine Desktopübe
 Unabhängige Gegenreviews für Netzwerk, Kampagne, Hex/Diagnose und den zusätzlichen
 Anführerfix sind abgeschlossen. Beim Menü gefundene Lücken (Polling, Fokus-Kreis,
 unterbrochene Gesten) sind implementiert und mit realer Godot-Eingabeverarbeitung geprüft.
+
+## Websiteveröffentlichung
+
+Lokaler Bericht und Websitepaket bestehen jeweils 53 Offline-/Handy-/Exportchecks.
+Die Code- und Berichtcommits sind in Main integriert und gepusht. Drei
+Veröffentlichungsversuche scheiterten jedoch beim Hostingdienst: zunächst mit
+einem allgemeinen workers-sdk-Fehler, danach mit `Failed to publish the built site.`
+Auch ein kleineres Paket mit dem Roharchiv als Repositorylink blieb erfolglos.
+Eine aktuelle Live-Veröffentlichung wird deshalb nicht behauptet.
+
+Die bereits gespeicherte Websiteversion ist wiederverwendbar. Exakte Projekt-,
+Versions-, Deployment- und Sourcekennungen sowie der Archivpfad stehen in
+`publication_status.json`; die bestehende private Zielwebsite bleibt
+https://sternenbuergerchen-spielreview.klabauta.chatgpt.site.
