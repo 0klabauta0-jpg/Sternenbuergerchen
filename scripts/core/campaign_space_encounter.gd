@@ -60,7 +60,7 @@ func apply_command(command: Dictionary, context: Dictionary={}) -> Dictionary:
 		if String(_state.phase)!="rescue_ready": return {"ok":false,"reason":"enemy_still_active"}
 		_state.phase="victory"
 	elif op=="retreat":
-		if String(_state.phase) in ["victory","aborted"]: return {"ok":false,"reason":"encounter_closed"}
+		if String(_state.phase) in ["victory","defeat","aborted"]: return {"ok":false,"reason":"encounter_closed"}
 		_state.phase="aborted"
 	else: return {"ok":false,"reason":"unknown_operation"}
 	_state.revision+=1

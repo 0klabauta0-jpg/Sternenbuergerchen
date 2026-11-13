@@ -41,6 +41,8 @@ func _test_parallel_ownership_and_rebind() -> void:
 	var client_scene: Node = MISSION_SCENE.instantiate()
 	host_scene.name = "Mission"
 	client_scene.name = "Mission"
+	_configure_scene(host_scene)
+	_configure_scene(client_scene)
 	host_root.add_child(host_scene)
 	client_root.add_child(client_scene)
 	await _poll(host_api, client_api, 16)
@@ -70,6 +72,8 @@ func _test_parallel_ownership_and_rebind() -> void:
 
 	var target_a := Vector2(160.0, 160.0)
 	var target_b := Vector2(320.0, 160.0)
+	_configure_authored_interactions(host_scene, target_a, target_b)
+	_configure_authored_interactions(client_scene, target_a, target_b)
 	var host_command: Dictionary = _build_command("parallel_terminal_alpha", host_fireteam, String(host_unit.call("get_unit_id")), target_a, 120.0)
 	var client_command: Dictionary = _build_command("parallel_terminal_bravo", client_fireteam, String(client_unit.call("get_unit_id")), target_b, 120.0)
 	var host_result: Dictionary = Dictionary(host_sim.call("submit_network_command_for_peer", host_command, 1))
@@ -149,6 +153,29 @@ func _test_parallel_ownership_and_rebind() -> void:
 
 	_cleanup(pair, host_root, client_root)
 	await process_frame
+
+
+func _configure_scene(scene: Node) -> void:
+	scene.get_node("SimulationRoot").set("is_server_authoritative", true)
+	scene.get_node("MissionSetup").set("defer_friendly_runtime_activation", false)
+	# Keep unrelated NPC combat out of this ownership/replication fixture.
+	scene.get_node("CombatLoopDriver").call("set_combat_startup_grace_ticks", 100000)
+
+
+func _configure_authored_interactions(scene: Node, target_a: Vector2, target_b: Vector2) -> void:
+	# Author the synthetic interactions on the actual scene's map and runtime
+	# owner before sending commands; client metadata cannot create Host facts.
+	var map_data = scene.get_node("MissionSetup").get("_loaded_terrain_map_data")
+	_assert(map_data != null, "Parallel fixture has a loaded authoritative map")
+	if map_data == null:
+		return
+	var slice := {"flow_steps":[], "interaction_points":[]}
+	var positions := {"parallel_terminal_alpha":target_a, "parallel_terminal_bravo":target_b}
+	for interaction_id: String in positions:
+		map_data.set_marker_position(interaction_id, positions[interaction_id])
+		slice.flow_steps.append({"step_id":interaction_id, "objective_type":"computer_hold", "target_marker_id":interaction_id, "operator_team_id":"team_alpha", "min_hold_seconds":120.0, "required_state":interaction_id + "_complete"})
+		slice.interaction_points.append({"interaction_id":interaction_id, "interaction_type":"computer", "marker_id":interaction_id, "required_order":"take", "duration_seconds":120.0, "radius_world":72.0, "required_team":"team_alpha", "step_id":interaction_id, "gate_id":interaction_id, "required_state":interaction_id + "_complete"})
+	_assert(bool(scene.get_node("CombatLoopDriver").call("configure_scenario_runtime_gates", slice)), "Parallel fixture configures real host-authored bindings")
 
 
 func _build_command(interaction_id: String, fireteam_id: String, unit_id: String, target: Vector2, duration: float) -> Dictionary:

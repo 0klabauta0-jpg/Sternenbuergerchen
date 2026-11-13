@@ -34,6 +34,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Camera polling follows the same input permission as event callbacks.
+	# Modal menus disable input, while the rest of the simulation keeps ticking.
+	if not is_processing_unhandled_input():
+		return
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null:
 		enabled = false
@@ -70,6 +74,11 @@ func _process(delta: float) -> void:
 	if direction == Vector2.ZERO:
 		return
 	position += direction.normalized() * CAMERA_PAN_SPEED * delta / zoom.x
+
+
+func cancel_modal_input() -> void:
+	_is_panning = false
+	_pan_previous_position = Vector2.ZERO
 
 
 func _input(event: InputEvent) -> void:

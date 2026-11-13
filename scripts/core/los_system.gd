@@ -79,11 +79,12 @@ func find_first_blocker_grid(source_grid: Vector2i, target_grid: Vector2i, terra
 	if not target_grid_float.is_finite(): target_grid_float = Vector2(target_grid)
 	var source_tile = terrain_reader.call("get_tile_at_grid", source_grid)
 	var target_tile = terrain_reader.call("get_tile_at_grid", target_grid)
-	var source_height: int = int(source_tile.height_level) if source_tile != null else 0
-	var target_height: int = int(target_tile.height_level) if target_tile != null else 0
+	var source_height: float = float(source_tile.height_level) if source_tile != null else 0.0
+	var target_height: float = float(target_tile.height_level) if target_tile != null else 0.0
 	if endpoint_heights.is_finite():
-		source_height = int(endpoint_heights.x)
-		target_height = int(endpoint_heights.y)
+		# Explicit Hex ramps stand at half-levels; rounding changes occlusion.
+		source_height = endpoint_heights.x
+		target_height = endpoint_heights.y
 	var hex_grid: bool = _uses_hex_grid(terrain_reader)
 	_build_grid_line_into(source_grid, target_grid, _los_step_buffer, terrain_reader)
 	for stepped_grid in _los_step_buffer:

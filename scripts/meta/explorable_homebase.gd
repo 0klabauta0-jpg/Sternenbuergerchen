@@ -1107,11 +1107,11 @@ func _physics_process(delta: float) -> void:
 	request_walk_to(target)
 
 
-func _clear_keyboard_input() -> void:
+func _clear_keyboard_input(stop_legacy_movement: bool = true) -> void:
 	_keys.clear()
 	# The campaign owner keeps accepted movement running while its view is
 	# hidden. Clearing local input must not emit a gameplay cancel command.
-	if _keyboard_move and _personnel_runtime() == null:
+	if stop_legacy_movement and _keyboard_move and _personnel_runtime() == null:
 		_stop_avatar()
 	_keyboard_move = false
 
@@ -1483,11 +1483,24 @@ func _sync_capacity_visuals(stage: Node3D) -> void:
 		visual.call("build",Vector2(float(pad.plane[0]),float(pad.plane[1])),Vector2(float(pad.size[0]),float(pad.size[1])),String(pad.designation))
 		visual.position.y=float(pad.get("surface_y",0))-PAD_SCRIPT.DECK_HEIGHT
 
+func cancel_modal_input() -> void:
+	_camera_dragging = false
+	_camera_drag_last = Vector2.ZERO
+	# Dropping local input must not cancel an already accepted movement order.
+	_clear_keyboard_input(false)
+	_move_cadence = 0.0
+	_clear_base_context()
+
+
 func _input(event: InputEvent) -> void:
 	if not _active or _pad_preview or not is_visible_in_tree(): _camera_dragging=false; return
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:
 		_camera_dragging=false
 	elif event is InputEventMouseMotion and _camera_dragging:
+		if (event.button_mask & MOUSE_BUTTON_MASK_MIDDLE) == 0:
+			_camera_dragging = false
+			_camera_drag_last = Vector2.ZERO
+			return
 		var transform := _host.get_global_transform_with_canvas().affine_inverse()
 		var scale := Vector2(_viewport.size)/_host.size.max(Vector2.ONE)
 		_view.call("pan_camera_between_screen_positions",(transform*_camera_drag_last)*scale,(transform*event.position)*scale)

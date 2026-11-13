@@ -66,8 +66,12 @@ func _run()->void:
 	check(runtime.commands.size()==1 and runtime.commands[0].operation=="campaign_space_rescue","existing button signal delegates to the same runtime command owner")
 	for phase in ["victory","defeat","aborted"]:
 		runtime.encounter._state.phase=phase
+		runtime.encounter._state.resolved=false
 		panel.refresh()
-		check(not panel.visible,"terminal phase hides panel: "+phase)
+		check(panel.visible and panel._attack.disabled and panel._rescue.disabled and panel._retreat.disabled and panel._status.text.contains("Rückkehr"),"pending terminal return remains visible without duplicate actions: "+phase)
+		runtime.encounter.get_completed_result()
+		panel.refresh()
+		check(not panel.visible,"committed terminal result hides panel: "+phase)
 	check(runtime.full_reads==0 and runtime.encounter_reads>10,"visible and terminal refreshes never request a full meta snapshot")
 	var replacement:=RuntimeSpy.new()
 	root.add_child(replacement)

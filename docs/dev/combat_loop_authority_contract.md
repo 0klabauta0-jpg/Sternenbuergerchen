@@ -30,6 +30,14 @@ Read-only UI-Events wie `combat_ui_event` sind keine Effects und duerfen keinen 
 - Contact-State: kommt aus dem bestehenden `ContactTracker` und bleibt read-only fuer UI/Overlay.
 - Mission-Result: wird vom Combat-Loop gebaut, aber nicht von UI-Skripten mutiert.
 
+Kontakt-/Feuerdiagnosen sind reine Projektionen. `can_unit_attack_for_readout`
+liest aktuelle Bereitschaft und vorhandene Return-Fire-Fenster, wuerfelt aber
+keinen Disziplinbruch und schreibt weder Cooldown noch Ereignis. Ein bereits
+gebauter Damage-Effect belegt die erfolgte Entscheidung fuer seine Diagnose.
+Nur die wirkliche Feuerentscheidung verwendet weiterhin `can_unit_attack`
+mit dem bisherigen autoritativen Disziplinpfad. Auch beim ersten Auftauchen
+eines Gegners darf ein HUD-Read weder globalen noch Root-RNG verbrauchen.
+
 ## Simulationstick und Decision-Kadenz
 Discipline-, Misidentification- und Medic-Support-Cooldowns laufen pro aktivem
 autoritativen Simulationstick weiter, auch wenn dieser Tick die teuren Combat-

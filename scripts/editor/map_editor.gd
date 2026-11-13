@@ -396,6 +396,10 @@ func _apply_help_id(node: Node, help_id: String) -> void:
 
 
 func _process(delta: float) -> void:
+	# This callback only polls camera input. Respect modal input suspension
+	# without pausing editor jobs, deferred redraws, or the simulation.
+	if not is_processing_unhandled_input():
+		return
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null:
 		var view_direction := Vector2.ZERO
@@ -429,6 +433,31 @@ func _process(delta: float) -> void:
 		direction.x += 1.0
 	if direction != Vector2.ZERO:
 		camera.position += direction.normalized() * CAMERA_PAN_SPEED * delta / camera.zoom.x
+
+
+func cancel_modal_input() -> void:
+	# Preserve Undo for edits already applied during a stroke; do not apply
+	# another brush sample, finish a network path, or change map selection.
+	if _is_painting:
+		commit_undo_transaction()
+	_is_painting = false
+	_last_painted_grid = Vector2i(-1, -1)
+	_height_stroke_visited.clear()
+	_is_panning = false
+	_is_rotating_3d_camera = false
+	_right_mouse_pressed = false
+	_right_mouse_dragged = false
+	_right_drag_selection_active = false
+	_right_mouse_additive_selection = false
+	_dragged_patrol_waypoint_index = -1
+	_is_dragging_marker = false
+	_has_dragged_marker = false
+	_dragged_marker_id = ""
+	_dragged_marker_press_screen_position = Vector2.ZERO
+	_clear_network_drag_preview()
+	_queue_hover_preview_hide()
+	_queue_patrol_route_preview_hide()
+	_hide_explicit_height_preview()
 
 
 func _unhandled_input(event: InputEvent) -> void:

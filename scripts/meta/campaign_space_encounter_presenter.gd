@@ -41,8 +41,12 @@ func refresh() -> void:
 		hide()
 		return
 	var state:Dictionary=_runtime.call("get_space_encounter_snapshot")
-	visible=not state.is_empty() and String(state.get("phase","")) not in ["aborted","defeat","victory"]
+	visible=not state.is_empty() and not bool(state.get("resolved", false))
 	if not visible:return
+	if String(state.get("phase", "")) in ["aborted", "defeat", "victory"]:
+		_status.text = "Begegnung abgeschlossen. Die Rückkehr in den Orbit wird bestätigt; bei einer Verzögerung wird sie automatisch erneut versucht."
+		_attack.disabled = true; _rescue.disabled = true; _retreat.disabled = true
+		return
 	if state.phase == "entering":
 		var feedback: Dictionary = _runtime.call("get_campaign_entry_feedback") if _runtime.has_method("get_campaign_entry_feedback") else {}
 		_status.text = "Der Kampfbereich wird vorbereitet." if feedback.is_empty() or feedback.get("ok", false) else "Der Kampfbereich ist noch nicht bereit. Du kannst den Anflug abbrechen."

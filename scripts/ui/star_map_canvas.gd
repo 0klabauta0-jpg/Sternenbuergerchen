@@ -272,6 +272,16 @@ func _handle_gui_event(event: InputEvent) -> bool:
 		return true
 	return false
 
+func cancel_modal_input() -> void:
+	_drag_button = 0
+	_drag_position = Vector2.ZERO
+	_selection_active = false
+	_selection_start = Vector2.ZERO
+	_selection_end = Vector2.ZERO
+	_selection_additive = false
+	queue_redraw()
+
+
 func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree():
 		_drag_button = 0

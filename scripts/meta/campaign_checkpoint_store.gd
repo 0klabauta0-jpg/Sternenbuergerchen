@@ -4,6 +4,11 @@ const DEFAULT_PATH := "user://campaigns/introduction/checkpoint_v1.json"
 const MAX_BYTES := 4 * 1024 * 1024
 const HEX_CHECKPOINT_CONTRACT := "res://scripts/core/hex_checkpoint_transaction.gd"
 static func validate_payload(payload: Dictionary) -> Dictionary:
+	if payload.has("retired_active_checkpoint_sha256"):
+		var digest: Variant = payload.retired_active_checkpoint_sha256
+		if typeof(digest) != TYPE_STRING or digest.length() != 64: return {"ok":false,"reason":"invalid_active_retirement"}
+		for letter in digest:
+			if not String(letter) in "0123456789abcdef": return {"ok":false,"reason":"invalid_active_retirement"}
 	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 64 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
 	var ids: Array = []

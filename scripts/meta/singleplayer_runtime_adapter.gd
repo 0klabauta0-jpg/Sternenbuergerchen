@@ -1272,6 +1272,8 @@ func advance_space_travel(delta: float) -> void:
 	if _space_encounter != null and String(_space_encounter.get_snapshot().get("phase","")) == "combat":
 		_simulation.advance_campaign_space_fire({"runtime_authorized":true})
 		_commit("campaign_space","advance",{"delta_seconds":minf(delta,1.0)},"",{"runtime_authorized":true})
+	# A transient transaction rejection must not strand a terminal encounter.
+	if _space_encounter != null and not _space_encounter.peek_completed_result().is_empty():
 		_finish_space_encounter_result()
 
 func _advance_surface_orbit_intents() -> void:

@@ -20325,6 +20325,26 @@ func _update_selection_drag(screen_position: Vector2) -> bool:
 	return true
 
 
+func cancel_modal_input() -> void:
+	# Drop transient pointer gestures only. Existing selections, waypoints and
+	# authoritative commands remain intact; finish handlers would commit them.
+	_cancel_selection_interaction()
+	_right_order_press_active = false
+	_right_order_drag_active = false
+	_right_order_press_screen_position = Vector2.ZERO
+	_right_order_drag_screen_position = Vector2.ZERO
+	_right_order_append_mode = false
+	_area_order_press_active = false
+	_area_order_drag_active = false
+	_area_order_press_screen_position = Vector2.ZERO
+	_area_order_drag_screen_position = Vector2.ZERO
+	_is_dragging_waypoint = false
+	_has_dragged_waypoint = false
+	_dragged_waypoint_ref = {}
+	_dragged_waypoint_press_screen_position = Vector2.ZERO
+	_update_area_order_overlay(Rect2())
+
+
 func _cancel_selection_interaction() -> void:
 	if not _selection_press_active and not _selection_drag_active:
 		return
@@ -20726,7 +20746,7 @@ func _resolve_fireteam_leader_for_behavior(fireteam_id: String):
 	var mission_combat_driver = _get_mission_combat_loop_driver()
 	if mission_combat_driver != null and mission_combat_driver.has_method("get_current_fireteam_lead_unit"):
 		var active_lead = mission_combat_driver.call("get_current_fireteam_lead_unit", normalized_fireteam_id)
-		if active_lead != null:
+		if is_instance_valid(active_lead) and (not active_lead.has_method("get_vital_state") or String(active_lead.call("get_vital_state")) == "fit"):
 			return active_lead
 	var best_unit = null
 	var best_leadership: float = -1.0
@@ -20742,13 +20762,13 @@ func _resolve_fireteam_leader_for_behavior(fireteam_id: String):
 		if leadership > best_leadership:
 			best_leadership = leadership
 			best_unit = unit
-	if best_unit != null:
-		return best_unit
-	return _get_selection_anchor_for_fireteam(normalized_fireteam_id)
+	# No fit member means no behavioral leadership. Selection may still retain
+	# a casualty as its display anchor, but must not elect that anchor as leader.
+	return best_unit
 
 
 func _get_mission_combat_loop_driver():
-	return get_node_or_null("../MissionCombatLoopDriver")
+	return _get_combat_loop_driver()
 
 
 func _is_unit_current_fireteam_lead(unit: Node) -> bool:
@@ -20759,7 +20779,7 @@ func _is_unit_current_fireteam_lead(unit: Node) -> bool:
 		return false
 	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
 	if leader == null or not leader.has_method("get_unit_id"):
-		return bool(unit.get("is_fireteam_lead"))
+		return false
 	return String(leader.call("get_unit_id")) == String(unit.call("get_unit_id"))
 
 
@@ -21172,6 +21192,7 @@ func _get_selection_anchor_for_fireteam(fireteam_id: String) -> Node2D:
 	if normalized_fireteam_id.is_empty():
 		return null
 
+	var leader = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
 	var first_match: Node2D = null
 	for unit in _get_all_friendly_units(true):
 		if not (unit is Node2D):
@@ -21180,7 +21201,7 @@ func _get_selection_anchor_for_fireteam(fireteam_id: String) -> Node2D:
 			continue
 		if first_match == null:
 			first_match = unit as Node2D
-		if _is_unit_current_fireteam_lead(unit):
+		if unit == leader:
 			return unit as Node2D
 
 	return first_match

@@ -447,6 +447,7 @@ func _process(_delta: float) -> void:
 				elif now >= _active_autosave_next_msec:
 					var auto_result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime)
 					set_meta("campaign_active_autosave_result",auto_result)
+					set_meta("campaign_active_checkpoint_result",auto_result)
 					_active_autosave_next_msec = now + (300000 if auto_result.get("ok",false) else 30000)
 			else: _active_autosave_next_msec = 0
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
@@ -4231,7 +4232,7 @@ func _continue_campaign_after_failed_extraction() -> bool:
 	if not is_campaign_start() or not bool(_last_mission_result.get("campaign_checkpoint_retry_required", false)):
 		return false
 	# This is an explicit rollback, never a physical arrival or a fresh save.
-	load("res://scripts/meta/game_start_contract.gd").request_start(get_tree(), "campaign", "continue")
+	load("res://scripts/meta/game_start_contract.gd").request_start(get_tree(), "campaign", "continue_home")
 	get_tree().change_scene_to_file("res://scenes/meta/meta_layer_test.tscn")
 	return true
 
@@ -8147,6 +8148,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 func request_campaign_save() -> Dictionary:
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
+	set_meta("campaign_active_checkpoint_result" if is_instance_valid(_active_mission) else "campaign_checkpoint_result", result.duplicate(true))
 	if result.get("ok",false):
 		result["message"] = "Kampagne gespeichert."
 		if is_instance_valid(_active_mission): _active_autosave_next_msec = Time.get_ticks_msec() + 300000
@@ -8162,7 +8164,8 @@ func is_campaign_start() -> bool:
 
 func _campaign_load_failed() -> void:
 	push_warning("Kampagnenstand ungueltig; kein neuer Stand wird angelegt.")
-	get_tree().root.set_meta("campaign_start_error", "Kampagnenstand konnte nicht geladen werden. Vorhandener Stand bleibt erhalten.")
+	var detail := String(_campaign_start.get("error_message")) if _campaign_start != null else ""
+	get_tree().root.set_meta("campaign_start_error", detail if not detail.is_empty() else "Kampagnenstand konnte nicht geladen werden. Vorhandener Stand bleibt erhalten. Im Kampagnenmenü ist der letzte Basisstand separat erreichbar.")
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 

@@ -155,6 +155,8 @@ func _valid_space_area_context(context: Dictionary) -> bool:
 		return payload.size() == 2 and typeof(payload.get("delta_seconds")) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(payload.delta_seconds))
 	if context.operation == "begin_approach":
 		return payload.size() == 2 and typeof(payload.get("location_id")) == TYPE_STRING and not String(payload.location_id).is_empty()
+	if context.operation == "end_campaign_encounter":
+		return payload.size() == 2 and payload.get("location_id") == "distress_orbit" and context.expected_phase == "approach" and not String(context.source_area_id).is_empty() and context.source_area_id == context.target_area_id
 	if context.operation == "begin_station_landing":
 		return payload.size() == 2 and payload.get("location_id") == "polisa"
 	if context.operation == "depart_station_landing":

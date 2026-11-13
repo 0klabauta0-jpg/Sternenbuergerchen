@@ -67,6 +67,11 @@ func _process(delta: float) -> void:
 		if _orbit_visible: _refresh_orbit_projection()
 		else: refresh()
 
+func cancel_modal_input() -> void:
+	_show_fuel_help = false
+	_update_fuel_help()
+
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.keycode == KEY_ALT and not event.echo:
 		_show_fuel_help = event.pressed and is_visible_in_tree()

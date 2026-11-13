@@ -477,6 +477,14 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 		elapsed = _active_jump_duration_seconds
 		progress = 1.0
 		next_revision += 1 # Existing completion: advance revision followed by arrival revision.
+	elif operation == "end_campaign_encounter":
+		# The encounter stays in the existing local area. Only its approach
+		# reservation ends; Root validates terminal combat and return fuel.
+		if _phase != "approach" or _location_id != "distress_orbit" or payload.get("location_id") != _location_id or payload.get("craft_id") != _craft_id:
+			return _reject("encounter_return_changed", "Kein passender abgeschlossener Notrufeinsatz")
+		orbit = String(Dictionary(_definition.get("location_orbits", {})).get(_location_id, ""))
+		if orbit != _orbit_id: return _reject("location_orbit_mismatch", "Notruf und Reiseorbit passen nicht")
+		marker = _orbit_marker_id
 	elif operation == "enter_orbit":
 		if _phase not in ["surface", "approach"]: return _reject("surface_exit_required", "Kein vorhandener Ortsabflug")
 		orbit = String(Dictionary(_definition.get("location_orbits", {})).get(_location_id, ""))
@@ -498,14 +506,14 @@ func _prepare_space_area_transition_state(expected_revision: int, context: Dicti
 	if body.is_empty() or String(body.get("id", "")) != body_id: return _reject("unbound_target_body", "Zielkoerper ist nicht kanonisch gebunden")
 	if operation == "begin_approach" and not ORBIT_SURFACE_LOCATIONS.contains(body, next_location):
 		return _reject("body_surface_mismatch", "Koerper weist diesen Ort nicht als Oberflaeche aus")
-	if marker.is_empty() and operation == "enter_orbit": marker = GRID.ORBIT_MARKER_IDS[0]
+	if marker.is_empty() and operation in ["enter_orbit", "end_campaign_encounter"]: marker = GRID.ORBIT_MARKER_IDS[0]
 	if GRID.orbit_marker(orbit_definition, marker).is_empty(): return _reject("unknown_orbit_marker", "Vorhandener Orbitmarker fehlt")
 	var layout: Dictionary = load("res://scripts/mission/orbit_approach_layout.gd").build(body_id)
 	if not layout.get("ok", false) or String(context.target_area_id) != String(layout.body_map_id):
 		return _reject("area_body_mismatch", "Bereich passt nicht zum tatsaechlichen Reiseziel")
 	var flight_binding := {}
 	var flight_snapshot: Dictionary = _flight.get_snapshot()
-	if operation == "begin_approach":
+	if operation in ["begin_approach", "end_campaign_encounter"]:
 		if flight_snapshot.get("coordinate_frame") != "local" or flight_snapshot.get("motion_mode") != "tactical" or String(flight_snapshot.get("space_area_id", "")) != String(context.source_area_id) or String(context.source_area_id) != String(layout.body_map_id):
 			return _reject("local_surface_approach_required", "Oberflaechenanflug braucht den echten lokalen taktischen Flight")
 		flight_binding = _space_area_flight_binding(flight_snapshot)

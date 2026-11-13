@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
+const INTERACTION_BINDINGS := preload("res://scripts/mission/mission_interaction_point_binding.gd")
 const SCENARIO_PATH := "res://data/mission_scenarios/station_route_one_screen_multiplayer_drill.json"
 const ENET_PORT_START := 19461
 const ENET_PORT_END := 19471
@@ -43,6 +44,8 @@ func _test_full_route() -> void:
 	var client_scene := MISSION_SCENE.instantiate()
 	host_scene.name = "Mission"
 	client_scene.name = "Mission"
+	_configure_scene(host_scene)
+	_configure_scene(client_scene)
 	host_root.add_child(host_scene)
 	client_root.add_child(client_scene)
 	await _poll(host_api, client_api, 16)
@@ -61,10 +64,20 @@ func _test_full_route() -> void:
 	_configure(host_sim, peer_id, fireteam_id)
 	_configure(client_sim, peer_id, fireteam_id)
 	var host_unit := _find_unit(host_scene, unit_id)
-	var target := Vector2(host_scene.get_node("MapRoot/objective_point").global_position)
+	# Use the map already loaded by MissionSetup, not a separately loaded copy.
+	var map_data = host_scene.get_node("MissionSetup").get("_loaded_terrain_map_data")
+	var bindings: Dictionary = {}
+	var scenario: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(SCENARIO_PATH))
+	for binding: Dictionary in INTERACTION_BINDINGS.normalize_scenario_bindings(scenario):
+		bindings[String(binding.interaction_id)] = binding
 	for step_variant in ROUTE:
 		var step: Dictionary = Dictionary(step_variant).duplicate(true)
-		step.merge({"accepted":true,"fireteam_id":fireteam_id,"target_position":target,"gate_id":step.step_id,"interaction_radius_world":72.0}, true)
+		var binding: Dictionary = bindings.get(String(step.interaction_id), {})
+		_assert(not binding.is_empty() and map_data != null and map_data.has_marker(String(binding.get("marker_id", ""))), "%s has a real authored Host marker" % step.interaction_id)
+		if binding.is_empty() or map_data == null or not map_data.has_marker(String(binding.get("marker_id", ""))):
+			continue
+		var target: Vector2 = map_data.get_marker_position(String(binding.marker_id), Vector2.ZERO)
+		step.merge({"accepted":true,"fireteam_id":fireteam_id,"target_position":target,"gate_id":binding.gate_id,"interaction_radius_world":float(binding.radius_world)}, true)
 		var command: Dictionary = Dictionary(client_controller.call("build_mission_interaction_multiplayer_network_command", step, unit_id, "team_alpha", target))
 		_assert(not command.is_empty() and String(command.get("source_context", "")) == "mission_interaction_use_intent_command", "%s projects to a neutral network command" % step.interaction_id)
 		client_sim.rpc_id(1, "request_command", command)
@@ -88,6 +101,16 @@ func _test_full_route() -> void:
 	pair.client_peer.close()
 	pair.host_peer.close()
 	await process_frame
+
+
+func _configure_scene(scene: Node) -> void:
+	# Set the actual scenario before _ready so its map, UI bindings and host
+	# runtime gates agree. Damage/AI motion are outside this routing regression.
+	scene.get_node("MissionSetup").set("scenario_file_path", SCENARIO_PATH)
+	scene.get_node("MissionSetup").set("defer_friendly_runtime_activation", false)
+	scene.get_node("SimulationRoot").set("is_server_authoritative", true)
+	# The existing grace API still runs Arrival/Hold, gates and replication.
+	scene.get_node("CombatLoopDriver").call("set_combat_startup_grace_ticks", 100000)
 
 
 func _configure(sim: Node, peer_id: int, fireteam_id: String) -> void:

@@ -120,18 +120,27 @@ Schusserlaubnis, Deckungsbalance, RNG oder Schadenswirkung in diesem Helper.
 
 ## Cache
 
-`CombatVisibilityCache.query_hex_visibility` hält reine Geometrie über
-Tickgrenzen. Geordnete Zellen, effektive halbe Endpunkthöhen, Registryidentität
+Auf Main hält `CombatVisibilityCache.query_hex_visibility` reine Geometrie
+innerhalb eines Simulationsticks. Geordnete Zellen, effektive halbe Endpunkthöhen, Registryidentität
 und Terrainrevision bilden den Key. Richtung/Reichweite werden jedes Mal
 frisch gefiltert; Renderpositionen sind keine Eingabe. Ohne Revisions-API
-keine dauerhafte Wiederverwendung.
+keine Wiederverwendung. Der gemeinsame LOS-Leser erhält Halbwerthöhen als Float
+bis zum Hindernisvergleich; Rampenhöhe 2,5 wird nicht auf 2 abgerundet.
 
-Maximal16384Einträge, deterministische LRU mit verketteten Dictionaryeinträgen;
-kein linearer Suchlauf pro Hit/Eviction. Neue Revisionen treffen keine alten
-Keys; alte Einträge bleiben begrenzt. Kapazitätswechsel und `clear_hex_cache`
-leeren auch die Hex-Auditzähler. Der alte Weltpositionscache bleibt ticklokal.
-`begin_tick` leert dessen Daten, nicht die neue Hex-Geometrie. Diagnosewerte
-sind keine replizierte Gameplaywahrheit.
+Maximal 4096 Einträge; bei Erreichen der Kapazität wird der abgeleitete Hexcache
+geleert. `begin_tick` leert bei Tickwechsel Weltpositions- und Hexcache samt
+Auditzählern. Neue Terrainrevisionen treffen keine alten Keys. Diagnosewerte
+sind keine replizierte Gameplaywahrheit. Der frühere Kartenkandidat beschrieb
+eine tickübergreifende 16384-LRU; diese ist keine aktuelle Mainimplementierung.
+
+Der aktive Main-Schussresolver fragt denselben `HexSightRuntimeAdapter` wie
+der Kontaktpfad ab: logische Zulassung, Zelle, Facing, Halbwerthöhe und die
+bestehende Umrechnung der Waffenreichweite auf Hexradien. `handled=true` ist
+abschließend, auch bei fehlender Zulassung oder blockierter Sicht; dann gibt
+es keinen Weltpositionsfallback. Legacy ohne aktiven Hexowner verwendet
+unverändert den bisherigen LOS-Pfad. Diagnose-Reichweite und LOS lesen dieselbe
+Hexabfrage; ihr Abstand wird aus den logischen Zentren über die Registrymetrik
+abgeleitet. Overwatch wird dadurch nicht aktiviert und FoW nicht migriert.
 
 ## Erkennungsepisoden
 

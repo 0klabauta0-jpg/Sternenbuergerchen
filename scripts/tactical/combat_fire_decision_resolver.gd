@@ -150,8 +150,12 @@ static func build_cover_effectiveness_readout(attacker, target, context: Diction
 		return _build_unknown_cover_readout("no_attack_weapon", contact_state)
 
 	var weapon_range_world: float = _get_weapon_attack_range(attacker, target, context)
-	var distance_world: float = _get_node_distance(attacker, target)
+	var get_attack_distance: Callable = context.get("get_attack_distance", Callable())
+	var distance_world: float = float(get_attack_distance.call(attacker, target)) if get_attack_distance.is_valid() else _get_node_distance(attacker, target)
 	var range_state: String = _resolve_range_state(distance_world, weapon_range_world)
+	var logical_visibility := _query_logical_visibility(attacker, target, weapon_range_world, context)
+	if bool(logical_visibility.get("handled", false)):
+		range_state = "in_range" if bool(logical_visibility.get("in_range", false)) else "out_of_range"
 	var los_state: String = _resolve_los_state(attacker, target, context)
 	var raw_cover_score: int = _get_target_cover_score(target, context)
 	var raw_cover_state: String = _resolve_cover_state(raw_cover_score)
@@ -200,7 +204,7 @@ static func build_fire_rule_outcome_diagnostic(unit, context: Dictionary = {}) -
 	var is_suppress: bool = fire_rule == "suppress"
 	var can_attack: bool = bool(context.get("can_attack", false))
 	if not context.has("can_attack") and unit != null:
-		can_attack = can_unit_attack(unit, context)
+		can_attack = can_unit_attack_for_readout(unit, context)
 	return {
 		"schema": "sternenbuergerchen.fire_rule_outcome.v1",
 		"source": "CombatFireDecisionResolver",
@@ -231,6 +235,16 @@ static func can_enemy_attack(unit) -> bool:
 
 
 static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
+	return _resolve_unit_attack_readiness(unit, context, true)
+
+
+## Projection only: a read may inspect the return-fire window, never roll or
+## commit a discipline break. Actual fire selection keeps can_unit_attack().
+static func can_unit_attack_for_readout(unit, context: Dictionary = {}) -> bool:
+	return _resolve_unit_attack_readiness(unit, context, false)
+
+
+static func _resolve_unit_attack_readiness(unit, context: Dictionary, allow_discipline_decision: bool) -> bool:
 	if not _can_unit_seek_target(unit):
 		return false
 	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
@@ -240,6 +254,8 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 			if can_return_fire.is_valid() and bool(can_return_fire.call(unit)):
 				return true
 		if fire_rule == "hold":
+			return false
+		if not allow_discipline_decision:
 			return false
 		var discipline_break: Callable = context.get("check_discipline_break", Callable())
 		if not discipline_break.is_valid() or not bool(discipline_break.call(unit)):
@@ -331,15 +347,22 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	if _get_team_id(attacker) == _get_team_id(target):
 		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
-	var los_system = context.get("los_system", null)
-	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
-		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
-		return false
 	var effective_attack_range: float = _get_effective_attack_range(attacker, target, context)
 	if debug_enabled:
 		_record_hotspot(context, "range_attackability", started_usec)
+	var logical_visibility := _query_logical_visibility(attacker, target, effective_attack_range, context)
+	if bool(logical_visibility.get("handled", false)):
+		return bool(logical_visibility.get("visible", false))
+	var los_system = context.get("los_system", null)
+	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
+		return false
 	var result := bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
 	return result
+
+
+static func _query_logical_visibility(attacker, target, max_range: float, context: Dictionary) -> Dictionary:
+	var query: Callable = context.get("query_current_visibility", Callable())
+	return Dictionary(query.call(attacker, target, max_range)) if query.is_valid() else {}
 
 static func _record_hotspot(context: Dictionary, name: String, started_usec: int) -> void:
 	if not bool(context.get("combat_hotspot_debug_enabled", false)):
@@ -556,6 +579,9 @@ static func _resolve_range_state(distance_world: float, weapon_range_world: floa
 static func _resolve_los_state(attacker, target, context: Dictionary) -> String:
 	if not (attacker is Node2D) or not (target is Node2D):
 		return "unknown"
+	var logical_visibility := _query_logical_visibility(attacker, target, -1.0, context)
+	if bool(logical_visibility.get("handled", false)):
+		return "clear" if bool(logical_visibility.get("visible", false)) else "blocked"
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return "unknown"

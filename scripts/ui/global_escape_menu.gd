@@ -32,6 +32,10 @@ var _window_mode_option: OptionButton = null
 var _test_mode: bool = false
 var _quit_requested_for_tests: bool = false
 var _last_loaded_scene_path: String = ""
+var _modal_open: bool = false
+var _previous_focus: WeakRef = null
+var _suspended_input: Dictionary = {}
+var _panel_focus_controls: Array[Control] = []
 
 
 func _ready() -> void:
@@ -40,6 +44,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_ensure_audio_event_bus()
 	_build_overlay()
+	get_viewport().gui_focus_changed.connect(_on_gui_focus_changed)
 	var tree := get_tree()
 	if tree != null:
 		if not tree.node_added.is_connected(_on_tree_node_added):
@@ -49,6 +54,13 @@ func _ready() -> void:
 
 func _input(event: InputEvent) -> void:
 	_handle_escape_input(event)
+	if not _modal_open or not event is InputEventKey:
+		return
+	if event.pressed and event.keycode == KEY_TAB and not _panel_focus_controls.is_empty():
+		var index := _panel_focus_controls.find(get_viewport().gui_get_focus_owner())
+		index = posmod(index + (-1 if event.shift_pressed else 1), _panel_focus_controls.size())
+		_panel_focus_controls[index].grab_focus()
+		get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -89,9 +101,10 @@ func set_settings_path_for_tests(path: String) -> void:
 
 func open_menu(status_text: String = "") -> void:
 	_ensure_overlay()
+	_begin_modal_input()
+	_overlay_root.visible = true
 	_show_menu_panel()
 	_refresh_action_buttons()
-	_overlay_root.visible = true
 	if not status_text.strip_edges().is_empty():
 		_set_status(status_text)
 	_play_ui_sfx("click", "escape_menu_open")
@@ -99,6 +112,7 @@ func open_menu(status_text: String = "") -> void:
 
 func close_menu() -> void:
 	_ensure_overlay()
+	_end_modal_input(true)
 	_overlay_root.visible = false
 	_play_ui_sfx("cancel", "escape_menu_close")
 
@@ -124,24 +138,25 @@ func is_controls_visible() -> bool:
 
 func open_controls() -> void:
 	_ensure_overlay()
+	_begin_modal_input()
 	_menu_panel.hide()
 	_settings_panel.hide()
 	_controls_panel.show()
 	_overlay_root.show()
-	var back := _controls_panel.find_child("ControlsBackButton", true, false) as Button
-	if back != null:
-		back.grab_focus()
+	_focus_panel(_controls_panel)
 	_play_ui_sfx("click", "escape_controls_open")
 
 
 func open_settings() -> void:
 	_ensure_overlay()
+	_begin_modal_input()
 	_draft_settings = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings", _settings_config_path)).duplicate(true)
 	_refresh_settings_controls()
 	_menu_panel.visible = false
 	_controls_panel.visible = false
 	_settings_panel.visible = true
 	_overlay_root.visible = true
+	_focus_panel(_settings_panel)
 	_set_status("Einstellungen")
 	_play_ui_sfx("click", "escape_settings_open")
 
@@ -209,6 +224,7 @@ func load_mission_slot(change_scene: bool = true) -> Dictionary:
 			var error: Error = tree.change_scene_to_file(scene_path)
 			if error != OK:
 				return _load_result(false, "change_scene_failed", scene_path, error)
+			_end_modal_input(false)
 			_overlay_root.visible = false
 	return _load_result(true, "loaded", scene_path)
 
@@ -221,6 +237,7 @@ func return_to_main_menu(change_scene: bool = true) -> Dictionary:
 			var error: Error = tree.change_scene_to_file(MAIN_MENU_SCENE_PATH)
 			if error != OK:
 				return {"ok": false, "reason": "change_scene_failed", "error": error}
+			_end_modal_input(false)
 			_overlay_root.visible = false
 	return {"ok": true, "target_scene": MAIN_MENU_SCENE_PATH}
 
@@ -505,6 +522,93 @@ func _show_menu_panel() -> void:
 	_controls_panel.visible = false
 	_refresh_action_buttons()
 	_set_status("Escape · Einsätze laufen weiter")
+	if _modal_open:
+		_focus_panel(_menu_panel)
+
+
+func _begin_modal_input() -> void:
+	if _modal_open:
+		return
+	var focused := get_viewport().gui_get_focus_owner()
+	_previous_focus = weakref(focused) if focused != null else null
+	_modal_open = true
+	var scene := get_tree().current_scene
+	if scene != null:
+		_suspend_scene_input_recursive(scene)
+
+
+func _suspend_scene_input_recursive(node: Node) -> void:
+	_suspend_scene_input(node)
+	for child in node.get_children():
+		_suspend_scene_input_recursive(child)
+
+
+func _suspend_scene_input(node: Node) -> void:
+	if not _modal_open or not is_instance_valid(node) or not node.is_inside_tree():
+		return
+	var scene := get_tree().current_scene
+	if scene == null or (node != scene and not scene.is_ancestor_of(node)):
+		return
+	var id := node.get_instance_id()
+	if _suspended_input.has(id):
+		return
+	# A release can occur while callbacks are suspended. Cancel only unfinished
+	# UI gestures; never synthesize a release that could commit an order.
+	if node.has_method("cancel_modal_input"):
+		node.call("cancel_modal_input")
+	# One bounded traversal on opening; simulation/physics processing is untouched.
+	var flags := [node.is_processing_input(), node.is_processing_shortcut_input(), node.is_processing_unhandled_key_input(), node.is_processing_unhandled_input()]
+	if not flags.has(true):
+		return
+	_suspended_input[id] = [weakref(node)] + flags
+	node.set_process_input(false)
+	node.set_process_shortcut_input(false)
+	node.set_process_unhandled_key_input(false)
+	node.set_process_unhandled_input(false)
+
+
+func _end_modal_input(restore_focus: bool) -> void:
+	_modal_open = false
+	_panel_focus_controls.clear()
+	for entry: Array in _suspended_input.values():
+		var node: Node = entry[0].get_ref()
+		if is_instance_valid(node):
+			node.set_process_input(entry[1])
+			node.set_process_shortcut_input(entry[2])
+			node.set_process_unhandled_key_input(entry[3])
+			node.set_process_unhandled_input(entry[4])
+	_suspended_input.clear()
+	var focused: Control = _previous_focus.get_ref() if _previous_focus != null else null
+	_previous_focus = null
+	if restore_focus and is_instance_valid(focused) and focused.is_visible_in_tree() and focused.focus_mode != Control.FOCUS_NONE and (not focused is BaseButton or not focused.disabled):
+		focused.grab_focus()
+
+
+func _focus_panel(panel: Control, preserve_current: bool = false) -> void:
+	var focused := get_viewport().gui_get_focus_owner()
+	_panel_focus_controls.clear()
+	for child in panel.find_children("*", "Control", true, false):
+		if child.focus_mode == Control.FOCUS_ALL and child.is_visible_in_tree() and (not child is BaseButton or not child.disabled):
+			_panel_focus_controls.append(child)
+	if _panel_focus_controls.is_empty():
+		return
+	for index in _panel_focus_controls.size():
+		var control := _panel_focus_controls[index]
+		var previous := control.get_path_to(_panel_focus_controls[posmod(index - 1, _panel_focus_controls.size())])
+		var next := control.get_path_to(_panel_focus_controls[(index + 1) % _panel_focus_controls.size()])
+		control.focus_previous = previous
+		control.focus_next = next
+		control.focus_neighbor_top = previous
+		control.focus_neighbor_bottom = next
+	if preserve_current and _panel_focus_controls.has(focused):
+		focused.grab_focus()
+	else:
+		_panel_focus_controls[0].grab_focus()
+
+
+func _on_gui_focus_changed(control: Control) -> void:
+	if _modal_open and control != null and not _overlay_root.is_ancestor_of(control) and not _panel_focus_controls.is_empty():
+		_panel_focus_controls[0].grab_focus()
 
 
 func _ensure_overlay() -> void:
@@ -525,6 +629,8 @@ func _refresh_action_buttons() -> void:
 		_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else "Startet die gemerkte Szene von vorn. Kein gespeicherter Spielfortschritt."
 	if _main_menu_button != null:
 		_main_menu_button.disabled = _is_current_scene_main_menu()
+	if _modal_open and is_menu_visible():
+		_focus_panel(_menu_panel, true)
 
 
 func _refresh_settings_controls() -> void:
@@ -661,9 +767,18 @@ func _install_button_sfx_recursive(node: Node) -> void:
 
 
 func _on_tree_node_added(node: Node) -> void:
+	if _modal_open:
+		# Run after _ready, which can enable a newly added node's input callbacks.
+		_suspend_new_scene_input.call_deferred(weakref(node))
 	var button := node as BaseButton
 	if button != null:
 		_install_button_sfx(button)
+
+
+func _suspend_new_scene_input(node_ref: WeakRef) -> void:
+	var node: Node = node_ref.get_ref()
+	if is_instance_valid(node):
+		_suspend_scene_input(node)
 
 
 func _install_button_sfx(button: BaseButton) -> void:

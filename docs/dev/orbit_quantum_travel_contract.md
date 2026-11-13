@@ -44,10 +44,14 @@ Bestehende Fuel-Kosten werden genau einmal beim verbindlichen Ortsanflug und
 Rueckflug gebucht. Quantum-Abbruch/Neustart fuehren keine zusaetzliche Oekonomie
 ein. UI besitzt keine Craft-, Fuel-, Missions- oder Reiseparallelwahrheit.
 
-V1: ein aktiver Reiseausflug, ein Mond, ein Planet, zwei Zielorte. Bestehende
-andere Skirmish-/Multiplayer-Missionen bleiben getrennt. Basischeckpoint bleibt
-einziger Savepunkt; Abbruch der Anwendung im Orbit setzt beim Fortsetzen auf
-den letzten Basischeckpoint zurueck.
+Historischer V1-Umfang: ein aktiver Reiseausflug, ein Mond, ein Planet, zwei
+Zielorte. Bestehende andere Skirmish-/Multiplayer-Missionen bleiben getrennt.
+Seit dem aktiven Kampagnencheckpoint sind unterstuetzte stabile Ein-Schiff-
+Bodeneinsaetze separat speicherbar. Normales `continue` laedt einen gueltigen,
+zum Basisstand passenden Einsatzstand, sonst den Basisstand. Orbitflug selbst
+ist weiterhin kein Dateisavepunkt. Ein ungueltiger Einsatzstand wird nicht
+stillschweigend durch den Basisstand ersetzt; die ausdrueckliche Rueckkehr zum
+Basisstand verwendet `continue_home` gemaess `campaign_introduction_contract.md`.
 
 ## Sternkartenkamera und Zukunftspositionen
 
@@ -71,3 +75,17 @@ Landung vor Heimkehr. Native Verstaendlichkeit bleibt getrennte Sichtpruefung.
 
 ## Revision 10.11.2026
 Die historische Ein-Reise-Grenze ist fuer diesen Slice abgeloest: singleplayer_fleet_travel_state.gd indiziert unveraenderte individuelle Reiseowner. Orte und Ansicht folgen persistent_location_runtime_contract.md. Die erste Kampagne bleibt bei zwei Personen/einem Schiff; Mehrtruppbetrieb ist mit isoliertem groesserem Team geprueft. Mehrschiff-Weltcheckpoint bleibt sichtbar gesperrt, statt ein unvollstaendiges Ein-Schiff-Save zu erzeugen.
+
+## Encounterabschluss, Revision 13.11.2026
+
+Der gebundene Notrufeinsatz endet nach bestaetigtem Sieg, Rueckzug oder
+Niederlage ueber `SimulationRoot.commit_campaign_space_return`. Root prueft
+den terminalen, noch nicht verbrauchten Encounterbeleg, die tatsaechlichen
+Combat-/Flightowner und den vorherigen Abflugbeleg. Fleet und Einzelreiseowner
+bereiten `end_campaign_encounter` nur fuer `approach` an `distress_orbit` im
+passenden lokalen Orbitbereich vor. Erst nach gemeinsamer Reise-/Fuelvalidierung
+werden Rueckflugkosten, Kontaktentfernung und `orbit` synchron publiziert.
+Der Spielerflight und seine lokale Position bleiben erhalten; dies ist keine
+Heimkehr oder Basislandung. Gleiche abgeschlossene Requests sind wiederholbar,
+ohne erneut Fuel oder Ergebnisse zu erzeugen. Ein voruebergehend abgelehnter
+Abschluss bleibt sichtbar ausstehend und wird vom Runtimepfad erneut versucht.

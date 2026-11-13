@@ -3,6 +3,7 @@ extends RefCounted
 
 const PRESETS = preload("res://scripts/npc/unit_roster_presets.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
+const ACTIVE_STORE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
 const BASE_MAP := "res://maps/campaign_intro_base.json"
 const HEX_AUTOSAVE_INTERVAL_MSEC := 5 * 60 * 1000
 var entry: Dictionary = {}
@@ -14,11 +15,15 @@ var active_pending: Dictionary = {}
 var active_restore_in_progress := false
 var _hex_export_scope := ""
 var _hex_export_msec: int = -1
+var _retired_active_sha256 := ""
+var _retire_active_on_home_save := false
 
 func configure(flow: Node, request: Dictionary) -> void:
 	var run_source: Dictionary = {}
 	entry = request.duplicate(true)
-	if String(request.get("action", "new")) == "continue":
+	var action := String(request.get("action", "new"))
+	_retire_active_on_home_save = action == "new"
+	if action in ["continue", "continue_home"]:
 		var loaded: Dictionary = STORE.load_checkpoint()
 		if not bool(loaded.get("ok", false)):
 			error_message = "Kampagnenstand konnte nicht geladen werden. Zurueck zum Menue."
@@ -32,23 +37,29 @@ func configure(flow: Node, request: Dictionary) -> void:
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 		_migrate_known_main_starter(checkpoint)
 		run_source = checkpoint.duplicate(true)
-		var active_store = load("res://scripts/meta/campaign_active_checkpoint_store.gd")
-		if FileAccess.file_exists(active_store.DEFAULT_PATH):
+		_retired_active_sha256 = String(checkpoint.get("retired_active_checkpoint_sha256", ""))
+		if action == "continue" and FileAccess.file_exists(ACTIVE_STORE.DEFAULT_PATH) and FileAccess.get_sha256(ACTIVE_STORE.DEFAULT_PATH) != _retired_active_sha256:
 			var bootstrap = load("res://scripts/mission/campaign_active_bootstrap_validation.gd")
-			var active: Dictionary = active_store.load_checkpoint(bootstrap.validate)
+			var active: Dictionary = ACTIVE_STORE.load_checkpoint(bootstrap.validate)
 			if not active.get("ok",false):
 				# A newer home save supersedes an older active file without deletion.
 				if active.get("reason") != "active_home_mismatch":
-					error_message = "Einsatzstand ist ungueltig; der Heimatstand bleibt erhalten."
+					error_message = "Einsatzstand ist ungültig. Im Kampagnenmenü kannst du ausdrücklich den letzten Basisstand laden; der Einsatzstand wird dabei als Datei gesichert."
 					return
 			else:
 				active_pending = active.payload.components
 				active_restore_in_progress = true
 				checkpoint["base_personnel"] = active_pending.base_personnel.duplicate(true)
-	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, String(request.get("action", "new")) != "continue")
+	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, action == "new")
 	if not run.get("ok", false):
 		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
 		return
+	if action == "continue_home" and FileAccess.file_exists(ACTIVE_STORE.DEFAULT_PATH):
+		var archived: Dictionary = ACTIVE_STORE.archive_checkpoint(FileAccess.get_sha256(ACTIVE_STORE.DEFAULT_PATH))
+		if not archived.get("ok", false):
+			error_message = "Einsatzstand konnte nicht gesichert werden. Beide Speicherstände bleiben erhalten."
+			return
+		flow.set_meta("campaign_active_archive", archived)
 	campaign_run_id = run.id
 	var roster: Array = Array(checkpoint.get("roster", _initial_roster())).duplicate(true)
 	flow.set("_all_team_units", roster)
@@ -196,12 +207,23 @@ func save_home_checkpoint(flow: Node, runtime: Node, force: bool = false) -> Dic
 	payload["fleet"] = []
 	for ship: Dictionary in crafts:
 		payload.fleet.append({"definition":ship.duplicate(true),"pilot_id":String(Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(String(ship.craft_id),"")),"location":String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"homebase"))})
+	# Commit the exact superseded file identity WITH the new home checkpoint.
+	# If archiving fails or the process exits after the atomic home rename,
+	# Continue can still ignore only that retired artifact without parsing it.
+	var active_sha := FileAccess.get_sha256(ACTIVE_STORE.DEFAULT_PATH) if _retire_active_on_home_save and FileAccess.file_exists(ACTIVE_STORE.DEFAULT_PATH) else ""
+	if not active_sha.is_empty(): _retired_active_sha256 = active_sha
+	if not _retired_active_sha256.is_empty(): payload["retired_active_checkpoint_sha256"] = _retired_active_sha256
 	var signature: String = JSON.stringify(payload, "", true).sha256_text()
 	if signature == last_save_signature:
 		return {"ok": true, "unchanged": true}
 	var result: Dictionary = STORE.save_checkpoint(payload)
 	if result.get("ok", false):
 		last_save_signature = signature
+		_retire_active_on_home_save = false
+		if not active_sha.is_empty():
+			var archived: Dictionary = ACTIVE_STORE.archive_checkpoint(active_sha)
+			result["active_archive"] = archived
+			if archived.get("ok", false): flow.set_meta("campaign_active_archive", archived)
 	return result
 
 

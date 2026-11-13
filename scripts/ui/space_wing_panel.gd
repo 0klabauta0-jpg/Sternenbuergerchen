@@ -161,6 +161,15 @@ func _card_input(event: InputEvent, id: String) -> void:
 		_drag_active = true
 		accept_event()
 
+func cancel_modal_input() -> void:
+	_drag_active = false
+	_drag_wing = ""
+	_drag_start = Vector2.ZERO
+	_drag_end = Vector2.ZERO
+	_drag_additive = false
+	queue_redraw()
+
+
 func _input(event: InputEvent) -> void:
 	if not _drag_active: return
 	if not is_visible_in_tree():

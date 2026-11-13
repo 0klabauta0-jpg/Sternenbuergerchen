@@ -102,6 +102,14 @@ const FORBIDDEN_HEX_AUTHORITY_KEYS: PackedStringArray = [
 ]
 const MAX_AUTHORITY_PAYLOAD_DEPTH := 16
 const MAX_AUTHORITY_PAYLOAD_NODES := 4096
+# These are outputs of host posture/combat policy, never player intent. Keep
+# serialized UnitCommands compatible, but discard their derived runtime facts
+# at this boundary. Trusted runtime enqueue_command() does not use this contract.
+const HOST_UNIT_POLICY_FIELDS: PackedStringArray = [
+	"move_speed_factor", "sight_range_factor", "cover_score", "attack_bonus",
+	"posture_policy_id", "engagement_range_policy", "engagement_range_factor",
+	"contact_initiative_seconds", "aim_readiness_percent", "team_target_support_percent",
+]
 const FORBIDDEN_LZ_SOURCES: PackedStringArray = [
 	"scenario",
 	"mission_scenario",
@@ -126,6 +134,8 @@ func validate(command_dict: Dictionary, context: Dictionary = {}) -> Dictionary:
 	var forbidden_key: String = _find_forbidden_state_key(command)
 	if not forbidden_key.is_empty():
 		return _reject("state_mutation_key:%s" % forbidden_key)
+	for field in HOST_UNIT_POLICY_FIELDS:
+		command.erase(field)
 
 	var category: String = _detect_category(command)
 	if category.is_empty():
@@ -491,7 +501,7 @@ func _has_forbidden_lz_source(command: Dictionary) -> bool:
 func _has_vector2_or_vector3(command: Dictionary, key: String) -> bool:
 	var value: Variant = command.get(key, null)
 	var value_type: int = typeof(value)
-	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3
+	return (value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3) and value.is_finite()
 
 
 func _accept_payload(command_type: String, unit_id: String, team_id: String, fireteam_id: String, extra_ownership: Dictionary = {}) -> Dictionary:

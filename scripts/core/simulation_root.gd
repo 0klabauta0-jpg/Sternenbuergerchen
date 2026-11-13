@@ -8013,7 +8013,8 @@ func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: S
 		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
 	if _campaign_space_return_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
 	var encounter: Dictionary = _space_encounter_owner.get_snapshot()
-	if request_id.strip_edges().is_empty() or encounter.get("craft_id") != craft_id or encounter.get("phase") not in ["victory", "defeat", "aborted"] or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return {"ok":false, "reason":"encounter_not_complete"}
+	if request_id.strip_edges().is_empty() or encounter.get("craft_id") != craft_id or _space_encounter_owner.peek_completed_result().is_empty() or _space_encounter_owner.get("_combat_owner") != _space_combat_state: return {"ok":false, "reason":"encounter_not_complete"}
+	if _space_encounter_owner.get("_combat_ids") != {"player":craft_id, "hostile":"hostile_cutlass", "neutral":"neutral_buccaneer"}: return {"ok":false, "reason":"encounter_actors_changed"}
 	var tokens: Variant = adapter.get("_departure_token_by_craft")
 	if typeof(tokens) != TYPE_DICTIONARY: return {"ok":false, "reason":"departure_unavailable"}
 	var departure_id := String(tokens.get(craft_id, ""))
@@ -8037,7 +8038,7 @@ func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: S
 	var validation: Dictionary = _singleplayer_space_travel_owner.validate_prepared_space_area_transition(candidate, context) if candidate.get("ok", false) else candidate
 	if not validation.get("ok", false) or validation.get("replayed", false):
 		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
-		return {"ok":false, "reason":"travel_validation_failed"}
+		return {"ok":false, "reason":String(validation.get("reason", "travel_validation_failed"))}
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self):
 		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
 		return {"ok":false, "reason":"supply_authority_unavailable"}

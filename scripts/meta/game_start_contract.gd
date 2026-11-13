@@ -11,7 +11,7 @@ static func request_start(tree: SceneTree, mode: String, action: String = "new",
 	clear_start(tree)
 	if tree == null or tree.root == null:
 		return {"ok": false, "reason": "missing_tree"}
-	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue"] or (mode == "skirmish" and action != "new"):
+	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue", "continue_home"] or (mode == "skirmish" and action != "new"):
 		return {"ok": false, "reason": "invalid_start"}
 	if not preset_id.is_empty() and (mode != "skirmish" or preset_id not in ["early", "mid", "late"]):
 		return {"ok":false,"reason":"invalid_skirmish_preset"}
@@ -39,7 +39,7 @@ static func consume_start(tree: SceneTree) -> Dictionary:
 	var action: Variant = value.get("action")
 	if not mode is String or not action is String:
 		return fallback
-	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue"] or (mode == "skirmish" and action != "new"):
+	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue", "continue_home"] or (mode == "skirmish" and action != "new"):
 		return fallback
 	var result := {"mode": mode, "action": action}
 	if value.has("preset_id"):

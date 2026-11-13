@@ -66,6 +66,8 @@ const TEAM_EDITOR_METRIC_GROUP_CONFIG: Dictionary = {
 var _campaign_button: Button
 var _campaign_dialog: ConfirmationDialog
 var _campaign_continue_button: Button
+var _campaign_home_button: Button
+var _campaign_home_dialog: ConfirmationDialog
 var _campaign_replace_dialog: ConfirmationDialog
 var _skirmish_dialog: AcceptDialog
 var _skirmish_points_dialog: AcceptDialog
@@ -3820,12 +3822,14 @@ func _ensure_campaign_entry() -> void:
 	_campaign_dialog = ConfirmationDialog.new()
 	_campaign_dialog.name = "CampaignStartDialog"
 	_campaign_dialog.title = "Kampagne"
-	_campaign_dialog.dialog_text = "Einfuehrung mit Pilot und einem Leader.\nFortsetzen laedt den letzten sicheren Basis-Meilenstein.\nUnterbrochene Ausfluege werden von dort erneut begonnen."
+	_campaign_dialog.dialog_text = "Einführung mit Pilot und einem Leader.\nFortsetzen lädt den letzten gültigen Einsatzstand, sonst den Basisstand.\nEin beschädigter Einsatzstand wird nicht automatisch übersprungen."
 	_campaign_dialog.ok_button_text = "Neue Kampagne"
 	_campaign_dialog.cancel_button_text = "Zurueck"
 	add_child(_campaign_dialog)
 	_campaign_continue_button = _campaign_dialog.add_button("Fortsetzen", false, "continue")
 	_campaign_continue_button.name = "CampaignContinueButton"
+	_campaign_home_button = _campaign_dialog.add_button("Letzten Basisstand laden …", false, "continue_home")
+	_campaign_home_button.name = "CampaignHomeContinueButton"
 	_campaign_dialog.custom_action.connect(_on_campaign_dialog_action)
 	_campaign_dialog.confirmed.connect(_on_campaign_new_pressed)
 	_campaign_replace_dialog = ConfirmationDialog.new()
@@ -3836,6 +3840,14 @@ func _ensure_campaign_entry() -> void:
 	_campaign_replace_dialog.cancel_button_text = "Abbrechen"
 	add_child(_campaign_replace_dialog)
 	_campaign_replace_dialog.confirmed.connect(_start_campaign.bind("new"))
+	_campaign_home_dialog = ConfirmationDialog.new()
+	_campaign_home_dialog.name = "CampaignHomeContinueDialog"
+	_campaign_home_dialog.title = "Zum letzten Basisstand zurückkehren?"
+	_campaign_home_dialog.dialog_text = "Der aktuelle Ausflug wird nicht fortgesetzt. Ein vorhandener Einsatzstand bleibt als Archivdatei erhalten. Geladen wird ausdrücklich der letzte sichere Basisstand."
+	_campaign_home_dialog.ok_button_text = "Basisstand laden"
+	_campaign_home_dialog.cancel_button_text = "Abbrechen"
+	add_child(_campaign_home_dialog)
+	_campaign_home_dialog.confirmed.connect(_start_campaign.bind("continue_home"))
 
 
 func _load_campaign_checkpoint() -> Dictionary:
@@ -3852,12 +3864,19 @@ func _campaign_checkpoint_exists() -> bool:
 
 func _on_campaign_pressed() -> void:
 	_campaign_continue_button.disabled = not bool(_load_campaign_checkpoint().get("ok", false))
-	_campaign_dialog.popup_centered(Vector2i(620, 240))
+	_campaign_home_button.disabled = _campaign_continue_button.disabled
+	_campaign_dialog.popup_centered(Vector2i(760, 260))
 
 
 func _on_campaign_dialog_action(action: StringName) -> void:
 	if action == &"continue":
 		_on_campaign_continue_pressed()
+	elif action == &"continue_home":
+		if not bool(_load_campaign_checkpoint().get("ok", false)):
+			_status_label.text = "Kein gültiger Basisstand vorhanden"
+			return
+		_campaign_dialog.hide()
+		_campaign_home_dialog.popup_centered(Vector2i(600, 220))
 
 
 func _on_campaign_continue_pressed() -> void:
@@ -3881,6 +3900,7 @@ func _on_campaign_new_pressed() -> void:
 func _start_campaign(action: String) -> void:
 	_campaign_dialog.hide()
 	_campaign_replace_dialog.hide()
+	_campaign_home_dialog.hide()
 	GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "campaign", action)
 	_play_ui_sfx("confirm", "campaign")
 	_change_scene(SINGLEPLAYER_SCENE_PATH)

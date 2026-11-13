@@ -150,7 +150,9 @@ func refresh() -> void:
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}
 	var checkpoint_guard: Dictionary=Dictionary(_runtime.call("get_snapshot").get("checkpoint_guard",{}))
-	var signature := JSON.stringify({"view_mode":String(homebase.get("_operations_mode")) if homebase != null else "", "checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
+	var active_save: Dictionary = _flow.get_meta("campaign_active_checkpoint_result", {}) if is_instance_valid(_flow) else {}
+	var in_mission := is_instance_valid(mission)
+	var signature := JSON.stringify({"view_mode":String(homebase.get("_operations_mode")) if homebase != null else "", "in_mission":in_mission,"active_save":active_save,"checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
 	if signature == _signature:
 		return
 	_signature = signature
@@ -162,6 +164,10 @@ func refresh() -> void:
 	_guidance.text = String(step[1])
 	_checkpoint_label.text = "Speichert an Basis-Meilensteinen." if checkpoint.is_empty() else ("Basisstand gespeichert." if bool(checkpoint.get("ok", false)) else "Speichern fehlgeschlagen. Der letzte Basisstand bleibt erhalten.")
 	if not bool(checkpoint_guard.get("ok",true)): _checkpoint_label.text=String(checkpoint_guard.get("message","Speichern wartet auf die Rueckkehr aller Schiffe"))
+	if in_mission:
+		_checkpoint_label.text = "Stabilen Einsatz über Escape → Kampagne speichern sichern."
+		if not active_save.is_empty():
+			_checkpoint_label.text = "Einsatzstand gespeichert; Fortsetzen nimmt diesen Einsatz wieder auf." if active_save.get("ok", false) else "Einsatz noch nicht speicherbar; der letzte gespeicherte Stand bleibt erhalten."
 	_service.register_control(_guidance, _help_id)
 	_service.register_control(_help_button, _help_id)
 	_guidance.visible = not _hints_hidden

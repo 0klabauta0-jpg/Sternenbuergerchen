@@ -45,6 +45,24 @@ Der Contract lehnt Payloads ab, die Client-State als Wahrheit setzen wollen, unt
 - Dropship-/LZ-Runtime-State
 - LZ-Payloads mit `source_context`/`source` aus `scenario`, `mission_scenario`, `editor` oder `map_editor`
 
+## Host-Normalisierung (Reviewkorrektur 13.11.2026)
+- Serialisierte UnitCommands dürfen weiterhin gültige Bewegungs-/Haltabsichten
+  liefern. Abgeleitete Geschwindigkeits-, Sicht-, Deckungs-, Angriffs-, Reichweiten-,
+  Initiative- und Bereitschaftswerte werden an der Netzwerkgrenze entfernt.
+  Direkte interne `enqueue_command()`-Aufrufe behalten ihre Host-Policy-Werte.
+- Zielvektoren der geprüften Netzwerkabsichten müssen endlich sein.
+- Bei Missionsinteraktionen dienen Client-Metadaten nur als Hinweise. Der
+  CombatDriver bestimmt Markerposition, Radius, Dauer, Bedienart und Step/Gate
+  aus dem geladenen Host-Szenario und `MissionSetup`-Kartenmodell. Unbekannte IDs,
+  fehlende Marker, falsche Besitzer, unerfüllte Voraussetzungen und nicht mehr
+  aktive Missionen/Bediener werden abgewiesen.
+- Entfernung und ununterbrochene Bedienzeit werden an der registrierten Host-Unit
+  geprüft. Ersatzbefehle, Down/Despawn und Szenariowechsel beenden alte Pending-Uses;
+  ein Retry desselben Bedieners erhält gültigen Fortschritt. Bestehende Ressourcen-
+  und Rückkehrgates entscheiden weiterhin über den tatsächlichen Abschluss.
+- Regression: `scripts/tests/astra_network_fixes_20261113.gd` verwendet echte
+  localhost-ENet-RPCs und Produktionsowner mit privatem Testprofil.
+
 ## Testbarkeit
 `scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd` prueft:
 - erlaubter Move wird serverseitig enqueued

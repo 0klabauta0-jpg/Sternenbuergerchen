@@ -37,11 +37,26 @@ static func load_checkpoint(validator: Callable, path: String = DEFAULT_PATH) ->
 	if not FileAccess.file_exists(path): return _reject("checkpoint_missing")
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null or file.get_length() > MAX_BYTES: return _reject("checkpoint_unreadable")
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	var parser := JSON.new()
+	var parse_error := parser.parse(file.get_as_text())
+	file.close()
+	if parse_error != OK: return _reject("invalid_checkpoint_json")
+	var parsed: Variant = parser.data
 	if not parsed is Dictionary or not _json_value(parsed): return _reject("invalid_checkpoint_json")
 	var validated: Variant = validator.call(parsed.duplicate(true))
 	if not validated is Dictionary or not validated.get("ok",false): return validated if validated is Dictionary else _reject("invalid_active_checkpoint")
 	return {"ok":true,"payload":parsed}
+
+# Preserve the exact prior artifact, including malformed JSON. The expected
+# digest prevents a newly written active save from being retired by stale work.
+static func archive_checkpoint(expected_sha256: String, path: String = DEFAULT_PATH) -> Dictionary:
+	if not _valid_path(path): return _reject("invalid_checkpoint_path")
+	if not FileAccess.file_exists(path): return {"ok":true,"unchanged":true}
+	if expected_sha256.length() != 64 or FileAccess.get_sha256(path) != expected_sha256: return _reject("active_checkpoint_changed")
+	var archived := path.trim_suffix(".json") + ".retired-" + expected_sha256 + ".json"
+	if FileAccess.file_exists(archived) and FileAccess.get_sha256(archived) != expected_sha256: return _reject("active_archive_conflict")
+	if DirAccess.rename_absolute(ProjectSettings.globalize_path(path), ProjectSettings.globalize_path(archived)) != OK: return _reject("active_archive_failed")
+	return {"ok":true,"archived_path":archived}
 
 static func _valid_path(path: String) -> bool:
 	if not path.begins_with("user://campaigns/") or path.contains("\\") or not path.to_lower().ends_with(".json"): return false
