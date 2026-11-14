@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "runtime_fallback",
+      "script": "res://scripts/tests/native_navigation_runtime_verifier.gd",
+      "args": [
+        "--expect-native=false",
+        "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\runtime_fallback.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_RUNTIME",
+      "timeout": 180
+    },
+    {
+      "name": "load_fallback",
+      "script": "res://scripts/tests/native_navigation_load_verifier.gd",
+      "args": [
+        "--expect-native=false",
+        "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\load_fallback.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_LOAD",
+      "timeout": 180
+    }
+  ]
+}

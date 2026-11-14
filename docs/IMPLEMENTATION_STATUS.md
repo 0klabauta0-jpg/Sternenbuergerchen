@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Native Navigation: Runtime-Standard und Vorbereitung beim Laden — 14.11.2026
+
+Folgebranch `task/native-navigation-runtime-20261114`, bewusst auf dem noch
+nicht integrierten optimierten Prototyp `fa3a2a7a5`. SimulationRoot nutzt C++
+standardmaessig fuer HPA/A* und Ersatzzielsuche. Missionladeabschluss bereitet
+Graph/Terrain nach initialen Szenario-/Tuer-Overrides vor; erste Move-Anfrage
+verwendet den Snapshot ohne Neuaufbau. Fehlende DLL faellt auf GDScript zurueck.
+10/10 Gates, 1953 Assertions ohne Fehler/Leaks und 32 exakte Bewegungstick-Paare.
+GM01-Median ganzer Befehlsticks: 171,9645 -> 6,9825 ms (24,63x); Vorbereitung
+beim Laden nativ rund 0,594 s inkl. Graph, davon 0,309 s native Daten. Laden
+plus acht Ticks: 1846–1915 ms -> 657–658 ms. C++/DLL unveraendert zum Prototyp.
+Headless-Owner-/Ladertests mit isolierten Visuals; keine allgemeine FPS- oder
+Multiplayer-/Save-Continue-Freigabe. Kein Mainmerge/EXE. Vertrag und Evidenz:
+`docs/dev/native_navigation_runtime_contract.md`,
+`docs/qa/native_navigation_runtime_20261114/README.md`.
+
 ### Native Navigation: Optionswechsel ohne Terrain-Neuaufbau — 14.11.2026
 
 Folgebranch `task/native-navigation-dynamic-costs-20261114`, bewusst auf dem noch

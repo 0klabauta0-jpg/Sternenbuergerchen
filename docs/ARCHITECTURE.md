@@ -12,6 +12,7 @@ Simulation, Darstellung und UI strikt trennen.
 - Dirty-Flags statt per-frame Komplett-Refresh
 - Out-of-View-Simulation vereinfacht, aber konsistent
 - Navigation ueber A*-Pfadsuche auf dem Iso-Grid (walkable, Hoehenunterschied, Surface-Kosten); Geradlinien-Fallback ohne TerrainRegistry
+- SimulationRoot verwendet standardmaessig die native C++-A*/HPA-Navigation mit GDScript-Fallback. Der Missionladeabschluss bereitet Graph/Terrain nach initialen Overrides vor; Ownership und Invalidierung stehen in `docs/dev/native_navigation_runtime_contract.md`.
 - Neue Hex-Inhalte verwenden den versionierten Vertrag `hex_axial_v1` aus `docs/dev/hex_grid_v1_contract.md`: MapData besitzt die Topologie, Registry/A*/HPA lesen dieselben sechs Nachbarn und SimulationRoot verwendet das physische Bewegungsmass. Bestehende Karten ohne Topologiefeld bleiben ausdruecklich `square8`. Neben dem ersten nativen Basis-Ausschnitt verwendet die regulaere GM01 inzwischen 96×98 echte Hexfelder bis zur sichtbaren Bodenaußenkante (`gm01_frontier_map_contract.md`); das ist keine abgeschlossene Migration aller Altinhalte.
 - Datenbasiertes Combat statt Physik-Ballistik
 

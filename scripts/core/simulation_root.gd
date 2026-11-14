@@ -71,6 +71,7 @@ const LOCAL_AVOIDANCE_MIN_FORWARD_PROGRESS_FACTOR: float = 0.35
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
+const NATIVE_NAVIGATION_SCRIPT: GDScript = preload("res://scripts/terrain/native_navigation.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const BOTTLENECK_RESERVATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
@@ -103,6 +104,7 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var combat_rng_seed: int = 1
 @export var terrain_move_debug_enabled: bool = false
 @export var navigation_budget_enabled: bool = true
+@export var native_navigation_enabled: bool = true
 @export_range(0, 64, 1) var navigation_max_new_path_queries_per_tick: int = 4
 @export var navigation_debug_enabled: bool = false
 @export_range(1, 128, 1) var navigation_debug_query_history_limit: int = 24
@@ -187,6 +189,9 @@ var _snapshot_blocked_peer_ids: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
 var _hpa_navigation_graph = null
 var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
+var _native_navigation = NATIVE_NAVIGATION_SCRIPT.new()
+var _navigation_backend_debug: Dictionary = {}
+var _navigation_prewarm_debug: Dictionary = {}
 var _hpa_navigation_registry = null
 var _hpa_navigation_tile_count: int = -1
 var _hpa_navigation_registry_revision: int = -1
@@ -335,6 +340,74 @@ func get_navigation_debug_snapshot() -> Dictionary:
 		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
 		"last_path_metrics": _navigation_last_path_metrics.duplicate(true),
 		"hpa_navigation": _get_hpa_navigation_debug_snapshot(),
+		"navigation_backend": get_navigation_backend_debug_snapshot(),
+	}
+
+
+func get_navigation_backend_debug_snapshot() -> Dictionary:
+	var snapshot: Dictionary = _native_navigation.get_debug_snapshot()
+	snapshot.merge(_navigation_backend_debug, true)
+	snapshot["enabled"] = native_navigation_enabled
+	snapshot["prewarm"] = _navigation_prewarm_debug.duplicate(true)
+	if not native_navigation_enabled:
+		snapshot["last_backend"] = "gdscript"
+		snapshot["fallback_reason"] = "native_navigation_disabled"
+	return snapshot
+
+
+func prewarm_navigation(terrain_registry = null) -> Dictionary:
+	# Call only after the loader has registered tiles and initial runtime overrides.
+	# This prepares derived data; it does not enqueue commands or spend query budget.
+	var started: int = Time.get_ticks_usec()
+	if terrain_registry == null:
+		terrain_registry = _get_terrain_registry()
+	if not is_instance_valid(terrain_registry):
+		_clear_navigation_prepared_data()
+		_navigation_prewarm_debug = {
+			"ready": false, "native_prepared": false, "backend": "none",
+			"reason": "terrain_registry_unavailable", "duration_usec": Time.get_ticks_usec() - started,
+			"graph_prepare_usec": 0, "native_prepare_usec": 0, "registry_revision": -1, "tile_count": 0,
+		}
+		return _navigation_prewarm_debug.duplicate(true)
+	var graph_started: int = Time.get_ticks_usec()
+	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	var graph_prepare_usec: int = Time.get_ticks_usec() - graph_started
+	var native_started: int = Time.get_ticks_usec()
+	var native_prepared: bool = false
+	var reason: String = "native_navigation_disabled"
+	if native_navigation_enabled:
+		native_prepared = _native_navigation.prepare(terrain_registry, {}, graph)
+		reason = "prepared" if native_prepared else String(_native_navigation.get_debug_snapshot().get("fallback_reason", "native_preparation_failed"))
+		_navigation_backend_debug = {"last_backend": "native" if native_prepared else "gdscript_fallback", "fallback_reason": "" if native_prepared else reason}
+	else:
+		_set_gdscript_navigation_backend(reason)
+	_navigation_prewarm_debug = {
+		"ready": true, "native_prepared": native_prepared,
+		"backend": "native" if native_prepared else "gdscript", "reason": reason,
+		"duration_usec": Time.get_ticks_usec() - started, "graph_prepare_usec": graph_prepare_usec,
+		"native_prepare_usec": Time.get_ticks_usec() - native_started,
+		"registry_revision": _get_terrain_registry_revision(terrain_registry),
+		"tile_count": int(terrain_registry.call("get_tile_count")) if terrain_registry.has_method("get_tile_count") else _hpa_navigation_tile_count,
+	}
+	return _navigation_prewarm_debug.duplicate(true)
+
+
+func _clear_navigation_prepared_data() -> void:
+	_hpa_navigation_graph = null
+	_hpa_navigation_registry = null
+	_hpa_navigation_tile_count = -1
+	_hpa_navigation_registry_revision = -1
+	_hpa_navigation_last_build_stats.clear()
+	_native_navigation.clear_prepared_data()
+	_navigation_backend_debug = {"last_backend": "none", "fallback_reason": "terrain_registry_unavailable"}
+
+
+func _set_gdscript_navigation_backend(reason: String) -> void:
+	_navigation_backend_debug = {
+		"last_backend": "gdscript", "fallback_reason": reason,
+		"result_cache_hit": false, "snapshot_reused": false, "graph_reused": false,
+		"snapshot_prepare_usec": 0, "native_query_usec": 0,
+		"target_cost_compute_count": 0, "edge_cost_compute_count": 0,
 	}
 
 
@@ -2430,6 +2503,7 @@ func _make_navigation_record(
 		or status == HPA_PATHFINDER_SCRIPT.STATUS_LOCAL_PATH_FAILED
 		or status == HPA_PATHFINDER_SCRIPT.STATUS_INVALID
 	)
+	var backend_snapshot: Dictionary = get_navigation_backend_debug_snapshot()
 	return {
 		"tick": tick_counter,
 		"unit_id": unit_id,
@@ -2438,6 +2512,8 @@ func _make_navigation_record(
 		"query_kind": query_kind,
 		"route_type": route_type,
 		"status": status,
+		"backend": String(backend_snapshot.get("last_backend", "none")),
+		"backend_fallback_reason": String(backend_snapshot.get("fallback_reason", "")),
 		"from_grid": from_grid,
 		"to_grid": to_grid,
 		"duration_usec": duration_usec,
@@ -2961,7 +3037,13 @@ func _annotate_navigation_query_metrics(query: Dictionary, path_grid_points: Arr
 func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry, navigation_options: Dictionary = {}) -> Dictionary:
 	var graph = _ensure_hpa_navigation_graph(terrain_registry)
 	if graph != null and _hpa_pathfinder != null:
-		var hpa_query: Dictionary = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph, navigation_options))
+		var hpa_query: Dictionary
+		if native_navigation_enabled:
+			hpa_query = _native_navigation.find_path_with_status(from_grid, to_grid, terrain_registry, graph, navigation_options)
+			_navigation_backend_debug.clear()
+		else:
+			hpa_query = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph, navigation_options))
+			_set_gdscript_navigation_backend("native_navigation_disabled")
 		var hpa_status: String = String(hpa_query.get("status", ""))
 		if not Array(hpa_query.get("path", [])).is_empty():
 			return hpa_query
@@ -2969,13 +3051,23 @@ func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_
 			return hpa_query
 
 	return {
-		"path": _terrain_pathfinder.call("find_path_with_options", from_grid, to_grid, terrain_registry, navigation_options),
+		"path": _find_navigation_direct_path(from_grid, to_grid, terrain_registry, navigation_options),
 		"status": "direct_a_star",
 	}
 
 
+func _find_navigation_direct_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry, navigation_options: Dictionary = {}) -> Array:
+	if native_navigation_enabled:
+		var path: Array = _native_navigation.find_path_with_options(from_grid, to_grid, terrain_registry, navigation_options)
+		_navigation_backend_debug.clear()
+		return path
+	_set_gdscript_navigation_backend("native_navigation_disabled")
+	return _terrain_pathfinder.find_path_with_options(from_grid, to_grid, terrain_registry, navigation_options)
+
+
 func _ensure_hpa_navigation_graph(terrain_registry):
-	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+	if not is_instance_valid(terrain_registry) or not terrain_registry.has_method("get_all_tiles"):
+		_clear_navigation_prepared_data()
 		return null
 	var tile_count: int = int(terrain_registry.call("get_tile_count")) if terrain_registry.has_method("get_tile_count") else Array(terrain_registry.call("get_all_tiles")).size()
 	var registry_revision: int = _get_terrain_registry_revision(terrain_registry)
@@ -3130,7 +3222,7 @@ func _find_nearest_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Ve
 		var candidate_grid: Vector2i = Vector2i(tile_data.grid_position)
 		if candidate_grid == from_grid:
 			return candidate_grid
-		if not _terrain_pathfinder.find_path(from_grid, candidate_grid, terrain_registry).is_empty():
+		if not _find_navigation_direct_path(from_grid, candidate_grid, terrain_registry).is_empty():
 			return candidate_grid
 	return null
 
