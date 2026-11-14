@@ -2335,6 +2335,11 @@ func _build_mission_scenario_runtime_gate_context() -> Dictionary:
 	}
 
 
+## Read-only: fit members per enemy group, as the scenario runtime gates count them.
+func get_enemy_group_fit_counts() -> Dictionary:
+	return _build_enemy_group_fit_counts()
+
+
 func _build_enemy_group_fit_counts() -> Dictionary:
 	# A defeated final defender drops out of live tactics. Retain the group
 	# identity once actually observed, so zero is distinct from not yet spawned.

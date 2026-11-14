@@ -2,8 +2,9 @@ extends RefCounted
 ## Ground air defence against a ship on its landing approach.
 ## Contract: docs/dev/ground_air_defense_engagement_contract.md
 ## Pure proposal: reads data/combat/air_defense_units.json, rolls seeded dice,
-## returns the next ship state and an event list. It owns no state and has no
-## production caller yet; a SimulationRoot caller commits the result.
+## returns the next ship state and an event list. It owns no state. Caller:
+## scripts/mission/air_defense_approach_plan.gd at the landing commit point;
+## the mission controller commits the result through SimulationRoot.
 
 const SYSTEMS = preload("res://scripts/tactical/space_component_systems.gd")
 const DATA_PATH := "res://data/combat/air_defense_units.json"

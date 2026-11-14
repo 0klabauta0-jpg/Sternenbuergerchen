@@ -3942,10 +3942,10 @@ func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = fals
 		_last_command_text = "DROP ALREADY ACTIVE"
 	elif _try_start_drop_sequence(ignore_global_cooldown):
 		_drop_ship_requested = true
-		_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
+		_last_command_text = _air_defense_feedback_text if not _air_defense_feedback_text.is_empty() else "DROP INBOUND %s" % _get_approach_angle_name()
 	else:
 		_drop_ship_requested = false
-		_last_command_text = "NO DROP TEAM AVAILABLE"
+		_last_command_text = _air_defense_feedback_text if not _air_defense_feedback_text.is_empty() else "NO DROP TEAM AVAILABLE"
 	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
@@ -36159,6 +36159,7 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
+	_air_defense_feedback_text = ""
 	var pending_landing:Dictionary={}
 	if _should_keep_campaign_dropship_landed():
 		if not _has_lz_position: return false
@@ -36214,6 +36215,8 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	var landing:Dictionary=_prepare_ground_ship_landing(_mission_drop_craft_id,pending_landing)
 	if not bool(landing.get("ok",false)):
 		_last_command_text=String(landing.get("message","Landeplatz ist noch nicht bereit"))
+		return false
+	if not _resolve_air_defense_on_approach(Vector2(landing.get("resolved_lz_position", Dictionary(_field_landing_by_craft.get(_mission_drop_craft_id, {})).get("resolved_lz_position", _lz_position)))):
 		return false
 	if landing.has("resolved_lz_position"):_field_landing_by_craft[_mission_drop_craft_id]=landing
 	_prepare_drop_sequence_context()
@@ -37815,13 +37818,53 @@ func _validate_campaign_field_lz(position: Vector2) -> Dictionary:
 	return FIELD_LANDING.validate(registry, registry.call("world_to_grid", position), _campaign_occupied_landing_positions())
 
 func _resolve_campaign_field_lz() -> Dictionary:
+	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), _mission_drop_pilot_skill(),0.5, _campaign_occupied_landing_positions())
+
+func _mission_drop_pilot_skill() -> float:
 	var pilot_id := String(_find_mission_dropship_card_entry(_mission_drop_craft_id).get("pilot_unit_id", ""))
 	var pilot = _get_campaign_sortie_unit(pilot_id)
 	var skill: float = 0.5
 	if pilot != null:
 		var value: Variant = pilot.get("dropship_piloting")
 		if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0: skill = clampf(float(value),0.0,1.0)
-	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), skill,0.5, _campaign_occupied_landing_positions())
+	return skill
+
+# Ground air defence at the landing commit point (ground_air_defense_engagement_contract).
+# Authoritative side only. Returns false when the approach is broken off.
+const AIR_DEFENSE_PLAN = preload("res://scripts/mission/air_defense_approach_plan.gd")
+var _air_defense_feedback_text: String = ""
+
+func _resolve_air_defense_on_approach(lz: Vector2) -> bool:
+	var setup: Node = get_node_or_null("../MissionSetup")
+	var registry = _get_terrain_registry()
+	var driver = _get_combat_loop_driver()
+	if _is_connected_network_snapshot_client() or setup == null or registry == null or driver == null or not driver.has_method("get_enemy_group_fit_counts") or not setup.has_method("get_scenario_tactical_authoring_snapshot"): return true
+	var map = setup.get("_loaded_terrain_map_data")
+	if map == null or not map.has_method("get_place_presentation") or String(registry.call("get_grid_topology")) != POLISA_GLOBE_HEX.TOPOLOGY_ID: return true
+	var height_at := func(cell: Vector2i) -> int: return int(registry.call("get_height_at", cell))
+	var vehicles: Array = AIR_DEFENSE_PLAN.vehicles_from_props(Array(map.get_place_presentation().get("props", [])), height_at)
+	var crew: Dictionary = AIR_DEFENSE_PLAN.crew_state(setup.call("get_scenario_tactical_authoring_snapshot"), driver.call("get_enemy_group_fit_counts"))
+	if vehicles.is_empty() or not bool(crew.known): return true
+	var craft_id: String = _mission_drop_craft_id.strip_edges() if not _mission_drop_craft_id.strip_edges().is_empty() else "mission_dropship"
+	var offset: Vector2 = Vector2(APPROACH_OFFSETS.get(_get_approach_angle_name(), Vector2(180.0, -112.0)))
+	var start: Vector2 = lz + offset.normalized() * _get_drop_offmap_distance() # as _get_drop_sequence_staging_position
+	var simulation_root: Node = get_node_or_null("../SimulationRoot")
+	var prior: Dictionary = simulation_root.call("get_air_asset_status_snapshot", craft_id) if simulation_root != null and simulation_root.has_method("get_air_asset_status_snapshot") else {}
+	var plan: Dictionary = AIR_DEFENSE_PLAN.resolve({"vehicles": vehicles, "height_at": height_at, "crew_ready": bool(crew.crew_ready),
+		"start_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", start)), "lz_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", lz)),
+		"pilot_skill": _mission_drop_pilot_skill(), "seed": craft_id + str(lz) + ":air_defense", "integrity": int(prior.get("integrity", 100)),
+		"model_id": String(_find_mission_dropship_card_entry(craft_id).get("model_id", "cutlass")), "approach_style": ""}) # no stored approach style yet
+	if not bool(plan.get("engaged", false)): return true
+	var snapshot: Dictionary = AIR_DEFENSE_PLAN.status_snapshot_after(prior, craft_id, _mission_drop_display_name, plan)
+	_enqueue_air_asset_status_effect(snapshot, {"event_id": String(plan.event_id)})
+	if _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id: _air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", snapshot)
+	_air_defense_feedback_text = String(plan.message)
+	_last_command_text = _air_defense_feedback_text
+	_set_mission_dropship_card_feedback(craft_id, _air_defense_feedback_text)
+	if not bool(plan.landing_allowed):
+		_drop_ship_requested = false # the player calls the craft again; no automatic re-roll
+		_update_ui()
+	return bool(plan.landing_allowed)
 
 const FLIGHT_MOTION = preload("res://scripts/terrain/mission_flight_visual.gd")
 

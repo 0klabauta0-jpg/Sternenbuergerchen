@@ -1,5 +1,23 @@
 # IMPLEMENTATION_STATUS
 
+### Flugabwehr am echten Landeanflug angeschlossen - 14.11.2026
+
+Task `docs/tasks/FLUGABWEHR_ANSCHLUSS_2026_11_14.md`. Neues reines Skript
+`scripts/mission/air_defense_approach_plan.gd`: Fahrzeuge aus den Map-Props
+(`hagel`, `donnerkeil`), Anflugweg vom Inbound-Start zur LZ alle 4 Felder eine
+Salve, Besatzung aus den Fit-Zaehlern der Gruppe
+`tactical_authoring.air_asset_risk.enemy_group_id`. Der Missionscontroller ruft
+es einmal in `_try_start_drop_sequence` nach der LZ-Pruefung auf (nur
+autoritative Seite). Abbruch: keine Landung, Meldung "Flugabwehr: Anflug
+abgebrochen, Rumpf N %". Weiterflug: Landung wie vorher plus Kurzmeldung.
+Schaden als `AirAssetStatus`-Integritaet je Schiff ueber den vorhandenen
+Effekt `air_asset_status_update` an `SimulationRoot`. Ohne gespeicherten
+Anflugstil wird immer abgedreht. Offen: Sichtlinie nicht ans Gelaende
+angeschlossen, kein Absturzpfad (Zerstoerung = erzwungener Abbruch, Rumpf 1 %),
+keine Reparatur der Integritaet, keine Abfrage "abdrehen?".
+`air_defense_approach_plan_verifier` 23/0, `air_defense_approach_landing_verifier`
+10/0 (Linux headless).
+
 ### Flugabwehr: Regelkern und Werte, noch nicht angeschlossen - 14.11.2026
 
 Neuer Contract `docs/dev/ground_air_defense_engagement_contract.md` mit den

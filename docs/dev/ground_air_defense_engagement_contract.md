@@ -22,7 +22,12 @@ abbekommt. Zuerst als Gegner **[N]**.
 | --- | --- |
 | Werte der beiden Fahrzeuge | `data/combat/air_defense_units.json` |
 | Regelkern Anflug gegen Flugabwehr, gewuerfelt | `scripts/combat/air_defense_engagement.gd`, geprueft durch `scripts/tests/air_defense_engagement_verifier.gd` |
-| Anschluss an den echten Anflug (Abfrage "abdrehen?", Schaden am Schiff im Spiel) | **offen** |
+| Anschluss an den echten Landeanflug: Fahrzeuge aus den Map-Props, Salven entlang des Anflugwegs, Schaden am Schiff, Abbruch oder Landung | `scripts/mission/air_defense_approach_plan.gd`, ein Aufruf in `_try_start_drop_sequence`; geprueft durch `air_defense_approach_plan_verifier` und `air_defense_approach_landing_verifier`. Task `docs/tasks/FLUGABWEHR_ANSCHLUSS_2026_11_14.md` |
+| Schaden am Schiff im Spiel | `AirAssetStatus`-Integritaet je Schiff (0..100 = Rumpfanteil) ueber `air_asset_status_update` in `SimulationRoot`; **keine Reparatur** |
+| Abfrage "abdrehen?" | **offen**; ohne gespeicherten Anflugstil wird immer abgedreht ("aggressiv" hiesse weiter anfliegen) |
+| Sichtlinie gegen Gelaende im Anflug | **offen**; heute immer frei |
+| Absturz im Anflug | **offen**; Zerstoerung wird zum erzwungenen Abbruch mit Rumpf 1 % |
+| Start und Bergung (Abflug) unter Beschuss | **offen** |
 | Fahrzeug als Einheit am Boden (Besatzung, Schaden, Herausschiessen, Uebernehmen) | **offen**, Regeln unten |
 | Panzerfaust und Schienengewehr im Laden | **offen**, Preisvorschlag unten |
 | Transportschiff fuer Fahrzeuge | **offen**, eigenes Modell und eigene Regel |
@@ -119,3 +124,5 @@ Zum Vergleich: Cutlass 340, Buccaneer 230, Veteran 145 Punkte. Aufruestbar spaet
 
 ## Pruefung
 `godot --headless -s scripts/tests/air_defense_engagement_verifier.gd` (37 Pruefpunkte).
+`godot --headless --path . -s scripts/tests/air_defense_approach_plan_verifier.gd` (23 Pruefpunkte, GM02-Kartendaten).
+`godot --headless --path . -s scripts/tests/air_defense_approach_landing_verifier.gd` (10 Pruefpunkte, echter Controller auf GM02).
