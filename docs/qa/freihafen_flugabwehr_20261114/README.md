@@ -31,5 +31,23 @@ Aussenlager) noch einmal; die Zahlen sind von diesem Lauf.
 - Landung eines grossen Schiffs auf den beiden Freihafen-Pads im Spiel. Der Pruefer bestaetigt nur, dass die
   Landeflaeche am Marker frei ist.
 
-## Windows-Rechner (D3D12, native Navigation)
-Wird nach dem Lauf dort ergaenzt.
+## Windows-Rechner (D3D12, native Navigation), 14.11.2026 abends
+
+| Pruefer | Ergebnis |
+| --- | --- |
+| `campaign_maps_content_verifier` | 69 / 0 |
+| `playtest_20261110_resource_geometry_verifier` | 0 Fehlschlaege |
+| `ground_mission02_relay_ridge_verifier` | 35 / 0 |
+| `map_services_verifier_20261114` | 81 / 0 |
+| `playtest_20261109_trade_refuel_verifier` | 41 / 0 |
+| `grafikpass_r123_navigation_verifier` | Exit 0 |
+| `air_defense_engagement_verifier` | 37 / 0 |
+| `playtest_20261110_place_dressing_verifier` | 2 Fehlschlaege wie vorher |
+| `campaign_two_moon_roundtrips_real_verifier` | 75 / 1: "actual crew begins boarding at outpost" |
+
+Der Fehlschlag im Hin-und-Rueckflug-Test tritt auf demselben Rechner auch mit der Karte und dem
+Ausgestaltungsskript von `f4799d6a6` auf (75 / 1, derselbe Punkt). Er kommt also nicht von der Mauer oder dem
+Vorfeld. Die Ursache ist nicht untersucht.
+
+Zwei Standbilder unter D3D12 (Freihafen, GM02-Stellung) wurden angesehen und stimmen mit den Bildern in diesem
+Ordner ueberein; sie sind nicht eingecheckt.
