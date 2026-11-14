@@ -1,0 +1,9 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+BENCH_FIXTURE_BEGIN square24 cells=576
+BENCH_FIXTURE_END square24
+BENCH_FIXTURE_BEGIN hex24 cells=576
+BENCH_FIXTURE_END hex24
+BENCH_FIXTURE_BEGIN gm01 cells=9408
+BENCH_FIXTURE_END gm01
+NATIVE_NAVIGATION_BENCHMARK pairs=243 failures=0 output=C:\Users\bjoer\.codex\worktrees\native-pathfinding-prototype\SternenBuergerchen\docs\qa\native_navigation_20261114\bench_a\result.json

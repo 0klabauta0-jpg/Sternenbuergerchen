@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### Nativer A*/HPA-Prototyp: geprueft, bleibt opt-in — 14.11.2026
+
+Separater Branch `task/native-navigation-prototype-20261114`, bewusst auf dem
+noch nicht integrierten Playtest-Reviewstand `9e2e972a1010d10fa5cdc0c08bd588bea5128173`.
+C++-GDExtension mit stabilem A*, gerichteten Dijkstra-Karten und bestehender HPA-
+Portallogik; Adapter mit exakten GDScript-Kosten, Snapshot und 64er-FIFO-Cache.
+Godot 4.6.2 laedt die gebaute Windows-x64-DLL. Finaler Differentialverifier 921/0,
+unveraenderter Hex-/HPA-Nachbar 41/0; alle 502 akzeptierten Messpaare liefern
+identische geordnete Pfade, Status und Scores. Fehlende DLL wird im Negativtest erkannt.
+GM01-HPA mit vorbereiteten stabilen Kosten: Median 246,893 -> 7,4465 ms.
+Kalt inklusive Vorbereitung: 477,145 -> 1046,925 ms; wechselnde Bewegungsoptionen:
+149,7165 -> 978,075 ms. Vollkarten-Kostenaufbau dominiert und verhindert aktuell
+einen allgemeinen Produktionsgewinn. Normale Navigation unveraendert; Folgearbeit
+muesste Terrain-Snapshot und anfrageabhaengige Kosten trennen. Kein Mainmerge,
+EXE-Export oder FPS-Nachweis. Evidenz und reproduzierbarer Build:
+`docs/qa/native_navigation_20261114/README.md`, `native/navigation/README.md`.
+
 ### Playtest-Überarbeitung: vollständige Liste und Arbeitsplan — 14.11.2026
 
 Nur Planung auf `task/playtest-rework-plan-20261114`: alle 23 Rückmeldungspunkte

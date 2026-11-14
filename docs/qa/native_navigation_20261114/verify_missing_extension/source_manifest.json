@@ -1,0 +1,21 @@
+{
+  "source_head": "9e2e972a1010d10fa5cdc0c08bd588bea5128173",
+  "engine": "4.6.2.stable.official.71f334935",
+  "run_id": "20261114T111407Z-8645b32e",
+  "source_sha256": {
+    "maps/Ground_Mission01_32x32.json": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+    "scripts/tests/native_navigation_prototype_verifier.gd": "c9bbc6b12ebf91580f417deb8758f4fdc5ab66c1589d8b77344d8d2bc7e086f8",
+    "scripts/terrain/native_navigation_prototype.gd": "704425d01622aed581f1b98c06d79076b3b61ca066d308458e35104b786ad464",
+    "scripts/terrain/hpa_pathfinder.gd": "ac7140281c19da041f224e9cc565ffcd1021ee068e236499b3ca034a73d7ba33",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/terrain_pathfinder.gd": "4af48f72ca156e4e30e3c7cc1f2f717e6cb0b353dcbfb7a3d9f05c2fd05c93f3",
+    "scripts/terrain/terrain_tile_data.gd": "9e01d21bcc082b68bb79c4c194a610cd9bc922026da12fc108e965a39dd1e23d",
+    "scripts/tests/native_navigation_prototype_fixtures.gd": "b5cf0a3e0897b39480f3242ec4dc205e6c09b45145e626132a3d61223518dbfa",
+    "scripts/terrain/hpa_navigation_graph.gd": "24f492995ea3e2964dafa2a43f698c49663880b22bf16183b79d45d9c961c912",
+    "scripts/terrain/terrain_registry.gd": "1aa3b96e1010298d050d1aade5b27c40ddb560dccd17ac4ad1d74223d37974b7"
+  },
+  "minimal_project": "C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\tmp\\native_navigation\\20261114T111407Z-8645b32e",
+  "headless": true,
+  "gpu_timing": "unavailable",
+  "player_profile": "unique isolated project"
+}

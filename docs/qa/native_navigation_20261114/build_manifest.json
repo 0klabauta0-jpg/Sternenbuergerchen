@@ -1,0 +1,47 @@
+{
+  "recorded_utc": "2026-11-14T11:26:52.491494+00:00",
+  "base_commit": "9e2e972a1010d10fa5cdc0c08bd588bea5128173",
+  "branch": "task/native-navigation-prototype-20261114",
+  "godot": "4.6.2.stable.official.71f334935",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "architecture": "x86_64",
+  "compiler": {
+    "name": "MSVC",
+    "cl_file_version": "19.51.36243.0",
+    "toolset_directory": "14.51.36231",
+    "installation": "Visual Studio 18 Community"
+  },
+  "scons": "4.11.1",
+  "godot_cpp": {
+    "remote": "https://github.com/godotengine/godot-cpp.git",
+    "tag": "godot-4.5-stable",
+    "commit": "e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+    "working_tree_clean": true
+  },
+  "recipe": {
+    "working_directory": "native/navigation",
+    "environment": {
+      "GODOT_CPP_DIR": "pinned godot-cpp checkout"
+    },
+    "command": "python -m SCons platform=windows target=template_release arch=x86_64 precision=single optimize=speed -j8",
+    "kernel_extra_flags": [
+      "/fp:strict"
+    ],
+    "profile": "build_profile.json",
+    "reproduction_script": "native/navigation/build.ps1"
+  },
+  "incremental_verification": "build_verify.log: source/dependency targets up to date; DLL hash matches all accepted test and benchmark copies",
+  "files_sha256": {
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll": "14dd385f7acf0cdb9f551aa31823245d6ae1e0ea3ce583725b459a42b4091eaa",
+    "native/navigation/build.ps1": "9a197cfc20a9239f381389126a34a8d078113a8092b13890f43d6913b8cec8fb",
+    "native/navigation/build_profile.json": "d91e96bc849d2f33e1ea0bff1ae7ec49bf0aac6d8e026c17ff5e340ebc352142",
+    "native/navigation/navigation.gdextension": "662100291bee07110801a32835d9490e360e2c8e3caae6e162a7bcc48479f97d",
+    "native/navigation/SConstruct": "2cec1ec29b97f7cf8e5b497e831587473a20ce92c879e54cea6562e07de3cd8c",
+    "native/navigation/src/native_hpa.cpp": "77fe203f71acee97f34f242d2db17021ea3c77b4c8d66257e76f8d79c21717ef",
+    "native/navigation/src/native_navigation.cpp": "4234dd06d146d70dbd5def546340843c2f329ae21014ebc3d670f9acdee0a687",
+    "native/navigation/src/native_navigation.h": "36a7c1572ba10418fb0b5bdd12d520b757a77a73cd06b23162c87770bf9f7bdd",
+    "native/navigation/src/register_types.cpp": "557d0e3af45952fc5d88b3bc421038fac4830653cc1ab8840375439d2e1289e6"
+  },
+  "dll_size_bytes": 384512,
+  "scope": "Windows x64 release DLL only; no game export; source builds may differ bytewise with compiler/linker versions."
+}
