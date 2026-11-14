@@ -1,0 +1,52 @@
+{
+  "ship": "vulture",
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-VULTURE.obj",
+  "source_sha256": "a182080cf1d711b4e4731fa2760ac84bc3bc65acdc84fde6512f8df6278c2ef2",
+  "raw": {
+    "vertices": 510088,
+    "triangles": 999904,
+    "bounds_min": [
+      -308.4112854003906,
+      -698.7149047851562,
+      -169.92803955078125
+    ],
+    "bounds_max": [
+      308.4305419921875,
+      588.6881713867188,
+      169.9390411376953
+    ],
+    "dimensions": [
+      616.841796875,
+      1287.403076171875,
+      339.8670654296875
+    ],
+    "materials": 0
+  },
+  "normalized_source": {
+    "vertices": 510088,
+    "triangles": 999904,
+    "bounds_min": [
+      -1.9165457487106323,
+      -4.0,
+      0.0
+    ],
+    "bounds_max": [
+      1.9165462255477905,
+      4.0,
+      2.1119544506073
+    ],
+    "dimensions": [
+      3.833091974258423,
+      8.0,
+      2.1119544506073
+    ],
+    "materials": 0
+  },
+  "source_scale_factor": 0.006214060031445784,
+  "authoring_length_m": 8,
+  "forward_blender": "-Y",
+  "forward_gltf": "+Z",
+  "material_note": "Source contains no materials; authored four-color preview palette, not original textures.",
+  "provenance": "User-supplied RSI model conversion; local derivative, redistribution license not established.",
+  "blender": "5.1.1"
+}

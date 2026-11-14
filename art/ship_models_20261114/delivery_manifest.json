@@ -1,0 +1,393 @@
+{
+  "status": "separate local asset candidates, not gameplay integrated",
+  "ships": {
+    "prospector": {
+      "geometry_pass": true,
+      "warnings": [
+        "hidden back-to-back faces: Prospector (7 pairs) - delete to save tris"
+      ]
+    },
+    "vulture": {
+      "geometry_pass": true,
+      "warnings": [
+        "hidden back-to-back faces: Vulture (6 pairs) - delete to save tris"
+      ]
+    },
+    "caterpillar": {
+      "geometry_pass": true,
+      "warnings": [
+        "hidden back-to-back faces: Hull<->LiftMount (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Hull<->CargoDoor_L_03 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Hull<->CargoDoor_L_04 (1 pairs) - delete to save tris",
+        "hidden back-to-back faces: Hull<->CargoDoor_R_03 (1 pairs) - delete to save tris"
+      ]
+    },
+    "gladius": {
+      "geometry_pass": true,
+      "warnings": []
+    },
+    "hornet": {
+      "geometry_pass": true,
+      "warnings": [
+        "hidden back-to-back faces: Hornet (38 pairs) - delete to save tris"
+      ]
+    }
+  },
+  "files": [
+    {
+      "path": "caterpillar/candidate_material.png",
+      "bytes": 1882986,
+      "sha256": "cc8894be5a9e889bcb09adcaab2086b993f41cb26aa98dfff0f468edb840f63c"
+    },
+    {
+      "path": "caterpillar/candidate_solid.png",
+      "bytes": 1899978,
+      "sha256": "db646c326c5f8da1996ea2ec0a7b4d15a75f49e12a955cb76fc1ebe9cd5bd577"
+    },
+    {
+      "path": "caterpillar/candidate_wire.png",
+      "bytes": 683906,
+      "sha256": "1f40fa52d9156995235b847e37d04b3321478246cb7700c9d7fbb802756c530a"
+    },
+    {
+      "path": "caterpillar/caterpillar.blend",
+      "bytes": 864289,
+      "sha256": "a27a25e8b9dccba01c4dc9f596849a82f2727f80bd3e8f9cec5ea0adb9cf341d"
+    },
+    {
+      "path": "caterpillar/caterpillar.glb",
+      "bytes": 2584720,
+      "sha256": "fa26699dca15c04edc3c032f6666f8cba7684a659489ccc1d96a82d430356e49"
+    },
+    {
+      "path": "caterpillar/mechanisms_open.png",
+      "bytes": 1904462,
+      "sha256": "2eaa7899f275d5784046499b216bcd6f5cd528a5b03daa2724ca5b658edd553b"
+    },
+    {
+      "path": "caterpillar/metrics.json",
+      "bytes": 8776,
+      "sha256": "c4125f2fb2a9b6a66a9415e2a8ebbbca1161da196ca51af4ef965af80af6b40a"
+    },
+    {
+      "path": "caterpillar/qa_raw.json",
+      "bytes": 7770,
+      "sha256": "718d969bcc5138bb46ceb5348c47b53495dad8c88ea6c5a351437c3acd18b4f7"
+    },
+    {
+      "path": "caterpillar/README.md",
+      "bytes": 4913,
+      "sha256": "fb79b4930532d9f2579d29b9854c2c233541443364fbb3dbb561b00a7e57cdec"
+    },
+    {
+      "path": "caterpillar/source_views.png",
+      "bytes": 3156370,
+      "sha256": "7fc432268c60637561e9311f1eb583cb2fa6d2caac7a9982d611cd4c70b3f066"
+    },
+    {
+      "path": "caterpillar/verification.json",
+      "bytes": 2271,
+      "sha256": "353531b8395195f0f41d2fb62be0563766dfb38dee4b68c5f2184607850ca750"
+    },
+    {
+      "path": "gladius/gladius.blend",
+      "bytes": 593459,
+      "sha256": "f41bee2a2297b97de1f52392419bb21bb20793bf913e8b033f045c405833f19d"
+    },
+    {
+      "path": "gladius/gladius.glb",
+      "bytes": 1430796,
+      "sha256": "6eac54c9a6a035b9374f893a6b149c352847000963d538b4379f1e2fe4fb4ea7"
+    },
+    {
+      "path": "gladius/metrics.json",
+      "bytes": 1359,
+      "sha256": "67654dbf6e3e2c5ccf870aa929e589eebdca4726d22da12a0dee71b8b8567f25"
+    },
+    {
+      "path": "gladius/qa/candidate.png",
+      "bytes": 1244777,
+      "sha256": "e9233334e2f00b269165f44e3bb51bd64de4317bd6af6532398fee10620c96c6"
+    },
+    {
+      "path": "gladius/qa/geometry.json",
+      "bytes": 828,
+      "sha256": "d25fdd8a7251e5eb8962217394470d5dece381c7769aa5250d640629fbf7cda6"
+    },
+    {
+      "path": "gladius/qa/material.png",
+      "bytes": 1225593,
+      "sha256": "1c62182e16cb7e8fb47a9cc6d74ac757226320c1c06f93112f82beade77f049e"
+    },
+    {
+      "path": "gladius/qa/parts.png",
+      "bytes": 640636,
+      "sha256": "a60944503d75446855f7843c2c4ec94345dd8c9a48216c6d6ec3c3019b1d5e3c"
+    },
+    {
+      "path": "gladius/qa/source.png",
+      "bytes": 1243306,
+      "sha256": "4a9927e32e98cdc12a6a2275817d006e41032691ad86801f76331c83c381a26d"
+    },
+    {
+      "path": "gladius/qa/wire.png",
+      "bytes": 701146,
+      "sha256": "e6d8ae789e9922d5b1356775a62b058175bf98bdd0c220a711e00a9058ea1517"
+    },
+    {
+      "path": "gladius/source_manifest.json",
+      "bytes": 1421,
+      "sha256": "fdfe1baa60ab5c630c356fc90297123fe6e636c80244fff011dd654ca3a514f2"
+    },
+    {
+      "path": "godot_probe/final/caterpillar_closed.png",
+      "bytes": 80399,
+      "sha256": "93b65730da22910081c91c296ab83783980cab7c33349256360d7398c2288065"
+    },
+    {
+      "path": "godot_probe/final/caterpillar_open_lift_down_Scene.png",
+      "bytes": 86868,
+      "sha256": "a78b238bb228f1c9650509df3099dcabdfeb5cb6b1547d13483aee28ded927e6"
+    },
+    {
+      "path": "godot_probe/final/caterpillar_rear.png",
+      "bytes": 77833,
+      "sha256": "eec0eb674659fc68b38d81bf2572468e37f71778f0b30e912b4cb787e33607a2"
+    },
+    {
+      "path": "godot_probe/final/evidence_manifest.json",
+      "bytes": 3705,
+      "sha256": "e100acb75b68144a12bc40201d75bd7309ce6f73f08033a7a84377cd1ef50900"
+    },
+    {
+      "path": "godot_probe/final/headless.log",
+      "bytes": 306,
+      "sha256": "a4f98219698eaf5deb98477071d77eaa18b0747953d2f8d63e8ff2af7e0fb162"
+    },
+    {
+      "path": "godot_probe/final/headless_report.json",
+      "bytes": 43878,
+      "sha256": "94328f674e4c7b561e9347883ac47a5bbb593821618755074c75b78432638294"
+    },
+    {
+      "path": "godot_probe/final/headless_runner_report.json",
+      "bytes": 2745,
+      "sha256": "c3a4394c42da50c5d2a23701785d6eb5d6dda151baa4d6748c48b0339637cdcd"
+    },
+    {
+      "path": "godot_probe/final/native_contact_sheet.png",
+      "bytes": 554582,
+      "sha256": "15c86cfba76791612737bec20bb151333d56877e267a93ace09c28a8a796d970"
+    },
+    {
+      "path": "godot_probe/final/native_report.json",
+      "bytes": 47765,
+      "sha256": "505e18169029b48296bd4a79ebbe34e2bb0cdbff6a0d50b96d0141e04cd8f2c3"
+    },
+    {
+      "path": "godot_probe/final/native_runner_report.json",
+      "bytes": 856,
+      "sha256": "6754f93690169e6840dd6173cb95bbcfc391cd4acd833de9e5aa82e72163a988"
+    },
+    {
+      "path": "godot_probe/final/native_stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "godot_probe/final/native_stdout.log",
+      "bytes": 410,
+      "sha256": "acaaca3fefa13e1ee3a9c9346be4ee1d49634a666607e8c1a5f995e022170eb4"
+    },
+    {
+      "path": "godot_probe/final/README.md",
+      "bytes": 4570,
+      "sha256": "42f36aa97d3439765d0dff70254f531493e74a7acdeba386548c34f183ee0ca3"
+    },
+    {
+      "path": "hornet/hornet.blend",
+      "bytes": 659619,
+      "sha256": "b6e6556ba2511280e9a78daae1cb2de348565ef34a9e250a04c1b18aa9b85d20"
+    },
+    {
+      "path": "hornet/hornet.glb",
+      "bytes": 1617644,
+      "sha256": "f2635c1302e9d7a62759bd6ba0758c0323a8f34555d1a16b8a42f9ccd552198a"
+    },
+    {
+      "path": "hornet/metrics.json",
+      "bytes": 1350,
+      "sha256": "16b24741047f2f57e9c2f272a854f807e72e1efb1409a9f2ca65a2f01d664afe"
+    },
+    {
+      "path": "hornet/qa/candidate.png",
+      "bytes": 1250505,
+      "sha256": "effe0ec81bedf44c6a8643a432bcacc99b4949d07197d3deb69b576a146fd13b"
+    },
+    {
+      "path": "hornet/qa/geometry.json",
+      "bytes": 971,
+      "sha256": "3e2d32af29f5feb682cf80228b02230fcf88105d0df71b7f296b7942e25e624b"
+    },
+    {
+      "path": "hornet/qa/material.png",
+      "bytes": 1222118,
+      "sha256": "62ce62e2bcc6a9496535a413760a891a43f333e5b74ed076b7c63ca703f20aee"
+    },
+    {
+      "path": "hornet/qa/parts.png",
+      "bytes": 641719,
+      "sha256": "8a0a49a5cef6f932003019ccf3aceb115e4e844c902249a2a864b684b4f605cd"
+    },
+    {
+      "path": "hornet/qa/source.png",
+      "bytes": 1251199,
+      "sha256": "6feb45389d58393349613251ca2af0f15aed3feed3d8672cd000d5de666b104d"
+    },
+    {
+      "path": "hornet/qa/wire.png",
+      "bytes": 691186,
+      "sha256": "033d35416b9e0aead042fb3629261e28c4bcd1b73d45603ea1251d78ca502a8c"
+    },
+    {
+      "path": "hornet/source_manifest.json",
+      "bytes": 1376,
+      "sha256": "cd520f5f552cabb99912ea146135fa7fb28325a54afbcba6403dcdea73fc3555"
+    },
+    {
+      "path": "prospector/metrics.json",
+      "bytes": 1356,
+      "sha256": "76e35aa973c2fcef578d0476499584864135cdf03bbc9d2180103a59a4835513"
+    },
+    {
+      "path": "prospector/prospector.blend",
+      "bytes": 835345,
+      "sha256": "f46600e4d4891a32da82dc6885c3b791621b68e553781c27c1be9156a899b721"
+    },
+    {
+      "path": "prospector/prospector.glb",
+      "bytes": 2036260,
+      "sha256": "446acf1f20f827c44d54e440d51416cf32828539f510dde14b7bcb25cb019a2d"
+    },
+    {
+      "path": "prospector/qa/candidate.png",
+      "bytes": 1303736,
+      "sha256": "56a6d80f5696f77107504e6688b107030e44fe464fba4ad903201900396e7689"
+    },
+    {
+      "path": "prospector/qa/geometry.json",
+      "bytes": 982,
+      "sha256": "4c591c9acb0501a991bcd8d72ad3fca25f34e368d76d283fb2ccb3c7cb1483ae"
+    },
+    {
+      "path": "prospector/qa/material.png",
+      "bytes": 1274646,
+      "sha256": "e5ee01e86e4cb9acc59ec981ffb81a98ad1f7ab80450fa094fe54e9beb68d968"
+    },
+    {
+      "path": "prospector/qa/parts.png",
+      "bytes": 670923,
+      "sha256": "39f8079ebfe6e866fd46a31a4fe2da5a7663cf930caf1eb6d00cbe2608aa82db"
+    },
+    {
+      "path": "prospector/qa/source.png",
+      "bytes": 1308515,
+      "sha256": "f1f432d73eecdb9b9a09f54ec040420284d5137941361784f3285be0babec30a"
+    },
+    {
+      "path": "prospector/qa/wire.png",
+      "bytes": 747432,
+      "sha256": "cb76ab23ed4877de7985632dc64a13902ea3a550b3d2211deccb0d74b2cfb276"
+    },
+    {
+      "path": "prospector/source_manifest.json",
+      "bytes": 1389,
+      "sha256": "e25cf630f89bcdb67843886004d68226ad12b01fe034740515d701dd618f5256"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4591,
+      "sha256": "455ce762c40927e328353b66e038bd8db7f029eda61e27107791dcd6df96360d"
+    },
+    {
+      "path": "RESULTS.md",
+      "bytes": 3584,
+      "sha256": "338929bfbacb55b830ff41ece93091cd818784642b369ef54c8caaae194619b2"
+    },
+    {
+      "path": "tools/package_delivery.py",
+      "bytes": 3095,
+      "sha256": "50b91ab904b1f22fb12faf0e3904dd3ffdfd04daae43999de158a00307613d55"
+    },
+    {
+      "path": "tools/prepare_ships.py",
+      "bytes": 13990,
+      "sha256": "f52a4a7278393762e0dba869f2fe07d0aa1ae18c2c52d6fd6901bf89eee91438"
+    },
+    {
+      "path": "tools/repair_coplanar.py",
+      "bytes": 3397,
+      "sha256": "5b97744bf3c2b9d9c20b0056103159e38b185504d4c50df65c5003fd47d38e75"
+    },
+    {
+      "path": "tools/review_wire.py",
+      "bytes": 1644,
+      "sha256": "8a0f5ee5f7ea1c07cd85e956b5a625217037a9ce6b803df3bd5e7c11ea8b44fa"
+    },
+    {
+      "path": "vulture/metrics.json",
+      "bytes": 4408,
+      "sha256": "0bc79be3b2c3b3b57724d9d985b3f7a5670ec3f18453f6f4c97e35efbcf075b9"
+    },
+    {
+      "path": "vulture/qa/candidate.png",
+      "bytes": 1304886,
+      "sha256": "462aec15cb22d83203fde52669bc5f5cfe733486d69d6742b4429a5c7e86e561"
+    },
+    {
+      "path": "vulture/qa/coplanar_repair.json",
+      "bytes": 2684,
+      "sha256": "54eeeef7d117edab6e58a8cd68e7c6e178a5868c06d7351b14659c70eb6f73b4"
+    },
+    {
+      "path": "vulture/qa/geometry.json",
+      "bytes": 972,
+      "sha256": "83761f2af57cbfb0b5a4a1da01300afad8ab5efdb03a518127316424d918ce7e"
+    },
+    {
+      "path": "vulture/qa/material.png",
+      "bytes": 1307657,
+      "sha256": "94fe7a6a082a6e80e39cb917d5dbec133bdc9ee43c08b7b639fa16d709444f0d"
+    },
+    {
+      "path": "vulture/qa/parts.png",
+      "bytes": 671201,
+      "sha256": "51d7f0e815a70034c9ae1aa97163d9f9c1237de2a5d129c4f392e0c0f6cda0be"
+    },
+    {
+      "path": "vulture/qa/source.png",
+      "bytes": 1330610,
+      "sha256": "fced0fe71229ebeb9f9a17cddee72419ee4b09df9606e156ae21192675e0d566"
+    },
+    {
+      "path": "vulture/qa/wire.png",
+      "bytes": 762863,
+      "sha256": "995dc478a261a962c07f66861749e89daea4d4c01ec25a96d9dfcf3b72316142"
+    },
+    {
+      "path": "vulture/source_manifest.json",
+      "bytes": 1374,
+      "sha256": "c7af4b8f68ccfc855266aa3a3aec487936a75f54385751a7abfec92da0b68859"
+    },
+    {
+      "path": "vulture/vulture.blend",
+      "bytes": 758746,
+      "sha256": "0f749cfb90619034f076aa7afd1c22df37501b89342a0ef7cdc2c9c254e1d26f"
+    },
+    {
+      "path": "vulture/vulture.glb",
+      "bytes": 1835176,
+      "sha256": "ea8833f294d7ff4790199006da5d6f868b8afd560c055a9b1de2e244f24c461a"
+    }
+  ]
+}

@@ -1,0 +1,343 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "hidden back-to-back faces: Hull<->LiftMount (2 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_L_03 (2 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_L_04 (1 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_R_03 (1 pairs) - delete to save tris"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [
+    {
+      "where": "Hull<->LiftMount",
+      "tri_pairs": 2
+    },
+    {
+      "where": "Hull<->CargoDoor_L_03",
+      "tri_pairs": 2
+    },
+    {
+      "where": "Hull<->CargoDoor_L_04",
+      "tri_pairs": 1
+    },
+    {
+      "where": "Hull<->CargoDoor_R_03",
+      "tri_pairs": 1
+    }
+  ],
+  "enclosed": [],
+  "objects": {
+    "Hull": {
+      "verts": 13211,
+      "faces": 26942,
+      "tris": 26942,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_R_01": {
+      "verts": 323,
+      "faces": 642,
+      "tris": 642,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_L_01": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_R_02": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_L_02": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_R_03": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_L_03": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_R_04": {
+      "verts": 324,
+      "faces": 644,
+      "tris": 644,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "CargoDoor_L_04": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "NoseCargoDoor": {
+      "verts": 327,
+      "faces": 650,
+      "tris": 650,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 4
+    },
+    "ServiceLiftDeck": {
+      "verts": 8,
+      "faces": 12,
+      "tris": 12,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "LiftGuide_A": {
+      "verts": 8,
+      "faces": 12,
+      "tris": 12,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "LiftGuide_B": {
+      "verts": 8,
+      "faces": 12,
+      "tris": 12,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "LiftMount": {
+      "verts": 8,
+      "faces": 12,
+      "tris": 12,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    }
+  }
+}

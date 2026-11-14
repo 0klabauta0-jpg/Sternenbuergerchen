@@ -1,0 +1,18 @@
+# User-supplied third-party derivatives remain local; public repo gets tools/evidence.
+*.blend
+*.blend1
+*.blend2
+*.glb
+*.png
+*.png.import
+*.log
+*.zip
+*.crash.txt
+diagnostic/
+**/.godot/
+**/__pycache__/
+godot_probe/runs/
+godot_probe/verification/
+godot_probe/native_logs/
+caterpillar/qa_rejected*.json
+caterpillar/islands.json

@@ -1,0 +1,52 @@
+{
+  "ship": "prospector",
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-002\\MISC\\MISC-PROSPECTOR.obj",
+  "source_sha256": "982bdbfeaa44537299e6c77a2403db80691b826d36659e7eea6255ef96c0790f",
+  "raw": {
+    "vertices": 231645,
+    "triangles": 403931,
+    "bounds_min": [
+      -760.0263671875,
+      -1188.34326171875,
+      -335.7412109375
+    ],
+    "bounds_max": [
+      747.9463500976562,
+      1181.0673828125,
+      343.15545654296875
+    ],
+    "dimensions": [
+      1507.97265625,
+      2369.41064453125,
+      678.8966674804688
+    ],
+    "materials": 0
+  },
+  "normalized_source": {
+    "vertices": 231645,
+    "triangles": 403931,
+    "bounds_min": [
+      -2.5457346439361572,
+      -4.0,
+      0.0
+    ],
+    "bounds_max": [
+      2.5457348823547363,
+      3.999999761581421,
+      2.2922043800354004
+    ],
+    "dimensions": [
+      5.091469764709473,
+      8.0,
+      2.2922043800354004
+    ],
+    "materials": 0
+  },
+  "source_scale_factor": 0.0033763670381343593,
+  "authoring_length_m": 8,
+  "forward_blender": "-Y",
+  "forward_gltf": "+Z",
+  "material_note": "Source contains no materials; authored four-color preview palette, not original textures.",
+  "provenance": "User-supplied RSI model conversion; local derivative, redistribution license not established.",
+  "blender": "5.1.1"
+}

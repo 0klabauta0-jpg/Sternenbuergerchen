@@ -1,0 +1,36 @@
+{
+  "file": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CATERPILLAR.FBX",
+  "sha256": "776bcab307544213861e0567f3ba9c2d42e69d50c4c71009541ad488f1822b3c",
+  "objects": [
+    {
+      "name": "DRAKE-CATERPILLAR",
+      "type": "MESH",
+      "parent": null,
+      "location": [
+        0.0728759765625,
+        0.05078125,
+        6.555084228515625
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "vertices": 175634,
+      "triangles": 243269,
+      "min": [
+        -1975.167236328125,
+        -5578.0,
+        -653.0516967773438
+      ],
+      "max": [
+        1975.31298828125,
+        5578.1015625,
+        666.161865234375
+      ],
+      "materials": [
+        "default"
+      ]
+    }
+  ]
+}

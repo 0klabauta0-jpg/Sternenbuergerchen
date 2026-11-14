@@ -1,0 +1,17 @@
+config_version=5
+
+[application]
+config/name="Ship asset import probe 2026-11-14"
+run/max_fps=30
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=720
+window/size/window_width_override=960
+window/size/window_height_override=720
+window/vsync/vsync_mode=0
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false

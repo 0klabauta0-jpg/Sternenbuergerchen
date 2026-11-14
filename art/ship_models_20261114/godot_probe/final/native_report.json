@@ -1,0 +1,1704 @@
+{
+  "captures": [
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/prospector_closed.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/prospector_rear.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/vulture_closed.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/vulture_rear.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/gladius_closed.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/gladius_rear.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/hornet_closed.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/hornet_rear.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/caterpillar_closed.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/caterpillar_rear.png",
+    "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/godot_probe/runs/native_20261114T145853_15996/caterpillar_open_lift_down_Scene.png"
+  ],
+  "check_count": 132,
+  "checks": [
+    {
+      "label": "nonempty selected model list",
+      "pass": true
+    },
+    {
+      "label": "capture uses actual native renderer",
+      "pass": true
+    },
+    {
+      "label": "prospector GLB exists",
+      "pass": true
+    },
+    {
+      "label": "prospector direct GLTFDocument import succeeds",
+      "pass": true
+    },
+    {
+      "label": "prospector generate_scene returns Node3D",
+      "pass": true
+    },
+    {
+      "label": "prospector nonempty imported mesh",
+      "pass": true
+    },
+    {
+      "label": "prospector finite vertices, normals and transforms",
+      "pass": true
+    },
+    {
+      "label": "prospector every surface has a material",
+      "pass": true
+    },
+    {
+      "label": "prospector complete unit normals",
+      "pass": true
+    },
+    {
+      "label": "prospector triangle indices remain in range",
+      "pass": true
+    },
+    {
+      "label": "prospector imported triangle count matches GLB accessors",
+      "pass": true
+    },
+    {
+      "label": "prospector imported material count matches GLB declarations",
+      "pass": true
+    },
+    {
+      "label": "prospector positive three-dimensional bounds",
+      "pass": true
+    },
+    {
+      "label": "prospector underside on ground pivot",
+      "pass": true
+    },
+    {
+      "label": "prospector centered horizontal anchor: complete static model",
+      "pass": true
+    },
+    {
+      "label": "prospector current authoring metrics exist",
+      "pass": true
+    },
+    {
+      "label": "prospector authoring metrics parse",
+      "pass": true
+    },
+    {
+      "label": "prospector actual imported triangles match current authoring metrics",
+      "pass": true
+    },
+    {
+      "label": "prospector actual imported bounds match current Blender metrics with axis conversion",
+      "pass": true
+    },
+    {
+      "label": "prospector material count matches current Blender GLB roundtrip",
+      "pass": true
+    },
+    {
+      "label": "prospector authoring metrics unchanged while read",
+      "pass": true
+    },
+    {
+      "label": "prospector closed nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "prospector closed saved native capture",
+      "pass": true
+    },
+    {
+      "label": "prospector rear nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "prospector rear saved native capture",
+      "pass": true
+    },
+    {
+      "label": "prospector GLB bytes unchanged during audit/capture",
+      "pass": true
+    },
+    {
+      "label": "vulture GLB exists",
+      "pass": true
+    },
+    {
+      "label": "vulture direct GLTFDocument import succeeds",
+      "pass": true
+    },
+    {
+      "label": "vulture generate_scene returns Node3D",
+      "pass": true
+    },
+    {
+      "label": "vulture nonempty imported mesh",
+      "pass": true
+    },
+    {
+      "label": "vulture finite vertices, normals and transforms",
+      "pass": true
+    },
+    {
+      "label": "vulture every surface has a material",
+      "pass": true
+    },
+    {
+      "label": "vulture complete unit normals",
+      "pass": true
+    },
+    {
+      "label": "vulture triangle indices remain in range",
+      "pass": true
+    },
+    {
+      "label": "vulture imported triangle count matches GLB accessors",
+      "pass": true
+    },
+    {
+      "label": "vulture imported material count matches GLB declarations",
+      "pass": true
+    },
+    {
+      "label": "vulture positive three-dimensional bounds",
+      "pass": true
+    },
+    {
+      "label": "vulture underside on ground pivot",
+      "pass": true
+    },
+    {
+      "label": "vulture centered horizontal anchor: complete static model",
+      "pass": true
+    },
+    {
+      "label": "vulture current authoring metrics exist",
+      "pass": true
+    },
+    {
+      "label": "vulture authoring metrics parse",
+      "pass": true
+    },
+    {
+      "label": "vulture actual imported triangles match current authoring metrics",
+      "pass": true
+    },
+    {
+      "label": "vulture actual imported bounds match current Blender metrics with axis conversion",
+      "pass": true
+    },
+    {
+      "label": "vulture material count matches current Blender GLB roundtrip",
+      "pass": true
+    },
+    {
+      "label": "vulture authoring metrics unchanged while read",
+      "pass": true
+    },
+    {
+      "label": "vulture closed nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "vulture closed saved native capture",
+      "pass": true
+    },
+    {
+      "label": "vulture rear nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "vulture rear saved native capture",
+      "pass": true
+    },
+    {
+      "label": "vulture GLB bytes unchanged during audit/capture",
+      "pass": true
+    },
+    {
+      "label": "gladius GLB exists",
+      "pass": true
+    },
+    {
+      "label": "gladius direct GLTFDocument import succeeds",
+      "pass": true
+    },
+    {
+      "label": "gladius generate_scene returns Node3D",
+      "pass": true
+    },
+    {
+      "label": "gladius nonempty imported mesh",
+      "pass": true
+    },
+    {
+      "label": "gladius finite vertices, normals and transforms",
+      "pass": true
+    },
+    {
+      "label": "gladius every surface has a material",
+      "pass": true
+    },
+    {
+      "label": "gladius complete unit normals",
+      "pass": true
+    },
+    {
+      "label": "gladius triangle indices remain in range",
+      "pass": true
+    },
+    {
+      "label": "gladius imported triangle count matches GLB accessors",
+      "pass": true
+    },
+    {
+      "label": "gladius imported material count matches GLB declarations",
+      "pass": true
+    },
+    {
+      "label": "gladius positive three-dimensional bounds",
+      "pass": true
+    },
+    {
+      "label": "gladius underside on ground pivot",
+      "pass": true
+    },
+    {
+      "label": "gladius centered horizontal anchor: complete static model",
+      "pass": true
+    },
+    {
+      "label": "gladius current authoring metrics exist",
+      "pass": true
+    },
+    {
+      "label": "gladius authoring metrics parse",
+      "pass": true
+    },
+    {
+      "label": "gladius actual imported triangles match current authoring metrics",
+      "pass": true
+    },
+    {
+      "label": "gladius actual imported bounds match current Blender metrics with axis conversion",
+      "pass": true
+    },
+    {
+      "label": "gladius material count matches current Blender GLB roundtrip",
+      "pass": true
+    },
+    {
+      "label": "gladius authoring metrics unchanged while read",
+      "pass": true
+    },
+    {
+      "label": "gladius closed nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "gladius closed saved native capture",
+      "pass": true
+    },
+    {
+      "label": "gladius rear nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "gladius rear saved native capture",
+      "pass": true
+    },
+    {
+      "label": "gladius GLB bytes unchanged during audit/capture",
+      "pass": true
+    },
+    {
+      "label": "hornet GLB exists",
+      "pass": true
+    },
+    {
+      "label": "hornet direct GLTFDocument import succeeds",
+      "pass": true
+    },
+    {
+      "label": "hornet generate_scene returns Node3D",
+      "pass": true
+    },
+    {
+      "label": "hornet nonempty imported mesh",
+      "pass": true
+    },
+    {
+      "label": "hornet finite vertices, normals and transforms",
+      "pass": true
+    },
+    {
+      "label": "hornet every surface has a material",
+      "pass": true
+    },
+    {
+      "label": "hornet complete unit normals",
+      "pass": true
+    },
+    {
+      "label": "hornet triangle indices remain in range",
+      "pass": true
+    },
+    {
+      "label": "hornet imported triangle count matches GLB accessors",
+      "pass": true
+    },
+    {
+      "label": "hornet imported material count matches GLB declarations",
+      "pass": true
+    },
+    {
+      "label": "hornet positive three-dimensional bounds",
+      "pass": true
+    },
+    {
+      "label": "hornet underside on ground pivot",
+      "pass": true
+    },
+    {
+      "label": "hornet centered horizontal anchor: complete static model",
+      "pass": true
+    },
+    {
+      "label": "hornet current authoring metrics exist",
+      "pass": true
+    },
+    {
+      "label": "hornet authoring metrics parse",
+      "pass": true
+    },
+    {
+      "label": "hornet actual imported triangles match current authoring metrics",
+      "pass": true
+    },
+    {
+      "label": "hornet actual imported bounds match current Blender metrics with axis conversion",
+      "pass": true
+    },
+    {
+      "label": "hornet material count matches current Blender GLB roundtrip",
+      "pass": true
+    },
+    {
+      "label": "hornet authoring metrics unchanged while read",
+      "pass": true
+    },
+    {
+      "label": "hornet closed nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "hornet closed saved native capture",
+      "pass": true
+    },
+    {
+      "label": "hornet rear nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "hornet rear saved native capture",
+      "pass": true
+    },
+    {
+      "label": "hornet GLB bytes unchanged during audit/capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar GLB exists",
+      "pass": true
+    },
+    {
+      "label": "caterpillar direct GLTFDocument import succeeds",
+      "pass": true
+    },
+    {
+      "label": "caterpillar generate_scene returns Node3D",
+      "pass": true
+    },
+    {
+      "label": "caterpillar nonempty imported mesh",
+      "pass": true
+    },
+    {
+      "label": "caterpillar finite vertices, normals and transforms",
+      "pass": true
+    },
+    {
+      "label": "caterpillar every surface has a material",
+      "pass": true
+    },
+    {
+      "label": "caterpillar complete unit normals",
+      "pass": true
+    },
+    {
+      "label": "caterpillar triangle indices remain in range",
+      "pass": true
+    },
+    {
+      "label": "caterpillar imported triangle count matches GLB accessors",
+      "pass": true
+    },
+    {
+      "label": "caterpillar imported material count matches GLB declarations",
+      "pass": true
+    },
+    {
+      "label": "caterpillar positive three-dimensional bounds",
+      "pass": true
+    },
+    {
+      "label": "caterpillar underside on ground pivot",
+      "pass": true
+    },
+    {
+      "label": "caterpillar centered horizontal anchor: static Hull; separately authored outboard service lift expands aggregate starboard bounds",
+      "pass": true
+    },
+    {
+      "label": "caterpillar current authoring metrics exist",
+      "pass": true
+    },
+    {
+      "label": "caterpillar authoring metrics parse",
+      "pass": true
+    },
+    {
+      "label": "caterpillar actual imported triangles match current authoring metrics",
+      "pass": true
+    },
+    {
+      "label": "caterpillar authoring metrics unchanged while read",
+      "pass": true
+    },
+    {
+      "label": "caterpillar has one separate static Hull mesh",
+      "pass": true
+    },
+    {
+      "label": "caterpillar Scene positive animation duration",
+      "pass": true
+    },
+    {
+      "label": "caterpillar static Hull stable at clip fraction 0.33333333333333",
+      "pass": true
+    },
+    {
+      "label": "caterpillar static Hull stable at clip fraction 0.66666666666667",
+      "pass": true
+    },
+    {
+      "label": "caterpillar static Hull stable at clip fraction 1.0",
+      "pass": true
+    },
+    {
+      "label": "caterpillar Scene moves imported nodes",
+      "pass": true
+    },
+    {
+      "label": "caterpillar eight separate imported cargo doors move",
+      "pass": true
+    },
+    {
+      "label": "caterpillar separate imported service lift moves",
+      "pass": true
+    },
+    {
+      "label": "caterpillar clip returns to closed rest pose",
+      "pass": true
+    },
+    {
+      "label": "caterpillar has exported mechanical animation",
+      "pass": true
+    },
+    {
+      "label": "caterpillar closed nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar closed saved native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar rear nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar rear saved native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar open_lift_down_Scene nonempty native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar open_lift_down_Scene saved native capture",
+      "pass": true
+    },
+    {
+      "label": "caterpillar GLB bytes unchanged during audit/capture",
+      "pass": true
+    }
+  ],
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "failures": 0,
+  "probe_sha256": "6d45ac9e6dcef85181b903feaeaee95ac845324b248dc99ce92f5452585ce594",
+  "rendered": true,
+  "renderer": "gl_compatibility",
+  "schema": "ship_models.godot_probe.v1",
+  "scope": "Fresh direct GLTFDocument imports in an isolated Godot project. Asset geometry and animation preview only; no gameplay integration, playthrough, collision, performance or artistic approval.",
+  "ships": [
+    {
+      "animations": {
+        "clips": []
+      },
+      "authoring_metrics": {
+        "expected_triangles": 19932,
+        "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/prospector/metrics.json",
+        "sha256": "76e35aa973c2fcef578d0476499584864135cdf03bbc9d2180103a59a4835513"
+      },
+      "bounds": {
+        "max": [
+          2.541663646698,
+          2.27278637886047,
+          3.99577903747559
+        ],
+        "min": [
+          -2.54197835922241,
+          0.0,
+          -3.99573135375977
+        ],
+        "size": [
+          5.08364200592041,
+          2.27278637886047,
+          7.99151039123535
+        ]
+      },
+      "bytes": 2036260,
+      "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/prospector/prospector.glb",
+      "geometry": {
+        "bad_indices": 0,
+        "bad_normals": 0,
+        "finite": true,
+        "material_count": 3,
+        "materials": [
+          "prospector_Hull",
+          "prospector_Structure",
+          "prospector_Accent"
+        ],
+        "meshes": 1,
+        "missing_materials": 0,
+        "normal_count": 59790,
+        "parts": [
+          {
+            "bounds": {
+              "max": [
+                2.541663646698,
+                2.27278637886047,
+                3.99577903747559
+              ],
+              "min": [
+                -2.54197835922241,
+                0.0,
+                -3.99573135375977
+              ],
+              "size": [
+                5.08364200592041,
+                2.27278637886047,
+                7.99151039123535
+              ]
+            },
+            "path": "Prospector",
+            "surfaces": 3,
+            "triangles": 19932
+          }
+        ],
+        "triangles": 19932,
+        "vertex_count": 59790
+      },
+      "pivot_reference": {
+        "aggregate_center": [
+          -0.000157356262207031,
+          1.13639318943024,
+          0.0000238418579101563
+        ],
+        "basis": "complete static model",
+        "bounds": {
+          "max": [
+            2.541663646698,
+            2.27278637886047,
+            3.99577903747559
+          ],
+          "min": [
+            -2.54197835922241,
+            0.0,
+            -3.99573135375977
+          ],
+          "size": [
+            5.08364200592041,
+            2.27278637886047,
+            7.99151039123535
+          ]
+        }
+      },
+      "sha256": "446acf1f20f827c44d54e440d51416cf32828539f510dde14b7bcb25cb019a2d",
+      "ship": "prospector"
+    },
+    {
+      "animations": {
+        "clips": []
+      },
+      "authoring_metrics": {
+        "expected_triangles": 17970,
+        "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/vulture/metrics.json",
+        "sha256": "0bc79be3b2c3b3b57724d9d985b3f7a5670ec3f18453f6f4c97e35efbcf075b9"
+      },
+      "bounds": {
+        "max": [
+          1.91743397712708,
+          2.10616278648376,
+          3.99900102615356
+        ],
+        "min": [
+          -1.91767525672913,
+          0.0,
+          -3.99296617507935
+        ],
+        "size": [
+          3.8351092338562,
+          2.10616278648376,
+          7.99196720123291
+        ]
+      },
+      "bytes": 1835176,
+      "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/vulture/vulture.glb",
+      "geometry": {
+        "bad_indices": 0,
+        "bad_normals": 0,
+        "finite": true,
+        "material_count": 2,
+        "materials": [
+          "vulture_Hull",
+          "vulture_Structure"
+        ],
+        "meshes": 1,
+        "missing_materials": 0,
+        "normal_count": 53904,
+        "parts": [
+          {
+            "bounds": {
+              "max": [
+                1.91743397712708,
+                2.10616278648376,
+                3.99900102615356
+              ],
+              "min": [
+                -1.91767525672913,
+                0.0,
+                -3.99296617507935
+              ],
+              "size": [
+                3.8351092338562,
+                2.10616278648376,
+                7.99196720123291
+              ]
+            },
+            "path": "Vulture",
+            "surfaces": 2,
+            "triangles": 17970
+          }
+        ],
+        "triangles": 17970,
+        "vertex_count": 53904
+      },
+      "pivot_reference": {
+        "aggregate_center": [
+          -0.000120639801025391,
+          1.05308139324188,
+          0.00301742553710938
+        ],
+        "basis": "complete static model",
+        "bounds": {
+          "max": [
+            1.91743397712708,
+            2.10616278648376,
+            3.99900102615356
+          ],
+          "min": [
+            -1.91767525672913,
+            0.0,
+            -3.99296617507935
+          ],
+          "size": [
+            3.8351092338562,
+            2.10616278648376,
+            7.99196720123291
+          ]
+        }
+      },
+      "sha256": "ea8833f294d7ff4790199006da5d6f868b8afd560c055a9b1de2e244f24c461a",
+      "ship": "vulture"
+    },
+    {
+      "animations": {
+        "clips": []
+      },
+      "authoring_metrics": {
+        "expected_triangles": 14000,
+        "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/gladius/metrics.json",
+        "sha256": "67654dbf6e3e2c5ccf870aa929e589eebdca4726d22da12a0dee71b8b8567f25"
+      },
+      "bounds": {
+        "max": [
+          3.43068027496338,
+          2.26728749275208,
+          3.99736309051514
+        ],
+        "min": [
+          -3.43059825897217,
+          0.0,
+          -3.99477672576904
+        ],
+        "size": [
+          6.86127853393555,
+          2.26728749275208,
+          7.99213981628418
+        ]
+      },
+      "bytes": 1430796,
+      "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/gladius/gladius.glb",
+      "geometry": {
+        "bad_indices": 0,
+        "bad_normals": 0,
+        "finite": true,
+        "material_count": 3,
+        "materials": [
+          "gladius_Hull",
+          "gladius_Structure",
+          "gladius_Glass"
+        ],
+        "meshes": 1,
+        "missing_materials": 0,
+        "normal_count": 41982,
+        "parts": [
+          {
+            "bounds": {
+              "max": [
+                3.43068027496338,
+                2.26728749275208,
+                3.99736309051514
+              ],
+              "min": [
+                -3.43059825897217,
+                0.0,
+                -3.99477672576904
+              ],
+              "size": [
+                6.86127853393555,
+                2.26728749275208,
+                7.99213981628418
+              ]
+            },
+            "path": "Gladius",
+            "surfaces": 3,
+            "triangles": 14000
+          }
+        ],
+        "triangles": 14000,
+        "vertex_count": 41982
+      },
+      "pivot_reference": {
+        "aggregate_center": [
+          0.0000410079956054688,
+          1.13364374637604,
+          0.00129318237304688
+        ],
+        "basis": "complete static model",
+        "bounds": {
+          "max": [
+            3.43068027496338,
+            2.26728749275208,
+            3.99736309051514
+          ],
+          "min": [
+            -3.43059825897217,
+            0.0,
+            -3.99477672576904
+          ],
+          "size": [
+            6.86127853393555,
+            2.26728749275208,
+            7.99213981628418
+          ]
+        }
+      },
+      "sha256": "6eac54c9a6a035b9374f893a6b149c352847000963d538b4379f1e2fe4fb4ea7",
+      "ship": "gladius"
+    },
+    {
+      "animations": {
+        "clips": []
+      },
+      "authoring_metrics": {
+        "expected_triangles": 15840,
+        "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/hornet/metrics.json",
+        "sha256": "16b24741047f2f57e9c2f272a854f807e72e1efb1409a9f2ca65a2f01d664afe"
+      },
+      "bounds": {
+        "max": [
+          3.85186719894409,
+          1.8105616569519,
+          3.99832701683044
+        ],
+        "min": [
+          -3.85386323928833,
+          0.0,
+          -3.9976818561554
+        ],
+        "size": [
+          7.70573043823242,
+          1.8105616569519,
+          7.99600887298584
+        ]
+      },
+      "bytes": 1617644,
+      "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/hornet/hornet.glb",
+      "geometry": {
+        "bad_indices": 0,
+        "bad_normals": 0,
+        "finite": true,
+        "material_count": 2,
+        "materials": [
+          "hornet_Hull",
+          "hornet_Structure"
+        ],
+        "meshes": 1,
+        "missing_materials": 0,
+        "normal_count": 47506,
+        "parts": [
+          {
+            "bounds": {
+              "max": [
+                3.85186719894409,
+                1.8105616569519,
+                3.99832701683044
+              ],
+              "min": [
+                -3.85386323928833,
+                0.0,
+                -3.9976818561554
+              ],
+              "size": [
+                7.70573043823242,
+                1.8105616569519,
+                7.99600887298584
+              ]
+            },
+            "path": "Hornet",
+            "surfaces": 2,
+            "triangles": 15840
+          }
+        ],
+        "triangles": 15840,
+        "vertex_count": 47506
+      },
+      "pivot_reference": {
+        "aggregate_center": [
+          -0.000998020172119141,
+          0.905280828475952,
+          0.000322580337524414
+        ],
+        "basis": "complete static model",
+        "bounds": {
+          "max": [
+            3.85186719894409,
+            1.8105616569519,
+            3.99832701683044
+          ],
+          "min": [
+            -3.85386323928833,
+            0.0,
+            -3.9976818561554
+          ],
+          "size": [
+            7.70573043823242,
+            1.8105616569519,
+            7.99600887298584
+          ]
+        }
+      },
+      "sha256": "f2635c1302e9d7a62759bd6ba0758c0323a8f34555d1a16b8a42f9ccd552198a",
+      "ship": "hornet"
+    },
+    {
+      "animations": {
+        "clips": [
+          {
+            "length": 3.0,
+            "moved": [
+              "Caterpillar/CargoDoor_L_01",
+              "Caterpillar/CargoDoor_L_02",
+              "Caterpillar/CargoDoor_L_03",
+              "Caterpillar/CargoDoor_L_04",
+              "Caterpillar/CargoDoor_R_01",
+              "Caterpillar/CargoDoor_R_02",
+              "Caterpillar/CargoDoor_R_03",
+              "Caterpillar/CargoDoor_R_04",
+              "Caterpillar/NoseCargoDoor",
+              "Caterpillar/ServiceLiftDeck"
+            ],
+            "name": "Scene",
+            "samples": [
+              {
+                "bounds": {
+                  "max": [
+                    1.55999982357025,
+                    0.953407108783722,
+                    4.00515270233154
+                  ],
+                  "min": [
+                    -1.42261612415314,
+                    0.0,
+                    -4.00740528106689
+                  ],
+                  "size": [
+                    2.98261594772339,
+                    0.953407108783722,
+                    8.01255798339844
+                  ]
+                },
+                "deltas": {
+                  "Caterpillar/CargoDoor_L_01": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_02": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_03": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_04": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_01": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_02": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_03": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_04": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/NoseCargoDoor": {
+                    "rotation_radians": [
+                      1.57079637050629,
+                      0.0,
+                      0.0
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  }
+                },
+                "fraction": 0.333333333333333,
+                "moved": [
+                  "Caterpillar/CargoDoor_L_01",
+                  "Caterpillar/CargoDoor_L_02",
+                  "Caterpillar/CargoDoor_L_03",
+                  "Caterpillar/CargoDoor_L_04",
+                  "Caterpillar/CargoDoor_R_01",
+                  "Caterpillar/CargoDoor_R_02",
+                  "Caterpillar/CargoDoor_R_03",
+                  "Caterpillar/CargoDoor_R_04",
+                  "Caterpillar/NoseCargoDoor"
+                ],
+                "stable": [
+                  "Caterpillar",
+                  "Caterpillar/Hull",
+                  "Caterpillar/LiftGuide_A",
+                  "Caterpillar/LiftGuide_B",
+                  "Caterpillar/LiftMount",
+                  "Caterpillar/ServiceLiftDeck"
+                ],
+                "time": 1.0
+              },
+              {
+                "bounds": {
+                  "max": [
+                    1.55999982357025,
+                    0.953407108783722,
+                    4.00515270233154
+                  ],
+                  "min": [
+                    -1.42261612415314,
+                    0.0,
+                    -4.00740528106689
+                  ],
+                  "size": [
+                    2.98261594772339,
+                    0.953407108783722,
+                    8.01255798339844
+                  ]
+                },
+                "deltas": {
+                  "Caterpillar/CargoDoor_L_01": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_02": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_03": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_L_04": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_01": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_02": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_03": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/CargoDoor_R_04": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      -1.57079648971558
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/NoseCargoDoor": {
+                    "rotation_radians": [
+                      1.57079637050629,
+                      0.0,
+                      0.0
+                    ],
+                    "translation": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  "Caterpillar/ServiceLiftDeck": {
+                    "rotation_radians": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    "translation": [
+                      0.0,
+                      -0.300000011920929,
+                      0.0
+                    ]
+                  }
+                },
+                "fraction": 0.666666666666667,
+                "moved": [
+                  "Caterpillar/CargoDoor_L_01",
+                  "Caterpillar/CargoDoor_L_02",
+                  "Caterpillar/CargoDoor_L_03",
+                  "Caterpillar/CargoDoor_L_04",
+                  "Caterpillar/CargoDoor_R_01",
+                  "Caterpillar/CargoDoor_R_02",
+                  "Caterpillar/CargoDoor_R_03",
+                  "Caterpillar/CargoDoor_R_04",
+                  "Caterpillar/NoseCargoDoor",
+                  "Caterpillar/ServiceLiftDeck"
+                ],
+                "stable": [
+                  "Caterpillar",
+                  "Caterpillar/Hull",
+                  "Caterpillar/LiftGuide_A",
+                  "Caterpillar/LiftGuide_B",
+                  "Caterpillar/LiftMount"
+                ],
+                "time": 2.0
+              },
+              {
+                "bounds": {
+                  "max": [
+                    1.55999982357025,
+                    0.953407108783722,
+                    4.00515270233154
+                  ],
+                  "min": [
+                    -1.42261612415314,
+                    0.0,
+                    -4.00740528106689
+                  ],
+                  "size": [
+                    2.98261594772339,
+                    0.953407108783722,
+                    8.01255798339844
+                  ]
+                },
+                "deltas": {
+
+                },
+                "fraction": 1.0,
+                "moved": [],
+                "stable": [
+                  "Caterpillar",
+                  "Caterpillar/CargoDoor_L_01",
+                  "Caterpillar/CargoDoor_L_02",
+                  "Caterpillar/CargoDoor_L_03",
+                  "Caterpillar/CargoDoor_L_04",
+                  "Caterpillar/CargoDoor_R_01",
+                  "Caterpillar/CargoDoor_R_02",
+                  "Caterpillar/CargoDoor_R_03",
+                  "Caterpillar/CargoDoor_R_04",
+                  "Caterpillar/Hull",
+                  "Caterpillar/LiftGuide_A",
+                  "Caterpillar/LiftGuide_B",
+                  "Caterpillar/LiftMount",
+                  "Caterpillar/NoseCargoDoor",
+                  "Caterpillar/ServiceLiftDeck"
+                ],
+                "time": 3.0
+              }
+            ],
+            "tracks": 10
+          }
+        ]
+      },
+      "authoring_metrics": {
+        "expected_triangles": 32826,
+        "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/caterpillar/metrics.json",
+        "sha256": "c4125f2fb2a9b6a66a9415e2a8ebbbca1161da196ca51af4ef965af80af6b40a"
+      },
+      "bounds": {
+        "max": [
+          1.55999982357025,
+          0.953407108783722,
+          4.00515270233154
+        ],
+        "min": [
+          -1.42261612415314,
+          0.0,
+          -4.00740528106689
+        ],
+        "size": [
+          2.98261594772339,
+          0.953407108783722,
+          8.01255798339844
+        ]
+      },
+      "bytes": 2584720,
+      "file": "C:/dev/SternenBuergerchen-worktrees/ship-model-preparation-20261114/art/ship_models_20261114/caterpillar/caterpillar.glb",
+      "geometry": {
+        "bad_indices": 0,
+        "bad_normals": 0,
+        "finite": true,
+        "material_count": 4,
+        "materials": [
+          "Hull_MutedRed",
+          "Structure_Dark",
+          "Panels_Bone",
+          "Access_Ochre"
+        ],
+        "meshes": 14,
+        "missing_materials": 0,
+        "normal_count": 98368,
+        "parts": [
+          {
+            "bounds": {
+              "max": [
+                -0.168819203972816,
+                0.678592503070831,
+                2.72078490257263
+              ],
+              "min": [
+                -0.254179120063782,
+                0.243998721241951,
+                2.08279323577881
+              ],
+              "size": [
+                0.0853599160909653,
+                0.434593796730042,
+                0.637991666793823
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_L_01",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                -0.168910816311836,
+                0.679710924625397,
+                2.00437307357788
+              ],
+              "min": [
+                -0.254072666168213,
+                0.243662536144257,
+                1.36546170711517
+              ],
+              "size": [
+                0.0851618498563766,
+                0.43604838848114,
+                0.638911366462708
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_L_02",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                -0.168916314840317,
+                0.679715692996979,
+                1.28640115261078
+              ],
+              "min": [
+                -0.254070460796356,
+                0.243684321641922,
+                0.648059010505676
+              ],
+              "size": [
+                0.0851541459560394,
+                0.436031371355057,
+                0.638342142105103
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_L_03",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                -0.168907672166824,
+                0.679715037345886,
+                0.569438457489014
+              ],
+              "min": [
+                -0.254070162773132,
+                0.243674859404564,
+                -0.0689142048358917
+              ],
+              "size": [
+                0.085162490606308,
+                0.436040163040161,
+                0.638352632522583
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_L_04",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                0.626910209655762,
+                0.679664731025696,
+                2.72058176994324
+              ],
+              "min": [
+                0.552000761032104,
+                0.243741780519485,
+                2.08249187469482
+              ],
+              "size": [
+                0.0749094486236572,
+                0.43592295050621,
+                0.638089895248413
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_R_01",
+            "surfaces": 2,
+            "triangles": 642
+          },
+          {
+            "bounds": {
+              "max": [
+                0.634745597839355,
+                0.679663896560669,
+                2.00401139259338
+              ],
+              "min": [
+                0.552039206027985,
+                0.243536680936813,
+                1.36551904678345
+              ],
+              "size": [
+                0.0827063918113709,
+                0.436127215623856,
+                0.638492345809937
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_R_02",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                0.635163307189941,
+                0.67985999584198,
+                1.28638470172882
+              ],
+              "min": [
+                0.552034974098206,
+                0.243591979146004,
+                0.647953033447266
+              ],
+              "size": [
+                0.0831283330917358,
+                0.436268031597137,
+                0.638431668281555
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_R_03",
+            "surfaces": 2,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                0.62691330909729,
+                0.679659008979797,
+                0.569474101066589
+              ],
+              "min": [
+                0.552039623260498,
+                0.243650943040848,
+                -0.0688129365444183
+              ],
+              "size": [
+                0.074873685836792,
+                0.43600806593895,
+                0.63828706741333
+              ]
+            },
+            "path": "Caterpillar/CargoDoor_R_04",
+            "surfaces": 2,
+            "triangles": 644
+          },
+          {
+            "bounds": {
+              "max": [
+                1.42083537578583,
+                0.953407108783722,
+                4.00515270233154
+              ],
+              "min": [
+                -1.42261612415314,
+                0.0,
+                -4.00740528106689
+              ],
+              "size": [
+                2.84345149993896,
+                0.953407108783722,
+                8.01255798339844
+              ]
+            },
+            "path": "Caterpillar/Hull",
+            "surfaces": 3,
+            "triangles": 26942
+          },
+          {
+            "bounds": {
+              "max": [
+                1.19249999523163,
+                0.475125163793564,
+                -0.132500007748604
+              ],
+              "min": [
+                1.1674998998642,
+                0.0451251566410065,
+                -0.167500004172325
+              ],
+              "size": [
+                0.0250000953674316,
+                0.430000007152557,
+                0.0349999964237213
+              ]
+            },
+            "path": "Caterpillar/LiftGuide_A",
+            "surfaces": 1,
+            "triangles": 12
+          },
+          {
+            "bounds": {
+              "max": [
+                1.19249999523163,
+                0.475125163793564,
+                -0.532500028610229
+              ],
+              "min": [
+                1.1674998998642,
+                0.0451251566410065,
+                -0.567499995231628
+              ],
+              "size": [
+                0.0250000953674316,
+                0.430000007152557,
+                0.0349999666213989
+              ]
+            },
+            "path": "Caterpillar/LiftGuide_B",
+            "surfaces": 1,
+            "triangles": 12
+          },
+          {
+            "bounds": {
+              "max": [
+                1.19000005722046,
+                0.415125161409378,
+                -0.149999976158142
+              ],
+              "min": [
+                1.00999999046326,
+                0.375125139951706,
+                -0.550000011920929
+              ],
+              "size": [
+                0.180000066757202,
+                0.0400000214576721,
+                0.400000035762787
+              ]
+            },
+            "path": "Caterpillar/LiftMount",
+            "surfaces": 1,
+            "triangles": 12
+          },
+          {
+            "bounds": {
+              "max": [
+                0.542613208293915,
+                0.56220954656601,
+                3.50239372253418
+              ],
+              "min": [
+                -0.159694954752922,
+                0.260473787784576,
+                3.4821937084198
+              ],
+              "size": [
+                0.702308177947998,
+                0.301735758781433,
+                0.0202000141143799
+              ]
+            },
+            "path": "Caterpillar/NoseCargoDoor",
+            "surfaces": 1,
+            "triangles": 650
+          },
+          {
+            "bounds": {
+              "max": [
+                1.55999994277954,
+                0.39262518286705,
+                -0.120000004768372
+              ],
+              "min": [
+                1.1800000667572,
+                0.357625156641006,
+                -0.579999983310699
+              ],
+              "size": [
+                0.379999876022339,
+                0.0350000262260437,
+                0.459999978542328
+              ]
+            },
+            "path": "Caterpillar/ServiceLiftDeck",
+            "surfaces": 1,
+            "triangles": 12
+          }
+        ],
+        "triangles": 32826,
+        "vertex_count": 98368
+      },
+      "pivot_reference": {
+        "aggregate_center": [
+          0.0686918497085571,
+          0.476703554391861,
+          -0.00112628936767578
+        ],
+        "basis": "static Hull; separately authored outboard service lift expands aggregate starboard bounds",
+        "bounds": {
+          "max": [
+            1.42083537578583,
+            0.953407108783722,
+            4.00515270233154
+          ],
+          "min": [
+            -1.42261612415314,
+            0.0,
+            -4.00740528106689
+          ],
+          "size": [
+            2.84345149993896,
+            0.953407108783722,
+            8.01255798339844
+          ]
+        }
+      },
+      "sha256": "fa26699dca15c04edc3c032f6666f8cba7684a659489ccc1d96a82d430356e49",
+      "ship": "caterpillar"
+    }
+  ]
+}

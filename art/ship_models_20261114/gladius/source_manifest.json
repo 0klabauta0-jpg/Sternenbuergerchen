@@ -1,0 +1,52 @@
+{
+  "ship": "gladius",
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-002\\AEGIS\\AEGIS-GLADIUS.obj",
+  "source_sha256": "1efe5ee7231bca2581b8f5b9e8af2f459e0bd460ed42c772a1ffa40db2d2b20f",
+  "raw": {
+    "vertices": 221456,
+    "triangles": 417693,
+    "bounds_min": [
+      -847.7012329101562,
+      -987.5797729492188,
+      -280.72564697265625
+    ],
+    "bounds_max": [
+      847.6829833984375,
+      987.5572509765625,
+      280.7001037597656
+    ],
+    "dimensions": [
+      1695.38427734375,
+      1975.136962890625,
+      561.42578125
+    ],
+    "materials": 0
+  },
+  "normalized_source": {
+    "vertices": 221456,
+    "triangles": 417693,
+    "bounds_min": [
+      -3.4334511756896973,
+      -3.999999761581421,
+      0.0
+    ],
+    "bounds_max": [
+      3.4334511756896973,
+      3.999999761581421,
+      2.2739717960357666
+    ],
+    "dimensions": [
+      6.8669023513793945,
+      7.999999523162842,
+      2.2739717960357666
+    ],
+    "materials": 0
+  },
+  "source_scale_factor": 0.004050351901205925,
+  "authoring_length_m": 8,
+  "forward_blender": "-Y",
+  "forward_gltf": "+Z",
+  "material_note": "Source contains no materials; authored four-color preview palette, not original textures.",
+  "provenance": "User-supplied RSI model conversion; local derivative, redistribution license not established.",
+  "blender": "5.1.1"
+}

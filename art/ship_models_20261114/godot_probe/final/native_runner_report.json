@@ -1,0 +1,22 @@
+{
+  "bounded_seconds": 90,
+  "stdout": "C:\\dev\\SternenBuergerchen-worktrees\\ship-model-preparation-20261114\\art\\ship_models_20261114\\godot_probe\\native_logs\\20261114T145852\\stdout.log",
+  "exit_code": 0,
+  "stderr": "C:\\dev\\SternenBuergerchen-worktrees\\ship-model-preparation-20261114\\art\\ship_models_20261114\\godot_probe\\native_logs\\20261114T145852\\stderr.log",
+  "passed": true,
+  "ships": "prospector,vulture,gladius,hornet,caterpillar",
+  "argv": [
+    "--path",
+    "\"C:\\dev\\SternenBuergerchen-worktrees\\ship-model-preparation-20261114\\art\\ship_models_20261114\\godot_probe\"",
+    "--rendering-method",
+    "gl_compatibility",
+    "--windowed",
+    "--resolution",
+    "960x720",
+    "--script",
+    "probe.gd",
+    "--",
+    "--render",
+    "--ships=prospector,vulture,gladius,hornet,caterpillar"
+  ]
+}

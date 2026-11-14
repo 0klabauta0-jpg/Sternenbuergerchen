@@ -1,0 +1,352 @@
+{
+  "source": {
+    "file": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CATERPILLAR.FBX",
+    "sha256": "776bcab307544213861e0567f3ba9c2d42e69d50c4c71009541ad488f1822b3c",
+    "objects": [
+      {
+        "name": "DRAKE-CATERPILLAR",
+        "type": "MESH",
+        "parent": null,
+        "location": [
+          0.0728759765625,
+          0.05078125,
+          6.555084228515625
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "vertices": 175634,
+        "triangles": 243269,
+        "min": [
+          -1975.167236328125,
+          -5578.0,
+          -653.0516967773438
+        ],
+        "max": [
+          1975.31298828125,
+          5578.1015625,
+          666.161865234375
+        ],
+        "materials": [
+          "default"
+        ]
+      }
+    ]
+  },
+  "parts": [
+    {
+      "name": "Hull",
+      "source_triangles": 237831,
+      "triangles": 26965
+    },
+    {
+      "name": "CargoDoor_R_01",
+      "source_triangles": 570,
+      "triangles": 649
+    },
+    {
+      "name": "CargoDoor_L_01",
+      "source_triangles": 526,
+      "triangles": 650
+    },
+    {
+      "name": "CargoDoor_R_02",
+      "source_triangles": 570,
+      "triangles": 650
+    },
+    {
+      "name": "CargoDoor_L_02",
+      "source_triangles": 570,
+      "triangles": 650
+    },
+    {
+      "name": "CargoDoor_R_03",
+      "source_triangles": 570,
+      "triangles": 650
+    },
+    {
+      "name": "CargoDoor_L_03",
+      "source_triangles": 570,
+      "triangles": 650
+    },
+    {
+      "name": "CargoDoor_R_04",
+      "source_triangles": 570,
+      "triangles": 649
+    },
+    {
+      "name": "CargoDoor_L_04",
+      "source_triangles": 570,
+      "triangles": 650
+    },
+    {
+      "name": "NoseCargoDoor",
+      "source_triangles": 626,
+      "triangles": 650
+    }
+  ],
+  "controls": [
+    {
+      "node": "CargoDoor_R_01",
+      "axis": "Y",
+      "open_degrees": 90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        0.5609999895095825,
+        -2.4014999866485596,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        0.5609999895095825,
+        0.23899999260902405,
+        2.4014999866485596
+      ]
+    },
+    {
+      "node": "CargoDoor_L_01",
+      "axis": "Y",
+      "open_degrees": -90.0,
+      "source_faces": 526,
+      "pivot_local_blender": [
+        -0.17800000309944153,
+        -2.4014999866485596,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        -0.17800000309944153,
+        0.23899999260902405,
+        2.4014999866485596
+      ]
+    },
+    {
+      "node": "CargoDoor_R_02",
+      "axis": "Y",
+      "open_degrees": 90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        0.5609999895095825,
+        -1.684499979019165,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        0.5609999895095825,
+        0.23899999260902405,
+        1.684499979019165
+      ]
+    },
+    {
+      "node": "CargoDoor_L_02",
+      "axis": "Y",
+      "open_degrees": -90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        -0.17800000309944153,
+        -1.684499979019165,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        -0.17800000309944153,
+        0.23899999260902405,
+        1.684499979019165
+      ]
+    },
+    {
+      "node": "CargoDoor_R_03",
+      "axis": "Y",
+      "open_degrees": 90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        0.5609999895095825,
+        -0.9674999713897705,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        0.5609999895095825,
+        0.23899999260902405,
+        0.9674999713897705
+      ]
+    },
+    {
+      "node": "CargoDoor_L_03",
+      "axis": "Y",
+      "open_degrees": -90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        -0.17800000309944153,
+        -0.9674999713897705,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        -0.17800000309944153,
+        0.23899999260902405,
+        0.9674999713897705
+      ]
+    },
+    {
+      "node": "CargoDoor_R_04",
+      "axis": "Y",
+      "open_degrees": 90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        0.5609999895095825,
+        -0.25049999356269836,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        0.5609999895095825,
+        0.23899999260902405,
+        0.25049999356269836
+      ]
+    },
+    {
+      "node": "CargoDoor_L_04",
+      "axis": "Y",
+      "open_degrees": -90.0,
+      "source_faces": 570,
+      "pivot_local_blender": [
+        -0.17800000309944153,
+        -0.25049999356269836,
+        0.23899999260902405
+      ],
+      "translation_gltf_at_rest": [
+        -0.17800000309944153,
+        0.23899999260902405,
+        0.25049999356269836
+      ]
+    },
+    {
+      "node": "NoseCargoDoor",
+      "axis": "X",
+      "open_degrees": 90.0,
+      "source_faces": 626,
+      "pivot_local_blender": [
+        0.19099999964237213,
+        -3.490000009536743,
+        0.2590000033378601
+      ],
+      "translation_gltf_at_rest": [
+        0.19099999964237213,
+        0.2590000033378601,
+        3.490000009536743
+      ]
+    },
+    {
+      "node": "ServiceLiftDeck",
+      "translation_axis": "Z",
+      "raised_z": 0.37,
+      "lowered_z": 0.07,
+      "new_authored_geometry": true,
+      "pivot_local_blender": [
+        1.3700000047683716,
+        0.3499999940395355,
+        0.3700000047683716
+      ],
+      "translation_gltf_at_rest": [
+        1.3700000047683716,
+        0.3700000047683716,
+        -0.3499999940395355
+      ]
+    }
+  ],
+  "blender_version": "5.1.1",
+  "output_triangles": 32826,
+  "source_normalized_length": 8.0,
+  "units": "stylized meters, not canonical ship size",
+  "forward_blender": "-Y",
+  "forward_gltf": "+Z",
+  "limitations": [
+    "Source lacks named door/lift rig and verified interior",
+    "Lift is newly authored replacement geometry; placement is candidate",
+    "No cargo collisions, navmesh, personnel transport or gameplay authority",
+    "No source textures; new four-color candidate palette"
+  ],
+  "removed_debris_vertices": {
+    "Hull": 0,
+    "CargoDoor_R_01": 0,
+    "CargoDoor_L_01": 0,
+    "CargoDoor_R_02": 0,
+    "CargoDoor_L_02": 0,
+    "CargoDoor_R_03": 0,
+    "CargoDoor_L_03": 0,
+    "CargoDoor_R_04": 0,
+    "CargoDoor_L_04": 0,
+    "NoseCargoDoor": 0,
+    "ServiceLiftDeck": 0,
+    "LiftGuide_A": 0,
+    "LiftGuide_B": 0,
+    "LiftMount": 0
+  },
+  "ground_offset": 0.005125175695866346,
+  "final_parts": {
+    "Hull": 26942,
+    "CargoDoor_R_01": 642,
+    "CargoDoor_L_01": 650,
+    "CargoDoor_R_02": 650,
+    "CargoDoor_L_02": 650,
+    "CargoDoor_R_03": 650,
+    "CargoDoor_L_03": 650,
+    "CargoDoor_R_04": 644,
+    "CargoDoor_L_04": 650,
+    "NoseCargoDoor": 650,
+    "ServiceLiftDeck": 12,
+    "LiftGuide_A": 12,
+    "LiftGuide_B": 12,
+    "LiftMount": 12
+  },
+  "qa_pass": true,
+  "source_original_triangles": 243269,
+  "source_normalized_welded_triangles": 242973,
+  "triangle_reduction_percent": 86.50629550004317,
+  "root_translation_gltf": [
+    0,
+    0.005125175695866346,
+    0
+  ],
+  "bounds_blender": {
+    "objects": 14,
+    "triangles": 32826,
+    "min": [
+      -1.4226161241531372,
+      -4.005152702331543,
+      0.0
+    ],
+    "max": [
+      1.559999942779541,
+      4.0074052810668945,
+      0.9534071087837219
+    ],
+    "parts": {
+      "CargoDoor_L_01": 650,
+      "CargoDoor_L_02": 650,
+      "CargoDoor_L_03": 650,
+      "CargoDoor_L_04": 650,
+      "CargoDoor_R_01": 642,
+      "CargoDoor_R_02": 650,
+      "CargoDoor_R_03": 650,
+      "CargoDoor_R_04": 644,
+      "Hull": 26942,
+      "LiftGuide_A": 12,
+      "LiftGuide_B": 12,
+      "LiftMount": 12,
+      "NoseCargoDoor": 650,
+      "ServiceLiftDeck": 12
+    }
+  },
+  "mechanical_clearance_m": 0.006,
+  "pipeline": {
+    "solidify_thickness_hull": 0.014,
+    "voxel_hull": 0.007,
+    "solidify_thickness_doors": 0.008,
+    "voxel_doors": 0.004,
+    "smooth_factor": 0.5,
+    "smooth_iterations": 2,
+    "planar_dissolve": false,
+    "uv_required": false,
+    "palette": "four new constant materials, source textureless"
+  },
+  "qa_warnings_accepted": {
+    "back_to_back_contacts": "Six triangle pairs in four contacts: closed moving doors must retain their mating skins for opening; lift mount is an intentional assembly contact. No same-facing overlap or topology errors."
+  }
+}

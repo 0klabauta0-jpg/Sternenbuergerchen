@@ -1,0 +1,38 @@
+{
+  "engine": "BLENDER_WORKBENCH",
+  "resolution": [
+    1280,
+    800
+  ],
+  "ortho_scale": 9.0,
+  "target": [
+    0,
+    0,
+    0.46
+  ],
+  "cameras": {
+    "three_quarter": [
+      10,
+      -14,
+      9
+    ],
+    "side": [
+      12,
+      0,
+      2.4
+    ],
+    "top": [
+      0,
+      -0.001,
+      12
+    ]
+  },
+  "outputs": [
+    "comparison_source_three_quarter.png",
+    "comparison_source_side.png",
+    "comparison_source_top.png",
+    "comparison_candidate_three_quarter.png",
+    "comparison_candidate_side.png",
+    "comparison_candidate_top.png"
+  ]
+}

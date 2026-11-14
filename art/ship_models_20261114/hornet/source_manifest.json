@@ -1,0 +1,52 @@
+{
+  "ship": "hornet",
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\ANVIL\\ANVIL-HORNET.obj",
+  "source_sha256": "af7f13d553d544e3e7cdff756a8c30a341f3832b17b40a9c3b71a1f0abec280d",
+  "raw": {
+    "vertices": 348772,
+    "triangles": 287335,
+    "bounds_min": [
+      -1088.671875,
+      -1129.201416015625,
+      -256.6484375
+    ],
+    "bounds_max": [
+      1088.6590576171875,
+      1129.265625,
+      256.6629333496094
+    ],
+    "dimensions": [
+      2177.3310546875,
+      2258.467041015625,
+      513.3114013671875
+    ],
+    "materials": 0
+  },
+  "normalized_source": {
+    "vertices": 348772,
+    "triangles": 287335,
+    "bounds_min": [
+      -3.8562989234924316,
+      -4.000000476837158,
+      0.0
+    ],
+    "bounds_max": [
+      3.8562989234924316,
+      4.0,
+      1.8182647228240967
+    ],
+    "dimensions": [
+      7.712597846984863,
+      8.0,
+      1.8182647228240967
+    ],
+    "materials": 0
+  },
+  "source_scale_factor": 0.003542225702086149,
+  "authoring_length_m": 8,
+  "forward_blender": "-Y",
+  "forward_gltf": "+Z",
+  "material_note": "Source contains no materials; authored four-color preview palette, not original textures.",
+  "provenance": "User-supplied RSI model conversion; local derivative, redistribution license not established.",
+  "blender": "5.1.1"
+}

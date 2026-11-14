@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### Schiffmodelle als separate Kandidaten — 14.11.2026
+
+Auf `task/ship-model-preparation-20261114`, Basis `integration/core-foundation`
+(`3cae5a216`, Auguststand), ausschliesslich neues Assetpaket. Lokale Benutzer-
+Originale aufbereitet: Prospector 19.932, Vulture 17.970, Caterpillar 32.826,
+Gladius 14.000, vorhandene Hornet 15.840 Dreiecke. Je editierbare Blender-Datei
+und GLB, Quellenhashes, Geometrie-QA und Roundtrip. Caterpillar neun echte
+getrennte Klappen und neues Liftdeck, ein gepruefter Bewegungsclip; keine
+Gameplay-/Kollisionsintegration. Alle Geometriegates ohne Fehler, verbleibende
+Gegenflaechenwarnungen dokumentiert; Caterpillar ohne UV-Texturpruefung.
+Isolierter Godot-4.6.2-Import 109/109 und native Pruefung 132/132 ohne Engine-
+oder Leakfehler, Bilder geoeffnet. Keine allgemeine FPS-/Spiel-/Nutzerabnahme.
+Task `docs/tasks/SHIP_MODELS_2026_11_14.md`; Paketdoku
+`art/ship_models_20261114/RESULTS.md`. Binaere Ableitungen lokal, Pipeline und
+Dokumentation separat versioniert. Fremde Blender-Sitzung nicht verwendet;
+kein Mainmerge, kein November-Gameplaystand und keine EXE veraendert.
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.

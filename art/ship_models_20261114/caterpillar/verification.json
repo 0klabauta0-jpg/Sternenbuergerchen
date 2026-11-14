@@ -1,0 +1,88 @@
+{
+  "source_blend": {
+    "objects": 14,
+    "triangles": 32826,
+    "min": [
+      -1.4226161241531372,
+      -4.005152702331543,
+      0.0
+    ],
+    "max": [
+      1.559999942779541,
+      4.0074052810668945,
+      0.9534071087837219
+    ],
+    "parts": {
+      "Hull": 26942,
+      "CargoDoor_R_01": 642,
+      "CargoDoor_L_01": 650,
+      "CargoDoor_R_02": 650,
+      "CargoDoor_L_02": 650,
+      "CargoDoor_R_03": 650,
+      "CargoDoor_L_03": 650,
+      "CargoDoor_R_04": 644,
+      "CargoDoor_L_04": 650,
+      "NoseCargoDoor": 650,
+      "ServiceLiftDeck": 12,
+      "LiftGuide_A": 12,
+      "LiftGuide_B": 12,
+      "LiftMount": 12
+    }
+  },
+  "fresh_glb": {
+    "objects": 14,
+    "triangles": 32826,
+    "min": [
+      -1.4226161241531372,
+      -4.005152702331543,
+      0.0
+    ],
+    "max": [
+      1.559999942779541,
+      4.0074052810668945,
+      0.9534071087837219
+    ],
+    "parts": {
+      "CargoDoor_L_01": 650,
+      "CargoDoor_L_02": 650,
+      "CargoDoor_L_03": 650,
+      "CargoDoor_L_04": 650,
+      "CargoDoor_R_01": 642,
+      "CargoDoor_R_02": 650,
+      "CargoDoor_R_03": 650,
+      "CargoDoor_R_04": 644,
+      "Hull": 26942,
+      "LiftGuide_A": 12,
+      "LiftGuide_B": 12,
+      "LiftMount": 12,
+      "NoseCargoDoor": 650,
+      "ServiceLiftDeck": 12
+    }
+  },
+  "animations": [
+    "Scene"
+  ],
+  "moving_nodes": [
+    "CargoDoor_L_01",
+    "CargoDoor_L_02",
+    "CargoDoor_L_03",
+    "CargoDoor_L_04",
+    "CargoDoor_R_01",
+    "CargoDoor_R_02",
+    "CargoDoor_R_03",
+    "CargoDoor_R_04",
+    "NoseCargoDoor",
+    "ServiceLiftDeck"
+  ],
+  "source_unchanged": true,
+  "glb_sha256": "fa26699dca15c04edc3c032f6666f8cba7684a659489ccc1d96a82d430356e49",
+  "blend_sha256": "a27a25e8b9dccba01c4dc9f596849a82f2727f80bd3e8f9cec5ea0adb9cf341d",
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [
+    "hidden back-to-back faces: Hull<->LiftMount (2 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_L_03 (2 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_L_04 (1 pairs) - delete to save tris",
+    "hidden back-to-back faces: Hull<->CargoDoor_R_03 (1 pairs) - delete to save tris"
+  ]
+}

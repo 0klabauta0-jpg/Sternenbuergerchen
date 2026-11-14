@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "checks": [
+    {"name": "four_static_ships", "script": "res://probe.gd", "args": ["--ships=prospector,vulture,gladius,hornet"], "success_marker": "PASS: ship_asset_import", "timeout": 90},
+    {"name": "all_ships", "script": "res://probe.gd", "args": [], "success_marker": "PASS: ship_asset_import", "timeout": 90}
+  ]
+}
