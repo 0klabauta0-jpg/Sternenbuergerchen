@@ -58,6 +58,9 @@ TRAILS = [
     [(136.0, 76.2), (143.0, 81.4)],
     [(120.0, 83.1), (125.0, 71.0)],
 ]
+# The two air-defence vehicles (own designs, art/flugabwehr_kit_20261114): long axis along X, cab towards -X.
+FA = "res://Assets/curated/flugabwehr_kit_20261114/"
+wb.ASSETS.update({"hagel": (FA + "fa_hagel.glb", 1.6, 0.75, 3, True, 80), "donnerkeil": (FA + "fa_donnerkeil.glb", 1.6, 0.75, 3, True, 80)})
 # (asset, x, z, rotation, scale); kit pieces face +Z at rotation 0
 PROPS = [
     # relay site on the plateau
@@ -72,10 +75,12 @@ PROPS = [
     ("crates", 119.4, 61.4, 0, 1.0),
     ("barrels", 119.4, 73.4, 0, 1.0),
     ("crates", 129.6, 69.2, 0, 1.0),
-    # air-defence corner
-    ("container_stack", 139.4, 73.4, -20, 1.0),
+    # air-defence corner: flak truck "Hagel" and missile truck "Donnerkeil" either side of the objective
+    ("hagel", 138.6, 74.4, 18, 1.0),
+    ("donnerkeil", 133.2, 79.0, -14, 1.0),
+    ("container_stack", 142.4, 73.0, -20, 1.0),
     ("power", 144.6, 72.6, 90, 1.0),
-    ("crates", 133.4, 78.6, 0, 1.0),
+    ("crates", 130.4, 77.6, 0, 1.0),
     ("barrels", 137.6, 80.4, 0, 1.0),
     ("container_petrol", 146.6, 80.0, 60, 1.0),
     # landing fields

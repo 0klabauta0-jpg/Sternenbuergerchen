@@ -1,0 +1,107 @@
+{
+ "fh_warehouse": {
+  "file": "fh_warehouse.glb",
+  "triangles": 2636,
+  "size_x": 6.0,
+  "size_z_depth": 4.28,
+  "height": 2.995
+ },
+ "fh_office": {
+  "file": "fh_office.glb",
+  "triangles": 1740,
+  "size_x": 3.7,
+  "size_z_depth": 3.34,
+  "height": 1.915
+ },
+ "fh_workshop": {
+  "file": "fh_workshop.glb",
+  "triangles": 2072,
+  "size_x": 3.8,
+  "size_z_depth": 3.8,
+  "height": 2.415
+ },
+ "fh_tank_pair": {
+  "file": "fh_tank_pair.glb",
+  "triangles": 1068,
+  "size_x": 2.5,
+  "size_z_depth": 1.4,
+  "height": 1.99
+ },
+ "fh_radio_mast": {
+  "file": "fh_radio_mast.glb",
+  "triangles": 1488,
+  "size_x": 1.1,
+  "size_z_depth": 1.1,
+  "height": 4.58
+ },
+ "fh_gate": {
+  "file": "fh_gate.glb",
+  "triangles": 748,
+  "size_x": 4.16,
+  "size_z_depth": 0.8,
+  "height": 1.35
+ },
+ "fh_pallet_stack": {
+  "file": "fh_pallet_stack.glb",
+  "triangles": 308,
+  "size_x": 1.32,
+  "size_z_depth": 0.62,
+  "height": 0.67
+ },
+ "fh_yard_lamp": {
+  "file": "fh_yard_lamp.glb",
+  "triangles": 172,
+  "size_x": 0.5,
+  "size_z_depth": 0.2,
+  "height": 1.525
+ },
+ "fh_apron_trade_outpost": {
+  "file": "fh_apron_trade_outpost.glb",
+  "triangles": 936,
+  "size_x": 34.1,
+  "size_z_depth": 18.0,
+  "height": 0.098
+ },
+ "fh_wall_4_lamp": {
+  "file": "fh_wall_4_lamp.glb",
+  "triangles": 280,
+  "size_x": 4.125,
+  "size_z_depth": 0.24,
+  "height": 0.92
+ },
+ "fh_wall_4": {
+  "file": "fh_wall_4.glb",
+  "triangles": 204,
+  "size_x": 4.05,
+  "size_z_depth": 0.2,
+  "height": 0.66
+ },
+ "fh_wall_2": {
+  "file": "fh_wall_2.glb",
+  "triangles": 180,
+  "size_x": 2.05,
+  "size_z_depth": 0.2,
+  "height": 0.66
+ },
+ "fh_wall_1": {
+  "file": "fh_wall_1.glb",
+  "triangles": 168,
+  "size_x": 1.05,
+  "size_z_depth": 0.2,
+  "height": 0.66
+ },
+ "fh_container_row_a": {
+  "file": "fh_container_row_a.glb",
+  "triangles": 3344,
+  "size_x": 2.074,
+  "size_z_depth": 2.748,
+  "height": 1.7
+ },
+ "fh_container_row_b": {
+  "file": "fh_container_row_b.glb",
+  "triangles": 4176,
+  "size_x": 2.074,
+  "size_z_depth": 2.748,
+  "height": 1.7
+ }
+}

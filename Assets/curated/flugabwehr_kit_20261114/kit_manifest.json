@@ -1,0 +1,16 @@
+{
+ "fa_hagel": {
+  "file": "fa_hagel.glb",
+  "triangles": 3656,
+  "size_x": 3.409,
+  "size_z_depth": 2.08,
+  "height": 2.196
+ },
+ "fa_donnerkeil": {
+  "file": "fa_donnerkeil.glb",
+  "triangles": 3752,
+  "size_x": 3.262,
+  "size_z_depth": 2.08,
+  "height": 2.661
+ }
+}

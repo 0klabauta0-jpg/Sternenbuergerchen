@@ -16,6 +16,16 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		var size:=Vector3(float(dimensions[0]),float(dimensions[1]),float(dimensions[2]))
 		var elevation := float(spec.get("terrain_height_level", 0)) * float(presentation.get("height_step", 0.5))
 		var bounds:=AABB(Vector3(float(center[0])-size.x*.5,elevation,float(center[1])-size.z*.5),size)
+		# Optional own exterior model (14.11.2026, Freihafen kit): same footprint, front towards +Z.
+		var model_path:=String(spec.get("model",""))
+		if model_path!="" and ResourceLoader.exists(model_path):
+			var model: Node3D=(load(model_path) as PackedScene).instantiate(); model.name=String(spec.get("id","Building")); root.add_child(model)
+			model.position=Vector3(float(center[0]),elevation,float(center[1]))
+			var sign:=Label3D.new(); sign.name="ExteriorIdentification"; sign.text=String(spec.get("name",""))
+			sign.font_size=48; sign.pixel_size=size.x*0.00040; sign.outline_size=0; sign.modulate=Color("3a4a4c")
+			sign.position=Vector3(0.0,float(spec.get("sign_height",size.y*0.9)),size.z*0.5+0.02); model.add_child(sign)
+			blockers.append(mesh_bounds(model,root))
+			continue
 		var shell: Node3D=SHELL.new(); shell.name=String(spec.get("id","Building")); root.add_child(shell)
 		shell.call("build",bounds,bool(spec.get("hall",false)))
 		var label: Label3D=shell.get_node_or_null("ExteriorIdentification")
