@@ -1,0 +1,130 @@
+{
+  "schema": "sternenbuergerchen.visual_target_sources.v1",
+  "date": "2026-11-14",
+  "reference_count": 10,
+  "copy_policy": "Originaldateien unverändert; bytegleiche lokale Paketkopien",
+  "new_generation_tool": "built-in image_gen.imagegen",
+  "new_generation_reference_mode": "Überwiegend Textprompts aus gesichteten Stilreferenzen; direkte Edit-Inputs separat in Generation-Metadaten",
+  "sources": [
+    {
+      "id": "art_outpost",
+      "source_path": "C:/dev/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+      "file": "sources/art/03_aussenposten_stilstudie.png",
+      "origin": "Früheres generiertes 2D-Ziel des Projekts, Grafikpaket 01.11.2026",
+      "role": "Industrielle Gebäudeformen, Außenposten, Materialpalette, funktionale Arbeitsdetails",
+      "constraints": "Ältere warme Vegetation ist keine Vorgabe für den kargen Mond der revidierten Absturzbilder.",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "bytes": 3411898,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "art_people",
+      "source_path": "C:/dev/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+      "file": "sources/art/02_menschen_stilstudie.png",
+      "origin": "Früheres generiertes 2D-Ziel des Projekts, Grafikpaket 01.11.2026",
+      "role": "Erwachsene Proportionen und lesbare Rollen Operator, Pilot, Mechaniker, Medic",
+      "constraints": "Rollenfarben und Schutzkleidung sind Stilreferenz; konkrete Ausrüstung folgt später dem Spielzustand.",
+      "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+      "bytes": 2767466,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "art_cutlass",
+      "source_path": "C:/dev/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+      "file": "sources/art/08_cutlass_vorne_wimmel.png",
+      "origin": "Früheres generiertes Wimmelbild-Ziel des Projekts, Grafikpaket 01.11.2026",
+      "role": "Vereinfachte facettierte Schiffsform und gebrochenes Weiß/Blaugrau/Ocker",
+      "constraints": "Spätere Schiffkorrekturen sind im Task ART_2026_11_01_astra_ship_revision.md dokumentiert; kein identisches Modell für alle neuen Szenen behauptet.",
+      "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+      "bytes": 1972494,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "art_map",
+      "source_path": "C:/dev/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "file": "sources/art/03_taktische_rostwelt_gesamtkarte.png",
+      "origin": "Bestehende 2D-Kompositionsreferenz im Grafikpaket 01.11.2026",
+      "role": "Hohe taktische Kamera, Fels-/Gebäudehierarchie, klare funktionale Gruppen und freie Flächen",
+      "constraints": "Die ältere Vorlage enthält ein Quadratgitter. Dieses wird ausdrücklich nicht übernommen: neue Zielbilder zeigen Hexfelder.",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "bytes": 2468912,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_wallpaper_interior",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-02-08_00-33-29-C8A.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-02-08_00-33-29-C8A.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers; vom Hauptagenten als aktuelles Windows-Hintergrundbild zugeordnet",
+      "role": "Bewohnter technischer Innenraum, eingelassene Leuchten, Sitz-/Schlaf-/Arbeitsbereiche und menschlicher Maßstab",
+      "constraints": "Screenshot ist externe Stilreferenz, keine eigene Spielaufnahme.",
+      "sha256": "ad12930a20f6191fc5df967a2ee618f4fc6b63d060327c271fb04a0c88aa836f",
+      "bytes": 766580,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_geology_red",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-03-08_15-37-30-1B1.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-03-08_15-37-30-1B1.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers",
+      "role": "Karge rote Geologie aus großer Höhe, Schichtfelsgruppen, ungleich breite Passagen und Sedimentrinnen",
+      "constraints": "Form- und Verteilungsreferenz; kein kopiertes Kartenlayout.",
+      "sha256": "d2d33dc39fdced6fadeeab687d9ab0c5cfc36d8691d375f4ee3d99b29cecd8e8",
+      "bytes": 1414916,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_geology_light",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-03-08_16-00-35-254.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-03-08_16-00-35-254.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers",
+      "role": "Helle/dunkle Mineralfelder, gebrochene große Felsmassen und lokal konzentriertes Geröll",
+      "constraints": "Groß-/Mittel-/Kleinhierarchie statt gleichmäßiger Zufallsstreuung.",
+      "sha256": "8ec584cf16240c539e9fbd8dd1e261e43ee22590edc95d8def9e6e9f58c1ba94",
+      "bytes": 1275132,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_outpost_overview",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-04-24_18-33-06-E01.jpg",
+      "file": "sources/star-citizen/ScreenShot-2025-04-24_18-33-06-E01.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers; Aufnahmedatum aus Dateiname, nicht aus dem späteren Sammelordner",
+      "role": "Industrieller Ortsausschnitt aus der Vogelperspektive, rechteckige Arbeitsfläche und Felskontur",
+      "constraints": "Grauer Dunst ist keine Vorgabe für die Spiellesbarkeit der neuen Bilder.",
+      "sha256": "fbb0e0a44b58fbcbe4aab9ccf1535f3c3f1411895bd22ea30da72befb9f60fff",
+      "bytes": 677546,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_landing_group",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-02-11_20-33-35-82F.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-02-11_20-33-35-82F.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers",
+      "role": "Schiffe und niedrige technische Strukturen auf weitgehend kargem Mondboden, Maßstab und Abendlicht",
+      "constraints": "Der auffällige rote Effekt ist keine neue beauftragte Spielmechanik und wurde nicht als Grundmotiv übernommen.",
+      "sha256": "56f16049cc77ef3b0fa0c39c3312f4069ea14a0930c811133d735f44f1dcf6ee",
+      "bytes": 679576,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_armored_crew",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-02-15_20-07-46-5A0.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-02-15_20-07-46-5A0.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot aus der Bildersammlung des Nutzers",
+      "role": "Vier erwachsene gepanzerte Personen, Ausrüstungssilhouetten und industrielle Pad-/Hangarmarkierungen",
+      "constraints": "Keine direkte Modell-/Rüstungsrekonstruktion oder Übernahme der stehenden Reihe als Szenenkomposition.",
+      "sha256": "426e36da78b30541244eae4219eac1c3f4ccc5de88d4224eabce03c5eb96e23f",
+      "bytes": 923507,
+      "viewed_on": "2026-11-14",
+      "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    }
+  ]
+}

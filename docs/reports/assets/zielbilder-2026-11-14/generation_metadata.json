@@ -1,0 +1,250 @@
+{
+  "schema": "sternenbuergerchen.image_generation_trace.v1",
+  "date": "2026-11-14",
+  "tool": "built-in image_gen.imagegen",
+  "transparent_background": false,
+  "reference_handling": "Local art and Star Citizen images were inspected and distilled into text prompts; they were not directly attached to new-image generator calls. Listed edit inputs are actual files passed to the tool.",
+  "current": [
+    {
+      "id": 1,
+      "title": "Satellitenabsturz auf Mondboden",
+      "output_file": "01_satellitenabsturz_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-23e27fbb-0680-4e79-9d71-f8a3a8e3ea5a.png",
+      "tool": "image_gen.imagegen",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-80d2d478-165a-46a2-a138-126771b4e089.png"
+      ],
+      "prompt_source": "prompts.json items[0].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-23e27fbb-0680-4e79-9d71-f8a3a8e3ea5a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 2,
+      "title": "Die Spur zum Wrack",
+      "output_file": "02_suchspur_fog_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-128510e4-31ce-409a-8e60-bbf352c82b78.png",
+      "tool": "image_gen.imagegen",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f9dfb5c9-1d02-4ff1-9fe1-38373dc022cf.png"
+      ],
+      "prompt_source": "prompts.json items[1].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-128510e4-31ce-409a-8e60-bbf352c82b78.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 3,
+      "title": "Felsen, Geröll und Laufwege",
+      "output_file": "03_geologie_hex_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-34504551-394f-4387-b9a6-c5c52d520e24.png",
+      "tool": "image_gen.imagegen",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-2be28d7d-727f-4614-9ff8-0bbfa73028a8.png"
+      ],
+      "prompt_source": "prompts.json items[2].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-34504551-394f-4387-b9a6-c5c52d520e24.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 4,
+      "title": "Eine vollständige Einsatzkarte",
+      "output_file": "04_map_uebersicht_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-16e86e2b-1ec7-4a79-ac23-2585bf0495a4.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[3].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-16e86e2b-1ec7-4a79-ac23-2585bf0495a4.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 5,
+      "title": "Außenposten am Canyon",
+      "output_file": "05_aussenposten.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a261a729-775a-4826-a937-723a081900c1.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[4].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a261a729-775a-4826-a937-723a081900c1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 6,
+      "title": "Anflug auf die Landeplattform",
+      "output_file": "06_landepad_anflug.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a36653b9-619f-4cfb-82b2-23720e9159a3.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[5].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a36653b9-619f-4cfb-82b2-23720e9159a3.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 7,
+      "title": "Landepad: Wartung und Versorgung",
+      "output_file": "07_pad_service.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-64b77bbb-2719-4905-9b25-553b4cee9060.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[6].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-64b77bbb-2719-4905-9b25-553b4cee9060.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 8,
+      "title": "Basisräume als Schnittansicht",
+      "output_file": "08_basis_cutaway.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e8d67682-acfd-4760-aa4c-6b9b360c64a7.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[7].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e8d67682-acfd-4760-aa4c-6b9b360c64a7.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 9,
+      "title": "Fracht, Rohstoffe und Werkstatt",
+      "output_file": "09_logistikhof.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-9b96fa9f-e0c8-4f36-a332-d1b199693626.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[8].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-9b96fa9f-e0c8-4f36-a332-d1b199693626.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 10,
+      "title": "Feuerteams im Bodengefecht",
+      "output_file": "10_bodengefecht.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-00c92488-e7aa-4c74-bd36-edae0ae74a8d.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[9].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-00c92488-e7aa-4c74-bd36-edae0ae74a8d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 11,
+      "title": "Außenposten bei Nacht",
+      "output_file": "11_nachtverteidigung.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-5d13f9cc-4b67-401f-ae5f-8e453fc5ebbd.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[10].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-5d13f9cc-4b67-401f-ae5f-8e453fc5ebbd.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 12,
+      "title": "Rückzug zur Abholung",
+      "output_file": "12_extraktion.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-5a9fb9ff-2238-4313-a3e1-ea38f25e417d.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[11].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-5a9fb9ff-2238-4313-a3e1-ea38f25e417d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 13,
+      "title": "Mondorbit und Weiterreise",
+      "output_file": "13_orbit_reise.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[12].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 14,
+      "title": "Raumkampf im Asteroidenfeld",
+      "output_file": "14_raumkampf.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[13].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 15,
+      "title": "Hilfe für ein havariertes Schiff",
+      "output_file": "15_orbit_bergehilfe.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[14].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 16,
+      "title": "Kleine Orbitalstation",
+      "output_file": "16_orbitalstation.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[15].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 17,
+      "title": "Anbaupods am Außenposten",
+      "output_file": "17_nahrungspods_r03.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-fe9c60f6-4bae-41e3-9a8f-eb5e762173a5.png",
+      "tool": "image_gen.imagegen",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-9b411c7b-4a76-4903-940c-15d0d6876da1.png"
+      ],
+      "prompt_source": "prompts.json items[16].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-fe9c60f6-4bae-41e3-9a8f-eb5e762173a5.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    }
+  ],
+  "superseded": [
+    {
+      "id": 1,
+      "file": "01_satellitenabsturz.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-80d2d478-165a-46a2-a138-126771b4e089.png",
+      "mode": "generate",
+      "referenced_image_paths": []
+    },
+    {
+      "id": 2,
+      "file": "02_suchspur_fog.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f9dfb5c9-1d02-4ff1-9fe1-38373dc022cf.png",
+      "mode": "generate",
+      "referenced_image_paths": []
+    },
+    {
+      "id": 3,
+      "file": "03_geologie_hex.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-2be28d7d-727f-4614-9ff8-0bbfa73028a8.png",
+      "mode": "generate",
+      "referenced_image_paths": []
+    },
+    {
+      "id": 4,
+      "file": "04_map_uebersicht.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6240b48b-3b4f-405e-bdbd-a400acb28bfd.png",
+      "mode": "generate",
+      "referenced_image_paths": []
+    },
+    {
+      "id": 17,
+      "file": "17_nahrungspods.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f3927179-85c9-42c7-994b-18e41f0c234d.png",
+      "mode": "generate",
+      "referenced_image_paths": []
+    },
+    {
+      "id": 17,
+      "file": "17_nahrungspods_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-9b411c7b-4a76-4903-940c-15d0d6876da1.png",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f3927179-85c9-42c7-994b-18e41f0c234d.png"
+      ]
+    }
+  ]
+}

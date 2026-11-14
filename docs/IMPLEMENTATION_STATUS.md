@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### Bild-KI-Zielserie – 14.11.2026
+17 eigenstaendige 2D-Zielbilder in isoliertem task/visual-targets-20261114,
+Basis integration/core-foundation 3cae5a2. Aktuelle Grafik-/Hexregeln und
+lokale Star-Citizen-Screenshots als Stilreferenz gesichtet. Nutzerkorrektur:
+Acker war Metapher; aktive Absturzbilder zeigen kargen Mondboden, Nahrung
+in geschlossenen Anbaupods. Offlinegalerie mit Notizen und JSON-Export,
+Originalausgaben, Prompts und Quellen-/SHA-256-Nachweis im Bildpaket.
+Keine Runtime-, Modell-, Karten- oder Gameplayintegration und keine
+Nutzerabnahme. Task: docs/tasks/ART_2026_11_14_visual_targets.md;
+Galerie: docs/reports/ZIELBILDER_2026_11_14.html.
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.
