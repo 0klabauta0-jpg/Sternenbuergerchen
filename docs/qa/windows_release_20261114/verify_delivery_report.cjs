@@ -4,7 +4,7 @@ const {pathToFileURL}=require('node:url');const {chromium}=require(process.argv[
 try{browser=await chromium.launch({channel:'chrome',headless:true});const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});await context.setOffline(true);await context.addInitScript(()=>Object.defineProperty(window,'showDirectoryPicker',{value:undefined}));const page=await context.newPage();page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(pathToFileURL(path.resolve(process.argv[3]||'docs/reports/SPIELREVIEW_2026_11_12.html')).href);
 check(await page.locator('#windows-delivery').count()===1,'Current delivery section exists once');check(await page.locator('#review-completion').count()===1,'Prior evidence retained');
-check((await page.locator('#windows-delivery').textContent()).includes('a377c7346'),'Actual EXE source displayed');
+check((await page.locator('#windows-delivery').textContent()).includes(process.argv[4]||'a377c7346'),'Actual EXE source displayed');
 check(await page.locator('#windows-delivery a[href="https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site"]').count()===1,'Public guide linked');
 check(await page.locator('#windows-delivery img').count()===9,'Six current captures and three user references retained');
 check(await page.locator('#windows-delivery img').evaluateAll(async images=>{await Promise.all(images.map(i=>{i.loading='eager';return i.decode().catch(()=>{});}));return images.every(i=>i.naturalWidth>0);}), 'All revision images load offline');

@@ -1,0 +1,15 @@
+{
+  "repository": "0klabauta0-jpg/Sternenbuergerchen",
+  "repository_private": true,
+  "release_url": "https://github.com/0klabauta0-jpg/Sternenbuergerchen/releases/tag/playtest-2026-11-14-r2",
+  "prerelease": true,
+  "draft": false,
+  "tag_commit": "8571be32c9502669a313dbdb2e2a67729257646e",
+  "asset_id": 745832907,
+  "zip_bytes": 188699405,
+  "local_sha256": "020c3a4966febbb700d4de824401c5497806f268ac38a3db70d44426ab6522fa",
+  "github_digest": "sha256:020c3a4966febbb700d4de824401c5497806f268ac38a3db70d44426ab6522fa",
+  "github_asset_state": "uploaded",
+  "verified_utc": "2026-11-14T01:14:53.417503+00:00",
+  "scope": "Artifact matches tested package; private prerelease, bounded exported EXE startup."
+}

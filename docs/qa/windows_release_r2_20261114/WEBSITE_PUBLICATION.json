@@ -1,0 +1,58 @@
+{
+  "build": "8571be32c9502669a313dbdb2e2a67729257646e",
+  "guide": {
+    "project_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91",
+    "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+    "access_mode": "public",
+    "allowed_users": 1,
+    "allowed_groups": 0,
+    "current_user_role": "owner",
+    "latest_version_number": 2,
+    "source_commit": "77c60aea8ce40df934cb58c2449af5d20a471af3",
+    "deployment": {
+      "id": "appgdep_6af7b58f5bac8191ae42a4e65c612ed4",
+      "project_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91",
+      "title": "Sternenbürgerchen · Spielanleitung",
+      "version_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91~appgver_94b953e69e3881919c4d0092a22c738f",
+      "type": "publish",
+      "status": "succeeded",
+      "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+      "has_mcp": false,
+      "screenshot_asset_pointer": null,
+      "provider_deployment_id": "release---6af7a7dfbf0c8191a4986f757486d215",
+      "failure_message": null,
+      "env_set_revision": 0,
+      "updated_at": "2026-11-14T01:12:57.702089+00:00"
+    },
+    "local_checks": 68,
+    "anonymous_live_checks": 23
+  },
+  "review": {
+    "project_id": "appgprj_6af6b36c322c8191b942ee89bed48f40",
+    "url": "https://sternenbuergerchen-spielreview.klabauta.chatgpt.site",
+    "access_mode": "custom",
+    "allowed_users": 1,
+    "allowed_groups": 0,
+    "current_user_role": "owner",
+    "latest_version_number": 7,
+    "source_commit": "dc6c78b50c19448043325323aebdea52b58789f1",
+    "deployment": {
+      "id": "appgdep_6af7b5bf5934819197ce3a84e83b459e",
+      "project_id": "appgprj_6af6b36c322c8191b942ee89bed48f40",
+      "title": "SternenBürgerchen – Spielreview",
+      "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_69802449d31c819184d30c25c58d60e2",
+      "type": "publish",
+      "status": "succeeded",
+      "url": "https://sternenbuergerchen-spielreview.klabauta.chatgpt.site",
+      "has_mcp": false,
+      "screenshot_asset_pointer": null,
+      "provider_deployment_id": "release---6af6b3cfcd808191ba6a068478377c17",
+      "failure_message": null,
+      "env_set_revision": 0,
+      "updated_at": "2026-11-14T01:13:52.512369+00:00"
+    },
+    "local_checks": 13,
+    "historical_links_preserved": 225,
+    "authenticated_live_browser_check": false
+  }
+}

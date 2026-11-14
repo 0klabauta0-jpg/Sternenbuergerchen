@@ -1,0 +1,279 @@
+{
+  "passed": 68,
+  "failed": 0,
+  "checks": [
+    {
+      "ok": true,
+      "label": "pistol exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "pistol base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "pistol damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "pistol effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "smg exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "smg base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "smg damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "smg effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "rifle exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "rifle base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "rifle damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "rifle effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "sniper exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "sniper base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "sniper damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "sniper effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "rail_gun exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "rail_gun base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "rail_gun damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "rail_gun effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "rocket_launcher exists in runtime"
+    },
+    {
+      "ok": true,
+      "label": "rocket_launcher base_hit_chance matches source"
+    },
+    {
+      "ok": true,
+      "label": "rocket_launcher damage_per_hit matches source"
+    },
+    {
+      "ok": true,
+      "label": "rocket_launcher effective_tile_range matches source"
+    },
+    {
+      "ok": true,
+      "label": "Worked standing example 42%"
+    },
+    {
+      "ok": true,
+      "label": "Worked damage 37 and roll .30 hits"
+    },
+    {
+      "ok": true,
+      "label": "Moving example 33.6%"
+    },
+    {
+      "ok": true,
+      "label": "Exact decimal threshold misses"
+    },
+    {
+      "ok": true,
+      "label": "Upper cap before movement, then .8 multiplier"
+    },
+    {
+      "ok": true,
+      "label": "Minimum after movement remains 5%"
+    },
+    {
+      "ok": true,
+      "label": "Flank changes chance and removes target cover"
+    },
+    {
+      "ok": true,
+      "label": "Flank damage 40 x 1.3"
+    },
+    {
+      "ok": true,
+      "label": "Spotted contact costs 15 points before accuracy"
+    },
+    {
+      "ok": true,
+      "label": "Ordered support/contact/flank calculation"
+    },
+    {
+      "ok": true,
+      "label": "Zero target multiplier prevents damage"
+    },
+    {
+      "ok": true,
+      "label": "Invalid nonfinite input produces finite explanatory result"
+    },
+    {
+      "ok": true,
+      "label": "Ten complete guide chapters"
+    },
+    {
+      "ok": true,
+      "label": "Calculator renders example"
+    },
+    {
+      "ok": true,
+      "label": "Calculator reacts to movement"
+    },
+    {
+      "ok": true,
+      "label": "UI explains strict threshold"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal page overflow at 320"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal page overflow at 390"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal page overflow at 768"
+    },
+    {
+      "ok": true,
+      "label": "No horizontal page overflow at 1440"
+    },
+    {
+      "ok": true,
+      "label": "Search filters chapters"
+    },
+    {
+      "ok": true,
+      "label": "Truthful empty search state"
+    },
+    {
+      "ok": true,
+      "label": "Checklist persists locally"
+    },
+    {
+      "ok": true,
+      "label": "Checklist reset"
+    },
+    {
+      "ok": true,
+      "label": "Image opens with keyboard"
+    },
+    {
+      "ok": true,
+      "label": "Image closes with Escape"
+    },
+    {
+      "ok": true,
+      "label": "Image focus restored"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #inhalt resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #start resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #start resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #einsatz resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #basis resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #sternkarte resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #steuerung resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #hex resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #treffer resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #waffen resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #koop resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #hilfe resolves"
+    },
+    {
+      "ok": true,
+      "label": "Anchor #start resolves"
+    },
+    {
+      "ok": true,
+      "label": "Native image loads"
+    },
+    {
+      "ok": true,
+      "label": "Native image loads"
+    },
+    {
+      "ok": true,
+      "label": "Native image loads"
+    },
+    {
+      "ok": true,
+      "label": "No browser JavaScript errors"
+    }
+  ],
+  "errors": []
+}

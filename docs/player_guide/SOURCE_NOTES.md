@@ -1,3 +1,12 @@
+# R2-Aktualisierung 14.11.2026
+
+Aktueller Exportcommit: `8571be32c9502669a313dbdb2e2a67729257646e`. R2-Paket erst nach bestandenem
+Paketstart verlinkt. Karten-/Serviceverhalten durch map_services_20261114-Nachweise
+belegt. Ergänzte Quellen: ground_service_access, field_landing_contract,
+SingleplayerRuntimeAdapter/SupplyState, SpaceCombatState und ServicesPresenter.
+Die folgende Erstfassung dokumentiert die Herkunft der unveränderten Kampf-
+und Bedienkapitel; ihre damalige Abgrenzung ist historisch.
+
 # Spielanleitung: Quellen und Gültigkeit
 
 Stand der Anleitung: Windowspaket `a377c7346cf6ec27cb9156f72e36e2fd24e406e7`,

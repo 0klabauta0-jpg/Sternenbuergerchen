@@ -1,0 +1,21 @@
+{
+  "passed": 2,
+  "failed": 2,
+  "checks": [
+    {
+      "ok": true,
+      "label": "Current delivery section exists once"
+    },
+    {
+      "ok": true,
+      "label": "Prior evidence retained"
+    },
+    {
+      "ok": false,
+      "label": "Actual EXE source displayed"
+    }
+  ],
+  "errors": [
+    "Error: Actual EXE source displayed"
+  ]
+}

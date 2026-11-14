@@ -1,0 +1,22 @@
+{
+  "profile_unchanged": true,
+  "isolated_appdata": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\tmp\\windows_release_r2_20261114\\profile",
+  "tests": [
+    {
+      "name": "normal_main_menu",
+      "exit_code": 0,
+      "passed": true,
+      "errors": [],
+      "seconds": 2.21,
+      "command": [
+        "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-r2-8571be32c\\SternenBuergerchen.exe",
+        "--headless",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\windows_release_r2_20261114\\normal_main_menu_engine.log",
+        "--quit-after",
+        "120"
+      ]
+    }
+  ],
+  "scope": "Headless exported R2 EXE normal main menu startup only; no campaign/WAN/FPS/visual acceptance."
+}
