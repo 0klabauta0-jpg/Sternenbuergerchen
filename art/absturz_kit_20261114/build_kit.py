@@ -17,7 +17,7 @@ import build_kit as kit  # Asset helper, palette, export
 
 OUT = ROOT / "Assets" / "curated" / "absturz_kit_20261114"
 kit.PALETTE.update({"earth": "b9653f", "earth_dark": "8e4a2f", "scorch": "4b3a33", "rock": "a05a3c", "rock_dark": "7c432e",
-                    "benit_a": "3fb0a6", "benit_b": "6878e0", "foil": "c9a24a"})
+                    "benit_a": "3fb0a6", "benit_b": "6878e0", "benit_c": "e39a2f", "foil": "c9a24a"})
 Asset = kit.Asset
 
 
@@ -115,7 +115,8 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = {}
     for asset in (satellite_wreck(), solar_fragment(), debris_small(), furrow_berm(),
-                  ore_outcrop("ab_ore_outcrop_a", "benit_a"), ore_outcrop("ab_ore_outcrop_b", "benit_b"), freighter_hull()):
+                  ore_outcrop("ab_ore_outcrop_a", "benit_a"), ore_outcrop("ab_ore_outcrop_b", "benit_b"),
+                  ore_outcrop("ab_ore_outcrop_c", "benit_c"), freighter_hull()):
         manifest[asset.name] = asset.export()
     (OUT / "kit_manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: v["triangles"] for k, v in manifest.items()}))

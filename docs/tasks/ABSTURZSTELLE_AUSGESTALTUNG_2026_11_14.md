@@ -48,3 +48,11 @@ Bilder: `docs/qa/absturzstelle_20261114/` (00 vorher, 01–06 nachher).
 - Das Wrack sperrt Zellen direkt neben dem Missionsmarker; die Markerzelle und ihre Nachbarn bleiben frei.
 - Die Erdwälle sind reine Darstellung ohne Deckung oder Sperre.
 - Die Furche ist nur Bodenfarbe plus Modelle, keine Vertiefung im Gelände.
+
+## Nachtrag 14.11., 21:00: Handelsaußenposten und neue Straße
+
+**Handelsaußenposten** (`maps/trade_outpost.json`, `tools/dress_trade_outpost.py`, gleiche Arbeitsweise, Basis `068784888`): die 103 alten Space-Kit-Felsen sind durch den Sandstein der übrigen Karten ersetzt (gleiche Zellen, gleiche Sperrwirkung); Freihafen und fernes Außenlager haben Kit-Teile bekommen (Container, Kisten, Solar, Aggregat, Wohnmodul); A- und C-Benit sind mit Erzbrocken markiert (neues Modell `ab_ore_outcrop_c`); zwei Pfade zu den Erzstellen; 316 Felsbrocken als Deckung in beiden Kernen. Pads, Dienste, Frachtlift, Gebäude, Marker und Ressourcen unverändert. Alle zehn Marker und Ressourcenzellen bleiben erreichbar.
+
+**Straße** (`scripts/terrain/frontier_road_deck.gd`, Wunsch von Björn nach dem Referenzbild „Rostgrenze“): gleichmäßiges Band mit weichen Bögen (Mittellinie stärker geglättet: 12 Durchgänge, bis 0,42 Zelle), Fahrbahn 1,1 Zellen breit, heller Metallrahmen, orangefarbene Linie, kleine Leuchtpunkte am Rahmen (`BuiltRoadLights`, reine Darstellung). Straßen sind in den Kartendaten jetzt eine Zelle breit (Absturzstelle, GM02 neu erzeugt). Die Platte ragt damit optisch etwa 0,2 Zellen in die Nachbarzellen; deren Hexlinien liegen dort unter der Platte. Die Farben der GM01-Wegbänder in `frontier_art_dressing.gd` sind angeglichen.
+
+Prüfung nach dem Nachtrag (Linux, headless): `campaign_maps_content_verifier` 69 / 0, `location_resource_runtime_verifier` 21 / 0, `playtest_20261110_location_terrain_verifier` und `…resource_geometry_verifier` ohne Fehlschlag, `ground_mission02_relay_ridge_verifier` 35 / 0, `review_completion_hex_surface_verifier` 246 / 0, `map_services_verifier_20261114` 81 / 0, `windbruch_outpost_verifier` 41 / 0. Bilder: `docs/qa/handelsposten_strasse_20261114/`.

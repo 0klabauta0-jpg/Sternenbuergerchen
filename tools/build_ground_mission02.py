@@ -178,7 +178,7 @@ def main() -> None:
 
     roads, trails = set(), set()
     for line in ROADS:
-        wb.stroke(roads, [anchor(p) for p in line], 2)
+        wb.stroke(roads, [anchor(p) for p in line])
     for name in ("westrampe", "nordrampe"):
         for k in range(-2, 5):
             for c in band(name, k)[1:3]:

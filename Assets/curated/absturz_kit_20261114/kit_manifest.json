@@ -41,6 +41,13 @@
   "size_z_depth": 1.209,
   "height": 0.8
  },
+ "ab_ore_outcrop_c": {
+  "file": "ab_ore_outcrop_c.glb",
+  "triangles": 308,
+  "size_x": 1.54,
+  "size_z_depth": 1.209,
+  "height": 0.8
+ },
  "ab_freighter_hull": {
   "file": "ab_freighter_hull.glb",
   "triangles": 664,

@@ -228,8 +228,8 @@ func _path(points: Array,width: float,service_lane: bool = false,id: String = "p
 	# Grafikpass R2: tarred road. Pale kerb, worn edge line, dark matte asphalt;
 	# same three joined layers and heights as before, colours match
 	# frontier_road_deck.gd so authored and cell-built roads read as one family.
-	_ribbon(samples,width+0.14,0.007,"a59f90")
-	_ribbon(samples,width,0.010,"d6cba0")
+	_ribbon(samples,width+0.14,0.007,"b9b6aa")
+	_ribbon(samples,width,0.010,"d98a2b")
 	_ribbon(samples,width-0.10,ACCESS.PAVING_HEIGHT,"46484c")
 
 func _add_path_guides() -> void:

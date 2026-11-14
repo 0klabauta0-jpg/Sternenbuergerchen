@@ -12,16 +12,22 @@ const HEX = preload("res://scripts/terrain/hex_grid.gd")
 ## like the landing pads; the view lifts grid lines and units by this amount.
 const DECK_HEIGHT := 0.09
 ## Lane width and the two rims as fractions of the cell size.
-const LANE_WIDTH := 0.80
+const LANE_WIDTH := 1.10
 const LINE_RIM := 0.045
-const KERB_RIM := 0.075
+const KERB_RIM := 0.10
 const DISC_SEGMENTS := 18
 const LINK_SEGMENTS := 6
 const GRADED_LIFT := 0.03
 const ASPHALT := Color("46484c")
-const KERB := Color("a59f90")
-const KERB_SIDE := Color("857f72")
-const EDGE_LINE := Color("d6cba0")
+## Look after the user's "Rostgrenze" reference (14.11.2026): dark deck in a
+## pale metal frame, an orange line inside the frame, small marker lights.
+const KERB := Color("b9b6aa")
+const KERB_SIDE := Color("8d8a80")
+const EDGE_LINE := Color("d98a2b")
+const MARKER_LIGHT := Color("8fe6e0")
+const MARKER_SPACING := 3
+const RELAX_ITERATIONS := 12
+const RELAX_LIMIT := 0.42
 
 
 ## cells: Vector2i -> Vector3 (cell centre on its ground surface).
@@ -58,8 +64,8 @@ static func build(parent: Node3D, cells: Dictionary, cell_size: float, height_at
 	# road reads as one drawn line; junctions, ends and yards stay put, and no
 	# centre leaves its own cell.
 	var points: Dictionary = cells.duplicate()
-	var limit: float = cell_size * 0.34
-	for iteration in range(4):
+	var limit: float = cell_size * RELAX_LIMIT
+	for iteration in range(RELAX_ITERATIONS):
 		var relaxed: Dictionary = {}
 		for grid: Vector2i in cells:
 			var around: Array = neighbours[grid]
@@ -155,7 +161,45 @@ static func build(parent: Node3D, cells: Dictionary, cell_size: float, height_at
 	instance.set_meta("road_link_count", links.size())
 	instance.set_meta("road_surface_lift_by_cell", lift_by_cell)
 	parent.add_child(instance)
+	_add_marker_lights(instance, cells, points, neighbours, lift_by_cell, cell_size, height_at)
 	return instance
+
+
+## Small lights on the frame of plain lane cells, on both sides, every few
+## cells. Render-only child of the deck; unshaded so it reads at night too.
+static func _add_marker_lights(deck: MeshInstance3D, cells: Dictionary, points: Dictionary, neighbours: Dictionary, lift_by_cell: Dictionary, cell_size: float, height_at: Callable) -> void:
+	var lights := SurfaceTool.new()
+	lights.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var stud := BoxMesh.new()
+	stud.size = Vector3(0.14, 0.04, 0.14) * cell_size
+	var offset: float = (LANE_WIDTH * 0.5 + LINE_RIM + KERB_RIM * 0.5) * cell_size
+	var count := 0
+	for grid: Vector2i in cells:
+		var around: Array = neighbours[grid]
+		if around.size() != 2 or float(lift_by_cell[grid]) > DECK_HEIGHT or posmod(grid.x * 2 + grid.y, MARKER_SPACING) != 0:
+			continue
+		var along: Vector3 = Vector3(points[around[1]]) - Vector3(points[around[0]])
+		along.y = 0.0
+		if along.length_squared() < 0.0001:
+			continue
+		var side := Vector3(along.z, 0.0, -along.x).normalized() * offset
+		for direction: float in [-1.0, 1.0]:
+			var spot: Vector3 = _on_ground(Vector3(points[grid]) + side * direction, height_at, DECK_HEIGHT + 0.012)
+			lights.append_from(stud, 0, Transform3D(Basis(Vector3.UP, atan2(along.x, along.z)), spot))
+			count += 1
+	if count == 0:
+		return
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = MARKER_LIGHT
+	lights.set_material(material)
+	var node := MeshInstance3D.new()
+	node.name = "BuiltRoadLights"
+	node.mesh = lights.commit()
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	node.set_meta("render_only", true)
+	deck.add_child(node)
+	deck.set_meta("road_marker_light_count", count)
 
 
 static func _wall(surface: SurfaceTool, a: Vector3, b: Vector3, drop: float, outward: Vector3, color: Color) -> void:

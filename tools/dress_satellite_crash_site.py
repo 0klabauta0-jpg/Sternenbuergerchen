@@ -88,7 +88,7 @@ def main() -> None:
 
     roads, trails, furrow = set(), set(), set()
     for line in ROADS:
-        wb.stroke(roads, line, 2)
+        wb.stroke(roads, line)
     for line in TRAILS:
         wb.stroke(trails, line)
     (fx0, fz0), (fx1, fz1) = FURROW
