@@ -1,9 +1,19 @@
 # IMPLEMENTATION_STATUS
 
-### Bestätigte Bildreferenzen gesammelt – 14.11.2026 (Taskbranch)
+### Bildreferenzen erweitert und Fehlzuordnung korrigiert – 14.11.2026 (Taskbranch)
 
-25 unveränderte Bilder mit Herkunft und SHA-256 unter `Referenzbilder_Bestaetigt/`: drei bestätigte Rüstungstafeln, drei ältere Stilziele, A5-UI und 13 Boden-Zielbilder; fünf frühere/teilweise bestätigte Bilder separat. Kopierhashes, Eindeutigkeit und PNG-Dekodierung bestanden. Keine neuen Bilder, Spieländerungen oder Mainintegration. Task: `docs/tasks/APPROVED_IMAGE_COLLECTION_2026_11_14.md`.
-
+95 eindeutige Bilder lokal unter `Referenzbilder_Bestaetigt/` gesammelt: Rüstungen,
+frühe April-Hintergründe, September-Webseitenziele, Szenen, Menüs, Schiffe und
+Porträts. 20 positive Stil-/Bildbestätigungen, neun Nutzerreferenzen, sechs
+Richtungsentscheidungen, vier Teilfreigaben; 56 historische/offene Bewertungen
+bleiben entsprechend markiert. Die ausdrücklich beanstandete Deckstudie aus
+der Sammlung entfernt; Quelloriginal erhalten. Frühere Sites-Webseite und ihre
+archivierten N7-/N8-Bildzuordnungen wiedergefunden. Offline-Galerie mit Suche,
+Filtern, Großansicht, lokalen Notizen und JSON-Export. 95 Kopierhashes,
+Bilddekodierung und Eindeutigkeit sowie 18 DOM-Funktionsprüfungen bestanden.
+Browserrichtlinie blockierte file://; keine visuelle Desktop-/Mobilabnahme.
+Keine Spieländerung, neue Bilder oder Mainintegration.
+Task: `docs/tasks/APPROVED_IMAGE_COLLECTION_2026_11_14.md`.
 
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.

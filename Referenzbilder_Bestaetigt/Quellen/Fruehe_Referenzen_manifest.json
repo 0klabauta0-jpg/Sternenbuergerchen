@@ -1,0 +1,260 @@
+{
+  "schema": "sternenbuergerchen.graphics_references.v1",
+  "date": "2026-11-01",
+  "task": "docs/tasks/ART_2026_11_01_pass02.md",
+  "current_user_references": [
+    {
+      "id": "ref_rostgrenze",
+      "title": "Rostgrenze · Außenposten-Cutaway",
+      "group": "buildings",
+      "description": "Rote Schichtklippen, helle orange eingefasste Module, sichtbar gruppierte Arbeitsräume und ein gebauter Weg zwischen Eingang und Landepad.",
+      "assignments": [
+        "terrain: große unregelmäßige Schichtklippen und gestaffelte Felsgruppen",
+        "structures: creme-orange Rahmen, Sockel, Eingänge und lesbare Funktionsgruppen",
+        "connections: gemeinsame Wege, Pad und einzelne Anschlussgruppen"
+      ],
+      "limits": "Raumaufteilung ist eine Formreferenz. Bettenzahlen, Erweiterungsmarken und Beschriftungen beauftragen keine Innenraum-, Basis- oder Wirtschaftssimulation.",
+      "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-03f6c8c2-a842-4970-8104-e3c33497f729.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+      "bytes": 2808290,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+      "status": "current_user_reference",
+      "native_engine_capture": false,
+      "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+      "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+    },
+    {
+      "id": "ref_freihafen",
+      "title": "Freihafen · Distribution Center",
+      "group": "buildings",
+      "description": "Zusammengehörige creme-orange Hallen, breite Torrahmen, Arbeitsbuchten, geordnete Containergruppen und verbundene graue Plattformen vor roten Klippen.",
+      "assignments": [
+        "terrain: weite rostrote Landschaft mit kühlen grauen Bauflächen",
+        "structures: kräftige Rahmen, große ruhige Dachformen und verständliche Arbeitsausstattung",
+        "composition: Hauptgebäude, Nebenmodul und Pad über gebaute Flächen verbinden"
+      ],
+      "limits": "Der Grafikpass übernimmt Formhierarchie und Funktionsgruppen. Eine komplette Lagerhalle, Warenwirtschaft, Fahrzeuge oder Logistiksimulation sind damit nicht implementiert oder zusätzlich beauftragt.",
+      "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-1f877621-9b3e-4afa-919a-7c8e41fbe0cc.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+      "bytes": 2998364,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+      "status": "current_user_reference",
+      "native_engine_capture": false,
+      "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+      "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+    },
+    {
+      "id": "ref_tactical",
+      "title": "Rostwelt · Taktische Gesamtansicht",
+      "group": "terrain",
+      "description": "Weite isometrische Spiellandschaft mit geschichteter Klippenkante, einzelnen Felstürmen, offenen Bewegungsräumen und einer verbundenen Gruppe heller Cutaway-Module.",
+      "assignments": [
+        "terrain: natürlich gestaffelte Randklippen, ruhige offene Flächen und wenige große Felsgruppen",
+        "composition: Gebäudemassen, Radar/Pad und Wegschleifen im Spielabstand lesbar halten",
+        "people: kleine Gruppen und klare Auswahl vor ruhigem Boden beurteilen"
+      ],
+      "limits": "Die sichtbaren Quadratfelder sind Bildinhalt. Der ausdrücklich beauftragte Spielvertrag bleibt hex_axial_v1; das Bild löst keine Rückmigration zu Quadratfeldern aus.",
+      "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-720890b3-d6c0-4574-8cc3-053eeede46f7.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "bytes": 2468912,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+      "status": "current_user_reference",
+      "native_engine_capture": false,
+      "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+      "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+    }
+  ],
+  "historical_context": [
+    {
+      "id": "history_menu",
+      "title": "Crew · Schiffsinnenraum",
+      "description": "Früherer Hauptmenühintergrund, TASK_199.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": "Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+      "sha256": "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563",
+      "bytes": 717441,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "project_copy_byte_identical": true,
+      "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+    },
+    {
+      "id": "history_explosion",
+      "title": "Roter Außenposten · Explosion",
+      "description": "Früherer Debrief-/Ergebnishintergrund, TASK_245.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": "Assets/used/backgrounds/ai_generated/bg_desert_explosion_base.jpg",
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+      "sha256": "c203999a3a3a2cff13a13e1489da6b05547d81083e07290b7d9d51011044c9af",
+      "bytes": 788232,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "project_copy_byte_identical": true,
+      "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+    },
+    {
+      "id": "history_hangar",
+      "title": "Blaue Hangarhalle",
+      "description": "Früherer Lobby-/Setuphintergrund, TASK_245.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": "Assets/used/backgrounds/ai_generated/bg_hangar_shiphall.png",
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_34_01.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_34_01.png",
+      "sha256": "837b6362f56c82036b3fbc09a526a71921fe0bd1f462d57eb4318f0e7f48958b",
+      "bytes": 1589094,
+      "dimensions": [
+        1344,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "project_copy_byte_identical": true,
+      "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+    },
+    {
+      "id": "history_night",
+      "title": "Nächtlicher Außenposten",
+      "description": "Ältere lokale Bildquelle; kein belegter Katalogeintrag oder Modellfreigabestatus.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": null,
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+      "sha256": "21c95ddc1cf633837b644e61a032825b66bf9af8f4fe2ea55292d569e2559a47",
+      "bytes": 666505,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false
+    },
+    {
+      "id": "history_space_simple",
+      "title": "Asteroidenflug · Flächige Fassung",
+      "description": "Ältere lokale Bildquelle; kein belegter Katalogeintrag oder Modellfreigabestatus.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": null,
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_38_25.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_38_25.png",
+      "sha256": "44d80f2d39b9f5d0de8660e5d8221fc8fc63909b09501295a47c2afa0db999a3",
+      "bytes": 1124014,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false
+    },
+    {
+      "id": "history_space",
+      "title": "Asteroidenflug · Detailfassung",
+      "description": "Früherer Lade-/Lobbyhintergrund, TASK_245.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": "Assets/used/backgrounds/ai_generated/bg_asteroid_flight.png",
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_41_57.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_41_57.png",
+      "sha256": "89c2d6b8c65f5d73c04ae72242cb7f4f59b78c13b953e083d5065e3e42997c0c",
+      "bytes": 1702838,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "project_copy_byte_identical": true,
+      "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+    },
+    {
+      "id": "history_desert",
+      "title": "Sandiger Raumhafen",
+      "description": "Früherer Missionsauswahl-/Setuphintergrund, TASK_245.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": "Assets/used/backgrounds/ai_generated/bg_desert_outpost.png",
+      "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_45_03.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_45_03.png",
+      "sha256": "1a2bf25c7a1800db1b3cdca088d8ad10e04f197d5a78b65f714c78c4bdffcb3b",
+      "bytes": 1526978,
+      "dimensions": [
+        1376,
+        768
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "project_copy_byte_identical": true,
+      "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+    },
+    {
+      "id": "history_shadowfall",
+      "title": "Shadowfall · Alpha / Bravo / Charlie / Delta",
+      "description": "Ältere lokale taktische Karte auf grauem Boden mit Kompass. Eigenständiges Bild, ausdrücklich nicht identisch mit der neu gelieferten roten Gesamtkarte.",
+      "status": "historical_context_only",
+      "active_model_reference": false,
+      "origin": "older local image; original generation prompt/tool not available",
+      "project_copy": null,
+      "source_path": "C:/Users/bjoer/Pictures/Shadowfall_Map_2.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Shadowfall_Map_2.png",
+      "sha256": "12f2510f4efd0033b65e8de2c24b875f4c5758ccd2f3da89e11ada885a15ff46",
+      "bytes": 7198974,
+      "dimensions": [
+        3072,
+        2048
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false
+    }
+  ],
+  "current_reference_count": 3,
+  "historical_count": 8,
+  "runtime_topology": "hex_axial_v1",
+  "notes": [
+    "All packaged originals are byte-identical; report WebP derivatives are display packaging only.",
+    "Historical images document earlier UI/context, not current model approval.",
+    "The three current attachments complement generated 01/02/03 and ship targets; they are not three new generated outputs."
+  ]
+}

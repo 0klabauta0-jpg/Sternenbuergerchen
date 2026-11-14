@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-10",
+  "source_pin": "046b6d91a",
+  "reference_chat": "01a09651-a457-70e0-8d66-a5d15acc6f31",
+  "files": [
+    {
+      "file": "star_map.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_48_40.png",
+      "status": "KI-Konzept, Asche-System mit Stationsvorschau",
+      "sha256": "3e5df3459c50a7ffab0dfac1df5e89b083ab1e634ac319d7d7fabed11e2fa2e6",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "inventory_drag.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_48_46.png",
+      "status": "KI-Konzept, Ida-Inventar mit Transferpfeil",
+      "sha256": "9a5f149cea0af5f8436a584ab87aa1aa9a366263073ffa8f2cce6a506995a699",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "trade_outpost.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_48_52.png",
+      "status": "KI-Konzept, Freihafen/Distribution Center",
+      "sha256": "86b997c2f274408b6ef6c04a0edb31336324ca47192707bef33b82a9cf53e747",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "homebase.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_48_58.png",
+      "status": "KI-Konzept, Rostgrenze-Aussenposten",
+      "sha256": "4930cf00a434d3a81124596b8cb6f7ac3b557ced03bc094816277a7787e11b22",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "star_map_variant.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_49_07.png",
+      "status": "KI-Konzept, Asche-System mit Bodenvorschau",
+      "sha256": "ac75c395eac78af6e1b0992d9b7c43801f6fc0b9daa2ef4ddaf9f3eef79d8beb",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "inventory_grid.png",
+      "source": "C:\\Users\\bjoer\\Downloads\\Codex-Bild 21. Sept. 2026, 01_49_15.png",
+      "status": "KI-Konzept, Ida-Inventar mit Rucksackraster",
+      "sha256": "f6cb7637b8943a95156fe42b19008e2d1de79c65cbd6a5feb9afcb3fa68bb626",
+      "provenance": "Im Chat Analysiere Sternbuergerchen neu als Nutzerreferenz beigefuegt; Originalprompt/-generierungsverlauf in dieser Planung nicht rekonstruiert."
+    },
+    {
+      "file": "playtest_satellite.png",
+      "source": "C:\\Users\\bjoer\\AppData\\Local\\Temp\\codex-clipboard-b29fa128-289c-4581-a665-e02964007228.png",
+      "status": "Nutzerscreenshot 10.11.2026; sichtbarer Ist-Befund, Buildrevision unbekannt",
+      "sha256": "9e57ab70bd8a4e2d213d9e10442bbe17519cf11b3791e84ec06ab8ca15bd958c"
+    }
+  ]
+}

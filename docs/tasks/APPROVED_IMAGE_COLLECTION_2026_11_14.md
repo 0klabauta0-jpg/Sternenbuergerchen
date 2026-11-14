@@ -10,3 +10,12 @@ Betroffene Dateien: Referenzbilder_Bestaetigt/** und diese Taskdatei.
 Lokale Prüfung: Alle Kopien per SHA-256, PNG-Dekodierung und eindeutigen Bildhash prüfen; Git-Diff nur für eigene Dateien.
 Risiken / offen: Kein vollständiger Beweis über sämtliche historischen Chats; Stilzustimmung ist keine native Modellabnahme. Alte Raumkonzepte bleiben ausgeschlossen.
 Basis: integration/core-foundation 3cae5a216, separater Taskbranch/Worktree; aktuelle Quelldateien zusätzlich aus Main und zwei bestehenden Task-Worktrees kopiert. Hauptcheckout nicht umgeschaltet.
+
+## Folgeauftrag 14.11.2026
+- Nutzerkorrektur: Deckbild ausdrücklich schlecht, vollständig aus der Sammlung ausschließen; historische Originaldatei bleibt erhalten.
+- Suche auf frühe Szenenreferenzen, HTML-Seiten, Nutzer-Downloads und ältere Projektarchive erweitern.
+- Alle Bilder zusammen auffindbar; bestätigte Ziele, historische Nutzerreferenzen und noch unbewertete eigene Entwürfe klar unterscheiden. Keine neue Zustimmung erfinden.
+- Lokale Galerie mit Suche, Gruppen-/Statusfilter, Großansicht, Notizen und JSON-Export; vorhandene Workbench-Vorlage verwenden.
+- Kopierhashes und Bilddekodierung prüfen; Galerie offline auf Desktop/schmal sowie Filter/Notizen/Export prüfen.
+
+Ergebnis Folgeauftrag: 95 eindeutige Bilder; 20 positiv bestätigt, neun als Nutzerreferenz zugeordnet, sechs Richtungsentscheidungen, vier Teilfreigaben, 14 historische und 42 offene Einträge. 18 DOM-Prüfungen bestanden. Browser-Dateizugriff richtlinienseitig blockiert; keine visuelle Desktop-/Mobilprüfung. `Quellen/GALERIE_PRUEFUNG.json` dokumentiert Grenzen.

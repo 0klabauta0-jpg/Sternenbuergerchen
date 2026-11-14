@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-14",
+  "kind": "DOM-only integration checks using linkedom; not rendered browser QA",
+  "passed": 18,
+  "failed": 0,
+  "image_count": 95,
+  "checks": [
+    {
+      "label": "95 unique original images",
+      "pass": true
+    },
+    {
+      "label": "All 95 copied files match SHA256",
+      "pass": true
+    },
+    {
+      "label": "Explicitly rejected deck absent from gallery items and image files",
+      "pass": true
+    },
+    {
+      "label": "95 cards and image links",
+      "pass": true
+    },
+    {
+      "label": "No external script, stylesheet or image dependencies",
+      "pass": true
+    },
+    {
+      "label": "Initial count and all cards visible",
+      "pass": true
+    },
+    {
+      "label": "Search finds early Rostgrenze references",
+      "pass": true
+    },
+    {
+      "label": "Empty search has zero results",
+      "pass": true
+    },
+    {
+      "label": "Reset restores every image",
+      "pass": true
+    },
+    {
+      "label": "User-reference filter shows exactly 9",
+      "pass": true
+    },
+    {
+      "label": "Positive filter excludes open/historical/partial images",
+      "pass": true
+    },
+    {
+      "label": "September website category shows 6 targets",
+      "pass": true
+    },
+    {
+      "label": "Large-image dialog opens correct original and closes",
+      "pass": true
+    },
+    {
+      "label": "Notes and decisions persist to browser storage",
+      "pass": true
+    },
+    {
+      "label": "Reload restores notes and decisions",
+      "pass": true
+    },
+    {
+      "label": "JSON export uses required workbench schema and all images",
+      "pass": true
+    },
+    {
+      "label": "Download uses Blob URL and timestamped JSON filename",
+      "pass": true
+    },
+    {
+      "label": "Responsive rules and viewport declaration present (static check only)",
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "Browser security policy rejected file:// navigation. No alternate browser route attempted.",
+    "Desktop/mobile rendering and actual browser download not visually verified.",
+    "PNG/JPEG decoding was verified separately with Pillow."
+  ]
+}
