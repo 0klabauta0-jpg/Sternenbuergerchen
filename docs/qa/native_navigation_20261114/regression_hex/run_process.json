@@ -1,0 +1,14 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\tmp\\native_navigation\\20261114T111450Z-8c9c1944",
+    "--script",
+    "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+    "--",
+    "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_20261114\\regression_hex\\result.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 0.7490392999898177
+}

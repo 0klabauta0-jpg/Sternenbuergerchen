@@ -1,0 +1,7 @@
+.build/
+.sconsign*
+src/*.obj
+src/*.os
+bin/*.exp
+bin/*.lib
+bin/*.pdb

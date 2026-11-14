@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+DYNAMIC_OPTIONS_BEGIN hex24
+DYNAMIC_OPTIONS_PAIR hex24 0 gd_usec=39939 native_usec=60133 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 1 gd_usec=31344 native_usec=56474 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 2 gd_usec=37577 native_usec=59122 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 3 gd_usec=59359 native_usec=59038 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 4 gd_usec=16843 native_usec=58688 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 5 gd_usec=21938 native_usec=56387 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 6 gd_usec=17931 native_usec=56235 parity=true
+DYNAMIC_OPTIONS_PAIR hex24 7 gd_usec=3814 native_usec=56780 parity=true
+DYNAMIC_OPTIONS_END hex24
+DYNAMIC_OPTIONS_BEGIN gm01
+DYNAMIC_OPTIONS_PAIR gm01 0 gd_usec=139994 native_usec=954819 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 1 gd_usec=107721 native_usec=971911 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 2 gd_usec=251150 native_usec=980108 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 3 gd_usec=147185 native_usec=976042 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 4 gd_usec=145942 native_usec=1032804 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 5 gd_usec=152248 native_usec=972012 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 6 gd_usec=215344 native_usec=1060289 parity=true
+DYNAMIC_OPTIONS_PAIR gm01 7 gd_usec=347114 native_usec=1106740 parity=true
+DYNAMIC_OPTIONS_END gm01
+NATIVE_NAVIGATION_DYNAMIC_OPTIONS pairs=16 failures=0 output=C:\Users\bjoer\.codex\worktrees\native-pathfinding-prototype\SternenBuergerchen\docs\qa\native_navigation_20261114\dynamic_options\result.json

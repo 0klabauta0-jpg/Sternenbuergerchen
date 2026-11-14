@@ -1,0 +1,1078 @@
+{
+	"context": {
+		"cost_profile": "Derived balanced Move with default cover_priority0.4, no hazard cells; runtime-style changing corridor endpoints and lane offsets",
+		"cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+		"engine": {
+			"build": "official",
+			"hash": "71f334935c000924d403448e698df4441130df18",
+			"hex": 263682,
+			"major": 4,
+			"minor": 6,
+			"patch": 2,
+			"status": "stable",
+			"string": "4.6.2-stable (official)",
+			"timestamp": 0
+		},
+		"gpu_time": "unavailable",
+		"ordering": "GDS first on even samples, native first on odd samples",
+		"os": "Windows",
+		"processor_count": 16,
+		"profile_sources": [
+			"scripts/tactical/fireteam_movement_controller.gd:_resolve_stage_navigation_weights",
+			"scripts/core/simulation_root.gd:_append_navigation_corridor_options"
+		],
+		"renderer": "headless",
+		"samples_per_fixture": 8,
+		"scope": "Successive navigation queries on same registry, graph and solver. No actor replay, FPS, GPU or release claim. Graph construction reported separately and excluded equally from request timings.",
+		"seed": 0,
+		"small_sample_warning": true,
+		"timed_boundary": "public HPA call including full option-dependent snapshot preparation, native transfer, query and return conversion"
+	},
+	"failures": [],
+	"pair_count": 16,
+	"passed": true,
+	"rows": [
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				-4,
+				10
+			],
+			"gdscript_usec": 39939,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 577,
+				"result_cache_entry_count": 1,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 1,
+				"snapshot_prepare_usec": 59455,
+				"snapshot_reused": false
+			},
+			"native_usec": 60133,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-4, 10)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(9, 14)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000fcffffff0a0000000400000010000000636f727269646f725f746f5f6772696406000000090000000e000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 30,
+			"path_sha256": "5e48f45b822d0a885dd876bb17958ecb2143574c196eec90c4f985a74153d46e",
+			"sample": 0,
+			"score": {
+				"cover_sum": 17.21,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.573666666666667,
+				"mean_exposure": 0.0,
+				"path_cost": 53.5339254840558,
+				"path_length_grid": 30
+			},
+			"status": "hpa",
+			"to": [
+				9,
+				14
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				-2,
+				9
+			],
+			"gdscript_usec": 31344,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 313,
+				"result_cache_entry_count": 2,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 2,
+				"snapshot_prepare_usec": 56106,
+				"snapshot_reused": false
+			},
+			"native_usec": 56474,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-2, 9)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(12, 20)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000feffffff090000000400000010000000636f727269646f725f746f5f67726964060000000c00000014000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 29,
+			"path_sha256": "b50b6ad4ea1fc9bb5d16f131b5269aba19af7feb331366589c8e8a1dde9383ad",
+			"sample": 1,
+			"score": {
+				"cover_sum": 14.01,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.483103448275862,
+				"mean_exposure": 0.0,
+				"path_cost": 35.7997006194718,
+				"path_length_grid": 29
+			},
+			"status": "hpa",
+			"to": [
+				12,
+				20
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				0,
+				8
+			],
+			"gdscript_usec": 37577,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 461,
+				"result_cache_entry_count": 3,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 3,
+				"snapshot_prepare_usec": 58575,
+				"snapshot_reused": false
+			},
+			"native_usec": 59122,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(0, 8)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(16, 2)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f6772696400000600000000000000080000000400000010000000636f727269646f725f746f5f67726964060000001000000002000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f67726964030000000000403f0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 26,
+			"path_sha256": "64823237082644f95a1197a584d2188456bbdc85d22a87586e5fccbb48aca2ac",
+			"sample": 2,
+			"score": {
+				"cover_sum": 15.41,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.592692307692308,
+				"mean_exposure": 0.0,
+				"path_cost": 60.4103654769856,
+				"path_length_grid": 26
+			},
+			"status": "hpa",
+			"to": [
+				16,
+				2
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				2,
+				7
+			],
+			"gdscript_usec": 59359,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 561,
+				"result_cache_entry_count": 4,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 4,
+				"snapshot_prepare_usec": 58409,
+				"snapshot_reused": false
+			},
+			"native_usec": 59038,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(2, 7)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(19, 8)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f6772696400000600000002000000070000000400000010000000636f727269646f725f746f5f67726964060000001300000008000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 30,
+			"path_sha256": "03b1e6ecd3349b075083cb60a6b918d3f764c8484cc2409fba95b004b68df486",
+			"sample": 3,
+			"score": {
+				"cover_sum": 16.33,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.544333333333333,
+				"mean_exposure": 0.0,
+				"path_cost": 77.9388624944584,
+				"path_length_grid": 30
+			},
+			"status": "hpa",
+			"to": [
+				19,
+				8
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				4,
+				6
+			],
+			"gdscript_usec": 16843,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 202,
+				"result_cache_entry_count": 5,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 5,
+				"snapshot_prepare_usec": 58422,
+				"snapshot_reused": false
+			},
+			"native_usec": 58688,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(4, 6)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(-2, 14)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f6772696400000600000004000000060000000400000010000000636f727269646f725f746f5f6772696406000000feffffff0e000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 10,
+			"path_sha256": "e81e2f235451d7a61ac6d552d6cd90784b3cca4bfb2d82484a0695c1b01465c9",
+			"sample": 4,
+			"score": {
+				"cover_sum": 6.09,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.609,
+				"mean_exposure": 0.0,
+				"path_cost": 8.67037820438174,
+				"path_length_grid": 10
+			},
+			"status": "hpa",
+			"to": [
+				-2,
+				14
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				6,
+				5
+			],
+			"gdscript_usec": 21938,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 216,
+				"result_cache_entry_count": 6,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 6,
+				"snapshot_prepare_usec": 56111,
+				"snapshot_reused": false
+			},
+			"native_usec": 56387,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(6, 5)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(1, 20)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f6772696400000600000006000000050000000400000010000000636f727269646f725f746f5f67726964060000000100000014000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f67726964030000000000403f0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 17,
+			"path_sha256": "159854592e4a88a33a3186c9261bbe99d957490f4c553469ce953d5d635fc267",
+			"sample": 5,
+			"score": {
+				"cover_sum": 9.11,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.535882352941176,
+				"mean_exposure": 0.0,
+				"path_cost": 18.2838125882894,
+				"path_length_grid": 17
+			},
+			"status": "hpa",
+			"to": [
+				1,
+				20
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				9,
+				2
+			],
+			"gdscript_usec": 17931,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 206,
+				"result_cache_entry_count": 7,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 7,
+				"snapshot_prepare_usec": 55974,
+				"snapshot_reused": false
+			},
+			"native_usec": 56235,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(9, 2)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(5, 2)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f6772696400000600000009000000020000000400000010000000636f727269646f725f746f5f67726964060000000500000002000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 9,
+			"path_sha256": "3673c0fc6d41b75edee27f4e53a1f53a9ddccf05fd59355a4523d15bd108b7d8",
+			"sample": 6,
+			"score": {
+				"cover_sum": 6.04,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.671111111111111,
+				"mean_exposure": 0.0,
+				"path_cost": 20.8079820465358,
+				"path_length_grid": 9
+			},
+			"status": "hpa",
+			"to": [
+				5,
+				2
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "hex24",
+			"from": [
+				11,
+				1
+			],
+			"gdscript_usec": 3814,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 11,
+				"result_cache_entry_count": 8,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 8,
+				"snapshot_prepare_usec": 56718,
+				"snapshot_reused": false
+			},
+			"native_usec": 56780,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(11, 1)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(9, 6)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f677269640000060000000b000000010000000400000010000000636f727269646f725f746f5f67726964060000000900000006000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 6,
+			"path_sha256": "5d7d2ab3ef8971ca18bf5a9ea29efcd90ea5e4822850be93e51e96d24c3213c1",
+			"sample": 7,
+			"score": {
+				"cover_sum": 1.92,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.32,
+				"mean_exposure": 0.0,
+				"path_cost": 5.31256758287385,
+				"path_length_grid": 6
+			},
+			"status": "same_component",
+			"to": [
+				9,
+				6
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-57,
+				70
+			],
+			"gdscript_usec": 139994,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 2792,
+				"result_cache_entry_count": 1,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 1,
+				"snapshot_prepare_usec": 951946,
+				"snapshot_reused": false
+			},
+			"native_usec": 954819,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-57, 70)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(11, 58)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000c7ffffff460000000400000010000000636f727269646f725f746f5f67726964060000000b0000003a000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 69,
+			"path_sha256": "0f79516ec3e5d0a09c155c2db32e90a653b538edb8eac9f3642507f10f7748bc",
+			"sample": 0,
+			"score": {
+				"cover_sum": 0.0,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.0,
+				"mean_exposure": 0.0,
+				"path_cost": 107.159485282741,
+				"path_length_grid": 69
+			},
+			"status": "hpa",
+			"to": [
+				11,
+				58
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-53,
+				69
+			],
+			"gdscript_usec": 107721,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 1957,
+				"result_cache_entry_count": 2,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 2,
+				"snapshot_prepare_usec": 969869,
+				"snapshot_reused": false
+			},
+			"native_usec": 971911,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-53, 69)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(12, 72)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000cbffffff450000000400000010000000636f727269646f725f746f5f67726964060000000c00000048000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 69,
+			"path_sha256": "c7c93249aea61fe9e70742bd218483e32118dcd78b0b1c327ea53b6f1d7ead99",
+			"sample": 1,
+			"score": {
+				"cover_sum": 0.0,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.0,
+				"mean_exposure": 0.0,
+				"path_cost": 108.811721541343,
+				"path_length_grid": 69
+			},
+			"status": "hpa",
+			"to": [
+				12,
+				72
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-50,
+				59
+			],
+			"gdscript_usec": 251150,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 4377,
+				"result_cache_entry_count": 3,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 3,
+				"snapshot_prepare_usec": 975662,
+				"snapshot_reused": false
+			},
+			"native_usec": 980108,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-50, 59)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(14, -12)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000ceffffff3b0000000400000010000000636f727269646f725f746f5f67726964060000000e000000f4ffffff040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f67726964030000000000403f0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 84,
+			"path_sha256": "b49437442c583cbc63a9c5aeef7baa5e23e2d90a54c08d9a1dbaa21c2f10970e",
+			"sample": 2,
+			"score": {
+				"cover_sum": 15.84,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.188571428571429,
+				"mean_exposure": 0.0,
+				"path_cost": 230.450897116248,
+				"path_length_grid": 84
+			},
+			"status": "hpa",
+			"to": [
+				14,
+				-12
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-48,
+				58
+			],
+			"gdscript_usec": 147185,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 2603,
+				"result_cache_entry_count": 4,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 4,
+				"snapshot_prepare_usec": 973363,
+				"snapshot_reused": false
+			},
+			"native_usec": 976042,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-48, 58)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(15, 22)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000d0ffffff3a0000000400000010000000636f727269646f725f746f5f67726964060000000f00000016000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 65,
+			"path_sha256": "81c4a3f04db521996108bc9fba963d93d171f750210486280430f42c46c20764",
+			"sample": 3,
+			"score": {
+				"cover_sum": 6.0,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.0923076923076923,
+				"mean_exposure": 0.0,
+				"path_cost": 112.032301573671,
+				"path_length_grid": 65
+			},
+			"status": "hpa",
+			"to": [
+				15,
+				22
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-46,
+				49
+			],
+			"gdscript_usec": 145942,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 2813,
+				"result_cache_entry_count": 5,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 5,
+				"snapshot_prepare_usec": 1029914,
+				"snapshot_reused": false
+			},
+			"native_usec": 1032804,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-46, 49)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(16, 41)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000d2ffffff310000000400000010000000636f727269646f725f746f5f67726964060000001000000029000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 66,
+			"path_sha256": "9f024eb51ce994cef80d8a12b9b356b0aeaede5c534e4ef24fdc5e0b1022152a",
+			"sample": 4,
+			"score": {
+				"cover_sum": 9.66,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.146363636363636,
+				"mean_exposure": 0.0,
+				"path_cost": 121.065093371746,
+				"path_length_grid": 66
+			},
+			"status": "hpa",
+			"to": [
+				16,
+				41
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-45,
+				65
+			],
+			"gdscript_usec": 152248,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 3157,
+				"result_cache_entry_count": 6,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 6,
+				"snapshot_prepare_usec": 968781,
+				"snapshot_reused": false
+			},
+			"native_usec": 972012,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-45, 65)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(17, 59)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000d3ffffff410000000400000010000000636f727269646f725f746f5f6772696406000000110000003b000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f67726964030000000000403f0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 63,
+			"path_sha256": "c5236eeed53bd62f9f3710e4e8c138fce96702cce074e659f56fd8dfc727cdf6",
+			"sample": 5,
+			"score": {
+				"cover_sum": 0.0,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.0,
+				"mean_exposure": 0.0,
+				"path_cost": 98.0714342553651,
+				"path_length_grid": 63
+			},
+			"status": "hpa",
+			"to": [
+				17,
+				59
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-43,
+				44
+			],
+			"gdscript_usec": 215344,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 4428,
+				"result_cache_entry_count": 7,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 7,
+				"snapshot_prepare_usec": 1055772,
+				"snapshot_reused": false
+			},
+			"native_usec": 1060289,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-43, 44)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(18, 69)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": -0.75,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000d5ffffff2c0000000400000010000000636f727269646f725f746f5f67726964060000001200000045000000040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000040bf0400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 87,
+			"path_sha256": "72a19791c45bbd277b522fa2e7f149b4294c8d6ca169eaf6d648f1f085d6ab16",
+			"sample": 6,
+			"score": {
+				"cover_sum": 0.0,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.0,
+				"mean_exposure": 0.0,
+				"path_cost": 143.193482935554,
+				"path_length_grid": 87
+			},
+			"status": "hpa",
+			"to": [
+				18,
+				69
+			]
+		},
+		{
+			"both_result_cache_misses": true,
+			"fixture": "gm01",
+			"from": [
+				-42,
+				54
+			],
+			"gdscript_usec": 347114,
+			"inputs_unchanged": true,
+			"native_debug": {
+				"fallback_reason": "",
+				"last_backend": "native",
+				"native_available": true,
+				"native_query_usec": 5291,
+				"result_cache_entry_count": 8,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 8,
+				"snapshot_prepare_usec": 1101360,
+				"snapshot_reused": false
+			},
+			"native_usec": 1106740,
+			"native_used": true,
+			"new_option_snapshot_built": true,
+			"options": {
+				"blocker_clearance_radius": 1,
+				"blocker_clearance_weight": 0.392,
+				"corridor_enabled": true,
+				"corridor_from_grid": "(-42, 54)",
+				"corridor_half_width_grid": 1.34164076680163,
+				"corridor_to_grid": "(20, -20)",
+				"corridor_weight": 0.62,
+				"cover_aware_enabled": true,
+				"cover_weight": 0.56,
+				"exposure_max_grid_distance": 8.0,
+				"exposure_weight": 0.72,
+				"hazard_grids": [],
+				"lane_enabled": true,
+				"lane_offset_grid": 0.0,
+				"lane_weight": 0.88
+			},
+			"options_variant_hex": "1b0000000f0000000400000013000000636f7665725f61776172655f656e61626c6564000100000001000000040000000f0000006578706f737572655f77656967687400030001000ad7a3703d0ae73f040000000c000000636f7665725f77656967687403000100eb51b81e85ebe13f040000001a0000006578706f737572655f6d61785f677269645f64697374616e636500000300000000000041040000000c00000068617a6172645f67726964731c000000000000000400000010000000636f727269646f725f656e61626c656401000000010000000400000012000000636f727269646f725f66726f6d5f67726964000006000000d6ffffff360000000400000010000000636f727269646f725f746f5f677269640600000014000000ecffffff040000000f000000636f727269646f725f7765696768740003000100d7a3703d0ad7e33f0400000018000000636f727269646f725f68616c665f77696474685f67726964030001002e4b064f5c77f53f040000000c0000006c616e655f656e61626c65640100000001000000040000000b0000006c616e655f7765696768740003000100295c8fc2f528ec3f04000000100000006c616e655f6f66667365745f6772696403000000000000000400000018000000626c6f636b65725f636c656172616e63655f776569676874030001004a0c022b8716d93f0400000018000000626c6f636b65725f636c656172616e63655f7261646975730200000001000000",
+			"ordered_path_status_score_equal": true,
+			"path_length": 85,
+			"path_sha256": "67aa9de0bfbcd95d972560735378a9f7ace65cee92dd991fb6c5d4432be8b129",
+			"sample": 7,
+			"score": {
+				"cover_sum": 14.4,
+				"exposure_sum": 0.0,
+				"mean_cover": 0.169411764705882,
+				"mean_exposure": 0.0,
+				"path_cost": 230.272503676811,
+				"path_length_grid": 85
+			},
+			"status": "hpa",
+			"to": [
+				20,
+				-20
+			]
+		}
+	],
+	"schema": "native_navigation_dynamic_options.v1",
+	"summaries": {
+		"gm01": {
+			"cumulative_speedup": 0.187057658703432,
+			"gdscript": {
+				"count": 8,
+				"max": 347114,
+				"mean": 188337.25,
+				"median": 149716.5,
+				"p95": 347114,
+				"sum": 1506698.0
+			},
+			"graph_build_usec_excluded_from_both": 267990,
+			"median_speedup": 0.153072617130588,
+			"native": {
+				"count": 8,
+				"max": 1106740,
+				"mean": 1006840.625,
+				"median": 978075.0,
+				"p95": 1106740,
+				"sum": 8054725.0
+			},
+			"native_query": {
+				"count": 8,
+				"max": 5291,
+				"mean": 3427.25,
+				"median": 2985.0,
+				"p95": 5291,
+				"sum": 27418.0
+			},
+			"native_snapshot_prepare": {
+				"count": 8,
+				"max": 1101360,
+				"mean": 1003333.375,
+				"median": 974512.5,
+				"p95": 1101360,
+				"sum": 8026667.0
+			},
+			"small_sample_warning": true,
+			"tile_count": 9408
+		},
+		"hex24": {
+			"cumulative_speedup": 0.494202313025405,
+			"gdscript": {
+				"count": 8,
+				"max": 59359,
+				"mean": 28593.125,
+				"median": 26641.0,
+				"p95": 59359,
+				"sum": 228745.0
+			},
+			"graph_build_usec_excluded_from_both": 14160,
+			"median_speedup": 0.461443863234836,
+			"native": {
+				"count": 8,
+				"max": 60133,
+				"mean": 57857.125,
+				"median": 57734.0,
+				"p95": 60133,
+				"sum": 462857.0
+			},
+			"native_query": {
+				"count": 8,
+				"max": 577,
+				"mean": 318.375,
+				"median": 264.5,
+				"p95": 577,
+				"sum": 2547.0
+			},
+			"native_snapshot_prepare": {
+				"count": 8,
+				"max": 59455,
+				"mean": 57471.25,
+				"median": 57563.5,
+				"p95": 59455,
+				"sum": 459770.0
+			},
+			"small_sample_warning": true,
+			"tile_count": 576
+		}
+	},
+	"unit": "usec"
+}

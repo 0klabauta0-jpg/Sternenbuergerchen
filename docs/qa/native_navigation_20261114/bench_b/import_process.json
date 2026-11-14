@@ -1,0 +1,12 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\tmp\\native_navigation\\20261114T111812Z-443c93b6",
+    "--editor",
+    "--import"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 3.0309430999914184
+}

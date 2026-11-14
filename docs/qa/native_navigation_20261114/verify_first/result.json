@@ -1,0 +1,19 @@
+{
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"failed": 0,
+	"failures": [],
+	"native_astar_queries": 75,
+	"native_hpa_queries": 75,
+	"passed": 858,
+	"scope": "Differential navigation-only tests; original GDScript is oracle; exact ordered paths/status/scores; no gameplay/FPS claim."
+}
