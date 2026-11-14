@@ -252,12 +252,33 @@ func _layout() -> void:
 	if _hints_hidden and not _guidance_moved: _strip.position=Vector2(maxf(210,get_viewport_rect().size.x-500),8)
 	_guidance.custom_minimum_size.x = maxf(260, _strip.size.x - 24)
 	_strip.reset_size()
-	for protected in ([] if _guidance_moved else _launch_action_rects()):
-		if _strip.get_global_rect().intersects(protected):
-			_strip.position = Vector2(maxf(210, get_viewport_rect().size.x-_strip.size.x-16), protected.end.y+12)
-			break
+	if not _guidance_moved:
+		_strip.position = _free_guidance_position(_launch_action_rects())
 	if _popup_host.visible:
 		_place_popup_host()
+
+
+func _free_guidance_position(protected: Array[Rect2]) -> Vector2:
+	# Playtest L04: the hint card must never sit on an action and swallow part of its clicks.
+	var view: Vector2 = get_viewport_rect().size
+	var card: Vector2 = _strip.size
+	var right: float = maxf(210.0, view.x - card.x - 16.0)
+	var candidates: Array[Vector2] = [_strip.position, Vector2(right, 88.0), Vector2(right, 8.0), Vector2(210.0, 8.0)]
+	for protected_rect: Rect2 in protected:
+		candidates.append(Vector2(right, protected_rect.end.y + 12.0))
+	var best: Vector2 = _strip.position
+	var best_overlap: float = INF
+	for candidate: Vector2 in candidates:
+		var rect := Rect2(candidate, card)
+		var overlap: float = 0.0
+		for protected_rect: Rect2 in protected:
+			overlap += rect.intersection(protected_rect).get_area()
+		if overlap < best_overlap:
+			best_overlap = overlap
+			best = candidate
+		if overlap <= 0.0:
+			break
+	return best
 
 
 func _launch_action_rects() -> Array[Rect2]:

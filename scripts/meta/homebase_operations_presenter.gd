@@ -99,6 +99,11 @@ var _base_management_bar: VBoxContainer
 var _base_navigation_group: VBoxContainer
 var _flight_navigation_group: VBoxContainer
 var _flight_management_bar: VBoxContainer
+var _nav_group_toggles: Dictionary = {}
+var _nav_column: VBoxContainer
+var _nav_dock_spacer: Control
+var _nav_group_open: Dictionary = {"base": true, "mission": true}
+var _interface_settings_path: String = "user://sternenbuergerchen_settings.cfg"
 var _right_flyout_active:=false
 var _flyout_kind:String=""
 var _flyout_scrim:ColorRect
@@ -204,7 +209,25 @@ func _build() -> void:
 	var nav := VBoxContainer.new()
 	nav.custom_minimum_size.x = 166
 	nav.add_theme_constant_override("separation", 4)
-	body.add_child(nav)
+	# Playtest L04: the navigation ends above the full-width base command dock and scrolls
+	# instead of sliding underneath it when the unfolded submenus need more height.
+	_nav_column = VBoxContainer.new()
+	_nav_column.name = "NavigationColumn"
+	_nav_column.custom_minimum_size.x = 166
+	_nav_column.add_theme_constant_override("separation", 0)
+	body.add_child(_nav_column)
+	var nav_scroll := ScrollContainer.new()
+	nav_scroll.name = "NavigationScroll"
+	nav_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	nav_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_nav_column.add_child(nav_scroll)
+	nav.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nav.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	nav_scroll.add_child(nav)
+	_nav_dock_spacer = Control.new()
+	_nav_dock_spacer.name = "NavigationDockSpacer"
+	_nav_dock_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_nav_column.add_child(_nav_dock_spacer)
 	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "mission", "label": "Flugdeck"}, {"id": "map", "label": "Sternkarte"}, {"id": "jobs", "label": "Smart Mobile"}]:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
@@ -222,22 +245,16 @@ func _build() -> void:
 			_base_navigation_group.name = "BaseNavigationGroup"
 			_base_navigation_group.add_theme_constant_override("separation", 3)
 			nav.add_child(_base_navigation_group)
-			_base_navigation_group.add_child(button)
-			button.mouse_entered.connect(func(): _base_management_bar.show())
-			button.focus_entered.connect(func(): _base_management_bar.show())
-			_base_navigation_group.mouse_exited.connect(_close_base_navigation_after_exit)
+			_base_navigation_group.add_child(_nav_group_header(button, "base"))
 		elif key == "mission":
 			_flight_navigation_group = VBoxContainer.new()
 			_flight_navigation_group.name = "FlightNavigationGroup"
 			nav.add_child(_flight_navigation_group)
-			_flight_navigation_group.add_child(button)
+			_flight_navigation_group.add_child(_nav_group_header(button, "mission"))
 			_flight_management_bar = VBoxContainer.new()
 			_flight_management_bar.name = "FlightManagementActions"
 			_flight_navigation_group.add_child(_flight_management_bar)
 			_flight_management_bar.hide()
-			button.mouse_entered.connect(func(): _flight_management_bar.show())
-			button.focus_entered.connect(func(): _flight_management_bar.show())
-			_flight_navigation_group.mouse_exited.connect(_close_flight_navigation_after_exit)
 		else:
 			nav.add_child(button)
 		button.pressed.connect(_navigate_from_sidebar.bind(key))
@@ -262,9 +279,7 @@ func _build() -> void:
 	_flight_management_bar.add_child(refuel)
 	refuel.custom_minimum_size.y = 29
 	refuel.add_theme_font_size_override("font_size",13)
-	refuel.pressed.connect(func():
-		_flight_management_bar.hide()
-		_open_base_management("ship"))
+	refuel.pressed.connect(func(): _open_base_management("ship"))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	# Keep Smart Mobile with the other navigation entries. A bottom-pinned
@@ -323,7 +338,8 @@ func _build() -> void:
 		action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
-	_base_management_bar.hide()
+	_load_nav_groups()
+	_apply_nav_groups()
 	_flyout_scrim=ColorRect.new();_flyout_scrim.name="BaseFlyoutBackdrop";_flyout_scrim.color=Color(0.015,0.05,0.07,.16);_flyout_scrim.z_index=1;_workspace.add_child(_flyout_scrim);_flyout_scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);_flyout_scrim.hide()
 	_flyout_scrim.gui_input.connect(func(event:InputEvent):
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:_close_workspace_flyout())
@@ -1037,7 +1053,13 @@ func _pad_selected(index: int) -> void:
 
 func get_launch_action_rects() -> Array[Rect2]:
 	var result: Array[Rect2] = []
-	for control in [_start, _board, _unboard, _launch_reason, _base_management_bar]+_nav.values():
+	# Also used by the campaign hint card: it must not cover any of these actions (Playtest L04).
+	var controls: Array = [_start, _board, _unboard, _launch_reason, _base_management_bar, _flight_management_bar, _team_selector, _flyout_close] + _nav.values() + _nav_group_toggles.values()
+	if _job_board != null:
+		controls.append(_job_board.get("_footer"))
+	if _inventory_panel != null:
+		controls.append(_inventory_panel.get("_rest"))
+	for control in controls:
 		if control != null and control.is_visible_in_tree():
 			result.append(control.get_global_rect())
 	return result
@@ -1160,7 +1182,6 @@ func _layout_columns() -> void:
 
 
 func _open_base_management(section: String) -> void:
-	_base_management_bar.hide()
 	_right_flyout_active=true;_flyout_kind=section
 	if section == "inventory":
 		_act("navigate", {"mode":"squad"})
@@ -1172,8 +1193,6 @@ func _open_base_management(section: String) -> void:
 
 
 func _navigate_from_sidebar(mode:String)->void:
-	if mode != "base": _base_management_bar.hide()
-	if mode != "mission": _flight_management_bar.hide()
 	_right_flyout_active=mode=="jobs"
 	_flyout_kind=mode if _right_flyout_active else ""
 	_act("navigate",{"mode":mode})
@@ -1211,6 +1230,7 @@ func _on_command_dock_geometry_changed() -> void:
 
 func _layout_workspace_flyout()->void:
 	if _flyout_scrim==null:return
+	_layout_nav_dock_spacer()
 	_flyout_scrim.visible=_right_flyout_active;_flyout_close.visible=_right_flyout_active
 	_focused_portrait.visible=true
 	for node:Control in [_services_view,_job_board,_columns.equipment]:node.z_index=0
@@ -1245,17 +1265,71 @@ func _start_workspace_flyout_animation()->void:
 	_flyout_tween.tween_property(panel,"modulate:a",1.0,.18)
 
 
-func _close_base_navigation_after_exit() -> void:
-	# Allow pointer travel from the heading into its submenu before folding.
-	await get_tree().create_timer(0.12).timeout
-	if not _base_navigation_group.get_global_rect().has_point(get_global_mouse_position()):
-		_base_management_bar.hide()
+func _layout_nav_dock_spacer() -> void:
+	if _nav_dock_spacer == null or _nav_column == null:
+		return
+	var overlap := maxf(0.0, _nav_column.get_global_rect().end.y - get_overlay_safe_rect().end.y)
+	if not is_equal_approx(_nav_dock_spacer.custom_minimum_size.y, overlap):
+		_nav_dock_spacer.custom_minimum_size.y = overlap
 
 
-func _close_flight_navigation_after_exit() -> void:
-	await get_tree().create_timer(0.12).timeout
-	if not _flight_navigation_group.get_global_rect().has_point(get_global_mouse_position()):
-		_flight_management_bar.hide()
+func _nav_group_header(button: Button, key: String) -> HBoxContainer:
+	# Playtest L16: a submenu folds only on an explicit click, never on pointer exit.
+	var row := HBoxContainer.new()
+	row.name = "NavigationHeader_" + key
+	row.add_theme_constant_override("separation", 2)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(button)
+	var toggle := _button("▾", false)
+	toggle.name = "ToggleSubmenu_" + key
+	toggle.custom_minimum_size = Vector2(32, 46)
+	toggle.pressed.connect(_toggle_nav_group.bind(key))
+	row.add_child(toggle)
+	_nav_group_toggles[key] = toggle
+	return row
+
+
+func _toggle_nav_group(key: String) -> void:
+	set_nav_group_open(key, not bool(_nav_group_open.get(key, true)))
+
+
+func set_nav_group_open(key: String, open: bool) -> void:
+	_nav_group_open[key] = open
+	_apply_nav_groups()
+	_save_nav_groups()
+
+
+func set_interface_settings_path_for_tests(path: String) -> void:
+	_interface_settings_path = path
+
+
+func _apply_nav_groups() -> void:
+	for key: String in _nav_group_toggles:
+		var open := bool(_nav_group_open.get(key, true))
+		var bar: Control = _base_management_bar if key == "base" else _flight_management_bar
+		if bar != null:
+			bar.visible = open
+		var toggle: Button = _nav_group_toggles[key]
+		toggle.text = "▾" if open else "▸"
+		toggle.tooltip_text = "Untermenü einklappen" if open else "Untermenü aufklappen"
+
+
+func _load_nav_groups() -> void:
+	var config := ConfigFile.new()
+	if config.load(_interface_settings_path) != OK:
+		return
+	for key: String in _nav_group_open:
+		_nav_group_open[key] = bool(config.get_value("interface", "nav_open_" + key, _nav_group_open[key]))
+
+
+func _save_nav_groups() -> void:
+	var config := ConfigFile.new()
+	var error := config.load(_interface_settings_path)
+	if error != OK and error != ERR_FILE_NOT_FOUND:
+		return
+	for key: String in _nav_group_open:
+		config.set_value("interface", "nav_open_" + key, bool(_nav_group_open[key]))
+	config.save(_interface_settings_path)
 
 
 func _terminal_requested(id: String) -> void:
