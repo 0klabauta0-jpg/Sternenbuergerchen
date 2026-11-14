@@ -27,6 +27,9 @@ class Owner extends Node:
   return actor if is_instance_valid(actor) else units.get_unit(id)
  func _extract_move_speed_factor(command:Dictionary,_actor)->float:return float(command.get("move_speed_factor",1.0))
  func _build_navigation_cost_options(_command:Dictionary,_registry)->Dictionary:return {}
+ func create_regional_navigation_search(from_grid:Vector2i,to_grid:Vector2i,registry,options:Dictionary={}):
+  return preload("res://scripts/terrain/terrain_pathfinder.gd").RegionalHexSearch.new(from_grid,to_grid,registry.get_revision(),options,registry)
+ func _note_regional_navigation_backend(_search)->String:return "gdscript"
  func _commit_hex_movement_facing(id:String,direction:int)->void:ground.commit_facing(id,direction)
  func commit_hex_ground_plan(plan:Dictionary,revision:int)->Dictionary:return ground.commit_plan(plan,revision)
  func stop_hex_ground_units(ids:PackedStringArray,reason:String)->Dictionary:return ground.stop_units(ids,reason)

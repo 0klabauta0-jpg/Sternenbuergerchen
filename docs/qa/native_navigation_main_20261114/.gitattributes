@@ -1,0 +1,2 @@
+# Preserve engine output verbatim, including whitespace in diagnostic lines.
+*.log -whitespace

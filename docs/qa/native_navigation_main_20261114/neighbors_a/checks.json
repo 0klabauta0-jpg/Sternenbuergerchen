@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "corridor_lane_cover",
+      "script": "res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 240
+    },
+    {
+      "name": "hex_base",
+      "script": "res://scripts/tests/hex_base_personnel_owner_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_BASE_PERSONNEL_OWNER_PASS",
+      "timeout": 240
+    },
+    {
+      "name": "hex_boarding",
+      "script": "res://scripts/tests/hex_base_boarding_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_BASE_BOARDING_PASS",
+      "timeout": 240
+    }
+  ]
+}

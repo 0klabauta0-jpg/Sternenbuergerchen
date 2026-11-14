@@ -30,6 +30,59 @@ var _cache_graph_revision: int = -1
 var _debug: Dictionary = {}
 
 
+class RegionalSearch:
+	extends RefCounted
+	var source: Vector2i
+	var goal: Vector2i
+	var revision: int
+	var registry_id: int
+	var options: Dictionary
+	var cost_options: Dictionary
+	var finished: bool = false
+	var invalidated: bool = false
+	var path: Array = []
+	var expanded_count: int = 0
+	var started_usec: int = Time.get_ticks_usec()
+	var last_slice_usec: int = 0
+	var work_usec: int = 0
+	var max_slice_usec: int = 0
+	var backend: String = "native"
+	var fallback_reason: String = ""
+	var _native_search: Object
+	var _last_native_debug: Dictionary = {}
+
+	func _init(native_search: Object, start: Vector2i, target: Vector2i, registry, query_options: Dictionary) -> void:
+		_native_search = native_search
+		source = start
+		goal = target
+		revision = int(registry.call("get_revision"))
+		registry_id = registry.get_instance_id()
+		options = query_options.duplicate(true)
+		cost_options = query_options.duplicate(true)
+
+	func advance(_pathfinder, registry, expansion_limit: int) -> int:
+		if not is_instance_valid(registry) or registry.get_instance_id() != registry_id or int(registry.call("get_revision")) != revision:
+			finished = true
+			invalidated = true
+			path.clear()
+			fallback_reason = "regional_registry_changed"
+			return 0
+		_last_native_debug = _native_search.call("advance", expansion_limit)
+		finished = bool(_last_native_debug.finished)
+		invalidated = bool(_last_native_debug.invalidated)
+		expanded_count = int(_last_native_debug.expanded_count)
+		path = Array(_last_native_debug.path).duplicate()
+		if invalidated:
+			fallback_reason = "regional_snapshot_changed"
+		return int(_last_native_debug.used)
+
+	func get_debug_snapshot() -> Dictionary:
+		var result: Dictionary = _last_native_debug.duplicate(true)
+		result["backend"] = backend
+		result["fallback_reason"] = fallback_reason
+		return result
+
+
 func _init() -> void:
 	if ClassDB.class_exists("NativeNavigationKernel"):
 		_kernel = ClassDB.instantiate("NativeNavigationKernel")
@@ -84,13 +137,14 @@ func clear_prepared_data() -> void:
 	_reset_debug()
 
 
-func _reject(reason: String) -> bool:
+func _reject(reason: String, clear_snapshot: bool = true) -> bool:
 	_debug["fallback_reason"] = reason
-	_prepared_registry_ref = null
-	_prepared_graph_ref = null
-	_graph_registry_ref = null
-	_terrain_grids.clear()
-	_graph_data.clear()
+	if clear_snapshot:
+		_prepared_registry_ref = null
+		_prepared_graph_ref = null
+		_graph_registry_ref = null
+		_terrain_grids.clear()
+		_graph_data.clear()
 	return false
 
 
@@ -124,7 +178,7 @@ func prepare(registry, options: Dictionary = {}, graph = null) -> bool:
 func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 	_debug["fallback_reason"] = ""
 	if typeof(options.get("diagnostics")) == TYPE_DICTIONARY:
-		return _reject("diagnostics_require_gdscript")
+		return _reject("diagnostics_require_gdscript", false)
 	if not is_instance_valid(_kernel):
 		return _reject("native_extension_unavailable")
 	if not _kernel.has_method("load_terrain") or not _kernel.has_method("begin_query"):
@@ -135,7 +189,7 @@ func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 		return _reject("unsupported_graph")
 	var normalized: Dictionary = _normalized_options(options)
 	if not bool(_fallback_hpa.call("_is_result_cache_value_supported", normalized)):
-		return _reject("unsupported_or_nonfinite_options")
+		return _reject("unsupported_or_nonfinite_options", false)
 	var registry_revision: int = int(registry.call("get_revision"))
 	var graph_revision: int = int(graph.call("get_revision")) if graph != null else -1
 	var terrain_reused: bool = _referent(_prepared_registry_ref) == registry and _prepared_registry_revision == registry_revision
@@ -177,7 +231,7 @@ func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 		return _reject("revision_changed_during_snapshot")
 	var options_started: int = Time.get_ticks_usec()
 	if not bool(_kernel.call("begin_query", normalized)):
-		return _reject("native_query_options_rejected")
+		return _reject("native_query_options_rejected", false)
 	_option_prepare_count += 1
 	_debug["options_prepare_usec"] = Time.get_ticks_usec() - options_started
 	return true
@@ -191,6 +245,7 @@ func _load_terrain(registry) -> bool:
 	var cover := PackedFloat64Array()
 	var blocks_los := PackedByteArray()
 	var heights := PackedInt32Array()
+	var stand_heights := PackedFloat64Array()
 	var object_heights := PackedInt32Array()
 	var surface_costs := PackedFloat64Array()
 	_terrain_grids.clear()
@@ -210,6 +265,7 @@ func _load_terrain(registry) -> bool:
 		if absi(height) > 1000000 or absi(object_height) > 1000000:
 			return _reject("height_outside_prototype_range")
 		heights.append(height)
+		stand_heights.append(PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.stand_height(tile))
 		object_heights.append(object_height)
 		surface_costs.append(PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(tile.surface_type)))
 	var offsets := PackedInt32Array()
@@ -224,12 +280,12 @@ func _load_terrain(registry) -> bool:
 			if not grid_ids.has(target) or not _oracle.can_traverse_step(grid, target, registry):
 				continue
 			var target_id: int = int(grid_ids[target])
-			# An allowed height-changing edge is a slope. Retain the unmultiplied
+			# Match Main's canonical ramp midpoint heights. Retain the unmultiplied
 			# base; dividing a previous diagonal cost would change float rounding.
 			var cost: float = surface_costs[target_id]
-			var height_difference: int = absi(int(heights[target_id]) - int(heights[source_id]))
+			var height_difference: float = absf(stand_heights[target_id] - stand_heights[source_id])
 			if height_difference > 0:
-				cost = surface_costs[target_id] + (float(height_difference) * 1.0)
+				cost += height_difference
 			neighbors.append(target_id)
 			costs.append(cost)
 	offsets.append(neighbors.size())
@@ -239,6 +295,21 @@ func _load_terrain(registry) -> bool:
 		"height": heights, "object_height": object_heights, "hex": hex_mode, "heuristic_min": 0.7})):
 		return _reject("native_snapshot_rejected")
 	return true
+
+
+func create_regional_search(from_grid: Vector2i, to_grid: Vector2i, registry, options: Dictionary = {}):
+	_reset_debug()
+	if prepare(registry, options):
+		if _kernel.has_method("create_regional_search"):
+			var native_search: Object = _kernel.call("create_regional_search", from_grid, to_grid, _normalized_options(options))
+			if is_instance_valid(native_search):
+				_debug["last_backend"] = "native"
+				return RegionalSearch.new(native_search, from_grid, to_grid, registry, options)
+			_debug["fallback_reason"] = "regional_input_not_supported"
+		else:
+			_debug["fallback_reason"] = "native_regional_api_unavailable"
+	_debug["last_backend"] = "gdscript_fallback"
+	return PATH_SCRIPT.RegionalHexSearch.new(from_grid, to_grid, int(registry.call("get_revision")), options, registry)
 
 
 func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, options: Dictionary = {}) -> Array:

@@ -90,6 +90,7 @@ void NativeNavigationKernel::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_terrain", "snapshot"), &NativeNavigationKernel::load_terrain);
     ClassDB::bind_method(D_METHOD("begin_query", "options"), &NativeNavigationKernel::begin_query);
     ClassDB::bind_method(D_METHOD("get_query_debug"), &NativeNavigationKernel::get_query_debug);
+    ClassDB::bind_method(D_METHOD("create_regional_search", "from_grid", "to_grid", "options"), &NativeNavigationKernel::create_regional_search);
     ClassDB::bind_method(D_METHOD("find_path", "from_grid", "to_grid"), &NativeNavigationKernel::find_path);
     ClassDB::bind_method(D_METHOD("build_local_cost_map", "from_grid", "component_grids", "reverse_steps"), &NativeNavigationKernel::build_local_cost_map);
     ClassDB::bind_method(D_METHOD("find_hpa", "from_grid", "to_grid", "graph_data"), &NativeNavigationKernel::find_hpa);
@@ -118,6 +119,7 @@ int NativeNavigationKernel::direction_index(const Vector2i &from, const Vector2i
 }
 
 void NativeNavigationKernel::clear_snapshot() {
+    if (++snapshot_generation_ == 0) ++snapshot_generation_;
     ready_ = false;
     hex_ = false;
     direction_count_ = 8;

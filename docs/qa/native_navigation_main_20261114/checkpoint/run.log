@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: actual root admits actor
+PASS: pending commands block export
+PASS: actual root exports composite checkpoint: 
+PASS: checkpoint contains actual active movement
+PASS: wrong map is rejected without mutation
+PASS: root prepares portable composite: 
+PASS: root validates prepared owner bundle
+PASS: composite restore retains root owners
+PASS: actor remains registered after restore
+PASS: restored movement and ground state match checkpoint
+HEX_ROOT_CHECKPOINT_INTEGRATION passed=10 failed=0
+HEX_ROOT_CHECKPOINT_INTEGRATION_PASS

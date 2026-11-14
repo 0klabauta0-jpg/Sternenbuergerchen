@@ -1,0 +1,14 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123647Z-12beb4e7",
+    "--script",
+    "res://scripts/tests/native_navigation_main_verifier.gd",
+    "--",
+    "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\targeted_a\\result.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 3.974660000007134
+}

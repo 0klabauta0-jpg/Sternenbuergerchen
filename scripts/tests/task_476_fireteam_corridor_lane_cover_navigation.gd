@@ -23,6 +23,10 @@ class SimulationStub:
 	extends RefCounted
 	var commands: Array = []
 
+	func is_hex_ground_runtime_active() -> bool:
+		# This fixture tests legacy formation metadata, not HexGround occupancy.
+		return false
+
 	func enqueue_command(command_dict: Dictionary) -> void:
 		commands.append(command_dict.duplicate(true))
 
@@ -286,7 +290,9 @@ func _cleanup_units(units: Array) -> void:
 func _read_text(path: String) -> String:
 	if not FileAccess.file_exists(path):
 		return ""
-	return FileAccess.get_file_as_string(path)
+	# These guards match ASCII contract markers only. Historical documents contain
+	# mixed encodings; do not decode unrelated bytes as UTF-8 or rewrite history.
+	return FileAccess.get_file_as_bytes(path).get_string_from_ascii()
 
 
 func _assert(condition: bool, message: String) -> void:

@@ -1,0 +1,11 @@
+Requirement already satisfied: scons==4.11.1 in c:\users\bjoer\.codex\cache\native-navigation\venv\lib\site-packages (4.11.1)
+
+[notice] A new release of pip is available: 25.3 -> 26.3
+[notice] To update, run: C:\Users\bjoer\.codex\cache\native-navigation\venv\Scripts\python.exe -m pip install --upgrade pip
+scons: Reading SConscript files ...
+Building for architecture x86_64 on platform windows
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: `C:\Users\bjoer\.codex\cache\native-navigation\godot-cpp\bin\libgodot-cpp.windows.template_release.x86_64.lib' is up to date.
+scons: `bin\native_navigation.windows.template_release.x86_64.dll' is up to date.
+scons: done building targets.

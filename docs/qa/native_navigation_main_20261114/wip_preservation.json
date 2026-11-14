@@ -1,0 +1,24 @@
+{
+  "preserved": true,
+  "checks": {
+    "head_unchanged": true,
+    "branch_unchanged": true,
+    "tracked_bytes_unchanged": true,
+    "untracked_inventory_and_stat_unchanged": true,
+    "status_unchanged": true,
+    "index_unchanged": true
+  },
+  "branch": "task/playtest-rework-plan-20261114",
+  "head": "9e2e972a1010d10fa5cdc0c08bd588bea5128173",
+  "tracked_sha256": {
+    "docs/tasks/PLAYTEST_2026_11_10_campaign_world_inventory.md": "3b81b714254af50c792550b1ab8e73e1a99ea929dcdb5b32841e741b6cde98bd",
+    "scripts/meta/explorable_homebase.gd": "48b82f9d31821a54fed29f86b6db61133db7fccae69efd0f4b86a790b7f1dbad",
+    "scripts/terrain/frontier_art_geology.gd": "dff4be73b02617482f4c1c38f2166c7fd50e95b6f0333aa0bbc9d46f8b8e320a",
+    "scripts/terrain/terrain_map_3d_view.gd": "97e9d9ed73f1ca81fa3334fe1fcba4d9ac8fd420911a0e643c79443f6202c4c9",
+    "scripts/tests/mission_test_setup.gd": "6d53d4fe5ca4949728a33fca50301c66774e66ff4d48bc2ef327bb9c41c0139a",
+    "shaders/terrain/frontier_ground.gdshader": "dd09387c71ca867e3c79b8a7286c66089682e438cb8627c24ef9627c45f5205c"
+  },
+  "untracked_count": 102105,
+  "untracked_inventory_stat_sha256": "761f3f4dfeac0d14836d2760fd8df87f027e8509d525989dea4efc8264ee6f80",
+  "guard_scope": "Tracked WIP copied and content-hashed; all untracked paths, size and nanosecond mtime compared. No checkout/stash/clean in original."
+}

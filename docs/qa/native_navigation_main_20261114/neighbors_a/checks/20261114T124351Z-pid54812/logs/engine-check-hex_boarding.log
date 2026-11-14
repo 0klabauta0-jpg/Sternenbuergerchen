@@ -1,0 +1,69 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: real Root exposes actual hex movement and arrival contract
+PASS: actual queued commands commit hex segments instead of free movement
+PASS: unadmitted actor never falls back to legacy movement
+PASS: fractional actor projection changes neither gameplay state nor combat RNG
+PASS: unadmitted presentation actor cannot capture a hex objective
+PASS: rejected nonfinite target cannot replace the accepted actor command or token
+PASS: objective capture reads committed hex at handoff instead of render position
+PASS: logical fields remain exclusive throughout a faster follower and slower leader
+PASS: actor positions always follow the owner despite enabled legacy avoidance and spacing
+PASS: handoff to destination is not premature arrival before edge completion
+PASS: both real commands finish at their requested ground goals
+PASS: finished actors stand at authoritative goal centers
+PASS: waiting behind another unit does not rebuild unchanged routes
+PASS: warm reservation attempts reuse terrain timing profiles instead of rereading whole routes
+PASS: actual movement keeps bounded navigation and reservation work
+PASS: arrival reads reject stale command identity and missing units
+PASS: stationary facing commit refreshes actor projection after movement ends
+PASS: zero navigation admission keeps the goal pending without free movement
+PASS: real Hold cancels the accepted goal and never resumes its old continuation
+PASS: real damage producer stops motion and future promises while wounded unit keeps its hex
+PASS: another real goal routes around a downed ground occupant in available space
+PASS: unflagged legacy context retains its old continuous move path
+PASS: real projected movement starts with canonical facing in direction0
+PASS: real direction0 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction1
+PASS: real direction1 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction2
+PASS: real direction2 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction3
+PASS: real direction3 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction4
+PASS: real direction4 reaches its actual ground center
+PASS: real projected movement starts with canonical facing in direction5
+PASS: real direction5 reaches its actual ground center
+PASS: all six projected directions use equal physical step durations
+PASS: actual ramp goal completes bidirectionally: (1, 0)
+PASS: actual ramp goal completes bidirectionally: (-1, 0)
+PASS: ramp cliff cannot become a render-position shortcut or repeated blind route search
+PASS: hidden location executes its own real goal while another location holds the same local ID
+PASS: actual command and actor projections stay scoped to their owning registry
+PASS: stationary occupied goal waits without starting impossible navigation
+PASS: occupied goal preserves accepted token and distinct actor cells
+PASS: occupied accepted intent survives real movement export and restore
+PASS: restored occupied intent retains token and wait reason
+PASS: same accepted intent replans and actually arrives after blocker release
+PASS: blocked follower has a cached route before its first accepted promise
+PASS: Hold before first ground commit releases navigation and timing caches
+PASS: actual boarding group receives distinct legal physical approach goals
+PASS: actual arrivals retain Ground until existing transport owner confirms boarding
+PASS: existing transport confirmation releases both physical claims exactly once
+PASS: one free ground field keeps the full two-person crew aboard before any transport change
+PASS: rejected existing transport unboard cancels the prepared Ground group
+PASS: actual successful unboard publishes the whole crew on distinct reserved fields while pilot stays aboard
+PASS: occupied physical exit keeps pilot aboard instead of stacking on first person
+PASS: cleared actual exit admits the same pilot on a distinct physical field
+PASS: actual remote recruitment binding releases only its own old base Ground claim
+PASS: actual team with pilot member unboards coherently whole=false
+PASS: actual team with pilot member unboards coherently whole=true
+PASS: station recruit has no physical base presence
+PASS: station personnel blocks incomplete home checkpoint
+PASS: unverified arrival leaves person remote
+PASS: stale shuttle proof releases reserved ground without changing person
+PASS: verified arrival commits shuttle and base ground together
+PASS: station recruit does not use an automatically invented field bed
+PASS: station recruit cannot manually use an unbuilt bed
+RESULTS: 65 passed, 0 failed
+HEX_BASE_BOARDING_PASS

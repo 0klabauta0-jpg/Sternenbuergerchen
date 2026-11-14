@@ -1,8 +1,9 @@
 # Native runtime navigation
 
 Windows x64 GDExtension for Godot 4.6.2, enabled by default in SimulationRoot.
-The extension implements stable A*, directed local Dijkstra cost maps and the complete
-existing HPA portal search/assembly. It is not a new globally optimal HPA algorithm.
+The extension implements stable A*, directed local Dijkstra cost maps, the existing
+HPA portal search/assembly and Main's incremental RegionalHexSearch. It is not a
+new globally optimal HPA algorithm.
 
 ## Build
 
@@ -33,12 +34,16 @@ and differential runs before extending the manifest.
 - `find_path_with_options(from, to, registry, options = {}) -> Array`
 - `find_path_with_status(from, to, registry, graph, options = {}) -> Dictionary`
 - `prepare(registry, options = {}, graph = null) -> bool`
+- `create_regional_search(from, to, registry, options = {})` with a budgeted `advance()`
 - `clear_result_cache()`, `clear_prepared_data()` and `get_debug_snapshot()`
 
-SimulationRoot selects this adapter for HPA/direct A* and reachability fallbacks.
+SimulationRoot selects this adapter for normal HexGround incremental searches,
+legacy HPA/direct A* and reachability fallbacks.
 The mission loader calls `prewarm_navigation(registry)` after initial scenario/door
 overrides and before gameplay starts. Thus the first command reuses the prepared
-terrain and graph. The existing native AStar2D homebase graph is kept separately.
+terrain. Only the legacy HPA path prebuilds an HPA graph. Actual homebase HexGround
+movement uses the same adapter; its AStar2D clearance/target projection remains.
+Base loading and successfully finalized checkpoint restores also prewarm terrain.
 See `docs/dev/native_navigation_runtime_contract.md` for ownership and lifecycle.
 
 `SimulationRoot.native_navigation_enabled = false` retains the GDScript reference
@@ -49,14 +54,23 @@ for existing differential benchmarks.
 The adapter retains terrain data by registry identity/revision and HPA geometry by
 registry/graph identity/revision. Terrain preparation uses the **unchanged**
 TerrainPathfinder traversal rules and stores directed base costs before diagonal
-multiplication, cover values, walkability and LOS/height data. An option change no
+multiplication, cover values, walkability and LOS/height data. Directed base costs
+use Main's canonical ramp stand heights (including half levels). An option change no
 longer rebuilds either snapshot.
 
 Each real search calls the kernel's `begin_query(options)`. Native A*, Dijkstra and
 HPA then share lazily evaluated directed costs, including cover, exposure/LOS,
 corridor, lane and clearance. Generation stamps discard previous query costs
 without a map-wide reset. Arithmetic order and Godot Vector2 precision match the
-GDScript reference. No per-neighbor callbacks into GDScript are used.
+GDScript reference. `blocked_grids` is respected by membership, including false
+values. No per-neighbor callbacks into GDScript are used.
+
+Regional jobs retain their own sparse frontier, predecessor/cost maps and query
+cost caches, sharing one kernel terrain snapshot by reference. An interleaved
+job or ordinary A*/HPA call cannot overwrite another job's costs. Snapshot
+generations invalidate obsolete jobs; owners restart them under their existing
+revision rules. The existing expansion limits, stable ordering, nearest-reachable
+result, reservations and authoritative arrival remain unchanged.
 
 One terrain snapshot and one graph snapshot are retained; arrays grow with the map,
 not with the number of previous queries. HPA results use a bounded 64-entry FIFO
@@ -84,6 +98,8 @@ python scripts/tests/run_native_navigation_prototype.py
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_verifier.gd
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_load_verifier.gd
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_benchmark.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_main_verifier.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_main_benchmark.gd
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_verifier.gd --without-native --script-arg=--expect-native=false
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_prototype_benchmark.gd
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_dynamic_costs_benchmark.gd
@@ -103,8 +119,9 @@ one phase includes a cold first request, another records explicit preparation an
 also includes it in the reported series total. Each query must use native code,
 miss the result cache, open a new cost context and retain one terrain/HPA snapshot.
 These are navigation subsystem measurements, not frame-rate or actor-playthrough
-proof. Current owner/loader integration results are in
-`docs/qa/native_navigation_runtime_20261114/README.md`; earlier lazy-cost measurements
+proof. Current Main HexGround integration results are in
+`docs/qa/native_navigation_main_20261114/README.md`; the earlier owner/loader results
+are in `docs/qa/native_navigation_runtime_20261114/README.md`. Earlier lazy-cost measurements
 remain in `docs/qa/native_navigation_dynamic_costs_20261114/README.md`.
 The earlier `native_navigation_20261114` evidence belongs to
 commit `7a7cf80e3`; its source hashes intentionally differ after this optimization.

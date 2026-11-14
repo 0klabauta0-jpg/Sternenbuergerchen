@@ -1,0 +1,6 @@
+{
+  "before_sha256": "6d580907d98d54b89c2c76a3b88555ab17527a3f8c218f1b416ff092fd75c31b",
+  "after_sha256": "75323f8bfe173a9db321a67944f3d61eee2e9408614ed10084de0af45394a809",
+  "historical_body_preserved": true,
+  "change": "Completion status prepended after execution; old body preserved byte-for-byte"
+}

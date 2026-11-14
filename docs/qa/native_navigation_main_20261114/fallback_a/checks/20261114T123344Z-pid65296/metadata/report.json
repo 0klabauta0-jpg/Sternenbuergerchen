@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.059,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T12:33:44.441809+00:00",
+  "finished_at": "2026-11-14T12:33:53.203549+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-main_integration.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec\\scripts\\tests\\native_navigation_main_verifier.gd",
+        "--",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\main.json",
+        "--expect-native=false"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 3.334,
+      "name": "main_integration",
+      "marker_found": true,
+      "errors": [
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid access to property or key 'arrived' on a base object of type 'Dictionary'.",
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid access to property or key 'arrived' on a base object of type 'Dictionary'.",
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid type in function 'admit_hex_ground_units' in base 'Node (SimulationRoot)'. The array of argument 1 (Array) does not have the same element type as the expected typed array argument.",
+        "SCRIPT ERROR: Invalid access to property or key 'arrived' on a base object of type 'Dictionary'."
+      ],
+      "error_count": 9,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\check-main_integration.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-main_integration.log",
+      "passed": false,
+      "reasons": [
+        "9 error(s)"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-runtime_fallback.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec\\scripts\\tests\\native_navigation_runtime_verifier.gd",
+        "--",
+        "--expect-native=false",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\runtime_fallback.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.304,
+      "name": "runtime_fallback",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\check-runtime_fallback.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-runtime_fallback.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-load_fallback.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T123338Z-9fc21dec\\scripts\\tests\\native_navigation_load_verifier.gd",
+        "--",
+        "--expect-native=false",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\load_fallback.json"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 3.045,
+      "name": "load_fallback",
+      "marker_found": true,
+      "errors": [
+        "ERROR: Load prewarm uses final revision after initial scenario overrides",
+        "ERROR: HPA graph exists before the first navigation query",
+        "ERROR: Mission loading builds HPA graph exactly once",
+        "ERROR: First loaded-map query has exact GDScript path and status",
+        "ERROR: First loaded-map query has exact score fields"
+      ],
+      "error_count": 5,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\check-load_fallback.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_a\\checks\\20261114T123344Z-pid65296\\logs\\engine-check-load_fallback.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "5 error(s)"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 1,
+    "failed": 2
+  }
+}

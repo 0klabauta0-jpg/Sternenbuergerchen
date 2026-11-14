@@ -80,13 +80,8 @@ bool NativeNavigationKernel::load_terrain(const Dictionary &snapshot) {
     return true;
 }
 
-bool NativeNavigationKernel::begin_query(const Dictionary &options) {
-    // Rejecting a query keeps its immutable terrain, but never exposes old costs.
-    query_ready_ = false;
-    target_cost_compute_count_ = 0;
-    edge_cost_compute_count_ = 0;
-    if (!ready_ || !dynamic_costs_ || options.get("diagnostics", Variant()).get_type() == Variant::DICTIONARY) return false;
-    QueryOptions next;
+bool NativeNavigationKernel::parse_query_options(const Dictionary &options, QueryOptions &next) const {
+    if (options.get("diagnostics", Variant()).get_type() == Variant::DICTIONARY) return false;
     auto number = [&](const char *name, double fallback, double &value) {
         const Variant input = options.get(name, fallback);
         if (input.get_type() != Variant::INT && input.get_type() != Variant::FLOAT) return false;
@@ -145,6 +140,27 @@ bool NativeNavigationKernel::begin_query(const Dictionary &options) {
         if (!bounded_grid(grid) || !std::isfinite(score)) return false;
         next.exposures[grid_key(grid)] = std::clamp(score, 0.0, 1.0);
     }
+    const Variant blocked_input = options.get("blocked_grids", Dictionary());
+    if (blocked_input.get_type() != Variant::DICTIONARY) return false;
+    const Dictionary blocked = blocked_input;
+    const Array blocked_keys = blocked.keys();
+    for (int64_t i = 0; i < blocked_keys.size(); ++i) {
+        if (blocked_keys[i].get_type() != Variant::VECTOR2I) return false;
+        const Vector2i grid = blocked_keys[i];
+        if (!bounded_grid(grid)) return false;
+        // Presence blocks, even when the dictionary value is false.
+        next.blocked.insert(grid_key(grid));
+    }
+    return true;
+}
+
+bool NativeNavigationKernel::begin_query(const Dictionary &options) {
+    // Rejecting a query keeps its immutable terrain, but never exposes old costs.
+    query_ready_ = false;
+    target_cost_compute_count_ = 0;
+    edge_cost_compute_count_ = 0;
+    QueryOptions next;
+    if (!ready_ || !dynamic_costs_ || !parse_query_options(options, next)) return false;
     query_ = std::move(next);
     // The ordinary path is O(options), with no map-wide reset or cost rebuild.
     if (++query_generation_ == 0) {
@@ -167,48 +183,57 @@ Dictionary NativeNavigationKernel::get_query_debug() const {
     return debug;
 }
 
+double NativeNavigationKernel::cost_with_components(int from_id, int direction, const QueryOptions &query, const TargetCosts &components) const {
+    const int target_id = neighbors_[from_id][direction];
+    double cost = edge_costs_[from_id][direction];
+    if (query.cover_aware) cost = std::max(cost + query.exposure_weight * components.exposure - query.cover_weight * cover_[target_id], 0.05);
+    cost += components.corridor;
+    cost += components.lane;
+    cost += components.clearance;
+    if (!hex_ && direction >= 4) cost *= DIAGONAL_COST;
+    return cost;
+}
+
 double NativeNavigationKernel::cost_for_edge(int from_id, int direction) {
     const double base = edge_costs_[from_id][direction];
     if (!dynamic_costs_) return base;
     if (!query_ready_ || !std::isfinite(base)) return INF_COST;
     if (edge_generations_[from_id][direction] == query_generation_) return query_edge_costs_[from_id][direction];
     const int target_id = neighbors_[from_id][direction];
-    if (target_id < 0) return INF_COST;
-    const TargetCosts &components = target_costs(target_id);
-    double cost = base;
-    if (query_.cover_aware) cost = std::max(cost + query_.exposure_weight * components.exposure - query_.cover_weight * cover_[target_id], 0.05);
-    cost += components.corridor;
-    cost += components.lane;
-    cost += components.clearance;
-    if (!hex_ && direction >= 4) cost *= DIAGONAL_COST;
+    if (target_id < 0 || query_.blocked.count(grid_key(grids_[target_id]))) return INF_COST;
+    const double cost = cost_with_components(from_id, direction, query_, target_costs(target_id));
     query_edge_costs_[from_id][direction] = cost;
     edge_generations_[from_id][direction] = query_generation_;
     ++edge_cost_compute_count_;
     return cost;
 }
 
+NativeNavigationKernel::TargetCosts NativeNavigationKernel::compute_target_costs(int target_id, const QueryOptions &query) const {
+    TargetCosts costs;
+    costs.exposure = exposure_score(target_id, query);
+    if ((query.corridor_enabled && query.corridor_weight > 0.0) || (query.lane_enabled && query.lane_weight > 0.0)) {
+        const double distance = signed_line_distance(grids_[target_id], query);
+        if (query.corridor_enabled && query.corridor_weight > 0.0 && std::abs(distance) > query.corridor_half_width) {
+            costs.corridor = (std::abs(distance) - query.corridor_half_width) * query.corridor_weight;
+        }
+        if (query.lane_enabled && query.lane_weight > 0.0) costs.lane = std::abs(distance - query.lane_offset) * query.lane_weight * 0.35;
+    }
+    costs.clearance = clearance_penalty(target_id, query);
+    return costs;
+}
+
 const NativeNavigationKernel::TargetCosts &NativeNavigationKernel::target_costs(int target_id) {
     TargetCosts &costs = target_costs_[target_id];
     if (costs.generation == query_generation_) return costs;
-    costs.exposure = exposure_score(target_id);
-    costs.corridor = 0.0;
-    costs.lane = 0.0;
-    if ((query_.corridor_enabled && query_.corridor_weight > 0.0) || (query_.lane_enabled && query_.lane_weight > 0.0)) {
-        const double distance = signed_line_distance(grids_[target_id]);
-        if (query_.corridor_enabled && query_.corridor_weight > 0.0 && std::abs(distance) > query_.corridor_half_width) {
-            costs.corridor = (std::abs(distance) - query_.corridor_half_width) * query_.corridor_weight;
-        }
-        if (query_.lane_enabled && query_.lane_weight > 0.0) costs.lane = std::abs(distance - query_.lane_offset) * query_.lane_weight * 0.35;
-    }
-    costs.clearance = clearance_penalty(target_id);
+    costs = compute_target_costs(target_id, query_);
     costs.generation = query_generation_;
     ++target_cost_compute_count_;
     return costs;
 }
 
-double NativeNavigationKernel::signed_line_distance(const Vector2i &grid) const {
-    const Vector2i from = query_.has_corridor_from ? query_.corridor_from : grid;
-    const Vector2i to = query_.has_corridor_to ? query_.corridor_to : grid;
+double NativeNavigationKernel::signed_line_distance(const Vector2i &grid, const QueryOptions &query) const {
+    const Vector2i from = query.has_corridor_from ? query.corridor_from : grid;
+    const Vector2i to = query.has_corridor_to ? query.corridor_to : grid;
     const Vector2 from_value = hex_ ? axial_to_plane(from) : Vector2(from);
     const Vector2 to_value = hex_ ? axial_to_plane(to) : Vector2(to);
     const Vector2 point_value = hex_ ? axial_to_plane(grid) : Vector2(grid);
@@ -219,10 +244,10 @@ double NativeNavigationKernel::signed_line_distance(const Vector2i &grid) const 
     return double(line.cross(delta)) / length;
 }
 
-double NativeNavigationKernel::clearance_penalty(int target_id) const {
-    if (query_.clearance_weight <= 0.0) return 0.0;
+double NativeNavigationKernel::clearance_penalty(int target_id, const QueryOptions &query) const {
+    if (query.clearance_weight <= 0.0) return 0.0;
     const Vector2i grid = grids_[target_id];
-    const int radius = query_.clearance_radius;
+    const int radius = query.clearance_radius;
     double score = 0.0;
     int samples = 0;
     for (int dx = -radius; dx <= radius; ++dx) {
@@ -236,19 +261,19 @@ double NativeNavigationKernel::clearance_penalty(int target_id) const {
         }
     }
     if (samples <= 0) return 0.0;
-    return std::clamp(score / double(samples), 0.0, 1.0) * query_.clearance_weight * 0.4;
+    return std::clamp(score / double(samples), 0.0, 1.0) * query.clearance_weight * 0.4;
 }
 
-double NativeNavigationKernel::exposure_score(int target_id) const {
-    if (!query_.cover_aware) return 0.0;
+double NativeNavigationKernel::exposure_score(int target_id, const QueryOptions &query) const {
+    if (!query.cover_aware) return 0.0;
     const Vector2i grid = grids_[target_id];
-    const auto override = query_.exposures.find(grid_key(grid));
-    if (override != query_.exposures.end()) return override->second;
+    const auto override = query.exposures.find(grid_key(grid));
+    if (override != query.exposures.end()) return override->second;
     double exposure = 0.0;
-    for (const Vector2i &hazard : query_.hazards) {
+    for (const Vector2i &hazard : query.hazards) {
         const double distance = hex_ ? double(hex_distance(grid, hazard)) : double(std::max(std::abs(int64_t(grid.x) - hazard.x), std::abs(int64_t(grid.y) - hazard.y)));
-        if (distance > query_.exposure_max_distance || !line_of_sight(hazard, grid)) continue;
-        const double contribution = 1.0 - std::clamp(distance / query_.exposure_max_distance, 0.0, 1.0);
+        if (distance > query.exposure_max_distance || !line_of_sight(hazard, grid)) continue;
+        const double contribution = 1.0 - std::clamp(distance / query.exposure_max_distance, 0.0, 1.0);
         exposure = std::max(exposure, contribution);
     }
     return std::clamp(exposure, 0.0, 1.0);

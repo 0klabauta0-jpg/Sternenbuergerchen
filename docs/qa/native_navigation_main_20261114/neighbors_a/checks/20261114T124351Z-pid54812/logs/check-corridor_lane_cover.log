@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+=== TASK_476 Fireteam Corridor Lane Cover Navigation ===
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Move execution starts for navigation-context export
+[PASS] Move issues four movement commands
+[PASS] Movement state exposes per-unit navigation diagnostics
+[PASS] Formation lanes keep left and right offsets instead of one centerline
+[PASS] SimulationRoot passes corridor option to navigation
+[PASS] SimulationRoot normalizes corridor start to grid
+[PASS] SimulationRoot converts corridor width to grid distance
+[PASS] SimulationRoot passes lane option to navigation
+[PASS] SimulationRoot converts lane offset to grid distance
+[PASS] SimulationRoot passes blocker-clearance weight
+[PASS] Pathfinder favors the assigned buddy lane
+[PASS] Pathfinder rewards cover tiles separately from lane score
+[PASS] Pathfinder penalizes blocker-adjacent steps
+[PASS] TASK_476 task file exists
+[PASS] Implementation status documents TASK_476
+[PASS] Roadmap lists TASK_476
+[PASS] Behavior contract documents TASK_476
+[PASS] Movement controller exports lane navigation metadata
+[PASS] SimulationRoot normalizes corridor/lane navigation options
+[PASS] Pathfinder scores blocker-clearance penalty
+=== RESULTS: 36 passed, 0 failed ===
+ALL TESTS PASSED

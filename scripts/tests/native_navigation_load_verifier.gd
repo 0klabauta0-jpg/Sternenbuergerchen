@@ -123,35 +123,40 @@ func _run() -> void:
 	_check(setup.rendering_suppressed, "Rendering isolated without replacing terrain load")
 	_check(setup.override_applied and setup.gate_revision_after > setup.gate_revision_before, "Late scenario stage publishes a real terrain revision")
 	_check(setup.final_loading_revision == registry.get_revision(), "Final load stage observes the current terrain revision")
-	_check(int(simulation.get("_hpa_navigation_registry_revision")) == registry.get_revision(), "Load prewarm uses final revision after initial scenario overrides")
+	_check(simulation.is_hex_ground_runtime_active(), "Real GM01 loader activates the productive HexGround owner")
 	var prewarm: Dictionary = prepared.get("prewarm", {})
 	_check(bool(prewarm.get("ready", false)), "Load hook records a ready navigation backend")
 	_check(int(prewarm.get("registry_revision", -1)) == registry.get_revision(), "Public prewarm report records the final terrain revision")
 	_check(bool(prewarm.get("native_prepared", false)) == expect_native, "Public prewarm report identifies real native availability")
-	_check(simulation.get("_hpa_navigation_graph") != null, "HPA graph exists before the first navigation query")
-	_check(int(simulation.get("_hpa_navigation_build_count")) == 1, "Mission loading builds HPA graph exactly once")
+	_check(prewarm.get("search_mode") == "regional_hex", "Productive mission prepares the incremental navigation mode")
+	_check(int(simulation.get("_hpa_navigation_build_count")) == 0, "Productive mission avoids an unused HPA graph")
 	if expect_native:
 		_check(int(prepared.get("snapshot_build_count", 0)) == 1, "Mission loading prepares exactly one native terrain snapshot")
-		_check(int(prepared.get("graph_build_count", 0)) == 1, "Mission loading prepares exactly one native HPA snapshot")
+		_check(int(prepared.get("graph_build_count", -1)) == 0, "Incremental movement needs no native HPA snapshot")
 	else:
 		_check(int(prepared.get("snapshot_build_count", -1)) == 0, "DLL-free loading does not claim a native snapshot")
 	var pair: Array = FIX.query_pairs(registry, 1)[0]
 	var options := {"cover_aware_enabled": true, "cover_weight": 0.4,
 		"exposure_weight": 0.8, "hazard_grids": [setup.override_grid]}
-	var graph = simulation.get("_hpa_navigation_graph")
-	var expected: Dictionary = HPA.new().find_path_with_status(pair[0], pair[1], registry, graph, options)
+	var oracle = PATH.new()
+	var reference = PATH.RegionalHexSearch.new(pair[0], pair[1], registry.get_revision(), options, registry)
+	while not reference.finished:
+		reference.advance(oracle, registry, 24)
+	var expected: Dictionary = {"path": reference.path, "status": "direct_a_star" if reference.path.back() == pair[1] else "regional_nearest_reachable"}
 	var query_started: int = Time.get_ticks_usec()
-	var actual: Dictionary = simulation.call("_find_navigation_grid_path", pair[0], pair[1], registry, options)
+	var search = simulation.create_regional_navigation_search(pair[0], pair[1], registry, options)
+	while not search.finished:
+		search.advance(oracle, registry, 24)
+	var actual: Dictionary = {"path": search.path, "status": "direct_a_star" if search.path.back() == pair[1] else "regional_nearest_reachable"}
 	var query_usec: int = Time.get_ticks_usec() - query_started
 	var after_query: Dictionary = simulation.call("get_navigation_backend_debug_snapshot")
 	_check(not Array(actual.get("path", [])).is_empty(), "First loaded-map query returns a nonempty route")
 	_check(actual.get("path", []) == expected.get("path", []) and actual.get("status", "") == expected.get("status", ""), "First loaded-map query has exact GDScript path and status")
-	var oracle = PATH.new()
 	_check(oracle.score_path(actual.get("path", []), registry, options) == oracle.score_path(expected.get("path", []), registry, options), "First loaded-map query has exact score fields")
-	_check(int(simulation.get("_hpa_navigation_build_count")) == 1, "First query does not rebuild the load-prepared HPA graph")
+	_check(int(simulation.get("_hpa_navigation_build_count")) == 0, "First incremental query does not build an unused HPA graph")
 	_check(int(after_query.get("snapshot_build_count", -1)) == int(prepared.get("snapshot_build_count", -2)), "First query does not rebuild the load-prepared native terrain")
 	_check(int(after_query.get("graph_build_count", -1)) == int(prepared.get("graph_build_count", -2)), "First query does not rebuild the load-prepared native HPA snapshot")
-	_check(String(after_query.get("last_backend", "")) == ("native" if expect_native else "gdscript_fallback"), "First normal query uses the expected backend")
+	_check(String(after_query.get("last_backend", "")) == ("native" if expect_native else "gdscript"), "First normal query uses the expected backend")
 	# Re-entering an already initialized loader must not prepare anything again.
 	setup.call("_finish_ready_after_scenario_loaded", leader, units, leaders, simulation)
 	var repeated: Dictionary = simulation.call("get_navigation_backend_debug_snapshot")

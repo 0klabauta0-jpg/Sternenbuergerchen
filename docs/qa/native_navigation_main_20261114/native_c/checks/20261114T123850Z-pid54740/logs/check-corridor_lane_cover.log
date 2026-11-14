@@ -1,0 +1,84 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+=== TASK_476 Fireteam Corridor Lane Cover Navigation ===
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_hex_ground_runtime_active' in base 'RefCounted (SimulationStub)'.
+   at: FireteamMovementController._resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+   GDScript backtrace (most recent call first):
+       [0] _resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+       [1] _issue_stage (res://scripts/tactical/fireteam_movement_controller.gd:910)
+       [2] start_execution (res://scripts/tactical/fireteam_movement_controller.gd:262)
+       [3] _test_fireteam_commands_export_navigation_context (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:108)
+       [4] _run_tests (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:90)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_hex_ground_runtime_active' in base 'RefCounted (SimulationStub)'.
+   at: FireteamMovementController._resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+   GDScript backtrace (most recent call first):
+       [0] _resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+       [1] _issue_stage (res://scripts/tactical/fireteam_movement_controller.gd:910)
+       [2] start_execution (res://scripts/tactical/fireteam_movement_controller.gd:262)
+       [3] _test_fireteam_commands_export_navigation_context (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:108)
+       [4] _run_tests (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:90)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_hex_ground_runtime_active' in base 'RefCounted (SimulationStub)'.
+   at: FireteamMovementController._resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+   GDScript backtrace (most recent call first):
+       [0] _resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+       [1] _issue_stage (res://scripts/tactical/fireteam_movement_controller.gd:910)
+       [2] start_execution (res://scripts/tactical/fireteam_movement_controller.gd:262)
+       [3] _test_fireteam_commands_export_navigation_context (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:108)
+       [4] _run_tests (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:90)
+SCRIPT ERROR: Invalid call. Nonexistent function 'is_hex_ground_runtime_active' in base 'RefCounted (SimulationStub)'.
+   at: FireteamMovementController._resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+   GDScript backtrace (most recent call first):
+       [0] _resolve_occupied_hex_formation_targets (res://scripts/tactical/fireteam_movement_controller.gd:1054)
+       [1] _issue_stage (res://scripts/tactical/fireteam_movement_controller.gd:910)
+       [2] start_execution (res://scripts/tactical/fireteam_movement_controller.gd:262)
+       [3] _test_fireteam_commands_export_navigation_context (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:108)
+       [4] _run_tests (res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd:90)
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Moving command exports navigation corridor
+[PASS] Moving command exports navigation lane
+[PASS] Moving command enables cover-aware navigation
+[PASS] Moving command exports blocker-clearance weight
+[PASS] Move execution starts for navigation-context export
+[PASS] Move issues four movement commands
+[PASS] Movement state exposes per-unit navigation diagnostics
+[PASS] Formation lanes keep left and right offsets instead of one centerline
+[PASS] SimulationRoot passes corridor option to navigation
+[PASS] SimulationRoot normalizes corridor start to grid
+[PASS] SimulationRoot converts corridor width to grid distance
+[PASS] SimulationRoot passes lane option to navigation
+[PASS] SimulationRoot converts lane offset to grid distance
+[PASS] SimulationRoot passes blocker-clearance weight
+[PASS] Pathfinder favors the assigned buddy lane
+[PASS] Pathfinder rewards cover tiles separately from lane score
+[PASS] Pathfinder penalizes blocker-adjacent steps
+Unicode parsing error: Byte 63 is not a correct continuation byte after e4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (97)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fc)
+Unicode parsing error: Byte 65 is not a correct continuation byte after df
+Unicode parsing error: Byte 63 is not a correct continuation byte after e4
+Unicode parsing error: Byte 63 is not a correct continuation byte after e4
+Unicode parsing error: Byte 65 is not a correct continuation byte after df
+Unicode parsing error: Byte 6c is not a correct continuation byte after df
+Unicode parsing error: Byte 65 is not a correct continuation byte after df
+Unicode parsing error: Byte 31 is not a correct continuation byte after d7
+Unicode parsing error: Byte 37 is not a correct continuation byte after d7
+[PASS] TASK_476 task file exists
+[PASS] Implementation status documents TASK_476
+[PASS] Roadmap lists TASK_476
+[PASS] Behavior contract documents TASK_476
+[PASS] Movement controller exports lane navigation metadata
+[PASS] SimulationRoot normalizes corridor/lane navigation options
+[PASS] Pathfinder scores blocker-clearance penalty
+=== RESULTS: 36 passed, 0 failed ===
+ALL TESTS PASSED

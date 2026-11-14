@@ -1,0 +1,12 @@
+{
+  "exit_code": 0,
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_full_old_20794113",
+    "--editor",
+    "--import"
+  ],
+  "dll": "fa3a2a7a5"
+}

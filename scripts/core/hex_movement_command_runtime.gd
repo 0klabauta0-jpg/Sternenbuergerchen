@@ -236,7 +236,7 @@ func tick(delta:float)->void:
 	var owner=_owner()
 	var now:int=owner.tick_counter
 	var revision:int=_registry.call("get_revision")
-	_audit={"tick":now,"navigation_slices":0,"navigation_jobs_created":0,"navigation_expansions":0,"reservation_requests":0,"accepted_steps":0,"plan_calls":0,"timing_edge_reads":0,"backoff_routes_started":0,"backoff_examined_cells":0}
+	_audit={"tick":now,"navigation_slices":0,"native_navigation_slices":0,"gdscript_navigation_slices":0,"navigation_jobs_created":0,"navigation_expansions":0,"reservation_requests":0,"accepted_steps":0,"plan_calls":0,"timing_edge_reads":0,"backoff_routes_started":0,"backoff_examined_cells":0}
 	for id in _orders:
 		var order:Dictionary=_orders[id]
 		if order.status in ["arrived","canceled"]:continue
@@ -348,10 +348,13 @@ func tick(delta:float)->void:
 			nav_jobs+=1
 			_audit.navigation_slices=nav_jobs
 			if order.search==null:
-				order.search=PATHFINDER.RegionalHexSearch.new(state.grid,navigation_goal,revision,options,_registry)
+				order.search=owner.create_regional_navigation_search(state.grid,navigation_goal,_registry,options)
 				order.navigation_jobs+=1
 				_audit.navigation_jobs_created+=1
 			var allowance:int=mini(24,MAX_NAV_EXPANSIONS-expansions)
+			var backend:String=owner._note_regional_navigation_backend(order.search)
+			order.navigation_backend=backend
+			_audit[backend+"_navigation_slices"]+=1
 			expansions+=order.search.advance(_pathfinder,_registry,allowance)
 			_audit.navigation_expansions=expansions
 			order.last_nav_tick=now

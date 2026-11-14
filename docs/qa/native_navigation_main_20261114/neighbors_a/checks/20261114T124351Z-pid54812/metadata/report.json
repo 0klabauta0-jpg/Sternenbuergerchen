@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.053,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T12:43:51.386267+00:00",
+  "finished_at": "2026-11-14T12:43:55.967953+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-corridor_lane_cover.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f\\scripts\\tests\\task_476_fireteam_corridor_lane_cover_navigation.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.385,
+      "name": "corridor_lane_cover",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\check-corridor_lane_cover.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-corridor_lane_cover.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-hex_base.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f\\scripts\\tests\\hex_base_personnel_owner_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.564,
+      "name": "hex_base",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\check-hex_base.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-hex_base.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-hex_boarding.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124343Z-ccf61d1f\\scripts\\tests\\hex_base_boarding_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.566,
+      "name": "hex_boarding",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\check-hex_boarding.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\neighbors_a\\checks\\20261114T124351Z-pid54812\\logs\\engine-check-hex_boarding.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

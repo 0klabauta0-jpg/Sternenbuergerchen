@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "main_integration",
+      "script": "res://scripts/tests/native_navigation_main_verifier.gd",
+      "args": [
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\native_c\\main.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_MAIN",
+      "timeout": 240
+    },
+    {
+      "name": "runtime",
+      "script": "res://scripts/tests/native_navigation_runtime_verifier.gd",
+      "args": [
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\native_c\\runtime_native.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_RUNTIME",
+      "timeout": 240
+    },
+    {
+      "name": "mission_load",
+      "script": "res://scripts/tests/native_navigation_load_verifier.gd",
+      "args": [
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\native_c\\mission_load_native.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_LOAD",
+      "timeout": 240
+    },
+    {
+      "name": "native_parity",
+      "script": "res://scripts/tests/native_navigation_prototype_verifier.gd",
+      "args": [
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\native_c\\native_parity.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_PARITY",
+      "timeout": 240
+    },
+    {
+      "name": "door_revision",
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "args": [],
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
+      "timeout": 240
+    },
+    {
+      "name": "movement_fallback",
+      "script": "res://scripts/tests/review_20261102_p2_fallback_verifier.gd",
+      "args": [],
+      "success_marker": "=== RESULTS:",
+      "timeout": 240
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "args": [
+        "--evidence-output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\native_c\\hex_movement.json"
+      ],
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 240
+    },
+    {
+      "name": "corridor_lane_cover",
+      "script": "res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 240
+    },
+    {
+      "name": "command_lifecycle",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "args": [],
+      "success_marker": "TASK_501: ALL PASSED",
+      "timeout": 240
+    },
+    {
+      "name": "hex_authoritative",
+      "script": "res://scripts/tests/hex_movement_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_MOVEMENT_PASS",
+      "timeout": 240
+    },
+    {
+      "name": "hex_ship",
+      "script": "res://scripts/tests/hex_dynamic_ship_movement_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_DYNAMIC_SHIP_MOVEMENT_PASS",
+      "timeout": 240
+    },
+    {
+      "name": "hex_movement_save",
+      "script": "res://scripts/tests/hex_movement_save_state_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_MOVEMENT_SAVE_STATE",
+      "timeout": 240
+    },
+    {
+      "name": "hex_base",
+      "script": "res://scripts/tests/hex_base_personnel_owner_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_BASE_PERSONNEL_OWNER_PASS",
+      "timeout": 240
+    },
+    {
+      "name": "hex_boarding",
+      "script": "res://scripts/tests/hex_base_boarding_verifier.gd",
+      "args": [],
+      "success_marker": "HEX_BASE_BOARDING_PASS",
+      "timeout": 240
+    },
+    {
+      "name": "mission_restore",
+      "script": "res://scripts/tests/mission_ground_actor_transaction_verifier.gd",
+      "args": [],
+      "success_marker": "MISSION_GROUND_ACTOR_TRANSACTION",
+      "timeout": 240
+    }
+  ]
+}

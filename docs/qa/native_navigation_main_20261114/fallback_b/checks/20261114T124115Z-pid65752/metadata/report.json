@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.049,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T12:41:15.846417+00:00",
+  "finished_at": "2026-11-14T12:41:25.595122+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-main_integration.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d\\scripts\\tests\\native_navigation_main_verifier.gd",
+        "--",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\main.json",
+        "--expect-native=false"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.614,
+      "name": "main_integration",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\check-main_integration.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-main_integration.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-runtime_fallback.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d\\scripts\\tests\\native_navigation_runtime_verifier.gd",
+        "--",
+        "--expect-native=false",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\runtime_fallback.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.304,
+      "name": "runtime_fallback",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\check-runtime_fallback.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-runtime_fallback.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-load_fallback.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\tmp\\native_navigation\\20261114T124109Z-66496f5d\\scripts\\tests\\native_navigation_load_verifier.gd",
+        "--",
+        "--expect-native=false",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\load_fallback.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.768,
+      "name": "load_fallback",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\check-load_fallback.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-navigation-main-20261114\\docs\\qa\\native_navigation_main_20261114\\fallback_b\\checks\\20261114T124115Z-pid65752\\logs\\engine-check-load_fallback.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

@@ -1,5 +1,23 @@
 # IMPLEMENTATION_STATUS
 
+### C++-Navigation in aktuellem Main integriert — 14.11.2026
+
+Integrationsbasis Main `03cdccc51`; gezielte Uebernahme der drei Navigations-
+Commits und Anpassung an die neueren Main-Hexregeln. Produktive HexGround-/
+Regionalsuche nun inkrementell in C++, mit identischen Rampen-/Blockerkosten,
+Suchreihenfolge und 24/96-Expansionsbudgets. Mission-/Basisladeabschluss sowie
+abgeschlossene Checkpointfinalisierung bereiten die finale Terrainrevision vor.
+GDScript-Fallback bleibt erhalten. 18 nichtleere Gates, 245 native Slicevergleiche,
+32 exakte Benchmark-Commandpaare. GM01 CPU-Summe aller Ticks eines Commands:
+Median 167,431 -> 53,4115 ms; Such-Ticks 121,071 -> 7,3885 ms. Native Vorbereitung
+371–404 ms; inklusive Laden und acht Commands 1432–1469 -> 823–862 ms.
+Hauptcheckout-WIP/Branch/Index erhalten, sechs Dateien bytegleich und Inventar/
+Stat von 102105 untracked Dateien unveraendert. Keine neue EXE oder allgemeine
+FPS-/Kampagnen-/Multiplayerfreigabe. Zwei verworfene Editorimportabstuerze mit
+unbekannter Ursache und erfolgreicher frischer Endlauf dokumentiert. Vertrag:
+`docs/dev/native_navigation_runtime_contract.md`; aktuelle Evidenz und Grenzen:
+`docs/qa/native_navigation_main_20261114/README.md`.
+
 ### Öffentlicher Code und erweiterter Bildkatalog — 14.11.2026
 
 Auf ausdrücklichen Nutzerwunsch ist das Coderepository jetzt öffentlich. Der Referenzkatalog wurde auf 71 eindeutige Bilder erweitert: Rüstungen3, Menschen13, Landschaft/Gebäude5, Schiffe10, HUD/Menüs31, Ausrüstung/Icons9. GitHub-Galerien nach Rubriken und eigenes ZIP; Bilder und Herkunftsmanifeste geprüft. Keine Spieländerung oder neue EXE. Nachweise: docs/qa/public_reference_catalog_20261114/. Diese Freigabe ersetzt die bisherige private Code-Sichtbarkeit.

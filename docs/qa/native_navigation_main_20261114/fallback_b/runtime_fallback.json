@@ -1,0 +1,120 @@
+{
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"expected_native": false,
+	"failed": 0,
+	"failures": [],
+	"passed": 168,
+	"samples": [
+		{
+			"backend_after_first_move": {
+				"edge_cost_compute_count": 0,
+				"enabled": true,
+				"fallback_reason": "native_extension_unavailable",
+				"graph_build_count": 0,
+				"graph_prepare_usec": 0,
+				"graph_reused": false,
+				"last_backend": "gdscript_fallback",
+				"native_available": false,
+				"native_query_usec": 0,
+				"option_prepare_count": 0,
+				"options_prepare_usec": 0,
+				"prewarm": {
+					"backend": "gdscript",
+					"duration_usec": 1238,
+					"graph_prepare_usec": 1217,
+					"native_prepare_usec": 16,
+					"native_prepared": false,
+					"ready": true,
+					"reason": "native_extension_unavailable",
+					"registry_revision": 48,
+					"search_mode": "hpa",
+					"tile_count": 48
+				},
+				"result_cache_entry_count": 0,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 0,
+				"snapshot_prepare_usec": 2,
+				"snapshot_reused": false,
+				"target_cost_compute_count": 0,
+				"terrain_prepare_usec": 0
+			},
+			"case": "square8/first_command",
+			"first_move_tick_usec": 3661,
+			"preparation_usec": 1246,
+			"prewarm": {
+				"backend": "gdscript",
+				"duration_usec": 1238,
+				"graph_prepare_usec": 1217,
+				"native_prepare_usec": 16,
+				"native_prepared": false,
+				"ready": true,
+				"reason": "native_extension_unavailable",
+				"registry_revision": 48,
+				"search_mode": "hpa",
+				"tile_count": 48
+			}
+		},
+		{
+			"backend_after_first_move": {
+				"edge_cost_compute_count": 0,
+				"enabled": true,
+				"fallback_reason": "native_extension_unavailable",
+				"graph_build_count": 0,
+				"graph_prepare_usec": 0,
+				"graph_reused": false,
+				"last_backend": "gdscript_fallback",
+				"native_available": false,
+				"native_query_usec": 0,
+				"option_prepare_count": 0,
+				"options_prepare_usec": 0,
+				"prewarm": {
+					"backend": "gdscript",
+					"duration_usec": 931,
+					"graph_prepare_usec": 919,
+					"native_prepare_usec": 9,
+					"native_prepared": false,
+					"ready": true,
+					"reason": "native_extension_unavailable",
+					"registry_revision": 49,
+					"search_mode": "hpa",
+					"tile_count": 48
+				},
+				"result_cache_entry_count": 0,
+				"result_cache_hit": false,
+				"result_cache_limit": 64,
+				"snapshot_build_count": 0,
+				"snapshot_prepare_usec": 2,
+				"snapshot_reused": false,
+				"target_cost_compute_count": 0,
+				"terrain_prepare_usec": 0
+			},
+			"case": "hex_axial_v1/first_command",
+			"first_move_tick_usec": 3263,
+			"preparation_usec": 937,
+			"prewarm": {
+				"backend": "gdscript",
+				"duration_usec": 931,
+				"graph_prepare_usec": 919,
+				"native_prepare_usec": 9,
+				"native_prepared": false,
+				"ready": true,
+				"reason": "native_extension_unavailable",
+				"registry_revision": 49,
+				"search_mode": "hpa",
+				"tile_count": 48
+			}
+		}
+	],
+	"scope": "Actual SimulationRoot and UnitRegistry command processing with synthetic map data. No renderer, save access, actor playthrough or FPS claim."
+}

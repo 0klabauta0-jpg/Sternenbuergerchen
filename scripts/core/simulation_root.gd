@@ -2625,10 +2625,20 @@ func validate_prepared_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
 	return _get_hex_checkpoint_transaction().validate(prepared)
 
 func commit_hex_checkpoint_restore(prepared:RefCounted,publish:bool=true)->Dictionary:
-	return _get_hex_checkpoint_transaction().commit(prepared,publish)
+	var result:Dictionary=_get_hex_checkpoint_transaction().commit(prepared,publish)
+	if publish:_prewarm_finalized_hex_checkpoint(result)
+	return result
 
 func finalize_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
-	return _get_hex_checkpoint_transaction().finalize(prepared)
+	var result:Dictionary=_get_hex_checkpoint_transaction().finalize(prepared)
+	_prewarm_finalized_hex_checkpoint(result)
+	return result
+
+func _prewarm_finalized_hex_checkpoint(result:Dictionary)->void:
+	# Restore publishes terrain overrides. Refresh derived navigation only after
+	# all owners and callbacks have finalized, never inside the atomic publish.
+	if result.get("ok",false) and result.get("committed",false) and not result.get("context_changed",false) and not result.get("replayed",false) and is_hex_ground_runtime_active():
+		prewarm_navigation(get_hex_ground_terrain_registry())
 
 func restore_hex_checkpoint_state(state:Dictionary)->Dictionary:
 	var prepared:Dictionary=prepare_hex_checkpoint_restore(state)
@@ -3507,7 +3517,10 @@ func prewarm_navigation(terrain_registry = null) -> Dictionary:
 		}
 		return _navigation_prewarm_debug.duplicate(true)
 	var graph_started: int = Time.get_ticks_usec()
-	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	# Productive HexGround and large-map moves use incremental direct search.
+	# Only prepare the HPA graph for callers that actually use it.
+	var incremental: bool = _uses_regional_navigation(terrain_registry) or (is_hex_ground_runtime_active() and terrain_registry == get_hex_ground_terrain_registry())
+	var graph = null if incremental else _ensure_hpa_navigation_graph(terrain_registry)
 	var graph_prepare_usec: int = Time.get_ticks_usec() - graph_started
 	var native_started: int = Time.get_ticks_usec()
 	var native_prepared: bool = false
@@ -3521,6 +3534,7 @@ func prewarm_navigation(terrain_registry = null) -> Dictionary:
 	_navigation_prewarm_debug = {
 		"ready": true, "native_prepared": native_prepared,
 		"backend": "native" if native_prepared else "gdscript", "reason": reason,
+		"search_mode": "regional_hex" if incremental else "hpa",
 		"duration_usec": Time.get_ticks_usec() - started, "graph_prepare_usec": graph_prepare_usec,
 		"native_prepare_usec": Time.get_ticks_usec() - native_started,
 		"registry_revision": _get_terrain_registry_revision(terrain_registry),
@@ -3546,6 +3560,25 @@ func _set_gdscript_navigation_backend(reason: String) -> void:
 		"snapshot_prepare_usec": 0, "native_query_usec": 0,
 		"target_cost_compute_count": 0, "edge_cost_compute_count": 0,
 	}
+
+
+func create_regional_navigation_search(from_grid: Vector2i, to_grid: Vector2i, terrain_registry, options: Dictionary = {}):
+	var search
+	if native_navigation_enabled:
+		search = _native_navigation.create_regional_search(from_grid, to_grid, terrain_registry, options)
+	else:
+		search = TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch.new(from_grid, to_grid, _get_terrain_registry_revision(terrain_registry), options, terrain_registry)
+	_note_regional_navigation_backend(search)
+	return search
+
+
+func _note_regional_navigation_backend(search) -> String:
+	if search is TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch:
+		var reason: String = "native_navigation_disabled" if not native_navigation_enabled else String(_native_navigation.get_debug_snapshot().get("fallback_reason", "regional_fallback"))
+		_set_gdscript_navigation_backend(reason)
+		return "gdscript"
+	_navigation_backend_debug = {"last_backend": "native", "fallback_reason": "", "search_mode": "regional_hex", "result_cache_hit": false}
+	return "native"
 
 
 func _get_hpa_navigation_debug_snapshot() -> Dictionary:
@@ -6521,13 +6554,13 @@ func _uses_regional_navigation(terrain_registry) -> bool:
 
 func _build_regional_path_world_points(cmd: Dictionary, unit, terrain_registry, from_grid: Vector2i, to_grid: Vector2i, resolved_target: Vector2, options: Dictionary) -> Array:
 	var revision := _get_terrain_registry_revision(terrain_registry)
-	var search: TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch = cmd.get("_regional_navigation_search")
+	var search = cmd.get("_regional_navigation_search")
 	if (
 		search == null or search.source != from_grid or search.goal != to_grid
 		or search.revision != revision or search.registry_id != terrain_registry.get_instance_id()
 		or search.cost_options != options
 	):
-		search = TERRAIN_PATHFINDER_SCRIPT.RegionalHexSearch.new(from_grid, to_grid, revision, options, terrain_registry)
+		search = create_regional_navigation_search(from_grid, to_grid, terrain_registry, options)
 		cmd["_regional_navigation_search"] = search
 	var limit := REGIONAL_NAVIGATION_EXPANSIONS_PER_SLICE
 	if is_processing_tick:
@@ -6535,6 +6568,7 @@ func _build_regional_path_world_points(cmd: Dictionary, unit, terrain_registry, 
 		limit = int(_regional_navigation_admissions.get(unit_id, limit))
 		limit = mini(limit, REGIONAL_NAVIGATION_EXPANSIONS_PER_TICK - _regional_navigation_expansions_this_tick)
 	var started := Time.get_ticks_usec()
+	_note_regional_navigation_backend(search)
 	_regional_navigation_expansions_this_tick += search.advance(_terrain_pathfinder, terrain_registry, limit)
 	search.last_slice_usec = Time.get_ticks_usec() - started
 	search.work_usec += search.last_slice_usec

@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+MAIN_NAV_PAIR ramps 0 gd_nav_usec=15602 native_nav_usec=1484 exact=true
+MAIN_NAV_PAIR ramps 1 gd_nav_usec=12174 native_nav_usec=1437 exact=true
+MAIN_NAV_PAIR ramps 2 gd_nav_usec=3849 native_nav_usec=938 exact=true
+MAIN_NAV_PAIR ramps 3 gd_nav_usec=4919 native_nav_usec=1272 exact=true
+MAIN_NAV_PAIR ramps 4 gd_nav_usec=1340 native_nav_usec=614 exact=true
+MAIN_NAV_PAIR ramps 5 gd_nav_usec=19033 native_nav_usec=2056 exact=true
+MAIN_NAV_PAIR ramps 6 gd_nav_usec=5163 native_nav_usec=825 exact=true
+MAIN_NAV_PAIR ramps 7 gd_nav_usec=5818 native_nav_usec=1313 exact=true
+MAIN_NAV_PAIR gm01 0 gd_nav_usec=71736 native_nav_usec=4457 exact=true
+MAIN_NAV_PAIR gm01 1 gd_nav_usec=220780 native_nav_usec=13117 exact=true
+MAIN_NAV_PAIR gm01 2 gd_nav_usec=123099 native_nav_usec=7496 exact=true
+MAIN_NAV_PAIR gm01 3 gd_nav_usec=200170 native_nav_usec=12222 exact=true
+MAIN_NAV_PAIR gm01 4 gd_nav_usec=117540 native_nav_usec=6911 exact=true
+MAIN_NAV_PAIR gm01 5 gd_nav_usec=123726 native_nav_usec=7384 exact=true
+MAIN_NAV_PAIR gm01 6 gd_nav_usec=84661 native_nav_usec=6433 exact=true
+MAIN_NAV_PAIR gm01 7 gd_nav_usec=111613 native_nav_usec=6851 exact=true
+NATIVE_NAVIGATION_MAIN_BENCHMARK pairs=16 failures=0

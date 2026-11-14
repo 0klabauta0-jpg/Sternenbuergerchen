@@ -1,0 +1,21 @@
+{
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"expect_native": false,
+	"failed": 0,
+	"failures": [],
+	"passed": 622,
+	"runtime_pairs": [],
+	"schema": "native_navigation_main.v1",
+	"scope": "Current Main ramp/blocker and incremental semantics, real HexGround commands with simple actors; no rendered/FPS/network/save acceptance.",
+	"slice_pairs": 245
+}

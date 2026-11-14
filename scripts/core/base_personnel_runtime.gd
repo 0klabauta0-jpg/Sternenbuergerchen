@@ -250,7 +250,9 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 				_beds[bed.id] = id
 	_hex_required=not String(map_data.get_tactical_grid_rules()).is_empty()
 	var configured:Dictionary=_sim.configure_hex_ground_runtime(map_data,_terrain)
-	if configured.ok:_sync_hex_ground_presence()
+	if configured.ok:
+		_sync_hex_ground_presence()
+		_sim.prewarm_navigation(_terrain)
 	_sim.tick_processed.connect(_on_tick)
 	_sim.set_physics_process(true)
 

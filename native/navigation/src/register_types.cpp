@@ -4,7 +4,10 @@
 
 using namespace godot;
 static void initialize_navigation(ModuleInitializationLevel level) {
-    if (level == MODULE_INITIALIZATION_LEVEL_SCENE) GDREGISTER_CLASS(NativeNavigationKernel);
+    if (level == MODULE_INITIALIZATION_LEVEL_SCENE) {
+        GDREGISTER_CLASS(NativeNavigationKernel);
+        GDREGISTER_CLASS(NativeRegionalSearch);
+    }
 }
 static void terminate_navigation(ModuleInitializationLevel) {}
 extern "C" GDExtensionBool GDE_EXPORT native_navigation_init(

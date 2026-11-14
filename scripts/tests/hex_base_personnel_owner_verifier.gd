@@ -12,6 +12,12 @@ class Flow extends Node:
 class Navigation extends RefCounted:
 	var searches:=0
 	var terrain: Node
+	func is_available_world(world:Vector2)->bool:
+		# The fixture has no additional ship masks; use actual terrain passability.
+		return is_instance_valid(terrain) and world.is_finite() and terrain.is_walkable(terrain.world_to_grid(world))
+	func nearest_available_world(world:Vector2)->Vector2:
+		if not is_instance_valid(terrain) or not world.is_finite():return world
+		return terrain.resolve_walkable_target(world).replacement_position
 	func get_ground_clearance_mask() -> Dictionary:
 		return {"ok":true,"registry_id":terrain.get_instance_id(),"source_signature":"fixture_clearance","blocked_cells":[]}
 	func find_world_path(_from:Vector2,target:Vector2)->Array:

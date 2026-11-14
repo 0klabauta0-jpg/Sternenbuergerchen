@@ -1,0 +1,22 @@
+{
+  "source_base": "03cdccc512c69c5fd2d935aa5c192716bc1c873b",
+  "engine": "4.6.2.stable.official.71f334935",
+  "platform": "Windows x64",
+  "binding_commit": "e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+  "scons": "4.11.1",
+  "compiler": "MSVC19.51.36243, /fp:strict",
+  "command": "./native/navigation/build.ps1 -DependencyRoot C:/Users/bjoer/.codex/cache/native-navigation -Jobs 8",
+  "files_sha256": {
+    "native/navigation/src/native_costs.cpp": "223217eab0042f5b6005efe1d8550f52b0b086fe7735c3acb406c1d258b6ffb7",
+    "native/navigation/src/native_hpa.cpp": "77fe203f71acee97f34f242d2db17021ea3c77b4c8d66257e76f8d79c21717ef",
+    "native/navigation/src/native_navigation.cpp": "6d6c029abe5607289a80af8f6fc46b71162e598d30b9ea2cd4b4b1a0b61c5e74",
+    "native/navigation/src/native_regional.cpp": "e0892ce77beef2ceda45834a51ada49c9ef782cf013adead89fed25f154f2e2d",
+    "native/navigation/src/register_types.cpp": "9e5de784aa4d5e21c97f463d3f9dbea7856911347a3edf53c41822ee23466ce8",
+    "native/navigation/src/native_navigation.h": "4fdd34737d83d70f4113aacd4ffa842fedd4003fc6d3eca7baadbedf77ea37cd",
+    "native/navigation/SConstruct": "2cec1ec29b97f7cf8e5b497e831587473a20ce92c879e54cea6562e07de3cd8c",
+    "native/navigation/build.ps1": "9a197cfc20a9239f381389126a34a8d078113a8092b13890f43d6913b8cec8fb",
+    "native/navigation/build_profile.json": "d91e96bc849d2f33e1ea0bff1ae7ec49bf0aac6d8e026c17ff5e340ebc352142",
+    "native/navigation/navigation.gdextension": "662100291bee07110801a32835d9490e360e2c8e3caae6e162a7bcc48479f97d",
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll": "48e55a8f9036c5b45f7ba4a12f25c246df869646ac7291ba32dff367da39d702"
+  }
+}

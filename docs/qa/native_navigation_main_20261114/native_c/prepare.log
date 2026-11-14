@@ -1,0 +1,79 @@
+import: C:\dev\SternenBuergerchen-worktrees\native-navigation-main-20261114\docs\qa\native_navigation_main_20261114\native_c\project
+eparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  37% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  43% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  45% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  54% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  56% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  62% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  75% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  81% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  83% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  86% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | Rajdhani-Medium.ttf[39m[0m
+[   2% ] [90m[1mreimport[22m | Rajdhani-SemiBold.ttf[39m[0m
+[   5% ] [90m[1mreimport[22m | Rajdhani-Medium.ttf[39m[0m
+[   8% ] [90m[1mreimport[22m | Rajdhani-SemiBold.ttf[39m[0m
+[  10% ] [90m[1mreimport[22m | terrain_rampLarge_NE.png[39m[0m
+[  13% ] [90m[1mreimport[22m | terrain_rampLarge_NW.png[39m[0m
+[  16% ] [90m[1mreimport[22m | terrain_rampLarge_SE.png[39m[0m
+[  18% ] [90m[1mreimport[22m | terrain_rampLarge_SW.png[39m[0m
+[  21% ] [90m[1mreimport[22m | terrain_sideCliff_NE.png[39m[0m
+[  24% ] [90m[1mreimport[22m | terrain_sideCliff_NW.png[39m[0m
+[  27% ] [90m[1mreimport[22m | terrain_sideCliff_SE.png[39m[0m
+[  29% ] [90m[1mreimport[22m | terrain_sideCliff_SW.png[39m[0m
+[  32% ] [90m[1mreimport[22m | terrain_sideCorner_NE.png[39m[0m
+[  35% ] [90m[1mreimport[22m | terrain_sideCorner_NW.png[39m[0m
+[  37% ] [90m[1mreimport[22m | terrain_sideCorner_SE.png[39m[0m
+[  40% ] [90m[1mreimport[22m | terrain_sideCorner_SW.png[39m[0m
+[  43% ] [90m[1mreimport[22m | terrain_side_NE.png[39m[0m
+[  45% ] [90m[1mreimport[22m | terrain_side_NW.png[39m[0m
+[  48% ] [90m[1mreimport[22m | terrain_side_SE.png[39m[0m
+[  51% ] [90m[1mreimport[22m | terrain_side_SW.png[39m[0m
+[  54% ] [90m[1mreimport[22m | terrain_SW.png[39m[0m
+[  56% ] [90m[1mreimport[22m | colormap.png[39m[0m
+[  59% ] [90m[1mreimport[22m | inspect.svg[39m[0m
+[  62% ] [90m[1mreimport[22m | orbit_map.svg[39m[0m
+[  64% ] [90m[1mreimport[22m | astronautA_SW.png[39m[0m
+[  67% ] [90m[1mreimport[22m | astronautB_SW.png[39m[0m
+[  70% ] [90m[1mreimport[22m | corridor_wallCorner_NE.png[39m[0m
+[  72% ] [90m[1mreimport[22m | corridor_wallCorner_NW.png[39m[0m
+[  75% ] [90m[1mreimport[22m | corridor_wallCorner_SE.png[39m[0m
+[  78% ] [90m[1mreimport[22m | corridor_wallCorner_SW.png[39m[0m
+[  81% ] [90m[1mreimport[22m | corridor_wall_NE.png[39m[0m
+[  83% ] [90m[1mreimport[22m | corridor_wall_NW.png[39m[0m
+[  86% ] [90m[1mreimport[22m | corridor_wall_SE.png[39m[0m
+[  89% ] [90m[1mreimport[22m | corridor_wall_SW.png[39m[0m
+[  91% ] [90m[1mreimport[22m | craft_speederB_SE.png[39m[0m
+[  94% ] [90m[1mreimport[22m | platform_large_NW.png[39m[0m
+[  97% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (36 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+Evidence: C:\dev\SternenBuergerchen-worktrees\native-navigation-main-20261114\docs\qa\native_navigation_main_20261114\native_c\project
