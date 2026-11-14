@@ -37496,11 +37496,16 @@ func get_campaign_ground_ship_access(craft_id:String)->Dictionary:
 	var registry:Node=simulation.get_hex_ground_terrain_registry()
 	var mask:Dictionary=get_ground_ship_blocked_cells()
 	if not mask.ok:return mask
-	var signature:String=str([craft_id,position,mask.source_signature])
+	# Board where the crew got out: the search starts at the same unload anchor
+	# as _advance_hex_drop_unit, not at the hull centre. From the centre the
+	# search could leave the hull on the far side, more than a boarding radius
+	# away from the people who had just disembarked.
+	var approach:String=_get_drop_sequence_approach_angle_name() if _is_active_drop_sequence_for_craft(craft_id) else _sanitize_approach_angle_name(String(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id,{})).get("approach_angle","NW")))
+	var signature:String=str([craft_id,position,approach,mask.source_signature])
 	if _campaign_ground_access_cache.get("signature","")==signature:return _campaign_ground_access_cache.result.duplicate(true)
 	var foreign:Dictionary=get_ground_ship_blocked_cells(craft_id)
 	if not foreign.ok:return foreign
-	var exit:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new()._exit_anchor(registry,registry.world_to_grid(position),mask.blocked_cells,foreign.blocked_cells)
+	var exit:Dictionary=HEX_DEPLOYMENT_ADAPTER_SCRIPT.new()._exit_anchor(registry,registry.world_to_grid(position+_get_unload_offset(0,approach)),mask.blocked_cells,foreign.blocked_cells)
 	if not exit.get("ok",false):return {"ok":false,"reason":"ground_ship_access_unavailable"}
 	var result:Dictionary={"ok":true,"position":registry.grid_to_world(exit.grid),"grid":exit.grid,"craft_id":craft_id,"source_signature":signature}
 	_campaign_ground_access_cache={"signature":signature,"result":result}
