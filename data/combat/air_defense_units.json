@@ -1,0 +1,84 @@
+{
+  "status": "provisional_rule_core_not_wired",
+  "contract": "docs/dev/ground_air_defense_engagement_contract.md",
+  "units": {
+    "hagel": {
+      "name": "Hagel",
+      "kind": "flak",
+      "model": "res://Assets/curated/flugabwehr_kit_20261114/fa_hagel.glb",
+      "size": 1,
+      "grade": "D",
+      "hull": 220.0,
+      "shield_item": "shield_s1",
+      "power_item": "power_s1",
+      "crew": [
+        {"seat": "driver", "exposed": false},
+        {"seat": "gunner", "exposed": true, "required_to_fire": true}
+      ],
+      "sight_range_hex": 14,
+      "radar_range_hex": 30,
+      "needs_radar_lock": false,
+      "weapon_range_hex": 16,
+      "weapon_min_range_hex": 0,
+      "min_elevation_degrees": 0.0,
+      "shots_per_volley": 8,
+      "base_hit_chance": 0.30,
+      "damage_per_hit": 7.0,
+      "reload_volleys": 1,
+      "can_engage_ground": true,
+      "skirmish_points": 260
+    },
+    "donnerkeil": {
+      "name": "Donnerkeil",
+      "kind": "missile",
+      "model": "res://Assets/curated/flugabwehr_kit_20261114/fa_donnerkeil.glb",
+      "size": 1,
+      "grade": "D",
+      "hull": 180.0,
+      "shield_item": "shield_s1",
+      "power_item": "power_s1",
+      "crew": [
+        {"seat": "driver", "exposed": false},
+        {"seat": "operator", "exposed": false, "required_to_fire": true}
+      ],
+      "sight_range_hex": 14,
+      "radar_range_hex": 60,
+      "needs_radar_lock": true,
+      "weapon_range_hex": 45,
+      "weapon_min_range_hex": 6,
+      "min_elevation_degrees": 0.0,
+      "shots_per_volley": 1,
+      "base_hit_chance": 0.70,
+      "damage_per_hit": 55.0,
+      "reload_volleys": 3,
+      "missiles": 2,
+      "can_engage_ground": false,
+      "skirmish_points": 320
+    }
+  },
+  "pilot": {
+    "reaction_delay_volleys_unskilled": 3,
+    "reaction_delay_volleys_expert": 0,
+    "evasion_base": 0.15,
+    "evasion_per_skill": 0.45,
+    "break_off_volleys_unskilled": 2,
+    "break_off_volleys_expert": 0,
+    "flare_reaction_base": 0.35,
+    "flare_reaction_per_skill": 0.60,
+    "auto_break_off_hull_fraction": 0.35
+  },
+  "countermeasures": {
+    "flare_decoy_chance": 0.75,
+    "missile_evasion_weight": 0.6,
+    "ships": {"cutlass": {"flares": 2}, "buccaneer": {"flares": 2}}
+  },
+  "approach_profiles": {
+    "normal": {"clearance_levels": 6},
+    "low": {"clearance_levels": 1, "lz_radius_factor": 1.5}
+  },
+  "range_falloff": {"full_until_fraction": 0.5, "factor_at_max_range": 0.5},
+  "infantry_counters": {
+    "rocket_launcher": {"display_name": "Panzerfaust", "proposed_skirmish_points": 60},
+    "rail_gun": {"display_name": "Schienengewehr", "proposed_skirmish_points": 75}
+  }
+}

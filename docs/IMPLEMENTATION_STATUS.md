@@ -1,5 +1,29 @@
 # IMPLEMENTATION_STATUS
 
+### Flugabwehr: Regelkern und Werte, noch nicht angeschlossen - 14.11.2026
+
+Neuer Contract `docs/dev/ground_air_defense_engagement_contract.md` mit den
+Nutzerentscheidungen vom 14.11. (Schaden am Schiff, Abdrehen nach der ersten
+Salve, Flares, Tiefflug, 0-Grad-Horizont, Schild/Kraftwerk Groesse 1 Guete D,
+Pilotenkoennen bestimmt Reaktion). Werte der Fahrzeuge "Hagel" und
+"Donnerkeil" in `data/combat/air_defense_units.json`. Reiner, gesaeter
+Regelkern `scripts/combat/air_defense_engagement.gd` auf Basis von
+`space_component_systems.apply_hit`; kein Aufrufer im Spiel, keine neue
+Gameplayautoritaet. `air_defense_engagement_verifier` 37/0 (Linux headless).
+Offen: Anschluss an den Anflug, Fahrzeug als Bodeneinheit (Besatzung,
+Herausschiessen, Uebernehmen), Panzerfaust/Schienengewehr im Laden,
+Transportschiff.
+
+### Freihafen als ummauerter Warenhof, Flugabwehr-Modelle auf GM02 - 14.11.2026
+
+`maps/trade_outpost.json`: Gebaeude, Warenhof und Landefeld auf einem
+gepflasterten Vorfeld in einer Mauer, Strasse bis zum Aussenlager; eigene
+Aussenmodelle ueber `structures[].model` in `place_reference_dressing.gd`.
+`maps/Ground_Mission02_128x128.json`: Modelle "Hagel" und "Donnerkeil" als
+feste Hindernisse an der Flugabwehr-Stellung. Gelaende, Marker, Pads, Dienste
+und Missionsdaten unveraendert. Belege und Grenzen:
+`docs/qa/freihafen_flugabwehr_20261114/README.md`.
+
 ### Grafikpass R1-R3 fuer Main geprueft - 14.11.2026
 
 Die drei gelieferten Patches in Reihenfolge R1, R2, R3 auf Mainbasis
