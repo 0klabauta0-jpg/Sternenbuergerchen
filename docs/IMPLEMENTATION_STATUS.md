@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### Bestätigte Bildreferenzen gesammelt – 14.11.2026 (Taskbranch)
+
+25 unveränderte Bilder mit Herkunft und SHA-256 unter `Referenzbilder_Bestaetigt/`: drei bestätigte Rüstungstafeln, drei ältere Stilziele, A5-UI und 13 Boden-Zielbilder; fünf frühere/teilweise bestätigte Bilder separat. Kopierhashes, Eindeutigkeit und PNG-Dekodierung bestanden. Keine neuen Bilder, Spieländerungen oder Mainintegration. Task: `docs/tasks/APPROVED_IMAGE_COLLECTION_2026_11_14.md`.
+
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.

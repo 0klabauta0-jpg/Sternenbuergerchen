@@ -1,0 +1,207 @@
+{
+  "date": "2026-11-14",
+  "image_count": 25,
+  "scope": "Belegte positive Bewertungen; Teilfreigaben und ältere Rüstungsvarianten separat. Keine garantierte Vollständigkeit aller historischen Chats.",
+  "items": [
+    {
+      "file": "01_Ruestungen/01_Leicht_Mehransichten.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\light_turnaround_ai_r04.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997",
+      "bytes": 1661536,
+      "status": "Bestätigte 2D-Modellvorlage; spätere Helm-/Plattenkorrekturen beachten.",
+      "evidence": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\README.md"
+    },
+    {
+      "file": "01_Ruestungen/02_Mittel_Mehransichten.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\medium_turnaround_ai_r04.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8",
+      "bytes": 1741257,
+      "status": "Bestätigte 2D-Modellvorlage; spätere Helm-/Plattenkorrekturen beachten.",
+      "evidence": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\README.md"
+    },
+    {
+      "file": "01_Ruestungen/03_Schwer_Mehransichten.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\heavy_turnaround_ai_r04.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e",
+      "bytes": 1713006,
+      "status": "Bestätigte 2D-Modellvorlage; spätere Helm-/Plattenkorrekturen beachten.",
+      "evidence": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\README.md"
+    },
+    {
+      "file": "90_Teilweise_bestaetigt_und_aeltere_Varianten/Ruestungen/medium_erster_Entwurf.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\medium_turnaround_ai.png",
+      "sha256": "d3ff96b6373dc0df47e42eb6ee5c9a3a885a1eb91c101132e4d3143ef26ab292",
+      "bytes": 1529057,
+      "status": "Frühere positiv bewertete Körperform; Rüstungsstufe bzw. Schweißerbrille/Mundstück danach korrigiert. Keine aktuelle Gesamtfreigabe.",
+      "evidence": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\README.md"
+    },
+    {
+      "file": "90_Teilweise_bestaetigt_und_aeltere_Varianten/Ruestungen/heavy_erster_Entwurf.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\heavy_turnaround_ai.png",
+      "sha256": "0647574fbcfb97991d2dd9be9cd352a3aef830c839f15ea26659d133fcafa63a",
+      "bytes": 1559400,
+      "status": "Frühere positiv bewertete Körperform; Rüstungsstufe bzw. Schweißerbrille/Mundstück danach korrigiert. Keine aktuelle Gesamtfreigabe.",
+      "evidence": "C:\\dev\\SternenBuergerchen-worktrees\\native-glut-maps-20261110\\art\\armor_orc_morozov_20261111\\README.md"
+    },
+    {
+      "file": "02_Stilziele_2026_11_01/01_rostwelt_landschaft.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\reports\\assets\\grafik-2026-11-01\\01_rostwelt_landschaft.png",
+      "sha256": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea",
+      "bytes": 3232166,
+      "status": "Ausdrücklich positiv bestätigtes Stilziel. Menschenstudie historisch: spätere Kenney-Grundfigur hat Vorrang.",
+      "evidence": "docs/tasks/ART_2026_11_01_engine_graphics_pass.md:4-15"
+    },
+    {
+      "file": "02_Stilziele_2026_11_01/02_menschen_stilstudie.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\reports\\assets\\grafik-2026-11-01\\02_menschen_stilstudie.png",
+      "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+      "bytes": 2767466,
+      "status": "Ausdrücklich positiv bestätigtes Stilziel. Menschenstudie historisch: spätere Kenney-Grundfigur hat Vorrang.",
+      "evidence": "docs/tasks/ART_2026_11_01_engine_graphics_pass.md:4-15"
+    },
+    {
+      "file": "02_Stilziele_2026_11_01/03_aussenposten_stilstudie.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\reports\\assets\\grafik-2026-11-01\\03_aussenposten_stilstudie.png",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "bytes": 3411898,
+      "status": "Ausdrücklich positiv bestätigtes Stilziel. Menschenstudie historisch: spätere Kenney-Grundfigur hat Vorrang.",
+      "evidence": "docs/tasks/ART_2026_11_01_engine_graphics_pass.md:4-15"
+    },
+    {
+      "file": "03_UI/mockup_a5_mission_zweireihig.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\reports\\assets\\ui-2026-11-01\\mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "bytes": 2558195,
+      "status": "Bestätigte A5-2D-Vorlage; spätere Bedienkorrekturen gelten weiter.",
+      "evidence": "docs/tasks/UI_2026_11_02_a5_kartenrand.md:3-14"
+    },
+    {
+      "file": "90_Teilweise_bestaetigt_und_aeltere_Varianten/Klippen_rechte_Variante_gewaehlt.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\qa\\hex_surface_design_20261113\\references\\cliff_detail_proposal.png",
+      "sha256": "d6965e1909ab616288b4c39aef0805fcd661ff99b3b3e5274ede20f33e330cbc",
+      "bytes": 2230963,
+      "status": "Nur die rechte gebrochene Felsvariante gewählt.",
+      "evidence": "docs/qa/hex_surface_design_20261113/references/detail_provenance.json"
+    },
+    {
+      "file": "90_Teilweise_bestaetigt_und_aeltere_Varianten/Deck_nur_weisse_Halle_bestaetigt.png",
+      "source": "C:\\dev\\SternenBuergerchen\\docs\\qa\\hex_surface_design_20261113\\references\\deck_revision_concept.png",
+      "sha256": "6c4e2797848700012c171047db6f095964bdad1b07450028bfd56171ec5cccac",
+      "bytes": 2272652,
+      "status": "Nur weiße Halle und deren Perspektive positiv; übrige Deckstudie abgelehnt.",
+      "evidence": "docs/qa/hex_surface_design_20261113/references/detail_provenance.json; REFERENCE_MANIFEST.json"
+    },
+    {
+      "file": "90_Teilweise_bestaetigt_und_aeltere_Varianten/UI_Seitenleiste_mit_Korrekturen.png",
+      "source": "C:\\dev\\SternenBuergerchen\\art\\homebase_ui_study_20261112\\sidebar_study.png",
+      "sha256": "efdfa08e6fb226f38f80e0782d1c023c832b71775ae99c015cc9339eb8fd6ee0",
+      "bytes": 2101839,
+      "status": "Seitenleistenform positiv; Reihenfolge korrigiert, generische Icons nicht angenommen.",
+      "evidence": "art/homebase_ui_study_20261112/README.md"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/01_satellitenabsturz_r02.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\01_satellitenabsturz_r02.png",
+      "sha256": "a8f92848e46ae5483d8ed31ac5a8f014436c55affdd832cad4f1c177d9fa0549",
+      "bytes": 3783694,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/02_suchspur_fog_r02.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\02_suchspur_fog_r02.png",
+      "sha256": "50e71f321ced08e1d5ed9f66891b89e0d4822ff80b589c1b35186615bed06265",
+      "bytes": 3286922,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/03_geologie_hex_r02.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\03_geologie_hex_r02.png",
+      "sha256": "483456fa47ef09f2bab34cedf41ac7fd3774022d617fb0bc828fda797b6e28fb",
+      "bytes": 2944822,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/04_map_uebersicht_r02.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\04_map_uebersicht_r02.png",
+      "sha256": "c5ff4cda67ab5b03095aa91a14710cdeef33350b1ef2ebdfa506d9c758546cbb",
+      "bytes": 3517594,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/05_aussenposten.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\05_aussenposten.png",
+      "sha256": "27f3a7a134f5359c92f93b24c23d2e35e459889945689719ad3231dc29eef1d3",
+      "bytes": 3103057,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/06_landepad_anflug.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\06_landepad_anflug.png",
+      "sha256": "61750513113c51fdaf0bb1a27509261c072a6cec466b03d8ad0636a343387f3e",
+      "bytes": 2932167,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/07_pad_service.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\07_pad_service.png",
+      "sha256": "09fb601421084ea9f6914af679bd0b7178b2159448984c321b6597a13e8fa86c",
+      "bytes": 2832389,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/08_basis_cutaway.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\08_basis_cutaway.png",
+      "sha256": "93f7a4ef5cadb630ae51f69341e0ae6796b32e456e245cc0d9cd018ed6c95973",
+      "bytes": 2833165,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/09_logistikhof.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\09_logistikhof.png",
+      "sha256": "a7dc20375ad362d5817cff38f8a52a98d7dde8fa63b4404507719ccccc853a4d",
+      "bytes": 3068612,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/10_bodengefecht.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\10_bodengefecht.png",
+      "sha256": "d44cc57e23cedc27c77bd1e41ae332c437681acee23794560e2b90cc5c21d5d8",
+      "bytes": 2966819,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/11_nachtverteidigung.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\11_nachtverteidigung.png",
+      "sha256": "000e8887ec0d8f7379b40c8a336351af77762669fd83a50e1ee4efd111e6250c",
+      "bytes": 2515054,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/12_extraktion.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\12_extraktion.png",
+      "sha256": "b89bffa9f68e804c63cd5977bb3e57f95684eb7cab266b2f6c0a1c30f395ebf1",
+      "bytes": 3122811,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    },
+    {
+      "file": "04_Boden_Zielbilder_2026_11_14/17_nahrungspods_r03.png",
+      "source": "C:\\dev\\SternenBuergerchen-worktrees\\visual-targets-20261114\\docs\\reports\\assets\\zielbilder-2026-11-14\\17_nahrungspods_r03.png",
+      "sha256": "d65db369754c0db099d641ec18aedf41d3cc1637ab34076a6cfd369cc76482af",
+      "bytes": 2930895,
+      "status": "Boden-Stilrichtung insgesamt positiv bestätigt; einzelne Rastermaßstäbe/Winkel und Szenendetails brauchen Korrekturen. Keine technische Gesamtfreigabe.",
+      "evidence": "Chat 01a1da5a-ff93-78a2-99ed-0948febf430a, Nutzerfeedback 14.11.2026; Bildstand b5e9b312b"
+    }
+  ]
+}

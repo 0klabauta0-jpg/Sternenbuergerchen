@@ -1,0 +1,232 @@
+{
+  "revision": "r04",
+  "status": "approved_2d_targets_native_draft_not_style_approved_r05_in_progress",
+  "tool": "built-in image_gen; no Ultra model selector exposed",
+  "user_feedback": "2D targets approved; native forms must come substantially closer. Welding goggles rejected; light reduced, medium stronger, heavy body retained. Astra Ultra chosen for Blender revision.",
+  "reference_inputs": [
+    {
+      "path": "native_generation_input.png",
+      "sha256": "b31fae1ad0a5599f54569808fcde1046cb3c10d010592a1d1e455d4ab57c1946"
+    },
+    {
+      "path": "orc_medium.webp",
+      "sha256": "3980f832e6015d8e0096fa0e1f4111f72c92a4fe6885bbcb375d6a4ff78d68ad"
+    },
+    {
+      "path": "morozov_concept.jpg",
+      "sha256": "c1b86a0143ffd13f74445e23bbd05b8b57e4c6f9fafbb336d56a5b32fdb179ca"
+    }
+  ],
+  "generated_outputs": [
+    {
+      "path": "medium_turnaround_ai.png",
+      "sha256": "d3ff96b6373dc0df47e42eb6ee5c9a3a885a1eb91c101132e4d3143ef26ab292",
+      "role": "2D modeling reference, not native proof",
+      "original_path": "C:/Users/bjoer/.codex/generated_images/01a1c792-fd49-72f1-b9e5-55144605b486/exec-a5e02542-c558-46af-90f2-dbfd774d73ef.png",
+      "status": "earlier_target_body_positive_helmet_or_armor_grade_revised"
+    },
+    {
+      "path": "heavy_turnaround_ai.png",
+      "sha256": "0647574fbcfb97991d2dd9be9cd352a3aef830c839f15ea26659d133fcafa63a",
+      "role": "2D modeling reference, not native proof",
+      "original_path": "C:/Users/bjoer/.codex/generated_images/01a1c792-fd49-72f1-b9e5-55144605b486/exec-a41e77a4-a99f-4bf4-a23e-0c2d0d6acc30.png",
+      "status": "earlier_target_body_positive_helmet_or_armor_grade_revised"
+    },
+    {
+      "path": "light_turnaround_ai_r04.png",
+      "sha256": "9920440569b26f87ce0d47fc48e4df429a250008d313f083ddd72b67fd38f997",
+      "role": "2D modeling reference, not native proof",
+      "original_path": "C:/Users/bjoer/.codex/generated_images/01a1c792-fd49-72f1-b9e5-55144605b486/exec-18ba3289-2146-428a-b9c1-816d68b8c1aa.png",
+      "status": "confirmed_current_modeling_target"
+    },
+    {
+      "path": "medium_turnaround_ai_r04.png",
+      "sha256": "1a5e38e8759ff01ed25974b4acd9a7f1d5931b8890207db952bf1bc3bab432d8",
+      "role": "2D modeling reference, not native proof",
+      "original_path": "C:/Users/bjoer/.codex/generated_images/01a1c792-fd49-72f1-b9e5-55144605b486/exec-050af50f-dc0a-4c52-a90c-2b4a0e77a3b1.png",
+      "status": "confirmed_current_modeling_target"
+    },
+    {
+      "path": "heavy_turnaround_ai_r04.png",
+      "sha256": "7068a0a83201e28c44ed29fff6fffd4638a61b783d0696afddd976bc01c5f59e",
+      "role": "2D modeling reference, not native proof",
+      "original_path": "C:/Users/bjoer/.codex/generated_images/01a1c792-fd49-72f1-b9e5-55144605b486/exec-a29d5a6f-4d5e-4326-8e7a-e46f9353014b.png",
+      "status": "confirmed_current_modeling_target"
+    }
+  ],
+  "generation_parents": {
+    "medium_turnaround_ai.png": [
+      "native_generation_input.png",
+      "orc_medium.webp"
+    ],
+    "heavy_turnaround_ai.png": [
+      "native_generation_input.png",
+      "morozov_concept.jpg"
+    ],
+    "light_turnaround_ai_r04.png": [
+      "medium_turnaround_ai.png"
+    ],
+    "medium_turnaround_ai_r04.png": [
+      "medium_turnaround_ai.png"
+    ],
+    "heavy_turnaround_ai_r04.png": [
+      "heavy_turnaround_ai.png"
+    ]
+  },
+  "source_urls": {
+    "orc_medium.webp": "https://media.starcitizen.tools/thumb/e/eb/ORC-mkV_Green.png/640px-ORC-mkV_Green.png.webp",
+    "morozov_concept.jpg": "https://media.starcitizen.tools/5/5a/Morozov_Heavy_Armor_Star_Citizen.jpg"
+  },
+  "own_sources": [
+    {
+      "path": "build_outfit_parts.py",
+      "sha256": "bf60e02fc09ca881ca60b2ec73354184c73c302e332040e0dcc572d7d3043c99"
+    },
+    {
+      "path": "armor_outfit_parts.blend",
+      "sha256": "b2bb91a964383ee204f99cfbf66578fb6ea1b23bd1c53139110ff7181142e2f6"
+    },
+    {
+      "path": "qa.json",
+      "sha256": "eade8888fbc0d64bf99ee9f425b2c7ca7f6301d379193b3de8fad5272d8f3438"
+    },
+    {
+      "path": "personnel_armor_visual_r04.gd",
+      "sha256": "5eade69cfb2bde89e6f23babab63c9707d87977e0a18aafe5b48b43ab7a59944"
+    },
+    {
+      "path": "prompts.json",
+      "sha256": "67d81441a2135cb3aeb081dde7bc1adc950691e229bd85508e77ef6e9d90035b"
+    },
+    {
+      "path": "prompts_user_revision.json",
+      "sha256": "73a9d633c666db95670cd9e96538cbc55245d9195e743ed4e9304c3969dacc88"
+    }
+  ],
+  "exports": [
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_heavy.glb",
+      "sha256": "8015cccde4696be6b688da9f2a9a322d8161ed06c32e43c0e0e17bc14ff3da3a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/boot_medium.glb",
+      "sha256": "cbac793b6a98f876c1bdbd16e53a186ad187f9b631709eb639f5d0d479e48ee4"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/collar.glb",
+      "sha256": "ce27a2fd0df99638bcde53f2f8d1688ed5cb70df9f7a541df90a8d1115d58711"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_heavy.glb",
+      "sha256": "e79680f66bbae0b466f16a614ed78dac14a2a74340a62ea97512fc299856e0cf"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_light.glb",
+      "sha256": "fb27e6c8734812e597a6221aefa28cfd64dd82ac27f1e736b4a1de39b8a4efff"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/forearm_medium.glb",
+      "sha256": "ad6da8bd6ab22a0e438c8f6bc73faa8ba5832d172d3c16ca09d40744e795c1a1"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/hand_guard_heavy.glb",
+      "sha256": "eca3ad298dc6b9e6e7b0888b49b5f9c851ecc9b3c96990080cc21a2a78a71c61"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_heavy.glb",
+      "sha256": "dd81e2317e31496dab81024ffd452f625825fe357be3ce0406193bff709f8014"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_light.glb",
+      "sha256": "0808155f90daa4e3e77626b76b7da029e5cfbd8d9173873a6b0a0f2bc204fb73"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/helmet_medium.glb",
+      "sha256": "54a835055a016db429683b59b0ff055c8533d052654f3adec258d54fa2d0a10b"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_heavy.glb",
+      "sha256": "61e3caf2ccc19c3cb3547cc5a862e7754b599d5c2eff7c67992167a575a7f6a3"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_light.glb",
+      "sha256": "ae0b8168102bc367bc435a8f96fb1cc13c8de1a24a294bc6e56778ef7cdf1a7c"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/knee_medium.glb",
+      "sha256": "ed8bc4a64eec2088e3b052ef3ce616fe7529643da0eaadd0a98f20c7ccdf6029"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_heavy.glb",
+      "sha256": "10d7832f74e58a68b4a43e26bfa9646d8e5218ad28cad926a9af3f38fef0a89a"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_light.glb",
+      "sha256": "71007c0496ac085ae6b1434b9fdcd60bf933f87679476a7dca1410bc2ffd4ad0"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pauldron_medium.glb",
+      "sha256": "4844e39b3d1340006fe515575cc0ffe9146b137465a988ff543965b5372914ad"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_heavy.glb",
+      "sha256": "40f077cfc433cc592c32753ef30ddab91896cff6b69457fef6e3caddec29f795"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_light.glb",
+      "sha256": "42516bedbb0391c4364bfc3e5b1f87a05d3bf648be35b0f0d1db11d524e668f9"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/pelvis_medium.glb",
+      "sha256": "70c68c9333266ee62cf22734b954d0255d5ccd590f7f820dd5cbf7ba1b8cfa7e"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_heavy.glb",
+      "sha256": "586d3354f2f4c6e3b09c54d6a7f76a0c5a96b993059a032c690d061612d08915"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/shin_medium.glb",
+      "sha256": "cd83c747924581dfca651ea4108bb1c477aca138c7a7248e90f383759608cc52"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_heavy.glb",
+      "sha256": "3fef57b03dc0b5fc112a9f7a1f9a221aceb377c25460e8289e06d989eecdb134"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/thigh_medium.glb",
+      "sha256": "6063eee22e2dafac4b01df4cc13afd22af5c49206617d20cd3c890b8c24b7bf7"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_heavy.glb",
+      "sha256": "fb4f1da5169128700bb7479d6a2f0eba3dad19dede71db6f5ebe37843b625b0f"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_light.glb",
+      "sha256": "f18d6c25f352ef25a1fc82301f1358a8e9c5cb2a9d3984b7c035a3ca0feae2fe"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/torso_medium.glb",
+      "sha256": "58b89fcd7c4181196e4b9391a1a40722ccde3199e848245275ef01a41ac3d827"
+    },
+    {
+      "path": "Assets/curated/personnel/armor_orc_morozov_20261111/upper_arm_heavy.glb",
+      "sha256": "041bd0a7b2192e127fd59612053be3216a6ff8cfa31ebeda2316120ceb7e383d"
+    }
+  ],
+  "triangles": {
+    "light": 3098,
+    "medium": 6056,
+    "heavy": 9656
+  },
+  "counts": {
+    "light": 9,
+    "medium": 15,
+    "heavy": 20
+  },
+  "native_tests": {
+    "poses": 110,
+    "equipment": 16,
+    "failures": 0
+  },
+  "package_helmet_geometry_adopted": false
+}
