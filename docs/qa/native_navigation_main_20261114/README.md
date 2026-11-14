@@ -123,6 +123,14 @@ Inventar, Groesse und Nanosekunden-Mtime unveraendert. Kein Stash, Checkout oder
 Clean im Hauptcheckout. Dieser bleibt auf `task/playtest-rework-plan-20261114`;
 Main wird aus dem separaten Integrationsworktree aktualisiert.
 
+Der [Nachabgleich nach dem Push](wip_post_push.json) bestaetigt dieselben sechs
+Originaldateien und das gesamte untracked Inventar weiterhin unveraendert.
+Inzwischen sind zusaetzliche Aenderungen an vier Planungsdokumenten im
+Hauptcheckout aufgetaucht. Diese wurden nicht von der Integration bearbeitet
+oder zurueckgesetzt; der Gesamtstatus ist deshalb nachtraeglich nicht mehr
+identisch zum anfangs erfassten Status. Produktstand auf Main/GitHub:
+`ea39251206eb8dfea7f86ce5f973ffd30b5a07c4`; dieser Nachtrag aendert nur Evidenz.
+
 Einzelne frische Pruefungen von der Repo-Wurzel, seriell:
 
 ```powershell

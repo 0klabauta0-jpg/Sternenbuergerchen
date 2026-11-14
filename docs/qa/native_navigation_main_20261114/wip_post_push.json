@@ -1,0 +1,17 @@
+{
+  "after_main_push": "ea39251206eb8dfea7f86ce5f973ffd30b5a07c4",
+  "original_tracked_bytes_preserved": true,
+  "untracked_inventory_stat_preserved": true,
+  "untracked_count": 102105,
+  "original_branch": "task/playtest-rework-plan-20261114",
+  "observed_branch": "task/playtest-rework-plan-20261114",
+  "observed_head": "9e2e972a1010d10fa5cdc0c08bd588bea5128173",
+  "index_unchanged": true,
+  "additional_modified_tracked_files": [
+    "docs/IMPLEMENTATION_STATUS.md",
+    "docs/TASK_ROADMAP.md",
+    "docs/superpowers/plans/2026-11-14-playtest-rework.md",
+    "docs/tasks/PLAYTEST_REWORK_2026_11_14.md"
+  ],
+  "note": "Four additional planning-document edits appeared after the earlier complete guard. They are outside this integration and were left untouched; complete status is therefore no longer identical to the initial status."
+}
