@@ -21,6 +21,7 @@ const STATION_FLOOR_BOUNDARY = preload("res://scripts/terrain/station_floor_boun
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 const FRONTIER_GM01_LAYOUT_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_gm01_layout.gd")
+const FRONTIER_ROAD_DECK_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_road_deck.gd")
 const FRONTIER_REFERENCE_DRESSING_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_reference_dressing.gd")
 const PERSONNEL_IDENTITY = preload("res://scripts/terrain/personnel_visual_identity.gd")
 
@@ -1261,6 +1262,9 @@ var _authored_rock_surface_levels: Dictionary = {}
 var _authored_rock_surface_owners: Dictionary = {}
 var _show_authoring_markers := true
 var _place_dressing_root: Node3D
+## Grafikpass R2, render-only: built road object and raised landing decks.
+var _built_road_deck: MeshInstance3D = null
+var _visual_deck_lift_by_cell: Dictionary = {}
 var _place_dressing_signature := ""
 var _place_dressing_grids: Array[Vector2i]=[]
 var _arid_pebble_excluded_grids: Dictionary = {}
@@ -1599,11 +1603,14 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 		_update_camera_transform()
 	if _frontier_art_enabled and _terrain_map_data != null:
 		_frontier_art_profile.quiet_tactical_surface=_is_arid_terrain_visual_context()
+		# Under a built road deck the ground keeps only a faint dusty shoulder.
+		_frontier_art_profile.road_paint_strength = 0.14 if _built_road_deck_applies() else 1.0
 		var q_axis := _grid_to_3d_position(Vector2(1,0),0)
 		var r_axis := _grid_to_3d_position(Vector2(0,1),0)
 		_frontier_art_profile.configure_surface_blend(Array(_terrain_map_data.call("get_tiles")),Vector2(q_axis.x,q_axis.z),Vector2(r_axis.x,r_axis.z))
 	_sync_authored_visual_layout()
 	_sync_place_reference_dressing()
+	_configure_visual_deck_lift(_collect_raised_pad_specs())
 	_index_authored_rock_surfaces()
 	_clear_children(_map_root)
 	_hex_grid_parents.clear()
@@ -1730,6 +1737,7 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
 	_map_total_tile_count = tiles.size()
 	_rebuild_render_tile_index(tiles)
+	_sync_built_road_deck(tiles)
 	if _uses_hex_grid() and _regional_height_step > 0.0 and not is_instance_valid(_authored_visual_layout_root):
 		_visual_streaming_active = true
 		for tile in tiles:
@@ -5611,6 +5619,10 @@ func _hex_grid_outline_cached(tile, cache: Dictionary) -> PackedVector3Array:
 
 func _hex_grid_model_support_lift(tile) -> float:
 	if not _uses_hex_grid() or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile): return 0.0
+	# Grafikpass R2: cells under a raised landing deck stand on that deck.
+	if not _visual_deck_lift_by_cell.is_empty():
+		var deck_lift: float = float(_visual_deck_lift_by_cell.get(tile.grid_position, 0.0))
+		if deck_lift > 0.0: return deck_lift
 	var type_id: String = _resolve_tile_asset_type_id(String(tile.object_type_id),String(tile.type_id))
 	if type_id.is_empty(): return 0.0
 	var is_floor: bool = HEX_FLOOR_ADAPTER.supports(type_id)
@@ -16795,6 +16807,85 @@ func _sync_place_reference_dressing() -> void:
 		if String(tile.object_type_id)=="frontier_scene_solid":
 			_external_terrain_object_visuals[tile.grid_position]=weakref(_place_dressing_root)
 			_place_dressing_grids.append(tile.grid_position)
+
+func _collect_raised_pad_specs() -> Array:
+	var pads: Array = []
+	if _terrain_map_data == null or _homebase_visuals_enabled or _orbital_station_view:
+		return pads
+	if _terrain_map_data.has_method("get_place_presentation"):
+		pads.append_array(Array(_terrain_map_data.call("get_place_presentation").get("pads", [])))
+	if is_instance_valid(_authored_visual_layout_root):
+		pads.append_array(Array(_authored_visual_layout_facts.get("pad_decks", [])))
+	return pads
+
+
+func _configure_visual_deck_lift(pads: Array) -> void:
+	# Cold map configuration. Render-only standing height for cells whose
+	# centre lies on a raised landing deck; no terrain, LOS or path facts.
+	_visual_deck_lift_by_cell.clear()
+	if not _uses_hex_grid():
+		return
+	var cell_size: float = _get_3d_cell_size()
+	var deck_top: float = preload("res://scripts/terrain/place_reference_dressing.gd").PAD_DECK_TOP
+	for pad: Dictionary in pads:
+		var center: Array = pad.get("center", [0, 0])
+		var size: Array = pad.get("size", [5, 4])
+		var extent := Vector2(float(size[0]), float(size[1]))
+		var rect := Rect2(Vector2(float(center[0]), float(center[1])) - extent * 0.5, extent).grow(-0.12 * cell_size)
+		var low := Vector2i(2147483647, 2147483647)
+		var high := Vector2i(-2147483647, -2147483647)
+		for corner: Vector2 in [rect.position, rect.end, Vector2(rect.position.x, rect.end.y), Vector2(rect.end.x, rect.position.y)]:
+			var axial: Vector2i = HEX_GRID_SCRIPT.round_axial(HEX_GRID_SCRIPT.plane_to_axial(corner / cell_size))
+			low = low.min(axial)
+			high = high.max(axial)
+		for q in range(low.x - 1, high.x + 2):
+			for r in range(low.y - 1, high.y + 2):
+				if rect.has_point(HEX_GRID_SCRIPT.axial_to_plane(Vector2(q, r)) * cell_size):
+					_visual_deck_lift_by_cell[Vector2i(q, r)] = deck_top
+
+
+func _built_road_deck_applies() -> bool:
+	return _terrain_map_data != null and _uses_hex_grid() and _is_arid_terrain_visual_context() \
+		and not _homebase_visuals_enabled and not _orbital_station_view and not _terrain_resource_prefill_only
+
+
+func _sync_built_road_deck(tiles: Array) -> void:
+	# Cold, once per map render. Flat road cells become one static object;
+	# ramps and graded regional cells keep the painted ground route.
+	if is_instance_valid(_built_road_deck):
+		_built_road_deck.get_parent().remove_child(_built_road_deck)
+		_built_road_deck.queue_free()
+	_built_road_deck = null
+	if not _built_road_deck_applies() or _world_root == null:
+		return
+	var cells: Dictionary = {}
+	var height_step: float = _get_3d_height_step()
+	# An authored layout already carries joined service paths around its
+	# buildings; those keep their own ribbon and are not built a second time.
+	var authored_paths: Array = []
+	if is_instance_valid(_authored_visual_layout_root):
+		for node: Node in _authored_visual_layout_root.find_children("*", "Node3D", true, false):
+			if node.has_method("get_access_snapshot"):
+				authored_paths.append_array(Array(Dictionary(node.call("get_access_snapshot")).get("paths", [])))
+	for tile in tiles:
+		if String(tile.surface_type) != "road" or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile):
+			continue
+		if _regional_height_step > 0.0 and not _regional_surface_profile(tile).is_empty():
+			continue
+		var centre: Vector3 = _grid_to_3d_position(Vector2(tile.grid_position), float(tile.height_level) * height_step)
+		var covered := false
+		for path: Dictionary in authored_paths:
+			var reach: float = float(path.get("width", 1.0)) * 0.5 + _get_3d_cell_size() * 0.55
+			for sample: Vector2 in PackedVector2Array(path.get("samples", PackedVector2Array())):
+				if sample.distance_squared_to(Vector2(centre.x, centre.z)) < reach * reach:
+					covered = true
+					break
+			if covered:
+				break
+		if not covered:
+			cells[tile.grid_position] = centre
+	_built_road_deck = FRONTIER_ROAD_DECK_SCRIPT.build(_world_root, cells, _get_3d_cell_size())
+
 
 func set_authoring_markers_visible(enabled: bool) -> void:
 	if _show_authoring_markers==enabled: return

@@ -200,23 +200,35 @@ func _test_revision_gap()->void:
 	view.free();registry.free()
 
 func _test_painted_pad(view:Node)->void:
+	# Grafikpass R2 (Nutzerentscheidung 14.11.2026): Landepads sind wieder
+	# niedrige erhoehte Objekte statt Bodenfarbe. Die frueheren Erwartungen an
+	# die flache Bemalung sind ersetzt. Unveraendert bleibt: keine Terrainhoehe.
 	var container:=Node3D.new();view.add_child(container)
-	var dressing:Dictionary=preload("res://scripts/terrain/place_reference_dressing.gd").build(container,{"pads":[{"center":[0,0],"size":[5.5,4.2],"name":"PAD"}]})
+	var place=preload("res://scripts/terrain/place_reference_dressing.gd")
+	var spec:={"center":[0,0],"size":[5.5,4.2],"name":"PAD"}
+	var dressing:Dictionary=place.build(container,{"pads":[spec]})
 	view.set("_place_dressing_root",dressing.root)
+	view.call("_configure_visual_deck_lift",[spec])
 	var bounds:Dictionary=view.call("_get_local_visual_bounds",dressing.root)
 	var tile=TILE.new({"tile_id":"0,0","grid_position":Vector2i.ZERO,"height_level":0,"walkable":true})
 	var points:PackedVector3Array=view.call("_hex_grid_outline_cached",tile,{})
 	var clear:=bool(bounds.valid)
 	for point in points:clear=clear and point.y>Vector3(bounds.max).y
-	check(clear,"actual painted pad producer remains below depth-tested authored contour")
-	check(is_zero_approx(float(view.call("_hex_grid_model_support_lift",tile))) and TILE.stand_height(tile)==0.0,"painted apron does not invent model support or terrain height")
-	var cap_shadow_off:=true
+	check(clear,"raised pad deck stays below the lifted depth-tested hex contour")
+	check(is_equal_approx(float(view.call("_hex_grid_model_support_lift",tile)),place.PAD_DECK_TOP) and TILE.stand_height(tile)==0.0,"raised deck lifts only the visual standing height; terrain height stays zero")
+	var outside=TILE.new({"tile_id":"9,9","grid_position":Vector2i(9,9),"height_level":0,"walkable":true})
+	check(is_zero_approx(float(view.call("_hex_grid_model_support_lift",outside))),"cells beside the deck keep ground standing height")
+	var deck_casts:=false
+	var inlays_off:=true
 	var inset_retained:=false
 	for pad in dressing.root.get_children():
 		for child in pad.get_children():
-			if child is MeshInstance3D:cap_shadow_off=cap_shadow_off and child.cast_shadow==GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if child is MeshInstance3D:
+				if String(child.name)=="ChamferedDeck":deck_casts=deck_casts or child.cast_shadow!=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				else:inlays_off=inlays_off and child.cast_shadow==GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if String(child.name)=="InsetDeck":inset_retained=child.visible
-	check(cap_shadow_off and inset_retained,"actual painted pad removes self-shadow casters while retaining inset geometry")
+	check(deck_casts and inlays_off and inset_retained,"only the solid deck bodies cast; thin inlays stay non-casting and the inset is retained")
+	view.call("_configure_visual_deck_lift",[])
 	var standalone=preload("res://scripts/terrain/frontier_outpost_pad.gd").new();container.add_child(standalone);standalone.build(Vector2.ZERO,Vector2(5.5,4.2),"RAISED")
 	check(standalone.get_node("InsetDeck").cast_shadow!=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,"unflattened standalone pad caster route remains unchanged")
 	container.free();view.set("_place_dressing_root",null)

@@ -22,6 +22,14 @@ uniform vec4 sediment_color : source_color = vec4(0.73, 0.51, 0.33, 1.0);
 // hue only, so wide fields stay quiet and no cell lattice is drawn.
 uniform float drift_strength : hint_range(0.0, 1.5) = 0.8;
 uniform float rock_facet_strength : hint_range(0.0, 1.5) = 1.0;
+// Grafikpass R2: narrow sand strips on otherwise firm ground read as a worn
+// footpath that wanders inside its hexes. Set by the profile per map.
+uniform bool trail_surface = false;
+// Direction towards the profile sun (rotation -52/-32). Faces turned away
+// from it receive a warm bounce so shaded cliffs keep their stone colour.
+uniform vec3 sun_direction_world = vec3(-0.326, 0.788, 0.522);
+// 1.0 paints roads into the ground; lower when a built road deck covers them.
+uniform float road_paint_strength : hint_range(0.0, 1.0) = 1.0;
 varying vec3 ground_world_position;
 varying vec3 ground_world_normal;
 varying float ramp_incline;
@@ -65,15 +73,16 @@ float wind_drift(vec2 p) {
 	return clamp((long_band * 0.50 + short_band * 0.32 + ripple * 0.18) * 2.6 - 1.3, -1.0, 1.0);
 }
 
-// Angular fracture cells for cliff faces. Returns x: facet tone (-1..1),
-// y: crevice weight (0..1). Cells are stretched vertically like joint blocks.
-vec2 fracture_facets(vec2 face) {
+// Quarry-stone blocks for cliff faces. Returns x: block tone (-1..1),
+// y: joint weight (0..1), z: position inside the block (-1 foot .. 1 crown).
+vec3 fracture_facets(vec2 face) {
 	vec2 q = face * vec2(1.05, 0.52);
 	vec2 cell = floor(q);
 	vec2 local = fract(q);
 	float nearest = 8.0;
 	float second = 8.0;
 	float tone = 0.0;
+	float rise = 0.0;
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			vec2 offset = vec2(float(x), float(y));
@@ -85,6 +94,7 @@ vec2 fracture_facets(vec2 face) {
 				second = nearest;
 				nearest = distance;
 				tone = patch_hash(id + vec2(331.0, 419.0));
+				rise = -delta.y;
 			} else if (distance < second) {
 				second = distance;
 			}
@@ -92,7 +102,7 @@ vec2 fracture_facets(vec2 face) {
 	}
 	float gap = second - nearest;
 	float edge = max(fwidth(gap), 0.02);
-	return vec2(tone * 2.0 - 1.0, 1.0 - smoothstep(0.03 - edge, 0.10 + edge, gap));
+	return vec3(tone * 2.0 - 1.0, 1.0 - smoothstep(0.03 - edge, 0.10 + edge, gap), clamp(rise * 1.6, -1.0, 1.0));
 }
 
 float wheel_mark(vec2 p,vec2 a,vec2 b) {
@@ -162,9 +172,12 @@ void fragment() {
 		// variant), a shaded foot and a sun-bleached crown. Geometry is unchanged.
 		float wall = (1.0 - exposed) * rock_facet_strength;
 		float along = abs(ground_world_normal.x) > abs(ground_world_normal.z) ? ground_world_position.z : ground_world_position.x;
-		vec2 facets = fracture_facets(vec2(along, ground_world_position.y) * 1.6 + vec2(region * 0.6, 0.0));
-		value *= pow(1.0 + facets.x * 0.10 * wall, tint_gamma);
-		value *= pow(1.0 - facets.y * 0.26 * wall, tint_gamma);
+		vec3 facets = fracture_facets(vec2(along, ground_world_position.y) * 1.6 + vec2(region * 0.6, 0.0));
+		value *= pow(1.0 + facets.x * 0.13 * wall, tint_gamma);
+		value *= pow(1.0 - facets.y * 0.30 * wall, tint_gamma);
+		// Each block catches light on its upper edge and shades towards its
+		// foot: chunky quarried stone instead of a flat printed crack pattern.
+		value *= pow(1.0 + facets.z * 0.11 * wall * (1.0 - facets.y), tint_gamma);
 		float foot = 1.0 - smoothstep(-0.05, 0.85, ground_world_position.y);
 		value *= pow(1.0 - foot * 0.20 * wall, tint_gamma);
 		pigment = mix(pigment, pigment * pow(vec3(0.86, 0.74, 0.78), vec3(tint_gamma)), facets.y * 0.55 * wall);
@@ -210,9 +223,23 @@ void fragment() {
 		vec2 warp = vec2(broad_patch(p*2.2),broad_patch(p*2.2+vec2(8.0,3.0)))-0.5;
 		vec2 uv = (grid+warp*0.18-surface_bounds.xy+0.5)/surface_bounds.zw;
 		vec4 weights = texture(surface_mask,uv);
-		float road = smoothstep(0.12,0.85,weights.r);
+		float road = smoothstep(0.12,0.85,weights.r) * road_paint_strength;
 		float rock = smoothstep(0.05,0.95,weights.g);
 		float sand = clamp(weights.b+(broad_patch(p*0.21)-0.5)*0.42,0.0,1.0);
+		float trail = 0.0;
+		if (trail_surface) {
+			// A second, slowly meandering lookup lets the worn line drift off
+			// the cell centres; a firm core with a loose, broken verge.
+			vec2 meander = vec2(broad_patch(p*0.50+vec2(17.0,3.0)),broad_patch(p*0.50+vec2(2.0,29.0)))-0.5;
+			vec2 trail_uv = (grid+meander*0.80+warp*0.22-surface_bounds.xy+0.5)/surface_bounds.zw;
+			float worn = texture(surface_mask,trail_uv).b;
+			float core = smoothstep(0.40,0.66,worn);
+			float verge = smoothstep(0.14,0.44,worn)*(1.0-core);
+			trail = core;
+			// A footpath is compacted earth, not a bright sand road: stay closer
+			// to the surrounding ground than a full sand field.
+			sand = clamp(core*0.62+verge*smoothstep(0.35,0.75,broad_patch(p*2.3+vec2(5.0,1.0)))*0.30,0.0,1.0);
+		}
 		vec3 earth = mix(vec3(0.65,0.36,0.25),vec3(0.81,0.54,0.34),sand);
 		earth = mix(earth,vec3(0.62,0.38,0.30),rock*0.65);
 		// Dust remains at the irregular road shoulder and in small worn patches.
@@ -221,7 +248,11 @@ void fragment() {
 		float road_dust = smoothstep(0.50,0.82,broad_patch(p*0.75+vec2(3.3,8.8)))*0.38;
 		earth = mix(earth,vec3(0.50,0.475,0.40),road*(1.0-road_wear)*(1.0-road_dust));
 		earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
-		drift_mask = clamp(1.0 - road * 0.72 - weights.a, 0.0, 1.0);
+		drift_mask = clamp(1.0 - road * 0.72 - weights.a - trail * 0.35, 0.0, 1.0);
+		if (trail_surface) {
+			// Trodden centre: paler and finer, with scuffed darker flecks.
+			earth *= 1.0-trail*0.045*smoothstep(0.55,0.80,broad_patch(p*5.5+vec2(1.0,9.0)));
+		}
 		if (homebase_palette) {
 			// Muted rust and dusty compacted soil share the existing rock family.
 			// Saved surface weights still describe exactly the same cells.
@@ -249,7 +280,7 @@ void fragment() {
 		float crack_edge=max(fwidth(crack_field),0.009);
 		float fissure=(1.0-smoothstep(0.018-crack_edge,0.045+crack_edge,crack_field))*crust_zone;
 		float shoulder=homebase_palette ? 0.0 : (1.0-smoothstep(0.025,0.11,abs(weights.r-0.62)))*broad_patch(p*3.0);
-		float detail_strength=quiet_tactical_surface ? 0.42 : 1.0;
+		float detail_strength=quiet_tactical_surface ? 0.24 : 1.0;
 		if (quiet_tactical_surface) {
 			// Isolated crust and gravel fields; the wide ground between them stays plain.
 			crust_zone*=smoothstep(0.58,0.80,broad_patch(p*0.19+vec2(2.4,11.3)));
@@ -299,6 +330,13 @@ void fragment() {
 		pigment *= pow(1.0 + (ripple * 0.085 + mottle * 0.07) * near, tint_gamma);
 	}
 	ALBEDO = pigment * value;
+	if (rock_strata) {
+		// Warm ground bounce keeps shaded cliff faces readable instead of
+		// dropping to black; strongest near the foot, none on the crown.
+		float shade_wall = 1.0 - smoothstep(0.40, 0.88, ground_world_normal.y);
+		float averted = smoothstep(0.20, -0.30, dot(normalize(ground_world_normal), normalize(sun_direction_world)));
+		EMISSION = ALBEDO * vec3(1.0, 0.84, 0.74) * (0.12 + 0.62 * averted) * shade_wall * rock_facet_strength;
+	}
 	ROUGHNESS = 0.96;
 	METALLIC = 0.0;
 }

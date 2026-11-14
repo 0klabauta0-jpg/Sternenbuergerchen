@@ -32,7 +32,7 @@ func run() -> void:
 			last_map = f[1]
 		else:
 			v.set("_camera_size", float(f[4]))
-			v.call("focus_world_position", Vector2(float(f[2]), float(f[3])))
+			v.call("focus_world_position", Vector2(float(f[2]), float(f[3])) if f[2] != "obj" else v.get("_terrain_map_data").get_marker_position("objective_point"))
 			v.call("_update_camera_transform")
 		for i in 16: await process_frame
 		await RenderingServer.frame_post_draw

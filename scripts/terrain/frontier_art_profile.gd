@@ -17,6 +17,10 @@ var _blend_texture: ImageTexture
 var _world_to_grid := Vector4(1,0,0,1)
 var homebase_palette: bool = false
 var quiet_tactical_surface: bool = false
+## Render-only: true when sand cells are narrow strips on firmer ground.
+var trail_surface: bool = false
+## Render-only: 1.0 paints roads into the ground, lower under a built road deck.
+var road_paint_strength: float = 1.0
 
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
@@ -73,6 +77,10 @@ func apply_light(light: DirectionalLight3D) -> void:
 func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> void:
 	_blend=load("res://scripts/terrain/terrain_surface_blend.gd").build(tiles)
 	if _blend.is_empty(): return
+	var sand_cells := 0
+	for tile in tiles:
+		if String(tile.surface_type) == "sand": sand_cells += 1
+	trail_surface = sand_cells > 0 and float(sand_cells) < float(tiles.size()) * 0.30
 	_blend_texture=ImageTexture.create_from_image(_blend.image)
 	var inverse := Transform2D(axis_q,axis_r,Vector2.ZERO).affine_inverse()
 	_world_to_grid=Vector4(inverse.x.x,inverse.y.x,inverse.x.y,inverse.y.y)
@@ -81,6 +89,8 @@ func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> 
 func _apply_blend(material: ShaderMaterial, rock: bool) -> void:
 	material.set_shader_parameter("homebase_palette", homebase_palette)
 	material.set_shader_parameter("quiet_tactical_surface", quiet_tactical_surface)
+	material.set_shader_parameter("trail_surface", trail_surface and not rock)
+	material.set_shader_parameter("road_paint_strength", road_paint_strength)
 	material.set_shader_parameter("surface_blending",not rock and not _blend.is_empty())
 	if rock or _blend.is_empty(): return
 	material.set_shader_parameter("surface_mask",_blend_texture)
