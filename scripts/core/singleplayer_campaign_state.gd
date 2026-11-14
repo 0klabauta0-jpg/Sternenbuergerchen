@@ -243,7 +243,12 @@ func _upload(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var id := String(payload.get("job_id",""))
 	if not bool(context.get("at_home",false)):
 		return _reject("upload_requires_home","Chip-Upload nur am Terminal der Heimatbasis")
-	if not _jobs.has(id) or String(_jobs[id].status) != "pending_upload":
+	var job: Dictionary = _jobs.get(id, {})
+	var status := String(job.get("status", ""))
+	# Playtest L01: a chip that physically reached the home base proves recovery and return,
+	# even when the mission result never reported its last step and the job stayed active.
+	var carried_home := status == "active" and bool(job.get("home_upload", false)) and bool(context.get("chip_at_home", false))
+	if status != "pending_upload" and not carried_home:
 		return _reject("no_chip","Kein geborgener Chip zum Hochladen")
 	return _finalize(id)
 
