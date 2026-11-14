@@ -1,0 +1,12 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T151217Z-703b964d",
+    "--editor",
+    "--import"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 5.019114399998216
+}

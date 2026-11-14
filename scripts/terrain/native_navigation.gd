@@ -6,10 +6,13 @@ extends RefCounted
 ## are evaluated lazily by C++; unchanged GDScript is the differential oracle.
 const PATH_SCRIPT = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_SCRIPT = preload("res://scripts/terrain/hpa_pathfinder.gd")
+const REGISTRY_SCRIPT = preload("res://scripts/terrain/terrain_registry.gd")
 const RESULT_CACHE_LIMIT: int = 64
 var _oracle = PATH_SCRIPT.new()
 var _fallback_hpa = HPA_SCRIPT.new()
 var _kernel: Object
+var _terrain_builder: Object
+var native_terrain_builder_enabled: bool = true
 var _prepared_registry_ref: WeakRef
 var _prepared_graph_ref: WeakRef
 var _prepared_registry_revision: int = -1
@@ -86,6 +89,8 @@ class RegionalSearch:
 func _init() -> void:
 	if ClassDB.class_exists("NativeNavigationKernel"):
 		_kernel = ClassDB.instantiate("NativeNavigationKernel")
+	if ClassDB.class_exists("NativeTerrainBuilder"):
+		_terrain_builder = ClassDB.instantiate("NativeTerrainBuilder")
 	_reset_debug()
 
 
@@ -93,7 +98,8 @@ func _reset_debug() -> void:
 	_debug = {"last_backend": "none", "fallback_reason": "", "result_cache_hit": false,
 		"snapshot_prepare_usec": 0, "native_query_usec": 0, "snapshot_reused": false,
 		"terrain_prepare_usec": 0, "graph_prepare_usec": 0, "options_prepare_usec": 0,
-		"graph_reused": false}
+		"graph_reused": false, "terrain_builder": "reused", "terrain_extract_usec": 0,
+		"terrain_edges_usec": 0, "terrain_load_usec": 0}
 
 
 func get_debug_snapshot() -> Dictionary:
@@ -238,6 +244,7 @@ func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 
 
 func _load_terrain(registry) -> bool:
+	var phase_started: int = Time.get_ticks_usec()
 	var tiles: Array = registry.call("get_all_tiles")
 	var grid_ids: Dictionary = {}
 	var coords := PackedInt32Array()
@@ -248,6 +255,12 @@ func _load_terrain(registry) -> bool:
 	var stand_heights := PackedFloat64Array()
 	var object_heights := PackedInt32Array()
 	var surface_costs := PackedFloat64Array()
+	var traits := PackedByteArray()
+	var ramp_directions := PackedInt32Array()
+	# Duck readers and derived registries may supply different effective geometry
+	# through get_tile_at_grid than through enumeration. Keep their original calls.
+	var builder_supported: bool = native_terrain_builder_enabled and is_instance_valid(_terrain_builder) \
+		and _terrain_builder.has_method("build_edges") and registry.get_script() == REGISTRY_SCRIPT
 	_terrain_grids.clear()
 	for tile in tiles:
 		var grid: Vector2i = Vector2i(tile.grid_position)
@@ -268,32 +281,58 @@ func _load_terrain(registry) -> bool:
 		stand_heights.append(PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.stand_height(tile))
 		object_heights.append(object_height)
 		surface_costs.append(PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(tile.surface_type)))
+		if builder_supported:
+			var ramp: int = int(tile.ramp_direction)
+			if height < 0 or height > PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL or ramp < -1 or ramp >= 6:
+				builder_supported = false
+			else:
+				ramp_directions.append(ramp)
+				traits.append((1 if tile.explicit_hex_ramps else 0) | (2 if tile.regional_grade else 0)
+					| (4 if String(tile.edge_type) == "slope" else 0) | (8 if String(tile.object_type_id) == "glut_bridge_deck" else 0))
+	_debug["terrain_extract_usec"] = Time.get_ticks_usec() - phase_started
+	phase_started = Time.get_ticks_usec()
+	var hex_mode: bool = registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == "hex_axial_v1"
+	var built_edges: Dictionary = {}
+	if builder_supported:
+		built_edges = _terrain_builder.call("build_edges", {"coords": coords, "height": heights, "walkable": walkable,
+			"traits": traits, "ramp_direction": ramp_directions, "stand_height": stand_heights, "surface_cost": surface_costs, "hex": hex_mode})
 	var offsets := PackedInt32Array()
 	var neighbors := PackedInt32Array()
 	var costs := PackedFloat64Array()
-	var directions: Array = _oracle.get_neighbor_directions(registry)
-	for source_id in range(_terrain_grids.size()):
+	if not built_edges.is_empty():
+		offsets = built_edges.offsets
+		neighbors = built_edges.neighbors
+		costs = built_edges.costs
+		_debug["terrain_builder"] = "native"
+	else:
+		# Original edge traversal remains the fallback for older DLLs, unsupported
+		# authored values and the developer comparison switch.
+		_debug["terrain_builder"] = "gdscript"
+		var directions: Array = _oracle.get_neighbor_directions(registry)
+		for source_id in range(_terrain_grids.size()):
+			offsets.append(neighbors.size())
+			var grid: Vector2i = _terrain_grids[source_id]
+			for direction in directions:
+				var target: Vector2i = grid + Vector2i(direction)
+				if not grid_ids.has(target) or not _oracle.can_traverse_step(grid, target, registry):
+					continue
+				var target_id: int = int(grid_ids[target])
+				# Match Main's canonical ramp midpoint heights. Retain the unmultiplied
+				# base; dividing a previous diagonal cost would change float rounding.
+				var cost: float = surface_costs[target_id]
+				var height_difference: float = absf(stand_heights[target_id] - stand_heights[source_id])
+				if height_difference > 0:
+					cost += height_difference
+				neighbors.append(target_id)
+				costs.append(cost)
 		offsets.append(neighbors.size())
-		var grid: Vector2i = _terrain_grids[source_id]
-		for direction in directions:
-			var target: Vector2i = grid + Vector2i(direction)
-			if not grid_ids.has(target) or not _oracle.can_traverse_step(grid, target, registry):
-				continue
-			var target_id: int = int(grid_ids[target])
-			# Match Main's canonical ramp midpoint heights. Retain the unmultiplied
-			# base; dividing a previous diagonal cost would change float rounding.
-			var cost: float = surface_costs[target_id]
-			var height_difference: float = absf(stand_heights[target_id] - stand_heights[source_id])
-			if height_difference > 0:
-				cost += height_difference
-			neighbors.append(target_id)
-			costs.append(cost)
-	offsets.append(neighbors.size())
-	var hex_mode: bool = registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == "hex_axial_v1"
+	_debug["terrain_edges_usec"] = Time.get_ticks_usec() - phase_started
+	phase_started = Time.get_ticks_usec()
 	if not bool(_kernel.call("load_terrain", {"coords": coords, "offsets": offsets, "neighbors": neighbors,
 		"costs": costs, "walkable": walkable, "cover": cover, "blocks_los": blocks_los,
 		"height": heights, "object_height": object_heights, "hex": hex_mode, "heuristic_min": 0.7})):
 		return _reject("native_snapshot_rejected")
+	_debug["terrain_load_usec"] = Time.get_ticks_usec() - phase_started
 	return true
 
 

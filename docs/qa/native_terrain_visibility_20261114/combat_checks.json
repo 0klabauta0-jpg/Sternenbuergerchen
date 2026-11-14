@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {
+      "name": "combat",
+      "script": "res://scripts/tests/task_1191_shared_combat_visibility_cache.gd",
+      "success_marker": "=== RESULTS:",
+      "args": [],
+      "timeout": 180
+    }
+  ],
+  "version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150050Z-074f9a9e",
+    "--script",
+    "res://scripts/tests/native_terrain_preparation_verifier.gd",
+    "--",
+    "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\terrain_verify_a\\result.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 2.6890629999979865
+}

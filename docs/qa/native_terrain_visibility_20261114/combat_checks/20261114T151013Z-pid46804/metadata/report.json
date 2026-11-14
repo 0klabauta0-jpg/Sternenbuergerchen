@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks\\20261114T151013Z-pid46804",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150951Z-6dd016fe",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.048,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks\\20261114T151013Z-pid46804\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T15:10:13.920059+00:00",
+  "finished_at": "2026-11-14T15:10:43.749596+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150951Z-6dd016fe",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks\\20261114T151013Z-pid46804\\logs\\engine-check-combat.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150951Z-6dd016fe\\scripts\\tests\\task_1191_shared_combat_visibility_cache.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 29.774,
+      "name": "combat",
+      "marker_found": true,
+      "errors": [
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_01.ogg'.",
+        "ERROR: Resource file not found: res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg (expected type: unknown)",
+        "ERROR: Error loading resource: 'res://Assets/used/audio/kenney_all_in_one/impact/impact_generic_light_02.ogg'."
+      ],
+      "error_count": 96,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks\\20261114T151013Z-pid46804\\logs\\check-combat.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\combat_checks\\20261114T151013Z-pid46804\\logs\\engine-check-combat.log",
+      "passed": false,
+      "reasons": [
+        "96 error(s)"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}

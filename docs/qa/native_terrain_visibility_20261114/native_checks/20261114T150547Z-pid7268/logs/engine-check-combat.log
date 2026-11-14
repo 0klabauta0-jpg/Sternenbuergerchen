@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Could not resolve script "res://scripts/tactical/enemy_limbo_behavior_adapter.gd".
+   at: GDScript::reload (res://scripts/tests/mission_combat_loop_driver.gd:15)
+SCRIPT ERROR: Parse Error: Could not resolve script "res://scripts/tactical/enemy_limbo_behavior_adapter.gd".
+   at: GDScript::reload (res://scripts/tests/mission_combat_loop_driver.gd:5218)
+SCRIPT ERROR: Parse Error: Could not resolve script "res://scripts/tactical/enemy_limbo_behavior_adapter.gd".
+   at: GDScript::reload (res://scripts/tests/mission_combat_loop_driver.gd:5219)
+SCRIPT ERROR: Parse Error: Could not resolve script "res://scripts/tactical/enemy_limbo_behavior_adapter.gd".
+   at: GDScript::reload (res://scripts/tests/mission_combat_loop_driver.gd:5237)
+SCRIPT ERROR: Parse Error: Could not resolve script "res://scripts/tactical/enemy_limbo_behavior_adapter.gd".
+   at: GDScript::reload (res://scripts/tests/mission_combat_loop_driver.gd:5238)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:0)
+ERROR: Failed to load script "res://scripts/tests/task_1191_shared_combat_visibility_cache.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+=== TASK_1191 Shared Combat Visibility Cache ===
+PASS: Combat driver loads the shared visibility cache
+PASS: Combat driver wires a derived cache node
+PASS: Combat hotpath audit exposes cache status
+PASS: 16v12 performance fixture enables the shared visibility cache
+PASS: Equal ordered node queries share one terrain occlusion
+PASS: Audit separates asks, terrain checks and cache hits
+PASS: Direction, revision, in-cell position and tick do not reuse stale geometry
+SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.
+   at: SimulationCombatAITickBudgetHarness._make_combat_context (res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd:118)
+   GDScript backtrace (most recent call first):
+       [0] _make_combat_context (res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd:118)
+       [1] _run_16v12_fixture (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:132)
+       [2] _test_16v12_cache_on_off_is_deterministic (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:119)
+       [3] _run_tests (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:45)
+SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.
+   at: SimulationCombatAITickBudgetHarness._make_combat_context (res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd:118)
+   GDScript backtrace (most recent call first):
+       [0] _make_combat_context (res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd:118)
+       [1] _run_16v12_fixture (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:132)
+       [2] _test_16v12_cache_on_off_is_deterministic (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:120)
+       [3] _run_tests (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:45)
+PASS: 16v12 cache on/off keeps 600 ticks bit-exact for contacts, detection, fire, hits and mission result
+ERROR: FAIL: 16v12 fixture records shared visibility cache hits
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:220)
+       [1] _test_16v12_cache_on_off_is_deterministic (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:123)
+       [2] _run_tests (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:45)
+PASS: 16v12 cache never performs more terrain LOS checks than visibility asks
+ERROR: FAIL: 16v12 fixture reports enemy tactics rebuilds alongside visibility metrics
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:220)
+       [1] _test_16v12_cache_on_off_is_deterministic (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:125)
+       [2] _run_tests (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:45)
+ERROR: FAIL: 16v12 fixture exercises active combat movement during the cache comparison
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:220)
+       [1] _test_16v12_cache_on_off_is_deterministic (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:126)
+       [2] _run_tests (res://scripts/tests/task_1191_shared_combat_visibility_cache.gd:45)
+=== RESULTS: 9 passed, 3 failed ===

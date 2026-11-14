@@ -1,0 +1,19 @@
+{
+	"compared_edges": 51721,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"failed": 0,
+	"failures": [],
+	"passed": 1468,
+	"reference_body_sha256": "263f4473b0b19f36d876413060f361e1022f21ba3f96455a3ccf1055aa1a765e",
+	"schema": "native_terrain_preparation_verifier.v1"
+}

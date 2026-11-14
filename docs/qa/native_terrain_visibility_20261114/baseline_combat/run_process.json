@@ -1,0 +1,14 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T145416Z-bb237eee",
+    "--script",
+    "res://scripts/tests/performance_hex_cache_20261113.gd",
+    "--",
+    "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\baseline_combat\\result.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 0.5041946000128519
+}

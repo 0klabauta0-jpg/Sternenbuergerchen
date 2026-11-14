@@ -7,6 +7,41 @@ const NO_BLOCKER_GRID := Vector2i(2147483647, 2147483647)
 const HEX_GRID_SCRIPT = preload("res://scripts/terrain/hex_grid.gd")
 
 var _los_step_buffer: Array[Vector2i] = []
+var _native_visibility_enabled := true
+var _native_visibility_checked := false
+var _native_visibility: RefCounted
+var _native_visibility_calls := 0
+var _native_visibility_fallbacks := 0
+
+
+func set_native_visibility_enabled(enabled: bool) -> void:
+	# Developer/reference switch; no terrain or result state is cached here.
+	_native_visibility_enabled = enabled
+
+
+func get_native_visibility_snapshot() -> Dictionary:
+	return {"enabled": _native_visibility_enabled, "available": _native_visibility != null,
+		"native_calls": _native_visibility_calls, "fallback_calls": _native_visibility_fallbacks,
+		"kernel": "stateless_hex_line", "retained_terrain_cells": 0}
+
+
+func _try_native_hex_line(source: Vector2i, target: Vector2i, out: Array[Vector2i]) -> bool:
+	if not _native_visibility_enabled:
+		return false
+	if not _native_visibility_checked:
+		_native_visibility_checked = true
+		if ClassDB.class_exists("NativeVisibilityKernel"):
+			var candidate = ClassDB.instantiate("NativeVisibilityKernel")
+			if candidate is RefCounted and candidate.has_method("build_hex_line"):
+				_native_visibility = candidate
+	if _native_visibility != null:
+		var result: Variant = _native_visibility.call("build_hex_line", source, target)
+		if result is Array and not result.is_empty() and result.front() == source and result.back() == target:
+			out.assign(result)
+			_native_visibility_calls += 1
+			return true
+	_native_visibility_fallbacks += 1
+	return false
 
 
 func has_line_of_sight_between_points(
@@ -123,6 +158,8 @@ func _build_grid_line(source_grid: Vector2i, target_grid: Vector2i) -> Array[Vec
 func _build_grid_line_into(source_grid: Vector2i, target_grid: Vector2i, out: Array[Vector2i], terrain_registry = null) -> void:
 	out.clear()
 	if _uses_hex_grid(terrain_registry):
+		if _try_native_hex_line(source_grid, target_grid, out):
+			return
 		out.assign(HEX_GRID_SCRIPT.line(source_grid, target_grid))
 		return
 	var delta: Vector2i = target_grid - source_grid

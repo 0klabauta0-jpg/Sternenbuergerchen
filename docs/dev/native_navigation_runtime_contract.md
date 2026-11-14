@@ -53,6 +53,23 @@ wiederholte oder durch Kontextwechsel ueberholte Finalisierungen bauen nichts
 auf. Die bestehende Restore-Autoritaet wird dadurch nicht erweitert.
 
 ## Beobachtbarkeit und Grenzen
+Die native Terrainvorbereitung baut gerichtete Nachbarkanten ueber den
+zustandslosen `NativeTerrainBuilder` aus gepackten Feldern. GDScript liest
+weiterhin effektive Walkability, Hoehen, Oberflaechen und Overrides der Registry.
+Nur die exakte kanonische `TerrainRegistry` mit unterstuetzten Hoehen-/Rampenwerten
+verwendet diesen Builder. Abgeleitete/andere Reader, ausgeschalteter Builder,
+fehlende Methode oder abgelehnte Eingaben verwenden die urspruengliche
+GDScript-Kantenschleife. `native_terrain_builder_enabled` ist ein interner
+Vergleichsschalter. Die bestehenden DLL-freien Navigationsfallbacks bleiben.
+
+Diese Optimierung fuehrt keine inkrementellen Terrainupdates ein: Eine neue
+Revision baut weiterhin einen vollstaendigen Snapshot. Queryoptionen allein
+loesen weiterhin keinen Terrainaufbau aus. Native Suchjobs, Gleichstandsfolge,
+Budgets, Rampenregeln und Gameplay-Autoritaet bleiben unveraendert.
+Die Debugfelder `terrain_builder`, `terrain_extract_usec`, `terrain_edges_usec`
+und `terrain_load_usec` trennen Wiederverwendung, Extraktion, Kanten und Laden.
+Nachweis: `docs/qa/native_terrain_visibility_20261114/README.md`.
+
 `get_navigation_backend_debug_snapshot()` zeigt Backend/Fallbackgrund, Snapshot-
 Zaehler und den letzten Prewarmbericht mit Dauer und Registryrevision.
 `get_navigation_debug_snapshot().navigation_backend` und Queryhistory zeigen die

@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PERF_SAMPLE {"metric":"hex_visibility_64_pairs_4_readers_cpu","pairs":64,"readers":4,"renderer":"headless","samples":[2456,2536,2490,2500,2442,2447,2436,2471,2465,2459,2462,2498,2493,2483,2489,2549,2482,2495,2468,2475,2557,2481,2478,2544,2487,2471,2601,2534,2506,2506],"tick_local":true,"unit":"usec"}
+PERFORMANCE_REVIEW passed=27 failed=0

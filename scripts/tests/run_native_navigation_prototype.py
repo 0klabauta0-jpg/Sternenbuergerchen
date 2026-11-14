@@ -19,8 +19,10 @@ def main():
     parser.add_argument("--output-dir")
     parser.add_argument("--timeout", type=int, default=1800)
     parser.add_argument("--without-native", action="store_true")
+    parser.add_argument("--with-limboai", action="store_true", help="Include the real LimboAI dependency for combat fixtures")
     parser.add_argument("--script-arg", action="append", default=[])
     parser.add_argument("--copy-script", action="append", default=[])
+    parser.add_argument("--copy-resource", action="append", default=[], help="Explicit project-relative runtime resource")
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--success-marker")
     args = parser.parse_args()
@@ -34,6 +36,11 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     entry = "scripts/tests/" + args.script
     queue = [entry, *["scripts/tests/" + name for name in args.copy_script]]
+    for relative in args.copy_resource:
+        source = (ROOT / relative).resolve()
+        if not source.is_relative_to(ROOT) or not source.is_file():
+            parser.error("copy-resource must name an existing file inside the project")
+        queue.append(source.relative_to(ROOT).as_posix())
     # Fixture uses a constant map path; preserve bytes including source metadata.
     queue += ["maps/Ground_Mission01_32x32.json"]
     copied = {}
@@ -58,18 +65,30 @@ def main():
             for dep in re.findall(r'preload\(\s*["\x27]res://([^"\x27]+)["\x27]\s*\)', source_text):
                 if (ROOT / dep).is_file():
                     queue.append(dep)
+    extension_files = []
+    extensions = []
     if not args.without_native:
-        for relative in [
+        extensions.append("res://native/navigation/navigation.gdextension")
+        extension_files += [
             "native/navigation/navigation.gdextension",
             "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll",
-        ]:
-            source = ROOT / relative
-            dest = project / relative
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, dest)
-            copied[relative] = hashlib.sha256(source.read_bytes()).hexdigest()
+        ]
+    if args.with_limboai:
+        extensions.append("res://addons/limboai/bin/limboai.gdextension")
+        extension_files += [
+            "addons/limboai/bin/limboai.gdextension",
+            "addons/limboai/bin/liblimboai.windows.editor.x86_64.dll",
+            "addons/limboai/bin/liblimboai.windows.template_release.x86_64.dll",
+        ]
+    for relative in extension_files:
+        source = ROOT / relative
+        dest = project / relative
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, dest)
+        copied[relative] = hashlib.sha256(source.read_bytes()).hexdigest()
+    if extensions:
         (project / ".godot").mkdir(exist_ok=True)
-        (project / ".godot/extension_list.cfg").write_text("res://native/navigation/navigation.gdextension\n")
+        (project / ".godot/extension_list.cfg").write_text("\n".join(extensions) + "\n")
     (project / "project.godot").write_text(
         'config_version=5\n[application]\nconfig/name="NativeNavigationProbe-' + run_id +
         '"\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="NativeNavigationProbe/' + run_id +
@@ -79,6 +98,10 @@ def main():
         "engine": subprocess.check_output([args.godot, "--version"], text=True).strip(),
         "run_id": run_id, "source_sha256": copied, "minimal_project": str(project),
         "headless": True, "gpu_timing": "unavailable", "player_profile": "unique isolated project",
+        # Preserve captured byte hashes, plus LF hashes for Git checkouts whose
+        # attributes normalize CRLF. Only declared text resources are normalized.
+        "source_lf_sha256": {name: hashlib.sha256((project / name).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+                             for name in copied if Path(name).suffix in [".gd", ".json", ".md", ".txt", ".tscn", ".tres", ".gdextension", ".gdshader", ".gdshaderinc"]},
     }
     (output / "source_manifest.json").write_text(json.dumps(environment, indent=2), encoding="utf-8")
     commands = [

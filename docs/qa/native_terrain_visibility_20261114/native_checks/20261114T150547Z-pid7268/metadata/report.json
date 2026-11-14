@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.048,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T15:05:47.742189+00:00",
+  "finished_at": "2026-11-14T15:06:02.029170+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-visibility.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\native_visibility_verifier.gd",
+        "--",
+        "--require-native=true"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.637,
+      "name": "visibility",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-visibility.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-visibility.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-terrain.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\native_terrain_preparation_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.119,
+      "name": "terrain",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-terrain.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-terrain.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-frontier.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\frontier_hex_visibility_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.55,
+      "name": "frontier",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-frontier.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-frontier.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-fog_los.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\runtime_hitches_r4_20261107_fog_los_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.465,
+      "name": "fog_los",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-fog_los.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-fog_los.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-fog_slices.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\reference_polish_r3_20261106_fog_single_slice_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.306,
+      "name": "fog_slices",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-fog_slices.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-fog_slices.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-hex_cache.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\performance_hex_cache_20261113.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.464,
+      "name": "hex_cache",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-hex_cache.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-hex_cache.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-combat.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\task_1191_shared_combat_visibility_cache.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 1.565,
+      "name": "combat",
+      "marker_found": true,
+      "errors": [
+        "SCRIPT ERROR: Parse Error: Could not resolve script \"res://scripts/tactical/enemy_limbo_behavior_adapter.gd\".",
+        "SCRIPT ERROR: Parse Error: Could not resolve script \"res://scripts/tactical/enemy_limbo_behavior_adapter.gd\".",
+        "SCRIPT ERROR: Parse Error: Could not resolve script \"res://scripts/tactical/enemy_limbo_behavior_adapter.gd\".",
+        "SCRIPT ERROR: Parse Error: Could not resolve script \"res://scripts/tactical/enemy_limbo_behavior_adapter.gd\".",
+        "SCRIPT ERROR: Parse Error: Could not resolve script \"res://scripts/tactical/enemy_limbo_behavior_adapter.gd\".",
+        "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+        "SCRIPT ERROR: Compile Error: Failed to compile depended scripts.",
+        "ERROR: Failed to load script \"res://scripts/tests/task_1191_shared_combat_visibility_cache.gd\" with error \"Compilation failed\".",
+        "SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.",
+        "SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.",
+        "ERROR: FAIL: 16v12 fixture records shared visibility cache hits",
+        "ERROR: FAIL: 16v12 fixture reports enemy tactics rebuilds alongside visibility metrics",
+        "ERROR: FAIL: 16v12 fixture exercises active combat movement during the cache comparison"
+      ],
+      "error_count": 13,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-combat.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-combat.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "13 error(s)"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-navigation.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\native_navigation_main_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 3.32,
+      "name": "navigation",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-navigation.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-navigation.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-load.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\tmp\\native_navigation\\20261114T150522Z-53e9e072\\scripts\\tests\\native_navigation_load_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.765,
+      "name": "load",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\check-load.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-20261114\\docs\\qa\\native_terrain_visibility_20261114\\native_checks\\20261114T150547Z-pid7268\\logs\\engine-check-load.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 9,
+    "passed": 8,
+    "failed": 1
+  }
+}

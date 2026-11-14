@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### Native Terrainvorbereitung und Hexsicht — 14.11.2026 (Task-Branch)
+
+Basis frisch geholter Main `a982a0b5d`; Branch
+`task/native-terrain-visibility-20261114`. Gerichtete Terrainkanten und
+zustandslose Hexlinien in der vorhandenen C++-GDExtension; Regeln, Owner,
+Cache-/FoW-Budgets und GDScript-Fallbacks bleiben erhalten. Je 40 gepaarte
+Samples: GM01-Vorbereitung Median 388,853 -> 75,834 ms (-80,5 %), kurze
+gecachte Sichtabfragen 2,620 -> 2,3725 ms (-9,4 %). Voller FoW-Job nur rund
+2 % niedrigerer beobachteter Median; kein allgemeiner FPS-/FoW-Nachweis.
+12 akzeptierte Gates inklusive 3.387 Sicht- und 1.468 Terrainassertions,
+51.721 Kanten, bestehendem 600-Tick-Kampf-/Cachetest und drei Gates ohne DLL.
+Windows x64/Godot 4.6.2; keine neue EXE, kein Mainmerge oder Fullgame-Playtest.
+Messgrenzen, verworfene Isolationslaeufe und Rohdaten:
+`docs/qa/native_terrain_visibility_20261114/README.md`.
+
 ### C++-Navigation in aktuellem Main integriert — 14.11.2026
 
 Integrationsbasis Main `03cdccc51`; gezielte Uebernahme der drei Navigations-

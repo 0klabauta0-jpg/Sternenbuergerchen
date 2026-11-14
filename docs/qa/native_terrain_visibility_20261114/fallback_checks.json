@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "visibility",
+      "script": "res://scripts/tests/native_visibility_verifier.gd",
+      "success_marker": "NATIVE_VISIBILITY_VERIFIER",
+      "args": [
+        "--require-native=false"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "navigation",
+      "script": "res://scripts/tests/native_navigation_main_verifier.gd",
+      "success_marker": "NATIVE_NAVIGATION_MAIN",
+      "args": [
+        "--expect-native=false"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "load",
+      "script": "res://scripts/tests/native_navigation_load_verifier.gd",
+      "success_marker": "NATIVE_NAVIGATION_LOAD",
+      "args": [
+        "--expect-native=false"
+      ],
+      "timeout": 180
+    }
+  ]
+}

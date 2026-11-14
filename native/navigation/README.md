@@ -5,6 +5,16 @@ The extension implements stable A*, directed local Dijkstra cost maps, the exist
 HPA portal search/assembly and Main's incremental RegionalHexSearch. It is not a
 new globally optimal HPA algorithm.
 
+The same library also contains two stateless kernels: `NativeTerrainBuilder`
+constructs directed adjacency from packed effective terrain fields, and
+`NativeVisibilityKernel` generates the exact canonical Hex ray cells. LOS still
+reads current terrain and applies blocker/height rules in GDScript; Square wall
+segments keep their original path. Neither kernel owns gameplay state.
+Older or missing kernel APIs retain GDScript fallbacks. See
+`docs/dev/native_visibility_runtime_contract.md` and
+`docs/qa/native_terrain_visibility_20261114/README.md` for the bounded contract
+and paired measurements. Terrain revisions still rebuild a full snapshot.
+
 ## Build
 
 From the repository root in PowerShell:
