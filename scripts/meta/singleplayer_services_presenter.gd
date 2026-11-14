@@ -371,6 +371,8 @@ func _apply_section() -> void:
 		var has_data:bool=false
 		for job:Dictionary in _snapshot.get("campaign",{}).get("jobs",{}).values():
 			has_data=has_data or String(job.get("status",""))=="pending_upload"
+		var upload_blocker:String=String(_snapshot.get("home_services",{}).get("upload_blocker",""))
+		has_data=has_data or not Array(_snapshot.get("home_services",{}).get("upload_job_ids",[])).is_empty() or not upload_blocker.is_empty()
 		if not has_data:
 			_section_note.text="Keine geborgenen Missionsdaten vorhanden. Erst am Einsatzort sichern, zum Schiff zurückbringen und heimkehren."
 			var jobs:Dictionary=_snapshot.get("campaign",{}).get("jobs",{})
@@ -382,7 +384,7 @@ func _apply_section() -> void:
 				if String(job.get("status",""))=="completed":
 					_section_note.text="%s: Daten bereits hochgeladen und Belohnung erhalten. Keine weiteren Missionsdaten zum Hochladen vorhanden."%String(job.get("title",id))
 		elif _campaign_buttons.campaign_upload.button.disabled:
-			_section_note.text="Missionsdaten geborgen. Zuerst wieder an der Heimatbasis landen."
+			_section_note.text=upload_blocker if not upload_blocker.is_empty() else "Missionsdaten geborgen. Zuerst wieder an der Heimatbasis landen."
 		else:
 			_section_note.text="Missionsdaten vorhanden. Mit dem Button unten hochladen."
 	_feedback.visible = ship or (not _availability_feedback and _feedback.text != "Versorgung bereit")
@@ -444,6 +446,7 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 	var at_outpost := String(context.get("location_id", "")) == "trade_outpost" and not _selected_craft_id.is_empty() and _selected_craft_id == job_craft
 	var has_chip := false
 	for job: Dictionary in jobs.values(): has_chip = has_chip or String(job.get("status","")) == "pending_upload"
+	has_chip = has_chip or not local_uploads.is_empty() or not String(home_services.get("upload_blocker", "")).is_empty()
 	for key in _campaign_buttons:
 		var action: Dictionary = _campaign_buttons[key]
 		var button: Button = action.button

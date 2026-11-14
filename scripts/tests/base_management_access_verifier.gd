@@ -14,9 +14,9 @@ func _run()->void:
 	screen.request_operation("navigate",{"mode":"base"})
 	var presenter:Node=screen.get("_operations_presenter")
 	var bar:Control=presenter.get("_base_management_bar")
-	check(not bar.is_visible_in_tree(),"base submenu starts folded instead of covering the map")
-	presenter.get("_nav").base.mouse_entered.emit()
-	check(bar.is_visible_in_tree() and bar.get_parent()==presenter.get("_base_navigation_group"),"hover opens management directly below Basis erkunden")
+	presenter.call("set_interface_settings_path_for_tests","user://nav_groups_fixture.cfg")
+	presenter.call("set_nav_group_open","base",true)
+	check(bar.is_visible_in_tree() and bar.get_parent()==presenter.get("_base_navigation_group"),"base submenu is unfolded directly below Basis erkunden")
 	for i in 12:await process_frame
 	check(Rect2(Vector2.ZERO,Vector2(root.size)).encloses(bar.get_global_rect()),"expanded submenu stays within the 1280 viewport")
 	if DisplayServer.get_name()!="headless":
@@ -25,17 +25,20 @@ func _run()->void:
 	var motion:=InputEventMouseMotion.new()
 	motion.position=Vector2(1100,300)
 	root.push_input(motion)
-	presenter.call("_close_base_navigation_after_exit")
 	await create_timer(0.2).timeout
-	check(not bar.visible,"leaving the navigation folds submenu")
-	presenter.get("_nav").base.focus_entered.emit()
-	check(bar.visible,"keyboard focus can reopen the submenu")
+	check(bar.visible,"leaving the navigation keeps the submenu open")
+	var toggle:Button=presenter.get("_nav_group_toggles").base
+	check(toggle.get_global_rect().size.x>=32 and toggle.get_global_rect().size.y>=32,"submenu toggle has a full-size click area")
+	toggle.pressed.emit()
+	check(not bar.visible,"explicit toggle folds the submenu")
+	toggle.pressed.emit()
+	check(bar.visible,"explicit toggle unfolds the submenu again")
 	var actions:Dictionary={}
 	for button:Button in bar.get_children():actions[button.text]=button
 	check(actions.has("Bauen") and actions.has("Werkstatt / Blueprints") and actions.has("Datenterminal / Hochladen"),"base exposes build workshop and upload directly")
 	var before:Dictionary=flow.get("_singleplayer_runtime").get("_supply").export_state()
 	actions["Datenterminal / Hochladen"].pressed.emit()
-	check(not bar.visible,"choosing a submenu entry folds navigation")
+	check(bar.visible,"choosing a submenu entry keeps the submenu open")
 	var services:Node=presenter.get("_services_view")
 	check(services.is_visible_in_tree() and services.get("_section")=="data","actual data-terminal button opens canonical upload view")
 	check(services.get("_campaign_buttons").campaign_upload.button.is_visible_in_tree(),"upload location stays discoverable without a chip")

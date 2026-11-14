@@ -178,6 +178,8 @@ func _build_personnel_controls() -> void:
 	_person_panel.name = "BasePersonnelActions"
 	_person_panel.resized.connect(func(): command_dock_geometry_changed.emit())
 	_person_panel.visibility_changed.connect(func(): command_dock_geometry_changed.emit())
+	_person_panel.resized.connect(_layout_exploration_help)
+	_person_panel.visibility_changed.connect(_layout_exploration_help)
 	add_child(_person_panel)
 	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	var dock := PanelContainer.new()
@@ -1343,6 +1345,17 @@ func _box(parent: Node3D, size_value: Vector3, position_value: Vector3, color: C
 	return visual
 
 
+func _layout_exploration_help() -> void:
+	# Playtest L04/L01: "Konsole aufsuchen" sat completely underneath the full-width
+	# command dock and could not be clicked. Keep the help block above the dock.
+	var panel := get_node_or_null("ExplorationHelp") as Control
+	if panel == null:
+		return
+	var dock_height: float = _person_panel.size.y if _person_panel != null and _person_panel.visible else 0.0
+	panel.offset_bottom = -(dock_height + 12.0) if dock_height > 0.0 else -22.0
+	panel.offset_top = panel.offset_bottom - 96.0
+
+
 func _build_overlay() -> void:
 	var panel := VBoxContainer.new()
 	panel.name = "ExplorationHelp"
@@ -1365,6 +1378,7 @@ func _build_overlay() -> void:
 	_hint.mouse_filter = Control.MOUSE_FILTER_STOP
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(_hint)
+	_layout_exploration_help()
 	var exit := Button.new()
 	exit.name = "ExitExploration"
 	exit.text = "Übersicht  ·  Esc"

@@ -37,7 +37,7 @@ func run() -> void:
 		if not await _click_ui(presenter.get("_nav").get("jobs"), "actual Smart Mobile navigation"):
 			await finish_capture(); return
 		await frames(18)
-		check(not presenter.get("_base_management_bar").visible and not presenter.get("_flight_management_bar").visible, "switching to the actual job app folds unrelated action groups")
+		check(presenter.get("_base_management_bar").visible, "switching to the actual job app keeps the unfolded base actions open")
 		var board: Control = presenter.get("_job_board")
 		if not _expect(board.is_visible_in_tree() and presenter.is_workspace_flyout_open(), "actual navigation opens the visible job app " + str(dimensions)):
 			await finish_capture(); return

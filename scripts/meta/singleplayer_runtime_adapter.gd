@@ -1924,18 +1924,19 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		var job_id := String(payload.get("job_id",""))
 		if job_id.is_empty():
 			for id in snapshot.jobs:
-				if String(snapshot.jobs[id].status) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if String(id) == "satellite_recovery" else "outpost_chip").is_empty():
+				if not _local_upload_container(String(id), snapshot.jobs[id]).is_empty():
 					job_id = String(id)
 					break
 		var job: Dictionary = snapshot.jobs.get(job_id,{})
-		if String(job.get("status","")) != "pending_upload": return _reject("no_chip","Kein geborgener Chip zum Hochladen")
+		var upload_status := String(job.get("status",""))
+		if upload_status != "pending_upload" and not (upload_status == "active" and bool(job.get("home_upload",false))): return _reject("no_chip","Kein geborgener Chip zum Hochladen")
 		craft_id = String(job.get("craft_id",craft_id))
 		var item_id := "satellite_chip" if job_id == "satellite_recovery" else "outpost_chip"
 		var container:String=_find_local_campaign_chip_container(item_id)
 		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt bei der Person, im Schiff oder im Basislager")
 		var cargo := _commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":item_id,"amount":-1},"campaign-cargo:upload:"+job_id,{"campaign_authorized":true})
 		if not bool(cargo.get("ok",false)): return cargo
-		var result := _commit("singleplayer_campaign","upload_job",{"job_id":job_id},"upload:"+job_id,{"at_home":true})
+		var result := _commit("singleplayer_campaign","upload_job",{"job_id":job_id},"upload:"+job_id,{"at_home":true,"chip_at_home":true})
 		if bool(result.get("ok",false)):
 			var receipt: Dictionary = result.get("completion_receipt",{})
 			_commit("singleplayer_supply","apply_reward",{"completion_id":receipt.completion_id},"reward:"+String(receipt.completion_id),{"completion_receipt":receipt})
@@ -2375,12 +2376,32 @@ func _find_local_campaign_chip_container(item_id: String) -> String:
 		if int(Dictionary(inventory.get(container, {})).get("items", {}).get(item_id, 0)) > 0: return container
 	return ""
 
+func _local_upload_container(job_id: String, job: Dictionary) -> String:
+	# Playtest L01: the upload follows the chip that is physically at home. The job may still
+	# be "active" when the mission result never reported its last step.
+	var status := String(job.get("status", ""))
+	if status != "pending_upload" and not (status == "active" and bool(job.get("home_upload", false))):
+		return ""
+	return _find_local_campaign_chip_container("satellite_chip" if job_id == "satellite_recovery" else "outpost_chip")
+
+
+func _upload_blocker_text(container: String) -> String:
+	if container.begins_with("craft:"):
+		return "Der Datenträger liegt im Lager eines Schiffs, das nicht an der Heimatbasis steht. Erst hier landen."
+	if container.begins_with("unit:"):
+		return "Der Datenträger ist bei einer Person, die nicht an der Heimatbasis ist. Erst mit ihr heimkehren."
+	return ""
+
+
 func _home_services_snapshot() -> Dictionary:
 	var local_jobs: Array[String] = []
+	var blocker := ""
 	for id: String in _campaign.get_campaign_snapshot().get("jobs", {}):
 		var job: Dictionary = _campaign.get_campaign_snapshot().jobs[id]
-		if String(job.get("status", "")) == "pending_upload" and not _find_local_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip").is_empty(): local_jobs.append(id)
-	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "all_at_home":_all_at_home()}
+		if not _local_upload_container(id, job).is_empty(): local_jobs.append(id)
+		elif blocker.is_empty() and bool(job.get("home_upload", false)) and String(job.get("status", "")) in ["pending_upload", "active"]:
+			blocker = _upload_blocker_text(_find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", String(job.get("craft_id", ""))))
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home()}
 
 func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	# get_completed_result consumes its delivery flag before automatic recruitment.
