@@ -22,6 +22,7 @@ const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 const FRONTIER_GM01_LAYOUT_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_gm01_layout.gd")
 const FRONTIER_ROAD_DECK_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_road_deck.gd")
+const CLIFF_DETAIL_MAX_TILES: int = 20000
 const FRONTIER_REFERENCE_DRESSING_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_reference_dressing.gd")
 const PERSONNEL_IDENTITY = preload("res://scripts/terrain/personnel_visual_identity.gd")
 
@@ -4634,7 +4635,9 @@ func _add_regional_cliff_faces(tiles: Array) -> void:
 
 func _append_cliff_face(surface:SurfaceTool,a:Vector3,b:Vector3,base_a:Vector3,base_b:Vector3,cell:Vector2i,edge:int,cell_size:float)->void:
 	if _frontier_art_enabled and _regional_height_step>0.0:
-		CLIFF_FRACTURE.append_face(surface,a,b,base_a,base_b,cell.x*73856093 ^ cell.y*19349663 ^ edge*83492791,cell_size)
+		# Richer cliff geometry only where the triangle budget allows it: the
+		# large campaign regions keep the four-facet face (resource cache limit).
+		CLIFF_FRACTURE.append_face(surface,a,b,base_a,base_b,cell.x*73856093 ^ cell.y*19349663 ^ edge*83492791,cell_size,true,_map_total_tile_count>0 and _map_total_tile_count<=CLIFF_DETAIL_MAX_TILES)
 	else:
 		_add_regional_triangle(surface,a,base_a,b)
 		_add_regional_triangle(surface,b,base_a,base_b)
@@ -16868,11 +16871,9 @@ func _sync_built_road_deck(tiles: Array) -> void:
 			if node.has_method("get_access_snapshot"):
 				authored_paths.append_array(Array(Dictionary(node.call("get_access_snapshot")).get("paths", [])))
 	for tile in tiles:
-		if String(tile.surface_type) != "road" or TERRAIN_TILE_DATA_SCRIPT.is_explicit_ramp(tile):
+		if String(tile.surface_type) != "road":
 			continue
-		if _regional_height_step > 0.0 and not _regional_surface_profile(tile).is_empty():
-			continue
-		var centre: Vector3 = _grid_to_3d_position(Vector2(tile.grid_position), float(tile.height_level) * height_step)
+		var centre: Vector3 = _grid_to_3d_position(Vector2(tile.grid_position), TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * height_step)
 		var covered := false
 		for path: Dictionary in authored_paths:
 			var reach: float = float(path.get("width", 1.0)) * 0.5 + _get_3d_cell_size() * 0.55
@@ -16884,7 +16885,29 @@ func _sync_built_road_deck(tiles: Array) -> void:
 				break
 		if not covered:
 			cells[tile.grid_position] = centre
-	_built_road_deck = FRONTIER_ROAD_DECK_SCRIPT.build(_world_root, cells, _get_3d_cell_size())
+	_built_road_deck = FRONTIER_ROAD_DECK_SCRIPT.build(_world_root, cells, _get_3d_cell_size(), Callable(self, "_road_ground_y"))
+	# The road is a raised slab like the pads: hex lines, selection and units
+	# stand on it. Ramp cells are excluded by _hex_grid_model_support_lift.
+	for grid: Vector2i in cells:
+		_visual_deck_lift_by_cell[grid] = maxf(float(_visual_deck_lift_by_cell.get(grid, 0.0)), FRONTIER_ROAD_DECK_SCRIPT.DECK_HEIGHT)
+
+
+func _road_ground_y(point: Vector2) -> float:
+	# Terrain surface under a road vertex, including graded ramp caps. Unlike
+	# _get_world_surface_y this ignores model support lifts (pads, floors).
+	var world := _position_3d_to_world(Vector3(point.x, 0.0, point.y))
+	var cell := _world_to_grid_position(world)
+	var tile = _render_tile_by_grid.get(cell)
+	if tile == null:
+		return 0.0
+	var height: float = TERRAIN_TILE_DATA_SCRIPT.stand_height(tile) * _get_3d_height_step()
+	if not _uses_hex_grid():
+		return height
+	var profile := _regional_surface_profile(tile)
+	if profile.is_empty():
+		return height
+	var offset: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(_world_to_grid_float(world) - Vector2(cell))
+	return height + REGIONAL_SURFACE.rise_at(offset, profile) * _get_3d_height_step()
 
 
 func set_authoring_markers_visible(enabled: bool) -> void:

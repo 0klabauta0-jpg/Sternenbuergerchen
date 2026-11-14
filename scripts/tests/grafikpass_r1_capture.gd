@@ -4,6 +4,8 @@ extends SceneTree
 ##   CAP_DIR   absolute output directory
 ##   CAP_SHOTS "name|map_id|focus_x|focus_y|camera_size;..." ; focus_x "obj"
 ##             frames the map's objective_point marker instead.
+##   CAP_FIGURES optional "x,z,level,yaw;..." in plane cells: places the
+##             project's own unit models as size comparison.
 ## Example shot list: docs/qa/grafikpass_r1_20261114/README.md
 const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
 const VIEW = preload("res://scripts/terrain/terrain_map_3d_view.gd")
@@ -29,7 +31,28 @@ func run() -> void:
 			if f[2] == "obj": focus = terrain.get_marker_position("objective_point")
 			v.configure_from_map(terrain, focus, float(f[4]))
 			v.set_authoring_markers_visible(false)
-			last_map = f[1]
+			# Optional comparison figures: the project's own unit models.
+			# "x,z,level,yaw;..." in plane coordinates.
+			var figures := OS.get_environment("CAP_FIGURES")
+			if not figures.is_empty():
+				var armors := ["light", "medium", "heavy", "suit"]
+				var index := 0
+				for entry in figures.split(";", false):
+					var parts := entry.split(",")
+					var actor: Node = load("res://scripts/npc/test_unit.gd").new()
+					actor.unit_id = "figure_%d" % index
+					actor.team_id = "team_alpha"
+					actor.armor_id = armors[index % armors.size()]
+					actor.portrait_path = load("res://scripts/meta/portrait_identity_catalog.gd").resolve_path("char_portrait_%03d" % (1 + (index * 7) % 40))
+					root.add_child(actor)
+					var figure: Node3D = v.call("_create_unit_proxy", actor)
+					figure.position = Vector3(float(parts[0]), float(parts[2]) * 0.75, float(parts[1]))
+					figure.rotation_degrees.y = float(parts[3]) if parts.size() > 3 else 0.0
+					v.get("_world_root").add_child(figure)
+					var idle := figure.find_child("UnitVisualAnimationPlayer", true, false) as AnimationPlayer
+					if idle != null and idle.has_animation("idle"):
+						idle.play("idle"); idle.advance(0.2); idle.pause()
+					index += 1
 		else:
 			v.set("_camera_size", float(f[4]))
 			v.call("focus_world_position", Vector2(float(f[2]), float(f[3])) if f[2] != "obj" else v.get("_terrain_map_data").get_marker_position("objective_point"))

@@ -59,7 +59,7 @@
       0.5,
       0.83
     ],
-    "map_file_path": "res://maps/fortified_outpost.json",
+    "map_file_path": "res://maps/windbruch_outpost.json",
     "scenario_file_path": "res://data/mission_scenarios/outpost_chip_recovery.json",
     "landing_pad_ids": [
       "fortified_pad_01"

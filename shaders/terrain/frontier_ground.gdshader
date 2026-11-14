@@ -223,7 +223,10 @@ void fragment() {
 		vec2 warp = vec2(broad_patch(p*2.2),broad_patch(p*2.2+vec2(8.0,3.0)))-0.5;
 		vec2 uv = (grid+warp*0.18-surface_bounds.xy+0.5)/surface_bounds.zw;
 		vec4 weights = texture(surface_mask,uv);
-		float road = smoothstep(0.12,0.85,weights.r) * road_paint_strength;
+		// A built road deck cannot follow a graded ramp, so the ramp itself keeps
+		// full paint and takes the asphalt tone of the deck it connects.
+		float graded = smoothstep(0.04, 0.14, ramp_incline);
+		float road = smoothstep(0.12,0.85,weights.r) * mix(road_paint_strength, 1.0, graded);
 		float rock = smoothstep(0.05,0.95,weights.g);
 		float sand = clamp(weights.b+(broad_patch(p*0.21)-0.5)*0.42,0.0,1.0);
 		float trail = 0.0;
@@ -246,7 +249,8 @@ void fragment() {
 		float road_wear = broad_patch(p*4.0)*0.16;
 		// Blown dust thins the paving irregularly instead of a clean painted band.
 		float road_dust = smoothstep(0.50,0.82,broad_patch(p*0.75+vec2(3.3,8.8)))*0.38;
-		earth = mix(earth,vec3(0.50,0.475,0.40),road*(1.0-road_wear)*(1.0-road_dust));
+		vec3 paving = mix(vec3(0.50,0.475,0.40), vec3(0.295,0.305,0.32), graded * step(road_paint_strength, 0.99));
+		earth = mix(earth,paving,road*(1.0-road_wear)*(1.0-road_dust*(1.0-graded)));
 		earth = mix(earth,vec3(0.25,0.45,0.50),weights.a);
 		drift_mask = clamp(1.0 - road * 0.72 - weights.a - trail * 0.35, 0.0, 1.0);
 		if (trail_surface) {
