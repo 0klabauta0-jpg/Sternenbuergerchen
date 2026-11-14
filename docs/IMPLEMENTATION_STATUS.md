@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Mainintegration der nativen Terrain-/Sichtoptimierung geprueft — 14.11.2026
+
+Mainbasis `a982a0b5d`, unveraenderte Uebernahme von `96098c668` per
+Fast-forward im separaten Integrationsworktree. Neun native und drei DLL-freie
+Gates sowie drei kurze Benchmark-Paritaetslaeufe erneut bestanden; keine
+Engine-/Parser-/Leakfehler. Unveraenderte 15 versionierte Buildinputs/DLL und
+297/251 kopierte Testquellen geprueft. Kein weiterer Gameplayumbau.
+Hauptcheckout-WIP, Branch, Index, sechs Dateien und 102.105 untracked
+Inventareintraege unveraendert. Mainveroeffentlichung freigegeben; keine neue
+EXE oder Fullgame-/FPS-/Multiplayerfreigabe. Aktuelle Integrationsbelege:
+`docs/qa/native_terrain_visibility_main_20261114/README.md`.
+
 ### Native Terrainvorbereitung und Hexsicht — 14.11.2026 (Task-Branch)
 
 Basis frisch geholter Main `a982a0b5d`; Branch

@@ -1,0 +1,37 @@
+{
+  "base_main": "a982a0b5d2265678bc796a5da77fe7a0e13e397c",
+  "source_branch_commit": "96098c6685141647480d0d7691dd8d2565dd8b49",
+  "integration_mode": "fast-forward, no source conflict or product edits",
+  "head_at_tests": "96098c6685141647480d0d7691dd8d2565dd8b49",
+  "engine": "4.6.2.stable.official.71f334935",
+  "product_diff_from_source_commit": "",
+  "tracked_build_inputs_and_dll_match": true,
+  "source_and_binary_sha256": {
+    "native/navigation/src/native_costs.cpp": "82080d8718326608729e03fd1bab7fe24ebe139ddd6c406fef8266777a7c0b75",
+    "native/navigation/src/native_hpa.cpp": "77fe203f71acee97f34f242d2db17021ea3c77b4c8d66257e76f8d79c21717ef",
+    "native/navigation/src/native_navigation.cpp": "3ff40e44a5a92e743882f4c03a9e07b563fa1c85ddd26327ce9eb2051f9b15fb",
+    "native/navigation/src/native_navigation.h": "4fdd34737d83d70f4113aacd4ffa842fedd4003fc6d3eca7baadbedf77ea37cd",
+    "native/navigation/src/native_regional.cpp": "e0892ce77beef2ceda45834a51ada49c9ef782cf013adead89fed25f154f2e2d",
+    "native/navigation/src/native_terrain_builder.cpp": "4a0136c11ed79792a376caedbd2be94ccafa2c60f80ac7b78f32e3bcd948151a",
+    "native/navigation/src/native_terrain_builder.h": "7f02ab6366ce3fa9e97e232cbc556fe134b4de9cf01b27d6c953be06e0321799",
+    "native/navigation/src/native_visibility.cpp": "90de8ee36f79fa42d9380e5fd5900635730704ef60a23e841bfd834efca61fe3",
+    "native/navigation/src/native_visibility.h": "c6a72c944ade2b9405bfb3b46e3f7b5f3b6607e7c1a2dd85a3be51d36d93ea7d",
+    "native/navigation/src/register_types.cpp": "8c6255ea2a132fd189199f8b2c6bf9121cd0cf3ecd476b54137679a7f801f0ec",
+    "native/navigation/SConstruct": "2cec1ec29b97f7cf8e5b497e831587473a20ce92c879e54cea6562e07de3cd8c",
+    "native/navigation/build.ps1": "9a197cfc20a9239f381389126a34a8d078113a8092b13890f43d6913b8cec8fb",
+    "native/navigation/build_profile.json": "d91e96bc849d2f33e1ea0bff1ae7ec49bf0aac6d8e026c17ff5e340ebc352142",
+    "native/navigation/navigation.gdextension": "662100291bee07110801a32835d9490e360e2c8e3caae6e162a7bcc48479f97d",
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll": "c98e78c70502ee58476f558c124d2a97ba27b516482ee51ee9b95591fefa47bc"
+  },
+  "original_manifest_non_versioned_obj_files_excluded": [
+    "native/navigation/src/native_costs.windows.template_release.x86_64.obj",
+    "native/navigation/src/native_hpa.windows.template_release.x86_64.obj",
+    "native/navigation/src/native_navigation.windows.template_release.x86_64.obj",
+    "native/navigation/src/native_regional.windows.template_release.x86_64.obj",
+    "native/navigation/src/native_terrain_builder.windows.template_release.x86_64.obj",
+    "native/navigation/src/native_visibility.windows.template_release.x86_64.obj",
+    "native/navigation/src/register_types.windows.template_release.x86_64.obj"
+  ],
+  "native_suite_source_count": 297,
+  "native_suite_sources_match": true
+}

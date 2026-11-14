@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: square8 authored free case has its independent real LOS result
+PASS: square8 free retains the exact Fog result and counters
+PASS: square8 free performs one complete real terrain LOS per admitted pair
+PASS: square8 free does not mutate query inputs
+PASS: square8 free preserves terrain-only API fallback
+PASS: square8 free preserves complete points-only API
+PASS: square8 authored blocked case has its independent real LOS result
+PASS: square8 blocked retains the exact Fog result and counters
+PASS: square8 blocked performs one complete real terrain LOS per admitted pair
+PASS: square8 blocked does not mutate query inputs
+PASS: square8 blocked preserves terrain-only API fallback
+PASS: square8 blocked preserves complete points-only API
+PASS: square8 authored out_of_range case has its independent real LOS result
+PASS: square8 out_of_range retains the exact Fog result and counters
+PASS: square8 out_of_range performs one complete real terrain LOS per admitted pair
+PASS: square8 out_of_range does not mutate query inputs
+PASS: square8 out_of_range preserves terrain-only API fallback
+PASS: square8 out_of_range preserves complete points-only API
+PASS: square8 keeps observer order and first-visible early return
+PASS: square8 blocked then visible observers perform exactly two complete terrain queries
+PASS: square8 mode-off keeps its no-query fast path
+PASS: square8 absent tile remains safely invisible
+PASS: square8 full candidate order/cursor/count and 512-tile scheduling match the real fallback oracle
+PASS: square8 full atomically publishes an exact complete team/delta snapshot
+PASS: square8 full never repeats complete terrain LOS across the actual job
+PASS: square8 dirty candidate order/cursor/count and 512-tile scheduling match the real fallback oracle
+PASS: square8 dirty atomically publishes an exact complete team/delta snapshot
+PASS: square8 dirty never repeats complete terrain LOS across the actual job
+PASS: square8 all real query/commit work preserves registry and source tile data
+PASS: hex_axial_v1 authored free case has its independent real LOS result
+PASS: hex_axial_v1 free retains the exact Fog result and counters
+PASS: hex_axial_v1 free performs one complete real terrain LOS per admitted pair
+PASS: hex_axial_v1 free does not mutate query inputs
+PASS: hex_axial_v1 free preserves terrain-only API fallback
+PASS: hex_axial_v1 free preserves complete points-only API
+PASS: hex_axial_v1 authored blocked case has its independent real LOS result
+PASS: hex_axial_v1 blocked retains the exact Fog result and counters
+PASS: hex_axial_v1 blocked performs one complete real terrain LOS per admitted pair
+PASS: hex_axial_v1 blocked does not mutate query inputs
+PASS: hex_axial_v1 blocked preserves terrain-only API fallback
+PASS: hex_axial_v1 blocked preserves complete points-only API
+PASS: hex_axial_v1 authored out_of_range case has its independent real LOS result
+PASS: hex_axial_v1 out_of_range retains the exact Fog result and counters
+PASS: hex_axial_v1 out_of_range performs one complete real terrain LOS per admitted pair
+PASS: hex_axial_v1 out_of_range does not mutate query inputs
+PASS: hex_axial_v1 out_of_range preserves terrain-only API fallback
+PASS: hex_axial_v1 out_of_range preserves complete points-only API
+PASS: hex_axial_v1 keeps observer order and first-visible early return
+PASS: hex_axial_v1 blocked then visible observers perform exactly two complete terrain queries
+PASS: hex_axial_v1 mode-off keeps its no-query fast path
+PASS: hex_axial_v1 absent tile remains safely invisible
+PASS: hex_axial_v1 full candidate order/cursor/count and 512-tile scheduling match the real fallback oracle
+PASS: hex_axial_v1 full atomically publishes an exact complete team/delta snapshot
+PASS: hex_axial_v1 full never repeats complete terrain LOS across the actual job
+PASS: hex_axial_v1 dirty candidate order/cursor/count and 512-tile scheduling match the real fallback oracle
+PASS: hex_axial_v1 dirty atomically publishes an exact complete team/delta snapshot
+PASS: hex_axial_v1 dirty never repeats complete terrain LOS across the actual job
+PASS: hex_axial_v1 all real query/commit work preserves registry and source tile data
+R4_FOG_LOS: 58 passed, 0 failed
+R4_FOG_LOS_PASS

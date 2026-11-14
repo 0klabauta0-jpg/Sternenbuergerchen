@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "terrain",
+      "script": "res://scripts/tests/native_terrain_preparation_benchmark.gd",
+      "success_marker": "NATIVE_TERRAIN_PREPARATION",
+      "args": [
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\terrain_smoke.json"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "visibility",
+      "script": "res://scripts/tests/native_visibility_benchmark.gd",
+      "success_marker": "NATIVE_VISIBILITY_BENCHMARK",
+      "args": [
+        "--backend=paired",
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\visibility_smoke.json"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "near_visibility",
+      "script": "res://scripts/tests/native_visibility_near_benchmark.gd",
+      "success_marker": "NATIVE_VISIBILITY_NEAR_BENCHMARK",
+      "args": [
+        "--backend=paired",
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\near_visibility_smoke.json"
+      ],
+      "timeout": 180
+    }
+  ]
+}

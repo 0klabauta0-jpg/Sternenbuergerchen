@@ -1,0 +1,1054 @@
+{
+	"context": {
+		"cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+		"engine": {
+			"build": "official",
+			"hash": "71f334935c000924d403448e698df4441130df18",
+			"hex": 263682,
+			"major": 4,
+			"minor": 6,
+			"patch": 2,
+			"status": "stable",
+			"string": "4.6.2-stable (official)",
+			"timestamp": 0
+		},
+		"fixture_load_usec": 245168,
+		"gpu_timing": "unavailable",
+		"half_height_endpoints": 0,
+		"map": "Ground_Mission01_32x32.json",
+		"metric": "64 distinct ordered real-map walkable source/target pairs at4..8hex on six axes; facing aligned to each target; four reads each and fresh begin_tick per sample;64 misses/192 hits on current CombatVisibilityCache",
+		"ordering": "GDScript first on even samples, native first on odd samples",
+		"os": "Windows",
+		"pair_count": 64,
+		"profile": {
+			"arc_degrees": 120.0,
+			"range_hex": 8
+		},
+		"query_distances_hex": [
+			4,
+			5,
+			6,
+			4,
+			5,
+			6,
+			7,
+			8,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			4,
+			5,
+			7,
+			8,
+			4,
+			5,
+			6,
+			7,
+			8,
+			5,
+			7,
+			6,
+			5,
+			6,
+			7,
+			8,
+			4,
+			4,
+			6,
+			7,
+			8,
+			5,
+			6,
+			7,
+			8,
+			5,
+			7
+		],
+		"renderer": "headless",
+		"samples_per_backend": 3,
+		"scope": "Complete admitted cached Hex visibility query CPU including native boundary/result transfer, first native kernel creation and outputs; excludes fixture/load/setup/hash/audit. No full fight, FoW, FPS, rendering or multiplayer claim.",
+		"tiles": 9408,
+		"warmup": 3
+	},
+	"failures": [],
+	"pairs": [
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-57, 70)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-53, 70)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-53, 69)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-48, 64)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-50, 59)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-50, 53)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-45, 65)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-45, 69)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-43, 44)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-38, 44)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-42, 54)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-36, 48)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-41, 62)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-41, 55)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-40, 68)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-48, 68)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-37, 27)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-37, 32)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-36, 25)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-30, 25)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-36, 72)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-29, 65)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-35, 68)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-35, 60)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-34, 62)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-38, 62)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-33, 54)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-38, 59)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-32, 44)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-32, 50)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-31, 32)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-24, 32)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-30, 18)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-22, 10)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-30, 65)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-30, 61)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-29, 49)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-34, 49)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-28, 31)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-34, 37)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-27, 11)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-27, 18)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-27, 58)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-19, 58)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-26, 36)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-22, 32)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-25, 12)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-25, 7)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-25, 59)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-31, 59)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-24, 33)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-31, 40)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-23, 5)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-23, 13)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-23, 52)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-19, 52)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-22, 22)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-17, 17)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-22, 69)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-22, 63)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-21, 37)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-28, 37)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-20, 3)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-28, 11)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-20, 50)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-20, 54)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-19, 14)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-14, 14)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-19, 61)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-13, 55)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-18, 23)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-18, 16)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-18, 70)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-26, 70)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-17, 30)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-21, 34)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-16, -12)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-16, -7)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-15, -9)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-8, -16)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-15, 38)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-15, 30)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-14, -8)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-18, -8)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-14, 39)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-19, 44)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-13, -9)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-13, -3)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-13, 38)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-6, 38)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-12, -12)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-4, -20)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-11, -16)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-16, -16)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-10, -20)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-10, -13)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-9, 70)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-15, 70)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-7, 62)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-2, 57)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(-6, 11)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-6, 5)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(-6, 58)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-13, 58)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-5, 7)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-13, 15)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(-5, 54)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-5, 58)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 4,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(-2, -5)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-6, -1)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(-1, -9)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(5, -9)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(-1, 38)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(6, 31)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 2,
+				"grid": "(0, -13)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(0, -21)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 4,
+				"grid": "(1, -17)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-4, -12)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 6,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(1, 30)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(1, 36)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 0,
+				"grid": "(2, -21)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(9, -21)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 8,
+			"observer": {
+				"facing_dir": 1,
+				"grid": "(2, 26)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(10, 18)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 5,
+			"observer": {
+				"facing_dir": 3,
+				"grid": "(3, 22)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(-2, 22)",
+				"stand_height_steps2": 0
+			}
+		},
+		{
+			"distance_hex": 7,
+			"observer": {
+				"facing_dir": 5,
+				"grid": "(4, 18)",
+				"stand_height_steps2": 0
+			},
+			"target": {
+				"grid": "(4, 25)",
+				"stand_height_steps2": 0
+			}
+		}
+	],
+	"passed": true,
+	"rows": [
+		{
+			"audit": {
+				"available": true,
+				"enabled": true,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 64,
+				"retained_terrain_cells": 0
+			},
+			"backend": "native",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 4,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 0,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2314
+		},
+		{
+			"audit": {
+				"available": false,
+				"enabled": false,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 0,
+				"retained_terrain_cells": 0
+			},
+			"backend": "gdscript",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 4,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 0,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2517
+		},
+		{
+			"audit": {
+				"available": false,
+				"enabled": false,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 0,
+				"retained_terrain_cells": 0
+			},
+			"backend": "gdscript",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 5,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 1,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2492
+		},
+		{
+			"audit": {
+				"available": true,
+				"enabled": true,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 64,
+				"retained_terrain_cells": 0
+			},
+			"backend": "native",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 5,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 1,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2322
+		},
+		{
+			"audit": {
+				"available": true,
+				"enabled": true,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 64,
+				"retained_terrain_cells": 0
+			},
+			"backend": "native",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 6,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 2,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2329
+		},
+		{
+			"audit": {
+				"available": false,
+				"enabled": false,
+				"fallback_calls": 0,
+				"kernel": "stateless_hex_line",
+				"native_calls": 0,
+				"retained_terrain_cells": 0
+			},
+			"backend": "gdscript",
+			"blocked_pairs": 0,
+			"cache": {
+				"actual_los_check_count": 64,
+				"asked_pair_count": 256,
+				"cache_hit_count": 192,
+				"cache_status": "active",
+				"current_tick": 6,
+				"derived_only": true,
+				"entry_count": 64,
+				"hex_actual_los_check_count": 64,
+				"hex_entry_count": 64,
+				"key_ordered_by_source_target": true,
+				"range_rejected_count": 0,
+				"snapshot_serialized": false
+			},
+			"clear_pairs": 64,
+			"sample": 2,
+			"signature": "4bdabca7c551d468d811fca51d4af87d94e5b257840c4bada354f379a91bc087",
+			"usec": 2503
+		}
+	],
+	"schema": "native_visibility_near_cached_queries.v1"
+}

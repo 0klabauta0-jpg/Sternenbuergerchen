@@ -1,5 +1,9 @@
 # Terrainvorbereitung und Kampf-/FoW-Sicht — 14.11.2026
 
+Nachfolgende, ausdruecklich beauftragte Mainintegration mit frischen Tests:
+[Integrationsbericht](../native_terrain_visibility_main_20261114/README.md).
+Die folgenden Messungen und Grenzen dokumentieren den urspruenglichen Branchstand.
+
 ## Ergebnis und Entscheidung
 
 Basis ist der zu Taskbeginn frisch geholte Main

@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "visibility",
+      "script": "res://scripts/tests/native_visibility_verifier.gd",
+      "success_marker": "NATIVE_VISIBILITY_VERIFIER",
+      "args": [
+        "--require-native=true"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "terrain",
+      "script": "res://scripts/tests/native_terrain_preparation_verifier.gd",
+      "success_marker": "NATIVE_TERRAIN_PREPARATION_VERIFIER",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "frontier",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "fog_los",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_fog_los_verifier.gd",
+      "success_marker": "R4_FOG_LOS_PASS",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "fog_slices",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_fog_single_slice_verifier.gd",
+      "success_marker": "R3_FOG_SINGLE_SLICE_PASS",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "hex_cache",
+      "script": "res://scripts/tests/performance_hex_cache_20261113.gd",
+      "success_marker": "PERFORMANCE_REVIEW passed=27 failed=0",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "combat",
+      "script": "res://scripts/tests/task_1191_shared_combat_visibility_cache.gd",
+      "success_marker": "=== RESULTS:",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "navigation",
+      "script": "res://scripts/tests/native_navigation_main_verifier.gd",
+      "success_marker": "NATIVE_NAVIGATION_MAIN",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "load",
+      "script": "res://scripts/tests/native_navigation_load_verifier.gd",
+      "success_marker": "NATIVE_NAVIGATION_LOAD",
+      "args": [],
+      "timeout": 180
+    }
+  ]
+}

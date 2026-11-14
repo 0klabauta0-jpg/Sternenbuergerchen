@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.059,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T15:33:14.101876+00:00",
+  "finished_at": "2026-11-14T15:33:23.517390+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-terrain.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115\\scripts\\tests\\native_terrain_preparation_benchmark.gd",
+        "--",
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\terrain_smoke.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 5.837,
+      "name": "terrain",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\check-terrain.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-terrain.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-visibility.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115\\scripts\\tests\\native_visibility_benchmark.gd",
+        "--",
+        "--backend=paired",
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\visibility_smoke.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.86,
+      "name": "visibility",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\check-visibility.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-visibility.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-near_visibility.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\tmp\\native_navigation\\20261114T153100Z-c8ad2115\\scripts\\tests\\native_visibility_near_benchmark.gd",
+        "--",
+        "--backend=paired",
+        "--samples=3",
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\near_visibility_smoke.json"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.645,
+      "name": "near_visibility",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\check-near_visibility.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\native-terrain-visibility-main-20261114\\docs\\qa\\native_terrain_visibility_main_20261114\\benchmark_smoke_checks\\20261114T153314Z-pid63312\\logs\\engine-check-near_visibility.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

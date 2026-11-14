@@ -1,5 +1,11 @@
 # Native Terrainvorbereitung und Kampf-/FoW-Sicht — 14.11.2026
 
+Folgeauftrag am selben Tag: Mainintegration mit erneuter Verifikation ausdruecklich
+beauftragt. Die urspruengliche Branchabgrenzung unten beschreibt den Messauftrag;
+Integrationsstatus und neue Belege stehen in
+`docs/tasks/NATIVE_TERRAIN_VISIBILITY_MAIN_2026_11_14.md` und
+`docs/qa/native_terrain_visibility_main_20261114/README.md`.
+
 ## Ziel / Problem und Ursache
 Nutzerauftrag: Terrainvorbereitung und Kampf-/FoW-Sicht auf aktuellem Main
 messen und lohnende C++-Optimierungen auf eigenem Branch umsetzen. Main besitzt

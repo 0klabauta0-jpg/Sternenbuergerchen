@@ -1,0 +1,160 @@
+{
+  "passed": true,
+  "count": 15,
+  "regression_gates": 12,
+  "benchmark_smoke_gates": 3,
+  "checks": [
+    {
+      "name": "native_checks/visibility",
+      "passed": true,
+      "markers": [
+        "NATIVE_VISIBILITY_VERIFIER passed=3387 failed=0 native_calls=3036"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/terrain",
+      "passed": true,
+      "markers": [
+        "NATIVE_TERRAIN_PREPARATION_VERIFIER 1468/0 edges=51721"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/frontier",
+      "passed": true,
+      "markers": [
+        "=== RESULTS: 76 passed, 0 failed ==="
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/fog_los",
+      "passed": true,
+      "markers": [
+        "R4_FOG_LOS_PASS"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/fog_slices",
+      "passed": true,
+      "markers": [
+        "R3_FOG_SINGLE_SLICE_PASS"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/hex_cache",
+      "passed": true,
+      "markers": [
+        "PERFORMANCE_REVIEW passed=27 failed=0"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/combat",
+      "passed": true,
+      "markers": [
+        "=== RESULTS: 12 passed, 0 failed ==="
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/navigation",
+      "passed": true,
+      "markers": [
+        "NATIVE_NAVIGATION_MAIN 668/0 slice_pairs=245 runtime_pairs=4"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "native_checks/load",
+      "passed": true,
+      "markers": [
+        "NATIVE_NAVIGATION_LOAD 24/0 expect_native=true"
+      ],
+      "report": "native_checks/20261114T153127Z-pid70056/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "fallback_checks/visibility",
+      "passed": true,
+      "markers": [
+        "NATIVE_VISIBILITY_VERIFIER passed=3335 failed=0 native_calls=0"
+      ],
+      "report": "fallback_checks/20261114T153259Z-pid34296/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "fallback_checks/navigation",
+      "passed": true,
+      "markers": [
+        "NATIVE_NAVIGATION_MAIN 654/0 slice_pairs=245 runtime_pairs=4"
+      ],
+      "report": "fallback_checks/20261114T153259Z-pid34296/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "fallback_checks/load",
+      "passed": true,
+      "markers": [
+        "NATIVE_NAVIGATION_LOAD 23/0 expect_native=false"
+      ],
+      "report": "fallback_checks/20261114T153259Z-pid34296/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "benchmark_smoke_checks/terrain",
+      "passed": true,
+      "markers": [
+        "NATIVE_TERRAIN_PREPARATION rows=24 failures=0"
+      ],
+      "report": "benchmark_smoke_checks/20261114T153314Z-pid63312/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "benchmark_smoke_checks/visibility",
+      "passed": true,
+      "markers": [
+        "NATIVE_VISIBILITY_BENCHMARK rows=6 failures=0"
+      ],
+      "report": "benchmark_smoke_checks/20261114T153314Z-pid63312/metadata/report.json",
+      "sources_match": true
+    },
+    {
+      "name": "benchmark_smoke_checks/near_visibility",
+      "passed": true,
+      "markers": [
+        "NATIVE_VISIBILITY_NEAR_BENCHMARK rows=6 failures=0"
+      ],
+      "report": "benchmark_smoke_checks/20261114T153314Z-pid63312/metadata/report.json",
+      "sources_match": true
+    }
+  ],
+  "smoke": {
+    "terrain": {
+      "rows": 24,
+      "passed": true,
+      "usage": "Parity/integration smoke only; insufficient samples for fresh performance acceptance"
+    },
+    "visibility": {
+      "rows": 6,
+      "passed": true,
+      "usage": "Parity/integration smoke only; insufficient samples for fresh performance acceptance"
+    },
+    "near_visibility": {
+      "rows": 6,
+      "passed": true,
+      "usage": "Parity/integration smoke only; insufficient samples for fresh performance acceptance"
+    }
+  }
+}

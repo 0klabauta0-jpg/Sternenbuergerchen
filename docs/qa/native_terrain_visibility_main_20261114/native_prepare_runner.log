@@ -1,0 +1,78 @@
+import: C:\dev\SternenBuergerchen-worktrees\native-terrain-visibility-main-20261114\docs\qa\native_terrain_visibility_main_20261114\native_suite
+1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  20% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  26% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  41% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  58% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  73% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  79% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | impact_generic_light_02.ogg[39m[0m
+[   2% ] [90m[1mreimport[22m | impact_generic_light_01.ogg[39m[0m
+[   5% ] [90m[1mreimport[22m | impact_generic_light_02.ogg[39m[0m
+[   8% ] [90m[1mreimport[22m | impact_generic_light_01.ogg[39m[0m
+[  11% ] [90m[1mreimport[22m | terrain_SW.png[39m[0m
+[  14% ] [90m[1mreimport[22m | terrain_side_SW.png[39m[0m
+[  17% ] [90m[1mreimport[22m | terrain_side_SE.png[39m[0m
+[  20% ] [90m[1mreimport[22m | terrain_side_NW.png[39m[0m
+[  23% ] [90m[1mreimport[22m | terrain_side_NE.png[39m[0m
+[  26% ] [90m[1mreimport[22m | terrain_sideCorner_SW.png[39m[0m
+[  29% ] [90m[1mreimport[22m | terrain_sideCorner_SE.png[39m[0m
+[  32% ] [90m[1mreimport[22m | terrain_sideCorner_NW.png[39m[0m
+[  35% ] [90m[1mreimport[22m | terrain_sideCorner_NE.png[39m[0m
+[  38% ] [90m[1mreimport[22m | terrain_sideCliff_SW.png[39m[0m
+[  41% ] [90m[1mreimport[22m | terrain_sideCliff_SE.png[39m[0m
+[  44% ] [90m[1mreimport[22m | terrain_sideCliff_NW.png[39m[0m
+[  47% ] [90m[1mreimport[22m | terrain_sideCliff_NE.png[39m[0m
+[  50% ] [90m[1mreimport[22m | terrain_rampLarge_SW.png[39m[0m
+[  52% ] [90m[1mreimport[22m | colormap.png[39m[0m
+[  55% ] [90m[1mreimport[22m | astronautA_SW.png[39m[0m
+[  58% ] [90m[1mreimport[22m | astronautB_SW.png[39m[0m
+[  61% ] [90m[1mreimport[22m | corridor_wallCorner_NE.png[39m[0m
+[  64% ] [90m[1mreimport[22m | corridor_wallCorner_NW.png[39m[0m
+[  67% ] [90m[1mreimport[22m | corridor_wallCorner_SE.png[39m[0m
+[  70% ] [90m[1mreimport[22m | corridor_wallCorner_SW.png[39m[0m
+[  73% ] [90m[1mreimport[22m | corridor_wall_NE.png[39m[0m
+[  76% ] [90m[1mreimport[22m | corridor_wall_NW.png[39m[0m
+[  79% ] [90m[1mreimport[22m | corridor_wall_SE.png[39m[0m
+[  82% ] [90m[1mreimport[22m | corridor_wall_SW.png[39m[0m
+[  85% ] [90m[1mreimport[22m | craft_speederB_SE.png[39m[0m
+[  88% ] [90m[1mreimport[22m | rock_largeB_SW.png[39m[0m
+[  91% ] [90m[1mreimport[22m | rock_SW.png[39m[0m
+[  94% ] [90m[1mreimport[22m | terrain_rampLarge_NE.png[39m[0m
+[  97% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (33 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+Evidence: C:\dev\SternenBuergerchen-worktrees\native-terrain-visibility-main-20261114\docs\qa\native_terrain_visibility_main_20261114\native_suite
