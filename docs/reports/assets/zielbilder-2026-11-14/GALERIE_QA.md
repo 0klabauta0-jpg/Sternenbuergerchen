@@ -35,3 +35,27 @@ Nach Abschluss der Generierung am 14.11.2026 um 15:25-15:27 Uhr Europe/Berlin wu
 - Finale Screenshots `output/playwright/visual-gallery/final-desktop.png` und `final-mobile.png` visuell geoeffnet: Einzelkarten, Notizen und Export passen in die jeweilige Ansicht.
 
 Die fruehe Bedienpruefung lief parallel zur Erzeugung und enthielt erwartbare `ERR_FILE_NOT_FOUND` fuer damals noch nicht vorhandene PNGs. Diese historische Begrenzung ist durch die vollstaendige finale Ladepruefung aufgehoben. Fruehe Screenshots koennen weiterhin die historische 16er-Beschriftung und inzwischen ersetzte Bilder zeigen; fuer den Abschluss gelten die hier genannten finalen Belege.
+
+## Weltraumrevision: Feedback und dateigebundene Bewertungen
+
+Gezielte Folgepruefung am 14.11.2026, 15:57-16:03 Uhr Europe/Berlin. Keine Runtime-QA.
+
+- Die 17 Motivkarten und die Lightbox zeigen das dokumentierte `user_feedback`. Boden 01-12 und 17: insgesamt positiv bestaetigte Stilrichtung, ausdruecklich keine native Modellabnahme. Weltraum 13-16: ueberarbeitete Fassung, aktuelles Nutzerurteil offen.
+- Neues Browserspeicherformat v2 bindet Bewertungen und Notizen an den Dateinamen. Historische Eintraege bleiben je Revision erhalten und werden im `revision_history`-Teil des JSON-Exports ausgegeben. Aktuelle Dateizuordnung steht zusaetzlich in `metadata.asset_files`.
+- Migration des alten dateilosen Browserformats mit absichtlich verschiedenen Testurteilen geprueft: Bodenentscheidung/-notiz und Nahrungspodnotiz bleiben erhalten; alte Weltraum-Urteile und -Notizen landen bei den bekannten urspruenglichen PNGs. Die neue R03 beginnt mit `unreviewed` und leerer Notiz. Zwei vorhandene Alturteile erzeugten zwei sichtbare Revisionshinweise.
+- Neue R03-Notiz und -Entscheidung ueber die echten Bedienfelder gesetzt; nach Reload bleiben diese unter `13_orbit_reise_r03.png` erhalten, gleichzeitig die abweichende alte Notiz unter `13_orbit_reise.png`.
+- Echter JSON-Download `output/playwright/visual-gallery/visual-targets-20261114-2026-11-14T15-00-04-383Z-01.json`: 17 Assetzuordnungen, aktuelle und historische Notiz der Orbitkarte getrennt, alle Nutzerfeedbackobjekte enthalten. Diese Datei enthaelt ausdruecklich synthetische QA-Urteile, keine Nutzerentscheidungen.
+- Export-Roundtrip und anschliessender Import einer alten dateigebundenen Exportdatei geprueft: neue R03-Bewertung bleibt erhalten. Leere Altwerte ueberschreiben keine bereits archivierte aussagekraeftige Altnotiz; diese Kante wurde beim Test gefunden, behoben und erneut ueber die echte Importbedienung bestanden.
+- 17/17 Bilder im Browser geladen und dekodiert; 13-15 sind `*_r03.png`. 390px-Ansicht mit 366px-Kartenspalte, Dokumentbreite 390px, kein horizontaler Ueberlauf. Konsole ohne Meldungen, Fehler oder Warnungen. Polisar-Lightbox mit sichtbarem Nutzerfeedback passt in denselben Viewport.
+- Sichtbarer Link `Blender-Auftrag: Polisar` im Header und Footer; `Raumkarten-Recherche` im Footer. Links zeigen auf die zugehoerigen lokalen Markdown-Dateien im Bildpaket.
+
+## Aktueller Abschluss: Polisar R04
+
+Am 14.11.2026 um 16:07 Uhr Europe/Berlin nach erneuter Nutzerkorrektur abgeschlossen. Der aktuelle Satz besteht aus 17 Motiven; Weltraum 13-15 verwendet R03, Station 16 verwendet ausschliesslich `16_orbitalstation_r04.png`. Die frueher genannten R03-Belege der Station sind historische Zwischenstaende.
+
+- Finale Galerie erneut aus `prompts.json` erzeugt. Alle 17 aktuellen Bilder im echten `file://`-Browser erfolgreich dekodiert. Konsole: 0 Meldungen, 0 Fehler, 0 Warnungen.
+- Tatsaechlichen Dateiwechselschutz R03 -> R04 mit vorhandenem v2-Speicher geprueft: alte Stationentscheidung `good` und Notiz `QA nur Station R03` bleiben unter `16_orbitalstation_r03.png`; aktuelle Station R04 beginnt `unreviewed` mit leerer Notiz. Die unveraenderte Bodenentscheidung und Bodennotiz bleiben erhalten. Die R03-Notiz ist im sichtbaren Revisionsverlauf der Stationskarte abrufbar.
+- Echter Download `output/playwright/visual-gallery/visual-targets-20261114-2026-11-14T15-07-29-920Z-01.json`: 17 Assetzuordnungen, aktuelle Stationdatei R04, historisches R03-Urteil getrennt und aktuelles `user_feedback` mit Label `Markierungen umgesetzt · Bewertung offen` enthalten.
+- Schmale Ansicht 390px: Dokumentbreite 390px ohne Ueberlauf. Desktop 1440px: kein Ueberlauf. Header und Footer enthalten beide den lokalen Blender-Auftrag-Link. Die Recherche ist im Footer verlinkt.
+- Synthetische QA-Eintraege danach aus dem isolierten Browserprofil entfernt; abschliessender Reload zeigt leere Notizfelder. Keine synthetische Bewertung oder Abnahme in HTML/Prompts geschrieben.
+- Generator, erzeugte HTML-Datei und dieses QA-Dokument sind abschliessend mit LF-Zeilenenden gespeichert. Keine Runtime-Dateien geaendert und kein Commit durch diesen Teilauftrag.

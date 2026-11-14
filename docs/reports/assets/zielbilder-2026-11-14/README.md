@@ -5,9 +5,11 @@ Mischung aus der funktionalen Science-Fiction-Gestaltung von Star Citizen und
 einer lesbaren, illustrierten Wimmelbildwelt. Bodenansichten berücksichtigen
 das Hexfeld, Maßstab, freie Wege, Deckung und funktionale Baugruppen.
 
-**Status: generierte 2D-Ziele zur Sichtung.** Die Bilder sind keine nativen
-Godot-Aufnahmen, keine integrierten Modelle und noch nicht vom Nutzer
-abgenommen. Die voneinander abweichenden Schiffe, Wracks, Pads und Gebäude
+**Status: Boden-Stilrichtung positiv bestätigt, Raumkarten R03 / Polisar R04 zur Sichtung.**
+Der Nutzer findet die Bodenmotive insgesamt passend. Die vier kritisierten
+Weltraumansichten 13–16 wurden ersetzt; ihre neue Bewertung ist offen.
+Die Zielbilder sind keine nativen Godot-Aufnahmen oder integrierten Modelle.
+Die voneinander abweichenden Schiffe, Wracks, Pads und Gebäude
 sind eigenständige Szenenvarianten. Sie sind keine maßgleichen Mehransichten
 eines bereits vereinbarten Modells.
 
@@ -30,10 +32,10 @@ stehen in [prompts.json](prompts.json). Bei Revisionen gilt dessen Feld `file`.
 | 10 | Feuerteams im Bodengefecht | Deckung, Truppabstände und verständliche Feuerlinien |
 | 11 | Außenposten bei Nacht | Lesbare Verteidigung, Arbeitslicht und dunkle Umgebung |
 | 12 | Rückzug zur Abholung | Bewegungsrichtung, Schutz und Schiffszugang |
-| 13 | Mondorbit und Weiterreise | Schiff, Himmelskörper und Reiseatmosphäre |
-| 14 | Raumkampf im Asteroidenfeld | Erkennbare Schiffe, Richtungen und räumliche Staffelung |
-| 15 | Hilfe für ein havariertes Schiff | Bergung als übersichtliche Raumbegegnung |
-| 16 | Kleine Orbitalstation | Technische Baugruppen und Anflugraum |
+| 13 | Orbitkarte – Planetenanflug | Planetensaum oben, Systemrichtung unten, kleine Schiffe auf großer Hexkarte |
+| 14 | Raumkampf im Asteroidenfeld | Kleine Rotten, zusammenhängendes Hexraster und freie Manöverräume |
+| 15 | Wrackbegegnung | Kleines beschädigtes Schiff und gerichtete Trümmer im Kartenausschnitt |
+| 16 | Polisar – Stationsanflug | Stehende Ringe, kompakte Pads, größerer Innenbereich, zwei Dockports, hintere Hälfte außerhalb der Map |
 | 17 | Anbaupods am Außenposten | Geschlossene Anbaumodule auf kargem Außengelände |
 
 ## Nutzerkorrektur und Bildgrenzen
@@ -49,9 +51,23 @@ Ansichten dieser Mondoberfläche.
 Das Hexraster ist eine sichtbare Gestaltungsvorgabe und keine mathematisch
 geprüfte Kartenquelle. Seine örtliche Form und sein Maßstab können zwischen
 den KI-Bildern schwanken. Für eine spätere Umsetzung gelten die echten
-Karten-, Höhen-, Navigations- und Sichtdaten des Spiels. Ein in Weltraumbildern
-verwendetes Sensor-Hexraster ist lediglich ein Darstellungskonzept; daraus
-folgt keine zusätzliche Raumkampf- oder Navigationsmechanik.
+Karten-, Höhen-, Navigations- und Sichtdaten des Spiels. Die neuen
+Weltraumbilder richten sich nach dem gelesenen Raumkampfvertrag:
+512 Spalten × 256 Reihen für die gesamte lokale Karte, Ansichten als
+gezoomte Ausschnitte. Leichte und mittlere Jäger entsprechen nach aktuellem
+Nutzerfeedback einem Hex, größere Nutzschiffe wie die Cutlass zwei Hex.
+Die Zahl in der Miniaturansicht bezeichnet die Gesamtkarte, nicht die
+Anzahl sichtbarer gezeichneter Zellen. Wrackbergung ist eine mögliche
+Bildsituation und kein Nachweis einer fertigen Bergemechanik.
+
+Bei Polisar liegen Räume und kompakte Pads vor der oberen Kartengrenze.
+Die hintere Hälfte kann als Dekoration sichtbar bleiben. Senkrechte Ringe
+erscheinen von oben schmal; zwei seitliche Dockports dienen großen Schiffen.
+Der Nutzer nennt die Station Polisar; die bestehenden gelesenen Code-IDs
+heißen `polisa` und werden durch diese Grafikaufgabe nicht geändert.
+Die Unterlagen [RAUMKARTEN_RECHERCHE.md](RAUMKARTEN_RECHERCHE.md) und
+[POLISAR_BLENDER_AUFTRAG.md](POLISAR_BLENDER_AUFTRAG.md) halten Quellen,
+Bildvorgaben und den direkt übergebbaren Modellierungsauftrag fest.
 
 Die gestalterische Prüfung und konkrete offene Stellen stehen in
 [BILDPRUEFUNG.md](BILDPRUEFUNG.md). Ein technischer Hash-/Dateinachweis ist
@@ -66,17 +82,39 @@ eine lokale Referenzkopie bedeutet nicht, dass diese Datei dem Generator
 direkt als Bild-Input übergeben wurde. Die Korrekturen 01/02 R02 verwenden
 die jeweiligen ersten Generatorbilder als Edit-Eingabe. Weitere tatsächliche
 Generation-/Revisionszuordnungen hält `generation_metadata.json` fest.
-Alle 23 Originalausgaben (17 aktuelle Bilder und sechs Zwischenstände)
+Alle 32 Originalausgaben (17 aktuelle Bilder und 15 Zwischenstände)
 wurden unverändert ins Paket kopiert und gegen ihre Generatororiginale
 mit SHA-256 verglichen. Die finalen Dateinamen stehen in `prompts.json`.
 
-[sources.json](sources.json) ordnet zehn unveränderte lokale Referenzkopien
-zu: vier frühere Projektillustrationen und sechs Star-Citizen-Screenshots
-aus der Bildersammlung des Nutzers. Es enthält Originalpfad, Herkunft,
-Rolle, Hinweise und SHA-256. Das gezeigte SC-Innenraumbild ist vom
-Hauptagenten als Windows-Hintergrundbild zugeordnet. Alle zehn Quellen
-wurden am 14.11.2026 tatsächlich geöffnet. Die Kopien liegen unter
-`sources/art/` und `sources/star-citizen/`; die Originale bleiben unverändert.
+[sources.json](sources.json) ordnet 16 unveränderte Referenzkopien zu:
+vier frühere Projektillustrationen, sieben Star-Citizen-Bilder aus dem
+Bilderordner, die neue vom Nutzer angehängte Port-Olisar-Draufsicht,
+zwei native R08-Aufnahmen aus einem anderen Arbeitsbaum und zwei Webbilder.
+Originalpfad bzw. Quellseite, Herkunft, Rolle und SHA-256 sind dokumentiert.
+Alle Quellen wurden am 14.11.2026 tatsächlich geöffnet. Quellen liegen
+unter `sources/art/`, `sources/star-citizen/`, `sources/native/` und
+`sources/web/`; die Originale bleiben unverändert. Die native Referenz
+belegt den betrachteten R08-Stand, keine Abnahme der aktuellen Runtime.
+
+Web-Bildreferenzen: **Hasgaha**, [Port Olisar Over the Years](https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H),
+mit Credit und Verweis auf [hasgaha.com](https://hasgaha.com).
+Die verlinkte Sammlung erlaubt Nutzung mit Namensnennung und Website-Link.
+Auch die vom Nutzer übermittelte Draufsicht trägt ein Hasgaha-Wasserzeichen.
+Der historische Aufbau wurde ergänzend mit der
+[Port-Olisar-Beschreibung](https://starcitizen.tools/Port_Olisar) abgeglichen;
+die Kompaktfassung und die zwei zusätzlichen Dockports sind Nutzerwünsche
+für Polisar, keine behauptete Originalausstattung von Port Olisar.
+
+Polisar R03 ist ein direkter Bild-Edit mit der nativen R08-Nahaufnahme,
+der vom Nutzer übermittelten Draufsicht und R02 als reiner Detail-/Materialquelle.
+R03 der anderen Raumkarten verkleinert die Schiffe und korrigiert
+Auswahlmarkierungen bzw. den Auto-Schalter. Polisar R04 editiert unmittelbar
+die letzte vom Nutzer farbig annotierte Chat-Anlage: Ringe vergrößert und
+auf die verlängerte Nabenachse zentriert, Streben ergänzt, links zwei
+Solarflügel, rechts vier Tanks und längere Dockarme. Die Farbmarkierungen
+sind entfernt, Beschriftung und unteres Raster korrigiert. Für die Annotation
+wurde kein lokaler Dateipfad mitgeteilt; der tatsächliche Toolaufruf
+verwendete num_last_images_to_include=1. Die alten Fassungen bleiben erhalten.
 
 Die ältere taktische Rostwelt-Vorlage enthält noch ein Quadratgitter.
 Übernommen wurden daraus Komposition und Formenstaffelung; die neue

@@ -1,8 +1,8 @@
 {
   "schema": "sternenbuergerchen.visual_target_sources.v1",
   "date": "2026-11-14",
-  "reference_count": 10,
-  "copy_policy": "Originaldateien unverändert; bytegleiche lokale Paketkopien",
+  "reference_count": 16,
+  "copy_policy": "Unveränderte lokale Quellenkopien sowie unveränderte heruntergeladene Web-Bildreferenzen; Quellen und Credits einzeln dokumentiert.",
   "new_generation_tool": "built-in image_gen.imagegen",
   "new_generation_reference_mode": "Überwiegend Textprompts aus gesichteten Stilreferenzen; direkte Edit-Inputs separat in Generation-Metadaten",
   "sources": [
@@ -125,6 +125,90 @@
       "bytes": 923507,
       "viewed_on": "2026-11-14",
       "usage": "Visuell gesichtet und in Textprompt-Regeln übersetzt; keine dieser Referenzdateien als direkter Bild-Input der neuen Erzeugung behauptet."
+    },
+    {
+      "id": "sc_port_tressler",
+      "source_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-01-31_14-40-04-D50.jpg",
+      "file": "sources/star-citizen/ScreenShot-2026-01-31_14-40-04-D50.jpg",
+      "origin": "Lokaler Star-Citizen-Screenshot des Nutzers",
+      "role": "Industrielle Ringsegmente, tiefe Hangarblöcke, Materialdetails; nicht die Filmkamera.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "079d72e910473a35e685465bd3895cfae4aa0173217cdbd2a197437a1342c03f",
+      "bytes": 796615,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json."
+    },
+    {
+      "id": "sc_port_olisar_user",
+      "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-33db2b95-cd6b-4b6c-8df7-517ac1cf7251.png",
+      "file": "sources/star-citizen/port_olisar_user_topview.png",
+      "origin": "Vom Nutzer angehängte Star-Citizen-Draufsicht; sichtbares Hasgaha-Wasserzeichen, Quelle vom Nutzer übermittelt",
+      "role": "Maßgebliche Geometrie: horizontale Querachse, aufrechte Ringe und getrennte Padgruppen; direkter Input Polisar R03.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "a63126a7e6756872fcd4ebbefbfccab71009acec2e4a9db38e9b2441445cc9f4",
+      "bytes": 1617350,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json.",
+      "credit": "Hasgaha — https://hasgaha.com",
+      "credit_url": "https://hasgaha.com",
+      "source_page": "https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H",
+      "source_page_note": "Die Web-Sammlung ist ein ergänzender Autor-/Credit-Link; die genaue Fundseite dieser Nutzeranlage ist nicht belegt."
+    },
+    {
+      "id": "native_polisa_overview",
+      "source_path": "C:/dev/SternenBuergerchen-worktrees/space-air-parent-20261112/output/native_glut_maps/polisa_r08_20261111/polisa_r08_whole_map.png",
+      "file": "sources/native/polisa_r08_whole_map.png",
+      "origin": "Bestehende native Godot-Kartenaufnahme R08 aus anderem Arbeitsbaum",
+      "role": "Layoutanker: Station am oberen Rand der 512×256-Karte, viel freier Raum darunter.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "2505eb00eae34c31d13b1a96b08d9372f1ac422e811e2b61fa5df897422a41fd",
+      "bytes": 46172,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json."
+    },
+    {
+      "id": "native_polisa_near",
+      "source_path": "C:/dev/SternenBuergerchen-worktrees/space-air-parent-20261112/output/native_glut_maps/polisa_r08_20261111/polisa_r08_station_near.png",
+      "file": "sources/native/polisa_r08_station_near.png",
+      "origin": "Bestehende native Godot-Nahaufnahme R08 aus anderem Arbeitsbaum",
+      "role": "Direkter Edit-Input R03: Raum-/Padaufteilung, blaue Kugel, Shops; kein Nachweis des aktuellen Main-Produktstands.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "b753b7f6f5de65b972fe8f4477e4dcf8739e123be2af1e8d1f1419423503a77d",
+      "bytes": 910643,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json."
+    },
+    {
+      "id": "web_port_olisar_2021",
+      "source_path": "https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H",
+      "file": "sources/web/port_olisar_2021_hasgaha.png",
+      "origin": "Hasgaha, Screenshots of Port Olisar Over the Years, 2021 Alpha 3.14",
+      "role": "Externe Stilquelle: Stationssilhouette und Größenverhältnis im Weltraum; Kamera nicht übernommen.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "2e8efcaecb9876121beac867e0c0e390b27f8a5aee2a04eccfcc374dbc38c089",
+      "bytes": 401588,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json.",
+      "credit": "Hasgaha — https://hasgaha.com",
+      "credit_url": "https://hasgaha.com",
+      "source_page": "https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H",
+      "remote_image_url": "https://robertsspaceindustries.com/i/0572b05e7cdc199bdf8f762e72a1014bf9bbbc49/resize(1464,1464,inside,JLypLpqVPBaNxs8FRN3D3vuTrjntZTaECi8ToQLLZiEgiUjcwEzuY511JgyJBk2nwU4KBWPC3t64FJzEsV4pZ3115nHoFyJprQsUpYxynFGr3DRSMPWN5u9C9cDPTihddmWmwRQLT1oGyQPkizpZzRrroRbQquDcDLAsHRbF9HhpFkWWUPQX6hchgig37oX8mc)/f9ae7106-f363-441d-becd-3af4dcf588fb.png"
+    },
+    {
+      "id": "web_port_olisar_2023",
+      "source_path": "https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H",
+      "file": "sources/web/port_olisar_2023_hasgaha.png",
+      "origin": "Hasgaha, Screenshots of Port Olisar Over the Years, 2023 Alpha 3.19",
+      "role": "Externe Stilquelle: axiale Konstruktion, aufrechte Ringe, Industriematerialien; keine native Spielaufnahme.",
+      "constraints": "Quelle und neues KI-Ziel sind getrennt. Keine technische Abnahme durch das Referenzbild.",
+      "sha256": "5389d808583de5160ab6f4b895ce40f29915b168ac3053903a63138d6736916f",
+      "bytes": 435820,
+      "viewed_on": "2026-11-14",
+      "usage": "Tatsächlich gesichtet. Direkte Generator-Eingaben nur gemäß generation_metadata.json.",
+      "credit": "Hasgaha — https://hasgaha.com",
+      "credit_url": "https://hasgaha.com",
+      "source_page": "https://robertsspaceindustries.com/community-hub/post/screenshots-of-port-olisar-over-the-years-03Z7D1CWw5L2H",
+      "remote_image_url": "https://robertsspaceindustries.com/i/41165f7cda338b4c932d36e212338f3da5bb5a5a/resize(1464,1464,inside,JLypLpqVPBaNxs8FRN3D3vuTrjntZTaECi8ToQLLZiEgiUjcwEzuY511JgyJBk2nwU4KBWPC3t64FJzEsV4pZ3115nHoFyJprQsUpYxynFGr3DRSMPWN5u9C9cDPTihddmWmwRQLT1oGse7F8YkzCiRQ5Nj2AwLkLpx1E9rg3MZzskbLc8srdNtHAUN1a5Sd1G)/d9fbcf57-30d5-406b-ae50-fe446b8d2a99.png"
     }
   ]
 }

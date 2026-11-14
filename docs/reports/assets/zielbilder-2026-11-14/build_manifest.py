@@ -120,7 +120,8 @@ def build(root):
             if record["sha256"] != source["sha256"]:
                 errors.append("Referenzkopie weicht vom dokumentierten Original ab: " + source["file"])
             original = Path(source["source_path"])
-            original_available = original.is_file()
+            is_remote = source["source_path"].startswith(("https://", "http://"))
+            original_available = not is_remote and original.is_file()
             original_matches = sha256(original) == source["sha256"] if original_available else None
             if original_matches is False:
                 errors.append("Originalquelle wurde seit der Sicherung verändert: " + source["source_path"])
@@ -141,7 +142,11 @@ def build(root):
     documents = []
     generation_metadata = None
     for name in ("prompts.json", "sources.json", "README.md", "build_manifest.py",
-                 "generation_metadata.json", "BILDPRUEFUNG.md", "GALERIE_QA.md"):
+                 "generation_metadata.json", "BILDPRUEFUNG.md", "GALERIE_QA.md",
+                 "RAUMKARTEN_RECHERCHE.md", "POLISAR_BLENDER_AUFTRAG.md",
+                 "space_revision_prompts.json", "space_revision_generation.json",
+                 "space_final_generation.json", "station_revision_prompt.json",
+                 "station_annotated_revision_prompt.json", "station_annotated_revision_generation.json"):
         if (root / name).is_file():
             documents.append(file_record(root, name))
             if name == "generation_metadata.json":
@@ -157,7 +162,7 @@ def build(root):
         "base_commit": prompts.get("base_commit"),
         "reference_working_head": prompts.get("reference_working_head"),
         "complete": True,
-        "scope": "KI-Zielbilder; keine nativen Godot-Aufnahmen, integrierten Modelle oder Nutzerabnahmen",
+        "scope": "KI-Zielbilder; Boden-Stilrichtung positiv bestätigt, neue Raumkarten zur Bewertung. Keine native Modellabnahme. Native Aufnahmen nur als getrennte Referenzquellen.",
         "reference_mode": sources["new_generation_reference_mode"],
         "validation": "SHA-256, Dateiexistenz und PNG/JPEG-Abmessungen; keine geometrische oder gestalterische Abnahme",
         "counts": {"active": len(active), "superseded": len(superseded),

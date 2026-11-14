@@ -3,7 +3,7 @@
   "date": "2026-11-14",
   "tool": "built-in image_gen.imagegen",
   "transparent_background": false,
-  "reference_handling": "Local art and Star Citizen images were inspected and distilled into text prompts; they were not directly attached to new-image generator calls. Listed edit inputs are actual files passed to the tool.",
+  "reference_handling": "Text generation from inspected references for most images; actual edit inputs are recorded per image. Polisar R03 uses native R08 near view, the user-supplied Port Olisar top view, and the R02 material/detail reference. Polisar R04 directly edits the most recent annotated user attachment using num_last_images_to_include=1; no local input path was supplied for that attachment.",
   "current": [
     {
       "id": 1,
@@ -145,47 +145,54 @@
     },
     {
       "id": 13,
-      "title": "Mondorbit und Weiterreise",
-      "output_file": "13_orbit_reise.png",
-      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png",
+      "title": "Orbitkarte – Anflug zum Planetensaum",
+      "output_file": "13_orbit_reise_r03.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6a2fe346-e843-490f-a6f5-a0f93efd4a26.png",
       "tool": "image_gen.imagegen",
-      "mode": "generate",
-      "referenced_image_paths": [],
-      "prompt_source": "prompts.json items[12].prompt",
-      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-26258938-a14e-4209-8f53-eb5ed4b48b97.png"
+      ],
+      "prompt_source": "prompts.json: entry with file=13_orbit_reise_r03.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6a2fe346-e843-490f-a6f5-a0f93efd4a26.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
     },
     {
       "id": 14,
-      "title": "Raumkampf im Asteroidenfeld",
-      "output_file": "14_raumkampf.png",
-      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png",
+      "title": "Raumkampf – Gefecht im Asteroidenfeld",
+      "output_file": "14_raumkampf_r03.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-031b5e27-ce51-4c9b-a954-12e7ead99e8a.png",
       "tool": "image_gen.imagegen",
-      "mode": "generate",
-      "referenced_image_paths": [],
-      "prompt_source": "prompts.json items[13].prompt",
-      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f19b5677-0bd2-44d7-97a2-4913d0cb6d1d.png"
+      ],
+      "prompt_source": "prompts.json: entry with file=14_raumkampf_r03.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-031b5e27-ce51-4c9b-a954-12e7ead99e8a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
     },
     {
       "id": 15,
-      "title": "Hilfe für ein havariertes Schiff",
-      "output_file": "15_orbit_bergehilfe.png",
-      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png",
+      "title": "Wrackbegegnung – Ausschnitt der Raumkarte",
+      "output_file": "15_orbit_bergehilfe_r03.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-8fab06ec-49ee-47df-a49b-43a432a898ea.png",
       "tool": "image_gen.imagegen",
-      "mode": "generate",
-      "referenced_image_paths": [],
-      "prompt_source": "prompts.json items[14].prompt",
-      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-3e5af79f-d1f2-448c-82fd-bf458cc6e0ba.png"
+      ],
+      "prompt_source": "prompts.json: entry with file=15_orbit_bergehilfe_r03.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-8fab06ec-49ee-47df-a49b-43a432a898ea.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
     },
     {
       "id": 16,
-      "title": "Kleine Orbitalstation",
-      "output_file": "16_orbitalstation.png",
-      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png",
+      "title": "Polisar – Ringnaben, Solarflügel und Tankmodule",
+      "output_file": "16_orbitalstation_r04.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-4b622b53-2c60-4c36-aa09-8158a1b3e62e.png",
       "tool": "image_gen.imagegen",
-      "mode": "generate",
-      "referenced_image_paths": [],
-      "prompt_source": "prompts.json items[15].prompt",
-      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      "mode": "edit",
+      "num_last_images_to_include": 1,
+      "input_description": "Most recent user-attached annotated Polisar R03 image with red ring/bracing, blue axle, green solar and orange tank markings; conversation image, no supplied local path.",
+      "prompt_source": "prompts.json: entry with file=16_orbitalstation_r04.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-4b622b53-2c60-4c36-aa09-8158a1b3e62e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
     },
     {
       "id": 17,
@@ -245,6 +252,109 @@
       "referenced_image_paths": [
         "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f3927179-85c9-42c7-994b-18e41f0c234d.png"
       ]
+    },
+    {
+      "id": 13,
+      "title": "Mondorbit und Weiterreise",
+      "output_file": "13_orbit_reise.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[12].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-6d52c8fa-a7fe-4e33-b16c-63b997552c8e.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 13,
+      "title": "Orbitkarte – Anflug zum Planetensaum",
+      "output_file": "13_orbit_reise_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-26258938-a14e-4209-8f53-eb5ed4b48b97.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json: entry with file=13_orbit_reise_r02.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-26258938-a14e-4209-8f53-eb5ed4b48b97.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 14,
+      "title": "Raumkampf im Asteroidenfeld",
+      "output_file": "14_raumkampf.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[13].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-a2c90405-cc0b-485d-b389-3bf6d5fdfac2.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 14,
+      "title": "Raumkampf – Gefecht im Asteroidenfeld",
+      "output_file": "14_raumkampf_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f19b5677-0bd2-44d7-97a2-4913d0cb6d1d.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json: entry with file=14_raumkampf_r02.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-f19b5677-0bd2-44d7-97a2-4913d0cb6d1d.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 15,
+      "title": "Hilfe für ein havariertes Schiff",
+      "output_file": "15_orbit_bergehilfe.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[14].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-713e9b0c-aa66-4136-a400-f3d25e1a364a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 15,
+      "title": "Wrackbegegnung – Ausschnitt der Raumkarte",
+      "output_file": "15_orbit_bergehilfe_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-3e5af79f-d1f2-448c-82fd-bf458cc6e0ba.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json: entry with file=15_orbit_bergehilfe_r02.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-3e5af79f-d1f2-448c-82fd-bf458cc6e0ba.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 16,
+      "title": "Kleine Orbitalstation",
+      "output_file": "16_orbitalstation.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json items[15].prompt",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-e7d324d7-1dfc-41ad-a669-b6cee8cea5b3.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 16,
+      "title": "Polisa – Stationsanflug auf großer Raumkarte",
+      "output_file": "16_orbitalstation_r02.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-59d6d4e8-36e2-4e65-99b4-05a32d505255.png",
+      "tool": "image_gen.imagegen",
+      "mode": "generate",
+      "referenced_image_paths": [],
+      "prompt_source": "prompts.json: entry with file=16_orbitalstation_r02.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-59d6d4e8-36e2-4e65-99b4-05a32d505255.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "id": 16,
+      "title": "Polisar – kompakte Pads, großer Stationskern",
+      "output_file": "16_orbitalstation_r03.png",
+      "original_output": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-2d4099f3-f05f-475e-b26a-3d7867465ace.png",
+      "tool": "image_gen.imagegen",
+      "mode": "edit",
+      "referenced_image_paths": [
+        "C:/dev/SternenBuergerchen-worktrees/space-air-parent-20261112/output/native_glut_maps/polisa_r08_20261111/polisa_r08_station_near.png",
+        "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-33db2b95-cd6b-4b6c-8df7-517ac1cf7251.png",
+        "C:/dev/SternenBuergerchen-worktrees/visual-targets-20261114/docs/reports/assets/zielbilder-2026-11-14/16_orbitalstation_r02.png"
+      ],
+      "prompt_source": "prompts.json: entry with file=16_orbitalstation_r03.png",
+      "tool_output_hint": "Generated images are saved to C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a as C:\\Users\\bjoer\\.codex\\generated_images\\01a1da5a-ff93-78a2-99ed-0948febf430a\\exec-2d4099f3-f05f-475e-b26a-3d7867465ace.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
     }
   ]
 }
