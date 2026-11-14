@@ -79,7 +79,7 @@ func _test_windbruch() -> void:
 			if not oracle.can_traverse_step(tile.grid_position, target, terrain): continue
 			ramp_edges += 1
 			ramp_costs = ramp_costs and native.get("_kernel").step_cost(tile.grid_position, target) == oracle.get_step_cost(tile.grid_position, target, terrain)
-	_check(all_explicit and ramp_count == 26 and half_heights, "Root metadata activates all tiles and preserves all 26 half-height ramps")
+	_check(all_explicit and ramp_count == 240 and half_heights, "Root metadata activates all tiles and preserves all 240 half-height ramps")
 	_check(ramp_edges > 0 and ramp_costs, "Every legal directed authored ramp edge has the exact native/GDScript cost")
 	var pairs: Array = [[landing, chip], [chip, returning]]
 	var gd: Dictionary = FIX.create_rig(scene, map, terrain, false)

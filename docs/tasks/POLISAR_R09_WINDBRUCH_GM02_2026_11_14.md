@@ -34,7 +34,7 @@ Abweichung vom Blender-Auftrag: Er verlangt einen separaten Kandidaten ohne Einb
 ## Geänderte Testerwartungen (bewusst)
 
 - `windbruch_outpost_verifier`: 131 072 Zellen, 240 Rampenzellen, drei Pads.
-- `grafikpass_r123_navigation_verifier`: 131 072 statt 6336 Zellen. Der Test braucht die native Erweiterung und lief hier nicht.
+- `grafikpass_r123_navigation_verifier`: 131 072 statt 6336 Zellen, 240 statt 26 Rampenzellen. Der Test braucht die native Erweiterung; Ergebnis auf dem Windows-Rechner siehe unten.
 - `task_413_terrain_theme_packs_ground_mission_variant`, `review_completion_station_visual_verifier`, `review_completion_cliff_station_revision_verifier`: Sie nutzten GM02 als Beispiel für das gemischte Thema bzw. für eine nicht-aride Karte und lesen jetzt die Fixture. Im Cliff-Test steht das neue GM02 zusätzlich als aride Karte.
 
 ## Lokale Prüfung (Godot 4.6.2, Linux, headless, ohne native Erweiterung)
