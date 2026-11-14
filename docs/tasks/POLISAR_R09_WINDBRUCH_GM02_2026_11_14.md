@@ -53,11 +53,25 @@ Abweichung vom Blender-Auftrag: Er verlangt einen separaten Kandidaten ohne Einb
 | Offline-Prüfungen des Polisar-Layouts (`build_candidate.py`) | alle wahr, eine zusammenhängende begehbare Fläche |
 | Achsprüfung am Modell | Ringmitten und Achse deckungsgleich |
 
-Nicht gelaufen: `grafikpass_r123_surface_verifier` und `review_completion_map_preparation_verifier` (Prozess hier wegen Speicher beendet), alles mit nativer Erweiterung, das laufende Spiel.
+## Prüfung auf dem Windows-Rechner (Godot 4.6.2, native Erweiterung, eigenes `APPDATA` für die Läufe)
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Import des Projekts im neuen Worktree | Exit 0 |
+| `windbruch_outpost_verifier` | 41 / 0 |
+| `ground_mission02_relay_ridge_verifier` | 35 / 0 |
+| `grafikpass_r123_navigation_verifier` (native und GDScript-Wegfindung auf Windbruch 512 × 256, Landung → Chip → zurück) | 39 / 0, 2 Routen, 796 Rampenkanten |
+| `review_completion_station_visual_verifier` | 158 / 0 |
+| `polisa_globe_map_verifier`, `polisa_shuttle_pad_reservation_verifier`, `polisa_shuttle_station_verifier` | bestehen |
+| `polisa_actual_station_collision_verifier` | 11 Fehlschläge, wie auf dem Stand davor in der Linux-Umgebung |
+| `campaign_chapter_one_sortie_verifier` | 24 / 1; der Fehlschlag („TIMEOUT satellite_recovery actual mission instance exists“) tritt in der Linux-Umgebung auch auf unverändertem `742f36c1` auf |
+| Drei Aufnahmen der Kartenansicht mit D3D12 / Forward+ (Polisar, Windbruch-Kern, GM02-Relais) | Karten und Modelle erscheinen wie in den Software-Bildern, keine Shader- oder Skriptfehler im Log |
+
+Nicht gelaufen: `grafikpass_r123_surface_verifier` und `review_completion_map_preparation_verifier` (sie verlangen Codex' isolierte Projektkopie), ein gespielter Auftrag im laufenden Spiel.
 
 ## Risiken / offene Punkte
 
-- Nichts davon ist im Spiel unter D3D12 gesehen worden. Bei R1–R3 hat Codex beim Einbau vier Fehler gefunden, die hier nicht sichtbar waren.
+- Unter D3D12 gibt es nur drei Standbilder der Kartenansicht. Kein Auftrag ist auf den neuen Karten gespielt worden. Bei R1–R3 hat Codex beim Einbau vier Fehler gefunden, die in den Software-Bildern nicht sichtbar waren.
 - Polisar: Landung, Shuttle und Rekrutierung hängen an Pad-Markern und Zellen, die sich verschoben haben. Die Verifier sehen keinen Unterschied zum Stand davor, ein Durchlauf im Spiel fehlt.
 - Polisar: Drawcalls 28 → 108, Dreiecke 23 388 → 45 680; nicht profiliert.
 - Windbruch: Die Regionalrampen sind automatisch gesetzt und nur auf Erreichbarkeit geprüft, nicht auf Spielgefühl. Der Kern ist nicht mehr von Fels umschlossen; Gegner und Spieler haben zusätzliche Zugänge.
