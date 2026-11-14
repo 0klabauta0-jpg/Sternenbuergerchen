@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Playtest-Überarbeitung: vollständige Liste und Arbeitsplan — 14.11.2026
+
+Nur Planung auf `task/playtest-rework-plan-20261114`: alle 23 Rückmeldungspunkte
+mit Unterpunkten gesichert, AP0–AP15 mit Abhängigkeiten, Zuständigkeiten,
+Akzeptanz und Prüfwegen geordnet. Masterliste:
+`docs/tasks/PLAYTEST_REWORK_2026_11_14.md`; Arbeitsplan:
+`docs/superpowers/plans/2026-11-14-playtest-rework.md`.
+Keine Produktänderung oder Laufzeitprüfung in diesem Planungsauftrag. Frühere
+separate R2-Quellkandidaten bleiben ungeprüfte Teilstände; kein Paket als
+umgesetzt markiert, kein Mainmerge und kein Export. Vor Umsetzung tatsächliche
+Build-/Integrationsbasis und bestehende Contracts über AP0 abgleichen.
+
 ### Hex-Fortsetzung auf tatsächlichem Karten-Kandidaten — 13.11.2026
 
 Berichtbranch task/hex-review-report-20261113 bleibt auf Reviewfix8d0f9a597.

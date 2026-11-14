@@ -1,5 +1,18 @@
 # TASK_ROADMAP
 
+### Playtest-Rückmeldungen: Reihenfolge geplant — 14.11.2026
+
+Vollständige Liste mit 23 Punkten:
+`docs/tasks/PLAYTEST_REWORK_2026_11_14.md`.
+Paketplan AP0–AP15:
+`docs/superpowers/plans/2026-11-14-playtest-rework.md`.
+Ausgangsbasis/Performance → Grundbedienung und Datapad → direkte Gefechte →
+Lager/Besatzung/Flugdeck → Sternkarte/Sicht/Flugübergänge → Meldungen →
+Editor/Gebäude/Grafik → gemessene Performance und Gesamtabnahme.
+Abhängigkeiten und unabhängig vorbereitbare Teile stehen im Plan. Alle Pakete
+offen; ausdrücklich nur Dokumentation. Andere Projektaufträge werden nicht
+umpriorisiert. Keine Umsetzung, Integration oder EXE durch diesen Auftrag.
+
 ### Hexsicht, Erkennung und ein NPC pro Feld geplant — 11.11.2026
 
 Arbeitsplan erstellt, nicht umgesetzt. Zuerst gemeinsamen Rampen-/Kartenstand
