@@ -11,6 +11,9 @@ Keine Produktänderung oder Laufzeitprüfung in diesem Planungsauftrag. Frühere
 separate R2-Quellkandidaten bleiben ungeprüfte Teilstände; kein Paket als
 umgesetzt markiert, kein Mainmerge und kein Export. Vor Umsetzung tatsächliche
 Build-/Integrationsbasis und bestehende Contracts über AP0 abgleichen.
+Nutzerergänzung: keine Rückwärtskompatibilität oder Migration alter Savegames
+erforderlich; Performance hat hohe Priorität und ist Abnahmekriterium jedes
+Pakets ab AP0. Nur die Planungsdokumente ergänzt, keine Umsetzung begonnen.
 
 ### Hex-Fortsetzung auf tatsächlichem Karten-Kandidaten — 13.11.2026
 

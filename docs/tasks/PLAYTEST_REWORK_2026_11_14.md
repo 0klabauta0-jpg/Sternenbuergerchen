@@ -32,6 +32,23 @@ Spielstände. Eine spätere Umsetzung soll vorhandene Systeme wiederverwenden;
 neue Wirtschaft, neue allgemeine Raumkampfsimulation und eine komplette
 Engine-/Architekturerneuerung sind keine impliziten Zusatzaufträge.
 
+## Verbindliche Prioritäten – Ergänzung des Nutzers
+
+**Keine Rückwärtskompatibilität für alte Savegames erforderlich.** Die spätere
+Umsetzung darf bestehende Spielstände und Speicherformate inkompatibel machen.
+Keine Migrationen, Kompatibilitätsschichten oder Altformat-Fallbacks allein zum
+Erhalt alter Savegames einplanen. Ein Neustart mit einem neuen Spielstand ist
+akzeptiert. Speichern und Laden neu erzeugter Spielstände muss weiterhin
+korrekt funktionieren; die Freigabe ist kein Auftrag, vorhandene Dateien zu
+löschen oder echte Profile für Tests zu überschreiben.
+
+**Performance hat hohe Priorität und ist ein verbindliches Entwurfs- und
+Abnahmekriterium für jedes Arbeitspaket.** Flüssige Bedienung, stabile
+Framezeiten und wenige Ruckler werden von Anfang an berücksichtigt und
+gemessen. Performance nicht erst am Ende in AP15 behandeln. Zusätzliche
+Grafikeffekte und Komfortfunktionen dürfen diese Priorität nicht unterlaufen;
+bei Zielkonflikten eine weniger aufwendige Variante vorziehen.
+
 ## L01 – Erste Kampagnenmission / Datapad
 
 - [ ] Beheben, warum das geborgene Datapad in Anjas Inventar nicht hochgeladen werden kann.
@@ -144,7 +161,7 @@ Engine-/Architekturerneuerung sind keine impliziten Zusatzaufträge.
 
 ## L15 – Performance
 
-- [ ] Weiterhin auftretende Ruckler und langsame Abläufe untersuchen.
+- [ ] Performance mit hoher Priorität in jedem Arbeitspaket berücksichtigen; weiterhin auftretende Ruckler und langsame Abläufe untersuchen und beheben.
 - [ ] Besonders Basiserkunden sowie das Öffnen und Aktualisieren der Bedienbereiche prüfen.
 - [ ] Verbesserungen mit vergleichbaren Vorher-/Nachher-Messungen nachweisen.
 

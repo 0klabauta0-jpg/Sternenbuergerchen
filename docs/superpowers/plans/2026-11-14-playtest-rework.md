@@ -22,6 +22,8 @@
 - Taktische Befehle bleiben im vorhandenen Fireteamweg. Die NPC-Anzeige erweitert nicht still die direkte Einzelpersonensteuerung im Gefecht.
 - Tatsächliches Hinlaufen, Aufsitzen, Absitzen, Flug und Erkundung bestätigen; ein Drag, eine Auswahl oder ein Szenenwechsel ist kein Gameplayabschluss.
 - Keine automatische Änderung/Überschreibung echter Profile oder Saves durch Tests. Isolierte Testprofile und Kopien verwenden.
+- Alte Savegames müssen nicht kompatibel bleiben. Speicherformate dürfen sich brechend ändern; keine Migrationen, Kompatibilitätsschichten oder Altformat-Fallbacks allein zur Rettung alter Spielstände einplanen. Ein neuer Spielstart ist akzeptiert. Save/Continue-Prüfungen dieses Plans beziehen sich auf neu erzeugte Spielstände im jeweils aktuellen Format. Dies erlaubt keine eigenmächtige Löschung vorhandener Dateien.
+- Performance hat hohe Priorität: Sie ist Entwurfs- und Abnahmekriterium jedes Pakets, nicht nur eine Abschlussaufgabe in AP15. Bei Zielkonflikten mit zusätzlichen Grafik-/Komforteffekten die weniger aufwendige Variante bevorzugen.
 - Grafikziel, nativer Ist-Stand und Kandidat nach `graphics_reference_revision_contract.md` unterscheiden; Originale erhalten. Technischer Import ersetzt keine visuelle Nutzerabnahme.
 - Neue oder stark überarbeitete HTML-Reports folgen dem HTML-Workbench-Contract. Dieser Auftrag erzeugt nur Markdown.
 - Kein neues Gesamtraumkampfsystem, keine neue strategische Kriegs-KI oder Wirtschaft als Nebenprodukt des Einzelgefechtmenüs. Fehlende Voraussetzungen separat ausweisen.
@@ -75,6 +77,7 @@ Gefechtsstarts als Prüfweg ersetzen, nicht als Produktabschluss.
 - [ ] Gewünschtes Verhalten im zuständigen Contract festhalten und mit einem gezielten Verifier reproduzieren. Keine Tests, die nur den Aufbau des neuen Codes nachzeichnen.
 - [ ] Kleinste notwendige Änderung am vorhandenen Owner-/Commandpfad ausführen.
 - [ ] Gezielten Verifier und betroffene Nachbarregressionen ausführen; Fehlversuche, Baselinefehler und bestandene Läufe getrennt dokumentieren.
+- [ ] Performanceauswirkung gegen AP0 und das vereinbarte Paketbudget prüfen. Relevante Verschlechterungen vor Paketabschluss beheben oder als offenen Abnahmepunkt ausweisen; einen bestandenen Funktionstest nicht als Performancefreigabe behandeln.
 - [ ] Native Bedien-/Sichtprobe am tatsächlichen Kandidaten durchführen, soweit das Paket Darstellung oder Eingabe betrifft.
 - [ ] Eigenen integrierbaren Commit mit ausschließlich Paketdateien erstellen; Doku und Grenzen mitführen. Integration nach Projektregeln separat ausweisen.
 
@@ -92,6 +95,7 @@ Den Profilpfad dabei nach dem vorhandenen Testwerkzeug isolieren; echte Kampagne
 - [ ] Kleine Repro-Matrix anlegen: Datapad, Buttonrand/X, Ausstieg/RMB, großer Kartenrand, Schiffsauswahl/Doppelklick, schwarzer Start, Betten und Mauer-/Höhenwerkzeug.
 - [ ] Vergleichsszenen für Basisruhe, Kamerabewegung, Panelöffnung, Aufsitzen und große Bodenkarte festlegen. Auflösung, Renderer, Hardware, Unitanzahl, Seed und Kamerapfad protokollieren.
 - [ ] Median und P95/P99 der Framezeiten sowie relevante lange Frames und UI-Öffnungszeiten erfassen; CPU/GPU und aktive/verborgene Ansichten unterscheiden.
+- [ ] Daraus konkrete Framezeit-/Ruckler-/UI-Budgets für die Zielhardware ableiten und als verbindliche Paketabnahme dokumentieren. Keine unbelegte FPS-Zahl vor der Messung festschreiben; Alt-Save-Kompatibilität ist kein Planungsziel.
 - [ ] Vorhandene Inventar-, Reise-, Sicht-, Gebäude- und Skirmishcontracts mit der Liste abgleichen. Konflikte ausdrücklich als Revision markieren.
 
 **Liefert:** gemeinsame Quellbasis, isolierte Profile, Repro-/Messmatrix und Paketstatus. **Abnahme:** jeder spätere Befund hat Build-/Quellbezug; keine Behauptung einer pauschal grünen oder performanten Ausgangsbasis. Historische Performancezahlen sind kein frischer Vergleich.
@@ -285,6 +289,11 @@ Den Profilpfad dabei nach dem vorhandenen Testwerkzeug isolieren; echte Kampagne
 ## AP15 – Performancekorrekturen und zusammenhängende Abnahme
 
 **Dateien:** nur die durch AP0-/Paketmessungen tatsächlich identifizierten Hotpaths; `docs/performance/` und `docs/qa/` für reproduzierbare Evidenz.
+
+**Priorität:** Performance ist bereits in AP0 und jedem Umsetzungspaket
+verbindlich. AP15 bündelt Messvergleich und Gesamtabnahme; notwendige
+Korrekturen werden nicht bis hierhin aufgeschoben. Alte Savegames sind auch
+hier kein Kompatibilitäts- oder Migrationsgate.
 
 - [ ] Auf derselben Karte, Auflösung, Kamera, Unitanzahl, Engine/Renderer und Hardware wie AP0 erneut messen; Warm-up und Importspitzen gesondert kennzeichnen.
 - [ ] Verbleibende teure UI-/Viewport-/Snapshot-/Sichtpfade einzeln korrigieren und jeweils den passenden kleinen Verifier oder eine dokumentierte Profilerprobe mitliefern.
