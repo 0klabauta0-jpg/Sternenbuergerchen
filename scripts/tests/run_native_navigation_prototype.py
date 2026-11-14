@@ -24,7 +24,7 @@ def main():
         parser.error("script must be a basename in scripts/tests")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
     project = ROOT / "tmp" / "native_navigation" / run_id
-    output = Path(args.output_dir).resolve() if args.output_dir else ROOT / "docs/qa/native_navigation_20261114" / run_id
+    output = Path(args.output_dir).resolve() if args.output_dir else ROOT / "docs/qa/native_navigation_dynamic_costs_20261114" / run_id
     project.mkdir(parents=True, exist_ok=False)
     output.mkdir(parents=True, exist_ok=False)
     entry = "scripts/tests/" + args.script

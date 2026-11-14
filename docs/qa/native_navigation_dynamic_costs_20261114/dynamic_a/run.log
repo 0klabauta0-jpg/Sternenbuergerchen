@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+DYNAMIC_COSTS_BEGIN hex24
+DYNAMIC_COSTS_PAIR hex24 successive_commands 0 gd_usec=36663 native_usec=16549 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 1 gd_usec=29419 native_usec=459 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 2 gd_usec=35453 native_usec=604 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 3 gd_usec=45319 native_usec=726 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 4 gd_usec=12924 native_usec=286 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 5 gd_usec=18903 native_usec=337 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 6 gd_usec=16169 native_usec=371 parity=true
+DYNAMIC_COSTS_PAIR hex24 successive_commands 7 gd_usec=3871 native_usec=114 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 0 gd_usec=37374 native_usec=568 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 1 gd_usec=29246 native_usec=587 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 2 gd_usec=34313 native_usec=590 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 3 gd_usec=44587 native_usec=721 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 4 gd_usec=12712 native_usec=296 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 5 gd_usec=18691 native_usec=334 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 6 gd_usec=17627 native_usec=364 parity=true
+DYNAMIC_COSTS_PAIR hex24 prepared_commands 7 gd_usec=3713 native_usec=115 parity=true
+DYNAMIC_COSTS_END hex24
+DYNAMIC_COSTS_BEGIN gm01
+DYNAMIC_COSTS_PAIR gm01 successive_commands 0 gd_usec=133178 native_usec=280427 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 1 gd_usec=97497 native_usec=1974 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 2 gd_usec=230618 native_usec=5978 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 3 gd_usec=138584 native_usec=2729 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 4 gd_usec=134852 native_usec=3675 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 5 gd_usec=135954 native_usec=3372 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 6 gd_usec=192039 native_usec=4671 parity=true
+DYNAMIC_COSTS_PAIR gm01 successive_commands 7 gd_usec=248279 native_usec=6204 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 0 gd_usec=152171 native_usec=2731 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 1 gd_usec=114785 native_usec=2384 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 2 gd_usec=275173 native_usec=6426 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 3 gd_usec=161524 native_usec=2802 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 4 gd_usec=168867 native_usec=4243 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 5 gd_usec=209562 native_usec=5014 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 6 gd_usec=237716 native_usec=5444 parity=true
+DYNAMIC_COSTS_PAIR gm01 prepared_commands 7 gd_usec=299894 native_usec=6353 parity=true
+DYNAMIC_COSTS_END gm01
+NATIVE_NAVIGATION_DYNAMIC_COSTS pairs=32 failures=0 output=C:\Users\bjoer\.codex\worktrees\native-pathfinding-prototype\SternenBuergerchen\docs\qa\native_navigation_dynamic_costs_20261114\dynamic_a\result.json

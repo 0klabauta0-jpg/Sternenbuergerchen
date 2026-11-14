@@ -1,0 +1,48 @@
+{
+  "godot": "4.6.2.stable.official.71f334935",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "architecture": "x86_64",
+  "compiler": {
+    "name": "MSVC",
+    "cl_file_version": "19.51.36243.0",
+    "toolset_directory": "14.51.36231",
+    "installation": "Visual Studio 18 Community"
+  },
+  "scons": "4.11.1",
+  "godot_cpp": {
+    "remote": "https://github.com/godotengine/godot-cpp.git",
+    "tag": "godot-4.5-stable",
+    "commit": "e83fd0904c13356ed1d4c3d09f8bb9132bdc6b77",
+    "working_tree_clean": true
+  },
+  "recipe": {
+    "working_directory": "native/navigation",
+    "environment": {
+      "GODOT_CPP_DIR": "pinned godot-cpp checkout"
+    },
+    "command": "python -m SCons platform=windows target=template_release arch=x86_64 precision=single optimize=speed -j8",
+    "kernel_extra_flags": [
+      "/fp:strict"
+    ],
+    "profile": "build_profile.json",
+    "reproduction_script": "native/navigation/build.ps1"
+  },
+  "scope": "Windows x64 release DLL only; no game export; source builds may differ bytewise with compiler/linker versions.",
+  "recorded_utc": "2026-11-14T11:42:00.666207+00:00",
+  "base_commit": "7a7cf80e39e9895c2b03d68b514e97fdc8340ac5",
+  "branch": "task/native-navigation-dynamic-costs-20261114",
+  "files_sha256": {
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll": "f58d2704b8f8535ca82ca447e698a94f15b23278b868c261133a725dfa5677f8",
+    "native/navigation/build.ps1": "9a197cfc20a9239f381389126a34a8d078113a8092b13890f43d6913b8cec8fb",
+    "native/navigation/build_profile.json": "d91e96bc849d2f33e1ea0bff1ae7ec49bf0aac6d8e026c17ff5e340ebc352142",
+    "native/navigation/navigation.gdextension": "662100291bee07110801a32835d9490e360e2c8e3caae6e162a7bcc48479f97d",
+    "native/navigation/SConstruct": "2cec1ec29b97f7cf8e5b497e831587473a20ce92c879e54cea6562e07de3cd8c",
+    "native/navigation/src/native_costs.cpp": "5563826d3afa62f613764ffe531428f9151880f7da5a456f161e5f7bd993d6fa",
+    "native/navigation/src/native_hpa.cpp": "77fe203f71acee97f34f242d2db17021ea3c77b4c8d66257e76f8d79c21717ef",
+    "native/navigation/src/native_navigation.cpp": "aadaec6f32f7b53f346d4f1dc2210d7a0661bdb86a45c296478671d8bd9e9de5",
+    "native/navigation/src/native_navigation.h": "824b91e164ee3305e08482376fd8b84dac5cf47d7f8ee816d92c8bb58cb824e8",
+    "native/navigation/src/register_types.cpp": "557d0e3af45952fc5d88b3bc421038fac4830653cc1ab8840375439d2e1289e6"
+  },
+  "dll_size_bytes": 406016,
+  "incremental_verification": "build_verify.log: final sources up to date; DLL matches all accepted test and benchmark copies"
+}

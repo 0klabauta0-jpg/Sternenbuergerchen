@@ -1,0 +1,14 @@
+{
+  "command": [
+    "godot_console.exe",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\tmp\\native_navigation\\20261114T113938Z-5e6ac955",
+    "--script",
+    "res://scripts/tests/native_navigation_prototype_benchmark.gd",
+    "--",
+    "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_dynamic_costs_20261114\\static_b\\result.json"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 26.08647569999448
+}
