@@ -10,7 +10,10 @@ const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrai
 
 const TASK_PATH: String = "res://docs/tasks/TASK_413_terrain_theme_packs_ground_mission_variant.md"
 const SURFACE_THEME_CATALOG_PATH: String = "res://data/terrain_surface_visual_theme_catalog.json"
-const MAP_PATH: String = "res://maps/Ground_Mission02_128x128.json"
+## The theme-pack feature keeps its original showcase map as a fixture; the playable
+## GM02 was rebuilt in the frontier look (ground_mission02_relay_ridge_verifier.gd).
+const MAP_PATH: String = "res://maps/Ground_Mission02_128x128_legacy_theme_fixture.json"
+const PLAYABLE_MAP_PATH: String = "res://maps/Ground_Mission02_128x128.json"
 const SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission02_128x128.json"
 const EXPECTED_SIZE: Vector2i = Vector2i(128, 128)
 const EXPECTED_THEME_ID: String = "ground_mission_mixed_v1"
@@ -118,7 +121,7 @@ func _test_scenario_contract(map_data) -> void:
 	var validation: Dictionary = Dictionary(scenario.call("validate"))
 	_assert(bool(validation.get("valid", false)), "Ground Mission 02 scenario validates: %s" % JSON.stringify(Array(validation.get("errors", []))))
 	_assert(String(scenario.scenario_id) == "ground_mission02_128x128", "Scenario id is stable")
-	_assert(String(scenario.map_file_path) == MAP_PATH, "Scenario references Ground Mission 02 map")
+	_assert(String(scenario.map_file_path) == PLAYABLE_MAP_PATH, "Scenario references Ground Mission 02 map")
 	_assert(PackedStringArray(scenario.call("get_enemy_ids")).size() == 12, "Scenario defines twelve enemy IDs")
 	_assert(Array(scenario.enemy_groups).size() == 3, "Scenario defines three enemy groups")
 	var threats: Array = Array(scenario.call("get_enemy_air_asset_threats", map_data))

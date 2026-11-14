@@ -1,0 +1,102 @@
+{
+ "schema": "polisar_model_manifest.v1",
+ "revision": "polisar_r09",
+ "units": "1 Blender unit = 1 map plane unit (hex centre step); no metres claimed",
+ "axes": "layout (x, z, up) -> Blender (x, -z, up); glTF Y-up export -> Godot (x, up, z); pivot = layout origin on the deck plane; scale 1",
+ "objects": {
+  "Struktur_Innenbereich": {
+   "collection": "01_Struktur_Innenbereich",
+   "triangles": 17132,
+   "materials": 15
+  },
+  "Daecher": {
+   "collection": "02_Daecher",
+   "triangles": 1036,
+   "materials": 5
+  },
+  "Pads": {
+   "collection": "03_Pads",
+   "triangles": 2956,
+   "materials": 7
+  },
+  "Ring_Links": {
+   "collection": "04_Ringe_Achse",
+   "triangles": 3280,
+   "materials": 8
+  },
+  "Ring_Rechts": {
+   "collection": "04_Ringe_Achse",
+   "triangles": 3280,
+   "materials": 8
+  },
+  "Achse": {
+   "collection": "04_Ringe_Achse",
+   "triangles": 3148,
+   "materials": 7
+  },
+  "Solarfluegel_Links": {
+   "collection": "05_Solarfluegel_Links",
+   "triangles": 3016,
+   "materials": 7
+  },
+  "Treibstofftanks_Rechts": {
+   "collection": "06_Treibstofftanks_Rechts",
+   "triangles": 4256,
+   "materials": 8
+  },
+  "Grossschiff_Docks": {
+   "collection": "07_Grossschiff_Docks",
+   "triangles": 2212,
+   "materials": 10
+  },
+  "Technik_Seiten": {
+   "collection": "08_Technik_Seiten",
+   "triangles": 3216,
+   "materials": 9
+  },
+  "Heck_Dekoration": {
+   "collection": "09_Heck_Dekoration_nicht_begehbar",
+   "triangles": 3184,
+   "materials": 9
+  },
+  "Hilfen_Entwurf": {
+   "collection": "10_Hilfen_Entwurf_nicht_exportiert",
+   "triangles": 246,
+   "materials": 4
+  }
+ },
+ "exported_triangles": 46716,
+ "materials": 26,
+ "axis_check": {
+  "axle_authored": {
+   "layout_z": 24.0,
+   "up": -2.2
+  },
+  "axle_measured": {
+   "layout_z": 24.0,
+   "up": -2.2
+  },
+  "rings_measured": {
+   "Ring_Links": {
+    "centre_layout_z": 24.0,
+    "centre_up": -2.2,
+    "outer_diameter_z": 68.0,
+    "outer_diameter_up": 68.0,
+    "plane_x": -50.0
+   },
+   "Ring_Rechts": {
+    "centre_layout_z": 24.0,
+    "centre_up": -2.2,
+    "outer_diameter_z": 68.0,
+    "outer_diameter_up": 68.0,
+    "plane_x": 50.0
+   }
+  },
+  "ring_centres_on_axle": true
+ },
+ "sha256": {
+  "layout.json": "7cb73ee349cdb3af5891e492096b17dc5f7bd843234c464588f291e0a87c6ed8",
+  "polisar_station.glb": "6055ba361c6b8babb5cf0ab724af10717cf67b76aad24c30130ef9e941fcfc1c",
+  "polisar_r09.blend": "7e9b08f3ae214055ef13186183c062e86841c0586c740450203036d41d2f321d"
+ }
+}

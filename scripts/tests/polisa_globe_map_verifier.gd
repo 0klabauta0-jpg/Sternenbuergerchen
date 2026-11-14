@@ -8,7 +8,7 @@ func _run() -> void:
 	var size: Dictionary = map.get_tile_size()
 	terrain.configure_iso_grid(map.get_grid_origin(), size.half_width, size.half_height, map.get_grid_topology())
 	for tile in map.get_tiles(): terrain.register_tile(tile)
-	var facts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://art/polisa_r08_20261111/layout_compiled.json"))
+	var facts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://art/polisar_r09_20261114/layout_compiled.json"))
 	var globe: Dictionary = {}
 	for item: Dictionary in facts.furniture:
 		if item.get("id") == "globe": globe = item

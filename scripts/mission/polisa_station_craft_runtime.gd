@@ -1,6 +1,6 @@
 extends RefCounted
 ## Pure facts/builders. The local TacticalController owns admission and presence.
-const LAYOUT_PATH := "res://art/polisa_r08_20261111/layout_compiled.json"
+const LAYOUT_PATH := "res://art/polisar_r09_20261114/layout_compiled.json"
 const RECEIPT_PAD_COMPATIBILITY_REVISION := 1
 const RECEIPT_PAD_IDS := ["polisa_pad_01", "polisa_pad_02", "polisa_pad_03", "polisa_pad_04", "polisa_pad_05", "polisa_pad_06", "polisa_pad_07"]
 

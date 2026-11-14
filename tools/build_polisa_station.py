@@ -1,13 +1,13 @@
-"""Rebuild Polisa R08 at home-pad scale; preserve production scene IDs."""
+"""Rebuild the Polisa station map from the Polisar R09 layout; preserve production scene IDs."""
 from pathlib import Path
 import json
 import runpy
 ROOT = Path(__file__).resolve().parents[1]
 
 def main():
-    package = ROOT / 'art/polisa_r08_20261111'
+    package = ROOT / 'art/polisar_r09_20261114'
     runpy.run_path(str(package / 'build_candidate.py'), run_name='__main__')
-    candidate = ROOT / 'output/native_glut_maps/polisa_r08_20261111/polisa_station_candidate.json'
+    candidate = ROOT / 'output/native_glut_maps/polisar_r09_20261114/polisa_station_candidate.json'
     data = json.loads(candidate.read_text(encoding='utf-8'))
     layout = json.loads((package / 'layout.json').read_text(encoding='utf-8'))
     camera = layout['standard_camera']

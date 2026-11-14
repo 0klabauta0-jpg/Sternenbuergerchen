@@ -96,9 +96,9 @@ func run()->void:
 		check(view.get("_station_module_projection").context_read_count==read_count,"1000 module reads retain one narrow authored layout projection "+map_id)
 		check(west.size()>=8 and west.max()-west.min()<0.00001 and east.size()>=4 and east.max()-east.min()<0.00001,"both authored side walls are straight and parallel to warehouse "+map_id)
 		check(var_to_bytes(map.get_tiles().map(func(tile):return tile.to_dict()))==before,"native module projection preserves every gameplay tile fact "+map_id)
-	for map_id:String in ["satellite_crash_site","trade_outpost","fortified_outpost","Ground_Mission01_32x32","frontier_workyard_24x20","station_outpost_64x64","station_outpost_192x192","Ground_Mission02_128x128","polisa_station","homebase_frontier_exploration"]:
+	for map_id:String in ["satellite_crash_site","trade_outpost","fortified_outpost","Ground_Mission01_32x32","frontier_workyard_24x20","station_outpost_64x64","station_outpost_192x192","Ground_Mission02_128x128","Ground_Mission02_128x128_legacy_theme_fixture","polisa_station","homebase_frontier_exploration"]:
 		var map=MAP.load_from_file("res://maps/"+map_id+".json");view.set("_terrain_map_data",map)
-		var expected:bool=map_id not in ["Ground_Mission02_128x128","polisa_station","homebase_frontier_exploration"]
+		var expected:bool=map_id not in ["Ground_Mission02_128x128_legacy_theme_fixture","polisa_station","homebase_frontier_exploration"]
 		check(view.call("_is_arid_terrain_visual_context")==expected,"actual map semantics select quiet arid palette "+map_id)
 	var station=MAP.load_from_file("res://maps/station_outpost_64x64.json");view.set("_terrain_map_data",station)
 	for cell:Vector2i in [Vector2i(19,20),Vector2i(20,21),Vector2i(21,19),Vector2i(57,19)]:
@@ -118,7 +118,7 @@ func run()->void:
 	check(view.call("_legacy_cliff_visual_kind",ornament)=="keep","explicit authored object height excludes terrain-only replacement")
 	view.set("_active_grid_topology","square8")
 	check(view.call("_legacy_cliff_visual_kind",station.get_tile_at_grid(Vector2i(19,20)))=="keep","legacy Square import preserves original cliff models")
-	view.set("_active_grid_topology","hex_axial_v1");view.set("_terrain_map_data",MAP.load_from_file("res://maps/Ground_Mission02_128x128.json"))
+	view.set("_active_grid_topology","hex_axial_v1");view.set("_terrain_map_data",MAP.load_from_file("res://maps/Ground_Mission02_128x128_legacy_theme_fixture.json"))
 	check(view.call("_legacy_cliff_visual_kind",station.get_tile_at_grid(Vector2i(19,20)))=="keep","nonarid biome excludes arid cliff replacement")
 	view.free()
 	print("REVIEW_CLIFF_STATION passed=%d failed=%d"%[passed,failed]);quit(1 if failed else 0)

@@ -93,7 +93,7 @@ func run() -> void:
 						check(false, map_id + " uncovered module " + kind)
 		check(count >= 20, map_id + " authored station module families covered")
 		check(before == JSON.stringify(map.get_tiles().map(func(tile): return tile.to_dict())), map_id + " terrain facts unchanged by projection")
-	view.set("_terrain_map_data",MAP.load_from_file("res://maps/Ground_Mission02_128x128.json"))
+	view.set("_terrain_map_data",MAP.load_from_file("res://maps/Ground_Mission02_128x128_legacy_theme_fixture.json"))
 	check(view.call("_resolve_tile_asset_type_id","nature_tree_blocker","ground_flat")=="nature_tree_blocker","temperate map keeps its original tree visuals")
 	check(not view.call("_is_arid_station_stone","nature_rock_cover"),"temperate cover retains original palette")
 	# Actual dual layer tile: the wall/prop must not consume its floor fallback.

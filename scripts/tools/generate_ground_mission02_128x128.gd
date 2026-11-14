@@ -5,7 +5,8 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 
-const MAP_PATH: String = "res://maps/Ground_Mission02_128x128.json"
+## Old mixed-theme generator: writes the fixture only. The playable map comes from tools/build_ground_mission02.py.
+const MAP_PATH: String = "res://maps/Ground_Mission02_128x128_legacy_theme_fixture.json"
 const SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission02_128x128.json"
 const MAP_SIZE: Vector2i = Vector2i(128, 128)
 const THEME_ID: String = "ground_mission_mixed_v1"
