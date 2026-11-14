@@ -1,6 +1,6 @@
-# Native navigation prototype
+# Native runtime navigation
 
-Opt-in Windows x64 GDExtension for Godot 4.6.2. Production navigation is unchanged.
+Windows x64 GDExtension for Godot 4.6.2, enabled by default in SimulationRoot.
 The extension implements stable A*, directed local Dijkstra cost maps and the complete
 existing HPA portal search/assembly. It is not a new globally optimal HPA algorithm.
 
@@ -28,12 +28,23 @@ and differential runs before extending the manifest.
 
 ## API and ownership
 
-`scripts/terrain/native_navigation_prototype.gd` exposes:
+`scripts/terrain/native_navigation.gd` exposes:
 
 - `find_path_with_options(from, to, registry, options = {}) -> Array`
 - `find_path_with_status(from, to, registry, graph, options = {}) -> Dictionary`
 - `prepare(registry, options = {}, graph = null) -> bool`
-- `clear_result_cache()` and `get_debug_snapshot()`
+- `clear_result_cache()`, `clear_prepared_data()` and `get_debug_snapshot()`
+
+SimulationRoot selects this adapter for HPA/direct A* and reachability fallbacks.
+The mission loader calls `prewarm_navigation(registry)` after initial scenario/door
+overrides and before gameplay starts. Thus the first command reuses the prepared
+terrain and graph. The existing native AStar2D homebase graph is kept separately.
+See `docs/dev/native_navigation_runtime_contract.md` for ownership and lifecycle.
+
+`SimulationRoot.native_navigation_enabled = false` retains the GDScript reference
+for developer comparisons. Without the DLL, navigation falls back automatically.
+The previous `native_navigation_prototype.gd` name remains a compatibility wrapper
+for existing differential benchmarks.
 
 The adapter retains terrain data by registry identity/revision and HPA geometry by
 registry/graph identity/revision. Terrain preparation uses the **unchanged**
@@ -70,14 +81,19 @@ therefore not part of the gameplay-equivalence claim.
 
 ```powershell
 python scripts/tests/run_native_navigation_prototype.py
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_verifier.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_load_verifier.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_benchmark.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_runtime_verifier.gd --without-native --script-arg=--expect-native=false
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_prototype_benchmark.gd
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_dynamic_costs_benchmark.gd
 ```
 
 The runner copies the actual source bytes and navigation dependencies into a fresh
 ignored minimal project, records SHA256, imports only that project and uses an
-isolated user-data namespace. It fails on engine/parse errors. No game asset import,
-player save access or production enable switch is involved.
+isolated user-data namespace. It fails on engine/parse errors and leaks. It copies
+explicit preload resources required by the real loader; unrelated asset catalogs
+are not imported. No player saves or full visual scene are loaded.
 
 Fixed-options benchmarks distinguish cold solver/graph construction in a running
 process, warm uncached queries, cached results and revision rebuilds. Preparation
@@ -87,7 +103,9 @@ one phase includes a cold first request, another records explicit preparation an
 also includes it in the reported series total. Each query must use native code,
 miss the result cache, open a new cost context and retain one terrain/HPA snapshot.
 These are navigation subsystem measurements, not frame-rate or actor-playthrough
-proof. Refer to `docs/qa/native_navigation_dynamic_costs_20261114/README.md` for the
-current results. The earlier `native_navigation_20261114` evidence belongs to
+proof. Current owner/loader integration results are in
+`docs/qa/native_navigation_runtime_20261114/README.md`; earlier lazy-cost measurements
+remain in `docs/qa/native_navigation_dynamic_costs_20261114/README.md`.
+The earlier `native_navigation_20261114` evidence belongs to
 commit `7a7cf80e3`; its source hashes intentionally differ after this optimization.
 The old dynamic-options command remains an alias for the current benchmark.

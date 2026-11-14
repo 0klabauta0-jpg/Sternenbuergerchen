@@ -1,4 +1,4 @@
-"""Run unchanged script sources in a fresh minimal Godot project; never import game assets."""
+"""Run unchanged sources in an isolated Godot project with explicit dependencies only."""
 import argparse
 import hashlib
 import json
@@ -19,16 +19,21 @@ def main():
     parser.add_argument("--output-dir")
     parser.add_argument("--timeout", type=int, default=1800)
     parser.add_argument("--without-native", action="store_true")
+    parser.add_argument("--script-arg", action="append", default=[])
+    parser.add_argument("--copy-script", action="append", default=[])
+    parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--success-marker")
     args = parser.parse_args()
-    if Path(args.script).name != args.script or not args.script.endswith(".gd"):
-        parser.error("script must be a basename in scripts/tests")
+    for name in [args.script, *args.copy_script]:
+        if Path(name).name != name or not name.endswith(".gd"):
+            parser.error("scripts must be basenames in scripts/tests")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
     project = ROOT / "tmp" / "native_navigation" / run_id
-    output = Path(args.output_dir).resolve() if args.output_dir else ROOT / "docs/qa/native_navigation_dynamic_costs_20261114" / run_id
+    output = Path(args.output_dir).resolve() if args.output_dir else ROOT / "docs/qa/native_navigation_runtime_20261114" / run_id
     project.mkdir(parents=True, exist_ok=False)
     output.mkdir(parents=True, exist_ok=False)
     entry = "scripts/tests/" + args.script
-    queue = [entry]
+    queue = [entry, *["scripts/tests/" + name for name in args.copy_script]]
     # Fixture uses a constant map path; preserve bytes including source metadata.
     queue += ["maps/Ground_Mission01_32x32.json"]
     copied = {}
@@ -43,9 +48,15 @@ def main():
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, dest)
         copied[relative] = hashlib.sha256(source.read_bytes()).hexdigest()
-        if source.suffix in [".gd", ".json"]:
-            for dep in re.findall(r'res://([^"\s\x27]+)', source.read_text(encoding="utf-8-sig")):
-                if Path(dep).suffix in [".gd", ".json", ".txt"] and (ROOT / dep).is_file():
+        if source.suffix in [".gd", ".json", ".tscn", ".tres", ".gdshader", ".gdshaderinc"]:
+            source_text = source.read_text(encoding="utf-8-sig")
+            for dep in re.findall(r'res://([^"\s\x27]+)', source_text):
+                if (source.suffix in [".tscn", ".tres", ".gdshader", ".gdshaderinc"] or Path(dep).suffix in [".gd", ".json", ".txt", ".md"]) and (ROOT / dep).is_file():
+                    queue.append(dep)
+            # Actual preload resources are required even by a rendering-free
+            # subclass. String-only asset catalog entries are not imported.
+            for dep in re.findall(r'preload\(\s*["\x27]res://([^"\x27]+)["\x27]\s*\)', source_text):
+                if (ROOT / dep).is_file():
                     queue.append(dep)
     if not args.without_native:
         for relative in [
@@ -73,8 +84,10 @@ def main():
     commands = [
         [args.godot, "--headless", "--path", str(project), "--editor", "--import"],
         [args.godot, "--headless", "--path", str(project), "--script", "res://" + entry,
-         "--", "--output=" + str(output / "result.json")],
+         "--", "--output=" + str(output / "result.json"), *args.script_arg],
     ]
+    if args.prepare_only:
+        commands = commands[:1]
     for name, command in zip(["import", "run"], commands):
         started = time.monotonic()
         print(name + ": " + str(output), flush=True)
@@ -87,9 +100,11 @@ def main():
             "duration_seconds": time.monotonic() - started,
         }, indent=2))
         if result.returncode or any(token in text for token in [
-            "SCRIPT ERROR:", "Parse Error:", "Failed to load script", "ERROR:", "ObjectDB instances leaked",
+            "SCRIPT ERROR", "Parse Error", "Compile Error", "Failed to load script", "ERROR:", "ObjectDB instances leaked", "resources still in use at exit",
         ]):
             raise SystemExit(result.returncode or 1)
+        if name == "run" and args.success_marker and args.success_marker not in text:
+            raise SystemExit("Missing success marker: " + args.success_marker)
     print("Evidence: " + str(output), flush=True)
 
 if __name__ == "__main__":

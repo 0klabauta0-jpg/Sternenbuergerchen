@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+RUNTIME_NAV_PAIR hex24 0 gd_tick_usec=42787 native_tick_usec=2064 parity=true
+RUNTIME_NAV_PAIR hex24 1 gd_tick_usec=34613 native_tick_usec=2089 parity=true
+RUNTIME_NAV_PAIR hex24 2 gd_tick_usec=39521 native_tick_usec=2199 parity=true
+RUNTIME_NAV_PAIR hex24 3 gd_tick_usec=50375 native_tick_usec=2179 parity=true
+RUNTIME_NAV_PAIR hex24 4 gd_tick_usec=14567 native_tick_usec=818 parity=true
+RUNTIME_NAV_PAIR hex24 5 gd_tick_usec=21291 native_tick_usec=1851 parity=true
+RUNTIME_NAV_PAIR hex24 6 gd_tick_usec=19180 native_tick_usec=872 parity=true
+RUNTIME_NAV_PAIR hex24 7 gd_tick_usec=4311 native_tick_usec=498 parity=true
+RUNTIME_NAV_PAIR gm01 0 gd_tick_usec=144651 native_tick_usec=5849 parity=true
+RUNTIME_NAV_PAIR gm01 1 gd_tick_usec=107945 native_tick_usec=6064 parity=true
+RUNTIME_NAV_PAIR gm01 2 gd_tick_usec=280395 native_tick_usec=11235 parity=true
+RUNTIME_NAV_PAIR gm01 3 gd_tick_usec=169994 native_tick_usec=7339 parity=true
+RUNTIME_NAV_PAIR gm01 4 gd_tick_usec=155235 native_tick_usec=6319 parity=true
+RUNTIME_NAV_PAIR gm01 5 gd_tick_usec=156011 native_tick_usec=6098 parity=true
+RUNTIME_NAV_PAIR gm01 6 gd_tick_usec=266361 native_tick_usec=9717 parity=true
+RUNTIME_NAV_PAIR gm01 7 gd_tick_usec=339163 native_tick_usec=11004 parity=true
+NATIVE_NAVIGATION_RUNTIME_BENCHMARK pairs=16 failures=0

@@ -351,6 +351,10 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 	_admit_hex_setup_nodes(visual_unit_nodes)
 	_ensure_primary_3d_view(visual_unit_nodes)
 	if not _hex_setup_presentation_only:_initialize_fog_of_war(visual_unit_nodes, terrain_registry)
+	# Initial scenario gates can change door/terrain overrides above. Prepare the
+	# final revision before this synchronous load releases the first gameplay tick.
+	if simulation_root != null and simulation_root.has_method("prewarm_navigation"):
+		simulation_root.call("prewarm_navigation", terrain_registry)
 	_is_initialized = true
 	if _hex_setup_presentation_only and simulation_root.has_method("refresh_multiplayer_replica_presence"):simulation_root.call("refresh_multiplayer_replica_presence")
 

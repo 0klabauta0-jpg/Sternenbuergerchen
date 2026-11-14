@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "runtime",
+      "script": "res://scripts/tests/native_navigation_runtime_verifier.gd",
+      "args": [
+        "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\runtime_native.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_RUNTIME",
+      "timeout": 180
+    },
+    {
+      "name": "mission_load",
+      "script": "res://scripts/tests/native_navigation_load_verifier.gd",
+      "args": [
+        "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\mission_load_native.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_LOAD",
+      "timeout": 180
+    },
+    {
+      "name": "native_parity",
+      "script": "res://scripts/tests/native_navigation_prototype_verifier.gd",
+      "args": [
+        "--output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\native_parity.json"
+      ],
+      "success_marker": "NATIVE_NAVIGATION_PARITY",
+      "timeout": 180
+    },
+    {
+      "name": "door_revision",
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "args": [],
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "movement_fallback",
+      "script": "res://scripts/tests/review_20261102_p2_fallback_verifier.gd",
+      "args": [],
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "args": [
+        "--evidence-output=C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\docs\\qa\\native_navigation_runtime_20261114\\hex_movement.json"
+      ],
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 180
+    },
+    {
+      "name": "corridor_lane_cover",
+      "script": "res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "command_lifecycle",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "args": [],
+      "success_marker": "TASK_501: ALL PASSED",
+      "timeout": 180
+    }
+  ]
+}
