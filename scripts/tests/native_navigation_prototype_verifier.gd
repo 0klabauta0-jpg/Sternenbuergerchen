@@ -50,8 +50,11 @@ func _run() -> void:
 	_check(ClassDB.class_exists("NativeNavigationKernel"), "GDExtension registered real NativeNavigationKernel")
 	if failed == 0:
 		_test_kernel_validation()
+		_test_dynamic_kernel_validation()
 		for topology in ["square8", "hex_axial_v1"]:
 			_test_topology(topology)
+			_test_dynamic_costs(topology)
+			_test_lazy_short_query(topology)
 		_test_cache_and_identity()
 		_test_extreme_coordinate_fallback()
 		_test_real_map()
@@ -157,10 +160,12 @@ func _test_cache_and_identity() -> void:
 	_check(identity_result == HPA.new().find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph), "Same-revision different registry produces its own path")
 	_check(candidate.get_debug_snapshot().get("snapshot_build_count", 0) > builds_before, "Registry/graph identity change rebuilds snapshot")
 	var before_graph: int = candidate.get_debug_snapshot().get("snapshot_build_count", -1)
+	var graph_builds_before: int = candidate.get_debug_snapshot().get("graph_build_count", -1)
 	other_graph.build_from_registry(other_registry, 3)
 	var graph_result: Dictionary = candidate.find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph)
 	_check(graph_result == HPA.new().find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph), "Changed graph revision exact result")
-	_check(candidate.get_debug_snapshot().get("snapshot_build_count", 0) > before_graph, "Graph revision invalidation")
+	_check(candidate.get_debug_snapshot().get("snapshot_build_count", -2) == before_graph, "Graph revision retains unchanged terrain snapshot")
+	_check(candidate.get_debug_snapshot().get("graph_build_count", -1) == graph_builds_before + 1, "Graph revision invalidates graph snapshot")
 	var before_registry: int = candidate.get_debug_snapshot().get("snapshot_build_count", -1)
 	other_registry.set_runtime_tile_overrides([{"grid_position": Vector2i(6, 6), "walkable_override": false}])
 	other_graph.rebuild_dirty_clusters_from_registry(other_registry, other_registry.get_dirty_grid_positions())
@@ -168,11 +173,15 @@ func _test_cache_and_identity() -> void:
 	_check(revision_result == HPA.new().find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph), "Changed runtime door revision exact result")
 	_check(candidate.get_debug_snapshot().get("snapshot_build_count", 0) > before_registry, "Registry revision invalidation without intervening calls")
 	var before_options: int = candidate.get_debug_snapshot().get("snapshot_build_count", -1)
+	var option_graphs_before: int = candidate.get_debug_snapshot().get("graph_build_count", -1)
+	var option_prepares_before: int = candidate.get_debug_snapshot().get("option_prepare_count", -1)
 	var changed_options := {"cover_aware_enabled": true, "cover_weight": 0.2, "lane_enabled": true, "lane_weight": 0.3,
 		"lane_offset_grid": 2.0, "corridor_from_grid": Vector2i.ZERO, "corridor_to_grid": Vector2i(11, 11)}
 	var option_result: Dictionary = candidate.find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph, changed_options)
 	_check(option_result == HPA.new().find_path_with_status(Vector2i.ZERO, Vector2i(11, 11), other_registry, other_graph, changed_options), "Changed cost options exact result")
-	_check(candidate.get_debug_snapshot().get("snapshot_build_count", 0) > before_options, "Cost options invalidate prepared data")
+	_check(candidate.get_debug_snapshot().get("snapshot_build_count", -2) == before_options, "Changed cost options retain terrain snapshot")
+	_check(candidate.get_debug_snapshot().get("graph_build_count", -2) == option_graphs_before, "Changed cost options retain graph snapshot")
+	_check(candidate.get_debug_snapshot().get("option_prepare_count", -2) == option_prepares_before + 1, "Changed cost options refresh query context")
 	registry.free()
 	other_registry.free()
 
@@ -217,3 +226,131 @@ func _test_kernel_validation() -> void:
 		malformed.merge(mutations[index], true)
 		_check(not kernel.load_snapshot(malformed), "Reject malformed native snapshot %d" % index)
 		_check(kernel.find_path(Vector2i.ZERO, Vector2i.RIGHT).is_empty(), "Rejected snapshot cannot return stale path %d" % index)
+
+
+func _test_dynamic_kernel_validation() -> void:
+	var kernel = ClassDB.instantiate("NativeNavigationKernel")
+	var valid := {"coords": PackedInt32Array([0, 0, 1, 0]), "offsets": PackedInt32Array([0, 1, 2]),
+		"neighbors": PackedInt32Array([1, 0]), "costs": PackedFloat64Array([1.0, 1.0]),
+		"walkable": PackedByteArray([1, 1]), "cover": PackedFloat64Array([0.0, 0.5]),
+		"blocks_los": PackedByteArray([0, 0]), "height": PackedInt32Array([0, 0]),
+		"object_height": PackedInt32Array([0, 0]), "hex": false}
+	_check(kernel.load_terrain(valid), "Native accepts dynamic terrain snapshot")
+	_check(not kernel.is_ready(), "Dynamic terrain waits for valid query options")
+	_check(kernel.find_path(Vector2i.ZERO, Vector2i.RIGHT).is_empty(), "Unprepared dynamic terrain cannot search")
+	_check(kernel.begin_query({"cover_aware_enabled": true, "cover_weight": 0.4}), "Dynamic query starts")
+	_check(kernel.step_cost(Vector2i.ZERO, Vector2i.RIGHT) == 1.0 - 0.4 * 0.5, "Dynamic query evaluates exact cover cost")
+	_check(kernel.begin_query({}), "Dynamic query can reset to plain costs")
+	_check(kernel.step_cost(Vector2i.ZERO, Vector2i.RIGHT) == 1.0, "New query cannot reuse old edge cost")
+	_check(not kernel.begin_query({"cover_weight": NAN}), "Nonfinite dynamic query rejected")
+	_check(not kernel.is_ready() and kernel.find_path(Vector2i.ZERO, Vector2i.RIGHT).is_empty(), "Rejected query cannot search stale costs")
+	_check(is_inf(kernel.step_cost(Vector2i.ZERO, Vector2i.RIGHT)), "Rejected query cannot expose stale edge costs")
+	_check(kernel.begin_query({}), "Valid query restores prepared terrain")
+	var malformed: Dictionary = valid.duplicate(true)
+	malformed["cover"] = PackedFloat64Array([0.0])
+	_check(not kernel.load_terrain(malformed), "Malformed dynamic attributes rejected")
+	_check(kernel.find_path(Vector2i.ZERO, Vector2i.RIGHT).is_empty(), "Rejected dynamic snapshot cannot search old terrain")
+
+
+func _test_dynamic_costs(topology: String) -> void:
+	var registry = FIX.synthetic(topology, 10, 8, Vector2i(-4, -3), true)
+	var graph = FIX.graph_for(registry, 3)
+	var candidate = NATIVE.new()
+	var start := Vector2i(-3, -2)
+	var goal := Vector2i(4, 3)
+	var option_sets: Array = [
+		{"cover_aware_enabled": true, "cover_weight": 0.56, "exposure_weight": 1.3,
+			"hazard_grids": [Vector2i(-4, -2), Vector2i(4, 3)], "exposure_max_grid_distance": 7.0},
+		{"cover_aware_enabled": true, "cover_weight": 0.56, "exposure_weight": 2.1,
+			"hazard_grids": [Vector2i(4, -2), Vector2i(-3, 3)],
+			"exposure_by_grid": {Vector2i(-2, -2): 2.0, Vector2i(-1, -2): -0.5}},
+		{"corridor_enabled": true, "corridor_weight": 0.8, "lane_enabled": true, "lane_weight": 0.4, "lane_offset_grid": -0.75},
+		{"corridor_enabled": true, "corridor_weight": 0.8, "corridor_from_grid": start,
+			"lane_enabled": true, "lane_weight": 0.4, "lane_offset_grid": 0.75},
+		{"corridor_enabled": true, "corridor_weight": 0.8, "corridor_to_grid": goal,
+			"lane_enabled": true, "lane_weight": 0.4, "lane_offset_grid": 0.75},
+		{"corridor_enabled": true, "corridor_weight": 0.8, "corridor_from_grid": goal, "corridor_to_grid": goal,
+			"lane_enabled": true, "lane_weight": 0.4, "lane_offset_grid": 0.75},
+	]
+	for radius in [1, 2, 3]:
+		option_sets.append({"blocker_clearance_weight": 0.392, "blocker_clearance_radius": radius,
+			"cover_aware_enabled": true, "cover_weight": 0.56, "exposure_weight": 0.72,
+			"hazard_grids": [Vector2i(-4, 0), Vector2i(4, 3)], "exposure_max_grid_distance": 8.0,
+			"corridor_enabled": true, "corridor_weight": 0.62, "corridor_half_width_grid": 1.3,
+			"corridor_from_grid": start, "corridor_to_grid": goal,
+			"lane_enabled": true, "lane_weight": 0.88, "lane_offset_grid": float(radius - 2) * 0.75})
+	# Return to earlier inputs after other queries; no per-query cache may leak.
+	option_sets.append(option_sets[0].duplicate(true))
+	option_sets.append({})
+	for index in range(option_sets.size()):
+		candidate.clear_result_cache()
+		_compare(candidate, registry, graph, start, goal, option_sets[index], topology + " successive dynamic options %d" % index)
+		_check(candidate.get_debug_snapshot().get("snapshot_build_count", -1) == 1, topology + " options preserve one terrain snapshot %d" % index)
+		_check(candidate.get_debug_snapshot().get("graph_build_count", -1) == 1, topology + " options preserve one graph snapshot %d" % index)
+		var prepared: bool = candidate.prepare(registry, option_sets[index], graph)
+		_check(prepared, topology + " direct dynamic costs prepared %d" % index)
+		if prepared:
+			_check_all_edge_costs(candidate, registry, option_sets[index], topology + " full directed cost grid %d" % index)
+	# Override only terrain facts read by dynamic costs. The same adapter must
+	# discard old cover/LOS/height/traversability inputs at the registry revision.
+	var changes: Array = [
+		{"grid_position": Vector2i(-2, -2), "cover_value_override": 100},
+		{"grid_position": Vector2i(-2, -2), "blocks_los_override": true, "object_height_override": 3},
+		{"grid_position": Vector2i(-2, -2), "blocks_los_override": true, "object_height_override": 0},
+		{"grid_position": Vector2i(-2, -2), "walkable_override": false},
+	]
+	for index in range(changes.size()):
+		var before: int = candidate.get_debug_snapshot().get("snapshot_build_count", -1)
+		registry.set_runtime_tile_overrides([changes[index]])
+		graph.rebuild_dirty_clusters_from_registry(registry, registry.get_dirty_grid_positions())
+		candidate.clear_result_cache()
+		_compare(candidate, registry, graph, start, goal, option_sets[8], topology + " dynamic registry override %d" % index)
+		_check(candidate.get_debug_snapshot().get("snapshot_build_count", -1) == before + 1, topology + " override rebuilds exactly one terrain snapshot %d" % index)
+		_check_all_edge_costs(candidate, registry, option_sets[8], topology + " override exact directed costs %d" % index)
+	registry.clear_runtime_tile_overrides()
+	graph.rebuild_dirty_clusters_from_registry(registry, registry.get_dirty_grid_positions())
+	candidate.clear_result_cache()
+	_compare(candidate, registry, graph, start, goal, option_sets[0], topology + " cleared dynamic registry overrides")
+	registry.free()
+
+
+func _check_all_edge_costs(candidate, registry, options: Dictionary, label: String) -> void:
+	var oracle = PATH.new()
+	var same: bool = true
+	var first_mismatch: String = ""
+	for tile in registry.get_all_tiles():
+		var source: Vector2i = tile.grid_position
+		for direction in oracle.get_neighbor_directions(registry):
+			var target: Vector2i = source + Vector2i(direction)
+			var expected: float = oracle.get_step_cost(source, target, registry, options)
+			var actual: float = candidate.get("_kernel").step_cost(source, target)
+			if expected != actual:
+				same = false
+				if first_mismatch.is_empty(): first_mismatch = " %s -> %s expected=%.17f actual=%.17f" % [source, target, expected, actual]
+	_check(same, label + first_mismatch)
+
+
+func _test_lazy_short_query(topology: String) -> void:
+	var registry = FIX.synthetic(topology, 32, 32, Vector2i(-8, -8), false)
+	var candidate = NATIVE.new()
+	var options := {"cover_aware_enabled": true, "cover_weight": 0.2, "exposure_weight": 0.7,
+		"hazard_grids": [Vector2i(-5, 0)], "exposure_max_grid_distance": 8.0,
+		"blocker_clearance_weight": 0.3, "blocker_clearance_radius": 2}
+	var expected: Array = PATH.new().find_path_with_options(Vector2i.ZERO, Vector2i.RIGHT, registry, options)
+	var actual: Array = candidate.find_path_with_options(Vector2i.ZERO, Vector2i.RIGHT, registry, options)
+	_same_path(expected, actual, registry, options, topology + " lazy short query")
+	var debug: Dictionary = candidate.get_debug_snapshot()
+	_check(debug.get("last_backend", "") == "native", topology + " lazy query uses native backend")
+	var targets: int = int(debug.get("target_cost_compute_count", -1))
+	var edges: int = int(debug.get("edge_cost_compute_count", -1))
+	_check(targets > 0 and targets < 64, topology + " short query computes fewer than64 of1024 target costs")
+	_check(edges > 0 and edges < 128, topology + " short query computes only visited directed edges")
+	_check(candidate.prepare(registry, options), topology + " lazy query reset prepared")
+	var kernel = candidate.get("_kernel")
+	var cost: float = kernel.step_cost(Vector2i.ZERO, Vector2i.RIGHT)
+	var first: Dictionary = kernel.get_query_debug()
+	_check(kernel.step_cost(Vector2i.ZERO, Vector2i.RIGHT) == cost, topology + " repeated lazy edge exact")
+	var second: Dictionary = kernel.get_query_debug()
+	_check(first.get("edge_cost_compute_count", -1) == 1 and second.get("edge_cost_compute_count", -2) == 1, topology + " repeated edge evaluated once within query")
+	_check(first.get("target_cost_compute_count", -1) == 1 and second.get("target_cost_compute_count", -2) == 1, topology + " repeated target evaluated once within query")
+	registry.free()

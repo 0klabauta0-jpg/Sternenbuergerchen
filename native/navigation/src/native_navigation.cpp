@@ -87,6 +87,9 @@ public:
 
 void NativeNavigationKernel::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_snapshot", "snapshot"), &NativeNavigationKernel::load_snapshot);
+    ClassDB::bind_method(D_METHOD("load_terrain", "snapshot"), &NativeNavigationKernel::load_terrain);
+    ClassDB::bind_method(D_METHOD("begin_query", "options"), &NativeNavigationKernel::begin_query);
+    ClassDB::bind_method(D_METHOD("get_query_debug"), &NativeNavigationKernel::get_query_debug);
     ClassDB::bind_method(D_METHOD("find_path", "from_grid", "to_grid"), &NativeNavigationKernel::find_path);
     ClassDB::bind_method(D_METHOD("build_local_cost_map", "from_grid", "component_grids", "reverse_steps"), &NativeNavigationKernel::build_local_cost_map);
     ClassDB::bind_method(D_METHOD("find_hpa", "from_grid", "to_grid", "graph_data"), &NativeNavigationKernel::find_hpa);
@@ -124,6 +127,19 @@ void NativeNavigationKernel::clear_snapshot() {
     neighbors_.clear();
     edge_costs_.clear();
     walkable_.clear();
+    dynamic_costs_ = false;
+    query_ready_ = false;
+    query_generation_ = 0;
+    target_cost_compute_count_ = 0;
+    edge_cost_compute_count_ = 0;
+    query_ = QueryOptions();
+    cover_.clear();
+    blocks_los_.clear();
+    height_.clear();
+    object_height_.clear();
+    target_costs_.clear();
+    edge_generations_.clear();
+    query_edge_costs_.clear();
 }
 
 bool NativeNavigationKernel::load_snapshot(const Dictionary &snapshot) {
@@ -201,16 +217,16 @@ double NativeNavigationKernel::heuristic(const Vector2i &from, const Vector2i &t
     return (std::abs(ax - ay) + std::min(ax, ay) * DIAGONAL_COST) * heuristic_min_;
 }
 
-double NativeNavigationKernel::step_cost(const Vector2i &from_grid, const Vector2i &to_grid) const {
-    if (!ready_) return INF_COST;
+double NativeNavigationKernel::step_cost(const Vector2i &from_grid, const Vector2i &to_grid) {
+    if (!is_ready()) return INF_COST;
     const int id = grid_id(from_grid);
     const int d = direction_index(from_grid, to_grid);
-    return id < 0 || d < 0 ? INF_COST : edge_costs_[id][d];
+    return id < 0 || d < 0 ? INF_COST : cost_for_edge(id, d);
 }
 
 Array NativeNavigationKernel::find_path(const Vector2i &from_grid, const Vector2i &to_grid) {
     Array result;
-    if (!ready_) return result;
+    if (!is_ready()) return result;
     const int start = grid_id(from_grid), goal = grid_id(to_grid);
     if (start < 0 || goal < 0) return result;
     if (start == goal) { result.append(from_grid); return result; }
@@ -231,7 +247,7 @@ Array NativeNavigationKernel::find_path(const Vector2i &from_grid, const Vector2
         for (int d = 0; d < direction_count_; ++d) {
             const int next = neighbors_[current][d];
             if (next < 0) continue;
-            const double tentative = g_score[current] + edge_costs_[current][d];
+            const double tentative = g_score[current] + cost_for_edge(current, d);
             if (tentative >= g_score[next]) continue;
             parent[next] = current;
             g_score[next] = tentative;
@@ -243,7 +259,7 @@ Array NativeNavigationKernel::find_path(const Vector2i &from_grid, const Vector2
 
 Dictionary NativeNavigationKernel::build_local_cost_map(const Vector2i &from_grid, const Array &component_grids, bool reverse_steps) {
     Dictionary result;
-    if (!ready_) return result;
+    if (!is_ready()) return result;
     const int start = grid_id(from_grid);
     if (start < 0) return result;
     std::vector<uint8_t> allowed(grids_.size(), 0), settled(grids_.size(), 0), in_open(grids_.size(), 0);
@@ -268,7 +284,7 @@ Dictionary NativeNavigationKernel::build_local_cost_map(const Vector2i &from_gri
         for (int d = 0; d < direction_count_; ++d) {
             const int next = neighbors_[current][d];
             if (next < 0 || !allowed[next] || settled[next]) continue;
-            const double edge = reverse_steps ? edge_costs_[next][hex_ ? HEX_REVERSE[d] : SQUARE_REVERSE[d]] : edge_costs_[current][d];
+            const double edge = reverse_steps ? cost_for_edge(next, hex_ ? HEX_REVERSE[d] : SQUARE_REVERSE[d]) : cost_for_edge(current, d);
             const double candidate = costs[current] + edge;
             if (candidate >= costs[next]) continue;
             if (!std::isfinite(costs[next])) discovery.push_back(next);

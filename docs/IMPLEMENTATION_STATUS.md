@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### Native Navigation: Optionswechsel ohne Terrain-Neuaufbau — 14.11.2026
+
+Folgebranch `task/native-navigation-dynamic-costs-20261114`, bewusst auf dem noch
+nicht integrierten Prototyp `7a7cf80e3`. Terrain-/HPA-Snapshots sind jetzt von
+Anfrageoptionen getrennt; C++ berechnet gerichtete Kosten einschliesslich
+Exposure/LOS, Cover, Korridor, Lane und Clearance bedarfsgerecht. 1381/0
+Differentialpruefungen und 41/0 Hex-Regressionschecks; alle 550 Messpaare exakt.
+GM01 mit denselben wechselnden Optionen: nativer Median 978,075 -> 4,173 ms;
+gepaartes GDScript 137,775 ms. Acht Anfragen einschliesslich erster Vorbereitung
+309–318 ms vs 1311–1318 ms. Kalter Einzelaufruf und Terrain-Revisionsaufbau bleiben
+langsamer; keine allgemeine FPS-Aussage. Normaler Navigationspfad unveraendert,
+kein Mainmerge oder EXE. Build, Messgrenzen und Rohdaten:
+`docs/qa/native_navigation_dynamic_costs_20261114/README.md`.
+
 ### Nativer A*/HPA-Prototyp: geprueft, bleibt opt-in — 14.11.2026
 
 Separater Branch `task/native-navigation-prototype-20261114`, bewusst auf dem

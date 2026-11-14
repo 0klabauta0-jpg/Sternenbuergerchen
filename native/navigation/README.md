@@ -35,17 +35,30 @@ and differential runs before extending the manifest.
 - `prepare(registry, options = {}, graph = null) -> bool`
 - `clear_result_cache()` and `get_debug_snapshot()`
 
-The adapter materializes directed edge costs with the **unchanged** TerrainPathfinder.
-It sends packed arrays to C++ once per registry/graph identity, revision and exact
-options value. Search makes no GDScript callbacks per neighbor. This intentionally
-isolates the search migration from cost-rule migration, at the expense of expensive
-full-map preparation. One prepared snapshot is retained; HPA results use a bounded 64-entry
-FIFO cache with defensive copies. Authorities and mutations stay with existing owners.
+The adapter retains terrain data by registry identity/revision and HPA geometry by
+registry/graph identity/revision. Terrain preparation uses the **unchanged**
+TerrainPathfinder traversal rules and stores directed base costs before diagonal
+multiplication, cover values, walkability and LOS/height data. An option change no
+longer rebuilds either snapshot.
+
+Each real search calls the kernel's `begin_query(options)`. Native A*, Dijkstra and
+HPA then share lazily evaluated directed costs, including cover, exposure/LOS,
+corridor, lane and clearance. Generation stamps discard previous query costs
+without a map-wide reset. Arithmetic order and Godot Vector2 precision match the
+GDScript reference. No per-neighbor callbacks into GDScript are used.
+
+One terrain snapshot and one graph snapshot are retained; arrays grow with the map,
+not with the number of previous queries. HPA results use a bounded 64-entry FIFO
+cache with defensive copies. Authorities and mutations stay with existing owners.
 
 Unsupported inputs use an explicitly reported GDScript fallback. The supported
-coordinate domain is +/-1,000,000 per component; malformed/nonfinite native input
-is rejected. A rejected kernel load clears stale data. Callers must publish terrain
-and graph changes through their existing revision contracts.
+coordinate and height domain is +/-1,000,000 per component. Native query flags use
+bools; endpoints, hazards and exposure keys use Vector2i. Numeric cost options must
+be finite with absolute value <=1e12, and clearance radius is limited to 64; values
+below 1 retain the reference's clamp to 1. Unsupported values explicitly fall back
+to GDScript. A rejected kernel load clears stale data; a rejected query cannot
+reuse previous query costs. Callers must publish terrain and graph changes through
+their existing revision contracts.
 
 Gameplay equality means exact ordered paths, HPA status, edge costs and path scores.
 Native diagnostic timing/counters are deliberately separate. Requested GDScript
@@ -58,7 +71,7 @@ therefore not part of the gameplay-equivalence claim.
 ```powershell
 python scripts/tests/run_native_navigation_prototype.py
 python scripts/tests/run_native_navigation_prototype.py --script native_navigation_prototype_benchmark.gd
-python scripts/tests/run_native_navigation_prototype.py --script native_navigation_dynamic_options_benchmark.gd
+python scripts/tests/run_native_navigation_prototype.py --script native_navigation_dynamic_costs_benchmark.gd
 ```
 
 The runner copies the actual source bytes and navigation dependencies into a fresh
@@ -69,7 +82,12 @@ player save access or production enable switch is involved.
 Fixed-options benchmarks distinguish cold solver/graph construction in a running
 process, warm uncached queries, cached results and revision rebuilds. Preparation
 and language transfer are included in cold calls and recorded separately for warm
-reuse. Dynamic-option measurements model changing corridor/lane/cost requests.
+reuse. Dynamic-option measurements use the original eight changing requests:
+one phase includes a cold first request, another records explicit preparation and
+also includes it in the reported series total. Each query must use native code,
+miss the result cache, open a new cost context and retain one terrain/HPA snapshot.
 These are navigation subsystem measurements, not frame-rate or actor-playthrough
-proof. Refer to `docs/qa/native_navigation_20261114/README.md` for measured gains,
-regressions, raw data and the integration decision.
+proof. Refer to `docs/qa/native_navigation_dynamic_costs_20261114/README.md` for the
+current results. The earlier `native_navigation_20261114` evidence belongs to
+commit `7a7cf80e3`; its source hashes intentionally differ after this optimization.
+The old dynamic-options command remains an alias for the current benchmark.

@@ -2,8 +2,8 @@ class_name NativeNavigationPrototype
 extends RefCounted
 
 ## Opt-in differential prototype. Registry and HPA graph remain authoritative.
-## Preparation deliberately retains the original GDScript cost calculations.
-## Measure preparation plus query for cold comparisons, not just the C++ call.
+## Terrain and graph snapshots survive option changes. Query-dependent costs
+## are evaluated lazily by C++; unchanged GDScript is the differential oracle.
 const PATH_SCRIPT = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_SCRIPT = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const RESULT_CACHE_LIMIT: int = 64
@@ -14,9 +14,13 @@ var _prepared_registry_ref: WeakRef
 var _prepared_graph_ref: WeakRef
 var _prepared_registry_revision: int = -1
 var _prepared_graph_revision: int = -1
-var _prepared_options: String = ""
+var _graph_registry_ref: WeakRef
+var _graph_registry_revision: int = -1
+var _terrain_grids: Array = []
 var _graph_data: Dictionary = {}
 var _snapshot_build_count: int = 0
+var _graph_build_count: int = 0
+var _option_prepare_count: int = 0
 var _result_cache: Dictionary = {}
 var _result_fifo: Array[String] = []
 var _cache_registry_ref: WeakRef
@@ -34,12 +38,21 @@ func _init() -> void:
 
 func _reset_debug() -> void:
 	_debug = {"last_backend": "none", "fallback_reason": "", "result_cache_hit": false,
-		"snapshot_prepare_usec": 0, "native_query_usec": 0, "snapshot_reused": false}
+		"snapshot_prepare_usec": 0, "native_query_usec": 0, "snapshot_reused": false,
+		"terrain_prepare_usec": 0, "graph_prepare_usec": 0, "options_prepare_usec": 0,
+		"graph_reused": false}
 
 
 func get_debug_snapshot() -> Dictionary:
 	var result: Dictionary = _debug.duplicate(true)
 	result["snapshot_build_count"] = _snapshot_build_count
+	result["graph_build_count"] = _graph_build_count
+	result["option_prepare_count"] = _option_prepare_count
+	if is_instance_valid(_kernel) and _kernel.has_method("get_query_debug"):
+		result.merge(_kernel.call("get_query_debug"), false)
+	if bool(result.get("result_cache_hit", false)) or result.get("last_backend") == "gdscript_fallback":
+		result["target_cost_compute_count"] = 0
+		result["edge_cost_compute_count"] = 0
 	result["result_cache_entry_count"] = _result_cache.size()
 	result["result_cache_limit"] = RESULT_CACHE_LIMIT
 	result["native_available"] = is_instance_valid(_kernel)
@@ -55,7 +68,8 @@ func _reject(reason: String) -> bool:
 	_debug["fallback_reason"] = reason
 	_prepared_registry_ref = null
 	_prepared_graph_ref = null
-	_prepared_options = ""
+	_graph_registry_ref = null
+	_terrain_grids.clear()
 	_graph_data.clear()
 	return false
 
@@ -92,6 +106,8 @@ func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 		return _reject("diagnostics_require_gdscript")
 	if not is_instance_valid(_kernel):
 		return _reject("native_extension_unavailable")
+	if not _kernel.has_method("load_terrain") or not _kernel.has_method("begin_query"):
+		return _reject("native_extension_api_mismatch")
 	if not _valid_registry(registry):
 		return _reject("unsupported_registry")
 	if graph != null and not _valid_graph(graph):
@@ -99,77 +115,108 @@ func _prepare_snapshot(registry, options: Dictionary, graph) -> bool:
 	var normalized: Dictionary = _normalized_options(options)
 	if not bool(_fallback_hpa.call("_is_result_cache_value_supported", normalized)):
 		return _reject("unsupported_or_nonfinite_options")
-	var options_key: String = var_to_bytes(normalized).hex_encode()
 	var registry_revision: int = int(registry.call("get_revision"))
 	var graph_revision: int = int(graph.call("get_revision")) if graph != null else -1
-	if _referent(_prepared_registry_ref) == registry and _referent(_prepared_graph_ref) == graph and _prepared_registry_revision == registry_revision and _prepared_graph_revision == graph_revision and _prepared_options == options_key:
-		_debug["snapshot_reused"] = true
-		return true
-	_debug["snapshot_reused"] = false
+	var terrain_reused: bool = _referent(_prepared_registry_ref) == registry and _prepared_registry_revision == registry_revision
+	_debug["snapshot_reused"] = terrain_reused
+	if not terrain_reused:
+		var terrain_started: int = Time.get_ticks_usec()
+		if not _load_terrain(registry):
+			return false
+		_debug["terrain_prepare_usec"] = Time.get_ticks_usec() - terrain_started
+		_prepared_registry_ref = weakref(registry)
+		_prepared_registry_revision = registry_revision
+		_snapshot_build_count += 1
+	if graph != null:
+		var graph_reused: bool = _referent(_prepared_graph_ref) == graph and _prepared_graph_revision == graph_revision and _referent(_graph_registry_ref) == registry and _graph_registry_revision == registry_revision
+		_debug["graph_reused"] = graph_reused
+		if not graph_reused:
+			var graph_started: int = Time.get_ticks_usec()
+			var component_by_grid: Dictionary = {}
+			var component_tiles: Dictionary = {}
+			for grid in _terrain_grids:
+				var key: String = String(graph.call("get_component_key_for_grid", grid))
+				component_by_grid[grid] = key
+				if not key.is_empty() and not component_tiles.has(key):
+					component_tiles[key] = graph.call("get_component_tiles", key)
+			var adjacency: Dictionary = _fallback_hpa.call("_build_portal_adjacency", graph)
+			for key in adjacency:
+				Array(adjacency[key]).sort_custom(Callable(_fallback_hpa, "_sort_edges"))
+			_graph_data = {"component_by_grid": component_by_grid, "component_tiles": component_tiles,
+				"adjacency": adjacency, "portals": graph.call("get_portals_snapshot")}
+			_prepared_graph_ref = weakref(graph)
+			_prepared_graph_revision = graph_revision
+			_graph_registry_ref = weakref(registry)
+			_graph_registry_revision = registry_revision
+			_graph_build_count += 1
+			_debug["graph_prepare_usec"] = Time.get_ticks_usec() - graph_started
+		# Pruning remains query-dependent even though geometry is retained.
+		_graph_data["minimum_step_cost"] = _fallback_hpa.call("_minimum_local_step_cost", normalized)
+	if int(registry.call("get_revision")) != registry_revision or (graph != null and int(graph.call("get_revision")) != graph_revision):
+		return _reject("revision_changed_during_snapshot")
+	var options_started: int = Time.get_ticks_usec()
+	if not bool(_kernel.call("begin_query", normalized)):
+		return _reject("native_query_options_rejected")
+	_option_prepare_count += 1
+	_debug["options_prepare_usec"] = Time.get_ticks_usec() - options_started
+	return true
+
+
+func _load_terrain(registry) -> bool:
 	var tiles: Array = registry.call("get_all_tiles")
 	var grid_ids: Dictionary = {}
 	var coords := PackedInt32Array()
 	var walkable := PackedByteArray()
+	var cover := PackedFloat64Array()
+	var blocks_los := PackedByteArray()
+	var heights := PackedInt32Array()
+	var object_heights := PackedInt32Array()
+	var surface_costs := PackedFloat64Array()
+	_terrain_grids.clear()
 	for tile in tiles:
 		var grid: Vector2i = Vector2i(tile.grid_position)
 		if absi(grid.x) > 1000000 or absi(grid.y) > 1000000:
 			return _reject("coordinate_outside_prototype_range")
 		grid_ids[grid] = grid_ids.size()
+		_terrain_grids.append(grid)
 		coords.append(grid.x)
 		coords.append(grid.y)
 		walkable.append(1 if bool(registry.call("is_walkable", grid)) else 0)
+		cover.append(_oracle._get_cover_score(grid, registry))
+		blocks_los.append(1 if (bool(registry.call("blocks_los_at_grid", grid)) if registry.has_method("blocks_los_at_grid") else bool(tile.blocks_los)) else 0)
+		var height: int = int(tile.height_level)
+		var object_height: int = int(registry.call("get_object_height_at_grid", grid)) if registry.has_method("get_object_height_at_grid") else int(tile.object_height)
+		if absi(height) > 1000000 or absi(object_height) > 1000000:
+			return _reject("height_outside_prototype_range")
+		heights.append(height)
+		object_heights.append(object_height)
+		surface_costs.append(PATH_SCRIPT.TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(tile.surface_type)))
 	var offsets := PackedInt32Array()
 	var neighbors := PackedInt32Array()
 	var costs := PackedFloat64Array()
 	var directions: Array = _oracle.get_neighbor_directions(registry)
-	var query_options: Dictionary = normalized.duplicate(false)
-	query_options[PATH_SCRIPT.STEP_COST_CONTEXT_OPTION] = PATH_SCRIPT.StepCostContext.new(registry)
-	for tile in tiles:
+	for source_id in range(_terrain_grids.size()):
 		offsets.append(neighbors.size())
-		var grid: Vector2i = Vector2i(tile.grid_position)
+		var grid: Vector2i = _terrain_grids[source_id]
 		for direction in directions:
 			var target: Vector2i = grid + Vector2i(direction)
-			if not grid_ids.has(target):
+			if not grid_ids.has(target) or not _oracle.can_traverse_step(grid, target, registry):
 				continue
-			var cost: float = _oracle.get_step_cost(grid, target, registry, query_options)
-			if is_nan(cost) or cost < 0.0:
-				return _reject("unsupported_edge_cost")
-			if is_inf(cost):
-				continue
-			neighbors.append(int(grid_ids[target]))
+			var target_id: int = int(grid_ids[target])
+			# An allowed height-changing edge is a slope. Retain the unmultiplied
+			# base; dividing a previous diagonal cost would change float rounding.
+			var cost: float = surface_costs[target_id]
+			var height_difference: int = absi(int(heights[target_id]) - int(heights[source_id]))
+			if height_difference > 0:
+				cost = surface_costs[target_id] + (float(height_difference) * 1.0)
+			neighbors.append(target_id)
 			costs.append(cost)
 	offsets.append(neighbors.size())
 	var hex_mode: bool = registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == "hex_axial_v1"
-	var heuristic_min: float = 0.7
-	if bool(normalized.get("cover_aware_enabled", false)):
-		heuristic_min = 0.05 if hex_mode else maxf(0.05, 0.7 - maxf(float(normalized.get("cover_weight", 0.0)), 0.0))
-	var graph_data: Dictionary = {}
-	if graph != null:
-		var component_by_grid: Dictionary = {}
-		var component_tiles: Dictionary = {}
-		for grid in grid_ids:
-			var key: String = String(graph.call("get_component_key_for_grid", grid))
-			component_by_grid[grid] = key
-			if not key.is_empty() and not component_tiles.has(key):
-				component_tiles[key] = graph.call("get_component_tiles", key)
-		var adjacency: Dictionary = _fallback_hpa.call("_build_portal_adjacency", graph)
-		for key in adjacency:
-			Array(adjacency[key]).sort_custom(Callable(_fallback_hpa, "_sort_edges"))
-		graph_data = {"component_by_grid": component_by_grid, "component_tiles": component_tiles,
-			"adjacency": adjacency, "portals": graph.call("get_portals_snapshot"),
-			"minimum_step_cost": _fallback_hpa.call("_minimum_local_step_cost", normalized)}
-	if int(registry.call("get_revision")) != registry_revision or (graph != null and int(graph.call("get_revision")) != graph_revision):
-		return _reject("revision_changed_during_snapshot")
-	if not bool(_kernel.call("load_snapshot", {"coords": coords, "offsets": offsets, "neighbors": neighbors,
-		"costs": costs, "walkable": walkable, "hex": hex_mode, "heuristic_min": heuristic_min})):
+	if not bool(_kernel.call("load_terrain", {"coords": coords, "offsets": offsets, "neighbors": neighbors,
+		"costs": costs, "walkable": walkable, "cover": cover, "blocks_los": blocks_los,
+		"height": heights, "object_height": object_heights, "hex": hex_mode, "heuristic_min": 0.7})):
 		return _reject("native_snapshot_rejected")
-	_prepared_registry_ref = weakref(registry)
-	_prepared_graph_ref = weakref(graph) if graph != null else null
-	_prepared_registry_revision = registry_revision
-	_prepared_graph_revision = graph_revision
-	_prepared_options = options_key
-	_graph_data = graph_data
-	_snapshot_build_count += 1
 	return true
 
 

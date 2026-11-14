@@ -1,0 +1,29 @@
+{
+  "source_head": "7a7cf80e39e9895c2b03d68b514e97fdc8340ac5",
+  "engine": "4.6.2.stable.official.71f334935",
+  "run_id": "20261114T114007Z-31cd2676",
+  "source_sha256": {
+    "maps/Ground_Mission01_32x32.json": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+    "scripts/tests/frontier_hex_foundation_verifier.gd": "c01c179612db0fae53959c36a4059a7b117c8887464749a6c55774c553c3cb61",
+    "maps/station_outpost_64x64.json": "5a98b05458bdfb2884129cca5a7e8eff14e033b89233d9d800fc8eb5be841d1b",
+    "scripts/terrain/hex_grid.gd": "f19974abdeacda0f0b0ebc218776b6f7a1d785a8b720c90e76bd75c210f3d60d",
+    "scripts/terrain/hpa_pathfinder.gd": "ac7140281c19da041f224e9cc565ffcd1021ee068e236499b3ca034a73d7ba33",
+    "scripts/terrain/terrain_pathfinder.gd": "4af48f72ca156e4e30e3c7cc1f2f717e6cb0b353dcbfb7a3d9f05c2fd05c93f3",
+    "scripts/terrain/terrain_tile_data.gd": "9e01d21bcc082b68bb79c4c194a610cd9bc922026da12fc108e965a39dd1e23d",
+    "scripts/terrain/hpa_navigation_graph.gd": "24f492995ea3e2964dafa2a43f698c49663880b22bf16183b79d45d9c961c912",
+    "scripts/terrain/terrain_registry.gd": "1aa3b96e1010298d050d1aade5b27c40ddb560dccd17ac4ad1d74223d37974b7",
+    "scripts/terrain/terrain_map_data.gd": "16591b8da49aac87023ff3eb7817ffdb8714ce9a5cb8caaaa11712e06809d226",
+    "scripts/tactical/enemy_team_tactics_profile.gd": "285b3fdd5417cafa82293213b7713e8ffd15ce14e976a68d73639a975495526b",
+    "scripts/core/weapon_data.gd": "a16f41e1c8b5556ea05eb7f7321653bebd0c49efdbf7902f8a5805633e418240",
+    "scripts/terrain/terrain_tile_catalog.gd": "37f2989ecd57dcba1b2e94cbde777b6b4b96d6fc3bef402f66dff0d007c3d24c",
+    "scripts/terrain/terrain_texture_catalog.gd": "9c33921d0390c62e45aa7e87da216d88370417123cb33fcf44ddf8c95772fb7f",
+    "data/terrain_tile_catalog.json": "a175a6efdd9ce28790d7458c57aa0dfa439ea73e7dd865e70fd0cfe125433b71",
+    "scripts/terrain/terrain_marker_catalog.gd": "489fa41494980dab339ee4a84b8fed9f10226902ea1c56a2efc505a23fd87fb2",
+    "native/navigation/navigation.gdextension": "662100291bee07110801a32835d9490e360e2c8e3caae6e162a7bcc48479f97d",
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll": "f58d2704b8f8535ca82ca447e698a94f15b23278b868c261133a725dfa5677f8"
+  },
+  "minimal_project": "C:\\Users\\bjoer\\.codex\\worktrees\\native-pathfinding-prototype\\SternenBuergerchen\\tmp\\native_navigation\\20261114T114007Z-31cd2676",
+  "headless": true,
+  "gpu_timing": "unavailable",
+  "player_profile": "unique isolated project"
+}
