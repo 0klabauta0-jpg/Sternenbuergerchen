@@ -1,0 +1,51 @@
+{
+ "ab_satellite_wreck": {
+  "file": "ab_satellite_wreck.glb",
+  "triangles": 640,
+  "size_x": 3.065,
+  "size_z_depth": 3.687,
+  "height": 1.521
+ },
+ "ab_solar_fragment": {
+  "file": "ab_solar_fragment.glb",
+  "triangles": 148,
+  "size_x": 1.713,
+  "size_z_depth": 0.956,
+  "height": 0.66
+ },
+ "ab_debris_small": {
+  "file": "ab_debris_small.glb",
+  "triangles": 200,
+  "size_x": 1.185,
+  "size_z_depth": 1.008,
+  "height": 0.352
+ },
+ "ab_furrow_berm": {
+  "file": "ab_furrow_berm.glb",
+  "triangles": 220,
+  "size_x": 2.419,
+  "size_z_depth": 0.871,
+  "height": 0.34
+ },
+ "ab_ore_outcrop_a": {
+  "file": "ab_ore_outcrop_a.glb",
+  "triangles": 308,
+  "size_x": 1.54,
+  "size_z_depth": 1.209,
+  "height": 0.8
+ },
+ "ab_ore_outcrop_b": {
+  "file": "ab_ore_outcrop_b.glb",
+  "triangles": 308,
+  "size_x": 1.54,
+  "size_z_depth": 1.209,
+  "height": 0.8
+ },
+ "ab_freighter_hull": {
+  "file": "ab_freighter_hull.glb",
+  "triangles": 664,
+  "size_x": 5.55,
+  "size_z_depth": 3.267,
+  "height": 1.931
+ }
+}
