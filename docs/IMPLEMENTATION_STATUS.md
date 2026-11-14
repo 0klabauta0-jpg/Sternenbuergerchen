@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### Öffentlicher Code und erweiterter Bildkatalog — 14.11.2026
+
+Auf ausdrücklichen Nutzerwunsch ist das Coderepository jetzt öffentlich. Der Referenzkatalog wurde auf 71 eindeutige Bilder erweitert: Rüstungen3, Menschen13, Landschaft/Gebäude5, Schiffe10, HUD/Menüs31, Ausrüstung/Icons9. GitHub-Galerien nach Rubriken und eigenes ZIP; Bilder und Herkunftsmanifeste geprüft. Keine Spieländerung oder neue EXE. Nachweise: docs/qa/public_reference_catalog_20261114/. Diese Freigabe ersetzt die bisherige private Code-Sichtbarkeit.
+
+
 ### Öffentliche Downloads — 14.11.2026
 
 R2-EXE (Build 8571be32c) und fünf beschriftete eigene 2D-Grafikreferenzen im separaten öffentlichen GitHub-Repository Sternenbuergerchen-Downloads. EXE-ZIP unverändert zum geprüften Paket. Anonyme Downloads und GitHub-Digests geprüft. Anleitung und privater Bericht erhalten öffentliche Downloadlinks. Coderepository bleibt privat. Nachweise: docs/qa/public_downloads_20261114/. Keine Spieländerung oder neue Kampagnenabnahme.

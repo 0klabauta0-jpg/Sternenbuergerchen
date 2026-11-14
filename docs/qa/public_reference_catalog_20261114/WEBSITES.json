@@ -1,0 +1,38 @@
+{
+  "guide": {
+    "source_commit": "a0459b8f724efc96a4a20f7d9b9a99735732123e",
+    "deployment": {
+      "id": "appgdep_6af8220ae494819191d73f040e002348",
+      "project_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91",
+      "title": "Sternenbürgerchen · Spielanleitung",
+      "version_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91~appgver_e001848cbeac8191ac2ea58797900a81",
+      "type": "publish",
+      "status": "succeeded",
+      "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+      "has_mcp": false,
+      "screenshot_asset_pointer": null,
+      "provider_deployment_id": "release---6af7a7dfbf0c8191a4986f757486d215",
+      "failure_message": null,
+      "env_set_revision": 0,
+      "updated_at": "2026-11-14T08:55:49.289127+00:00"
+    }
+  },
+  "review": {
+    "source_commit": "c1bae150f4c1a0b8683fa4b272a19df86f204d66",
+    "deployment": {
+      "id": "appgdep_6af821f905c881919e5742e2a4f3da0a",
+      "project_id": "appgprj_6af6b36c322c8191b942ee89bed48f40",
+      "title": "SternenBürgerchen – Spielreview",
+      "version_id": "appgprj_6af6b36c322c8191b942ee89bed48f40~appgver_6c2623ed976481919aa3fb7b842391cd",
+      "type": "publish",
+      "status": "succeeded",
+      "url": "https://sternenbuergerchen-spielreview.klabauta.chatgpt.site",
+      "has_mcp": false,
+      "screenshot_asset_pointer": null,
+      "provider_deployment_id": "release---6af6b3cfcd808191ba6a068478377c17",
+      "failure_message": null,
+      "env_set_revision": 0,
+      "updated_at": "2026-11-14T08:55:35.044401+00:00"
+    }
+  }
+}

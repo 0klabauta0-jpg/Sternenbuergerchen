@@ -1,0 +1,22 @@
+{
+  "checked_utc": "2026-11-14T08:53:05.121622+00:00",
+  "anonymous": true,
+  "code_repository_public": true,
+  "code_project_file_readable": true,
+  "image_count": 71,
+  "all_image_sha256_and_public_git_blobs_match": true,
+  "categories": {
+    "01_Ruestungen": 3,
+    "02_Menschen_Portraets": 13,
+    "03_Landschaft_Gebaeude": 5,
+    "04_Schiffe": 10,
+    "05_HUD_Menues_Sternkarte": 31,
+    "06_Ausruestung_Icons": 9
+  },
+  "public_tree_sha": "826f6b6690d5fc576030a9da6fcbbcc67c8fe893",
+  "download_url": "https://github.com/0klabauta0-jpg/Sternenbuergerchen-Downloads/releases/download/playtest-2026-11-14-r2/SternenBuergerchen_Referenzgalerie_2026-11-14-r2.zip",
+  "download_http": 206,
+  "asset_bytes": 141578973,
+  "asset_sha256": "sha256:8319b52375de3106162b24610e8ce8b9623a28fe799a38891221a4ffdf306b3a",
+  "category_pages": 6
+}
