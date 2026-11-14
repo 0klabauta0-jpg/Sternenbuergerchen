@@ -5700,6 +5700,8 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	var key: String = "hex_grid_coverage_regional" if _regional_height_step > 0.0 else ("hex_grid_coverage_authored" if authored else "hex_grid_coverage_plain")
 	if _homebase_visuals_enabled: key += "_homebase"
 	if _orbital_station_view: key += "_orbital"
+	var arid_ink: bool = _is_arid_terrain_visual_context()
+	if arid_ink: key += "_arid"
 	if _material_cache.has(key):
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
@@ -5707,6 +5709,11 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	material.set_shader_parameter("line_color", Color(0.13, 0.07, 0.025, 0.92) if authored else Color(0.25, 0.15, 0.10, 0.68))
 	if _regional_height_step > 0.0:
 		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.68))
+	if arid_ink:
+		# Grafikpass R1: rust-brown ink instead of near-black on arid ground.
+		# Opacity, pixel width and distance floor keep the overview legibility
+		# thresholds; only the hue and value move towards the reference.
+		material.set_shader_parameter("line_color", Color(0.30, 0.125, 0.065, 0.74) if authored else Color(0.29, 0.13, 0.075, 0.68))
 	if _orbital_station_view:
 		material.set_shader_parameter("line_color", Color(0.015, 0.035, 0.05, 1.0))
 		material.set_shader_parameter("distant_contrast_floor", 0.85)

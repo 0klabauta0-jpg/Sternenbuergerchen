@@ -61,8 +61,10 @@ void fragment() {
 	// Upper surfaces fade toward warm chalk; broad quiet areas remain intact.
 	float bleaching = up * smoothstep(0.18, 0.80, broad) * role_strength.y;
 	vec3 faded = mix(base_color.rgb, vec3(0.66, 0.63, 0.52), 0.18);
-	faded = max(faded, base_color.rgb * 1.46);
-	paint = mix(paint, faded, bleaching * 0.82 * wear_strength);
+	// Grafikpass R1: roofs keep their petrol/slate identity under the warm sun;
+	// the former 1.46 lift read as white-blue glass at play distance.
+	faded = max(faded, base_color.rgb * 1.18);
+	paint = mix(paint, faded, bleaching * 0.50 * wear_strength);
 	// Dust is concentrated at the base, with a softly broken accumulation line.
 	float relative_height = max(p.y, 0.0) / max(building_height, 0.2);
 	float dust_height = relative_height + (broad - 0.5) * 0.065;
@@ -86,6 +88,17 @@ void fragment() {
 	float abrasion = edge * edge_selection * role_strength.w * wear_strength;
 	vec3 undercoat = mix(base_color.rgb * 0.50, vec3(0.19, 0.23, 0.22), 0.26);
 	paint = mix(paint, undercoat, abrasion * 0.65);
+	// Grafikpass R1: reference hulls are warm cream with petrol roofs. Pale
+	// neutral paint is pulled towards sand-cream so sunlit panels no longer
+	// clip to cold white; blue-green paint gains a little depth.
+	float grade_gamma = OUTPUT_IS_SRGB ? 1.0 : 2.2;
+	vec3 graded = OUTPUT_IS_SRGB ? paint : pow(max(paint, vec3(0.0)), vec3(1.0 / 2.2));
+	float high = max(graded.r, max(graded.g, graded.b));
+	float low = min(graded.r, min(graded.g, graded.b));
+	float pale_hull = smoothstep(0.58, 0.78, high) * (1.0 - smoothstep(0.10, 0.24, high - low));
+	float petrol = smoothstep(0.02, 0.12, min(graded.g, graded.b) - graded.r) * (1.0 - smoothstep(0.62, 0.80, high));
+	paint = mix(paint, paint * pow(vec3(0.92, 0.84, 0.69), vec3(grade_gamma)), pale_hull * 0.85);
+	paint = mix(paint, paint * pow(vec3(0.74, 0.93, 0.98), vec3(grade_gamma)), petrol * 0.70);
 	ALBEDO = clamp(paint, vec3(0.0), vec3(1.0));
 	ROUGHNESS = clamp(0.92 + (base_dust + bleaching) * 0.035 * wear_strength, 0.0, 1.0);
 	METALLIC = 0.0;
