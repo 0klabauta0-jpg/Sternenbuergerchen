@@ -1,0 +1,20 @@
+{
+  "export.log": {
+    "size_bytes": 3553560,
+    "sha256": "4950179da326dce70bdd067cfda4d90f9fb026bfcd0522fb1f8fd7e2545d59f5",
+    "engine_error_lines": [],
+    "packed_entries": 25274,
+    "forbidden_stored_entries": [],
+    "warning_count": 12,
+    "provenance_written": false
+  },
+  "export_relative_path.log": {
+    "size_bytes": 3540709,
+    "sha256": "2fbc7dda69e6a3fa45bbeb388fd3a2d660b66918b3668a2da161040638501a8c",
+    "engine_error_lines": [],
+    "packed_entries": 25274,
+    "forbidden_stored_entries": [],
+    "warning_count": 5,
+    "provenance_written": true
+  }
+}

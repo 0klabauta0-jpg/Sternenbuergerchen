@@ -1,0 +1,89 @@
+{
+  "status": "bounded_headless_start_pass",
+  "git_commit": "a377c7346cf6ec27cb9156f72e36e2fd24e406e7",
+  "product_base_commit": "39c36fa4ccd0c5c16ab357dee2b2208aeb961566",
+  "engine": "4.6.2.stable.official.71f334935",
+  "package_directory": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346",
+  "exe": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe",
+  "zip": "C:\\dev\\SternenBuergerchen-releases\\SternenBuergerchen-Windows-2026-11-14-a377c7346.zip",
+  "zip_size_bytes": 188799952,
+  "zip_sha256": "b255e8c98c1527607fe60d1153e1075dd0d9752a316af4d7204faa415b32aa0e",
+  "zip_member_hashes_match": {
+    "liblimboai.windows.template_release.x86_64.dll": true,
+    "libterrain.windows.release.x86_64.dll": true,
+    "README.txt": true,
+    "release_build_provenance.json": true,
+    "SHA256SUMS.txt": true,
+    "SternenBuergerchen.console.exe": true,
+    "SternenBuergerchen.exe": true,
+    "SternenBuergerchen.pck": true
+  },
+  "files": {
+    "liblimboai.windows.template_release.x86_64.dll": {
+      "size_bytes": 3461632,
+      "sha256": "7b3c8a9bbbffa0073bfa2e3702e89b0fd466313115cbd3fdcb6b90b9a43e4815"
+    },
+    "libterrain.windows.release.x86_64.dll": {
+      "size_bytes": 3549184,
+      "sha256": "7e483bd1d917fa84a1668cef64e96e5fc7e6ddf9879de67adc776c10eca3c8cd"
+    },
+    "README.txt": {
+      "size_bytes": 978,
+      "sha256": "472eefc195e3dcc03c25017c626f78e314ec48ed788561c6b0143b0cf3bf273e"
+    },
+    "release_build_provenance.json": {
+      "size_bytes": 643,
+      "sha256": "b9583af2c2611c40e30549653753f05fecee2305dd714f42f2f89381cfbb1f64"
+    },
+    "SHA256SUMS.txt": {
+      "size_bytes": 672,
+      "sha256": "62db8862d496007dd24dae69f759356540128e56c73bb39b07c0e767ba242d75"
+    },
+    "SternenBuergerchen.console.exe": {
+      "size_bytes": 91136,
+      "sha256": "446ff4197f017ea753e4c75e5644ee68fa323448add126b1e6b3490ad75bcae6"
+    },
+    "SternenBuergerchen.exe": {
+      "size_bytes": 104553472,
+      "sha256": "0f62f71cb565b8c52cde789257f84ce37d3a3f1e3b740a1f09e4013ad6e850dc"
+    },
+    "SternenBuergerchen.pck": {
+      "size_bytes": 356313548,
+      "sha256": "7fbc0f237df01b92084a80f7872e7df8e64ac4ff3f9978ff66a97a0864dd7d41"
+    }
+  },
+  "export_pipeline_exit_code": 0,
+  "release_start_check_gate": "pass",
+  "headless_start": {
+    "profile_unchanged": true,
+    "isolated_appdata": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\tmp\\windows_release_20261114\\profile",
+    "tests": [
+      {
+        "name": "normal_main_menu",
+        "exit_code": 0,
+        "passed": true,
+        "errors": [],
+        "seconds": 2.16,
+        "command": [
+          "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe",
+          "--headless",
+          "--log-file",
+          "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\windows_release_20261114\\normal_main_menu_engine.log",
+          "--quit-after",
+          "120"
+        ]
+      }
+    ],
+    "scope": "Headless exported EXE normal main menu startup only; external packed probe timed out and is excluded; no campaign/WAN/FPS/visual acceptance."
+  },
+  "excluded_failed_attempts": [
+    "absolute-output provenance poststep: Godot export succeeded, pipeline poststep failed; corrected relative export rerun passed",
+    "--path invocation unsupported by release template",
+    "external --script packed probe timeout75s; not counted as pass"
+  ],
+  "limits": [
+    "No native screenshot or gameplay input acceptance",
+    "No complete five-mission victory confirmed",
+    "No general WAN/FPS acceptance"
+  ]
+}

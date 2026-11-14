@@ -1,0 +1,26 @@
+{
+  "profile_unchanged": true,
+  "isolated_appdata": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\tmp\\windows_release_20261114\\profile",
+  "tests": [
+    {
+      "name": "packed_resource_probe",
+      "exit_code": 1,
+      "passed": false,
+      "errors": [
+        "ERROR: `--path` was specified on the command line, but this Godot binary was compiled without support for path overrides. Aborting.\r"
+      ],
+      "seconds": 0.06,
+      "command": [
+        "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\windows_release_20261114\\packed_resource_probe_engine.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\windows_release_20261114\\packed_probe.gd"
+      ]
+    }
+  ],
+  "scope": "Headless exported EXE startup and packed main menu resource checks; no campaign/WAN/FPS/visual acceptance."
+}

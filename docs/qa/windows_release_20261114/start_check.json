@@ -1,0 +1,74 @@
+{
+  "schema": "sternenbuergerchen.release_runtime_start_check.v1",
+  "task_id": "TASK_818",
+  "gate": "pass",
+  "repo_root": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113",
+  "branch": "task/windows-release-guide-20261114",
+  "git_head": "a377c7346",
+  "expected_git_commit": "a377c7346cf6ec27cb9156f72e36e2fd24e406e7",
+  "contract_path": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\tmp\\windows_release_20261114\\contract.json",
+  "release_directory": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346",
+  "exe_path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe",
+  "pck_path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.pck",
+  "console_exe_path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.console.exe",
+  "max_age_hours": 48,
+  "pck_fresh_enough": true,
+  "release_provenance": {
+    "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\release_build_provenance.json",
+    "exists": true,
+    "valid": true,
+    "git_commit": "a377c7346cf6ec27cb9156f72e36e2fd24e406e7",
+    "pck_sha256": "7fbc0f237df01b92084a80f7872e7df8e64ac4ff3f9978ff66a97a0864dd7d41",
+    "pck_size_bytes": 356313548,
+    "exported_at_utc": "11/13/2026 23:56:51",
+    "tracked_worktree_clean": true
+  },
+  "release_provenance_path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\release_build_provenance.json",
+  "actual_pck_sha256": "7fbc0f237df01b92084a80f7872e7df8e64ac4ff3f9978ff66a97a0864dd7d41",
+  "required_files": {
+    "exe": {
+      "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe",
+      "exists": true,
+      "size_bytes": 104553472,
+      "last_write_time": "2026-11-14T00:55:05.7238402+01:00",
+      "age_hours": 0.03
+    },
+    "console_exe": {
+      "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.console.exe",
+      "exists": true,
+      "size_bytes": 91136,
+      "last_write_time": "2026-11-14T00:55:05.7718403+01:00",
+      "age_hours": 0.03
+    },
+    "pck": {
+      "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.pck",
+      "exists": true,
+      "size_bytes": 356313548,
+      "last_write_time": "2026-11-14T00:56:46.0420862+01:00",
+      "age_hours": 0.0
+    },
+    "liblimboai.windows.template_release.x86_64.dll": {
+      "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\liblimboai.windows.template_release.x86_64.dll",
+      "exists": true,
+      "size_bytes": 3461632,
+      "last_write_time": "2026-11-14T00:56:46.1065856+01:00",
+      "age_hours": 0.0
+    },
+    "libterrain.windows.release.x86_64.dll": {
+      "path": "C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\libterrain.windows.release.x86_64.dll",
+      "exists": true,
+      "size_bytes": 3549184,
+      "last_write_time": "2026-11-14T00:56:46.3900821+01:00",
+      "age_hours": 0.0
+    }
+  },
+  "running_processes": [],
+  "temp_files": [],
+  "warnings": [],
+  "hard_failures": [],
+  "start_command": "Start-Process -FilePath \"C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\\SternenBuergerchen.exe\" -WorkingDirectory \"C:\\dev\\SternenBuergerchen-releases\\2026-11-14-a377c7346\"",
+  "read_only": true,
+  "kills_processes": false,
+  "starts_processes": false,
+  "updates_shortcuts": false
+}
