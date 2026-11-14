@@ -982,6 +982,7 @@ var _camera_size: float = CAMERA_DEFAULT_SIZE
 var _camera_yaw_degrees: float = 45.0
 var _camera_pitch_degrees: float = DEFAULT_CAMERA_PITCH_DEGREES
 var _map_total_tile_count: int = 0
+var _cliff_detail_bounds: Rect2 = Rect2()
 var _map_tile_count: int = 0
 var _visual_streaming_active: bool = false
 var _visual_streaming_active_chunks: Dictionary = {}
@@ -1737,6 +1738,10 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 
 	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
 	_map_total_tile_count = tiles.size()
+	_cliff_detail_bounds = Rect2()
+	var detail_bounds: Array = Array(_terrain_map_data.get_place_presentation().get("cliff_detail_bounds", []))
+	if detail_bounds.size() == 4:
+		_cliff_detail_bounds = Rect2(float(detail_bounds[0]), float(detail_bounds[1]), float(detail_bounds[2]) - float(detail_bounds[0]), float(detail_bounds[3]) - float(detail_bounds[1]))
 	_rebuild_render_tile_index(tiles)
 	_sync_built_road_deck(tiles)
 	if _uses_hex_grid() and _regional_height_step > 0.0 and not is_instance_valid(_authored_visual_layout_root):
@@ -4637,10 +4642,23 @@ func _append_cliff_face(surface:SurfaceTool,a:Vector3,b:Vector3,base_a:Vector3,b
 	if _frontier_art_enabled and _regional_height_step>0.0:
 		# Richer cliff geometry only where the triangle budget allows it: the
 		# large campaign regions keep the four-facet face (resource cache limit).
-		CLIFF_FRACTURE.append_face(surface,a,b,base_a,base_b,cell.x*73856093 ^ cell.y*19349663 ^ edge*83492791,cell_size,true,_map_total_tile_count>0 and _map_total_tile_count<=CLIFF_DETAIL_MAX_TILES)
+		CLIFF_FRACTURE.append_face(surface,a,b,base_a,base_b,cell.x*73856093 ^ cell.y*19349663 ^ edge*83492791,cell_size,true,_cliff_detail_applies(cell))
 	else:
 		_add_regional_triangle(surface,a,base_a,b)
 		_add_regional_triangle(surface,b,base_a,base_b)
+
+
+## Small maps get the detailed face everywhere. A large region may name one
+## authored plane rectangle (place_presentation.cliff_detail_bounds) whose
+## cliffs keep it; everything else stays on the four-facet face.
+func _cliff_detail_applies(cell: Vector2i) -> bool:
+	if _map_total_tile_count <= 0:
+		return false
+	if _map_total_tile_count <= CLIFF_DETAIL_MAX_TILES:
+		return true
+	if not _cliff_detail_bounds.has_area():
+		return false
+	return _cliff_detail_bounds.has_point(Vector2(float(cell.x) + float(cell.y) * 0.5, float(cell.y) * 0.8660254))
 
 
 func _regional_ramp_material(tile, surface_type: String) -> Material:

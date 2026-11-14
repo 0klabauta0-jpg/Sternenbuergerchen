@@ -23,7 +23,7 @@ func run() -> void:
 	var map = MAP.load_from_file(PATH)
 	check(map != null and not map.has_load_issue(), "map loads without a load issue")
 	var tiles: Array = map.get_tiles()
-	check(tiles.size() == 88 * 72, "all 6336 authored cells are valid tiles")
+	check(tiles.size() == 512 * 256, "all 131072 authored cells of the 512 x 256 region are valid tiles")
 	check(map.get_grid_topology() == "hex_axial_v1" and map.get_tactical_grid_rules() == "hex_tactical_v1", "hex topology and tactical rules")
 	check(map.get_terrain_height_rules() == TILE.EXPLICIT_HEIGHT_RULES and is_equal_approx(map.get_regional_height_step(), 0.75), "explicit ramp height rules, 0.75 step")
 	var by_cell: Dictionary = {}
@@ -33,7 +33,7 @@ func run() -> void:
 		by_cell[tile.grid_position] = tile
 		if TILE.is_explicit_ramp(tile): ramps += 1
 		if String(tile.object_type_id) == "frontier_scene_solid": solids += 1
-	check(ramps == 26, "five ramps with 26 ramp cells")
+	check(ramps == 240, "seven authored and 34 regional ramps with 240 ramp cells")
 	check(solids > 150, "buildings and large props reserve blocked cells")
 	for marker_id in ["spawn_alpha", "spawn_bravo", "objective_point", "spawn_enemy_defense", "ship_return"]:
 		check(map.has_marker(marker_id), "marker present: " + marker_id)
@@ -79,7 +79,7 @@ func run() -> void:
 		else: existing += 1
 	check(missing.is_empty(), "every placed model exists (%s)" % str(missing))
 	check(kit > 30 and existing >= 5, "own kit pieces plus existing project models (%d / %d)" % [kit, existing])
-	check(Array(presentation.get("pads", [])).size() == 2, "two landing pads")
+	check(Array(presentation.get("pads", [])).size() == 3, "three landing pads")
 	for pad: Dictionary in presentation.get("pads", []):
 		var flat := true
 		for tile in tiles:

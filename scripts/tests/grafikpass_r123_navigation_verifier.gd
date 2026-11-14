@@ -41,7 +41,7 @@ func _tile_bytes(map) -> PackedByteArray:
 func _test_windbruch() -> void:
 	var source_hash := FileAccess.get_sha256(MAP_PATH)
 	var map = FIX.MAP.load_from_file(MAP_PATH)
-	_check(not map.has_load_issue() and map.get_tiles().size() == 6336, "Actual Windbruch source imports all 6336 authored cells")
+	_check(not map.has_load_issue() and map.get_tiles().size() == 131072, "Actual Windbruch source imports all 131072 authored cells")
 	_check(map.get_grid_topology() == "hex_axial_v1" and map.get_tactical_grid_rules() == "hex_tactical_v1" and map.get_terrain_height_rules() == "explicit_hex_ramps_v1", "Importer retains productive hex and explicit height rules")
 	for marker: String in ["spawn_alpha", "outpost_chip", "ship_return"]:
 		_check(map.has_marker(marker), "Authored mission marker exists: " + marker)
