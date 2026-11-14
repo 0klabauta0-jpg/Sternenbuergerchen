@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-78e6a7fe2df24bec98a64ebc5d0b0d7e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: campaign_intro_base SaveAs succeeds
+PASS: campaign_intro_base preserves homebase_exploration
+PASS: campaign_intro_base preserves place_world
+PASS: campaign_intro_base canonical edits win
+PASS: campaign_intro_base retains all tiles
+PASS: campaign_intro_base reloads saved edit
+PASS: campaign_intro_base original untouched
+PASS: homebase_frontier_exploration SaveAs succeeds
+PASS: homebase_frontier_exploration preserves homebase_exploration
+PASS: homebase_frontier_exploration preserves place_world
+PASS: homebase_frontier_exploration canonical edits win
+PASS: homebase_frontier_exploration retains all tiles
+PASS: homebase_frontier_exploration reloads saved edit
+PASS: homebase_frontier_exploration original untouched
+PASS: trade_outpost SaveAs succeeds
+PASS: trade_outpost preserves place_world
+PASS: trade_outpost preserves singleplayer_site
+PASS: trade_outpost preserves place_presentation
+PASS: trade_outpost canonical edits win
+PASS: trade_outpost retains all tiles
+PASS: trade_outpost reloads saved edit
+PASS: trade_outpost original untouched
+PASS: satellite_crash_site SaveAs succeeds
+PASS: satellite_crash_site preserves place_world
+PASS: satellite_crash_site preserves singleplayer_site
+PASS: satellite_crash_site preserves place_presentation
+PASS: satellite_crash_site canonical edits win
+PASS: satellite_crash_site retains all tiles
+PASS: satellite_crash_site reloads saved edit
+PASS: satellite_crash_site original untouched
+PASS: Ground_Mission01_32x32 SaveAs succeeds
+PASS: Ground_Mission01_32x32 preserves place_presentation
+PASS: Ground_Mission01_32x32 canonical edits win
+PASS: Ground_Mission01_32x32 retains all tiles
+PASS: Ground_Mission01_32x32 reloads saved edit
+PASS: Ground_Mission01_32x32 original untouched
+PASS: future metadata SaveAs succeeds
+PASS: unknown nested metadata survives
+PASS: metadata cannot overwrite edited map name
+PASS: metadata cannot overwrite edited tiles
+PASS: second save succeeds
+PASS: metadata survives repeated save/reload
+MAP_SAVE_METADATA passed=42 failed=0

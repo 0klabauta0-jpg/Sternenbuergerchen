@@ -64,13 +64,14 @@ func cells_for_body(registry:Node,craft:Dictionary,position:Vector2,profile:Dict
 		for r in range(low_r,high_r+1):
 			examined+=1
 			var grid:=Vector2i(q,r)
-			if registry.call("get_tile_at_grid",grid)==null:continue
 			var center:Vector2=BODY.iso_to_plane(registry.call("grid_to_world",grid))
 			var overlaps:=true
 			for interval in intervals:
 				var shift:float=interval.axis.dot(center)
 				if shift+float(interval.cell_max)<float(interval.shape_min)-EPSILON or shift+float(interval.cell_min)>float(interval.shape_max)+EPSILON:overlaps=false;break
-			if overlaps:blocked.append(grid)
+			if overlaps:
+				if registry.call("get_tile_at_grid",grid)==null:return _reject("footprint_outside_map")
+				blocked.append(grid)
 	return {"ok":true,"blocked_cells":blocked,"examined":examined,"reason":""}
 
 func _reject(reason:String)->Dictionary:

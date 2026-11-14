@@ -2169,6 +2169,9 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 	# A UI payload or stale adapter projection cannot supply installed parts.
 	context.erase("prepare_ship_component_install")
 	context.erase("commit_ship_component_install")
+	context.erase("repair_callback")
+	if command.get("contract_category")=="singleplayer_supply" and command.get("operation")=="repair":
+		context["repair_callback"]=Callable(self,"_repair_ground_ship_at_service")
 	if String(command.get("contract_category", "")) == "singleplayer_supply" and String(command.get("operation", "")) == "station_install_ship_component":
 		if _ship_equipment_owner == null:
 			return {"ok": false, "reason": "ship_equipment_unavailable", "message": "Warp-Werkstatt nicht verfuegbar"}
@@ -8456,3 +8459,12 @@ func _commit_piloted_air_ground_impact(event: Dictionary) -> Dictionary:
 	result["radius"] = scattered.radius
 	_piloted_air_ground_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
 	return result
+
+func _repair_ground_ship_at_service(craft_id:String)->Dictionary:
+	if _should_skip_local_tick_processing() or _departure_adapter==null:return {"ok":false,"reason":"not_authority"}
+	var adapter:Node=_departure_adapter.get_ref()
+	if not is_instance_valid(adapter) or not adapter.has_method("get_ground_repair_context"):return {"ok":false,"reason":"adapter_required"}
+	var service:Dictionary=adapter.call("get_ground_repair_context",craft_id)
+	if service.get("ground_service_verified",false)!=true or not Array(service.get("services",[])).has("repair"):return {"ok":false,"reason":"repair_service_required"}
+	if _space_combat_state.get_ship_systems(craft_id).is_empty():return {"ok":true,"message":"Lokaler Reparaturservice bereit; keine beschädigten Rumpfdaten","craft_id":craft_id}
+	return _space_combat_state.repair_ship_systems(craft_id)

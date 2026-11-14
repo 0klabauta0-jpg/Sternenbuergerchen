@@ -65,6 +65,7 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 		["SouthernBrokenRidge", Vector2(10.0, 29.3), Vector3(5.6, 2.1, 3.2), 1811],
 		["SoutheastRidge", Vector2(28.6, 27.6), Vector3(4.0, 1.8, 3.3), 1907],
 		["EasternShoulder", Vector2(30.4, 18.8), Vector3(3.2, 1.5, 3.8), 2017],
+		["LandingMesa", Vector2(41.0, 42.0), Vector3(14.0, 3.8, 14.0), 2208],
 	]:
 		# Reuse the geology's actual erosion constructor, not a separate proxy mesh.
 		geology._add_mesa(String(spec[0]), spec[1], spec[2], int(spec[3]))

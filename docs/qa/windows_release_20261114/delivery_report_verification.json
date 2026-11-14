@@ -1,0 +1,59 @@
+{
+  "passed": 13,
+  "failed": 0,
+  "checks": [
+    {
+      "ok": true,
+      "label": "Current delivery section exists once"
+    },
+    {
+      "ok": true,
+      "label": "Prior evidence retained"
+    },
+    {
+      "ok": true,
+      "label": "Actual EXE source displayed"
+    },
+    {
+      "ok": true,
+      "label": "Public guide linked"
+    },
+    {
+      "ok": true,
+      "label": "Six current captures and three user references retained"
+    },
+    {
+      "ok": true,
+      "label": "All revision images load offline"
+    },
+    {
+      "ok": true,
+      "label": "Report fits 320"
+    },
+    {
+      "ok": true,
+      "label": "Report fits 390"
+    },
+    {
+      "ok": true,
+      "label": "Report fits 1440"
+    },
+    {
+      "ok": true,
+      "label": "Workbench schema retained"
+    },
+    {
+      "ok": true,
+      "label": "Delivery assessment and notes exported"
+    },
+    {
+      "ok": true,
+      "label": "Map decision exported"
+    },
+    {
+      "ok": true,
+      "label": "No JavaScript errors"
+    }
+  ],
+  "errors": []
+}

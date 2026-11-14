@@ -10,7 +10,7 @@ TASK_182 ist ein Contract- und Audit-Task. Er beschreibt Zielregeln und Bestands
 
 | Feld | Zielregel |
 | --- | --- |
-| `height_level` | Reine Gelaendehoehe, geclamped auf `0..2`. |
+| `height_level` | Reine Gelaendehoehe, geclamped auf `0..TerrainTileData.MAX_HEIGHT_LEVEL` (seit 14.11.2026: `0..16`). |
 | `object_height` | Hoehe eines Objekts auf dem Tile, geclamped auf `0..3`. Veraendert nie `height_level`. |
 | `surface_type` | Bodenoberflaeche: `ground`, `road`, `sand`, `rock`. Gilt auf jeder Hoehe. |
 | `walkable` | Tile-weite Begehbarkeit. `false` blockiert Bewegung unabhaengig von Hoehe und Kante. |
@@ -152,3 +152,27 @@ TASK_183 prueft Editor-Authoring und Save/Load-Roundtrips.
 TASK_184 prueft Gameplay-Semantik fuer A*, HPA, LOS, Cover, Combat und Diagonalregeln.
 
 TASK_185 prueft 2.5D-/Legacy-Visuals, Hoehenanker, Edge-Linien, Surface-Lesbarkeit und fehlende 3D-Mappings.
+
+## Physische Mesakappen und Feldlandung — 14.11.2026
+
+GM01 nutzt weiterhin 0,5m je Terrainstufe (0,42m ist die davon getrennte
+Objekthoehenprojektion). Die vorhandenen hohen erodierten Felsen erfordern den
+bestehenden Hoehenowner bis Stufe16. Flache echte Meshkappen werden auf diese
+Stufen quantisiert. Ein Offlinevorschlag erhaelt nur vollstaendig innerhalb der
+realen Kappenpolygonflaeche liegende Hexzellen; Polygonkanten und hoeher liegende
+Nachbarkoerper duerfen sie nicht schneiden. Alle anderen Felszellen bleiben
+blockiert. Die gespeicherten MapData-Tiles besitzen Standhoehe, Navigation und
+LOS; Mesh-Metadaten sind ausschliesslich Authoringeingabe und Visualnachweis.
+
+Genau der lebende zugehoerige Kappenmesh darf die doppelte Hexfuellung
+unterdruecken. WeakRef, unveraenderter Transform und exakte Hoehenpassung sind
+Pflicht; bei geloeschtem Mesh oder Hoehenedit kehrt die normale Hexkappe zurueck.
+Hexkontur, Picking und Figurprojektion lesen weiterhin denselben Terrainwert.
+Die vier alten braunen Square-Rampen wurden zu gespeicherten expliziten Hex-
+Rampen des bestehenden Vertrags umgearbeitet.
+
+Die Startvorschau prueft weiter eine kleine Landezone; vor Annahme und Touchdown
+prueft der vorhandene Schiffsowner zusaetzlich ALLE Zellen der tatsaechlichen
+importierten Schiffsprojektion. Fehlende Randzellen, Blocker, explizite Rampen,
+Mischhoehen sowie andere Craft-/Rootbelegungen lehnen ab. Ein Mittelpunkt oder
+sieben freie Nachbarzellen allein sind kein Tragfaehigkeitsnachweis.

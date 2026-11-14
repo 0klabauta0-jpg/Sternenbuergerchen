@@ -41,11 +41,13 @@ func run() -> void:
 	check(overlay.rebuild_count==1 and overlay.get_child_count()==2,"cached_caps_outline_and_up_arrow")
 	check(overlay.get_node("PlannedCaps").mesh.get_aabb().position.y>.75,"view_height_scale_used")
 	var source = map.get_tile_at_grid(center)
-	source.ramp_direction=4;source.height_level=7
+	source.ramp_direction=4;source.height_level=TILE.MAX_HEIGHT_LEVEL-1
 	var retained := PREVIEW.plan(map,center,0,"raise","cliff",false,false,0)
-	check(retained.tiles[center].ramp_direction==4 and retained.tiles[center].height_level==7,"direction_retained_and_ramp_h7_guard")
+	check(retained.tiles[center].ramp_direction==4 and retained.tiles[center].height_level==TILE.MAX_HEIGHT_LEVEL-1,"direction_retained_and_ramp_max_guard")
 	var flat := PREVIEW.plan(map,center,0,"set_8","cliff",true,false,0)
 	check(flat.tiles[center].height_level==8 and flat.tiles[center].ramp_direction==-1,"plateau_exact_h8")
+	var full := PREVIEW.plan(map,center,0,"set_16","cliff",true,false,0)
+	check(full.tiles[center].height_level==16 and full.tiles[center].ramp_direction==-1,"plateau_exact_h16")
 	source.ramp_direction=-1;source.height_level=0
 	editor.get_node("UI/TopBar/Margin/HBox/BrushSizeOptionButton").select(1)
 	editor.set("_height_tool_mode","raise")

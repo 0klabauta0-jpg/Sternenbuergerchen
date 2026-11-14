@@ -59,3 +59,40 @@ Visuals mit blockierten Footprints; Änderungen benötigen echte Terrainfakten.
 Vorhandener Polisa-Frachtaufzug ist wiederzuverwenden, nicht blind als bereits
 funktionsfähiger Ground-Service auszugeben. Keine Form- oder Spielabnahme allein
 aus Quelltextprüfungen ableiten.
+
+## Konkretisierung nach nativem Bestand
+Bilder 1/2 sind exakt GM02 und Station64; Bild3 ist GM01, nicht trade_outpost.
+Native Vorherkameras: scripts/tests/map_services_capture_20261114.gd;
+private Aufnahme map_services_before/2bf53c3cebd4413da5406e823c50ec25 (13/0).
+GM01-Geologie bleibt eigenstaendig, Handelsort wird separat am Servicekern gebuendelt.
+Owner: TerrainMapData/TileData/Registry fuer Standhoehen und Begehbarkeit;
+StationModuleProjection und TerrainMap3DView lesen Daten. SingleplayerRuntimeAdapter
+prueft lokale Schiffe, SupplyState bucht, AutomaticCargoTransfer plant begrenzt.
+Felsoberseiten werden nur vollstaendig von realen flachen Kappen getragene Hexzellen;
+keine Felskollision ueber einen blossen Visualoffset vortaeuschen.
+
+## Erreichter Umfang und gezielte Pruefung
+
+GM02-Palette umfasst Boden, Wege, Zielauflage und Naturmodelle in den tatsaechlichen
+Materialrouten. Station64 und alle neun Station192-Ensembles haben geschlossene
+vier Aussenecken, Kreuz und vier passierbare Einzeltueren. Seitliche Flaechen
+sind blockerfreie, neutral bezeichnete Lager-/Reserveaprons, keine erfundenen
+Tankstellen. GM01 hat83 echte Kappenzellen einschliesslich genau einer neuen
+breiten Landemesa; alte Silhouetten bleiben abgesehen von kleiner quantisierter
+Kappenhoehenanpassung erhalten. Workyard erhaelt26 echte erhoehte Tiles; am
+Handelsort entsteht separat eine61-Zellen-Huegelgruppe. Kein Kopieren eines
+identischen Dekorationsmusters ueber alle Karten.
+
+Produktowner und Dateien: TerrainTileData/RegionalHexSurface, FrontierArtGeology,
+FrontierGM01Layout, TerrainMap3DView; sechs geaenderte Karten (GM01, GM02-Palette
+ueber View, Station64/192, Workyard, Trade/Satellite-Service-Metadaten),
+FieldLandingContract/HexGroundShipFootprint und TacticalController;
+SingleplayerRuntimeAdapter/SupplyState/SimulationRoot/SpaceCombatState,
+MetaLayerFlow-Recoveryclock, ServicesPresenter und bestehende Liftvisuals.
+Editor verwendet dieselben gespeicherten Terrain-/Hoehenfelder bis16, keine
+versteckte Mesh-Gameplaywahrheit. Die neue generierte Mesa liegt auf GM01 bei
+Plane(41,42); die anderen Varianten sind in den vorhandenen Karten-/Editorwegen.
+
+QA: docs/qa/map_services_20261114/. Quell-/Profilguards, native Bilder und
+Headless-Assertions getrennt. Vollstaendiger Fuenf-Missionen-Sieg, WAN und eine
+persoenliche Gestaltungsgenehmigung bleiben ausserhalb dieses Pakets.

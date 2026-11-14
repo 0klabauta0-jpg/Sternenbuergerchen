@@ -23,6 +23,9 @@ var _fuel: Label
 var _tool_buttons: Dictionary={}
 var _buy: Button
 var _amount: SpinBox
+var _repair: Button
+var _cargo_load: Button
+var _cargo_unload: Button
 var _refuel: Button
 var _return: Button
 var _feedback: Label
@@ -120,6 +123,12 @@ func _build() -> void:
 	_refuel = _button("Auftanken", "RefuelCraft")
 	ship_content.add_child(_refuel);SKIN.button(_refuel,true)
 	_refuel.pressed.connect(func(): _submit("refuel"))
+	_repair=_button("Reparaturservice", "RepairCraft");ship_content.add_child(_repair)
+	_repair.pressed.connect(func():_ground_request("repair",{}))
+	_cargo_load=_button("Frachtaufzug → Schiff", "LoadGroundCargo");ship_content.add_child(_cargo_load)
+	_cargo_unload=_button("Schiff → Frachtaufzug", "UnloadGroundCargo");ship_content.add_child(_cargo_unload)
+	_cargo_load.pressed.connect(func():_ground_cargo_request(true))
+	_cargo_unload.pressed.connect(func():_ground_cargo_request(false))
 	_return = _button("Zur Heimatbasis", "ServiceReturnHomebase")
 	ship_content.add_child(_return)
 	ship_content.move_child(_craft_selector,0);ship_content.move_child(_fuel,1);ship_content.move_child(fuel_row,2);ship_content.move_child(_refuel,3)
@@ -233,6 +242,13 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var context: Dictionary = Dictionary(contexts.get(_selected_craft_id, {}))
 	var location: String = String(context.get("location_id", ""))
 	var available: bool = not context.is_empty() and not bool(context.get("craft_busy", true)) and _command_handler.is_valid()
+	var local_service:bool=location!="trade_outpost" or bool(context.get("ground_service_verified",false))
+	_repair.disabled=not available or not bool(context.get("ground_service_verified",false)) or not Array(context.get("services",[])).has("repair")
+	_repair.tooltip_text="Reparatur läuft nur am freigegebenen lokalen Servicepad"
+	var lift:=String(context.get("cargo_lift_container_id",""))
+	_cargo_load.visible=location=="trade_outpost";_cargo_unload.visible=_cargo_load.visible
+	_cargo_load.disabled=not available or lift.is_empty() or not local_service or not Array(context.get("services",[])).has("cargo")
+	_cargo_unload.disabled=_cargo_load.disabled
 	var unavailable_reason: String = "Versorgung erst nach Landung am passenden Versorgungsort"
 	if _selected_craft_id.is_empty():
 		unavailable_reason = "Serviceschiff auswählen"
@@ -243,7 +259,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var stock: int = int(Dictionary(supply.get("stock_by_offer_id", {})).get(OFFER_ID, 0))
 	_buy.text = "Sanitätswerkzeug · %d Cr · %d verfügbar" % [price, stock]
 	var buy_reason: String = ""
-	if not available:
+	if not available or not local_service or not Array(context.get("services",[])).has("trade"):
 		buy_reason = unavailable_reason
 	elif offer.is_empty() or not Array(offer.get("location_ids", [])).has(location):
 		buy_reason = "Kauf nur am Handelsaußenposten"
@@ -259,23 +275,25 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var tool_price:=int(tool_offer.get("unit_price",0))
 		var button: Button=_tool_buttons[id]
 		button.text="%s · %d Cr · %d verfügbar" % [tool_offer.get("name",id),tool_price,tool_stock]
-		button.disabled=not available or not Array(tool_offer.get("location_ids",[])).has(location) or tool_stock<1 or int(supply.get("credits",0))<tool_price or _pending.has("buy")
+		button.disabled=not available or not local_service or not Array(context.get("services",[])).has("trade") or not Array(tool_offer.get("location_ids",[])).has(location) or tool_stock<1 or int(supply.get("credits",0))<tool_price or _pending.has("buy")
 		if id == "mining_tool_supply" and String(_snapshot.get("mode","")) == "campaign" and not Array(supply.get("blueprints",[])).has("mining_tool"): button.disabled = true
-		button.tooltip_text = "Kauf wird in dieses Schiff geliefert" if not button.disabled else "Schiff muss am Handelsservice sein. Credits und Bestand erforderlich."
+		button.tooltip_text = ("Kauf wird im lokalen Frachtaufzug bereitgestellt" if not lift.is_empty() else "Kauf wird in dieses Schiff geliefert") if not button.disabled else "Schiff muss am Handelsservice sein. Credits und Bestand erforderlich."
 		if id == "backpack_supply" and not button.disabled:
-			button.tooltip_text = "Wird in die Schiffsfracht geliefert. An der Heimatbasis anlegen."
+			button.tooltip_text = "Wird im Frachtaufzug bereitgestellt; anschließend ins Schiff laden." if not lift.is_empty() else "Wird in die Schiffsfracht geliefert. An der Heimatbasis anlegen."
 
 	var purchased_item := "c_benit" if location == "satellite_crash" else "b_benit"
-	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory",{})).get("craft:"+_selected_craft_id,{})).get("items",{})
+	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory",{})).get("craft:"+_selected_craft_id,{})).get("items",{}).duplicate()
+	var stored:Dictionary=Dictionary(Dictionary(supply.get("inventory",{})).get(lift,{})).get("items",{})
+	for item in stored:cargo[item]=int(cargo.get(item,0))+int(stored[item])
 	_sell.visible = location in ["satellite_crash","trade_outpost"]
 	_sell.text = "1 × %s verkaufen · 15 Cr" % ("C-Benit" if purchased_item == "c_benit" else "B-Benit")
-	_sell.disabled = not available or int(cargo.get(purchased_item,0)) < 1
-	_sell.tooltip_text = "Dieser Händler kauft nur diesen Rohstoff aus der Schiffsfracht"
+	_sell.disabled = not available or not local_service or not Array(context.get("services",[])).has("trade") or int(cargo.get(purchased_item,0)) < 1
+	_sell.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug"
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
 	_refuel.text = "+%s Treibstoff · %s Cr" % [str(amount), str(cost)]
 	var fuel_reason: String = ""
-	if not available:
+	if not available or not local_service or not Array(context.get("services",[])).has("refuel"):
 		fuel_reason = unavailable_reason
 	elif not location in ["homebase", "trade_outpost", "satellite_crash"]:
 		fuel_reason = "An diesem Ort gibt es keine Tankstelle"
@@ -320,10 +338,12 @@ func _apply_section() -> void:
 	if _modular_builder != null:
 		_modular_builder.visible = _section == "build" and String(_snapshot.get("mode", "")) == "campaign"
 		if _modular_builder.visible: _modular_builder.call("refresh", _snapshot)
-	for control in [_craft_selector,_fuel,_buy,_sell,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
+	for control in [_craft_selector,_fuel,_buy,_sell,_repair,_cargo_load,_cargo_unload,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
 		control.visible = ship
 	var trade_context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
 	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]
+	_cargo_load.visible=ship and String(trade_context.get("location_id",""))=="trade_outpost"
+	_cargo_unload.visible=_cargo_load.visible
 	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading
 	_tool_buttons["backpack_supply"].visible = ship and String(trade_context.get("location_id", "")) == "trade_outpost" and String(_snapshot.get("mode", "")) == "campaign"
 	_items.visible = ship and trading
@@ -475,7 +495,9 @@ func _submit_sell() -> void:
 	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
 	var item := "c_benit" if String(context.get("location_id","")) == "satellite_crash" else "b_benit"
 	_sequence += 1
-	var result: Dictionary = _command_handler.call("sell",{"service_location_id":String(context.get("location_id", "")),"craft_id":_selected_craft_id,"item_id":item,"quantity":1,"request_id":"services-sell:%d:%d" % [get_instance_id(),_sequence]})
+	var cargo:Dictionary=Dictionary(Dictionary(_snapshot.get("supply",{})).get("inventory",{})).get("craft:"+_selected_craft_id,{}).get("items",{})
+	var source:="craft:"+_selected_craft_id if int(cargo.get(item,0))>0 else String(context.get("cargo_lift_container_id",""))
+	var result: Dictionary = _command_handler.call("sell",{"source_container_id":source,"service_location_id":String(context.get("location_id", "")),"craft_id":_selected_craft_id,"item_id":item,"quantity":1,"request_id":"services-sell:%d:%d" % [get_instance_id(),_sequence]})
 	_feedback.text = String(result.get("message",result.get("reason","Verkauf bestätigt")))
 	refresh()
 
@@ -548,3 +570,17 @@ func fit_to_viewport() -> void:
 	var viewport:=get_viewport_rect()
 	size=Vector2(330,0)
 	position=Vector2(maxf(viewport.size.x-size.x-20,16),196)
+
+func _ground_request(operation:String, payload:Dictionary)->void:
+	if not _command_handler.is_valid():return
+	_sequence+=1
+	var context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
+	payload.merge({"craft_id":_selected_craft_id,"service_location_id":String(context.get("location_id","")),"request_id":"ground-service:%d:%d"%[get_instance_id(),_sequence]},true)
+	var result:Dictionary=_command_handler.call(operation,payload)
+	_feedback.text=String(result.get("message",result.get("reason","")))
+	refresh()
+
+func _ground_cargo_request(load_ship:bool)->void:
+	var context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
+	var lift:=String(context.get("cargo_lift_container_id",""))
+	_ground_request("cargo_transfer_all",{"source_container_id":lift if load_ship else "craft:"+_selected_craft_id,"destination_container_id":"craft:"+_selected_craft_id if load_ship else lift})

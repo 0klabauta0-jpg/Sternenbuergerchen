@@ -83,3 +83,27 @@ Die feinere Basisnavigation deckt denselben erweiterten Raum ab. Kein Ring
 von Ersatzbloecken begrenzt den alten Ausschnitt. Natuerliche Gesteinsgruppen
 besitzen gespeicherte Bewegungs-/LOS-Sperren; dekorative Models erzeugen keine
 unsichtbaren Spielregeln. Basisstartkamera bleibt auf den kleinen Kern gezoomt.
+
+## Lokale Bodendienste — 14.11.2026
+
+Eine beliebige gueltige Feldlandung gewaehrt keinen Tank-/Reparaturservice.
+SingleplayerRuntimeAdapter ermittelt kontrollierbares Schiff, echten Ort,
+geparkten Zustand und Padposition. Datenbasierte `ground_services` geben
+Dienstfaehigkeiten und Zugang explizit frei. Angefragte Orts-/Pad-/Teamwerte
+sind kein Beweis. Die Peer-/Teamzuordnung bleibt beim vorhandenen Root.
+Heimatpads und die tatsaechliche Polisa-Andockung behalten ihre bestehenden
+Freigaben. Am Handelsaussenposten sind zwei lokale Pads ausgewiesen.
+
+Der bestehende Satelliten-NPC handelt weiterhin nach Kontakt, wenn das eigene
+geparkte Schiff im lokalen Radius des realen Haendlermarkers steht. Daraus
+folgt mangels freigegebener Tank-/Werkstattflaeche kein Fuel-/Repairservice.
+
+Reparaturanfragen laufen als idempotenter Supplycommand durch SimulationRoot.
+Der Root setzt den Callback selbst und prueft den gebundenen Adapter erneut.
+Nur SpaceCombatState aendert den lebenden Rumpf auf seine vorhandene Kapazitaet;
+Schild, Pose, Fracht und Fuel werden nicht neu initialisiert. Dieser einfache
+Service verlangt derzeit keinen neuen Preis. Zerstoerte Rumpfsysteme werden
+nicht dadurch wiederbelebt. Der vorhandene Meta-Recoveryclock schreitet auf
+berechtigten lokalen Pads auch bei Reisephase `surface`/`grounded` fort; auf
+freiem Feld oder im Flug nicht. Completion aendert nie einen vorhandenen
+Missionsort in Heimatbasis. Schildregeneration bleibt unveraendert.

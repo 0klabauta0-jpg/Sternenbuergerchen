@@ -693,3 +693,14 @@ static func _navigation_control_valid(control: Dictionary, pose: Dictionary) -> 
 
 static func _navigation_bad() -> Dictionary:
 	return {"ok":false, "reason":"invalid_navigation_checkpoint"}
+
+func repair_ship_systems(craft_id:String)->Dictionary:
+	if not _ship_systems.has(craft_id):return {"ok":false,"reason":"ship_systems_unavailable"}
+	var current:Dictionary=_ship_systems[craft_id]
+	var state:Dictionary=current.state
+	var hull:=float(state.get("hull",0.0));var capacity:=float(state.get("hull_capacity",0.0))
+	if not is_finite(hull) or not is_finite(capacity) or hull<=0.0 or capacity<=0.0 or hull>capacity:return {"ok":false,"reason":"ship_not_repairable"}
+	# Only hull changes. Flight pose, shield recharge, equipment, fuel and
+	# inventory retain their existing authoritative owners and values.
+	state.hull=capacity
+	return {"ok":true,"craft_id":craft_id,"hull_before":hull,"hull_after":capacity,"message":"Rumpf am lokalen Servicepad repariert"}

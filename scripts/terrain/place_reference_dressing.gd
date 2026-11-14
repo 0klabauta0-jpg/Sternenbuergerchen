@@ -33,6 +33,12 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		# Ground-painted apron: no raised platform or invented navigation surface.
 		pad.scale.y=.1; pad.position.y=.025
 		pad.call("use_ground_painted_shadows")
+	for spec: Dictionary in presentation.get("cargo_lifts",[]):
+		var lift=load("res://scripts/terrain/polisa_cargo_lift_visual.gd").new()
+		lift.name=String(spec.get("id","CargoLift"));root.add_child(lift)
+		var center:Array=spec.get("center",[0,0])
+		lift.position=Vector3(float(center[0]),0.0,float(center[1]))
+		lift.call("set_stationary_state",{}, {})
 	return {"root":root,"blockers":blockers}
 static func mesh_bounds(node: Node3D, root: Node3D) -> AABB:
 	var bounds:=AABB(); var initialized:=false

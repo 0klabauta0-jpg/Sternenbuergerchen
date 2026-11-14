@@ -37764,6 +37764,8 @@ func _check_ground_ship_landing_site(craft:Dictionary,position:Vector2,profile:D
 	var registry:Node=simulation_root.call("get_hex_ground_terrain_registry")
 	var raster:Dictionary=_get_bound_ground_ship_cells(registry,craft,position,profile)
 	if not raster.ok:return raster
+	var support:Dictionary=FIELD_LANDING.validate_cells(registry,raster.blocked_cells)
+	if not support.ok:return support
 	var foreign:Dictionary=get_ground_ship_blocked_cells(String(craft.get("craft_id","")))
 	if not foreign.ok:return foreign
 	var foreign_cells:Dictionary={}

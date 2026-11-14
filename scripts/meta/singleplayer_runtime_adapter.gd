@@ -121,6 +121,8 @@ var _polisa_shuttle_dispatcher: RefCounted
 var _polisa_shuttle_home: RefCounted
 var _cargo_transfer = preload("res://scripts/core/automatic_cargo_transfer.gd").new()
 var _service_pad_reservation: Dictionary = {}
+var _ground_cargo_visual_signature := ""
+var _ground_cargo_visual_refresh_msec := 0
 var _shuttle_return_poll := 0.0
 var _shuttle_home_retry := 0.0
 var _polisa_market = preload("res://scripts/meta/polisa_recruitment_market.gd").new()
@@ -521,7 +523,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -625,6 +627,11 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			_screen.call("_refresh_personnel_loadout_projection")
 			_screen.call("_emit_homebase_fireteam_context_changed")
 		return result
+	if operation == "repair":
+		var context:=_service_context(String(data.get("craft_id","")))
+		if not bool(context.get("ground_service_verified",false)) or not Array(context.get("services",[])).has("repair"):
+			return _reject("repair_service_required","Reparatur nur am lokalen freigegebenen Servicepad")
+		return _commit("singleplayer_supply","repair",data,request_id,context)
 	if operation in ["buy", "refuel", "sell"]:
 		if operation == "buy":
 			var offered: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id", "")), {})
@@ -643,7 +650,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
 		context["craft_id"]=craft_id
 		context["require_blueprints"]=_campaign_mode
-		context["cargo_lift_delivery"]=_campaign_mode and String(context.get("location_id",""))=="polisa"
+		var capability:="trade" if operation in ["buy","sell"] else "refuel"
+		if String(context.get("location_id","")) in ["trade_outpost","satellite_crash"] and (not Array(context.get("services",[])).has(capability) or (capability=="refuel" and not bool(context.get("ground_service_verified",false)))):
+			return _reject("local_service_required","Schiff muss am freigegebenen lokalen Handels- oder Servicepunkt stehen")
+		context["cargo_lift_delivery"]=_campaign_mode and not String(context.get("cargo_lift_container_id","")).is_empty()
 		context["ship_component_model_id"] = String(_ship_equipment.get_snapshot(craft_id).get("model_id", "")) if _ship_equipment != null else ""
 		var result: Dictionary = _commit("singleplayer_supply", operation, data, request_id, context)
 		if result.get("ok", false) and _campaign_mode and String(context.get("location_id", "")) == "trade_outpost":
@@ -765,13 +775,20 @@ func _has_active_transit() -> bool:
 func _validate_cargo_transfer(source:String,target:String)->Dictionary:
 	if not _campaign_mode or source==target:return _reject("cargo_invalid_route","Frachtweg ungültig")
 	var craft_count:=0
+	var location:=""
+	var contexts: Array[Dictionary]=[]
 	for container:String in [source,target]:
-		if container=="station:polisa:lift":continue
+		if container in ["station:polisa:lift","station:trade_outpost:lift"]:continue
 		if not container.begins_with("craft:"):return _reject("cargo_invalid_route","Nur lokale Schiffe und Frachtaufzug")
-		var craft:=container.trim_prefix("craft:")
-		if String(_service_context(craft).get("location_id",""))!="polisa":return _reject("cargo_ship_unavailable","Schiff muss auf Port Olisar gelandet sein")
-		craft_count+=1
+		var context:=_service_context(container.trim_prefix("craft:"))
+		var place:=String(context.get("location_id",""))
+		if place not in ["polisa","trade_outpost"] or not bool(context.get("ground_service_verified",false)) or not Array(context.get("services",[])).has("cargo"):
+			return _reject("cargo_ship_unavailable","Schiff muss am lokalen Frachtpad stehen")
+		if not location.is_empty() and location!=place:return _reject("cargo_different_location","Schiffe müssen am selben Frachtservice stehen")
+		location=place;contexts.append(context);craft_count+=1
 	if craft_count<1:return _reject("cargo_invalid_route","Schiff auswählen")
+	for container:String in [source,target]:
+		if container.begins_with("station:") and container!="station:"+location+":lift":return _reject("cargo_different_location","Frachtaufzug ist nicht am Schiffsort")
 	return {"ok":true}
 
 func _cargo_inventory()->Dictionary:
@@ -784,6 +801,7 @@ func has_active_cargo_transfer(craft_id:String)->bool:
 	return _cargo_transfer.blocks_craft(craft_id)
 
 func _service_context(craft_id: String) -> Dictionary:
+	if not _ground_service_craft_owned(craft_id): return {}
 	if craft_id.is_empty() or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty():
 		return {}
 	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty():
@@ -792,7 +810,7 @@ func _service_context(craft_id: String) -> Dictionary:
 	if location == "homebase":
 		if _home_pad_for(craft_id).is_empty() or not _craft_grounded_at_home(craft_id):
 			return {}
-		return {"location_id": "homebase", "craft_busy": false}
+		return {"location_id": "homebase", "craft_busy": false, "ground_service_verified":true, "services":["trade","refuel","repair"]}
 	var routes: Dictionary = _travel.get_snapshot(craft_id).get("routes", {})
 	if routes.has(craft_id) and String(Dictionary(routes[craft_id]).get("phase", "")) not in ["grounded", "surface"]: return {}
 	var departure: Dictionary = _craft_visit_binding(craft_id)
@@ -802,7 +820,7 @@ func _service_context(craft_id: String) -> Dictionary:
 		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
 		if controller == null or not bool(controller.call("_is_parked_campaign_dropship", craft_id)): return {}
 		# Station-wide service menu after actual docking; walking to the counter is optional.
-		return {"location_id":"polisa", "craft_busy":false, "station_service_verified":true}
+		return {"location_id":"polisa", "craft_busy":false, "station_service_verified":true, "ground_service_verified":true, "services":["trade","cargo","refuel","repair"], "cargo_lift_container_id":"station:polisa:lift"}
 	if location == "mission" and place_id in ["trade_outpost","satellite_crash"]:
 		var card: Dictionary = _flow.call("_find_mission_drop_card_in_planning_state",craft_id)
 		if String(card.get("state",card.get("mission_drop_state",""))) not in ["landed","unloading","complete"]: return {}
@@ -813,7 +831,14 @@ func _service_context(craft_id: String) -> Dictionary:
 		if driver == null or not driver.has_method("get_mission_interaction_runtime_states"): return {}
 		var states: Dictionary = driver.call("get_mission_interaction_runtime_states")
 		if bool(Dictionary(states.get("trade_service",{})).get("complete",false)) or bool(Dictionary(states.get("deliver_benit",{})).get("complete",false)):
-			return {"location_id":place_id,"craft_busy":false}
+			var setup: Node = mission.get_node_or_null("MissionSetup")
+			var map = setup.get("_loaded_terrain_map_data") if setup != null else null
+			var registry: Node = mission.get_node_or_null("TerrainRegistry")
+			var local: Dictionary = load("res://scripts/mission/ground_service_access.gd").at_position(map,registry,controller.call("_campaign_landed_craft_position",craft_id),true)
+			if place_id=="satellite_crash" and map!=null and map.has_marker("trade_service") and Vector2(controller.call("_campaign_landed_craft_position",craft_id)).distance_to(map.get_marker_position("trade_service"))<=256.0:
+				local["services"]=["trade"]
+			local.merge({"location_id":place_id,"craft_busy":false},true)
+			return local
 
 	return {}
 
@@ -1240,6 +1265,7 @@ func preview_space_warp_entry(craft_id: String) -> Dictionary:
 
 func advance_space_travel(delta: float) -> void:
 	_cargo_transfer.advance(delta)
+	_project_ground_cargo_lifts()
 	_advance_surface_orbit_intents()
 	_advance_polisa_recruitment()
 	_restore_polisa_residents()
@@ -2422,3 +2448,34 @@ func _fulfill_polisa_local_ship(offer: Dictionary, request_id: String, requested
 	_pad_by_craft[id] = home_pad
 	sync_crafts()
 	return {"ok":true,"receipt_schema_version":2,"craft_id":id,"delivery_location_id":"polisa","landing_pad_id":home_pad,"acquisition_pad_id":acquisition_pad,"pad_fit_revision":1,"origin_kind":"local_station_purchase","origin_location_id":"polisa","origin_receipt_id":request_id}
+
+func get_ground_repair_context(craft_id:String)->Dictionary:
+	return _service_context(craft_id).duplicate(true)
+
+func _ground_service_craft_owned(craft_id:String)->bool:
+	if _flow==null or _simulation==null: return false
+	var definition:Dictionary=_flow.call("_find_homebase_aircraft_definition",craft_id)
+	if definition.is_empty():return false
+	var local:=String(_simulation.call("get_peer_team",multiplayer.get_unique_id()))
+	if local.is_empty():local=String(_simulation.get("_multiplayer_local_team"))
+	if local.is_empty() and not multiplayer.has_multiplayer_peer():local="team_alpha"
+	if local.is_empty():return false
+	return String(definition.get("owner_team_id",definition.get("team_id","team_alpha")))==local
+
+func _project_ground_cargo_lifts()->void:
+	if _supply==null or _flow==null:return
+	var job:Dictionary=_cargo_transfer.get_snapshot()
+	var signature:=str([_supply.get_revision(),job])
+	if signature==_ground_cargo_visual_signature and Time.get_ticks_msec()-_ground_cargo_visual_refresh_msec<1000:return
+	_ground_cargo_visual_signature=signature
+	_ground_cargo_visual_refresh_msec=Time.get_ticks_msec()
+	var inventory:Dictionary=_cargo_inventory()
+	for definition:Dictionary in Array(_flow.get("_homebase_aircraft_definitions")):
+		var craft:=String(definition.get("craft_id",""))
+		var mission:Node=_flow.call("get_mission_for_craft",craft)
+		if mission==null:continue
+		var controller:Node=mission.get_node_or_null("TacticalController")
+		var view:Node=controller.call("_get_primary_3d_view") if controller!=null else null
+		if view==null or not view.has_method("set_ground_cargo_lift_state"):continue
+		var local_job:Dictionary=job if "station:trade_outpost:lift" in [String(job.get("source","")),String(job.get("target",""))] else {"phase":"idle"}
+		view.call("set_ground_cargo_lift_state","trade_lift",Dictionary(inventory.get("station:trade_outpost:lift",{})).get("items",{}),local_job)

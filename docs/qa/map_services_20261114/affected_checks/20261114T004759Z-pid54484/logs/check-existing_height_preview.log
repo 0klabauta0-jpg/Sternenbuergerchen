@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-78e6a7fe2df24bec98a64ebc5d0b0d7e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HEIGHT_PREVIEW seven_hex_planned_ramp: PASS
+HEIGHT_PREVIEW planning_has_no_owner_mutation: PASS
+HEIGHT_PREVIEW cached_caps_outline_and_up_arrow: PASS
+HEIGHT_PREVIEW view_height_scale_used: PASS
+HEIGHT_PREVIEW direction_retained_and_ramp_h7_guard: FAIL
+HEIGHT_PREVIEW plateau_exact_h8: PASS
+HEIGHT_PREVIEW overlap_two_centers_raise_once: PASS
+HEIGHT_PREVIEW visited_preview_announces_no_extra_raise: PASS
+HEIGHT_PREVIEW pre_gui_release_commits_and_resets_visited: PASS
+HEIGHT_PREVIEW single_undo_restores_entire_overlap_stroke: PASS
+HEIGHT_PREVIEW redo_restores_same_stroke: PASS
+HEIGHT_PREVIEW real_camera_ray_hits_visible_ramp_cap: PASS
+HEIGHT_PREVIEW failures=1

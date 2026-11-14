@@ -98,9 +98,7 @@
 		}
 	},
 	"mission_slot_count": 4,
-	"patrol_paths": {
-
-	},
+	"patrol_paths": {},
 	"terrain_visual_theme_id": "frontier_illustrated_v1",
 	"tile_size": {
 		"half_height": 32,
@@ -885,7 +883,7 @@
 				"x": 2,
 				"y": 15
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -899,7 +897,7 @@
 				"x": 2,
 				"y": 16
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -1151,7 +1149,7 @@
 				"x": 3,
 				"y": 14
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -1165,9 +1163,9 @@
 				"x": 3,
 				"y": 15
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
-			"surface_type": "ground",
+			"surface_type": "rock",
 			"type_id": "ground_flat",
 			"walkable": true
 		},
@@ -1179,7 +1177,7 @@
 				"x": 3,
 				"y": 16
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -1431,7 +1429,7 @@
 				"x": 4,
 				"y": 14
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -1445,7 +1443,7 @@
 				"x": 4,
 				"y": 15
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4358,7 +4356,7 @@
 				"x": 15,
 				"y": 3
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4372,7 +4370,7 @@
 				"x": 15,
 				"y": 4
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4386,7 +4384,7 @@
 				"x": 15,
 				"y": 5
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4624,7 +4622,7 @@
 				"x": 16,
 				"y": 2
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4638,7 +4636,7 @@
 				"x": 16,
 				"y": 3
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4652,7 +4650,7 @@
 				"x": 16,
 				"y": 4
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4666,7 +4664,7 @@
 				"x": 16,
 				"y": 5
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4890,7 +4888,7 @@
 				"x": 17,
 				"y": 1
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4904,7 +4902,7 @@
 				"x": 17,
 				"y": 2
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4918,9 +4916,9 @@
 				"x": 17,
 				"y": 3
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
-			"surface_type": "ground",
+			"surface_type": "rock",
 			"type_id": "ground_flat",
 			"walkable": true
 		},
@@ -4932,7 +4930,7 @@
 				"x": 17,
 				"y": 4
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -4946,7 +4944,7 @@
 				"x": 17,
 				"y": 5
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5170,7 +5168,7 @@
 				"x": 18,
 				"y": 1
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5184,7 +5182,7 @@
 				"x": 18,
 				"y": 2
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5198,7 +5196,7 @@
 				"x": 18,
 				"y": 3
 			},
-			"height_level": 0,
+			"height_level": 2,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5212,7 +5210,7 @@
 				"x": 18,
 				"y": 4
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5450,7 +5448,7 @@
 				"x": 19,
 				"y": 1
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5464,7 +5462,7 @@
 				"x": 19,
 				"y": 2
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -5478,7 +5476,7 @@
 				"x": 19,
 				"y": 3
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "ground_flat",
@@ -6828,5 +6826,7 @@
 			"type_id": "ground_flat",
 			"walkable": true
 		}
-	]
+	],
+	"regional_terrain_version": 3,
+	"regional_height_step": 0.5
 }

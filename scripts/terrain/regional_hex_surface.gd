@@ -64,7 +64,7 @@ static func profile(tile, tiles: Dictionary) -> PackedFloat32Array:
 
 
 static func _valid_ramp(tile) -> bool:
-	return tile != null and tile.explicit_hex_ramps and tile.walkable and tile.ramp_direction >= 0 and tile.ramp_direction < 6 and tile.height_level < 8
+	return tile != null and tile.explicit_hex_ramps and tile.walkable and tile.ramp_direction >= 0 and tile.ramp_direction < 6 and tile.height_level < TILE.MAX_HEIGHT_LEVEL
 
 
 static func _nominal_height(tile, world_corner: Vector2) -> float:

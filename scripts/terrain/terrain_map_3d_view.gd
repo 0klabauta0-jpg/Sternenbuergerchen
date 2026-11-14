@@ -1257,6 +1257,8 @@ const REFERENCE_PROPS = preload("res://scripts/terrain/frontier_place_props.gd")
 var _reference_place_enabled := false
 var _homebase_visuals_enabled: bool = false
 var _homebase_rock_heights: Dictionary = {}
+var _authored_rock_surface_levels: Dictionary = {}
+var _authored_rock_surface_owners: Dictionary = {}
 var _show_authoring_markers := true
 var _place_dressing_root: Node3D
 var _place_dressing_signature := ""
@@ -1576,6 +1578,10 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 	_read_map_transform()
 	_configure_arid_pebble_exclusions()
 	_homebase_rock_heights.clear()
+	_authored_rock_surface_levels.clear()
+	if _terrain_map_data != null:
+		for cell: Array in _terrain_map_data.get_place_presentation().get("rock_surface_cells", []):
+			if cell.size() >= 3: _authored_rock_surface_levels[Vector2i(int(cell[0]),int(cell[1]))] = int(cell[2])
 	_station_module_projection.configure(_terrain_map_data)
 	_station_door_visuals.clear()
 	_station_door_registry_stamp = ""
@@ -1598,6 +1604,7 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 		_frontier_art_profile.configure_surface_blend(Array(_terrain_map_data.call("get_tiles")),Vector2(q_axis.x,q_axis.z),Vector2(r_axis.x,r_axis.z))
 	_sync_authored_visual_layout()
 	_sync_place_reference_dressing()
+	_index_authored_rock_surfaces()
 	_clear_children(_map_root)
 	_hex_grid_parents.clear()
 	_hex_grid_dirty_chunks.clear()
@@ -4067,6 +4074,13 @@ func _ensure_nodes() -> void:
 	environment.adjustment_saturation = EDITOR_ADJUSTMENT_SATURATION
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_environment(environment)
+	if _is_mixed_ground_palette():
+		environment.ambient_light_energy = 0.26
+		environment.tonemap_mode = Environment.TONE_MAPPER_ACES
+		environment.tonemap_exposure = 0.82
+		environment.adjustment_brightness = 1.0
+		environment.adjustment_contrast = 1.08
+		environment.adjustment_saturation = 1.0
 	if _orbital_station_view:
 		environment.background_color = Color("050a16")
 		environment.ambient_light_color = Color("b0c7e5")
@@ -4095,6 +4109,9 @@ func _apply_editor_light_settings() -> void:
 	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_light(light)
+	if _is_mixed_ground_palette():
+		light.light_energy = 0.80
+		light.light_color = Color("f5e2c2")
 	if _orbital_station_view:
 		light.light_color = Color("e4eeff")
 
@@ -4714,7 +4731,7 @@ func _add_tile_visual(tile_data) -> void:
 	if _uses_hex_grid():
 		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
 		var hex_material: Material = _frontier_art_profile.surface_material_for(String(tile_data.surface_type)) if _frontier_art_enabled else _make_material(hex_color)
-		if not owns_flat_ground:
+		if not owns_flat_ground and not _has_authored_rock_surface(tile_data):
 			var thin_cap: bool = _regional_height_step > 0.0
 			var is_bridge := String(tile_data.object_type_id) == "glut_bridge_deck"
 			if is_bridge:
@@ -4922,6 +4939,9 @@ func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String =
 	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
 	root_basis = _get_cell_module_visual_basis(normalized_visual_type_id) * root_basis
 	var root_transform := Transform3D(root_basis, _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y))
+	if _is_mixed_ground_palette() and (normalized_visual_type_id.begins_with("nature_") or normalized_visual_type_id.begins_with("rock_")):
+		source=source.duplicate(false)
+		source.material_override=_make_material(Color("30483a") if normalized_visual_type_id.contains("tree") or normalized_visual_type_id.contains("bush") else Color("665745"))
 	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
 	var instance_transform: Transform3D = root_transform * mesh_transform
 	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(normalized_visual_type_id):
@@ -5260,6 +5280,8 @@ func _apply_ground_surface_material_override(model_instance: Node3D, visual_type
 
 func _get_ground_surface_model_override_color(visual_type_id: String, tile_data) -> Color:
 	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if _is_mixed_ground_palette():
+		return Color("978266") if HEX_FLOOR_ADAPTER.supports(normalized) else _get_tile_color(tile_data)
 	if _frontier_art_enabled and (normalized == "ground_flat" or normalized.begins_with("nature_ground")):
 		var surface_type := String(tile_data.surface_type) if tile_data != null else "ground"
 		return _frontier_art_profile.surface_color(surface_type)
@@ -5682,7 +5704,7 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
 	material.shader = HEX_GRID_COVERAGE_SHADER
-	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.68) if authored else Color(0.25, 0.15, 0.10, 0.68))
+	material.set_shader_parameter("line_color", Color(0.13, 0.07, 0.025, 0.92) if authored else Color(0.25, 0.15, 0.10, 0.68))
 	if _regional_height_step > 0.0:
 		material.set_shader_parameter("line_color", Color(0.16, 0.09, 0.06, 0.68))
 	if _orbital_station_view:
@@ -5769,6 +5791,7 @@ func _get_grid_point_key(point: Vector3) -> String:
 
 
 func _add_height_edge_visuals(tile_data) -> void:
+	if _has_authored_rock_surface(tile_data): return
 	if _uses_hex_grid():
 		return # Hex columns already connect their top surface to the common base.
 	if _uses_strict_3d_asset_mapping():
@@ -6339,6 +6362,9 @@ func _queue_static_prop_model_batch(tile_data, top_y: float, visual_type_id: Str
 	var rotation_y: float = _get_asset_rotation_y(normalized_visual_type_id)
 	if apply_tile_rotation:
 		rotation_y += _get_tile_object_rotation_degrees(tile_data)
+	if _is_mixed_ground_palette():
+		source=source.duplicate(false)
+		source.material_override=_make_material(Color("30483a") if normalized_visual_type_id.contains("tree") or normalized_visual_type_id.contains("bush") else Color("665745"))
 	var prop_position: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(normalized_visual_type_id)) + _get_asset_position_offset(normalized_visual_type_id)
 	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
 	var root_transform := Transform3D(root_basis, prop_position)
@@ -6584,10 +6610,13 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 	if _uses_hex_grid() and HEX_FLOOR_ADAPTER.supports(visual_type_id):
 		_hex_floor_adapter.finish_model(model_instance)
 		_apply_station_floor_boundary(model_instance, tile_data)
+		if _is_mixed_ground_palette():_apply_material_override_recursive(model_instance,_make_material(Color("978266")))
 	if _is_arid_station_stone(visual_type_id):
 		visual_root.transform=_arid_stone_transform(visual_root.transform,tile_data.grid_position)
 		_apply_material_override_recursive(model_instance,_frontier_art_profile.material_for(Color("a56847"),true))
 		_queue_arid_foot_pebbles(tile_data, top_y)
+	if _is_mixed_ground_palette() and visual_type_id.begins_with("nature_"):
+		_apply_material_override_recursive(model_instance,_make_material(Color("30483a") if visual_type_id.contains("tree") or visual_type_id.contains("bush") else Color("665745")))
 	if visual_type_id.begins_with("station_set_door"):
 		_register_station_door_visual(tile_data.grid_position, model_instance)
 	_asset_model_count += 1
@@ -15662,7 +15691,7 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 	if not normalized_object.is_empty():
 		# Authored desert station dressing only. Logical tree blocker/cover facts
 		# remain in TerrainRegistry; temperate and other catalog uses stay intact.
-		if normalized_object=="nature_tree_blocker" and _is_arid_station_visual_context():
+		if normalized_object in ["nature_tree_blocker", "nature_bush_cover"] and _is_arid_station_visual_context():
 			return "glut_sandstone_04"
 		return normalized_object
 
@@ -16089,6 +16118,11 @@ func _build_tile_modulate(tile_data) -> Color:
 
 
 func _get_tile_color(tile_data) -> Color:
+	# GM02's former near-white cap hid the distinction between soil, track and
+	# the objective platform. Palette only: all terrain facts stay unchanged.
+	if _terrain_map_data != null and _terrain_map_data.get_terrain_visual_theme_id() == "ground_mission_mixed_v1":
+		var palette := {"ground":Color("514b2e"), "sand":Color("80653e"), "road":Color("303b3d"), "rock":Color("52584c"), "water":Color("406f7b")}
+		return palette.get(String(tile_data.surface_type), palette.ground).lightened(0.025 * mini(int(tile_data.height_level), 3))
 	var tile_color := _get_space_kit_terrain_top_color()
 	match String(tile_data.surface_type):
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
@@ -16855,3 +16889,34 @@ func _begin_terrain_resource_context(tiles: Array) -> bool:
 		_terrain_resource_failure = String(started.reason)
 		return false
 	return true
+
+func _index_authored_rock_surfaces() -> void:
+	_authored_rock_surface_owners.clear()
+	if _terrain_map_data == null: return
+	for cell: Array in _terrain_map_data.get_place_presentation().get("rock_surface_cells", []):
+		if cell.size() < 4: continue
+		var owner: Node3D
+		if is_instance_valid(_authored_visual_layout_root):
+			owner = _authored_visual_layout_root.get_node_or_null("FrontierErodedGeology/"+String(cell[3])) as Node3D
+		if owner == null or not owner.has_meta("rock_surface_polygon"): continue
+		_authored_rock_surface_owners[Vector2i(int(cell[0]),int(cell[1]))] = {"owner":weakref(owner),"transform":owner.global_transform,
+			"height":owner.global_position.y+float(owner.get_meta("rock_surface_y"))}
+
+func _has_authored_rock_surface(tile) -> bool:
+	# A saved cap suppresses its duplicate fill only while its exact source
+	# mesh remains alive, unchanged and at the authoritative stand height.
+	if tile == null or not tile.walkable or int(_authored_rock_surface_levels.get(tile.grid_position,-1)) != int(tile.height_level): return false
+	var entry: Dictionary = _authored_rock_surface_owners.get(tile.grid_position,{})
+	if entry.is_empty(): return false
+	var owner: Node3D = entry.owner.get_ref() as Node3D
+	return is_instance_valid(owner) and owner.is_inside_tree() and owner.global_transform.is_equal_approx(entry.transform) and is_equal_approx(float(entry.height), float(tile.height_level)*_get_3d_height_step())
+
+func _is_mixed_ground_palette() -> bool:
+	return _terrain_map_data != null and _terrain_map_data.get_terrain_visual_theme_id() == "ground_mission_mixed_v1"
+
+func set_ground_cargo_lift_state(id:String, items:Dictionary, job:Dictionary)->void:
+	if not is_instance_valid(_place_dressing_root):return
+	var lift:Node=_place_dressing_root.get_node_or_null(NodePath(id))
+	if lift!=null and lift.has_method("set_stationary_state"):
+		lift.call("set_stationary_state",items,job)
+		_request_viewport_redraw(true)

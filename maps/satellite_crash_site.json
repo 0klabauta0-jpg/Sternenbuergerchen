@@ -436,7 +436,8 @@
           4.0
         ]
       }
-    ]
+    ],
+    "ground_services": []
   },
   "regional_terrain_version": 3,
   "regional_height_step": 0.75,

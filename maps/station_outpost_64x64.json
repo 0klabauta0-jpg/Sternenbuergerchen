@@ -617,11 +617,84 @@
 						39,
 						38
 					],
-					"module_count": 76
+					"module_count": 82,
+					"rooms": [
+						{
+							"id": "1",
+							"source_center": [
+								27,
+								28
+							]
+						},
+						{
+							"id": "2",
+							"source_center": [
+								36,
+								28
+							]
+						},
+						{
+							"id": "3",
+							"source_center": [
+								27,
+								35
+							]
+						},
+						{
+							"id": "4",
+							"source_center": [
+								36,
+								35
+							]
+						}
+					],
+					"single_door_cells": [
+						[
+							33,
+							28
+						],
+						[
+							29,
+							35
+						],
+						[
+							27,
+							31
+						],
+						[
+							36,
+							31
+						]
+					]
 				}
 			],
-			"ensembles_revision": "all_station_ensembles_v1"
-		}
+			"ensembles_revision": "all_station_ensembles_v1",
+			"rooms_revision": "closed_cross_v1"
+		},
+		"pads": [
+			{
+				"center": [
+					59.0,
+					12.12435565298214
+				],
+				"size": [
+					6.2,
+					5.2
+				],
+				"name": "LAGER"
+			},
+			{
+				"center": [
+					39.0,
+					41.569219381653056
+				],
+				"size": [
+					6.2,
+					5.2
+				],
+				"name": "RESERVE"
+			}
+		]
 	},
 	"terrain_visual_theme_id": "frontier_illustrated_v1",
 	"tile_size": {
@@ -1453,7 +1526,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -1833,7 +1906,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -3159,7 +3232,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -3539,7 +3612,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -4861,7 +4934,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -5241,7 +5314,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -6563,7 +6636,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -6943,7 +7016,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -8269,7 +8342,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -9971,7 +10044,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 135.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -11675,7 +11748,7 @@
 			},
 			"height_level": 2,
 			"object_height": 1,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -12084,8 +12157,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12098,8 +12171,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12112,8 +12185,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12126,8 +12199,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12140,8 +12213,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12154,8 +12227,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12168,8 +12241,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12984,8 +13057,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -12998,8 +13071,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13012,8 +13085,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13026,8 +13099,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13040,8 +13113,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13054,8 +13127,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13068,8 +13141,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13377,7 +13450,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -13882,8 +13955,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13896,8 +13969,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13910,8 +13983,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13924,8 +13997,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13938,8 +14011,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13952,8 +14025,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -13966,8 +14039,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14696,7 +14769,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -14781,8 +14854,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14795,8 +14868,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14809,8 +14882,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14823,8 +14896,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14837,8 +14910,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14851,8 +14924,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -14865,8 +14938,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15076,7 +15149,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -15680,8 +15753,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15694,8 +15767,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15708,8 +15781,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15722,8 +15795,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15736,8 +15809,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15750,8 +15823,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -15764,8 +15837,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -16397,7 +16470,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -16582,8 +16655,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -16596,25 +16669,25 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 55,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 17,
 				"y": 47
 			},
 			"height_level": 0,
-			"object_height": 2,
+			"object_height": 0,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_rock_cover",
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"object_type_id": "",
+			"surface_type": "road",
+			"type_id": "ground_flat",
+			"walkable": true
 		},
 		{
 			"blocks_los": false,
@@ -16626,8 +16699,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -16640,8 +16713,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -16654,8 +16727,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -16668,8 +16741,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17482,8 +17555,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17496,8 +17569,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17510,8 +17583,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17524,8 +17597,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17538,8 +17611,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17552,8 +17625,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17566,8 +17639,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -17721,7 +17794,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -18101,7 +18174,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -19423,7 +19496,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -19804,7 +19877,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -20071,10 +20144,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -20087,10 +20160,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall_corner",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -20947,10 +21020,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -20963,10 +21036,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -20993,10 +21066,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -21136,7 +21209,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -21516,7 +21589,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -21799,11 +21872,11 @@
 			},
 			"height_level": 1,
 			"object_height": 0,
-			"object_rotation_degrees": 270.0,
-			"object_type_id": "station_set_door_single_half",
+			"object_rotation_degrees": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true
 		},
 		{
 			"blocks_los": false,
@@ -21829,10 +21902,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -21845,10 +21918,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -21903,10 +21976,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -22707,10 +22780,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
-			"object_type_id": "station_set_wall_door",
+			"object_rotation_degrees": 90.0,
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -22723,10 +22796,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -22809,10 +22882,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -22854,7 +22927,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "sand",
 			"type_id": "nature_ground_sand_dirt",
 			"walkable": true
@@ -23238,7 +23311,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -23591,10 +23664,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -23607,25 +23680,27 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 25,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -23666,7 +23741,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": true
@@ -23724,10 +23799,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -24472,10 +24547,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -24488,10 +24563,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -24523,33 +24598,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 26,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": true
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 26,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -24632,10 +24710,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -25352,8 +25430,9 @@
 			"object_height": 2,
 			"object_type_id": "station_set_wall_corner",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
-			"walkable": false
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": true,
@@ -25365,10 +25444,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 270.0,
+			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -25439,22 +25518,25 @@
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": true,
+			"object_type_id": "station_set_door_single",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 27,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_detail",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -25536,10 +25618,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -25552,11 +25634,11 @@
 			},
 			"height_level": 1,
 			"object_height": 0,
-			"object_rotation_degrees": 180.0,
-			"object_type_id": "station_set_door_single",
+			"object_rotation_degrees": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true
 		},
 		{
 			"blocks_los": false,
@@ -26257,7 +26339,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -26330,33 +26413,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 28,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 28,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -26415,18 +26501,20 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 28,
 				"y": 37
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": true,
@@ -26438,10 +26526,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
-			"object_type_id": "station_set_wall_door_wide",
+			"object_rotation_degrees": 90.0,
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -27158,8 +27246,9 @@
 			"object_height": 2,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": false
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -27236,33 +27325,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 29,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 29,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -27293,20 +27385,20 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 29,
 				"y": 35
 			},
 			"height_level": 1,
-			"object_height": 2,
+			"object_height": 0,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_door_single",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true
 		},
 		{
 			"blocks_los": true,
@@ -27319,9 +27411,9 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -27348,10 +27440,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -27617,7 +27709,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 135.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -27996,7 +28088,7 @@
 			},
 			"height_level": 1,
 			"object_height": 1,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -28070,7 +28162,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -28143,33 +28236,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 30,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 30,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": true,
@@ -28182,7 +28278,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -28198,7 +28294,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -28255,10 +28351,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -28977,10 +29073,11 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_type_id": "station_set_wall_window",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -29064,7 +29161,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_door_center",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -29080,7 +29177,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -29165,10 +29262,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -29335,7 +29432,7 @@
 			},
 			"height_level": 0,
 			"object_height": 1,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -29715,7 +29812,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -29887,7 +29984,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -29942,7 +30040,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -29958,24 +30056,10 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"edge_type": "none",
-			"grid_position": {
-				"x": 32,
-				"y": 31
-			},
-			"height_level": 1,
-			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": true
 		},
 		{
 			"blocks_los": true,
@@ -29983,14 +30067,31 @@
 			"edge_type": "none",
 			"grid_position": {
 				"x": 32,
-				"y": 32
+				"y": 31
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"edge_type": "none",
+			"grid_position": {
+				"x": 32,
+				"y": 32
+			},
+			"height_level": 1,
+			"object_height": 0,
+			"object_type_id": "",
+			"surface_type": "ground",
+			"type_id": "station_set_floor_panel",
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -30072,10 +30173,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -30794,7 +30895,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -30821,26 +30923,26 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 33,
 				"y": 28
 			},
 			"height_level": 1,
-			"object_height": 2,
+			"object_height": 0,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_detail",
+			"object_type_id": "station_set_door_single",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true
 		},
 		{
 			"blocks_los": false,
@@ -30871,33 +30973,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 33,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 33,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_detail",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -30981,10 +31086,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -31054,7 +31159,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -31436,7 +31541,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -31703,24 +31808,27 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_type_id": "station_set_wall_door",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 90.0
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 34,
 				"y": 26
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": false,
@@ -31779,33 +31887,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 34,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 34,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -31889,10 +32000,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -32594,10 +32705,11 @@
 			},
 			"height_level": 1,
 			"object_height": 0,
-			"object_type_id": "station_set_door_single_closed",
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": true,
@@ -32609,10 +32721,11 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_type_id": "station_set_wall_window",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": false
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -32687,33 +32800,36 @@
 			"walkable": false
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 35,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 35,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -32795,10 +32911,10 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_rotation_degrees": 180.0,
+			"object_rotation_degrees": 0.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -33516,7 +33632,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -33600,22 +33717,25 @@
 			"object_height": 0,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": true,
+			"object_type_id": "station_set_door_single",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 36,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall_door_edge",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
 			"blocks_los": false,
@@ -33674,32 +33794,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 36,
 				"y": 37
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 36,
 				"y": 38
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_straight",
-			"walkable": true
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_type_id": "station_set_wall_corner",
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": false,
@@ -34416,7 +34540,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -34493,49 +34618,52 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 37,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 37,
 				"y": 32
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_type_id": "station_set_wall",
+			"object_height": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true,
+			"object_rotation_degrees": 0
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 60,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 37,
 				"y": 33
 			},
 			"height_level": 1,
-			"object_height": 2,
-			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_switch",
+			"object_height": 0,
+			"object_rotation_degrees": 0,
+			"object_type_id": "",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": true
 		},
 		{
 			"blocks_los": false,
@@ -34552,32 +34680,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 37,
 				"y": 35
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 37,
 				"y": 36
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": false,
@@ -35320,7 +35452,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -35393,18 +35526,20 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 38,
 				"y": 31
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": true
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -35421,32 +35556,36 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 38,
 				"y": 33
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
-			"blocks_los": false,
-			"cover_value": 0,
+			"blocks_los": true,
+			"cover_value": 60,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 38,
 				"y": 34
 			},
 			"height_level": 1,
-			"object_height": 0,
+			"object_height": 2,
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": true
+			"walkable": false,
+			"object_type_id": "station_set_wall",
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": false,
@@ -35795,7 +35934,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "cliff_straight_ne",
 			"walkable": false
@@ -36178,7 +36317,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -36221,10 +36360,11 @@
 			},
 			"height_level": 1,
 			"object_height": 2,
-			"object_type_id": "station_set_wall_window",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -36327,7 +36467,7 @@
 			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -37129,7 +37269,8 @@
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -37200,7 +37341,7 @@
 			"height_level": 1,
 			"object_height": 2,
 			"object_rotation_degrees": 90.0,
-			"object_type_id": "station_set_wall_window",
+			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
 			"walkable": false
@@ -37512,7 +37653,7 @@
 			"height_level": 2,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -37892,7 +38033,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -38035,8 +38176,9 @@
 			"object_height": 2,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
-			"walkable": false
+			"type_id": "station_set_floor_panel",
+			"walkable": false,
+			"object_rotation_degrees": 0.0
 		},
 		{
 			"blocks_los": false,
@@ -38941,7 +39083,8 @@
 			"object_type_id": "station_set_wall_corner",
 			"surface_type": "ground",
 			"type_id": "station_set_floor_panel",
-			"walkable": false
+			"walkable": false,
+			"object_rotation_degrees": 90.0
 		},
 		{
 			"blocks_los": true,
@@ -38956,7 +39099,7 @@
 			"object_rotation_degrees": 90.0,
 			"object_type_id": "station_set_wall",
 			"surface_type": "ground",
-			"type_id": "station_set_floor_detail",
+			"type_id": "station_set_floor_panel",
 			"walkable": false
 		},
 		{
@@ -39222,7 +39365,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -39604,7 +39747,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -40932,7 +41075,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "nature_ground_dirt",
 			"walkable": true
@@ -41312,7 +41455,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 135.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -43957,7 +44100,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 135.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -45059,8 +45202,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45073,8 +45216,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45087,8 +45230,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45101,8 +45244,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45115,8 +45258,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45129,8 +45272,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45143,8 +45286,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45667,7 +45810,7 @@
 			},
 			"height_level": 1,
 			"object_height": 1,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -45962,8 +46105,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45976,8 +46119,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -45990,8 +46133,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46004,8 +46147,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46018,8 +46161,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46032,24 +46175,24 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 25,
+			"cover_value": 0,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 50,
 				"y": 17
 			},
 			"height_level": 0,
-			"object_height": 1,
+			"object_height": 0,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"object_type_id": "",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46866,8 +47009,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46880,8 +47023,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46894,8 +47037,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46908,8 +47051,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46922,8 +47065,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46936,8 +47079,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -46950,8 +47093,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47375,7 +47518,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 225.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -47770,8 +47913,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47784,8 +47927,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47798,8 +47941,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47812,8 +47955,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47826,8 +47969,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47840,8 +47983,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -47854,8 +47997,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48672,8 +48815,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48686,8 +48829,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48700,8 +48843,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48714,8 +48857,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48728,8 +48871,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48742,8 +48885,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -48756,8 +48899,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49462,7 +49605,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -49575,8 +49718,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49589,8 +49732,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49603,8 +49746,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49617,8 +49760,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49631,8 +49774,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49645,8 +49788,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -49659,8 +49802,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50476,8 +50619,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50490,8 +50633,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50504,8 +50647,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50518,8 +50661,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50532,8 +50675,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50546,8 +50689,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -50560,8 +50703,8 @@
 			},
 			"height_level": 0,
 			"object_height": 0,
-			"surface_type": "ground",
-			"type_id": "station_set_floor_panel_end",
+			"surface_type": "road",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -52103,7 +52246,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 315.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -52483,7 +52626,7 @@
 			"height_level": 1,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "cliff_straight_sw",
 			"walkable": false
@@ -53807,7 +53950,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 180.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -54187,7 +54330,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "rock",
 			"type_id": "nature_ground_rock_dirt",
 			"walkable": true
@@ -55513,7 +55656,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 45.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -57213,7 +57356,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 270.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true
@@ -57595,7 +57738,7 @@
 			"height_level": 0,
 			"object_height": 1,
 			"object_rotation_degrees": 135.0,
-			"object_type_id": "nature_bush_cover",
+			"object_type_id": "nature_rock_cover",
 			"surface_type": "ground",
 			"type_id": "ground_flat",
 			"walkable": true

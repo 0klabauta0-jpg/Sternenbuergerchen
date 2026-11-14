@@ -4955,14 +4955,16 @@ func _advance_air_asset_recoveries(delta_seconds: float) -> bool:
 		if craft_id.is_empty():
 			continue
 		var previous_state: Dictionary = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
-		if _is_space_craft_away(craft_id):
-			next_recoveries[craft_id] = previous_state
+		var service: Dictionary = _singleplayer_runtime.call("get_ground_repair_context",craft_id) if _singleplayer_runtime != null else {}
+		var authorized_service := bool(service.get("ground_service_verified",false)) and Array(service.get("services",[])).has("repair")
+		if (_is_space_craft_away(craft_id) or _singleplayer_runtime != null) and not authorized_service:
+			next_recoveries[craft_id]=previous_state
 			continue
 		var next_state: Dictionary = Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("tick_recovery", previous_state, delta_seconds)).duplicate(true)
 		next_recoveries[craft_id] = next_state
 		if JSON.stringify(previous_state) != JSON.stringify(next_state):
 			changed = true
-		if String(next_state.get("meta_state", "craft_available")) == "craft_available":
+		if String(next_state.get("meta_state", "craft_available")) == "craft_available" and not _is_space_craft_away(craft_id) and (not authorized_service or service.get("location_id","")=="homebase"):
 			_aircraft_location_by_craft[craft_id] = "homebase"
 	_air_asset_recovery_by_craft = next_recoveries
 	return changed

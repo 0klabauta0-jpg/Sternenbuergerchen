@@ -1,0 +1,31 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 621.14 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-da014e4eba514578be0d61542cc401aa
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS private profile
+PASS regional camera chunks fully built
+PASS Ground_Mission02_128x128 native dimensions
+PASS Ground_Mission02_128x128 written
+PASS regional camera chunks fully built
+PASS station_outpost_64x64 native dimensions
+PASS station_outpost_64x64 written
+PASS regional camera chunks fully built
+PASS Ground_Mission01_32x32 native dimensions
+PASS Ground_Mission01_32x32 written
+PASS regional camera chunks fully built
+PASS gm01_landing_mesa native dimensions
+PASS gm01_landing_mesa written
+PASS regional camera chunks fully built
+PASS trade_outpost native dimensions
+PASS trade_outpost written
+PASS regional camera chunks fully built
+PASS trade_outpost_service_core native dimensions
+PASS trade_outpost_service_core written
+PASS regional camera chunks fully built
+PASS trade_outpost_local_hill native dimensions
+PASS trade_outpost_local_hill written
+PASS regional camera chunks fully built
+PASS frontier_workyard_24x20 native dimensions
+PASS frontier_workyard_24x20 written
+MAP_SERVICES_CAPTURE passed=25 failed=0

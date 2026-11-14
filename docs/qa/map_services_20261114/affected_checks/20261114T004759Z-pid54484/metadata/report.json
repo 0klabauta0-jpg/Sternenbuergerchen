@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\tmp\\map_services_checks_physical.json",
+  "godot": "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.044,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-14T00:47:59.572078+00:00",
+  "finished_at": "2026-11-14T00:48:45.744484+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-existing_cargo_restore.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project\\affected_checks\\automatic_cargo_transfer_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.023,
+      "name": "existing_cargo_restore",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\check-existing_cargo_restore.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-existing_cargo_restore.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-existing_height_preview.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project\\affected_checks\\explicit_hex_height_preview_test.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 5.189,
+      "name": "existing_height_preview",
+      "marker_found": false,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\check-existing_height_preview.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-existing_height_preview.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "missing success marker"
+      ]
+    },
+    {
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-map_metadata_roundtrip.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\.godot\\review2_isolation\\78e6a7fe2df24bec98a64ebc5d0b0d7e\\project\\affected_checks\\map_save_metadata_roundtrip_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 39.893,
+      "name": "map_metadata_roundtrip",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\check-map_metadata_roundtrip.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\hex-enet-followup-20261113\\docs\\qa\\map_services_20261114\\affected_checks\\20261114T004759Z-pid54484\\logs\\engine-check-map_metadata_roundtrip.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 2,
+    "failed": 1
+  }
+}

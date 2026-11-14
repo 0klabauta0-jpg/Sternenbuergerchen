@@ -3,6 +3,7 @@ extends Node3D
 var _footprints: Array[Rect2] = []
 var _materials: Array[Material] = []
 var _sediment_material: Material
+var surface_height_step := 0.5
 
 func build(profile, _center: Vector2) -> Array[Rect2]:
 	_footprints.clear()
@@ -96,6 +97,11 @@ func _pass02_envelope(size: Vector3,seed_value: int) -> Rect2:
 	return Rect2(low,high-low)
 
 func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_value: int,tiers: int) -> void:
+	# The real top and saved terrain share the same canonical level. Snap only
+	# substantial terraces; talus and narrow foot fragments remain decoration.
+	var supported_surface := tiers >= 2 and size.y > 1.0 and label != "FracturedSpire"
+	if supported_surface:
+		size.y = maxf(surface_height_step, snappedf(group.position.y + size.y, surface_height_step) - group.position.y)
 	var outline := _block_outline(seed_value,12 if tiers==1 else 18)
 	var channel_limit := 2 if tiers==2 or label=="FracturedSpire" else 3 if label=="OffsetCrown" else 5
 	var eroded := _eroded_outline(outline,seed_value,tiers,channel_limit)
@@ -186,6 +192,11 @@ func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_v
 	instance.set_meta("erosion_channel_count",eroded["channel_count"])
 	instance.position = Vector3(center.x,0.0,center.y)
 	instance.mesh = mesh
+	if supported_surface:
+		var polygon := PackedVector2Array()
+		for point: Vector3 in last: polygon.append(Vector2(point.x, point.z))
+		instance.set_meta("rock_surface_polygon", polygon)
+		instance.set_meta("rock_surface_y", size.y)
 	for surface in range(mesh.get_surface_count()):
 		instance.set_surface_override_material(surface,_materials[surface_materials[surface]])
 	group.add_child(instance)
@@ -321,3 +332,16 @@ func build_tile_rock(profile: RefCounted, seed_value: int) -> void:
 	for color in ["aa583d","ae5c3e","b46141","bb6846","c1724d"]: _materials.append(profile.material_for(Color(color),true))
 	_sediment_material=profile.material_for(profile.surface_color("ground"))
 	_add_mesa("ErodedFragment",Vector2.ZERO,Vector3(1.2,1.1,1.0),seed_value)
+
+func surface_specs() -> Array[Dictionary]:
+	# Cold own-root enumeration, reused only by offline authoring/QA.
+	var result: Array[Dictionary] = []
+	for group: Node in get_children():
+		for part: Node in group.get_children():
+			if not part.has_meta("rock_surface_polygon"): continue
+			var polygon := PackedVector2Array()
+			for point: Vector2 in part.get_meta("rock_surface_polygon"):
+				polygon.append(point + Vector2(part.position.x + group.position.x, part.position.z + group.position.z))
+			result.append({"id":String(group.name)+"/"+String(part.name), "polygon":polygon,
+				"height":float(part.get_meta("rock_surface_y"))+part.position.y+group.position.y})
+	return result

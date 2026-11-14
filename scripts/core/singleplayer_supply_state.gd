@@ -132,6 +132,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"station_recruit_cancel": result = _cancel_station_recruit(payload, authority_context)
 		"station_build_home_pad": result = _station_build_home_pad(authority_context)
 		"refuel": result = _refuel(payload, authority_context)
+		"repair": result = _repair(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
 		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
@@ -186,7 +187,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var price: int = int(offer.get("unit_price", 0))
 	if price <= 0 or quantity > _credits / price:
 		return _reject("insufficient_credits", "Credits reichen nicht")
-	var destination := "station:polisa:lift" if location_id == "polisa" and bool(context.get("cargo_lift_delivery",false)) else "craft:"+String(context.get("craft_id",""))
+	var destination := String(context.get("cargo_lift_container_id","station:polisa:lift")) if location_id in ["polisa","trade_outpost"] and bool(context.get("cargo_lift_delivery",false)) else "craft:"+String(context.get("craft_id",""))
 	var purchased_items: Dictionary = _item_quantities
 	if not _inventory.is_empty():
 		if not _inventory.has(destination): return _reject("inventory_access","Lieferziel fehlt")
@@ -346,7 +347,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for id in containers:
 		var personal := String(id).begins_with("unit:") and String(id).ends_with(":backpack")
 		var container: Variant = containers[id]
-		if not (String(id) in ["base:homebase","station:polisa:lift"] or String(id).begins_with("craft:") or personal) or not INVENTORY.valid_container(container):
+		if not (String(id) in ["base:homebase","station:polisa:lift","station:trade_outpost:lift"] or String(id).begins_with("craft:") or personal) or not INVENTORY.valid_container(container):
 			return _reject("invalid_inventory", "Container ungueltig")
 		if not personal and container.has("armor_chip_capacity"):
 			return _reject("invalid_inventory", "Rüstungsplatz gehört zu einer Person")
@@ -390,6 +391,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	return {"ok":true}
 
 func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
+	if not _inventory.has("station:trade_outpost:lift"):
+		_inventory["station:trade_outpost:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("station:polisa:lift"):
 		_inventory["station:polisa:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("base:homebase"):
@@ -840,7 +843,8 @@ func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var item := String(payload.get("item_id",""))
 	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted:15})
 	var price := int(orders.get(item, 0))
-	var container := "craft:"+String(context.get("craft_id",""))
+	var container := String(payload.get("source_container_id","craft:"+String(context.get("craft_id",""))))
+	if container != "craft:"+String(context.get("craft_id","")) and container != String(context.get("cargo_lift_container_id","")): return _reject("inventory_access","Verkauf nur aus lokalem Schiff oder Frachtaufzug")
 	if price <= 0 or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
 	var quantity := int(payload.quantity)
 	var items: Dictionary = _inventory[container].items
@@ -1205,3 +1209,14 @@ func _publish_prepared_route_fuel(_candidate: Dictionary, validation: Dictionary
 		_revision += 1
 		_requests[String(patch.request_id)] = Dictionary(patch.receipt).duplicate(true)
 	return Dictionary(patch.result).duplicate(true)
+
+func _repair(payload:Dictionary,context:Dictionary)->Dictionary:
+	var id:=String(payload.get("craft_id",""))
+	var callback:Callable=context.get("repair_callback",Callable())
+	if not _fuel_by_craft_id.has(id) or context.get("ground_service_verified",false)!=true or not Array(context.get("services",[])).has("repair") or not callback.is_valid():return _reject("repair_service_required","Lokaler Reparaturservice nicht bestätigt")
+	var result:Dictionary=callback.call(id)
+	if result.get("ok",false):_revision+=1
+	return result
+
+func get_revision()->int:
+	return _revision

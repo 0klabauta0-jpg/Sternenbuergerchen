@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-78e6a7fe2df24bec98a64ebc5d0b0d7e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: real supply configured
+PASS: purchase reaches real station lift container
+PASS: order accepted
+PASS: active ship and checkpoint guarded
+PASS: no instant transfer
+PASS: one real inventory mutation per elapsed interval
+PASS: same order does not duplicate
+PASS: transfer completes and conserves inventory
+PASS: reverse direction
+PASS: location change blocks without moving items
+PASS: cancel safely releases guard
+PASS: ship-to-ship transfer
+PASS: ship-to-ship transfers real items
+PASS: destination can be filled
+PASS: second purchase enters lift
+PASS: full destination starts pending order
+PASS: full destination leaves source intact
+PASS: new transfer can start after cancellation
+PASS: other action removes source item
+PASS: missing source cannot create duplicate cargo
+PASS: transfer order records persistent replay receipt
+PASS: lift and ship inventories survive supply restore
+PASS: completed order receipt remains idempotent after restore
+PASS: old save without lift remains valid
+PASS: old save gains empty lift without changing ship cargo
+AUTOMATIC_CARGO_TRANSFER_PASS

@@ -45,3 +45,14 @@ func _box(parent: Node3D, dimensions: Vector3, at: Vector3, material: Material) 
 	part.material_override = material
 	part.position = at
 	parent.add_child(part)
+
+func set_stationary_state(items:Dictionary, job:Dictionary)->void:
+	if _carrier==null:return
+	var count:=0
+	for quantity in items.values():count+=int(quantity)
+	_carrier.visible=count>0 or job.get("phase","")=="active"
+	var total:=maxi(int(job.get("total",0)),1)
+	var progress:=clampf(float(job.get("completed",0))/float(total),0.0,1.0)
+	_carrier.position=Vector3(1.15,lerpf(-0.2,0.12,progress) if job.get("phase","")=="active" else 0.12,0.0)
+	set_meta("displayed_cargo_count",count)
+	set_meta("displayed_transfer_phase",String(job.get("phase","idle")))
