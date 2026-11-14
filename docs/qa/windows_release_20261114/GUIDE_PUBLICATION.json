@@ -1,0 +1,12 @@
+{
+  "project_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91",
+  "version_id": "appgprj_6af7a5bb23e481919e7aaed6be097d91~appgver_7882b465a02c819184ccbaf73ce9c297",
+  "deployment_id": "appgdep_6af7a7dfbf0c8191a4986f757486d215",
+  "status": "succeeded",
+  "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+  "access_mode": "public",
+  "source_commit": "1b7f1910e4bf6523a9aa975552bc1fe8d58c83fc",
+  "updated_at": "2026-11-14T00:14:38.992661+00:00",
+  "private_game_repository": true,
+  "private_review_unchanged": true
+}

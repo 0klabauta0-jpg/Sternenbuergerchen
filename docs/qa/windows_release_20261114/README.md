@@ -36,3 +36,24 @@ Der anschliessende normale Einstieg ohne Overrides bestand: Engine-/Netfoxmarker
 Exit0, keine ERROR-/Parse-/Compile-/Leakzeilen, Originalprofil unveraendert.
 Keine native Screenshotabnahme; der bestehende Runner nimmt Projektchecks
 und keine exportierte EXE direkt entgegen.
+
+## Auslieferung und Anleitung
+
+GitHub-Prerelease: https://github.com/0klabauta0-jpg/Sternenbuergerchen/releases/tag/playtest-2026-11-14
+Repository bleibt privat. GitHub meldet dieselbe SHA256 wie die lokale ZIP;
+`GITHUB_PUBLICATION.json` dokumentiert Quelle, Tag und Asset. EXE zuerst an den
+Nutzer ausgeliefert; neue Karten-/Frachtwünsche sind nicht im Paket enthalten.
+
+Öffentliche Anleitung: https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site
+Eigene öffentliche Site, vorhandener Arbeitsbericht bleibt privat. Quelle
+`docs/player_guide/`; Veröffentlichung `GUIDE_PUBLICATION.json`. Zehn Kapitel,
+nativer Screenshotbestand, lokale Checkliste, Suche und Boden-Trefferrechner.
+68 lokale Prüfungen bestanden (Katalogabgleich, gerechnete Grenzfälle, UI auf
+320/390/768/1440px, Tastatur, Bilder und Links). Mobile und Desktopaufnahmen
+geöffnet und beurteilt: lesbar, ohne Seitenüberlauf, Rechner bedienbar.
+23 zusätzliche öffentliche Prüfungen bestanden, ohne Cookies oder Anmeldung.
+Alle ausgelieferten JS-/CSS-/Bild-/Fontdateien bytegleich. Der erste strikte
+HTML-Hashvergleich erkannte das vom Hosting angehängte Cloudflare-Schutzscript;
+dieser rote Versuch bleibt erhalten. Die Folgeprüfung bestätigt den vollständigen
+unveränderten Autoreninhalt und genau diesen zusätzlichen Schutzscriptbereich.
+Keine Performance- oder Spielabnahme aus den Websitechecks ableiten.

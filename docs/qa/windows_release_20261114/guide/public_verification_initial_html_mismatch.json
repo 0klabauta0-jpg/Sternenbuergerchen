@@ -1,0 +1,19 @@
+{
+  "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+  "anonymous": true,
+  "passed": 1,
+  "failed": 2,
+  "checks": [
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 index.html"
+    },
+    {
+      "ok": false,
+      "label": "Published bytes match index.html"
+    }
+  ],
+  "errors": [
+    "Error: Published bytes match index.html"
+  ]
+}
