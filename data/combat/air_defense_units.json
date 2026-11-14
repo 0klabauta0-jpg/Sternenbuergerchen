@@ -1,5 +1,5 @@
 {
-  "status": "provisional_rule_core_not_wired",
+  "status": "provisional_values_wired_at_landing_commit",
   "contract": "docs/dev/ground_air_defense_engagement_contract.md",
   "units": {
     "hagel": {
