@@ -1,5 +1,9 @@
 # IMPLEMENTATION_STATUS
 
+### Playtest-Überarbeitung: Review-Ergänzung und Umsetzungsauftrag - 14.11.2026
+
+Masterliste um Review-Funde ergänzt (Kennzeichen [R], neue Punkte L24 Bedienregeln und L25 Begriffe), Arbeitsplan mit Zuordnung nachgezogen, Abgrenzung zur parallelen Grafik-Überarbeitung festgehalten. In diesem Schritt nur Markdown geändert. Der Nutzer hat danach die Umsetzung beauftragt; sie beginnt mit AP0. Noch kein Paket umgesetzt.
+
 ### Playtest-Überarbeitung: vollständige Liste und Arbeitsplan — 14.11.2026
 
 Nur Planung auf `task/playtest-rework-plan-20261114`: alle 23 Rückmeldungspunkte

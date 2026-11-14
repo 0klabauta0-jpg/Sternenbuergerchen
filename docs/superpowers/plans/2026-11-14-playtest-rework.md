@@ -1,6 +1,6 @@
 # Playtest-Überarbeitung – Arbeitsplan
 
-> **For agentic workers:** REQUIRED SUB-SKILL bei einer später beauftragten Umsetzung: `superpowers:subagent-driven-development` oder `superpowers:executing-plans`; paketweise arbeiten. **Dieser Auftrag erlaubt ausschließlich Planung. Keine Umsetzung aus diesem Dokument heraus starten.**
+> **For agentic workers:** Paketweise arbeiten; bei der Umsetzung `superpowers:subagent-driven-development` oder `superpowers:executing-plans` verwenden, sofern verfügbar. **Umsetzung vom Nutzer am 14.11.2026 beauftragt; Start mit AP0, danach in der Reihenfolge dieses Plans.**
 
 **Goal:** Die vollständigen Playtest-Rückmeldungen in kleine, überprüfbare und geordnet integrierbare Arbeitspakete überführen.
 
@@ -8,13 +8,14 @@
 
 **Tech Stack:** Godot 4.6.2, GDScript, vorhandene Hex-/Square-Karten, native Godot-Oberfläche und bestehende Assets. Kein Enginewechsel und keine neue Frameworkabhängigkeit.
 
-**Spec:** [Vollständige Änderungsliste L01–L23](../../tasks/PLAYTEST_REWORK_2026_11_14.md).
+**Spec:** [Vollständige Änderungsliste L01–L25](../../tasks/PLAYTEST_REWORK_2026_11_14.md).
 
-**Status am 14.11.2026:** Nur geplant. Alle Pakete offen. Vorhandene frühe Quellkandidaten zählen nicht als Paketabschluss. Keine Laufzeitprüfung, kein Build und keine Spielstandänderung im Planungsauftrag.
+**Status am 14.11.2026:** Geplant und durch ein Review ergänzt; Umsetzung beauftragt, noch kein Paket abgeschlossen. Vorhandene frühe Quellkandidaten zählen nicht als Paketabschluss. Der Paketstand steht am Ende dieses Dokuments.
 
 ## Globale Grenzen
 
-- Aktuelle Nutzeranweisung: **„Erst mal nur planen, noch nichts umsetzen.“**
+- Nutzeranweisungen vom 14.11.2026 in dieser Reihenfolge: „Erst mal nur planen, noch nichts umsetzen“, dann Review-Funde einarbeiten, dann den Spielcode ändern und das Spiel weiter optimieren und spielbarer machen. Maßgeblich ist die letzte Anweisung; die Paketreihenfolge dieses Plans bleibt.
+- Nutzerhinweis vom 14.11.2026: `AGENTS.md`, CODEX_RULES und ältere Contracts können veraltet und überladen sein. Sie sind Hintergrund, keine Vorschrift; im Zweifel gilt der tatsächliche Code.
 - Vor späteren Änderungen `AGENTS.md`, PROJECT_BRIEF, ARCHITECTURE, CODEX_RULES, IMPLEMENTATION_STATUS und die Paketcontracts auf der gewählten Basis lesen.
 - Nicht auf `main` oder ungeprüft auf einem alten Taskbranch implementieren. AP0 legt den aktuellen Integrationsstand fest; vorhandenes fremdes WIP bleibt erhalten.
 - Keine zweite Mission-, Unit-, Lager-, Platz-, Reise- oder Sichtwahrheit in UI/Visuals. Registries sind Lookup, keine versteckten Mutatoren.
@@ -28,6 +29,7 @@
 - Neue oder stark überarbeitete HTML-Reports folgen dem HTML-Workbench-Contract. Dieser Auftrag erzeugt nur Markdown.
 - Kein neues Gesamtraumkampfsystem, keine neue strategische Kriegs-KI oder Wirtschaft als Nebenprodukt des Einzelgefechtmenüs. Fehlende Voraussetzungen separat ausweisen.
 - Ein späterer Export/eine EXE ist ein eigener Arbeitsschritt, kein Paketabschluss dieses Plans.
+- Abgrenzung zur parallelen Grafik-Überarbeitung nach dem gleichnamigen Abschnitt der Masterliste: keine Shader-, Modell-, Material- oder Assetänderungen in diesem Strang; geteilte Dateien nur nach Eintrag in der Abstimmungsnotiz.
 
 ## Prüfstellen mit besonderem Risiko
 
@@ -43,18 +45,18 @@ Reihenfolge innerhalb dieses Vorhabens; andere Projektaufträge werden dadurch n
 
 | Paket | Ergebnis | Voraussetzung | Listenpunkte |
 | --- | --- | --- | --- |
-| AP0 | Verbindliche Ausgangsbasis, Repros und Performancebaseline | keine | querschnittlich, L15 |
-| AP1 | Verlässliche Klickflächen und dauerhaft offene Menüs | AP0 | L04, L16 |
+| AP0 | Verbindliche Ausgangsbasis, Repros und Performancebaseline | keine | querschnittlich, L15, L25 |
+| AP1 | Verlässliche Klickflächen und dauerhaft offene Menüs | AP0 | L04, L16, Grundregeln L24 |
 | AP2 | Sichtbarer, korrekter Datapad-Upload auf gültigem Heimstand | AP0, AP1; voller Ausflug nach AP5/AP9 | L01 |
 | AP3a / AP3b | Direkte Boden- / Weltraumgefechte als schneller Prüfweg | AP0, AP1 | L17 |
-| AP4 | Gemeinsames Basis-/Schiffslager und Truppbedienung | AP1, Upload-/Bestandskern aus AP2 | L05, L09 |
-| AP5 | Autoritative Besatzungsplätze und Auf-/Absitzregeln | AP0; AP3a für Bodenabnahme | L03, L07, L08 |
+| AP4 | Gemeinsames Basis-/Schiffslager und Truppbedienung | AP1, Upload-/Bestandskern aus AP2 | L05, L09, L24 |
+| AP5 | Autoritative Besatzungsplätze und Auf-/Absitzregeln | AP0; AP3a für Bodenabnahme | L03, L07, L08, L24 |
 | AP6 | Kompaktes Flugdeck auf derselben echten Basis | AP4, AP5 | L06, L07, L09, L03 |
-| AP7 | Sternkartenbedienung: ansehen, auswählen, ausdrücklich reisen | AP1 | L20, L21, L22 |
+| AP7 | Sternkartenbedienung: ansehen, auswählen, ausdrücklich reisen | AP1 | L20, L21, L22, L24 |
 | AP8 | Teambezogene Erkundung und Sichtschutz auf allen Karten | AP7; AP3a oder isolierte Szenen als Prüfweg | L12, L21, Suchanteil L11 |
 | AP9a / AP9b | Echte Kartenrand-/OM-Übergänge, dann Warpdarstellung | AP5, AP7, AP8 | L02, L23, Automatikgrenze L22 |
 | AP10 | Verständliche Sprechblasen und hilfreiche Hoverinfos | AP1, AP5, AP6, AP8 | L10, L13 |
-| AP11 | Editorübersicht und verständliche Höhenbearbeitung | AP0 | Grundbedienung L18 |
+| AP11 | Editorübersicht und verständliche Höhenbearbeitung | AP0; „Karte testen“ erst nach AP3a | Grundbedienung L18 |
 | AP12 | Verlässliche Mauern, Assetmaßstäbe und Vergleichsobjekte | AP11 | übriges L18 |
 | AP13 | Umschaltbare Dächer mit geschütztem Innenraumwissen | AP8, AP11, AP12 | L19 |
 | AP14a / b / c | Absturzstelle / Skirmish-Betten / schwere Rüstung | AP8, AP12; Betten zusätzlich AP13 | L11, L14 |
@@ -108,7 +110,7 @@ Den Profilpfad dabei nach dem vorhandenen Testwerkzeug isolieren; echte Kampagne
 
 - [ ] Reale Pointertests für Mitte, vier Randbereiche und Ecken von Annahme-/X-Buttons ergänzen, einschließlich überlagernder Controls und periodischem Refresh.
 - [ ] Den tatsächlichen Eingabeempfänger korrigieren; sichtbare Fläche und Hitfläche müssen zusammenpassen. Nicht nur `pressed.emit()` testen.
-- [ ] Plus-/Minus-Schalter für Basismenüs einführen; Fokus-/Mauswechsel und Panelrefresh dürfen ein angeheftetes Menü nicht schließen.
+- [ ] Auf-/Zuklapp-Schalter für Basismenüs einführen: Pfeil (▸/▾), Mindestklickfläche nach L04, ganze Buttonfläche, wenn der Navigationsbutton keine eigene Aktion hat (L16 [R]). Fokus-/Mauswechsel und Panelrefresh dürfen ein aufgeklapptes Menü nicht schließen; mehrere Menüs gleichzeitig offen; Zustand als Benutzereinstellung.
 - [ ] Bei 1280×720, 1920×1080 und 3440×1440 prüfen: keine verdeckten Aktionen, kein ungewollter Weltbefehl beim UI-Klick und keine Klickdurchleitung beim Schließen.
 
 **Abnahme:** ein Klick löst genau eine Aktion aus; Menüs bleiben bis zum expliziten Schließen offen. **Risiko:** z-Reihenfolge, Geschwisterreihenfolge und Inputfilter nicht verwechseln. Ausgangstest auf R2: `scripts/tests/job_app_safe_area_verifier.gd`.
@@ -164,7 +166,7 @@ Den Profilpfad dabei nach dem vorhandenen Testwerkzeug isolieren; echte Kampagne
 - [ ] Pilot, Cutlass-Turm und zunächst vier Cutlass-Passagierplätze anhand der tatsächlichen Schiffsdefinition modellieren; Truppzugehörigkeit getrennt erhalten.
 - [ ] Drag auf einen Platz beauftragt einen wirklichen Weg und reserviert gültig. „An Bord“ erst nach bestätigter Ankunft; eine Person belegt nie zwei Plätze oder Schiffe.
 - [ ] Buccaneer-Cockpit und Cutlass-Heckklappe als passende Ein-/Ausstiegsanker prüfen; Hull-Footprint, freie Ausstiegsfelder und Navigation verwenden dieselbe Geometrie.
-- [ ] „Absitzen“ betrifft Passagiere; Funktionsbesatzung bleibt. „Aufstehen“ gibt Pilot-/Turmplatz frei, steigt nicht sofort aus und macht die Person für das folgende Absitzen verfügbar. Den Fall vollständig belegter Passagierplätze vorher entscheiden.
+- [ ] „Absitzen“ betrifft Passagiere; Funktionsbesatzung bleibt. Hat ein Schiff keine Passagierplätze, sitzt der Pilot ab. „Platz verlassen“ (früher „Aufstehen“) gibt Pilot-/Turmplatz frei, steigt nicht sofort aus und macht die Person für das folgende Absitzen verfügbar; Hauptweg ist Ziehen auf einen Passagierplatz, ein belegter Platz bedeutet Tausch. Der Rechtsklickfall bei vollen Passagierplätzen folgt der offenen Entscheidung der Masterliste.
 - [ ] Nach bestätigtem Ausstieg den vorhandenen Rechtsklick-/Fireteambefehl ohne erneute Auswahl-/Phasenblockade annehmen können.
 - [ ] Doppelklick/Dragwiederholung, voller Platz, Tod/Ausfall, Schiffwechsel und Save/Continue dürfen keine Doppelbelegung oder Phantomcrew erzeugen. Bestehende Autoritäts-/Multiplayergrenzen erhalten.
 
@@ -300,9 +302,34 @@ hier kein Kompatibilitäts- oder Migrationsgate.
 - [ ] Median/P95/P99, lange Frames und Panelöffnungszeiten vorher/nachher ausweisen. CPU-Beschleunigung nicht ohne native Messung als FPS-/GPU-Gewinn bezeichnen; Zielbudget nach AP0 festlegen, keine unbelegte Zahl versprechen.
 - [ ] Kampagnendurchlauf: Vorbereitung/Lager → Plätze → sichtbares Aufsitzen → Sternkartenziel wählen → ausdrücklicher Sprung → Anflug/Erkundung → Datapad → Absitzen-/Aufsitzregeln → OM an/aus → Heimatlandung → Upload → Save/Continue.
 - [ ] Boden- und Raum-Einzelgefecht mit allen angebotenen Startseiten starten und neu starten; Editorhöhe/Mauer/Dach speichern und neu laden; Skirmishbetten und schwere Rüstung nativ prüfen.
-- [ ] L01–L23 samt Unterpunkten einzeln bewerten: umgesetzt, technisch geprüft, native Abnahme offen oder konkret blockiert. Keine Gesamtfreigabe nur aus der Anzahl grüner Assertions ableiten.
+- [ ] L01–L25 samt Unterpunkten und [R]-Punkten einzeln bewerten: umgesetzt, technisch geprüft, native Abnahme offen oder konkret blockiert. Keine Gesamtfreigabe nur aus der Anzahl grüner Assertions ableiten.
 
 **Abnahme:** vollständige Zuordnung der Ergebnisse zu den Anforderungen, nachvollziehbare Restpunkte und messbare Aussage zur Performance. Kein zusätzlicher Featureumfang und kein automatischer Release.
+
+## Review-Nachtrag vom 14.11.2026 – Zuordnung der [R]-Punkte
+
+Die [R]-Punkte der Masterliste bleiben bei ihrer L-Nummer und damit beim bereits zugeordneten Paket. Die Tabelle nennt je Paket, was dadurch hinzukommt.
+
+| Paket | Zusätzliche [R]-Punkte |
+| --- | --- |
+| AP0 | Glossar L25 gegen Code und Anzeigetexte prüfen; Liste der von Beginn an bekannten Orte; Vorher-Messung vor jeder Codeänderung (L15) |
+| AP1 | Mindestklickfläche, Esc schließt oberstes Fenster (L04); Pfeilschalter, mehrere Menüs, Zustand als Einstellung (L16); Ziehschwelle, Abbruch und Zielhervorhebung als gemeinsame Grundlage (L24) |
+| AP2 | Sitzende Pilotin gilt als lokal erreichbar; Datapad per Ziehen abgeben; Missionsgegenstand schützen; Sperrgrund nennen (L01) |
+| AP3a / AP3b | Startseite per Ziehen auf genordeter Vorschau; Gegner und Endbedingung anzeigen; Benennung im Hauptmenü (L17) |
+| AP4 | Truppverwaltung per Ziehen, Gegenstand auf Personenkarte, Ortsbindung der Übertragung, Buttons erst nach Zielhervorhebung entfernen (L05); Layout als Einstellung (L09); Stapel teilen, Mehrfachauswahl (L24) |
+| AP5 | Automatische Auswahl nach Absitzen, Aufsitzen per Rechtsklick mit bisherigem Platz, Startregel bei laufenden Personen (L03); Plätze aus der Schiffsdefinition, Tausch (L07); Platz verlassen, Schiff ohne Passagierplätze, einzeln absitzen per Herausziehen (L08) |
+| AP6 | Offene Dächer im Flugdeck, Platzwahl beim Ziehen aufs Schiff, Trupp größer als Platzzahl, Anzeige „unterwegs“ (L06); Eignungshervorhebung beim Ziehen (L07) |
+| AP7 | Auswahl klappt nichts zu, Dropship klären (L20); L21 nicht vor L22, Infozeile für unbekannte Karte (L21); Ziel per Ziehen vorwählen, gesperrter Sprungbutton mit Grund, Rücknahme (L22) |
+| AP8 | Wegfindungs- und Routenleck, Hover über Schwarz, bekannte Orte, Erkundung im Spielstand (L12); Suchgebiet und Markerwechsel (L11) |
+| AP9a / AP9b | Definition „freie Route“, zurückgelassene Personen, Anflug auf unbekannte Karte, Richtungsgeste, Beschleunigen (L02, L23) |
+| AP10 | Sprecher ohne Fireteamkarte, Reihung und Verlauf, Klick auf Sprechblase (L10); Sperrgründe im Hover (L13) |
+| AP11 | Undo/Redo-Tasten, „Karte testen“ (L18) |
+| AP12 | Editorwarnung für Objekte außerhalb ihres Raums und unerreichbare Einstiege (L18) |
+| AP13 | Dach pro Gebäude, Befehl durch geschlossenes Dach, keine Wirkung auf Sicht und Wege (L19) |
+| AP14a / b / c | Spur aus Furche und Trümmern nur nach Sichtung (L11); Beobachtung zur schweren Rüstung einholen (L14); Optik durch den Grafik-Strang |
+| AP15 | Listenaktualisierung nur geänderter Einträge nachmessen (L15); Gesamtbewertung L01–L25 |
+
+Einzige neue Abhängigkeit: „Karte testen“ (AP11) benötigt den Einzelgefechtsstart aus AP3a. Alle übrigen [R]-Punkte ändern die Paketreihenfolge nicht.
 
 ## Statusführung und Abschluss dieses Planungsauftrags
 
@@ -314,7 +341,12 @@ hier kein Kompatibilitäts- oder Migrationsgate.
 | Native Abnahme offen | Technische Prüfung ersetzt kein tatsächliches Bedien-/Gestaltungsurteil |
 | Abgenommen | Zugehörige technische und native Kriterien nachgewiesen |
 
-Dieser Planungsauftrag prüft nur Dokumentation: vollständige Liste, alle
-Paketzuordnungen, Links, Abhängigkeiten, Scope und unveränderte Produktdateien.
-Er endet mit gespeicherter Masterliste und Arbeitsplan. Umsetzung bleibt bis
-zu einem späteren ausdrücklichen Arbeitsauftrag ausgesetzt.
+Der Planungsauftrag endete mit gespeicherter Masterliste und Arbeitsplan und prüfte nur Dokumentation. Seit dem Umsetzungsauftrag vom 14.11.2026 wird der Stand je Paket hier geführt:
+
+| Paket | Stand | Beleg |
+| --- | --- | --- |
+| AP0 | Teilweise erledigt: Ausgangsbasis festgestellt (`main` `03cdccc51` enthält den gespielten R2-Stand `8571be32c` plus drei Doku-Commits), eigener Worktree angelegt, Prüfskripte laufen headless mit isoliertem Profil. Offen: Repro-Matrix, Performancebaseline, Glossarabgleich | Branch `task/playtest-rework-impl-20261114` |
+| AP1 | Technisch geprüft, native Abnahme offen: Hinweiskarte, Kommando-Dock und Navigationsspalte verdecken keine Schaltflächen mehr; „Konsole aufsuchen“ liegt nicht mehr unter dem Dock; Untermenüs bleiben offen und klappen nur über den Pfeilschalter. Offen: Mindestgröße (vier zu kleine Flächen gefunden), Esc, Ziehschwelle; das im Playtest gemeldete X-/Annahme-Problem ließ sich headless nicht nachstellen | `scripts/tests/playtest_hit_area_audit_verifier.gd`: 4320 Prüfpunkte in drei Auflösungen, 0 Fehler (vorher 116 Fehler an 30 Schaltflächen); Commit `da563688b` auf `task/playtest-rework-impl-20261114` |
+| AP2–AP15 | Geplant / offen | – |
+
+Bereits vor diesen Änderungen auf `main` rot (nicht durch AP1 verursacht, per Gegenprobe bestätigt): `character_navigation_equipment_verifier.gd` (4 Fehler), `flugdeck_layout_verifier.gd` (1 Fehler), `campaign_tutorial_presenter_test.gd` (7 Fehler).

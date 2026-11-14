@@ -2,7 +2,7 @@
 
 ### Playtest-Rückmeldungen: Reihenfolge geplant — 14.11.2026
 
-Vollständige Liste mit 23 Punkten:
+Vollständige Liste mit 25 Punkten (L24–L25 aus dem Review ergänzt):
 `docs/tasks/PLAYTEST_REWORK_2026_11_14.md`.
 Paketplan AP0–AP15:
 `docs/superpowers/plans/2026-11-14-playtest-rework.md`.
