@@ -11,6 +11,13 @@ func use_ground_painted_shadows() -> void:
 	for child in get_children():
 		if child is MeshInstance3D:child.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
+func use_raised_deck_shadows() -> void:
+	# Grafikpass R2: a low raised deck. Only the two solid deck bodies cast;
+	# the thin inlays and markings above them never do (self-shadow bands).
+	for child in get_children():
+		if child is MeshInstance3D:
+			child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if String(child.name) == "ChamferedDeck" else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
 func build(center: Vector2, size: Vector2, designation: String, access_side: float = 1.0) -> Rect2:
 	position = Vector3(center.x,0.0,center.y)
 	footprint = Rect2(center-size*0.5,size)

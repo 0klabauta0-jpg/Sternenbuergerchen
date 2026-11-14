@@ -18,7 +18,14 @@ func _check(ok: bool, label: String) -> void:
 
 func _run() -> void:
 	var paths: PackedStringArray = CATALOG.all_paths()
-	_check(paths.size() == 17, "all current authored productive ground/base starts are represented")
+	_check(paths.size() == 18 and paths.has("res://maps/windbruch_outpost.json"), "all current authored productive ground/base starts including Windbruch are represented")
+	# Integration runs may select one actual changed map; default still covers all.
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--map="):
+			var selected: String = argument.trim_prefix("--map=")
+			_check(paths.has(selected), "selected map belongs to the productive catalog")
+			paths = PackedStringArray([selected]) if paths.has(selected) else PackedStringArray()
+			break
 	for path in paths:
 		await _verify(path)
 	print("REVIEW_MAP_PREPARATION passed=%d failed=%d" % [passed, failed])

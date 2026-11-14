@@ -1,0 +1,87 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+BODY_PROFILE { "ok": true, "bounds": [P: (-5.878891, 0.0, -5.499999), S: (11.75778, 4.119763, 11.0)], "model_scale": 0.22, "cell_size": 1.0, "yaw_degrees": 315.0, "model_id": "buccaneer", "asset_id": "buccaneer_01" }
+PASS actual imported Buccaneer provides physical body profile
+BODY_FOOTPRINT_DIAGNOSTIC { "center": (19, 46), "height": 7.0, "world": (138.4211, 2618.79), "footprint": [(16, 48), (17, 46), (17, 47), (17, 48), (18, 44), (18, 45), (18, 46), (18, 47), (18, 48), (19, 44), (19, 45), (19, 46), (19, 47), (19, 48), (20, 44), (20, 45), (20, 46), (20, 47), (20, 48), (21, 44), (21, 45), (21, 46), (22, 44)], "bad": [] }
+PASS real mesa admits full existing Buccaneer footprint
+PASS mixed-height physical footprint rejected
+PASS blocked edge physical footprint rejected
+PASS occupied landing rejected
+PASS exact living mesh owns saved cap
+PASS editor height change restores ordinary cap while source lives
+PASS freed cap owner restores normal ground fallback
+PASS freed exact mesh produces an actual replacement Hex cap
+PASS real Root binds real runtime adapter
+PASS foreign actual adapter rejects buy
+PASS foreign actual adapter rejects refuel
+PASS foreign actual adapter rejects repair
+PASS foreign actual adapter rejects sell
+PASS foreign actual adapter rejects cargo
+PASS offpad actual adapter rejects buy
+PASS offpad actual adapter rejects refuel
+PASS offpad actual adapter rejects repair
+PASS offpad actual adapter rejects sell
+PASS offpad actual adapter rejects cargo
+PASS all denied services preserve credits fuel inventory hull
+PASS UI location cannot spoof actual service
+PASS real buy delivers to persistent local lift
+PASS real local adapter refuels
+PASS real Root repairs damaged hull through supply command
+PASS repair receipt is idempotent
+PASS real adapter starts local cargo job
+PASS real timed cargo commits inventory movement
+PASS real adapter starts ship-to-lift unloading
+PASS unloading conserves quantities and empties ship
+PASS actual adapter sells local stored ore once with correct credits
+PASS real adapter projects committed lift quantity and transfer state
+PASS Polisa job cannot animate unrelated ground lift
+PASS repair and cargo preserve physical ship location
+PASS new cargo container and repair receipts survive ordinary restore
+PASS surface offpad real recovery clock stays stopped
+PASS surface local service advances production recovery clock
+PASS surface repair completion never teleports craft home
+PASS grounded offpad real recovery clock stays stopped
+PASS grounded local service advances production recovery clock
+PASS grounded repair completion never teleports craft home
+PASS existing Polisa surface service recovery remains usable
+PASS existing satellite NPC trade remains available to nearby parked ship
+PASS satellite NPC trade does not invent refuel service
+PASS satellite NPC cannot remotely sell from distant ship
+PASS presenter enables three authorized local service buttons
+PASS three real button signals submit correct owner requests
+PASS repair-only pad cannot enable trade fuel or cargo
+PASS section gate keeps ground cargo buttons hidden at home
+PASS station_outpost_64x64 station_0_0 four closed outer corners
+PASS station_outpost_64x64 station_0_0 four real passable single-door cells
+PASS station_outpost_64x64 station_0_0 four rooms connected through actual door cells
+PASS station_outpost_64x64 existing two-cell mission breach preserved
+PASS station_outpost_192x192 station_0_0 four closed outer corners
+PASS station_outpost_192x192 station_0_0 four real passable single-door cells
+PASS station_outpost_192x192 station_0_0 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_1_0 four closed outer corners
+PASS station_outpost_192x192 station_1_0 four real passable single-door cells
+PASS station_outpost_192x192 station_1_0 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_2_0 four closed outer corners
+PASS station_outpost_192x192 station_2_0 four real passable single-door cells
+PASS station_outpost_192x192 station_2_0 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_0_1 four closed outer corners
+PASS station_outpost_192x192 station_0_1 four real passable single-door cells
+PASS station_outpost_192x192 station_0_1 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_1_1 four closed outer corners
+PASS station_outpost_192x192 station_1_1 four real passable single-door cells
+PASS station_outpost_192x192 station_1_1 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_2_1 four closed outer corners
+PASS station_outpost_192x192 station_2_1 four real passable single-door cells
+PASS station_outpost_192x192 station_2_1 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_0_2 four closed outer corners
+PASS station_outpost_192x192 station_0_2 four real passable single-door cells
+PASS station_outpost_192x192 station_0_2 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_1_2 four closed outer corners
+PASS station_outpost_192x192 station_1_2 four real passable single-door cells
+PASS station_outpost_192x192 station_1_2 four rooms connected through actual door cells
+PASS station_outpost_192x192 station_2_2 four closed outer corners
+PASS station_outpost_192x192 station_2_2 four real passable single-door cells
+PASS station_outpost_192x192 station_2_2 four rooms connected through actual door cells
+PASS station_outpost_192x192 existing two-cell mission breach preserved
+MAP_SERVICES_VERIFIER passed=81 failed=0

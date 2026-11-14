@@ -1,0 +1,136 @@
+{
+  "passed": true,
+  "models": [
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_barrel_cluster.glb",
+      "sha256": "496eb1acf40edadadda4ab2e6b53501855dfa844644c0e2c8929d0abb2525d80",
+      "vertices": 1016,
+      "triangles": 564,
+      "surfaces": 5,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_bunker_entrance.glb",
+      "sha256": "de7febd907cc963a7d3336738e5b95834cb82911f9f50209b48dd9b8a243f005",
+      "vertices": 2136,
+      "triangles": 1000,
+      "surfaces": 10,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_comm_dish.glb",
+      "sha256": "dd891c1e32f7ab87d3df2bd35f4dc5626373ba5f85181eaf11592d331af895da",
+      "vertices": 2204,
+      "triangles": 1124,
+      "surfaces": 14,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_container_hall.glb",
+      "sha256": "2a67ca026a419bd748f137906994d57c77d3ca98645c3aa7daaf42df8e690245",
+      "vertices": 18548,
+      "triangles": 8572,
+      "surfaces": 15,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_container_orange.glb",
+      "sha256": "e33e7b4e1eae47fddc014f040f4667c1f25c6bb16a29788bfcd5349084210879",
+      "vertices": 1824,
+      "triangles": 836,
+      "surfaces": 2,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_container_petrol.glb",
+      "sha256": "783126ba58442ab799366e0c4d6ba6d7966a18bbf4f5512e5d6d555caef3bdfe",
+      "vertices": 1824,
+      "triangles": 836,
+      "surfaces": 2,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_container_stack.glb",
+      "sha256": "03dfa35fa824092f2764bf1941ecc468fcb7f62f0df978753287b1fcffc9d39a",
+      "vertices": 5664,
+      "triangles": 2596,
+      "surfaces": 4,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_crate_cluster.glb",
+      "sha256": "25e3dab5d6fb672b128b6ff0f5b6db769e8e54418ece2b28a4f545126169d2e9",
+      "vertices": 844,
+      "triangles": 428,
+      "surfaces": 6,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_hull_hab_long.glb",
+      "sha256": "d3b97c7bcd55dd1adffab5698455893d9e4a1d8ac6ebe5f0682c42e16834ab47",
+      "vertices": 4568,
+      "triangles": 2288,
+      "surfaces": 15,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_power_unit.glb",
+      "sha256": "6c4c7e7b13bdeafe2806947a0dd0573e10d70efc9f899884072d67bd3442f06c",
+      "vertices": 1884,
+      "triangles": 936,
+      "surfaces": 10,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_solar_array.glb",
+      "sha256": "4bc1a6af73fc6c2ba263e6a1b2f6562f6a935a60e63103e2f4cbb937797fd838",
+      "vertices": 1296,
+      "triangles": 600,
+      "surfaces": 5,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_wreck_engine.glb",
+      "sha256": "5e962ff5c6d8a1b943e302728bf1783b23542b1a75c236ad36a347d7e3177da6",
+      "vertices": 752,
+      "triangles": 408,
+      "surfaces": 5,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    },
+    {
+      "file": "Assets/curated/windbruch_kit_20261114/wb_wreck_wing.glb",
+      "sha256": "8d7da96cdd6da8dc0e2d9e39c95a66fc2a0b734e7223157528bf2eca7460c0a6",
+      "vertices": 1364,
+      "triangles": 664,
+      "surfaces": 6,
+      "finite_attributes": true,
+      "degenerate_triangles": 0,
+      "external_buffers": []
+    }
+  ],
+  "scope": "Source glTF geometry only; imported placement and renderer checked separately"
+}

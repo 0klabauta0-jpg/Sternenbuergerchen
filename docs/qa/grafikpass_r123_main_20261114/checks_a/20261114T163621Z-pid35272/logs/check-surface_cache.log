@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS: fixture exercises the actual arid road route
+PASS: live view has a real built road mesh
+PASS: correct flat road/ramp road/nonroad ramp/pad support (3, 2)
+PASS: world surface includes only the visual support (3, 2)
+PASS: actual actor projection stands above its surface (3, 2)
+PASS: actual asphalt triangles agree with actor support (3, 2)
+PASS: drawn hex contour clears the actual raised road triangles (3, 2)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (7, 2)
+PASS: world surface includes only the visual support (7, 2)
+PASS: actual actor projection stands above its surface (7, 2)
+PASS: actual asphalt triangles agree with actor support (7, 2)
+PASS: drawn hex contour clears the actual raised road triangles (7, 2)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (7, 5)
+PASS: world surface includes only the visual support (7, 5)
+PASS: actual actor projection stands above its surface (7, 5)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (3, 6)
+PASS: world surface includes only the visual support (3, 6)
+PASS: actual actor projection stands above its surface (3, 6)
+PASS: pad contour clears actual raised pad geometry
+PASS: both regional chunks and actual ground shader materials are present
+PASS: direct ground keeps the faint road shoulder
+PASS: actual resource prefill finishes both chunks
+PASS: prefill builds no separate live road object
+PASS: receiving view restores actual cached geometry without rebuilding chunks
+PASS: restored ground retains the same faint road shoulder
+PASS: actual cached ground uniforms and surface-mask bytes equal the direct view
+PASS: restored chunk and live grid geometry equal the direct view
+PASS: receiving view builds the identical road mesh
+PASS: live view has a real built road mesh
+PASS: correct flat road/ramp road/nonroad ramp/pad support (3, 2)
+PASS: world surface includes only the visual support (3, 2)
+PASS: actual actor projection stands above its surface (3, 2)
+PASS: actual asphalt triangles agree with actor support (3, 2)
+PASS: drawn hex contour clears the actual raised road triangles (3, 2)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (7, 2)
+PASS: world surface includes only the visual support (7, 2)
+PASS: actual actor projection stands above its surface (7, 2)
+PASS: actual asphalt triangles agree with actor support (7, 2)
+PASS: drawn hex contour clears the actual raised road triangles (7, 2)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (7, 5)
+PASS: world surface includes only the visual support (7, 5)
+PASS: actual actor projection stands above its surface (7, 5)
+PASS: correct flat road/ramp road/nonroad ramp/pad support (3, 6)
+PASS: world surface includes only the visual support (3, 6)
+PASS: actual actor projection stands above its surface (3, 6)
+PASS: pad contour clears actual raised pad geometry
+PASS: all visual builds and reads preserve terrain height, ramps, walkability, LOS and registry revision
+GRAFIKPASS_R123_SURFACE {"failed":0,"passed":47}

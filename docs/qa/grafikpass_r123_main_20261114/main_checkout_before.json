@@ -1,0 +1,15 @@
+{
+  "head": "9b52e0781f58f27f58d3300cef9eca13cafdd48b",
+  "branch": "task/playtest-rework-plan-20261114",
+  "index_sha256": "e4f764fb1a3334b9d97934152f75c82aefa1eca366998641b29ca45e514358be",
+  "modified_file_sha256": {
+    "docs/tasks/PLAYTEST_2026_11_10_campaign_world_inventory.md": "3b81b714254af50c792550b1ab8e73e1a99ea929dcdb5b32841e741b6cde98bd",
+    "scripts/meta/explorable_homebase.gd": "48b82f9d31821a54fed29f86b6db61133db7fccae69efd0f4b86a790b7f1dbad",
+    "scripts/terrain/frontier_art_geology.gd": "dff4be73b02617482f4c1c38f2166c7fd50e95b6f0333aa0bbc9d46f8b8e320a",
+    "scripts/terrain/terrain_map_3d_view.gd": "97e9d9ed73f1ca81fa3334fe1fcba4d9ac8fd420911a0e643c79443f6202c4c9",
+    "scripts/tests/mission_test_setup.gd": "6d53d4fe5ca4949728a33fca50301c66774e66ff4d48bc2ef327bb9c41c0139a",
+    "shaders/terrain/frontier_ground.gdshader": "dd09387c71ca867e3c79b8a7286c66089682e438cb8627c24ef9627c45f5205c"
+  },
+  "untracked_count": 102105,
+  "untracked_inventory_stat_sha256": "06411ea76b87cc364d75e9eea86c3c624d285f076e1d1f802057fe66f0011f61"
+}

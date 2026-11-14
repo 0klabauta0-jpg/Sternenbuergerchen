@@ -2,6 +2,11 @@ extends RefCounted
 ## Reuses the existing reviewed closed exterior family. Cold visual build only.
 const SHELL = preload("res://scripts/terrain/frontier_closed_buildings.gd")
 const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
+## Grafikpass R2 (user decision 14.11.2026): landing pads are low raised
+## objects again, not ground paint. Visual height only; the view lifts grid
+## lines, units and craft on the covered cells by the same amount. Terrain
+## height, walkability and landing rules are unchanged.
+const PAD_DECK_TOP := 0.12
 static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 	var root:=Node3D.new(); root.name="PlaceReferenceDressing"; parent.add_child(root)
 	var blockers: Array=[]
@@ -30,9 +35,8 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		var pad: Node3D=PAD.new(); root.add_child(pad)
 		var center: Array=spec.get("center",[0,0]); var size: Array=spec.get("size",[5,4])
 		pad.call("build",Vector2(float(center[0]),float(center[1])),Vector2(float(size[0]),float(size[1])),String(spec.get("name","PAD")))
-		# Ground-painted apron: no raised platform or invented navigation surface.
-		pad.scale.y=.1; pad.position.y=.025
-		pad.call("use_ground_painted_shadows")
+		pad.scale.y=PAD_DECK_TOP/PAD.DECK_HEIGHT; pad.position.y=0.0
+		pad.call("use_raised_deck_shadows")
 	for spec: Dictionary in presentation.get("cargo_lifts",[]):
 		var lift=load("res://scripts/terrain/polisa_cargo_lift_visual.gd").new()
 		lift.name=String(spec.get("id","CargoLift"));root.add_child(lift)

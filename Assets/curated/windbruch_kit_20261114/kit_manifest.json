@@ -1,0 +1,97 @@
+{
+ "unit": "1.0 = one hex cell; person 0.6",
+ "front": "-Y in Blender, +Z in glTF",
+ "assets": {
+  "wb_hull_hab_long": {
+   "file": "wb_hull_hab_long.glb",
+   "triangles": 2288,
+   "size_x": 3.43,
+   "size_z_depth": 2.45,
+   "height": 1.79
+  },
+  "wb_container_hall": {
+   "file": "wb_container_hall.glb",
+   "triangles": 8572,
+   "size_x": 5.313,
+   "size_z_depth": 4.31,
+   "height": 2.408
+  },
+  "wb_comm_dish": {
+   "file": "wb_comm_dish.glb",
+   "triangles": 1124,
+   "size_x": 2.881,
+   "size_z_depth": 2.327,
+   "height": 3.24
+  },
+  "wb_bunker_entrance": {
+   "file": "wb_bunker_entrance.glb",
+   "triangles": 1000,
+   "size_x": 2.9,
+   "size_z_depth": 2.614,
+   "height": 2.025
+  },
+  "wb_container_orange": {
+   "file": "wb_container_orange.glb",
+   "triangles": 836,
+   "size_x": 2.074,
+   "size_z_depth": 0.888,
+   "height": 0.85
+  },
+  "wb_container_petrol": {
+   "file": "wb_container_petrol.glb",
+   "triangles": 836,
+   "size_x": 2.074,
+   "size_z_depth": 0.888,
+   "height": 0.85
+  },
+  "wb_container_stack": {
+   "file": "wb_container_stack.glb",
+   "triangles": 2596,
+   "size_x": 2.206,
+   "size_z_depth": 2.217,
+   "height": 1.7
+  },
+  "wb_crate_cluster": {
+   "file": "wb_crate_cluster.glb",
+   "triangles": 428,
+   "size_x": 0.987,
+   "size_z_depth": 0.869,
+   "height": 0.653
+  },
+  "wb_barrel_cluster": {
+   "file": "wb_barrel_cluster.glb",
+   "triangles": 564,
+   "size_x": 1.185,
+   "size_z_depth": 0.783,
+   "height": 0.38
+  },
+  "wb_power_unit": {
+   "file": "wb_power_unit.glb",
+   "triangles": 936,
+   "size_x": 1.88,
+   "size_z_depth": 1.21,
+   "height": 1.25
+  },
+  "wb_solar_array": {
+   "file": "wb_solar_array.glb",
+   "triangles": 600,
+   "size_x": 2.6,
+   "size_z_depth": 1.15,
+   "height": 0.801
+  },
+  "wb_wreck_wing": {
+   "file": "wb_wreck_wing.glb",
+   "triangles": 664,
+   "size_x": 4.691,
+   "size_z_depth": 2.123,
+   "height": 0.95
+  },
+  "wb_wreck_engine": {
+   "file": "wb_wreck_engine.glb",
+   "triangles": 408,
+   "size_x": 2.212,
+   "size_z_depth": 1.318,
+   "height": 1.02
+  }
+ }
+}

@@ -225,10 +225,12 @@ func _path(points: Array,width: float,service_lane: bool = false,id: String = "p
 		curve.add_point(points[index],-tangent,tangent)
 	var samples := curve.get_baked_points()
 	_paths.append({"id":id,"points":points.duplicate(),"samples":samples,"width":width,"service_lane":service_lane})
-	# Warm dusty shoulders merge with the red soil; the deck stays matte and low.
-	_ribbon(samples,width+0.14,0.007,"b47b53")
-	_ribbon(samples,width,0.010,"686f63")
-	_ribbon(samples,width-0.10,ACCESS.PAVING_HEIGHT,"747c6c")
+	# Grafikpass R2: tarred road. Pale kerb, worn edge line, dark matte asphalt;
+	# same three joined layers and heights as before, colours match
+	# frontier_road_deck.gd so authored and cell-built roads read as one family.
+	_ribbon(samples,width+0.14,0.007,"a59f90")
+	_ribbon(samples,width,0.010,"d6cba0")
+	_ribbon(samples,width-0.10,ACCESS.PAVING_HEIGHT,"46484c")
 
 func _add_path_guides() -> void:
 	for path in _paths:

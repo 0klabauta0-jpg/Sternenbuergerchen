@@ -14,6 +14,8 @@ const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings
 const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
 const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
 const REFERENCE_DRESSING = preload("res://scripts/terrain/frontier_reference_dressing.gd")
+const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
+const PLACE_DRESSING = preload("res://scripts/terrain/place_reference_dressing.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/"
 const MODEL_SCALE := 0.35
 const OBJECT_HEIGHT_STEP := 0.42
@@ -43,6 +45,12 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 	# The original pad centres retain all existing access and contact-wear anchors.
 	_flat_apron(root, profile, Vector2(6.5, 10.9), Vector2(5.0, 4.4), "01")
 	_flat_apron(root, profile, Vector2(19.2, 11.8), Vector2(4.2, 4.1), "02")
+	# Grafikpass R2: the aprons carry a low raised deck object again. The
+	# painted apron below keeps every existing anchor, rect and wear contract.
+	var pad_decks: Array = []
+	for spec in [[Vector2(6.5, 10.9), Vector2(5.0, 4.4), "01", 1.0], [Vector2(19.2, 11.8), Vector2(4.2, 4.1), "02", -1.0]]:
+		_raised_deck(root, spec[0], spec[1], String(spec[2]), float(spec[3]))
+		pad_decks.append({"center": [spec[0].x, spec[0].y], "size": [spec[1].x, spec[1].y]})
 	anchors["pad01"] = ACCESS.pad(Vector2(6.5, 10.9), Vector2(5.0, 4.4), 1.0)
 	anchors["pad02"] = ACCESS.pad(Vector2(19.2, 11.8), Vector2(4.2, 4.1), -1.0)
 	_solar_array(root, blockers)
@@ -121,6 +129,7 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 		"assets": assets,
 		"layout_id": LAYOUT_ID,
 		"grid_size": GRID_SIZE,
+		"pad_decks": pad_decks,
 	}
 	facts["reference_dressing_context"] = _reference_dressing_context(root, blockers, paths)
 	var plant := dressing.find_child("DryAgave", true, false) as MeshInstance3D
@@ -423,6 +432,20 @@ static func _road_ribbon(root: Node3D, material: Material, id: String, points: A
 	instance.material_override = material
 	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(instance)
+
+
+static func _raised_deck(root: Node3D, centre: Vector2, size: Vector2,
+		designation: String, access_side: float) -> void:
+	var apron := root.get_node_or_null("PaintedLandingApron" + designation) as Node3D
+	if apron == null:
+		return
+	var deck: Node3D = PAD.new()
+	deck.name = "RaisedLandingDeck"
+	apron.add_child(deck)
+	deck.call("build", Vector2.ZERO, size, "PAD " + designation, access_side)
+	deck.position = Vector3.ZERO
+	deck.scale.y = PLACE_DRESSING.PAD_DECK_TOP / PAD.DECK_HEIGHT
+	deck.call("use_raised_deck_shadows")
 
 
 static func _flat_apron(root: Node3D, profile, centre: Vector2,

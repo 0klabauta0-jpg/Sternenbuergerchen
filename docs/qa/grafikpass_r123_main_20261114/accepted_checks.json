@@ -1,0 +1,94 @@
+{
+  "passed": 17,
+  "failed": 0,
+  "headless_import_passed": true,
+  "checks": [
+    {
+      "name": "windbruch_content",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "windbruch_navigation",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "hex_surface",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "grid_cache",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "art_profile",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "environment",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "paths",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "building_material",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "station_visual",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "gm01_edge",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "windbruch_prefill",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "campaign_content",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "campaign_chain",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "orbit_locations",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "map_services",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "free_landing",
+      "passed": true,
+      "evidence": "checks_b\\20261114T164232Z-pid69092\\metadata\\report.json"
+    },
+    {
+      "name": "surface_cache_and_fow",
+      "passed": true,
+      "evidence": "captures_b/surface_run.json",
+      "renderer": "Forward+/D3D12",
+      "assertions": 148
+    }
+  ]
+}

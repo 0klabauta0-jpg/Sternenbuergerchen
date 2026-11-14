@@ -1,0 +1,162 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T164209Z-a335a3f3
+PASS normal tactical overview retains legible Hex coverage
+PASS actual imported module station_set_floor_panel
+PASS actual imported module station_set_floor_panel
+PASS station_set_floor_panel row follows cell centers 0.0
+PASS station_set_floor_panel no lateral staircase at seam 0.0
+PASS actual Hex floor footprints have thin continuous seam 0.0
+PASS station_set_floor_panel finite positive native bounds
+PASS actual imported module station_set_wall
+PASS actual imported module station_set_wall
+PASS station_set_wall row follows cell centers 0.0
+PASS station_set_wall no lateral staircase at seam 0.0
+PASS station_set_wall authored wall seam retained 0.0
+PASS station_set_wall original wall perspective is not sheared
+PASS station_set_wall finite positive native bounds
+PASS actual imported module station_set_wall_door
+PASS actual imported module station_set_wall_door
+PASS station_set_wall_door row follows cell centers 0.0
+PASS station_set_wall_door no lateral staircase at seam 0.0
+PASS station_set_wall_door authored wall seam retained 0.0
+PASS station_set_wall_door original wall perspective is not sheared
+PASS station_set_wall_door finite positive native bounds
+PASS actual imported module station_set_floor_panel
+PASS actual imported module station_set_floor_panel
+PASS station_set_floor_panel row follows cell centers 90.0
+PASS station_set_floor_panel no lateral staircase at seam 90.0
+PASS actual Hex floor footprints have thin continuous seam 90.0
+PASS station_set_floor_panel finite positive native bounds
+PASS actual imported module station_set_wall
+PASS actual imported module station_set_wall
+PASS station_set_wall row follows cell centers 90.0
+PASS station_set_wall no lateral staircase at seam 90.0
+PASS station_set_wall authored wall seam retained 90.0
+PASS station_set_wall original wall perspective is not sheared
+PASS station_set_wall finite positive native bounds
+PASS actual imported module station_set_wall_door
+PASS actual imported module station_set_wall_door
+PASS station_set_wall_door row follows cell centers 90.0
+PASS station_set_wall_door no lateral staircase at seam 90.0
+PASS station_set_wall_door authored wall seam retained 90.0
+PASS station_set_wall_door original wall perspective is not sheared
+PASS station_set_wall_door finite positive native bounds
+PASS actual imported module station_set_floor_panel
+PASS actual imported module station_set_floor_panel
+PASS station_set_floor_panel row follows cell centers 180.0
+PASS station_set_floor_panel no lateral staircase at seam 180.0
+PASS actual Hex floor footprints have thin continuous seam 180.0
+PASS station_set_floor_panel finite positive native bounds
+PASS actual imported module station_set_wall
+PASS actual imported module station_set_wall
+PASS station_set_wall row follows cell centers 180.0
+PASS station_set_wall no lateral staircase at seam 180.0
+PASS station_set_wall authored wall seam retained 180.0
+PASS station_set_wall original wall perspective is not sheared
+PASS station_set_wall finite positive native bounds
+PASS actual imported module station_set_wall_door
+PASS actual imported module station_set_wall_door
+PASS station_set_wall_door row follows cell centers 180.0
+PASS station_set_wall_door no lateral staircase at seam 180.0
+PASS station_set_wall_door authored wall seam retained 180.0
+PASS station_set_wall_door original wall perspective is not sheared
+PASS station_set_wall_door finite positive native bounds
+PASS actual imported module station_set_floor_panel
+PASS actual imported module station_set_floor_panel
+PASS station_set_floor_panel row follows cell centers 270.0
+PASS station_set_floor_panel no lateral staircase at seam 270.0
+PASS actual Hex floor footprints have thin continuous seam 270.0
+PASS station_set_floor_panel finite positive native bounds
+PASS actual imported module station_set_wall
+PASS actual imported module station_set_wall
+PASS station_set_wall row follows cell centers 270.0
+PASS station_set_wall no lateral staircase at seam 270.0
+PASS station_set_wall authored wall seam retained 270.0
+PASS station_set_wall original wall perspective is not sheared
+PASS station_set_wall finite positive native bounds
+PASS actual imported module station_set_wall_door
+PASS actual imported module station_set_wall_door
+PASS station_set_wall_door row follows cell centers 270.0
+PASS station_set_wall_door no lateral staircase at seam 270.0
+PASS station_set_wall_door authored wall seam retained 270.0
+PASS station_set_wall_door original wall perspective is not sheared
+PASS station_set_wall_door finite positive native bounds
+PASS actual imported module station_set_wall_corner
+PASS station_set_wall_corner shares rotated axial module basis
+PASS station_set_wall_corner upright nonmirrored geometry
+PASS station_set_wall_corner retains orthogonal local body
+PASS actual imported module station_set_door_single
+PASS station_set_door_single shares rotated axial module basis
+PASS station_set_door_single upright nonmirrored geometry
+PASS station_set_door_single retains orthogonal local body
+PASS actual imported module station_set_door_single_half
+PASS station_set_door_single_half shares rotated axial module basis
+PASS station_set_door_single_half upright nonmirrored geometry
+PASS station_set_door_single_half retains orthogonal local body
+PASS actual imported module station_set_door_single_closed
+PASS station_set_door_single_closed shares rotated axial module basis
+PASS station_set_door_single_closed upright nonmirrored geometry
+PASS station_set_door_single_closed retains orthogonal local body
+PASS actual imported module station_set_door_double_closed
+PASS station_set_door_double_closed shares rotated axial module basis
+PASS station_set_door_double_closed upright nonmirrored geometry
+PASS station_set_door_double_closed retains orthogonal local body
+PASS actual imported module modular_floor
+PASS modular_floor shares rotated axial module basis
+PASS modular_floor upright nonmirrored geometry
+PASS actual imported module modular_wall
+PASS modular_wall shares rotated axial module basis
+PASS modular_wall upright nonmirrored geometry
+PASS modular_wall retains orthogonal local body
+PASS actual imported module modular_wall_corner
+PASS modular_wall_corner shares rotated axial module basis
+PASS modular_wall_corner upright nonmirrored geometry
+PASS modular_wall_corner retains orthogonal local body
+PASS actual imported module modular_gate
+PASS modular_gate shares rotated axial module basis
+PASS modular_gate upright nonmirrored geometry
+PASS modular_gate retains orthogonal local body
+PASS frontier_utility_fuel_01 standalone shape unchanged
+PASS station_set_chair_armrest standalone shape unchanged
+PASS station_set_computer_wide standalone shape unchanged
+PASS nature_tree_blocker standalone shape unchanged
+PASS fahrzeug_speeder standalone shape unchanged
+PASS station_wall productive legacy module shares cell axes
+PASS station_wall_door productive legacy module shares cell axes
+PASS wall_straight_ne productive legacy module shares cell axes
+PASS wall_corner_sw productive legacy module shares cell axes
+PASS spacekit_corridor_split productive legacy module shares cell axes
+PASS spacekit_pipe_corner productive legacy module shares cell axes
+PASS station_set_balcony_floor_center productive legacy module shares cell axes
+PASS station_set_balcony_floor_corner productive legacy module shares cell axes
+PASS actual imported module station_set_wall
+PASS legacy square module orientation unchanged
+PASS individual floor route
+PASS individual floor has axial seam axis
+PASS batched floor route
+PASS batch and individual floor transforms agree
+PASS station_outpost_64x64 desert trees use existing sandstone visual
+PASS station_outpost_64x64 white cover and former trees share arid material route
+PASS station_outpost_64x64 coordinate dressing is deterministic and varies repeated silhouettes
+PASS station_outpost_64x64 stone variation keeps each real obstacle inside its cell
+PASS station_outpost_64x64 authored station module families covered
+PASS station_outpost_64x64 terrain facts unchanged by projection
+PASS station_outpost_192x192 desert trees use existing sandstone visual
+PASS station_outpost_192x192 white cover and former trees share arid material route
+PASS station_outpost_192x192 coordinate dressing is deterministic and varies repeated silhouettes
+PASS station_outpost_192x192 stone variation keeps each real obstacle inside its cell
+PASS station_outpost_192x192 authored station module families covered
+PASS station_outpost_192x192 terrain facts unchanged by projection
+PASS test_mission_32x32_slots8 authored station module families covered
+PASS test_mission_32x32_slots8 terrain facts unchanged by projection
+PASS temperate map keeps its original tree visuals
+PASS temperate cover retains original palette
+PASS actual floor remains below station_set_wall
+PASS dual-layer projection preserves exact terrain facts station_set_wall
+PASS actual floor remains below station_set_computer_wide
+PASS dual-layer projection preserves exact terrain facts station_set_computer_wide
+PASS actual authored patrol remains available to editor
+PASS runtime hides only green patrol authoring line without changing patrol owner data
+PASS editor can restore authored patrol line
+REVIEW_STATION_VISUAL passed=158 failed=0

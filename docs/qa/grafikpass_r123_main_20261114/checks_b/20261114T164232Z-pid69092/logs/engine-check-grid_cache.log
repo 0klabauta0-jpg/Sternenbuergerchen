@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T164209Z-a335a3f3
+PASS: normal regional view produces both actual ramp/plateau grid chunks
+PASS: actual hidden resource prefill completes every fixture chunk
+PASS: static prefill retains no obsolete live-grid mesh or parent cache
+PASS: receiving view restores static resources without rebuilding terrain
+PASS: restored live grid has exactly the same vertices as normal map rendering
+PASS: restored chunk counters include the newly projected live grid
+PASS: unknown terrain has no grid in either direct or restored view
+PASS: cache restore cannot resurrect the prefill's fully visible grid
+PASS: same real visible ramp and plateau generate identical contours
+PASS: authoritative door opening updates the same visible contour after both start paths
+PASS: FoW and door projection never grow or mutate static cache accounting
+PASS: views preserve authored terrain and the single explicit runtime change
+REVIEW_GRID_CACHE passed=12 failed=0

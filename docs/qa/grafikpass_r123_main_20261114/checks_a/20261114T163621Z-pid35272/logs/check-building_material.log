@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS migrated scene matches byte-preservation audit scenes/terrain/frontier_habitat_exterior.tscn
+PASS serialized scene needs no legacy instance values
+PASS migrated scene matches byte-preservation audit scenes/terrain/frontier_hall_exterior.tscn
+PASS serialized scene needs no legacy instance values
+PASS packed habitat preserves exact local bounds on all wear parts
+PASS packed habitat allocates no per-instance shader slots
+PASS every original wear part is present habitat
+PASS repeated habitat shares meshes and material variants with identical transforms
+PASS published original model bounds remain unchanged habitat
+PASS original binary source unchanged habitat
+PASS live builder habitat preserves exact local bounds on all wear parts
+PASS live builder habitat allocates no per-instance shader slots
+PASS live builder and saved scene retain every wear part habitat
+PASS 1000 unchanged bounds reuse live material habitat
+PASS packed hall preserves exact local bounds on all wear parts
+PASS packed hall allocates no per-instance shader slots
+PASS every original wear part is present hall
+PASS repeated hall shares meshes and material variants with identical transforms
+PASS published original model bounds remain unchanged hall
+PASS original binary source unchanged hall
+PASS live builder hall preserves exact local bounds on all wear parts
+PASS live builder hall allocates no per-instance shader slots
+PASS live builder and saved scene retain every wear part hall
+PASS 1000 unchanged bounds reuse live material hall
+PASS actual 18 Station192 buildings preserves exact local bounds on all wear parts
+PASS actual 18 Station192 buildings allocates no per-instance shader slots
+PASS real production presentation instantiates all 18 authored buildings
+PASS 783 live wear parts exceed old 256-instance capacity without dropping any part
+PASS 18 buildings reuse only 86 immutable material variants
+PASS rendering preserves every actual terrain fact
+REVIEW_BUILDING_MATERIAL passed=30 failed=0

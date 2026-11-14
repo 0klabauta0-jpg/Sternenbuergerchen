@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS map loads without a load issue
+PASS all 6336 authored cells are valid tiles
+PASS hex topology and tactical rules
+PASS explicit ramp height rules, 0.75 step
+PASS five ramps with 26 ramp cells
+PASS buildings and large props reserve blocked cells
+PASS marker present: spawn_alpha
+PASS marker present: spawn_bravo
+PASS marker present: objective_point
+PASS marker present: spawn_enemy_defense
+PASS marker present: ship_return
+PASS most of the map is one connected walkable area (4438 cells)
+PASS marker reachable from the landing field: objective_point
+PASS marker reachable from the landing field: outpost_chip
+PASS marker reachable from the landing field: rally_hauptrampe
+PASS marker reachable from the landing field: recon_hintertuer
+PASS marker reachable from the landing field: recon_ostkante
+PASS marker reachable from the landing field: ship_return
+PASS marker reachable from the landing field: spawn_alpha
+PASS marker reachable from the landing field: spawn_bravo
+PASS marker reachable from the landing field: spawn_enemy_defense
+PASS patrol route stays on reachable cells: hof_runde
+PASS patrol route stays on reachable cells: kanten_wache
+PASS landing field, yard and relay sit on three different levels
+PASS every placed model exists ([])
+PASS own kit pieces plus existing project models (49 / 5)
+PASS two landing pads
+PASS pad stands on flat level-0 ground: LANDEFELD · 01
+PASS pad stands on flat level-0 ground: FRACHT · 02
+PASS outpost_chip_recovery points at this map
+PASS scenario validates against the map: { "valid": true, "errors": [] }
+PASS scenario marker present: outpost_chip
+PASS scenario marker present: ship_return
+PASS scenario marker present: spawn_enemy_defense
+PASS scenario marker present: spawn_alpha
+PASS scenario marker present: objective_point
+WINDBRUCH_OUTPOST passed=36 failed=0

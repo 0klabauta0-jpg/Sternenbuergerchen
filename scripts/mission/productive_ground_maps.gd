@@ -12,6 +12,7 @@ const PLAYABLE: PackedStringArray = [
 	"res://maps/satellite_crash_site.json",
 	"res://maps/trade_outpost.json",
 	"res://maps/fortified_outpost.json",
+	"res://maps/windbruch_outpost.json",
 	"res://maps/polisa_station.json",
 	"res://maps/distress_orbit.json",
 	"res://maps/test_mission.json",

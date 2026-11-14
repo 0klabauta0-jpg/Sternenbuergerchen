@@ -17,6 +17,10 @@ var _blend_texture: ImageTexture
 var _world_to_grid := Vector4(1,0,0,1)
 var homebase_palette: bool = false
 var quiet_tactical_surface: bool = false
+## Render-only: true when sand cells are narrow strips on firmer ground.
+var trail_surface: bool = false
+## Render-only: 1.0 paints roads into the ground, lower under a built road deck.
+var road_paint_strength: float = 1.0
 
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
@@ -42,26 +46,30 @@ func material_for(color: Color, rock: bool = false, paved: bool = false, slope_s
 
 func apply_environment(environment: Environment) -> void:
 	environment.background_color = Color("aa6e58")
-	environment.ambient_light_color = Color("b6bfcd")
-	environment.ambient_light_energy = 0.34
+	# Grafikpass R1: cooler sky fill against a warmer sun, so shaded faces
+	# turn towards violet-blue as in the landscape references.
+	environment.ambient_light_color = Color("a9b6d8")
+	environment.ambient_light_energy = 0.36
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
-	environment.tonemap_exposure = 0.95
+	# Lower exposure keeps cream hulls and petrol roofs from clipping to white.
+	environment.tonemap_exposure = 0.84
 	environment.adjustment_brightness = 1.0
 	environment.adjustment_contrast = 1.05
-	environment.adjustment_saturation = 0.94
+	environment.adjustment_saturation = 1.0
 	environment.ssao_enabled = true
 	environment.ssao_radius = 0.22
 	environment.ssao_intensity = 1.35
 
 func apply_light(light: DirectionalLight3D) -> void:
-	light.light_color = Color("fff0d9")
-	light.light_energy = 0.95
+	light.light_color = Color("ffe9c9")
+	light.light_energy = 0.98
 	light.rotation_degrees = Vector3(-52.0, -32.0, 0.0)
 	light.shadow_opacity = 0.72
 	light.shadow_blur = 1.8
 	light.shadow_normal_bias = 0.45
 	light.shadow_bias = 0.025
-	if homebase_palette:
+	if homebase_palette or quiet_tactical_surface:
+		# Flat rock crowns and wide ground showed striped self-shadowing.
 		light.shadow_normal_bias = 1.0
 		light.shadow_bias = 0.075
 	light.directional_shadow_max_distance = 45.0
@@ -69,6 +77,10 @@ func apply_light(light: DirectionalLight3D) -> void:
 func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> void:
 	_blend=load("res://scripts/terrain/terrain_surface_blend.gd").build(tiles)
 	if _blend.is_empty(): return
+	var sand_cells := 0
+	for tile in tiles:
+		if String(tile.surface_type) == "sand": sand_cells += 1
+	trail_surface = sand_cells > 0 and float(sand_cells) < float(tiles.size()) * 0.30
 	_blend_texture=ImageTexture.create_from_image(_blend.image)
 	var inverse := Transform2D(axis_q,axis_r,Vector2.ZERO).affine_inverse()
 	_world_to_grid=Vector4(inverse.x.x,inverse.y.x,inverse.x.y,inverse.y.y)
@@ -77,6 +89,8 @@ func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> 
 func _apply_blend(material: ShaderMaterial, rock: bool) -> void:
 	material.set_shader_parameter("homebase_palette", homebase_palette)
 	material.set_shader_parameter("quiet_tactical_surface", quiet_tactical_surface)
+	material.set_shader_parameter("trail_surface", trail_surface and not rock)
+	material.set_shader_parameter("road_paint_strength", road_paint_strength)
 	material.set_shader_parameter("surface_blending",not rock and not _blend.is_empty())
 	if rock or _blend.is_empty(): return
 	material.set_shader_parameter("surface_mask",_blend_texture)

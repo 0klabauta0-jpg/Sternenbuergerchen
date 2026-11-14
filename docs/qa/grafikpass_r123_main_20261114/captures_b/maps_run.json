@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "godot_console.exe",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\grafikpass-r123-main-20261114\\tmp\\grafikpass_integration\\final_b\\project",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "d3d12",
+    "--position",
+    "-2000,-2000",
+    "--resolution",
+    "1280x720",
+    "--script",
+    "res://scripts/tests/grafikpass_r1_capture.gd"
+  ],
+  "environment": {
+    "CAP_DIR": "C:\\dev\\SternenBuergerchen-worktrees\\grafikpass-r123-main-20261114\\docs\\qa\\grafikpass_r123_main_20261114\\captures_b",
+    "CAP_SHOTS": "windbruch_overview|windbruch_outpost|2200|2500|70;windbruch_yard|windbruch_outpost|2884|2622|24;windbruch_ramp|windbruch_outpost|1300|2800|20;windbruch_relay|windbruch_outpost|obj|0|22;gm01_pad|Ground_Mission01_32x32|150|560|7;gm02_control|Ground_Mission02_128x128|obj|0|26"
+  },
+  "exit_code": 0,
+  "seconds": 13.6,
+  "errors": [],
+  "passed": true
+}

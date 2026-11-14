@@ -206,7 +206,7 @@ func _wait_homebase() -> bool:
 	return ready
 
 func _remaining_missions() -> void:
-	for spec in [["outpost_recovery","trade_outpost","res://maps/trade_outpost.json"],["benit_delivery","satellite_crash","res://maps/satellite_crash_site.json"],["outpost_chip_recovery","fortified_outpost","res://maps/fortified_outpost.json"]]:
+	for spec in [["outpost_recovery","trade_outpost","res://maps/trade_outpost.json"],["benit_delivery","satellite_crash","res://maps/satellite_crash_site.json"],["outpost_chip_recovery","fortified_outpost","res://maps/windbruch_outpost.json"]]:
 		var job:String=spec[0]; var location:String=spec[1]; var map_path:String=spec[2]
 		if String(_campaign().jobs[job].status)=="pending_upload":
 			_check(_runtime.call("request_operation","campaign_upload",{"job_id":job}).get("ok",false),"resume verified pending upload")

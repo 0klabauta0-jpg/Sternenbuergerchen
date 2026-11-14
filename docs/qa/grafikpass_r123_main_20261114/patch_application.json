@@ -1,0 +1,86 @@
+[
+  {
+    "order": 1,
+    "path": "C:\\Users\\bjoer\\Downloads\\grafikpass_r1_20261114.patch",
+    "sha256": "b469adf3f5acc231d97d652733347234cdafb55553cd74df873728cbb7d0e7e4",
+    "size": 2491210,
+    "steps": [
+      {
+        "command": [
+          "git",
+          "apply",
+          "--check",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r1_20261114.patch"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r1_20261114.patch"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "index_tree_after": "9bdb49a230081aec42a862ad18e25fcce7f1c774"
+  },
+  {
+    "order": 2,
+    "path": "C:\\Users\\bjoer\\Downloads\\grafikpass_r2_20261114.patch",
+    "sha256": "ece35ddd3bde67b4ecb47925074450034f0e0cb40acd12e0f2100c60ceda04a4",
+    "size": 2063862,
+    "steps": [
+      {
+        "command": [
+          "git",
+          "apply",
+          "--check",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r2_20261114.patch"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r2_20261114.patch"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "index_tree_after": "a15dafbe82173de800e109078e8e4c6244a25b7c"
+  },
+  {
+    "order": 3,
+    "path": "C:\\Users\\bjoer\\Downloads\\grafikpass_r3_20261114.patch",
+    "sha256": "5ecd7aeb4006ad6b8e33187c993eb0fb94e3ff3277a99295af52459cf75439a8",
+    "size": 3304446,
+    "steps": [
+      {
+        "command": [
+          "git",
+          "apply",
+          "--check",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r3_20261114.patch"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "apply",
+          "--index",
+          "C:\\Users\\bjoer\\Downloads\\grafikpass_r3_20261114.patch"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "index_tree_after": "b0596c937302b889b1a6d5fef1b61d007d9103fa"
+  }
+]

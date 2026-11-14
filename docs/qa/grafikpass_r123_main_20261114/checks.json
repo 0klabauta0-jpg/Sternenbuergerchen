@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "windbruch_content",
+      "script": "res://scripts/tests/windbruch_outpost_verifier.gd",
+      "success_marker": "WINDBRUCH_OUTPOST",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "windbruch_navigation",
+      "script": "res://scripts/tests/grafikpass_r123_navigation_verifier.gd",
+      "success_marker": "GRAFIKPASS_R123_NAVIGATION",
+      "args": [
+        "--output=C:\\dev\\SternenBuergerchen-worktrees\\grafikpass-r123-main-20261114\\docs\\qa\\grafikpass_r123_main_20261114\\windbruch_navigation.json"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "surface_cache",
+      "script": "res://scripts/tests/grafikpass_r123_surface_verifier.gd",
+      "success_marker": "GRAFIKPASS_R123_SURFACE",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "hex_surface",
+      "script": "res://scripts/tests/review_completion_hex_surface_verifier.gd",
+      "success_marker": "REVIEW_HEX_SURFACE",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "grid_cache",
+      "script": "res://scripts/tests/review_completion_grid_cache_verifier.gd",
+      "success_marker": "REVIEW_GRID_CACHE",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "art_profile",
+      "script": "res://scripts/tests/frontier_art_profile_verifier.gd",
+      "success_marker": "FRONTIER_ART_RESULT",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "environment",
+      "script": "res://scripts/tests/frontier_main_environment_verifier.gd",
+      "success_marker": "FRONTIER_MAIN_ENVIRONMENT",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "paths",
+      "script": "res://scripts/tests/frontier_pass07_paths_verifier.gd",
+      "success_marker": "FRONTIER_PASS07_PATHS",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "building_material",
+      "script": "res://scripts/tests/review_completion_building_material_verifier.gd",
+      "success_marker": "REVIEW_BUILDING_MATERIAL",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "station_visual",
+      "script": "res://scripts/tests/review_completion_station_visual_verifier.gd",
+      "success_marker": "REVIEW_STATION_VISUAL",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "gm01_edge",
+      "script": "res://scripts/tests/gm01_frontier_map_edge_verifier.gd",
+      "success_marker": "GM01_FRONTIER_MAP_EDGE_ALL_PASS",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "windbruch_prefill",
+      "script": "res://scripts/tests/review_completion_map_preparation_verifier.gd",
+      "success_marker": "REVIEW_MAP_PREPARATION",
+      "args": [
+        "--map=res://maps/windbruch_outpost.json"
+      ],
+      "timeout": 180
+    },
+    {
+      "name": "campaign_content",
+      "script": "res://scripts/tests/campaign_maps_content_verifier.gd",
+      "success_marker": "CAMPAIGN_MAPS_CONTENT",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "campaign_chain",
+      "script": "res://scripts/tests/campaign_five_missions_chain_test.gd",
+      "success_marker": "CAMPAIGN_FIVE_CHAIN:",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "orbit_locations",
+      "script": "res://scripts/tests/orbit_surface_locations_verifier.gd",
+      "success_marker": "ORBIT_SURFACE_LOCATIONS passed",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "map_services",
+      "script": "res://scripts/tests/map_services_verifier_20261114.gd",
+      "success_marker": "MAP_SERVICES",
+      "args": [],
+      "timeout": 180
+    },
+    {
+      "name": "free_landing",
+      "script": "res://scripts/tests/playtest_20261110_free_landing_verifier.gd",
+      "success_marker": "FREE_LANDING",
+      "args": [],
+      "timeout": 180
+    }
+  ]
+}

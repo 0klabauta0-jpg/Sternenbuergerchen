@@ -1,0 +1,250 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp corner/midpoint follows actual slope 0
+PASS ramp connects H2 to H3 0
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp corner/midpoint follows actual slope 1
+PASS ramp connects H2 to H3 1
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp corner/midpoint follows actual slope 2
+PASS ramp connects H2 to H3 2
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp corner/midpoint follows actual slope 3
+PASS ramp connects H2 to H3 3
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp corner/midpoint follows actual slope 4
+PASS ramp connects H2 to H3 4
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp corner/midpoint follows actual slope 5
+PASS ramp connects H2 to H3 5
+PASS derived floor palette suppresses internal ring contrast
+PASS quiet palette never mutates source texture
+PASS floor material and palette are cached across identical instances
+PASS actual floor model available station_set_floor_panel
+PASS actual floor route adapts station_set_floor_panel
+PASS floor stays inside assigned Hex and reaches all six corners station_set_floor_panel0.0
+PASS original floor material surfaces and UVs survive station_set_floor_panel
+PASS thin floor preserves original plane/volume kind station_set_floor_panel
+PASS conservative culling box encloses actual floor geometry station_set_floor_panel
+PASS floor finish stays light with muted rough metal accents station_set_floor_panel
+PASS source materials/textures remain unchanged for other assets station_set_floor_panel
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_floor_panel
+PASS identical floor instance reuses projected mesh station_set_floor_panel
+PASS identical floor instance reuses immutable material copy station_set_floor_panel
+PASS contour clears actual floor top station_set_floor_panel
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_floor_panel [lift=0.028000 top=0.028000]
+PASS actual floor model available station_set_floor_panel
+PASS actual floor route adapts station_set_floor_panel
+PASS floor stays inside assigned Hex and reaches all six corners station_set_floor_panel90.0
+PASS original floor material surfaces and UVs survive station_set_floor_panel
+PASS thin floor preserves original plane/volume kind station_set_floor_panel
+PASS conservative culling box encloses actual floor geometry station_set_floor_panel
+PASS floor finish stays light with muted rough metal accents station_set_floor_panel
+PASS source materials/textures remain unchanged for other assets station_set_floor_panel
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_floor_panel
+PASS identical floor instance reuses projected mesh station_set_floor_panel
+PASS identical floor instance reuses immutable material copy station_set_floor_panel
+PASS contour clears actual floor top station_set_floor_panel
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_floor_panel [lift=0.028000 top=0.028000]
+PASS actual floor model available station_set_floor_panel_end
+PASS actual floor route adapts station_set_floor_panel_end
+PASS floor stays inside assigned Hex and reaches all six corners station_set_floor_panel_end0.0
+PASS original floor material surfaces and UVs survive station_set_floor_panel_end
+PASS thin floor preserves original plane/volume kind station_set_floor_panel_end
+PASS conservative culling box encloses actual floor geometry station_set_floor_panel_end
+PASS floor finish stays light with muted rough metal accents station_set_floor_panel_end
+PASS source materials/textures remain unchanged for other assets station_set_floor_panel_end
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_floor_panel_end
+PASS identical floor instance reuses projected mesh station_set_floor_panel_end
+PASS identical floor instance reuses immutable material copy station_set_floor_panel_end
+PASS contour clears actual floor top station_set_floor_panel_end
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_floor_panel_end [lift=0.028000 top=0.028000]
+PASS actual floor model available station_set_floor_panel_end
+PASS actual floor route adapts station_set_floor_panel_end
+PASS floor stays inside assigned Hex and reaches all six corners station_set_floor_panel_end90.0
+PASS original floor material surfaces and UVs survive station_set_floor_panel_end
+PASS thin floor preserves original plane/volume kind station_set_floor_panel_end
+PASS conservative culling box encloses actual floor geometry station_set_floor_panel_end
+PASS floor finish stays light with muted rough metal accents station_set_floor_panel_end
+PASS source materials/textures remain unchanged for other assets station_set_floor_panel_end
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_floor_panel_end
+PASS identical floor instance reuses projected mesh station_set_floor_panel_end
+PASS identical floor instance reuses immutable material copy station_set_floor_panel_end
+PASS contour clears actual floor top station_set_floor_panel_end
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_floor_panel_end [lift=0.028000 top=0.028000]
+PASS actual floor model available station_set_balcony_floor_center
+PASS actual floor route adapts station_set_balcony_floor_center
+PASS floor stays inside assigned Hex and reaches all six corners station_set_balcony_floor_center0.0
+PASS original floor material surfaces and UVs survive station_set_balcony_floor_center
+PASS thin floor preserves original plane/volume kind station_set_balcony_floor_center
+PASS conservative culling box encloses actual floor geometry station_set_balcony_floor_center
+PASS floor finish stays light with muted rough metal accents station_set_balcony_floor_center
+PASS source materials/textures remain unchanged for other assets station_set_balcony_floor_center
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_balcony_floor_center
+PASS identical floor instance reuses projected mesh station_set_balcony_floor_center
+PASS identical floor instance reuses immutable material copy station_set_balcony_floor_center
+PASS contour clears actual floor top station_set_balcony_floor_center
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_balcony_floor_center [lift=0.028000 top=0.028000]
+PASS actual floor model available station_set_balcony_floor_center
+PASS actual floor route adapts station_set_balcony_floor_center
+PASS floor stays inside assigned Hex and reaches all six corners station_set_balcony_floor_center90.0
+PASS original floor material surfaces and UVs survive station_set_balcony_floor_center
+PASS thin floor preserves original plane/volume kind station_set_balcony_floor_center
+PASS conservative culling box encloses actual floor geometry station_set_balcony_floor_center
+PASS floor finish stays light with muted rough metal accents station_set_balcony_floor_center
+PASS source materials/textures remain unchanged for other assets station_set_balcony_floor_center
+PASS derived thin floor avoids self-shadow while original model casting is untouched station_set_balcony_floor_center
+PASS identical floor instance reuses projected mesh station_set_balcony_floor_center
+PASS identical floor instance reuses immutable material copy station_set_balcony_floor_center
+PASS contour clears actual floor top station_set_balcony_floor_center
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset station_set_balcony_floor_center [lift=0.028000 top=0.028000]
+PASS actual floor model available modular_floor
+PASS actual floor route adapts modular_floor
+PASS floor stays inside assigned Hex and reaches all six corners modular_floor0.0
+PASS original floor material surfaces and UVs survive modular_floor
+PASS thin floor preserves original plane/volume kind modular_floor
+PASS conservative culling box encloses actual floor geometry modular_floor
+PASS floor finish stays light with muted rough metal accents modular_floor
+PASS source materials/textures remain unchanged for other assets modular_floor
+PASS derived thin floor avoids self-shadow while original model casting is untouched modular_floor
+PASS identical floor instance reuses projected mesh modular_floor
+PASS identical floor instance reuses immutable material copy modular_floor
+PASS contour clears actual floor top modular_floor
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset modular_floor [lift=0.028000 top=0.028000]
+PASS actual floor model available modular_floor
+PASS actual floor route adapts modular_floor
+PASS floor stays inside assigned Hex and reaches all six corners modular_floor90.0
+PASS original floor material surfaces and UVs survive modular_floor
+PASS thin floor preserves original plane/volume kind modular_floor
+PASS conservative culling box encloses actual floor geometry modular_floor
+PASS floor finish stays light with muted rough metal accents modular_floor
+PASS source materials/textures remain unchanged for other assets modular_floor
+PASS derived thin floor avoids self-shadow while original model casting is untouched modular_floor
+PASS identical floor instance reuses projected mesh modular_floor
+PASS identical floor instance reuses immutable material copy modular_floor
+PASS contour clears actual floor top modular_floor
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset modular_floor [lift=0.028000 top=0.028000]
+PASS actual floor model available factory_floor
+PASS actual floor route adapts factory_floor
+PASS floor stays inside assigned Hex and reaches all six corners factory_floor0.0
+PASS original floor material surfaces and UVs survive factory_floor
+PASS thin floor preserves original plane/volume kind factory_floor
+PASS conservative culling box encloses actual floor geometry factory_floor
+PASS floor finish stays light with muted rough metal accents factory_floor
+PASS source materials/textures remain unchanged for other assets factory_floor
+PASS derived thin floor avoids self-shadow while original model casting is untouched factory_floor
+PASS identical floor instance reuses projected mesh factory_floor
+PASS identical floor instance reuses immutable material copy factory_floor
+PASS contour clears actual floor top factory_floor
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset factory_floor [lift=0.028000 top=0.028000]
+PASS actual floor model available factory_floor
+PASS actual floor route adapts factory_floor
+PASS floor stays inside assigned Hex and reaches all six corners factory_floor90.0
+PASS original floor material surfaces and UVs survive factory_floor
+PASS thin floor preserves original plane/volume kind factory_floor
+PASS conservative culling box encloses actual floor geometry factory_floor
+PASS floor finish stays light with muted rough metal accents factory_floor
+PASS source materials/textures remain unchanged for other assets factory_floor
+PASS derived thin floor avoids self-shadow while original model casting is untouched factory_floor
+PASS identical floor instance reuses projected mesh factory_floor
+PASS identical floor instance reuses immutable material copy factory_floor
+PASS contour clears actual floor top factory_floor
+PASS actual thin floor top and Actor support agree without legacy thick-slab offset factory_floor [lift=0.028000 top=0.028000]
+PASS floor adaptation excludes furniture/walls/vehicles station_set_chair_armrest
+PASS floor adaptation excludes furniture/walls/vehicles frontier_utility_fuel_01
+PASS floor adaptation excludes furniture/walls/vehicles fahrzeug_speeder
+PASS floor adaptation excludes furniture/walls/vehicles station_set_wall
+PASS blocked neighbor never receives usable grid
+PASS 1000 unchanged frames retain exact cached mesh/node
+PASS runtime blocking removes contour without replacing node
+PASS visual projection never mutates raw terrain truth
+PASS unknown/invisible cells receive no elevated grid
+PASS visible legal surface restores its contour
+PASS actual Ground admits support actor
+PASS actual Ground commits step onto real Kenney floor
+PASS actual imported floor has positive visual support
+PASS floor support follows actual segment before/after handoff 2
+PASS visual reads preserve Ground/owner/RNG stamp 2
+PASS floor support follows actual segment before/after handoff 3
+PASS visual reads preserve Ground/owner/RNG stamp 3
+PASS floor support follows actual segment before/after handoff 4
+PASS visual reads preserve Ground/owner/RNG stamp 4
+PASS actual stop begins Ground centering
+PASS stop/recentering preserves continuous support start
+PASS centering interpolates support to occupied destination
+PASS stationary actual actor stands above imported floor
+PASS selection and actor share visual support without changing logical height
+PASS actual actor checkpoint remains exportable with support projection
+PASS lifecycle cleanup removes support receipt
+PASS fluent support metadata is excluded from actual actor checkpoint schema
+PASS raised pad deck stays below the lifted depth-tested hex contour
+PASS raised deck lifts only the visual standing height; terrain height stays zero
+PASS cells beside the deck keep ground standing height
+PASS only the solid deck bodies cast; thin inlays stay non-casting and the inset is retained
+PASS unflattened standalone pad caster route remains unchanged
+PASS skipped registry revision reconciles both distant chunks after HPA consumed first dirty list
+PASS revision gap rebuilds exactly changed chunks
+PASS unchanged projected facts skip duplicate mesh rebuild after registry notification
+REVIEW_HEX_SURFACE passed=246 failed=0

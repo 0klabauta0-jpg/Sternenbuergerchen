@@ -1,0 +1,30 @@
+{
+  "base_head": "794d91ac6c25c87641d0618a47e0c665e1edd826",
+  "source_files_verified": 2633,
+  "changed_source": [],
+  "copied_files_verified": 2633,
+  "importer_rewritten_remaps": [],
+  "unexpected_copy_changes": [],
+  "studio_a_sources_still_equal": 28,
+  "native_files_equal_to_main": [
+    "native/navigation/.gitignore",
+    "native/navigation/README.md",
+    "native/navigation/SConstruct",
+    "native/navigation/bin/native_navigation.windows.template_release.x86_64.dll",
+    "native/navigation/build.ps1",
+    "native/navigation/build_profile.json",
+    "native/navigation/navigation.gdextension",
+    "native/navigation/src/native_costs.cpp",
+    "native/navigation/src/native_hpa.cpp",
+    "native/navigation/src/native_navigation.cpp",
+    "native/navigation/src/native_navigation.h",
+    "native/navigation/src/native_regional.cpp",
+    "native/navigation/src/native_terrain_builder.cpp",
+    "native/navigation/src/native_terrain_builder.h",
+    "native/navigation/src/native_visibility.cpp",
+    "native/navigation/src/native_visibility.h",
+    "native/navigation/src/register_types.cpp",
+    "native/navigation/third_party/godot-cpp-LICENSE.md"
+  ],
+  "native_changed": []
+}

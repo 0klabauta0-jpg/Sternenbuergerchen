@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS: all current authored productive ground/base starts including Windbruch are represented
+PASS: selected map belongs to the productive catalog
+PASS: res://maps/windbruch_outpost.json actual terrain data loads
+MAP_PREPARATION {"elapsed_ms":686,"map":"res://maps/windbruch_outpost.json","mode":"whole_map_resource_prefill","state":{"expected_chunks":108,"geometry_build_count":108,"is_total_gpu_memory_measurement":false,"max_payload_bytes":268435456,"memory_static_baseline_bytes":103965625,"memory_static_delta_bytes":9058736,"memory_static_peak_bytes":113024361,"prepared_chunks":108,"progress":1.0,"ready":true,"reason":"","resource_restore_count":0,"retained_payload_bytes":5136160,"retained_scene_nodes":0,"status":"ready"},"tiles":6336}
+PASS: res://maps/windbruch_outpost.json every expected chunk is actually prepared
+PASS: res://maps/windbruch_outpost.json actual measured payload respects unchanged 256 MiB product bound
+PASS: res://maps/windbruch_outpost.json hidden whole-map preparation retains no chunk scene nodes
+PASS: res://maps/windbruch_outpost.json only complete resource preparation yields a handoff
+PASS: res://maps/windbruch_outpost.json actual receiving view restores cached geometry without rebuilding it
+PASS: res://maps/windbruch_outpost.json received cache produces real initial map geometry
+REVIEW_MAP_PREPARATION passed=9 failed=0

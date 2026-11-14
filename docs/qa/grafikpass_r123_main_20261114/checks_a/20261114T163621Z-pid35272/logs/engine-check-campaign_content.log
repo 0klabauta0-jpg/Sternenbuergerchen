@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2/Grafikpass/20261114T163526Z-34d29212
+PASS: five authored campaign jobs
+PASS: scenario exists: satellite_recovery
+PASS: scenario validates: satellite_recovery []
+PASS: runtime interaction retains authored marker identity: satellite_recovery/satellite_data
+PASS: runtime interaction retains authored marker identity: satellite_recovery/ship_return
+PASS: runtime interaction retains authored marker identity: satellite_recovery/trade_service
+PASS: scenario exists: outpost_recovery
+PASS: scenario validates: outpost_recovery []
+PASS: runtime interaction retains authored marker identity: outpost_recovery/recover_crate
+PASS: runtime interaction retains authored marker identity: outpost_recovery/ship_return
+PASS: runtime interaction retains authored marker identity: outpost_recovery/trade_service
+PASS: authored enemy count: outpost_recovery
+PASS: campaign outpost guards do not respawn: outpost_recovery
+PASS: explicit supported guard weapon: outpost_recovery
+PASS: loaded runtime retains explicit guard weapon: outpost_recovery
+PASS: living guards block authored outpost gates: outpost_recovery
+PASS: defeating guards still requires physical recovery and return: outpost_recovery
+FAIL: scenario exists: benit_delivery
+PASS: scenario exists: outpost_chip_recovery
+PASS: scenario validates: outpost_chip_recovery []
+PASS: runtime interaction retains authored marker identity: outpost_chip_recovery/outpost_chip
+PASS: runtime interaction retains authored marker identity: outpost_chip_recovery/ship_return
+PASS: authored enemy count: outpost_chip_recovery
+PASS: campaign outpost guards do not respawn: outpost_chip_recovery
+PASS: explicit supported guard weapon: outpost_chip_recovery
+PASS: loaded runtime retains explicit guard weapon: outpost_chip_recovery
+PASS: living guards block authored outpost gates: outpost_chip_recovery
+PASS: defeating guards still requires physical recovery and return: outpost_chip_recovery
+PASS: scenario exists: buccaneer_rescue
+PASS: scenario validates: buccaneer_rescue []
+PASS: runtime interaction retains authored marker identity: buccaneer_rescue/cutlass_contact
+PASS: runtime interaction retains authored marker identity: buccaneer_rescue/buccaneer_contact
+PASS: map loads: satellite_crash_site
+PASS: large playable map: satellite_crash_site
+PASS: reachable marker satellite_crash_site/objective_point
+PASS: reachable marker satellite_crash_site/satellite_data
+PASS: reachable marker satellite_crash_site/ship_return
+PASS: reachable marker satellite_crash_site/spawn_alpha
+PASS: reachable marker satellite_crash_site/spawn_bravo
+PASS: reachable marker satellite_crash_site/trade_service
+PASS: actual height-aware navigation can leave the M3 recruit ridge
+PASS: satellite requires exploration beyond landing area
+PASS: satellite and trader are distinct destinations
+PASS: map loads: trade_outpost
+PASS: large playable map: trade_outpost
+PASS: reachable marker trade_outpost/objective_point
+PASS: reachable marker trade_outpost/recover_crate
+PASS: reachable marker trade_outpost/recruit_contact
+PASS: reachable marker trade_outpost/ship_return
+PASS: reachable marker trade_outpost/spawn_alpha
+PASS: reachable marker trade_outpost/spawn_bravo
+PASS: reachable marker trade_outpost/spawn_enemy_defense
+PASS: reachable marker trade_outpost/trade_service
+PASS: outpost and trader are spatially separate
+PASS: map loads: fortified_outpost
+PASS: large playable map: fortified_outpost
+PASS: reachable marker fortified_outpost/objective_point
+PASS: reachable marker fortified_outpost/outpost_chip
+PASS: reachable marker fortified_outpost/ship_return
+PASS: reachable marker fortified_outpost/spawn_alpha
+PASS: reachable marker fortified_outpost/spawn_bravo
+PASS: reachable marker fortified_outpost/spawn_enemy_defense
+PASS: two complementary ores at satellite_crash
+PASS: two complementary ores at trade_outpost
+CAMPAIGN_MAPS_CONTENT passed=63 failed=1

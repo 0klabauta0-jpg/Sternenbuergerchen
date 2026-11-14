@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "godot_console.exe",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\grafikpass-r123-main-20261114\\tmp\\grafikpass_integration\\final_b\\project",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "d3d12",
+    "--position",
+    "-2000,-2000",
+    "--script",
+    "res://scripts/tests/grafikpass_r123_surface_verifier.gd"
+  ],
+  "exit_code": 0,
+  "seconds": 4.057,
+  "errors": [],
+  "passed": true
+}

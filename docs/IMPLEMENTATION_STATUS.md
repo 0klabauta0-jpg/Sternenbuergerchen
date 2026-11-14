@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Grafikpass R1-R3 fuer Main geprueft - 14.11.2026
+
+Die drei gelieferten Patches in Reihenfolge R1, R2, R3 auf Mainbasis
+794d91ac6 uebernommen: Terrain-/Gebaeudematerialien, erhoehte Pads/Strassen,
+Windbruch als neue Karte fuer outpost_chip_recovery und 13 passende GLBs.
+Vier gezielte Darstellungsfixes fuer Shaderverlauf, Materialcache,
+Rampenunterstuetzung und FoW ueber Decks; keine neue Gameplayautoritaet.
+16 Headless-Gates und ein nativer Surface-/FoW-Gate (148/148) bestanden;
+39/39 Navigation mit echten SimulationRoot-Befehlen und C++/GDScript-Paritaet.
+13 Modelle importiert, sieben frische Forward+/D3D12-Bilder technisch geprueft.
+2.633 Testquellen bytegleich; native Quellen/DLL und Hauptcheckout-WIP erhalten.
+GM02-Kontrollbild vom Nutzer beanstandet; separate Neuerstellung angekuendigt,
+kein GM02-Ersatz in diesen Patches. Keine EXE oder volle Kampagnenabnahme.
+Details, Versuchsergebnisse und Grenzen:
+`docs/qa/grafikpass_r123_main_20261114/README.md`.
+
 ### Mainintegration der nativen Terrain-/Sichtoptimierung geprueft — 14.11.2026
 
 Mainbasis `a982a0b5d`, unveraenderte Uebernahme von `96098c668` per

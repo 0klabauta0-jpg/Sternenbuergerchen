@@ -12,6 +12,7 @@ const REGIONAL_CAMPAIGN_MAPS := [
 	"res://maps/satellite_crash_site.json",
 	"res://maps/trade_outpost.json",
 	"res://maps/fortified_outpost.json",
+	"res://maps/windbruch_outpost.json",
 ]
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
