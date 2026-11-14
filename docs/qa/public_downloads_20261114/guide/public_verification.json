@@ -1,0 +1,101 @@
+{
+  "url": "https://sternenbuergerchen-spielanleitung.klabauta.chatgpt.site",
+  "anonymous": true,
+  "passed": 23,
+  "failed": 0,
+  "checks": [
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 index.html"
+    },
+    {
+      "ok": true,
+      "label": "Complete authored HTML preserved"
+    },
+    {
+      "ok": true,
+      "label": "Only observed Cloudflare security script appended"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 style.css"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match style.css"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 combat.js"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match combat.js"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 guide.js"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match guide.js"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 assets/home.png"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match assets/home.png"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 assets/jobs.png"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match assets/jobs.png"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 assets/starmap.png"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match assets/starmap.png"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 assets/Rajdhani-SemiBold.ttf"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match assets/Rajdhani-SemiBold.ttf"
+    },
+    {
+      "ok": true,
+      "label": "Anonymous HTTP 200 assets/OFL.txt"
+    },
+    {
+      "ok": true,
+      "label": "Published bytes match assets/OFL.txt"
+    },
+    {
+      "ok": true,
+      "label": "Fresh anonymous browser opens real guide"
+    },
+    {
+      "ok": true,
+      "label": "Live calculator works"
+    },
+    {
+      "ok": true,
+      "label": "Live mobile layout fits"
+    },
+    {
+      "ok": true,
+      "label": "No runtime errors"
+    }
+  ],
+  "errors": []
+}

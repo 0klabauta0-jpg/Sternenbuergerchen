@@ -1,0 +1,32 @@
+{
+  "public_gallery": [
+    {
+      "file": "bilder/01_rostwelt_landschaft.png",
+      "anonymous": true,
+      "sha256_match": true
+    },
+    {
+      "file": "bilder/02_menschen_stilstudie.png",
+      "anonymous": true,
+      "sha256_match": true
+    },
+    {
+      "file": "bilder/03_aussenposten_stilstudie.png",
+      "anonymous": true,
+      "sha256_match": true
+    },
+    {
+      "file": "bilder/map_detail_proposal.png",
+      "anonymous": true,
+      "sha256_match": true
+    },
+    {
+      "file": "bilder/cliff_detail_proposal.png",
+      "anonymous": true,
+      "sha256_match": true
+    }
+  ],
+  "guide_has_both_direct_links": true,
+  "code_repository_remains_private": true,
+  "prior_probe": "Python urllib website request received HTTP403 from edge; fresh anonymous browser checks23/0 and this Node fetch pass."
+}

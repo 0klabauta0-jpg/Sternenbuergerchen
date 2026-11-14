@@ -1,0 +1,25 @@
+{
+  "checked_utc": "2026-11-14T08:37:14.986319+00:00",
+  "anonymous": true,
+  "public_repository": "https://github.com/0klabauta0-jpg/Sternenbuergerchen-Downloads",
+  "release_url": "https://github.com/0klabauta0-jpg/Sternenbuergerchen-Downloads/releases/tag/playtest-2026-11-14-r2",
+  "assets": [
+    {
+      "name": "SternenBuergerchen-Windows-R2-2026-11-14-8571be32c.zip",
+      "url": "https://github.com/0klabauta0-jpg/Sternenbuergerchen-Downloads/releases/download/playtest-2026-11-14-r2/SternenBuergerchen-Windows-R2-2026-11-14-8571be32c.zip",
+      "bytes": 188699405,
+      "sha256": "020c3a4966febbb700d4de824401c5497806f268ac38a3db70d44426ab6522fa",
+      "anonymous_http": 206,
+      "zip_magic": true
+    },
+    {
+      "name": "SternenBuergerchen_2D-Referenzbilder_2026-11-14.zip",
+      "url": "https://github.com/0klabauta0-jpg/Sternenbuergerchen-Downloads/releases/download/playtest-2026-11-14-r2/SternenBuergerchen_2D-Referenzbilder_2026-11-14.zip",
+      "bytes": 13767551,
+      "sha256": "8e23bc8d37c9c80d684ef745fe035b05ed8ac9ded39df1ae5e494bcacc02c348",
+      "anonymous_http": 206,
+      "zip_magic": true
+    }
+  ],
+  "scope": "Unauthenticated metadata and HTTP range download; full asset digests match checked local packages."
+}

@@ -1,0 +1,124 @@
+{
+  "package": "SternenBuergerchen 2D-Referenzbilder",
+  "date": "2026-11-14",
+  "source_repository": "SternenBuergerchen (Projektquellen)",
+  "source_commit": "ea0d3f7b7",
+  "scope": "Unveraenderte vorhandene KI-Projektentwuerfe. Kein Beleg fuer implementierte Modelle oder aktuelle EXE-Grafik.",
+  "items": [
+    {
+      "original_path": "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png",
+      "status": "Historischer eigener KI-2D-Zielentwurf, kein Ingamebeweis",
+      "provenance": {
+        "tool": "image_gen.imagegen built-in",
+        "date": "2026-11-01",
+        "input_references": [
+          "InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+        ]
+      },
+      "package_path": "bilder/01_rostwelt_landschaft.png",
+      "sha256": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea",
+      "bytes": 3232166,
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    {
+      "original_path": "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+      "status": "Historischer eigener KI-2D-Zielentwurf, kein Ingamebeweis",
+      "provenance": {
+        "tool": "image_gen.imagegen built-in",
+        "date": "2026-11-01",
+        "input_references": [
+          "InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+        ]
+      },
+      "package_path": "bilder/02_menschen_stilstudie.png",
+      "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+      "bytes": 2767466,
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    {
+      "original_path": "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+      "status": "Historischer eigener KI-2D-Zielentwurf, kein Ingamebeweis",
+      "provenance": {
+        "tool": "image_gen.imagegen built-in",
+        "date": "2026-11-01",
+        "input_references": [
+          "InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+        ]
+      },
+      "package_path": "bilder/03_aussenposten_stilstudie.png",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "bytes": 3411898,
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    {
+      "original_path": "docs/qa/hex_surface_design_20261113/references/map_detail_proposal.png",
+      "status": "Offener KI-2D-Gestaltungsvorschlag, kein Ingamebeweis",
+      "provenance": {
+        "tool": "built-in image_gen",
+        "date": "2026-11-13",
+        "input_references": [
+          {
+            "path": "docs/qa/review_completion_20261113/maps_after/7aef3090831340a9a4dc9a96bb56fa5b/images/satellite_crash_site_arrival.png",
+            "sha256": "7921971339fc99880b025f3ad90aa4459f7d6a5df1e3cc05b52611b2d73c269d"
+          },
+          {
+            "path": "docs/qa/review_completion_20261113/hex_surface_after/985bbe319b1a4c07a5394c4279e55e12/images/actual_hill_ramp_hex_surface.png",
+            "sha256": "5cc56e331ecc593cb7100fb4fa6c733bd16edd7d480efcb6be58c2370a9eea34"
+          },
+          {
+            "path": "docs/qa/ui_native_r4_20261102/captures/mission_frontier_1280x720.png",
+            "sha256": "3686c68dc0e2b17b4bc4359ecac4a2915d3e7951f34e398dc4d286bbc3c0126a"
+          }
+        ]
+      },
+      "package_path": "bilder/map_detail_proposal.png",
+      "sha256": "f0dcaf519ac1adb190fe614240dc7271c3c85e8e692f458618581c1979ffb480",
+      "bytes": 2391990,
+      "dimensions": [
+        1774,
+        887
+      ]
+    },
+    {
+      "original_path": "docs/qa/hex_surface_design_20261113/references/cliff_detail_proposal.png",
+      "status": "Rechte Felsvariante durch Nutzer ausgewaehlt; KI-2D-Entwurf, kein Ingamebeweis",
+      "provenance": {
+        "tool": "built-in image_gen",
+        "date": "2026-11-13",
+        "input_references": [
+          {
+            "path": "docs/qa/review_completion_20261113/hex_surface_after/985bbe319b1a4c07a5394c4279e55e12/images/actual_hill_ramp_hex_surface.png",
+            "sha256": "5cc56e331ecc593cb7100fb4fa6c733bd16edd7d480efcb6be58c2370a9eea34"
+          },
+          {
+            "path": "docs/qa/review_completion_20261113/maps_after/7aef3090831340a9a4dc9a96bb56fa5b/images/fortified_outpost_objective.png",
+            "sha256": "080eba26d8e8b2dc336837116c019d4ff9df128470c077dc186c4e366a702272"
+          }
+        ]
+      },
+      "package_path": "bilder/cliff_detail_proposal.png",
+      "sha256": "d6965e1909ab616288b4c39aef0805fcd661ff99b3b3e5274ede20f33e330cbc",
+      "bytes": 2230963,
+      "dimensions": [
+        1774,
+        887
+      ]
+    }
+  ],
+  "excluded": [
+    "RSI-/Star-Citizen-Webscreenshots und fremde Assetpreviews",
+    "Cutlass/Buccaneer-Zielbilder: fremde Schiffsdesigns, keine klare Weitergabegrundlage im Quellenmanifest",
+    "Nutzerbilder references/current: Generation/Urheberschaft in den gelesenen Quellen nicht eigenstaendig belegt",
+    "Abgelehnte Deckstudie, alte Varianten und native Screenshots: fuer die kompakte Zielbildauswahl nicht erforderlich",
+    "Smart-Mobile-Konzept: externe Vorlagen in der Entwurfsfolge, deshalb fuer diese kompakte Auswahl ausgelassen"
+  ]
+}
