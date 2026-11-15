@@ -92,11 +92,11 @@ Neuer Schluessel im Rueckgabe-Dictionary:
 | `AllFireteamsButton` | unveraendert `T.pos + (T.w - 64, 8)`, 52 x 24 | |
 | `A5TeamPortraits` | `T.pos + (10, 36)`, Groesse `(T.w - 20, ph)` | y 34 |
 | `A5TeamSummary` | `P.pos + (8, i)`, Groesse `(336, 24)` | in der Karte |
-| `TacticalStancePanel` | `P.pos + (8, i + 30)`, Groesse `(336, 28)` | in der Karte |
-| `A5FireRuleHeading` | `P.pos + (8, i + 64)`, Groesse `(88, 28)` | in der Karte |
-| `A5FireRuleSelector` | `P.pos + (100, i + 64)`, Groesse `(244, 28)` | in der Karte |
+| `TacticalStancePanel` | `P.pos + (8, i + 30)`, Groesse `(336, 48)` | in der Karte |
+| `A5FireRuleHeading` | `P.pos + (8, i + 82)`, Groesse `(88, 28)` | in der Karte |
+| `A5FireRuleSelector` | `P.pos + (100, i + 82)`, Groesse `(244, 28)` | in der Karte |
 | `A5TeamBoard` | `P.pos + (360, i + 30)`, Groesse `(104, 28)` | in der Karte |
-| `A5BoardStatus` | `P.pos + (360, i + 62)`, Groesse `(160, 36)` | in der Karte |
+| `A5BoardStatus` | `P.pos + (360, i + 66)`, Groesse `(160, 36)` | in der Karte |
 
 - Die versteckten Original-Feuerregel-Knoepfe (`RULES`), `info_scroll`, Kontextknoepfe und `_context_tool_rect` bleiben unveraendert.
 - `team.set_meta("native_a5_parameter_group_left", true)` bleibt. Zusaetzlich `team.set_meta("native_a5_parameter_group_band", true)`.

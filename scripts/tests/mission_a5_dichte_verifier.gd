@@ -93,6 +93,11 @@ func _check_live(vp: Vector2i) -> void:
 		_expect(params.encloses(rect), "%s: %s liegt in team_parameters (%s)" % [tag, node_path.get_file(), str(rect)])
 		_expect(dock.get_global_rect().grow(1.0).encloses(rect), "%s: %s liegt im BottomDock" % [tag, node_path.get_file()])
 		_expect(not rect.intersects(target.get_global_rect()), "%s: %s schneidet A5TargetOrderPanel nicht" % [tag, node_path.get_file()])
+	var stance_rect: Rect2 = (mission.get_node(STANCE) as Control).get_global_rect()
+	var selector_rect: Rect2 = (mission.get_node(TEAM + "/A5FireRuleSelector") as Control).get_global_rect()
+	var heading_rect: Rect2 = (mission.get_node(TEAM + "/A5FireRuleHeading") as Control).get_global_rect()
+	_expect(not stance_rect.intersects(selector_rect) and not stance_rect.intersects(heading_rect), "%s: Haltungsrahmen %s schneidet Feuerregel-Zeile nicht (%s, %s)" % [tag, str(stance_rect), str(heading_rect), str(selector_rect)])
+	_expect(dock.get_global_rect().grow(1.0).encloses(selector_rect), "%s: A5FireRuleSelector liegt im BottomDock" % tag)
 	var portraits := mission.get_node(TEAM + "/A5TeamPortraits") as Control
 	_expect(portraits.get_child_count() > 0, "%s: Portraits vorhanden" % tag)
 	for child in portraits.get_children():

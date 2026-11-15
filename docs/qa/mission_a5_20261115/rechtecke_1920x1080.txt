@@ -6,10 +6,10 @@ MissionIdentityPanel	[P: (1124.0, 16.0), S: (440.0, 64.0)]	true
 MissionDropshipPanel	[P: (1592.0, 16.0), S: (312.0, 92.0)]	true
 MissionDropshipPanel/CompactCard	[P: (1592.0, 16.0), S: (312.0, 92.0)]	true
 TacticalEventLogPanel	[P: (1592.0, 796.0), S: (312.0, 120.0)]	true
-TacticalStancePanel	[P: (712.0, 966.0), S: (336.0, 44.0)]	true
-A5FireRuleSelector	[P: (804.0, 1000.0), S: (244.0, 31.0)]	true
-A5FireRuleHeading	[P: (712.0, 1000.0), S: (88.0, 28.0)]	true
+TacticalStancePanel	[P: (712.0, 966.0), S: (336.0, 48.0)]	true
+A5FireRuleSelector	[P: (804.0, 1018.0), S: (244.0, 31.0)]	true
+A5FireRuleHeading	[P: (712.0, 1018.0), S: (88.0, 28.0)]	true
 A5TeamBoard	[P: (1064.0, 966.0), S: (104.0, 31.0)]	true
-A5BoardStatus	[P: (1064.0, 998.0), S: (160.0, 39.0)]	true
+A5BoardStatus	[P: (1064.0, 1002.0), S: (160.0, 39.0)]	true
 A5TeamSummary	[P: (712.0, 936.0), S: (336.0, 24.0)]	true
 A5TeamPortraits	[P: (26.0, 816.0), S: (292.0, 88.0)]	true

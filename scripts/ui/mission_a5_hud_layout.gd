@@ -141,7 +141,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	if stance_panel != null:
 		stance_panel.clip_contents = false
 		var params_rect: Rect2i = layout.team_parameters
-		_place(stance_panel, Rect2(Vector2(params_rect.position) + Vector2(8, float(layout.action_inset + 30)), Vector2(336, 28)))
+		_place(stance_panel, Rect2(Vector2(params_rect.position) + Vector2(8, float(layout.action_inset + 30)), Vector2(336, 48)))
 		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
@@ -677,11 +677,11 @@ static func _layout_selected_team_controls(controller: Node, team: PanelContaine
 	fire_heading.clip_text = true
 	fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	fire_heading.visible = true
-	_place(fire_heading, Rect2(params.position + Vector2(8, inset + 64), Vector2(88, 28)))
+	_place(fire_heading, Rect2(params.position + Vector2(8, inset + 82), Vector2(88, 28)))
 	fire_heading.z_index = 12
 	var selector := team.get_node("A5FireRuleSelector") as OptionButton
 	selector.add_theme_font_size_override("font_size", font_size)
-	_place(selector, Rect2(params.position + Vector2(100, inset + 64), Vector2(244, 28)))
+	_place(selector, Rect2(params.position + Vector2(100, inset + 82), Vector2(244, 28)))
 	var details := team.get_node("A5DetailsButton") as Button
 	details.add_theme_font_size_override("font_size", font_size - 1)
 	_place(details, Rect2(rect.position + Vector2(rect.size.x - 144, 8), Vector2(76, 24)))
@@ -694,7 +694,7 @@ static func _layout_selected_team_controls(controller: Node, team: PanelContaine
 	board.add_theme_font_size_override("font_size",font_size)
 	_place(board,Rect2(params.position+Vector2(360,inset+30),Vector2(104,28)))
 	var status:=team.get_node("A5BoardStatus") as Label
-	_place(status,Rect2(params.position+Vector2(360,inset+62),Vector2(160,36)))
+	_place(status,Rect2(params.position+Vector2(360,inset+66),Vector2(160,36)))
 	team.mouse_filter = Control.MOUSE_FILTER_STOP
 	THEME.style_card(team, true)
 	team.set_meta("native_a5_parameter_group_left", true)
