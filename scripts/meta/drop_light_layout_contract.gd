@@ -83,31 +83,34 @@ static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) ->
 	var medium: bool = viewport_size.y >= 900
 	var action: int = 72 if large else (64 if medium else 52)
 	var gap: int = 8 if medium else 6
-	var inset: int = 16 if large else (12 if medium else 8)
+	var inset: int = 12 if large else 8
 	var edge: int = 24 if large else 16
-	var card_width: int = 400 if large else (336 if medium else 300)
-	var portrait_height: int = 64 if large else (58 if medium else 53)
+	var card_width: int = 376 if large else (312 if medium else 280)
+	var portrait_height: int = 96 if large else (88 if medium else 80)
 	var band_height: int = 2 * action + 3 * inset
 	var band_top: int = viewport_size.y - band_height
-	var team_height: int = 254 if large else (238 if medium else 226)
+	var team_height: int = portrait_height + 48
 	var team_top: int = band_top - team_height - 12
 	var mini_top: int = 96 if medium else 88
 	var mini_height: int = mini(680 if large else 480, maxi(120, team_top - mini_top - 12))
 	var command_width: int = 5 * action + 4 * gap + 2 * inset
-	var transport_width: int = 440 if large else (384 if medium else 344)
-	var objective_width: int = 456 if large else (400 if medium else 344)
+	var transport_width: int = 376 if large else (312 if medium else 280)
+	var objective_width: int = 504 if large else (440 if medium else 392)
+	var target_width: int = 344 if large else (320 if medium else 272)
+	var event_log_height: int = 152 if large else (120 if medium else 104)
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
-		"mission_identity": Rect2i(viewport_size.x - transport_width - objective_width - 2 * edge - 12, edge, objective_width, 112 if large else (96 if medium else 88)),
+		"mission_identity": Rect2i(viewport_size.x - transport_width - objective_width - 2 * edge - 12, edge, objective_width, 72 if large else (64 if medium else 56)),
 		"top_nav": Rect2i(edge, edge, 528 if large else (440 if medium else 384), 72 if large else (64 if medium else 56)),
 		"fireteam_mini": Rect2i(edge, team_top - mini_height - 12, card_width + 16, mini_height),
-		"event_log": Rect2i(viewport_size.x - transport_width - edge, band_top - (176 if large else 144) - 12, transport_width, 176 if large else 144),
+		"event_log": Rect2i(viewport_size.x - transport_width - edge, band_top - event_log_height - 12, transport_width, event_log_height),
 		"bottom_dock": Rect2i(0, band_top, viewport_size.x, band_height),
 		"command_matrix": Rect2i(0, band_top, command_width, band_height),
-		"target_order": Rect2i(command_width + gap, band_top, 344 if large else (320 if medium else 272), band_height),
+		"target_order": Rect2i(command_width + gap, band_top, target_width, band_height),
+		"team_parameters": Rect2i(command_width + gap + target_width + gap, band_top, 528, band_height),
 		"selected_fireteam": Rect2i(edge, team_top, card_width, team_height),
 		"selected_members": Rect2i(edge, team_top, card_width, portrait_height),
-		"mission_control": Rect2i(viewport_size.x - transport_width - edge, edge, transport_width, 280 if large else (248 if medium else 224)),
+		"mission_control": Rect2i(viewport_size.x - transport_width - edge, edge, transport_width, 200 if large else (176 if medium else 160)),
 		"action_edge": action, "action_gap": gap, "action_inset": inset,
 		"card_width": card_width, "portrait_height": portrait_height,
 		"body_font_size": 18 if large else (16 if medium else 14),
