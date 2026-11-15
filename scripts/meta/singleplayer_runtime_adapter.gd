@@ -109,6 +109,7 @@ static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -
 
 
 var _base_personnel: Node
+var _fallen: Array = []
 var _flow: Node
 var _screen: Control
 var _simulation: Node
@@ -193,6 +194,7 @@ func configure(flow: Node, screen: Control) -> void:
 			_campaign.restore_state(checkpoint.campaign)
 			_supply.restore_state(checkpoint.supply)
 			_onboarding.restore_state(checkpoint.onboarding)
+			restore_fallen_from_checkpoint(checkpoint)
 			if checkpoint.has("polisa_recruitment_market") and not _polisa_market.restore_state(checkpoint.polisa_recruitment_market).get("ok", false):
 				push_error("Invalid Polisa recruitment market checkpoint")
 				return
@@ -1750,7 +1752,37 @@ func export_campaign_checkpoint() -> Dictionary:
 	var payload := {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "location_resources":resources,"ship_equipment":_ship_equipment.export_state(),"polisa_recruitment_market":_polisa_market.export_state()}
 	if not hex_checkpoint.is_empty(): payload["hex_tactical"] = hex_checkpoint
 	else: payload["base_personnel"] = _base_personnel.export_state() if _base_personnel != null else {}
+	payload["fallen"] = get_fallen()
 	return payload
+
+## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
+func record_fallen(entry: Dictionary) -> Dictionary:
+	var clean: Dictionary = _clean_fallen_entry(entry)
+	if clean.is_empty(): return {"ok": false, "reason": "invalid_fallen_entry"}
+	for known: Dictionary in _fallen:
+		if known.unit_id == clean.unit_id: return {"ok": true, "unchanged": true}
+	_fallen.append(clean)
+	return {"ok": true}
+
+func get_fallen() -> Array:
+	return _fallen.duplicate(true)
+
+## Ersetzt die Liste durch die des Standes (leer, wenn der Stand kein Feld "fallen" hat).
+func restore_fallen_from_checkpoint(checkpoint: Dictionary) -> void:
+	_fallen = []
+	var saved: Variant = checkpoint.get("fallen", [])
+	if typeof(saved) != TYPE_ARRAY: return
+	for entry in saved:
+		if typeof(entry) == TYPE_DICTIONARY: record_fallen(entry)
+
+static func _clean_fallen_entry(entry: Dictionary) -> Dictionary:
+	if typeof(entry.get("unit_id")) != TYPE_STRING or String(entry.unit_id).is_empty(): return {}
+	var clean := {"unit_id": String(entry.unit_id)}
+	for key in ["display_name", "job_id", "location_id"]:
+		var value: Variant = entry.get(key, "")
+		if typeof(value) != TYPE_STRING: return {}
+		clean[key] = String(value)
+	return clean
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}

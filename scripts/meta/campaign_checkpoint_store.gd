@@ -203,8 +203,17 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if ids.has("campaign_outpost_recruit") != bool(progress.get("recruited_outpost",false)) or ids.has("campaign_rescue_pilot") != bool(progress.get("recruited_pilot",false)): return {"ok":false,"reason":"checkpoint_roster_progress_mismatch"}
 	var original_fleet_count := fleet_ids.size() - Dictionary(station.ships).size()
 	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
+	if payload.has("fallen") and not _valid_fallen(payload.fallen): return {"ok":false,"reason":"invalid_fallen"}
 
 	return {"ok":true}
+## Gefallenenliste: Array aus Dictionaries mit nicht leerem String unit_id; die drei anderen Schluessel sind optional, aber Strings.
+static func _valid_fallen(value: Variant) -> bool:
+	if typeof(value) != TYPE_ARRAY: return false
+	for entry in value:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("unit_id")) != TYPE_STRING or String(entry.unit_id).is_empty(): return false
+		for key in ["display_name", "job_id", "location_id"]:
+			if entry.has(key) and typeof(entry[key]) != TYPE_STRING: return false
+	return true
 static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dictionary:
 	# V2 has no free-position mirror. Reject before any Legacy normalization.
 	if payload.has("base_personnel") or typeof(payload.hex_tactical) != TYPE_DICTIONARY:
