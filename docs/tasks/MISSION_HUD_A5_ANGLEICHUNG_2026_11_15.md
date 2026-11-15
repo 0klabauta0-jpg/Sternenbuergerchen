@@ -64,7 +64,7 @@ umgehaengt oder geloescht; es aendern sich Rechtecke, Mindestgroessen, Schriftgr
 | `card_width` | 280 | 312 | 376 | 300 / 336 / 400 |
 | `portrait_height` | 80 | 88 | 96 | 53 / 58 / 64 |
 | `team_height` | 128 | 136 | 144 | 226 / 238 / 254 |
-| `transport_width` | 280 | 312 | 376 | 344 / 384 / 440 |
+| `transport_width` | 304 | 320 | 376 | 344 / 384 / 440 |
 | `objective_width` | 392 | 440 | 504 | 344 / 400 / 456 |
 | Hoehe `mission_identity` | 56 | 64 | 72 | 88 / 96 / 112 |
 | Hoehe `event_log` | 104 | 120 | 152 | 144 / 144 / 176 |
@@ -244,3 +244,9 @@ Keine neuen Fehlschlaege in vorher fehlgeschlagenen Tests (Fehlerzeilen verglich
 - Schritt 5.2 musste nicht angewendet werden (Protokoll, Dropship-Breite, Hoehe 92 innerhalb der Grenzen).
 - Testszene zeigt Dropship-Karte ohne Schiff ("Kein Dropship"): Schiffsbild und Anflugrad nicht im Bild geprueft.
 
+### Nachtrag: Karte mit Schiff
+Mit Schiff und drei gleichzeitig sichtbaren Knoepfen (Landezone waehlen, Landen, Abheben) brauchen die Knoepfe 303 px bei 296 px Innenbreite der Karte; `transport_width` ist deshalb 304 / 320 / 376 (vorher 280 / 312 / 376). `event_log` und `mission_identity` folgen ueber die vorhandenen Formeln. Gemessen (Verifier-Block mit zwei Schiffen, Karte `a5_ui_lz_1` "Entermesser", Zustand waiting):
+- 1280 x 720: Karte P(960,16) S(304,184)
+- 1920 x 1080: Karte P(1584,16) S(320,198) (Grenze 220)
+- 3440 x 1440: Karte P(3040,24) S(376,220)
+Alle drei Knoepfe sichtbar, ohne `clip_text`, rechter Rand innerhalb des Viewports, keine Ueberschneidung mit Zielkarte und Protokoll. Bilder: `mit_schiff_1920x1080.jpg`, `mit_schiff_1280x720.jpg`.

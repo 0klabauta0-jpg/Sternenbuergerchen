@@ -2,10 +2,10 @@ TacticalUI/BottomDock	[P: (0.0, 928.0), S: (1920.0, 152.0)]	true
 FireteamPanel	[P: (16.0, 780.0), S: (312.0, 136.0)]	true
 FireteamMiniPanel	[P: (16.0, 288.0), S: (328.0, 480.0)]	true
 A5TargetOrderPanel	[P: (376.0, 928.0), S: (320.0, 152.0)]	true
-MissionIdentityPanel	[P: (1124.0, 16.0), S: (440.0, 64.0)]	true
-MissionDropshipPanel	[P: (1592.0, 16.0), S: (312.0, 92.0)]	true
-MissionDropshipPanel/CompactCard	[P: (1592.0, 16.0), S: (312.0, 92.0)]	true
-TacticalEventLogPanel	[P: (1592.0, 792.0), S: (312.0, 120.0)]	true
+MissionIdentityPanel	[P: (1116.0, 16.0), S: (440.0, 64.0)]	true
+MissionDropshipPanel	[P: (1584.0, 16.0), S: (320.0, 92.0)]	true
+MissionDropshipPanel/CompactCard	[P: (1584.0, 16.0), S: (320.0, 92.0)]	true
+TacticalEventLogPanel	[P: (1584.0, 792.0), S: (320.0, 120.0)]	true
 TacticalStancePanel	[P: (712.0, 966.0), S: (336.0, 48.0)]	true
 A5FireRuleSelector	[P: (804.0, 1018.0), S: (244.0, 31.0)]	true
 A5FireRuleHeading	[P: (712.0, 1018.0), S: (88.0, 28.0)]	true

@@ -12,8 +12,8 @@ func _init() -> void:
 func _run() -> void:
 	# [Viewport, inset, band, card_width, portrait_height, team_height, transport_width, objective_width, identity_h, log_h, control_h, body, heading]
 	var specs: Array = [
-		[Vector2i(1280, 720), 8, 128, 280, 80, 128, 280, 392, 56, 104, 160, 14, 20],
-		[Vector2i(1920, 1080), 8, 152, 312, 88, 136, 312, 440, 64, 120, 176, 16, 23],
+		[Vector2i(1280, 720), 8, 128, 280, 80, 128, 304, 392, 56, 104, 160, 14, 20],
+		[Vector2i(1920, 1080), 8, 152, 312, 88, 136, 320, 440, 64, 120, 176, 16, 23],
 		[Vector2i(3440, 1440), 12, 180, 376, 96, 144, 376, 504, 72, 152, 200, 18, 26],
 	]
 	for spec in specs:
@@ -116,6 +116,30 @@ func _check_live(vp: Vector2i) -> void:
 	_expect(not ship_rect.intersects(identity.get_global_rect()), "%s: Dropship schneidet Identity nicht" % tag)
 	var dial := mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard/Contents/ApproachRow/ApproachDial") as Control
 	_expect(dial.custom_minimum_size == Vector2(96, 56), "%s: ApproachDial 96x56" % tag)
+	# Karte mit Schiff: drei Knoepfe gleichzeitig sichtbar.
+	var planning: Dictionary = Dictionary(controller.call("get_planning_state"))
+	planning["mission_drop_craft_id"] = "a5_ui_lz_1"
+	planning["mission_drop_state"] = "waiting"
+	planning["mission_drop_cards"] = [
+		{"craft_id": "a5_ui_lz_1", "craft_type": "dropship", "display_name": "Entermesser", "state": "waiting", "eta_seconds": 0, "progress": 0, "passenger_count": 2, "embarked_unit_ids": ["unit_alpha"], "has_lz_position": true, "has_embarked_payload": true, "approach_angle": "NW"},
+		{"craft_id": "a5_ui_lz_2", "craft_type": "dropship", "display_name": "Zweites Schiff", "state": "to_mission", "eta_seconds": 30, "progress": 0, "passenger_count": 0, "embarked_unit_ids": [], "has_lz_position": false}]
+	controller.call("set_planning_state", planning)
+	for _i in range(16):
+		await process_frame
+	var live_vp := Vector2i(mission.get_viewport().get_visible_rect().size)
+	var live_layout: Dictionary = LAYOUT.get_mission_hud_layout(live_vp)
+	var live_tag: String = "%s mit Schiff (Viewport %s)" % [tag, str(live_vp)]
+	var card_rect: Rect2 = ship.get_global_rect()
+	for action in ["set_lz", "drop", "return"]:
+		var btn := mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Actions/" + action) as Button
+		_expect(btn.is_visible_in_tree(), "%s: Knopf %s sichtbar" % [live_tag, action])
+		_expect(not btn.clip_text, "%s: Knopf %s ohne clip_text" % [live_tag, action])
+	_expect(absf(card_rect.size.x - float((live_layout.mission_control as Rect2i).size.x)) <= 1.0, "%s: Breite %s == transport_width" % [live_tag, str(card_rect.size.x)])
+	_expect(card_rect.end.x <= float(live_vp.x - _edge(live_vp)) + 1.0, "%s: rechter Rand %s" % [live_tag, str(card_rect.end.x)])
+	if live_vp == Vector2i(1920, 1080):
+		_expect(card_rect.size.y <= 220.0, "%s: Hoehe %s <= 220" % [live_tag, str(card_rect.size.y)])
+	_expect(not card_rect.intersects(identity.get_global_rect()) and not card_rect.intersects(event_log.get_global_rect()), "%s: schneidet Identity/Protokoll nicht" % live_tag)
+	print("MESSUNG ", live_tag, " Karte ", card_rect)
 	mission.queue_free()
 	for _i in range(4):
 		await process_frame

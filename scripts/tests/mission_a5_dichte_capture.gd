@@ -55,6 +55,21 @@ func _run() -> void:
 		var f := FileAccess.open(ProjectSettings.globalize_path(OUT_DIR + "rechtecke_%s.txt" % tag), FileAccess.WRITE)
 		f.store_string("\n".join(lines) + "\n")
 		f.close()
+		var planning: Dictionary = Dictionary(controller.call("get_planning_state"))
+		planning["mission_drop_craft_id"] = "a5_ui_lz_1"
+		planning["mission_drop_state"] = "waiting"
+		planning["mission_drop_cards"] = [
+			{"craft_id": "a5_ui_lz_1", "craft_type": "dropship", "display_name": "Entermesser", "state": "waiting", "eta_seconds": 0, "progress": 0, "passenger_count": 2, "embarked_unit_ids": ["unit_alpha"], "has_lz_position": true, "has_embarked_payload": true, "approach_angle": "NW"},
+			{"craft_id": "a5_ui_lz_2", "craft_type": "dropship", "display_name": "Zweites Schiff", "state": "to_mission", "eta_seconds": 30, "progress": 0, "passenger_count": 0, "embarked_unit_ids": [], "has_lz_position": false}]
+		controller.call("set_planning_state", planning)
+		for _i in range(16):
+			await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(ProjectSettings.globalize_path(OUT_DIR + "mit_schiff_%s.png" % tag))
+		var ship_node := mission.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
+		var f2 := FileAccess.open(ProjectSettings.globalize_path(OUT_DIR + "rechtecke_mit_schiff_%s.txt" % tag), FileAccess.WRITE)
+		f2.store_string("MissionDropshipPanel\t%s\n" % str(ship_node.get_global_rect()))
+		f2.close()
 		mission.queue_free()
 		for _i in range(4):
 			await process_frame
