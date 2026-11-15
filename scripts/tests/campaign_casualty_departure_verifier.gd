@@ -14,9 +14,17 @@ func _run() -> void:
 	if only.is_empty() or only == "A":
 		await _departure_a_baseline()
 	if only.is_empty() or only == "B":
-		await _departure_b_revived()
+		await _departure_revived("B", false)
 	if only.is_empty() or only == "C":
-		await _departure_c_total_loss()
+		await _departure_total_loss("C", false)
+	if only.is_empty() or only == "F":
+		await _departure_revived("F", true)
+	if only.is_empty() or only == "G":
+		await _departure_total_loss("G", true)
+	if only.is_empty() or only == "H":
+		await _departure_h_hud_without_casualties()
+	if only.is_empty() or only == "I":
+		await _departure_i_without_gate()
 	if only.is_empty() or only == "D":
 		await _departure_d_skirmish()
 	if only.is_empty() or only == "E":
@@ -26,6 +34,16 @@ func _run() -> void:
 
 func _request_return() -> Dictionary:
 	return _runtime.call("request_operation", "return_homebase", {"craft_id": _craft_id})
+
+## HUD-Weg: so ruft die Schiffskarte ("Abheben") den Rueckflug auf; sonst der Adapter-Eingang der Versorgungsoberflaeche.
+func _press_return(hud: bool, s: Dictionary) -> Dictionary:
+	if hud:
+		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		return {"ok": true, "hud": true}
+	return _request_return()
+
+func _fuel() -> float:
+	return float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0))
 
 func _craft_location() -> String:
 	return String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", ""))
@@ -85,79 +103,121 @@ func _departure_a_baseline() -> void:
 		_check(String(statuses[id][0]) != "wounded", "A: %s ist nicht wounded" % id)
 	await _end_sortie()
 
-func _departure_b_revived() -> void:
+func _departure_revived(tag: String, hud: bool) -> void:
 	var s: Dictionary = await _begin_sortie()
 	if s.is_empty(): return
 	var leader: Node2D = s.leader
 	var driver: Node = s.driver
 	leader.call("apply_damage", 10000)
-	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "B: Treiber merkt sich die ausgefallene Person"): return
-	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", "B: innerhalb der Frist aufgerichtet")
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, tag + ": Treiber merkt sich die ausgefallene Person"): return
+	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", tag + ": innerhalb der Frist aufgerichtet")
 	if not _seat_crew(s): return
-	var departure: Dictionary = _request_return()
-	print("DEPARTURE_B_REQUEST ", departure)
-	_check(bool(departure.get("ok", false)), "B: Rueckflug wird angenommen")
-	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, "B: Einsatz wird freigegeben"): return
+	var departure: Dictionary = _press_return(hud, s)
+	print("DEPARTURE_" + tag + "_REQUEST ", departure)
+	_check(bool(departure.get("ok", false)), tag + ": Rueckflug wird angenommen")
+	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, tag + ": Einsatz wird freigegeben"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
 	var unit: Dictionary = _roster_unit("campaign_leader")
 	var recovery: Dictionary = Dictionary(unit.get("recovery_state", {}))
 	var entry: Dictionary = _casualty_entry(result, "campaign_leader")
-	print("DEPARTURE_B_RESULT result=", result.get("result"), " outcome=", result.get("mission_outcome"), " wc=", result.get("win_condition_type"), " casualties=", result.get("casualties"), " fatal=", result.get("fatality_unit_ids"), " total_loss=", result.get("casualty_total_loss"), " retry=", result.get("campaign_checkpoint_retry_required"), " job=", _job_status(), " retreat=", _campaign().jobs.satellite_recovery.get("retreat_count", "none"), " phase=", _transfer_phase(), " location=", _craft_location(), " view=", _flow.get("_current_meta_view"))
-	_check(String(result.get("result", "")) == "aborted" and String(result.get("mission_outcome", "")) == "aborted", "B: Ergebnis aborted, mission_outcome aborted")
-	_check(String(result.get("win_condition_type", "")) == "departure", "B: win_condition_type ist departure")
-	_check(String(entry.get("severity", "")) == "light" and String(entry.get("outcome", "")) == "wounded" and Array(result.get("casualties", [])).size() == 1, "B: casualties enthaelt genau den Truppfuehrer als leicht verwundet")
-	_check(not String(entry.get("display_name", "")).is_empty(), "B: casualties-Eintrag traegt display_name")
-	_check(PackedStringArray(result.get("fatality_unit_ids", PackedStringArray(["x"]))).is_empty(), "B: keine Toten gemeldet")
-	_check(result.has("casualty_total_loss") and not bool(result.get("casualty_total_loss", true)) and not bool(result.get("campaign_checkpoint_retry_required", false)), "B: kein Totalverlust, kein Checkpoint-Retry")
+	print("DEPARTURE_" + tag + "_RESULT result=", result.get("result"), " outcome=", result.get("mission_outcome"), " wc=", result.get("win_condition_type"), " casualties=", result.get("casualties"), " fatal=", result.get("fatality_unit_ids"), " total_loss=", result.get("casualty_total_loss"), " retry=", result.get("campaign_checkpoint_retry_required"), " job=", _job_status(), " retreat=", _campaign().jobs.satellite_recovery.get("retreat_count", "none"), " phase=", _transfer_phase(), " location=", _craft_location(), " view=", _flow.get("_current_meta_view"))
+	_check(String(result.get("result", "")) == "aborted" and String(result.get("mission_outcome", "")) == "aborted", tag + ": Ergebnis aborted, mission_outcome aborted")
+	_check(String(result.get("win_condition_type", "")) == "departure", tag + ": win_condition_type ist departure")
+	_check(String(entry.get("severity", "")) == "light" and String(entry.get("outcome", "")) == "wounded" and Array(result.get("casualties", [])).size() == 1, tag + ": casualties enthaelt genau den Truppfuehrer als leicht verwundet")
+	_check(not String(entry.get("display_name", "")).is_empty(), tag + ": casualties-Eintrag traegt display_name")
+	_check(PackedStringArray(result.get("fatality_unit_ids", PackedStringArray(["x"]))).is_empty(), tag + ": keine Toten gemeldet")
+	_check(result.has("casualty_total_loss") and not bool(result.get("casualty_total_loss", true)) and not bool(result.get("campaign_checkpoint_retry_required", false)), tag + ": kein Totalverlust, kein Checkpoint-Retry")
 	var leader_state: Dictionary = {}
 	for state: Dictionary in Array(result.get("team_states", [])):
 		if String(state.get("unit_id", "")) == "campaign_leader":
 			leader_state = state
-	_check(bool(leader_state.get("was_downed", false)) and bool(leader_state.get("near_ship", false)), "B: team_states tragen die Messung am gelandeten Schiff (was_downed, near_ship)")
-	_check(String(unit.get("availability_status", "")) == "wounded" and String(recovery.get("severity", "")) == "light" and is_equal_approx(float(recovery.get("seconds_remaining", -1.0)), 180.0), "B: Kader: wounded, light, 180.0 s")
-	_check(String(_roster_unit("campaign_pilot").get("availability_status", "")) != "wounded", "B: Pilot ist nicht verwundet")
-	_check(_job_status() == "failed", "B: Auftrag steht auf failed (ist %s)" % _job_status())
-	_check(String(_flow.get("_current_meta_view")) == "debrief" or String(_flow.get("_current_meta_view")) == "star_map", "B: Debrief wird gezeigt (oder Sternkarte bei laufender Route)")
-	_check(await _wait_departure_settled("B"), "B: das Schiff fliegt ab und erreicht den Orbit")
+	_check(bool(leader_state.get("was_downed", false)) and bool(leader_state.get("near_ship", false)), tag + ": team_states tragen die Messung am gelandeten Schiff (was_downed, near_ship)")
+	_check(String(unit.get("availability_status", "")) == "wounded" and String(recovery.get("severity", "")) == "light" and is_equal_approx(float(recovery.get("seconds_remaining", -1.0)), 180.0), tag + ": Kader: wounded, light, 180.0 s")
+	_check(String(_roster_unit("campaign_pilot").get("availability_status", "")) != "wounded", tag + ": Pilot ist nicht verwundet")
+	_check(_job_status() == "failed", tag + ": Auftrag steht auf failed (ist %s)" % _job_status())
+	_check(String(_flow.get("_current_meta_view")) == "debrief" or String(_flow.get("_current_meta_view")) == "star_map", tag + ": Debrief wird gezeigt (oder Sternkarte bei laufender Route)")
+	_check(await _wait_departure_settled("B"), tag + ": das Schiff fliegt ab und erreicht den Orbit")
 	# Genau einmal: Rueckflug erneut angefragt, Ergebnis erneut zugestellt.
 	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
 	for round_index in 2:
 		var again: Dictionary = _request_return()
-		print("DEPARTURE_B_AGAIN ", round_index, " ", again)
+		print("DEPARTURE_" + tag + "_AGAIN ", round_index, " ", again)
 		_flow.call("_on_mission_combat_resolved", {"result": "victory", "mission_outcome": "won"})
 	await process_frame
 	var remaining_after: float = float(Dictionary(_roster_unit("campaign_leader").get("recovery_state", {})).get("seconds_remaining", -1.0))
-	_check(remaining_after <= 180.0 and remaining_after > 150.0, "B: Restzeit nach Wiederholungen nicht zurueckgesetzt (%.2f)" % remaining_after)
-	_check(String(Dictionary(_roster_unit("campaign_leader").get("recovery_state", {})).get("severity", "")) == "light", "B: Schwere bleibt light")
-	_check(Array(_flow.get("_all_team_units")).size() == roster_before.size(), "B: Kader hat dieselbe Groesse")
-	_check(Dictionary(_flow.get("_last_mission_result")) == result, "B: Ergebnis bleibt nach Wiederholungen unveraendert")
+	_check(remaining_after <= 180.0 and remaining_after > 150.0, tag + ": Restzeit nach Wiederholungen nicht zurueckgesetzt (%.2f)" % remaining_after)
+	_check(String(Dictionary(_roster_unit("campaign_leader").get("recovery_state", {})).get("severity", "")) == "light", tag + ": Schwere bleibt light")
+	_check(Array(_flow.get("_all_team_units")).size() == roster_before.size(), tag + ": Kader hat dieselbe Groesse")
+	_check(Dictionary(_flow.get("_last_mission_result")) == result, tag + ": Ergebnis bleibt nach Wiederholungen unveraendert")
 	await _end_sortie()
 
-func _departure_c_total_loss() -> void:
+func _departure_total_loss(tag: String, hud: bool) -> void:
 	var s: Dictionary = await _begin_sortie()
 	if s.is_empty(): return
 	var leader: Node2D = s.leader
 	var driver: Node = s.driver
 	leader.call("apply_damage", 10000)
-	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "C: Treiber merkt sich die ausgefallene Person"): return
-	_check(String(leader.call("get_vital_state")) != "fit", "C: Truppfuehrer liegt")
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, tag + ": Treiber merkt sich die ausgefallene Person"): return
+	_check(String(leader.call("get_vital_state")) != "fit", tag + ": Truppfuehrer liegt")
 	if not _seat_crew(s): return
-	var departure: Dictionary = _request_return()
-	print("DEPARTURE_C_REQUEST ", departure)
+	var fuel_before: float = _fuel()
+	var departure: Dictionary = _press_return(hud, s)
+	print("DEPARTURE_" + tag + "_REQUEST ", departure)
 	var started_phase: String = _transfer_phase()
-	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, "C: Einsatz wird freigegeben"): return
+	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, tag + ": Einsatz wird freigegeben"): return
 	await process_frame
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
-	print("DEPARTURE_C_RESULT result=", result.get("result"), " outcome=", result.get("mission_outcome"), " wc=", result.get("win_condition_type"), " reason=", result.get("total_loss_reason"), " total_loss=", result.get("casualty_total_loss"), " retry=", result.get("campaign_checkpoint_retry_required"), " started_phase=", started_phase, " phase_now=", _transfer_phase(), " location=", _craft_location(), " view=", _flow.get("_current_meta_view"), " job=", _job_status())
-	_check(started_phase != "to_homebase", "C: kein Rueckflug gestartet")
-	_check(_transfer_phase() != "to_homebase", "C: auch danach kein Rueckflug unterwegs")
-	_check(String(result.get("result", "")) == "defeat" and bool(result.get("campaign_checkpoint_retry_required", false)), "C: Ergebnis defeat mit Checkpoint-Retry")
-	_check(bool(result.get("casualty_total_loss", false)) and String(result.get("total_loss_reason", "")) == "ground_team_down", "C: Totalverlust, Grund ground_team_down")
-	_check(String(_flow.get("_current_meta_view")) == "debrief", "C: Debrief ist sichtbar")
-	_check(String(_space().get("phase", "")) != "orbit" and _craft_location() != "starmap", "C: das Schiff hat den Ort nicht verlassen")
-	_check(not result.has("casualties") or Array(result.get("casualties", [])).is_empty(), "C: keine Verwundeten gemeldet")
+	print("DEPARTURE_" + tag + "_RESULT result=", result.get("result"), " outcome=", result.get("mission_outcome"), " wc=", result.get("win_condition_type"), " reason=", result.get("total_loss_reason"), " total_loss=", result.get("casualty_total_loss"), " retry=", result.get("campaign_checkpoint_retry_required"), " started_phase=", started_phase, " phase_now=", _transfer_phase(), " location=", _craft_location(), " view=", _flow.get("_current_meta_view"), " job=", _job_status())
+	_check(is_equal_approx(_fuel(), fuel_before), tag + ": Treibstoff ist nicht abgebucht (%.2f -> %.2f)" % [fuel_before, _fuel()])
+	_check(started_phase != "to_homebase", tag + ": kein Rueckflug gestartet")
+	_check(_transfer_phase() != "to_homebase", tag + ": auch danach kein Rueckflug unterwegs")
+	_check(String(result.get("result", "")) == "defeat" and bool(result.get("campaign_checkpoint_retry_required", false)), tag + ": Ergebnis defeat mit Checkpoint-Retry")
+	_check(bool(result.get("casualty_total_loss", false)) and String(result.get("total_loss_reason", "")) == "ground_team_down", tag + ": Totalverlust, Grund ground_team_down")
+	_check(String(_flow.get("_current_meta_view")) == "debrief", tag + ": Debrief ist sichtbar")
+	_check(String(_space().get("phase", "")) != "orbit" and _craft_location() != "starmap", tag + ": das Schiff hat den Ort nicht verlassen")
+	_check(not result.has("casualties") or Array(result.get("casualties", [])).is_empty(), tag + ": keine Verwundeten gemeldet")
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
-		_check(String(unit.get("availability_status", "")) != "wounded", "C: %s ist nicht wounded" % unit.get("unit_id"))
+		_check(String(unit.get("availability_status", "")) != "wounded", tag + ": %s ist nicht wounded" % unit.get("unit_id"))
+	await _end_sortie()
+
+## H: HUD-Weg ohne Ausfaelle: das Schiff hebt ab wie vor der Aenderung (Vergleich mit A).
+func _departure_h_hud_without_casualties() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	if not _seat_crew(s): return
+	var last_before: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	var fuel_before: float = _fuel()
+	_press_return(true, s)
+	if not await _wait_departure_settled("H"): return
+	await process_frame
+	print("DEPARTURE_H_OBSERVED job=", _job_status(), " view=", _flow.get("_current_meta_view"), " location=", _craft_location(), " released=", _mission_released(), " last=", _flow.get("_last_mission_result"), " fuel=", fuel_before, "->", _fuel())
+	_check(_job_status() == "failed", "H: Auftrag wird wie bisher als failed gebucht")
+	_check(Dictionary(_flow.get("_last_mission_result")) == last_before and not Dictionary(_flow.get("_last_mission_result")).has("casualties"), "H: kein Ergebnis departure, keine casualties")
+	_check(String(_flow.get("_current_meta_view")) == "mission" and not _mission_released() and _craft_location() == "starmap", "H: kein Debrief, Ort bleibt, Schiff im Orbit")
+	_check(not bool(s.driver.get("_combat_finished")), "H: Driver wurde nicht aufgeloest")
+	for unit: Dictionary in Array(_flow.get("_all_team_units")):
+		_check(String(unit.get("availability_status", "")) != "wounded", "H: %s ist nicht wounded" % unit.get("unit_id"))
+	await _end_sortie()
+
+## I: Controller ohne gesetztes Gate verhaelt sich wie vor der Aenderung (Ausfall, aber keine Auswertung).
+func _departure_i_without_gate() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	var leader: Node2D = s.leader
+	var driver: Node = s.driver
+	leader.call("apply_damage", 10000)
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "I: Treiber merkt sich die ausgefallene Person"): return
+	_check(bool(Callable(s.controller, "_on_mission_dropship_return_pressed").is_valid()) and Callable(s.controller.get("_campaign_departure_gate")).is_valid(), "I: das Gate ist im Kampagneneinsatz gesetzt")
+	s.controller.call("set_campaign_departure_gate", Callable())
+	if not _seat_crew(s): return
+	var last_before: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	_press_return(true, s)
+	if not await _wait_departure_settled("I"): return
+	await process_frame
+	_check(not bool(driver.get("_combat_finished")), "I: ohne Gate keine Aufloesung am Driver")
+	_check(Dictionary(_flow.get("_last_mission_result")) == last_before, "I: ohne Gate kein Ergebnis (wie vor der Aenderung)")
+	for unit: Dictionary in Array(_flow.get("_all_team_units")):
+		_check(String(unit.get("availability_status", "")) != "wounded", "I: %s ist nicht wounded" % unit.get("unit_id"))
 	await _end_sortie()
 
 ## Truppen bleiben am Ort: die Regel steht ausdruecklich in _campaign_departure_empties_location.

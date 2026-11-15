@@ -14564,6 +14564,12 @@ var _polisa_service_return_gate: Callable
 func set_polisa_service_return_gate(gate: Callable) -> void:
 	_polisa_service_return_gate = gate
 
+# Kampagne (Task 5c): der Flow wertet einen Abflug mit Ausfaellen aus, solange das Schiff noch gelandet ist.
+var _campaign_departure_gate: Callable
+
+func set_campaign_departure_gate(gate: Callable) -> void:
+	_campaign_departure_gate = gate
+
 func _on_mission_dropship_return_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
@@ -14594,6 +14600,14 @@ func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
 	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
 		return false
+	if _campaign_departure_gate.is_valid():
+		var gate_result: Variant = _campaign_departure_gate.call(normalized_craft_id)
+		if typeof(gate_result) == TYPE_DICTIONARY and bool(gate_result.get("handled", false)):
+			var gate_message: String = String(gate_result.get("message", "")).strip_edges()
+			if not gate_message.is_empty():
+				_last_command_text = gate_message
+				_set_mission_dropship_card_feedback(normalized_craft_id, gate_message)
+			return false
 	if _is_parked_campaign_dropship(normalized_craft_id):
 		_select_mission_dropship_craft(normalized_craft_id, false)
 		if _is_active_drop_sequence_for_craft(normalized_craft_id):

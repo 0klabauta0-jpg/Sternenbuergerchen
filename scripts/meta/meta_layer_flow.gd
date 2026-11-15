@@ -4461,6 +4461,9 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		combat_driver.set("campaign_casualty_rules_enabled", not casualty_rules.is_empty())
 		if not casualty_rules.is_empty():
 			combat_driver.set("down_revive_window_seconds", float(casualty_rules.get("down_revive_window_seconds", 0.0)))
+		# Task 5c: der Abflug-Knopf der Schiffskarte laeuft ueber dieselbe Auswertung wie _request_singleplayer_return.
+		if tactical_controller != null and tactical_controller.has_method("set_campaign_departure_gate"):
+			tactical_controller.call("set_campaign_departure_gate", Callable(self, "_campaign_departure_gate") if not casualty_rules.is_empty() else Callable())
 
 	if preview_mode:
 		_disable_node_processing(mission_instance.get_node_or_null("SimulationRoot"))
@@ -8452,33 +8455,67 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 		var boarding: Dictionary = controller.call("request_campaign_crew_boarding", craft_id)
 		if not bool(boarding.get("ok", false)):
 			return boarding
+	# Task 5c: Abflug mit Ausfaellen wird ausgewertet, BEVOR Treibstoff abgebucht wird (Totalverlust fliegt nie).
+	var departure: Dictionary = _campaign_departure_gate(craft_id)
+	if bool(departure.get("handled", false)):
+		var handled_reply: Dictionary = {"ok": bool(departure.get("ok", true)), "message": String(departure.get("message", "")), "departure_resolved": bool(departure.get("ok", true))}
+		for key: String in ["reason", "total_loss"]:
+			if departure.has(key):
+				handled_reply[key] = departure[key]
+		return handled_reply
 	var fuel_gate: Dictionary = _singleplayer_runtime.call("authorize_return", craft_id)
 	if not bool(fuel_gate.get("ok", false)):
 		return fuel_gate
-	# Task 5c: Abflug mit Ausfaellen wird wie ein Rueckzug ausgewertet, solange das Schiff noch gelandet ist.
-	if _resolve_campaign_departure_if_retreat(visit):
-		return {"ok": true, "message": "Rueckzug ausgewertet", "departure_resolved": true}
 	controller.call("_on_mission_dropship_return_pressed", craft_id)
 	return {"ok": true, "message": "Rueckflug angefordert"}
 
 
-## Abflug mit Ausfaellen: loest den Einsatz ueber den Driver als aborted / departure auf. Das Ergebnis laeuft
-## danach durch _on_mission_combat_resolved, die einzige Stelle, die Verluste ermittelt und anwendet.
-## Genau einmal: _combat_finished am Driver sperrt eine zweite Aufloesung, _active_mission == null die zweite Zustellung.
-## Gibt false zurueck (und aendert nichts), wenn der heutige Abflugweg unveraendert gelten soll.
-func _resolve_campaign_departure_if_retreat(visit: Node) -> bool:
-	if not is_campaign_start() or visit == null or visit != _active_mission or _get_campaign_casualty_rules().is_empty():
-		return false
+## Einzige Eintrittsstelle der Abflug-Auswertung; der Missionscontroller ruft sie ueber set_campaign_departure_gate
+## (HUD-Knopf "Abheben"), _request_singleplayer_return ruft sie direkt (Adapter, Polisa-Dispatcher).
+## {"handled": false}: nichts auszuwerten, der Abflug laeuft wie bisher.
+## {"handled": true, ...}: Einsatz wurde ueber den Driver als aborted / departure aufgeloest (oder ist gerade nicht aufloesbar);
+## der Flow hat den weiteren Ablauf uebernommen, der Controller hebt nicht selbst ab.
+## Das Ergebnis laeuft durch _on_mission_combat_resolved, die einzige Stelle, die Verluste ermittelt und anwendet.
+## Genau einmal: _combat_finished am Driver sperrt eine zweite Aufloesung (dann handled false), _active_mission == null die zweite Zustellung.
+func _campaign_departure_gate(craft_id: String) -> Dictionary:
+	var not_handled: Dictionary = {"handled": false}
+	if not is_campaign_start() or _singleplayer_runtime == null or _get_campaign_casualty_rules().is_empty():
+		return not_handled
+	var visit: Node = get_mission_for_craft(craft_id)
+	if visit == null or visit != _active_mission:
+		return not_handled
 	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
 	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
-		return false
+		return not_handled
 	if not _departure_has_casualties(visit, driver):
-		return false
+		return not_handled
 	var measured: Dictionary = _build_mission_result(visit, {})
 	if not _campaign_departure_empties_location(Array(measured.get("team_states", []))):
-		return false
+		return not_handled
+	# Ohne moeglichen Rueckflug (Treibstoff) bliebe der Einsatz sonst halb aufgeloest: dann gilt der heutige Weg.
+	if not bool(Dictionary(_singleplayer_runtime.call("preview_return", craft_id)).get("ok", false)):
+		return not_handled
+	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
+	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
+		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
+	var drop_source: String = _get_mission_drop_source()
 	driver.call("_resolve_combat", "aborted", "", "departure")
-	return true
+	if _active_mission == visit:
+		return {"handled": true, "ok": false, "reason": "departure_unresolved", "message": "Abflug konnte nicht ausgewertet werden, bitte erneut versuchen"}
+	var total_loss: bool = bool(_last_mission_result.get("casualty_total_loss", false))
+	if total_loss:
+		return {"handled": true, "ok": true, "total_loss": true, "message": "Bodenteam ausgefallen: Einsatz verloren, kein Abflug"}
+	_start_departure_flight_if_idle(craft_id, drop_source)
+	return {"handled": true, "ok": true, "total_loss": false, "message": "Rückzug ausgewertet: Verluste gemeldet, das Schiff fliegt ab"}
+
+
+## Der Abschluss startet den Flug nur fuer die Quelle homebase_direct selbst. Fuer jede andere Quelle startet das hier,
+## damit die Rueckmeldung "Schiff fliegt ab" stimmt; mit laufendem Flug oder Oberflaechenabflug geschieht nichts.
+func _start_departure_flight_if_idle(craft_id: String, drop_source: String) -> void:
+	if String(_aircraft_location_by_craft.get(craft_id, "")) != "mission" or not _find_pending_mission_craft_transfer(craft_id).is_empty():
+		return
+	var to_homebase: bool = drop_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT
+	_begin_mission_craft_transfer(craft_id, "to_homebase" if to_homebase else "to_fob", MISSION_DROPSHIP_TO_HOMEBASE_SECONDS if to_homebase else MISSION_DROPSHIP_TO_FOB_SECONDS, drop_source)
 
 
 ## Mindestens eine eigene Person ist nicht fit oder war ausgefallen (leichte Vorpruefung, ohne Ergebnis zu bauen).
