@@ -134,7 +134,7 @@ func _test_save_load_and_surface_gameplay_contract() -> void:
 	var reloaded_rock = reloaded.call("get_tile_at_grid", Vector2i(1, 0)) if reloaded != null else null
 	_assert(_tile_has_fields(reloaded_sand, "nature_ground_sand_dirt", TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND, 2, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE), "Nature sand surface survives Save/Load")
 	_assert(_tile_has_fields(reloaded_rock, "nature_ground_rock_dirt", TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK, 1, TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF), "Nature rock surface survives Save/Load")
-	_assert(TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND) > TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND), "Sand gameplay movement cost stays slower than ground")
+	_assert(is_equal_approx(TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND), TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND)), "Sand path cost equals ground path cost")
 	_assert(TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD) < TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND), "Road gameplay movement cost stays faster than ground")
 
 

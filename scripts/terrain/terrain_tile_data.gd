@@ -9,6 +9,9 @@ const SURFACE_ROAD: String = "road"
 const SURFACE_SAND: String = "sand"
 const SURFACE_ROCK: String = "rock"
 const SURFACE_WATER: String = "water"
+## Decision 15.11.2026: ground vehicles, once they can drive, move at double speed on
+## built roads. Not used yet; there are no drivable ground vehicles.
+const ROAD_VEHICLE_SPEED_FACTOR: float = 2.0
 
 const DEFAULT_WALKABLE: bool = true
 const DEFAULT_BLOCKS_LOS: bool = false
@@ -151,12 +154,14 @@ static func _allows_height_transition(higher, lower, registry_passable: bool) ->
 	return String(higher.edge_type) == EDGE_SLOPE
 
 
+## Decision 15.11.2026: sand counts as normal ground (trails are visual only) and a built
+## road makes movement on foot a little faster (+20 %).
 static func get_surface_speed_factor(next_surface_type: String) -> float:
 	match _normalize_surface_type(next_surface_type):
 		SURFACE_ROAD:
-			return 1.4
+			return 1.2
 		SURFACE_SAND:
-			return 0.6
+			return 1.0
 		SURFACE_ROCK:
 			return 0.8
 		SURFACE_WATER:
@@ -168,9 +173,9 @@ static func get_surface_speed_factor(next_surface_type: String) -> float:
 static func get_surface_path_cost(next_surface_type: String) -> float:
 	match _normalize_surface_type(next_surface_type):
 		SURFACE_ROAD:
-			return 0.7
+			return 0.83
 		SURFACE_SAND:
-			return 1.5
+			return 1.0
 		SURFACE_ROCK:
 			return 1.3
 		SURFACE_WATER:
