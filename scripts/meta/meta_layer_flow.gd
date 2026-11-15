@@ -8455,8 +8455,57 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 	var fuel_gate: Dictionary = _singleplayer_runtime.call("authorize_return", craft_id)
 	if not bool(fuel_gate.get("ok", false)):
 		return fuel_gate
+	# Task 5c: Abflug mit Ausfaellen wird wie ein Rueckzug ausgewertet, solange das Schiff noch gelandet ist.
+	if _resolve_campaign_departure_if_retreat(visit):
+		return {"ok": true, "message": "Rueckzug ausgewertet", "departure_resolved": true}
 	controller.call("_on_mission_dropship_return_pressed", craft_id)
 	return {"ok": true, "message": "Rueckflug angefordert"}
+
+
+## Abflug mit Ausfaellen: loest den Einsatz ueber den Driver als aborted / departure auf. Das Ergebnis laeuft
+## danach durch _on_mission_combat_resolved, die einzige Stelle, die Verluste ermittelt und anwendet.
+## Genau einmal: _combat_finished am Driver sperrt eine zweite Aufloesung, _active_mission == null die zweite Zustellung.
+## Gibt false zurueck (und aendert nichts), wenn der heutige Abflugweg unveraendert gelten soll.
+func _resolve_campaign_departure_if_retreat(visit: Node) -> bool:
+	if not is_campaign_start() or visit == null or visit != _active_mission or _get_campaign_casualty_rules().is_empty():
+		return false
+	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
+	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
+		return false
+	if not _departure_has_casualties(visit, driver):
+		return false
+	var measured: Dictionary = _build_mission_result(visit, {})
+	if not _campaign_departure_empties_location(Array(measured.get("team_states", []))):
+		return false
+	driver.call("_resolve_combat", "aborted", "", "departure")
+	return true
+
+
+## Mindestens eine eigene Person ist nicht fit oder war ausgefallen (leichte Vorpruefung, ohne Ergebnis zu bauen).
+func _departure_has_casualties(mission_instance: Node, driver: Node) -> bool:
+	var setup: Node = mission_instance.get_node_or_null("MissionSetup")
+	if setup == null:
+		return false
+	var unit_ids: PackedStringArray = PackedStringArray(setup.get("selected_team_unit_ids"))
+	var flags: Dictionary = Dictionary(driver.call("get_casualty_flags")) if driver.has_method("get_casualty_flags") else {}
+	for slot_index in range(mini(unit_ids.size(), FRIENDLY_NODE_NAMES.size())):
+		var unit: Node = mission_instance.get_node_or_null(String(FRIENDLY_NODE_NAMES[slot_index]))
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		if bool(Dictionary(flags.get(String(unit.call("get_unit_id")), {})).get("was_downed", false)):
+			return true
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			return true
+	return false
+
+
+## Truppen duerfen spaeter am Ort bleiben, waehrend das Schiff fliegt: nur wenn danach keine einsatzfaehige Person mehr am Boden steht, ist der Abflug ein Rueckzug.
+func _campaign_departure_empties_location(team_states: Array) -> bool:
+	for raw_state in team_states:
+		var state: Dictionary = raw_state
+		if String(state.get("vital_state", "")) == "fit" and not bool(state.get("aboard", false)):
+			return false
+	return true
 
 
 func _finish_singleplayer_visit_if_returned() -> void:
