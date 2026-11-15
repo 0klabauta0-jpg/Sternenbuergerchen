@@ -1818,7 +1818,26 @@ func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
 
 
 func _queue_bleedout_for_downed_friendly(simulation_root: Node) -> void:
-	_queue_bleedout_for_downed_units(simulation_root, _get_units(friendly_unit_paths))
+	var friendly_units: Array = _get_units(friendly_unit_paths)
+	if campaign_casualty_rules_enabled:
+		_poll_friendly_casualty_state(friendly_units)
+	_queue_bleedout_for_downed_units(simulation_root, friendly_units)
+
+
+## Kampagne: Zustand eigener Einheiten jeden Tick lesen, unabhängig von Signalverbindungen
+## (Einheiten werden teils erst nach _ready() registriert und sind dann nicht verbunden).
+func _poll_friendly_casualty_state(units: Array) -> void:
+	for unit in units:
+		if unit == null or not unit.has_method("get_vital_state") or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		if String(unit.call("get_vital_state")) != "fit":
+			_was_downed_unit_ids[unit_id] = true
+		elif _down_state_started_msec_by_unit_id.has(unit_id):
+			_clear_down_state_linger(unit_id)
+			_queued_bleedout_by_unit_id.erase(unit_id)
 
 
 func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> void:

@@ -21,12 +21,15 @@ func _process(_delta: float) -> bool:
 	_case_switch_on_medic_revive_flagged()
 	_case_switch_on_window_zero_bleedout_no_respawn()
 	_case_switch_on_enemy_still_respawns()
+	_case_unconnected_unit_flagged_by_tick()
+	_case_unconnected_unit_heal_resets_window()
+	_case_switch_off_unconnected_unit_not_flagged()
 	print("CAMPAIGN_CASUALTY_DRIVER passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
 
 
-func _build(campaign_on: bool, window_seconds: float) -> Dictionary:
+func _build(campaign_on: bool, window_seconds: float, unconnected_friend: bool = false) -> Dictionary:
 	var fixture := Node.new()
 	var driver = load("res://scripts/tests/mission_combat_loop_driver.gd").new()
 	var friend = load("res://scripts/npc/test_unit.gd").new()
@@ -63,6 +66,12 @@ func _build(campaign_on: bool, window_seconds: float) -> Dictionary:
 		driver.set("campaign_casualty_rules_enabled", true)
 		driver.set("down_revive_window_seconds", window_seconds)
 	driver.call("_connect_unit_signals")
+	if unconnected_friend:
+		# Wie im Kampagneneinsatz: Einheit wurde nach _ready() registriert, der Driver hat keine Verbindung.
+		for signal_name in ["vital_status_changed", "damage_applied", "healed_applied"]:
+			for connection in friend.get_signal_connection_list(signal_name):
+				if connection["callable"].get_object() == driver:
+					friend.disconnect(signal_name, connection["callable"])
 	return {"fixture": fixture, "driver": driver, "friend": friend, "enemy": enemy, "respawn": respawn, "sim": sim}
 
 
@@ -170,6 +179,48 @@ func _case_switch_on_enemy_still_respawns() -> void:
 	_check(env.respawn.call("has_pending_respawn", ENEMY_ID), "campaign: enemy respawns as before")
 	var flags: Dictionary = driver.call("get_casualty_flags")
 	_check(not flags.has(ENEMY_ID), "campaign: enemies are not part of casualty flags")
+	env.fixture.free()
+
+
+func _case_unconnected_unit_flagged_by_tick() -> void:
+	var env := _build(true, 60.0, true)
+	var driver = env.driver
+	var friend = env.friend
+	_check(friend.get_signal_connection_list("vital_status_changed").is_empty(), "unconnected: driver has no vital_status_changed connection")
+	friend.call("apply_damage", 1000, {})
+	_check(not Dictionary(driver.call("get_casualty_flags"))[FRIEND_ID].was_downed, "unconnected: signal path alone does not flag")
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	var flags: Dictionary = driver.call("get_casualty_flags")
+	_check(flags.has(FRIEND_ID) and flags[FRIEND_ID].was_downed == true, "unconnected: tick flags was_downed")
+	env.fixture.free()
+
+
+func _case_unconnected_unit_heal_resets_window() -> void:
+	var env := _build(true, 60.0, true)
+	var driver = env.driver
+	var friend = env.friend
+	friend.call("apply_damage", 1000, {})
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_age_down_state(driver, FRIEND_ID, 5.0)
+	_check(friend.call("apply_heal", 10, {}), "unconnected: heal inside window accepted")
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	var started: Dictionary = driver.get("_down_state_started_msec_by_unit_id")
+	_check(not started.has(FRIEND_ID), "unconnected: tick clears the linger timestamp of a revived unit")
+	friend.call("apply_damage", 1000, {})
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(friend.call("get_vital_state") == "down", "unconnected: downed again, still down")
+	_check(_bleedout_effects(env.sim) == 0, "unconnected: no bleedout, the 60 s window starts anew")
+	env.fixture.free()
+
+
+func _case_switch_off_unconnected_unit_not_flagged() -> void:
+	var env := _build(false, 60.0, true)
+	var driver = env.driver
+	env.friend.call("apply_damage", 1000, {})
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(Dictionary(driver.get("_was_downed_unit_ids")).is_empty(), "switch off: tick flags nothing")
+	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	_check(states.size() == 1 and Dictionary(states[0]).keys().size() == 4 and not Dictionary(states[0]).has("was_downed"), "switch off, unconnected: team state keeps four old fields")
 	env.fixture.free()
 
 
