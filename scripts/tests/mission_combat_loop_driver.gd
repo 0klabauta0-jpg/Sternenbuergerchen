@@ -92,6 +92,10 @@ signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
 
 @export var friendly_team_id: String = "team_alpha"
+## Kampagnenregeln für Ausfälle: eigene Einheiten stehen nicht von selbst wieder auf.
+@export var campaign_casualty_rules_enabled: bool = false
+## Nur bei eingeschaltetem Schalter: Frist, in der ein Sanitäter eine liegende Einheit noch versorgen kann.
+@export var down_revive_window_seconds: float = 3.0
 @export var contact_range: float = 180.0
 @export var damage_per_hit: int = 40
 @export var base_hit_chance: float = 0.45
@@ -140,6 +144,7 @@ func _record_resolver_target_evaluation(_attacker, _target) -> void:
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
 var _down_state_started_msec_by_unit_id: Dictionary = {}
+var _was_downed_unit_ids: Dictionary = {}
 var _enemy_reposition_ready_at_msec: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
@@ -1830,7 +1835,7 @@ func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> vo
 		if String(unit.call("get_vital_state")) != "down":
 			continue
 
-		if not _has_down_state_linger_elapsed(unit_id):
+		if not _has_down_state_linger_elapsed(unit_id, unit):
 			continue
 
 		simulation_root.call(
@@ -1857,7 +1862,11 @@ func _clear_down_state_linger(unit_id: String) -> void:
 	_down_state_started_msec_by_unit_id.erase(unit_id.strip_edges())
 
 
-func _has_down_state_linger_elapsed(unit_id: String) -> bool:
+func _is_friendly_unit(unit) -> bool:
+	return unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")) == friendly_team_id
+
+
+func _has_down_state_linger_elapsed(unit_id: String, unit = null) -> bool:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return false
@@ -1866,7 +1875,20 @@ func _has_down_state_linger_elapsed(unit_id: String) -> bool:
 		return false
 	var started_msec: int = int(_down_state_started_msec_by_unit_id.get(normalized_unit_id, Time.get_ticks_msec()))
 	var elapsed_seconds: float = float(Time.get_ticks_msec() - started_msec) / 1000.0
-	return elapsed_seconds >= DOWN_STATE_VISIBLE_MIN_SECONDS
+	var linger_seconds: float = DOWN_STATE_VISIBLE_MIN_SECONDS
+	if campaign_casualty_rules_enabled and _is_friendly_unit(unit):
+		linger_seconds = down_revive_window_seconds
+	return elapsed_seconds >= linger_seconds
+
+
+func get_casualty_flags() -> Dictionary:
+	var flags: Dictionary = {}
+	for unit in _get_units(friendly_unit_paths):
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		flags[unit_id] = {"was_downed": _was_downed_unit_ids.has(unit_id)}
+	return flags
 
 
 func _request_respawn_for_unit(unit, unit_id: String) -> void:
@@ -1879,6 +1901,8 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 		unit_team_id = String(unit.call("get_team_id"))
 
 	if unit_team_id.is_empty():
+		return
+	if campaign_casualty_rules_enabled and unit_team_id == friendly_team_id:
 		return
 	if _finite_enemy_roster and unit_team_id != friendly_team_id:
 		return
@@ -3335,14 +3359,15 @@ func _build_team_states(paths: Array[NodePath]) -> Array:
 			vital_state = String(unit.call("get_vital_state"))
 
 		var display_name: String = String(unit.call("get_display_name")) if unit.has_method("get_display_name") else String(unit.call("get_unit_id"))
-		team_states.append(
-			{
-				"unit_id": String(unit.call("get_unit_id")),
-				"display_name": display_name,
-				"vital_state": vital_state,
-				"health_points": health_points,
-			}
-		)
+		var team_state: Dictionary = {
+			"unit_id": String(unit.call("get_unit_id")),
+			"display_name": display_name,
+			"vital_state": vital_state,
+			"health_points": health_points,
+		}
+		if campaign_casualty_rules_enabled:
+			team_state["was_downed"] = _was_downed_unit_ids.has(String(team_state["unit_id"]))
+		team_states.append(team_state)
 
 	return team_states
 
@@ -3818,6 +3843,8 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 	match vital_state:
 		"down":
 			_mark_unit_down_started(unit_id)
+			if campaign_casualty_rules_enabled and _is_friendly_unit(unit):
+				_was_downed_unit_ids[unit_id] = true
 			_set_event_text("%s DOWN" % unit_id)
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "DOWN", DOWN_EVENT_COLOR, 1.5)
