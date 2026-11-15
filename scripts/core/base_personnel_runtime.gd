@@ -15,6 +15,7 @@ var _visible_base_map: RefCounted
 var _registry: Node
 var _layout: Dictionary = {}
 var _states: Dictionary = {}
+var _unavailable_unit_reasons: Dictionary = {}
 var _beds: Dictionary = {}
 var _sequence: int = 0
 var _board_groups: Dictionary = {}
@@ -776,6 +777,38 @@ func export_state() -> Dictionary:
 		units[id] = {"position":[pos.x,pos.y],"status":state.status if state.status in ["sleeping","aboard","station"] else "outside","craft_id":state.craft_id if state.status == "aboard" else "","bed_id":state.bed_id if state.status == "sleeping" else "","auto_rest_enabled":bool(state.get("auto_rest_enabled",true)),"rest_automatic":bool(state.get("rest_automatic",false))}
 		if state.status == "station": units[id]["location_id"] = "polisa"
 	return {"version":1,"units":units}
+## Persons who may not leave on a sortie ({unit_id: message}); fed by the campaign flow.
+## Empty (the default and the skirmish case) changes nothing.
+func set_unavailable_unit_reasons(reasons: Dictionary) -> void:
+	_unavailable_unit_reasons = {}
+	for key in reasons:
+		_unavailable_unit_reasons[String(key)] = String(reasons[key])
+func _unit_block_message(id: String) -> String:
+	if not _unavailable_unit_reasons.has(id): return ""
+	var message := String(_unavailable_unit_reasons[id])
+	return message if not message.is_empty() else "Person ist verwundet"
+func _unit_block_rejection(id: String) -> Dictionary:
+	var message := _unit_block_message(id)
+	return _reject("unit_wounded", message) if not message.is_empty() else {}
+## Reject result for the first blocked person aboard or assigned to this craft; {} if none.
+func get_departure_block(craft_id: String) -> Dictionary:
+	if _unavailable_unit_reasons.is_empty() or craft_id.is_empty(): return {}
+	var ids: Array = []
+	for id in _states:
+		if String(_states[id].get("status", "")) in ["aboard", "boarding"] and String(_states[id].get("craft_id", "")) == craft_id: ids.append(String(id))
+	if _board_groups.has(craft_id):
+		for id in Array(_board_groups[craft_id].get("ids", [])): ids.append(String(id))
+	if is_instance_valid(_screen):
+		if _screen.has_method("_get_assigned_pilot_id"):
+			var pilot := String(_screen.call("_get_assigned_pilot_id", craft_id))
+			if not pilot.is_empty(): ids.append(pilot)
+		if _screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw") and _screen.has_method("_get_member_unit_ids_for_fireteam"):
+			for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id):
+				for id in _screen.call("_get_member_unit_ids_for_fireteam", String(team)): ids.append(String(id))
+	for id in ids:
+		var blocked := _unit_block_rejection(String(id))
+		if not blocked.is_empty(): return blocked
+	return {}
 func is_pilot_aboard(craft_id: String) -> bool:
 	var id := String(_screen.call("_get_assigned_pilot_id", craft_id))
 	return _states.has(id) and _states[id].status == "aboard" and _states[id].craft_id == craft_id
@@ -865,6 +898,8 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 				state.bed_id = bed_id
 			return result
 		"base_board":
+			var wounded_block := _unit_block_rejection(id)
+			if not wounded_block.is_empty(): return wounded_block
 			if bool(_screen.call("_operations_craft_busy", craft)) or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft)).is_empty():
 				return _reject("craft_busy", "Schiff nicht verfuegbar")
 			if craft.is_empty():
@@ -988,6 +1023,9 @@ func _board_team(craft: String, payload: Dictionary) -> Dictionary:
 		return _reject("pilot_missing", "Pilot zuweisen")
 	if not ids.has(pilot):
 		ids.append(pilot)
+	for id in ids:
+		var wounded_block := _unit_block_rejection(String(id))
+		if not wounded_block.is_empty(): return wounded_block
 	var previously_aboard: Dictionary = {}
 	var walking:=PackedStringArray()
 	for id in ids:
