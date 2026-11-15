@@ -89,12 +89,12 @@ func _test_terrain_tile_data_contract() -> void:
 	_assert(TERRAIN_TILE_DATA_SCRIPT.get("DEFAULT_OBJECT_HEIGHT") == 0, "TerrainTileData default object height is zero")
 
 	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "ground")), 1.0), "Ground speed factor is 1.0")
-	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "road")), 1.4), "Road speed factor is 1.4")
-	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "sand")), 0.6), "Sand speed factor is 0.6")
+	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "road")), 1.2), "Road speed factor is 1.2")
+	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "sand")), 1.0), "Sand speed factor is 1.0")
 	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_speed_factor", "rock")), 0.8), "Rock speed factor is 0.8")
 	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "ground")), 1.0), "Ground path cost is 1.0")
-	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "road")), 0.7), "Road path cost is 0.7")
-	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "sand")), 1.5), "Sand path cost is 1.5")
+	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "road")), 0.83), "Road path cost is 0.83")
+	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "sand")), 1.0), "Sand path cost is 1.0")
 	_assert(_float_eq(float(TERRAIN_TILE_DATA_SCRIPT.call("get_surface_path_cost", "rock")), 1.3), "Rock path cost is 1.3")
 
 	var clamped_tile = TERRAIN_TILE_DATA_SCRIPT.new({

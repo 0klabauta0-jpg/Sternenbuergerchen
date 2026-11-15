@@ -48,11 +48,13 @@ Surface-Kosten werden nicht von Hoehe ueberschrieben:
 | Surface | Speed | Pfadkosten |
 | --- | ---: | ---: |
 | `ground` | `1.0` | `1.0` |
-| `road` | `1.4` | `0.7` |
-| `sand` | `0.6` | `1.5` |
+| `road` | `1.2` | `0.83` |
+| `sand` | `1.0` | `1.0` |
 | `rock` | `0.8` | `1.3` |
 
-Ein Sandhang ist also eine `slope`-Transition auf ein Tile mit `surface_type = sand` und dadurch teurer/langsamer als ein Ground-Hang.
+Entscheidung vom 15.11.2026: Sand zaehlt als normaler Boden, Trampelpfade sind rein visuell. Gebaute Strassen geben zu Fuss +20 %. Bodenfahrzeuge bewegen sich auf Strassen mit doppelter Geschwindigkeit, sobald sie fahren koennen (Konstante `ROAD_VEHICLE_SPEED_FACTOR` in `terrain_tile_data.gd`, noch ungenutzt).
+
+Ein Sandhang ist also eine `slope`-Transition auf ein Tile mit `surface_type = sand` und verhaelt sich wie ein Ground-Hang.
 
 ## LOS, Cover und Combat
 LOS liest nur autoritative Terrain-Daten. Renderer-Nodes, Editor-Controls und sichtbare Mesh-Hoehen sind keine Gameplay-Quelle.
@@ -121,7 +123,7 @@ Defaults fuer alte Karten bleiben konservativ: `height_level = 0`, `object_heigh
 | Flach zu flach | Beide Tiles gleiche `height_level` | Nach `walkable` und Surface-Kosten begehbar | Normale Hoehe | Keine Huegellinie |
 | Flach zu Hang | Hoeheres Tile `edge_type = slope` | Begehbar mit Hangkosten | Hoehenbonus nach `height_level` | Slope-/Rampenlinie am hoeheren Tile |
 | Flach zu Klippe | Hoeheres Tile `edge_type = cliff` | Blockiert | LOS nutzt Daten, nicht Kantenvisual | Klippenlinie am hoeheren Tile |
-| Hang mit Sand | Hoeheres Ziel `edge_type = slope`, `surface_type = sand` | Begehbar, teurer/langsamer als Ground-Hang | Normale Hoehenregeln | Sand-Top bleibt sichtbar, Hangseite bleibt sichtbar |
+| Hang mit Sand | Hoeheres Ziel `edge_type = slope`, `surface_type = sand` | Begehbar, verhaelt sich wie Ground-Hang | Normale Hoehenregeln | Sand-Top bleibt sichtbar, Hangseite bleibt sichtbar |
 | Klippe mit Sand | Hoeheres Tile `edge_type = cliff`, `surface_type = sand` | Blockiert | Normale Hoehenregeln | Sand-Top plus Klippenlinie |
 | Plateau-Innenbereich | Gleiche `height_level`, `edge_type = none` erlaubt | Begehbar nach `walkable` | Normale Hoehenregeln | Keine Huegellinie |
 | Wand auf flach | `height_level = 0`, `object_height > 0`, oft `blocks_los = true` | Nach `walkable`; Wand-Tile meist blockiert | Blockerhoehe `height_level + object_height` | Objektbasis auf Bodenoberseite |

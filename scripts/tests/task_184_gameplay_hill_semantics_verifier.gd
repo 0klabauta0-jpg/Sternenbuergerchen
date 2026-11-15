@@ -50,7 +50,7 @@ func _test_slope_cliff_and_surface_step_costs() -> void:
 	_assert(bool(pathfinder.call("can_traverse_step", Vector2i(1, 0), Vector2i(0, 0), registry)), "Slope allows height transition down")
 	_assert(ground_slope_cost > flat_ground_cost, "Slope path costs more than flat ground")
 	_assert(sand_slope_cost > ground_slope_cost, "Sand slope costs more than ground slope")
-	_assert(float(registry.call("get_surface_speed_factor_at_world", registry.call("grid_to_world", Vector2i(1, 1)))) < 1.0, "Sand height tile keeps slower surface speed")
+	_assert(is_equal_approx(float(registry.call("get_surface_speed_factor_at_world", registry.call("grid_to_world", Vector2i(1, 1)))), 1.0), "Sand height tile moves at normal ground speed")
 	_assert(not bool(pathfinder.call("can_traverse_step", Vector2i(0, 0), Vector2i(0, 1), registry)), "Cliff blocks height transition")
 	_assert(is_inf(cliff_cost), "Blocked cliff step reports infinite path cost")
 	_assert(not bool(pathfinder.call("can_traverse_step", Vector2i(0, 0), Vector2i(0, 2), registry)), "Edge none does not become a free height transition")
