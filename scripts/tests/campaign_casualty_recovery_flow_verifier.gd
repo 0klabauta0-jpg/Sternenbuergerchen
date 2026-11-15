@@ -15,7 +15,7 @@ const PILOT := "campaign_pilot"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _selected_scenarios()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -243,8 +243,11 @@ func _z7() -> void:
 	await create_timer(3.0).timeout
 	_check(Array(_flow.get("_all_team_units")) == before and Array(_flow.get("_available_team_units")) == available_before, "Z7: Kader nach 3 s identisch")
 	_check(_lock().is_empty(), "Z7: Sperre leer")
-	var advances: Variant = _flow.get("_recovery_advance_count")
-	_check(advances != null and int(advances) == 0, "Z7: im Tick wurde nichts berechnet (advance-Zaehler %s)" % advances)
+	# Niemand verwundet: nach einem vollen Takt steht die Uhr auf 0 (der erste Takt nach einer Verwundung zieht nicht zu viel ab).
+	_flow.set("_recovery_clock", 0.9)
+	_flow.call("_tick_personnel_recovery", 0.2)
+	_check(is_zero_approx(float(_flow.get("_recovery_clock"))), "Z7: ohne Verwundete steht die Uhr nach dem Takt auf 0 (%s)" % _flow.get("_recovery_clock"))
+	_check(Array(_flow.get("_all_team_units")) == before and _lock().is_empty(), "Z7: Kader weiter identisch, Sperre leer")
 
 func _z8() -> void:
 	if not await _open("campaign", "new"): return
@@ -259,3 +262,66 @@ func _z8() -> void:
 	_check(pilot_rest >= 594.0 and pilot_rest <= 597.5 and String(_roster_unit(PILOT).get("availability_status", "")) == "wounded", "Z8: die andere zaehlt weiter und ist noch verwundet (%.2f)" % pilot_rest)
 	var lock: Dictionary = _lock()
 	_check(lock.size() == 1 and lock.has(PILOT) and not lock.has(LEADER) and String(lock[PILOT]).contains(_name(PILOT)), "Z8: Sperre enthaelt nur noch die andere (%s)" % lock)
+
+## Z9: Verluste ueber den echten Weg _apply_campaign_casualties; die Sperre steht sofort, ohne Wartezeit und ohne eigenen Aufruf des Tests.
+func _z9() -> void:
+	if not await _open("campaign", "new"): return
+	_set_roster()
+	_check(_lock().is_empty(), "Z9: vor den Verlusten ist die Sperre leer")
+	var won: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_c", "down", false)], "won")
+	var applied: Dictionary = _flow.call("_apply_campaign_casualties", won)
+	var lock: Dictionary = _lock()
+	print("Z9_LOCK ", lock)
+	_check(String(_roster_unit("t_c").get("availability_status", "")) == "wounded" and not applied.is_empty(), "Z9: Verlust angewendet, Person ist wounded")
+	_check(lock.size() == 1 and lock.has("t_c"), "Z9: direkt nach dem Aufruf enthaelt die Sperre genau die Verwundete (%s)" % lock)
+	_check(String(lock.get("t_c", "")).begins_with("Carl Cobalt: Verwundet (mittel), noch "), "Z9: Meldung mit Namen und 'Verwundet (mittel)'")
+
+## Z10: Die Ausfallzeit zaehlt auch, waehrend ein echter Kampagneneinsatz laeuft (zu Hause gebliebene dritte Person).
+func _z10() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	_check(_flow.get("_active_mission") != null, "Z10: Einsatz laeuft")
+	var units: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var home_unit: Dictionary = Dictionary(units[0]).duplicate(true)
+	home_unit["unit_id"] = "t7b_home_unit"
+	home_unit["display_name"] = "Hanna Heim"
+	home_unit["availability_status"] = "wounded"
+	home_unit["status_text"] = "wounded"
+	home_unit["recovery_state"] = {"state": "wounded", "severity": "medium", "seconds_total": 900.0, "seconds_remaining": 900.0, "source": "campaign_casualty"}
+	units.append(home_unit)
+	_flow.call("_replace_roster_units", units)
+	_feed()
+	_check(_lock().has("t7b_home_unit"), "Z10: Sperre kennt die Zuhausegebliebene")
+	await create_timer(5.0).timeout
+	var remaining: float = _remaining("t7b_home_unit")
+	print("Z10_REMAINING ", remaining)
+	_check(_flow.get("_active_mission") != null, "Z10: Einsatz laeuft weiter")
+	_check(remaining >= 894.0 and remaining <= 896.0, "Z10: Restzeit sank waehrend des Einsatzes um die gelaufenen Sekunden (%.2f)" % remaining)
+
+## Z11: Altdaten: "wounded" ohne recovery_state, niemand sonst verwundet -> nach 2 s active, Sperre leer.
+func _z11() -> void:
+	if not await _open("campaign", "new"): return
+	var units: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	for unit: Dictionary in units:
+		if String(unit.get("unit_id", "")) == LEADER:
+			unit["availability_status"] = "wounded"
+			unit["status_text"] = "wounded"
+			unit["recovery_state"] = {}
+	_flow.call("_replace_roster_units", units)
+	_feed()
+	_check(String(_roster_unit(LEADER).get("availability_status", "")) == "wounded" and _lock().is_empty(), "Z11: Fixture: wounded ohne recovery_state, keine Sperre")
+	await create_timer(2.5).timeout
+	var unit: Dictionary = _roster_unit(LEADER)
+	_check(String(unit.get("availability_status", "")) == "active" and Dictionary(unit.get("recovery_state", {"x": 1})).is_empty() and String(unit.get("status_text", "x")).is_empty(), "Z11: Altdatenperson ist active, recovery_state und status_text leer (%s)" % unit.get("availability_status"))
+	_check(_lock().is_empty(), "Z11: Sperre leer")
+
+## Z12: Ein Haenger zaehlt hoechstens 2 s; die Uhr beginnt bei der ersten Verwundung bei 0.
+func _z12() -> void:
+	if not await _open("campaign", "new"): return
+	_flow.set("_recovery_clock", 0.9)
+	_wound(LEADER, "medium", 900.0, 900.0)
+	_check(is_zero_approx(float(_flow.get("_recovery_clock"))), "Z12: bei der ersten Verwundung steht die Uhr auf 0 (%s)" % _flow.get("_recovery_clock"))
+	_flow.call("_tick_personnel_recovery", 600.0)
+	var drop: float = 900.0 - _remaining(LEADER)
+	print("Z12_DROP ", drop)
+	_check(drop > 0.5 and drop <= 2.05, "Z12: Delta 600 senkt die Restzeit um hoechstens 2 s (%.3f)" % drop)

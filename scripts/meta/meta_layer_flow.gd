@@ -171,9 +171,10 @@ var _singleplayer_services_open := false
 var _singleplayer_services_elapsed: float = 0.0
 ## Ausfallzeit der Verwundeten (nur Kampagne): echte Sekunden werden gesammelt, je volle Sekunde einmal auf den Kader angewendet.
 const PERSONNEL_RECOVERY_SCRIPT = preload("res://scripts/core/personnel_recovery_runtime.gd")
+## Je Frame zaehlt hoechstens so viel mit: ein Haenger, Ladebildschirm oder Ruhezustand des Rechners ist keine Spielzeit.
+const PERSONNEL_RECOVERY_MAX_FRAME_SECONDS := 2.0
 var _recovery_clock: float = 0.0
 var _wound_lock_active: bool = false
-var _recovery_advance_count: int = 0
 var _star_map_screen: Control
 var _remote_inspection_screen: Control
 var _inspection_target: Dictionary = {} # View identity only, never knowledge.
@@ -5000,22 +5001,22 @@ func _replace_roster_units(updated_units: Array) -> void:
 func _tick_personnel_recovery(delta: float) -> void:
 	if not is_campaign_start():
 		return
-	_recovery_clock += delta
+	_recovery_clock += minf(delta, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS)
 	if _recovery_clock < 1.0:
 		return
-	var elapsed: float = _recovery_clock
+	var elapsed: float = minf(_recovery_clock, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS)
 	_recovery_clock = 0.0
+	# Gestuetzt auf den Status, nicht auf die Restzeit: Altdaten "wounded" ohne recovery_state raeumt advance() einmal ab.
 	var any_wounded := false
 	for unit_variant in _all_team_units:
-		if typeof(unit_variant) == TYPE_DICTIONARY and PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant):
+		if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("availability_status", "")) == "wounded":
 			any_wounded = true
 			break
 	if not any_wounded:
-		# Nichts zu zaehlen; nur eine noch gesetzte Sperre wird abgeraeumt.
+		# Nichts zu zaehlen (Uhr steht auf 0); nur eine noch gesetzte Sperre wird abgeraeumt.
 		if _wound_lock_active:
 			_sync_wound_lock()
 		return
-	_recovery_advance_count += 1
 	var advanced: Dictionary = PERSONNEL_RECOVERY_SCRIPT.advance(_all_team_units, elapsed)
 	if bool(advanced.get("changed", false)):
 		_replace_roster_units(Array(advanced.get("units", [])))
@@ -5042,6 +5043,9 @@ func _sync_wound_lock() -> void:
 		var display_name: String = String(unit.get("display_name", "")).strip_edges()
 		reasons[unit_id] = "%s: %s" % [display_name if not display_name.is_empty() else unit_id, PERSONNEL_RECOVERY_SCRIPT.describe(unit)]
 	base.call("set_unavailable_unit_reasons", reasons)
+	if not reasons.is_empty() and not _wound_lock_active:
+		# Erste Verwundung nach einer Pause: die Uhr beginnt bei 0, der erste Takt zieht nicht zu viel ab.
+		_recovery_clock = 0.0
 	_wound_lock_active = not reasons.is_empty()
 
 
