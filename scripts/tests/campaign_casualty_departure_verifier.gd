@@ -21,6 +21,12 @@ func _run() -> void:
 		await _departure_revived("F", true)
 	if only.is_empty() or only == "G":
 		await _departure_total_loss("G", true)
+	if only.is_empty() or only == "J":
+		await _departure_low_fuel("J", true)
+	if only.is_empty() or only == "K":
+		await _departure_low_fuel("K", false)
+	if only.is_empty() or only == "L":
+		await _departure_l_not_focused()
 	if only.is_empty() or only == "H":
 		await _departure_h_hud_without_casualties()
 	if only.is_empty() or only == "I":
@@ -39,8 +45,15 @@ func _request_return() -> Dictionary:
 func _press_return(hud: bool, s: Dictionary) -> Dictionary:
 	if hud:
 		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
-		return {"ok": true, "hud": true}
+		return {"ok": true, "hud": true, "feedback": _card_feedback(s)}
 	return _request_return()
+
+## Karten-Rueckmeldung, die die Schiffskarte dem Spieler zeigt (leer, wenn der Controller nicht mehr da ist).
+func _card_feedback(s: Dictionary) -> String:
+	if not is_instance_valid(s.controller):
+		return ""
+	var card: Dictionary = s.controller.call("_find_mission_dropship_card_entry", _craft_id)
+	return String(s.controller.call("_get_mission_dropship_card_feedback_text", card))
 
 func _fuel() -> float:
 	return float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0))
@@ -114,7 +127,7 @@ func _departure_revived(tag: String, hud: bool) -> void:
 	if not _seat_crew(s): return
 	var departure: Dictionary = _press_return(hud, s)
 	print("DEPARTURE_" + tag + "_REQUEST ", departure)
-	_check(bool(departure.get("ok", false)), tag + ": Rueckflug wird angenommen")
+	_check(bool(departure.get("ok", false)) and (not hud or String(departure.get("feedback", "")).contains("Rückzug ausgewertet")), tag + ": Rueckflug wird angenommen (HUD: Karten-Rueckmeldung nennt die Auswertung)")
 	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, tag + ": Einsatz wird freigegeben"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
 	var unit: Dictionary = _roster_unit("campaign_leader")
@@ -136,7 +149,7 @@ func _departure_revived(tag: String, hud: bool) -> void:
 	_check(String(_roster_unit("campaign_pilot").get("availability_status", "")) != "wounded", tag + ": Pilot ist nicht verwundet")
 	_check(_job_status() == "failed", tag + ": Auftrag steht auf failed (ist %s)" % _job_status())
 	_check(String(_flow.get("_current_meta_view")) == "debrief" or String(_flow.get("_current_meta_view")) == "star_map", tag + ": Debrief wird gezeigt (oder Sternkarte bei laufender Route)")
-	_check(await _wait_departure_settled("B"), tag + ": das Schiff fliegt ab und erreicht den Orbit")
+	_check(await _wait_departure_settled(tag), tag + ": das Schiff fliegt ab und erreicht den Orbit")
 	# Genau einmal: Rueckflug erneut angefragt, Ergebnis erneut zugestellt.
 	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
 	for round_index in 2:
@@ -178,6 +191,80 @@ func _departure_total_loss(tag: String, hud: bool) -> void:
 	_check(not result.has("casualties") or Array(result.get("casualties", [])).is_empty(), tag + ": keine Verwundeten gemeldet")
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
 		_check(String(unit.get("availability_status", "")) != "wounded", tag + ": %s ist nicht wounded" % unit.get("unit_id"))
+	await _end_sortie()
+
+func _set_fuel(value: float) -> void:
+	Dictionary(_runtime.get("_supply").get("_fuel_by_craft_id"))[_craft_id] = value
+
+## J (HUD) / K (Adapter): aufgerichteter Truppfuehrer, Treibstoff unter dem Bedarf des Rueckflugs.
+## Nichts wird aufgeloest, das Schiff bleibt, der Zustand ist nach jedem Druck wie davor; mit Treibstoff laeuft es wie F.
+func _departure_low_fuel(tag: String, hud: bool) -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	var leader: Node2D = s.leader
+	var driver: Node = s.driver
+	leader.call("apply_damage", 10000)
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, tag + ": Treiber merkt sich die ausgefallene Person"): return
+	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", tag + ": aufgerichtet")
+	if not _seat_crew(s): return
+	var fuel_full: float = _fuel()
+	_set_fuel(1.0)
+	_check(is_equal_approx(_fuel(), 1.0), tag + ": Treibstoff ist knapp gesetzt")
+	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var last_before: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	for round_index in 3:
+		var reply: Dictionary = _press_return(hud, s)
+		await process_frame
+		print("DEPARTURE_", tag, "_PRESS ", round_index, " ", reply)
+		if hud:
+			_check(String(reply.get("feedback", "")).contains("Treibstoff reicht nicht für den Rückflug"), tag + ": Druck %d: Karten-Meldung nennt den Treibstoff" % (round_index + 1))
+		else:
+			_check(not bool(reply.get("ok", true)) and String(reply.get("reason", "")) == "insufficient_fuel" and String(reply.get("message", "")) == "Treibstoff reicht nicht für den Rückflug", tag + ": Druck %d: abgelehnt mit insufficient_fuel und Meldung" % (round_index + 1))
+		_check(_flow.get("_active_mission") == s.mission and not bool(driver.get("_combat_finished")), tag + ": Druck %d: nichts aufgeloest" % (round_index + 1))
+		_check(Array(_flow.get("_all_team_units")) == roster_before and Dictionary(_flow.get("_last_mission_result")) == last_before, tag + ": Druck %d: Kader und Ergebnis unveraendert" % (round_index + 1))
+		_check(_job_status() == "active" and is_equal_approx(_fuel(), 1.0), tag + ": Druck %d: Auftrag active, Treibstoff unveraendert" % (round_index + 1))
+		_check(bool(s.controller.call("_is_parked_campaign_dropship", _craft_id)) and _transfer_phase().is_empty() and String(_space().get("phase", "")) != "orbit", tag + ": Druck %d: Schiff bleibt gelandet" % (round_index + 1))
+	# Treibstoff aufgefuellt: Ablauf wie F.
+	_set_fuel(fuel_full)
+	var reply_ok: Dictionary = _press_return(hud, s)
+	print("DEPARTURE_", tag, "_REFUELED ", reply_ok)
+	if not await _wait(func(): return _flow.get("_active_mission") == null, 120000, tag + ": Einsatz wird freigegeben"): return
+	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	var recovery: Dictionary = Dictionary(_roster_unit("campaign_leader").get("recovery_state", {}))
+	_check(String(result.get("result", "")) == "aborted" and String(result.get("win_condition_type", "")) == "departure", tag + ": mit Treibstoff aborted / departure")
+	_check(Array(result.get("casualties", [])).size() == 1 and String(_casualty_entry(result, "campaign_leader").get("severity", "")) == "light", tag + ": genau eine leichte Verwundung")
+	_check(String(_roster_unit("campaign_leader").get("availability_status", "")) == "wounded" and is_equal_approx(float(recovery.get("seconds_remaining", -1.0)), 180.0), tag + ": Kader wounded, 180.0 s")
+	_check(_job_status() == "failed", tag + ": Auftrag failed")
+	_check(await _wait_departure_settled(tag), tag + ": das Schiff fliegt ab und erreicht den Orbit")
+	await _end_sortie()
+
+## L: Ort ohne HUD-Fokus (Fixture: _active_mission entfernt), Ausfall liegt dort: Abflug gesperrt, nichts aufgeloest.
+func _departure_l_not_focused() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	var leader: Node2D = s.leader
+	var driver: Node = s.driver
+	var mission: Node = s.mission
+	_check(not String(mission.get_meta("location_id", "")).is_empty(), "L: Einsatzort ist eine Ortsinstanz (location_id %s)" % String(mission.get_meta("location_id", "")))
+	if not _seat_crew(s): return
+	_flow.set("_active_mission", null)
+	var reachable: bool = _flow.call("get_mission_for_craft", _craft_id) == mission
+	print("DEPARTURE_L_REACHABLE ", reachable)
+	_check(reachable, "L: das Schiff erreicht seine Ortsinstanz auch ohne Fokus")
+	# Ohne Ausfaelle an diesem Ort: nichts zu tun.
+	_check(not bool(Dictionary(_flow.call("_campaign_departure_gate", _craft_id)).get("handled", true)), "L: ohne Ausfaelle handled false")
+	leader.call("apply_damage", 10000)
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "L: Treiber dieser Instanz merkt sich die ausgefallene Person"): return
+	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", "L: aufgerichtet, war_downed bleibt")
+	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	# Der Adapter-Abflug steigt zuerst ein (Truppe an Bord); erst dann liegt keine einsatzfaehige Person mehr am Boden.
+	var reply: Dictionary = _request_return()
+	print("DEPARTURE_L_REQUEST ", reply)
+	_check(not bool(reply.get("ok", true)) and String(reply.get("reason", "")) == "location_not_focused", "L: gesperrt mit location_not_focused")
+	_check(String(reply.get("message", "")) == "Am Einsatzort liegen Ausgefallene. Abflug nur aus der Ortsansicht.", "L: Meldung auf Deutsch")
+	_check(_transfer_phase().is_empty(), "L: kein Flug gestartet")
+	_check(not bool(driver.get("_combat_finished")) and Array(_flow.get("_all_team_units")) == roster_before and Dictionary(_flow.get("_last_mission_result")).is_empty(), "L: nichts aufgeloest, Kader und Ergebnis unveraendert")
+	_flow.set("_active_mission", mission)
 	await _end_sortie()
 
 ## H: HUD-Weg ohne Ausfaelle: das Schiff hebt ab wie vor der Aenderung (Vergleich mit A).

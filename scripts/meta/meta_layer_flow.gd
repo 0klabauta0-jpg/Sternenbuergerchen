@@ -8482,19 +8482,27 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	if not is_campaign_start() or _singleplayer_runtime == null or _get_campaign_casualty_rules().is_empty():
 		return not_handled
 	var visit: Node = get_mission_for_craft(craft_id)
-	if visit == null or visit != _active_mission:
+	if visit == null:
 		return not_handled
 	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
 	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
 		return not_handled
+	# Ausfaelle und Ort werden am Driver und an den Personen DIESER Instanz gemessen (auch ohne HUD-Fokus).
 	if not _departure_has_casualties(visit, driver):
 		return not_handled
 	var measured: Dictionary = _build_mission_result(visit, {})
 	if not _campaign_departure_empties_location(Array(measured.get("team_states", []))):
 		return not_handled
-	# Ohne moeglichen Rueckflug (Treibstoff) bliebe der Einsatz sonst halb aufgeloest: dann gilt der heutige Weg.
-	if not bool(Dictionary(_singleplayer_runtime.call("preview_return", craft_id)).get("ok", false)):
-		return not_handled
+	# Die Verlustauswertung rechnet im Kontext der fokussierten Instanz; ein Wechsel des Kontexts ist hier nicht vorgesehen.
+	if visit != _active_mission:
+		return {"handled": true, "ok": false, "reason": "location_not_focused", "message": "Am Einsatzort liegen Ausgefallene. Abflug nur aus der Ortsansicht."}
+	# Das Gate loest nur auf, wenn der Abschluss durchlaeuft. Ohne Totalverlust braucht _on_mission_combat_resolved
+	# einen genehmigten Rueckflug (authorize_return); das wird hier lesend vorab geprueft, nichts wird abgebucht.
+	var preview_resolution: Dictionary = _resolve_campaign_casualties({"mission_outcome": "aborted"}, _get_campaign_casualty_rules())
+	if not bool(preview_resolution.get("total_loss", false)):
+		var return_check: Dictionary = _departure_return_preflight(craft_id)
+		if not bool(return_check.get("ok", false)):
+			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": "Treibstoff reicht nicht für den Rückflug" if String(return_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel"] else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
 	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
 	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
 		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
@@ -8507,6 +8515,30 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 		return {"handled": true, "ok": true, "total_loss": true, "message": "Bodenteam ausgefallen: Einsatz verloren, kein Abflug"}
 	_start_departure_flight_if_idle(craft_id, drop_source)
 	return {"handled": true, "ok": true, "total_loss": false, "message": "Rückzug ausgewertet: Verluste gemeldet, das Schiff fliegt ab"}
+
+
+## Lesende Spiegelung von authorize_return (singleplayer_runtime_adapter.gd): dieselben Zweige und dieselbe Treibstoffpruefung,
+## aber ohne consume_route_fuel. Ein schon bestaetigter Rueckflug (Wiederholung derselben Anfrage) gilt als ok.
+func _departure_return_preflight(craft_id: String) -> Dictionary:
+	var preview: Dictionary = Dictionary(_singleplayer_runtime.call("preview_return", craft_id))
+	if not bool(preview.get("ok", false)):
+		return preview
+	var travel: Object = _singleplayer_runtime.get("_travel")
+	var simulation: Object = _singleplayer_runtime.get("_simulation")
+	var supply: Object = _singleplayer_runtime.get("_supply")
+	if travel == null or simulation == null or supply == null:
+		return {"ok": false, "reason": "fuel_unverifiable", "message": "Treibstoff nicht prüfbar"}
+	var flight: Object = travel.call("get_flight_state", craft_id)
+	if flight != null:
+		var flight_snapshot: Dictionary = Dictionary(flight.call("get_snapshot"))
+		var craft_snapshot: Dictionary = Dictionary(travel.call("get_craft_snapshot", craft_id))
+		var local_surface: bool = flight_snapshot.get("coordinate_frame") == "local" and flight_snapshot.get("motion_mode") == "inactive" and craft_snapshot.get("phase") == "surface"
+		var polisa_surface: bool = flight_snapshot.get("coordinate_frame") == "strategic" and craft_snapshot.get("phase") == "surface" and craft_snapshot.get("location_id") == "polisa"
+		if local_surface or polisa_surface:
+			return Dictionary(simulation.call("preview_singleplayer_local_return_fuel", _singleplayer_runtime, craft_id))
+	if Dictionary(supply.get("_requests")).has("return:" + String(preview.get("outward_token", "")) + ":fuel"):
+		return {"ok": true}
+	return Dictionary(supply.call("preview_route_fuel", Dictionary(preview.get("route", {})), {"departure_authorized": true}))
 
 
 ## Der Abschluss startet den Flug nur fuer die Quelle homebase_direct selbst. Fuer jede andere Quelle startet das hier,
