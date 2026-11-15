@@ -5,6 +5,12 @@ extends "res://scripts/tests/campaign_pilot_ground_loop_test.gd"
 func _on_actual_landed(_controller: Node) -> void:
 	pass
 
+func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
+	# Unter niedriger Prioritaet entsteht die Missionsinstanz erst nach der Gelaendevorbereitung der grossen Karte: bis zu 180 s.
+	if label.ends_with("actual mission instance exists"):
+		milliseconds = maxi(milliseconds, 180000)
+	return await super._wait(predicate, milliseconds * 4 if milliseconds < 180000 else milliseconds, label)
+
 func _run() -> void:
 	_configure_entry()
 	for scenario: Dictionary in [
@@ -38,7 +44,13 @@ func _run() -> void:
 		if all_down:
 			controller.call("_get_campaign_sortie_unit", "campaign_pilot").call("apply_damage", 10000)
 		var gate: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)
-		_check(String(gate.get("reason", "")) == ("pilot_unavailable" if all_down else "crew_unavailable"), "Real unavailable person blocks physical boarding")
+		print("CAMPAIGN_CASUALTY_GATE ", gate)
+		if all_down:
+			_check(String(gate.get("reason", "")) == "pilot_unavailable", "Real unavailable person blocks physical boarding")
+		else:
+			# Seit Aufgabe 4 steigt die einsatzfaehige Pilotin ein, die liegende Person bleibt; der Totalverlust
+			# (keine Bodenperson mehr einsatzfaehig) entsteht am Missionsende in _on_mission_combat_resolved.
+			_check(bool(gate.get("ok", false)) and PackedStringArray(gate.get("casualty_unit_ids", PackedStringArray())) == PackedStringArray(["campaign_leader"]), "Fit pilot boards, downed leader stays behind (casualty_unit_ids)")
 		var supply_before: Dictionary = _supply().duplicate(true)
 		mission.get_node("CombatLoopDriver").call("_resolve_combat", "defeat" if all_down else "victory", "enemy" if all_down else "player")
 		await process_frame
@@ -47,6 +59,7 @@ func _run() -> void:
 		_check(String(_flow.get("_current_meta_view")) == "debrief", "Casualty debrief is visible")
 		var result: Dictionary = _flow.get("_last_mission_result")
 		_check(bool(result.get("campaign_checkpoint_retry_required", false)) and String(result.get("result", "")) == "defeat", "Impossible extraction requires explicit checkpoint retry and no success")
+		_check(bool(result.get("casualty_total_loss", false)) and String(result.get("total_loss_reason", "")) == ("pilot_down" if all_down else "ground_team_down"), "Result names the total-loss reason")
 		_check(Array(result.get("team_states", [])).size() == 2 and not Dictionary(result.get("progression_summary", {})).is_empty(), "Both original casualties and existing medical progression reach debrief")
 		_check(String(_campaign().jobs.satellite_recovery.status) == "failed", "Existing owner records failed job")
 		_check(_supply() == supply_before, "No return fuel debit or completion reward")

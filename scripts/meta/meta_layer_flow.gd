@@ -4517,6 +4517,9 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		return
 	var resolved_result: Dictionary = mission_result.duplicate(true)
 	var failed_extraction := false
+	# Nur Kampagne und nur mit gueltigen Regeln ({} sonst): dann gelten Verwundung, Tod und Totalverlust.
+	var casualty_rules: Dictionary = _get_campaign_casualty_rules() if is_campaign_start() else {}
+	var casualty_resolution: Dictionary = {}
 	if is_campaign_start():
 		var crew_boarding: Dictionary = _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(crew_boarding.get("ok", false)):
@@ -4524,16 +4527,24 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 				# A terminal casualty cannot walk/board. Finish the existing result
 				# lifecycle without authorizing a ghost flight or rewarding extraction.
 				failed_extraction = true
-				resolved_result["original_mission_result"] = mission_result.duplicate(true)
-				resolved_result["result"] = "defeat"
-				resolved_result["mission_outcome"] = "defeat"
-				resolved_result["winning_team_id"] = ""
-				resolved_result["campaign_checkpoint_retry_required"] = true
-				resolved_result["extraction_failure"] = crew_boarding.duplicate(true)
+				_mark_campaign_total_loss(resolved_result, mission_result, crew_boarding)
+				if not casualty_rules.is_empty():
+					resolved_result["casualty_total_loss"] = true
+					resolved_result["total_loss_reason"] = "pilot_down" if String(crew_boarding.get("reason", "")) == "pilot_unavailable" else "ground_team_down"
 			else:
 				_pending_campaign_mission_result = mission_result.duplicate(true)
 				_get_homebase_screen().set_meta("singleplayer_departure_error", crew_boarding)
 				return
+		elif not casualty_rules.is_empty():
+			# Einschiffen ist durch: team_states (inkl. aboard/near_ship) entscheiden ueber Verluste.
+			casualty_resolution = _resolve_campaign_casualties(mission_result, casualty_rules)
+			if bool(casualty_resolution.get("total_loss", false)):
+				failed_extraction = true
+				_mark_campaign_total_loss(resolved_result, mission_result, {"ok": false, "reason": "crew_unavailable", "total_loss_reason": String(casualty_resolution.get("total_loss_reason", ""))})
+				resolved_result["casualty_total_loss"] = true
+				resolved_result["total_loss_reason"] = String(casualty_resolution.get("total_loss_reason", ""))
+			else:
+				resolved_result["casualty_total_loss"] = false
 	if not failed_extraction and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
@@ -4547,9 +4558,19 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 
 	_last_mission_result = _build_mission_result(_active_mission, resolved_result)
 	_last_mission_result = _apply_air_asset_recovery_from_mission_result(_last_mission_result)
+	if is_campaign_start():
+		# Das Ergebnis traegt die Merker jetzt; der naechste Einsatz startet mit leeren Merkern.
+		var casualty_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver")
+		if casualty_driver != null and casualty_driver.has_method("clear_casualty_flags"):
+			casualty_driver.call("clear_casualty_flags")
+	if not casualty_resolution.is_empty() and not failed_extraction:
+		_last_mission_result["casualties"] = Array(casualty_resolution.get("casualties", [])).duplicate(true)
+		_last_mission_result["fatality_unit_ids"] = PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray()))
 	if not failed_extraction:
 		_return_homebase_direct_craft_after_mission()
 	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
+	# Nach der Fortschrittsrechnung, damit die Stufe "wounded" den dort gesetzten Status "recovering" ueberschreibt.
+	_last_mission_result = _apply_campaign_casualties(_last_mission_result)
 	if failed_extraction:
 		_last_mission_result["progression_save_ok"] = false
 	var fob_screen = _get_fob_screen()
@@ -4571,6 +4592,72 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		_show_star_map()
 	else:
 		_show_debrief()
+
+
+## Gemeinsamer Totalverlust-Pfad (wie bisher bei nicht einsatzfaehiger Besatzung): Niederlage, kein Erfolg, Checkpoint-Retry.
+func _mark_campaign_total_loss(resolved_result: Dictionary, mission_result: Dictionary, extraction_failure: Dictionary) -> void:
+	resolved_result["original_mission_result"] = mission_result.duplicate(true)
+	resolved_result["result"] = "defeat"
+	resolved_result["mission_outcome"] = "defeat"
+	resolved_result["winning_team_id"] = ""
+	resolved_result["campaign_checkpoint_retry_required"] = true
+	resolved_result["extraction_failure"] = extraction_failure.duplicate(true)
+
+
+## Verluste des laufenden Einsatzes aus den team_states (Task 1 Resolver). Nur nach erfolgreichem Einschiffen aufrufen.
+func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary) -> Dictionary:
+	var measured: Dictionary = _build_mission_result(_active_mission, mission_result)
+	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
+	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, _mission_planning_state.get("mission_drop_pilot_unit_id", ""))).strip_edges()
+	return Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules))
+
+
+## Schreibt Verwundungen in den Kader und ergaenzt die casualties-Eintraege um display_name.
+## Tote bleiben hier unveraendert im Kader (nur fatality_unit_ids). Ausserhalb der Kampagne, bei
+## ungueltigen Regeln, Totalverlust oder ohne casualties-Feld kommt das Ergebnis unveraendert zurueck.
+## Genau einmal je Einsatz: der Aufruf liegt hinter der Pruefung _active_mission == null in
+## _on_mission_combat_resolved; _release_active_mission() schliesst danach jede weitere Zustellung aus.
+func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
+	var result: Dictionary = mission_result.duplicate(true)
+	if not is_campaign_start() or not result.has("casualties") or bool(result.get("casualty_total_loss", false)):
+		return result
+	if _get_campaign_casualty_rules().is_empty():
+		return result
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	var state_names: Dictionary = {}
+	for raw_state in Array(result.get("team_states", [])):
+		var state: Dictionary = raw_state
+		state_names[String(state.get("unit_id", ""))] = String(state.get("display_name", ""))
+	var roster_names: Dictionary = {}
+	for raw_unit in _all_team_units:
+		var roster_unit: Dictionary = raw_unit
+		roster_names[String(roster_unit.get("unit_id", ""))] = String(roster_unit.get("display_name", ""))
+	var severities: Dictionary = {}
+	var casualties: Array = []
+	for raw_entry in Array(result.get("casualties", [])):
+		var entry: Dictionary = Dictionary(raw_entry).duplicate(true)
+		var unit_id: String = String(entry.get("unit_id", ""))
+		var display_name: String = String(roster_names.get(unit_id, ""))
+		if display_name.is_empty():
+			display_name = String(state_names.get(unit_id, ""))
+		entry["display_name"] = display_name if not display_name.is_empty() else unit_id
+		casualties.append(entry)
+		if String(entry.get("outcome", "")) == "wounded":
+			severities[unit_id] = String(entry.get("severity", "light"))
+	result["casualties"] = casualties
+	if severities.is_empty():
+		return result
+	var updated_units: Array = []
+	for raw_unit in _all_team_units:
+		var unit: Dictionary = Dictionary(raw_unit).duplicate(true)
+		var wounded_id: String = String(unit.get("unit_id", ""))
+		if severities.has(wounded_id):
+			unit["availability_status"] = "wounded"
+			unit["recovery_state"] = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", String(severities[wounded_id]), rules))
+			unit["status_text"] = "wounded"
+		updated_units.append(unit)
+	_replace_roster_units(updated_units)
+	return result
 
 
 func _return_homebase_direct_craft_after_mission() -> void:

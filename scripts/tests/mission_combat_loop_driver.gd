@@ -1910,6 +1910,10 @@ func get_casualty_flags() -> Dictionary:
 	return flags
 
 
+func clear_casualty_flags() -> void:
+	_was_downed_unit_ids.clear()
+
+
 func _request_respawn_for_unit(unit, unit_id: String) -> void:
 	var respawn_manager = get_node_or_null(respawn_manager_path)
 	if respawn_manager == null or not respawn_manager.has_method("request_respawn"):
