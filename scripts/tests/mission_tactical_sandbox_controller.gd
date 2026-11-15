@@ -35645,6 +35645,8 @@ func _finish_right_order_context_interaction(screen_position: Vector2, append_pr
 			return true
 		_open_area_order_command_menu(screen_position, area_order_targets, false, append_mode)
 		return true
+	if _try_board_by_right_click_on_ship(screen_position):
+		return true
 	if not _planning_enabled:
 		return request_immediate_move_from_screen(screen_position)
 	return _try_open_waypoint_menu_at_position(screen_position, append_mode)
@@ -36718,6 +36720,7 @@ func _advance_hex_drop_unit(sequence:Dictionary)->void:
 		_post_drop_security_pending_fireteam_ids[fireteam_id]=true
 		_runtime_activation_pending_fireteam_ids[fireteam_id]=true
 	_last_command_text="AB %d/%d"%[index+1,units.size()]
+	_select_fireteam_after_deployment(units,fireteam_id)
 
 
 func _deploy_next_embarked_unit_for_sequence(sequence: Dictionary) -> void:
@@ -36766,6 +36769,20 @@ func _deploy_next_embarked_unit_for_sequence(sequence: Dictionary) -> void:
 		else:
 			_runtime_activation_pending_fireteam_ids[fireteam_id] = true
 	_last_command_text = "AB %d/%d" % [int(sequence.get("unit_index", 0)), units.size()]
+	_select_fireteam_after_deployment(units, fireteam_id)
+
+
+## Called after each unit got out. Once every unit of this fireteam is on the
+## ground, the team is selected, but only if nothing else is selected.
+func _select_fireteam_after_deployment(units: Array, fireteam_id: String) -> void:
+	if fireteam_id.is_empty() or not _selected_fireteam_ids.is_empty():
+		return
+	for unit in units:
+		if unit == null or not unit.has_method("get_fireteam_id") or not unit.has_method("get_unit_id"):
+			continue
+		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() == fireteam_id and not _deployed_unit_ids.has(String(unit.call("get_unit_id"))):
+			return
+	_set_selected_fireteams(PackedStringArray([fireteam_id]))
 
 
 func _show_drop_team_event_text_for_sequence(sequence: Dictionary, event_text: String, color: Color, duration_seconds: float) -> void:
@@ -37545,10 +37562,11 @@ var _campaign_extraction_craft_id: String = ""
 var _campaign_extraction_poll: float = 0.0
 var _campaign_extraction_elapsed: float = 0.0
 
-func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
+## Id of the parked own dropship within 56 px of the screen position, or "".
+func _landed_craft_id_at_screen_position(screen_position: Vector2) -> String:
 	var view = _get_primary_3d_view()
 	if view == null or not view.has_method("world_to_screen_position"):
-		return false
+		return ""
 	for card: Dictionary in _get_mission_dropship_card_entries():
 		var craft_id := String(card.get("craft_id", ""))
 		if not _is_parked_campaign_dropship(craft_id): continue
@@ -37556,8 +37574,29 @@ func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
 		if not position.is_finite(): continue
 		var screen: Vector2 = view.call("world_to_screen_position", position)
 		if screen.distance_to(screen_position) <= 56.0:
-			return select_mission_dropship_craft(craft_id)
-	return false
+			return craft_id
+	return ""
+
+func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
+	var craft_id := _landed_craft_id_at_screen_position(screen_position)
+	return not craft_id.is_empty() and select_mission_dropship_craft(craft_id)
+
+## Right click (no drag) on the own landed ship with exactly one fireteam
+## selected is the same request as the "Aufsitzen" button.
+func _try_board_by_right_click_on_ship(screen_position: Vector2) -> bool:
+	if _selected_fireteam_ids.size() != 1 or _landed_craft_id_at_screen_position(screen_position).is_empty():
+		return false
+	var answer := request_selected_team_boarding()
+	if not bool(answer.get("ok", false)):
+		_last_command_text = String(answer.get("message", "Aufsitzen nicht möglich"))
+		_update_ui()
+	return true
+
+## True while the crew of this craft is still getting out (drop sequence unloading).
+func _is_craft_unloading(craft_id: String) -> bool:
+	if _is_active_drop_sequence_for_craft(craft_id):
+		return _drop_sequence_phase == DROP_SEQUENCE_UNLOADING
+	return String(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("phase", "")) == DROP_SEQUENCE_UNLOADING
 
 # Derived geometry only. Same bounded exit projection as disembarkation;
 # no camera, occupancy, selected team, actor position or mutable gameplay value.
@@ -37664,7 +37703,7 @@ func get_selected_team_boarding_snapshot() -> Dictionary:
 	var result:Dictionary={"can_board":false,"craft_id":craft,"fireteam_id":team,"message":"Einen Trupp auswählen"}
 	if _selected_fireteam_ids.size()!=1:return result
 	if not _can_issue_local_commands():result.message="Keine Befehlsberechtigung";return result
-	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfügbar";return result
+	if not _is_parked_campaign_dropship(craft):result.message="Absitzen läuft noch" if _is_craft_unloading(craft) else "Kein eigenes gelandetes Truppschiff verfügbar";return result
 	if not get_campaign_ground_ship_access(craft).get("ok",false):result.message="Zugang zum Schiff ist blockiert";return result
 	var units:Array=_get_campaign_sortie_units().filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==team)
 	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result

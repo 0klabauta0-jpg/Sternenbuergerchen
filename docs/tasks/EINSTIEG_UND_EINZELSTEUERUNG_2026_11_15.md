@@ -75,3 +75,7 @@ Rechtsklick auf einen Interaktionspunkt oder Gegenstand lässt die einzeln gewä
 - Die Auswahlgeste (zweiter Klick wählt die Person) ist ein Vorschlag; Björn entscheidet nach dem Ausprobieren.
 - Gezieltes Feuer auf eine bestimmte Person statt auf ihre Position gibt es im Regelwerk nicht; C1 nutzt die Position.
 - Mehrspieler-Freigabe der Einzelsteuerung (Kategorie `unit_command` im Befehlsvertrag) kommt später.
+
+## Ergebnis Paket A0 (15.11.2026)
+
+Das Prüfskript `playtest_l03_boarding_repro_verifier.gd` spielt S1 bis S5 mit dem Zweiertrupp der Kampagne durch; auf `main` (`9fe0b659b`) sind alle fünf Szenen grün. Wird die Einstiegskorrektur `b5227ab21` probeweise zurückgenommen, kann die gelandete Besatzung gar nicht mehr aufsitzen. Der Hänger aus dem Playtest vom 14.11. war dieser Fehler und ist behoben; ein Paket A1 entfällt. Offen blieb nur die irreführende Meldung während des Absitzens (Paket B).
