@@ -6,6 +6,9 @@ const LOCATIONS: GDScript = preload("res://scripts/mission/singleplayer_location
 const JOBS: GDScript = preload("res://scripts/mission/singleplayer_job_contract.gd")
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_command_contract.gd")
 
+## Missionsende mit result "aborted" und einer dieser win_condition_type-Kennungen ist ein Rueckzug, kein Fehlschlag.
+const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
+
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
 var _selected_location_id: String = "homebase"
@@ -95,6 +98,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"complete_job": result = _complete(payload, authority_context)
 		"fail_job": result = _fail(payload, authority_context)
 		"retry_failed_job": result = _retry_failed(payload)
+		"reopen_retreated_job": result = _reopen_retreated(payload)
 		"upload_job": result = _upload(payload, authority_context)
 		"claim_recruit", "load_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
@@ -290,10 +294,15 @@ func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("mission_aborted", false)) and not String(evidence.get("result", "")) in ["defeat", "aborted", "timeout"]:
 		return _reject("failure_not_authorized", "Fehlschlag nicht bestaetigt")
 	_jobs[job_id].status = "failed"
+	# Rueckzug: nur aus dem bestaetigten Ergebnis, nie aus dem Kontext (mission_aborted = bewusstes Aufgeben).
+	var retreat: bool = String(evidence.get("result", "")) == "aborted" and RETREAT_WIN_CONDITIONS.has(String(evidence.get("win_condition_type", "")))
+	if retreat:
+		_jobs[job_id]["retreat_count"] = int(_jobs[job_id].get("retreat_count", 0)) + 1
+		_jobs[job_id]["reopen_at_home"] = true
 	if _selected_job_id == job_id:
 		_selected_job_id = ""
 	_revision += 1
-	return {"ok": true, "job_id": job_id, "message": "Auftrag beendet"}
+	return {"ok": true, "job_id": job_id, "retreat": retreat, "message": "Rückzug. Auftrag bleibt offen." if retreat else "Auftrag beendet"}
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
@@ -307,13 +316,25 @@ func _retry_failed(payload: Dictionary) -> Dictionary:
 	var job_id := String(payload.get("job_id", ""))
 	var gate := _retry_gate(job_id)
 	if not gate.ok: return gate
+	_reopen_job(job_id)
+	return {"ok":true,"job_id":job_id,"message":"Auftrag erneut angenommen"}
+
+func _reopen_job(job_id: String) -> void:
 	_jobs[job_id].status = "accepted"
 	_jobs[job_id].erase("craft_id")
+	if _jobs[job_id].has("reopen_at_home"):
+		_jobs[job_id]["reopen_at_home"] = false
 	for craft_id in _departures_by_craft_id.keys():
 		if String(_departures_by_craft_id[craft_id].get("job_id", "")) == job_id:
 			_departures_by_craft_id.erase(craft_id)
 	_revision += 1
-	return {"ok":true,"job_id":job_id,"message":"Auftrag erneut angenommen"}
+
+func _reopen_retreated(payload: Dictionary) -> Dictionary:
+	var job_id := String(payload.get("job_id", ""))
+	if not _jobs.has(job_id) or String(_jobs[job_id].status) != "failed" or not bool(_jobs[job_id].get("reopen_at_home", false)) or _completion_receipts.has(job_id + ":completed"):
+		return _reject("job_not_retreated", "Nur nach einem Rückzug wieder öffnen")
+	_reopen_job(job_id)
+	return {"ok":true,"job_id":job_id,"message":"Auftrag wieder offen"}
 
 func export_state() -> Dictionary:
 	var state := get_campaign_snapshot()
@@ -338,6 +359,11 @@ func restore_state(data: Dictionary) -> Dictionary:
 		_jobs[job_id].status = String(data.jobs[job_id].status)
 		if data.jobs[job_id].has("craft_id"):
 			_jobs[job_id]["craft_id"] = String(data.jobs[job_id].craft_id)
+		# Nur die zwei Rueckzugsfelder aus dem Stand uebernehmen; fehlen sie, gelten die Standardwerte (0 / false).
+		if data.jobs[job_id].has("retreat_count"):
+			_jobs[job_id]["retreat_count"] = int(data.jobs[job_id].retreat_count)
+		if data.jobs[job_id].has("reopen_at_home"):
+			_jobs[job_id]["reopen_at_home"] = bool(data.jobs[job_id].reopen_at_home)
 	_selected_location_id = String(data.selected_location_id)
 	_selected_job_id = String(data.selected_job_id)
 	_departures_by_craft_id = data.departures_by_craft_id.duplicate(true)
@@ -368,6 +394,13 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 			return _reject("invalid_job_state", "Auftrag fehlt")
 		var saved: Dictionary = data.jobs[job_id].duplicate(true)
 		saved.erase("locked")
+		# Rueckzugsfelder sind Spielstand, keine Auftragsdefinition: getrennt auf Typ pruefen, vor dem Definitionsvergleich entfernen.
+		if saved.has("retreat_count") and not _saved_integer(saved.retreat_count):
+			return _reject("invalid_job_state", "Rückzugszähler ungültig")
+		if saved.has("reopen_at_home") and (typeof(saved.reopen_at_home) != TYPE_BOOL or (bool(saved.reopen_at_home) and String(saved.get("status", "")) != "failed")):
+			return _reject("invalid_job_state", "Rückzugsmerker ungültig")
+		saved.erase("retreat_count")
+		saved.erase("reopen_at_home")
 		if String(saved.get("status", "")) not in ["offered", "accepted", "active", "completed", "failed", "pending_upload"]:
 			return _reject("invalid_job_status", "Auftragsstatus ungueltig")
 		var status := String(saved.status)

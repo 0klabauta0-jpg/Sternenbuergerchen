@@ -1032,6 +1032,25 @@ func _retry_failed_home_gate() -> Dictionary:
 			return _reject("retry_requires_home", "Erst zur Basis zurückkehren, dann Auftrag erneut annehmen")
 	return {"ok":true}
 
+## Nach einem Rückzug ist der Auftrag zu Hause ohne Klick wieder offen. Gleiche Heimat-Bedingung wie "Erneut annehmen";
+## sonst bleibt der Auftrag failed mit gesetztem Merker. Mehrfacher Aufruf ändert nichts weiter.
+func reopen_retreated_jobs() -> Dictionary:
+	var reopened := PackedStringArray()
+	if _campaign == null or _simulation == null or not bool(_retry_failed_home_gate().get("ok", false)):
+		return {"ok": true, "reopened_job_ids": reopened}
+	var jobs: Dictionary = _campaign.get_campaign_snapshot().jobs
+	var ids: Array = jobs.keys()
+	ids.sort()
+	for job_id: String in ids:
+		var job: Dictionary = Dictionary(jobs[job_id])
+		if String(job.get("status", "")) != "failed" or not bool(job.get("reopen_at_home", false)):
+			continue
+		# Eigene Anfrage-ID je Rückzug: ein zweiter Rückzug nach dem Wiederöffnen ist kein Replay des ersten.
+		var committed: Dictionary = _commit("singleplayer_campaign", "reopen_retreated_job", {"job_id": job_id}, "reopen:%s:%d" % [job_id, int(job.get("retreat_count", 0))])
+		if bool(committed.get("ok", false)):
+			reopened.append(job_id)
+	return {"ok": true, "reopened_job_ids": reopened}
+
 func _campaign_operation_gate(operation: String, payload: Dictionary) -> Dictionary:
 	if operation == "select_destination":
 		return _campaign.validate_location_visit(String(payload.get("location_id", "")), bool(_retry_failed_home_gate().ok))
