@@ -1,8 +1,23 @@
 extends RefCounted
 ## Read-only equipment projection: one cached rigid-skinned outfit per rig/class.
 const PATH := "res://Assets/curated/personnel/armor_kenney_r07_20261111/"
+## Heavy armour parts R08 (source: art/ruestung_schwer_r08_20261115/build_parts.py). Same file names as R07.
+const HEAVY_PATH := "res://Assets/curated/personnel/armor_r08_schwer_20261115/"
 const PREFIX := "ArmorVisual_"
-const REVISION := "kenney_authored_r07_undersuit_v2"
+const REVISION := "kenney_authored_r07_undersuit_v2_heavy_r08"
+## R08 heavy-only fitting numbers (R07 values in brackets).
+const HEAVY_HELMET_SCALE := Vector3(1.38, 1.00, 1.19) # (1.38, 1.00, 1.30)
+const HEAVY_GLOVE := Vector3(0.62, 0.56, 0.48) # (0.30, 0.31, 0.24)
+const HEAVY_GLOVE_REACH := 0.19 # (0.13)
+const HEAVY_TORSO_DEPTH := 1.55 # (1.16)
+const HEAVY_KNEE := Vector2(1.40, 1.20) # (1.26, 1.02)
+const HEAVY_FOREARM := Vector2(1.75, 1.50) # (1.42, 1.40)
+const HEAVY_SHIN_WIDTH := 1.38 # (1.25)
+const HEAVY_UPPER_ARM := Vector2(0.48, 0.85) # (0.40, 0.73)
+const HEAVY_PAULDRON_ROOF := 1.50 # (1.62)
+const HEAVY_PAULDRON_LERP := -0.04 # (0.07)
+const HEAVY_PAULDRON_HEIGHT := 1.15 # (0.82)
+const HEAVY_PAULDRON_TILT := -12.0 # (-50.0); R08 plates sit on the shoulder, not as flat wings
 static var _parts: Dictionary = {}
 static var _outfits: Dictionary = {}
 static var _underlays: Dictionary = {}
@@ -89,6 +104,9 @@ static func _bake_outfit(skeleton: Skeleton3D, armor_id: String, model: Node3D) 
 			helmet_center = axes * head_bounds.get_center()
 			if armor_id != "heavy": helmet_center -= up * head_bounds.size.y * 0.025
 			helmet_size = head_bounds.size * Vector3(1.38, 1.00, 1.30)
+			if armor_id == "heavy":
+				# R08: rounder, less deep dome (sheet: head depth 0.319 of body height).
+				helmet_size = head_bounds.size * HEAVY_HELMET_SCALE
 			if armor_id == "medium":
 				helmet_size = head_bounds.size * Vector3(1.36, 1.08, 1.20)
 			elif armor_id == "light":
@@ -112,15 +130,15 @@ static func _bake_outfit(skeleton: Skeleton3D, armor_id: String, model: Node3D) 
 					width * {"light":0.48,"medium":0.66,"heavy":0.77}[armor_id]))
 		if armor_id == "heavy":
 			_add_limb(specs, "upper_arm_" + armor_id, side + "Arm", arm, elbow, forward,
-				width * 0.40, width * 0.49, 0.73)
+				width * HEAVY_UPPER_ARM.x, width * 0.49, HEAVY_UPPER_ARM.y) # R08: thicker, longer sleeve (0.40, 0.73)
 		_add_limb(specs, "forearm_" + armor_id, side + "ForeArm", elbow, wrist, forward,
 			width * {"light":0.30,"medium":0.53,"heavy":0.58}[armor_id],
 			width * {"light":0.46,"medium":0.56,"heavy":0.60}[armor_id], 0.78 if armor_id == "light" else 0.90)
 		if armor_id == "heavy":
 			var hand_axis := (elbow - wrist).normalized()
 			_add_spec(specs, "hand_guard_" + armor_id, side + "Hand", _limb_axes(hand_axis, forward),
-				wrist - hand_axis * width * 0.13 + forward * width * 0.035,
-				Vector3(width * 0.30, width * 0.31, width * 0.24))
+				wrist - hand_axis * width * HEAVY_GLOVE_REACH + forward * width * 0.035, # R08: fist covers the fingers (0.13)
+				HEAVY_GLOVE * width) # R08: large gloves as on the sheet.
 		if armor_id == "light":
 			_add_spec(specs, "knee_light", side + "Leg", axes,
 				Vector3(bones[side + "Leg"]) + forward * width * 0.20,
@@ -236,7 +254,8 @@ static func _limb_axes(up: Vector3, front: Vector3) -> Basis:
 
 static func _load_part(name: String) -> Dictionary:
 	if _parts.has(name): return _parts[name]
-	var scene := load(PATH + name + ".glb") as PackedScene
+	var folder := HEAVY_PATH if name == "collar" or name.ends_with("_heavy") else PATH
+	var scene := load(folder + name + ".glb") as PackedScene
 	if scene == null: return {}
 	var root := scene.instantiate() as Node3D
 	if root == null: return {}
@@ -424,7 +443,8 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 				if addition.size.length() > 0.0: torso_bounds = torso_bounds.merge(addition)
 			if torso_bounds.size.z > 0.0:
 				center.z = torso_bounds.get_center().z
-				dimensions.z = torso_bounds.size.z * {"light":1.12,"medium":1.14,"heavy":1.16}[armor_id]
+				# R08 heavy: deeper chest (sheet: torso depth 0.268 of body height at 45 %).
+				dimensions.z = torso_bounds.size.z * {"light":1.12,"medium":1.14,"heavy":HEAVY_TORSO_DEPTH}[armor_id]
 				dimensions.x = width * {"light":1.02,"medium":1.18,"heavy":1.26}[armor_id]
 				if armor_id=="heavy":dimensions.y*=.93
 		elif part.begins_with("pelvis_"):
@@ -436,17 +456,19 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 			var bounds := _bone_bounds(model, skeleton, bone, axes)
 			var elbow := skeleton.get_bone_global_rest(skeleton.find_bone(bone.replace("Arm","ForeArm"))).origin
 			var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
-			center = axes.inverse() * shoulder.lerp(elbow, 0.07)
+			# R08 heavy: plate stack sits higher, on top of the shoulder (0.07).
+			center = axes.inverse() * shoulder.lerp(elbow, HEAVY_PAULDRON_LERP if armor_id == "heavy" else 0.07)
 			dimensions.y += shoulder.distance_to(elbow)*.06
-			var roof_width:float={"light":1.06,"medium":1.40,"heavy":1.62}[armor_id]
+			# R08 heavy: bell-shaped plate stack over the shoulder (1.62).
+			var roof_width:float={"light":1.06,"medium":1.40,"heavy":HEAVY_PAULDRON_ROOF}[armor_id]
 			dimensions.x *= roof_width
-			dimensions.y *= {"light":1.0,"medium":.90,"heavy":.82}[armor_id]
+			dimensions.y *= {"light":1.0,"medium":.90,"heavy":HEAVY_PAULDRON_HEIGHT}[armor_id] # R08 heavy: taller stack (.82)
 			if bounds.has_volume():
 				center.x = bounds.get_center().x + dimensions.x*(1-1/roof_width)*.40*(1 if bone.begins_with("Left") else -1)
 				center.z = bounds.get_center().z
 				dimensions.z = bounds.size.z * {"light":1.38,"medium":1.62,"heavy":1.92}[armor_id]
 			var roof_center_world:Vector3=axes*center
-			axes=axes*Basis(Vector3.BACK,deg_to_rad({"light":0.0,"medium":-40.0,"heavy":-50.0}[armor_id])*(1 if bone.begins_with("Left") else -1))
+			axes=axes*Basis(Vector3.BACK,deg_to_rad({"light":0.0,"medium":-40.0,"heavy":HEAVY_PAULDRON_TILT}[armor_id])*(1 if bone.begins_with("Left") else -1))
 			center=axes.inverse()*roof_center_world
 		elif part.begins_with("knee_"):
 			var joint := skeleton.get_bone_global_rest(skeleton.find_bone(bone)).origin
@@ -455,7 +477,8 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 			center = axes.inverse()*joint
 			var bounds := _joint_section_bounds(model,skeleton,[bone,bone.replace("Leg","UpLeg")],axes,center.y,joint.distance_to(ankle)*.055)
 			if bounds.size.x>0.0 and bounds.size.z>0.0:
-				dimensions = Vector3(bounds.size.x * {"light":.80,"medium":1.18,"heavy":1.26}[armor_id],bounds.size.x * {"light":.73,"medium":1.0,"heavy":1.02}[armor_id],bounds.size.z*1.10)
+				# R08 heavy: large knee plates.
+				dimensions = Vector3(bounds.size.x * {"light":.80,"medium":1.18,"heavy":HEAVY_KNEE.x}[armor_id],bounds.size.x * {"light":.73,"medium":1.0,"heavy":HEAVY_KNEE.y}[armor_id],bounds.size.z*1.10)
 				center.x = bounds.get_center().x
 				center.z = bounds.get_center().z + bounds.size.z*.13
 				model.set_meta("r07_knee_section_"+bone,{"bounds":bounds,"center":center,"dimensions":dimensions})
@@ -468,15 +491,17 @@ static func _fit_anatomical_specs(specs: Array, model: Node3D, skeleton: Skeleto
 					center.x = bounds.get_center().x
 					center.z = bounds.get_center().z
 					if part.begins_with("forearm_"):
-						dimensions.x = bounds.size.x * {"light":0.90,"medium":1.35,"heavy":1.42}[armor_id]
-						dimensions.z = bounds.size.z * {"light":1.13,"medium":1.30,"heavy":1.40}[armor_id]
+						# R08 heavy: thicker forearm guards (sheet: arm span 0.473 of body height).
+						dimensions.x = bounds.size.x * {"light":0.90,"medium":1.35,"heavy":HEAVY_FOREARM.x}[armor_id]
+						dimensions.z = bounds.size.z * {"light":1.13,"medium":1.30,"heavy":HEAVY_FOREARM.y}[armor_id]
 					elif part.begins_with("thigh_"):
 						dimensions.x = bounds.size.x * (1.16 if armor_id=="medium" else 1.24)
 						dimensions.z = bounds.size.z * (1.16 if armor_id=="medium" else 1.24)
 						center.y-=dimensions.y*.08
 						dimensions.y*=.90
 					elif part.begins_with("shin_"):
-						dimensions.x = bounds.size.x * (1.15 if armor_id=="medium" else 1.25)
+						# R08 heavy: wider shins (sheet: leg width 0.287 of body height).
+						dimensions.x = bounds.size.x * (1.15 if armor_id=="medium" else HEAVY_SHIN_WIDTH if armor_id=="heavy" else 1.25)
 						dimensions.z = bounds.size.z * (1.20 if armor_id=="medium" else 1.25)
 					else:
 						dimensions.z=bounds.size.z*1.25
