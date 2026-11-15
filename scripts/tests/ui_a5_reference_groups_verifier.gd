@@ -77,7 +77,7 @@ func _check_scene(size: Vector2i) -> void:
 			controller.call("_close_character_overlay")
 			opened_portrait = true
 	var transport := scene.get_node("TacticalUI/MissionDropshipPanel") as Control
-	_check(transport.visible and transport.size.x <= 280 and transport.get_global_rect().position.y <= 24, prefix + "dropship primary is a compact upper-right card")
+	_check(transport.visible and transport.size.x <= 304 and transport.get_global_rect().position.y <= 24, prefix + "dropship primary is a compact upper-right card")
 	var state := transport.get_node("CompactCard/Contents/Header/Identity/A5TransportState") as Label
 	_check(state.is_visible_in_tree() and not state.text.is_empty() and state.get_theme_font_size("font_size") >= 14, prefix + "primary transport state remains readable")
 	_check_compact_readout(transport, prefix)

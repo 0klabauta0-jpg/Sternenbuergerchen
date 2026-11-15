@@ -1,44 +1,44 @@
 {
- "revision": "heavy_r08_20261115",
+ "revision": "heavy_r10_20261115",
  "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
- "note": "R08 heavy armour parts, drop-in for the R07 heavy parts",
+ "note": "R10: curved brow, visor and mask",
  "parts": {
   "helmet_heavy": {
    "file": "helmet_heavy.glb",
-   "triangles": 608,
+   "triangles": 632,
    "materials": [
     "M_Armor_Titanium",
     "M_Armor_Visor",
     "M_Armor_Graphite"
    ],
    "bounds_min": [
-    -0.516,
-    -0.5,
+    -0.531,
+    -0.535,
     -0.5
    ],
    "bounds_max": [
-    0.516,
-    0.425,
+    0.531,
+    0.475,
     0.5
    ]
   },
   "collar": {
    "file": "collar.glb",
-   "triangles": 212,
+   "triangles": 228,
    "materials": [
     "M_Armor_Graphite",
     "M_Armor_Titanium",
     "M_Armor_Amber"
    ],
    "bounds_min": [
-    -0.46,
-    -0.49,
+    -0.5,
+    -0.52,
     -0.5
    ],
    "bounds_max": [
-    0.46,
-    0.48,
-    0.43
+    0.5,
+    0.52,
+    0.515
    ]
   },
   "torso_heavy": {
@@ -228,5 +228,5 @@
    ]
   }
  },
- "outfit_triangles": 5288
+ "outfit_triangles": 5328
 }
