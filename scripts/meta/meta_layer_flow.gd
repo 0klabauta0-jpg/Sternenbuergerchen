@@ -465,6 +465,7 @@ func _process(_delta: float) -> void:
 					set_meta("campaign_active_checkpoint_result",auto_result)
 					_active_autosave_next_msec = now + (300000 if auto_result.get("ok",false) else 30000)
 			else: _active_autosave_next_msec = 0
+			if not is_instance_valid(_active_mission): _reopen_retreated_jobs_before_home_checkpoint()
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
 			if bool(saved.get("ok", false)) or String(saved.get("reason", "")) not in ["away_from_checkpoint", "preparation_in_progress"]:
 				set_meta("campaign_checkpoint_result", saved)
@@ -4656,6 +4657,7 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 	if severities.is_empty():
 		return result
 	var updated_units: Array = []
+	var applied_recovery: Dictionary = {}
 	for raw_unit in _all_team_units:
 		var unit: Dictionary = Dictionary(raw_unit).duplicate(true)
 		var wounded_id: String = String(unit.get("unit_id", ""))
@@ -4673,8 +4675,21 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 			unit["availability_status"] = "wounded"
 			unit["recovery_state"] = recovery
 			unit["status_text"] = "wounded"
+			applied_recovery[wounded_id] = recovery.duplicate(true)
 		updated_units.append(unit)
 	_replace_roster_units(updated_units)
+	# Das Ergebnis traegt die tatsaechlich angewendete Verwundung (nach "nie kuerzer, nie leichter"),
+	# nicht die Regelwerte der neuen Verwundung. Das Feld severity bleibt die neue Verwundung.
+	for index in range(casualties.size()):
+		var applied_entry: Dictionary = casualties[index]
+		var applied_id: String = String(applied_entry.get("unit_id", ""))
+		if String(applied_entry.get("outcome", "")) == "wounded" and applied_recovery.has(applied_id):
+			var applied: Dictionary = applied_recovery[applied_id]
+			applied_entry["recovery_severity"] = String(applied.get("severity", "light"))
+			applied_entry["recovery_seconds_remaining"] = float(applied.get("seconds_remaining", 0.0))
+			applied_entry["recovery_seconds_total"] = float(applied.get("seconds_total", 0.0))
+			casualties[index] = applied_entry
+	result["casualties"] = casualties
 	return result
 
 
@@ -8360,8 +8375,34 @@ func get_exit_progress_projection() -> Dictionary:
 	return {}
 
 
+## Rueckzugsauftraege je "id:retreat_count", fuer die schon eine Warnung ausgegeben wurde (eine Warnung je Rueckzug).
+var _retreat_reopen_warned: Dictionary = {}
+
+## Gemeinsame Stelle nach der Heimkehr: wird unmittelbar vor jedem Schreiben des Basis-Checkpoints aufgerufen
+## (periodischer Speicherpunkt in _process und request_campaign_save), damit der gespeicherte Stand den
+## wieder offenen Auftrag enthaelt. Ohne Rueckzug (kein reopen_at_home) aendert der Aufruf nichts.
+## Scheitert das Wiederoeffnen zu Hause, gibt es eine Warnung; der naechste Aufruf versucht es erneut.
+func _reopen_retreated_jobs_before_home_checkpoint() -> void:
+	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return
+	if not bool(_campaign_start.call("get_home_checkpoint_guard", self, _singleplayer_runtime).get("ok", false)): return
+	_singleplayer_runtime.call("reopen_retreated_jobs")
+	for location in _aircraft_location_by_craft.values():
+		if String(location) != "homebase": return
+	var campaign_owner: Object = _singleplayer_runtime.get("_campaign")
+	if campaign_owner == null: return
+	var jobs: Dictionary = Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {}))
+	for job_id in jobs.keys():
+		var job: Dictionary = Dictionary(jobs[job_id])
+		if String(job.get("status", "")) == "failed" and bool(job.get("reopen_at_home", false)):
+			var warn_key := "%s:%d" % [String(job_id), int(job.get("retreat_count", 0))]
+			if not _retreat_reopen_warned.has(warn_key):
+				_retreat_reopen_warned[warn_key] = true
+				push_warning("Rueckzugsauftrag %s konnte zu Hause nicht wieder geoeffnet werden; naechster Versuch beim naechsten Speichern." % String(job_id))
+
+
 func request_campaign_save() -> Dictionary:
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
+	if not is_instance_valid(_active_mission): _reopen_retreated_jobs_before_home_checkpoint()
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
 	set_meta("campaign_active_checkpoint_result" if is_instance_valid(_active_mission) else "campaign_checkpoint_result", result.duplicate(true))
 	if result.get("ok",false):

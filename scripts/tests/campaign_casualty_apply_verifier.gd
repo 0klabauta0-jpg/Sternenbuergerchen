@@ -86,6 +86,9 @@ func _sortie_a_light_wound() -> void:
 	_check(String(entry.get("severity", "")) == "light" and String(entry.get("outcome", "")) == "wounded", "A: Truppfuehrer steht als leicht verwundet in casualties")
 	_check(not String(entry.get("display_name", "")).is_empty(), "A: casualties-Eintrag traegt display_name")
 	_check(Array(result.get("casualties", [])).size() == 1, "A: genau ein casualties-Eintrag")
+	# Task 8b: das Ergebnis traegt die angewendete Verwundung (Werte aus dem Kader nach dem Anwenden).
+	_check(String(entry.get("recovery_severity", "")) == "light" and entry.get("recovery_seconds_remaining") is float and is_equal_approx(float(entry.get("recovery_seconds_remaining", -1.0)), 180.0) and entry.get("recovery_seconds_total") is float and is_equal_approx(float(entry.get("recovery_seconds_total", -1.0)), 180.0), "A (8b): casualties-Eintrag in _last_mission_result traegt recovery_severity light, 180.0 und 180.0")
+	_check(String(entry.get("severity", "")) == "light", "A (8b): severity bleibt wie es war")
 	_check(PackedStringArray(result.get("fatality_unit_ids", PackedStringArray(["x"]))).is_empty(), "A: keine Toten gemeldet")
 	var unit: Dictionary = _roster_unit("campaign_leader")
 	var recovery: Dictionary = Dictionary(unit.get("recovery_state", {}))
@@ -177,6 +180,7 @@ func _sortie_b_ground_team_down() -> void:
 	_check(String(result.get("result", "")) == "defeat" and bool(result.get("campaign_checkpoint_retry_required", false)), "B: Ergebnis defeat mit Checkpoint-Retry wie bisher")
 	_check(String(_flow.get("_current_meta_view")) == "debrief", "B: Debrief ist sichtbar")
 	_check(not result.has("casualties") or Array(result.get("casualties", [])).is_empty(), "B: keine Verwundeten gemeldet")
+	_check(not _any_recovery_field(result), "B (8b): Totalverlust: keine recovery_*-Felder im Ergebnis")
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
 		_check(String(unit.get("availability_status", "")) != "wounded", "B: %s ist nicht wounded" % unit.get("unit_id"))
 	await _end_sortie()
@@ -196,6 +200,14 @@ func _sortie_c_pilot_down() -> void:
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
 		_check(String(unit.get("availability_status", "")) != "wounded", "C: %s ist nicht wounded" % unit.get("unit_id"))
 	await _end_sortie()
+
+## Task 8b: gibt es irgendwo in casualties ein recovery_*-Feld?
+func _any_recovery_field(result: Dictionary) -> bool:
+	for entry: Dictionary in Array(result.get("casualties", [])):
+		for key: String in ["recovery_severity", "recovery_seconds_remaining", "recovery_seconds_total"]:
+			if entry.has(key):
+				return true
+	return false
 
 func _four_units() -> Array:
 	var units: Array = []
@@ -264,6 +276,12 @@ func _direct_part() -> void:
 	var longer: Dictionary = Dictionary(_roster_unit("t_c").get("recovery_state", {}))
 	_check(String(longer.get("severity", "")) == "medium" and is_equal_approx(float(longer.get("seconds_remaining", -1.0)), 900.0) and is_equal_approx(float(longer.get("seconds_total", -1.0)), 900.0), "Direkt: mittel mit Restzeit 500, erneut mittel angewendet: Restzeit 900 (neu ist laenger)")
 	_set_roster()
+	_set_wounded("t_c", "severe", 2400.0, 2280.0)
+	var light_over_severe: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_c", "fit", false, true)], "won")
+	var applied_over_severe: Dictionary = _flow.call("_apply_campaign_casualties", light_over_severe)
+	var over_entry: Dictionary = _casualty_entry(applied_over_severe, "t_c")
+	_check(String(over_entry.get("severity", "")) == "light" and String(over_entry.get("recovery_severity", "")) == "severe" and is_equal_approx(float(over_entry.get("recovery_seconds_remaining", -1.0)), 2280.0) and is_equal_approx(float(over_entry.get("recovery_seconds_total", -1.0)), 2400.0), "Direkt (8b): schwer mit 2280, leicht angewendet: Eintrag severity light, recovery_severity severe, remaining 2280.0, total 2400.0")
+	_set_roster()
 	_set_wounded("t_c", "severe", 2400.0, 2000.0)
 	var light: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_c", "fit", false, true)], "won")
 	_flow.call("_apply_campaign_casualties", light)
@@ -279,8 +297,9 @@ func _direct_part() -> void:
 	var loss: Dictionary = _built_result([_state("t_pilot", "down", false), _state("t_leader", "fit", false), _state("t_c", "down", true)], "aborted")
 	_check(bool(loss.casualty_total_loss), "Direkt Totalverlust: Fixture ist ein Totalverlust")
 	var roster_loss: Array = Array(_flow.get("_all_team_units")).duplicate(true)
-	_flow.call("_apply_campaign_casualties", loss)
+	var applied_loss: Dictionary = _flow.call("_apply_campaign_casualties", loss)
 	_check(Array(_flow.get("_all_team_units")) == roster_loss, "Direkt Totalverlust: niemand wird verwundet")
+	_check(not _any_recovery_field(applied_loss), "Direkt Totalverlust (8b): keine recovery_*-Felder")
 	# Ungueltige Regeln: Ergebnis und Kader unveraendert.
 	_set_roster()
 	_flow.set("_campaign_casualty_rules", {})
@@ -303,6 +322,7 @@ func _skirmish_part_apply() -> void:
 	await process_frame
 	var fake: Dictionary = {"mission_outcome": "won", "casualties": [{"unit_id": "x", "outcome": "wounded", "severity": "light"}], "team_states": []}
 	_check(Dictionary(_flow.call("_apply_campaign_casualties", fake)) == fake, "Skirmish: _apply_campaign_casualties gibt das Ergebnis unveraendert zurueck")
+	_check(not _any_recovery_field(Dictionary(_flow.call("_apply_campaign_casualties", fake))), "Skirmish (8b): keine recovery_*-Felder")
 	# Eine Person liegt am Ende: bisheriges Verhalten ist "recovering" (mission_progression_resolver).
 	var probe: Dictionary = _flow.call("_build_mission_result", mission, {})
 	var downed_id: String = ""
