@@ -77,10 +77,29 @@ func _boarding_part() -> void:
 	var guard: Dictionary = controller.call("get_campaign_pilot_flight_guard", _craft_id)
 	print("BOARDING_GUARD ", guard)
 	_check(bool(guard.get("ok", false)), "Flugfreigabe: Ausgefallene zaehlen nicht als fehlende Besatzung")
-	# Gruppe 3: alle Bodenpersonen ausgefallen.
-	var none_fit: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)
-	print("BOARDING_NONE_FIT ", none_fit)
-	_check(not bool(none_fit.get("ok", true)) and String(none_fit.get("reason", "")) == "crew_unavailable", "Keine Bodenperson einsatzfaehig: crew_unavailable")
+	# Wiederholbarkeit: Pilot an Bord, Ausgefallene liegt noch. Jeder weitere Aufruf liefert dasselbe, niemand wird doppelt eingeschifft.
+	for round_index in 2:
+		var again: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)
+		print("BOARDING_AGAIN ", round_index, " ", again)
+		_check(bool(again.get("ok", false)), "Wiederholter Aufruf %d: ok" % (round_index + 1))
+		_check(PackedStringArray(again.get("casualty_unit_ids", PackedStringArray())) == PackedStringArray(["campaign_leader"]), "Wiederholter Aufruf %d: casualty_unit_ids nennt die Liegende" % (round_index + 1))
+		_check(embarked.size() == 1 and embarked.has("campaign_pilot") and deployed.has("campaign_leader") and not embarked.has("campaign_leader"), "Wiederholter Aufruf %d: niemand doppelt oder zusaetzlich eingeschifft" % (round_index + 1))
+	# Teilpfad Trupp: Truppmitglied(er) mit dem Pilot im selben Trupp; fitter Teil an Bord, eine Person liegt.
+	var leader_team: String = String(leader.call("get_fireteam_id"))
+	var pilot_team: String = String(pilot.call("get_fireteam_id"))
+	print("BOARDING_TEAMS leader=", leader_team, " pilot=", pilot_team)
+	if leader_team == pilot_team:
+		for round_index in 2:
+			var team_again: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id, leader_team)
+			print("BOARDING_TEAM_AGAIN ", round_index, " ", team_again)
+			_check(bool(team_again.get("ok", false)) and PackedStringArray(team_again.get("casualty_unit_ids", PackedStringArray())) == PackedStringArray(["campaign_leader"]), "Truppaufruf %d (fitter Teil an Bord, eine liegt): ok mit casualty_unit_ids" % (round_index + 1))
+	_check(leader_team == pilot_team, "Fixture: Truppfuehrer und Pilot teilen sich einen Trupp")
+	# Ganzer Trupp liegt (Fixture: Truppfuehrer allein in eigenem Trupp, er liegt, niemand aus dem Trupp ist fit oder an Bord).
+	_check(bool(leader.call("set_fireteam_id", "ft_test_solo")), "Fixture: Truppfuehrer in eigenen Test-Trupp gesetzt")
+	var team_down: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id, "ft_test_solo")
+	print("BOARDING_TEAM_DOWN ", team_down)
+	_check(not bool(team_down.get("ok", true)) and String(team_down.get("reason", "")) == "crew_unavailable", "Truppaufruf, ganzer Trupp liegt: crew_unavailable")
+	leader.call("set_fireteam_id", leader_team)
 	# Gruppe 4: Pilot ausgefallen.
 	pilot.call("apply_damage", 10000)
 	var no_pilot: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)

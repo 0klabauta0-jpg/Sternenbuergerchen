@@ -14081,6 +14081,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 	var rules_on: bool = _campaign_casualty_rules_active()
 	var casualties := PackedStringArray()
 	var ground_casualty := false
+	var fit_seen := false
 	for unit in relevant_crew:
 		if unit == null or not unit.has_method("get_unit_id"): continue
 		var id: String = String(unit.call("get_unit_id"))
@@ -14088,6 +14089,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 			casualties.append(id)
 			ground_casualty = ground_casualty or _deployed_unit_ids.has(id) or (hex_required and not simulation.get_hex_unit_state(id).is_empty())
 			continue
+		fit_seen = true
 		if not _deployed_unit_ids.has(id) and not (hex_required and not simulation.get_hex_unit_state(id).is_empty()):continue
 		if not unit is Node2D or int(unit.call("get_health")) <= 0:
 			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
@@ -14100,7 +14102,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 			return {"ok": false, "reason": "pilot_not_at_ship" if id == pilot_id else "crew_not_at_ship", "message": "Alle Bodenpersonen muessen zuerst zum Schiff zuruecklaufen"}
 		crew.append(unit)
 	if crew.is_empty():
-		if ground_casualty: return {"ok": false, "reason": "crew_unavailable", "message": "Kein Bodenteam einsatzfaehig", "casualty_unit_ids": casualties}
+		if ground_casualty and not fit_seen: return {"ok": false, "reason": "crew_unavailable", "message": "Kein Bodenteam einsatzfähig", "casualty_unit_ids": casualties}
 		if rules_on: flight_guard["casualty_unit_ids"] = casualties
 		return flight_guard
 	var boarding_scope:String=_campaign_boarding_scope_signature(craft_id)
