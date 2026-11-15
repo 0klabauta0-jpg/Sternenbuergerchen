@@ -132,7 +132,7 @@ def fmt(m, key):
         if m["K1_start"] is None:
             return "kein Visier"
         return "%.1f-%.1f %%" % (m["K1_start"] * 100, m["K1_end"] * 100)
-    return "%.3f H" % m[key]
+    return "kein Visier" if m[key] is None else "%.3f H" % m[key]
 
 
 def measure_sheet():

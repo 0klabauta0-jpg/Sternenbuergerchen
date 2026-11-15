@@ -154,5 +154,39 @@ Schritte 1.3, 3.1, 5.1, 5.3. Die Freigabe des Aussehens gibt der Nutzer anhand d
 - Dieselbe Funktion bedient Heimatbasis, Polisa-Vitrinen und Charakter-Vorschau; dort aendert sich der Helm mit.
 - Render laufen in Software-GL; Farben koennen leicht von der Grafikkarte abweichen, die Verhaeltnisse nicht.
 
-## Ergebnis
-(wird vom Hilfsagenten gefuellt)
+## Ergebnis (15.11.2026)
+Render-Weg: echter Einheiten-Proxy (`TerrainMap3DView._create_unit_proxy` mit `test_unit.gd`, ohne Karte aufgerufen, wie `personnel_body_preview.gd`), Idle bei 0,2 s.
+r00 (unveraenderter Stand) sieht aus wie die untere Reihe in `vergleich_heavy_r08.jpg`; die Messung des Bogens erfuellt K1 bis K8
+(Bogen: K8 gemessen 0,271 H statt 0,284 H im Plan, weiterhin ueber der Grenze 0,25 H).
+
+| Nr. | Mass | Bogen | R08 (r00) | R09 (r07) | |
+|---|---|---|---|---|---|
+| K1 | Visier vorn (dunkle Zeilen) | 17.9-20.6 % | 13.4-16.9 % (verfehlt) | 17.9-22.1 % | ok |
+| K2 | Visierbreite | 0.204 H | 0.198 H (ok) | 0.227 H | ok |
+| K3 | dunkle Zeile > 0,03 H oberhalb 14 % | 0.000 H | 0.198 H (verfehlt) | 0.000 H | ok |
+| K4 | groesste Helmbreite 3-22 % | 0.311 H | 0.320 H (ok) | 0.322 H | ok |
+| K5 | schmalste Zeile 20-32 % vorn | 0.256 H | 0.248 H (ok) | 0.242 H | ok |
+| K6 | Kragenbreite 26-30 % | 0.307 H | 0.276 H (ok) | 0.284 H | ok |
+| K7 | groesste Kopftiefe seitlich | 0.320 H | 0.325 H (ok) | 0.330 H | ok |
+| K8 | schmalste Zeile 22-30 % seitlich | 0.271 H | 0.294 H (ok) | 0.293 H | ok |
+| K9 | Dreiecke Helm / Kragen / Ruestung | | 608 / 212 / 5288 | 576 / 228 / 5272 | ok (<= 700 / 260 / 9000) |
+
+Endwerte: `HEAVY_HELMET_SCALE` = (1.38, 0.96, 1.19), `HEAVY_COLLAR_DROP` = 0.24, `HEAVY_COLLAR_SIZE` = (1.75, 0.34, 1.48) (Kragen-Konstanten nie veraendert, keine Kragen-Regel ausgeloest: K5, K6, K8 waren in jeder Runde erfuellt).
+
+Runden (r01 = Bau nach Plan A/B, danach Nachstellen):
+- r01: Plan-Werte. Nur K1 verfehlt (Visier 23,4-26,2 %, zu tief; K3 und Rest ok).
+- r02, r03, r04: Regel K1 "zu tief" je einmal (Teile 2, 3, 6 z +0,03; Teile 4, 5 z +0,015; Teil 4 Hoehe +0,03). K1 Ende 25,4 / 24,5 / 23,6 %, Beginn blieb 23,4 %.
+- r05, r06: dieselbe Regel. Messung: "kein Visier". Ursache: die Helmschale (Radius ca. 0,47 bis 0,49 auf Visierhoehe) liegt weiter vorn als die Vorderflaeche des Visiers (y = -0,46); je hoeher das Visier liegt, desto mehr verdeckt die Schale es in der Mitte (Bild: Visier zerfaellt in zwei Haelften, dann ganz weg). Mit den Regeln allein ist K1 nicht erreichbar.
+- r07 (Abweichung vom Plan, ueber das Rundenbudget hinaus): Stand r06 (Regel fuenfmal angewendet) plus Teile 2, 3, 4 und die Atemschlitze (Teil 5) um 0,05 nach vorn (y -0,435 / -0,41 / -0,41 / -0,537). Danach K1 bis K9 erfuellt. K5 (0,242 H) und K7 (0,330 H) liegen knapp an der Grenze. Zur Pruefung: ohne diese Verschiebung bleibt K1 verfehlt (r04: 23,4-23,6 %, r05/r06: Visier verdeckt).
+
+Sichtbare Restunterschiede:
+- Der Helm ist im Spiel hoeher als im Bogen (Augenmass im Bild: Unterkante der Maske vom Kragen teils verdeckt); Maske und Kragen ueberdecken sich staerker.
+- Visier ist ein gerader dunkler Balken ohne Rahmenschraege; im Bogen laeuft es seitlich geschwungen aus der Schale; Stirnwulst nur als schmaler Streifen.
+- Maske rechteckiger und dunkler als die abgeschraegte Maske im Bogen; in der Seitenansicht steht sie als Block leicht vor.
+- Schultern, Oberarme und geduckte Haltung unveraendert (nicht Teil von R09); Seitenansicht K7/K8 wegen der Idle-Haltung nur bedingt vergleichbar.
+
+Tests (unveraendert, keine FAIL-Zeilen): `personnel_undersuit_switch_verifier`, `gm01_frontier_briefing_cache_verifier` (30/0), `task_097_verifier` (13/0),
+`review_completion_graphics_fixes` (519/0), `task_353_shared_loadout_contract_helper` (20/0). Kein Test musste angepasst werden.
+Leicht und mittel: je fuenf Bilder (vorne, hinten, seite, oben, Spielmassstab) vor (Stand r00) und nach der Aenderung, maximale Abweichung 0 (pixelgleich).
+Bilder: `docs/qa/ruestung_vergleich_20261115/vergleich_heavy_r09.jpg`, `helm_heavy_r08_r09.jpg`, `extra_r09_im_spielmassstab.jpg`.
+Werkzeug: `scripts/tests/ruestung_ansichten_capture.gd`, `tools/ruestung_ansichten_messen.py` (Unterbefehle `helm3`, `extra` fuer die Zusatzbilder).

@@ -181,37 +181,35 @@ class Asset:
 
 # ======================================================================= parts
 def helmet_heavy() -> Asset:
-    """Faceted dome, brow ridge, visor slit, mask with breathing slits, chin block, ear discs."""
+    """R09: big dome down to the chin, brow ridge, wide low visor slit, short dark mask with breathing slits, ear discs."""
     a = Asset("helmet_heavy")
-    a.lathe([(-0.50, 0.39), (-0.30, 0.43), (-0.06, 0.44), (0.16, 0.43), (0.32, 0.37), (0.43, 0.26), (0.50, 0.10)], T, seg=12)
+    a.lathe([(-0.50, 0.36), (-0.36, 0.42), (-0.18, 0.455), (0.02, 0.46), (0.20, 0.43), (0.34, 0.35), (0.44, 0.23), (0.50, 0.09)],
+            T, seg=14, depth_scale=1.06)
     # Brow ridge over the visor.
-    a.box((0.72, 0.30, 0.10), (0, -0.33, 0.19), T, 0.03, taper=0.9, taper_axis="y")
-    # Visor slit (near black), slightly recessed under the brow.
-    a.box((0.64, 0.26, 0.12), (0, -0.33, 0.075), V, 0.02)
-    # Mask: wedge-shaped face plate with two horizontal breathing slits per cheek.
-    a.box((0.70, 0.34, 0.28), (0, -0.30, -0.15), T, 0.04, taper=1.15, taper_axis="z")
+    a.box((0.80, 0.22, 0.08), (0, -0.435, 0.010), T, 0.02, taper=0.92, taper_axis="y")
+    # Wide visor slit (near black), runs out of the shell at the sides.
+    a.box((0.74, 0.20, 0.15), (0, -0.41, -0.105), V, 0.0)
+    # Mask under the visor: dark, narrower towards the bottom.
+    a.box((0.62, 0.24, 0.320), (0, -0.41, -0.340), G, 0.03, taper=1.12, taper_axis="z")
     for x in (-0.17, 0.17):
-        for z in (-0.10, -0.17):
-            a.box((0.15, 0.04, 0.03), (x, -0.47, z), V, 0.0)
-    a.box((0.26, 0.26, 0.13), (0, -0.37, -0.38), T, 0.03)  # chin block
-    a.box((0.30, 0.03, 0.03), (0, -0.47, -0.30), V, 0.0)  # seam above the chin
-    # Round ear discs: light rim with a dark core.
-    for x in (-0.455, 0.455):
-        a.cyl(0.13, 0.08, (x, 0.03, 0.05), T, seg=10, rot=(0, 90, 0), bevel=0.015)
-        a.cyl(0.07, 0.04, (x * 1.09, 0.03, 0.05), G, seg=8, rot=(0, 90, 0))
+        for z in (-0.325, -0.375):
+            a.box((0.13, 0.03, 0.025), (x, -0.537, z), V, 0.0)  # breathing slits
+    # Round ear discs at visor height: light rim with a dark core.
+    for x in (-0.47, 0.47):
+        a.cyl(0.12, 0.07, (x, 0.04, -0.090), T, seg=10, rot=(0, 90, 0), bevel=0.015)
+        a.cyl(0.065, 0.04, (x * 1.075, 0.04, -0.090), G, seg=8, rot=(0, 90, 0))
     return a
 
 
 def collar() -> Asset:
-    """Thick dark neck ring with a rolled top and small amber marks front and back."""
+    """R09: thick dark neck ring, drawn in at the top, light rim for the helmet, small amber marks front and back."""
     a = Asset("collar")
-    a.cyl(0.50, 0.58, (0, 0, -0.21), G, r2=0.47, seg=8, bevel=0.04)
-    a.cyl(0.47, 0.30, (0, 0, 0.23), G, r2=0.36, seg=8)
-    a.cyl(0.36, 0.06, (0, 0, 0.40), T, seg=8)  # light rim the helmet sits on
+    a.lathe([(-0.50, 0.50), (-0.12, 0.50), (0.18, 0.47), (0.40, 0.41), (0.50, 0.35)], G, seg=10)
+    a.cyl(0.35, 0.05, (0, 0, 0.49), T, seg=10)  # light rim the helmet sits on
     for x in (-0.24, 0.24):
         for dz in (0.0, 0.07):
-            a.box((0.12, 0.04, 0.035), (x, -0.47, -0.28 + dz), A, 0.0)
-            a.box((0.12, 0.04, 0.035), (x * 0.9, 0.46, 0.02 + dz), A, 0.0)
+            a.box((0.12, 0.04, 0.035), (x, -0.50, -0.28 + dz), A, 0.0)
+            a.box((0.12, 0.04, 0.035), (x * 0.9, 0.50, 0.02 + dz), A, 0.0)
     return a
 
 
@@ -352,8 +350,8 @@ COUNT = {"helmet_heavy": 1, "collar": 1, "torso_heavy": 1, "pelvis_heavy": 1}
 def main() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"revision": "heavy_r08_20261115", "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
-                "note": "R08 heavy armour parts, drop-in for the R07 heavy parts", "parts": {}}
+    manifest = {"revision": "heavy_r09_20261115", "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
+                "note": "R09: helmet and collar second round", "parts": {}}
     total = 0
     for build in PARTS:
         info = build().export()

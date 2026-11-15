@@ -4,9 +4,12 @@ const PATH := "res://Assets/curated/personnel/armor_kenney_r07_20261111/"
 ## Heavy armour parts R08 (source: art/ruestung_schwer_r08_20261115/build_parts.py). Same file names as R07.
 const HEAVY_PATH := "res://Assets/curated/personnel/armor_r08_schwer_20261115/"
 const PREFIX := "ArmorVisual_"
-const REVISION := "kenney_authored_r07_undersuit_v2_heavy_r08"
+const REVISION := "kenney_authored_r07_undersuit_v2_heavy_r09"
 ## R08 heavy-only fitting numbers (R07 values in brackets).
-const HEAVY_HELMET_SCALE := Vector3(1.38, 1.00, 1.19) # (1.38, 1.00, 1.30)
+const HEAVY_HELMET_SCALE := Vector3(1.38, 0.96, 1.19) # (1.38, 1.00, 1.19); R07 (1.38, 1.00, 1.30)
+## R09 collar fitting: centre = Head - up * width * DROP, size factors for width / torso / width.
+const HEAVY_COLLAR_DROP := 0.24 # (0.24)
+const HEAVY_COLLAR_SIZE := Vector3(1.75, 0.34, 1.48) # (1.75, 0.34, 1.48)
 const HEAVY_GLOVE := Vector3(0.62, 0.56, 0.48) # (0.30, 0.31, 0.24)
 const HEAVY_GLOVE_REACH := 0.19 # (0.13)
 const HEAVY_TORSO_DEPTH := 1.55 # (1.16)
@@ -116,8 +119,8 @@ static func _bake_outfit(skeleton: Skeleton3D, armor_id: String, model: Node3D) 
 			helmet_center, helmet_size)
 	if armor_id == "heavy":
 		_add_spec(specs, "collar", "Chest", axes,
-			Vector3(bones.Head) - up * width * 0.24,
-			Vector3(width * 1.75, torso * 0.34, width * 1.48))
+			Vector3(bones.Head) - up * width * HEAVY_COLLAR_DROP,
+			Vector3(width * HEAVY_COLLAR_SIZE.x, torso * HEAVY_COLLAR_SIZE.y, width * HEAVY_COLLAR_SIZE.z))
 	for side: String in ["Left", "Right"]:
 		var arm: Vector3 = bones[side + "Arm"]
 		var elbow: Vector3 = bones[side + "ForeArm"]
