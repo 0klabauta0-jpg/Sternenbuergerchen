@@ -17,7 +17,7 @@ Sie gelten nur in der Kampagne. Skirmish und Mehrspieler bleiben unverändert.
 2. **Versorgungsfrist.** Wer ausfällt, liegt 60 Sekunden „am Boden“. In dieser Zeit kann ein Sanitäter ihn wieder aufrichten. Danach ist er „kritisch“ und kann im Feld nicht mehr aufgerichtet werden. [V]
 3. **Tot ist nur, wer zurückbleibt.** [B] Solange es das Tragen noch nicht gibt (Paket 3b), gilt als geborgen [V]:
    - bei Sieg jeder Ausgefallene (das Gebiet ist gesichert);
-   - sonst, wer an Bord ist oder höchstens 72 Einheiten vom gelandeten Schiff entfernt liegt.
+   - sonst, wer an Bord ist oder höchstens 180 Einheiten vom Einstiegspunkt des gelandeten Schiffs entfernt liegt (zwei Hexfelder). Ursprünglich waren 72 vorgesehen (Radius der Evakuierungszone); auf Hex-Karten liegt der Feldabstand aber bei etwa 88, 72 hätte nur das Einstiegsfeld selbst erfasst und wäre enger gewesen als der Einschiff-Radius (128). Geändert am 15.11. vom Hauptchat, Björn gemeldet.
 4. **Verwundungsstufen.** [B: abgestuft; Zuordnung V]
    - leicht: im Einsatz ausgefallen und vom Sanitäter wieder aufgerichtet;
    - mittel: am Ende „am Boden“ und geborgen;
