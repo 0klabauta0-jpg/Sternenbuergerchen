@@ -22,6 +22,12 @@ ausdrueckliche Anflug bindet Ort/Job und startet die zugehoerige Karteninstanz.
 - job_id: satellite_recovery, getrennt von location_id. Mehrere Jobs duerfen
   denselben Ort referenzieren. Job enthaelt Titel, Objectivebezug und Belohnung.
 - Status: offered -> accepted -> active -> completed oder failed.
+- Rückzug (seit Paket 3a, 15.11.2026; `docs/dev/campaign_casualty_retreat_contract.md`):
+  Ein Ergebnis `aborted` mit `win_condition_type` `evacuation` oder `departure`
+  setzt den Auftrag auf failed mit `reopen_at_home` und zählt `retreat_count`
+  hoch. Bei der Heimkehr wird er vor dem Basis-Checkpoint wieder accepted
+  (Operation `reopen_retreated_job`), ohne `Erneut annehmen`. Ein Rückzug ist
+  kein Fehlschlag im Sinn der Zeilen unten.
 - Annahme startet keinen Flug. Zielwahl startet keine Mission. Handelsbesuch
   braucht keinen Kampfauftrag. completed besitzt eine stabile Abschluss-ID.
 - Abschluss nur mit bestaetigtem Runtime-/Scenariobeleg, niemals durch
@@ -37,7 +43,9 @@ ausdrueckliche Anflug bindet Ort/Job und startet die zugehoerige Karteninstanz.
   vom Runtime-Handoff. Ein fehlendes, fremdes oder abgeflogenes Schiff kann keinen
   crew_returned-Beleg erzeugen. Frueher expliziter Rueckflug bleibt moeglich;
   nach tatsaechlicher Heimkehr ohne Abschluss wird der Auftrag fehlgeschlagen
-  und die verlassene Instanz geschlossen, ohne Belohnung.
+  und die verlassene Instanz geschlossen, ohne Belohnung. Ausnahme seit
+  Paket 3a: Ist der Abflug ein Rückzug (keine einsatzfähige eigene Person bleibt
+  am Ort), bleibt der Auftrag offen und wird zu Hause wieder geöffnet.
 
 ## Bruecke und Pruefung
 

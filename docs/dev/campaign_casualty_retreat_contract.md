@@ -1,0 +1,233 @@
+# Campaign Casualty And Retreat Contract
+
+Stand: 15.11.2026, Paket 3a „Ausfall und Rückzug in der Kampagne“. Aufgabendatei: `docs/tasks/SPIELRUNDE_AUSFALL_RUECKZUG_2026_11_15.md`. Arbeitsplan: `docs/superpowers/plans/2026-11-15-ausfall-und-rueckzug.md`.
+
+Entscheidungen, die Björn getroffen hat, sind mit [B] gekennzeichnet; Festlegungen, die Claude vorgeschlagen und Björn mit der Freigabe vom 15.11. angenommen hat, mit [V]. Die Uhrzeiten der Entscheidungen stammen aus dem Protokoll der Umsetzung (`.superpowers/sdd/ausfall-und-rueckzug/progress.md`); die Zeiten zwischen 15:40 und 18:15 darin waren laut Protokoll geschätzt.
+
+## Geltungsbereich
+
+- Die Regeln gelten nur in der Kampagne. Skirmish und Mehrspieler bleiben unverändert: eigene Ausgefallene stehen dort nach der bisherigen Frist (30 Sekunden Respawn-Timer) wieder auf, das Missionsergebnis trägt keine der unten genannten Felder.
+- Der Schalter heißt `campaign_casualty_rules_enabled` und liegt am Combat-Driver (`scripts/tests/mission_combat_loop_driver.gd`, Export, Vorgabe `false`). `MetaLayerFlow._configure_mission_instance` setzt ihn nur, wenn `is_campaign_start()` wahr ist, die Instanz keine Vorschau ist und die Regeln aus `data/singleplayer/casualty_rules.json` gültig sind (`CampaignCasualtyRules.rules_are_valid`). Bei ungültiger oder fehlender Regeldatei meldet `CampaignCasualtyRules.load_rules` den Fehler einmal und gibt `{}` zurück; die Kampagne läuft dann mit ausgeschalteten Regeln wie vor dem Paket. Aufrufer rechnen nie mit Nullwerten weiter.
+- Balancewerte stehen ausschließlich in `data/singleplayer/casualty_rules.json` (`balance_status`: `initial_values_not_final`), nie als Zahl im Code. Bergungsradius `recovery_radius_world` 180, Frist `down_revive_window_seconds` 60, Ausfallzeiten `recovery_seconds` leicht 180, mittel 900, schwer 2400 Sekunden, Block `total_loss` (Gebühr, Mindestgebühr, Stufe, Moral).
+- Der Bergungsradius ist von ursprünglich 72 auf 180 geändert worden (15.11., Hauptchat, Björn gemeldet): Auf Hex-Karten liegt der Feldabstand bei etwa 88; 72 hätte nur das Einstiegsfeld selbst erfasst und wäre enger gewesen als der Einschiff-Radius `CAMPAIGN_BOARDING_RADIUS` (128). 180 entspricht etwa zwei Feldern. Der Wert steht in der Datendatei und ist dort mit einer Zeile zurückzudrehen.
+
+## Regeln und Besitzer
+
+Die Regeln 1 bis 8 sind die der Aufgabendatei. Der Besitzer ist die Stelle im Code, die die Regel durchsetzt; andere Stellen lesen nur.
+
+### Regel 1: Kein Respawn für eigene Leute [B]
+
+Bei eingeschaltetem Schalter wird für eigene Einheiten kein Respawn angefordert. Besitzer: `MissionCombatLoopDriver._request_respawn_for_unit` (kehrt bei Schalter an und eigenem Team sofort zurück). Gegner behalten ihren Respawn. Auf Hex-Karten kam ein Respawn eigener Einheiten schon vorher nicht zustande (der Driver nimmt ihn an, `begin_hex_respawn` hat keinen Aufrufer, die Einheit bleibt in `respawning`); dieses Paket ändert daran nichts.
+
+### Regel 2: Versorgungsfrist [V]
+
+Wer ausfällt, liegt `down_revive_window_seconds` (60) Sekunden „am Boden“; in dieser Zeit kann ein Sanitäter ihn aufrichten, danach ist er „kritisch“ und im Feld nicht mehr aufzurichten. Besitzer: `MissionCombatLoopDriver._has_down_state_linger_elapsed(unit_id, unit)` nimmt bei Schalter an und eigener Einheit die Frist statt `DOWN_STATE_VISIBLE_MIN_SECONDS`. Der Flow reicht die Frist aus den Regeln an den Driver. `was_downed` und das Fristende werden zusätzlich je Tick abgefragt (`_poll_friendly_casualty_state`), weil Einheiten im echten Einsatz erst nach `_ready()` registriert werden und ihre Signale sonst nicht verbunden wären. Die Abfrage läuft hinter der Startschonfrist `_combat_startup_grace_ticks` (Vorgabe 0, in der Kampagne so belassen).
+
+### Regel 3: Tot ist nur, wer zurückbleibt [B]
+
+Solange es das Tragen noch nicht gibt (Paket 3b), gilt als geborgen [V]: bei Sieg jeder Ausgefallene; sonst, wer an Bord ist (`aboard`) oder höchstens `recovery_radius_world` (180) vom Schiffszugang des gelandeten Schiffs entfernt liegt (`near_ship`). Besitzer der Einstufung: `CampaignCasualtyRules.classify_unit`. Wer nicht geborgen ist und nicht fit, ist `dead`.
+
+**Geschützte Personen** [B, 15.11., 23:07]: Personen, die die Kampagne voraussetzt, können nicht sterben; sie überleben schwer verwundet. Das sind `campaign_outpost_recruit`, `campaign_rescue_pilot`, der Pilot eines Schiffs und der Anwerber des Polisa-Marktes. Besitzer der Auskunft: `SingleplayerRuntimeAdapter.is_person_protected_from_death(unit_id)`. Besitzer der Anwendung: `MetaLayerFlow._apply_campaign_casualties` nimmt jede geschützte Person je Person (nie für den ganzen Einsatz) aus `fatality_unit_ids` und setzt ihren Eintrag in `casualties` auf `outcome` `wounded`, `severity` `severe` und `protected_from_death` `true`; danach geht sie den Weg der Verwundeten.
+
+Wer stirbt, wird aus Kader, Basis-Personalliste, Truppdefinitionen, Schiffs- und Personenausrüstung, Rucksack und Auswahl genommen und in die Gefallenenliste eingetragen (siehe dort). Besitzer: `MetaLayerFlow._remove_campaign_fatalities(unit_ids, mission_result)`.
+
+- Nachrücken: Stirbt die Person auf Kaderplatz 0, rückt unter den Lebenden die erste mit `roster_role_category == "operator"` und Führung größer 0 nach vorn (`_campaign_roster_without`); der Pilot steht danach auf Platz 1. Ist der tote Lead eines Trupps nicht mehr Mitglied, wird das erste lebende Mitglied Lead.
+- Absicherung: `_campaign_roster_problems` spiegelt `CampaignCheckpointStore.validate_payload` (Kader 2 bis 64 Personen, Platz 0 Operator mit Führung, Platz 1 Pilot mit `dropship_piloting` größer 0). Wäre ein bis dahin gültiger Kader nach dem Entfernen ungültig, wird nichts entfernt und ein `push_error` mit den IDs geschrieben. Ein schon vorher ungültiger Kader löst die Absicherung nicht aus.
+- Rucksack: `SingleplayerSupplyState.discard_person_equipment(unit_id)` (im Adapter durchgereicht, dort zusätzlich `remove_unit` am Ausrüstungsstand) verwirft den Rucksack `unit:<id>:backpack`. Auftragsfracht (`RESERVED_QUEST_ITEMS`) geht nicht verloren, sondern kommt wie bei `return_skirmish_person_equipment` ins Basislager, sonst könnte ein Auftrag unlösbar werden. Das weicht vom Plansatz „kein Übertrag ins Basislager“ ab.
+- Einmaligkeit: `_remove_campaign_fatalities` betrachtet nur Personen, die noch im Kader stehen; eine zweite Zustellung findet niemanden. `record_fallen` ist je `unit_id` idempotent. Eintrag und Entfernen laufen im selben Schritt ohne `await` vor demselben Heimat-Checkpoint, damit Person und Eintrag nicht auseinanderlaufen. Zuerst werden alle Einträge gebildet und mit `validate_fallen_entry` geprüft; scheitert einer, wird niemand entfernt.
+
+### Regel 4: Verwundungsstufen [B: abgestuft; Zuordnung V]
+
+- leicht: im Einsatz ausgefallen und vom Sanitäter wieder aufgerichtet (am Ende fit, aber `was_downed`);
+- mittel: am Ende „am Boden“ und geborgen;
+- schwer: am Ende „kritisch“ (`bleedout` oder `respawning`) und geborgen.
+
+Besitzer: `CampaignCasualtyRules.classify_unit`. Eine Person gilt als nicht fit, wenn ihr `vital_state` nicht `fit` ist oder ihre Gesundheit 0 oder weniger beträgt.
+
+### Regel 5: Ausfallzeit in Echtzeit [V]
+
+Leicht 180, mittel 900, schwer 2400 Sekunden (vorläufig, nur in der Regeldatei). Die Zeit läuft auch während andere im Einsatz sind. Besitzer:
+
+- Erstellen: `CampaignCasualtyRules.build_recovery_state(severity, rules)` liefert `{state: "wounded", severity, seconds_total, seconds_remaining, source: "campaign_casualty"}`; `MetaLayerFlow._apply_campaign_casualties` schreibt es in den Kader.
+- Zählen: `PersonnelRecoveryRuntime.advance(units, delta_seconds)` (`scripts/core/personnel_recovery_runtime.gd`, reine statische Funktion auf Kopien, nie negativ, Delta 0 oder kleiner ändert nichts; Verwundete ohne `recovery_state` aus Altdaten gelten als genesen). `MetaLayerFlow._tick_personnel_recovery(delta)` ruft sie aus `_process`, nur in der Kampagne, unabhängig von der Ansicht und auch während eines Einsatzes.
+- Takt und Deckel: Der Tick sammelt das Frame-Delta gedeckelt auf `PERSONNEL_RECOVERY_MAX_FRAME_SECONDS` (2,0). Sobald eine volle Sekunde gesammelt ist und jemand `availability_status == "wounded"` hat, wird einmal `advance` mit höchstens 2,0 Sekunden angewendet. Ohne Verwundete steht die Uhr auf 0.
+- Nur bei laufendem Spiel: Gezählt werden nur Frame-Deltas. Zeit, in der das Spiel steht (beendet, zwischen Speichern und Fortsetzen), zählt nicht; ein langer Hänger zählt höchstens 2,0 Sekunden. Der Takt hängt an der Spielzeit; `Engine.time_scale` würde die Ausfallzeit mitbeschleunigen, wird im Spielcode aber nirgends gesetzt.
+- Verwundung wird nie kürzer oder leichter: Trifft eine neue Verwundung eine schon verwundete Person, gilt die schwerere Stufe und das Maximum aus alter Restzeit und neuer Zeit (`seconds_total` ebenso). Zwei leichte Wunden addieren sich nicht.
+
+### Regel 6: Einsatzsperre [B]
+
+Verwundete können an der Heimatbasis nicht eingeschifft werden; die Ablehnung nennt Name, Stufe und Restzeit, in der Form „<Anzeigename>: Verwundet (mittel), noch 9:55“.
+
+- Füttern: `MetaLayerFlow._sync_wound_lock()` ist die eine Stelle, die der Basis-Runtime die Sperre aus dem Kader gibt: `BasePersonnelRuntime.set_unavailable_unit_reasons({unit_id: Meldung})` (über `adapter.get_base_personnel_runtime()`), als Ganzes ersetzt, ohne Verwundete leer. Aufrufer: Tick, `_apply_campaign_casualties`, `_remove_campaign_fatalities`, `_ready` direkt nach `configure` des Adapters (Kampagnenstart, Fortsetzen, Rücksprung zum Checkpoint). Skirmish sperrt nichts.
+- Einschiffen: `BasePersonnelRuntime.apply_operation` (Zweig `base_board`) und `_board_team` lehnen eine gesperrte Person vor jeder Änderung ab.
+- Abflug: `BasePersonnelRuntime.get_departure_block(craft_id)` liefert `{ok: false, reason: "unit_wounded", message}` für die erste gesperrte Person, die an Bord ist, am Schiff einsteigt, der Schiffsgruppe angehört, als Pilot eingeteilt ist oder zu den Nutzlast-Trupps gehört; sonst `{}`. `SingleplayerRuntimeAdapter.authorize_departure` fragt das zuerst ab.
+
+**Wo die Sperre gilt** [V, 15.11.; durch Björn bestätigt 15.11., 23:07, siehe unten]: nur an der Heimatbasis. `authorize_departure` ruft `get_departure_block` nur, wenn `_craft_is_grounded_at_home(craft_id)` wahr ist (Ort `homebase`, kein offener Missionstransfer, Reisephase `grounded`).
+
+**Entscheidung** [B, 15.11., 23:07]: Ein Schiff mit einer Verwundeten an Bord darf direkt den nächsten Einsatzort anfliegen; die Einsatzsperre gilt nur an der Heimatbasis. Das ist gewollt, keine Lücke mehr. (Vorher stand es als „bekannte Lücke“ in der Aufgabendatei.)
+
+### Regel 7: Totalverlust [B, 15.11.]
+
+Fällt der Pilot aus, ist am Ende niemand vom Bodentrupp mehr einsatzfähig, oder bliebe nach den Toten kein Truppführer oder kein Pilot im Kader, dann stirbt niemand: Der Einsatz gilt wie vor dem Paket als verloren und die Kampagne springt zum letzten Basisstand zurück (`continue_home`, siehe `docs/dev/campaign_introduction_contract.md`).
+
+Besitzer der Feststellung: `CampaignCasualtyRules.resolve_mission(team_states, mission_outcome, roster_units, pilot_unit_id, rules)` mit den Gründen `pilot_down`, `ground_team_down`, `no_leader_left`, `no_pilot_left`, `roster_too_small`. Lehnt schon das Einschiffen mit `pilot_unavailable` oder `crew_unavailable` ab, setzt der Flow `pilot_down` bzw. `ground_team_down`. Beide Wege münden in `MetaLayerFlow._mark_campaign_total_loss` (Ergebnis `defeat`, `campaign_checkpoint_retry_required`, `extraction_failure`). Bei Totalverlust werden keine Verwundungen angewendet und niemand entfernt (`_apply_campaign_casualties` kehrt zurück).
+
+**Malus bei Totalverlust** [B: es muss einen geben; Ausgestaltung V]. Umsetzung in Arbeit (Task 5b), nach Abschluss gegen den Code prüfen. Nach der Aufgabendatei gilt: Der Rücksprung gilt als Notbergung durch einen Rettungsdienst. Sie kostet 25 % des Guthabens, mindestens 50 Credits (höchstens das vorhandene Guthaben). Jeder, der im Einsatz am Boden lag, ist danach leicht verwundet. Die Moral aller Beteiligten sinkt um 0,08. Der Auftrag gilt als gescheitert und muss neu angenommen werden. Der Malus wird auf den wiederhergestellten Basisstand angewendet und sofort gespeichert, damit er sich nicht durch Neuladen umgehen lässt. Die Werte stehen im Block `total_loss` der Regeldatei (`rescue_fee_fraction`, `rescue_fee_minimum`, `wound_severity`, `morale_delta`). Die reine Rechnung existiert als `CampaignCasualtyRules.build_total_loss_penalty(team_states, credits, rules)` und liefert `rescue_fee`, `wounded`, `morale_delta` und `morale_unit_ids`. Wo und mit welchen Namen der Flow den Malus anwendet und im Ergebnis ausweist, ist bei Abschluss von Task 5b hier nachzutragen.
+
+### Regel 8: Rückzug ist ein normaler Ausgang [B]
+
+Nach „Evakuieren“ bleibt der Auftrag angenommen und kann ohne „Erneut annehmen“ wieder angeflogen werden; die Zahl der Rückzüge wird mitgezählt.
+
+**Was als Rückzug zählt** [B, 15.11., 12:05]: „Evakuieren“ und jeder Abflug vom Einsatzort bei aktivem Auftrag, nach dem keine einsatzfähige eigene Person mehr am Ort bleibt. Bleiben einsatzfähige Leute am Ort (Verstärkung mit nur einem Schiff nachholen, einen Außenposten halten, während das Schiff weiterfliegt), ist der Abflug in keiner Form ein Rückzug: keine Verlustauswertung, der Auftrag bleibt, wie er ist. Im Code ist ein Rückzug ein Ergebnis `aborted` mit `win_condition_type` `evacuation` oder `departure`. Besitzer der Zuordnung: `SingleplayerCampaignState.RETREAT_WIN_CONDITIONS` (`["evacuation", "departure"]`, die einzige Stelle der beiden Werte). Die Regel „keine einsatzfähige Person bleibt“ steht ausdrücklich in `MetaLayerFlow._campaign_departure_empties_location(team_states)`: `false`, sobald eine Person `fit` und nicht `aboard` ist.
+
+Stand heute: Das Spiel lässt ein Schiff noch nicht abfliegen, solange ein Einsatzfähiger nicht an Bord ist (`get_campaign_pilot_flight_guard` mit `require_all_crew`, Grund `crew_not_aboard`), und gibt den Ort frei, sobald kein Schiff mehr dort ist. Die Bedingung „Einsatzfähige bleiben am Ort“ ist deshalb im heutigen Spiel nie erfüllt; „Truppen bleiben am Ort“ wird in Paket 3c gebaut. Dieses Paket schreibt nur die Regel fest; `_campaign_departure_gate` wertet nicht aus, wenn `_campaign_departure_empties_location` falsch liefert.
+
+**Abflug mit Ausgefallenen** [V]: Ein Abflug wird nur ausgewertet, wenn der Abschluss sicher durchläuft. Reicht der Treibstoff nicht für den Rückflug, hebt das Schiff nicht ab und nichts wird gebucht. Ein Abflug, der von außerhalb der Ortsansicht ausgelöst wird, ist gesperrt, solange dort Ausgefallene liegen.
+
+**Treibstoff** [B, 15.11., 23:07]: Das Schiff fliegt so weit, wie der Treibstoff reicht: entweder nicht in den Orbit oder in den Orbit; für den Warpsprung muss der Treibstoff vorher reichen; im Zweifel kommt später ein Tankschiff. Das wird ein eigenes späteres Paket am Flug- und Treibstoffsystem (etappenweiser Treibstoff, Tankschiff; mit dem Bedien-Strang abzustimmen). In Paket 3a gilt übergangsweise: Mit Ausgefallenen am Boden und zu wenig Treibstoff für den ganzen Rückflug hebt das Schiff nicht ab und meldet es.
+
+## Felder im Missionsergebnis
+
+Alle Felder dieses Abschnitts gibt es nur in der Kampagne mit gültigen Regeln. In Skirmish, Mehrspieler und bei ungültiger Regeldatei bleibt das Ergebnis wie vorher (kein `was_downed`, `near_ship` oder `aboard` in `team_states`, keine der übrigen Felder).
+
+**`team_states`** (je eigene Einheit; Driver `_build_team_states`, ergänzt von `MetaLayerFlow._build_mission_result`):
+
+- `was_downed`: die Einheit war im Einsatz ausgefallen. Quelle: `MissionCombatLoopDriver.get_casualty_flags()`. Die Merker werden nach der Auswertung mit `clear_casualty_flags()` geleert.
+- `near_ship`: Abstand zum Schiffszugang (`get_campaign_ground_ship_access(craft_id)` des Missionscontrollers, `craft_id` aus `mission_drop_craft_id`) höchstens `recovery_radius_world`. Auf Hex-Karten wird die Position aus dem Hex-Zustand der Einheit gelesen (`SimulationRoot.get_hex_unit_state`), sonst aus `global_position`. Ist das Schiff nicht bekannt oder der Punkt nicht endlich, ist `near_ship` `false`. Besitzer: `MetaLayerFlow._campaign_casualty_fields_for_unit`, `_campaign_result_unit_position`.
+- `aboard`: Meta `dropship_embarked` der Einheit.
+- Fehlt der Pilot in `team_states` (er blieb im Schiff), gilt er als einsatzfähig (Ruling Task 1). Fällt er im Einsatz aus, muss er in `team_states` stehen, sonst wird `pilot_down` nicht erkannt.
+
+**`casualties`** (Liste; nur Personen mit Folgen, Unverletzte stehen nicht darin):
+
+- `unit_id`, `display_name`, `outcome` (`wounded` oder `dead`), `severity` (`light`, `medium`, `severe`).
+- Bei Verwundeten außerdem die nach dem Anwenden geltenden Werte `recovery_severity`, `recovery_seconds_remaining`, `recovery_seconds_total` (Lieferseite: `_apply_campaign_casualties`; wegen der Regel „Verwundung wird nie kürzer oder leichter“ können sie von der reinen Einstufung abweichen). Die Anzeige liest sie aus dem Ergebnis und nie aus der Regeldatei. Fehlen sie, zeigt der Debrief nur die Stufe ohne Zeit.
+- `protected_from_death`: `true` bei einer geschützten Person, die statt zu sterben schwer verwundet überlebt.
+
+**Weitere Felder:**
+
+- `fatality_unit_ids`: die Gefallenen (ohne die geschützten Personen). Die Namen stehen weiter in `casualties`, damit der Debrief sie zeigen kann, auch nachdem die Personen aus dem Kader genommen sind. Ein durch die Absicherung gesperrter Tod bleibt in `fatality_unit_ids` stehen, die Person bleibt dann im Kader; der Debrief zeigt sie als gefallen.
+- `casualty_total_loss` (bool) und `total_loss_reason` (`pilot_down`, `ground_team_down`, `no_leader_left`, `no_pilot_left`, `roster_too_small`). Das Feld `casualty_total_loss` ist zugleich das Merkmal, an dem der Debrief „Kampagne mit Verlustauswertung“ erkennt; bei ungültiger Regeldatei fehlt es und der Debrief zeigt den alten Text.
+- `win_condition_type`: `evacuation` (Knopf „Evakuieren“, `MissionCombatLoopDriver.request_mission_evacuation`) oder `departure` (Abflug über das Abflug-Gate). Zusammen mit `result` `aborted` ist das ein Rückzug. `casualties` und `fatality_unit_ids` hängen am Ergebnis, das der Debrief liest (`_last_mission_result`), nicht an dem Ergebnis, das `record_mission_result` bucht, damit die Buchung unverändert dasselbe bekommt wie vorher; `casualty_total_loss` und `total_loss_reason` stehen in beiden.
+- Malus bei Totalverlust: Ein Feld im Ergebnis für den angewendeten Malus ist durch Task 5b vorgesehen. Sein Name wird hier erst nach Abschluss von Task 5b gegen den Code eingetragen.
+
+**Einmaligkeit:** Verluste werden genau einmal angewendet. Schutz: `_on_mission_combat_resolved` kehrt bei `_active_mission == null` sofort zurück, und `_release_active_mission()` setzt das in derselben Funktion; jede weitere Zustellung (auch der 0,25-Sekunden-Wiederholer) kommt deshalb weder bis zum Einschiffen noch zur Buchung. Die Funktion läuft synchron ohne `await`. Der Driver sperrt zusätzlich eine zweite Auflösung (`_combat_finished`).
+
+**Reihenfolge in `_on_mission_combat_resolved`** (nur Kampagne, gültige Regeln): Einschiffen wie bisher; meldet es `pilot_unavailable` oder `crew_unavailable`, bleibt es der alte Weg `failed_extraction`, zusätzlich mit `casualty_total_loss` und Grund. Ist es `ok`, werden die `team_states` über `_resolve_campaign_casualties` gemessen und `resolve_mission` aufgerufen; die gemessenen `team_states` ersetzen die des später gebauten Ergebnisses (eine Messung je Ergebnis). Totalverlust geht in `_mark_campaign_total_loss`. Sonst folgen nach `_apply_mission_progression_to_roster` die Verwundungen in `_apply_campaign_casualties`, damit „wounded“ das dort gesetzte „recovering“ überschreibt, und das Entfernen der Gefallenen.
+
+**Einschiffen mit Ausgefallenen** (Aufgabe 4): Bei eingeschaltetem Schalter blockieren Ausgefallene das Einschiffen nicht mehr. `MissionTacticalSandboxController.request_campaign_crew_boarding` überspringt Personen, die nicht `fit` sind, und liefert auf den Pfaden der Besatzungsschleife `casualty_unit_ids`; frühe Ablehnungen (`pilot_unavailable`, `craft_not_landed`, `crew_not_at_ship`, `hex_ground_unavailable`) tragen das Feld nicht, Aufrufer behandeln ein fehlendes Feld als leer. Der Aufruf ist beliebig oft wiederholbar. `crew_unavailable` wegen Ausfall gibt es nur, wenn in der betrachteten Gruppe niemand einsatzfähig ist; ein einsatzfähiger Pilot zählt als einsatzfähige Person. `get_campaign_pilot_flight_guard` meldet bei nicht fittem Piloten `pilot_unavailable` und zählt nicht fitte Nicht-Piloten nicht als fehlende Besatzung. Den Totalverlust `ground_team_down` stellt `resolve_mission` am Missionsende fest, nicht das Einschiffen. Bei ausgeschaltetem Schalter verhalten sich beide Funktionen wie vorher.
+
+## Felder am Kader
+
+- `availability_status == "wounded"` und `recovery_state` (`state`, `severity`, `seconds_total`, `seconds_remaining`, `source`). Besitzer: `_apply_campaign_casualties`. `PersonnelRecoveryRuntime.is_wounded(unit)` gilt, wenn der Status `wounded` ist und die Restzeit größer 0.
+- Verwundete mit Status `wounded` ohne `recovery_state` (Altdaten) werden vom Takt einmal auf `active` gesetzt und sperren nicht.
+- In Skirmish setzt der Missionsfortschritt Liegende weiter auf `recovering`; die Kampagne überschreibt das mit `wounded`.
+- Die Heimatbasis-Ansicht hält eine eigene Kopie des Kaders (siehe „Bekannte Grenzen“).
+
+## Felder im Kampagnenstand
+
+Besitzer ist `SingleplayerCampaignState` (`scripts/core/singleplayer_campaign_state.gd`), Transport über den Befehlsvertrag (`scripts/mission/singleplayer_campaign_command_contract.gd`, `OPERATIONS`).
+
+- Auftragsfelder `retreat_count` (ganze Zahl, 0 oder größer) und `reopen_at_home` (bool, nur bei Status `failed` zulässig). Frische Aufträge tragen die Felder nicht; fehlen sie in einem gespeicherten Stand, gelten 0 und `false`. Der Stand wird beim Laden auf Typ geprüft.
+- Konstante `RETREAT_WIN_CONDITIONS` (`["evacuation", "departure"]`). `_fail` wertet ein Ergebnis als Rückzug, wenn `result == "aborted"` und `win_condition_type` darin steht: Status `failed`, `retreat_count` plus 1, `reopen_at_home` `true`, die Bindung an Ort und Schiff bleibt, Meldung „Rückzug. Auftrag bleibt offen.“. `mission_aborted` allein zählt nie als Rückzug. Niederlage, Totalverlust, Zeitablauf und `abandon_job` setzen das Flag nie und bleiben Fehlschlag („Auftrag beendet“, wiederholbar über „Erneut annehmen“).
+- Operation `reopen_retreated_job` mit Payload `{job_id}`: nur für einen Auftrag mit `failed` und `reopen_at_home`, sonst `job_not_retreated`; sie setzt den Auftrag auf `accepted`, `reopen_at_home` auf `false`, der Zähler `retreat_count` bleibt. Wiederholung ändert nichts.
+- Adapter: `SingleplayerRuntimeAdapter.reopen_retreated_jobs()` (Request-ID `reopen:<job>:<retreat_count>`).
+- Wiederöffnen bei Heimkehr: `MetaLayerFlow._reopen_retreated_jobs_before_home_checkpoint()` läuft unmittelbar vor `save_home_checkpoint` im 0,25-Sekunden-Speicherpunkt in `_process` und in `request_campaign_save`, nur ohne aktiven Einsatz und nur wenn der Checkpoint-Guard `ok` ist. Alle Wege nach Hause enden in „Schiff `homebase`, kein aktiver Einsatz“; der Speicherpunkt ist die einzige gemeinsame Stelle danach. Liegt danach (alle Schiffe exakt `homebase`) noch ein Auftrag `failed` mit `reopen_at_home`, schreibt der Flow eine `push_warning` je Auftrag und Rückzug und versucht es beim nächsten Speichern erneut.
+
+## Gefallenenliste
+
+- Besitzer: `SingleplayerRuntimeAdapter` (`record_fallen(entry)`, `get_fallen()`, `validate_fallen_entry(entry)`, `restore_fallen_from_checkpoint(checkpoint)`).
+- Eintrag: `unit_id`, `display_name`, `job_id`, `location_id`. `job_id` und `location_id` kommen aus `_active_singleplayer_identity`, ersatzweise aus dem Ergebnis.
+- `record_fallen` liefert `{ok: true}`, `{ok: true, unchanged: true}` bei bekannter `unit_id` (idempotent) oder `{ok: false, reason: "invalid_fallen_entry"}`. `get_fallen()` liefert eine tiefe Kopie.
+- Checkpoint: `export_campaign_checkpoint()` schreibt das Feld `fallen` immer, auch leer; `configure()` liest es im Checkpoint-Zweig zurück. `CampaignCheckpointStore.validate_payload` lehnt ein ungültiges Feld mit `invalid_fallen` ab; ein Stand ohne `fallen` lädt mit leerer Liste. Ein Rücksprung auf einen älteren Stand lässt später aufgenommene Einträge verschwinden; der Stand ist die Wahrheit.
+
+## Abflug-Gate
+
+Ein Abflug vom Einsatzort ohne Missionsauflösung hat zwei Eintrittswege, die dieselbe Stelle benutzen: den Rückflug über die Oberfläche (`MetaLayerFlow._request_singleplayer_return`, auch Versorgung und Polisa-Dienstflug) und den HUD-Knopf „Abheben“ der Schiffskarte. Der zweite umgeht `_request_singleplayer_return`; deshalb gibt es ein Gate im Missionscontroller.
+
+- `MissionTacticalSandboxController.set_campaign_departure_gate(gate: Callable)`: `_apply_selected_mission_dropship_return` ruft das Gate mit der Schiffs-ID nach erfolgreichem Einschiffen und nach `_can_request_mission_dropship_return`, vor allem, was abhebt. Meldet es `handled == true`, wird die Meldung als Rückmeldung gezeigt und es hebt nichts ab. Ohne Gate (Skirmish, Mehrspieler, Vorschau) ist nichts anders. Der Flow setzt das Gate in `_configure_mission_instance`, nur in der Kampagne, ohne Vorschau und bei gültigen Regeln.
+- `MetaLayerFlow._campaign_departure_gate(craft_id)` ist die eine Eintrittsfunktion. `_request_singleplayer_return` ruft sie nach dem Einschiffen direkt.
+
+Antworten:
+
+- `{"handled": false}`: nicht auszuwerten (keine Kampagne oder Regeln, keine Instanz, Driver fertig, keine Ausfälle, einsatzfähige Person bleibt am Boden); der Abflug läuft wie bisher.
+- `{"handled": true, "ok": false, "reason", "message"}`: gesperrt, nichts aufgelöst, nichts gebucht. Gründe: `insufficient_fuel` bzw. `insufficient_return_fuel` (Meldung „Treibstoff reicht nicht für den Rückflug“), ein anderer Grund aus `preview_return`, `location_not_focused` (Ausgefallene liegen an einem Ort, dessen Instanz nicht die fokussierte ist; Meldung „Am Einsatzort liegen Ausgefallene. Abflug nur aus der Ortsansicht.“), `flow_busy` (der Flow steckt in einem Ortsrückruf), `departure_unresolved` (die Auflösung ist nicht durchgelaufen).
+- `{"handled": true, "ok": true, "total_loss": bool, "message"}`: ausgewertet. Bei Totalverlust gibt es keinen Flug und keine Treibstoffbuchung („Bodenteam ausgefallen: Einsatz verloren, kein Abflug“). Sonst startet der Flug („Rückzug ausgewertet: Verluste gemeldet, das Schiff fliegt ab“). `_request_singleplayer_return` meldet dazu `departure_resolved: true`.
+
+Ablauf: Das Gate misst Ausfälle (`_departure_has_casualties`, lesend) und Ort an den Personen der Instanz des Schiffs (`get_mission_for_craft`), nicht an der fokussierten. Bleibt eine einsatzfähige Person am Boden (`_campaign_departure_empties_location` falsch), wird nicht ausgewertet. Ohne Totalverlust prüft `_departure_return_preflight(craft_id)` lesend, ob der Abschluss durchläuft (spiegelt `authorize_return`, bucht nichts), damit kein halb aufgelöster Einsatz entsteht. Dann löst `driver._resolve_combat("aborted", "", "departure")` auf; das Signal `combat_resolved` führt über `_on_mission_combat_resolved` (bei Orten über `_on_location_combat_resolved`) in dieselbe Verlustauswertung wie jedes Missionsende. Ohne Totalverlust startet `_start_departure_flight_if_idle` den Flug, falls der Abschluss ihn nicht selbst gestartet hat (Quelle `homebase_direct`: `to_homebase`; die Altquellen `fob`, `homebase_direct_then_fob` und leer: `to_fob`, nur am Code belegt). Die Auswertung geschieht vor dem Controller-Aufruf, solange das Schiff noch gelandet ist; danach wären Schiffszugang und Einschiffen nicht mehr messbar.
+
+Nach einer Abflug-Auswertung schreiben `_complete_space_surface_departure` und `_finish_singleplayer_visit_if_returned` weiter ihr eigenes `aborted` ohne Rückzugsfelder (wie nach einer Evakuierung); sie wenden keine Verluste an, also keine Doppelanwendung. Den Rückzugszähler erhöht der Kampagnenstand beim Buchen des Ergebnisses, nicht diese Stellen.
+
+## Anzeige
+
+Die Anzeige liest nur und speichert nichts (AGENTS.md).
+
+| Ort | Text |
+| --- | --- |
+| `scripts/meta/debrief_screen.gd` Überschrift | Rückzug (Kampagne, `aborted`, `win_condition_type` in `RETREAT_WIN_CONDITIONS`): „Rückzug · Auftrag bleibt offen“ statt „Einsatz abgebrochen“ |
+| `debrief_screen.gd` Personenkarte | Verwundet: „Verwundet (mittel) · Ausfall 15:00 · ALPHA“ (Stufe und Zeit aus `recovery_*` des Ergebnisses; ohne Felder nur die Stufe); Gefallen: „Gefallen · zurückgelassen · ALPHA“ |
+| `debrief_screen.gd` Zählzeile | Verwundete zählen als „verwundet“, Tote als „gefallen“ |
+| `scripts/meta/character_sheet_formatter.gd` `format_status_text(status_text, unit)` | Verwundet: „Verwundet (mittel), noch 12:30“ statt „wounded“ (auch Zeile „Status“ im Charakterblatt) |
+| `scripts/meta/homebase_screen.gd` `_build_roster_card_secondary_text` | „Verwundet (mittel), noch 12:30 \| <Ort>“ |
+| `scripts/meta/singleplayer_job_board_presenter.gd` `_status_text` | `accepted` oder `offered` mit `retreat_count` 1 oder mehr: „Offen · 1 Rückzug“ bzw. „Offen · N Rückzüge“; `failed` mit `reopen_at_home`: „Rückzug · wird an der Basis wieder geöffnet“; sonst der bisherige Text |
+| Missionscontroller, Einschiffen | „Kein Bodenteam einsatzfähig“ (Grund `crew_unavailable`) |
+| Missionscontroller, Abflug-Gate | die Meldungen des Abflug-Gates (siehe oben) |
+| Basis, Einschiffen | die Meldung der Einsatzsperre (Name, Stufe, Restzeit) |
+
+Die Restzeit in „noch 12:30“ ist der Stand des Kaders beim Neuzeichnen; die Anzeige rechnet nichts herunter.
+
+## Tests des Pakets
+
+Aufruf aus dem Arbeitsordner: `$env:APPDATA = "$env:TEMP\<Wegwerf-Profil>"; godot_console.exe --headless --path . -s scripts/tests/<name>.gd`, immer nur ein Godot-Prozess, ohne Fenster. Der Exit-Code über `cmd /c start /wait` kommt immer als 0 an; maßgeblich ist die Schlusszeile. `campaign_save_menu_routing_verifier` braucht zusätzlich `$env:POLISA_TEST_PROFILE = "1"`. Zahlen sind die zuletzt gemessenen laut Protokoll (Stand 15.11.2026); Läufe, die nach einer späteren Änderung nicht wiederholt wurden, sind vermerkt.
+
+| Test (`scripts/tests/`) | Schlusszeile, zuletzt gemessen | Prüft |
+| --- | --- | --- |
+| `campaign_casualty_rules_verifier.gd` | `CAMPAIGN_CASUALTY_RULES passed=20 failed=0` | Resolver, Regeldatei (Aufgabe 1) |
+| `campaign_casualty_driver_verifier.gd` | `CAMPAIGN_CASUALTY_DRIVER passed=36 failed=0` | Schalter, kein Respawn, Frist, `was_downed` je Tick (Aufgabe 2) |
+| `campaign_casualty_result_verifier.gd` | `CAMPAIGN_CASUALTY_RESULT passed=68 failed=0` | `was_downed`, `near_ship`, `aboard` im echten Einsatz, Skirmish-Gegenprobe (Aufgabe 3) |
+| `campaign_casualty_boarding_verifier.gd` | `CAMPAIGN_CASUALTY_BOARDING passed=64 failed=0` | Einschiffen mit Ausgefallenen, wiederholbar (Aufgabe 4) |
+| `campaign_casualty_apply_verifier.gd` | `CAMPAIGN_CASUALTY_APPLY passed=225 failed=0` | Verluste erkennen und genau einmal anwenden, Szenario Sieg (Aufgabe 5a; 219 vor Aufgabe 8b) |
+| `campaign_casualty_debrief_retry_test.gd` | `CAMPAIGN_CASUALTY_RESULTS passed=164 failed=0` | Totalverlust, Debrief, Wiederholung; war vor dem Paket 25/1 (12-Sekunden-Timeout) |
+| `campaign_casualty_departure_verifier.gd` | `CAMPAIGN_CASUALTY_DEPARTURE passed=519 failed=0` | Abflug-Gate, HUD und Adapter, Treibstoff, nicht fokussierte Orte (Aufgabe 5c); voller Lauf rund 25 Minuten auf `fb813cfcd`, seither nicht wiederholt |
+| `campaign_retreat_keeps_job_open_verifier.gd` | `CAMPAIGN_RETREAT passed=102 failed=0` | Kampagnenstand und Adapter (Aufgabe 8a) |
+| `campaign_retreat_reopen_at_home_verifier.gd` | `CAMPAIGN_RETREAT_REOPEN passed=194 failed=0` | echte Heimkehr nach Rückzug, Wiederöffnen vor dem Basis-Checkpoint, Fortsetzen (Aufgabe 8b; rund 4 Minuten) |
+| `campaign_casualty_fallen_list_verifier.gd` | `CAMPAIGN_CASUALTY_FALLEN passed=45 failed=0` | Gefallenenliste, Checkpoint (Aufgabe 6a) |
+| `campaign_casualty_roster_verifier.gd` | `CAMPAIGN_CASUALTY_ROSTER passed=234 failed=0` | Gefallene aus Kader, Basis, Trupps, Ausrüstung; Nachrücken; geschützte Personen (Aufgabe 6b) |
+| `campaign_casualty_recovery_verifier.gd` | `CAMPAIGN_CASUALTY_RECOVERY passed=44 failed=0` | Ausfallzeit, Einsatzsperre, Abflugsperre nur an der Basis (Aufgabe 7a) |
+| `campaign_casualty_recovery_flow_verifier.gd` | `CAMPAIGN_CASUALTY_RECOVERY_FLOW passed=105 failed=0` | Takt im Spielablauf, Sperre aus dem Kader, Checkpoint, Skirmish (Aufgabe 7b; rund 4 Minuten) |
+| `campaign_casualty_display_verifier.gd` | `CAMPAIGN_CASUALTY_DISPLAY passed=72 failed=0` | Anzeigetexte (Aufgabe 9) |
+| `campaign_total_loss_penalty_verifier.gd` | noch keine Zahl | Malus bei Totalverlust (Task 5b, in Arbeit, noch nicht im Repo) |
+
+Die Schlusszeilen und Aufrufe je Aufgabe sind in den Berichten unter `.superpowers/sdd/ausfall-und-rueckzug/` belegt. `campaign_two_moon_roundtrips_real_verifier` (gut 10 Minuten) lief zuletzt mit 83/0 (laut Protokoll auf `7ea87deda`); er gehört nicht zum Paket, ist aber als Gesamtprobe vorgesehen und nach den späteren Änderungen nicht wiederholt worden. Lange Läufe (alles über etwa 5 Minuten) werden nach dem Merge gesammelt nachgeholt [B, 15.11., 18:27]; Näheres in der Aufgabendatei.
+
+## Bekannte Grenzen
+
+Was das Protokoll als offen, zurückgestellt oder ungetestet führt. Nichts hiervon ist als bestanden zu werten.
+
+**Zurückgestellt (Ruling):**
+
+- Ein durch einen Todesfall leer gewordener Trupp wird in Paket 3a nicht aufgelöst; er bleibt ohne Mitglieder und ohne Lead in der Basisansicht stehen, der Spieler kann ihn mit dem vorhandenen Knopf entfernen. Ursache: Es fehlt eine öffentliche Funktion in `homebase_screen.gd` (gewünscht `remove_fireteam(fireteam_id) -> bool` ohne Fokuswechsel, Signal und Neuaufbau). Der Prüfer fand keinen Schaden (Einschiffen schützt mit `not members.is_empty()`, `validate_payload` nimmt den Stand an). Das weicht vom Plansatz „leerer Trupp wird aufgelöst“ ab. Folgepunkt nach dem Merge.
+- Die Restzeit auf der Personenkarte der Heimatbasis läuft nicht sichtbar mit: Die Ansicht hält eine eigene Kaderkopie und baut sich nicht jede Sekunde neu auf. Die Zeit im Kader zählt richtig. Folgepunkt in `homebase_screen.gd` nach dem Merge.
+- Die Meldung „Alle an Bord. Rueckflug ist bereit.“ (Missionscontroller) erscheint weiter, wenn Liegende am Boden zurückbleiben; `casualty_unit_ids` liest noch kein Aufrufer. Außerdem setzt `get_selected_team_boarding_snapshot` bei einer Person mit 0 Gesundheit `can_board = false`; ein Trupp mit einem Liegenden lässt sich im UI nicht zum Einschiffen anfordern (Wunsch an den Bedien-Strang, der die Funktion belegt). Kleiner Folgepunkt nach dem Merge.
+- Auftragsfracht, die einer Toten abgenommen wird, kommt ins Basislager, ohne die Lagerkapazität zu prüfen.
+
+**Nicht herstellbar oder nicht getestet:**
+
+- Ein echter Einsatz mit Toten ist mit der Zweierbesatzung der Kampagne nicht herstellbar (jede Tote wäre ein Totalverlust). Der Pfad „Rückzug mit Toten“ ist nur direkt geprüft: `_apply_campaign_casualties` mit Ergebnissen aus den echten Regeln. Die Quelle von `job_id`/`location_id` im echten Einsatz ist nur am Code belegt.
+- Ungeklärt aus der Prüfung von Aufgabe 6b: (a) Mitglieder, die in der Ansichts-Definition eines Trupps stehen, aber nicht in der Basis gestagt sind (`homebase_screen.gd`, um Zeile 6867 bis 6881): Hat der Trupp noch lebende Mitglieder, gilt er nicht als leer, und die gespeicherte Definition könnte die Tote behalten und in den Checkpoint tragen. (b) `_mission_planning_state["selected_fireteam_definitions"]` und `drop_state` werden nicht bereinigt. Beides ist heute nicht erreichbar und wird mit größeren Trupps relevant.
+- Nicht getestet (6b): Basisansicht gar nicht aufgebaut; Tote mit Basiszustand `aboard`; Anwerber mit Kaufbeleg als Toter; zweites Schiff; geschützte und schon verwundete Person; `campaign_outpost_recruit` und `campaign_rescue_pilot` direkt. `is_person_protected_from_death` liefert `true`, wenn `recruiter_id` und `unit_id` beide leer sind, und vergleicht ohne `strip_edges`. Eine nachrückende Person kann verwundet sein (Truppführer auf Platz 0 mit Einsatzsperre). Bei leerem Kader entfallen in der Kampagne alle Trupps mit Mitgliedern aus der FOB-Liste (`_campaign_fob_fireteam_definitions`).
+- Nicht getestet (Ausfallzeit): Fortsetzen mit laufendem Einsatz stellt die Sperre nur nach Code wieder her (`commit_hex_checkpoint_restore` ungelesen); Altdaten-Verwundete sperren bis zur Bereinigung (höchstens eine Sekunde) nicht; die erste Sekunde nach einer Verwundung kann bis zu eine Sekunde zu früh abgezogen werden; bei Hängern gehen bis zu 0,9 Sekunden verloren; `_replace_roster_units` kopiert den Kader pro Sekunde zweimal tief (bei 40 Personen klein, ungemessen); Entlassen synchronisiert die Sperre nicht sofort, der nächste Takt räumt ab; Z4 und Z3 des Flow-Tests belegen kein `ok` von `authorize_departure` nach der Genesung und keinen echten Flug; der Fall „Ort `homebase`, Phase Orbit oder Quantum“ ist ohne echte `_travel` nicht baubar.
+- Nicht getestet (Driver, Ergebnis, Einschiffen): `was_downed` entsteht für eine Einheit, die schon vor dem Verbinden `down` war oder später zu `friendly_unit_paths` kommt, nicht; die Abfrage läuft nicht während `_combat_startup_grace_ticks` (Kampagne: 0); Nicht-Hex-Pfad und ungültige Regeln im Ergebnistest; „down“ mit Gesundheit größer 0; `boarding_pilot_id`-Teilpfad mit Ausgefallenen; mehr als zwei Personen; mehrere Schiffe. Der Fall „Personen weder am Boden noch an Bord“ im Frühausstieg des Teilpfads ignoriert Ausfälle (vorbestehend, Erreichbarkeit unbelegt).
+- Nicht getestet (Abflug-Gate): Ein zweiter Einsatz in derselben Instanz nach einem ausgewerteten Abflug ist nur am Code belegt (`reset_for_location_job`). Die Vorprüfung nimmt die `craft_id` des Tastendrucks, der Abschluss die der aktiven Identität; bei mehreren Schiffen an einem Ort können sie abweichen. Gemessen und aufgelöst wird nur für die fokussierte Instanz. `polisa_shuttle_dispatcher.gd` (Zeile 104) verschluckt die Gate-Meldung (`shuttle_takeoff_unavailable`). `_request_singleplayer_return` meldet bei Totalverlust `ok: true` und `departure_resolved: true`; Aufrufer könnten das als „Schiff fliegt“ lesen. Zwei Fehlerstellen des Abschlusses sind nicht vorgeprüft (erneutes Einschiff-Scheitern, `_active_mission == null`); der Auffang `departure_unresolved` lässt den Driver dann fertig zurück.
+- Treibstoff am Einsatzort: Beim Start verlangt das Spiel die Rückflugreserve (`require_return_reserve`); mehrere andere Zweige von `prepare_route_fuel` prüfen ohne Reserve, und `docs/qa/singleplayer_20261109/REVIEW.md` (P1) führt den nicht bezahlbaren Rückflug als bekannte Lücke. Im Normalfall tritt „zu wenig Treibstoff am Einsatzort“ nicht ein, über Sonderpfade schon; die Vorprüfung ist Absicherung, kein Normalweg. Bekannt, nicht von diesem Paket: `_on_mission_combat_resolved` bricht bei gescheitertem `authorize_return` ab, nachdem der Driver schon fertig ist, ohne Pending-Ergebnis (auch bei normalen Einsätzen); der HUD-Knopf „Abheben“ prüft sonst keinen Treibstoff.
+- Nicht getestet (Rückzugs-Wiederöffnen und Anzeige): Das Warn- und Wiederholverhalten bei scheiterndem Wiederöffnen; der Knopf „Evakuieren“ selbst (getestet ist der Treiber-Weg dahinter); „erster Checkpoint nach der Landung enthält den Auftrag“ (nur Code, Reihenfolge vor dem Schreiben); bei `waiting_pad` speichert der Guard, das Wiederöffnen verlangt aber `homebase`; mögliche einmalige Fehlwarnung kurz nach der Landung (`_has_active_transit`). `failed` mit `reopen_at_home` und `retreat_count` 0 zeigt den alten Text; leeres `recovery_severity` ergibt „Verwundet ()“; NaN oder unendliche `recovery_seconds_remaining` sind ungeprüft. Textlängen in den Feldern (Statuslabel der Personenkarte, Auftragskarte 230 Pixel) sind kopflos nicht prüfbar und bleiben Björns Sichtprüfung beim Spielen.
+- Nicht prüfbar ohne Projektkopie: `review_completion_ux_20261113` (verlangt ein isoliertes Projekt, `SB_REVIEW2_USER_DIR`) und `review_completion_home_save_verifier` (nicht gefahren, nicht gelesen).
+- Schon vor Paket 3a rot und im Protokoll als solche geführt: `campaign_five_actual_sorties_verifier` 92/1, `campaign_active_mission_continue_verifier`, `campaign_pilot_ground_loop_test` 31/1, `character_navigation_equipment_verifier` 4, `playtest_20261110_place_dressing_verifier` 2, `playtest_20261105_explorable_homebase_verifier` 2, `task_182_terrain_hill_rules_contract_verifier` 83/3, `campaign_retry_boundary_test` failed=3, `task_237_mission_progression_xp_morale_frustration` 16/2, `task_1069_station_route_evac_abort_outcome` 14/2, `playtest_20261110_extraction_loop` 31/1, `campaign_legacy_satellite_boarding_verifier` 32/1, `playtest_20261109_campaign_landed_craft_verifier` 4/7, `playtest_20261109_actual_craft_return_binding_verifier` 9/7, `polisa_shuttle_full_loop_verifier` 9/2, `polisa_shuttle_real_ground_verifier` 9/4, `polisa_recruit_controller_verifier` (2 SCRIPT ERROR), `compact_singleplayer_panels_verifier` 7/1, `polisa_player_departure_flow_verifier` (Parse Error), `campaign_onboarding_state_test` (SCRIPT ERROR Zeile 129). Nach dem Aufsetzen auf `main` neu messen.
+- Balance: Die Ausfallzeiten und der Malus sind ungespielt; die Regeldatei trägt `balance_status` `initial_values_not_final`.
+
+## Spätere Pakete
+
+- **Paket 3b, Tragen und Bergen:** Ausgefallene tragen und bergen (braucht den Missionscontroller und die Einzelsteuerung). Bis dahin gilt die Bergungsregel „Sieg, an Bord oder nahe am Schiff“.
+- **Paket 3c, Ort merkt sich den Stand und Truppen bleiben am Ort:** Der Ort merkt sich nach einem Rückzug getötete Gegner, Türen und Aufklärung. „Truppen bleiben am Ort“ heißt: Das Schiff pendelt oder fliegt weiter, einsatzfähige Leute halten einen Außenposten oder werden mit nur einem Schiff nachgeholt. Dafür sind die Flugsperre im Missionscontroller (`crew_not_aboard`), die Besuchs- und Identitätsführung je Besuch statt je Schiff, die Auftragsbuchung in der Laufzeit und das Freigeben des Orts anzupassen; `_campaign_departure_gate` wertet dann schon heute nicht aus.
+- **Treibstoff etappenweise und Tankschiff:** Eigenes Paket am Flug- und Treibstoffsystem (siehe Regel 8, Entscheidung 15.11., 23:07), mit dem Bedien-Strang abzustimmen. Es ersetzt die Übergangsregel von Paket 3a.
+- **Krankenstation** (verkürzt Ausfallzeiten): Etappe 2.
+- **Folgepunkte nach dem Merge:** Restzeit auf der Personenkarte läuft mit; leerer Trupp wird aufgelöst; Meldung „Alle an Bord“ und Einschiffen eines Trupps mit Liegendem.

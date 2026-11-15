@@ -1,9 +1,11 @@
 # GLOSSARY
 
-- **Bleedout**: Endzustand nach Down; Unit ist handlungsunfaehig und wartet auf Respawn
+- **am Boden** (Kampagne, seit Paket 3a): Zustand einer ausgefallenen eigenen Person in den ersten 60 Sekunden nach dem Ausfall; ein Sanitäter kann sie wieder aufrichten. Danach ist sie „kritisch“
+- **Bleedout**: Endzustand nach Down; Unit ist handlungsunfaehig und wartet auf Respawn. In der Kampagne (eigene Leute) = „kritisch“; es gibt dort keinen Respawn
 - **Commander**: Spieler auf oberster Befehlsebene
 - **Cover / Deckung**: Zahlenwert, der Trefferchance und Schadenshoehe reduziert; setzt sich aus Command-, Phase- und Terrain-Cover zusammen
 - **Down**: Zustand nach toedlichem Schaden; Unit ist gefallen, aber noch nicht endgueltig ausgeschieden
+- **Einsatzsperre** (Kampagne): Verwundete können an der Heimatbasis nicht eingeschifft werden, und ein dort gelandetes Schiff mit ihnen an Bord startet nicht; die Ablehnung nennt Name, Stufe und Restzeit. Gilt nur an der Heimatbasis
 - **Engage**: Feuerfreigabe und aktiver Kampfkontakt mit Feinden im Sichtbereich
 - **EventRouter**: zentrale Signal-/Event-Entkopplung
 - **Fireteam**: Untereinheit innerhalb eines FTL-Teams (z.B. BLUE, GOLD); dient zur Aufteilung von Befehlen
@@ -11,17 +13,22 @@
 - **FOB**: Forward Operating Base; Staging-Screen vor dem Einsatz
 - **FOW (Fog of War)**: Sichtbarkeitssystem; bestimmt welche Einheiten fuer ein Team sichtbar sind
 - **FTL**: Fire Team Leader; direkte Unterebene unter dem Commander
+- **Gefallenenliste** (Kampagne): Liste der Personen, die im Einsatz zurückgelassen wurden und gestorben sind (`unit_id`, Name, Auftrag, Ort); steht im Kampagnen-Checkpoint im Feld `fallen`
 - **Heimatbasis**: Management-Screen zur Teamzusammenstellung
+- **kritisch** (Kampagne): Zustand einer ausgefallenen eigenen Person nach Ablauf der Versorgungsfrist; im Feld nicht mehr aufzurichten. Ist sie am Missionsende geborgen, ist sie schwer verwundet, sonst tot
 - **LOS (Line of Sight)**: Sichtlinie zwischen zwei Einheiten; kann durch Terrain blockiert werden
 - **Nehmen (Take)**: Gebiet einnehmen; beim vollen Capture-Fortschritt wechselt der Besitzer
+- **Notbergung** (Kampagne): Der Rücksprung zum letzten Basisstand nach einem Totalverlust gilt als Rettung durch einen Rettungsdienst und kostet etwas (Gebühr, leichte Verwundung der am Boden Gelegenen, Moral). Umsetzung in Arbeit (Task 5b)
 - **Objective**: Einnehmbarer Zielpunkt auf der Karte mit Capture-Fortschritt und Besitzer
 - **Phase**: Taktische Einsatzphase (APPROACH, ASSAULT, HOLD); beeinflusst Feuerverhalten, Geschwindigkeit und Deckung
 - **Registry**: zentrale strukturierte Laufzeitliste statt SceneTree-Abfragen
-- **Respawn**: Wiederbelebung einer Unit nach Bleedout mit konfigurierbarem Timer (Rover/FOB/Homebase)
+- **Respawn**: Wiederbelebung einer Unit nach Bleedout mit konfigurierbarem Timer (Rover/FOB/Homebase). Nicht für eigene Leute in der Kampagne
 - **Rover/Frachter**: Schnellster Spawn-Typ (30s); liefert die Spawn-Position auf der Karte
+- **Rückzug** (Kampagne): „Evakuieren“ oder ein Abflug vom Einsatzort bei aktivem Auftrag, nach dem keine einsatzfähige eigene Person mehr am Ort bleibt; im Code ein Ergebnis `aborted` mit `win_condition_type` `evacuation` oder `departure`. Der Auftrag bleibt angenommen und wird zu Hause wieder geöffnet; kein Fehlschlag
 - **SimulationRoot**: einzige autoritative Stelle fuer Gameplay-State-Aenderungen
 - **Skill**: Individuelle Unit-Faehigkeit (accuracy, speed, leadership, toughness); beeinflusst Combat und Bewegung
 - **TerrainMapData**: Serialisierbare Terrain-Konfiguration als JSON; enthaelt Tile-Eigenschaften und Karten-Metadaten
+- **Totalverlust** (Kampagne): Pilot ausgefallen, am Ende niemand vom Bodentrupp einsatzfähig, oder nach den Toten kein Truppführer oder kein Pilot im Kader. Niemand stirbt; der Einsatz gilt als verloren, die Kampagne springt zum letzten Basisstand zurück, mit Malus (Notbergung)
 - **Trait**: Persoenlichkeitsmerkmal einer Unit (z.B. aggressive, cautious); modifiziert Skill-Werte
 - **Verteidigen**: Position halten unter Feinddruck
 - **WaveController**: Steuert das gestaffelte Spawnen von Gegnerwellen waehrend einer Mission

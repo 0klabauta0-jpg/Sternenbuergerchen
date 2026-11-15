@@ -40,6 +40,15 @@ The existing `combat_resolved` signal carries this result to MetaLayerFlow.
 MetaLayerFlow continues to enrich it with team state and Mini AAR before
 opening Debrief.
 
+## Auftragsstatus in der Kampagne (seit Paket 3a, 15.11.2026)
+
+Gilt nur in der Kampagne; Skirmish und Mehrspieler bleiben unverändert. Einzelheiten und Besitzer stehen in `docs/dev/campaign_casualty_retreat_contract.md`.
+
+- Eine Evakuierung (`win_condition_type = evacuation`) ist in der Kampagne ein Rückzug und kein gescheiterter Auftrag. `SingleplayerCampaignState` setzt den Auftrag auf `failed`, zählt `retreat_count` hoch, setzt `reopen_at_home` und behält die Bindung an Ort und Schiff. Bei der Heimkehr wird der Auftrag vor dem Basis-Checkpoint wieder auf `accepted` gesetzt (Operation `reopen_retreated_job`); „Erneut annehmen“ ist dafür nicht nötig. Niederlage, Totalverlust, Zeitablauf und `abandon_job` bleiben Fehlschlag.
+- Der Abflug vom Einsatzort bei aktivem Auftrag ist ebenfalls ein Rückzug (`win_condition_type = departure`), aber nur, wenn danach keine einsatzfähige eigene Person mehr am Ort bleibt. Bleiben Einsatzfähige am Ort, wird nichts ausgewertet und der Auftrag bleibt, wie er ist. Der Abflug läuft über das Abflug-Gate (`MetaLayerFlow._campaign_departure_gate`) durch dieselbe Verlustauswertung wie jedes Missionsende.
+- Der Driver bleibt Besitzer des Ergebnisses; der Flow ergänzt in der Kampagne `casualties`, `fatality_unit_ids`, `casualty_total_loss` und `total_loss_reason`. Bei einem Rückzug werden Ausgefallene nach den Bergungsregeln verwundet oder als gefallen gemeldet (tot ist nur, wer zurückbleibt).
+- Der Debrief zeigt bei einem Rückzug die Überschrift „Rückzug · Auftrag bleibt offen“ statt „Einsatz abgebrochen“; die Auftragstafel zeigt „Offen · N Rückzüge“ bzw. „Rückzug · wird an der Basis wieder geöffnet“.
+
 ## Multiplayer Boundary
 
 TASK_1069 is not a unilateral PvP team extraction feature. In a multiplayer
