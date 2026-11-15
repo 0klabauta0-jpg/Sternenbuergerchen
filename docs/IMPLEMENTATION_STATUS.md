@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+## 2026-11-15 - Alte Karten und Einsaetze aus der Spielerauswahl
+- `ProductiveGroundMaps.selectable_paths()` ist jetzt eine explizite Allow-List (Ground_Mission01/02, satellite_crash_site, trade_outpost, windbruch_outpost, polisa_station); `TEST_ONLY` dokumentiert alle nicht angebotenen Karten, Dateien bleiben liegen.
+- Die Einsaetze `frontier_probe`, `frontier_probe_vertical_slice`, `station_route_one_screen_multiplayer_drill` tragen `player_visible: false` und fehlen in Missionsauswahl und Operations-Snapshot; per ID bleiben sie startbar. Kampagne unberuehrt.
+- Task: `docs/tasks/ALTE_KARTEN_UND_EINSAETZE_AUS_DER_AUSWAHL_2026_11_15.md`; Pruefung: `homebase_pads_testmaps_verifier`.
+
 ### Schwere Ruestung R08 aus Skriptquelle - 15.11.2026
 
 Task `docs/tasks/RUESTUNG_SCHWER_R08_2026_11_15.md`. Neue schwere Ruestungsteile aus `art/ruestung_schwer_r08_20261115/build_parts.py` in `Assets/curated/personnel/armor_r08_schwer_20261115/` (gleiche Dateinamen), `personnel_armor_visual.gd` laedt sie nur fuer "heavy"; leicht/mittel unveraendert. Vergleich: `docs/qa/ruestung_vergleich_20261115/vergleich_heavy_r08.jpg`.

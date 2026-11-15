@@ -53,6 +53,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	},
 	{
 		"mission_id": "frontier_probe",
+		"player_visible": false, # old station map: startable by id, never listed for the player
 		"mission_name": "Operation: Frontier Probe",
 		"map_file_path": "res://maps/station_outpost_192x192.json",
 		"scenario_file_path": NO_SCENARIO_FILE_PATH,
@@ -61,6 +62,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	},
 	{
 		"mission_id": "frontier_probe_vertical_slice",
+		"player_visible": false, # old station map: startable by id, never listed for the player
 		"mission_name": "Operation: Frontier Probe Slice",
 		"map_file_path": "res://maps/station_outpost_192x192.json",
 		"scenario_file_path": FRONTIER_VERTICAL_SLICE_SCENARIO_PATH,
@@ -70,6 +72,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	},
 	{
 		"mission_id": "station_route_one_screen_multiplayer_drill",
+		"player_visible": false, # old station map: startable by id, never listed for the player
 		"mission_name": "Operation: Station Route",
 		"map_file_path": "res://maps/station_outpost_192x192.json",
 		"scenario_file_path": STATION_ROUTE_ONE_SCREEN_SCENARIO_PATH,

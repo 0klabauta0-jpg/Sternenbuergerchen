@@ -8132,6 +8132,8 @@ func _populate_mission_selector(selector: OptionButton) -> void:
 	var selected_index: int = -1
 	for mission_variant in mission_catalog:
 		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if not bool(mission_definition.get("player_visible", true)):
+			continue
 		var mission_id: String = String(mission_definition.get("mission_id", "")).strip_edges()
 		var mission_name: String = String(mission_definition.get("mission_name", "Mission")).strip_edges()
 		var map_file_path: String = String(mission_definition.get("map_file_path", "")).strip_edges()
@@ -9258,6 +9260,8 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 	var missions: Array = []
 	for mission_variant in _mission_catalog:
 		var mission: Dictionary = Dictionary(mission_variant)
+		if not bool(mission.get("player_visible", true)):
+			continue
 		missions.append({"id": String(mission.get("id", mission.get("mission_id", ""))), "label": String(mission.get("display_name", mission.get("mission_name", mission.get("name", "Einsatz"))))})
 	return {"mode": _operations_mode, "roster": roster, "fireteams": fireteams,
 		"singleplayer": _singleplayer_snapshot_provider.call() if include_runtime and _singleplayer_snapshot_provider.is_valid() else {},
