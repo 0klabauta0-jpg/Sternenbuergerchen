@@ -10,7 +10,6 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const CAMPAIGN_STATE_SCRIPT: GDScript = preload("res://scripts/core/singleplayer_campaign_state.gd")
-const CASUALTY_RULES_SCRIPT: GDScript = preload("res://scripts/core/campaign_casualty_rules.gd")
 const PERSONNEL_RECOVERY_SCRIPT: GDScript = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const RETREAT_HEADING := "Rückzug · Auftrag bleibt offen"
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
@@ -614,8 +613,7 @@ func _refresh_native_review_cards() -> void:
 		child.queue_free()
 	var states: Array = _mission_result.get("team_states", [])
 	var casualty_kinds: Dictionary = _casualty_kinds_by_unit()
-	var casualty_severities: Dictionary = _casualty_severities_by_unit()
-	var casualty_rules: Dictionary = CASUALTY_RULES_SCRIPT.load_rules() if casualty_kinds.values().has("wounded") else {}
+	var casualty_entries: Dictionary = _casualty_wounded_entries_by_unit()
 	for entry in states:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
@@ -666,7 +664,7 @@ func _refresh_native_review_cards() -> void:
 		var casualty_kind := String(casualty_kinds.get(String(member.get("unit_id", "")), ""))
 		var status_head: String = String(status_names.get(vital, "Status unbekannt"))
 		if casualty_kind == "wounded":
-			status_head = _wounded_status_text(String(casualty_severities.get(String(member.get("unit_id", "")), "")), casualty_rules)
+			status_head = _wounded_status_text(Dictionary(casualty_entries.get(String(member.get("unit_id", "")), {})))
 		elif casualty_kind == "dead":
 			status_head = "Gefallen · zurückgelassen"
 		status.text = "%s%s" % [status_head, " · " + fireteam if not fireteam.is_empty() else ""]
@@ -726,20 +724,23 @@ func _casualty_kinds_by_unit() -> Dictionary:
 	return kinds
 
 
-func _casualty_severities_by_unit() -> Dictionary:
-	var severities: Dictionary = {}
+## unit_id -> casualties-Eintrag der Verwundeten, nur aus dem Ergebnis gelesen.
+func _casualty_wounded_entries_by_unit() -> Dictionary:
+	var entries: Dictionary = {}
 	if not _is_campaign_casualty_result():
-		return severities
+		return entries
 	for raw in Array(_mission_result.get("casualties", [])):
 		if typeof(raw) == TYPE_DICTIONARY and String(raw.get("outcome", "")) == "wounded":
-			severities[String(raw.get("unit_id", ""))] = String(raw.get("severity", ""))
-	return severities
+			entries[String(raw.get("unit_id", ""))] = raw
+	return entries
 
 
-## "Verwundet (mittel) · Ausfall 15:00"; die volle Ausfallzeit steht in den Regeldaten.
-func _wounded_status_text(severity: String, rules: Dictionary) -> String:
+## "Verwundet (mittel) · Ausfall 15:00". Zeigt, was angewendet wurde (recovery_severity,
+## recovery_seconds_remaining aus dem Eintrag); ohne diese Felder die Stufe aus severity, ohne Zeit.
+func _wounded_status_text(entry: Dictionary) -> String:
+	var severity := String(entry.get("recovery_severity", entry.get("severity", "")))
 	var text := "Verwundet (%s)" % String(PERSONNEL_RECOVERY_SCRIPT.SEVERITY_NAMES.get(severity, severity))
-	var seconds: Variant = Dictionary(rules.get("recovery_seconds", {})).get(severity, null)
+	var seconds: Variant = entry.get("recovery_seconds_remaining", null)
 	if typeof(seconds) == TYPE_INT or typeof(seconds) == TYPE_FLOAT:
 		var whole := int(floor(maxf(0.0, float(seconds))))
 		text += " · Ausfall %d:%02d" % [floori(whole / 60.0), whole % 60]

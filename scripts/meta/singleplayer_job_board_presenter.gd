@@ -271,9 +271,9 @@ func _status_text(job: Dictionary) -> String:
 	var status := String(job.get("status", "offered"))
 	var text := String(DISPLAY.STATUS.get(status, status))
 	var retreats := int(job.get("retreat_count", 0))
-	if retreats > 0 and status in ["offered", "accepted", "failed"]:
-		if bool(job.get("reopen_at_home", false)):
-			return "Rückzug · wird an der Basis wieder geöffnet"
+	if retreats > 0 and status == "failed" and bool(job.get("reopen_at_home", false)):
+		return "Rückzug · wird an der Basis wieder geöffnet"
+	if retreats > 0 and status in ["offered", "accepted"]:
 		return "Offen · 1 Rückzug" if retreats == 1 else "Offen · %d Rückzüge" % retreats
 	return text
 

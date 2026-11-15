@@ -5,7 +5,6 @@ extends SceneTree
 
 const DEBRIEF := preload("res://scenes/meta/debrief_test_screen.tscn")
 const AUTHORITY := preload("res://scripts/mission/mission_combat_authority_contract.gd")
-const RULES := preload("res://scripts/core/campaign_casualty_rules.gd")
 const RECOVERY := preload("res://scripts/core/personnel_recovery_runtime.gd")
 const FORMATTER := preload("res://scripts/meta/character_sheet_formatter.gd")
 const PROFILE := preload("res://scripts/meta/meta_unit_profile.gd")
@@ -101,14 +100,13 @@ func _member(unit_id: String, name: String, vital: String) -> Dictionary:
 	return {"unit_id": unit_id, "display_name": name, "vital_state": vital, "health_points": 0 if vital == "dead" else 40, "fireteam_id": "alpha"}
 
 
-func _people_report(with_campaign: bool, severity: String) -> Dictionary:
+func _people_report(with_campaign: bool, severity: String, applied: Dictionary = {}) -> Dictionary:
 	var report := _campaign_report("victory", "objective_capture") if with_campaign else _base_report("victory", "objective_capture")
 	report["team_states"] = [_member("u_ok", "Ida", "fit"), _member("u_hurt", "Hanna", "fit"), _member("u_dead", "Karl", "dead")]
 	if with_campaign:
-		report["casualties"] = [
-			{"unit_id": "u_hurt", "outcome": "wounded", "severity": severity, "display_name": "Hanna"},
-			{"unit_id": "u_dead", "outcome": "dead", "severity": "", "display_name": "Karl"},
-		]
+		var hurt := {"unit_id": "u_hurt", "outcome": "wounded", "severity": severity, "display_name": "Hanna"}
+		hurt.merge(applied, true)
+		report["casualties"] = [hurt, {"unit_id": "u_dead", "outcome": "dead", "severity": "", "display_name": "Karl"}]
 		report["fatality_unit_ids"] = PackedStringArray(["u_dead"])
 	return report
 
@@ -121,26 +119,35 @@ func _status_text(screen: Control, unit_id: String) -> String:
 	return "<keine Karte>"
 
 
-func _m_ss(seconds: float) -> String:
-	var whole := int(seconds)
-	return "%d:%02d" % [whole / 60, whole % 60]
-
-
 func _check_debrief_people() -> void:
-	var rules: Dictionary = RULES.load_rules()
-	_check(not rules.is_empty(), "Regeldatei lädt für den Zeitvergleich")
-	var literal := {"light": ["leicht", "3:00"], "medium": ["mittel", "15:00"], "severe": ["schwer", "40:00"]}
-	for severity in ["light", "medium", "severe"]:
-		var word: String = literal[severity][0]
-		var expected_time: String = literal[severity][1]
-		_check(_m_ss(float(Dictionary(rules.get("recovery_seconds", {})).get(severity, -1.0))) == expected_time, "Regeldaten: %s dauert %s" % [severity, expected_time])
-		var report := _people_report(true, severity)
+	var source := FileAccess.get_file_as_string("res://scripts/meta/debrief_screen.gd")
+	_check(not source.is_empty() and not source.contains("casualty_rules"), "debrief_screen.gd enthält 'casualty_rules' nicht (kein Zugriff auf die Regeldatei)")
+	# Die Anzeige zeigt, was angewendet wurde. Die Werte hier entsprechen bewusst NICHT den Regelwerten.
+	var applied_severe := {"recovery_severity": "severe", "recovery_seconds_remaining": 2280.0, "recovery_seconds_total": 2400.0}
+	var applied_medium := {"recovery_severity": "medium", "recovery_seconds_remaining": 900.0, "recovery_seconds_total": 900.0}
+	var applied_light := {"recovery_severity": "light", "recovery_seconds_remaining": 125.9, "recovery_seconds_total": 180.0}
+	var wound_cases := [
+		["severity light, angewendet schwer 38:00", "light", applied_severe, ["Verwundet (schwer)", "38:00"], ["leicht", "3:00", "40:00"]],
+		["mittel 15:00", "medium", applied_medium, ["Verwundet (mittel)", "15:00"], ["Ausfall 3:00"]],
+		["leicht, Restzeit 125,9 s wird abgerundet", "light", applied_light, ["Verwundet (leicht)", "Ausfall 2:05"], ["schwer"]],
+		["ohne die drei Felder: nur Stufe, keine Zeit", "light", {}, ["Verwundet (leicht)"], ["Ausfall", "3:00"]],
+	]
+	for wound_case in wound_cases:
+		var label_name: String = wound_case[0]
+		var report := _people_report(true, String(wound_case[1]), Dictionary(wound_case[2]))
 		var original := report.duplicate(true)
 		var screen := await _open_debrief(report)
 		var hurt := _status_text(screen, "u_hurt")
-		_check(hurt.contains("Verwundet (%s)" % word) and hurt.contains(expected_time), "Debrief-Zeile Verwundete (%s) nennt Stufe und %s: '%s'" % [severity, expected_time, hurt])
-		_check(not hurt.contains("Einsatzfähig") and not hurt.to_lower().contains("erholt") and not hurt.to_lower().contains("recovering"), "Debrief-Zeile Verwundete (%s) widerspricht sich nicht" % severity)
-		if severity == "medium":
+		var contains_ok := true
+		for needle in wound_case[3]:
+			contains_ok = contains_ok and hurt.contains(String(needle))
+		var excludes_ok := true
+		for needle in wound_case[4]:
+			excludes_ok = excludes_ok and not hurt.contains(String(needle))
+		_check(contains_ok and excludes_ok, "Debrief-Zeile Verwundete (%s): '%s'" % [label_name, hurt])
+		_check(not hurt.contains("Einsatzfähig") and not hurt.to_lower().contains("erholt") and not hurt.to_lower().contains("recovering"), "Debrief-Zeile Verwundete widerspricht sich nicht (%s)" % label_name)
+		var severity: String = String(wound_case[1])
+		if label_name.begins_with("mittel"):
 			var dead := _status_text(screen, "u_dead")
 			_check(dead.contains("Gefallen · zurückgelassen"), "Debrief-Zeile Gefallene nennt 'Gefallen · zurückgelassen': '%s'" % dead)
 			_check(not dead.contains("Verstorben"), "Debrief-Zeile Gefallene zeigt nicht zusätzlich 'Verstorben'")
@@ -268,16 +275,19 @@ func _check_board(screen: Control) -> void:
 	_check(String(base.card).contains("Erneut verfügbar") and not String(base.card).contains("Offen ·") and not String(base.card).contains("Rückzug"), "Auftragstafel ohne retreat_count: heutiger Text ('%s')" % String(base.card).replace("\n", "/"))
 	var zero := await _board_texts(stub, board, _job("failed", {"retreat_count": 0}))
 	_check(zero.card == base.card and zero.details == base.details, "Auftragstafel mit retreat_count 0: Text exakt wie ohne das Feld")
-	var one := await _board_texts(stub, board, _job("failed", {"retreat_count": 1, "reopen_at_home": false}))
+	var one := await _board_texts(stub, board, _job("accepted", {"retreat_count": 1, "reopen_at_home": false}))
 	_check(String(one.card).contains("Offen · 1 Rückzug") and not String(one.card).contains("Rückzüge") and not String(one.card).contains("Erneut verfügbar"), "Auftragstafel retreat_count 1: 'Offen · 1 Rückzug' ('%s')" % String(one.card).replace("\n", "/"))
 	_check(String(one.details).contains("Offen · 1 Rückzug"), "Auftragsdossier retreat_count 1: 'Offen · 1 Rückzug'")
-	var two := await _board_texts(stub, board, _job("failed", {"retreat_count": 2, "reopen_at_home": false}))
+	var two := await _board_texts(stub, board, _job("offered", {"retreat_count": 2, "reopen_at_home": false}))
 	_check(String(two.card).contains("Offen · 2 Rückzüge") and String(two.details).contains("Offen · 2 Rückzüge"), "Auftragstafel retreat_count 2: 'Offen · 2 Rückzüge' ('%s')" % String(two.card).replace("\n", "/"))
 	var pending := await _board_texts(stub, board, _job("failed", {"retreat_count": 1, "reopen_at_home": true}))
 	_check(String(pending.card).contains("Rückzug · wird an der Basis wieder geöffnet") and not String(pending.card).contains("Offen · 1 Rückzug"), "Auftragstafel vor dem Wiederöffnen: 'Rückzug · wird an der Basis wieder geöffnet' ('%s')" % String(pending.card).replace("\n", "/"))
 	_check(String(pending.details).contains("Rückzug · wird an der Basis wieder geöffnet"), "Auftragsdossier vor dem Wiederöffnen nennt denselben Text")
-	var reopened := await _board_texts(stub, board, _job("accepted", {"retreat_count": 1, "reopen_at_home": false}))
-	_check(String(reopened.card).contains("Offen · 1 Rückzug"), "Wiedergeöffneter Auftrag (accepted, 1 Rückzug): 'Offen · 1 Rückzug' ('%s')" % String(reopened.card).replace("\n", "/"))
+	# Späterer Fehlschlag durch Niederlage: failed, retreat_count bleibt, kein reopen_at_home -> alter Text.
+	var later_failure := await _board_texts(stub, board, _job("failed", {"retreat_count": 1, "reopen_at_home": false}))
+	_check(later_failure.card == base.card and later_failure.details == base.details and String(later_failure.card).contains("Erneut verfügbar") and not String(later_failure.card).contains("Offen ·"), "failed, retreat_count 1, reopen_at_home false: alter Text ('%s')" % String(later_failure.card).replace("\n", "/"))
+	var later_failure_no_field := await _board_texts(stub, board, _job("failed", {"retreat_count": 3}))
+	_check(later_failure_no_field.card == base.card, "failed, retreat_count 3, ohne reopen_at_home: alter Text")
 	var accepted_plain := await _board_texts(stub, board, _job("accepted"))
 	_check(String(accepted_plain.card).contains("Angenommen") and not String(accepted_plain.card).contains("Rückzug"), "Angenommener Auftrag ohne Rückzug: heutiger Text")
 	var active := await _board_texts(stub, board, _job("active", {"retreat_count": 1}))
