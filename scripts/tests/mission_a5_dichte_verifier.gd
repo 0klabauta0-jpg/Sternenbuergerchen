@@ -42,7 +42,7 @@ func _check_table(spec: Array) -> void:
 	_expect((layout.mission_control as Rect2i).size.y == int(spec[10]), "%s: mission_control height" % tag)
 	_expect(int(layout.body_font_size) == int(spec[11]), "%s: body_font_size" % tag)
 	_expect(int(layout.heading_font_size) == int(spec[12]), "%s: heading_font_size" % tag)
-	_expect((layout.event_log as Rect2i).end.y == (layout.bottom_dock as Rect2i).position.y - 12, "%s: event_log 12 above band" % tag)
+	_expect((layout.event_log as Rect2i).end.y == (layout.bottom_dock as Rect2i).position.y - (12 if vp.y >= 1260 else 16), "%s: event_log above band (12 gross, 16 sonst; Rasterlage)" % tag)
 	_expect(layout.has("team_parameters"), "%s: team_parameters present" % tag)
 	if layout.has("team_parameters"):
 		var params: Rect2i = layout.team_parameters

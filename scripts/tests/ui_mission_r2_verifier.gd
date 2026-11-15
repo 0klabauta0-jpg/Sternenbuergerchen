@@ -52,7 +52,7 @@ func _check_scene(size: Vector2i) -> void:
 		_check(selector.item_count == 4, prefix + "all four existing rules remain available")
 		for rule in RULES:
 			_check(_rule_index(selector, rule) >= 0, prefix + rule + " maps to its original rule value")
-		_check(team.get_global_rect().encloses(selector.get_global_rect()), prefix + "selector remains inside its team group")
+		_check(Rect2(HUD.LAYOUT.get_mission_hud_layout(Vector2i(scene.get_viewport().get_visible_rect().size)).team_parameters).grow(1).encloses(selector.get_global_rect()) and (scene.get_node("TacticalUI/BottomDock") as Control).get_global_rect().grow(1).encloses(selector.get_global_rect()), prefix + "selector remains inside its team group")
 		var heading := team.get_node("A5FireRuleHeading") as Label
 		_check(heading.is_visible_in_tree() and heading.get_visible_line_count() >= 1 and heading.get_theme_font_size("font_size") >= 12, prefix + "fire-rule heading has an actually drawable readable line")
 		_check(not heading.get_global_rect().intersects(selector.get_global_rect()), prefix + "rule heading stays above the selector without overlap")

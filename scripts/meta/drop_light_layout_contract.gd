@@ -103,7 +103,7 @@ static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) ->
 		"mission_identity": Rect2i(viewport_size.x - transport_width - objective_width - 2 * edge - 12, edge, objective_width, 72 if large else (64 if medium else 56)),
 		"top_nav": Rect2i(edge, edge, 528 if large else (440 if medium else 384), 72 if large else (64 if medium else 56)),
 		"fireteam_mini": Rect2i(edge, team_top - mini_height - 12, card_width + 16, mini_height),
-		"event_log": Rect2i(viewport_size.x - transport_width - edge, band_top - event_log_height - 12, transport_width, event_log_height),
+		"event_log": Rect2i(viewport_size.x - transport_width - edge, band_top - event_log_height - (12 if large else 16), transport_width, event_log_height),
 		"bottom_dock": Rect2i(0, band_top, viewport_size.x, band_height),
 		"command_matrix": Rect2i(0, band_top, command_width, band_height),
 		"target_order": Rect2i(command_width + gap, band_top, target_width, band_height),
