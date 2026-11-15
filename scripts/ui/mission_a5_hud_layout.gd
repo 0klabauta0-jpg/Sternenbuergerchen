@@ -585,6 +585,8 @@ static func refresh_player_readout(controller: Node, context: Dictionary) -> voi
 		var label := controller.get_node_or_null(String(spec[0])) as Label
 		if label != null:
 			_set_text(label, String(model.get(String(spec[1]), "")))
+			if String(spec[1]) in ["mission_text", "transport_text"]:
+				label.tooltip_text = label.text
 	# The production light refresh runs the legacy stance writer first. Restore
 	# only these three known controls; no configure(), placement or tree scan.
 	refresh_selected_stance(controller)
@@ -615,12 +617,14 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 		var body := _ensure_label(panel, String(spec[3]), font_size)
 		for label in [heading, body]:
 			label.clip_text = true
-			label.max_lines_visible = 2
+			label.max_lines_visible = 1 if rect.size.y < 80 else 2
+		body.tooltip_text = body.text
+		body.mouse_filter = Control.MOUSE_FILTER_PASS
 		_place(heading, Rect2(rect.position + Vector2(52, 6), Vector2(rect.size.x - 148, font_size + 10)))
-		_place(body, Rect2(rect.position + Vector2(52, font_size + 18), Vector2(rect.size.x - 62, rect.size.y - font_size - 26)))
+		_place(body, Rect2(rect.position + Vector2(52, font_size + 18), Vector2(rect.size.x - 62, rect.size.y - (font_size + 18) - 4)))
 		var icon_id := "dropship" if String(spec[0]) == STRATEGIC else "target"
 		var icon := _ensure_readout_icon(panel, icon_id)
-		_place(icon, Rect2(rect.position + Vector2(10, 20), Vector2(26, 30)))
+		_place(icon, Rect2(rect.position + Vector2(10, (rect.size.y - 30) / 2), Vector2(26, 30)))
 		var card := panel as PanelContainer
 		if card != null:
 			THEME.style_card(card)

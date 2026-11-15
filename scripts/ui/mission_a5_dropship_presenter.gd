@@ -54,8 +54,8 @@ static func ensure(controller: Node) -> Control:
 			var label := Label.new()
 			label.name = spec[0]
 			label.clip_text = true
-			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			label.max_lines_visible = 2
+			label.autowrap_mode = TextServer.AUTOWRAP_OFF
+			label.max_lines_visible = 1
 			label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			identity.add_child(label)
@@ -72,6 +72,8 @@ static func ensure(controller: Node) -> Control:
 		direction_row.name = "ApproachRow"
 		var heading := Label.new()
 		heading.text = "Anflugrichtung"
+		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		direction_row.add_child(heading)
 		var dial: Control = preload("res://scripts/ui/components/approach_dial.gd").new()
 		dial.name = "ApproachDial"
@@ -90,7 +92,7 @@ static func ensure(controller: Node) -> Control:
 		var feedback := Label.new()
 		feedback.name = "MissionDropshipCardFeedbackLabel"
 		feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		feedback.max_lines_visible = 2
+		feedback.max_lines_visible = 1
 		box.add_child(feedback)
 		THEME.style_label(feedback, false, 13)
 		var details := Button.new()
@@ -189,7 +191,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	var status := card.get_node("Contents/Header/Identity/A5TransportState") as Label
 	var ship := card.get_node("Contents/Header/ShipTexture") as TextureRect
 	title.text = "Dropship" if selected_card.is_empty() else SHIPS.get_ui_display_name(selected_card, "dropship")
-	THEME.style_section_heading(title, int(hud_layout.body_font_size) + 6)
+	THEME.style_section_heading(title, int(hud_layout.body_font_size) + 2)
 	status.text = "Kein Dropship" if selected_card.is_empty() else _state_text(selected_card)
 	if not selected_card.is_empty():
 		var authoritative_status := String(controller.call("_build_mission_dropship_status_text", selected_card))
@@ -210,13 +212,12 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	ship.visible = ship.texture != null
 	# Wrapped, clipped Labels report a 1px native minimum. Reserve actual font
 	# lines independently of the ship image, including the no-transport state.
-	var header := card.get_node("Contents/Header") as HBoxContainer
-	var details := header.get_node("DetailsButton") as Button
-	var text_width := float(rect.size.x) - card.get_theme_stylebox("panel").get_minimum_size().x - details.get_combined_minimum_size().x - header.get_theme_constant("separation")
-	if ship.visible:
-		text_width -= ship.get_combined_minimum_size().x + header.get_theme_constant("separation")
-	_set_readout_minimum_height(title, text_width)
-	_set_readout_minimum_height(status, text_width)
+	# One line each (clipped, full text in the tooltip): width never wraps.
+	for one_line in [title, status]:
+		one_line.max_lines_visible = 1
+		one_line.autowrap_mode = TextServer.AUTOWRAP_OFF
+		one_line.clip_text = true
+		_set_readout_minimum_height(one_line, 100000.0)
 	title.tooltip_text = title.text
 	var landed: bool = not selected_card.is_empty() and bool(controller.call("_is_parked_campaign_dropship", craft_id))
 	for action in ["set_lz", "drop", "board", "return"]:
@@ -251,6 +252,9 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
 	if feedback.text == "Trupp ab": feedback.text = "Trupp abgesetzt"
+	feedback.max_lines_visible = 1
+	feedback.tooltip_text = feedback.text
+	feedback.mouse_filter = Control.MOUSE_FILTER_PASS
 	feedback.visible = not feedback.text.is_empty() and feedback.text != "Trupp ab"
 	if not selected_card.is_empty():
 		controller.call("_apply_mission_dropship_card_feedback_style", feedback, controller.call("_get_mission_dropship_card_feedback_tone", selected_card))
@@ -262,31 +266,38 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 
 static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics: Dictionary) -> void:
 	var font_size: int = int(metrics.body_font_size)
-	var signature: String = "%d:%d" % [rect.size.x, font_size]
+	var signature: String = "%d:%d:p7" % [rect.size.x, font_size]
 	if String(panel.get_meta("native_a5_readable_metrics", "")) == signature:
 		return
 	panel.set_meta("native_a5_readable_metrics", signature)
+	var tier: int = 2 if font_size >= 18 else (1 if font_size >= 16 else 0)
 	var card := panel.get_node("CompactCard") as PanelContainer
-	card.add_theme_stylebox_override("panel", THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_ACCENT.darkened(0.38), 6, 2, Vector4(12, 10, 12, 10)))
+	card.add_theme_stylebox_override("panel", THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_ACCENT.darkened(0.38), 6, 2, Vector4(8, 6, 8, 6)))
 	var image := card.get_node("Contents/Header/ShipTexture") as TextureRect
-	image.custom_minimum_size = Vector2(roundf(float(rect.size.x) * 0.38), 112 if font_size >= 18 else (96 if font_size >= 16 else 80))
+	image.custom_minimum_size = [Vector2(84, 48), Vector2(96, 56), Vector2(112, 64)][tier]
 	var details := card.get_node("Contents/Header/DetailsButton") as Button
 	details.text = "Details"
-	details.custom_minimum_size = Vector2(68, 40 if font_size >= 18 else 32)
+	details.custom_minimum_size = [Vector2(64, 26), Vector2(68, 28), Vector2(76, 32)][tier]
 	details.add_theme_font_size_override("font_size", font_size - 1)
 	var status := card.get_node("Contents/Header/Identity/A5TransportState") as Label
-	THEME.style_label(status, false, font_size)
+	THEME.style_label(status, false, font_size - 1)
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
-	THEME.style_label(feedback, false, font_size - 1)
+	THEME.style_label(feedback, false, maxi(13, font_size - 2))
+	var approach_heading := card.get_node("Contents/ApproachRow").get_child(0) as Label
+	approach_heading.add_theme_font_size_override("font_size", font_size - 1)
 	var actions := card.get_node("Contents/Actions") as HBoxContainer
-	actions.add_theme_constant_override("separation", 8)
+	actions.add_theme_constant_override("separation", 4)
 	for action in ["set_lz", "drop", "board", "return"]:
 		var button := actions.get_node(NodePath(action)) as Button
-		button.custom_minimum_size = Vector2(0, 48 if font_size >= 18 else (44 if font_size >= 16 else 40))
-		button.add_theme_font_size_override("font_size", font_size - 1)
+		button.custom_minimum_size = Vector2(0, _action_height(font_size))
+		button.add_theme_font_size_override("font_size", maxi(13, font_size - 2))
 	var selector := panel.get_node("CraftSelector") as OptionButton
-	selector.custom_minimum_size.y = 40 if font_size >= 18 else 34
-	selector.add_theme_font_size_override("font_size", font_size)
+	selector.custom_minimum_size.y = [28, 30, 36][tier]
+	selector.add_theme_font_size_override("font_size", font_size - 1)
+
+
+static func _action_height(font_size: int) -> int:
+	return 40 if font_size >= 18 else (32 if font_size >= 16 else 28)
 
 
 static func _status_visual(card: Dictionary, pending: bool, text: String) -> Dictionary:
@@ -311,8 +322,8 @@ static func _style_primary_action(card: PanelContainer, font_size: int) -> void:
 		var key: String = String(button.name) + ":" + str(primary == String(button.name)) + ":" + str(font_size)
 		if String(button.get_meta("native_a5_primary_style", "")) != key:
 			THEME.style_command_button(button, "accent" if primary == String(button.name) else "neutral")
-			button.add_theme_font_size_override("font_size", font_size - 1)
-			button.custom_minimum_size = Vector2(0, 48 if font_size >= 18 else (44 if font_size >= 16 else 40))
+			button.add_theme_font_size_override("font_size", maxi(13, font_size - 2))
+			button.custom_minimum_size = Vector2(0, _action_height(font_size))
 			button.set_meta("native_a5_primary_style", key)
 
 

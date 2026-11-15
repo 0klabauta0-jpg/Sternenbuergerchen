@@ -6441,7 +6441,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.custom_minimum_size = Vector2(minf(portrait_edge, float(metrics.portrait_height)), metrics.portrait_height)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
 	for index in range(resolved_units.size()):
 		var unit := resolved_units[index] as Node
