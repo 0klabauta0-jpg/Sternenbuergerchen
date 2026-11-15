@@ -498,6 +498,7 @@ var _selection_adapter = FIRETEAM_SELECTION_ADAPTER_SCRIPT.new()
 var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
 var _current_approach_index: int = 0
+var _current_approach_style: String = "normal" # per selected craft, like _current_approach_index
 var _selected_fireteam_ids: PackedStringArray = []
 var _default_fireteam_selection_initialized: bool = false
 var _focused_fireteam_id: String = ""
@@ -1226,6 +1227,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		var angle_index: int = APPROACH_ANGLES.find(approach_angle)
 		if angle_index != -1:
 			_current_approach_index = angle_index
+	if planning_state.has("approach_style"):
+		_current_approach_style = AIR_DEFENSE_PLAN.sanitize_style(String(planning_state.get("approach_style", "")))
 	if planning_state.has("has_lz_position"):
 		_has_lz_position = bool(planning_state.get("has_lz_position", false))
 	if planning_state.has("lz_position"):
@@ -1281,6 +1284,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 					selected_drop_card["lz_position"] = planning_state["lz_position"]
 				if planning_state.has("approach_angle") and (planning_has_lz_position or not selected_drop_card.has("approach_angle")):
 					selected_drop_card["approach_angle"] = planning_state["approach_angle"]
+				if planning_state.has("approach_style") and (planning_has_lz_position or not selected_drop_card.has("approach_style")):
+					selected_drop_card["approach_style"] = planning_state["approach_style"]
 				if not selected_drop_card.has("drop_ship_requested") and planning_state.has("drop_ship_requested"):
 					selected_drop_card["drop_ship_requested"] = bool(planning_state.get("drop_ship_requested", false))
 				if not selected_drop_card.has("drop_ship_staged") and planning_state.has("drop_ship_staged"):
@@ -1456,6 +1461,7 @@ func get_planning_state() -> Dictionary:
 		"has_lz_position": _has_lz_position,
 		"lz_position": _lz_position,
 		"approach_angle": _get_approach_angle_name(),
+		"approach_style": _current_approach_style,
 		"drop_ship_requested": _drop_ship_requested,
 		"drop_ship_staged": _drop_ship_staged,
 		"mission_drop_source": _mission_drop_source,
@@ -2587,6 +2593,8 @@ func _does_authoritative_dropship_card_satisfy_pending(card: Dictionary, pending
 			return not bool(card.get("has_lz_position", false))
 		"set_dropship_approach":
 			return _sanitize_approach_angle_name(String(card.get("approach_angle", ""))) == _sanitize_approach_angle_name(String(payload.get("approach_angle", "")))
+		"set_dropship_approach_style":
+			return AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", ""))) == AIR_DEFENSE_PLAN.sanitize_style(String(payload.get("approach_style", "")))
 		"call_dropship":
 			return String(card.get("state", "")).strip_edges().to_lower() != "waiting"
 		"return_dropship":
@@ -2600,6 +2608,8 @@ func _build_dropship_command_action_label(command_type: String) -> String:
 			return "LZ"
 		"set_dropship_approach":
 			return "APPROACH"
+		"set_dropship_approach_style":
+			return "ANFLUGSTIL"
 		"call_dropship":
 			return "DROP"
 		"return_dropship":
@@ -2639,6 +2649,8 @@ func apply_authoritative_dropship_command(command: Dictionary) -> bool:
 		"set_dropship_approach":
 			_select_approach_angle(String(command.get("approach_angle", "NW")))
 			return true
+		"set_dropship_approach_style":
+			return _select_approach_style(String(command.get("approach_style", "")))
 		"call_dropship":
 			_request_selected_mission_dropship_drop(true, true)
 			return true
@@ -3775,6 +3787,19 @@ func _select_fireteam_by_name(fireteam_name: String, should_emit_signal: bool = 
 	if next_index == -1:
 		return
 	_set_selected_fireteams(_selection_ids_for_index(next_index), should_emit_signal)
+
+
+## Unknown styles are rejected (returns false), the stored style stays.
+func _select_approach_style(style_name: String) -> bool:
+	var style: String = AIR_DEFENSE_PLAN.normalize_style(style_name)
+	if style.is_empty():
+		return false
+	_current_approach_style = style
+	_last_command_text = "ANFLUGSTIL %s" % String(AIR_DEFENSE_PLAN.STYLE_LABELS.get(style, style))
+	_store_selected_mission_dropship_plan()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
 
 
 func _select_approach_angle(angle_name: String) -> void:
@@ -12090,6 +12115,8 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		result["lz_name"] = generated_lz_label
 	if card.has("approach_angle"):
 		result["approach_angle"] = approach_angle
+	if card.has("approach_style"):
+		result["approach_style"] = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", "")))
 	if card.has("drop_ship_requested"):
 		result["drop_ship_requested"] = bool(card.get("drop_ship_requested", false))
 	if card.has("drop_ship_staged"):
@@ -12352,6 +12379,7 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 		result.erase("lz_label")
 		result.erase("lz_name")
 	result["approach_angle"] = _get_approach_angle_name()
+	result["approach_style"] = _current_approach_style
 	result["drop_ship_requested"] = _drop_ship_requested
 	result["drop_ship_staged"] = _drop_ship_staged
 	if not _mission_drop_source.is_empty() and not result.has("payload_source"):
@@ -12575,6 +12603,10 @@ func _apply_mission_dropship_card_selection(card: Dictionary) -> void:
 			_current_approach_index = angle_index
 	elif card_count > 1:
 		_current_approach_index = APPROACH_ANGLES.find("NW")
+	if card.has("approach_style"):
+		_current_approach_style = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", "")))
+	elif card_count > 1:
+		_current_approach_style = AIR_DEFENSE_PLAN.DEFAULT_APPROACH_STYLE
 	if card.has("has_lz_position"):
 		_has_lz_position = bool(card.get("has_lz_position", false))
 		_lz_position = _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)
@@ -13232,6 +13264,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	var payload_ids: Array = _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))
 	host.set_meta("mission_dropship_passenger_content", true)
 	_append_mission_dropship_card_command_row(host, card)
+	_append_mission_dropship_card_approach_style_row(host, card)
 	_append_air_support_card_row(host, card)
 	var content_changed := _refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
@@ -13259,7 +13292,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return content_changed
 	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
 	for child in host.get_children():
-		if child.name in ["MissionDropshipCardCommandRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
+		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
 			continue
 		host.remove_child(child)
 		child.queue_free()
@@ -13369,6 +13402,30 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	row.add_child(drop_button)
 
 
+## Approach style (ground air defence): one compact three-state row under the
+## LZ / approach / drop row. Sends the same command path as the approach angle.
+func _append_mission_dropship_card_approach_style_row(host: VBoxContainer, card: Dictionary) -> void:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if host == null or craft_id.is_empty() or host.get_node_or_null("MissionDropshipApproachStyleRow") != null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "MissionDropshipApproachStyleRow"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 1)
+	row.set_meta("mission_dropship_card_approach_style_row", true)
+	row.set_meta("mission_dropship_craft_id", craft_id)
+	host.add_child(row)
+	var active_style: String = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", _current_approach_style)))
+	var disabled: bool = _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_card_lz(card)
+	for style in AIR_DEFENSE_PLAN.APPROACH_STYLES:
+		var button := _build_mission_dropship_card_command_button(String(AIR_DEFENSE_PLAN.STYLE_LABELS[style]), String(AIR_DEFENSE_PLAN.STYLE_TOOLTIPS[style]), disabled,
+			Callable(self, "_on_mission_dropship_card_approach_style_pressed").bind(craft_id, String(style)), craft_id, "style_%s" % String(style), String(style) == active_style)
+		button.custom_minimum_size = Vector2(0.0, MISSION_DROPSHIP_APPROACH_BUTTON_SIZE.y)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.set_meta("mission_dropship_approach_style", String(style))
+		row.add_child(button)
+
+
 func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or simulation == null or simulation.get("_air_support_source") == null or String(get_parent().get_meta("location_id", "")) == "polisa": return
@@ -13432,6 +13489,12 @@ func _refresh_mission_dropship_card_command_row(host: VBoxContainer, card: Dicti
 		elif button is GridContainer:
 			for approach in button.get_children():
 				changed = _apply_mission_dropship_command_button_delta(approach, approach.text, approach.tooltip_text, lz_disabled, String(approach.text) == active_angle) or changed
+	var style_row := host.get_node_or_null("MissionDropshipApproachStyleRow")
+	if style_row != null:
+		var active_style: String = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", _current_approach_style)))
+		for style_button in style_row.get_children():
+			if style_button is Button:
+				changed = _apply_mission_dropship_command_button_delta(style_button, style_button.text, style_button.tooltip_text, lz_disabled, String(style_button.get_meta("mission_dropship_approach_style", "")) == active_style) or changed
 	return changed
 
 
@@ -14448,6 +14511,16 @@ func _on_mission_dropship_card_approach_pressed(craft_id: String, angle_name: St
 		request_network_authoritative_dropship_command("set_dropship_approach", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"approach_angle": _sanitize_approach_angle_name(angle_name)})
 		return
 	_select_approach_angle(angle_name)
+
+
+func _on_mission_dropship_card_approach_style_pressed(craft_id: String, style_name: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	if _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("set_dropship_approach_style", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"approach_style": AIR_DEFENSE_PLAN.sanitize_style(style_name)})
+		return
+	_select_approach_style(style_name)
 
 
 func _on_mission_dropship_card_drop_pressed(craft_id: String) -> void:
@@ -37818,7 +37891,7 @@ func _validate_campaign_field_lz(position: Vector2) -> Dictionary:
 	return FIELD_LANDING.validate(registry, registry.call("world_to_grid", position), _campaign_occupied_landing_positions())
 
 func _resolve_campaign_field_lz() -> Dictionary:
-	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), _mission_drop_pilot_skill(),0.5, _campaign_occupied_landing_positions())
+	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), _mission_drop_pilot_skill(),0.5, _campaign_occupied_landing_positions(), AIR_DEFENSE_PLAN.lz_radius_factor_for_style(_current_approach_style))
 
 func _mission_drop_pilot_skill() -> float:
 	var pilot_id := String(_find_mission_dropship_card_entry(_mission_drop_craft_id).get("pilot_unit_id", ""))
@@ -37853,7 +37926,7 @@ func _resolve_air_defense_on_approach(lz: Vector2) -> bool:
 	var plan: Dictionary = AIR_DEFENSE_PLAN.resolve({"vehicles": vehicles, "height_at": height_at, "crew_ready": bool(crew.crew_ready),
 		"start_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", start)), "lz_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", lz)),
 		"pilot_skill": _mission_drop_pilot_skill(), "seed": craft_id + str(lz) + ":air_defense", "integrity": int(prior.get("integrity", 100)),
-		"model_id": String(_find_mission_dropship_card_entry(craft_id).get("model_id", "cutlass")), "approach_style": ""}) # no stored approach style yet
+		"model_id": String(_find_mission_dropship_card_entry(craft_id).get("model_id", "cutlass")), "approach_style": _current_approach_style})
 	if not bool(plan.get("engaged", false)): return true
 	var snapshot: Dictionary = AIR_DEFENSE_PLAN.status_snapshot_after(prior, craft_id, _mission_drop_display_name, plan)
 	_enqueue_air_asset_status_effect(snapshot, {"event_id": String(plan.event_id)})

@@ -24,10 +24,10 @@ static func validate(registry: Node, grid: Vector2i, occupied_positions: Array) 
 			return {"ok":false, "reason":"occupied", "message":"Landezone ist durch ein anderes Schiff belegt"}
 	return {"ok":true, "position":position}
 
-static func resolve(registry: Node, requested: Vector2, seed: String, pilot_skill: float, team_skill: float, occupied: Array) -> Dictionary:
+static func resolve(registry: Node, requested: Vector2, seed: String, pilot_skill: float, team_skill: float, occupied: Array, radius_factor: float = 1.0) -> Dictionary:
 	var checked := validate(registry, registry.call("world_to_grid", requested), occupied)
 	if not bool(checked.ok): return checked
-	var result: Dictionary = ACCURACY.resolve_lz_command(requested, seed, pilot_skill, team_skill, true)
+	var result: Dictionary = ACCURACY.resolve_lz_command(requested, seed, pilot_skill, team_skill, true, radius_factor)
 	var resolved_grid: Vector2i = registry.call("world_to_grid", result.resolved_lz_position)
 	var actual := validate(registry, resolved_grid, occupied)
 	# Deviation never permits landing in a blocker. The requested safe footprint

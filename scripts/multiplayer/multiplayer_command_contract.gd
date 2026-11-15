@@ -38,6 +38,7 @@ const ALLOWED_DROPSHIP_COMMAND_TYPES: PackedStringArray = [
 	"clear_lz",
 	"call_dropship",
 	"set_dropship_approach",
+	"set_dropship_approach_style",
 	"return_dropship",
 ]
 const ALLOWED_ROLE_OVERRIDE_COMMAND_TYPES: PackedStringArray = [
@@ -276,6 +277,12 @@ func _validate_dropship_command(command: Dictionary) -> Dictionary:
 			return _reject("dropship_approach_missing_angle")
 		if not approach_angle in ["NW", "NE", "SW", "SE"]:
 			return _reject("dropship_approach_invalid")
+	if command_type == "set_dropship_approach_style":
+		var approach_style: String = String(command.get("approach_style", "")).strip_edges().to_lower()
+		if approach_style.is_empty():
+			return _reject("dropship_approach_style_missing")
+		if not approach_style in ["vorsichtig", "normal", "aggressiv"]:
+			return _reject("dropship_approach_style_invalid")
 
 	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, fireteam_id, {
 		"craft_id": craft_id,

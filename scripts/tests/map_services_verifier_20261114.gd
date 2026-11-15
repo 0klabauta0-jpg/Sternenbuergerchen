@@ -134,8 +134,12 @@ func services()->void:
  var buy:Dictionary=request(adapter,"buy","valid-buy")
  check(buy.get("ok",false) and buy.get("container_id","")=="station:trade_outpost:lift","real buy delivers to persistent local lift")
  check(request(adapter,"refuel","valid-fuel").get("ok",false),"real local adapter refuels")
+ # Ground air defence damage (AirAssetStatus) is repaired by the same service (FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15).
+ sim._apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update","status_snapshot":{"asset_id":"ship","asset_type":"dropship","state":"damaged","integrity":40,"max_integrity":100,"warning_visible":true}})
  var repair:Dictionary=request(adapter,"repair","valid-repair")
  check(repair.get("ok",false) and repair.get("hull_before",0)==75.0 and repair.get("hull_after",0)==100.0,"real Root repairs damaged hull through supply command")
+ var air_status:Dictionary=sim.get_air_asset_status_snapshot("ship")
+ check(int(air_status.get("integrity",0))==100 and String(air_status.get("state",""))=="intact" and not bool(air_status.get("warning_visible",true)) and int(repair.get("air_asset_integrity_before",0))==40,"real service repair also restores the craft's air asset integrity to 100 / intact")
  check(request(adapter,"repair","valid-repair").get("replayed",false),"repair receipt is idempotent")
  var cargo:Dictionary=adapter.request_operation("cargo_transfer_all",{"source_container_id":"station:trade_outpost:lift","destination_container_id":"craft:ship","request_id":"valid-cargo"})
  check(cargo.get("ok",false),"real adapter starts local cargo job")

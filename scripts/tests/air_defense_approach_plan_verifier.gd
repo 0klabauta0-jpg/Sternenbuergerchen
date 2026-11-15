@@ -5,6 +5,7 @@ extends SceneTree
 const PLAN = preload("res://scripts/mission/air_defense_approach_plan.gd")
 const AD = preload("res://scripts/combat/air_defense_engagement.gd")
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
+const ACCURACY = preload("res://scripts/mission/dropship_lz_accuracy_contract.gd")
 const MAP_PATH := "res://maps/Ground_Mission02_128x128.json"
 const SCENARIO_PATH := "res://data/mission_scenarios/ground_mission02_128x128.json"
 var passed := 0
@@ -116,5 +117,44 @@ func _run() -> void:
 			damaged_snapshot = PLAN.status_snapshot_after({}, "craft_b", "Craft B", close)
 			break
 	check(not damaged_plan.is_empty() and int(damaged_snapshot.integrity) == int(damaged_plan.hull_percent) and String(damaged_snapshot.state) in ["hit", "damaged"], "pressing on to an LZ beside the battery costs hull and is stored as hit or damaged: " + String(damaged_plan.get("message", "")))
+	_style_checks(vehicles, start, near_corner)
 	print("AIR_DEFENSE_APPROACH_PLAN passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
+
+
+## Task docs/tasks/FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15.md
+func _style_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> void:
+	var mapping := true
+	for row in [["vorsichtig", "low", AD.DECISION_BREAK_OFF], ["normal", "normal", AD.DECISION_BREAK_OFF], ["aggressiv", "normal", AD.DECISION_PRESS_ON]]:
+		mapping = mapping and PLAN.sanitize_style(row[0]) == row[0] and PLAN.profile_for_style(row[0]) == row[1] and PLAN.decision_for_style(row[0]) == row[2]
+	check(mapping, "style -> profile and decision: vorsichtig low / break off, normal normal / break off, aggressiv normal / press on")
+	var unknown := true
+	for raw in ["", "  ", "kamikaze", "aggressive", "LOW"]:
+		unknown = unknown and PLAN.sanitize_style(raw) == "normal" and PLAN.profile_for_style(raw) == "normal" and PLAN.decision_for_style(raw) == AD.DECISION_BREAK_OFF and PLAN.normalize_style(raw).is_empty()
+	check(unknown and PLAN.sanitize_style(" Aggressiv ") == "aggressiv", "unknown or empty style behaves as normal; case and spaces are tolerated")
+	check(is_equal_approx(PLAN.lz_radius_factor_for_style("vorsichtig"), 1.5) and is_equal_approx(PLAN.lz_radius_factor_for_style("normal"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("aggressiv"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("x"), 1.0), "landing scatter factor is 1.5 only for vorsichtig")
+	var base: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true)
+	var same: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true, 1.0)
+	var low: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true, 1.5)
+	check(is_equal_approx(float(base.lz_accuracy_radius), lerpf(96.0, 12.0, 0.5)) and JSON.stringify(base) == JSON.stringify(same), "default callers keep the old scatter radius and position: %.1f" % float(base.lz_accuracy_radius))
+	check(is_equal_approx(float(low.lz_accuracy_radius), float(base.lz_accuracy_radius) * 1.5) and is_equal_approx(float(low.landing_deviation), float(base.landing_deviation) * 1.5), "factor 1.5 widens the scatter radius and the rolled deviation by 1.5")
+
+	# Ridge battery: vehicle 4 levels above the flat valley the ship flies over.
+	var flat := func(_cell: Vector2i) -> int: return 0
+	var ridge: Array = [{"instance_id": "hagel@ridge", "unit_id": "hagel", "cell": Vector2i(0, 0), "ground_level": 4}]
+	var ridge_context := {"vehicles": ridge, "start_plane": Vector2(-30.0, 0.0), "lz_plane": Vector2(6.0, 0.0), "height_at": flat, "crew_ready": true, "pilot_skill": 0.5, "seed": "ridge", "model_id": "cutlass", "integrity": 100}
+	var ridge_normal: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "normal"}))
+	var ridge_low: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "vorsichtig"}))
+	check(bool(ridge_normal.engaged) and types(ridge_normal.result).has("flak_volley") and not bool(ridge_normal.landing_allowed), "normal approach past a ridge battery is fired upon and breaks off: " + String(ridge_normal.message))
+	check(String(ridge_low.approach_profile) == "low" and not types(ridge_low.result).has("flak_volley") and int(ridge_low.hits) == 0 and bool(ridge_low.landing_allowed), "low approach stays below the ridge battery's horizon: no fire, landing allowed")
+	var same_level: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "vorsichtig", "vehicles": [{"instance_id": "hagel@valley", "unit_id": "hagel", "cell": Vector2i(0, 0), "ground_level": 0}]}, true))
+	check(types(same_level.result).has("flak_volley"), "low flight does not protect against a battery on the same level")
+
+	# GM02 corner approach per style (diagnostic print plus the decision rules).
+	for style in ["vorsichtig", "normal", "aggressiv"]:
+		var plan: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 100, style)
+		print("GM02 corner style=%s profile=%s engaged=%s hits=%d outcome=%s landing=%s" % [style, plan.approach_profile, plan.engaged, int(plan.hits), plan.outcome, plan.landing_allowed])
+		if style != "aggressiv" and bool(plan.engaged) and int(plan.hits) > 0:
+			check(not bool(plan.landing_allowed), style + " breaks off when hit on the GM02 corner approach")
+		if style == "aggressiv":
+			check(String(plan.decision) == AD.DECISION_PRESS_ON, "aggressiv presses on on the GM02 corner approach")

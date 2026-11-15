@@ -1,6 +1,6 @@
 # Bodengestuetzte Flugabwehr gegen anfliegende Schiffe (Contract)
 
-Stand 14.11.2026. Nutzerentscheidungen vom selben Tag sind mit **[N]** markiert. Alles andere ist Vorschlag
+Stand 15.11.2026. Nutzerentscheidungen vom 14.11. sind mit **[N]** markiert. Alles andere ist Vorschlag
 des Grafik-Strangs und noch nicht vom Nutzer bestaetigt.
 
 ## Zweck
@@ -23,8 +23,11 @@ abbekommt. Zuerst als Gegner **[N]**.
 | Werte der beiden Fahrzeuge | `data/combat/air_defense_units.json` |
 | Regelkern Anflug gegen Flugabwehr, gewuerfelt | `scripts/combat/air_defense_engagement.gd`, geprueft durch `scripts/tests/air_defense_engagement_verifier.gd` |
 | Anschluss an den echten Landeanflug: Fahrzeuge aus den Map-Props, Salven entlang des Anflugwegs, Schaden am Schiff, Abbruch oder Landung | `scripts/mission/air_defense_approach_plan.gd`, ein Aufruf in `_try_start_drop_sequence`; geprueft durch `air_defense_approach_plan_verifier` und `air_defense_approach_landing_verifier`. Task `docs/tasks/FLUGABWEHR_ANSCHLUSS_2026_11_14.md` |
-| Schaden am Schiff im Spiel | `AirAssetStatus`-Integritaet je Schiff (0..100 = Rumpfanteil) ueber `air_asset_status_update` in `SimulationRoot`; **keine Reparatur** |
-| Abfrage "abdrehen?" | **offen**; ohne gespeicherten Anflugstil wird immer abgedreht ("aggressiv" hiesse weiter anfliegen) |
+| Schaden am Schiff im Spiel | `AirAssetStatus`-Integritaet je Schiff (0..100 = Rumpfanteil) ueber `air_asset_status_update` in `SimulationRoot` |
+| Reparatur der Integritaet | Servicepad-Reparatur (`_repair_ground_ship_at_service`) setzt auch den `AirAssetStatus` auf 100 / intakt; gleicher Preis, gleiche Bedingungen. Task `docs/tasks/FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15.md` |
+| Integritaet ueber das Missionsende | **nicht gespeichert**; Befund mit Belegen in der Task-Datei vom 15.11. |
+| Anflugstil je Schiff (statt Abfrage "abdrehen?") | `approach_style` in Schiffskarte und Planungszustand, Befehl `set_dropship_approach_style`, Dreier-Zeile "Vorsichtig / Normal / Aggressiv" in der Schiffskarte; Regeln unten |
+| Tiefflug mit Preis | Profil `low` bei "vorsichtig", Streukreis der Kampagnen-Feldlandung x 1,5 |
 | Sichtlinie gegen Gelaende im Anflug | **offen**; heute immer frei |
 | Absturz im Anflug | **offen**; Zerstoerung wird zum erzwungenen Abbruch mit Rumpf 1 % |
 | Start und Bergung (Abflug) unter Beschuss | **offen** |
@@ -45,7 +48,20 @@ Der Regelkern besitzt keinen Zustand. Er liefert einen Vorschlag (`runtime_autho
 - Gelaende zwischen Fahrzeug und Schiff verdeckt das Schiff (Sichtlinie).
 - **Tiefflug [N]:** Anflugprofil `low` haelt eine Hoehenstufe ueber dem Boden unter dem Schiff, `normal` sechs.
   Tiefflug ueber tieferem Gelaende bleibt damit unter dem Horizont einer Stellung auf dem Kamm. Auf gleicher
-  Hoehe wie die Stellung schuetzt er nicht. Vorschlag als Preis: Landegenauigkeit schlechter (Streukreis x 1,5).
+  Hoehe wie die Stellung schuetzt er nicht. Preis: Landegenauigkeit schlechter (Streukreis x 1,5,
+  `approach_profiles.low.lz_radius_factor`), umgesetzt am 15.11.
+
+### Anflugstil je Schiff (umgesetzt am 15.11.)
+Vorschlag des Grafik-Strangs, vom Nutzer am 14.11. als Richtung bestaetigt: Abdrehen, Tiefflug, Weiterfliegen.
+| Stil | Profil | unter Beschuss | Preis |
+| --- | --- | --- | --- |
+| Vorsichtig | `low` | abdrehen | Streukreis der Landung x 1,5 |
+| Normal (Standard) | `normal` | abdrehen | - |
+| Aggressiv | `normal` | weiter anfliegen, Landung trotz Treffern, Meldung "Flugabwehr: N Treffer, Rumpf N %" | Schaden |
+- Unbekannter Stil gilt als "normal"; der Befehl `set_dropship_approach_style` lehnt ihn ab.
+- Auch bei "aggressiv" dreht der Pilot unter 35 % Rumpf von sich aus ab; Zerstoerung bleibt erzwungener Abbruch
+  mit Rumpf 1 %.
+- Der Stil wird je Schiff gespeichert wie der Anflugwinkel (Schiffskarte, Planungszustand, Netzbefehl).
 - Der "Donnerkeil" braucht Radar. Der "Hagel" kann auch nach Sicht richten.
 
 ### Warnung vor Schaden
@@ -117,12 +133,14 @@ Zum Vergleich: Cutlass 340, Buccaneer 230, Veteran 145 Punkte. Aufruestbar spaet
 - Kein Fahrzeug in Spielerhand, bevor es ein Transportschiff und Fahrregeln gibt.
 
 ## Offene Entscheidungen
-- Wo die Abfrage "abdrehen?" erscheint und was ein abgebrochener Anflug kostet (Treibstoff, Zeit).
-- Ob Tiefflug die Landegenauigkeit verschlechtert.
+- Was ein abgebrochener Anflug kostet (Treibstoff, Zeit). Eine Abfrage "abdrehen?" waehrend des Anflugs gibt es
+  nicht; der vorher gewaehlte Anflugstil entscheidet.
+- Ob die Integritaet ueber das Missionsende gespeichert wird.
 - Flares je Schiffstyp und ob sie Geld kosten.
 - Ob ein uebernommenes Fahrzeug gegen feindliche Schiffe eingesetzt werden kann.
 
 ## Pruefung
 `godot --headless -s scripts/tests/air_defense_engagement_verifier.gd` (37 Pruefpunkte).
-`godot --headless --path . -s scripts/tests/air_defense_approach_plan_verifier.gd` (23 Pruefpunkte, GM02-Kartendaten).
-`godot --headless --path . -s scripts/tests/air_defense_approach_landing_verifier.gd` (10 Pruefpunkte, echter Controller auf GM02).
+`godot --headless --path . -s scripts/tests/air_defense_approach_plan_verifier.gd` (32 Pruefpunkte, GM02-Kartendaten).
+`godot --headless --path . -s scripts/tests/air_defense_approach_landing_verifier.gd` (25 Pruefpunkte, echter Controller auf GM02).
+`godot --headless --path . -s scripts/tests/map_services_verifier_20261114.gd` (Reparatur am Servicepad, auch `AirAssetStatus`).

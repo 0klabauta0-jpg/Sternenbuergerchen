@@ -3,7 +3,8 @@ extends RefCounted
 ## resolver scripts/combat/air_defense_engagement.gd from map data and turns its
 ## result into a landing outcome and an AirAssetStatus snapshot.
 ## Contract: docs/dev/ground_air_defense_engagement_contract.md
-## Task: docs/tasks/FLUGABWEHR_ANSCHLUSS_2026_11_14.md
+## Task: docs/tasks/FLUGABWEHR_ANSCHLUSS_2026_11_14.md,
+## docs/tasks/FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15.md (approach style, repair)
 ## Pure static helpers: no state, no scene. The mission controller commits the
 ## snapshot through SimulationRoot's air_asset_status_update effect.
 
@@ -19,6 +20,18 @@ const OUTCOME_NONE := "none"
 const OUTCOME_PRESSED_ON := "pressed_on"
 const OUTCOME_BROKE_OFF := "broke_off"
 const OUTCOME_DESTROYED := "destroyed_forced_break_off"
+## Approach style per mission craft (task FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15).
+const STYLE_CAUTIOUS := "vorsichtig"
+const STYLE_NORMAL := "normal"
+const STYLE_AGGRESSIVE := "aggressiv"
+const APPROACH_STYLES: PackedStringArray = ["vorsichtig", "normal", "aggressiv"]
+const DEFAULT_APPROACH_STYLE := STYLE_NORMAL
+const STYLE_LABELS := {"vorsichtig": "Vorsichtig", "normal": "Normal", "aggressiv": "Aggressiv"}
+const STYLE_TOOLTIPS := {
+	"vorsichtig": "Tiefflug unter dem Radar, dreht unter Beschuss ab; Landung ungenauer (Streukreis x 1,5).",
+	"normal": "Normale Flughoehe, dreht unter Beschuss ab.",
+	"aggressiv": "Normale Flughoehe, fliegt unter Beschuss weiter und landet trotz Treffern.",
+}
 
 
 static func plane_to_cell(plane: Vector2) -> Vector2i:
@@ -86,8 +99,30 @@ static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, 
 	return volleys
 
 
+## Known style or "" for an unknown value (commands reject "", stored state falls back).
+static func normalize_style(approach_style: String) -> String:
+	var style: String = approach_style.strip_edges().to_lower()
+	return style if APPROACH_STYLES.has(style) else ""
+
+
+## Unknown or empty style behaves as "normal".
+static func sanitize_style(approach_style: String) -> String:
+	var style: String = normalize_style(approach_style)
+	return style if not style.is_empty() else DEFAULT_APPROACH_STYLE
+
+
+static func profile_for_style(approach_style: String) -> String:
+	return "low" if sanitize_style(approach_style) == STYLE_CAUTIOUS else APPROACH_PROFILE
+
+
 static func decision_for_style(approach_style: String) -> String:
-	return AD.DECISION_PRESS_ON if approach_style.strip_edges().to_lower() in ["aggressiv", "aggressive"] else AD.DECISION_BREAK_OFF
+	return AD.DECISION_PRESS_ON if sanitize_style(approach_style) == STYLE_AGGRESSIVE else AD.DECISION_BREAK_OFF
+
+
+## Landing scatter radius factor: the low profile's lz_radius_factor, 1.0 otherwise.
+static func lz_radius_factor_for_style(approach_style: String) -> float:
+	var profiles: Dictionary = Dictionary(AD.definition().get("approach_profiles", {}))
+	return float(Dictionary(profiles.get(profile_for_style(approach_style), {})).get("lz_radius_factor", 1.0))
 
 
 ## Effective stats of the model's default loadout; hull from integrity (0..100).
@@ -114,14 +149,18 @@ static func resolve(context: Dictionary) -> Dictionary:
 		return ship
 	var height_at: Callable = context.get("height_at")
 	var samples: Array = approach_samples(Vector2(context.get("start_plane", Vector2.ZERO)), Vector2(context.get("lz_plane", Vector2.ZERO)))
-	var decision: String = decision_for_style(String(context.get("approach_style", "")))
+	var style: String = sanitize_style(String(context.get("approach_style", "")))
+	var profile_id: String = profile_for_style(style)
+	var decision: String = decision_for_style(style)
 	var result: Dictionary = AD.resolve_approach({
 		"seed": String(context.get("seed", "")), "pilot_skill": float(context.get("pilot_skill", 0.5)),
 		"ship_model": String(ship.model_id), "ship_stats": ship.stats, "ship_state": ship.state, "decision": decision,
-		"volleys": build_volleys(Array(context.get("vehicles", [])), samples, height_at, bool(context.get("crew_ready", false))),
+		"volleys": build_volleys(Array(context.get("vehicles", [])), samples, height_at, bool(context.get("crew_ready", false)), profile_id),
 	})
 	var plan: Dictionary = summarize(result, String(context.get("seed", "")))
 	plan["decision"] = decision
+	plan["approach_style"] = style
+	plan["approach_profile"] = profile_id
 	plan["volley_count"] = samples.size()
 	return plan
 
@@ -171,4 +210,21 @@ static func status_snapshot_after(prior: Dictionary, craft_id: String, display_n
 		status.state = AIR_ASSET_STATUS.STATE_HIT
 	status.metadata["air_defense"] = {"outcome": String(plan.get("outcome", "")), "hits": int(plan.get("hits", 0)),
 		"hull_percent": int(plan.get("hull_percent", 100)), "event_id": String(plan.get("event_id", ""))}
+	return Dictionary(status.to_snapshot()).duplicate(true)
+
+
+## Status after a ground service repair: integrity full, state intact, warning off.
+## Terminal states (destroyed / crashed) are not repaired here.
+static func repaired_status_snapshot(prior: Dictionary, event_id: String = "") -> Dictionary:
+	if prior.is_empty() or AIR_ASSET_STATUS.is_terminal_state(String(prior.get("state", ""))):
+		return {}
+	var status = AIR_ASSET_STATUS.from_dict(prior.duplicate(true))
+	status.integrity = int(status.max_integrity)
+	status.state = AIR_ASSET_STATUS.STATE_INTACT
+	status.warning_visible = false
+	status.locked_by_unit_id = ""
+	status.threat_weapon_id = ""
+	status.last_reason = "ground_service_repair"
+	if not event_id.is_empty():
+		status.last_event_id = event_id
 	return Dictionary(status.to_snapshot()).duplicate(true)

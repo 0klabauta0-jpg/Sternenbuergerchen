@@ -447,6 +447,7 @@ func publish_singleplayer_departure_events(adapter: Node, request_id: String) ->
 var _space_encounter_owner: RefCounted
 var _space_runtime_tick: Callable
 const SPACE_COMBAT_STATE = preload("res://scripts/core/space_combat_state.gd")
+const AIR_DEFENSE_APPROACH_PLAN_SCRIPT = preload("res://scripts/mission/air_defense_approach_plan.gd")
 const SPACE_FLIGHT_STATE = preload("res://scripts/core/space_flight_state.gd")
 const SPACE_GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SPACE_AREA_GRID = preload("res://scripts/core/space_area_grid.gd")
@@ -5410,7 +5411,7 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_unit_command_status(cmd)
 		"set_fire_rule":
 			_apply_fire_rule_command(cmd)
-		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "return_dropship":
+		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "set_dropship_approach_style", "return_dropship":
 			_apply_dropship_command(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
@@ -8592,5 +8593,20 @@ func _repair_ground_ship_at_service(craft_id:String)->Dictionary:
 	if not is_instance_valid(adapter) or not adapter.has_method("get_ground_repair_context"):return {"ok":false,"reason":"adapter_required"}
 	var service:Dictionary=adapter.call("get_ground_repair_context",craft_id)
 	if service.get("ground_service_verified",false)!=true or not Array(service.get("services",[])).has("repair"):return {"ok":false,"reason":"repair_service_required"}
-	if _space_combat_state.get_ship_systems(craft_id).is_empty():return {"ok":true,"message":"Lokaler Reparaturservice bereit; keine beschädigten Rumpfdaten","craft_id":craft_id}
-	return _space_combat_state.repair_ship_systems(craft_id)
+	var result:Dictionary
+	if _space_combat_state.get_ship_systems(craft_id).is_empty():result={"ok":true,"message":"Lokaler Reparaturservice bereit; keine beschädigten Rumpfdaten","craft_id":craft_id}
+	else:result=_space_combat_state.repair_ship_systems(craft_id)
+	if result.get("ok",false):_repair_air_asset_status_at_service(craft_id,result)
+	return result
+
+## Same repair also restores the craft's AirAssetStatus (ground air defence damage)
+## through the air_asset_status_update effect handler.
+func _repair_air_asset_status_at_service(craft_id:String,result:Dictionary)->void:
+	var prior:Dictionary=get_air_asset_status_snapshot(craft_id)
+	if prior.is_empty() or (int(prior.get("integrity",100))>=int(prior.get("max_integrity",100)) and String(prior.get("state",""))=="intact"):return
+	var repaired:Dictionary=AIR_DEFENSE_APPROACH_PLAN_SCRIPT.repaired_status_snapshot(prior,"ground_service_repair:%s:%d"%[craft_id,tick_counter])
+	if repaired.is_empty():return
+	_apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update","status_snapshot":repaired,"event_id":String(repaired.get("last_event_id",""))})
+	result["air_asset_integrity_before"]=int(prior.get("integrity",0))
+	result["air_asset_integrity_after"]=int(repaired.get("integrity",100))
+	if String(result.get("message","")).begins_with("Lokaler Reparaturservice bereit"):result["message"]="Rumpf am lokalen Servicepad repariert"

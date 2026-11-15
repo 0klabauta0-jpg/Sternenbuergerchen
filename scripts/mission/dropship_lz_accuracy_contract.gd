@@ -5,9 +5,10 @@ const MAX_V1_DEVIATION_RADIUS: float = 96.0
 const MIN_V1_DEVIATION_RADIUS: float = 12.0
 
 
-static func resolve_lz_command(requested_lz_position: Vector2, seed: String, pilot_skill: float = 0.5, team_skill: float = 0.5, server_authoritative: bool = true) -> Dictionary:
+## radius_factor: scatter radius multiplier (low approach profile 1.5); 1.0 keeps the v1 radius.
+static func resolve_lz_command(requested_lz_position: Vector2, seed: String, pilot_skill: float = 0.5, team_skill: float = 0.5, server_authoritative: bool = true, radius_factor: float = 1.0) -> Dictionary:
 	var skill: float = clampf((pilot_skill * 0.72) + (team_skill * 0.28), 0.0, 1.0)
-	var radius: float = lerpf(MAX_V1_DEVIATION_RADIUS, MIN_V1_DEVIATION_RADIUS, skill)
+	var radius: float = lerpf(MAX_V1_DEVIATION_RADIUS, MIN_V1_DEVIATION_RADIUS, skill) * maxf(radius_factor, 0.0)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed_to_int("%s:%.2f:%.2f:lz" % [seed.strip_edges(), pilot_skill, team_skill])
 	var angle: float = rng.randf() * TAU
