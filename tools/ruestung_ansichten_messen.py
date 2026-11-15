@@ -216,12 +216,15 @@ def build_helm_gross(folder: Path, out: Path):
     row_of(panels).save(out, quality=88)
 
 
-def helm3(old: Path, new: Path, out: Path):
+def helm3(old: Path, new: Path, out: Path, newer: Path = None):
     sheet = Image.open(SHEET)
     rows = []
     for name, xs in (("vorne", FRONT_X), ("seite", SIDE_X)):
-        rows.append(row_of([head_crop(sheet, xs, SHEET_Y), head_crop(Image.open(old / (name + ".png"))),
-                            head_crop(Image.open(new / (name + ".png")))]))
+        cols = [head_crop(sheet, xs, SHEET_Y), head_crop(Image.open(old / (name + ".png"))),
+                head_crop(Image.open(new / (name + ".png")))]
+        if newer is not None:
+            cols.append(head_crop(Image.open(newer / (name + ".png"))))
+        rows.append(row_of(cols))
     w = max(r.width for r in rows)
     canvas = Image.new("RGB", (w, sum(r.height for r in rows)), (204, 204, 204))
     y = 0
@@ -241,7 +244,7 @@ def extra(folders, out: Path):
     big = row_of([c.resize((c.width * 4, c.height * 4), Image.NEAREST) for c in crops], gap=10)
     canvas = Image.new("RGB", (max(one.width, big.width), one.height + big.height + 40), (30, 30, 30))
     d = ImageDraw.Draw(canvas)
-    d.text((10, 6), "1:1 Spielmassstab, Figur ca. 70 px (Kamera Yaw 45 / Pitch 40): leicht | mittel | schwer R09, mit Gewehr, Idle 0.2 s", fill=(220, 220, 220))
+    d.text((10, 6), "1:1 Spielmassstab, Figur ca. 70 px (Kamera Yaw 45 / Pitch 40): leicht | mittel | schwer R10, mit Gewehr, Idle 0.2 s", fill=(220, 220, 220))
     canvas.paste(one, (0, 22))
     d.text((10, one.height + 26), "4x (nearest)", fill=(220, 220, 220))
     canvas.paste(big, (0, one.height + 40))
@@ -250,7 +253,10 @@ def extra(folders, out: Path):
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "helm3":
-        helm3(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]))
+        if len(sys.argv) > 5:
+            helm3(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[5]), Path(sys.argv[4]))
+        else:
+            helm3(Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]))
         return
     if len(sys.argv) > 1 and sys.argv[1] == "extra":
         extra(sys.argv[2:5], Path(sys.argv[5]))

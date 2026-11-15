@@ -1,23 +1,23 @@
 {
- "revision": "heavy_r09_20261115",
+ "revision": "heavy_r10_20261115",
  "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
- "note": "R09: helmet and collar second round",
+ "note": "R10: curved brow, visor and mask",
  "parts": {
   "helmet_heavy": {
    "file": "helmet_heavy.glb",
-   "triangles": 576,
+   "triangles": 632,
    "materials": [
     "M_Armor_Titanium",
     "M_Armor_Visor",
     "M_Armor_Graphite"
    ],
    "bounds_min": [
-    -0.525,
-    -0.552,
+    -0.531,
+    -0.535,
     -0.5
    ],
    "bounds_max": [
-    0.525,
+    0.531,
     0.475,
     0.5
    ]
@@ -228,5 +228,5 @@
    ]
   }
  },
- "outfit_triangles": 5272
+ "outfit_triangles": 5328
 }

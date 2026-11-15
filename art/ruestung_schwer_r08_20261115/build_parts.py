@@ -142,6 +142,29 @@ class Asset:
         bmesh.ops.recalc_face_normals(part, faces=list(part.faces))
         self.merge(part, material, loc)
 
+    def arc_band(self, z0, z1, r0, r1, half_angle, thickness, material, seg=6, depth_scale=1.0, centre=-90.0):
+        """Curved plate hugging a body of revolution: a sector of a ring around Z.
+        Outer radius r0 at height z0 (bottom) and r1 at z1 (top); spans centre +- half_angle degrees
+        (centre -90 = front, -Y); thickness goes inwards; depth_scale stretches Y like lathe()."""
+        part = bmesh.new()
+        cols = []
+        for i in range(seg + 1):
+            ang = math.radians(centre - half_angle + 2.0 * half_angle * i / seg)
+            col = []
+            for z, r in ((z0, r0), (z1, r1)):
+                for rr in (r, r - thickness):
+                    col.append(part.verts.new((rr * math.cos(ang), rr * math.sin(ang) * depth_scale, z)))
+            cols.append(col)  # outer bottom, inner bottom, outer top, inner top
+        for a, b in zip(cols, cols[1:]):
+            part.faces.new((a[0], b[0], b[2], a[2]))  # outer
+            part.faces.new((a[1], a[3], b[3], b[1]))  # inner
+            part.faces.new((a[2], b[2], b[3], a[3]))  # top
+            part.faces.new((a[0], a[1], b[1], b[0]))  # bottom
+        part.faces.new((cols[0][0], cols[0][2], cols[0][3], cols[0][1]))
+        part.faces.new((cols[-1][0], cols[-1][1], cols[-1][3], cols[-1][2]))
+        bmesh.ops.recalc_face_normals(part, faces=list(part.faces))
+        self.merge(part, material)
+
     # ---------------------------------------------------------------- export
     def export(self) -> dict:
         mesh = bpy.data.meshes.new(self.name)
@@ -181,23 +204,20 @@ class Asset:
 
 # ======================================================================= parts
 def helmet_heavy() -> Asset:
-    """R09: big dome down to the chin, brow ridge, wide low visor slit, short dark mask with breathing slits, ear discs."""
+    """R10: dome down to the chin, curved brow lip, visor band that wraps to the sides, curved light mask with
+    breathing slits, larger ear discs. Brow, visor and mask follow the shell instead of sitting on it as boxes."""
     a = Asset("helmet_heavy")
     a.lathe([(-0.50, 0.36), (-0.36, 0.42), (-0.18, 0.455), (0.02, 0.46), (0.20, 0.43), (0.34, 0.35), (0.44, 0.23), (0.50, 0.09)],
             T, seg=14, depth_scale=1.06)
-    # Brow ridge over the visor.
-    a.box((0.80, 0.22, 0.08), (0, -0.435, 0.010), T, 0.02, taper=0.92, taper_axis="y")
-    # Wide visor slit (near black), runs out of the shell at the sides.
-    a.box((0.74, 0.20, 0.15), (0, -0.41, -0.105), V, 0.0)
-    # Mask under the visor: dark, narrower towards the bottom.
-    a.box((0.62, 0.24, 0.320), (0, -0.41, -0.340), G, 0.03, taper=1.12, taper_axis="z")
-    for x in (-0.17, 0.17):
-        for z in (-0.325, -0.375):
-            a.box((0.13, 0.03, 0.025), (x, -0.537, z), V, 0.0)  # breathing slits
-    # Round ear discs at visor height: light rim with a dark core.
-    for x in (-0.47, 0.47):
-        a.cyl(0.12, 0.07, (x, 0.04, -0.090), T, seg=10, rot=(0, 90, 0), bevel=0.015)
-        a.cyl(0.065, 0.04, (x * 1.075, 0.04, -0.090), G, seg=8, rot=(0, 90, 0))
+    a.arc_band(-0.03, 0.05, 0.505, 0.49, 54, 0.10, T, seg=6, depth_scale=1.06)   # brow lip, overhangs the visor
+    a.arc_band(-0.18, -0.03, 0.467, 0.471, 46, 0.10, V, seg=6, depth_scale=1.06)  # visor band, recessed between brow and mask
+    a.arc_band(-0.50, -0.18, 0.38, 0.478, 50, 0.10, T, seg=6, depth_scale=1.06)  # mask, narrower towards the chin
+    for x in (-0.15, 0.15):
+        for z, y in ((-0.30, -0.443), (-0.35, -0.426)):
+            a.box((0.11, 0.03, 0.022), (x, y, z), V, 0.0)  # breathing slits
+    for x in (-0.475, 0.475):
+        a.cyl(0.13, 0.07, (x, 0.04, -0.090), T, seg=10, rot=(0, 90, 0), bevel=0.015)
+        a.cyl(0.07, 0.04, (x * 1.075, 0.04, -0.090), G, seg=8, rot=(0, 90, 0))
     return a
 
 
@@ -350,8 +370,8 @@ COUNT = {"helmet_heavy": 1, "collar": 1, "torso_heavy": 1, "pelvis_heavy": 1}
 def main() -> None:
     bpy.ops.wm.read_factory_settings(use_empty=True)
     OUT.mkdir(parents=True, exist_ok=True)
-    manifest = {"revision": "heavy_r09_20261115", "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
-                "note": "R09: helmet and collar second round", "parts": {}}
+    manifest = {"revision": "heavy_r10_20261115", "source": "art/ruestung_schwer_r08_20261115/build_parts.py",
+                "note": "R10: curved brow, visor and mask", "parts": {}}
     total = 0
     for build in PARTS:
         info = build().export()
