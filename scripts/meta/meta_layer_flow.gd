@@ -4400,7 +4400,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		else:
 			var fob_screen: Node = get_node_or_null("FOBScreen")
 			if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
-				mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
+				mission_setup.set("selected_fireteam_definitions", _campaign_fob_fireteam_definitions(fob_screen).duplicate(true))
 		var planning_unit_configs: Array = Array(_mission_planning_state.get("selected_team_unit_configs", []))
 		if is_campaign_start():
 			# Homebase Direct bypasses the legacy FOB roster presenter. Pass the
@@ -4662,8 +4662,30 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		casualties.append(entry)
 		if String(entry.get("outcome", "")) == "wounded":
 			severities[unit_id] = String(entry.get("severity", "light"))
+	# Personen, die die Kampagne voraussetzt (Fortschritts-Rekrut, Schiffspilot, Anwerber), sterben nicht: Sie gelten als
+	# schwer verwundet geborgen und gehen den normalen Weg der Verwundeten. Die Pruefung gilt je Person.
+	var fatal_unit_ids: PackedStringArray = PackedStringArray()
+	for raw_fatal_id in PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())):
+		var fatal_id: String = String(raw_fatal_id)
+		if not _is_campaign_person_protected(fatal_id):
+			fatal_unit_ids.append(fatal_id)
+			continue
+		var protected_index: int = -1
+		for index in range(casualties.size()):
+			if String(Dictionary(casualties[index]).get("unit_id", "")) == fatal_id:
+				protected_index = index
+				break
+		var protected_entry: Dictionary = Dictionary(casualties[protected_index]) if protected_index >= 0 else {"unit_id": fatal_id, "display_name": String(roster_names.get(fatal_id, state_names.get(fatal_id, fatal_id)))}
+		protected_entry["outcome"] = "wounded"
+		protected_entry["severity"] = "severe"
+		protected_entry["protected_from_death"] = true
+		if protected_index >= 0:
+			casualties[protected_index] = protected_entry
+		else:
+			casualties.append(protected_entry)
+		severities[fatal_id] = "severe"
+	result["fatality_unit_ids"] = fatal_unit_ids
 	result["casualties"] = casualties
-	var fatal_unit_ids: PackedStringArray = PackedStringArray(result.get("fatality_unit_ids", PackedStringArray()))
 	if severities.is_empty():
 		_remove_campaign_fatalities(fatal_unit_ids, result)
 		return result
@@ -4707,18 +4729,21 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 
 
 ## Task 6b: Wer zurueckbleibt, ist tot und verlaesst den Kampagnenkader. Nur Kampagne; es zaehlt, wer in unit_ids steht
-## und noch im Kader ist (dieselbe Zustellung ein zweites Mal findet niemanden mehr). Entfernen und Eintragen in die
-## Gefallenenliste (record_fallen) laufen ohne Pause in einem Schritt, also vor jedem naechsten Basis-Checkpoint.
-## Wuerde der Kader dadurch ungueltig, bleibt alles wie es ist (push_error mit den IDs). Das Ergebnis wird nicht veraendert:
-## fatality_unit_ids und die Namen in casualties stehen fuer den Debrief weiter darin. job_id und location_id kommen aus
-## _active_singleplayer_identity (am Missionsende noch gefuellt), ersatzweise aus dem Ergebnis.
+## und noch im Kader ist (dieselbe Zustellung ein zweites Mal findet niemanden mehr). Geschuetzte Personen (die Kampagne
+## setzt sie voraus) sind hier nie dabei: _apply_campaign_casualties macht sie vorher zu schwer Verwundeten.
+## Alles oder nichts: Erst werden die Eintraege der Gefallenenliste gebildet und geprueft, dann Absicherung (war der Kader
+## vorher gueltig und waere danach ungueltig, bleibt alles wie es ist), dann Eintragen und Entfernen in einem Schritt ohne
+## Pause, also vor jedem naechsten Basis-Checkpoint. Bei einem Hindernis: push_error mit den IDs, nichts wird veraendert.
+## Das Ergebnis wird nicht veraendert: fatality_unit_ids und die Namen in casualties stehen fuer den Debrief weiter darin.
+## job_id und location_id kommen aus _active_singleplayer_identity (am Missionsende noch gefuellt), ersatzweise (auch bei
+## leerem Wert) aus dem Ergebnis.
 func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Dictionary) -> void:
 	if not is_campaign_start() or unit_ids.is_empty():
 		return
 	var dead_units: Dictionary = {}
 	for raw_id in unit_ids:
 		var dead_id: String = String(raw_id).strip_edges()
-		if dead_id.is_empty() or dead_units.has(dead_id):
+		if dead_id.is_empty() or dead_units.has(dead_id) or _is_campaign_person_protected(dead_id):
 			continue
 		for unit_variant in _all_team_units:
 			if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("unit_id", "")) == dead_id:
@@ -4726,18 +4751,37 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 				break
 	if dead_units.is_empty():
 		return
-	var survivors: Array = _campaign_roster_without(dead_units)
-	var blockers: PackedStringArray = _campaign_fatality_blockers(dead_units, survivors)
-	if not blockers.is_empty():
-		push_error("Gefallene bleiben im Kader (%s): %s" % [", ".join(PackedStringArray(dead_units.keys())), "; ".join(blockers)])
+	var dead_list: String = ", ".join(PackedStringArray(dead_units.keys()))
+	if _singleplayer_runtime == null or not _singleplayer_runtime.has_method("record_fallen") or not _singleplayer_runtime.has_method("validate_fallen_entry"):
+		push_error("Gefallene bleiben im Kader (%s): keine Gefallenenliste" % dead_list)
 		return
-	var job_id: String = String(_active_singleplayer_identity.get("job_id", mission_result.get("job_id", "")))
-	var location_id: String = String(_active_singleplayer_identity.get("location_id", mission_result.get("location_id", "")))
+	var survivors: Array = _campaign_roster_without(dead_units)
+	if _campaign_roster_problems(_all_team_units).is_empty():
+		var after_problems: PackedStringArray = _campaign_roster_problems(survivors)
+		if not after_problems.is_empty():
+			push_error("Gefallene bleiben im Kader (%s): %s" % [dead_list, "; ".join(after_problems)])
+			return
+	var job_id: String = String(_active_singleplayer_identity.get("job_id", "")).strip_edges()
+	if job_id.is_empty():
+		job_id = String(mission_result.get("job_id", ""))
+	var location_id: String = String(_active_singleplayer_identity.get("location_id", "")).strip_edges()
+	if location_id.is_empty():
+		location_id = String(mission_result.get("location_id", ""))
+	var entries: Array = []
 	for dead_id: String in dead_units:
 		var display_name: String = String(Dictionary(dead_units[dead_id]).get("display_name", "")).strip_edges()
-		var recorded: Dictionary = Dictionary(_singleplayer_runtime.call("record_fallen", {"unit_id": dead_id, "display_name": display_name if not display_name.is_empty() else dead_id, "job_id": job_id, "location_id": location_id}))
+		var entry: Dictionary = {"unit_id": dead_id, "display_name": display_name if not display_name.is_empty() else dead_id, "job_id": job_id, "location_id": location_id}
+		var verdict: Dictionary = Dictionary(_singleplayer_runtime.call("validate_fallen_entry", entry))
+		if not bool(verdict.get("ok", false)):
+			push_error("Gefallene bleiben im Kader (%s): Eintrag fuer %s nicht moeglich (%s)" % [dead_list, dead_id, String(verdict.get("reason", ""))])
+			return
+		entries.append(entry)
+	for entry: Dictionary in entries:
+		var recorded: Dictionary = Dictionary(_singleplayer_runtime.call("record_fallen", entry))
 		if not bool(recorded.get("ok", false)):
-			push_error("Gefallenenliste lehnt %s ab: %s" % [dead_id, String(recorded.get("reason", ""))])
+			push_error("Gefallenenliste lehnt %s ab: %s" % [String(entry.unit_id), String(recorded.get("reason", ""))])
+	var homebase_screen: Node = _get_homebase_screen()
+	var emptied_teams: Array = _campaign_teams_emptied_by(dead_units, homebase_screen)
 	_all_team_units = survivors
 	_available_team_units = _available_team_units.filter(func(unit: Dictionary) -> bool: return not dead_units.has(String(unit.get("unit_id", ""))))
 	for dead_id: String in dead_units:
@@ -4751,10 +4795,20 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 			_selected_unit_ids.remove_at(selected_index)
 			if selected_index < _selected_fireteam_ids.size():
 				_selected_fireteam_ids.remove_at(selected_index)
-	_discard_fatalities_from_runtime(dead_units)
-	_discard_fatalities_from_homebase_teams(dead_units)
+	_discard_fatalities_from_runtime(dead_units, homebase_screen)
+	if homebase_screen != null:
+		# Dieselbe Reihenfolge wie _refresh_homebase_screen, aber unabhaengig davon, ob die Ansicht gerade verdeckt ist:
+		# erst die Personen (Mitglieder und Leads der Trupps mit Lebenden richtet die Ansicht danach selbst aus), dann der
+		# Kontext mit den bereinigten Definitionen der Trupps, die keine Mitglieder mehr haben.
+		homebase_screen.call("setup_roster", _available_team_units, _homebase_staged_unit_ids)
+		homebase_screen.call("set_fireteam_context", _homebase_staged_fireteam_ids, emptied_teams, false)
 	_refresh_homebase_screen()
 	_sync_wound_lock()
+
+
+## Ist diese Person fuer die Kampagne geschuetzt (Fortschritts-Rekrut, Schiffspilot, Anwerber)? Die Auskunft kommt vom Adapter.
+func _is_campaign_person_protected(unit_id: String) -> bool:
+	return _singleplayer_runtime != null and _singleplayer_runtime.has_method("is_person_protected_from_death") and bool(_singleplayer_runtime.call("is_person_protected_from_death", unit_id))
 
 
 ## Kader ohne die Gefallenen. Stirbt Platz 0, rueckt die erste lebende Person mit roster_role_category "operator" und
@@ -4779,95 +4833,105 @@ func _is_campaign_leader_candidate(unit: Dictionary) -> bool:
 	return String(unit.get("roster_role_category", "")) == "operator" and float(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("_leadership", unit)) > 0.0
 
 
-## Gruende, warum das Entfernen den Kampagnenstand ungueltig machen wuerde (leer = darf entfernt werden).
-## Spiegel von campaign_checkpoint_store.validate_payload: 2 bis 64 Personen, Platz 0 Operator mit Fuehrung, Platz 1 Pilot,
-## kein Pilot eines Schiffs, kein durch Kampagnenfortschritt vorausgesetzter Rekrut, kein Anwerber des Marktes.
-func _campaign_fatality_blockers(dead_units: Dictionary, survivors: Array) -> PackedStringArray:
-	var blockers: PackedStringArray = PackedStringArray()
-	if _singleplayer_runtime == null or not _singleplayer_runtime.has_method("record_fallen"):
-		blockers.append("keine Gefallenenliste")
-	if survivors.size() < 2 or survivors.size() > 64:
-		blockers.append("der Kader hat danach %d Personen" % survivors.size())
-	else:
-		var leader: Dictionary = survivors[0]
-		var pilot: Dictionary = survivors[1]
-		if not _is_campaign_leader_candidate(leader):
-			blockers.append("Platz 0 ist kein Operator mit Fuehrung")
-		var piloting: Variant = pilot.get("dropship_piloting")
-		if String(pilot.get("roster_role_category", "")) != "pilot" or typeof(piloting) not in [TYPE_INT, TYPE_FLOAT] or float(piloting) <= 0.0:
-			blockers.append("Platz 1 ist kein Pilot")
-	for craft_id in _assigned_aircraft_pilot_by_craft:
-		if dead_units.has(String(_assigned_aircraft_pilot_by_craft[craft_id])):
-			blockers.append("Pilot des Schiffs %s" % String(craft_id))
-	for fixed_id in ["campaign_outpost_recruit", "campaign_rescue_pilot"]:
-		if dead_units.has(fixed_id):
-			blockers.append("%s gehoert zum Kampagnenfortschritt" % fixed_id)
-	var market: Variant = _singleplayer_runtime.get("_polisa_market") if _singleplayer_runtime != null else null
-	if market != null and market.has_method("snapshot") and dead_units.has(String(Dictionary(market.call("snapshot")).get("recruiter_id", "")).strip_edges()):
-		blockers.append("Anwerber des Marktes")
-	return blockers
+## Maengel eines Kampagnenkaders (leer = gueltig). Spiegel von campaign_checkpoint_store.validate_payload:
+## 2 bis 64 Personen, Platz 0 Operator mit Fuehrung, Platz 1 Pilot mit dropship_piloting > 0.
+func _campaign_roster_problems(units: Array) -> PackedStringArray:
+	var problems: PackedStringArray = PackedStringArray()
+	if units.size() < 2 or units.size() > 64:
+		problems.append("der Kader hat %d Personen" % units.size())
+		return problems
+	if typeof(units[0]) != TYPE_DICTIONARY or not _is_campaign_leader_candidate(Dictionary(units[0])):
+		problems.append("Platz 0 ist kein Operator mit Fuehrung")
+	var pilot: Dictionary = Dictionary(units[1]) if typeof(units[1]) == TYPE_DICTIONARY else {}
+	var piloting: Variant = pilot.get("dropship_piloting")
+	if String(pilot.get("roster_role_category", "")) != "pilot" or typeof(piloting) not in [TYPE_INT, TYPE_FLOAT] or float(piloting) <= 0.0:
+		problems.append("Platz 1 ist kein Pilot")
+	return problems
 
 
-## Basis-Personalliste, Ausruestung (Loadout-Besitzer) und Rucksack der Gefallenen. Ihre Gegenstaende gehen verloren:
-## sie bleiben am Ort zurueck und kommen nicht ins Basislager.
-func _discard_fatalities_from_runtime(dead_units: Dictionary) -> void:
+## Basis-Personalliste, Ausruestung und Rucksack der Gefallenen. Ihre Gegenstaende gehen verloren (sie bleiben am Ort
+## zurueck, kein Uebertrag ins Basislager); nur Auftragsfracht behandelt der Versorgungsstand gesondert.
+func _discard_fatalities_from_runtime(dead_units: Dictionary, homebase_screen: Node) -> void:
 	if _singleplayer_runtime == null:
 		return
 	var base: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
-	var simulation: Node = _singleplayer_runtime.get("_simulation")
-	var supply: Variant = _singleplayer_runtime.get("_supply")
-	var homebase_screen: Node = _get_homebase_screen()
+	var base_ids: Array = []
+	if base != null:
+		for person_variant in Array(Dictionary(base.call("get_snapshot")).get("units", [])):
+			base_ids.append(String(Dictionary(person_variant).get("unit_id", "")))
 	for dead_id: String in dead_units:
-		if base != null and Dictionary(base.get("_states")).has(dead_id):
+		if base_ids.has(dead_id):
 			base.call("remove_person", dead_id)
-		var owners: Array = []
-		if simulation != null and simulation.has_method("get_personnel_loadout_state"):
-			owners.append(simulation.call("get_personnel_loadout_state"))
+		var discarded: Dictionary = Dictionary(_singleplayer_runtime.call("discard_person_equipment", dead_id))
+		if not bool(discarded.get("ok", false)):
+			push_error("Ausruestung von %s nicht verworfen: %s" % [dead_id, String(discarded.get("reason", ""))])
 		if homebase_screen != null and homebase_screen.has_method("get_personnel_loadout_state"):
-			owners.append(homebase_screen.call("get_personnel_loadout_state"))
-		for owner in owners:
-			owner.call("remove_unit", dead_id)
-		var inventory: Variant = supply.get("_inventory") if supply != null else null
-		var bag_key: String = "unit:%s:backpack" % dead_id
-		if typeof(inventory) == TYPE_DICTIONARY and Dictionary(inventory).erase(bag_key):
-			supply.set("_revision", int(supply.get("_revision")) + 1)
+			homebase_screen.call("get_personnel_loadout_state").call("remove_unit", dead_id)
 
 
-## Trupps der Basisansicht (Besitzer der Trupp-Definitionen): Gefallene raus, ein toter Lead wird durch ein lebendes
-## Mitglied ersetzt, ein dadurch leerer Trupp wird aufgeloest (der letzte verbleibende bleibt, leer).
-func _discard_fatalities_from_homebase_teams(dead_units: Dictionary) -> void:
-	var homebase_screen: Node = _get_homebase_screen()
-	if homebase_screen == null or not homebase_screen.has_method("_get_fireteam_definitions_snapshot"):
-		return
-	var cleaned: Array = []
-	var emptied: PackedStringArray = PackedStringArray()
-	for definition_variant in Array(homebase_screen.call("_get_fireteam_definitions_snapshot")):
-		var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
-		var members: PackedStringArray = PackedStringArray()
-		var lost_member: bool = dead_units.has(String(definition.get("lead_unit_id", "")))
-		for member_variant in Array(definition.get("member_unit_ids", [])):
-			if dead_units.has(String(member_variant)):
-				lost_member = true
+## Trupps der Basisansicht, die durch den Tod keine Mitglieder mehr haetten: bereinigte Definitionen (ohne Mitglieder und
+## ohne Lead), die set_fireteam_context anstelle der alten einsetzt. Sonst fiele die Ansicht fuer einen leeren Trupp auf
+## dessen alte member_unit_ids zurueck, in denen noch die Toten stehen. Nur oeffentliche Auskunft der Ansicht.
+func _campaign_teams_emptied_by(dead_units: Dictionary, homebase_screen: Node) -> Array:
+	var emptied: Array = []
+	if homebase_screen == null or not homebase_screen.has_method("get_operations_snapshot"):
+		return emptied
+	for team_variant in Array(Dictionary(homebase_screen.call("get_operations_snapshot")).get("fireteams", [])):
+		var team: Dictionary = Dictionary(team_variant)
+		var lost: bool = false
+		var living: bool = false
+		for member_variant in Array(team.get("members", [])):
+			if dead_units.has(String(Dictionary(member_variant).get("id", ""))):
+				lost = true
 			else:
-				members.append(String(member_variant))
+				living = true
+		if lost and not living:
+			emptied.append({"id": String(team.get("id", "")), "label": String(team.get("label", "")), "lead_unit_id": "", "member_unit_ids": PackedStringArray(), "member_loadouts": {}})
+	return emptied
+
+
+## Trupp-Definitionen der FOB-Ansicht, wie der Flow sie weitergibt: Mitglieder und Lead muessen im Kampagnenkader stehen.
+## Ein Trupp, der dadurch alle Mitglieder verliert, entfaellt. Ausserhalb der Kampagne unveraendert.
+func _campaign_fob_fireteam_definitions(fob_screen: Variant) -> Array:
+	var definitions: Array = Array(fob_screen.call("get_fireteam_definitions")) if fob_screen != null and fob_screen.has_method("get_fireteam_definitions") else []
+	if not is_campaign_start():
+		return definitions
+	var known: Dictionary = {}
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) == TYPE_DICTIONARY:
+			known[String(Dictionary(unit_variant).get("unit_id", ""))] = true
+	var cleaned: Array = []
+	for definition_variant in definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			cleaned.append(definition_variant)
+			continue
+		var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
+		var had_members: bool = false
+		var members: PackedStringArray = PackedStringArray()
+		for field: String in ["member_unit_ids", "members"]:
+			if not definition.has(field):
+				continue
+			var kept: Array = []
+			for member in definition[field]:
+				var member_id: String = String(Dictionary(member).get("unit_id", Dictionary(member).get("id", ""))) if typeof(member) == TYPE_DICTIONARY else String(member)
+				had_members = true
+				if known.has(member_id):
+					kept.append(member)
+					if not members.has(member_id):
+						members.append(member_id)
+			definition[field] = PackedStringArray(kept) if typeof(definition[field]) == TYPE_PACKED_STRING_ARRAY else kept
 		var loadouts: Dictionary = Dictionary(definition.get("member_loadouts", {}))
-		for dead_id: String in dead_units:
-			loadouts.erase(dead_id)
-		definition["member_unit_ids"] = members
-		definition["member_loadouts"] = loadouts
-		if not members.has(String(definition.get("lead_unit_id", ""))):
+		for loadout_id in loadouts.keys():
+			if not known.has(String(loadout_id)):
+				loadouts.erase(loadout_id)
+		if definition.has("member_loadouts"):
+			definition["member_loadouts"] = loadouts
+		if had_members and members.is_empty():
+			continue
+		if definition.has("lead_unit_id") and not members.has(String(definition.get("lead_unit_id", ""))) and (not members.is_empty() or not known.has(String(definition.get("lead_unit_id", "")))):
 			definition["lead_unit_id"] = String(members[0]) if not members.is_empty() else ""
-		if lost_member and members.is_empty():
-			emptied.append(String(definition.get("id", "")))
 		cleaned.append(definition)
-	# Gleiche Reihenfolge wie _refresh_homebase_screen: erst die Personen, dann der Trupp-Kontext. Die bereinigten
-	# Definitionen ersetzen die der Ansicht (Verschmelzen nach id), auch wenn die Ansicht gerade verdeckt ist.
-	homebase_screen.call("setup_roster", _available_team_units, _homebase_staged_unit_ids)
-	homebase_screen.call("set_fireteam_context", _homebase_staged_fireteam_ids, cleaned, false)
-	for emptied_id: String in emptied:
-		if Array(homebase_screen.get("_fireteam_definitions")).size() > 1:
-			homebase_screen.set("_focused_fireteam_id", emptied_id)
-			homebase_screen.call("_on_homebase_remove_fireteam_pressed")
+	return cleaned
 
 
 func _return_homebase_direct_craft_after_mission() -> void:
@@ -5544,7 +5608,7 @@ func _refresh_homebase_screen() -> void:
 	var fob_screen = _get_fob_screen()
 	var fireteam_definitions: Array = []
 	if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
-		fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
+		fireteam_definitions = _campaign_fob_fireteam_definitions(fob_screen).duplicate(true)
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
 	# This is a presentation refresh, not a request to equip old FOB exports.
 	homebase_screen.set_fireteam_context(_homebase_staged_fireteam_ids, fireteam_definitions, false)
@@ -6046,7 +6110,7 @@ func _refresh_fob_screen() -> void:
 	fob_screen.set_meta("homebase_direct_bypass_active", false)
 	_sync_fob_transfer_selection_from_screen()
 	var selected_mission: Dictionary = _get_selected_mission_definition()
-	var fireteam_definitions: Array = fob_screen.get_fireteam_definitions()
+	var fireteam_definitions: Array = _campaign_fob_fireteam_definitions(fob_screen)
 	var transport_craft_states: Array = _build_transport_craft_states()
 	fob_screen.set_available_units(_build_fob_profile_unit_subset(transport_craft_states))
 	fob_screen.set_transport_craft_state(transport_craft_states)
@@ -6820,7 +6884,7 @@ func _build_fob_member_loadouts() -> Dictionary:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null:
 		return {}
-	return _build_member_loadouts_from_fireteam_definitions(fob_screen.get_fireteam_definitions())
+	return _build_member_loadouts_from_fireteam_definitions(_campaign_fob_fireteam_definitions(fob_screen))
 
 
 func _build_member_loadouts_from_fireteam_definitions(definitions: Array) -> Dictionary:
@@ -7066,7 +7130,7 @@ func _sync_mission_setup_contract_fields(drop_state: Dictionary, applied_source:
 	if applied_source == MISSION_DROP_SOURCE_FOB:
 		var fireteam_definitions: Array = []
 		if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
-			fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
+			fireteam_definitions = _campaign_fob_fireteam_definitions(fob_screen).duplicate(true)
 		_mission_planning_state["selected_fireteam_definitions"] = fireteam_definitions
 		if fob_screen != null and fob_screen.has_method("get_selected_unit_configs"):
 			_mission_planning_state["selected_team_unit_configs"] = Array(fob_screen.call("get_selected_unit_configs")).duplicate(true)

@@ -1767,6 +1767,28 @@ func record_fallen(entry: Dictionary) -> Dictionary:
 func get_fallen() -> Array:
 	return _fallen.duplicate(true)
 
+## Prueft nur, ob record_fallen den Eintrag annehmen wuerde (ohne ihn aufzunehmen).
+func validate_fallen_entry(entry: Dictionary) -> Dictionary:
+	if _clean_fallen_entry(entry).is_empty(): return {"ok": false, "reason": "invalid_fallen_entry"}
+	return {"ok": true}
+
+## Lesende Auskunft: Diese Person setzt die Kampagne voraus (Fortschritts-Rekruten, Schiffspilot, Anwerber des Marktes).
+## Sie stirbt nicht; sie gilt als schwer verwundet geborgen.
+func is_person_protected_from_death(unit_id: String) -> bool:
+	if unit_id in ["campaign_outpost_recruit", "campaign_rescue_pilot"]: return true
+	if is_instance_valid(_flow):
+		var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
+		if typeof(pilots) == TYPE_DICTIONARY and Dictionary(pilots).values().has(unit_id): return true
+	return _polisa_market != null and String(_polisa_market.snapshot().get("recruiter_id", "")) == unit_id
+
+## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
+func discard_person_equipment(unit_id: String) -> Dictionary:
+	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
+	var result: Dictionary = _supply.discard_person_equipment(unit_id)
+	if bool(result.get("ok", false)) and _simulation != null:
+		_simulation.get_personnel_loadout_state().remove_unit(unit_id)
+	return result
+
 ## Ersetzt die Liste durch die des Standes (leer, wenn der Stand kein Feld "fallen" hat).
 func restore_fallen_from_checkpoint(checkpoint: Dictionary) -> void:
 	_fallen = []

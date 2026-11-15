@@ -267,7 +267,9 @@ func _direct_part() -> void:
 	var fatal: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_d", "down", false)], "aborted")
 	var applied_fatal: Dictionary = _flow.call("_apply_campaign_casualties", fatal)
 	_check(PackedStringArray(applied_fatal.get("fatality_unit_ids", PackedStringArray())) == PackedStringArray(["t_d"]), "Direkt Rueckzug fern: fatality_unit_ids == [t_d]")
-	_check(Array(_flow.get("_all_team_units")) == roster_before, "Direkt Rueckzug fern: Kadereintrag der Toten (und alle anderen) unveraendert")
+	var roster_without_dead: Array = roster_before.filter(func(unit: Dictionary) -> bool: return String(unit.get("unit_id", "")) != "t_d")
+	var fallen_after: Array = Array(_flow.get("_singleplayer_runtime").call("get_fallen"))
+	_check(Array(_flow.get("_all_team_units")) == roster_without_dead and fallen_after.any(func(entry: Dictionary) -> bool: return String(entry.get("unit_id", "")) == "t_d"), "Direkt Rueckzug fern: Tote steht nicht mehr im Kader (alle anderen unveraendert) und steht in get_fallen()")
 	_check(String(_casualty_entry(applied_fatal, "t_d").get("display_name", "")) == "Dora Dunkel" and String(_casualty_entry(applied_fatal, "t_d").get("outcome", "")) == "dead", "Direkt Rueckzug fern: Tote steht mit display_name in casualties")
 	# Eine laufende Verwundung wird nie kuerzer und nie leichter.
 	_set_roster()

@@ -603,6 +603,33 @@ func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> D
 	_revision += 1
 	return {"ok": true}
 
+
+## Rucksack einer gefallenen Person: alles darin geht verloren (bleibt am Ort zurueck), ausser der Auftragsfracht
+## (RESERVED_QUEST_ITEMS). Die kommt wie bei return_skirmish_person_equipment ins Basislager, damit kein Auftrag unloesbar wird;
+## ist dort schon ein Stueck derselben Auftragsfracht, ist das Duplikat eines und wird verworfen (mehr als eines darf es nie geben).
+func discard_person_equipment(unit_id: String) -> Dictionary:
+	var bag_key := "unit:" + unit_id + ":backpack"
+	if not _inventory.has(bag_key):
+		return {"ok": true, "discarded": 0, "kept_quest_items": []}
+	var storage: Dictionary = _inventory.get("base:homebase", {})
+	var bag: Dictionary = _inventory[bag_key]
+	var discarded := 0
+	var kept: Array = []
+	for item: String in Dictionary(bag.get("items", {})):
+		var amount := int(bag.items[item])
+		if INVENTORY.RESERVED_QUEST_ITEMS.has(item) and not storage.is_empty():
+			var stored := int(storage.items.get(item, 0))
+			var moved := maxi(0, mini(amount, 1 - stored))
+			if moved > 0:
+				storage.items[item] = stored + moved
+				kept.append(item)
+			discarded += amount - moved
+		else:
+			discarded += amount
+	_inventory.erase(bag_key)
+	_revision += 1
+	return {"ok": true, "discarded": discarded, "kept_quest_items": kept}
+
 func _blueprints() -> Array:
 	var result: Array = []
 	for receipt: Dictionary in _reward_receipts.values():

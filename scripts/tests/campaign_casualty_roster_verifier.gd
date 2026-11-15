@@ -9,6 +9,9 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## Z5: Absicherung: Tote wuerden den Kader ungueltig machen (beide Truppfuehrer bzw. der Pilot): nichts wird entfernt.
 ## Z6: Verwundete und Tote im selben Ergebnis.   Z7: Totalverlust und Skirmish: niemand entfernt.   Z8: keine Toten: nichts aendert sich.
 ## Z9: Nachruecken ueberspringt Personen ohne Fuehrung, die vor dem Truppfuehrer im Kader stehen.
+## Z10: Geschuetzte Person (Anwerber) zusammen mit einer normalen Toten: die Geschuetzte ueberlebt schwer verwundet, die andere faellt.   Z11: Absicherung nur bei vorher gueltig, nachher ungueltig.
+## Z12: Nicht eintragbarer Eintrag: niemand wird entfernt.   Z13: Auftragsfracht der Toten bleibt, der Rest geht verloren.   Z14: Tote auch in der FOB-Liste: nach dem Auffrischen in keiner Definition.
+## Z15: Entfernen bei laufendem Einsatz und verdeckter Basisansicht.   Z16: Das Entfernen aendert den Fokus der Basisansicht nicht.
 ## Einzeln starten: Umgebungsvariable T6B_ONLY (zum Beispiel "Z4") oder Kommandozeilenargument nach "--" (zum Beispiel "-- Z4"); ohne Angabe laufen alle.
 
 const STORE_6B = preload("res://scripts/meta/campaign_checkpoint_store.gd")
@@ -24,7 +27,7 @@ const LOCATION_6B := "satellite_crash"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _t6b_selected()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -205,7 +208,9 @@ func _t6b_z1() -> void:
 	if not _check(not before.is_empty() and bool(STORE_6B.validate_payload(before).get("ok", false)), "Z1: Fixture: Stand mit vier Personen ist gueltig"): return
 	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B, SHOOTER_C], "Z1: Fixture: Kader A, Pilot, B, C (%s)" % [_t6b_roster_ids()])
 	_check(_t6b_payload_base_ids(before).size() == 4 and _t6b_base_ids().size() == 4, "Z1: Fixture: die Basis kennt alle vier (%s)" % [_t6b_base_ids()])
-	_check(not _t6b_where(before, SHOOTER_C).is_empty() and _t6b_where(before, SHOOTER_C).size() >= 8, "Z1: Fixture: C haengt an vielen Stellen (%s)" % [_t6b_where(before, SHOOTER_C)])
+	var places_before: Array = _t6b_where(before, SHOOTER_C)
+	var missing_places: Array = ["roster", "base_personnel", "craft.staged_unit_ids", "craft.member_loadouts", "supply.inventory", "flow._available_team_units", "base runtime", "flow._homebase_staged_unit_ids", "loadout state"].filter(func(place: String) -> bool: return not places_before.has(place))
+	_check(missing_places.is_empty() and places_before.any(func(place: String) -> bool: return place.begins_with("fireteam ")), "Z1: Fixture: C haengt an allen genannten Stellen, auch staged_unit_ids (fehlt: %s, alle: %s)" % [missing_places, places_before])
 	_check(Array(_t6b_team(before, _t6b_team_ids(before)[-1]).get("member_unit_ids", [])) == [SHOOTER_C], "Z1: Fixture: der zweite Trupp besteht nur aus C")
 	var states: Array = _t6b_states({SHOOTER_C: "down"})
 	var result: Dictionary = _t6b_result(states, "aborted")
@@ -219,7 +224,8 @@ func _t6b_z1() -> void:
 	_check(left.is_empty(), "Z1: C fehlt in Kader, Basis, staged_unit_ids, Trupps, Schiffsausruestung, Inventar und Flow (noch da: %s)" % [left])
 	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B], "Z1: Kader nun A, Pilot, B (%s)" % [_t6b_roster_ids()])
 	_check(_t6b_payload_base_ids(after).size() == 3 and _t6b_payload_base_ids(after) == _t6b_base_ids(), "Z1: Basis-Personalliste hat drei Personen und gleicht dem Stand")
-	_check(not _t6b_team_ids(after).has(_t6b_team_ids(before)[-1]) and _t6b_team_ids(after).size() == _t6b_team_ids(before).size() - 1, "Z1: der leere zweite Trupp ist aufgeloest (%s -> %s)" % [_t6b_team_ids(before), _t6b_team_ids(after)])
+	var emptied_team: Dictionary = _t6b_team(after, _t6b_team_ids(before)[-1])
+	_check(Array(emptied_team.get("member_unit_ids", ["x"])).is_empty() and String(emptied_team.get("lead_unit_id", "x")).is_empty(), "Z1: der zweite Trupp hat weder Mitglieder noch Lead (%s)" % [emptied_team])
 	var first_team: Dictionary = _t6b_team(after, _t6b_team_ids(before)[0])
 	_check(Array(first_team.get("member_unit_ids", [])) == [LEAD_A, LEAD_B] and String(first_team.get("lead_unit_id", "")) == LEAD_A, "Z1: erster Trupp unveraendert A (Lead) und B")
 	_check(Array(Array(after.get("craft", {}).get("staged_fireteam_ids", [])).filter(func(id): return not _t6b_team_ids(after).has(id))).is_empty(), "Z1: staged_fireteam_ids nennen nur vorhandene Trupps")
@@ -335,9 +341,11 @@ func _t6b_z5() -> void:
 	var pilot_dead: Dictionary = _t6b_result(_t6b_states({}), "aborted")
 	pilot_dead["fatality_unit_ids"] = PackedStringArray([PILOT_ID])
 	pilot_dead["casualties"] = [{"unit_id": PILOT_ID, "outcome": "dead"}]
-	_flow.call("_apply_campaign_casualties", pilot_dead)
-	_check(Array(_flow.get("_all_team_units")) == roster_before and Array(_runtime.call("get_fallen")).is_empty(), "Z5: Pilot tot: Kader und Liste unveraendert")
-	_check(_t6b_lock().is_empty(), "Z5: keine Sperre fuer jemanden, der nicht entfernt wurde")
+	var pilot_applied: Dictionary = _flow.call("_apply_campaign_casualties", pilot_dead)
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B, SHOOTER_C] and Array(_runtime.call("get_fallen")).is_empty(), "Z5: Pilot tot: niemand entfernt, Liste leer (geschuetzt, schwer verwundet geborgen)")
+	_check(String(_roster_unit(PILOT_ID).get("availability_status", "")) == "wounded" and String(Dictionary(_roster_unit(PILOT_ID).get("recovery_state", {})).get("severity", "")) == "severe", "Z5: der Pilot ist wounded (schwer)")
+	_check(_t6b_lock().has(PILOT_ID), "Z5: der Pilot steht in der Einsatzsperre (%s)" % [_t6b_lock()])
+	_check(PackedStringArray(pilot_applied.get("fatality_unit_ids", PackedStringArray(["x"]))).is_empty() and bool(_casualty_entry(pilot_applied, PILOT_ID).get("protected_from_death", false)), "Z5: das Ergebnis nennt den Piloten nicht mehr als gefallen, sondern geschuetzt")
 	# Kader aus nur zwei Personen: der Tod von A liesse unter zwei Personen fallen.
 	await _end_sortie()
 	if not await _t6b_open("campaign", "new"): return
@@ -421,3 +429,133 @@ func _t6b_z9() -> void:
 	_check(_t6b_roster_ids() == [LEAD_B, PILOT_ID, SHOOTER_C], "Z9: B (Fuehrung > 0) auf Platz 0, Pilot Platz 1, C uebersprungen (%s)" % [_t6b_roster_ids()])
 	var after: Dictionary = _t6b_payload()
 	_check(not after.is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)), "Z9: Stand gueltig")
+
+## Zwei Tote, davon einer geschuetzt (Anwerber des Marktes): Die Geschuetzte geht den Weg der Verwundeten, nur die andere faellt.
+func _t6b_z10() -> void:
+	if not await _t6b_new_four(): return
+	_runtime.get("_polisa_market").set("_recruiter_id", LEAD_B)
+	_check(bool(_runtime.call("is_person_protected_from_death", LEAD_B)) and not bool(_runtime.call("is_person_protected_from_death", SHOOTER_C)), "Z10: Fixture: B ist als Anwerber geschuetzt, C nicht")
+	var both: Dictionary = _t6b_result(_t6b_states({}), "aborted")
+	both["fatality_unit_ids"] = PackedStringArray([LEAD_B, SHOOTER_C])
+	both["casualties"] = [{"unit_id": LEAD_B, "outcome": "dead"}, {"unit_id": SHOOTER_C, "outcome": "dead"}]
+	var applied: Dictionary = _flow.call("_apply_campaign_casualties", both)
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B], "Z10: B bleibt im Kader, C ist entfernt (%s)" % [_t6b_roster_ids()])
+	var wounded: Dictionary = _roster_unit(LEAD_B)
+	_check(String(wounded.get("availability_status", "")) == "wounded" and String(Dictionary(wounded.get("recovery_state", {})).get("severity", "")) == "severe", "Z10: B ist wounded (schwer)")
+	_check(_t6b_lock().has(LEAD_B) and not _t6b_lock().has(SHOOTER_C), "Z10: Sperre fuer B, nicht fuer C (%s)" % [_t6b_lock()])
+	var fallen: Array = _runtime.call("get_fallen")
+	_check(fallen.size() == 1 and String(Dictionary(fallen[0]).get("unit_id", "")) == SHOOTER_C, "Z10: nur C steht in get_fallen() (%s)" % [fallen])
+	var entry_b: Dictionary = _casualty_entry(applied, LEAD_B)
+	_check(String(entry_b.get("outcome", "")) == "wounded" and String(entry_b.get("severity", "")) == "severe" and bool(entry_b.get("protected_from_death", false)), "Z10: Ergebnis zeigt B als verwundet (schwer) und geschuetzt (%s)" % [entry_b])
+	_check(String(entry_b.get("recovery_severity", "")) == "severe" and float(entry_b.get("recovery_seconds_remaining", 0.0)) > 0.0, "Z10: Ergebnis traegt die recovery_*-Felder von B")
+	_check(PackedStringArray(applied.get("fatality_unit_ids", PackedStringArray())) == PackedStringArray([SHOOTER_C]) and String(_casualty_entry(applied, SHOOTER_C).get("outcome", "")) == "dead", "Z10: fatality_unit_ids enthaelt nur C")
+	var after: Dictionary = _t6b_payload()
+	_check(not after.is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)) and _t6b_where(after, SHOOTER_C).is_empty(), "Z10: Stand gueltig, C ueberall weg")
+
+## Die Absicherung greift nur, wenn der Kader vorher gueltig war. War er schon ungueltig, wird normal entfernt.
+func _t6b_z11() -> void:
+	if not await _t6b_new_four(): return
+	var broken: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	for index in range(broken.size()):
+		if String(Dictionary(broken[index]).get("unit_id", "")) == PILOT_ID:
+			var unit: Dictionary = broken[index]
+			unit["roster_role_category"] = "operator"
+			broken[index] = unit
+	_flow.set("_all_team_units", broken)
+	_check(not bool(STORE_6B.validate_payload(_t6b_payload()).get("ok", true)), "Z11: Fixture: der Kader ist vorher schon ungueltig (Platz 1 ist kein Pilot)")
+	var applied: Dictionary = _flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B], "Z11: vorher ungueltig: C wird trotzdem normal entfernt (%s)" % [_t6b_roster_ids()])
+	_check(Array(_runtime.call("get_fallen")).size() == 1 and PackedStringArray(applied.get("fatality_unit_ids", PackedStringArray())) == PackedStringArray([SHOOTER_C]), "Z11: C steht in der Gefallenenliste")
+	# Gegenprobe: vorher gueltig, nachher ungueltig (beide Truppfuehrer) bleibt gesperrt (siehe Z5).
+	await _end_sortie()
+	if not await _t6b_new_four(): return
+	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var both: Dictionary = _t6b_result(_t6b_states({}), "aborted")
+	both["fatality_unit_ids"] = PackedStringArray([LEAD_A, LEAD_B])
+	both["casualties"] = [{"unit_id": LEAD_A, "outcome": "dead"}, {"unit_id": LEAD_B, "outcome": "dead"}]
+	_flow.call("_apply_campaign_casualties", both)
+	_check(Array(_flow.get("_all_team_units")) == roster_before and Array(_runtime.call("get_fallen")).is_empty(), "Z11: vorher gueltig, nachher ungueltig: nichts entfernt")
+
+## Kann ein Eintrag nicht in die Gefallenenliste, wird fuer diesen Einsatz niemand entfernt.
+func _t6b_z12() -> void:
+	if not await _t6b_new_four(): return
+	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var base_before: Array = _t6b_base_ids()
+	var real_runtime: Node = _runtime
+	var proxy_script := GDScript.new()
+	proxy_script.source_code = "extends Node\nfunc validate_fallen_entry(entry):\n\treturn {\"ok\": false, \"reason\": \"test_reject\"}\nfunc record_fallen(entry):\n\treturn {\"ok\": false, \"reason\": \"test_reject\"}\nfunc is_person_protected_from_death(unit_id):\n\treturn false\n"
+	proxy_script.reload()
+	var proxy := Node.new()
+	proxy.set_script(proxy_script)
+	_flow.set("_singleplayer_runtime", proxy)
+	var dead_c: Dictionary = _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted")
+	_flow.call("_remove_campaign_fatalities", PackedStringArray([SHOOTER_C]), dead_c)
+	_flow.set("_singleplayer_runtime", real_runtime)
+	proxy.free()
+	_check(Array(_flow.get("_all_team_units")) == roster_before and _t6b_base_ids() == base_before and Array(real_runtime.call("get_fallen")).is_empty(), "Z12: Eintrag nicht moeglich: Kader, Basis und Liste unveraendert")
+	var after: Dictionary = _t6b_payload()
+	_check(not _t6b_where(after, SHOOTER_C).is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)), "Z12: C haengt weiter an allen Stellen, Stand gueltig")
+
+## Auftragsfracht im Rucksack der Toten bleibt (Basislager), alles andere geht verloren.
+func _t6b_z13() -> void:
+	if not await _t6b_new_four(): return
+	var supply: RefCounted = _runtime.get("_supply")
+	Dictionary(Dictionary(supply.get("_inventory"))["unit:%s:backpack" % SHOOTER_C]["items"])["satellite_chip"] = 1
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	var exported: Dictionary = Dictionary(supply.call("export_state"))
+	var quantities: Dictionary = Dictionary(exported.get("item_quantities", {}))
+	_check(int(quantities.get("satellite_chip", 0)) == 1, "Z13: die Auftragsfracht (satellite_chip) liegt im Basislager (%s)" % [quantities])
+	_check(not quantities.has("mining_tool") and not Dictionary(exported.get("inventory", {})).has("unit:%s:backpack" % SHOOTER_C), "Z13: der uebrige Rucksackinhalt (mining_tool) ist weg, der Rucksack auch")
+	var direct: Dictionary = Dictionary(supply.call("discard_person_equipment", SHOOTER_C))
+	_check(bool(direct.get("ok", false)) and int(direct.get("discarded", -1)) == 0 and Array(direct.get("kept_quest_items", ["x"])).is_empty(), "Z13: ein zweiter Aufruf ist harmlos (%s)" % [direct])
+
+## Eine Tote steht zusaetzlich in einem Trupp der FOB-Liste: nach dem Auffrischen in keiner Definition.
+func _t6b_z14() -> void:
+	if not await _t6b_new_four(): return
+	var fob: Node = _flow.call("_get_fob_screen")
+	if not _check(fob != null, "Z14: Fixture: FOB-Ansicht ist da"): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	fob.set("_fireteam_definitions", [
+		{"id": team_ids[0], "label": "Eins", "lead_unit_id": LEAD_A, "member_unit_ids": PackedStringArray([LEAD_A, SHOOTER_C]), "member_loadouts": {}},
+		{"id": team_ids[-1], "label": "Zwei", "lead_unit_id": SHOOTER_C, "member_unit_ids": PackedStringArray([SHOOTER_C]), "member_loadouts": {SHOOTER_C: {}}}])
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	_flow.call("_refresh_homebase_screen")
+	var still: Array = []
+	for source: String in ["flow", "homebase"]:
+		var definitions: Array = Array(_flow.call("_campaign_fob_fireteam_definitions", fob)) if source == "flow" else Array(_screen.call("_get_fireteam_definitions_snapshot"))
+		for definition: Dictionary in definitions:
+			if JSON.stringify(definition).contains(SHOOTER_C):
+				still.append("%s %s" % [source, definition.get("id")])
+	_check(still.is_empty(), "Z14: nach dem Auffrischen steht C in keiner Definition (noch da: %s)" % [still])
+	var after: Dictionary = _t6b_payload()
+	_check(_t6b_where(after, SHOOTER_C).is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)), "Z14: auch im Checkpoint ist C weg, Stand gueltig")
+	var kept: Array = Array(_flow.call("_campaign_fob_fireteam_definitions", fob)).filter(func(definition: Dictionary) -> bool: return String(definition.get("id", "")) == team_ids[0])
+	_check(kept.size() == 1 and Array(Dictionary(kept[0]).get("member_unit_ids", [])) == [LEAD_A] and String(Dictionary(kept[0]).get("lead_unit_id", "")) == LEAD_A, "Z14: der erste Trupp der FOB-Liste behaelt A als Mitglied und Lead")
+
+## Laeuft ein Einsatz und ist die Basisansicht verdeckt, wird trotzdem bereinigt (Ansicht und Checkpoint).
+func _t6b_z15() -> void:
+	if not await _t6b_new_four(): return
+	var dummy := Node.new()
+	_flow.set("_active_mission", dummy)
+	_screen.visible = false
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	_flow.set("_active_mission", null)
+	_screen.visible = true
+	dummy.free()
+	var after: Dictionary = _t6b_payload()
+	_check(not after.is_empty() and _t6b_where(after, SHOOTER_C).is_empty(), "Z15: bei laufendem Einsatz und verdeckter Ansicht: C in keiner Definition, keinem Checkpoint (noch da: %s)" % [_t6b_where(after, SHOOTER_C)])
+	_check(not after.is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)), "Z15: Stand gueltig")
+	var emptied: Dictionary = _t6b_team(after, _t6b_team_ids(after)[-1])
+	_check(not JSON.stringify(Array(_screen.call("_get_fireteam_definitions_snapshot"))).contains(SHOOTER_C) and Array(emptied.get("member_unit_ids", ["x"])).is_empty(), "Z15: auch die Definitionen der Basisansicht kennen C nicht mehr")
+
+## Das Entfernen wechselt den Fokus der Basisansicht nicht.
+func _t6b_z16() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	# Fokus auf den betroffenen Trupp, die fokussierte Person ueberlebt (eine fokussierte Tote muss der Ansicht ohnehin weichen).
+	_screen.set("_focused_fireteam_id", team_ids[-1])
+	_screen.set("_focused_unit_id", LEAD_A)
+	var focus_before: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id"), _screen.get("_loadout_staged_fireteam_id")]
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	var focus_after: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id"), _screen.get("_loadout_staged_fireteam_id")]
+	_check(focus_before == focus_after, "Z16: Fokus vorher == nachher (%s -> %s)" % [focus_before, focus_after])
