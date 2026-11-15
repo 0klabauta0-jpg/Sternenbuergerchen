@@ -207,4 +207,40 @@ Schritte 1.4, 5.3, 6.1. Der Hauptchat laesst danach dieselbe Liste auf dem Windo
 - Die Haltungs- und Feuerregel-Bedienung wandert aus der Karte ins Band; gleiche Knoepfe, anderer Ort.
 
 ## Ergebnis
-(wird vom Hilfsagenten gefuellt)
+Verifier `mission_a5_dichte_verifier`: `MISSION_A5_DICHTE: 157 passed, 0 failed`.
+
+### Gemessene Rechtecke 1920 x 1080 (docs/qa/mission_a5_20261115/rechtecke_1920x1080.txt)
+```
+TacticalUI/BottomDock	[P: (0.0, 928.0), S: (1920.0, 152.0)]
+FireteamPanel	[P: (16.0, 780.0), S: (312.0, 136.0)]
+FireteamMiniPanel	[P: (16.0, 288.0), S: (328.0, 480.0)]
+A5TargetOrderPanel	[P: (376.0, 928.0), S: (320.0, 152.0)]
+MissionIdentityPanel	[P: (1124.0, 16.0), S: (440.0, 64.0)]
+MissionDropshipPanel	[P: (1592.0, 16.0), S: (312.0, 92.0)]
+MissionDropshipPanel/CompactCard	[P: (1592.0, 16.0), S: (312.0, 92.0)]
+TacticalEventLogPanel	[P: (1592.0, 792.0), S: (312.0, 120.0)]
+```
+Zielwerte: FireteamPanel 312 x 136, Dropship-Karte 312 breit (hoehe 92, Grenze 196), Identity 440 x 64, Protokoll 312 x 120, Band 152 hoch.
+
+### Bestandstests (vorher -> nachher, 38 Tests)
+Bestanden 9 -> 11. Zeilen mit Unterschied:
+- playtest_20261105_mission_hud_groups_verifier: 225 passed / 6 failed -> 231 / 0
+- ui_mission_r2_verifier: 1 failure -> 0 (Aufgabe "Band nutzt nur noetige Hoehe" besteht jetzt)
+- ui_a5_native_hud_verifier: 24 -> 22 failures
+- ui_a5_reference_groups_verifier: 102 passed / 10 failed -> 108 / 4
+Keine neuen Fehlschlaege in vorher fehlgeschlagenen Tests (Fehlerzeilen verglichen).
+
+### Testanpassungen
+- playtest_20261105_mission_hud_groups_verifier.gd Z.17: 300/336/400 -> 280/312/376 (a); Z.92 `>= 80` -> `>= 48` (b, Schiffsbild).
+- compact_fireteam_card_verifier.gd Z.34: `<=64` -> `<=96` (b, Portraithoehe gross); Z.38 Aufsitzen-Knopf: Erwartung "in Truppkarte" -> "in team_parameters und BottomDock" (c).
+- ui_mission_r2_verifier.gd Z.55: Selector "in Truppkarte" -> "in team_parameters und BottomDock" (c).
+- ui_a5_reference_groups_verifier.gd Z.82: Statusschrift `>= 14` -> `>= 13` (b, body-1 in klein); Z.177/178: Titel "zwei Zeilen" -> "eine Zeile" (b).
+
+### Abweichungen vom Plan
+- Zeilenabstand im Band-Modul (Nachbesserung Hauptchat): Der Haltungsrahmen hat im lebenden HUD Mindesthoehe 44 (1080) / 47 (1440), also ueberdeckte schon Hoehe 40 die Feuerregel-Zeile. Statt i+72: `TacticalStancePanel` Groesse (336, 48), `A5FireRuleHeading`/`A5FireRuleSelector` bei i+82, `A5BoardStatus` i+66. Tabelle B oben entsprechend geaendert.
+- Protokoll: `task_627` verlangt Rasterlage von `event_log` (Vielfache von 8); mit Abstand 12 liegt y bei 796 (nicht auf Raster). Abstand ist jetzt 16 fuer klein und mittel (y 472 / 792), 12 bleibt fuer gross (y 1096). Verifier entsprechend angepasst.
+- Auswahlfeld `CraftSelector`: Schrift `body - 1` fuer alle Stufen (Tabelle nennt sie nur in "klein").
+- Die tatsaechliche Mindesthoehe einiger Knoepfe liegt 3 px ueber der Platzierung (Selector/Board 31 statt 28); innerhalb der Toleranz der Pruefungen.
+- Schritt 5.2 musste nicht angewendet werden (Protokoll, Dropship-Breite, Hoehe 92 innerhalb der Grenzen).
+- Testszene zeigt Dropship-Karte ohne Schiff ("Kein Dropship"): Schiffsbild und Anflugrad nicht im Bild geprueft.
+

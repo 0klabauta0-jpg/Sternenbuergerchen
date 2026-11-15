@@ -12177,3 +12177,4 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Kompakte NPC-Karten koennen per Doppelklick weiter das Character Sheet anfordern, auch wenn sie fuer Staging-/Transit-Zustaende optisch disabled sind.
 - Risiken: Die FOB-UI bleibt Staging-/Darstellungsschicht; Transport-, Respawn- und Fireteam-Zustand duerfen nicht als zweite Gameplay-Wahrheit in den Karten landen. Der finale FullHD-Sichtcheck der kompakten Karten bleibt offen.
 - Lokale Pruefung: `task_316_fob_fireteam_staging_migration.gd`, `task_309_fireteam_assignment_board_compact_frames.gd` und `git diff --check` laufen gruen.
+15.11.2026 Missionsansicht an A5 angeglichen (P7), siehe docs/tasks/MISSION_HUD_A5_ANGLEICHUNG_2026_11_15.md
