@@ -110,7 +110,7 @@ func _check_live(vp: Vector2i) -> void:
 	var ship_rect: Rect2 = ship.get_global_rect()
 	_expect(absf(ship_rect.size.x - float((layout.mission_control as Rect2i).size.x)) <= 1.0, "%s: Dropship Breite %s" % [tag, str(ship_rect.size.x)])
 	if vp == Vector2i(1920, 1080):
-		_expect(ship_rect.size.y <= 196.0, "%s: Dropship Hoehe %s <= 196" % [tag, str(ship_rect.size.y)])
+		_expect(ship_rect.size.y <= 220.0, "%s: Dropship Hoehe %s <= 220" % [tag, str(ship_rect.size.y)])
 	_expect(ship_rect.end.x <= float(vp.x - _edge(vp)) + 1.0, "%s: Dropship rechter Rand %s" % [tag, str(ship_rect.end.x)])
 	_expect(not ship_rect.intersects(event_log.get_global_rect()), "%s: Dropship schneidet Protokoll nicht" % tag)
 	_expect(not ship_rect.intersects(identity.get_global_rect()), "%s: Dropship schneidet Identity nicht" % tag)

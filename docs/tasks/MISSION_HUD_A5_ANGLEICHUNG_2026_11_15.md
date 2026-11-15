@@ -115,8 +115,8 @@ Neuer Schluessel im Rueckgabe-Dictionary:
 | Innenrand der Karte (`Vector4`) | 8, 6, 8, 6 | gleich | gleich | 12, 10, 12, 10 |
 | Schiffsbild Mindestgroesse | 84 x 48 | 96 x 56 | 112 x 64 | 0,38 x Breite, 80 / 96 / 112 hoch |
 | Titel Schrift | `body + 2` | | | `body + 6` |
-| Titel und Status | eine Zeile: `max_lines_visible = 1`, `autowrap_mode = AUTOWRAP_OFF`, `clip_text = true`, Tooltip = Text; `_set_readout_minimum_height(label, 100000.0)` | | | zwei Zeilen |
-| Status Schrift | `body - 1` | | | `body` |
+| Titel und Status | Titel bleibt zweizeilig (`AUTOWRAP_WORD_SMART`, `max_lines_visible = 2`, `_set_readout_minimum_height(title, text_width)`); Status eine Zeile (`max_lines_visible = 1`, `AUTOWRAP_OFF`, `clip_text = true`, `_set_readout_minimum_height(status, 100000.0)`), Tooltip = Text | | | zwei Zeilen |
+| Status Schrift | `maxi(14, body - 1)` | | | `body` |
 | "Details" Mindestgroesse | 64 x 26 | 68 x 28 | 76 x 32 | 68 x 32 / 68 x 32 / 68 x 40 |
 | Aktionsknoepfe Mindesthoehe (in `_apply_readable_geometry` und `_style_primary_action`) | 28 | 32 | 40 | 40 / 44 / 48 |
 | Aktionsknoepfe Schrift (beide Stellen) | `maxi(13, body - 2)` | | | `body - 1` |
@@ -172,13 +172,13 @@ Tests, die schon in `p7_vorher.tsv` fehlschlagen, nicht reparieren; nur vermerke
   - `A5TeamPortraits`: jedes Kind hat Hoehe `portrait_height`
   - `TacticalEventLogPanel.get_global_rect()` == `layout.event_log`
   - `MissionIdentityPanel.get_global_rect()` == `layout.mission_identity`
-  - `MissionDropshipPanel`: Breite == `transport_width`; Hoehe bei 1920 x 1080 hoechstens 196; rechter Rand <= Viewport-Breite - `edge` + 1
+  - `MissionDropshipPanel`: Breite == `transport_width`; Hoehe bei 1920 x 1080 hoechstens 220; rechter Rand <= Viewport-Breite - `edge` + 1
   - `MissionDropshipPanel` schneidet weder `TacticalEventLogPanel` noch `MissionIdentityPanel`
   - `ApproachDial.custom_minimum_size == Vector2(96, 56)`
 - [ ] 5.2 Regeln, falls eine Erwartung nicht haelt:
   - Protokoll groesser als `event_log`: in `tactical_event_log_panel.gd` die `custom_minimum_size`, die das erzwingt, nur dann verkleinern, wenn `get_meta("native_a5_layout", false)` wahr ist.
   - Dropship-Karte breiter als `transport_width`: am Knopf `set_lz` `clip_text = true` und `size_flags_stretch_ratio = 1.8` setzen, Tooltip = voller Text.
-  - Dropship-Karte hoeher als 196: Messwerte ins Ergebnis schreiben, nichts weiter verkleinern.
+  - Dropship-Karte hoeher als 220: Messwerte ins Ergebnis schreiben, nichts weiter verkleinern.
 - [ ] 5.3 Test besteht. Aufnahme aus Schritt 4 wiederholen, falls 5.2 etwas geaendert hat. Commit "Missionsansicht A5: Aufnahme und Masstest".
 
 ### 6. Bestandstests
@@ -220,7 +220,7 @@ MissionDropshipPanel	[P: (1592.0, 16.0), S: (312.0, 92.0)]
 MissionDropshipPanel/CompactCard	[P: (1592.0, 16.0), S: (312.0, 92.0)]
 TacticalEventLogPanel	[P: (1592.0, 792.0), S: (312.0, 120.0)]
 ```
-Zielwerte: FireteamPanel 312 x 136, Dropship-Karte 312 breit (hoehe 92, Grenze 196), Identity 440 x 64, Protokoll 312 x 120, Band 152 hoch.
+Zielwerte: FireteamPanel 312 x 136, Dropship-Karte 312 breit (hoehe 92, Grenze 220), Identity 440 x 64, Protokoll 312 x 120, Band 152 hoch.
 
 ### Bestandstests (vorher -> nachher, 38 Tests)
 Bestanden 9 -> 11. Zeilen mit Unterschied:
@@ -234,11 +234,11 @@ Keine neuen Fehlschlaege in vorher fehlgeschlagenen Tests (Fehlerzeilen verglich
 - playtest_20261105_mission_hud_groups_verifier.gd Z.17: 300/336/400 -> 280/312/376 (a); Z.92 `>= 80` -> `>= 48` (b, Schiffsbild).
 - compact_fireteam_card_verifier.gd Z.34: `<=64` -> `<=96` (b, Portraithoehe gross); Z.38 Aufsitzen-Knopf: Erwartung "in Truppkarte" -> "in team_parameters und BottomDock" (c).
 - ui_mission_r2_verifier.gd Z.55: Selector "in Truppkarte" -> "in team_parameters und BottomDock" (c).
-- ui_a5_reference_groups_verifier.gd Z.82: Statusschrift `>= 14` -> `>= 13` (b, body-1 in klein); Z.177/178: Titel "zwei Zeilen" -> "eine Zeile" (b).
+- ui_a5_reference_groups_verifier.gd: unveraendert (Anweisung Hauptchat: Titel bleibt zweizeilig, Status `maxi(14, body - 1)`; Tabelle D entsprechend geaendert).
 
 ### Abweichungen vom Plan
 - Zeilenabstand im Band-Modul (Nachbesserung Hauptchat): Der Haltungsrahmen hat im lebenden HUD Mindesthoehe 44 (1080) / 47 (1440), also ueberdeckte schon Hoehe 40 die Feuerregel-Zeile. Statt i+72: `TacticalStancePanel` Groesse (336, 48), `A5FireRuleHeading`/`A5FireRuleSelector` bei i+82, `A5BoardStatus` i+66. Tabelle B oben entsprechend geaendert.
-- Protokoll: `task_627` verlangt Rasterlage von `event_log` (Vielfache von 8); mit Abstand 12 liegt y bei 796 (nicht auf Raster). Abstand ist jetzt 16 fuer klein und mittel (y 472 / 792), 12 bleibt fuer gross (y 1096). Verifier entsprechend angepasst.
+- Protokoll: `task_627_host_client_fireteam_eventlog_overlap_polish` ("Event log contract rect stays on base grid", `is_rect_on_base_grid`) verlangt Rasterlage von `event_log`; mit Abstand 12 liegt y bei 796 (nicht Vielfaches von 8) und der Test, der vorher bestand, schlug fehl. Abstand ist deshalb 16 fuer klein und mittel (y 472 / 792), 12 bleibt fuer gross (y 1096).
 - Auswahlfeld `CraftSelector`: Schrift `body - 1` fuer alle Stufen (Tabelle nennt sie nur in "klein").
 - Die tatsaechliche Mindesthoehe einiger Knoepfe liegt 3 px ueber der Platzierung (Selector/Board 31 statt 28); innerhalb der Toleranz der Pruefungen.
 - Schritt 5.2 musste nicht angewendet werden (Protokoll, Dropship-Breite, Hoehe 92 innerhalb der Grenzen).

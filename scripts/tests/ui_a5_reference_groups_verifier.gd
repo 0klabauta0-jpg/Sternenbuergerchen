@@ -79,7 +79,7 @@ func _check_scene(size: Vector2i) -> void:
 	var transport := scene.get_node("TacticalUI/MissionDropshipPanel") as Control
 	_check(transport.visible and transport.size.x <= 280 and transport.get_global_rect().position.y <= 24, prefix + "dropship primary is a compact upper-right card")
 	var state := transport.get_node("CompactCard/Contents/Header/Identity/A5TransportState") as Label
-	_check(state.is_visible_in_tree() and not state.text.is_empty() and state.get_theme_font_size("font_size") >= 13, prefix + "primary transport state remains readable")
+	_check(state.is_visible_in_tree() and not state.text.is_empty() and state.get_theme_font_size("font_size") >= 14, prefix + "primary transport state remains readable")
 	_check_compact_readout(transport, prefix)
 	for action in ["set_lz", "drop"]:
 		var button := transport.get_node("CompactCard/Contents/Actions/" + action) as Button
@@ -174,8 +174,8 @@ func _check_transport_modal_actions(size: Vector2i) -> void:
 	_check(float(popup.size.y) - full.get_global_rect().end.y <= 24, "%s: single-craft popup ends near its actual detail content instead of leaving a fixed empty lower half" % size)
 	var title := transport.get_node("CompactCard/Contents/Header/Identity/A5TransportHeading") as Label
 	_check(title.text.contains("Cutlass") and title.text.ends_with("A5 UI fixture"), "%s: the known mission transport role retains its Cutlass class and the original player caption" % size)
-	var two_lines := title.get_visible_line_count() == 1 and title.custom_minimum_size.y >= 1 * ceilf(title.get_theme_font("font").get_height(title.get_theme_font_size("font_size")))
-	_check(two_lines, "%s: the real long class/name caption retains one drawable font line" % size)
+	var two_lines := title.get_visible_line_count() == 2 and title.custom_minimum_size.y >= 2 * ceilf(title.get_theme_font("font").get_height(title.get_theme_font_size("font_size")))
+	_check(two_lines, "%s: the real long class/name caption retains two drawable font lines" % size)
 	if not two_lines:
 		print("A5_CAPTION_DIAGNOSTIC ", JSON.stringify({"viewport": str(size), "text": title.text, "rect": str(title.get_global_rect()), "minimum": str(title.get_combined_minimum_size()), "custom_minimum": str(title.custom_minimum_size), "font_size": title.get_theme_font_size("font_size"), "text_width": title.get_theme_font("font").get_string_size(title.text, HORIZONTAL_ALIGNMENT_LEFT, -1, title.get_theme_font_size("font_size")).x, "line_count": title.get_line_count(), "visible_line_count": title.get_visible_line_count(), "metric_signature": str(title.get_meta("native_a5_readout_metrics", [])), "source_cards": controller.call("_get_mission_dropship_card_entries")}))
 	var lz: Button = null

@@ -54,8 +54,8 @@ static func ensure(controller: Node) -> Control:
 			var label := Label.new()
 			label.name = spec[0]
 			label.clip_text = true
-			label.autowrap_mode = TextServer.AUTOWRAP_OFF
-			label.max_lines_visible = 1
+			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if String(spec[0]) == "A5TransportHeading" else TextServer.AUTOWRAP_OFF
+			label.max_lines_visible = 2 if String(spec[0]) == "A5TransportHeading" else 1
 			label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			identity.add_child(label)
@@ -212,12 +212,19 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	ship.visible = ship.texture != null
 	# Wrapped, clipped Labels report a 1px native minimum. Reserve actual font
 	# lines independently of the ship image, including the no-transport state.
-	# One line each (clipped, full text in the tooltip): width never wraps.
-	for one_line in [title, status]:
-		one_line.max_lines_visible = 1
-		one_line.autowrap_mode = TextServer.AUTOWRAP_OFF
-		one_line.clip_text = true
-		_set_readout_minimum_height(one_line, 100000.0)
+	# Title keeps two wrapped lines (long craft names); status is one clipped line.
+	var header := card.get_node("Contents/Header") as HBoxContainer
+	var details := header.get_node("DetailsButton") as Button
+	var text_width := float(rect.size.x) - card.get_theme_stylebox("panel").get_minimum_size().x - details.get_combined_minimum_size().x - header.get_theme_constant("separation")
+	if ship.visible:
+		text_width -= ship.get_combined_minimum_size().x + header.get_theme_constant("separation")
+	title.max_lines_visible = 2
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_set_readout_minimum_height(title, text_width)
+	status.max_lines_visible = 1
+	status.autowrap_mode = TextServer.AUTOWRAP_OFF
+	status.clip_text = true
+	_set_readout_minimum_height(status, 100000.0)
 	title.tooltip_text = title.text
 	var landed: bool = not selected_card.is_empty() and bool(controller.call("_is_parked_campaign_dropship", craft_id))
 	for action in ["set_lz", "drop", "board", "return"]:
@@ -280,7 +287,7 @@ static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics
 	details.custom_minimum_size = [Vector2(64, 26), Vector2(68, 28), Vector2(76, 32)][tier]
 	details.add_theme_font_size_override("font_size", font_size - 1)
 	var status := card.get_node("Contents/Header/Identity/A5TransportState") as Label
-	THEME.style_label(status, false, font_size - 1)
+	THEME.style_label(status, false, maxi(14, font_size - 1))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	THEME.style_label(feedback, false, maxi(13, font_size - 2))
 	var approach_heading := card.get_node("Contents/ApproachRow").get_child(0) as Label
