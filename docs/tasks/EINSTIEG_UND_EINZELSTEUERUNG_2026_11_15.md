@@ -89,3 +89,11 @@ Das Prüfskript `playtest_l03_boarding_repro_verifier.gd` spielt S1 bis S5 mit d
 - **Bekannte Schwäche:** Ein Rechtsklick auf das Schiff in den ersten rund zwei Sekunden nach dem Absitzen kann mit `movement_controller_start_failed` abgelehnt werden, solange der Pilot noch vom Schiff wegläuft. Ob das auch den Knopf „Aufsitzen“ betrifft, ist nicht untersucht.
 - **Nur Einzelspiel:** Ein verbundener Mehrspieler-Client bekommt die Meldung „Einzelsteuerung gibt es im Mehrspieler noch nicht“.
 - **Offen:** Paket C2 (nehmen und benutzen), Freigabe im Mehrspieler, gezieltes Feuer auf eine bestimmte Person.
+
+
+## Nachtrag: auf `main` gebracht (15.11.2026, 12:00)
+
+- Vor dem Merge neu auf `main` `40ea8d106` aufgesetzt (Missionsansicht A5, schwere Rüstung R09 und R10 des Grafik-Strangs). Einzige gemeinsame Datei: der Missionscontroller; Git hat ohne Konflikt zusammengeführt.
+- Auf dem zusammengeführten Stand gelaufen: `playtest_l03_right_click_boarding_verifier` 68 / 0, `playtest_l03_boarding_repro_verifier` 44 / 0, `bugfix_mission_right_click_order_flow` 21 / 0, `compact_fireteam_card_verifier` 41 / 0, `mission_a5_dichte_verifier` Exit 0, `playtest_hit_area_audit_verifier` 4395 Prüfungen und `failed=0`, `campaign_two_moon_roundtrips_real_verifier` 83 / 0.
+- `playtest_direct_unit_control_verifier` meldete auf dem zusammengeführten Stand einmal 96 / 2 (Szene „DC-replace“). Ursache lag im Prüfskript: Der zweite Befehl kam nach einer festen Wartezeit von einer Spielsekunde, und genau dann erreichte die Person das erste Ziel. Je nach Abfragezeitpunkt war der erste Befehl schon erledigt (und wurde zu Recht gemeldet) statt ersetzt. Das Skript wartet jetzt, bis die Person unterwegs ist (mindestens ein Feld gelaufen, noch mehr als drei Felder vom ersten Ziel), und prüft das ausdrücklich. Danach dreimal hintereinander 97 / 0. Am Spielcode wurde dafür nichts geändert.
+- Die Meldung „Absitzen läuft noch“ steht weiter in `A5BoardStatus`; der Knoten liegt seit A5 im Befehlsband unten.

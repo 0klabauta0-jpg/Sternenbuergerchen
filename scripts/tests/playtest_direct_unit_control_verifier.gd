@@ -341,8 +341,13 @@ func _scene_replace_and_rejoin_early() -> void:
 	var first: Vector2 = _far_target(10.0)
 	var second: Vector2 = _far_target(6.0, first)
 	var events_before: int = _event_count()
+	var replace_start: Vector2 = _grid_pos(PILOT_ID)
 	await _right_click(_screen_of(first))
-	await _wait_scene(Callable(self, "_never"), 1.0)
+	# The second order has to come while the person is under way. A fixed wait
+	# ended right at the arrival at the first target, so the first order was
+	# sometimes already completed (and rightly reported) instead of replaced.
+	var under_way: float = await _wait_scene(func() -> bool: return replace_start.distance_to(_grid_pos(PILOT_ID)) >= _tile_size and _dist_to(PILOT_ID, first) > _tile_size * 3.0, 10.0)
+	_check(under_way >= 0.0 and not _at(PILOT_ID, first), "DC-replace the second order comes while the person is still on its way (%.0f to the first target, tile %.0f)" % [_dist_to(PILOT_ID, first), _tile_size])
 	await _right_click(_screen_of(second))
 	_check(_event_count() == events_before, "DC-replace the replaced direct order emits nothing")
 	var arrived: float = await _wait_scene(func() -> bool: return _at(PILOT_ID, second), 120.0)
