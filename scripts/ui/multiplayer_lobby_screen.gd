@@ -1342,7 +1342,7 @@ func _ensure_world_runtime() -> void:
 	_world_open_map_option = OptionButton.new()
 	_world_open_map_option.custom_minimum_size.x = 180
 	row.add_child(_world_open_map_option)
-	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").playable_paths():
+	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").selectable_paths():
 		_world_open_map_option.add_item(path.get_file().get_basename())
 		_world_open_map_option.set_item_metadata(_world_open_map_option.item_count - 1, path)
 	_world_open_button = Button.new()
@@ -1637,7 +1637,7 @@ func _populate_map_options() -> void:
 	if _map_option == null:
 		return
 	_map_option.clear()
-	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").playable_paths():
+	for path: String in preload("res://scripts/mission/productive_ground_maps.gd").selectable_paths():
 		_map_option.add_item(path.get_file().get_basename())
 		_map_option.set_item_metadata(_map_option.item_count - 1, path)
 	if _map_option.item_count <= 0:

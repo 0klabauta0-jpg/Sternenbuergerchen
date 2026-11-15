@@ -18,6 +18,12 @@ const PLAYABLE: PackedStringArray = [
 	"res://maps/test_mission.json",
 	"res://maps/test_mission_32x32_slots8.json",
 ]
+## Old-style test maps: stay on disk and loadable (tests, editor, multiplayer
+## runtime validation) but are not offered in player-facing map pickers.
+const TEST_ONLY: PackedStringArray = [
+	"res://maps/station_outpost_64x64.json",
+	"res://maps/station_outpost_192x192.json",
+]
 const BASES: PackedStringArray = [
 	"res://maps/campaign_intro_base.json",
 	"res://maps/homebase_frontier_exploration.json",
@@ -47,4 +53,11 @@ static func playable_paths() -> PackedStringArray:
 		if not filename.ends_with(".json") or paths.has(path) or BASES.has(path) or is_historical_fixture(path): continue
 		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if data is Dictionary and data.get("tiles") is Array and not data.tiles.is_empty() and data.get("grid_size") is Dictionary: paths.append(path)
+	return paths
+
+## What the player may pick in lobby / open-location lists (playable_paths minus test-only maps).
+static func selectable_paths() -> PackedStringArray:
+	var paths := PackedStringArray()
+	for path: String in playable_paths():
+		if not TEST_ONLY.has(path): paths.append(path)
 	return paths

@@ -3,6 +3,7 @@
 ### Schwere Ruestung R08 aus Skriptquelle - 15.11.2026
 
 Task `docs/tasks/RUESTUNG_SCHWER_R08_2026_11_15.md`. Neue schwere Ruestungsteile aus `art/ruestung_schwer_r08_20261115/build_parts.py` in `Assets/curated/personnel/armor_r08_schwer_20261115/` (gleiche Dateinamen), `personnel_armor_visual.gd` laedt sie nur fuer "heavy"; leicht/mittel unveraendert. Vergleich: `docs/qa/ruestung_vergleich_20261115/vergleich_heavy_r08.jpg`.
+- 15.11.2026 Heimatbasis-Pads erhoeht, alte Stationskarten aus der Spielerauswahl: Landeplaetze der Heimatbasis stehen wie auf den Missionskarten `PAD_DECK_TOP` (0.12) ueber dem Boden; Schiffe, Personen und Avatar im Pad-Rechteck werden nur zur Anzeige um denselben Betrag angehoben (Pad-Daten, Navigation, Klickebene unveraendert). `station_outpost_64x64`/`192x192` sind ueber `ProductiveGroundMaps.TEST_ONLY` / `selectable_paths()` aus den Lobby-Kartenlisten genommen, bleiben auf der Platte und laden weiter. Offen: `HOMEBASE_MISSION_CATALOG` bietet weiter Frontier-Probe-Missionen auf der 192er-Karte an. Task: `docs/tasks/HEIMATBASIS_PADS_TESTKARTEN_2026_11_15.md`, Verifier: `homebase_pads_testmaps_verifier`.
 
 ### Flugabwehr am echten Landeanflug angeschlossen - 14.11.2026
 

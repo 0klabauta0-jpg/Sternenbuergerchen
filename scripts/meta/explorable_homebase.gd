@@ -19,6 +19,7 @@ const AVATAR_SCRIPT: GDScript = preload("res://scripts/meta/homebase_commander_a
 const FLIGHT_VISUAL_SCRIPT: GDScript = preload("res://scripts/terrain/mission_flight_visual.gd")
 const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
+const PAD_DECK_TOP: float = preload("res://scripts/terrain/place_reference_dressing.gd").PAD_DECK_TOP
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const INTERACTION_RADIUS: float = 1.8
 const BASE_NAV: GDScript = preload("res://scripts/meta/base_interior_navigation.gd")
@@ -487,7 +488,7 @@ func _update_personnel_visuals() -> void:
 		model.visible = status not in ["aboard", "away"] and not _pad_preview
 		(entry.marker as Node3D).visible = model.visible
 		var plane: Vector3 = _view.call("_world_to_3d_position", actor.position, 0.0)
-		var position_3d: Vector3 = plane + Vector3.UP * _standing_y(plane)
+		var position_3d: Vector3 = plane + Vector3.UP * (_standing_y(plane) + _pad_deck_lift_at(plane))
 		var sleeping_rotation: float = model.rotation.y
 		var field_bunk := false
 		if status == "sleeping":
@@ -1181,6 +1182,7 @@ func _update_avatar_visual() -> void:
 	if _model == null:
 		return
 	var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", _avatar.position, 0.006)
+	position_3d.y += _pad_deck_lift_at(position_3d)
 	var displacement: Vector3 = position_3d - _model.position
 	var moving: bool = _avatar.position.distance_squared_to(_previous_position) > 0.00001
 	_model.position = position_3d
@@ -1270,10 +1272,28 @@ func _build_landing_pads(stage: Node3D) -> void:
 		var center: Array = Array(pad["plane"])
 		var pad_size: Array = Array(pad["size"])
 		visual.call("build", Vector2(float(center[0]), float(center[1])), Vector2(float(pad_size[0]), float(pad_size[1])), String(pad["designation"]) if bool(pad.get("built",true)) else "BAUPLATZ · PAD 02")
-		if not bool(pad.get("built",true)): visual.scale.y=0.15
-		# A 12 mm render separation avoids coplanar pad/ground fighting. The
-		# authoritative walk surface and ship/person standing heights stay put.
-		visual.position.y = float(pad.get("surface_y", 0.0)) - PAD_SCRIPT.DECK_HEIGHT + 0.012
+		_apply_pad_deck_height(visual, pad)
+
+
+## Display only: built pads are low raised decks (same height as on mission maps).
+## Unbuilt building sites keep the old sunken look. Pad plane/size/nav stay untouched.
+func _apply_pad_deck_height(visual: Node3D, pad: Dictionary) -> void:
+	var built: bool = bool(pad.get("built", true))
+	visual.scale.y = PAD_DECK_TOP / PAD_SCRIPT.DECK_HEIGHT if built else 0.15
+	visual.position.y = float(pad.get("surface_y", 0.0)) + (0.0 if built else 0.012 - PAD_SCRIPT.DECK_HEIGHT)
+	if built:
+		visual.call("use_raised_deck_shadows")
+
+
+## Visual lift for anything standing on a built pad deck (0.0 elsewhere).
+func _pad_deck_lift_at(plane: Vector3) -> float:
+	for pad: Dictionary in Array(_layout.get("landing_pads", [])):
+		if not bool(pad.get("built", true)): continue
+		var center: Array = Array(pad.plane)
+		var extent: Array = Array(pad.size)
+		var size := Vector2(float(extent[0]), float(extent[1]))
+		if Rect2(Vector2(float(center[0]), float(center[1])) - size * 0.5, size).has_point(Vector2(plane.x, plane.z)): return PAD_DECK_TOP
+	return 0.0
 
 
 func _build_boundary_rocks(stage: Node3D) -> void:
@@ -1527,14 +1547,14 @@ func _sync_capacity_visuals(stage: Node3D) -> void:
 		var pillow:=MeshInstance3D.new(); var pillow_mesh:=BoxMesh.new(); pillow_mesh.size=Vector3(0.56,0.12,0.34); pillow.mesh=pillow_mesh; pillow.position=Vector3(0,0.47,-0.65); owner.add_child(pillow)
 	for pad: Dictionary in Array(layout.get("landing_pads",[])):
 		if stage.has_node(String(pad.id)):
-			stage.get_node(String(pad.id)).scale.y=1.0 if bool(pad.get("built",true)) else 0.15
+			_apply_pad_deck_height(stage.get_node(String(pad.id)),pad)
 			var designation: Node=stage.get_node(String(pad.id)).get_node_or_null("PadDesignation")
 			if designation!=null:designation.text=String(pad.designation) if bool(pad.get("built",true)) else "BAUPLATZ · PAD 02"
 			continue
 		var visual: Node3D=PAD_SCRIPT.new(); visual.name=String(pad.id); stage.add_child(visual)
 		visual.set_meta("landing_pad_id",String(pad.id))
 		visual.call("build",Vector2(float(pad.plane[0]),float(pad.plane[1])),Vector2(float(pad.size[0]),float(pad.size[1])),String(pad.designation))
-		visual.position.y=float(pad.get("surface_y",0))-PAD_SCRIPT.DECK_HEIGHT
+		_apply_pad_deck_height(visual,pad)
 
 func cancel_modal_input() -> void:
 	_camera_dragging = false
@@ -1689,7 +1709,7 @@ func _find_projected_craft(id: String) -> Dictionary:
 func _apply_pad_flight_display(entry: Dictionary, craft: Dictionary) -> void:
 	var node: Node3D=entry.node
 	var pad: Dictionary=_pad_definition(String(entry.landing_pad_id))
-	var anchor:=_plane_position(pad.plane)
+	var anchor:=_plane_position(pad.plane)+Vector3.UP*_pad_deck_lift_at(_plane_position(pad.plane))
 	var motion: Dictionary=craft.get("pad_visual",{})
 	var phase:=String(motion.get("phase","landed"))
 	node.position=anchor; node.rotation=Vector3.ZERO
