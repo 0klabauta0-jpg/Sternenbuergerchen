@@ -7,6 +7,7 @@ extends "res://scripts/tests/campaign_casualty_boarding_verifier.gd"
 func _run() -> void:
 	_configure_entry()
 	await _sortie_a_light_wound()
+	await _sortie_d_victory()
 	await _sortie_b_ground_team_down()
 	await _sortie_c_pilot_down()
 	await _direct_part()
@@ -111,6 +112,41 @@ func _sortie_a_light_wound() -> void:
 	_check(is_equal_approx(float(Dictionary(_roster_unit("campaign_leader").get("recovery_state", {})).get("seconds_remaining", -1.0)), 150.0), "A: spaete Zustellung setzt die Restzeit nicht zurueck")
 	await _end_sortie()
 
+## Echter Sieg: Truppfuehrer faellt aus, wird aufgerichtet, beide am Einstiegsfeld, Aufloesung als victory.
+## Grenze: Aufgeloest wird direkt am Driver; die Auftragsschritte (Chip bergen) gelten dabei nicht als erfuellt,
+## deshalb bucht record_mission_result den Auftrag nicht (Status bleibt active). Ergebnis und Verwundung sind voll geprueft.
+func _sortie_d_victory() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	var leader: Node2D = s.leader
+	var driver: Node = s.driver
+	leader.call("apply_damage", 10000)
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "D: Treiber merkt sich die ausgefallene Person"): return
+	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", "D: innerhalb der Frist aufgerichtet")
+	if not _place_at(s.simulation, s.access, "campaign_leader", Vector2.ZERO): return
+	if not _place_at(s.simulation, s.access, "campaign_pilot", Vector2.ZERO): return
+	var job_before: String = String(_campaign().jobs.satellite_recovery.status)
+	driver.call("_resolve_combat", "victory", String(driver.get("friendly_team_id")))
+	if not await _wait_released("D: Einsatz wird freigegeben"): return
+	var result: Dictionary = _flow.get("_last_mission_result")
+	var job_after: String = String(_campaign().jobs.satellite_recovery.status)
+	print("APPLY_D_RESULT result=", result.get("result"), " mission_outcome=", result.get("mission_outcome"), " retry=", result.get("campaign_checkpoint_retry_required"), " total_loss=", result.get("casualty_total_loss"), " job_before=", job_before, " job_after=", job_after, " casualties=", result.get("casualties"))
+	_check(String(result.get("result", "")) == "victory" and String(result.get("mission_outcome", "")) == "won", "D: Ergebnis bleibt victory, mission_outcome won")
+	_check(not bool(result.get("campaign_checkpoint_retry_required", false)), "D: kein Checkpoint-Retry")
+	_check(result.has("casualty_total_loss") and not bool(result.get("casualty_total_loss", true)), "D: kein Totalverlust")
+	var entry: Dictionary = _casualty_entry(result, "campaign_leader")
+	_check(String(entry.get("severity", "")) == "light" and String(entry.get("outcome", "")) == "wounded" and Array(result.get("casualties", [])).size() == 1, "D: genau der Truppfuehrer, leicht verwundet")
+	var unit: Dictionary = _roster_unit("campaign_leader")
+	var recovery: Dictionary = Dictionary(unit.get("recovery_state", {}))
+	_check(String(unit.get("availability_status", "")) == "wounded" and is_equal_approx(float(recovery.get("seconds_remaining", -1.0)), 180.0), "D: Kader: wounded, 180 s")
+	var leader_state: Dictionary = {}
+	for state: Dictionary in Array(result.get("team_states", [])):
+		if String(state.get("unit_id", "")) == "campaign_leader":
+			leader_state = state
+	_check(bool(leader_state.get("was_downed", false)) and bool(leader_state.get("near_ship", false)), "D: team_states im Ergebnis tragen die Messung, aus der casualties entstand")
+	_check(job_before == "active" and job_after != "failed" and job_after in ["active", "completed", "pending_upload"], "D: Auftrag wird nicht als gescheitert gebucht (vorher %s, nachher %s)" % [job_before, job_after])
+	await _end_sortie()
+
 func _sortie_b_ground_team_down() -> void:
 	var s: Dictionary = await _begin_sortie()
 	if s.is_empty(): return
@@ -176,6 +212,15 @@ func _built_result(states: Array, outcome: String) -> Dictionary:
 	var resolved: Dictionary = CASUALTY_RULES.resolve_mission(states, outcome, _four_units(), "t_pilot", rules)
 	return {"mission_outcome": outcome, "result": "victory" if outcome == "won" else outcome, "team_states": states, "casualties": resolved.casualties, "fatality_unit_ids": resolved.fatality_unit_ids, "casualty_total_loss": resolved.total_loss}
 
+func _set_wounded(unit_id: String, severity: String, total: float, remaining: float) -> void:
+	var units: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	for unit: Dictionary in units:
+		if String(unit.get("unit_id", "")) == unit_id:
+			unit["availability_status"] = "wounded"
+			unit["status_text"] = "wounded"
+			unit["recovery_state"] = {"state": "wounded", "severity": severity, "seconds_total": total, "seconds_remaining": remaining, "source": "campaign_casualty"}
+	_flow.call("_replace_roster_units", units)
+
 func _set_roster() -> void:
 	_flow.set("_all_team_units", _four_units())
 	_flow.set("_available_team_units", _four_units())
@@ -212,10 +257,23 @@ func _direct_part() -> void:
 	_check(PackedStringArray(applied_fatal.get("fatality_unit_ids", PackedStringArray())) == PackedStringArray(["t_d"]), "Direkt Rueckzug fern: fatality_unit_ids == [t_d]")
 	_check(Array(_flow.get("_all_team_units")) == roster_before, "Direkt Rueckzug fern: Kadereintrag der Toten (und alle anderen) unveraendert")
 	_check(String(_casualty_entry(applied_fatal, "t_d").get("display_name", "")) == "Dora Dunkel" and String(_casualty_entry(applied_fatal, "t_d").get("outcome", "")) == "dead", "Direkt Rueckzug fern: Tote steht mit display_name in casualties")
-	# Mehrfach angewendet bleibt gleich.
-	var again: Dictionary = _flow.call("_apply_campaign_casualties", won)
+	# Eine laufende Verwundung wird nie kuerzer und nie leichter.
+	_set_roster()
+	_set_wounded("t_c", "medium", 900.0, 500.0)
 	_flow.call("_apply_campaign_casualties", won)
-	_check(Dictionary(_roster_unit("t_c").get("recovery_state", {})).get("seconds_remaining") == 900.0 and again.has("casualties"), "Direkt: erneutes Anwenden desselben Siegs setzt dieselbe Stufe")
+	var longer: Dictionary = Dictionary(_roster_unit("t_c").get("recovery_state", {}))
+	_check(String(longer.get("severity", "")) == "medium" and is_equal_approx(float(longer.get("seconds_remaining", -1.0)), 900.0) and is_equal_approx(float(longer.get("seconds_total", -1.0)), 900.0), "Direkt: mittel mit Restzeit 500, erneut mittel angewendet: Restzeit 900 (neu ist laenger)")
+	_set_roster()
+	_set_wounded("t_c", "severe", 2400.0, 2000.0)
+	var light: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_c", "fit", false, true)], "won")
+	_flow.call("_apply_campaign_casualties", light)
+	var kept: Dictionary = Dictionary(_roster_unit("t_c").get("recovery_state", {}))
+	_check(String(kept.get("severity", "")) == "severe" and is_equal_approx(float(kept.get("seconds_remaining", -1.0)), 2000.0) and is_equal_approx(float(kept.get("seconds_total", -1.0)), 2400.0), "Direkt: schwer mit Restzeit 2000, leichte angewendet: bleibt severe mit 2000 (total 2400)")
+	_set_roster()
+	_set_wounded("t_c", "light", 180.0, 60.0)
+	_flow.call("_apply_campaign_casualties", won)
+	var heavier: Dictionary = Dictionary(_roster_unit("t_c").get("recovery_state", {}))
+	_check(String(heavier.get("severity", "")) == "medium" and is_equal_approx(float(heavier.get("seconds_remaining", -1.0)), 900.0), "Direkt: leicht mit Restzeit 60, mittel angewendet: wird medium mit 900")
 	# Totalverlust-Ergebnis: niemand wird verwundet.
 	_set_roster()
 	var loss: Dictionary = _built_result([_state("t_pilot", "down", false), _state("t_leader", "fit", false), _state("t_c", "down", true)], "aborted")
@@ -245,9 +303,23 @@ func _skirmish_part_apply() -> void:
 	await process_frame
 	var fake: Dictionary = {"mission_outcome": "won", "casualties": [{"unit_id": "x", "outcome": "wounded", "severity": "light"}], "team_states": []}
 	_check(Dictionary(_flow.call("_apply_campaign_casualties", fake)) == fake, "Skirmish: _apply_campaign_casualties gibt das Ergebnis unveraendert zurueck")
+	# Eine Person liegt am Ende: bisheriges Verhalten ist "recovering" (mission_progression_resolver).
+	var probe: Dictionary = _flow.call("_build_mission_result", mission, {})
+	var downed_id: String = ""
+	var downed_vital: String = "fit"
+	for state: Dictionary in Array(probe.get("team_states", [])):
+		downed_id = String(state.get("unit_id", ""))
+		break
+	for node: Node in mission.get_children():
+		if node.has_method("get_unit_id") and String(node.call("get_unit_id")) == downed_id:
+			node.call("apply_damage", 10000)
+			downed_vital = String(node.call("get_vital_state"))
+	_check(not downed_id.is_empty() and downed_vital != "fit", "Skirmish: eine Person liegt vor dem Missionsende (%s, %s)" % [downed_id, downed_vital])
 	mission.get_node("CombatLoopDriver").call("_resolve_combat", "defeat", "enemy")
 	if not await _wait_released("Skirmish: Einsatz wird freigegeben"): return
 	var result: Dictionary = _flow.get("_last_mission_result")
+	print("APPLY_SKIRMISH downed=", downed_id, " status=", _roster_unit(downed_id).get("availability_status"))
+	_check(String(_roster_unit(downed_id).get("availability_status", "")) == "recovering", "Skirmish: liegende Person hat genau availability_status recovering wie bisher")
 	_check(not result.is_empty() and not result.has("casualties") and not result.has("casualty_total_loss") and not result.has("fatality_unit_ids"), "Skirmish: Ergebnis ohne Felder casualties/casualty_total_loss/fatality_unit_ids")
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
 		_check(String(unit.get("availability_status", "")) != "wounded", "Skirmish: %s ist nicht wounded" % unit.get("unit_id"))

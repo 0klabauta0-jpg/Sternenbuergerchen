@@ -4563,6 +4563,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		var casualty_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver")
 		if casualty_driver != null and casualty_driver.has_method("clear_casualty_flags"):
 			casualty_driver.call("clear_casualty_flags")
+	if casualty_resolution.has("team_states"):
+		_last_mission_result["team_states"] = Array(casualty_resolution.get("team_states", [])).duplicate(true)
 	if not casualty_resolution.is_empty() and not failed_extraction:
 		_last_mission_result["casualties"] = Array(casualty_resolution.get("casualties", [])).duplicate(true)
 		_last_mission_result["fatality_unit_ids"] = PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray()))
@@ -4609,7 +4611,10 @@ func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary)
 	var measured: Dictionary = _build_mission_result(_active_mission, mission_result)
 	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
 	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, _mission_planning_state.get("mission_drop_pilot_unit_id", ""))).strip_edges()
-	return Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules))
+	var resolution: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules))
+	# Genau diese Messung steht spaeter im Ergebnis; casualties und team_states koennen nicht auseinanderlaufen.
+	resolution["team_states"] = Array(measured.get("team_states", [])).duplicate(true)
+	return resolution
 
 
 ## Schreibt Verwundungen in den Kader und ergaenzt die casualties-Eintraege um display_name.
@@ -4652,8 +4657,18 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		var unit: Dictionary = Dictionary(raw_unit).duplicate(true)
 		var wounded_id: String = String(unit.get("unit_id", ""))
 		if severities.has(wounded_id):
+			var recovery: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", String(severities[wounded_id]), rules))
+			var existing: Dictionary = Dictionary(unit.get("recovery_state", {}))
+			if String(unit.get("availability_status", "")) == "wounded" and float(existing.get("seconds_remaining", 0.0)) > 0.0:
+				# Eine laufende Verwundung wird nie kuerzer und nie leichter.
+				var severity_rank: Dictionary = {"light": 0, "medium": 1, "severe": 2}
+				var old_severity: String = String(existing.get("severity", "light"))
+				if int(severity_rank.get(old_severity, 0)) > int(severity_rank.get(String(recovery.get("severity", "light")), 0)):
+					recovery["severity"] = old_severity
+				recovery["seconds_remaining"] = maxf(float(existing.get("seconds_remaining", 0.0)), float(recovery.get("seconds_remaining", 0.0)))
+				recovery["seconds_total"] = maxf(float(existing.get("seconds_total", 0.0)), float(recovery.get("seconds_total", 0.0)))
 			unit["availability_status"] = "wounded"
-			unit["recovery_state"] = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", String(severities[wounded_id]), rules))
+			unit["recovery_state"] = recovery
 			unit["status_text"] = "wounded"
 		updated_units.append(unit)
 	_replace_roster_units(updated_units)
