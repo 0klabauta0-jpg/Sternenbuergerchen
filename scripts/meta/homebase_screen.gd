@@ -8201,7 +8201,7 @@ func _build_roster_card_secondary_text(unit_id: String, profile) -> String:
 		status_text = String(profile.status_text).strip_edges()
 		if status_text.is_empty():
 			status_text = String(profile.availability_status).strip_edges()
-	status_text = CHARACTER_SHEET_FORMATTER_SCRIPT.format_status_text(status_text) if not status_text.is_empty() else "Einsatzbereit"
+	status_text = CHARACTER_SHEET_FORMATTER_SCRIPT.format_status_text(status_text, profile) if not status_text.is_empty() else "Einsatzbereit"
 	var location_text: String = _build_homebase_location_text(unit_id)
 	return "%s | %s" % [status_text, location_text]
 

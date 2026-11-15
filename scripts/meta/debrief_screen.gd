@@ -9,6 +9,10 @@ const SHIP_IDENTITY_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_s
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+const CAMPAIGN_STATE_SCRIPT: GDScript = preload("res://scripts/core/singleplayer_campaign_state.gd")
+const CASUALTY_RULES_SCRIPT: GDScript = preload("res://scripts/core/campaign_casualty_rules.gd")
+const PERSONNEL_RECOVERY_SCRIPT: GDScript = preload("res://scripts/core/personnel_recovery_runtime.gd")
+const RETREAT_HEADING := "Rückzug · Auftrag bleibt offen"
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
 const FRONTIER_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
 const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
@@ -609,6 +613,9 @@ func _refresh_native_review_cards() -> void:
 		_native_review_people.remove_child(child)
 		child.queue_free()
 	var states: Array = _mission_result.get("team_states", [])
+	var casualty_kinds: Dictionary = _casualty_kinds_by_unit()
+	var casualty_severities: Dictionary = _casualty_severities_by_unit()
+	var casualty_rules: Dictionary = CASUALTY_RULES_SCRIPT.load_rules() if casualty_kinds.values().has("wounded") else {}
 	for entry in states:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
@@ -656,10 +663,16 @@ func _refresh_native_review_cards() -> void:
 		var vital := String(member.get("vital_state", "unknown"))
 		var status_names := {"fit": "Einsatzfähig", "wounded": "Verletzt", "down": "Ausgefallen", "dead": "Verstorben"}
 		var fireteam := String(member.get("fireteam_id", "")).to_upper()
-		status.text = "%s%s" % [status_names.get(vital, "Status unbekannt"), " · " + fireteam if not fireteam.is_empty() else ""]
+		var casualty_kind := String(casualty_kinds.get(String(member.get("unit_id", "")), ""))
+		var status_head: String = String(status_names.get(vital, "Status unbekannt"))
+		if casualty_kind == "wounded":
+			status_head = _wounded_status_text(String(casualty_severities.get(String(member.get("unit_id", "")), "")), casualty_rules)
+		elif casualty_kind == "dead":
+			status_head = "Gefallen · zurückgelassen"
+		status.text = "%s%s" % [status_head, " · " + fireteam if not fireteam.is_empty() else ""]
 		TACTICAL_UI_THEME_SCRIPT.style_label(status, true, 12)
-		if vital in ["wounded", "down", "dead"]:
-			status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if vital == "wounded" else TACTICAL_UI_THEME_SCRIPT.COLOR_DANGER)
+		if vital in ["wounded", "down", "dead"] or not casualty_kind.is_empty():
+			status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if (vital == "wounded" or casualty_kind == "wounded") else TACTICAL_UI_THEME_SCRIPT.COLOR_DANGER)
 		contents.add_child(status)
 		var health := Label.new()
 		health.name = "HealthLabel"
@@ -687,6 +700,52 @@ func _refresh_native_review_cards() -> void:
 	_queue_native_review_layout()
 
 
+## Kampagnenergebnis mit Verlustauswertung: Das Feld casualty_total_loss setzt nur die Kampagne
+## (siehe _on_mission_combat_resolved). Totalverlust behaelt die bisherige Anzeige.
+func _is_campaign_casualty_result() -> bool:
+	return _mission_result.has("casualty_total_loss") and not bool(_mission_result.get("casualty_total_loss", false))
+
+
+func _is_campaign_retreat_result() -> bool:
+	return _is_campaign_casualty_result() and String(_mission_result.get("result", "")) == "aborted" and Array(CAMPAIGN_STATE_SCRIPT.RETREAT_WIN_CONDITIONS).has(String(_mission_result.get("win_condition_type", "")))
+
+
+## unit_id -> "wounded" | "dead", nur aus dem Ergebnis gelesen.
+func _casualty_kinds_by_unit() -> Dictionary:
+	var kinds: Dictionary = {}
+	if not _is_campaign_casualty_result():
+		return kinds
+	for raw in Array(_mission_result.get("casualties", [])):
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var outcome := String(raw.get("outcome", ""))
+		if outcome in ["wounded", "dead"]:
+			kinds[String(raw.get("unit_id", ""))] = outcome
+	for dead_id in Array(_mission_result.get("fatality_unit_ids", [])):
+		kinds[String(dead_id)] = "dead"
+	return kinds
+
+
+func _casualty_severities_by_unit() -> Dictionary:
+	var severities: Dictionary = {}
+	if not _is_campaign_casualty_result():
+		return severities
+	for raw in Array(_mission_result.get("casualties", [])):
+		if typeof(raw) == TYPE_DICTIONARY and String(raw.get("outcome", "")) == "wounded":
+			severities[String(raw.get("unit_id", ""))] = String(raw.get("severity", ""))
+	return severities
+
+
+## "Verwundet (mittel) · Ausfall 15:00"; die volle Ausfallzeit steht in den Regeldaten.
+func _wounded_status_text(severity: String, rules: Dictionary) -> String:
+	var text := "Verwundet (%s)" % String(PERSONNEL_RECOVERY_SCRIPT.SEVERITY_NAMES.get(severity, severity))
+	var seconds: Variant = Dictionary(rules.get("recovery_seconds", {})).get(severity, null)
+	if typeof(seconds) == TYPE_INT or typeof(seconds) == TYPE_FLOAT:
+		var whole := int(floor(maxf(0.0, float(seconds))))
+		text += " · Ausfall %d:%02d" % [floori(whole / 60.0), whole % 60]
+	return text
+
+
 func _apply_player_readout_texts() -> void:
 	var vbox := get_node("Panel/Margin/VBox")
 	# v1 diagnostic snapshots retain their original format explicitly. Player
@@ -703,7 +762,7 @@ func _apply_player_readout_texts() -> void:
 	var result_code := String(_mission_result.get("result", ""))
 	var aborted := result_code == "aborted"
 	var ended := result_code in ["victory", "success", "defeat", "failure", "draw", "ended", "aborted"] or String(_mission_result.get("mission_outcome", "")) in ["completed", "ended", "success", "failure", "aborted"]
-	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ("Einsatz abgebrochen" if aborted else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig"))
+	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ((RETREAT_HEADING if _is_campaign_retreat_result() else "Einsatz abgebrochen") if aborted else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig"))
 	var successful := result_code in ["victory", "success"]
 	var failed := result_code in ["defeat", "failure"]
 	_native_review_outcome_symbol.text = "✓" if successful else ("×" if failed else ("—" if ended else "?"))
@@ -730,8 +789,14 @@ func _apply_player_readout_texts() -> void:
 		(summary_strip.get_child(index) as Label).text = summaries[index]
 	var counts: Dictionary = {}
 	var state_names := {"fit": "einsatzfähig", "wounded": "verletzt", "down": "ausgefallen", "dead": "verstorben"}
+	var count_casualties: Dictionary = _casualty_kinds_by_unit()
 	for member in Array(_mission_result.get("team_states", [])):
 		var state: String = state_names.get(String(member.get("vital_state", "")), "unbekannt")
+		var count_kind := String(count_casualties.get(String(member.get("unit_id", "")), ""))
+		if count_kind == "wounded":
+			state = "verwundet"
+		elif count_kind == "dead":
+			state = "gefallen"
 		counts[state] = int(counts.get(state, 0)) + 1
 	var count_parts := PackedStringArray()
 	for state in counts:

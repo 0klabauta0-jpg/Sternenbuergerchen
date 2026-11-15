@@ -8,6 +8,7 @@ const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/r
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
+const PERSONNEL_RECOVERY_RUNTIME_SCRIPT: GDScript = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const EXPERIENCE_CONFIG: GDScript = preload("res://scripts/meta/skirmish_start_configuration.gd")
 const CORE_ORDER: Array = [
 	["accuracy", "Accuracy"],
@@ -264,7 +265,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		"relationship_entries": relationship_entries,
 		"relationship_overview_rows": _relationship_highlights(relationship_entries),
 		"relationship_empty_text": "Noch keine Beziehung bekannt.",
-		"overview_status_text": format_status_text(String(options.get("status_text", profile.availability_status))),
+		"overview_status_text": format_status_text(String(options.get("status_text", profile.availability_status)), profile),
 		"pilot_explanation": _build_pilot_explanation(profile),
 		"trait_text": trait_text,
 		"trait_rows": _build_trait_rows(profile),
@@ -314,9 +315,25 @@ static func format_role_name(role_name: String) -> String:
 	return COPY.text(role_name)
 
 
-static func format_status_text(status_text: String) -> String:
+## Anzeigetext fuer den Zustand. Mit `unit` (Kader-Eintrag oder Profil): eine laufende Verwundung
+## zeigt den Text aus PersonnelRecoveryRuntime.describe; alle anderen Zustaende wie bisher.
+static func format_status_text(status_text: String, unit: Variant = null) -> String:
+	var wounded_text: String = _wounded_status_text(unit)
+	if not wounded_text.is_empty():
+		return wounded_text
 	var known: String = COPY.text(status_text.to_lower())
 	return status_text if known == status_text.to_lower() else known
+
+
+static func _wounded_status_text(unit: Variant) -> String:
+	if unit == null:
+		return ""
+	var entry: Dictionary = {}
+	if unit is Dictionary:
+		entry = unit
+	elif unit is Object and "availability_status" in unit and "recovery_state" in unit:
+		entry = {"availability_status": unit.availability_status, "recovery_state": unit.recovery_state}
+	return PERSONNEL_RECOVERY_RUNTIME_SCRIPT.describe(entry) if not entry.is_empty() else ""
 
 
 static func _build_suitability_rows(profile) -> Array:
@@ -393,7 +410,7 @@ static func _build_status_rows(profile, options: Dictionary = {}) -> Array:
 	var frustration_row: Dictionary = {"label": "Frustration", "value_text": _format_fraction_or_na(progression.get("frustration", "n/a")), "help_id": "character_sheet.frustration"}
 	_apply_fraction_row_metadata(frustration_row, progression.get("frustration", "n/a"), "progression", "frustration")
 	return [
-		{"label": "Status", "value_text": COPY.text(_optional_text(status_text, _optional_text(String(profile.availability_status), "active"))), "help_id": "character_sheet.status"},
+		{"label": "Status", "value_text": _optional_text(_wounded_status_text(profile), COPY.text(_optional_text(status_text, _optional_text(String(profile.availability_status), "active")))), "help_id": "character_sheet.status"},
 		{"label": "Erholung", "value_text": recovery_text, "help_id": "character_sheet.recovery"},
 		morale_row,
 		frustration_row,
