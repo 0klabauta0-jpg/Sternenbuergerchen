@@ -13771,6 +13771,11 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 	return chip
 
 
+func _campaign_casualty_rules_active() -> bool:
+	var driver: Node = get_node_or_null("../CombatLoopDriver")
+	return driver != null and bool(driver.get("campaign_casualty_rules_enabled"))
+
+
 # Campaign pilot is a real sortie member. Assignment alone never authorizes flight.
 func get_campaign_pilot_flight_guard(craft_id: String, require_all_crew: bool = true) -> Dictionary:
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
@@ -13785,7 +13790,7 @@ func get_campaign_pilot_flight_guard(craft_id: String, require_all_crew: bool = 
 	if pilot_id.is_empty():
 		return {"ok": false, "reason": "pilot_presence_unknown", "message": "Zugewiesener Pilot fehlt am Schiff"}
 	var pilot = _get_campaign_sortie_unit(pilot_id)
-	if pilot == null or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0:
+	if pilot == null or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or (_campaign_casualty_rules_active() and pilot.has_method("get_vital_state") and String(pilot.call("get_vital_state")) != "fit"):
 		return {"ok": false, "reason": "pilot_unavailable", "message": "Pilot ist nicht flugfaehig"}
 	if _deployed_unit_ids.has(pilot_id) or not bool(pilot.get_meta("dropship_embarked", false)):
 		return {"ok": false, "reason": "pilot_not_aboard", "message": "Pilot muss zum Schiff zurueck und wieder einsteigen"}
@@ -13803,6 +13808,7 @@ func get_campaign_pilot_flight_guard(craft_id: String, require_all_crew: bool = 
 	for id in ownership:
 		if not require_all_crew and id != pilot_id: continue
 		var member = _get_campaign_sortie_unit(id)
+		if member != null and id != pilot_id and _campaign_casualty_rules_active() and member.has_method("get_vital_state") and String(member.call("get_vital_state")) != "fit": continue
 		if member == null or int(member.call("get_health")) <= 0: return {"ok":false,"reason":"crew_unavailable"}
 		if _deployed_unit_ids.has(id) or not bool(member.get_meta("dropship_embarked", false)) or not aboard.has(id): return {"ok":false,"reason":"pilot_not_aboard" if id == pilot_id else "crew_not_aboard"}
 		if _requires_hex_deployment_owner() and (not simulation.get_hex_unit_state(id).is_empty() or simulation.has_hex_pending_admission(id)):return {"ok":false,"reason":"crew_deployment_pending"}
@@ -14072,9 +14078,16 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
 	var ship_position: Vector2 = _drop_sequence_position if _is_active_drop_sequence_for_craft(craft_id) else _coerce_vector2_value(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("position", Vector2.INF), Vector2.INF)
 	var crew: Array = []
+	var rules_on: bool = _campaign_casualty_rules_active()
+	var casualties := PackedStringArray()
+	var ground_casualty := false
 	for unit in relevant_crew:
 		if unit == null or not unit.has_method("get_unit_id"): continue
 		var id: String = String(unit.call("get_unit_id"))
+		if rules_on and unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			casualties.append(id)
+			ground_casualty = ground_casualty or _deployed_unit_ids.has(id) or (hex_required and not simulation.get_hex_unit_state(id).is_empty())
+			continue
 		if not _deployed_unit_ids.has(id) and not (hex_required and not simulation.get_hex_unit_state(id).is_empty()):continue
 		if not unit is Node2D or int(unit.call("get_health")) <= 0:
 			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
@@ -14086,7 +14099,10 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		if not _campaign_unit_near_boarding_ship(craft_id, unit_position, ship_position):
 			return {"ok": false, "reason": "pilot_not_at_ship" if id == pilot_id else "crew_not_at_ship", "message": "Alle Bodenpersonen muessen zuerst zum Schiff zuruecklaufen"}
 		crew.append(unit)
-	if crew.is_empty(): return flight_guard
+	if crew.is_empty():
+		if ground_casualty: return {"ok": false, "reason": "crew_unavailable", "message": "Kein Bodenteam einsatzfaehig", "casualty_unit_ids": casualties}
+		if rules_on: flight_guard["casualty_unit_ids"] = casualties
+		return flight_guard
 	var boarding_scope:String=_campaign_boarding_scope_signature(craft_id)
 	# Validate the whole group before any mutation. SimulationRoot commits presence.
 	var embarked:Dictionary={}
@@ -14120,9 +14136,13 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		bound_root=root_ref.get_ref()
 		owner=owner_ref.get_ref()
 		if not is_instance_valid(owner) or owner.is_queued_for_deletion() or not is_instance_valid(bound_root) or owner.get_node_or_null("../SimulationRoot")!=bound_root or not bound_root.call("_hex_embark_receipt_current",embarked) or owner._campaign_boarding_scope_signature(craft_id)!=boarding_scope:return {"ok":false,"reason":"boarding_context_changed"}
-		return {"ok":true,"message":"Trupp an Bord"}
+		var done_hex:Dictionary={"ok":true,"message":"Trupp an Bord"}
+		if rules_on:done_hex["casualty_unit_ids"]=casualties
+		return done_hex
 	_emit_planning_state_changed()
-	return {"ok": false, "reason": "pilot_boarding_pending", "message": "Team steigt ein; Pilot uebernimmt seinen Posten"}
+	var pending:Dictionary={"ok": false, "reason": "pilot_boarding_pending", "message": "Team steigt ein; Pilot uebernimmt seinen Posten"}
+	if rules_on:pending["casualty_unit_ids"]=casualties
+	return pending
 
 
 func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
