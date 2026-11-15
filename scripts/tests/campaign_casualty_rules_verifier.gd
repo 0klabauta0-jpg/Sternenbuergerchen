@@ -49,5 +49,8 @@ func _run() -> void:
 	check(penalty.wounded.size() == 2 and penalty.wounded[0].severity == "light" and Array(penalty.morale_unit_ids).size() == 4, "everyone who was down is lightly wounded, everyone loses morale")
 	check(int(R.build_total_loss_penalty(lost_team, 120, rules).rescue_fee) == 50, "the rescue fee has a minimum")
 	check(int(R.build_total_loss_penalty(lost_team, 30, rules).rescue_fee) == 30, "the rescue fee never exceeds the credits")
+	check(R.rules_are_valid(rules), "shipped rules file is valid")
+	check(not R.rules_are_valid({}) and not R.rules_are_valid({"down_revive_window_seconds": 60.0}), "empty or partial rules are invalid")
+	check(R.load_rules("res://data/singleplayer/does_not_exist.json").is_empty(), "a missing rules file yields empty rules and reports an error")
 	print("CAMPAIGN_CASUALTY_RULES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)

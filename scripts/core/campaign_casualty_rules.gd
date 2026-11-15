@@ -4,11 +4,36 @@ extends RefCounted
 
 const RULES_PATH := "res://data/singleplayer/casualty_rules.json"
 
+static func _is_number(value: Variant) -> bool:
+	return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
+
+static func rules_are_valid(rules: Dictionary) -> bool:
+	if not _is_number(rules.get("down_revive_window_seconds")) or float(rules["down_revive_window_seconds"]) <= 0.0:
+		return false
+	if not _is_number(rules.get("recovery_radius_world")) or float(rules["recovery_radius_world"]) <= 0.0:
+		return false
+	var seconds: Variant = rules.get("recovery_seconds")
+	if not seconds is Dictionary:
+		return false
+	for key in ["light", "medium", "severe"]:
+		if not _is_number(seconds.get(key)):
+			return false
+	var total_loss: Variant = rules.get("total_loss")
+	if not total_loss is Dictionary:
+		return false
+	for key in ["rescue_fee_fraction", "rescue_fee_minimum", "morale_delta"]:
+		if not _is_number(total_loss.get(key)):
+			return false
+	return total_loss.get("wound_severity") is String
+
 static func load_rules(path: String = RULES_PATH) -> Dictionary:
-	if not FileAccess.file_exists(path):
+	var parsed: Variant = null
+	if FileAccess.file_exists(path):
+		parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not parsed is Dictionary or not rules_are_valid(parsed):
+		push_error("campaign_casualty_rules: Regeldatei fehlt oder ist ungültig: %s" % path)
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if parsed is Dictionary else {}
+	return parsed
 
 static func _is_fit(team_state: Dictionary) -> bool:
 	return str(team_state.get("vital_state", "fit")) == "fit" and float(team_state.get("health_points", 1.0)) > 0.0
