@@ -917,8 +917,16 @@ func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_d
 		return fuel_gate
 	return {"ok": true, "departure": departure}
 
+func _craft_is_grounded_at_home(craft_id: String) -> bool:
+	# Same condition BasePersonnelRuntime._unit_is_home uses for a craft.
+	if _flow == null: return false
+	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase": return false
+	if not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty(): return false
+	return String(get_space_travel_snapshot(craft_id).get("phase", "grounded")) == "grounded"
+
 func authorize_departure(craft_id: String, approach_request_id: String = "", station_dock: bool = false) -> Dictionary:
-	if is_instance_valid(_base_personnel) and _base_personnel.has_method("get_departure_block"):
+	# Wounded persons only block a departure from the home base; later legs may carry them.
+	if is_instance_valid(_base_personnel) and _base_personnel.has_method("get_departure_block") and _craft_is_grounded_at_home(craft_id):
 		var wounded_block: Dictionary = _base_personnel.call("get_departure_block", craft_id)
 		if not wounded_block.is_empty(): return wounded_block
 	if _simulation == null: return _reject("runtime_unavailable", "Simulation ist nicht bereit")

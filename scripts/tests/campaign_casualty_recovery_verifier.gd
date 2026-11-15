@@ -70,6 +70,13 @@ func _pure_part() -> void:
 	_check(res.units[1].availability_status == "active" and res.recovered_unit_ids == PackedStringArray(["old", "bad"]), "advance: kaputter recovery_state genesen, beide in recovered_unit_ids")
 	var mixed: Dictionary = RECOVERY.advance([_wounded("w", 500.0), active], 10.0)
 	_check(mixed.units.size() == 2 and mixed.units[1] == active, "advance: Reihenfolge und Anzahl bleiben erhalten")
+	var as_text := _wounded("w", 0.0)
+	as_text.recovery_state.seconds_remaining = "720"
+	_check(RECOVERY.is_wounded(as_text) and RECOVERY.describe(as_text) == "Verwundet (mittel), noch 12:00", "Restzeit als Zahl im Text (\"720\") wird als 720 gelesen")
+	res = RECOVERY.advance([as_text], 20.0)
+	_check(res.units[0].availability_status == "wounded" and is_equal_approx(float(res.units[0].recovery_state.seconds_remaining), 700.0), "advance: Textzahl \"720\" minus 20 s ergibt 700 s")
+	as_text.recovery_state.seconds_remaining = "abc"
+	_check(not RECOVERY.is_wounded(as_text), "Restzeit als Text ohne Zahl zaehlt nicht als verwundet")
 	_check(RECOVERY.is_wounded(_wounded("w", 5.0)), "is_wounded: wounded mit Rest > 0 ist true")
 	_check(not RECOVERY.is_wounded(_wounded("w", 0.0)), "is_wounded: wounded mit Rest 0 ist false")
 	_check(not RECOVERY.is_wounded(active), "is_wounded: active ist false")
@@ -124,6 +131,8 @@ func _adapter_part() -> void:
 	var base: Node = rig.base
 	var adapter: Node = ADAPTER.new()
 	adapter._base_personnel = base
+	adapter._flow = rig.flow
+	rig.flow._aircraft_location_by_craft = {"c1": "homebase", "c2": "homebase"}
 	rig.screen.pilot = ""
 	rig.screen.payload_teams = []
 	base.set_unavailable_unit_reasons({"crew_1": "Name crew_1 ist verwundet"})
@@ -134,6 +143,13 @@ func _adapter_part() -> void:
 	_check(str(res.get("message", "")).contains("Name crew_1"), "authorize_departure: Meldung der Sperre")
 	res = adapter.authorize_departure("c2")
 	_check(str(res.get("reason", "")) != "unit_wounded", "authorize_departure anderes Schiff: nicht gesperrt")
+	for place in ["mission", "starmap", "polisa", ""]:
+		rig.flow._aircraft_location_by_craft["c1"] = place
+		res = adapter.authorize_departure("c1")
+		_check(str(res.get("reason", "")) != "unit_wounded", "Gesperrte Person an Bord, Schiff nicht an der Heimatbasis (%s): nicht unit_wounded" % place)
+	rig.flow._aircraft_location_by_craft["c1"] = "homebase"
+	res = adapter.authorize_departure("c1")
+	_check(str(res.get("reason", "")) == "unit_wounded", "Gesperrte Person an Bord, Schiff wieder an der Heimatbasis: unit_wounded")
 	base._states["crew_1"].status = "outside"
 	base._states["crew_1"].craft_id = ""
 	base.set_unavailable_unit_reasons({"crew_1": "Name crew_1 ist verwundet"})

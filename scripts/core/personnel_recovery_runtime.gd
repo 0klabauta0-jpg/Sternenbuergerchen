@@ -9,6 +9,8 @@ static func _remaining(unit: Dictionary) -> float:
 	if not state is Dictionary:
 		return 0.0
 	var value: Variant = state.get("seconds_remaining", 0.0)
+	if typeof(value) == TYPE_STRING and (value as String).is_valid_float():
+		value = (value as String).to_float()
 	if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
 		return 0.0
 	return maxf(0.0, float(value))
