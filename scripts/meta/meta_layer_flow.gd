@@ -169,6 +169,11 @@ var _singleplayer_services: Control
 var _singleplayer_services_toggle: Button
 var _singleplayer_services_open := false
 var _singleplayer_services_elapsed: float = 0.0
+## Ausfallzeit der Verwundeten (nur Kampagne): echte Sekunden werden gesammelt, je volle Sekunde einmal auf den Kader angewendet.
+const PERSONNEL_RECOVERY_SCRIPT = preload("res://scripts/core/personnel_recovery_runtime.gd")
+var _recovery_clock: float = 0.0
+var _wound_lock_active: bool = false
+var _recovery_advance_count: int = 0
 var _star_map_screen: Control
 var _remote_inspection_screen: Control
 var _inspection_target: Dictionary = {} # View identity only, never knowledge.
@@ -263,6 +268,7 @@ func _ready() -> void:
 	_singleplayer_runtime.name = "SingleplayerRuntime"
 	add_child(_singleplayer_runtime)
 	_singleplayer_runtime.call("configure", self, homebase_screen)
+	_sync_wound_lock()
 	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1" and OS.get_environment("CAMPAIGN_ACTIVE_TEST_ORBIT") == "1":
 		_singleplayer_runtime.set("_surface_orbit_path_enabled",true)
 	var encounter_layer := CanvasLayer.new()
@@ -425,6 +431,7 @@ func _process(_delta: float) -> void:
 	var scope_started_usec := frame_started_usec
 	var scopes: Dictionary = {}
 	_poll_retired_terrain_workers()
+	_tick_personnel_recovery(_delta)
 	for craft_id in _space_approaches.keys():
 		if not _space_approaches.has(craft_id): continue
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
@@ -4678,6 +4685,7 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 			applied_recovery[wounded_id] = recovery.duplicate(true)
 		updated_units.append(unit)
 	_replace_roster_units(updated_units)
+	_sync_wound_lock()
 	# Das Ergebnis traegt die tatsaechlich angewendete Verwundung (nach "nie kuerzer, nie leichter"),
 	# nicht die Regelwerte der neuen Verwundung. Das Feld severity bleibt die neue Verwundung.
 	for index in range(casualties.size()):
@@ -4984,6 +4992,57 @@ func _replace_roster_units(updated_units: Array) -> void:
 		return
 	_all_team_units = next_all_units
 	_available_team_units = _replace_units_by_id(_available_team_units, units_by_id)
+
+
+## Echtzeit-Takt der Ausfallzeit (nur Kampagne). Sammelt das echte Delta; je volle Sekunde wird, und nur wenn jemand
+## verwundet ist, einmal advance() auf den Kader angewendet. _replace_roster_units tauscht nur die beiden Kader-Arrays
+## aus (kein Signal, kein Ansichtsneubau, kein Speichern); den Kader nimmt der vorhandene Speicherpunkt mit.
+func _tick_personnel_recovery(delta: float) -> void:
+	if not is_campaign_start():
+		return
+	_recovery_clock += delta
+	if _recovery_clock < 1.0:
+		return
+	var elapsed: float = _recovery_clock
+	_recovery_clock = 0.0
+	var any_wounded := false
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) == TYPE_DICTIONARY and PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant):
+			any_wounded = true
+			break
+	if not any_wounded:
+		# Nichts zu zaehlen; nur eine noch gesetzte Sperre wird abgeraeumt.
+		if _wound_lock_active:
+			_sync_wound_lock()
+		return
+	_recovery_advance_count += 1
+	var advanced: Dictionary = PERSONNEL_RECOVERY_SCRIPT.advance(_all_team_units, elapsed)
+	if bool(advanced.get("changed", false)):
+		_replace_roster_units(Array(advanced.get("units", [])))
+	_sync_wound_lock()
+
+
+## Die eine Stelle, die der Basis-Runtime die Einsatzsperre aus dem Kader gibt: je verwundeter Person
+## "<Anzeigename>: <Verwundet (Stufe), noch m:ss>", ohne Verwundete ein leeres Dictionary. Ersetzt die Sperre als Ganzes.
+## Skirmish sperrt nichts. Aufrufer: Takt, _apply_campaign_casualties, Start/Laden der Kampagne (_ready).
+func _sync_wound_lock() -> void:
+	if not is_campaign_start() or not is_instance_valid(_singleplayer_runtime) or not _singleplayer_runtime.has_method("get_base_personnel_runtime"):
+		return
+	var base: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
+	if base == null or not base.has_method("set_unavailable_unit_reasons"):
+		return
+	var reasons: Dictionary = {}
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = unit_variant
+		if not PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit):
+			continue
+		var unit_id: String = String(unit.get("unit_id", ""))
+		var display_name: String = String(unit.get("display_name", "")).strip_edges()
+		reasons[unit_id] = "%s: %s" % [display_name if not display_name.is_empty() else unit_id, PERSONNEL_RECOVERY_SCRIPT.describe(unit)]
+	base.call("set_unavailable_unit_reasons", reasons)
+	_wound_lock_active = not reasons.is_empty()
 
 
 func _replace_units_by_id(source_units: Array, units_by_id: Dictionary) -> Array:
