@@ -47,6 +47,7 @@
   - `classify_unit(team_state: Dictionary, mission_outcome: String) -> Dictionary` → `{"unit_id": String, "outcome": "unharmed"|"wounded"|"dead", "severity": ""|"light"|"medium"|"severe"}`
   - `resolve_mission(team_states: Array, mission_outcome: String, roster_units: Array, pilot_unit_id: String, rules: Dictionary) -> Dictionary` → `{"total_loss": bool, "total_loss_reason": String, "casualties": Array, "fatality_unit_ids": PackedStringArray}`
   - `build_recovery_state(severity: String, rules: Dictionary) -> Dictionary` → `{"state": "wounded", "severity": severity, "seconds_total": float, "seconds_remaining": float, "source": "campaign_casualty"}`
+  - `build_total_loss_penalty(team_states: Array, credits: int, rules: Dictionary) -> Dictionary` → `{"rescue_fee": int, "wounded": Array, "morale_delta": float, "morale_unit_ids": PackedStringArray}`; `wounded` enthält `{"unit_id", "severity"}` für jede Person, die nicht `fit` ist oder `was_downed` hat; `morale_unit_ids` sind alle Personen aus `team_states`
 - Eingabefelder je `team_state`: `unit_id`, `vital_state` (`fit`/`down`/`bleedout`/`respawning`), `health_points`, `was_downed` (bool), `near_ship` (bool), `aboard` (bool). `mission_outcome` ist `won`, `aborted` oder `lost`.
 
 - [ ] **Step 1: Datendatei anlegen**
@@ -57,7 +58,8 @@
   "balance_status": "initial_values_not_final",
   "down_revive_window_seconds": 60.0,
   "recovery_radius_world": 72.0,
-  "recovery_seconds": { "light": 180.0, "medium": 900.0, "severe": 2400.0 }
+  "recovery_seconds": { "light": 180.0, "medium": 900.0, "severe": 2400.0 },
+  "total_loss": { "rescue_fee_fraction": 0.25, "rescue_fee_minimum": 50, "wound_severity": "light", "morale_delta": -0.08 }
 }
 ```
 
@@ -93,6 +95,12 @@ func _run() -> void:
 	check(no_leader.total_loss and no_leader.total_loss_reason == "no_leader_left", "deaths that leave no leader are a total loss")
 	var state: Dictionary = R.build_recovery_state("severe", rules)
 	check(state.state == "wounded" and float(state.seconds_remaining) == 2400.0 and float(state.seconds_total) == 2400.0, "recovery state carries the configured time")
+	var lost_team: Array = [ts("lead", "down"), ts("two", "fit", true), ts("three", "fit"), ts("pilot", "fit", false, true, true)]
+	var penalty: Dictionary = R.build_total_loss_penalty(lost_team, 500, rules)
+	check(int(penalty.rescue_fee) == 125 and is_equal_approx(float(penalty.morale_delta), -0.08), "total loss costs a quarter of the credits and morale")
+	check(penalty.wounded.size() == 2 and penalty.wounded[0].severity == "light" and Array(penalty.morale_unit_ids).size() == 4, "everyone who was down is lightly wounded, everyone loses morale")
+	check(int(R.build_total_loss_penalty(lost_team, 120, rules).rescue_fee) == 50, "the rescue fee has a minimum")
+	check(int(R.build_total_loss_penalty(lost_team, 30, rules).rescue_fee) == 30, "the rescue fee never exceeds the credits")
 ```
 
 - [ ] **Step 3: Test laufen lassen, er muss scheitern** (Skript `campaign_casualty_rules.gd` fehlt).
@@ -102,7 +110,7 @@ func _run() -> void:
   - `resolve_mission`, Reihenfolge der Totalverlust-Prüfung: (1) Pilot nicht `fit` → `pilot_down`; (2) kein `team_state` außer dem Piloten ist `fit` → `ground_team_down`; (3) nach Abzug der Toten enthält `roster_units` keine Person mit `roster_role_category == "operator"` und Führung > 0 (`skill_leadership`, sonst `skill_values.leadership`) → `no_leader_left`; (4) kein Pilot (`dropship_piloting > 0`) übrig → `no_pilot_left`; (5) weniger als 2 Personen übrig → `roster_too_small`. Bei Totalverlust: `casualties` und `fatality_unit_ids` leer.
   - `casualties` enthält nur Einträge mit `outcome != "unharmed"`.
 
-- [ ] **Step 5: Test laufen lassen:** `CAMPAIGN_CASUALTY_RULES passed=13 failed=0`.
+- [ ] **Step 5: Test laufen lassen:** `CAMPAIGN_CASUALTY_RULES passed=17 failed=0`.
 
 - [ ] **Step 6: Commit** (`git add data/singleplayer/casualty_rules.json scripts/core/campaign_casualty_rules.gd scripts/tests/campaign_casualty_rules_verifier.gd`).
 
@@ -213,6 +221,8 @@ func _run() -> void:
   - `_apply_campaign_casualties` nach `_apply_mission_progression_to_roster` aufrufen, damit die Stufe den dort gesetzten Status `recovering` überschreibt. `mission_progression_resolver.gd` bleibt unverändert.
   - Einmaligkeit: an der Stelle absichern, an der heute schon verhindert wird, dass ein wartendes Ergebnis Belohnung oder Fortschritt doppelt bucht; keinen zweiten Merker daneben erfinden, wenn der vorhandene genügt.
   - Tote werden in dieser Aufgabe nur gemeldet (`fatality_unit_ids`); das Entfernen folgt in Task 6.
+  - **Malus bei Totalverlust** (Regel 7): Nach dem Rücksprung auf den Basisstand `build_total_loss_penalty` mit den `team_states` des verlorenen Einsatzes und dem Guthaben des wiederhergestellten Stands aufrufen. Gebühr vom Guthaben abziehen (über den Owner, der Credits bucht, nicht direkt im UI), die genannten Personen leicht verwunden (`build_recovery_state`), `progression.morale` der Beteiligten um `morale_delta` senken (auf 0..1 begrenzt), dann den Basis-Checkpoint sofort schreiben. Genau einmal je verlorenem Einsatz, auch wenn der Stand danach mehrfach geladen wird (an der vorhandenen Lauf-Kennung des Checkpoints festmachen, siehe `campaign_checkpoint_run_id_verifier.gd`). Das Ergebnis trägt `"total_loss_penalty": Dictionary` für den Debrief.
+  - Zusätzliche Prüfungen im Test dieser Aufgabe: Totalverlust bei 500 Credits → danach 375 Credits; die Person, die lag, ist leicht verwundet mit 180 s; Moral der Beteiligten ist um 0,08 gesunken; Stand speichern, neu laden, erneut laden → Guthaben bleibt 375 und die Restzeit wird nicht neu gesetzt; der Auftrag ist `failed` und `retreat_count` unverändert.
 
 - [ ] **Step 4: Test grün, `campaign_casualty_debrief_retry_test.gd` angepasst und grün. Step 5: Commit.**
 

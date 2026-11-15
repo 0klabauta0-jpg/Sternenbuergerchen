@@ -1,6 +1,6 @@
 # Spielrunde, Paket 3a: Ausfall und Rückzug in der Kampagne (15.11.2026)
 
-Status: Entwurf. Regeln mit [B] hat Björn am 15.11.2026 entschieden (Projektdokument `claude/Spielvision.md`, Abschnitt 4). Regeln mit [V] sind Vorschläge und noch nicht freigegeben.
+Status: Von Björn am 15.11.2026 freigegeben („deine Vorschläge sind freigegeben, aber es muss einen Malus geben bei Totalverlust“). Regeln mit [B] hat Björn entschieden; Regeln mit [V] sind Vorschläge von Claude, die er mit dieser Freigabe angenommen hat. Offen ist nur die Ausgestaltung des Malus in Regel 7.
 Arbeitsplan: `docs/superpowers/plans/2026-11-15-ausfall-und-rueckzug.md`.
 
 ## Ziel / Problem
@@ -24,7 +24,8 @@ Sie gelten nur in der Kampagne. Skirmish und Mehrspieler bleiben unverändert.
    - schwer: am Ende „kritisch“ und geborgen.
 5. **Ausfallzeit in Echtzeit**, auch während andere im Einsatz sind: leicht 3 Minuten, mittel 15 Minuten, schwer 40 Minuten. Die Werte stehen in `data/singleplayer/casualty_rules.json` und sind vorläufig. [V]
 6. **Einsatzsperre.** Verwundete können an der Basis nicht eingeschifft werden; die Ablehnung nennt Name, Stufe und Restzeit. [B]
-7. **Totalverlust.** Fällt der Pilot aus, ist am Ende niemand vom Bodentrupp mehr einsatzfähig, oder bliebe nach den Toten kein Truppführer oder kein Pilot im Kader, dann stirbt niemand: Der Einsatz gilt wie heute als verloren und die Kampagne springt zum letzten Basisstand zurück. [V]
+7. **Totalverlust.** Fällt der Pilot aus, ist am Ende niemand vom Bodentrupp mehr einsatzfähig, oder bliebe nach den Toten kein Truppführer oder kein Pilot im Kader, dann stirbt niemand: Der Einsatz gilt wie heute als verloren und die Kampagne springt zum letzten Basisstand zurück. [B, 15.11.]
+   **Malus bei Totalverlust** [B: es muss einen geben; Ausgestaltung V]: Der Rücksprung gilt als Notbergung durch einen Rettungsdienst. Sie kostet 25 % des Guthabens, mindestens 50 Credits (höchstens das vorhandene Guthaben). Jeder, der im Einsatz am Boden lag, ist danach leicht verwundet. Die Moral aller Beteiligten sinkt um 0,08. Der Auftrag gilt als gescheitert und muss neu angenommen werden. Der Malus wird auf den wiederhergestellten Basisstand angewendet und sofort gespeichert, damit er sich nicht durch Neuladen umgehen lässt. Werte in `data/singleplayer/casualty_rules.json`.
 8. **Rückzug ist ein normaler Ausgang.** Nach „Evakuieren“ bleibt der Auftrag angenommen und kann ohne „Erneut annehmen“ wieder angeflogen werden; die Zahl der Rückzüge wird mitgezählt. [B]
 
 ## Nicht-Ziele dieses Pakets
