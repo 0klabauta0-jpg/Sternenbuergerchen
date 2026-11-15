@@ -17,6 +17,20 @@ const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
 const EQUIPMENT_LABELS: Dictionary = {"suit": "Anzug", "light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_backdrop.gd")
+# PC density, user decision 14.11.2026: mouse and keyboard sizes at 1920x1080.
+# Floors: no click target below 28 px, no body text below 14 px.
+const DENSITY: Dictionary = {
+	"button_height": 30, "button_primary_height": 34, "button_font": 15, "button_padding_y": 4,
+	"input_height": 30, "option_height": 30, "option_font": 15,
+	"nav_width": 166, "nav_button_height": 36, "nav_icon": 24, "nav_font": 15,
+	"nav_toggle_size": Vector2(32, 36), "nav_sub_height": 30, "nav_sub_font": 14,
+	"card_min_height": 64, "card_empty_min_height": 48, "card_padding_y": 3, "card_text_separation": 0,
+	"card_portrait": 48, "card_name_height": 28, "card_name_padding_y": 1, "card_name_padding_x": 4,
+	"card_name_font": 16, "card_name_font_compact": 15, "card_name_font_wide": 23,
+	"card_role_font": 14, "card_role_font_wide": 17, "card_status_font": 14, "card_status_font_wide": 16,
+	"card_action_size": Vector2(40, 30),
+	"palette_chip_size": Vector2(86, 30),
+}
 
 var _screen: WeakRef
 var _built: bool = false
@@ -207,13 +221,13 @@ func _build() -> void:
 	body.add_theme_constant_override("separation", 12)
 	outer.add_child(body)
 	var nav := VBoxContainer.new()
-	nav.custom_minimum_size.x = 166
+	nav.custom_minimum_size.x = DENSITY.nav_width
 	nav.add_theme_constant_override("separation", 4)
 	# Playtest L04: the navigation ends above the full-width base command dock and scrolls
 	# instead of sliding underneath it when the unfolded submenus need more height.
 	_nav_column = VBoxContainer.new()
 	_nav_column.name = "NavigationColumn"
-	_nav_column.custom_minimum_size.x = 166
+	_nav_column.custom_minimum_size.x = DENSITY.nav_width
 	_nav_column.add_theme_constant_override("separation", 0)
 	body.add_child(_nav_column)
 	var nav_scroll := ScrollContainer.new()
@@ -232,13 +246,13 @@ func _build() -> void:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
-		button.custom_minimum_size.y = 46
+		button.custom_minimum_size.y = DENSITY.nav_button_height
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_override("font", THEME.get_heading_font())
-		button.add_theme_font_size_override("font_size", 17)
+		button.add_theme_font_size_override("font_size", DENSITY.nav_font)
 		button.icon = NAV_ICONS.get_icon(key)
 		button.expand_icon = true
-		button.add_theme_constant_override("icon_max_width", 36)
+		button.add_theme_constant_override("icon_max_width", DENSITY.nav_icon)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if key == "base":
 			_base_navigation_group = VBoxContainer.new()
@@ -277,8 +291,8 @@ func _build() -> void:
 	var refuel := _button("Tankservice", false)
 	refuel.name = "OpenBaseServices"
 	_flight_management_bar.add_child(refuel)
-	refuel.custom_minimum_size.y = 29
-	refuel.add_theme_font_size_override("font_size",13)
+	refuel.custom_minimum_size.y = DENSITY.nav_sub_height
+	refuel.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
 	refuel.pressed.connect(func(): _open_base_management("ship"))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
@@ -333,8 +347,8 @@ func _build() -> void:
 	_base_navigation_group.add_child(_base_management_bar)
 	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"]]:
 		var action := _button(String(entry[0]), false)
-		action.add_theme_font_size_override("font_size", 13)
-		action.custom_minimum_size.y = 29
+		action.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
+		action.custom_minimum_size.y = DENSITY.nav_sub_height
 		action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
@@ -388,7 +402,7 @@ func _build_roster() -> void:
 	var content: VBoxContainer = _column("roster", "Personal")
 	_search = LineEdit.new()
 	_search.placeholder_text = "Name suchen"
-	_search.custom_minimum_size.y = 40
+	_search.custom_minimum_size.y = DENSITY.input_height
 	content.add_child(_search)
 	_search.text_changed.connect(func(_value: String): _filter_rows())
 	_sort_selector = _option(content, "PersonnelSort")
@@ -396,7 +410,7 @@ func _build_roster() -> void:
 	_roster_return_target = DRAG_SURFACE.new()
 	_roster_return_target.name = "ReturnPersonToRoster"
 	_roster_return_target.set("accepted_type", "homebase_unit_card")
-	_roster_return_target.custom_minimum_size.y = 34
+	_roster_return_target.custom_minimum_size.y = DENSITY.input_height
 	_roster_return_target.tooltip_text = "Truppmitglied hierher ziehen, um es aus dem Trupp zu lösen"
 	_roster_return_target.add_theme_stylebox_override("panel", _style(PANEL, CYAN))
 	content.add_child(_roster_return_target)
@@ -497,9 +511,11 @@ func _build_equipment() -> void:
 	list.add_child(_inventory_panel)
 	_inventory_panel.operation_requested.connect(_act)
 	_remove_member = _button("Aus Trupp entfernen", false)
+	_remove_member.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	list.add_child(_remove_member)
 	_remove_member.pressed.connect(func(): _act("remove", {"unit_id": _focused_id}))
 	_focused_details = _button("Charakter ansehen", false)
+	_focused_details.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	list.add_child(_focused_details)
 	_focused_details.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 
@@ -507,7 +523,7 @@ func _build_equipment() -> void:
 func _build_equipment_palette(parent: Control) -> void:
 	_equipment_palette_toggle = _button("Ausrüstung ziehen ▸", false)
 	_equipment_palette_toggle.name = "EquipmentPaletteToggle"
-	_equipment_palette_toggle.custom_minimum_size.y = 36
+	_equipment_palette_toggle.custom_minimum_size.y = DENSITY.button_height
 	_equipment_palette_toggle.tooltip_text = "Ausrüstungsoptionen zum Ziehen öffnen"
 	parent.add_child(_equipment_palette_toggle)
 	_equipment_palette = VBoxContainer.new()
@@ -523,8 +539,8 @@ func _build_equipment_palette(parent: Control) -> void:
 	for spec: Dictionary in [{"id": "armor", "label": "Rüstung"}, {"id": "weapon_1", "label": "Primär"}, {"id": "weapon_2", "label": "Sekundär"}]:
 		var key: String = String(spec.id)
 		var button: Button = _button(String(spec.label), false)
-		button.custom_minimum_size.y = 32
-		button.add_theme_font_size_override("font_size", 14)
+		button.custom_minimum_size.y = DENSITY.button_height
+		button.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tabs.add_child(button)
 		_equipment_palette_tabs[key] = button
@@ -555,7 +571,7 @@ func _update_equipment_palette() -> void:
 		if not _equipment_palette_chips.has(cache_key):
 			var chip: PanelContainer = DRAG_SURFACE.new()
 			chip.name = "EquipmentChoice_" + _equipment_palette_key + "_" + item_id.validate_node_name()
-			chip.custom_minimum_size = Vector2(86, 34)
+			chip.custom_minimum_size = DENSITY.palette_chip_size
 			chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 			chip.add_theme_stylebox_override("panel", _style(Color("17424c"), CYAN))
 			_equipment_palette_flow.add_child(chip)
@@ -636,8 +652,8 @@ func _build_flightdeck() -> void:
 	_start.pressed.connect(func(): _act("start", {"craft_id": _craft_id}))
 	for button in [_board, _unboard, _start]:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size = Vector2(0, 40)
-		button.add_theme_font_size_override("font_size", 15)
+		button.custom_minimum_size = Vector2(0, DENSITY.button_primary_height if button == _start else DENSITY.button_height)
+		button.add_theme_font_size_override("font_size", DENSITY.button_font)
 		button.clip_text = true
 	_launch_reason = _label("Abflugbereitschaft wird geprüft …", 13, GOLD)
 	_launch_reason.name = "LaunchReadiness"
@@ -703,39 +719,49 @@ func _layout_reference_stage() -> void:
 func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	var panel: PanelContainer = DRAG_SURFACE.new()
 	panel.name = "Person_" + id.validate_node_name()
-	panel.custom_minimum_size.y = 112
-	panel.add_theme_stylebox_override("panel", _style(Color("163743"), Color("28515e")))
+	panel.custom_minimum_size.y = DENSITY.card_min_height
+	panel.add_theme_stylebox_override("panel", _card_style(Color("163743"), Color("28515e")))
 	parent.add_child(panel)
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_theme_constant_override("separation", 9)
 	panel.add_child(row)
-	var portrait: TextureRect = _portrait(Vector2(96, 96))
+	var portrait: TextureRect = _portrait(Vector2(DENSITY.card_portrait, DENSITY.card_portrait))
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(portrait)
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.mouse_filter = Control.MOUSE_FILTER_PASS
 	text.custom_minimum_size.x = 100.0
-	text.add_theme_constant_override("separation", 3)
+	text.add_theme_constant_override("separation", DENSITY.card_text_separation)
+	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(text)
 	var focus := Button.new()
 	focus.flat = true
 	focus.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	focus.add_theme_font_size_override("font_size", 19)
-	focus.custom_minimum_size.y = 31
+	focus.add_theme_font_size_override("font_size", DENSITY.card_name_font)
+	focus.custom_minimum_size.y = DENSITY.card_name_height
+	# Flat name button: compact inset, text aligned with role and status; nothing is drawn for these states.
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var inset := StyleBoxEmpty.new()
+		inset.content_margin_left = 0
+		inset.content_margin_right = DENSITY.card_name_padding_x
+		inset.content_margin_top = DENSITY.card_name_padding_y
+		inset.content_margin_bottom = DENSITY.card_name_padding_y
+		focus.add_theme_stylebox_override(state, inset)
 	focus.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	focus.clip_text = true
 	text.add_child(focus)
 	panel.call("forward_drag_from", focus)
 	focus.gui_input.connect(func(event: InputEvent): _person_input(event, panel))
 	panel.gui_input.connect(func(event: InputEvent): _person_input(event, panel, true))
-	var role: Label = _label("", 15, MUTED)
+	var role: Label = _label("", DENSITY.card_role_font, MUTED)
 	role.autowrap_mode = TextServer.AUTOWRAP_OFF
 	role.clip_text = true
 	role.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	text.add_child(role)
-	var status: Label = _label("", 14, CYAN)
+	var status: Label = _label("", DENSITY.card_status_font, CYAN)
 	status.autowrap_mode = TextServer.AUTOWRAP_OFF
 	status.clip_text = true
 	status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -749,7 +775,7 @@ func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	var action: Button
 	if with_assign:
 		action = _button("+", false)
-		action.custom_minimum_size = Vector2(40, 42)
+		action.custom_minimum_size = DENSITY.card_action_size
 		action.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(action)
 	if not with_assign:
@@ -813,7 +839,7 @@ func refresh() -> void:
 		for key in _nav:
 			var button: Button = _nav[key]
 			THEME.style_command_button(button, "selected" if key == _mode else "neutral")
-			button.add_theme_font_size_override("font_size", 17)
+			button.add_theme_font_size_override("font_size", DENSITY.nav_font)
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
 		_workflow.visible = _mode != "base" and not _right_flyout_active
@@ -892,13 +918,13 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	var panel: PanelContainer = row.root
 	var wide: bool = _workspace.size.x > 2200.0
 	var compact_slot: bool = row.assign == null and size.x < 1600.0
-	var portrait_edge: float = 52.0 if row.assign != null else (64.0 if compact_slot else 72.0)
+	var portrait_edge: float = DENSITY.card_portrait
 	var style_signature: String = "%s:%s" % [wide, compact_slot]
 	if String(panel.get_meta("operations_row_style", "")) != style_signature:
 		portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
-		(row.focus as Button).add_theme_font_size_override("font_size", 17 if compact_slot else (23 if wide else 19))
-		(row.role as Label).add_theme_font_size_override("font_size", 14 if compact_slot else (17 if wide else 15))
-		(row.status as Label).add_theme_font_size_override("font_size", 13 if compact_slot else (16 if wide else 14))
+		(row.focus as Button).add_theme_font_size_override("font_size", DENSITY.card_name_font_compact if compact_slot else (DENSITY.card_name_font_wide if wide else DENSITY.card_name_font))
+		(row.role as Label).add_theme_font_size_override("font_size", DENSITY.card_role_font_wide if wide and not compact_slot else DENSITY.card_role_font)
+		(row.status as Label).add_theme_font_size_override("font_size", DENSITY.card_status_font_wide if wide and not compact_slot else DENSITY.card_status_font)
 		panel.set_meta("operations_row_style", style_signature)
 	portrait.visible = not unit.is_empty()
 	_set_portrait(portrait, unit)
@@ -914,7 +940,7 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	status.text = "%s · %s / %s" % [String(unit.get("status", "")), String(EQUIPMENT_LABELS.get(String(loadout.get("armor","")),"")), String(EQUIPMENT_LABELS.get(String(loadout.get("weapon_1","")),""))] if not unit.is_empty() else ""
 	status.tooltip_text = status.text
 	panel.tooltip_text = "%s · %s" % [String(unit.get("name", "Freier Platz")), status.text]
-	panel.custom_minimum_size.y = 58.0 if unit.is_empty() else 80.0
+	panel.custom_minimum_size.y = DENSITY.card_empty_min_height if unit.is_empty() else DENSITY.card_min_height
 	panel.set("drag_payload", {"type": "homebase_unit_card", "unit_id": String(unit.get("id", "")), "source_context": "operations", "label": String(unit.get("name", ""))} if not unit.is_empty() else {})
 	var badges: Array = Array(unit.get("badges", []))
 	var badge: TextureRect = row.badge
@@ -925,7 +951,7 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 		badge.tooltip_text = BADGES.format_badge_tooltip(badge_data)
 	var selected: bool = not unit.is_empty() and String(unit.get("id", "")) == _focused_id
 	if not panel.has_meta("operations_selected") or bool(panel.get_meta("operations_selected")) != selected:
-		panel.add_theme_stylebox_override("panel", _style(Color("173d49"), GOLD if selected else Color("28515e")))
+		panel.add_theme_stylebox_override("panel", _card_style(Color("173d49"), GOLD if selected else Color("28515e")))
 		panel.set_meta("operations_selected", selected)
 
 
@@ -1282,7 +1308,7 @@ func _nav_group_header(button: Button, key: String) -> HBoxContainer:
 	row.add_child(button)
 	var toggle := _button("▾", false)
 	toggle.name = "ToggleSubmenu_" + key
-	toggle.custom_minimum_size = Vector2(32, 46)
+	toggle.custom_minimum_size = DENSITY.nav_toggle_size
 	toggle.pressed.connect(_toggle_nav_group.bind(key))
 	row.add_child(toggle)
 	_nav_group_toggles[key] = toggle
@@ -1497,10 +1523,10 @@ func _portrait(minimum: Vector2) -> TextureRect:
 func _option(parent: Control, node_name: String) -> OptionButton:
 	var option := OptionButton.new()
 	option.name = node_name
-	option.custom_minimum_size.y = 42
+	option.custom_minimum_size.y = DENSITY.option_height
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	option.fit_to_longest_item = false
-	option.add_theme_font_size_override("font_size", 17)
+	option.add_theme_font_size_override("font_size", DENSITY.option_font)
 	parent.add_child(option)
 	return option
 
@@ -1508,13 +1534,27 @@ func _option(parent: Control, node_name: String) -> OptionButton:
 func _button(value: String, primary: bool) -> Button:
 	var button := Button.new()
 	button.text = value
-	button.custom_minimum_size.y = 40
-	button.add_theme_font_size_override("font_size", 17)
-	button.add_theme_stylebox_override("normal", _style(GOLD if primary else PANEL, GOLD if primary else CYAN))
-	button.add_theme_stylebox_override("hover", _style(Color("ffe785") if primary else Color("1d5361"), CYAN))
-	button.add_theme_stylebox_override("pressed", _style(Color("dfb62d") if primary else Color("0c5864"), GOLD))
+	button.custom_minimum_size.y = DENSITY.button_primary_height if primary else DENSITY.button_height
+	button.add_theme_font_size_override("font_size", DENSITY.button_font)
+	button.add_theme_stylebox_override("normal", _button_style(GOLD if primary else PANEL, GOLD if primary else CYAN))
+	button.add_theme_stylebox_override("hover", _button_style(Color("ffe785") if primary else Color("1d5361"), CYAN))
+	button.add_theme_stylebox_override("pressed", _button_style(Color("dfb62d") if primary else Color("0c5864"), GOLD))
 	button.add_theme_color_override("font_color", INK if primary else CREAM)
 	return button
+
+
+func _button_style(background: Color, border: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = _style(background, border)
+	style.content_margin_top = DENSITY.button_padding_y
+	style.content_margin_bottom = DENSITY.button_padding_y
+	return style
+
+
+func _card_style(background: Color, border: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = _style(background, border)
+	style.content_margin_top = DENSITY.card_padding_y
+	style.content_margin_bottom = DENSITY.card_padding_y
+	return style
 
 
 func _style(background: Color, border: Color) -> StyleBoxFlat:

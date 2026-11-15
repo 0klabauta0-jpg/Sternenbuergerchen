@@ -13,6 +13,18 @@ in der Schiffskarte). Vorsichtig = Tiefflug `low` + abdrehen + Streukreis x 1,5,
 normal = abdrehen, aggressiv = weiterfliegen und landen trotz Treffern.
 Servicepad-Reparatur setzt auch die `AirAssetStatus`-Integritaet auf 100. Die
 Integritaet wird ueber das Missionsende nicht gespeichert (Befund in der Task).
+### UI-Dichte Heimatbasis (P6) - 15.11.2026
+
+Task `docs/tasks/UI_DICHTE_HEIMATBASIS_2026_11_15.md`. Dichte-Tabelle `DENSITY`
+oben in `homebase_operations_presenter.gd` (PC-Dichte, Nutzerentscheidung
+14.11.2026): Buttons 30 hoch (Haupt-Aktion 34), Schrift 15; Navigation 36 hoch,
+Icon 24, Schrift 15; Unterpunkte 30/14; Personenkarten 99 -> 74 mit Portrait
+48x48; "Aus Trupp entfernen"/"Charakter ansehen" in Inhaltsbreite statt 1010 px.
+`personnel_inventory_panel.gd`: Slot 264x80 -> 240x60 (Icon 48), Lagerkachel
+126x80 -> 110x68. Seitenleistenbreite und Kommando-Dock unveraendert (Gruende im
+Task). Aufnahmen `docs/qa/ui_dichte_20261115/p6_*.jpg`. 13 Tests vor/nach ohne
+neue FAIL-Zeilen, zwei 1280x720-Pruefungen jetzt PASS; keine Test-Erwartung
+geaendert (Linux headless).
 
 ### Flugabwehr am echten Landeanflug angeschlossen - 14.11.2026
 

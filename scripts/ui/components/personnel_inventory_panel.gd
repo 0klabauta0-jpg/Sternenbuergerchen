@@ -10,6 +10,14 @@ const COPY=preload("res://scripts/meta/character_sheet_copy.gd")
 const PORTRAITS=preload("res://scripts/meta/portrait_identity_catalog.gd")
 const PORTRAIT_SIZE := Vector2(112, 140)
 const MODEL_HEIGHT := 500.0
+# PC density, user decision 14.11.2026 (home base P6): body slots and storage tiles.
+const SLOT_HEIGHT := 60.0
+const SLOT_WIDTH_WIDE := 240.0
+const SLOT_WIDTH_NARROW := 216.0
+const SLOT_ICON := Vector2(48, 48)
+const STORAGE_TILE_SIZE := Vector2(110, 64)
+const STORAGE_TILE_ICON := 28
+const STORAGE_TILE_PADDING := Vector2(6, 4)
 const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","none":"Leer"}
 var _rest: CheckButton
 var _signature := ""
@@ -148,9 +156,9 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var item: String=ITEMS.item_from_slot(key,String(loadout.get(key,"none")))
 		var slot: PanelContainer=SURFACE.new(); slot.name="InventorySlot_"+key
 		slot.add_theme_stylebox_override("panel",SKIN.box(SKIN.CARD,4))
-		slot.accepted_type="inventory_item" if equipment_allowed else ""; slot.custom_minimum_size=Vector2(130,66); _slots.add_child(slot)
+		slot.accepted_type="inventory_item" if equipment_allowed else ""; slot.custom_minimum_size=Vector2(130,SLOT_HEIGHT); _slots.add_child(slot)
 		var slot_body:=HBoxContainer.new(); slot_body.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot.add_child(slot_body)
-		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=Vector2(72,72); icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
+		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=SLOT_ICON; icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
 		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item));label.custom_minimum_size.x=130;label.add_theme_font_size_override("font_size",16);label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
 		slot.payload_dropped.connect(func(data:Dictionary): _wear(data,key))
 	_layout_body_slots()
@@ -177,8 +185,9 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var grid:=GridContainer.new(); grid.columns=2; body.add_child(grid)
 		for item in Dictionary(data.get("items",{})):
 			var source: PanelContainer=SURFACE.new(); source.drag_payload={"type":"inventory_item","source_container_id":id,"item_id":item,"label":String(LABELS.get(item,item))} if allowed else {}; grid.add_child(source)
-			var button:=Button.new(); button.text="%s\n× %d" % [String(LABELS.get(item,item)).replace("Maschinenpistole","Maschinen-\npistole"),int(data.items[item])]; button.icon=_item_icon(String(item)); button.expand_icon=true; button.add_theme_constant_override("icon_max_width",42); button.custom_minimum_size=Vector2(126,78); button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
-			SKIN.button(button);button.custom_minimum_size.y=78;button.add_theme_font_size_override("font_size",14);button.add_theme_constant_override("icon_max_width",32);button.text=button.text.replace(" Rüstung","\nRüstung")
+			var button:=Button.new(); button.text="%s\n× %d" % [String(LABELS.get(item,item)).replace("Maschinenpistole","Maschinen-\npistole"),int(data.items[item])]; button.icon=_item_icon(String(item)); button.expand_icon=true; button.add_theme_constant_override("icon_max_width",42); button.custom_minimum_size=STORAGE_TILE_SIZE; button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
+			SKIN.button(button);button.custom_minimum_size.y=STORAGE_TILE_SIZE.y;button.add_theme_font_size_override("font_size",14);button.add_theme_constant_override("icon_max_width",STORAGE_TILE_ICON);button.text=button.text.replace(" Rüstung","\nRüstung")
+			if not id.begins_with("unit:"): _compact_tile(button)
 			if id.begins_with("unit:"):
 				button.name="BackpackItem_"+String(item)+"_List";button.text="" if button.icon != null else String(LABELS.get(item,item));button.custom_minimum_size=Vector2(64,64);button.add_theme_constant_override("icon_max_width",52);button.tooltip_text="%s × %d"%[String(LABELS.get(item,item)),int(data.items[item])]
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
@@ -188,6 +197,14 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 	_remove_armor.visible = equipment_allowed and String(loadout.get("armor", "suit")) != "suit"
 	_remove_armor.disabled = accessible.is_empty()
 	_layout_body_slots()
+
+func _compact_tile(button: Button) -> void:
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var style := button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
+		if style == null: continue
+		style.content_margin_left = STORAGE_TILE_PADDING.x; style.content_margin_right = STORAGE_TILE_PADDING.x
+		style.content_margin_top = STORAGE_TILE_PADDING.y; style.content_margin_bottom = STORAGE_TILE_PADDING.y
+		button.add_theme_stylebox_override(state, style)
 
 func _layout_body_slots() -> void:
 	if _identity == null or _bag_preview == null:
@@ -217,11 +234,11 @@ func _layout_body_slots() -> void:
 		var slot:=_slots.get_node_or_null("InventorySlot_"+key) as Control
 		if slot==null:continue
 		var icon:TextureRect=slot.get_child(0).get_child(0)
-		icon.custom_minimum_size=Vector2(72,72) if wide else Vector2(48,48)
+		icon.custom_minimum_size=SLOT_ICON
 		var label:Label=slot.get_child(0).get_child(1)
 		label.custom_minimum_size.x=130 if wide else 100;label.add_theme_font_size_override("font_size",16 if wide else 14)
-		var slot_width := minf(left - 24, 264 if wide else 216)
-		slot.custom_minimum_size = Vector2(slot_width, 80)
+		var slot_width := minf(left - 24, SLOT_WIDTH_WIDE if wide else SLOT_WIDTH_NARROW)
+		slot.custom_minimum_size = Vector2(slot_width, SLOT_HEIGHT)
 		slot.size = slot.custom_minimum_size
 		slot.position = Vector2(12, slot_y)
 		slot_y += slot.size.y + 4
