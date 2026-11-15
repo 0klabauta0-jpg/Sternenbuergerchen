@@ -8,6 +8,7 @@ const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_
 const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/mission_progression_resolver.gd")
 const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
+const CAMPAIGN_CASUALTY_RULES_SCRIPT: GDScript = preload("res://scripts/core/campaign_casualty_rules.gd")
 const REGIONAL_CAMPAIGN_MAPS := [
 	"res://maps/satellite_crash_site.json",
 	"res://maps/trade_outpost.json",
@@ -145,6 +146,8 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _singleplayer_runtime: Node
+var _campaign_casualty_rules: Dictionary = {}
+var _campaign_casualty_rules_loaded: bool = false
 var _game_start_request: Dictionary = {}
 var _campaign_start: RefCounted
 var _active_autosave_next_msec: int = 0
@@ -4453,6 +4456,11 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			combat_driver.set("win_condition", selected_win_condition)
 		if _active_mission_started_at_msec > 0:
 			combat_driver.set("mission_timer_started_at_msec", _active_mission_started_at_msec)
+		# Verwundung und Tod gelten nur im echten Kampagneneinsatz und nur mit gueltigen Regeln.
+		var casualty_rules: Dictionary = _get_campaign_casualty_rules() if is_campaign_start() and not preview_mode else {}
+		combat_driver.set("campaign_casualty_rules_enabled", not casualty_rules.is_empty())
+		if not casualty_rules.is_empty():
+			combat_driver.set("down_revive_window_seconds", float(casualty_rules.get("down_revive_window_seconds", 0.0)))
 
 	if preview_mode:
 		_disable_node_processing(mission_instance.get_node_or_null("SimulationRoot"))
@@ -4594,6 +4602,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 			result_unit_ids = PackedStringArray(setup.get("selected_team_unit_ids"))
 			result_fireteam_ids = PackedStringArray(setup.get("selected_team_fireteam_ids"))
 	var team_states: Array = []
+	var casualty_context: Dictionary = _build_campaign_casualty_context(mission_instance) if is_campaign_start() else {}
 	var friendly_slot_count: int = mini(result_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
 	for slot_index in range(friendly_slot_count):
 		var node_name: String = String(FRIENDLY_NODE_NAMES[slot_index])
@@ -4615,16 +4624,17 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 		if unit.has_method("get_vital_state"):
 			vital_state = String(unit.call("get_vital_state"))
 
-		team_states.append(
-			{
-				"unit_id": resolved_unit_id,
-				"display_name": String(unit.get("display_name")),
-				"portrait_path": _resolve_unit_portrait_path(resolved_unit_id),
-				"fireteam_id": String(unit.get("fireteam_id")),
-				"vital_state": vital_state,
-				"health_points": health_points,
-			}
-		)
+		var team_state: Dictionary = {
+			"unit_id": resolved_unit_id,
+			"display_name": String(unit.get("display_name")),
+			"portrait_path": _resolve_unit_portrait_path(resolved_unit_id),
+			"fireteam_id": String(unit.get("fireteam_id")),
+			"vital_state": vital_state,
+			"health_points": health_points,
+		}
+		if is_campaign_start():
+			team_state.merge(_campaign_casualty_fields_for_unit(unit, resolved_unit_id, casualty_context))
+		team_states.append(team_state)
 
 	var merged_result: Dictionary = mission_result.duplicate(true)
 	if merged_result.is_empty():
@@ -4649,6 +4659,65 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 	if not mini_aar_debrief.is_empty():
 		merged_result["mini_aar_debrief"] = mini_aar_debrief
 	return merged_result
+
+
+## Regeln einmal laden und merken. Ungueltig oder fehlend: leeres Dictionary;
+## load_rules meldet den Fehler dabei genau einmal, weil das Ergebnis gemerkt wird.
+func _get_campaign_casualty_rules() -> Dictionary:
+	if not _campaign_casualty_rules_loaded:
+		_campaign_casualty_rules_loaded = true
+		_campaign_casualty_rules = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("load_rules"))
+	return _campaign_casualty_rules
+
+
+## Gemeinsame Messgroessen fuer alle Personen eines Ergebnisses: Ausfall-Merker, Landeplatz, Radius.
+func _build_campaign_casualty_context(mission_instance: Node) -> Dictionary:
+	var context: Dictionary = {"flags": {}, "ship_ok": false, "ship_position": Vector2.ZERO, "radius": 0.0, "controller": null, "simulation": null}
+	var driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
+	if driver != null and driver.has_method("get_casualty_flags"):
+		context["flags"] = Dictionary(driver.call("get_casualty_flags"))
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	if rules.is_empty():
+		return context
+	var controller: Node = mission_instance.get_node_or_null("TacticalController")
+	context["controller"] = controller
+	context["simulation"] = mission_instance.get_node_or_null("SimulationRoot")
+	context["radius"] = float(rules.get("recovery_radius_world", 0.0))
+	var craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		craft_id = String(_mission_planning_state.get("launch_ready_craft_id", "")).strip_edges()
+	if controller != null and not craft_id.is_empty() and controller.has_method("get_campaign_ground_ship_access"):
+		var access: Dictionary = Dictionary(controller.call("get_campaign_ground_ship_access", craft_id))
+		var access_position: Variant = access.get("position", null)
+		if bool(access.get("ok", false)) and typeof(access_position) == TYPE_VECTOR2 and (access_position as Vector2).is_finite():
+			context["ship_ok"] = true
+			context["ship_position"] = access_position
+	return context
+
+
+func _campaign_casualty_fields_for_unit(unit: Node, unit_id: String, context: Dictionary) -> Dictionary:
+	var flag: Dictionary = Dictionary(Dictionary(context.get("flags", {})).get(unit_id, {}))
+	var near_ship: bool = false
+	if bool(context.get("ship_ok", false)) and unit is Node2D:
+		var position: Vector2 = _campaign_result_unit_position(unit as Node2D, unit_id, context)
+		near_ship = position.is_finite() and position.distance_to(Vector2(context.get("ship_position", Vector2.ZERO))) <= float(context.get("radius", 0.0))
+	return {
+		"was_downed": bool(flag.get("was_downed", false)),
+		"near_ship": near_ship,
+		"aboard": bool(unit.get_meta("dropship_embarked", false)),
+	}
+
+
+## Dieselbe Positionsquelle wie request_campaign_crew_boarding: auf Hex-Karten der Hex-Zustand, sonst global_position.
+func _campaign_result_unit_position(unit: Node2D, unit_id: String, context: Dictionary) -> Vector2:
+	var controller: Node = context.get("controller", null)
+	var simulation: Node = context.get("simulation", null)
+	if controller != null and simulation != null and controller.has_method("_requires_hex_deployment_owner") and bool(controller.call("_requires_hex_deployment_owner")):
+		var ground: Dictionary = Dictionary(simulation.call("get_hex_unit_state", unit_id))
+		var registry: Node = simulation.call("get_hex_ground_terrain_registry")
+		if not ground.is_empty() and ground.has("grid") and registry != null:
+			return Vector2(registry.call("grid_to_world", ground.get("grid")))
+	return unit.global_position
 
 
 func _extract_mini_aar_debrief_from_mission(mission_instance: Node) -> Dictionary:
