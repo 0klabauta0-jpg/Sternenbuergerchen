@@ -13,6 +13,9 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## Z12: Nicht eintragbarer Eintrag: niemand wird entfernt.   Z13: Auftragsfracht der Toten bleibt, der Rest geht verloren.   Z14: Tote auch in der FOB-Liste: nach dem Auffrischen in keiner Definition.
 ## Z15: Entfernen bei laufendem Einsatz und verdeckter Basisansicht.   Z16: Das Entfernen aendert den Fokus der Basisansicht nicht.
 ## Z17: Ein auf Polisa angeworbener Rekrut (mit echtem Finalize-Beleg) stirbt: Basisstand speichern, laden, fortsetzen und erneut speichern gelingt; ein Beleg ohne Person im Kader oder in der Gefallenenliste bleibt abgelehnt.
+## Nacharbeit 3a: Z1 (zweiter Trupp), Z15 und Z16 sind auf das neue Verhalten umgestellt (leer gewordener Trupp wird aufgeloest, bisher blieb er leer stehen).
+## Z18: Trupp mit einem Mitglied, das faellt: weg aus Definitionen, Auswahl, Schiffszuteilung, Ansicht; Speichern, Laden, Fortsetzen ohne ihn.
+## Z19: Trupp mit zwei Mitgliedern, eines faellt: bleibt.   Z20: von Hand angelegter leerer Trupp bleibt.   Z21: remove_fireteam und Knopf.   Z22: Fokus auf dem aufgeloesten Trupp.
 ## Einzeln starten: Umgebungsvariable T6B_ONLY (zum Beispiel "Z4") oder Kommandozeilenargument nach "--" (zum Beispiel "-- Z4"); ohne Angabe laufen alle.
 
 const STORE_6B = preload("res://scripts/meta/campaign_checkpoint_store.gd")
@@ -28,7 +31,7 @@ const LOCATION_6B := "satellite_crash"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _t6b_selected()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17", "Z18", "Z19", "Z20", "Z21", "Z22"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -226,7 +229,8 @@ func _t6b_z1() -> void:
 	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B], "Z1: Kader nun A, Pilot, B (%s)" % [_t6b_roster_ids()])
 	_check(_t6b_payload_base_ids(after).size() == 3 and _t6b_payload_base_ids(after) == _t6b_base_ids(), "Z1: Basis-Personalliste hat drei Personen und gleicht dem Stand")
 	var emptied_team: Dictionary = _t6b_team(after, _t6b_team_ids(before)[-1])
-	_check(Array(emptied_team.get("member_unit_ids", ["x"])).is_empty() and String(emptied_team.get("lead_unit_id", "x")).is_empty(), "Z1: der zweite Trupp hat weder Mitglieder noch Lead (%s)" % [emptied_team])
+	# Umgestellt (Nacharbeit 3a): bisher "leerer Trupp bleibt ohne Mitglieder und Lead stehen", jetzt wird er aufgeloest.
+	_check(emptied_team.is_empty() and not _t6b_team_ids(after).has(_t6b_team_ids(before)[-1]), "Z1: der zweite Trupp ist aufgeloest, er steht nicht mehr in den Definitionen (%s)" % [_t6b_team_ids(after)])
 	var first_team: Dictionary = _t6b_team(after, _t6b_team_ids(before)[0])
 	_check(Array(first_team.get("member_unit_ids", [])) == [LEAD_A, LEAD_B] and String(first_team.get("lead_unit_id", "")) == LEAD_A, "Z1: erster Trupp unveraendert A (Lead) und B")
 	_check(Array(Array(after.get("craft", {}).get("staged_fireteam_ids", [])).filter(func(id): return not _t6b_team_ids(after).has(id))).is_empty(), "Z1: staged_fireteam_ids nennen nur vorhandene Trupps")
@@ -536,6 +540,7 @@ func _t6b_z14() -> void:
 ## Laeuft ein Einsatz und ist die Basisansicht verdeckt, wird trotzdem bereinigt (Ansicht und Checkpoint).
 func _t6b_z15() -> void:
 	if not await _t6b_new_four(): return
+	var emptied_team_id: String = String(_t6b_team_ids(_t6b_payload())[-1])
 	var dummy := Node.new()
 	_flow.set("_active_mission", dummy)
 	_screen.visible = false
@@ -546,20 +551,24 @@ func _t6b_z15() -> void:
 	var after: Dictionary = _t6b_payload()
 	_check(not after.is_empty() and _t6b_where(after, SHOOTER_C).is_empty(), "Z15: bei laufendem Einsatz und verdeckter Ansicht: C in keiner Definition, keinem Checkpoint (noch da: %s)" % [_t6b_where(after, SHOOTER_C)])
 	_check(not after.is_empty() and bool(STORE_6B.validate_payload(after).get("ok", false)), "Z15: Stand gueltig")
-	var emptied: Dictionary = _t6b_team(after, _t6b_team_ids(after)[-1])
-	_check(not JSON.stringify(Array(_screen.call("_get_fireteam_definitions_snapshot"))).contains(SHOOTER_C) and Array(emptied.get("member_unit_ids", ["x"])).is_empty(), "Z15: auch die Definitionen der Basisansicht kennen C nicht mehr")
+	# Umgestellt (Nacharbeit 3a): der leer gewordene Trupp ist aufgeloest, auch bei verdeckter Ansicht und laufendem Einsatz.
+	_check(not JSON.stringify(Array(_screen.call("_get_fireteam_definitions_snapshot"))).contains(SHOOTER_C) and _t6b_team(after, emptied_team_id).is_empty() and not _t6b_team_ids(after).has(emptied_team_id), "Z15: auch die Definitionen der Basisansicht kennen C nicht mehr, der leere Trupp ist aufgeloest (%s)" % [_t6b_team_ids(after)])
 
 ## Das Entfernen wechselt den Fokus der Basisansicht nicht.
 func _t6b_z16() -> void:
 	if not await _t6b_new_four(): return
 	var team_ids: Array = _t6b_team_ids(_t6b_payload())
-	# Fokus auf den betroffenen Trupp, die fokussierte Person ueberlebt (eine fokussierte Tote muss der Ansicht ohnehin weichen).
-	_screen.set("_focused_fireteam_id", team_ids[-1])
+	# Fokus auf einen Trupp, der bleibt, die fokussierte Person ueberlebt (eine fokussierte Tote muss der Ansicht ohnehin weichen).
+	# Umgestellt (Nacharbeit 3a): bisher war der Fokus auf dem betroffenen Trupp; der wird jetzt aufgeloest (siehe Z21).
+	_screen.set("_focused_fireteam_id", team_ids[0])
 	_screen.set("_focused_unit_id", LEAD_A)
-	var focus_before: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id"), _screen.get("_loadout_staged_fireteam_id")]
+	var focus_before: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id")]
+	_check(String(_screen.get("_loadout_staged_fireteam_id")) == String(team_ids[-1]), "Z16: Fixture: der Ausruestungs-Trupp zeigt (vom Anlegen her) auf den zweiten Trupp")
 	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
-	var focus_after: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id"), _screen.get("_loadout_staged_fireteam_id")]
-	_check(focus_before == focus_after, "Z16: Fokus vorher == nachher (%s -> %s)" % [focus_before, focus_after])
+	var focus_after: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id")]
+	_check(focus_before == focus_after, "Z16: Fokus (Trupp, Person) vorher == nachher (%s -> %s)" % [focus_before, focus_after])
+	# Umgestellt (Nacharbeit 3a): der Ausruestungs-Trupp zeigte auf den aufgeloesten Trupp und folgt dem Fokus.
+	_check(String(_screen.get("_loadout_staged_fireteam_id")) == String(team_ids[0]), "Z16: der Ausruestungs-Trupp zeigt nicht mehr auf den aufgeloesten Trupp (%s)" % _screen.get("_loadout_staged_fireteam_id"))
 
 const RECRUIT_17 := "polisa_recruit_z17"
 
@@ -646,3 +655,150 @@ func _t6b_z17() -> void:
 	_check(bool(second.get("ok", false)), "Z17: zweites Speichern nach dem Fortsetzen gelingt (%s)" % [second])
 	var reloaded: Dictionary = STORE_6B.load_checkpoint()
 	_check(bool(reloaded.get("ok", false)) and JSON.stringify(Dictionary(reloaded.get("payload", {})).get("fallen", [])).contains(RECRUIT_17), "Z17: auch der zweite Stand laesst sich laden und nennt den Gefallenen (ok=%s)" % [reloaded.get("ok", false)])
+
+# ---------- Leer gewordene Trupps werden aufgeloest (Nacharbeit 3a) ----------
+
+func _t6b_view_team_ids() -> Array:
+	var ids: Array = []
+	for team: Dictionary in Array(Dictionary(_screen.call("get_operations_snapshot")).get("fireteams", [])):
+		ids.append(String(team.get("id", "")))
+	return ids
+
+## Zahl der gezeichneten Truppkarten der Trupp-Liste der Ansicht.
+func _t6b_team_card_count() -> int:
+	var list := _screen.get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll/FireteamList")
+	var count := 0
+	if list != null:
+		for child in list.get_children():
+			if bool(child.get_meta("homebase_direct_fireteam_card", false)) and not child.is_queued_for_deletion():
+				count += 1
+	return count
+
+## Wo der Trupp ausser in den Definitionen noch haengt: Auswahl, Schiffszuteilung, Ansicht (leer = nirgends).
+func _t6b_team_places(team_id: String) -> Array:
+	var found: Array = []
+	if _t6b_view_team_ids().has(team_id): found.append("view operations fireteams")
+	if _t6b_team_ids(_t6b_payload()).has(team_id): found.append("checkpoint fireteam_definitions")
+	if JSON.stringify(Array(_screen.call("_get_fireteam_definitions_snapshot"))).contains("\"%s\"" % team_id): found.append("view definitions")
+	for field: String in ["_selected_fireteam_ids", "_homebase_staged_fireteam_ids"]:
+		if PackedStringArray(_flow.get(field)).has(team_id): found.append("flow." + field)
+	if PackedStringArray(_screen.call("get_selected_fireteam_ids")).has(team_id): found.append("view selected_fireteam_ids")
+	if PackedStringArray(_screen.get("_homebase_dropship_staged_fireteam_ids")).has(team_id): found.append("view dropship staged")
+	for craft_ids in Dictionary(_screen.get("_homebase_dropship_staged_fireteam_ids_by_craft")).values():
+		if PackedStringArray(craft_ids).has(team_id): found.append("view dropship by craft")
+	if Array(Dictionary(_t6b_payload().get("craft", {})).get("staged_fireteam_ids", [])).has(team_id): found.append("checkpoint staged_fireteam_ids")
+	return found
+
+## Z18: Das einzige Mitglied eines Trupps faellt: der Trupp ist aufgeloest (Definitionen, Auswahl, Schiffszuteilung, Ansicht),
+## der Heim-Stand ist gueltig, nach Speichern, Laden und Fortsetzen gibt es ihn nicht mehr.
+func _t6b_z18() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	var gone_id: String = String(team_ids[-1])
+	var craft_id: String = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
+	_screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {craft_id: PackedStringArray([gone_id])})
+	_screen.call("_sync_homebase_direct_legacy_payload_list")
+	var places: Array = _t6b_team_places(gone_id)
+	_check(places.has("view operations fireteams") and places.has("checkpoint fireteam_definitions") and places.has("view dropship staged") and places.has("view dropship by craft"), "Z18: Fixture: der Trupp steht in Ansicht, Definitionen und Schiffszuteilung (%s)" % [places])
+	var result: Dictionary = _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted")
+	_check(PackedStringArray(result.fatality_unit_ids) == PackedStringArray([SHOOTER_C]), "Z18: Fixture: C faellt, sonst niemand")
+	_flow.call("_apply_campaign_casualties", result)
+	_check(_t6b_team_places(gone_id).is_empty(), "Z18: der Trupp von C hat keinen Platz mehr (%s)" % [_t6b_team_places(gone_id)])
+	var after: Dictionary = _t6b_payload()
+	_check(_t6b_team_ids(after) == [team_ids[0]] and _t6b_view_team_ids() == [team_ids[0]], "Z18: nur der erste Trupp bleibt (Stand %s, Ansicht %s)" % [_t6b_team_ids(after), _t6b_view_team_ids()])
+	_check(_t6b_team_card_count() == 1, "Z18: die Ansicht zeichnet eine Truppkarte (%d)" % _t6b_team_card_count())
+	_check(bool(STORE_6B.validate_payload(after).get("ok", false)) and _t6b_where(after, SHOOTER_C).is_empty(), "Z18: Heim-Stand ist gueltig (%s)" % [STORE_6B.validate_payload(after)])
+	var first_team: Dictionary = _t6b_team(after, team_ids[0])
+	_check(Array(first_team.get("member_unit_ids", [])) == [LEAD_A, LEAD_B] and String(first_team.get("lead_unit_id", "")) == LEAD_A, "Z18: der erste Trupp bleibt mit A (Lead) und B")
+	_check(_t6b_lock().is_empty(), "Z18: Einsatzsperre leer")
+	var saved: Dictionary = _flow.call("request_campaign_save")
+	if not _check(bool(saved.get("ok", false)), "Z18: Speichern gelingt (%s)" % [saved.get("reason", "")]): return
+	await _end_sortie()
+	await create_timer(0.5).timeout
+	if not await _t6b_open("campaign", "continue"): return
+	var resumed: Dictionary = _t6b_payload()
+	_check(not resumed.is_empty() and bool(STORE_6B.validate_payload(resumed).get("ok", false)), "Z18: Stand nach dem Fortsetzen ist gueltig")
+	_check(_t6b_team_ids(resumed) == [team_ids[0]] and _t6b_team_places(gone_id).is_empty(), "Z18: nach dem Fortsetzen gibt es den Trupp nicht mehr (%s)" % [_t6b_team_places(gone_id)])
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B], "Z18: Kader nach dem Fortsetzen A, Pilot, B (%s)" % [_t6b_roster_ids()])
+
+## Z19: Ein Trupp mit zwei Mitgliedern, eines faellt: der Trupp bleibt mit dem Ueberlebenden, der als Lead nachrueckt.
+func _t6b_z19() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	var kept_id: String = String(team_ids[-1])
+	var moved: Dictionary = _screen.call("request_operation", "assign", {"unit_id": LEAD_B, "fireteam_id": kept_id})
+	if not _check(bool(moved.get("ok", false)), "Z19: Fixture: B wechselt in den zweiten Trupp (%s)" % [moved]): return
+	var before: Dictionary = _t6b_payload()
+	var two: Dictionary = _t6b_team(before, kept_id)
+	_check(Array(two.get("member_unit_ids", [])).size() == 2 and Array(two.get("member_unit_ids", [])).has(SHOOTER_C) and Array(two.get("member_unit_ids", [])).has(LEAD_B), "Z19: Fixture: der zweite Trupp hat C und B (%s)" % [two])
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	var after: Dictionary = _t6b_payload()
+	var kept: Dictionary = _t6b_team(after, kept_id)
+	_check(not kept.is_empty() and Array(kept.get("member_unit_ids", [])) == [LEAD_B], "Z19: der Trupp bleibt mit einem Mitglied, B (%s)" % [kept])
+	_check(String(kept.get("lead_unit_id", "")) == LEAD_B, "Z19: B ist Lead des Trupps (%s)" % [kept.get("lead_unit_id", "")])
+	_check(_t6b_team_ids(after) == team_ids and _t6b_view_team_ids() == team_ids, "Z19: beide Trupps stehen weiter in Stand und Ansicht (%s / %s)" % [_t6b_team_ids(after), _t6b_view_team_ids()])
+	_check(bool(STORE_6B.validate_payload(after).get("ok", false)) and _t6b_where(after, SHOOTER_C).is_empty(), "Z19: Stand gueltig, C weg")
+
+## Z20: Ein von Hand angelegter leerer Trupp bleibt, mit und ohne Todesfall; nur der durch den Tod leer gewordene wird aufgeloest.
+func _t6b_z20() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	var added: Dictionary = _screen.call("request_operation", "add_fireteam", {})
+	if not _check(bool(added.get("ok", false)), "Z20: Fixture: dritter Trupp von Hand angelegt (%s)" % [added]): return
+	var manual_id: String = ""
+	for id: String in _t6b_team_ids(_t6b_payload()):
+		if not team_ids.has(id):
+			manual_id = id
+	if not _check(not manual_id.is_empty() and Array(_t6b_team(_t6b_payload(), manual_id).get("member_unit_ids", ["x"])).is_empty(), "Z20: Fixture: der neue Trupp ist leer (%s)" % [manual_id]): return
+	# Ohne Todesfall (Sieg, nichts verloren): der leere Trupp bleibt.
+	var peace: Dictionary = _t6b_result(_t6b_states({}), "won")
+	_check(PackedStringArray(peace.fatality_unit_ids).is_empty(), "Z20: Fixture: Sieg ohne Tote")
+	_flow.call("_apply_campaign_casualties", peace)
+	_check(_t6b_team_ids(_t6b_payload()) == team_ids + [manual_id] and _t6b_view_team_ids() == team_ids + [manual_id], "Z20: ohne Todesfall bleiben alle drei Trupps, auch der leere (%s)" % [_t6b_team_ids(_t6b_payload())])
+	# Mit einem Todesfall in einem anderen Trupp: nur dieser wird aufgeloest, der leere von Hand bleibt.
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	var after: Dictionary = _t6b_payload()
+	_check(_t6b_team_ids(after) == [team_ids[0], manual_id] and _t6b_view_team_ids() == [team_ids[0], manual_id], "Z20: nach dem Tod von C: erster und leerer Trupp bleiben, der zweite ist weg (%s / %s)" % [_t6b_team_ids(after), _t6b_view_team_ids()])
+	_check(Array(_t6b_team(after, manual_id).get("member_unit_ids", ["x"])).is_empty(), "Z20: der von Hand angelegte Trupp ist weiter leer")
+	_check(bool(STORE_6B.validate_payload(after).get("ok", false)), "Z20: Stand gueltig")
+
+## Z21: remove_fireteam der Ansicht: Rueckgabe, kein Fokuswechsel ausser beim fokussierten Trupp, Knopf gleich; und ein
+## aufgeloester Trupp, der gerade im Fokus steht, laesst den Fokus auf einen vorhandenen Trupp fallen.
+func _t6b_z21() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	if not _check(_screen.has_method("remove_fireteam"), "Z21: die Ansicht hat remove_fireteam"): return
+	var added: Dictionary = _screen.call("request_operation", "add_fireteam", {})
+	var manual_id: String = ""
+	for id: String in _t6b_view_team_ids():
+		if not team_ids.has(id):
+			manual_id = id
+	if not _check(bool(added.get("ok", false)) and not manual_id.is_empty(), "Z21: Fixture: dritter Trupp (%s)" % [added]): return
+	_screen.set("_focused_fireteam_id", team_ids[0])
+	var focus_before: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id")]
+	_check(String(_screen.get("_loadout_staged_fireteam_id")) == manual_id, "Z21: Fixture: der Ausruestungs-Trupp zeigt (vom Anlegen her) auf den neuen Trupp")
+	_check(not bool(_screen.call("remove_fireteam", "")) and not bool(_screen.call("remove_fireteam", "ft_gibt_es_nicht")), "Z21: leere und unbekannte ID: false")
+	_check(_t6b_view_team_ids() == team_ids + [manual_id], "Z21: false aendert nichts")
+	_check(bool(_screen.call("remove_fireteam", manual_id)), "Z21: bekannte ID: true")
+	_check(_t6b_view_team_ids() == team_ids and _t6b_team_places(manual_id).is_empty(), "Z21: der Trupp ist weg (%s)" % [_t6b_team_places(manual_id)])
+	_check([_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id")] == focus_before, "Z21: Fokus (Trupp, Person) unveraendert, wenn ein anderer Trupp entfernt wird")
+	_check(String(_screen.get("_loadout_staged_fireteam_id")) == String(team_ids[0]), "Z21: der Ausruestungs-Trupp zeigte auf den entfernten Trupp und folgt dem Fokus (%s)" % _screen.get("_loadout_staged_fireteam_id"))
+	_check(not bool(_screen.call("remove_fireteam", manual_id)), "Z21: zweiter Aufruf: false")
+	# Knopf: entfernt den fokussierten Trupp wie bisher (jetzt ueber remove_fireteam), Fokus faellt auf den ersten.
+	_screen.set("_focused_fireteam_id", team_ids[-1])
+	_screen.call("_on_homebase_remove_fireteam_pressed")
+	_check(_t6b_view_team_ids() == [team_ids[0]] and String(_screen.get("_focused_fireteam_id")) == String(team_ids[0]), "Z21: Knopf entfernt den fokussierten Trupp, Fokus auf den ersten (%s, Fokus %s)" % [_t6b_view_team_ids(), _screen.get("_focused_fireteam_id")])
+	# Letzter Trupp: der Knopf entfernt ihn weiter nicht.
+	_screen.call("_on_homebase_remove_fireteam_pressed")
+	_check(_t6b_view_team_ids() == [team_ids[0]], "Z21: der letzte Trupp bleibt beim Knopf")
+
+## Z22: Der aufgeloeste Trupp steht gerade im Fokus: der Fokus faellt auf einen vorhandenen Trupp.
+func _t6b_z22() -> void:
+	if not await _t6b_new_four(): return
+	var team_ids: Array = _t6b_team_ids(_t6b_payload())
+	_screen.set("_focused_fireteam_id", team_ids[-1])
+	_screen.set("_focused_unit_id", LEAD_A)
+	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
+	var focus: String = String(_screen.get("_focused_fireteam_id"))
+	_check(_t6b_view_team_ids() == [team_ids[0]] and focus == String(team_ids[0]) and String(_screen.get("_loadout_staged_fireteam_id")) == focus, "Z22: Fokus und Ausruestungs-Trupp fallen auf den vorhandenen Trupp (%s)" % [focus])
+	_check(String(_screen.get("_focused_unit_id")) == LEAD_A, "Z22: die fokussierte Person bleibt")

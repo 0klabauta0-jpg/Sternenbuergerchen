@@ -6260,21 +6260,41 @@ func _on_homebase_remove_fireteam_pressed() -> void:
 	var fireteam_id: String = _normalize_fireteam_id(_focused_fireteam_id)
 	if fireteam_id.is_empty() or _fireteam_definitions.size() <= 1:
 		return
-	var next_definitions: Array = []
-	for definition_variant in _fireteam_definitions:
-		var definition: Dictionary = Dictionary(definition_variant)
-		if _normalize_fireteam_id(String(definition.get("id", ""))) == fireteam_id:
-			continue
-		next_definitions.append(definition)
-	_fireteam_definitions = next_definitions
-	for unit_index in range(_selected_fireteam_ids.size()):
-		if String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower() == fireteam_id:
-			_selected_fireteam_ids[unit_index] = ""
-	_remove_homebase_direct_payload_fireteam(fireteam_id)
-	_focused_fireteam_id = _normalize_fireteam_id(String(Dictionary(_fireteam_definitions[0]).get("id", HOMEBASE_DEFAULT_FIRETEAM_ID))) if not _fireteam_definitions.is_empty() else HOMEBASE_DEFAULT_FIRETEAM_ID
-	_loadout_staged_fireteam_id = _focused_fireteam_id
+	if not remove_fireteam(fireteam_id):
+		return
 	_emit_homebase_fireteam_context_changed()
 	_rebuild_ui()
+
+
+## Loest einen Trupp nach ID auf: Definition, Zuordnung der Personen (Auswahl) und Schiffszuteilung. Unabhaengig vom Fokus.
+## Der Fokus (und der Ausruestungs-Trupp) wechselt nur, wenn er auf dem entfernten Trupp stand: dann auf den ersten
+## verbleibenden. Kein Signal und kein Neuaufbau; wer sofort neu zeichnen muss, ruft danach setup_roster oder
+## set_fireteam_context (der Knopf: Signal und _rebuild_ui). false: leere oder unbekannte ID, nichts geaendert.
+func remove_fireteam(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return false
+	var next_definitions: Array = []
+	var found: bool = false
+	for definition_variant in _fireteam_definitions:
+		var definition: Dictionary = Dictionary(definition_variant)
+		if _normalize_fireteam_id(String(definition.get("id", ""))) == normalized_fireteam_id:
+			found = true
+			continue
+		next_definitions.append(definition)
+	if not found:
+		return false
+	_fireteam_definitions = next_definitions
+	for unit_index in range(_selected_fireteam_ids.size()):
+		if String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower() == normalized_fireteam_id:
+			_selected_fireteam_ids[unit_index] = ""
+	_remove_homebase_direct_payload_fireteam(normalized_fireteam_id)
+	var focus_removed: bool = _normalize_fireteam_id(_focused_fireteam_id) == normalized_fireteam_id
+	if focus_removed:
+		_focused_fireteam_id = _normalize_fireteam_id(String(Dictionary(_fireteam_definitions[0]).get("id", HOMEBASE_DEFAULT_FIRETEAM_ID))) if not _fireteam_definitions.is_empty() else HOMEBASE_DEFAULT_FIRETEAM_ID
+	if focus_removed or _normalize_fireteam_id(_loadout_staged_fireteam_id) == normalized_fireteam_id:
+		_loadout_staged_fireteam_id = _focused_fireteam_id
+	return true
 
 
 func _on_homebase_assign_focused_unit_pressed() -> void:

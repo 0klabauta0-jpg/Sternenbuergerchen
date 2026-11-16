@@ -4937,6 +4937,11 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 		# Kontext mit den bereinigten Definitionen der Trupps, die keine Mitglieder mehr haben.
 		homebase_screen.call("setup_roster", _available_team_units, _homebase_staged_unit_ids)
 		homebase_screen.call("set_fireteam_context", _homebase_staged_fireteam_ids, emptied_teams, false)
+		# Ein Trupp, der durch Todesfaelle kein Mitglied mehr hat, wird aufgeloest (Definition, Auswahl, Schiffszuteilung).
+		# Von Hand angelegte leere Trupps sind nicht dabei: sie haben nie ein Mitglied verloren.
+		if homebase_screen.has_method("remove_fireteam"):
+			for emptied_team_variant in emptied_teams:
+				homebase_screen.call("remove_fireteam", String(Dictionary(emptied_team_variant).get("id", "")))
 	_refresh_homebase_screen()
 	_sync_wound_lock()
 
@@ -5006,7 +5011,8 @@ func _discard_fatalities_from_runtime(dead_units: Dictionary, homebase_screen: N
 
 ## Trupps der Basisansicht, die durch den Tod keine Mitglieder mehr haetten: bereinigte Definitionen (ohne Mitglieder und
 ## ohne Lead), die set_fireteam_context anstelle der alten einsetzt. Sonst fiele die Ansicht fuer einen leeren Trupp auf
-## dessen alte member_unit_ids zurueck, in denen noch die Toten stehen. Nur oeffentliche Auskunft der Ansicht.
+## dessen alte member_unit_ids zurueck, in denen noch die Toten stehen. Danach loest der Aufrufer diese Trupps mit
+## remove_fireteam der Ansicht auf. Nur oeffentliche Auskunft der Ansicht.
 func _campaign_teams_emptied_by(dead_units: Dictionary, homebase_screen: Node) -> Array:
 	var emptied: Array = []
 	if homebase_screen == null or not homebase_screen.has_method("get_operations_snapshot"):
