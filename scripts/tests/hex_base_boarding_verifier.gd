@@ -78,7 +78,7 @@ func _test_station_roster_identity()->void:
 	rig.base.sync_roster()
 	var actor:Node=rig.base.get_actor("polisa_recruit_station")
 	_check(is_instance_valid(actor) and not actor.visible and rig.base._states.polisa_recruit_station.status=="station" and not rig.base._unit_is_home("polisa_recruit_station") and rig.sim.get_hex_unit_state("polisa_recruit_station").is_empty(),"station recruit has no physical base presence")
-	_check(rig.base.has_method("has_station_recruits") and rig.base.has_station_recruits(),"station personnel blocks incomplete home checkpoint")
+	_check(rig.base.has_method("has_station_recruits") and rig.base.has_station_recruits(),"base reports a recruit resident on the station (has_station_recruits)")
 	rig.scene.free()
 
 func _test_station_shuttle_home_admission()->void:
