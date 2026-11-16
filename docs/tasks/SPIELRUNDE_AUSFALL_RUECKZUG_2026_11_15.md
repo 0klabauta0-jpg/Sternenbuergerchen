@@ -76,7 +76,7 @@ Zur Aufgabendatei und zum Plan selbst gehören die Commits `2fcf3bd23` (Entwurf)
 | 3 | Kampagnenschalter beim Missionsaufbau, `was_downed`/`near_ship`/`aboard`, Radius 180 | `d8ec72aa7` | `campaign_casualty_result_verifier` 68/0 | geprüft |
 | 4 | Einschiffen mit Ausgefallenen | `db648de9b`, Fix `9a279ff12` | `campaign_casualty_boarding_verifier` 64/0 | geprüft |
 | 5a | Verluste erkennen und genau einmal anwenden | `555b5a403`, Fix `e3e3e6384` | `campaign_casualty_apply_verifier` 225/0 (219/0 bis Aufgabe 8b), `campaign_casualty_debrief_retry_test` 164/0 | geprüft |
-| 5b | Malus bei Totalverlust nach dem Rücksprung | noch kein Commit | `campaign_total_loss_penalty_verifier` (P1 bis P8, noch ohne Zahl) | in Arbeit |
+| 5b | Malus bei Totalverlust nach dem Rücksprung | `ad3428128`, Umbau auf Zusatzdatei `e947cded6` | `campaign_total_loss_penalty_verifier` 266/0 (P5 einzeln 44/0) | umgesetzt, Prüfung läuft (Stand 16.11.2026) |
 | 5c | Abflug ohne Missionsauflösung durch die Verlustauswertung, Abflug-Gate im Controller | `854662390`, `7ea87deda`, `fb813cfcd` | `campaign_casualty_departure_verifier` 519/0 (voller Lauf rund 25 Minuten, auf `fb813cfcd`) | geprüft |
 | 6a | Gefallenenliste im Kampagnen-Checkpoint | `77a090df5` | `campaign_casualty_fallen_list_verifier` 45/0 | geprüft |
 | 6b | Gefallene aus Kader, Basis, Trupps, Ausrüstung; Nachrücken; geschützte Personen | `1646e0b53`, Fix `ae15afbae` | `campaign_casualty_roster_verifier` 234/0 | geprüft (ein Punkt per Ruling zurückgestellt: leerer Trupp bleibt stehen) |
@@ -85,7 +85,7 @@ Zur Aufgabendatei und zum Plan selbst gehören die Commits `2fcf3bd23` (Entwurf)
 | 8a | Kampagnenstand: `retreat_count`, `reopen_at_home`, Operation `reopen_retreated_job` | `f2c321bbf` | `campaign_retreat_keeps_job_open_verifier` 102/0 | geprüft |
 | 8b | Wiederöffnen bei Heimkehr vor dem Basis-Checkpoint, `recovery_*` im Ergebnis | `8bfb79370` | `campaign_retreat_reopen_at_home_verifier` 194/0 (rund 4 Minuten) | geprüft |
 | 9 | Anzeige in Debrief, Charakterblatt, Personenkarte, Auftragstafel | `b413384c6`, Fix `334494a74` | `campaign_casualty_display_verifier` 72/0 | geprüft |
-| 10 | Verträge und Unterlagen (10a), Aufsetzen auf `main` und kurze Regression (10b), Gesamtprüfung (10c) | 10a: der Commit mit dieser Datei | 10a: keine Tests (nur `docs/`) | 10a geschrieben, der Malus-Absatz im Vertrag ist nach Task 5b gegen den Code zu prüfen; 10b und 10c laut Protokoll noch nicht begonnen |
+| 10 | Verträge und Unterlagen (10a), Aufsetzen auf `main` und kurze Regression (10b), Gesamtprüfung (10c) | 10a: der Commit mit dieser Datei | 10a: keine Tests (nur `docs/`) | 10a erledigt (Malus-Unterlagen am 16.11.2026 nach 5b gegen den Code nachgezogen); 10b „Aufsetzen auf `main` und kurze Regression“ und 10c „Gesamtprüfung“ offen |
 
 Vergleichsläufe nach den Aufgaben (unverändert gegenüber vorher, soweit im Bericht belegt): `campaign_save_menu_routing_verifier` PASS (mit `POLISA_TEST_PROFILE=1`), `campaign_checkpoint_run_id_verifier` PASS, `review8_ux_debrief_abort_verifier` 50/0, `character_sheet_compact_verifier` 25/0, `campaign_hex_autosave_interval_verifier` 17/0, `hex_campaign_continue_verifier` 17/0, `hex_base_personnel_owner_verifier` 68/0, `campaign_five_missions_state_test` 15/0, `campaign_five_missions_chain_test` 64/0, `campaign_supply_progression_verifier` failures=0, `medic_support_verifier` 30/0, `task_513_mission_combat_resolution_boundary` 26/0, `campaign_guard_vital_gate_verifier` failures=0, `playtest_l03_boarding_repro_verifier` 44/0 (nur für den Lauf vom anderen Branch geholt).
 
@@ -111,7 +111,7 @@ Aus den Rulings des Protokolls; Björn entschieden sind mit [B] gekennzeichnet.
 
 ### Nicht geprüft / offen
 
-- Der Malus bei Totalverlust (Aufgabe 5b) ist in Arbeit und nicht committet; die Feld- und Funktionsnamen des Flows fehlen im Vertrag und sind nach Abschluss nachzutragen.
+- Der Malus bei Totalverlust (Aufgabe 5b) ist umgesetzt, die Prüfung läuft noch; Feld- und Funktionsnamen stehen im Vertrag (Regel 7). Ungeprüft bleiben `review_completion_ux_20261113` und `review_completion_home_save_verifier` (ohne Projektkopie nicht lauffähig), und `astra_campaign_fixes_20261113.gd` Z. 57 ist durch den Malus bewusst falsch.
 - Zurückgestellt (Ruling): leerer Trupp bleibt stehen (Funktion `remove_fireteam` in `homebase_screen.gd` fehlt); Restzeit auf der Personenkarte läuft nicht sichtbar mit (Kaderkopie der Basisansicht); Meldung „Alle an Bord“ mit Liegenden und `get_selected_team_boarding_snapshot` setzt bei 0 Gesundheit `can_board = false` (Wunsch an den Bedien-Strang). Alle drei nach dem Merge.
 - Ungeklärt aus der Prüfung von 6b (heute nicht erreichbar, wird mit größeren Trupps relevant): (a) Mitglieder, die in der Ansichts-Definition eines Trupps stehen, aber nicht gestagt sind, könnten die Tote in den Checkpoint tragen; (b) `_mission_planning_state["selected_fireteam_definitions"]` und `drop_state` werden nicht bereinigt.
 - Ein echter Einsatz mit Toten ist mit der Zweierbesatzung nicht herstellbar; der Pfad ist direkt geprüft, nicht Ende-zu-Ende. Ebenso nur am Code belegt: die Buchung eines Siegs mit Verwundetem (`completed` oder `pending_upload`; der Auftrag bleibt im Test `active`), Fortsetzen mit laufendem Einsatz und Sperre, ein zweiter Einsatz in derselben Instanz nach einem ausgewerteten Abflug, die Altquellen `fob` und `homebase_direct_then_fob`.
@@ -129,5 +129,5 @@ Auf Anweisung von Björn [B, 15.11., 18:27] („überspringe so lange Tests und 
 - `campaign_casualty_departure_verifier`: zuletzt 519/0 auf `fb813cfcd` (voller Lauf, rund 25 Minuten). Seither nach den Aufgaben 6a, 6b, 7b, 8b und 9 nicht wiederholt.
 - `campaign_two_moon_roundtrips_real_verifier`: zuletzt 83/0 laut Protokoll auf `7ea87deda` (gut 10 Minuten). Nach den späteren Änderungen nicht wiederholt.
 - Aus den Aufgaben 6b und später übersprungen, weil nicht verlangt oder lang: `campaign_casualty_boarding_verifier`, `campaign_casualty_result_verifier`, `campaign_casualty_driver_verifier` nach den Änderungen von 6b (zuletzt 64/0, 68/0, 36/0).
-- Zusätzlich nach Task 5b: der neue Test `campaign_total_loss_penalty_verifier` und, was 5b als übersprungen meldet.
+- Zusätzlich nach Task 5b: der neue Test `campaign_total_loss_penalty_verifier` und, was 5b als übersprungen meldet. P5 des Tests ist gelaufen (einzeln 44/0 in 110 s); der Gesamtlauf mit 266/0 steht im Vertrag.
 - Aufruf: `cd C:\dev\SternenBuergerchen-worktrees\spielrunde-ausfall-20261115; $env:APPDATA="$env:TEMP\sb_spielrunde_profil"; cmd /c "start /belownormal /b /wait godot_console.exe --headless --path . -s scripts/tests/<NAME>.gd" *> "$env:TEMP\<NAME>.out"; Get-Content "$env:TEMP\<NAME>.out" -Tail 30`. Immer nur ein Godot-Prozess, Schlusszeile auswerten.

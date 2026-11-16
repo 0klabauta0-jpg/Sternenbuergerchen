@@ -18,7 +18,7 @@
 - **kritisch** (Kampagne): Zustand einer ausgefallenen eigenen Person nach Ablauf der Versorgungsfrist; im Feld nicht mehr aufzurichten. Ist sie am Missionsende geborgen, ist sie schwer verwundet, sonst tot
 - **LOS (Line of Sight)**: Sichtlinie zwischen zwei Einheiten; kann durch Terrain blockiert werden
 - **Nehmen (Take)**: Gebiet einnehmen; beim vollen Capture-Fortschritt wechselt der Besitzer
-- **Notbergung** (Kampagne): Der Rücksprung zum letzten Basisstand nach einem Totalverlust gilt als Rettung durch einen Rettungsdienst und kostet etwas (Gebühr, leichte Verwundung der am Boden Gelegenen, Moral). Umsetzung in Arbeit (Task 5b)
+- **Notbergung** (Kampagne): Der Rücksprung zum letzten Basisstand nach einem Totalverlust gilt als Rettung durch einen Rettungsdienst und kostet etwas (Gebühr, leichte Verwundung der am Boden Gelegenen, Moral). Umgesetzt (Task 5b), Prüfung läuft; der ausstehende Malus steht bis zum Laden in einer Zusatzdatei neben dem Checkpoint
 - **Objective**: Einnehmbarer Zielpunkt auf der Karte mit Capture-Fortschritt und Besitzer
 - **Phase**: Taktische Einsatzphase (APPROACH, ASSAULT, HOLD); beeinflusst Feuerverhalten, Geschwindigkeit und Deckung
 - **Registry**: zentrale strukturierte Laufzeitliste statt SceneTree-Abfragen

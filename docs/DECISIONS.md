@@ -69,7 +69,12 @@ Vertrag: `docs/dev/campaign_casualty_retreat_contract.md`. Aufgabendatei: `docs/
 ### Malus bei Totalverlust [B: es muss einen geben; Ausgestaltung V]
 - Entscheidung: Bei Totalverlust (Pilot ausgefallen, niemand vom Bodentrupp einsatzfähig, oder kein Truppführer oder Pilot im Kader übrig) stirbt niemand; der Rücksprung zum Basisstand gilt als Notbergung und kostet 25 % des Guthabens (mindestens 50 Credits), macht alle am Boden Gelegenen leicht verwundet und senkt die Moral um 0,08.
 - Warum: Der Rücksprung soll etwas kosten und sich nicht durch Neuladen umgehen lassen.
-- Auswirkung: Umsetzung in Arbeit (Task 5b); Stand im Vertrag, Regel 7.
+- Auswirkung: Umgesetzt (Task 5b, Commits `ad3428128`, `e947cded6`), Prüfung läuft (Stand 16.11.2026). Der Malus wird beim Laden des Basisstands angewendet, der Basis-Checkpoint danach sofort neu geschrieben; Einzelheiten im Vertrag, Regel 7.
+
+### Ausstehender Malus in einer Zusatzdatei [Ruling des Koordinators, 16.11.2026, Björn zur Kenntnis]
+- Entscheidung: Die Checkpoint-Datei bleibt beim Totalverlust unberührt. Der ausstehende Malus steht in einer Zusatzdatei `pending_total_loss_v1.json` neben `checkpoint_v1.json` (mit `loss_id`, `job_id`, `penalty` und der Prüfsumme des Stands, auf den sie sich bezieht). Beim Laden wird er angewendet, wenn die Prüfsumme passt; danach wird der Basis-Checkpoint geschrieben und die Zusatzdatei gelöscht. Eine veraltete oder unlesbare Zusatzdatei wird ohne Wirkung gelöscht, eine neue Kampagne löscht sie.
+- Warum: Die ältere Zusicherung „ein verlorener Einsatz überschreibt den letzten sicheren Stand nie“ gilt seit vor diesem Paket und wird von Tests geprüft. Die erste Bauart (Eintrag im Checkpoint) brach sie (`campaign_casualty_debrief_retry_test` 161/3).
+- Auswirkung: Wer die Zusatzdatei von Hand löscht, entgeht dem Malus (privates Projekt, hingenommen). Ändert ein Speichervorgang den Checkpoint zwischen Totalverlust und Laden, entfällt der Malus; im Normalfall sperrt der Checkpoint-Guard das Speichern. Der Test `astra_campaign_fixes_20261113.gd` Zeile 57 wird bewusst falsch (nicht lauffähig ohne Isolations-Setup).
 
 ### Lange Testläufe werden nachgeholt [B, 15.11., 18:27]
 - Entscheidung: Lange Testläufe (alles über etwa 5 Minuten) werden in den Aufgaben ausgelassen und nach dem Merge gesammelt nachgeholt.
