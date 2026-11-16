@@ -204,7 +204,7 @@ func _i4_lifecycle_flag_field() -> void:
 	for label: String in junk_cases:
 		var bad: Dictionary = _lifecycle_variant(life, junk_cases[label])
 		var prepared: Dictionary = load(LIFECYCLE_SCRIPT).new().prepare_restore(sim, driver, bad)
-		_check(not bool(prepared.get("ok", false)), "I4: Unsinn im Feld wird abgelehnt (%s) [%s]" % [label, prepared.get("reason", "")])
+		_check(not bool(prepared.get("ok", false)) and String(prepared.get("reason", "")) == "invalid_mission_casualty_flags", "I4: Unsinn im Feld wird mit dem genauen Grund abgelehnt (%s) [%s]" % [label, prepared.get("reason", "")])
 	_check(bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), "I4: abgelehnter Unsinn aendert die Merker nicht")
 	# Alter Stand ohne das Feld: laedt, und die Merker sind danach leer.
 	var old_form: Dictionary = _lifecycle_variant(life, func(f): f.erase("casualty_flags"))
