@@ -248,7 +248,7 @@ func _remaining_missions() -> void:
 					if sim.get_hex_unit_state(String(id)).is_empty() or not is_instance_valid(actor) or actor.get_vital_state()!="fit":continue
 					live+=1
 					if actor.global_position.distance_to(rally)>400.0:return false
-				return live>=2,180000,"actual ground squad gathers before enemy contact"):
+				return live>=_crew_ids.size()-1,180000,"actual ground squad gathers before enemy contact"):
 				_trace_actual_combat("rally_timeout");return
 			if not _check(controller.issue_right_click_command_for_test(enemy_target,"take",false),"normal TAKE / ENGAGE plan accepts after rally"):return
 			_check(bool(controller.call("execute_selected_fireteam_orders")),"approach actual outpost guard")
