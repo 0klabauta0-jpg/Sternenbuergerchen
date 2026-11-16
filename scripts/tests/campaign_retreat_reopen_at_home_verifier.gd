@@ -9,6 +9,8 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## R3: Rueckzug ueber "Evakuieren" (Treiber-Weg des Knopfs: request_mission_evacuation): derselbe Ausgang.
 ## R4: Abflug ohne Ausfaelle ist ebenfalls ein Rueckzug (Regel 8): nach der Heimkehr accepted, retreat_count 1, wieder anwaehlbar, niemand verwundet.
 ## R5: Totalverlust: nach dem Ruecksprung zum Checkpoint ist nichts wieder geoeffnet.
+## R6: Heimlandung kommt vor der Buchung des Rueckzugs (Abflug wartet noch): die Ortsinstanz wird nach dem Abschluss trotzdem freigegeben.
+## R7: Heimlandung eines Schiffs gibt nur die Ortsinstanz frei, deren Auftrag auf das Wiederoeffnen wartet.
 ## Mit der Umgebungsvariable T8B_ONLY (zum Beispiel "R1") laeuft nur dieser Teil.
 
 const JOB := "satellite_recovery"
@@ -23,6 +25,10 @@ func _run() -> void:
 		await _retreat_to_home("R3", "evacuation", false)
 	if only.is_empty() or only == "R4":
 		await _r4_no_retreat()
+	if only.is_empty() or only == "R6":
+		await _r6_landing_before_booking()
+	if only.is_empty() or only == "R7":
+		await _r7_foreign_job_keeps_focus()
 	if only.is_empty() or only == "R5":
 		await _r5_total_loss()
 	print("CAMPAIGN_RETREAT_REOPEN passed=%d failed=%d" % [_passed, _failed])
@@ -160,6 +166,75 @@ func _r4_no_retreat() -> void:
 	_check(_screen.call("request_operation", "select_destination", {"location_id": "satellite_crash", "job_id": JOB}).get("ok", false), "R4: Ziel ist wieder anwaehlbar")
 	for id: String in _roster_statuses().keys():
 		_check(String(_roster_statuses()[id][0]) != "wounded", "R4: %s ist nicht wounded (niemand verwundet)" % id)
+	await _end_sortie()
+
+## R6 (M-a): Die Heimlandung wird angefordert, waehrend der Abflug vom Ort noch in _pending_surface_departures wartet (der Rueckzug ist beim
+## Landen noch nicht gebucht). Nach Abschluss des Abflugs muss die Ortsinstanz trotzdem freigegeben sein, wie im Normalweg.
+## Annaeherung: Die Landungsanforderung ruft denselben Flow-Eingang auf wie der Adapter nach der Landung (_finish_space_home_landing ohne Beleg);
+## die Raumreise selbst wird nicht geflogen, weil das Schiff im kopflosen Test waehrend des wartenden Abflugs nicht am Heimatorbit sein kann.
+func _r6_landing_before_booking() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	if not _seat_crew(s): return
+	# Im kopflosen Test ohne Hex-Bodenlauf schliesst der Abflug im selben Aufruf ab (retire_location_craft_visit meldet sofort "committed"),
+	# das Wartefenster entsteht nur, wenn der Ort noch nicht fertig ist. Deshalb dieselben Flow-Schritte wie _finish_space_surface_departure,
+	# mit der Landungsanforderung dazwischen: Abflug vorbereiten und anmelden (wartet), Heimlandung anfordern, dann den ersten Versuch fahren.
+	var record: Dictionary = _flow.call("_prepare_space_surface_departure", _craft_id)
+	_check(not record.is_empty() and bool(_flow.call("_register_space_surface_departure", _craft_id, record)), "R6: Abflug ist vorbereitet und angemeldet")
+	var pending: Dictionary = _flow.get("_pending_surface_departures")
+	# Der echte Rueckflug (return_homebase) wuerde hier blockieren, solange der Eintrag wartet; die Einschiffung, die er vorher erledigt,
+	# wird nachgestellt: beide Personen tragen dropship_embarked (daran misst die Buchung, ob am Ort jemand bleibt).
+	for unit: Node in [s.leader, s.pilot]:
+		unit.set_meta("dropship_embarked", true)
+	print("R6_PENDING has=", pending.has(_craft_id), " job=", _job_line())
+	if not _check(pending.has(_craft_id), "R6: der Abflug wartet in _pending_surface_departures, als die Landung angefordert wird"): return
+	_check(_job_status() == "active", "R6: beim Landen ist der Rueckzug noch nicht gebucht (Auftrag active, %s)" % _job_line())
+	_flow.call("_finish_space_home_landing", _craft_id)
+	_check(bool(Dictionary(pending[_craft_id]).get("home_landing_requested", false)), "R6: die Heimlandung ist beim wartenden Abflug vorgemerkt")
+	_flow.call("_finish_space_surface_departure", _craft_id, record)
+	if not await _wait(func(): return not Dictionary(_flow.get("_pending_surface_departures")).has(_craft_id), 120000, "R6: der Abflug wird abgeschlossen"): return
+	await process_frame
+	print("R6_AFTER_DEPARTURE ", _job_line(), " location=", _craft_location(), " view=", _flow.get("_current_meta_view"), " mission=", _flow.get("_active_mission"))
+	_check(_flow.get("_active_mission") == null, "R6: nach dem Abflug ist die Ortsinstanz freigegeben (_active_mission null)")
+	_check(String(_flow.get("_current_meta_view")) == "homebase", "R6: die Basis wird gezeigt (%s)" % _flow.get("_current_meta_view"))
+	var guard: Dictionary = _flow.get("_campaign_start").call("get_home_checkpoint_guard", _flow, _runtime)
+	print("R6_GUARD ", guard)
+	# Die Annaeherung fliegt das Schiff nicht wirklich (es steht fuer den Reisebesitzer noch am Ort): world_active ist deshalb erwartet und kein Mangel
+	# des Flows. Die Sperre durch die fokussierte Ortsinstanz (away_from_checkpoint) darf nicht mehr gelten.
+	_check(String(guard.get("reason", "")) != "away_from_checkpoint", "R6: der Heim-Speicherpunkt ist nicht mehr durch die Ortsinstanz gesperrt (%s)" % [guard])
+	# Wieder geoeffnet wird beim Speicherpunkt ueber reopen_retreated_jobs() (R4 prueft den periodischen Speicherpunkt mit echtem Rueckflug).
+	var reopened: Dictionary = _runtime.call("reopen_retreated_jobs")
+	print("R6_REOPEN ", reopened)
+	var job: Dictionary = _job()
+	_check(String(job.get("status", "")) == "accepted" and int(job.get("retreat_count", 0)) == 1 and not bool(job.get("reopen_at_home", true)), "R6: accepted, retreat_count 1, reopen_at_home false (%s)" % _job_line())
+	await _end_sortie()
+
+## R7 (M-b): Wartet ein Rueckzug, gibt die Heimlandung eines Schiffs nur die Ortsinstanz frei, deren Auftrag wartet.
+## Gebauter Zustand (zwei Schiffe und zwei Orte waeren in der kopflosen Szene zu aufwendig): Die fokussierte Instanz traegt kurz die
+## Kennung eines fremden Auftrags, waehrend ein anderer Auftrag (satellite_recovery) auf das Wiederoeffnen wartet; die echte
+## Flow-Funktion _finish_space_home_landing darf die Instanz dann nicht freigeben. Mit der echten Kennung gibt sie sie frei.
+func _r7_foreign_job_keeps_focus() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	if not _seat_crew(s): return
+	_check(bool(_request_return().get("ok", false)), "R7: Rueckflug ohne Ausfaelle wird angenommen")
+	if not await _wait_departure_settled("R7"): return
+	await process_frame
+	var mission: Node = _flow.get("_active_mission")
+	_check(mission != null and _job_status() == "failed" and bool(_job().get("reopen_at_home", false)), "R7: Rueckzug wartet auf das Wiederoeffnen, Ortsinstanz ist noch fokussiert (%s)" % _job_line())
+	if mission == null: return
+	_check(_flow.has_method("_release_location_for_waiting_retreat"), "R7: gemeinsame Freigabe-Hilfsfunktion existiert")
+	var real_identity: Dictionary = Dictionary(mission.get_meta("singleplayer_mission_identity", {})).duplicate(true)
+	var foreign_identity: Dictionary = real_identity.duplicate(true)
+	foreign_identity["job_id"] = "foreign_job_without_retreat"
+	mission.set_meta("singleplayer_mission_identity", foreign_identity)
+	_flow.call("_finish_space_home_landing", _craft_id)
+	print("R7_FOREIGN mission_kept=", _flow.get("_active_mission") == mission, " view=", _flow.get("_current_meta_view"))
+	_check(_flow.get("_active_mission") == mission, "R7: die Heimlandung mit fremdem Auftrag nimmt die fokussierte Ortsinstanz nicht aus dem Fokus")
+	_check(String(_flow.get("_current_meta_view")) == "mission", "R7: die Ansicht springt nicht zur Basis (%s)" % _flow.get("_current_meta_view"))
+	mission.set_meta("singleplayer_mission_identity", real_identity)
+	_flow.call("_finish_space_home_landing", _craft_id)
+	_check(_flow.get("_active_mission") == null and String(_flow.get("_current_meta_view")) == "homebase", "R7: mit dem wartenden Auftrag der Instanz wird sie freigegeben (%s)" % _flow.get("_current_meta_view"))
 	await _end_sortie()
 
 ## R5: Totalverlust (Truppfuehrer liegt, Abflugversuch): nach dem Ruecksprung zum Checkpoint ist nichts wieder geoeffnet.

@@ -8761,20 +8761,47 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 	# Publish the completed Flow projection before observers can admit a new visit.
 	if String(identity.get("craft_id", "")) == craft_id and not String(identity.get("job_id", "")).is_empty():
 		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result":"aborted","reason":"craft_left_without_objective_completion"}, instance), identity)
+		# Landete das Schiff schon vor der Buchung (home_landing_requested), war der Rueckzug beim Landen noch nicht gebucht: nachpruefen.
+		if bool(record.home_landing_requested) and _release_location_for_waiting_retreat(instance):
+			_refresh_homebase_screen()
+			_show_homebase(true)
 
 
-## Gibt es einen Rueckzugsauftrag, der zu Hause noch wieder geoeffnet werden muss (failed mit gesetztem reopen_at_home)?
-func _campaign_retreat_awaiting_home() -> bool:
-	if _singleplayer_runtime == null:
+## Gibt es fuer diese Ortsinstanz einen Rueckzugsauftrag, der zu Hause noch wieder geoeffnet werden muss (Auftrag der Instanz
+## failed mit gesetztem reopen_at_home)? Der Auftrag kommt aus singleplayer_mission_identity der Instanz: das ist die Kennung,
+## unter der der Abflug gebucht wird (siehe _complete_space_surface_departure); location_id traegt jede Instanz, aber ein Ort
+## kann mehrere Auftraege haben.
+func _campaign_retreat_awaiting_home(visit: Node) -> bool:
+	if _singleplayer_runtime == null or not is_instance_valid(visit):
+		return false
+	var job_id: String = String(Dictionary(visit.get_meta("singleplayer_mission_identity", {})).get("job_id", ""))
+	if job_id.is_empty():
 		return false
 	var campaign_owner: Object = _singleplayer_runtime.get("_campaign")
 	if campaign_owner == null:
 		return false
-	for job_variant in Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {})).values():
-		var job: Dictionary = job_variant
-		if String(job.get("status", "")) == "failed" and bool(job.get("reopen_at_home", false)):
-			return true
-	return false
+	var job: Dictionary = Dictionary(Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {})).get(job_id, {}))
+	return String(job.get("status", "")) == "failed" and bool(job.get("reopen_at_home", false))
+
+
+## Nimmt die fokussierte Ortsinstanz aus dem Fokus (Heim-Speicherpunkt ist solange gesperrt, wie _active_mission gesetzt ist).
+func _drop_focused_location() -> void:
+	_release_active_mission()
+	_active_singleplayer_identity.clear()
+	_mission_planning_state=DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
+	_reset_active_mission_timer()
+
+
+## Einzige Stelle fuer die Freigabe nach einem Rueckzug ohne Debrief (Regel 8): Die fokussierte Ortsinstanz wird freigegeben,
+## wenn ihr Auftrag auf das Wiederoeffnen wartet und kein anderes Schiff mehr auf "mission" steht. Aufrufer: die Heimlandung und
+## der Abschluss des Oberflaechenabflugs (dort, wenn die Landung vor der Buchung kam). Gibt true zurueck, wenn freigegeben wurde.
+func _release_location_for_waiting_retreat(visit: Node) -> bool:
+	if not is_campaign_start() or not is_instance_valid(visit) or _active_mission != visit or not _campaign_retreat_awaiting_home(visit):
+		return false
+	for other_location in _aircraft_location_by_craft.values():
+		if String(other_location) == "mission": return false
+	_drop_focused_location()
+	return true
 
 
 func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary = {}) -> void:
@@ -8791,15 +8818,10 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_remove_pending_mission_craft_transfer(craft_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
 	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
-	if not release_legacy and is_campaign_start() and _active_mission != null and _active_mission == returning_mission and _campaign_retreat_awaiting_home():
-		release_legacy = true
-		for other_location in _aircraft_location_by_craft.values():
-			if String(other_location) == "mission": release_legacy = false
 	if release_legacy:
-		_release_active_mission()
-		_active_singleplayer_identity.clear()
-		_mission_planning_state=DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
-		_reset_active_mission_timer()
+		_drop_focused_location()
+	elif _release_location_for_waiting_retreat(returning_mission):
+		release_legacy = true
 	_refresh_homebase_screen()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
