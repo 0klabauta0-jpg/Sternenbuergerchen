@@ -24,13 +24,16 @@ func _run() -> void:
 	var root_owner: Node = mission.get_node("SimulationRoot")
 	var checkpoint: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime)
 	_check(not checkpoint.get("ok", false), "campaign checkpoint is rejected during real deployed mission")
-	var target: Vector2 = controller.call("_campaign_landed_craft_position", _craft_id)
+	# Im Hex-Boden steigt die Besatzung an der Einstiegszelle ein, nicht an der Rumpfmitte.
+	var boarding_access: Dictionary = controller.call("get_campaign_ground_ship_access", _craft_id)
+	var target: Vector2 = Vector2(boarding_access.position)
+	var boarding_radius: float = float(controller.get("CAMPAIGN_BOARDING_RADIUS"))
 	controller.call("_create_waypoints_for_selected_fireteams", target, true)
 	if not _check(bool(controller.call("execute_selected_fireteam_orders")), "real crew receives ship return walk"): await _finish(); return
 	if not await _wait(func():
 		for id in _crew_ids:
 			var person: Node2D = controller.call("_find_friendly_unit_by_id", id)
-			if person == null or person.global_position.distance_to(target) > 90.0: return false
+			if person == null or person.global_position.distance_to(target) > boarding_radius: return false
 		return true, 45000, "real crew walks back near landed ship"): await _finish(); return
 	var boarded: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)
 	print("LEGACY_SATELLITE_BOARD ", boarded)
