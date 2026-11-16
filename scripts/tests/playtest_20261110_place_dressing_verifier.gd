@@ -19,7 +19,7 @@ func _run() -> void:
 	for prop: Dictionary in props:
 		if ResourceLoader.exists(String(prop.get("path",""))): loadable_props+=1
 		else: missing_prop_paths.append(String(prop.get("path","")))
-	check(loadable_props==props.size(),"every prop of the map is loadable (%d of %d; missing: %s)"%[loadable_props,props.size(),", ".join(missing_prop_paths)])
+	check(props.size()>=1 and loadable_props==props.size(),"every prop of the map is loadable (%d of %d; missing: %s)"%[loadable_props,props.size(),", ".join(missing_prop_paths)])
 	var building_blockers: Array=Array(built.blockers).slice(0,building_count)
 	check(building_count>=1 and building_blockers.size()==building_count and Array(built.blockers).size()==building_count+loadable_props,"trade compound builds one blocker per saved structure plus one per loadable prop (%d + %d)"%[building_count,loadable_props])
 	var missing:=0; var solids:=0
