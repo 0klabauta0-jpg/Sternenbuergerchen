@@ -25,8 +25,10 @@ func _run() -> void:
 	runtime.call("observe_campaign_progress")
 	_check(runtime.call("authorize_departure", craft).get("ok", false), "Fixture uses actual authorized departure binding")
 	# Focused mid-flight boundary fixture, not a full transport acceptance test.
-	# preview_return verlangt im Ausflug einen Missionsregler mit Pilotenwache; hier eine Attrappe,
-	# die echte Wache prueft campaign_five_actual_sorties_verifier.
+	# Die Regel retry_requires_home greift schon durch den Schiffsstandort (_aircraft_location_by_craft = "mission"),
+	# nicht durch die Attrappe. Die Attrappe braucht nur authorize_return -> preview_return: Dort verlangt preview_return im Ausflug
+	# einen Missionsregler mit Pilotenwache, und die Attrappe antwortet fuer die Pilotenwache fest mit ok.
+	# Die echte Wache prueft campaign_five_actual_sorties_verifier.
 	var guard_script := GDScript.new()
 	guard_script.source_code = "extends Node\nvar _deployed_unit_ids: Dictionary = {}\nfunc get_campaign_pilot_flight_guard(_craft_id, _extra = true):\n\treturn {\"ok\": true}\nfunc _find_mission_dropship_card_entry(_craft_id) -> Dictionary:\n\treturn {}\n"
 	guard_script.reload()
