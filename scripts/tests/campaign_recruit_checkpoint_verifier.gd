@@ -3,7 +3,8 @@ extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ## Die Kampagnen-Heimkarte ist eine Hex-Karte: die Basis-Personalliste liegt im Stand unter hex_tactical, nicht als Top-Level-base_personnel.
 ## Der Rekrut entsteht ueber die Besitzer-Operationen des Anwerbewegs und durchlaeuft die Zustaende des Spiels:
 ## station (Resident auf Polisa, Schiff steht an der Heimatbasis) -> aboard (am Heim-Pad) -> outside (nach base_unboard auf der Heimkarte).
-## R1: station.   R2: aboard.   R3: outside.   R4: Gegenproben an der Payload mit dem genauen Ablehnungsgrund.
+## R1: station.   R2: aboard.   R3: outside.   R4: Gegenproben an der Payload und am Besitzer (Resident mit Schiff) mit dem genauen Ablehnungsgrund.
+## R5: Gegenprobe am Besitzer: Resident auf Polisa mit Heimzelle.
 ## Je Zustand: Stand gueltig, save_home_checkpoint, request_campaign_save, Laden, Fortsetzen (continue), gleicher Status, zweites Speichern.
 ##
 ## LUECKEN (kein oeffentlicher Weg im kopflosen Test, daher private Aufrufe oder Attrappen; jede Stelle ist hier genannt):
@@ -23,10 +24,14 @@ extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ##    Person weiter Resident (Status station, keine Heimzelle) ist.
 ## 6. Der echte Flug Polisa -> Heimatbasis wird nicht gefahren: das Schiff steht von Anfang an an der Heimatbasis (Zustand "Schiff zu Hause,
 ##    Resident auf Polisa" ueber die Besitzer-Operationen). Belegt wird, dass die Nutzlastpruefung des Abflugs den Residenten nicht kennt.
+## 7. Private Feldleser und -schreiber ohne oeffentlichen Weg: _flow._aircraft_location_by_craft, _flow._homebase_aircraft_definitions,
+##    _flow._all_team_units, _flow._campaign_start, _runtime._polisa_market, _runtime._supply, _runtime._simulation und die Hex-Zelle
+##    (_simulation.get_hex_unit_state, oeffentlich, aber der Test greift ueber _runtime auf die Simulation zu). R4/R5 setzen fuer die
+##    Gegenproben am Besitzer craft_id/status im Zustandsspeicher der Basis (base._states) und stellen ihn danach wieder her.
 
 func _run() -> void:
 	_configure_entry()
-	for scenario: String in ["R1", "R2", "R3", "R4"]:
+	for scenario: String in ["R1", "R2", "R3", "R4", "R5"]:
 		print("--- ", scenario)
 		await call("_rc_" + scenario.to_lower())
 		await _end_sortie()
@@ -124,12 +129,10 @@ func _rc_r1() -> void:
 	var craft_id := _rc_craft_id()
 	var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, ""))
 	_check(location in ["homebase", "waiting_pad"], "R1: das Schiff steht an der Heimatbasis (%s)" % location)
-	# Adapter validate_space_launch (crew_not_aboard) fragt nur get_payload_presence(craft) ab, also die dem Schiff zugewiesene Nutzlast.
-	var payload_members := {}
-	for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id):
-		for member in _screen.call("_get_member_unit_ids_for_fireteam", String(team)):
-			payload_members[String(member)] = true
-	_check(not payload_members.has(unit_id), "R1: der Resident gehoert zu keiner Nutzlast-Truppe des Schiffs (Mitglieder %s); die Abflugpruefung kennt ihn nicht" % [payload_members.keys()])
+	# Adapter validate_space_launch (crew_not_aboard) fragt nur get_payload_presence(craft) ab (singleplayer_runtime_adapter.gd), also die dem Schiff zugewiesene Nutzlast.
+	# Ohne Truppe im Schiff (R1 ohne with_squad) ist die Nutzlast leer; zaehlt der Resident dort mit, waere member_count > 0.
+	var presence: Dictionary = _t6b_base().get_payload_presence(craft_id)
+	_check(int(presence.get("member_count", -1)) == 0 and int(presence.get("aboard_count", -1)) == 0, "R1: die Nutzlast des Schiffs ist leer, der Resident zaehlt dort nicht mit (%s); die Abflugpruefung kennt ihn nicht" % [presence])
 	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty(), "R1: der Resident hat keine Zelle auf der Heimkarte")
 	await _rc_cycle(unit_id, "R1", "station")
 	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty() and bool(_t6b_base().call("has_station_recruits")), "R1: nach dem Fortsetzen: weiter ohne Heimzelle und weiter Resident auf Polisa")
@@ -185,3 +188,33 @@ func _rc_r4() -> void:
 	for entry: Array in cases:
 		var verdict: Dictionary = STORE_6B.validate_payload(entry[1])
 		_check(not bool(verdict.get("ok", false)) and String(verdict.get("reason", "")) == String(entry[2]), "R4: %s: abgelehnt mit %s (ist %s)" % [entry[0], entry[2], verdict.get("reason", "ok")])
+	# Gegenprobe am Besitzer: ein Resident auf Polisa, dem ein Schiff zugeschrieben ist, wird vom Basis-Export abgelehnt.
+	var base: Node = _t6b_base()
+	var unit_state: Dictionary = Dictionary(base.get("_states")).get(unit_id, {})
+	if not _check(not unit_state.is_empty() and bool(Dictionary(base.call("export_checkpoint_state")).get("version", 0) == 2), "R4: Ausgangsstand der Basis (Resident auf Polisa) laesst sich exportieren"): return
+	unit_state["craft_id"] = _rc_craft_id()
+	var with_ship: Dictionary = base.call("export_checkpoint_state")
+	unit_state["craft_id"] = ""
+	_check(not bool(with_ship.get("ok", true)) and String(with_ship.get("reason", "")) == "base_checkpoint_station_context", "R4: Resident auf Polisa mit craft_id: abgelehnt mit base_checkpoint_station_context (ist %s)" % [with_ship.get("reason", "ok")])
+	_check(Dictionary(base.call("export_checkpoint_state")).get("version", 0) == 2, "R4: nach der Gegenprobe ist der Basis-Export wieder gueltig")
+
+## Gegenprobe am Besitzer: ein Resident auf Polisa, der zugleich eine Zelle auf der Heimkarte hat, wird abgelehnt.
+func _rc_r5() -> void:
+	var unit_id: String = await _rc_hire(true)
+	if unit_id.is_empty(): return
+	var craft_id := _rc_craft_id()
+	var boarded: Dictionary = _board_with_squad(unit_id, craft_id)
+	if not _check(bool(boarded.get("ok", false)), "R5: Rekrut geht an Bord (%s)" % [boarded]): return
+	var out: Dictionary = _t6b_base().call("request_operation", "base_unboard", {"unit_id": unit_id, "craft_id": craft_id})
+	for _i in range(120):
+		await process_frame
+		if _rc_status(unit_id) == "outside": break
+	if not _check(_rc_status(unit_id) == "outside" and not _runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty(), "R5: Rekrut steht draussen und hat eine Heimzelle (Status %s, %s)" % [_rc_status(unit_id), out]): return
+	var base: Node = _t6b_base()
+	var unit_state: Dictionary = Dictionary(base.get("_states")).get(unit_id, {})
+	if not _check(not unit_state.is_empty() and Dictionary(base.call("export_checkpoint_state")).get("version", 0) == 2, "R5: Ausgangsstand (draussen) laesst sich exportieren"): return
+	unit_state["status"] = "station"
+	var with_cell: Dictionary = base.call("export_checkpoint_state")
+	unit_state["status"] = "outside"
+	_check(not bool(with_cell.get("ok", true)) and String(with_cell.get("reason", "")) == "base_checkpoint_station_context", "R5: Resident auf Polisa mit Heimzelle: abgelehnt mit base_checkpoint_station_context (ist %s)" % [with_cell.get("reason", "ok")])
+	_check(Dictionary(base.call("export_checkpoint_state")).get("version", 0) == 2, "R5: nach der Gegenprobe ist der Basis-Export wieder gueltig")
