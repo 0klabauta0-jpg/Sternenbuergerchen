@@ -105,6 +105,7 @@ func _test_terrain_tile_data_contract() -> void:
 		"edge_type": "invalid_edge",
 	})
 	var max_height_level: int = int(TERRAIN_TILE_DATA_SCRIPT.get("MAX_HEIGHT_LEVEL"))
+	_assert(max_height_level == 16, "MAX_HEIGHT_LEVEL is 16 as in docs/dev/terrain_height_hill_rules.md")
 	_assert(int(clamped_tile.height_level) == max_height_level, "height_level clamps to 0..MAX_HEIGHT_LEVEL (docs/dev/terrain_height_hill_rules.md)")
 	_assert(int(clamped_tile.object_height) == 3, "object_height clamps to 0..3")
 	_assert(int(clamped_tile.cover_value) == 100, "cover_value clamps to 0..100")
