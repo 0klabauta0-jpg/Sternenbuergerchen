@@ -38,9 +38,19 @@ func _run() -> void:
 	for terminal in terminals:
 		terminal_ids.append(String(terminal.id))
 	_expect(terminal_ids.has("personnel") and terminal_ids.has("team") and terminal_ids.has("flightdeck") and terminal_ids.has("mission"), "Existing meta destinations retain real world consoles")
+	# The Commander no longer starts within reach of a console (hex layout): walk to the personnel console first.
+	var personnel_terminal: Dictionary = {}
+	for terminal in terminals:
+		if String(terminal.id) == "personnel":
+			personnel_terminal = terminal
+	_expect(bool(base.call("request_walk_to", Vector2(personnel_terminal.get("world_position", Vector2.ZERO)))), "Walk to the personnel console is accepted")
+	for _step in range(900):
+		await physics_frame
+		if String(Dictionary(base.call("get_exploration_snapshot")).get("nearby_terminal", "")) == "personnel":
+			break
 	_expect(bool(base.call("request_terminal", "personnel")) and _terminal_events == ["personnel"], "Nearby real console emits existing personnel destination exactly once")
 	_expect(bool(Dictionary(first.get("service_drone", {})).get("decorative", false)) and not bool(Dictionary(first.get("service_drone", {})).get("runtime_unit", true)), "Service drone is an authored visual without another runtime unit")
-	var start: Vector2 = first.get("avatar_position", Vector2.ZERO)
+	var start: Vector2 = Dictionary(base.call("get_exploration_snapshot")).get("avatar_position", Vector2.ZERO)
 	var target: Vector2 = first.get("initial_walk_target", start)
 	_expect(bool(base.call("request_walk_to", target)), "Walk request is accepted through command boundary")
 	await _physics_frames(90)
@@ -49,7 +59,19 @@ func _run() -> void:
 	_expect(int(moved.get("simulation_ticks", 0)) > int(first.get("simulation_ticks", 0)), "Authoritative base runtime actually ticks")
 	_expect(int(moved.get("movement_command_count", 0)) >= 1, "Movement is backed by a submitted command")
 	_expect(Dictionary(first.get("service_drone", {})).get("model_local_rotation") != Dictionary(moved.get("service_drone", {})).get("model_local_rotation"), "Active service drone has actual temporal mesh motion")
-	_expect(not bool(base.call("request_walk_to", first.get("blocked_test_position", start))), "Stored terrain blocker rejects walk request")
+	# layout.blocked_test_grid (24, 16) predates the hex rebuild and is walkable now; take a cell the terrain really blocks.
+	var terrain: Object = base.get("_terrain")
+	var blocked_cell := Vector2i.ZERO
+	var blocked_found := false
+	var origin_cell := Vector2i(Vector2(terrain.call("world_to_grid", start)))
+	for ring in range(1, 16):
+		for dx in range(-ring, ring + 1):
+			for dy in range(-ring, ring + 1):
+				if not blocked_found and not bool(terrain.call("is_walkable", origin_cell + Vector2i(dx, dy))):
+					blocked_cell = origin_cell + Vector2i(dx, dy)
+					blocked_found = true
+	_expect(blocked_found, "Terrain near the Commander contains a really blocked cell")
+	_expect(not bool(base.call("request_walk_to", terrain.call("grid_to_world", blocked_cell))), "Stored terrain blocker rejects walk request")
 	_expect(not bool(base.call("request_terminal", "unknown")), "Unknown destination cannot emit meta action")
 	var distant_id: String = String(first.get("distant_terminal_id", "mission"))
 	_expect(not bool(base.call("request_terminal", distant_id)), "Distant console cannot activate without actual proximity")
