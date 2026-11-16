@@ -1,11 +1,14 @@
 extends "res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd"
-## Isolated larger Skirmish roster, two real craft, real route/landing commands.
-## Only this non-campaign fixture advances the existing base boarding clock.
+## Skirmish mit Voreinstellung "early" (nur sie hat seit a4d5948c5 eine Basis-Personal-Laufzeit), zwei echte Schiffe, echte Route-/Landebefehle.
+## Einsteigen laeuft echt zu Fuss (base_board); nur der bestehende Boarding-Takt wird in kleinen Schritten vorgespult.
+const PRESET := "early"
 var same_place := false
 var native_probe := false
 func _run() -> void:
 	same_place=OS.get_cmdline_user_args().has("same_place")
 	native_probe=OS.get_cmdline_user_args().has("native_probe") or OS.get_cmdline_user_args().has("capture_only")
+	# Skirmish hat seit a4d5948c5 nur mit Voreinstellung eine Basis-Personal-Laufzeit (ohne sie gibt es keinen Piloten an Bord, Start = pilot_not_aboard).
+	load("res://scripts/meta/game_start_contract.gd").request_start(self,"skirmish","new",PRESET)
 	_flow=FLOW.instantiate(); root.add_child(_flow); await process_frame
 	_screen=_flow.get_node("HomebaseScreen"); _runtime=_flow.get("_singleplayer_runtime")
 	if native_probe:
@@ -30,24 +33,25 @@ func _run() -> void:
 		var actor: Node2D=a.get_node("TacticalController").call("_find_friendly_unit_by_id",id)
 		if actor!=null: positions[id]=actor.position
 	_flow.call("_show_homebase",true)
-	_flow.call("_on_homebase_aircraft_add_requested","dropship")
+	# Die Voreinstellung liefert das zweite echte Schiff samt Landeplatz, eigenem Piloten und zweitem Trupp schon mit. Ein nachtraeglich
+	# per _on_homebase_aircraft_add_requested hinzugefuegtes Schiff hat keinen Landeplatz und laesst sich nicht zu Fuss einschiffen
+	# (respawn_ship_mask_unavailable).
 	operations=_screen.call("get_operations_snapshot")
-	var craft_b:=""
+	var craft_b:=""; var pilot_b:=""
 	for craft: Dictionary in operations.crafts:
-		if String(craft.id)!=craft_a: craft_b=String(craft.id)
-	_check(not craft_b.is_empty(),"fixture adds second real ship through existing owner")
-	_screen.call("request_operation","add_fireteam")
-	operations=_screen.call("get_operations_snapshot")
+		if String(craft.id)!=craft_a and craft_b.is_empty(): craft_b=String(craft.id); pilot_b=String(craft.get("pilot_id",""))
+	_check(not craft_b.is_empty(),"preset provides a second real ship")
 	var team_b:=""
 	for team: Dictionary in operations.fireteams:
-		if Array(team.members).is_empty(): team_b=String(team.id)
-	var free: Array=[]
-	for unit: Dictionary in operations.roster:
-		if not bool(unit.busy) and String(unit.fireteam_id).is_empty(): free.append(String(unit.id))
-	_check(free.size()>=2 and not team_b.is_empty(),"isolated larger roster has independent crew and pilot")
-	if free.size()<2 or team_b.is_empty(): await _finish(); return
-	_check(_screen.call("request_operation","assign",{"unit_id":free[0],"fireteam_id":team_b}).get("ok",false),"B assigns its own troop")
-	_check(_screen.call("request_operation","pilot",{"unit_id":free[1],"craft_id":craft_b}).get("ok",false),"B assigns its own pilot")
+		if String(team.id)!=team_a and not Array(team.members).is_empty() and not bool(team.get("busy",false)): team_b=String(team.id); break
+	var members_b: Array=[]
+	for team: Dictionary in operations.fireteams:
+		if String(team.id)==team_b:
+			for member: Dictionary in team.members: members_b.append(String(member.id))
+	var pilot_a:=String(first.get("pilot_id",""))
+	_check(not team_b.is_empty() and not members_b.is_empty(),"preset provides an independent second troop")
+	_check(not pilot_b.is_empty() and pilot_b!=pilot_a and not members_b.has(pilot_b) and not PackedStringArray(ids_a).has(pilot_b),"B has its own pilot, independent of A's pilot and both troops")
+	if team_b.is_empty() or pilot_b.is_empty(): await _finish(); return
 	_screen.call("request_operation","craft",{"craft_id":craft_b})
 	_check(_screen.call("request_operation","select_destination",{"location_id":"satellite_crash" if same_place else "trade_outpost","craft_id":craft_b}).get("ok",false),"B chooses trade while A remains deployed")
 	if not await _route(craft_b,team_b,"satellite_crash" if same_place else "trade_outpost"):
@@ -104,20 +108,43 @@ func _run() -> void:
 	print("TWO_LOCATION_RUNTIME completed=",_failed==0)
 	await _finish()
 
+## Echtes Einschiffen: Basis-Personal-Laufzeit und der bestehende Boarding-Takt laufen in kleinen Schritten, bis der Pilot
+## tatsaechlich an Bord ist und der Nutzlast-Besitzer den Start freigibt (Muster orbit_quantum_flow_verifier._board_real_crew).
+## Niemand wird versetzt oder als an Bord markiert.
+func _board_real_crew(craft: String, team: String) -> bool:
+	var personnel: Node=_runtime.call("get_base_personnel_runtime")
+	if not _check(personnel!=null,"preset Skirmish has a base personnel runtime for "+craft): return false
+	# Der Screen setzt ohne unit_id die zuletzt fokussierte Person ein (hier womoeglich schon an Bord eines anderen Schiffs): eine Person des Trupps nennen.
+	var members: PackedStringArray=_screen.call("_get_member_unit_ids_for_fireteam",team)
+	var walk: Dictionary=_screen.call("request_operation","base_board",{"craft_id":craft,"fireteam_id":team,"unit_id":String(members[0]) if not members.is_empty() else "","whole_fireteam":true})
+	if not _check(walk.get("ok",false),"public base command starts the real crew walk and boarding "+craft):
+		print(walk); return false
+	var sim: Node=personnel.call("get_simulation_root")
+	for tick in range(6000):
+		if personnel.call("is_pilot_aboard",craft) and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft",craft)): break
+		sim.call("_physics_process",0.05)
+		_screen.call("_debug_advance_homebase_direct_boarding",0.05)
+	var boarded:=bool(personnel.call("is_pilot_aboard",craft)) and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft",craft))
+	if not boarded:
+		print("BOARDING_DIAG pilot_aboard=",personnel.call("is_pilot_aboard",craft)," payload=",_screen.call("_has_homebase_direct_launch_payload_for_craft",craft)," walking_groups=",personnel.get("_board_groups").keys())
+	return _check(boarded,"real pilot arrival and payload owner confirm boarding "+craft)
+
 func _route(craft: String, team: String, location: String) -> bool:
 	_screen.call("request_operation","craft",{"craft_id":craft})
 	_screen.call("request_operation","focus_fireteam",{"fireteam_id":team})
-	var current: Dictionary=_screen.call("get_operations_snapshot").selected_craft
-	if not Array(current.get("payload_fireteam_ids",[])).has(team):
-		var boarding: Dictionary=_screen.call("request_operation","board",{"craft_id":craft,"fireteam_id":team})
-		if not _check(boarding.get("ok",false),"independent boarding "+craft):
-			print("REVISIT_BOARD ",boarding," members=",_screen.call("_get_member_unit_ids_for_fireteam",team)," payload=",_screen.call("_operations_payload_craft_for_team",team)," gate=",_screen.call("_build_homebase_direct_staging_craft_gate_for_craft",craft)); return false
-	_screen.call("_debug_advance_homebase_direct_boarding",30.0)
+	# Einsteigen geht nur noch den echten Weg: base_board schickt Truppmitglieder und Pilot zu Fuss zum Schiff (kein Sofort-Staging).
+	if not _board_real_crew(craft,team):
+		print("REVISIT_BOARD members=",_screen.call("_get_member_unit_ids_for_fireteam",team)," payload=",_screen.call("_operations_payload_craft_for_team",team)," gate=",_screen.call("_build_homebase_direct_staging_craft_gate_for_craft",craft)); return false
 	var started: Dictionary=_screen.call("request_operation","start",{"craft_id":craft})
 	if not _check(started.get("ok",false),"independent normal launch "+craft): print(started); return false
-	var jump: Dictionary=_screen.call("request_operation","space_start_quantum",{"craft_id":craft,"target_orbit_id":"planet_orbit"})
+	# start meldet auch dann ok, wenn der Abflug scheitert (Fehler nur im Screen-Meta): auf die Phase warten, nicht auf das Ergebnis.
+	if not await _wait(func(): return String(_runtime.call("get_space_travel_snapshot",craft).phase)=="orbit",60000,"craft lifts off into orbit "+craft):
+		print("DEPARTURE_ERROR ",_screen.get_meta("singleplayer_departure_error",{})); return false
+	var target_orbit:=String(Dictionary(Dictionary(_runtime.call("get_space_travel_snapshot",craft)).get("location_orbits",{})).get(location,""))
+	if not _check(not target_orbit.is_empty(),"travel snapshot names the orbit of "+location): return false
+	var jump: Dictionary=_screen.call("request_operation","space_start_quantum",{"craft_id":craft,"target_orbit_id":target_orbit})
 	if not _check(jump.get("ok",false),"independent quantum "+craft): print(jump); return false
-	if not await _wait(func(): return String(_runtime.call("get_space_travel_snapshot",craft).orbit_id)=="planet_orbit",10000,"craft reaches planet "+craft): return false
+	if not await _wait(func(): return String(_runtime.call("get_space_travel_snapshot",craft).orbit_id)==target_orbit,60000,"craft reaches orbit "+target_orbit+" "+craft): return false
 	var approach: Dictionary=_screen.call("request_operation","space_begin_approach",{"craft_id":craft,"location_id":location})
 	if not _check(approach.get("ok",false),"independent approach "+craft): print(approach); return false
 	if not await _wait(func(): return _flow.call("get_mission_for_craft",craft)!=null,20000,"real place loaded "+location): return false
