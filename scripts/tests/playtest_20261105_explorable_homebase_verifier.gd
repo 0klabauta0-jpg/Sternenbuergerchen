@@ -67,7 +67,8 @@ func _run() -> void:
 	for ring in range(1, 16):
 		for dx in range(-ring, ring + 1):
 			for dy in range(-ring, ring + 1):
-				if not blocked_found and not bool(terrain.call("is_walkable", origin_cell + Vector2i(dx, dy))):
+				# is_walkable() is false for cells outside the map (no tile), so only cells that have a tile count as blocked terrain.
+				if not blocked_found and terrain.call("get_tile_at_grid", origin_cell + Vector2i(dx, dy)) != null and not bool(terrain.call("is_walkable", origin_cell + Vector2i(dx, dy))):
 					blocked_cell = origin_cell + Vector2i(dx, dy)
 					blocked_found = true
 	_expect(blocked_found, "Terrain near the Commander contains a really blocked cell")
