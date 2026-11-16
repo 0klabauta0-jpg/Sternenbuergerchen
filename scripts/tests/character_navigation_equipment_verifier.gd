@@ -29,7 +29,7 @@ func _run()->void:
  check(popup.is_visible_in_tree(),"actual NPC details opened")
  check(String(preview.get_meta("preview_unit_id",""))=="campaign_leader","full-body preview uses actual selected actor")
  check(bool(preview.get_meta("preview_uses_existing_model",false)),"full-body preview uses existing map character model")
- check(preview.size.y>=400 and preview.size.y<=460,"shared character card uses a substantially larger figure")
+ check(is_equal_approx(preview.size.y,500.0),"shared character card uses a substantially larger figure")
  check(bool(preview.get_meta("preview_idle_pose",false)),"preview freezes existing idle pose rather than showing the bind pose")
  check(panel.get("_identity_portrait").texture!=null,"original identity portrait is retained beside the shared character name")
  check(panel.get("_badges").get_child_count()>=3,"actual character bonuses also appear in equipment view")
@@ -60,7 +60,8 @@ func _run()->void:
   for i in 12:await process_frame
   print("DETAIL_RECT requested=",resolution," viewport=",root.get_visible_rect()," popup=",popup.get_global_rect())
   check(Rect2(Vector2.ZERO,Vector2(resolution)).grow(1).encloses(popup.get_global_rect()),"full-height popup fits "+str(resolution))
-  check(popup.size.y>=resolution.y-25,"popup uses available screen height")
+  var expected_popup:Rect2i=screen.call("get_native_r2_layout_snapshot").character_popup
+  check(is_equal_approx(popup.size.y,float(expected_popup.size.y)),"popup uses available screen height above the command dock")
   if DisplayServer.get_name()!="headless":
    await RenderingServer.frame_post_draw
    DirAccess.make_dir_recursive_absolute("C:/dev/SternenBuergerchen/output/character_navigation_20261110")
