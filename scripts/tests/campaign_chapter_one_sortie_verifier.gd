@@ -2,6 +2,7 @@ extends "res://scripts/tests/campaign_intro_loop_smoke.gd"
 ## Actual first chapter sortie at 4x simulation speed; no fabricated objective results.
 func _run() -> void:
 	Engine.time_scale=4.0
+	_configure_entry() # seeds the menu-built Skirmish team, otherwise _finish compares the roster file with an empty fixture
 	START.request_start(self,"campaign","new")
 	_flow=FLOW.instantiate(); root.add_child(_flow)
 	await process_frame
@@ -39,7 +40,10 @@ func _run() -> void:
 	await _finish()
 
 func _wait_homebase() -> bool:
-	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "planet_orbit", 35000, "Actual surface exit returns original craft to planet orbit"):
+	# The destination orbit of the location comes from the route owner (satellite_crash is glut_1a_orbit now, no longer planet_orbit).
+	var destination_orbit := String(Dictionary(_space().get("location_orbits", {})).get(String(_campaign().get("selected_location_id", "")), ""))
+	if not _check(not destination_orbit.is_empty(), "actual return orbit of the destination exists"): return false
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == destination_orbit, 35000, "Actual surface exit returns original craft to planet orbit"):
 		_dump("return_to_planet_orbit")
 		return false
 	_check(String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) != "homebase", "Planet orbit is not physical home arrival")

@@ -17,11 +17,18 @@ func _expected_crew_count() -> int:
 	return 1
 
 func _all_crew_deployed(controller: Node) -> bool:
-	if not _insertion_guard_checked and Dictionary(controller.get("_deployed_unit_ids")).has("campaign_leader") and Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).has(_team_id):
+	if not _insertion_guard_checked and Dictionary(controller.get("_deployed_unit_ids")).has("campaign_leader"):
+		# The guard in mission_tactical_sandbox_controller.gd:1590 holds GO while the fireteam is not runtime-active or still pending (pending ids are keyed by the lower-case fireteam id, not by the campaign team id).
+		# The pending dictionaries are already empty when the leader shows up in _deployed_unit_ids, so the transient is the runtime-active flag.
 		controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
-		var accepted: bool = controller.call("execute_selected_fireteam_orders")
-		_check(not accepted and String(controller.get("_last_command_text")).begins_with("WAIT FOR INSERTION"), "GO is held until actual deploy effects and automatic insertion security finish")
-		_insertion_guard_checked = true
+		var held := false
+		for fireteam_id in controller.get("_selected_fireteam_ids"):
+			var key := String(fireteam_id).strip_edges().to_lower()
+			held = held or not bool(controller.call("_is_fireteam_runtime_active", key)) or Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).has(key) or Dictionary(controller.get("_post_drop_security_pending_fireteam_ids")).has(key)
+		if held:
+			var accepted: bool = controller.call("execute_selected_fireteam_orders")
+			_check(not accepted and String(controller.get("_last_command_text")).begins_with("WAIT FOR INSERTION"), "GO is held until actual deploy effects and automatic insertion security finish")
+			_insertion_guard_checked = true
 	var pilot: Node = controller.call("_find_friendly_unit_by_id", "campaign_pilot")
 	if not Dictionary(controller.get("_deployed_unit_ids")).has("campaign_pilot") or pilot == null or bool(pilot.get_meta("dropship_embarked", true)):
 		return false
