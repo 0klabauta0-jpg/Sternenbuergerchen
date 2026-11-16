@@ -8842,6 +8842,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
+	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
 	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
@@ -9530,23 +9531,59 @@ func _bind_location_visit(instance: Node, identity: Dictionary) -> void:
 			var driver: Node=instance.get_node_or_null("CombatLoopDriver")
 			if setup!=null and driver!=null: driver.call("reset_for_location_job",String(setup.get("scenario_file_path")))
 
+## Homecoming rule per craft: everyone aboard is the craft's pilot or a member of one of its payload teams
+## (the base checkpoint export refuses an aboard person who is neither). This restores the people the visit
+## identity lists; without a team entry a person joins the team the rest of the payload belongs to (else "ft1").
+## Anyone aboard the visit never listed is handled by _admit_unplaced_aboard_crew once the craft is home.
 func _restore_returning_visit_membership(craft_id: String) -> void:
 	var instance: Node=get_mission_for_craft(craft_id)
 	if instance==null: return
 	var visit: Dictionary=Dictionary(Dictionary(instance.get_meta("singleplayer_visit_identities",{})).get(craft_id,{}))
 	var ids: Array=visit.get("unit_ids",[]); var teams: Array=visit.get("fireteam_ids",[])
-	var pilot:=String(_assigned_aircraft_pilot_by_craft.get(craft_id,""))
+	var payload_team:=_craft_payload_team_for_homecoming(craft_id)
 	var profiles: Array=[]
 	for index in ids.size():
-		var id:=String(ids[index])
-		if id==pilot or _homebase_staged_unit_ids.has(id): continue
-		var profile: Dictionary={}
-		for unit: Dictionary in _all_team_units:
-			if String(unit.get("unit_id",""))==id: profile=unit; break
-		if profile.is_empty(): continue
-		profiles.append(profile.duplicate(true)); _homebase_staged_unit_ids.append(id)
-		_homebase_staged_fireteam_ids.append(String(teams[index]) if index<teams.size() else "ft1")
+		var profile:=_stage_returning_person(craft_id,String(ids[index]),String(teams[index]) if index<teams.size() else payload_team)
+		if not profile.is_empty(): profiles.append(profile)
 	_available_team_units=_merge_missing_units_by_id(_available_team_units,profiles)
+
+## A person aboard the landed craft that is neither its pilot nor staged (a pilot displaced by a pilot-seat change on
+## the ship map, a recruit the visit never listed) joins the craft's payload team. Runs after the craft counts as home,
+## because the base personnel owner reports its people as "away" until then. The new pilot stays pilot only.
+func _admit_unplaced_aboard_crew(craft_id: String) -> void:
+	var payload_team:=_craft_payload_team_for_homecoming(craft_id)
+	var profiles: Array=[]
+	for id in _aboard_unit_ids_of_craft(craft_id):
+		var profile:=_stage_returning_person(craft_id,String(id),payload_team)
+		if not profile.is_empty(): profiles.append(profile)
+	if profiles.is_empty(): return
+	_available_team_units=_merge_missing_units_by_id(_available_team_units,profiles)
+
+## Stages one returning person (not the pilot, not yet staged) in `team`; returns its profile copy, {} if nothing changed.
+func _stage_returning_person(craft_id: String, id: String, team: String) -> Dictionary:
+	if id==String(_assigned_aircraft_pilot_by_craft.get(craft_id,"")) or _homebase_staged_unit_ids.has(id): return {}
+	for unit: Dictionary in _all_team_units:
+		if String(unit.get("unit_id",""))==id:
+			_homebase_staged_unit_ids.append(id); _homebase_staged_fireteam_ids.append(team)
+			return unit.duplicate(true)
+	return {}
+
+## First payload team of the craft that has members (as register_campaign_recruit picks it); "ft1" when the craft has none.
+func _craft_payload_team_for_homecoming(craft_id: String) -> String:
+	var home_screen: Node=_get_homebase_screen()
+	if home_screen==null: return "ft1"
+	for team: String in home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft_id):
+		if not PackedStringArray(home_screen.call("_get_member_unit_ids_for_fireteam",team)).is_empty(): return team
+	return "ft1"
+
+## People the base personnel owner reports aboard this craft.
+func _aboard_unit_ids_of_craft(craft_id: String) -> Array:
+	var result: Array=[]
+	var personnel: Node=_singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime!=null else null
+	if personnel==null: return result
+	for person: Dictionary in Array(personnel.call("get_snapshot").get("units",[])):
+		if String(person.get("status",""))=="aboard" and String(person.get("craft_id",""))==craft_id: result.append(String(person.get("unit_id","")))
+	return result
 
 
 func register_campaign_recruit(profile: Dictionary, craft_definition: Dictionary = {}, payload_craft_id: String = "") -> Dictionary:
