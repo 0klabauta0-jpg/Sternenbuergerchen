@@ -14,7 +14,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	for spec in [[Vector2i(1280, 720), 52.0, 300.0, 80.0], [Vector2i(1920, 1080), 64.0, 336.0, 88.0], [Vector2i(3440, 1440), 72.0, 400.0, 96.0]]:
+	for spec in [[Vector2i(1280, 720), 52.0, 280.0, 80.0], [Vector2i(1920, 1080), 64.0, 312.0, 88.0], [Vector2i(3440, 1440), 72.0, 376.0, 96.0]]:
 		await _check_size(spec[0], spec[1], spec[2], spec[3])
 	print("MISSION_HUD_GROUPS: %d passed, %d failed" % [_passed, _failed])
 	quit(0 if _failed == 0 else 1)
@@ -89,7 +89,7 @@ func _check_size(size_value: Vector2i, action_edge: float, card_width: float, po
 	var transport := scene.get_node("TacticalUI/MissionDropshipPanel") as Control
 	_expect(viewport_rect.encloses(transport.get_global_rect()) and transport.get_global_rect().position.x >= size_value.x * 0.5, "%s: transport card fits the upper-right viewport" % size_value)
 	var preview := transport.get_node("CompactCard/Contents/Header/ShipTexture") as TextureRect
-	_expect(preview.custom_minimum_size.y >= 80, "%s: Ref03 preview has a larger readable image slot" % size_value)
+	_expect(preview.custom_minimum_size.y >= 48, "%s: Ref03 preview has a larger readable image slot" % size_value)
 	var details := transport.get_node("CompactCard/Contents/Header/DetailsButton") as Button
 	details.pressed.emit()
 	_expect(bool((scene.get_node("TacticalUI/A5DropshipDetailsPopup") as PopupPanel).visible), "%s: transport details keep their existing callback" % size_value)

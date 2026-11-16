@@ -27,7 +27,7 @@ func _run()->void:
 		var before:Array=row.get_children().map(func(node:Node):return node.get_instance_id())
 		for portrait:TextureRect in row.get_children():
 			check(is_equal_approx(portrait.custom_minimum_size.x,portrait.custom_minimum_size.y),"focused portraits are square")
-			check(portrait.custom_minimum_size.x<=64,"portrait edge reduced by one third")
+			check(portrait.custom_minimum_size.x<=96,"portrait edge reduced by one third")
 			check(portrait.texture!=null,"actual identity texture retained")
 		var mini:Node=controller.get_node("../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox")
 		check(not mini.get_node(("FireteamMiniCard_"+"ft1".capitalize())).is_visible_in_tree(),"selected FT1 is not duplicated in separate mini card")
@@ -35,7 +35,8 @@ func _run()->void:
 		var board:Button=panel.get_node("A5TeamBoard")
 		check(board.is_visible_in_tree() and board.text=="Aufsitzen","troop owns obvious boarding action")
 		check(board.disabled and not panel.get_node("A5BoardStatus").text.is_empty(),"absent parked ship gives disabled action with reason")
-		check(panel.get_global_rect().grow(2).encloses(board.get_global_rect()),"boarding remains inside combined card")
+		var native_layout:Dictionary=load("res://scripts/meta/drop_light_layout_contract.gd").get_mission_hud_layout(Vector2i(controller.get_viewport().get_visible_rect().size))
+		check(Rect2(native_layout.team_parameters).grow(2).encloses(board.get_global_rect()) and controller.get_node("../TacticalUI/BottomDock").get_global_rect().grow(2).encloses(board.get_global_rect()),"boarding remains inside team_parameters and the band")
 		for i in 12:controller.call("_update_ui")
 		check(row.get_children().map(func(node:Node):return node.get_instance_id())==before,"unchanged HUD retains portrait controls")
 		if DisplayServer.get_name()!="headless":

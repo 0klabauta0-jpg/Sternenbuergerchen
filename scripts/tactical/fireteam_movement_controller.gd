@@ -113,6 +113,45 @@ const FORMATION_MAX_DISTANCE_CAP_FACTOR: float = 2.8
 
 var _execution_by_fireteam: Dictionary = {}
 var _execution_sequence: int = 0
+## Units a player sent on their own (direct control). They are not members of
+## any running fireteam order until the owner includes them again.
+var _excluded_unit_ids: Dictionary = {}
+
+func set_unit_excluded(unit_id: String, excluded: bool) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	if excluded:
+		_excluded_unit_ids[normalized_unit_id] = true
+	else:
+		_excluded_unit_ids.erase(normalized_unit_id)
+
+
+func is_unit_excluded(unit_id: String) -> bool:
+	return _excluded_unit_ids.has(unit_id.strip_edges())
+
+
+## One command for one person outside any fireteam execution (source
+## "direct_control"). Same builder as the stage commands, so Root accepts it
+## the same way. Returns true when the command was valid and handed to Root.
+func enqueue_direct_unit_command(simulation_root, team_id: String, unit_id: String, command_type: String, target_position: Vector2, command_token: String, unit = null) -> bool:
+	var is_engage: bool = command_type == UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
+	return _enqueue_unit_command(
+		simulation_root,
+		team_id,
+		unit_id,
+		command_type,
+		target_position,
+		1.0,
+		0.0,
+		0.0,
+		"direct_control",
+		-1,
+		unit,
+		command_token,
+		UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE if is_engage else UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TRAVEL,
+		UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_READY
+	)
 
 
 func reset_fireteam(fireteam_id: String) -> void:
@@ -1473,7 +1512,7 @@ func _build_member_records(units: Array, leader) -> Array:
 		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 			continue
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
-		if unit_id.is_empty():
+		if unit_id.is_empty() or _excluded_unit_ids.has(unit_id):
 			continue
 		records.append(
 			{
@@ -2863,6 +2902,7 @@ func capture_hex_execution_scope(units:Array,simulation_root)->Dictionary:
 	for unit in units:
 		if not is_instance_valid(unit) or not unit.has_method("get_unit_id"):continue
 		var id:String=String(unit.call("get_unit_id"))
+		if _excluded_unit_ids.has(id):continue
 		var binding:Dictionary=simulation_root.call("get_hex_actor_execution_binding",id)
 		if not binding.is_empty() and int(binding.actor)==unit.get_instance_id():scope.members[id]=binding
 	return scope
@@ -2885,7 +2925,7 @@ func filter_hex_execution_scope(scope:Dictionary,units:Array,simulation_root)->A
 			members.erase(id)
 	var result:Array=[]
 	for unit in units:
-		if is_instance_valid(unit) and unit.has_method("get_unit_id") and members.has(String(unit.call("get_unit_id"))):result.append(unit)
+		if is_instance_valid(unit) and unit.has_method("get_unit_id") and members.has(String(unit.call("get_unit_id"))) and not _excluded_unit_ids.has(String(unit.call("get_unit_id"))):result.append(unit)
 	return result
 
 

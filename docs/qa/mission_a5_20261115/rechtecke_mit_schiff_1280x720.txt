@@ -1,0 +1,1 @@
+MissionDropshipPanel	[P: (960.0, 16.0), S: (304.0, 184.0)]

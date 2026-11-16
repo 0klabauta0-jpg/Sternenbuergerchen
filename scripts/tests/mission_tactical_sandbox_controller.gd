@@ -466,6 +466,9 @@ const MISSION_EVACUATION_LZ_RADIUS: float = 72.0
 const MISSION_EVACUATION_BUTTON_NAME: String = "MissionEvacuationButton"
 
 signal planning_state_changed(planning_state)
+## A person sent on their own (direct control) finished or lost an action.
+## action is "move" or "engage"; details carry "target" and, on failure, "reason".
+signal direct_unit_action_resolved(unit_id: String, action: String, success: bool, details: Dictionary)
 signal polisa_globe_requested(recruiter: Dictionary)
 
 @export var alpha_flow_driver_path: NodePath
@@ -824,6 +827,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_ensure_plan_mode_switch()
 	_advance_campaign_extraction(delta)
+	_advance_direct_unit_control(delta)
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -1015,6 +1019,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if not key_event.pressed or key_event.echo:
 		return
+	if key_event.keycode == KEY_ESCAPE and not _selected_unit_id.is_empty():
+		_clear_single_unit_selection()
 	if _has_tactical_ui_focus():
 		return
 	if key_event.is_action_pressed(ACTION_DELETE_ORDER):
@@ -5497,9 +5503,17 @@ func _on_native_member_portrait_gui_input(event: InputEvent, unit_id: String, fi
 		var mouse := event as InputEventMouseButton
 		if mouse.button_index == MOUSE_BUTTON_LEFT and mouse.pressed:
 			_cancel_selection_interaction()
-			_on_fireteam_group_pressed(fireteam_id)
 			if mouse.double_click:
+				# The first click of the pair already chose the person; keep it.
+				if _selected_fireteam_ids.size() != 1 or _selected_fireteam_ids[0] != fireteam_id.strip_edges().to_lower():
+					_on_fireteam_group_pressed(fireteam_id)
 				_open_character_overlay(unit_id)
+			elif unit_id == _selected_unit_id:
+				_clear_single_unit_selection()
+				_last_command_text = "SELECT %s" % _get_fireteam_name().to_upper()
+				_update_ui()
+			elif not select_single_unit(unit_id):
+				_on_fireteam_group_pressed(fireteam_id)
 			get_viewport().set_input_as_handled()
 
 
@@ -6441,7 +6455,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.custom_minimum_size = Vector2(minf(portrait_edge, float(metrics.portrait_height)), metrics.portrait_height)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
 	for index in range(resolved_units.size()):
 		var unit := resolved_units[index] as Node
@@ -20481,6 +20495,7 @@ func _finish_selection_interaction(screen_position: Vector2) -> bool:
 			return true
 
 	if not ctrl_pressed:
+		_clear_single_unit_selection()
 		if _select_tile_from_screen_position(screen_position):
 			return true
 		_clear_selection()
@@ -20497,6 +20512,8 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 	if fireteam_id.is_empty():
 		return
+	if not ctrl_pressed and _try_select_single_from_click(unit, fireteam_id):
+		return
 	_set_selected_fireteams(PackedStringArray(_selection_adapter.call("build_unit_click_selection", _selected_fireteam_ids, fireteam_id, ctrl_pressed)))
 
 
@@ -20505,7 +20522,8 @@ func _try_select_fireteam_from_map_click(screen_position: Vector2, ctrl_pressed:
 	if unit == null:
 		return false
 	_apply_unit_click_selection(unit, ctrl_pressed)
-	_last_command_text = "SELECT %s" % _get_fireteam_name().to_upper()
+	if _selected_unit_id.is_empty():
+		_last_command_text = "SELECT %s" % _get_fireteam_name().to_upper()
 	_update_ui()
 	return true
 
@@ -20529,6 +20547,7 @@ func _focus_primary_view_on_selected_fireteams() -> bool:
 
 
 func _apply_lasso_selection(selection_rect: Rect2, ctrl_pressed: bool) -> void:
+	_clear_single_unit_selection()
 	var lasso_fireteam_ids: PackedStringArray = []
 	for fireteam_id in _get_available_fireteam_ids():
 		var unit: Node2D = _get_selection_anchor_for_fireteam(fireteam_id)
@@ -20557,7 +20576,10 @@ func apply_local_multiplayer_fireteam_perspective(fireteam_ids: Variant) -> Pack
 
 
 func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, should_emit_signal: bool = true) -> void:
-	_selected_fireteam_ids = _sanitize_fireteam_ids(next_selected_fireteam_ids)
+	var sanitized_selection: PackedStringArray = _sanitize_fireteam_ids(next_selected_fireteam_ids)
+	if not _selected_unit_id.is_empty() and sanitized_selection != _selected_fireteam_ids:
+		_selected_unit_id = ""
+	_selected_fireteam_ids = sanitized_selection
 	_update_focused_fireteam_from_selection()
 	_current_fireteam_index = 0
 	var selection_options: Array = _get_fireteam_selection_options()
@@ -20589,6 +20611,7 @@ func _update_focused_fireteam_from_selection() -> void:
 
 func _refresh_selection_visuals() -> void:
 	_selection_adapter.call("apply_unit_selection", _get_all_friendly_units(true), _selected_fireteam_ids)
+	_apply_single_unit_selection_ring()
 	_suppress_primary_view_legacy_unit_visuals()
 	_refresh_tile_selection_visuals()
 
@@ -34619,6 +34642,8 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 		return false
 	if waypoint == null or typeof(waypoint.target_position) != TYPE_VECTOR2:
 		return false
+	# Next order of this fireteam: people sent on their own rejoin it first.
+	_rejoin_detached_units(fireteam_id)
 	var execution_scope:Dictionary=_new_hex_execution_scope(fireteam_id,_current_hex_execution_scope(fireteam_id))
 	var execution_units:Array=_hex_execution_units(fireteam_id,execution_scope)
 	if execution_units.is_empty():return false
@@ -35680,6 +35705,10 @@ func _finish_right_order_context_interaction(screen_position: Vector2, append_pr
 			_update_ui()
 			return true
 		_open_area_order_command_menu(screen_position, area_order_targets, false, append_mode)
+		return true
+	if not _selected_unit_id.is_empty() and _handle_direct_unit_right_click(screen_position):
+		return true
+	if _try_board_by_right_click_on_ship(screen_position):
 		return true
 	if not _planning_enabled:
 		return request_immediate_move_from_screen(screen_position)
@@ -36754,6 +36783,7 @@ func _advance_hex_drop_unit(sequence:Dictionary)->void:
 		_post_drop_security_pending_fireteam_ids[fireteam_id]=true
 		_runtime_activation_pending_fireteam_ids[fireteam_id]=true
 	_last_command_text="AB %d/%d"%[index+1,units.size()]
+	_select_fireteam_after_deployment(units,fireteam_id)
 
 
 func _deploy_next_embarked_unit_for_sequence(sequence: Dictionary) -> void:
@@ -36802,6 +36832,20 @@ func _deploy_next_embarked_unit_for_sequence(sequence: Dictionary) -> void:
 		else:
 			_runtime_activation_pending_fireteam_ids[fireteam_id] = true
 	_last_command_text = "AB %d/%d" % [int(sequence.get("unit_index", 0)), units.size()]
+	_select_fireteam_after_deployment(units, fireteam_id)
+
+
+## Called after each unit got out. Once every unit of this fireteam is on the
+## ground, the team is selected, but only if nothing else is selected.
+func _select_fireteam_after_deployment(units: Array, fireteam_id: String) -> void:
+	if fireteam_id.is_empty() or not _selected_fireteam_ids.is_empty():
+		return
+	for unit in units:
+		if unit == null or not unit.has_method("get_fireteam_id") or not unit.has_method("get_unit_id"):
+			continue
+		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() == fireteam_id and not _deployed_unit_ids.has(String(unit.call("get_unit_id"))):
+			return
+	_set_selected_fireteams(PackedStringArray([fireteam_id]))
 
 
 func _show_drop_team_event_text_for_sequence(sequence: Dictionary, event_text: String, color: Color, duration_seconds: float) -> void:
@@ -37581,10 +37625,11 @@ var _campaign_extraction_craft_id: String = ""
 var _campaign_extraction_poll: float = 0.0
 var _campaign_extraction_elapsed: float = 0.0
 
-func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
+## Id of the parked own dropship within 56 px of the screen position, or "".
+func _landed_craft_id_at_screen_position(screen_position: Vector2) -> String:
 	var view = _get_primary_3d_view()
 	if view == null or not view.has_method("world_to_screen_position"):
-		return false
+		return ""
 	for card: Dictionary in _get_mission_dropship_card_entries():
 		var craft_id := String(card.get("craft_id", ""))
 		if not _is_parked_campaign_dropship(craft_id): continue
@@ -37592,8 +37637,32 @@ func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
 		if not position.is_finite(): continue
 		var screen: Vector2 = view.call("world_to_screen_position", position)
 		if screen.distance_to(screen_position) <= 56.0:
-			return select_mission_dropship_craft(craft_id)
-	return false
+			return craft_id
+	return ""
+
+func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
+	var craft_id := _landed_craft_id_at_screen_position(screen_position)
+	if craft_id.is_empty() or not select_mission_dropship_craft(craft_id):
+		return false
+	_clear_single_unit_selection()
+	return true
+
+## Right click (no drag) on the own landed ship with exactly one fireteam
+## selected is the same request as the "Aufsitzen" button.
+func _try_board_by_right_click_on_ship(screen_position: Vector2) -> bool:
+	if _selected_fireteam_ids.size() != 1 or _landed_craft_id_at_screen_position(screen_position).is_empty():
+		return false
+	var answer := request_selected_team_boarding()
+	if not bool(answer.get("ok", false)):
+		_last_command_text = String(answer.get("message", "Aufsitzen nicht möglich"))
+		_update_ui()
+	return true
+
+## True while the crew of this craft is still getting out (drop sequence unloading).
+func _is_craft_unloading(craft_id: String) -> bool:
+	if _is_active_drop_sequence_for_craft(craft_id):
+		return _drop_sequence_phase == DROP_SEQUENCE_UNLOADING
+	return String(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("phase", "")) == DROP_SEQUENCE_UNLOADING
 
 # Derived geometry only. Same bounded exit projection as disembarkation;
 # no camera, occupancy, selected team, actor position or mutable gameplay value.
@@ -37700,7 +37769,7 @@ func get_selected_team_boarding_snapshot() -> Dictionary:
 	var result:Dictionary={"can_board":false,"craft_id":craft,"fireteam_id":team,"message":"Einen Trupp auswählen"}
 	if _selected_fireteam_ids.size()!=1:return result
 	if not _can_issue_local_commands():result.message="Keine Befehlsberechtigung";return result
-	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfügbar";return result
+	if not _is_parked_campaign_dropship(craft):result.message="Absitzen läuft noch" if _is_craft_unloading(craft) else "Kein eigenes gelandetes Truppschiff verfügbar";return result
 	if not get_campaign_ground_ship_access(craft).get("ok",false):result.message="Zugang zum Schiff ist blockiert";return result
 	var units:Array=_get_campaign_sortie_units().filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==team)
 	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result
@@ -37736,6 +37805,243 @@ func _advance_selected_team_boarding(delta:float) -> void:
 		elif reason not in ["pilot_not_at_ship","crew_not_at_ship","pilot_boarding_pending"] or float(request.elapsed)>180:
 			_selected_team_boarding_requests.erase(team)
 			_last_command_text=String(result.get("message","Aufsitzen unterbrochen"))
+
+
+# ---------------------------------------------------------------- direct control of one person (package C1)
+# State lives here; movement and fire still go through the simulation's
+# enqueue_command. A detached person is excluded from the fireteam's running
+# order (FireteamMovementController.set_unit_excluded) until the fireteam gets
+# its next order. No tree scans: units come from the runtime index, and the
+# poll only looks at detached/pending/selected persons.
+const DIRECT_POLL_SECONDS: float = 0.2
+const DIRECT_REACHED_RADIUS: float = 18.0
+var _selected_unit_id: String = ""
+var _detached_units: Dictionary = {}        # unit_id -> fireteam_id
+var _pending_direct_moves: Dictionary = {}  # unit_id -> {"token": String, "target": Vector2}
+var _direct_unit_action_events: Array = []
+var _direct_command_sequence: int = 0
+var _direct_poll_remaining: float = 0.0
+
+func get_selected_unit_id() -> String:
+	return _selected_unit_id
+
+func is_unit_detached(unit_id: String) -> bool:
+	return _detached_units.has(unit_id)
+
+func get_direct_unit_action_events() -> Array:
+	return _direct_unit_action_events.duplicate(true)
+
+func _direct_unit_by_id(unit_id: String) -> Node:
+	if unit_id.is_empty():
+		return null
+	_ensure_mission_runtime_read_models()
+	if _mission_runtime_index == null:
+		return null
+	var unit = _mission_runtime_index.call("get_unit_by_id", unit_id)
+	if not is_instance_valid(unit) or not unit.has_method("get_team_id") or String(unit.call("get_team_id")).strip_edges() != get_local_command_team_id():
+		return null
+	return unit
+
+## Fit, visible and not aboard: the only state in which a person can be sent.
+func _is_direct_control_possible(unit: Node) -> bool:
+	if not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+		return false
+	if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+		return false
+	if _embarked_unit_ids.has(String(unit.call("get_unit_id"))):
+		return false
+	return not (unit is CanvasItem and not (unit as CanvasItem).visible)
+
+func select_single_unit(unit_id: String) -> bool:
+	var unit := _direct_unit_by_id(unit_id)
+	if not _is_direct_control_possible(unit) or not unit.has_method("get_fireteam_id") or not _can_issue_local_commands():
+		return false
+	if unit_id.begins_with("station_shuttle_pilot_"):
+		return false
+	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return false
+	if _selected_fireteam_ids.size() != 1 or _selected_fireteam_ids[0] != fireteam_id:
+		_set_selected_fireteams(PackedStringArray([fireteam_id]))
+	_selected_unit_id = unit_id
+	_refresh_selection_visuals()
+	_last_command_text = "Einzelsteuerung: %s" % _direct_unit_label(unit)
+	_update_ui()
+	return true
+
+func _clear_single_unit_selection() -> bool:
+	if _selected_unit_id.is_empty():
+		return false
+	_selected_unit_id = ""
+	_refresh_selection_visuals()
+	return true
+
+func _direct_unit_label(unit: Node) -> String:
+	return String(unit.call("get_display_name")) if unit.has_method("get_display_name") else String(unit.call("get_unit_id"))
+
+## Second click on a person of the (only) selected fireteam: that person alone.
+## Clicking the single-selected person again drops back to the fireteam.
+func _try_select_single_from_click(unit: Node, fireteam_id: String) -> bool:
+	if not unit.has_method("get_unit_id") or _selected_fireteam_ids.size() != 1 or _selected_fireteam_ids[0] != fireteam_id:
+		return false
+	var unit_id: String = String(unit.call("get_unit_id"))
+	if unit_id == _selected_unit_id:
+		_clear_single_unit_selection()
+		_last_command_text = "SELECT %s" % _get_fireteam_name().to_upper()
+		_update_ui()
+		return true
+	return select_single_unit(unit_id)
+
+## The single-selected person carries the selection ring, the rest of the team does not.
+func _apply_single_unit_selection_ring() -> void:
+	if _selected_unit_id.is_empty():
+		return
+	for unit in _get_all_friendly_units(true):
+		if unit == null or not unit.has_method("set_tactical_selected") or not unit.has_method("get_unit_id") or not unit.has_method("get_fireteam_id"):
+			continue
+		if _selected_fireteam_ids.has(String(unit.call("get_fireteam_id")).strip_edges().to_lower()):
+			unit.call("set_tactical_selected", String(unit.call("get_unit_id")) == _selected_unit_id)
+
+func _is_connected_multiplayer_client() -> bool:
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer if multiplayer != null else null
+	return peer != null and not (peer is OfflineMultiplayerPeer) and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED and not multiplayer.is_server()
+
+## Right click while one person is single-selected. Target kinds in order:
+## visible enemy, downed own person, own ship, ground. Returns false only when
+## the selected person is no longer usable (the single selection is dropped and
+## the click is handled as a fireteam click).
+func _handle_direct_unit_right_click(screen_position: Vector2) -> bool:
+	var unit := _direct_unit_by_id(_selected_unit_id)
+	if not _is_direct_control_possible(unit):
+		_clear_single_unit_selection()
+		return false
+	if _is_connected_multiplayer_client():
+		_set_direct_control_text("Einzelsteuerung gibt es im Mehrspieler noch nicht")
+		return true
+	var enemy := _find_visible_enemy_at_screen_position(screen_position)
+	if enemy != null:
+		_send_direct_unit_command(unit, "engage", (enemy as Node2D).global_position)
+		return true
+	if _find_downed_friendly_at_screen_position(screen_position) != null:
+		# Reserved for a later carry action; no command yet.
+		_set_direct_control_text("Liegende Kameraden lassen sich noch nicht tragen")
+		return true
+	if not _landed_craft_id_at_screen_position(screen_position).is_empty():
+		_set_direct_control_text("Einzelne Personen sitzen über den Trupp auf")
+		return true
+	var tile: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if tile.is_empty():
+		_set_direct_control_text("Kein Feld unter dem Zeiger")
+		return true
+	_send_direct_unit_command(unit, "move", Vector2(tile.get("world_position", Vector2.INF)))
+	return true
+
+func _set_direct_control_text(text: String) -> void:
+	_last_command_text = text
+	_update_ui()
+
+## Nearest visible enemy within the unit pick radius of the pointer, or null.
+func _find_visible_enemy_at_screen_position(screen_position: Vector2) -> Node:
+	var world_position: Vector2 = _screen_to_world_position(screen_position)
+	var best_unit: Node = null
+	var best_distance_sq: float = UNIT_SELECTION_PICK_RADIUS * UNIT_SELECTION_PICK_RADIUS
+	for unit in _get_all_enemy_units(false):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) == "dead":
+			continue
+		var distance_sq: float = (unit as Node2D).global_position.distance_squared_to(world_position)
+		if distance_sq <= best_distance_sq:
+			best_distance_sq = distance_sq
+			best_unit = unit
+	return best_unit
+
+## Nearest visible own person who is down within the pick radius, or null.
+func _find_downed_friendly_at_screen_position(screen_position: Vector2) -> Node:
+	var world_position: Vector2 = _screen_to_world_position(screen_position)
+	var best_unit: Node = null
+	var best_distance_sq: float = UNIT_SELECTION_PICK_RADIUS * UNIT_SELECTION_PICK_RADIUS
+	for unit in _get_all_friendly_units(false):
+		if not (unit is Node2D) or not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) == "fit":
+			continue
+		var distance_sq: float = (unit as Node2D).global_position.distance_squared_to(world_position)
+		if distance_sq <= best_distance_sq:
+			best_distance_sq = distance_sq
+			best_unit = unit
+	return best_unit
+
+func _send_direct_unit_command(unit: Node, action: String, target_position: Vector2) -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	_ensure_fireteam_movement_controller()
+	if simulation_root == null or _fireteam_movement_controller == null or not target_position.is_finite():
+		return false
+	var unit_id: String = String(unit.call("get_unit_id"))
+	_direct_command_sequence += 1
+	var token: String = "direct_control:%s:%d" % [unit_id, _direct_command_sequence]
+	var command_type: String = "engage_area" if action == "engage" else "move_to_position"
+	var accepted: bool = bool(_fireteam_movement_controller.call("enqueue_direct_unit_command", simulation_root, String(unit.call("get_team_id")), unit_id, command_type, target_position, token, unit))
+	if not accepted:
+		_set_direct_control_text("Einzelsteuerung: Befehl nicht möglich")
+		return false
+	# A direct order replaced by another direct order emits nothing for the old one.
+	_pending_direct_moves.erase(unit_id)
+	_detached_units[unit_id] = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	_fireteam_movement_controller.call("set_unit_excluded", unit_id, true)
+	if action == "move":
+		_pending_direct_moves[unit_id] = {"token": token, "target": target_position}
+	else:
+		# No kill tracking yet: the event only says the order was accepted.
+		_emit_direct_unit_action(unit_id, "engage", true, {"target": target_position, "accepted_only": true})
+	_set_direct_control_text("Einzelsteuerung: %s" % _direct_unit_label(unit))
+	return true
+
+func _emit_direct_unit_action(unit_id: String, action: String, success: bool, details: Dictionary) -> void:
+	_direct_unit_action_events.append({"unit_id": unit_id, "action": action, "success": success, "details": details.duplicate(true)})
+	direct_unit_action_resolved.emit(unit_id, action, success, details)
+
+## The person is part of the fireteam's orders again. A move that was still on
+## its way ends as failed with the given reason.
+func _end_direct_control_for_unit(unit_id: String, reason: String) -> void:
+	if _pending_direct_moves.has(unit_id):
+		var pending: Dictionary = _pending_direct_moves[unit_id]
+		_pending_direct_moves.erase(unit_id)
+		_emit_direct_unit_action(unit_id, "move", false, {"target": pending.target, "reason": reason})
+	_detached_units.erase(unit_id)
+	if _fireteam_movement_controller != null:
+		_fireteam_movement_controller.call("set_unit_excluded", unit_id, false)
+
+func _rejoin_detached_units(fireteam_id: String) -> void:
+	if _detached_units.is_empty():
+		return
+	for unit_id in _detached_units.keys():
+		if _detached_units[unit_id] == fireteam_id:
+			_end_direct_control_for_unit(String(unit_id), "rejoined")
+
+func _advance_direct_unit_control(delta: float) -> void:
+	if _detached_units.is_empty() and _pending_direct_moves.is_empty() and _selected_unit_id.is_empty():
+		return
+	_direct_poll_remaining -= delta
+	if _direct_poll_remaining > 0.0:
+		return
+	_direct_poll_remaining = DIRECT_POLL_SECONDS
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	for unit_id in _pending_direct_moves.keys():
+		var unit := _direct_unit_by_id(String(unit_id))
+		if _is_direct_control_possible(unit) and _direct_move_arrived(unit, simulation_root, _pending_direct_moves[unit_id]):
+			var pending: Dictionary = _pending_direct_moves[unit_id]
+			_pending_direct_moves.erase(unit_id)
+			_emit_direct_unit_action(String(unit_id), "move", true, {"target": pending.target})
+	for unit_id in _detached_units.keys():
+		if not _is_direct_control_possible(_direct_unit_by_id(String(unit_id))):
+			_end_direct_control_for_unit(String(unit_id), "down")
+	if not _selected_unit_id.is_empty() and not _is_direct_control_possible(_direct_unit_by_id(_selected_unit_id)):
+		_clear_single_unit_selection()
+
+func _direct_move_arrived(unit: Node, simulation_root: Node, pending: Dictionary) -> bool:
+	var target: Vector2 = pending.target
+	if simulation_root != null and simulation_root.has_method("is_hex_ground_runtime_active") and bool(simulation_root.call("is_hex_ground_runtime_active")):
+		return bool(simulation_root.call("has_hex_position_arrived", String(unit.call("get_unit_id")), target, String(pending.token)))
+	return unit is Node2D and (unit as Node2D).global_position.distance_to(target) <= DIRECT_REACHED_RADIUS
 
 
 var _planning_enabled: bool = true
