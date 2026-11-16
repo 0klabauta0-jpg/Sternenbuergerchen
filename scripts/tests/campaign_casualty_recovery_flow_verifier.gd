@@ -8,6 +8,7 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## Z6: Skirmish zaehlt nichts und sperrt nichts.   Z7: Niemand verwundet: nichts aendert sich.   Z8: zwei Verwundete, kuerzere Zeit genest zuerst.
 ## Z13: Sichtbare Basisansicht: die Statuszeile der Verwundeten zeigt die laufende Restzeit, ohne Neuaufbau (gleiche Karte, Marker, Auswahl).
 ## Z14: Ablauf der Zeit: Karte zeigt den normalen Zustand, die Person ist einschiffbar.   Z15: Unsichtbare Ansicht: keine Auffrischung.
+## Z16: Offenes Charakterblatt: nur die Statuszeile aendert sich, ohne Neuaufbau.   Z17: Ende der Verwundung: Auswahl, Fokus, Truppkarten-Auswahl und Rueckmeldung bleiben.
 ## Einzeln starten: Umgebungsvariable T7B_ONLY (zum Beispiel "Z5") oder Kommandozeilenargument nach "--" (zum Beispiel "-- Z5"); ohne Angabe laufen alle.
 
 const RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
@@ -17,7 +18,7 @@ const PILOT := "campaign_pilot"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _selected_scenarios()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -372,6 +373,52 @@ func _z13() -> void:
 	_check(String(_screen.get("_team_feedback_text")) == "z13-marker", "Z13: Ansicht wurde nicht neu aufgebaut (Marker blieb, setup_roster lief nicht)")
 	_check(_view_state() == view_before, "Z13: Auswahl und Fokus unveraendert")
 	_check(after_text.get_slice(" | ", 1) == before_text.get_slice(" | ", 1), "Z13: nur der Statusteil der Zeile aendert sich, der Ortsteil bleibt")
+
+## Z16: Offenes Charakterblatt der verwundeten, fokussierten Person: nur die Statuszeile aendert sich (gleiches Etikett, kein Neuaufbau).
+func _z16() -> void:
+	if not await _open("campaign", "new"): return
+	_wound(LEADER, "medium", 900.0, 900.0)
+	_flow.call("_refresh_homebase_screen")
+	var profile = Dictionary(_screen.get("_profiles_by_id")).get(LEADER, null)
+	if not _check(profile != null, "Z16: Fixture: Profil der Person ist da"): return
+	_screen.call("_on_compact_card_open_requested", LEADER, profile, "roster")
+	_check(bool(_screen.get("_character_sheet_open")) and String(_screen.get("_focused_unit_id")) == LEADER, "Z16: Fixture: Blatt der Person ist offen")
+	var host: Node = _screen.call("_get_character_sheet_content_host")
+	var label: Label = host.find_child("ValueText_status", true, false) as Label if host != null else null
+	if not _check(label != null and label.text.begins_with("Verwundet (mittel), noch 15:00"), "Z16: Fixture: Blatt zeigt 'Verwundet (mittel), noch 15:00' (%s)" % (label.text if label != null else "<kein Etikett>")): return
+	var label_id: int = label.get_instance_id()
+	var first_child_id: int = host.get_child(0).get_instance_id()
+	var children: int = host.get_child_count()
+	_tick_seconds(2)
+	var after: Label = host.find_child("ValueText_status", true, false) as Label
+	print("Z16_TEXT ", label.text)
+	_check(after != null and after.text.begins_with("Verwundet (mittel), noch 14:58"), "Z16: Blatt zeigt nach zwei Sekunden 14:58 (%s)" % (after.text if after != null else "<kein Etikett>"))
+	_check(after != null and after.get_instance_id() == label_id and host.get_child_count() == children and host.get_child(0).get_instance_id() == first_child_id, "Z16: Blatt wurde nicht neu aufgebaut (gleiche Knoten)")
+	# Gleicher Text: ein weiterer Aufruf mit derselben Restzeit aendert nichts.
+	var same_text: String = after.text
+	_screen.call("refresh_recovery_status", [_roster_unit(LEADER)])
+	_check(host.find_child("ValueText_status", true, false) == after and after.text == same_text, "Z16: gleicher Text, nichts angefasst")
+
+## Z17: Endet eine Verwundung, laeuft der volle Neuaufbau der Ansicht. Beleg, was dabei mit Auswahl, Fokus,
+## Truppkarten-Auswahl und einer gerade angezeigten Rueckmeldung passiert.
+func _z17() -> void:
+	if not await _open("campaign", "new"): return
+	_wound(LEADER, "medium", 900.0, 2.0)
+	_flow.call("_refresh_homebase_screen")
+	_screen.call("_on_compact_card_pressed", PILOT, Dictionary(_screen.get("_profiles_by_id")).get(PILOT, null), "roster")
+	_screen.set("_team_feedback_text", "z17-marker")
+	var before: Array = _view_state()
+	var loadout_team_before: Variant = _screen.get("_loadout_staged_fireteam_id")
+	var team_cards_before: Array = Array(_screen.get("_selected_fireteam_ids")).duplicate()
+	print("Z17_BEFORE ", before, " loadout=", loadout_team_before, " feedback=", _screen.get("_team_feedback_text"))
+	_tick_seconds(2)
+	_check(String(_roster_unit(LEADER).get("availability_status", "")) == "active", "Z17: Fixture: die Verwundung ist beendet")
+	print("Z17_AFTER ", _view_state(), " loadout=", _screen.get("_loadout_staged_fireteam_id"), " feedback=", _screen.get("_team_feedback_text"))
+	_check(_view_state() == before, "Z17: Auswahl und Fokus (Person und Trupp) bleiben nach dem Ende der Verwundung")
+	_check(_screen.get("_loadout_staged_fireteam_id") == loadout_team_before and Array(_screen.get("_selected_fireteam_ids")) == team_cards_before, "Z17: Truppkarten-Auswahl bleibt nach dem Ende der Verwundung")
+	_check(String(_screen.get("_team_feedback_text")) == "z17-marker", "Z17: eine angezeigte Rueckmeldung bleibt nach dem Ende der Verwundung")
+	var single: Dictionary = _board_one(LEADER)
+	_check(bool(single.get("ok", false)) and String(single.get("reason", "")) != "unit_wounded", "Z17: die genesene Person ist einschiffbar (%s)" % single)
 
 func _z14() -> void:
 	if not await _open("campaign", "new"): return

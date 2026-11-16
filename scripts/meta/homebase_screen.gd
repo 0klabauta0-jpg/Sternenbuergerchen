@@ -313,7 +313,21 @@ func refresh_recovery_status(units: Array) -> int:
 		if unit_id == _focused_unit_id:
 			focused_changed = true
 	if focused_changed and _character_sheet_open:
-		_update_character_sheet()
+		# Open sheet of the focused person: only the status line changes with the countdown. Set that one label when its
+		# text really differs (no rebuild, so scroll position and sections stay); rebuild only if the sheet has no such line.
+		var focused_profile = _profiles_by_id.get(_focused_unit_id, null)
+		var sheet_host := _get_character_sheet_content_host()
+		var sheet_status: String = _build_sheet_status_text(_focused_unit_id)
+		var shown_text: String = CHARACTER_SHEET_FORMATTER_SCRIPT.format_status_text(sheet_status, focused_profile)
+		var status_label: Label = sheet_host.find_child("ValueText_status", true, false) as Label if sheet_host != null else null
+		if status_label == null or shown_text == CHARACTER_SHEET_FORMATTER_SCRIPT.format_status_text(sheet_status, null):
+			_update_character_sheet()
+		else:
+			if status_label.text != shown_text:
+				status_label.text = shown_text
+			var overview_label: Label = sheet_host.find_child("CharacterStatus", true, false) as Label
+			if overview_label != null and overview_label.text != "Status: " + shown_text:
+				overview_label.text = "Status: " + shown_text
 	return refreshed
 
 

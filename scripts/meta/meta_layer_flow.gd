@@ -5399,22 +5399,24 @@ func _tick_personnel_recovery(delta: float) -> void:
 		_present_recovery_progress(PackedStringArray(advanced.get("recovered_unit_ids", PackedStringArray())))
 
 
-## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): endet eine Verwundung, laeuft der
-## normale Aktualisierungsweg der Ansicht (Personen, Trupps, Verfuegbarkeit); sonst werden nur die Statuszeilen der
-## angezeigten Verwundeten neu gesetzt. Unsichtbare Ansicht oder niemand verwundet: kein Aufruf.
+## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): sichtbar werden nur die
+## Statuszeilen der Verwundeten und der Genesenen neu gesetzt (Anzeigeprofil und Verfuegbarkeit der Ansicht ueber
+## refresh_recovery_status), ohne Neuaufbau: Auswahl, Fokus, Truppkarten-Auswahl und eine angezeigte Rueckmeldung bleiben
+## (Beleg: campaign_casualty_recovery_flow_verifier Z17; der volle Neuaufbau loeschte die Rueckmeldung). Eine unsichtbare
+## Ansicht wird beim Ende einer Verwundung wie bisher ganz aufgefrischt, damit sie beim Einblenden stimmt.
 func _present_recovery_progress(recovered_unit_ids: PackedStringArray) -> void:
-	if not recovered_unit_ids.is_empty():
-		_refresh_homebase_screen()
-		return
 	var homebase_screen: Node = _get_homebase_screen()
-	if homebase_screen == null or not homebase_screen.has_method("refresh_recovery_status") or not homebase_screen.is_visible_in_tree():
+	var can_patch: bool = homebase_screen != null and homebase_screen.has_method("refresh_recovery_status") and homebase_screen.is_visible_in_tree()
+	if not can_patch:
+		if not recovered_unit_ids.is_empty():
+			_refresh_homebase_screen()
 		return
-	var wounded_units: Array = []
+	var changed_units: Array = []
 	for unit_variant in _all_team_units:
-		if typeof(unit_variant) == TYPE_DICTIONARY and PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant):
-			wounded_units.append(unit_variant)
-	if not wounded_units.is_empty():
-		homebase_screen.call("refresh_recovery_status", wounded_units)
+		if typeof(unit_variant) == TYPE_DICTIONARY and (PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant) or recovered_unit_ids.has(String(Dictionary(unit_variant).get("unit_id", "")))):
+			changed_units.append(unit_variant)
+	if not changed_units.is_empty():
+		homebase_screen.call("refresh_recovery_status", changed_units)
 
 
 ## Die eine Stelle, die der Basis-Runtime die Einsatzsperre aus dem Kader gibt: je verwundeter Person
