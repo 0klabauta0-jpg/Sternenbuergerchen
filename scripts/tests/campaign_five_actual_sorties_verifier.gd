@@ -241,6 +241,10 @@ func _remaining_missions() -> void:
 			var rally:Vector2=Vector2(access.position).lerp(enemy_target,0.80)
 			controller.call("_create_waypoints_for_selected_fireteams",rally,true)
 			if not _check(controller.execute_selected_fireteam_orders(),"normal squad rally GO accepts"):return
+			# The assigned pilot is aboard at this point and has no hex state (836886221); only he is exempt, nobody else.
+			var needed_live:int=_crew_ids.size()-(1 if _crew_ids.has(_pilot_id) else 0)
+			print("RALLY_CREW size=",_crew_ids.size()," pilot_in_crew=",_crew_ids.has(_pilot_id)," needed_live=",needed_live)
+			if not _check(needed_live>=1,"rally expects at least one non-pilot crew member"):return
 			if not await _wait(func():
 				var live:=0
 				for id in _crew_ids:
@@ -248,7 +252,7 @@ func _remaining_missions() -> void:
 					if sim.get_hex_unit_state(String(id)).is_empty() or not is_instance_valid(actor) or actor.get_vital_state()!="fit":continue
 					live+=1
 					if actor.global_position.distance_to(rally)>400.0:return false
-				return live>=_crew_ids.size()-1,180000,"actual ground squad gathers before enemy contact"):
+				return live>=needed_live,180000,"actual ground squad gathers before enemy contact"):
 				_trace_actual_combat("rally_timeout");return
 			if not _check(controller.issue_right_click_command_for_test(enemy_target,"take",false),"normal TAKE / ENGAGE plan accepts after rally"):return
 			_check(bool(controller.call("execute_selected_fireteam_orders")),"approach actual outpost guard")
