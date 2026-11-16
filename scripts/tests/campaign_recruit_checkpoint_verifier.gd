@@ -185,6 +185,12 @@ func _rc_r4() -> void:
 	var foreign: Dictionary = payload.duplicate(true)
 	foreign.hex_tactical.base_personnel.units[PILOT_ID]["status"] = "station"
 	cases.append(["Status station bei einer Person, die kein Polisa-Rekrut ist", foreign, "invalid_station_personnel"])
+	var with_craft: Dictionary = payload.duplicate(true)
+	with_craft.hex_tactical.base_personnel.units[unit_id]["craft_id"] = _rc_craft_id()
+	cases.append(["Resident auf Polisa mit craft_id", with_craft, "invalid_station_personnel"])
+	var with_bed: Dictionary = payload.duplicate(true)
+	with_bed.hex_tactical.base_personnel.units[unit_id]["bed_id"] = "bed_1"
+	cases.append(["Resident auf Polisa mit bed_id", with_bed, "invalid_station_personnel"])
 	for entry: Array in cases:
 		var verdict: Dictionary = STORE_6B.validate_payload(entry[1])
 		_check(not bool(verdict.get("ok", false)) and String(verdict.get("reason", "")) == String(entry[2]), "R4: %s: abgelehnt mit %s (ist %s)" % [entry[0], entry[2], verdict.get("reason", "ok")])
