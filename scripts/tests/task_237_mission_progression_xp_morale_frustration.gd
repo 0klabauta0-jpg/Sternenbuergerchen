@@ -128,8 +128,11 @@ func _test_debrief_renders_character_updates() -> void:
 	})
 	await process_frame
 	var labels: PackedStringArray = _collect_label_texts(debrief)
-	_assert(_labels_contain(labels, "Character updates:"), "Debrief renders character update section")
-	_assert(_labels_contain(labels, "Anja helped the objective"), "Debrief renders concise character event")
+	# Seit 5500bcbe2 zeigt der Bericht nur die Anzahl; der Einzeltext steht im Originalbericht (TextEdit).
+	_assert(_labels_contain(labels, "2 Personenmeldungen"), "Debrief renders character update section")
+	debrief.call("open_debrief_details")
+	var original: TextEdit = debrief.find_child("DebriefOriginalText", true, false) as TextEdit
+	_assert(original != null and original.text.contains("Anja helped the objective"), "Debrief original report holds concise character event")
 	debrief.queue_free()
 	await process_frame
 
