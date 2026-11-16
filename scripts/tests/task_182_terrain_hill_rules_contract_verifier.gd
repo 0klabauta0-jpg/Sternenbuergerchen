@@ -104,7 +104,8 @@ func _test_terrain_tile_data_contract() -> void:
 		"cover_value": 999,
 		"edge_type": "invalid_edge",
 	})
-	_assert(int(clamped_tile.height_level) == 2, "height_level clamps to 0..2")
+	var max_height_level: int = int(TERRAIN_TILE_DATA_SCRIPT.get("MAX_HEIGHT_LEVEL"))
+	_assert(int(clamped_tile.height_level) == max_height_level, "height_level clamps to 0..MAX_HEIGHT_LEVEL (docs/dev/terrain_height_hill_rules.md)")
 	_assert(int(clamped_tile.object_height) == 3, "object_height clamps to 0..3")
 	_assert(int(clamped_tile.cover_value) == 100, "cover_value clamps to 0..100")
 	_assert(String(clamped_tile.edge_type) == TERRAIN_TILE_DATA_SCRIPT.get("EDGE_CLIFF"), "Invalid edge_type normalizes to cliff")
@@ -140,7 +141,8 @@ func _test_pathfinder_and_authoring_anchors() -> void:
 	_assert(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.get("MODE_LOWER") == "lower", "Height tool defines lower mode")
 	_assert(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.get("MODE_SET_1") == "set_1", "Height tool defines set_1 mode")
 	_assert(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.get("MODE_SET_2") == "set_2", "Height tool defines set_2 mode")
-	_assert(int(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("get_next_height_level", 2, "raise")) == 2, "Height tool clamps raise at H=2")
+	var tool_max_height: int = int(TERRAIN_TILE_DATA_SCRIPT.get("MAX_HEIGHT_LEVEL"))
+	_assert(int(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("get_next_height_level", tool_max_height, "raise")) == tool_max_height, "Height tool clamps raise at MAX_HEIGHT_LEVEL")
 	_assert(int(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("get_next_height_level", 0, "lower")) == 0, "Height tool clamps lower at H=0")
 	var zero_patch: Dictionary = MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("build_height_patch", 1, "lower", "slope", "none")
 	_assert(int(zero_patch.get("height_level", -1)) == 0 and String(zero_patch.get("edge_type", "")) == "none", "Height tool clears edge_type to none at H=0")
@@ -151,7 +153,7 @@ func _test_pathfinder_and_authoring_anchors() -> void:
 func _test_los_and_visual_contract_anchors() -> void:
 	var los_text: String = _read_text_file("res://scripts/core/los_system.gd")
 	_assert(los_text.contains("height_level") and los_text.contains("object_height"), "LOS system reads height_level and object_height")
-	_assert(los_text.contains("blocker_height") and los_text.contains("+ int(tile_data.object_height)"), "LOS system computes blocker height from terrain plus object height")
+	_assert(los_text.contains("blocker_height") and los_text.contains("int(tile_data.height_level) + object_height"), "LOS system computes blocker height from terrain plus object height")
 
 	var renderer_text: String = _read_text_file("res://scripts/terrain/terrain_map_renderer.gd")
 	_assert(renderer_text.contains("height_level") and renderer_text.contains("edge_type"), "Legacy terrain renderer reads height and edge_type")
