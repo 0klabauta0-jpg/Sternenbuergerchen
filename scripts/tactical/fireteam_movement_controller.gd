@@ -1817,9 +1817,15 @@ func _compute_group_spread(unit_ids: PackedStringArray, current_positions: Dicti
 
 func _resolve_effective_style(raw_style: String, units: Array, member_records: Array) -> String:
 	var normalized_style: String = _normalize_advance_style(raw_style)
-	if units.is_empty():
+	# Embarked members are neither present nor lost for the style choice: only ground members count.
+	var ground_unit_count: int = 0
+	for unit in units:
+		if unit == null or bool(unit.get_meta("dropship_embarked", false)):
+			continue
+		ground_unit_count += 1
+	if ground_unit_count == 0:
 		return normalized_style
-	if member_records.size() * 2 > units.size():
+	if member_records.size() * 2 > ground_unit_count:
 		return normalized_style
 	return ADVANCE_STYLE_RUSH
 
