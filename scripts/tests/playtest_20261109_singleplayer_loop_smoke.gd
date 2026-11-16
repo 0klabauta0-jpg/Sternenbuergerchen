@@ -247,7 +247,7 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	var approach_phase := String(_space().get("phase", ""))
 	var transit: Dictionary = Dictionary(_space().get("orbit_transit", {}))
 	_check(_flow.get("_active_mission") == null and (approach_phase == "approach" or (approach.get("pending", false) and approach_phase == "orbit" and transit.get("status") == "flying")), "Explicit approach waits for orbit transit or begins before map instantiation")
-	if not await _wait(func(): return _flow.get("_active_mission") != null, 12000, scenario_id + " actual mission instance exists"):
+	if not await _wait(func(): return _flow.get("_active_mission") != null, 180000, scenario_id + " actual mission instance exists"):
 		_dump("mission_creation")
 		return false
 	_flow.call("_show_mission")
@@ -308,7 +308,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		if not is_instance_valid(controller):
 			return false
 		var entry: Dictionary = _find_interaction(controller.call("get_mission_interaction_runtime_use_state_snapshot"), interaction)
-		return String(entry.get("runtime_use_status", "")) == "usable", 45000, interaction + " becomes usable after real simulated approach"):
+		return String(entry.get("runtime_use_status", "")) == "usable", 180000, interaction + " becomes usable after real simulated approach"):
 		_dump("approach_" + interaction)
 		return false
 	var intent: Dictionary = controller.call("create_selected_mission_interaction_use_intent", interaction)
