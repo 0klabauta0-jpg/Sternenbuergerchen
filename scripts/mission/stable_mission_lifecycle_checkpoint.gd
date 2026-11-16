@@ -75,7 +75,7 @@ func prepare_restore(sim: Node, driver: Node, state: Dictionary) -> Dictionary:
 				if not id is String or id.is_empty() or not _integer(values[id],0,1000000000000): return _reject("invalid_mission_cooldowns")
 	# Ausfall-Merker des Drivers (Kampagne). Staende vor dieser Erweiterung haben das Feld nicht: dann sind die Merker leer.
 	var casualty_ids: Array = []
-	for actor in sim.get_unit_registry().get_all_units(): casualty_ids.append(String(actor.get("unit_id")))
+	for actor in sim.get_unit_registry().get_all_units(): casualty_ids.append(String(actor.get_unit_id()))
 	if data.has("casualty_flags"):
 		fields.append("casualty_flags")
 		var casualty_checked: Dictionary = driver.validate_casualty_state(data.casualty_flags, casualty_ids)
