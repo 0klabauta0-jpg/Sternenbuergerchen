@@ -41,7 +41,7 @@ func _command_is_stable(sim: Node, actor: Node, command: RefCounted) -> bool:
 func _snapshot_fields(sim: Node, driver: Node) -> Dictionary:
 	var cooldowns := {}
 	for field in COOLDOWN_FIELDS: cooldowns[field] = Dictionary(driver.get(field)).duplicate(true)
-	return {"next_attack_tick":driver._next_attack_tick, "startup_grace":driver._combat_startup_grace_ticks, "seen_friendly":driver._has_seen_active_friendly_units, "seen_enemy":driver._has_seen_active_enemy_units, "resolved_without_friendly":driver._resolved_without_seen_friendly, "latest_tokens":sim._latest_command_token_by_unit_id.duplicate(true), "committed_tokens":sim._committed_command_token_by_unit_id.duplicate(true), "combat_cooldowns":cooldowns}
+	return {"next_attack_tick":driver._next_attack_tick, "startup_grace":driver._combat_startup_grace_ticks, "seen_friendly":driver._has_seen_active_friendly_units, "seen_enemy":driver._has_seen_active_enemy_units, "resolved_without_friendly":driver._resolved_without_seen_friendly, "latest_tokens":sim._latest_command_token_by_unit_id.duplicate(true), "committed_tokens":sim._committed_command_token_by_unit_id.duplicate(true), "combat_cooldowns":cooldowns, "casualty_flags":driver.export_casualty_state()}
 
 func _source_stamp(sim: Node, driver: Node) -> Dictionary:
 	return {"fields":_snapshot_fields(sim,driver), "start":driver._mission_started_at_msec, "offset":driver._checkpoint_elapsed_offset_msec, "limit":driver.mission_time_limit_seconds, "team":driver.friendly_team_id, "scenario_result":driver._mission_result.duplicate(true), "winner":driver._winning_team_id}
@@ -73,6 +73,13 @@ func prepare_restore(sim: Node, driver: Node, state: Dictionary) -> Dictionary:
 			if not values is Dictionary or values.size() > 128: return _reject("invalid_mission_cooldowns")
 			for id in values:
 				if not id is String or id.is_empty() or not _integer(values[id],0,1000000000000): return _reject("invalid_mission_cooldowns")
+	# Ausfall-Merker des Drivers (Kampagne). Staende vor dieser Erweiterung haben das Feld nicht: dann sind die Merker leer.
+	var casualty_ids: Array = []
+	for actor in sim.get_unit_registry().get_all_units(): casualty_ids.append(String(actor.get("unit_id")))
+	if data.has("casualty_flags"):
+		fields.append("casualty_flags")
+		var casualty_checked: Dictionary = driver.validate_casualty_state(data.casualty_flags, casualty_ids)
+		if not casualty_checked.get("ok",false): return _reject("invalid_mission_casualty_flags")
 	if data.size()!=fields.size() or not data.has_all(fields) or not _integer(data.next_attack_tick,0,1000000000000) or not _integer(data.startup_grace,0,1000000) or typeof(data.seen_friendly)!=TYPE_BOOL or typeof(data.seen_enemy)!=TYPE_BOOL or typeof(data.resolved_without_friendly)!=TYPE_BOOL or not data.latest_tokens is Dictionary or not data.committed_tokens is Dictionary: return _reject("invalid_mission_lifecycle")
 	for id in data.latest_tokens:
 		if typeof(id)!=TYPE_STRING or typeof(data.latest_tokens[id])!=TYPE_STRING: return _reject("invalid_mission_lifecycle")
@@ -82,7 +89,7 @@ func prepare_restore(sim: Node, driver: Node, state: Dictionary) -> Dictionary:
 		if _preparations[id].handle.get_ref()==null: _preparations.erase(id)
 	if _preparations.size()>=32: return _reject("mission_lifecycle_capacity")
 	var handle := PreparedLifecycle.new()
-	_preparations[handle.get_instance_id()] = {"handle":weakref(handle),"sim":weakref(sim),"driver":weakref(driver),"source_tick":sim.tick_counter,"source_rng":sim._combat_rng.state,"source_stamp":_source_stamp(sim,driver),"data":data,"tick":int(state.tick),"rng":int(state.rng),"elapsed":int(state.elapsed_msec)}
+	_preparations[handle.get_instance_id()] = {"handle":weakref(handle),"sim":weakref(sim),"driver":weakref(driver),"source_tick":sim.tick_counter,"source_rng":sim._combat_rng.state,"source_stamp":_source_stamp(sim,driver),"data":data,"casualty_ids":casualty_ids,"tick":int(state.tick),"rng":int(state.rng),"elapsed":int(state.elapsed_msec)}
 	_preparations[handle.get_instance_id()]["rng_streams"] = streams.duplicate(true)
 	_preparations[handle.get_instance_id()]["source_rng_streams"] = RNG.capture(sim)
 	return {"ok":true,"prepared":handle}
@@ -112,6 +119,7 @@ func _publish_restore(handle: RefCounted) -> void:
 	driver._has_seen_active_enemy_units=record.data.seen_enemy
 	driver._resolved_without_seen_friendly=record.data.resolved_without_friendly
 	for field in COOLDOWN_FIELDS: driver.set(field, Dictionary(record.data.get("combat_cooldowns",{}).get(field,{})).duplicate(true))
+	driver.restore_casualty_state(record.data.get("casualty_flags", {"was_downed_unit_ids":[]}), record.casualty_ids)
 	driver.restore_checkpoint_elapsed_time(record.elapsed)
 
 func _integer(value: Variant, minimum: int, maximum: int) -> bool:

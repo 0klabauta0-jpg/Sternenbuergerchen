@@ -1914,6 +1914,44 @@ func clear_casualty_flags() -> void:
 	_was_downed_unit_ids.clear()
 
 
+## Einsatz-Autosave: Ausfall-Merker des Drivers (wer im Einsatz am Boden lag). Besitzer bleibt der Driver; der Speicher
+## ruft nur Export, Pruefung und Import. Ohne Kampagnenregeln sind die Merker leer.
+func export_casualty_state() -> Dictionary:
+	var ids: Array = _was_downed_unit_ids.keys()
+	ids.sort()
+	return {"was_downed_unit_ids": ids}
+
+
+## Prueft einen gespeicherten Ausfallzustand, ohne etwas zu aendern. allowed_unit_ids: die Personen, die im Einsatz sind.
+func validate_casualty_state(state: Variant, allowed_unit_ids: Array) -> Dictionary:
+	if not state is Dictionary or state.size() != 1 or not state.has("was_downed_unit_ids") or not state["was_downed_unit_ids"] is Array:
+		return {"ok": false, "reason": "invalid_mission_casualty_flags"}
+	var ids: Array = state["was_downed_unit_ids"]
+	if ids.size() > allowed_unit_ids.size():
+		return {"ok": false, "reason": "invalid_mission_casualty_flags"}
+	var seen: Dictionary = {}
+	for id in ids:
+		if typeof(id) != TYPE_STRING or String(id).is_empty() or seen.has(id) or not allowed_unit_ids.has(id):
+			return {"ok": false, "reason": "invalid_mission_casualty_flags"}
+		seen[id] = true
+	return {"ok": true}
+
+
+## Setzt die Merker aus einem gespeicherten Stand; bei ungueltigem Stand bleibt alles unveraendert.
+## allowed_unit_ids leer: die eigenen Einheiten des Drivers (friendly_unit_paths).
+func restore_casualty_state(state: Variant, allowed_unit_ids: Array = []) -> Dictionary:
+	var allowed: Array = allowed_unit_ids
+	if allowed.is_empty():
+		allowed = Dictionary(get_casualty_flags()).keys()
+	var checked: Dictionary = validate_casualty_state(state, allowed)
+	if not checked.get("ok", false):
+		return checked
+	_was_downed_unit_ids.clear()
+	for id in state["was_downed_unit_ids"]:
+		_was_downed_unit_ids[String(id)] = true
+	return {"ok": true}
+
+
 func _request_respawn_for_unit(unit, unit_id: String) -> void:
 	var respawn_manager = get_node_or_null(respawn_manager_path)
 	if respawn_manager == null or not respawn_manager.has_method("request_respawn"):
