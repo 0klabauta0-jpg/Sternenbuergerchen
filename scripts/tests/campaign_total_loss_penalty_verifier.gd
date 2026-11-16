@@ -7,6 +7,8 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## P5 Totalverlust beim Abflug (HUD-Weg): derselbe Malus genau einmal (lang, siehe T5B_ONLY).
 ## P6 Gegenproben: gewoehnliche Niederlage, Sieg, Rueckzug, Skirmish: kein Malus.
 ## P7 schon schwer verwundet (2000 s): bleibt schwer mit 2000 s (nie kuerzer, nie leichter).
+## P9 Zusatzdatei: veraltet -> ohne Wirkung geloescht, neue Kampagne loescht sie, Checkpoint beim Totalverlust unberuehrt.
+## (Der Fall "Abbruch nach dem Speichern, vor dem Loeschen" und "Fenster" laufen im echten Einsatz von P1/P2/P3.)
 ## P8 Debrief: Zeile "Notbergung · <Betrag> Credits Bergungsgebuehr" nur mit total_loss_penalty.
 ## Einzeln starten: Umgebungsvariable T5B_ONLY (zum Beispiel "P4" oder "P1,P7") oder Kommandozeilenargument nach "--"; ohne Angabe laufen alle.
 
@@ -20,6 +22,8 @@ func _run() -> void:
 	var selected: Array = _selected_scenarios()
 	if _wants(selected, ["P4"]):
 		await _p4_limits()
+	if _wants(selected, ["P9"]):
+		await _p9_stale_and_new_campaign()
 	if _wants(selected, ["P7"]):
 		await _p7_already_wounded()
 	if _wants(selected, ["P8"]):
@@ -33,8 +37,6 @@ func _run() -> void:
 		await _p6_real_victory()
 	if _wants(selected, ["P5"]):
 		await _p5_departure_total_loss()
-	else:
-		print("T5B_SKIPPED P5 (Totalverlust beim Abflug) laeuft nur mit T5B_ONLY=P5")
 	print("CAMPAIGN_TOTAL_LOSS_PENALTY passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -50,10 +52,9 @@ func _selected_scenarios() -> Array:
 			result.append(upper)
 	return result
 
-## P5 ist lang und laeuft nur, wenn es ausdruecklich genannt wird.
 func _wants(selected: Array, tags: Array) -> bool:
 	if selected.is_empty():
-		return not tags.has("P5")
+		return true
 	for tag: String in tags:
 		if selected.has(tag):
 			return true
@@ -117,8 +118,18 @@ func _loss_result() -> Dictionary:
 	return {"result": "defeat", "mission_outcome": "defeat", "casualty_total_loss": true, "total_loss_reason": "ground_team_down",
 		"team_states": [_state(LEADER, "down", false, true), _state(PILOT, "fit", false)]}
 
+## Kennung aus der Zusatzdatei neben dem Checkpoint ("" ohne Datei).
 func _pending_id() -> String:
-	return String(Dictionary(_disk().get("pending_total_loss", {})).get("loss_id", ""))
+	var pending: Dictionary = STORE.load_pending_total_loss()
+	return String(Dictionary(pending.get("record", {})).get("loss_id", "")) if bool(pending.get("ok", false)) else ""
+
+func _pending_exists() -> bool:
+	return FileAccess.file_exists(STORE.PENDING_TOTAL_LOSS_PATH)
+
+func _write_bytes(path: String, bytes: PackedByteArray) -> void:
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	file.store_buffer(bytes)
+	file.close()
 
 func _campaign_job() -> Dictionary:
 	return Dictionary(_campaign().jobs.get("satellite_recovery", {}))
@@ -191,9 +202,11 @@ func _p1_p2_p3_real_total_loss() -> void:
 	if not await _down_leader(s, "P1"): return
 	if not _place_at(s.simulation, s.access, LEADER, Vector2.ZERO): return
 	if not _place_at(s.simulation, s.access, PILOT, Vector2.ZERO): return
+	var checkpoint_before: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
 	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released("P1: Einsatz wird freigegeben"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == checkpoint_before and not checkpoint_before.is_empty(), "P1: die Checkpoint-Datei ist nach dem Totalverlust Byte fuer Byte dieselbe wie davor")
 	var penalty: Dictionary = Dictionary(result.get("total_loss_penalty", {}))
 	print("P1_RESULT total_loss=", result.get("casualty_total_loss"), " penalty=", penalty, " pending=", _pending_id(), " disk_credits=", _disk_credits())
 	_check(bool(result.get("casualty_total_loss", false)) and bool(result.get("campaign_checkpoint_retry_required", false)), "P1: Totalverlust mit Checkpoint-Retry")
@@ -211,7 +224,7 @@ func _p1_p2_p3_real_total_loss() -> void:
 	_check(String(_flow.get("_current_meta_view")) == "debrief", "P1: Debrief ist sichtbar")
 	var job: Dictionary = _campaign_job()
 	_check(String(job.get("status", "")) == "failed" and int(job.get("retreat_count", 0)) == retreat_before and not bool(job.get("reopen_at_home", false)), "P1: Auftrag failed, retreat_count unveraendert (%d), nicht wieder geoeffnet" % retreat_before)
-	_check(_disk_credits() == 500 and not _pending_id().is_empty(), "P1: Der Basisstand traegt schon den ausstehenden Malus (Kennung) und noch 500 Credits")
+	_check(_disk_credits() == 500 and not _pending_id().is_empty(), "P1: Die Zusatzdatei traegt schon den ausstehenden Malus (Kennung), der Basisstand noch 500 Credits")
 	var loss_id: String = _pending_id()
 	# P3: mehrfache Zustellung und mehrfaches Bestaetigen.
 	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
@@ -220,7 +233,8 @@ func _p1_p2_p3_real_total_loss() -> void:
 	await process_frame
 	_check(_pending_id() == loss_id and _disk_credits() == 500, "P3: erneute Zustellung aendert Kennung und Basisstand nicht")
 	_check(Array(_flow.get("_all_team_units")) == roster_before and Dictionary(_flow.get("_last_mission_result")).get("total_loss_penalty") == penalty, "P3: erneute Zustellung aendert Kader und Ergebnis nicht")
-	var pending_bytes: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
+	var pending_bytes: PackedByteArray = FileAccess.get_file_as_bytes(STORE.PENDING_TOTAL_LOSS_PATH)
+	_check(not pending_bytes.is_empty(), "P1: Zusatzdatei vorhanden")
 	if not await _press_continue(): return
 	# Nach dem Ruecksprung.
 	var job_after: Dictionary = _campaign_job()
@@ -257,18 +271,55 @@ func _p1_p2_p3_real_total_loss() -> void:
 	_check(_credits() == 375 and _disk_credits() == 375 and _pending_id().is_empty(), "P3: wiederholtes Laden als continue_home zieht nicht noch einmal ab (%d)" % _credits())
 	_check(_remaining(LEADER) <= remaining_first + 0.001 and String(_recovery(LEADER).get("severity", "")) == "light" and is_equal_approx(_morale(LEADER), float(morale_after[LEADER])), "P3: continue_home setzt weder Restzeit noch Moral zurueck")
 	await _close()
-	# Fenster: Spiel nach dem Totalverlust beendet, bevor der Debrief bestaetigt wurde. Die Datei mit dem ausstehenden Malus
-	# wird zurueckgespielt; das Fortsetzen wendet den Malus an (nicht umgehbar), danach nie wieder.
-	var restore: FileAccess = FileAccess.open(STORE.DEFAULT_PATH, FileAccess.WRITE)
-	restore.store_buffer(pending_bytes)
-	restore.close()
-	_check(_pending_id() == loss_id and _disk_credits() == 500, "Fenster: Basisstand mit ausstehendem Malus zurueckgespielt (500 Credits)")
+	var checkpoint_after: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
+	# Fenster: Spiel nach dem Totalverlust beendet, bevor der Debrief bestaetigt wurde. Checkpoint (wie davor) und Zusatzdatei
+	# werden zurueckgespielt; das Fortsetzen wendet den Malus an (nicht umgehbar), danach nie wieder.
+	_check(not _pending_exists(), "Fenster: nach dem Speichern ist die Zusatzdatei geloescht")
+	_write_bytes(STORE.DEFAULT_PATH, checkpoint_before)
+	_write_bytes(STORE.PENDING_TOTAL_LOSS_PATH, pending_bytes)
+	_check(_pending_id() == loss_id and _disk_credits() == 500, "Fenster: Zusatzdatei und alter Basisstand zurueckgespielt (500 Credits)")
 	if not await _open_scene("campaign", "continue"): return
-	_check(_credits() == 375 and _disk_credits() == 375 and _pending_id().is_empty(), "Fenster: Fortsetzen ohne Debrief-Knopf wendet den Malus an (375)")
+	_check(_credits() == 375 and _disk_credits() == 375 and not _pending_exists(), "Fenster: Fortsetzen ohne Debrief-Knopf wendet den Malus an (375), Zusatzdatei geloescht")
 	_check(String(_recovery(LEADER).get("severity", "")) == "light" and is_equal_approx(_remaining(LEADER), 180.0) and is_equal_approx(_morale(PILOT), 0.42), "Fenster: leicht verwundet mit 180 s, Moral 0,42")
 	await _close()
 	if not await _open_scene("campaign", "continue"): return
 	_check(_credits() == 375, "Fenster: zweites Fortsetzen zieht nicht noch einmal ab (%d)" % _credits())
+	await _close()
+	# Abbruch nach dem Speichern, vor dem Loeschen: die Zusatzdatei liegt wieder neben dem NEUEN Stand und ist veraltet.
+	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) != checkpoint_before and not checkpoint_after.is_empty(), "Abbruch: der gespeicherte Stand hat einen anderen Inhalt als der alte")
+	_write_bytes(STORE.PENDING_TOTAL_LOSS_PATH, pending_bytes)
+	if not await _open_scene("campaign", "continue"): return
+	_check(_credits() == 375 and _disk_credits() == 375, "Abbruch nach Speichern, vor Loeschen: kein zweiter Abzug (%d)" % _credits())
+	_check(not _pending_exists(), "Abbruch: veraltete Zusatzdatei wurde ohne Wirkung geloescht")
+	_check(is_equal_approx(_morale(PILOT), 0.42), "Abbruch: Moral nicht ein zweites Mal gesenkt")
+	await _close()
+
+# ---------- P9: Zusatzdatei veraltet / neue Kampagne ----------
+
+func _p9_stale_and_new_campaign() -> void:
+	if not await _open_scene("campaign", "new"): return
+	_set_credits(500)
+	if not _save_base("P9"): return
+	var bytes_before: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
+	var staged: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
+	_check(int(staged.get("rescue_fee", -1)) == 125 and _pending_exists(), "P9: Malus ausstehend in der Zusatzdatei")
+	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == bytes_before, "P9: die Checkpoint-Datei bleibt Byte fuer Byte unveraendert")
+	var staged_again: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
+	_check(String(staged_again.get("loss_id", "x")) == String(staged.get("loss_id", "y")), "P9: derselbe verlorene Einsatz noch einmal: gleiche Kennung")
+	# Der Stand wird danach neu gespeichert (andere Pruefsumme): die Zusatzdatei ist veraltet.
+	_set_credits(400)
+	if not _save_base("P9 neuer Stand"): return
+	_check(_pending_exists(), "P9: die veraltete Zusatzdatei liegt noch da")
+	await _close()
+	if not await _open_scene("campaign", "continue"): return
+	_check(_credits() == 400 and String(_roster_unit(LEADER).get("availability_status", "")) != "wounded", "P9: veraltete Zusatzdatei ohne Wirkung (400 Credits, niemand verwundet)")
+	_check(not _pending_exists(), "P9: veraltete Zusatzdatei wurde geloescht")
+	# Neue Kampagne loescht eine vorhandene Zusatzdatei.
+	var staged_new: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
+	_check(int(staged_new.get("rescue_fee", -1)) == 100 and _pending_exists(), "P9: neuer Malus (100) ausstehend")
+	await _close()
+	if not await _open_scene("campaign", "new"): return
+	_check(not _pending_exists(), "P9: neue Kampagne loescht die Zusatzdatei")
 	await _close()
 
 # ---------- P4: Grenzen ----------

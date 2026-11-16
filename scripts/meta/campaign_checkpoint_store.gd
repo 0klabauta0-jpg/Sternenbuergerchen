@@ -3,17 +3,67 @@ extends RefCounted
 const DEFAULT_PATH := "user://campaigns/introduction/checkpoint_v1.json"
 const MAX_BYTES := 4 * 1024 * 1024
 const HEX_CHECKPOINT_CONTRACT := "res://scripts/core/hex_checkpoint_transaction.gd"
+## Task 5b: ausstehender Malus nach Totalverlust, eigene Datei neben dem Checkpoint (der Checkpoint selbst bleibt unberuehrt).
+const PENDING_TOTAL_LOSS_PATH := "user://campaigns/introduction/pending_total_loss_v1.json"
+
+## Schreibt den ausstehenden Malus (loss_id, job_id, penalty) zusammen mit der Pruefsumme der Checkpoint-Datei, auf die er sich
+## bezieht. Erst vollstaendig in eine .tmp-Datei, dann ersetzen (wie der Checkpoint).
+static func save_pending_total_loss(record: Dictionary, path: String = PENDING_TOTAL_LOSS_PATH, checkpoint_path: String = DEFAULT_PATH) -> Dictionary:
+	if not _valid_path(path) or not _valid_path(checkpoint_path):
+		return {"ok":false,"reason":"invalid_checkpoint_path"}
+	if typeof(record.get("loss_id")) != TYPE_STRING or String(record.loss_id).is_empty() or typeof(record.get("penalty")) != TYPE_DICTIONARY:
+		return {"ok":false,"reason":"invalid_pending_total_loss"}
+	if not FileAccess.file_exists(checkpoint_path):
+		return {"ok":false,"reason":"checkpoint_missing"}
+	var stored: Dictionary = record.duplicate(true)
+	stored["checkpoint_sha256"] = FileAccess.get_sha256(checkpoint_path)
+	var absolute := ProjectSettings.globalize_path(path)
+	if DirAccess.make_dir_recursive_absolute(absolute.get_base_dir()) != OK:
+		return {"ok":false,"reason":"checkpoint_directory_failed"}
+	var temporary := absolute + ".tmp"
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
+	if file == null:
+		return {"ok":false,"reason":"checkpoint_write_failed"}
+	file.store_string(JSON.stringify(stored, "\t", true))
+	file.flush()
+	var error := file.get_error()
+	file.close()
+	if error != OK:
+		return {"ok":false,"reason":"checkpoint_write_failed"}
+	if DirAccess.rename_absolute(temporary, absolute) != OK:
+		return {"ok":false,"reason":"checkpoint_replace_failed"}
+	return {"ok":true,"record":stored}
+
+## Liest den ausstehenden Malus. ok false: keine Datei (reason pending_missing) oder unlesbar (pending_invalid).
+## matches_checkpoint: die Datei bezieht sich auf genau die jetzt vorhandene Checkpoint-Datei.
+static func load_pending_total_loss(path: String = PENDING_TOTAL_LOSS_PATH, checkpoint_path: String = DEFAULT_PATH) -> Dictionary:
+	if not _valid_path(path) or not _valid_path(checkpoint_path):
+		return {"ok":false,"reason":"invalid_checkpoint_path"}
+	if not FileAccess.file_exists(path):
+		return {"ok":false,"reason":"pending_missing"}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null or file.get_length() > MAX_BYTES:
+		return {"ok":false,"reason":"pending_invalid"}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY or typeof(parsed.get("loss_id")) != TYPE_STRING or String(parsed.loss_id).is_empty() or typeof(parsed.get("penalty")) != TYPE_DICTIONARY or typeof(parsed.get("checkpoint_sha256")) != TYPE_STRING:
+		return {"ok":false,"reason":"pending_invalid"}
+	var matches := FileAccess.file_exists(checkpoint_path) and FileAccess.get_sha256(checkpoint_path) == String(parsed.checkpoint_sha256)
+	return {"ok":true,"record":parsed,"matches_checkpoint":matches}
+
+## Loescht die Zusatzdatei (keine Datei ist auch in Ordnung).
+static func clear_pending_total_loss(path: String = PENDING_TOTAL_LOSS_PATH) -> Dictionary:
+	if not _valid_path(path):
+		return {"ok":false,"reason":"invalid_checkpoint_path"}
+	var absolute := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path) and DirAccess.remove_absolute(absolute) != OK:
+		return {"ok":false,"reason":"pending_remove_failed"}
+	return {"ok":true}
 static func validate_payload(payload: Dictionary) -> Dictionary:
 	if payload.has("retired_active_checkpoint_sha256"):
 		var digest: Variant = payload.retired_active_checkpoint_sha256
 		if typeof(digest) != TYPE_STRING or digest.length() != 64: return {"ok":false,"reason":"invalid_active_retirement"}
 		for letter in digest:
 			if not String(letter) in "0123456789abcdef": return {"ok":false,"reason":"invalid_active_retirement"}
-	# Task 5b: optionaler ausstehender Malus nach Totalverlust (alte Staende ohne das Feld bleiben gueltig).
-	if payload.has("pending_total_loss"):
-		var pending: Variant = payload.pending_total_loss
-		if typeof(pending) != TYPE_DICTIONARY or typeof(pending.get("loss_id")) != TYPE_STRING or String(pending.loss_id).is_empty() or typeof(pending.get("penalty")) != TYPE_DICTIONARY:
-			return {"ok":false,"reason":"invalid_pending_total_loss"}
 	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 64 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
 	var ids: Array = []
