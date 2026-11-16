@@ -50,7 +50,7 @@ static func blocked_text(reason: String) -> String:
 		"home_checkpoint_mismatch":"Im Einsatz kann gerade nicht gespeichert werden: Der Kader hat sich seit dem Speichern an der Basis geändert. Nach der Rückkehr dort speichern.",
 		"checkpoint_recruit_presence_missing":"Ein angeworbenes Mitglied fehlt noch in der Basis. Bitte später erneut speichern.",
 		"base_checkpoint_aboard_context":"Im Einsatz kann gerade nicht gespeichert werden: Jemand an Bord gehört zu keinem Trupp. Es gilt der zuletzt gespeicherte Stand.",
-		"runtime_unavailable":"Die Basis kann gerade nicht gespeichert werden. Kurz warten, bis alle stehen; bleibt es so, hat jemand an Bord keinen Trupp."}
+		"runtime_unavailable":"Die Basis kann gerade nicht gespeichert werden. Kurz warten, bis Schiffe gelandet sind und alle stehen. Bleibt es so, hat jemand an Bord keinen Trupp."}
 	if reason.is_empty(): return ""
 	return String(messages.get(reason, "Dieser Zustand kann momentan nicht sicher gespeichert werden."))
 

@@ -40,6 +40,14 @@ const PLACE_WORD := {
 	"checkpoint_recruit_presence_missing": "Basis",
 	"runtime_unavailable": "Basis",
 }
+## Gruende, die nur an der Basis entstehen: ihr Satz nennt den Einsatz nicht.
+const BASE_ONLY := ["checkpoint_recruit_presence_missing", "runtime_unavailable"]
+## Gruende, die nur im Einsatz entstehen: ihr Satz beginnt nicht mit "Die Basis".
+const MISSION_ONLY := [
+	"mission_combat_unsupported", "mission_lifecycle_unsupported", "mission_planned_orders_unsupported",
+	"mission_fleet_unsupported", "home_personnel_unsupported", "home_checkpoint_mismatch", "base_checkpoint_aboard_context",
+]
+const RUNTIME_UNAVAILABLE_TEXT := "Die Basis kann gerade nicht gespeichert werden. Kurz warten, bis Schiffe gelandet sind und alle stehen. Bleibt es so, hat jemand an Bord keinen Trupp."
 
 var _passed := 0
 var _failed := 0
@@ -62,6 +70,12 @@ func _run() -> void:
 		_check(text.length() <= MAX_LENGTH, "%s: Satz hoechstens %d Zeichen (%d)" % [reason, MAX_LENGTH, text.length()])
 		if PLACE_WORD.has(reason):
 			_check(text.contains(String(PLACE_WORD[reason])), "%s: der Satz nennt den Ort ('%s')" % [reason, PLACE_WORD[reason]])
+		if reason in BASE_ONLY:
+			_check(not text.to_lower().contains("einsatz"), "%s: ein Basis-Satz nennt den Einsatz nicht" % reason)
+		if reason in MISSION_ONLY:
+			_check(not text.begins_with("Die Basis"), "%s: ein Einsatz-Satz beginnt nicht mit 'Die Basis'" % reason)
+		if reason == "runtime_unavailable":
+			_check(text == RUNTIME_UNAVAILABLE_TEXT, "runtime_unavailable: genauer Satz (Schiffe gelandet, alle stehen, kein Trupp)")
 		# Gezaehlt, damit jeder dieser Gruende einen eigenen Satz hat.
 		seen[text] = int(seen.get(text, 0)) + 1
 	_check(seen.size() == REASONS.size(), "jeder der %d Gruende hat einen eigenen, unterschiedlichen Satz (%d verschiedene)" % [REASONS.size(), seen.size()])
