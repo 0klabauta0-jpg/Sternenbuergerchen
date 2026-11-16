@@ -11,9 +11,13 @@ func _run() -> void:
 	var stage:=Node3D.new(); root.add_child(stage)
 	var built: Dictionary=load("res://scripts/terrain/place_reference_dressing.gd").build(stage,presentation)
 	# build() lists the structures first, then the props; fences, crates and walls do not all block by design.
+	# Expectation derived from the saved map: one blocker per structure, plus one per prop whose scene exists (place_reference_dressing.gd).
 	var building_count:=Array(presentation.get("structures",[])).size()
+	var loadable_props:=0
+	for prop: Dictionary in Array(presentation.get("props",[])):
+		if ResourceLoader.exists(String(prop.get("path",""))): loadable_props+=1
 	var building_blockers: Array=Array(built.blockers).slice(0,building_count)
-	check(building_count>=1 and Array(built.blockers).size()>=building_count and building_blockers.size()==building_count,"actual reviewed shells and utility model form trade compound")
+	check(building_count>=1 and building_blockers.size()==building_count and Array(built.blockers).size()==building_count+loadable_props,"trade compound builds one blocker per saved structure plus one per loadable prop (%d + %d)"%[building_count,loadable_props])
 	var missing:=0; var solids:=0
 	for tile in map.get_tiles():
 		var point: Vector2=load("res://scripts/terrain/hex_grid.gd").axial_to_plane(Vector2(tile.grid_position))
@@ -21,7 +25,7 @@ func _run() -> void:
 			var footprint:=Rect2(Vector2(bounds.position.x,bounds.position.z),Vector2(bounds.size.x,bounds.size.z)).grow(.58)
 			if footprint.has_point(point):
 				solids+=1
-				if tile.walkable or not tile.blocks_los or int(tile.object_height)<clampi(ceili(bounds.end.y/.42),1,3) : missing+=1
+				if tile.walkable or not tile.blocks_los or int(tile.object_height)<clampi(ceili(bounds.end.y/.42),1,3): missing+=1
 	check(solids>25 and missing==0,"saved navigation and LOS cover actual closed exterior geometry")
 	var registry: Node=load("res://scripts/terrain/terrain_registry.gd").new()
 	registry.configure_iso_grid(map.get_grid_origin(),64,32,map.get_grid_topology())
