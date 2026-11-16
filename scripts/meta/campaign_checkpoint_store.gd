@@ -172,6 +172,11 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		var result: Dictionary = pair[0].restore_state(pair[1])
 		if not result.get("ok", false):
 			return result
+	# Gefallene verlassen den Kader, ihr Finalize-Beleg bleibt aber im Versorgungsstand (er ist die Rechnung der Anwerbung).
+	# Darum gilt ein Beleg auch fuer eine Person aus der Gefallenenliste; jede andere Person muss im Kader stehen.
+	if payload.has("fallen") and not _valid_fallen(payload.fallen): return {"ok":false,"reason":"invalid_fallen"}
+	var fallen_ids := {}
+	for fallen_entry: Dictionary in Array(payload.get("fallen", [])): fallen_ids[String(fallen_entry.unit_id)] = true
 	var recruit_receipts := {}
 	var recruit_reservations := {}
 	var recruit_finalized := {}
@@ -181,7 +186,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if entry.get("operation") in ["station_recruit_finalize", "station_recruit_cancel"]: recruit_finalized[String(entry.get("reservation_id", ""))] = true
 		if entry.get("operation") == "station_recruit_finalize":
 			var recruit_id := String(entry.get("unit_id", ""))
-			if not recruit_id.begins_with("polisa_recruit_") or not ids.has(recruit_id): return {"ok":false,"reason":"checkpoint_recruit_receipt_mismatch"}
+			if not recruit_id.begins_with("polisa_recruit_") or not (ids.has(recruit_id) or fallen_ids.has(recruit_id)): return {"ok":false,"reason":"checkpoint_recruit_receipt_mismatch"}
 			recruit_receipts[recruit_id] = true
 	for reservation_id: String in recruit_reservations:
 		if not recruit_finalized.has(reservation_id): return {"ok":false,"reason":"checkpoint_recruit_admission_pending"}
@@ -258,8 +263,6 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if ids.has("campaign_outpost_recruit") != bool(progress.get("recruited_outpost",false)) or ids.has("campaign_rescue_pilot") != bool(progress.get("recruited_pilot",false)): return {"ok":false,"reason":"checkpoint_roster_progress_mismatch"}
 	var original_fleet_count := fleet_ids.size() - Dictionary(station.ships).size()
 	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
-	if payload.has("fallen") and not _valid_fallen(payload.fallen): return {"ok":false,"reason":"invalid_fallen"}
-
 	return {"ok":true}
 ## Gefallenenliste: Array aus Dictionaries mit nicht leerem String unit_id; die drei anderen Schluessel sind optional, aber Strings.
 static func _valid_fallen(value: Variant) -> bool:

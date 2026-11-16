@@ -12,6 +12,7 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## Z10: Geschuetzte Person (Anwerber) zusammen mit einer normalen Toten: die Geschuetzte ueberlebt schwer verwundet, die andere faellt.   Z11: Absicherung nur bei vorher gueltig, nachher ungueltig.
 ## Z12: Nicht eintragbarer Eintrag: niemand wird entfernt.   Z13: Auftragsfracht der Toten bleibt, der Rest geht verloren.   Z14: Tote auch in der FOB-Liste: nach dem Auffrischen in keiner Definition.
 ## Z15: Entfernen bei laufendem Einsatz und verdeckter Basisansicht.   Z16: Das Entfernen aendert den Fokus der Basisansicht nicht.
+## Z17: Ein auf Polisa angeworbener Rekrut (mit echtem Finalize-Beleg) stirbt: Basisstand speichern, laden, fortsetzen und erneut speichern gelingt; ein Beleg ohne Person im Kader oder in der Gefallenenliste bleibt abgelehnt.
 ## Einzeln starten: Umgebungsvariable T6B_ONLY (zum Beispiel "Z4") oder Kommandozeilenargument nach "--" (zum Beispiel "-- Z4"); ohne Angabe laufen alle.
 
 const STORE_6B = preload("res://scripts/meta/campaign_checkpoint_store.gd")
@@ -27,7 +28,7 @@ const LOCATION_6B := "satellite_crash"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _t6b_selected()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15", "Z16", "Z17"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -559,3 +560,89 @@ func _t6b_z16() -> void:
 	_flow.call("_apply_campaign_casualties", _t6b_result(_t6b_states({SHOOTER_C: "down"}), "aborted"))
 	var focus_after: Array = [_screen.get("_focused_fireteam_id"), _screen.get("_focused_unit_id"), _screen.get("_loadout_staged_fireteam_id")]
 	_check(focus_before == focus_after, "Z16: Fokus vorher == nachher (%s -> %s)" % [focus_before, focus_after])
+
+const RECRUIT_17 := "polisa_recruit_z17"
+
+## Kampagnenstart mit A, Pilot und einem auf Polisa angeworbenen Rekruten. Der Rekrut hat Reservierungs- und Finalize-Beleg
+## im Versorgungsstand, so wie ihn die Anwerbung anlegt (Form wie in campaign_five_missions_chain_test).
+func _t6b_new_polisa_recruit() -> bool:
+	if not await _t6b_open("campaign", "new"):
+		return false
+	var template: Dictionary = _roster_unit(LEAD_A).duplicate(true)
+	if not _check(not template.is_empty(), "Z17 Aufbau: Truppfuehrer A ist im Kader"):
+		return false
+	var profile: Dictionary = template.duplicate(true)
+	profile["unit_id"] = RECRUIT_17
+	profile["display_name"] = "Rosa Reuter"
+	profile["fireteam_id"] = ""
+	profile["roster_role_category"] = "operator"
+	profile["role_name"] = "Rifleman"
+	profile["skill_leadership"] = 0.0
+	if typeof(profile.get("skill_values")) == TYPE_DICTIONARY:
+		profile["skill_values"]["leadership"] = 0.0
+	var added: Dictionary = _flow.call("register_campaign_recruit", profile)
+	if not _check(bool(added.get("ok", false)), "Z17 Aufbau: Rekrut kommt in den Kader (%s)" % [added]):
+		return false
+	var simulation: Node = _runtime.get("_simulation")
+	simulation.call("request_personnel_loadout_command", "configure_roster", {"roster": [profile]})
+	simulation.call("request_personnel_loadout_command", "set_loadout", {"unit_id": RECRUIT_17, "loadout": {"armor": "suit", "weapon_1": "pistol", "weapon_2": "medictool"}})
+	var supply: RefCounted = _runtime.get("_supply")
+	supply.call("configure_inventory", [RECRUIT_17], [], true)
+	var requests: Dictionary = supply.get("_requests")
+	var reserve_signature: String = JSON.stringify({"operation": "station_recruit_reserve", "payload": {"offer_id": "offer-z17"}}, "", true)
+	requests["reserve-z17"] = {"signature": reserve_signature, "result": {"ok": true, "operation": "station_recruit_reserve", "request_id": "reserve-z17", "offer_id": "offer-z17", "unit_id": RECRUIT_17, "cost": 300, "location_id": "polisa", "state": "pending", "profile": {"unit_id": RECRUIT_17}}}
+	var final_signature: String = JSON.stringify({"operation": "station_recruit_finalize", "payload": {"reservation_id": "reserve-z17"}}, "", true)
+	requests["final-z17"] = {"signature": final_signature, "result": {"ok": true, "operation": "station_recruit_finalize", "request_id": "final-z17", "reservation_id": "reserve-z17", "offer_id": "offer-z17", "unit_id": RECRUIT_17, "cost": 300, "location_id": "polisa"}}
+	_flow.set("_active_singleplayer_identity", {"job_id": JOB_6B, "location_id": LOCATION_6B, "craft_id": String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))})
+	_flow.call("_sync_wound_lock")
+	return true
+
+## K1: Der Beleg eines gefallenen Polisa-Rekruten bleibt in supply.requests; der Basisstand muss trotzdem speicherbar bleiben.
+func _t6b_z17() -> void:
+	if not await _t6b_new_polisa_recruit(): return
+	var before: Dictionary = _t6b_payload()
+	# Im Hex-Stand liegt die Basis-Personalliste unter hex_tactical; die Pruefung "checkpoint_recruit_presence_missing" fuer lebende
+	# Polisa-Rekruten sieht sie dort nicht (bekannt, ausserhalb dieses Befunds). Darum wird hier nur der Zustand NACH dem Tod verlangt.
+	if not _check(not before.is_empty(), "Z17: Fixture: Stand mit lebendem Rekruten laesst sich bauen"): return
+	_check(Dictionary(before.get("supply", {})).get("requests", {}).has("final-z17") and _t6b_roster_ids() == [LEAD_A, PILOT_ID, RECRUIT_17], "Z17: Fixture: Kader A, Pilot, Rekrut; Finalize-Beleg steht im Versorgungsstand")
+	_flow.call("_remove_campaign_fatalities", PackedStringArray([RECRUIT_17]), {"mission_outcome": "aborted"})
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID], "Z17: der Rekrut ist aus dem Kader entfernt (%s)" % [_t6b_roster_ids()])
+	var fallen: Array = _runtime.call("get_fallen")
+	_check(fallen.size() == 1 and String(Dictionary(fallen[0]).get("unit_id", "")) == RECRUIT_17, "Z17: der Rekrut steht in der Gefallenenliste (%s)" % [fallen])
+	var after: Dictionary = _t6b_payload()
+	if not _check(not after.is_empty(), "Z17: Stand nach dem Tod laesst sich bauen"): return
+	_check(Dictionary(after.get("supply", {})).get("requests", {}).has("final-z17"), "Z17: der Finalize-Beleg bleibt im Versorgungsstand")
+	var verdict: Dictionary = STORE_6B.validate_payload(after)
+	_check(bool(verdict.get("ok", false)), "Z17: validate_payload nimmt den Beleg des Gefallenen an (%s)" % [verdict])
+	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
+	_check(bool(saved.get("ok", false)), "Z17: save_home_checkpoint gelingt nach dem Tod (%s)" % [saved])
+	var loaded: Dictionary = STORE_6B.load_checkpoint()
+	_check(bool(loaded.get("ok", false)) and JSON.stringify(Dictionary(loaded.get("payload", {})).get("fallen", [])).contains(RECRUIT_17), "Z17: die geschriebene Datei laesst sich laden und nennt den Gefallenen (ok=%s)" % [loaded.get("ok", false)])
+	# Gegenproben auf dem Stand nach dem Tod.
+	var forgotten: Dictionary = after.duplicate(true)
+	forgotten["fallen"] = []
+	_check(String(STORE_6B.validate_payload(forgotten).get("reason", "")) == "checkpoint_recruit_receipt_mismatch", "Z17: Beleg ohne Person im Kader und ohne Eintrag in der Gefallenenliste wird abgelehnt (%s)" % [STORE_6B.validate_payload(forgotten)])
+	var other: Dictionary = after.duplicate(true)
+	other["fallen"] = [{"unit_id": "polisa_recruit_anderer", "display_name": "Anderer", "job_id": JOB_6B, "location_id": LOCATION_6B}]
+	_check(String(STORE_6B.validate_payload(other).get("reason", "")) == "checkpoint_recruit_receipt_mismatch", "Z17: ein Gefallener mit anderer ID rechtfertigt den Beleg nicht")
+	var ghost: Dictionary = after.duplicate(true)
+	ghost.supply.requests["reserve-ghost"] = {"signature": JSON.stringify({"operation": "station_recruit_reserve", "payload": {"offer_id": "offer-ghost"}}, "", true), "result": {"ok": true, "operation": "station_recruit_reserve", "request_id": "reserve-ghost", "offer_id": "offer-ghost", "unit_id": "polisa_recruit_ghost", "cost": 300, "location_id": "polisa", "state": "pending", "profile": {"unit_id": "polisa_recruit_ghost"}}}
+	ghost.supply.requests["final-ghost"] = {"signature": JSON.stringify({"operation": "station_recruit_finalize", "payload": {"reservation_id": "reserve-ghost"}}, "", true), "result": {"ok": true, "operation": "station_recruit_finalize", "request_id": "final-ghost", "reservation_id": "reserve-ghost", "offer_id": "offer-ghost", "unit_id": "polisa_recruit_ghost", "cost": 300, "location_id": "polisa"}}
+	_check(String(STORE_6B.validate_payload(ghost).get("reason", "")) == "checkpoint_recruit_receipt_mismatch", "Z17: Beleg fuer eine Person, die weder im Kader noch in der Gefallenenliste steht, wird abgelehnt")
+	# Fortsetzen und ein zweites Speichern.
+	_flow.queue_free()
+	await process_frame
+	START.request_start(self, "campaign", "continue")
+	_flow = FLOW.instantiate()
+	root.add_child(_flow)
+	current_scene = _flow
+	await process_frame
+	_screen = _flow.get_node("HomebaseScreen")
+	_runtime = _flow.get("_singleplayer_runtime")
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID] and not _t6b_base_ids().has(RECRUIT_17), "Z17: nach dem Fortsetzen: Kader A und Pilot, der Rekrut bleibt weg (%s)" % [_t6b_roster_ids()])
+	var resumed_fallen: Array = _runtime.call("get_fallen")
+	_check(resumed_fallen.size() == 1 and String(Dictionary(resumed_fallen[0]).get("unit_id", "")) == RECRUIT_17, "Z17: die Gefallenenliste ist nach dem Fortsetzen erhalten")
+	var second: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
+	_check(bool(second.get("ok", false)), "Z17: zweites Speichern nach dem Fortsetzen gelingt (%s)" % [second])
+	var reloaded: Dictionary = STORE_6B.load_checkpoint()
+	_check(bool(reloaded.get("ok", false)) and JSON.stringify(Dictionary(reloaded.get("payload", {})).get("fallen", [])).contains(RECRUIT_17), "Z17: auch der zweite Stand laesst sich laden und nennt den Gefallenen (ok=%s)" % [reloaded.get("ok", false)])

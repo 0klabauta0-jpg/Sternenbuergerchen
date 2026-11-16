@@ -6,11 +6,15 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## B: Truppfuehrer aufgerichtet, Abflug wird als Rueckzug (aborted / departure) ausgewertet, genau einmal.
 ## C: Truppfuehrer liegt, Totalverlust beim Abflug, kein Rueckflug.
 ## D: Skirmish erreicht den Abflugweg nicht und bleibt unveraendert.
-## Mit der Umgebungsvariable T5C_ONLY (zum Beispiel "A") laeuft nur dieser Teil.
+## M: Das Gate sperrt, solange ein Missionsergebnis auf Zustellung wartet (Wettlauf nach "Evakuieren"): nichts aufgeloest, kein Abheben.
+## Mit der Umgebungsvariable T5C_ONLY (zum Beispiel "A") oder dem Kommandozeilenargument nach "--" (zum Beispiel "-- A") laeuft nur dieser Teil.
 
 func _run() -> void:
 	_configure_entry()
 	var only: String = OS.get_environment("T5C_ONLY").strip_edges().to_upper()
+	for arg: String in OS.get_cmdline_user_args():
+		if only.is_empty() and arg.strip_edges().length() == 1:
+			only = arg.strip_edges().to_upper()
 	if only.is_empty() or only == "A":
 		await _departure_a_baseline()
 	if only.is_empty() or only == "B":
@@ -35,6 +39,8 @@ func _run() -> void:
 		await _departure_d_skirmish()
 	if only.is_empty() or only == "E":
 		await _departure_e_troops_stay()
+	if only.is_empty() or only == "M":
+		await _departure_m_result_pending()
 	print("CAMPAIGN_CASUALTY_DEPARTURE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -106,7 +112,9 @@ func _departure_a_baseline() -> void:
 	var statuses: Dictionary = _roster_statuses()
 	print("DEPARTURE_A_OBSERVED job_before=", job_before, " job_after=", _job_status(), " last_before_empty=", last_before.is_empty(), " last_after_empty=", last_after.is_empty(), " last_after=", last_after, " view=", _flow.get("_current_meta_view"), " location=", _craft_location(), " transfer=", _transfer_phase(), " released=", _mission_released(), " space_phase=", _space().get("phase"), " roster=", statuses, " retreat=", _campaign().jobs.satellite_recovery.get("retreat_count", "none"))
 	_check(job_before == "active", "A: Auftrag war aktiv")
-	_check(_job_status() == "failed", "A: Auftrag wird wie bisher als failed gebucht (aborted ohne Rueckzugsfelder)")
+	# Regel 8 (Entscheidung des Nutzers): Jeder Abflug bei aktivem Auftrag, nach dem niemand Einsatzfaehiges am Ort bleibt, ist ein Rueckzug.
+	var job_after: Dictionary = Dictionary(_campaign().jobs.satellite_recovery)
+	_check(_job_status() == "failed" and bool(job_after.get("reopen_at_home", false)) and int(job_after.get("retreat_count", 0)) == 1, "A: Abflug ohne Ausfaelle zaehlt als Rueckzug: failed mit reopen_at_home true und retreat_count 1 vor der Heimkehr (%s)" % [job_after])
 	_check(not _mission_released() and _craft_location() == "starmap" and String(_space().get("phase", "")) == "orbit", "A: Ort bleibt bestehen, Schiff ist auf der Sternkarte im Orbit")
 	_check(String(_flow.get("_current_meta_view")) == "mission", "A: Ansicht bleibt wie bisher mission")
 	_check(last_after == last_before, "A: kein Ergebnis in _last_mission_result geschrieben (unveraendert zu vorher)")
@@ -265,6 +273,44 @@ func _departure_l_not_focused() -> void:
 	_check(_transfer_phase().is_empty(), "L: kein Flug gestartet")
 	_check(not bool(driver.get("_combat_finished")) and Array(_flow.get("_all_team_units")) == roster_before and Dictionary(_flow.get("_last_mission_result")).is_empty(), "L: nichts aufgeloest, Kader und Ergebnis unveraendert")
 	_flow.set("_active_mission", mission)
+	await _end_sortie()
+
+## M: Wartet ein Missionsergebnis auf Zustellung (nach "Evakuieren" laeuft das Einschiffen noch, der 0,25-s-Wiederholer hat das
+## Ergebnis noch nicht zugestellt), sperrt das Gate den Abflug. Das echte Timing laesst sich kopflos nicht treffen: der Wartezustand
+## wird hergestellt, indem das wartende Ergebnis gesetzt wird; Setzen, Pruefen und Loeschen laufen in einem Schritt ohne Frame
+## dazwischen, damit der Wiederholer es nicht zustellt.
+func _departure_m_result_pending() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	var leader: Node2D = s.leader
+	var driver: Node = s.driver
+	leader.call("apply_damage", 10000)
+	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, "M: Treiber merkt sich die ausgefallene Person"): return
+	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", "M: Truppfuehrer innerhalb der Frist aufgerichtet (das Gate wuerde sonst auswerten)")
+	if not _seat_crew(s): return
+	var last_before: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
+	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	_flow.set("_pending_campaign_mission_result", {"mission_outcome": "aborted", "result": "aborted", "win_condition_type": "evacuation"})
+	# Wie im echten Ablauf (_run_location_callback): das wartende Ergebnis steht auch im Kontext des Ortes, sonst holt jeder
+	# Kontextwechsel (Planungsmeldung beim Einschiffen) den leeren Stand zurueck.
+	_flow.call("_remember_location", s.mission)
+	var blocked: Dictionary = Dictionary(_flow.call("_campaign_departure_gate", _craft_id))
+	var hud: Dictionary = _press_return(true, s)
+	var transfer_while_pending: String = _transfer_phase()
+	var finished_while_pending: bool = bool(driver.get("_combat_finished"))
+	var pending_kept: bool = not Dictionary(_flow.get("_pending_campaign_mission_result")).is_empty()
+	_flow.get("_pending_campaign_mission_result").clear()
+	_flow.call("_remember_location", s.mission)
+	print("DEPARTURE_M_BLOCKED ", blocked, " hud=", hud, " transfer=", transfer_while_pending, " finished=", finished_while_pending)
+	_check(bool(blocked.get("handled", false)) and not bool(blocked.get("ok", true)) and String(blocked.get("reason", "")) == "mission_result_pending", "M: Gate sperrt mit mission_result_pending (%s)" % [blocked])
+	_check(String(blocked.get("message", "")) == "Einsatz wird gerade abgeschlossen", "M: Meldung auf Deutsch")
+	_check(String(hud.get("feedback", "")).contains("Einsatz wird gerade abgeschlossen") or String(hud.get("feedback", "")).is_empty(), "M: HUD-Weg: Karten-Rueckmeldung nennt den Abschluss, falls sie angezeigt wird (%s)" % [hud.get("feedback", "")])
+	_check(transfer_while_pending.is_empty() and not finished_while_pending and pending_kept, "M: kein Abheben, Driver nicht aufgeloest, das wartende Ergebnis bleibt erhalten")
+	_check(Dictionary(_flow.get("_last_mission_result")) == last_before and Array(_flow.get("_all_team_units")) == roster_before and _job_status() == "active", "M: nichts aufgeloest: kein Ergebnis, Kader unveraendert, Auftrag active")
+	# Ohne wartendes Ergebnis wertet dasselbe Gate wieder aus (der Fall B).
+	var released: Dictionary = Dictionary(_flow.call("_campaign_departure_gate", _craft_id))
+	print("DEPARTURE_M_RELEASED ", released)
+	_check(bool(released.get("handled", false)) and bool(released.get("ok", false)) and bool(driver.get("_combat_finished")), "M: ohne wartendes Ergebnis wertet das Gate wieder aus (handled, ok, Driver aufgeloest)")
 	await _end_sortie()
 
 ## H: HUD-Weg ohne Ausfaelle: das Schiff hebt ab wie vor der Aenderung (Vergleich mit A).

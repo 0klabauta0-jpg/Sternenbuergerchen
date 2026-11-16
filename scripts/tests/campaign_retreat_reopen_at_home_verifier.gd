@@ -7,7 +7,7 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ##     nach der Landung accepted, reopen_at_home false, retreat_count 1, Auftragstafel waehlbar, Truppfuehrer wounded/light.
 ## R2: gespeicherter Stand enthaelt den offenen Auftrag; Meta-Szene neu aufbauen und Kampagne fortsetzen.
 ## R3: Rueckzug ueber "Evakuieren" (Treiber-Weg des Knopfs: request_mission_evacuation): derselbe Ausgang.
-## R4: kein Rueckzug: Hin- und Rueckflug ohne Ausfaelle, nichts wird wieder geoeffnet.
+## R4: Abflug ohne Ausfaelle ist ebenfalls ein Rueckzug (Regel 8): nach der Heimkehr accepted, retreat_count 1, wieder anwaehlbar, niemand verwundet.
 ## R5: Totalverlust: nach dem Ruecksprung zum Checkpoint ist nichts wieder geoeffnet.
 ## Mit der Umgebungsvariable T8B_ONLY (zum Beispiel "R1") laeuft nur dieser Teil.
 
@@ -138,7 +138,7 @@ func _evacuation_to_orbit(tag: String) -> void:
 	var reached: bool = await _wait(func(): return String(_space().get("phase", "")) == "orbit", 60000, tag + ": Schiff erreicht nach Evakuieren den Orbit")
 	print(tag, "_EVAC_STATE reached=", reached, " location=", _craft_location(), " space=", _space().get("phase"), " transfer=", _transfer_phase(), " view=", _flow.get("_current_meta_view"))
 
-## R4: kein Rueckzug. Hin- und Rueckflug ohne Ausfaelle: Auftragsstatus wie vor der Aenderung (failed, retreat_count 0).
+## R4: Hin- und Rueckflug ohne Ausfaelle ist ebenfalls ein Rueckzug (Regel 8): nach der Heimkehr accepted, retreat_count 1, wieder anwaehlbar, niemand verwundet.
 func _r4_no_retreat() -> void:
 	var s: Dictionary = await _begin_sortie()
 	if s.is_empty(): return
@@ -149,11 +149,17 @@ func _r4_no_retreat() -> void:
 	print("R4_BEFORE_HOME ", _job_line())
 	if not await _return_to_home("satellite_crash"): return
 	await create_timer(2.0).timeout
+	if not await _wait(func(): return _job_status() == "accepted", 15000, "R4: Auftrag steht nach der Landung von allein wieder auf accepted"): return
 	var job: Dictionary = _job()
 	print("R4_OBSERVED ", _job_line(), " location=", _craft_location(), " history=", job.keys())
-	_check(String(job.get("status", "")) == "failed", "R4: Auftragsstatus nach der Heimkehr wie vor der Aenderung: failed (%s)" % _job_line())
-	_check(int(job.get("retreat_count", 0)) == 0 and not bool(job.get("reopen_at_home", false)), "R4: retreat_count 0, kein reopen_at_home")
-	_check(not bool(_availability().get("can_accept", false)) or String(_job().get("status", "")) == "failed", "R4: Auftragstafel unveraendert zur Vergleichsbasis (%s)" % _availability())
+	_check(_flow.get("_active_mission") == null and String(_flow.get("_current_meta_view")) == "homebase", "R4: ohne Debrief gibt die Heimkehr die Ortsinstanz frei, die Ansicht ist die Basis (%s)" % [_flow.get("_current_meta_view")])
+	# Regel 8 (Entscheidung des Nutzers): Auch ein Abflug ohne Ausfaelle ist ein Rueckzug, sobald niemand Einsatzfaehiges am Ort bleibt.
+	_check(String(job.get("status", "")) == "accepted" and int(job.get("retreat_count", 0)) == 1 and not bool(job.get("reopen_at_home", true)), "R4: nach der Heimkehr accepted, retreat_count 1, reopen_at_home false (%s)" % _job_line())
+	var availability: Dictionary = _availability()
+	_check(bool(availability.get("visible", false)) and not bool(availability.get("can_accept", true)), "R4: Auftragstafel: sichtbar, schon angenommen, ohne Erneut annehmen (%s)" % [availability])
+	_check(_screen.call("request_operation", "select_destination", {"location_id": "satellite_crash", "job_id": JOB}).get("ok", false), "R4: Ziel ist wieder anwaehlbar")
+	for id: String in _roster_statuses().keys():
+		_check(String(_roster_statuses()[id][0]) != "wounded", "R4: %s ist nicht wounded (niemand verwundet)" % id)
 	await _end_sortie()
 
 ## R5: Totalverlust (Truppfuehrer liegt, Abflugversuch): nach dem Ruecksprung zum Checkpoint ist nichts wieder geoeffnet.

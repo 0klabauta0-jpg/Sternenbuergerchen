@@ -436,6 +436,8 @@ func _restore_active_campaign() -> void:
 		if _active_mission != scene: scene.queue_free()
 		call_deferred("_campaign_load_failed")
 		return
+	# Der Aufbau ueber _configure_mission_instance wurde beim Fortsetzen uebersprungen: die Ausfallregeln nachziehen.
+	_apply_campaign_casualty_rules(scene, false)
 	_campaign_start.set("active_restore_in_progress",false)
 
 
@@ -4478,14 +4480,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			combat_driver.set("win_condition", selected_win_condition)
 		if _active_mission_started_at_msec > 0:
 			combat_driver.set("mission_timer_started_at_msec", _active_mission_started_at_msec)
-		# Verwundung und Tod gelten nur im echten Kampagneneinsatz und nur mit gueltigen Regeln.
-		var casualty_rules: Dictionary = _get_campaign_casualty_rules() if is_campaign_start() and not preview_mode else {}
-		combat_driver.set("campaign_casualty_rules_enabled", not casualty_rules.is_empty())
-		if not casualty_rules.is_empty():
-			combat_driver.set("down_revive_window_seconds", float(casualty_rules.get("down_revive_window_seconds", 0.0)))
-		# Task 5c: der Abflug-Knopf der Schiffskarte laeuft ueber dieselbe Auswertung wie _request_singleplayer_return.
-		if tactical_controller != null and tactical_controller.has_method("set_campaign_departure_gate"):
-			tactical_controller.call("set_campaign_departure_gate", Callable(self, "_campaign_departure_gate") if not casualty_rules.is_empty() else Callable())
+		_apply_campaign_casualty_rules(mission_instance, preview_mode)
 
 	if preview_mode:
 		_disable_node_processing(mission_instance.get_node_or_null("SimulationRoot"))
@@ -4495,6 +4490,26 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		_disable_node_processing(mission_instance.get_node_or_null("AlphaFlowDriver"))
 		_disable_node_processing(mission_instance.get_node_or_null("BravoFlowDriver"))
 		_disable_node_processing(mission_instance.get_node_or_null("CharlieFlowDriver"))
+
+
+## Die drei Setzungen, mit denen eine Einsatzinstanz die Ausfallregeln der Kampagne bekommt: der Schalter am Driver, das Fenster zum
+## Aufrichten und das Abflug-Gate am Controller. Eine Quelle fuer den Aufbau (_configure_mission_instance) UND das Fortsetzen eines
+## Einsatz-Autosaves (_restore_active_campaign); sonst liefe der Rest des Einsatzes ohne die Regeln, die das Flow am Ende anwendet.
+## Verwundung und Tod gelten nur im echten Kampagneneinsatz (keine Vorschau) und nur mit gueltigen Regeln.
+func _apply_campaign_casualty_rules(mission_instance: Node, preview_mode: bool) -> void:
+	if not is_instance_valid(mission_instance):
+		return
+	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver == null:
+		return
+	var tactical_controller: Node = mission_instance.get_node_or_null("TacticalController")
+	var casualty_rules: Dictionary = _get_campaign_casualty_rules() if is_campaign_start() and not preview_mode else {}
+	combat_driver.set("campaign_casualty_rules_enabled", not casualty_rules.is_empty())
+	if not casualty_rules.is_empty():
+		combat_driver.set("down_revive_window_seconds", float(casualty_rules.get("down_revive_window_seconds", 0.0)))
+	# Task 5c: der Abflug-Knopf der Schiffskarte laeuft ueber dieselbe Auswertung wie _request_singleplayer_return.
+	if tactical_controller != null and tactical_controller.has_method("set_campaign_departure_gate"):
+		tactical_controller.call("set_campaign_departure_gate", Callable(self, "_campaign_departure_gate") if not casualty_rules.is_empty() else Callable())
 
 
 func _sync_active_homebase_direct_selection_from_mission_setup() -> void:
@@ -8745,7 +8760,21 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 		_show_star_map()
 	# Publish the completed Flow projection before observers can admit a new visit.
 	if String(identity.get("craft_id", "")) == craft_id and not String(identity.get("job_id", "")).is_empty():
-		_singleplayer_runtime.call("record_mission_result", {"result":"aborted","reason":"craft_left_without_objective_completion"}, identity)
+		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result":"aborted","reason":"craft_left_without_objective_completion"}, instance), identity)
+
+
+## Gibt es einen Rueckzugsauftrag, der zu Hause noch wieder geoeffnet werden muss (failed mit gesetztem reopen_at_home)?
+func _campaign_retreat_awaiting_home() -> bool:
+	if _singleplayer_runtime == null:
+		return false
+	var campaign_owner: Object = _singleplayer_runtime.get("_campaign")
+	if campaign_owner == null:
+		return false
+	for job_variant in Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {})).values():
+		var job: Dictionary = job_variant
+		if String(job.get("status", "")) == "failed" and bool(job.get("reopen_at_home", false)):
+			return true
+	return false
 
 
 func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary = {}) -> void:
@@ -8760,6 +8789,12 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_remove_pending_mission_craft_transfer(craft_id)
+	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
+	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
+	if not release_legacy and is_campaign_start() and _active_mission != null and _active_mission == returning_mission and _campaign_retreat_awaiting_home():
+		release_legacy = true
+		for other_location in _aircraft_location_by_craft.values():
+			if String(other_location) == "mission": release_legacy = false
 	if release_legacy:
 		_release_active_mission()
 		_active_singleplayer_identity.clear()
@@ -8933,6 +8968,9 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 ## der Flow hat den weiteren Ablauf uebernommen, der Controller hebt nicht selbst ab.
 ## Das Ergebnis laeuft durch _on_mission_combat_resolved, die einzige Stelle, die Verluste ermittelt und anwendet.
 ## Genau einmal: _combat_finished am Driver sperrt eine zweite Aufloesung (dann handled false), _active_mission == null die zweite Zustellung.
+## Wartet ein Missionsergebnis auf Zustellung (_pending_campaign_mission_result), sperrt das Gate: {"handled": true, "ok": false, "reason": "mission_result_pending"}.
+## Ohne Ausfaelle bleibt es bei handled false (keine Verlustauswertung, kein Debrief); der Abflug wird dann ueber
+## _campaign_departure_booking als Rueckzug (win_condition_type "departure") gebucht.
 func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	var not_handled: Dictionary = {"handled": false}
 	if not is_campaign_start() or _singleplayer_runtime == null or _get_campaign_casualty_rules().is_empty():
@@ -8940,6 +8978,10 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	var visit: Node = get_mission_for_craft(craft_id)
 	if visit == null:
 		return not_handled
+	# Wartet das Ergebnis dieses Einsatzes noch auf Zustellung (nach "Evakuieren" laeuft das Einschiffen, der Wiederholer hat es noch
+	# nicht zugestellt), ist der Driver schon fertig, die Verluste sind aber noch nicht angewendet: nichts aufloesen, nicht abheben.
+	if visit == _active_mission and not _pending_campaign_mission_result.is_empty():
+		return {"handled": true, "ok": false, "reason": "mission_result_pending", "message": "Einsatz wird gerade abgeschlossen"}
 	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
 	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
 		return not_handled
@@ -9033,6 +9075,20 @@ func _campaign_departure_empties_location(team_states: Array) -> bool:
 	return true
 
 
+## Regel 8: Ein Abflug bei aktivem Auftrag, nach dem niemand Einsatzfaehiges am Ort bleibt, ist ein Rueckzug. Das gilt auch ohne
+## Ausfaelle (dann ohne Verlustauswertung und Debrief gebucht): die Buchung traegt win_condition_type "departure", der Auftrag bleibt
+## offen und der Rueckzug wird gezaehlt. Gemessen wird an den Personen der Ortsinstanz wie im Gate (_campaign_departure_empties_location);
+## ist keine Instanz mehr da oder gelten keine Regeln (Skirmish), bleibt die Buchung unveraendert.
+func _campaign_departure_booking(booking: Dictionary, visit: Node) -> Dictionary:
+	var result: Dictionary = booking.duplicate(true)
+	if not is_campaign_start() or _get_campaign_casualty_rules().is_empty() or not is_instance_valid(visit):
+		return result
+	var measured: Dictionary = _build_mission_result(visit, {})
+	if _campaign_departure_empties_location(Array(measured.get("team_states", []))):
+		result["win_condition_type"] = "departure"
+	return result
+
+
 func _finish_singleplayer_visit_if_returned() -> void:
 	if _active_mission == null or _active_singleplayer_identity.is_empty():
 		return
@@ -9042,7 +9098,7 @@ func _finish_singleplayer_visit_if_returned() -> void:
 	if not _pending_mission_craft_transfers.is_empty():
 		return
 	if not String(_active_singleplayer_identity.get("job_id", "")).is_empty():
-		_singleplayer_runtime.call("record_mission_result", {"result": "aborted", "reason": "craft_returned_without_objective_completion"}, _active_singleplayer_identity.duplicate(true))
+		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result": "aborted", "reason": "craft_returned_without_objective_completion"}, _active_mission), _active_singleplayer_identity.duplicate(true))
 	_release_active_mission()
 	_active_singleplayer_identity.clear()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
