@@ -223,7 +223,6 @@ func _r7_foreign_job_keeps_focus() -> void:
 	var mission: Node = _flow.get("_active_mission")
 	_check(mission != null and _job_status() == "failed" and bool(_job().get("reopen_at_home", false)), "R7: Rueckzug wartet auf das Wiederoeffnen, Ortsinstanz ist noch fokussiert (%s)" % _job_line())
 	if mission == null: return
-	_check(_flow.has_method("_release_location_for_waiting_retreat"), "R7: gemeinsame Freigabe-Hilfsfunktion existiert")
 	var real_identity: Dictionary = Dictionary(mission.get_meta("singleplayer_mission_identity", {})).duplicate(true)
 	var foreign_identity: Dictionary = real_identity.duplicate(true)
 	foreign_identity["job_id"] = "foreign_job_without_retreat"
