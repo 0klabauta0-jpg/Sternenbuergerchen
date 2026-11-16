@@ -39,8 +39,9 @@ func _wait_homebase() -> bool:
 		presence_before[String(person.unit_id)] = [String(person.status), String(person.craft_id)]
 	_check(int(before.onboarding.stage_index) == _return_number + 1, "Actual home arrival advances tutorial in order")
 	_check(Array(_flow.get("_all_team_units")).size() == 2, "True return keeps exactly two NPCs")
-	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime)
-	if not _check(bool(saved.get("ok", false)), "Actual home milestone saves valid complete checkpoint"):
+	# Explicit milestone save: force=true bypasses the 5 minute hex autosave interval (campaign_start_configuration.gd), otherwise the arrival autosave makes this a no-op and Continue loads the older file.
+	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
+	if not _check(bool(saved.get("ok", false)) and not bool(saved.get("throttled", false)), "Actual home milestone saves valid complete checkpoint"):
 		print("CHECKPOINT_RESULT:", saved)
 		return false
 	var loaded: Dictionary = STORE.load_checkpoint()

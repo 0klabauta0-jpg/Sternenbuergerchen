@@ -69,16 +69,18 @@ func _run() -> void:
 	if not await _move_and_use(mission, "ship_return", "return_to_ship", "res://maps/satellite_crash_site.json"):
 		await _finish()
 		return
-	if not await _wait(func(): return String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 10000, "Real mission result completes accepted campaign job"):
+	if not await _wait(func(): return String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "pending_upload", 10000, "Real mission result secures the chip and awaits home upload"):
 		_dump("campaign_completion")
 		await _finish()
 		return
-	var rewarded: Dictionary = _flow.call("get_singleplayer_snapshot")
-	_check(int(rewarded.supply.credits) == int(initial.supply.credits) + 150, "Runtime reward credits exactly one data-defined payment")
-	_check(Dictionary(rewarded.campaign.get("completion_receipts", {})).size() == 1, "Exactly one campaign completion receipt")
+	_check(int(_flow.call("get_singleplayer_snapshot").supply.credits) == int(initial.supply.credits), "No reward before physical home upload")
 	if not await _wait_homebase():
 		await _finish()
 		return
+	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", "Home upload completes the accepted campaign job")
+	var rewarded: Dictionary = _flow.call("get_singleplayer_snapshot")
+	_check(int(rewarded.supply.credits) == int(initial.supply.credits) + 150, "Runtime reward credits exactly one data-defined payment")
+	_check(Dictionary(rewarded.campaign.get("completion_receipts", {})).size() == 1, "Exactly one campaign completion receipt")
 	_flow.call("request_debrief_return_homebase_for_test")
 	var returned: Dictionary = _flow.call("get_singleplayer_snapshot")
 	_check(float(returned.supply.fuel_by_craft_id[_craft_id]) == float(initial.supply.fuel_by_craft_id[_craft_id]) - 24.0, "First actual round trip consumes outbound and reverse route fuel once")
@@ -247,6 +249,7 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	var approach_phase := String(_space().get("phase", ""))
 	var transit: Dictionary = Dictionary(_space().get("orbit_transit", {}))
 	_check(_flow.get("_active_mission") == null and (approach_phase == "approach" or (approach.get("pending", false) and approach_phase == "orbit" and transit.get("status") == "flying")), "Explicit approach waits for orbit transit or begins before map instantiation")
+	# 180 s: the newly built crash site needs terrain preparation; measured 16-20 s headless (below normal priority, other Godot runs in parallel), the old 12 s was too tight.
 	if not await _wait(func(): return _flow.get("_active_mission") != null, 180000, scenario_id + " actual mission instance exists"):
 		_dump("mission_creation")
 		return false
@@ -304,6 +307,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 	if not _check(bool(controller.call("execute_selected_fireteam_orders")), interaction + " actual move GO accepts"):
 		_dump("move_go")
 		return false
+	# 180 s: the real approach over the 512x256 map measured 48 s (satellite_data and ship_return, headless, parallel Godot runs); the old 45 s limit was exceeded.
 	if not await _wait(func():
 		if not is_instance_valid(controller):
 			return false
@@ -352,7 +356,21 @@ func _wait_homebase() -> bool:
 		return String(craft.get("location_id", "")) == "homebase" and not bool(craft.get("busy", true)), 35000, "Actual reverse transit restores original craft to homebase")
 	if not ready:
 		_dump("homebase_return")
-	return ready
+		return false
+	return await _upload_pending_chip()
+
+## Contract (campaign_introduction_contract.md): a recovered chip is uploaded at the home terminal; request_operation("campaign_upload") is the operation the home UI calls.
+## Runs at the end of the home arrival, before subclasses check the tutorial milestone and save/continue the home checkpoint.
+func _upload_pending_chip() -> bool:
+	if String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) != "pending_upload":
+		return true
+	_flow.call("_show_homebase")
+	var uploaded: Dictionary = _runtime.call("request_operation", "campaign_upload", {"job_id": "satellite_recovery"})
+	if not _check(bool(uploaded.get("ok", false)), "Real home upload accepted"):
+		print("UPLOAD_RESULT ", uploaded)
+		print("UPLOAD_JOB ", Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}))
+		return false
+	return true
 
 func _space() -> Dictionary:
 	return Dictionary(_flow.call("get_singleplayer_snapshot").get("space_travel", {}))
