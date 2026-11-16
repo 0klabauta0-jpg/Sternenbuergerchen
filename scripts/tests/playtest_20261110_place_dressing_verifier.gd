@@ -10,12 +10,16 @@ func _run() -> void:
 	check(float(presentation.get("initial_camera_size",0))==22,"place has deliberately closer initial tactical framing")
 	var stage:=Node3D.new(); root.add_child(stage)
 	var built: Dictionary=load("res://scripts/terrain/place_reference_dressing.gd").build(stage,presentation)
-	# build() lists the structures first, then the props; fences, crates and walls do not all block by design.
+	# build() lists the structures first, then the props.
 	# Expectation derived from the saved map: one blocker per structure, plus one per prop whose scene exists (place_reference_dressing.gd).
 	var building_count:=Array(presentation.get("structures",[])).size()
+	var props:Array=Array(presentation.get("props",[]))
 	var loadable_props:=0
-	for prop: Dictionary in Array(presentation.get("props",[])):
+	var missing_prop_paths:PackedStringArray=[]
+	for prop: Dictionary in props:
 		if ResourceLoader.exists(String(prop.get("path",""))): loadable_props+=1
+		else: missing_prop_paths.append(String(prop.get("path","")))
+	check(loadable_props==props.size(),"every prop of the map is loadable (%d of %d; missing: %s)"%[loadable_props,props.size(),", ".join(missing_prop_paths)])
 	var building_blockers: Array=Array(built.blockers).slice(0,building_count)
 	check(building_count>=1 and building_blockers.size()==building_count and Array(built.blockers).size()==building_count+loadable_props,"trade compound builds one blocker per saved structure plus one per loadable prop (%d + %d)"%[building_count,loadable_props])
 	var missing:=0; var solids:=0
