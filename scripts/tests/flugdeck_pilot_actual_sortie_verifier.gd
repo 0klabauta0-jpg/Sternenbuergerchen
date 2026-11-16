@@ -14,6 +14,7 @@ func _prepare_initial_base() -> bool:
 
 func _run() -> void:
 	Engine.time_scale=4.0
+	_configure_entry() # seeds the menu-built Skirmish team for the inherited _finish check
 	START.request_start(self,"campaign","new")
 	_flow=FLOW.instantiate(); root.add_child(_flow)
 	await process_frame

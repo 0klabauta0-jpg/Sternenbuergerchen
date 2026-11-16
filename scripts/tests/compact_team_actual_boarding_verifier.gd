@@ -47,4 +47,5 @@ func _launch_and_land(scenario_id:String,map_path:String)->bool:
 	_check(not ship_board.is_visible_in_tree(),"boarding action is no longer duplicated at ship")
 	var deploy:Dictionary=controller.request_campaign_crew_deployment(_craft_id)
 	if not _check(deploy.get("ok",false),"existing Trupp absetzen remains available"):return false
-	return await _wait(func():return controller.get("_runtime_activation_pending_fireteam_ids").is_empty() and controller.get("_post_drop_security_pending_fireteam_ids").is_empty(),8000,"actual insertion guard finishes after boarding roundtrip")
+	# GO is deliberately held ("WAIT FOR INSERTION", mission_tactical_sandbox_controller.gd:1590) until the team is runtime-active again; empty pending lists alone are true before the drop starts.
+	return await _wait(func():return _all_crew_deployed(controller) and bool(controller.call("_is_fireteam_runtime_active",_team_id.to_lower())) and controller.get("_runtime_activation_pending_fireteam_ids").is_empty() and controller.get("_post_drop_security_pending_fireteam_ids").is_empty(),60000,"actual insertion guard finishes after boarding roundtrip")
