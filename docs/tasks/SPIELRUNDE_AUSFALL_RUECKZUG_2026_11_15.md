@@ -110,6 +110,7 @@ Aus den Rulings des Protokolls; Björn entschieden sind mit [B] gekennzeichnet.
 - Aufgabe 5a: In `campaign_casualty_debrief_retry_test` wurde die Wartezeit angepasst und eine Erwartung geändert (Einschiffen mit liegendem Truppführer und fittem Piloten ist seit Aufgabe 4 `ok`); der Test lief vorher 25/1, danach 164/0.
 - Aufgabe 7b: Das Frame-Delta wird auf 2,0 Sekunden gedeckelt, damit lange Hänger nicht als Ausfallzeit zählen.
 - Reihenfolge am Ende [B, 23:07 und 23:10]: Paket 3a fertig machen, dann Merge nach `main` (Björns Ja gilt für diesen einen Merge), dann EXE bauen, dann die langen Läufe. Vor dem Merge bleibt Pflicht: Aufsetzen auf aktuelles `main`, kurze Tests, die drei Prüfskripte des Bedien-Strangs, Gesamtprüfung des Branches.
+- Nacharbeit 3a (16.11.2026), M-a: Kam die Heimlandung vor der Buchung des Rückzugs (Abflug wartete noch in `_pending_surface_departures`), blieb die Ortsinstanz fokussiert; `_complete_space_surface_departure` prüft die Freigabe jetzt nach der Buchung noch einmal. M-b: Die Wartebedingung `_campaign_retreat_awaiting_home(visit)` fragt nur noch den Auftrag der Instanz des heimkehrenden Schiffs (`job_id` aus `singleplayer_mission_identity`), nicht mehr irgendeinen Auftrag; die Freigabe selbst steht an einer Stelle, `_release_location_for_waiting_retreat`. Prüfungen R6 und R7 im `campaign_retreat_reopen_at_home_verifier`.
 
 ### Nicht geprüft / offen
 
