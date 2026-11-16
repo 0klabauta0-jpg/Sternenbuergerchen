@@ -120,7 +120,8 @@ func _all_crew_deployed(controller: Node) -> bool:
 	# Hex activation can set and consume its receipt in one owner callback.
 	# Exercise GO during the real, externally observable inbound/unload window
 	# instead of depending on sampling that shorter internal flag interval.
-	if not _insertion_guard_checked and (not bool(controller.call("_is_fireteam_runtime_active", _team_id)) or Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).has(_team_id) or Dictionary(controller.get("_post_drop_security_pending_fireteam_ids")).has(_team_id)):
+	var team_key := _team_id.to_lower() # the controller keys fireteams in lower case
+	if not _insertion_guard_checked and (not bool(controller.call("_is_fireteam_runtime_active", team_key)) or Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).has(team_key) or Dictionary(controller.get("_post_drop_security_pending_fireteam_ids")).has(team_key)):
 		controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 		var accepted: bool = controller.call("execute_selected_fireteam_orders")
 		_check(not accepted and String(controller.get("_last_command_text")).begins_with("WAIT FOR INSERTION"), "GO is blocked during the actual inbound/unloading interval")
