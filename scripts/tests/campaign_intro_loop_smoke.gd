@@ -17,9 +17,9 @@ func _expected_crew_count() -> int:
 	return 1
 
 func _all_crew_deployed(controller: Node) -> bool:
-	if not _insertion_guard_checked and Dictionary(controller.get("_deployed_unit_ids")).has("campaign_leader"):
+	if not _insertion_guard_checked:
 		# The guard in mission_tactical_sandbox_controller.gd:1590 holds GO while the fireteam is not runtime-active or still pending (pending ids are keyed by the lower-case fireteam id, not by the campaign team id).
-		# The pending dictionaries are already empty when the leader shows up in _deployed_unit_ids, so the transient is the runtime-active flag.
+		# Observed on the first poll after the drop was requested (the wait predicate runs at once), i.e. while the insertion is still running; it must not wait until the leader is listed as deployed, because the guard is already released by then.
 		controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 		var held := false
 		for fireteam_id in controller.get("_selected_fireteam_ids"):

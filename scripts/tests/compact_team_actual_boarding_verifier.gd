@@ -48,4 +48,9 @@ func _launch_and_land(scenario_id:String,map_path:String)->bool:
 	var deploy:Dictionary=controller.request_campaign_crew_deployment(_craft_id)
 	if not _check(deploy.get("ok",false),"existing Trupp absetzen remains available"):return false
 	# GO is deliberately held ("WAIT FOR INSERTION", mission_tactical_sandbox_controller.gd:1590) until the team is runtime-active again; empty pending lists alone are true before the drop starts.
+	# Observe the hold right now, while the drop is running (observing it inside the wait predicate only happens after the hold is gone).
+	controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
+	var held_go:bool=controller.call("execute_selected_fireteam_orders")
+	_check(not held_go and String(controller.get("_last_command_text")).begins_with("WAIT FOR INSERTION"),"GO is held while the boarded troop is still being set down")
+	_insertion_guard_checked=true
 	return await _wait(func():return _all_crew_deployed(controller) and bool(controller.call("_is_fireteam_runtime_active",_team_id.to_lower())) and controller.get("_runtime_activation_pending_fireteam_ids").is_empty() and controller.get("_post_drop_security_pending_fireteam_ids").is_empty(),60000,"actual insertion guard finishes after boarding roundtrip")
