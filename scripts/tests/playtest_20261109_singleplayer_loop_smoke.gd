@@ -359,13 +359,13 @@ func _wait_homebase() -> bool:
 		return false
 	return await _upload_pending_chip()
 
-## Contract (campaign_introduction_contract.md): a recovered chip is uploaded at the home terminal; request_operation("campaign_upload") is the operation the home UI calls.
+## Contract (campaign_introduction_contract.md): a recovered chip is uploaded at the home terminal; request_operation("campaign_upload") is the operation the home UI calls, through the screen's gate (homebase_screen.gd _request_operation_from_base -> base_runtime.validate_operation).
 ## Runs at the end of the home arrival, before subclasses check the tutorial milestone and save/continue the home checkpoint.
 func _upload_pending_chip() -> bool:
 	if String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) != "pending_upload":
 		return true
 	_flow.call("_show_homebase")
-	var uploaded: Dictionary = _runtime.call("request_operation", "campaign_upload", {"job_id": "satellite_recovery"})
+	var uploaded: Dictionary = _screen.call("request_operation", "campaign_upload", {"job_id": "satellite_recovery"})
 	if not _check(bool(uploaded.get("ok", false)), "Real home upload accepted"):
 		print("UPLOAD_RESULT ", uploaded)
 		print("UPLOAD_JOB ", Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}))
