@@ -23,7 +23,7 @@ extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ## 5. station_claim_resident selbst braucht die Polisa-Mission und wird nicht gefahren; nach dem Fortsetzen wird nur belegt, dass die
 ##    Person weiter Resident (Status station, keine Heimzelle) ist.
 ## 6. Der echte Flug Polisa -> Heimatbasis wird nicht gefahren: das Schiff steht von Anfang an an der Heimatbasis (Zustand "Schiff zu Hause,
-##    Resident auf Polisa" ueber die Besitzer-Operationen). Belegt wird, dass die Nutzlastpruefung des Abflugs den Residenten nicht kennt.
+##    Resident auf Polisa" ueber die Besitzer-Operationen). Geprueft wird (R1), dass die dem Schiff zugewiesene Nutzlast leer ist (member_count 0, aboard_count 0); ob die Abflugpruefung selbst den Residenten ausschliesst, wird nicht gefahren.
 ## 7. Private Feldleser und -schreiber ohne oeffentlichen Weg: _flow._aircraft_location_by_craft, _flow._homebase_aircraft_definitions,
 ##    _flow._all_team_units, _flow._campaign_start, _flow._singleplayer_runtime, _runtime._polisa_market, _runtime._supply, _runtime._simulation und die Hex-Zelle
 ##    (_simulation.get_hex_unit_state, oeffentlich, aber der Test greift ueber _runtime auf die Simulation zu). R4/R5 setzen fuer die
