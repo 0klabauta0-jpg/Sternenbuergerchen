@@ -37738,7 +37738,16 @@ func request_campaign_extraction(craft_id: String) -> Dictionary:
 	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
 	var teams := PackedStringArray()
-	for unit in _campaign_craft_crew(craft_id):
+	var crew: Array = _campaign_craft_crew(craft_id)
+	# Mit Ausfallregeln: Liegende werden uebersprungen (Tragen gibt es noch nicht); abgelehnt wird nur ohne flugfaehigen Piloten oder ohne eine einsatzfaehige Person.
+	var casualties: Array = _campaign_boarding_casualties(crew)
+	if not casualties.is_empty():
+		var guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
+		if String(guard.get("reason", "")) == "pilot_unavailable": return guard
+		if casualties.size() == crew.size():
+			return {"ok": false, "reason": "crew_unavailable", "message": "Kein Bodenteam einsatzfähig", "casualty_unit_ids": _campaign_unit_ids(casualties)}
+	for unit in crew:
+		if casualties.has(unit): continue
 		var id := String(unit.call("get_unit_id"))
 		if int(unit.call("get_health")) <= 0:
 			return {"ok": false, "reason": "crew_unavailable", "message": "Eine Bodenperson ist nicht einsatzfaehig"}
@@ -37764,6 +37773,40 @@ func _on_campaign_extraction_pressed(craft_id: String) -> void:
 	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
 
+## Nur mit gesetztem Schalter campaign_casualty_rules_enabled: die Personen, die nicht einsatzfaehig am Boden liegen (vital_state nicht fit). Sonst leer.
+func _campaign_boarding_casualties(units: Array) -> Array:
+	var result: Array = []
+	if not _campaign_casualty_rules_active(): return result
+	for unit in units:
+		if unit != null and unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit": result.append(unit)
+	return result
+
+func _campaign_unit_ids(units: Array) -> PackedStringArray:
+	var ids := PackedStringArray()
+	for unit in units: ids.append(String(unit.call("get_unit_id")))
+	return ids
+
+## Rueckmeldung, wenn die Einsatzfaehigen an Bord sind und noch jemand liegt; leer, wenn niemand (mehr) liegt.
+## Wer beim Abheben als geborgen gilt: an Bord oder nahe am Schiffszugang (Vertrag Regel 3). Liegende werden nicht eingeschifft, also gilt: nah am Schiff.
+## Bleibt ausser dem Piloten keine einsatzfaehige Person, ist Abheben ein Totalverlust (Vertrag Regel 7).
+func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedStringArray) -> String:
+	var parts := PackedStringArray()
+	for id in casualty_ids:
+		var unit = _get_campaign_sortie_unit(String(id))
+		if unit == null or not unit.has_method("get_vital_state"): continue
+		var vital := String(unit.call("get_vital_state"))
+		if vital == "fit": continue
+		var person := String(unit.call("get_display_name")).strip_edges() if unit.has_method("get_display_name") else ""
+		if person.is_empty(): person = String(id)
+		parts.append((person + " (kritisch)") if vital in ["bleedout", "respawning"] else person)
+	if parts.is_empty(): return ""
+	var pilot_id := String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+	var other_fit := false
+	for unit in _get_campaign_sortie_units():
+		if String(unit.call("get_unit_id")) != pilot_id and String(unit.call("get_vital_state")) == "fit" and int(unit.call("get_health")) > 0: other_fit = true
+	var tail := "Abheben lässt Liegende zurück oder birgt sie, wenn sie nah am Schiff liegen." if other_fit else "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
+	return "An Bord. Am Boden: %s. %s" % [", ".join(parts), tail]
+
 func _advance_campaign_extraction(delta: float) -> void:
 	_advance_selected_team_boarding(delta)
 	if _campaign_extraction_craft_id.is_empty(): return
@@ -37776,7 +37819,8 @@ func _advance_campaign_extraction(delta: float) -> void:
 	var reason := String(result.get("reason", ""))
 	if bool(result.get("ok", false)):
 		_campaign_extraction_craft_id = ""
-		_set_mission_dropship_card_feedback(craft_id, "Alle an Bord. Rueckflug ist bereit.")
+		var casualty_text := _campaign_casualty_aboard_text(craft_id, PackedStringArray(result.get("casualty_unit_ids", PackedStringArray())))
+		_set_mission_dropship_card_feedback(craft_id, casualty_text if not casualty_text.is_empty() else "Alle an Bord. Rueckflug ist bereit.")
 	elif reason not in ["pilot_not_at_ship", "crew_not_at_ship", "pilot_boarding_pending"] or _campaign_extraction_elapsed > 180.0:
 		_campaign_extraction_craft_id = ""
 		_set_mission_dropship_card_feedback(craft_id, String(result.get("message", "Rueckweg unterbrochen")))
@@ -37796,6 +37840,16 @@ func get_selected_team_boarding_snapshot() -> Dictionary:
 	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result
 	if _selected_team_boarding_requests.has(team):result.message="Trupp geht zum Schiff / steigt ein";return result
 	if units.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):result.message="Trupp an Bord";return result
+	var casualties:Array=_campaign_boarding_casualties(units)
+	if not casualties.is_empty():
+		# Mit Ausfallregeln sitzen die Einsatzfaehigen auf; Liegende bleiben liegen.
+		var fit_units:Array=units.filter(func(unit:Node):return not casualties.has(unit))
+		if fit_units.is_empty():result.message="Kein Bodenteam einsatzfähig";return result
+		var guard:Dictionary=get_campaign_pilot_flight_guard(craft)
+		if String(guard.get("reason",""))=="pilot_unavailable":result.message=String(guard.get("message","Pilot ist nicht flugfaehig"));return result
+		if fit_units.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):result.message="Trupp an Bord";return result
+		result.can_board=true;result.message="Einsatzfähige gehen zum Schiff und sitzen auf"
+		return result
 	if units.any(func(unit:Node):return int(unit.call("get_health"))<=0):result.message="Nicht alle Truppmitglieder sind boardingbereit";return result
 	result.can_board=true;result.message="Zum Truppschiff gehen und aufsitzen"
 	return result
@@ -37823,6 +37877,10 @@ func _advance_selected_team_boarding(delta:float) -> void:
 		if bool(result.get("ok",false)):
 			_selected_team_boarding_requests.erase(team)
 			_last_command_text=team.to_upper()+" an Bord"
+			var casualty_text:=_campaign_casualty_aboard_text(String(request.craft_id),PackedStringArray(result.get("casualty_unit_ids",PackedStringArray())))
+			if not casualty_text.is_empty():
+				_last_command_text=casualty_text
+				_set_mission_dropship_card_feedback(String(request.craft_id),casualty_text)
 		elif reason not in ["pilot_not_at_ship","crew_not_at_ship","pilot_boarding_pending"] or float(request.elapsed)>180:
 			_selected_team_boarding_requests.erase(team)
 			_last_command_text=String(result.get("message","Aufsitzen unterbrochen"))
