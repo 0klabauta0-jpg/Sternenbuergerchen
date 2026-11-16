@@ -25,7 +25,7 @@ extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ## 6. Der echte Flug Polisa -> Heimatbasis wird nicht gefahren: das Schiff steht von Anfang an an der Heimatbasis (Zustand "Schiff zu Hause,
 ##    Resident auf Polisa" ueber die Besitzer-Operationen). Belegt wird, dass die Nutzlastpruefung des Abflugs den Residenten nicht kennt.
 ## 7. Private Feldleser und -schreiber ohne oeffentlichen Weg: _flow._aircraft_location_by_craft, _flow._homebase_aircraft_definitions,
-##    _flow._all_team_units, _flow._campaign_start, _runtime._polisa_market, _runtime._supply, _runtime._simulation und die Hex-Zelle
+##    _flow._all_team_units, _flow._campaign_start, _flow._singleplayer_runtime, _runtime._polisa_market, _runtime._supply, _runtime._simulation und die Hex-Zelle
 ##    (_simulation.get_hex_unit_state, oeffentlich, aber der Test greift ueber _runtime auf die Simulation zu). R4/R5 setzen fuer die
 ##    Gegenproben am Besitzer craft_id/status im Zustandsspeicher der Basis (base._states) und stellen ihn danach wieder her.
 
@@ -132,7 +132,7 @@ func _rc_r1() -> void:
 	# Adapter validate_space_launch (crew_not_aboard) fragt nur get_payload_presence(craft) ab (singleplayer_runtime_adapter.gd), also die dem Schiff zugewiesene Nutzlast.
 	# Ohne Truppe im Schiff (R1 ohne with_squad) ist die Nutzlast leer; zaehlt der Resident dort mit, waere member_count > 0.
 	var presence: Dictionary = _t6b_base().get_payload_presence(craft_id)
-	_check(int(presence.get("member_count", -1)) == 0 and int(presence.get("aboard_count", -1)) == 0, "R1: die Nutzlast des Schiffs ist leer, der Resident zaehlt dort nicht mit (%s); die Abflugpruefung kennt ihn nicht" % [presence])
+	_check(int(presence.get("member_count", -1)) == 0 and int(presence.get("aboard_count", -1)) == 0, "R1: die dem Schiff zugewiesene Nutzlast ist leer (member_count 0, aboard_count 0); die Abflugpruefung sieht dort niemanden (%s)" % [presence])
 	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty(), "R1: der Resident hat keine Zelle auf der Heimkarte")
 	await _rc_cycle(unit_id, "R1", "station")
 	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty() and bool(_t6b_base().call("has_station_recruits")), "R1: nach dem Fortsetzen: weiter ohne Heimzelle und weiter Resident auf Polisa")
