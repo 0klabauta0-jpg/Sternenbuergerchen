@@ -6,6 +6,8 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 ## Z4: Verwundete an Bord des an der Heimatbasis gelandeten Schiffs: authorize_departure sperrt, nach dem Absetzen nicht mehr.
 ## Z5: Speichern, Meta-Szene neu aufbauen, Fortsetzen: Restzeit bleibt, Sperre gilt sofort wieder.
 ## Z6: Skirmish zaehlt nichts und sperrt nichts.   Z7: Niemand verwundet: nichts aendert sich.   Z8: zwei Verwundete, kuerzere Zeit genest zuerst.
+## Z13: Sichtbare Basisansicht: die Statuszeile der Verwundeten zeigt die laufende Restzeit, ohne Neuaufbau (gleiche Karte, Marker, Auswahl).
+## Z14: Ablauf der Zeit: Karte zeigt den normalen Zustand, die Person ist einschiffbar.   Z15: Unsichtbare Ansicht: keine Auffrischung.
 ## Einzeln starten: Umgebungsvariable T7B_ONLY (zum Beispiel "Z5") oder Kommandozeilenargument nach "--" (zum Beispiel "-- Z5"); ohne Angabe laufen alle.
 
 const RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
@@ -15,7 +17,7 @@ const PILOT := "campaign_pilot"
 func _run() -> void:
 	_configure_entry()
 	var selected: Array = _selected_scenarios()
-	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12"]:
+	for scenario: String in ["Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "Z10", "Z11", "Z12", "Z13", "Z14", "Z15"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -325,3 +327,93 @@ func _z12() -> void:
 	var drop: float = 900.0 - _remaining(LEADER)
 	print("Z12_DROP ", drop)
 	_check(drop > 0.5 and drop <= 2.05, "Z12: Delta 600 senkt die Restzeit um hoechstens 2 s (%.3f)" % drop)
+
+# ---------- Restzeit auf der Personenkarte (Nacharbeit 3a) ----------
+
+func _card_for(unit_id: String) -> Node:
+	for field: String in ["_staged_cards_by_unit_id", "_roster_cards_by_unit_id"]:
+		var cards: Dictionary = Dictionary(_screen.get(field))
+		if cards.has(unit_id) and is_instance_valid(cards[unit_id]):
+			return cards[unit_id]
+	return null
+
+## Statuszeile der Karte, gelesen ueber die oeffentliche Auskunft der Karte (der Text, den sie anzeigt).
+func _card_status(unit_id: String) -> String:
+	var card: Node = _card_for(unit_id)
+	return String(Dictionary(card.call("get_profile_reference_contract_snapshot")).get("secondary_text_override", "<keine Karte>")) if card != null else "<keine Karte>"
+
+## Eine volle Sekunde Spielzeit ueber den echten Takt des Flows.
+func _tick_seconds(count: int) -> void:
+	for _i in range(count):
+		_flow.set("_recovery_clock", 0.0)
+		_flow.call("_tick_personnel_recovery", 1.0)
+
+func _view_state() -> Array:
+	return [PackedStringArray(_screen.call("get_selected_unit_ids")), PackedStringArray(_screen.call("get_selected_fireteam_ids")), _screen.get("_focused_unit_id"), _screen.get("_focused_fireteam_id")]
+
+func _z13() -> void:
+	if not await _open("campaign", "new"): return
+	_wound(LEADER, "medium", 900.0, 900.0)
+	_flow.call("_refresh_homebase_screen")
+	_check(_screen.is_visible_in_tree(), "Z13: Fixture: Basisansicht ist sichtbar")
+	var card: Node = _card_for(LEADER)
+	if not _check(card != null, "Z13: Fixture: Karte der Verwundeten ist da"): return
+	var before_text: String = _card_status(LEADER)
+	_check(before_text.begins_with("Verwundet (mittel), noch 15:00"), "Z13: Fixture: Karte zeigt 'Verwundet (mittel), noch 15:00' (%s)" % before_text)
+	_screen.set("_team_feedback_text", "z13-marker")
+	var view_before: Array = _view_state()
+	var card_id: int = card.get_instance_id()
+	_tick_seconds(2)
+	var after_text: String = _card_status(LEADER)
+	print("Z13_TEXT ", before_text, " -> ", after_text)
+	_check(after_text.begins_with("Verwundet (mittel), noch 14:58"), "Z13: nach zwei gezaehlten Sekunden zeigt die Karte 14:58 (%s)" % after_text)
+	_check(is_equal_approx(_remaining(LEADER), 898.0), "Z13: Kader zaehlt weiter (Wahrheit beim Kader): %.2f" % _remaining(LEADER))
+	_check(_card_for(LEADER) != null and _card_for(LEADER).get_instance_id() == card_id, "Z13: dieselbe Karten-Instanz vorher und nachher")
+	_check(String(_screen.get("_team_feedback_text")) == "z13-marker", "Z13: Ansicht wurde nicht neu aufgebaut (Marker blieb, setup_roster lief nicht)")
+	_check(_view_state() == view_before, "Z13: Auswahl und Fokus unveraendert")
+	_check(after_text.get_slice(" | ", 1) == before_text.get_slice(" | ", 1), "Z13: nur der Statusteil der Zeile aendert sich, der Ortsteil bleibt")
+
+func _z14() -> void:
+	if not await _open("campaign", "new"): return
+	_wound(LEADER, "medium", 900.0, 2.0)
+	_flow.call("_refresh_homebase_screen")
+	var fit_status: String = _card_status(PILOT).get_slice(" | ", 0)
+	_check(_card_status(LEADER).begins_with("Verwundet (mittel), noch 0:02"), "Z14: Fixture: Karte zeigt 0:02 (%s)" % _card_status(LEADER))
+	_tick_seconds(1)
+	_check(_card_status(LEADER).begins_with("Verwundet (mittel), noch 0:01"), "Z14: nach einer Sekunde 0:01 (%s)" % _card_status(LEADER))
+	_tick_seconds(1)
+	var text: String = _card_status(LEADER)
+	print("Z14_TEXT ", text, " fit=", fit_status)
+	_check(String(_roster_unit(LEADER).get("availability_status", "")) == "active", "Z14: Kader: Person ist active")
+	_check(not text.contains("Verwundet") and not text.contains("noch ") and text.get_slice(" | ", 0) == fit_status, "Z14: Karte zeigt sofort den normalen Zustand wie eine gesunde Person (%s / %s)" % [text, fit_status])
+	_check(_lock().is_empty(), "Z14: Sperre leer")
+	var single: Dictionary = _board_one(LEADER)
+	_check(bool(single.get("ok", false)) and String(single.get("reason", "")) != "unit_wounded", "Z14: Person ist ohne weiteres Zutun einschiffbar (%s)" % single)
+
+func _z15() -> void:
+	if not await _open("campaign", "new"): return
+	_wound(LEADER, "medium", 900.0, 900.0)
+	_flow.call("_refresh_homebase_screen")
+	var shown: String = _card_status(LEADER)
+	_screen.visible = false
+	_check(not _screen.is_visible_in_tree(), "Z15: Fixture: Basisansicht ist unsichtbar")
+	_tick_seconds(2)
+	_check(_card_status(LEADER) == shown, "Z15: bei unsichtbarer Ansicht wird keine Karte beschrieben (%s)" % _card_status(LEADER))
+	_check(is_equal_approx(_remaining(LEADER), 898.0), "Z15: der Kader zaehlt trotzdem weiter (%.2f)" % _remaining(LEADER))
+	_screen.visible = true
+	_tick_seconds(1)
+	_check(_card_status(LEADER).begins_with("Verwundet (mittel), noch 14:57"), "Z15: wieder sichtbar: spaetestens der naechste Takt zeigt die aktuelle Restzeit (%s)" % _card_status(LEADER))
+	# Niemand verwundet: nichts aendert sich an der Karte.
+	var healed: Array = []
+	for unit: Dictionary in Array(_flow.get("_all_team_units")):
+		var copy: Dictionary = unit.duplicate(true)
+		copy["availability_status"] = "active"
+		copy["recovery_state"] = {}
+		copy["status_text"] = ""
+		healed.append(copy)
+	_flow.call("_replace_roster_units", healed)
+	_flow.call("_refresh_homebase_screen")
+	var healthy: String = _card_status(LEADER)
+	_screen.set("_team_feedback_text", "z15-marker")
+	_tick_seconds(2)
+	_check(_card_status(LEADER) == healthy and String(_screen.get("_team_feedback_text")) == "z15-marker", "Z15: ohne Verwundete bleibt die Ansicht unberuehrt (%s)" % _card_status(LEADER))

@@ -273,6 +273,50 @@ func set_fireteam_context(selected_fireteam_ids: PackedStringArray = [], firetea
 			_update_character_sheet()
 
 
+## Nimmt die Restzeit der Verwundeten auf die angezeigten Personenkarten: setzt nur die Statuszeile der Karten der
+## uebergebenen Personen neu (Roster und Einsatzvorbereitung). Kein Neuaufbau, keine Auswahl-, Fokus- oder Scrolländerung,
+## kein Layout. Die Wahrheit liegt beim Kader des Aufrufers; hier wird nur der Statusteil des Anzeigeprofils nachgezogen.
+## Unsichtbare Ansicht oder keine Personen: nichts. Rueckgabe: Zahl der aufgefrischten Karten.
+func refresh_recovery_status(units: Array) -> int:
+	if units.is_empty() or not is_inside_tree() or not is_visible_in_tree():
+		return 0
+	var refreshed: int = 0
+	var focused_changed: bool = false
+	for unit_variant in units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = unit_variant
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		var profile = _profiles_by_id.get(unit_id, null)
+		if unit_id.is_empty() or profile == null:
+			continue
+		var availability_status: String = String(unit.get("availability_status", "active")).strip_edges().to_lower()
+		var status_text: String = String(unit.get("status_text", "")).strip_edges()
+		var recovery_state: Dictionary = Dictionary(unit.get("recovery_state", {})).duplicate(true)
+		profile.availability_status = availability_status
+		profile.status_text = status_text
+		profile.recovery_state = recovery_state
+		for index in range(_available_units.size()):
+			if typeof(_available_units[index]) == TYPE_DICTIONARY and String(Dictionary(_available_units[index]).get("unit_id", "")).strip_edges() == unit_id:
+				var own_copy: Dictionary = _available_units[index]
+				own_copy["availability_status"] = availability_status
+				own_copy["status_text"] = status_text
+				own_copy["recovery_state"] = recovery_state.duplicate(true)
+				break
+		var secondary_text: String = _build_roster_card_secondary_text(unit_id, profile)
+		for cards in [_roster_cards_by_unit_id, _staged_cards_by_unit_id]:
+			var card = Dictionary(cards).get(unit_id, null)
+			if card == null or not is_instance_valid(card) or not card.is_inside_tree():
+				continue
+			card.setup_from_profile(profile, {"copy_profile": false, "secondary_text_override": secondary_text})
+			refreshed += 1
+		if unit_id == _focused_unit_id:
+			focused_changed = true
+	if focused_changed and _character_sheet_open:
+		_update_character_sheet()
+	return refreshed
+
+
 func set_mission_context(mission_catalog: Array, selected_map_path: String, mission_name: String, mission_slot_count: int, selected_mission_id: String = "") -> void:
 	_mission_catalog = mission_catalog.duplicate(true)
 	_selected_mission_id = selected_mission_id.strip_edges() if not selected_mission_id.strip_edges().is_empty() else _selected_mission_id

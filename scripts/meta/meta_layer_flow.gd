@@ -5385,9 +5385,30 @@ func _tick_personnel_recovery(delta: float) -> void:
 			_sync_wound_lock()
 		return
 	var advanced: Dictionary = PERSONNEL_RECOVERY_SCRIPT.advance(_all_team_units, elapsed)
-	if bool(advanced.get("changed", false)):
+	var presentation_changed: bool = bool(advanced.get("changed", false))
+	if presentation_changed:
 		_replace_roster_units(Array(advanced.get("units", [])))
 	_sync_wound_lock()
+	if presentation_changed:
+		_present_recovery_progress(PackedStringArray(advanced.get("recovered_unit_ids", PackedStringArray())))
+
+
+## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): endet eine Verwundung, laeuft der
+## normale Aktualisierungsweg der Ansicht (Personen, Trupps, Verfuegbarkeit); sonst werden nur die Statuszeilen der
+## angezeigten Verwundeten neu gesetzt. Unsichtbare Ansicht oder niemand verwundet: kein Aufruf.
+func _present_recovery_progress(recovered_unit_ids: PackedStringArray) -> void:
+	if not recovered_unit_ids.is_empty():
+		_refresh_homebase_screen()
+		return
+	var homebase_screen: Node = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("refresh_recovery_status") or not homebase_screen.is_visible_in_tree():
+		return
+	var wounded_units: Array = []
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) == TYPE_DICTIONARY and PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant):
+			wounded_units.append(unit_variant)
+	if not wounded_units.is_empty():
+		homebase_screen.call("refresh_recovery_status", wounded_units)
 
 
 ## Die eine Stelle, die der Basis-Runtime die Einsatzsperre aus dem Kader gibt: je verwundeter Person
