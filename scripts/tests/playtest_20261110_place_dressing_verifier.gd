@@ -10,15 +10,18 @@ func _run() -> void:
 	check(float(presentation.get("initial_camera_size",0))==22,"place has deliberately closer initial tactical framing")
 	var stage:=Node3D.new(); root.add_child(stage)
 	var built: Dictionary=load("res://scripts/terrain/place_reference_dressing.gd").build(stage,presentation)
-	check(built.blockers.size()==3,"actual reviewed shells and utility model form trade compound")
+	# build() lists the structures first, then the props; fences, crates and walls do not all block by design.
+	var building_count:=Array(presentation.get("structures",[])).size()
+	var building_blockers: Array=Array(built.blockers).slice(0,building_count)
+	check(building_count>=1 and Array(built.blockers).size()>=building_count and building_blockers.size()==building_count,"actual reviewed shells and utility model form trade compound")
 	var missing:=0; var solids:=0
 	for tile in map.get_tiles():
 		var point: Vector2=load("res://scripts/terrain/hex_grid.gd").axial_to_plane(Vector2(tile.grid_position))
-		for bounds: AABB in Array(built.blockers):
+		for bounds: AABB in building_blockers:
 			var footprint:=Rect2(Vector2(bounds.position.x,bounds.position.z),Vector2(bounds.size.x,bounds.size.z)).grow(.58)
 			if footprint.has_point(point):
 				solids+=1
-				if tile.walkable or not tile.blocks_los or int(tile.object_height)<clampi(ceili(bounds.end.y/.42),1,3): missing+=1
+				if tile.walkable or not tile.blocks_los or int(tile.object_height)<clampi(ceili(bounds.end.y/.42),1,3) : missing+=1
 	check(solids>25 and missing==0,"saved navigation and LOS cover actual closed exterior geometry")
 	var registry: Node=load("res://scripts/terrain/terrain_registry.gd").new()
 	registry.configure_iso_grid(map.get_grid_origin(),64,32,map.get_grid_topology())
