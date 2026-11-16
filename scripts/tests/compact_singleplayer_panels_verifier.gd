@@ -59,7 +59,9 @@ func _run() -> void:
 	var selector: OptionButton = services.find_child("ServiceCraftSelector", true, false)
 	var snapshot: Dictionary = runtime.call("get_snapshot")
 	var actual_id: String = String(snapshot.crafts[0].craft_id)
-	_check(selector != null and String(selector.get_item_metadata(0)) == actual_id and selector.get_item_text(0) != actual_id, "Craft selector shows a display name while preserving actual craft ID")
+	# Seit a4d5948c5 steht an Position 0 der Platzhalter "Serviceschiff auswaehlen" (selection_required, ohne Schiffs-ID); die Schiffe beginnen bei 1.
+	_check(selector != null and selector.item_count >= 2 and String(selector.get_item_metadata(0)).is_empty() and String(selector.get_item_metadata(0)) != actual_id and selector.get_item_text(0) != actual_id, "Craft selector starts with a placeholder entry that carries no craft ID")
+	_check(selector != null and selector.item_count >= 2 and String(selector.get_item_metadata(1)) == actual_id and selector.get_item_text(1) != actual_id and not selector.get_item_text(1).is_empty(), "Craft selector shows a display name while preserving actual craft ID")
 	flow.queue_free()
 	host.queue_free()
 	await process_frame
