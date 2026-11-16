@@ -190,8 +190,11 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			recruit_receipts[recruit_id] = true
 	for reservation_id: String in recruit_reservations:
 		if not recruit_finalized.has(reservation_id): return {"ok":false,"reason":"checkpoint_recruit_admission_pending"}
+	# Die Basis-Personalliste liegt im Hex-Stand unter hex_tactical.base_personnel, sonst als Top-Level-base_personnel.
+	var base_list: Variant = Dictionary(payload.hex_tactical).get("base_personnel") if payload.get("hex_tactical") is Dictionary else payload.get("base_personnel")
+	var base_units: Variant = Dictionary(base_list).get("units") if base_list is Dictionary else null
 	for id: String in ids:
-		if id.begins_with("polisa_recruit_") and not payload.has("base_personnel"): return {"ok":false,"reason":"checkpoint_recruit_presence_missing"}
+		if id.begins_with("polisa_recruit_") and not (base_units is Dictionary and Dictionary(base_units).has(id)): return {"ok":false,"reason":"checkpoint_recruit_presence_missing"}
 		if id.begins_with("polisa_recruit_") and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
 		if ids.size() > 4 and id not in [String(leader.get("unit_id", "")), String(pilot.get("unit_id", "")), "campaign_outpost_recruit", "campaign_rescue_pilot"] and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
 	if payload.has("polisa_recruitment_market"):
