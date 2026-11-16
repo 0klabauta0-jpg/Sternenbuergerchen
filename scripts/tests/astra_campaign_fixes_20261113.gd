@@ -54,7 +54,35 @@ func _run() -> void:
 	_check(_flow.get("_game_start_request").action == "continue_home", "debrief carries explicit home intent")
 	_check(_flow.get("_active_mission") == null and not _flow.get("_campaign_start").active_restore_in_progress and _space().phase == "grounded", "saved active mission cannot override explicit safe-home rollback")
 	_check(FileAccess.get_file_as_bytes(_archive_path(active_sha)) == active_before and not FileAccess.file_exists(ACTIVE.DEFAULT_PATH), "rollback archives valid active bytes without deleting them")
-	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == home_before, "explicit rollback itself does not rewrite home")
+	# Seit ad3428128 (Paket 3a, Aufgabe 5b; Vertrag docs/dev/campaign_casualty_retreat_contract.md, Regel 7) wendet das Laden des Basisstands den
+	# Totalverlust-Malus an und schreibt den Basisstand sofort neu: Bergungsgebuehr, leichte Verwundung, Moral. Frueher pruefte diese Zeile
+	# Byte-Gleichheit ("der Rollback schreibt den Basisstand nicht neu"); das gilt nur noch fuer alles ausser dem Malus.
+	var loss_rules: Dictionary = Dictionary(load("res://scripts/core/campaign_casualty_rules.gd").call("load_rules")).get("total_loss", {})
+	var payload_before: Dictionary = JSON.parse_string(home_before.get_string_from_utf8())
+	var home_after: Dictionary = STORE.load_checkpoint()
+	var payload_after: Dictionary = Dictionary(home_after.get("payload", {})).duplicate(true)
+	var credits_before := int(Dictionary(payload_before.get("supply", {})).get("credits", 0))
+	var fee := mini(maxi(roundi(float(credits_before) * float(loss_rules.get("rescue_fee_fraction", 0.0))), int(loss_rules.get("rescue_fee_minimum", 0))), credits_before)
+	_check(home_after.get("ok", false) and fee > 0 and int(Dictionary(payload_after.get("supply", {})).get("credits", -1)) == credits_before - fee, "explicit rollback charges the rescue fee from the rules file exactly once")
+	var penalty_ok := true
+	for penalized_id in ["campaign_leader", "campaign_pilot"]:
+		var unit_before := _roster_unit(payload_before, penalized_id)
+		var unit_after := _roster_unit(payload_after, penalized_id)
+		var morale_before := float(Dictionary(unit_before.get("progression", {})).get("morale", 0.50))
+		var morale_expected := clampf(morale_before + float(loss_rules.get("morale_delta", 0.0)), 0.0, 1.0)
+		var morale_after := float(Dictionary(unit_after.get("progression", {})).get("morale", -1.0))
+		penalty_ok = penalty_ok and not unit_before.is_empty() and String(unit_after.get("availability_status", "")) == "wounded" and String(Dictionary(unit_after.get("recovery_state", {})).get("severity", "")) == String(loss_rules.get("wound_severity", "")) and absf(morale_after - morale_expected) < 0.0001 and morale_after < morale_before
+		# Nur die Felder des Malus zurueckdrehen; danach muss der Rest des Basisstands dem alten gleichen.
+		for i in range(Array(payload_after.get("roster", [])).size()):
+			if typeof(payload_after.roster[i]) == TYPE_DICTIONARY and String(payload_after.roster[i].get("unit_id", "")) == penalized_id:
+				for key in ["availability_status", "recovery_state", "status_text", "progression"]:
+					if unit_before.has(key): payload_after.roster[i][key] = unit_before[key]
+					else: payload_after.roster[i].erase(key)
+	_check(penalty_ok, "explicit rollback wounds both downed crew lightly and lowers their morale by the rules value")
+	if payload_after.has("supply") and payload_before.has("supply"):
+		payload_after["supply"]["credits"] = payload_before["supply"]["credits"]
+		payload_after["supply"]["revision"] = payload_before["supply"].get("revision", 0)
+	_check(payload_after == payload_before, "explicit rollback changes nothing in home except the total-loss penalty")
 	await _reload("continue")
 	_check(_flow.get("_active_mission") == null and _space().phase == "grounded", "subsequent ordinary Continue stays at chosen home")
 	# Deliberately malformed old file: a new campaign supersedes it atomically.
@@ -128,6 +156,12 @@ func _reload(action: String) -> void:
 
 func _archive_path(digest: String) -> String:
 	return ACTIVE.DEFAULT_PATH.trim_suffix(".json") + ".retired-" + digest + ".json"
+
+func _roster_unit(payload: Dictionary, unit_id: String) -> Dictionary:
+	for raw in Array(payload.get("roster", [])):
+		if typeof(raw) == TYPE_DICTIONARY and String(raw.get("unit_id", "")) == unit_id:
+			return raw
+	return {}
 
 func _write(path: String, bytes: PackedByteArray) -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
