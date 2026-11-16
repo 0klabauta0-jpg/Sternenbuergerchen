@@ -1511,6 +1511,10 @@ func _build_member_records(units: Array, leader) -> Array:
 			continue
 		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 			continue
+		# An embarked member cannot carry out a march order, so it gets no formation slot
+		# (the simulation owner's dropship_embarked meta; same truth the Hex binding uses).
+		if bool(unit.get_meta("dropship_embarked", false)):
+			continue
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		if unit_id.is_empty() or _excluded_unit_ids.has(unit_id):
 			continue

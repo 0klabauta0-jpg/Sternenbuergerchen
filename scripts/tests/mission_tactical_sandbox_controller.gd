@@ -30630,7 +30630,7 @@ func _build_mission_interaction_fireteam_positions_for_readability() -> Array:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
 			continue
-		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		var anchor_position: Variant = _resolve_fireteam_ground_use_position(fireteam_id)
 		if typeof(anchor_position) != TYPE_VECTOR2:
 			continue
 		entries.append({
@@ -30641,6 +30641,27 @@ func _build_mission_interaction_fireteam_positions_for_readability() -> Array:
 			"selected": _selected_fireteam_ids.has(fireteam_id),
 		})
 	return entries
+
+
+## Use range only counts members who are fit and on the ground. A member who is
+## embarked (simulation owner's dropship_embarked meta) stands at the ship and
+## must not pull the squad position away from the members who can act.
+## Returns null when nobody is on the ground (squad is then not in range).
+func _resolve_fireteam_ground_use_position(fireteam_id: String) -> Variant:
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		if bool(unit.get_meta("dropship_embarked", false)):
+			continue
+		sum += (unit as Node2D).global_position
+		count += 1
+	if count > 0:
+		return sum / float(count)
+	return null
 
 
 func _get_mission_interaction_states_for_readability() -> Dictionary:
