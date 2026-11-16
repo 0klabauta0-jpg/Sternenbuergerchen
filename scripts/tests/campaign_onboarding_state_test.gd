@@ -161,6 +161,11 @@ func _initialize() -> void:
 		bad = payload.duplicate(true)
 		bad.onboarding.stage_index = 3
 		check(not store.validate_payload(bad).ok, "onboarding stage 3 requires the outpost completion receipt")
+		# Stufe 7 (Kampagne abgeschlossen) verlangt die Belege der ersten fuenf Auftraege; hier gibt es nur den ersten.
+		bad = payload.duplicate(true)
+		bad.onboarding.stage_index = 7
+		var late_stage: Dictionary = store.validate_payload(bad)
+		check(not late_stage.ok and String(late_stage.get("reason", "")) == "checkpoint_progress_mismatch", "onboarding stage 7 with only one completion receipt rejected as checkpoint_progress_mismatch (%s)" % [late_stage])
 		var buy := {"contract_category":"singleplayer_supply","operation":"buy","payload":{"offer_id":"medictool_supply","quantity":1},"request_id":"buy"}
 		check(supply.apply_command(buy, {"location_id":"trade_outpost","craft_busy":false}).ok, "actual trade purchase")
 		var refuel := {"contract_category":"singleplayer_supply","operation":"refuel","payload":{"craft_id":"campaign_craft","amount":1.0},"request_id":"refuel"}
@@ -168,7 +173,7 @@ func _initialize() -> void:
 		# Die Handelsfakten gibt es im Onboarding-Eigner nicht mehr (seit e4b407fe0); die Stufe bleibt bei 2.
 		payload.supply = supply.export_state()
 		payload.onboarding = owner.export_state()
-		check(store.save_checkpoint(payload, checkpoint).ok, "completed campaign checkpoint")
-		check(store.load_checkpoint(checkpoint).ok, "completed campaign continue")
+		check(store.save_checkpoint(payload, checkpoint).ok, "stage-2 checkpoint after trade")
+		check(store.load_checkpoint(checkpoint).ok, "stage-2 checkpoint after trade continue")
 	print("CAMPAIGN_DOMAIN failures=", failures)
 	quit(0 if failures == 0 else 1)
