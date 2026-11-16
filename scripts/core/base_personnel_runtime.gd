@@ -1475,11 +1475,14 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		var actor:Node2D=_checkpoint_live_actor(id)
 		if actor==null:return _checkpoint_reject("base_checkpoint_actor_unbound")
 		var value:Variant=state.units[id]
-		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
+		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard","station"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
 		var action:Dictionary={}
 		if value.status=="aboard":
 			var home_member := _checkpoint_home_craft(value.craft_id) and _checkpoint_craft_member(id,value.craft_id)
 			if (not home_member and not _checkpoint_away_craft_member(id,value.craft_id,state)) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
+		elif value.status=="station":
+			# Resident auf Polisa: nur die Person, keine Zelle auf der Heimkarte, kein Schiff, kein Bett, keine Aktion.
+			if not id.begins_with("polisa_recruit_") or not value.craft_id.is_empty() or not value.bed_id.is_empty() or not value.action.is_empty() or target.has_unit(id) or intents.has(id):return _checkpoint_reject("base_checkpoint_station_context")
 		else:
 			if not value.craft_id.is_empty() or not target.has_unit(id):return _checkpoint_reject("base_checkpoint_ground_presence")
 		if value.status=="moving":

@@ -602,7 +602,7 @@ func _t6b_z17() -> void:
 	if not await _t6b_new_polisa_recruit(): return
 	var before: Dictionary = _t6b_payload()
 	# Im Hex-Stand liegt die Basis-Personalliste unter hex_tactical; die Pruefung "checkpoint_recruit_presence_missing" fuer lebende
-	# Polisa-Rekruten sieht sie dort nicht (bekannt, ausserhalb dieses Befunds). Darum wird hier nur der Zustand NACH dem Tod verlangt.
+	# Polisa-Rekruten liest sie dort seit dem Fix (campaign_recruit_checkpoint_verifier deckt den lebenden Rekruten ab). Dieser Fall prueft den Tod.
 	if not _check(not before.is_empty(), "Z17: Fixture: Stand mit lebendem Rekruten laesst sich bauen"): return
 	_check(Dictionary(before.get("supply", {})).get("requests", {}).has("final-z17") and _t6b_roster_ids() == [LEAD_A, PILOT_ID, RECRUIT_17], "Z17: Fixture: Kader A, Pilot, Rekrut; Finalize-Beleg steht im Versorgungsstand")
 	_flow.call("_remove_campaign_fatalities", PackedStringArray([RECRUIT_17]), {"mission_outcome": "aborted"})

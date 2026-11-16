@@ -1,25 +1,55 @@
 extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ## Ein auf Polisa angeworbener, lebender Rekrut darf das Speichern an der Heimatbasis nicht blockieren.
 ## Die Kampagnen-Heimkarte ist eine Hex-Karte: die Basis-Personalliste liegt im Stand unter hex_tactical, nicht als Top-Level-base_personnel.
-## Der Rekrut entsteht ueber die Operationen des Anwerbewegs (Markt oeffnen, station_recruit_reserve, register_campaign_recruit,
-## station_recruit_finalize mit echtem Beleg im Versorgungsstand); nur die Stationsmission (Globus, Aufnahme-Akteur) fehlt im kopflosen Test.
-## R1: Rekrut noch auf Polisa (Status station).   R2: Rekrut an der Heimatbasis (Status outside).
-## Je Fall: Stand gueltig, save_home_checkpoint, request_campaign_save, Laden, Fortsetzen, Rekrut da, zweites Speichern.
-## R3: Gegenproben an der Payload.
+## Der Rekrut entsteht ueber die Besitzer-Operationen des Anwerbewegs und durchlaeuft die Zustaende des Spiels:
+## station (Resident auf Polisa, Schiff steht an der Heimatbasis) -> aboard (am Heim-Pad) -> outside (nach base_unboard auf der Heimkarte).
+## R1: station.   R2: aboard.   R3: outside.   R4: Gegenproben an der Payload mit dem genauen Ablehnungsgrund.
+## Je Zustand: Stand gueltig, save_home_checkpoint, request_campaign_save, Laden, Fortsetzen (continue), gleicher Status, zweites Speichern.
+##
+## LUECKEN (kein oeffentlicher Weg im kopflosen Test, daher private Aufrufe oder Attrappen; jede Stelle ist hier genannt):
+## 1. Die Stationsmission (Globus, Anwerber am Globus, request_polisa_recruit_admission) wird nicht aufgebaut. Statt
+##    request_operation("station_recruit_hire") laufen _polisa_market.open/quote, _commit(station_recruit_reserve) und
+##    _commit(station_recruit_finalize) direkt am Adapter (private Methode _commit); das recruit_verify ist eine Attrappe, die ok liefert.
+## 2. Credits: Es gibt keine oeffentliche Gutschrift ausserhalb eines bestaetigten Auftragsabschlusses; der Test nimmt das guenstigste
+##    Angebot, das das Startguthaben deckt, und schreibt keine Credits. Reicht das Startguthaben nicht, schlaegt der Aufbau laut fehl.
+## 3. station -> aboard: Aufnahme in die Nutzlast-Truppe des Schiffs (register_campaign_recruit mit payload_craft_id; "assign" lehnt einen
+##    Resident mit unit_busy ab) und base.mark_recruit_remote(unit, craft)
+##    (oeffentlicher Besitzer-Aufruf des Abholpfads) statt bind_confirmed_polisa_player_boarding plus _restore_returning_visit_membership,
+##    die eine echte Polisa-Mission mit Besuchskennung brauchen. Ohne Truppe im Schiff lehnt der Hex-Export "aboard" mit
+##    base_checkpoint_aboard_context ab (gewollt: strenge Mitgliedschaft); ob das Spiel bei der Rueckkehr immer eine Truppe herstellt, ist nicht gefahren.
+## 4. aboard -> outside: request_operation("base_unboard") am Heim-Pad (oeffentlich); die Ankunft ueber den Stationsshuttle
+##    (admit_polisa_shuttle_home) braucht Shuttle und Quittungen und wird nicht gefahren.
+## 5. station_claim_resident selbst braucht die Polisa-Mission und wird nicht gefahren; nach dem Fortsetzen wird nur belegt, dass die
+##    Person weiter Resident (Status station, keine Heimzelle) ist.
+## 6. Der echte Flug Polisa -> Heimatbasis wird nicht gefahren: das Schiff steht von Anfang an an der Heimatbasis (Zustand "Schiff zu Hause,
+##    Resident auf Polisa" ueber die Besitzer-Operationen). Belegt wird, dass die Nutzlastpruefung des Abflugs den Residenten nicht kennt.
 
 func _run() -> void:
 	_configure_entry()
-	for scenario: String in ["R1", "R2", "R3"]:
+	for scenario: String in ["R1", "R2", "R3", "R4"]:
 		print("--- ", scenario)
 		await call("_rc_" + scenario.to_lower())
 		await _end_sortie()
 	print("CAMPAIGN_RECRUIT_CHECKPOINT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
-## Kampagnenstart, dann Anwerbung ueber die Besitzer-Operationen. at_station: Profil traegt recruit_location=polisa (so legt der Adapter es an).
-func _rc_hire(at_station: bool) -> String:
+func _rc_status(unit_id: String) -> String:
+	# export_state (oeffentlich) nennt station/aboard/outside; get_snapshot meldet beides als "away".
+	var base: Node = _t6b_base()
+	if base == null:
+		return "<keine Basis>"
+	var units: Dictionary = Dictionary(base.call("export_state")).get("units", {})
+	return String(Dictionary(units.get(unit_id, {})).get("status", "<nicht in der Liste>"))
+
+func _rc_craft_id() -> String:
+	return String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
+
+## Kampagnenstart, dann Anwerbung: Resident auf Polisa (Status station). Rueckgabe: unit_id oder "".
+func _rc_hire(with_squad: bool = false) -> String:
 	if not await _t6b_open("campaign", "new"):
 		return ""
+	if with_squad and not await _prepare_initial_base():
+		return ""  # echtes Einsteigen der Startbesatzung (Nutzlast-Truppe geladen), wie campaign_recruit_transport_verifier
 	var leader: Dictionary = _roster_unit(LEAD_A)
 	var occupied := {}
 	for profile: Dictionary in Array(_flow.get("_all_team_units")):
@@ -28,23 +58,27 @@ func _rc_hire(at_station: bool) -> String:
 	var opened: Dictionary = market.call("open", "campaign:0", leader, occupied)
 	if not _check(bool(opened.get("ok", false)) and not Array(opened.get("offers", [])).is_empty(), "Anwerbung: Markt oeffnet mit Angeboten (%s)" % [opened.get("reason", "")]):
 		return ""
-	var offer: Dictionary = opened.offers[0]
-	var supply: RefCounted = _runtime.get("_supply")
-	if int(supply.call("get_supply_snapshot").get("credits", 0)) < int(offer.get("price", 0)):
-		supply.set("_credits", 5000)  # Nur Startguthaben fuer den Test; die Anwerbung selbst bucht der Besitzer.
+	var credits: int = int(_runtime.call("get_campaign_credits"))
+	var offer: Dictionary = {}
+	for candidate: Dictionary in Array(opened.offers):
+		var price: int = int(candidate.get("price", 0))
+		if price <= credits and (offer.is_empty() or price < int(offer.get("price", 0))):
+			offer = candidate
+	if not _check(not offer.is_empty(), "Anwerbung: ein Angebot ist mit dem Startguthaben (%d) bezahlbar" % credits):
+		return ""
 	var reservation_id: String = "polisa-hire:" + String(offer.id)
 	var context := {"location_id": "polisa", "station_service_verified": true, "recruit_quote": Callable(market, "quote")}
 	var reserved: Dictionary = _runtime.call("_commit", "singleplayer_supply", "station_recruit_reserve", {"offer_id": offer.id}, reservation_id, context)
 	if not _check(bool(reserved.get("ok", false)), "Anwerbung: Reservierung gelingt (%s)" % [reserved]):
 		return ""
-	var quote: Dictionary = market.call("quote", String(offer.id))
-	var hired: Dictionary = Dictionary(quote.get("profile", offer.get("profile", {}))).duplicate(true)
+	var hired: Dictionary = Dictionary(market.call("quote", String(offer.id)).get("profile", offer.get("profile", {}))).duplicate(true)
 	var unit_id := String(offer.id)
-	if at_station:
-		hired["recruit_location"] = "polisa"
-	var registered: Dictionary = _flow.call("register_campaign_recruit", hired)
+	hired["recruit_location"] = "polisa"
+	# with_squad: Aufnahme in die Nutzlast-Truppe des Heimschiffs (payload_craft_id), so wie die Abholung einen Rekruten ins Schiff legt.
+	var registered: Dictionary = _flow.call("register_campaign_recruit", hired, {}, _rc_craft_id() if with_squad else "")
 	if not _check(bool(registered.get("ok", false)), "Anwerbung: Rekrut kommt in den Kader (%s)" % [registered]):
 		return ""
+	var supply: RefCounted = _runtime.get("_supply")
 	supply.call("configure_inventory", [unit_id], [], true)
 	var simulation: Node = _runtime.get("_simulation")
 	simulation.call("request_personnel_loadout_command", "configure_roster", {"roster": [hired]})
@@ -53,26 +87,22 @@ func _rc_hire(at_station: bool) -> String:
 	var finalized: Dictionary = _runtime.call("_commit", "singleplayer_supply", "station_recruit_finalize", {"reservation_id": reservation_id}, "final:" + reservation_id, {"recruit_verify": verify})
 	if not _check(bool(finalized.get("ok", false)), "Anwerbung: Finalize gelingt (%s)" % [finalized]):
 		return ""
-	_flow.set("_active_singleplayer_identity", {"job_id": JOB_6B, "location_id": LOCATION_6B, "craft_id": String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))})
-	_flow.call("_sync_wound_lock")
-	var state: Dictionary = Dictionary(Dictionary(_t6b_base().get("_states")).get(unit_id, {}))
-	print("RC_STATE ", unit_id, " status=", state.get("status", "<none>"), " at_station=", at_station)
+	_check(_rc_status(unit_id) == "station", "Anwerbung: Rekrut steht auf Polisa (Status %s)" % _rc_status(unit_id))
 	return unit_id
 
-func _rc_cycle(unit_id: String, label: String) -> void:
-	var hex_required: bool = bool(_runtime.get("_simulation").call("is_hex_ground_runtime_required"))
-	_check(hex_required, "%s: die Heimkarte der Kampagne ist eine Hex-Karte" % label)
-	_check(_t6b_roster_ids().has(unit_id) and _t6b_base_ids().has(unit_id), "%s: Rekrut ist im Kader und in der Personalliste" % label)
+## Speichern, Laden, Fortsetzen, zweites Speichern; der Status des Rekruten bleibt gleich.
+func _rc_cycle(unit_id: String, label: String, expected_status: String) -> void:
+	_check(bool(_runtime.get("_simulation").call("is_hex_ground_runtime_required")), "%s: die Heimkarte der Kampagne ist eine Hex-Karte" % label)
+	_check(_t6b_roster_ids().has(unit_id) and _t6b_base_ids().has(unit_id) and _rc_status(unit_id) == expected_status, "%s: Rekrut ist im Kader und in der Personalliste, Status %s (ist %s)" % [label, expected_status, _rc_status(unit_id)])
 	var payload: Dictionary = _t6b_payload()
-	if not _check(not payload.is_empty(), "%s: Stand laesst sich erfassen" % label): return
-	_check(payload.has("hex_tactical") and not payload.has("base_personnel"), "%s: Stand traegt die Personalliste unter hex_tactical" % label)
+	if not _check(not payload.is_empty(), "%s: Stand laesst sich erfassen (Hex-Export: %s)" % [label, Dictionary(_runtime.get("_simulation").call("export_hex_checkpoint_state")).get("reason", "ok")]): return
+	_check(payload.has("hex_tactical") and not payload.has("base_personnel") and Dictionary(payload.hex_tactical.base_personnel.units[unit_id]).get("status") == expected_status, "%s: Stand traegt die Personalliste unter hex_tactical, Status %s" % [label, expected_status])
 	var verdict: Dictionary = STORE_6B.validate_payload(payload)
 	_check(bool(verdict.get("ok", false)), "%s: validate_payload ist ok (%s)" % [label, verdict])
-	var start: RefCounted = _flow.get("_campaign_start")
-	var saved: Dictionary = start.call("save_home_checkpoint", _flow, _runtime, true)
-	_check(bool(saved.get("ok", false)), "%s: save_home_checkpoint gelingt (%s)" % [label, saved])
+	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
+	_check(bool(saved.get("ok", false)), "%s: save_home_checkpoint gelingt (%s)" % [label, String(saved.get("reason", "ok"))])
 	var manual: Dictionary = _flow.call("request_campaign_save")
-	_check(bool(manual.get("ok", false)), "%s: request_campaign_save gelingt (%s)" % [label, manual])
+	_check(bool(manual.get("ok", false)), "%s: request_campaign_save gelingt (%s)" % [label, String(manual.get("reason", "ok"))])
 	var loaded: Dictionary = STORE_6B.load_checkpoint()
 	_check(bool(loaded.get("ok", false)) and JSON.stringify(Dictionary(loaded.get("payload", {})).get("roster", [])).contains(unit_id), "%s: Datei laesst sich laden und nennt den Rekruten (%s)" % [label, loaded.get("reason", "ok")])
 	_flow.queue_free()
@@ -84,46 +114,74 @@ func _rc_cycle(unit_id: String, label: String) -> void:
 	await process_frame
 	_screen = _flow.get_node("HomebaseScreen")
 	_runtime = _flow.get("_singleplayer_runtime")
-	_check(_t6b_roster_ids().has(unit_id) and _t6b_base_ids().has(unit_id), "%s: nach dem Fortsetzen ist der Rekrut im Kader und in der Personalliste (%s / %s)" % [label, _t6b_roster_ids(), _t6b_base_ids()])
+	_check(_t6b_roster_ids().has(unit_id) and _t6b_base_ids().has(unit_id) and _rc_status(unit_id) == expected_status, "%s: nach dem Fortsetzen ist der Rekrut im Kader und in der Personalliste, Status %s (ist %s; Kader %s)" % [label, expected_status, _rc_status(unit_id), _t6b_roster_ids()])
 	var second: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
-	_check(bool(second.get("ok", false)), "%s: zweites Speichern gelingt (%s)" % [label, second])
+	_check(bool(second.get("ok", false)), "%s: zweites Speichern gelingt (%s)" % [label, String(second.get("reason", "ok"))])
 
 func _rc_r1() -> void:
-	var unit_id: String = await _rc_hire(true)
+	var unit_id: String = await _rc_hire()
 	if unit_id.is_empty(): return
-	_check(String(Dictionary(Dictionary(_t6b_base().get("_states")).get(unit_id, {})).get("status", "")) == "station", "R1: Rekrut steht auf Polisa (Status station)")
-	# Gewollt: das Hex-Format der Basisliste kennt den Status station nicht (hex_base_boarding_verifier: "station personnel blocks incomplete
-	# home checkpoint"). Ein Rekrut auf Polisa gehoert zu einem Schiff, das nicht an der Heimatbasis steht; ein Heimstand mit ihm ist im
-	# Spiel nicht erreichbar. Hier nur: der Stand wird vom Basis-Besitzer abgelehnt, nicht erst vom Pruefer der Datei.
-	var exported: Dictionary = _runtime.get("_simulation").call("export_hex_checkpoint_state")
-	_check(not bool(exported.get("ok", false)) and String(exported.get("reason", "")) == "base_checkpoint_invalid_unit", "R1: Rekrut auf Polisa: der Hex-Besitzer lehnt den Heimstand ab (Grund %s)" % [exported.get("reason", "")])
-	var guarded: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
-	_check(not bool(guarded.get("ok", false)) and String(guarded.get("reason", "")) != "checkpoint_recruit_presence_missing", "R1: Speichern wird abgelehnt, aber nicht mit dem Grund der Dateipruefung (Grund %s)" % [guarded.get("reason", "")])
+	var craft_id := _rc_craft_id()
+	var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, ""))
+	_check(location in ["homebase", "waiting_pad"], "R1: das Schiff steht an der Heimatbasis (%s)" % location)
+	# Adapter validate_space_launch (crew_not_aboard) fragt nur get_payload_presence(craft) ab, also die dem Schiff zugewiesene Nutzlast.
+	var payload_members := {}
+	for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id):
+		for member in _screen.call("_get_member_unit_ids_for_fireteam", String(team)):
+			payload_members[String(member)] = true
+	_check(not payload_members.has(unit_id), "R1: der Resident gehoert zu keiner Nutzlast-Truppe des Schiffs (Mitglieder %s); die Abflugpruefung kennt ihn nicht" % [payload_members.keys()])
+	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty(), "R1: der Resident hat keine Zelle auf der Heimkarte")
+	await _rc_cycle(unit_id, "R1", "station")
+	_check(_runtime.get("_simulation").call("get_hex_unit_state", unit_id).is_empty() and bool(_t6b_base().call("has_station_recruits")), "R1: nach dem Fortsetzen: weiter ohne Heimzelle und weiter Resident auf Polisa")
 
 func _rc_r2() -> void:
-	var unit_id: String = await _rc_hire(false)
+	var unit_id: String = await _rc_hire(true)
 	if unit_id.is_empty(): return
-	_check(String(Dictionary(Dictionary(_t6b_base().get("_states")).get(unit_id, {})).get("status", "")) != "station", "R2: Rekrut ist an der Heimatbasis (Status nicht station)")
-	await _rc_cycle(unit_id, "R2")
+	var craft_id := _rc_craft_id()
+	var squad: Dictionary = _board_with_squad(unit_id, craft_id)
+	if not _check(bool(squad.get("ok", false)), "R2: Rekrut ist in der Nutzlast-Truppe und an Bord des Heimschiffs (%s)" % [squad]): return
+	await _rc_cycle(unit_id, "R2", "aboard")
+
+## Zustand "an Bord am Heim-Pad": Truppe der Schiffsnutzlast (wie _restore_returning_visit_membership sie bei der Rueckkehr herstellt) und Bindung an Bord.
+func _board_with_squad(unit_id: String, craft_id: String) -> Dictionary:
+	var boarded: Dictionary = _t6b_base().call("mark_recruit_remote", unit_id, craft_id)
+	return boarded if bool(boarded.get("ok", false)) else {"ok": false, "step": "board", "result": boarded}
 
 func _rc_r3() -> void:
-	var unit_id: String = await _rc_hire(false)
+	var unit_id: String = await _rc_hire(true)
+	if unit_id.is_empty(): return
+	var craft_id := _rc_craft_id()
+	var boarded: Dictionary = _board_with_squad(unit_id, craft_id)
+	if not _check(bool(boarded.get("ok", false)), "R3: Rekrut geht an Bord (%s)" % [boarded]): return
+	var out: Dictionary = _t6b_base().call("request_operation", "base_unboard", {"unit_id": unit_id, "craft_id": craft_id})
+	print("RC_UNBOARD ", out)
+	for _i in range(120):
+		await process_frame
+		if _rc_status(unit_id) == "outside": break
+	if not _check(_rc_status(unit_id) == "outside", "R3: Rekrut steigt an der Heimatbasis aus (Status %s, %s)" % [_rc_status(unit_id), out]): return
+	await _rc_cycle(unit_id, "R3", "outside")
+
+func _rc_r4() -> void:
+	var unit_id: String = await _rc_hire()
 	if unit_id.is_empty(): return
 	var payload: Dictionary = _t6b_payload()
-	if not _check(not payload.is_empty() and bool(STORE_6B.validate_payload(payload).get("ok", false)), "R3: Ausgangsstand ist gueltig (%s)" % [STORE_6B.validate_payload(payload)]): return
+	if not _check(not payload.is_empty() and bool(STORE_6B.validate_payload(payload).get("ok", false)), "R4: Ausgangsstand (Resident auf Polisa) ist gueltig (%s)" % [STORE_6B.validate_payload(payload)]): return
+	var cases: Array = []
 	var without_recruit: Dictionary = payload.duplicate(true)
 	Dictionary(without_recruit.hex_tactical.base_personnel.units).erase(unit_id)
-	var r_without: Dictionary = STORE_6B.validate_payload(without_recruit)
-	_check(not bool(r_without.get("ok", false)), "R3: Rekrut aus der Personalliste im Hex-Stand entfernt: abgelehnt (Grund %s)" % [r_without.get("reason", "")])
+	cases.append(["Rekrut aus der Personalliste im Hex-Stand entfernt", without_recruit, "invalid_hex_checkpoint_roster"])
 	var no_list: Dictionary = payload.duplicate(true)
 	Dictionary(no_list.hex_tactical).erase("base_personnel")
-	var r_none: Dictionary = STORE_6B.validate_payload(no_list)
-	_check(not bool(r_none.get("ok", false)), "R3: Personalliste ganz entfernt: abgelehnt (Grund %s)" % [r_none.get("reason", "")])
-	# Ohne jede Personalliste (weder hex_tactical noch base_personnel) greift die Anwesenheitspruefung selbst.
+	cases.append(["Personalliste aus hex_tactical entfernt (Formfehler)", no_list, "invalid_hex_checkpoint"])
 	var bare: Dictionary = payload.duplicate(true)
 	bare.erase("hex_tactical")
-	_check(String(STORE_6B.validate_payload(bare).get("reason", "")) == "checkpoint_recruit_presence_missing", "R3: gar keine Personalliste: checkpoint_recruit_presence_missing (Grund %s)" % [STORE_6B.validate_payload(bare).get("reason", "")])
+	cases.append(["gar keine Personalliste (weder hex_tactical noch base_personnel)", bare, "checkpoint_recruit_presence_missing"])
 	var mirrored: Dictionary = payload.duplicate(true)
 	mirrored["base_personnel"] = payload.hex_tactical.base_personnel.duplicate(true)
-	var r_mirror: Dictionary = STORE_6B.validate_payload(mirrored)
-	_check(String(r_mirror.get("reason", "")) == "invalid_hex_checkpoint_mirror", "R3: Top-Level-base_personnel in einem Hex-Stand bleibt abgelehnt (Grund %s)" % [r_mirror.get("reason", "")])
+	cases.append(["Top-Level-base_personnel in einem Hex-Stand", mirrored, "invalid_hex_checkpoint_mirror"])
+	var foreign: Dictionary = payload.duplicate(true)
+	foreign.hex_tactical.base_personnel.units[PILOT_ID]["status"] = "station"
+	cases.append(["Status station bei einer Person, die kein Polisa-Rekrut ist", foreign, "invalid_station_personnel"])
+	for entry: Array in cases:
+		var verdict: Dictionary = STORE_6B.validate_payload(entry[1])
+		_check(not bool(verdict.get("ok", false)) and String(verdict.get("reason", "")) == String(entry[2]), "R4: %s: abgelehnt mit %s (ist %s)" % [entry[0], entry[2], verdict.get("reason", "ok")])

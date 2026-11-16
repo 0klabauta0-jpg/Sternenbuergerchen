@@ -290,6 +290,9 @@ static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dic
 	for id in base.units:
 		if not roster_ids.has(id) or typeof(base.units[id]) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
+		# Resident auf Polisa: nur angeworbene Personen, wie im Nicht-Hex-Stand (invalid_station_personnel).
+		if base.units[id].get("status") == "station" and not String(id).begins_with("polisa_recruit_"):
+			return {"ok":false,"reason":"invalid_station_personnel"}
 	var ships: Dictionary = {}
 	var fleet: Variant = payload.get("fleet", [])
 	if not fleet is Array: return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
