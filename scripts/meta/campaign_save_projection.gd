@@ -44,12 +44,13 @@ static func blocked_text(reason: String) -> String:
 	if reason in ["checkpoint_pending_work","checkpoint_clock_unsynced","checkpoint_pending_setup","checkpoint_pending_selection"]:
 		return "Speichern wartet auf laufende Befehle oder die Aufstellung. Danach erneut speichern."
 	var messages := {"mission_planned_orders_unsupported":"Geplante Befehle zuerst ausführen oder entfernen.", "mission_movement_pending":"Speichern wartet, bis die Bewegung abgeschlossen ist.", "mission_lifecycle_busy":"Speichern wartet auf einen stabilen Einsatzstand.", "mission_combat_unsupported":"Während dieses Gefechts ist Speichern noch nicht verfügbar.", "away_from_checkpoint":"Während der Reise ist Speichern noch nicht verfügbar.", "world_active":"Während der Reise ist Speichern noch nicht verfügbar.", "mission_travel_mismatch":"Während der Reise ist Speichern noch nicht verfügbar.", "shuttle_active":"Speichern wartet auf den Abschluss des Shuttleflugs.", "shuttle_pending":"Speichern wartet auf den Shuttletransport.", "cargo_transfer_active":"Speichern wartet auf den Frachttransfer.", "recruitment_pending":"Speichern wartet auf die Anwerbung.", "preparation_in_progress":"Speichern wartet auf die Vorbereitung von Besatzung oder Fracht.", "home_hex_checkpoint_unsupported":"Der aktuelle Heimatbasisstand ist im Einsatz nicht vollständig speicherbar.", "multiple_locations_unsupported":"Speichern mit mehreren aktiven Orten wird noch nicht unterstützt.", "active_restore_pending":"Der Einsatz wird noch geladen.", "campaign_unavailable":"Die Kampagne ist noch nicht bereit.", "campaign_load_failed":"Die Kampagne konnte nicht geladen werden.",
-		"mission_lifecycle_unsupported":"Im Einsatz kann gerade nicht gespeichert werden: Jemand liegt am Boden oder ein Einsatzschritt läuft. Es gilt der zuletzt gespeicherte Stand.",
+		"mission_lifecycle_unsupported":"Im Einsatz kann gerade nicht gespeichert werden: Gegner sind aktiv, jemand ist verletzt oder ein Auftragsschritt läuft. Es gilt der zuletzt gespeicherte Stand.",
 		"mission_fleet_unsupported":"Mit mehr als einem Schiff kann im Einsatz noch nicht gespeichert werden. Es gilt der zuletzt gespeicherte Stand, etwa der von der Basis.",
 		"home_personnel_unsupported":"Im Einsatz kann nur gespeichert werden, wenn der ganze Kader dabei ist. Es gilt der zuletzt gespeicherte Stand, etwa der von der Basis.",
-		"home_checkpoint_mismatch":"Der gespeicherte Stand der Basis ist älter als der Kader. Bitte zuerst an der Basis speichern.",
-		"checkpoint_recruit_presence_missing":"Ein angeworbenes Mitglied fehlt noch in der Personalliste der Basis. Bitte später erneut speichern.",
-		"base_checkpoint_aboard_context":"Jemand an Bord gehört gerade zu keinem Trupp des Schiffs oder ist noch unterwegs. Erst aussteigen lassen oder zuweisen, dann speichern."}
+		"home_checkpoint_mismatch":"Im Einsatz kann gerade nicht gespeichert werden: Der Kader hat sich seit dem Speichern an der Basis geändert. Nach der Rückkehr dort speichern.",
+		"checkpoint_recruit_presence_missing":"Ein angeworbenes Mitglied fehlt noch in der Basis. Bitte später erneut speichern.",
+		"base_checkpoint_aboard_context":"Im Einsatz kann gerade nicht gespeichert werden: Jemand an Bord gehört zu keinem Trupp. Es gilt der zuletzt gespeicherte Stand.",
+		"runtime_unavailable":"Die Basis kann gerade nicht gespeichert werden. Kurz warten, bis alle stehen; bleibt es so, hat jemand an Bord keinen Trupp."}
 	if reason.is_empty(): return ""
 	return String(messages.get(reason, "Dieser Zustand kann momentan nicht sicher gespeichert werden."))
 

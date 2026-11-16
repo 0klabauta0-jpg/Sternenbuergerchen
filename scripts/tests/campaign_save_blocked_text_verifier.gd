@@ -6,17 +6,40 @@ const PROJECTION = preload("res://scripts/meta/campaign_save_projection.gd")
 const GENERIC := "Dieser Zustand kann momentan nicht sicher gespeichert werden."
 const MAX_LENGTH := 160
 ## Gruende, die laut Quelle beim Speichern im Einsatz oder an der Basis ankommen koennen.
+## Je Grund: wo er entsteht und wo er beim Spieler ankommt.
 const REASONS := [
+	# scripts/mission/stable_mission_lifecycle_checkpoint.gd Z. 20: ein Akteur gehoert nicht zur eigenen Seite (Gegner aktiv). Kommt im Einsatz an.
 	"mission_combat_unsupported",
+	# stable_mission_lifecycle_checkpoint.gd Z. 8/18: einer der neun Merker (BLOCKING_DICTS) ist belegt; wird VOR mission_combat_unsupported geprueft. Kommt im Einsatz an.
 	"mission_lifecycle_unsupported",
+	# stable_mission_lifecycle_checkpoint.gd Z. 23/30 (Einsatz) und scripts/core/hex_checkpoint_transaction.gd Z. 135/141 (Basis): Bewegung laeuft noch.
 	"mission_movement_pending",
+	# stable_mission_lifecycle_checkpoint.gd Z. 28: geplante Befehle im Einsatz. Kommt im Einsatz an.
 	"mission_planned_orders_unsupported",
+	# scripts/mission/campaign_active_mission_capture.gd Z. 42: mehr als ein Schiff. Kommt im Einsatz an.
 	"mission_fleet_unsupported",
+	# campaign_active_mission_capture.gd Z. 91/94/96: Kader im Einsatz nicht vollstaendig dabei. Kommt im Einsatz an.
 	"home_personnel_unsupported",
+	# campaign_active_mission_capture.gd Z. 80: Kader weicht vom gespeicherten Basisstand ab. Kommt nur im Einsatz an.
 	"home_checkpoint_mismatch",
+	# scripts/meta/campaign_checkpoint_store.gd Z. 197: angeworbener Rekrut fehlt in der Basis-Personalverwaltung. Kommt beim Speichern an der Basis an.
 	"checkpoint_recruit_presence_missing",
+	# scripts/core/base_personnel_runtime.gd Z. 1482 (Hex-Export der Basis), im Einsatz ueber campaign_active_mission_capture.gd Z. 26-27 erreicht. Kommt im Einsatz an.
 	"base_checkpoint_aboard_context",
+	# scripts/meta/campaign_start_configuration.gd Z. 199-200: export_campaign_checkpoint des Adapters liefert {} (Reise oder Stand der Basis nicht erfassbar). Kommt beim Speichern an der Basis an.
+	"runtime_unavailable",
 ]
+## Wort, das den Ort richtig nennt; faellt ein Satz fuer den falschen Ort auf. Einsatz-Gruende nennen "Im Einsatz", Basis-Gruende "Basis".
+## mission_combat_unsupported, mission_movement_pending und mission_planned_orders_unsupported bleiben unveraendert und nennen den Ort nicht.
+const PLACE_WORD := {
+	"mission_lifecycle_unsupported": "Im Einsatz",
+	"mission_fleet_unsupported": "im Einsatz",
+	"home_personnel_unsupported": "Im Einsatz",
+	"home_checkpoint_mismatch": "Im Einsatz",
+	"base_checkpoint_aboard_context": "Im Einsatz",
+	"checkpoint_recruit_presence_missing": "Basis",
+	"runtime_unavailable": "Basis",
+}
 
 var _passed := 0
 var _failed := 0
@@ -37,6 +60,8 @@ func _run() -> void:
 		var text: String = PROJECTION.blocked_text(reason)
 		_check(not text.is_empty() and text != GENERIC, "%s hat einen eigenen Satz" % reason)
 		_check(text.length() <= MAX_LENGTH, "%s: Satz hoechstens %d Zeichen (%d)" % [reason, MAX_LENGTH, text.length()])
+		if PLACE_WORD.has(reason):
+			_check(text.contains(String(PLACE_WORD[reason])), "%s: der Satz nennt den Ort ('%s')" % [reason, PLACE_WORD[reason]])
 		# Gezaehlt, damit jeder dieser Gruende einen eigenen Satz hat.
 		seen[text] = int(seen.get(text, 0)) + 1
 	_check(seen.size() == REASONS.size(), "jeder der %d Gruende hat einen eigenen, unterschiedlichen Satz (%d verschiedene)" % [REASONS.size(), seen.size()])
