@@ -16,6 +16,9 @@ const TEXT_OLD_REFUSAL: String = "Eine Bodenperson ist nicht einsatzfaehig"
 const TEXT_OLD_SNAPSHOT_REFUSAL: String = "Nicht alle Truppmitglieder sind boardingbereit"
 const TEXT_PILOT_DOWN: String = "Pilot ist nicht flugfaehig"
 const TEXT_ABOARD_PREFIX: String = "An Bord. Am Boden: "
+## Schlusssaetze der Rueckmeldung: mit weiterer einsatzfaehiger Bodenperson (Bergung nach Abstand) und im sicheren Totalverlust (nur der Pilot ist einsatzfaehig).
+const TEXT_TAIL_RECOVERY: String = "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen."
+const TEXT_TAIL_TOTAL_LOSS: String = "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
 
 var _driver: Node
 var _leader: Node
@@ -115,7 +118,8 @@ func _check_casualty_text(text: String, label: String) -> void:
 	var state_label: String = " (kritisch)" if _critical(_leader) else ""
 	_check(text.begins_with(TEXT_ABOARD_PREFIX) and text.contains(_leader_name() + state_label + "."), "%s: Text nennt den Liegenden mit Namen und Zustand (%s)" % [label, text])
 	_check(text != TEXT_ALL_ABOARD and not text.contains("Rueckflug ist bereit"), "%s: nicht der Text 'Alle an Bord. Rueckflug ist bereit.'" % label)
-	_check(text.contains("Abheben"), "%s: Text sagt, was Abheben mit dem Liegenden macht" % label)
+	# Im echten Einsatz gibt es nur Truppfuehrer (liegt) und Pilot (an Bord): der Schluss ist der sichere Totalverlust.
+	_check(text == "%s%s%s. %s" % [TEXT_ABOARD_PREFIX, _leader_name(), state_label, TEXT_TAIL_TOTAL_LOSS], "%s: genauer Text mit Totalverlust-Schluss (%s)" % [label, text])
 
 # ---------------------------------------------------------------- scenes
 
@@ -138,8 +142,13 @@ func _scene_pb0_nobody_down() -> void:
 	_board_button_info()
 	var answer: Dictionary = _controller.request_selected_team_boarding()
 	_check(bool(answer.get("ok", false)), "PB0 Aufsitzen: Anfrage angenommen (%s)" % _clean(String(answer.get("message", ""))))
+	var card_before: String = _feedback()
 	await _wait_scene(_aboard_or_dropped, BOARD_LIMIT_SECONDS)
 	_check(_is_aboard() and not _request_open(), "PB0 Aufsitzen: alle an Bord, Anfrage geschlossen (Meldung jetzt '%s')" % _clean(String(_controller.get("_last_command_text"))))
+	# Ohne Liegende bleibt die Rueckmeldung wie vor dem 16.11.: die Schiffskarte wird nicht angefasst und die Hilfsfunktion liefert keinen Text.
+	# Die Befehlszeile ("<TRUPP> an Bord") ueberschreibt der Phasentext im selben Bild (_process, "P0 PRE COMPLETE"); sie ist von aussen nicht zu lesen.
+	_check(_feedback() == card_before and not _feedback().begins_with(TEXT_ABOARD_PREFIX), "PB0 Aufsitzen: Schiffskarte unveraendert '%s' (ist '%s')" % [card_before, _feedback()])
+	_check(String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray())) == "", "PB0 Aufsitzen: Hilfsfunktion ohne Liegende liefert keinen Text")
 	if not await _prepare_ground():
 		_check(false, "PB0 Vorbedingung 3: Trupp wieder am Boden")
 		return
@@ -234,14 +243,18 @@ func _scene_pb4_right_click() -> void:
 	# Nach Ablauf der Versorgungsfrist heisst der Zustand "kritisch"; der Text folgt dem Zustand (nur wenn er im Test erreicht wird).
 	var critical: float = await _wait_scene(func(): return _critical(_leader), 100.0)
 	print("PBINFO PB4 kritisch erreicht nach %.1f s, Zustand=%s" % [critical, String(_leader.call("get_vital_state"))])
-	if critical >= 0.0 and _controller.has_method("_campaign_casualty_aboard_text"):
-		var text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([LEADER_ID])))
-		_check(text.contains(_leader_name() + " (kritisch)"), "PB4 kritisch: der Text nennt '(kritisch)' (%s)" % text)
-		# Mit zwei Personen gibt es keine zweite einsatzfaehige Bodenperson. Die Satzvariante "bleibt eine Bodenperson fit" pruefe ich an der Hilfsfunktion:
-		# eine Schiffs-ID ohne Karte hat keinen Piloten, der Pilot der Probe zaehlt dann als einsatzfaehige Bodenperson.
-		var normal: String = String(_controller.call("_campaign_casualty_aboard_text", "no_such_craft", PackedStringArray([LEADER_ID])))
-		_check(normal == "An Bord. Am Boden: %s (kritisch). Abheben lässt Liegende zurück oder birgt sie, wenn sie nah am Schiff liegen." % _leader_name(), "PB4 Hilfsfunktion, mit weiterer einsatzfaehiger Person: Satz mit Bergung (%s)" % normal)
-		_check(String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray())) == "", "PB4 Hilfsfunktion: ohne Liegende kein Text")
+	# Fehlt eine Voraussetzung, ist das ein Fehlschlag und kein stilles Ueberspringen.
+	if not _check(critical >= 0.0, "PB4 kritisch: der Liegende erreicht den Zustand 'kritisch' (Zustand %s)" % String(_leader.call("get_vital_state"))):
+		return
+	if not _check(_controller.has_method("_campaign_casualty_aboard_text"), "PB4 Hilfsfunktion _campaign_casualty_aboard_text ist vorhanden"):
+		return
+	var text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([LEADER_ID])))
+	_check(text == "%s%s (kritisch). %s" % [TEXT_ABOARD_PREFIX, _leader_name(), TEXT_TAIL_TOTAL_LOSS], "PB4 kritisch: genauer Text mit '(kritisch)' und Totalverlust-Schluss (%s)" % text)
+	# Mit zwei Personen gibt es keine zweite einsatzfaehige Bodenperson. Die Satzvariante "bleibt eine Bodenperson fit" pruefe ich an der Hilfsfunktion:
+	# eine Schiffs-ID ohne Karte hat keinen Piloten, der Pilot der Probe zaehlt dann als einsatzfaehige Bodenperson.
+	var normal: String = String(_controller.call("_campaign_casualty_aboard_text", "no_such_craft", PackedStringArray([LEADER_ID])))
+	_check(normal == "%s%s (kritisch). %s" % [TEXT_ABOARD_PREFIX, _leader_name(), TEXT_TAIL_RECOVERY], "PB4 Hilfsfunktion, mit weiterer einsatzfaehiger Person: genauer Normalsatz (%s)" % normal)
+	_check(String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray())) == "", "PB4 Hilfsfunktion: ohne Liegende kein Text")
 
 ## PB5: Abheben nach dem Einsteigen laeuft ueber das Gate. Mit nur zwei Personen ist der einzige Bodenmann der Liegende: Totalverlust.
 func _scene_pb5_departure() -> void:
