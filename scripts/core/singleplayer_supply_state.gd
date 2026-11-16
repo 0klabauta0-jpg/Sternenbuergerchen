@@ -734,6 +734,20 @@ func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 	_credits-=100; _revision+=1
 	return {"ok":true,"message":"Landepad gebaut"}
 
+func get_credits() -> int:
+	return _credits
+
+## Notbergung nach einem Totalverlust: bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ.
+## Gibt die tatsaechlich abgezogene Summe zurueck.
+func charge_credits_capped(amount: int) -> Dictionary:
+	if amount < 0:
+		return _reject("invalid_amount", "Betrag darf nicht negativ sein")
+	var charged: int = mini(amount, maxi(_credits, 0))
+	if charged > 0:
+		_credits -= charged
+		_revision += 1
+	return {"ok": true, "charged": charged, "credits": _credits}
+
 func get_modular_base() -> Dictionary:
 	if _modular_plan_cache_revision != _revision:
 		var replay: Dictionary = MODULAR.replay(_requests)

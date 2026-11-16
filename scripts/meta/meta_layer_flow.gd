@@ -9,6 +9,7 @@ const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/met
 const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const CAMPAIGN_CASUALTY_RULES_SCRIPT: GDScript = preload("res://scripts/core/campaign_casualty_rules.gd")
+const CAMPAIGN_CHECKPOINT_STORE_SCRIPT: GDScript = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const REGIONAL_CAMPAIGN_MAPS := [
 	"res://maps/satellite_crash_site.json",
 	"res://maps/trade_outpost.json",
@@ -150,6 +151,8 @@ var _campaign_casualty_rules: Dictionary = {}
 var _campaign_casualty_rules_loaded: bool = false
 var _game_start_request: Dictionary = {}
 var _campaign_start: RefCounted
+# Task 5b: Der Malus nach Totalverlust ist angewendet, der Basis-Checkpoint dazu aber noch nicht geschrieben.
+var _total_loss_penalty_unsaved: bool = false
 var _active_autosave_next_msec: int = 0
 var _campaign_tutorial: Control
 var _active_singleplayer_identity: Dictionary = {}
@@ -269,6 +272,8 @@ func _ready() -> void:
 	_singleplayer_runtime.name = "SingleplayerRuntime"
 	add_child(_singleplayer_runtime)
 	_singleplayer_runtime.call("configure", self, homebase_screen)
+	# Task 5b: ein ausstehender Malus nach Totalverlust gilt auf dem eben wiederhergestellten Basisstand.
+	_apply_pending_total_loss_penalty()
 	_sync_wound_lock()
 	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1" and OS.get_environment("CAMPAIGN_ACTIVE_TEST_ORBIT") == "1":
 		_singleplayer_runtime.set("_surface_orbit_path_enabled",true)
@@ -382,6 +387,10 @@ func _ready() -> void:
 	# The new run's durable baseline must exist before boarding or accepting a
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
+		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
+	# Task 5b: der Malus wird sofort mit dem Basisstand gespeichert (ersetzt auch den ausstehenden Eintrag).
+	if _total_loss_penalty_unsaved:
+		_total_loss_penalty_unsaved = false
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
 	call_deferred("_sync_mission_host_visibility")
 	call_deferred("_apply_release_start_mission_deeplink")
@@ -4585,6 +4594,11 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
 	# Nach der Fortschrittsrechnung, damit die Stufe "wounded" den dort gesetzten Status "recovering" ueberschreibt.
 	_last_mission_result = _apply_campaign_casualties(_last_mission_result)
+	if failed_extraction and bool(_last_mission_result.get("casualty_total_loss", false)):
+		# Task 5b: Notbergung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
+		var total_loss_penalty: Dictionary = _stage_total_loss_penalty(_last_mission_result)
+		if not total_loss_penalty.is_empty():
+			_last_mission_result["total_loss_penalty"] = total_loss_penalty
 	if failed_extraction:
 		_last_mission_result["progression_save_ok"] = false
 	var fob_screen = _get_fob_screen()
@@ -4616,6 +4630,105 @@ func _mark_campaign_total_loss(resolved_result: Dictionary, mission_result: Dict
 	resolved_result["winning_team_id"] = ""
 	resolved_result["campaign_checkpoint_retry_required"] = true
 	resolved_result["extraction_failure"] = extraction_failure.duplicate(true)
+
+
+## Task 5b: Eine laufende Verwundung wird nie kuerzer und nie leichter. Liefert den recovery_state, der fuer die Person
+## gilt (Stufe aus den Regeln, mit der bisherigen verrechnet). Gemeinsam fuer Verluste am Missionsende und die Notbergung.
+func _merge_campaign_recovery_state(unit: Dictionary, severity: String, rules: Dictionary) -> Dictionary:
+	var recovery: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", severity, rules))
+	var existing: Dictionary = Dictionary(unit.get("recovery_state", {}))
+	if String(unit.get("availability_status", "")) == "wounded" and float(existing.get("seconds_remaining", 0.0)) > 0.0:
+		var severity_rank: Dictionary = {"light": 0, "medium": 1, "severe": 2}
+		var old_severity: String = String(existing.get("severity", "light"))
+		if int(severity_rank.get(old_severity, 0)) > int(severity_rank.get(String(recovery.get("severity", "light")), 0)):
+			recovery["severity"] = old_severity
+		recovery["seconds_remaining"] = maxf(float(existing.get("seconds_remaining", 0.0)), float(recovery.get("seconds_remaining", 0.0)))
+		recovery["seconds_total"] = maxf(float(existing.get("seconds_total", 0.0)), float(recovery.get("seconds_total", 0.0)))
+	return recovery
+
+
+## Task 5b: Notbergung nach Totalverlust, Schritt 1 (sobald der Totalverlust feststeht, noch vor dem Debrief).
+## Der Malus wird aus den team_states des verlorenen Einsatzes und dem Guthaben des Basisstands berechnet, auf den
+## zurueckgesprungen wird (die Checkpoint-Datei), und als "pending_total_loss" mit einer Kennung in genau diese Datei
+## geschrieben. Die Datei bleibt sonst unveraendert; abgezogen wird erst beim Wiederherstellen (_apply_pending_total_loss_penalty).
+## Ein bereits ausstehender Eintrag (derselbe verlorene Einsatz noch einmal) bleibt unveraendert und wird zurueckgegeben.
+## Leeres Dictionary: kein Malus (nicht Kampagne, kein Totalverlust, ungueltige Regeln, Basisstand nicht lesbar/schreibbar).
+func _stage_total_loss_penalty(mission_result: Dictionary) -> Dictionary:
+	if not is_campaign_start() or _campaign_start == null or not bool(mission_result.get("casualty_total_loss", false)):
+		return {}
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	if rules.is_empty():
+		return {}
+	var loaded: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.load_checkpoint()
+	if not bool(loaded.get("ok", false)):
+		push_error("Notbergung: Basisstand nicht lesbar (%s), kein Malus" % String(loaded.get("reason", "")))
+		return {}
+	var payload: Dictionary = Dictionary(loaded.get("payload", {}))
+	if payload.has("pending_total_loss"):
+		var known: Dictionary = Dictionary(payload.get("pending_total_loss", {}))
+		var known_penalty: Dictionary = Dictionary(known.get("penalty", {})).duplicate(true)
+		known_penalty["loss_id"] = String(known.get("loss_id", ""))
+		return known_penalty
+	var credits: int = int(Dictionary(payload.get("supply", {})).get("credits", 0))
+	var penalty: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_total_loss_penalty", Array(mission_result.get("team_states", [])), credits, rules))
+	penalty["morale_unit_ids"] = Array(penalty.get("morale_unit_ids", PackedStringArray()))
+	var job_id: String = String(_active_singleplayer_identity.get("job_id", mission_result.get("job_id", "")))
+	var loss_id: String = ("%s|%s|%s|%s|%d|%d" % [String(_campaign_start.get("campaign_run_id")), job_id, String(_active_singleplayer_identity.get("location_id", "")), String(_active_singleplayer_identity.get("craft_id", "")), Time.get_unix_time_from_system(), Time.get_ticks_usec()]).sha256_text()
+	payload["pending_total_loss"] = {"loss_id": loss_id, "job_id": job_id, "penalty": penalty.duplicate(true)}
+	var saved: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.save_checkpoint(payload)
+	if not bool(saved.get("ok", false)):
+		push_error("Notbergung: Malus konnte nicht im Basisstand gesichert werden (%s), kein Malus" % String(saved.get("reason", "")))
+		return {}
+	penalty["loss_id"] = loss_id
+	return penalty
+
+
+## Task 5b: Notbergung nach Totalverlust, Schritt 2 (beim Wiederherstellen des Basisstands, nach dem Aufbau der Laufzeit).
+## Steht in der geladenen Checkpoint-Datei ein ausstehender Malus, wird er auf diesen Stand angewendet: Gebuehr (hoechstens das
+## Guthaben) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
+## (auf 0..1 begrenzt). Der Eintrag wird aus dem geladenen Stand entfernt; _ready schreibt den Basis-Checkpoint danach sofort,
+## die Datei ersetzt Stand und Eintrag in einem Schritt (atomares Ersetzen). Gibt zurueck, ob ein Malus angewendet wurde.
+func _apply_pending_total_loss_penalty() -> bool:
+	if not is_campaign_start() or _campaign_start == null or not is_instance_valid(_singleplayer_runtime):
+		return false
+	if bool(_campaign_start.get("active_restore_in_progress")):
+		return false
+	var checkpoint: Dictionary = _campaign_start.get("checkpoint")
+	if typeof(checkpoint.get("pending_total_loss")) != TYPE_DICTIONARY:
+		return false
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	if rules.is_empty():
+		return false
+	var penalty: Dictionary = Dictionary(Dictionary(checkpoint.get("pending_total_loss")).get("penalty", {}))
+	var fee: int = maxi(int(penalty.get("rescue_fee", 0)), 0)
+	if fee > 0:
+		_singleplayer_runtime.call("charge_campaign_credits_capped", fee)
+	var severities: Dictionary = {}
+	for raw_wounded in Array(penalty.get("wounded", [])):
+		if typeof(raw_wounded) == TYPE_DICTIONARY:
+			severities[String(raw_wounded.get("unit_id", ""))] = String(raw_wounded.get("severity", "light"))
+	var morale_ids: Dictionary = {}
+	for raw_id in Array(penalty.get("morale_unit_ids", [])):
+		morale_ids[String(raw_id)] = true
+	var morale_delta: float = float(penalty.get("morale_delta", 0.0))
+	var updated_units: Array = []
+	for raw_unit in _all_team_units:
+		var unit: Dictionary = Dictionary(raw_unit).duplicate(true)
+		var unit_id: String = String(unit.get("unit_id", ""))
+		if severities.has(unit_id):
+			unit["recovery_state"] = _merge_campaign_recovery_state(unit, String(severities[unit_id]), rules)
+			unit["availability_status"] = "wounded"
+			unit["status_text"] = "wounded"
+		if morale_ids.has(unit_id):
+			var progression: Dictionary = Dictionary(unit.get("progression", {})).duplicate(true)
+			progression["morale"] = clampf(float(progression.get("morale", 0.50)) + morale_delta, 0.0, 1.0)
+			unit["progression"] = progression
+		updated_units.append(unit)
+	_replace_roster_units(updated_units)
+	_sync_wound_lock()
+	checkpoint.erase("pending_total_loss")
+	_total_loss_penalty_unsaved = true
+	return true
 
 
 ## Verluste des laufenden Einsatzes aus den team_states (Task 1 Resolver). Nur nach erfolgreichem Einschiffen aufrufen.
@@ -4695,16 +4808,7 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		var unit: Dictionary = Dictionary(raw_unit).duplicate(true)
 		var wounded_id: String = String(unit.get("unit_id", ""))
 		if severities.has(wounded_id):
-			var recovery: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", String(severities[wounded_id]), rules))
-			var existing: Dictionary = Dictionary(unit.get("recovery_state", {}))
-			if String(unit.get("availability_status", "")) == "wounded" and float(existing.get("seconds_remaining", 0.0)) > 0.0:
-				# Eine laufende Verwundung wird nie kuerzer und nie leichter.
-				var severity_rank: Dictionary = {"light": 0, "medium": 1, "severe": 2}
-				var old_severity: String = String(existing.get("severity", "light"))
-				if int(severity_rank.get(old_severity, 0)) > int(severity_rank.get(String(recovery.get("severity", "light")), 0)):
-					recovery["severity"] = old_severity
-				recovery["seconds_remaining"] = maxf(float(existing.get("seconds_remaining", 0.0)), float(recovery.get("seconds_remaining", 0.0)))
-				recovery["seconds_total"] = maxf(float(existing.get("seconds_total", 0.0)), float(recovery.get("seconds_total", 0.0)))
+			var recovery: Dictionary = _merge_campaign_recovery_state(unit, String(severities[wounded_id]), rules)
 			unit["availability_status"] = "wounded"
 			unit["recovery_state"] = recovery
 			unit["status_text"] = "wounded"

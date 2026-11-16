@@ -9,6 +9,11 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if typeof(digest) != TYPE_STRING or digest.length() != 64: return {"ok":false,"reason":"invalid_active_retirement"}
 		for letter in digest:
 			if not String(letter) in "0123456789abcdef": return {"ok":false,"reason":"invalid_active_retirement"}
+	# Task 5b: optionaler ausstehender Malus nach Totalverlust (alte Staende ohne das Feld bleiben gueltig).
+	if payload.has("pending_total_loss"):
+		var pending: Variant = payload.pending_total_loss
+		if typeof(pending) != TYPE_DICTIONARY or typeof(pending.get("loss_id")) != TYPE_STRING or String(pending.loss_id).is_empty() or typeof(pending.get("penalty")) != TYPE_DICTIONARY:
+			return {"ok":false,"reason":"invalid_pending_total_loss"}
 	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 64 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
 	var ids: Array = []

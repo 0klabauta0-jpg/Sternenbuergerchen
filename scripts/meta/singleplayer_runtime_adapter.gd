@@ -1755,6 +1755,15 @@ func export_campaign_checkpoint() -> Dictionary:
 	payload["fallen"] = get_fallen()
 	return payload
 
+## Guthaben des Kampagnenstands (Besitzer: SingleplayerSupplyState), nur lesend.
+func get_campaign_credits() -> int:
+	return _supply.get_credits() if _supply != null else 0
+
+## Task 5b: Bergungsgebuehr nach Totalverlust. Zieht hoechstens das vorhandene Guthaben ab (nie ins Minus).
+func charge_campaign_credits_capped(amount: int) -> Dictionary:
+	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
+	return _supply.charge_credits_capped(amount)
+
 ## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
 func record_fallen(entry: Dictionary) -> Dictionary:
 	var clean: Dictionary = _clean_fallen_entry(entry)
