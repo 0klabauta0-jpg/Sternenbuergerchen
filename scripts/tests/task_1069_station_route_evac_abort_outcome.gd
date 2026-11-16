@@ -5,7 +5,6 @@ const MISSION_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/missi
 
 const STATION_MISSION_ID: String = "station_route_one_screen_multiplayer_drill"
 const STATION_SCENARIO_PATH: String = "res://data/mission_scenarios/station_route_one_screen_multiplayer_drill.json"
-const TEST_LZ_POSITION := Vector2(384.0, 224.0)
 
 var _passed: int = 0
 var _failed: int = 0
@@ -49,6 +48,11 @@ func _test_station_route_evacuation_outcome() -> void:
 	if homebase == null:
 		await _cleanup(flow)
 		return
+	# Seit affc40ebc verlangt die Hex-Landung ein gebundenes Schiffsmodell (cutlass/buccaneer);
+	# die Standard-Basisschiffe tragen keins.
+	for definition: Dictionary in Array(flow.get("_homebase_aircraft_definitions")):
+		definition["model_id"] = "cutlass"
+		definition["visual_asset_id"] = "cutlass_01"
 	flow.call("_on_homebase_mission_selection_changed", STATION_MISSION_ID)
 	homebase.call("request_mission_start")
 	await _wait_frames(12)
@@ -89,8 +93,13 @@ func _test_station_route_evacuation_outcome() -> void:
 	_assert(not bool(before_lz.get("eligible", true)), "Evac stays blocked before LZ placement")
 	_assert(String(before_lz.get("reason", "")) == "lz_missing", "Evac names missing LZ")
 
+	# Die Karte ist seit affc40ebc hex_axial_v1: Landezone aus dem Karten-Marker spawn_alpha ableiten.
+	var station_map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file("res://maps/station_outpost_192x192.json")
+	var test_lz_position: Vector2 = station_map.get_marker_position("spawn_alpha") + Vector2(512.0, 0.0)
+	primary_view.call("focus_world_position", test_lz_position)
+	await _wait_frames(2)
 	controller.call("_on_mission_dropship_card_set_lz_pressed", craft_id)
-	_assert(bool(controller.call("_place_lz_from_screen_position", primary_view.call("world_to_screen_position", TEST_LZ_POSITION))), "Evac trace places LZ")
+	_assert(bool(controller.call("_place_lz_from_screen_position", primary_view.call("world_to_screen_position", test_lz_position))), "Evac trace places LZ")
 	controller.call("_on_mission_dropship_card_drop_pressed", craft_id)
 	await _wait_frames(4)
 	controller.call("_complete_drop_sequence_deployment")
@@ -106,7 +115,7 @@ func _test_station_route_evacuation_outcome() -> void:
 		return
 	controller.call("_on_fireteam_group_pressed", fireteam_id)
 	var selected_snapshot: Dictionary = Dictionary(controller.call("get_mission_evacuation_snapshot"))
-	var resolved_lz_position: Vector2 = Vector2(selected_snapshot.get("lz_position", TEST_LZ_POSITION))
+	var resolved_lz_position: Vector2 = Vector2(selected_snapshot.get("lz_position", test_lz_position))
 	_move_fireteam_to_lz(controller, fireteam_id, resolved_lz_position + Vector2(144.0, 0.0))
 	controller.call("_update_ui")
 	await _wait_frames(2)
