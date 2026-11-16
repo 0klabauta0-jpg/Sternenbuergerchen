@@ -32192,7 +32192,11 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
-		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		# Preview lines and heading start at the members on the ground; a member who is
+		# embarked stands at the ship. A squad that is entirely aboard keeps the old anchor.
+		var anchor_position: Variant = _resolve_fireteam_ground_use_position(fireteam_id)
+		if typeof(anchor_position) != TYPE_VECTOR2:
+			anchor_position = _resolve_fireteam_visual_anchor_position(fireteam_id)
 		if typeof(anchor_position) != TYPE_VECTOR2:
 			continue
 		var entry: Dictionary = {
@@ -37804,7 +37808,7 @@ func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedString
 	var other_fit := false
 	for unit in _get_campaign_sortie_units():
 		if String(unit.call("get_unit_id")) != pilot_id and String(unit.call("get_vital_state")) == "fit" and int(unit.call("get_health")) > 0: other_fit = true
-	var tail := "Abheben lässt Liegende zurück oder birgt sie, wenn sie nah am Schiff liegen." if other_fit else "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
+	var tail := "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen." if other_fit else "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
 	return "An Bord. Am Boden: %s. %s" % [", ".join(parts), tail]
 
 func _advance_campaign_extraction(delta: float) -> void:
