@@ -26,6 +26,9 @@ func _run() -> void:
 	_check(not checkpoint.get("ok", false), "campaign checkpoint is rejected during real deployed mission")
 	# Im Hex-Boden steigt die Besatzung an der Einstiegszelle ein, nicht an der Rumpfmitte.
 	var boarding_access: Dictionary = controller.call("get_campaign_ground_ship_access", _craft_id)
+	if not _check(boarding_access.get("ok", false), "ship boarding access is available (%s)" % [boarding_access]):
+		await _finish()
+		return
 	var target: Vector2 = Vector2(boarding_access.position)
 	var boarding_radius: float = float(controller.get("CAMPAIGN_BOARDING_RADIUS"))
 	controller.call("_create_waypoints_for_selected_fireteams", target, true)
