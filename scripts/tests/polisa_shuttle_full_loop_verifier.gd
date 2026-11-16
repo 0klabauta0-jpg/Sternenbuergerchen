@@ -8,7 +8,7 @@ class ServiceController extends "res://scripts/tests/mission_tactical_sandbox_co
 		return {"ok":true,"pad_id":"fixture-pad","position":fixture_lz,"ground_body_profile":{}}
 	func _ground_ship_touchdown_ready(_craft: String, _position: Vector2, _visual: bool) -> bool: return true
 	func get_ground_ship_blocked_cells(_craft: String = "") -> Dictionary:
-		return {"ok":true,"registry_id":get_node("../SimulationRoot").get_hex_ground_terrain_registry().get_instance_id(),"blocked_cells":[]}
+		return {"ok":true,"registry_id":get_node("../SimulationRoot").get_hex_ground_terrain_registry().get_instance_id(),"source_signature":"fixture","blocked_cells":[]}
 	func finalize_station_craft_update() -> void: pass
 	func _emit_planning_state_changed() -> void: pass
 	func _store_selected_mission_dropship_plan() -> void: pass
