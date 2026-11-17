@@ -8858,6 +8858,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 		release_legacy = true
 	_refresh_homebase_screen()
 	_apply_homecoming_payload_assignments()
+	_homecoming_warned.clear()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
 
@@ -9616,25 +9617,46 @@ func _restore_returning_visit_membership(craft_id: String) -> void:
 func _admit_unplaced_aboard_crew(craft_id: String) -> void:
 	var profiles: Array=[]
 	for id in _aboard_unit_ids_of_craft(craft_id):
-		var profile:=_stage_returning_person(craft_id,String(id),"")
+		var profile:=_stage_returning_person(craft_id,String(id),"",true)
 		if not profile.is_empty(): profiles.append(profile)
 	if profiles.is_empty(): return
 	_available_team_units=_merge_missing_units_by_id(_available_team_units,profiles)
 
 ## Stages one returning person (not the pilot, not yet staged) in `team` (empty: _homecoming_team_for); returns its
-## profile copy, {} if nothing changed. A person unknown to the roster or without any team gets one warning, no team.
-func _stage_returning_person(craft_id: String, id: String, team: String) -> Dictionary:
+## profile copy, {} if nothing changed. `final` is the pass after the craft counts as home (only then the base personnel
+## owner lets a person leave the craft): without any reachable team the person leaves the craft at the base through the
+## existing "base_unboard" operation; if that fails too, the person stays without a team. At most one warning per person
+## and landing (_homecoming_warned).
+func _stage_returning_person(craft_id: String, id: String, team: String, final: bool = false) -> Dictionary:
 	if id==String(_assigned_aircraft_pilot_by_craft.get(craft_id,"")) or _homebase_staged_unit_ids.has(id): return {}
 	for unit: Dictionary in _all_team_units:
 		if String(unit.get("unit_id",""))!=id: continue
 		var target:=team if not team.is_empty() else _homecoming_team_for(craft_id)
 		if target.is_empty():
-			push_warning("Heimkehr: %s an Bord von %s bleibt ohne Trupp (kein Nutzlast-Trupp, kein freier Trupp)" % [id,craft_id])
+			if not final: return {} # the pass after the craft is home decides
+			var left:=_unboard_homecoming_person(craft_id,id)
+			_homecoming_warn_once(craft_id,id,("Heimkehr: %s ist an der Basis ausgestiegen, weil %s keinen freien Trupp hat" % [id,craft_id]) if bool(left.get("ok",false)) else ("Heimkehr: %s an Bord von %s bleibt ohne Trupp (kein Trupp erreichbar, Aussteigen fehlgeschlagen: %s)" % [id,craft_id,String(left.get("reason","?"))]))
 			return {}
 		_homebase_staged_unit_ids.append(id); _homebase_staged_fireteam_ids.append(target)
 		return unit.duplicate(true)
-	push_warning("Heimkehr: %s an Bord von %s steht nicht im Kader und wird keinem Trupp zugeordnet" % [id,craft_id])
+	_homecoming_warn_once(craft_id,id,"Heimkehr: %s an Bord von %s steht nicht im Kader und wird keinem Trupp zugeordnet" % [id,craft_id])
 	return {}
+
+## craft_id:unit_id of the people already warned about during the current home landing.
+var _homecoming_warned: Dictionary = {}
+
+func _homecoming_warn_once(craft_id: String, id: String, text: String) -> void:
+	var key:="%s:%s" % [craft_id,id]
+	if _homecoming_warned.has(key): return
+	_homecoming_warned[key]=true
+	push_warning(text)
+
+## The person leaves the landed craft at the base: the existing "base_unboard" operation of the base personnel owner
+## (the same way crew leaves a landed craft at home). Returns that operation's result.
+func _unboard_homecoming_person(craft_id: String, id: String) -> Dictionary:
+	var personnel: Node=_singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime!=null and _singleplayer_runtime.has_method("get_base_personnel_runtime") else null
+	if personnel==null: return {"ok":false,"reason":"personnel_unavailable"}
+	return Dictionary(personnel.call("apply_operation","base_unboard",{"unit_id":id,"craft_id":craft_id}))
 
 ## Trupp fuer eine Person ohne Trupp bei der Heimkehr, nur aus den Listen des Flows und der Zuweisung des Schiffs
 ## (nie aus dem Auswahlzustand der Ansicht, der erst nach der Heimkehr aufgefrischt wird; nie der Trupp eines anderen Schiffs):
@@ -9657,8 +9679,11 @@ func _homecoming_team_for(craft_id: String) -> String:
 		_homecoming_pending_payload[craft_id]=payload[0]
 		return payload[0]
 	var assigned: Dictionary={}
-	for definition: Dictionary in _homebase_aircraft_definitions:
-		for team: String in home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(definition.get("craft_id",""))): assigned[team]=true
+	# A team held under any key of the raw lists counts as assigned (also keys without a craft definition, e.g. the legacy "").
+	var craft_keys: Array=Array(home_screen.call("_get_homebase_direct_payload_craft_keys"))
+	for definition: Dictionary in _homebase_aircraft_definitions: craft_keys.append(String(definition.get("craft_id","")))
+	for key in craft_keys:
+		for team: String in home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(key)): assigned[team]=true
 	for team_craft in _homecoming_pending_payload.values(): assigned[String(team_craft)]=true
 	for definition_variant in Array(home_screen.call("_get_fireteam_definitions_snapshot")):
 		var team:=String(Dictionary(definition_variant).get("id","")).strip_edges().to_lower()

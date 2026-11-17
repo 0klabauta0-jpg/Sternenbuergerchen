@@ -5,6 +5,11 @@ extends SceneTree
 ## S1: second ship has its own team; pilot swap displaces its pilot; the view is current.
 ## S2: same, but the base view is stale (nobody selected) when the ship lands.
 ## S3: second ship carries no team; a free team is assigned to it (existing assignment path) and takes the person.
+## S3 also saves, loads and checks that the assigned team with the person is still there.
+## S4: no team can be reached (only ft1, owned by the first ship): the person leaves the ship at the base through the
+##     existing "base_unboard" operation, ft1 stays as it is, the save is ok and the person still stands at the base after loading.
+## S5: ship 2 lands while a mission runs and the base view is hidden (not refreshed); once the view is shown and refreshed
+##     the person is in the team of ship 2, the save is ok and the loaded state agrees.
 ## Needs an isolated APPDATA (runner).
 const START = preload("res://scripts/meta/game_start_contract.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
@@ -29,7 +34,7 @@ func _check(value: bool, label: String) -> bool:
 	print("PASS: " if value else "FAIL: ", label)
 	return value
 
-func _fixture(flow: Node, second_team: bool, stale_view: bool) -> Dictionary:
+func _fixture(flow: Node, second_team: bool, stale_view: bool, free_team: bool) -> Dictionary:
 	var campaign = load("res://scripts/core/singleplayer_campaign_state.gd").new()
 	var supply = load("res://scripts/core/singleplayer_supply_state.gd").new()
 	var onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
@@ -73,7 +78,7 @@ func _fixture(flow: Node, second_team: bool, stale_view: bool) -> Dictionary:
 		staged_units.append("campaign_outpost_recruit"); staged_teams.append("ft2")
 		# Without member ids in the definition the view knows the members only from its selection (so it can be stale).
 		definitions.append({"id":"ft2","lead_unit_id":"campaign_outpost_recruit"} if stale_view else {"id":"ft2","lead_unit_id":"campaign_outpost_recruit","member_unit_ids":["campaign_outpost_recruit"]})
-	else:
+	elif free_team:
 		definitions.append({"id":"ft2","lead_unit_id":"","member_unit_ids":[]})
 	var craft := {"definition":first,"pilot_id":"campaign_pilot","staged_unit_ids":staged_units,"staged_fireteam_ids":staged_teams,"fireteam_definitions":definitions}
 	var payload := {"schema_version":1,"roster":roster,"craft":craft,"fleet":[{"definition":first,"pilot_id":"campaign_pilot","location":"homebase"},{"definition":second,"pilot_id":"campaign_rescue_pilot","location":"homebase"}],"campaign":state,"supply":supply.export_state(),"onboarding":onboarding.export_state()}
@@ -102,10 +107,19 @@ func _payload(screen: Node, craft_id: String) -> Array:
 	return Array(screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id))
 
 ## Boots the two-ship checkpoint, optionally displaces the second ship's pilot, lands the second ship at home.
-func _scenario(label: String, second_team: bool, swap: bool, stale_view: bool) -> void:
+## Options: second_team (ship 2 has its own team ft2), swap (real pilot-seat change on ship 2), stale_view (see below),
+## free_team (an empty team ft2 exists without a ship), hidden_view (a mission runs, the base view is hidden and not
+## refreshed when ship 2 lands; afterwards the view is shown and refreshed), reload (save, load, check the loaded state),
+## unboard (no team can be reached: the person must leave the ship at the base).
+func _scenario(label: String, o: Dictionary) -> void:
+	var only := OS.get_cmdline_user_args() # optional: one scenario label to run alone
+	if not only.is_empty() and not only.has(label): return
+	var second_team: bool = bool(o.get("second_team", false)); var swap: bool = bool(o.get("swap", false))
+	var stale_view: bool = bool(o.get("stale_view", false)); var hidden_view: bool = bool(o.get("hidden_view", false))
+	var unboard: bool = bool(o.get("unboard", false)); var reload: bool = bool(o.get("reload", false))
 	var flow := _open("new"); await process_frame
 	flow.set_process(false)
-	var payload := _fixture(flow, second_team, stale_view)
+	var payload := _fixture(flow, second_team, stale_view, bool(o.get("free_team", false)))
 	flow.queue_free(); await process_frame
 	var saved: Dictionary = STORE.save_checkpoint(payload)
 	if not _check(bool(saved.get("ok", false)), label + ": two-ship checkpoint saves"):
@@ -136,20 +150,68 @@ func _scenario(label: String, second_team: bool, swap: bool, stale_view: bool) -
 		screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", held)
 		_check(PackedStringArray(screen.call("_get_member_unit_ids_for_fireteam", "ft2")).is_empty(), label + ": fixture: the base view has no members for the second team")
 		_check(_payload(screen, SHIP2) == ["ft2"] and _payload(screen, SHIP1) == ["ft1"], label + ": fixture: both ships keep their assigned team")
+	var dummy_mission: Node = null
+	if hidden_view:
+		# A mission of the first ship runs: the base view is hidden and _refresh_homebase_screen returns early.
+		dummy_mission = Node.new(); root.add_child(dummy_mission)
+		flow.set("_active_mission", dummy_mission)
+		screen.visible = false
 	flow.call("_finish_space_home_landing", SHIP2)
+	if hidden_view:
+		_check(bool(flow.get("_homebase_presentation_dirty")), label + ": fixture: the view was not refreshed by the landing")
+		flow.set("_active_mission", null)
+		screen.visible = true
+		flow.call("_refresh_homebase_screen")
+		dummy_mission.queue_free()
 	var teams := _teams(screen)
 	print("TWO_CRAFT_STATE ", label, " ", var_to_str({"teams": teams, "payload1": _payload(screen, SHIP1), "payload2": _payload(screen, SHIP2), "staged": flow.get("_homebase_staged_unit_ids"), "staged_teams": flow.get("_homebase_staged_fireteam_ids"), "pilot2": Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(SHIP2, "")}))
 	var payload2: Array = _payload(screen, SHIP2)
-	_check(not payload2.is_empty() and Array(teams.get(String(payload2[0]) if not payload2.is_empty() else "", [])).has(displaced), label + ": displaced person is in a payload team of the second ship")
+	var team_of_ship2 := String(payload2[0]) if not payload2.is_empty() else ""
+	if unboard:
+		# The person walks onto the base ground: let the base simulation run until the base state can be exported again.
+		owner.call("get_simulation_root").set_physics_process(true)
+		var ticks := 0
+		while ticks < 600 and not bool(Dictionary(owner.call("export_checkpoint_state")).get("ok", false)):
+			await physics_frame; ticks += 1
+		print("S4_EXPORT ticks=", ticks, " ", var_to_str(owner.call("export_checkpoint_state")).left(200))
+		_check(String(_person(owner, displaced).get("status", "")) != "aboard", label + ": the person has left the second ship")
+		_check(payload2.is_empty() and not _in_any_team(teams, displaced), label + ": the person is in no team and the second ship got none")
+	else:
+		_check(not payload2.is_empty() and Array(teams.get(team_of_ship2, [])).has(displaced), label + ": displaced person is in a payload team of the second ship")
 	_check(not Array(teams.get("ft1", [])).has(displaced) and Array(teams.get("ft1", [])) == first_before and _payload(screen, SHIP1) == ["ft1"], label + ": the first ship's team is unchanged")
 	var save: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, adapter, true)
 	if not _check(bool(save.get("ok", false)) and not bool(save.get("throttled", false)), label + ": home checkpoint saves"):
 		print("SAVE_RESULT ", label, " ", save)
 	flow.queue_free(); await process_frame
+	if reload or unboard:
+		flow = _open("continue"); await process_frame
+		flow.set_process(false)
+		screen = flow.get_node("HomebaseScreen")
+		owner = flow.get("_singleplayer_runtime").call("get_base_personnel_runtime")
+		var loaded_teams := _teams(screen)
+		var loaded_payload2 := _payload(screen, SHIP2)
+		print("TWO_CRAFT_LOADED ", label, " ", var_to_str({"teams": loaded_teams, "payload1": _payload(screen, SHIP1), "payload2": loaded_payload2, "person": _person(owner, displaced)}))
+		if unboard:
+			_check(String(_person(owner, displaced).get("status", "")) != "aboard" and not _in_any_team(loaded_teams, displaced), label + ": after loading the person still stands at the base")
+		else:
+			_check(not loaded_payload2.is_empty() and Array(loaded_teams.get(String(loaded_payload2[0]), [])).has(displaced) and _payload(screen, SHIP1) == ["ft1"], label + ": after loading the second ship still has its team with the person")
+		flow.queue_free(); await process_frame
+
+func _person(owner: Node, id: String) -> Dictionary:
+	for person: Dictionary in Array(owner.call("get_snapshot").get("units", [])):
+		if String(person.get("unit_id", "")) == id: return person
+	return {}
+
+func _in_any_team(teams: Dictionary, id: String) -> bool:
+	for team in teams.values():
+		if Array(team).has(id): return true
+	return false
 
 func _run() -> void:
-	await _scenario("S1", true, true, false)
-	await _scenario("S2", true, true, true)
-	await _scenario("S3", false, false, false)
+	await _scenario("S1", {"second_team": true, "swap": true})
+	await _scenario("S2", {"second_team": true, "swap": true, "stale_view": true})
+	await _scenario("S3", {"free_team": true, "reload": true})
+	await _scenario("S4", {"unboard": true})
+	await _scenario("S5", {"second_team": true, "swap": true, "hidden_view": true, "reload": true})
 	print("CAMPAIGN_PILOT_SWAP_TWO_CRAFT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
