@@ -6,7 +6,7 @@
   const form=$('hit-form');
   function updateCalculator(){
     const read=id=>$(id).type==='checkbox'?$(id).checked:$(id).value;
-    const result=GuideCombat.calculate({weapon:read('weapon'),accuracy:read('accuracy'),ownCover:read('own-cover'),targetCover:read('target-cover'),height:read('height'),roll:read('roll'),moving:read('moving'),flank:read('flank'),spotted:read('spotted'),support:read('support'),attack:read('attack'),profile:read('profile'),evasion:read('evasion'),baseDamage:read('base-damage'),targetDamage:read('target-damage')});
+    const result=GuideCombat.calculate({weapon:read('weapon'),accuracy:read('accuracy'),ownCover:read('own-cover'),targetCover:read('target-cover'),height:read('height'),distance:read('distance'),roll:read('roll'),moving:read('moving'),flank:read('flank'),spotted:read('spotted'),support:read('support'),attack:read('attack'),profile:read('profile'),evasion:read('evasion'),baseDamage:read('base-damage'),targetDamage:read('target-damage')});
     $('chance').textContent=pct(result.chance);$('damage').textContent=result.damage;
     $('roll-result').textContent='Wurf '+num(result.roll)+' → '+(result.hit?'Treffer':'Verfehlt');
     $('breakdown').textContent='Angepasste Waffenbasis '+pct(result.base)+' · vor Begrenzung '+pct(result.raw)+' · begrenzt '+pct(result.standing)+' · Bewegungsfaktor '+num(result.movement)+' → '+pct(result.chance)+(read('flank')?' · Zieldeckung durch Flanke: 0':'');

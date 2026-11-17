@@ -56,3 +56,6 @@ verify_guide.cjs prüft Katalogwerte gegen GDScript, konkrete von Hand gerechnet
 Fälle und Grenzen, mobile Breiten, Suche, Checkliste, Bilddialog, Tastatur,
 Anker und Assets in einem frischen Headless-Chrome ohne Benutzerprofil.
 Publikation zusätzlich ohne Cookie/Anmeldung per HTTP prüfen.
+
+## Ergänzung 17.11.2026: Entfernungszonen
+Der Trefferrechner kennt die Eingabe „Entfernung zum Ziel (Felder)“ mit den Zonen nah (bis 6), mittel (7–18), fern (ab 19) und dem Zu-/Abschlag je Waffe. Quellen: scripts/core/weapon_data.gd (WEAPON_CATALOG, `range_band_hit_modifier`, RANGE_BAND_*), scripts/core/simulation_root.gd (_apply_damage_effect) und docs/dev/combat_loop_authority_contract.md. Das Handbuch ist damit neuer als die oben genannte Buildzuordnung.

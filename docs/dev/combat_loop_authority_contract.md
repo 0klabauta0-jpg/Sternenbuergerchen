@@ -85,3 +85,22 @@ Nicht erlaubt:
 - UI-/Presenter-Code darf keinen Combat-State besitzen.
 - Neue Resolver duerfen keine direkten Damage-, Heal-, Respawn- oder Movement-Mutationen an Units ausfuehren.
 - Snapshot-Key-Umbenennungen brauchen einen eigenen Contract-/Migrationstask.
+
+## Erweiterung 17.11.2026: Entfernungszonen in der Trefferchance
+Die Entfernung zwischen Schuetze und Ziel geht in die Trefferchance ein (`SimulationRoot._apply_damage_effect`, im selben Summenterm wie der Hoehenzuschlag, also vor der Begrenzung auf 0,05 bis 0,95 und vor dem Bewegungsfaktor). Die Reichweite bleibt zusaetzlich nur Schussvoraussetzung.
+- Drei feste Zonen in Feldern: nah bis 6, mittel 7 bis 18, fern ab 19 (genau 6 und 18 zaehlen zur naeheren Zone). Konstanten `WeaponData.RANGE_BAND_NEAR_MAX_TILES = 6`, `RANGE_BAND_MID_MAX_TILES = 18`.
+- Je Waffe der Datenschluessel `range_band_hit_modifier` (`near`, `mid`, `far`) in `WEAPON_CATALOG`, als Anteil (+0,10 = plus 10 Prozentpunkte); fehlt der Schluessel oder die Zone, gilt 0.
+- Messung wie bei der Reichweitenpruefung: aktive Hex-Bodenlaufzeit = Hex-Felderabstand der Raster-Positionen (`HexGrid.distance`); sonst Weltabstand geteilt durch `WeaponData.get_world_units_per_tile`.
+- Gilt fuer alle Seiten und Modi, auch Ueberwachungsfeuer; gemeint ist die Waffe aus dem Effekt (`weapon_id`), ersatzweise die aktive Waffe des Schuetzen.
+
+| Waffe | nah | mittel | fern |
+|---|---|---|---|
+| pistol | +0,10 | -0,15 | 0 |
+| smg | +0,15 | -0,10 | 0 |
+| rifle | 0 | +0,05 | -0,10 |
+| sniper | -0,20 | 0 | +0,10 |
+| rail_gun | -0,10 | 0 | -0,05 |
+| rocket_launcher | -0,10 | 0 | 0 |
+| none, medictool | 0 | 0 | 0 |
+
+Pruefung: `scripts/tests/combat_range_band_hit_chance_verifier.gd`. Handbuch-Rechner: `docs/player_guide/combat.js` (Eingabe `distance`).
