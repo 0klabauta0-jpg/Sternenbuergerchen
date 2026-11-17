@@ -169,6 +169,21 @@ func _scenario(label: String, o: Dictionary) -> void:
 		var notes: Dictionary = flow.get("_homecoming_pending_payload")
 		if not mid.is_empty():
 			_check(notes.get(SHIP2, "") == "ft2", label + ": fixture: the note for ship 2 (ft2) is kept while the view is hidden")
+			if mid == "V6": # two persons are noted for ft2: A (not in the team) and B (the recruit, in the team)
+				var person_a := "campaign_rescue_pilot"
+				flow.set("_homecoming_pending_persons", {SHIP2: [person_a, recruit]})
+				var st_units: PackedStringArray = flow.get("_homebase_staged_unit_ids"); var st_teams: PackedStringArray = flow.get("_homebase_staged_fireteam_ids")
+				var in_ft2 := PackedStringArray()
+				for index in st_units.size():
+					if st_teams[index] == "ft2": in_ft2.append(st_units[index])
+				_check(in_ft2.has(recruit) and not in_ft2.has(person_a), label + ": fixture: person A is noted but not in ft2, person B (the recruit) is noted and in ft2")
+				flow.set("_active_mission", null)
+				screen.visible = true
+				flow.call("_refresh_homebase_screen")
+				dummy_mission.queue_free()
+				_check(_payload(screen, SHIP2).has("ft2") and _payload(screen, SHIP1) == ["ft1"], label + ": ft2 is assigned to ship 2 although person A is not in it, person B is")
+				_check(Dictionary(flow.get("_homecoming_pending_payload")).is_empty(), label + ": the note is empty after applying")
+				flow.queue_free(); await process_frame; return
 			if mid == "V2": # the person leaves the team before the view is refreshed
 				var ids := PackedStringArray(); var team_ids := PackedStringArray()
 				var staged_units: PackedStringArray = flow.get("_homebase_staged_unit_ids"); var staged_teams: PackedStringArray = flow.get("_homebase_staged_fireteam_ids")
@@ -203,6 +218,26 @@ func _scenario(label: String, o: Dictionary) -> void:
 		else: _check(q1 == ["ft1"] and q2.has("ft3") and q2.has("ft2"), label + ": ship 2 holds the player's team and the noted team, ship 1 unchanged")
 		if mid_now == "V1":
 			flow.queue_free(); await process_frame; return
+	if mid_now == "V5":
+		# Ship 2 has landed (view current, note applied and cleared); a note as S5b leaves it is put back, then ship 2 starts to the
+		# star map through the real start request of the base view (flow handler -> adapter launch_to_moon_orbit).
+		var held_before := _payload(screen, SHIP1)
+		flow.set("_homecoming_pending_payload", {SHIP2: "ft2"}); flow.set("_homecoming_pending_persons", {SHIP2: [recruit]})
+		_check(_payload(screen, SHIP2).has("ft2") and String(Dictionary(flow.get("_aircraft_location_by_craft")).get(SHIP2, "")) == "homebase", label + ": fixture: ship 2 is at the base with ft2 and a note for it exists")
+		# The boarding of the team is a timed view animation: let it count as finished (the person already is aboard).
+		var boarding: Dictionary = screen.call("_ensure_homebase_direct_boarding_state", "ft2", SHIP2)
+		boarding["elapsed_seconds"] = 100000.0
+		print("V5_GATE boarded=", screen.call("_are_homebase_payload_fireteams_boarded", PackedStringArray(_payload(screen, SHIP2))), " units=", screen.call("_build_unit_ids_for_fireteams", PackedStringArray(_payload(screen, SHIP2))))
+		print("V5_CAN can=", screen.call("can_request_mission_start", SHIP2), " campaign=", adapter.call("is_campaign_mission"))
+		screen.call("request_mission_start", SHIP2)
+		await process_frame
+		print("V5_ERR ", var_to_str(screen.get_meta("singleplayer_departure_error", {})))
+		var location := String(Dictionary(flow.get("_aircraft_location_by_craft")).get(SHIP2, ""))
+		print("V5_LAUNCH location=", location, " notes=", var_to_str(flow.get("_homecoming_pending_payload")), " persons=", var_to_str(flow.get("_homecoming_pending_persons")))
+		_check(location == "starmap", label + ": ship 2 started to the star map")
+		_check(not Dictionary(flow.get("_homecoming_pending_payload")).has(SHIP2) and not Dictionary(flow.get("_homecoming_pending_persons")).has(SHIP2), label + ": right after the start there is no note for ship 2")
+		_check(_payload(screen, SHIP1) == held_before, label + ": the assignment of the other ship is unchanged")
+		flow.queue_free(); await process_frame; return
 	var teams := _teams(screen)
 	print("TWO_CRAFT_STATE ", label, " ", var_to_str({"teams": teams, "payload1": _payload(screen, SHIP1), "payload2": _payload(screen, SHIP2), "staged": flow.get("_homebase_staged_unit_ids"), "staged_teams": flow.get("_homebase_staged_fireteam_ids"), "pilot2": Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(SHIP2, "")}))
 	var payload2: Array = _payload(screen, SHIP2)
@@ -267,5 +302,8 @@ func _run() -> void:
 	await _scenario("V2", {"free_team": true, "hidden_view": true, "mid": "V2"})
 	await _scenario("V3", {"free_team": true, "hidden_view": true, "mid": "V3"})
 	await _scenario("V4", {"free_team": true, "extra_team": true, "mid": "V4", "reload": true})
+	# V5: ship 2 starts to the star map with a note present. V6: two persons noted for one team, one of them no longer in it.
+	await _scenario("V5", {"free_team": true, "mid": "V5"})
+	await _scenario("V6", {"free_team": true, "hidden_view": true, "mid": "V6"})
 	print("CAMPAIGN_PILOT_SWAP_TWO_CRAFT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

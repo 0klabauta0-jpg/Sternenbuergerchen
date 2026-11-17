@@ -4033,11 +4033,13 @@ func _on_homebase_mission_start_requested() -> void:
 		if not bool(launch.get("ok", false)):
 			_get_homebase_screen().set_meta("singleplayer_departure_error", launch)
 			return
+		_homecoming_forget_craft(requested_direct_craft_id) # the craft left the base for the star map
 		_last_mission_result.clear()
 		_show_star_map()
 		return
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		_begin_homebase_direct_mission_transfer_from_planning()
+		_homecoming_forget_craft(requested_direct_craft_id) # the craft left the base for a direct drop
 		_sync_homebase_direct_mission_drop_transport_fields()
 		_refresh_homebase_screen()
 		_ensure_transport_timer_state()
@@ -8534,7 +8536,7 @@ func _finish_space_approach(craft_id: String = "") -> void:
 	_selected_fireteam_ids = entry.teams.duplicate()
 	_mission_planning_state = entry.planning.duplicate(true)
 	_begin_mission_craft_transfer(craft_id, "to_mission", 1.0, MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
-	_homecoming_forget_craft(craft_id) # the craft leaves the base
+	_homecoming_forget_craft(craft_id) # the craft leaves orbit
 	_aircraft_location_by_craft[craft_id] = "starmap"
 	_sync_homebase_direct_mission_drop_transport_fields()
 	_singleplayer_runtime.call("finish_space_approach", craft_id)
@@ -8784,7 +8786,7 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 	if instance != null:
 		identity = Dictionary(instance.get_meta("singleplayer_mission_identity", {})).duplicate(true)
 		_remember_location(instance)
-	_homecoming_forget_craft(craft_id) # the craft leaves the base
+	_homecoming_forget_craft(craft_id) # the craft leaves the surface
 	_aircraft_location_by_craft[craft_id]="starmap"
 	# A real departure retires its visit, not the player's independent place view.
 	# Keep the old non-persistent scene behaviour for compatibility.
