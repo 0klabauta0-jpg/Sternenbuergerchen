@@ -275,7 +275,7 @@ func load_mission_slot(change_scene: bool = true) -> Dictionary:
 
 
 func return_to_main_menu(change_scene: bool = true, confirmed: bool = false) -> Dictionary:
-	if not confirmed and _confirm_exit_if_needed("main_menu", change_scene):
+	if not confirmed and _confirm_exit_if_needed("main_menu", change_scene, _save_campaign_before_exit()):
 		return {"ok":false,"reason":"confirmation_required"}
 	_play_ui_sfx("cancel", "return_to_main_menu")
 	if change_scene and not _test_mode:
@@ -290,7 +290,7 @@ func return_to_main_menu(change_scene: bool = true, confirmed: bool = false) -> 
 
 
 func request_quit_game(confirmed: bool = false) -> Dictionary:
-	if not confirmed and _confirm_exit_if_needed("quit"):
+	if not confirmed and _confirm_exit_if_needed("quit", true, _save_campaign_before_exit()):
 		return {"ok":false,"reason":"confirmation_required"}
 	_play_ui_sfx("cancel", "quit_game")
 	if _test_mode:
@@ -466,7 +466,16 @@ func _campaign_save_projection() -> Dictionary:
 	return scene.get_campaign_save_projection() if _is_campaign_context() and scene.has_method("get_campaign_save_projection") else {}
 
 
-func _confirm_exit_if_needed(action: String, change_scene: bool = true) -> bool:
+## Ein Speicherversuch je Beenden-Vorgang (Spiel beenden oder Hauptmenue), vor der Nachfrage. Nur im ersten, unbestaetigten Aufruf;
+## der bestaetigte Aufruf speichert nicht noch einmal. Ausserhalb der Kampagne passiert nichts. Auch im Testmodus.
+func _save_campaign_before_exit() -> Dictionary:
+	var tree := get_tree()
+	var current_scene := tree.current_scene if tree != null else null
+	if not _is_campaign_context() or not current_scene.has_method("request_campaign_save"): return {}
+	return current_scene.call("request_campaign_save")
+
+
+func _confirm_exit_if_needed(action: String, change_scene: bool = true, save_result: Dictionary = {}) -> bool:
 	var projection := _campaign_save_projection()
 	if projection.is_empty() or not projection.get("has_unsaved_progress", false): return false
 	_ensure_overlay()
@@ -481,6 +490,8 @@ func _confirm_exit_if_needed(action: String, change_scene: bool = true) -> bool:
 	_exit_label.text = "Ungespeicherter Fortschritt\n\nBei Fortsetzen wird geladen:\n" + String(projection.get("summary", "Kein gültiger Stand vorhanden."))
 	var blocked := String(projection.get("save_blocked_text", ""))
 	if not blocked.is_empty(): _exit_label.text += "\n\n" + blocked
+	var refused := String(save_result.get("message", "")) if not bool(save_result.get("ok", true)) else ""
+	if not refused.is_empty() and not _exit_label.text.contains(refused): _exit_label.text += "\n\n" + refused
 	_exit_label.text += "\n\nEinsätze laufen auch während dieser Rückfrage weiter."
 	_exit_save.disabled = not projection.get("can_save", false)
 	_exit_save.text = "Speichern und beenden" if action == "quit" else "Speichern und zum Hauptmenü"

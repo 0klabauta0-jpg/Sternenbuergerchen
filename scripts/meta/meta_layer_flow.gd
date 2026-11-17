@@ -388,6 +388,7 @@ func _ready() -> void:
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
+	if is_campaign_start(): _reset_completion_save_baseline()
 	# Task 5b: der Malus wird sofort mit dem Basisstand gespeichert (ersetzt auch den ausstehenden Eintrag).
 	if _total_loss_penalty_unsaved:
 		_total_loss_penalty_unsaved = false
@@ -439,6 +440,7 @@ func _restore_active_campaign() -> void:
 	# Der Aufbau ueber _configure_mission_instance wurde beim Fortsetzen uebersprungen: die Ausfallregeln nachziehen.
 	_apply_campaign_casualty_rules(scene, false)
 	_campaign_start.set("active_restore_in_progress",false)
+	_reset_completion_save_baseline()
 
 
 func _process(_delta: float) -> void:
@@ -492,6 +494,7 @@ func _process(_delta: float) -> void:
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
 			if bool(saved.get("ok", false)) or String(saved.get("reason", "")) not in ["away_from_checkpoint", "preparation_in_progress"]:
 				set_meta("campaign_checkpoint_result", saved)
+			_poll_completion_save()
 			if profile_enabled:
 				scopes["checkpoint_usec"] = Time.get_ticks_usec() - scope_started_usec
 				scope_started_usec = Time.get_ticks_usec()
@@ -8902,12 +8905,69 @@ func _reopen_retreated_jobs_before_home_checkpoint() -> void:
 				push_warning("Rueckzugsauftrag %s konnte zu Hause nicht wieder geoeffnet werden; naechster Versuch beim naechsten Speichern." % String(job_id))
 
 
+## Abschluss-Speichern (N10): Zahl der Kampagnenauftraege mit Status "completed" beim letzten Abgleich (-1 = noch nicht gesetzt).
+## Waechst sie an der Basis, folgt genau ein erzwungenes Speichern ueber request_campaign_save().
+var _completed_jobs_seen: int = -1
+## Ein Abschluss wartet noch auf sein Speichern (der erste Versuch wurde abgelehnt oder steht noch aus).
+var _completion_save_open: bool = false
+var _completion_save_next_msec: int = 0
+var _completion_save_warned: bool = false
+
+func _completed_campaign_job_count() -> int:
+	if _singleplayer_runtime == null: return -1
+	var campaign_owner: Object = _singleplayer_runtime.get("_campaign")
+	if campaign_owner == null: return -1
+	var count := 0
+	var jobs: Dictionary = Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {}))
+	for job_id in jobs.keys():
+		if String(Dictionary(jobs[job_id]).get("status", "")) == "completed": count += 1
+	return count
+
+
+## Setzt den zuletzt gesehenen Stand auf den jetzt geltenden Wert (Laden, Kampagnenstart): Laden loest kein Speichern aus.
+func _reset_completion_save_baseline() -> void:
+	_completed_jobs_seen = _completed_campaign_job_count()
+	_completion_save_open = false
+	_completion_save_warned = false
+
+
+## Laeuft an der Basis im regelmaessigen Takt von _process. Im Einsatz bleibt der Abgleich stehen; ein dort abgeschlossener
+## Auftrag wird nach der Rueckkehr zur Basis gespeichert. Fehlgeschlagene Versuche wiederholen sich hoechstens einmal je Sekunde.
+func _poll_completion_save() -> void:
+	if not is_campaign_start() or _singleplayer_runtime == null or is_instance_valid(_active_mission): return
+	if bool(_campaign_start.get("active_restore_in_progress")): return
+	var count := _completed_campaign_job_count()
+	if count < 0: return
+	if _completed_jobs_seen < 0:
+		_completed_jobs_seen = count
+		return
+	if count > _completed_jobs_seen: _completion_save_open = true
+	elif not _completion_save_open:
+		_completed_jobs_seen = count
+		return
+	if not _completion_save_open: return
+	var now := Time.get_ticks_msec()
+	if now < _completion_save_next_msec: return
+	var result: Dictionary = request_campaign_save()
+	if bool(result.get("ok", false)):
+		_completed_jobs_seen = count
+		_completion_save_open = false
+		_completion_save_warned = false
+		return
+	_completion_save_next_msec = now + 1000
+	if not _completion_save_warned:
+		_completion_save_warned = true
+		push_warning("Speichern nach Auftragsabschluss abgelehnt (%s); wird wiederholt." % String(result.get("reason", "")))
+
+
 func request_campaign_save() -> Dictionary:
+	set_meta("campaign_save_attempts", int(get_meta("campaign_save_attempts", 0)) + 1)
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
 	if not is_instance_valid(_active_mission): _reopen_retreated_jobs_before_home_checkpoint()
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
 	set_meta("campaign_active_checkpoint_result" if is_instance_valid(_active_mission) else "campaign_checkpoint_result", result.duplicate(true))
 	if result.get("ok",false):
+		set_meta("campaign_save_successes", int(get_meta("campaign_save_successes", 0)) + 1)
 		result["message"] = "Kampagne gespeichert."
 		if is_instance_valid(_active_mission): _active_autosave_next_msec = Time.get_ticks_msec() + 300000
 	else:
