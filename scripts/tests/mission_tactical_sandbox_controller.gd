@@ -3981,7 +3981,14 @@ func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = fals
 		_last_command_text = _air_defense_feedback_text if not _air_defense_feedback_text.is_empty() else "DROP INBOUND %s" % _get_approach_angle_name()
 	else:
 		_drop_ship_requested = false
-		_last_command_text = _air_defense_feedback_text if not _air_defense_feedback_text.is_empty() else "NO DROP TEAM AVAILABLE"
+		if not _air_defense_feedback_text.is_empty():
+			_last_command_text = _air_defense_feedback_text
+		elif not _drop_refusal_text.is_empty():
+			# Die Landung lehnt den Platz ab: Der Spieler liest den Grund, nicht "kein Trupp".
+			_last_command_text = _drop_refusal_text
+			_set_mission_dropship_card_feedback(_mission_drop_craft_id, _drop_refusal_text)
+		else:
+			_last_command_text = "NO DROP TEAM AVAILABLE"
 	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
@@ -36399,14 +36406,20 @@ func _maybe_bootstrap_live_drop() -> void:
 		_live_drop_bootstrap_consumed = true
 
 
+## Grund, aus dem das Absetzen den Landeplatz ablehnt (leer: nicht wegen des Landeplatzes gescheitert).
+## Der Aufrufer zeigt ihn statt "NO DROP TEAM AVAILABLE".
+var _drop_refusal_text: String = ""
+
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	_air_defense_feedback_text = ""
+	_drop_refusal_text = ""
 	var pending_landing:Dictionary={}
 	if _should_keep_campaign_dropship_landed():
 		if not _has_lz_position: return false
 		var validation: Dictionary = _resolve_campaign_field_lz()
 		if not bool(validation.ok):
 			_last_command_text = String(validation.get("message", "Landeflaeche ist nicht frei"))
+			_drop_refusal_text = _last_command_text
 			return false
 		pending_landing=validation
 	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
@@ -36456,6 +36469,7 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	var landing:Dictionary=_prepare_ground_ship_landing(_mission_drop_craft_id,pending_landing)
 	if not bool(landing.get("ok",false)):
 		_last_command_text=String(landing.get("message","Landeplatz ist noch nicht bereit"))
+		_drop_refusal_text=_last_command_text
 		return false
 	if not _resolve_air_defense_on_approach(Vector2(landing.get("resolved_lz_position", Dictionary(_field_landing_by_craft.get(_mission_drop_craft_id, {})).get("resolved_lz_position", _lz_position)))):
 		return false
