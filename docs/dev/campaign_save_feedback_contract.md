@@ -37,6 +37,15 @@ Auch Fensterschließen und Alt+F4 führen über dieselbe Ausstiegsprüfung. Nur 
 globale Menü-Autoload bindet das Hauptfenstersignal und deaktiviert dessen
 automatische Beendigung; sein Teardown gibt die vorherige Option wieder frei.
 
+Zusätzliche Speicherpunkte über `request_campaign_save()`: Wächst an der Basis
+die Zahl der abgeschlossenen Kampagnenaufträge, folgt genau ein erzwungenes
+Speichern; bei Ablehnung wird höchstens einmal je Sekunde erneut versucht, bis
+es gelingt oder ein Einsatz beginnt. Das Laden eines Stands löst nichts aus.
+„Spiel beenden“ und „Zurück ins Hauptmenü“ machen in der Kampagne je Vorgang
+genau einen Speicherversuch, bevor nachgefragt wird; gelingt er, entfällt die
+Rückfrage (keine ungespeicherten Änderungen mehr), gelingt er nicht, nennt die
+Rückfrage den Grund.
+
 Ein laufender Skirmish-Einsatz erklärt seinen Neustart ohne Fortschrittssave.
 Ein Szenenbookmark wird nicht als solcher Save angeboten. Hauptmenü und reine
 Skirmish-Vorbereitung erhalten keine zusätzliche Rückfrage.
