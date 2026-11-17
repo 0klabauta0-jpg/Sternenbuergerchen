@@ -37826,6 +37826,7 @@ func _campaign_unit_ids(units: Array) -> PackedStringArray:
 ## Bleibt ausser dem Piloten keine einsatzfaehige Person, ist Abheben ein Totalverlust (Vertrag Regel 7).
 func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedStringArray) -> String:
 	var parts := PackedStringArray()
+	var protected_names := PackedStringArray()
 	for id in casualty_ids:
 		var unit = _get_campaign_sortie_unit(String(id))
 		if unit == null or not unit.has_method("get_vital_state"): continue
@@ -37834,6 +37835,7 @@ func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedString
 		var person := String(unit.call("get_display_name")).strip_edges() if unit.has_method("get_display_name") else ""
 		if person.is_empty(): person = String(id)
 		parts.append((person + " (kritisch)") if vital in ["bleedout", "respawning"] else person)
+		if _campaign_person_protected_from_death(String(id)): protected_names.append(person)
 	if parts.is_empty(): return ""
 	# Ist der Auftrag erfuellt (der Driver hat mit mission_outcome "won" aufgeloest), wird jeder Ausgefallene gerettet (Vertrag Regel 3).
 	# Quelle der Entscheidung ist das Gate in meta_layer_flow.gd (_campaign_departure_gate): Ist der Driver fertig (Zeile 9038), loest der Abflug nichts mehr auf
@@ -37845,8 +37847,35 @@ func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedString
 	var other_fit := false
 	for unit in _get_campaign_sortie_units():
 		if String(unit.call("get_unit_id")) != pilot_id and String(unit.call("get_vital_state")) == "fit" and int(unit.call("get_health")) > 0: other_fit = true
-	var tail := "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen." if other_fit else "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
-	return "An Bord. Am Boden: %s. %s" % [", ".join(parts), tail]
+	return _campaign_aboard_sentence(parts, protected_names, other_fit)
+
+## Satz nach dem Einsteigen mit Liegenden (nicht bei erfuelltem Auftrag). Geschuetzte Personen sterben nie, sie werden in jedem Fall gerettet (Vertrag campaign_casualty_retreat_contract.md, Geschuetzte Personen).
+func _campaign_aboard_sentence(parts: PackedStringArray, protected_names: PackedStringArray, other_fit: bool) -> String:
+	var head := "An Bord. Am Boden: %s." % ", ".join(parts)
+	var loss_tail := "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
+	if protected_names.is_empty():
+		return "%s %s" % [head, "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen." if other_fit else loss_tail]
+	var rescued := _campaign_join_names(protected_names)
+	var verb := "wird" if protected_names.size() == 1 else "werden"
+	if protected_names.size() >= parts.size():
+		var only := "%s %s %s beim Abheben in jedem Fall gerettet." % [head, rescued, verb]
+		return only if other_fit else "%s %s" % [only, loss_tail]
+	var tail := "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen" if other_fit else loss_tail.trim_suffix(".")
+	return "%s %s; %s %s in jedem Fall gerettet." % [head, tail, rescued, verb]
+
+func _campaign_join_names(names: PackedStringArray) -> String:
+	if names.size() <= 1: return "".join(names)
+	return "%s und %s" % [", ".join(names.slice(0, names.size() - 1)), names[names.size() - 1]]
+
+## Auskunft der Kampagne (Besitzer: SingleplayerRuntimeAdapter), wie sie auch die Ausfallregeln beim Abheben benutzen; ohne Kampagne false.
+func _campaign_person_protected_from_death(unit_id: String) -> bool:
+	var ancestor: Node = get_parent()
+	while ancestor != null:
+		if ancestor.has_method("get_singleplayer_snapshot"):
+			var adapter: Variant = ancestor.get("_singleplayer_runtime")
+			return adapter != null and adapter.has_method("is_person_protected_from_death") and bool(adapter.call("is_person_protected_from_death", unit_id))
+		ancestor = ancestor.get_parent()
+	return false
 
 func _advance_campaign_extraction(delta: float) -> void:
 	_advance_selected_team_boarding(delta)

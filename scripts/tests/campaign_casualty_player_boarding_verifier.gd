@@ -40,6 +40,9 @@ func _run() -> void:
 	if await _open_sortie():
 		await _scene_pb7_mission_won()
 	await _close_sortie()
+	if await _open_sortie():
+		await _scene_pb8_protected_persons()
+	await _close_sortie()
 	print("CAMPAIGN_CASUALTY_PLAYER_BOARDING passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -302,6 +305,52 @@ func _scene_pb6_pilot_down() -> void:
 	_check(not bool(snapshot.get("can_board", true)) and String(snapshot.get("message", "")) == String(direct.get("message", TEXT_PILOT_DOWN)), "PB6 Aufsitzen: Snapshot lehnt ab: %s" % _clean(String(snapshot.get("message", ""))))
 	var board: Dictionary = _controller.request_selected_team_boarding()
 	_check(not bool(board.get("ok", true)) and not _request_open(), "PB6 Aufsitzen: abgelehnt, keine Anfrage offen")
+
+## PB8: Geschuetzte Personen (is_person_protected_from_death) sterben nie; der Satz nach dem Einsteigen darf fuer sie nicht "gilt als gefallen" sagen.
+## Die Satzbildung steht in _campaign_aboard_sentence und wird mit erfundenen Namen fuer alle Faelle geprueft (mit nur zwei Personen im Einsatz
+## ist "geschuetzt und ungeschuetzt liegen, ein Dritter ist fit" nicht herstellbar); dazu zwei Faelle mit dem echten Piloten (geschuetzt) und dem Truppfuehrer.
+func _scene_pb8_protected_persons() -> void:
+	_begin_scene("PB8")
+	var sentence := func(parts: Array, protected_names: Array, other_fit: bool) -> String:
+		return String(_controller.call("_campaign_aboard_sentence", PackedStringArray(parts), PackedStringArray(protected_names), other_fit))
+	_check(sentence.call(["A (kritisch)"], [], true) == "An Bord. Am Boden: A (kritisch). " + TEXT_TAIL_RECOVERY, "PB8 nur Ungeschuetzte: Satz wie bisher (%s)" % sentence.call(["A (kritisch)"], [], true))
+	_check(sentence.call(["A (kritisch)"], [], false) == "An Bord. Am Boden: A (kritisch). " + TEXT_TAIL_TOTAL_LOSS, "PB8 nur Ungeschuetzte ohne weitere Person: Totalverlust wie bisher")
+	var mixed: String = sentence.call(["A (kritisch)", "B (kritisch)"], ["B"], true)
+	_check(mixed == "An Bord. Am Boden: A (kritisch), B (kritisch). Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen; B wird in jedem Fall gerettet.", "PB8 gemischt: Satz mit einer Geschuetzten (%s)" % mixed)
+	var mixed_two: String = sentence.call(["A (kritisch)", "B (kritisch)", "C"], ["B", "C"], true)
+	_check(mixed_two == "An Bord. Am Boden: A (kritisch), B (kritisch), C. Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen; B und C werden in jedem Fall gerettet.", "PB8 gemischt: Mehrzahl (%s)" % mixed_two)
+	var only: String = sentence.call(["B (kritisch)"], ["B"], true)
+	_check(only == "An Bord. Am Boden: B (kritisch). B wird beim Abheben in jedem Fall gerettet.", "PB8 nur Geschuetzte: Einzahl (%s)" % only)
+	var only_two: String = sentence.call(["B (kritisch)", "C"], ["B", "C"], true)
+	_check(only_two == "An Bord. Am Boden: B (kritisch), C. B und C werden beim Abheben in jedem Fall gerettet.", "PB8 nur Geschuetzte: Mehrzahl (%s)" % only_two)
+	var only_loss: String = sentence.call(["B (kritisch)"], ["B"], false)
+	_check(only_loss == "An Bord. Am Boden: B (kritisch). B wird beim Abheben in jedem Fall gerettet. " + TEXT_TAIL_TOTAL_LOSS, "PB8 nur Geschuetzte, Totalverlust-Zusatz bleibt (%s)" % only_loss)
+	_check(not only.contains("geborgen") and not mixed.contains("geborgen"), "PB8 Sprachregel: Lebende werden gerettet, nicht geborgen")
+	# Echte Personen: der Pilot des Schiffs ist geschuetzt, der Truppfuehrer nicht.
+	var runtime: Node = _flow.get("_singleplayer_runtime")
+	if not _check(runtime != null and bool(runtime.call("is_person_protected_from_death", _pilot_id)) and not bool(runtime.call("is_person_protected_from_death", LEADER_ID)), "PB8 Vorbedingung: Pilot geschuetzt, Truppfuehrer nicht"):
+		return
+	if not await _prepare_ground():
+		_check(false, "PB8 Vorbedingung: Trupp am Boden")
+		return
+	var pilot: Node = _controller.call("_get_campaign_sortie_unit", _pilot_id)
+	pilot.call("apply_damage", 10000)
+	var flagged: float = await _wait_scene(func(): return bool(Dictionary(_driver.call("get_casualty_flags")).get(_pilot_id, {}).get("was_downed", false)), 10.0)
+	if not _check(flagged >= 0.0 and String(pilot.call("get_vital_state")) != "fit", "PB8 Pilot liegt"):
+		return
+	var pilot_name: String = String(pilot.call("get_display_name")).strip_edges()
+	var pilot_label: String = pilot_name + (" (kritisch)" if _critical(pilot) else "")
+	var protected_text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([_pilot_id])))
+	_check(protected_text == "%s%s. %s wird beim Abheben in jedem Fall gerettet." % [TEXT_ABOARD_PREFIX, pilot_label, pilot_name], "PB8 echter Pilot liegt (Truppfuehrer fit): nur Geschuetzte, kein 'gefallen' (%s)" % protected_text)
+	# Fallen beide aus, loest der Driver die Niederlage auf und die Flags werden nicht mehr gefuehrt: nur den Zustand pruefen.
+	_leader.call("apply_damage", 10000)
+	await _wait_scene(Callable(self, "_never"), 1.0)
+	if not _check(String(_leader.call("get_vital_state")) != "fit", "PB8 Truppfuehrer liegt auch"):
+		return
+	var leader_label: String = _leader_name() + (" (kritisch)" if _critical(_leader) else "")
+	pilot_label = pilot_name + (" (kritisch)" if _critical(pilot) else "")
+	var mixed_text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([LEADER_ID, _pilot_id])))
+	_check(mixed_text == "%s%s, %s. Abheben wäre ein Totalverlust: Bodenteam ausgefallen; %s wird in jedem Fall gerettet." % [TEXT_ABOARD_PREFIX, leader_label, pilot_label, pilot_name], "PB8 echt gemischt (niemand fit): Totalverlust-Schluss mit Rettung des Piloten (%s)" % mixed_text)
 
 ## PB7: Einsteigen mit Liegender bei erfuelltem Auftrag. Der Driver hat den Sieg aufgeloest (mission_outcome "won"): jeder Ausgefallene wird gerettet,
 ## der Satz darf nicht sagen, dass Fernliegende als gefallen gelten, und der Totalverlust-Zusatz entfaellt.
