@@ -30,7 +30,7 @@ abbekommt. Zuerst als Gegner **[N]**.
 | Tiefflug mit Preis | Profil `low` bei "vorsichtig", Streukreis der Kampagnen-Feldlandung x 1,5 |
 | Sichtlinie gegen Gelaende im Anflug | **offen**; heute immer frei |
 | Absturz im Anflug | **offen**; Zerstoerung wird zum erzwungenen Abbruch mit Rumpf 1 % |
-| Start und Bergung (Abflug) unter Beschuss | **offen** |
+| Start und Abholen (Abflug) unter Beschuss | **offen** |
 | Fahrzeug als Einheit am Boden (Besatzung, Schaden, Herausschiessen, Uebernehmen) | **offen**, Regeln unten |
 | Panzerfaust und Schienengewehr im Laden | **offen**, Preisvorschlag unten |
 | Transportschiff fuer Fahrzeuge | **offen**, eigenes Modell und eigene Regel |
