@@ -737,7 +737,7 @@ func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 func get_credits() -> int:
 	return _credits
 
-## Notbergung nach einem Totalverlust: bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ.
+## Notrettung nach einem Totalverlust: bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ.
 ## Gibt die tatsaechlich abgezogene Summe zurueck.
 func charge_credits_capped(amount: int) -> Dictionary:
 	if amount < 0:
