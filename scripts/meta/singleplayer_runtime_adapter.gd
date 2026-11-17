@@ -1759,7 +1759,7 @@ func export_campaign_checkpoint() -> Dictionary:
 func get_campaign_credits() -> int:
 	return _supply.get_credits() if _supply != null else 0
 
-## Task 5b: Bergungsgebuehr nach Totalverlust. Zieht hoechstens das vorhandene Guthaben ab (nie ins Minus).
+## Task 5b: Rettungsgebuehr nach Totalverlust. Zieht hoechstens das vorhandene Guthaben ab (nie ins Minus).
 func charge_campaign_credits_capped(amount: int) -> Dictionary:
 	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
 	return _supply.charge_credits_capped(amount)
@@ -1782,7 +1782,7 @@ func validate_fallen_entry(entry: Dictionary) -> Dictionary:
 	return {"ok": true}
 
 ## Lesende Auskunft: Diese Person setzt die Kampagne voraus (Fortschritts-Rekruten, Schiffspilot, Anwerber des Marktes).
-## Sie stirbt nicht; sie gilt als schwer verwundet geborgen.
+## Sie stirbt nicht; sie gilt als schwer verwundet gerettet.
 func is_person_protected_from_death(unit_id: String) -> bool:
 	if unit_id in ["campaign_outpost_recruit", "campaign_rescue_pilot"]: return true
 	if is_instance_valid(_flow):
