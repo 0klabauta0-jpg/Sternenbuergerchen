@@ -4618,7 +4618,7 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	# Nach der Fortschrittsrechnung, damit die Stufe "wounded" den dort gesetzten Status "recovering" ueberschreibt.
 	_last_mission_result = _apply_campaign_casualties(_last_mission_result)
 	if failed_extraction and bool(_last_mission_result.get("casualty_total_loss", false)):
-		# Task 5b: Notbergung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
+		# Task 5b: Notrettung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
 		var total_loss_penalty: Dictionary = _stage_total_loss_penalty(_last_mission_result)
 		if not total_loss_penalty.is_empty():
 			_last_mission_result["total_loss_penalty"] = total_loss_penalty
@@ -4656,7 +4656,7 @@ func _mark_campaign_total_loss(resolved_result: Dictionary, mission_result: Dict
 
 
 ## Task 5b: Eine laufende Verwundung wird nie kuerzer und nie leichter. Liefert den recovery_state, der fuer die Person
-## gilt (Stufe aus den Regeln, mit der bisherigen verrechnet). Gemeinsam fuer Verluste am Missionsende und die Notbergung.
+## gilt (Stufe aus den Regeln, mit der bisherigen verrechnet). Gemeinsam fuer Verluste am Missionsende und die Notrettung.
 func _merge_campaign_recovery_state(unit: Dictionary, severity: String, rules: Dictionary) -> Dictionary:
 	var recovery: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_recovery_state", severity, rules))
 	var existing: Dictionary = Dictionary(unit.get("recovery_state", {}))
@@ -4670,7 +4670,7 @@ func _merge_campaign_recovery_state(unit: Dictionary, severity: String, rules: D
 	return recovery
 
 
-## Task 5b: Notbergung nach Totalverlust, Schritt 1 (sobald der Totalverlust feststeht, noch vor dem Debrief).
+## Task 5b: Notrettung nach Totalverlust, Schritt 1 (sobald der Totalverlust feststeht, noch vor dem Debrief).
 ## Der Malus wird aus den team_states des verlorenen Einsatzes und dem Guthaben des Basisstands berechnet, auf den
 ## zurueckgesprungen wird (die Checkpoint-Datei), und mit einer Kennung (loss_id) in einer Zusatzdatei neben dem Checkpoint
 ## gesichert (campaign_checkpoint_store.save_pending_total_loss, mit der Pruefsumme des Checkpoints). Der Checkpoint selbst
@@ -4685,7 +4685,7 @@ func _stage_total_loss_penalty(mission_result: Dictionary) -> Dictionary:
 		return {}
 	var loaded: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.load_checkpoint()
 	if not bool(loaded.get("ok", false)):
-		push_error("Notbergung: Basisstand nicht lesbar (%s), kein Malus" % String(loaded.get("reason", "")))
+		push_error("Notrettung: Basisstand nicht lesbar (%s), kein Malus" % String(loaded.get("reason", "")))
 		return {}
 	var payload: Dictionary = Dictionary(loaded.get("payload", {}))
 	var known: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.load_pending_total_loss()
@@ -4700,13 +4700,13 @@ func _stage_total_loss_penalty(mission_result: Dictionary) -> Dictionary:
 	var loss_id: String = ("%s|%s|%s|%s|%d|%d" % [String(_campaign_start.get("campaign_run_id")), job_id, String(_active_singleplayer_identity.get("location_id", "")), String(_active_singleplayer_identity.get("craft_id", "")), Time.get_unix_time_from_system(), Time.get_ticks_usec()]).sha256_text()
 	var saved: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.save_pending_total_loss({"loss_id": loss_id, "job_id": job_id, "penalty": penalty.duplicate(true)})
 	if not bool(saved.get("ok", false)):
-		push_error("Notbergung: Malus konnte nicht neben dem Basisstand gesichert werden (%s), kein Malus" % String(saved.get("reason", "")))
+		push_error("Notrettung: Malus konnte nicht neben dem Basisstand gesichert werden (%s), kein Malus" % String(saved.get("reason", "")))
 		return {}
 	penalty["loss_id"] = loss_id
 	return penalty
 
 
-## Task 5b: Notbergung nach Totalverlust, Schritt 2 (beim Wiederherstellen des Basisstands, nach dem Aufbau der Laufzeit).
+## Task 5b: Notrettung nach Totalverlust, Schritt 2 (beim Wiederherstellen des Basisstands, nach dem Aufbau der Laufzeit).
 ## Gibt es die Zusatzdatei und bezieht sie sich auf genau den geladenen Stand, wird der Malus angewendet: Gebuehr (hoechstens das
 ## Guthaben) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
 ## (auf 0..1 begrenzt). _ready schreibt den Basis-Checkpoint danach sofort und loescht DANACH die Zusatzdatei; der neu
@@ -4725,11 +4725,11 @@ func _apply_pending_total_loss_penalty() -> bool:
 	var pending: Dictionary = CAMPAIGN_CHECKPOINT_STORE_SCRIPT.load_pending_total_loss()
 	if not bool(pending.get("ok", false)):
 		if String(pending.get("reason", "")) == "pending_invalid":
-			push_warning("Notbergung: Zusatzdatei unlesbar, wird ohne Wirkung geloescht")
+			push_warning("Notrettung: Zusatzdatei unlesbar, wird ohne Wirkung geloescht")
 			CAMPAIGN_CHECKPOINT_STORE_SCRIPT.clear_pending_total_loss()
 		return false
 	if not bool(pending.get("matches_checkpoint", false)):
-		push_warning("Notbergung: Zusatzdatei gehoert zu einem anderen Stand (veraltet), wird ohne Wirkung geloescht")
+		push_warning("Notrettung: Zusatzdatei gehoert zu einem anderen Stand (veraltet), wird ohne Wirkung geloescht")
 		CAMPAIGN_CHECKPOINT_STORE_SCRIPT.clear_pending_total_loss()
 		return false
 	var rules: Dictionary = _get_campaign_casualty_rules()
@@ -4811,7 +4811,7 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		if String(entry.get("outcome", "")) == "wounded":
 			severities[unit_id] = String(entry.get("severity", "light"))
 	# Personen, die die Kampagne voraussetzt (Fortschritts-Rekrut, Schiffspilot, Anwerber), sterben nicht: Sie gelten als
-	# schwer verwundet geborgen und gehen den normalen Weg der Verwundeten. Die Pruefung gilt je Person.
+	# schwer verwundet gerettet und gehen den normalen Weg der Verwundeten. Die Pruefung gilt je Person.
 	var fatal_unit_ids: PackedStringArray = PackedStringArray()
 	for raw_fatal_id in PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())):
 		var fatal_id: String = String(raw_fatal_id)
