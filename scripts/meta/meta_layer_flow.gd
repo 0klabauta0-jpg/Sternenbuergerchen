@@ -5813,6 +5813,7 @@ func _refresh_homebase_screen() -> void:
 		homebase_screen.call("set_last_mission_result_summary", _last_mission_result.duplicate(true))
 	if homebase_screen.has_method("set_post_mission_skill_delta_summary"):
 		homebase_screen.call("set_post_mission_skill_delta_summary", Dictionary(_last_mission_result.get("progression_award_summary", {})))
+	if not _homecoming_pending_payload.is_empty(): _apply_homecoming_payload_assignments()
 
 
 func _build_homebase_aircraft_definitions_with_recovery() -> Array:
@@ -8846,6 +8847,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	var follow_arrival := _current_meta_view == "star_map" and _get_view_travel_craft_id() == craft_id
 	var returning_mission := get_mission_for_craft(craft_id)
 	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
+	_homecoming_pending_payload.erase(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_admit_unplaced_aboard_crew(craft_id)
@@ -9693,14 +9695,17 @@ func _homecoming_team_for(craft_id: String) -> String:
 	return ""
 
 ## Assigns the free team chosen by _homecoming_team_for to its craft through the base view's assignment path.
+## A note is only cleared once it was applied to a refreshed view. While the view is not refreshed (a mission runs and
+## the base view is hidden) it stays and is applied at the end of the next successful _refresh_homebase_screen; a later
+## landing of the same craft replaces it; a craft that meanwhile holds another team (the player assigned one) drops it.
 func _apply_homecoming_payload_assignments() -> void:
 	var home_screen: Node=_get_homebase_screen()
-	if home_screen!=null:
-		for craft_id in _homecoming_pending_payload:
-			var team:=String(_homecoming_pending_payload[craft_id])
-			var held: PackedStringArray=home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(craft_id))
-			if not held.has(team): home_screen.call("_add_homebase_direct_payload_fireteam_to_craft",team,String(craft_id))
-	_homecoming_pending_payload.clear()
+	if home_screen==null or _homebase_presentation_dirty: return
+	for craft_id in _homecoming_pending_payload.keys():
+		var team:=String(_homecoming_pending_payload[craft_id])
+		var held: PackedStringArray=home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(craft_id))
+		if held.is_empty(): home_screen.call("_add_homebase_direct_payload_fireteam_to_craft",team,String(craft_id))
+		_homecoming_pending_payload.erase(craft_id)
 
 func _staged_team_has_members(team: String) -> bool:
 	for index in mini(_homebase_staged_unit_ids.size(),_homebase_staged_fireteam_ids.size()):

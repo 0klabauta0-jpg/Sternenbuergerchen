@@ -150,6 +150,10 @@ func _scenario(label: String, o: Dictionary) -> void:
 		screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", held)
 		_check(PackedStringArray(screen.call("_get_member_unit_ids_for_fireteam", "ft2")).is_empty(), label + ": fixture: the base view has no members for the second team")
 		_check(_payload(screen, SHIP2) == ["ft2"] and _payload(screen, SHIP1) == ["ft1"], label + ": fixture: both ships keep their assigned team")
+	if bool(o.get("assigned_empty", false)):
+		# Stage 2: ship 2 holds an assigned team without any member (put in directly, the setters would drop it).
+		screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {SHIP1: PackedStringArray(["ft1"]), SHIP2: PackedStringArray(["ft2"])})
+		_check(_payload(screen, SHIP2) == ["ft2"] and _payload(screen, SHIP1) == ["ft1"], label + ": fixture: ship 2 holds ft2 without members")
 	var dummy_mission: Node = null
 	if hidden_view:
 		# A mission of the first ship runs: the base view is hidden and _refresh_homebase_screen returns early.
@@ -192,7 +196,8 @@ func _scenario(label: String, o: Dictionary) -> void:
 		var loaded_payload2 := _payload(screen, SHIP2)
 		print("TWO_CRAFT_LOADED ", label, " ", var_to_str({"teams": loaded_teams, "payload1": _payload(screen, SHIP1), "payload2": loaded_payload2, "person": _person(owner, displaced)}))
 		if unboard:
-			_check(String(_person(owner, displaced).get("status", "")) != "aboard" and not _in_any_team(loaded_teams, displaced), label + ": after loading the person still stands at the base")
+			_check(String(_person(owner, displaced).get("status", "")) == "outside" and not _in_any_team(loaded_teams, displaced), label + ": after loading the person stands outside at the base, in no team")
+			_check(_payload(screen, SHIP1) == ["ft1"] and Array(loaded_teams.get("ft1", [])) == first_before and loaded_payload2.is_empty(), label + ": after loading ft1 still belongs to the first ship and the second ship has no team")
 		else:
 			_check(not loaded_payload2.is_empty() and Array(loaded_teams.get(String(loaded_payload2[0]), [])).has(displaced) and _payload(screen, SHIP1) == ["ft1"], label + ": after loading the second ship still has its team with the person")
 		flow.queue_free(); await process_frame
@@ -213,5 +218,7 @@ func _run() -> void:
 	await _scenario("S3", {"free_team": true, "reload": true})
 	await _scenario("S4", {"unboard": true})
 	await _scenario("S5", {"second_team": true, "swap": true, "hidden_view": true, "reload": true})
+	await _scenario("S5b", {"free_team": true, "hidden_view": true, "reload": true})
+	await _scenario("S5c", {"free_team": true, "assigned_empty": true, "hidden_view": true, "reload": true})
 	print("CAMPAIGN_PILOT_SWAP_TWO_CRAFT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
