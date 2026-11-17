@@ -815,7 +815,7 @@ func _apply_player_readout_texts() -> void:
 	(vbox.get_node("AARSummaryLabel") as Label).text = "Gemeldete Gefechtsdaten"
 	(vbox.get_node("AARRowsLabel") as Label).text = "%d Kennzahlen · Liste scrollen" % Array(aar.get("rows", [])).size()
 	(vbox.get_node("AARLimitLabel") as Label).text = "Diese Auswertung vergibt selbst keine Erfahrung."
-	var chip_names := {"shots": "Schüsse", "hits": "Treffer", "ff": "Eigenbeschuss", "sup": "Unterdrückung", "wounded": "Verwundete", "extracted": "Geborgen"}
+	var chip_names := {"shots": "Schüsse", "hits": "Treffer", "ff": "Eigenbeschuss", "sup": "Unterdrückung", "wounded": "Verwundete", "extracted": "Ausgeflogen"}
 	var chips: Array = aar.get("chips", [])
 	var strip := vbox.get_node("AARChipStrip") as HBoxContainer
 	for index in range(mini(chips.size(), strip.get_child_count())):
@@ -843,9 +843,9 @@ func _apply_player_readout_texts() -> void:
 	var checkpoint_retry := bool(_mission_result.get("campaign_checkpoint_retry_required", false))
 	if checkpoint_retry:
 		_native_review_confirmation.text = "Heimkehr nicht moeglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen laedt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
-		# Task 5b: Notbergung nach Totalverlust, nur aus dem Ergebnis gelesen.
+		# Task 5b: Notrettung nach Totalverlust, nur aus dem Ergebnis gelesen.
 		if bool(_mission_result.get("casualty_total_loss", false)) and typeof(_mission_result.get("total_loss_penalty")) == TYPE_DICTIONARY:
-			_native_review_confirmation.text += "\nNotbergung · %d Credits Bergungsgebühr" % int(Dictionary(_mission_result.get("total_loss_penalty")).get("rescue_fee", 0))
+			_native_review_confirmation.text += "\nNotrettung · %d Credits Rettungsgebühr" % int(Dictionary(_mission_result.get("total_loss_penalty")).get("rescue_fee", 0))
 	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
 		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
 		if not button.has_meta("debrief_original_text"):
@@ -932,7 +932,7 @@ func _refresh_native_report_sections() -> void:
 
 
 func _player_metric_text(text: String) -> String:
-	var replacements := {"Friendly Fire": "Eigenbeschuss", "FIRE": "Schüsse", "Fire": "Schüsse", "HIT": "Treffer", "SUP": "Unterdrückung", "Suppress": "Unterdrückung", "WOUND": "Verwundet", "DOWN": "Ausgefallen", "EXT": "Geborgen", "Risk": "Risiko"}
+	var replacements := {"Friendly Fire": "Eigenbeschuss", "FIRE": "Schüsse", "Fire": "Schüsse", "HIT": "Treffer", "SUP": "Unterdrückung", "Suppress": "Unterdrückung", "WOUND": "Verwundet", "DOWN": "Ausgefallen", "EXT": "Ausgeflogen", "Risk": "Risiko"}
 	for token in replacements:
 		text = text.replace(token, replacements[token])
 	return text

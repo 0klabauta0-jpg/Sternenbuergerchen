@@ -1,5 +1,5 @@
 extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
-## Task 5b (Ausfall und Rueckzug): Malus bei Totalverlust (Notbergung).
+## Task 5b (Ausfall und Rueckzug): Malus bei Totalverlust (Notrettung).
 ## P1 echter Einsatz, Totalverlust am Missionsende: 500 -> 375 Credits, leicht verwundet (180 s), Moral -0,08, Ergebnis mit total_loss_penalty.
 ## P2 Neuaufbau und Fortsetzen (zweimal): Guthaben, Restzeit und Moral aendern sich nicht mehr.
 ## P3 mehrfache Zustellung des Ergebnisses und mehrfaches Bestaetigen des Debriefs: kein zweiter Abzug.
@@ -9,13 +9,13 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## P7 schon schwer verwundet (2000 s): bleibt schwer mit 2000 s (nie kuerzer, nie leichter).
 ## P9 Zusatzdatei: veraltet -> ohne Wirkung geloescht, neue Kampagne loescht sie, Checkpoint beim Totalverlust unberuehrt.
 ## (Der Fall "Abbruch nach dem Speichern, vor dem Loeschen" und "Fenster" laufen im echten Einsatz von P1/P2/P3.)
-## P8 Debrief: Zeile "Notbergung · <Betrag> Credits Bergungsgebuehr" nur mit total_loss_penalty.
+## P8 Debrief: Zeile "Notrettung · <Betrag> Credits Rettungsgebuehr" nur mit total_loss_penalty.
 ## Einzeln starten: Umgebungsvariable T5B_ONLY (zum Beispiel "P4" oder "P1,P7") oder Kommandozeilenargument nach "--"; ohne Angabe laufen alle.
 
 const LEADER := "campaign_leader"
 const PILOT := "campaign_pilot"
 const DEBRIEF_RETURN_BUTTON := "DebriefScreen/Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton"
-const PENALTY_LINE_PREFIX := "Notbergung · "
+const PENALTY_LINE_PREFIX := "Notrettung · "
 
 func _run() -> void:
 	_configure_entry()
@@ -459,23 +459,23 @@ func _p8_debrief() -> void:
 	var status: Label = debrief.find_child("ConfirmedConsequencesStatus", true, false)
 	var text_without: String = status.text
 	var all_without: String = _debrief_texts(debrief)
-	_check(not all_without.contains("Notbergung"), "P8: Totalverlust ohne Feld: keine Notbergung-Zeile")
+	_check(not all_without.contains("Notrettung"), "P8: Totalverlust ohne Feld: keine Notrettung-Zeile")
 	var loss_with: Dictionary = loss_without.duplicate(true)
 	loss_with["total_loss_penalty"] = {"rescue_fee": 125, "wounded": [{"unit_id": LEADER, "severity": "light"}], "morale_delta": -0.08, "morale_unit_ids": [LEADER, PILOT]}
 	debrief.call("set_mission_result", loss_with)
 	var text_with: String = status.text
-	var line: String = PENALTY_LINE_PREFIX + "125 Credits Bergungsgebühr"
+	var line: String = PENALTY_LINE_PREFIX + "125 Credits Rettungsgebühr"
 	print("P8_TEXT ", text_with.replace("\n", " | "))
 	_check(_debrief_texts(debrief).contains(line), "P8: Totalverlust mit Feld zeigt '%s'" % line)
 	_check(text_with == text_without + "\n" + line, "P8: sonst Zeichen fuer Zeichen wie vorher (nur die eine Zeile mehr)")
 	debrief.call("set_mission_result", loss_without.duplicate(true))
-	_check(status.text == text_without and not _debrief_texts(debrief).contains("Notbergung"), "P8: ohne Feld wieder genau der alte Text")
+	_check(status.text == text_without and not _debrief_texts(debrief).contains("Notrettung"), "P8: ohne Feld wieder genau der alte Text")
 	var victory: Dictionary = {"result": "victory", "mission_outcome": "won", "casualty_total_loss": false, "casualties": []}
 	debrief.call("set_mission_result", victory.duplicate(true))
 	var all_victory: String = _debrief_texts(debrief)
-	_check(not all_victory.contains("Notbergung"), "P8: Sieg: keine Notbergung-Zeile")
+	_check(not all_victory.contains("Notrettung"), "P8: Sieg: keine Notrettung-Zeile")
 	var victory_with: Dictionary = victory.duplicate(true)
 	victory_with["total_loss_penalty"] = {"rescue_fee": 125}
 	debrief.call("set_mission_result", victory_with)
-	_check(not _debrief_texts(debrief).contains("Notbergung"), "P8: Sieg mit Feld (nicht vorgesehen): keine Zeile, nur bei Totalverlust")
+	_check(not _debrief_texts(debrief).contains("Notrettung"), "P8: Sieg mit Feld (nicht vorgesehen): keine Zeile, nur bei Totalverlust")
 	await _close()

@@ -55,7 +55,7 @@ func _run() -> void:
 	_check(_flow.get("_active_mission") == null and not _flow.get("_campaign_start").active_restore_in_progress and _space().phase == "grounded", "saved active mission cannot override explicit safe-home rollback")
 	_check(FileAccess.get_file_as_bytes(_archive_path(active_sha)) == active_before and not FileAccess.file_exists(ACTIVE.DEFAULT_PATH), "rollback archives valid active bytes without deleting them")
 	# Seit ad3428128 (Paket 3a, Aufgabe 5b; Vertrag docs/dev/campaign_casualty_retreat_contract.md, Regel 7) wendet das Laden des Basisstands den
-	# Totalverlust-Malus an und schreibt den Basisstand sofort neu: Bergungsgebuehr, leichte Verwundung, Moral. Frueher pruefte diese Zeile
+	# Totalverlust-Malus an und schreibt den Basisstand sofort neu: Rettungsgebuehr, leichte Verwundung, Moral. Frueher pruefte diese Zeile
 	# Byte-Gleichheit ("der Rollback schreibt den Basisstand nicht neu"); das gilt nur noch fuer alles ausser dem Malus.
 	var loss_rules: Dictionary = Dictionary(load("res://scripts/core/campaign_casualty_rules.gd").call("load_rules")).get("total_loss", {})
 	var payload_before: Dictionary = JSON.parse_string(home_before.get_string_from_utf8())
