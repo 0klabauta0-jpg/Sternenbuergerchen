@@ -16,9 +16,11 @@ const TEXT_OLD_REFUSAL: String = "Eine Bodenperson ist nicht einsatzfaehig"
 const TEXT_OLD_SNAPSHOT_REFUSAL: String = "Nicht alle Truppmitglieder sind boardingbereit"
 const TEXT_PILOT_DOWN: String = "Pilot ist nicht flugfaehig"
 const TEXT_ABOARD_PREFIX: String = "An Bord. Am Boden: "
-## Schlusssaetze der Rueckmeldung: mit weiterer einsatzfaehiger Bodenperson (Bergung nach Abstand) und im sicheren Totalverlust (nur der Pilot ist einsatzfaehig).
+## Schlusssaetze der Rueckmeldung: mit weiterer einsatzfaehiger Bodenperson (Rettung nach Abstand) und im sicheren Totalverlust (nur der Pilot ist einsatzfaehig).
 const TEXT_TAIL_RECOVERY: String = "Wer beim Abheben nicht nah am Schiff liegt, gilt als gefallen."
 const TEXT_TAIL_TOTAL_LOSS: String = "Abheben wäre ein Totalverlust: Bodenteam ausgefallen."
+## Bei erfuelltem Auftrag (mission_outcome "won" am Driver) werden alle Ausgefallenen gerettet (Vertrag Regel 3).
+const TEXT_TAIL_WON: String = "Auftrag erfüllt: Beim Abheben werden alle gerettet."
 
 var _driver: Node
 var _leader: Node
@@ -34,6 +36,9 @@ func _run() -> void:
 	await _close_sortie()
 	if await _open_sortie():
 		await _scene_pb6_pilot_down()
+	await _close_sortie()
+	if await _open_sortie():
+		await _scene_pb7_mission_won()
 	await _close_sortie()
 	print("CAMPAIGN_CASUALTY_PLAYER_BOARDING passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
@@ -297,3 +302,35 @@ func _scene_pb6_pilot_down() -> void:
 	_check(not bool(snapshot.get("can_board", true)) and String(snapshot.get("message", "")) == String(direct.get("message", TEXT_PILOT_DOWN)), "PB6 Aufsitzen: Snapshot lehnt ab: %s" % _clean(String(snapshot.get("message", ""))))
 	var board: Dictionary = _controller.request_selected_team_boarding()
 	_check(not bool(board.get("ok", true)) and not _request_open(), "PB6 Aufsitzen: abgelehnt, keine Anfrage offen")
+
+## PB7: Einsteigen mit Liegender bei erfuelltem Auftrag. Der Driver hat den Sieg aufgeloest (mission_outcome "won"): jeder Ausgefallene wird gerettet,
+## der Satz darf nicht sagen, dass Fernliegende als gefallen gelten, und der Totalverlust-Zusatz entfaellt.
+func _scene_pb7_mission_won() -> void:
+	_begin_scene("PB7")
+	if not await _prepare_ground():
+		_check(false, "PB7 Vorbedingung: Trupp am Boden")
+		return
+	if not _check(_start_march(4.0), "PB7 Vorbereitung: Trupp marschiert vom Schiff weg"):
+		return
+	await _wait_scene(_settled_after_two_seconds.bind(_game_seconds), 60.0)
+	if not _check(await _leader_down(), "PB7 Truppfuehrer liegt"):
+		return
+	if not _check(not bool(_driver.call("is_combat_finished")), "PB7 Vorbedingung: Auftrag noch nicht aufgeloest"):
+		return
+	_select_team()
+	var state_label: String = " (kritisch)" if _critical(_leader) else ""
+	var open_text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([LEADER_ID])))
+	_check(open_text == "%s%s%s. %s" % [TEXT_ABOARD_PREFIX, _leader_name(), state_label, TEXT_TAIL_TOTAL_LOSS], "PB7 Auftrag offen: Text wie bisher mit Totalverlust-Schluss (%s)" % open_text)
+	_driver.call("_resolve_combat", "victory", String(_driver.get("friendly_team_id")))
+	var outcome: String = String(Dictionary(_driver.call("get_mission_result")).get("mission_outcome", ""))
+	print("PBINFO PB7 Driver fertig=", _driver.call("is_combat_finished"), " mission_outcome=", outcome)
+	if not _check(bool(_driver.call("is_combat_finished")) and outcome == "won", "PB7 Auftrag erfuellt: Driver meldet mission_outcome 'won' (%s)" % outcome):
+		return
+	await _wait_scene(Callable(self, "_never"), 1.0)
+	if not _check(is_instance_valid(_controller) and is_instance_valid(_leader), "PB7 Controller und Truppfuehrer sind nach dem Sieg noch da"):
+		return
+	state_label = " (kritisch)" if _critical(_leader) else ""
+	var won_text: String = String(_controller.call("_campaign_casualty_aboard_text", _craft_id, PackedStringArray([LEADER_ID])))
+	_check(won_text == "%s%s%s. %s" % [TEXT_ABOARD_PREFIX, _leader_name(), state_label, TEXT_TAIL_WON], "PB7 Auftrag erfuellt: genauer Satz mit Rettung aller (%s)" % won_text)
+	var won_other: String = String(_controller.call("_campaign_casualty_aboard_text", "no_such_craft", PackedStringArray([LEADER_ID])))
+	_check(won_other == "%s%s%s. %s" % [TEXT_ABOARD_PREFIX, _leader_name(), state_label, TEXT_TAIL_WON], "PB7 Auftrag erfuellt, mit weiterer einsatzfaehiger Person: derselbe Satz (%s)" % won_other)

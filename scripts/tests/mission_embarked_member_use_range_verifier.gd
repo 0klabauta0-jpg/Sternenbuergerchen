@@ -1,9 +1,9 @@
 extends "res://scripts/tests/campaign_intro_loop_smoke.gd"
 ## Eingeschiffte Mitglieder zaehlen weder fuer die Nutzungsentfernung noch fuer die Platzvergabe.
 ## Echter Kampagnenstart, echte Landung auf der Satellitenkarte (kuerzester Einsatz mit benutzbarem
-## Objekt "satellite_data"), echtes Marschieren mit Truppfuehrer und Pilot. Einzige Fixture:
-## der Pilot wird mit der Hex-Zelle am Schiffszugang platziert (wie campaign_casualty_boarding_verifier),
-## danach geht er ueber den normalen Weg request_campaign_crew_boarding(craft, "", pilot) an Bord.
+## Objekt "satellite_data"), echtes Marschieren mit Truppfuehrer und Pilot. Der Pilot laeuft wirklich zum
+## Schiffszugang zurueck und geht ueber den normalen Weg request_campaign_crew_boarding(craft, "", pilot) an Bord.
+## Die Stilwahl und die Platzvergabe ohne Hex-Bindung laufen direkt am Bewegungsbesitzer (Stub-Einheiten bzw. echte Einheiten).
 
 const OBJECT_ID := "satellite_data"
 const MAP_PATH := "res://maps/satellite_crash_site.json"
@@ -110,6 +110,11 @@ func _style_checks(movement) -> void:
 	var records_d: Array = movement._build_member_records(squad_d, squad_d[0])
 	_check(records_d.size() == 1 and movement._resolve_effective_style(doctrine, squad_d, records_d) == rush, "Stil: 1 eingeschifft, 2 ausgefallen, 1 fit: vereinfacht, Eingeschiffte zaehlen nicht mit")
 	_free_all(squad_d)
+	# Alle vier eingeschifft: keine Records, kein Start; der Stil bleibt die Lehre, keine Vereinfachung.
+	var squad_e: Array = _stub_squad(4, 0)
+	var records_e: Array = movement._build_member_records(squad_e, squad_e[0])
+	_check(records_e.is_empty() and movement._resolve_effective_style(doctrine, squad_e, records_e) == doctrine, "Stil: alle vier eingeschifft: Lehrstil, keine Vereinfachung")
+	_free_all(squad_e)
 
 func _use_entry(controller: Node) -> Dictionary:
 	return _find_interaction(controller.call("get_mission_interaction_runtime_use_state_snapshot"), OBJECT_ID)
@@ -278,12 +283,9 @@ func _scenarios() -> void:
 	var token5 := "n7-pilot-board-5"
 	simulation.enqueue_command({"type": "move_to_position", "unit_id": _pilot_id, "team_id": "team_alpha", "target_position": plan5.targets[_pilot_id], "command_token": token5, "move_speed_factor": 1.0, "source_command_type": "pilot_board"})
 	if not _check(await _until(func(): return simulation.has_hex_destination_arrived(_pilot_id, token5), 240000), "Fall 5: Pilot laeuft zum Schiffszugang"): return
-	# Nach dem Aussteigen setzt das Schiff erst seine Landesequenz fort ("craft_not_landed"): bis zu 30 s warten.
-	var attempt: Dictionary = {}
-	await _until(func():
-		attempt["answer"] = controller.request_campaign_crew_boarding(_craft_id, "", _pilot_id)
-		return bool(Dictionary(attempt["answer"]).get("ok", false)) or String(Dictionary(attempt["answer"]).get("reason", "")) != "craft_not_landed", 30000)
-	var boarding5: Dictionary = Dictionary(attempt.get("answer", {}))
+	# Nach dem Aussteigen setzt das Schiff erst seine Landesequenz fort ("craft_not_landed"): erst warten, bis der Zugang wieder lesbar ist, dann genau einmal einschiffen.
+	if not _check(await _until(func(): return bool(Dictionary(controller.call("get_campaign_ground_ship_access", _craft_id)).get("ok", false)), 30000), "Fall 5: Schiffszugang ist wieder lesbar (gelandet)"): return
+	var boarding5: Dictionary = controller.request_campaign_crew_boarding(_craft_id, "", _pilot_id)
 	print("EMBARKED_USE pilot_boarding_5=", boarding5)
 	if not _check(bool(boarding5.get("ok", false)), "Fall 5: Pilot wird eingeschifft"): return
 	if not _check(await _until(func(): return bool(pilot.get_meta("dropship_embarked", false)) and not bool(leader.get_meta("dropship_embarked", false)), 15000), "Fall 5: nur der Pilot ist an Bord"): return

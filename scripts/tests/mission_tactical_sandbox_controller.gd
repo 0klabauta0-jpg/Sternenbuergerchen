@@ -37791,7 +37791,7 @@ func _campaign_unit_ids(units: Array) -> PackedStringArray:
 	return ids
 
 ## Rueckmeldung, wenn die Einsatzfaehigen an Bord sind und noch jemand liegt; leer, wenn niemand (mehr) liegt.
-## Wer beim Abheben als geborgen gilt: an Bord oder nahe am Schiffszugang (Vertrag Regel 3). Liegende werden nicht eingeschifft, also gilt: nah am Schiff.
+## Wer beim Abheben gerettet wird: an Bord oder nahe am Schiffszugang, bei erfuelltem Auftrag jeder (Vertrag Regel 3). Liegende werden nicht eingeschifft, also gilt: nah am Schiff.
 ## Bleibt ausser dem Piloten keine einsatzfaehige Person, ist Abheben ein Totalverlust (Vertrag Regel 7).
 func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedStringArray) -> String:
 	var parts := PackedStringArray()
@@ -37804,6 +37804,12 @@ func _campaign_casualty_aboard_text(craft_id: String, casualty_ids: PackedString
 		if person.is_empty(): person = String(id)
 		parts.append((person + " (kritisch)") if vital in ["bleedout", "respawning"] else person)
 	if parts.is_empty(): return ""
+	# Ist der Auftrag erfuellt (der Driver hat mit mission_outcome "won" aufgeloest), wird jeder Ausgefallene gerettet (Vertrag Regel 3).
+	# Quelle der Entscheidung ist das Gate in meta_layer_flow.gd (_campaign_departure_gate): Ist der Driver fertig (Zeile 9038), loest der Abflug nichts mehr auf
+	# und das Ergebnis des Drivers gilt; sonst loest er als "aborted" auf (Zeile 9060), und es zaehlt der Abstand zum Schiff.
+	var driver = _get_combat_loop_driver()
+	if driver != null and driver.has_method("is_combat_finished") and bool(driver.call("is_combat_finished")) and String(Dictionary(driver.call("get_mission_result")).get("mission_outcome", "")) == "won":
+		return "An Bord. Am Boden: %s. Auftrag erfüllt: Beim Abheben werden alle gerettet." % ", ".join(parts)
 	var pilot_id := String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
 	var other_fit := false
 	for unit in _get_campaign_sortie_units():
