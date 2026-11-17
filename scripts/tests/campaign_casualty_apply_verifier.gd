@@ -254,13 +254,13 @@ func _direct_part() -> void:
 	_check(String(Dictionary(c_unit.get("recovery_state", {})).get("source", "")) == "campaign_casualty", "Direkt Sieg: recovery_state-Quelle campaign_casualty")
 	_check(String(_roster_unit("t_leader").get("availability_status", "")) == "active", "Direkt Sieg: Unversehrte bleibt active")
 	_check(String(_casualty_entry(applied, "t_c").get("display_name", "")) == "Carl Cobalt", "Direkt Sieg: casualties-Eintrag traegt display_name aus dem Kader")
-	# Kritisch und geborgen (Rueckzug nahe am Schiff).
+	# Kritisch und gerettet (Rueckzug nahe am Schiff).
 	_set_roster()
 	var saved: Dictionary = _built_result([_state("t_pilot", "fit", false), _state("t_leader", "fit", false), _state("t_c", "bleedout", true)], "aborted")
 	var applied_severe: Dictionary = _flow.call("_apply_campaign_casualties", saved)
 	var severe: Dictionary = Dictionary(_roster_unit("t_c").get("recovery_state", {}))
-	_check(String(severe.get("severity", "")) == "severe" and is_equal_approx(float(severe.get("seconds_remaining", -1.0)), 2400.0), "Direkt Rueckzug: kritisch und geborgen ist severe, 2400 s")
-	_check(PackedStringArray(applied_severe.get("fatality_unit_ids", PackedStringArray())).is_empty(), "Direkt Rueckzug geborgen: keine Toten")
+	_check(String(severe.get("severity", "")) == "severe" and is_equal_approx(float(severe.get("seconds_remaining", -1.0)), 2400.0), "Direkt Rueckzug: kritisch und gerettet ist severe, 2400 s")
+	_check(PackedStringArray(applied_severe.get("fatality_unit_ids", PackedStringArray())).is_empty(), "Direkt Rueckzug gerettet: keine Toten")
 	# Rueckzug mit einer liegenden Person fern vom Schiff: gemeldet, Kader unveraendert.
 	_set_roster()
 	var roster_before: Array = Array(_flow.get("_all_team_units")).duplicate(true)

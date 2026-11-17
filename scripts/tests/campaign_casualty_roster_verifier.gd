@@ -347,7 +347,7 @@ func _t6b_z5() -> void:
 	pilot_dead["fatality_unit_ids"] = PackedStringArray([PILOT_ID])
 	pilot_dead["casualties"] = [{"unit_id": PILOT_ID, "outcome": "dead"}]
 	var pilot_applied: Dictionary = _flow.call("_apply_campaign_casualties", pilot_dead)
-	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B, SHOOTER_C] and Array(_runtime.call("get_fallen")).is_empty(), "Z5: Pilot tot: niemand entfernt, Liste leer (geschuetzt, schwer verwundet geborgen)")
+	_check(_t6b_roster_ids() == [LEAD_A, PILOT_ID, LEAD_B, SHOOTER_C] and Array(_runtime.call("get_fallen")).is_empty(), "Z5: Pilot tot: niemand entfernt, Liste leer (geschuetzt, schwer verwundet gerettet)")
 	_check(String(_roster_unit(PILOT_ID).get("availability_status", "")) == "wounded" and String(Dictionary(_roster_unit(PILOT_ID).get("recovery_state", {})).get("severity", "")) == "severe", "Z5: der Pilot ist wounded (schwer)")
 	_check(_t6b_lock().has(PILOT_ID), "Z5: der Pilot steht in der Einsatzsperre (%s)" % [_t6b_lock()])
 	_check(PackedStringArray(pilot_applied.get("fatality_unit_ids", PackedStringArray(["x"]))).is_empty() and bool(_casualty_entry(pilot_applied, PILOT_ID).get("protected_from_death", false)), "Z5: das Ergebnis nennt den Piloten nicht mehr als gefallen, sondern geschuetzt")
@@ -361,7 +361,7 @@ func _t6b_z5() -> void:
 
 func _t6b_z6() -> void:
 	if not await _t6b_new_four(): return
-	# B ist bewusstlos, aber am Schiff (geborgen: schwer verwundet); C liegt fern vom Schiff (tot).
+	# B ist bewusstlos, aber am Schiff (gerettet: schwer verwundet); C liegt fern vom Schiff (tot).
 	var result: Dictionary = _t6b_result(_t6b_states({LEAD_B: "bleedout", SHOOTER_C: "down"}), "aborted")
 	_check(PackedStringArray(result.fatality_unit_ids) == PackedStringArray([SHOOTER_C]), "Z6: Fixture: nur C ist tot (%s)" % [result.fatality_unit_ids])
 	var applied: Dictionary = _flow.call("_apply_campaign_casualties", result)
