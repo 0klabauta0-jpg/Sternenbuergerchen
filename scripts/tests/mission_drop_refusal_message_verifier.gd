@@ -36,6 +36,36 @@ func _check_refused_landing() -> void:
 	_check(card_text != NO_TEAM_TEXT and command_text != NO_TEAM_TEXT, "Fall 1: weder Karte noch Befehlszeile zeigen " + NO_TEAM_TEXT)
 	_check(command_text.contains(reason_text), "Fall 1: die Befehlszeile nennt denselben Grund: " + command_text)
 	_check(Dictionary(controller.get("_deployed_unit_ids")).is_empty() and String(card.get("state", "")) == "waiting", "Fall 1: der Trupp ist noch an Bord, die Karte wartet")
+	await _check_retry_with_accepted_landing(mission, controller, reason_text)
+
+## Fix-Runde 1: Der Spieler waehlt danach einen besseren Platz. Der alte Ablehnungsgrund darf waehrend des Anflugs nicht
+## mehr auf der Karte stehen. Danach landet der Trupp, und der Knopf "Absetzen" des gelandeten Schiffs wird gelesen.
+func _check_retry_with_accepted_landing(mission: Node, controller: Node, reason_text: String) -> void:
+	var map = MAP.load_from_file("res://maps/trade_outpost.json")
+	var view: Node = mission.get_node("Primary3DView")
+	var good: Vector2 = map.get_marker_position("spawn_alpha")
+	view.call("focus_world_position", good)
+	controller.call("_on_mission_dropship_card_set_lz_pressed", _craft_id)
+	var placed: bool = bool(controller.call("_place_lz_from_screen_position", view.call("world_to_screen_position", good)))
+	var accepted: Dictionary = controller.call("_resolve_campaign_field_lz")
+	var landing: Dictionary = controller.call("_prepare_ground_ship_landing", _craft_id, accepted)
+	if not _check(placed and bool(landing.get("ok", false)), "Wiederholung: ein neu gesetzter Landeplatz wird von Setzen und Landung angenommen: " + str(landing.get("reason", "ok"))):
+		return
+	controller.call("_on_mission_dropship_card_drop_pressed", _craft_id)
+	var card: Dictionary = controller.call("_find_mission_dropship_card_entry", _craft_id)
+	var card_text: String = String(card.get("card_feedback_text", ""))
+	print("WIEDERHOLUNG phase=", controller.get("_drop_sequence_phase"), " card_text=", card_text)
+	_check(String(controller.get("_drop_sequence_phase")) == "inbound", "Wiederholung: das Schiff fliegt an")
+	_check(not card_text.contains(reason_text), "Wiederholung: die Karte zeigt waehrend des Anflugs nicht mehr den alten Ablehnungsgrund: " + card_text)
+	if not await super._wait(func(): return _all_crew_deployed(controller) and int(mission.get_node("SimulationRoot").call("get_tick")) > 0, 60000, "Wiederholung: der Trupp landet am neuen Platz"):
+		return
+	# Gelandetes Schiff, kein absetzbarer Trupp mehr: Knopfweg (fuehrt in der Kampagne nicht durch _request_selected_mission_dropship_drop).
+	controller.call("_on_mission_dropship_card_drop_pressed", _craft_id)
+	card = controller.call("_find_mission_dropship_card_entry", _craft_id)
+	var landed_text: String = String(card.get("card_feedback_text", ""))
+	print("FALL3 card_text=", landed_text, " command_text=", controller.get("_last_command_text"))
+	# Befund: Auf dem gelandeten Schiff laeuft der Knopf nicht durch _try_start_drop_sequence; das Spiel nennt hier den eigenen Grund.
+	_check(landed_text.begins_with("Absetzen braucht ein gelandetes Schiff mit Kräften an Bord") and not landed_text.contains(reason_text), "Fall 3: gelandetes Schiff ohne absetzbaren Trupp, Knopfweg: die Karte nennt den eigenen Grund statt eines alten Texts: " + landed_text)
 
 func _check_no_team_available() -> void:
 	# Fall 2: eigene Mission-Szene neben dem Flow (der Elterntest liest den Flow nach dem Abbruch noch).

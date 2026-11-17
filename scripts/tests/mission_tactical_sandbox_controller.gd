@@ -3987,6 +3987,7 @@ func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = fals
 			# Die Landung lehnt den Platz ab: Der Spieler liest den Grund, nicht "kein Trupp".
 			_last_command_text = _drop_refusal_text
 			_set_mission_dropship_card_feedback(_mission_drop_craft_id, _drop_refusal_text)
+			_drop_refusal_card_text_by_craft[_mission_drop_craft_id] = _drop_refusal_text
 		else:
 			_last_command_text = "NO DROP TEAM AVAILABLE"
 	_store_selected_mission_dropship_plan()
@@ -36409,10 +36410,23 @@ func _maybe_bootstrap_live_drop() -> void:
 ## Grund, aus dem das Absetzen den Landeplatz ablehnt (leer: nicht wegen des Landeplatzes gescheitert).
 ## Der Aufrufer zeigt ihn statt "NO DROP TEAM AVAILABLE".
 var _drop_refusal_text: String = ""
+## Der Ablehnungsgrund, den DIESE Ablehnung auf die Karte des Schiffs geschrieben hat (Schiff -> Text). Ein neuer
+## Versuch nimmt nur diesen Text wieder von der Karte; jede andere Rueckmeldung bleibt, wie sie war.
+var _drop_refusal_card_text_by_craft: Dictionary = {}
+
+func _clear_own_drop_refusal_card_feedback() -> void:
+	var craft_id: String = _mission_drop_craft_id
+	var own_text: String = String(_drop_refusal_card_text_by_craft.get(craft_id, ""))
+	if own_text.is_empty():
+		return
+	_drop_refusal_card_text_by_craft.erase(craft_id)
+	if _get_mission_dropship_card_feedback_text(_find_raw_mission_dropship_card_entry(craft_id)) == own_text:
+		_set_mission_dropship_card_feedback(craft_id, "")
 
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	_air_defense_feedback_text = ""
 	_drop_refusal_text = ""
+	_clear_own_drop_refusal_card_feedback()
 	var pending_landing:Dictionary={}
 	if _should_keep_campaign_dropship_landed():
 		if not _has_lz_position: return false
