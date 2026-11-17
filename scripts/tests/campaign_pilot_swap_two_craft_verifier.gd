@@ -227,13 +227,9 @@ func _scenario(label: String, o: Dictionary) -> void:
 		# The boarding of the team is a timed view animation: let it count as finished (the person already is aboard).
 		var boarding: Dictionary = screen.call("_ensure_homebase_direct_boarding_state", "ft2", SHIP2)
 		boarding["elapsed_seconds"] = 100000.0
-		print("V5_GATE boarded=", screen.call("_are_homebase_payload_fireteams_boarded", PackedStringArray(_payload(screen, SHIP2))), " units=", screen.call("_build_unit_ids_for_fireteams", PackedStringArray(_payload(screen, SHIP2))))
-		print("V5_CAN can=", screen.call("can_request_mission_start", SHIP2), " campaign=", adapter.call("is_campaign_mission"))
 		screen.call("request_mission_start", SHIP2)
 		await process_frame
-		print("V5_ERR ", var_to_str(screen.get_meta("singleplayer_departure_error", {})))
 		var location := String(Dictionary(flow.get("_aircraft_location_by_craft")).get(SHIP2, ""))
-		print("V5_LAUNCH location=", location, " notes=", var_to_str(flow.get("_homecoming_pending_payload")), " persons=", var_to_str(flow.get("_homecoming_pending_persons")))
 		_check(location == "starmap", label + ": ship 2 started to the star map")
 		_check(not Dictionary(flow.get("_homecoming_pending_payload")).has(SHIP2) and not Dictionary(flow.get("_homecoming_pending_persons")).has(SHIP2), label + ": right after the start there is no note for ship 2")
 		_check(_payload(screen, SHIP1) == held_before, label + ": the assignment of the other ship is unchanged")
