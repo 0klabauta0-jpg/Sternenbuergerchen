@@ -253,6 +253,7 @@ func _build_hex_rig() -> bool:
 	for x in range(26):
 		for y in range(2):
 			_hex_terrain.register_tile(TILE_SCRIPT.new({"tile_id": "r%d_%d" % [x, y], "grid_position": Vector2i(x, y)}))
+	_hex_terrain.register_tile(TILE_SCRIPT.new({"tile_id": "r0_7", "grid_position": Vector2i(0, 7)}))
 	_hex_units = UNIT_REGISTRY_SCRIPT.new()
 	_hex_units.name = "HexUnits"
 	_hex_scene.add_child(_hex_units)
@@ -262,7 +263,7 @@ func _build_hex_rig() -> bool:
 	_hex_sim.unit_registry_path = _hex_sim.get_path_to(_hex_units)
 	_hex_sim.terrain_registry_path = _hex_sim.get_path_to(_hex_terrain)
 	_hex_sim.set_combat_rng_seed(7)
-	var map = MAP_SCRIPT.create_empty("range_band_hex", Vector2i(26, 2), Vector2.ZERO, 64, 32, 3, "hex_axial_v1")
+	var map = MAP_SCRIPT.create_empty("range_band_hex", Vector2i(26, 8), Vector2.ZERO, 64, 32, 3, "hex_axial_v1")
 	map.set_tactical_grid_rules("hex_tactical_v1")
 	_hex_sim.configure_hex_ground_runtime(map, _hex_terrain)
 	_hex_sim.damage_effect_resolved.connect(func(result: Dictionary) -> void: _captured.append(result))
@@ -270,6 +271,9 @@ func _build_hex_rig() -> bool:
 	_hex_add_unit("hx_att", "team_alpha", Vector2i(0, 0), batch)
 	for d in [4, 6, 7, 9, 18, 19, 22]:
 		_hex_add_unit("hx_t%d" % d, "team_bravo", Vector2i(d, 0), batch)
+	# cells off the row where hex steps and world distance fall into DIFFERENT zones (found by search, see _test_hex_off_row)
+	_hex_add_unit("hx_ws_near", "team_bravo", Vector2i(0, 7), batch)
+	_hex_add_unit("hx_ws_far", "team_bravo", Vector2i(18, 1), batch)
 	# registered with the root but never admitted to the ground runtime: no hex state
 	var loose: Node2D = _make_unit("hx_loose", "team_bravo", "red", _hex_terrain.grid_to_world(Vector2i(9, 1)))
 	_hex_scene.add_child(loose)
@@ -330,13 +334,51 @@ func _test_hex_branch() -> void:
 		var got: float = float(_hex_shot(String(c[0]), String(c[1])).get("hit_chance_resolved", -1.0))
 		_assert(_is(got, _hex_neutral + float(c[2])), "hex %s: %s -> neutral %+.2f (%.4f)" % [c[0], c[3], float(c[2]), got])
 	# No hex state for the target: no distance, no modifier (not a script error).
-	var loose_sniper: float = float(_hex_shot("sniper", "hx_loose").get("hit_chance_resolved", -1.0))
+	# smg is the discriminating weapon: at the loose target's world distance (below) the legacy branch would say mid = -0.10.
+	var loose_world: float = _hex_world_tiles(Vector2i(0, 0), Vector2i(9, 1))
+	_assert(String(WEAPON_DATA_SCRIPT.get_range_band(loose_world)) == "mid", "fixture: the target without hex state is %.2f world tiles away (mid, smg would get -0.10 by world distance)" % loose_world)
+	var loose_smg: float = float(_hex_shot("smg", "hx_loose").get("hit_chance_resolved", -1.0))
 	var loose_none: float = float(_hex_shot("none", "hx_loose").get("hit_chance_resolved", -1.0))
-	_assert(loose_sniper > 0.0 and _is(loose_sniper, loose_none), "hex: target without hex state gets modifier 0 (%.4f = %.4f)" % [loose_sniper, loose_none])
+	_assert(loose_smg > 0.0 and _is(loose_smg, loose_none), "hex: target without hex state gets modifier 0 with smg (%.4f = %.4f)" % [loose_smg, loose_none])
+	_test_hex_off_row()
 	# Clamp order in hex too: input 1.05, sniper near (6 steps)
 	var hex_offset: float = _hex_neutral - INPUT
 	var summed: float = float(_hex_shot("sniper", "hx_t6", 1.05).get("hit_chance_resolved", -1.0))
 	_assert(_is(summed, 1.05 + hex_offset - 0.20), "hex: sniper near with input 1.05: add first, then clamp (%.4f)" % summed)
+
+
+## World distance between two hex cells in tiles, measured like the legacy branch (world distance / world units per tile).
+func _hex_world_tiles(from_cell: Vector2i, to_cell: Vector2i) -> float:
+	var upt: float = WEAPON_DATA_SCRIPT.get_world_units_per_tile(_hex_terrain)
+	return Vector2(_hex_terrain.grid_to_world(from_cell)).distance_to(Vector2(_hex_terrain.grid_to_world(to_cell))) / upt
+
+
+## Targets off the row: hex steps and world distance give DIFFERENT zones, so only the hex step count passes.
+func _test_hex_off_row() -> void:
+	# Search proof that such cells exist (cells up to 25 steps from (0,0) on this grid).
+	var differing: int = 0
+	for q in range(0, 26):
+		for r in range(0, 26):
+			var steps: int = HEX_GRID_SCRIPT.distance(Vector2i(0, 0), Vector2i(q, r))
+			if steps >= 1 and steps <= 25 and WEAPON_DATA_SCRIPT.get_range_band(float(steps)) != WEAPON_DATA_SCRIPT.get_range_band(_hex_world_tiles(Vector2i(0, 0), Vector2i(q, r))):
+				differing += 1
+	_assert(differing > 0, "fixture: %d cells (q,r >= 0, up to 25 steps) have different zones by hex steps and by world distance" % differing)
+	var cells: Array = [
+		["hx_ws_near", Vector2i(0, 7), "sniper", 0.0, "near", "mid"],
+		["hx_ws_near", Vector2i(0, 7), "smg", -0.10, "near", "mid"],
+		["hx_ws_far", Vector2i(18, 1), "sniper", 0.10, "mid", "far"],
+		["hx_ws_far", Vector2i(18, 1), "rifle", -0.10, "mid", "far"],
+	]
+	for c in cells:
+		var cell: Vector2i = c[1]
+		var steps: int = HEX_GRID_SCRIPT.distance(Vector2i(0, 0), cell)
+		var world: float = _hex_world_tiles(Vector2i(0, 0), cell)
+		var steps_zone: String = String(WEAPON_DATA_SCRIPT.get_range_band(float(steps)))
+		var world_zone: String = String(WEAPON_DATA_SCRIPT.get_range_band(world))
+		var label: String = "cell (%d,%d): %d steps = %s, world distance %.2f tiles = %s" % [cell.x, cell.y, steps, steps_zone, world, world_zone]
+		_assert(steps_zone != world_zone, "fixture: " + label)
+		var got: float = float(_hex_shot(String(c[2]), String(c[0])).get("hit_chance_resolved", -1.0))
+		_assert(_is(got, _hex_neutral + float(c[3])), "hex %s by steps (%s): neutral %+.2f (%.4f)" % [c[2], label, float(c[3]), got])
 
 
 func _test_hex_moving_shooter() -> void:
