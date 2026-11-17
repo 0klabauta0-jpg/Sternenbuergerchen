@@ -6,6 +6,13 @@ extends RefCounted
 
 const DEFAULT_WORLD_UNITS_PER_TILE: float = 72.0
 
+## Distance zones for the hit chance (distance shooter -> target in tiles, same measure as the range check).
+## near: up to RANGE_BAND_NEAR_MAX_TILES, mid: up to RANGE_BAND_MID_MAX_TILES (both inclusive), far: beyond.
+## Each weapon may carry "range_band_hit_modifier": {"near", "mid", "far"} as a share (+0.10 = plus 10 points);
+## a weapon without the key, or without a zone, gets 0.
+const RANGE_BAND_NEAR_MAX_TILES: int = 6
+const RANGE_BAND_MID_MAX_TILES: int = 18
+
 const WEAPON_CATALOG: Dictionary = {
 	"none": {
 		"id": "none",
@@ -29,6 +36,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.40,
 		"ticks_between_attacks": 9,
 		"effective_tile_range": 8,
+		"range_band_hit_modifier": {"near": 0.10, "mid": -0.15, "far": 0.0},
 		"effective_range": 140.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_gun",
 		"sprite_scale": Vector2(1.0, 1.0),
@@ -44,6 +52,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.40,
 		"ticks_between_attacks": 6,
 		"effective_tile_range": 10,
+		"range_band_hit_modifier": {"near": 0.15, "mid": -0.10, "far": 0.0},
 		"effective_range": 140.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_gun",
 		"sprite_scale": Vector2(1.0, 1.0),
@@ -59,6 +68,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.45,
 		"ticks_between_attacks": 10,
 		"effective_tile_range": 25,
+		"range_band_hit_modifier": {"near": 0.0, "mid": 0.05, "far": -0.10},
 		"effective_range": 180.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_rifle",
 		"sprite_scale": Vector2(1.0, 1.0),
@@ -74,6 +84,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.55,
 		"ticks_between_attacks": 18,
 		"effective_tile_range": 42,
+		"range_band_hit_modifier": {"near": -0.20, "mid": 0.0, "far": 0.10},
 		"effective_range": 260.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_rifle",
 		"sprite_scale": Vector2(1.45, 1.45),
@@ -89,6 +100,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.35,
 		"ticks_between_attacks": 18,
 		"effective_tile_range": 20,
+		"range_band_hit_modifier": {"near": -0.10, "mid": 0.0, "far": -0.05},
 		"effective_range": 260.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_rifle",
 		"sprite_scale": Vector2(2.0, 2.0),
@@ -105,6 +117,7 @@ const WEAPON_CATALOG: Dictionary = {
 		"base_hit_chance": 0.30,
 		"ticks_between_attacks": 26,
 		"effective_tile_range": 18,
+		"range_band_hit_modifier": {"near": -0.10, "mid": 0.0, "far": 0.0},
 		"effective_range": 220.0,
 		"asset_prefix": "res://Assets/kenney_space-kit/Isometric/weapon_rifle",
 		"sprite_scale": Vector2(1.85, 1.85),
@@ -167,6 +180,27 @@ static func get_effective_tile_range(weapon_id: String) -> int:
 static func get_effective_world_range(weapon_id: String, terrain_context = null) -> float:
 	return float(get_effective_tile_range(weapon_id)) * get_world_units_per_tile(terrain_context)
 
+
+## Zone name for a distance in tiles: "near", "mid" or "far". Exactly on a border counts to the nearer zone.
+static func get_range_band(distance_tiles: float) -> String:
+	if distance_tiles <= float(RANGE_BAND_NEAR_MAX_TILES):
+		return "near"
+	if distance_tiles <= float(RANGE_BAND_MID_MAX_TILES):
+		return "mid"
+	return "far"
+
+
+## Hit chance share added for this weapon at this distance (tiles). Unknown weapon ids fall back like get_weapon().
+static func get_range_band_hit_modifier(weapon_id: String, distance_tiles: float) -> float:
+	return get_range_band_hit_modifier_for_weapon(get_weapon(weapon_id), distance_tiles)
+
+
+## Same for a weapon dictionary (a missing key or zone gives 0).
+static func get_range_band_hit_modifier_for_weapon(weapon: Dictionary, distance_tiles: float) -> float:
+	var table: Variant = weapon.get("range_band_hit_modifier", null)
+	if typeof(table) != TYPE_DICTIONARY:
+		return 0.0
+	return float(Dictionary(table).get(get_range_band(distance_tiles), 0.0))
 
 static func get_world_units_per_tile(terrain_context = null, fallback_world_units_per_tile: float = DEFAULT_WORLD_UNITS_PER_TILE) -> float:
 	if terrain_context != null and terrain_context is Object:

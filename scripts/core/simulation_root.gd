@@ -7034,6 +7034,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var attacker_hit_modifier:float=float(attacker_profile.hit_modifier) if attacker_profile.has("hit_modifier") else _extract_unit_hit_modifier(attacker_unit)
 	var target_evasion_modifier:float=float(target_profile.evasion_modifier) if target_profile.has("evasion_modifier") else _extract_unit_evasion_modifier(unit)
 	var height_modifier:float=_extract_height_accuracy_modifier(attacker_unit,unit)
+	var range_band_modifier:float=_extract_range_band_hit_modifier(effect,attacker_unit,unit)
 	var attacker_ground:Dictionary=get_hex_unit_state(attacker_unit_id)
 	var attacker_moving:bool=not attacker_ground.is_empty() and bool(attacker_ground.movement_state.moving)
 	var moving_shot_factor:float=_get_moving_shot_accuracy_multiplier(attacker_unit,attacker_profile) if attacker_moving else 1.0
@@ -7052,6 +7053,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		+ attacker_attack_bonus
 		+ attacker_hit_modifier
 		+ height_modifier
+		+ range_band_modifier
 		+ (attacker_cover_ratio * ATTACKER_COVER_HIT_BONUS_FACTOR)
 		- target_evasion_modifier
 		- (target_cover_ratio * TARGET_COVER_HIT_PENALTY_FACTOR),
@@ -7363,6 +7365,31 @@ func _extract_unit_attack_bonus(unit) -> float:
 		return 0.0
 
 	return float(unit.call("get_attack_bonus"))
+
+
+## Distance zone modifier of the hit chance (WeaponData.RANGE_BAND_*). The distance is measured like the range check:
+## Hex ground runtime = hex steps between the two grids, otherwise world distance / world units per tile.
+## Weapon: the one named in the effect, else the attacker's active weapon; no weapon or no distance = 0.
+func _extract_range_band_hit_modifier(effect: Dictionary, attacker_unit, target_unit) -> float:
+	if attacker_unit == null or target_unit == null:
+		return 0.0
+	var weapon_id: String = String(effect.get("weapon_id", "")).strip_edges()
+	if weapon_id.is_empty() and attacker_unit.has_method("get_active_weapon_id"):
+		weapon_id = String(attacker_unit.call("get_active_weapon_id")).strip_edges()
+	if weapon_id.is_empty():
+		return 0.0
+	var distance_tiles: float = -1.0
+	if is_hex_ground_runtime_active():
+		var source := _hex_ground_state_for_unit(attacker_unit)
+		var destination := _hex_ground_state_for_unit(target_unit)
+		if not source.is_empty() and not destination.is_empty():
+			distance_tiles = float(HEX_GRID_SCRIPT.distance(source.grid, destination.grid))
+	elif attacker_unit is Node2D and target_unit is Node2D:
+		var units_per_tile: float = WEAPON_DATA_SCRIPT.get_world_units_per_tile(_get_terrain_registry())
+		distance_tiles = (attacker_unit as Node2D).global_position.distance_to((target_unit as Node2D).global_position) / units_per_tile
+	if distance_tiles < 0.0:
+		return 0.0
+	return WEAPON_DATA_SCRIPT.get_range_band_hit_modifier(weapon_id, distance_tiles)
 
 
 func _extract_height_accuracy_modifier(attacker_unit, target_unit) -> float:
