@@ -459,6 +459,8 @@ const POST_DROP_SECURITY_ORIGIN: String = "post_drop_360_security"
 const POST_DROP_SECURITY_MODE: String = "360"
 const POST_DROP_SECURITY_RADIUS_TILES: int = 4
 const POST_DROP_SECURITY_TILE_WORLD_STEP: float = 64.0
+# Ausgefallene Verteidiger belegen die Zielfelder, der Trupp kann die Stellung oft nicht betreten: "Stellung frei und Trupp steht davor" zaehlt als genommen.
+const TAKE_CLEAR_RADIUS_TILES: int = 4
 const POST_DROP_SECURITY_MOVE_SPEED_FACTOR: float = 0.68
 const POST_DROP_COVER_SEARCH_RADIUS_FACTOR: float = 1.65
 const POST_DROP_COVER_MIN_SCORE: float = 32.0
@@ -32745,6 +32747,8 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 	var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
 	if command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
 		return true
+	if _is_take_waypoint_secured(fireteam_id, execution_state, waypoint):
+		return true
 	var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id)):
@@ -32754,6 +32758,27 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 	if anchor == null:
 		return false
 	return anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
+
+
+## A point TAKE is done when its area is clear of capable enemies, the squad has no
+## enemy contact left and the leader stands within TAKE_CLEAR_RADIUS_TILES of the target.
+func _is_take_waypoint_secured(fireteam_id: String, execution_state: Dictionary, waypoint) -> bool:
+	if waypoint == null or String(waypoint.command_type).strip_edges().to_lower() != FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE:
+		return false
+	# Stationary interactions and the campaign return gather end by their own arrival rules.
+	if execution_state.has("interaction_waypoint_id") or bool(execution_state.get("campaign_return_gather", false)):
+		return false
+	var target: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
+	var radius: float = float(TAKE_CLEAR_RADIUS_TILES) * POST_DROP_SECURITY_TILE_WORLD_STEP
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if not (leader is Node2D) or (leader as Node2D).global_position.distance_to(target) > radius:
+		return false
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("is_area_cleared"):
+		return false
+	if not bool(combat_driver.call("is_area_cleared", {"center_position": target, "area_radius": radius})):
+		return false
+	return _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty()
 
 
 func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary, execution_state: Dictionary = {}, movement_was_active: bool = false) -> bool:
@@ -35281,6 +35306,12 @@ func _update_active_phase_execution(delta: float) -> void:
 		if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent" and Dictionary(execution_state.get("interaction_arrival_receipt", {})).is_empty():
 			if _try_start_stationary_interaction(String(fireteam_id), waypoint, phase_index, execution_state):
 				_phase_execution_by_fireteam[fireteam_id] = execution_state
+		# A TAKE whose area is clear ends here, even if the squad cannot enter the held fields.
+		if _is_take_waypoint_secured(String(fireteam_id), execution_state, waypoint):
+			_complete_waypoint_and_activate_next(String(fireteam_id), plan, waypoint_index)
+			_notify_fireteam_ready_for_coordination(String(fireteam_id))
+			did_change = true
+			continue
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 		_ensure_fireteam_movement_controller()
