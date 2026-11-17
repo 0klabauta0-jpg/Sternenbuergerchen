@@ -7,6 +7,7 @@ extends SceneTree
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const FIRETEAM_ID: String = "blue"
 const TAKE_CLEAR_RADIUS_WORLD: float = 256.0
+const ARRIVAL_SLACK_WORLD: float = 20.0
 const ENEMY_NODES: Array[String] = ["EnemyDelta", "EnemyEcho"]
 const BLUE_NODES: Array[String] = ["UnitAlpha", "UnitBravo", "UnitDelta", "UnitGolf", "UnitHotel"]
 
@@ -25,6 +26,7 @@ func _run_tests() -> void:
 	await _test_take_ends_after_fight_and_march_follows()
 	await _test_queued_waypoint_activates_after_take()
 	await _test_take_on_empty_point_ends_only_near_target()
+	await _test_hold_time_and_go_with_queued_waypoint()
 	Engine.time_scale = 1.0
 	print("mission_take_order_completes_when_clear_verifier passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
@@ -144,6 +146,11 @@ func _test_take_ends_after_fight_and_march_follows() -> void:
 	_keep_enemies_down(scene)
 	_assert(_living_enemy_count(scene) == 0, "All defenders are down")
 	_assert(await _wait_take_ended(scene, true, 10.0), "TAKE ends within seconds once the area is clear and the leader stands near")
+	var reservation_waited: float = 0.0
+	while reservation_waited < 3.0 and not _members_waiting_reservation(scene).is_empty():
+		await _wait_game(0.5)
+		reservation_waited += 0.5
+		_keep_enemies_down(scene)
 	_assert(_members_waiting_reservation(scene).is_empty(), "No member stays in waiting_reservation after the TAKE ended: %s" % [_members_waiting_reservation(scene)])
 	# Follow-up march must work (this is the case that failed with the stuck TAKE).
 	var controller: Node = _controller(scene)
@@ -200,23 +207,55 @@ func _test_take_on_empty_point_ends_only_near_target() -> void:
 	var target: Vector2 = scene.get_node("EnemyDelta").global_position
 	_keep_enemies_down(scene)
 	_assert(_start_take(scene, target), "TAKE on an empty point is accepted")
-	var ended_too_early: bool = false
+	var controller: Node = _controller(scene)
+	var constants: Dictionary = controller.get_script().get_script_constant_map()
+	var anchor_radius: float = float(constants["PHASE_WAYPOINT_COMPLETE_RADIUS"])
+	var center_radius: float = float(constants["PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS"])
 	var ended: bool = false
+	var anchor_distance: float = INF
+	var center_near: bool = false
 	var leader_distance_at_end: float = INF
 	var waited: float = 0.0
 	while waited < 70.0:
-		await _wait_game(0.5)
-		waited += 0.5
+		await _wait_game(0.25)
+		waited += 0.25
 		_keep_enemies_down(scene)
-		var leader := _leader(scene)
-		var distance: float = leader.global_position.distance_to(target) if leader != null else INF
 		if not _waypoint_active(scene, "take"):
 			ended = true
-			leader_distance_at_end = distance
-			ended_too_early = distance > TAKE_CLEAR_RADIUS_WORLD + 40.0
+			var leader := _leader(scene)
+			leader_distance_at_end = leader.global_position.distance_to(target) if leader != null else INF
+			var anchor := controller.call("_get_selection_anchor_for_fireteam", FIRETEAM_ID) as Node2D
+			anchor_distance = anchor.global_position.distance_to(target) if anchor != null else INF
+			center_near = bool(controller.call("_is_fireteam_center_near_position", FIRETEAM_ID, target, center_radius + ARRIVAL_SLACK_WORLD))
 			break
-	_assert(ended, "TAKE on an empty point does end once the squad is near")
-	_assert(not ended_too_early, "TAKE on an empty point does not end early (leader was %.0f away)" % leader_distance_at_end)
+	_assert(ended, "TAKE on an empty point does end once the squad has arrived")
+	# Never contested, nothing jams: only the normal arrival rule (anchor <= 26 or centre <= 48, plus a little movement between polls) may end it.
+	_assert(anchor_distance <= anchor_radius + ARRIVAL_SLACK_WORLD or center_near, "TAKE on an empty point ends only on arrival (anchor %.0f, centre near: %s, leader %.0f away)" % [anchor_distance, center_near, leader_distance_at_end])
+	await _close_scene(scene)
+
+
+# Haltezeit und GO: the controller clock is stepped by hand (set_process(false) + _process(delta)) so the 2 s hold can be observed exactly.
+func _test_hold_time_and_go_with_queued_waypoint() -> void:
+	var scene: Node = await _open_scene()
+	var controller: Node = _controller(scene)
+	var target: Vector2 = scene.get_node("EnemyDelta").global_position
+	_assert(_start_take(scene, target), "Hold test: TAKE started")
+	_assert(bool(controller.call("issue_right_click_command_for_test", Vector2(-305.0, 568.0), "move", true)), "Hold test: waypoint queued behind the TAKE")
+	_assert(await _march_until_near(scene, target, TAKE_CLEAR_RADIUS_WORLD - 30.0, 60.0), "Hold test: leader reaches the take area")
+	await _wait_game(1.5)
+	controller.set_process(false)
+	_keep_enemies_down(scene)
+	_assert(_waypoint_active(scene, "take"), "Hold test: TAKE still active right after the last defender fell")
+	controller.call("_process", 0.5)
+	controller.call("_process", 0.5)
+	_assert(_waypoint_active(scene, "take"), "Hold test: after 1 s of clear area the TAKE is still active")
+	_assert(bool(controller.call("execute_selected_fireteam_orders")), "Hold test: GO before the hold time is over is accepted")
+	_assert(_waypoint_active(scene, "take") and not _waypoint_active(scene, "move"), "Hold test: that GO does not end the TAKE and starts no march")
+	controller.call("_process", 0.5)
+	_assert(_waypoint_active(scene, "take"), "Hold test: after 1.5 s the TAKE is still active")
+	controller.call("_process", 0.5)
+	_assert(not _waypoint_active(scene, "take") and _waypoint_active(scene, "move"), "Hold test: after more than 2 s the TAKE ended and the queued waypoint is active")
+	controller.set_process(true)
 	await _close_scene(scene)
 
 
