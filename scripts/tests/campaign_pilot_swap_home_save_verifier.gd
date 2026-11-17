@@ -75,6 +75,10 @@ func _verify_after_home(inherited_ok: bool) -> void:
 	if not inherited_ok:
 		return
 	# The inherited loop has already saved, rebuilt the Flow and continued: this is the loaded state.
+	var loaded_state: Dictionary = _state()
+	print("PILOT_SWAP_LOADED_STATE swap=", _swap, " ", var_to_str(loaded_state))
+	_check(loaded_state.pilot == expected_pilot, "Loaded game keeps the chosen pilot")
+	_check(_in_a_payload_team(loaded_state, other), "Loaded game keeps " + other + " in a payload team of the craft")
 	var selected: Dictionary = _screen.call("request_operation", "select_destination", {"location_id": "trade_outpost", "job_id": "", "request_id": "swap:destination"})
 	_check(bool(selected.get("ok", false)), "Continued game selects the next destination")
 	var guard: Dictionary = _runtime.call("authorize_departure", _craft_id)
