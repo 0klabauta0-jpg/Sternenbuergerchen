@@ -188,6 +188,7 @@ var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = []
 var _homebase_staged_unit_ids: PackedStringArray = []
 var _homebase_staged_fireteam_ids: PackedStringArray = []
+var _homecoming_pending_persons: Dictionary = {} # craft_id -> people the note below was made for
 var _homecoming_pending_payload: Dictionary = {} # craft_id -> free team to assign to it once the view has the staged lists
 var _selected_fireteam_ids: PackedStringArray = []
 var _active_mission = null
@@ -389,6 +390,7 @@ func _ready() -> void:
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
+	_homecoming_forget_all() # new campaign / loaded state
 	if is_campaign_start(): _reset_completion_save_baseline()
 	# Task 5b: der Malus wird sofort mit dem Basisstand gespeichert (ersetzt auch den ausstehenden Eintrag).
 	if _total_loss_penalty_unsaved:
@@ -441,6 +443,7 @@ func _restore_active_campaign() -> void:
 	# Der Aufbau ueber _configure_mission_instance wurde beim Fortsetzen uebersprungen: die Ausfallregeln nachziehen.
 	_apply_campaign_casualty_rules(scene, false)
 	_campaign_start.set("active_restore_in_progress",false)
+	_homecoming_forget_all() # restored active state
 	_reset_completion_save_baseline()
 
 
@@ -4178,6 +4181,7 @@ func _on_homebase_aircraft_pilot_transfer_requested(craft_id: String, pilot_unit
 	if not selected_cargo_id.is_empty() and loaded_cargo_id.is_empty():
 		return
 
+	_homecoming_forget_craft(normalized_craft_id) # the craft leaves the base
 	_aircraft_location_by_craft[normalized_craft_id] = "transit"
 	_available_team_units = _remove_units_by_id(_available_team_units, PackedStringArray([normalized_pilot_id]))
 	_pending_homebase_pilot_transfers.append(_build_homebase_pilot_transfer_entry(normalized_craft_id, normalized_pilot_id, loaded_cargo_id))
@@ -5635,6 +5639,7 @@ func _complete_homebase_pilot_transfer(entry: Dictionary) -> void:
 	var craft_id: String = String(entry.get("craft_id", "")).strip_edges()
 	var pilot_unit_id: String = String(entry.get("pilot_unit_id", "")).strip_edges()
 	if not craft_id.is_empty():
+		_homecoming_forget_craft(craft_id) # the craft leaves the base
 		_aircraft_location_by_craft[craft_id] = "fob"
 	_selected_unit_ids = _remove_unit_ids_from_list(_selected_unit_ids, PackedStringArray([pilot_unit_id]))
 	_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
@@ -8529,6 +8534,7 @@ func _finish_space_approach(craft_id: String = "") -> void:
 	_selected_fireteam_ids = entry.teams.duplicate()
 	_mission_planning_state = entry.planning.duplicate(true)
 	_begin_mission_craft_transfer(craft_id, "to_mission", 1.0, MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
+	_homecoming_forget_craft(craft_id) # the craft leaves the base
 	_aircraft_location_by_craft[craft_id] = "starmap"
 	_sync_homebase_direct_mission_drop_transport_fields()
 	_singleplayer_runtime.call("finish_space_approach", craft_id)
@@ -8778,6 +8784,7 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 	if instance != null:
 		identity = Dictionary(instance.get_meta("singleplayer_mission_identity", {})).duplicate(true)
 		_remember_location(instance)
+	_homecoming_forget_craft(craft_id) # the craft leaves the base
 	_aircraft_location_by_craft[craft_id]="starmap"
 	# A real departure retires its visit, not the player's independent place view.
 	# Keep the old non-persistent scene behaviour for compatibility.
@@ -8847,7 +8854,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	var follow_arrival := _current_meta_view == "star_map" and _get_view_travel_craft_id() == craft_id
 	var returning_mission := get_mission_for_craft(craft_id)
 	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
-	_homecoming_pending_payload.erase(craft_id) # a later landing of the same craft replaces its note
+	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_admit_unplaced_aboard_crew(craft_id)
@@ -9640,6 +9647,8 @@ func _stage_returning_person(craft_id: String, id: String, team: String, final: 
 			_homecoming_warn_once(craft_id,id,("Heimkehr: %s ist an der Basis ausgestiegen, weil %s keinen freien Trupp hat" % [id,craft_id]) if bool(left.get("ok",false)) else ("Heimkehr: %s an Bord von %s bleibt ohne Trupp (kein Trupp erreichbar, Aussteigen fehlgeschlagen: %s)" % [id,craft_id,String(left.get("reason","?"))]))
 			return {}
 		_homebase_staged_unit_ids.append(id); _homebase_staged_fireteam_ids.append(target)
+		if team.is_empty(): # chosen by _homecoming_team_for: the note keeps who it was made for
+			var noted: Array=Array(_homecoming_pending_persons.get(craft_id,[])); noted.append(id); _homecoming_pending_persons[craft_id]=noted
 		return unit.duplicate(true)
 	_homecoming_warn_once(craft_id,id,"Heimkehr: %s an Bord von %s steht nicht im Kader und wird keinem Trupp zugeordnet" % [id,craft_id])
 	return {}
@@ -9695,17 +9704,43 @@ func _homecoming_team_for(craft_id: String) -> String:
 	return ""
 
 ## Assigns the free team chosen by _homecoming_team_for to its craft through the base view's assignment path.
-## A note is only cleared once it was applied to a refreshed view. While the view is not refreshed (a mission runs and
-## the base view is hidden) it stays and is applied at the end of the next successful _refresh_homebase_screen; a later
-## landing of the same craft replaces it; a craft that meanwhile holds another team (the player assigned one) drops it.
+## A note is only cleared once it was handled on a refreshed view. While the view is not refreshed (a mission runs and
+## the base view is hidden) it stays and is applied at the end of the next successful _refresh_homebase_screen.
+## Each note is checked first and dropped without being applied if it is stale (_homecoming_note_valid). A valid note
+## is done when the craft already holds the noted team; otherwise the team is assigned in addition to what the craft holds.
+## Other ways a note ends: a later landing of the same craft, the craft leaving the base, loading a state, a new campaign
+## (_homecoming_forget_craft / _homecoming_forget_all).
 func _apply_homecoming_payload_assignments() -> void:
 	var home_screen: Node=_get_homebase_screen()
 	if home_screen==null or _homebase_presentation_dirty: return
 	for craft_id in _homecoming_pending_payload.keys():
 		var team:=String(_homecoming_pending_payload[craft_id])
-		var held: PackedStringArray=home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(craft_id))
-		if held.is_empty(): home_screen.call("_add_homebase_direct_payload_fireteam_to_craft",team,String(craft_id))
-		_homecoming_pending_payload.erase(craft_id)
+		if _homecoming_note_valid(String(craft_id),team,home_screen):
+			var held: PackedStringArray=home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(craft_id))
+			if not held.has(team): home_screen.call("_add_homebase_direct_payload_fireteam_to_craft",team,String(craft_id))
+		_homecoming_forget_craft(String(craft_id))
+
+## (a) the craft is at home, (b) no OTHER craft holds the noted team under any key of the raw lists (the assignment path
+## would take it away from that craft), (c) at least one person the note was made for is still staged in the noted team.
+func _homecoming_note_valid(craft_id: String, team: String, home_screen: Node) -> bool:
+	if String(_aircraft_location_by_craft.get(craft_id,""))!="homebase": return false
+	var keys: Array=Array(home_screen.call("_get_homebase_direct_payload_craft_keys"))
+	for definition: Dictionary in _homebase_aircraft_definitions: keys.append(String(definition.get("craft_id","")))
+	for key in keys:
+		if String(key).strip_edges()==craft_id: continue
+		if PackedStringArray(home_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",String(key))).has(team): return false
+	for person in Array(_homecoming_pending_persons.get(craft_id,[])):
+		for index in mini(_homebase_staged_unit_ids.size(),_homebase_staged_fireteam_ids.size()):
+			if String(_homebase_staged_unit_ids[index])==String(person) and String(_homebase_staged_fireteam_ids[index]).strip_edges().to_lower()==team: return true
+	return false
+
+func _homecoming_forget_craft(craft_id: String) -> void:
+	_homecoming_pending_payload.erase(craft_id)
+	_homecoming_pending_persons.erase(craft_id)
+
+func _homecoming_forget_all() -> void:
+	_homecoming_pending_payload.clear()
+	_homecoming_pending_persons.clear()
 
 func _staged_team_has_members(team: String) -> bool:
 	for index in mini(_homebase_staged_unit_ids.size(),_homebase_staged_fireteam_ids.size()):
