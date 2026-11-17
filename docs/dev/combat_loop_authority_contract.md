@@ -91,7 +91,7 @@ Die Entfernung zwischen Schuetze und Ziel geht in die Trefferchance ein (`Simula
 - Drei feste Zonen in Feldern: nah bis 6, mittel 7 bis 18, fern ab 19 (genau 6 und 18 zaehlen zur naeheren Zone). Konstanten `WeaponData.RANGE_BAND_NEAR_MAX_TILES = 6`, `RANGE_BAND_MID_MAX_TILES = 18`.
 - Je Waffe der Datenschluessel `range_band_hit_modifier` (`near`, `mid`, `far`) in `WEAPON_CATALOG`, als Anteil (+0,10 = plus 10 Prozentpunkte); fehlt der Schluessel oder die Zone, gilt 0.
 - Messung wie bei der Reichweitenpruefung: aktive Hex-Bodenlaufzeit = Hex-Felderabstand der Raster-Positionen (`HexGrid.distance`); sonst Weltabstand geteilt durch `WeaponData.get_world_units_per_tile`.
-- Gilt fuer alle Seiten und Modi, auch Ueberwachungsfeuer; gemeint ist die Waffe aus dem Effekt (`weapon_id`), ersatzweise die aktive Waffe des Schuetzen.
+- Gilt fuer alle Seiten und Modi, auch Ueberwachungsfeuer. Gemeint ist die Waffe aus dem Effekt (`weapon_id`), ersatzweise die aktive Waffe des Schuetzen; der Effekt des Ueberwachungsfeuers (`overwatch_controller.gd`) traegt kein `weapon_id`, dort greift die Regel ueber die aktive Waffe.`n- Grenzfall der Messung: In der Hex-Laufzeit zaehlt die Zone Hex-Schritte. Das Ueberwachungsfeuer prueft seine Reichweite dort ueber den Weltabstand (LOS-System); beide Messungen koennen an einer Zonengrenze um ein Feld auseinanderliegen.
 
 | Waffe | nah | mittel | fern |
 |---|---|---|---|

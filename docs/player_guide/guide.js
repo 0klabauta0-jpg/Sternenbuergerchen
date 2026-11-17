@@ -9,7 +9,7 @@
     const result=GuideCombat.calculate({weapon:read('weapon'),accuracy:read('accuracy'),ownCover:read('own-cover'),targetCover:read('target-cover'),height:read('height'),distance:read('distance'),roll:read('roll'),moving:read('moving'),flank:read('flank'),spotted:read('spotted'),support:read('support'),attack:read('attack'),profile:read('profile'),evasion:read('evasion'),baseDamage:read('base-damage'),targetDamage:read('target-damage')});
     $('chance').textContent=pct(result.chance);$('damage').textContent=result.damage;
     $('roll-result').textContent='Wurf '+num(result.roll)+' → '+(result.hit?'Treffer':'Verfehlt');
-    $('breakdown').textContent='Angepasste Waffenbasis '+pct(result.base)+' · vor Begrenzung '+pct(result.raw)+' · begrenzt '+pct(result.standing)+' · Bewegungsfaktor '+num(result.movement)+' → '+pct(result.chance)+(read('flank')?' · Zieldeckung durch Flanke: 0':'');
+    $('breakdown').textContent='Angepasste Waffenbasis '+pct(result.base)+' · Entfernung '+({near:'nah',mid:'mittel',far:'fern'})[result.zone]+' '+(result.rangeBonus>=0?'+':'')+num(result.rangeBonus*100)+' Punkte'+' · vor Begrenzung '+pct(result.raw)+' · begrenzt '+pct(result.standing)+' · Bewegungsfaktor '+num(result.movement)+' → '+pct(result.chance)+(read('flank')?' · Zieldeckung durch Flanke: 0':'');
   }
   form.addEventListener('input',updateCalculator);form.addEventListener('change',updateCalculator);form.addEventListener('submit',e=>e.preventDefault());
   $('reset-calc').addEventListener('click',()=>{form.reset();updateCalculator();});updateCalculator();
