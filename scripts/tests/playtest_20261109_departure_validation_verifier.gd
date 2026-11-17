@@ -41,6 +41,9 @@ func _run() -> void:
 		var empty: Dictionary = departure.duplicate()
 		empty.craft_id = "empty"
 		_check(not supply.preview_route_fuel(empty, authority).ok, "Insufficient fuel rejects before any command")
+		var empty_reply: Dictionary = supply.preview_route_fuel(empty, authority)
+		_check(String(empty_reply.get("reason", "")) == "insufficient_fuel", "Empty tank without reserve check keeps the reason insufficient_fuel")
+		_check(String(empty_reply.get("message", "")).contains("zuerst auftanken"), "Insufficient fuel message tells the player to refuel first: " + String(empty_reply.get("message", "")))
 	var busy_purchase: Dictionary = supply.apply_command({"contract_category": "singleplayer_supply", "operation": "buy", "payload": {"offer_id": "medictool_supply", "quantity": 1}, "request_id": "busy"}, {"location_id": "trade_outpost", "craft_busy": true})
 	_check(not busy_purchase.ok, "Busy craft cannot purchase through service owner")
 	_check(supply.get_supply_snapshot().credits == before_supply.credits and supply.get_supply_snapshot().item_quantities == before_supply.item_quantities, "Rejected busy purchase changes no balance")
