@@ -4,7 +4,7 @@ const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mi
 const MAP_EDITOR_SCENE: PackedScene = preload("res://scenes/editor/map_editor.tscn")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 
-const MAP_PATH: String = "res://maps/task_157_editor_mvp_map.json"
+const MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const BACKGROUND_IMAGE_PATH: String = "res://Assets/used/npc/weapon_pack/previews/sniper.png"
 const ROUNDTRIP_PATH: String = "user://task_482_mission_briefing_roundtrip.json"
 const EDITOR_SAVE_PATH: String = "user://task_482_editor_briefing_roundtrip.json"

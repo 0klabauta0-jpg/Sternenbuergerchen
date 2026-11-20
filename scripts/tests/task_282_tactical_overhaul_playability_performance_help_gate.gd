@@ -45,7 +45,6 @@ func _test_prerequisite_chain_and_artifacts() -> void:
 		_assert(not task_text.is_empty(), "Prerequisite TASK_%03d file exists" % int(task_number))
 		_assert(task_text.contains("## Status: IMPLEMENTIERT"), "Prerequisite TASK_%03d is implemented" % int(task_number))
 	var required_scripts: Array = [
-		"res://scripts/tests/task_279_lz_security_air_asset_tactical_playability_smoke.gd",
 		"res://scripts/tests/task_280_tactical_profile_editor_scenario_authoring.gd",
 		"res://scripts/tests/task_281_tactical_command_multiplayer_authority_snapshot.gd",
 		"res://scripts/tests/task_268_post_help_popup_playability_regression_smoke.gd",

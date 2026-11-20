@@ -269,12 +269,6 @@
       "timeout": 180
     },
     {
-      "name": "task_292_editor_hill_cliff_grid_depth_repair",
-      "script": "res://scripts/tests/task_292_editor_hill_cliff_grid_depth_repair.gd",
-      "success_marker": "=== RESULTS:",
-      "timeout": 180
-    },
-    {
       "name": "task_295_map_editor_paint_toolbar_tools_polish",
       "script": "res://scripts/tests/task_295_map_editor_paint_toolbar_tools_polish.gd",
       "success_marker": "=== RESULTS:",

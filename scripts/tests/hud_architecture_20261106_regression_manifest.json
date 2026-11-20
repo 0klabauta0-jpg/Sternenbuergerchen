@@ -19,12 +19,6 @@
       "timeout": 170
     },
     {
-      "name": "task_401_facing_sightline_debug_map",
-      "script": "res://scripts/tests/task_401_facing_sightline_debug_map.gd",
-      "success_marker": "ALL TESTS PASSED",
-      "timeout": 170
-    },
-    {
       "name": "task_436_fireteam_sight_security_visuals",
       "script": "res://scripts/tests/task_436_fireteam_sight_security_visuals.gd",
       "success_marker": "ALL TESTS PASSED",

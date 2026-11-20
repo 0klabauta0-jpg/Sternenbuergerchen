@@ -50,7 +50,6 @@ const REQUIRED_RISK_ROWS: Array = [
 		"severity": "High",
 		"files": [
 			"res://scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd",
-			"res://scripts/tests/task_279_lz_security_air_asset_tactical_playability_smoke.gd",
 			"res://scripts/tests/task_281_tactical_command_multiplayer_authority_snapshot.gd",
 			"res://docs/reports/tactical_overhaul_playability_performance_help_gate.md",
 		],

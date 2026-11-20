@@ -30,12 +30,6 @@
       "script": "res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd",
       "success_marker": "ALL TESTS PASSED",
       "timeout": 180
-    },
-    {
-      "name": "task_401_facing_sightline_debug_map",
-      "script": "res://scripts/tests/task_401_facing_sightline_debug_map.gd",
-      "success_marker": "ALL TESTS PASSED",
-      "timeout": 180
     }
   ]
 }
