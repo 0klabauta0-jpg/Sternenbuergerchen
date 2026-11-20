@@ -46,6 +46,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	},
 	{
 		"mission_id": "fireteam_command_drill",
+		"player_visible": false, # old test map: startable by id, never listed for the player
 		"mission_name": "Operation: Fireteam Command Drill",
 		"map_file_path": "res://maps/fireteam_command_drill_24x24.json",
 		"scenario_file_path": "res://data/mission_scenarios/fireteam_command_drill_24x24.json",
@@ -84,6 +85,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	},
 	{
 		"mission_id": "wall_breach",
+		"player_visible": false, # old test map: startable by id, never listed for the player
 		"mission_name": "Operation: Wall Breach",
 		"map_file_path": "res://maps/wall_test_4x4.json",
 		"scenario_file_path": NO_SCENARIO_FILE_PATH,

@@ -36,7 +36,8 @@ const ALLOW_LIST: PackedStringArray = [
 	"res://maps/Ground_Mission01_32x32.json", "res://maps/Ground_Mission02_128x128.json", "res://maps/satellite_crash_site.json",
 	"res://maps/trade_outpost.json", "res://maps/windbruch_outpost.json", "res://maps/polisa_station.json",
 ]
-const HIDDEN_MISSIONS: PackedStringArray = ["frontier_probe", "frontier_probe_vertical_slice", "station_route_one_screen_multiplayer_drill"]
+const HIDDEN_MISSIONS: PackedStringArray = ["frontier_probe", "frontier_probe_vertical_slice", "station_route_one_screen_multiplayer_drill", "fireteam_command_drill", "wall_breach"]
+const LISTED_MISSIONS: PackedStringArray = ["fob_transfer", "grid_sweep"]
 
 func _check_allow_list() -> void:
 	_check(MAPS.selectable_paths() == ALLOW_LIST, "selectable list equals the allow-list in order: %s" % [MAPS.selectable_paths()])
@@ -70,6 +71,12 @@ func _check_mission_list() -> void:
 		_check(not listed.has(mission_id), "%s is not in the operations mission list" % mission_id)
 		_check(not selector_ids.has(mission_id), "%s is not in the mission selector" % mission_id)
 	_check(listed.has("grid_sweep") and listed.has("fob_transfer"), "visible missions stay listed: %s" % [listed])
+	var listed_sorted: Array = Array(listed)
+	listed_sorted.sort()
+	var selector_sorted: Array = Array(selector_ids)
+	selector_sorted.sort()
+	_check(listed_sorted == Array(LISTED_MISSIONS), "operations mission list holds exactly fob_transfer and grid_sweep: %s" % [listed])
+	_check(selector_sorted == Array(LISTED_MISSIONS), "mission selector holds exactly fob_transfer and grid_sweep: %s" % [selector_ids])
 	selector.free()
 	screen.call("set_mission_context", catalog, "res://maps/station_outpost_192x192.json", "Operation: Frontier Probe", 3, "frontier_probe")
 	_check(String(screen.call("_resolve_selected_mission_scenario_path")) == "", "hidden mission still resolves by id (frontier_probe)")
