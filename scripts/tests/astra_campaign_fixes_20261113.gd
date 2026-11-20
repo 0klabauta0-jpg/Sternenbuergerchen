@@ -6,7 +6,7 @@ const ACTIVE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
 const CONFIG = preload("res://scripts/meta/campaign_start_configuration.gd")
 
 func _run() -> void:
-	var isolation: Dictionary = ISOLATION_GUARD.isolation_verdict(OS.get_environment("SB_REVIEW2_USER_DIR"), OS.get_user_data_dir(), ProjectSettings.globalize_path("user://"), String(ProjectSettings.get_setting("application/config/name", "")), ISOLATION_GUARD.system_temp_dir())
+	var isolation: Dictionary = ISOLATION_GUARD.verdict_from_environment()
 	if not bool(isolation.get("ok", false)):
 		printerr("ASTRA_CAMPAIGN_FIXES_REFUSED: private review2 profile required (", isolation.get("reason", ""), ")")
 		quit(2); return

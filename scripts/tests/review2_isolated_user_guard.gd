@@ -10,9 +10,9 @@ static func normalize_path(path: String) -> String:
 ## Ordner gesetzt ist und user:// genau dort liegt UND entweder das Projekt eine
 ## umbenannte Review2-Kopie ist ODER der Ordner echt unterhalb des System-Temp-
 ## Verzeichnisses liegt. Der echte Spielstand liegt unter %APPDATA% und nie dort.
-## user_profile_dir ist %USERPROFILE% (die APPDATA-Umleitung beruehrt ihn nicht). Wer
-## ihn weglaesst, bekommt den Wert der Umgebung; ein leerer Wert lehnt den Temp-Zweig ab.
-static func isolation_verdict(expected_dir: String, actual_dir: String, localized_dir: String, app_name: String, temp_dir: String, user_profile_dir: String = OS.get_environment("USERPROFILE")) -> Dictionary:
+## user_profile_dir ist %USERPROFILE% (die APPDATA-Umleitung beruehrt ihn nicht); ein
+## leerer Wert lehnt den Temp-Zweig ab. Alle sechs Werte sind Pflicht.
+static func isolation_verdict(expected_dir: String, actual_dir: String, localized_dir: String, app_name: String, temp_dir: String, user_profile_dir: String) -> Dictionary:
 	var expected: String = normalize_path(expected_dir).to_lower()
 	var actual: String = normalize_path(actual_dir).to_lower()
 	var localized: String = normalize_path(localized_dir).to_lower()
@@ -28,16 +28,24 @@ static func isolation_verdict(expected_dir: String, actual_dir: String, localize
 		return {"ok": false, "reason": "no usable system temp directory"}
 	if not expected.begins_with(temp + "/"):
 		return {"ok": false, "reason": "user:// is neither a review2 project copy nor strictly below the system temp directory"}
-	# TEMP/TMP wird nicht blind geglaubt: Der echte Spielstand liegt unter APPDATA (Roaming).
+	# TEMP/TMP wird nicht blind geglaubt. Der Temp-Zweig nimmt nur an, was alle Regeln erfuellt:
+	# UNC-Pfade sind hier nie zugelassen (umgeleitetes Roaming liegt oft auf einer Freigabe).
+	if expected.begins_with("//") or temp.begins_with("//"):
+		return {"ok": false, "reason": "UNC paths are not accepted in the temp branch"}
+	# Der echte Spielstand liegt unter APPDATA (Roaming).
 	if (expected + "/").contains("/appdata/roaming/"):
 		return {"ok": false, "reason": "user:// lies in an AppData/Roaming folder (the real save location)"}
 	var profile: String = normalize_path(user_profile_dir).to_lower()
 	if profile.is_empty():
 		return {"ok": false, "reason": "USERPROFILE is not set, cannot rule out the real profile"}
-	if (expected + "/").begins_with(profile + "/appdata/roaming/"):
-		return {"ok": false, "reason": "user:// lies below USERPROFILE/AppData/Roaming (the real save location)"}
+	# Temp darf nie der Benutzerordner oder ein Vorfahre davon sein.
 	if (profile + "/").begins_with(temp + "/"):
 		return {"ok": false, "reason": "system temp directory is the user profile or one of its ancestors"}
+	# Positive Kennung: der erste Ordner unterhalb von Temp ist ein sb_*-Wegwerf-Profil.
+	# Pfade sind kleingeschrieben normalisiert, also gilt auch "SB_Test".
+	var first_folder: String = expected.substr(temp.length() + 1).get_slice("/", 0)
+	if not (first_folder.begins_with("sb_") and first_folder.length() > 3):
+		return {"ok": false, "reason": "user:// is below temp but not inside an sb_* throwaway profile"}
 	return {"ok": true, "reason": "user:// is strictly below the system temp directory"}
 
 
@@ -48,14 +56,19 @@ static func system_temp_dir() -> String:
 	return temp
 
 
-static func require_isolated_user_data() -> bool:
-	var verdict: Dictionary = isolation_verdict(
+## Sammelt die sechs Werte aus der Umgebung und entscheidet. Kein Abbruch.
+static func verdict_from_environment() -> Dictionary:
+	return isolation_verdict(
 		OS.get_environment("SB_REVIEW2_USER_DIR"),
 		OS.get_user_data_dir(),
 		ProjectSettings.globalize_path("user://"),
 		String(ProjectSettings.get_setting("application/config/name", "")),
 		system_temp_dir(),
 		OS.get_environment("USERPROFILE"))
+
+
+static func require_isolated_user_data() -> bool:
+	var verdict: Dictionary = verdict_from_environment()
 	if not bool(verdict.get("ok", false)):
 		push_error("REVIEW2_ISOLATION_REFUSED: test requires a separate verified user:// directory (" + String(verdict.get("reason", "")) + ")")
 		OS.kill(OS.get_process_id())

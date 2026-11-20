@@ -2,6 +2,7 @@ extends SceneTree
 ## Belegt die Entscheidungsfunktion der Isolations-Sperre, ohne die Sperre selbst
 ## aufzurufen (sie wuerde den Prozess beenden). Zweck der Sperre: Kein Test darf
 ## in den echten Spielstand schreiben.
+## Fall-Namen mit "nur_" bezeichnen Faelle, die genau eine Regel haelt (fuer Mutationsbelege).
 
 const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
 const TEMP := "C:\\Users\\b\\AppData\\Local\\Temp"
@@ -19,27 +20,43 @@ func _init() -> void:
 	# --- angenommen
 	_same("projektkopie_ohne_temp", "C:/x/Review2/user", "", "", COPY_NAME, true, "review2 project copy")
 	_same("projektkopie_mit_temp", "C:/x/Review2/user", TEMP, PROFILE, COPY_NAME, true, "review2 project copy")
+	_same("unc_im_kopiezweig_bleibt_angenommen", "//server/share/x", "", "", COPY_NAME, true, "review2 project copy")
 	_expect("temp_profil_gemischt", "C:\\Users\\B\\AppData\\Local\\TEMP\\sb_profil\\Godot\\app_userdata\\X", TEMP_USERDIR, TEMP_USERDIR, NORMAL, TEMP, PROFILE, true, "strictly below")
 	_expect("temp_profil_abschlusstrenner", TEMP_USERDIR + "/", TEMP_USERDIR, TEMP_USERDIR, NORMAL, TEMP + "\\", PROFILE + "\\", true, "strictly below")
 	_same("gegenprobe_gueltiger_temp_fall", TEMP_USERDIR, TEMP, PROFILE, NORMAL, true, "strictly below")
+	_same("kennung_sb_xyz_tief", "C:/Users/b/AppData/Local/Temp/sb_xyz/a/b/Sternenbuergerchen", TEMP, PROFILE, NORMAL, true, "strictly below")
+	_same("kennung_grossbuchstaben_gelten", "C:/Users/b/AppData/Local/Temp/SB_Test/x", TEMP, PROFILE, NORMAL, true, "strictly below")
+	_same("kennung_unser_wegwerf_profil", "C:/Users/b/AppData/Local/Temp/sb_spielrunde_profil_g1/Godot/app_userdata/Sternenbuergerchen", TEMP, PROFILE, NORMAL, true, "strictly below")
+	_same("laufwerksbuchstabe_klein_gross", "c:/users/b/appdata/local/temp/sb_x/y", TEMP, PROFILE, NORMAL, true, "strictly below")
+	# simplify_path verwirft ".." an der Wurzel ("C:/../Users" -> "C:/Users"), wie Windows es aufloest:
+	# der Pfad liegt dann wirklich unter Temp und ist zulaessig; fuehrt er zum echten Profil, bleibt er abgelehnt.
+	_same("punktpunkt_an_der_wurzel_unter_temp", "C:/../Users/b/AppData/Local/Temp/sb_x/y", TEMP, PROFILE, NORMAL, true, "strictly below")
+	_same("punktpunkt_an_der_wurzel_echtes_profil", "C:/../Users/b/AppData/Roaming/x", TEMP, PROFILE, NORMAL, false, "neither")
 	# --- grundlegende Ablehnungen
 	_expect("expected_leer", "", TEMP_USERDIR, TEMP_USERDIR, NORMAL, TEMP, PROFILE, false, "not set")
 	_expect("actual_abweichend", TEMP_USERDIR, TEMP_USERDIR + "_andere", TEMP_USERDIR, NORMAL, TEMP, PROFILE, false, "does not resolve")
 	_expect("localized_abweichend", TEMP_USERDIR, TEMP_USERDIR, TEMP_USERDIR + "_andere", NORMAL, TEMP, PROFILE, false, "does not resolve")
 	_expect("projektkopie_expected_leer", "", "C:/x", "C:/x", COPY_NAME, TEMP, PROFILE, false, "not set")
 	_expect("projektkopie_actual_abweichend", "C:/x", "C:/y", "C:/x", COPY_NAME, TEMP, PROFILE, false, "does not resolve")
-	# --- echtes Profil (Hauptfall) und Temp als Vorfahre davon
+	# --- jede Regel des Temp-Zweigs hat einen Fall, den nur sie haelt
+	_same("nur_ra_roaming_in_sb_ordner", "C:/Users/b/AppData/Local/Temp/sb_x/AppData/Roaming/Godot/x", TEMP, PROFILE, NORMAL, false, "AppData/Roaming folder")
+	_same("nur_leerpruefung_profil_leer", TEMP_USERDIR, TEMP, "", NORMAL, false, "USERPROFILE is not set")
+	_same("nur_rc_temp_ist_benutzerordner", "C:/Users/b/sb_x/Dokumente/x", "C:\\Users\\b", PROFILE, NORMAL, false, "ancestors")
+	_same("nur_rc_temp_ist_users", "C:/Users/b/sb_x/Dokumente/x", "C:\\Users", PROFILE, NORMAL, false, "ancestors")
+	_same("nur_unc_temp_unter_unc_temp", "//server/share/Temp/sb_x/Godot/app_userdata/X", "\\\\server\\share\\Temp", PROFILE, NORMAL, false, "UNC")
+	_same("nur_kennung_godot_ordner", "C:/Users/b/AppData/Local/Temp/Godot/app_userdata/X", TEMP, PROFILE, NORMAL, false, "sb_*")
+	_same("nur_kennung_b_roaming_ohne_appdata", "C:/Users/b/AppData/Local/Temp/b/Roaming/Godot/x", TEMP, PROFILE, NORMAL, false, "sb_*")
+	_same("nur_kennung_sb_unterstrich_zu_kurz", "C:/Users/b/AppData/Local/Temp/sb_/x", TEMP, PROFILE, NORMAL, false, "sb_*")
+	_same("nur_kennung_sb_ohne_unterstrich", "C:/Users/b/AppData/Local/Temp/sbx/x", TEMP, PROFILE, NORMAL, false, "sb_*")
+	# --- echtes Profil (Hauptfall), Temp als Vorfahre davon, umgeleitetes Roaming
 	_same("echtes_profil_plausibles_temp", REAL, TEMP, PROFILE, NORMAL, false, "neither")
 	_same("echtes_profil_temp_ist_benutzerordner", REAL, "C:\\Users\\b", PROFILE, NORMAL, false, "AppData/Roaming")
 	_same("echtes_profil_temp_ist_appdata", REAL, "C:\\Users\\b\\AppData", PROFILE, NORMAL, false, "AppData/Roaming")
 	_same("echtes_profil_temp_ist_users", REAL, "C:\\Users", PROFILE, NORMAL, false, "AppData/Roaming")
 	_same("echtes_profil_temp_ist_roaming", REAL, "C:\\Users\\b\\AppData\\Roaming", PROFILE, NORMAL, false, "AppData/Roaming")
-	_same("echtes_profil_profil_leer", REAL, "C:\\Users\\b", "", NORMAL, false, "AppData/Roaming")
-	# nur R-c haelt: kein Roaming-Pfad, aber Temp ist der Benutzerordner / Vorfahre
-	_same("nur_rc_temp_ist_benutzerordner", "C:/Users/b/Dokumente/x", "C:\\Users\\b", PROFILE, NORMAL, false, "ancestors")
-	_same("nur_rc_temp_ist_users", "C:/Users/b/Dokumente/x", "C:\\Users", PROFILE, NORMAL, false, "ancestors")
-	# Profil-Ordner fehlt
-	_same("profil_leer_sonst_gueltig", TEMP_USERDIR, TEMP, "", NORMAL, false, "USERPROFILE is not set")
+	_same("umgeleitetes_roaming_d_profiles", "D:/Profiles/b/Roaming/Godot/app_userdata/Sternenbuergerchen", "D:\\Profiles", PROFILE, NORMAL, false, "sb_*")
+	_same("unc_wurzel_als_temp_roaming", "//server/share/users/b/AppData/Roaming/x", "\\\\server\\share", PROFILE, NORMAL, false, "UNC")
+	_same("unc_umgeleitetes_roaming_ohne_literal", "//srv/share/b/AppData(Roaming)/Godot/app_userdata/Sternenbuergerchen", "\\\\srv\\share", PROFILE, NORMAL, false, "UNC")
 	# --- Temp-Plausibilitaet
 	_same("temp2_ist_nicht_temp", "C:/Users/b/AppData/Local/Temp2/x", TEMP, PROFILE, NORMAL, false, "neither")
 	_same("ordner_ist_temp_selbst", TEMP, TEMP, PROFILE, NORMAL, false, "neither")
@@ -49,17 +66,9 @@ func _init() -> void:
 	# --- ".." und Kurznamen
 	_same("punktpunkt_fuehrt_aus_temp_heraus", "C:/Users/b/AppData/Local/Temp/a/../../Roaming/x", TEMP, PROFILE, NORMAL, false, "")
 	_same("fuehrendes_punktpunkt_in_expected", "../Temp/x", TEMP, PROFILE, NORMAL, false, "")
-	# simplify_path verwirft ".." an der Wurzel ("C:/../Users" -> "C:/Users"), wie Windows es aufloest:
-	# der Pfad liegt dann wirklich unter Temp und ist zulaessig; fuehrt er zum echten Profil, bleibt er abgelehnt.
-	_same("punktpunkt_an_der_wurzel_unter_temp", "C:/../Users/b/AppData/Local/Temp/x", TEMP, PROFILE, NORMAL, true, "strictly below")
-	_same("punktpunkt_an_der_wurzel_echtes_profil", "C:/../Users/b/AppData/Roaming/x", TEMP, PROFILE, NORMAL, false, "neither")
 	_same("punktpunkt_in_temp_zeigt_auf_profil", REAL, "C:\\Users\\b\\AppData\\Local\\Temp\\..\\..\\..", PROFILE, NORMAL, false, "")
-	_same("punktpunkt_in_temp_nur_rc", "C:/Users/b/Dokumente/x", "C:\\Users\\b\\AppData\\Local\\Temp\\..\\..\\..", PROFILE, NORMAL, false, "ancestors")
+	_same("punktpunkt_in_temp_nur_rc", "C:/Users/b/sb_x/Dokumente/x", "C:\\Users\\b\\AppData\\Local\\Temp\\..\\..\\..", PROFILE, NORMAL, false, "ancestors")
 	_same("kurzname_in_temp_gegen_langen_namen", "C:/Users/bjoer/AppData/Local/Temp/x", "C:\\Users\\BJOERN~1\\AppData\\Local\\Temp", "C:\\Users\\bjoer", NORMAL, false, "neither")
-	_same("laufwerksbuchstabe_klein_gross", "c:/users/b/appdata/local/temp/x", TEMP, PROFILE, NORMAL, true, "strictly below")
-	# --- UNC (tatsaechliches Ergebnis festgehalten)
-	_same("unc_temp_unter_unc_temp", "//server/share/Temp/x", "\\\\server\\share\\Temp", PROFILE, NORMAL, true, "strictly below")
-	_same("unc_wurzel_als_temp_roaming", "//server/share/users/b/AppData/Roaming/x", "\\\\server\\share", PROFILE, NORMAL, false, "AppData/Roaming")
 	# --- Kopiename ist bewusst genau (Gross/Klein)
 	_same("kopiename_klein_ausserhalb_temp", "C:/x/Review2/user", TEMP, PROFILE, "sb-codex-review2-x", false, "neither")
 	_same("kopiename_klein_echtes_profil", REAL, TEMP, PROFILE, "sb-codex-review2-x", false, "neither")
@@ -68,9 +77,6 @@ func _init() -> void:
 	_check("ablehnung_nennt_grund", not String(verdict.get("reason", "")).is_empty())
 	# --- system_temp_dir liest TEMP, faellt auf TMP zurueck
 	_test_system_temp_dir()
-	# --- Beobachtung: was macht simplify_path aus den Randfaellen
-	for sample in ["../Temp/x", "C:/../Users/b", "C:/Users/b/AppData/Local/Temp/../../..", "//server/share/Temp/x", "\\\\server\\share\\Temp", "C:", ".", "/", "tmp"]:
-		print("SIMPLIFY ", sample, " -> ", GUARD.normalize_path(sample))
 	print("REVIEW2_ISOLATION_GUARD passed=%d failed=%d" % [_passed, _failed])
 	quit(0 if _failed == 0 else 1)
 
