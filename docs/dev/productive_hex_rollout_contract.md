@@ -129,7 +129,7 @@ verzögerte/konkurrierende Drehungen blockieren einen partiellen Save weiterhin.
 
 Ein neuerer fehlgeschlagener Force-Export verwirft auch ein noch laufendes älteres
 Erfolgsintervall, ohne die letzte gültige Datei zu ersetzen. Die Ground-/Actor-
-Transaktion bereinigt tote Handles und begrenzt beide Schemazweige gemeinsam auf
+Transaktion bereinigt tote Handles und begrenzt die Vorbereitungen auf
 32 lebendige Vorbereitungen. Der Movementcodec erhält tatsächliche Post-Drop-
 Sicherungsfelder explizit: kanonische Securitymodi (einschließlich historischem
 `directional`), ganzzahliger Radius 0..256 und endlicher Winkel innerhalb ±2τ.
@@ -145,7 +145,7 @@ Checkpoint-Export und Restorevorbereitung dürfen für belegte Routensegmente un
 Passagezusagen einen kalten Korridorindex mit höchstens 8192 Knoten vorbereiten.
 Das ist ein begrenzter Savepfad, keine Tickarbeit; das normale Tickbudget bleibt
 64 Knoten. Ein unvollständiger Index wird weiterhin abgelehnt.
-Vorbereitungen bleiben über Legacy und Hex gemeinsam auf 32 lebende Handles
+Vorbereitungen bleiben auf 32 lebende Handles
 begrenzt. Verwaiste äußere Actor-/Batchrecords werden vor inneren Vorbereitungen
 bereinigt; synchrone Publikationsguards werden nicht als Referenzkreis gehalten.
 

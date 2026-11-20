@@ -1,6 +1,6 @@
 extends RefCounted
 ## Read-only collection of independently validated owner snapshots for a narrow
-## stable single-craft, no-enemy legacy surface mission. This is NOT a complete
+## stable single-craft, no-enemy surface mission on a Hex map. This is NOT a complete
 ## world checkpoint: Root receipts and staged scene restoration remain required.
 const HOME_STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")

@@ -26,6 +26,15 @@ func _run() -> void:
  var legacy := {"ok":true,"schema":"legacy_ground_positions.v1","frame":{},"map_fingerprint":"","overrides":{},"positions":{}}
  var rejected: Dictionary = transaction_script.new().prepare_restore(rig.sim,rig.terrain,legacy,saved_actors,["a","b"],{})
  _check(not rejected.get("ok",true) and rejected.get("reason") == "unsupported_ground_schema","legacy ground checkpoint is rejected with unsupported_ground_schema (got " + str(rejected.get("reason")) + ")")
+ # Derselbe heute gueltige Hex-Stand, nur das ground-Schema im Speicher auf das alte Format gesetzt.
+ var format_only: Dictionary = saved_ground.duplicate(true)
+ format_only.schema = "legacy_ground_positions.v1"
+ var format_rejected: Dictionary = transaction_script.new().prepare_restore(rig.sim,rig.terrain,format_only,saved_actors,["a","b"],{})
+ _check(not format_rejected.get("ok",true) and format_rejected.get("reason") == "unsupported_ground_schema","nur das Schema weicht ab: Grund genau unsupported_ground_schema (got " + str(format_rejected.get("reason")) + ")")
+ var no_schema: Dictionary = transaction_script.new().prepare_restore(rig.sim,rig.terrain,{},saved_actors,["a","b"],{})
+ _check(not no_schema.get("ok",true) and no_schema.get("reason") == "unsupported_ground_schema","ground ohne Schema (leer): Grund genau unsupported_ground_schema (got " + str(no_schema.get("reason")) + ")")
+ var unchanged: Dictionary = transaction_script.new().prepare_restore(rig.sim,rig.terrain,saved_ground,saved_actors,["a","b"],{})
+ _check(unchanged.get("ok",false) == true,"derselbe Stand mit hex_mission_ground.v1 wird angenommen (ok == true)")
  _check(a.global_position.is_finite() and b.global_position.is_finite() and not sim.get_hex_unit_state("a").is_empty() and not sim.get_hex_unit_state("b").is_empty(),"rejection leaves both actors on the Hex ground")
  rig.scene.free()
  done()

@@ -4,6 +4,8 @@ extends "res://scripts/tests/review_completion_authentic_legacy_continue.gd"
 ## 20.11.2026: von dem alten Zwischenstand (legacy_source_pair, wird nicht mehr geladen) auf das
 ## Hex-Paar return_source_pair umgezogen; Pruefungen unveraendert. NICHT per Lauf belegt (verlangt
 ## eine isolierte Projektkopie), nur --check-only. Wer ihn fahren kann: bitte laufen lassen.
+## Achtung: Das Paar return_source_pair/ vom 13.11. scheitert am Basisstand vermutlich mit
+## stale_campaign_definitions (Ortsdaten geaendert); ein neues Hex-Paar kann noetig sein.
 const HEX_DIR := "res://docs/qa/review_completion_20261113/return_source_pair/"
 const HEX_HOME_SHA := "c346f73b218552e5851efdc35468a259f6a06d8ebd247d75ca5d810492e675cd"
 const HEX_ACTIVE_SHA := "d6e7af966ae8e5da08858e0874c3775505c05cd007c029471f0c0b8ffa295181"
@@ -111,14 +113,21 @@ func _copy_hex_pair() -> bool:
 	var pairs := [[HEX_DIR + "checkpoint_v1.json", STORE.DEFAULT_PATH, HEX_HOME_SHA], [HEX_DIR + "active_checkpoint_v1.json", LEGACY_ACTIVE.DEFAULT_PATH, HEX_ACTIVE_SHA]]
 	for pair in pairs:
 		if not _check(FileAccess.file_exists(pair[0]) and FileAccess.get_sha256(pair[0]) == pair[2], "exact Hex source " + String(pair[0]).get_file()): return false
+	if not _check(not FileAccess.file_exists(STORE.DEFAULT_PATH) and not FileAccess.file_exists(LEGACY_ACTIVE.DEFAULT_PATH), "isolated profile is empty before installing fixtures"):
+		return false
 	_original_home = FileAccess.get_file_as_bytes(pairs[0][0])
 	_original_active = FileAccess.get_file_as_bytes(pairs[1][0])
 	for pair in pairs:
-		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(pair[1]).get_base_dir())
+		if not _check(DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(pair[1]).get_base_dir()) == OK, "private campaign directory is available"):
+			return false
 		var file := FileAccess.open(pair[1], FileAccess.WRITE)
-		if not _check(file != null, "private campaign file opens for an exact byte copy"): return false
-		file.store_buffer(FileAccess.get_file_as_bytes(pair[0]))
+		if not _check(file != null, "private campaign fixture opens for an exact byte copy"): return false
+		var bytes := FileAccess.get_file_as_bytes(pair[0])
+		file.store_buffer(bytes)
+		file.flush()
+		var error := file.get_error()
 		file.close()
+		if not _check(error == OK and FileAccess.get_file_as_bytes(String(pair[1])) == bytes, "private campaign copy preserves every original byte"): return false
 	return true
 
 func _retired_view_context(location_id: String, queued: bool = false) -> Dictionary:

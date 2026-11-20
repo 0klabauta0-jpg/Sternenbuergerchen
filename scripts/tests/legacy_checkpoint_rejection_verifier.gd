@@ -56,11 +56,27 @@ func _run() -> void:
 		# deshalb wird nur belegt, dass die Ablehnung am Ladeergebnis des Basisstands nichts aendert.
 		_check(HOME.load_checkpoint() == home_before, "Ablehnung des Einsatzstands aendert das Ladeergebnis des Basisstands nicht (" + str(home_before.get("reason", "ok")) + ")")
 		_check(FileAccess.get_file_as_bytes(HOME.DEFAULT_PATH) == home_bytes and FileAccess.get_file_as_bytes(ACTIVE.DEFAULT_PATH) == active_bytes, "beide Dateien bleiben Byte fuer Byte unveraendert")
-	# Gegenprobe: heutiger Hex-Zwischenstand wird angenommen.
+	# Gegenprobe mit dem echten Hex-Paar (Basisstand ist veraltet, daher keine Annahme moeglich).
 	if _check(_install(HEX_DIR), "Hex-Paar im Wegwerf-Profil installiert"):
 		var loaded_hex: Dictionary = ACTIVE.load_checkpoint(BOOTSTRAP.validate)
 		# Das Hex-Paar scheitert heute an veralteten Ortsdaten des Basisstands, aber NICHT am Zwischenstandsformat.
-		_check(loaded_hex.get("reason") != "unsupported_ground_schema", "Hex-Einsatzstand wird nicht wegen des Formats abgelehnt (Ergebnis: " + str(loaded_hex.get("reason", "ok")) + ")")
+		_check(loaded_hex.get("reason") != "unsupported_ground_schema", "Hex-Einsatzstand wird nicht wegen des Formats abgelehnt (Ergebnis: " + str(loaded_hex.get("reason", "ok")) + "); echte Annahme: mission_ground_actor_transaction_verifier")
+		# Im Speicher gebaut: derselbe Hex-Umschlag, nur das ground-Schema (bzw. ground selbst) weicht ab.
+		# Die Ablehnung kommt vor dem Laden des Basisstands, deshalb ist sie hier erreichbar.
+		var base: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(HEX_DIR + "active_checkpoint_v1.json"))
+		_check(BOOTSTRAP.validate(base.duplicate(true)).get("reason") != "unsupported_ground_schema", "unveraenderter Hex-Umschlag: Grund ist nicht unsupported_ground_schema")
+		var format_only: Dictionary = base.duplicate(true)
+		format_only.components.ground.schema = "legacy_ground_positions.v1"
+		var checked: Dictionary = BOOTSTRAP.validate(format_only)
+		_check(not checked.get("ok", true) and checked.get("reason") == "unsupported_ground_schema", "nur das ground-Schema weicht ab: Grund genau unsupported_ground_schema (war: " + str(checked.get("reason")) + ")")
+		var no_ground: Dictionary = base.duplicate(true)
+		no_ground.components.erase("ground")
+		checked = BOOTSTRAP.validate(no_ground)
+		_check(not checked.get("ok", true) and checked.get("reason") == "unsupported_ground_schema", "ground fehlt: Grund genau unsupported_ground_schema (war: " + str(checked.get("reason")) + ")")
+		var null_ground: Dictionary = base.duplicate(true)
+		null_ground.components.ground = null
+		checked = BOOTSTRAP.validate(null_ground)
+		_check(not checked.get("ok", true) and checked.get("reason") == "unsupported_ground_schema", "ground ist null: Grund genau unsupported_ground_schema (war: " + str(checked.get("reason")) + ")")
 	print("RESULTS: %d passed, %d failed" % [passed, failed])
 	if failed == 0: print("LEGACY_CHECKPOINT_REJECTION_PASS")
 	quit(0 if failed == 0 else 1)
