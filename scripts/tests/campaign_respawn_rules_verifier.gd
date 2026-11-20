@@ -29,6 +29,54 @@ func _base_rules() -> Dictionary:
 		"total_loss": {"rescue_fee_fraction": 0.25, "rescue_fee_minimum": 50, "wound_severity": "light", "morale_delta": -0.08},
 	}
 
+## Dead unit "a" (left behind) with a given respawns_used value in the team state and/or the roster entry.
+func _one_dead(rules: Dictionary, state_has: bool, state_value: Variant, roster_has: bool, roster_value: Variant, limit: int) -> Dictionary:
+	var state: Dictionary = ts("a", "down")
+	if state_has:
+		state["respawns_used"] = state_value
+	var a_entry: Dictionary = unit("a", "operator")
+	if roster_has:
+		a_entry["respawns_used"] = roster_value
+	var roster: Array = [unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), a_entry]
+	var ctx: Dictionary = {"respawn_limit": limit} if limit > 0 else {}
+	return R.resolve_mission([ts("lead", "fit"), ts("pilot", "fit", false, true, true), state], "aborted", roster, "pilot", rules, ctx)
+
+func _run_used_reading(rules: Dictionary) -> void:
+	# Helper itself
+	check(R.respawns_used_of(null) == 0 and R.respawns_used_of(5) == 0 and R.respawns_used_of([1]) == 0 and R.respawns_used_of("x") == 0, "respawns_used_of: non-dictionary entry is 0")
+	check(R.respawns_used_of({}) == 0 and R.respawns_used_of({"respawns_used": 2}) == 2 and R.respawns_used_of({"respawns_used": 2.9}) == 2 and R.respawns_used_of({"respawns_used": -4}) == 0, "respawns_used_of: missing 0, int, float truncated, negative 0")
+	check(R.respawns_used_of({"respawns_used": INF}) == 0 and R.respawns_used_of({"respawns_used": NAN}) == 0, "respawns_used_of: INF and NAN are 0")
+	var bad_values: Array = [null, "2", [], true, {}, -1]
+	for where in ["state", "roster"]:
+		for bad in bad_values:
+			var label := "%s respawns_used=%s" % [where, str(bad)]
+			var s_has: bool = where == "state"
+			var with_limit: Dictionary = _one_dead(rules, s_has, bad, not s_has, bad, 3)
+			var ok_limit: bool = with_limit.has("casualties") and Array(with_limit.respawn_unit_ids) == ["a"] and with_limit.fatality_unit_ids.is_empty() and int(with_limit.casualties[0].death_number) == 1
+			check(ok_limit, label + ", limit 3: counts as 0 used")
+			var no_limit: Dictionary = _one_dead(rules, s_has, bad, not s_has, bad, 0)
+			check(no_limit.has("casualties") and Array(no_limit.fatality_unit_ids) == ["a"] and no_limit.respawn_unit_ids.is_empty(), label + ", no limit: same fatalities, no error")
+		var good: Dictionary = _one_dead(rules, where == "state", 2.0, where == "roster", 2.0, 3)
+		check(good.has("casualties") and Array(good.respawn_unit_ids) == ["a"] and int(good.casualties[0].death_number) == 3, where + " respawns_used=2.0: counts as 2")
+		var maxed: Dictionary = _one_dead(rules, where == "state", 3.0, where == "roster", 3.0, 3)
+		check(maxed.has("casualties") and Array(maxed.fatality_unit_ids) == ["a"] and maxed.respawn_unit_ids.is_empty(), where + " respawns_used=3.0 with limit 3: final")
+	# Precedence: team state, then roster, then 0
+	var p1: Dictionary = _one_dead(rules, true, 3, true, 0, 3)
+	check(Array(p1.fatality_unit_ids) == ["a"], "state says 3, roster says 0, limit 3: final")
+	var p2: Dictionary = _one_dead(rules, false, 0, true, 3, 3)
+	check(Array(p2.fatality_unit_ids) == ["a"], "state has no field, roster says 3, limit 3: final")
+	var p3: Dictionary = _one_dead(rules, false, 0, false, 0, 3)
+	check(Array(p3.respawn_unit_ids) == ["a"] and int(p3.casualties[0].death_number) == 1, "neither says anything: death number 1")
+	var p4: Dictionary = _one_dead(rules, true, 0, true, 3, 3)
+	check(Array(p4.respawn_unit_ids) == ["a"], "state says 0, roster says 3: the state wins")
+	# Broken roster entries (not dictionaries), with and without limit
+	var junk_roster: Array = [5, null, "x", unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), unit("a", "operator")]
+	junk_roster[5]["respawns_used"] = 1
+	var junk_team: Array = [ts("lead", "fit"), ts("pilot", "down"), ts("a", "down")]
+	for junk_ctx in [{}, {"respawn_limit": 0}, {"respawn_limit": 3}]:
+		var junk: Dictionary = R.resolve_mission(junk_team, "won", junk_roster, "pilot", rules, junk_ctx)
+		check(junk.has("total_loss") and junk.total_loss and junk.total_loss_reason == "pilot_down" and junk.fatality_unit_ids.is_empty() and junk.respawn_unit_ids.is_empty(), "pilot_down with broken roster entries, ctx %s: no error" % str(junk_ctx))
+
 func _run() -> void:
 	var rules: Dictionary = R.load_rules()
 	# Times
@@ -101,14 +149,18 @@ func _run() -> void:
 	var leader_team: Array = [ts("lead", "down", true, false, false, 0), ts("two", "down", true, false, false, 0), ts("three", "fit"), ts("pilot", "fit", false, true, true)]
 	var leader_roster: Array = [unit("lead", "operator", 0.6), unit("two", "operator", 0.4), unit("three", "operator"), unit("pilot", "pilot", 0.0, 0.7)]
 	check(R.resolve_mission(leader_team, "aborted", leader_roster, "pilot", rules).total_loss_reason == "no_leader_left", "without limit: no_leader_left")
-	check(not R.resolve_mission(leader_team, "aborted", leader_roster, "pilot", rules, ctx).total_loss, "limit 3: no_leader_left not triggered")
+	var leader3: Dictionary = R.resolve_mission(leader_team, "aborted", leader_roster, "pilot", rules, ctx)
+	check(not leader3.total_loss and leader3.total_loss_reason == "" and Array(leader3.respawn_unit_ids) == ["lead", "two"] and leader3.fatality_unit_ids.is_empty(), "limit 3: no_leader_left not triggered, both leaders respawn")
 	var no_pilot_roster: Array = [unit("lead", "operator", 0.6), unit("p2", "pilot", 0.0, 0.7), unit("three", "operator")]
 	var no_pilot_team: Array = [ts("lead", "fit"), ts("three", "fit"), ts("p2", "down", true, false, false, 0)]
 	check(R.resolve_mission(no_pilot_team, "aborted", no_pilot_roster, "lead", rules).total_loss_reason == "no_pilot_left", "without limit: no_pilot_left")
-	check(not R.resolve_mission(no_pilot_team, "aborted", no_pilot_roster, "lead", rules, ctx).total_loss, "limit 3: no_pilot_left not triggered")
+	var pilot3: Dictionary = R.resolve_mission(no_pilot_team, "aborted", no_pilot_roster, "lead", rules, ctx)
+	check(not pilot3.total_loss and pilot3.total_loss_reason == "" and Array(pilot3.respawn_unit_ids) == ["p2"] and pilot3.fatality_unit_ids.is_empty(), "limit 3: no_pilot_left not triggered, the pilot respawns")
+	check(tl0.has("respawn_unit_ids") and tl0.respawn_unit_ids.is_empty() and tl0.fatality_unit_ids.is_empty() and tl0.casualties.is_empty(), "total loss result carries an empty respawn_unit_ids")
 	# pilot_down and ground_team_down unchanged
 	check(R.resolve_mission([ts("lead", "fit"), ts("pilot", "down")], "won", roster, "pilot", rules, ctx).total_loss_reason == "pilot_down", "pilot_down unchanged with limit")
 	check(R.resolve_mission([ts("lead", "down"), ts("a", "bleedout"), ts("pilot", "fit", false, true, true)], "lost", roster, "pilot", rules, ctx).total_loss_reason == "ground_team_down", "ground_team_down unchanged with limit")
+	_run_used_reading(rules)
 	# Backward equality: no limit vs limit 0
 	var plain: Dictionary = R.resolve_mission(team, "aborted", roster, "pilot", rules)
 	var zero: Dictionary = R.resolve_mission(team, "aborted", roster, "pilot", rules, {"respawn_limit": 0})

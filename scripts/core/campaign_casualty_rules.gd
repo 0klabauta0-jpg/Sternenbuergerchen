@@ -3,6 +3,8 @@ extends RefCounted
 ## All balance values come from data/singleplayer/casualty_rules.json.
 
 const RULES_PATH := "res://data/singleplayer/casualty_rules.json"
+## Used when the rules file has no "respawn" block. The only place for these defaults.
+const DEFAULT_RESPAWN := {"outage_base_seconds": 3600, "outage_step_seconds": 1800, "pickup_location_id": "polisa"}
 
 static func _is_number(value: Variant) -> bool:
 	return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
@@ -28,8 +30,6 @@ static func rules_are_valid(rules: Dictionary) -> bool:
 		return false
 	return _respawn_block_is_valid(rules)
 
-const DEFAULT_RESPAWN := {"outage_base_seconds": 3600, "outage_step_seconds": 1800, "pickup_location_id": "polisa"}
-
 static func _is_positive_whole(value: Variant) -> bool:
 	if not _is_number(value):
 		return false
@@ -53,14 +53,26 @@ static func _respawn_config(rules: Dictionary) -> Dictionary:
 
 static func respawn_outage_seconds(death_number: int, rules: Dictionary) -> int:
 	var cfg: Dictionary = _respawn_config(rules)
-	return int(cfg.get("outage_base_seconds", 3600)) + int(cfg.get("outage_step_seconds", 1800)) * (maxi(death_number, 1) - 1)
+	return int(cfg["outage_base_seconds"]) + int(cfg["outage_step_seconds"]) * (maxi(death_number, 1) - 1)
+
+## Reads "respawns_used" from a team state or roster entry. Never raises: anything that is not a
+## Dictionary, or whose value is not a finite number, counts as 0. Floats are truncated, negatives are 0.
+static func respawns_used_of(entry: Variant) -> int:
+	if not entry is Dictionary:
+		return 0
+	var value: Variant = entry.get("respawns_used", 0)
+	if typeof(value) == TYPE_INT:
+		return maxi(int(value), 0)
+	if typeof(value) == TYPE_FLOAT and is_finite(float(value)):
+		return maxi(int(value), 0)
+	return 0
 
 static func is_final_death(respawns_used: int, respawn_limit: int) -> bool:
 	return maxi(respawns_used, 0) >= maxi(respawn_limit, 0)
 
 static func build_respawn_state(death_number: int, source: String, rules: Dictionary) -> Dictionary:
 	var seconds := respawn_outage_seconds(death_number, rules)
-	return {"state": "respawning", "death_number": maxi(death_number, 1), "seconds_total": seconds, "seconds_remaining": seconds, "pickup_location_id": str(_respawn_config(rules).get("pickup_location_id", "polisa")), "source": source}
+	return {"state": "respawning", "death_number": maxi(death_number, 1), "seconds_total": seconds, "seconds_remaining": seconds, "pickup_location_id": str(_respawn_config(rules)["pickup_location_id"]), "source": source}
 
 static func load_rules(path: String = RULES_PATH) -> Dictionary:
 	var parsed: Variant = null
@@ -96,10 +108,12 @@ static func _leadership(unit: Dictionary) -> float:
 
 static func resolve_mission(team_states: Array, mission_outcome: String, roster_units: Array, pilot_unit_id: String, rules: Dictionary, context: Dictionary = {}) -> Dictionary:
 	var respawn_limit: int = maxi(int(context.get("respawn_limit", 0)), 0)
+	# The roster is only searched for respawns_used when a limit is set; without a limit it is untouched.
 	var roster_used := {}
-	for raw_roster in roster_units:
-		var roster_unit: Dictionary = raw_roster
-		roster_used[str(roster_unit.get("unit_id", ""))] = int(roster_unit.get("respawns_used", 0))
+	if respawn_limit > 0:
+		for raw_roster in roster_units:
+			if raw_roster is Dictionary:
+				roster_used[str(raw_roster.get("unit_id", ""))] = respawns_used_of(raw_roster)
 	var classified: Array = []
 	var dead_ids := PackedStringArray()
 	var respawn_ids := PackedStringArray()
@@ -116,7 +130,7 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 		var result: Dictionary = classify_unit(state, mission_outcome)
 		classified.append(result)
 		if result.outcome == "dead":
-			var used: int = int(state.get("respawns_used", roster_used.get(unit_id, 0)))
+			var used: int = respawns_used_of(state) if state.has("respawns_used") else int(roster_used.get(unit_id, 0))
 			var final_death := is_final_death(used, respawn_limit)
 			result["final"] = final_death
 			result["death_number"] = maxi(used, 0) + 1
