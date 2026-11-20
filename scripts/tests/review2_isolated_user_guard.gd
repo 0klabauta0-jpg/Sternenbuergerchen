@@ -10,7 +10,9 @@ static func normalize_path(path: String) -> String:
 ## Ordner gesetzt ist und user:// genau dort liegt UND entweder das Projekt eine
 ## umbenannte Review2-Kopie ist ODER der Ordner echt unterhalb des System-Temp-
 ## Verzeichnisses liegt. Der echte Spielstand liegt unter %APPDATA% und nie dort.
-static func isolation_verdict(expected_dir: String, actual_dir: String, localized_dir: String, app_name: String, temp_dir: String) -> Dictionary:
+## user_profile_dir ist %USERPROFILE% (die APPDATA-Umleitung beruehrt ihn nicht). Wer
+## ihn weglaesst, bekommt den Wert der Umgebung; ein leerer Wert lehnt den Temp-Zweig ab.
+static func isolation_verdict(expected_dir: String, actual_dir: String, localized_dir: String, app_name: String, temp_dir: String, user_profile_dir: String = OS.get_environment("USERPROFILE")) -> Dictionary:
 	var expected: String = normalize_path(expected_dir).to_lower()
 	var actual: String = normalize_path(actual_dir).to_lower()
 	var localized: String = normalize_path(localized_dir).to_lower()
@@ -24,8 +26,18 @@ static func isolation_verdict(expected_dir: String, actual_dir: String, localize
 	# Ein nacktes Laufwerk oder Wurzelverzeichnis ist kein Temp-Ordner.
 	if temp.is_empty() or not temp.contains("/") or temp.ends_with(":"):
 		return {"ok": false, "reason": "no usable system temp directory"}
-	if not expected.begins_with(temp + "/") or expected.length() <= temp.length() + 1:
+	if not expected.begins_with(temp + "/"):
 		return {"ok": false, "reason": "user:// is neither a review2 project copy nor strictly below the system temp directory"}
+	# TEMP/TMP wird nicht blind geglaubt: Der echte Spielstand liegt unter APPDATA (Roaming).
+	if (expected + "/").contains("/appdata/roaming/"):
+		return {"ok": false, "reason": "user:// lies in an AppData/Roaming folder (the real save location)"}
+	var profile: String = normalize_path(user_profile_dir).to_lower()
+	if profile.is_empty():
+		return {"ok": false, "reason": "USERPROFILE is not set, cannot rule out the real profile"}
+	if (expected + "/").begins_with(profile + "/appdata/roaming/"):
+		return {"ok": false, "reason": "user:// lies below USERPROFILE/AppData/Roaming (the real save location)"}
+	if (profile + "/").begins_with(temp + "/"):
+		return {"ok": false, "reason": "system temp directory is the user profile or one of its ancestors"}
 	return {"ok": true, "reason": "user:// is strictly below the system temp directory"}
 
 
@@ -42,7 +54,8 @@ static func require_isolated_user_data() -> bool:
 		OS.get_user_data_dir(),
 		ProjectSettings.globalize_path("user://"),
 		String(ProjectSettings.get_setting("application/config/name", "")),
-		system_temp_dir())
+		system_temp_dir(),
+		OS.get_environment("USERPROFILE"))
 	if not bool(verdict.get("ok", false)):
 		push_error("REVIEW2_ISOLATION_REFUSED: test requires a separate verified user:// directory (" + String(verdict.get("reason", "")) + ")")
 		OS.kill(OS.get_process_id())
