@@ -228,7 +228,7 @@ func refresh() -> void:
 	var job: Dictionary = jobs.get(_job_id, {})
 	for id:String in _card_buttons:
 		_card_buttons[id].modulate=Color.WHITE if id==_job_id else Color("b0c1c3")
-		_card_buttons[id].text=("▾  " if id==_job_id and _details_expanded else "▸  ")+String(jobs[id].title) + "\n" + _status_text(jobs[id])
+		_card_buttons[id].text=("▾  " if id==_job_id and _details_expanded else "▸  ")+String(jobs[id].title) + "\n" + _lock_text(availability, id, _status_text(jobs[id]))
 	var status: String = String(job.get("status", "offered"))
 	var locations: Dictionary = campaign.get("locations", {})
 	var location_id := String(job.get("location_id", ""))
@@ -243,13 +243,13 @@ func refresh() -> void:
 	_summary.text = String(job.get("description", ""))
 	_summary.tooltip_text = _summary.text
 	_summary.visible = not _summary.text.is_empty() and not _summary.text.contains("Bestätigten Fortschritt im Auftrag verfolgen.")
-	_details.text = "Zielort: %s\nStatus: %s\nBelohnung: %d Kredite" % [DISPLAY.location_name(location_id, location), "Vorherigen Auftrag abschließen" if bool(job.get("locked",false)) else _status_text(job), int(Dictionary(job.get("reward", {})).get("credits", 0))]
+	_details.text = "Zielort: %s\nStatus: %s\nBelohnung: %d Kredite" % [DISPLAY.location_name(location_id, location), "Vorherigen Auftrag abschließen" if bool(job.get("locked",false)) else _lock_text(availability, _job_id, _status_text(job)), int(Dictionary(job.get("reward", {})).get("credits", 0))]
 	var issuer:Dictionary=JOBS.get_issuer_for_job(_job_id)
 	if not issuer.is_empty():_details.text="Auftraggeber: %s\n\n%s"%[String(issuer.display_name),_details.text]
 	var briefing:Dictionary=JOBS.get_briefing(_job_id,campaign,singleplayer.get("space_travel",{}))
 	var body_name:String=String(briefing.get("body_name",""))
 	if not body_name.is_empty():
-		_details.text="Himmelskörper: %s (%s)\nEinsatzgebiet: %s\nStatus: %s\nBelohnung: %d Kredite"%[body_name,String(briefing.get("body_kind","")),String(briefing.get("site_label",location.get("name","—"))),_status_text(job),int(Dictionary(job.get("reward",{})).get("credits",0))]
+		_details.text="Himmelskörper: %s (%s)\nEinsatzgebiet: %s\nStatus: %s\nBelohnung: %d Kredite"%[body_name,String(briefing.get("body_kind","")),String(briefing.get("site_label",location.get("name","—"))),_lock_text(availability,_job_id,_status_text(job)),int(Dictionary(job.get("reward",{})).get("credits",0))]
 		if not issuer.is_empty():_details.text+="\nAuftraggeber: "+String(issuer.display_name)
 	var objectives:PackedStringArray=PackedStringArray()
 	for objective:String in briefing.get("objectives",[]):objectives.append("• "+objective)
@@ -264,6 +264,14 @@ func refresh() -> void:
 	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded;_actions.visible=_details_expanded
 	_footer.visible = _details_expanded
 	_layout_device()
+
+## Gesperrt gelisteter Auftrag (Vorgaenger fertig, Vorbedingung fehlt): statt des Statustexts steht der
+## Grund der Sperre im Wortlaut des Kampagnenstands. Sonst unveraenderter Statustext.
+func _lock_text(availability: Dictionary, id: String, status_text: String) -> String:
+	var entry: Dictionary = availability.get(id, {})
+	if bool(entry.get("locked", false)) and not String(entry.get("message", "")).is_empty():
+		return "Gesperrt: " + String(entry.message)
+	return status_text
 
 ## Statuszeile eines Auftrags. Nach einem Rueckzug bleibt der Auftrag offen; die Anzeige liest nur
 ## retreat_count und reopen_at_home aus dem Kampagnenstand. Ohne Rueckzug der heutige Statustext.

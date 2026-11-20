@@ -313,9 +313,9 @@ func run() -> void:
 	check(custom_owner.get_job_availability(true).values().all(func(entry: Dictionary): return bool(entry.visible)), "skirmish keeps its actual unsequenced jobs available")
 	host.free()
 	finish_job("outpost_recovery")
-	check(not owner.get_job_availability(true).benit_delivery.visible and not command("accept_job",{"job_id":"benit_delivery"}).ok, "Benit remains hidden after predecessor until actual recruit and crate")
+	check(owner.get_job_availability(true).benit_delivery.visible and owner.get_job_availability(true).benit_delivery.locked and owner.get_job_availability(true).benit_delivery.reason == "outpost_preparation_required" and not command("accept_job",{"job_id":"benit_delivery"}).ok, "Benit is listed as locked with its reason after predecessor, and stays unacceptable until actual recruit and crate")
 	check(command("claim_recruit",{"kind":"outpost"},{"runtime_authorized":true}).ok, "actual outpost recruit")
-	check(not owner.get_job_availability(true).benit_delivery.visible, "recruit alone does not unlock Benit")
+	check(owner.get_job_availability(true).benit_delivery.locked and not owner.get_job_availability(true).benit_delivery.can_accept, "recruit alone does not unlock Benit")
 	check(command("load_crate",{},{"runtime_authorized":true}).ok and owner.get_job_availability(true).benit_delivery.can_accept, "actual cargo and recruit unlock Benit together")
 	finish_job("benit_delivery"); finish_job("outpost_chip_recovery"); finish_job("buccaneer_rescue")
 	for id: String in owner.get_campaign_snapshot().jobs:

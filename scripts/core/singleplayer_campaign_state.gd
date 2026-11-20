@@ -129,7 +129,11 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 		var gate := _retry_gate(id) if status == "failed" else _acceptance_gate(id)
 		if status == "failed" and gate.ok and not retry_allowed:
 			gate = _reject("retry_requires_home", "Erst zur Basis zurückkehren, dann Auftrag erneut annehmen")
-		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok), "can_accept":status in ["offered", "failed"] and bool(gate.ok), "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
+		# "locked": gelistet (visible), aber nicht annehmbar, weil der Spieler selbst noch etwas erledigen muss
+		# (Vorgaenger fertig, Person/Kiste am Handelsposten fehlen). Der Grund steht in reason/message.
+		# Anfliegbar macht ihn das nicht: validate_location_visit ueberspringt gesperrte Auftraege.
+		var locked := status == "offered" and String(gate.get("reason", "")) == "outpost_preparation_required"
+		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or locked, "can_accept":status in ["offered", "failed"] and bool(gate.ok), "locked":locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
 	return result
 
 func validate_location_visit(location_id: String, retry_allowed: bool = false) -> Dictionary:
@@ -137,7 +141,8 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or not _enforce_sequence: return {"ok":true}
 	var availability := get_job_availability(retry_allowed)
 	for id: String in _jobs:
-		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible): return {"ok":true}
+		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
+		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].locked): return {"ok":true}
 	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
 
 func _accept(payload: Dictionary) -> Dictionary:
