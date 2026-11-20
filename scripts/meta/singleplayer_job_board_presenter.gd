@@ -269,7 +269,7 @@ func refresh() -> void:
 ## Grund der Sperre im Wortlaut des Kampagnenstands. Sonst unveraenderter Statustext.
 func _lock_text(availability: Dictionary, id: String, status_text: String) -> String:
 	var entry: Dictionary = availability.get(id, {})
-	if bool(entry.get("locked", false)) and not String(entry.get("message", "")).is_empty():
+	if bool(entry.get("shown_as_locked", false)) and not String(entry.get("message", "")).is_empty():
 		return "Gesperrt: " + String(entry.message)
 	return status_text
 

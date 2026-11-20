@@ -6,6 +6,7 @@ const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_space_travel_state.gd")
 const COMMAND = preload("res://scripts/mission/singleplayer_campaign_command_contract.gd")
 const BOARD = preload("res://scripts/meta/singleplayer_job_board_presenter.gd")
+const STAR = preload("res://scripts/ui/star_map_screen.gd")
 const REASON_TEXT := "Zuerst die Person am Handelsposten aufnehmen und die Kiste bergen"
 const EMPTY_TEXT := "Zurzeit keine verfügbaren Aufträge"
 var passed := 0
@@ -51,6 +52,65 @@ func _projection(travel_owner: RefCounted) -> Dictionary:
 func _listed(board: Control) -> Array:
 	return Array(board.get("_card_buttons").keys())
 
+## Frischer Kampagnenstand mit den Auftraegen 1 und 2 abgeschlossen (Auftrag 3 gesperrt). jobs_override
+## wird dem Stand ueber den oeffentlichen Weg configure(locations, jobs) uebergeben.
+func _owner_at_locked_state(jobs_override: Dictionary = {}) -> void:
+	owner = CAMPAIGN.new()
+	var locations: Dictionary = {}
+	if not jobs_override.is_empty():
+		locations = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/locations.json"))
+	_check(owner.configure(locations, jobs_override).get("ok", false), "Fixture: Kampagnenstand konfiguriert")
+	_finish_job("satellite_recovery")
+	_finish_job("outpost_recovery")
+
+## W1: Ein Fixture, in dem der gesperrte Auftrag der einzige Grund fuer den Anflug seines Ortes waere.
+## Die Auftragsdaten sind die echten, nur benit_delivery liegt in distress_orbit (dort sonst nur der noch
+## unsichtbare Auftrag 5). Ohne den Zusatz "nicht shown_as_locked" in validate_location_visit waere der Ort offen.
+func _anflug_fixture() -> void:
+	var jobs: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/jobs.json"))
+	jobs.benit_delivery.location_id = "distress_orbit"
+	_owner_at_locked_state(jobs)
+	var avail: Dictionary = owner.get_job_availability(true)
+	_check(bool(avail.benit_delivery.visible) and bool(avail.benit_delivery.shown_as_locked) and not bool(avail.buccaneer_rescue.visible), "Fixture: benit_delivery gesperrt gelistet, Auftrag 5 am selben Ort unsichtbar")
+	var visit: Dictionary = owner.validate_location_visit("distress_orbit", true)
+	_check(not bool(visit.get("ok", true)) and String(visit.get("reason", "")) == "tutorial_locked", "Fixture: der Ort nur mit gesperrtem Auftrag ist nicht anfliegbar (beobachtet %s)" % str(visit))
+	_check(not bool(_command("accept_job", {"job_id":"benit_delivery"}).get("ok", true)), "Fixture: Annehmen bleibt abgelehnt")
+	_check(bool(_command("claim_recruit", {"kind":"outpost"}, {"runtime_authorized":true}).get("ok", false)) and bool(_command("load_crate", {}, {"runtime_authorized":true}).get("ok", false)), "Fixture: Person aufgenommen und Kiste geladen")
+	_check(bool(owner.validate_location_visit("distress_orbit", true).get("ok", false)), "Fixture: nach der Vorbereitung ist der Ort anfliegbar (Gegenfall)")
+
+## W2: Der Hinweis der echten Sternkarte am gewaehlten Ort. Der Bildschirm wird ohne Isolations-Waechter
+## instanziert (er schreibt nichts nach user://); Ausgabe ist das Label _job_guidance.
+func _sternkarte_hinweis(travel_owner: RefCounted) -> void:
+	_owner_at_locked_state()
+	var view: Control = STAR.new()
+	root.add_child(view)
+	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var provider := func() -> Dictionary:
+		var campaign: Dictionary = owner.get_campaign_snapshot()
+		campaign["job_availability"] = owner.get_job_availability(true)
+		var places := {}
+		for id: String in campaign.locations: places[id] = owner.validate_location_visit(id, true)
+		campaign["location_availability"] = places
+		return {"mode":"campaign", "campaign":campaign, "space_travel":travel_owner.get_snapshot()}
+	view.configure(provider, func(_op: String, _payload: Dictionary = {}) -> Dictionary: return {"ok":true})
+	view.set_process(false)
+	_check(bool(_command("select_destination", {"location_id":"satellite_crash", "job_id":""}).get("ok", false)), "Sternkarte: satellite_crash gewaehlt")
+	view.refresh()
+	await process_frame
+	var hint: Label = view.get("_job_guidance")
+	_check(hint != null and hint.visible and hint.text.contains("Gesperrt: " + REASON_TEXT), "Sternkarte: Hinweis nennt den Grund (beobachtet \"%s\")" % (hint.text if hint != null else "-"))
+	_check(hint != null and hint.text.contains(String(owner.get_campaign_snapshot().jobs.benit_delivery.title)), "Sternkarte: Hinweis nennt den gesperrten Auftrag")
+	_check(_command("select_destination", {"location_id":"trade_outpost", "job_id":""}).get("ok", false), "Sternkarte: trade_outpost gewaehlt")
+	view.refresh()
+	await process_frame
+	_check(hint != null and hint.visible and not hint.text.contains("Gesperrt"), "Gegenfall: Ort ohne gesperrten Auftrag zeigt keinen Sperrtext (beobachtet \"%s\")" % (hint.text if hint != null else "-"))
+	_check(bool(_command("select_destination", {"location_id":"satellite_crash", "job_id":""}).get("ok", false)), "Sternkarte: satellite_crash erneut gewaehlt")
+	_check(bool(_command("claim_recruit", {"kind":"outpost"}, {"runtime_authorized":true}).get("ok", false)) and bool(_command("load_crate", {}, {"runtime_authorized":true}).get("ok", false)), "Sternkarte: Person und Kiste vorhanden")
+	view.refresh()
+	await process_frame
+	_check(hint != null and hint.visible and not hint.text.contains("Gesperrt"), "Gegenfall: nach der Vorbereitung kein Sperrtext (beobachtet \"%s\")" % (hint.text if hint != null else "-"))
+	view.queue_free()
+
 func _run() -> void:
 	owner = CAMPAIGN.new()
 	var travel_owner := TRAVEL.new()
@@ -67,7 +127,7 @@ func _run() -> void:
 	board.refresh()
 	_check(_listed(board) == ["satellite_recovery"], "Anfang: nur der erste Auftrag steht auf der Tafel (beobachtet %s)" % str(_listed(board)))
 	var start_avail: Dictionary = owner.get_job_availability(true)
-	_check(not bool(start_avail.benit_delivery.visible) and not bool(start_avail.benit_delivery.get("locked", false)), "Anfang: benit_delivery ist unsichtbar und nicht als gesperrt gelistet")
+	_check(not bool(start_avail.benit_delivery.visible) and not bool(start_avail.benit_delivery.get("shown_as_locked", false)), "Anfang: benit_delivery ist unsichtbar und nicht als gesperrt gelistet")
 	_finish_job("satellite_recovery")
 	screen.snapshot = _projection(travel_owner)
 	board.refresh()
@@ -77,20 +137,16 @@ func _run() -> void:
 	# Auftrag 3: Vorgaenger fertig, aber Person und Kiste fehlen.
 	var avail: Dictionary = owner.get_job_availability(true)
 	var benit: Dictionary = avail.benit_delivery
-	_check(bool(benit.visible) and bool(benit.get("locked", false)) and not bool(benit.can_accept), "benit_delivery ist sichtbar, gesperrt und nicht annehmbar (beobachtet %s)" % str(benit))
+	_check(bool(benit.visible) and bool(benit.get("shown_as_locked", false)) and not bool(benit.can_accept), "benit_delivery ist sichtbar, gesperrt und nicht annehmbar (beobachtet %s)" % str(benit))
 	_check(String(benit.reason) == "outpost_preparation_required" and String(benit.message) == REASON_TEXT, "Grund der Sperre bleibt der vorhandene Wortlaut (beobachtet \"%s\")" % String(benit.message))
 	_check(not bool(avail.outpost_chip_recovery.visible) and not bool(avail.buccaneer_rescue.visible), "Auftraege 4 und 5 bleiben unsichtbar (Vorgaenger offen)")
 	var accept_try: Dictionary = _command("accept_job", {"job_id":"benit_delivery"})
 	_check(not bool(accept_try.get("ok", true)) and String(accept_try.get("reason", "")) == "outpost_preparation_required" and String(accept_try.get("message", "")) == REASON_TEXT, "Annehmen bleibt abgelehnt, Antwort unveraendert (beobachtet %s)" % str(accept_try))
 	_check(String(owner.get_campaign_snapshot().jobs.benit_delivery.status) == "offered", "benit_delivery bleibt offen, nicht angenommen")
-	# Anfliegen: der Ort darf nicht wegen des gesperrten Auftrags freigeschaltet werden.
-	var benit_location := String(owner.get_campaign_snapshot().jobs.benit_delivery.location_id)
-	var other_open := false
-	for id: String in owner.get_campaign_snapshot().jobs:
-		if id != "benit_delivery" and String(owner.get_campaign_snapshot().jobs[id].location_id) == benit_location and bool(avail[id].visible):
-			other_open = true
-	var location_free := bool(owner.get_campaign_snapshot().locations[benit_location].get("free_visit", false))
-	_check(bool(owner.validate_location_visit(benit_location, true).get("ok", false)) == (other_open or location_free), "Ort des gesperrten Auftrags wird durch ihn nicht anfliegbar (Ort %s, anderer offener Auftrag dort: %s)" % [benit_location, str(other_open)])
+	# Echte Daten: benit_delivery liegt in satellite_crash, wo auch der fertige satellite_recovery sichtbar ist.
+	# Der Ort war und bleibt anfliegbar; der Schutz gegen "nur wegen des gesperrten Auftrags" wirkt hier nicht
+	# und wird unten mit einem eigenen Fixture geprueft.
+	_check(bool(owner.validate_location_visit("satellite_crash", true).get("ok", false)), "echte Daten: satellite_crash bleibt anfliegbar (wegen des fertigen Auftrags 1)")
 	# Tafel mit allen Auftraegen.
 	screen.snapshot = _projection(travel_owner)
 	board.refresh()
@@ -117,22 +173,24 @@ func _run() -> void:
 	var none_visible: Dictionary = _projection(travel_owner)
 	for id: String in none_visible.campaign.job_availability:
 		none_visible.campaign.job_availability[id]["visible"] = false
-		none_visible.campaign.job_availability[id]["locked"] = false
+		none_visible.campaign.job_availability[id]["shown_as_locked"] = false
 	screen.snapshot = none_visible
 	board.refresh()
 	_check(empty_label.visible and empty_label.text.contains(EMPTY_TEXT), "ohne sichtbare Auftraege bleibt der Leertext")
 	# Vorbedingung erfuellt: Person und Kiste -> annehmbar, nicht mehr gesperrt.
 	_check(bool(_command("claim_recruit", {"kind":"outpost"}, {"runtime_authorized":true}).get("ok", false)), "echte Person aufgenommen")
 	var half: Dictionary = owner.get_job_availability(true).benit_delivery
-	_check(bool(half.visible) and bool(half.get("locked", false)) and not bool(half.can_accept), "Person allein: weiter sichtbar und gesperrt")
+	_check(bool(half.visible) and bool(half.get("shown_as_locked", false)) and not bool(half.can_accept), "Person allein: weiter sichtbar und gesperrt")
 	_check(bool(_command("load_crate", {}, {"runtime_authorized":true}).get("ok", false)), "echte Kiste geladen")
 	var ready: Dictionary = owner.get_job_availability(true).benit_delivery
-	_check(bool(ready.visible) and not bool(ready.get("locked", true)) and bool(ready.can_accept), "Person und Kiste: sichtbar, nicht mehr gesperrt, annehmbar")
+	_check(bool(ready.visible) and not bool(ready.get("shown_as_locked", true)) and bool(ready.can_accept), "Person und Kiste: sichtbar, nicht mehr gesperrt, annehmbar")
 	screen.snapshot = _projection(travel_owner)
 	board.refresh()
 	if board.get("_card_buttons").has("benit_delivery"): board.get("_card_buttons").benit_delivery.pressed.emit()
 	_check(not accept_button.disabled and not details.text.contains("Gesperrt"), "Tafel: nach der Vorbereitung ist Annehmen frei, kein Sperrtext")
 	screen.queue_free()
+	_anflug_fixture()
+	await _sternkarte_hinweis(travel_owner)
 	await process_frame
 	print("SINGLEPLAYER_JOB_BOARD_LOCKED_JOB passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)

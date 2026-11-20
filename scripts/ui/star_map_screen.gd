@@ -393,7 +393,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var job_body := String(Dictionary(Dictionary(travel.get("orbits", {})).get(job_orbit, {})).get("body_id", ""))
 		var body_name := DISPLAY.body_name(job_body, Dictionary(travel.get("bodies", {})).get(job_body, {}))
 		var job_state := Dictionary(job_availability.get(id, {}))
-		var state_text := ("Gesperrt: " + String(job_state.get("message", ""))) if bool(job_state.get("locked", false)) else String(DISPLAY.STATUS.get(status, status))
+		var state_text := ("Gesperrt: " + String(job_state.get("message", ""))) if bool(job_state.get("shown_as_locked", false)) else String(DISPLAY.STATUS.get(status, status))
 		guidance.append("%s\n%s · %s\nBelohnung: %d Kredite" % [String(job_data.get("title", "Auftrag")), body_name, state_text, int(Dictionary(job_data.get("reward", {})).get("credits", 0))])
 	_job_guidance.text = "\n".join(guidance)
 	_job_guidance.visible = not guidance.is_empty()
