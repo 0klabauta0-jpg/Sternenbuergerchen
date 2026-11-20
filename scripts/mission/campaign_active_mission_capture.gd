@@ -5,7 +5,6 @@ extends RefCounted
 const HOME_STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const ACTORS = preload("res://scripts/mission/mission_actor_checkpoint_batch.gd")
-const GROUND = preload("res://scripts/mission/legacy_ground_checkpoint.gd")
 const LIFECYCLE = preload("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
 const ROOT_RECEIPTS = preload("res://scripts/mission/root_receipt_checkpoint.gd")
 const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
@@ -136,15 +135,10 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var actors := ACTORS.new()
 	var actor_state: Dictionary = actors.export_actors(sim)
 	if not actor_state.get("ok",false): return actor_state
-	var ground := GROUND.new()
-	var ground_state: Dictionary
-	if sim.is_hex_ground_runtime_active():
-		var exported: Dictionary = sim.export_hex_checkpoint_state()
-		if not exported.get("ok",false): return exported
-		ground_state = {"ok":true,"schema":"hex_mission_ground.v1","checkpoint":exported.state}
-	else:
-		ground_state = ground.export_positions(sim,terrain,active_ids)
-	if not ground_state.get("ok",false): return ground_state
+	if not sim.is_hex_ground_runtime_active(): return _reject("hex_ground_inactive")
+	var exported: Dictionary = sim.export_hex_checkpoint_state()
+	if not exported.get("ok",false): return exported
+	var ground_state := {"ok":true,"schema":"hex_mission_ground.v1","checkpoint":exported.state}
 	var selected: Dictionary = flow.call("_get_selected_mission_definition")
 	var mission_config := {"time_limit_seconds":float(driver.get("mission_time_limit_seconds")),"win_condition":String(driver.get("win_condition"))}
 	var scenario: Variant = setup.get("_mission_scenario")

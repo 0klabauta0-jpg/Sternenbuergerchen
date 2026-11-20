@@ -1,11 +1,17 @@
 extends "res://scripts/tests/review_completion_authentic_legacy_continue.gd"
 ## Real historical campaign reconstruction; no invented location, actor or fog.
 ## The inherited helper freezes only after the genuine world commit succeeds.
+## 20.11.2026: von dem alten Zwischenstand (legacy_source_pair, wird nicht mehr geladen) auf das
+## Hex-Paar return_source_pair umgezogen; Pruefungen unveraendert. NICHT per Lauf belegt (verlangt
+## eine isolierte Projektkopie), nur --check-only. Wer ihn fahren kann: bitte laufen lassen.
+const HEX_DIR := "res://docs/qa/review_completion_20261113/return_source_pair/"
+const HEX_HOME_SHA := "c346f73b218552e5851efdc35468a259f6a06d8ebd247d75ca5d810492e675cd"
+const HEX_ACTIVE_SHA := "d6e7af966ae8e5da08858e0874c3775505c05cd007c029471f0c0b8ffa295181"
 
 func _run() -> void:
 	if not LEGACY_GUARD.require_isolated_user_data(): return
 	if not _check(FileAccess.file_exists("user://review2_isolation_canary.json"), "actual isolated profile canary"): await _finish(); return
-	if not _copy_authentic_pair(): await _finish(); return
+	if not _copy_hex_pair(): await _finish(); return
 	if not await _continue_from_files("remote view real campaign"): await _finish(); return
 	# Complete deferred visual-node admission after the already frozen gameplay.
 	await process_frame
@@ -101,6 +107,20 @@ func _run() -> void:
 	_check(_same(baseline, _owners()), "retired view recovery does not mutate gameplay, files or location owners")
 	await _finish()
 
+func _copy_hex_pair() -> bool:
+	var pairs := [[HEX_DIR + "checkpoint_v1.json", STORE.DEFAULT_PATH, HEX_HOME_SHA], [HEX_DIR + "active_checkpoint_v1.json", LEGACY_ACTIVE.DEFAULT_PATH, HEX_ACTIVE_SHA]]
+	for pair in pairs:
+		if not _check(FileAccess.file_exists(pair[0]) and FileAccess.get_sha256(pair[0]) == pair[2], "exact Hex source " + String(pair[0]).get_file()): return false
+	_original_home = FileAccess.get_file_as_bytes(pairs[0][0])
+	_original_active = FileAccess.get_file_as_bytes(pairs[1][0])
+	for pair in pairs:
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(pair[1]).get_base_dir())
+		var file := FileAccess.open(pair[1], FileAccess.WRITE)
+		if not _check(file != null, "private campaign file opens for an exact byte copy"): return false
+		file.store_buffer(FileAccess.get_file_as_bytes(pair[0]))
+		file.close()
+	return true
+
 func _retired_view_context(location_id: String, queued: bool = false) -> Dictionary:
 	var actual: Node = _flow.get("_active_mission")
 	var retired := Node2D.new()
@@ -148,8 +168,8 @@ func _finish() -> void:
 	current_scene = null
 	await process_frame
 	if not _original_home.is_empty():
-		_check(FileAccess.get_file_as_bytes(SOURCE_DIR + "checkpoint_v1.json") == _original_home and FileAccess.get_sha256(SOURCE_DIR + "checkpoint_v1.json") == SOURCE_HOME_SHA, "authentic Home source remains byte-identical")
-		_check(FileAccess.get_file_as_bytes(SOURCE_DIR + "active_checkpoint_v1.json") == _original_active and FileAccess.get_sha256(SOURCE_DIR + "active_checkpoint_v1.json") == SOURCE_ACTIVE_SHA, "authentic Active source remains byte-identical")
+		_check(FileAccess.get_file_as_bytes(HEX_DIR + "checkpoint_v1.json") == _original_home and FileAccess.get_sha256(HEX_DIR + "checkpoint_v1.json") == HEX_HOME_SHA, "authentic Home source remains byte-identical")
+		_check(FileAccess.get_file_as_bytes(HEX_DIR + "active_checkpoint_v1.json") == _original_active and FileAccess.get_sha256(HEX_DIR + "active_checkpoint_v1.json") == HEX_ACTIVE_SHA, "authentic Active source remains byte-identical")
 		_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == _original_home and FileAccess.get_file_as_bytes(LEGACY_ACTIVE.DEFAULT_PATH) == _original_active, "inspection never rewrites either private campaign file")
 	print("REMOTE_INSPECTION passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

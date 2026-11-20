@@ -8,6 +8,8 @@ static func validate(payload: Dictionary) -> Dictionary:
 	if payload.size()!=2 or payload.get("schema")!="campaign_active_checkpoint.v1" or not payload.get("components") is Dictionary: return _bad("active_checkpoint_invalid")
 	var data: Dictionary = payload.components
 	if typeof(data.get("home_sha256"))!=TYPE_STRING or data.home_sha256.length()!=64 or data.home_sha256!=FileAccess.get_sha256(HOME.DEFAULT_PATH): return _bad("active_home_mismatch")
+	# Zwischenstaende im Format vor dem Hexfeld (legacy_ground_positions.v1) werden seit 20.11.2026 abgelehnt.
+	if not data.get("ground") is Dictionary or data.ground.get("schema")!="hex_mission_ground.v1": return _bad("unsupported_ground_schema")
 	var loaded: Dictionary = HOME.load_checkpoint()
 	if not loaded.get("ok",false): return loaded
 	var home: Dictionary = loaded.payload.duplicate(true)

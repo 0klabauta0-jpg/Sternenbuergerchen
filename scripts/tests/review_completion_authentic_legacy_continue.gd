@@ -1,7 +1,8 @@
 extends "res://scripts/tests/campaign_active_mission_continue_verifier.gd"
 ## Historical files produced by an actual campaign on snapshot d1efd4047a7c.
 ## No edited Home digest, fabricated win, transport state or gameplay restore.
-## This checks reconstruction and a new native save, not a full mission playthrough.
+## Since 20.11.2026 this checks that the old-format Active file is REJECTED (reason
+## unsupported_ground_schema). Its helpers serve the tests that extend it.
 const LEGACY_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
 const LEGACY_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const LEGACY_ACTIVE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
@@ -15,34 +16,17 @@ var _old_home: Dictionary = {}
 var _old_components: Dictionary = {}
 
 func _run() -> void:
-	# The inherited SceneTree constructor already defers this entry point.
+	# Seit 20.11.2026 wird ein Zwischenstand im alten Format (legacy_ground_positions.v1) abgelehnt.
+	# Eingabe sind die echten alten Dateien; die Hilfsfunktionen unten bleiben fuer die Erben.
+	# Nicht per Lauf belegt (verlangt isolierte Projektkopie), nur --check-only.
 	if not LEGACY_GUARD.require_isolated_user_data(): return
 	if not _check(FileAccess.file_exists("user://review2_isolation_canary.json"), "runner's real isolation autoload ran before campaign bootstrap"):
 		await _finish(); return
 	if not _copy_authentic_pair(): await _finish(); return
-	if not await _continue_from_files("historical Legacy pair"): await _finish(); return
-	_check_restored_owners(_old_components, true)
-	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == _original_home and FileAccess.get_file_as_bytes(LEGACY_ACTIVE.DEFAULT_PATH) == _original_active, "first Continue preserves both historical private-profile files byte for byte")
-	# Exercise the same Save command as a player, against the actual published
-	# owners. Post-restore freezing only prevents unrelated simulation ticks.
-	var menu: Node = root.get_node("GlobalEscapeMenu")
-	var saved: Dictionary = menu.call("save_current_mission_slot")
-	if not _check(saved.get("ok", false), "actual Escape Save writes the reconstructed mission as native Hex"):
-		print("AUTHENTIC_LEGACY_SAVE_FAILURE ", saved)
-		await _finish(); return
-	var native: Variant = JSON.parse_string(FileAccess.get_file_as_string(LEGACY_ACTIVE.DEFAULT_PATH))
-	if not _check(native is Dictionary and native.get("components") is Dictionary, "native Save produces a complete active envelope"):
-		await _finish(); return
-	var components: Dictionary = native.components
-	_check(components.ground.schema == "hex_mission_ground.v1" and components.has("home_hex_tactical"), "native Save captures both actual Hex mission and away-base owners")
-	_check(components.home_sha256 == SOURCE_HOME_SHA and FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == _original_home, "native Save keeps the actual historical Home hash and unchanged Home file")
-	var native_bytes := FileAccess.get_file_as_bytes(LEGACY_ACTIVE.DEFAULT_PATH)
-	_flow.queue_free()
-	await process_frame
-	_flow = null
-	if not await _continue_from_files("new native Hex save"): await _finish(); return
-	_check_restored_owners(components, false)
-	_check(FileAccess.get_file_as_bytes(LEGACY_ACTIVE.DEFAULT_PATH) == native_bytes, "second Continue reads the newly saved Hex file without rewriting it")
+	var bootstrap = load("res://scripts/mission/campaign_active_bootstrap_validation.gd")
+	var loaded: Dictionary = LEGACY_ACTIVE.load_checkpoint(bootstrap.validate)
+	_check(not loaded.get("ok", true) and loaded.get("reason") == "unsupported_ground_schema", "historical Legacy Active file is rejected early: " + str(loaded.get("reason")))
+	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == _original_home and FileAccess.get_file_as_bytes(LEGACY_ACTIVE.DEFAULT_PATH) == _original_active, "rejection preserves both historical private-profile files byte for byte")
 	await _finish()
 
 func _copy_authentic_pair() -> bool:
