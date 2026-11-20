@@ -5,7 +5,9 @@ extends SceneTree
 
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const VALID_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
+const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const ROUNDTRIP_PATH: String = "user://mission_scenario_validation_roundtrip.json"
+const REQUIRED_LZ_KEYS: Array = ["lz", "player_lz", "requires_player_lz", "lz_position", "has_lz_position", "drop_lz", "dropship_lz", "landing_zone", "landing_zone_position"]
 
 var _passed: int = 0
 var _failed: int = 0
@@ -23,8 +25,9 @@ func _run_tests() -> void:
 	_test_duplicate_enemy_ids()
 	_test_patrol_binding_validation()
 	_test_lz_fields_rejected()
+	_test_objective_position_from_map()
 	_test_roundtrip()
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(ROUNDTRIP_PATH))
+	_remove_roundtrip_file()
 	print("MISSION_SCENARIO_VALIDATION passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -71,19 +74,59 @@ func _test_patrol_binding_validation() -> void:
 
 
 func _test_lz_fields_rejected() -> void:
-	var data: Dictionary = _valid_scenario_dict("reject_lz")
-	data["lz_position"] = {"x": 1.0, "y": 2.0}
-	data["dropship"] = {"landing_zone": {"x": 3.0, "y": 4.0}}
-	var scenario = MISSION_SCENARIO_DATA_SCRIPT.new(data)
-	_assert(_has_error(scenario, "LZ must not be stored in mission scenarios"), "LZ fields anywhere in the scenario report 'LZ must not be stored in mission scenarios'")
-	var serialized: Dictionary = Dictionary(scenario.call("to_dict"))
+	# Fixed minimum list: an accidentally emptied or shrunk FORBIDDEN_LZ_KEYS must show up here.
+	var game_keys: PackedStringArray = MISSION_SCENARIO_DATA_SCRIPT.FORBIDDEN_LZ_KEYS
+	for key: String in REQUIRED_LZ_KEYS:
+		_assert(game_keys.has(key), "FORBIDDEN_LZ_KEYS contains '%s'" % key)
+	var keys: PackedStringArray = PackedStringArray(REQUIRED_LZ_KEYS)
+	for key: String in game_keys:
+		if not keys.has(key):
+			keys.append(key)
+	# One scenario per forbidden key, exactly that one field, exact path in the message.
+	for key: String in keys:
+		var data: Dictionary = _valid_scenario_dict("reject_lz_" + key)
+		data[key] = {"x": 1.0, "y": 2.0}
+		var errors: PackedStringArray = _lz_errors(MISSION_SCENARIO_DATA_SCRIPT.new(data))
+		_assert(errors.size() == 1 and errors[0] == "LZ must not be stored in mission scenarios: scenario.%s" % key, "Top-level '%s' reports exactly 'LZ must not be stored in mission scenarios: scenario.%s' (got %s)" % [key, key, errors])
+	# Nested in a dictionary and inside an array: the path names the location.
+	var nested: Dictionary = _valid_scenario_dict("reject_lz_nested")
+	nested["dropship"] = {"player_lz": {"x": 3.0, "y": 4.0}}
+	var nested_errors: PackedStringArray = _lz_errors(MISSION_SCENARIO_DATA_SCRIPT.new(nested))
+	_assert(nested_errors.size() == 1 and nested_errors[0] == "LZ must not be stored in mission scenarios: scenario.dropship.player_lz", "Nested dropship.player_lz reports its path (got %s)" % [nested_errors])
+	var in_array: Dictionary = _valid_scenario_dict("reject_lz_array")
+	in_array["waves"] = [{"id": "w1"}, {"lz": {"x": 5.0, "y": 6.0}}]
+	var array_errors: PackedStringArray = _lz_errors(MISSION_SCENARIO_DATA_SCRIPT.new(in_array))
+	_assert(array_errors.size() == 1 and array_errors[0] == "LZ must not be stored in mission scenarios: scenario.waves[1].lz", "Array entry waves[1].lz reports its path (got %s)" % [array_errors])
+	var serial_data: Dictionary = _valid_scenario_dict("reject_lz_serialize")
+	serial_data["lz_position"] = {"x": 1.0, "y": 2.0}
+	serial_data["dropship"] = {"landing_zone": {"x": 3.0, "y": 4.0}}
+	var serialized: Dictionary = Dictionary(MISSION_SCENARIO_DATA_SCRIPT.new(serial_data).call("to_dict"))
 	_assert(not _has_key_recursive(serialized, "lz_position") and not _has_key_recursive(serialized, "landing_zone"), "Rejected LZ fields are not serialized")
+
+
+func _test_objective_position_from_map() -> void:
+	var map = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", VALID_MAP_PATH)
+	var scenario = MISSION_SCENARIO_DATA_SCRIPT.new(_valid_scenario_dict("objective_position"))
+	var marker_position: Vector2 = map.call("get_marker_position", "objective_point")
+	var resolved: Vector2 = scenario.call("get_objective_position", map, Vector2(-7.0, -9.0))
+	_assert(marker_position.distance_to(Vector2.ZERO) > 0.5, "Map marker objective_point sits away from the origin")
+	_assert(resolved.distance_to(marker_position) < 0.001, "get_objective_position resolves the marker position from the Hex map (%s vs %s)" % [resolved, marker_position])
+	var unknown_data: Dictionary = _valid_scenario_dict("objective_unknown_marker")
+	unknown_data["objective"] = {"marker_id": "does_not_exist_objective", "capture_radius": 80.0}
+	var unknown_scenario = MISSION_SCENARIO_DATA_SCRIPT.new(unknown_data)
+	_assert(unknown_scenario.call("get_objective_position", map, Vector2(-7.0, -9.0)) == Vector2(-7.0, -9.0), "Unknown objective marker resolves to the fallback position")
+	_assert(scenario.call("get_objective_position", null, Vector2(-7.0, -9.0)) == Vector2(-7.0, -9.0), "Without map data the objective position is the fallback")
+	var position_data: Dictionary = _valid_scenario_dict("objective_explicit_position")
+	position_data["objective"] = {"position": {"x": 123.0, "y": 45.0}, "capture_radius": 80.0}
+	var position_scenario = MISSION_SCENARIO_DATA_SCRIPT.new(position_data)
+	_assert(position_scenario.call("get_objective_position", map, Vector2(-7.0, -9.0)) == Vector2(123.0, 45.0), "Explicit objective position wins over the map")
 
 
 func _test_roundtrip() -> void:
 	var scenario = MISSION_SCENARIO_DATA_SCRIPT.new(_valid_scenario_dict("roundtrip"))
 	_assert(scenario.call("save_to_file", ROUNDTRIP_PATH) == OK, "Scenario saves to user:// JSON")
 	var loaded = MISSION_SCENARIO_DATA_SCRIPT.call("load_from_file", ROUNDTRIP_PATH)
+	_remove_roundtrip_file()
 	var loaded_errors: PackedStringArray = _errors(loaded)
 	_assert(loaded_errors.is_empty(), "Saved scenario loads and validates (errors: %s)" % [", ".join(loaded_errors)])
 	_assert(JSON.stringify(loaded.call("to_dict")) == JSON.stringify(scenario.call("to_dict")), "Save/load roundtrip keeps the full scenario dictionary")
@@ -108,6 +151,19 @@ func _valid_scenario_dict(scenario_id: String) -> Dictionary:
 		],
 		"notes": ["scenario validation verifier fixture"],
 	}
+
+
+func _remove_roundtrip_file() -> void:
+	if FileAccess.file_exists(ROUNDTRIP_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ROUNDTRIP_PATH))
+
+
+func _lz_errors(scenario) -> PackedStringArray:
+	var result := PackedStringArray()
+	for error_variant in _errors(scenario):
+		if String(error_variant).begins_with("LZ must not be stored"):
+			result.append(String(error_variant))
+	return result
 
 
 func _errors(scenario) -> PackedStringArray:
