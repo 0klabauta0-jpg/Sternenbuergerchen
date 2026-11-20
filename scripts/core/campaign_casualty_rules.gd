@@ -24,7 +24,43 @@ static func rules_are_valid(rules: Dictionary) -> bool:
 	for key in ["rescue_fee_fraction", "rescue_fee_minimum", "morale_delta"]:
 		if not _is_number(total_loss.get(key)):
 			return false
-	return total_loss.get("wound_severity") is String
+	if not total_loss.get("wound_severity") is String:
+		return false
+	return _respawn_block_is_valid(rules)
+
+const DEFAULT_RESPAWN := {"outage_base_seconds": 3600, "outage_step_seconds": 1800, "pickup_location_id": "polisa"}
+
+static func _is_positive_whole(value: Variant) -> bool:
+	if not _is_number(value):
+		return false
+	return float(value) > 0.0 and is_equal_approx(float(value), roundf(float(value)))
+
+## The respawn block is optional; a missing block means the defaults above.
+static func _respawn_block_is_valid(rules: Dictionary) -> bool:
+	if not rules.has("respawn"):
+		return true
+	var block: Variant = rules["respawn"]
+	if not block is Dictionary:
+		return false
+	if not _is_positive_whole(block.get("outage_base_seconds")) or not _is_positive_whole(block.get("outage_step_seconds")):
+		return false
+	var place: Variant = block.get("pickup_location_id")
+	return place is String and place != ""
+
+static func _respawn_config(rules: Dictionary) -> Dictionary:
+	var block: Variant = rules.get("respawn", DEFAULT_RESPAWN)
+	return block if block is Dictionary else DEFAULT_RESPAWN
+
+static func respawn_outage_seconds(death_number: int, rules: Dictionary) -> int:
+	var cfg: Dictionary = _respawn_config(rules)
+	return int(cfg.get("outage_base_seconds", 3600)) + int(cfg.get("outage_step_seconds", 1800)) * (maxi(death_number, 1) - 1)
+
+static func is_final_death(respawns_used: int, respawn_limit: int) -> bool:
+	return maxi(respawns_used, 0) >= maxi(respawn_limit, 0)
+
+static func build_respawn_state(death_number: int, source: String, rules: Dictionary) -> Dictionary:
+	var seconds := respawn_outage_seconds(death_number, rules)
+	return {"state": "respawning", "death_number": maxi(death_number, 1), "seconds_total": seconds, "seconds_remaining": seconds, "pickup_location_id": str(_respawn_config(rules).get("pickup_location_id", "polisa")), "source": source}
 
 static func load_rules(path: String = RULES_PATH) -> Dictionary:
 	var parsed: Variant = null
@@ -58,9 +94,15 @@ static func _leadership(unit: Dictionary) -> float:
 	var skills: Variant = unit.get("skill_values", {})
 	return float(skills.get("leadership", 0.0)) if skills is Dictionary else 0.0
 
-static func resolve_mission(team_states: Array, mission_outcome: String, roster_units: Array, pilot_unit_id: String, rules: Dictionary) -> Dictionary:
+static func resolve_mission(team_states: Array, mission_outcome: String, roster_units: Array, pilot_unit_id: String, rules: Dictionary, context: Dictionary = {}) -> Dictionary:
+	var respawn_limit: int = maxi(int(context.get("respawn_limit", 0)), 0)
+	var roster_used := {}
+	for raw_roster in roster_units:
+		var roster_unit: Dictionary = raw_roster
+		roster_used[str(roster_unit.get("unit_id", ""))] = int(roster_unit.get("respawns_used", 0))
 	var classified: Array = []
 	var dead_ids := PackedStringArray()
+	var respawn_ids := PackedStringArray()
 	var pilot_fit := true
 	var other_fit := false
 	for raw in team_states:
@@ -74,7 +116,15 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 		var result: Dictionary = classify_unit(state, mission_outcome)
 		classified.append(result)
 		if result.outcome == "dead":
-			dead_ids.append(unit_id)
+			var used: int = int(state.get("respawns_used", roster_used.get(unit_id, 0)))
+			var final_death := is_final_death(used, respawn_limit)
+			result["final"] = final_death
+			result["death_number"] = maxi(used, 0) + 1
+			if final_death:
+				dead_ids.append(unit_id)
+			else:
+				result["respawn_state"] = build_respawn_state(int(result["death_number"]), "left_behind", rules)
+				respawn_ids.append(unit_id)
 	var reason := ""
 	if not pilot_fit:
 		reason = "pilot_down"
@@ -100,12 +150,12 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 		elif survivors.size() < 2:
 			reason = "roster_too_small"
 	if reason != "":
-		return {"total_loss": true, "total_loss_reason": reason, "casualties": [], "fatality_unit_ids": PackedStringArray()}
+		return {"total_loss": true, "total_loss_reason": reason, "casualties": [], "fatality_unit_ids": PackedStringArray(), "respawn_unit_ids": PackedStringArray()}
 	var casualties: Array = []
 	for entry in classified:
 		if entry.outcome != "unharmed":
 			casualties.append(entry)
-	return {"total_loss": false, "total_loss_reason": "", "casualties": casualties, "fatality_unit_ids": dead_ids}
+	return {"total_loss": false, "total_loss_reason": "", "casualties": casualties, "fatality_unit_ids": dead_ids, "respawn_unit_ids": respawn_ids}
 
 static func build_recovery_state(severity: String, rules: Dictionary) -> Dictionary:
 	var seconds := float(rules.get("recovery_seconds", {}).get(severity, 0.0))
