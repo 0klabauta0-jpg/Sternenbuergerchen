@@ -1,12 +1,14 @@
 extends "res://scripts/tests/campaign_legacy_satellite_boarding_verifier.gd"
 ## Real deployed save -> ordinary Continue -> casualty -> actual debrief rollback.
 ## Corrupt-file and interrupted archival fixtures use private user:// only.
+const ISOLATION_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
 const ACTIVE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
 const CONFIG = preload("res://scripts/meta/campaign_start_configuration.gd")
 
 func _run() -> void:
-	if OS.get_environment("SB_REVIEW2_USER_DIR").is_empty() or not OS.get_user_data_dir().contains("SB-Codex-Review2-"):
-		printerr("ASTRA_CAMPAIGN_FIXES_REFUSED: private review2 profile required")
+	var isolation: Dictionary = ISOLATION_GUARD.isolation_verdict(OS.get_environment("SB_REVIEW2_USER_DIR"), OS.get_user_data_dir(), ProjectSettings.globalize_path("user://"), String(ProjectSettings.get_setting("application/config/name", "")), ISOLATION_GUARD.system_temp_dir())
+	if not bool(isolation.get("ok", false)):
+		printerr("ASTRA_CAMPAIGN_FIXES_REFUSED: private review2 profile required (", isolation.get("reason", ""), ")")
 		quit(2); return
 	_configure_entry()
 	await _new_flow()
