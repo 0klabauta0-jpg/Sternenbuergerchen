@@ -1445,7 +1445,7 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	if terrain_map_data!=null and terrain_map_data.has_load_issue():
 		_terrain_setup_error={"ok":false,"reason":"map_load_issue"}
 		return false
-	if terrain_map_data != null and (force_hex_tactical_runtime or not preload("res://scripts/mission/productive_ground_maps.gd").is_historical_fixture(map_file_path)):
+	if terrain_map_data != null:
 		var imported: Dictionary = terrain_map_data.activate_hex_tactical_runtime()
 		if not imported.get("ok",false):
 			_terrain_setup_error = imported

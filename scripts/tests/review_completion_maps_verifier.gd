@@ -10,29 +10,9 @@ func _run() -> void:
 	for path: String in CATALOG.all_paths():
 		_test_map(path)
 		await process_frame
-	var historical = MAP.load_from_file("res://maps/facing_sightline_debug_12x12.json")
-	_check(historical.get_grid_topology() == "square8" and historical.get_tactical_grid_rules().is_empty(), "explicit historical fixture keeps Square8 import semantics")
-	_test_runtime_import()
 	print("REVIEW_COMPLETION_MAP_MATRIX ", JSON.stringify(matrix))
 	print("REVIEW_COMPLETION_MAPS passed=%d failed=%d" % [passed, failed])
 	quit(0 if failed == 0 else 1)
-
-func _test_runtime_import() -> void:
-	var source := "res://maps/legacy/fireteam_command_drill_24x24_square8_20261113.json"
-	var digest := FileAccess.get_sha256(source)
-	var legacy = MAP.load_from_file(source)
-	var point: Vector2 = legacy.get_marker_position("spawn_alpha")
-	var origin: Vector2 = legacy.get_grid_origin()
-	var metrics: Dictionary = legacy.get_tile_size()
-	var skew := Vector2((point.x-origin.x)/metrics.half_width,(point.y-origin.y)/metrics.half_height)
-	var q := (skew.x+skew.y)*0.5
-	var r := (skew.y-skew.x)*0.5
-	var expected := origin + Vector2((q+0.5*r-sqrt(3.0)*0.5*r)*metrics.half_width,(q+0.5*r+sqrt(3.0)*0.5*r)*metrics.half_height)
-	var count: int = legacy.get_tiles().size()
-	_check(legacy.activate_hex_tactical_runtime().get("ok",false) and legacy.get_grid_topology()=="hex_axial_v1" and legacy.get_tactical_grid_rules()=="hex_tactical_v1","custom Legacy import activates the same Hex runtime contract")
-	_check(legacy.get_marker_position("spawn_alpha").distance_to(expected)<0.001 and legacy.get_tiles().size()==count,"custom import migrates marker world coordinates while preserving logical tiles")
-	var once: Vector2 = legacy.get_marker_position("spawn_alpha")
-	_check(legacy.activate_hex_tactical_runtime().get("ok",false) and legacy.get_marker_position("spawn_alpha")==once and FileAccess.get_sha256(source)==digest,"runtime import is idempotent and leaves the user's original map artifact unchanged")
 
 func _test_map(path: String) -> void:
 	var started := Time.get_ticks_msec()

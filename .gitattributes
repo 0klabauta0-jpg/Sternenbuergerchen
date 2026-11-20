@@ -52,5 +52,4 @@ docs/qa/cpu_hud_r8_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-
 docs/qa/review_completion_20261113/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/qa/starmap_mobile_20261113/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/qa/hex_surface_design_20261113/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-maps/legacy/*_square8_20261113.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/reports/SPIELREVIEW_2026_11_12.html -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

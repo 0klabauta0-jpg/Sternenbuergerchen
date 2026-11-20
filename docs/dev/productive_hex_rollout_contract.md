@@ -31,25 +31,7 @@ Szenenmarker explizit in Hexkoordinaten: Alpha (3,7), Bravo (4,0), Ziel (4,4).
 `wall_test_4x4` behält seinen geschlossenen Mauerring um das Ziel; Aufnahme in den
 Katalog ist kein Nachweis eines abgeschlossenen Missionsszenarios.
 
-Explizite historische Import-/Testdateien werden nicht als fertige Lobbykarten
-angeboten, bleiben aber unverändert vorhanden und direkt in Tests/Editor ladbar:
-
-| Datei | Grund |
-|---|---|
-| editor_terrain_visual_recovery_reference.json | 36-Felder-Grafik-/Editorreferenz |
-| enemy_tactics_smoke_32x32.json | Sparse KI-Smoke-Fixture, 45 vorhandene Felder |
-| facing_sightline_debug_12x12.json | Richtungs-/Sichtlinien-Verifier |
-| hill_mechanics_16x16_testmap.json | Historische Höhen-/Rampenregression |
-| task_156_contract_map.json | Vier-Felder-Contractfixture |
-| task_157_editor_mvp_map.json | Vier-Felder-Editorfixture |
-| test_lz_air_asset_threat_fixture.json | Acht-Felder-LZ-/Luftabwehrfixture |
-| Test_mission_32x32.json | Ein-Feld-Vorlage mit Kommentar, kein gültiges JSON |
-
-Frühere Square8-Originale der sieben konvertierten Karten liegen byteerhalten unter
-`maps/legacy/*_square8_20261113.json`. Der reproduzierbare Migrationshelfer
-`scripts/tools/migrate_productive_hex_maps_20261113.py` lässt Tilefakten und logische
-Koordinaten unverändert und konvertiert Weltmarker, Patrouillenpunkte und
-Darstellerzentren. Erfindet keine Rampen oder neue Terrain-/Schadensregeln.
+Die historischen Import- und Testdateien ohne Hexfeld, die Square8-Originale unter `maps/legacy/` und der Migrationshelfer wurden am 20.11.2026 auf Björns Entscheidung entfernt.
 
 ## Besitzer und Grenzen
 
