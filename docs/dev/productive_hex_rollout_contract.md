@@ -108,11 +108,17 @@ dateigebunden validierten Restorepayload. Kein allgemeines Ignorieren von
 Abwesenheits-/Belegungswahrheit. Der Missionscheckpoint kombiniert Ground und echte
 Actor-Modelle in einer Roottransaktion; lebendige Holds/Vitals bleiben erhalten.
 
-Stabile alte Missionen auf bereits identischer Hexgeometrie dürfen aus
-`legacy_ground_positions.v1` migrieren: Frame, Terrainfingerprint, Overrides,
-Actoridentitäten und alte Positionen müssen übereinstimmen. Die bestehende
-Admission wählt eindeutige legale Zellen; der Eingang wird nicht verändert. Eine
-Square8-Geometrie oder geänderte Karte wird nicht still geometrisch geraten.
+Zwischenstände im alten Format (`legacy_ground_positions.v1`, Bodenpositionen ohne
+Hexfeld) werden seit 20.11.2026 auf Björns Entscheidung abgelehnt und nicht mehr auf
+Hex umgerechnet; es gibt keine Karte ohne Hexfeld mehr. Die Ablehnung sitzt früh in
+`campaign_active_bootstrap_validation.gd` (Grund `unsupported_ground_schema`, nur wenn der
+Home-Hash passt; sonst gilt der Stand als vom neueren Basisstand abgelöst) und
+zusätzlich in `mission_ground_actor_transaction.gd` (gleicher Grund). Der Spieler sieht
+den vorhandenen Text aus `campaign_start_configuration.gd`: "Einsatzstand ist ungültig.
+Im Kampagnenmenü kannst du ausdrücklich den letzten Basisstand laden; der Einsatzstand
+wird dabei als Datei gesichert." Beide Dateien bleiben unverändert, der Basisstand
+bleibt erhalten. Prüfung: `legacy_checkpoint_rejection_verifier.gd` und
+`mission_ground_actor_transaction_verifier.gd`.
 
 Neue Kampagnen schreiben nach erfolgreicher Ownerkonfiguration ihren ursprünglichen
 Home-Checkpoint vor weiteren Benutzeraktionen. Der fünfminütige Autosave-Erfolgstimer
@@ -166,10 +172,9 @@ werden akzeptiert, ohne Epsilon, Feldverlust oder gelockerte Transportbelege.
   Gemessene Aufwandszähler sind begrenzte Headless-Evidenz, keine FPS-Abnahme.
 - `review_completion_base_clearance_verifier.gd`: tatsächlicher Clearanceindex,
   Bed-/Craftmasken, reine Leser und Root/Base-Bewegung sowie Admission.
-- `review_completion_legacy_hex_verifier.gd`: tatsächlicher alter Ownerexport,
-  Admissionmigration, native Neuspeicherung; falsche RNG-Typen/fehlende Felder/
-  Overflow ohne Änderungen der Owner oder des Eingangspayloads. Dies ist kein
-  Ersatz für ein authentisches vollständiges Altsavepaar.
+- `review_completion_legacy_hex_verifier.gd` (alter Ownerexport, Admissionmigration) ist seit
+  20.11.2026 entfernt; die Ablehnung alter Zwischenstände prüft
+  `legacy_checkpoint_rejection_verifier.gd`.
 - `review_completion_home_save_verifier.gd` und
   `campaign_hex_autosave_interval_verifier.gd`: normale initiale Datei vor Testsave,
   echte Boardingphase, Store-Reimport und ehrlicher begrenzter Fehlerretry.
