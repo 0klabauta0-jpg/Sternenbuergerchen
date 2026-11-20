@@ -20,6 +20,12 @@ const KEY_MOVEMENT_VOLUME: String = "movement_volume"
 const KEY_AMBIENT_VOLUME: String = "ambient_volume"
 const KEY_FOG_OF_WAR_MODE: String = "fog_of_war_mode"
 const KEY_CONTEXTUAL_HELP_MODE: String = "contextual_help_mode"
+const KEY_CAMPAIGN_RESPAWN_LIMIT: String = "campaign_respawn_limit"
+const DEFAULT_CAMPAIGN_RESPAWN_LIMIT: int = 3
+const MIN_CAMPAIGN_RESPAWN_LIMIT: int = 0
+## Upper bound of the setting. scripts/core/campaign_casualty_rules.gd keeps its own copy (no ui <-> core coupling);
+## campaign_respawn_rules_verifier checks that both are equal.
+const MAX_CAMPAIGN_RESPAWN_LIMIT: int = 9
 const WINDOW_MODE_WINDOWED: String = "windowed"
 const WINDOW_MODE_BORDERLESS: String = "borderless"
 const WINDOW_MODE_FULLSCREEN: String = "fullscreen"
@@ -45,6 +51,7 @@ static func get_default_settings() -> Dictionary:
 		KEY_AMBIENT_VOLUME: 100.0,
 		KEY_FOG_OF_WAR_MODE: FOW_CONTRACT_SCRIPT.DEFAULT_MODE,
 		KEY_CONTEXTUAL_HELP_MODE: CONTEXTUAL_HELP_MODE_COMPACT,
+		KEY_CAMPAIGN_RESPAWN_LIMIT: DEFAULT_CAMPAIGN_RESPAWN_LIMIT,
 	}
 
 
@@ -66,8 +73,28 @@ static func normalize_settings(raw_settings: Dictionary = {}) -> Dictionary:
 	result[KEY_AMBIENT_VOLUME] = clampf(float(result.get(KEY_AMBIENT_VOLUME, 100.0)), 0.0, 100.0)
 	result[KEY_FOG_OF_WAR_MODE] = FOW_CONTRACT_SCRIPT.call("normalize_mode", String(result.get(KEY_FOG_OF_WAR_MODE, FOW_CONTRACT_SCRIPT.DEFAULT_MODE)))
 	result[KEY_CONTEXTUAL_HELP_MODE] = normalize_contextual_help_mode(String(result.get(KEY_CONTEXTUAL_HELP_MODE, CONTEXTUAL_HELP_MODE_COMPACT)))
+	result[KEY_CAMPAIGN_RESPAWN_LIMIT] = normalize_campaign_respawn_limit(result.get(KEY_CAMPAIGN_RESPAWN_LIMIT, DEFAULT_CAMPAIGN_RESPAWN_LIMIT))
 	result["fog_of_war_enabled"] = String(result.get(KEY_FOG_OF_WAR_MODE, FOW_CONTRACT_SCRIPT.DEFAULT_MODE)) != FOW_CONTRACT_SCRIPT.MODE_OFF
 	return result
+
+
+## Whole number 0..9. Floats are rounded; anything that is not a finite number (text, null, bool, array, INF, NAN) gives the default.
+static func normalize_campaign_respawn_limit(value: Variant) -> int:
+	if typeof(value) == TYPE_INT:
+		return clampi(int(value), MIN_CAMPAIGN_RESPAWN_LIMIT, MAX_CAMPAIGN_RESPAWN_LIMIT)
+	if typeof(value) == TYPE_FLOAT and is_finite(float(value)):
+		return roundi(clampf(float(value), float(MIN_CAMPAIGN_RESPAWN_LIMIT), float(MAX_CAMPAIGN_RESPAWN_LIMIT)))
+	return DEFAULT_CAMPAIGN_RESPAWN_LIMIT
+
+
+## Pure reader for game code: the limit inside an already loaded settings dictionary.
+static func get_campaign_respawn_limit(settings: Dictionary) -> int:
+	return normalize_campaign_respawn_limit(settings.get(KEY_CAMPAIGN_RESPAWN_LIMIT, DEFAULT_CAMPAIGN_RESPAWN_LIMIT))
+
+
+## Loads the saved settings file and returns the limit (3 for a missing file, missing key or broken value).
+static func load_campaign_respawn_limit() -> int:
+	return get_campaign_respawn_limit(load_settings())
 
 
 static func normalize_window_mode(window_mode: String) -> String:
@@ -131,6 +158,7 @@ static func build_snapshot(settings: Dictionary = {}) -> Dictionary:
 		KEY_AMBIENT_VOLUME: float(normalized_settings.get(KEY_AMBIENT_VOLUME, 100.0)),
 		KEY_FOG_OF_WAR_MODE: String(normalized_settings.get(KEY_FOG_OF_WAR_MODE, FOW_CONTRACT_SCRIPT.DEFAULT_MODE)),
 		KEY_CONTEXTUAL_HELP_MODE: String(normalized_settings.get(KEY_CONTEXTUAL_HELP_MODE, CONTEXTUAL_HELP_MODE_COMPACT)),
+		KEY_CAMPAIGN_RESPAWN_LIMIT: int(normalized_settings.get(KEY_CAMPAIGN_RESPAWN_LIMIT, DEFAULT_CAMPAIGN_RESPAWN_LIMIT)),
 		"fog_of_war_enabled": bool(normalized_settings.get("fog_of_war_enabled", true)),
 		"display": {
 			KEY_RESOLUTION_PRESET: String(normalized_settings.get(KEY_RESOLUTION_PRESET, "1920x1080")),
@@ -160,6 +188,7 @@ static func build_snapshot(settings: Dictionary = {}) -> Dictionary:
 			KEY_CONTEXTUAL_HELP_MODE: String(normalized_settings.get(KEY_CONTEXTUAL_HELP_MODE, CONTEXTUAL_HELP_MODE_COMPACT)),
 			"valid_contextual_help_modes": VALID_CONTEXTUAL_HELP_MODES,
 			"default_contextual_help_mode": CONTEXTUAL_HELP_MODE_COMPACT,
+			KEY_CAMPAIGN_RESPAWN_LIMIT: int(normalized_settings.get(KEY_CAMPAIGN_RESPAWN_LIMIT, DEFAULT_CAMPAIGN_RESPAWN_LIMIT)),
 		},
 		"valid_fog_of_war_modes": FOW_CONTRACT_SCRIPT.VALID_MODES,
 		"default_fog_of_war_mode": FOW_CONTRACT_SCRIPT.DEFAULT_MODE,
@@ -206,7 +235,7 @@ static func _section_for_key(key: String) -> String:
 			return DISPLAY_SECTION
 		KEY_MASTER_VOLUME, KEY_MUSIC_VOLUME, KEY_SFX_VOLUME, KEY_UI_VOLUME, KEY_COMBAT_VOLUME, KEY_MOVEMENT_VOLUME, KEY_AMBIENT_VOLUME:
 			return AUDIO_SECTION
-		KEY_FOG_OF_WAR_MODE, KEY_CONTEXTUAL_HELP_MODE:
+		KEY_FOG_OF_WAR_MODE, KEY_CONTEXTUAL_HELP_MODE, KEY_CAMPAIGN_RESPAWN_LIMIT:
 			return GAMEPLAY_SECTION
 		_:
 			return GAMEPLAY_SECTION

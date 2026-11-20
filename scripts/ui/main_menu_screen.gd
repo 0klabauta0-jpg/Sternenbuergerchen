@@ -90,6 +90,8 @@ var _sfx_volume_slider: HSlider = null
 var _fog_of_war_option: OptionButton = null
 var _contextual_help_mode_label: Label = null
 var _contextual_help_option: OptionButton = null
+var _respawn_limit_label: Label = null
+var _respawn_limit_spin: SpinBox = null
 var _input_actions_label: Label = null
 var _settings_apply_button: Button = null
 var _settings_reset_button: Button = null
@@ -882,6 +884,8 @@ func _connect_signals() -> void:
 		_fog_of_war_option.item_selected.connect(_on_fog_of_war_mode_selected)
 	if _contextual_help_option != null:
 		_contextual_help_option.item_selected.connect(_on_contextual_help_mode_selected)
+	if _respawn_limit_spin != null:
+		_respawn_limit_spin.value_changed.connect(_on_respawn_limit_changed)
 	if _settings_apply_button != null:
 		_settings_apply_button.pressed.connect(apply_settings)
 	if _settings_reset_button != null:
@@ -920,6 +924,17 @@ func _ensure_settings_screen_nodes() -> void:
 	_fog_of_war_option = _ensure_settings_option("FogOfWarModeOptionButton", Vector2(360.0, 38.0))
 	_contextual_help_mode_label = _ensure_settings_label("ContextualHelpModeLabel", "Kontext-Hilfe", 14)
 	_contextual_help_option = _ensure_settings_option("ContextualHelpModeOptionButton", Vector2(360.0, 38.0))
+	_respawn_limit_label = _ensure_settings_label("RespawnLimitLabel", "Respawns je Person (Kampagne)", 14)
+	_respawn_limit_spin = _settings_vbox.get_node_or_null("RespawnLimitSpinBox") as SpinBox
+	if _respawn_limit_spin == null:
+		_respawn_limit_spin = SpinBox.new()
+		_respawn_limit_spin.name = "RespawnLimitSpinBox"
+		_settings_vbox.add_child(_respawn_limit_spin)
+	_respawn_limit_spin.min_value = GAME_SETTINGS_CONTRACT_SCRIPT.MIN_CAMPAIGN_RESPAWN_LIMIT
+	_respawn_limit_spin.max_value = GAME_SETTINGS_CONTRACT_SCRIPT.MAX_CAMPAIGN_RESPAWN_LIMIT
+	_respawn_limit_spin.step = 1.0
+	_respawn_limit_spin.custom_minimum_size = Vector2(360.0, 38.0)
+	_respawn_limit_spin.tooltip_text = "So oft kommt eine zurückgelassene Person wieder. Danach ist ihr nächster Tod endgültig. 0 = kein Respawn."
 	if _bubble_mode_option != null:
 		_bubble_mode_option.custom_minimum_size = Vector2(360.0, 38.0)
 
@@ -3372,6 +3387,8 @@ func _order_settings_nodes(action_row: HBoxContainer) -> void:
 		_fog_of_war_option,
 		_contextual_help_mode_label,
 		_contextual_help_option,
+		_respawn_limit_label,
+		_respawn_limit_spin,
 		_settings_vbox.get_node_or_null("BubbleModeLabel"),
 		_bubble_mode_option,
 		_thought_hold_label,
@@ -3493,6 +3510,8 @@ func _refresh_settings_controls(gameplay_settings: Dictionary, comic_settings: D
 				"expanded": "Erweitert",
 			}
 		)
+	if _respawn_limit_spin != null:
+		_respawn_limit_spin.set_value_no_signal(int(GAME_SETTINGS_CONTRACT_SCRIPT.call("get_campaign_respawn_limit", gameplay)))
 	_apply_contextual_help_mode_to_service(gameplay)
 	_refresh_thought_hold_label(comic)
 	if _input_actions_label != null:
@@ -4302,6 +4321,11 @@ func _on_contextual_help_mode_selected(index: int) -> void:
 	_apply_contextual_help_mode_to_service(_draft_gameplay_settings)
 	_status_label.text = "Settings changed"
 	_play_ui_sfx("switch", "contextual_help_mode")
+
+
+func _on_respawn_limit_changed(value: float) -> void:
+	_draft_gameplay_settings[GAME_SETTINGS_CONTRACT_SCRIPT.KEY_CAMPAIGN_RESPAWN_LIMIT] = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("normalize_campaign_respawn_limit", value))
+	_status_label.text = "Settings changed"
 
 
 func _sanitize_test_profile_fragment(text: String) -> String:
