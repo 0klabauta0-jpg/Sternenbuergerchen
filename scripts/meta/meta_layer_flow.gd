@@ -5392,9 +5392,10 @@ func _tick_personnel_recovery(delta: float) -> void:
 	var elapsed: float = minf(_recovery_clock, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS)
 	_recovery_clock = 0.0
 	# Gestuetzt auf den Status, nicht auf die Restzeit: Altdaten "wounded" ohne recovery_state raeumt advance() einmal ab.
+	# Wer gestorben ist und wartet (respawning), zaehlt wie ein Verwundeter mit; awaiting_pickup zaehlt nicht, bleibt aber gesperrt.
 	var any_wounded := false
 	for unit_variant in _all_team_units:
-		if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("availability_status", "")) == "wounded":
+		if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("availability_status", "")) in ["wounded", "respawning"]:
 			any_wounded = true
 			break
 	if not any_wounded:
@@ -5408,7 +5409,10 @@ func _tick_personnel_recovery(delta: float) -> void:
 		_replace_roster_units(Array(advanced.get("units", [])))
 	_sync_wound_lock()
 	if presentation_changed:
-		_present_recovery_progress(PackedStringArray(advanced.get("recovered_unit_ids", PackedStringArray())))
+		# Auch wer den Ausfall hinter sich hat (matured) braucht eine aufgefrischte Karte, wenn die Ansicht verdeckt ist.
+		var refreshed_ids: PackedStringArray = PackedStringArray(advanced.get("recovered_unit_ids", PackedStringArray()))
+		refreshed_ids.append_array(PackedStringArray(advanced.get("matured_unit_ids", PackedStringArray())))
+		_present_recovery_progress(refreshed_ids)
 
 
 ## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): sichtbar werden nur die
@@ -5425,7 +5429,7 @@ func _present_recovery_progress(recovered_unit_ids: PackedStringArray) -> void:
 		return
 	var changed_units: Array = []
 	for unit_variant in _all_team_units:
-		if typeof(unit_variant) == TYPE_DICTIONARY and (PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit_variant) or recovered_unit_ids.has(String(Dictionary(unit_variant).get("unit_id", "")))):
+		if typeof(unit_variant) == TYPE_DICTIONARY and (PERSONNEL_RECOVERY_SCRIPT.is_blocked(unit_variant) or recovered_unit_ids.has(String(Dictionary(unit_variant).get("unit_id", "")))):
 			changed_units.append(unit_variant)
 	if not changed_units.is_empty():
 		homebase_screen.call("refresh_recovery_status", changed_units)
@@ -5445,7 +5449,7 @@ func _sync_wound_lock() -> void:
 		if typeof(unit_variant) != TYPE_DICTIONARY:
 			continue
 		var unit: Dictionary = unit_variant
-		if not PERSONNEL_RECOVERY_SCRIPT.is_wounded(unit):
+		if not PERSONNEL_RECOVERY_SCRIPT.is_blocked(unit):
 			continue
 		var unit_id: String = String(unit.get("unit_id", ""))
 		var display_name: String = String(unit.get("display_name", "")).strip_edges()
