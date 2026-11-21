@@ -65,9 +65,6 @@ var patrol_bindings: Array = []
 var tactical_authoring: Dictionary = {}
 var briefing: Dictionary = {}
 var vertical_slice: Dictionary = {}
-## Optional: Beute, die beim erfolgreichen Abschluss des Auftrags gebucht wird ([{item_id, quantity}]). null = nicht gesetzt.
-## Der Rohwert bleibt erhalten, damit die Validierung einen falschen Typ ablehnen kann.
-var completion_loot: Variant = null
 var notes: PackedStringArray = PackedStringArray()
 
 var _load_issues: PackedStringArray = PackedStringArray()
@@ -165,8 +162,6 @@ func to_dict() -> Dictionary:
 		data["briefing"] = serialized_briefing
 	if not vertical_slice.is_empty():
 		data["vertical_slice"] = vertical_slice.duplicate(true)
-	if completion_loot != null:
-		data["completion_loot"] = completion_loot.duplicate(true) if (completion_loot is Array or completion_loot is Dictionary) else completion_loot
 	if not notes.is_empty():
 		data["notes"] = Array(notes)
 	return data
@@ -196,7 +191,6 @@ func validate(referenced_map = null) -> Dictionary:
 	var terrain_map_data = _load_referenced_map(errors, referenced_map)
 	_validate_objective(terrain_map_data, errors)
 	var enemy_ids: PackedStringArray = _validate_enemy_groups(terrain_map_data, errors)
-	_validate_completion_loot(errors)
 	_validate_wave_config(errors)
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
 	_validate_tactical_authoring(terrain_map_data, errors)
@@ -215,42 +209,6 @@ func validate(referenced_map = null) -> Dictionary:
 
 func get_source_path() -> String:
 	return _source_path
-
-
-## Gepruefte Beuteeintraege als [{item_id, quantity}]; leer, wenn das Feld fehlt oder ungueltig ist.
-func get_completion_loot() -> Array:
-	var result: Array = []
-	var errors: PackedStringArray = PackedStringArray()
-	_validate_completion_loot(errors)
-	if completion_loot == null or not errors.is_empty():
-		return result
-	for entry_variant in Array(completion_loot):
-		var entry: Dictionary = Dictionary(entry_variant)
-		result.append({"item_id": String(entry.get("item_id", "")).strip_edges(), "quantity": int(entry.get("quantity", 0))})
-	return result
-
-
-func _validate_completion_loot(errors: PackedStringArray) -> void:
-	if completion_loot == null:
-		return
-	if not (completion_loot is Array):
-		errors.append("completion_loot must be a list of {item_id, quantity}")
-		return
-	var inventory_contract: GDScript = load("res://scripts/mission/inventory_transfer_contract.gd")
-	var loot_index: int = 0
-	for entry_variant in Array(completion_loot):
-		if typeof(entry_variant) != TYPE_DICTIONARY:
-			errors.append("completion_loot[%d] must be an object" % loot_index)
-		else:
-			var entry: Dictionary = Dictionary(entry_variant)
-			var item_id: String = String(entry.get("item_id", "")).strip_edges() if typeof(entry.get("item_id", null)) == TYPE_STRING else ""
-			if item_id.is_empty() or not bool(inventory_contract.call("known", item_id)):
-				errors.append("completion_loot[%d].item_id is not a known item" % loot_index)
-			var quantity: Variant = entry.get("quantity", null)
-			var quantity_ok: bool = (typeof(quantity) == TYPE_INT and int(quantity) >= 1) or (typeof(quantity) == TYPE_FLOAT and is_finite(float(quantity)) and float(quantity) >= 1.0 and float(quantity) == floorf(float(quantity)))
-			if not quantity_ok:
-				errors.append("completion_loot[%d].quantity must be a whole number >= 1" % loot_index)
-		loot_index += 1
 
 
 func get_enemy_ids() -> PackedStringArray:
@@ -390,8 +348,6 @@ func _apply_dict(data: Dictionary) -> void:
 	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
 	briefing = _coerce_briefing(data.get("briefing", data.get("mission_briefing", {})))
 	vertical_slice = _coerce_vertical_slice(data.get("vertical_slice", {}))
-	var raw_completion_loot: Variant = data.get("completion_loot", null)
-	completion_loot = raw_completion_loot.duplicate(true) if (raw_completion_loot is Array or raw_completion_loot is Dictionary) else raw_completion_loot
 	notes = _coerce_notes(data.get("notes", []))
 
 

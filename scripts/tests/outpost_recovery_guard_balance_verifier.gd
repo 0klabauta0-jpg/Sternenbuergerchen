@@ -3,7 +3,7 @@ extends SceneTree
 ## (a) echter Weg: mission_test_setup._apply_authored_enemy_loadout mit der echten Szenariodatei,
 ## (b) Gegenprobe: Wachen von outpost_chip_recovery und ein Szenario ohne das Feld bleiben unberuehrt,
 ## (c) echte Trefferrechnung (SimulationRoot._apply_damage_effect, deterministisch),
-## (d) Validierung der neuen Felder skill_accuracy und completion_loot.
+## (d) Validierung des neuen Felds skill_accuracy.
 
 const SCENARIO_GUARD := "res://data/mission_scenarios/outpost_recovery.json"
 const SCENARIO_CHIP := "res://data/mission_scenarios/outpost_chip_recovery.json"
@@ -60,9 +60,17 @@ func _applied_unit(scenario_path: String, enemy_id: String, sentinel_accuracy: f
 	return unit
 
 
+## Der erwartete Wert kommt aus der Szenariodatei (nicht doppelt festverdrahtet); er muss unter der Archetyp-Genauigkeit 0.3 liegen.
+func _authored_accuracy() -> float:
+	var groups: Array = _scenario_dict().enemy_groups
+	return float(Dictionary(groups[0]).get("skill_accuracy", -1.0))
+
+
 func _test_guard_identity() -> void:
+	var authored := _authored_accuracy()
+	_assert(authored >= 0.0 and authored < 0.3, "Szenariodatei traegt skill_accuracy unter dem Archetyp-Wert 0.3 (%.2f)" % authored)
 	var unit := _applied_unit(SCENARIO_GUARD, "outpost_recovery_guard_01", 0.3)
-	_assert(is_equal_approx(float(unit.call("get_accuracy_skill")), 0.0), "Wachmann von outpost_recovery hat Genauigkeit 0.0")
+	_assert(is_equal_approx(float(unit.call("get_accuracy_skill")), authored), "Wachmann von outpost_recovery hat die Genauigkeit aus der Szenariodatei (%.2f)" % authored)
 	_assert(int(unit.call("get_max_health_points")) == 100 and int(unit.call("get_health")) == 100, "Trefferpunkte wie bisher (100)")
 	_assert(String(unit.call("get_weapon_1_id")) == "pistol", "Waffe wie bisher (Pistole)")
 	_assert(is_equal_approx(float(unit.call("get_toughness_skill")), 0.5), "Zaehigkeit unveraendert (nur Genauigkeit wird gesetzt)")
@@ -134,7 +142,7 @@ func _test_hit_chance() -> void:
 	_assert(guard_chance < reference_chance, "Wachmann trifft schlechter als ein Gegner mit Genauigkeit 0.3 (%.3f < %.3f)" % [guard_chance, reference_chance])
 	var mult_guard := float(guard.call("get_combat_hit_chance_multiplier"))
 	var mult_reference := float(reference.call("get_combat_hit_chance_multiplier"))
-	_assert(absf(mult_guard - 0.5) < EPS, "Fertigkeitsmultiplikator des Wachmanns ist 0.5 (0.5 + 0.0), ist %.3f" % mult_guard)
+	_assert(absf(mult_guard - (0.5 + _authored_accuracy())) < EPS, "Fertigkeitsmultiplikator des Wachmanns ist 0.5 + Genauigkeit (%.3f)" % mult_guard)
 	var expected_delta := INPUT * (mult_guard - mult_reference)
 	_assert(absf((guard_chance - reference_chance) - expected_delta) < EPS, "Unterschied entspricht der Formel Eingang x Multiplikator-Differenz (%.4f, erwartet %.4f)" % [guard_chance - reference_chance, expected_delta])
 	for unit in [guard, reference, target]:
@@ -157,12 +165,6 @@ func _with_accuracy(value: Variant) -> Dictionary:
 	return data
 
 
-func _with_loot(value: Variant) -> Dictionary:
-	var data := _scenario_dict()
-	data["completion_loot"] = value
-	return data
-
-
 func _has_error(errors: PackedStringArray, needle: String) -> bool:
 	for error in errors:
 		if String(error).contains(needle):
@@ -178,13 +180,4 @@ func _test_validation() -> void:
 		_assert(not _has_error(_errors_for(_with_accuracy(good)), "skill_accuracy"), "skill_accuracy %s wird angenommen" % str(good))
 	var round_trip = DATA_SCRIPT.from_dict(_scenario_dict())
 	var out_groups: Array = round_trip.call("to_dict").enemy_groups
-	_assert(is_equal_approx(float(Dictionary(out_groups[0]).get("skill_accuracy", -1.0)), 0.0), "skill_accuracy ueberlebt Laden und Speichern")
-	var ok_loot := [{"item_id": "armor_light", "quantity": 1}, {"item_id": "smg", "quantity": 1}]
-	_assert(not _has_error(_errors_for(_with_loot(ok_loot)), "completion_loot"), "gueltige completion_loot wird angenommen")
-	_assert(_has_error(_errors_for(_with_loot([{"item_id": "gibt_es_nicht", "quantity": 1}])), "completion_loot"), "unbekannte item_id wird abgelehnt")
-	_assert(_has_error(_errors_for(_with_loot([{"item_id": "smg", "quantity": 0}])), "completion_loot"), "Menge 0 wird abgelehnt")
-	_assert(_has_error(_errors_for(_with_loot([{"item_id": "smg", "quantity": 1.5}])), "completion_loot"), "gebrochene Menge wird abgelehnt")
-	_assert(_has_error(_errors_for(_with_loot("armor_light")), "completion_loot"), "Nicht-Liste wird abgelehnt")
-	_assert(_has_error(_errors_for(_with_loot([5])), "completion_loot"), "Eintrag ohne Objekt wird abgelehnt")
-	var loot_round = DATA_SCRIPT.from_dict(_with_loot(ok_loot))
-	_assert(Array(loot_round.call("to_dict").get("completion_loot", [])).size() == 2, "completion_loot ueberlebt Laden und Speichern")
+	_assert(is_equal_approx(float(Dictionary(out_groups[0]).get("skill_accuracy", -1.0)), _authored_accuracy()), "skill_accuracy ueberlebt Laden und Speichern")
