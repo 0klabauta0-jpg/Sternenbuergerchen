@@ -228,6 +228,9 @@ func _rk_r1() -> void:
 	if not await _rk_claim_and_board(visit): return
 	if not await _rk_depart_to_orbit(): return
 	_rk_check_picked_up(respawns_used, "R1 Abgeholt")
+	# Der Abflugvorgang ist abgeschlossen: ohne Bindung der Wartenden-Schleife (Flow) bliebe er im endlosen Wiederholversuch stehen.
+	await _pk_wait(func(): return false, 3000)
+	_check(Dictionary(_flow.get("_pending_surface_departures")).is_empty(), "R2: der Abflugvorgang ist abgeschlossen, kein offener Wiederholversuch (%s)" % [Dictionary(_flow.get("_pending_surface_departures")).keys()])
 	var markers_after: Dictionary = _rk_markers()
 	_check(markers_after == markers_before, "R1: der Anwerbe-Abschluss lief nicht ein zweites Mal (Credits, Reservierungen, Kadergroesse, Eintraege, Basis: vorher %s, nachher %s)" % [markers_before, markers_after])
 
@@ -248,6 +251,9 @@ func _rk_r2() -> void:
 	var c: Dictionary = _roster_unit(RK_ID)
 	_check(_ra_base_status(RK_ID) == "station", "R2: respawning: beim Abflug nicht gebunden, Basis-Zustand bleibt station (%s)" % _ra_base_status(RK_ID))
 	_check(String(c.get("availability_status", "")) == "respawning" and not Dictionary(c.get("recovery_state", {})).is_empty() and int(c.get("respawns_used", -1)) == respawns_used, "R2: respawning: nicht abgeschlossen (Status %s, respawns_used %s)" % [c.get("availability_status"), c.get("respawns_used")])
+	# Der Abflugvorgang ist abgeschlossen: ohne Bindung der Wartenden-Schleife (Flow) bliebe er im endlosen Wiederholversuch stehen.
+	await _pk_wait(func(): return false, 3000)
+	_check(Dictionary(_flow.get("_pending_surface_departures")).is_empty(), "R2: der Abflugvorgang ist abgeschlossen, kein offener Wiederholversuch (%s)" % [Dictionary(_flow.get("_pending_surface_departures")).keys()])
 	var markers_after: Dictionary = _rk_markers()
 	_check(markers_after == markers_before, "R2: nichts weiter geaendert (Kader, Credits, Eintraege: vorher %s, nachher %s)" % [markers_before, markers_after])
 
