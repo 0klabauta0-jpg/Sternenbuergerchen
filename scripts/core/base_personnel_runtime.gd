@@ -726,6 +726,8 @@ func verify_polisa_shuttle_return_board_receipt(receipt: Dictionary) -> bool:
 ## Internal handoff after a verified physical service-shuttle disembark.
 func admit_polisa_shuttle_home(id: String, receipt: Dictionary, anchor: Vector2i) -> Dictionary:
 	if not _states.has(id) or String(_states[id].get("status", "")) != "station": return _reject("not_station_personnel", "Person ist nicht auf dem Stationsshuttle")
+	# Der Shuttleweg ist Anwerbungen vorbehalten: wer nach einem Ausfall wartet, kommt nur mit dem Schiff heim (Abholung beim Abflug).
+	if _waits_for_pickup(id): return _reject("not_station_personnel", "Wartende kommen nur mit dem Schiff heim")
 	var shuttle: RefCounted = get_parent().get("_polisa_shuttle")
 	if shuttle == null or not shuttle.has_method("prepare_home_disembark"): return _reject("shuttle_unavailable", "Shuttleübergabe nicht verfügbar")
 	var prepared: Dictionary = shuttle.call("prepare_home_disembark", receipt)
