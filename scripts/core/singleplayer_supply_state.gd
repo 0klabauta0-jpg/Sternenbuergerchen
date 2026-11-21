@@ -54,6 +54,18 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	for cost in Dictionary(data.get("route_fuel_costs", {})).values():
 		if not _valid_nonnegative_number(cost):
 			return _reject("invalid_supply_data", "Routenkosten ungueltig")
+	# Etappenkosten: wenn vorhanden, muss jede Strecke aufgehen (Summe der Etappen == Routenwert).
+	if data.has("leg_fuel_costs"):
+		if typeof(data.leg_fuel_costs) != TYPE_DICTIONARY: return _reject("invalid_supply_data", "Etappenkosten ungueltig")
+		var route_costs: Dictionary = Dictionary(data.get("route_fuel_costs", {}))
+		for route: String in route_costs:
+			var legs: Variant = data.leg_fuel_costs.get(route)
+			if typeof(legs) != TYPE_DICTIONARY: return _reject("invalid_supply_data", "Etappenkosten fehlen fuer " + route)
+			var leg_sum := 0.0
+			for leg: String in legs:
+				if leg not in FUEL_LEGS or not _valid_nonnegative_number(legs[leg]): return _reject("invalid_supply_data", "Etappenkosten ungueltig")
+				leg_sum += float(legs[leg])
+			if absf(leg_sum - float(route_costs[route])) > 0.00001: return _reject("invalid_supply_data", "Etappen ergeben nicht die Streckenkosten: " + route)
 	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
@@ -92,7 +104,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -134,6 +146,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"refuel": result = _refuel(payload, authority_context)
 		"repair": result = _repair(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
+		"consume_leg_fuel": result = _consume_leg(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
 		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
 		"campaign_research": result = _campaign_research(payload, authority_context, request_id)
@@ -252,6 +265,99 @@ func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictio
 		if fuel + 0.00001 < cost + float(routes[reverse]):
 			return _reject("insufficient_return_fuel", "Treibstoff muss fuer Hin- und Rueckflug reichen; zuerst auftanken")
 	return {"ok": true, "craft_id": craft_id, "fuel_cost": cost, "message": "Routentreibstoff gebucht"}
+
+# --- Treibstoff je Etappe (Regel 8 / Auftrag 21.11.) ---------------------------------
+# Jede Etappe bucht ihren Anteil genau einmal, wenn sie beginnt. Es gibt keine Rueckflugreserve:
+# Eine Etappe startet nur, wenn ihr eigener Anteil gedeckt ist. Die Summe der Etappen einer Strecke
+# ist gleich dem Wert in route_fuel_costs (leg_fuel_costs in data/singleplayer/trade_offers.json).
+const FUEL_LEGS: Array = ["launch", "jump", "approach", "surface_exit", "landing"]
+const FUEL_LEG_LABELS: Dictionary = {"launch": "Abheben", "jump": "Quantensprung", "approach": "Ortsanflug", "surface_exit": "Ortsabflug", "landing": "Landung", "whole_route": "Flug"}
+
+func has_fuel_account(craft_id: String) -> bool:
+	return _fuel_by_craft_id.has(craft_id)
+
+func has_request(request_id: String) -> bool:
+	return _requests.has(request_id)
+
+## Etappe des Rueckwegs vom Ort nach Hause (Regel 8 / Auftrag 21.11.): Wurde der Hinweg ueber einen Orbit geflogen (Etappe "approach"),
+## verlaesst das Schiff den Ort nur bis in den Orbit ("surface_exit"); Sprung und Landung buchen danach selbst. Wurde der Hinweg als
+## ganze Strecke gebucht (Direktstart ohne Orbit, alter Beleg consume_route_fuel, unbekannt), kehrt es ohne Orbit heim ("whole_route").
+func get_return_leg(outward_token: String) -> String:
+	var receipt: Dictionary = Dictionary(_requests.get(outward_token + ":fuel", {}))
+	var result: Dictionary = Dictionary(receipt.get("result", {}))
+	return "surface_exit" if String(result.get("operation", "")) == "consume_leg_fuel" and String(result.get("leg", "")) == "approach" else "whole_route"
+
+func get_fuel(craft_id: String) -> float:
+	return float(_fuel_by_craft_id.get(craft_id, 0.0))
+
+func get_fuel_capacity() -> float:
+	return float(_definitions.get("fuel_capacity", 0.0))
+
+## Kosten einer Etappe. "whole_route" ist die Summe aller Etappen der Strecke (Direktflug ohne Orbit).
+## Abheben ohne Ziel (destination leer) und Landung ohne Herkunft (origin leer) sind ziel-unabhaengig.
+## Gibt -1.0 zurueck, wenn die Etappe nicht definiert ist.
+func get_leg_fuel_cost(origin: String, destination: String, leg: String) -> float:
+	var table: Dictionary = Dictionary(_definitions.get("leg_fuel_costs", {}))
+	var route := origin + ">" + destination
+	if leg == "whole_route":
+		if not table.has(route): return -1.0
+		var sum := 0.0
+		for value in Dictionary(table[route]).values(): sum += float(value)
+		return sum
+	if leg not in FUEL_LEGS: return -1.0
+	if table.has(route) and Dictionary(table[route]).has(leg): return float(table[route][leg])
+	if leg == "launch" and origin == "homebase" and destination.is_empty():
+		return _cheapest_leg(table, leg, "homebase>", "")
+	if leg == "landing" and destination == "homebase" and origin.is_empty():
+		return _cheapest_leg(table, leg, "", ">homebase")
+	if leg == "jump" and not table.has(route) and origin != "homebase" and destination != "homebase" and not origin.is_empty() and not destination.is_empty():
+		# Zwei Orte ohne eigene Strecke: Sprung ueber die Heimat (beide Haelften der Sprungkosten).
+		var there := get_leg_fuel_cost(origin, "homebase", "jump")
+		var back := get_leg_fuel_cost("homebase", destination, "jump")
+		return there + back if there >= 0.0 and back >= 0.0 else -1.0
+	return -1.0
+
+func _cheapest_leg(table: Dictionary, leg: String, prefix: String, suffix: String) -> float:
+	var best := -1.0
+	for route: String in table:
+		if (not prefix.is_empty() and not route.begins_with(prefix)) or (not suffix.is_empty() and not route.ends_with(suffix)): continue
+		if not Dictionary(table[route]).has(leg): continue
+		var value := float(table[route][leg])
+		if best < 0.0 or value < best: best = value
+	return best
+
+static func _fuel_text(value: float) -> String:
+	return "%d" % int(round(value)) if is_equal_approx(value, round(value)) else "%.1f" % value
+
+## Lesende Vorpruefung, geteilt mit der Buchung. Aendert nichts (auch nicht _revision).
+func preview_leg_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictionary:
+	if not bool(context.get("departure_authorized", false)):
+		return _reject("departure_not_authorized", "Abflug nicht bestaetigt")
+	var craft_id: String = String(payload.get("craft_id", ""))
+	if not _fuel_by_craft_id.has(craft_id):
+		return _reject("unknown_craft", "Schiff unbekannt")
+	var leg := String(payload.get("leg", ""))
+	var origin := String(payload.get("origin_location_id", ""))
+	var destination := String(payload.get("destination_location_id", ""))
+	var cost := get_leg_fuel_cost(origin, destination, leg)
+	if cost < 0.0:
+		return _reject("unknown_leg", "Etappe unbekannt")
+	var fuel: float = float(_fuel_by_craft_id[craft_id])
+	if fuel + 0.00001 < cost:
+		var message := "Treibstoff reicht nicht für den Rückflug" if leg == "surface_exit" or (leg == "whole_route" and destination == "homebase") else "Treibstoff reicht nicht für diese Etappe (%s). Benötigt %s, vorhanden %s." % [String(FUEL_LEG_LABELS.get(leg, leg)), _fuel_text(cost), _fuel_text(fuel)]
+		var rejected := _reject("leg_fuel_insufficient", message)
+		rejected.merge({"leg": leg, "needed": cost, "available": fuel}, true)
+		return rejected
+	return {"ok": true, "craft_id": craft_id, "leg": leg, "fuel_cost": cost, "message": "Etappentreibstoff gebucht"}
+
+func _consume_leg(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var validation: Dictionary = preview_leg_fuel(payload, context)
+	if not bool(validation.get("ok", false)):
+		return validation
+	var craft_id: String = String(validation.craft_id)
+	_fuel_by_craft_id[craft_id] = maxf(float(_fuel_by_craft_id[craft_id]) - float(validation.fuel_cost), 0.0)
+	_revision += 1
+	return validation
 
 func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var receipt: Dictionary = Dictionary(context.get("completion_receipt", {}))
@@ -545,6 +651,9 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	for route: String in Dictionary(right.get("route_fuel_costs", {})).keys():
 		if route.contains("polisa") and not Dictionary(left.get("route_fuel_costs", {})).has(route): right.route_fuel_costs.erase(route)
 	if not left.has("commodity_buy_orders"): right.erase("commodity_buy_orders")
+	# Etappenkosten (T1 Tanker, 21.11.2026) sind rein hinzugekommen: Staende davor kennen den Block nicht und bleiben ladbar.
+	# Ein gespeicherter Block muss dagegen exakt dem aktuellen entsprechen (der strenge Vergleich unten).
+	if not left.has("leg_fuel_costs"): right.erase("leg_fuel_costs")
 	return JSON.stringify(left, "", true) == JSON.stringify(right, "", true)
 
 
@@ -1183,6 +1292,15 @@ func _route_fuel_input_fingerprint(command: Dictionary, flags: Dictionary) -> St
 	var reverse := String(payload.get("destination_location_id", "")) + ">" + String(payload.get("origin_location_id", ""))
 	var routes: Dictionary = _definitions.get("route_fuel_costs", {})
 	var request_id := String(command.request_id).strip_edges()
+	if String(command.get("operation", "")) == "consume_leg_fuel":
+		var leg := String(payload.get("leg", ""))
+		var leg_origin := String(payload.get("origin_location_id", ""))
+		var leg_destination := String(payload.get("destination_location_id", ""))
+		var leg_inputs := {"revision":_revision,"bind_epoch":_route_prepare_epoch,
+			"craft_id":craft_id,"fuel_present":_fuel_by_craft_id.has(craft_id),"fuel":_fuel_by_craft_id.get(craft_id),
+			"leg":leg,"route":route,"leg_cost":get_leg_fuel_cost(leg_origin, leg_destination, leg),
+			"request_id":request_id,"receipt_present":_requests.has(request_id),"receipt":_requests.get(request_id)}
+		return JSON.stringify(leg_inputs, "", true).sha256_text()
 	var inputs := {"revision":_revision,"bind_epoch":_route_prepare_epoch,
 		"craft_id":craft_id,"fuel_present":_fuel_by_craft_id.has(craft_id),"fuel":_fuel_by_craft_id.get(craft_id),
 		"route":route,"route_present":routes.has(route),"route_cost":routes.get(route),
@@ -1202,7 +1320,8 @@ func _sign_prepared_route_fuel(candidate: Dictionary) -> String:
 func prepare_route_fuel(command: Dictionary, trusted_context: Dictionary = {}) -> Dictionary:
 	if not _has_route_fuel_authority(trusted_context.get("route_fuel_authority")):
 		return _reject("route_preparation_authority_required", "Routenvorbereitung benötigt gebundene Laufzeitberechtigung")
-	if not COMMANDS.validate_command(command) or _definitions.is_empty() or String(command.get("operation", "")) != "consume_route_fuel": return _reject("invalid_command", "Nur Routentreibstoff kann vorbereitet werden")
+	if not COMMANDS.validate_command(command) or _definitions.is_empty() or String(command.get("operation", "")) not in ["consume_route_fuel", "consume_leg_fuel"]: return _reject("invalid_command", "Nur Routen- oder Etappentreibstoff kann vorbereitet werden")
+	var leg_command := String(command.operation) == "consume_leg_fuel"
 	var request_id := String(command.request_id).strip_edges()
 	var signature := JSON.stringify({"operation":command.operation,"payload":command.payload}, "", true)
 	var mode := "apply"
@@ -1215,10 +1334,10 @@ func prepare_route_fuel(command: Dictionary, trusted_context: Dictionary = {}) -
 	var flags := {"departure_authorized":typeof(trusted_context.get("departure_authorized")) == TYPE_BOOL and trusted_context.get("departure_authorized") == true, "require_return_reserve":typeof(trusted_context.get("require_return_reserve", false)) == TYPE_BOOL and trusted_context.get("require_return_reserve", false) == true}
 	if mode == "apply":
 		if typeof(trusted_context.get("departure_authorized")) != TYPE_BOOL or typeof(trusted_context.get("require_return_reserve", false)) != TYPE_BOOL: return _reject("invalid_route_context", "Routenberechtigung ungültig")
-		result = preview_route_fuel(command.payload, flags)
+		result = preview_leg_fuel(command.payload, flags) if leg_command else preview_route_fuel(command.payload, flags)
 		if not result.get("ok", false): return result
 		result["request_id"] = request_id
-		result["operation"] = "consume_route_fuel"
+		result["operation"] = String(command.operation)
 	var candidate := {"ok":true,"candidate_schema":1,"owner_id":get_instance_id(),"bind_epoch":_route_prepare_epoch,"expected_revision":_revision,"input_fingerprint":_route_fuel_input_fingerprint(command, flags),"command":command.duplicate(true),"flags":flags,"mode":mode,"result":result.duplicate(true)}
 	if mode == "apply": candidate["fuel_after"] = maxf(float(_fuel_by_craft_id[String(command.payload.get("craft_id", ""))]) - float(result.fuel_cost), 0.0)
 	candidate["seal"] = _sign_prepared_route_fuel(candidate)
