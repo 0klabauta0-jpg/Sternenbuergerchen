@@ -8,6 +8,7 @@ const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.
 const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
 const MODULAR = preload("res://scripts/core/campaign_modular_plan.gd")
+const EMERGENCY_TANKER = preload("res://scripts/core/emergency_tanker_service.gd")
 var _inventory: Dictionary = {}
 var _location_resources: Dictionary = {}
 var _modular_capacity_baseline := -1
@@ -32,6 +33,8 @@ var _research_snapshot_cache: Dictionary = {}
 var _research_snapshot_revision := -1
 var _station_purchase_cache_revision := -1
 var _station_purchase_cache: Dictionary = {}
+var _open_tanker_cache_revision := -1
+var _open_tanker_cache: Dictionary = {}
 var _revision: int = 0
 # Opt-in in-process capability for the UNWIRED prepared departure seam.
 var _route_prepare_authority: WeakRef
@@ -68,6 +71,10 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 			if absf(leg_sum - float(route_costs[route])) > 0.00001: return _reject("invalid_supply_data", "Etappen ergeben nicht die Streckenkosten: " + route)
 		var structure_error: String = _leg_structure_error(data.leg_fuel_costs)
 		if not structure_error.is_empty(): return _reject("invalid_supply_data", structure_error)
+	# Nottankdienst (T2): alle Zahlen kommen aus diesem Block; er darf fehlen (dann gibt es keinen Dienst).
+	if data.has("emergency_fuel"):
+		var emergency_error: String = _emergency_fuel_error(data.emergency_fuel)
+		if not emergency_error.is_empty(): return _reject("invalid_supply_data", emergency_error)
 	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
@@ -87,6 +94,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_reward_receipts.clear()
 	_research_receipts.clear()
 	_research_snapshot_revision = -1
+	_open_tanker_cache_revision = -1
 	_revision = 0
 	for offer_id in Dictionary(data.get("offers", {})):
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
@@ -106,7 +114,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -149,6 +157,9 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"repair": result = _repair(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"consume_leg_fuel": result = _consume_leg(payload, authority_context)
+		"emergency_tanker_order": result = _emergency_tanker_order(payload, authority_context, request_id)
+		"emergency_tanker_deliver": result = _emergency_tanker_deliver(payload, authority_context, request_id)
+		"emergency_tanker_cancel": result = _emergency_tanker_cancel(payload, authority_context, request_id)
 		"apply_reward": result = _reward(payload, authority_context)
 		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
 		"campaign_research": result = _campaign_research(payload, authority_context, request_id)
@@ -252,6 +263,8 @@ func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictio
 	var craft_id: String = String(payload.get("craft_id", ""))
 	if not _fuel_by_craft_id.has(craft_id):
 		return _reject("unknown_craft", "Schiff unbekannt")
+	var open_tanker: Dictionary = _open_tanker_for_craft(craft_id)
+	if not open_tanker.is_empty(): return _tanker_order_open_rejection(open_tanker)
 	var route: String = String(payload.get("origin_location_id", "")) + ">" + String(payload.get("destination_location_id", ""))
 	var routes: Dictionary = _definitions.get("route_fuel_costs", {})
 	if not routes.has(route):
@@ -365,6 +378,9 @@ func preview_leg_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictiona
 	var craft_id: String = String(payload.get("craft_id", ""))
 	if not _fuel_by_craft_id.has(craft_id):
 		return _reject("unknown_craft", "Schiff unbekannt")
+	# Solange ein Tankerauftrag fuer dieses Schiff offen ist, startet keine Etappe (auch keine kostenlose): das Schiff bleibt stehen.
+	var open_tanker: Dictionary = _open_tanker_for_craft(craft_id)
+	if not open_tanker.is_empty(): return _tanker_order_open_rejection(open_tanker)
 	var leg := String(payload.get("leg", ""))
 	var origin := String(payload.get("origin_location_id", ""))
 	var destination := String(payload.get("destination_location_id", ""))
@@ -394,6 +410,177 @@ func _consume_leg(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_fuel_by_craft_id[craft_id] = maxf(float(_fuel_by_craft_id[craft_id]) - float(validation.fuel_cost), 0.0)
 	_revision += 1
 	return validation
+
+# --- Nottankdienst (T2 des Tanker-Auftrags, 21.11.2026) ------------------------------------------------
+# Geld, Treibstoff und Belege liegen hier. Zustaende und Restzeit fuehrt scripts/core/emergency_tanker_service.gd, getickt von der
+# Laufzeit-Stelle (singleplayer_runtime_adapter.gd). Ein Auftrag ist "offen", solange sein Bestellbeleg weder einen Lieferbeleg
+# (<order_id>:deliver) noch einen Stornobeleg (<order_id>:cancel) hat; das gilt auch nach dem Laden. Alle Zahlen stehen im Block
+# emergency_fuel der Daten, nichts davon im Code.
+
+static func _emergency_fuel_error(block: Variant) -> String:
+	if typeof(block) != TYPE_DICTIONARY: return "Tankerdaten ungueltig"
+	var number_ok := func(value: Variant) -> bool: return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0.0
+	var integer_ok := func(value: Variant) -> bool: return number_ok.call(value) and float(value) == floorf(float(value)) and float(value) <= 2147483647.0
+	if not integer_ok.call(block.get("callout_fee")): return "Tanker: Anfahrtsgebuehr ungueltig"
+	if not number_ok.call(block.get("price_per_unit")) or float(block.price_per_unit) <= 0.0: return "Tanker: Mengenpreis ungueltig"
+	if not integer_ok.call(block.get("quantity")) or float(block.quantity) <= 0.0: return "Tanker: Liefermenge ungueltig"
+	if not integer_ok.call(block.get("min_quantity")) or float(block.min_quantity) <= 0.0 or float(block.min_quantity) > float(block.quantity): return "Tanker: Mindestmenge ungueltig"
+	for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds"]:
+		if not number_ok.call(block.get(key)): return "Tanker: Zeit ungueltig: " + key
+	if typeof(block.get("status")) != TYPE_STRING: return "Tanker: Status fehlt"
+	return ""
+
+## Offene Auftraege, aus den Belegen abgeleitet: order_id -> Ergebnis des Bestellbefehls. Gilt auch nach dem Laden.
+func get_open_tanker_orders() -> Dictionary:
+	if _open_tanker_cache_revision != _revision:
+		_open_tanker_cache = {}
+		for request_id: String in _requests:
+			var result: Dictionary = Dictionary(_requests[request_id].get("result", {}))
+			if String(result.get("operation", "")) != "emergency_tanker_order": continue
+			if _requests.has(request_id + ":deliver") or _requests.has(request_id + ":cancel"): continue
+			_open_tanker_cache[request_id] = result.duplicate(true)
+		_open_tanker_cache_revision = _revision
+	return _open_tanker_cache.duplicate(true)
+
+func _open_tanker_for_craft(craft_id: String) -> Dictionary:
+	if _open_tanker_cache_revision != _revision: get_open_tanker_orders()
+	for order: Dictionary in _open_tanker_cache.values():
+		if String(order.get("craft_id", "")) == craft_id: return order
+	return {}
+
+func _tanker_reject(reason: String, extra: Dictionary = {}) -> Dictionary:
+	var result := _reject(reason, EMERGENCY_TANKER.message_for(reason, extra))
+	result.merge(extra, false)
+	return result
+
+func _tanker_order_open_rejection(order: Dictionary) -> Dictionary:
+	return _tanker_reject("tanker_order_open", {"order_id": String(order.get("order_id", ""))})
+
+## Reine Auskunft vor der Bestellung: Menge, Preis, Wartezeit oder der Grund der Sperre. Bucht nichts, aendert die Revision nicht.
+## Der Kontext kommt vom Laufzeit-Besitzer (Adapter): craft_available, at_service_point, fuel_problem (aus get_fuel_status).
+func preview_emergency_tanker(payload: Dictionary, context: Dictionary = {}) -> Dictionary:
+	var data: Dictionary = Dictionary(_definitions.get("emergency_fuel", {}))
+	if data.is_empty(): return _tanker_reject("emergency_fuel_unavailable")
+	var craft_id: String = String(payload.get("craft_id", ""))
+	if craft_id.is_empty() or not _fuel_by_craft_id.has(craft_id) or context.get("craft_available", false) != true:
+		return _tanker_reject("craft_unavailable")
+	var open_order: Dictionary = _open_tanker_for_craft(craft_id)
+	if not open_order.is_empty(): return _tanker_order_open_rejection(open_order)
+	if context.get("at_service_point", true) != false: return _tanker_reject("at_service_point")
+	if context.get("fuel_problem", false) != true: return _tanker_reject("no_fuel_problem")
+	var capacity: float = float(_definitions.fuel_capacity)
+	var fuel: float = float(_fuel_by_craft_id[craft_id])
+	var free: float = maxf(capacity - fuel, 0.0)
+	var quantity: int = int(minf(float(data.quantity), floorf(free + 0.00001)))
+	if quantity < int(data.min_quantity):
+		return _tanker_reject("tank_nearly_full", {"quantity": quantity, "min_quantity": int(data.min_quantity)})
+	var callout_fee: int = int(data.callout_fee)
+	var price: int = callout_fee + int(ceil(float(quantity) * float(data.price_per_unit)))
+	if _credits < price:
+		return _tanker_reject("insufficient_credits", {"price": price, "credits": _credits, "quantity": quantity})
+	var dispatch_seconds: float = float(data.dispatch_seconds)
+	var response_seconds: float = float(data.response_seconds)
+	var refuel_seconds: float = float(data.refuel_seconds)
+	return {"ok": true, "craft_id": craft_id, "quantity": quantity, "price": price, "callout_fee": callout_fee, "unit_price": float(data.price_per_unit),
+		"credits": _credits, "free_capacity": free, "dispatch_seconds": dispatch_seconds, "response_seconds": response_seconds, "refuel_seconds": refuel_seconds,
+		"wait_seconds": dispatch_seconds + response_seconds, "total_seconds": dispatch_seconds + response_seconds + refuel_seconds, "status": String(data.get("status", "")),
+		"message": "Tanker rufen: %d Einheiten für %d Cr, Ankunft in etwa %d s." % [quantity, price, int(ceil(dispatch_seconds + response_seconds))]}
+
+func _tanker_authorized(context: Dictionary) -> bool:
+	return context.get("emergency_tanker_authorized", false) == true
+
+## Bestellen: bucht den Preis sofort und genau einmal. order_id ist die Anfrage-ID (stabil); dieselbe Anfrage noch einmal liefert
+## den Beleg mit replayed=true (apply_command), ohne zweite Buchung.
+func _emergency_tanker_order(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if not _tanker_authorized(context): return _tanker_reject("tanker_not_authorized")
+	var preview: Dictionary = preview_emergency_tanker(payload, context)
+	if not bool(preview.get("ok", false)): return preview
+	_credits -= int(preview.price)
+	_revision += 1
+	var receipt: Dictionary = preview.duplicate(true)
+	for key: String in ["credits", "free_capacity", "wait_seconds", "total_seconds", "status"]: receipt.erase(key)
+	receipt["order_id"] = request_id
+	receipt["message"] = "Tanker bestellt"
+	return receipt
+
+func _tanker_order_receipt(order_id: String) -> Dictionary:
+	var result: Dictionary = Dictionary(Dictionary(_requests.get(order_id, {})).get("result", {}))
+	return result if String(result.get("operation", "")) == "emergency_tanker_order" else {}
+
+## Lieferung: schreibt die bestellte Menge genau einmal gut (begrenzt durch die freie Tankkapazitaet). Der Lieferbeleg hat die feste
+## Kennung <order_id>:deliver; ein bereits storniertes oder verfallenes Auftrag wird nicht beliefert.
+func _emergency_tanker_deliver(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if not _tanker_authorized(context): return _tanker_reject("tanker_not_authorized")
+	var order_id: String = String(payload.get("order_id", ""))
+	if order_id.is_empty() or request_id != order_id + ":deliver": return _tanker_reject("invalid_request_id")
+	var order: Dictionary = _tanker_order_receipt(order_id)
+	if order.is_empty(): return _tanker_reject("unknown_order")
+	if _requests.has(order_id + ":cancel"): return _tanker_reject("order_closed")
+	var craft_id: String = String(order.craft_id)
+	if not _fuel_by_craft_id.has(craft_id): return _tanker_reject("craft_unavailable")
+	var capacity: float = float(_definitions.fuel_capacity)
+	var fuel: float = float(_fuel_by_craft_id[craft_id])
+	var amount: float = minf(float(order.quantity), maxf(capacity - fuel, 0.0))
+	_fuel_by_craft_id[craft_id] = minf(fuel + amount, capacity)
+	_revision += 1
+	return {"ok": true, "order_id": order_id, "craft_id": craft_id, "quantity": int(order.quantity), "amount": int(amount), "fuel_after": float(_fuel_by_craft_id[craft_id]), "message": "Tanker hat betankt"}
+
+## Stornieren oder Verfall. reason "player": in requested volle Rueckerstattung, in en_route nur der Mengenpreis (die Anfahrtsgebuehr ist
+## verloren), ab at_ship nicht mehr moeglich (tanker_already_arrived). reason "expired" (Schiff zerstoert oder aus der Flotte
+## entfernt): volle Rueckerstattung in jedem Zustand. Den Zustand liefert der Dienstbesitzer ueber den Kontext (emergency_tanker_state).
+## Jede Erstattung genau einmal: der Stornobeleg hat die feste Kennung <order_id>:cancel.
+func _emergency_tanker_cancel(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
+	if not _tanker_authorized(context): return _tanker_reject("tanker_not_authorized")
+	var order_id: String = String(payload.get("order_id", ""))
+	var reason: String = String(payload.get("reason", "player"))
+	if order_id.is_empty() or request_id != order_id + ":cancel" or reason not in ["player", "expired"]: return _tanker_reject("invalid_request_id")
+	var order: Dictionary = _tanker_order_receipt(order_id)
+	if order.is_empty(): return _tanker_reject("unknown_order")
+	if _requests.has(order_id + ":deliver"): return _tanker_reject("order_closed")
+	var price: int = int(order.price)
+	var state: String = String(context.get("emergency_tanker_state", ""))
+	var refund: int = price
+	if reason == "player":
+		if state == "requested": refund = price
+		elif state == "en_route": refund = price - int(order.callout_fee)
+		else: return _tanker_reject("tanker_already_arrived")
+	_credits += refund
+	_revision += 1
+	return {"ok": true, "order_id": order_id, "craft_id": String(order.craft_id), "reason": reason, "state": state if reason == "player" else "expired", "refund": refund, "kept": price - refund, "message": "Tankerauftrag beendet, erstattet: %d Cr" % refund}
+
+## Belege der Tankerbefehle beim Laden pruefen: ein Lieferbeleg und ein Stornobeleg zum selben Auftrag schliessen sich aus, beide
+## gehoeren zu einem vorhandenen Bestellbeleg, Preis und Erstattung folgen den Zahlen im Bestellbeleg selbst.
+func _valid_tanker_requests(requests: Dictionary) -> bool:
+	for request_id: String in requests:
+		var entry: Dictionary = requests[request_id]
+		var result: Dictionary = Dictionary(entry.get("result", {}))
+		var operation: String = String(result.get("operation", ""))
+		if operation not in ["emergency_tanker_order", "emergency_tanker_deliver", "emergency_tanker_cancel"]: continue
+		var signature: Dictionary = Dictionary(JSON.parse_string(String(entry.get("signature", "{}"))))
+		var payload: Dictionary = Dictionary(signature.get("payload", {}))
+		if operation == "emergency_tanker_order":
+			var craft_id: String = String(result.get("craft_id", ""))
+			if craft_id.is_empty() or String(result.get("order_id", "")) != request_id or String(payload.get("craft_id", "")) != craft_id: return false
+			if not _valid_positive_integer(result.get("quantity")) or not _valid_nonnegative_integer(result.get("callout_fee")) or not _valid_nonnegative_integer(result.get("price")) or int(result.price) < int(result.callout_fee): return false
+			if not _valid_nonnegative_number(result.get("unit_price")) or int(result.price) != int(result.callout_fee) + int(ceil(float(result.quantity) * float(result.unit_price))): return false
+			for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds"]:
+				if not _valid_nonnegative_number(result.get(key)): return false
+			continue
+		var order_id: String = String(payload.get("order_id", ""))
+		var order: Dictionary = Dictionary(Dictionary(requests.get(order_id, {})).get("result", {}))
+		if order.is_empty() or String(order.get("operation", "")) != "emergency_tanker_order" or String(result.get("order_id", "")) != order_id or String(result.get("craft_id", "")) != String(order.get("craft_id", "")): return false
+		if operation == "emergency_tanker_deliver":
+			if request_id != order_id + ":deliver" or requests.has(order_id + ":cancel"): return false
+			if not _valid_nonnegative_integer(result.get("amount")) or int(result.amount) > int(order.quantity): return false
+		else:
+			if request_id != order_id + ":cancel" or requests.has(order_id + ":deliver"): return false
+			var reason: String = String(result.get("reason", ""))
+			var refund: Variant = result.get("refund")
+			if not _valid_nonnegative_integer(refund): return false
+			var price: int = int(order.price)
+			var allowed: Array = [price] if reason == "expired" else ([price, price - int(order.callout_fee)] if reason == "player" else [])
+			if not allowed.has(int(refund)): return false
+	return true
 
 func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var receipt: Dictionary = Dictionary(context.get("completion_receipt", {}))
@@ -474,6 +661,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if not _valid_component_requests(data.requests, data.stock_by_offer_id, fresh._definitions): return _reject("invalid_component_receipts", "Komponentenbelege ungültig")
 	if not _valid_recruit_requests(data.requests): return _reject("invalid_recruit_receipts", "Anwerbungsbelege ungültig")
 	if not _valid_campaign_bed_requests(data.requests): return _reject("invalid_bed_receipts", "Bettenbelege ungültig")
+	if not fresh._valid_tanker_requests(data.requests): return _reject("invalid_tanker_receipts", "Tankerbelege ungültig")
 	var modular_replay: Dictionary = MODULAR.replay(data.requests)
 	if not modular_replay.get("ok", false): return modular_replay
 	var station_receipts: Dictionary = fresh.validate_station_receipts(data.requests)
@@ -528,6 +716,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_reward_receipts = data.reward_receipts.duplicate(true)
 	_research_receipts = research.duplicate(true)
 	_research_snapshot_revision = -1
+	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_station_purchase_cache_revision = -1
 	return {"ok":true}
@@ -690,6 +879,10 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	# Etappenkosten (T1 Tanker, 21.11.2026) sind rein hinzugekommen: Staende davor kennen den Block nicht und bleiben ladbar.
 	# Ein gespeicherter Block muss dagegen exakt dem aktuellen entsprechen (der strenge Vergleich unten).
 	if not left.has("leg_fuel_costs"): right.erase("leg_fuel_costs")
+	# Nottankdienst (T2): die Zahlen des Blocks emergency_fuel gelten nur fuer kuenftige Bestellungen; jede offene Bestellung traegt ihre
+	# eigenen Zahlen im Beleg. Darum wird der Block beim Vergleich ignoriert (ein Stand ohne ihn laedt, ein Stand mit ihm laedt auch,
+	# wenn die Zahlen spaeter neu abgestimmt werden).
+	left.erase("emergency_fuel"); right.erase("emergency_fuel")
 	return JSON.stringify(left, "", true) == JSON.stringify(right, "", true)
 
 

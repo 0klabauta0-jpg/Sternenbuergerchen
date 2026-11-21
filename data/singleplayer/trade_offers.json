@@ -355,6 +355,16 @@
     "homebase>polisa": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
     "polisa>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0}
   },
+  "emergency_fuel": {
+    "callout_fee": 100,
+    "price_per_unit": 6,
+    "quantity": 30,
+    "min_quantity": 10,
+    "dispatch_seconds": 5,
+    "response_seconds": 60,
+    "refuel_seconds": 10,
+    "status": "vorlaeufig"
+  },
   "benit_buy_orders": {
     "satellite_crash": {
       "c_benit": 12
