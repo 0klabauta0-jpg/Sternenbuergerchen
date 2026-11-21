@@ -66,6 +66,16 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 				if leg not in FUEL_LEGS or not _valid_nonnegative_number(legs[leg]): return _reject("invalid_supply_data", "Etappenkosten ungueltig")
 				leg_sum += float(legs[leg])
 			if absf(leg_sum - float(route_costs[route])) > 0.00001: return _reject("invalid_supply_data", "Etappen ergeben nicht die Streckenkosten: " + route)
+			# Ort -> Ort (Fix-Runde 1, W7): Das Schiff verlaesst den Ort, bevor ein Ziel gewaehlt ist, und fliegt erst danach an. Gebucht werden also
+			# der Ortsabflug des Ortes (wie nach Hause), der Sprung dieser Strecke und der Anflug wie von zu Hause. Nur so ergibt die Summe der real
+			# gebuchten Etappen den Streckenwert.
+			var parts: PackedStringArray = route.split(">")
+			if parts.size() == 2 and parts[0] != "homebase" and parts[1] != "homebase":
+				var out_legs: Variant = data.leg_fuel_costs.get(parts[0] + ">homebase")
+				var in_legs: Variant = data.leg_fuel_costs.get("homebase>" + parts[1])
+				if typeof(out_legs) != TYPE_DICTIONARY or typeof(in_legs) != TYPE_DICTIONARY: return _reject("invalid_supply_data", "Ort-zu-Ort-Strecke ohne Heimat-Etappen: " + route)
+				if absf(float(legs.get("surface_exit", -1.0)) - float(out_legs.get("surface_exit", -2.0))) > 0.00001 or absf(float(legs.get("approach", -1.0)) - float(in_legs.get("approach", -2.0))) > 0.00001:
+					return _reject("invalid_supply_data", "Ort-zu-Ort-Strecke weicht von den real gebuchten Etappen ab: " + route)
 	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
@@ -271,7 +281,7 @@ func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictio
 # Eine Etappe startet nur, wenn ihr eigener Anteil gedeckt ist. Die Summe der Etappen einer Strecke
 # ist gleich dem Wert in route_fuel_costs (leg_fuel_costs in data/singleplayer/trade_offers.json).
 const FUEL_LEGS: Array = ["launch", "jump", "approach", "surface_exit", "landing"]
-const FUEL_LEG_LABELS: Dictionary = {"launch": "Abheben", "jump": "Quantensprung", "approach": "Ortsanflug", "surface_exit": "Ortsabflug", "landing": "Landung", "whole_route": "Flug"}
+const FUEL_LEG_LABELS: Dictionary = {"launch": "Abheben", "jump": "Quantensprung", "approach": "Ortsanflug", "surface_exit": "Ortsabflug", "landing": "Landung"}
 
 func has_fuel_account(craft_id: String) -> bool:
 	return _fuel_by_craft_id.has(craft_id)
@@ -279,31 +289,21 @@ func has_fuel_account(craft_id: String) -> bool:
 func has_request(request_id: String) -> bool:
 	return _requests.has(request_id)
 
-## Etappe des Rueckwegs vom Ort nach Hause (Regel 8 / Auftrag 21.11.): Wurde der Hinweg ueber einen Orbit geflogen (Etappe "approach"),
-## verlaesst das Schiff den Ort nur bis in den Orbit ("surface_exit"); Sprung und Landung buchen danach selbst. Wurde der Hinweg als
-## ganze Strecke gebucht (Direktstart ohne Orbit, alter Beleg consume_route_fuel, unbekannt), kehrt es ohne Orbit heim ("whole_route").
-func get_return_leg(outward_token: String) -> String:
-	var receipt: Dictionary = Dictionary(_requests.get(outward_token + ":fuel", {}))
-	var result: Dictionary = Dictionary(receipt.get("result", {}))
-	return "surface_exit" if String(result.get("operation", "")) == "consume_leg_fuel" and String(result.get("leg", "")) == "approach" else "whole_route"
-
 func get_fuel(craft_id: String) -> float:
 	return float(_fuel_by_craft_id.get(craft_id, 0.0))
 
 func get_fuel_capacity() -> float:
 	return float(_definitions.get("fuel_capacity", 0.0))
 
-## Kosten einer Etappe. "whole_route" ist die Summe aller Etappen der Strecke (Direktflug ohne Orbit).
+func get_fuel_price_per_unit() -> float:
+	return float(_definitions.get("fuel_price_per_unit", 0.0))
+
+## Kosten einer Etappe.
 ## Abheben ohne Ziel (destination leer) und Landung ohne Herkunft (origin leer) sind ziel-unabhaengig.
 ## Gibt -1.0 zurueck, wenn die Etappe nicht definiert ist.
 func get_leg_fuel_cost(origin: String, destination: String, leg: String) -> float:
 	var table: Dictionary = Dictionary(_definitions.get("leg_fuel_costs", {}))
 	var route := origin + ">" + destination
-	if leg == "whole_route":
-		if not table.has(route): return -1.0
-		var sum := 0.0
-		for value in Dictionary(table[route]).values(): sum += float(value)
-		return sum
 	if leg not in FUEL_LEGS: return -1.0
 	if table.has(route) and Dictionary(table[route]).has(leg): return float(table[route][leg])
 	if leg == "launch" and origin == "homebase" and destination.is_empty():
@@ -342,9 +342,16 @@ func preview_leg_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictiona
 	var cost := get_leg_fuel_cost(origin, destination, leg)
 	if cost < 0.0:
 		return _reject("unknown_leg", "Etappe unbekannt")
+	# Anrechnung (nur intern, vom Simulationsbesitzer): ein schon bezahlter Teil derselben Etappe, zum Beispiel beim Neustart eines
+	# abgebrochenen Sprungs zu einem teureren Ziel. Es wird nur die Differenz gebucht; nie mehr als die Etappe kostet, nie zurueck.
+	if payload.has("already_paid"):
+		var credit: Variant = payload.get("already_paid")
+		if typeof(credit) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(credit)) or float(credit) < 0.0:
+			return _reject("invalid_leg_credit", "Anrechnung ungueltig")
+		cost = maxf(cost - float(credit), 0.0)
 	var fuel: float = float(_fuel_by_craft_id[craft_id])
 	if fuel + 0.00001 < cost:
-		var message := "Treibstoff reicht nicht für den Rückflug" if leg == "surface_exit" or (leg == "whole_route" and destination == "homebase") else "Treibstoff reicht nicht für diese Etappe (%s). Benötigt %s, vorhanden %s." % [String(FUEL_LEG_LABELS.get(leg, leg)), _fuel_text(cost), _fuel_text(fuel)]
+		var message := "Treibstoff reicht nicht für den Rückflug" if leg == "surface_exit" else "Treibstoff reicht nicht für diese Etappe (%s). Benötigt %s, vorhanden %s." % [String(FUEL_LEG_LABELS.get(leg, leg)), _fuel_text(cost), _fuel_text(fuel)]
 		var rejected := _reject("leg_fuel_insufficient", message)
 		rejected.merge({"leg": leg, "needed": cost, "available": fuel}, true)
 		return rejected
