@@ -215,6 +215,17 @@ func _run() -> void:
 	_check(not bool(arrow.call("is_showing")), "Skirmish: kein Pfeil")
 	runtime.snapshot["mode"] = "campaign"
 
+	# Ohne Operations-Besitzer (keine Attrappe): leeres, typisiertes Array[Rect2], Pfeil unveraendert.
+	var dummy: Control = _homebase.get("_operations_presenter")
+	_homebase.set("_operations_presenter", null)
+	arrows.call("configure", [hint_a])
+	presenter.call("refresh")
+	var rects: Variant = presenter.call("_launch_action_rects")
+	_check(rects is Array and (rects as Array).is_empty(), "Ohne Operations-Besitzer: leere Liste")
+	_check(rects is Array and (rects as Array).is_typed() and (rects as Array).get_typed_builtin() == TYPE_RECT2, "Ohne Operations-Besitzer: Array[Rect2]")
+	_check(bool(arrow.call("is_showing")), "Ohne Operations-Besitzer: Pfeil unveraendert sichtbar")
+	_homebase.set("_operations_presenter", dummy)
+
 	# Aufraeumen.
 	_check(other != null, "Testaufbau vollstaendig")
 	var absolute: String = ProjectSettings.globalize_path(TEST_CFG)

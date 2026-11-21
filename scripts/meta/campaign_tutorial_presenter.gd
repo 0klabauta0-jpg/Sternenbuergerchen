@@ -347,7 +347,10 @@ func _launch_action_rects() -> Array[Rect2]:
 	if screen == null:
 		return []
 	var operations: Control = screen.get("_operations_presenter")
-	return operations.call("get_launch_action_rects") if operations != null and operations.has_method("get_launch_action_rects") else []
+	if operations != null and operations.has_method("get_launch_action_rects"):
+		return operations.call("get_launch_action_rects")
+	var none: Array[Rect2] = []
+	return none
 
 
 func _fit_popup_content() -> void:
