@@ -4908,7 +4908,20 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 	_sync_wound_lock()
 	if not respawn_unit_ids.is_empty():
 		_park_pickup_persons(respawn_unit_ids)
-		_refresh_homebase_screen()
+		# R4a: Wer ausfaellt, verliert Platz in Trupp und Auswahl sowie Rucksack und Loadout wie ein Gefallener; Kader-Eintrag,
+		# Position und Basis-Darsteller (station) bleiben. Nach _replace_roster_units und _park_pickup_persons, weil die Ansicht
+		# die Karten mit dem schon gesetzten Status aufbaut.
+		var departing: Dictionary = {}
+		for respawn_id in respawn_unit_ids:
+			departing[String(respawn_id)] = true
+		var respawn_screen: Node = _get_homebase_screen()
+		var respawn_emptied: Array = _drop_units_from_squads_and_selection(departing, respawn_screen)
+		_refresh_after_roster_departure(respawn_emptied, respawn_screen)
+		# Erst nach dem Neuaufbau der Ansicht: Solange die Person im Kader steht, schreibt der Neuaufbau mit der noch
+		# nicht aufgeloesten Trupp-Definition ein Loadout fuer sie zurueck (anders als bei Gefallenen, die nicht mehr im Kader stehen).
+		if _singleplayer_runtime != null:
+			for respawn_id: String in departing:
+				_discard_person_gear(respawn_id, respawn_screen)
 	# Das Ergebnis traegt die tatsaechlich angewendete Verwundung (nach "nie kuerzer, nie leichter"),
 	# nicht die Regelwerte der neuen Verwundung. Das Feld severity bleibt die neue Verwundung.
 	for index in range(casualties.size()):
