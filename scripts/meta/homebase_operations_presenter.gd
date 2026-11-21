@@ -345,7 +345,7 @@ func _build() -> void:
 	_base_management_bar.name = "BaseManagementActions"
 	_base_management_bar.add_theme_constant_override("separation", 3)
 	_base_navigation_group.add_child(_base_management_bar)
-	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"]]:
+	for entry in [["Bauen", "build"], ["Werkstatt / Erlaubnisse", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"]]:
 		var action := _button(String(entry[0]), false)
 		action.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
 		action.custom_minimum_size.y = DENSITY.nav_sub_height

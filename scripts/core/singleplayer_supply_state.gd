@@ -174,7 +174,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 		if not _fuel_by_craft_id.has(component_craft) or not _inventory.has("craft:"+component_craft): return _reject("inventory_access", "Schiffslager für den Antrieb fehlt")
 	var blueprint := String(offer.get("required_blueprint", ""))
 	if bool(context.get("require_blueprints", false)) and not blueprint.is_empty() and not _blueprints().has(blueprint):
-		return _reject("blueprint_locked", "Zuerst den passenden Bauplan freischalten")
+		return _reject("blueprint_locked", "Zuerst die passende Erwerbserlaubnis freischalten")
 	if bool(context.get("craft_busy", true)):
 		return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
 	if not _has_service(location_id, "trade") or not Array(offer.get("location_ids", [])).has(location_id):
@@ -682,7 +682,7 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 func preview_campaign_fabrication(blueprint: String) -> Dictionary:
 	# Inventory/credit projection only. The command still checks runtime home access.
 	var recipe := get_campaign_recipe(blueprint)
-	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
+	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Erwerbserlaubnis noch nicht freigeschaltet")
 	if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
 	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary:
 		return _reject("invalid_recipe", "Herstellungsrezept ungültig")

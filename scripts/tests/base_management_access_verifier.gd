@@ -35,7 +35,7 @@ func _run()->void:
 	check(bar.visible,"explicit toggle unfolds the submenu again")
 	var actions:Dictionary={}
 	for button:Button in bar.get_children():actions[button.text]=button
-	check(actions.has("Bauen") and actions.has("Werkstatt / Blueprints") and actions.has("Datenterminal / Hochladen"),"base exposes build workshop and upload directly")
+	check(actions.has("Bauen") and actions.has("Werkstatt / Erlaubnisse") and actions.has("Datenterminal / Hochladen"),"base exposes build workshop and upload directly")
 	var before:Dictionary=flow.get("_singleplayer_runtime").get("_supply").export_state()
 	actions["Datenterminal / Hochladen"].pressed.emit()
 	check(bar.visible,"choosing a submenu entry keeps the submenu open")

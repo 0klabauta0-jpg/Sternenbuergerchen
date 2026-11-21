@@ -366,7 +366,7 @@ func _apply_section() -> void:
 		button.show()
 		if not available:
 			button.disabled=true
-			button.tooltip_text={"build":"Nach der Pilotenrettung verfügbar; bereits gebaute Pads bleiben erhalten.","workshop":"Passenden Blueprint zuerst in den Kampagnenaufträgen freischalten.","data":"Keine geborgenen Missionsdaten zum Hochladen vorhanden."}.get(_section,"")
+			button.tooltip_text={"build":"Nach der Pilotenrettung verfügbar; bereits gebaute Pads bleiben erhalten.","workshop":"Passende Erwerbserlaubnis zuerst in den Kampagnenaufträgen freischalten.","data":"Keine geborgenen Missionsdaten zum Hochladen vorhanden."}.get(_section,"")
 	if _section == "data":
 		var has_data:bool=false
 		for job:Dictionary in _snapshot.get("campaign",{}).get("jobs",{}).values():
@@ -390,9 +390,9 @@ func _apply_section() -> void:
 	_feedback.visible = ship or (not _availability_feedback and _feedback.text != "Versorgung bereit")
 	for action:Dictionary in _campaign_buttons.values():
 		action.card.visible=action.button.visible
-		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Blueprint freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
+		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Erwerbserlaubnis freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
 		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
-		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Blueprint fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else String(action.button.tooltip_text)
+		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Erwerbserlaubnis fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else String(action.button.tooltip_text)
 		if String(action.operation)=="campaign_build_housing":action.state_label.text="Gebaut: %d / 20 Betten" % int(_snapshot.get("supply", {}).get("campaign_beds", 2))
 	for craft:Dictionary in _snapshot.get("crafts",[]):
 		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)

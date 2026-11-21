@@ -552,7 +552,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if String(payload.get("target_craft_id", "")) != target or typeof(payload.get("unit_ids")) != TYPE_ARRAY: return _reject("invalid_crew_handoff", "Besatzungsauswahl ungültig")
 		return _flow.call("handoff_polisa_station_crew", String(payload.get("source_craft_id", "")), target, PackedStringArray(payload.unit_ids), String(payload.get("pilot_id", "")), _request_id("station-handoff", payload)) if _flow.has_method("handoff_polisa_station_crew") else _reject("crew_handoff_unavailable", "Besatzungsübergabe nicht verfügbar")
 	if operation == "buy" and _campaign_mode and String(payload.get("offer_id","")) == "mining_tool_supply" and not Array(_supply.get_supply_snapshot().get("blueprints",[])).has("mining_tool"):
-		return _reject("blueprint_locked","Miningwerkzeug nach dem Blueprint aus Mission 3 verfügbar")
+		return _reject("blueprint_locked","Miningwerkzeug nach der Erwerbserlaubnis aus Mission 3 verfügbar")
 	var data: Dictionary = payload.duplicate(true)
 	var request_id: String = _request_id(operation, data)
 	data.erase("request_id")
@@ -646,7 +646,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			var offer: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id","")),{})
 			var item := String(offer.get("item_id",""))
 			var needed := "mining_tool" if item == "mining_tool" else ("assault_rifle" if item == "rifle" else "")
-			if not needed.is_empty() and not Array(_supply.get_supply_snapshot().get("blueprints",[])).has(needed): return _reject("blueprint_locked","Zuerst den passenden Blueprint im Kampagnenauftrag freischalten")
+			if not needed.is_empty() and not Array(_supply.get_supply_snapshot().get("blueprints",[])).has(needed): return _reject("blueprint_locked","Zuerst die passende Erwerbserlaubnis im Kampagnenauftrag freischalten")
 		var craft_id: String = String(data.get("craft_id", ""))
 		var context: Dictionary = _service_context(craft_id)
 		if context.is_empty():

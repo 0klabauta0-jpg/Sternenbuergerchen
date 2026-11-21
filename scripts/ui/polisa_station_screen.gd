@@ -191,7 +191,7 @@ func refresh(snapshot: Dictionary) -> void:
 		var ship := String(offer.get("kind", "")) == "ship"
 		var buy_payload := {"craft_id":String(snapshot.get("craft_id", "")),"offer_id":offer_id,"quantity":1}
 		if ship: buy_payload["delivery_mode"] = _delivery_mode
-		var buy := _button(actions, "Bauplan fehlt" if locked else ("Auf Polisa übernehmen" if ship and _delivery_mode == "local" else "Kaufen"), _request.bind("station_buy_ship" if ship else "buy", buy_payload), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and (String(snapshot.get("free_home_pad", "")).is_empty() or (_delivery_mode == "local" and not bool(snapshot.get("local_pickup_available", false))))))
+		var buy := _button(actions, "Erwerbserlaubnis fehlt" if locked else ("Auf Polisa übernehmen" if ship and _delivery_mode == "local" else "Kaufen"), _request.bind("station_buy_ship" if ship else "buy", buy_payload), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and (String(snapshot.get("free_home_pad", "")).is_empty() or (_delivery_mode == "local" and not bool(snapshot.get("local_pickup_available", false))))))
 		buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if _page in ["infantry", "armor"]:
 			var slot := "armor" if item.begins_with("armor_") else ("backpack" if item == "backpack" else "weapon_1")
