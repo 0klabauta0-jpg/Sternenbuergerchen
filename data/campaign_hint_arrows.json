@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "retire_when": ["stage_above:0", "job_closed:satellite_recovery"],
   "hints": [
     {
       "id": "equip_weapon",
@@ -9,7 +10,7 @@
         {"node": "InventorySlot_weapon_1", "within": "PersonnelInventory"},
         {"node": "Navigate_squad"}
       ],
-      "show_when": ["stage:0", "job_open:satellite_recovery", "pistol_in_store"],
+      "show_when": ["stage:0", "pistol_in_store"],
       "done_when": ["weapon_carried"]
     },
     {
@@ -23,7 +24,7 @@
         {"node": "OpenBaseServices"},
         {"node": "Navigate_mission"}
       ],
-      "show_when": ["stage:0", "job_open:satellite_recovery"],
+      "show_when": ["stage:0"],
       "done_when": ["fuel_full"]
     },
     {
@@ -32,6 +33,7 @@
       "text": "Hier den Satellitenauftrag annehmen",
       "target": [
         {"node": "AcceptJob"},
+        {"node": "JobCard_satellite_recovery"},
         {"node": "Navigate_jobs"}
       ],
       "show_when": ["stage:0", "job_open:satellite_recovery"],

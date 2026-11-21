@@ -18,13 +18,17 @@ extends RefCounted
 ## facts["operations"] (Basisansicht) und schreiben nichts:
 ##   weapon_carried          irgendeine Person traegt eine Waffe (Waffe 1 oder 2)
 ##   pistol_in_store         im Basislager liegt mindestens eine Pistole
-##   job_open:<id>           Auftrag ist angebbar (offered/failed), also noch nicht angenommen
+##   job_open:<id>           Auftrag ist annehmbar (offered/failed), also noch nicht angenommen
 ##   job_taken:<id>          Auftrag ist angenommen oder laeuft (accepted/active)
+##   job_closed:<id>         Auftrag ist weder annehmbar noch angenommen (erledigt)
+##   stage_above:<n>         Einfuehrungsstufe ist groesser als n
 ##   fuel_full               Tank des gewaehlten Schiffs ist voll
 ##   crew_boarded            Trupp und Pilot des gewaehlten Schiffs sind wirklich an Bord
 ##   boarding_underway       Trupp ist dem Schiff zugeteilt, aber noch nicht vollstaendig an Bord
 ##   launch_ready            Abflug ist moeglich (kein Sperrgrund)
 ##   craft_away              das gewaehlte Schiff ist unterwegs/im Einsatz
+## Optional oberste Liste "retire_when": [Woerter] (nur stage_above/job_closed): gelten alle, kann nie wieder ein
+## Hinweis offen sein; die Karte baut dann keine Fakten mehr (is_retired).
 ## Zielnamen: `find_child(name, true, false)` nimmt den ERSTEN Treffer unter der Suchwurzel. Ein Name
 ## muss dort also eindeutig sein und darf kein `*` oder `?` enthalten (das waeren Muster). Ist er es nicht
 ## (z. B. InventorySlot_weapon_1 gibt es im Ausruestungspanel UND im Charakterblatt), sagt "within" den
@@ -38,6 +42,7 @@ var settings_path: String = SETTINGS.CONFIG_PATH
 var poll_interval_msec: int = 2000
 
 var _hints: Array = []
+var _retire_when: Array = []
 var _loaded: bool = false
 var _arrow: Control = null
 var _enabled: bool = true
@@ -194,6 +199,26 @@ func _ensure_loaded() -> void:
 		var list: Variant = data.get("hints", [])
 		if list is Array:
 			configure(list)
+		set_retire_when(data.get("retire_when", []))
+
+
+## Woerter (alle muessen gelten), nach denen kein Hinweis je wieder offen sein kann ("retire_when" der Datei).
+func set_retire_when(words: Variant) -> void:
+	_retire_when = []
+	if words is Array:
+		for word: Variant in words:
+			_retire_when.append(String(word))
+
+
+## Gilt nur mit leichten Fakten (stage, runtime). Eine leere Liste heisst: nie fertig.
+func is_retired(facts: Dictionary) -> bool:
+	_ensure_loaded()
+	if _retire_when.is_empty():
+		return false
+	for word: String in _retire_when:
+		if not _holds(word, facts):
+			return false
+	return true
 
 
 func _poll_settings() -> void:
@@ -250,6 +275,10 @@ func _holds(word: String, facts: Dictionary) -> bool:
 			return _job_status(facts, arg) in ["offered", "failed"]
 		"job_taken":
 			return _job_status(facts, arg) in ["accepted", "active"]
+		"job_closed":
+			return _job_status(facts, arg) not in ["offered", "failed", "accepted", "active"]
+		"stage_above":
+			return arg.is_valid_int() and facts.has("stage") and int(facts["stage"]) > int(arg)
 		"fuel_full":
 			return _w_fuel_full(facts)
 		"crew_boarded":
@@ -268,19 +297,21 @@ func _holds(word: String, facts: Dictionary) -> bool:
 
 # --- Spielstand-Woerter: nur Lesen in den uebergebenen Schnappschuessen ---
 
-func _runtime(facts: Dictionary) -> Dictionary:
-	var value: Variant = facts.get("runtime", {})
+## Ein Feld, das ein Dictionary sein soll, sonst ein leeres (kein Skriptfehler bei falschem Typ).
+func _dict(value: Variant) -> Dictionary:
 	return value if value is Dictionary else {}
+
+
+func _runtime(facts: Dictionary) -> Dictionary:
+	return _dict(facts.get("runtime"))
 
 
 func _operations(facts: Dictionary) -> Dictionary:
-	var value: Variant = facts.get("operations", {})
-	return value if value is Dictionary else {}
+	return _dict(facts.get("operations"))
 
 
 func _selected_craft(facts: Dictionary) -> Dictionary:
-	var value: Variant = _operations(facts).get("selected_craft", {})
-	return value if value is Dictionary else {}
+	return _dict(_operations(facts).get("selected_craft"))
 
 
 func _w_weapon_carried(facts: Dictionary) -> bool:
@@ -300,28 +331,20 @@ func _w_weapon_carried(facts: Dictionary) -> bool:
 
 
 func _w_pistol_in_store(facts: Dictionary) -> bool:
-	var inventory: Variant = Dictionary(_runtime(facts).get("supply", {})).get("inventory", {})
-	if not inventory is Dictionary:
-		return false
-	var store: Variant = (inventory as Dictionary).get("base:homebase", {})
-	if not store is Dictionary:
-		return false
-	var items: Variant = (store as Dictionary).get("items", {})
-	return items is Dictionary and int((items as Dictionary).get("pistol", 0)) > 0
+	var inventory: Dictionary = _dict(_dict(_runtime(facts).get("supply")).get("inventory"))
+	var items: Dictionary = _dict(_dict(inventory.get("base:homebase")).get("items"))
+	return int(items.get("pistol", 0)) > 0
 
 
 func _job_status(facts: Dictionary, job_id: String) -> String:
-	var jobs: Variant = Dictionary(_runtime(facts).get("campaign", {})).get("jobs", {})
-	if not jobs is Dictionary:
-		return ""
-	var job: Variant = (jobs as Dictionary).get(job_id, {})
-	return String((job as Dictionary).get("status", "")) if job is Dictionary else ""
+	var jobs: Dictionary = _dict(_dict(_runtime(facts).get("campaign")).get("jobs"))
+	return String(_dict(jobs.get(job_id)).get("status", ""))
 
 
 func _w_fuel_full(facts: Dictionary) -> bool:
 	var craft_id: String = String(_selected_craft(facts).get("id", ""))
-	var supply: Dictionary = _runtime(facts).get("supply", {})
-	var fuel: Variant = Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, null)
+	var supply: Dictionary = _dict(_runtime(facts).get("supply"))
+	var fuel: Variant = _dict(supply.get("fuel_by_craft_id")).get(craft_id, null)
 	if craft_id.is_empty() or fuel == null:
 		return false
 	return float(fuel) >= float(supply.get("fuel_capacity", 0.0)) - 0.001
@@ -343,7 +366,7 @@ func _w_launch_ready(facts: Dictionary) -> bool:
 	if not bool(craft.get("can_start", false)):
 		return false
 	var runtime: Dictionary = _runtime(facts)
-	if bool(Dictionary(runtime.get("space_travel", {})).get("enabled", false)):
-		var readiness: Dictionary = Dictionary(Dictionary(runtime.get("space_launch_readiness_by_craft_id", {})).get(String(craft.get("id", "")), {}))
+	if bool(_dict(runtime.get("space_travel")).get("enabled", false)):
+		var readiness: Dictionary = _dict(_dict(runtime.get("space_launch_readiness_by_craft_id")).get(String(craft.get("id", ""))))
 		return bool(readiness.get("ok", false))
 	return true

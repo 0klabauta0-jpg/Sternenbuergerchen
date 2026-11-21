@@ -29,6 +29,10 @@ class HomebaseProbe:
 	extends Control
 	var _operations_mode: String = "base"
 	var _operations_presenter: Control = OperationsProbe.new()
+	var ops_calls: int = 0
+	func get_operations_snapshot(_with_details: bool = false) -> Dictionary:
+		ops_calls += 1
+		return {}
 
 var _passed: int = 0
 var _failed: int = 0
@@ -88,6 +92,7 @@ func _run() -> void:
 	var arrow: Control = presenter.call("get_hint_arrow")
 	var arrows: RefCounted = presenter.call("get_hint_arrows")
 	arrow.set("pulse_enabled", false)
+	presenter.set("hint_update_interval_msec", 0)
 	arrows.set("settings_path", TEST_CFG)
 	arrows.set("poll_interval_msec", 0)
 	await process_frame
@@ -105,6 +110,40 @@ func _run() -> void:
 	arrows.call("configure", [_hint("w", 1, "TargetButton", ["stage:9"], [])])
 	presenter.call("_update_hint_arrows")
 	_check(runtime.snapshot_calls > calls_before, "Mit Hinweisen: Schnappschuss wird gelesen")
+	# K1: Die 50-ms-Sperre gilt auch im Aufruf ueber refresh(): innerhalb der Sperre keine neuen Fakten.
+	presenter.set("hint_update_interval_msec", 60000)
+	presenter.call("_update_hint_arrows")
+	calls_before = runtime.snapshot_calls
+	presenter.call("_update_hint_arrows")
+	presenter.call("_update_hint_arrows")
+	_check(runtime.snapshot_calls == calls_before, "Sperre: zweiter Aufruf innerhalb der Sperre baut keine Fakten")
+	presenter.set("hint_update_interval_msec", 0)
+	presenter.call("_update_hint_arrows")
+	_check(runtime.snapshot_calls > calls_before, "Ohne Sperre baut jeder Aufruf Fakten")
+	# W3: Kann kein Hinweis je wieder offen sein, baut die Karte keine Fakten und fragt keinen Betriebs-Schnappschuss.
+	arrows.call("set_retire_when", ["stage_above:0"])
+	runtime.snapshot["onboarding"]["stage_index"] = 1
+	presenter.call("_update_hint_arrows")
+	var ops_before: int = _homebase.ops_calls
+	presenter.call("_update_hint_arrows")
+	presenter.call("_update_hint_arrows")
+	_check(_homebase.ops_calls == ops_before, "Ausgemustert: get_operations_snapshot wird nicht mehr gerufen")
+	_check((presenter.get("_hint_facts") as Dictionary).is_empty(), "Ausgemustert: keine Fakten gebaut")
+	_check(not arrow.call("is_showing"), "Ausgemustert: kein Pfeil")
+	runtime.snapshot["onboarding"]["stage_index"] = 0
+	presenter.call("_update_hint_arrows")
+	_check(_homebase.ops_calls > ops_before, "Nicht ausgemustert (Stufe 0): Betriebs-Schnappschuss wird wieder gelesen")
+	arrows.call("set_retire_when", [])
+	# K2: Felder, die da sind, aber kein Dictionary: kein Skriptfehler, der Hinweis bleibt einfach zu.
+	arrows.call("configure", [_hint("k2", 1, "TargetButton", ["job_open:a", "fuel_full", "launch_ready", "pistol_in_store", "weapon_carried"], [])])
+	runtime.snapshot["campaign"] = 5
+	runtime.snapshot["supply"] = "x"
+	runtime.snapshot["selected_craft"] = 3
+	presenter.call("_update_hint_arrows")
+	_check(not arrow.call("is_showing"), "K2: Nicht-Dictionary-Felder werden ohne Fehler als 'nicht erfuellt' gelesen")
+	runtime.snapshot.erase("campaign")
+	runtime.snapshot.erase("supply")
+	runtime.snapshot.erase("selected_craft")
 	arrows.call("configure", [])
 	# Die ausgelieferte Datenliste hat seit P3 die fuenf Hinweise der Basis (Inhalt prueft campaign_hint_arrows_flow_verifier).
 	var shipped: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign_hint_arrows.json"))

@@ -42,6 +42,7 @@ func _run() -> void:
 	await _part_a_full_order()
 	await _part_b_mode_off()
 	await _part_c_resume_with_accepted_job()
+	await _part_d_accept_first()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_CFG))
 	print("CAMPAIGN_HINT_ARROWS_FLOW passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
@@ -219,9 +220,9 @@ func _part_a_full_order() -> void:
 	_check(chooser != null and chooser.is_visible_in_tree() and chooser.selected == 0, "A2: im Tankfenster ist noch kein Serviceschiff gewaehlt")
 	_points_at(chooser, "A2 Schiffswahl")
 	_check(_active() == "refuel_ship", "A2: Hinweis bleibt 'refuel_ship' bei der Schiffswahl")
-	# Das Schiff waehlt der Spieler durch Anklicken in der Basis (so macht es das Spiel: Basiswelt -> Serviceschiff).
-	# Die Schiffswahl im Tankfenster selbst wird von homebase_screen.request_operation nicht weitergereicht (siehe Bericht).
-	_flow.call("_on_base_world_selection_changed", "ship", _craft)
+	# Das Schiff waehlt der Spieler in der Auswahl IM Tankfenster (W2: homebase_screen leitet die Wahl jetzt weiter).
+	chooser.select(1)
+	chooser.item_selected.emit(1)
 	await _wait_frames(30)
 	_check(await _wait_hint("refuel_ship"), "A2: Hinweis bleibt, nachdem das Schiff gewaehlt ist")
 	var refuel: Control = _in("MissionServices", "RefuelCraft")
@@ -242,10 +243,16 @@ func _part_a_full_order() -> void:
 	_node("Navigate_jobs").pressed.emit()
 	_check(await _wait_hint("accept_job"), "A3: Hinweis bleibt, nachdem die Auftragstafel offen ist")
 	# Die Auftragstafel zeigt die Annehmen-Schaltflaeche erst, wenn die Auftragskarte aufgeklappt ist (Klick auf die Karte).
-	var cards: Dictionary = _screen.get("_operations_presenter").get("_job_board").get("_card_buttons")
-	_check(cards.has(JOB), "A3: die Auftragskarte des Satellitenauftrags ist da")
-	if cards.has(JOB):
-		(cards[JOB] as Button).pressed.emit()
+	# Bis dahin zeigt der Pfeil auf die Karte (Knotenname JobCard_<Auftrag>), danach auf AcceptJob.
+	await _wait_until(func(): return _node("JobCard_" + JOB) != null and _node("JobCard_" + JOB).is_visible_in_tree())
+	await _wait_frames(10)
+	var card: Control = _node("JobCard_" + JOB)
+	_check(card != null and card.is_visible_in_tree(), "A3: die Auftragskarte des Satellitenauftrags (JobCard_) ist sichtbar")
+	_check(_node("AcceptJob") == null or not _node("AcceptJob").is_visible_in_tree(), "A3: AcceptJob ist vor dem Aufklappen noch nicht sichtbar")
+	_points_at(card, "A3 Auftragskarte")
+	_check(_active() == "accept_job", "A3: Hinweis bleibt 'accept_job' bei der Karte")
+	if card != null:
+		(card as Button).pressed.emit()
 	await _wait_until(func(): return _node("AcceptJob") != null and _node("AcceptJob").is_visible_in_tree())
 	await _wait_frames(10)
 	var accept: Control = _node("AcceptJob")
@@ -309,6 +316,7 @@ func _part_c_resume_with_accepted_job() -> void:
 		return
 	var accepted: Dictionary = _screen.call("request_operation", "accept_job", {"job_id": JOB})
 	_check(bool(accepted.get("ok", false)), "C: Satellitenauftrag im neuen Stand angenommen: " + str(accepted))
+	await _equip()
 	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _adapter, true)
 	_check(bool(saved.get("ok", false)), "C: Stand gespeichert: " + str(saved))
 	await _close_flow()
@@ -321,9 +329,49 @@ func _part_c_resume_with_accepted_job() -> void:
 		await process_frame
 		if not _active().is_empty():
 			seen[_active()] = true
-	_check(not seen.has("equip_weapon") and not seen.has("refuel_ship") and not seen.has("accept_job"), "C: Fortsetzen zeigt keinen der Hinweise 1 bis 3 erneut: " + str(seen.keys()))
-	_check(seen.has("board_ship"), "C: nach dem Fortsetzen steht der naechste offene Hinweis 'board_ship' an: " + str(seen.keys()))
+	_check(not seen.has("equip_weapon") and not seen.has("accept_job"), "C: Fortsetzen (ausgeruestet, Auftrag angenommen) zeigt weder 'equip_weapon' noch 'accept_job' erneut: " + str(seen.keys()))
+	_check(seen.has("refuel_ship"), "C: nach dem Fortsetzen steht der naechste offene Hinweis 'refuel_ship' an (Tank nicht voll): " + str(seen.keys()))
 	await _close_flow()
+
+
+## W1: Wer den Auftrag zuerst annimmt, sieht trotzdem 10 (Ausruesten), dann 20 (Tanken), dann 40 (Einschiffen).
+func _part_d_accept_first() -> void:
+	if not await _open_flow("new"):
+		return
+	var accepted: Dictionary = _screen.call("request_operation", "accept_job", {"job_id": JOB})
+	_check(bool(accepted.get("ok", false)), "D: Satellitenauftrag zuerst angenommen: " + str(accepted))
+	_screen.call("request_operation", "navigate", {"mode": "base"})
+	_check(await _wait_hint("equip_weapon"), "D: trotz angenommenem Auftrag erscheint Pfeil 'equip_weapon'")
+	await _equip()
+	_check(await _wait_hint("refuel_ship"), "D: danach 'refuel_ship'")
+	_node("OpenBaseServices").pressed.emit()
+	await _wait_frames(30)
+	var chooser := _in("BaseServices", "ServiceCraftSelector") as OptionButton
+	if chooser != null:
+		chooser.select(1)
+		chooser.item_selected.emit(1)
+	await _wait_frames(30)
+	var refuel: Control = _in("MissionServices", "RefuelCraft")
+	if refuel == null or not refuel.is_visible_in_tree():
+		refuel = _in("BaseServices", "RefuelCraft")
+	for i in 40:
+		if refuel == null or _fuel_full():
+			break
+		(refuel as Button).pressed.emit()
+		await _wait_frames(4)
+	_check(_fuel_full(), "D: Tank voll")
+	_check(await _wait_hint("board_ship"), "D: danach 'board_ship' (accept_job entfaellt, der Auftrag ist angenommen)")
+	await _close_flow()
+
+
+## Rüstet die erste Person mit der Pistole aus dem Lager aus (echtes Ziehen-Signal des Platzes).
+func _equip() -> void:
+	_screen.call("request_operation", "navigate", {"mode": "squad"})
+	await _wait_frames(30)
+	var slot: Control = _slot()
+	if slot != null:
+		slot.payload_dropped.emit({"source_container_id": "base:homebase", "item_id": "pistol"})
+	await _wait_frames(10)
 
 
 ## Der Pfeil faengt nichts: Unter seinem Kasten wird dasselbe Steuerelement getroffen wie ohne Pfeil.

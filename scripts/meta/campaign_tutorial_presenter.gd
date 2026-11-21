@@ -17,13 +17,13 @@ const STEPS := {
 	"rescue_completed":["campaign.movement","Mission 5: Notruf annehmen und im Planetenorbit anfliegen. Feindliche Cutlass bekämpfen; neutrale Buccaneer retten."],
 	"pilot_recruited":["campaign.use","Nach dem Sieg den Buccaneer-Piloten retten. Er schließt sich mit seinem Schiff an; das Team wächst auf vier."],
 	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Unter Basis erkunden → Bauen das zweite Landepad für 100 Credits bauen."],
-	"satellite_completed":["campaign.movement","Satellitenauftrag erfüllt: Chip bergen und mit dem Schiff zur Basis zurückfliegen."],
-	"satellite_home":["campaign.return","Zurück an der Basis: unter Basis erkunden → Datenterminal / Hochladen den Satellitenchip hochladen."],
-	"trade_departed":["campaign.trade","Zum Handelsposten fliegen und dort die Person ansprechen, die sich dem Team anschließen will."],
-	"trade_used":["campaign.use","Handel abgeschlossen: Die gekaufte Ausrüstung im Schiff verstauen und bereitmachen."],
-	"bought":["campaign.trade","Gekauft: Im Versorgungsfenster prüfen, ob die neue Ausrüstung im Lager des Schiffs liegt."],
-	"refueled":["campaign.trade","Das Schiff ist aufgetankt. Weiter zum nächsten Auftrag oder zurück zur Basis."],
-	"trade_home":["campaign.return","Mit der Handelsware zur Basis heimkehren und dort abgeben."],
+	"satellite_completed":["campaign.movement","Satellitenauftrag erledigt. Bring den geborgenen Chip zum Schiff und fliege heim."],
+	"satellite_home":["campaign.return","Du bist zurück an der Basis. Lade den Chip am Datenterminal hoch (Basis erkunden)."],
+	"trade_departed":["campaign.trade","Du bist zum Handelsposten unterwegs. Lande dort und nutze das Versorgungsfenster zum Kaufen, Verkaufen oder Tanken."],
+	"trade_used":["campaign.use","Handelsposten genutzt: gekauft, verkauft oder getankt. Fliege jetzt zur Basis zurück."],
+	"bought":["campaign.trade","Gekauft. Die Ware liegt im Lager des Schiffs. Fliege jetzt zur Basis zurück."],
+	"refueled":["campaign.trade","Schiff aufgetankt. Fliege weiter oder zurück zur Basis."],
+	"trade_home":["campaign.return","Zurück an der Basis. Hole die gekauften Gegenstände aus dem Schiff ins Basislager."],
 	"completed":["campaign.complete","Erstes Kampagnenkapitel abgeschlossen: vier Personen, zwei Schiffe und zwei Landepads. Orte bleiben besuchbar; sichere Basisstände können fortgesetzt werden."]
 }
 var _runtime: Node
@@ -57,6 +57,9 @@ var _hint_arrows: RefCounted
 var _hint_facts: Dictionary = {}
 var _hint_root: Node
 var _hint_update_msec: int = -1000000
+var _hint_facts_msec: int = -1000000
+## True while no hint can ever open again (stage and satellite job, see "retire_when"): no facts, no operations snapshot.
+var _hint_retired: bool = false
 var _arrow_rect_seen: Rect2 = Rect2()
 var hint_update_interval_msec: int = 50
 
@@ -177,8 +180,20 @@ func _update_hint_arrows() -> void:
 		return
 	if _hint_arrow.get_parent() == null and get_parent() != null:
 		get_parent().add_child(_hint_arrow)
-	_hint_update_msec = Time.get_ticks_msec()
+	# The 50 ms lock also holds for this path (own stamp: the follow-up in _process must not starve the 4 Hz rebuild).
+	var now: int = Time.get_ticks_msec()
+	if now - _hint_facts_msec < hint_update_interval_msec:
+		return
+	_hint_facts_msec = now
+	_hint_update_msec = now
 	_build_hint_facts()
+	if _hint_retired:
+		_hint_arrow.call("hide_arrow")
+		if _arrow_rect_seen != Rect2():
+			_arrow_rect_seen = Rect2()
+			if _strip != null:
+				_layout()
+		return
 	_apply_hint_arrows()
 
 func _apply_hint_arrows() -> void:
@@ -196,12 +211,17 @@ func _apply_hint_arrows() -> void:
 func _build_hint_facts() -> void:
 	_hint_root = null
 	_hint_facts = {}
+	_hint_retired = false
 	var snapshot: Dictionary = {}
 	if is_instance_valid(_runtime) and _runtime.has_method("get_snapshot"):
 		snapshot = _runtime.get_snapshot()
 	if String(snapshot.get("mode", "")) != "campaign":
 		return
-	var onboarding: Dictionary = snapshot.get("onboarding", {})
+	var onboarding: Dictionary = snapshot.get("onboarding", {}) if snapshot.get("onboarding") is Dictionary else {}
+	# Light check first (stage + runtime snapshot only): once nothing can open again, stop here.
+	if bool(_hint_arrows.call("is_retired", {"stage": int(onboarding.get("stage_index", 0)), "runtime": snapshot})):
+		_hint_retired = true
+		return
 	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
 	var operations_mode: String = _variant_text(homebase.get("_operations_mode")) if homebase != null else ""
 	var meta_view: String = _variant_text(_flow.get("_current_meta_view")) if is_instance_valid(_flow) else ""
