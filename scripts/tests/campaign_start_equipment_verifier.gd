@@ -7,6 +7,8 @@ extends SceneTree
 ##   B Ein VOR der Aenderung geschriebener Basisstand (mit 2 leichten Ruestungen) laesst sich weiter laden und bleibt unveraendert
 ##   C Die leichte Ruestung bleibt erreichbar: Satellitenauftrag -> Erwerbserlaubnis light_armor -> Polisa-Angebot kaufbar
 ##   D Echte neue Kampagne: Loadout-Besitzer, Ansicht und Lager; die Pistole laesst sich ueber die oeffentliche Ausruestungs-Operation anlegen
+##   E Ganzer Spielstand: neue Kampagne, beide Personen auf den alten Zustand ausruesten (Pistolen, Sanitaetsgeraet), erzwungen speichern,
+##     ueber "Fortsetzen" laden; Ausruestung je Person und Lager bleiben wie gespeichert (Startwerte werden beim Laden nicht erneut gesetzt)
 ## Nicht hier, sondern in anderen Tests: das Ziehen per Maus (character_navigation_equipment_verifier), der Einsatz mit
 ## unbewaffnetem Truppfuehrer (campaign_intro_loop_smoke), der Gefechtseinsatz mit einer Pistole (campaign_five_actual_sorties_verifier),
 ## das Fortsetzen alter Staende (main_legacy_checkpoint_verifier, campaign_preparation_continue_test).
@@ -39,6 +41,7 @@ func _run() -> void:
 	_part_b_old_base_state_loads()
 	_part_c_light_armor_chain()
 	await _part_d_real_new_campaign()
+	await _part_e_continue_keeps_saved_equipment()
 	print("CAMPAIGN_START_EQUIPMENT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -152,6 +155,67 @@ func _part_d_real_new_campaign() -> void:
 	_check(int(after_items.get("pistol", 0)) == 1, "D: danach liegt noch eine Pistole im Lager (echte Bestandsbuchung): " + str(after_items))
 	var pilot_state: Dictionary = Dictionary(Dictionary(runtime.get("_simulation").call("get_personnel_loadout_state").call("get_snapshot")).get("campaign_pilot", {}))
 	_check(String(pilot_state.get("weapon_1", "")) == "none", "D: der Pilot bleibt unbewaffnet")
+	flow.queue_free()
+	await process_frame
+
+func _loadouts_of(runtime: Node) -> Dictionary:
+	return Dictionary(runtime.get("_simulation").call("get_personnel_loadout_state").call("get_snapshot"))
+
+func _base_items_of(runtime: Node) -> Dictionary:
+	return Dictionary(Dictionary(Dictionary(runtime.call("get_snapshot")).supply.inventory["base:homebase"]).get("items", {}))
+
+func _equip(screen: Control, craft: String, unit_id: String, item: String, slot: String) -> bool:
+	var result: Dictionary = screen.call("request_operation", "inventory_equip", {"unit_id": unit_id, "craft_id": craft, "source_container_id": "base:homebase", "item_id": item, "slot": slot})
+	return _check(bool(result.get("ok", false)), "E: %s -> %s/%s ueber die echte Operation: %s" % [item, unit_id, slot, str(result)])
+
+func _part_e_continue_keeps_saved_equipment() -> void:
+	# W1: Ganzer Spielstand ueber den echten Speicher- und Fortsetzen-Weg. Der Stand ist der ALTE Zustand
+	# (beide Personen mit Pistole, eine mit Sanitaetsgeraet, Lager entsprechend leer). Das Laden darf die neue
+	# Startausruestung (suit/none/none, Lager 2/1) NICHT noch einmal anwenden.
+	START.request_start(self, "campaign", "new")
+	var flow: Node = FLOW.instantiate()
+	root.add_child(flow)
+	await process_frame
+	var screen: Control = flow.get_node("HomebaseScreen")
+	var runtime: Node = flow.get("_singleplayer_runtime")
+	if not _check(runtime != null, "E: neue Kampagne hat ihre Laufzeit"):
+		flow.queue_free()
+		await process_frame
+		return
+	var craft := String(flow.get_meta("singleplayer_bootstrap_craft_id"))
+	_check(int(_base_items_of(runtime).get("pistol", 0)) == 2, "E: Ausgang: neues Lager mit 2 Pistolen")
+	_equip(screen, craft, "campaign_leader", "pistol", "weapon_1")
+	_equip(screen, craft, "campaign_pilot", "pistol", "weapon_1")
+	_equip(screen, craft, "campaign_pilot", "medictool", "weapon_2")
+	var items_before: Dictionary = _base_items_of(runtime)
+	_check(int(items_before.get("pistol", 0)) == 0 and int(items_before.get("medictool", 0)) == 0, "E: vor dem Speichern ist das Lager leer geraeumt: " + str(items_before))
+	var saved: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, runtime, true)
+	_check(bool(saved.get("ok", false)) and not bool(saved.get("throttled", false)), "E: erzwungenes Speichern gelingt: " + str(saved))
+	flow.queue_free()
+	await process_frame
+	START.request_start(self, "campaign", "continue")
+	flow = FLOW.instantiate()
+	root.add_child(flow)
+	await process_frame
+	screen = flow.get_node("HomebaseScreen")
+	runtime = flow.get("_singleplayer_runtime")
+	if not _check(runtime != null, "E: Fortsetzen liefert eine Laufzeit"):
+		flow.queue_free()
+		await process_frame
+		return
+	var owner_state: Dictionary = _loadouts_of(runtime)
+	var expect := {"campaign_leader": ["pistol", "none"], "campaign_pilot": ["pistol", "medictool"]}
+	for id: String in START_PEOPLE:
+		var want: Array = expect[id]
+		var o: Dictionary = Dictionary(owner_state.get(id, {}))
+		_check(String(o.get("armor", "")) == "suit" and String(o.get("weapon_1", "")) == want[0] and String(o.get("weapon_2", "")) == want[1], "E: nach Fortsetzen (Besitzer) %s wie gespeichert %s: %s" % [id, str(want), str(o)])
+		var s: Dictionary = screen.call("_get_member_loadout", id)
+		_check(String(s.get("weapon_1", "")) == want[0] and String(s.get("weapon_2", "")) == want[1], "E: nach Fortsetzen (Bildschirm) %s: %s" % [id, str(s)])
+		var v: Dictionary = Dictionary(Dictionary(screen.call("get_personnel_inventory_view", id)).get("unit", {})).get("loadout", {})
+		_check(String(v.get("weapon_1", "")) == want[0] and String(v.get("weapon_2", "")) == want[1], "E: nach Fortsetzen (Inventarsicht) %s: %s" % [id, str(v)])
+	var items_after: Dictionary = _base_items_of(runtime)
+	_check(int(items_after.get("pistol", 0)) == 0 and int(items_after.get("medictool", 0)) == 0 and int(items_after.get("armor_light", 0)) == 0, "E: Lagerbestand genau wie gespeichert, nicht auf 2/1 zurueckgesetzt: " + str(items_after))
+	_check(Array(flow.get("_all_team_units")).size() == 2, "E: Fortsetzen legt keine weiteren Personen an")
 	flow.queue_free()
 	await process_frame
 
