@@ -77,6 +77,32 @@ func _run_used_reading(rules: Dictionary) -> void:
 		var junk: Dictionary = R.resolve_mission(junk_team, "won", junk_roster, "pilot", rules, junk_ctx)
 		check(junk.has("total_loss") and junk.total_loss and junk.total_loss_reason == "pilot_down" and junk.fatality_unit_ids.is_empty() and junk.respawn_unit_ids.is_empty(), "pilot_down with broken roster entries, ctx %s: no error" % str(junk_ctx))
 
+## The limit comes from a settings file that can be edited by hand: respawn_limit_of must never raise and must cap to 0..9.
+func _run_limit_reading(rules: Dictionary) -> void:
+	var cases: Array = [[0, 0], [3, 3], [9, 9], [12, 9], [-5, 0], [3.9, 3], [0.9, 0], [9999999999, 9], [1e30, 9], [-1e30, 0], [INF, 0], [-INF, 0], [NAN, 0], [null, 0], ["3", 0], [[], 0], [[3], 0], [{}, 0], [{"a": 3}, 0], [true, 0], [false, 0]]
+	for c in cases:
+		var got: Variant = R.respawn_limit_of(c[0])
+		check(typeof(got) == TYPE_INT and got == c[1], "respawn_limit_of(%s) = %s (got %s)" % [str(c[0]), str(c[1]), str(got)])
+	check(R.MAX_RESPAWN_LIMIT == 9, "core upper bound is 9")
+	check(R.MAX_RESPAWN_LIMIT == preload("res://scripts/ui/game_settings_contract.gd").MAX_CAMPAIGN_RESPAWN_LIMIT, "core and settings upper bounds are equal")
+	# resolve_mission with every kind of limit value: no error, and the effect is the clamped limit
+	var roster: Array = [unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), unit("a", "operator")]
+	for c in cases:
+		for used in [0, 8, 9]:
+			var team: Array = [ts("lead", "fit"), ts("pilot", "fit", false, true, true), ts("a", "down", true, false, false, used)]
+			var res: Dictionary = R.resolve_mission(team, "aborted", roster, "pilot", rules, {"respawn_limit": c[0]})
+			var expect_final: bool = used >= int(c[1])
+			var ok: bool = res.has("casualties") and (Array(res.fatality_unit_ids) == ["a"]) == expect_final and (Array(res.respawn_unit_ids) == ["a"]) == (not expect_final)
+			check(ok, "resolve_mission limit %s, used %d: %s" % [str(c[0]), used, "final" if expect_final else "respawn"])
+	# Huge or broken counters never give a free life
+	check(R.respawns_used_of({"respawns_used": 5000}) == 1000 and R.respawns_used_of({"respawns_used": 1000}) == 1000 and R.respawns_used_of({"respawns_used": 999}) == 999, "respawns_used_of caps at 1000")
+	check(R.respawns_used_of({"respawns_used": 1e30}) == 1000 and R.respawns_used_of({"respawns_used": 9999999999}) == 1000 and R.respawns_used_of({"respawns_used": 1001.5}) == 1000, "respawns_used_of: huge int and float give 1000, not 0")
+	check(R.respawns_used_of({"respawns_used": -1e30}) == 0 and R.respawns_used_of({"respawns_used": INF}) == 0 and R.respawns_used_of({"respawns_used": NAN}) == 0, "respawns_used_of: -1e30, INF and NAN stay 0")
+	for big in [5000, 1e30, 9999999999]:
+		for where in ["state", "roster"]:
+			var big_res: Dictionary = _one_dead(rules, where == "state", big, where == "roster", big, 9)
+			check(big_res.has("casualties") and Array(big_res.fatality_unit_ids) == ["a"] and big_res.respawn_unit_ids.is_empty(), "%s respawns_used=%s with limit 9: final, no free life" % [where, str(big)])
+
 func _run() -> void:
 	var rules: Dictionary = R.load_rules()
 	# Times
@@ -161,6 +187,7 @@ func _run() -> void:
 	check(R.resolve_mission([ts("lead", "fit"), ts("pilot", "down")], "won", roster, "pilot", rules, ctx).total_loss_reason == "pilot_down", "pilot_down unchanged with limit")
 	check(R.resolve_mission([ts("lead", "down"), ts("a", "bleedout"), ts("pilot", "fit", false, true, true)], "lost", roster, "pilot", rules, ctx).total_loss_reason == "ground_team_down", "ground_team_down unchanged with limit")
 	_run_used_reading(rules)
+	_run_limit_reading(rules)
 	# Backward equality: no limit vs limit 0
 	var plain: Dictionary = R.resolve_mission(team, "aborted", roster, "pilot", rules)
 	var zero: Dictionary = R.resolve_mission(team, "aborted", roster, "pilot", rules, {"respawn_limit": 0})

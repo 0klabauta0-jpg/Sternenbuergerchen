@@ -5,6 +5,11 @@ extends RefCounted
 const RULES_PATH := "res://data/singleplayer/casualty_rules.json"
 ## Used when the rules file has no "respawn" block. The only place for these defaults.
 const DEFAULT_RESPAWN := {"outage_base_seconds": 3600, "outage_step_seconds": 1800, "pickup_location_id": "polisa"}
+## Upper bound of the respawn limit. A copy of GameSettingsContract.MAX_CAMPAIGN_RESPAWN_LIMIT (scripts/ui must not be
+## imported from scripts/core); campaign_respawn_rules_verifier checks that both are equal.
+const MAX_RESPAWN_LIMIT := 9
+## Cap for a stored respawns_used counter.
+const MAX_RESPAWNS_USED := 1000
 
 static func _is_number(value: Variant) -> bool:
 	return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
@@ -57,14 +62,24 @@ static func respawn_outage_seconds(death_number: int, rules: Dictionary) -> int:
 
 ## Reads "respawns_used" from a team state or roster entry. Never raises: anything that is not a
 ## Dictionary, or whose value is not a finite number, counts as 0. Floats are truncated, negatives are 0.
+## Huge values are capped at MAX_RESPAWNS_USED (not reset to 0): a broken big counter must never give a free life.
 static func respawns_used_of(entry: Variant) -> int:
 	if not entry is Dictionary:
 		return 0
 	var value: Variant = entry.get("respawns_used", 0)
 	if typeof(value) == TYPE_INT:
-		return maxi(int(value), 0)
+		return clampi(int(value), 0, MAX_RESPAWNS_USED)
 	if typeof(value) == TYPE_FLOAT and is_finite(float(value)):
-		return maxi(int(value), 0)
+		return int(clampf(float(value), 0.0, float(MAX_RESPAWNS_USED)))
+	return 0
+
+## Reads the respawn limit from the settings (a file the player can edit by hand). Never raises.
+## int stays, finite float is truncated, everything else (null, text, array, bool, dictionary, INF, NAN) is 0; result 0..MAX_RESPAWN_LIMIT.
+static func respawn_limit_of(value: Variant) -> int:
+	if typeof(value) == TYPE_INT:
+		return clampi(int(value), 0, MAX_RESPAWN_LIMIT)
+	if typeof(value) == TYPE_FLOAT and is_finite(float(value)):
+		return int(clampf(float(value), 0.0, float(MAX_RESPAWN_LIMIT)))
 	return 0
 
 static func is_final_death(respawns_used: int, respawn_limit: int) -> bool:
@@ -107,7 +122,7 @@ static func _leadership(unit: Dictionary) -> float:
 	return float(skills.get("leadership", 0.0)) if skills is Dictionary else 0.0
 
 static func resolve_mission(team_states: Array, mission_outcome: String, roster_units: Array, pilot_unit_id: String, rules: Dictionary, context: Dictionary = {}) -> Dictionary:
-	var respawn_limit: int = maxi(int(context.get("respawn_limit", 0)), 0)
+	var respawn_limit: int = respawn_limit_of(context.get("respawn_limit", 0))
 	# The roster is only searched for respawns_used when a limit is set; without a limit it is untouched.
 	var roster_used := {}
 	if respawn_limit > 0:
