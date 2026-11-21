@@ -8,6 +8,7 @@ extends "res://scripts/tests/campaign_respawn_gear_verifier.gd"
 ##    (Operator, Sanitaeter) leeren Rucksack, suit, pistol, medictool nur bei Sanitaet; nichts vom Vorherigen; im Loadout-Snapshot, nicht nur get_loadout.
 ## P3 complete_campaign_pickup ohne Wartende (active, respawning) aendert nichts.
 ## P4 Heimatbasis nach der Abholung (Punkt 10): Speichern und Fortsetzen mit der Abgeholten (active, Grundausstattung, in keinem alten Trupp).
+## P5 Operation "pilot" (Punkt 7): gesperrte Personen (respawning, awaiting_pickup, wounded, in_transit) werden mit unit_busy abgelehnt.
 ## Hinweis: Speichern im Einsatz mit Wartenden wird abgelehnt (bekannter Mangel W7); kein Test hier stuetzt sich darauf.
 ## Abschlusszeile: CAMPAIGN_RESPAWN_PICKUP passed=%d failed=%d
 ## Einzeln starten: Kommandozeilenargument nach "--" (zum Beispiel "-- P2").
@@ -27,7 +28,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if not arg.strip_edges().is_empty():
 			selected.append(arg.strip_edges().to_upper())
-	for scenario: String in ["P1", "P2", "P3", "P4"]:
+	for scenario: String in ["P1", "P2", "P3", "P4", "P5"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -109,6 +110,31 @@ func _pk_p3() -> void:
 	var unknown: Dictionary = _flow.call("complete_campaign_pickup", "kein_kader_eintrag")
 	_check(not bool(unknown.get("ok", false)), "P3: unbekannte Person: abgelehnt (%s)" % [unknown])
 
+## Punkt 7: Die Operation "pilot" lehnt eine gesperrte Person mit unit_busy ab (respawning, awaiting_pickup, wounded, in_transit);
+## eine verfuegbare Person (der eingeteilte Pilot) wird nicht mit unit_busy abgelehnt.
+func _pk_p5() -> void:
+	if not await _t6b_new_four(): return
+	_craft_id = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
+	var control: Dictionary = _pk_op("pilot", {"unit_id": PILOT_ID})
+	_check(String(control.get("reason", "")) != "unit_busy", "P5: Kontrolle: der verfuegbare Pilot wird nicht mit unit_busy abgelehnt (%s)" % [control])
+	_flow.call("_apply_campaign_casualties", _ra_result(_t6b_states({SHOOTER_C: "down"}), "aborted", 3))
+	_flow.call("_refresh_homebase_screen")
+	var respawning: Dictionary = _pk_op("pilot", {"unit_id": SHOOTER_C})
+	_check(String(_pk_roster_field(SHOOTER_C, "availability_status")) == "respawning" and not bool(respawning.get("ok", false)) and String(respawning.get("reason", "")) == "unit_busy", "P5: respawning: unit_busy (%s)" % [respawning])
+	_pk_mature(SHOOTER_C)
+	_flow.call("_refresh_homebase_screen")
+	var awaiting: Dictionary = _pk_op("pilot", {"unit_id": SHOOTER_C})
+	_check(String(_pk_roster_field(SHOOTER_C, "availability_status")) == "awaiting_pickup" and not bool(awaiting.get("ok", false)) and String(awaiting.get("reason", "")) == "unit_busy", "P5: awaiting_pickup: unit_busy (%s)" % [awaiting])
+	for status: String in ["wounded", "in_transit"]:
+		var roster: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+		for entry: Variant in roster:
+			if entry is Dictionary and String((entry as Dictionary).get("unit_id", "")) == SHOOTER_C:
+				(entry as Dictionary)["availability_status"] = status
+		_flow.call("_replace_roster_units", roster)
+		_flow.call("_refresh_homebase_screen")
+		var other: Dictionary = _pk_op("pilot", {"unit_id": SHOOTER_C})
+		_check(not bool(other.get("ok", false)) and String(other.get("reason", "")) == "unit_busy", "P5: %s: unit_busy (%s)" % [status, other])
+
 func _pk_board_home_crew() -> bool:
 	_craft_id = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
 	var personnel: Node = _t6b_base()
@@ -189,7 +215,6 @@ func _pk_p1() -> void:
 	if not _check(bool(access.get("ok", false)) and _place_at(simulation, access, SHOOTER_C, Vector2.ZERO), "P1: C steht am Schiff (Zugang %s)" % [access]): return
 	result = _runtime.call("request_operation", "station_board_crew", {"craft_id": _craft_id, "service_location_id": "polisa"})
 	if not _check(await _pk_wait(func(): return bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).get("ok", false)) and bool(registry.get_unit(SHOOTER_C).get_meta("dropship_embarked", false)), 90000), "P1: die Besatzung und C steigen ein (%s)" % [result]):
-		print("P1_DIAG guard=", controller.call("get_campaign_pilot_flight_guard", _craft_id), " embarked=", registry.get_unit(SHOOTER_C).get_meta("dropship_embarked", false))
 		return
 	_check(_ra_base_status(SHOOTER_C) == "station" and String(_pk_roster_field(SHOOTER_C, "availability_status")) == "awaiting_pickup", "P1: eingestiegen, aber noch nicht abgeflogen: C bleibt awaiting_pickup und station")
 	result = _runtime.call("request_operation", "return_homebase", {"craft_id": _craft_id, "service_location_id": "polisa"})

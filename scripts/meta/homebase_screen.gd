@@ -9480,6 +9480,8 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 			if operation == "pilot":
 				if unit_id.is_empty():
 					_on_clear_pilot_button_pressed(craft_id)
+				elif _profiles_by_id.has(unit_id) and String(_profiles_by_id[unit_id].availability_status) in ["wounded", "respawning", "awaiting_pickup", "in_transit"]:
+					return _operations_rejected("unit_busy", "Person ist verwundet, wartet auf Abholung oder ist unterwegs")
 				elif not _profiles_by_id.has(unit_id) or (_selected_unit_ids.has(unit_id) and get_base_personnel_runtime() == null) or not _find_transfer_entry_for_unit(unit_id).is_empty():
 					return _operations_rejected("pilot_busy", "Pilot ist nicht verfügbar")
 				else:
