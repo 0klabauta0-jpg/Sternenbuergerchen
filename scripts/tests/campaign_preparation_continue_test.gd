@@ -30,7 +30,7 @@ func _run() -> void:
 	_check(screen.call("request_operation", "loadout", {"unit_id": "campaign_leader", "fireteam_id": "ft2", "key": "weapon_2", "value": "medictool"}).get("ok", false), "Equip the owned medic tool")
 	_check(int(adapter.get_snapshot().supply.inventory["base:homebase"].items.get("medictool", 0)) == stock_before - 1, "Equipped medic tool leaves base inventory")
 	_check(screen.call("request_operation", "pilot", {"craft_id": craft, "unit_id": ""}).get("ok", false), "Pilot can be unassigned at home")
-	var result: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"))
+	var result: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"), true)
 	_check(result.get("ok", false), "Valid unfinished preparation saves without silently reverting")
 	if not result.get("ok", false):
 		print("SAVE_RESULT:", result)

@@ -48,6 +48,8 @@ func _run()->void:
  check(int(first_after["base:homebase"].items.get("pistol",0))==int(first_before["base:homebase"].items.get("pistol",0))-1,"dragging the starter pistol from the base store consumes one actual free item")
  check(String(screen.get_personnel_inventory_view("campaign_leader").unit.loadout.weapon_1)=="pistol","dragged pistol is now the leader's weapon")
  var before:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory.duplicate(true)
+ # Das Panel baut seine Plaetze nach jeder Aenderung neu auf: den Platz noch einmal holen.
+ slot=panel.get("_slots").get_node("InventorySlot_weapon_1")
  slot.payload_dropped.emit({"source_container_id":"base:homebase","item_id":"medictool"})
  for i in 8:await process_frame
  var after:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory
