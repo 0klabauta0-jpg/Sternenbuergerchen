@@ -49,7 +49,10 @@ var _hint_arrows: RefCounted
 func _exit_tree() -> void:
 	# The arrow is a sibling of this card (not a child), so it must be released with it.
 	if _hint_arrow != null and is_instance_valid(_hint_arrow):
-		_hint_arrow.queue_free()
+		if _hint_arrow.get_parent() == null:
+			_hint_arrow.free()
+		else:
+			_hint_arrow.queue_free()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -142,7 +145,10 @@ func _build_ui() -> void:
 
 func _update_hint_arrows() -> void:
 	# Runs before the early returns of refresh(): the arrows must outlive the hidden card.
-	if _hint_arrows == null or _hint_arrow == null:
+	if _hint_arrows == null or not is_instance_valid(_hint_arrow):
+		return
+	# Empty list (the P2 state): no snapshot, no facts, nothing to do. Loads the list only once.
+	if not bool(_hint_arrows.call("has_hints")):
 		return
 	if _hint_arrow.get_parent() == null and get_parent() != null:
 		get_parent().add_child(_hint_arrow)

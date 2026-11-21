@@ -9,6 +9,8 @@ extends RefCounted
 ##   stage:<n>      facts["stage"] == n
 ##   view:<name>    facts["view"] == name oder facts["views"] enthaelt name
 ##   fact:<key>     facts[key] ist der Bool true
+## Zielnamen: `find_child(name, true, false)` nimmt den ERSTEN Treffer unter der Suchwurzel. Ein Name
+## muss dort also eindeutig sein und darf kein `*` oder `?` enthalten (das waeren Muster).
 
 const SETTINGS: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const DEFAULT_PATH: String = "res://data/campaign_hint_arrows.json"
@@ -42,7 +44,17 @@ func configure(hints: Array) -> void:
 			_hints.append(hint)
 	_hints.sort_custom(_order_less)
 	_loaded = true
-	_active_id = ""
+	_hide()
+
+
+## Laedt die Liste einmal (ohne vorheriges `configure`). Danach billig.
+func ensure_loaded() -> void:
+	_ensure_loaded()
+
+
+func has_hints() -> bool:
+	_ensure_loaded()
+	return not _hints.is_empty()
 
 
 func set_enabled(enabled: bool) -> void:

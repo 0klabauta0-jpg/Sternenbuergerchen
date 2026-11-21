@@ -10,7 +10,9 @@ const TEST_CFG: String = "user://campaign_hint_arrows_toggle_settings.cfg"
 class RuntimeProbe:
 	extends Node
 	var snapshot: Dictionary = {"mode": "campaign", "onboarding": {"stage_index": 0, "next_step_id": "base_ready", "facts": {"ready": true}, "completed": false}}
+	var snapshot_calls: int = 0
 	func get_snapshot() -> Dictionary:
+		snapshot_calls += 1
 		return snapshot.duplicate(true)
 
 class FlowProbe:
@@ -95,6 +97,15 @@ func _run() -> void:
 	presenter.call("refresh")
 	_check(not arrow.call("is_showing"), "Leere Liste: kein Pfeil")
 	_check(String(arrows.call("get_active_hint_id")) == "", "Leere Liste: keine aktive Kennung")
+	# W1: Mit leerer Liste fragt die Pfeilsteuerung den Laufzeit-Schnappschuss gar nicht erst ab.
+	var calls_before: int = runtime.snapshot_calls
+	presenter.call("_update_hint_arrows")
+	presenter.call("_update_hint_arrows")
+	_check(runtime.snapshot_calls == calls_before, "Leere Liste: kein Schnappschuss, keine Fakten")
+	arrows.call("configure", [_hint("w", 1, "TargetButton", ["stage:9"], [])])
+	presenter.call("_update_hint_arrows")
+	_check(runtime.snapshot_calls > calls_before, "Mit Hinweisen: Schnappschuss wird gelesen")
+	arrows.call("configure", [])
 	# Die ausgelieferte Datenliste ist leer.
 	var shipped: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign_hint_arrows.json"))
 	_check(shipped is Dictionary and Array((shipped as Dictionary).get("hints", [1])).is_empty(), "Datei data/campaign_hint_arrows.json hat leere Liste")

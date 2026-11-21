@@ -28,6 +28,11 @@ var _showing: bool = false
 var _target: Rect2 = Rect2()
 var _text: String = ""
 var _layout: Dictionary = {}
+var _layout_count: int = 0
+var _box_style: StyleBoxFlat = null
+var _has_last: bool = false
+var _unfit: bool = false
+var _last_view: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -43,16 +48,44 @@ func _ready() -> void:
 
 func show_at(target_rect: Rect2, text: String) -> void:
 	_ensure_label()
+	var view: Vector2 = _view_size()
+	# Gleiche Eingaben wie zuletzt (gezeigt oder wegen Platzmangel bewusst ausgeblendet): nichts neu rechnen.
+	if _has_last and (_showing or _unfit) and target_rect == _target and text == _text and view == _last_view:
+		return
 	_target = target_rect
 	_text = text
+	_last_view = view
+	_has_last = true
 	_showing = true
+	_unfit = false
+	_relayout()
+	if _unfit:
+		_showing = false
+		_layout = {}
+		visible = false
+		set_process(false)
+		if _label != null:
+			_label.visible = false
+		queue_redraw()
+		return
 	visible = true
 	set_process(pulse_enabled)
-	_relayout()
+
+
+## Wie oft das Layout tatsaechlich gerechnet wurde (Tests).
+func get_layout_count() -> int:
+	return _layout_count
+
+
+func get_box_style() -> StyleBoxFlat:
+	_ensure_style()
+	return _box_style
 
 
 func hide_arrow() -> void:
 	_showing = false
+	_unfit = false
+	_has_last = false
 	_layout = {}
 	visible = false
 	set_process(false)
@@ -120,11 +153,26 @@ func _measure_text(text: String) -> Vector2:
 	return Vector2(width, ceilf(wrapped.y) + 2.0)
 
 
+func _ensure_style() -> void:
+	if _box_style == null:
+		_box_style = THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_WARNING, THEME.CORNER_RADIUS, 2, Vector4.ZERO, 0.96)
+
+
 func _relayout() -> void:
 	if not _showing or _label == null:
 		return
 	var text_size: Vector2 = _measure_text(_text)
+	_layout_count += 1
 	_layout = compute_layout(_target, _view_size(), text_size)
+	if not bool(_layout["fits"]):
+		# Lieber kein Pfeil als einer, der das Ziel verdeckt oder aus dem Fenster ragt.
+		_unfit = true
+		_showing = false
+		_layout = {}
+		visible = false
+		_label.visible = false
+		queue_redraw()
+		return
 	var box: Rect2 = Rect2(_layout["box"])
 	var has_box: bool = bool(_layout["has_box"])
 	_label.visible = has_box
@@ -141,8 +189,8 @@ func _draw() -> void:
 		return
 	var box: Rect2 = Rect2(_layout["box"])
 	if bool(_layout["has_box"]):
-		var style: StyleBoxFlat = THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_WARNING, THEME.CORNER_RADIUS, 2, Vector4.ZERO, 0.96)
-		draw_style_box(style, box)
+		_ensure_style()
+		draw_style_box(_box_style, box)
 	var direction: Vector2 = _layout["dir"]
 	var shift: Vector2 = Vector2.ZERO
 	if pulse_enabled:
