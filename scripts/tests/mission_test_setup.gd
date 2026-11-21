@@ -1,6 +1,7 @@
 extends Node
 
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
+const PERSONNEL_RECOVERY: GDScript = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
@@ -610,7 +611,8 @@ func get_runtime_selection_status()->Dictionary:
 func request_polisa_recruit_admission(profile: Dictionary, spawn_grid: Vector2i) -> Dictionary:
 	var id := String(profile.get("unit_id", ""))
 	if not _is_initialized or not _hex_setup_required or _hex_setup_presentation_only or _hex_selection_applying or not _hex_selection_pending.is_empty(): return {"ok":false,"reason":"selection_unavailable"}
-	if not (id.begins_with("polisa_recruit_") or id.begins_with("station_shuttle_pilot_")) or selected_team_unit_ids.has(id) or _polisa_recruit_pending.has(id): return {"ok":false,"reason":"invalid_or_duplicate_recruit"}
+	# R4c: Neben den Kennungen zaehlt auch ein Profil, das auf Abholung wartet (awaiting_pickup); respawning nicht.
+	if not (id.begins_with("polisa_recruit_") or id.begins_with("station_shuttle_pilot_") or PERSONNEL_RECOVERY.is_awaiting_pickup(profile)) or selected_team_unit_ids.has(id) or _polisa_recruit_pending.has(id): return {"ok":false,"reason":"invalid_or_duplicate_recruit"}
 	var simulation: Node = _get_simulation_root()
 	var terrain: Node = get_node_or_null(terrain_registry_path)
 	if simulation == null or not simulation.is_hex_ground_runtime_active() or terrain == null or not terrain.is_walkable(spawn_grid): return {"ok":false,"reason":"invalid_station_spawn"}

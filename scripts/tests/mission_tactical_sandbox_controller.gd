@@ -3,6 +3,7 @@ extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const POLISA_GLOBE_ACCESS = preload("res://scripts/mission/polisa_globe_access.gd")
+const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const POLISA_GLOBE_HEX = preload("res://scripts/terrain/hex_grid.gd")
 const NATIVE_A5_HUD_LAYOUT_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_hud_layout.gd")
 const NATIVE_A5_DROPSHIP_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_dropship_presenter.gd")
@@ -19359,11 +19360,13 @@ func get_polisa_resident_spawn_grid() -> Dictionary:
 	return POLISA_GLOBE_ACCESS.find_spawn(_polisa_globe_grid(), terrain, simulation.call("get_hex_ground_planning_snapshot"))
 
 func register_polisa_resident(unit_id: String) -> Dictionary:
-	if get_parent() == null or String(get_parent().get_meta("location_id", "")) != "polisa" or not unit_id.begins_with("polisa_recruit_"): return {"ok":false,"reason":"invalid_station_resident"}
+	var setup := get_node_or_null("../MissionSetup")
+	# R4c: Neben der Kennung polisa_recruit_ ist auch eine Person zugelassen, deren zugelassenes Profil auf Abholung wartet (awaiting_pickup).
+	var awaits_pickup: bool = setup != null and Array(setup.get("selected_team_unit_configs")).any(func(config: Variant) -> bool: return config is Dictionary and String((config as Dictionary).get("unit_id", "")) == unit_id and PERSONNEL_RECOVERY.is_awaiting_pickup(config))
+	if get_parent() == null or String(get_parent().get_meta("location_id", "")) != "polisa" or not (unit_id.begins_with("polisa_recruit_") or awaits_pickup): return {"ok":false,"reason":"invalid_station_resident"}
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
 	for visit: Dictionary in visits.values():
 		if Array(visit.get("unit_ids", [])).has(unit_id): return {"ok":false,"reason":"already_assigned_to_visit"}
-	var setup := get_node_or_null("../MissionSetup")
 	var simulation := get_node_or_null("../SimulationRoot")
 	if setup == null or simulation == null or not setup.has_method("get_polisa_recruit_admission"): return {"ok":false,"reason":"station_state_unavailable"}
 	var admission: Dictionary = setup.call("get_polisa_recruit_admission", unit_id)

@@ -5106,6 +5106,42 @@ func _park_pickup_persons(unit_ids: PackedStringArray) -> void:
 			push_error("Wiederkehrende Person %s nicht auf Polisa gestellt: %s" % [String(unit_id), String(parked.get("reason", ""))])
 
 
+## Respawn (R4c): Steht die Person im Kader und wartet auf Abholung (awaiting_pickup, nicht respawning)?
+func _roster_unit_awaits_pickup(unit_id: String) -> bool:
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("unit_id", "")) == unit_id:
+			return PERSONNEL_RECOVERY_SCRIPT.is_awaiting_pickup(unit_variant)
+	return false
+
+
+## Respawn (R4c): Die Person ist auf Polisa abgeholt (bestaetigter Abflug mit ihr an Bord, die Basis hat sie auf aboard gesetzt).
+## Sie ist wieder einsatzfaehig: active, ohne Ausfalldaten und Statustext; respawns_used bleibt. Die Grundausstattung gibt der
+## Adapter (grant_pickup_starting_equipment, die eine Stelle dafuer). Ohne Wartende ({ok:false}) wird nichts geaendert.
+func complete_campaign_pickup(unit_id: String) -> Dictionary:
+	if not _roster_unit_awaits_pickup(unit_id):
+		return {"ok": false, "reason": "not_awaiting_pickup"}
+	var updated: Array = []
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			updated.append(unit_variant)
+			continue
+		var unit: Dictionary = Dictionary(unit_variant).duplicate(true)
+		if String(unit.get("unit_id", "")) == unit_id:
+			unit["availability_status"] = "active"
+			unit["recovery_state"] = {}
+			unit["status_text"] = ""
+		updated.append(unit)
+	_replace_roster_units(updated)
+	var equipment: Dictionary = {"ok": true}
+	if is_instance_valid(_singleplayer_runtime) and _singleplayer_runtime.has_method("grant_pickup_starting_equipment"):
+		equipment = Dictionary(_singleplayer_runtime.call("grant_pickup_starting_equipment", unit_id))
+		if not bool(equipment.get("ok", false)):
+			push_error("Abgeholte Person %s ohne Grundausstattung: %s" % [unit_id, String(equipment.get("reason", ""))])
+	_sync_wound_lock()
+	_refresh_homebase_screen()
+	return {"ok": true, "unit_id": unit_id, "equipment": equipment}
+
+
 ## Kader ohne die Gefallenen. Stirbt Platz 0, rueckt die erste lebende Person mit roster_role_category "operator" und
 ## Fuehrung > 0 auf Platz 0; der Pilot (bisher Platz 1) bleibt dann Platz 1.
 func _campaign_roster_without(dead_units: Dictionary) -> Array:
@@ -8889,7 +8925,9 @@ func _attempt_space_surface_departure(craft_id: String, record: Dictionary, init
 		return
 	if instance != null and String(instance.get_meta("location_id", "")) == "polisa":
 		for unit_id: String in PackedStringArray(record.unit_ids):
-			if not unit_id.begins_with("polisa_recruit_"): continue
+			# R4c: Neben den Angeworbenen (Kennung) wird auch gebunden, wer auf Abholung wartet (awaiting_pickup).
+			var awaits_pickup: bool = _roster_unit_awaits_pickup(unit_id)
+			if not (unit_id.begins_with("polisa_recruit_") or awaits_pickup): continue
 			var personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if is_instance_valid(_singleplayer_runtime) and _singleplayer_runtime.has_method("get_base_personnel_runtime") else null
 			if personnel == null or not personnel.has_method("bind_confirmed_polisa_player_boarding"):
 				record.retryable = true
@@ -8898,6 +8936,8 @@ func _attempt_space_surface_departure(craft_id: String, record: Dictionary, init
 			if not bound.get("ok", false):
 				record.retryable = true
 				return
+			# Erst nach dem bestaetigten Abflug mit der Person an Bord wird sie wieder einsatzfaehig.
+			if awaits_pickup: complete_campaign_pickup(unit_id)
 			if not _surface_departure_record_current(craft_id, record): return
 	_complete_space_surface_departure(craft_id, instance, record)
 

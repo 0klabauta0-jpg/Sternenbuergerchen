@@ -37,6 +37,7 @@ const BUILDING_BOUNDS := {
 const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
 const HOME_CRAFT_FOOTPRINT = preload("res://scripts/meta/home_craft_footprint.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
+const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
 var _modular_base: Dictionary = {"rooms":[], "beds":[]}
 var _home_craft_blocker_signature := ""
 var _home_craft_blocker_rectangles:Array[Rect2] = []
@@ -617,6 +618,14 @@ func _waits_for_pickup(id: String) -> bool:
 		if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return _profile_waits_for_pickup(profile)
 	return false
 
+## Respawn (R4c): Die EINE Frage "wartet auf Abholung" (Kader-Eintrag awaiting_pickup, nicht respawning). Dieselbe Auskunft
+## fragen Adapter, Einsatzbild, Stationssteuerung und Flow ueber PersonnelRecoveryRuntime.is_awaiting_pickup; hier nach Kennung.
+func is_awaiting_pickup(id: String) -> bool:
+	if _flow == null: return false
+	for profile: Variant in Array(_flow.get("_all_team_units")):
+		if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return PERSONNEL_RECOVERY.is_awaiting_pickup(profile)
+	return false
+
 ## Respawn (R3): Die Person verlaesst die Basis und wartet unsichtbar auf Polisa. Ohne Basis-Person ({ok, unchanged}) ist nichts zu tun.
 ## Das Abholen selbst ist nicht hier (R4).
 func park_pickup_person(unit_id: String) -> Dictionary:
@@ -644,7 +653,7 @@ func has_station_recruits() -> bool:
 ## Called only after the station controller has actually retired this visit.
 ## A real remote actor must already be embarked and absent from station ground.
 func bind_confirmed_polisa_player_boarding(unit_id: String, craft_id: String, mission: Node) -> Dictionary:
-	if not unit_id.begins_with("polisa_recruit_") or craft_id.is_empty() or not _states.has(unit_id) or not is_instance_valid(_flow) or not _flow.has_method("get_mission_for_craft") or _flow.call("get_mission_for_craft", craft_id) != mission or not is_instance_valid(mission) or String(mission.get_meta("location_id", "")) != "polisa": return _reject("invalid_station_boarding", "Person oder Stationsbesuch nicht verfügbar")
+	if not (unit_id.begins_with("polisa_recruit_") or is_awaiting_pickup(unit_id)) or craft_id.is_empty() or not _states.has(unit_id) or not is_instance_valid(_flow) or not _flow.has_method("get_mission_for_craft") or _flow.call("get_mission_for_craft", craft_id) != mission or not is_instance_valid(mission) or String(mission.get_meta("location_id", "")) != "polisa": return _reject("invalid_station_boarding", "Person oder Stationsbesuch nicht verfügbar")
 	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "mission" or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty(): return _reject("invalid_station_craft", "Eigenes Schiff ist nicht auf Polisa")
 	var visits: Dictionary = mission.get_meta("singleplayer_visit_identities", {})
 	if not Array(Dictionary(visits.get(craft_id, {})).get("unit_ids", [])).has(unit_id): return _reject("station_crew_mismatch", "Person gehört nicht zu diesem Besuch")
