@@ -65,6 +65,9 @@ var patrol_bindings: Array = []
 var tactical_authoring: Dictionary = {}
 var briefing: Dictionary = {}
 var vertical_slice: Dictionary = {}
+## Optional: Beute, die beim erfolgreichen Abschluss des Auftrags gebucht wird ([{item_id, quantity}]). null = nicht gesetzt.
+## Der Rohwert bleibt erhalten, damit die Validierung einen falschen Typ ablehnen kann.
+var completion_loot: Variant = null
 var notes: PackedStringArray = PackedStringArray()
 
 var _load_issues: PackedStringArray = PackedStringArray()
@@ -162,6 +165,8 @@ func to_dict() -> Dictionary:
 		data["briefing"] = serialized_briefing
 	if not vertical_slice.is_empty():
 		data["vertical_slice"] = vertical_slice.duplicate(true)
+	if completion_loot != null:
+		data["completion_loot"] = completion_loot.duplicate(true) if (completion_loot is Array or completion_loot is Dictionary) else completion_loot
 	if not notes.is_empty():
 		data["notes"] = Array(notes)
 	return data
@@ -191,6 +196,7 @@ func validate(referenced_map = null) -> Dictionary:
 	var terrain_map_data = _load_referenced_map(errors, referenced_map)
 	_validate_objective(terrain_map_data, errors)
 	var enemy_ids: PackedStringArray = _validate_enemy_groups(terrain_map_data, errors)
+	_validate_completion_loot(errors)
 	_validate_wave_config(errors)
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
 	_validate_tactical_authoring(terrain_map_data, errors)
@@ -209,6 +215,42 @@ func validate(referenced_map = null) -> Dictionary:
 
 func get_source_path() -> String:
 	return _source_path
+
+
+## Gepruefte Beuteeintraege als [{item_id, quantity}]; leer, wenn das Feld fehlt oder ungueltig ist.
+func get_completion_loot() -> Array:
+	var result: Array = []
+	var errors: PackedStringArray = PackedStringArray()
+	_validate_completion_loot(errors)
+	if completion_loot == null or not errors.is_empty():
+		return result
+	for entry_variant in Array(completion_loot):
+		var entry: Dictionary = Dictionary(entry_variant)
+		result.append({"item_id": String(entry.get("item_id", "")).strip_edges(), "quantity": int(entry.get("quantity", 0))})
+	return result
+
+
+func _validate_completion_loot(errors: PackedStringArray) -> void:
+	if completion_loot == null:
+		return
+	if not (completion_loot is Array):
+		errors.append("completion_loot must be a list of {item_id, quantity}")
+		return
+	var inventory_contract: GDScript = load("res://scripts/mission/inventory_transfer_contract.gd")
+	var loot_index: int = 0
+	for entry_variant in Array(completion_loot):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			errors.append("completion_loot[%d] must be an object" % loot_index)
+		else:
+			var entry: Dictionary = Dictionary(entry_variant)
+			var item_id: String = String(entry.get("item_id", "")).strip_edges() if typeof(entry.get("item_id", null)) == TYPE_STRING else ""
+			if item_id.is_empty() or not bool(inventory_contract.call("known", item_id)):
+				errors.append("completion_loot[%d].item_id is not a known item" % loot_index)
+			var quantity: Variant = entry.get("quantity", null)
+			var quantity_ok: bool = (typeof(quantity) == TYPE_INT and int(quantity) >= 1) or (typeof(quantity) == TYPE_FLOAT and is_finite(float(quantity)) and float(quantity) >= 1.0 and float(quantity) == floorf(float(quantity)))
+			if not quantity_ok:
+				errors.append("completion_loot[%d].quantity must be a whole number >= 1" % loot_index)
+		loot_index += 1
 
 
 func get_enemy_ids() -> PackedStringArray:
@@ -348,6 +390,8 @@ func _apply_dict(data: Dictionary) -> void:
 	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
 	briefing = _coerce_briefing(data.get("briefing", data.get("mission_briefing", {})))
 	vertical_slice = _coerce_vertical_slice(data.get("vertical_slice", {}))
+	var raw_completion_loot: Variant = data.get("completion_loot", null)
+	completion_loot = raw_completion_loot.duplicate(true) if (raw_completion_loot is Array or raw_completion_loot is Dictionary) else raw_completion_loot
 	notes = _coerce_notes(data.get("notes", []))
 
 
@@ -409,6 +453,11 @@ func _validate_enemy_groups(terrain_map_data, errors: PackedStringArray) -> Pack
 			errors.append("enemy_groups[%d] needs spawn_marker_id or spawn_position" % group_index)
 		elif not spawn_marker_id.is_empty() and terrain_map_data != null and terrain_map_data.has_method("has_marker") and not bool(terrain_map_data.call("has_marker", spawn_marker_id)):
 			errors.append("enemy_groups[%d].spawn_marker_id does not exist in map: %s" % [group_index, spawn_marker_id])
+		if group.has("skill_accuracy"):
+			var accuracy: Variant = group.get("skill_accuracy")
+			var accuracy_ok: bool = (typeof(accuracy) == TYPE_INT or typeof(accuracy) == TYPE_FLOAT) and is_finite(float(accuracy)) and float(accuracy) >= 0.0 and float(accuracy) <= 1.0
+			if not accuracy_ok:
+				errors.append("enemy_groups[%d].skill_accuracy must be a number from 0 to 1" % group_index)
 		var enemy_ids: Array = Array(group.get("enemy_ids", []))
 		if enemy_ids.is_empty():
 			errors.append("enemy_groups[%d].enemy_ids needs at least one enemy id" % group_index)
@@ -544,6 +593,9 @@ func _coerce_enemy_groups(value: Variant) -> Array:
 			group["spawn_marker_id"] = spawn_marker_id
 		if group_dict.has("spawn_position") and _is_vector2_payload(group_dict.get("spawn_position", null)):
 			group["spawn_position"] = _coerce_vector2(group_dict.get("spawn_position", Vector2.ZERO), Vector2.ZERO)
+		if group_dict.has("skill_accuracy"):
+			# Rohwert behalten: die Validierung lehnt Nicht-Zahlen und Werte ausserhalb 0..1 ab.
+			group["skill_accuracy"] = group_dict.get("skill_accuracy")
 		var group_notes: PackedStringArray = _coerce_notes(group_dict.get("notes", []))
 		if not group_notes.is_empty():
 			group["notes"] = Array(group_notes)
@@ -805,7 +857,7 @@ func _serialize_enemy_groups() -> Array:
 			"team_id": String(group.get("team_id", DEFAULT_TEAM_ID)),
 			"enemy_ids": Array(_coerce_string_array(group.get("enemy_ids", []))),
 		}
-		for optional_key in ["display_name", "spawn_marker_id", "notes"]:
+		for optional_key in ["display_name", "spawn_marker_id", "notes", "skill_accuracy"]:
 			if group.has(optional_key):
 				serialized_group[optional_key] = group.get(optional_key)
 		if group.has("spawn_position"):

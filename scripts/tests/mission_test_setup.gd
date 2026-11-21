@@ -2187,6 +2187,8 @@ func _apply_authored_enemy_loadout(unit: Node, unit_id: String, unit_team_id: St
 	if _mission_scenario==null or not bool(Dictionary(_mission_scenario.call("get_vertical_slice")).get("finite_enemy_roster",false)):return
 	var group: Dictionary=_find_scenario_enemy_group_for_unit(unit_id)
 	var tactics: Dictionary=Dictionary(group.get("tactics",{}))
+	# Optional authored accuracy of this group (0..1); absent keeps the archetype value.
+	if group.has("skill_accuracy"):unit.call("apply_identity_config",{"skill_accuracy":float(group.skill_accuracy)})
 	var weapon:=String(tactics.get("weapon_id",""))
 	if weapon.is_empty():return
 	var weapons=load("res://scripts/core/weapon_data.gd")

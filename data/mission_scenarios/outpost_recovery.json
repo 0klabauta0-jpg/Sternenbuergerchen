@@ -16,6 +16,7 @@
       "display_name": "Außenpostenwache",
       "team_id": "team_bravo",
       "spawn_marker_id": "spawn_enemy_defense",
+      "skill_accuracy": 0.0,
       "enemy_ids": [
         "outpost_recovery_guard_01"
       ],
@@ -44,6 +45,16 @@
         "communication_intensity": "low",
         "weapon_id": "pistol"
       }
+    }
+  ],
+  "completion_loot": [
+    {
+      "item_id": "armor_light",
+      "quantity": 1
+    },
+    {
+      "item_id": "smg",
+      "quantity": 1
     }
   ],
   "wave_config": {
