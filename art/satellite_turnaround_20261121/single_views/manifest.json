@@ -1,0 +1,94 @@
+{
+  "source": "satellite_mission01_four_views_v3.png",
+  "source_sha256": "0d34a2318730afd113dac6572d148807cb1d9dcf3a9dcbbeb8dc14fea2a447c6",
+  "operation": "lossless_quadrant_extraction",
+  "resampled": false,
+  "retouched": false,
+  "transparent_padding_px": 32,
+  "images": [
+    {
+      "view": "01_Vorne",
+      "file": "Satellit_01_Vorne.png",
+      "source_box": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "size": [
+        691,
+        691
+      ],
+      "alpha_bounds": [
+        38,
+        51,
+        622,
+        580
+      ],
+      "sha256": "a6680f02c4a4804b76e98b16c33f2fef8ddcca48e8cf7e068ba4721b34c82306"
+    },
+    {
+      "view": "02_Rechts",
+      "file": "Satellit_02_Rechts.png",
+      "source_box": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "size": [
+        691,
+        691
+      ],
+      "alpha_bounds": [
+        33,
+        53,
+        594,
+        580
+      ],
+      "sha256": "a75b49d28faf52a15864cac286b0f79dd14eeb5f6b76930860c956b298c10795"
+    },
+    {
+      "view": "03_Hinten",
+      "file": "Satellit_03_Hinten.png",
+      "source_box": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "size": [
+        691,
+        691
+      ],
+      "alpha_bounds": [
+        18,
+        48,
+        570,
+        577
+      ],
+      "sha256": "d0ba9afa3d01b7bb04d6f0f71456c8b62b6418607ee8301db5a91b35877f48d6"
+    },
+    {
+      "view": "04_Links",
+      "file": "Satellit_04_Links.png",
+      "source_box": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "size": [
+        691,
+        691
+      ],
+      "alpha_bounds": [
+        38,
+        49,
+        583,
+        577
+      ],
+      "sha256": "95e97185f2747829f4bef64eb742e2b16cee3cc3e4276246ab55060d862d5875"
+    }
+  ]
+}

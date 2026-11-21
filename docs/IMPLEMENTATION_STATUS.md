@@ -1,6 +1,8 @@
 # IMPLEMENTATION_STATUS
 
 ## 2026-11-21 - Tripo-Tanker und Satellitenreferenz
+- Nutzerkorrektur: Satelliten-V3 als vier einzelne transparente PNGs fuer Tripo
+  unter art/satellite_turnaround_20261121/single_views/, pixelgleich extrahiert.
 - Separater Modellkandidat in art/tanker_tripo_20261121/: Nutzerquelle erhalten,
   gleichfoermig auf 102 x 68.655 x 28.882 m skaliert; 82 editierbare Teile,
   15097 Tris. Kleine Topologiefehler bereinigt, 82 Texturen in einem Atlas.

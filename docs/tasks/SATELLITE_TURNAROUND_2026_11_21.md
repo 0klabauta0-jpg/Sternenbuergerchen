@@ -25,6 +25,11 @@ Projektasset wird nicht ersetzt. KI-Ansichten koennen bei der Rekonstruktion ein
 manuelle Abstimmung der Rueck- und Seitenansichten erfordern.
 
 ## Abschluss
+Nutzerkorrektur am 21.11.: Vier separate PNGs statt eines gemeinsamen Blatts
+bereitgestellt. V3-Quadranten verlustfrei extrahiert und transparent gepolstert;
+keine neue Bildgestaltung. Pixel-/Alpha-/Datei-/ZIP-Pruefung dokumentiert in
+`art/satellite_turnaround_20261121/single_views/manifest.json`.
+
 `satellite_mission01_four_views_v3.png` erzeugt, visuell geprueft und als RGBA-PNG
 mit echter Transparenz verifiziert. V3 korrigiert Schuesselrichtung und doppelten
 Fluegelstumpf in den Seitenansichten. Lokale Kopie in Downloads, Quellenbilder und

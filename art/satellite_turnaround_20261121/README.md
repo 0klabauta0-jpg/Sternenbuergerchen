@@ -1,5 +1,13 @@
 # Satellit der ersten Mission - Vierseitenreferenz
 
+Nutzerkorrektur: Fuer Tripo gibt es jetzt vier EINZELNE PNG-Dateien unter
+`single_views/`: `Satellit_01_Vorne.png`, `Satellit_02_Rechts.png`,
+`Satellit_03_Hinten.png`, `Satellit_04_Links.png`.
+Die Quadranten der V3 sind unveraendert ausgeschnitten, nicht neu generiert,
+nicht retuschiert und nicht skaliert. Jeweils 32 transparente Randpixel ergeben
+691 x 691 Pixel. Die Pixelgleichheit mit der Quelle ist nach PNG-Readback geprueft.
+Kopien und ein ZIP mit genau vier PNGs liegen in Downloads.
+
 Ausgabe: `satellite_mission01_four_views_v3.png`, transparentes RGBA-PNG.
 Anordnung: oben links vorne, oben rechts rechts, unten links hinten, unten rechts links.
 
