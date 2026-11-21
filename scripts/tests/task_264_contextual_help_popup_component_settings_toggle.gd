@@ -142,10 +142,16 @@ func _test_main_menu_settings_and_global_button() -> void:
 	_assert(String(help_snapshot.get("global_button_help_id", "")) == "shell.global_help_button", "Global help button has help_id")
 	var global_button := menu.get_node_or_null("GlobalHelpButton") as Button
 	_assert(global_button != null and global_button.pressed.get_connections().size() >= 1, "Global help button has pressed callback")
-	var contextual_option := menu.get_node_or_null("SettingsPanel/SettingsMargin/SettingsVBox/ContextualHelpModeOptionButton") as OptionButton
+	# Die Einstellungen liegen seit dem Umbau in SettingsBodyScroll/SettingsContent: per Namen suchen, nicht per festem Pfad.
+	var contextual_option := menu.find_child("ContextualHelpModeOptionButton", true, false) as OptionButton
 	_assert(contextual_option != null and contextual_option.item_count == 3, "Settings UI exposes three contextual help modes")
-	_assert(String(contextual_option.get_meta("help_id", "")) == "settings.contextual_help_mode", "Contextual help option has help_id")
-	var fog_option := menu.get_node_or_null("SettingsPanel/SettingsMargin/SettingsVBox/FogOfWarModeOptionButton") as OptionButton
+	if contextual_option != null:
+		var mode_ids: Array = []
+		for index in contextual_option.item_count:
+			mode_ids.append(String(contextual_option.get_item_metadata(index)))
+		_assert(mode_ids == ["off", "compact", "expanded"], "Contextual help modes are off, compact, expanded: " + str(mode_ids))
+	_assert(contextual_option != null and String(contextual_option.get_meta("help_id", "")) == "settings.contextual_help_mode", "Contextual help option has help_id")
+	var fog_option := menu.find_child("FogOfWarModeOptionButton", true, false) as OptionButton
 	_assert(String(fog_option.get_meta("help_id", "")) == "settings.fog_of_war_mode", "Fog of war option has help_id")
 	if global_button != null:
 		global_button.pressed.emit()
