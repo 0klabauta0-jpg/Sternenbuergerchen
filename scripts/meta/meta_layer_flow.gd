@@ -4988,28 +4988,52 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 		if not bool(recorded.get("ok", false)):
 			push_error("Gefallenenliste lehnt %s ab: %s" % [String(entry.unit_id), String(recorded.get("reason", ""))])
 	var homebase_screen: Node = _get_homebase_screen()
-	var emptied_teams: Array = _campaign_teams_emptied_by(dead_units, homebase_screen)
+	var emptied_teams: Array = _drop_units_from_squads_and_selection(dead_units, homebase_screen)
 	_all_team_units = survivors
 	_available_team_units = _available_team_units.filter(func(unit: Dictionary) -> bool: return not dead_units.has(String(unit.get("unit_id", ""))))
-	for dead_id: String in dead_units:
-		var staged_index: int = _homebase_staged_unit_ids.find(dead_id)
+	_discard_fatalities_from_runtime(dead_units, homebase_screen)
+	_refresh_after_roster_departure(emptied_teams, homebase_screen)
+
+
+## Wer den Kader verlaesst oder (Respawn) ausfaellt, verliert Platz in Trupp und Einsatzauswahl (Schritt 5 der Gefallenen,
+## R4a herausgeloest). departed: Dictionary mit den Kennungen als Schluessel. Ermittelt ZUERST die Trupps, die dadurch ohne
+## Mitglied waeren (bereinigte Definitionen, Rueckgabe), und streicht danach die Personen aus den gestaffelten und gewaehlten
+## Listen samt Parallelliste der Trupp-Kennungen. Aendert weder Kader noch Basis-Personal noch Ausruestung.
+func _drop_units_from_squads_and_selection(departed: Dictionary, homebase_screen: Node) -> Array:
+	var emptied_teams: Array = _campaign_teams_emptied_by(departed, homebase_screen)
+	for unit_id: String in departed:
+		var staged_index: int = _homebase_staged_unit_ids.find(unit_id)
 		if staged_index >= 0:
 			_homebase_staged_unit_ids.remove_at(staged_index)
 			if staged_index < _homebase_staged_fireteam_ids.size():
 				_homebase_staged_fireteam_ids.remove_at(staged_index)
-		var selected_index: int = _selected_unit_ids.find(dead_id)
+		var selected_index: int = _selected_unit_ids.find(unit_id)
 		if selected_index >= 0:
 			_selected_unit_ids.remove_at(selected_index)
 			if selected_index < _selected_fireteam_ids.size():
 				_selected_fireteam_ids.remove_at(selected_index)
-	_discard_fatalities_from_runtime(dead_units, homebase_screen)
+	return emptied_teams
+
+
+## Rucksack und eigenes Loadout einer Person verwerfen (Schritt 6a, R4a herausgeloest): Auftragsfracht geht ins Basislager,
+## der Rest ist verloren. Nur Ausruestung; Kader und Basis-Darsteller bleiben unberuehrt.
+func _discard_person_gear(unit_id: String, homebase_screen: Node) -> void:
+	var discarded: Dictionary = Dictionary(_singleplayer_runtime.call("discard_person_equipment", unit_id))
+	if not bool(discarded.get("ok", false)):
+		push_error("Ausruestung von %s nicht verworfen: %s" % [unit_id, String(discarded.get("reason", ""))])
+	if homebase_screen != null and homebase_screen.has_method("get_personnel_loadout_state"):
+		homebase_screen.call("get_personnel_loadout_state").call("remove_unit", unit_id)
+
+
+## Ansicht nach dem Abgang (Schritt 7, R4a herausgeloest): erst die Personen, dann der Kontext mit den bereinigten Trupps,
+## dann die leer gewordenen Trupps aufloesen, dann Ansicht und Sperre auffrischen. Laeuft unabhaengig davon, ob die Ansicht
+## gerade verdeckt ist (dieselbe Reihenfolge wie _refresh_homebase_screen).
+func _refresh_after_roster_departure(emptied_teams: Array, homebase_screen: Node) -> void:
 	if homebase_screen != null:
-		# Dieselbe Reihenfolge wie _refresh_homebase_screen, aber unabhaengig davon, ob die Ansicht gerade verdeckt ist:
-		# erst die Personen (Mitglieder und Leads der Trupps mit Lebenden richtet die Ansicht danach selbst aus), dann der
-		# Kontext mit den bereinigten Definitionen der Trupps, die keine Mitglieder mehr haben.
+		# Mitglieder und Leads der Trupps mit Lebenden richtet die Ansicht danach selbst aus.
 		homebase_screen.call("setup_roster", _available_team_units, _homebase_staged_unit_ids)
 		homebase_screen.call("set_fireteam_context", _homebase_staged_fireteam_ids, emptied_teams, false)
-		# Ein Trupp, der durch Todesfaelle kein Mitglied mehr hat, wird aufgeloest (Definition, Auswahl, Schiffszuteilung).
+		# Ein Trupp, der durch den Abgang kein Mitglied mehr hat, wird aufgeloest (Definition, Auswahl, Schiffszuteilung).
 		# Von Hand angelegte leere Trupps sind nicht dabei: sie haben nie ein Mitglied verloren.
 		if homebase_screen.has_method("remove_fireteam"):
 			for emptied_team_variant in emptied_teams:
@@ -5087,11 +5111,7 @@ func _discard_fatalities_from_runtime(dead_units: Dictionary, homebase_screen: N
 	for dead_id: String in dead_units:
 		if base_ids.has(dead_id):
 			base.call("remove_person", dead_id)
-		var discarded: Dictionary = Dictionary(_singleplayer_runtime.call("discard_person_equipment", dead_id))
-		if not bool(discarded.get("ok", false)):
-			push_error("Ausruestung von %s nicht verworfen: %s" % [dead_id, String(discarded.get("reason", ""))])
-		if homebase_screen != null and homebase_screen.has_method("get_personnel_loadout_state"):
-			homebase_screen.call("get_personnel_loadout_state").call("remove_unit", dead_id)
+		_discard_person_gear(dead_id, homebase_screen)
 
 
 ## Trupps der Basisansicht, die durch den Tod keine Mitglieder mehr haetten: bereinigte Definitionen (ohne Mitglieder und
