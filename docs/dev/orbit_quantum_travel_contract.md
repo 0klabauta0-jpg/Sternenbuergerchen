@@ -39,10 +39,11 @@ Reise geoeffnet werden; das aendert weder Standort noch Heimkehrbelege.
 Ort/Karte/Szenario, Auftrag und Orbit sind getrennte IDs. Auftragsannahme und
 Quantum-Reise aktivieren/erfuellen keinen Auftrag. Kampagnenfreischaltungen
 bleiben gueltig. Bereitschaft fuer Abheben braucht Pilot, fertig geboardete
-Payload und reales Pad; Ortsanflug prueft zudem Ort, Auftrag und Rueckreserve.
-Bestehende Fuel-Kosten werden genau einmal beim verbindlichen Ortsanflug und
-Rueckflug gebucht. Quantum-Abbruch/Neustart fuehren keine zusaetzliche Oekonomie
-ein. UI besitzt keine Craft-, Fuel-, Missions- oder Reiseparallelwahrheit.
+Payload und reales Pad; Ortsanflug prueft zudem Ort, Auftrag und den Treibstoff fuer seine eigene Etappe (keine Rueckreserve mehr, Regel 8, 21.11.).
+Fuel wird je Etappe genau einmal gebucht, wenn die Etappe beginnt: Abheben,
+Quantensprung, verbindlicher Ortsanflug, Ortsabflug (Landung auf der Mondbasis
+kostet 0). Ein Quantum-Abbruch erstattet nichts; der Neustart aus stopped
+kostet die Sprungetappe nicht noch einmal. UI besitzt keine Craft-, Fuel-, Missions- oder Reiseparallelwahrheit.
 
 Historischer V1-Umfang: ein aktiver Reiseausflug, ein Mond, ein Planet, zwei
 Zielorte. Bestehende andere Skirmish-/Multiplayer-Missionen bleiben getrennt.

@@ -57,16 +57,17 @@ Mengen muessen positiv, bezahlbar und innerhalb Angebot/Fuelkapazitaet sein.
 request_id ist verpflichtend; Wiederholung fuehrt keine zweite Buchung aus.
 Completionbelohnungen werden je stabiler Abschluss-ID genau einmal verbucht.
 
-Feste datenbasierte Fuelkosten je Ortsverbindung werden genau einmal vor
-autorisiertem Abflug gebucht. Ablehnung und wiederholte Requests kosten nichts
+Feste datenbasierte Fuelkosten je Ortsverbindung werden seit 21.11. (Regel 8)
+je Etappe (Abheben, Sprung, Anflug, Ortsabflug, Landung) genau einmal gebucht, wenn die
+Etappe beginnt; die Summe der Etappen einer Strecke ist der Streckenwert. Ablehnung und wiederholte Requests kosten nichts
 zusaetzlich. Unzureichendes Fuel sperrt den Abflug mit Grund. Kein Verbrauch
-im UI-/Visualtick. Startwerte erlauben den Test-Rundflug; kein neues
-Notfall-/Strandingmodell. Basis und Handelsort lesen denselben Servicezustand.
+im UI-/Visualtick. Startwerte erlauben den Test-Rundflug; liegen geblieben ist ein abgeleiteter Zustand (get_fuel_status),
+der Notdienst folgt in spaeteren Abschnitten des Tanker-Auftrags. Basis und Handelsort lesen denselben Servicezustand.
 
-Vor dem Abflug muss Fuel fuer die feste Hin- und Rueckstrecke vorhanden sein.
-Die reine Vorpruefung reserviert dies als Mindestbudget, bucht aber weiterhin
-nur die jeweilige tatsaechliche Strecke einmal ab. Zu wenig Rueckflugbudget
-lehnt vor jeder Flug-/Auftragsmutation ab. Ein unerwartet abgelehnter Rueckflug
+Eine Etappe startet nur, wenn ihr eigener Anteil gedeckt ist; eine Rueckflugreserve
+fuer die ganze Hin- und Rueckstrecke gibt es nicht mehr (Regel 8, 21.11.). Die
+reine Vorpruefung bucht nichts. Zu wenig Treibstoff fuer die naechste Etappe
+lehnt vor jeder Flug-/Auftragsmutation ab (leg_fuel_insufficient). Ein unerwartet abgelehnter Rueckflug
 darf die einzige aktive Missionsinstanz nicht verwerfen.
 
 Pruefung: gespeicherte Topologie hex_axial_v1, Inhalts-/Erreichbarkeitsorakel,

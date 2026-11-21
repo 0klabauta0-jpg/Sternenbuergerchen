@@ -64,7 +64,7 @@ Vertrag: `docs/dev/campaign_casualty_retreat_contract.md`. Aufgabendatei: `docs/
 ### Treibstoff: so weit, wie er reicht [B, 15.11., 23:07]
 - Entscheidung: Das Schiff fliegt so weit, wie der Treibstoff reicht: entweder nicht in den Orbit oder in den Orbit; für den Warpsprung muss der Treibstoff vorher reichen; im Zweifel kommt später ein Tankschiff.
 - Warum: Der Treibstoff bleibt eine echte Grenze; im Zweifel hilft ein Tankschiff (wie die Starfarer).
-- Auswirkung: Das wird ein eigenes späteres Paket am Flug- und Treibstoffsystem (etappenweiser Treibstoff, Tankschiff), mit dem Bedien-Strang abzustimmen. In Paket 3a gilt übergangsweise: Mit Ausgefallenen am Boden und zu wenig Treibstoff für den ganzen Rückflug hebt das Schiff nicht ab und meldet es.
+- Auswirkung: Umgesetzt am 21.11. im Tanker-Auftrag, Abschnitt T1: Jede Etappe (Abheben, Sprung, Anflug, Ortsabflug, Landung) bucht ihren eigenen Anteil genau einmal, wenn sie beginnt; die Summe je Strecke bleibt der bisherige Wert. Die pauschale Hin-und-Rückflug-Reserve (Übergangsregel von Paket 3a) entfällt; "liegen geblieben" ist ein abgeleiteter Zustand. Tankschiff und Notdienst folgen in späteren Abschnitten.
 
 ### Malus bei Totalverlust [B: es muss einen geben; Ausgestaltung V]
 - Entscheidung: Bei Totalverlust (Pilot ausgefallen, niemand vom Bodentrupp einsatzfähig, oder kein Truppführer oder Pilot im Kader übrig) stirbt niemand; der Rücksprung zum Basisstand gilt als Notbergung und kostet 25 % des Guthabens (mindestens 50 Credits), macht alle am Boden Gelegenen leicht verwundet und senkt die Moral um 0,08.
