@@ -18,10 +18,15 @@ class FlowProbe:
 	var _current_meta_view: String = "homebase"
 	var _active_mission: Node = null
 
+class OperationsProbe:
+	extends Control
+	func get_launch_action_rects() -> Array[Rect2]:
+		return []
+
 class HomebaseProbe:
 	extends Control
 	var _operations_mode: String = "base"
-	var _operations_presenter: Control = null
+	var _operations_presenter: Control = OperationsProbe.new()
 
 var _passed: int = 0
 var _failed: int = 0
@@ -196,7 +201,7 @@ func _run() -> void:
 	_homebase.set("_operations_mode", "base")
 
 	# Pfeil lebt weiter, wenn die Karte sich ausblendet (Tank- und Auftragsfenster).
-	arrows.call("configure", [hint_a])
+	arrows.call("configure", [_hint("g", 10, "TargetButton", ["stage:0", "fact:ready"], [])])
 	_homebase.set("_operations_mode", "services")
 	presenter.call("refresh")
 	_check(not presenter.visible, "Karte blendet sich im Servicefenster aus")
