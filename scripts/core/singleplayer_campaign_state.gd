@@ -377,6 +377,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_requests = data.requests.duplicate(true)
 	_progress = Dictionary(data.get("progress",_progress)).duplicate(true)
 	_revision = int(data.revision)
+	# Orte mit anderem Kartenpfad: der Stand ist angenommen; wer einen Ortszustand traegt (Basisstand-Lader, Einsatz-Zwischenstand), entscheidet selbst.
+	if result.has("relocated_location_ids"):
+		return {"ok":true, "relocated_location_ids":result.relocated_location_ids}
 	return {"ok":true}
 
 func _validate_saved_state(data: Dictionary) -> Dictionary:
@@ -393,7 +396,8 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		var allowed := ["active","completed"] if pair[0] == "recruited_outpost" else ["completed"]
 		if bool(data.progress.get(pair[0],false)) and String(Dictionary(data.jobs.get(pair[1],{})).get("status","")) not in allowed: return _reject("invalid_progress","Fortschritt ohne Missionsabschluss")
 	if bool(data.progress.second_pad_built) and not bool(data.progress.recruited_pilot): return _reject("invalid_progress","Pad ohne geretteten Piloten")
-	if not _compatible_locations(data.locations) or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
+	var location_verdict: Dictionary = _compare_locations(data.locations)
+	if not location_verdict.ok or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
 		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
 	for job_id in _jobs:
 		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
@@ -446,6 +450,8 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	if not location_verdict.relocated.is_empty():
+		return {"ok":true, "relocated_location_ids":location_verdict.relocated}
 	return {"ok":true}
 
 func _saved_integer(value: Variant) -> bool:
@@ -455,11 +461,65 @@ func _saved_equal(a: Variant, b: Variant) -> bool:
 	return JSON.stringify(JSON.parse_string(JSON.stringify(a)), "", true) == JSON.stringify(JSON.parse_string(JSON.stringify(b)), "", true)
 
 
-func _compatible_locations(saved: Dictionary) -> bool:
-	# Polisa is an additive free visit; no old location definition may drift.
+## Ortsfelder, an denen kein gespeicherter Zustand haengt: sie werden beim Laden nicht verglichen, es gilt der heutige Wert.
+## name: nur Anzeige (campaign_display_catalog.location_name); gespeichert wird er nirgends ausser im Ortsblock selbst.
+## region_position: nur Sternkarte (star_map_canvas, star_map_screen); Reisekosten stehen in trade_offers.json, nicht hier.
+const LOCATION_PRESENTATION_FIELDS: Array = ["name", "region_position"]
+## Kartenpfad: wird angenommen, der Ort beginnt dann frisch (siehe CampaignCheckpointStore.adopt_relocated_maps).
+## Alle uebrigen Felder (id, scenario_file_path, landing_pad_ids, services, free_visit) bleiben streng: an ihnen haengen
+## Auftraege, Abfluege, Landeplaetze und Versorgungsdienste im Stand.
+const LOCATION_MAP_FIELD := "map_file_path"
+
+## {"ok":bool, "relocated":Array}. relocated: Orte, deren gespeicherter Kartenpfad vom heutigen abweicht (nur bei ok).
+## Polisa is an additive free visit; every other location must exist exactly once, with all strict fields unchanged.
+func _compare_locations(saved: Dictionary) -> Dictionary:
 	var current := _locations.duplicate(true)
 	if not saved.has("polisa") and bool(Dictionary(current.get("polisa", {})).get("free_visit", false)): current.erase("polisa")
-	return JSON.stringify(saved, "", true) == JSON.stringify(current, "", true)
+	if saved.size() != current.size(): return {"ok":false}
+	var relocated: Array = []
+	for id in saved:
+		if typeof(id) != TYPE_STRING or not current.has(id) or typeof(saved[id]) != TYPE_DICTIONARY: return {"ok":false}
+		var old: Dictionary = saved[id]
+		if not _saved_location_presentable(old): return {"ok":false}
+		if _strict_location_signature(old) != _strict_location_signature(current[id]): return {"ok":false}
+		if String(old[LOCATION_MAP_FIELD]) != String(current[id][LOCATION_MAP_FIELD]): relocated.append(String(id))
+	relocated.sort()
+	return {"ok":true, "relocated":relocated}
+
+func _compatible_locations(saved: Dictionary) -> bool:
+	return bool(_compare_locations(saved).ok)
+
+## Die streng verglichenen Felder eines Ortes (alles ausser Darstellung und Kartenpfad), als stabiler Text.
+func _strict_location_signature(location: Dictionary) -> String:
+	var strict := location.duplicate(true)
+	for field in LOCATION_PRESENTATION_FIELDS: strict.erase(field)
+	strict.erase(LOCATION_MAP_FIELD)
+	return JSON.stringify(strict, "", true)
+
+## Die nicht verglichenen Felder muessen im Stand trotzdem vorhanden und brauchbar sein (wie singleplayer_location_contract).
+func _saved_location_presentable(location: Dictionary) -> bool:
+	if typeof(location.get("name")) != TYPE_STRING or String(location.name).strip_edges().is_empty(): return false
+	var position: Variant = location.get("region_position")
+	if typeof(position) != TYPE_ARRAY or position.size() != 2: return false
+	for coordinate in position:
+		if typeof(coordinate) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(coordinate)): return false
+	var map_path: Variant = location.get(LOCATION_MAP_FIELD)
+	return typeof(map_path) == TYPE_STRING and String(map_path).begins_with("res://maps/") and String(map_path).ends_with(".json")
+
+## Fuer den Lader eines Basisstands: schreibt die heutigen Ortsdefinitionen in den gespeicherten Campaign-Block (Darstellung und
+## Kartenpfad von heute) und nennt die Orte, deren Kartenpfad sich geaendert hat. Ist der Ortsblock nicht vertraeglich
+## (streng geprueftes Feld, fehlender oder zusaetzlicher Ort), bleibt der Stand unveraendert und das Ergebnis leer;
+## restore_state lehnt ihn dann mit stale_campaign_definitions ab.
+static func adopt_current_location_definitions(campaign_state: Dictionary) -> Array:
+	var saved: Variant = campaign_state.get("locations")
+	if typeof(saved) != TYPE_DICTIONARY: return []
+	var fresh = load("res://scripts/core/singleplayer_campaign_state.gd").new()
+	if not fresh.configure().get("ok", false): return []
+	var verdict: Dictionary = fresh._compare_locations(saved)
+	if not verdict.ok: return []
+	for id in saved.keys():
+		if JSON.stringify(saved[id], "", true) != JSON.stringify(fresh._locations[id], "", true): saved[id] = fresh._locations[id].duplicate(true)
+	return verdict.relocated
 
 
 func _reset_departure_preparation() -> void:

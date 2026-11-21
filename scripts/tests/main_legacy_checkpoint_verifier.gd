@@ -14,7 +14,9 @@ func _run() -> void:
 	if not fixture is Dictionary or not STORE.validate_payload(fixture).get("ok", false):
 		printerr("FAIL: authentic Main checkpoint rejected"); quit(1); return
 	var tampered: Dictionary = fixture.duplicate(true)
-	tampered.campaign.locations.homebase.name = "Manipulated"
+	# Der Anzeigename ist seit Abschnitt SB (21.11.2026) kein Vergleichsfeld mehr (campaign_location_definitions_tolerance_verifier);
+	# geprueft wird ein Feld, an dem gespeicherter Zustand haengt: die Dienste des Ortes.
+	tampered.campaign.locations.homebase.services = ["personnel", "jobs"]
 	if STORE.validate_payload(tampered).get("ok", false):
 		printerr("FAIL: altered existing location accepted"); quit(1); return
 	var saved: Dictionary = STORE.save_checkpoint(fixture)

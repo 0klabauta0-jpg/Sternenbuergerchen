@@ -346,10 +346,50 @@ static func load_checkpoint(path: String = DEFAULT_PATH) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint_json"}
+	# Nur im Speicher: die Datei bleibt, wie sie ist (ein Einsatzstand haengt an ihrer Pruefsumme).
+	var relocated: Array = adopt_relocated_maps(parsed)
 	var result := validate_payload(parsed)
 	if result.ok:
 		result["payload"] = parsed
+		if not relocated.is_empty():
+			result["relocated_location_ids"] = relocated
+			result["notices"] = _relocation_notices(parsed, relocated)
 	return result
+
+## Ein Ort, dessen Karte seit dem Speichern ausgetauscht wurde (anderer map_file_path in locations.json), wird angenommen und beginnt
+## frisch: Der Basisstand speichert je Ort nur die Ortsressourcen (Fundstellen: entdeckt / Restmenge), und zwar zweimal -
+## oben unter location_resources und beim Besitzer der Vorraete unter supply.location_resources. Beides wird fuer diesen einen Ort
+## auf den Anfangszustand der heutigen Ortsdaten gesetzt, alle anderen Orte und alles uebrige (Kader, Guthaben, Lager, Auftraege,
+## Fortschritt) bleiben. Landeplaetze, Dienste und Auftragsbindung stehen nicht im Basisstand, sondern in den Ortsdaten
+## und werden streng verglichen; Orts-Instanz, Markierungen und Abfluege gibt es im Basisstand nicht (er wird nur zuhause geschrieben).
+## Ist der Ortsblock sonst nicht vertraeglich, passiert nichts und validate_payload lehnt den Stand ab.
+## Rueckgabe: Ids der neu aufgesetzten Orte (leer = nichts geaendert).
+static func adopt_relocated_maps(payload: Dictionary) -> Array:
+	var campaign_state: Variant = payload.get("campaign")
+	if typeof(campaign_state) != TYPE_DICTIONARY: return []
+	var relocated: Array = load("res://scripts/core/singleplayer_campaign_state.gd").adopt_current_location_definitions(campaign_state)
+	if relocated.is_empty(): return relocated
+	var definitions: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/location_resources.json"))
+	if typeof(definitions) != TYPE_DICTIONARY: return relocated
+	for place: String in relocated:
+		if typeof(definitions.get(place)) != TYPE_DICTIONARY: continue
+		var fresh = load("res://scripts/core/location_runtime_state.gd").new()
+		fresh.configure(definitions[place])
+		var sites: Dictionary = fresh.export_state()
+		if payload.get("location_resources") is Dictionary and payload.location_resources.has(place):
+			payload.location_resources[place] = {"version":1,"location_id":place,"sites":sites.duplicate(true)}
+		if payload.get("supply") is Dictionary and payload.supply.get("location_resources") is Dictionary and payload.supply.location_resources.has(place):
+			payload.supply.location_resources[place] = sites.duplicate(true)
+	return relocated
+
+## Eine einmalige Meldung je neu aufgesetztem Ort (der Spieler sieht sie, wo der Lader Meldungen zeigt; sonst Protokoll).
+static func _relocation_notices(payload: Dictionary, relocated: Array) -> Array:
+	var display = load("res://scripts/mission/campaign_display_catalog.gd")
+	var notices: Array = []
+	for place: String in relocated:
+		var record: Dictionary = Dictionary(Dictionary(payload.campaign.locations).get(place, {}))
+		notices.append("Die Karte von %s wurde überarbeitet; der Ort beginnt frisch." % display.location_name(place, record))
+	return notices
 static func save_checkpoint(payload: Dictionary, path: String = DEFAULT_PATH) -> Dictionary:
 	if not _valid_path(path):
 		return {"ok":false,"reason":"invalid_checkpoint_path"}
