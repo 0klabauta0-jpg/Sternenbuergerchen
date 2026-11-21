@@ -305,11 +305,12 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
 	var bound: Dictionary = _singleplayer_campaign_owner.configure_departure_preparation_authority(self)
 	if not bound.get("ok", false): return bound
-	# Regel 8 / Auftrag 21.11.: Aus dem Orbit bucht der Anflug nur seinen Anteil (Abheben und Sprung waren eigene Etappen);
-	# ein Direktstart vom Pad ohne Orbit bucht die ganze Strecke auf einmal. Keine Rueckflugreserve.
+	# Regel 8 / Auftrag 21.11.: Aus dem Orbit bucht der Anflug nur seinen Anteil (Abheben und Sprung waren eigene Etappen).
+	# Ein Start ohne Anflugkennung (Direktstart vom Pad ohne Orbit) kommt im Spiel nicht vor (einziger Aufrufer ist der Adapter mit
+	# Anflugkennung, singleplayer_runtime_adapter.gd authorize_departure); er behaelt die alte Ganze-Strecke-Buchung ohne Reserve.
 	var fuel_payload: Dictionary = departure.duplicate(true)
-	fuel_payload["leg"] = "approach" if not approach_request_id.is_empty() else "whole_route"
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":fuel_payload, "request_id":request_id + ":fuel"}
+	if not approach_request_id.is_empty(): fuel_payload["leg"] = "approach"
+	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel" if not approach_request_id.is_empty() else "consume_route_fuel", "payload":fuel_payload, "request_id":request_id + ":fuel"}
 	var binding := {"contract_category":"singleplayer_campaign", "operation":"bind_departure", "payload":departure.duplicate(true), "request_id":request_id}
 	var activation := {}
 	if not String(departure.get("job_id", "")).is_empty():
@@ -819,22 +820,29 @@ func get_space_area_revision(area_id: String) -> int:
 func _leg_fuel_applies(craft_id: String) -> bool:
 	return _singleplayer_supply_owner != null and _singleplayer_supply_owner.has_fuel_account(craft_id)
 
-func _leg_fuel_payload(craft_id: String, leg: String, origin: String, destination: String) -> Dictionary:
-	return {"craft_id":craft_id, "leg":leg, "origin_location_id":origin, "destination_location_id":destination}
+func _leg_fuel_payload(craft_id: String, leg: String, origin: String, destination: String, already_paid: float = 0.0) -> Dictionary:
+	var payload := {"craft_id":craft_id, "leg":leg, "origin_location_id":origin, "destination_location_id":destination}
+	if already_paid > 0.0: payload["already_paid"] = already_paid
+	return payload
 
 ## Lesende Vorpruefung einer Etappe. Eine Etappe ohne definierte Kosten (unknown_leg) gilt als kostenlos.
-func _preview_leg_fuel(craft_id: String, leg: String, origin: String, destination: String) -> Dictionary:
+func _preview_leg_fuel(craft_id: String, leg: String, origin: String, destination: String, already_paid: float = 0.0) -> Dictionary:
 	if not _leg_fuel_applies(craft_id): return {"ok":true, "skipped":true}
-	var gate: Dictionary = _singleplayer_supply_owner.preview_leg_fuel(_leg_fuel_payload(craft_id, leg, origin, destination), {"departure_authorized":true})
+	var gate: Dictionary = _singleplayer_supply_owner.preview_leg_fuel(_leg_fuel_payload(craft_id, leg, origin, destination, already_paid), {"departure_authorized":true})
 	if not gate.get("ok", false) and gate.get("reason") == "unknown_leg": return {"ok":true, "skipped":true}
 	return gate
 
 ## Bucht eine zuvor geprueften Etappe ueber den Versorgungsbesitzer. Kostenlose Etappen erzeugen keinen Beleg.
-func _book_leg_fuel(craft_id: String, leg: String, origin: String, destination: String, request_id: String) -> Dictionary:
+## Die Etappe ist dann schon veroeffentlicht und nicht mehr zurueckzunehmen; scheitert die Buchung trotz Vorpruefung, wird das laut
+## gemeldet (push_error mit Etappe und Grund), statt still ein Gratis-Flug zu werden.
+func _book_leg_fuel(craft_id: String, leg: String, origin: String, destination: String, request_id: String, already_paid: float = 0.0) -> Dictionary:
 	if not _leg_fuel_applies(craft_id): return {"ok":true, "skipped":true}
-	if _singleplayer_supply_owner.get_leg_fuel_cost(origin, destination, leg) <= 0.0: return {"ok":true, "skipped":true}
+	if _singleplayer_supply_owner.get_leg_fuel_cost(origin, destination, leg) - already_paid <= 0.00001: return {"ok":true, "skipped":true}
 	# Direkt am Besitzer, ohne Signal: die Buchung liegt in der synchronen Veroeffentlichungsstrecke der Etappe.
-	return _singleplayer_supply_owner.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":_leg_fuel_payload(craft_id, leg, origin, destination), "request_id":request_id}, {"departure_authorized":true})
+	var booked: Dictionary = _singleplayer_supply_owner.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":_leg_fuel_payload(craft_id, leg, origin, destination, already_paid), "request_id":request_id}, {"departure_authorized":true})
+	if not bool(booked.get("ok", false)):
+		push_error("Treibstoff: Etappe %s (%s > %s) von %s nicht gebucht, Grund %s (%s)" % [leg, origin, destination, craft_id, String(booked.get("reason", "?")), String(booked.get("message", ""))])
+	return booked
 
 ## Befehl fuer den Ortsabflug (Rueckweg Ort -> Heimat): nur der Anteil "surface_exit"; Sprung und Landung buchen selbst.
 func _surface_exit_fuel_command(route: Dictionary, outward_token: String) -> Dictionary:
@@ -851,23 +859,42 @@ static func _location_at_orbit(locations: Dictionary, orbit_id: String, preferre
 	ids.sort()
 	return "" if ids.is_empty() else String(ids[0])
 
+## Merker je Schiff fuer den zuletzt bezahlten, noch offenen Sprung: {origin, destination, paid}. Wird nur fuer den Neustart aus
+## "stopped" gebraucht (dort kennt der Reisebesitzer den Ausgangsorbit nicht mehr). Fehlt er (zum Beispiel nach dem Laden), bleibt es
+## beim Fortsetzen ohne Kosten.
+var _open_jump_by_craft: Dictionary = {}
+
 ## Plan der Sprungetappe, VOR der Veroeffentlichung gelesen (danach hat sich der Orbit geaendert).
-## Ein Neustart aus "stopped" ist der bezahlte, noch nicht vollendete Sprung und kostet nichts.
+## Neustart aus "stopped" (Fix-Runde 1): derselbe Zielort ist die bezahlte, noch nicht vollendete Fortsetzung und kostet nichts; ein anderes,
+## teureres Ziel bucht nur die Differenz zum schon Bezahlten (ist sie nicht gedeckt, startet der Sprung nicht); ein billigeres Ziel
+## bucht nichts und erstattet nichts.
 func _plan_jump_fuel(craft_id: String, target_orbit_id: String) -> Dictionary:
 	if not _leg_fuel_applies(craft_id) or _singleplayer_space_travel_owner == null: return {"ok":true, "skipped":true}
 	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
-	if String(travel.get("phase", "")) == "stopped": return {"ok":true, "skipped":true, "continuation":true}
 	var locations: Dictionary = Dictionary(travel.get("location_orbits", {}))
 	var preferred := String(_singleplayer_campaign_owner.get_campaign_snapshot().get("selected_location_id", "")) if _singleplayer_campaign_owner != null else ""
-	var origin := _location_at_orbit(locations, String(travel.get("orbit_id", "")), preferred)
 	var destination := _location_at_orbit(locations, target_orbit_id, preferred)
+	if String(travel.get("phase", "")) == "stopped":
+		var open: Dictionary = Dictionary(_open_jump_by_craft.get(craft_id, {}))
+		if open.is_empty() or String(open.destination) == destination: return {"ok":true, "skipped":true, "continuation":true}
+		var full: float = _singleplayer_supply_owner.get_leg_fuel_cost(String(open.origin), destination, "jump")
+		if full < 0.0: return {"ok":true, "skipped":true, "continuation":true}
+		var paid: float = float(open.paid)
+		var remember := {"origin":String(open.origin), "destination":destination, "paid":maxf(paid, full)}
+		if full - paid <= 0.00001: return {"ok":true, "skipped":true, "continuation":true, "remember":remember}
+		var restart_gate: Dictionary = _preview_leg_fuel(craft_id, "jump", String(open.origin), destination, paid)
+		if not restart_gate.get("ok", false): return restart_gate
+		return {"ok":true, "origin":String(open.origin), "destination":destination, "already_paid":paid, "remember":remember}
+	var origin := _location_at_orbit(locations, String(travel.get("orbit_id", "")), preferred)
 	var gate: Dictionary = _preview_leg_fuel(craft_id, "jump", origin, destination)
 	if not gate.get("ok", false): return gate
-	return {"ok":true, "origin":origin, "destination":destination}
+	var cost: float = _singleplayer_supply_owner.get_leg_fuel_cost(origin, destination, "jump")
+	return {"ok":true, "origin":origin, "destination":destination, "remember":{"origin":origin, "destination":destination, "paid":maxf(cost, 0.0)}}
 
 func _book_planned_jump_fuel(plan: Dictionary, craft_id: String, request_id: String) -> void:
+	if plan.has("remember"): _open_jump_by_craft[craft_id] = Dictionary(plan.remember).duplicate()
 	if plan.get("skipped", false): return
-	_book_leg_fuel(craft_id, "jump", String(plan.origin), String(plan.destination), request_id + ":leg:jump")
+	_book_leg_fuel(craft_id, "jump", String(plan.origin), String(plan.destination), request_id + ":leg:jump", float(plan.get("already_paid", 0.0)))
 
 func commit_singleplayer_space_launch(adapter: Node, craft_id: String, request_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
