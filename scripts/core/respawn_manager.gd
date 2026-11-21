@@ -2,11 +2,11 @@ class_name RespawnManager
 extends Node
 
 ## Respawn timer thresholds (in seconds) per spawn type, matching V1 design:
-## Rover: 30s, FOB: 150s (2.5 min), Homebase: 270s (4.5 min)
+## Rover: 60s, FOB: 240s (4 min), Homebase: 420s (7 min)
 
-const RESPAWN_TIME_ROVER: float = 30.0
-const RESPAWN_TIME_FOB: float = 150.0
-const RESPAWN_TIME_HOMEBASE: float = 270.0
+const RESPAWN_TIME_ROVER: float = 60.0
+const RESPAWN_TIME_FOB: float = 240.0
+const RESPAWN_TIME_HOMEBASE: float = 420.0
 
 signal unit_respawn_started(unit_id: String, respawn_time: float)
 signal unit_respawn_completed(unit_id: String)

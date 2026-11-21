@@ -108,6 +108,9 @@ func _case_switch_off_skirmish_respawns() -> void:
 	_check(_bleedout_effects(env.sim) == 1, "switch off: bleedout queued after 3 s")
 	friend.call("advance_bleedout")
 	_check(env.respawn.call("has_pending_respawn", FRIEND_ID), "skirmish still respawns")
+	# Björn 21.11.: Wiederkehr-Zeiten verlängert (Rover 60, FOB 240, Homebase 420 Sekunden; vorher 30/150/270).
+	_check(is_equal_approx(float(env.respawn.call("get_respawn_time", "rover")), 60.0) and is_equal_approx(float(env.respawn.call("get_respawn_time", "fob")), 240.0) and is_equal_approx(float(env.respawn.call("get_respawn_time", "homebase")), 420.0), "skirmish respawn times are 60/240/420 s")
+	_check(float(env.respawn.call("get_remaining_time", FRIEND_ID)) > 30.0, "skirmish rover respawn countdown is longer than the old 30 s")
 	_check(friend.call("get_vital_state") == "respawning", "switch off: unit enters respawning")
 	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
 	_check(states.size() == 1 and not Dictionary(states[0]).has("was_downed"), "switch off: team state has no was_downed key")
