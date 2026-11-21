@@ -66,16 +66,8 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 				if leg not in FUEL_LEGS or not _valid_nonnegative_number(legs[leg]): return _reject("invalid_supply_data", "Etappenkosten ungueltig")
 				leg_sum += float(legs[leg])
 			if absf(leg_sum - float(route_costs[route])) > 0.00001: return _reject("invalid_supply_data", "Etappen ergeben nicht die Streckenkosten: " + route)
-			# Ort -> Ort (Fix-Runde 1, W7): Das Schiff verlaesst den Ort, bevor ein Ziel gewaehlt ist, und fliegt erst danach an. Gebucht werden also
-			# der Ortsabflug des Ortes (wie nach Hause), der Sprung dieser Strecke und der Anflug wie von zu Hause. Nur so ergibt die Summe der real
-			# gebuchten Etappen den Streckenwert.
-			var parts: PackedStringArray = route.split(">")
-			if parts.size() == 2 and parts[0] != "homebase" and parts[1] != "homebase":
-				var out_legs: Variant = data.leg_fuel_costs.get(parts[0] + ">homebase")
-				var in_legs: Variant = data.leg_fuel_costs.get("homebase>" + parts[1])
-				if typeof(out_legs) != TYPE_DICTIONARY or typeof(in_legs) != TYPE_DICTIONARY: return _reject("invalid_supply_data", "Ort-zu-Ort-Strecke ohne Heimat-Etappen: " + route)
-				if absf(float(legs.get("surface_exit", -1.0)) - float(out_legs.get("surface_exit", -2.0))) > 0.00001 or absf(float(legs.get("approach", -1.0)) - float(in_legs.get("approach", -2.0))) > 0.00001:
-					return _reject("invalid_supply_data", "Ort-zu-Ort-Strecke weicht von den real gebuchten Etappen ab: " + route)
+		var structure_error: String = _leg_structure_error(data.leg_fuel_costs)
+		if not structure_error.is_empty(): return _reject("invalid_supply_data", structure_error)
 	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
@@ -282,6 +274,43 @@ func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictio
 # ist gleich dem Wert in route_fuel_costs (leg_fuel_costs in data/singleplayer/trade_offers.json).
 const FUEL_LEGS: Array = ["launch", "jump", "approach", "surface_exit", "landing"]
 const FUEL_LEG_LABELS: Dictionary = {"launch": "Abheben", "jump": "Quantensprung", "approach": "Ortsanflug", "surface_exit": "Ortsabflug", "landing": "Landung"}
+
+## Fix fuel structure (Fix-Runde 2, W8): Die Etappenpreise bestehen aus ortsfesten Teilen (Abheben, Anflug, Ortsabflug, Heimlandung; je Teil
+## ueberall gleich) und einem Sprungpreis je Orbit-Paar. Der Sprung ist in beide Richtungen gleich, kostet immer etwas und erfuellt die
+## Dreiecksungleichung: Keine Kette echter Etappen ist je billiger als die direkte Strecke, und kein Sprung startet mit leerem Tank.
+## Gibt "" zurueck, wenn die Daten stimmen, sonst den Grund.
+static func _pair_key(a: String, b: String) -> String:
+	return a + "|" + b if a <= b else b + "|" + a
+
+static func _leg_structure_error(table: Dictionary) -> String:
+	var fixed: Dictionary = {}
+	var jumps: Dictionary = {}
+	for route: String in table:
+		var parts: PackedStringArray = route.split(">")
+		if parts.size() != 2: return "Streckenname ungueltig: " + route
+		var legs: Dictionary = table[route]
+		for leg: String in legs:
+			if leg == "jump": continue
+			if fixed.has(leg) and absf(float(fixed[leg]) - float(legs[leg])) > 0.00001: return "Ortsfester Teil %s ist nicht ueberall gleich (%s)" % [leg, route]
+			fixed[leg] = float(legs[leg])
+		if not legs.has("jump") or float(legs["jump"]) <= 0.0: return "Sprung ohne Kosten oder fehlend: " + route
+		var key: String = _pair_key(parts[0], parts[1])
+		if jumps.has(key) and absf(float(jumps[key]) - float(legs["jump"])) > 0.00001: return "Sprung nicht in beide Richtungen gleich: " + key
+		jumps[key] = float(legs["jump"])
+	var places: Array = []
+	for key: String in jumps:
+		for place: String in key.split("|"):
+			if not places.has(place): places.append(place)
+	for a: String in places:
+		for b: String in places:
+			for c: String in places:
+				if a == b or b == c or a == c: continue
+				var ab: String = _pair_key(a, b)
+				var bc: String = _pair_key(b, c)
+				var ac: String = _pair_key(a, c)
+				if jumps.has(ab) and jumps.has(bc) and jumps.has(ac) and float(jumps[ac]) > float(jumps[ab]) + float(jumps[bc]) + 0.00001:
+					return "Dreiecksungleichung verletzt: %s > %s + %s" % [ac, ab, bc]
+	return ""
 
 func has_fuel_account(craft_id: String) -> bool:
 	return _fuel_by_craft_id.has(craft_id)
