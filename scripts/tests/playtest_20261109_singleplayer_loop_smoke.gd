@@ -87,7 +87,8 @@ func _run() -> void:
 	_check(int(returned.supply.credits) == int(rewarded.supply.credits), "Viewing result/homebase again cannot duplicate reward")
 	_check(_identity(_screen.call("get_operations_snapshot")) == _identity_before, "First return preserves all original identities and portraits")
 	_check(_screen.call("request_operation", "select_destination", {"location_id": "trade_outpost", "job_id": "", "request_id": "loop:trade"}).get("ok", false), "Second sortie selects trade location without combat job")
-	if not await _launch_and_land("trade_outpost_visit", "res://maps/trade_outpost.json"):
+	# Seit e4b407fe0 (10.11.) laedt der Handelsaussenposten (locations.json: trade_outpost) das Szenario outpost_recovery (Wache, Kiste, Rueckkehr; trade_service ist dort ein Haendlerpunkt ohne Vorstufe), nicht mehr trade_outpost_visit.
+	if not await _launch_and_land("outpost_recovery", "res://maps/trade_outpost.json"):
 		await _finish()
 		return
 	mission = _flow.get("_active_mission")
@@ -95,7 +96,7 @@ func _run() -> void:
 	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 	var before_service: Dictionary = _flow.call("get_singleplayer_snapshot")
 	_check(not Dictionary(before_service.get("service_contexts_by_craft_id", {})).has(_craft_id), "Landing alone cannot grant trader use proof")
-	if not await _move_and_use(mission, "trade_service", "service_visit", "res://maps/trade_outpost.json"):
+	if not await _move_and_use(mission, "trade_service", "trade_service", "res://maps/trade_outpost.json"):
 		await _finish()
 		return
 	if not await _wait(func(): return Dictionary(_flow.call("get_singleplayer_snapshot").get("service_contexts_by_craft_id", {})).has(_craft_id), 3000, "Actual landed craft and completed trader Use enable service"):
@@ -106,12 +107,20 @@ func _run() -> void:
 	if not _check(services != null and services == _flow.get_node_or_null("SingleplayerServiceLayer/MissionServices"), "Trade uses the actual Flow-owned service panel"):
 		await _finish()
 		return
+	# Seit a4d5948c5 (12.11.) ist die Versorgung ein eingeklapptes Bedienelement (ServicePanelToggle, "Versorgung oeffnen"); der Spieler klappt sie auf (Vertrag: campaign_service_toggle_verifier). Vorher stand das Panel von selbst offen.
+	var service_toggle: Button = _flow.get("_singleplayer_services_toggle")
+	if not await _wait(func(): return service_toggle != null and service_toggle.is_visible_in_tree(), 3000, "Compact Versorgung control is offered after the completed trader Use"):
+		_dump("service_toggle")
+		await _finish()
+		return
+	service_toggle.pressed.emit()
 	services.call("set_selected_craft", _craft_id)
 	var buy: Button = services.find_child("BuySupply", true, false)
 	var fuel: Button = services.find_child("RefuelCraft", true, false)
 	var orbital_return: Button = services.find_child("ServiceReturnHomebase", true, false)
 	var service_supply: Dictionary = _supply()
 	if not await _wait(func(): return services.is_visible_in_tree() and buy != null and buy.is_visible_in_tree() and not buy.disabled and fuel != null and fuel.is_visible_in_tree() and not fuel.disabled, 2000, "Flow-owned service UI offers purchase and refuel after Use"):
+		print("SERVICE_UI_STATE: panel_visible=", services.is_visible_in_tree(), " buy=", buy != null and buy.is_visible_in_tree(), "/", buy != null and buy.disabled, " (", buy.tooltip_text if buy != null else "-", ") fuel=", fuel != null and fuel.is_visible_in_tree(), "/", fuel != null and fuel.disabled, " (", fuel.tooltip_text if fuel != null else "-", ")")
 		_dump("service_ui")
 		await _finish()
 		return
@@ -121,7 +130,14 @@ func _run() -> void:
 	fuel.pressed.emit()
 	var paid: Dictionary = _supply()
 	_check(int(paid.credits) == int(service_supply.credits) - 70, "Real service double-clicks debit one purchase and one ten-unit refuel")
-	_check(int(Dictionary(Dictionary(paid.get("inventory",{})).get("craft:"+_craft_id,{})).get("items",paid.item_quantities).get("medictool",0)) == int(Dictionary(Dictionary(service_supply.get("inventory",{})).get("craft:"+_craft_id,{})).get("items",service_supply.item_quantities).get("medictool",0)) + 1, "Second sortie grants one real purchased item")
+	# Seit 8571be32c liefert der Handelsaussenposten Gekauftes in den lokalen Frachtaufzug (station:trade_outpost:lift), nicht mehr direkt ins Schiff; gezaehlt wird, was im Schiff UND im Aufzug liegt.
+	var medictools_here := func(supply: Dictionary) -> int:
+		var inventory: Dictionary = Dictionary(supply.get("inventory", {}))
+		var total := 0
+		for container: String in ["craft:" + _craft_id, "station:trade_outpost:lift"]:
+			total += int(Dictionary(Dictionary(inventory.get(container, {})).get("items", {})).get("medictool", 0))
+		return total
+	_check(int(medictools_here.call(paid)) == int(medictools_here.call(service_supply)) + 1, "Second sortie grants one real purchased item (ship or local cargo lift)")
 	_check(float(paid.fuel_by_craft_id[_craft_id]) == float(service_supply.fuel_by_craft_id[_craft_id]) + 10.0, "Confirmed actual craft gains exactly ten fuel")
 	if not await _prepare_visit_return(mission):
 		await _finish()
@@ -325,7 +341,8 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		return false
 	if not await _wait(func():
 		if is_instance_valid(driver):
-			return PackedStringArray(driver.call("get_mission_scenario_runtime_gate_snapshot").get("completed_step_ids", [])).has(step)
+			# Der Haendlerpunkt (trade_service) ist in outpost_recovery kein Ablaufschritt (flow_steps), also nie in completed_step_ids; sein Abschluss steht im Laufzeitstand der Interaktion (derselbe Stand, aus dem der Adapter den Service-Kontext bildet).
+			return PackedStringArray(driver.call("get_mission_scenario_runtime_gate_snapshot").get("completed_step_ids", [])).has(step) or bool(Dictionary(driver.call("get_mission_interaction_runtime_states").get(interaction, {})).get("complete", false))
 		return step == "return_to_ship" and String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 45000, interaction + " actual timed Use commits required runtime step"):
 		_dump("use_execution_" + interaction)
 		return false

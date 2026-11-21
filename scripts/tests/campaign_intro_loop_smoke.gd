@@ -44,12 +44,18 @@ func _wait_homebase() -> bool:
 	var presence_before: Dictionary = {}
 	for person: Dictionary in Array(Dictionary(before.get("base_personnel", {})).get("units", [])):
 		presence_before[String(person.unit_id)] = [String(person.status), String(person.craft_id)]
-	_check(int(before.onboarding.stage_index) == _return_number + 1, "Actual home arrival advances tutorial in order")
+	# Stufe 2 der Einfuehrung verlangt outpost_completed + outpost_recruited + crate_loaded (campaign_onboarding_state.gd STAGE_FACTS), also den abgeschlossenen Auftrag outpost_recovery. Der zweite Ausflug ist ein Handelsbesuch ohne Auftrag (select_destination mit job_id ""), er schaltet die Einfuehrung deshalb nicht weiter: nach der ersten Rueckkehr Stufe 2, nach der zweiten weiterhin 2.
+	_check(int(before.onboarding.stage_index) == mini(_return_number, 1) + 1, "Actual home arrival advances tutorial in order (a job-free trade visit does not advance it)")
 	_check(Array(_flow.get("_all_team_units")).size() == 2, "True return keeps exactly two NPCs")
+	# Der Heim-Speicherpunkt ist gesperrt, solange eine Ortsinstanz fokussiert ist (campaign_start_configuration.gd get_home_checkpoint_guard); nach dem Abflug wird sie freigegeben (wie campaign_retreat_reopen_at_home_verifier R6 es verlangt). Darauf wird gewartet, nicht darum herumgespeichert.
+	if not await _wait(func(): return _flow.get("_active_mission") == null, 5000, "Visit location instance is released after the real return home"):
+		print("CHECKPOINT_STATE: active_mission=", _flow.get("_active_mission"), " view=", _flow.get("_current_meta_view"), " return_number=", _return_number)
+		return false
 	# Explicit milestone save: force=true bypasses the 5 minute hex autosave interval (campaign_start_configuration.gd), otherwise the arrival autosave makes this a no-op and Continue loads the older file.
 	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
 	if not _check(bool(saved.get("ok", false)) and not bool(saved.get("throttled", false)), "Actual home milestone saves valid complete checkpoint"):
 		print("CHECKPOINT_RESULT:", saved)
+		print("CHECKPOINT_STATE: active_mission=", _flow.get("_active_mission"), " pending_transfers=", Array(_flow.get("_pending_mission_craft_transfers")).size(), " travel_phase=", _runtime.call("get_space_travel_snapshot").get("phase", "?"), " locations=", _flow.get("_aircraft_location_by_craft"), " stage_index=", before.onboarding.stage_index, " return_number=", _return_number)
 		return false
 	var loaded: Dictionary = STORE.load_checkpoint()
 	_check(bool(loaded.get("ok", false)), "Saved campaign checkpoint loads after real trip")
@@ -121,13 +127,25 @@ func _prepare_visit_return(mission: Node) -> bool:
 	if bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).ok): return true
 	var map = MAP.load_from_file("res://maps/trade_outpost.json")
 	var ship: Vector2 = map.get_marker_position("ship_return")
+	# Das Schiff steht dort, wo die Besatzung es gelandet hat (gewaehlte Landezone), nicht zwingend auf der Marke ship_return; die Rueckkehr zielt wie in _move_and_use auf den echten Landeplatz.
+	if controller.has_method("_campaign_landed_craft_position"):
+		ship = controller.call("_campaign_landed_craft_position", _craft_id)
+	# Auf Hex-Karten zaehlt fuer das Einsteigen der Bodenzugang des Schiffs (get_campaign_ground_ship_access), nicht die Schiffsmitte: _campaign_unit_near_boarding_ship misst gegen ihn (Radius 128). Die Besatzung blieb sonst rund 220 Einheiten vor dem Schiff stehen.
+	if controller.has_method("get_campaign_ground_ship_access"):
+		var access: Dictionary = controller.call("get_campaign_ground_ship_access", _craft_id)
+		if bool(access.get("ok", false)): ship = Vector2(access.position)
 	controller.call("_create_waypoints_for_selected_fireteams", ship, true)
 	if not _check(bool(controller.call("execute_selected_fireteam_orders")), "Actual crew receives ship return walk"): return false
 	if not await _wait(func():
 		for id in ["campaign_leader", "campaign_pilot"]:
 			var unit: Node2D = controller.call("_find_friendly_unit_by_id", id)
 			if unit == null or unit.global_position.distance_to(ship) > 128.0: return false
-		return true, 45000, "Actual crew returns to ship before boarding"): return false
+		# 180 s wie in _move_and_use der Oberklasse: der echte Marsch ueber die Karte dauerte dort 48 s (headless, parallele Godot-Laeufe); 45 s war zu knapp.
+		return true, 180000, "Actual crew returns to ship before boarding"):
+		for id in ["campaign_leader", "campaign_pilot"]:
+			var unit: Node2D = controller.call("_find_friendly_unit_by_id", id)
+			print("SHIP_RETURN_STATE: ", id, " pos=", unit.global_position if unit != null else "-", " ship=", ship, " dist=", unit.global_position.distance_to(ship) if unit != null else -1.0, " vital=", unit.call("get_vital_state") if unit != null and unit.has_method("get_vital_state") else "-", " last_command=", controller.get("_last_command_text"))
+		return false
 	controller.call("request_campaign_crew_boarding", _craft_id)
 	return await _wait(func(): return bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).ok), 3000, "Actual pilot commits boarding before reverse flight")
 
