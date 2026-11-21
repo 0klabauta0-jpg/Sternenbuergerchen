@@ -45,10 +45,16 @@ func request_departure(source_craft_id: String) -> Dictionary:
 	if not is_instance_valid(controller) or not is_instance_valid(simulation) or not simulation.has_method("get_hex_unit_state"): return _reject("station_runtime_unavailable")
 	var deployed: Variant = controller.get("_deployed_unit_ids")
 	if typeof(deployed) != TYPE_DICTIONARY: return _reject("station_presence_unavailable")
+	# Respawn (R4f): Wer ausfaellt (respawning) oder auf Abholung wartet (awaiting_pickup), fliegt nie mit dem Dienst heim (daheim abgelehnt).
+	var waiting := {}
+	var roster: Variant = _flow.get("_all_team_units")
+	if roster is Array:
+		for entry: Variant in roster:
+			if entry is Dictionary and String((entry as Dictionary).get("availability_status", "")) in ["respawning", "awaiting_pickup"]: waiting[String((entry as Dictionary).get("unit_id", ""))] = true
 	var candidates: Array[String] = []
 	for raw in Array(source.get("unit_ids", [])):
 		var id := String(raw)
-		if id.begins_with("polisa_recruit_") and deployed.has(id) and not Dictionary(simulation.call("get_hex_unit_state", id)).is_empty(): candidates.append(id)
+		if id.begins_with("polisa_recruit_") and not waiting.has(id) and deployed.has(id) and not Dictionary(simulation.call("get_hex_unit_state", id)).is_empty(): candidates.append(id)
 	if candidates.is_empty(): return {"ok":true,"handled":false}
 	var person := candidates[0]
 	var ground: Dictionary = simulation.call("get_hex_unit_state", person)

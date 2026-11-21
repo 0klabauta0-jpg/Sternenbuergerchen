@@ -2,15 +2,13 @@ extends SceneTree
 ## R4c Respawn, Befund W1 (Pruefbericht 1): Der Shuttle-Dienst waehlt seine Fahrgaeste nur nach der Kennung polisa_recruit_ (und "am Boden").
 ## Eine frueher Angeworbene, die auf Abholung wartet (awaiting_pickup) und am Boden zurueckbleibt, wuerde so auf den Heimflug geschickt; daheim lehnt
 ## admit_polisa_shuttle_home sie jetzt ab (Wartende kommen nur mit dem Schiff), der Adapter wiederholt den Schritt alle 0,5 s.
-## Dieser Test haelt NUR die Auswahl fest. Mit der Fassung des Dispatchers bis 5d207c752 (scripts/mission/polisa_shuttle_dispatcher.gd, ausserhalb des
-## Auftrags R4c) gilt: BEFUND = die Wartende wird gewaehlt (Ausgabe "BEFUND W1 ... gewaehlt"), und die Pruefung ist gruen. Sobald der Dispatcher
-## Wartende ausnimmt, wird die Pruefung "BEFUND W1" rot und ist auf "nicht gewaehlt" umzudrehen.
+## R4f: Der Dispatcher nimmt Wartende (awaiting_pickup) und Ausgefallene (respawning) aus der Auswahl aus; dieser Test haelt NUR die Auswahl fest.
 ## Abschlusszeile: CAMPAIGN_RESPAWN_PICKUP_DISPATCHER passed=%d failed=%d
 
 const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
 
 class Controller extends Node:
-	var _deployed_unit_ids := {"polisa_recruit_back": true, "polisa_recruit_fresh": true}
+	var _deployed_unit_ids := {"polisa_recruit_back": true, "polisa_recruit_down": true, "polisa_recruit_fresh": true, "polisa_recruit_nofile": true}
 class Setup extends Node:
 	func get_polisa_recruit_admission(_id: String) -> Dictionary: return {"ok": true}
 class Terrain extends Node:
@@ -25,7 +23,12 @@ class Flow extends Node:
 	var place: Node
 	func get_mission_for_craft(_id: String) -> Node: return place
 	func _request_singleplayer_return(_id: String) -> Dictionary: return {"ok": true}
-	func _roster_unit_awaits_pickup(id: String) -> bool: return id == "polisa_recruit_back"
+	## Kader wie im Spiel: Wartende (awaiting_pickup), Ausgefallene (respawning), eine nie gestorbene Angeworbene (active).
+	var _all_team_units: Array = [
+		{"unit_id": "polisa_recruit_back", "availability_status": "awaiting_pickup"},
+		{"unit_id": "polisa_recruit_down", "availability_status": "respawning"},
+		{"unit_id": "polisa_recruit_fresh", "availability_status": "active"},
+	]
 class Base extends Node:
 	func get_shuttle_person_status(_id: String) -> Dictionary: return {"ok": true, "has_bed": false, "has_task": false}
 class Bridge extends RefCounted:
@@ -50,10 +53,18 @@ func _run() -> void:
 		print("CAMPAIGN_RESPAWN_PICKUP_DISPATCHER refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
 		quit(2)
 		return
-	for case_ids: Array in [[["polisa_recruit_fresh"], "polisa_recruit_fresh"], [["polisa_recruit_back"], "polisa_recruit_back"]]:
+	## Fall: [Besucher-Kennungen, erwartete Wahl ("" = niemand), Beschriftung]
+	for case_ids: Array in [
+		[["polisa_recruit_fresh"], "polisa_recruit_fresh", "Kontrolle: eine nie gestorbene Angeworbene am Boden wird vom Shuttle-Dienst gewaehlt"],
+		[["polisa_recruit_nofile"], "polisa_recruit_nofile", "Kontrolle: eine Angeworbene ohne Kader-Eintrag wird gewaehlt (nur die Kennung zaehlt)"],
+		[["polisa_recruit_back"], "", "W1: eine Wartende (awaiting_pickup) mit Kennung wird NICHT gewaehlt"],
+		[["polisa_recruit_down"], "", "W1: eine Ausgefallene (respawning) mit Kennung wird NICHT gewaehlt"],
+		[["polisa_recruit_back", "polisa_recruit_down", "polisa_recruit_fresh"], "polisa_recruit_fresh", "W1: neben Wartender und Ausgefallener wird die nie gestorbene gewaehlt"],
+	]:
 		var place := Node.new(); root.add_child(place)
 		place.set_meta("location_id", "polisa")
 		place.set_meta("singleplayer_visit_identities", {"own": {"unit_ids": case_ids[0]}})
+		# Ohne Kader-Eintrag fuer "nofile" bewusst.
 		var c := Controller.new(); c.name = "TacticalController"; place.add_child(c)
 		var setup := Setup.new(); setup.name = "MissionSetup"; place.add_child(setup)
 		var terrain := Terrain.new(); place.add_child(terrain)
@@ -64,12 +75,11 @@ func _run() -> void:
 		dispatcher._bridge = Bridge.new()
 		dispatcher.configure(flow, base, Owner.new(), Callable())
 		var start: Dictionary = dispatcher.request_departure("own")
-		var chosen: bool = bool(start.get("pending", false)) and String(dispatcher.get_snapshot().get("person_id", "")) == String(case_ids[1])
-		if String(case_ids[1]) == "polisa_recruit_fresh":
-			_check(chosen, "Kontrolle: eine frisch Angeworbene am Boden wird vom Shuttle-Dienst gewaehlt")
+		var picked := String(dispatcher.get_snapshot().get("person_id", ""))
+		if String(case_ids[1]).is_empty():
+			_check(not bool(start.get("pending", false)) and picked.is_empty(), String(case_ids[2]) + " (gewaehlt: '%s', pending: %s)" % [picked, str(start.get("pending", false))])
 		else:
-			print("BEFUND W1: die wartende frueher Angeworbene %s wird vom Shuttle-Dienst %s" % [case_ids[1], "gewaehlt" if chosen else "nicht gewaehlt"])
-			_check(chosen, "BEFUND W1: die wartende frueher Angeworbene wird vom Shuttle-Dienst gewaehlt (Dispatcher waehlt nur nach Kennung)")
+			_check(bool(start.get("pending", false)) and picked == String(case_ids[1]), String(case_ids[2]) + " (gewaehlt: '%s')" % picked)
 		place.free(); flow.free(); base.free()
 	print("CAMPAIGN_RESPAWN_PICKUP_DISPATCHER passed=%d failed=%d" % [_passed, _failed])
 	quit(0 if _failed == 0 else 1)
