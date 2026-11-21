@@ -48,13 +48,28 @@ func run() -> void:
 	presenter._end_hover()
 	check(presenter.get("_hide_timer").is_stopped(), "Explicit pinned help survives pointer exit")
 	check(runtime.get_snapshot() == original, "Hide/reopen never advances owner progress")
-	var ids := {"base_ready":"campaign.boarding","satellite_completed":"campaign.movement","satellite_home":"campaign.return","trade_departed":"campaign.trade","trade_used":"campaign.use","bought":"campaign.trade","refueled":"campaign.trade","trade_home":"campaign.return","completed":"campaign.complete"}
-	for step in ids:
+	# The steps come from the real source: every fact the onboarding state can report as next_step_id (plus "completed")
+	# needs its own help text, not the generic fallback.
+	var real_steps: Array = []
+	var stage_of: Dictionary = {}
+	var onboarding_stages: Array = load("res://scripts/core/campaign_onboarding_state.gd").STAGE_FACTS
+	for stage_index in onboarding_stages.size():
+		for fact in onboarding_stages[stage_index]:
+			real_steps.append(String(fact))
+			stage_of[String(fact)] = stage_index
+	real_steps.append("completed")
+	stage_of["completed"] = onboarding_stages.size()
+	var known_steps: Dictionary = load("res://scripts/meta/campaign_tutorial_presenter.gd").STEPS
+	check(real_steps.size() == 11, "Onboarding source lists the eleven real steps: " + str(real_steps))
+	for step in real_steps:
+		check(known_steps.has(step), "Real step has its own help text: " + step)
 		runtime.snapshot.onboarding.next_step_id = step
-		runtime.snapshot.onboarding.stage_index = 3 if step == "completed" else (2 if step in ["trade_departed","trade_used","bought","refueled","trade_home"] else (0 if step == "base_ready" else 1))
+		runtime.snapshot.onboarding.stage_index = stage_of[step]
 		presenter.refresh()
 		var view: Dictionary = presenter.get_presentation_snapshot()
-		check(view.help_id == ids[step] and not String(view.guidance).is_empty(), "Runtime step maps to actionable help: " + step)
+		check(known_steps.has(step) and view.help_id == known_steps[step][0] and view.help_id != "campaign.job" and not String(view.guidance).is_empty(), "Runtime step maps to actionable help: " + step)
+	for step in known_steps:
+		check(real_steps.has(step), "Help text belongs to a step the source can deliver: " + step)
 	presenter.set_help_mode("off")
 	presenter.get_node("CampaignGuidance").find_child("CampaignHelpButton", true, false).pressed.emit()
 	check(not presenter.get_presentation_snapshot().popup_visible, "Off setting blocks help popup")
