@@ -43,6 +43,8 @@ var secondary_text: String = ""
 var rank_badges: Array = []
 var availability_status: String = "active"
 var recovery_state: Dictionary = {}
+## Respawn: wie oft die Person in der Kampagne schon gestorben und wiedergekommen ist (fehlt = 0).
+var respawns_used: int = 0
 var relationship_summary_text: String = ""
 var relationship_links: Array = []
 var fireteam_history: Array = []
@@ -110,6 +112,7 @@ func to_dict() -> Dictionary:
 		"rank_badges": rank_badges.duplicate(true),
 		"availability_status": availability_status,
 		"recovery_state": recovery_state.duplicate(true),
+		"respawns_used": respawns_used,
 		"relationship_summary_text": relationship_summary_text,
 		"relationship_links": relationship_links.duplicate(true),
 		"fireteam_history": fireteam_history.duplicate(true),
@@ -168,6 +171,7 @@ func _apply_dict(data: Dictionary) -> void:
 	rank_badges = _coerce_badge_array(data.get("rank_badges", []))
 	availability_status = String(data.get("availability_status", "active")).strip_edges().to_lower()
 	recovery_state = Dictionary(data.get("recovery_state", {})).duplicate(true)
+	respawns_used = preload("res://scripts/core/campaign_casualty_rules.gd").respawns_used_of(data)
 	relationship_summary_text = String(data.get("relationship_summary_text", "")).strip_edges()
 	relationship_links = _coerce_dictionary_array(data.get("relationship_links", []))
 	fireteam_history = _coerce_dictionary_array(data.get("fireteam_history", []))

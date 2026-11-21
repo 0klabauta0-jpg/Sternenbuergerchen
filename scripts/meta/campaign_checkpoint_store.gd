@@ -67,9 +67,12 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if payload.get("schema_version") != 1 or typeof(payload.get("roster")) != TYPE_ARRAY or payload.roster.size() < 2 or payload.roster.size() > 64 or typeof(payload.get("craft")) != TYPE_DICTIONARY:
 		return {"ok":false,"reason":"invalid_checkpoint"}
 	var ids: Array = []
+	# Respawn: wer gestorben ist oder auf Abholung wartet, steht wie ein Angeworbener als "station" in der Basis.
+	var pickup_ids: Array = []
 	for unit in payload.roster:
 		if typeof(unit) != TYPE_DICTIONARY or typeof(unit.get("unit_id")) != TYPE_STRING or String(unit.unit_id).is_empty() or ids.has(unit.unit_id):
 			return {"ok":false,"reason":"invalid_campaign_roster"}
+		if String(unit.get("availability_status", "")) in ["respawning", "awaiting_pickup"]: pickup_ids.append(unit.unit_id)
 		for field in ["skill_values", "communication_values", "platform_values", "behavior_axes", "method_scores", "function_scores", "recovery_state", "progression", "ftl_tactical_progression"]:
 			if unit.has(field) and typeof(unit[field]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_roster_field"}
@@ -92,7 +95,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 				if unit.has(field) and typeof(unit[field])!=TYPE_BOOL: return {"ok":false,"reason":"invalid_auto_rest_setting"}
 			if typeof(unit.get("position")) != TYPE_ARRAY or unit.position.size() != 2 or not String(unit.get("status", "")) in ["outside","sleeping","aboard","station"]:
 				return {"ok":false,"reason":"invalid_base_position"}
-			if unit.status == "station" and (not String(id).begins_with("polisa_recruit_") or unit.get("location_id") != "polisa" or not String(unit.get("craft_id", "")).is_empty() or not String(unit.get("bed_id", "")).is_empty()): return {"ok":false,"reason":"invalid_station_personnel"}
+			if unit.status == "station" and (not (String(id).begins_with("polisa_recruit_") or pickup_ids.has(id)) or unit.get("location_id") != "polisa" or not String(unit.get("craft_id", "")).is_empty() or not String(unit.get("bed_id", "")).is_empty()): return {"ok":false,"reason":"invalid_station_personnel"}
 			for number in unit.position:
 				if typeof(number) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(number)):
 					return {"ok":false,"reason":"invalid_base_position"}
@@ -274,7 +277,15 @@ static func _valid_fallen(value: Variant) -> bool:
 		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("unit_id")) != TYPE_STRING or String(entry.unit_id).is_empty(): return false
 		for key in ["display_name", "job_id", "location_id"]:
 			if entry.has(key) and typeof(entry[key]) != TYPE_STRING: return false
+		# Respawn: die neuen Felder sind optional und werden beim Laden einzeln bereinigt (Adapter), nicht hier abgelehnt.
 	return true
+## Respawn: Der Kader-Eintrag sagt, dass die Person gestorben ist oder auf Abholung wartet.
+static func _roster_waits_for_pickup(roster: Variant, unit_id: String) -> bool:
+	if typeof(roster) != TYPE_ARRAY: return false
+	for entry in roster:
+		if typeof(entry) == TYPE_DICTIONARY and String(entry.get("unit_id", "")) == unit_id:
+			return String(entry.get("availability_status", "")) in ["respawning", "awaiting_pickup"]
+	return false
 static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dictionary:
 	# V2 has no free-position mirror. Reject before any Legacy normalization.
 	if payload.has("base_personnel") or typeof(payload.hex_tactical) != TYPE_DICTIONARY:
@@ -292,7 +303,7 @@ static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dic
 			return {"ok":false,"reason":"invalid_hex_checkpoint_roster"}
 		# Resident auf Polisa: nur angeworbene Personen, wie im Nicht-Hex-Stand (invalid_station_personnel).
 		# Auch ohne Schiff und ohne Bett (leere craft_id und bed_id).
-		if base.units[id].get("status") == "station" and (not String(id).begins_with("polisa_recruit_") or not String(base.units[id].get("craft_id", "")).is_empty() or not String(base.units[id].get("bed_id", "")).is_empty()):
+		if base.units[id].get("status") == "station" and (not (String(id).begins_with("polisa_recruit_") or _roster_waits_for_pickup(payload.roster, String(id))) or not String(base.units[id].get("craft_id", "")).is_empty() or not String(base.units[id].get("bed_id", "")).is_empty()):
 			return {"ok":false,"reason":"invalid_station_personnel"}
 	var ships: Dictionary = {}
 	var fleet: Variant = payload.get("fleet", [])

@@ -231,7 +231,7 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 			var candidate := Vector2(float(point[0]), float(point[1]))
 			if _terrain.is_walkable(_terrain.world_to_grid(candidate)):
 				actor.position = _navigation_graph.call("nearest_available_world", candidate) if _navigation_graph != null and _navigation_graph.has_method("is_available_world") and not _navigation_graph.call("is_available_world", candidate) else candidate
-		if String(restore.get("status", "")) == "station" and String(restore.get("location_id", "")) == "polisa" and id.begins_with("polisa_recruit_"):
+		if _profile_waits_for_pickup(profile) or (String(restore.get("status", "")) == "station" and String(restore.get("location_id", "")) == "polisa" and id.begins_with("polisa_recruit_")):
 			_states[id].status = "station"
 			actor.visible = false
 		elif String(restore.get("status", "")) == "aboard":
@@ -438,7 +438,7 @@ func sync_roster() -> void:
 			actor.position = _navigation_graph.call("nearest_available_world", actor.position)
 		_registry.register_unit(id, actor)
 		_sim.register_known_unit(id, actor)
-		var at_station := String(profile.get("recruit_location", "")) == "polisa" and id.begins_with("polisa_recruit_")
+		var at_station := (String(profile.get("recruit_location", "")) == "polisa" and id.begins_with("polisa_recruit_")) or _profile_waits_for_pickup(profile)
 		_states[id] = {"unit_id":id,"name":String(profile.get("display_name",id)),"role":String(profile.get("role_name","")),"status":"station" if at_station else "outside","craft_id":"","bed_id":"","action":{},"last_result":{}}
 		if at_station: actor.visible = false
 	_sync_hex_ground_presence()
@@ -606,6 +606,32 @@ func get_shuttle_person_status(unit_id: String) -> Dictionary:
 
 func get_terrain_registry() -> Node:
 	return _terrain
+## Respawn (R3): Wer gestorben ist oder nach dem Ausfall auf Abholung wartet, steht wie ein Angeworbener unsichtbar auf Polisa
+## (Zustand "station", nicht ansprechbar, nicht einschiffbar). Die Wahrheit liegt im Kader-Eintrag (availability_status).
+static func _profile_waits_for_pickup(profile: Variant) -> bool:
+	return profile is Dictionary and String((profile as Dictionary).get("availability_status", "")) in ["respawning", "awaiting_pickup"]
+
+func _waits_for_pickup(id: String) -> bool:
+	if _flow == null: return false
+	for profile: Variant in Array(_flow.get("_all_team_units")):
+		if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return _profile_waits_for_pickup(profile)
+	return false
+
+## Respawn (R3): Die Person verlaesst die Basis und wartet unsichtbar auf Polisa. Ohne Basis-Person ({ok, unchanged}) ist nichts zu tun.
+## Das Abholen selbst ist nicht hier (R4).
+func park_pickup_person(unit_id: String) -> Dictionary:
+	if not _states.has(unit_id) or String(_states[unit_id].get("status", "")) == "station":
+		return {"ok":true,"unchanged":true}
+	_cancel(unit_id, false)
+	if _requires_hex_ground():
+		var released: Dictionary = _sim.release_base_ground_people(self, PackedStringArray([unit_id]), "respawn_station")
+		if not released.get("ok", false): return released
+	_states[unit_id].status = "station"
+	var actor := get_actor(unit_id)
+	if is_instance_valid(actor): actor.visible = false
+	state_changed.emit()
+	return {"ok":true}
+
 func has_station_recruits() -> bool:
 	for state: Dictionary in _states.values():
 		if String(state.get("status", "")) == "station": return true
@@ -1482,7 +1508,7 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 			if (not home_member and not _checkpoint_away_craft_member(id,value.craft_id,state)) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
 		elif value.status=="station":
 			# Resident auf Polisa: nur die Person, keine Zelle auf der Heimkarte, kein Schiff, kein Bett, keine Aktion.
-			if not id.begins_with("polisa_recruit_") or not value.craft_id.is_empty() or not value.bed_id.is_empty() or not value.action.is_empty() or target.has_unit(id) or intents.has(id):return _checkpoint_reject("base_checkpoint_station_context")
+			if not (id.begins_with("polisa_recruit_") or _waits_for_pickup(String(id))) or not value.craft_id.is_empty() or not value.bed_id.is_empty() or not value.action.is_empty() or target.has_unit(id) or intents.has(id):return _checkpoint_reject("base_checkpoint_station_context")
 		else:
 			if not value.craft_id.is_empty() or not target.has_unit(id):return _checkpoint_reject("base_checkpoint_ground_presence")
 		if value.status=="moving":

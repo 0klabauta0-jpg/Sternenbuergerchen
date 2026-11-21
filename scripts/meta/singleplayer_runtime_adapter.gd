@@ -1765,6 +1765,8 @@ func charge_campaign_credits_capped(amount: int) -> Dictionary:
 	return _supply.charge_credits_capped(amount)
 
 ## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
+## Seit dem Respawn zusaetzlich optional: reason ("respawn_limit"), respawns_used, respawn_limit (ganze Zahlen >= 0);
+## alte Eintraege ohne diese Felder bleiben gueltig und unveraendert.
 func record_fallen(entry: Dictionary) -> Dictionary:
 	var clean: Dictionary = _clean_fallen_entry(entry)
 	if clean.is_empty(): return {"ok": false, "reason": "invalid_fallen_entry"}
@@ -1813,6 +1815,16 @@ static func _clean_fallen_entry(entry: Dictionary) -> Dictionary:
 		var value: Variant = entry.get(key, "")
 		if typeof(value) != TYPE_STRING: return {}
 		clean[key] = String(value)
+	# Respawn: optionale Felder eines endgueltigen Todes. Fehlen sie, bleibt der Eintrag wie er war (alte Staende);
+	# hat ein Feld den falschen Typ, entfaellt nur dieses Feld, nicht der ganze Eintrag.
+	if typeof(entry.get("reason")) == TYPE_STRING and not String(entry.reason).is_empty():
+		clean["reason"] = String(entry.reason)
+	for key in ["respawns_used", "respawn_limit"]:
+		var number: Variant = entry.get(key)
+		if typeof(number) == TYPE_INT and int(number) >= 0:
+			clean[key] = int(number)
+		elif typeof(number) == TYPE_FLOAT and is_finite(float(number)) and float(number) >= 0.0 and float(number) == floorf(float(number)):
+			clean[key] = int(number)
 	return clean
 
 func _reject(reason: String, message: String) -> Dictionary:
