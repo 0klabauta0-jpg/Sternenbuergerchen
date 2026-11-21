@@ -429,6 +429,28 @@ func _nd_e() -> void:
 	print("RDE_E_EDIT add=", other, " assign=", moved, " back=", back)
 	_check(bool(other.get("ok", false)), "E: Trupp-Bearbeitung an anderem Trupp laeuft")
 	_nd_check_e("nach Trupp-Bearbeitung an anderem Trupp")
+	# R4f: Speichern und Fortsetzen darf B nicht zurueckbringen (auch nicht in die FOB-Ansicht).
+	if not await _nd_save_and_continue("E (nach dem Tod)"): return
+	_nd_check_e("nach erneutem Speichern und Fortsetzen")
+	# R4f: Nach dem Abholen ist B wieder einteilbar wie jede andere Person.
+	var ticks: int = _nd_mature([LEAD_B])
+	if not _check(_nd_status(LEAD_B) == "awaiting_pickup", "E: B wartet auf Abholung nach %d Takten" % ticks): return
+	_nd_craft()
+	var boarded: Dictionary = _t6b_base().call("mark_recruit_remote", LEAD_B, _craft_id)
+	if not _check(bool(boarded.get("ok", false)), "E: Aufbau: B ist an Bord des Heimschiffs (%s)" % [boarded]): return
+	var picked: Dictionary = _flow.call("complete_campaign_pickup", LEAD_B)
+	if not _check(bool(picked.get("ok", false)) and _nd_status(LEAD_B) == "active", "E: B ist abgeholt und aktiv (%s)" % [picked]): return
+	var out: Dictionary = _t6b_base().call("request_operation", "base_unboard", {"unit_id": LEAD_B, "craft_id": _craft_id})
+	await _pk_wait(func(): return _ra_base_status(LEAD_B) == "outside", 60000)
+	if not _check(bool(out.get("ok", false)) and _ra_base_status(LEAD_B) == "outside", "E: Aufbau: B steht an der Basis (%s)" % [out]): return
+	var known_after: Array = _rg_team_ids()
+	var added_after: Dictionary = _screen.call("request_operation", "add_fireteam", {})
+	var team_after: String = ""
+	for team_id: String in _rg_team_ids():
+		if not known_after.has(team_id):
+			team_after = team_id
+	var reassigned: Dictionary = _screen.call("request_operation", "assign", {"unit_id": LEAD_B, "fireteam_id": team_after})
+	_check(bool(added_after.get("ok", false)) and bool(reassigned.get("ok", false)) and _rg_team_members(team_after).has(LEAD_B), "E: B nach dem Abholen wieder einteilbar (%s / %s)" % [added_after, reassigned])
 
 func _nd_check_e(tag: String) -> void:
 	var places: Array = _rg_definition_places(LEAD_B)

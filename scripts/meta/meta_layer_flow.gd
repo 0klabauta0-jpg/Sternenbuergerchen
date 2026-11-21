@@ -5058,6 +5058,53 @@ func _drop_units_from_squads_and_selection(departed: Dictionary, homebase_screen
 				cleaned.append(definition)
 		if not cleaned.is_empty():
 			homebase_screen.call("set_fireteam_context", PackedStringArray(_homebase_staged_fireteam_ids), cleaned, false)
+	# Wiederkehrer (R4f): Die FOB-Ansicht fuehrt eigene Trupp-Definitionen und Auswahl. Sie stehen dort weiter, bis die Ansicht neu
+	# aufgebaut wird (_campaign_fob_fireteam_definitions laesst jedes Mitglied im Kader durch, und die Ansicht liest diese Funktion
+	# gar nicht). Deshalb hier dieselbe Bereinigung an der Ansicht selbst; ohne Ansicht oder ohne Wiederkehrer nichts zu tun.
+	var fob_screen: Node = _get_fob_screen() if scrub_definitions else null
+	if fob_screen != null and fob_screen.has_method("get_fireteam_definitions") and fob_screen.has_method("set_team") and fob_screen.has_method("get_team") and fob_screen.has_method("get_selected_fireteam_ids"):
+		var fob_changed: bool = false
+		var fob_cleaned: Array = []
+		for fob_definition_variant in Array(fob_screen.call("get_fireteam_definitions")):
+			if typeof(fob_definition_variant) != TYPE_DICTIONARY:
+				fob_cleaned.append(fob_definition_variant)
+				continue
+			var fob_definition: Dictionary = Dictionary(fob_definition_variant).duplicate(true)
+			var fob_had_members: bool = false
+			var fob_remaining: PackedStringArray = PackedStringArray()
+			for fob_member_variant in Array(fob_definition.get("member_unit_ids", [])):
+				fob_had_members = true
+				if departed.has(String(fob_member_variant)):
+					fob_changed = true
+				else:
+					fob_remaining.append(String(fob_member_variant))
+			var fob_loadouts: Dictionary = Dictionary(fob_definition.get("member_loadouts", {})).duplicate(true)
+			for departed_id: String in departed:
+				if fob_loadouts.erase(departed_id):
+					fob_changed = true
+			if departed.has(String(fob_definition.get("lead_unit_id", ""))):
+				fob_definition["lead_unit_id"] = String(fob_remaining[0]) if not fob_remaining.is_empty() else ""
+				fob_changed = true
+			if fob_had_members and fob_remaining.is_empty():
+				continue
+			fob_definition["member_unit_ids"] = fob_remaining
+			fob_definition["member_loadouts"] = fob_loadouts
+			fob_cleaned.append(fob_definition)
+		var fob_units: PackedStringArray = PackedStringArray(fob_screen.call("get_team"))
+		var fob_team_ids: PackedStringArray = PackedStringArray(fob_screen.call("get_selected_fireteam_ids"))
+		var fob_kept_units: PackedStringArray = PackedStringArray()
+		var fob_kept_teams: PackedStringArray = PackedStringArray()
+		for fob_index in range(fob_units.size()):
+			if departed.has(String(fob_units[fob_index])):
+				fob_changed = true
+				continue
+			fob_kept_units.append(fob_units[fob_index])
+			if fob_index < fob_team_ids.size() and fob_units.size() == fob_team_ids.size():
+				fob_kept_teams.append(fob_team_ids[fob_index])
+		if fob_units.size() != fob_team_ids.size():
+			fob_kept_teams = fob_team_ids
+		if fob_changed:
+			fob_screen.call("set_team", fob_kept_units, fob_kept_teams, fob_cleaned)
 	return emptied_teams
 
 
