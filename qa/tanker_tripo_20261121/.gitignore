@@ -1,0 +1,5 @@
+.godot/
+*.uid
+check_runs/
+render_profile/
+*.import

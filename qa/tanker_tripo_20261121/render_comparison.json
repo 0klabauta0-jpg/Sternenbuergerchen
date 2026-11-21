@@ -1,0 +1,28 @@
+{
+  "front": {
+    "resolution": [
+      1280,
+      800
+    ],
+    "ship_pixels_in_either_image": 236622,
+    "silhouette_pixel_changes": 8,
+    "exact_rgb_matches": 206964,
+    "mean_max_channel_delta_8_bit": 0.1458782361741512,
+    "p95_max_channel_delta_8_bit": 1,
+    "max_channel_delta_8_bit": 90,
+    "pixels_with_max_channel_delta_above_12": 99
+  },
+  "rear": {
+    "resolution": [
+      1280,
+      800
+    ],
+    "ship_pixels_in_either_image": 201026,
+    "silhouette_pixel_changes": 12,
+    "exact_rgb_matches": 174963,
+    "mean_max_channel_delta_8_bit": 0.16091450857103062,
+    "p95_max_channel_delta_8_bit": 1,
+    "max_channel_delta_8_bit": 56,
+    "pixels_with_max_channel_delta_above_12": 144
+  }
+}

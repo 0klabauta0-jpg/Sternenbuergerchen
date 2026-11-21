@@ -1,0 +1,339 @@
+00:03.125  blend            | Read blend: "C:\dev\SternenBuergerchen-worktrees\tanker-tripo-20261121\art\tanker_tripo_20261121\source\tanker_tripo_original.blend"
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_0_basecolor.jpg' not found
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_10_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_0_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_11_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_10_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_12_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_11_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_13_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_12_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_14_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_13_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_15_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_14_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_16_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_15_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_17_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_16_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_18_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_17_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_19_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_18_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_1_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_19_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_20_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_1_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_21_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_20_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_22_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_21_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_23_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_22_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_24_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_23_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_25_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_24_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_26_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_25_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_27_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_26_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_28_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_27_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_29_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_28_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_2_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_29_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_30_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_2_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_31_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_30_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_32_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_31_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_33_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_32_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_34_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_33_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_35_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_34_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_36_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_35_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_37_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_36_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_38_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_37_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_39_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_38_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_3_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_39_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_40_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_3_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_41_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_40_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_42_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_41_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_43_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_42_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_44_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_43_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_45_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_44_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_46_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_45_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_47_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_46_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_48_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_47_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_49_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_48_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_4_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_49_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_50_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_4_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_51_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_50_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_52_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_51_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_53_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_52_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_54_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_53_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_55_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_54_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_56_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_55_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_57_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_56_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_58_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_57_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_59_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_58_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_5_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_59_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_60_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_5_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_61_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_60_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_62_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_61_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_63_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_62_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_64_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_63_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_65_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_64_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_66_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_65_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_67_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_66_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_68_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_67_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_69_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_68_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_6_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_69_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_70_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_6_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_71_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_70_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_72_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_71_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_73_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_72_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_74_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_73_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_75_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_74_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_76_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_75_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_77_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_76_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_78_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_77_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_79_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_78_basecolor.jpg" not available. Keeping packed image
+00:03.250  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_7_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_79_basecolor.jpg" not available. Keeping packed image
+00:03.266  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_80_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_7_basecolor.jpg" not available. Keeping packed image
+00:03.266  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_81_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_80_basecolor.jpg" not available. Keeping packed image
+00:03.266  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_8_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_81_basecolor.jpg" not available. Keeping packed image
+00:03.266  reports          | ERROR Unable to pack file, source path 'C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_9_basecolor.jpg' not found
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_8_basecolor.jpg" not available. Keeping packed image
+Info: Saved as "tanker_102m_segmented.blend"
+INFO Draco is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+14:17:44 | INFO: Starting glTF 2.0 export
+14:17:44 | INFO: Extracting primitive: Mesh_0
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_78
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_39
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_76
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_6
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_35
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_9
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_37
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_38
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_13
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_29
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_68
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_10
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_56
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_32
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_24
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_5
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_60
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_52
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_25
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_17
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_58
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_44
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_33
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_30
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_57
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_18
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_42
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_19
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_1
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_31
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_69
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_73
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_59
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_48
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_75
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_2
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_50
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_16
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_28
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_51
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_4
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_63
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_14
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_72
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_7
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_20
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_34
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_26
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_61
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_79
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_66
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_36
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_15
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_27
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_21
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_67
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_8
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_80
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_3
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_22
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_53
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_81
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_47
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_64
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_62
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_41
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_74
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_65
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_11
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_54
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_23
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_77
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_55
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_70
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_43
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_46
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_49
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_12
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_45
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_40
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Extracting primitive: Mesh_71
+14:17:44 | INFO: Primitives created: 1
+14:17:44 | INFO: Finished glTF 2.0 export in 0.2345888614654541 s
+
+TANKER_PREPARED {"metres": {"meshes": 82, "triangles": 15102, "vertices": 7717, "materials": 82, "bounds_min": [-34.327667236328125, -51.0, 0.0], "bounds_max": [34.32767105102539, 50.999996185302734, 28.88156509399414], "dimensions_xyz": [68.65533828735352, 101.99999618530273, 28.88156509399414]}, "errors": ["tripo_part_1: 2 edges with inconsistent face winding", "tripo_part_43: 2 edges with inconsistent face winding", "tripo_part_74: 4 edges with inconsistent face winding", "floating/detached part in tripo_part_52 (4 verts at [9.041, -11.07, 9.226])", "floating/detached part in tripo_part_74 (3 verts at [-0.37, -22.37, 25.686])"], "warnings": ["hidden back-to-back faces: tripo_part_0<->tripo_part_1 (1 pairs) - delete to save tris", "hidden back-to-back faces: tripo_part_54<->tripo_part_69 (1 pairs) - delete to save tris", "hidden back-to-back faces: tripo_part_64<->tripo_part_69 (1 pairs) - delete to save tris"]}
+ERROR: Image "C:\Users\bjoer\AppData\Local\Temp\blender_a27056\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\tankersci-fi_spaceship_3d_model_tripo_part_9_basecolor.jpg" not available. Keeping packed image
+
+Blender quit

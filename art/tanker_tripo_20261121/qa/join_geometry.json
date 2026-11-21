@@ -1,0 +1,6 @@
+{
+  "triangles_matched": 15097,
+  "max_corner_error_m": 5.3947966093944364e-06,
+  "tolerance_m": 2e-05,
+  "all_triangles_matched": true
+}

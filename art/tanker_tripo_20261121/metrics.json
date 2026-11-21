@@ -1,0 +1,66 @@
+{
+  "source_sha256": "979f522e44c57b68ef8e3345d17a621f81c0403726c60a970f057a58f23ec8a7",
+  "source": {
+    "meshes": 82,
+    "triangles": 15102,
+    "vertices": 7717,
+    "materials": 82,
+    "bounds_min": [
+      -0.49921703338623047,
+      -0.3367294371128082,
+      1.3824789091287926e-09
+    ],
+    "bounds_max": [
+      0.5018507838249207,
+      0.33708086609840393,
+      0.283454954624176
+    ],
+    "dimensions_xyz": [
+      1.0010678172111511,
+      0.6738103032112122,
+      0.2834549532416971
+    ]
+  },
+  "metres": {
+    "meshes": 82,
+    "triangles": 15102,
+    "vertices": 7717,
+    "materials": 82,
+    "bounds_min": [
+      -34.327667236328125,
+      -51.0,
+      0.0
+    ],
+    "bounds_max": [
+      34.32767105102539,
+      50.999996185302734,
+      28.88156509399414
+    ],
+    "dimensions_xyz": [
+      68.65533828735352,
+      101.99999618530273,
+      28.88156509399414
+    ]
+  },
+  "uniform_scale_from_source": 101.89119882423067,
+  "reference_length_m": 102.0,
+  "game_units_per_metre": 0.09386666666666667,
+  "game_dimensions_xyz": [
+    6.44444775390625,
+    9.574399641927084,
+    2.7110162434895835
+  ],
+  "geometry_signature": "b57c66581ee5af86da5b484926bc2db6154967e6d81eb3a2d2d31835bea1de38",
+  "qa_errors": [
+    "tripo_part_1: 2 edges with inconsistent face winding",
+    "tripo_part_43: 2 edges with inconsistent face winding",
+    "tripo_part_74: 4 edges with inconsistent face winding",
+    "floating/detached part in tripo_part_52 (4 verts at [9.041, -11.07, 9.226])",
+    "floating/detached part in tripo_part_74 (3 verts at [-0.37, -22.37, 25.686])"
+  ],
+  "qa_warnings": [
+    "hidden back-to-back faces: tripo_part_0<->tripo_part_1 (1 pairs) - delete to save tris",
+    "hidden back-to-back faces: tripo_part_54<->tripo_part_69 (1 pairs) - delete to save tris",
+    "hidden back-to-back faces: tripo_part_64<->tripo_part_69 (1 pairs) - delete to save tris"
+  ]
+}

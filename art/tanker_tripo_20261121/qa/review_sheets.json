@@ -1,0 +1,36 @@
+{
+  "random": {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_random.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_random_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_random_back.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_random_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_random_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "back",
+      "top",
+      "three_quarter"
+    ]
+  },
+  "wire": {
+    "ok": true,
+    "sheet": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_wire.png",
+    "views": [
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_wire_front.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_wire_back.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_wire_top.png",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\art\\tanker_tripo_20261121\\qa\\review_wire_three_quarter.png"
+    ],
+    "layout": "2x2",
+    "order": [
+      "front",
+      "back",
+      "top",
+      "three_quarter"
+    ]
+  }
+}

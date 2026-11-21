@@ -1,0 +1,128 @@
+{
+  "checks_failed": [],
+  "game_world_units_per_meter": 0.09386666666666667,
+  "godot": "4.6.2-stable (official)",
+  "route": "GLTFDocument.append_from_file + generate_scene",
+  "variants": {
+    "cutlass_01.glb": {
+      "bounds_max": [
+        1.3286172151565552,
+        1.2642592191696167,
+        1.7599995136260986
+      ],
+      "bounds_min": [
+        -1.3286172151565552,
+        0.0,
+        -1.7599999904632568
+      ],
+      "bounds_size": [
+        2.6572344303131104,
+        1.2642592191696167,
+        3.5199995040893555
+      ],
+      "decoded_images": 5,
+      "embedded_image_buffer_views": 5,
+      "file": "C:/dev/SternenBuergerchen/Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "materials": 8,
+      "mesh_instances": 1,
+      "mesh_surfaces": 8,
+      "missing_albedo_texture_slots": 4,
+      "missing_material_slots": 0,
+      "missing_surface_uv": 0,
+      "non_triangle_surfaces": 0,
+      "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "source_images": 5,
+      "triangles": 22496.0
+    },
+    "tanker_102m.glb": {
+      "bounds_max": [
+        34.327674865722656,
+        28.88156509399414,
+        51.000003814697266
+      ],
+      "bounds_min": [
+        -34.327667236328125,
+        0.0,
+        -50.999996185302734
+      ],
+      "bounds_size": [
+        68.65534210205078,
+        28.88156509399414,
+        102.0
+      ],
+      "decoded_images": 1,
+      "embedded_image_buffer_views": 1,
+      "file": "C:/dev/SternenBuergerchen-worktrees/tanker-tripo-20261121/art/tanker_tripo_20261121/exports/tanker_102m.glb",
+      "materials": 1,
+      "mesh_instances": 1,
+      "mesh_surfaces": 1,
+      "missing_albedo_texture_slots": 0,
+      "missing_material_slots": 0,
+      "missing_surface_uv": 0,
+      "non_triangle_surfaces": 0,
+      "sha256": "781f8856dd3a9bba09cee9e72088300fad6259eae05104ebe0bd72f342d2f8ed",
+      "source_images": 1,
+      "triangles": 15097.0
+    },
+    "tanker_102m_clean_segmented.glb": {
+      "bounds_max": [
+        34.327667236328125,
+        28.88156509399414,
+        50.9999885559082
+      ],
+      "bounds_min": [
+        -34.327667236328125,
+        0.0,
+        -50.999996185302734
+      ],
+      "bounds_size": [
+        68.65533447265625,
+        28.88156509399414,
+        101.99998474121094
+      ],
+      "decoded_images": 82,
+      "embedded_image_buffer_views": 82,
+      "file": "C:/dev/SternenBuergerchen-worktrees/tanker-tripo-20261121/art/tanker_tripo_20261121/exports/tanker_102m_clean_segmented.glb",
+      "materials": 82,
+      "mesh_instances": 82,
+      "mesh_surfaces": 82,
+      "missing_albedo_texture_slots": 0,
+      "missing_material_slots": 0,
+      "missing_surface_uv": 0,
+      "non_triangle_surfaces": 0,
+      "sha256": "1539aa829340e84127d1570a3eb2c0845dd6e3180560d59d556dd4598fc4ce3d",
+      "source_images": 82,
+      "triangles": 15097.0
+    },
+    "tanker_game.glb": {
+      "bounds_max": [
+        3.222224235534668,
+        2.7110161781311035,
+        4.787199974060059
+      ],
+      "bounds_min": [
+        -3.2222237586975098,
+        0.0,
+        -4.787199974060059
+      ],
+      "bounds_size": [
+        6.444447994232178,
+        2.7110161781311035,
+        9.574399948120117
+      ],
+      "decoded_images": 1,
+      "embedded_image_buffer_views": 1,
+      "file": "C:/dev/SternenBuergerchen-worktrees/tanker-tripo-20261121/art/tanker_tripo_20261121/exports/tanker_game.glb",
+      "materials": 1,
+      "mesh_instances": 1,
+      "mesh_surfaces": 1,
+      "missing_albedo_texture_slots": 0,
+      "missing_material_slots": 0,
+      "missing_surface_uv": 0,
+      "non_triangle_surfaces": 0,
+      "sha256": "cb23b4af9fc0dc611c603b069fe15a102135aee3560e9e74eb73b1378ef94d8d",
+      "source_images": 1,
+      "triangles": 15097.0
+    }
+  }
+}

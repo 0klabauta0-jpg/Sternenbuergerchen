@@ -1,0 +1,130 @@
+{
+  "godot": "4.6.2-stable (official)",
+  "images": [
+    {
+      "camera_size": 80.0,
+      "eye": [
+        122.0,
+        82.0,
+        142.0
+      ],
+      "image": "segmented_front.png",
+      "target": [
+        0.0,
+        13.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "camera_size": 80.0,
+      "eye": [
+        -122.0,
+        82.0,
+        -142.0
+      ],
+      "image": "segmented_rear.png",
+      "target": [
+        0.0,
+        13.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "camera_size": 80.0,
+      "eye": [
+        122.0,
+        82.0,
+        142.0
+      ],
+      "image": "atlas_front.png",
+      "target": [
+        0.0,
+        13.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "camera_size": 80.0,
+      "eye": [
+        -122.0,
+        82.0,
+        -142.0
+      ],
+      "image": "atlas_rear.png",
+      "target": [
+        0.0,
+        13.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "camera_size": 12.3,
+      "eye": [
+        0.0,
+        22.0,
+        0.0
+      ],
+      "image": "scale_top.png",
+      "target": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "camera_size": 11.0,
+      "eye": [
+        9.5,
+        10.0,
+        20.0
+      ],
+      "image": "scale_front.png",
+      "target": [
+        0.0,
+        0.800000011920929,
+        0.0
+      ],
+      "up": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  ],
+  "projection": "orthographic",
+  "rendering_device": "NVIDIA GeForce RTX 4070 Ti SUPER",
+  "rendering_method": "gl_compatibility",
+  "resolution": [
+    1280,
+    800
+  ],
+  "ship_lengths_world_units": {
+    "cutlass": 3.52,
+    "tanker": 9.5744
+  }
+}

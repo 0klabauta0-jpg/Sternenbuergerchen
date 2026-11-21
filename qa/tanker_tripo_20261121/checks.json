@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "tanker-gltf",
+      "script": "res://verify.gd",
+      "success_marker": "PASS: tanker glTF",
+      "timeout": 40
+    }
+  ]
+}

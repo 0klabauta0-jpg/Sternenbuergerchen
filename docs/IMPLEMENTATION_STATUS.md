@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+## 2026-11-21 - Tripo-Tanker und Satellitenreferenz
+- Separater Modellkandidat in art/tanker_tripo_20261121/: Nutzerquelle erhalten,
+  gleichfoermig auf 102 x 68.655 x 28.882 m skaliert; 82 editierbare Teile,
+  15097 Tris. Kleine Topologiefehler bereinigt, 82 Texturen in einem Atlas.
+- Godot-4.6.2-Import und native Vergleichsbilder im isolierten QA-Projekt gruen;
+  Spiel-GLB 9.5744 Einheiten lang, passend zum Cutlass-Massstabsanker.
+  Keine produktive Integration oder Nottankdienst-/Kauf-/Betankungslogik.
+- KI-Vierseitenreferenz des Satelliten aus Mission 1 in art/satellite_turnaround_20261121/,
+  transparentes PNG samt Vorlagen/Prompts; kein Austausch des Missionsmodells.
+- Tasks: TANKER_TRIPO_MODELLPRUEFUNG_2026_11_21.md und SATELLITE_TURNAROUND_2026_11_21.md.
+  Basis be0b30af9, Branch task/tanker-tripo-20261121; vorhandene WIP-Worktrees erhalten.
+
+
 ## 2026-11-15 - Alte Karten und Einsaetze aus der Spielerauswahl
 - `ProductiveGroundMaps.selectable_paths()` ist jetzt eine explizite Allow-List (Ground_Mission01/02, satellite_crash_site, trade_outpost, windbruch_outpost, polisa_station); `TEST_ONLY` dokumentiert alle nicht angebotenen Karten, Dateien bleiben liegen.
 - Die Einsaetze `frontier_probe`, `frontier_probe_vertical_slice`, `station_route_one_screen_multiplayer_drill` tragen `player_visible: false` und fehlen in Missionsauswahl und Operations-Snapshot; per ID bleiben sie startbar. Kampagne unberuehrt.

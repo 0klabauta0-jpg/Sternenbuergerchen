@@ -1,0 +1,6 @@
+00:00.547  blend            | Read blend: "C:\dev\SternenBuergerchen-worktrees\tanker-tripo-20261121\art\tanker_tripo_20261121\editable\tanker_102m_segmented.blend"
+CLEAN_QA {"errors": [], "warnings": ["tripo_part_1: duplicate verts=3 loose verts=0", "tripo_part_74: duplicate verts=6 loose verts=0", "hidden back-to-back faces: tripo_part_54<->tripo_part_69 (1 pairs) - delete to save tris", "hidden back-to-back faces: tripo_part_0<->tripo_part_1 (1 pairs) - delete to save tris", "hidden back-to-back faces: tripo_part_64<->tripo_part_69 (1 pairs) - delete to save tris"]}
+Info: Saved as "tanker_102m_clean_segmented.blend"
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

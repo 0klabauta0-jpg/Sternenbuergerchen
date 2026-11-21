@@ -1,0 +1,1749 @@
+{
+  "stats": {
+    "meshes": 82,
+    "triangles": 15102,
+    "vertices": 7717,
+    "materials": 82,
+    "bounds_min": [
+      -0.49921703338623047,
+      -0.3367294371128082,
+      1.3824789091287926e-09
+    ],
+    "bounds_max": [
+      0.5018507838249207,
+      0.33708086609840393,
+      0.283454954624176
+    ],
+    "dimensions_xyz": [
+      1.0010678172111511,
+      0.6738103032112122,
+      0.2834549532416971
+    ]
+  },
+  "images": [
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_0_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_0_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_10_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_10_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_11_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_11_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_12_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_12_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_13_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_13_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_14_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_14_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_15_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_15_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_16_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_16_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_17_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_17_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_18_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_18_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_19_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_19_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_1_basecolor",
+      "size": [
+        1024,
+        1024
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_1_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_20_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_20_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_21_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_21_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_22_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_22_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_23_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_23_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_24_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_24_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_25_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_25_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_26_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_26_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_27_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_27_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_28_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_28_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_29_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_29_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_2_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_2_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_30_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_30_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_31_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_31_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_32_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_32_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_33_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_33_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_34_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_34_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_35_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_35_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_36_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_36_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_37_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_37_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_38_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_38_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_39_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_39_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_3_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_3_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_40_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_40_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_41_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_41_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_42_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_42_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_43_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_43_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_44_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_44_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_45_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_45_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_46_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_46_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_47_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_47_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_48_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_48_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_49_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_49_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_4_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_4_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_50_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_50_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_51_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_51_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_52_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_52_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_53_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_53_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_54_basecolor",
+      "size": [
+        512,
+        512
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_54_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_55_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_55_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_56_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_56_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_57_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_57_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_58_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_58_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_59_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_59_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_5_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_5_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_60_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_60_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_61_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_61_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_62_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_62_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_63_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_63_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_64_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_64_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_65_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_65_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_66_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_66_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_67_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_67_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_68_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_68_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_69_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_69_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_6_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_6_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_70_basecolor",
+      "size": [
+        32,
+        32
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_70_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_71_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_71_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_72_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_72_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_73_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_73_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_74_basecolor",
+      "size": [
+        32,
+        32
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_74_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_75_basecolor",
+      "size": [
+        128,
+        128
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_75_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_76_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_76_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_77_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_77_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_78_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_78_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_79_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_79_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_7_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_7_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_80_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_80_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_81_basecolor",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_81_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_8_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_8_basecolor.jpg",
+      "colorspace": "sRGB"
+    },
+    {
+      "name": "tankersci-fi_spaceship_3d_model_tripo_part_9_basecolor",
+      "size": [
+        256,
+        256
+      ],
+      "packed": true,
+      "has_data": true,
+      "source_path": "//..\\..\\..\\..\\Users\\bjoer\\AppData\\Local\\Temp\\blender_a27056\\tripo_convert_4f55fd8a-feb0-4433-bc5b-b75214be2941.fbm\\tankersci-fi_spaceship_3d_model_tripo_part_9_basecolor.jpg",
+      "colorspace": "sRGB"
+    }
+  ],
+  "parts": [
+    {
+      "name": "tripo_part_0",
+      "triangles": 438,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_0_material"
+      ]
+    },
+    {
+      "name": "tripo_part_1",
+      "triangles": 1584,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_1_material"
+      ]
+    },
+    {
+      "name": "tripo_part_10",
+      "triangles": 362,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_10_material"
+      ]
+    },
+    {
+      "name": "tripo_part_11",
+      "triangles": 360,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_11_material"
+      ]
+    },
+    {
+      "name": "tripo_part_12",
+      "triangles": 350,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_12_material"
+      ]
+    },
+    {
+      "name": "tripo_part_13",
+      "triangles": 288,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_13_material"
+      ]
+    },
+    {
+      "name": "tripo_part_14",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_14_material"
+      ]
+    },
+    {
+      "name": "tripo_part_15",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_15_material"
+      ]
+    },
+    {
+      "name": "tripo_part_16",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_16_material"
+      ]
+    },
+    {
+      "name": "tripo_part_17",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_17_material"
+      ]
+    },
+    {
+      "name": "tripo_part_18",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_18_material"
+      ]
+    },
+    {
+      "name": "tripo_part_19",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_19_material"
+      ]
+    },
+    {
+      "name": "tripo_part_2",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_2_material"
+      ]
+    },
+    {
+      "name": "tripo_part_20",
+      "triangles": 282,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_20_material"
+      ]
+    },
+    {
+      "name": "tripo_part_21",
+      "triangles": 216,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_21_material"
+      ]
+    },
+    {
+      "name": "tripo_part_22",
+      "triangles": 216,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_22_material"
+      ]
+    },
+    {
+      "name": "tripo_part_23",
+      "triangles": 204,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_23_material"
+      ]
+    },
+    {
+      "name": "tripo_part_24",
+      "triangles": 200,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_24_material"
+      ]
+    },
+    {
+      "name": "tripo_part_25",
+      "triangles": 198,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_25_material"
+      ]
+    },
+    {
+      "name": "tripo_part_26",
+      "triangles": 198,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_26_material"
+      ]
+    },
+    {
+      "name": "tripo_part_27",
+      "triangles": 198,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_27_material"
+      ]
+    },
+    {
+      "name": "tripo_part_28",
+      "triangles": 192,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_28_material"
+      ]
+    },
+    {
+      "name": "tripo_part_29",
+      "triangles": 188,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_29_material"
+      ]
+    },
+    {
+      "name": "tripo_part_3",
+      "triangles": 368,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_3_material"
+      ]
+    },
+    {
+      "name": "tripo_part_30",
+      "triangles": 186,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_30_material"
+      ]
+    },
+    {
+      "name": "tripo_part_31",
+      "triangles": 174,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_31_material"
+      ]
+    },
+    {
+      "name": "tripo_part_32",
+      "triangles": 146,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_32_material"
+      ]
+    },
+    {
+      "name": "tripo_part_33",
+      "triangles": 144,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_33_material"
+      ]
+    },
+    {
+      "name": "tripo_part_34",
+      "triangles": 140,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_34_material"
+      ]
+    },
+    {
+      "name": "tripo_part_35",
+      "triangles": 140,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_35_material"
+      ]
+    },
+    {
+      "name": "tripo_part_36",
+      "triangles": 138,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_36_material"
+      ]
+    },
+    {
+      "name": "tripo_part_37",
+      "triangles": 132,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_37_material"
+      ]
+    },
+    {
+      "name": "tripo_part_38",
+      "triangles": 126,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_38_material"
+      ]
+    },
+    {
+      "name": "tripo_part_39",
+      "triangles": 126,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_39_material"
+      ]
+    },
+    {
+      "name": "tripo_part_4",
+      "triangles": 422,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_4_material"
+      ]
+    },
+    {
+      "name": "tripo_part_40",
+      "triangles": 126,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_40_material"
+      ]
+    },
+    {
+      "name": "tripo_part_41",
+      "triangles": 126,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_41_material"
+      ]
+    },
+    {
+      "name": "tripo_part_42",
+      "triangles": 126,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_42_material"
+      ]
+    },
+    {
+      "name": "tripo_part_43",
+      "triangles": 121,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_43_material"
+      ]
+    },
+    {
+      "name": "tripo_part_44",
+      "triangles": 122,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_44_material"
+      ]
+    },
+    {
+      "name": "tripo_part_45",
+      "triangles": 118,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_45_material"
+      ]
+    },
+    {
+      "name": "tripo_part_46",
+      "triangles": 120,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_46_material"
+      ]
+    },
+    {
+      "name": "tripo_part_47",
+      "triangles": 118,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_47_material"
+      ]
+    },
+    {
+      "name": "tripo_part_48",
+      "triangles": 114,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_48_material"
+      ]
+    },
+    {
+      "name": "tripo_part_49",
+      "triangles": 114,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_49_material"
+      ]
+    },
+    {
+      "name": "tripo_part_5",
+      "triangles": 602,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_5_material"
+      ]
+    },
+    {
+      "name": "tripo_part_50",
+      "triangles": 98,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_50_material"
+      ]
+    },
+    {
+      "name": "tripo_part_51",
+      "triangles": 98,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_51_material"
+      ]
+    },
+    {
+      "name": "tripo_part_52",
+      "triangles": 96,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_52_material"
+      ]
+    },
+    {
+      "name": "tripo_part_53",
+      "triangles": 96,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_53_material"
+      ]
+    },
+    {
+      "name": "tripo_part_54",
+      "triangles": 90,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_54_material"
+      ]
+    },
+    {
+      "name": "tripo_part_55",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_55_material"
+      ]
+    },
+    {
+      "name": "tripo_part_56",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_56_material"
+      ]
+    },
+    {
+      "name": "tripo_part_57",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_57_material"
+      ]
+    },
+    {
+      "name": "tripo_part_58",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_58_material"
+      ]
+    },
+    {
+      "name": "tripo_part_59",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_59_material"
+      ]
+    },
+    {
+      "name": "tripo_part_6",
+      "triangles": 104,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_6_material"
+      ]
+    },
+    {
+      "name": "tripo_part_60",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_60_material"
+      ]
+    },
+    {
+      "name": "tripo_part_61",
+      "triangles": 92,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_61_material"
+      ]
+    },
+    {
+      "name": "tripo_part_62",
+      "triangles": 96,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_62_material"
+      ]
+    },
+    {
+      "name": "tripo_part_63",
+      "triangles": 86,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_63_material"
+      ]
+    },
+    {
+      "name": "tripo_part_64",
+      "triangles": 82,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_64_material"
+      ]
+    },
+    {
+      "name": "tripo_part_65",
+      "triangles": 66,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_65_material"
+      ]
+    },
+    {
+      "name": "tripo_part_66",
+      "triangles": 66,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_66_material"
+      ]
+    },
+    {
+      "name": "tripo_part_67",
+      "triangles": 66,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_67_material"
+      ]
+    },
+    {
+      "name": "tripo_part_68",
+      "triangles": 62,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_68_material"
+      ]
+    },
+    {
+      "name": "tripo_part_69",
+      "triangles": 62,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_69_material"
+      ]
+    },
+    {
+      "name": "tripo_part_7",
+      "triangles": 600,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_7_material"
+      ]
+    },
+    {
+      "name": "tripo_part_70",
+      "triangles": 56,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_70_material"
+      ]
+    },
+    {
+      "name": "tripo_part_71",
+      "triangles": 56,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_71_material"
+      ]
+    },
+    {
+      "name": "tripo_part_72",
+      "triangles": 56,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_72_material"
+      ]
+    },
+    {
+      "name": "tripo_part_73",
+      "triangles": 56,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_73_material"
+      ]
+    },
+    {
+      "name": "tripo_part_74",
+      "triangles": 29,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_74_material"
+      ]
+    },
+    {
+      "name": "tripo_part_75",
+      "triangles": 32,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_75_material"
+      ]
+    },
+    {
+      "name": "tripo_part_76",
+      "triangles": 24,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_76_material"
+      ]
+    },
+    {
+      "name": "tripo_part_77",
+      "triangles": 24,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_77_material"
+      ]
+    },
+    {
+      "name": "tripo_part_78",
+      "triangles": 24,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_78_material"
+      ]
+    },
+    {
+      "name": "tripo_part_79",
+      "triangles": 24,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_79_material"
+      ]
+    },
+    {
+      "name": "tripo_part_8",
+      "triangles": 398,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_8_material"
+      ]
+    },
+    {
+      "name": "tripo_part_80",
+      "triangles": 20,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_80_material"
+      ]
+    },
+    {
+      "name": "tripo_part_81",
+      "triangles": 20,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_81_material"
+      ]
+    },
+    {
+      "name": "tripo_part_9",
+      "triangles": 374,
+      "uv_layers": [
+        "UVMap"
+      ],
+      "materials": [
+        "tripo_part_9_material"
+      ]
+    }
+  ]
+}

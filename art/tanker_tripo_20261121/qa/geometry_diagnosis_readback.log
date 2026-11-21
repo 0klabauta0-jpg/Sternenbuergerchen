@@ -1,0 +1,6 @@
+00:00.422  blend            | Read blend: "C:\dev\SternenBuergerchen-worktrees\tanker-tripo-20261121\art\tanker_tripo_20261121\editable\tanker_102m_segmented.blend"
+00:00.609  blend            | Read blend: "C:\dev\SternenBuergerchen-worktrees\tanker-tripo-20261121\art\tanker_tripo_20261121\editable\tanker_102m_clean_segmented.blend"
+{"prepared_blend_sha256": "cf5da1593ca8b18be3942fda711b071f06de3da0872f004ee4cec865f85ac3fa", "clean_blend_sha256": "58b49f40e2ed05b5e93e4bcf7866ba641ef2e66b60a1d4cf32d8d8dd4431cfc3", "retained_world_coordinates_uv_and_material_slots_exact": true, "mesh_count": 82, "clean_triangle_count": 15097, "unchanged_packed_textures": 82, "bounds_world": [[-34.327667236328125, -51.0, 0.0], [34.32767105102539, 50.999996185302734, 28.88156509399414]], "dimensions_xyz": [68.65533828735352, 101.99999618530273, 28.88156509399414], "removed_triangles_by_part": {"tripo_part_52": 4, "tripo_part_74": 1}, "vertex_count_changes": {"tripo_part_1": 3, "tripo_part_52": -4, "tripo_part_74": 3}}
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

@@ -1,0 +1,14 @@
+config_version=5
+
+[application]
+
+config/name="Tanker Tripo Asset QA"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+
+[audio]
+
+driver/enable_input=false

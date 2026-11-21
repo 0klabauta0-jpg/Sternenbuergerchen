@@ -1,0 +1,51 @@
+{
+  "tool": "built-in image_gen",
+  "use_case": "stylized-concept",
+  "status": "generated_reference_for_tripo_not_a_verified_3d_blueprint",
+  "selected_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1da7f-f02f-7580-b98c-dbc5230c0b56\\exec-3ef87fd1-f4bd-4b24-9057-36843fc0b1d7.png",
+  "reference_images": [
+    "C:/dev/SternenBuergerchen/docs/qa/absturzstelle_20261114/03_wrack_nah.jpg",
+    "C:/dev/SternenBuergerchen/Assets/curated/mission_illustrations_20261113/satellite_recovery.png"
+  ],
+  "prompts": [
+    "Use case: stylized-concept. Create ONE high-quality 2x2 orthographic four-side turnaround sheet for image-to-3D reconstruction in Tripo. Subject: the SAME damaged survey satellite from the provided game references, reinterpreted in a readable charming Wimmelbild-style miniature-game illustration / polished stylized 3D rendering with Star Citizen-like industrial science-fiction construction. Input image1 is the actual current game object and its functional identity; image2 is the richer mission illustration for materials only. Isolate only the satellite, omit all ground, terrain, debris piles, people, space, scenery and shadows on a background. TRUE transparent alpha background. Four equal quadrants with generous completely empty transparent gutters, NO borders, NO text, NO labels, NO watermarks. Top-left exact FRONT view, top-right exact RIGHT view, bottom-left exact BACK view, bottom-right exact LEFT view. Orthographic engineering turnaround, zero perspective, identical fixed scale and upright orientation in all four views. Exactly one rigid consistent object rotated by 90 degrees between views; do not mirror views or redesign it. Lock silhouette, damage, panel number, panel attachment, colors and all components across all views. Model: compact bevelled cream/off-white rectangular satellite equipment bus, warm ochre/gold protective band, graphite structural ribs and a dark instrument box. One broad dark teal-blue solar panel wing remains attached on a short sturdy hinge and is visibly bent upwards; the opposite side has a clearly broken short solar-wing joint stub, NOT a second intact wing. Large cream parabolic communication dish with a chipped rim held close against the upper body by its damaged but visibly connected bent bracket and a short thick cable; one bent antenna rod. One small inset amber data cartridge with a modest cyan status light, the object to retrieve in the mission. One small dark truncated-cone attitude/orbit thruster at the rear. A few broad scorched patches and restrained chipped edges imply a crash, but all main construction remains extremely easy to distinguish. It should look like a carefully illustrated collectible prop from our Wimmelbild strategy-game art: softly bevelled chunky forms, clean broad surfaces, tasteful medium detail, crisp material boundaries, subtle brush-like finish, soft diffuse studio illumination. No dense microgreebles, no masses of tiny wires, no text markings, no loose hovering pieces. Complete silhouette in every quadrant, nothing cropped. Roughly the readable complexity of a 15,000-triangle small game prop, not photorealism and not a crude blockout. Preserve the physical placement of the ONE solar wing, broken opposite stub, dish, rear thruster and data cartridge consistently across all four projections. Render in the largest practical square sheet.",
+    "Edit this satellite turnaround sheet, preserving its current beautiful illustrated Wimmelbild science-fiction style, cream/gold/blue palette, true transparent alpha background, four equal quadrants, and all major shapes. This is a consistency correction for 3D modelling. Make the front and back physically distinct: in the TOP-LEFT FRONT view replace the protruding circular nozzle in the middle of the body with a flat dark-blue octagonal optical sensor window, set flush in the same gold-edged square frame. The only conical thruster belongs on the REAR of the body, clearly visible in the BOTTOM-LEFT BACK view. Make its location in both side views agree with that rear placement. Preserve exactly ONE bent attached blue solar wing, ONE opposite broken hinge stub, ONE chipped cream dish on its attached bent bracket, and ONE amber removable data cartridge with cyan indicator. The data cartridge is on a single side panel only; don't duplicate it on multiple unrelated faces. Carefully enforce that all four images are orthographic rotations of this SAME object, with the same damage, fixed relative parts, same scale, same height, and no perspective distortion. Order remains front, right, back, left reading top-left to bottom-right. Do not add objects, floors, scenery, labels or text. Keep generous clean transparent margins and gutters, and clean alpha edges without colored fringe or loose colored speckles.",
+    "Edit this four-view satellite sheet with a narrow engineering consistency correction. Keep BOTH LEFT COLUMN images (front top-left, rear bottom-left) and their exact lovely Wimmelbild miniature sci-fi design unchanged. Keep the body, palette, scale and 2x2 layout. Correct ONLY the two RIGHT COLUMN side images to represent that same object: In TOP-RIGHT, the FRONT of the body is on the LEFT (flat blue optical sensor end), and the REAR engine nozzle is on the RIGHT. Therefore the dish MUST have its concave open bowl facing LEFT toward the front, NOT facing right toward the engine. Rotate the dish and attached bracket appropriately, keeping it securely on top. This side of the body has the broken solar-wing hinge stub, with the small amber data cartridge below it; the surviving solar wing is on the far side. In BOTTOM-RIGHT, the FRONT of the body is on the RIGHT, rear nozzle on the LEFT. Therefore the dish MUST face RIGHT toward the front, NOT left toward the engine. This side has the ONE surviving bent blue solar wing attached prominently to the broad side facing the viewer; REMOVE the erroneous extra broken stub from this side. There is ONLY ONE surviving wing and ONLY ONE broken opposite stub in the object. Keep damage and dish rim chip matching the front and back views. Ensure the side dish directions are corrected, this is the main edit. Preserve transparent background, make clean cutout edges with no red/yellow fringe, floating speckles or background debris. No labels, text, extra objects or scenery."
+  ],
+  "layout": {
+    "top_left": "front",
+    "top_right": "right",
+    "bottom_left": "back",
+    "bottom_right": "left"
+  },
+  "notes": [
+    "True RGBA transparency checked; alpha left unchanged.",
+    "Current mission GLB is not replaced.",
+    "AI turnaround is a modelling reference; projection consistency still requires 3D reconstruction review."
+  ],
+  "earlier_selected_original": "C:/Users/bjoer/.codex/generated_images/01a1da7f-f02f-7580-b98c-dbc5230c0b56/exec-bff5a67e-f164-4f14-b4eb-5d2600411ed2.png",
+  "final_file": "satellite_mission01_four_views_v3.png",
+  "download_copy": "C:\\Users\\bjoer\\Downloads\\Satellit_Mission01_Vier_Ansichten_20261121_v3.png",
+  "reference_hashes": [
+    {
+      "file": "references\\03_wrack_nah.jpg",
+      "sha256": "0ced0ed4b0268fa34688d154b46db99577a1929d8493ec8a156580ab15e3e97b"
+    },
+    {
+      "file": "references\\satellite_recovery.png",
+      "sha256": "7149b965a1723f1b7383f460948842e3f7176f7c9a85ebdec1e52faffcdbe352"
+    }
+  ],
+  "output_sha256": "0d34a2318730afd113dac6572d148807cb1d9dcf3a9dcbbeb8dc14fea2a447c6",
+  "output_image": {
+    "mode": "RGBA",
+    "size": [
+      1254,
+      1254
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ]
+  }
+}

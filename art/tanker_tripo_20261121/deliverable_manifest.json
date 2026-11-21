@@ -1,0 +1,40 @@
+{
+  "status": "separate_model_candidate",
+  "source": "C:\\dev\\SternenBuergerchen\\Assets\\Trip\\tanker.blend",
+  "source_sha256": "979f522e44c57b68ef8e3345d17a621f81c0403726c60a970f057a58f23ec8a7",
+  "source_unmodified": true,
+  "runtime_integration": false,
+  "files": [
+    {
+      "file": "editable/tanker_102m_clean_segmented.blend",
+      "bytes": 1622660,
+      "sha256": "58b49f40e2ed05b5e93e4bcf7866ba641ef2e66b60a1d4cf32d8d8dd4431cfc3"
+    },
+    {
+      "file": "editable/tanker_102m_atlas_segmented.blend",
+      "bytes": 5018736,
+      "sha256": "1426a303d1efc388722aec9165d990d143f6e362e06df796c9184ce44c7b5611"
+    },
+    {
+      "file": "exports/tanker_102m.glb",
+      "bytes": 4899360,
+      "sha256": "781f8856dd3a9bba09cee9e72088300fad6259eae05104ebe0bd72f342d2f8ed"
+    },
+    {
+      "file": "exports/tanker_game.glb",
+      "bytes": 4899396,
+      "sha256": "cb23b4af9fc0dc611c603b069fe15a102135aee3560e9e74eb73b1378ef94d8d"
+    },
+    {
+      "file": "exports/tanker_basecolor_atlas.png",
+      "bytes": 4445628,
+      "sha256": "dcd4d9148335253554c947a535da4d089b3c0b2f87bd77019ed3a45c59cc6efe"
+    },
+    {
+      "file": "exports/tanker_102m_clean_segmented.glb",
+      "bytes": 1467628,
+      "sha256": "1539aa829340e84127d1570a3eb2c0845dd6e3180560d59d556dd4598fc4ce3d"
+    }
+  ],
+  "download_copy": "C:\\Users\\bjoer\\Downloads\\Tanker_102m_geprueft_20261121.blend"
+}

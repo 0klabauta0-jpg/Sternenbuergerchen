@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184",
+  "project": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121",
+  "manifest": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\checks.json",
+  "godot": "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.073,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": false,
+  "started_at": "2026-11-21T13:27:34.013288+00:00",
+  "finished_at": "2026-11-21T13:27:38.362520+00:00",
+  "import": {
+    "argv": [
+      "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+      "--headless",
+      "--path",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121",
+      "--log-file",
+      "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\import-godot.log",
+      "--import"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 3.815,
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\import.log",
+    "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\import-godot.log",
+    "passed": true
+  },
+  "checks": [
+    {
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Microsoft\\WinGet\\Links\\godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\engine-check-tanker-gltf.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\verify.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.445,
+      "name": "tanker-gltf",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\check-tanker-gltf.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen-worktrees\\tanker-tripo-20261121\\qa\\tanker_tripo_20261121\\check_runs\\20261121T132734Z-pid37184\\logs\\engine-check-tanker-gltf.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}
