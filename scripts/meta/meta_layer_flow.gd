@@ -9185,6 +9185,9 @@ var _completed_jobs_seen: int = -1
 var _completion_save_open: bool = false
 var _completion_save_next_msec: int = 0
 var _completion_save_warned: bool = false
+## Speichern, erster Teil / 21.11. (S3): gemerkter Speicherwunsch des Spielers ({} = keiner) und die Rueckmeldungszeile am Bildschirmrand.
+var _save_wish: Dictionary = {}
+var _save_toast: Node = null
 
 func _completed_campaign_job_count() -> int:
 	if _singleplayer_runtime == null: return -1
@@ -9211,23 +9214,31 @@ func _reset_completion_save_baseline() -> void:
 	_completed_jobs_seen = _completed_campaign_job_count()
 	_completion_save_open = false
 	_completion_save_warned = false
+	_save_wish.clear() # Ein vorgemerkter Wunsch verfaellt beim Laden und beim Kampagnenstart.
 
 
 ## Laeuft an der Basis im regelmaessigen Takt von _process. Im Einsatz bleibt der Abgleich stehen; ein dort abgeschlossener
 ## Auftrag wird nach der Rueckkehr zur Basis gespeichert. Fehlgeschlagene Versuche wiederholen sich hoechstens einmal je Sekunde.
 func _poll_completion_save() -> void:
-	if not is_campaign_start() or _singleplayer_runtime == null or is_instance_valid(_active_mission): return
+	if not is_campaign_start() or _singleplayer_runtime == null: return
+	# Speichern, erster Teil / 21.11.: Beginnt ein Einsatz, bevor die Lage das Speichern erlaubt hat, entfaellt der Wunsch (ein Einsatzstand
+	# wird nur auf ausdruecklichen Wunsch im Einsatz geschrieben, nicht aus einer alten Vormerkung).
+	if not _save_wish.is_empty() and is_instance_valid(_active_mission):
+		_save_wish.clear()
+		_show_save_feedback("Speichern nicht mehr vorgemerkt. Es gilt der zuletzt gespeicherte Stand.")
+	if is_instance_valid(_active_mission): return
 	if bool(_campaign_start.get("active_restore_in_progress")): return
 	var count := _completed_campaign_job_count()
 	if count < 0: return
 	if _completed_jobs_seen < 0:
 		_completed_jobs_seen = count
 		return
+	var wish_open: bool = not _save_wish.is_empty()
 	if count > _completed_jobs_seen: _completion_save_open = true
-	elif not _completion_save_open:
+	elif not _completion_save_open and not wish_open:
 		_completed_jobs_seen = count
 		return
-	if not _completion_save_open: return
+	if not _completion_save_open and not wish_open: return
 	var now := Time.get_ticks_msec()
 	if now < _completion_save_next_msec: return
 	var result: Dictionary = request_campaign_save()
@@ -9235,8 +9246,16 @@ func _poll_completion_save() -> void:
 		_completed_jobs_seen = count
 		_completion_save_open = false
 		_completion_save_warned = false
+		if wish_open:
+			# Ein Schreibvorgang erledigt Wunsch und Abschluss/Landung zugleich.
+			_save_wish.clear()
+			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
 		return
 	_completion_save_next_msec = now + 1000
+	if wish_open and not load("res://scripts/meta/campaign_save_projection.gd").is_transient(String(result.get("reason", ""))):
+		# Der Grund hat sich in einen ohne Aussicht verwandelt: ehrlicher Satz statt endlosem Warten.
+		_save_wish.clear()
+		_show_save_feedback(String(result.get("message", "")))
 	if not _completion_save_warned:
 		_completion_save_warned = true
 		push_warning("Speichern nach Auftragsabschluss abgelehnt (%s); wird wiederholt." % String(result.get("reason", "")))
@@ -9254,8 +9273,52 @@ func request_campaign_save() -> Dictionary:
 		if is_instance_valid(_active_mission): _active_autosave_next_msec = Time.get_ticks_msec() + 300000
 	else:
 		var reason := String(result.get("reason",""))
-		result["message"] = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason)
+		# Speichern, erster Teil / 21.11.: der Satz nennt Grund und Zeitpunkt; "home" trennt den Basis-Satz vom Einsatz-Satz.
+		var detail := String(result.get("detail", "")) if result.has("detail") else ("" if is_instance_valid(_active_mission) else "home")
+		result["message"] = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
 	return result
+
+
+## Speichern, erster Teil / 21.11. (S3): Speichern von Hand (Menuepunkt und Taste F5). Klappt es nicht aus einem Uebergangsgrund
+## (Schiff im Flug, Boarding, Frachttransfer ...), merkt sich das Spiel den Wunsch und speichert, sobald die Lage es erlaubt
+## (_poll_completion_save, hoechstens einmal je Sekunde, derselbe Weg und dieselben Schutzpruefungen wie request_campaign_save).
+## Antwort bei Vormerkung: ok=false, pending=true, message="Speichern vorgemerkt: ...". Gruende ohne Aussicht (Gegner, Liegende, Fehler) und
+## jede Ablehnung im Einsatz bekommen keinen Wunsch, sondern nur den ehrlichen Satz. Die Rueckmeldung erscheint auch ohne Menue am Bildschirmrand.
+func request_player_save() -> Dictionary:
+	var projection = load("res://scripts/meta/campaign_save_projection.gd")
+	var result: Dictionary = request_campaign_save()
+	if bool(result.get("ok", false)):
+		_save_wish.clear()
+		_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
+		return result
+	var reason := String(result.get("reason", ""))
+	var detail := String(result.get("detail", "")) if result.has("detail") else ""
+	if is_campaign_start() and not is_instance_valid(_active_mission) and projection.is_transient(reason):
+		_save_wish = {"reason": reason, "detail": detail, "since_msec": Time.get_ticks_msec()}
+		_completion_save_next_msec = Time.get_ticks_msec() + 1000
+		result["pending"] = true
+		result["message"] = projection.pending_text(reason, detail)
+	else:
+		_save_wish.clear()
+	_show_save_feedback(String(result.get("message", "")))
+	return result
+
+
+## Der gemerkte Speicherwunsch (leer = keiner); nur lesen.
+func get_pending_save_wish() -> Dictionary:
+	return _save_wish.duplicate(true)
+
+
+## Kurze Zeile am Bildschirmrand (verschwindet nach einigen Sekunden, faengt keine Eingabe). Der letzte Satz steht auch im Meta
+## campaign_save_feedback.
+func _show_save_feedback(text: String) -> void:
+	set_meta("campaign_save_feedback", text)
+	if text.is_empty(): return
+	if _save_toast == null or not is_instance_valid(_save_toast):
+		_save_toast = load("res://scripts/ui/campaign_save_toast.gd").new()
+		_save_toast.name = "CampaignSaveToast"
+		add_child(_save_toast)
+	_save_toast.call("show_text", text)
 
 func is_campaign_start() -> bool:
 	return String(_game_start_request.get("mode", "skirmish")) == "campaign"

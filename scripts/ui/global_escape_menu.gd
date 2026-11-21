@@ -53,6 +53,7 @@ func _ready() -> void:
 	name = "GlobalEscapeMenu"
 	layer = 1000
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_ensure_quick_save_action()
 	_install_window_close_guard()
 	_ensure_audio_event_bus()
 	_build_overlay()
@@ -95,7 +96,45 @@ func _exit_tree() -> void:
 	_quit_window = null
 
 
+const QUICK_SAVE_ACTION := "campaign_quick_save"
+
+## Speichern, erster Teil / 21.11. (S3): neue Eingabeaktion, Standardtaste F5. Sie steht in der Tastenliste (Kartensteuerung).
+func _ensure_quick_save_action() -> void:
+	if not InputMap.has_action(QUICK_SAVE_ACTION):
+		InputMap.add_action(QUICK_SAVE_ACTION, 0.2)
+	if InputMap.action_get_events(QUICK_SAVE_ACTION).is_empty():
+		var event := InputEventKey.new()
+		event.keycode = KEY_F5
+		event.physical_keycode = KEY_F5
+		InputMap.action_add_event(QUICK_SAVE_ACTION, event)
+
+
+## Taste F5 speichert die Kampagne wie der Menuepunkt "Kampagne speichern" (dieselbe Funktion _on_save_pressed, also auch
+## "vorgemerkt", wenn es gerade nicht geht). Nur in der Kampagne, nicht in einer Texteingabe, nicht in der Nachfrage beim Beenden,
+## nicht bei Tastenwiederholung. Gibt wahr zurueck, wenn die Taste verbraucht wurde.
+func _handle_quick_save_input(event: InputEvent) -> bool:
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return false
+	if not key_event.is_action_pressed(QUICK_SAVE_ACTION, false):
+		return false
+	if not _is_campaign_context():
+		return false
+	var viewport := get_viewport()
+	var focus: Control = viewport.gui_get_focus_owner() if viewport != null else null
+	if focus is LineEdit or focus is TextEdit:
+		return false
+	if _exit_panel != null and _exit_panel.is_visible_in_tree():
+		return false
+	_on_save_pressed()
+	if viewport != null:
+		viewport.set_input_as_handled()
+	return true
+
+
 func _input(event: InputEvent) -> void:
+	if _handle_quick_save_input(event):
+		return
 	_handle_escape_input(event)
 	if not _modal_open or not event is InputEventKey:
 		return
@@ -227,12 +266,16 @@ func set_draft_audio_settings(master_volume: float, sfx_volume: float, ui_volume
 	_refresh_settings_controls()
 
 
-func save_current_mission_slot() -> Dictionary:
+## defer_if_blocked: Speichern von Hand (Menuepunkt, Taste F5). Geht es gerade nicht aus einem Uebergangsgrund, wird der Wunsch vorgemerkt
+## (request_player_save des Flows). Beim Beenden bleibt es bei request_campaign_save mit der Nachfrage, ohne Warten.
+func save_current_mission_slot(defer_if_blocked: bool = false) -> Dictionary:
 	var tree := get_tree()
 	var current_scene := tree.current_scene if tree != null else null
 	if current_scene == null:
 		return _save_result(false, "no_current_scene")
 	if current_scene.has_method("is_campaign_start") and current_scene.call("is_campaign_start") and current_scene.has_method("request_campaign_save"):
+		if defer_if_blocked and current_scene.has_method("request_player_save"):
+			return current_scene.call("request_player_save")
 		return current_scene.call("request_campaign_save")
 	var scene_path: String = String(current_scene.scene_file_path).strip_edges()
 	if scene_path.is_empty():
@@ -832,9 +875,9 @@ func _on_settings_apply_pressed() -> void:
 
 
 func _on_save_pressed() -> void:
-	var result: Dictionary = save_current_mission_slot()
+	var result: Dictionary = save_current_mission_slot(true)
 	_refresh_action_buttons()
-	_play_ui_sfx("confirm" if bool(result.get("ok", false)) else "warning", "save_mission_slot")
+	_play_ui_sfx("confirm" if bool(result.get("ok", false)) else ("click" if bool(result.get("pending", false)) else "warning"), "save_mission_slot")
 	var saved_text := "Kampagne gespeichert." if _is_campaign_context() else "Szenenstart gemerkt. Fortschritt wird nicht gespeichert."
 	_set_status(String(result.get("message", saved_text if bool(result.get("ok", false)) else "Speichern ist hier nicht verfügbar.")))
 

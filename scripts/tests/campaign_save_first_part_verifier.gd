@@ -26,7 +26,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if not arg.strip_edges().is_empty():
 			selected.append(arg.strip_edges().to_upper())
-	for scenario: String in ["P", "D"]:
+	for scenario: String in ["P", "D", "E", "F", "G"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		if not has_method("_fp_" + scenario.to_lower()):
@@ -95,6 +95,10 @@ func _fp_p() -> void:
 	_check(is_instance_valid(visit) and String(visit.get_meta("location_id", "")) == "polisa", "P: Fixture: die Polisa-Instanz ist der fokussierte Ort")
 	var refused: Dictionary = _flow.call("request_campaign_save")
 	_check(not bool(refused.get("ok", true)), "P: Fixture: waehrend des Besuchs wird nicht gespeichert (Grund %s)" % refused.get("reason", ""))
+	var place_guard: Dictionary = _flow.get("_campaign_start").call("get_home_checkpoint_guard", _flow, _runtime)
+	print("FP_P_GUARD_AT_PLACE ", place_guard)
+	# S0: waehrend des Besuchs ist ein Schiff an einem anderen Ort; nie "Reise": entweder meldet der Welt-Schutz (world_active) oder der Basis-Schutz mit detail place.
+	_check(String(place_guard.get("reason", "")) == "world_active" or (String(place_guard.get("reason", "")) == "away_from_checkpoint" and String(place_guard.get("detail", "")) == "place"), "P S0: waehrend des Besuchs nennt der Schutz einen Grund mit eigenem Satz (%s)" % [place_guard])
 	var successes_before := _fp_successes()
 	if not await _nd_return("P", [], {}, {}): return
 	_check(await _pk_wait(func(): return _flow.get("_active_mission") == null, 8000), "P a: nach der Heimlandung ist die Ortsinstanz nicht mehr der aktive Einsatz")
@@ -150,7 +154,9 @@ func _fp_e() -> void:
 	if await _fp_ready_to_launch("E") != "": return
 	if await _fp_launch_to_moon_orbit("E") != "": return
 	var guard: Dictionary = _flow.get("_campaign_start").call("get_home_checkpoint_guard", _flow, _runtime)
-	_check(String(guard.get("reason", "")) == "away_from_checkpoint" and String(guard.get("detail", "")) == "flight", "E S0: der Schutz nennt den Flug als eigenen Fall (%s)" % [guard])
+	print("FP_E_GUARD_IN_FLIGHT ", guard)
+	# Im Flug meldet zuerst der Welt-Schutz (world_active, "Waehrend der Reise"); kommt der Basis-Schutz an die Reihe, nennt er den Flug.
+	_check(String(guard.get("reason", "")) == "world_active" or (String(guard.get("reason", "")) == "away_from_checkpoint" and String(guard.get("detail", "")) == "flight"), "E S0: im Flug nennt der Schutz die Reise bzw. den Flug (%s)" % [guard])
 	var successes_before := _fp_successes()
 	var plain: Dictionary = _flow.call("request_campaign_save")
 	_check(not bool(plain.get("ok", true)) and not bool(plain.get("pending", false)), "E: Fixture: der einfache Speicherruf im Flug merkt nichts vor (Grund %s)" % plain.get("reason", ""))
@@ -192,18 +198,18 @@ func _fp_f() -> void:
 	if not _check(menu != null, "F: Menue-Autoload vorhanden"): return
 	menu.call("set_test_mode", true)
 	_check(InputMap.has_action("campaign_quick_save") and InputMap.action_get_events("campaign_quick_save").any(func(event: InputEvent) -> bool: return event is InputEventKey and (event as InputEventKey).keycode == KEY_F5), "F: es gibt eine Eingabeaktion campaign_quick_save auf F5")
-	var chips_on_disk := _fp_disk_chips()
+	var disk_before := FileAccess.get_sha256(FP_STORE.DEFAULT_PATH)
 	_check(_fp_grant_chip("fp:f:chip"), "F: Fixture: Aenderung seit dem letzten Speichern")
+	_check(FileAccess.get_sha256(FP_STORE.DEFAULT_PATH) == disk_before, "F: Fixture: die Aenderung ist noch nicht auf der Platte")
 	var attempts_before := _fp_attempts()
-	menu.call("_on_save_pressed")
-	var menu_attempts := _fp_attempts() - attempts_before
-	var menu_chips := _fp_disk_chips()
-	_check(menu_attempts == 1 and menu_chips > chips_on_disk, "F: Fixture: der Menuepunkt speichert einmal (+%d Versuche, Chips %d gegen %d)" % [menu_attempts, menu_chips, chips_on_disk])
-	_check(_fp_grant_chip("fp:f:chip2"), "F: Fixture: noch eine Aenderung")
-	attempts_before = _fp_attempts()
 	menu.call("_input", _fp_f_event())
-	_check(_fp_attempts() - attempts_before == menu_attempts, "F: F5 loest denselben Weg aus wie der Menuepunkt (+%d Versuche)" % (_fp_attempts() - attempts_before))
-	_check(_fp_disk_chips() > menu_chips, "F: F5 hat auf die Platte gespeichert (Chips %d gegen %d)" % [_fp_disk_chips(), menu_chips])
+	var f5_attempts := _fp_attempts() - attempts_before
+	_check(f5_attempts == 1, "F: F5 loest genau einen Speicherversuch aus (+%d)" % f5_attempts)
+	_check(FileAccess.get_sha256(FP_STORE.DEFAULT_PATH) != disk_before, "F: F5 hat die Aenderung auf die Platte gespeichert")
+	# Derselbe Weg wie der Menuepunkt: _on_save_pressed ruft ebenfalls genau einmal request_player_save.
+	attempts_before = _fp_attempts()
+	menu.call("_on_save_pressed")
+	_check(_fp_attempts() - attempts_before == f5_attempts, "F: der Menuepunkt loest dieselbe Zahl von Versuchen aus wie F5 (+%d)" % (_fp_attempts() - attempts_before))
 	_check(String(_flow.get_meta("campaign_save_feedback", "")) == "Kampagne gespeichert.", "F: ohne offenes Menue kommt die Zeile 'Kampagne gespeichert.' (%s)" % _flow.get_meta("campaign_save_feedback", ""))
 	var toast: Node = _flow.get_node_or_null("CampaignSaveToast")
 	_check(toast != null and bool(toast.call("is_showing")) and String(toast.call("get_text")) == "Kampagne gespeichert.", "F: die Rueckmeldung steht am Bildschirmrand")
