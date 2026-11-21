@@ -23,7 +23,8 @@ func _run() -> void:
 	var operations: Dictionary = screen.call("get_operations_snapshot")
 	for id in ["campaign_leader","campaign_pilot"]:
 		var actual_loadout: Dictionary=screen.call("_get_member_loadout",id)
-		_check(String(actual_loadout.weapon_1)=="pistol" and String(actual_loadout.armor)=="light","Campaign actually equips starter pistol/light on "+id)
+		# Neue Kampagne seit 21.11.2026: nur Raumanzug, keine Waffen; Pistolen und Sanitaetsgeraet liegen im Basislager (Auftrag P1).
+		_check(String(actual_loadout.armor)=="suit" and String(actual_loadout.weapon_1)=="none" and String(actual_loadout.weapon_2)=="none","Campaign starts in undersuit without weapons on "+id)
 	var craft: Dictionary = operations.get("selected_craft", {})
 	_check(not String(craft.get("pilot_id", "")).is_empty(), "Campaign has a real assigned pilot")
 	_check(Array(flow.get("_selected_unit_ids")).size() == 1, "Exactly one deployable leader selected")

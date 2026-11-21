@@ -25,7 +25,9 @@ func _run() -> void:
 		await process_frame
 	check(people.get_snapshot().units.all(func(person:Dictionary):return person.status=="sleeping"),"both people physically reach beds and sleep")
 	var actual_craft:=String(screen.call("get_operations_snapshot").selected_craft.id)
-	var outfit: Dictionary=screen.call("request_operation","inventory_equip",{"unit_id":"campaign_pilot","craft_id":actual_craft,"source_container_id":"base:homebase","item_id":"armor_light","slot":"armor"})
+	# Seit 21.11.2026 (Auftrag P1) liegt keine leichte Ruestung im Startlager. Dieser Test prueft das Wecken durch eine
+	# erfolgreiche Ausruestung, nicht die Startausruestung; er ruestet deshalb ueber die oeffentliche Operation eine Pistole aus.
+	var outfit: Dictionary=screen.call("request_operation","inventory_equip",{"unit_id":"campaign_pilot","craft_id":actual_craft,"source_container_id":"base:homebase","item_id":"pistol","slot":"weapon_1"})
 	check(outfit.get("ok",false) and people._states.campaign_pilot.status=="outside","successful finite equipment wakes sleeping person")
 	people.request_operation("base_sleep",{"unit_id":"campaign_pilot"})
 	deadline=Time.get_ticks_msec()+15000
@@ -51,7 +53,7 @@ func _run() -> void:
 	var standing: Vector2=people.get_actor("campaign_leader").position
 	people.advance_automatic_rest(120.0)
 	check(people._states.campaign_leader.status=="outside" and people.get_actor("campaign_leader").position==standing,"disabled person stays where player left them")
-	var gear: Dictionary=screen.call("request_operation","loadout",{"unit_id":"campaign_leader","key":"armor","value":"light"})
+	var gear: Dictionary=screen.call("request_operation","loadout",{"unit_id":"campaign_leader","key":"weapon_1","value":"pistol"})
 	check(gear.get("ok",false),"manual equipment remains usable")
 	var saved: Dictionary=flow.get("_campaign_start").call("save_home_checkpoint",flow,runtime)
 	check(saved.get("ok",false),"safe campaign save includes new personal setting")

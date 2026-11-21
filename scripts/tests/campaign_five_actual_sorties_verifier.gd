@@ -1,5 +1,11 @@
 extends "res://scripts/tests/campaign_intro_loop_smoke.gd"
 ## Actual five-sortie chapter at 4x simulation speed; no fabricated results.
+func _configure_base_equipment() -> void:
+	super._configure_base_equipment()
+	# Seit 21.11.2026 (Auftrag P1) startet der Truppfuehrer ohne Waffe. Dieser Test prueft die fuenf Einsaetze (mit Gefechten),
+	# nicht die Startausruestung: Er zieht deshalb die eine Pistole aus dem Basislager ueber die oeffentliche Operation an.
+	var gear: Dictionary = _screen.call("request_operation", "inventory_equip", {"unit_id": "campaign_leader", "craft_id": _craft_id, "source_container_id": "base:homebase", "item_id": "pistol", "slot": "weapon_1"})
+	_check(bool(gear.get("ok", false)), "Leader draws a pistol from the base store for the combat sorties")
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 	if label.ends_with("actual mission instance exists"):
 		var deadline := Time.get_ticks_msec() + maxi(milliseconds, 60000)

@@ -551,7 +551,9 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 func configure_start_inventory(mode: String) -> void:
 	if mode != "campaign": return
 	_item_quantities.clear()
-	_item_quantities.merge({"armor_light":2,"pistol":2,"medictool":1})
+	# Neue Kampagne: Die Personen starten im Raumanzug ohne Waffen; zwei Pistolen und ein Sanitätsgerät liegen im Lager,
+	# keine leichte Rüstung (die kommt mit der Erwerbserlaubnis nach dem Satellitenauftrag).
+	_item_quantities.merge({"pistol":2,"medictool":1})
 	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
 	_revision += 1
 

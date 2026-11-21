@@ -150,4 +150,8 @@ func _prepare_visit_return(mission: Node) -> bool:
 	return await _wait(func(): return bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).ok), 3000, "Actual pilot commits boarding before reverse flight")
 
 func _configure_base_equipment() -> void:
-	pass
+	# Seit 21.11.2026 (Auftrag P1) startet die Kampagne ohne Waffen. Der erste Einsatz (Satellit, keine Gegner) und der
+	# Handelsbesuch laufen bewusst mit dem unbewaffneten Truppfuehrer; hier wird nur belegt, dass er wirklich unbewaffnet ist.
+	for id in ["campaign_leader", "campaign_pilot"]:
+		var gear: Dictionary = _screen.call("_get_member_loadout", id)
+		_check(String(gear.get("weapon_1", "")) == "none" and String(gear.get("weapon_2", "")) == "none", "Sortie runs with unarmed start gear on " + id)

@@ -37,8 +37,17 @@ func _run()->void:
  check(popup.find_child("CharacterDerivationOverview",true,false)==null,"unused origins box is removed from character overview")
  for key:String in ["armor","weapon_1","weapon_2"]:
   check(not preview.get_global_rect().intersects(panel.get("_slots").get_node("InventorySlot_"+key).get_global_rect()),"equipment slot does not cover the figure: "+key)
- var before:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory.duplicate(true)
+ # Seit 21.11.2026 (Auftrag P1) startet die Person ohne Waffe: erst die Pistole aus dem Lager ziehen (nichts kehrt zurueck),
+ # danach das Sanitaetsgeraet auf denselben Platz (jetzt kehrt die zuvor getragene Pistole ins Lager zurueck).
+ check(String(screen.get_personnel_inventory_view("campaign_leader").unit.loadout.weapon_1)=="none","leader starts without a weapon in slot 1")
  var slot:Control=panel.get("_slots").get_node("InventorySlot_weapon_1")
+ var first_before:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory.duplicate(true)
+ slot.payload_dropped.emit({"source_container_id":"base:homebase","item_id":"pistol"})
+ for i in 8:await process_frame
+ var first_after:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory
+ check(int(first_after["base:homebase"].items.get("pistol",0))==int(first_before["base:homebase"].items.get("pistol",0))-1,"dragging the starter pistol from the base store consumes one actual free item")
+ check(String(screen.get_personnel_inventory_view("campaign_leader").unit.loadout.weapon_1)=="pistol","dragged pistol is now the leader's weapon")
+ var before:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory.duplicate(true)
  slot.payload_dropped.emit({"source_container_id":"base:homebase","item_id":"medictool"})
  for i in 8:await process_frame
  var after:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory

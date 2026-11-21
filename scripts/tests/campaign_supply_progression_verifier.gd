@@ -8,7 +8,10 @@ func _initialize() -> void:
 	supply.configure_start_inventory("campaign")
 	var initial: Dictionary = supply.get_supply_snapshot()
 	check(not initial.item_quantities.has("rifle") and not initial.item_quantities.has("armor_heavy"),"campaign has no late equipment")
-	check(int(initial.item_quantities.get("pistol",0))>=2,"campaign pistols exist")
+	# Startlager seit 21.11.2026 (Auftrag P1): 2 Pistolen, 1 Sanitaetsgeraet, keine leichte Ruestung.
+	check(int(initial.item_quantities.get("pistol",0))==2,"campaign starts with exactly two stored pistols")
+	check(int(initial.item_quantities.get("medictool",0))==1,"campaign starts with one stored medic tool")
+	check(int(initial.item_quantities.get("armor_light",0))==0,"campaign starts without stored light armor")
 	var cmd := {"contract_category":"singleplayer_supply","operation":"campaign_cargo","payload":{"container_id":"craft:dropship_1","item_id":"satellite_chip","amount":1},"request_id":"chip1"}
 	check(not supply.apply_command(cmd).get("ok",false),"UI cannot grant quest cargo")
 	check(supply.apply_command(cmd,{"campaign_authorized":true}).get("ok",false),"trusted actual recovery grants chip")
