@@ -4,6 +4,8 @@ const HELP_SERVICE = preload("res://scripts/ui/contextual_help_service.gd")
 const HELP_POPUP = preload("res://scripts/ui/contextual_help_popup.gd")
 const SETTINGS = preload("res://scripts/ui/game_settings_contract.gd")
 const THEME = preload("res://scripts/ui/tactical_ui_theme.gd")
+const HINT_ARROW = preload("res://scripts/ui/campaign_hint_arrow.gd")
+const HINT_ARROWS = preload("res://scripts/meta/campaign_hint_arrows.gd")
 const STEPS := {
 	"base_ready":["campaign.boarding","Mondbasis vorbereiten: zwei Personen ausrüsten, Satellitenauftrag im Smart Mobile annehmen, Pilot und Trupp an Bord nehmen, abheben."],
 	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis unter Basis erkunden → Datenterminal / Hochladen den Chip hochladen."],
@@ -41,6 +43,13 @@ var _guidance_moved := false
 var _pinned: bool = false
 var _seen: Dictionary = {}
 var _render_count: int = 0
+var _hint_arrow: Control
+var _hint_arrows: RefCounted
+
+func _exit_tree() -> void:
+	# The arrow is a sibling of this card (not a child), so it must be released with it.
+	if _hint_arrow != null and is_instance_valid(_hint_arrow):
+		_hint_arrow.queue_free()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -126,8 +135,55 @@ func _build_ui() -> void:
 		control.focus_exited.connect(_end_hover)
 	_guidance.mouse_filter = Control.MOUSE_FILTER_PASS
 	_guidance.focus_mode = Control.FOCUS_ALL
+	_hint_arrow = HINT_ARROW.new()
+	_hint_arrow.name = "CampaignHintArrow"
+	_hint_arrows = HINT_ARROWS.new()
+	_hint_arrows.call("attach_arrow", _hint_arrow)
+
+func _update_hint_arrows() -> void:
+	# Runs before the early returns of refresh(): the arrows must outlive the hidden card.
+	if _hint_arrows == null or _hint_arrow == null:
+		return
+	if _hint_arrow.get_parent() == null and get_parent() != null:
+		get_parent().add_child(_hint_arrow)
+	var snapshot: Dictionary = {}
+	if is_instance_valid(_runtime) and _runtime.has_method("get_snapshot"):
+		snapshot = _runtime.get_snapshot()
+	if String(snapshot.get("mode", "")) != "campaign":
+		_hint_arrows.call("refresh", null, {})
+		return
+	var onboarding: Dictionary = snapshot.get("onboarding", {})
+	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
+	var operations_mode: String = _variant_text(homebase.get("_operations_mode")) if homebase != null else ""
+	var meta_view: String = _variant_text(_flow.get("_current_meta_view")) if is_instance_valid(_flow) else ""
+	var views: Array = []
+	for view_name: String in [operations_mode, meta_view]:
+		if not view_name.is_empty():
+			views.append(view_name)
+	var facts: Dictionary = {}
+	var onboarding_facts: Variant = onboarding.get("facts", {})
+	if onboarding_facts is Dictionary:
+		facts = (onboarding_facts as Dictionary).duplicate()
+	facts["stage"] = int(onboarding.get("stage_index", 0))
+	facts["step"] = String(onboarding.get("next_step_id", ""))
+	facts["view"] = operations_mode if not operations_mode.is_empty() else meta_view
+	facts["views"] = views
+	facts["in_mission"] = is_instance_valid(_flow) and is_instance_valid(_flow.get("_active_mission"))
+	var search_root: Node = homebase if homebase != null else (_flow if is_instance_valid(_flow) else null)
+	_hint_arrows.call("refresh", search_root, facts)
+
+## Read access for tests and later hint content: the arrow node and its controller.
+func get_hint_arrow() -> Control:
+	return _hint_arrow
+
+func get_hint_arrows() -> RefCounted:
+	return _hint_arrows
+
+func _variant_text(value: Variant) -> String:
+	return "" if value == null else String(value)
 
 func refresh() -> void:
+	_update_hint_arrows()
 	if is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "inspection":
 		visible = false
 		return
@@ -184,6 +240,7 @@ func refresh() -> void:
 
 func hide_hints() -> void:
 	_hints_hidden = true
+	if _hint_arrows != null: _hint_arrows.call("set_enabled", false)
 	_guidance.hide()
 	_hide_button.hide()
 	_dismiss_popup()
@@ -191,12 +248,14 @@ func hide_hints() -> void:
 
 func reopen_help() -> void:
 	_hints_hidden = false
+	if _hint_arrows != null: _hint_arrows.call("set_enabled", true)
 	_guidance.show()
 	_hide_button.show()
 	_show_help(true)
 
 func set_help_mode(mode: String) -> void:
 	_service.set_help_mode(mode)
+	if _hint_arrows != null: _hint_arrows.call("set_help_mode", mode)
 	if mode == "off" and _popup != null:
 		_dismiss_popup()
 
