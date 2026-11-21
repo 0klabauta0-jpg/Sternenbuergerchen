@@ -9068,11 +9068,36 @@ func _drop_focused_location() -> void:
 	_reset_active_mission_timer()
 
 
-## Einzige Stelle fuer die Freigabe nach einem Rueckzug ohne Debrief (Regel 8): Die fokussierte Ortsinstanz wird freigegeben,
-## wenn ihr Auftrag auf das Wiederoeffnen wartet und kein anderes Schiff mehr auf "mission" steht. Aufrufer: die Heimlandung und
-## der Abschluss des Oberflaechenabflugs (dort, wenn die Landung vor der Buchung kam). Gibt true zurueck, wenn freigegeben wurde.
+## Speichern, erster Teil / 21.11.: Ist die fokussierte Ortsinstanz ein Besuch, der nichts mehr zu erledigen hat? Das gilt fuer einen
+## Besuch ohne Auftrag (Polisa, Handelsposten ueber "Zur Heimatbasis") und fuer einen Ort, dessen Auftrag nicht mehr "active" ist
+## (abgebrochen oder gescheitert, auch ohne Rueckzug). Ein Ort mit weiter laufendem Auftrag zaehlt nicht.
+func _campaign_location_visit_idle(visit: Node) -> bool:
+	if _singleplayer_runtime == null or not is_instance_valid(visit):
+		return false
+	var location_id: String = String(visit.get_meta("location_id", ""))
+	if location_id.is_empty():
+		return false
+	# Ein noch nicht zugestelltes Einsatzergebnis darf die Freigabe nie verlieren (_release_active_mission leert es).
+	if not _pending_campaign_mission_result.is_empty() or not Dictionary(Dictionary(_location_contexts.get(location_id, {})).get("pending", {})).is_empty():
+		return false
+	var job_id: String = String(Dictionary(visit.get_meta("singleplayer_mission_identity", {})).get("job_id", ""))
+	if job_id.is_empty():
+		return true
+	var campaign_owner: Object = _singleplayer_runtime.get("_campaign")
+	if campaign_owner == null:
+		return false
+	var job: Dictionary = Dictionary(Dictionary(campaign_owner.call("get_campaign_snapshot").get("jobs", {})).get(job_id, {}))
+	return not job.is_empty() and String(job.get("status", "")) != "active"
+
+
+## Einzige Stelle fuer die Freigabe der fokussierten Ortsinstanz nach der Heimkehr: bei einem Rueckzug ohne Debrief (Regel 8, der
+## Auftrag wartet auf das Wiederoeffnen) und, seit "Speichern, erster Teil / 21.11.", bei jedem Besuch ohne laufenden Auftrag. Sie wird
+## freigegeben, wenn kein anderes Schiff mehr auf "mission" steht. Aufrufer: die Heimlandung und der Abschluss des
+## Oberflaechenabflugs (dort, wenn die Landung vor der Buchung kam). Gibt true zurueck, wenn freigegeben wurde.
 func _release_location_for_waiting_retreat(visit: Node) -> bool:
-	if not is_campaign_start() or not is_instance_valid(visit) or _active_mission != visit or not _campaign_retreat_awaiting_home(visit):
+	if not is_campaign_start() or not is_instance_valid(visit) or _active_mission != visit:
+		return false
+	if not _campaign_retreat_awaiting_home(visit) and not _campaign_location_visit_idle(visit):
 		return false
 	for other_location in _aircraft_location_by_craft.values():
 		if String(other_location) == "mission": return false
@@ -9105,6 +9130,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_warned.clear()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
+	_arm_landing_save()
 
 
 # The escape menu invokes the owning campaign saver, never the generic
@@ -9169,6 +9195,15 @@ func _completed_campaign_job_count() -> int:
 	for job_id in jobs.keys():
 		if String(Dictionary(jobs[job_id]).get("status", "")) == "completed": count += 1
 	return count
+
+
+## Speichern, erster Teil / 21.11.: Jede Heimlandung loest einmal ein erzwungenes Speichern aus (nicht nur ein Auftragsabschluss), sobald
+## die Lage es erlaubt. Es nutzt dieselbe Wiederholmaschine wie der Abschluss (_poll_completion_save: hoechstens einmal je Sekunde, bis es
+## klappt) und damit dieselben Schutzpruefungen von request_campaign_save; abgelehnt wird nichts geschrieben.
+func _arm_landing_save() -> void:
+	if not is_campaign_start() or _singleplayer_runtime == null: return
+	_completion_save_open = true
+	_completion_save_next_msec = 0
 
 
 ## Setzt den zuletzt gesehenen Stand auf den jetzt geltenden Wert (Laden, Kampagnenstart): Laden loest kein Speichern aus.

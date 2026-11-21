@@ -1495,7 +1495,22 @@ func validate_space_launch(craft_id: String, observe_progress: bool = true) -> D
 			return _reject("job_required", "Satellitenauftrag im Mobilgerät annehmen")
 	return {"ok": true}
 
+## Speichern, erster Teil / 21.11.: Vor dem Abheben von der Heimatbasis wird einmal erzwungen gespeichert, damit das Ausruesten der
+## ersten Minuten nicht an der Fuenf-Minuten-Drossel haengt. "Erzwungen" heisst nur: ohne Drossel, nicht ohne Pruefung
+## (request_campaign_save laeuft ueber denselben get_home_checkpoint_guard). Wird abgelehnt, bleibt der vorige gueltige Stand
+## unberuehrt und das Schiff hebt trotzdem ab; die Antwort steht in der Rueckgabe (pre_launch_save) und im Meta des Flows.
+func _save_before_launch() -> Dictionary:
+	if not _campaign_mode or _flow == null or not _flow.has_method("request_campaign_save"):
+		return {}
+	# Nur der Heimweg: Laeuft gerade ein Einsatz an einem Ort, ist das nicht der Moment fuer einen Einsatzstand.
+	if is_instance_valid(_flow.get("_active_mission")):
+		return {}
+	var saved: Dictionary = Dictionary(_flow.call("request_campaign_save")).duplicate(true)
+	_flow.set_meta("campaign_launch_save_result", saved)
+	return saved
+
 func launch_to_moon_orbit(craft_id: String) -> Dictionary:
+	var pre_launch_save: Dictionary = _save_before_launch()
 	var request_id := _request_id("orbit-launch", {})
 	var result: Dictionary = _simulation.commit_singleplayer_space_launch(self, craft_id, request_id)
 	if result.get("ok", false):
@@ -1504,7 +1519,11 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
-		return result.travel_result
+		var travel: Dictionary = Dictionary(result.travel_result)
+		if not pre_launch_save.is_empty():
+			travel = travel.duplicate()
+			travel["pre_launch_save"] = pre_launch_save
+		return travel
 	return result
 
 func _publish_space_launch_event(request_id: String) -> void:

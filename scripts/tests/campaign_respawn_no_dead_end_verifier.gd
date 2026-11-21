@@ -394,10 +394,11 @@ func _nd_a() -> void:
 		saved = _nd_probe_save("A 4 Wiederholung")
 		if not bool(saved.get("ok", false)):
 			await _pk_wait(func(): return false, 2000)
-	# BEFUND (gemessen, nicht vom Respawn): Nach JEDEM Polisa-Besuch haelt die Meta-Szene die Orts-Instanz als aktiven Einsatz; Speichern geht dann
-	# ueber den Einsatzweg und wird mit mission_identity_mismatch abgelehnt (job_id des Besuchs ist leer). Dieselbe Ablehnung ohne Tote: Lage S.
-	# Die Pruefung haelt den Befund fest; sie wird gruen, wenn Speichern gelingt oder genau diese Ablehnung kommt, und rot bei jedem anderen Grund.
-	_check(bool(saved.get("ok", false)) or String(saved.get("reason", "")) == "mission_identity_mismatch", "A: BEFUND Speichern an der Heimatbasis nach der Rueckkehr von Polisa: gelingt oder wird wie ohne Tote mit mission_identity_mismatch abgelehnt (Grund: %s, ok: %s)" % [saved.get("reason", ""), saved.get("ok", false)])
+	# Speichern, erster Teil / 21.11.: Frueher war das ein BEFUND (gemessen, nicht vom Respawn): Nach JEDEM Polisa-Besuch hielt die Meta-Szene die Orts-Instanz
+	# als aktiven Einsatz, Speichern ging ueber den Einsatzweg und wurde mit mission_identity_mismatch abgelehnt (job_id des Besuchs ist leer).
+	# Seit dem Abschnitt "Speichern, erster Teil" gibt die Heimlandung die Ortsinstanz eines Besuchs ohne Auftrag frei (meta_layer_flow.gd
+	# _release_location_for_waiting_retreat / _campaign_location_visit_idle): Speichern daheim nach dem Polisa-Besuch KLAPPT.
+	_check(bool(saved.get("ok", false)), "A: Speichern an der Heimatbasis nach der Rueckkehr von Polisa klappt (Speichern, erster Teil / 21.11.; Grund: %s, ok: %s)" % [saved.get("reason", ""), saved.get("ok", false)])
 	_check(_t6b_roster_ids() == roster_before, "A: Kader nach der Rueckkehr unveraendert")
 	_check(_flow.call("_campaign_roster_problems", Array(_flow.get("_all_team_units"))).is_empty(), "A: Kader bleibt spielbar")
 	await _nd_start_new_mission("A", [LEAD_B, SHOOTER_C], PILOT_ID)
@@ -602,7 +603,8 @@ func _nd_s() -> void:
 	await _nd_unboard_all("S", [])
 	var saved: Dictionary = _nd_probe_save("S 4 nach allem")
 	print("RDE_S_RESULT save_ok=", saved.get("ok", false), " reason=", saved.get("reason", ""))
-	_check(bool(saved.get("ok", false)) or String(saved.get("reason", "")) == "mission_identity_mismatch", "S: BEFUND ohne Tote: Speichern daheim nach dem Polisa-Besuch gelingt oder wird mit mission_identity_mismatch abgelehnt (Grund: %s)" % [saved.get("reason", "")])
+	# Speichern, erster Teil / 21.11.: war ein BEFUND (mission_identity_mismatch), jetzt klappt es (die Heimlandung gibt die Ortsinstanz frei).
+	_check(bool(saved.get("ok", false)), "S: ohne Tote: Speichern daheim nach dem Polisa-Besuch klappt (Speichern, erster Teil / 21.11.; Grund: %s)" % [saved.get("reason", "")])
 
 # ---------- M1 ----------
 
