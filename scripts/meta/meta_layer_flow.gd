@@ -5902,6 +5902,9 @@ func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_sec
 		if surface_exit and retirement_record.is_empty(): return
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", normalized_craft_id)
 		if not bool(return_gate.get("ok", false)):
+			# Nicht stumm scheitern (Fix-Runde 1, W3): dieselbe Meldung wie am HUD-Gate, auf der Schiffskarte und als Abflugfehler.
+			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
+			_report_departure_block(normalized_craft_id, return_gate)
 			return
 		if surface_exit:
 			var previous_transfer_id: String = String(_find_pending_mission_craft_transfer(normalized_craft_id).get("transfer_id", ""))
@@ -9471,7 +9474,39 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 ## Wartet ein Missionsergebnis auf Zustellung (_pending_campaign_mission_result), sperrt das Gate: {"handled": true, "ok": false, "reason": "mission_result_pending"}.
 ## Ohne Ausfaelle bleibt es bei handled false (keine Verlustauswertung, kein Debrief); der Abflug wird dann ueber
 ## _campaign_departure_booking als Rueckzug (win_condition_type "departure") gebucht.
+## Fix-Runde 1, W3: Auch ohne Ausfaelle prueft der Abflug den Treibstoff fuer den Ortsabflug, bevor das Schiff etwas startet;
+## fehlt er, steht dieselbe Meldung wie beim Abflug mit Ausfaellen auf der Schiffskarte ({"handled": true, "ok": false}).
 func _campaign_departure_gate(craft_id: String) -> Dictionary:
+	var gated: Dictionary = _campaign_departure_gate_casualties(craft_id)
+	if bool(gated.get("handled", false)):
+		return gated
+	return _departure_fuel_block(craft_id)
+
+
+## Lesende Treibstoffpruefung des Abflugs von einem Ort (ohne Ausfaelle). {"handled": false}, wenn der Abflug weiterlaufen darf.
+func _departure_fuel_block(craft_id: String) -> Dictionary:
+	if not is_campaign_start() or _singleplayer_runtime == null or get_mission_for_craft(craft_id) == null:
+		return {"handled": false}
+	var check: Dictionary = _departure_return_preflight(craft_id)
+	var reason := String(check.get("reason", ""))
+	if bool(check.get("ok", false)) or reason not in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+		return {"handled": false}
+	return {"handled": true, "ok": false, "reason": reason, "message": "Treibstoff reicht nicht für den Rückflug"}
+
+
+## Zeigt eine Abflugsperre auf der Schiffskarte des Ortes (Controller der Instanz, an der das Schiff steht).
+func _report_departure_block(craft_id: String, gate: Dictionary) -> void:
+	var reason := String(gate.get("reason", ""))
+	var message := "Treibstoff reicht nicht für den Rückflug" if reason in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"] else String(gate.get("message", ""))
+	if message.is_empty():
+		return
+	var visit: Node = get_mission_for_craft(craft_id)
+	var controller: Node = visit.get_node_or_null("TacticalController") if visit != null else null
+	if controller != null and controller.has_method("_set_mission_dropship_card_feedback"):
+		controller.call("_set_mission_dropship_card_feedback", craft_id, message)
+
+
+func _campaign_departure_gate_casualties(craft_id: String) -> Dictionary:
 	var not_handled: Dictionary = {"handled": false}
 	if not is_campaign_start() or _singleplayer_runtime == null or _get_campaign_casualty_rules().is_empty():
 		return not_handled
@@ -9519,8 +9554,9 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	return {"handled": true, "ok": true, "total_loss": false, "message": "Rückzug ausgewertet: Verluste gemeldet, das Schiff fliegt ab"}
 
 
-## Lesende Spiegelung von authorize_return (singleplayer_runtime_adapter.gd): dieselben Zweige und dieselbe Treibstoffpruefung,
-## aber ohne consume_route_fuel. Ein schon bestaetigter Rueckflug (Wiederholung derselben Anfrage) gilt als ok.
+## Lesende Spiegelung von authorize_return (singleplayer_runtime_adapter.gd): dieselben Zweige und dieselbe Treibstoffpruefung
+## (Etappe Ortsabflug, preview_leg_fuel), aber ohne die Buchung consume_leg_fuel. Ein schon bestaetigter Rueckflug (Wiederholung
+## derselben Anfrage, Beleg "return:<Hinweg>:fuel") gilt als ok.
 func _departure_return_preflight(craft_id: String) -> Dictionary:
 	var preview: Dictionary = Dictionary(_singleplayer_runtime.call("preview_return", craft_id))
 	if not bool(preview.get("ok", false)):
@@ -9540,10 +9576,10 @@ func _departure_return_preflight(craft_id: String) -> Dictionary:
 			return Dictionary(simulation.call("preview_singleplayer_local_return_fuel", _singleplayer_runtime, craft_id))
 	if Dictionary(supply.get("_requests")).has("return:" + String(preview.get("outward_token", "")) + ":fuel"):
 		return {"ok": true}
-	# Wie authorize_return (Regel 8 / Auftrag 21.11.): nach einem Hinweg ueber den Orbit nur der Ortsabflug, nach einem Direktstart die ganze Strecke.
-	var whole_return: Dictionary = Dictionary(preview.get("route", {})).duplicate(true)
-	whole_return["leg"] = String(supply.call("get_return_leg", String(preview.get("outward_token", ""))))
-	return Dictionary(supply.call("preview_leg_fuel", whole_return, {"departure_authorized": true}))
+	# Wie authorize_return (Regel 8 / Auftrag 21.11.): vom Ort bucht der Rueckweg nur den Ortsabflug; Sprung und Landung buchen danach selbst.
+	var exit_leg: Dictionary = Dictionary(preview.get("route", {})).duplicate(true)
+	exit_leg["leg"] = "surface_exit"
+	return Dictionary(supply.call("preview_leg_fuel", exit_leg, {"departure_authorized": true}))
 
 
 ## Der Abschluss startet den Flug nur fuer die Quelle homebase_direct selbst. Fuer jede andere Quelle startet das hier,
