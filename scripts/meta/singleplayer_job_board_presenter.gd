@@ -206,7 +206,7 @@ func refresh() -> void:
 			_visible_job_ids.append(String(id))
 			_jobs.add_item(String(jobs[id].title))
 			_jobs.set_item_metadata(_jobs.item_count - 1, id)
-			var card:=Button.new();card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;card.custom_minimum_size=Vector2(230,52);_job_cards.add_child(card)
+			var card:=Button.new();card.name="JobCard_"+String(id);card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;card.custom_minimum_size=Vector2(230,52);_job_cards.add_child(card)
 			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=MENU_ICONS.get_icon("satellite_chip");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",30)
 			var target_id:String=String(id)
 			card.pressed.connect(_toggle_job_details.bind(target_id))
