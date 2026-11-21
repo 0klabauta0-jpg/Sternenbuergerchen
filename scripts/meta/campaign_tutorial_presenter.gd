@@ -17,6 +17,13 @@ const STEPS := {
 	"rescue_completed":["campaign.movement","Mission 5: Notruf annehmen und im Planetenorbit anfliegen. Feindliche Cutlass bekämpfen; neutrale Buccaneer retten."],
 	"pilot_recruited":["campaign.use","Nach dem Sieg den Buccaneer-Piloten retten. Er schließt sich mit seinem Schiff an; das Team wächst auf vier."],
 	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Unter Basis erkunden → Bauen das zweite Landepad für 100 Credits bauen."],
+	"satellite_completed":["campaign.movement","Satellitenauftrag erfüllt: Chip bergen und mit dem Schiff zur Basis zurückfliegen."],
+	"satellite_home":["campaign.return","Zurück an der Basis: unter Basis erkunden → Datenterminal / Hochladen den Satellitenchip hochladen."],
+	"trade_departed":["campaign.trade","Zum Handelsposten fliegen und dort die Person ansprechen, die sich dem Team anschließen will."],
+	"trade_used":["campaign.use","Handel abgeschlossen: Die gekaufte Ausrüstung im Schiff verstauen und bereitmachen."],
+	"bought":["campaign.trade","Gekauft: Im Versorgungsfenster prüfen, ob die neue Ausrüstung im Lager des Schiffs liegt."],
+	"refueled":["campaign.trade","Das Schiff ist aufgetankt. Weiter zum nächsten Auftrag oder zurück zur Basis."],
+	"trade_home":["campaign.return","Mit der Handelsware zur Basis heimkehren und dort abgeben."],
 	"completed":["campaign.complete","Erstes Kampagnenkapitel abgeschlossen: vier Personen, zwei Schiffe und zwei Landepads. Orte bleiben besuchbar; sichere Basisstände können fortgesetzt werden."]
 }
 var _runtime: Node
