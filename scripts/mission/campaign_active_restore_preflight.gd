@@ -63,6 +63,9 @@ static func prepare(data: Dictionary, adapter: Node, target_root: Node = null) -
 	var campaign = CAMPAIGN.new()
 	var checked: Dictionary = campaign.restore_state(data.campaign)
 	if not checked.get("ok",false): return checked
+	# Ein Ort mit seither ausgetauschter Karte darf einen Basisstand neu beginnen (campaign_checkpoint_store.adopt_relocated_maps),
+	# einen laufenden Einsatz aber nicht: seine Welt gehoert zur alten Karte. Der Spieler laedt den letzten Basisstand.
+	if not Array(checked.get("relocated_location_ids",[])).is_empty(): return _bad("stale_campaign_definitions")
 	var job: Dictionary = data.campaign.get("jobs",{}).get(identity.job_id,{})
 	var departure: Dictionary = data.campaign.get("departures_by_craft_id",{}).get(craft_id,{})
 	if job.get("status")!="active" or job.get("scenario_id")!=identity.scenario_id or job.get("location_id")!=identity.location_id or departure.get("destination_location_id")!=identity.location_id or departure.get("job_id")!=identity.job_id: return _bad("active_campaign_mismatch")

@@ -38,6 +38,11 @@ func configure(flow: Node, request: Dictionary) -> void:
 			if not preflight.get("ok", false):
 				error_message = "Hex-Kampagnenstand passt nicht zur aktuellen Heimatbasis: " + String(preflight.get("reason", "checkpoint_invalid"))
 				return
+		# Orte, deren Karte seit dem Speichern ueberarbeitet wurde, beginnen frisch (Speicher: adopt_relocated_maps). Einmalige Meldung:
+		# Es gibt beim Laden noch keinen Meldeweg zum Spieler, darum ins Protokoll und als Meta "campaign_load_notices" am Flow.
+		var load_notices: Array = Array(loaded.get("notices", []))
+		for notice in load_notices: print("Kampagnenstand: ", notice)
+		if not load_notices.is_empty(): flow.set_meta("campaign_load_notices", load_notices.duplicate())
 		checkpoint = Dictionary(loaded.payload).duplicate(true)
 		_migrate_known_main_starter(checkpoint)
 		run_source = checkpoint.duplicate(true)
