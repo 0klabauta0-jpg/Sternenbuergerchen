@@ -3,7 +3,7 @@ extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const POLISA_GLOBE_ACCESS = preload("res://scripts/mission/polisa_globe_access.gd")
-const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
+const BASE_PERSONNEL_SCRIPT = preload("res://scripts/core/base_personnel_runtime.gd")
 const POLISA_GLOBE_HEX = preload("res://scripts/terrain/hex_grid.gd")
 const NATIVE_A5_HUD_LAYOUT_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_hud_layout.gd")
 const NATIVE_A5_DROPSHIP_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_dropship_presenter.gd")
@@ -19362,12 +19362,13 @@ func get_polisa_resident_spawn_grid() -> Dictionary:
 func register_polisa_resident(unit_id: String) -> Dictionary:
 	var setup := get_node_or_null("../MissionSetup")
 	# R4c: Neben der Kennung polisa_recruit_ ist auch eine Person zugelassen, deren zugelassenes Profil auf Abholung wartet (awaiting_pickup).
-	var awaits_pickup: bool = false
-	var configs: Variant = setup.get("selected_team_unit_configs") if setup != null and not unit_id.begins_with("polisa_recruit_") else null
+	# Es zaehlt die zugelassene Konfiguration der Person; respawning kommt nie durch, auch nicht mit Kennung. Ohne Konfiguration nur die Kennung.
+	var eligible: bool = unit_id.begins_with("polisa_recruit_")
+	var configs: Variant = setup.get("selected_team_unit_configs") if setup != null else null
 	if configs is Array:
 		for config: Variant in configs:
-			if config is Dictionary and String((config as Dictionary).get("unit_id", "")) == unit_id and PERSONNEL_RECOVERY.is_awaiting_pickup(config): awaits_pickup = true
-	if get_parent() == null or String(get_parent().get_meta("location_id", "")) != "polisa" or not (unit_id.begins_with("polisa_recruit_") or awaits_pickup): return {"ok":false,"reason":"invalid_station_resident"}
+			if config is Dictionary and String((config as Dictionary).get("unit_id", "")) == unit_id: eligible = BASE_PERSONNEL_SCRIPT.polisa_visit_eligible(unit_id, config)
+	if get_parent() == null or String(get_parent().get_meta("location_id", "")) != "polisa" or not eligible: return {"ok":false,"reason":"invalid_station_resident"}
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
 	for visit: Dictionary in visits.values():
 		if Array(visit.get("unit_ids", [])).has(unit_id): return {"ok":false,"reason":"already_assigned_to_visit"}

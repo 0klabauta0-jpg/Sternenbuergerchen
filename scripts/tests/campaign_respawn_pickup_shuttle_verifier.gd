@@ -4,6 +4,17 @@ extends "res://scripts/tests/hex_base_boarding_verifier.gd"
 ## kein Bodenplatz, keine Veroeffentlichung durch den Shuttle. Die Kontrolle (Anwerbung ohne Ausfall) wird wie bisher aufgenommen.
 ## Gleiche Vorrichtung wie hex_base_boarding_verifier (Scope, FakeShuttle). Abschlusszeile: CAMPAIGN_RESPAWN_PICKUP_SHUTTLE passed=%d failed=%d
 
+const PICKUP_SHUTTLE_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
+## Erste Anweisung: die Schutzpruefung des Wegwerfprofils, bevor die Vorlage irgendetwas aufbaut oder schreibt.
+func _run() -> void:
+	var verdict: Dictionary = PICKUP_SHUTTLE_GUARD.verdict_from_environment()
+	if not bool(verdict.get("ok", false)):
+		print("CAMPAIGN_RESPAWN_PICKUP_SHUTTLE refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
+		quit(2)
+		return
+	await super._run()
+
 func _finish() -> void:
 	if failed == 0:
 		_shuttle_case("respawning", false)

@@ -45,7 +45,7 @@ func _finish() -> void:
 	# B1: awaiting_pickup, Kennung ohne polisa_recruit_
 	var waiting_id := "pickup_on_ship"
 	var waiting_case: Dictionary = _bind_case(rig, visit, flow, waiting_id, {"unit_id": waiting_id, "display_name": "Wartende", "availability_status": "awaiting_pickup", "recovery_state": {"state": "awaiting_pickup", "pickup_location_id": "polisa"}, "respawns_used": 1})
-	_check(String(rig.base._states[waiting_id].status) == "station" and rig.base.is_awaiting_pickup(waiting_id), "B1: Fixture: die Wartende steht auf station, der Kader fuehrt sie als awaiting_pickup")
+	_check(String(rig.base._states[waiting_id].status) == "station" and rig.base.polisa_visit_eligible_by_id(waiting_id), "B1: Fixture: die Wartende steht auf station, der Kader fuehrt sie als awaiting_pickup")
 	var refused: Dictionary = rig.base.bind_confirmed_polisa_player_boarding(waiting_id, "ship", visit.scene)
 	_check(not bool(refused.get("ok", false)) and String(rig.base._states[waiting_id].status) == "station", "B1: ohne tatsaechlichen Einstieg bleibt die Wartende auf station (%s)" % [refused])
 	waiting_case.actor.set_meta("dropship_embarked", true)
@@ -70,6 +70,22 @@ func _finish() -> void:
 	recruit_case.actor.visible = false
 	var recruit_bound: Dictionary = rig.base.bind_confirmed_polisa_player_boarding(recruit_id, "ship", visit.scene)
 	_check(bool(recruit_bound.get("ok", false)) and String(rig.base._states[recruit_id].status) == "aboard" and String(rig.base._states[recruit_id].craft_id) == "ship", "B3: eine Angeworbene (polisa_recruit_) wird wie vorher gebunden (%s)" % [recruit_bound])
+
+	# B4: frueher Angeworbene (Kennung) und ausgefallen (respawning): wird nie gebunden, auch nicht mit eingestiegenem Darsteller (K1)
+	var gone_id := "polisa_recruit_pickup_gone"
+	var gone_case: Dictionary = _bind_case(rig, visit, flow, gone_id, {"unit_id": gone_id, "display_name": "Ausgefallene Angeworbene", "recruit_location": "polisa", "availability_status": "respawning", "recovery_state": {"state": "respawning", "death_number": 1, "seconds_total": 3600, "seconds_remaining": 600, "pickup_location_id": "polisa", "source": "left_behind"}, "respawns_used": 1})
+	gone_case.actor.set_meta("dropship_embarked", true)
+	gone_case.actor.visible = false
+	var gone_bound: Dictionary = rig.base.bind_confirmed_polisa_player_boarding(gone_id, "ship", visit.scene)
+	_check(not bool(gone_bound.get("ok", false)) and String(rig.base._states[gone_id].status) == "station" and String(rig.base._states[gone_id].craft_id).is_empty(), "B4: eine Angeworbene mit Kennung, die ausgefallen ist (respawning), wird nicht gebunden (%s)" % [gone_bound])
+
+	# B5: frueher Angeworbene (Kennung) und wartet auf Abholung: wird gebunden (Abhol-Weg)
+	var back_id := "polisa_recruit_pickup_back"
+	var back_case: Dictionary = _bind_case(rig, visit, flow, back_id, {"unit_id": back_id, "display_name": "Wartende Angeworbene", "recruit_location": "polisa", "availability_status": "awaiting_pickup", "recovery_state": {"state": "awaiting_pickup", "pickup_location_id": "polisa"}, "respawns_used": 1})
+	back_case.actor.set_meta("dropship_embarked", true)
+	back_case.actor.visible = false
+	var back_bound: Dictionary = rig.base.bind_confirmed_polisa_player_boarding(back_id, "ship", visit.scene)
+	_check(bool(back_bound.get("ok", false)) and String(rig.base._states[back_id].status) == "aboard", "B5: eine Angeworbene mit Kennung, die auf Abholung wartet, wird gebunden (%s)" % [back_bound])
 
 	visit.scene.free()
 	rig.scene.free()

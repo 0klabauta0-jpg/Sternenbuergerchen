@@ -9,6 +9,8 @@ extends "res://scripts/tests/campaign_respawn_gear_verifier.gd"
 ## P3 complete_campaign_pickup ohne Wartende (active, respawning) aendert nichts.
 ## P4 Heimatbasis nach der Abholung (Punkt 10): Speichern und Fortsetzen mit der Abgeholten (active, Grundausstattung, in keinem alten Trupp).
 ## P5 Operation "pilot" (Punkt 7): gesperrte Personen (respawning, awaiting_pickup, wounded, in_transit) werden mit unit_busy abgelehnt.
+## P6 K1: die eine Frage "darf auf Polisa erscheinen/uebernommen/gebunden werden" mit und ohne Kennung (respawning nie), Abhol-Abschluss fuer eine Angeworbene in awaiting_pickup.
+## P7 Befund 1: Die Abgeholte ist nach dem Aussteigen daheim sichtbar.   P8 Gegenprobe: eine frisch Angeworbene (Kennung) ebenso.
 ## Hinweis: Speichern im Einsatz mit Wartenden wird abgelehnt (bekannter Mangel W7); kein Test hier stuetzt sich darauf.
 ## Abschlusszeile: CAMPAIGN_RESPAWN_PICKUP passed=%d failed=%d
 ## Einzeln starten: Kommandozeilenargument nach "--" (zum Beispiel "-- P2").
@@ -28,7 +30,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if not arg.strip_edges().is_empty():
 			selected.append(arg.strip_edges().to_upper())
-	for scenario: String in ["P1", "P2", "P3", "P4", "P5"]:
+	for scenario: String in ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -135,6 +137,68 @@ func _pk_p5() -> void:
 		var other: Dictionary = _pk_op("pilot", {"unit_id": SHOOTER_C})
 		_check(not bool(other.get("ok", false)) and String(other.get("reason", "")) == "unit_busy", "P5: %s: unit_busy (%s)" % [status, other])
 
+## K1: Die eine Frage "darf diese Person auf Polisa erscheinen/uebernommen/gebunden werden" im echten Kader der echten Basis, mit Kennung und ohne.
+## Danach der Abhol-Abschluss fuer eine frueher Angeworbene (Kennung) in awaiting_pickup: active, Ausfalldaten leer, respawns_used gleich, Grundausstattung.
+func _pk_p6() -> void:
+	if not await _t6b_new_four(): return
+	var roster: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var cases := {
+		"polisa_recruit_k1_gone": ["respawning", false], "polisa_recruit_k1_back": ["awaiting_pickup", true], "polisa_recruit_k1_never": ["active", true],
+		"k1_plain_gone": ["respawning", false], "k1_plain_back": ["awaiting_pickup", true], "k1_plain_active": ["active", false]}
+	for id: String in cases:
+		var entry: Dictionary = Dictionary(roster[0]).duplicate(true)
+		entry["unit_id"] = id
+		entry["availability_status"] = cases[id][0]
+		entry["recovery_state"] = {} if cases[id][0] == "active" else {"state": cases[id][0], "pickup_location_id": "polisa"}
+		entry["respawns_used"] = 1
+		roster.append(entry)
+	_flow.call("_replace_roster_units", roster)
+	var base: Node = _t6b_base()
+	for id: String in cases:
+		_check(bool(base.call("polisa_visit_eligible_by_id", id)) == bool(cases[id][1]), "P6: %s (%s): darf auf Polisa erscheinen = %s" % [id, cases[id][0], cases[id][1]])
+	var respawns_used: int = int(_roster_unit("polisa_recruit_k1_back").get("respawns_used", -1))
+	var done: Dictionary = _flow.call("complete_campaign_pickup", "polisa_recruit_k1_back")
+	var picked: Dictionary = _roster_unit("polisa_recruit_k1_back")
+	_check(bool(done.get("ok", false)) and String(picked.get("availability_status", "")) == "active" and Dictionary(picked.get("recovery_state", {})).is_empty() and int(picked.get("respawns_used", -1)) == respawns_used, "P6: die frueher Angeworbene (Kennung) in awaiting_pickup wird ueber den Abhol-Abschluss active (%s)" % [done])
+	var gone: Dictionary = _flow.call("complete_campaign_pickup", "polisa_recruit_k1_gone")
+	_check(not bool(gone.get("ok", false)) and String(_roster_unit("polisa_recruit_k1_gone").get("availability_status", "")) == "respawning", "P6: die frueher Angeworbene in respawning wird nicht abgeschlossen (%s)" % [gone])
+
+## Befund 1: Wer auf Polisa war und daheim aussteigt, ist sichtbar (Darsteller sichtbar und im Baum). Die Abgeholte (C) und zur Gegenprobe
+## eine frisch Angeworbene (Kennung), beide ueber den Besitzer-Aufruf mark_recruit_remote an Bord des Heimschiffs gesetzt.
+func _pk_p7() -> void:
+	await _pk_visibility(SHOOTER_C)
+
+## Gegenprobe zu P7 mit einer frisch Angeworbenen allein (am Schiffsplatz ist nur Raum fuer eine Person).
+func _pk_p8() -> void:
+	await _pk_visibility("polisa_recruit_p7_control")
+
+func _pk_visibility(subject: String) -> void:
+	if not await _t6b_new_four(): return
+	_craft_id = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
+	_flow.call("_apply_campaign_casualties", _ra_result(_t6b_states({SHOOTER_C: "down"}), "aborted", 3))
+	_pk_mature(SHOOTER_C)
+	var recruit_id := "polisa_recruit_p7_control"
+	var roster: Array = Array(_flow.get("_all_team_units")).duplicate(true)
+	var entry: Dictionary = Dictionary(roster[0]).duplicate(true)
+	entry["unit_id"] = recruit_id
+	entry["display_name"] = "Angeworbene P7"
+	entry["availability_status"] = "active"
+	entry["recovery_state"] = {}
+	entry["recruit_location"] = "polisa"
+	roster.append(entry)
+	_flow.call("_replace_roster_units", roster)
+	_t6b_base().call("sync_roster")
+	for id: String in [subject]:
+		var boarded: Dictionary = _t6b_base().call("mark_recruit_remote", id, _craft_id)
+		_check(bool(boarded.get("ok", false)) and _ra_base_status(id) == "aboard", "P7: %s ist an Bord des Heimschiffs (%s)" % [id, boarded])
+	_flow.call("complete_campaign_pickup", SHOOTER_C)
+	for id: String in [subject]:
+		var out: Dictionary = _t6b_base().call("request_operation", "base_unboard", {"unit_id": id, "craft_id": _craft_id})
+		await _pk_wait(func(): return _ra_base_status(id) == "outside", 60000)
+		await _pk_wait(func(): return false, 1500)
+		var actor: Node = _t6b_base().call("get_actor", id)
+		_check(bool(out.get("ok", false)) and _ra_base_status(id) == "outside" and actor != null and actor.visible and actor.is_visible_in_tree(), "P7: %s ist nach dem Aussteigen daheim sichtbar (%s, Zustand %s, sichtbar %s)" % [id, out, _ra_base_status(id), actor.visible if actor != null else "kein Darsteller"])
+
 func _pk_board_home_crew() -> bool:
 	_craft_id = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
 	var personnel: Node = _t6b_base()
@@ -204,11 +268,13 @@ func _pk_p1() -> void:
 	_check(String(_pk_roster_field(SHOOTER_C, "availability_status")) == "awaiting_pickup" and _ra_base_status(SHOOTER_C) == "station", "P1: nach Ablauf der Uhr wartet C (awaiting_pickup) und steht auf station")
 	if not _check(await _pk_wait(func():
 		return Dictionary(mission.get_meta("singleplayer_station_personnel", {})).has(SHOOTER_C) and registry.get_unit(SHOOTER_C) != null and not simulation.call("get_hex_unit_state", SHOOTER_C).is_empty(), 60000), "P1: C erscheint als Bewohnerin auf Polisa (Darsteller, Bodenzustand)"):
-		print("P1_DIAG residents=", mission.get_meta("singleplayer_station_personnel", {}), " unit=", registry.get_unit(SHOOTER_C), " base=", _ra_base_status(SHOOTER_C), " setup=", mission.get_node("MissionSetup").call("get_runtime_selection_status"))
 		return
 	var claim: Dictionary = _runtime.call("request_operation", "station_claim_resident", {"craft_id": _craft_id, "unit_id": SHOOTER_C})
 	_check(bool(claim.get("ok", false)), "P1: C wird fuer dieses Schiff uebernommen (%s)" % [claim])
 	_check(_ra_base_status(SHOOTER_C) == "station" and String(_pk_roster_field(SHOOTER_C, "availability_status")) == "awaiting_pickup", "P1: uebernommen, aber noch nicht abgeflogen: C bleibt awaiting_pickup und station")
+	if _pk_mode == "no_board":
+		await _pk_leave_without_her(controller)
+		return
 	# Der Spieler laeuft C zum Schiff (der Befehl dafuer ist eine Einsatzansicht-Eingabe); hier setzt der Test sie wie campaign_casualty_boarding_verifier
 	# ueber _place_at an den Zugang des Schiffs (schreibt in den Bodenzustand, kein oeffentlicher Weg fuer einen Laufbefehl in diesem Aufbau).
 	var access: Dictionary = controller.call("get_campaign_ground_ship_access", _craft_id)
@@ -239,6 +305,24 @@ func _pk_p1() -> void:
 	await _pk_wait(func(): return _ra_base_status(SHOOTER_C) == "outside", 30000)
 	_check(bool(unboard.get("ok", false)) and _ra_base_status(SHOOTER_C) == "outside", "P1: beim Aussteigen daheim steht C wieder an der Basis (%s, Basis-Zustand %s)" % [unboard, _ra_base_status(SHOOTER_C)])
 	_pk_check_picked_up(respawns_used)
+
+var _pk_mode := "full"
+
+## W2 (b): C ist uebernommen, steigt aber NICHT ein, der Spieler fliegt heim. Der Abflug darf nicht endlos haengen; C bleibt awaiting_pickup und station.
+func _pk_p9() -> void:
+	_pk_mode = "no_board"
+	await _pk_p1()
+	_pk_mode = "full"
+
+func _pk_leave_without_her(controller: Node) -> void:
+	var result: Dictionary = _runtime.call("request_operation", "return_homebase", {"craft_id": _craft_id, "service_location_id": "polisa"})
+	_check(not bool(result.get("ok", false)) and String(result.get("reason", "")) == "crew_not_at_ship", "P9: der Rueckflug ohne die uebernommene, nicht eingestiegene C wird sauber abgelehnt (%s)" % [result.get("reason", result)])
+	await _pk_wait(func(): return false, 20000)
+	var space: Dictionary = _pk_space()
+	_check(String(space.get("phase", "")) == "surface" and String(space.get("location_id", "")) == "polisa", "P9: das Schiff bleibt auf Polisa (kein haengender Abflug), Phase %s" % space.get("phase", ""))
+	_check(Dictionary(_flow.get("_pending_surface_departures")).is_empty(), "P9: kein offener Abflugvorgang")
+	_check(_ra_base_status(SHOOTER_C) == "station" and String(_pk_roster_field(SHOOTER_C, "availability_status")) == "awaiting_pickup" and Dictionary(_pk_roster_field(SHOOTER_C, "recovery_state")).get("state", "") == "awaiting_pickup", "P9: C bleibt awaiting_pickup und station, nichts halb gesetzt")
+	_check(Dictionary(_t6b_base().get("_unavailable_unit_reasons")).has(SHOOTER_C), "P9: C bleibt fuer Einsaetze gesperrt (awaiting_pickup)")
 
 ## Punkt 10: Speichern an der Heimatbasis und Fortsetzen mit einer Abgeholten. Der Flug ist hier nicht gefahren (nach einem Polisa-Besuch haelt die
 ## Meta-Szene die Orts-Instanz als aktiven Einsatz, dann geht das Speichern ueber den Einsatzweg, bekannter Mangel W7); dafuer wie

@@ -7,7 +7,6 @@ const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const ORBIT_SURFACES = preload("res://scripts/mission/orbit_surface_locations.gd")
-const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
 
 # Disposable future-input projection, not a live UI/gameplay owner. Actual Root,
 # BasePersonnel, BaseActors, terrain and registry perform all candidate validation.
@@ -481,7 +480,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if String(_service_context(craft_id).get("location_id", "")) != "polisa" or _base_personnel == null: return _reject("station_service_required", "Eigenes Schiff zuerst auf Polisa bereitstellen")
 		var states: Dictionary = _base_personnel.get("_states")
 		# R4c: Neben der Kennung polisa_recruit_ ist auch eine Person uebernehmbar, die auf Abholung wartet (awaiting_pickup).
-		if not (unit_id.begins_with("polisa_recruit_") or _base_personnel.is_awaiting_pickup(unit_id)) or String(Dictionary(states.get(unit_id, {})).get("status", "")) != "station": return _reject("resident_unavailable", "Person ist nicht auf Polisa verfügbar")
+		if not _base_personnel.polisa_visit_eligible_by_id(unit_id) or String(Dictionary(states.get(unit_id, {})).get("status", "")) != "station": return _reject("resident_unavailable", "Person ist nicht auf Polisa verfügbar")
 		var controller := get_polisa_globe_controller()
 		if controller == null or not controller.has_method("claim_polisa_resident"): return _reject("resident_unavailable", "Personalübernahme nicht verfügbar")
 		return controller.call("claim_polisa_resident", unit_id, craft_id)
@@ -1821,6 +1820,10 @@ func grant_pickup_starting_equipment(unit_id: String) -> Dictionary:
 	_supply.configure_inventory([unit_id], [], true)
 	var loadout := {"armor": "suit", "weapon_1": "pistol", "weapon_2": "medictool" if role == "medic" else "none"}
 	_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": unit_id, "loadout": loadout})
+	# Der Besitzer meldet nichts zurueck: im Loadout-Stand nachlesen, ob die Grundausstattung wirklich steht.
+	var stored: Dictionary = Dictionary(Dictionary(_simulation.get_personnel_loadout_state().call("get_snapshot")).get(unit_id, {}))
+	for slot: String in loadout:
+		if String(stored.get(slot, "")) != String(loadout[slot]): return _reject("loadout_not_set", "Grundausstattung konnte nicht gesetzt werden")
 	return {"ok": true, "unit_id": unit_id, "loadout": loadout}
 
 ## Ersetzt die Liste durch die des Standes (leer, wenn der Stand kein Feld "fallen" hat).
@@ -2259,8 +2262,8 @@ func _restore_polisa_residents() -> void:
 	var station_simulation: Node = mission.get_node_or_null("SimulationRoot")
 	for profile: Dictionary in Array(_flow.get("_all_team_units")):
 		var id := String(profile.get("unit_id", ""))
-		# R4c: Neben der Kennung polisa_recruit_ erscheint auch, wer auf Abholung wartet (awaiting_pickup); wer noch ausfaellt (respawning) nicht.
-		if not (id.begins_with("polisa_recruit_") or PERSONNEL_RECOVERY.is_awaiting_pickup(profile)) or String(Dictionary(states.get(id, {})).get("status", "")) != "station" or visit_ids.has(id): continue
+		# R4c: Neben der Kennung polisa_recruit_ erscheint auch, wer auf Abholung wartet (awaiting_pickup); wer noch ausfaellt (respawning) nie, auch nicht mit Kennung.
+		if not _base_personnel.polisa_visit_eligible(id, profile) or String(Dictionary(states.get(id, {})).get("status", "")) != "station" or visit_ids.has(id): continue
 		if residents.has(id) and is_instance_valid(registry.get_unit(id)) and station_simulation != null and not Dictionary(station_simulation.get_hex_unit_state(id)).is_empty(): continue
 		var pending := false
 		for item: Dictionary in _polisa_recruit_pending.values():

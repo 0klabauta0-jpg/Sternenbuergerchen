@@ -11,7 +11,7 @@ const PICKUP_STATION_GUARD = preload("res://scripts/tests/review2_isolated_user_
 
 ## Jede zugelassene Person bekommt eine eigene freie Zelle (der Vorlagen-Steuerung genuegt eine einzige).
 class PickupController extends FixtureController:
-	var cells := [Vector2i(2, 0), Vector2i(1, 0), Vector2i(3, 0)]
+	var cells := [Vector2i(2, 0), Vector2i(1, 0), Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0)]
 	var placed := {}
 	func get_polisa_resident_spawn_grid() -> Dictionary: return {"ok": true, "spawn_grid": cells[mini(placed.size(), cells.size() - 1)]}
 	func register_polisa_resident(id: String) -> Dictionary:
@@ -42,6 +42,13 @@ func _run() -> void:
 		print("CAMPAIGN_RESPAWN_PICKUP_STATION refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
 		quit(2)
 		return
+	_station_session(false)
+	_station_session(true)
+	print("CAMPAIGN_RESPAWN_PICKUP_STATION passed=%d failed=%d" % [passed, failed])
+	quit(0 if failed == 0 else 1)
+
+## Eine frische Vorrichtung je Sitzung (die Zellen des Einsatzbilds sind begrenzt): zweite Sitzung = K1 (S5, S6).
+func _station_session(second: bool) -> void:
 	var rig: Dictionary = _selection_rig(PackedStringArray(["a"]))
 	rig.setup.name = "MissionSetup"
 	var controller := PickupController.new()
@@ -49,7 +56,7 @@ func _run() -> void:
 	rig.scene.add_child(controller)
 	var flow := FixtureFlow.new()
 	rig.scene.add_child(flow)
-	var base_rig: Dictionary = _admission_rig([Vector2i.ZERO, Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)])
+	var base_rig: Dictionary = _admission_rig([Vector2i.ZERO, Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0)])
 	var base = load("res://scripts/core/base_personnel_runtime.gd").new()
 	base_rig.scene.add_child(base)
 	base._flow = flow
@@ -85,6 +92,11 @@ func _run() -> void:
 	rig.scene.set_meta("location_id", "polisa")
 	rig.scene.set_meta("singleplayer_visit_identities", {"ship": {"craft_id": "ship", "unit_ids": []}})
 	var states: Dictionary = base._states
+	if second:
+		_station_k1(rig, flow, base, adapter, controller, states)
+		rig.scene.free()
+		base_rig.scene.free()
+		return
 
 	# S1: respawning
 	var down := _pickup_profile("pickup_down", "respawning")
@@ -132,6 +144,8 @@ func _run() -> void:
 		rig.setup.selected_team_fireteam_ids.append("")
 		rig.setup.selected_team_unit_configs.append({"unit_id": "__filler_%d" % filler})
 		free_slots -= 1
+	var full_admission: Dictionary = rig.setup.request_polisa_recruit_admission(late, Vector2i(2, 0))
+	_check(not bool(full_admission.get("ok", false)) and String(full_admission.get("reason", "")) == "selection_capacity", "S3: bei voller Auswahl lehnt das Einsatzbild mit selection_capacity ab (%s)" % [full_admission])
 	for attempt in range(3):
 		adapter._polisa_resident_retry_msec = 0
 		adapter._restore_polisa_residents()
@@ -165,5 +179,34 @@ func _run() -> void:
 
 	rig.scene.free()
 	base_rig.scene.free()
-	print("CAMPAIGN_RESPAWN_PICKUP_STATION passed=%d failed=%d" % [passed, failed])
-	quit(0 if failed == 0 else 1)
+
+func _station_k1(rig: Dictionary, flow: Node, base: Node, adapter: Node, controller: Node, states: Dictionary) -> void:
+	_add_spare_slot(rig, "__slot_1")
+	_add_spare_slot(rig, "__slot_2")
+	# S5 (K1): frueher Angeworbene (Kennung) und ausgefallen (respawning): nicht Bewohnerin, nicht zugelassen, nicht uebernehmbar
+	var gone := _pickup_profile("polisa_recruit_pickup_gone", "respawning")
+	gone["recruit_location"] = "polisa"
+	flow._all_team_units.append(gone)
+	base.sync_roster()
+	_add_spare_slot(rig, "__slot_4")
+	for attempt in range(3):
+		adapter._polisa_resident_retry_msec = 0
+		adapter._restore_polisa_residents()
+	_check(not controller.residents.has("polisa_recruit_pickup_gone") and rig.units.get_unit("polisa_recruit_pickup_gone") == null, "S5: eine Angeworbene (Kennung) in respawning erscheint nicht als Bewohnerin")
+	var gone_admission: Dictionary = rig.setup.request_polisa_recruit_admission(gone, Vector2i(2, 0))
+	_check(not bool(gone_admission.get("ok", false)) and rig.units.get_unit("polisa_recruit_pickup_gone") == null, "S5: das Einsatzbild lehnt sie ab (%s)" % [gone_admission])
+	var gone_claim: Dictionary = adapter.request_operation("station_claim_resident", {"craft_id": "ship", "unit_id": "polisa_recruit_pickup_gone"})
+	_check(not bool(gone_claim.get("ok", false)), "S5: sie ist nicht uebernehmbar (%s)" % [gone_claim])
+
+	# S6 (K1): frueher Angeworbene (Kennung), wartet auf Abholung: der ganze Abhol-Weg (Bewohnerin, uebernehmbar)
+	var back := _pickup_profile("polisa_recruit_pickup_back", "awaiting_pickup")
+	back["recruit_location"] = "polisa"
+	flow._all_team_units.append(back)
+	base.sync_roster()
+	_add_spare_slot(rig, "__slot_5")
+	for attempt in range(3):
+		adapter._polisa_resident_retry_msec = 0
+		adapter._restore_polisa_residents()
+	_check(controller.residents.has("polisa_recruit_pickup_back") and rig.units.get_unit("polisa_recruit_pickup_back") != null, "S6: eine Angeworbene (Kennung) in awaiting_pickup erscheint als Bewohnerin")
+	var back_claim: Dictionary = adapter.request_operation("station_claim_resident", {"craft_id": "ship", "unit_id": "polisa_recruit_pickup_back"})
+	_check(bool(back_claim.get("ok", false)) and String(states.polisa_recruit_pickup_back.status) == "station", "S6: sie ist uebernehmbar und bleibt bis zum Abflug station (%s)" % [back_claim])

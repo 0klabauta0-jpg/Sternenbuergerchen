@@ -618,13 +618,19 @@ func _waits_for_pickup(id: String) -> bool:
 		if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return _profile_waits_for_pickup(profile)
 	return false
 
-## Respawn (R4c): Die EINE Frage "wartet auf Abholung" (Kader-Eintrag awaiting_pickup, nicht respawning). Dieselbe Auskunft
-## fragen Adapter, Einsatzbild, Stationssteuerung und Flow ueber PersonnelRecoveryRuntime.is_awaiting_pickup; hier nach Kennung.
-func is_awaiting_pickup(id: String) -> bool:
-	if _flow == null: return false
-	for profile: Variant in Array(_flow.get("_all_team_units")):
-		if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return PERSONNEL_RECOVERY.is_awaiting_pickup(profile)
-	return false
+## Respawn (R4c): Die EINE Frage fuer alle Stellen auf Polisa (Erscheinen als Bewohner, Uebernehmen, Zulassung, Registrieren,
+## Binden beim Abflug): Wer noch ausfaellt (respawning) kommt nie durch, auch nicht mit der Kennung polisa_recruit_. Sonst
+## kommt durch, wer die Kennung polisa_recruit_ traegt (Angeworbene, auch eine nie gestorbene) oder auf Abholung wartet (awaiting_pickup).
+static func polisa_visit_eligible(unit_id: String, profile: Dictionary) -> bool:
+	if PERSONNEL_RECOVERY.is_respawning(profile): return false
+	return unit_id.begins_with("polisa_recruit_") or PERSONNEL_RECOVERY.is_awaiting_pickup(profile)
+
+## Dieselbe Frage nach der Kennung, mit dem Kader-Eintrag aus dem Flow (ohne Eintrag zaehlt nur die Kennung).
+func polisa_visit_eligible_by_id(id: String) -> bool:
+	if _flow != null:
+		for profile: Variant in Array(_flow.get("_all_team_units")):
+			if profile is Dictionary and String((profile as Dictionary).get("unit_id", "")) == id: return polisa_visit_eligible(id, profile)
+	return id.begins_with("polisa_recruit_")
 
 ## Respawn (R3): Die Person verlaesst die Basis und wartet unsichtbar auf Polisa. Ohne Basis-Person ({ok, unchanged}) ist nichts zu tun.
 ## Das Abholen selbst ist nicht hier (R4).
@@ -653,7 +659,7 @@ func has_station_recruits() -> bool:
 ## Called only after the station controller has actually retired this visit.
 ## A real remote actor must already be embarked and absent from station ground.
 func bind_confirmed_polisa_player_boarding(unit_id: String, craft_id: String, mission: Node) -> Dictionary:
-	if not (unit_id.begins_with("polisa_recruit_") or is_awaiting_pickup(unit_id)) or craft_id.is_empty() or not _states.has(unit_id) or not is_instance_valid(_flow) or not _flow.has_method("get_mission_for_craft") or _flow.call("get_mission_for_craft", craft_id) != mission or not is_instance_valid(mission) or String(mission.get_meta("location_id", "")) != "polisa": return _reject("invalid_station_boarding", "Person oder Stationsbesuch nicht verfügbar")
+	if not polisa_visit_eligible_by_id(unit_id) or craft_id.is_empty() or not _states.has(unit_id) or not is_instance_valid(_flow) or not _flow.has_method("get_mission_for_craft") or _flow.call("get_mission_for_craft", craft_id) != mission or not is_instance_valid(mission) or String(mission.get_meta("location_id", "")) != "polisa": return _reject("invalid_station_boarding", "Person oder Stationsbesuch nicht verfügbar")
 	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "mission" or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty(): return _reject("invalid_station_craft", "Eigenes Schiff ist nicht auf Polisa")
 	var visits: Dictionary = mission.get_meta("singleplayer_visit_identities", {})
 	if not Array(Dictionary(visits.get(craft_id, {})).get("unit_ids", [])).has(unit_id): return _reject("station_crew_mismatch", "Person gehört nicht zu diesem Besuch")
@@ -1185,6 +1191,10 @@ func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 	for member in leaving:_cancel(member,false)
 	_board_groups.erase(craft)
 	_sim.call("_publish_base_ground_actors",leaving)
+	# Wer auf Polisa war (Angeworbene, Abgeholte) kam unsichtbar an Bord (station/park); daheim ist sie mit Bodenzustand wieder zu sehen.
+	for member in leaving:
+		var returned:=get_actor(member)
+		if is_instance_valid(returned) and not _sim.get_hex_unit_state(member).is_empty():returned.visible=true
 	var publishing_owner:Node=owner_lifetime.get_ref()
 	if is_instance_valid(publishing_owner) and not publishing_owner.is_queued_for_deletion():publishing_owner.emit_signal("state_changed")
 	# Public observers may free/replace either projection owner. The model is

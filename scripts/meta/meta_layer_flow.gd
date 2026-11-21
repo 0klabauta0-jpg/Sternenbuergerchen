@@ -8925,10 +8925,11 @@ func _attempt_space_surface_departure(craft_id: String, record: Dictionary, init
 		return
 	if instance != null and String(instance.get_meta("location_id", "")) == "polisa":
 		for unit_id: String in PackedStringArray(record.unit_ids):
-			# R4c: Neben den Angeworbenen (Kennung) wird auch gebunden, wer auf Abholung wartet (awaiting_pickup).
+			# R4c: Neben den Angeworbenen (Kennung) wird auch gebunden, wer auf Abholung wartet (awaiting_pickup); wer noch ausfaellt (respawning) nie, auch nicht mit Kennung.
 			var awaits_pickup: bool = _roster_unit_awaits_pickup(unit_id)
-			if not (unit_id.begins_with("polisa_recruit_") or awaits_pickup): continue
 			var personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if is_instance_valid(_singleplayer_runtime) and _singleplayer_runtime.has_method("get_base_personnel_runtime") else null
+			var eligible: bool = bool(personnel.call("polisa_visit_eligible_by_id", unit_id)) if personnel != null and personnel.has_method("polisa_visit_eligible_by_id") else unit_id.begins_with("polisa_recruit_")
+			if not eligible: continue
 			if personnel == null or not personnel.has_method("bind_confirmed_polisa_player_boarding"):
 				record.retryable = true
 				return
