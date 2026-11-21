@@ -4915,7 +4915,7 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		for respawn_id in respawn_unit_ids:
 			departing[String(respawn_id)] = true
 		var respawn_screen: Node = _get_homebase_screen()
-		var respawn_emptied: Array = _drop_units_from_squads_and_selection(departing, respawn_screen)
+		var respawn_emptied: Array = _drop_units_from_squads_and_selection(departing, respawn_screen, true)
 		_refresh_after_roster_departure(respawn_emptied, respawn_screen)
 		# Erst nach dem Neuaufbau der Ansicht: Solange die Person im Kader steht, schreibt der Neuaufbau mit der noch
 		# nicht aufgeloesten Trupp-Definition ein Loadout fuer sie zurueck (anders als bei Gefallenen, die nicht mehr im Kader stehen).
@@ -5012,7 +5012,7 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 ## R4a herausgeloest). departed: Dictionary mit den Kennungen als Schluessel. Ermittelt ZUERST die Trupps, die dadurch ohne
 ## Mitglied waeren (bereinigte Definitionen, Rueckgabe), und streicht danach die Personen aus den gestaffelten und gewaehlten
 ## Listen samt Parallelliste der Trupp-Kennungen. Aendert weder Kader noch Basis-Personal noch Ausruestung.
-func _drop_units_from_squads_and_selection(departed: Dictionary, homebase_screen: Node) -> Array:
+func _drop_units_from_squads_and_selection(departed: Dictionary, homebase_screen: Node, scrub_definitions: bool = false) -> Array:
 	var emptied_teams: Array = _campaign_teams_emptied_by(departed, homebase_screen)
 	for unit_id: String in departed:
 		var staged_index: int = _homebase_staged_unit_ids.find(unit_id)
@@ -5025,6 +5025,39 @@ func _drop_units_from_squads_and_selection(departed: Dictionary, homebase_screen
 			_selected_unit_ids.remove_at(selected_index)
 			if selected_index < _selected_fireteam_ids.size():
 				_selected_fireteam_ids.remove_at(selected_index)
+	# Wiederkehrer (R4a Fix 1, W1): Sie stehen weiter im Kader und wuerden deshalb in gespeicherten, nicht eingeteilten Trupp-
+	# Definitionen als Mitglied bleiben (Rueckfall auf member_unit_ids) und beim naechsten Neuaufbau ein Loadout zurueckbekommen.
+	# Nur fuer Wiederkehrer (scrub_definitions); bei Gefallenen aendert sich nichts. Definitionen, die durch den Abgang leer
+	# werden, loest _refresh_after_roster_departure auf.
+	if scrub_definitions and homebase_screen != null and homebase_screen.has_method("_get_fireteam_definitions_snapshot") and homebase_screen.has_method("set_fireteam_context"):
+		var emptied_ids: Dictionary = {}
+		for emptied_variant in emptied_teams:
+			emptied_ids[String(Dictionary(emptied_variant).get("id", ""))] = true
+		var cleaned: Array = []
+		for definition_variant in Array(homebase_screen.call("_get_fireteam_definitions_snapshot")):
+			var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
+			if emptied_ids.has(String(definition.get("id", ""))):
+				continue
+			var touched: bool = false
+			var remaining: PackedStringArray = PackedStringArray()
+			for member_variant in Array(definition.get("member_unit_ids", [])):
+				if departed.has(String(member_variant)):
+					touched = true
+				else:
+					remaining.append(String(member_variant))
+			var member_loadouts: Dictionary = Dictionary(definition.get("member_loadouts", {})).duplicate(true)
+			for departed_id: String in departed:
+				if member_loadouts.erase(departed_id):
+					touched = true
+			if departed.has(String(definition.get("lead_unit_id", ""))):
+				definition["lead_unit_id"] = ""
+				touched = true
+			if touched:
+				definition["member_unit_ids"] = remaining
+				definition["member_loadouts"] = member_loadouts
+				cleaned.append(definition)
+		if not cleaned.is_empty():
+			homebase_screen.call("set_fireteam_context", PackedStringArray(_homebase_staged_fireteam_ids), cleaned, false)
 	return emptied_teams
 
 

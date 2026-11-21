@@ -24,7 +24,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if not arg.strip_edges().is_empty():
 			selected.append(arg.strip_edges().to_upper())
-	for scenario: String in ["G1", "G2", "G3", "G4", "G5", "G6"]:
+	for scenario: String in ["G1", "G2", "G3", "G4", "G5", "G6", "G7"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -116,6 +116,71 @@ func _rg_g4() -> void:
 	var stray: Array = _rg_stray(SHOOTER_C, [])
 	_check(stray.is_empty() and not _rg_inventory().has("unit:%s:backpack" % SHOOTER_C) and not _rg_loadouts().has(SHOOTER_C), "G4: Grenze 0: C ist ueberall weg (uebrig: %s)" % [stray])
 	_check(_flow.call("_campaign_roster_problems", Array(_flow.get("_all_team_units"))).is_empty(), "G4: Kader bleibt spielbar")
+
+## Alle Trupp-Definitionen (Basisansicht ueber den Kampagnenstand, Operationsansicht, FOB-Ansicht), in denen die Person als Mitglied steht.
+func _rg_definition_places(unit_id: String) -> Array:
+	var found: Array = []
+	for place: String in _t6b_where(_t6b_payload(), unit_id):
+		if place.begins_with("fireteam "):
+			found.append("payload " + place)
+	for team: Dictionary in Array(Dictionary(_screen.call("get_operations_snapshot")).get("fireteams", [])):
+		if _rg_team_members(String(team.get("id", ""))).has(unit_id):
+			found.append("ansicht " + String(team.get("id", "")))
+	for definition: Dictionary in Array(_screen.get("_fireteam_definitions")):
+		if Array(definition.get("member_unit_ids", [])).has(unit_id):
+			found.append("definition " + String(definition.get("id", "")))
+	var fob: Variant = _flow.call("_get_fob_screen")
+	if fob != null and fob.has_method("get_fireteam_definitions"):
+		for definition: Dictionary in Array(fob.call("get_fireteam_definitions")):
+			if Array(definition.get("member_unit_ids", [])).has(unit_id):
+				found.append("fob " + String(definition.get("id", "")))
+	return found
+
+## G7 (Fix-Runde 1, W1): B und der geschuetzte Pilot stehen zusaetzlich in einem gespeicherten, nicht eingeteilten Trupp (ft3).
+## B faellt aus: nach dem Ende, nach erneutem Neuaufbau der Ansicht, nach einer Trupp-Bearbeitung an anderem Trupp und nach
+## Speichern und Fortsetzen steht B in keiner Definition und hat kein eigenes Loadout; der verwundete Pilot bleibt in ft3.
+func _rg_g7() -> void:
+	if not await _t6b_new_four(): return
+	var added: Dictionary = _screen.call("request_operation", "add_fireteam", {})
+	if not _check(bool(added.get("ok", false)), "G7: Aufbau: dritter Trupp (%s)" % [added]): return
+	var team_three: String = String(_rg_team_ids()[-1])
+	var staged_ids: PackedStringArray = PackedStringArray(_flow.get("_homebase_staged_fireteam_ids"))
+	_screen.call("set_fireteam_context", staged_ids, [{"id": team_three, "label": team_three.to_upper(), "lead_unit_id": "", "member_unit_ids": PackedStringArray([LEAD_B, PILOT_ID]), "member_loadouts": {}}], false)
+	_check(_rg_team_members(team_three).has(LEAD_B) and _rg_team_members(team_three).has(PILOT_ID), "G7: Fixture: B und Pilot stehen in %s, das niemand eingeteilt hat (%s)" % [team_three, _rg_team_members(team_three)])
+	_flow.call("_apply_campaign_casualties", _ra_result(_t6b_states({LEAD_B: "down"}), "aborted", 3))
+	var protected_result: Dictionary = _ra_result(_t6b_states({}), "aborted", 3)
+	protected_result["respawn_unit_ids"] = PackedStringArray([PILOT_ID])
+	protected_result["casualties"] = [{"unit_id": PILOT_ID, "outcome": "dead", "final": false, "death_number": 1, "respawn_state": {"state": "respawning", "death_number": 1, "seconds_total": 3600, "seconds_remaining": 3600, "pickup_location_id": "polisa", "source": "left_behind"}}]
+	_flow.call("_apply_campaign_casualties", protected_result)
+	_check(String(_roster_unit(LEAD_B).get("availability_status", "")) == "respawning" and String(_roster_unit(PILOT_ID).get("availability_status", "")) == "wounded", "G7: B respawning, Pilot geschuetzt verwundet")
+	_rg_check_g7("direkt nach dem Ende", team_three)
+	_flow.call("_refresh_homebase_screen")
+	_rg_check_g7("nach erneutem Neuaufbau der Ansicht", team_three)
+	var other: Dictionary = _screen.call("request_operation", "add_fireteam", {})
+	var moved: Dictionary = _screen.call("request_operation", "assign", {"unit_id": LEAD_A, "fireteam_id": String(_rg_team_ids()[-1])})
+	var back: Dictionary = _screen.call("request_operation", "assign", {"unit_id": LEAD_A, "fireteam_id": _team_id})
+	print("RG_G7_EDIT add=", other, " assign=", moved, " back=", back)
+	_check(bool(other.get("ok", false)), "G7: Trupp-Bearbeitung an anderem Trupp laeuft (add_fireteam)")
+	_rg_check_g7("nach Trupp-Bearbeitung an anderem Trupp", team_three)
+	var saved: Dictionary = _flow.call("request_campaign_save")
+	if not _check(bool(saved.get("ok", false)), "G7: Speichern an der Basis gelingt (%s)" % [saved.get("reason", "")]): return
+	await _end_sortie()
+	await create_timer(0.5).timeout
+	if not await _t6b_open("campaign", "continue"): return
+	_rg_check_g7("nach Speichern und Fortsetzen", team_three)
+
+func _rg_check_g7(tag: String, team_three: String) -> void:
+	var places: Array = _rg_definition_places(LEAD_B)
+	print("RG_G7 ", tag, " B=", places, " loadouts_has_B=", _rg_loadouts().has(LEAD_B))
+	_check(places.is_empty(), "G7 (%s): B steht in keiner Trupp-Definition (%s)" % [tag, places])
+	_check(not _rg_loadouts().has(LEAD_B) and not _rg_inventory().has("unit:%s:backpack" % LEAD_B) or tag == "nach Speichern und Fortsetzen", "G7 (%s): B hat kein eigenes Loadout und keinen Rucksack" % tag)
+	_check(not _rg_loadouts().has(LEAD_B), "G7 (%s): get_snapshot der Loadouts enthaelt B nicht" % tag)
+	var pilot_places: Array = _rg_definition_places(PILOT_ID).filter(func(place: String) -> bool: return place.contains(team_three))
+	if tag == "nach Speichern und Fortsetzen":
+		# Der Spielstand haelt nicht eingeteilte Trupps nicht mit Mitgliedern fest (nur Messung, keine Erwartung).
+		print("RG_G7 Pilot nach Fortsetzen in: ", _rg_definition_places(PILOT_ID))
+		return
+	_check(not pilot_places.is_empty(), "G7 (%s): der verwundete geschuetzte Pilot bleibt in seinem gespeicherten Trupp (%s)" % [tag, pilot_places])
 
 ## park_pickup_person (R3-Fix-Runde, W6): Scheitert die Freigabe vom Hex-Boden, bleibt der alte Zustand der Person stehen.
 ## Der Fehlschlag wird erzwungen, indem der Darsteller von C zum Loeschen vorgemerkt wird (Freigabe: base_actor_unbound).
