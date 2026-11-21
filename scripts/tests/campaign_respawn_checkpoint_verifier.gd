@@ -8,7 +8,14 @@ extends "res://scripts/tests/campaign_casualty_recovery_flow_verifier.gd"
 const CP_STORE := preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const UNIT_PROFILE := preload("res://scripts/meta/meta_unit_profile.gd")
 
+const R3_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
 func _run() -> void:
+	var verdict: Dictionary = R3_GUARD.verdict_from_environment()
+	if not bool(verdict.get("ok", false)):
+		print("CAMPAIGN_RESPAWN_CHECKPOINT refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
+		quit(2)
+		return
 	_configure_entry()
 	_profile_part()
 	await _roundtrip("respawning")

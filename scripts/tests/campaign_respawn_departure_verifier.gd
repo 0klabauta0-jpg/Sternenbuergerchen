@@ -2,16 +2,26 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## R3d Respawn (Vorschau und Totalverlust): Die Vorschau des Abflugs rechnet mit derselben Grenze wie das echte Ende,
 ## und ein Totalverlust bleibt ein Totalverlust (niemand stirbt, niemand kommt wieder, der Kader bleibt wie er ist).
 ## Echter Einsatz mit Truppfuehrer und Pilot (wie Szenario C des Departure-Verifiers), einmal mit Grenze 3 (Vorgabe), einmal mit Grenze 0.
-## Die Grenze wird in den Einstellungen des Wegwerfprofils gesetzt und am Ende auf 3 zurueckgestellt.
+## Die Grenze wird in den Einstellungen des Wegwerfprofils gesetzt und am Ende auf den Anfangswert zurueckgestellt.
 ## Abschlusszeile: CAMPAIGN_RESPAWN_DEPARTURE passed=%d failed=%d
 
 const SETTINGS = preload("res://scripts/ui/game_settings_contract.gd")
 
+const R3_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
 func _run() -> void:
+	var verdict: Dictionary = R3_GUARD.verdict_from_environment()
+	if not bool(verdict.get("ok", false)):
+		print("CAMPAIGN_RESPAWN_DEPARTURE refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
+		quit(2)
+		return
+	# Den Anfangswert merken und genau ihn zurueckschreiben (nicht ein festes 3).
+	var initial_limit: int = SETTINGS.load_campaign_respawn_limit()
 	_configure_entry()
 	await _preview_case(3)
 	await _preview_case(0)
-	_set_limit(3)
+	_set_limit(initial_limit)
+	_check(SETTINGS.load_campaign_respawn_limit() == initial_limit, "Ende: Einstellung steht wieder auf dem Anfangswert %d" % initial_limit)
 	print("CAMPAIGN_RESPAWN_DEPARTURE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 

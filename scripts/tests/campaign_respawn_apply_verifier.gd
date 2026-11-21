@@ -6,7 +6,14 @@ extends "res://scripts/tests/campaign_casualty_roster_verifier.gd"
 ## S5 geschuetzter Pilot und Anwerber   S6 doppelte Zustellung (auch nach Speichern und Laden)   S7 Befund (a) Platz 0 gestorben, Befund (b) Pilot
 ## Abschlusszeile: CAMPAIGN_RESPAWN_APPLY passed=%d failed=%d
 
+const R3_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
 func _run() -> void:
+	var verdict: Dictionary = R3_GUARD.verdict_from_environment()
+	if not bool(verdict.get("ok", false)):
+		print("CAMPAIGN_RESPAWN_APPLY refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
+		quit(2)
+		return
 	_configure_entry()
 	for scenario: String in ["S1", "S2", "S3", "S4", "S5", "S6", "S7"]:
 		print("--- ", scenario)

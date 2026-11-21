@@ -5,7 +5,14 @@ extends "res://scripts/tests/campaign_casualty_recovery_flow_verifier.gd"
 ## (Einschiffen abgelehnt, Text "Name: gestorben, Respawn in m:ss" bzw. "Name: wartet auf Polisa").
 ## Abschlusszeile: CAMPAIGN_RESPAWN_CLOCK passed=%d failed=%d
 
+const R3_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
+
 func _run() -> void:
+	var verdict: Dictionary = R3_GUARD.verdict_from_environment()
+	if not bool(verdict.get("ok", false)):
+		print("CAMPAIGN_RESPAWN_CLOCK refused: needs a throwaway profile (SB_REVIEW2_USER_DIR), nothing written. Reason: %s" % str(verdict.get("reason", "")))
+		quit(2)
+		return
 	_configure_entry()
 	_pure()
 	await _flow_part()
