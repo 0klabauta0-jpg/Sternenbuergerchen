@@ -111,7 +111,9 @@ func tree_inspect_button(tree: Tree, item: TreeItem, button_id: int = 0) -> bool
 	return bool(result.ok)
 
 func run() -> void:
-	check(FileAccess.file_exists("user://review2_isolation_canary.json"), "actual isolated profile canary")
+	# Die Datei user://review2_isolation_canary.json schrieb nur der Autoload der frueheren Review2-Projektkopie; heute gilt die Isolations-Auskunft der Sperre (Muster: campaign_respawn_limit_setting_verifier).
+	var isolation: Dictionary = GUARD.verdict_from_environment()
+	check(bool(isolation.get("ok", false)), "actual isolated profile verdict (%s)" % str(isolation.get("reason", "")))
 	owner = CAMPAIGN.new(); travel = TRAVEL.new()
 	check(owner.configure().ok and travel.configure("ship").ok, "actual owners configure")
 	var catalog_hash := FileAccess.get_sha256("res://data/singleplayer/star_system.json")
