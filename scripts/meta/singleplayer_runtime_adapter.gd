@@ -433,7 +433,7 @@ func get_fuel_status(craft_id: String) -> Dictionary:
 	for next_leg: Dictionary in next_legs:
 		var missing: float = maxf(float(next_leg.cost) - fuel, 0.0)
 		if cheapest_missing < 0.0 or missing < cheapest_missing: cheapest_missing = missing
-	var refuel_affordable: bool = refuel_here and (cheapest_missing <= 0.0 or float(_supply.get_credits()) + 0.00001 >= ceil(cheapest_missing * _supply.get_fuel_price_per_unit()))
+	var refuel_affordable: bool = refuel_here and not next_legs.is_empty() and (cheapest_missing <= 0.0 or float(_supply.get_credits()) + 0.00001 >= ceil(cheapest_missing * _supply.get_fuel_price_per_unit()))
 	var in_transit: bool = phase == "quantum" or (phase == "approach" and raw_legs.is_empty())
 	var stranded: bool = phase != "grounded" and not in_transit and not any_affordable and not refuel_affordable
 	var strand_place := "none"
