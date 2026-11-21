@@ -106,9 +106,13 @@ func _run() -> void:
 	presenter.call("_update_hint_arrows")
 	_check(runtime.snapshot_calls > calls_before, "Mit Hinweisen: Schnappschuss wird gelesen")
 	arrows.call("configure", [])
-	# Die ausgelieferte Datenliste ist leer.
+	# Die ausgelieferte Datenliste hat seit P3 die fuenf Hinweise der Basis (Inhalt prueft campaign_hint_arrows_flow_verifier).
 	var shipped: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign_hint_arrows.json"))
-	_check(shipped is Dictionary and Array((shipped as Dictionary).get("hints", [1])).is_empty(), "Datei data/campaign_hint_arrows.json hat leere Liste")
+	var shipped_ids: Array = []
+	if shipped is Dictionary:
+		for entry: Variant in Array((shipped as Dictionary).get("hints", [])):
+			shipped_ids.append(String((entry as Dictionary).get("id", "")))
+	_check(shipped_ids == ["equip_weapon", "refuel_ship", "accept_job", "board_ship", "take_off"], "Datei data/campaign_hint_arrows.json hat die fuenf Basis-Hinweise: " + str(shipped_ids))
 
 	# Aufbau: Pfeil ist Geschwister, nicht Kind der Karte.
 	_check(arrow.get_parent() == presenter.get_parent(), "Pfeil ist Geschwister der Karte")
@@ -231,8 +235,11 @@ func _run() -> void:
 	_homebase.set("_operations_presenter", null)
 	arrows.call("configure", [hint_a])
 	presenter.call("refresh")
-	var rects: Variant = presenter.call("_launch_action_rects")
+	var rects: Variant = presenter.call("_operations_action_rects")
 	_check(rects is Array and (rects as Array).is_empty(), "Ohne Operations-Besitzer: leere Liste")
+	# Das Pfeilrechteck zaehlt fuer die Karte als geschuetzter Bereich (P3, Regel 8).
+	var protected_rects: Array = presenter.call("_launch_action_rects")
+	_check(protected_rects.has(Rect2(arrow.call("get_arrow_rect"))), "Gezeigter Pfeil ist ein geschuetzter Bereich der Karte")
 	_check(rects is Array and (rects as Array).is_typed() and (rects as Array).get_typed_builtin() == TYPE_RECT2, "Ohne Operations-Besitzer: Array[Rect2]")
 	_check(bool(arrow.call("is_showing")), "Ohne Operations-Besitzer: Pfeil unveraendert sichtbar")
 	_homebase.set("_operations_presenter", dummy)

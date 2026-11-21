@@ -3,14 +3,32 @@ extends RefCounted
 ## schreibt nie Spielwahrheit und speichert nichts.
 ##
 ## Hinweisliste (data/campaign_hint_arrows.json):
-##   {"version": 1, "hints": [{"id", "text", "target": {"node": "<Knotenname>"},
+##   {"version": 1, "hints": [{"id", "text", "target": <Ziel oder Liste von Zielen>,
 ##     "show_when": ["stage:0", ...], "done_when": [...], "order": 10}]}
-## Bedingungswoerter (feste Liste, Unbekanntes ist falsch und warnt einmal):
+## Ein Ziel ist {"node": "<Knotenname>"} oder {"node": "<Knotenname>", "within": "<Elternname>"}.
+## Bei einer Liste gewinnt das ERSTE Ziel, das gerade sichtbar ist (Wegweiser: zuerst das eigentliche Ziel,
+## danach die Schaltflaeche, die dorthin fuehrt). Ein Ziel kann zusaetzlich "text" (eigener Text statt dem
+## des Hinweises) und "require" ({"<Eigenschaft>": <Wert>} am gefundenen Steuerelement) tragen; gilt nur,
+## wenn alle Eigenschaften passen (z. B. {"selected": 0}: Auswahlfeld, in dem noch nichts gewaehlt ist).
+## Bedingungswoerter (feste Liste, Unbekanntes ist falsch und warnt einmal). Reine Anzeige-Fakten:
 ##   stage:<n>      facts["stage"] == n
 ##   view:<name>    facts["view"] == name oder facts["views"] enthaelt name
 ##   fact:<key>     facts[key] ist der Bool true
+## Spielstand-Woerter lesen NUR die Schnappschuesse facts["runtime"] (Laufzeit des Einzelspielers) und
+## facts["operations"] (Basisansicht) und schreiben nichts:
+##   weapon_carried          irgendeine Person traegt eine Waffe (Waffe 1 oder 2)
+##   pistol_in_store         im Basislager liegt mindestens eine Pistole
+##   job_open:<id>           Auftrag ist angebbar (offered/failed), also noch nicht angenommen
+##   job_taken:<id>          Auftrag ist angenommen oder laeuft (accepted/active)
+##   fuel_full               Tank des gewaehlten Schiffs ist voll
+##   crew_boarded            Trupp und Pilot des gewaehlten Schiffs sind wirklich an Bord
+##   boarding_underway       Trupp ist dem Schiff zugeteilt, aber noch nicht vollstaendig an Bord
+##   launch_ready            Abflug ist moeglich (kein Sperrgrund)
+##   craft_away              das gewaehlte Schiff ist unterwegs/im Einsatz
 ## Zielnamen: `find_child(name, true, false)` nimmt den ERSTEN Treffer unter der Suchwurzel. Ein Name
-## muss dort also eindeutig sein und darf kein `*` oder `?` enthalten (das waeren Muster).
+## muss dort also eindeutig sein und darf kein `*` oder `?` enthalten (das waeren Muster). Ist er es nicht
+## (z. B. InventorySlot_weapon_1 gibt es im Ausruestungspanel UND im Charakterblatt), sagt "within" den
+## Elternknoten, unter dem gesucht wird (selbst eindeutig, z. B. PersonnelInventory).
 
 const SETTINGS: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const DEFAULT_PATH: String = "res://data/campaign_hint_arrows.json"
@@ -38,7 +56,7 @@ func configure(hints: Array) -> void:
 	for entry: Variant in hints:
 		if entry is Dictionary:
 			var hint: Dictionary = entry
-			if String(hint.get("id", "")).is_empty() or not hint.get("target") is Dictionary:
+			if String(hint.get("id", "")).is_empty() or _target_list(hint.get("target")).is_empty():
 				push_warning("campaign_hint_arrows: Hinweis ohne id oder target uebersprungen")
 				continue
 			_hints.append(hint)
@@ -100,19 +118,60 @@ func refresh(search_root: Node, facts: Dictionary) -> void:
 	if chosen.is_empty():
 		_hide()
 		return
-	var target_info: Dictionary = chosen.get("target", {})
-	var node_name: String = String(target_info.get("node", ""))
-	var found: Node = search_root.find_child(node_name, true, false) if not node_name.is_empty() else null
-	var control: Control = found as Control
-	if control == null or not control.is_visible_in_tree():
-		_hide()
-		return
-	var rect: Rect2 = control.get_global_rect()
-	if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+	# Erstes sichtbares Ziel der Liste gewinnt (Wegweiser-Kette); keins sichtbar: kein Pfeil.
+	var rect: Rect2 = Rect2()
+	var have_rect: bool = false
+	var text: String = String(chosen.get("text", ""))
+	for target_info: Dictionary in _target_list(chosen.get("target")):
+		var control: Control = _find_target(search_root, target_info)
+		if control == null or not control.is_visible_in_tree() or not _requirements_met(control, target_info.get("require", {})):
+			continue
+		var candidate: Rect2 = control.get_global_rect()
+		if candidate.size.x <= 0.0 or candidate.size.y <= 0.0:
+			continue
+		rect = candidate
+		have_rect = true
+		text = String(target_info.get("text", text))
+		break
+	if not have_rect:
 		_hide()
 		return
 	_active_id = String(chosen.get("id", ""))
-	_arrow.call("show_at", rect, String(chosen.get("text", "")))
+	_arrow.call("show_at", rect, text)
+
+
+## "require": {"<Eigenschaft>": <Wert>} am gefundenen Steuerelement (z. B. {"selected": 0} fuer ein Auswahlfeld ohne Wahl).
+func _requirements_met(control: Control, require: Variant) -> bool:
+	if not require is Dictionary:
+		return true
+	for key: Variant in (require as Dictionary):
+		if control.get(String(key)) != (require as Dictionary)[key]:
+			return false
+	return true
+
+
+## `target` darf ein Ziel oder eine Liste von Zielen sein; ergibt immer eine Liste gueltiger Ziele.
+func _target_list(raw: Variant) -> Array:
+	var result: Array = []
+	var entries: Array = []
+	if raw is Dictionary:
+		entries.append(raw)
+	elif raw is Array:
+		entries = raw
+	for entry: Variant in entries:
+		if entry is Dictionary and not String((entry as Dictionary).get("node", "")).is_empty():
+			result.append(entry)
+	return result
+
+
+func _find_target(search_root: Node, target_info: Dictionary) -> Control:
+	var scope: Node = search_root
+	var within: String = String(target_info.get("within", ""))
+	if not within.is_empty():
+		scope = search_root.find_child(within, true, false)
+	if scope == null:
+		return null
+	return scope.find_child(String(target_info.get("node", "")), true, false) as Control
 
 
 func _hide() -> void:
@@ -183,7 +242,108 @@ func _holds(word: String, facts: Dictionary) -> bool:
 		"fact":
 			var value: Variant = facts.get(arg, false)
 			return typeof(value) == TYPE_BOOL and bool(value)
+		"weapon_carried":
+			return _w_weapon_carried(facts)
+		"pistol_in_store":
+			return _w_pistol_in_store(facts)
+		"job_open":
+			return _job_status(facts, arg) in ["offered", "failed"]
+		"job_taken":
+			return _job_status(facts, arg) in ["accepted", "active"]
+		"fuel_full":
+			return _w_fuel_full(facts)
+		"crew_boarded":
+			return _w_crew_boarded(facts)
+		"boarding_underway":
+			return _w_boarding_underway(facts)
+		"launch_ready":
+			return _w_launch_ready(facts)
+		"craft_away":
+			return bool(_selected_craft(facts).get("busy", false))
 	if not _warned.has(word):
 		_warned[word] = true
 		push_warning("campaign_hint_arrows: unbekanntes Bedingungswort '%s'" % word)
 	return false
+
+
+# --- Spielstand-Woerter: nur Lesen in den uebergebenen Schnappschuessen ---
+
+func _runtime(facts: Dictionary) -> Dictionary:
+	var value: Variant = facts.get("runtime", {})
+	return value if value is Dictionary else {}
+
+
+func _operations(facts: Dictionary) -> Dictionary:
+	var value: Variant = facts.get("operations", {})
+	return value if value is Dictionary else {}
+
+
+func _selected_craft(facts: Dictionary) -> Dictionary:
+	var value: Variant = _operations(facts).get("selected_craft", {})
+	return value if value is Dictionary else {}
+
+
+func _w_weapon_carried(facts: Dictionary) -> bool:
+	var roster: Variant = _operations(facts).get("roster", [])
+	if not roster is Array:
+		return false
+	for unit: Variant in roster:
+		if not unit is Dictionary:
+			continue
+		var loadout: Variant = (unit as Dictionary).get("loadout", {})
+		if not loadout is Dictionary:
+			continue
+		for key: String in ["weapon_1", "weapon_2"]:
+			if String((loadout as Dictionary).get(key, "none")) not in ["", "none"]:
+				return true
+	return false
+
+
+func _w_pistol_in_store(facts: Dictionary) -> bool:
+	var inventory: Variant = Dictionary(_runtime(facts).get("supply", {})).get("inventory", {})
+	if not inventory is Dictionary:
+		return false
+	var store: Variant = (inventory as Dictionary).get("base:homebase", {})
+	if not store is Dictionary:
+		return false
+	var items: Variant = (store as Dictionary).get("items", {})
+	return items is Dictionary and int((items as Dictionary).get("pistol", 0)) > 0
+
+
+func _job_status(facts: Dictionary, job_id: String) -> String:
+	var jobs: Variant = Dictionary(_runtime(facts).get("campaign", {})).get("jobs", {})
+	if not jobs is Dictionary:
+		return ""
+	var job: Variant = (jobs as Dictionary).get(job_id, {})
+	return String((job as Dictionary).get("status", "")) if job is Dictionary else ""
+
+
+func _w_fuel_full(facts: Dictionary) -> bool:
+	var craft_id: String = String(_selected_craft(facts).get("id", ""))
+	var supply: Dictionary = _runtime(facts).get("supply", {})
+	var fuel: Variant = Dictionary(supply.get("fuel_by_craft_id", {})).get(craft_id, null)
+	if craft_id.is_empty() or fuel == null:
+		return false
+	return float(fuel) >= float(supply.get("fuel_capacity", 0.0)) - 0.001
+
+
+func _w_crew_boarded(facts: Dictionary) -> bool:
+	var craft: Dictionary = _selected_craft(facts)
+	var passengers: int = int(craft.get("passenger_count", 0))
+	return bool(craft.get("has_payload", false)) and bool(craft.get("pilot_aboard", false)) and passengers > 0 and int(craft.get("aboard_count", 0)) >= passengers
+
+
+func _w_boarding_underway(facts: Dictionary) -> bool:
+	return bool(_selected_craft(facts).get("has_payload", false)) and not _w_crew_boarded(facts)
+
+
+## Wie das Flugdeck selbst: can_start der Basisansicht und, auf der Orbitroute, die Abflugpruefung der Laufzeit.
+func _w_launch_ready(facts: Dictionary) -> bool:
+	var craft: Dictionary = _selected_craft(facts)
+	if not bool(craft.get("can_start", false)):
+		return false
+	var runtime: Dictionary = _runtime(facts)
+	if bool(Dictionary(runtime.get("space_travel", {})).get("enabled", false)):
+		var readiness: Dictionary = Dictionary(Dictionary(runtime.get("space_launch_readiness_by_craft_id", {})).get(String(craft.get("id", "")), {}))
+		return bool(readiness.get("ok", false))
+	return true

@@ -1,1 +1,63 @@
-{"version": 1, "hints": []}
+{
+  "version": 1,
+  "hints": [
+    {
+      "id": "equip_weapon",
+      "order": 10,
+      "text": "Hier per Drag and Drop ausrüsten",
+      "target": [
+        {"node": "InventorySlot_weapon_1", "within": "PersonnelInventory"},
+        {"node": "Navigate_squad"}
+      ],
+      "show_when": ["stage:0", "job_open:satellite_recovery", "pistol_in_store"],
+      "done_when": ["weapon_carried"]
+    },
+    {
+      "id": "refuel_ship",
+      "order": 20,
+      "text": "Hier Schiff auftanken",
+      "target": [
+        {"node": "RefuelCraft", "within": "MissionServices"},
+        {"node": "ServiceCraftSelector", "within": "BaseServices", "require": {"selected": 0}, "text": "Hier zuerst das Schiff wählen"},
+        {"node": "RefuelCraft", "within": "BaseServices"},
+        {"node": "OpenBaseServices"},
+        {"node": "Navigate_mission"}
+      ],
+      "show_when": ["stage:0", "job_open:satellite_recovery"],
+      "done_when": ["fuel_full"]
+    },
+    {
+      "id": "accept_job",
+      "order": 30,
+      "text": "Hier den Satellitenauftrag annehmen",
+      "target": [
+        {"node": "AcceptJob"},
+        {"node": "Navigate_jobs"}
+      ],
+      "show_when": ["stage:0", "job_open:satellite_recovery"],
+      "done_when": ["job_taken:satellite_recovery"]
+    },
+    {
+      "id": "board_ship",
+      "order": 40,
+      "text": "Hier einschiffen",
+      "target": [
+        {"node": "BoardFireteam"},
+        {"node": "Navigate_mission"}
+      ],
+      "show_when": ["job_taken:satellite_recovery"],
+      "done_when": ["crew_boarded", "boarding_underway", "craft_away"]
+    },
+    {
+      "id": "take_off",
+      "order": 50,
+      "text": "Hier abheben",
+      "target": [
+        {"node": "StartMission"},
+        {"node": "Navigate_mission"}
+      ],
+      "show_when": ["job_taken:satellite_recovery", "crew_boarded", "launch_ready"],
+      "done_when": ["craft_away"]
+    }
+  ]
+}

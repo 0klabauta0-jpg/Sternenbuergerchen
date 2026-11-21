@@ -52,6 +52,13 @@ var _seen: Dictionary = {}
 var _render_count: int = 0
 var _hint_arrow: Control
 var _hint_arrows: RefCounted
+## Facts and search root of the hint arrows, rebuilt by every refresh() (4 Hz from the flow); the rectangle of
+## the target is followed in _process at most every hint_update_interval_msec (find_child is not free).
+var _hint_facts: Dictionary = {}
+var _hint_root: Node
+var _hint_update_msec: int = -1000000
+var _arrow_rect_seen: Rect2 = Rect2()
+var hint_update_interval_msec: int = 50
 
 func _exit_tree() -> void:
 	# The arrow is a sibling of this card (not a child), so it must be released with it.
@@ -150,20 +157,49 @@ func _build_ui() -> void:
 	_hint_arrows = HINT_ARROWS.new()
 	_hint_arrows.call("attach_arrow", _hint_arrow)
 
+func _process(_delta: float) -> void:
+	# Between two refresh() calls (the flow ticks at 4 Hz) only the target rectangle moves, e.g. while a side
+	# window slides in. Follow it with the cached facts, at most every hint_update_interval_msec.
+	if _hint_facts.is_empty() or _hint_arrows == null or not is_instance_valid(_hint_arrow):
+		return
+	var now: int = Time.get_ticks_msec()
+	if now - _hint_update_msec < hint_update_interval_msec:
+		return
+	_hint_update_msec = now
+	_apply_hint_arrows()
+
 func _update_hint_arrows() -> void:
 	# Runs before the early returns of refresh(): the arrows must outlive the hidden card.
 	if _hint_arrows == null or not is_instance_valid(_hint_arrow):
 		return
-	# Empty list (the P2 state): no snapshot, no facts, nothing to do. Loads the list only once.
+	# Empty list: no snapshot, no facts, nothing to do. Loads the list only once.
 	if not bool(_hint_arrows.call("has_hints")):
 		return
 	if _hint_arrow.get_parent() == null and get_parent() != null:
 		get_parent().add_child(_hint_arrow)
+	_hint_update_msec = Time.get_ticks_msec()
+	_build_hint_facts()
+	_apply_hint_arrows()
+
+func _apply_hint_arrows() -> void:
+	var search_root: Node = _hint_root if is_instance_valid(_hint_root) else null
+	_hint_arrows.call("refresh", search_root, _hint_facts)
+	# The arrow counts as a protected area for the card (see _launch_action_rects): re-place the card when it moved.
+	var arrow_rect: Rect2 = Rect2()
+	if bool(_hint_arrow.call("is_showing")):
+		arrow_rect = _hint_arrow.call("get_arrow_rect")
+	if arrow_rect != _arrow_rect_seen:
+		_arrow_rect_seen = arrow_rect
+		if _strip != null:
+			_layout()
+
+func _build_hint_facts() -> void:
+	_hint_root = null
+	_hint_facts = {}
 	var snapshot: Dictionary = {}
 	if is_instance_valid(_runtime) and _runtime.has_method("get_snapshot"):
 		snapshot = _runtime.get_snapshot()
 	if String(snapshot.get("mode", "")) != "campaign":
-		_hint_arrows.call("refresh", null, {})
 		return
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
@@ -182,8 +218,13 @@ func _update_hint_arrows() -> void:
 	facts["view"] = operations_mode if not operations_mode.is_empty() else meta_view
 	facts["views"] = views
 	facts["in_mission"] = is_instance_valid(_flow) and is_instance_valid(_flow.get("_active_mission"))
-	var search_root: Node = homebase if homebase != null else (_flow if is_instance_valid(_flow) else null)
-	_hint_arrows.call("refresh", search_root, facts)
+	# Read-only snapshots for the state words of the hint list (the arrows never write).
+	facts["runtime"] = snapshot
+	if homebase != null and homebase.has_method("get_operations_snapshot"):
+		facts["operations"] = homebase.call("get_operations_snapshot", false)
+	_hint_facts = facts
+	# Search root = the flow: the ship service card (MissionServices) lives next to the homebase screen, not below it.
+	_hint_root = _flow if is_instance_valid(_flow) else homebase
 
 ## Read access for tests and later hint content: the arrow node and its controller.
 func get_hint_arrow() -> Control:
@@ -354,6 +395,16 @@ func _free_guidance_position(protected: Array[Rect2]) -> Vector2:
 
 
 func _launch_action_rects() -> Array[Rect2]:
+	var rects: Array[Rect2] = _operations_action_rects().duplicate()
+	# The hint arrow is protected like the launch actions: the card must not cover it.
+	if is_instance_valid(_hint_arrow) and bool(_hint_arrow.call("is_showing")):
+		var arrow_rect: Rect2 = _hint_arrow.call("get_arrow_rect")
+		if arrow_rect.size.x > 0.0 and arrow_rect.size.y > 0.0:
+			rects.append(arrow_rect)
+	return rects
+
+
+func _operations_action_rects() -> Array[Rect2]:
 	if not is_instance_valid(_flow):
 		return []
 	var screen: Control = _flow.get_node_or_null("HomebaseScreen")
