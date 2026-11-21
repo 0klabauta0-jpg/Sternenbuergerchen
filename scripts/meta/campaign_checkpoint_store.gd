@@ -175,6 +175,11 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		var result: Dictionary = pair[0].restore_state(pair[1])
 		if not result.get("ok", false):
 			return result
+	# Nottankdienst (T2): Dienstzustand gegen die Bestellbelege des Versorgungsstands pruefen. Fehlt der Schluessel (alter Stand), gilt
+	# "kein Auftrag"; ein offener Beleg ohne Auftrag oder ein Auftrag ohne Beleg lehnt den Stand ab (nie stillschweigend reparieren).
+	if payload.has("emergency_tanker") and typeof(payload.emergency_tanker) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_tanker_state"}
+	var tanker_check: Dictionary = load("res://scripts/core/emergency_tanker_service.gd").validate_against_receipts(Dictionary(payload.get("emergency_tanker", {})), supply.get_open_tanker_orders())
+	if not tanker_check.get("ok", false): return {"ok":false,"reason":String(tanker_check.get("reason", "invalid_tanker_state"))}
 	# Gefallene verlassen den Kader, ihr Finalize-Beleg bleibt aber im Versorgungsstand (er ist die Rechnung der Anwerbung).
 	# Darum gilt ein Beleg auch fuer eine Person aus der Gefallenenliste; jede andere Person muss im Kader stehen.
 	if payload.has("fallen") and not _valid_fallen(payload.fallen): return {"ok":false,"reason":"invalid_fallen"}

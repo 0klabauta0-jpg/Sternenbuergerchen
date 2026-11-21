@@ -7,6 +7,7 @@ const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const ORBIT_SURFACES = preload("res://scripts/mission/orbit_surface_locations.gd")
+const TANKER_SERVICE = preload("res://scripts/core/emergency_tanker_service.gd")
 
 # Disposable future-input projection, not a live UI/gameplay owner. Actual Root,
 # BasePersonnel, BaseActors, terrain and registry perform all candidate validation.
@@ -120,6 +121,8 @@ var _travel: RefCounted
 var _polisa_shuttle: RefCounted
 var _polisa_shuttle_dispatcher: RefCounted
 var _polisa_shuttle_home: RefCounted
+## Nottankdienst (T2): Zustaende und Restzeit der offenen Auftraege; Geld, Treibstoff und Belege liegen im Versorgungsbesitzer.
+var _tanker: RefCounted = TANKER_SERVICE.new()
 var _cargo_transfer = preload("res://scripts/core/automatic_cargo_transfer.gd").new()
 var _service_pad_reservation: Dictionary = {}
 var _ground_cargo_visual_signature := ""
@@ -193,6 +196,12 @@ func configure(flow: Node, screen: Control) -> void:
 		if not checkpoint.is_empty():
 			_campaign.restore_state(checkpoint.campaign)
 			_supply.restore_state(checkpoint.supply)
+			# Nottankdienst: der Dienstzustand wird gegen die Bestellbelege des Versorgungsstands geprueft (kein stilles Reparieren).
+			# Fehlt der Schluessel (alter Stand), gilt "kein Auftrag".
+			var tanker_restore: Dictionary = restore_emergency_tanker(checkpoint)
+			if not tanker_restore.get("ok", false):
+				push_error("Invalid emergency tanker checkpoint: " + String(tanker_restore.get("reason", "")))
+				return
 			_onboarding.restore_state(checkpoint.onboarding)
 			restore_fallen_from_checkpoint(checkpoint)
 			if checkpoint.has("polisa_recruitment_market") and not _polisa_market.restore_state(checkpoint.polisa_recruitment_market).get("ok", false):
@@ -438,13 +447,104 @@ func get_fuel_status(craft_id: String) -> Dictionary:
 	var stranded: bool = phase != "grounded" and not in_transit and not any_affordable and not refuel_affordable
 	var strand_place := "none"
 	if stranded: strand_place = "surface" if phase == "surface" else ("space" if phase in ["stopped", "approach"] else "orbit")
-	return {"craft_id":craft_id, "fuel":fuel, "capacity":_supply.get_fuel_capacity(), "phase":phase, "location_id":location_id, "orbit_id":orbit, "next_legs":next_legs, "stranded":stranded, "strand_place":strand_place, "refuel_here":refuel_here, "refuel_affordable":refuel_affordable}
+	# Treibstoffproblem (T2, Nottankdienst): die naechste noetige Etappe ist nicht gedeckt, auch wenn das Schiff noch eine kostenlose
+	# Folgeetappe haette (zum Beispiel die Heimlandung aus dem Mondorbit). "stranded" ist strenger: dort ist gar nichts mehr bezahlbar.
+	var fuel_problem := false
+	if phase != "grounded" and not in_transit:
+		for next_leg: Dictionary in next_legs:
+			if float(next_leg.cost) > 0.0 and not bool(next_leg.affordable): fuel_problem = true
+	return {"craft_id":craft_id, "fuel":fuel, "capacity":_supply.get_fuel_capacity(), "phase":phase, "location_id":location_id, "orbit_id":orbit, "next_legs":next_legs, "stranded":stranded, "strand_place":strand_place, "refuel_here":refuel_here, "refuel_affordable":refuel_affordable, "fuel_problem":fuel_problem}
 
 ## Die Begegnung dieses Schiffs ist entschieden und wartet auf den bezahlten Rueckweg.
 func _encounter_return_pending(craft_id: String) -> bool:
 	if _space_encounter == null: return false
 	var pending: Dictionary = _space_encounter.peek_completed_result()
 	return not pending.is_empty() and String(pending.get("craft_id", "")) == craft_id
+
+# --- Nottankdienst (T2 des Tanker-Auftrags, 21.11.2026) ------------------------------------------------
+# Regeln, Geld, Treibstoff und Belege: SingleplayerSupplyState (Befehle emergency_tanker_order / _deliver / _cancel).
+# Zustaende und Restzeit: scripts/core/emergency_tanker_service.gd (hier getickt, in advance_space_travel).
+# Diese Stelle liefert nur die Tatsachen (Schiff vorhanden, Tankservice, Treibstoffproblem) und verbindet beide Besitzer.
+
+## Ein Schiff gilt als erreichbar, solange es in der Flotte steht, ein Treibstoffkonto hat und der Reisebesitzer es kennt.
+## Wird es waehrenddessen zerstoert oder aus der Flotte entfernt, verfaellt sein Auftrag (_advance_emergency_tanker).
+func _tanker_craft_alive(craft_id: String) -> bool:
+	if _flow == null or _supply == null or _travel == null or craft_id.is_empty(): return false
+	if Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty(): return false
+	return _supply.has_fuel_account(craft_id) and _travel.get_flight_state(craft_id) != null
+
+func _tanker_context(craft_id: String) -> Dictionary:
+	var status: Dictionary = get_fuel_status(craft_id)
+	return {"emergency_tanker_authorized": true, "craft_available": not status.is_empty() and _tanker_craft_alive(craft_id), "at_service_point": bool(status.get("refuel_here", true)), "fuel_problem": bool(status.get("fuel_problem", false))}
+
+## Reine Auskunft vor der Bestellung (T3 zeigt sie an): Menge, Preis, Wartezeit oder der Grund der Sperre samt deutschem Satz.
+## Bucht nichts und aendert den Versorgungsstand nicht.
+func preview_emergency_tanker(craft_id: String) -> Dictionary:
+	if _supply == null or _tanker == null: return _reject("runtime_unavailable", "Tankerdienst noch nicht bereit")
+	var result: Dictionary = _supply.preview_emergency_tanker({"craft_id": craft_id}, _tanker_context(craft_id))
+	var order: Dictionary = _tanker.get_order(craft_id)
+	if not order.is_empty(): result["order"] = Dictionary(_tanker.get_snapshot().orders.get(craft_id, {}))
+	return result
+
+func get_emergency_tanker_snapshot() -> Dictionary:
+	return _tanker.get_snapshot() if _tanker != null else {"orders": {}, "finished": {}}
+
+## Bestellen und Stornieren ueber den vorhandenen Befehlsweg (request_operation). Die Lieferung bucht nur der Tick.
+func _request_emergency_tanker(operation: String, payload: Dictionary) -> Dictionary:
+	if _tanker == null or _supply == null: return _reject("runtime_unavailable", "Tankerdienst noch nicht bereit")
+	var craft_id := String(payload.get("craft_id", ""))
+	if craft_id.is_empty(): return _reject("invalid_command", TANKER_SERVICE.message_for("invalid_command"))
+	if operation == "emergency_tanker_order":
+		var request_id: String = _request_id("tanker-order", payload)
+		var result: Dictionary = _commit("singleplayer_supply", "emergency_tanker_order", {"craft_id": craft_id}, request_id, _tanker_context(craft_id))
+		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)):
+			var opened: Dictionary = _tanker.open_order(result)
+			if not opened.get("ok", false):
+				# Darf nach der Pruefung im Versorgungsbesitzer nicht vorkommen; wenn doch, wird die Buchung sofort voll zurueckgegeben.
+				push_error("Tankerauftrag konnte nicht eroeffnet werden: " + String(opened.get("reason", "")))
+				_tanker_close(String(result.order_id), "expired", "requested")
+				return _reject("tanker_order_failed", "Tankerauftrag konnte nicht eroeffnet werden; Credits erstattet.")
+		return result
+	# emergency_tanker_cancel
+	var order: Dictionary = _tanker.get_order(craft_id)
+	if order.is_empty():
+		# Zweiter Klick nach einem Storno: derselbe Beleg, keine zweite Erstattung (der Versorgungsbesitzer liefert replayed).
+		var finished: Dictionary = _tanker.get_finished(craft_id)
+		if String(finished.get("state", "")) == "cancelled":
+			return _commit("singleplayer_supply", "emergency_tanker_cancel", {"order_id": String(finished.order_id), "reason": "player"}, String(finished.order_id) + ":cancel", {"emergency_tanker_authorized": true})
+		return {"ok": false, "reason": "no_open_order", "message": TANKER_SERVICE.message_for("no_open_order")}
+	if String(order.state) in ["at_ship", "refuelling"]:
+		return {"ok": false, "reason": "tanker_already_arrived", "message": TANKER_SERVICE.message_for("tanker_already_arrived")}
+	var cancelled: Dictionary = _commit("singleplayer_supply", "emergency_tanker_cancel", {"order_id": String(order.order_id), "reason": "player"}, String(order.order_id) + ":cancel", {"emergency_tanker_authorized": true, "emergency_tanker_state": String(order.state)})
+	if bool(cancelled.get("ok", false)) and not bool(cancelled.get("replayed", false)):
+		_tanker.close_order(String(order.order_id), "cancelled", int(cancelled.get("refund", 0)))
+	return cancelled
+
+## Verfall (Schiff zerstoert oder aus der Flotte entfernt): volle Rueckerstattung in jedem Zustand, genau einmal.
+func _tanker_close(order_id: String, end_state: String, state: String) -> void:
+	var cancelled: Dictionary = _commit("singleplayer_supply", "emergency_tanker_cancel", {"order_id": order_id, "reason": "expired"}, order_id + ":cancel", {"emergency_tanker_authorized": true, "emergency_tanker_state": state})
+	if bool(cancelled.get("ok", false)): _tanker.close_order(order_id, end_state, int(cancelled.get("refund", 0)))
+	else: push_error("Tankerauftrag %s konnte nicht erstattet werden: %s" % [order_id, String(cancelled.get("reason", "?"))])
+
+## Zeit des Nottankdienstes. Der Tick aendert den Versorgungsstand nicht (keine Revision); nur Lieferung und Verfall buchen.
+func _advance_emergency_tanker(delta: float) -> void:
+	if _tanker == null or _supply == null or not _tanker.has_open_orders(): return
+	for order: Dictionary in _tanker.open_orders():
+		if not _tanker_craft_alive(String(order.craft_id)): _tanker_close(String(order.order_id), "expired", String(order.state))
+	for due: Dictionary in _tanker.advance(delta):
+		var delivered: Dictionary = _commit("singleplayer_supply", "emergency_tanker_deliver", {"order_id": String(due.order_id)}, String(due.order_id) + ":deliver", {"emergency_tanker_authorized": true})
+		if bool(delivered.get("ok", false)): _tanker.complete(String(due.order_id), int(delivered.get("amount", 0)))
+		elif String(delivered.get("reason", "")) in ["craft_unavailable", "unknown_order", "order_closed"]: _tanker_close(String(due.order_id), "expired", String(due.state))
+
+## Beim Laden: Dienstzustand (Schluessel emergency_tanker) gegen die Bestellbelege des Versorgungsstands pruefen und uebernehmen.
+## Fehlt der Schluessel, gilt "kein Auftrag" (alter Stand); ein offener Beleg ohne Auftrag oder ein Auftrag ohne Beleg lehnt den Stand ab.
+func restore_emergency_tanker(checkpoint: Dictionary) -> Dictionary:
+	var state: Dictionary = Dictionary(checkpoint.get("emergency_tanker", {})) if typeof(checkpoint.get("emergency_tanker", {})) == TYPE_DICTIONARY else {"invalid": true}
+	var checked: Dictionary = TANKER_SERVICE.validate_against_receipts(state, _supply.get_open_tanker_orders())
+	if not checked.get("ok", false): return checked
+	if state.is_empty(): _tanker.clear()
+	else: _tanker.restore_state(state)
+	return {"ok": true}
 
 func get_snapshot() -> Dictionary:
 	if _simulation == null:
@@ -481,7 +581,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "emergency_tanker": _tanker.get_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -657,6 +757,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _base_personnel.request_operation(operation, payload) if _base_personnel != null else _reject("base_unavailable", "Basisaktion nur in Kampagne")
 	if _simulation == null:
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
+	if operation in ["emergency_tanker_order", "emergency_tanker_cancel"]:
+		return _request_emergency_tanker(operation, payload)
 	if operation in ["station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var target := String(payload.get("craft_id", ""))
 		if String(_service_context(target).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")
@@ -1458,6 +1560,7 @@ func preview_space_warp_entry(craft_id: String) -> Dictionary:
 	return {"ok":true, "owned_crafts":routes.keys(), "craft_pilots":pilots.duplicate(true)}
 
 func advance_space_travel(delta: float) -> void:
+	_advance_emergency_tanker(delta)
 	_cargo_transfer.advance(delta)
 	_project_ground_cargo_lifts()
 	_advance_surface_orbit_intents()
@@ -1938,6 +2041,9 @@ func export_campaign_checkpoint() -> Dictionary:
 	if not hex_checkpoint.is_empty(): payload["hex_tactical"] = hex_checkpoint
 	else: payload["base_personnel"] = _base_personnel.export_state() if _base_personnel != null else {}
 	payload["fallen"] = get_fallen()
+	# Nottankdienst: nur mit offenem Auftrag (kann hier nur der Fall sein, wenn alle Schiffe stehen; der Schluessel fehlt sonst wie in
+	# alten Staenden und bedeutet "kein Auftrag").
+	if _tanker != null and _tanker.has_open_orders(): payload["emergency_tanker"] = _tanker.export_state()
 	return payload
 
 ## Guthaben des Kampagnenstands (Besitzer: SingleplayerSupplyState), nur lesend.
@@ -2061,6 +2167,9 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 func get_world_checkpoint_guard() -> Dictionary:
 	if not bool(_cargo_transfer.get_snapshot().get("checkpoint_safe",true)):return _reject("cargo_transfer_active","Speichern wartet auf den Frachttransfer oder seinen Abbruch")
 	if _supply != null and _supply.has_pending_recruitments(): return _reject("recruitment_pending", "Speichern wartet auf den Abschluss der Anwerbung")
+	# T2: Ein offener Tankerauftrag liegt als Beleg im Versorgungsstand, sein Zustand nur hier. Der Einsatz-Speicherweg
+	# (campaign_active_mission_capture) kennt diesen Dienstzustand noch nicht und wuerde einen nicht ladbaren Stand schreiben.
+	if _tanker != null and _tanker.has_open_orders(): return _reject("emergency_tanker_open", "Speichern wartet auf den Tanker (Lieferung läuft)")
 	if _polisa_shuttle_dispatcher != null and String(_polisa_shuttle_dispatcher.get_snapshot().get("phase", "")) not in ["idle", "complete"]:
 		return _reject("shuttle_pending", "Speichern wartet auf die Vorbereitung des Shuttletransports")
 	if _polisa_shuttle != null and not bool(_service_shuttle_snapshot().get("checkpoint_safe", false)):
