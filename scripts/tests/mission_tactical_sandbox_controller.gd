@@ -19362,7 +19362,11 @@ func get_polisa_resident_spawn_grid() -> Dictionary:
 func register_polisa_resident(unit_id: String) -> Dictionary:
 	var setup := get_node_or_null("../MissionSetup")
 	# R4c: Neben der Kennung polisa_recruit_ ist auch eine Person zugelassen, deren zugelassenes Profil auf Abholung wartet (awaiting_pickup).
-	var awaits_pickup: bool = setup != null and Array(setup.get("selected_team_unit_configs")).any(func(config: Variant) -> bool: return config is Dictionary and String((config as Dictionary).get("unit_id", "")) == unit_id and PERSONNEL_RECOVERY.is_awaiting_pickup(config))
+	var awaits_pickup: bool = false
+	var configs: Variant = setup.get("selected_team_unit_configs") if setup != null and not unit_id.begins_with("polisa_recruit_") else null
+	if configs is Array:
+		for config: Variant in configs:
+			if config is Dictionary and String((config as Dictionary).get("unit_id", "")) == unit_id and PERSONNEL_RECOVERY.is_awaiting_pickup(config): awaits_pickup = true
 	if get_parent() == null or String(get_parent().get_meta("location_id", "")) != "polisa" or not (unit_id.begins_with("polisa_recruit_") or awaits_pickup): return {"ok":false,"reason":"invalid_station_resident"}
 	var visits: Dictionary = get_parent().get_meta("singleplayer_visit_identities", {})
 	for visit: Dictionary in visits.values():
