@@ -165,8 +165,14 @@ static func _valid_departure(id: String, receipt: Dictionary, context: Dictionar
 	if departure.get("craft_id") != receipt.craft_id or bindings.campaign.get("_departures_by_craft_id").get(receipt.craft_id) != departure: return false
 	var operation := "begin_station_dock" if receipt.station_dock else ("begin_station_landing" if receipt.station_landing else "begin_approach")
 	if receipt.station_dock and receipt.station_landing or context.operation != operation or context.context_id != ("station-dock:" if receipt.station_dock else "departure:") + id or context.payload.get("location_id") != departure.get("destination_location_id"): return false
+	# Staende vor Regel 8 / Auftrag 21.11. tragen den Routenbeleg (ganze Strecke); neue den Etappenbeleg "approach".
+	var fuel_command := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":departure, "request_id":id + ":fuel"}
+	if receipt.events is Array and not receipt.events.is_empty() and receipt.events[0] is Dictionary and receipt.events[0].get("command") is Dictionary and receipt.events[0].command.get("operation") == "consume_leg_fuel":
+		var leg_payload: Dictionary = departure.duplicate(true)
+		leg_payload["leg"] = "approach"
+		fuel_command = {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":leg_payload, "request_id":id + ":fuel"}
 	var events: Array = [
-		{"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":departure, "request_id":id + ":fuel"},
+		fuel_command,
 		{"contract_category":"singleplayer_campaign", "operation":"bind_departure", "payload":departure, "request_id":id}]
 	if not String(departure.get("job_id", "")).is_empty(): events.append({"contract_category":"singleplayer_campaign", "operation":"activate_job", "payload":{"job_id":departure.job_id,"craft_id":receipt.craft_id}, "request_id":id + ":active"})
 	if receipt.events.size() != events.size() + 1: return false
@@ -299,14 +305,16 @@ static func _valid_local_return(id: String, receipt: Dictionary, context: Dictio
 	if receipt.events.size() == 2:
 		var event: Variant = receipt.events[0]
 		if not _valid_supply_event(event, bindings): return false
-		if event.command.get("request_id") != "return:" + outward + ":fuel" or event.command.get("operation") != "consume_route_fuel" or not event.command.get("payload") is Dictionary: return false
+		if event.command.get("request_id") != "return:" + outward + ":fuel" or event.command.get("operation") not in ["consume_route_fuel", "consume_leg_fuel"] or not event.command.get("payload") is Dictionary: return false
+		if event.command.get("operation") == "consume_leg_fuel" and event.command.payload.get("leg") != "surface_exit": return false
 		if event.command.payload.get("craft_id") != context.payload.craft_id or event.command.payload.get("destination_location_id") != "homebase": return false
 	if not cancel:
 		var fuel_id := "return:" + outward + ":fuel"
 		var entry: Variant = bindings.supply.get("_requests").get(fuel_id)
 		if not entry is Dictionary or typeof(entry.get("signature")) != TYPE_STRING or not entry.get("result") is Dictionary or entry.result.get("ok") != true: return false
 		var fuel: Variant = JSON.parse_string(entry.signature)
-		if not fuel is Dictionary or not _keys(fuel, ["operation", "payload"]) or fuel.operation != "consume_route_fuel" or not fuel.payload is Dictionary or fuel.payload.get("craft_id") != context.payload.craft_id or fuel.payload.get("destination_location_id") != "homebase": return false
+		if not fuel is Dictionary or not _keys(fuel, ["operation", "payload"]) or fuel.operation not in ["consume_route_fuel", "consume_leg_fuel"] or not fuel.payload is Dictionary or fuel.payload.get("craft_id") != context.payload.craft_id or fuel.payload.get("destination_location_id") != "homebase": return false
+		if fuel.operation == "consume_leg_fuel" and fuel.payload.get("leg") != "surface_exit": return false
 		if JSON.stringify(fuel, "", true) != entry.signature: return false
 	return true
 

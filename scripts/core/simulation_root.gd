@@ -305,12 +305,16 @@ func commit_singleplayer_departure(adapter: Node, craft_id: String, request_id: 
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
 	var bound: Dictionary = _singleplayer_campaign_owner.configure_departure_preparation_authority(self)
 	if not bound.get("ok", false): return bound
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":departure.duplicate(true), "request_id":request_id + ":fuel"}
+	# Regel 8 / Auftrag 21.11.: Aus dem Orbit bucht der Anflug nur seinen Anteil (Abheben und Sprung waren eigene Etappen);
+	# ein Direktstart vom Pad ohne Orbit bucht die ganze Strecke auf einmal. Keine Rueckflugreserve.
+	var fuel_payload: Dictionary = departure.duplicate(true)
+	fuel_payload["leg"] = "approach" if not approach_request_id.is_empty() else "whole_route"
+	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":fuel_payload, "request_id":request_id + ":fuel"}
 	var binding := {"contract_category":"singleplayer_campaign", "operation":"bind_departure", "payload":departure.duplicate(true), "request_id":request_id}
 	var activation := {}
 	if not String(departure.get("job_id", "")).is_empty():
 		activation = {"contract_category":"singleplayer_campaign", "operation":"activate_job", "payload":{"job_id":departure.job_id, "craft_id":craft_id}, "request_id":request_id + ":active"}
-	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":true})
+	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":false})
 	if not supply_candidate.get("ok", false): return supply_candidate
 	var campaign_context := {"authority":self, "transaction_id":request_id, "built_home_pad_ids":pads.duplicate()}
 	var campaign_candidate: Dictionary = _singleplayer_campaign_owner.prepare_departure(binding, activation, campaign_context)
@@ -808,6 +812,63 @@ func get_space_actors_at(cells: Array[Vector2i]) -> Array[String]:
 func get_space_area_revision(area_id: String) -> int:
 	return _space_combat_state.get_area_revision(area_id)
 
+# --- Treibstoff je Etappe (Regel 8 / Auftrag 21.11.) -----------------------------------------------
+# Jede Etappe bucht ihren Anteil genau einmal, wenn sie beginnt; die Buchung liegt allein beim Versorgungsbesitzer
+# (SingleplayerSupplyState, Operation consume_leg_fuel). Hier wird nur lesend vorab geprueft und nach der erfolgreich
+# veroeffentlichten Etappe gebucht. Schiffe ohne Treibstoffkonto (z. B. der Stationsshuttle) unterliegen der Regel nicht.
+func _leg_fuel_applies(craft_id: String) -> bool:
+	return _singleplayer_supply_owner != null and _singleplayer_supply_owner.has_fuel_account(craft_id)
+
+func _leg_fuel_payload(craft_id: String, leg: String, origin: String, destination: String) -> Dictionary:
+	return {"craft_id":craft_id, "leg":leg, "origin_location_id":origin, "destination_location_id":destination}
+
+## Lesende Vorpruefung einer Etappe. Eine Etappe ohne definierte Kosten (unknown_leg) gilt als kostenlos.
+func _preview_leg_fuel(craft_id: String, leg: String, origin: String, destination: String) -> Dictionary:
+	if not _leg_fuel_applies(craft_id): return {"ok":true, "skipped":true}
+	var gate: Dictionary = _singleplayer_supply_owner.preview_leg_fuel(_leg_fuel_payload(craft_id, leg, origin, destination), {"departure_authorized":true})
+	if not gate.get("ok", false) and gate.get("reason") == "unknown_leg": return {"ok":true, "skipped":true}
+	return gate
+
+## Bucht eine zuvor geprueften Etappe ueber den Versorgungsbesitzer. Kostenlose Etappen erzeugen keinen Beleg.
+func _book_leg_fuel(craft_id: String, leg: String, origin: String, destination: String, request_id: String) -> Dictionary:
+	if not _leg_fuel_applies(craft_id): return {"ok":true, "skipped":true}
+	if _singleplayer_supply_owner.get_leg_fuel_cost(origin, destination, leg) <= 0.0: return {"ok":true, "skipped":true}
+	# Direkt am Besitzer, ohne Signal: die Buchung liegt in der synchronen Veroeffentlichungsstrecke der Etappe.
+	return _singleplayer_supply_owner.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":_leg_fuel_payload(craft_id, leg, origin, destination), "request_id":request_id}, {"departure_authorized":true})
+
+## Befehl fuer den Ortsabflug (Rueckweg Ort -> Heimat): nur der Anteil "surface_exit"; Sprung und Landung buchen selbst.
+func _surface_exit_fuel_command(route: Dictionary, outward_token: String) -> Dictionary:
+	var payload: Dictionary = route.duplicate(true)
+	payload["leg"] = "surface_exit"
+	return {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":payload, "request_id":"return:" + outward_token + ":fuel"}
+
+static func _location_at_orbit(locations: Dictionary, orbit_id: String, preferred: String) -> String:
+	if orbit_id.is_empty(): return ""
+	if not preferred.is_empty() and String(locations.get(preferred, "")) == orbit_id: return preferred
+	var ids: Array = []
+	for id in locations:
+		if String(locations[id]) == orbit_id: ids.append(String(id))
+	ids.sort()
+	return "" if ids.is_empty() else String(ids[0])
+
+## Plan der Sprungetappe, VOR der Veroeffentlichung gelesen (danach hat sich der Orbit geaendert).
+## Ein Neustart aus "stopped" ist der bezahlte, noch nicht vollendete Sprung und kostet nichts.
+func _plan_jump_fuel(craft_id: String, target_orbit_id: String) -> Dictionary:
+	if not _leg_fuel_applies(craft_id) or _singleplayer_space_travel_owner == null: return {"ok":true, "skipped":true}
+	var travel: Dictionary = _singleplayer_space_travel_owner.get_craft_snapshot(craft_id)
+	if String(travel.get("phase", "")) == "stopped": return {"ok":true, "skipped":true, "continuation":true}
+	var locations: Dictionary = Dictionary(travel.get("location_orbits", {}))
+	var preferred := String(_singleplayer_campaign_owner.get_campaign_snapshot().get("selected_location_id", "")) if _singleplayer_campaign_owner != null else ""
+	var origin := _location_at_orbit(locations, String(travel.get("orbit_id", "")), preferred)
+	var destination := _location_at_orbit(locations, target_orbit_id, preferred)
+	var gate: Dictionary = _preview_leg_fuel(craft_id, "jump", origin, destination)
+	if not gate.get("ok", false): return gate
+	return {"ok":true, "origin":origin, "destination":destination}
+
+func _book_planned_jump_fuel(plan: Dictionary, craft_id: String, request_id: String) -> void:
+	if plan.get("skipped", false): return
+	_book_leg_fuel(craft_id, "jump", String(plan.origin), String(plan.destination), request_id + ":leg:jump")
+
 func commit_singleplayer_space_launch(adapter: Node, craft_id: String, request_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
 	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
@@ -825,6 +886,9 @@ func commit_singleplayer_space_launch(adapter: Node, craft_id: String, request_i
 	if not gate.get("ok", false): return gate
 	var pilot: Dictionary = adapter.preview_space_warp_entry(craft_id)
 	if not pilot.get("ok", false): return pilot
+	# Abheben ist eine eigene Etappe: ohne gedeckten Anteil startet sie nicht (Regel 8 / Auftrag 21.11.).
+	var launch_fuel: Dictionary = _preview_leg_fuel(craft_id, "launch", "homebase", "")
+	if not launch_fuel.get("ok", false): return launch_fuel
 	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
 	if flight == null or _space_combat_state.get_actor(craft_id) != null or _space_combat_state.get_inactive_actor(craft_id) != null: return {"ok":false, "reason":"actor_unavailable"}
 	var pose: Dictionary = flight.get_snapshot()
@@ -855,6 +919,7 @@ func commit_singleplayer_space_launch(adapter: Node, craft_id: String, request_i
 		return committed_wing
 	flight._publish_travel_pose(fv)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
+	_book_leg_fuel(craft_id, "launch", "homebase", "", request_id + ":leg:launch")
 	var result := {"ok":true, "replayed":false, "receipt_id":request_id, "travel_result":travel_result}
 	var command := {"contract_category":"singleplayer_space_travel", "operation":"launch_to_orbit", "payload":payload, "request_id":request_id}
 	_launch_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "flight":flight, "equipment":_ship_equipment_owner, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":result.duplicate(true), "command":command, "event_published":false}
@@ -952,7 +1017,7 @@ func commit_station_purchase_local_admission(adapter: Node, craft_id: String) ->
 	var wing: Dictionary = _space_wing_state.preview_flying_wings("singleplayer", [craft_id], visit.owned_crafts, visit.craft_pilots)
 	if not movement.get("ok", false) or not admission.get("ok", false) or not wing.get("ok", false) or wing.expected_revision != preview.wing_revision: return {"ok":false, "reason":"birth_admission_changed"}
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":visit.route.duplicate(true), "request_id":"return:" + String(visit.outward_token) + ":fuel"}
+	var fuel := _surface_exit_fuel_command(visit.route, String(visit.outward_token))
 	var fuel_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
 	if not fuel_candidate.get("ok", false): return fuel_candidate
 	var payload := {"craft_id":craft_id, "location_id":"polisa", "target_id":layout.target_id, "layout_revision":layout.revision}
@@ -1012,7 +1077,7 @@ func commit_singleplayer_station_orbit(adapter: Node, craft_id: String, request_
 	var wing: Dictionary = _space_wing_state.preview_flying_wings("singleplayer", [craft_id], pilot.owned_crafts, pilot.craft_pilots)
 	if not wing.get("ok", false): return wing
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":pilot.route.duplicate(true), "request_id":"return:" + String(pilot.outward_token) + ":fuel"}
+	var fuel := _surface_exit_fuel_command(pilot.route, String(pilot.outward_token))
 	var fuel_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
 	if not fuel_candidate.get("ok", false): return fuel_candidate
 	var payload := {"craft_id":craft_id}
@@ -1056,6 +1121,9 @@ func commit_singleplayer_home_landing(adapter: Node, craft_id: String, request_i
 	if _launch_receipts.size() >= 1024: return {"ok":false, "reason":"receipt_capacity"}
 	var pilot: Dictionary = adapter.preview_space_home_landing(craft_id)
 	if not pilot.get("ok", false): return pilot
+	# Heimlandung ist eine Etappe (heute kostenlos, damit an der Basis nie ein Totpunkt entsteht).
+	var landing_fuel: Dictionary = _preview_leg_fuel(craft_id, "landing", "", "homebase")
+	if not landing_fuel.get("ok", false): return landing_fuel
 	var flight: RefCounted = _singleplayer_space_travel_owner.get_flight_state(craft_id)
 	if flight == null or _space_combat_state.get_actor(craft_id) != flight or _space_wing_state.get_craft_wing(craft_id, "singleplayer").is_empty(): return {"ok":false, "reason":"unknown_actor"}
 	var pose: Dictionary = flight.get_snapshot()
@@ -1093,6 +1161,7 @@ func commit_singleplayer_home_landing(adapter: Node, craft_id: String, request_i
 	flight._publish_area_transition(fv)
 	_space_combat_state._publish_local_departure(av)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
+	_book_leg_fuel(craft_id, "landing", "", "homebase", request_id + ":leg:landing")
 	var result := {"ok":true, "replayed":false, "receipt_id":request_id, "travel_result":travel_result}
 	var command := {"contract_category":"singleplayer_space_travel", "operation":"land_homebase", "payload":payload, "request_id":request_id}
 	_launch_receipts[request_id] = {"craft_id":craft_id, "fleet":_singleplayer_space_travel_owner, "flight":flight, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":result.duplicate(true), "command":command, "event_published":false}
@@ -1129,6 +1198,9 @@ func commit_singleplayer_warp_departure(adapter: Node, command: Dictionary) -> D
 	var wing_revision: int = _space_wing_state.get_snapshot().revision
 	var preview: Dictionary = preview_warp_departure(command.craft_id, command.target_orbit_id, pose.revision, travel.get("revision", -1), area_revision, wing_revision, {"runtime_authorized":true, "actor_id":"singleplayer"})
 	if not preview.get("ok", false): return preview
+	# Der Quantensprung ist eine eigene Etappe: sein Anteil muss vorher gedeckt sein, sonst startet er nicht.
+	var jump_fuel: Dictionary = _plan_jump_fuel(String(command.craft_id), String(command.target_orbit_id))
+	if not jump_fuel.get("ok", false): return jump_fuel
 	if adapter.has_method("requires_surface_orbit_exit_band") and adapter.requires_surface_orbit_exit_band(command.craft_id):
 		var area_layout: Dictionary = ORBIT_LAYOUT.build(String(pose.space_area_id).trim_prefix("orbit_approach:").uri_decode())
 		if not area_layout.get("ok", false) or area_layout.body_map_id != pose.space_area_id: return {"ok":false, "reason":"invalid_area"}
@@ -1161,6 +1233,7 @@ func commit_singleplayer_warp_departure(adapter: Node, command: Dictionary) -> D
 	flight._publish_area_transition(fv)
 	_space_combat_state._publish_local_departure(av)
 	var travel_result: Dictionary = _singleplayer_space_travel_owner._publish_prepared_space_area_transition(candidate, tv)
+	_book_planned_jump_fuel(jump_fuel, String(command.craft_id), String(command.request_id))
 	var result := {"ok":true, "replayed":false, "receipt_id":String(command.request_id), "travel_result":travel_result}
 	var event_command := {"contract_category":"singleplayer_space_travel", "operation":"start_quantum", "payload":payload, "request_id":command.request_id}
 	_warp_departure_receipts[command.request_id] = {"signature":signature, "fleet":_singleplayer_space_travel_owner, "flight":flight, "equipment":_ship_equipment_owner, "candidate":candidate.duplicate(true), "context":context.duplicate(true), "result":result.duplicate(true), "command":event_command, "event_published":false}
@@ -1291,7 +1364,7 @@ func preview_singleplayer_local_return_fuel(adapter: Node, craft_id: String) -> 
 	if not gate.get("ok", false): return gate
 	if typeof(gate.get("route")) != TYPE_DICTIONARY or gate.route.get("craft_id") != craft_id or typeof(gate.get("outward_token")) != TYPE_STRING or String(gate.outward_token).is_empty(): return {"ok":false, "reason":"invalid_return_context"}
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
-	var fuel := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":gate.route.duplicate(true), "request_id":"return:" + String(gate.outward_token) + ":fuel"}
+	var fuel := _surface_exit_fuel_command(gate.route, String(gate.outward_token))
 	var candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
 	if not candidate.get("ok", false): return candidate
 	var result: Dictionary = candidate.result.duplicate(true)
@@ -1375,7 +1448,7 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	var fuel_candidate := {}
 	if not is_cancel:
 		if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self): return {"ok":false, "reason":"supply_authority_unavailable"}
-		fuel = {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":route.duplicate(true), "request_id":"return:" + String(gate.outward_token) + ":fuel"}
+		fuel = _surface_exit_fuel_command(route, String(gate.outward_token))
 		fuel_candidate = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self,"departure_authorized":true,"require_return_reserve":false})
 		if not fuel_candidate.get("ok", false): return fuel_candidate
 	var bound: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
@@ -1451,7 +1524,7 @@ func commit_fixture_surface_group(bundle: Dictionary, context: Dictionary) -> Di
 	if typeof(fuel.get("payload")) != TYPE_DICTIONARY or typeof(binding.get("payload")) != TYPE_DICTIONARY: return {"ok":false, "reason":"invalid_bundle"}
 	var fp: Dictionary = fuel.get("payload", {})
 	var bp: Dictionary = binding.get("payload", {})
-	if fuel.get("operation") != "consume_route_fuel" or binding.get("operation") != "bind_departure" or fp.get("craft_id") != bundle.craft_id or bp.get("craft_id") != bundle.craft_id or fp.get("destination_location_id") != bundle.location_id or bp.get("destination_location_id") != bundle.location_id or fp.get("origin_location_id") != bp.get("origin_location_id"):
+	if fuel.get("operation") not in ["consume_route_fuel", "consume_leg_fuel"] or binding.get("operation") != "bind_departure" or fp.get("craft_id") != bundle.craft_id or bp.get("craft_id") != bundle.craft_id or fp.get("destination_location_id") != bundle.location_id or bp.get("destination_location_id") != bundle.location_id or fp.get("origin_location_id") != bp.get("origin_location_id"):
 		return {"ok":false, "reason":"bundle_mismatch"}
 	var flight: RefCounted = _space_combat_state.get_actor(bundle.craft_id)
 	if flight == null or _singleplayer_space_travel_owner.get_flight_state(bundle.craft_id) != flight: return {"ok":false, "reason":"unknown_actor"}
@@ -1466,7 +1539,8 @@ func commit_fixture_surface_group(bundle: Dictionary, context: Dictionary) -> Di
 	if not campaign_binding.get("ok", false): return campaign_binding
 	var fleet_binding: Dictionary = _singleplayer_space_travel_owner.configure_space_area_transition_authority(self)
 	if not fleet_binding.get("ok", false): return fleet_binding
-	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":true})
+	# Regel 8 / Auftrag 21.11.: keine Rueckflugreserve mehr.
+	var supply_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":false})
 	if not supply_candidate.get("ok", false): return supply_candidate
 	var campaign_context := {"authority":self, "transaction_id":String(bundle.request_id), "built_home_pad_ids":context.built_home_pad_ids.duplicate()}
 	var campaign_candidate: Dictionary = _singleplayer_campaign_owner.prepare_departure(binding, bundle.activation_command, campaign_context)
@@ -2188,7 +2262,25 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 		if not bool(_personnel_loadout_owner.call("has_unit", unit_id)):
 			return {"ok": false, "reason": "inventory_access", "message": "Person ist hier nicht erreichbar"}
 		context["loadout"] = _personnel_loadout_owner.call("get_loadout", unit_id)
+	# Treibstoff je Etappe fuer den strategischen Pfad (Quantensprung, Heimlandung). Die lokalen Pfade
+	# (commit_singleplayer_warp_departure, commit_singleplayer_home_landing) pruefen und buchen selbst.
+	var leg_operation := String(command.get("operation", ""))
+	var leg_craft := String(Dictionary(command.get("payload", {})).get("craft_id", ""))
+	var leg_request_id := String(command.get("request_id", ""))
+	var leg_jump_plan := {"skipped":true}
+	if String(command.get("contract_category", "")) == "singleplayer_space_travel" and leg_operation in ["start_quantum", "land_homebase"] and _leg_fuel_applies(leg_craft):
+		if leg_operation == "start_quantum":
+			# Eine Wiederholung derselben Anfrage prueft nichts neu: Die erste Buchung hat den Tank schon geleert.
+			if not _singleplayer_supply_owner.has_request(leg_request_id + ":leg:jump"):
+				leg_jump_plan = _plan_jump_fuel(leg_craft, String(Dictionary(command.payload).get("target_orbit_id", "")))
+				if not leg_jump_plan.get("ok", false): return leg_jump_plan
+		else:
+			var landing_gate: Dictionary = _preview_leg_fuel(leg_craft, "landing", "", "homebase")
+			if not landing_gate.get("ok", false): return landing_gate
 	var result: Dictionary = owner.call("apply_command", command.duplicate(true), context)
+	if bool(result.get("ok", false)) and not bool(result.get("replayed", false)) and _leg_fuel_applies(leg_craft):
+		if leg_operation == "start_quantum" and String(command.get("contract_category", "")) == "singleplayer_space_travel": _book_planned_jump_fuel(leg_jump_plan, leg_craft, leg_request_id)
+		elif leg_operation == "land_homebase" and String(command.get("contract_category", "")) == "singleplayer_space_travel": _book_leg_fuel(leg_craft, "landing", "", "homebase", leg_request_id + ":leg:landing")
 	if equipment_commit and bool(result.get("ok", false)) and not bool(result.get("replayed", false)):
 		# The Supply owner has validated the complete slot change. Publish both
 		# sides synchronously before listeners can observe a committed command.
@@ -8388,7 +8480,7 @@ func commit_campaign_space_return(adapter: Node, craft_id: String, request_id: S
 	if not _singleplayer_supply_owner.bind_route_fuel_preparation_authority(self):
 		_singleplayer_space_travel_owner.release_space_area_transition_context(context.context_id, self)
 		return {"ok":false, "reason":"supply_authority_unavailable"}
-	var fuel_command := {"contract_category":"singleplayer_supply", "operation":"consume_route_fuel", "payload":{"craft_id":craft_id, "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, "request_id":"return:" + departure_id + ":fuel"}
+	var fuel_command := _surface_exit_fuel_command({"craft_id":craft_id, "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, departure_id)
 	var fuel_candidate: Dictionary = _singleplayer_supply_owner.prepare_route_fuel(fuel_command, {"route_fuel_authority":self, "departure_authorized":true, "require_return_reserve":false})
 	var fuel_validation: Dictionary = _singleplayer_supply_owner.validate_prepared_route_fuel(fuel_candidate, self) if fuel_candidate.get("ok", false) else fuel_candidate
 	if not fuel_validation.get("ok", false) or fuel_validation.get("patch", {}).get("mode") != "apply":
