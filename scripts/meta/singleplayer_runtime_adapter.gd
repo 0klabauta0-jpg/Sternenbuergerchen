@@ -323,13 +323,102 @@ func _request_id(prefix: String, payload: Dictionary) -> String:
 func _commit(category: String, operation: String, payload: Dictionary, request_id: String, context: Dictionary = {}) -> Dictionary:
 	return _simulation.request_singleplayer_command({"contract_category": category, "operation": operation, "payload": payload, "request_id": request_id}, context)
 
+## Erreichbarkeit je Ziel (Regel 8 / Auftrag 21.11.): "ok" = die naechste Etappe ist bezahlbar (keine Rueckflugreserve);
+## "route_ok" = der Treibstoff reicht fuer den ganzen Hinweg ab dem jetzigen Stand des Schiffs.
 func _fuel_reachability(craft_id: String, locations: Dictionary) -> Dictionary:
 	var result := {}
 	if _supply == null or craft_id.is_empty(): return result
+	var travel: Dictionary = _travel.get_snapshot(craft_id) if _travel != null else {}
 	for id in locations:
 		if String(id) == "homebase": continue
-		result[id] = _supply.preview_route_fuel({"craft_id":craft_id, "origin_location_id":"homebase", "destination_location_id":String(id)}, {"departure_authorized":true, "require_return_reserve":true})
+		result[id] = _outbound_fuel_check(craft_id, String(id), travel)
 	return result
+
+static func _location_for_orbit(location_orbits: Dictionary, orbit_id: String, preferred: String = "") -> String:
+	if orbit_id.is_empty(): return ""
+	if not preferred.is_empty() and String(location_orbits.get(preferred, "")) == orbit_id: return preferred
+	var ids: Array = []
+	for id in location_orbits:
+		if String(location_orbits[id]) == orbit_id: ids.append(String(id))
+	ids.sort()
+	return "" if ids.is_empty() else String(ids[0])
+
+## Etappen, die einem Schiff bis zum Ziel noch bevorstehen: [{leg, origin, destination}].
+func _remaining_outbound_legs(travel: Dictionary, location_id: String) -> Array:
+	var phase := String(travel.get("phase", "grounded"))
+	var orbit := String(travel.get("orbit_id", ""))
+	var location_orbits: Dictionary = Dictionary(travel.get("location_orbits", {}))
+	var approach := {"leg":"approach", "origin":"homebase", "destination":location_id}
+	if phase in ["quantum", "stopped"]: return [approach]
+	if phase == "orbit":
+		if not String(location_orbits.get(location_id, "")).is_empty() and orbit == String(location_orbits.get(location_id, "")): return [approach]
+		return [{"leg":"jump", "origin":_location_for_orbit(location_orbits, orbit), "destination":location_id}, approach]
+	return [{"leg":"launch", "origin":"homebase", "destination":""}, {"leg":"jump", "origin":"homebase", "destination":location_id}, approach]
+
+func _outbound_fuel_check(craft_id: String, location_id: String, travel: Dictionary) -> Dictionary:
+	var legs: Array = _remaining_outbound_legs(travel, location_id)
+	var needed_total := 0.0
+	for entry: Dictionary in legs:
+		var cost: float = _supply.get_leg_fuel_cost(String(entry.origin), String(entry.destination), String(entry.leg))
+		if cost < 0.0: return {"ok":false, "reason":"unknown_route", "message":"Ortsverbindung unbekannt"}
+		needed_total += cost
+	var first: Dictionary = legs[0]
+	var gate: Dictionary = _supply.preview_leg_fuel({"craft_id":craft_id, "leg":first.leg, "origin_location_id":first.origin, "destination_location_id":first.destination}, {"departure_authorized":true})
+	var result: Dictionary = {"ok":bool(gate.get("ok", false))}
+	if not bool(result.ok):
+		for key: String in ["reason", "message", "leg", "needed"]:
+			if gate.has(key): result[key] = gate[key]
+	var available: float = _supply.get_fuel(craft_id)
+	result["next_leg"] = String(first.leg)
+	result["needed_next"] = _supply.get_leg_fuel_cost(String(first.origin), String(first.destination), String(first.leg))
+	result["needed_total"] = needed_total
+	result["available"] = available
+	result["route_ok"] = available + 0.00001 >= needed_total
+	return result
+
+## Abgeleiteter Zustand "liegen geblieben" (nicht gespeichert): das Schiff ist nicht daheim, keine einzige Folgeetappe ist
+## bezahlbar und hier gibt es keinen Tankservice. Die kostenlose Heimlandung zaehlt als bezahlbare Folgeetappe.
+func get_fuel_status(craft_id: String) -> Dictionary:
+	if _supply == null or _travel == null or not _supply.has_fuel_account(craft_id): return {}
+	var travel: Dictionary = _travel.get_snapshot(craft_id)
+	var phase := String(travel.get("phase", "grounded"))
+	var orbit := String(travel.get("orbit_id", ""))
+	var location_id := String(travel.get("location_id", ""))
+	var location_orbits: Dictionary = Dictionary(travel.get("location_orbits", {}))
+	var preferred := String(_campaign.get_campaign_snapshot().get("selected_location_id", "")) if _campaign != null else ""
+	var raw_legs: Array = []
+	match phase:
+		"grounded":
+			raw_legs = [{"leg":"launch", "origin":"homebase", "destination":""}]
+		"orbit":
+			if orbit == "moon_orbit":
+				raw_legs.append({"leg":"landing", "origin":"", "destination":"homebase"})
+				if not preferred.is_empty() and preferred != "homebase": raw_legs.append({"leg":"jump", "origin":"homebase", "destination":preferred})
+			else:
+				var here := _location_for_orbit(location_orbits, orbit, preferred)
+				raw_legs.append({"leg":"approach", "origin":"homebase", "destination":here})
+				raw_legs.append({"leg":"jump", "origin":here, "destination":"homebase"})
+		"stopped":
+			# Der bezahlte, noch nicht vollendete Sprung wird fortgesetzt und kostet nichts.
+			raw_legs = [{"leg":"jump", "origin":"", "destination":"", "free":true}]
+		"surface":
+			raw_legs = [{"leg":"surface_exit", "origin":location_id, "destination":"homebase"}]
+	var fuel: float = _supply.get_fuel(craft_id)
+	var next_legs: Array = []
+	var any_affordable := false
+	for entry: Dictionary in raw_legs:
+		var cost: float = 0.0 if bool(entry.get("free", false)) else _supply.get_leg_fuel_cost(String(entry.origin), String(entry.destination), String(entry.leg))
+		if cost < 0.0: continue
+		var affordable: bool = fuel + 0.00001 >= cost
+		any_affordable = any_affordable or affordable
+		next_legs.append({"leg":String(entry.leg), "cost":cost, "affordable":affordable})
+	var services: Array = Array(_service_context(craft_id).get("services", [])) if _flow != null else []
+	var refuel_here: bool = phase == "grounded" or services.has("refuel")
+	var in_transit: bool = phase in ["quantum", "approach"]
+	var stranded: bool = phase != "grounded" and not in_transit and not any_affordable and not refuel_here
+	var strand_place := "none"
+	if stranded: strand_place = "surface" if phase == "surface" else ("space" if phase == "stopped" else "orbit")
+	return {"craft_id":craft_id, "fuel":fuel, "capacity":_supply.get_fuel_capacity(), "phase":phase, "location_id":location_id, "orbit_id":orbit, "next_legs":next_legs, "stranded":stranded, "strand_place":strand_place, "refuel_here":refuel_here}
 
 func get_snapshot() -> Dictionary:
 	if _simulation == null:
@@ -915,7 +1004,10 @@ func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_d
 	var campaign_gate: Dictionary = _campaign.validate_departure(departure, {"departure_authorized": true, "built_home_pad_ids":_built_home_pad_ids()})
 	if not campaign_gate.get("ok", false):
 		return campaign_gate
-	var fuel_gate: Dictionary = _supply.preview_route_fuel(departure, {"departure_authorized": true, "require_return_reserve": true})
+	# Regel 8 / Auftrag 21.11.: Aus dem Zielorbit zaehlt nur der Anflug, vom Pad (Direktstart) die ganze Strecke. Keine Rueckflugreserve.
+	var fuel_payload: Dictionary = departure.duplicate(true)
+	fuel_payload["leg"] = "approach" if in_destination_orbit else "whole_route"
+	var fuel_gate: Dictionary = _supply.preview_leg_fuel(fuel_payload, {"departure_authorized": true})
 	if not fuel_gate.get("ok", false):
 		return fuel_gate
 	return {"ok": true, "departure": departure}
@@ -985,7 +1077,11 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	# came from a UI retry, automatic debrief, or the transport hook itself.
 	# Owner replay occurs before fuel validation, so a repeated success remains
 	# valid even if its original debit left less than another route's cost.
-	var result: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", preview.route, "return:" + String(preview.outward_token) + ":fuel", {"departure_authorized": true})
+	# Regel 8 / Auftrag 21.11.: Ging der Hinweg ueber einen Orbit, bucht der Ortsabflug nur seinen Anteil (Sprung und Landung folgen und
+	# buchen selbst); nur der Rueckflug eines Direktstarts ohne Orbit zahlt die ganze Strecke.
+	var whole_return: Dictionary = Dictionary(preview.route).duplicate(true)
+	whole_return["leg"] = _supply.get_return_leg(String(preview.outward_token))
+	var result: Dictionary = _commit("singleplayer_supply", "consume_leg_fuel", whole_return, "return:" + String(preview.outward_token) + ":fuel", {"departure_authorized": true})
 	if not request_id.is_empty():
 		result["return_request_id"] = request_id
 	return result
@@ -2028,7 +2124,8 @@ func _finish_space_encounter_result() -> void:
 	var craft_id := String(result.craft_id)
 	record_mission_result(result,{"craft_id":craft_id,"job_id":"buccaneer_rescue","scenario_id":"buccaneer_rescue"})
 	var outward_token := String(_departure_token_by_craft.get(craft_id,""))
-	_commit("singleplayer_supply","consume_route_fuel",{"craft_id":craft_id,"origin_location_id":"distress_orbit","destination_location_id":"homebase"},"return:"+outward_token+":fuel",{"departure_authorized":true})
+	# Der Schiffsort bleibt der Orbit; Sprung und Landung buchen ihre Anteile selbst (Regel 8 / Auftrag 21.11.).
+	_commit("singleplayer_supply","consume_leg_fuel",{"craft_id":craft_id,"origin_location_id":"distress_orbit","destination_location_id":"homebase","leg":"surface_exit"},"return:"+outward_token+":fuel",{"departure_authorized":true})
 	# Space encounter never fabricates a ground mission or landing.
 	_commit("singleplayer_space_travel","finish_approach",{"craft_id":craft_id},_request_id("encounter-finish",{}),{"runtime_authorized":true})
 	_commit("singleplayer_space_travel","enter_orbit",{"craft_id":craft_id},_request_id("encounter-orbit",{}),{"runtime_authorized":true})

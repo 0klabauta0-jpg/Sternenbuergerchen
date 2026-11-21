@@ -227,7 +227,7 @@ func _build() -> void:
 	information.add_child(_job_guidance)
 	_fuel_toggle = _button("FuelReachabilityToggle", "Treibstoff & Reichweite", func(): pass)
 	_fuel_toggle.toggle_mode = true
-	_fuel_toggle.tooltip_text = "Hin- und Rückflugkosten anzeigen. Der Sprung selbst verbraucht keinen Treibstoff. Alt halten zeigt dieselbe Information vorübergehend."
+	_fuel_toggle.tooltip_text = "Treibstoff je Etappe anzeigen: Abheben, Sprung, Anflug und Ortsabflug buchen je ihren Anteil. Alt halten zeigt dieselbe Information vorübergehend."
 	_fuel_toggle.toggled.connect(func(pressed: bool):
 		_fuel_pinned = pressed
 		_update_fuel_help())
@@ -430,12 +430,21 @@ func _update_fuel_help() -> void:
 	var campaign: Dictionary = _runtime.get("campaign", {})
 	var locations: Dictionary = campaign.get("locations", {})
 	var availability: Dictionary = campaign.get("location_availability", {})
-	var lines: PackedStringArray = ["TREIBSTOFF · Hin- und Rückflug ab Heimatbasis"]
+	# Regel 8 / Auftrag 21.11.: erreichbar = die nächste Etappe ist bezahlbar; zusätzlich: reicht der Treibstoff für den ganzen Hinweg?
+	var lines: PackedStringArray = ["TREIBSTOFF · nächste Etappe und ganzer Hinweg"]
 	for id in reach:
 		if not bool(Dictionary(availability.get(id, {})).get("ok", false)): continue
 		var outcome: Dictionary = reach[id]
 		var name := DISPLAY.location_name(id, locations.get(id, {}))
-		lines.append(("✓ " if bool(outcome.get("ok", false)) else "✕ ") + name + ("" if bool(outcome.get("ok", false)) else " · " + String(outcome.get("message", "Nicht verfügbar"))))
+		var next_ok := bool(outcome.get("ok", false))
+		var detail := ""
+		if not next_ok:
+			detail = " · " + String(outcome.get("message", "Nicht verfügbar"))
+		elif not bool(outcome.get("route_ok", true)):
+			detail = " · nächste Etappe möglich, der ganze Hinweg braucht %d (vorhanden %d)" % [int(ceil(float(outcome.get("needed_total", 0.0)))), int(floor(float(outcome.get("available", 0.0))))]
+		else:
+			detail = " · ganzer Hinweg gedeckt"
+		lines.append(("✓ " if next_ok else "✕ ") + name + detail)
 	if lines.size() == 1: lines.append("Keine Routendaten für verfügbare Ziele.")
 	_fuel_help.text = "\n".join(lines)
 	_fuel_help.visible = (_show_fuel_help or _fuel_pinned) and is_visible_in_tree()

@@ -9497,7 +9497,7 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	if not bool(preview_resolution.get("total_loss", false)):
 		var return_check: Dictionary = _departure_return_preflight(craft_id)
 		if not bool(return_check.get("ok", false)):
-			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": "Treibstoff reicht nicht für den Rückflug" if String(return_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel"] else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
+			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": "Treibstoff reicht nicht für den Rückflug" if String(return_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"] else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
 	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
 	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
 		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
@@ -9533,7 +9533,10 @@ func _departure_return_preflight(craft_id: String) -> Dictionary:
 			return Dictionary(simulation.call("preview_singleplayer_local_return_fuel", _singleplayer_runtime, craft_id))
 	if Dictionary(supply.get("_requests")).has("return:" + String(preview.get("outward_token", "")) + ":fuel"):
 		return {"ok": true}
-	return Dictionary(supply.call("preview_route_fuel", Dictionary(preview.get("route", {})), {"departure_authorized": true}))
+	# Wie authorize_return (Regel 8 / Auftrag 21.11.): nach einem Hinweg ueber den Orbit nur der Ortsabflug, nach einem Direktstart die ganze Strecke.
+	var whole_return: Dictionary = Dictionary(preview.get("route", {})).duplicate(true)
+	whole_return["leg"] = String(supply.call("get_return_leg", String(preview.get("outward_token", ""))))
+	return Dictionary(supply.call("preview_leg_fuel", whole_return, {"departure_authorized": true}))
 
 
 ## Der Abschluss startet den Flug nur fuer die Quelle homebase_direct selbst. Fuer jede andere Quelle startet das hier,
