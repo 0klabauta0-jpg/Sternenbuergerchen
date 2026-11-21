@@ -4858,7 +4858,13 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		protected_entry["outcome"] = "wounded"
 		protected_entry["severity"] = "severe"
 		protected_entry["protected_from_death"] = true
-		protected_entry.erase("respawn_state")
+		# Mit Respawn-Grenze ist die Verwundung kein Tod: kein final, keine Todesnummer, kein Wiederkehr-Stand im Eintrag.
+		# Grenze 0 bleibt wie seit R1 (dort steht final unveraendert).
+		if int(result.get("respawn_limit", 0)) > 0:
+			for dead_key: String in ["final", "death_number", "respawn_state"]:
+				protected_entry.erase(dead_key)
+		else:
+			protected_entry.erase("respawn_state")
 		if protected_index >= 0:
 			casualties[protected_index] = protected_entry
 		else:
