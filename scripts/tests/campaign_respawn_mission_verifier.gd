@@ -1,7 +1,12 @@
 extends "res://scripts/tests/campaign_respawn_apply_verifier.gd"
-## R3 Fix-Runde 1: Befunde W1/M5 (geschuetzte Personen), W3/W6/W7 (echtes Missionsende, Basiszustand, Autosave) und
-## die R4-Messung. Wie die anderen Respawn-Tests nur im Wegwerfprofil: ohne bestaetigtes Profil Abbruch mit Code 2, nichts geschrieben.
+## R3 Fix-Runde 1: Befunde W1/M5 (geschuetzte Personen), W3/W6/W7 (echtes Missionsende, Basiszustand, Autosave); R4a: Szenario R4.
+## Wie die anderen Respawn-Tests nur im Wegwerfprofil: ohne bestaetigtes Profil Abbruch mit Code 2, nichts geschrieben.
 ## P1 Pilot   P2 campaign_outpost_recruit   P3 campaign_rescue_pilot   P4 Anwerber   P5 Grenze 0 (Beobachtung)
+## M1 echtes Missionsende mit Wiederkehrer (W3/W6)   M2 Grenze 0 am echten Ende
+## W7 BEKANNTER MANGEL (wird in einem eigenen Abschnitt behoben, dann muss dieser Fall bewusst geaendert werden): Der Einsatzstand
+##    lehnt Wartende neben der Besatzung ab (home_personnel_unsupported), Fortsetzen faellt auf den Heimstand zurueck.
+## R4 (R4a): Wer im Trupp stirbt, steht nicht mehr im Trupp; der Trupp mit dem Gesunden laesst sich verladen (vorher: Zwischenzustand
+##    "Person im Trupp, Trupp nicht verladbar, remove/assign = unit_busy").
 ## Abschlusszeile: CAMPAIGN_RESPAWN_MISSION passed=%d failed=%d
 
 const MISSION_GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
@@ -37,6 +42,11 @@ func _rm_set_limit(limit: int) -> void:
 	var settings: Dictionary = RM_SETTINGS.load_settings()
 	settings["campaign_respawn_limit"] = limit
 	RM_SETTINGS.save_settings(settings)
+
+## Macht eine Person zum Anwerber des Marktes ueber den oeffentlichen Weg (open mit dem Kader-Profil), nicht ueber ein privates Feld.
+func _rm_make_recruiter(unit_id: String) -> bool:
+	var opened: Dictionary = _runtime.get("_polisa_market").call("open", "r4a_recruiter_batch", _roster_unit(unit_id), {})
+	return _check(bool(opened.get("ok", false)), "Aufbau: %s wird ueber PolisaRecruitmentMarket.open Anwerber (%s)" % [unit_id, opened.get("reason", "")])
 
 ## Echter Einsatz mit drei Personen: Truppfuehrer A, Pilot, und B (Truppfuehrer, ungeschuetzt) im selben Trupp.
 func _rm_add_b() -> bool:
@@ -128,6 +138,7 @@ func _rm_begin_sortie() -> Dictionary:
 		# Wie im Spiel liegt der Heimstand mit B als Wartendem auf der Platte (der Einsatzstand vergleicht Kader und Ausruestung mit ihm).
 		var home_saved: Dictionary = _flow.call("request_campaign_save")
 		if not _check(bool(home_saved.get("ok", false)), "Aufbau W7: Heimstand mit B als Wartendem gespeichert (%s)" % [home_saved.get("reason", "")]): return {}
+		_rm_w7_home_remaining = float(Dictionary(_roster_unit(LEAD_B).get("recovery_state", {})).get("seconds_remaining", -1.0))
 	else:
 		_crew_ids = [LEAD_A, LEAD_B]
 	_pilot_id = PILOT_ID
@@ -241,7 +252,11 @@ func _rm_m1() -> void:
 	_check(String(b_cont.get("availability_status", "")) == "respawning" and _ra_base_status(LEAD_B) == "station", "M1 (W6): nach dem Fortsetzen ist B respawning und station (%s / %s)" % [b_cont.get("availability_status", ""), _ra_base_status(LEAD_B)])
 	_check(_t6b_roster_ids() == roster_before, "M1 (W6): Kader nach dem Fortsetzen unveraendert")
 
-## W7: B wartet respawning auf Polisa, A und Pilot fliegen einen echten Einsatz; Autosave im Einsatz, Fortsetzen des Einsatzes.
+## W7 - BEKANNTER MANGEL, wird in eigenem Abschnitt behoben (dann muessen die Erwartungen dieses Falls bewusst geaendert werden):
+## B wartet respawning auf Polisa, A und Pilot fliegen einen echten Einsatz; der Einsatzstand mit Wartendem wird abgelehnt
+## (home_personnel_unsupported), der Heimstand auf der Platte bleibt dabei unveraendert, Fortsetzen faellt auf den Heimstand zurueck.
+var _rm_w7_home_remaining: float = -1.0
+
 func _rm_w7() -> void:
 	_rm_set_limit(3)
 	_rm_mode = "w7"
@@ -252,6 +267,9 @@ func _rm_w7() -> void:
 	var b_before: Dictionary = _roster_unit(LEAD_B).duplicate(true)
 	_check(String(b_before.get("availability_status", "")) == "respawning", "W7: B ist im Einsatz weiter respawning")
 	var remaining_before: float = float(Dictionary(b_before.get("recovery_state", {})).get("seconds_remaining", -1.0))
+	var home_path: String = load("res://scripts/meta/campaign_active_checkpoint_store.gd").HOME_PATH
+	var home_sha_before: String = FileAccess.get_sha256(home_path) if FileAccess.file_exists(home_path) else ""
+	_check(not home_sha_before.is_empty(), "W7: der Heimstand liegt auf der Platte")
 	var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
 	var captured: Dictionary = capture.capture_components(_flow, _runtime)
 	var stable_deadline := Time.get_ticks_msec() + 30000
@@ -263,12 +281,14 @@ func _rm_w7() -> void:
 	# Ein Wartender auf Polisa (wie jede nicht eingesetzte Person, auch ein Verwundeter) macht den Einsatz nicht speicherbar.
 	# Gepruefte Eigenschaft hier: Die Ablehnung ist sauber (kein halber Stand, keine Aktivdatei) und das Fortsetzen
 	# faellt auf den Heimstand zurueck, in dem B weiter respawning mit Restzeit steht.
-	_check(not bool(captured.get("ok", true)) and String(captured.get("reason", "")) == "home_personnel_unsupported", "W7: Einsatzstand mit Wartendem wird abgelehnt, Grund home_personnel_unsupported (%s)" % [captured.get("reason", "")])
+	_check(not bool(captured.get("ok", true)) and String(captured.get("reason", "")) == "home_personnel_unsupported", "W7 (bekannter Mangel, wird in eigenem Abschnitt behoben): Einsatzstand mit Wartendem wird abgelehnt, Grund home_personnel_unsupported (%s)" % [captured.get("reason", "")])
 	var active_path: String = load("res://scripts/meta/campaign_active_checkpoint_store.gd").DEFAULT_PATH
 	var saved: Dictionary = _flow.call("request_campaign_save")
 	print("RM_W7_SAVE ok=", saved.get("ok", false), " reason=", saved.get("reason", ""))
 	_check(not bool(saved.get("ok", true)), "W7: Autosave im Einsatz wird abgelehnt statt einen halben Stand zu schreiben (%s)" % [saved.get("reason", "")])
 	_check(not FileAccess.file_exists(active_path), "W7: es liegt keine Aktivdatei des Einsatzes auf der Platte")
+	var home_sha_after: String = FileAccess.get_sha256(home_path) if FileAccess.file_exists(home_path) else ""
+	_check(home_sha_after == home_sha_before, "W7: der Heimstand auf der Platte ist nach der Ablehnung unveraendert (Pruefsumme vorher %s, nachher %s)" % [home_sha_before.left(12), home_sha_after.left(12)])
 	_flow.queue_free()
 	await process_frame
 	START.request_start(self, "campaign", "continue")
@@ -283,37 +303,30 @@ func _rm_w7() -> void:
 	_check(_flow.get("_active_mission") == null, "W7: Fortsetzen faellt auf den Heimstand zurueck (kein Einsatz)")
 	var b_after: Dictionary = _roster_unit(LEAD_B)
 	var remaining_after: float = float(Dictionary(b_after.get("recovery_state", {})).get("seconds_remaining", -1.0))
-	_check(String(b_after.get("availability_status", "")) == "respawning" and remaining_after > 0.0 and remaining_after <= 3600.0, "W7: B bleibt respawning mit Restzeit; der Heimstand ist der vor dem Abflug, die im Einsatz vergangene Zeit zaehlt dort nicht (%s -> %s)" % [remaining_before, remaining_after])
+	_check(String(b_after.get("availability_status", "")) == "respawning" and remaining_after > 0.0, "W7: B bleibt respawning mit Restzeit nach dem Fortsetzen (%s)" % [remaining_after])
+	_check(_rm_w7_home_remaining > 0.0 and remaining_after >= remaining_before and remaining_after <= _rm_w7_home_remaining, "W7: die Restzeit ist die des Heimstands vor dem Abflug, hoechstens so gross wie beim Speichern (%s) und nicht kleiner als im Einsatz (%s): nachher %s; die im Einsatz vergangene Zeit zaehlt nicht" % [_rm_w7_home_remaining, remaining_before, remaining_after])
 	_check(_t6b_roster_ids() == roster_before, "W7: Kader nach dem Fortsetzen unveraendert")
 	_check(_ra_base_status(LEAD_B) == "station", "W7: B steht nach dem Fortsetzen weiter als station (%s)" % _ra_base_status(LEAD_B))
 
-## R4-Messung (nur messen): Wer respawning in einem Trupp mit Gesunden steht, was geht noch?
+## R4 (R4a): B stirbt im Trupp mit A. Danach steht B in keinem Trupp, der Trupp mit A laesst sich verladen und ist nicht gesperrt.
+## Der frueher gemessene Zwischenzustand (Person im Trupp, board/base_board = unit_wounded, remove/assign = unit_busy) gilt nicht mehr.
 func _rm_r4() -> void:
 	if not await _t6b_new_four(): return
+	var members_before: Array = _t6b_where(_t6b_payload(), LEAD_B)
+	_check(members_before.any(func(place: String) -> bool: return place.begins_with("fireteam ")), "R4: Fixture: B steht vor dem Tod in einem Trupp (%s)" % [members_before])
 	_flow.call("_apply_campaign_casualties", _ra_result(_t6b_states({LEAD_B: "down"}), "aborted", 3))
 	_check(String(_roster_unit(LEAD_B).get("availability_status", "")) == "respawning", "R4: B ist respawning")
-	var members: Array = Array(_screen.call("_get_member_unit_ids_for_fireteam", _team_id))
-	print("R4_MEASURE team=", _team_id, " members=", members)
+	var places: Array = _t6b_where(_t6b_payload(), LEAD_B).filter(func(place: String) -> bool: return place.begins_with("fireteam ") or place.begins_with("flow._selected") or place.begins_with("flow._homebase_staged") or place.begins_with("craft."))
+	_check(places.is_empty(), "R4: B steht in keinem Trupp, keiner Auswahl und nicht auf dem Schiff (%s)" % [places])
 	_craft_id = String(Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).get("craft_id", ""))
 	var team_board: Dictionary = _screen.call("request_operation", "board", {"craft_id": _craft_id, "fireteam_id": _team_id})
-	print("R4_MEASURE board_team=", team_board)
+	_check(bool(team_board.get("ok", false)), "R4: der Trupp mit A wird dem Schiff zugeteilt (%s)" % [team_board])
 	var walk: Dictionary = _screen.call("request_operation", "base_board", {"craft_id": _craft_id, "fireteam_id": _team_id, "whole_fireteam": true})
-	print("R4_MEASURE base_board_whole_team=", walk)
-	await create_timer(20.0).timeout
-	var states: Dictionary = Dictionary(_t6b_base().get("_states"))
-	var shown: Dictionary = {}
-	for id: String in [LEAD_A, PILOT_ID, LEAD_B]:
-		shown[id] = [String(Dictionary(states.get(id, {})).get("status", "")), String(Dictionary(states.get(id, {})).get("craft_id", ""))]
-	print("R4_MEASURE base_states_after_20s=", shown)
+	_check(bool(walk.get("ok", false)), "R4: der Trupp mit A geht an Bord (%s)" % [walk])
+	_check(await _wait(func(): return _ra_base_status(LEAD_A) == "aboard", 60000, "R4: A ist an Bord"), "R4: A steht aboard")
 	var block: Dictionary = _t6b_base().call("get_departure_block", _craft_id)
-	print("R4_MEASURE departure_block=", block)
-	var start: Dictionary = _screen.call("request_operation", "start", {"craft_id": _craft_id})
-	print("R4_MEASURE start=", start)
-	var removed: Dictionary = _screen.call("request_operation", "remove", {"unit_id": LEAD_B})
-	print("R4_MEASURE remove_B=", removed)
-	var moved: Dictionary = _screen.call("request_operation", "assign", {"unit_id": LEAD_B, "fireteam_id": ""})
-	print("R4_MEASURE assign_B_elsewhere=", moved)
-	_check(true, "R4: Messung abgeschlossen (keine Pruefung, nur Ausgabe)")
+	_check(block.is_empty(), "R4: die Abflugsperre ist leer (%s)" % [block])
+	_check(_ra_base_status(LEAD_B) == "station", "R4: B bleibt auf Polisa (station) und fliegt nicht mit")
 
 func _rm_m2() -> void:
 	_rm_set_limit(0)
@@ -330,6 +343,8 @@ func _rm_m2() -> void:
 	_check(not fallen.is_empty() and not fallen.has("reason") and not fallen.has("respawns_used") and not fallen.has("respawn_limit"), "M2: Grenze 0: Eintrag in der Gefallenenliste ohne die neuen Felder (%s)" % [fallen])
 	_check(not result.has("respawn_unit_ids") or PackedStringArray(result.get("respawn_unit_ids", PackedStringArray())).is_empty(), "M2: Grenze 0: niemand kommt wieder")
 	_check(not _t6b_base_ids().has(LEAD_B), "M2: B ist auch aus der Basis weg")
+	var m2_problems: PackedStringArray = _flow.call("_campaign_roster_problems", Array(_flow.get("_all_team_units")))
+	_check(m2_problems.is_empty(), "M2: der Kader bleibt spielbar (%s)" % [m2_problems])
 
 ## Ergebnis, in dem unit_id als Wiederkehrer (Grenze 3) mit vollem casualties-Eintrag steht, wie ihn resolve_mission liefert.
 func _rm_protected_result(unit_id: String, final_entry: bool) -> Dictionary:
@@ -374,14 +389,14 @@ func _rm_p3() -> void:
 
 func _rm_p4() -> void:
 	if not await _t6b_new_four(): return
-	_runtime.get("_polisa_market").set("_recruiter_id", LEAD_B)
+	if not _rm_make_recruiter(LEAD_B): return
 	_check(bool(_runtime.call("is_person_protected_from_death", LEAD_B)), "P4: Fixture: B ist als Anwerber geschuetzt")
 	_rm_check_protected(LEAD_B, "P4 Anwerber")
 
 ## Beobachtung (keine Aenderung): Was traegt der Eintrag einer geschuetzten Person bei Grenze 0, wo final seit R1 steht?
 func _rm_p5() -> void:
 	if not await _t6b_new_four(): return
-	_runtime.get("_polisa_market").set("_recruiter_id", LEAD_B)
+	if not _rm_make_recruiter(LEAD_B): return
 	var states: Array = _t6b_states({LEAD_B: "down"})
 	var result: Dictionary = _ra_result(states, "aborted", 0)
 	var raw_entry: Dictionary = _casualty_entry(result, LEAD_B)

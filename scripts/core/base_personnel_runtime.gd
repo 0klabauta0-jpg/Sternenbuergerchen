@@ -622,10 +622,11 @@ func _waits_for_pickup(id: String) -> bool:
 func park_pickup_person(unit_id: String) -> Dictionary:
 	if not _states.has(unit_id) or String(_states[unit_id].get("status", "")) == "station":
 		return {"ok":true,"unchanged":true}
-	_cancel(unit_id, false)
+	# Erst die Freigabe vom Hex-Boden: Scheitert sie, bleibt der Zustand der Person (Bett, Aktion, Status) unveraendert.
 	if _requires_hex_ground():
 		var released: Dictionary = _sim.release_base_ground_people(self, PackedStringArray([unit_id]), "respawn_station")
 		if not released.get("ok", false): return released
+	_cancel(unit_id, false)
 	_states[unit_id].status = "station"
 	# Wie ein Angeworbener ohne Schiff und ohne Bett (der Speicherpunkt verlangt leere craft_id und bed_id).
 	_states[unit_id].craft_id = ""

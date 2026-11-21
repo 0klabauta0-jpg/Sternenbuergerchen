@@ -4,6 +4,7 @@ extends "res://scripts/tests/campaign_respawn_apply_verifier.gd"
 ## Echte Meta-Szene mit vier Personen (A Truppfuehrer Platz 0, Pilot Platz 1, B Truppfuehrer in ft1 mit A, C Schuetze allein in ft2).
 ## G1 B stirbt: weg aus Trupp und Ausruestung, Kader bleibt; W4: A schifft mit dem Trupp ein, Abflugsperre leer   G2 C stirbt: ft2 aufgeloest, Rucksack weg, Auftragsfracht im Lager (W5)
 ## G3 geschuetzter Pilot: behaelt Trupp, Zuteilung, Ausruestung   G4 Grenze 0: wie bisher   G5 Heimatbasis: Speichern und Fortsetzen mit Wartenden (respawning, awaiting_pickup)
+## G6 park_pickup_person: scheitert die Freigabe vom Hex-Boden, bleibt der alte Zustand der Person stehen
 ## Hinweis: Speichern im Einsatz mit Wartenden wird abgelehnt (bekannter Mangel W7); kein Test hier stuetzt sich darauf.
 ## Prueft Ausruestung ueber export_state und den Loadout-Bestand (get_snapshot), nicht ueber get_loadout (das faellt auf Standards zurueck).
 ## Abschlusszeile: CAMPAIGN_RESPAWN_GEAR passed=%d failed=%d
@@ -23,7 +24,7 @@ func _run() -> void:
 	for arg: String in OS.get_cmdline_user_args():
 		if not arg.strip_edges().is_empty():
 			selected.append(arg.strip_edges().to_upper())
-	for scenario: String in ["G1", "G2", "G3", "G4", "G5"]:
+	for scenario: String in ["G1", "G2", "G3", "G4", "G5", "G6"]:
 		if not selected.is_empty() and not selected.has(scenario):
 			continue
 		print("--- ", scenario)
@@ -115,6 +116,24 @@ func _rg_g4() -> void:
 	var stray: Array = _rg_stray(SHOOTER_C, [])
 	_check(stray.is_empty() and not _rg_inventory().has("unit:%s:backpack" % SHOOTER_C) and not _rg_loadouts().has(SHOOTER_C), "G4: Grenze 0: C ist ueberall weg (uebrig: %s)" % [stray])
 	_check(_flow.call("_campaign_roster_problems", Array(_flow.get("_all_team_units"))).is_empty(), "G4: Kader bleibt spielbar")
+
+## park_pickup_person (R3-Fix-Runde, W6): Scheitert die Freigabe vom Hex-Boden, bleibt der alte Zustand der Person stehen.
+## Der Fehlschlag wird erzwungen, indem der Darsteller von C zum Loeschen vorgemerkt wird (Freigabe: base_actor_unbound).
+func _rg_g6() -> void:
+	if not await _t6b_new_four(): return
+	var base: Node = _t6b_base()
+	var hex_required: bool = bool(base.call("_requires_hex_ground"))
+	print("RG_G6 requires_hex_ground=", hex_required)
+	if not _check(hex_required, "G6: Fixture: die Basis laeuft auf dem Hex-Boden (sonst gibt es keine Freigabe, die scheitern kann)"): return
+	var actor: Node = base.call("get_actor", SHOOTER_C)
+	if not _check(actor != null, "G6: Fixture: C hat einen Darsteller"): return
+	var before: Dictionary = Dictionary(base.get("_states"))[SHOOTER_C].duplicate(true)
+	actor.queue_free()
+	var parked: Dictionary = Dictionary(base.call("park_pickup_person", SHOOTER_C))
+	var after: Dictionary = Dictionary(base.get("_states"))[SHOOTER_C].duplicate(true)
+	print("RG_G6 parked=", parked, " before=", before, " after=", after)
+	_check(not bool(parked.get("ok", true)), "G6: die Freigabe scheitert und park_pickup_person meldet es (%s)" % [parked])
+	_check(JSON.stringify(after, "", true) == JSON.stringify(before, "", true), "G6: bei Fehlschlag steht der alte Zustand von C unveraendert da (vorher %s, nachher %s)" % [before, after])
 
 ## Heimatbasis: B respawning, C awaiting_pickup, beide ohne Rucksack und Trupp; Speichern und Fortsetzen.
 func _rg_g5() -> void:
