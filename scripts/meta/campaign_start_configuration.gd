@@ -182,11 +182,18 @@ func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 		return {"ok": false, "reason": "campaign_load_failed"}
 	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")
 	if not bool(guard.get("ok",false)): return guard
-	if flow.get("_active_mission") != null or not Array(flow.get("_pending_mission_craft_transfers")).is_empty():
-		return {"ok": false, "reason": "away_from_checkpoint"}
+	# Speichern, erster Teil / 21.11.: "detail" trennt "Schiff im Flug" (flight) von "Schiff an einem anderen Ort" (place), nur fuer die Anzeige;
+	# der Grund bleibt away_from_checkpoint, die Schutzpruefung selbst ist unveraendert.
 	var travel: Dictionary = runtime.call("get_space_travel_snapshot") if runtime != null and runtime.has_method("get_space_travel_snapshot") else {}
+	var in_flight: bool = String(travel.get("phase", "grounded")) != "grounded"
+	var craft_locations: Variant = flow.get("_aircraft_location_by_craft")
+	if not in_flight and craft_locations is Dictionary:
+		for location in Dictionary(craft_locations).values():
+			if String(location) == "starmap": in_flight = true
+	if flow.get("_active_mission") != null or not Array(flow.get("_pending_mission_craft_transfers")).is_empty():
+		return {"ok": false, "reason": "away_from_checkpoint", "detail": "flight" if in_flight else "place"}
 	if String(travel.get("phase", "grounded")) != "grounded":
-		return {"ok": false, "reason": "away_from_checkpoint"}
+		return {"ok": false, "reason": "away_from_checkpoint", "detail": "flight"}
 	for field in ["_pending_homebase_team_transfers", "_pending_homebase_pilot_transfers", "_pending_homebase_cargo_loads"]:
 		if not Array(flow.get(field)).is_empty():
 			return {"ok": false, "reason": "preparation_in_progress"}
@@ -194,8 +201,9 @@ func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 	if crafts.is_empty():
 		return {"ok": false, "reason": "campaign_craft_count"}
 	for ship: Dictionary in crafts:
-		if String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"")) not in ["homebase","waiting_pad"]:
-			return {"ok":false,"reason":"away_from_checkpoint"}
+		var ship_location := String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),""))
+		if ship_location not in ["homebase","waiting_pad"]:
+			return {"ok":false,"reason":"away_from_checkpoint","detail":"flight" if ship_location == "starmap" else "place"}
 	return {"ok":true}
 
 func capture_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
@@ -317,7 +325,7 @@ func get_save_projection(flow: Node, runtime: Node) -> Dictionary:
 		captured = capture_home_checkpoint(flow, runtime)
 	result.can_save = bool(captured.get("ok", false))
 	result.save_blocked_reason = String(captured.get("reason", ""))
-	result.save_blocked_text = projection.blocked_text(result.save_blocked_reason)
+	result.save_blocked_text = projection.blocked_text(result.save_blocked_reason, String(captured.get("detail", "") if captured.has("detail") else ("" if active else "home")))
 	var expected_kind := "mission" if active else "home"
 	var stored: Dictionary = saved.active if active else saved.home
 	result.has_unsaved_progress = not result.can_save or result.kind != expected_kind or not projection.equivalent(Dictionary(captured.get("payload", {})), Dictionary(stored.get("payload", {})), active)
