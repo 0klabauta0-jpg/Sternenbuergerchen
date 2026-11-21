@@ -10,6 +10,7 @@ extends "res://scripts/tests/campaign_casualty_apply_verifier.gd"
 func _run() -> void:
 	_configure_entry()
 	await _k1_result_survives_missing_fuel()
+	await _w7_place_to_place()
 	print("TANKER_RESULT_FUEL passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -78,7 +79,7 @@ func _k1_result_survives_missing_fuel() -> void:
 	var chip: Dictionary = _runtime.call("_campaign_cargo", _craft_id, "satellite_chip", 1, "chip:satellite_recovery")
 	_check(bool(chip.get("ok", false)), "K1: Chip ist an Bord (%s)" % [chip])
 	# Aufgetankt (am Ort mit Tankservice oder hier direkt gesetzt): der Abschluss laeuft durch.
-	_set_fuel(20.0)
+	_set_fuel(fuel_on_site)
 	if not await _wait_released("K1: nach dem Tanken wird der Einsatz abgeschlossen und freigegeben"): return
 	await _settle_frames(10)
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
@@ -88,7 +89,7 @@ func _k1_result_survives_missing_fuel() -> void:
 	_check(String(result.get("result", "")) == "victory", "K1: das Ergebnis des Debriefs ist der Sieg")
 	_check(String(job_after.get("status", "")) not in ["active", "failed"] and int(job_after.get("retreat_count", 0)) == 0, "K1: Auftrag ist abgeschlossen (%s), kein Rueckzug" % job_after.get("status"))
 	_check(credits_after == credits_before, "K1: die Belohnung kommt erst mit dem Hochladen zu Hause (%d -> %d)" % [credits_before, credits_after])
-	_check(is_equal_approx(_fuel(), 13.0), "K1: der Ortsabflug hat jetzt genau seinen Anteil gebucht (20 - 7 = 13, ist %.1f)" % _fuel())
+	_check(is_equal_approx(_fuel(), fuel_on_site - 7.0), "K1: der Ortsabflug hat jetzt genau seinen Anteil gebucht (%.1f - 7, ist %.1f)" % [fuel_on_site, _fuel()])
 	_check(_pending().is_empty(), "K1: nichts wartet mehr")
 	# Heimkehr: Orbit, Sprung, Landung, Hochladen.
 	if not await _wait_homebase(): return
@@ -98,5 +99,60 @@ func _k1_result_survives_missing_fuel() -> void:
 	_check(String(final_job.get("status", "")) == "completed" and int(final_job.get("retreat_count", 0)) == 0, "K1: Heimkehr: Auftrag abgeschlossen, kein Rueckzug (%s)" % final_job.get("status"))
 	_check(_credits() == credits_before + 150, "K1: Belohnung genau einmal gebucht (%d -> %d)" % [credits_before, _credits()])
 	_check(Dictionary(_campaign().get("completion_receipts", {})).size() == 1, "K1: genau ein Abschlussbeleg")
-	_check(is_equal_approx(_fuel(), 8.0), "K1: Rueckweg bucht Ortsabflug 7 und Sprung 5 je einmal (20 - 12 = 8, ist %.1f)" % _fuel())
+	_check(is_equal_approx(_fuel(), fuel_on_site - 12.0), "K1: Rueckweg bucht Ortsabflug 7 und Sprung 5 je einmal (%.1f - 12, ist %.1f)" % [fuel_on_site, _fuel()])
+	# W6: die ganze Reise Heimat -> Absturzstelle -> Heimat summiert sich auf den alten Wert 24 (Abheben 2, Sprung 5, Anflug 5, Ortsabflug 7, Sprung 5, Landung 0).
+	var start_fuel: float = float(Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/trade_offers.json"))).get("initial_fuel", -1.0))
+	_check(is_equal_approx(fuel_on_site, start_fuel - 12.0) and is_equal_approx(_fuel(), start_fuel - 24.0), "W6: Hinweg 12 + Rueckweg 12 == 24, der Rueckweg bucht nicht doppelt (Start %.1f, am Ort %.1f, daheim %.1f)" % [start_fuel, fuel_on_site, _fuel()])
+	# W6: die Belege der Etappen ueberstehen den echten Basis-Stand (Speichern, Laden): hier ist der Flow nach "Weiter" neu gebaut.
+	var ids: PackedStringArray = PackedStringArray(Dictionary(_runtime.get("_supply").get("_requests")).keys())
+	var launches := 0
+	var jumps := 0
+	var approaches := 0
+	var returns := 0
+	for id: String in ids:
+		if id.ends_with(":leg:launch"): launches += 1
+		elif id.ends_with(":leg:jump"): jumps += 1
+		elif id.begins_with("return:") and id.ends_with(":fuel"): returns += 1
+		elif id.begins_with("departure:") and id.ends_with(":fuel"): approaches += 1
+	_check(launches == 1 and jumps == 2 and approaches == 1 and returns == 1, "W6: nach Speichern und Laden sind die Etappenbelege da (Abheben %d, Spruenge %d, Anflug %d, Ortsabflug %d)" % [launches, jumps, approaches, returns])
+	await _end_sortie()
+
+## W7: Ort -> Ort (Absturzstelle -> Handelsposten) kostet in den echten Befehlen genau den alten Wert 10:
+## Ortsabflug 7 (wie nach Hause, das Ziel ist beim Abheben vom Ort noch nicht gewaehlt), Sprung, Anflug.
+func _w7_place_to_place() -> void:
+	var s: Dictionary = await _begin_sortie()
+	if s.is_empty(): return
+	_identity_before = _identity(_screen.call("get_operations_snapshot"))
+	if not _place_at(s.simulation, s.access, "campaign_leader", Vector2.ZERO): return
+	if not _place_at(s.simulation, s.access, "campaign_pilot", Vector2.ZERO): return
+	var fuel_on_site: float = _fuel()
+	var job_before: Dictionary = _job()
+	# Ergebnis erst festhalten, dann mit voller Reserve ausliefern: so laeuft der echte Ortsabflug mit erfuellten Schritten.
+	_set_fuel(1.0)
+	s.driver.call("_resolve_combat", "victory", String(s.driver.get("friendly_team_id")))
+	await _settle_frames(30)
+	var held: Dictionary = _pending()
+	held["mission_scenario_runtime_gates"] = {"all_gates_complete": true, "completed_step_ids": Array(job_before.get("required_step_ids", []))}
+	_flow.set("_pending_campaign_mission_result", held)
+	_flow.call("_remember_location", s.mission)
+	_check(bool(_runtime.call("_campaign_cargo", _craft_id, "satellite_chip", 1, "chip:satellite_recovery").get("ok", false)), "W7: Chip ist an Bord")
+	_set_fuel(fuel_on_site)
+	if not await _wait_released("W7: Einsatz abgeschlossen"): return
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit", 120000, "W7: Schiff im Orbit der Absturzstelle"): return
+	_check(is_equal_approx(_fuel(), fuel_on_site - 7.0), "W7: der Ortsabflug bucht 7 (%.1f -> %.1f)" % [fuel_on_site, _fuel()])
+	var fuel_orbit: float = _fuel()
+	# Der Handelsposten ist im Kampagnenablauf noch gesperrt (tutorial_locked, erst nach der Absturzstelle). Fuer die reine Treibstoffrechnung wird die
+	# Kampagnensperre nur fuer diese drei Befehle abgeschaltet; Treibstoff, Reisebesitzer und Buchungen bleiben die echten.
+	_runtime.set("_campaign_mode", false)
+
+	var trade_orbit: String = String(Dictionary(_space().get("location_orbits", {})).get("trade_outpost", ""))
+	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": trade_orbit})
+	_check(bool(jump.get("ok", false)), "W7: Sprung zum Handelsposten angenommen: %s" % [jump])
+	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == trade_orbit, 60000, "W7: Schiff im Orbit des Handelspostens"): return
+	var selected: Dictionary = _screen.call("request_operation", "select_destination", {"location_id": "trade_outpost", "job_id": ""})
+	_check(bool(selected.get("ok", false)), "W7: im Orbit des Handelspostens wird er als Ziel gewaehlt: %s" % [selected])
+	# Der Anflug am Handelsposten ist im Kampagnenablauf an einen Auftrag dort gebunden (launch_payload_invalid ohne ihn) und kann hier nicht echt befohlen werden.
+	# Der Sprung Ort -> Ort kostet in den echten Etappen nichts mehr (Ortsabflug 7 wurde schon gebucht, Anflug 3 steht aus): Summe 7 + 0 + 3 = 10; die Summe aller Strecken mit echten Befehlen am Besitzer prueft tanker_leg_fuel_verifier.
+	_runtime.set("_campaign_mode", true)
+	_check(is_equal_approx(fuel_on_site - _fuel(), 7.0), "W7: bis zum Handelsposten sind genau Ortsabflug 7 und Sprung 0 gebucht (ist %.1f)" % (fuel_on_site - _fuel()))
 	await _end_sortie()
