@@ -627,6 +627,9 @@ func park_pickup_person(unit_id: String) -> Dictionary:
 		var released: Dictionary = _sim.release_base_ground_people(self, PackedStringArray([unit_id]), "respawn_station")
 		if not released.get("ok", false): return released
 	_states[unit_id].status = "station"
+	# Wie ein Angeworbener ohne Schiff und ohne Bett (der Speicherpunkt verlangt leere craft_id und bed_id).
+	_states[unit_id].craft_id = ""
+	_states[unit_id].bed_id = ""
 	var actor := get_actor(unit_id)
 	if is_instance_valid(actor): actor.visible = false
 	state_changed.emit()

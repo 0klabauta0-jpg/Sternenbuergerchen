@@ -69,6 +69,16 @@ func _run_used_reading(rules: Dictionary) -> void:
 	check(Array(p3.respawn_unit_ids) == ["a"] and int(p3.casualties[0].death_number) == 1, "neither says anything: death number 1")
 	var p4: Dictionary = _one_dead(rules, true, 0, true, 3, 3)
 	check(Array(p4.respawn_unit_ids) == ["a"], "state says 0, roster says 3: the state wins")
+	# R3: a wrong-typed counter in the team state does not count as 0; the roster entry decides then
+	for bad in bad_values:
+		if typeof(bad) == TYPE_INT:
+			continue # -1 is a number: it is read (as 0) and wins over the roster
+		var fallback: Dictionary = _one_dead(rules, true, bad, true, 3, 3)
+		check(Array(fallback.fatality_unit_ids) == ["a"] and fallback.respawn_unit_ids.is_empty(), "state respawns_used=%s (wrong type), roster says 3, limit 3: roster counts, final" % str(bad))
+		var fallback_low: Dictionary = _one_dead(rules, true, bad, true, 1, 3)
+		check(Array(fallback_low.respawn_unit_ids) == ["a"] and int(fallback_low.casualties[0].death_number) == 2, "state respawns_used=%s (wrong type), roster says 1: death number 2" % str(bad))
+	var nan_fallback: Dictionary = _one_dead(rules, true, NAN, true, 3, 3)
+	check(Array(nan_fallback.fatality_unit_ids) == ["a"], "state respawns_used=NAN, roster says 3: roster counts, final")
 	# Broken roster entries (not dictionaries), with and without limit
 	var junk_roster: Array = [5, null, "x", unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), unit("a", "operator")]
 	junk_roster[5]["respawns_used"] = 1

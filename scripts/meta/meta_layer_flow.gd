@@ -4620,6 +4620,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if not casualty_resolution.is_empty() and not failed_extraction:
 		_last_mission_result["casualties"] = Array(casualty_resolution.get("casualties", [])).duplicate(true)
 		_last_mission_result["fatality_unit_ids"] = PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray()))
+		_last_mission_result["respawn_unit_ids"] = PackedStringArray(casualty_resolution.get("respawn_unit_ids", PackedStringArray()))
+		_last_mission_result["respawn_limit"] = int(casualty_resolution.get("respawn_limit", 0))
 	if not failed_extraction:
 		_return_homebase_direct_craft_after_mission()
 	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
@@ -4779,7 +4781,10 @@ func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary)
 	var measured: Dictionary = _build_mission_result(_active_mission, mission_result)
 	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
 	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, _mission_planning_state.get("mission_drop_pilot_unit_id", ""))).strip_edges()
-	var resolution: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules))
+	# Respawn (R3): Die Grenze je Person kommt aus den Einstellungen und gilt fuer diesen ganzen Einsatz (Grenze 0 = wie bisher).
+	var respawn_limit: int = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_campaign_respawn_limit"))
+	var resolution: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules, {"respawn_limit": respawn_limit}))
+	resolution["respawn_limit"] = respawn_limit
 	# Genau diese Messung steht spaeter im Ergebnis; casualties und team_states koennen nicht auseinanderlaufen.
 	resolution["team_states"] = Array(measured.get("team_states", [])).duplicate(true)
 	return resolution
@@ -4820,11 +4825,29 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 			severities[unit_id] = String(entry.get("severity", "light"))
 	# Personen, die die Kampagne voraussetzt (Fortschritts-Rekrut, Schiffspilot, Anwerber), sterben nicht: Sie gelten als
 	# schwer verwundet gerettet und gehen den normalen Weg der Verwundeten. Die Pruefung gilt je Person.
+	# Respawn (R3): Wer schon wiederkommt oder auf Abholung wartet, ist mit diesem Ergebnis schon verbucht (zweite Zustellung
+	# desselben Ergebnisses, auch nach Speichern und Laden): Er stirbt nicht noch einmal und zaehlt nicht doppelt.
+	var already_booked: Dictionary = {}
+	for raw_booked in _all_team_units:
+		if typeof(raw_booked) == TYPE_DICTIONARY and (PERSONNEL_RECOVERY_SCRIPT.is_respawning(raw_booked) or PERSONNEL_RECOVERY_SCRIPT.is_awaiting_pickup(raw_booked)):
+			already_booked[String(Dictionary(raw_booked).get("unit_id", ""))] = true
 	var fatal_unit_ids: PackedStringArray = PackedStringArray()
-	for raw_fatal_id in PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())):
-		var fatal_id: String = String(raw_fatal_id)
+	var respawn_unit_ids: PackedStringArray = PackedStringArray()
+	var death_candidates: Array = []
+	for raw_final_id in PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())):
+		death_candidates.append([String(raw_final_id), false])
+	for raw_back_id in PackedStringArray(result.get("respawn_unit_ids", PackedStringArray())):
+		death_candidates.append([String(raw_back_id), true])
+	for candidate: Array in death_candidates:
+		var fatal_id: String = String(candidate[0])
+		var comes_back: bool = bool(candidate[1])
+		if already_booked.has(fatal_id):
+			continue
 		if not _is_campaign_person_protected(fatal_id):
-			fatal_unit_ids.append(fatal_id)
+			if comes_back:
+				respawn_unit_ids.append(fatal_id)
+			else:
+				fatal_unit_ids.append(fatal_id)
 			continue
 		var protected_index: int = -1
 		for index in range(casualties.size()):
@@ -4835,14 +4858,17 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 		protected_entry["outcome"] = "wounded"
 		protected_entry["severity"] = "severe"
 		protected_entry["protected_from_death"] = true
+		protected_entry.erase("respawn_state")
 		if protected_index >= 0:
 			casualties[protected_index] = protected_entry
 		else:
 			casualties.append(protected_entry)
 		severities[fatal_id] = "severe"
 	result["fatality_unit_ids"] = fatal_unit_ids
+	if result.has("respawn_unit_ids"):
+		result["respawn_unit_ids"] = respawn_unit_ids
 	result["casualties"] = casualties
-	if severities.is_empty():
+	if severities.is_empty() and respawn_unit_ids.is_empty():
 		_remove_campaign_fatalities(fatal_unit_ids, result)
 		return result
 	var updated_units: Array = []
@@ -4856,9 +4882,27 @@ func _apply_campaign_casualties(mission_result: Dictionary) -> Dictionary:
 			unit["recovery_state"] = recovery
 			unit["status_text"] = "wounded"
 			applied_recovery[wounded_id] = recovery.duplicate(true)
+		elif respawn_unit_ids.has(wounded_id):
+			# Respawn (R3): Die Person bleibt im Kader, gilt als gestorben und kommt nach der Ausfallzeit zur Abholung auf Polisa.
+			var death_entry: Dictionary = {}
+			for casualty_variant in casualties:
+				if String(Dictionary(casualty_variant).get("unit_id", "")) == wounded_id:
+					death_entry = Dictionary(casualty_variant)
+					break
+			var respawn_state: Dictionary = Dictionary(death_entry.get("respawn_state", {})).duplicate(true)
+			if respawn_state.is_empty():
+				var fallback_number: int = int(death_entry.get("death_number", int(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("respawns_used_of", unit)) + 1))
+				respawn_state = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_respawn_state", fallback_number, "left_behind", rules))
+			unit["availability_status"] = "respawning"
+			unit["recovery_state"] = respawn_state
+			unit["status_text"] = "respawning"
+			unit["respawns_used"] = int(respawn_state.get("death_number", 1))
 		updated_units.append(unit)
 	_replace_roster_units(updated_units)
 	_sync_wound_lock()
+	if not respawn_unit_ids.is_empty():
+		_park_pickup_persons(respawn_unit_ids)
+		_refresh_homebase_screen()
 	# Das Ergebnis traegt die tatsaechlich angewendete Verwundung (nach "nie kuerzer, nie leichter"),
 	# nicht die Regelwerte der neuen Verwundung. Das Feld severity bleibt die neue Verwundung.
 	for index in range(casualties.size()):
@@ -4918,6 +4962,16 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 	for dead_id: String in dead_units:
 		var display_name: String = String(Dictionary(dead_units[dead_id]).get("display_name", "")).strip_edges()
 		var entry: Dictionary = {"unit_id": dead_id, "display_name": display_name if not display_name.is_empty() else dead_id, "job_id": job_id, "location_id": location_id}
+		var respawn_limit: int = int(mission_result.get("respawn_limit", 0))
+		if respawn_limit > 0:
+			# Respawn (R3): Der endgueltige Tod nennt den Grund und wie oft die Person schon wiedergekommen war.
+			var used_before: int = int(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("respawns_used_of", dead_units[dead_id]))
+			for casualty_variant in Array(mission_result.get("casualties", [])):
+				if typeof(casualty_variant) == TYPE_DICTIONARY and String(Dictionary(casualty_variant).get("unit_id", "")) == dead_id and Dictionary(casualty_variant).has("death_number"):
+					used_before = maxi(int(Dictionary(casualty_variant).get("death_number", 1)) - 1, 0)
+			entry["reason"] = "respawn_limit"
+			entry["respawns_used"] = used_before
+			entry["respawn_limit"] = respawn_limit
 		var verdict: Dictionary = Dictionary(_singleplayer_runtime.call("validate_fallen_entry", entry))
 		if not bool(verdict.get("ok", false)):
 			push_error("Gefallene bleiben im Kader (%s): Eintrag fuer %s nicht moeglich (%s)" % [dead_list, dead_id, String(verdict.get("reason", ""))])
@@ -4961,6 +5015,19 @@ func _remove_campaign_fatalities(unit_ids: PackedStringArray, mission_result: Di
 ## Ist diese Person fuer die Kampagne geschuetzt (Fortschritts-Rekrut, Schiffspilot, Anwerber)? Die Auskunft kommt vom Adapter.
 func _is_campaign_person_protected(unit_id: String) -> bool:
 	return _singleplayer_runtime != null and _singleplayer_runtime.has_method("is_person_protected_from_death") and bool(_singleplayer_runtime.call("is_person_protected_from_death", unit_id))
+
+
+## Respawn (R3): Die Basis-Runtime stellt die Personen unsichtbar auf Polisa (Zustand "station"). Ohne Basis-Person: nichts zu tun.
+func _park_pickup_persons(unit_ids: PackedStringArray) -> void:
+	if unit_ids.is_empty() or _singleplayer_runtime == null or not _singleplayer_runtime.has_method("get_base_personnel_runtime"):
+		return
+	var base: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
+	if base == null or not base.has_method("park_pickup_person"):
+		return
+	for unit_id in unit_ids:
+		var parked: Dictionary = Dictionary(base.call("park_pickup_person", String(unit_id)))
+		if not bool(parked.get("ok", false)):
+			push_error("Wiederkehrende Person %s nicht auf Polisa gestellt: %s" % [String(unit_id), String(parked.get("reason", ""))])
 
 
 ## Kader ohne die Gefallenen. Stirbt Platz 0, rueckt die erste lebende Person mit roster_role_category "operator" und

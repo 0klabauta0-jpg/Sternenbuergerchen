@@ -82,6 +82,10 @@ static func respawn_limit_of(value: Variant) -> int:
 		return int(clampf(float(value), 0.0, float(MAX_RESPAWN_LIMIT)))
 	return 0
 
+## Ist der Wert eine Zaehlerzahl (ganze Zahl oder endliche Kommazahl)? Alles andere (null, Text, bool, Liste, ...) ist keine.
+static func _is_counter_value(value: Variant) -> bool:
+	return typeof(value) == TYPE_INT or (typeof(value) == TYPE_FLOAT and is_finite(float(value)))
+
 static func is_final_death(respawns_used: int, respawn_limit: int) -> bool:
 	return maxi(respawns_used, 0) >= maxi(respawn_limit, 0)
 
@@ -145,7 +149,8 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 		var result: Dictionary = classify_unit(state, mission_outcome)
 		classified.append(result)
 		if result.outcome == "dead":
-			var used: int = respawns_used_of(state) if state.has("respawns_used") else int(roster_used.get(unit_id, 0))
+			# Der Zaehler des Einsatzstands gilt nur, wenn er eine Zahl ist; sonst (fehlt oder falscher Typ) zaehlt der Kader.
+			var used: int = respawns_used_of(state) if _is_counter_value(state.get("respawns_used")) else int(roster_used.get(unit_id, 0))
 			var final_death := is_final_death(used, respawn_limit)
 			result["final"] = final_death
 			result["death_number"] = maxi(used, 0) + 1
