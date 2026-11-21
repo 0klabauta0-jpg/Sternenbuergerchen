@@ -317,34 +317,41 @@ func _fall_2_treibstoff() -> bool:
 	var reach: Dictionary = Dictionary(Dictionary(_flow.call("get_singleplayer_snapshot").get("space_travel", {})).get("fuel_reachability", {}))
 	print("K2_FALL2_REACHABILITY fuel=%s %s" % [str(fuel), str(reach)])
 	var satellite_reach: Dictionary = Dictionary(reach.get("satellite_crash", {}))
-	_check(not bool(satellite_reach.get("ok", true)) and not String(satellite_reach.get("message", "")).is_empty(), "Fall 2: die Erreichbarkeitsanzeige sagt, dass der Satellit mit %s Treibstoff nicht erreichbar ist (beobachtet: %s)" % [str(fuel), str(satellite_reach)])
+	# Regel 8 / Auftrag 21.11.: keine Rueckflugreserve mehr. "ok" heisst: die naechste Etappe (Abheben) ist bezahlbar; "route_ok" sagt, ob der ganze Hinweg reicht.
+	_check(bool(satellite_reach.get("ok", false)) and not bool(satellite_reach.get("route_ok", true)) and float(satellite_reach.get("needed_total", 0.0)) > fuel, "Fall 2: die Erreichbarkeitsanzeige sagt, dass mit %s Treibstoff die naechste Etappe geht, der ganze Hinweg zum Satelliten aber nicht reicht (beobachtet: %s)" % [str(fuel), str(satellite_reach)])
 	# 2.2a: mit 4 Treibstoff. Gefragt wird: Wo haelt das Spiel den Spieler auf, und mit welcher Meldung?
 	var low: Dictionary = await _probe_departure("niedrig", "satellite_crash")
+	# Regel 8 / Auftrag 21.11.: das Abheben (2) ist gedeckt und wird angenommen; der Sprung (5) startet nicht, weil nur noch 2 da sind.
 	var stopped_at_home: bool = not bool(Dictionary(low.start).get("ok", false))
+	var stopped_at_jump: bool = bool(Dictionary(low.start).get("ok", false)) and not bool(Dictionary(low.jump).get("ok", true))
 	var stopped_at_approach: bool = bool(low.reached_orbit) and not bool(Dictionary(low.approach).get("ok", true))
-	_check(stopped_at_home or stopped_at_approach, "Fall 2: ein Flug, den der Treibstoff nicht traegt, wird gestoppt, bevor der Spieler am Ziel steht (Abflug: %s, Anflug: %s)" % [_msg(Dictionary(low.start)), _msg(Dictionary(low.approach))])
-	var stop_text: String = String(Dictionary(low.start).get("message", "")) if stopped_at_home else String(Dictionary(low.approach).get("message", ""))
+	_check(stopped_at_home or stopped_at_jump or stopped_at_approach, "Fall 2: ein Flug, den der Treibstoff nicht traegt, wird gestoppt, bevor der Spieler am Ziel steht (Abflug: %s, Sprung: %s, Anflug: %s)" % [_msg(Dictionary(low.start)), _msg(Dictionary(low.jump)), _msg(Dictionary(low.approach))])
+	_check(stopped_at_jump and String(Dictionary(low.jump).get("reason", "")) == "leg_fuel_insufficient", "Fall 2: mit 4 Treibstoff wird zuerst das Abheben angenommen und dann der Sprung mit leg_fuel_insufficient abgelehnt (beobachtet: %s)" % _msg(Dictionary(low.jump)))
+	var stop_text: String = String(Dictionary(low.start).get("message", "")) if stopped_at_home else (String(Dictionary(low.jump).get("message", "")) if stopped_at_jump else String(Dictionary(low.approach).get("message", "")))
 	_check(stop_text.to_lower().contains("treibstoff"), "Fall 2: die Meldung nennt den Treibstoff als Ursache (beobachtet: \"%s\")" % stop_text)
-	_check(stop_text.to_lower().contains("auftanken") or stop_text.to_lower().contains("tanken"), "Fall 2: die Meldung sagt, dass getankt werden muss (beobachtet: \"%s\")" % stop_text)
+	# Die Meldung nennt benoetigte und vorhandene Menge (Auftrag 21.11.); der Hinweis zum Auftanken kommt erst mit dem Tankdienst (spaetere Abschnitte).
+	_check(stop_text.contains("Benötigt") and stop_text.contains("vorhanden"), "Fall 2: die Meldung nennt benoetigte und vorhandene Menge (beobachtet: \"%s\")" % stop_text)
 	var fuel_after_stop := _fuel_now()
-	_check(is_equal_approx(fuel_after_stop, fuel), "Fall 2: bis zur Ablehnung wurde kein Treibstoff abgebucht (vorher %s, nachher %s)" % [str(fuel), str(fuel_after_stop)])
+	_check(is_equal_approx(fuel_after_stop, fuel - 2.0), "Fall 2: gebucht ist nur das angenommene Abheben (2), der abgelehnte Sprung bucht nichts (vorher %s, nachher %s)" % [str(fuel), str(fuel_after_stop)])
 	# 2.2b: Steht das Schiff nach dem Stopp irgendwo im Weltraum? Dann muss es von dort heim.
 	if bool(Dictionary(low.start).get("ok", false)):
 		print("K2_FALL2_STOPPED_IN_SPACE phase=%s orbit=%s" % [String(_space().get("phase", "")), String(_space().get("orbit_id", ""))])
-		if not _check(await _wait_homebase(), "Fall 2: nach dem gestoppten Anflug kommt das Schiff mit %s Treibstoff ohne Hilfe zurueck nach Hause" % str(fuel_after_stop)): return false
+		if stopped_at_jump:
+			# Regel 8 / Auftrag 21.11.: das Schiff steht nach dem abgelehnten Sprung im Mondorbit; die Heimlandung kostet nichts und geht auch mit 2 Treibstoff.
+			var home_land: Dictionary = _screen.call("request_operation", "space_land_homebase", {"craft_id": _craft_id})
+			if not _check(bool(home_land.get("ok", false)), "Fall 2: aus dem Mondorbit gelingt die kostenlose Heimlandung mit %s Treibstoff (%s)" % [str(fuel_after_stop), _msg(home_land)]): return false
+			if not await _wait(func(): return String(_craft(_flow.call("get_singleplayer_snapshot")).get("location_id", "")) == "homebase" and not bool(_craft(_flow.call("get_singleplayer_snapshot")).get("busy", true)), 35000, "Fall 2: das Schiff steht nach der Heimlandung wieder zu Hause"): return false
+			_check(is_equal_approx(_fuel_now(), fuel_after_stop), "Fall 2: die Heimlandung bucht nichts")
+		elif not _check(await _wait_homebase(), "Fall 2: nach dem gestoppten Anflug kommt das Schiff mit %s Treibstoff ohne Hilfe zurueck nach Hause" % str(fuel_after_stop)): return false
 	_flow.call("_show_homebase")
 	print("K2_FALL2_BACK_HOME fuel=%s credits=%d phase=%s" % [str(_fuel_now()), _credits_now(), String(_space().get("phase", ""))])
-	# 2.2c: nachtanken, 23 reicht nicht (24 noetig), 24 reicht.
+	# 2.2c: nachtanken auf genau 24. Regel 8 / Auftrag 21.11.: Die frueheren Pruefung "23 reicht nicht" entfaellt, weil es keine Reserve mehr gibt:
+	# mit 23 wuerde der Hinweg (12) gedeckt angeflogen und das Schiff stuende am Ort mit 11 (der Rueckweg braucht 12). Diesen Zustand
+	# ("liegen geblieben") deckt tanker_leg_fuel_verifier ab; hier bleibt der Weg mit genau 24.
 	var credits_before := _credits_now()
-	var top_up: Dictionary = _runtime.call("request_operation", "refuel", {"craft_id": _craft_id, "amount": 23.0 - _fuel_now()})
-	if not _check(bool(top_up.get("ok", false)), "Fall 2: zu Hause laesst sich nachtanken (%s, Kosten %d Credits)" % [_msg(top_up), credits_before - _credits_now()]): return false
-	var mid: Dictionary = await _probe_departure("dreiundzwanzig", "satellite_crash")
-	var mid_stopped: bool = not bool(Dictionary(mid.start).get("ok", false)) or (bool(mid.reached_orbit) and not bool(Dictionary(mid.approach).get("ok", true)))
-	_check(mid_stopped, "Fall 2: mit 23 Treibstoff (24 noetig) wird der Flug gestoppt (Abflug: %s, Anflug: %s)" % [_msg(Dictionary(mid.start)), _msg(Dictionary(mid.approach))])
-	if bool(Dictionary(mid.start).get("ok", false)):
-		if not _check(await _wait_homebase(), "Fall 2: auch mit 23 Treibstoff kommt das Schiff aus dem Orbit heim"): return false
+	var top_up: Dictionary = _runtime.call("request_operation", "refuel", {"craft_id": _craft_id, "amount": 24.0 - _fuel_now()})
+	if not _check(bool(top_up.get("ok", false)) and is_equal_approx(_fuel_now(), 24.0), "Fall 2: zu Hause laesst sich auf genau 24 nachtanken (%s, Kosten %d Credits, beobachtet %s)" % [_msg(top_up), credits_before - _credits_now(), str(_fuel_now())]): return false
 	_flow.call("_show_homebase")
-	_check(bool(_runtime.call("request_operation", "refuel", {"craft_id": _craft_id, "amount": 24.0 - _fuel_now()}).get("ok", false)) and is_equal_approx(_fuel_now(), 24.0), "Fall 2: ein weiterer Tankschritt bringt genau 24 (beobachtet %s)" % str(_fuel_now()))
 	# 2.2d: mit genau 24 (null Reserve) die ganze Auftragsfahrt; am Ziel muss der Rueckflug bezahlt sein.
 	if not await _launch_and_land_again("benit_delivery", SATELLITE_MAP, "fall2"): return false
 	var at_destination := _fuel_now()

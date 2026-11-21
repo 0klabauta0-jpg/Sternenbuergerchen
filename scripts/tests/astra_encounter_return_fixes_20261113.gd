@@ -118,10 +118,12 @@ func _run_case(outcome: String, player_loss: bool = false) -> void:
 	check(f.supply.export_state() == supply_before and f.encounter.peek_completed_result() == pending, "rejections preserve fuel and pending result")
 	var fuel_before := float(f.supply.get_supply_snapshot().fuel_by_craft_id[f.craft])
 	f.supply.get("_fuel_by_craft_id")[f.craft] = 0.0
-	check(f.sim.commit_campaign_space_return(f.adapter, f.craft, request).get("reason") == "insufficient_fuel", "insufficient fuel rejects entire prepared return")
+	# Regel 8 / Auftrag 21.11.: der Grund heisst jetzt leg_fuel_insufficient (Etappe surface_exit), der Ablauf bleibt gleich.
+	check(f.sim.commit_campaign_space_return(f.adapter, f.craft, request).get("reason") == "leg_fuel_insufficient", "insufficient fuel rejects entire prepared return")
 	check(f.travel.get_snapshot().phase == "approach" and f.combat.get_actor("hostile_cutlass") != null and f.combat.get_actor("neutral_buccaneer") != null, "failed fuel does not remove contacts or change travel")
 	f.supply.get("_fuel_by_craft_id")[f.craft] = fuel_before
-	var expected: Dictionary = f.supply.preview_route_fuel({"craft_id":f.craft, "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, {"departure_authorized":true})
+	# Regel 8 / Auftrag 21.11.: der Ortsabflug bucht nur seinen Etappenanteil (surface_exit); der Heimsprung bucht spaeter selbst.
+	var expected: Dictionary = f.supply.preview_leg_fuel({"craft_id":f.craft, "leg":"surface_exit", "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, {"departure_authorized":true})
 	var result: Dictionary = f.sim.commit_campaign_space_return(f.adapter, f.craft, request)
 	if not check(result.get("ok", false), "actual Root completes " + outcome + " return"):
 		print("RETURN_FAILURE ", result); f.adapter.free(); f.sim.free(); return
@@ -151,7 +153,8 @@ func _test_adapter_retry() -> void:
 	var pending: Dictionary = f.encounter.peek_completed_result()
 	var campaign_before: Dictionary = f.campaign.export_state()
 	var supply_before: Dictionary = f.supply.export_state()
-	var expected: Dictionary = f.supply.preview_route_fuel({"craft_id":f.craft, "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, {"departure_authorized":true})
+	# Regel 8 / Auftrag 21.11.: der Ortsabflug bucht nur seinen Etappenanteil (surface_exit); der Heimsprung bucht spaeter selbst.
+	var expected: Dictionary = f.supply.preview_leg_fuel({"craft_id":f.craft, "leg":"surface_exit", "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, {"departure_authorized":true})
 	# The first actual adapter tick observes Root's real busy guard. No wrapper
 	# replaces advance_space_travel(), _finish_space_encounter_result() or Root.
 	f.sim.is_processing_tick = true
