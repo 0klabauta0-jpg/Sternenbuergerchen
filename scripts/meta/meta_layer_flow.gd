@@ -4605,6 +4605,11 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 			# (oder scheitert eine andere Transportpruefung), wird das Ergebnis wie im Einschiff-Zweig festgehalten. Sieg, Abschluss und
 			# Belohnung werden beim spaeteren Abflug gebucht (der Wiederholer stellt es zu, sobald der Rueckflug genehmigt wird); gesperrt
 			# ist nur der Abflug selbst. Der Ort und sein Schiff bleiben stehen, kein Schiff wird verwaist freigegeben.
+			# Fix-Runde 2, W9: Das Einsatzergebnis wird sofort gebucht (Abschluss/Fehlschlag des Auftrags und alles, was das Spiel dort gutschreibt);
+			# der Abflug wird getrennt geprueft und nur gesperrt. Die spaetere Zustellung bucht nichts doppelt (record_mission_result ignoriert
+			# einen nicht mehr aktiven Auftrag).
+			if String(return_gate.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+				_singleplayer_runtime.call("record_mission_result", resolved_result, _active_singleplayer_identity.duplicate(true))
 			_pending_campaign_mission_result = mission_result.duplicate(true)
 			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
 			return
@@ -9477,6 +9482,13 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 ## Fix-Runde 1, W3: Auch ohne Ausfaelle prueft der Abflug den Treibstoff fuer den Ortsabflug, bevor das Schiff etwas startet;
 ## fehlt er, steht dieselbe Meldung wie beim Abflug mit Ausfaellen auf der Schiffskarte ({"handled": true, "ok": false}).
 func _campaign_departure_gate(craft_id: String) -> Dictionary:
+	# Fix-Runde 2, W10: Ein unausgeliefertes Ergebnis sperrt den Abflug auch dann, wenn die Verlustregeln leer oder ungueltig sind.
+	var held_visit: Node = get_mission_for_craft(craft_id)
+	if is_campaign_start() and _singleplayer_runtime != null and held_visit != null and held_visit == _active_mission and not _pending_campaign_mission_result.is_empty():
+		var held_check: Dictionary = _departure_return_preflight(craft_id)
+		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": "Treibstoff reicht nicht für den Rückflug"}
+		return {"handled": true, "ok": false, "reason": "mission_result_pending", "message": "Einsatz wird gerade abgeschlossen"}
 	var gated: Dictionary = _campaign_departure_gate_casualties(craft_id)
 	if bool(gated.get("handled", false)):
 		return gated
