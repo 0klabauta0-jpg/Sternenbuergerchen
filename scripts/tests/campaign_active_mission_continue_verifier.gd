@@ -78,6 +78,16 @@ func _run() -> void:
  forged = wire.duplicate(true)
  forged.base_personnel.units[_pilot_id].status = "outside"
  _check(not preflight.prepare(forged,_runtime,live_root).get("ok",false),"inconsistent home personnel state is rejected before publication")
+ # Abschnitt SB: Ein Basisstand darf einen Ort mit neuer Karte frisch beginnen, ein laufender Einsatz nicht (seine Welt gehoert zur alten Karte).
+ forged = wire.duplicate(true)
+ forged.campaign.locations.satellite_crash.map_file_path = "res://maps/satellite_crash_site_alt.json"
+ var relocated_world: Dictionary = preflight.prepare(forged,_runtime,live_root)
+ _check(not relocated_world.get("ok",false) and String(relocated_world.get("reason","")) == "stale_campaign_definitions","active world whose place got another map path is rejected with stale_campaign_definitions")
+ # Gegenprobe: nur der Anzeigename des Einsatzortes weicht ab, das ist kein Kartenwechsel und wird nicht abgelehnt.
+ forged = wire.duplicate(true)
+ forged.campaign.locations.satellite_crash.name = "Anderer Name der Absturzstelle"
+ var renamed_world: Dictionary = preflight.prepare(forged,_runtime,live_root)
+ _check(renamed_world.get("ok",false),"active world whose place only has another display name still prepares (%s)" % [renamed_world.get("reason","")])
  _check(live_root.get("_singleplayer_campaign_owner") == before_root_campaign and _runtime.get("_supply").export_state() == before_supply,"rejected world candidates leave live owners untouched")
  var campaign = _flow.get("_campaign_start")
  var scene_factory = load("res://scripts/mission/campaign_active_scene_preflight.gd")
