@@ -96,7 +96,8 @@ func _run() -> void:
 	var return_auth: Dictionary = runtime.authorize_return(first_id, "pad-return")
 	_check(return_auth.ok, "Return flight authorizes real remote craft")
 	var returning_supply: Dictionary = runtime.get_snapshot().supply
-	_check(returning_supply.fuel_by_craft_id[first_id] == supply_before.fuel_by_craft_id[first_id] - 24.0, "Return charges authored reverse route once")
+	# Regel 8 / Auftrag 21.11.: authorize_return bucht nur den Ortsabflug (surface_exit 2); Sprung (10) und Heimlandung (0) buchen beim Sprung bzw. bei der Landung. Hinweg 12 + Ortsabflug 2 = 14; die Endsumme 24 steht in tanker_result_fuel_verifier.
+	_check(returning_supply.fuel_by_craft_id[first_id] == supply_before.fuel_by_craft_id[first_id] - 14.0, "Return charges only the surface exit leg once (Regel 8)")
 	_check(runtime.authorize_return(first_id, "pad-return").ok and runtime.get_snapshot().supply == returning_supply, "Return request replay never debits twice")
 	_check(runtime.authorize_return(first_id, "different-ui-event").ok and runtime.get_snapshot().supply == returning_supply, "Transport and UI return requests share one outward-trip receipt")
 	flow.call("_begin_mission_craft_transfer", first_id, "to_homebase", 18.0, "homebase_direct")

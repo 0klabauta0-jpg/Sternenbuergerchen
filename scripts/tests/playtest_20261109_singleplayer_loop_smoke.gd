@@ -224,8 +224,8 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if not _check(_flow.get("_active_mission") == null and int(_flow.get("_active_mission_started_at_msec")) == 0, scenario_id + " takeoff loads no mission and starts no mission timer"):
 		return false
 	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == before_launch_job_status, "Takeoff alone activates no campaign job")
-	# Regel 8 / Auftrag 21.11.: das Abheben bucht seinen eigenen Etappenanteil (2), aber keinen Zielanteil.
-	_check(is_equal_approx(float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0)), float(before_launch_fuel.get(_craft_id, 0.0)) - 2.0), "Takeoff alone debits only its own leg share (2), no destination fuel")
+	# Regel 8 / Auftrag 21.11.: das Abheben bucht seinen eigenen Etappenanteil (aus den Versorgungsdaten), aber keinen Zielanteil.
+	_check(is_equal_approx(float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0)), float(before_launch_fuel.get(_craft_id, 0.0)) - float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", "", "launch"))), "Takeoff alone debits only its own leg share, no destination fuel")
 	if not _check(String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == "moon_orbit", scenario_id + " actual takeoff reaches moon orbit"):
 		_dump("moon_orbit")
 		return false
@@ -258,8 +258,8 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 		return false
 	_check(_flow.get("_active_mission") == null and int(_flow.get("_active_mission_started_at_msec")) == 0, "Quantum arrival still loads no mission and starts no timer")
 	_check(String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == before_launch_job_status, "Quantum, abort and restart activate no job")
-	# Regel 8 / Auftrag 21.11.: Abheben (2) und der eine Sprung dieser Strecke sind bezahlt; Abbruch und Neustart aus "stopped" kosten nichts dazu.
-	var paid_so_far: float = 2.0 + float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", destination, "jump"))
+	# Regel 8 / Auftrag 21.11.: Abheben und der eine Sprung dieser Strecke sind bezahlt; Abbruch und Neustart aus "stopped" kosten nichts dazu.
+	var paid_so_far: float = float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", "", "launch")) + float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", destination, "jump"))
 	_check(is_equal_approx(float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0)), float(before_launch_fuel.get(_craft_id, 0.0)) - paid_so_far), "Quantum, abort and restart debit exactly the takeoff and one jump leg (%s), no approach fuel" % str(paid_so_far))
 	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id})
 	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from planet orbit"):
