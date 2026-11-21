@@ -227,7 +227,7 @@ func _departure_low_fuel(tag: String, hud: bool) -> void:
 		if hud:
 			_check(String(reply.get("feedback", "")).contains("Treibstoff reicht nicht für den Rückflug"), tag + ": Druck %d: Karten-Meldung nennt den Treibstoff" % (round_index + 1))
 		else:
-			_check(not bool(reply.get("ok", true)) and String(reply.get("reason", "")) == "insufficient_fuel" and String(reply.get("message", "")) == "Treibstoff reicht nicht für den Rückflug", tag + ": Druck %d: abgelehnt mit insufficient_fuel und Meldung" % (round_index + 1))
+			_check(not bool(reply.get("ok", true)) and String(reply.get("reason", "")) == "leg_fuel_insufficient" and String(reply.get("message", "")) == "Treibstoff reicht nicht für den Rückflug", tag + ": Druck %d: abgelehnt mit leg_fuel_insufficient (Regel 8 / Auftrag 21.11.) und Meldung" % (round_index + 1))
 		_check(_flow.get("_active_mission") == s.mission and not bool(driver.get("_combat_finished")), tag + ": Druck %d: nichts aufgeloest" % (round_index + 1))
 		_check(Array(_flow.get("_all_team_units")) == roster_before and Dictionary(_flow.get("_last_mission_result")) == last_before, tag + ": Druck %d: Kader und Ergebnis unveraendert" % (round_index + 1))
 		_check(_job_status() == "active" and is_equal_approx(_fuel(), 1.0), tag + ": Druck %d: Auftrag active, Treibstoff unveraendert" % (round_index + 1))

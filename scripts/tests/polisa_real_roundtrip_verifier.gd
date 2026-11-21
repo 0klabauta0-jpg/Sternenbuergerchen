@@ -21,6 +21,7 @@ func _run() -> void:
 	var result: Dictionary = _op("select_destination", {"location_id":"polisa", "job_id":""})
 	if not _check(result.get("ok", false), "Select Polisa as a free visit"):
 		print("SELECT: ", result); await _finish(); return
+	var fuel_start: float = float(_runtime.call("get_snapshot").supply.fuel_by_craft_id[_craft_id])
 	result = _op("start")
 	if not _check(result.get("ok", false), "Real crew departs homebase"):
 		print("START: ", result); await _finish(); return
@@ -93,6 +94,20 @@ func _run() -> void:
 	goods=Dictionary(Dictionary(after.inventory).get("craft:"+_craft_id,{})).get("items",{})
 	_check(int(goods.get("pistol",0))==int(old_goods.get("pistol",0))+1,"Actual ship inventory receives purchased item")
 	var fuel_before: float = float(after.fuel_by_craft_id[_craft_id])
+	# Tanker T1 (Regel 8 / Auftrag 21.11.): Hinweg Heimat -> Polisa = Abheben 2 + Sprung 4 + Anflug 4 = 10 (alter Wert homebase>polisa).
+	_check(is_equal_approx(fuel_start - fuel_before, 10.0), "T1: der Hinweg nach Polisa bucht in den echten Etappen genau 10 (%.1f -> %.1f)" % [fuel_start, fuel_before])
+	# Fix-Runde 1, Klein 3 (echter Stationsdienst): Tankservice da und Credits reichen -> nicht liegen geblieben; Tankservice da, aber 0 Credits -> liegen geblieben.
+	var supply_owner: Object = _runtime.get("_supply")
+	var credits_keep: int = int(supply_owner.get_credits())
+	supply_owner.get("_fuel_by_craft_id")[_craft_id] = 1.0
+	supply_owner.set("_credits", 100000)
+	var rich_status: Dictionary = _runtime.call("get_fuel_status", _craft_id)
+	_check(bool(rich_status.get("refuel_here", false)) and bool(rich_status.get("refuel_affordable", false)) and not bool(rich_status.get("stranded", true)), "Klein 3: an der Station mit Tankservice und Credits: refuel_affordable=true, nicht liegen geblieben: %s" % [rich_status])
+	supply_owner.set("_credits", 0)
+	var broke_status: Dictionary = _runtime.call("get_fuel_status", _craft_id)
+	_check(bool(broke_status.get("refuel_here", false)) and not bool(broke_status.get("refuel_affordable", true)) and bool(broke_status.get("stranded", false)), "Klein 3: an der Station mit Tankservice, aber 0 Credits: refuel_affordable=false, liegen geblieben: %s" % [broke_status])
+	supply_owner.get("_fuel_by_craft_id")[_craft_id] = fuel_before
+	supply_owner.set("_credits", credits_keep)
 	station.call("_request_refuel")
 	var refueled: Dictionary = _runtime.call("get_snapshot").supply
 	_check(float(refueled.fuel_by_craft_id[_craft_id]) > fuel_before, "Station refuels the landed ship")
@@ -119,5 +134,7 @@ func _run() -> void:
 			if craft.get("craft_id", "") == _craft_id: return craft.get("location_id", "") == "homebase" and not craft.get("busy", true)
 		return false, 45000), "Original ship and purchased cargo arrive home")
 	var final: Dictionary = _runtime.call("get_snapshot").supply
+	# Rueckweg vom Stationsorbit: Ortsabflug 6 + Sprung 4 + Landung 0 = 10 (alter Wert polisa>homebase), kein Doppelbuchen.
+	_check(is_equal_approx(float(refueled.fuel_by_craft_id[_craft_id]) - float(final.fuel_by_craft_id[_craft_id]), 10.0), "T1: der Rueckweg von Polisa nach Hause bucht in den echten Etappen genau 10 (%.1f -> %.1f)" % [float(refueled.fuel_by_craft_id[_craft_id]), float(final.fuel_by_craft_id[_craft_id])])
 	_check(int(Dictionary(Dictionary(final.inventory).get("craft:" + _craft_id, {})).get("items", {}).get("pistol", 0)) == int(goods.get("pistol", 0)), "Purchased cargo persists on return")
 	await _finish()

@@ -21,6 +21,11 @@ func _leg_command(craft_id: String, leg: String, origin: String, destination: St
 	return {"contract_category": "singleplayer_supply", "operation": "consume_leg_fuel", "payload": {"craft_id": craft_id, "leg": leg, "origin_location_id": origin, "destination_location_id": destination}, "request_id": request_id}
 
 func _run() -> void:
+	if "only=restart_other" in OS.get_cmdline_user_args():
+		await _scenario_restart_other_target()
+		print("TANKER_LEG_FUEL passed=%d failed=%d" % [_passed, _failed])
+		quit(0 if _failed == 0 else 1)
+		return
 	if "only=jump_restart" in OS.get_cmdline_user_args():
 		await _scenario_jump_restart()
 		print("TANKER_LEG_FUEL passed=%d failed=%d" % [_passed, _failed])
@@ -30,6 +35,7 @@ func _run() -> void:
 	_scenario_save_and_load()
 	await _scenario_full_tank_flight()
 	await _scenario_jump_restart()
+	await _scenario_restart_other_target()
 	await _scenario_launch_without_fuel()
 	await _scenario_jump_without_fuel()
 	await _scenario_stranded_in_orbit()
@@ -107,8 +113,16 @@ func _scenario_table_and_owner() -> void:
 		for value: Variant in Dictionary(legs.get(route, {})).values():
 			sum += float(value)
 		_check(is_equal_approx(sum, float(routes[route])), "1: Summe der Etappen == Routenwert fuer " + route)
-		var parts: PackedStringArray = route.split(">")
-		_check(is_equal_approx(supply.get_leg_fuel_cost(parts[0], parts[1], "whole_route"), float(routes[route])), "1: whole_route des Besitzers == Routenwert fuer " + route)
+		# W7: die Summe der ECHT gebuchten Etappen (echte Befehle am Besitzer) == alter Streckenwert, fuer JEDE Strecke inkl. Ort -> Ort.
+		var booked: float = _book_route_with_real_legs(String(route))
+		_check(booked >= 0.0 and is_equal_approx(booked, float(routes[route])), "1/W7: Summe der real gebuchten Etappen == route_fuel_costs fuer %s (gebucht %s, Soll %s)" % [route, booked, routes[route]])
+	# W7: Ort -> Ort muss exakt Ortsabflug des Ortes + Sprung + Anflug von zu Hause sein; weicht die Tabelle ab, wird sie abgelehnt.
+	var inconsistent: Dictionary = _data()
+	inconsistent.leg_fuel_costs["satellite_crash>trade_outpost"] = {"surface_exit": 6.0, "jump": 1.0, "approach": 3.0}
+	_check(not bool(SUPPLY_SCRIPT.new().configure([{"craft_id": "ship"}], inconsistent).get("ok", true)), "W7: Ort->Ort-Eintrag mit anderem Ortsabflug als Ort->Heimat wird abgelehnt")
+	var inconsistent_approach: Dictionary = _data()
+	inconsistent_approach.leg_fuel_costs["trade_outpost>satellite_crash"] = {"surface_exit": 5.0, "jump": 1.0, "approach": 4.0}
+	_check(not bool(SUPPLY_SCRIPT.new().configure([{"craft_id": "ship"}], inconsistent_approach).get("ok", true)), "W7: Ort->Ort-Eintrag mit anderem Anflug als Heimat->Ort wird abgelehnt")
 	# Eine Tabelle, die nicht aufgeht, wird abgelehnt.
 	var broken: Dictionary = _data()
 	broken.leg_fuel_costs["homebase>trade_outpost"]["approach"] = 4.0
@@ -148,14 +162,52 @@ func _scenario_table_and_owner() -> void:
 	# Alte Belege bleiben gueltig: consume_route_fuel wirkt wie bisher.
 	var legacy: Dictionary = poor.apply_command({"contract_category": "singleplayer_supply", "operation": "consume_route_fuel", "payload": {"craft_id": "ship", "origin_location_id": "homebase", "destination_location_id": "trade_outpost"}, "request_id": "t1:old-route"}, context)
 	_check(not legacy.get("ok", true) and String(legacy.get("reason", "")) == "insufficient_fuel", "4 (Entscheidung): consume_route_fuel bleibt fuer alte Belege gueltig und prueft wie bisher")
-	# Rueckweg vom Ort: nach einem Hinweg ueber den Orbit nur der Ortsabflug, nach einem Direktstart (oder altem/unbekanntem Beleg) die ganze Strecke.
-	var fresh: Object = SUPPLY_SCRIPT.new()
-	fresh.configure([{"craft_id": "ship"}], _data())
-	fresh.apply_command(_leg_command("ship", "approach", "homebase", "satellite_crash", "departure:orbit:fuel"), context)
-	fresh.apply_command(_leg_command("ship", "whole_route", "homebase", "satellite_crash", "departure:direct:fuel"), context)
-	fresh.apply_command({"contract_category": "singleplayer_supply", "operation": "consume_route_fuel", "payload": {"craft_id": "ship", "origin_location_id": "homebase", "destination_location_id": "trade_outpost"}, "request_id": "departure:old:fuel"}, context)
-	_check(fresh.get_return_leg("departure:orbit") == "surface_exit", "8: nach einem Hinweg ueber den Orbit ist der Rueckweg vom Ort der Ortsabflug")
-	_check(fresh.get_return_leg("departure:direct") == "whole_route" and fresh.get_return_leg("departure:old") == "whole_route" and fresh.get_return_leg("departure:unknown") == "whole_route", "8: nach Direktstart, altem oder unbekanntem Beleg ist der Rueckweg die ganze Strecke")
+	# Fix-Runde 1 (SMALL 2): "whole_route" und get_return_leg gibt es nicht mehr; der Rueckweg vom Ort ist immer der Ortsabflug.
+	_check(supply.get_leg_fuel_cost("homebase", "satellite_crash", "whole_route") < 0.0, "8: whole_route ist keine Etappe mehr (Kosten -1)")
+	_check(String(supply.preview_leg_fuel({"craft_id": "ship", "leg": "whole_route", "origin_location_id": "homebase", "destination_location_id": "satellite_crash"}, context).get("reason", "")) == "unknown_leg", "8: whole_route wird als unknown_leg abgelehnt")
+	_check(not supply.has_method("get_return_leg"), "8: get_return_leg ist entfernt")
+	# already_paid: nur die Differenz wird gebucht, nie mehr als die Etappe, nie zurueck.
+	var credit: Object = SUPPLY_SCRIPT.new()
+	credit.configure([{"craft_id": "ship"}], _data())
+	var credited: Dictionary = _leg_command("ship", "jump", "homebase", "trade_outpost", "t1:credit-a")
+	credited.payload["already_paid"] = 3.0
+	_check(credit.apply_command(credited, context).get("ok", false) and is_equal_approx(credit.get_fuel("ship"), 60.0), "SMALL 1: Anrechnung in voller Hoehe (3 von 3) bucht nichts")
+	var credited_more: Dictionary = _leg_command("ship", "jump", "homebase", "satellite_crash", "t1:credit-b")
+	credited_more.payload["already_paid"] = 3.0
+	_check(credit.apply_command(credited_more, context).get("ok", false) and is_equal_approx(credit.get_fuel("ship"), 58.0), "SMALL 1: Anrechnung 3 von 5 bucht nur die Differenz 2")
+	var credited_over: Dictionary = _leg_command("ship", "jump", "homebase", "trade_outpost", "t1:credit-c")
+	credited_over.payload["already_paid"] = 9.0
+	_check(credit.apply_command(credited_over, context).get("ok", false) and is_equal_approx(credit.get_fuel("ship"), 58.0), "SMALL 1: zu hohe Anrechnung erstattet nichts zurueck")
+	var credited_bad: Dictionary = _leg_command("ship", "jump", "homebase", "trade_outpost", "t1:credit-d")
+	credited_bad.payload["already_paid"] = -1.0
+	_check(not credit.apply_command(credited_bad, context).get("ok", true) and is_equal_approx(credit.get_fuel("ship"), 58.0), "SMALL 1: negative Anrechnung wird abgelehnt")
+
+## W7: bucht eine Strecke "origin>destination" so, wie die Simulation es im Spiel tut, mit echten Befehlen am Besitzer, und gibt den
+## abgezogenen Treibstoff zurueck. Von zu Hause: Abheben, Sprung, Anflug. Nach Hause: Ortsabflug, Sprung, Landung. Ort -> Ort:
+## Ortsabflug (Ort -> Heimat), Sprung (Ort -> Ort), Anflug (Heimat -> Ort). Nicht definierte Etappen kosten nichts (unknown_leg).
+func _book_route_with_real_legs(route: String) -> float:
+	var parts: PackedStringArray = route.split(">")
+	var from: String = parts[0]
+	var to: String = parts[1]
+	var supply: Object = SUPPLY_SCRIPT.new()
+	supply.configure([{"craft_id": "ship"}], _data())
+	var before: float = supply.get_fuel("ship")
+	var context: Dictionary = {"departure_authorized": true}
+	var steps: Array = []
+	if from == "homebase":
+		steps = [["launch", "homebase", ""], ["jump", from, to], ["approach", "homebase", to]]
+	elif to == "homebase":
+		steps = [["surface_exit", from, "homebase"], ["jump", from, to], ["landing", "", "homebase"]]
+	else:
+		steps = [["surface_exit", from, "homebase"], ["jump", from, to], ["approach", "homebase", to]]
+	var index: int = 0
+	for step: Array in steps:
+		index += 1
+		var result: Dictionary = supply.apply_command(_leg_command("ship", String(step[0]), String(step[1]), String(step[2]), "w7:%s:%d" % [route, index]), context)
+		if not result.get("ok", false):
+			_check(false, "W7: Etappe %s der Strecke %s wurde abgelehnt: %s" % [step[0], route, JSON.stringify(result)])
+			return -1.0
+	return before - supply.get_fuel("ship")
 
 # --- 9. Speichern, Laden, Altstaende --------------------------------------------------------------
 
@@ -248,6 +300,61 @@ func _scenario_jump_restart() -> void:
 	_check(arrived and is_equal_approx(supply.get_fuel(craft_id), 53.0), "7: nach der Ankunft bleibt es bei einer Sprungbuchung (53)")
 	await _close(s)
 
+# --- Klein 1: Neustart aus stopped zu einem anderen Ziel --------------------------------------------
+
+func _orbit_of(session: Dictionary, location_id: String) -> String:
+	return String(Dictionary(session.runtime.get_space_travel_snapshot(session.craft_id).get("location_orbits", {})).get(location_id, ""))
+
+## Startet einen Sprung zu first_orbit, bricht ihn mitten im All ab und gibt den Zustand zurueck (Sitzung offen).
+func _stopped_after_jump(initial_fuel: float, first_location: String) -> Dictionary:
+	var s: Dictionary = await _session(initial_fuel)
+	_launch(s)
+	var first_orbit: String = _orbit_of(s, first_location)
+	var jump: Dictionary = _jump(s, first_orbit)
+	s["first_jump"] = jump
+	if jump.get("ok", false):
+		await _wait_for(s, func() -> bool: return float(s.runtime.get_space_travel_snapshot(s.craft_id).get("progress", 0.0)) > 0.05, 3000)
+		s["aborted"] = s.screen.request_operation("space_abort_quantum", {"craft_id": s.craft_id})
+	return s
+
+func _scenario_restart_other_target() -> void:
+	# A: erst teuer (Satellit 5), dann billiger (Handelsposten 3): nichts erstattet; zurueck zum Satelliten ist schon bezahlt.
+	var a: Dictionary = await _stopped_after_jump(60.0, "satellite_crash")
+	var supply_a: Object = a.supply
+	_check(_orbit_of(a, "satellite_crash") != _orbit_of(a, "trade_outpost") and not _orbit_of(a, "trade_outpost").is_empty(), "Klein 1/A: Satellit und Handelsposten haben verschiedene Orbits")
+	_check(a.first_jump.get("ok", false) and bool(Dictionary(a.get("aborted", {})).get("ok", false)) and _phase(a) == "stopped" and is_equal_approx(supply_a.get_fuel(a.craft_id), 53.0), "Klein 1/A: teurer Sprung bezahlt (53) und abgebrochen: " + str(a.get("aborted", {})))
+	var cheaper: Dictionary = _jump(a, _orbit_of(a, "trade_outpost"))
+	_check(cheaper.get("ok", false) and is_equal_approx(supply_a.get_fuel(a.craft_id), 53.0), "Klein 1/A: Neustart zum billigeren Ziel ist angenommen, bucht nichts und erstattet nichts (53): " + str(cheaper))
+	await _wait_for(a, func() -> bool: return float(a.runtime.get_space_travel_snapshot(a.craft_id).get("progress", 0.0)) > 0.05, 3000)
+	a.screen.request_operation("space_abort_quantum", {"craft_id": a.craft_id})
+	var back: Dictionary = _jump(a, _orbit_of(a, "satellite_crash"))
+	_check(back.get("ok", false) and is_equal_approx(supply_a.get_fuel(a.craft_id), 53.0), "Klein 1/A: zurueck zum teuren Ziel kostet nichts mehr, 5 waren bezahlt (53): " + str(back))
+	await _close(a)
+	# B: erst billig (3), dann teuer (5): nur die Differenz 2 wird gebucht; gleiches Ziel danach kostenlos.
+	var b: Dictionary = await _stopped_after_jump(60.0, "trade_outpost")
+	var supply_b: Object = b.supply
+	_check(b.first_jump.get("ok", false) and _phase(b) == "stopped" and is_equal_approx(supply_b.get_fuel(b.craft_id), 55.0), "Klein 1/B: billiger Sprung bezahlt (55) und abgebrochen: " + str(b.first_jump))
+	var dearer: Dictionary = _jump(b, _orbit_of(b, "satellite_crash"))
+	_check(dearer.get("ok", false) and is_equal_approx(supply_b.get_fuel(b.craft_id), 53.0), "Klein 1/B: Neustart zum teureren Ziel bucht nur die Differenz 2 (55 -> 53): " + str(dearer))
+	await _wait_for(b, func() -> bool: return float(b.runtime.get_space_travel_snapshot(b.craft_id).get("progress", 0.0)) > 0.05, 3000)
+	b.screen.request_operation("space_abort_quantum", {"craft_id": b.craft_id})
+	var same: Dictionary = _jump(b, _orbit_of(b, "satellite_crash"))
+	_check(same.get("ok", false) and is_equal_approx(supply_b.get_fuel(b.craft_id), 53.0), "Klein 1/B: Neustart zum selben Ziel ist kostenlos (53): " + str(same))
+	var arrived: bool = await _wait_for(b, _arrived(b, _orbit_of(b, "satellite_crash")), 20000)
+	_check(arrived and is_equal_approx(supply_b.get_fuel(b.craft_id), 53.0), "Klein 1/B: nach der Ankunft insgesamt 7 + ... gebucht, Tank 53")
+	await _close(b)
+	# C: die Differenz ist nicht gedeckt: abgelehnt, nichts gebucht, das Schiff bleibt angehalten und kann zum bezahlten Ziel zurueck.
+	var c: Dictionary = await _stopped_after_jump(6.0, "trade_outpost")
+	var supply_c: Object = c.supply
+	_check(c.first_jump.get("ok", false) and _phase(c) == "stopped" and is_equal_approx(supply_c.get_fuel(c.craft_id), 1.0), "Klein 1/C: 6 - 2 - 3 = 1 Treibstoff im Stillstand: " + str(c.first_jump))
+	var revision_c: int = supply_c.get_revision()
+	var rejected: Dictionary = _jump(c, _orbit_of(c, "satellite_crash"))
+	_check(not rejected.get("ok", true) and String(rejected.get("reason", "")) == "leg_fuel_insufficient", "Klein 1/C: nicht gedeckte Differenz (2 bei 1) wird abgelehnt: " + str(rejected))
+	_check(_phase(c) == "stopped" and is_equal_approx(supply_c.get_fuel(c.craft_id), 1.0) and supply_c.get_revision() == revision_c, "Klein 1/C: abgelehnt heisst nichts gebucht, Phase stopped, _revision gleich")
+	var resume: Dictionary = _jump(c, _orbit_of(c, "trade_outpost"))
+	_check(resume.get("ok", false) and is_equal_approx(supply_c.get_fuel(c.craft_id), 1.0), "Klein 1/C: das bezahlte Ziel kann weiter kostenlos angeflogen werden: " + str(resume))
+	await _close(c)
+
 # --- 4. Tank 0 an der Basis: Abheben wird abgelehnt -------------------------------------------------
 
 func _scenario_launch_without_fuel() -> void:
@@ -323,6 +430,23 @@ func _scenario_outbound_only_approach() -> void:
 	for leg: Dictionary in Array(status.get("next_legs", [])):
 		if String(leg.get("leg", "")) == "surface_exit": exit_affordable = bool(leg.get("affordable", true))
 	_check(on_ground and not exit_affordable, "5: am Ort meldet get_fuel_status den Rueckweg (Ortsabflug) als nicht bezahlbar: " + str(status))
+	# Fix-Runde 1, Klein 3: Ohne Tankservice am Ort (hier fehlt die gelandete Mission) rettet auch Geld nicht; refuel_affordable braucht den Service.
+	# Der Fall "Tankservice vorhanden, Credits reichen nicht" mit echtem Dienst am Ort steht in tanker_result_fuel_verifier (Haltepunkt am Absturzort).
+	var credits_before: int = int(supply.get_credits())
+	supply.set("_credits", 100000)
+	var rich: Dictionary = s.runtime.get_fuel_status(craft_id)
+	_check(on_ground and not bool(rich.get("refuel_here", true)) and not bool(rich.get("refuel_affordable", true)) and bool(rich.get("stranded", false)), "Klein 3: ohne Tankservice am Ort hilft Geld nicht: refuel_affordable=false, liegen geblieben: " + str(rich))
+	supply.set("_credits", credits_before)
+	# Fix-Runde 1, Klein 4: _remaining_outbound_legs zeigt am Ort die wirklich offenen Etappen, im Anflug keine.
+	var surface_travel: Dictionary = s.runtime.get_space_travel_snapshot(craft_id)
+	var open_legs: Array = s.runtime.call("_remaining_outbound_legs", surface_travel, "trade_outpost")
+	var open_names: Array = []
+	for open_leg: Dictionary in open_legs: open_names.append("%s:%s>%s" % [open_leg.leg, open_leg.origin, open_leg.destination])
+	_check(on_ground and open_names == ["surface_exit:satellite_crash>homebase", "jump:satellite_crash>trade_outpost", "approach:homebase>trade_outpost"], "Klein 4: am Ort offen sind Ortsabflug, Sprung und Anflug zum anderen Ziel: " + str(open_names))
+	_check(on_ground and Array(s.runtime.call("_remaining_outbound_legs", surface_travel, "satellite_crash")).is_empty(), "Klein 4: am Zielort selbst ist nichts mehr offen")
+	_check(Array(s.runtime.call("_remaining_outbound_legs", {"phase": "approach", "location_id": "satellite_crash"}, "satellite_crash")).is_empty(), "Klein 4: im Anflug ist nichts mehr offen")
+	var surface_check: Dictionary = s.runtime.call("_outbound_fuel_check", craft_id, "trade_outpost", surface_travel)
+	_check(on_ground and is_equal_approx(float(surface_check.get("needed_total", -1.0)), 10.0) and not bool(surface_check.get("ok", true)), "Klein 4: Ort -> Ort braucht insgesamt 10 und ist ohne Treibstoff nicht gedeckt: " + str(surface_check))
 	# 8 und 10 (Flow-Ebene): der Rueckzug ("Abheben" am HUD) nutzt dieselbe Vorpruefung, bleibt lesend und lehnt mit dem Treibstoffgrund ab.
 	var before_fuel: float = supply.get_fuel(craft_id)
 	var revision: int = supply.get_revision()

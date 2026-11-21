@@ -21,6 +21,8 @@ func _run() -> void:
 		_run_case(outcome)
 	_run_case("defeat", true)
 	_test_adapter_retry()
+	_test_stranded_in_approach()
+	_test_old_branch_without_combat_owner()
 	print("ASTRA_ENCOUNTER_RETURN_FIXES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
 
@@ -172,6 +174,56 @@ func _test_adapter_retry() -> void:
 	check(f.campaign.export_state() == campaign_after and f.supply.export_state() == supply_after and f.flow.refreshes == 1, "later actual adapter ticks cannot duplicate result or return fuel")
 	var replay: Dictionary = f.sim.commit_campaign_space_return(f.adapter, f.craft, "encounter-return:astra-departure")
 	check(replay.get("ok", false) and replay.get("replayed", false) and f.campaign.export_state() == campaign_after and f.supply.export_state() == supply_after, "Root receipt still replays after actual adapter result consumption")
+	f.adapter.free()
+	f.sim.free()
+	f.flow.free()
+
+## Fix-Runde 1, W2a: Ein Schiff im Anflug mit entschiedener Begegnung und unbezahlbarem Rueckweg (kein Tankservice) ist liegen geblieben.
+func _test_stranded_in_approach() -> void:
+	var before_failures := failed
+	var f := _fixture()
+	if failed != before_failures:
+		f.adapter.free(); f.sim.free(); return
+	check(f.sim.request_singleplayer_command(_command("retreat")).get("ok", false), "W2a: Begegnung ist durch echten Rueckzug entschieden")
+	var fuel_before := float(f.supply.get_supply_snapshot().fuel_by_craft_id[f.craft])
+	var covered: Dictionary = f.adapter.get_fuel_status(f.craft)
+	check(String(covered.get("phase", "")) == "approach" and not bool(covered.get("stranded", true)), "W2a: mit gedecktem Rueckweg ist das Schiff im Anflug nicht liegen geblieben: " + str(covered))
+	f.supply.get("_fuel_by_craft_id")[f.craft] = 0.0
+	var status: Dictionary = f.adapter.get_fuel_status(f.craft)
+	var legs: Array = Array(status.get("next_legs", []))
+	check(String(status.get("phase", "")) == "approach" and bool(status.get("stranded", false)) and String(status.get("strand_place", "")) == "space", "W2a: unbezahlbarer Rueckweg im Anflug mit entschiedener Begegnung: liegen geblieben im All: " + str(status))
+	check(legs.size() == 1 and String(legs[0].get("leg", "")) == "surface_exit" and not bool(legs[0].get("affordable", true)), "W2a: der offene Rueckweg ist der Ortsabflug und nicht bezahlbar")
+	check(not bool(status.get("refuel_here", true)) and not bool(status.get("refuel_affordable", true)), "W2a: im Anflug gibt es keinen Tankservice")
+	f.supply.get("_fuel_by_craft_id")[f.craft] = fuel_before
+	f.adapter.free()
+	f.sim.free()
+
+## Fix-Runde 1, W2b: Der alte Zweig ohne Kampfbesitzer bucht das Ergebnis immer, den Rueckweg erst wenn er bezahlbar ist.
+func _test_old_branch_without_combat_owner() -> void:
+	var before_failures := failed
+	var f := _fixture(true)
+	if failed != before_failures:
+		f.adapter.free(); f.sim.free(); f.flow.free(); return
+	check(f.sim.request_singleplayer_command(_command("retreat")).get("ok", false), "W2b: Begegnung ist durch echten Rueckzug entschieden")
+	f.encounter.set("_combat_owner", null)
+	check(f.encounter.get("_combat_owner") == null, "W2b: der alte Zweig ohne Kampfbesitzer ist aktiv")
+	var fuel_before := float(f.supply.get_supply_snapshot().fuel_by_craft_id[f.craft])
+	var expected: Dictionary = f.supply.preview_leg_fuel({"craft_id":f.craft, "leg":"surface_exit", "origin_location_id":"distress_orbit", "destination_location_id":"homebase"}, {"departure_authorized":true})
+	f.supply.get("_fuel_by_craft_id")[f.craft] = 0.0
+	f.adapter.advance_space_travel(0.1)
+	var held: Dictionary = f.campaign.export_state()
+	check(held.jobs.buccaneer_rescue.status == "failed" and held.requests.has("result:buccaneer_rescue:astra-departure"), "W2b: das Ergebnis ist trotz leerem Tank gebucht")
+	check(f.travel.get_snapshot().phase == "approach" and not f.encounter.peek_completed_result().is_empty(), "W2b: ohne bezahlten Rueckweg bleibt das Schiff im Anflug und das Ergebnis nicht zugestellt")
+	check(is_equal_approx(float(f.supply.get_supply_snapshot().fuel_by_craft_id[f.craft]), 0.0), "W2b: es wird nichts gebucht, was nicht gedeckt ist")
+	f.supply.get("_fuel_by_craft_id")[f.craft] = fuel_before
+	f.adapter.advance_space_travel(0.1)
+	# Der Phasenwechsel (finish_approach/enter_orbit) gehoert dem Reisebesitzer und ist hier nicht gemeint: das Fixture setzt den Anflug kuenstlich.
+	check(f.encounter.peek_completed_result().is_empty() and f.encounter.get_snapshot().resolved, "W2b: mit bezahlbarem Rueckweg ist das Ergebnis zugestellt (resolved), erst nach der Buchung des Rueckwegs")
+	check(is_equal_approx(float(f.supply.get_supply_snapshot().fuel_by_craft_id[f.craft]), fuel_before - float(expected.fuel_cost)), "W2b: der Rueckweg wird genau einmal gebucht (Ortsabflug)")
+	var after: Dictionary = f.campaign.export_state()
+	var supply_after: Dictionary = f.supply.export_state()
+	for tick in range(3): f.adapter.advance_space_travel(0.1)
+	check(f.campaign.export_state() == after and f.supply.export_state() == supply_after, "W2b: weitere Takte buchen weder Ergebnis noch Treibstoff noch einmal")
 	f.adapter.free()
 	f.sim.free()
 	f.flow.free()
