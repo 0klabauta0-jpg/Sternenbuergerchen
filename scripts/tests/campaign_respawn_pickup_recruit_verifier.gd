@@ -103,8 +103,12 @@ func _rk_markers() -> Dictionary:
 	for unit: Dictionary in Array(_flow.get("_all_team_units")):
 		if String(unit.get("unit_id", "")) == RK_ID: count += 1
 	var supply_state: Dictionary = Dictionary(_runtime.get("_supply").call("export_state"))
+	# Nur die Belege der Anwerbung (Reservierung, Abschluss, Abbruch); die Rueckflug-Treibstoffbuchung am Orbit legt ebenfalls einen Beleg an und gehoert nicht dazu.
+	var recruit_receipts := 0
+	for receipt: Dictionary in Dictionary(supply_state.get("requests", {})).values():
+		if String(Dictionary(receipt.get("result", {})).get("operation", "")).begins_with("station_recruit"): recruit_receipts += 1
 	return {"credits": int(supply_state.get("credits", -1)), "pending": Dictionary(_runtime.get("_polisa_recruit_pending")).size(),
-		"roster": Array(_flow.get("_all_team_units")).size(), "entries": count, "base": base_ids.size(), "requests": Dictionary(supply_state.get("requests", {})).size()}
+		"roster": Array(_flow.get("_all_team_units")).size(), "entries": count, "base": base_ids.size(), "recruit_receipts": recruit_receipts}
 
 func _rk_find_team() -> void:
 	for team: Dictionary in Array(Dictionary(_screen.call("get_operations_snapshot")).get("fireteams", [])):
@@ -244,7 +248,8 @@ func _rk_r2() -> void:
 	var c: Dictionary = _roster_unit(RK_ID)
 	_check(_ra_base_status(RK_ID) == "station", "R2: respawning: beim Abflug nicht gebunden, Basis-Zustand bleibt station (%s)" % _ra_base_status(RK_ID))
 	_check(String(c.get("availability_status", "")) == "respawning" and not Dictionary(c.get("recovery_state", {})).is_empty() and int(c.get("respawns_used", -1)) == respawns_used, "R2: respawning: nicht abgeschlossen (Status %s, respawns_used %s)" % [c.get("availability_status"), c.get("respawns_used")])
-	_check(_rk_markers() == markers_before, "R2: nichts weiter geaendert (Kader, Credits, Eintraege)")
+	var markers_after: Dictionary = _rk_markers()
+	_check(markers_after == markers_before, "R2: nichts weiter geaendert (Kader, Credits, Eintraege: vorher %s, nachher %s)" % [markers_before, markers_after])
 
 func _rk_r3() -> void:
 	if not await _rk_setup(): return
