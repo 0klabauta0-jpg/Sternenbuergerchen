@@ -4601,8 +4601,11 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if not failed_extraction and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
-			# Preserve the actual scene and its confirmed result if a transport
-			# invariant fails; never orphan a remote craft by releasing its world.
+			# Das Ergebnis haengt nie am Treibstoff (Regel 8 / Auftrag 21.11., Fix-Runde 1 K1): Reicht der Tank nicht fuer den Ortsabflug
+			# (oder scheitert eine andere Transportpruefung), wird das Ergebnis wie im Einschiff-Zweig festgehalten. Sieg, Abschluss und
+			# Belohnung werden beim spaeteren Abflug gebucht (der Wiederholer stellt es zu, sobald der Rueckflug genehmigt wird); gesperrt
+			# ist nur der Abflug selbst. Der Ort und sein Schiff bleiben stehen, kein Schiff wird verwaist freigegeben.
+			_pending_campaign_mission_result = mission_result.duplicate(true)
 			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
 			return
 	_pending_campaign_mission_result.clear()
@@ -9478,6 +9481,10 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	# Wartet das Ergebnis dieses Einsatzes noch auf Zustellung (nach "Evakuieren" laeuft das Einschiffen, der Wiederholer hat es noch
 	# nicht zugestellt), ist der Driver schon fertig, die Verluste sind aber noch nicht angewendet: nichts aufloesen, nicht abheben.
 	if visit == _active_mission and not _pending_campaign_mission_result.is_empty():
+		# Wartet das Ergebnis, weil der Tank fuer den Ortsabflug nicht reicht (Fix-Runde 1 K1), nennt die Meldung den Treibstoff.
+		var held_check: Dictionary = _departure_return_preflight(craft_id)
+		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": "Treibstoff reicht nicht für den Rückflug"}
 		return {"handled": true, "ok": false, "reason": "mission_result_pending", "message": "Einsatz wird gerade abgeschlossen"}
 	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
 	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
