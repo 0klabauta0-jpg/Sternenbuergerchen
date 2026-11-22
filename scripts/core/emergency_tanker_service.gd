@@ -138,8 +138,9 @@ func advance(delta: float) -> Array:
 	return due
 
 ## Die Lieferung ist gebucht: der Auftrag ist abgeschlossen.
-func complete(order_id: String, delivered: int) -> bool:
-	return _finish(order_id, "completed", {"delivered": delivered})
+## refund: die Teilerstattung aus dem Lieferergebnis (0 bei voller Menge); T3 zeigt sie an.
+func complete(order_id: String, delivered: int, refund: int = 0) -> bool:
+	return _finish(order_id, "completed", {"delivered": delivered, "refund": refund})
 
 ## Die faellige Lieferung konnte nicht gebucht werden (der Versorgungsbesitzer lehnte mit reason ab). Merkt den Grund und zaehlt die
 ## Wiederholzeit; gibt true zurueck, sobald die Frist delivery_retry_seconds (aus den Daten, im Auftrag mitgefuehrt) abgelaufen ist.
@@ -170,6 +171,7 @@ func _finish(order_id: String, end_state: String, extra: Dictionary) -> bool:
 		var done: Dictionary = order.duplicate(true)
 		done["state"] = end_state
 		done["remaining"] = 0.0
+		done["closed_msec"] = Time.get_ticks_msec()
 		done.merge(extra, true)
 		_finished[craft_id] = done
 		_orders.erase(craft_id)
@@ -185,6 +187,7 @@ func get_snapshot() -> Dictionary:
 	for craft_id: String in _finished:
 		var done: Dictionary = Dictionary(_finished[craft_id]).duplicate(true)
 		done["state_label"] = state_label(String(done.get("state", "")))
+		done["age_seconds"] = float(Time.get_ticks_msec() - int(done.get("closed_msec", 0))) / 1000.0
 		finished[craft_id] = done
 	return {"orders": orders, "finished": finished}
 

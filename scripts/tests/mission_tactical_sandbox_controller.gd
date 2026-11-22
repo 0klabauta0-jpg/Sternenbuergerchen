@@ -20,6 +20,7 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
+const EMERGENCY_TANKER_PANEL_SCRIPT: GDScript = preload("res://scripts/ui/emergency_tanker_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
@@ -13363,6 +13364,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	_append_mission_dropship_card_approach_path_row(host, card)
 	_append_mission_dropship_card_arrival_mode_row(host, card)
 	_append_air_support_card_row(host, card)
+	_append_emergency_tanker_row(host, card)
 	var content_changed := _refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
 	var feedback_label := host.get_node_or_null("MissionDropshipCardFeedbackLabel") as Label
@@ -13389,7 +13391,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return content_changed
 	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
 	for child in host.get_children():
-		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "MissionDropshipApproachPathRow", "MissionDropshipArrivalModeRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
+		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "MissionDropshipApproachPathRow", "MissionDropshipArrivalModeRow", "AirSupportCardRow", "EmergencyTankerPanel", "MissionDropshipCardFeedbackLabel"]:
 			continue
 		host.remove_child(child)
 		child.queue_free()
@@ -13614,6 +13616,20 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	host.add_child(row)
 	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
+
+
+## Nottankdienst (T3): Knopf, Angebot und Zustand an der Schiffskarte des Ortes. Die Karte liest nur die Auskunft des Adapters
+## (get_emergency_tanker_view) und bestellt/storniert ueber request_operation; das Feld erscheint nur bei Treibstoffproblem oder offenem Auftrag.
+func _append_emergency_tanker_row(host: VBoxContainer, card: Dictionary) -> void:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if host == null or craft_id.is_empty() or host.get_node_or_null("EmergencyTankerPanel") != null: return
+	var ancestor: Node = get_parent()
+	while ancestor != null and not ancestor.has_method("get_singleplayer_snapshot"): ancestor = ancestor.get_parent()
+	var adapter: Variant = ancestor.get("_singleplayer_runtime") if ancestor != null else null
+	if not adapter is Node or not (adapter as Node).has_method("get_emergency_tanker_view"): return
+	var panel: VBoxContainer = EMERGENCY_TANKER_PANEL_SCRIPT.new()
+	host.add_child(panel)
+	panel.call("configure", Callable(adapter, "get_emergency_tanker_view").bind(craft_id), Callable(adapter, "request_operation"), 9)
 
 
 func _on_air_support_card_action(craft_id: String, action: String) -> void:

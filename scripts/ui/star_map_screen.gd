@@ -8,6 +8,7 @@ const ORBIT_CANVAS = preload("res://scripts/ui/orbit_area_canvas.gd")
 const WING_PANEL = preload("res://scripts/ui/space_wing_panel.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SERVICE_ROUTE_PROJECTION = preload("res://scripts/ui/polisa_service_route_projection.gd")
+const TANKER_PANEL = preload("res://scripts/ui/emergency_tanker_panel.gd")
 var _provider: Callable
 var _commands: Callable
 var _area_provider: Callable
@@ -33,6 +34,7 @@ var _fuel_help: Label
 var _show_fuel_help := false
 var _fuel_toggle: Button
 var _fuel_pinned := false
+var _tanker_panel: VBoxContainer
 var _boundary: Label
 var _error: Label
 var _progress: ProgressBar
@@ -236,6 +238,10 @@ func _build() -> void:
 	_fuel_help.name = "FuelReachability"
 	_fuel_help.hide()
 	information.add_child(_fuel_help)
+	# Nottankdienst (T3): erscheint nur bei Treibstoffproblem oder offenem Auftrag; liest und bestellt ueber den Befehlsweg.
+	_tanker_panel = TANKER_PANEL.new()
+	information.add_child(_tanker_panel)
+	_tanker_panel.configure(Callable(self, "_tanker_view"), func(operation: String, payload: Dictionary) -> Variant: return _commands.call(operation, payload) if _commands.is_valid() else {}, 13)
 	_status = _label("", 15)
 	_status.tooltip_text = "Am Flugdeck abheben, dann den Zielorbit wählen. Ein Zielort wird erst mit Anflug starten betreten."
 	_status.name = "TravelStatus"
@@ -448,6 +454,14 @@ func _update_fuel_help() -> void:
 	if lines.size() == 1: lines.append("Keine Routendaten für verfügbare Ziele.")
 	_fuel_help.text = "\n".join(lines)
 	_fuel_help.visible = (_show_fuel_help or _fuel_pinned) and is_visible_in_tree()
+
+## Auskunft des Nottankdienstes fuer das Schiff, das die Karte gerade zeigt (im Orbitbild das gewaehlte). Nur lesend.
+func _tanker_view() -> Dictionary:
+	if not _commands.is_valid(): return {}
+	var craft_id: String = _orbit_craft_id if _orbit_visible and not _orbit_craft_id.is_empty() else String(Dictionary(_runtime.get("space_travel", {})).get("craft_id", ""))
+	if craft_id.is_empty(): return {}
+	var result: Variant = _commands.call("emergency_tanker_view", {"craft_id": craft_id})
+	return result if result is Dictionary else {}
 
 func _on_fleet_craft_selected(index: int) -> void:
 	_orbit_craft_id = String(_fleet_selector.get_item_metadata(index))

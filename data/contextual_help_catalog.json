@@ -3205,6 +3205,24 @@
       ],
       "target_audience": "new_player",
       "manual_review": true
+    },
+    {
+      "help_id": "campaign.emergency_tanker",
+      "screen_id": "campaign",
+      "area_id": "emergency_tanker",
+      "status": "draft",
+      "title": "Tanker rufen",
+      "compact_lines": [
+        "Notlösung, wenn der Treibstoff nicht reicht und hier nicht getankt werden kann.",
+        "Der Preis steht im Angebot; erst Verbindlich bestellen bucht."
+      ],
+      "detail_lines": [
+        "Preis: Anfahrt plus Menge mal Satz. Normales Tanken an einem Ort mit Tankservice ist billiger.",
+        "Stornieren vor der Ankunft gibt Geld zurück; unterwegs ist die Anfahrt verloren.",
+        "Mit offenem Auftrag startet das Schiff keine Etappe."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
     }
   ]
 }

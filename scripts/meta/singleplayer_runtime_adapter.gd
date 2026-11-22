@@ -489,6 +489,42 @@ func preview_emergency_tanker(craft_id: String) -> Dictionary:
 func get_emergency_tanker_snapshot() -> Dictionary:
 	return _tanker.get_snapshot() if _tanker != null else {"orders": {}, "finished": {}}
 
+## Wie lange nach dem Ende eines Tankerauftrags sein Ergebnis noch angezeigt wird (nur Anzeige, keine Regel).
+const TANKER_RESULT_SHOW_SECONDS := 12.0
+
+## Fertige Auskunft fuer die Anzeige (T3): ein Schiff, ein Dictionary, nur lesend. Die Oberflaeche rechnet nichts nach.
+## visible: Treibstoffproblem, offener Auftrag oder ein eben beendeter Auftrag. offer: die reine Vorschau (preview_emergency_tanker) samt
+## Folgeetappen mit der Menge; order / finished: der Dienstzustand mit Restzeit; free_home_landing: Heimlandung aus dem Mondorbit ist frei.
+func get_emergency_tanker_view(craft_id: String) -> Dictionary:
+	var view := {"craft_id": craft_id, "visible": false, "fuel_problem": false, "offer": {}, "order": {}, "finished": {}, "free_home_landing": false}
+	if _supply == null or _tanker == null or craft_id.is_empty(): return view
+	var status: Dictionary = get_fuel_status(craft_id)
+	if status.is_empty(): return view
+	var snapshot: Dictionary = _tanker.get_snapshot()
+	var order: Dictionary = Dictionary(Dictionary(snapshot.orders).get(craft_id, {}))
+	var finished: Dictionary = Dictionary(Dictionary(snapshot.finished).get(craft_id, {}))
+	var recent: bool = not finished.is_empty() and float(finished.get("age_seconds", 1.0e9)) <= TANKER_RESULT_SHOW_SECONDS
+	var problem: bool = bool(status.get("fuel_problem", false))
+	view["fuel_problem"] = problem
+	view["order"] = order
+	view["finished"] = finished if recent else {}
+	view["visible"] = problem or not order.is_empty() or recent
+	if not view.visible: return view
+	var offer: Dictionary = _supply.preview_emergency_tanker({"craft_id": craft_id}, _tanker_context(craft_id))
+	if bool(offer.get("ok", false)):
+		var fuel_after: float = minf(float(status.get("fuel", 0.0)) + float(offer.quantity), float(status.get("capacity", 0.0)))
+		var reach: Array = []
+		for next_leg: Dictionary in Array(status.get("next_legs", [])):
+			reach.append({"leg": String(next_leg.get("leg", "")), "cost": float(next_leg.get("cost", 0.0)), "reachable": fuel_after + 0.00001 >= float(next_leg.get("cost", 0.0))})
+		offer["fuel_after"] = fuel_after
+		offer["capacity"] = float(status.get("capacity", 0.0))
+		offer["reach"] = reach
+	view["offer"] = offer
+	if String(status.get("phase", "")) == "orbit" and String(status.get("orbit_id", "")) == "moon_orbit":
+		for next_leg: Dictionary in Array(status.get("next_legs", [])):
+			if String(next_leg.get("leg", "")) == "landing" and float(next_leg.get("cost", 1.0)) <= 0.0: view["free_home_landing"] = true
+	return view
+
 ## Bestellen und Stornieren ueber den vorhandenen Befehlsweg (request_operation). Die Lieferung bucht nur der Tick.
 func _request_emergency_tanker(operation: String, payload: Dictionary) -> Dictionary:
 	if _tanker == null or _supply == null: return _reject("runtime_unavailable", "Tankerdienst noch nicht bereit")
@@ -533,7 +569,7 @@ func _advance_emergency_tanker(delta: float) -> void:
 		if not _tanker_craft_alive(String(order.craft_id)): _tanker_close(String(order.order_id), "expired", String(order.state))
 	for due: Dictionary in _tanker.advance(delta):
 		var delivered: Dictionary = _commit("singleplayer_supply", "emergency_tanker_deliver", {"order_id": String(due.order_id)}, String(due.order_id) + ":deliver", {"emergency_tanker_authorized": true})
-		if bool(delivered.get("ok", false)): _tanker.complete(String(due.order_id), int(delivered.get("amount", 0)))
+		if bool(delivered.get("ok", false)): _tanker.complete(String(due.order_id), int(delivered.get("amount", 0)), int(delivered.get("refund", 0)))
 		elif String(delivered.get("reason", "")) in ["craft_unavailable", "unknown_order", "order_closed"]: _tanker_close(String(due.order_id), "expired", String(due.state), String(delivered.get("reason", "")))
 		elif _tanker.note_delivery_failure(String(due.order_id), String(delivered.get("reason", "")), delta):
 			# Jeder andere Grund: der Dienst versucht es weiter, hoechstens delivery_retry_seconds (Daten). Danach verfaellt der Auftrag mit voller
@@ -764,6 +800,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
 	if operation in ["emergency_tanker_order", "emergency_tanker_cancel"]:
 		return _request_emergency_tanker(operation, payload)
+	# Reine Auskunft fuer Hosts, die nur den Befehlsweg kennen (Sternkarte): bucht nichts, hebt keine Revision.
+	if operation == "emergency_tanker_view":
+		return get_emergency_tanker_view(String(payload.get("craft_id", "")))
 	if operation in ["station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var target := String(payload.get("craft_id", ""))
 		if String(_service_context(target).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")
