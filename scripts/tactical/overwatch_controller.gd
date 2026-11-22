@@ -3,6 +3,7 @@ extends RefCounted
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
 
 const OVERWATCH_MOVE_THRESHOLD: float = 5.0
 const OVERWATCH_ACCURACY_BONUS: float = 0.1
@@ -92,7 +93,7 @@ func update(
 				if shot_dict.is_empty():
 					continue
 				var weapon_ticks: int = int(shot_dict.get("weapon_ticks", 1))
-				_member_ready_tick_by_unit_id[member_unit_id] = current_tick + max(weapon_ticks, 1)
+				_member_ready_tick_by_unit_id[member_unit_id] = current_tick + _get_lock_ticks(member, weapon_ticks)
 				simulation_root.call(
 					"enqueue_effect",
 					{
@@ -115,6 +116,16 @@ func update(
 			break
 	_prime_enemy_positions(enemy_units)
 	return triggered_shots
+
+
+## Gefechtstakt: Die Sperre nach einem Ueberwachungsschuss ist eine Periode des Mitglieds (aufgerundete Schritte
+## in Ticks), mit demselben Takt wie der Normalschuss (CombatCadence), nicht der rohe Waffenwert.
+func _get_lock_ticks(member, weapon_ticks: int) -> int:
+	var initiative: float = -1.0
+	if member != null and member.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(member.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		initiative = float(axes.get("initiative", -1.0))
+	return maxi(COMBAT_CADENCE_SCRIPT.period_steps(weapon_ticks, initiative) * COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS, 1)
 
 
 func _try_build_overwatch_shot(member, enemy, assignment: Dictionary, anchor_position: Vector2, terrain_registry, base_contact_range: float) -> Dictionary:
