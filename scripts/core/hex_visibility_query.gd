@@ -44,7 +44,10 @@ static func classify_candidate(observer: Dictionary, target: Dictionary,
 		return result
 	var direction: Vector2 = HEX.axial_to_plane(Vector2(HEX.DIRECTIONS[facing])).normalized()
 	var to_target: Vector2 = HEX.axial_to_plane(Vector2(delta)).normalized()
-	result.in_arc = delta == Vector2i.ZERO or direction.dot(to_target) + ARC_EPSILON >= cos(deg_to_rad(arc) * 0.5)
+	# Regel A: Wer neben (oder auf) dem Beobachter steht, ist nie ausserhalb des Sichtbogens; nur Sichtlinie
+	# und Verdeckung koennen ihn noch verbergen. Abstand >= 2 bleibt Flanke (outside_arc).
+	result.in_arc = HEX.distance(observer.grid, target.grid) <= 1 \
+		or direction.dot(to_target) + ARC_EPSILON >= cos(deg_to_rad(arc) * 0.5)
 	result.reason = "terrain_pending" if result.in_arc else "outside_arc"
 	return result
 

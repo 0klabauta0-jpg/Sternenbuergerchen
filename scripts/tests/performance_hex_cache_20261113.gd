@@ -47,6 +47,13 @@ func _run():
         _check(cache.get_audit_snapshot().hex_actual_los_check_count==1,"Duplicate pair traces terrain once")
         observer.facing_dir=3
         _check(_read(cache,registry,observer,target,profile).reason=="outside_arc","Facing changes immediately")
+        # Regel A (G1): Nachbar im Ruecken ist sichtbar, Abstand 2 im Ruecken bleibt outside_arc; Cache gleich reine Abfrage.
+        target.grid=Vector2i(1,0)
+        _check(_read(cache,registry,observer,target,profile).visible,"Neighbor behind is visible")
+        _check(_read(cache,registry,observer,target,profile)==QUERY.evaluate(observer,target,registry,profile),"Cached rear neighbor equals pure query")
+        target.grid=Vector2i(2,0)
+        _check(_read(cache,registry,observer,target,profile).reason=="outside_arc","Distance 2 behind stays outside_arc")
+        target.grid=Vector2i(4,0)
         observer.facing_dir=0
         profile.range_hex=1
         _check(_read(cache,registry,observer,target,profile).reason=="out_of_range","Range changes immediately")
