@@ -19923,6 +19923,7 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 	var positions: Dictionary = {}
 	var placed := false
 	var reason := ""
+	var no_cell: Dictionary = {}
 	if _requires_hex_deployment_owner():
 		if _has_live_hex_deployment_owner():
 			# Eingeschiffte Personen sind noch "staged": darum die Setup-Aufnahme mit allow_staged (wie die Absetz-Pruefung des
@@ -19933,19 +19934,19 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 			var registry: Node = simulation.get_hex_ground_terrain_registry()
 			for entry in Array(admitted.get("placements", [])):
 				positions[String(entry.unit_id)] = registry.grid_to_world(entry.grid)
-			# Wer nicht gesetzt werden konnte, bleibt nie an Bord des verlorenen Schiffs: er gilt als beim Absturz gestorben.
+			# LC2d A5: Die Suche reicht ueber die ganze Karte; wer trotzdem kein freies Feld findet (praktisch nur bei vollstaendig belegter Karte),
+			# wird NICHT "tot gebucht", sondern verlaesst das verlorene Schiff ohne Feld: er behaelt sein Schicksal (Verletzung) und wird mit der
+			# Notrettung heimgebracht (Einsatzende rettet alle Lebenden).
 			for id in Array(admitted.get("unplaced", [])):
-				units[id].set_meta("killed_in_crash", true)
-				units[id].set_meta("dropship_embarked", false)
-				units[id].set_meta("air_crash_state", "dead")
-				_embarked_unit_ids.erase(id)
-				results[id] = {"state": "dead", "health_loss_fraction": 0.0}
-				units[id].call("apply_damage", maxi(int(units[id].call("get_health")), 1), {"source": "air_crash", "craft_id": craft_id})
-				ids.remove_at(ids.find(id))
+				_leave_lost_craft_without_cell(units[id], id)
+				no_cell[id] = true
 			if not Array(admitted.get("unplaced", [])).is_empty():
 				_last_command_text = "Absturz: %d Person(en) fanden kein freies Feld" % Array(admitted.get("unplaced", [])).size()
 		else:
 			reason = "hex_ground_unavailable"
+			# Ohne lebenden Feld-Besitzer bleibt niemand an Bord des verlorenen Schiffs zurueck.
+			for id in ids:
+				_leave_lost_craft_without_cell(units[id], id)
 	else:
 		var registry: Node = _get_terrain_registry()
 		var base: Vector2 = registry.call("grid_to_world", grid) if registry != null else Vector2.ZERO
@@ -19957,6 +19958,8 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 	if placed:
 		var active_sequence: bool = _is_active_drop_sequence_for_craft(craft_id)
 		for id in ids:
+			if no_cell.has(id):
+				continue
 			_embarked_unit_ids.erase(id)
 			if active_sequence:
 				_drop_sequence_embarked_unit_ids.erase(id)
@@ -19997,14 +20000,20 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 	return {"ok": placed, "reason": reason, "placed": ids if placed else PackedStringArray()}
 
 
+## LC2d A5: Wer beim Absturz kein Feld bekommt, ist nicht mehr an Bord des verlorenen Schiffs (eingeschifft = nein), aber auch nicht abgesetzt.
+func _leave_lost_craft_without_cell(unit: Node, id: String) -> void:
+	unit.set_meta("dropship_embarked", false)
+	_embarked_unit_ids.erase(id)
+
+
 ## LC2b Nachbesserung (K2): Felder rund um die Absturzstelle, ringfoermig nach aussen (Breitensuche ueber die Nachbarn, hoechstens 64 Felder,
 ## nur begehbare). Das Absturzfeld selbst steht vorn, auch wenn es nicht begehbar ist (der Planer lehnt es dann ab, die Suche geht weiter).
-func _air_crash_anchor_cells(registry: Node, start: Vector2i) -> Array[Vector2i]:
+func _air_crash_anchor_cells(registry: Node, start: Vector2i, max_cells: int = 64, max_visited: int = 256) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	var queue: Array[Vector2i] = [start]
 	var seen: Dictionary = {start: true}
 	var cursor := 0
-	while cursor < queue.size() and queue.size() < 256 and cells.size() < 64:
+	while cursor < queue.size() and queue.size() < max_visited and cells.size() < max_cells:
 		var cell: Vector2i = queue[cursor]
 		cursor += 1
 		if bool(registry.call("is_walkable", cell)):
@@ -20046,6 +20055,21 @@ func _air_crash_admit_people(simulation: Node, ids: PackedStringArray, grid: Vec
 				break
 		if not done:
 			unplaced.append(id)
+	if not unplaced.is_empty():
+		# LC2d A5: Nahbereich voll oder unbegehbar: die Suche weitet sich ueber die ganze Karte aus, bis ein begehbares freies Feld gefunden ist.
+		var wide: Array[Vector2i] = _air_crash_anchor_cells(registry, grid, 100000, 120000)
+		var still_unplaced: Array = []
+		for id in unplaced:
+			var done_wide := false
+			for anchor in wide:
+				var single_wide: Dictionary = simulation.admit_hex_ground_setup_actors([{"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"}] as Array[Dictionary], true, true, excluded)
+				if bool(single_wide.get("ok", false)):
+					placements.append_array(Array(single_wide.get("placements", [])))
+					done_wide = true
+					break
+			if not done_wide:
+				still_unplaced.append(id)
+		unplaced = still_unplaced
 	return {"ok": unplaced.is_empty(), "reason": reason, "placements": placements, "unplaced": unplaced}
 
 

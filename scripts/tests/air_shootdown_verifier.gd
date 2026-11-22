@@ -296,6 +296,22 @@ func _test_root_outcomes(model_id: String) -> void:
 		_check(bool(stuck.get("ok", false)) and stuck.outcome == "crash", tag + "W4 (%s): Sortie nicht beendbar -> Bruchlandung: %s" % [wanted, str(stuck.get("outcome", stuck))])
 		_check(not Dictionary(f.root.get("_air_support_sorties")).has("ship") and f.root.is_air_craft_crashed("ship") and f.transport.crash_calls.size() == 1, tag + "W4 (%s): keine Sortie mehr, Absturzstelle gemerkt, Insassen versorgt" % wanted)
 		f.flow.free()
+	# --- LC2d A3: Lassen sich Wurf/Beenden nicht ausfuehren (Sortie-Kontext geaendert), gilt Bruchlandung mit den Standardwerten; nie ohne Ausgang in der Luft.
+	f = _air_fixture(model_id)
+	var stray := Node.new()
+	f.root.set("_air_support_source", weakref(stray))
+	var rng_before: int = int(f.root.get("_air_ground_rng_state"))
+	var degraded: Dictionary = f.root.resolve_air_shootdown("ship", 0.0, "Cutlass", _down_status())
+	_check(bool(degraded.get("ok", false)) and degraded.get("outcome", "") == "crash", tag + "A3: Kontext geaendert -> Bruchlandung statt ok:false: " + str(degraded.get("outcome", degraded)))
+	_check(f.root.is_air_craft_crashed("ship") and not Dictionary(f.root.get("_air_support_sorties")).has("ship") and f.transport.crash_calls.size() == 1, tag + "A3: Absturzstelle gemerkt, keine Sortie mehr, Insassen versorgt")
+	var default_states: Array = []
+	for id in Dictionary(degraded.get("results", {})):
+		default_states.append(String(degraded.results[id].state))
+	_check(default_states == ["light", "light"] and int(f.root.get("_air_ground_rng_state")) == rng_before, tag + "A3: Standardwerte (alle leicht verletzt, kein Wurf verbraucht): " + str(default_states))
+	var degraded_status: Dictionary = f.root.get_air_asset_status_snapshot("ship")
+	_check(int(degraded_status.get("integrity", -1)) == 0 and STATUS.is_terminal_state(String(degraded_status.get("state", ""))), tag + "A3: Schiff im Endzustand")
+	f.flow.free()
+	stray.free()
 	# --- Gleicher Startzustand, gleicher Ablauf.
 	var runs: Array = []
 	for i in range(2):
@@ -344,8 +360,28 @@ func _test_casualty_rules() -> void:
 	_check(bool(still_down.total_loss) and still_down.total_loss_reason == "pilot_down", "ohne Schiffsverlust bleibt pilot_down unveraendert (auch fuer einen Absturz-Ueberlebenden, W6)")
 	var plain_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down")], "won", roster, "pilot", rules, {"respawn_limit": 3})
 	_check(bool(plain_down.total_loss) and plain_down.total_loss_reason == "pilot_down", "unveraendert: ein anderweitig ausgefallener Pilot bleibt pilot_down")
-	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3, "craft_lost": true})
-	_check(bool(all_down.total_loss) and all_down.total_loss_reason == "ground_team_down", "sind alle eigenen Personen tot oder am Boden, gilt die vorhandene Niederlage-Regel (ground_team_down)")
+	# LC2d A2: nach einem Schiffsverlust gilt der Totalverlust NUR, wenn niemand mehr lebt.
+	var lost_ctx := {"respawn_limit": 0, "craft_lost": true}
+	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, lost_ctx)
+	_check(not bool(all_down.total_loss), "A2: Liegende leben (Notrettung), kein Totalverlust, auch wenn nur der Pilot beim Absturz starb (%s)" % str(all_down.get("total_loss_reason")))
+	var all_dead: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down", {"killed_in_crash": true}), _ts("two", "bleedout"), _ts("pilot", "down", crash_pilot)], "aborted", roster, "pilot", rules, lost_ctx)
+	_check(bool(all_dead.total_loss) and all_dead.total_loss_reason == "ground_team_down", "A2a: niemand lebt mehr -> bestehender Totalverlust (%s)" % str(all_dead.get("total_loss_reason")))
+	var pilot_dead: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, lost_ctx)
+	_check(not bool(pilot_dead.total_loss) and Array(pilot_dead.fatality_unit_ids) == ["pilot"], "A2b: Pilot tot, Trupp lebt (einziger Pilot im Kader) -> kein Totalverlust, Pilot tot (%s / %s)" % [str(pilot_dead.get("total_loss_reason")), str(pilot_dead.get("fatality_unit_ids"))])
+	var one_leader: Array = [_member("lead", "operator", 0.6), _member("pilot", "pilot", 0.0, 0.7), _member("two", "operator", 0.0)]
+	var leader_dead: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down", {"killed_in_crash": true}), _ts("two", "fit"), _ts("pilot", "fit")], "won", one_leader, "pilot", rules, lost_ctx)
+	_check(not bool(leader_dead.total_loss) and Array(leader_dead.fatality_unit_ids) == ["lead"], "A2c: Anfuehrer tot, zwei leben -> kein Totalverlust, Anfuehrer tot (%s)" % str(leader_dead.get("total_loss_reason")))
+	var leader_dead_plain: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down", {"killed_in_crash": true}), _ts("two", "fit"), _ts("pilot", "fit")], "won", one_leader, "pilot", rules, {"respawn_limit": 0})
+	_check(bool(leader_dead_plain.total_loss) and leader_dead_plain.total_loss_reason == "no_leader_left", "A2: ohne Schiffsverlust bleibt die Anfuehrer-Regel unveraendert")
+	# LC2d A1: Verblutete sind auch bei Schiffsverlust nicht gerettet (nach den vorhandenen Regeln tot, wenn der Einsatz nicht gewonnen ist).
+	var bled: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "bleedout"), _ts("pilot", "fit")], "aborted", roster, "pilot", rules, lost_ctx)
+	var bled_outcomes := {}
+	for entry in bled.casualties: bled_outcomes[entry.unit_id] = entry.outcome
+	_check(not bool(bled.total_loss) and bled_outcomes.get("two", "") == "dead" and Array(bled.fatality_unit_ids) == ["two"], "A1: Verblutete + Schiffsverlust + Abbruch -> tot gebucht (%s)" % str(bled_outcomes))
+	var lying: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "down"), _ts("pilot", "fit")], "aborted", roster, "pilot", rules, lost_ctx)
+	var lying_outcomes := {}
+	for entry in lying.casualties: lying_outcomes[entry.unit_id] = entry.outcome
+	_check(lying_outcomes.get("two", "") == "wounded", "A1: wer am Boden liegt und noch lebt, wird gerettet (%s)" % str(lying_outcomes))
 
 
 
@@ -364,6 +400,9 @@ func _test_controller() -> void:
 	# LC2b Nachbesserung K2: das Absturzfeld ist belegt bzw. unbegehbar; niemand darf an Bord des verlorenen Schiffs bleiben.
 	await _controller_case(["light"], false, "occupied")
 	await _controller_case(["unhurt", "light"], false, "blocked")
+	# LC2d A5: das Absturzfeld liegt mitten in unbegehbarem Gelaende (weiter als die alte Suchgrenze); die Suche weitet sich aus, niemand wird "tot gebucht".
+	await _controller_case(["unhurt", "light"], false, "walled")
+
 
 
 func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") -> void:
@@ -411,8 +450,13 @@ func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") 
 				site_grid = Vector2i(gx, 3)
 				break
 		_check(not bool(registry.call("is_walkable", site_grid)), "Absturzfeld ist unbegehbar (%s)" % str(site_grid))
+	if mode == "walled":
+		# Ein Feld weit ausserhalb der Karte: dort gibt es kein Feld (nicht begehbar), der Nahbereich der alten Suche (256 Felder) ist leer.
+		site_grid = Vector2i(-12, -12)
+		var near_anchors: Array = controller.call("_air_crash_anchor_cells", registry, site_grid)
+		_check(near_anchors.is_empty(), "A5 (Aufbau): im Nahbereich (alte Grenze) gibt es kein begehbares Feld (%d)" % near_anchors.size())
 	if mode == "occupied":
-		var blocker: Dictionary = simulation.call("admit_hex_ground_setup_actors", [{"unit_id": ids[0], "grid": site_grid, "facing_dir": 0, "posture_key": "standing"}], true, true)
+		var blocker: Dictionary = simulation.call("admit_hex_ground_setup_actors", [{"unit_id": ids[0], "grid": site_grid, "facing_dir": 0, "posture_key": "standing"}] as Array[Dictionary], true, true)
 		_check(bool(blocker.get("ok", false)), "eine Person steht auf dem Absturzfeld: " + str(blocker.get("reason", "")))
 	var order: Array = controller.call("get_air_crash_occupant_ids", "craft_a")
 	var rest: Array = []

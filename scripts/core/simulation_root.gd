@@ -8530,27 +8530,34 @@ func _air_shootdown_balance_text(results: Dictionary) -> String:
 func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: String, status_snapshot: Dictionary = {}) -> Dictionary:
 	if _should_skip_local_tick_processing() or is_processing_tick or not _air_support_sorties.has(craft_id): return {"ok":false, "reason":"sortie_unavailable"}
 	var rules: Dictionary = AIR_CRASH_RULES.load_rules()
-	if rules.is_empty(): return {"ok":false, "reason":"crash_rules_unavailable"}
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
-	if not binding.get("ok", false): return binding
 	var sortie: Dictionary = _air_support_sorties[craft_id]
 	var source: Node = sortie.source.get_ref()
-	if not is_instance_valid(source) or source.get("is_processing_tick") or source != _air_support_source.get_ref() or binding.flight != sortie.flight: return {"ok":false, "reason":"sortie_context_changed"}
-	var model_id := String(binding.equipment.get_snapshot(craft_id).get("model_id", ""))
+	# LC2d A3: Ein Schiff mit Rumpf 0 bleibt nie ohne Ausgang in der Luft. Fehlen Regeln oder Bindung oder hat sich der Sortie-Kontext
+	# geaendert, gilt Bruchlandung mit den Standardwerten (alle Insassen leicht verletzt, kein Wurf); die Sortie wird gestrichen.
+	var degraded: bool = rules.is_empty() or not binding.get("ok", false)
+	if not degraded and (not is_instance_valid(source) or source.get("is_processing_tick") or source != _air_support_source.get_ref() or binding.flight != sortie.flight): degraded = true
+	var model_id := String(binding.equipment.get_snapshot(craft_id).get("model_id", "")) if not degraded else ""
 	var site_grid: Vector2i = _air_crash_grid(craft_id)
-	var pose: Dictionary = binding.flight.get_snapshot()
-	var shot: Dictionary = AIR_CRASH_RULES.resolve_shootdown(pilot_skill, rules, _air_ground_rng_state)
-	if shot.is_empty(): return {"ok":false, "reason":"crash_rules_invalid"}
-	_air_ground_rng_state = int(shot.rng_state)
-	var outcome := String(shot.outcome)
+	var pose: Dictionary = binding.flight.get_snapshot() if not degraded else {}
+	var shot: Dictionary = {}
+	if not degraded:
+		shot = AIR_CRASH_RULES.resolve_shootdown(pilot_skill, rules, _air_ground_rng_state)
+		if shot.is_empty(): degraded = true
+		else: _air_ground_rng_state = int(shot.rng_state)
+	var outcome := String(shot.outcome) if not degraded else "crash"
 	var ship_name := display_name if not display_name.strip_edges().is_empty() else craft_id
 	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
 	# Notlandung nur, wenn die Landezone frei ist; sonst wird der Ausgang als Bruchlandung behandelt.
 	if outcome == "emergency_landing" and not _air_landing_zone_free(craft_id, sortie, binding): outcome = "crash"
-	# Eine laufende Angriffsanweisung endet mit dem Flug (ein spaeter Start schiesst nicht von allein); solange die Sortie noch besteht.
-	var ceased: Dictionary = request_air_support_cease_fire(craft_id, "shootdown-stop:%s:%d" % [craft_id, tick_counter])
-	if not ceased.get("ok", false): push_warning("Abschuss: Feuerstopp fuer %s nicht gebucht (%s)" % [craft_id, String(ceased.get("reason", ""))])
-	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, pose)
+	if degraded:
+		push_warning("Abschuss: %s ohne gueltigen Wurf/Kontext, Bruchlandung mit Standardwerten" % craft_id)
+		_air_support_sorties.erase(craft_id)
+	else:
+		# Eine laufende Angriffsanweisung endet mit dem Flug (ein spaeter Start schiesst nicht von allein); solange die Sortie noch besteht.
+		var ceased: Dictionary = request_air_support_cease_fire(craft_id, "shootdown-stop:%s:%d" % [craft_id, tick_counter])
+		if not ceased.get("ok", false): push_warning("Abschuss: Feuerstopp fuer %s nicht gebucht (%s)" % [craft_id, String(ceased.get("reason", ""))])
+	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, pose) if not degraded else {"ok":true}
 	if not ended.get("ok", false):
 		# W4: Das Schiff bleibt nie ohne Ausgang in der Luft. Laesst sich die Sortie nicht sauber beenden (Rueckversetzung/Abmeldung
 		# scheitert), kann es auch nicht landen: Bruchlandung, die Sortie wird ersatzlos gestrichen.
@@ -8572,7 +8579,12 @@ func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: S
 		messages.append("Notlandung geglückt. Rumpf %d %%." % int(round(float(hull) * 100.0 / float(status.max_integrity))))
 	else:
 		var ids: Array = Array(controller.call("get_air_crash_occupant_ids", craft_id)) if controller != null and controller.has_method("get_air_crash_occupant_ids") else []
-		var occupants: Dictionary = AIR_CRASH_RULES.resolve_occupants(outcome, ids, rules, _air_ground_rng_state)
+		var occupants: Dictionary = AIR_CRASH_RULES.resolve_occupants(outcome, ids, rules, _air_ground_rng_state) if not degraded else {}
+		if degraded:
+			var light_loss := float(rules.get("crash_light_health_loss_fraction", 0.4))
+			var default_results := {}
+			for id in ids: default_results[id] = {"state":"light", "health_loss_fraction":light_loss}
+			occupants = {"results":default_results, "dead_ids":[], "rng_state":_air_ground_rng_state}
 		if not ids.is_empty() and occupants.is_empty(): occupants = {"results":{}, "dead_ids":[], "rng_state":_air_ground_rng_state}
 		_air_ground_rng_state = int(occupants.get("rng_state", _air_ground_rng_state))
 		var results: Dictionary = Dictionary(occupants.get("results", {}))
