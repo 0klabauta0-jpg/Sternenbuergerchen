@@ -1,9 +1,9 @@
 extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## Task 5b (Ausfall und Rueckzug): Malus bei Totalverlust (Notrettung).
-## P1 echter Einsatz, Totalverlust am Missionsende: 500 -> 375 Credits, leicht verwundet (180 s), Moral -0,08, Ergebnis mit total_loss_penalty.
+## P1 echter Einsatz, Totalverlust am Missionsende: 500 -> 100 Credits (Abschnitt K: Mindestgebuehr 400), leicht verwundet (180 s), Moral -0,08, Ergebnis mit total_loss_penalty.
 ## P2 Neuaufbau und Fortsetzen (zweimal): Guthaben, Restzeit und Moral aendern sich nicht mehr.
 ## P3 mehrfache Zustellung des Ergebnisses und mehrfaches Bestaetigen des Debriefs: kein zweiter Abzug.
-## P4 Grenzen: 120 -> Gebuehr 50, 30 -> 30, 0 -> 0, kein negatives Guthaben.
+## P4 Grenzen (Abschnitt K): 120 -> Gebuehr 400 (-280), 30 -> 400 (-370), 0 -> 400 (-400), 500 -> 400 (100); die Gebuehr wird voll gebucht, auch ins Minus.
 ## P5 Totalverlust beim Abflug (HUD-Weg): derselbe Malus genau einmal (lang, siehe T5B_ONLY).
 ## P6 Gegenproben: gewoehnliche Niederlage, Sieg, Rueckzug, Skirmish: kein Malus.
 ## P7 schon schwer verwundet (2000 s): bleibt schwer mit 2000 s (nie kuerzer, nie leichter).
@@ -210,7 +210,7 @@ func _p1_p2_p3_real_total_loss() -> void:
 	var penalty: Dictionary = Dictionary(result.get("total_loss_penalty", {}))
 	print("P1_RESULT total_loss=", result.get("casualty_total_loss"), " penalty=", penalty, " pending=", _pending_id(), " disk_credits=", _disk_credits())
 	_check(bool(result.get("casualty_total_loss", false)) and bool(result.get("campaign_checkpoint_retry_required", false)), "P1: Totalverlust mit Checkpoint-Retry")
-	_check(result.get("total_loss_penalty") is Dictionary and int(penalty.get("rescue_fee", -1)) == 125, "P1: Ergebnis traegt total_loss_penalty mit rescue_fee 125")
+	_check(result.get("total_loss_penalty") is Dictionary and int(penalty.get("rescue_fee", -1)) == 400, "P1: Ergebnis traegt total_loss_penalty mit rescue_fee 400 (Mindestgebuehr)")
 	_check(is_equal_approx(float(penalty.get("morale_delta", 0.0)), -0.08), "P1: morale_delta ist -0,08")
 	var wounded_ids: Array = []
 	for entry: Dictionary in Array(penalty.get("wounded", [])):
@@ -239,8 +239,8 @@ func _p1_p2_p3_real_total_loss() -> void:
 	# Nach dem Ruecksprung.
 	var job_after: Dictionary = _campaign_job()
 	print("P1_AFTER credits=", _credits(), " leader=", _recovery(LEADER), " morale=", _morale(LEADER), "/", _morale(PILOT), " job=", job_after.get("status"), " disk_credits=", _disk_credits(), " pending=", _pending_id())
-	_check(_credits() == 375, "P1: nach Ruecksprung und Malus 375 Credits (%d)" % _credits())
-	_check(_disk_credits() == 375 and _pending_id().is_empty(), "P1/P3: der Malus ist sofort gespeichert (Basisstand 375, nichts mehr ausstehend)")
+	_check(_credits() == 100, "P1: nach Ruecksprung und Malus 100 Credits (%d)" % _credits())
+	_check(_disk_credits() == 100 and _pending_id().is_empty(), "P1/P3: der Malus ist sofort gespeichert (Basisstand 100, nichts mehr ausstehend)")
 	var leader_recovery: Dictionary = _recovery(LEADER)
 	_check(String(_roster_unit(LEADER).get("availability_status", "")) == "wounded" and String(leader_recovery.get("severity", "")) == "light", "P1: Truppfuehrer ist leicht verwundet")
 	_check(float(leader_recovery.get("seconds_remaining", -1.0)) > 170.0 and float(leader_recovery.get("seconds_remaining", -1.0)) <= 180.0 and is_equal_approx(float(leader_recovery.get("seconds_total", -1.0)), 180.0), "P1: 180 s (Rest %.2f)" % float(leader_recovery.get("seconds_remaining", -1.0)))
@@ -257,18 +257,18 @@ func _p1_p2_p3_real_total_loss() -> void:
 	for round_number in range(2):
 		await _close()
 		if not await _open_scene("campaign", "continue"): return
-		_check(_credits() == 375, "P2 (Runde %d): Guthaben bleibt 375 (%d)" % [round_number + 1, _credits()])
+		_check(_credits() == 100, "P2 (Runde %d): Guthaben bleibt 100 (%d)" % [round_number + 1, _credits()])
 		var remaining_now: float = _remaining(LEADER)
 		_check(remaining_now <= remaining_first + 0.001 and remaining_now >= remaining_first - 10.0 and remaining_now < 179.0, "P2 (Runde %d): Restzeit nicht neu gesetzt (%.2f nach %.2f)" % [round_number + 1, remaining_now, remaining_first])
 		_check(String(_recovery(LEADER).get("severity", "")) == "light", "P2 (Runde %d): weiter leicht verwundet" % [round_number + 1])
 		for id: String in [LEADER, PILOT]:
 			_check(is_equal_approx(_morale(id), float(morale_after[id])), "P2 (Runde %d): Moral von %s unveraendert (%.3f)" % [round_number + 1, id, _morale(id)])
-		_check(_disk_credits() == 375 and _pending_id().is_empty(), "P2 (Runde %d): Basisstand ohne ausstehenden Malus" % [round_number + 1])
+		_check(_disk_credits() == 100 and _pending_id().is_empty(), "P2 (Runde %d): Basisstand ohne ausstehenden Malus" % [round_number + 1])
 		remaining_first = remaining_now
 	# Der Debrief-Knopf laedt den Stand als continue_home: auch das wiederholte Bestaetigen zieht nichts mehr ab.
 	await _close()
 	if not await _open_scene("campaign", "continue_home"): return
-	_check(_credits() == 375 and _disk_credits() == 375 and _pending_id().is_empty(), "P3: wiederholtes Laden als continue_home zieht nicht noch einmal ab (%d)" % _credits())
+	_check(_credits() == 100 and _disk_credits() == 100 and _pending_id().is_empty(), "P3: wiederholtes Laden als continue_home zieht nicht noch einmal ab (%d)" % _credits())
 	_check(_remaining(LEADER) <= remaining_first + 0.001 and String(_recovery(LEADER).get("severity", "")) == "light" and is_equal_approx(_morale(LEADER), float(morale_after[LEADER])), "P3: continue_home setzt weder Restzeit noch Moral zurueck")
 	await _close()
 	var checkpoint_after: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
@@ -279,17 +279,17 @@ func _p1_p2_p3_real_total_loss() -> void:
 	_write_bytes(STORE.PENDING_TOTAL_LOSS_PATH, pending_bytes)
 	_check(_pending_id() == loss_id and _disk_credits() == 500, "Fenster: Zusatzdatei und alter Basisstand zurueckgespielt (500 Credits)")
 	if not await _open_scene("campaign", "continue"): return
-	_check(_credits() == 375 and _disk_credits() == 375 and not _pending_exists(), "Fenster: Fortsetzen ohne Debrief-Knopf wendet den Malus an (375), Zusatzdatei geloescht")
+	_check(_credits() == 100 and _disk_credits() == 100 and not _pending_exists(), "Fenster: Fortsetzen ohne Debrief-Knopf wendet den Malus an (100), Zusatzdatei geloescht")
 	_check(String(_recovery(LEADER).get("severity", "")) == "light" and is_equal_approx(_remaining(LEADER), 180.0) and is_equal_approx(_morale(PILOT), 0.42), "Fenster: leicht verwundet mit 180 s, Moral 0,42")
 	await _close()
 	if not await _open_scene("campaign", "continue"): return
-	_check(_credits() == 375, "Fenster: zweites Fortsetzen zieht nicht noch einmal ab (%d)" % _credits())
+	_check(_credits() == 100, "Fenster: zweites Fortsetzen zieht nicht noch einmal ab (%d)" % _credits())
 	await _close()
 	# Abbruch nach dem Speichern, vor dem Loeschen: die Zusatzdatei liegt wieder neben dem NEUEN Stand und ist veraltet.
 	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) != checkpoint_before and not checkpoint_after.is_empty(), "Abbruch: der gespeicherte Stand hat einen anderen Inhalt als der alte")
 	_write_bytes(STORE.PENDING_TOTAL_LOSS_PATH, pending_bytes)
 	if not await _open_scene("campaign", "continue"): return
-	_check(_credits() == 375 and _disk_credits() == 375, "Abbruch nach Speichern, vor Loeschen: kein zweiter Abzug (%d)" % _credits())
+	_check(_credits() == 100 and _disk_credits() == 100, "Abbruch nach Speichern, vor Loeschen: kein zweiter Abzug (%d)" % _credits())
 	_check(not _pending_exists(), "Abbruch: veraltete Zusatzdatei wurde ohne Wirkung geloescht")
 	_check(is_equal_approx(_morale(PILOT), 0.42), "Abbruch: Moral nicht ein zweites Mal gesenkt")
 	await _close()
@@ -298,11 +298,11 @@ func _p1_p2_p3_real_total_loss() -> void:
 
 func _p9_stale_and_new_campaign() -> void:
 	if not await _open_scene("campaign", "new"): return
-	_set_credits(500)
+	_set_credits(2000)
 	if not _save_base("P9"): return
 	var bytes_before: PackedByteArray = FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH)
 	var staged: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
-	_check(int(staged.get("rescue_fee", -1)) == 125 and _pending_exists(), "P9: Malus ausstehend in der Zusatzdatei")
+	_check(int(staged.get("rescue_fee", -1)) == 500 and _pending_exists(), "P9: Malus ausstehend in der Zusatzdatei (25 % von 2000)")
 	_check(FileAccess.get_file_as_bytes(STORE.DEFAULT_PATH) == bytes_before, "P9: die Checkpoint-Datei bleibt Byte fuer Byte unveraendert")
 	var staged_again: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
 	_check(String(staged_again.get("loss_id", "x")) == String(staged.get("loss_id", "y")), "P9: derselbe verlorene Einsatz noch einmal: gleiche Kennung")
@@ -316,7 +316,7 @@ func _p9_stale_and_new_campaign() -> void:
 	_check(not _pending_exists(), "P9: veraltete Zusatzdatei wurde geloescht")
 	# Neue Kampagne loescht eine vorhandene Zusatzdatei.
 	var staged_new: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
-	_check(int(staged_new.get("rescue_fee", -1)) == 100 and _pending_exists(), "P9: neuer Malus (100) ausstehend")
+	_check(int(staged_new.get("rescue_fee", -1)) == 400 and _pending_exists(), "P9: neuer Malus (400, Mindestgebuehr) ausstehend")
 	await _close()
 	if not await _open_scene("campaign", "new"): return
 	_check(not _pending_exists(), "P9: neue Kampagne loescht die Zusatzdatei")
@@ -326,7 +326,7 @@ func _p9_stale_and_new_campaign() -> void:
 
 func _p4_limits() -> void:
 	if not await _open_scene("campaign", "new"): return
-	for spec: Array in [[120, 50, 70], [30, 30, 0], [0, 0, 0], [500, 125, 375]]:
+	for spec: Array in [[120, 400, -280], [30, 400, -370], [0, 400, -400], [500, 400, 100]]:
 		var credits: int = spec[0]
 		_set_credits(credits)
 		if not _save_base("P4/%d" % credits): return
@@ -335,7 +335,7 @@ func _p4_limits() -> void:
 		await _close()
 		if not await _open_scene("campaign", "continue"): return
 		_check(_credits() == int(spec[2]), "P4: %d Credits -> danach %d (%d)" % [credits, int(spec[2]), _credits()])
-		_check(_credits() >= 0 and _disk_credits() == int(spec[2]) and _pending_id().is_empty(), "P4 (%d): nie negativ, gespeichert, nichts mehr ausstehend" % credits)
+		_check(_disk_credits() == int(spec[2]) and _pending_id().is_empty(), "P4 (%d): auch im Minus gespeichert und wieder geladen, nichts mehr ausstehend" % credits)
 	await _close()
 
 # ---------- P7: schon verwundet ----------
@@ -347,12 +347,12 @@ func _p7_already_wounded() -> void:
 	_set_credits(500)
 	if not _save_base("P7"): return
 	var staged: Dictionary = _flow.call("_stage_total_loss_penalty", _loss_result())
-	_check(int(staged.get("rescue_fee", -1)) == 125, "P7: Malus ist ausstehend")
+	_check(int(staged.get("rescue_fee", -1)) == 400, "P7: Malus ist ausstehend")
 	await _close()
 	if not await _open_scene("campaign", "continue"): return
 	var recovery: Dictionary = _recovery(LEADER)
 	print("P7_AFTER ", recovery, " credits=", _credits())
-	_check(_credits() == 375, "P7: Gebuehr abgezogen (375)")
+	_check(_credits() == 100, "P7: Gebuehr abgezogen (100)")
 	_check(String(recovery.get("severity", "")) == "severe" and float(recovery.get("seconds_remaining", -1.0)) <= 2000.0 and float(recovery.get("seconds_remaining", -1.0)) > 1980.0 and is_equal_approx(float(recovery.get("seconds_total", -1.0)), 2400.0), "P7: bleibt schwer mit etwa 2000 s, total 2400 (nie kuerzer, nie leichter)")
 	_check(String(_roster_unit(LEADER).get("availability_status", "")) == "wounded", "P7: weiter wounded")
 	await _close()
@@ -436,10 +436,10 @@ func _p5_departure_total_loss() -> void:
 	await process_frame
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result")).duplicate(true)
 	_check(bool(result.get("casualty_total_loss", false)), "P5: Totalverlust beim Abflug")
-	_check(int(Dictionary(result.get("total_loss_penalty", {})).get("rescue_fee", -1)) == 125, "P5: Ergebnis traegt rescue_fee 125")
+	_check(int(Dictionary(result.get("total_loss_penalty", {})).get("rescue_fee", -1)) == 400, "P5: Ergebnis traegt rescue_fee 400")
 	_check(not _pending_id().is_empty() and _disk_credits() == 500, "P5: Malus ausstehend im Basisstand")
 	if not await _press_continue(): return
-	_check(_credits() == 375 and _disk_credits() == 375 and _pending_id().is_empty(), "P5: genau einmal abgezogen (375)")
+	_check(_credits() == 100 and _disk_credits() == 100 and _pending_id().is_empty(), "P5: genau einmal abgezogen (100)")
 	_check(String(_recovery(LEADER).get("severity", "")) == "light", "P5: Truppfuehrer leicht verwundet")
 	await _close()
 
