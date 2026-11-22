@@ -57,6 +57,7 @@ static func build_from_identity_config(identity_config: Dictionary, options: Dic
 		"secondary_text": String(options.get("secondary_text", identity_config.get("secondary_text", ""))).strip_edges(),
 		"availability_status": String(identity_config.get("availability_status", "active")).strip_edges().to_lower(),
 		"recovery_state": Dictionary(identity_config.get("recovery_state", {})).duplicate(true),
+		"respawns_used": identity_config.get("respawns_used", 0),
 		"relationship_summary_text": String(identity_config.get("relationship_summary_text", "")).strip_edges(),
 		"relationship_links": Array(identity_config.get("relationship_links", [])).duplicate(true),
 		"fireteam_history": Array(identity_config.get("fireteam_history", [])).duplicate(true),

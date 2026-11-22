@@ -614,6 +614,7 @@ func _refresh_native_review_cards() -> void:
 	var states: Array = _mission_result.get("team_states", [])
 	var casualty_kinds: Dictionary = _casualty_kinds_by_unit()
 	var casualty_entries: Dictionary = _casualty_wounded_entries_by_unit()
+	var dead_entries: Dictionary = _casualty_dead_entries_by_unit()
 	for entry in states:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
@@ -666,7 +667,7 @@ func _refresh_native_review_cards() -> void:
 		if casualty_kind == "wounded":
 			status_head = _wounded_status_text(Dictionary(casualty_entries.get(String(member.get("unit_id", "")), {})))
 		elif casualty_kind == "dead":
-			status_head = "Gefallen · zurückgelassen"
+			status_head = _dead_status_text(Dictionary(dead_entries.get(String(member.get("unit_id", "")), {})))
 		status.text = "%s%s" % [status_head, " · " + fireteam if not fireteam.is_empty() else ""]
 		TACTICAL_UI_THEME_SCRIPT.style_label(status, true, 12)
 		if vital in ["wounded", "down", "dead"] or not casualty_kind.is_empty():
@@ -735,6 +736,35 @@ func _casualty_wounded_entries_by_unit() -> Dictionary:
 	return entries
 
 
+## unit_id -> casualties-Eintrag der Toten (outcome "dead"), nur aus dem Ergebnis gelesen.
+func _casualty_dead_entries_by_unit() -> Dictionary:
+	var entries: Dictionary = {}
+	if not _is_campaign_casualty_result():
+		return entries
+	for raw in Array(_mission_result.get("casualties", [])):
+		if typeof(raw) == TYPE_DICTIONARY and String(raw.get("outcome", "")) == "dead":
+			entries[String(raw.get("unit_id", ""))] = raw
+	return entries
+
+
+## Der Tod ist ein Tod mit Wiederkehr (Respawn): der Eintrag traegt den Ausfall-Zustand und ist nicht endgueltig.
+func _is_respawn_death(entry: Dictionary) -> bool:
+	return typeof(entry.get("respawn_state", null)) == TYPE_DICTIONARY and not Dictionary(entry.get("respawn_state", {})).is_empty() and not bool(entry.get("final", false))
+
+
+## Einsatzende, Tod (R5). Mit Wiederkehr: "Gestorben · zurückgelassen · Respawn 2 von 3 · Ausfall 90:00, dann auf Polisa".
+## Endgueltig bei gesetzter Grenze: "Gefallen · Respawn-Grenze erreicht (3 von 3)". Ohne Grenze (0 oder altes Ergebnis): wie bisher.
+func _dead_status_text(entry: Dictionary) -> String:
+	var limit: int = int(_mission_result.get("respawn_limit", 0)) if typeof(_mission_result.get("respawn_limit", 0)) in [TYPE_INT, TYPE_FLOAT] else 0
+	if _is_respawn_death(entry):
+		var state: Dictionary = Dictionary(entry.get("respawn_state", {}))
+		var number: int = int(entry.get("death_number", state.get("death_number", 1)))
+		return "Gestorben · zurückgelassen · Respawn %d von %d · Ausfall %s, dann auf Polisa" % [number, limit, PERSONNEL_RECOVERY_SCRIPT.format_outage(float(state.get("seconds_total", 0.0)))]
+	if limit > 0:
+		return "Gefallen · Respawn-Grenze erreicht (%d von %d)" % [limit, limit]
+	return "Gefallen · zurückgelassen"
+
+
 ## "Verwundet (mittel) · Ausfall 15:00". Zeigt, was angewendet wurde (recovery_severity,
 ## recovery_seconds_remaining aus dem Eintrag); ohne diese Felder die Stufe aus severity, ohne Zeit.
 func _wounded_status_text(entry: Dictionary) -> String:
@@ -791,13 +821,15 @@ func _apply_player_readout_texts() -> void:
 	var counts: Dictionary = {}
 	var state_names := {"fit": "einsatzfähig", "wounded": "verletzt", "down": "ausgefallen", "dead": "verstorben"}
 	var count_casualties: Dictionary = _casualty_kinds_by_unit()
+	var count_dead_entries: Dictionary = _casualty_dead_entries_by_unit()
 	for member in Array(_mission_result.get("team_states", [])):
 		var state: String = state_names.get(String(member.get("vital_state", "")), "unbekannt")
 		var count_kind := String(count_casualties.get(String(member.get("unit_id", "")), ""))
 		if count_kind == "wounded":
 			state = "verwundet"
 		elif count_kind == "dead":
-			state = "gefallen"
+			# "Gefallen" steht nur beim endgueltigen Tod; wer wiederkommt, ist gestorben.
+			state = "gestorben" if _is_respawn_death(Dictionary(count_dead_entries.get(String(member.get("unit_id", "")), {}))) else "gefallen"
 		counts[state] = int(counts.get(state, 0)) + 1
 	var count_parts := PackedStringArray()
 	for state in counts:

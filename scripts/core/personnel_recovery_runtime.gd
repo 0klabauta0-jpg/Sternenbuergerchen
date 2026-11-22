@@ -112,6 +112,21 @@ static func format_clock(seconds: float) -> String:
 		return "%d:%02d:%02d" % [floori(whole / 3600.0), floori((whole % 3600) / 60.0), whole % 60]
 	return "%d:%02d" % [floori(whole / 60.0), whole % 60]
 
+## Minutes without an hour part ("90:00"): the outage length as shown at the end of a mission.
+static func format_outage(seconds: float) -> String:
+	var whole := int(floor(maxf(0.0, seconds)))
+	return "%d:%02d" % [floori(whole / 60.0), whole % 60]
+
+## Player text for the person card and the character sheet (R5). Respawn states use the spec wording
+## ("Gestorben · Respawn in m:ss", "Wartet auf Polisa · abholen"); everything else is describe().
+static func card_text(unit: Dictionary) -> String:
+	if is_respawning(unit):
+		return "Gestorben · Respawn in %s" % format_clock(_remaining(unit))
+	if is_awaiting_pickup(unit):
+		return "Wartet auf %s · abholen" % _pickup_location(unit).capitalize()
+	return describe(unit)
+
+## Lock text for the squad assembly ("Name: " is put in front by the caller).
 static func describe(unit: Dictionary) -> String:
 	if is_respawning(unit):
 		return "gestorben, Respawn in %s" % format_clock(_remaining(unit))

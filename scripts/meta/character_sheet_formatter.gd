@@ -333,7 +333,25 @@ static func _wounded_status_text(unit: Variant) -> String:
 		entry = unit
 	elif unit is Object and "availability_status" in unit and "recovery_state" in unit:
 		entry = {"availability_status": unit.availability_status, "recovery_state": unit.recovery_state}
-	return PERSONNEL_RECOVERY_RUNTIME_SCRIPT.describe(entry) if not entry.is_empty() else ""
+	return PERSONNEL_RECOVERY_RUNTIME_SCRIPT.card_text(entry) if not entry.is_empty() else ""
+
+
+## Respawn (R5): "n von m", bei erreichter Grenze (n >= m, auch Grenze 0) mit Zusatz. Nur Anzeige: n ist der Zaehler der Person,
+## m die geltende Einstellung; fehlt der Zaehler (alter Stand), ist n 0.
+static func format_respawn_text(respawns_used: int, respawn_limit: int) -> String:
+	var used: int = maxi(respawns_used, 0)
+	var limit: int = maxi(respawn_limit, 0)
+	var text: String = "%d von %d" % [used, limit]
+	if used >= limit:
+		text += " · nächster Tod endgültig"
+	return text
+
+
+static func _respawn_rows(profile, options: Dictionary) -> Array:
+	if not options.has("respawn_limit") or profile == null:
+		return []
+	var used: int = int(profile.get("respawns_used")) if profile is Object else 0
+	return [{"label": "Respawns", "value_text": format_respawn_text(used, int(options.get("respawn_limit", 0))), "help_id": "character_sheet.status"}]
 
 
 static func _build_suitability_rows(profile) -> Array:
@@ -409,12 +427,14 @@ static func _build_status_rows(profile, options: Dictionary = {}) -> Array:
 	_apply_fraction_row_metadata(morale_row, progression.get("morale", "n/a"), "progression", "morale")
 	var frustration_row: Dictionary = {"label": "Frustration", "value_text": _format_fraction_or_na(progression.get("frustration", "n/a")), "help_id": "character_sheet.frustration"}
 	_apply_fraction_row_metadata(frustration_row, progression.get("frustration", "n/a"), "progression", "frustration")
-	return [
+	var rows: Array = [
 		{"label": "Status", "value_text": _optional_text(_wounded_status_text(profile), COPY.text(_optional_text(status_text, _optional_text(String(profile.availability_status), "active")))), "help_id": "character_sheet.status"},
 		{"label": "Erholung", "value_text": recovery_text, "help_id": "character_sheet.recovery"},
-		morale_row,
-		frustration_row,
 	]
+	rows.append_array(_respawn_rows(profile, options))
+	rows.append(morale_row)
+	rows.append(frustration_row)
+	return rows
 
 
 static func _build_relationship_entries(profile, options: Dictionary = {}) -> Array:

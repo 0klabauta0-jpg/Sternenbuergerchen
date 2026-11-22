@@ -10,6 +10,7 @@ const OPERATIONS_BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_r
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const PERSONNEL_INVENTORY_PANEL = preload("res://scripts/ui/components/personnel_inventory_panel.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
@@ -6023,10 +6024,7 @@ func _update_character_sheet() -> void:
 	var roster_names_by_id: Dictionary = {}
 	for known_id in _profiles_by_id:
 		roster_names_by_id[String(known_id)] = _build_display_name(String(known_id))
-	CHARACTER_SHEET_VIEW_SCRIPT.render(
-		content_host,
-		profile,
-		{
+	var sheet_options: Dictionary = {
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"current_assignment_text": current_assignment_text,
 			"roster_names_by_id": roster_names_by_id,
@@ -6042,7 +6040,11 @@ func _update_character_sheet() -> void:
 			"hide_loadout_dropdowns": true,
 			"hide_identity_overview":_singleplayer_snapshot_provider.is_valid(),
 		}
-	)
+	# Respawn (R5): Die Zeile "Respawns: n von m" gibt es nur in der Kampagne. Das Kennzeichen ist das Meta, das der Kampagnenstart
+	# an dieser Ansicht setzt (campaign_start_configuration); die Singleplayer-Bruecke gibt es auch im Skirmish.
+	if has_meta("campaign_base_map_path"):
+		sheet_options["respawn_limit"] = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_campaign_respawn_limit"))
+	CHARACTER_SHEET_VIEW_SCRIPT.render(content_host, profile, sheet_options)
 
 	_update_character_inventory()
 	call_deferred("_apply_character_popup_rect")
