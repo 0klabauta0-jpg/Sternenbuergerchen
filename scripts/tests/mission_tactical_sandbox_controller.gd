@@ -13553,7 +13553,7 @@ func _append_mission_dropship_card_approach_path_row(host: VBoxContainer, card: 
 		row.add_child(button)
 
 
-## True where the air support row (Start / Fliegen / Landen / Feuer) is offered; the arrival row (LB) shows exactly there.
+## True where the air support row (Start / Fliegen / Landen / Feuer) is offered.
 func _is_air_support_offered() -> bool:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
 	return simulation != null and simulation.get("_air_support_source") != null and String(get_parent().get_meta("location_id", "")) != "polisa"
@@ -13562,7 +13562,7 @@ func _is_air_support_offered() -> bool:
 ## Arrival mode (task LB): row "Ankunft: Landen / Kreisen" under the path row, only where air support is offered.
 func _append_mission_dropship_card_arrival_mode_row(host: VBoxContainer, card: Dictionary) -> void:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
-	if host == null or craft_id.is_empty() or host.get_node_or_null("MissionDropshipArrivalModeRow") != null or not _is_air_support_offered():
+	if host == null or craft_id.is_empty() or host.get_node_or_null("MissionDropshipArrivalModeRow") != null or not _can_arrive_circling():
 		return
 	var row := HBoxContainer.new()
 	row.name = "MissionDropshipArrivalModeRow"
@@ -36913,7 +36913,7 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 				if bool(sequence.get("service_reentry", false)): record_polisa_service_landing(sequence)
 				if not bool(sequence.get("visual_only", false)):
 					var landing_note: String = String(sequence.get("circle_note", ""))
-					sequence["circle_note"] = ""
+					sequence.erase("circle_note") # display text only, never part of a saved state
 					sequence["card_feedback_text"] = landing_note if not landing_note.is_empty() else "Touchdown"
 					_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), landing_note if not landing_note.is_empty() else "Touchdown")
 					_last_command_text = "TOUCHDOWN %s" % String(sequence.get("fireteam_name", "ALL")).strip_edges()
@@ -37372,7 +37372,6 @@ func _capture_active_drop_sequence() -> Dictionary:
 		"fireteam_name": _drop_sequence_fireteam_name,
 		"visual_only": _drop_sequence_visual_only,
 		"arrival_mode": _drop_sequence_arrival_mode,
-		"circle_note": _drop_sequence_circle_note,
 		"craft_id": _drop_sequence_craft_id,
 		"display_name": _drop_sequence_display_name,
 		"lz_position": _drop_sequence_lz_position,
@@ -37407,9 +37406,14 @@ func _prepare_drop_sequence_context() -> void:
 
 ## "circle" only where the arrival can really stay airborne: campaign landings that offer air support (E1). Else "land".
 func _effective_arrival_mode() -> String:
-	if _current_arrival_mode == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE and not preview_mode and _should_keep_campaign_dropship_landed() and _is_air_support_offered():
+	if _current_arrival_mode == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE and _can_arrive_circling():
 		return AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE
 	return AIR_DEFENSE_PLAN.ARRIVAL_LAND
+
+
+## Where circling can take effect at all; the "Ankunft" row shows exactly there, and `_effective_arrival_mode` asks the same.
+func _can_arrive_circling() -> bool:
+	return not preview_mode and _should_keep_campaign_dropship_landed() and _is_air_support_offered()
 
 
 ## Reason text of a refused circling arrival (one German half sentence per refusal reason of the root entry).
@@ -37417,6 +37421,8 @@ func _circle_refusal_text(reason: String) -> String:
 	match reason:
 		"pilot_not_aboard", "pilot_unavailable", "pilot_presence_unknown", "pilot_assignment_changed", "pilot_boarding_pending", "boarding_owner_unavailable", "pilot_not_assigned_to_craft", "crew_unavailable", "crew_not_aboard":
 			return "kein Pilot an Bord"
+		"crew_deployment_pending":
+			return "die Besatzung steigt noch ein oder aus"
 		"no_planetary_atmosphere":
 			return "hier gibt es keine Atmosphäre"
 		"systems_unavailable", "equipment_unavailable":
@@ -37427,7 +37433,7 @@ func _circle_refusal_text(reason: String) -> String:
 			return "die Zelle über der Landezone ist belegt"
 		"ground_unavailable", "invalid_context", "simulation_busy", "air_source_unavailable", "air_source_changed", "mission_context_changed", "craft_not_at_location", "air_owner_unavailable", "craft_not_ready":
 			return "die Luftunterstützung ist hier nicht bereit"
-	return "Grund: %s" % reason
+	return ""
 
 
 ## End of inbound for a circling arrival: ask the root for the air sortie. Returns {"ok":bool,"reason":String}.
@@ -37442,7 +37448,12 @@ func _begin_circling_arrival(craft_id: String, lz_position: Vector2) -> Dictiona
 
 
 func _circle_refusal_message(reason: String) -> String:
-	return "Kreisen nicht möglich: %s – das Schiff landet." % _circle_refusal_text(reason)
+	var text: String = _circle_refusal_text(reason)
+	if text.is_empty():
+		# Unknown reason: no raw code on screen, the code goes to the log only.
+		print("circling arrival refused, unlisted reason: ", reason)
+		return "Kreisen nicht möglich – das Schiff landet."
+	return "Kreisen nicht möglich: %s – das Schiff landet." % text
 
 
 func _clear_drop_sequence_context(preserve_hex_admission:bool=false) -> void:

@@ -63,6 +63,7 @@ func _run() -> void:
 	_part_root_fixture("cutlass", true)
 	_part_root_fixture("cutlass", false, "polisa")
 	await _part_harness()
+	await _part_flak_arrival()
 	if not "--no-real" in OS.get_cmdline_user_args():
 		await _part_real()
 	await _finish()
@@ -193,7 +194,7 @@ func _part_root_fixture(model_id: String, troop_aboard: bool, loc: String = "moo
 
 
 # ---------------------------------------------------------------- Teil 2
-func _open_gm02() -> Dictionary:
+func _open_gm02(parent: Node = null) -> Dictionary:
 	var mission: Node = MISSION_SCENE.instantiate()
 	var setup: Node = mission.get_node("MissionSetup")
 	setup.set("map_file_path", GM02_MAP)
@@ -201,7 +202,7 @@ func _open_gm02() -> Dictionary:
 	setup.set("selected_team_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo"]))
 	setup.set("selected_team_fireteam_ids", PackedStringArray(["ft1", "ft2"]))
 	setup.set("defer_friendly_runtime_activation", true)
-	root.add_child(mission)
+	(parent if parent != null else root).add_child(mission)
 	for _frame in range(3):
 		await process_frame
 	var controller: Node = mission.get_node("TacticalController")
@@ -272,6 +273,8 @@ func _part_harness() -> void:
 		"systems_unavailable": "Kreisen nicht möglich: die Schiffssysteme sind ausgefallen – das Schiff landet.",
 		"occupied_or_invalid_footprint": "Kreisen nicht möglich: die Zelle über der Landezone ist belegt – das Schiff landet.",
 		"already_airborne": "Kreisen nicht möglich: das Schiff ist schon in der Luft – das Schiff landet.",
+		"crew_deployment_pending": "Kreisen nicht möglich: die Besatzung steigt noch ein oder aus – das Schiff landet.",
+		"irgendein_neuer_grund": "Kreisen nicht möglich – das Schiff landet.",
 	}
 	for reason in cases:
 		_check(String(controller.call("_circle_refusal_message", reason)) == String(cases[reason]), "(e) Satz fuer %s: %s" % [reason, String(cases[reason])])
@@ -296,6 +299,107 @@ func _part_harness() -> void:
 	_check(Dictionary(simulation_root.get("_air_support_sorties")).is_empty() and String(controller.get("_drop_sequence_phase")) != "inbound", "(d) kein Sortie-Eintrag, das Schiff ist nicht da")
 	_check(String(_find_card(controller, "craft_a").get("state", "")) == "waiting", "(d) das Schiff bleibt fuer einen neuen Anruf verfuegbar")
 	mission.queue_free()
+	await process_frame
+
+
+# ---------------------------------------------------------------- Teil 2b
+# (d) durchgaengig: Flugabwehr trifft im Anflug (aggressiv, Rumpfverlust gebucht), das Schiff kreist danach in der Luft.
+func _part_flak_arrival() -> void:
+	print("--- Teil 2b (Flugabwehr trifft, Schiff kreist danach)")
+	var flow := FixFlow.new(); root.add_child(flow)
+	var env: Dictionary = await _open_gm02(flow)
+	if not _check(bool(env.ok), "(d) GM02-Mission fuer den durchgaengigen Fall geoeffnet"):
+		return
+	var mission: Node = env.mission
+	var controller: Node = env.controller
+	var team := String(env.teams[0])
+	var mission_root: Node = mission.get_node("SimulationRoot")
+	var pilot_id := String(env.first_ids[0])
+	flow._craft_location_runtime = {"craft_a": "moon_site"}
+	flow._assigned_aircraft_pilot_by_craft = {"craft_a": pilot_id}
+	flow._active_mission = mission
+	var adapter = ADAPTER.new(); flow.add_child(adapter); adapter._flow = flow
+	var source = ROOT_SCRIPT.new(); adapter.add_child(source); adapter._simulation = source
+	var fleet = FLEET.new(); fleet.configure(); fleet.register_craft("craft_a")
+	var equipment = EQUIPMENT.new(); equipment.configure([{"craft_id": "craft_a", "model_id": "cutlass"}])
+	source.configure_singleplayer_owners(null, null, null, fleet); source.configure_ship_equipment(equipment)
+	source.configure_departure_adapter(adapter)
+	source.get("_space_wing_state").ensure_flying_wings("singleplayer", ["craft_a"], ["craft_a"], {"craft_a": pilot_id})
+	source.tick_counter = 50
+	mission.set_meta("location_id", "moon_site")
+	mission.set_meta("campaign_ground_pilot_id", pilot_id)
+	mission.set_meta("singleplayer_visit_identities", {"craft_a": {"craft_id": "craft_a", "unit_ids": env.first_ids, "location_id": "moon_site"}})
+	var bind_result: Dictionary = adapter.bind_mission_air_support(mission)
+	_check(bool(bind_result.get("ok", false)), "(d) Luftunterstuetzung ist an die GM02-Mission gebunden: " + str(bind_result))
+	var raw_cards: Array = controller.get("_mission_drop_cards")
+	for raw_card in raw_cards:
+		if raw_card is Dictionary and String(raw_card.get("craft_id", "")) == "craft_a":
+			raw_card["pilot_unit_id"] = pilot_id
+	controller.set("_mission_drop_pilot_unit_id", pilot_id)
+	# aggressiv, Kreisen gewaehlt, Landeplatz mit zwei Treffern (siehe air_defense_approach_landing_verifier)
+	controller.call("_select_mission_dropship_craft", "craft_a", false)
+	controller.call("_set_selected_fireteams", PackedStringArray([team]), false)
+	controller.call("_select_approach_style", "aggressiv")
+	controller.call("_select_arrival_mode", "circle")
+	_check(String(controller.call("_effective_arrival_mode")) == "circle", "(d) die Ankunft ist hier wirksam Kreisen")
+	# (f) die Zeile "Ankunft" erscheint genau dort, wo Kreisen wirken kann
+	controller.call("_update_ui")
+	var details := mission.get_node_or_null("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Header/DetailsButton") as Button
+	if details != null:
+		details.pressed.emit()
+	for _frame in range(4):
+		await process_frame
+	_check(bool(controller.call("_can_arrive_circling")) and _find_button_by_meta(mission, "mission_dropship_arrival_mode", "circle", "craft_a") != null, "(f) mit gebundener Luftunterstuetzung zeigt die Karte die Zeile Ankunft")
+	controller.set("preview_mode", true)
+	controller.call("_update_ui")
+	await process_frame
+	_check(not bool(controller.call("_can_arrive_circling")) and String(controller.call("_effective_arrival_mode")) == "land", "(f) wo Kreisen nicht wirken kann (Vorschau), gilt dieselbe Bedingung: keine Zeile, effektiv Landen")
+	controller.set("preview_mode", false)
+	# Suche eine freie Zelle in Reichweite der Flugabwehr, in der der Anflug mit Rumpfverlust gelingt (nicht abbricht).
+	var registry: Node = controller.call("_get_terrain_registry")
+	var started := false
+	var text := ""
+	var booked: Dictionary = {}
+	for cell_y in range(84, 90):
+		for cell_x in range(79, 86):
+			mission_root.call("_repair_air_asset_status_at_service", "craft_a", {})
+			controller.call("_clear_drop_sequence_context")
+			controller.set("_lz_position", registry.call("grid_to_world", Vector2i(cell_x, cell_y)))
+			controller.set("_has_lz_position", true)
+			started = bool(controller.call("_try_start_drop_sequence", true))
+			text = String(controller.get("_last_command_text"))
+			for _frame in range(4):
+				await physics_frame
+			booked = mission_root.call("get_air_asset_status_snapshot", "craft_a")
+			if started and int(booked.get("integrity", 100)) < 100:
+				print("ARRIVAL_FLAK Zelle ", Vector2i(cell_x, cell_y), " -> ", text)
+				break
+			started = false
+		if started:
+			break
+	_check(started and text.begins_with("Flugabwehr: ") and text.contains(" Treffer, Rumpf "), "(d) die Flugabwehr trifft, der Anflug geht weiter: " + text)
+	_check(String(controller.get("_drop_sequence_phase")) == "inbound" and String(controller.get("_drop_sequence_arrival_mode")) == "circle", "(d) die Folge fliegt an und behaelt Kreisen")
+	_check(str(int(booked.get("integrity", -1))) + " %" == text.get_slice("Rumpf ", 1) and int(booked.get("integrity", 100)) < 100, "(d) der Rumpfverlust ist gebucht: " + str(booked.get("integrity")) + " / " + str(booked.get("state")))
+	# Der Pilot ist an Bord (die Embark-Wirkung wird hier nicht ueber den Takt abgearbeitet).
+	var pilot: Node = mission_root.call("_resolve_known_unit", pilot_id)
+	print("ARRIVAL_FLAK pilot embarked=", pilot.get_meta("dropship_embarked", false) if pilot != null else "none", " queue=", Array(mission_root.get("effects_queue")).size())
+	print("ARRIVAL_FLAK guard=", controller.call("get_campaign_air_support_pilot_guard", "craft_a"))
+	var guard := 0
+	while String(controller.get("_drop_sequence_phase")) == "inbound" and guard < 6000:
+		controller.call("_update_drop_sequence", 0.1)
+		guard += 1
+	print("ARRIVAL_FLAK reason=", controller.get("_drop_sequence_circle_reason"))
+	var sorties: Dictionary = mission_root.get("_air_support_sorties")
+	print("ARRIVAL_FLAK phase=", controller.get("_drop_sequence_phase"), " last=", controller.get("_last_command_text"), " steps=", guard, " sorties=", sorties.keys())
+	_check(String(controller.get("_drop_sequence_phase")) == "complete" and mission_root.call("is_air_support_craft_airborne", "craft_a"), "(d) nach den Treffern ist das Schiff in der Luft (kein Landen, Phase complete): " + String(controller.get("_last_command_text")))
+	_check(sorties.has("craft_a"), "(d) der Sortie-Eintrag ist da")
+	var after: Dictionary = mission_root.call("get_air_asset_status_snapshot", "craft_a")
+	_check(int(after.get("integrity", -1)) == int(booked.get("integrity", -2)), "(d) der gebuchte Rumpfwert ist nach der Ankunft unveraendert: " + str(after.get("integrity")))
+	var embarked: Dictionary = controller.get("_embarked_unit_ids")
+	var all_aboard := true
+	for id in env.first_ids: all_aboard = all_aboard and embarked.has(id) and not Dictionary(controller.get("_deployed_unit_ids")).has(id)
+	_check(all_aboard, "(d) der Trupp ist an Bord, niemand abgesetzt")
+	flow.queue_free()
 	await process_frame
 
 
@@ -376,14 +480,32 @@ func _part_real() -> void:
 	_check(bool(deploy.get("ok", false)), "(b) der Trupp steigt ueber request_campaign_crew_deployment aus: " + str(deploy))
 	if not await _wait(func(): return _all_crew_deployed(controller) and int(root_owner.call("get_tick")) > 0, 30000, "(b) der abgesetzte Trupp steht auf dem Boden und ist spielbar"): return
 	_saw_landed = false
+	# (ii) gelandet nach dem Kreisen, ganzer Trupp samt Pilot abgesetzt: der Einsatzstand laesst sich speichern, arrival_mode bleibt erhalten
+	var save_holder := {"value": {}}
+	await _wait(func():
+		save_holder.value = load("res://scripts/mission/campaign_active_mission_capture.gd").capture_components(_flow, _runtime)
+		return bool(Dictionary(save_holder.value).get("ok", false)), 20000, "(ii) der Einsatzstand ist nach dem Absetzen speicherbar (keine ausstehende Arbeit mehr)")
+	var landed_save: Dictionary = save_holder.value
+	print("SAVE_AFTER_CIRCLE_LANDING ok=", landed_save.get("ok", false), " reason=", landed_save.get("reason", ""))
+	_check(bool(landed_save.get("ok", false)), "(ii) Kreisen, dann gelandet und Trupp abgesetzt: Einsatz speichern geht (Grund: " + String(landed_save.get("reason", "")) + ")")
+	_check(String(controller.get("_drop_sequence_arrival_mode")) == "circle", "(ii) die Folge fuehrt arrival_mode circle weiter")
 
-	# h) Vergleich mit einem von Hand gestarteten Schiff.
+	# h) Vergleich mit einem von Hand gestarteten Schiff. Der Trupp ist beim Speichern vom Schiff weggelaufen: erst zurueck zum Schiff.
+	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", controller.call("_campaign_landed_craft_position", _craft_id), true)
+	_check(bool(controller.call("execute_selected_fireteam_orders")), "(h) der Trupp laeuft zum Schiff zurueck")
 	if details != null: details.pressed.emit()
 	await process_frame
 	var pilot_button: Button = _air_button(mission, "air_pilot_board")
 	if not _check(pilot_button != null and not pilot_button.disabled, "(h) Knopf Pilot einsteigen vorhanden"): return
-	pilot_button.pressed.emit()
-	if not await _wait(func(): return controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false), 20000, "(h) der Pilot ist wieder an Bord"): return
+	var board_deadline := Time.get_ticks_msec() + 90000
+	while Time.get_ticks_msec() < board_deadline and not bool(controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false)):
+		pilot_button.pressed.emit()
+		for _frame in range(60):
+			await process_frame
+	if not _check(bool(controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false)), "(h) der Pilot ist wieder an Bord"):
+		print("PILOT_GUARD ", controller.call("get_campaign_air_support_pilot_guard", _craft_id), " last=", controller.get("_last_command_text"), " deployed=", controller.get("_deployed_unit_ids").keys(), " embarked=", controller.get("_embarked_unit_ids").keys())
+		return
 	var start_button: Button = _air_button(mission, "air_start")
 	if not _check(start_button != null and not start_button.disabled, "(h) Knopf Start vorhanden"): return
 	start_button.pressed.emit()
@@ -401,6 +523,14 @@ func _part_real() -> void:
 
 	# Auftrag normal beenden und heimfliegen (Einsteigen am Ende der Mission, danach Orbit).
 	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
+	# (b) Laufbefehl: eine abgesetzte Einheit bekommt den Befehl und erreicht ein anderes Feld.
+	var walker: Node2D = root_owner.call("_resolve_known_unit", String(_crew_ids[0])) as Node2D
+	if not _check(walker != null, "(b) die abgesetzte Einheit ist als Bodenakteur da"): return
+	var walk_start: Vector2 = walker.global_position
+	var walk_target: Vector2 = MAP.load_from_file("res://maps/satellite_crash_site.json").get_marker_position("satellite_data")
+	controller.call("_create_waypoints_for_selected_fireteams", walk_target, true)
+	_check(bool(controller.call("execute_selected_fireteam_orders")), "(b) der Laufbefehl wird angenommen")
+	_check(await _wait(func(): return is_instance_valid(walker) and walker.global_position.distance_to(walk_start) > 12.0, 60000, "(b) die Einheit hat den Laufbefehl ausgefuehrt und steht auf einem anderen Feld"), "(b) Laufbefehl ausgefuehrt")
 	if not await _move_and_use(mission, "satellite_data", "secure_satellite", "res://maps/satellite_crash_site.json"): return
 	if not await _move_and_use(mission, "ship_return", "return_to_ship", "res://maps/satellite_crash_site.json"): return
 	if not await _wait(func(): return String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "pending_upload", 20000, "(b) der Auftrag ist mit dem Chip abgeschlossen (Rueckkehr zum Schiff wie gewohnt)"): return
