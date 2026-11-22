@@ -127,9 +127,13 @@ static func validate_data(owner: Node, data: Dictionary, bindings: Dictionary) -
 	var sequences: Dictionary = data.parallel.duplicate(true)
 	var shape := pack_sequence(owner.call("_capture_active_drop_sequence"))
 	if not shape.ok: return bad("transport_transition_pending")
-	if data.primary.size() != shape.value.size(): return bad("transport_sequence_invalid")
-	for key in shape.value:
-		if not data.primary.has(key) or typeof(data.primary[key]) != typeof(shape.value[key]): return bad("transport_sequence_invalid")
+	# Task LB: "arrival_mode" is optional in a saved state (older states lack it and read as "land"); every other key stays exact.
+	var expected_primary: Dictionary = shape.value.duplicate()
+	if not data.primary.has("arrival_mode"): expected_primary.erase("arrival_mode")
+	if data.primary.size() != expected_primary.size(): return bad("transport_sequence_invalid")
+	for key in expected_primary:
+		if not data.primary.has(key) or typeof(data.primary[key]) != typeof(expected_primary[key]): return bad("transport_sequence_invalid")
+	if data.primary.has("arrival_mode") and not data.primary.arrival_mode in ["land", "circle"]: return bad("transport_sequence_invalid")
 	if data.primary.phase != "":
 		var id: String = data.primary.craft_id
 		if sequences.has(id): return bad("transport_sequence_duplicate")
@@ -160,9 +164,10 @@ static func validate_data(owner: Node, data: Dictionary, bindings: Dictionary) -
 		var types := {"phase":TYPE_STRING,"unit_ids":TYPE_ARRAY,"unit_index":TYPE_INT,"timer":TYPE_FLOAT,"position":TYPE_VECTOR2,"lz_position":TYPE_VECTOR2,"visual_only":TYPE_BOOL,"craft_id":TYPE_STRING,"display_name":TYPE_STRING,"approach_angle":TYPE_STRING,"embarked_unit_ids":TYPE_DICTIONARY,"card_feedback_text":TYPE_STRING}
 		for key in types:
 			if not sequence.has(key) or typeof(sequence[key]) != types[key]: return bad("transport_sequence_invalid")
-		var optional := {"hex_admission":TYPE_DICTIONARY,"fireteam_name":TYPE_STRING,"model_id":TYPE_STRING,"craft_type":TYPE_STRING,"station_pad_id":TYPE_STRING,"boarded_fireteam_ids":TYPE_ARRAY,"progress":TYPE_FLOAT,"service_reentry":TYPE_BOOL}
+		var optional := {"hex_admission":TYPE_DICTIONARY,"fireteam_name":TYPE_STRING,"model_id":TYPE_STRING,"craft_type":TYPE_STRING,"station_pad_id":TYPE_STRING,"boarded_fireteam_ids":TYPE_ARRAY,"progress":TYPE_FLOAT,"service_reentry":TYPE_BOOL,"arrival_mode":TYPE_STRING}
 		for key in sequence:
 			if not types.has(key) and (not optional.has(key) or typeof(sequence[key]) != optional[key]): return bad("transport_sequence_invalid")
+		if sequence.has("arrival_mode") and not sequence.arrival_mode in ["land", "circle"]: return bad("transport_sequence_invalid")
 		if sequence.has("model_id") and sequence.model_id != cards[craft].get("model_id", ""): return bad("transport_identity_mismatch")
 		if sequence.unit_index < 0 or sequence.unit_index > sequence.unit_ids.size() or sequence.timer < 0.0 or sequence.visual_only: return bad("transport_sequence_invalid")
 		if root.has_method("is_air_support_craft_airborne") and root.call("is_air_support_craft_airborne", craft): return bad("transport_not_grounded")
@@ -265,6 +270,7 @@ static func publish(owner: Node, candidate: Dictionary) -> void:
 	var primary := unpack_sequence(data.primary, candidate.bindings.actors)
 	for key in ["phase", "units", "unit_index", "hex_admission", "timer", "position", "fireteam_name", "visual_only", "craft_id", "display_name", "lz_position", "approach_angle", "embarked_unit_ids"]:
 		owner.set("_drop_sequence_" + key, primary[key])
+	owner.set("_drop_sequence_arrival_mode", String(primary.get("arrival_mode", "land")))
 	var parallel: Dictionary = {}
 	for craft in data.parallel: parallel[craft] = unpack_sequence(data.parallel[craft], candidate.bindings.actors)
 	owner.set("_parallel_drop_sequences_by_craft", parallel)

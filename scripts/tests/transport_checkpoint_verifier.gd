@@ -59,6 +59,7 @@ func _initialize() -> void:
 	_multicraft()
 	_geometry()
 	_landing_key()
+	_arrival_mode()
 	print("TRANSPORT_CHECKPOINT checks=%d failures=%d" % [checks, failures])
 	quit(1 if failures else 0)
 
@@ -87,6 +88,61 @@ func _landing_key() -> void:
 	landing[&"foreign"] = true
 	rig.controller.set("_field_landing_by_craft", {"craft":landing})
 	_check(not rig.controller.export_transport_checkpoint().get("ok",true), "unknown StringName keys still fail closed")
+	rig.host.free()
+
+# Task LB: the sequence carries only the optional key "arrival_mode"; the display note "circle_note" never reaches a saved state.
+func _arrival_mode() -> void:
+	var pre_lb_keys := ["phase","units","unit_index","hex_admission","timer","position","fireteam_name","visual_only","craft_id","display_name","lz_position","approach_angle","embarked_unit_ids","card_feedback_text"]
+	var rig := fixture()
+	var state: Dictionary = rig.controller.export_transport_checkpoint()
+	_check(state.has("value"), "(i) landed ship, arrival land: mission state exports")
+	if state.has("value"):
+		var json: Dictionary = JSON.parse_string(JSON.stringify(state))
+		var data: Dictionary = CODEC.decode_value(json.value).value
+		var keys: Array = data.primary.keys()
+		keys.erase("arrival_mode")
+		keys.sort()
+		var expected: Array = pre_lb_keys.duplicate()
+		expected.erase("units")
+		expected.append("unit_ids")
+		expected.sort()
+		_check(data.primary.get("arrival_mode") == "land" and not data.primary.has("circle_note") and keys == expected, "(i) saved sequence equals the pre-LB one plus the optional arrival_mode land: " + str(keys))
+		var bindings := bind(rig)
+		var prepared: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(json, bindings)
+		_check(prepared.ok and rig.controller.validate_transport_checkpoint_candidate(prepared.candidate, bindings).ok, "(i) land: load works")
+		# (ii) circle, then landed with the troop deployed
+		rig.controller.set("_drop_sequence_arrival_mode", "circle")
+		var circle_state: Dictionary = rig.controller.export_transport_checkpoint()
+		_check(circle_state.has("value"), "(ii) arrival circle, landed later: mission state exports")
+		if circle_state.has("value"):
+			var circle_json: Dictionary = JSON.parse_string(JSON.stringify(circle_state))
+			var circle_prepared: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(circle_json, bindings)
+			_check(circle_prepared.ok and rig.controller.validate_transport_checkpoint_candidate(circle_prepared.candidate, bindings).ok, "(ii) circle: load works")
+			rig.controller.set("_drop_sequence_arrival_mode", "land")
+			if circle_prepared.ok:
+				rig.controller._publish_transport_checkpoint(circle_prepared.candidate)
+				_check(rig.controller.get("_drop_sequence_arrival_mode") == "circle" and rig.controller.export_transport_checkpoint() == circle_state, "(ii) arrival_mode circle survives save and load")
+		rig.controller.set("_drop_sequence_arrival_mode", "land")
+		# (iii) old state without the key
+		var old: Dictionary = CODEC.decode_value(json.value).value
+		old.primary.erase("arrival_mode")
+		var old_state := {"schema":json.schema,"value":CODEC.encode_value(old).value}
+		var old_prepared: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(old_state, bindings)
+		_check(old_prepared.ok and rig.controller.validate_transport_checkpoint_candidate(old_prepared.candidate, bindings).ok, "(iii) old state without arrival_mode loads")
+		if old_prepared.ok:
+			rig.controller.set("_drop_sequence_arrival_mode", "circle")
+			rig.controller._publish_transport_checkpoint(old_prepared.candidate)
+			_check(rig.controller.get("_drop_sequence_arrival_mode") == "land", "(iii) value after loading an old state is land")
+		# (iv) invalid values and the display note are rejected
+		for kind in ["value", "type", "note"]:
+			var bad: Dictionary = CODEC.decode_value(json.value).value
+			match kind:
+				"value": bad.primary.arrival_mode = "orbit"
+				"type": bad.primary.arrival_mode = 1
+				"note": bad.primary["circle_note"] = "Kreisen nicht möglich"
+			var altered := {"schema":json.schema,"value":CODEC.encode_value(bad).value}
+			var altered_prepared: Dictionary = rig.controller.prepare_transport_checkpoint_candidate(altered, bindings)
+			_check(not altered_prepared.ok or not rig.controller.validate_transport_checkpoint_candidate(altered_prepared.candidate, bindings).ok, "(iv) reject arrival_mode state: " + kind)
 	rig.host.free()
 
 func _geometry() -> void:
