@@ -15,6 +15,7 @@ const TERRAIN = preload("res://scripts/terrain/terrain_registry.gd")
 const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const STATUS = preload("res://scripts/mission/air_asset_status.gd")
+const CASUALTY = preload("res://scripts/core/campaign_casualty_rules.gd")
 
 var passed := 0
 var failed := 0
@@ -87,6 +88,7 @@ func _run() -> void:
 	_test_step_shootdown()
 	_test_root_outcomes("cutlass")
 	_test_root_outcomes("buccaneer")
+	_test_casualty_rules()
 	await process_frame
 	print("AIR_SHOOTDOWN passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -262,3 +264,37 @@ func _test_root_outcomes(model_id: String) -> void:
 		runs.append({"outcome": one.outcome, "messages": one.messages, "results": one.get("results", {}), "rng": f.root.get("_air_ground_rng_state"), "sites": f.root.get_air_crash_sites()})
 		f.flow.free()
 	_check(runs[0] == runs[1], tag + "gleicher Startzustand: gleicher Ablauf (zweimal)")
+
+
+# ---------------------------------------------------------------- Teil 3: Einstufung am Einsatzende (campaign_casualty_rules)
+func _ts(id: String, vital: String, extra: Dictionary = {}) -> Dictionary:
+	var state := {"unit_id": id, "vital_state": vital, "health_points": 0 if vital != "fit" else 100, "was_downed": vital != "fit", "near_ship": false, "aboard": false}
+	state.merge(extra, true)
+	return state
+
+
+func _member(id: String, role: String, leadership := 0.0, piloting := 0.0) -> Dictionary:
+	return {"unit_id": id, "roster_role_category": role, "skill_values": {"leadership": leadership}, "dropship_piloting": piloting}
+
+
+func _test_casualty_rules() -> void:
+	var rules: Dictionary = CASUALTY.load_rules()
+	# Wer beim Absturz gestorben ist, ist tot - auch in einem gewonnenen Einsatz, auch nahe am Schiff und an Bord.
+	var dead_won: Dictionary = CASUALTY.classify_unit(_ts("a", "down", {"killed_in_crash": true, "near_ship": true, "aboard": true}), "won")
+	_check(dead_won.outcome == "dead", "beim Absturz gestorben: tot, obwohl 'won', nahe am Schiff und an Bord (%s)" % str(dead_won))
+	var alive_won: Dictionary = CASUALTY.classify_unit(_ts("a", "down", {"near_ship": true, "aboard": true}), "won")
+	_check(alive_won.outcome == "wounded", "unveraendert: ohne das Merkmal rettet 'nahe am Schiff' (wounded)")
+	var roster: Array = [_member("lead", "operator", 0.6), _member("pilot", "pilot", 0.0, 0.7), _member("two", "operator", 0.4)]
+	var crash_pilot: Dictionary = {"killed_in_crash": true, "crashed_aboard": true}
+	var dead_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	_check(not bool(dead_pilot.total_loss) and Array(dead_pilot.respawn_unit_ids) == ["pilot"], "toter Pilot (Absturz) allein ist kein Totalverlust; Respawn-Regeln gelten (%s)" % str(dead_pilot.get("total_loss_reason")))
+	var respawn_entry: Dictionary = {}
+	for entry in dead_pilot.casualties:
+		if entry.unit_id == "pilot": respawn_entry = entry
+	_check(String(respawn_entry.get("outcome", "")) == "dead" and String(Dictionary(respawn_entry.get("respawn_state", {})).get("source", "")) == "crash", "Respawn-Quelle 'crash' fuer den beim Absturz Gestorbenen")
+	var lying_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", {"crashed_aboard": true})], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	_check(not bool(lying_pilot.total_loss), "am Boden liegender Pilot (Absturz) allein ist kein Totalverlust")
+	var plain_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down")], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	_check(bool(plain_down.total_loss) and plain_down.total_loss_reason == "pilot_down", "unveraendert: ein anderweitig ausgefallener Pilot bleibt pilot_down")
+	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	_check(bool(all_down.total_loss) and all_down.total_loss_reason == "ground_team_down", "sind alle eigenen Personen tot oder am Boden, gilt die vorhandene Niederlage-Regel (ground_team_down)")

@@ -108,6 +108,10 @@ static func _is_fit(team_state: Dictionary) -> bool:
 static func classify_unit(team_state: Dictionary, mission_outcome: String) -> Dictionary:
 	var unit_id := str(team_state.get("unit_id", ""))
 	var was_downed := bool(team_state.get("was_downed", false))
+	# LC2b: Wer beim Absturz eines Schiffs gestorben ist (Merkmal killed_in_crash, Quelle der Absturz), ist tot - zuerst gewertet,
+	# sonst rettet "an Bord", "nahe am Schiff" oder ein gewonnener Einsatz ihn. Danach gelten die Respawn-Regeln unveraendert.
+	if bool(team_state.get("killed_in_crash", false)):
+		return {"unit_id": unit_id, "outcome": "dead", "severity": ""}
 	if _is_fit(team_state):
 		if was_downed:
 			return {"unit_id": unit_id, "outcome": "wounded", "severity": "light"}
@@ -143,7 +147,9 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 		var unit_id := str(state.get("unit_id", ""))
 		var fit := _is_fit(state)
 		if unit_id == pilot_unit_id:
-			pilot_fit = fit
+			# LC2b: Ein Pilot, der mit seinem abgestuerzten Schiff ausfiel (crashed_aboard), loest allein keinen Totalverlust
+			# "pilot_down" aus: das Schiff ist ohnehin verloren; wie die Leute heimkommen, regeln die weiteren Abschnitte.
+			pilot_fit = fit or bool(state.get("crashed_aboard", false))
 		elif fit:
 			other_fit = true
 		var result: Dictionary = classify_unit(state, mission_outcome)
@@ -157,7 +163,7 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 			if final_death:
 				dead_ids.append(unit_id)
 			else:
-				result["respawn_state"] = build_respawn_state(int(result["death_number"]), "left_behind", rules)
+				result["respawn_state"] = build_respawn_state(int(result["death_number"]), "crash" if bool(state.get("killed_in_crash", false)) else "left_behind", rules)
 				respawn_ids.append(unit_id)
 	var reason := ""
 	if not pilot_fit:
