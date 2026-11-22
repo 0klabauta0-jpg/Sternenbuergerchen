@@ -320,9 +320,12 @@ func _test_controller() -> void:
 	print("--- Teil 4 (Controller auf GM02: Insassen, Absetzen, Schicksal, Schiff verloren)")
 	await _controller_case(["light", "dead"], true)
 	await _controller_case(["severe", "unhurt"], false)
+	# LC2b Nachbesserung K2: das Absturzfeld ist belegt bzw. unbegehbar; niemand darf an Bord des verlorenen Schiffs bleiben.
+	await _controller_case(["light"], false, "occupied")
+	await _controller_case(["unhurt", "light"], false, "blocked")
 
 
-func _controller_case(forms: Array, with_guards: bool) -> void:
+func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") -> void:
 	var mission: Node = MISSION_SCENE.instantiate()
 	var setup: Node = mission.get_node("MissionSetup")
 	setup.set("map_file_path", GM02_MAP)
@@ -355,23 +358,35 @@ func _controller_case(forms: Array, with_guards: bool) -> void:
 		var person: Node = controller.call("_get_campaign_sortie_unit", id)
 		if person != null:
 			person.set_meta("dropship_embarked", true)
-	_check(ids.size() == forms.size(), "zwei Personen im Einsatz (%d)" % ids.size())
+	_check(ids.size() == 2, "zwei Personen im Einsatz (%d)" % ids.size())
+	var simulation: Node = mission.get_node("SimulationRoot")
+	var site_grid: Vector2i = registry.call("world_to_grid", quiet_lz)
+	if mode == "blocked":
+		for gx in range(0, 128):
+			if not bool(registry.call("is_walkable", Vector2i(gx, 3))):
+				site_grid = Vector2i(gx, 3)
+				break
+		_check(not bool(registry.call("is_walkable", site_grid)), "Absturzfeld ist unbegehbar (%s)" % str(site_grid))
+	if mode == "occupied":
+		var blocker: Dictionary = simulation.call("admit_hex_ground_setup_actors", [{"unit_id": ids[0], "grid": site_grid, "facing_dir": 0, "posture_key": "standing"}], true, true)
+		_check(bool(blocker.get("ok", false)), "eine Person steht auf dem Absturzfeld: " + str(blocker.get("reason", "")))
 	var order: Array = controller.call("get_air_crash_occupant_ids", "craft_a")
 	var rest: Array = []
 	for id in ids:
 		if id != pilot_id:
 			rest.append(id)
 	rest.sort()
-	_check(not order.is_empty() and String(order[0]) == pilot_id, "Insassen: der Pilot kommt zuerst (%s)" % str(order))
-	_check(order.slice(1) == rest, "Insassen: danach alle Eingeschifften nach Kennung sortiert (%s)" % str(order))
+	if mode != "occupied":
+		_check(not order.is_empty() and String(order[0]) == pilot_id, "Insassen: der Pilot kommt zuerst (%s)" % str(order))
+		_check(order.slice(1) == rest, "Insassen: danach alle Eingeschifften nach Kennung sortiert (%s)" % str(order))
+	else:
+		_check(order == [pilot_id], "belegtes Feld: nur die noch eingeschiffte Person ist Insasse (%s)" % str(order))
 	var results: Dictionary = {}
 	for index in range(order.size()):
 		var form: String = String(forms[index % forms.size()])
 		results[String(order[index])] = {"state": form, "health_loss_fraction": 0.5 if form == "light" else 0.0}
-	var site_grid: Vector2i = registry.call("world_to_grid", quiet_lz)
 	var applied: Dictionary = controller.call("apply_air_crash", "craft_a", {"grid": site_grid}, results, order)
-	_check(bool(applied.get("ok", false)), "Absetzen an der Absturzstelle gelingt: " + str(applied))
-	var simulation: Node = mission.get_node("SimulationRoot")
+	_check(bool(applied.get("ok", false)), "Absetzen an der Absturzstelle gelingt (%s): %s" % [mode, str(applied)])
 	var embarked: Dictionary = {}
 	for id in controller.get("_embarked_unit_ids"):
 		embarked[String(id)] = true

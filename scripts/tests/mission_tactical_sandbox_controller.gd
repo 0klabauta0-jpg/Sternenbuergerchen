@@ -19927,17 +19927,23 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 		if _has_live_hex_deployment_owner():
 			# Eingeschiffte Personen sind noch "staged": darum die Setup-Aufnahme mit allow_staged (wie die Absetz-Pruefung des
 			# Adapters), alle am selben Ankerfeld; der Planer verteilt Kollisionen auf freie Nachbarfelder.
-			var candidates: Array[Dictionary] = []
-			for id in ids:
-				candidates.append({"unit_id": id, "grid": grid, "facing_dir": 0, "posture_key": "standing"})
-			var excluded: Array[Vector2i] = []
-			var admitted: Dictionary = simulation.admit_hex_ground_setup_actors(candidates, true, true, excluded)
-			placed = bool(admitted.get("ok", false))
+			var admitted: Dictionary = _air_crash_admit_people(simulation, ids, grid)
+			placed = bool(admitted.get("ok", false)) or not Array(admitted.get("placements", [])).is_empty()
 			reason = String(admitted.get("reason", ""))
-			if placed:
-				var registry: Node = simulation.get_hex_ground_terrain_registry()
-				for entry in Array(admitted.get("placements", [])):
-					positions[String(entry.unit_id)] = registry.grid_to_world(entry.grid)
+			var registry: Node = simulation.get_hex_ground_terrain_registry()
+			for entry in Array(admitted.get("placements", [])):
+				positions[String(entry.unit_id)] = registry.grid_to_world(entry.grid)
+			# Wer nicht gesetzt werden konnte, bleibt nie an Bord des verlorenen Schiffs: er gilt als beim Absturz gestorben.
+			for id in Array(admitted.get("unplaced", [])):
+				units[id].set_meta("killed_in_crash", true)
+				units[id].set_meta("dropship_embarked", false)
+				units[id].set_meta("air_crash_state", "dead")
+				_embarked_unit_ids.erase(id)
+				results[id] = {"state": "dead", "health_loss_fraction": 0.0}
+				units[id].call("apply_damage", maxi(int(units[id].call("get_health")), 1), {"source": "air_crash", "craft_id": craft_id})
+				ids.remove_at(ids.find(id))
+			if not Array(admitted.get("unplaced", [])).is_empty():
+				_last_command_text = "Absturz: %d Person(en) fanden kein freies Feld" % Array(admitted.get("unplaced", [])).size()
 		else:
 			reason = "hex_ground_unavailable"
 	else:
@@ -19984,6 +19990,58 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 				unit.call("apply_damage", loss, {"source": "air_crash", "craft_id": craft_id})
 			_mark_unit_was_downed(id)
 	return {"ok": placed, "reason": reason, "placed": ids if placed else PackedStringArray()}
+
+
+## LC2b Nachbesserung (K2): Felder rund um die Absturzstelle, ringfoermig nach aussen (Breitensuche ueber die Nachbarn, hoechstens 64 Felder,
+## nur begehbare). Das Absturzfeld selbst steht vorn, auch wenn es nicht begehbar ist (der Planer lehnt es dann ab, die Suche geht weiter).
+func _air_crash_anchor_cells(registry: Node, start: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	var queue: Array[Vector2i] = [start]
+	var seen: Dictionary = {start: true}
+	var cursor := 0
+	while cursor < queue.size() and queue.size() < 256 and cells.size() < 64:
+		var cell: Vector2i = queue[cursor]
+		cursor += 1
+		if bool(registry.call("is_walkable", cell)):
+			cells.append(cell)
+		# Rohe Hex-Nachbarn (nicht nur "legale"): von einem unbegehbaren Feld aus gibt es keine legalen, die Suche muss trotzdem nach aussen.
+		for direction in POLISA_GLOBE_HEX.DIRECTIONS:
+			var next: Vector2i = cell + direction
+			if not seen.has(next):
+				seen[next] = true
+				queue.append(next)
+	return cells
+
+
+## LC2b Nachbesserung (K2): Setzt Personen (noch "staged") ab. Erst alle zusammen an einem Anker; lehnt der Planer ab (Anker belegt, Platz
+## zu knapp), wird der naechste freie Anker versucht, zuletzt jede Person einzeln. Ein Fehlschlag aendert nichts am Zustand, Wiederholen ist sicher.
+## Rueckgabe: {ok (alle gesetzt), reason, placements:[{unit_id, grid}], unplaced:[ids]}.
+func _air_crash_admit_people(simulation: Node, ids: PackedStringArray, grid: Vector2i) -> Dictionary:
+	var registry: Node = simulation.get_hex_ground_terrain_registry()
+	var anchors: Array[Vector2i] = _air_crash_anchor_cells(registry, grid)
+	var excluded: Array[Vector2i] = []
+	var reason := "no_free_cell"
+	for anchor in anchors:
+		var candidates: Array[Dictionary] = []
+		for id in ids:
+			candidates.append({"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"})
+		var admitted: Dictionary = simulation.admit_hex_ground_setup_actors(candidates, true, true, excluded)
+		if bool(admitted.get("ok", false)):
+			return {"ok": true, "reason": "", "placements": Array(admitted.get("placements", [])), "unplaced": []}
+		reason = String(admitted.get("reason", reason))
+	var placements: Array = []
+	var unplaced: Array = []
+	for id in ids:
+		var done := false
+		for anchor in anchors:
+			var single: Dictionary = simulation.admit_hex_ground_setup_actors([{"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"}] as Array[Dictionary], true, true, excluded)
+			if bool(single.get("ok", false)):
+				placements.append_array(Array(single.get("placements", [])))
+				done = true
+				break
+		if not done:
+			unplaced.append(id)
+	return {"ok": unplaced.is_empty(), "reason": reason, "placements": placements, "unplaced": unplaced}
 
 
 ## LC2b: Eine leicht verletzte Person zaehlt nach dem Einsatz als "leicht verwundet" (classify_unit: fit und was_downed). Der Driver
