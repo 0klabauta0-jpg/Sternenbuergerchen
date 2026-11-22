@@ -8444,6 +8444,7 @@ func get_air_support_threat_targets() -> Array:
 		var pose: Dictionary = get_air_support_world_pose(craft_id)
 		if pose.is_empty(): continue
 		var skill := 0.5
+		var pilot_known := false
 		var binding: Dictionary = _resolve_air_support_craft(craft_id)
 		var pilot_check: Dictionary = _resolve_air_support_pilot(craft_id)
 		if binding.get("ok", false) and pilot_check.get("ok", false) and pilot_check.pilot.has_method("get_character_profile_bundle"):
@@ -8451,8 +8452,10 @@ func get_air_support_threat_targets() -> Array:
 			var profile: Variant = pilot_check.pilot.call("get_character_profile_bundle")
 			if typeof(profile) == TYPE_DICTIONARY and typeof(profile.get("platform_values")) == TYPE_DICTIONARY:
 				var value: Variant = profile.platform_values.get(key)
-				if typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)): skill = clampf(float(value), 0.0, 1.0)
-		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill, "approach_style":_air_attack_style(craft_id), "craft_type":_air_craft_type(craft_id)})
+				if typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)):
+					skill = clampf(float(value), 0.0, 1.0)
+					pilot_known = true
+		targets.append({"craft_id":craft_id, "pilot_known":pilot_known, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill, "approach_style":_air_attack_style(craft_id), "craft_type":_air_craft_type(craft_id)})
 	return targets
 
 func draw_air_ground_roll() -> float:
@@ -8544,17 +8547,24 @@ func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: S
 	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
 	# Notlandung nur, wenn die Landezone frei ist; sonst wird der Ausgang als Bruchlandung behandelt.
 	if outcome == "emergency_landing" and not _air_landing_zone_free(craft_id, sortie, binding): outcome = "crash"
+	# Eine laufende Angriffsanweisung endet mit dem Flug (ein spaeter Start schiesst nicht von allein); solange die Sortie noch besteht.
+	var ceased: Dictionary = request_air_support_cease_fire(craft_id, "shootdown-stop:%s:%d" % [craft_id, tick_counter])
+	if not ceased.get("ok", false): push_warning("Abschuss: Feuerstopp fuer %s nicht gebucht (%s)" % [craft_id, String(ceased.get("reason", ""))])
 	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, pose)
-	if not ended.get("ok", false): return ended
-	# Eine laufende Angriffsanweisung endet mit dem Flug (ein spaeter Start schiesst nicht von allein).
-	request_air_support_cease_fire(craft_id, "shootdown-stop:%s:%d" % [craft_id, tick_counter])
+	if not ended.get("ok", false):
+		# W4: Das Schiff bleibt nie ohne Ausgang in der Luft. Laesst sich die Sortie nicht sauber beenden (Rueckversetzung/Abmeldung
+		# scheitert), kann es auch nicht landen: Bruchlandung, die Sortie wird ersatzlos gestrichen.
+		push_warning("Abschuss: Sortie von %s nicht sauber beendbar (%s), Bruchlandung" % [craft_id, String(ended.get("reason", ""))])
+		if outcome == "emergency_landing": outcome = "crash"
+		_air_support_sorties.erase(craft_id)
 	var status = AIR_CRASH_STATUS.from_dict(status_snapshot if not status_snapshot.is_empty() else get_air_asset_status_snapshot(craft_id))
 	var messages: Array = []
 	var result: Dictionary = {"ok":true, "outcome":outcome, "messages":messages}
 	if outcome == "emergency_landing":
 		var hull := clampi(ceili(float(status.max_integrity) * float(rules.emergency_landing_hull_percent) / 100.0), 1, status.max_integrity)
-		status.integrity = hull
-		status.state = AIR_CRASH_STATUS.STATE_DAMAGED if hull <= int(ceil(float(status.max_integrity) * 0.55)) else AIR_CRASH_STATUS.STATE_HIT
+		# Zustand (beschaedigt/getroffen) nach der einen Schwelle in AirAssetStatus.apply_damage, keine zweite Zahl hier.
+		status.integrity = status.max_integrity
+		status.apply_damage(status.max_integrity - hull, {})
 		status.destroyed = false
 		status.crashed = false
 		status.warning_visible = false

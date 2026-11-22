@@ -253,7 +253,7 @@ func step(ctx: Dictionary) -> Dictionary:
 			if hit and _is_terminal(status):
 				# LC2b: Rumpf 0 = abgeschossen, genau einmal. Kein weiterer Schuetze schiesst in diesem Takt auf das Schiff.
 				out.events.append({"type": "shootdown", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick})
-				out.shootdowns.append({"craft_id": craft_id, "pilot_skill": float(target.get("pilot_skill", 0.5)), "display_name": display_name})
+				out.shootdowns.append({"craft_id": craft_id, "pilot_skill": float(target.get("pilot_skill", 0.5)) if bool(target.get("pilot_known", true)) else 0.0, "display_name": display_name})
 				_break_off_reported.erase(craft_id)
 				_cease_pending.erase(craft_id)
 				break

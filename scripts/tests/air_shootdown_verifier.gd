@@ -92,6 +92,7 @@ func _check(ok: bool, label: String) -> bool:
 
 func _run() -> void:
 	_test_step_shootdown()
+	_test_pilot_unknown()
 	_test_root_outcomes("cutlass")
 	_test_root_outcomes("buccaneer")
 	_test_casualty_rules()
@@ -114,6 +115,29 @@ func _target(craft_type: String, integrity: int = 100, state: String = "intact")
 func _ctx(tick: int, targets: Array, shooters: Array, roller: Roller) -> Dictionary:
 	return {"tick": tick, "targets": targets, "shooters": shooters, "id_of": Callable(self, "_fid"), "weapon_of": Callable(self, "_fweapon"),
 		"is_fit": Callable(self, "_ffit"), "has_ground_contact": Callable(self, "_fcontact"), "sees": Callable(self, "_fsees"), "roll": Callable(roller, "next")}
+
+
+## Klein 1: Ist der Pilotenwert unbekannt (pilot_known false), rechnet der Abschuss-Eintrag mit 0.0, nicht mit dem Ausweich-Vorgabewert 0.5.
+func _test_pilot_unknown() -> void:
+	var gfa = GFA.new()
+	var roller := Roller.new()
+	roller.values = [0.0]
+	var shooters: Array = [_unit("g1", "rocket_launcher")]
+	var target := _target("fighter")
+	target["pilot_known"] = false
+	gfa.step(_ctx(0, [target], shooters, roller))
+	var status: Dictionary = target.status
+	var tick: int = GFA.lock_ticks("rocket_launcher")
+	var skills: Array = []
+	for i in range(6):
+		target.status = status
+		var result: Dictionary = gfa.step(_ctx(tick, [target], shooters, roller))
+		for down in Array(result.get("shootdowns", [])):
+			skills.append(float(down.pilot_skill))
+		if result.updates.has("viper"):
+			status = result.updates.viper.snapshot
+		tick += GFA.lock_ticks("rocket_launcher")
+	_check(skills == [0.0], "unbekannter Pilot: Abschuss rechnet mit 0.0 (%s)" % str(skills))
 
 
 ## Leichter Jaeger, Raketenwerfer: zwei Treffer (je 50 %) holen ihn herunter; genau EIN Abschuss-Ereignis, auch wenn weitere Schuetzen und Takte folgen.
@@ -262,6 +286,15 @@ func _test_root_outcomes(model_id: String) -> void:
 		_check(not bool(second.get("ok", true)) and f.root.get_air_crash_sites().size() == 1 and f.transport.crash_calls.size() == 1, tag + outcome + ": genau ein Abschuss je Schiff")
 		var takeoff: Dictionary = f.root.request_air_support_takeoff("ship")
 		_check(not bool(takeoff.get("ok", true)), tag + outcome + ": kein neuer Start nach dem Absturz (%s)" % str(takeoff.get("reason")))
+		f.flow.free()
+	# --- W4: Laesst sich die Sortie nicht sauber beenden (Rueckversetzung scheitert), gilt Bruchlandung; das Schiff bleibt nie ohne Ausgang in der Luft.
+	for wanted in ["crash", "emergency_landing"]:
+		f = _air_fixture(model_id)
+		var sorties: Dictionary = f.root.get("_air_support_sorties")
+		sorties["ship"].previous_pose["position_plane"] = Vector2(INF, INF)
+		var stuck := _shoot(f, wanted, rules)
+		_check(bool(stuck.get("ok", false)) and stuck.outcome == "crash", tag + "W4 (%s): Sortie nicht beendbar -> Bruchlandung: %s" % [wanted, str(stuck.get("outcome", stuck))])
+		_check(not Dictionary(f.root.get("_air_support_sorties")).has("ship") and f.root.is_air_craft_crashed("ship") and f.transport.crash_calls.size() == 1, tag + "W4 (%s): keine Sortie mehr, Absturzstelle gemerkt, Insassen versorgt" % wanted)
 		f.flow.free()
 	# --- Gleicher Startzustand, gleicher Ablauf.
 	var runs: Array = []
