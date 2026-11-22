@@ -13,7 +13,8 @@ const COMBAT_AUDIO_IDS: Array = [
 ]
 const MIN_VISIBLE_FIRE_EVENTS: int = 12
 const MAX_COOLDOWN_MSEC: int = 25
-const MIN_POLYPHONY: int = 6
+const MIN_POLYPHONY: int = 12
+const SHOT_COUNT: int = 12
 
 var _passed: int = 0
 var _failed: int = 0
@@ -71,7 +72,7 @@ func _test_six_shots_all_accepted() -> void:
 	await process_frame
 	bus.call("stop_all_for_tests")
 	var accepted: int = 0
-	for index in range(6):
+	for index in range(SHOT_COUNT):
 		var result: Dictionary = bus.call("emit_weapon_fire", "rifle", {
 			"position": Vector3(float(index), 0.0, 0.0),
 			"now_msec": 10000 + index * 30,
@@ -81,7 +82,7 @@ func _test_six_shots_all_accepted() -> void:
 			accepted += 1
 		else:
 			print("  shot %d rejected: %s" % [index, String(result.get("reason", ""))])
-	_assert(accepted == 6, "six rifle shots 30 ms apart are all accepted (%d)" % accepted)
+	_assert(accepted == SHOT_COUNT, "%d rifle shots 30 ms apart are all accepted (%d)" % [SHOT_COUNT, accepted])
 	bus.call("stop_all_for_tests")
 	bus.queue_free()
 
