@@ -135,8 +135,10 @@ func _run() -> void:
 		check(INV.has_space({"capacity": 12, "items": {}}, item, 1), "%s fits an empty backpack" % item)
 		check(INV.valid_container({"capacity": 12, "items": {item: 2}}), "a backpack holding two %s is a valid container" % item)
 		check(INV.used({item: 3}) == 3, "%s takes one slot each" % item)
-		check(not INV.has_space({"capacity": 0, "armor_chip_capacity": 1, "items": {}}, item, 1), "%s does not fit the armor compartment of a person without a backpack" % item)
-		check(not INV.valid_container({"capacity": 0, "armor_chip_capacity": 1, "items": {item: 1}}), "a compartment-only container holding %s is invalid" % item)
+		# M2 (22.11.2026): changed expectation - the armor compartment now takes magazines (one place each); was "does not fit" in M1.
+		check(INV.has_space({"capacity": 0, "armor_chip_capacity": 1, "items": {}}, item, 1), "%s fits the armor compartment of a person without a backpack (M2)" % item)
+		check(INV.valid_container({"capacity": 0, "armor_chip_capacity": 1, "items": {item: 1}}), "a compartment-only container holding one %s is valid (M2)" % item)
+		check(not INV.valid_container({"capacity": 0, "armor_chip_capacity": 1, "items": {item: 2}}), "a size-1 compartment without a backpack cannot hold two %s" % item)
 	check(INV.has_space({"capacity": 0, "armor_chip_capacity": 1, "items": {}}, "satellite_chip", 1), "the armor compartment still takes a data chip")
 	check(not INV.known("ammo_unknown"), "an unknown ammunition id is still unknown")
 	check(INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"satellite_chip": 1, "ammo_light": 12}}), "chip in the compartment plus twelve magazines in the backpack is valid")

@@ -5,8 +5,13 @@ const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.
 const LOADOUT = preload("res://scripts/command/loadout_contract.gd")
 const DATA_CHIP_ITEMS := ["satellite_chip", "outpost_chip"]
 const RESERVED_QUEST_ITEMS := ["satellite_chip","outpost_chip","c_benit_crate"]
+const AMMO_RULES = preload("res://scripts/core/ammo_rules.gd")
+## Fachgroesse eines neuen persoenlichen Behaelters (Anzug); die wirkliche Groesse folgt der getragenen Ruestung (ammo_rules.json).
 const ARMOR_CHIP_CAPACITY := 1
+## Obergrenze fuer eine GESPEICHERTE Fachgroesse (nur Formpruefung; die Groessen selbst stehen in ammo_rules.json).
+const MAX_COMPARTMENT_CAPACITY := 32
 const BACKPACK_CAPACITY := 12
+static var _ammo_rules: Dictionary = {}
 const START_STOCK := {"armor_light":2,"armor_medium":2,"armor_heavy":2,"smg":2,"rifle":2,"medictool":1,"mining_tool":1,"salvage_tool":1}
 static func known(item: String) -> bool:
 	return SHIP_COMPONENTS.known(item) or SPACE_COMPONENTS.known(item) or item in ["armor_light","armor_medium","armor_heavy","ore","salvage","a_benit","b_benit","c_benit","satellite_chip","outpost_chip","c_benit_crate","mining_tool","salvage_tool","backpack","ammo_light","ammo_rifle","ammo_rail","ammo_rocket"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
@@ -26,23 +31,40 @@ static func count_chips(items: Dictionary) -> int:
 		count += int(items.get(item, 0))
 	return count
 
+static func ammo_rules() -> Dictionary:
+	if _ammo_rules.is_empty():
+		_ammo_rules = AMMO_RULES.load_rules()
+	return _ammo_rules
+
+static func count_ammo(items: Dictionary) -> int:
+	var count := 0
+	var rules := ammo_rules()
+	for item in items:
+		if AMMO_RULES.is_ammo_item(String(item), rules): count += int(items[item])
+	return count
+
+## Belegte Plaetze im Ruestungsfach: Chips zuerst, dann Magazine, nie mehr als die Fachgroesse.
+static func compartment_used(data: Dictionary) -> int:
+	var items: Dictionary = data.get("items", {})
+	return mini(int(data.get("armor_chip_capacity", 0)), count_chips(items) + count_ammo(items))
+
 static func backpack_slots_used(data: Dictionary) -> int:
 	var items: Dictionary = data.get("items", {})
 	var armor_slots := int(data.get("armor_chip_capacity", 0))
 	var used_slots := used(items)
 	if armor_slots > 0:
-		used_slots += maxi(0, count_chips(items) - armor_slots) + int(items.get("c_benit_crate", 0))
+		var chips := count_chips(items)
+		used_slots += maxi(0, chips - armor_slots) + int(items.get("c_benit_crate", 0))
+		# Magazine liegen nach den Chips im Fach; nur was dort keinen Platz hat, zaehlt gegen den Rucksack.
+		used_slots -= mini(count_ammo(items), maxi(0, armor_slots - chips))
 	return used_slots
 
 static func has_space(data: Dictionary, item: String, amount: int) -> bool:
-	var used_slots := backpack_slots_used(data)
-	var armor_slots := int(data.get("armor_chip_capacity", 0))
-	if armor_slots > 0 and DATA_CHIP_ITEMS.has(item):
-		var free_armor_slots := maxi(0, armor_slots - count_chips(data.items))
-		used_slots += maxi(0, amount - free_armor_slots)
-	elif armor_slots > 0 or not RESERVED_QUEST_ITEMS.has(item):
-		used_slots += amount
-	return used_slots <= int(data.capacity)
+	var items: Dictionary = Dictionary(data.get("items", {})).duplicate()
+	items[item] = int(items.get(item, 0)) + amount
+	var probe: Dictionary = data.duplicate()
+	probe["items"] = items
+	return backpack_slots_used(probe) <= int(data.capacity)
 
 static func positive_integer(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and float(value)>0 and float(value)==floor(float(value)) and float(value)<=2147483647
@@ -50,7 +72,8 @@ static func valid_container(data: Variant) -> bool:
 	if typeof(data) != TYPE_DICTIONARY or typeof(data.get("items")) != TYPE_DICTIONARY:
 		return false
 	var capacity: Variant = data.get("capacity")
-	if data.has("armor_chip_capacity") and data.armor_chip_capacity != ARMOR_CHIP_CAPACITY:
+	# Alte Staende tragen 1; neue die Groesse der Ruestung. Beim Laden wird sie aus der Ruestung neu bestimmt.
+	if data.has("armor_chip_capacity") and not (positive_integer(data.armor_chip_capacity) and float(data.armor_chip_capacity) <= MAX_COMPARTMENT_CAPACITY):
 		return false
 	if not positive_integer(capacity) and not (data.has("armor_chip_capacity") and typeof(capacity) in [TYPE_INT, TYPE_FLOAT] and capacity == 0):
 		return false
