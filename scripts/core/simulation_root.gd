@@ -8173,6 +8173,11 @@ func request_air_support_landing(craft_id: String) -> Dictionary:
 			if not String(ground.unit_id).is_empty(): return {"ok":false, "reason":"ground_landing_occupied"}
 	var controller: Node = get_parent().get_node_or_null("TacticalController")
 	if controller == null or not controller.has_method("_ground_ship_touchdown_ready") or not controller.call("_ground_ship_touchdown_ready", craft_id, sortie.landing_position, false): return {"ok":false, "reason":"ground_landing_occupied"}
+	return _end_air_sortie(craft_id, sortie, binding, source, pose)
+
+## Shared tail of the landing: the craft leaves the air back to its pose before the sortie. LC2b: also used by the
+## emergency landing and by the crash (the craft is then lost, see resolve_air_shootdown), which skip the position checks above.
+func _end_air_sortie(craft_id: String, sortie: Dictionary, binding: Dictionary, source: Node, pose: Dictionary) -> Dictionary:
 	var area_revision: int = binding.combat.get_area_revision(pose.space_area_id)
 	var actor: Dictionary = binding.combat.validate_deactivation(craft_id, pose.revision, area_revision)
 	if not actor.get("ok", false): return actor
@@ -8454,6 +8459,130 @@ func draw_air_ground_roll() -> float:
 	# Derselbe Strom wie das Bodenfeuer des Schiffs (im Spielstand gesichert), 0.0 <= Wert < 1.0.
 	_air_ground_rng_state = (_air_ground_rng_state * 1103515245 + 12345) & 0x7fffffff
 	return float(_air_ground_rng_state) / 2147483648.0
+
+## LC2b: Abschuss. Faellt der Rumpf eines eigenen Schiffs IN DER LUFT durch Bodenbeschuss auf 0, wuerfelt diese Funktion (genau einmal,
+## sie verlangt eine laufende Sortie) den Ausgang mit scripts/core/air_crash_rules.gd und dem Strom _air_ground_rng_state:
+## Notlandung (Schiff landet auf seiner Landezone, Rumpf aus den Daten), Bruchlandung oder Explosion (Schiff aus Luft und Einsatz,
+## Insassen ausgewuerfelt und an der Absturzstelle abgesetzt, Eintrag in _air_crash_sites). Der Einsatz laeuft weiter.
+const AIR_CRASH_RULES = preload("res://scripts/core/air_crash_rules.gd")
+const AIR_CRASH_STATUS = preload("res://scripts/mission/air_asset_status.gd")
+const AIR_CRASH_SEARCH_LIMIT := 96
+## Je Absturz ein Eintrag {craft_id:String, model_id:String, grid:Vector2i, outcome:"crash"|"explosion"} (Lesefunktion get_air_crash_sites).
+var _air_crash_sites: Array = []
+
+func get_air_crash_sites() -> Array:
+	return _air_crash_sites.duplicate(true)
+
+func is_air_craft_crashed(craft_id: String) -> bool:
+	for site: Dictionary in _air_crash_sites:
+		if String(site.get("craft_id", "")) == craft_id: return true
+	return false
+
+## Hexfeld unter der Position des Schiffs; ist es nicht begehbar, das naechste begehbare Feld (Breitensuche), sonst das Feld selbst.
+func _air_crash_grid(craft_id: String) -> Vector2i:
+	var terrain: Node = _air_ground_registry()
+	var pose: Dictionary = get_air_support_world_pose(craft_id)
+	if terrain == null or pose.is_empty(): return Vector2i.ZERO
+	var origin: Vector2i = terrain.call("world_to_grid", pose.position)
+	if not terrain.has_method("get_legal_hex_neighbors") or not terrain.has_method("is_walkable"): return origin
+	if terrain.call("get_tile_at_grid", origin) != null and bool(terrain.call("is_walkable", origin)): return origin
+	var queue: Array[Vector2i] = [origin]
+	var seen := {origin: true}
+	var cursor := 0
+	while cursor < queue.size() and cursor < AIR_CRASH_SEARCH_LIMIT:
+		var cell: Vector2i = queue[cursor]
+		cursor += 1
+		for next: Vector2i in terrain.call("get_legal_hex_neighbors", cell):
+			if seen.has(next): continue
+			seen[next] = true
+			if terrain.call("get_tile_at_grid", next) != null and bool(terrain.call("is_walkable", next)): return next
+			queue.append(next)
+	return origin
+
+## Ist die Landezone des Schiffs frei (dieselben Pruefungen wie request_air_support_landing, ohne Lage und Tempo)?
+func _air_landing_zone_free(craft_id: String, sortie: Dictionary, binding: Dictionary) -> bool:
+	if not is_hex_ground_runtime_active():
+		var occupied_cells: Array[Vector2i] = binding.combat.preview_actor_cells(craft_id, {})
+		if occupied_cells.is_empty(): return false
+		for cell in occupied_cells:
+			var ground: Dictionary = _air_ground_occupant(cell)
+			if not ground.get("ok", false) or not String(ground.unit_id).is_empty(): return false
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	return controller != null and controller.has_method("_ground_ship_touchdown_ready") and bool(controller.call("_ground_ship_touchdown_ready", craft_id, sortie.landing_position, false))
+
+func _air_shootdown_balance_text(results: Dictionary) -> String:
+	var dead := 0
+	var injured := 0
+	for id in results:
+		var state := String(Dictionary(results[id]).get("state", ""))
+		if state == "dead": dead += 1
+		elif state in ["light", "severe"]: injured += 1
+	var parts: Array[String] = []
+	if injured > 0: parts.append("%d verletzt" % injured)
+	if dead > 0: parts.append("%d tot" % dead)
+	return ", ".join(parts) if not parts.is_empty() else "Alle unversehrt"
+
+## Rueckgabe {ok, outcome, status, messages[, site, results]}; ok:false (ohne Wirkung ausser dem verbrauchten Wurf), wenn das Schiff
+## nicht (mehr) in einer Sortie fliegt oder die Regeln fehlen. status_snapshot: der Stand mit Rumpf 0 aus dem Bodenbeschuss.
+func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: String, status_snapshot: Dictionary = {}) -> Dictionary:
+	if _should_skip_local_tick_processing() or is_processing_tick or not _air_support_sorties.has(craft_id): return {"ok":false, "reason":"sortie_unavailable"}
+	var rules: Dictionary = AIR_CRASH_RULES.load_rules()
+	if rules.is_empty(): return {"ok":false, "reason":"crash_rules_unavailable"}
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return binding
+	var sortie: Dictionary = _air_support_sorties[craft_id]
+	var source: Node = sortie.source.get_ref()
+	if not is_instance_valid(source) or source.get("is_processing_tick") or source != _air_support_source.get_ref() or binding.flight != sortie.flight: return {"ok":false, "reason":"sortie_context_changed"}
+	var model_id := String(binding.equipment.get_snapshot(craft_id).get("model_id", ""))
+	var site_grid: Vector2i = _air_crash_grid(craft_id)
+	var pose: Dictionary = binding.flight.get_snapshot()
+	var shot: Dictionary = AIR_CRASH_RULES.resolve_shootdown(pilot_skill, rules, _air_ground_rng_state)
+	if shot.is_empty(): return {"ok":false, "reason":"crash_rules_invalid"}
+	_air_ground_rng_state = int(shot.rng_state)
+	var outcome := String(shot.outcome)
+	var ship_name := display_name if not display_name.strip_edges().is_empty() else craft_id
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	# Notlandung nur, wenn die Landezone frei ist; sonst wird der Ausgang als Bruchlandung behandelt.
+	if outcome == "emergency_landing" and not _air_landing_zone_free(craft_id, sortie, binding): outcome = "crash"
+	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, pose)
+	if not ended.get("ok", false): return ended
+	# Eine laufende Angriffsanweisung endet mit dem Flug (ein spaeter Start schiesst nicht von allein).
+	request_air_support_cease_fire(craft_id, "shootdown-stop:%s:%d" % [craft_id, tick_counter])
+	var status = AIR_CRASH_STATUS.from_dict(status_snapshot if not status_snapshot.is_empty() else get_air_asset_status_snapshot(craft_id))
+	var messages: Array = []
+	var result: Dictionary = {"ok":true, "outcome":outcome, "messages":messages}
+	if outcome == "emergency_landing":
+		var hull := clampi(ceili(float(status.max_integrity) * float(rules.emergency_landing_hull_percent) / 100.0), 1, status.max_integrity)
+		status.integrity = hull
+		status.state = AIR_CRASH_STATUS.STATE_DAMAGED if hull <= int(ceil(float(status.max_integrity) * 0.55)) else AIR_CRASH_STATUS.STATE_HIT
+		status.destroyed = false
+		status.crashed = false
+		status.warning_visible = false
+		status.locked_by_unit_id = ""
+		messages.append("Notlandung geglückt. Rumpf %d %%." % int(round(float(hull) * 100.0 / float(status.max_integrity))))
+	else:
+		var ids: Array = Array(controller.call("get_air_crash_occupant_ids", craft_id)) if controller != null and controller.has_method("get_air_crash_occupant_ids") else []
+		var occupants: Dictionary = AIR_CRASH_RULES.resolve_occupants(outcome, ids, rules, _air_ground_rng_state)
+		if not ids.is_empty() and occupants.is_empty(): occupants = {"results":{}, "dead_ids":[], "rng_state":_air_ground_rng_state}
+		_air_ground_rng_state = int(occupants.get("rng_state", _air_ground_rng_state))
+		var results: Dictionary = Dictionary(occupants.get("results", {}))
+		var site := {"craft_id":craft_id, "model_id":model_id, "grid":site_grid, "outcome":outcome}
+		_air_crash_sites.append(site)
+		status.integrity = 0
+		status.state = AIR_CRASH_STATUS.STATE_DESTROYED if outcome == "explosion" else AIR_CRASH_STATUS.STATE_CRASHED
+		status.destroyed = true
+		status.crashed = outcome == "crash"
+		status.warning_visible = true
+		messages.append(("%s explodiert." if outcome == "explosion" else "Bruchlandung! %s ist verloren.") % ship_name)
+		if not ids.is_empty(): messages.append(_air_shootdown_balance_text(results))
+		if controller != null and controller.has_method("apply_air_crash"):
+			result["placement"] = controller.call("apply_air_crash", craft_id, site, results, ids)
+		result["site"] = site.duplicate(true)
+		result["results"] = results
+	var snapshot: Dictionary = status.to_snapshot()
+	_apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update", "status_snapshot":snapshot, "event_id":"shootdown:%s:%d" % [craft_id, tick_counter]})
+	result["status"] = snapshot
+	return result
 
 func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) -> Dictionary:
 	# Admission is a separate transaction; bind only existing authoritative

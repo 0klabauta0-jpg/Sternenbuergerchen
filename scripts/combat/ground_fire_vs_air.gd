@@ -327,7 +327,7 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 			# LC2b: Abschuss. Die SimulationRoot wuerfelt den Ausgang und bucht den Endstand des Schiffs selbst (ein Status-Effekt
 			# mit Rumpf 0 wuerde den Endstand einer Notlandung ueberschreiben).
 			var down: Dictionary = Dictionary(shot_down[craft_id])
-			resolved = Dictionary(root.call("resolve_air_shootdown", craft_id, float(down.get("pilot_skill", 0.0)), String(down.get("display_name", craft_id))))
+			resolved = Dictionary(root.call("resolve_air_shootdown", craft_id, float(down.get("pilot_skill", 0.0)), String(down.get("display_name", craft_id)), snapshot))
 		if bool(resolved.get("ok", false)):
 			resolutions[craft_id] = resolved
 			snapshot = Dictionary(resolved.get("status", snapshot))
