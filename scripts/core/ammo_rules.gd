@@ -55,7 +55,7 @@ static func new_weapon_state(magazine_size: int) -> Dictionary:
 static func can_fire(state: Dictionary, needs_ammo: bool) -> bool:
 	if not needs_ammo:
 		return true
-	return int(state.get("rounds", 0)) > 0 and int(state.get("reload_ticks_left", 0)) == 0
+	return int(state.get("rounds", 0)) > 0 and int(state.get("reload_ticks_left", 0)) <= 0
 
 static func after_shot(state: Dictionary) -> Dictionary:
 	var result: Dictionary = state.duplicate(true)
@@ -63,11 +63,11 @@ static func after_shot(state: Dictionary) -> Dictionary:
 	return result
 
 static func needs_reload(state: Dictionary) -> bool:
-	return int(state.get("rounds", 0)) == 0 and int(state.get("reload_ticks_left", 0)) == 0
+	return int(state.get("rounds", 0)) == 0 and int(state.get("reload_ticks_left", 0)) <= 0
 
 static func begin_reload(state: Dictionary, reload_ticks: int) -> Dictionary:
 	var result: Dictionary = state.duplicate(true)
-	result["reload_ticks_left"] = maxi(0, reload_ticks)
+	result["reload_ticks_left"] = maxi(1, reload_ticks)
 	return result
 
 static func advance_reload(state: Dictionary, ticks: int, magazine_size: int) -> Dictionary:

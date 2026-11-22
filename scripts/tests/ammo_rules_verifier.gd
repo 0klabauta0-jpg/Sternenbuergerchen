@@ -42,7 +42,7 @@ func _run() -> void:
 	var pistol: Dictionary = WD.WEAPON_CATALOG["pistol"]
 	var size: int = int(pistol.magazine_size)
 	var reload: int = int(pistol.reload_ticks)
-	var chunk: int = reload / 3
+	var chunk: int = floori(reload / 3.0)
 	var state: Dictionary = R.new_weapon_state(size)
 	check(int(state.rounds) == size and int(state.reload_ticks_left) == 0, "a new weapon state holds a full magazine")
 	check(R.can_fire(state, true) and not R.needs_reload(state), "a full magazine can fire and needs no reload")
@@ -53,14 +53,16 @@ func _run() -> void:
 		state = R.after_shot(state)
 	check(int(state.rounds) == 0 and not R.can_fire(state, true) and R.needs_reload(state), "after a full magazine of shots: empty, cannot fire, needs reload")
 	check(int(R.after_shot(state).rounds) == 0, "after_shot at 0 stays at 0")
-	var frozen: Dictionary = state.duplicate(true)
-	state = R.begin_reload(state, reload)
-	check(frozen == {"rounds": 0, "reload_ticks_left": 0}, "begin_reload leaves the input alone")
+	var begin_input: Dictionary = state
+	var begin_copy: Dictionary = begin_input.duplicate(true)
+	state = R.begin_reload(begin_input, reload)
+	check(begin_input == begin_copy and not is_same(begin_input, state), "begin_reload leaves the input alone (input compared after the call)")
 	check(int(state.reload_ticks_left) == reload and not R.can_fire(state, true) and not R.needs_reload(state), "while reloading: cannot fire and needs no second reload")
 	for step in 3:
-		var prior: Dictionary = state.duplicate(true)
-		state = R.advance_reload(state, chunk, size)
-		check(prior.reload_ticks_left == reload - chunk * step, "advance_reload leaves the input alone (step %d)" % step)
+		var adv_input: Dictionary = state
+		var adv_copy: Dictionary = adv_input.duplicate(true)
+		state = R.advance_reload(adv_input, chunk, size)
+		check(adv_input == adv_copy and not is_same(adv_input, state), "advance_reload leaves the input alone (step %d, input compared after the call)" % step)
 		if step < 2:
 			check(int(state.reload_ticks_left) == reload - chunk * (step + 1) and int(state.rounds) == 0 and not R.can_fire(state, true), "reload step %d: still counting down, still empty" % step)
 	check(int(state.rounds) == size and int(state.reload_ticks_left) == 0 and R.can_fire(state, true), "after the last chunk: full magazine again, can fire")
@@ -69,6 +71,19 @@ func _run() -> void:
 	var idle: Dictionary = R.advance_reload(R.after_shot(R.new_weapon_state(size)), 10, size)
 	check(int(idle.rounds) == size - 1 and int(idle.reload_ticks_left) == 0, "advance_reload without a running reload changes nothing")
 	check(R.can_fire({"rounds": 0, "reload_ticks_left": 0}, false) and R.can_fire({"rounds": 0, "reload_ticks_left": 30}, false), "a weapon without ammunition need can always fire")
+
+	# can_fire: the reload condition on its own (rounds left, but a reload is running)
+	check(R.can_fire({"rounds": 5, "reload_ticks_left": 0}, true), "rounds left and no reload running can fire")
+	check(not R.can_fire({"rounds": 5, "reload_ticks_left": 10}, true), "rounds left but a reload running cannot fire")
+	# a zero or negative counter never gets stuck
+	var zero_begin: Dictionary = R.begin_reload({"rounds": 0, "reload_ticks_left": 0}, 0)
+	check(int(zero_begin.reload_ticks_left) >= 1 and not R.can_fire(zero_begin, true), "begin_reload with 0 ticks still starts a reload of at least one tick")
+	check(int(R.advance_reload(zero_begin, 1, size).rounds) == size, "a 0-tick reload ends after one tick with a full magazine")
+	var negative_state: Dictionary = {"rounds": 0, "reload_ticks_left": -3}
+	var negative_copy: Dictionary = negative_state.duplicate(true)
+	check(R.needs_reload(negative_state) and not R.can_fire(negative_state, true), "a negative counter with no rounds needs a reload")
+	check(R.can_fire({"rounds": 2, "reload_ticks_left": -3}, true), "a negative counter with rounds left can fire")
+	check(R.advance_reload(negative_state, 5, size) == negative_copy and negative_state == negative_copy, "advance_reload leaves a negative counter alone and the input unchanged")
 
 	# --- invalid rules ---
 	check(not R.validate_rules({}), "empty rules are invalid")
