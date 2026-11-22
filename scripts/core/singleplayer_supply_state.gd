@@ -484,7 +484,9 @@ func preview_emergency_tanker(payload: Dictionary, context: Dictionary = {}) -> 
 	var callout_fee: int = int(data.callout_fee)
 	var price: int = callout_fee + int(ceil(float(quantity) * float(data.price_per_unit)))
 	# Schulden (K, E2/E3): der Nottankdienst ist einer von zwei Wegen ins Minus; er liefert bis zum Kreditrahmen auf Kredit.
-	var credits_after: int = _credits - price
+	# Abschnitt P: credits_override (nur vom Adapter gesetzt) fragt "wie wuerde die Bestellung mit diesem erreichbaren Kontostand ausgehen"
+	# mit genau dieser Rechnung (Pleite-Pruefung); ohne den Schluessel gilt das echte Guthaben.
+	var credits_after: int = int(context.get("credits_override", _credits)) - price
 	var debt: Dictionary = Dictionary(_definitions.get("debt", {}))
 	if credits_after < 0:
 		if debt.is_empty():
@@ -1325,13 +1327,34 @@ func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
 		if counts[i] != i + 3: return false
 	return true
 
+## Ankaufpreis des Haendlers am Ort (0 = kauft nicht). Die eine Preisquelle fuer _sell und get_sellable_proceeds.
+func _commodity_price(location: String, item: String) -> int:
+	var wanted := "c_benit" if location == "satellite_crash" else "b_benit"
+	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted: 15})
+	return int(orders.get(item, 0))
+
+## Abschnitt P (Pleite, W1): was die Waren in den genannten Lagern (Schiffslager "craft:<id>", Frachtaufzug) beim Haendler am Ort
+## zusammen braechten, mit den Regeln von _sell (Handelsdienst am Ort, Preis > 0, keine Auftragsgegenstaende). Nur lesend.
+func get_sellable_proceeds(location_id: String, container_ids: Array) -> int:
+	if not _has_service(location_id, "trade"): return 0
+	var total := 0
+	var seen: Dictionary = {}
+	for raw_id: Variant in container_ids:
+		var container := String(raw_id)
+		if seen.has(container) or not _inventory.has(container): continue
+		seen[container] = true
+		var items: Dictionary = Dictionary(_inventory[container]).get("items", {})
+		for item_id: Variant in items.keys():
+			var item := String(item_id)
+			var price := _commodity_price(location_id, item)
+			if price > 0 and not INVENTORY.RESERVED_QUEST_ITEMS.has(item): total += int(items[item_id]) * price
+	return total
+
 func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location := String(context.get("location_id",""))
 	if not _has_service(location,"trade") or bool(context.get("craft_busy",true)): return _reject("trade_unavailable","Handel nicht erreichbar")
-	var wanted := "c_benit" if location=="satellite_crash" else "b_benit"
 	var item := String(payload.get("item_id",""))
-	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted:15})
-	var price := int(orders.get(item, 0))
+	var price := _commodity_price(location, item)
 	var container := String(payload.get("source_container_id","craft:"+String(context.get("craft_id",""))))
 	if container != "craft:"+String(context.get("craft_id","")) and container != String(context.get("cargo_lift_container_id","")): return _reject("inventory_access","Verkauf nur aus lokalem Schiff oder Frachtaufzug")
 	if price <= 0 or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")

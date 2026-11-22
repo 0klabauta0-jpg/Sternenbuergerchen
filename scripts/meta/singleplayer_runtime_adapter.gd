@@ -396,7 +396,8 @@ func _outbound_fuel_check(craft_id: String, location_id: String, travel: Diction
 
 ## Abgeleiteter Zustand "liegen geblieben" (nicht gespeichert): das Schiff ist nicht daheim, keine einzige Folgeetappe ist
 ## bezahlbar und hier gibt es keinen Tankservice. Die kostenlose Heimlandung zaehlt als bezahlbare Folgeetappe.
-func get_fuel_status(craft_id: String) -> Dictionary:
+## credits_override (nur Pleite-Pruefung, Abschnitt P): rechnet "Tanken bezahlbar" mit einem erreichbaren Kontostand statt dem Guthaben.
+func get_fuel_status(craft_id: String, credits_override: Variant = null) -> Dictionary:
 	if _supply == null or _travel == null or not _supply.has_fuel_account(craft_id): return {}
 	var travel: Dictionary = _travel.get_snapshot(craft_id)
 	var phase := String(travel.get("phase", "grounded"))
@@ -442,7 +443,7 @@ func get_fuel_status(craft_id: String) -> Dictionary:
 	for next_leg: Dictionary in next_legs:
 		var missing: float = maxf(float(next_leg.cost) - fuel, 0.0)
 		if cheapest_missing < 0.0 or missing < cheapest_missing: cheapest_missing = missing
-	var refuel_affordable: bool = refuel_here and not next_legs.is_empty() and (cheapest_missing <= 0.0 or float(_supply.get_credits()) + 0.00001 >= ceil(cheapest_missing * _supply.get_fuel_price_per_unit()))
+	var refuel_affordable: bool = refuel_here and not next_legs.is_empty() and (cheapest_missing <= 0.0 or float(_supply.get_credits() if credits_override == null else int(credits_override)) + 0.00001 >= ceil(cheapest_missing * _supply.get_fuel_price_per_unit()))
 	var in_transit: bool = phase == "quantum" or (phase == "approach" and raw_legs.is_empty())
 	var stranded: bool = phase != "grounded" and not in_transit and not any_affordable and not refuel_affordable
 	var strand_place := "none"
@@ -2107,26 +2108,71 @@ func advance_debt_interest(delta: float) -> Dictionary:
 	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
 	return _supply.advance_debt_clock(delta)
 
-## Abschnitt P: Pleite-Pruefung. Sammelt Kontostand, Kreditrahmen und den Treibstoffzustand jedes eigenen Schiffs (get_fuel_status, dazu ob
-## fuer das Schiff ein Nottanker bestellt ist) und fragt die reine Regel (campaign_bankruptcy_rules.gd). Nur lesend. Ausserhalb der Kampagne
-## und ohne Versorgungsstand: nie pleite.
+## Abschnitt P: Pleite-Pruefung (nur lesend; ausserhalb der Kampagne und ohne Versorgungsstand nie pleite). Antwort: bankrupt, reason (aus der
+## reinen Regel campaign_bankruptcy_rules.gd), credits (Guthaben), reachable_credits (Guthaben plus Erloes aus allem, was am Ort verkauft
+## werden kann), debt_limit, debt_refused (der Nottankdienst wuerde wegen des Kreditrahmens ablehnen: Vorwarnung).
+## 1. Runde mit dem echten Guthaben: kann ein Schiff so weiter, ist man nicht pleite. 2. Runde nur, wenn alle festliegen: mit dem erreichbaren
+## Kontostand werden "Folgeetappe bezahlbar", "Tanken bezahlbar" und "der Nottanker wuerde liefern" (die echte Bestellpruefung,
+## preview_emergency_tanker mit credits_override) neu bestimmt.
 func get_bankruptcy_check() -> Dictionary:
-	var result := {"bankrupt": false, "reason": "no_campaign", "credits": 0, "debt_limit": 0}
+	var result := {"bankrupt": false, "reason": "no_campaign", "credits": 0, "reachable_credits": 0, "debt_limit": 0, "debt_refused": false}
 	if _supply == null or not _campaign_mode or _flow == null: return result
-	var open_orders: Dictionary = _supply.get_open_tanker_orders()
-	var ordered: Dictionary = {}
-	for order: Dictionary in open_orders.values(): ordered[String(order.get("craft_id", ""))] = true
-	var states: Array = []
+	var rules = load("res://scripts/core/campaign_bankruptcy_rules.gd")
+	var credits: int = _supply.get_credits()
+	var limit: int = _supply.get_debt_limit()
+	var craft_ids: Array = []
 	for definition: Variant in Array(_flow.get("_homebase_aircraft_definitions")):
 		var craft_id := String(Dictionary(definition).get("craft_id", ""))
+		if not craft_id.is_empty() and _supply.has_fuel_account(craft_id): craft_ids.append(craft_id)
+	for craft_id: String in craft_ids:
+		var forced := {"craft_available": true, "at_service_point": false, "fuel_problem": true}
+		if String(_supply.preview_emergency_tanker({"craft_id": craft_id}, forced).get("reason", "")) == "debt_limit_reached":
+			result["debt_refused"] = true
+			break
+	var ordered: Dictionary = {}
+	for order: Dictionary in _supply.get_open_tanker_orders().values(): ordered[String(order.get("craft_id", ""))] = true
+	var states: Array = []
+	for craft_id: String in craft_ids:
 		var status: Dictionary = get_fuel_status(craft_id)
 		if status.is_empty(): continue
 		status["tanker_order_open"] = ordered.has(craft_id)
 		states.append(status)
-	result = load("res://scripts/core/campaign_bankruptcy_rules.gd").is_bankrupt(_supply.get_credits(), _supply.get_debt_limit(), states)
-	result["credits"] = _supply.get_credits()
-	result["debt_limit"] = _supply.get_debt_limit()
+	var verdict: Dictionary = rules.is_bankrupt(credits, limit, states)
+	var reachable := credits
+	if bool(verdict.get("bankrupt", false)):
+		reachable += _bankruptcy_sellable_proceeds(craft_ids)
+		states.clear()
+		for craft_id: String in craft_ids:
+			var status: Dictionary = get_fuel_status(craft_id, reachable)
+			if status.is_empty(): continue
+			var tanker_context: Dictionary = _tanker_context(craft_id)
+			tanker_context["credits_override"] = reachable
+			status["tanker_order_open"] = ordered.has(craft_id)
+			status["tanker_available"] = bool(_supply.preview_emergency_tanker({"craft_id": craft_id}, tanker_context).get("ok", false))
+			states.append(status)
+		verdict = rules.is_bankrupt(reachable, limit, states)
+	result.merge(verdict, true)
+	result["credits"] = credits
+	result["reachable_credits"] = reachable
+	result["debt_limit"] = limit
 	return result
+
+## Erloes aus allem, was die Schiffe an ihrem Ort ueber den vorhandenen Verkaufsweg (_sell: Schiffslager und Frachtaufzug beim Haendler)
+## verkaufen koennten. Ausruestung hat heute keinen Verkaufsweg. Ein gemeinsamer Frachtaufzug zaehlt einmal.
+func _bankruptcy_sellable_proceeds(craft_ids: Array) -> int:
+	var total := 0
+	var seen: Dictionary = {}
+	for craft_id: String in craft_ids:
+		var context: Dictionary = _service_context(craft_id)
+		if context.is_empty(): continue
+		var location := String(context.get("location_id", ""))
+		var containers: Array = []
+		for container: String in ["craft:" + craft_id, String(context.get("cargo_lift_container_id", ""))]:
+			if container.is_empty() or seen.has(location + "|" + container): continue
+			seen[location + "|" + container] = true
+			containers.append(container)
+		total += _supply.get_sellable_proceeds(location, containers)
+	return total
 
 ## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
 ## Seit dem Respawn zusaetzlich optional: reason ("respawn_limit"), respawns_used, respawn_limit (ganze Zahlen >= 0);
