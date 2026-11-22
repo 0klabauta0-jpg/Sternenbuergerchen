@@ -4608,7 +4608,7 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 			# Fix-Runde 2, W9: Das Einsatzergebnis wird sofort gebucht (Abschluss/Fehlschlag des Auftrags und alles, was das Spiel dort gutschreibt);
 			# der Abflug wird getrennt geprueft und nur gesperrt. Die spaetere Zustellung bucht nichts doppelt (record_mission_result ignoriert
 			# einen nicht mehr aktiven Auftrag).
-			if String(return_gate.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+			if String(return_gate.get("reason", "")) in DEPARTURE_FUEL_REASONS:
 				_singleplayer_runtime.call("record_mission_result", resolved_result, _active_singleplayer_identity.duplicate(true))
 			_pending_campaign_mission_result = mission_result.duplicate(true)
 			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
@@ -9486,8 +9486,8 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	var held_visit: Node = get_mission_for_craft(craft_id)
 	if is_campaign_start() and _singleplayer_runtime != null and held_visit != null and held_visit == _active_mission and not _pending_campaign_mission_result.is_empty():
 		var held_check: Dictionary = _departure_return_preflight(craft_id)
-		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
-			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": "Treibstoff reicht nicht für den Rückflug"}
+		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in DEPARTURE_FUEL_REASONS:
+			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": _departure_fuel_message(String(held_check.get("reason", "")))}
 		return {"handled": true, "ok": false, "reason": "mission_result_pending", "message": "Einsatz wird gerade abgeschlossen"}
 	var gated: Dictionary = _campaign_departure_gate_casualties(craft_id)
 	if bool(gated.get("handled", false)):
@@ -9495,21 +9495,28 @@ func _campaign_departure_gate(craft_id: String) -> Dictionary:
 	return _departure_fuel_block(craft_id)
 
 
+## Gruende, aus denen der Abflug am Treibstoff scheitert; tanker_order_open (T3): ein offener Nottankauftrag sperrt jede Etappe und
+## wird wie die Treibstoffgruende frueh abgelehnt und beim Einsatzergebnis sofort gebucht.
+const DEPARTURE_FUEL_REASONS: Array = ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient", "tanker_order_open"]
+
+func _departure_fuel_message(reason: String) -> String:
+	return "Ein Tanker ist unterwegs - erst abwarten oder stornieren." if reason == "tanker_order_open" else "Treibstoff reicht nicht für den Rückflug"
+
 ## Lesende Treibstoffpruefung des Abflugs von einem Ort (ohne Ausfaelle). {"handled": false}, wenn der Abflug weiterlaufen darf.
 func _departure_fuel_block(craft_id: String) -> Dictionary:
 	if not is_campaign_start() or _singleplayer_runtime == null or get_mission_for_craft(craft_id) == null:
 		return {"handled": false}
 	var check: Dictionary = _departure_return_preflight(craft_id)
 	var reason := String(check.get("reason", ""))
-	if bool(check.get("ok", false)) or reason not in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
+	if bool(check.get("ok", false)) or reason not in DEPARTURE_FUEL_REASONS:
 		return {"handled": false}
-	return {"handled": true, "ok": false, "reason": reason, "message": "Treibstoff reicht nicht für den Rückflug"}
+	return {"handled": true, "ok": false, "reason": reason, "message": _departure_fuel_message(reason)}
 
 
 ## Zeigt eine Abflugsperre auf der Schiffskarte des Ortes (Controller der Instanz, an der das Schiff steht).
 func _report_departure_block(craft_id: String, gate: Dictionary) -> void:
 	var reason := String(gate.get("reason", ""))
-	var message := "Treibstoff reicht nicht für den Rückflug" if reason in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"] else String(gate.get("message", ""))
+	var message := _departure_fuel_message(reason) if reason in DEPARTURE_FUEL_REASONS else String(gate.get("message", ""))
 	if message.is_empty():
 		return
 	var visit: Node = get_mission_for_craft(craft_id)
@@ -9530,8 +9537,8 @@ func _campaign_departure_gate_casualties(craft_id: String) -> Dictionary:
 	if visit == _active_mission and not _pending_campaign_mission_result.is_empty():
 		# Wartet das Ergebnis, weil der Tank fuer den Ortsabflug nicht reicht (Fix-Runde 1 K1), nennt die Meldung den Treibstoff.
 		var held_check: Dictionary = _departure_return_preflight(craft_id)
-		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"]:
-			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": "Treibstoff reicht nicht für den Rückflug"}
+		if not bool(held_check.get("ok", false)) and String(held_check.get("reason", "")) in DEPARTURE_FUEL_REASONS:
+			return {"handled": true, "ok": false, "reason": String(held_check.get("reason", "")), "message": _departure_fuel_message(String(held_check.get("reason", "")))}
 		return {"handled": true, "ok": false, "reason": "mission_result_pending", "message": "Einsatz wird gerade abgeschlossen"}
 	var driver: Node = visit.get_node_or_null("CombatLoopDriver")
 	if driver == null or not driver.has_method("_resolve_combat") or bool(driver.get("_combat_finished")):
@@ -9551,7 +9558,7 @@ func _campaign_departure_gate_casualties(craft_id: String) -> Dictionary:
 	if not bool(preview_resolution.get("total_loss", false)):
 		var return_check: Dictionary = _departure_return_preflight(craft_id)
 		if not bool(return_check.get("ok", false)):
-			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": "Treibstoff reicht nicht für den Rückflug" if String(return_check.get("reason", "")) in ["insufficient_fuel", "insufficient_return_fuel", "leg_fuel_insufficient"] else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
+			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": _departure_fuel_message(String(return_check.get("reason", ""))) if String(return_check.get("reason", "")) in DEPARTURE_FUEL_REASONS else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
 	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
 	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
 		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
