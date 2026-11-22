@@ -58,7 +58,7 @@ func _test_auto_defend_live_ticks_fire_and_damage_close_enemy() -> void:
 	var initial_health: int = int(enemy.call("get_health")) if enemy.has_method("get_health") else 0
 	if simulation_root.has_method("set_combat_rng_seed"):
 		simulation_root.call("set_combat_rng_seed", 7)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	_assert(bool(controller.call("_apply_default_fireteam_behavior", "drill", 1)), "Auto DEF 360 command is issued for live contact")
 	await _wait_physics_frames(8)
 
@@ -96,7 +96,7 @@ func _test_engage_live_ticks_fire_and_damage_close_enemy() -> void:
 	var initial_health: int = int(enemy.call("get_health")) if enemy.has_method("get_health") else 0
 	if simulation_root.has_method("set_combat_rng_seed"):
 		simulation_root.call("set_combat_rng_seed", 11)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	_assert(bool(controller.call("_apply_default_fireteam_behavior", "drill", 1)), "Auto DEF pre-state is applied before live Engage")
 	await _wait_physics_frames(8)
 
@@ -134,7 +134,7 @@ func _test_mission_control_contact_diagnostics_visible() -> void:
 	var enemy := enemies[0] as Node2D
 	enemy.global_position = Vector2(1280.0, 720.0)
 	_prepare_contact_units(controller, "drill", enemy.global_position, Vector2.RIGHT)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	_assert(bool(controller.call("_apply_default_fireteam_behavior", "drill", 1)), "Mission Control diagnostic test applies DEF contact setup")
 	await _wait_physics_frames(45)
 	controller.call("_update_ui")

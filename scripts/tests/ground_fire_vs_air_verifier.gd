@@ -800,7 +800,7 @@ func _ground_sequence(with_ship: bool) -> Dictionary:
 		# Nur die Schiffs-Status-Buchungen bleiben in der Warteschlange (sonst bliebe die Warnung ungebucht).
 		for index in range(f.sim.effects_queue.size() - 1, -1, -1):
 			if String(Dictionary(f.sim.effects_queue[index]).get("effect_type", "")) != "air_asset_status_update": f.sim.effects_queue.remove_at(index)
-	var result := {"shots": shots, "next_attack": int(f.driver._next_attack_tick), "air_events": air_events, "air_shots_enemy2": air_shots_by_enemy2,
+	var result := {"shots": shots, "next_attack": int(f.driver._earliest_next_shot_tick), "air_events": air_events, "air_shots_enemy2": air_shots_by_enemy2,
 		"air_events_enemy": air_events_by_enemy, "combat_rng_state": int(f.sim._combat_rng.state), "air_state": int(f.sim.export_gameplay_rng_state().air_ground)}
 	f.scope.free()
 	return result

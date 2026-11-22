@@ -62,7 +62,7 @@ func _test_engage_halts_on_attackable_contact_and_can_fire() -> void:
 	_prepare_fireteam_for_fast_contact(controller, "drill", enemy.global_position + Vector2(-112.0, 0.0), Vector2.RIGHT)
 	if simulation_root.has_method("set_combat_rng_seed"):
 		simulation_root.call("set_combat_rng_seed", 467)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 
 	var target_position: Vector2 = enemy.global_position + Vector2(240.0, 0.0)
 	var plan = _make_plan("drill", 1, FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE, target_position)
@@ -86,7 +86,7 @@ func _test_engage_halts_on_attackable_contact_and_can_fire() -> void:
 	var target_id: String = String(halt_context.get("target_unit_id", ""))
 	if not attacker_id.is_empty() and not target_id.is_empty():
 		combat_loop.set("_detection_progress", {"%s:%s" % [attacker_id, target_id]: 0})
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	combat_loop.call("_try_enqueue_attacks", simulation_root)
 	var diagnostics: Dictionary = Dictionary(combat_loop.call("get_contact_decision_diagnostics_snapshot"))
 	var fire_events: Array = Array(combat_loop.call("get_fire_event_snapshot"))

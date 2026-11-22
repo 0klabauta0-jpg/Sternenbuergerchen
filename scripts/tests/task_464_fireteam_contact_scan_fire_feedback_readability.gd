@@ -70,7 +70,7 @@ func _test_canvas_hidden_enemy_stays_combat_target() -> void:
 	var enemy_id: String = String(enemy.call("get_unit_id"))
 	combat_loop.set("_detection_progress", {"%s:%s" % [friendly_id, enemy_id]: 0})
 	combat_loop.set("_current_tick", 120)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	combat_loop.call("_try_enqueue_attacks", simulation_root)
 	var diagnostics: Dictionary = Dictionary(combat_loop.call("get_contact_decision_diagnostics_snapshot"))
 	_assert(String(diagnostics.get("reason", "")) == "fired", "Canvas-hidden active enemy can still be selected and fired on")

@@ -54,8 +54,8 @@ func _test_runtime_records_fired_and_cooldown_diagnostics() -> void:
 	var enemy_paths: Array[NodePath] = [driver.get_path_to(enemy)]
 	driver.friendly_unit_paths = friendly_paths
 	driver.enemy_unit_paths = enemy_paths
-	driver.set("_current_tick", 50)
-	driver.set("_next_attack_tick", 0)
+	# Gefechtstakt: Gewehr = Periode 4 Schritte; Tick 48 ist Schritt 16 (dran), Tick 51 ist Schritt 17 (nicht dran).
+	driver.set("_current_tick", 48)
 	driver.set("_detection_progress", {"task458_alpha:task458_enemy": 0})
 	driver.call("_try_enqueue_attacks", simulation)
 	var fired_snapshot: Dictionary = Dictionary(driver.call("get_contact_decision_diagnostics_snapshot"))
@@ -64,7 +64,12 @@ func _test_runtime_records_fired_and_cooldown_diagnostics() -> void:
 	_assert(String(fired_snapshot.get("target_unit_id", "")) == "task458_enemy", "Fired diagnostic names target")
 	_assert(String(fired_snapshot.get("weapon_id", "")) == "rifle", "Fired diagnostic names weapon")
 	_assert(not String(fired_snapshot.get("fire_event_id", "")).is_empty(), "Fired diagnostic links muzzle/fire event")
-	_assert(simulation.effects.size() == 1, "Fired diagnostic corresponds to one enqueued damage effect")
+	var friendly_effects: int = 0
+	for effect in simulation.effects:
+		if String(Dictionary(effect).get("attacker_unit_id", "")) == "task458_alpha":
+			friendly_effects += 1
+	_assert(friendly_effects == 1, "Fired diagnostic corresponds to one enqueued damage effect of the friendly shooter")
+	driver.set("_current_tick", 51)
 	driver.call("_try_enqueue_attacks", simulation)
 	var cooldown_snapshot: Dictionary = Dictionary(driver.call("get_contact_decision_diagnostics_snapshot"))
 	_assert(String(cooldown_snapshot.get("reason", "")) == "cooldown", "Runtime diagnostic records cooldown when contact exists but weapon waits")
@@ -128,8 +133,7 @@ func _test_mission_control_snapshot_exposes_contact_diagnostics() -> void:
 	var friendly_id: String = String(friendly.call("get_unit_id"))
 	var enemy_id: String = String(enemy.call("get_unit_id"))
 	combat_loop.set("_detection_progress", {"%s:%s" % [friendly_id, enemy_id]: 0})
-	combat_loop.set("_current_tick", 80)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.set("_current_tick", 84)
 	combat_loop.call("_try_enqueue_attacks", simulation_root)
 	controller.call("_update_ui")
 	var feedback: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot"))
