@@ -176,6 +176,7 @@ var _singleplayer_services_open := false
 var _singleplayer_services_elapsed: float = 0.0
 ## Ausfallzeit der Verwundeten (nur Kampagne): echte Sekunden werden gesammelt, je volle Sekunde einmal auf den Kader angewendet.
 const PERSONNEL_RECOVERY_SCRIPT = preload("res://scripts/core/personnel_recovery_runtime.gd")
+const CREDIT_TEXT_SCRIPT = preload("res://scripts/core/credit_text.gd")
 ## Je Frame zaehlt hoechstens so viel mit: ein Haenger, Ladebildschirm oder Ruhezustand des Rechners ist keine Spielzeit.
 const PERSONNEL_RECOVERY_MAX_FRAME_SECONDS := 2.0
 var _recovery_clock: float = 0.0
@@ -456,6 +457,7 @@ func _process(_delta: float) -> void:
 	var scopes: Dictionary = {}
 	_poll_retired_terrain_workers()
 	_tick_personnel_recovery(_delta)
+	_tick_debt_interest(_delta)
 	for craft_id in _space_approaches.keys():
 		if not _space_approaches.has(craft_id): continue
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
@@ -4757,7 +4759,8 @@ func _apply_pending_total_loss_penalty() -> bool:
 	var penalty: Dictionary = Dictionary(Dictionary(pending.get("record", {})).get("penalty", {}))
 	var fee: int = maxi(int(penalty.get("rescue_fee", 0)), 0)
 	if fee > 0:
-		_singleplayer_runtime.call("charge_campaign_credits_capped", fee)
+		# Abschnitt K (E4): die Rettungsgebuehr wird voll gebucht, auch wenn sie das Konto ins Minus fuehrt.
+		_singleplayer_runtime.call("charge_campaign_rescue_fee", fee)
 	var severities: Dictionary = {}
 	for raw_wounded in Array(penalty.get("wounded", [])):
 		if typeof(raw_wounded) == TYPE_DICTIONARY:
@@ -5644,6 +5647,20 @@ func _tick_personnel_recovery(delta: float) -> void:
 		var refreshed_ids: PackedStringArray = PackedStringArray(advanced.get("recovered_unit_ids", PackedStringArray()))
 		refreshed_ids.append_array(PackedStringArray(advanced.get("matured_unit_ids", PackedStringArray())))
 		_present_recovery_progress(refreshed_ids)
+
+
+## Abschnitt K: Echtzeit-Takt der Zinsuhr der Schulden (nur Kampagne). Dieselbe Art Uhr wie die Ausfallzeit: Frame-Deltas, je Frame
+## hoechstens PERSONNEL_RECOVERY_MAX_FRAME_SECONDS, steht bei geschlossenem Spiel. Die Uhr selbst und die Buchung gehoeren dem
+## Besitzer der Credits (SingleplayerSupplyState, ueber den Adapter); hier wird nur getaktet und die Meldung gezeigt.
+func _tick_debt_interest(delta: float) -> void:
+	if not is_campaign_start() or not is_instance_valid(_singleplayer_runtime):
+		return
+	var result: Dictionary = Dictionary(_singleplayer_runtime.call("advance_debt_interest", minf(delta, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS)))
+	var charges: Array = Array(result.get("charges", []))
+	if charges.is_empty():
+		return
+	var last: Dictionary = Dictionary(charges[charges.size() - 1])
+	_show_save_feedback(CREDIT_TEXT_SCRIPT.interest_message(int(last.get("amount", 0)), int(last.get("credits", 0))))
 
 
 ## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): sichtbar werden nur die

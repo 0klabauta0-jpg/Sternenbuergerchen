@@ -2096,6 +2096,17 @@ func charge_campaign_credits_capped(amount: int) -> Dictionary:
 	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
 	return _supply.charge_credits_capped(amount)
 
+## Abschnitt K: Rettungsgebuehr der Notrettung, voll gebucht (auch ins Minus und ueber den Kreditrahmen hinaus).
+func charge_campaign_rescue_fee(amount: int) -> Dictionary:
+	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
+	return _supply.charge_rescue_fee(amount)
+
+## Abschnitt K: Zinsuhr der Schulden. Der Aufrufer (meta_layer_flow, Echtzeit-Takt) deckelt das Delta je Frame; hier laeuft nur die Uhr
+## des Besitzers (SingleplayerSupplyState). Gibt die Buchungen zurueck: charges = [{amount, credits}].
+func advance_debt_interest(delta: float) -> Dictionary:
+	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
+	return _supply.advance_debt_clock(delta)
+
 ## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
 ## Seit dem Respawn zusaetzlich optional: reason ("respawn_limit"), respawns_used, respawn_limit (ganze Zahlen >= 0);
 ## alte Eintraege ohne diese Felder bleiben gueltig und unveraendert.
