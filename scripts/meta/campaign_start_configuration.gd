@@ -176,22 +176,39 @@ func _initial_roster() -> Array:
 func _hex_save_throttled(scope: String, now: int, force: bool) -> bool:
 	return not force and scope == _hex_export_scope and now - _hex_export_msec < HEX_AUTOSAVE_INTERVAL_MSEC
 
+## Fix-Runde 1 (W2): "flight", wenn irgendein Schiff wirklich fliegt (Reisephase quantum, stopped, orbit oder approach, oder auf der Sternkarte),
+## sonst "place" (ein Schiff steht an einem anderen Ort, etwa gelandet bei einem Besuch). Gelesen wird der Zustand der Schiffe.
+func _away_detail(flow: Node, runtime: Node) -> String:
+	var flight_phases := ["quantum", "stopped", "orbit", "approach"]
+	var travel: Dictionary = runtime.call("get_space_travel_snapshot") if runtime != null and runtime.has_method("get_space_travel_snapshot") else {}
+	if String(travel.get("phase", "grounded")) in flight_phases: return "flight"
+	var routes: Variant = travel.get("routes", {})
+	if routes is Dictionary:
+		for route in Dictionary(routes).values():
+			if route is Dictionary and String(Dictionary(route).get("phase", "grounded")) in flight_phases: return "flight"
+	var craft_locations: Variant = flow.get("_aircraft_location_by_craft")
+	if craft_locations is Dictionary:
+		for location in Dictionary(craft_locations).values():
+			if String(location) == "starmap": return "flight"
+	return "place"
+
 func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 	if active_restore_in_progress: return {"ok":false,"reason":"active_restore_pending"}
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
 	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")
-	if not bool(guard.get("ok",false)): return guard
+	if not bool(guard.get("ok",false)):
+		# Fix-Runde 1 (W2): im echten Flug und am Ort meldet der Welt-Schutz world_active. Der Zustand der Schiffe (nicht ein Text) sagt, welcher
+		# der beiden Faelle es ist; "detail" dient nur der Anzeige, die Schutzpruefung selbst bleibt unveraendert.
+		if String(guard.get("reason", "")) == "world_active" and not guard.has("detail"):
+			guard = guard.duplicate()
+			guard["detail"] = _away_detail(flow, runtime)
+		return guard
 	# Speichern, erster Teil / 21.11.: "detail" trennt "Schiff im Flug" (flight) von "Schiff an einem anderen Ort" (place), nur fuer die Anzeige;
 	# der Grund bleibt away_from_checkpoint, die Schutzpruefung selbst ist unveraendert.
 	var travel: Dictionary = runtime.call("get_space_travel_snapshot") if runtime != null and runtime.has_method("get_space_travel_snapshot") else {}
-	var in_flight: bool = String(travel.get("phase", "grounded")) != "grounded"
-	var craft_locations: Variant = flow.get("_aircraft_location_by_craft")
-	if not in_flight and craft_locations is Dictionary:
-		for location in Dictionary(craft_locations).values():
-			if String(location) == "starmap": in_flight = true
 	if flow.get("_active_mission") != null or not Array(flow.get("_pending_mission_craft_transfers")).is_empty():
-		return {"ok": false, "reason": "away_from_checkpoint", "detail": "flight" if in_flight else "place"}
+		return {"ok": false, "reason": "away_from_checkpoint", "detail": _away_detail(flow, runtime)}
 	if String(travel.get("phase", "grounded")) != "grounded":
 		return {"ok": false, "reason": "away_from_checkpoint", "detail": "flight"}
 	for field in ["_pending_homebase_team_transfers", "_pending_homebase_pilot_transfers", "_pending_homebase_cargo_loads"]:

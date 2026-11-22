@@ -43,9 +43,11 @@ static func time_text(stamp: int) -> String:
 ## Speichern, erster Teil / 21.11. (S0): Jeder Ablehnungsgrund an der Basis hat einen eigenen Satz, der sagt, WARUM gerade nicht gespeichert wird
 ## und WANN es wieder geht. detail trennt Faelle desselben Grundes: bei away_from_checkpoint "flight" (Schiff im Flug) von "place" (Schiff an
 ## einem anderen Ort), bei base_checkpoint_aboard_context "home" (an der Basis) von "mission" (im Einsatz, der bisherige Satz).
+## Fix-Runde 1 (W2): dieselben Saetze gelten fuer world_active (der Grund, den der Welt-Schutz im echten Flug und am Ort liefert), sobald
+## "detail" den Zustand des Schiffs nennt; ohne detail bleibt es der alte Reise-Satz (mit Zeitpunkt).
 const AWAY_TEXTS := {
-	"flight": "Das Schiff ist unterwegs. Gespeichert wird, sobald es an der Heimatbasis gelandet ist.",
-	"place": "Ein Schiff steht noch an einem anderen Ort. Gespeichert wird, sobald alle Schiffe wieder zu Hause sind.",
+	"flight": "Während der Reise kann noch nicht gespeichert werden. Es gilt der Stand von vor dem Abheben; nach der Landung an der Basis wird wieder gespeichert.",
+	"place": "Ein Schiff steht noch an einem anderen Ort. Es gilt der zuletzt gespeicherte Stand; nach der Heimkehr zur Basis wird wieder gespeichert.",
 	"": "Ein Schiff ist nicht an der Heimatbasis. Gespeichert wird, sobald alle Schiffe zu Hause sind.",
 }
 const BASE_TEXTS := {
@@ -70,6 +72,7 @@ const BASE_TEXTS := {
 	"mission_identity_mismatch": "Dieser Ortsbesuch gehört zu keinem Auftrag und wird nicht als Einsatz gespeichert. Nach der Heimkehr zur Basis wird gespeichert.",
 	"mission_scenario_mismatch": "Der Auftrag dieses Ortes läuft nicht mehr. Nach der Heimkehr zur Basis wird gespeichert.",
 	"mission_crew_not_deployed": "Die Besatzung ist noch nicht ausgestiegen. Nach dem Aussteigen erneut speichern.",
+	"launch_during_mission": "Gerade läuft ein Einsatz. Es gilt der zuletzt gespeicherte Stand; nach der Heimkehr zur Basis wird wieder gespeichert.",
 }
 const BASE_ABOARD_HOME_TEXT := "An der Basis kann gerade nicht gespeichert werden: Jemand an Bord gehört zu keinem Trupp. Kurz warten oder neu einteilen."
 ## Gruende, die vergehen, ohne dass der Spieler etwas tun muss: nur fuer sie merkt sich das Spiel einen Speicherwunsch.
@@ -114,6 +117,8 @@ static func pending_text(reason: String, detail: String = "") -> String:
 	var cause: String
 	if reason == "away_from_checkpoint":
 		cause = String(PENDING_AWAY.get(detail, PENDING_AWAY[""]))
+	elif reason == "world_active" and (detail == "flight" or detail == "place"):
+		cause = String(PENDING_AWAY[detail])
 	elif reason.begins_with("ground_save_"):
 		cause = "Die Basiskarte wird noch aufgebaut. Gespeichert wird danach."
 	else:
@@ -123,11 +128,14 @@ static func pending_text(reason: String, detail: String = "") -> String:
 static func blocked_text(reason: String, detail: String = "") -> String:
 	if reason == "away_from_checkpoint":
 		return String(AWAY_TEXTS.get(detail, AWAY_TEXTS[""]))
+	# world_active ohne detail (Aufrufer ohne Schiffszustand) bleibt der Reise-Satz unten; mit detail flight/place gelten die Saetze von oben.
+	if reason == "world_active" and (detail == "flight" or detail == "place"):
+		return String(AWAY_TEXTS[detail])
 	if reason == "base_checkpoint_aboard_context" and detail == "home":
 		return BASE_ABOARD_HOME_TEXT
 	if BASE_TEXTS.has(reason):
 		return String(BASE_TEXTS[reason])
-	var messages := {"mission_planned_orders_unsupported":"Geplante Befehle zuerst ausführen oder entfernen.", "mission_movement_pending":"Speichern wartet, bis die Bewegung abgeschlossen ist.", "mission_lifecycle_busy":"Speichern wartet auf einen stabilen Einsatzstand.", "mission_combat_unsupported":"Während dieses Gefechts ist Speichern noch nicht verfügbar.", "away_from_checkpoint":"Während der Reise ist Speichern noch nicht verfügbar.", "world_active":"Während der Reise ist Speichern noch nicht verfügbar.", "mission_travel_mismatch":"Während der Reise ist Speichern noch nicht verfügbar.", "shuttle_active":"Speichern wartet auf den Abschluss des Shuttleflugs.", "shuttle_pending":"Speichern wartet auf den Shuttletransport.", "cargo_transfer_active":"Speichern wartet auf den Frachttransfer.", "recruitment_pending":"Speichern wartet auf die Anwerbung.", "preparation_in_progress":"Speichern wartet auf die Vorbereitung von Besatzung oder Fracht.", "home_hex_checkpoint_unsupported":"Der aktuelle Heimatbasisstand ist im Einsatz nicht vollständig speicherbar.", "multiple_locations_unsupported":"Speichern mit mehreren aktiven Orten wird noch nicht unterstützt.", "active_restore_pending":"Der Einsatz wird noch geladen.", "campaign_unavailable":"Die Kampagne ist noch nicht bereit.", "campaign_load_failed":"Die Kampagne konnte nicht geladen werden.",
+	var messages := {"mission_planned_orders_unsupported":"Geplante Befehle zuerst ausführen oder entfernen.", "mission_movement_pending":"Speichern wartet, bis die Bewegung abgeschlossen ist.", "mission_lifecycle_busy":"Speichern wartet auf einen stabilen Einsatzstand.", "mission_combat_unsupported":"Während dieses Gefechts ist Speichern noch nicht verfügbar.", "away_from_checkpoint":"Während der Reise ist Speichern noch nicht verfügbar.", "world_active":"Während der Reise ist Speichern noch nicht verfügbar. Nach der Landung an der Basis wird wieder gespeichert.", "mission_travel_mismatch":"Während der Reise ist Speichern noch nicht verfügbar.", "shuttle_active":"Speichern wartet auf den Abschluss des Shuttleflugs.", "shuttle_pending":"Speichern wartet auf den Shuttletransport.", "cargo_transfer_active":"Speichern wartet auf den Frachttransfer.", "recruitment_pending":"Speichern wartet auf die Anwerbung.", "preparation_in_progress":"Speichern wartet auf die Vorbereitung von Besatzung oder Fracht.", "home_hex_checkpoint_unsupported":"Der aktuelle Heimatbasisstand ist im Einsatz nicht vollständig speicherbar.", "multiple_locations_unsupported":"Speichern mit mehreren aktiven Orten wird noch nicht unterstützt.", "active_restore_pending":"Der Einsatz wird noch geladen.", "campaign_unavailable":"Die Kampagne ist noch nicht bereit.", "campaign_load_failed":"Die Kampagne konnte nicht geladen werden.",
 		"mission_lifecycle_unsupported":"Im Einsatz kann gerade nicht gespeichert werden: Gegner sind aktiv, jemand ist verletzt oder ein Auftragsschritt läuft. Es gilt der zuletzt gespeicherte Stand.",
 		"mission_fleet_unsupported":"Mit mehr als einem Schiff kann im Einsatz noch nicht gespeichert werden. Es gilt der zuletzt gespeicherte Stand, etwa der von der Basis.",
 		"home_personnel_unsupported":"Im Einsatz kann nur gespeichert werden, wenn der ganze Kader dabei ist. Es gilt der zuletzt gespeicherte Stand, etwa der von der Basis.",
