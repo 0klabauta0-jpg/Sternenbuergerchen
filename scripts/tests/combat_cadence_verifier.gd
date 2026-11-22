@@ -76,6 +76,7 @@ func _run() -> void:
 	_test_duel_both_sides_shoot()
 	_test_cooldown_does_not_displace_other_side()
 	_test_three_against_one()
+	_test_twelve_shooters_twelve_events()
 	_test_simultaneous_kill()
 	_test_fixed_order_independent_of_creation()
 	await process_frame
@@ -286,6 +287,25 @@ func _test_three_against_one() -> void:
 	print("DREI gegen EINEN: eigene=%d (einer allein: %d) Gegner=%d" % [own_total, single_shots, _shots_by(f, "enemy")])
 	_check(own_total == 3 * single_shots, "Drei Eigene schiessen dreimal so oft wie einer (%d gegen %d)" % [own_total, single_shots])
 	_check(_shots_by(f, "enemy") == single_shots, "Der einzelne Gegner schiesst weiter in seinem Takt (%d)" % _shots_by(f, "enemy"))
+	f.scope.free()
+
+
+## Zwoelf Schuetzen im selben Schritt: zwoelf Feuer-Ereignisse in der Liste (MAX_RECENT_FIRE_EVENTS war 8).
+func _test_twelve_shooters_twelve_events() -> void:
+	var specs: Array = [{"id": "enemy", "team": "red", "grid": CENTER, "facing": 0, "weapon": "none"}]
+	for direction in range(6):
+		specs.append({"id": "n%02d" % direction, "team": "blue", "grid": CENTER + HEX.DIRECTIONS[direction], "facing": (direction + 3) % 6, "weapon": "pistol"})
+		specs.append({"id": "m%02d" % direction, "team": "blue", "grid": CENTER + HEX.DIRECTIONS[direction] * 2, "facing": (direction + 3) % 6, "weapon": "pistol"})
+	var f := _rig(specs)
+	_run_ticks(f, 9)
+	var shooters_seen: Dictionary = {}
+	var events_at_tick := 0
+	for event in f.driver.get_fire_event_snapshot():
+		if int(event.get("tick", -1)) == 9:
+			events_at_tick += 1
+			shooters_seen[String(event.get("attacker_unit_id", ""))] = true
+	_check(Array(f.calls[-1].shooters).size() == 12, "12 Schuetzen im selben Schritt schiessen (%d)" % Array(f.calls[-1].shooters).size())
+	_check(events_at_tick == 12 and shooters_seen.size() == 12, "12 Schuetzen -> 12 Feuer-Ereignisse mit 12 verschiedenen Schuetzen (%d/%d)" % [events_at_tick, shooters_seen.size()])
 	f.scope.free()
 
 
