@@ -38,9 +38,8 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 	var released: bool = await super._wait(predicate, milliseconds, label)
 	if released and label.begins_with("Visit location instance is released"):
 		var count_at_release: int = int(_flow.get_meta("campaign_save_feedback_count", 0))
-		print("FPT_RELEASE ret=%d flow=%d count=%d text=%s successes=%d" % [_return_number, _flow.get_instance_id(), count_at_release, _flow.get_meta("campaign_save_feedback", ""), int(_flow.get_meta("campaign_save_successes", 0))])
 		var told: Callable = func() -> bool: return int(_flow.get_meta("campaign_save_feedback_count", 0)) > count_at_release and String(_flow.get_meta("campaign_save_feedback", "")) == "Gespeichert."
-		var landing_told: bool = await super._wait(told, 15000, "Trade: nach der Heimlandung (Rueckkehr %d) speichert das Spiel von selbst und sagt 'Gespeichert.'" % _return_number)
+		await super._wait(told, 15000, "Trade: nach der Heimlandung (Rueckkehr %d) speichert das Spiel von selbst und sagt 'Gespeichert.'" % _return_number)
 		# Der Bild-Mitschnitt sieht Aenderungen nicht, die ganz innerhalb dieser Warteschleife (nur physics_frame) geschehen und vor dem Neuladen des Treibers enden:
 		# das Ergebnis der Wartezeit wird hier selbst in die Liste uebernommen.
 		var count_now: int = int(_flow.get_meta("campaign_save_feedback_count", 0))

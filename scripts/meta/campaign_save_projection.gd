@@ -46,7 +46,7 @@ static func time_text(stamp: int) -> String:
 ## Fix-Runde 1 (W2): dieselben Saetze gelten fuer world_active (der Grund, den der Welt-Schutz im echten Flug und am Ort liefert), sobald
 ## "detail" den Zustand des Schiffs nennt; ohne detail bleibt es der alte Reise-Satz (mit Zeitpunkt).
 const AWAY_TEXTS := {
-	"flight": "Während der Reise kann noch nicht gespeichert werden. Es gilt der Stand von vor dem Abheben; nach der Landung an der Basis wird wieder gespeichert.",
+	"flight": "Während der Reise kann noch nicht gespeichert werden. Es gilt der zuletzt gespeicherte Stand; nach der Landung an der Basis wird wieder gespeichert.",
 	"place": "Ein Schiff steht noch an einem anderen Ort. Es gilt der zuletzt gespeicherte Stand; nach der Heimkehr zur Basis wird wieder gespeichert.",
 	"": "Ein Schiff ist nicht an der Heimatbasis. Gespeichert wird, sobald alle Schiffe zu Hause sind.",
 }

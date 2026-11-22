@@ -391,7 +391,7 @@ func _fp_g() -> void:
 	_check(FP_PROJECTION.blocked_text("away_from_checkpoint", "flight") == flight and FP_PROJECTION.blocked_text("away_from_checkpoint", "place") == place, "G S0: away_from_checkpoint und world_active sagen im Flug und am Ort dasselbe")
 	_check(not place.contains("Reise") and not place.contains("Flug") and not place.contains("unterwegs"), "G S0: der Satz fuer 'an anderem Ort' spricht nicht von Reise oder Flug (%s)" % place)
 	_check(place.contains("anderen Ort") and place.contains("Heimkehr") and place.contains("gespeicherte Stand"), "G S0: der Orts-Satz nennt den Ort, den geltenden Stand und den Zeitpunkt (%s)" % place)
-	_check(flight.contains("Reise") and flight.contains("Abheben") and flight.contains("Landung") and flight.contains("Basis"), "G S0: der Flug-Satz nennt die Reise, den geltenden Stand (vor dem Abheben) und den Zeitpunkt (nach der Landung an der Basis) (%s)" % flight)
+	_check(flight.contains("Reise") and flight.contains("zuletzt gespeicherte Stand") and flight.contains("Landung") and flight.contains("Basis") and not flight.contains("Abheben"), "G S0: der Flug-Satz nennt die Reise, den zuletzt gespeicherten Stand (nicht 'vor dem Abheben') und den Zeitpunkt (nach der Landung an der Basis) (%s)" % flight)
 	var world_plain: String = FP_PROJECTION.blocked_text("world_active")
 	_check(world_plain.contains("Reise") and world_plain != flight and world_plain != place, "G S0: ohne Zusatz bleibt world_active ein eigener Satz mit 'Reise' (%s)" % world_plain)
 	_check(FP_PROJECTION.pending_text("world_active", "flight") != FP_PROJECTION.pending_text("world_active", "place"), "G S0: auch die Vormerk-Saetze trennen Flug und Ort")
