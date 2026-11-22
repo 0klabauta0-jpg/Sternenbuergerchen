@@ -111,6 +111,29 @@ func _run() -> void:
 		_check(styled_targets.size() == 1 and String(Dictionary(styled_targets[0]).get("approach_style", "")) == style, "Stil %s: die Zielliste traegt ihn" % style)
 		var refusal: Dictionary = root_owner.call("request_air_support_attack_order", {"craft_id": _craft_id, "target_unit_id": enemy_id, "request_id": "gfa-real:style:" + style})
 		_check((String(refusal.get("reason", "")) == "hull_too_damaged") == bool(style_cases[style]), "Stil %s bei 60 %% Rumpf: Angriffsbefehl %s (%s)" % [style, "gesperrt" if bool(style_cases[style]) else "nicht gesperrt", str(refusal.get("reason", "ok"))])
+	# Schiffsart ueber den echten Weg Schiffskarte -> Zielliste -> Schaden: Landefaehre = 34 %, Jaeger = 50 %, fehlende Art = Landefaehre (34 %).
+	var real_card: Dictionary = Dictionary(controller.call("_find_mission_dropship_card_entry", _craft_id))
+	var as_dropship: Dictionary = Dictionary(Array(root_owner.call("get_air_support_threat_targets"))[0])
+	_check(String(real_card.get("craft_type", "")) == "dropship" and String(as_dropship.get("craft_type", "")) == "dropship" and GFA_REAL.hit_damage_percent("rocket_launcher", String(as_dropship.craft_type)) == 34, "Schiffsart Landefaehre: Karte und Zielliste sagen dropship, Raketentreffer 34 %% (%s)" % str(as_dropship.get("craft_type")))
+	var cards: Array = controller.get("_mission_drop_cards")
+	var edited := 0
+	var kept_types: Array = []
+	for card_variant in cards:
+		var card: Dictionary = card_variant
+		if String(card.get("craft_id", "")) == _craft_id:
+			kept_types.append([card, card.get("craft_type", "")])
+			card["craft_type"] = "fighter"
+			edited += 1
+	var as_fighter: Dictionary = Dictionary(Array(root_owner.call("get_air_support_threat_targets"))[0])
+	_check(edited == 0 or (String(as_fighter.get("craft_type", "")) == "fighter" and GFA_REAL.hit_damage_percent("rocket_launcher", String(as_fighter.craft_type)) == 50 and GFA_REAL.hit_damage_percent("rail_gun", String(as_fighter.craft_type)) == 37), "Schiffsart Jaeger: Karte -> Zielliste sagt fighter, Raketentreffer 50 %% (%s, %d Karte(n) gesetzt)" % [str(as_fighter.get("craft_type")), edited])
+	_check(edited > 0, "Schiffsart Jaeger: die Schiffskarte der Sortie liess sich fuer die Probe setzen")
+	for card_variant in cards:
+		var card: Dictionary = card_variant
+		if String(card.get("craft_id", "")) == _craft_id: card["craft_type"] = ""
+	var untyped: Dictionary = Dictionary(Array(root_owner.call("get_air_support_threat_targets"))[0])
+	_check(GFA_REAL.hit_damage_percent("rocket_launcher", String(untyped.get("craft_type", ""))) == 34 and GFA_REAL.hit_damage_percent("rail_gun", String(untyped.get("craft_type", ""))) == 25, "fehlende Schiffsart gilt als Landefaehre: Raketentreffer 34 %%, Schiene 25 %% (Art '%s')" % str(untyped.get("craft_type", "")))
+	for pair in kept_types:
+		Dictionary(pair[0])["craft_type"] = pair[1]
 	# W1 (gelandet nach Sortie): die Landung nimmt das Schiff aus der Zielliste.
 	var landing: Dictionary = root_owner.call("request_air_support_landing", _craft_id)
 	_check(bool(landing.get("ok", false)) and not bool(root_owner.call("is_air_support_craft_airborne", _craft_id)), "W1: Landung gelungen (%s)" % str(landing.get("reason", "ok")))
