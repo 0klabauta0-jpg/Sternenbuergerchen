@@ -5411,7 +5411,7 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_unit_command_status(cmd)
 		"set_fire_rule":
 			_apply_fire_rule_command(cmd)
-		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "set_dropship_approach_style", "return_dropship":
+		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "set_dropship_approach_style", "set_dropship_approach_path", "return_dropship":
 			_apply_dropship_command(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.

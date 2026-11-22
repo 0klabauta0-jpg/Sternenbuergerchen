@@ -51,6 +51,7 @@ static func build_command_matrix_state(context: Dictionary) -> Dictionary:
 		"legacy_window_17_go_removed": true,
 		"lz_pick_group": "target_selection_left",
 		"approach_style_options": PackedStringArray(["vorsichtig", "normal", "aggressiv"]),
+		"approach_path_options": PackedStringArray(["steil", "normal", "tief"]),
 		"go_enabled": disabled_reasons.is_empty(),
 		"disabled_reasons": disabled_reasons,
 	}

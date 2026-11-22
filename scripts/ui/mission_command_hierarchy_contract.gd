@@ -225,6 +225,7 @@ static func build_dropship_command_matrix_layout_snapshot(context: Dictionary = 
 		"lz_pick_panel_role": PANEL_COMMAND_MATRIX,
 		"lz_pick_group": "target_selection_left",
 		"approach_style_options": PackedStringArray(["vorsichtig", "normal", "aggressiv"]),
+		"approach_path_options": PackedStringArray(["steil", "normal", "tief"]),
 		"go_enabled": disabled_reasons.is_empty(),
 		"disabled_reasons": disabled_reasons,
 		"ui_sets_gameplay_truth": UI_SETS_GAMEPLAY_TRUTH,
