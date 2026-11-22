@@ -181,7 +181,7 @@ const CREDIT_TEXT_SCRIPT = preload("res://scripts/core/credit_text.gd")
 const BANKRUPTCY_SCREEN_SCRIPT = preload("res://scripts/ui/campaign_bankruptcy_screen.gd")
 const BANKRUPTCY_CAMPAIGN_SCENE := "res://scenes/meta/meta_layer_test.tscn"
 const BANKRUPTCY_MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
-const BANKRUPTCY_LIMIT_WARNING := "Kreditrahmen ausgeschöpft. Sitzt du jetzt ohne Treibstoff fest, bist du pleite."
+const BANKRUPTCY_LIMIT_WARNING := "Der Nottankdienst liefert dir nicht mehr auf Kredit. Sitzt du jetzt ohne Treibstoff fest, bist du pleite."
 var _bankrupt: bool = false
 var _bankruptcy_screen: CanvasLayer
 var _bankruptcy_paused_tree: bool = false
@@ -5687,7 +5687,7 @@ func _check_bankruptcy() -> void:
 	var check: Dictionary = Dictionary(_singleplayer_runtime.call("get_bankruptcy_check"))
 	var credits: int = int(check.get("credits", 0))
 	if bool(check.get("bankrupt", false)):
-		_enter_bankruptcy(credits)
+		_enter_bankruptcy(credits, String(check.get("cause", "")))
 		return
 	# Vorwarnung: der Nottankdienst wuerde wegen des Kreditrahmens ablehnen, man ist aber noch nicht pleite.
 	if not bool(check.get("debt_refused", false)):
@@ -5725,13 +5725,14 @@ func is_campaign_bankrupt() -> bool:
 	return _bankrupt
 
 
-func _enter_bankruptcy(credits: int) -> void:
+func _enter_bankruptcy(credits: int, cause: String = "") -> void:
 	_bankrupt = true
 	_save_wish.clear()
 	_close_game_menu_for_bankruptcy() # ein offenes Spielmenue schliesst ueber seinen eigenen Weg (close_menu)
 	set_meta("campaign_bankruptcy_shown_count", int(get_meta("campaign_bankruptcy_shown_count", 0)) + 1)
 	_bankruptcy_screen = BANKRUPTCY_SCREEN_SCRIPT.new()
 	add_child(_bankruptcy_screen)
+	_bankruptcy_screen.call("set_cause", cause)
 	_bankruptcy_screen.call("set_debt_text", "Kontostand: " + CREDIT_TEXT_SCRIPT.format(credits, " Cr"))
 	_bankruptcy_screen.connect("action_requested", _on_bankruptcy_action)
 	var tree := get_tree()

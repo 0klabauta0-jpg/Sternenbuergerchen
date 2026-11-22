@@ -52,6 +52,8 @@ func _b1_band() -> void:
 	s.flow.call("_check_bankruptcy")
 	await process_frame
 	_check(_bf_screens(s) == 1 and paused, "B1 W2: -1450 im Orbit ohne Treibstoff, Tanker wuerde ablehnen: pleite (Bildschirm, Zeit steht)")
+	var refused_message: Label = s.flow.find_child("BankruptMessage", true, false) as Label
+	_check(refused_message != null and refused_message.text == "Der Nottankdienst liefert nicht mehr auf Kredit, und kein Schiff kann mehr starten.", "B1 Nachbesserung 2: am Aussenort mit abgelehntem Tanker steht Satz 1 (%s)" % [refused_message.text if refused_message != null else "fehlt"])
 	await _close(s)
 	paused = false
 	var t: Dictionary = await _bf_orbit_session()

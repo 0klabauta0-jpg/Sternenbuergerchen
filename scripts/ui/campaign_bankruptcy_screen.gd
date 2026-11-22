@@ -8,9 +8,11 @@ signal action_requested(action: String)
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const TITLE_TEXT := "Pleite"
-const MESSAGE_TEXT := "Die Schulden haben den Kreditrahmen erreicht, und kein Schiff kann mehr starten."
+const MESSAGE_TANKER_REFUSED := "Der Nottankdienst liefert nicht mehr auf Kredit, und kein Schiff kann mehr starten."
+const MESSAGE_NO_FUEL_NO_MONEY := "Kein Schiff kann mehr starten: Der Tank ist leer, und das Geld reicht nicht zum Tanken."
 const NEW_CAMPAIGN_HINT := "Der vorhandene Kampagnenstand wird durch eine neue Kampagne ersetzt. Noch einmal drücken, um zu bestätigen."
 
+var _message_label: Label
 var _debt_label: Label
 var _hint_label: Label
 var _load_button: Button
@@ -58,7 +60,8 @@ func _ready() -> void:
 	box.add_child(title)
 	var message := Label.new()
 	message.name = "BankruptMessage"
-	message.text = MESSAGE_TEXT
+	message.text = MESSAGE_NO_FUEL_NO_MONEY
+	_message_label = message
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message.add_theme_font_size_override("font_size", 15)
@@ -84,6 +87,11 @@ func _ready() -> void:
 ## Zeile mit dem Schuldenstand (fertiger Text, gebaut ueber credit_text.gd).
 func set_debt_text(text: String) -> void:
 	if _debt_label != null: _debt_label.text = text
+
+## Der Satz richtet sich nach dem Grund aus der Pleite-Rechnung (cause): "tanker_refused" oder sonst Tank leer und Geld reicht nicht.
+func set_cause(cause: String) -> void:
+	if _message_label != null:
+		_message_label.text = MESSAGE_TANKER_REFUSED if cause == "tanker_refused" else MESSAGE_NO_FUEL_NO_MONEY
 
 ## Sperrt die drei Knoepfe (waehrend des Szenenwechsels) oder gibt sie wieder frei.
 func set_buttons_disabled(disabled: bool) -> void:

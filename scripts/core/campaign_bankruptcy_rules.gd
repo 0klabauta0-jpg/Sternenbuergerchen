@@ -21,11 +21,13 @@ static func is_bankrupt(_reachable_credits: int, debt_limit: int, craft_fuel_sta
 	if debt_limit <= 0:
 		return {"bankrupt": false, "reason": "no_debt_limit"}
 	var counted := 0
+	var refused := false
 	for entry: Variant in craft_fuel_states:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
 		counted += 1
 		var state: Dictionary = entry
+		refused = refused or bool(state.get("tanker_refused", false))
 		if bool(state.get("tanker_order_open", false)):
 			return {"bankrupt": false, "reason": "tanker_order_open", "craft_id": String(state.get("craft_id", ""))}
 		if _can_continue(state):
@@ -34,7 +36,9 @@ static func is_bankrupt(_reachable_credits: int, debt_limit: int, craft_fuel_sta
 			return {"bankrupt": false, "reason": "tanker_available", "craft_id": String(state.get("craft_id", ""))}
 	if counted == 0:
 		return {"bankrupt": false, "reason": "no_craft"}
-	return {"bankrupt": true, "reason": "bankrupt"}
+	# cause: derselbe Durchlauf nennt den Grund fuer den Satz auf dem Bildschirm. "tanker_refused": die echte Bestellpruefung lehnt wegen des
+	## Kreditrahmens ab (Feld tanker_refused je Schiff); sonst "no_fuel_no_money" (Tank leer, Geld reicht nicht; Servicepunkt oder 0 Credits).
+	return {"bankrupt": true, "reason": "bankrupt", "cause": "tanker_refused" if refused else "no_fuel_no_money"}
 
 
 static func _can_continue(state: Dictionary) -> bool:

@@ -7,7 +7,9 @@ extends "res://scripts/tests/campaign_casualty_recovery_flow_verifier.gd"
 const RULES: GDScript = preload("res://scripts/core/campaign_bankruptcy_rules.gd")
 const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
 const STORE_PATH: String = "user://campaigns/introduction/checkpoint_v1.json"
-const WARNING_TEXT: String = "Kreditrahmen ausgeschöpft. Sitzt du jetzt ohne Treibstoff fest, bist du pleite."
+const WARNING_TEXT: String = "Der Nottankdienst liefert dir nicht mehr auf Kredit. Sitzt du jetzt ohne Treibstoff fest, bist du pleite."
+const TEXT_TANKER_REFUSED: String = "Der Nottankdienst liefert nicht mehr auf Kredit, und kein Schiff kann mehr starten."
+const TEXT_NO_FUEL_NO_MONEY: String = "Kein Schiff kann mehr starten: Der Tank ist leer, und das Geld reicht nicht zum Tanken."
 const SCREEN_NAME: String = "CampaignBankruptcyScreen"
 
 func _run() -> void:
@@ -19,6 +21,7 @@ func _run() -> void:
 	_configure_entry()
 	_rules_part()
 	await _screen_part()
+	await _cause_part()
 	await _save_part()
 	await _warning_part()
 	await _timing_part()
@@ -110,6 +113,28 @@ func _rules_part() -> void:
 	_check(not bool(_bankrupt(-5000, [_grounded_stuck()], 0).get("bankrupt", true)), "Regel: ohne Kreditrahmen in den Daten (0) gibt es keine Pleite")
 	_check(not bool(RULES.is_bankrupt(-2000, 1500, [null, "x", 3]).get("bankrupt", true)), "Regel: ungueltige Eintraege in der Liste: kein Absturz, nicht pleite")
 
+# ---------- Nachbesserung 2: der Satz richtet sich nach dem Grund (gleiche Rechnung wie "pleite") ----------
+
+func _message_of_screen() -> String:
+	var screen: Node = _screen_node()
+	var message: Label = screen.find_child("BankruptMessage", true, false) as Label if screen != null else null
+	return message.text if message != null else "(kein Bildschirm)"
+
+func _cause_part() -> void:
+	var refused: Dictionary = _orbit_stuck()
+	refused["tanker_refused"] = true
+	var r: Dictionary = _bankrupt(-1450, [refused])
+	_check(bool(r.get("bankrupt", false)) and String(r.get("cause", "")) == "tanker_refused", "Grund: Tanker lehnt ab: cause tanker_refused (%s)" % [r])
+	r = _bankrupt(-1450, [_grounded_stuck()])
+	_check(bool(r.get("bankrupt", false)) and String(r.get("cause", "")) == "no_fuel_no_money", "Grund: sonst no_fuel_no_money (%s)" % [r])
+	# (b) Stillstand an der Heimatbasis mit -50 Credits, (c) mit 0 Credits: Satz 2
+	for debt: int in [50, 0]:
+		if not await _bankrupt_setup(debt): return
+		_flow.call("_check_bankruptcy")
+		await process_frame
+		_check(_screens_count() == 1 and _message_of_screen() == TEXT_NO_FUEL_NO_MONEY, "Grund: Heimatbasis, Konto -%d, Tank leer: Satz 2 (%s)" % [debt, _message_of_screen()])
+		await _close()
+
 # ---------- Teil 2: Bildschirm, Zeit, Knoepfe ----------
 
 func _screen_part() -> void:
@@ -126,7 +151,7 @@ func _screen_part() -> void:
 	var message: Label = screen.find_child("BankruptMessage", true, false) as Label if screen != null else null
 	var debt: Label = screen.find_child("BankruptDebt", true, false) as Label if screen != null else null
 	_check(title != null and title.text == "Pleite", "Bildschirm: Ueberschrift Pleite")
-	_check(message != null and message.text == "Die Schulden haben den Kreditrahmen erreicht, und kein Schiff kann mehr starten.", "Bildschirm: der Satz steht woertlich")
+	_check(message != null and message.text == TEXT_NO_FUEL_NO_MONEY, "Bildschirm: an der Heimatbasis mit -1600 (Tanker dort nicht zustaendig) steht der Satz fuer leeren Tank und fehlendes Geld (%s)" % [message.text if message != null else "fehlt"])
 	_check(debt != null and debt.text.contains("-1600 Cr Schulden"), "Bildschirm: Zeile mit dem Schuldenstand ueber credit_text (%s)" % [debt.text if debt != null else "fehlt"])
 	for pair: Array in [["BankruptLoad", "Spielstand laden"], ["BankruptNewCampaign", "Neue Kampagne"], ["BankruptMainMenu", "Zum Hauptmenü"]]:
 		var button: Button = screen.find_child(String(pair[0]), true, false) as Button if screen != null else null

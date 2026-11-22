@@ -2148,7 +2148,9 @@ func get_bankruptcy_check() -> Dictionary:
 			var tanker_context: Dictionary = _tanker_context(craft_id)
 			tanker_context["credits_override"] = reachable
 			status["tanker_order_open"] = ordered.has(craft_id)
-			status["tanker_available"] = bool(_supply.preview_emergency_tanker({"craft_id": craft_id}, tanker_context).get("ok", false))
+			var offer: Dictionary = _supply.preview_emergency_tanker({"craft_id": craft_id}, tanker_context)
+			status["tanker_available"] = bool(offer.get("ok", false))
+			status["tanker_refused"] = String(offer.get("reason", "")) == "debt_limit_reached" # Grund fuer den Satz auf dem Bildschirm
 			states.append(status)
 		verdict = rules.is_bankrupt(reachable, limit, states)
 	result.merge(verdict, true)
