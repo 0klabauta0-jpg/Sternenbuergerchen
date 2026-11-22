@@ -16,6 +16,9 @@ const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const STATUS = preload("res://scripts/mission/air_asset_status.gd")
 const CASUALTY = preload("res://scripts/core/campaign_casualty_rules.gd")
+const MISSION_SCENE = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const GM02_MAP := "res://maps/Ground_Mission02_128x128.json"
+const GM02_SCENARIO := "res://data/mission_scenarios/ground_mission02_128x128.json"
 
 var passed := 0
 var failed := 0
@@ -75,13 +78,14 @@ func _init() -> void:
 	if GUARD.require_isolated_user_data(): call_deferred("_run")
 
 
-func _check(ok: bool, label: String) -> void:
+func _check(ok: bool, label: String) -> bool:
 	if ok:
 		passed += 1
 	else:
 		failed += 1
 		print("FAIL: %s" % label)
 		push_error(label)
+	return ok
 
 
 func _run() -> void:
@@ -89,6 +93,7 @@ func _run() -> void:
 	_test_root_outcomes("cutlass")
 	_test_root_outcomes("buccaneer")
 	_test_casualty_rules()
+	await _test_controller()
 	await process_frame
 	print("AIR_SHOOTDOWN passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -298,3 +303,104 @@ func _test_casualty_rules() -> void:
 	_check(bool(plain_down.total_loss) and plain_down.total_loss_reason == "pilot_down", "unveraendert: ein anderweitig ausgefallener Pilot bleibt pilot_down")
 	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3})
 	_check(bool(all_down.total_loss) and all_down.total_loss_reason == "ground_team_down", "sind alle eigenen Personen tot oder am Boden, gilt die vorhandene Niederlage-Regel (ground_team_down)")
+
+
+
+# ---------------------------------------------------------------- Teil 4: echter Controller (GM02)
+func _unit_ids(units: Array) -> Array:
+	var ids: Array = []
+	for unit in units:
+		ids.append(String(unit.call("get_unit_id")))
+	return ids
+
+
+func _test_controller() -> void:
+	print("--- Teil 4 (Controller auf GM02: Insassen, Absetzen, Schicksal, Schiff verloren)")
+	await _controller_case(["light", "dead"], true)
+	await _controller_case(["severe", "unhurt"], false)
+
+
+func _controller_case(forms: Array, with_guards: bool) -> void:
+	var mission: Node = MISSION_SCENE.instantiate()
+	var setup: Node = mission.get_node("MissionSetup")
+	setup.set("map_file_path", GM02_MAP)
+	setup.set("scenario_file_path", GM02_SCENARIO)
+	setup.set("selected_team_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo"]))
+	setup.set("selected_team_fireteam_ids", PackedStringArray(["ft1", "ft2"]))
+	setup.set("defer_friendly_runtime_activation", true)
+	root.add_child(mission)
+	for _frame in range(3):
+		await process_frame
+	var controller: Node = mission.get_node("TacticalController")
+	controller.set_process(false)
+	var teams: PackedStringArray = controller.call("_get_available_fireteam_ids")
+	if not _check(teams.size() >= 2, "GM02-Mission mit zwei Trupps geoeffnet"):
+		return
+	var ids: Array = _unit_ids(controller.call("_get_fireteam_units", String(teams[0]), true)) + _unit_ids(controller.call("_get_fireteam_units", String(teams[1]), true))
+	var registry: Node = controller.call("_get_terrain_registry")
+	var quiet_lz: Vector2 = TERRAIN_MAP.load_from_file(GM02_MAP).get_marker_position("spawn_alpha")
+	var pilot_id: String = String(ids[ids.size() - 1])
+	var card := {"craft_id": "craft_a", "model_id": "cutlass", "display_name": "craft_a", "payload_source": "homebase_direct", "state": "waiting", "progress": 0.0,
+		"passenger_count": ids.size(), "embarked_unit_ids": ids, "boarded_fireteam_ids": [String(teams[0])], "has_lz_position": true, "lz_position": quiet_lz,
+		"approach_angle": "NW", "pilot_unit_id": pilot_id}
+	var state: Dictionary = controller.call("get_planning_state")
+	state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "craft_a", "mission_drop_state": "waiting", "drop_ship_staged": true,
+		"embarked_unit_ids": ids, "deployed_unit_ids": [], "has_lz_position": true, "lz_position": quiet_lz, "selected_fireteams": [teams[0]],
+		"mission_drop_cards": [card]}, true)
+	controller.call("set_planning_state", state)
+	controller.call("_select_mission_dropship_craft", "craft_a", false)
+	for id in ids:
+		var person: Node = controller.call("_get_campaign_sortie_unit", id)
+		if person != null:
+			person.set_meta("dropship_embarked", true)
+	_check(ids.size() == forms.size(), "zwei Personen im Einsatz (%d)" % ids.size())
+	var order: Array = controller.call("get_air_crash_occupant_ids", "craft_a")
+	var rest: Array = []
+	for id in ids:
+		if id != pilot_id:
+			rest.append(id)
+	rest.sort()
+	_check(not order.is_empty() and String(order[0]) == pilot_id, "Insassen: der Pilot kommt zuerst (%s)" % str(order))
+	_check(order.slice(1) == rest, "Insassen: danach alle Eingeschifften nach Kennung sortiert (%s)" % str(order))
+	var results: Dictionary = {}
+	for index in range(order.size()):
+		var form: String = String(forms[index % forms.size()])
+		results[String(order[index])] = {"state": form, "health_loss_fraction": 0.5 if form == "light" else 0.0}
+	var site_grid: Vector2i = registry.call("world_to_grid", quiet_lz)
+	var applied: Dictionary = controller.call("apply_air_crash", "craft_a", {"grid": site_grid}, results, order)
+	_check(bool(applied.get("ok", false)), "Absetzen an der Absturzstelle gelingt: " + str(applied))
+	var simulation: Node = mission.get_node("SimulationRoot")
+	var embarked: Dictionary = {}
+	for id in controller.get("_embarked_unit_ids"):
+		embarked[String(id)] = true
+	var deployed: Dictionary = controller.get("_deployed_unit_ids")
+	for id in order:
+		var person: Node = controller.call("_get_campaign_sortie_unit", id)
+		var form: String = String(Dictionary(results[id]).get("state", ""))
+		var label: String = "%s (%s)" % [id, form]
+		_check(deployed.has(id) and not embarked.has(id) and not bool(person.get_meta("dropship_embarked", false)), "%s: nicht mehr eingeschifft, abgesetzt" % label)
+		_check(not Dictionary(simulation.call("get_hex_unit_state", id)).is_empty(), "%s: steht im Hex-Boden der Absturzstelle" % label)
+		var max_health: int = int(person.call("get_max_health_points"))
+		var health: int = int(person.call("get_health"))
+		match form:
+			"unhurt":
+				_check(health == max_health, "%s: unversehrt, volle Gesundheit (%d/%d)" % [label, health, max_health])
+			"light":
+				_check(health == maxi(max_health - roundi(0.5 * max_health), 1) and health >= 1, "%s: verliert die Haelfte der VOLLEN Gesundheit, mindestens 1 bleibt (%d/%d)" % [label, health, max_health])
+			"severe", "dead":
+				_check(health == 0, "%s: liegt am Boden (Gesundheit 0)" % label)
+		_check(bool(person.get_meta("killed_in_crash", false)) == (form == "dead"), "%s: Merkmal 'beim Absturz gestorben' nur beim Toten" % label)
+		_check(bool(person.get_meta("crashed_aboard", false)), "%s: war beim Absturz an Bord (crashed_aboard)" % label)
+	# Schiff verloren: nicht mehr geparkt, kein Heimflug, keine Besatzung mehr aufnehmbar.
+	if not with_guards:
+		mission.queue_free()
+		await process_frame
+		return
+	var sites: Array = simulation.get("_air_crash_sites")
+	sites.append({"craft_id": "craft_a", "model_id": "cutlass", "grid": site_grid, "outcome": "crash"})
+	_check(not bool(controller.call("_is_parked_campaign_dropship", "craft_a")), "verlorenes Schiff gilt nicht als geparkt")
+	_check(not bool(controller.call("_can_request_mission_dropship_return", {"craft_id": "craft_a", "state": "waiting"})), "verlorenes Schiff: kein Heimflug anforderbar")
+	var boarding: Dictionary = controller.call("request_campaign_crew_boarding", "craft_a")
+	_check(not bool(boarding.get("ok", true)) and String(boarding.get("reason", "")) == "craft_lost", "verlorenes Schiff: Einsteigen abgelehnt (craft_lost): " + str(boarding))
+	mission.queue_free()
+	await process_frame
