@@ -215,7 +215,9 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not _valid_positive_integer(payload.get("quantity")):
 		return _reject("invalid_quantity", "Menge muss eine positive ganze Zahl sein")
 	var quantity: int = int(payload.quantity)
-	if quantity > int(_stock_by_offer_id.get(offer_id, 0)):
+	# Angebote mit "unlimited": true (Munition, M3) haben keinen Vorrat; die Bestandszahl bleibt unveraendert.
+	var unlimited: bool = bool(offer.get("unlimited", false))
+	if not unlimited and quantity > int(_stock_by_offer_id.get(offer_id, 0)):
 		return _reject("insufficient_stock", "Angebotsmenge reicht nicht")
 	var price: int = int(offer.get("unit_price", 0))
 	if price <= 0 or quantity > _credits / price:
@@ -227,7 +229,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 		purchased_items=_inventory[destination].items
 		if INVENTORY.used(purchased_items)+quantity>int(_inventory[destination].capacity): return _reject("container_full","Schiffsfracht ist voll")
 	_credits -= quantity * price
-	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - quantity
+	if not unlimited: _stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - quantity
 	var item_id: String = String(offer.item_id)
 	purchased_items[item_id] = int(purchased_items.get(item_id, 0)) + quantity
 	_revision += 1
@@ -1058,13 +1060,22 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_revision+=1
 	return {"ok":true,"message":"Fracht bestaetigt","item_id":item,"amount":amount}
 
+## Rezepte mit "free": true brauchen keine Erwerbserlaubnis (Munition, M3).
+static func is_free_recipe(blueprint_id: String) -> bool:
+	return bool(get_campaign_recipe(blueprint_id).get("free", false))
+
+## Stueck je Herstellung; fehlt das Feld, gilt 1 (alle bisherigen Rezepte).
+static func recipe_output_count(recipe: Dictionary) -> int:
+	return int(recipe.get("output_count", 1))
+
 func preview_campaign_fabrication(blueprint: String) -> Dictionary:
 	# Inventory/credit projection only. The command still checks runtime home access.
 	var recipe := get_campaign_recipe(blueprint)
-	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Erwerbserlaubnis noch nicht freigeschaltet")
+	if recipe.is_empty() or not (_blueprints().has(blueprint) or is_free_recipe(blueprint)): return _reject("blueprint_locked","Erwerbserlaubnis noch nicht freigeschaltet")
 	if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
-	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary:
+	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary or not INVENTORY.positive_integer(recipe.get("output_count", 1)):
 		return _reject("invalid_recipe", "Herstellungsrezept ungültig")
+	var count := recipe_output_count(recipe)
 	var inputs: Dictionary = recipe.get("inputs", {})
 	var after := INVENTORY.used(_item_quantities)
 	for item: String in inputs:
@@ -1073,8 +1084,8 @@ func preview_campaign_fabrication(blueprint: String) -> Dictionary:
 			return _reject("missing_materials", "Im Basislager fehlen: %d × %s" % [int(inputs[item]), RESEARCH.item_label(item)])
 		after -= int(inputs[item])
 	if _credits < int(recipe.cost): return _reject("insufficient_credits", "Credits reichen nicht")
-	if after + 1 > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
-	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true)}
+	if after + count > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
+	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true), "output_count":count}
 
 func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
@@ -1086,12 +1097,15 @@ func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary
 		_item_quantities[item] -= int(quote.inputs[item])
 		if _item_quantities[item] == 0: _item_quantities.erase(item)
 	_credits -= int(quote.cost)
-	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + 1
+	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + int(quote.output_count)
 	_revision += 1
 	var result := {"ok":true,"message":"Gegenstand hergestellt","item_id":quote.item_id}
 	# Preserve legacy receipt shape; only material recipes need the new exact ledger.
 	if not Dictionary(quote.inputs).is_empty():
 		result.merge({"recipe_id":blueprint,"cost":quote.cost,"materials_consumed":quote.inputs.duplicate(true)})
+	# Stueckzahl (M3): nur Rezepte mit mehr als einem Stueck schreiben sie in den Beleg; alte Belege bleiben gleich.
+	if int(quote.output_count) > 1:
+		result["output_count"] = int(quote.output_count)
 	return result
 
 func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
@@ -1102,6 +1116,9 @@ func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
 		var recipe := get_campaign_recipe(id)
 		var receipt: Dictionary = request.get("result", {})
 		if recipe.is_empty() or receipt.get("item_id") != recipe.get("item"): return false
+		# Stueckzahl (M3): ein Rezept mit mehr als einem Stueck verlangt sie im Beleg; sonst darf der Beleg keine andere als 1 tragen.
+		var count := recipe_output_count(recipe)
+		if (count > 1 and int(receipt.get("output_count", 0)) != count) or (count == 1 and receipt.has("output_count")): return false
 		var inputs: Dictionary = recipe.get("inputs", {})
 		if not inputs.is_empty():
 			if receipt.get("recipe_id") != id or receipt.get("cost") != recipe.cost or receipt.get("materials_consumed") != inputs: return false
