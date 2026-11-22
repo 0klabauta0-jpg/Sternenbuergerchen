@@ -464,7 +464,52 @@ func _validate_briefing(errors: PackedStringArray) -> void:
 				errors.append("briefing.recommended_loadout[%d].weapon_ids contains unknown weapon id: %s" % [loadout_index, weapon_id])
 
 
+## Gepruefte Beute eines Interaktionspunkts (Rohfeld grants_items aus vertical_slice.interaction_points;
+## die normalisierten Bindings kennen das Feld nicht). Leer, wenn der Punkt fehlt, das Feld fehlt oder ungueltig ist.
+func get_interaction_grants(interaction_id: String) -> Array:
+	var result: Array = []
+	for point_variant in Array(vertical_slice.get("interaction_points", [])):
+		if typeof(point_variant) != TYPE_DICTIONARY or String(Dictionary(point_variant).get("interaction_id", "")) != interaction_id:
+			continue
+		var errors: PackedStringArray = PackedStringArray()
+		_validate_grants_items(Dictionary(point_variant), "interaction_points[%s]" % interaction_id, errors)
+		if not errors.is_empty():
+			return []
+		for entry_variant in Array(Dictionary(point_variant).get("grants_items", [])):
+			var entry: Dictionary = Dictionary(entry_variant)
+			result.append({"item_id": String(entry.get("item_id", "")).strip_edges(), "quantity": int(entry.get("quantity", 0))})
+	return result
+
+
+func _validate_grants_items(point: Dictionary, label: String, errors: PackedStringArray) -> void:
+	if not point.has("grants_items"):
+		return
+	var grants: Variant = point.get("grants_items")
+	if not (grants is Array):
+		errors.append("%s.grants_items must be a list of {item_id, quantity}" % label)
+		return
+	var inventory_contract: GDScript = load("res://scripts/mission/inventory_transfer_contract.gd")
+	var index: int = 0
+	for entry_variant in Array(grants):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			errors.append("%s.grants_items[%d] must be an object" % [label, index])
+		else:
+			var entry: Dictionary = Dictionary(entry_variant)
+			var item_id: String = String(entry.get("item_id", "")).strip_edges() if typeof(entry.get("item_id", null)) == TYPE_STRING else ""
+			if item_id.is_empty() or not bool(inventory_contract.call("known", item_id)):
+				errors.append("%s.grants_items[%d].item_id is not a known item" % [label, index])
+			var quantity: Variant = entry.get("quantity", null)
+			var quantity_ok: bool = (typeof(quantity) == TYPE_INT and int(quantity) >= 1) or (typeof(quantity) == TYPE_FLOAT and is_finite(float(quantity)) and float(quantity) >= 1.0 and float(quantity) == floorf(float(quantity)))
+			if not quantity_ok:
+				errors.append("%s.grants_items[%d].quantity must be a whole number >= 1" % [label, index])
+		index += 1
+
+
 func _validate_interaction_points(terrain_map_data, errors: PackedStringArray) -> void:
+	for point_variant in Array(vertical_slice.get("interaction_points", [])):
+		if typeof(point_variant) == TYPE_DICTIONARY:
+			var point: Dictionary = Dictionary(point_variant)
+			_validate_grants_items(point, "interaction_points[%s]" % String(point.get("interaction_id", "?")), errors)
 	var bindings: Array = get_interaction_points()
 	if bindings.is_empty():
 		return
