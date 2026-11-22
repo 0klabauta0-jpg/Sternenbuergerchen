@@ -244,7 +244,8 @@ func _test_hit_lifts_arc_for_both_sides() -> void:
 		_check(f.sim.effects_queue.size() > effects_before and returned, "%s: es faellt ein Gegenschuss" % tag)
 		# Fenster laeuft ab (kein neuer Treffer).
 		f.sim.effects_queue.clear()
-		for step in range(WINDOW + 2):
+		# Gefechtstakt: das Fenster ist je Einheit max(18, ceil(p) x 3 + 18) Ticks (Takt des Opfers), nicht mehr fest 18.
+		for step in range(int(f.driver._get_return_fire_window_ticks(f.driver._resolve_unit_by_id(victim_id))) + 2):
 			_tick(f)
 		var after: Dictionary = _sees(f, victim_id)
 		_check(String(after.get("reason", "")) == "outside_arc" and not bool(after.get("visible", true)), "%s: nach dem Fenster wieder outside_arc (%s)" % [tag, after.get("reason", "")])
