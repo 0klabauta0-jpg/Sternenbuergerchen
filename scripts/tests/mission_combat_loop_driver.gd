@@ -168,6 +168,8 @@ var _attack_contact_next: Dictionary = {}
 var _attack_follow_by_id: Dictionary = {}
 var _attack_follow_next: Dictionary = {}
 var _attack_period_cache: Dictionary = {}
+# n3: Die Initiative gilt fuer die ganze Mission. Aendert sich die Achse kuenftig im Einsatz (Moral, Verwundung),
+# muss der Eintrag der Einheit hier verworfen werden, sonst bleibt ihr Takt still veraltet.
 var _attack_initiative_cache: Dictionary = {}
 var _last_contact_pair: Dictionary = {}
 var _last_event_text: String = "Combat waiting"
@@ -2135,11 +2137,21 @@ func _combat_attack_phase(unit) -> int:
 		_attack_due_ids[unit_id] = true
 		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_DUE
 	if _attack_warmed_ids.has(unit_id):
+		# N1: In den letzten Schritten vor der Faelligkeit laeuft die Erkennung an, damit sie zum faelligen
+		# Schritt fertig ist (laengste moegliche Erkennung der Einheit, in Schritten).
+		if COMBAT_CADENCE_SCRIPT.steps_until_due(_attack_step, period) <= _get_detection_window_steps(unit):
+			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_WARMUP
 		if _attack_contact_ids.has(unit_id):
 			_attack_contact_next[unit_id] = true
 		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
 	_attack_warmed_ids[unit_id] = true
 	return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_WARMUP
+
+
+## Laengste Erkennungsdauer der Einheit in Entscheidungsschritten (Sichtbereitschaft 0 plus die Auftragszuschlaege).
+func _get_detection_window_steps(unit) -> int:
+	var longest_ticks: int = maxi(MAX_DETECTION_DELAY_TICKS + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
+	return int(ceil(float(longest_ticks) / float(COMBAT_DECISION_INTERVAL_TICKS)))
 
 
 func _get_attack_period_steps(attacker) -> int:
@@ -2213,6 +2225,9 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 		damage_effect["fire_event_id"] = fire_event_id
 		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
+	# K1r: ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung eine Periode lang.
+	if _overwatch_controller != null and _overwatch_controller.has_method("note_member_fired"):
+		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + _get_attack_period_steps(attacker) * COMBAT_DECISION_INTERVAL_TICKS)
 	_record_return_fire_window_if_needed(attacker, actual_target)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
@@ -4025,6 +4040,8 @@ func _connect_wave_controller_signals() -> void:
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
 	_clear_down_state_linger(unit_id)
+	_attack_warmed_ids.erase(unit_id)  # n2: gleiche ID, neuer Anlauf fuer die Erkennung
+	_attack_contact_ids.erase(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 

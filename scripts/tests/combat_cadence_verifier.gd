@@ -33,7 +33,8 @@ class NPC extends Node2D:
 	func get_fireteam_id() -> String: return team_id + "_ft"
 	func get_vital_state() -> String: return "fit" if hp > 0 else "down"
 	func get_health() -> int: return hp
-	func get_awareness() -> float: return 1.0
+	var awareness := 1.0
+	func get_awareness() -> float: return awareness
 	func get_active_weapon_id() -> String: return active_weapon_id
 	func get_current_unit_command(): return command
 	func get_stealth() -> float: return 0.0
@@ -118,6 +119,9 @@ func _run() -> void:
 	_test_discipline_roll_only_when_due()
 	_test_target_search_only_for_due_units()
 	_test_dead_shooter_keeps_hit_chance()
+	_test_normal_shot_sets_overwatch_lock()
+	_test_detection_runs_before_due()
+	_test_respawn_clears_warm_state()
 	await process_frame
 	print("COMBAT_CADENCE passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -215,6 +219,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.hp = int(spec.get("hp", 100000))
 		npc.initiative = float(spec.get("initiative", -1.0))
 		npc.hit_multiplier = float(spec.get("hit_multiplier", -1.0))
+		npc.awareness = float(spec.get("awareness", 1.0))
 		npc.position = terrain.grid_to_world(spec.grid)
 		if npc.team_id == "blue":
 			npc.command = COMMAND.new({"command_type": "hold_position", "fire_status": String(spec.get("fire_status", "fire_at_will")), "fire_rule": "free"})
@@ -236,6 +241,7 @@ func _tick(f: Dictionary) -> void:
 	f.cache.begin_tick(f.sim.tick_counter)
 	f.driver._current_tick = f.sim.tick_counter
 	f.driver._advance_return_fire_windows()
+	f.driver._advance_detection_timers()
 
 
 ## Laeuft `ticks` Ticks; an jedem 3. Tick entscheidet der Treiber. Gibt je Entscheidung die Schuetzen der Reihe nach zurueck
@@ -486,11 +492,16 @@ func _test_target_search_only_for_due_units() -> void:
 	for index in range(12):
 		var column: int = index % 6 - 3
 		var row: int = index / 6
-		specs.append({"id": "a%02d" % index, "team": "blue", "grid": CENTER + Vector2i(column, -1 - row), "facing": 0, "weapon": "rifle"})
-		specs.append({"id": "b%02d" % index, "team": "red", "grid": CENTER + Vector2i(column, 1 + row), "facing": 3, "weapon": "rifle"})
+		specs.append({"id": "a%02d" % index, "team": "blue", "grid": CENTER + Vector2i(column, -1 - row), "facing": 0, "weapon": "rocket"})
+		specs.append({"id": "b%02d" % index, "team": "red", "grid": CENTER + Vector2i(column, 1 + row), "facing": 3, "weapon": "rocket"})
 	var f := _rig(specs)
 	_run_ticks(f, 90)
-	var due_unit_steps := 24 * 7
+	# Rakete, Periode 9: gesucht wird im faelligen Schritt und im Erkennungsfenster davor (5 Schritte), sonst nicht.
+	var searched_steps := 0
+	for step in range(1, 31):
+		if CADENCE.steps_until_due(step, 9) <= 5:
+			searched_steps += 1
+	var due_unit_steps := 24 * searched_steps
 	var shots_total := 0
 	for entry in f.calls:
 		shots_total += Array(entry.shooters).size()
@@ -523,3 +534,74 @@ func _test_dead_shooter_keeps_hit_chance() -> void:
 		chances.append(seen[0] if not seen.is_empty() else -2.0)
 		f.scope.free()
 	_check(chances[0] > 0.0 and is_equal_approx(chances[0], chances[1]), "k1: Trefferchance unveraendert, ob der Schuetze faellt oder nicht (%s)" % str(chances))
+
+
+# ---- Runde 2, Teil A ---------------------------------------------------------
+
+## Ein Ueberwachungsversuch mit dem ECHTEN Controller: Gegner wird um 10 verschoben (Bewegungsschwelle 5), dann update().
+func _overwatch_try(f: Dictionary, controller: RefCounted, tick: int) -> Array:
+	var enemy = f.units["enemy"]
+	var own = f.units["own"]
+	enemy.position += Vector2(10.0, 0.0)
+	var snapshot: Array = [{
+		"overwatch_ready": true,
+		"fireteam_id": "blue_ft",
+		"anchor_position": own.position,
+		"member_assignments": [{"unit_id": "own", "center_angle": 0.0, "arc_width": TAU}],
+	}]
+	return Array(controller.call("update", f.sim, snapshot, {"blue_ft": [own]}, [enemy], f.scope.get_node("TerrainRegistry"), 1000.0, tick))
+
+
+## K1r: Ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung eine Periode lang. Echter Controller.
+func _test_normal_shot_sets_overwatch_lock() -> void:
+	var control := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "none"))
+	var control_controller: RefCounted = control.driver._overwatch_controller
+	control_controller.call("update", null, [], {}, [control.units["enemy"]], null, 1000.0, 0)
+	_check(_overwatch_try(control, control_controller, 12).size() == 1, "K1r Kontrolle: ohne Normalschuss loest die Ueberwachung aus")
+	control.scope.free()
+	var f := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "none"))
+	var controller: RefCounted = f.driver._overwatch_controller
+	controller.call("update", null, [], {}, [f.units["enemy"]], null, 1000.0, 0)
+	_run_ticks(f, 9)
+	_check(_shots_by(f, "own") == 1, "K1r: Normalschuss in Schritt 3")
+	_check(_overwatch_try(f, controller, 12).is_empty(), "K1r: im Schritt danach kein Ueberwachungsschuss desselben Mitglieds")
+	_check(_overwatch_try(f, controller, 15).is_empty(), "K1r: auch im uebernaechsten Schritt noch gesperrt (Periode 3 Schritte)")
+	_check(_overwatch_try(f, controller, 18).size() == 1, "K1r: nach Ablauf der Periode wieder moeglich")
+	f.scope.free()
+
+
+## N1: Ein Ziel, das 4 Schritte vor der Faelligkeit auftaucht (Rakete, Periode 9, Erkennung 9 Ticks), wird im faelligen
+## Schritt beschossen, nicht erst eine Periode spaeter. Und weit vor der Faelligkeit wird weiter nicht gesucht.
+func _test_detection_runs_before_due() -> void:
+	var specs: Array = [
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "weapon": "rocket", "awareness": 0.4},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "weapon": "none", "hp": 0},
+	]
+	var f := _rig(specs)
+	_run_ticks(f, 41)
+	f.units["enemy"].hp = 100000  # der Gegner "taucht auf" (vorher am Boden, kein Ziel)
+	_run_ticks(f, 20)
+	var first_shot_tick := -1
+	for entry in f.calls:
+		if Array(entry.shooters).has("own"):
+			first_shot_tick = int(entry.tick)
+			break
+	_check(first_shot_tick == 54, "N1: Ziel 4 Schritte vor der Faelligkeit -> Schuss im faelligen Schritt (Tick %d, erwartet 54)" % first_shot_tick)
+	f.scope.free()
+	# Weit vor der Faelligkeit nicht suchen: Ziel von Anfang an sichtbar, Schritte 1..27, nur Anlauf + Fenster + faellige Schritte.
+	var g := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "rocket", "none"))
+	_run_ticks(g, 81)
+	_check(g.driver.search_calls < 27 and g.driver.search_calls >= 5, "N1: Rakete sucht nicht in jedem Schritt (%d von 27)" % g.driver.search_calls)
+	g.scope.free()
+
+
+## n2: Wiederbeleben mit gleicher ID leert Anlauf und Kontaktmerker der Einheit.
+func _test_respawn_clears_warm_state() -> void:
+	var f := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "pistol"))
+	f.driver._attack_warmed_ids["own"] = true
+	f.driver._attack_contact_ids["own"] = true
+	f.driver._attack_warmed_ids["enemy"] = true
+	f.driver._on_unit_respawn_completed("own")
+	_check(not f.driver._attack_warmed_ids.has("own") and not f.driver._attack_contact_ids.has("own"), "n2: Respawn leert Anlauf und Kontakt der Einheit")
+	_check(f.driver._attack_warmed_ids.has("enemy"), "n2: andere Einheiten bleiben unberuehrt")
+	f.scope.free()

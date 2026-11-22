@@ -32,3 +32,9 @@ static func period_steps(ticks_between_attacks: int, initiative: float) -> int:
 
 static func is_due(step: int, period: int) -> bool:
 	return step % maxi(period, 1) == 0
+
+
+## Schritte bis zur naechsten Faelligkeit: 0 = jetzt faellig.
+static func steps_until_due(step: int, period: int) -> int:
+	var p: int = maxi(period, 1)
+	return (p - step % p) % p

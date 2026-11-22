@@ -10,11 +10,23 @@ const OVERWATCH_ACCURACY_BONUS: float = 0.1
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _last_enemy_positions_by_unit_id: Dictionary = {}
 var _member_ready_tick_by_unit_id: Dictionary = {}
+## Gefechtstakt: Ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung (eine Waffenperiode), damit es
+## nicht im Schritt danach ein zweites Mal schiesst. Getrennt von der Ueberwachungssperre, damit der Normaltakt
+## (get_member_ready_snapshot) durch diese Sperre nie ausgebremst wird.
+var _normal_fire_ready_tick_by_unit_id: Dictionary = {}
 
 
 func reset_all() -> void:
 	_last_enemy_positions_by_unit_id.clear()
 	_member_ready_tick_by_unit_id.clear()
+	_normal_fire_ready_tick_by_unit_id.clear()
+
+
+func note_member_fired(unit_id: String, ready_tick: int) -> void:
+	var key: String = unit_id.strip_edges()
+	if key.is_empty():
+		return
+	_normal_fire_ready_tick_by_unit_id[key] = maxi(int(_normal_fire_ready_tick_by_unit_id.get(key, 0)), ready_tick)
 
 
 func get_member_ready_snapshot(current_tick: int = -1) -> Dictionary:
@@ -69,6 +81,8 @@ func update(
 			if member_unit_id.is_empty():
 				continue
 			if int(_member_ready_tick_by_unit_id.get(member_unit_id, 0)) > current_tick:
+				continue
+			if int(_normal_fire_ready_tick_by_unit_id.get(member_unit_id, 0)) > current_tick:
 				continue
 			var member = unit_lookup.get(member_unit_id, null)
 			if not _can_member_overwatch(member):
