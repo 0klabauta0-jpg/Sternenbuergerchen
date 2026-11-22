@@ -176,6 +176,9 @@ var _hex_adapter_arc := -1.0
 @export_range(0.0, 360.0, 1.0) var hex_sight_arc_degrees := 120.0
 var _discipline_break_cooldown: Dictionary = {}
 var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
+## Regel D (Sicht): wer wen getroffen hat. Schluessel "<Schuetze>><Gruppe des Opfers>" -> Tick des Treffers;
+## die Gruppe ist die Fireteam des Opfers (sonst die Einheit selbst). Gilt fuer beide Seiten gleich.
+var _recent_hit_tick_by_shooter_and_group: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
@@ -994,7 +997,47 @@ func get_hex_sight_adapter() -> RefCounted:
 
 
 func _query_current_visibility(attacker, target, range_world: float) -> Dictionary:
-	return get_hex_sight_adapter().query_units(attacker, target, range_world)
+	# Regel D: Wer getroffen wird, weiss woher. Gegen einen Schuetzen, der die eigene Gruppe innerhalb des
+	# Rueckfeuerfensters getroffen hat, gilt der Sichtbogen nicht (360 Grad). Reichweite, Sichtlinie und
+	# Verdeckung gelten unveraendert weiter.
+	var arc_override: float = 360.0 if _was_recently_hit_by(attacker, target) else -1.0
+	return get_hex_sight_adapter().query_units(attacker, target, range_world, arc_override)
+
+
+func _visibility_group_key(unit) -> String:
+	var fireteam_id: String = _get_unit_fireteam_id(unit)
+	if not fireteam_id.is_empty():
+		return fireteam_id
+	if unit != null and unit.has_method("get_unit_id"):
+		return "unit:" + String(unit.call("get_unit_id")).strip_edges()
+	return ""
+
+
+func _record_incoming_hit_for_visibility(result: Dictionary) -> void:
+	if not bool(result.get("hit", false)) or bool(result.get("friendly_fire", false)):
+		return
+	var shooter_id: String = String(result.get("attacker_unit_id", "")).strip_edges()
+	var victim_id: String = String(result.get("target_unit_id", result.get("unit_id", ""))).strip_edges()
+	if shooter_id.is_empty() or victim_id.is_empty() or shooter_id == victim_id:
+		return
+	var group_key: String = _visibility_group_key(_resolve_unit_by_id(victim_id))
+	if group_key.is_empty():
+		return
+	_recent_hit_tick_by_shooter_and_group["%s>%s" % [shooter_id, group_key]] = _current_tick
+
+
+func _was_recently_hit_by(observer, shooter) -> bool:
+	if _recent_hit_tick_by_shooter_and_group.is_empty():
+		return false
+	if observer == null or shooter == null or not shooter.has_method("get_unit_id"):
+		return false
+	var group_key: String = _visibility_group_key(observer)
+	if group_key.is_empty():
+		return false
+	var key: String = "%s>%s" % [String(shooter.call("get_unit_id")).strip_edges(), group_key]
+	if not _recent_hit_tick_by_shooter_and_group.has(key):
+		return false
+	return _current_tick - int(_recent_hit_tick_by_shooter_and_group[key]) <= RETURN_FIRE_WINDOW_TICKS
 
 
 func _get_attack_distance(attacker, target) -> float:
@@ -1419,6 +1462,7 @@ func _prune_recent_fire_events() -> void:
 
 
 func _on_damage_effect_resolved(result: Dictionary) -> void:
+	_record_incoming_hit_for_visibility(result)
 	var fire_event_id: String = String(result.get("fire_event_id", "")).strip_edges()
 	if fire_event_id.is_empty():
 		return
@@ -3142,6 +3186,12 @@ func _advance_return_fire_windows() -> void:
 			keys_to_remove.append(key)
 	for key in keys_to_remove:
 		_recent_incoming_fire_tick_by_fireteam.erase(key)
+	var hit_keys_to_remove: Array = []
+	for hit_key in _recent_hit_tick_by_shooter_and_group.keys():
+		if _current_tick - int(_recent_hit_tick_by_shooter_and_group[hit_key]) > RETURN_FIRE_WINDOW_TICKS:
+			hit_keys_to_remove.append(hit_key)
+	for hit_key in hit_keys_to_remove:
+		_recent_hit_tick_by_shooter_and_group.erase(hit_key)
 
 
 func get_return_fire_window_snapshot() -> Dictionary:

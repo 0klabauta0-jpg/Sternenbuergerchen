@@ -39,10 +39,12 @@ func build_observer_signature(unit, range_world: float, include_position: bool =
 		signature["height"] = logical.get("stand_height_steps2")
 	return JSON.stringify(signature)
 
-func query_units(observer, target, range_world: float) -> Dictionary:
+## arc_degrees_override >= 0 ersetzt nur fuer diese eine Abfrage den Sichtbogen (Regel D: 360 gegen einen
+## Schuetzen, der getroffen hat). Reichweite, Sichtlinie und Verdeckung bleiben unberuehrt.
+func query_units(observer, target, range_world: float, arc_degrees_override: float = -1.0) -> Dictionary:
 	if not is_active():
 		return {"handled":false,"visible":false}
-	var source := build_observer_state(observer, range_world)
+	var source := build_observer_state(observer, range_world, arc_degrees_override)
 	var destination := build_observer_state(target, -1.0)
 	if source.is_empty() or destination.is_empty():
 		return {"handled":true,"visible":false,"reason":"missing_logical_state"}
@@ -50,7 +52,7 @@ func query_units(observer, target, range_world: float) -> Dictionary:
 	result["handled"] = true
 	return result
 
-func build_observer_state(unit, range_world: float) -> Dictionary:
+func build_observer_state(unit, range_world: float, arc_degrees_override: float = -1.0) -> Dictionary:
 	if not is_active() or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
 		return {}
 	var state: Dictionary = _owner.call("get_hex_unit_state", String(unit.call("get_unit_id")))
@@ -69,7 +71,7 @@ func build_observer_state(unit, range_world: float) -> Dictionary:
 		"hex_context_key":get_context_key(),"hex_registry_id":registry.get_instance_id(),
 		"hex_state":{"grid":state["grid"],"facing_dir":state["facing_dir"],
 			"stand_height_steps2":state["stand_height_steps2"]},
-		"hex_profile":{"range_hex":range_hex,"arc_degrees":_arc_degrees}}
+		"hex_profile":{"range_hex":range_hex,"arc_degrees":_arc_degrees if arc_degrees_override < 0.0 else arc_degrees_override}}
 
 static func query_snapshot(source: Dictionary, target: Dictionary, registry: Node, cache) -> Dictionary:
 	if not is_instance_valid(registry) or int(source.get("hex_registry_id",0)) != registry.get_instance_id():
