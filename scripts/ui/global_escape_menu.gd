@@ -208,6 +208,11 @@ func toggle_menu() -> void:
 		open_menu()
 
 
+## Abschnitt P: Ist irgendein Feld des Menues (Menue, Einstellungen, Tastenbelegung) offen?
+func is_overlay_open() -> bool:
+	return _overlay_root != null and _overlay_root.visible
+
+
 func is_menu_visible() -> bool:
 	return _overlay_root != null and _overlay_root.visible and _menu_panel != null and _menu_panel.visible
 
