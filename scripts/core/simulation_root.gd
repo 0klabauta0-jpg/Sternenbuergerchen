@@ -2421,6 +2421,7 @@ var _accepted_network_dropship_command_ids: Dictionary = {}
 var _accepted_network_dropship_command_id_order: Array = []
 var _network_command_dedupe_hit_count: int = 0
 var _network_command_preflight_validator: Callable = Callable()
+var _movement_suppression_provider: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
@@ -4054,6 +4055,17 @@ func set_network_command_preflight_validator(validator: Callable) -> void:
 func clear_network_command_preflight_validator(validator: Callable = Callable()) -> void:
 	if not validator.is_valid() or _network_command_preflight_validator == validator:
 		_network_command_preflight_validator = Callable()
+
+
+## Unterdrueckung (FT-0b): Der Gefechtstreiber des Hosts liefert je Einheit und Befehl einen Tempofaktor 0..1, der als
+## echter Multiplikator auf das Lauftempo wirkt (auch wenn der Befehl einen eigenen Faktor mitbringt). Ohne Lieferant 1.0.
+func set_movement_suppression_provider(provider: Callable) -> void:
+	_movement_suppression_provider = provider
+
+
+func clear_movement_suppression_provider(provider: Callable = Callable()) -> void:
+	if not provider.is_valid() or _movement_suppression_provider == provider:
+		_movement_suppression_provider = Callable()
 
 
 func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
@@ -7558,6 +7570,8 @@ func _extract_move_speed_factor(cmd: Dictionary, unit) -> float:
 	elif unit != null and unit.has_method("get_move_speed_factor"):
 		move_speed_factor = maxf(float(unit.call("get_move_speed_factor")), 0.0)
 
+	if _movement_suppression_provider.is_valid() and unit != null:
+		move_speed_factor *= clampf(float(_movement_suppression_provider.call(unit, cmd)), 0.0, 1.0)
 	return move_speed_factor * _extract_unit_speed_multiplier(unit)
 
 

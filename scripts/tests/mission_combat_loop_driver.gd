@@ -9,6 +9,8 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
 const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
+const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
+const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -173,6 +175,19 @@ var _attack_period_cache: Dictionary = {}
 # n3: Die Initiative gilt fuer die ganze Mission. Aendert sich die Achse kuenftig im Einsatz (Moral, Verwundung),
 # muss der Eintrag der Einheit hier verworfen werden, sonst bleibt ihr Takt still veraltet.
 var _attack_initiative_cache: Dictionary = {}
+# Unterdrueckung (FT-0b), fluechtig, nicht gespeichert: Wert und Stufe je Gruppe, laufende Nummer der Schussgelegenheit je
+# Einheit, Wirkung auf die Einheiten (Basiswerte zum Zurueckstellen).
+var _suppression_rules: Dictionary = SUPPRESSION_MATH_SCRIPT.load_rules()
+var _suppression_tracker = SUPPRESSION_TRACKER_SCRIPT.new(_suppression_rules)
+var _suppression_last_step_tick: int = -1
+var _suppression_slot_count_by_unit_id: Dictionary = {}
+var _suppression_slot_memo: Dictionary = {}
+var _suppression_overwatch_slot_by_unit_id: Dictionary = {}
+var _suppression_ignored_by_key: Dictionary = {}
+var _suppression_key_by_instance: Dictionary = {}
+var _suppression_applied_by_instance: Dictionary = {}
+var _suppression_baseline_by_instance: Dictionary = {}
+var _suppression_movement_provider: Callable = Callable()
 var _last_contact_pair: Dictionary = {}
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
@@ -307,6 +322,8 @@ func _ready() -> void:
 		if not simulation_root.is_connected("damage_effect_resolved", damage_resolved_callable):
 			simulation_root.connect("damage_effect_resolved", damage_resolved_callable)
 
+	if _runs_local_authority:
+		register_suppression_movement_provider(simulation_root)
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
 	if _runs_local_authority and simulation_root.has_signal("network_command_accepted"):
@@ -323,6 +340,8 @@ func _exit_tree() -> void:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("clear_network_command_preflight_validator"):
 		simulation_root.call("clear_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
+	if simulation_root != null and _suppression_movement_provider.is_valid() and simulation_root.has_method("clear_movement_suppression_provider"):
+		simulation_root.call("clear_movement_suppression_provider", _suppression_movement_provider)
 
 
 func is_combat_finished() -> bool:
@@ -1482,6 +1501,7 @@ func _prune_recent_fire_events() -> void:
 
 func _on_damage_effect_resolved(result: Dictionary) -> void:
 	_record_incoming_hit_for_visibility(result)
+	_note_suppression_from_result(result)
 	var fire_event_id: String = String(result.get("fire_event_id", "")).strip_edges()
 	if fire_event_id.is_empty():
 		return
@@ -1745,6 +1765,7 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_return_fire_windows()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
+	_advance_suppression(tick)
 	if profile_enabled:
 		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -2136,6 +2157,11 @@ func _combat_attack_phase(unit) -> int:
 	if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id:
 		_attack_follow_next[unit_id] = _attack_step + 1 + COMBAT_CADENCE_SCRIPT.steps_until_due(_attack_step + 1, period)
 	if COMBAT_CADENCE_SCRIPT.is_due(_attack_step, period):
+		if not _suppression_fire_slot_open(unit_id, unit):
+			# Unterdrueckung: die Gelegenheit ist verbraucht (keine Zielsuche, kein Wurf, kein Nachholen).
+			if _attack_contact_ids.has(unit_id):
+				_attack_contact_next[unit_id] = true
+			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
 		_attack_due_ids[unit_id] = true
 		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_DUE
 	if _attack_warmed_ids.has(unit_id):
@@ -5886,8 +5912,11 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 	else:
 		tactical_controller.call("refresh_fireteam_security_state")
 	var friendly_units_by_fireteam: Dictionary = {}
+	var overwatch_ready_snapshot: Dictionary = get_overwatch_member_ready_snapshot()
 	for friendly in _get_friendly_combat_units():
 		if friendly == null or not friendly.has_method("get_fireteam_id"):
+			continue
+		if not _suppression_overwatch_slot_open(friendly, overwatch_ready_snapshot):
 			continue
 		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
 		if fireteam_id.is_empty():
@@ -6057,4 +6086,311 @@ func reset_for_location_job(scenario_path: String) -> void:
 	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
 	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec(); _checkpoint_elapsed_offset_msec=0
+	reset_suppression()
 	configure_scenario_runtime_gates_from_file(scenario_path)
+
+
+# ---- Unterdrueckung (FT-0b) -------------------------------------------------------------------------------------------
+# Ein Wert je Gruppe fuer beide Seiten: eigene Seite je Fireteam, Gegner je group_id. Gerechnet nur hier auf dem Host,
+# nur ueber suppression_math.gd (Zahlen aus data/combat/suppression_rules.json), im Takt der Spiel-Ticks.
+
+## Schluessel einer eigenen Fireteam-Gruppe (so liest ihn der Taktik-Controller).
+static func suppression_own_key(fireteam_id: String) -> String:
+	return "own:" + fireteam_id.strip_edges().to_lower()
+
+
+func get_suppression_tracker():
+	return _suppression_tracker
+
+
+## Gruppe der Einheit: eigene Seite = Fireteam, Gegner = group_id (Taktikprofil), sonst Fireteam oder Team.
+func suppression_group_key(unit) -> String:
+	if unit == null or not is_instance_valid(unit):
+		return ""
+	var instance_id: int = unit.get_instance_id()
+	if _suppression_key_by_instance.has(instance_id):
+		return String(_suppression_key_by_instance[instance_id])
+	var key: String = ""
+	if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id:
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		key = suppression_own_key(fireteam_id if not fireteam_id.is_empty() else "team")
+	else:
+		key = "enemy:" + _get_enemy_security_group_id(unit, _get_enemy_tactics_config(unit))
+	_suppression_key_by_instance[instance_id] = key
+	return key
+
+
+func get_suppression_level(group_key: String) -> int:
+	return _suppression_tracker.level_of(group_key) if _suppression_tracker != null else 0
+
+
+## Stufe, die fuer diese Einheit gilt (0, wenn ihre Gruppe die Unterdrueckung ignoriert, z. B. "hold_till_last_man").
+func get_suppression_level_for_unit(unit) -> int:
+	if _suppression_tracker == null or unit == null or not _suppression_tracker.any_active():
+		return 0
+	var key: String = suppression_group_key(unit)
+	if bool(_suppression_ignored_by_key.get(key, false)):
+		return 0
+	return _suppression_tracker.level_of(key)
+
+
+## Anzeige: Wert, Schwelle der naechsten Stufe, Stufe und Stufenname einer Gruppe.
+func get_suppression_snapshot(group_key: String) -> Dictionary:
+	if _suppression_tracker == null:
+		return {}
+	var level: int = _suppression_tracker.level_of(group_key)
+	return {
+		"value": _suppression_tracker.value_of(group_key),
+		"threshold": _suppression_tracker.next_threshold_of(group_key),
+		"level": level,
+		"label": SUPPRESSION_MATH_SCRIPT.level_label(_suppression_rules, level),
+		"ignored": bool(_suppression_ignored_by_key.get(group_key, false)),
+	}
+
+
+func get_suppression_slot_count(unit_id: String) -> int:
+	return int(_suppression_slot_count_by_unit_id.get(unit_id, 0))
+
+
+## Nichts davon steht im Speicherstand: beim Laden eines Zwischenstands und beim Missionsneustart leeren.
+func reset_suppression() -> void:
+	if _suppression_tracker == null:
+		return
+	_suppression_tracker.reset()
+	_suppression_slot_count_by_unit_id.clear()
+	_suppression_slot_memo.clear()
+	_suppression_overwatch_slot_by_unit_id.clear()
+	_suppression_ignored_by_key.clear()
+	_suppression_key_by_instance.clear()
+	_suppression_last_step_tick = -1
+	_restore_suppression_effects()
+
+
+func register_suppression_movement_provider(simulation_root) -> void:
+	if simulation_root != null and simulation_root.has_method("set_movement_suppression_provider"):
+		_suppression_movement_provider = Callable(self, "get_suppression_move_factor")
+		simulation_root.call("set_movement_suppression_provider", _suppression_movement_provider)
+
+
+## Jeder aufgeloeste Schuss zaehlt fuer die Gruppe des ZIELS: Treffer mit dem angerichteten Schaden, Fehlschuss mit dem
+## Schaden, den die Waffe gemacht haette.
+func note_suppression_shot(target_unit, damage: float, hit: bool) -> void:
+	if _suppression_tracker == null:
+		return
+	var key: String = suppression_group_key(target_unit)
+	if not key.is_empty():
+		_suppression_tracker.note_shot(key, damage, hit)
+
+
+func _note_suppression_from_result(result: Dictionary) -> void:
+	var target = _resolve_unit_by_id(String(result.get("target_unit_id", result.get("unit_id", ""))))
+	if target == null:
+		return
+	var hit: bool = bool(result.get("hit", false))
+	var damage: float = float(result.get("damage_resolved", 0)) if hit else float(result.get("base_damage", 0))
+	note_suppression_shot(target, damage, hit)
+
+
+## Alle step_ticks Ticks ein Schritt: erst Wert (Gewinne seit dem letzten Schritt, Abbau), dann Stufe; danach die Wirkung auf
+## die Einheiten. Keine Wanduhr. Gibt zurueck, ob in diesem Tick ein Schritt lief.
+func _advance_suppression(tick: int) -> bool:
+	if _suppression_tracker == null:
+		return false
+	var every: int = SUPPRESSION_MATH_SCRIPT.step_ticks(_suppression_rules)
+	if tick <= 0 or tick % every != 0 or tick == _suppression_last_step_tick:
+		return false
+	_suppression_last_step_tick = tick
+	_suppression_key_by_instance.clear()
+	var has_groups: bool = not _suppression_tracker.group_keys().is_empty()
+	if not has_groups and _suppression_applied_by_instance.is_empty():
+		return true
+	var members_by_key: Dictionary = {}
+	for unit in _get_friendly_combat_units() + _get_enemy_combat_units():
+		var key: String = suppression_group_key(unit)
+		if not members_by_key.has(key):
+			members_by_key[key] = []
+		members_by_key[key].append(unit)
+	for key in _suppression_tracker.group_keys():
+		var members: Array = Array(members_by_key.get(key, []))
+		if members.is_empty():
+			# Niemand lebt mehr: die Gruppe haelt keinen Wert (nichts bleibt haengen).
+			_suppression_tracker.forget(key)
+			_suppression_ignored_by_key.erase(key)
+			continue
+		_step_suppression_group(key, members)
+	_apply_suppression_effects(members_by_key)
+	return true
+
+
+func _step_suppression_group(key: String, members: Array) -> void:
+	var leader = _suppression_leader(members)
+	var leadership: float = float(leader.call("get_leadership_skill")) if leader != null and leader.has_method("get_leadership_skill") else 0.5
+	var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
+	var stability_sum: float = 0.0
+	for member in members:
+		stability_sum += _suppression_contact_stability(member)
+	var stability: float = clampf(stability_sum / float(members.size()), 0.0, 1.0)
+	var decay_factor: float = 2.0 if trait_ids.has("calm") else 1.0
+	var threshold_factor: float = 1.4 if trait_ids.has("reckless") else 1.0
+	var ignored: bool = false
+	if key.begins_with("own:"):
+		var fireteam_id: String = key.substr(4)
+		var flank_state: Dictionary = get_fireteam_flank_vulnerability_state(fireteam_id)
+		if bool(flank_state.get("is_active", false)) or bool(flank_state.get("is_morale_active", false)):
+			threshold_factor *= float(flank_state.get("effective_suppression_threshold_multiplier", flank_state.get("suppression_threshold_multiplier", 1.0)))
+		var tactical_controller = _get_tactical_controller()
+		if tactical_controller != null and tactical_controller.has_method("is_suppression_ignored_for_fireteam"):
+			ignored = bool(tactical_controller.call("is_suppression_ignored_for_fireteam", fireteam_id))
+	_suppression_ignored_by_key[key] = ignored
+	_suppression_tracker.step(key, clampf(leadership, 0.0, 1.0), stability, decay_factor, threshold_factor)
+
+
+## Fuehrer der Gruppe: der amtierende Fireteam-Fuehrer, sonst die Einheit mit der hoechsten Fuehrung (bei Gleichstand die kleinere ID).
+func _suppression_leader(members: Array):
+	var acting = null
+	var first = members[0] if not members.is_empty() else null
+	if first != null and _get_unit_team_id_for_diagnostics(first) == friendly_team_id:
+		acting = get_current_fireteam_lead_unit(_get_unit_fireteam_id(first))
+		if acting != null and members.has(acting):
+			return acting
+	var best = null
+	var best_value: float = -1.0
+	var best_id: String = ""
+	for member in members:
+		var value: float = float(member.call("get_leadership_skill")) if member.has_method("get_leadership_skill") else 0.5
+		var unit_id: String = _get_unit_id_for_diagnostics(member)
+		if best == null or value > best_value or (is_equal_approx(value, best_value) and unit_id < best_id):
+			best = member
+			best_value = value
+			best_id = unit_id
+	return best
+
+
+func _suppression_contact_stability(unit) -> float:
+	if unit != null and unit.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(unit.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		if axes.has("contact_stability"):
+			return clampf(float(axes["contact_stability"]), 0.0, 1.0)
+	return 0.5
+
+
+## Trefferabzug und Deckungsboden je Stufe ueber die Laufzeitwerte der Einheit (wie bisher attack_bonus und cover_score);
+## Feuerstatus und Tempo der Einheit bleiben unberuehrt. Wer seine Gruppe verloren hat oder bei Stufe 0 steht, bekommt die Basiswerte zurueck.
+func _apply_suppression_effects(members_by_key: Dictionary) -> void:
+	for key in members_by_key.keys():
+		var level: int = 0 if bool(_suppression_ignored_by_key.get(key, false)) else _suppression_tracker.level_of(String(key))
+		for unit in members_by_key[key]:
+			var instance_id: int = unit.get_instance_id()
+			var applied: int = int(_suppression_applied_by_instance.get(instance_id, 0))
+			if applied != level:
+				_apply_suppression_to_unit(unit, level)
+
+
+func _apply_suppression_to_unit(unit, level: int) -> void:
+	var instance_id: int = unit.get_instance_id()
+	if not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
+		return
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null:
+		return
+	var base: Dictionary = Dictionary(_suppression_baseline_by_instance.get(instance_id, {}))
+	if base.is_empty():
+		if level <= 0:
+			_suppression_applied_by_instance.erase(instance_id)
+			return
+		base = {"attack_bonus": float(runtime_status.attack_bonus), "cover_score": float(runtime_status.cover_score)}
+		_suppression_baseline_by_instance[instance_id] = base
+	var next_attack_bonus: float = float(base["attack_bonus"])
+	var next_cover_score: float = float(base["cover_score"])
+	if level > 0:
+		next_attack_bonus += SUPPRESSION_MATH_SCRIPT.hit_bonus(_suppression_rules, level)
+		next_cover_score = maxf(next_cover_score, float(SUPPRESSION_MATH_SCRIPT.cover_floor(_suppression_rules, level)))
+	unit.call(
+		"set_runtime_status",
+		String(runtime_status.status),
+		String(runtime_status.active_command_type),
+		int(runtime_status.priority),
+		String(runtime_status.fire_status),
+		String(runtime_status.source_command_type),
+		float(runtime_status.move_speed_factor),
+		next_cover_score,
+		next_attack_bonus,
+		int(runtime_status.phase),
+		runtime_status.target_position,
+		String(runtime_status.movement_posture),
+		String(runtime_status.weapon_posture),
+		String(runtime_status.posture_policy_id),
+		float(runtime_status.sight_range_factor),
+		float(runtime_status.get("aim_readiness_percent"))
+	)
+	if level > 0:
+		_suppression_applied_by_instance[instance_id] = level
+	else:
+		_suppression_applied_by_instance.erase(instance_id)
+		_suppression_baseline_by_instance.erase(instance_id)
+
+
+func _restore_suppression_effects() -> void:
+	for unit in _get_friendly_combat_units() + _get_enemy_combat_units():
+		if _suppression_applied_by_instance.has(unit.get_instance_id()):
+			_apply_suppression_to_unit(unit, 0)
+	_suppression_applied_by_instance.clear()
+	_suppression_baseline_by_instance.clear()
+
+
+## Regel 5: die laufende Nummer der faelligen Schussgelegenheit der Einheit (zaehlt den ganzen Einsatz hoch, wird bei
+## Stufenwechsel nicht zurueckgesetzt). Gesperrte Gelegenheiten sind verbraucht. Je Schritt einmal gezaehlt.
+func _suppression_fire_slot_open(unit_id: String, unit) -> bool:
+	var memo: Dictionary = Dictionary(_suppression_slot_memo.get(unit_id, {}))
+	if not memo.is_empty() and int(memo["step"]) == _attack_step:
+		return bool(memo["allowed"])
+	var slot: int = int(_suppression_slot_count_by_unit_id.get(unit_id, 0)) + 1
+	_suppression_slot_count_by_unit_id[unit_id] = slot
+	var allowed: bool = SUPPRESSION_MATH_SCRIPT.fire_slot_allowed(_suppression_rules, get_suppression_level_for_unit(unit), slot)
+	_suppression_slot_memo[unit_id] = {"step": _attack_step, "allowed": allowed}
+	return allowed
+
+
+## Ueberwachungsschuesse unterliegen derselben Regel; gezaehlt wird je bereitem Mitglied und Schritt, solange eine Stufe gilt.
+func _suppression_overwatch_slot_open(unit, ready_snapshot: Dictionary) -> bool:
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return true
+	var unit_id: String = _get_unit_id_for_diagnostics(unit)
+	if not bool(Dictionary(ready_snapshot.get(unit_id, {})).get("ready", true)):
+		return true
+	var slot: int = int(_suppression_overwatch_slot_by_unit_id.get(unit_id, 0)) + 1
+	_suppression_overwatch_slot_by_unit_id[unit_id] = slot
+	return SUPPRESSION_MATH_SCRIPT.fire_slot_allowed(_suppression_rules, level, slot)
+
+
+## Regel 8: Tempofaktor 0..1 fuer einen laufenden Befehl. "Zum Feind" = das Ziel des Befehls liegt naeher am naechsten
+## Gegner der Einheit als ihre jetzige Position; ohne Gegner oder ohne Ziel gilt "nicht zum Feind".
+func get_suppression_move_factor(unit, cmd: Dictionary) -> float:
+	if _suppression_tracker == null or not _suppression_tracker.any_active():
+		return 1.0
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return 1.0
+	return SUPPRESSION_MATH_SCRIPT.move_factor(_suppression_rules, level, _suppression_move_is_toward_enemy(unit, cmd))
+
+
+func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
+	if not cmd.has("target_position") or not (unit is Node2D):
+		return false
+	var target_position: Vector2 = _coerce_vector2(cmd.get("target_position"), Vector2.INF)
+	if not target_position.is_finite():
+		return false
+	var own_position: Vector2 = _get_unit_world_position(unit)
+	var opponents: Array = _get_enemy_combat_units() if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id else _get_friendly_combat_units()
+	var nearest_position: Vector2 = Vector2.INF
+	var nearest_distance: float = INF
+	for opponent in opponents:
+		var opponent_position: Vector2 = _get_unit_world_position(opponent)
+		var distance: float = own_position.distance_to(opponent_position)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_position = opponent_position
+	if not nearest_position.is_finite():
+		return false
+	return target_position.distance_to(nearest_position) < nearest_distance
