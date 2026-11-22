@@ -97,6 +97,9 @@
     },
     {
       "audio_id": "combat_blaster_small_01",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_blaster",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_blaster_small_01.ogg",
@@ -111,6 +114,9 @@
     },
     {
       "audio_id": "combat_blaster_small_02",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_blaster",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_blaster_small_02.ogg",
@@ -125,6 +131,9 @@
     },
     {
       "audio_id": "combat_smg_laser_01",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_smg_burst",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_smg_laser_01.ogg",
@@ -139,6 +148,9 @@
     },
     {
       "audio_id": "combat_smg_laser_02",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_smg_burst",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_smg_laser_02.ogg",
@@ -153,6 +165,9 @@
     },
     {
       "audio_id": "combat_heavy_laser_01",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_heavy_weapon",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_heavy_laser_01.ogg",
@@ -167,6 +182,9 @@
     },
     {
       "audio_id": "combat_sniper_zap_01",
+      "spatial": false,
+      "cooldown_msec": 25,
+      "polyphony_limit": 6,
       "category": "combat",
       "planned_event": "combat_sniper_shot",
       "path": "res://Assets/used/audio/kenney_all_in_one/combat/combat_sniper_zap_01.ogg",
