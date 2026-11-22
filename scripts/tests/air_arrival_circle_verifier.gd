@@ -372,7 +372,6 @@ func _part_flak_arrival() -> void:
 				await physics_frame
 			booked = mission_root.call("get_air_asset_status_snapshot", "craft_a")
 			if started and int(booked.get("integrity", 100)) < 100:
-				print("ARRIVAL_FLAK Zelle ", Vector2i(cell_x, cell_y), " -> ", text)
 				break
 			started = false
 		if started:
@@ -380,17 +379,11 @@ func _part_flak_arrival() -> void:
 	_check(started and text.begins_with("Flugabwehr: ") and text.contains(" Treffer, Rumpf "), "(d) die Flugabwehr trifft, der Anflug geht weiter: " + text)
 	_check(String(controller.get("_drop_sequence_phase")) == "inbound" and String(controller.get("_drop_sequence_arrival_mode")) == "circle", "(d) die Folge fliegt an und behaelt Kreisen")
 	_check(str(int(booked.get("integrity", -1))) + " %" == text.get_slice("Rumpf ", 1) and int(booked.get("integrity", 100)) < 100, "(d) der Rumpfverlust ist gebucht: " + str(booked.get("integrity")) + " / " + str(booked.get("state")))
-	# Der Pilot ist an Bord (die Embark-Wirkung wird hier nicht ueber den Takt abgearbeitet).
-	var pilot: Node = mission_root.call("_resolve_known_unit", pilot_id)
-	print("ARRIVAL_FLAK pilot embarked=", pilot.get_meta("dropship_embarked", false) if pilot != null else "none", " queue=", Array(mission_root.get("effects_queue")).size())
-	print("ARRIVAL_FLAK guard=", controller.call("get_campaign_air_support_pilot_guard", "craft_a"))
 	var guard := 0
 	while String(controller.get("_drop_sequence_phase")) == "inbound" and guard < 6000:
 		controller.call("_update_drop_sequence", 0.1)
 		guard += 1
-	print("ARRIVAL_FLAK reason=", controller.get("_drop_sequence_circle_reason"))
 	var sorties: Dictionary = mission_root.get("_air_support_sorties")
-	print("ARRIVAL_FLAK phase=", controller.get("_drop_sequence_phase"), " last=", controller.get("_last_command_text"), " steps=", guard, " sorties=", sorties.keys())
 	_check(String(controller.get("_drop_sequence_phase")) == "complete" and mission_root.call("is_air_support_craft_airborne", "craft_a"), "(d) nach den Treffern ist das Schiff in der Luft (kein Landen, Phase complete): " + String(controller.get("_last_command_text")))
 	_check(sorties.has("craft_a"), "(d) der Sortie-Eintrag ist da")
 	var after: Dictionary = mission_root.call("get_air_asset_status_snapshot", "craft_a")
@@ -452,8 +445,12 @@ func _part_real() -> void:
 	print("CAPTURE_CIRCLING reason=", capture.get("reason", ""))
 	_check(not bool(capture.get("ok", true)), "(f) der Einsatz-Speicherpunkt wird waehrend des Kreisens abgelehnt (Grund: " + String(capture.get("reason", "")) + ")")
 	# E10 finding: with the troop still aboard the earlier gate mission_crew_not_deployed answers first; transport_not_grounded
-	# is only reached with a deployed crew. Either way the player reads the generic sentence.
-	_check(String(capture.get("reason", "")) in ["mission_crew_not_deployed", "transport_not_grounded"] and String(projection.get("save_blocked_text", "")) == GENERIC_SAVE_TEXT, "(f) Speichern gesperrt (Grund " + String(capture.get("reason", "")) + "); der Spieler liest: " + String(projection.get("save_blocked_text", "")))
+	# is only reached with a deployed crew.
+	# The sentence must come from the player-facing source (campaign_save_projection.gd, BASE_TEXTS) for the reason the projection reports.
+	var shown_text: String = String(projection.get("save_blocked_text", ""))
+	var source_text: String = String(load("res://scripts/meta/campaign_save_projection.gd").call("blocked_text", String(projection.get("save_blocked_reason", ""))))
+	_check(String(capture.get("reason", "")) in ["mission_crew_not_deployed", "transport_not_grounded"] and shown_text == source_text and shown_text != GENERIC_SAVE_TEXT, "(f) Speichern gesperrt (Grund " + String(capture.get("reason", "")) + "); der Spieler liest: " + shown_text)
+	_check(shown_text == "Die Besatzung ist noch nicht ausgestiegen. Nach dem Aussteigen erneut speichern.", "(f) der Spieler liest den Satz zu mission_crew_not_deployed: " + shown_text)
 
 	# h) Auftragsende / Heimflug, solange das Schiff kreist.
 	var circling_extract: Dictionary = controller.call("request_campaign_extraction", _craft_id)
@@ -486,7 +483,6 @@ func _part_real() -> void:
 		save_holder.value = load("res://scripts/mission/campaign_active_mission_capture.gd").capture_components(_flow, _runtime)
 		return bool(Dictionary(save_holder.value).get("ok", false)), 20000, "(ii) der Einsatzstand ist nach dem Absetzen speicherbar (keine ausstehende Arbeit mehr)")
 	var landed_save: Dictionary = save_holder.value
-	print("SAVE_AFTER_CIRCLE_LANDING ok=", landed_save.get("ok", false), " reason=", landed_save.get("reason", ""))
 	_check(bool(landed_save.get("ok", false)), "(ii) Kreisen, dann gelandet und Trupp abgesetzt: Einsatz speichern geht (Grund: " + String(landed_save.get("reason", "")) + ")")
 	_check(String(controller.get("_drop_sequence_arrival_mode")) == "circle", "(ii) die Folge fuehrt arrival_mode circle weiter")
 
@@ -504,7 +500,6 @@ func _part_real() -> void:
 		for _frame in range(60):
 			await process_frame
 	if not _check(bool(controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false)), "(h) der Pilot ist wieder an Bord"):
-		print("PILOT_GUARD ", controller.call("get_campaign_air_support_pilot_guard", _craft_id), " last=", controller.get("_last_command_text"), " deployed=", controller.get("_deployed_unit_ids").keys(), " embarked=", controller.get("_embarked_unit_ids").keys())
 		return
 	var start_button: Button = _air_button(mission, "air_start")
 	if not _check(start_button != null and not start_button.disabled, "(h) Knopf Start vorhanden"): return
