@@ -142,14 +142,18 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 	var respawn_ids := PackedStringArray()
 	var pilot_fit := true
 	var other_fit := false
+	# LC2c: Ist das Schiff verloren (context.craft_lost), holt die Notrettung alle Lebenden ab: Liegende gelten als gerettet
+	# (aboard), ausser wer beim Absturz gestorben ist. Fuer dieses Schiff gibt es die Kette pilot_down nicht mehr (nichts mehr zu fliegen).
+	var craft_lost: bool = bool(context.get("craft_lost", false))
 	for raw in team_states:
 		var state: Dictionary = raw
+		if craft_lost and not bool(state.get("killed_in_crash", false)):
+			state = state.duplicate()
+			state["aboard"] = true
 		var unit_id := str(state.get("unit_id", ""))
 		var fit := _is_fit(state)
 		if unit_id == pilot_unit_id:
-			# LC2b: Ein Pilot, der mit seinem abgestuerzten Schiff ausfiel (crashed_aboard), loest allein keinen Totalverlust
-			# "pilot_down" aus: das Schiff ist ohnehin verloren; wie die Leute heimkommen, regeln die weiteren Abschnitte.
-			pilot_fit = fit or bool(state.get("crashed_aboard", false))
+			pilot_fit = fit or craft_lost
 		elif fit:
 			other_fit = true
 		var result: Dictionary = classify_unit(state, mission_outcome)

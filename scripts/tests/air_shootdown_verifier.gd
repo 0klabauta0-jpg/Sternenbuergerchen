@@ -326,17 +326,25 @@ func _test_casualty_rules() -> void:
 	_check(alive_won.outcome == "wounded", "unveraendert: ohne das Merkmal rettet 'nahe am Schiff' (wounded)")
 	var roster: Array = [_member("lead", "operator", 0.6), _member("pilot", "pilot", 0.0, 0.7), _member("two", "operator", 0.4)]
 	var crash_pilot: Dictionary = {"killed_in_crash": true, "crashed_aboard": true}
-	var dead_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	var dead_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3, "craft_lost": true})
 	_check(not bool(dead_pilot.total_loss) and Array(dead_pilot.respawn_unit_ids) == ["pilot"], "toter Pilot (Absturz) allein ist kein Totalverlust; Respawn-Regeln gelten (%s)" % str(dead_pilot.get("total_loss_reason")))
 	var respawn_entry: Dictionary = {}
 	for entry in dead_pilot.casualties:
 		if entry.unit_id == "pilot": respawn_entry = entry
 	_check(String(respawn_entry.get("outcome", "")) == "dead" and String(Dictionary(respawn_entry.get("respawn_state", {})).get("source", "")) == "crash", "Respawn-Quelle 'crash' fuer den beim Absturz Gestorbenen")
-	var lying_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down", {"crashed_aboard": true})], "won", roster, "pilot", rules, {"respawn_limit": 3})
-	_check(not bool(lying_pilot.total_loss), "am Boden liegender Pilot (Absturz) allein ist kein Totalverlust")
+	var lying_pilot: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down")], "won", roster, "pilot", rules, {"respawn_limit": 3, "craft_lost": true})
+	_check(not bool(lying_pilot.total_loss), "W6: bei verlorenem Schiff gibt es keine pilot_down-Kette; liegender Pilot allein ist kein Totalverlust")
+	var lying_wounded: Array = lying_pilot.casualties.filter(func(e): return e.unit_id == "pilot")
+	_check(lying_wounded.size() == 1 and lying_wounded[0].outcome == "wounded", "Notrettung: der liegende Pilot wird gerettet (verwundet), auch ohne Sieg und ohne 'nahe am Schiff'")
+	var aborted_lost: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "aborted", roster, "pilot", rules, {"respawn_limit": 3, "craft_lost": true})
+	var outcomes := {}
+	for entry in aborted_lost.casualties: outcomes[entry.unit_id] = entry.outcome
+	_check(not bool(aborted_lost.total_loss) and outcomes.get("two", "") == "wounded" and outcomes.get("pilot", "") == "dead", "Abbruch bei verlorenem Schiff: Liegende gerettet, beim Absturz Gestorbener tot (%s)" % str(outcomes))
+	var still_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down")], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	_check(bool(still_down.total_loss) and still_down.total_loss_reason == "pilot_down", "ohne Schiffsverlust bleibt pilot_down unveraendert (auch fuer einen Absturz-Ueberlebenden, W6)")
 	var plain_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "fit"), _ts("two", "fit"), _ts("pilot", "down")], "won", roster, "pilot", rules, {"respawn_limit": 3})
 	_check(bool(plain_down.total_loss) and plain_down.total_loss_reason == "pilot_down", "unveraendert: ein anderweitig ausgefallener Pilot bleibt pilot_down")
-	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3})
+	var all_down: Dictionary = CASUALTY.resolve_mission([_ts("lead", "down"), _ts("two", "down"), _ts("pilot", "down", crash_pilot)], "won", roster, "pilot", rules, {"respawn_limit": 3, "craft_lost": true})
 	_check(bool(all_down.total_loss) and all_down.total_loss_reason == "ground_team_down", "sind alle eigenen Personen tot oder am Boden, gilt die vorhandene Niederlage-Regel (ground_team_down)")
 
 
