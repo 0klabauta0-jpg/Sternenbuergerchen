@@ -7,7 +7,8 @@ const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ov
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
-const COMBAT_DECISION_INTERVAL_TICKS: int = 3
+const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -154,7 +155,8 @@ var _fire_candidate_target_ids_by_attacker_id: Dictionary = {}
 var _fire_candidate_index_tick: int = -1
 var _fire_candidate_index_pair_count: int = 0
 var _resolver_target_evaluation_count: int = 0
-var _next_attack_tick: int = 1
+## Nur Anzeige (HUD "CONTACT WAIT", Diagnose): fruehester Tick, an dem eine Einheit mit Ziel wieder dran ist. Kein Spielzustand, nicht gespeichert.
+var _earliest_next_shot_tick: int = 0
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
 var _checkpoint_elapsed_offset_msec: int = 0
@@ -1803,6 +1805,13 @@ func _should_run_combat_decision_tick(tick: int) -> bool:
 	return tick % COMBAT_DECISION_INTERVAL_TICKS == 0
 
 
+## Nur fuer Tests (ersetzt das alte Freigeben des Schussplatzes): springt auf den naechsten Entscheidungsschritt,
+## an dem jede Einheit mit Periode 1..9 Schritte dran ist (kleinstes gemeinsames Vielfaches 2520).
+func align_to_common_decision_step_for_test() -> void:
+	var common_ticks: int = COMBAT_DECISION_INTERVAL_TICKS * 2520
+	_current_tick = (_current_tick / common_ticks + 1) * common_ticks
+
+
 func _refresh_runtime_authority(simulation_root: Node) -> bool:
 	var should_run: bool = _should_run_local_combat(simulation_root)
 	if should_run == _runs_local_authority:
@@ -2017,7 +2026,7 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 
 
 ## LC6: Bodentruppen mit Raketenwerfer oder Schienenkanone beschiessen eigene Schiffe in der Luft. Eigener Takt je
-## Einheit, der Schussplatz des Bodengefechts (_next_attack_tick) bleibt unberuehrt. Ohne Schiff in der Luft
+## Einheit (_locks), unabhaengig vom Takt des Infanteriegefechts (CombatCadence). Ohne Schiff in der Luft
 ## (Skirmish, Mehrspieler) tut der Aufruf nichts. Siehe scripts/combat/ground_fire_vs_air.gd.
 const GROUND_FIRE_VS_AIR_SCRIPT: GDScript = preload("res://scripts/combat/ground_fire_vs_air.gd")
 var _ground_fire_vs_air = null
@@ -2033,10 +2042,13 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	if profile_enabled:
 		_combat_fire_decision_debug_scopes_usec.clear()
 	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-	var contact_pair: Dictionary = _find_first_contact_pair()
+	# Gefechtstakt: jede Einheit beider Seiten mit gueltigem Ziel hat ihre Periode; dran ist sie, wenn
+	# step % Periode == 0. Kein gemeinsamer Schussplatz, kein Vorrang einer Seite.
+	var contact_pairs: Array = _find_contact_pairs()
 	if profile_enabled:
 		_combat_fire_decision_debug_scopes_usec["fire_find_contact_pair_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if contact_pair.is_empty():
+	if contact_pairs.is_empty():
+		_earliest_next_shot_tick = 0
 		if profile_enabled:
 			scope_started_usec = Time.get_ticks_usec()
 		_clear_contact_visuals()
@@ -2045,11 +2057,47 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			_combat_fire_decision_debug_scopes_usec["fire_no_contact_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
 		return
 
+	var step: int = _current_tick / COMBAT_DECISION_INTERVAL_TICKS
+	var due_pairs: Array = []
+	var next_due_step: int = -1
+	for pair in contact_pairs:
+		var period: int = _get_attack_period_steps(pair["attacker"])
+		if COMBAT_CADENCE_SCRIPT.is_due(step, period):
+			due_pairs.append(pair)
+		var following_step: int = (step / period + 1) * period
+		if next_due_step < 0 or following_step < next_due_step:
+			next_due_step = following_step
+	_earliest_next_shot_tick = next_due_step * COMBAT_DECISION_INTERVAL_TICKS
+	if due_pairs.is_empty():
+		var waiting_pair: Dictionary = contact_pairs[0]
+		_last_contact = {"attacker_id": String(waiting_pair["attacker_id"]), "target_id": String(waiting_pair["target_id"])}
+		_set_contact_visuals(waiting_pair["attacker"], waiting_pair["target"])
+		_update_status_label("contact")
+		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(waiting_pair))
+		return
+	# Feste Reihenfolge nach unit_id, unabhaengig von Seite und Anlegereihenfolge. Alle Schuesse des Schritts
+	# werden zuerst eingereiht; gewuerfelt und gebucht wird erst im Folgetick, Effekt fuer Effekt in dieser
+	# Reihenfolge, und ein Schuetze verliert seinen Schuss nicht, weil er in diesem Schritt faellt.
+	due_pairs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return String(a["attacker_id"]) < String(b["attacker_id"]))
+	for pair_index in range(due_pairs.size()):
+		_enqueue_attack_for_pair(due_pairs[pair_index], simulation_root, profile_enabled, pair_index > 0)
+
+
+func _get_attack_period_steps(attacker) -> int:
+	var weapon_id: String = String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", attacker))
+	var initiative: float = -1.0
+	if attacker != null and attacker.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(attacker.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		initiative = float(axes.get("initiative", -1.0))
+	return COMBAT_CADENCE_SCRIPT.period_steps(WEAPON_DATA_SCRIPT.get_ticks_between_attacks(weapon_id), initiative)
+
+
+func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, profile_enabled: bool, keep_previous_visuals: bool = false) -> void:
+	var scope_started_usec: int = 0
 	var attacker = contact_pair["attacker"]
 	var target = contact_pair["target"]
 	var attacker_id: String = String(contact_pair["attacker_id"])
 	var target_id: String = String(contact_pair["target_id"])
-	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
 	if attacker_id.is_empty() or target_id.is_empty():
 		_clear_contact_visuals()
 		_record_contact_decision_diagnostics("invalid_contact_pair", _build_contact_pair_decision_diagnostic(contact_pair))
@@ -2059,15 +2107,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		"attacker_id": attacker_id,
 		"target_id": target_id,
 	}
-	_set_contact_visuals(attacker, target)
+	_set_contact_visuals(attacker, target, keep_previous_visuals)
 	_update_status_label("contact")
-	if _current_tick < _next_attack_tick:
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(contact_pair))
-		if profile_enabled:
-			_combat_fire_decision_debug_scopes_usec["fire_cooldown_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
-		return
 
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
@@ -2114,7 +2155,6 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "EIGENBESCHUSS!")
 		_broadcast_remote_event("FRIENDLY FIRE %s" % actual_target_id, actual_target_id, MISIDENTIFICATION_EVENT_COLOR, 1.8, "FRIENDLY FIRE")
 		_record_friendly_fire_feedback(attacker, actual_target, attacker_id, target_id, actual_target_id)
-	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
 	var fired_diagnostic: Dictionary = _build_contact_pair_decision_diagnostic(contact_pair, decision)
 	fired_diagnostic["fire_event_id"] = fire_event_id
 	fired_diagnostic["actual_target_id"] = actual_target_id
@@ -2134,8 +2174,8 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 		"reason": normalized_reason,
 		"status": _resolve_contact_decision_status(normalized_reason),
 		"current_tick": _current_tick,
-		"next_attack_tick": _next_attack_tick,
-		"cooldown_ticks_remaining": maxi(_next_attack_tick - _current_tick, 0),
+		"next_attack_tick": _earliest_next_shot_tick,
+		"cooldown_ticks_remaining": maxi(_earliest_next_shot_tick - _current_tick, 0),
 		"active_friendly_count": _get_units(friendly_unit_paths).size(),
 		"active_enemy_count": _get_active_enemy_units().size(),
 		"combat_friendly_count": _get_friendly_combat_units().size(),
@@ -3579,6 +3619,27 @@ func _find_first_contact_pair() -> Dictionary:
 	return result
 
 
+## Gefechtstakt: je Schuetze beider Seiten sein Paar (siehe CombatFireDecisionResolver.find_contact_pairs).
+func _find_contact_pairs() -> Array:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if combat_tick_budget_debug_enabled and cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", true)
+	var result: Array = Array(
+		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
+			"find_contact_pairs",
+			_build_fire_decision_context(
+				{
+					"friendly_units": _get_friendly_combat_units(),
+					"enemy_units": _get_enemy_combat_units(),
+				}
+			)
+		)
+	)
+	if cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", false)
+	return result
+
+
 func _prioritize_standard_attack_fireteam_fairness(units: Array) -> Array:
 	if _last_standard_attacker_fireteam_id.is_empty():
 		return units
@@ -3897,15 +3958,17 @@ func _on_unit_respawn_completed(unit_id: String) -> void:
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 
 
-func _set_contact_visuals(attacker, target) -> void:
-	_clear_unit_contact_states()
+## add_to_previous: weiteres Paar desselben Schritts (Gefechtstakt), die bisherigen Paare bleiben gezeichnet.
+func _set_contact_visuals(attacker, target, add_to_previous: bool = false) -> void:
+	if not add_to_previous:
+		_clear_unit_contact_states()
 	if attacker == null or target == null:
-		if _readability_presenter != null:
+		if _readability_presenter != null and not add_to_previous:
 			_readability_presenter.call("clear_contact_line")
 		return
 
 	if _readability_presenter != null:
-		_readability_presenter.call("set_contact_line", attacker, target)
+		_readability_presenter.call("add_contact_line" if add_to_previous else "set_contact_line", attacker, target)
 
 	if attacker.has_method("set_contact_state"):
 		attacker.call("set_contact_state", true, String(target.call("get_unit_id")))
@@ -4091,10 +4154,10 @@ func _count_fit_enemy_units() -> int:
 
 
 func _build_attack_readiness_text() -> String:
-	if _current_tick >= _next_attack_tick:
+	if _current_tick >= _earliest_next_shot_tick:
 		return "ready"
 
-	return "tick %d" % (_next_attack_tick - _current_tick)
+	return "tick %d" % (_earliest_next_shot_tick - _current_tick)
 
 
 func _finish_readability_setup() -> void:

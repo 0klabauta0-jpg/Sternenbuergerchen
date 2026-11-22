@@ -8,68 +8,100 @@ const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/are
 static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	var friendly_units: Array = Array(context.get("friendly_units", []))
 	var enemy_units: Array = Array(context.get("enemy_units", []))
-	var friendly_team_id: String = String(context.get("friendly_team_id", ""))
-	var decision_context: Dictionary = context
+	var decision_context: Dictionary = _prepare_decision_context(context)
+	for friendly in friendly_units:
+		var pair: Dictionary = _contact_pair_for_friendly(friendly, enemy_units, decision_context)
+		if not pair.is_empty():
+			return pair
+	for enemy in enemy_units:
+		var pair: Dictionary = _contact_pair_for_enemy(enemy, friendly_units, decision_context)
+		if not pair.is_empty():
+			return pair
+	return {}
+
+
+## Gefechtstakt: je Schuetze beider Seiten sein gueltiges Paar (hoechstens eines je Einheit),
+## erst die eigenen in Eingabereihenfolge, dann die Gegner. Gleiche Regeln wie find_first_contact_pair.
+static func find_contact_pairs(context: Dictionary) -> Array:
+	var friendly_units: Array = Array(context.get("friendly_units", []))
+	var enemy_units: Array = Array(context.get("enemy_units", []))
+	var decision_context: Dictionary = _prepare_decision_context(context)
+	var pairs: Array = []
+	for friendly in friendly_units:
+		var pair: Dictionary = _contact_pair_for_friendly(friendly, enemy_units, decision_context)
+		if not pair.is_empty():
+			pairs.append(pair)
+	for enemy in enemy_units:
+		var pair: Dictionary = _contact_pair_for_enemy(enemy, friendly_units, decision_context)
+		if not pair.is_empty():
+			pairs.append(pair)
+	return pairs
+
+
+static func _prepare_decision_context(context: Dictionary) -> Dictionary:
 	# Only the authoritative driver enables this: its range callback depends on
 	# the attacker and terrain scale, not on the candidate target. Other resolver
 	# users retain their original target-sensitive callback semantics.
 	if bool(context.get("cache_effective_attack_range_by_attacker", false)):
-		decision_context = context.duplicate()
-		decision_context["precomputed_effective_attack_ranges"] = {}
-	for friendly in friendly_units:
-		if not _can_unit_seek_target(friendly):
-			continue
-		var enemy = pick_target_from_units(friendly, _filter_targets_for_attacker(friendly, enemy_units, decision_context), decision_context)
-		if enemy == null:
-			continue
-		var f_id: String = String(friendly.call("get_unit_id"))
-		var e_id: String = String(enemy.call("get_unit_id"))
-		var start_detection: Callable = decision_context.get("start_detection", Callable())
-		if start_detection.is_valid():
-			start_detection.call(friendly, f_id, e_id)
-		var is_detection_complete: Callable = decision_context.get("is_detection_complete", Callable())
-		if is_detection_complete.is_valid() and not bool(is_detection_complete.call(f_id, e_id)):
-			continue
-		var fireteam_id: String = ""
-		if friendly.has_method("get_fireteam_id"):
-			fireteam_id = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
-		var contact_entry: Dictionary = _call_contact_state(decision_context, fireteam_id, e_id)
-		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
-		if detection_state != "spotted" and detection_state != "confirmed":
-			continue
-		if not can_unit_attack(friendly, decision_context):
-			continue
-		return {
-			"attacker": friendly,
-			"target": enemy,
-			"attacker_id": f_id,
-			"target_id": e_id,
-			"contact_state": detection_state,
-		}
+		var prepared: Dictionary = context.duplicate()
+		prepared["precomputed_effective_attack_ranges"] = {}
+		return prepared
+	return context
 
-	for enemy in enemy_units:
-		if not can_enemy_attack(enemy):
-			continue
-		var friendly = pick_target_from_units(enemy, _filter_targets_for_attacker(enemy, friendly_units, decision_context), decision_context)
-		if friendly == null:
-			continue
-		var en_id: String = String(enemy.call("get_unit_id"))
-		var fr_id: String = String(friendly.call("get_unit_id"))
-		var start_detection_enemy: Callable = decision_context.get("start_detection", Callable())
-		if start_detection_enemy.is_valid():
-			start_detection_enemy.call(enemy, en_id, fr_id)
-		var is_detection_complete_enemy: Callable = decision_context.get("is_detection_complete", Callable())
-		if is_detection_complete_enemy.is_valid() and not bool(is_detection_complete_enemy.call(en_id, fr_id)):
-			continue
-		return {
-			"attacker": enemy,
-			"target": friendly,
-			"attacker_id": en_id,
-			"target_id": fr_id,
-			"contact_state": _resolve_enemy_contact_state_text(friendly_team_id),
-		}
 
-	return {}
+static func _contact_pair_for_friendly(friendly, enemy_units: Array, decision_context: Dictionary) -> Dictionary:
+	if not _can_unit_seek_target(friendly):
+		return {}
+	var enemy = pick_target_from_units(friendly, _filter_targets_for_attacker(friendly, enemy_units, decision_context), decision_context)
+	if enemy == null:
+		return {}
+	var f_id: String = String(friendly.call("get_unit_id"))
+	var e_id: String = String(enemy.call("get_unit_id"))
+	var start_detection: Callable = decision_context.get("start_detection", Callable())
+	if start_detection.is_valid():
+		start_detection.call(friendly, f_id, e_id)
+	var is_detection_complete: Callable = decision_context.get("is_detection_complete", Callable())
+	if is_detection_complete.is_valid() and not bool(is_detection_complete.call(f_id, e_id)):
+		return {}
+	var fireteam_id: String = ""
+	if friendly.has_method("get_fireteam_id"):
+		fireteam_id = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
+	var contact_entry: Dictionary = _call_contact_state(decision_context, fireteam_id, e_id)
+	var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
+	if detection_state != "spotted" and detection_state != "confirmed":
+		return {}
+	if not can_unit_attack(friendly, decision_context):
+		return {}
+	return {
+		"attacker": friendly,
+		"target": enemy,
+		"attacker_id": f_id,
+		"target_id": e_id,
+		"contact_state": detection_state,
+	}
+
+
+static func _contact_pair_for_enemy(enemy, friendly_units: Array, decision_context: Dictionary) -> Dictionary:
+	if not can_enemy_attack(enemy):
+		return {}
+	var friendly = pick_target_from_units(enemy, _filter_targets_for_attacker(enemy, friendly_units, decision_context), decision_context)
+	if friendly == null:
+		return {}
+	var en_id: String = String(enemy.call("get_unit_id"))
+	var fr_id: String = String(friendly.call("get_unit_id"))
+	var start_detection_enemy: Callable = decision_context.get("start_detection", Callable())
+	if start_detection_enemy.is_valid():
+		start_detection_enemy.call(enemy, en_id, fr_id)
+	var is_detection_complete_enemy: Callable = decision_context.get("is_detection_complete", Callable())
+	if is_detection_complete_enemy.is_valid() and not bool(is_detection_complete_enemy.call(en_id, fr_id)):
+		return {}
+	return {
+		"attacker": enemy,
+		"target": friendly,
+		"attacker_id": en_id,
+		"target_id": fr_id,
+		"contact_state": _resolve_enemy_contact_state_text(String(decision_context.get("friendly_team_id", ""))),
+	}
 
 
 static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -> Dictionary:

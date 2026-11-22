@@ -41,7 +41,7 @@ func _command_is_stable(sim: Node, actor: Node, command: RefCounted) -> bool:
 func _snapshot_fields(sim: Node, driver: Node) -> Dictionary:
 	var cooldowns := {}
 	for field in COOLDOWN_FIELDS: cooldowns[field] = Dictionary(driver.get(field)).duplicate(true)
-	return {"next_attack_tick":driver._next_attack_tick, "startup_grace":driver._combat_startup_grace_ticks, "seen_friendly":driver._has_seen_active_friendly_units, "seen_enemy":driver._has_seen_active_enemy_units, "resolved_without_friendly":driver._resolved_without_seen_friendly, "latest_tokens":sim._latest_command_token_by_unit_id.duplicate(true), "committed_tokens":sim._committed_command_token_by_unit_id.duplicate(true), "combat_cooldowns":cooldowns, "casualty_flags":driver.export_casualty_state()}
+	return {"startup_grace":driver._combat_startup_grace_ticks, "seen_friendly":driver._has_seen_active_friendly_units, "seen_enemy":driver._has_seen_active_enemy_units, "resolved_without_friendly":driver._resolved_without_seen_friendly, "latest_tokens":sim._latest_command_token_by_unit_id.duplicate(true), "committed_tokens":sim._committed_command_token_by_unit_id.duplicate(true), "combat_cooldowns":cooldowns, "casualty_flags":driver.export_casualty_state()}
 
 func _source_stamp(sim: Node, driver: Node) -> Dictionary:
 	return {"fields":_snapshot_fields(sim,driver), "start":driver._mission_started_at_msec, "offset":driver._checkpoint_elapsed_offset_msec, "limit":driver.mission_time_limit_seconds, "team":driver.friendly_team_id, "scenario_result":driver._mission_result.duplicate(true), "winner":driver._winning_team_id}
@@ -64,7 +64,11 @@ func prepare_restore(sim: Node, driver: Node, state: Dictionary) -> Dictionary:
 	var decoded := CODEC.decode_value(state.payload)
 	if not decoded.ok or not decoded.value is Dictionary: return _reject("invalid_mission_lifecycle")
 	var data: Dictionary = decoded.value
-	var fields := ["next_attack_tick","startup_grace","seen_friendly","seen_enemy","resolved_without_friendly","latest_tokens","committed_tokens"]
+	var fields := ["startup_grace","seen_friendly","seen_enemy","resolved_without_friendly","latest_tokens","committed_tokens"]
+	# Gefechtstakt: neue Staende haben keinen gemeinsamen Schussplatz mehr. Alte Staende tragen das Feld noch: angenommen, geprueft, ignoriert.
+	if data.has("next_attack_tick"):
+		fields.append("next_attack_tick")
+		if not _integer(data.next_attack_tick,0,1000000000000): return _reject("invalid_mission_lifecycle")
 	if data.has("combat_cooldowns"):
 		fields.append("combat_cooldowns")
 		if not data.combat_cooldowns is Dictionary or data.combat_cooldowns.size() != COOLDOWN_FIELDS.size() or not data.combat_cooldowns.has_all(COOLDOWN_FIELDS): return _reject("invalid_mission_cooldowns")
@@ -80,7 +84,7 @@ func prepare_restore(sim: Node, driver: Node, state: Dictionary) -> Dictionary:
 		fields.append("casualty_flags")
 		var casualty_checked: Dictionary = driver.validate_casualty_state(data.casualty_flags, casualty_ids)
 		if not casualty_checked.get("ok",false): return _reject("invalid_mission_casualty_flags")
-	if data.size()!=fields.size() or not data.has_all(fields) or not _integer(data.next_attack_tick,0,1000000000000) or not _integer(data.startup_grace,0,1000000) or typeof(data.seen_friendly)!=TYPE_BOOL or typeof(data.seen_enemy)!=TYPE_BOOL or typeof(data.resolved_without_friendly)!=TYPE_BOOL or not data.latest_tokens is Dictionary or not data.committed_tokens is Dictionary: return _reject("invalid_mission_lifecycle")
+	if data.size()!=fields.size() or not data.has_all(fields) or not _integer(data.startup_grace,0,1000000) or typeof(data.seen_friendly)!=TYPE_BOOL or typeof(data.seen_enemy)!=TYPE_BOOL or typeof(data.resolved_without_friendly)!=TYPE_BOOL or not data.latest_tokens is Dictionary or not data.committed_tokens is Dictionary: return _reject("invalid_mission_lifecycle")
 	for id in data.latest_tokens:
 		if typeof(id)!=TYPE_STRING or typeof(data.latest_tokens[id])!=TYPE_STRING: return _reject("invalid_mission_lifecycle")
 	for id in data.committed_tokens:
@@ -113,7 +117,6 @@ func _publish_restore(handle: RefCounted) -> void:
 	sim._latest_command_token_by_unit_id=record.data.latest_tokens
 	sim._committed_command_token_by_unit_id=record.data.committed_tokens
 	driver._current_tick=record.tick
-	driver._next_attack_tick=record.data.next_attack_tick
 	driver._combat_startup_grace_ticks=record.data.startup_grace
 	driver._has_seen_active_friendly_units=record.data.seen_friendly
 	driver._has_seen_active_enemy_units=record.data.seen_enemy
