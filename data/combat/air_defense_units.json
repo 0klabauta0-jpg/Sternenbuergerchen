@@ -76,6 +76,15 @@
     "normal": {"clearance_levels": 6},
     "low": {"clearance_levels": 1, "lz_radius_factor": 1.5}
   },
+  "approach_paths": {
+    "status": "provisional_la_2026_11_22",
+    "accident": {"hull_loss_min_percent": 20, "hull_loss_max_percent": 40, "hull_floor_percent": 1},
+    "paths": {
+      "normal": {},
+      "steil": {"exposure_factor": 0.6, "accident_max": 0.15},
+      "tief": {"profile": "low", "terrain_masking": true, "sample_step_hex": 4.0, "accident_max": 0.25}
+    }
+  },
   "range_falloff": {"full_until_fraction": 0.5, "factor_at_max_range": 0.5},
   "infantry_counters": {
     "rocket_launcher": {"display_name": "Panzerfaust", "proposed_skirmish_points": 60},

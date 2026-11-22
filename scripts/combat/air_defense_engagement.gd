@@ -230,6 +230,11 @@ static func resolve_approach(context: Dictionary) -> Dictionary:
 	}
 
 
+## Same seed text hash the volley dice use; LA's accident roll shares it (approach_paths).
+static func seed_to_int(value: String) -> int:
+	return _seed_to_int(value)
+
+
 static func _seed_to_int(value: String) -> int:
 	var hash_value: int = 216613626
 	for index in range(value.length()):

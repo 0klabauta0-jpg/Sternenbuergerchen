@@ -32,6 +32,19 @@ const STYLE_TOOLTIPS := {
 	"normal": "Normale Flughoehe, dreht unter Beschuss ab.",
 	"aggressiv": "Normale Flughoehe, fliegt unter Beschuss weiter und landet trotz Treffern.",
 }
+## Approach path per mission craft (task LA, 2026-11-22): the second axis next to the style.
+## Numbers live in data/combat/air_defense_units.json "approach_paths"; a missing block
+## makes every path behave like "normal". Normal never changes a result.
+const LOS = preload("res://scripts/core/los_system.gd")
+const PATH_STEEP := "steil"
+const PATH_NORMAL := "normal"
+const PATH_LOW := "tief"
+const APPROACH_PATHS: PackedStringArray = ["steil", "normal", "tief"]
+const DEFAULT_APPROACH_PATH := PATH_NORMAL
+const PATH_LABELS := {"steil": "Steil", "normal": "Normal", "tief": "Tief"}
+const PATH_FLIGHT_NAMES := {"steil": "Steilflug", "normal": "Normalflug", "tief": "Tiefflug"}
+const OUTCOME_ACCIDENT := "accident"
+const DEFAULT_PILOT_SKILL := 0.5
 
 
 static func plane_to_cell(plane: Vector2) -> Vector2i:
@@ -84,19 +97,61 @@ static func approach_samples(start_plane: Vector2, lz_plane: Vector2, step: floa
 	return samples
 
 
-## One volley per sample. Terrain masking is not wired yet: line of sight is true.
-static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, crew_ready: bool, profile_id: String = APPROACH_PROFILE) -> Array:
+## One volley per sample. Line of sight is true unless terrain_masking is set (approach
+## path "tief"): then every contact in reach is checked with LosSystem.find_first_blocker_grid
+## against the map's height levels, between the weapon mount and the ship's flight height.
+static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, crew_ready: bool, profile_id: String = APPROACH_PROFILE, terrain_masking: bool = false) -> Array:
 	var volleys: Array = []
+	var los: Variant = LOS.new() if terrain_masking else null
+	var reader: Variant = _HeightReader.new(height_at) if terrain_masking else null
 	for sample in samples:
 		var cell: Vector2i = plane_to_cell(Vector2(sample))
 		var ship_ground: int = int(height_at.call(cell))
 		var contacts: Dictionary = {}
 		for vehicle in vehicles:
-			contacts[String(vehicle.instance_id)] = {"unit_id": String(vehicle.unit_id), "range_hex": HEX.distance(Vector2i(vehicle.cell), cell),
-				"height_delta_levels": AD.height_delta_levels(ship_ground, profile_id, int(vehicle.ground_level)),
-				"has_line_of_sight": true, "crew_ready": crew_ready}
+			var range_hex: int = HEX.distance(Vector2i(vehicle.cell), cell)
+			var height_delta: int = AD.height_delta_levels(ship_ground, profile_id, int(vehicle.ground_level))
+			var contact := {"unit_id": String(vehicle.unit_id), "range_hex": range_hex, "height_delta_levels": height_delta, "has_line_of_sight": true, "crew_ready": crew_ready}
+			if terrain_masking:
+				var in_reach: bool = range_hex <= reach_hex(String(vehicle.unit_id))
+				contact["in_reach"] = in_reach
+				if in_reach:
+					var mount: float = float(int(vehicle.ground_level) + AD.MOUNT_LEVELS)
+					var blocker: Vector2i = los.find_first_blocker_grid(Vector2i(vehicle.cell), cell, reader, Vector2.INF, Vector2.INF, false, Vector2(mount, mount + float(height_delta)))
+					contact["has_line_of_sight"] = blocker == LOS.NO_BLOCKER_GRID
+			contacts[String(vehicle.instance_id)] = contact
 		volleys.append({"cell": cell, "contacts": contacts})
 	return volleys
+
+
+## Farthest distance (hex cells) at which the unit can notice a ship at all.
+static func reach_hex(unit_id: String) -> int:
+	var unit_data: Dictionary = AD.unit(unit_id)
+	return maxi(int(unit_data.get("sight_range_hex", 0)), int(unit_data.get("radar_range_hex", 0)))
+
+
+## The map's height levels as a terrain reader for LosSystem: every cell is an occluder
+## as high as its height level (the map's own blocks_los flags only carry walls).
+class _HeightReader:
+	extends RefCounted
+	class _Tile:
+		extends RefCounted
+		var height_level: int = 0
+		var blocks_los: bool = true
+		var object_height: int = 0
+	var _height_at: Callable
+	func _init(height_at: Callable) -> void:
+		_height_at = height_at
+	func get_grid_topology() -> String:
+		return HEX.TOPOLOGY_ID
+	func get_tile_at_grid(cell: Vector2i):
+		var tile := _Tile.new()
+		tile.height_level = int(_height_at.call(cell))
+		return tile
+	func blocks_los_at_grid(_cell: Vector2i) -> bool:
+		return true
+	func get_object_height_at_grid(_cell: Vector2i) -> int:
+		return 0
 
 
 ## Known style or "" for an unknown value (commands reject "", stored state falls back).
@@ -125,6 +180,153 @@ static func lz_radius_factor_for_style(approach_style: String) -> float:
 	return float(Dictionary(profiles.get(profile_for_style(approach_style), {})).get("lz_radius_factor", 1.0))
 
 
+## Known path or "" for an unknown value (commands reject "", stored state falls back).
+static func normalize_path(approach_path: String) -> String:
+	var path: String = approach_path.strip_edges().to_lower()
+	return path if APPROACH_PATHS.has(path) else ""
+
+
+## Unknown or empty path behaves as "normal".
+static func sanitize_path(approach_path: String) -> String:
+	var path: String = normalize_path(approach_path)
+	return path if not path.is_empty() else DEFAULT_APPROACH_PATH
+
+
+## Data of one path: {} for normal, an unknown path and a missing data block (= behaves like normal).
+## rules: optional replacement of the whole data file (tests); default AD.definition().
+static func path_rules(approach_path: String, rules: Dictionary = {}) -> Dictionary:
+	var path: String = sanitize_path(approach_path)
+	if path == PATH_NORMAL:
+		return {}
+	var source: Dictionary = rules if not rules.is_empty() else AD.definition()
+	return Dictionary(Dictionary(Dictionary(source.get("approach_paths", {})).get("paths", {})).get(path, {}))
+
+
+static func path_has_effect(approach_path: String, rules: Dictionary = {}) -> bool:
+	return not path_rules(approach_path, rules).is_empty()
+
+
+static func accident_rules(rules: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = rules if not rules.is_empty() else AD.definition()
+	return Dictionary(Dictionary(source.get("approach_paths", {})).get("accident", {}))
+
+
+## Accident chance of one approach: pmax x (1 - pilot)^2 (pmax from the data, 0 for normal).
+static func accident_probability(approach_path: String, pilot_skill: float, rules: Dictionary = {}) -> float:
+	var pmax: float = float(path_rules(approach_path, rules).get("accident_max", 0.0))
+	var pilot: float = clampf(pilot_skill, 0.0, 1.0)
+	return clampf(pmax * (1.0 - pilot) * (1.0 - pilot), 0.0, 1.0)
+
+
+## One seeded accident roll per approach: same seed text, same result (a repeated order does not
+## roll again). Two numbers are drawn every time (accident roll, hull loss roll), so the loss
+## never depends on whether the accident happened. Hull loss is in percentage points.
+static func accident_check(approach_path: String, pilot_skill: float, seed_text: String, rules: Dictionary = {}) -> Dictionary:
+	var path: String = sanitize_path(approach_path)
+	var probability: float = accident_probability(path, pilot_skill, rules)
+	var result := {"path": path, "possible": probability > 0.0, "pilot_skill": clampf(pilot_skill, 0.0, 1.0), "probability": probability, "threshold": probability,
+		"roll": -1.0, "occurred": false, "hull_loss": 0, "reason": ""}
+	if probability <= 0.0:
+		result["reason"] = "kein Unfallrisiko"
+		return result
+	var limits: Dictionary = accident_rules(rules)
+	var loss_min: int = int(limits.get("hull_loss_min_percent", 20))
+	var loss_max: int = maxi(int(limits.get("hull_loss_max_percent", 40)), loss_min)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = AD.seed_to_int("%s:approach_path:%s" % [seed_text, path])
+	var roll: float = rng.randf()
+	var loss_roll: float = rng.randf()
+	result["roll"] = roll
+	result["occurred"] = roll < probability
+	result["hull_loss"] = roundi(lerpf(float(loss_min), float(loss_max), loss_roll)) if bool(result.occurred) else 0
+	result["reason"] = "Wurf %.3f %s Schwelle %.3f" % [roll, "unter" if bool(result.occurred) else "nicht unter", probability]
+	return result
+
+
+## The pilot value that belongs to the ship: fighter_piloting in the fighter, dropship_piloting in
+## the dropship. skills: {"dropship_piloting": float, "fighter_piloting": float}; missing or
+## negative values (unset) fall back to 0.5 like the approach always did.
+static func pilot_skill_for_model(model_id: String, skills: Dictionary) -> float:
+	var key: String = "fighter_piloting" if model_id.strip_edges().to_lower() == "buccaneer" else "dropship_piloting"
+	var value: Variant = skills.get(key, -1.0)
+	if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0:
+		return clampf(float(value), 0.0, 1.0)
+	return DEFAULT_PILOT_SKILL
+
+
+## Steil: the volleys inside any battery's reach are the time in the effective area; the ship
+## keeps only the last exposure_factor of them (it comes down almost vertically over the LZ).
+## Returns {"samples", "in_range", "kept", "factor"}. No battery in reach: nothing to cut.
+static func exposure_window(samples: Array, vehicles: Array, factor: float) -> Dictionary:
+	var first: int = -1
+	for index in range(samples.size()):
+		var cell: Vector2i = plane_to_cell(Vector2(samples[index]))
+		for vehicle in vehicles:
+			if HEX.distance(Vector2i(vehicle.cell), cell) <= reach_hex(String(vehicle.unit_id)):
+				first = index
+				break
+		if first >= 0:
+			break
+	if first < 0 or factor >= 1.0:
+		var untouched: int = 0 if first < 0 else samples.size() - first
+		return {"samples": samples, "in_range": untouched, "kept": untouched, "factor": factor}
+	var in_range: int = samples.size() - first
+	var kept: int = clampi(ceili(float(in_range) * maxf(factor, 0.0)), 1, in_range)
+	return {"samples": samples.slice(samples.size() - kept), "in_range": in_range, "kept": kept, "factor": factor}
+
+
+## Stations that never had a clear line to the ship while it was inside their reach.
+static func masked_stations(vehicles: Array, volleys: Array) -> Array:
+	var masked: Array = []
+	for vehicle in vehicles:
+		var instance_id: String = String(vehicle.instance_id)
+		var clear: int = 0
+		var blocked: int = 0
+		for volley in volleys:
+			var contact: Dictionary = Dictionary(Dictionary(volley).get("contacts", {})).get(instance_id, {})
+			if not bool(contact.get("in_reach", false)):
+				continue
+			if bool(contact.get("has_line_of_sight", true)):
+				clear += 1
+			else:
+				blocked += 1
+		if blocked > 0 and clear == 0:
+			masked.append(instance_id)
+	return masked
+
+
+static func _percent_text(fraction: float) -> String:
+	var percent: float = fraction * 100.0
+	if absf(percent - roundf(percent)) < 0.05:
+		return "%d" % roundi(percent)
+	return ("%.1f" % percent).replace(".", ",")
+
+
+## Hint text of one path button; every number comes from the data and the ship's pilot
+## (pilot_skill < 0: no pilot figure).
+static func path_tooltip(approach_path: String, pilot_skill: float = -1.0, rules: Dictionary = {}) -> String:
+	var path: String = sanitize_path(approach_path)
+	if path == PATH_NORMAL:
+		return "Normale Flugbahn: wie bisher, kein zusätzliches Unfallrisiko."
+	var data: Dictionary = path_rules(path, rules)
+	var label: String = String(PATH_LABELS.get(path, path))
+	if data.is_empty():
+		return "%s: ohne Wirkung (keine Daten)." % label
+	var parts: Array = []
+	if data.has("exposure_factor"):
+		parts.append("kürzer im Feuer (nur %s %% der Zeit im Wirkbereich)" % _percent_text(float(data.exposure_factor)))
+	if bool(data.get("terrain_masking", false)):
+		parts.append("Gelände kann die Flugabwehr verdecken")
+	var text: String = "%s: %s." % [label, ", ".join(parts)] if not parts.is_empty() else "%s." % label
+	var pmax: float = float(data.get("accident_max", 0.0))
+	if pmax > 0.0:
+		text += " Unfallrisiko %s %% mal Pilotenfaktor" % _percent_text(pmax)
+		if pilot_skill >= 0.0:
+			text += ", bei diesem Piloten %s %%" % _percent_text(accident_probability(path, pilot_skill, rules))
+		text += "."
+	return text
+
+
 ## Effective stats of the model's default loadout; hull from integrity (0..100).
 static func ship_for(model_id: String, integrity: int, max_integrity: int = 100) -> Dictionary:
 	var models: Dictionary = Dictionary(CATALOG.definition().get("models", {}))
@@ -142,27 +344,81 @@ static func ship_for(model_id: String, integrity: int, max_integrity: int = 100)
 
 
 ## context: vehicles, start_plane, lz_plane, height_at, crew_ready, pilot_skill,
-## seed, model_id, integrity (0..100), approach_style.
+## seed, model_id, integrity (0..100), approach_style, approach_path (LA; "" = normal),
+## rules (optional replacement of the data file, tests only).
+## Path "normal" (or a missing approach_paths block) computes exactly as before LA.
 static func resolve(context: Dictionary) -> Dictionary:
 	var ship: Dictionary = ship_for(String(context.get("model_id", DEFAULT_MODEL)), int(context.get("integrity", 100)))
 	if not bool(ship.get("ok", false)):
 		return ship
+	var rules: Dictionary = Dictionary(context.get("rules", {}))
+	var path: String = sanitize_path(String(context.get("approach_path", "")))
+	var path_data: Dictionary = path_rules(path, rules)
 	var height_at: Callable = context.get("height_at")
-	var samples: Array = approach_samples(Vector2(context.get("start_plane", Vector2.ZERO)), Vector2(context.get("lz_plane", Vector2.ZERO)))
+	var vehicles: Array = Array(context.get("vehicles", []))
+	var samples: Array = approach_samples(Vector2(context.get("start_plane", Vector2.ZERO)), Vector2(context.get("lz_plane", Vector2.ZERO)), float(path_data.get("sample_step_hex", SAMPLE_STEP_HEX)))
 	var style: String = sanitize_style(String(context.get("approach_style", "")))
-	var profile_id: String = profile_for_style(style)
+	var profile_id: String = String(path_data.get("profile", profile_for_style(style)))
 	var decision: String = decision_for_style(style)
+	var window: Dictionary = {}
+	if path_data.has("exposure_factor"):
+		window = exposure_window(samples, vehicles, float(path_data.exposure_factor))
+		samples = Array(window.samples)
+	var masking: bool = bool(path_data.get("terrain_masking", false))
+	var volleys: Array = build_volleys(vehicles, samples, height_at, bool(context.get("crew_ready", false)), profile_id, masking)
 	var result: Dictionary = AD.resolve_approach({
 		"seed": String(context.get("seed", "")), "pilot_skill": float(context.get("pilot_skill", 0.5)),
 		"ship_model": String(ship.model_id), "ship_stats": ship.stats, "ship_state": ship.state, "decision": decision,
-		"volleys": build_volleys(Array(context.get("vehicles", [])), samples, height_at, bool(context.get("crew_ready", false)), profile_id),
+		"volleys": volleys,
 	})
 	var plan: Dictionary = summarize(result, String(context.get("seed", "")))
 	plan["decision"] = decision
 	plan["approach_style"] = style
 	plan["approach_profile"] = profile_id
 	plan["volley_count"] = samples.size()
+	plan["approach_path"] = path
+	if not path_data.is_empty() and bool(plan.get("ok", false)):
+		_apply_path_effects(plan, path, path_data, vehicles, volleys, window, context, rules)
 	return plan
+
+
+## LA: terrain cover report, steil window and the one accident roll, written into the plan
+## (plan.path_report, a changed plan.message / outcome / hull_percent). Only for paths with data.
+static func _apply_path_effects(plan: Dictionary, path: String, path_data: Dictionary, vehicles: Array, volleys: Array, window: Dictionary, context: Dictionary, rules: Dictionary) -> void:
+	var report := {"path": path, "stations_total": vehicles.size(), "stations_masked": [], "window": {}}
+	if not window.is_empty():
+		report["window"] = {"in_range": int(window.in_range), "kept": int(window.kept), "factor": float(window.factor)}
+	var sentences: Array = []
+	var flight_name: String = String(PATH_FLIGHT_NAMES.get(path, path))
+	if bool(path_data.get("terrain_masking", false)):
+		var masked: Array = masked_stations(vehicles, volleys)
+		report["stations_masked"] = masked
+		if not masked.is_empty():
+			sentences.append("%s: %d von %d Stellungen durch Gelände verdeckt." % [flight_name, masked.size(), vehicles.size()])
+	var accident: Dictionary = accident_check(path, float(context.get("pilot_skill", DEFAULT_PILOT_SKILL)), String(context.get("seed", "")), rules)
+	if bool(accident.possible) and not bool(plan.get("landing_allowed", true)):
+		# The air defence turned the approach away: it never reaches the ground, so nothing is rolled against it.
+		accident["occurred"] = false
+		accident["hull_loss"] = 0
+		accident["skipped"] = "approach_aborted"
+	if bool(accident.occurred):
+		var floor_percent: int = hull_floor_percent(rules)
+		var before: int = int(plan.hull_percent)
+		plan["hull_percent"] = maxi(before - int(accident.hull_loss), floor_percent)
+		accident["hull_loss_applied"] = before - int(plan.hull_percent)
+		if String(plan.get("outcome", OUTCOME_NONE)) == OUTCOME_NONE:
+			plan["outcome"] = OUTCOME_ACCIDENT
+		sentences.append("Unfall im %s: Rumpf -%d %%." % [flight_name, int(accident.hull_loss_applied)])
+	report["accident"] = accident
+	plan["path_report"] = report
+	plan["accident_occurred"] = bool(accident.occurred)
+	if not sentences.is_empty():
+		var flak_text: String = String(plan.get("message", ""))
+		plan["message"] = (flak_text + ". " if not flak_text.is_empty() else "") + " ".join(sentences)
+
+
+static func hull_floor_percent(rules: Dictionary = {}) -> int:
+	return maxi(int(accident_rules(rules).get("hull_floor_percent", 1)), 1)
 
 
 ## Landing outcome and German one-line message from a resolver result.
