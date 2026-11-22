@@ -16,6 +16,9 @@ const RANGE_BAND_MID_MAX_TILES: int = 18
 const WEAPON_CATALOG: Dictionary = {
 	"none": {
 		"id": "none",
+		"ammo_class": "",
+		"magazine_size": 0,
+		"reload_ticks": 0,
 		"display_name": "Keine Waffe",
 		"damage_per_hit": 0,
 		"base_hit_chance": 0.0,
@@ -31,6 +34,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"pistol": {
 		"id": "pistol",
+		"ammo_class": "ammo_light",
+		"magazine_size": 12,
+		"reload_ticks": 30,
 		"display_name": "Pistole",
 		"damage_per_hit": 18,
 		"base_hit_chance": 0.40,
@@ -47,6 +53,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"smg": {
 		"id": "smg",
+		"ammo_class": "ammo_light",
+		"magazine_size": 24,
+		"reload_ticks": 30,
 		"display_name": "Maschinenpistole",
 		"damage_per_hit": 25,
 		"base_hit_chance": 0.40,
@@ -63,6 +72,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"rifle": {
 		"id": "rifle",
+		"ammo_class": "ammo_rifle",
+		"magazine_size": 20,
+		"reload_ticks": 30,
 		"display_name": "Sturmgewehr",
 		"damage_per_hit": 40,
 		"base_hit_chance": 0.45,
@@ -79,6 +91,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"sniper": {
 		"id": "sniper",
+		"ammo_class": "ammo_rifle",
+		"magazine_size": 5,
+		"reload_ticks": 45,
 		"display_name": "Scharfschuetzengewehr",
 		"damage_per_hit": 60,
 		"base_hit_chance": 0.55,
@@ -95,6 +110,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"rail_gun": {
 		"id": "rail_gun",
+		"ammo_class": "ammo_rail",
+		"magazine_size": 4,
+		"reload_ticks": 60,
 		"display_name": "Schienenkanone",
 		"damage_per_hit": 70,
 		"base_hit_chance": 0.35,
@@ -112,6 +130,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"rocket_launcher": {
 		"id": "rocket_launcher",
+		"ammo_class": "ammo_rocket",
+		"magazine_size": 1,
+		"reload_ticks": 75,
 		"display_name": "Raketenwerfer",
 		"damage_per_hit": 90,
 		"base_hit_chance": 0.30,
@@ -129,6 +150,9 @@ const WEAPON_CATALOG: Dictionary = {
 	},
 	"medictool": {
 		"id": "medictool",
+		"ammo_class": "",
+		"magazine_size": 0,
+		"reload_ticks": 0,
 		"display_name": "Sanitätswerkzeug",
 		"damage_per_hit": 0,
 		"base_hit_chance": 0.0,

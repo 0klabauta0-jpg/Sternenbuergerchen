@@ -1,0 +1,14 @@
+{
+	"explosion_base": 0.18,
+	"explosion_pilot_factor": 0.14,
+	"emergency_landing_base": 0.10,
+	"emergency_landing_pilot_factor": 0.45,
+	"emergency_landing_hull_percent": 1,
+	"crash_dead_chance": 0.05,
+	"crash_max_dead": 1,
+	"crash_injured_chance": 0.70,
+	"crash_severe_share": 0.20,
+	"crash_light_health_loss_fraction": 0.40,
+	"explosion_dead_chance": 0.60,
+	"explosion_salvage_fraction": 0.25
+}

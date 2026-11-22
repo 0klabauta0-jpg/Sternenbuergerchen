@@ -151,6 +151,14 @@ func _build() -> void:
 		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}],
 		["campaign_fabricate","Mittlere Rüstung herstellen",{"blueprint_id":"medium_armor"}],
 		["campaign_fabricate","Schwere Rüstung herstellen",{"blueprint_id":"heavy_armor"}]]
+	# Munition (M3): Namen aus ammo_rules.json, Stueckzahl aus dem Rezept ("Magazin leicht × 4").
+	var ammo_names: Dictionary = Dictionary(load("res://scripts/core/ammo_rules.gd").load_rules().get("ammo_items", {}))
+	for recipe_id: String in ["ammo_light", "ammo_rifle", "ammo_rail", "ammo_rocket"]:
+		var ammo_recipe: Dictionary = load("res://scripts/core/singleplayer_supply_state.gd").get_campaign_recipe(recipe_id)
+		if ammo_recipe.is_empty(): continue
+		var ammo_count: int = load("res://scripts/core/singleplayer_supply_state.gd").recipe_output_count(ammo_recipe)
+		var ammo_title: String = String(ammo_names.get(String(ammo_recipe.item), String(ammo_recipe.item)))
+		campaign_actions.append(["campaign_fabricate", "%s × %d herstellen" % [ammo_title, ammo_count] if ammo_count > 1 else ammo_title + " herstellen", {"blueprint_id": recipe_id}])
 	for id: String in RESEARCH.definitions().get("nodes", {}):
 		var node: Dictionary = RESEARCH.definitions().nodes[id]
 		campaign_actions.append(["campaign_research", node.title, {"research_id": id}])
@@ -171,7 +179,7 @@ func _build() -> void:
 		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
 		if String(action[0])=="campaign_build_housing":path="res://Assets/curated/kenney/space_station/previews_all/bed-single.png"
 		if ResourceLoader.exists(path):icon.texture=load(path)
-		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","salvage_tool":"mining_tool","backpack_recycling":"backpack","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
+		var menu_item:String={"light_armor":"armor_light","medium_armor":"armor_medium","heavy_armor":"armor_heavy","mining_tool":"mining_tool","salvage_tool":"mining_tool","backpack_recycling":"backpack","assault_rifle":"rifle","ammo_light":"ammo_light","ammo_rifle":"ammo_rifle","ammo_rail":"ammo_rail","ammo_rocket":"ammo_rocket"}.get(blueprint,"satellite_chip")
 		if String(action[0]) not in ["campaign_build_pad", "campaign_build_housing"]:icon.texture=MENU_ICONS.get_icon(menu_item)
 		if not blueprint.is_empty():body.add_child(_label(get_blueprint_details(blueprint),14))
 		if String(action[0]) == "campaign_research":
@@ -391,9 +399,10 @@ func _apply_section() -> void:
 	_feedback.visible = ship or (not _availability_feedback and _feedback.text != "Versorgung bereit")
 	for action:Dictionary in _campaign_buttons.values():
 		action.card.visible=action.button.visible
-		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Erwerbserlaubnis freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
+		var free_recipe:bool=String(action.operation)=="campaign_fabricate" and load("res://scripts/core/singleplayer_supply_state.gd").is_free_recipe(String(action.payload.blueprint_id))
+		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else (("Ohne Erwerbserlaubnis verfügbar" if free_recipe else "Erwerbserlaubnis freigeschaltet") if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
 		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
-		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Erwerbserlaubnis fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else String(action.button.tooltip_text)
+		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Erwerbserlaubnis fehlt" if not (free_recipe or Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id))) else String(action.button.tooltip_text)
 		if String(action.operation)=="campaign_build_housing":action.state_label.text="Gebaut: %d / 20 Betten" % int(_snapshot.get("supply", {}).get("campaign_beds", 2))
 	for craft:Dictionary in _snapshot.get("crafts",[]):
 		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)
@@ -412,6 +421,8 @@ static func get_blueprint_details(blueprint_id:String)->String:
 	elif String(recipe.item)=="backpack":lines.append("Rucksack für %d Inventarplätze" % int(load("res://scripts/mission/inventory_transfer_contract.gd").BACKPACK_CAPACITY))
 	elif String(recipe.item) in ["armor_light", "armor_medium", "armor_heavy"]:
 		lines.append("Rüstungsklasse: " + {"armor_light":"Leicht", "armor_medium":"Mittel", "armor_heavy":"Schwer"}[String(recipe.item)])
+	var count:int=load("res://scripts/core/singleplayer_supply_state.gd").recipe_output_count(recipe)
+	if count>1:lines.append("Ergebnis: %d × %s" % [count, String(Dictionary(load("res://scripts/core/ammo_rules.gd").load_rules().get("ammo_items", {})).get(String(recipe.item), String(recipe.item)))])
 	lines.append("Herstellung: %d Cr"%int(recipe.cost))
 	for item: String in recipe.get("inputs", {}):
 		lines.append("Material: %d × %s aus dem Basislager" % [int(recipe.inputs[item]), RESEARCH.item_label(item)])
@@ -469,7 +480,7 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 			"campaign_build_housing":
 				enabled = int(supply.get("credits", 0)) >= 500 and int(supply.get("campaign_housing", 0)) < 9
 			"campaign_fabricate":
-				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id))
+				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id)) or load("res://scripts/core/singleplayer_supply_state.gd").is_free_recipe(String(action.payload.blueprint_id))
 				var quote: Dictionary = supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {})
 				enabled = home and bool(quote.get("ok", false))
 			"campaign_research":
