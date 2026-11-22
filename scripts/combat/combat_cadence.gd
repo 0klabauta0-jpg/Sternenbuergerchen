@@ -42,10 +42,23 @@ static func _ensure_loaded() -> void:
 
 
 static func _apply(values: Dictionary) -> void:
-	_scale_milli = maxi(int(round(float(values.get("cadence_scale", 8.0)) * 1000.0)), 1)
-	_base_milli = maxi(int(round(float(values.get("initiative_base", 1.3)) * 1000.0)), 0)
-	_weight_milli = maxi(int(round(float(values.get("initiative_weight", 0.6)) * 1000.0)), 0)
-	_reaction_ticks = maxi(int(round(float(values.get("reaction_initiative_ticks", 90)))), 0)
+	# Unbrauchbare Werte (Massstab <= 0, negatives Gewicht oder Basis, Basis <= Gewicht, negative Reaktion) ergeben die
+	# Vorgaben statt Dauerfeuer: sonst waere der Takt ueberall 1 Schritt.
+	var scale_milli: int = int(round(float(values.get("cadence_scale", 8.0)) * 1000.0))
+	var base_milli: int = int(round(float(values.get("initiative_base", 1.3)) * 1000.0))
+	var weight_milli: int = int(round(float(values.get("initiative_weight", 0.6)) * 1000.0))
+	var reaction: int = int(round(float(values.get("reaction_initiative_ticks", 90))))
+	if scale_milli <= 0:
+		scale_milli = int(round(float(DEFAULT_CONFIG["cadence_scale"]) * 1000.0))
+	if base_milli <= 0 or weight_milli < 0 or base_milli <= weight_milli:
+		base_milli = int(round(float(DEFAULT_CONFIG["initiative_base"]) * 1000.0))
+		weight_milli = int(round(float(DEFAULT_CONFIG["initiative_weight"]) * 1000.0))
+	if reaction < 0:
+		reaction = int(DEFAULT_CONFIG["reaction_initiative_ticks"])
+	_scale_milli = scale_milli
+	_base_milli = base_milli
+	_weight_milli = weight_milli
+	_reaction_ticks = reaction
 	_loaded = true
 
 
@@ -111,7 +124,8 @@ static func is_due(step: int, period_milli_value: int) -> bool:
 ## Schritte bis zur naechsten Faelligkeit: 0 = jetzt faellig.
 static func steps_until_due(step: int, period_milli_value: int) -> int:
 	var p: int = maxi(period_milli_value, 1000)
-	var waited: int = 0
-	while not is_due(step + waited, p):
-		waited += 1
-	return waited
+	# Naechster faelliger Schritt t: kleinstes t mit floor(t x 1000 / p) > floor((step - 1) x 1000 / p),
+	# also t >= ceil(q x p / 1000) fuer q = floor((step - 1) x 1000 / p) + 1.
+	var next_count: int = _floor_div((step - 1) * 1000, p) + 1
+	var due_step: int = (next_count * p + 999) / 1000
+	return maxi(due_step - step, 0)

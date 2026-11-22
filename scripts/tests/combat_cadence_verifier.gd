@@ -724,6 +724,26 @@ func _test_default_config_values() -> void:
 	_check(CADENCE.period_milli(9, 0.5) == 6000 and CADENCE.reaction_ticks(0.4) == 9, "ein geaendertes Feld wirkt, die anderen bleiben")
 	CADENCE.reset_config()
 	_check(CADENCE.period_milli(9, 0.5) == 24000, "reset_config liest wieder die Datei")
+	# R3: unbrauchbare Werte (Massstab <= 0, Basis <= Gewicht) ergeben die Vorgaben, nie Dauerfeuer.
+	var bad_configs := [
+		{"cadence_scale": 0.0}, {"cadence_scale": -3.0}, {"cadence_scale": 0.0004},
+		{"initiative_base": 0.5, "initiative_weight": 0.6}, {"initiative_base": 0.6, "initiative_weight": 0.6},
+		{"initiative_weight": -0.2}, {"initiative_base": -1.0}, {"reaction_initiative_ticks": -50},
+	]
+	for bad in bad_configs:
+		CADENCE.override_config_for_test(bad)
+		_check(CADENCE.period_milli(9, 0.5) == 24000 and CADENCE.period_milli(26, 1.0) == 8 * 9 * 700 and CADENCE.reaction_ticks(0.4) == 9, "unbrauchbare Werte %s -> Vorgaben" % str(bad))
+	CADENCE.reset_config()
+	# steps_until_due: geschlossene Form stimmt mit der Suche ueber alle Schritte ueberein.
+	var closed_form_ok := true
+	for period in [1000, 1500, 2604, 3180, 24000, 62496, 76320]:
+		for step in range(0, 400):
+			var waited := 0
+			while not CADENCE.is_due(step + waited, period):
+				waited += 1
+			if CADENCE.steps_until_due(step, period) != waited:
+				closed_form_ok = false
+	_check(closed_form_ok, "steps_until_due entspricht der Suche nach dem naechsten faelligen Schritt")
 
 
 func _test_default_cadence_over_600_steps() -> void:
