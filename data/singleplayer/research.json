@@ -93,6 +93,46 @@
       "inputs": {
         "salvage": 2
       }
+    },
+    "ammo_light": {
+      "item": "ammo_light",
+      "cost": 5,
+      "output_count": 4,
+      "free": true,
+      "inputs": {
+        "a_benit": 1
+      }
+    },
+    "ammo_rifle": {
+      "item": "ammo_rifle",
+      "cost": 5,
+      "output_count": 4,
+      "free": true,
+      "inputs": {
+        "a_benit": 1,
+        "b_benit": 1
+      }
+    },
+    "ammo_rail": {
+      "item": "ammo_rail",
+      "cost": 10,
+      "output_count": 2,
+      "free": true,
+      "inputs": {
+        "b_benit": 1,
+        "c_benit": 1
+      }
+    },
+    "ammo_rocket": {
+      "item": "ammo_rocket",
+      "cost": 10,
+      "output_count": 2,
+      "free": true,
+      "inputs": {
+        "a_benit": 1,
+        "b_benit": 1,
+        "c_benit": 1
+      }
     }
   }
 }
