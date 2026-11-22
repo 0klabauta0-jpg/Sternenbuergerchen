@@ -68,7 +68,24 @@ class QuietDriver extends DRIVER:
 		if simulation_root != null:
 			simulation_root.damage_effect_resolved.connect(_on_damage_effect_resolved)
 
+	## Echter Controller: "own" ist das Mitglied, "enemy" bewegt sich in jedem Schritt (Bewegungsschwelle 5), Kreis 360 Grad.
+	var real_overwatch := false
+	var _real_overwatch_direction := 1.0
+
 	func _try_enqueue_overwatch(_simulation_root: Node) -> Array:
+		if real_overwatch:
+			var own = get_node_or_null("../own")
+			var enemy = get_node_or_null("../enemy")
+			var terrain = get_node_or_null("../TerrainRegistry")
+			enemy.position += Vector2(10.0 * _real_overwatch_direction, 0.0)
+			_real_overwatch_direction = -_real_overwatch_direction
+			var snapshot: Array = [{
+				"overwatch_ready": true,
+				"fireteam_id": "blue_ft",
+				"anchor_position": own.position,
+				"member_assignments": [{"unit_id": "own", "center_angle": 0.0, "arc_width": TAU}],
+			}]
+			return Array(_overwatch_controller.call("update", get_node_or_null(simulation_root_path), snapshot, {"blue_ft": [own]}, [enemy], terrain, 1000.0, _current_tick))
 		var shots: Array = []
 		for shooter in Array(overwatch_plan.get(_current_tick, [])):
 			overwatch_ready_tick[String(shooter)] = _current_tick + overwatch_lock_ticks
@@ -76,6 +93,8 @@ class QuietDriver extends DRIVER:
 		return shots
 
 	func get_overwatch_member_ready_snapshot() -> Dictionary:
+		if real_overwatch:
+			return super.get_overwatch_member_ready_snapshot()
 		var snapshot: Dictionary = {}
 		for shooter in overwatch_ready_tick.keys():
 			var ready_tick: int = int(overwatch_ready_tick[shooter])
@@ -132,6 +151,9 @@ func _run() -> void:
 	_test_default_cadence_over_600_steps()
 	_test_default_detection_and_window()
 	_test_default_duel_600_steps()
+	_test_real_overwatch_member_keeps_period()
+	_test_normal_shot_locks_overwatch_full_period()
+	_test_return_fire_window_follows_period()
 	await process_frame
 	print("COMBAT_CADENCE passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -257,7 +279,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.awareness = float(spec.get("awareness", 1.0))
 		npc.position = terrain.grid_to_world(spec.grid)
 		if npc.team_id == "blue":
-			npc.command = COMMAND.new({"command_type": "hold_position", "fire_status": String(spec.get("fire_status", "fire_at_will")), "fire_rule": "free"})
+			npc.command = COMMAND.new({"command_type": "hold_position", "fire_status": String(spec.get("fire_status", "fire_at_will")), "fire_rule": String(spec.get("fire_rule", "free"))})
 		scope.add_child(npc)
 		registry.register_unit(npc.unit_id, npc)
 		sim.register_known_unit(npc.unit_id, npc)
@@ -702,6 +724,26 @@ func _test_default_config_values() -> void:
 	_check(CADENCE.period_milli(9, 0.5) == 6000 and CADENCE.reaction_ticks(0.4) == 9, "ein geaendertes Feld wirkt, die anderen bleiben")
 	CADENCE.reset_config()
 	_check(CADENCE.period_milli(9, 0.5) == 24000, "reset_config liest wieder die Datei")
+	# R3: unbrauchbare Werte (Massstab <= 0, Basis <= Gewicht) ergeben die Vorgaben, nie Dauerfeuer.
+	var bad_configs := [
+		{"cadence_scale": 0.0}, {"cadence_scale": -3.0}, {"cadence_scale": 0.0004},
+		{"initiative_base": 0.5, "initiative_weight": 0.6}, {"initiative_base": 0.6, "initiative_weight": 0.6},
+		{"initiative_weight": -0.2}, {"initiative_base": -1.0}, {"reaction_initiative_ticks": -50},
+	]
+	for bad in bad_configs:
+		CADENCE.override_config_for_test(bad)
+		_check(CADENCE.period_milli(9, 0.5) == 24000 and CADENCE.period_milli(26, 1.0) == 8 * 9 * 700 and CADENCE.reaction_ticks(0.4) == 9, "unbrauchbare Werte %s -> Vorgaben" % str(bad))
+	CADENCE.reset_config()
+	# steps_until_due: geschlossene Form stimmt mit der Suche ueber alle Schritte ueberein.
+	var closed_form_ok := true
+	for period in [1000, 1500, 2604, 3180, 24000, 62496, 76320]:
+		for step in range(0, 400):
+			var waited := 0
+			while not CADENCE.is_due(step + waited, period):
+				waited += 1
+			if CADENCE.steps_until_due(step, period) != waited:
+				closed_form_ok = false
+	_check(closed_form_ok, "steps_until_due entspricht der Suche nach dem naechsten faelligen Schritt")
 
 
 func _test_default_cadence_over_600_steps() -> void:
@@ -760,3 +802,90 @@ func _test_default_duel_600_steps() -> void:
 	_run_ticks(f, 1800)
 	_check(_shots_by(f, "own") == 28 and _shots_by(f, "enemy") == 23, "Duell 600 Schritte: 0,72 -> 28 Schuesse, 0,40 -> 23 Schuesse (%d / %d)" % [_shots_by(f, "own"), _shots_by(f, "enemy")])
 	f.scope.free()
+
+
+# ---- Runde 3, mit den echten Werten (Taktfaktor 8), gegen den echten Controller --------------------
+
+## Alle Schuesse des Mitglieds "own" (normal und Ueberwachung) mit ihrem Tick.
+func _own_shot_ticks(f: Dictionary) -> Array:
+	var ticks: Array = []
+	for entry in f.calls:
+		if Array(entry.shooters).has("own"):
+			ticks.append(int(entry.tick))
+	return ticks
+
+
+## R3-K1 (a) und (c): Ueberwachungsmitglied mit Pistole (Takt 24 Schritte = 72 Ticks). Zwischen zwei Schuessen des
+## Mitglieds, gleich ob Ueberwachung oder normal, liegen mindestens 72 Ticks; in 600 Schritten schiesst es nicht
+## mehr als ein gleiches Mitglied ohne Ueberwachung (+1 Toleranz).
+func _test_real_overwatch_member_keeps_period() -> void:
+	var with_overwatch := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "none"))
+	with_overwatch.driver.real_overwatch = true
+	_run_ticks(with_overwatch, 1800)
+	var plain := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "none"))
+	_run_ticks(plain, 1800)
+	var shot_ticks := _own_shot_ticks(with_overwatch)
+	var min_gap := 100000
+	for index in range(1, shot_ticks.size()):
+		min_gap = mini(min_gap, int(shot_ticks[index]) - int(shot_ticks[index - 1]))
+	print("R3-K1 Schuesse mit Ueberwachung: %d, ohne: %d, kleinster Abstand %d Ticks" % [shot_ticks.size(), _shots_by(plain, "own"), min_gap])
+	_check(shot_ticks.size() >= 2, "R3-K1: das Ueberwachungsmitglied schiesst (%d)" % shot_ticks.size())
+	_check(min_gap >= 72, "R3-K1 (a): zwei Schuesse des Mitglieds liegen mindestens 72 Ticks auseinander (%d)" % min_gap)
+	_check(shot_ticks.size() <= _shots_by(plain, "own") + 1, "R3-K1 (c): in 600 Schritten nicht mehr Schuesse als ohne Ueberwachung (%d gegen %d)" % [shot_ticks.size(), _shots_by(plain, "own")])
+	with_overwatch.scope.free()
+	plain.scope.free()
+
+
+## R3-K1 (b): Normalschuss (erster faelliger Schritt 24, Tick 72) sperrt die Ueberwachung bis Tick 144.
+func _test_normal_shot_locks_overwatch_full_period() -> void:
+	var f := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "none"))
+	var controller: RefCounted = f.driver._overwatch_controller
+	controller.call("update", null, [], {}, [f.units["enemy"]], null, 1000.0, 0)
+	_run_ticks(f, 72)
+	_check(_shots_by(f, "own") == 1, "R3-K1 (b): Normalschuss in Schritt 24 (Tick 72)")
+	_check(_overwatch_try(f, controller, 75).is_empty() and _overwatch_try(f, controller, 141).is_empty(), "R3-K1 (b): bis Tick 141 kein Ueberwachungsschuss")
+	_check(_overwatch_try(f, controller, 144).size() == 1, "R3-K1 (b): ab Tick 144 wieder moeglich")
+	f.scope.free()
+
+
+## R3-W1: Rueckfeuer- und "kuerzlich beschossen"-Fenster dauern max(18, ceil(p) x 3 + 18) Ticks (Pistole 0,5: 72 + 18 = 90).
+## "own" hat Feuerregel "return" und die Periode des Gegners (Pistole, Initiative neutral, 72 Ticks).
+func _test_return_fire_window_follows_period() -> void:
+	var specs: Array = [
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "weapon": "pistol", "fire_status": "hold_fire", "fire_rule": "return"},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "weapon": "pistol"},
+	]
+	var f := _rig(specs)
+	f.driver.forced_roll = 0.99
+	_run_ticks(f, 73)
+	_check(_shots_by(f, "enemy") == 1 and _shots_by(f, "own") == 0, "R3-W1: Gegner schiesst in Schritt 24 (Tick 72), own davor nicht (%d / %d)" % [_shots_by(f, "enemy"), _shots_by(f, "own")])
+	f.units["enemy"].active_weapon_id = "none"
+	_run_ticks(f, 71)
+	_check(_shots_by(f, "own") == 1 and Array(_shots_at(f, 144)).has("own"), "R3-W1: own erwidert in seinem naechsten faelligen Schritt (Tick 144, 72 Ticks nach dem Gegnerschuss) (%d)" % _shots_by(f, "own"))
+	_run_ticks(f, 72)
+	_check(_shots_by(f, "own") == 1, "R3-W1: nach Ablauf des Fensters (Tick 216, 144 nach dem Schuss) ist es wieder zu (%d)" % _shots_by(f, "own"))
+	f.scope.free()
+	var quiet := _rig([
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "weapon": "pistol", "fire_status": "hold_fire", "fire_rule": "return"},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "weapon": "none"},
+	])
+	quiet.driver.forced_roll = 0.99
+	_run_ticks(quiet, 600)
+	_check(_shots_by(quiet, "own") == 0, "R3-W1: ohne gegnerischen Schuss schiesst die Einheit nicht (%d)" % _shots_by(quiet, "own"))
+	# Sichtfenster: gleiche Dauer, an der Periode der beobachtenden Einheit.
+	var d: Dictionary = quiet.driver._recent_hit_tick_by_shooter_and_group
+	d["enemy>%s" % quiet.driver._visibility_group_key(quiet.units["own"])] = 100
+	quiet.driver._current_tick = 172
+	_check(quiet.driver._was_recently_hit_by(quiet.units["own"], quiet.units["enemy"]), "R3-W1: Sichtfenster 72 Ticks nach dem Treffer noch offen")
+	quiet.driver._current_tick = 190
+	_check(quiet.driver._was_recently_hit_by(quiet.units["own"], quiet.units["enemy"]), "R3-W1: Sichtfenster bis 90 Ticks offen")
+	quiet.driver._current_tick = 191
+	_check(not quiet.driver._was_recently_hit_by(quiet.units["own"], quiet.units["enemy"]), "R3-W1: Sichtfenster danach zu")
+	quiet.scope.free()
+
+
+func _shots_at(f: Dictionary, tick: int) -> Array:
+	for entry in f.calls:
+		if int(entry.tick) == tick:
+			return entry.shooters
+	return []

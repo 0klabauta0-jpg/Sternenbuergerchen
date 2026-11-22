@@ -57,6 +57,8 @@ const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
 const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
 const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const RETURN_FIRE_WINDOW_TICKS: int = 18
+## Aufraeumgrenze fuer die Fenstermerker: groesser als jedes Fenster max(18, ceil(p) x 3 + 18) (p bis rund 100 Schritte).
+const RETURN_FIRE_WINDOW_CLEANUP_TICKS: int = 400
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
@@ -1075,7 +1077,16 @@ func _was_recently_hit_by(observer, shooter) -> bool:
 	var key: String = "%s>%s" % [String(shooter.call("get_unit_id")).strip_edges(), group_key]
 	if not _recent_hit_tick_by_shooter_and_group.has(key):
 		return false
-	return _current_tick - int(_recent_hit_tick_by_shooter_and_group[key]) <= RETURN_FIRE_WINDOW_TICKS
+	return _current_tick - int(_recent_hit_tick_by_shooter_and_group[key]) <= _get_return_fire_window_ticks(observer)
+
+
+## Gefechtstakt: Rueckfeuer- und Sichtfenster dauern eine eigene Periode der Einheit plus das Grundfenster
+## (max(18, ceil(p) x 3 + 18) Ticks), sonst waere es bei Perioden ab 72 Ticks fast nie offen, wenn die Einheit dran ist.
+func _get_return_fire_window_ticks(unit) -> int:
+	if unit == null:
+		return RETURN_FIRE_WINDOW_TICKS
+	var period_steps: int = (_get_attack_period_milli(unit) + 999) / 1000
+	return maxi(RETURN_FIRE_WINDOW_TICKS, period_steps * COMBAT_DECISION_INTERVAL_TICKS + RETURN_FIRE_WINDOW_TICKS)
 
 
 func _get_attack_distance(attacker, target) -> float:
@@ -3236,7 +3247,7 @@ func _can_unit_return_fire(unit) -> bool:
 	if fireteam_id.is_empty() or not _recent_incoming_fire_tick_by_fireteam.has(fireteam_id):
 		return false
 	var last_incoming_tick: int = int(_recent_incoming_fire_tick_by_fireteam.get(fireteam_id, -RETURN_FIRE_WINDOW_TICKS - 1))
-	return _current_tick - last_incoming_tick <= RETURN_FIRE_WINDOW_TICKS
+	return _current_tick - last_incoming_tick <= _get_return_fire_window_ticks(unit)
 
 
 func _get_unit_fire_rule_for_diagnostics(unit) -> String:
@@ -3358,13 +3369,13 @@ func _advance_return_fire_windows() -> void:
 	var keys_to_remove: Array = []
 	for key in _recent_incoming_fire_tick_by_fireteam.keys():
 		var last_tick: int = int(_recent_incoming_fire_tick_by_fireteam[key])
-		if _current_tick - last_tick > RETURN_FIRE_WINDOW_TICKS:
+		if _current_tick - last_tick > RETURN_FIRE_WINDOW_CLEANUP_TICKS:
 			keys_to_remove.append(key)
 	for key in keys_to_remove:
 		_recent_incoming_fire_tick_by_fireteam.erase(key)
 	var hit_keys_to_remove: Array = []
 	for hit_key in _recent_hit_tick_by_shooter_and_group.keys():
-		if _current_tick - int(_recent_hit_tick_by_shooter_and_group[hit_key]) > RETURN_FIRE_WINDOW_TICKS:
+		if _current_tick - int(_recent_hit_tick_by_shooter_and_group[hit_key]) > RETURN_FIRE_WINDOW_CLEANUP_TICKS:
 			hit_keys_to_remove.append(hit_key)
 	for hit_key in hit_keys_to_remove:
 		_recent_hit_tick_by_shooter_and_group.erase(hit_key)
