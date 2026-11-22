@@ -6,6 +6,8 @@ extends SceneTree
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const INV = preload("res://scripts/mission/inventory_transfer_contract.gd")
 const RULES = preload("res://scripts/core/ammo_rules.gd")
+const SIM = preload("res://scripts/core/simulation_root.gd")
+const LOADOUT_STATE = preload("res://scripts/core/personnel_loadout_state.gd")
 const PANEL = preload("res://scripts/ui/components/personnel_inventory_panel.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const BAG := "unit:u1:backpack"
@@ -91,11 +93,26 @@ func _size_part() -> void:
 		check(ok_count == int(sizes[armor]), "%s: nimmt genau %d Magazine, das naechste wird abgelehnt (genommen: %d)" % [armor, sizes[armor], ok_count])
 		check(not _move(s, "ammo_light", BASE, BAG).get("ok", true) and _bag(s).capacity == 0, "%s: ohne Rucksack kein Platz ausser dem Fach" % armor)
 	var s := _sup("light")
-	_give(s, "satellite_chip", 1); _give(s, "ammo_light", 3)
+	_give(s, "satellite_chip", 1); _give(s, "ammo_light", 4)
 	check(_move(s, "satellite_chip", BASE, BAG).get("ok", false), "light: Chip kommt ins Fach")
-	check(_move(s, "ammo_light", BASE, BAG).get("ok", false) and _move(s, "ammo_light", BASE, BAG).get("ok", false), "light: Chip + 2 Magazine passen")
-	var third: Dictionary = _move(s, "ammo_light", BASE, BAG)
-	check(not third.get("ok", true) and String(third.get("reason", "")) == "container_full", "light: das dritte Magazin neben dem Chip wird abgelehnt")
+	var fit := 0
+	for i in range(3):
+		if _move(s, "ammo_light", BASE, BAG).get("ok", false): fit += 1
+	check(fit == 3, "light: neben dem Chip passen weiter genau 3 Magazine (M2-5: Chips zaehlen nicht gegen die Fachgroesse)")
+	var fourth: Dictionary = _move(s, "ammo_light", BASE, BAG)
+	check(not fourth.get("ok", true) and String(fourth.get("reason", "")) == "container_full", "light: das vierte Magazin neben dem Chip wird abgelehnt")
+	# W1 (a): Fach mit Magazinen voll, Chip-Aufnahme ueber den Befehl des Einsatz-Weges (campaign_cargo, Adapter _recover_secured_campaign_chips)
+	for chip in ["satellite_chip", "outpost_chip"]:
+		var full := _sup("light")
+		_give(full, "ammo_light", 3)
+		_move(full, "ammo_light", BASE, BAG, 3)
+		var got: Dictionary = full.apply_command(_cmd("campaign_cargo", {"container_id": BAG, "item_id": chip, "amount": 1}), {"campaign_authorized": true})
+		check(bool(got.get("ok", false)) and int(_bag(full).items.get(chip, 0)) == 1 and int(_bag(full).items.get("ammo_light", 0)) == 3, "%s: Chip-Aufnahme klappt bei vollem Magazinfach (Magazine bleiben)" % chip)
+	# W1 (c): zweiter Chip wie vor M2 (ohne Rucksack abgelehnt, mit Rucksackplatz ein Platz)
+	var two := _sup("heavy")
+	_give(two, "satellite_chip", 1); _give(two, "outpost_chip", 1)
+	check(_move(two, "satellite_chip", BASE, BAG).get("ok", false) and not _move(two, "outpost_chip", BASE, BAG).get("ok", true), "zweiter Chip: ohne Rucksack abgelehnt wie vor M2")
+	check(INV.valid_container({"capacity": 1, "armor_chip_capacity": 7, "items": {"satellite_chip": 1, "outpost_chip": 1}}) and not INV.valid_container({"capacity": 0, "armor_chip_capacity": 7, "items": {"satellite_chip": 1, "outpost_chip": 1}}), "zweiter Chip belegt einen Rucksackplatz, egal wie gross das Fach ist")
 	var p := _sup("heavy")
 	_give(p, "pistol", 1)
 	check(not _move(p, "pistol", BASE, BAG).get("ok", true), "heavy: eine Pistole passt nicht ins Fach (ohne Rucksack abgelehnt)")
@@ -149,12 +166,12 @@ func _container_part() -> void:
 	for size in [1, 2, 3, 5, 7]:
 		check(INV.valid_container({"capacity": 0, "armor_chip_capacity": size, "items": {}}), "Behaelter mit Fachgroesse %d ist gueltig" % size)
 	check(INV.valid_container({"capacity": 0, "armor_chip_capacity": 1, "items": {"satellite_chip": 1}}), "alte Form (Fach 1, ein Chip) bleibt gueltig")
-	check(INV.valid_container({"capacity": 0, "armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_light": 2}}), "light: Chip + 2 Magazine im Fach gueltig")
-	check(not INV.valid_container({"capacity": 0, "armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_light": 3}}), "light: Chip + 3 Magazine ohne Rucksack ungueltig")
+	check(INV.valid_container({"capacity": 0, "armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_light": 3}}), "light: Chip + 3 Magazine gueltig")
+	check(not INV.valid_container({"capacity": 0, "armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_light": 4}}), "light: Chip + 4 Magazine ohne Rucksack ungueltig")
 	check(INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"ammo_light": 13}}), "Rucksack 12 + Fach 1 nehmen 13 Magazine")
 	for bad in [0, -1, 1.5, "3", null, 999]:
 		check(not INV.valid_container({"capacity": 0, "armor_chip_capacity": bad, "items": {}}), "Fachgroesse %s ist ungueltig" % str(bad))
-	check(INV.compartment_used({"armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_rail": 1, "pistol": 2}}) == 2, "belegt zaehlt Chips und Magazine, keine Waffen")
+	check(INV.compartment_used({"armor_chip_capacity": 3, "items": {"satellite_chip": 1, "ammo_rail": 1, "pistol": 2}}) == 1, "belegt zaehlt nur Magazine, keine Chips und Waffen")
 	check(INV.compartment_used({"armor_chip_capacity": 1, "items": {"ammo_rail": 4}}) == 1, "belegt ist nie mehr als die Fachgroesse")
 
 # ---------- Ruestungswechsel ----------
@@ -162,10 +179,10 @@ func _container_part() -> void:
 func _fill_heavy() -> RefCounted:
 	var s := _sup("heavy")
 	_give(s, "satellite_chip", 1)
-	for m in ["ammo_light", "ammo_rifle", "ammo_rail"]: _give(s, m, 2)
+	var plan := {"ammo_light": 2, "ammo_rifle": 2, "ammo_rail": 2, "ammo_rocket": 1}
+	for m in plan: _give(s, m, int(plan[m]))
 	_move(s, "satellite_chip", BASE, BAG)
-	for m in ["ammo_light", "ammo_rifle", "ammo_rail"]:
-		for i in range(2): _move(s, m, BASE, BAG)
+	for m in plan: _move(s, m, BASE, BAG, int(plan[m]))
 	return s
 
 func _totals(s: RefCounted) -> Dictionary:
@@ -183,7 +200,7 @@ func _swap_part() -> void:
 	check(bool(r.get("ok", false)) and String(r.loadout.armor) == "suit", "heavy -> suit wird angenommen")
 	check(int(_bag(s).armor_chip_capacity) == 1, "danach hat das Fach 1 Platz")
 	var items: Dictionary = _bag(s).items
-	check(items.size() == 1 and int(items.get("satellite_chip", 0)) == 1, "im Fach bleibt nur der Chip (zuletzt)")
+	check(items.size() == 2 and int(items.get("satellite_chip", 0)) == 1 and int(items.get("ammo_rocket", 0)) == 1, "im Behaelter bleiben der Chip und ein Magazin (Chip wandert nie)")
 	check(int(Dictionary(_inv(s)[BASE].items).get("ammo_light", 0)) + int(Dictionary(_inv(s)[BASE].items).get("ammo_rifle", 0)) + int(Dictionary(_inv(s)[BASE].items).get("ammo_rail", 0)) == 6, "sechs Magazine liegen im Lager")
 	check(_totals(s) == before, "Summe aller Magazine und Chips vorher == nachher (nichts weg, nichts doppelt)")
 	check(_count(s, "armor_heavy") == heavy_before + 1, "abgelegte schwere Ruestung liegt im Lager")
@@ -214,13 +231,15 @@ func _swap_part() -> void:
 
 # ---------- Spielstand ----------
 
-func _fresh_restored(state: Dictionary, armor: String) -> Array:
+func _fresh_restored(state: Dictionary, armor: String, after_load: bool = true) -> Array:
 	var r: RefCounted = SUPPLY.new()
 	var data: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string(OFFER_PATH)))
 	r.configure([], data)
+	# Echter Ablauf: erst laden (die Auskunft ist noch nicht gebunden), dann bindet der Besitzer und gleicht einmal ab.
+	var res: Dictionary = r.restore_state(state)
 	_armor["u1"] = armor
 	r.set_armor_provider(func(unit_id: String) -> String: return String(_armor.get(unit_id, "")))
-	var res: Dictionary = r.restore_state(state)
+	if after_load: r.sync_compartments_after_load()
 	return [r, res]
 
 func _save_part() -> void:
@@ -237,14 +256,42 @@ func _save_part() -> void:
 	var alt := _fresh_restored(old_state, "light")
 	check(bool(alt[1].get("ok", false)), "Stand von vor M2 laedt (%s)" % str(alt[1].get("reason", "")))
 	check(int(_bag(alt[0]).armor_chip_capacity) == 3, "danach hat das Fach 3 Plaetze (aus der Ruestung light)")
-	_give(alt[0], "ammo_light", 3)
-	check(_move(alt[0], "ammo_light", BASE, BAG).get("ok", false) and _move(alt[0], "ammo_light", BASE, BAG).get("ok", false) and not _move(alt[0], "ammo_light", BASE, BAG).get("ok", true), "neben dem Chip nur 2 Magazine")
+	_give(alt[0], "ammo_light", 4)
+	check(_move(alt[0], "ammo_light", BASE, BAG, 3).get("ok", false) and not _move(alt[0], "ammo_light", BASE, BAG).get("ok", true), "neben dem Chip genau 3 Magazine")
 	var plain := _fresh_restored(old_state, "")
 	check(bool(plain[1].get("ok", false)) and int(_bag(plain[0]).armor_chip_capacity) == 1, "ohne Ruestungsauskunft bleibt der gespeicherte Wert 1")
 	# Ueberschuss beim Laden: heavy-Stand, Person traegt nun suit
 	var over := _fresh_restored(state, "suit")
 	check(bool(over[1].get("ok", false)), "Stand mit zu viel im Fach laedt trotzdem (%s)" % str(over[1].get("reason", "")))
-	check(_bag(over[0]).items.size() == 1 and _totals(over[0]) == _totals(s), "Ueberschuss liegt im Lager, Summe gleich")
+	check(_bag(over[0]).items.size() == 2 and int(_bag(over[0]).items.get("satellite_chip", 0)) == 1 and int(_bag(over[0]).armor_chip_capacity) == 1 and _totals(over[0]) == _totals(s), "Ueberschuss liegt nach dem Laden im Lager (Chip bleibt), Summe gleich, ohne Ruestungswechsel")
+	# W2: kein Lager am Ort -> nichts verschieben, nichts loeschen; Mehrinhalt bleibt bis zu einem Ort mit Lager
+	var nolager := _fresh_restored(state, "heavy", false)
+	var inv_ref: Dictionary = nolager[0].get("_inventory")
+	var base_saved: Dictionary = inv_ref[BASE]
+	inv_ref.erase(BASE)
+	_armor["u1"] = "suit"
+	nolager[0].sync_compartments_after_load()
+	check(int(inv_ref[BAG].armor_chip_capacity) == 7 and INV.count_ammo(inv_ref[BAG].items) == 7, "ohne Lager: nichts verschoben, nichts geloescht, Groesse bleibt")
+	inv_ref[BASE] = base_saved
+	nolager[0].sync_compartments_after_load()
+	check(int(inv_ref[BAG].armor_chip_capacity) == 1 and INV.count_ammo(inv_ref[BAG].items) == 1 and _totals(nolager[0]) == _totals(s), "am Ort mit Lager geht der Mehrinhalt ins Lager, Summe gleich")
+	# Abfragen aendern keinen Zustand: Speichern/Abfragen zeigen die neue Groesse, der Behaelter selbst bleibt
+	var pure := _fresh_restored(state, "heavy")
+	_armor["u1"] = "light"
+	var stored_before: Dictionary = pure[0].get("_inventory")[BAG].duplicate(true)
+	var view_size := int(pure[0].get_supply_snapshot().inventory[BAG].armor_chip_capacity)
+	var exported_size := int(pure[0].export_state().inventory[BAG].armor_chip_capacity)
+	check(pure[0].get("_inventory")[BAG] == stored_before and int(stored_before.armor_chip_capacity) == 7, "Abfrage und Speichern aendern den Zustand nicht")
+	check(view_size == 7 and exported_size == 7, "Inhalt passt nicht in 3 Plaetze: Abfrage zeigt weiter 7")
+	# Echter Besitzer: SimulationRoot reicht Loadout-Wiederherstellung an die Versorgung weiter
+	var sim: Node = SIM.new()
+	var owner: RefCounted = LOADOUT_STATE.new()
+	var wired := _fresh_restored(state, "heavy", false)
+	sim.configure_personnel_loadouts(owner)
+	sim.configure_singleplayer_owners(null, wired[0])
+	sim.request_personnel_loadout_command("restore", {"loadouts": {"u1": {"armor": "suit", "weapon_1": "pistol", "weapon_2": "none"}}})
+	check(int(_bag(wired[0]).armor_chip_capacity) == 1 and INV.count_ammo(_bag(wired[0]).items) == 1 and _totals(wired[0]) == _totals(s), "SimulationRoot: nach dem Wiederherstellen der Loadouts stimmt Fachgroesse und Ueberschuss liegt im Lager")
+	sim.free()
 	# Zahl im Behaelter ausser Reichweite: Stand wird abgelehnt (strenge Form bleibt)
 	var broken: Dictionary = state.duplicate(true)
 	broken.inventory[BAG].armor_chip_capacity = 0
@@ -265,7 +312,7 @@ func _loss_part() -> void:
 func _panel_part() -> void:
 	var panel: Control = PANEL.new()
 	var heading: String = panel.call("_carried_storage_title", {"capacity": 0, "armor_chip_capacity": 7, "items": {"satellite_chip": 1, "ammo_light": 2}})
-	check(heading.begins_with("Rüstungsfach (3/7)"), "Ueberschrift: Ruestungsfach (belegt/gesamt) -> '%s'" % heading.replace("\n", " | "))
+	check(heading.begins_with("Rüstungsfach (2/7)"), "Ueberschrift: Ruestungsfach (belegt/gesamt) -> '%s'" % heading.replace("\n", " | "))
 	var light_h: String = panel.call("_carried_storage_title", {"capacity": 12, "armor_chip_capacity": 3, "items": {"ammo_rail": 4}})
 	check(light_h.begins_with("Rüstungsfach (3/3)") and light_h.contains("Rucksack · 1/12"), "voll belegtes Fach, Rest im Rucksack -> '%s'" % light_h.replace("\n", " | "))
 	panel.free()

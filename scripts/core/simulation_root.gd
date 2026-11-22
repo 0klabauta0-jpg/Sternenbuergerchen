@@ -31,6 +31,9 @@ func request_personnel_loadout_command(operation: String, payload: Dictionary) -
 			_personnel_loadout_owner.call("set_loadout", String(payload.get("unit_id", "")), Dictionary(payload.get("loadout", {})))
 		"set_slot":
 			_personnel_loadout_owner.call("set_slot", String(payload.get("unit_id", "")), String(payload.get("key", "")), String(payload.get("value", "")))
+	# Der Loadout-Besitzer kennt jetzt die (geladenen) Personen mit ihrer Ruestung: Fachgroesse abgleichen, Ueberschuss ins Lager (M2).
+	if operation in ["restore", "import_fireteam_loadouts", "reconcile_context", "set_loadout", "set_slot"] and _singleplayer_supply_owner != null and _singleplayer_supply_owner.has_method("sync_compartments_after_load"):
+		_singleplayer_supply_owner.call("sync_compartments_after_load")
 
 var _base_personnel_owner: Node
 var _skirmish_economy_owner: RefCounted

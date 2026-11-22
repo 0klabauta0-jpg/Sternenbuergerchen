@@ -43,20 +43,20 @@ static func count_ammo(items: Dictionary) -> int:
 		if AMMO_RULES.is_ammo_item(String(item), rules): count += int(items[item])
 	return count
 
-## Belegte Plaetze im Ruestungsfach: Chips zuerst, dann Magazine, nie mehr als die Fachgroesse.
+## Belegte Magazinplaetze im Ruestungsfach (nie mehr als die Fachgroesse). Chips zaehlen NICHT mit (M2-5): fuer sie gilt
+## unveraendert die Regel von vor M2 (der erste Chip ist frei vom Rucksack, jeder weitere belegt einen Rucksackplatz).
 static func compartment_used(data: Dictionary) -> int:
-	var items: Dictionary = data.get("items", {})
-	return mini(int(data.get("armor_chip_capacity", 0)), count_chips(items) + count_ammo(items))
+	return mini(int(data.get("armor_chip_capacity", 0)), count_ammo(data.get("items", {})))
 
 static func backpack_slots_used(data: Dictionary) -> int:
 	var items: Dictionary = data.get("items", {})
 	var armor_slots := int(data.get("armor_chip_capacity", 0))
 	var used_slots := used(items)
 	if armor_slots > 0:
-		var chips := count_chips(items)
-		used_slots += maxi(0, chips - armor_slots) + int(items.get("c_benit_crate", 0))
-		# Magazine liegen nach den Chips im Fach; nur was dort keinen Platz hat, zaehlt gegen den Rucksack.
-		used_slots -= mini(count_ammo(items), maxi(0, armor_slots - chips))
+		# Chips: wie vor M2 (ein freier Chip, jeder weitere zaehlt gegen den Rucksack) - unabhaengig von den Magazinen.
+		used_slots += maxi(0, count_chips(items) - ARMOR_CHIP_CAPACITY) + int(items.get("c_benit_crate", 0))
+		# Magazine: die ersten `armor_slots` liegen im Fach; nur der Rest zaehlt gegen den Rucksack.
+		used_slots -= mini(count_ammo(items), armor_slots)
 	return used_slots
 
 static func has_space(data: Dictionary, item: String, amount: int) -> bool:

@@ -124,8 +124,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	_sync_compartments()
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -645,14 +644,13 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
-	_sync_compartments()
 	var exported: Dictionary = _export_state_base()
 	# Schulden (K): Restzeit bis zur naechsten Zinsbuchung, nur im Minus (additiver Schluessel; fehlt er, gilt die volle Periode).
 	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
 	return exported
 
 func _export_state_base() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory_view(),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -765,8 +763,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_station_purchase_cache_revision = -1
-	# Stand von vor M2 tragen Fachgroesse 1: hier aus der Ruestung neu bestimmen (Ueberschuss ins Lager, nie den Stand ablehnen).
-	_sync_compartments(true)
+	# Stand von vor M2 tragen Fachgroesse 1: aus der Ruestung neu bestimmen, solange nichts verschoben werden muss. Den Ueberschuss
+	# ins Lager bucht erst `sync_compartments_after_load`, wenn der Loadout-Besitzer die Personen kennt (nie den Stand ablehnen).
+	_sync_compartments(false)
 	return {"ok":true}
 
 func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
@@ -803,7 +802,7 @@ func set_armor_provider(provider: Callable) -> void:
 func _compartment_size_for(armor_id: String) -> int:
 	return maxi(1, INVENTORY.AMMO_RULES.compartment_capacity(armor_id, INVENTORY.ammo_rules()))
 
-## Was beim Verkleinern des Fachs auf `size` ins Lager muss: zuerst Magazine, zuletzt Chips, je Gruppe nach Kennung.
+## Was beim Verkleinern des Fachs auf `size` ins Lager muss: ueberzaehlige Magazine, nach Kennung geordnet.
 ## Ergebnis {item: Anzahl}; leer, wenn alles Platz hat. Veraendert nichts.
 func _compartment_overflow(personal: String, size: int) -> Dictionary:
 	var bag: Dictionary = _inventory[personal]
@@ -817,9 +816,7 @@ func _compartment_overflow(personal: String, size: int) -> Dictionary:
 		if INVENTORY.AMMO_RULES.is_ammo_item(String(item), rules): ammo_ids.append(String(item))
 	ammo_ids.sort()
 	order.append_array(ammo_ids)
-	var chip_ids: Array = INVENTORY.DATA_CHIP_ITEMS.duplicate()
-	chip_ids.sort()
-	order.append_array(chip_ids)
+	# Chips zaehlen nicht gegen die Fachgroesse (M2-5) und wandern nie.
 	for item in order:
 		if left <= 0: break
 		var take := mini(left, int(items.get(item, 0)))
@@ -846,18 +843,33 @@ func _apply_compartment_size(personal: String, size: int, moves: Dictionary, sto
 		storage.items[item] = int(storage.items.get(item, 0)) + int(moves[item])
 	bag["armor_chip_capacity"] = size
 
-## Leitet die Fachgroesse jeder Person aus ihrer getragenen Ruestung ab (Alt-Staende tragen 1).
-## Verkleinern: Passt der Inhalt, wird die Groesse einfach gesetzt. Passt er nicht, wandert der Ueberschuss nur dann ins Basislager,
-## wenn `move_overflow` gesetzt ist (Laden) UND das Lager Platz hat; sonst bleibt die gespeicherte Groesse unveraendert - nichts geht verloren.
+## Sollgroesse des Fachs einer Person laut Ruestung; 0 = keine Auskunft oder kein Fach.
+func _target_compartment_size(id: String) -> int:
+	if not _armor_provider.is_valid() or INVENTORY.ammo_rules().is_empty(): return 0
+	if not (id.begins_with("unit:") and id.ends_with(":backpack")) or not Dictionary(_inventory.get(id, {})).has("armor_chip_capacity"): return 0
+	var armor := String(_armor_provider.call(id.trim_prefix("unit:").trim_suffix(":backpack")))
+	return 0 if armor.is_empty() else _compartment_size_for(armor)
+
+## Nur lesen: die Behaelter so, wie sie nach einem Abgleich ohne Verschieben aussaehen (fuer Abfragen und Speichern).
+func _inventory_view() -> Dictionary:
+	var view: Dictionary = _inventory.duplicate(true)
+	for key in view.keys():
+		var size := _target_compartment_size(String(key))
+		if size > 0 and _compartment_overflow(String(key), size).is_empty(): view[key]["armor_chip_capacity"] = size
+	return view
+
+## Einmal aufrufen, sobald der Loadout-Besitzer die geladenen Personen kennt: Ueberschuss ins Basislager (nur wenn es eines gibt).
+func sync_compartments_after_load() -> void:
+	_sync_compartments(true)
+
+## Leitet die Fachgroesse jeder Person aus ihrer getragenen Ruestung ab (Alt-Staende tragen 1). Aendert Zustand: nur in Befehlen und beim Laden.
+## Passt der Inhalt, wird die Groesse einfach gesetzt. Passt er nicht, wandert der Ueberschuss nur dann ins Basislager, wenn
+## `move_overflow` gesetzt ist UND es dort Platz gibt; sonst (auch ohne Lager) bleibt alles stehen - nichts geht verloren.
 func _sync_compartments(move_overflow: bool = false) -> void:
-	if not _armor_provider.is_valid() or INVENTORY.ammo_rules().is_empty(): return
 	for key in _inventory.keys():
 		var id := String(key)
-		if not (id.begins_with("unit:") and id.ends_with(":backpack")) or not Dictionary(_inventory[id]).has("armor_chip_capacity"): continue
-		var armor := String(_armor_provider.call(id.trim_prefix("unit:").trim_suffix(":backpack")))
-		if armor.is_empty(): continue
-		var size := _compartment_size_for(armor)
-		if size == int(_inventory[id].armor_chip_capacity): continue
+		var size := _target_compartment_size(id)
+		if size == 0 or size == int(_inventory[id].armor_chip_capacity): continue
 		var moves := _compartment_overflow(id, size)
 		if moves.is_empty():
 			_inventory[id]["armor_chip_capacity"] = size

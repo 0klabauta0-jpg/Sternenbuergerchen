@@ -142,7 +142,10 @@ func _run() -> void:
 	check(INV.has_space({"capacity": 0, "armor_chip_capacity": 1, "items": {}}, "satellite_chip", 1), "the armor compartment still takes a data chip")
 	check(not INV.known("ammo_unknown"), "an unknown ammunition id is still unknown")
 	check(INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"satellite_chip": 1, "ammo_light": 12}}), "chip in the compartment plus twelve magazines in the backpack is valid")
-	check(not INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"satellite_chip": 1, "ammo_light": 13}}), "thirteen magazines plus a chip overfill a backpack")
+	# M2-5 (22.11.2026): changed expectation - the chip no longer takes the compartment place of a magazine, so 13 magazines
+	# (1 in the compartment, 12 in the backpack) plus a chip fit; was "overfill" in M1. 14 still overfill.
+	check(INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"satellite_chip": 1, "ammo_light": 13}}), "chip plus thirteen magazines fit (one in the compartment, twelve in the backpack)")
+	check(not INV.valid_container({"capacity": 12, "armor_chip_capacity": 1, "items": {"satellite_chip": 1, "ammo_light": 14}}), "fourteen magazines plus a chip overfill a backpack")
 
 	# --- display names ---
 	var names_ok := true

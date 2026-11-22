@@ -2341,6 +2341,9 @@ func _find_campaign_chip_container(item_id:String,craft_id:String)->String:
 		if int(Dictionary(inventory[id].get("items",{})).get(item_id,0))>0:return id
 	return ""
 
+## Fehlgeschlagene Chip-Aufnahmen, je Abflug einmal protokolliert (die Aufnahme wird bei jeder Beobachtung wiederholt).
+var _chip_pickup_warned:Dictionary={}
+
 func _recover_secured_campaign_chips()->void:
 	if not _campaign_mode:return
 	var campaign:Dictionary=_campaign.get_campaign_snapshot()
@@ -2364,7 +2367,11 @@ func _recover_secured_campaign_chips()->void:
 		var container:String="unit:"+String(lead.call("get_unit_id"))+":backpack"
 		var token:String=String(_departure_token_by_craft.get(craft_id,""))
 		if token.is_empty():continue
-		_commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":String(spec[3]),"amount":1},"chip-pickup:"+token+":"+String(spec[0]),{"campaign_authorized":true})
+		var picked:Dictionary=_commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":String(spec[3]),"amount":1},"chip-pickup:"+token+":"+String(spec[0]),{"campaign_authorized":true})
+		var warn_key:String=token+":"+String(spec[0])
+		if not bool(picked.get("ok",false)) and not _chip_pickup_warned.has(warn_key):
+			_chip_pickup_warned[warn_key]=true
+			push_warning("Chip-Aufnahme fehlgeschlagen (%s, %s): %s"%[String(spec[3]),container,String(picked.get("reason","?"))])
 
 func _all_at_home() -> bool:
 	if not _travel.all_grounded() or _has_active_transit(): return false
