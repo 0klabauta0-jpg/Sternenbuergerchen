@@ -19971,6 +19971,8 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 				_runtime_activation_pending_fireteam_ids[fireteam_id] = true
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "ABSTURZ", Color(1.0, 0.55, 0.35, 1.0), 1.5)
+			# W2: wie beim normalen Absetzen (_advance_hex_drop_unit): Ausruestungs-Modifikatoren der Person einreihen.
+			_enqueue_initial_loadout_effect_for_unit(id)
 		_fireteam_runtime_ui_refresh_frames_remaining = 6
 		_mission_drop_passenger_count = _embarked_unit_ids.size()
 		_store_active_drop_sequence_card()
@@ -19983,6 +19985,9 @@ func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, or
 		var state: String = String(entry.get("state", "unhurt"))
 		if state == "severe" or state == "dead":
 			unit.call("apply_damage", maxi(int(unit.call("get_health")), 1), {"source": "air_crash", "craft_id": craft_id})
+			# W3: Wer beim Absturz stirbt, ist wirklich tot: der Zustand "bleedout" (der, in den ein Verbluteter uebergeht) laesst keine Behandlung zu.
+			if state == "dead" and unit.has_method("advance_bleedout"):
+				unit.call("advance_bleedout")
 		elif state == "light":
 			var max_health: int = int(unit.call("get_max_health_points")) if unit.has_method("get_max_health_points") else 100
 			var loss: int = mini(roundi(float(entry.get("health_loss_fraction", 0.0)) * float(max_health)), int(unit.call("get_health")) - 1)

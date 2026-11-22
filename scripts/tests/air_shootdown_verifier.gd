@@ -359,6 +359,9 @@ func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") 
 		if person != null:
 			person.set_meta("dropship_embarked", true)
 	_check(ids.size() == 2, "zwei Personen im Einsatz (%d)" % ids.size())
+	var loadouts: Dictionary = setup.get("unit_loadout_modifiers_by_unit_id")
+	for id in ids:
+		loadouts[id] = {"crash_test_modifier": 1.0}
 	var simulation: Node = mission.get_node("SimulationRoot")
 	var site_grid: Vector2i = registry.call("world_to_grid", quiet_lz)
 	if mode == "blocked":
@@ -387,6 +390,17 @@ func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") 
 		results[String(order[index])] = {"state": form, "health_loss_fraction": 0.5 if form == "light" else 0.0}
 	var applied: Dictionary = controller.call("apply_air_crash", "craft_a", {"grid": site_grid}, results, order)
 	_check(bool(applied.get("ok", false)), "Absetzen an der Absturzstelle gelingt (%s): %s" % [mode, str(applied)])
+	# W2: Ausruestung wie nach normalem Absetzen (Effekt apply_loadout_modifiers je abgesetzter Person, soweit sie Modifikatoren hat).
+	var loadout_effects: Dictionary = {}
+	for effect in simulation.get("effects_queue"):
+		if typeof(effect) == TYPE_DICTIONARY and String(effect.get("effect_type", "")) == "apply_loadout_modifiers":
+			loadout_effects[String(effect.get("unit_id", ""))] = true
+	var with_modifiers := 0
+	for id in order:
+		if not Dictionary(setup.call("get_unit_loadout_modifiers_dict", id)).is_empty():
+			with_modifiers += 1
+			_check(loadout_effects.has(id), "%s: Ausruestungs-Effekt eingereiht wie beim normalen Absetzen" % id)
+	_check(with_modifiers > 0 or mode == "occupied", "mindestens eine Person hat Ausruestungs-Modifikatoren (Testaufbau): %d" % with_modifiers)
 	var embarked: Dictionary = {}
 	for id in controller.get("_embarked_unit_ids"):
 		embarked[String(id)] = true
@@ -406,6 +420,10 @@ func _controller_case(forms: Array, with_guards: bool, mode: String = "normal") 
 				_check(health == maxi(max_health - roundi(0.5 * max_health), 1) and health >= 1, "%s: verliert die Haelfte der VOLLEN Gesundheit, mindestens 1 bleibt (%d/%d)" % [label, health, max_health])
 			"severe", "dead":
 				_check(health == 0, "%s: liegt am Boden (Gesundheit 0)" % label)
+				if form == "dead":
+					_check(String(person.call("get_vital_state")) == "bleedout" and not bool(person.call("apply_heal", 20, {})), "%s: wirklich tot (Verblutet-Zustand), ein Sanitaeter kann ihn nicht behandeln" % label)
+				else:
+					_check(String(person.call("get_vital_state")) == "down", "%s: schwer verletzt = am Boden, rettbar" % label)
 		_check(bool(person.get_meta("killed_in_crash", false)) == (form == "dead"), "%s: Merkmal 'beim Absturz gestorben' nur beim Toten" % label)
 		_check(bool(person.get_meta("crashed_aboard", false)), "%s: war beim Absturz an Bord (crashed_aboard)" % label)
 	# Schiff verloren: nicht mehr geparkt, kein Heimflug, keine Besatzung mehr aufnehmbar.
