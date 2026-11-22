@@ -65,6 +65,10 @@
       {
         "target_id": "ship_return",
         "text": "Fracht zum Schiff zurückbringen"
+      },
+      {
+        "target_id": "spawn_enemy_defense",
+        "text": "Freiwillig: Ausrüstungskiste der Wache mitnehmen"
       }
     ],
     "title": "Ersten Außenposten sichern"
@@ -127,6 +131,30 @@
         "display_name": "Händler / Tankservice",
         "interaction_id": "trade_service",
         "marker_id": "trade_service"
+      },
+      {
+        "gate_id": "spawn_enemy_defense",
+        "step_id": "spawn_enemy_defense",
+        "required_state": "spawn_enemy_defense_done",
+        "interaction_id": "spawn_enemy_defense",
+        "display_name": "Ausrüstungskiste der Wache",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "duration_seconds": 3.0,
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "marker_id": "spawn_enemy_defense",
+        "requires_step_id": "clear_outpost",
+        "grants_items": [
+          {
+            "item_id": "armor_light",
+            "quantity": 1
+          },
+          {
+            "item_id": "smg",
+            "quantity": 1
+          }
+        ]
       }
     ],
     "flow_steps": [
