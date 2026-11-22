@@ -1034,9 +1034,44 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 	if bool(committed.get("ok",false)):
 		if _campaign_mode and job_id == "outpost_recovery" and operation == "complete_job":
 			_commit("singleplayer_campaign","load_crate",{},"load:"+job_id,{"runtime_authorized":true})
+		if _campaign_mode and operation == "complete_job":
+			# Optional gear crates: only booked after the mandatory cargo, never able to block the completion.
+			var loot_items: Array = _grant_used_interaction_loot(craft_id, scenario_id, _completed_interaction_states(craft_id))
+			if not loot_items.is_empty():
+				result["loot_items"] = loot_items
 	var receipt: Dictionary = committed.get("completion_receipt", {})
 	if not receipt.is_empty():
 		_commit("singleplayer_supply", "apply_reward", {"completion_id": receipt.completion_id}, "reward:" + String(receipt.completion_id), {"completion_receipt": receipt})
+
+## Interaction runtime states of the live mission of this craft ({} when the mission is already gone).
+func _completed_interaction_states(craft_id: String) -> Dictionary:
+	var mission: Node = _flow.call("get_mission_for_craft", craft_id) if _flow != null and _flow.has_method("get_mission_for_craft") else null
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
+	if driver == null or not driver.has_method("get_mission_interaction_runtime_states"):
+		return {}
+	return Dictionary(driver.call("get_mission_interaction_runtime_states"))
+
+## Books the grants_items of every optional interaction point that was completed in the mission into the ship cargo.
+## One receipt per piece, so a repeated delivery books nothing twice. A piece that does not fit is left behind and
+## reported; this never rejects or delays the job completion. Returns [{item_id, quantity, left_behind}].
+func _grant_used_interaction_loot(craft_id: String, scenario_id: String, states: Dictionary) -> Array:
+	var report: Array = []
+	var scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file("res://data/mission_scenarios/" + scenario_id + ".json")
+	if scenario == null:
+		return report
+	for point_variant in Array(Dictionary(scenario.call("get_vertical_slice")).get("interaction_points", [])):
+		var interaction_id: String = String(Dictionary(point_variant).get("interaction_id", ""))
+		if interaction_id.is_empty() or not bool(Dictionary(states.get(interaction_id, {})).get("complete", false)):
+			continue
+		for entry: Dictionary in scenario.call("get_interaction_grants", interaction_id):
+			var booked: int = 0
+			var left_behind: int = 0
+			for piece in range(int(entry.quantity)):
+				var cargo: Dictionary = _campaign_cargo(craft_id, String(entry.item_id), 1, "loot:%s:%s:%s:%d" % [scenario_id, interaction_id, String(entry.item_id), piece])
+				if bool(cargo.get("ok", false)): booked += 1
+				else: left_behind += 1
+			report.append({"item_id": String(entry.item_id), "quantity": booked, "left_behind": left_behind})
+	return report
 
 func _retry_failed_home_gate() -> Dictionary:
 	if _flow == null or _flow.get("_active_mission") != null or _has_active_transit():
