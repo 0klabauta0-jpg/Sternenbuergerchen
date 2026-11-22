@@ -28,12 +28,21 @@ func _test_suppression_builds_on_hits_and_interrupts_waypoint() -> void:
 	var unit_alpha = scene.get_node("UnitAlpha")
 	if unit_alpha != null and unit_alpha.has_method("set_contact_state"):
 		unit_alpha.call("set_contact_state", true, "enemy_01")
-	if unit_alpha != null and unit_alpha.has_method("apply_damage"):
-		unit_alpha.call("apply_damage", 20, {"effect_type": "damage"})
-	for _i in range(6):
-		await process_frame
+	# FT-0b: Unterdrueckung kommt nicht mehr aus Lebenspunkt-Differenzen, sondern aus aufgeloesten Schuessen auf die
+	# Gruppe (Fahrer) und laeuft in Spiel-Ticks. Der Test fuettert Treffer und taktet den Fahrer selbst.
+	var driver = scene.get_node("CombatLoopDriver")
+	scene.get_node("SimulationRoot").set_physics_process(false)
+	scene.get_node("SimulationRoot").set_process(false)
+	var tick: int = 30000
+	for _i in range(60):
+		driver.call("note_suppression_shot", unit_alpha, 18, true)
+		tick += 30
+		driver.call("_advance_suppression", tick)
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(driver.call("get_suppression_level_for_unit", unit_alpha)) >= 3:
+			break
 	var suppression: Dictionary = controller.call("get_fireteam_suppression_snapshot", "blue")
-	_assert(bool(suppression.get("is_suppressed", false)), "Blue fireteam enters suppressed state after taking damage in contact")
+	_assert(bool(suppression.get("is_suppressed", false)), "Blue fireteam enters suppressed state after taking resolved shots in contact")
 	var plan_status: String = _get_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue")
 	_assert(plan_status == "interrupted", "Active waypoint is marked interrupted while fireteam is suppressed")
 	scene.queue_free()
