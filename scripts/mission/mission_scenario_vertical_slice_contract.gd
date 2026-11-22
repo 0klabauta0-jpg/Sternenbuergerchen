@@ -176,6 +176,9 @@ static func _normalize_flow_steps(value: Variant) -> Array:
 		for optional_key in ["blocks_cargo_until_complete", "enemy_group_id", "operator_team_id", "requires_step_id"]:
 			if step.has(optional_key):
 				normalized[optional_key] = step.get(optional_key)
+		# Zusatz zur einen enemy_group_id: Liste von Gruppen, die ALLE ausgeschaltet sein muessen (fehlt sie, gilt das alte Verhalten).
+		if step.has("enemy_group_ids"):
+			normalized["enemy_group_ids"] = Array(_normalize_string_array(step.get("enemy_group_ids", [])))
 		result.append(normalized)
 	return result
 
