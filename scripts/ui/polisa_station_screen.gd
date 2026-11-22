@@ -179,12 +179,13 @@ func refresh(snapshot: Dictionary) -> void:
 		icon.tooltip_text = "Rüstung / 2D-Illustration" if armor_image != null else ""
 		icon.visible = icon.texture != null
 		details.add_child(icon)
-		var stock := int(Dictionary(snapshot.get("stock", {})).get(offer_id, 0))
+		var unlimited := bool(offer.get("unlimited", false))
+		var stock := 1000000 if unlimited else int(Dictionary(snapshot.get("stock", {})).get(offer_id, 0))
 		var title := _label(details, String(offer.get("name", offer.item_id)).replace("Ruestung", "Rüstung"))
 		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		SKIN.label(title, 18)
 		_label(details, "%d Cr" % int(offer.unit_price))
-		_label(details, "Bestand %d / Schiffslager %d" % [stock, _cargo(item)])
+		_label(details, ("Unbegrenzt / Schiffslager %d" % _cargo(item)) if unlimited else ("Bestand %d / Schiffslager %d" % [stock, _cargo(item)]))
 		var actions := HBoxContainer.new()
 		actions.add_theme_constant_override("separation", 8)
 		details.add_child(actions)
@@ -194,7 +195,7 @@ func refresh(snapshot: Dictionary) -> void:
 		if ship: buy_payload["delivery_mode"] = _delivery_mode
 		var buy := _button(actions, "Erwerbserlaubnis fehlt" if locked else ("Auf Polisa übernehmen" if ship and _delivery_mode == "local" else "Kaufen"), _request.bind("station_buy_ship" if ship else "buy", buy_payload), locked or stock < 1 or int(snapshot.get("credits", 0)) < int(offer.unit_price) or (ship and (String(snapshot.get("free_home_pad", "")).is_empty() or (_delivery_mode == "local" and not bool(snapshot.get("local_pickup_available", false))))))
 		buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if _page in ["infantry", "armor"]:
+		if _page in ["infantry", "armor"] and not item.begins_with("ammo_"):
 			var slot := "armor" if item.begins_with("armor_") else ("backpack" if item == "backpack" else "weapon_1")
 			var equip := _button(actions, "Ausrüsten", _request.bind("inventory_equip", {"craft_id":String(snapshot.get("craft_id", "")),"unit_id":_person,"item_id":item,"slot":slot,"source_container_id":"craft:" + String(snapshot.get("craft_id", ""))}), not _can_equip(item))
 			equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
