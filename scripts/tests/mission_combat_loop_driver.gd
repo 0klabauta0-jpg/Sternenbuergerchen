@@ -105,12 +105,14 @@ signal combat_resolved(mission_result: Dictionary)
 @export var enemy_advance_speed_factor: float = 0.3
 @export var enemy_engage_distance: float = 200.0
 @export var enemy_reposition_enabled: bool = true
-@export var enemy_reposition_cooldown_seconds: float = 4.0
+# Wartezeiten der Gegnerbewegung zaehlen in Spiel-Ticks (Physik-Tick, normal 60 je Sekunde), nicht in Wanduhr-ms.
+# 240 Ticks = 4,0 s, 120 Ticks = 2,0 s bei normalem Tempo (vorher enemy_*_cooldown_seconds).
+@export var enemy_reposition_cooldown_ticks: int = 240
 @export var enemy_reposition_min_distance: float = 30.0
 @export var enemy_reposition_max_distance: float = 60.0
 @export var enemy_reposition_move_speed_factor: float = 0.45
 @export var enemy_limbo_behavior_smoke_enabled: bool = true
-@export var enemy_limbo_cover_cooldown_seconds: float = 2.0
+@export var enemy_limbo_cover_cooldown_ticks: int = 120
 @export var enemy_limbo_cover_min_cover_score: int = 20
 @export var enemy_limbo_cover_search_radius: float = 160.0
 @export var enemy_limbo_cover_min_distance: float = 16.0
@@ -145,7 +147,7 @@ var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
 var _down_state_started_msec_by_unit_id: Dictionary = {}
 var _was_downed_unit_ids: Dictionary = {}
-var _enemy_reposition_ready_at_msec: Dictionary = {}
+var _enemy_reposition_ready_at_tick: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
 var _last_contact: Dictionary = {}
@@ -183,7 +185,7 @@ var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
 var _friendly_cover_ready_at_msec: Dictionary = {}
-var _enemy_limbo_cover_ready_at_msec: Dictionary = {}
+var _enemy_limbo_cover_ready_at_tick: Dictionary = {}
 var _enemy_limbo_behavior_decisions: Dictionary = {}
 var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
@@ -1290,7 +1292,7 @@ func get_enemy_limbo_behavior_snapshot() -> Dictionary:
 		return {}
 	var snapshot: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("get_behavior_tree_snapshot")).duplicate(true)
 	snapshot["enabled"] = enemy_limbo_behavior_smoke_enabled
-	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_msec.size()
+	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_tick.size()
 	snapshot["decision_count"] = _enemy_limbo_behavior_decisions.size()
 	snapshot["decisions"] = _build_enemy_limbo_behavior_decision_snapshot()
 	return snapshot
@@ -5348,8 +5350,7 @@ func _enemy_limbo_has_patrol(unit_id: String) -> bool:
 func _enemy_limbo_should_seek_cover(enemy, has_contact: bool, unit_id: String) -> bool:
 	if not has_contact or enemy == null or not (enemy is Node2D):
 		return false
-	var now_msec: int = Time.get_ticks_msec()
-	if int(_enemy_limbo_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+	if _enemy_limbo_cover_on_cooldown(unit_id):
 		return false
 	if _get_enemy_limbo_cover_score(enemy) >= enemy_limbo_cover_min_cover_score:
 		return false
@@ -5375,7 +5376,7 @@ func _try_enqueue_enemy_limbo_cover_move(simulation_root: Node, enemy) -> bool:
 		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER
 	))):
 		return false
-	_enemy_limbo_cover_ready_at_msec[unit_id] = Time.get_ticks_msec() + int(enemy_limbo_cover_cooldown_seconds * 1000.0)
+	_enemy_limbo_cover_ready_at_tick[unit_id] = _current_tick + maxi(enemy_limbo_cover_cooldown_ticks, 0)
 	if _enemy_patrol_paths_by_unit_id.has(unit_id):
 		_enemy_patrol_contact_locked[unit_id] = true
 	return true
@@ -5521,8 +5522,7 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 		return
 
 	var unit_id: String = String(unit.call("get_unit_id"))
-	var now_msec: int = Time.get_ticks_msec()
-	if int(_enemy_reposition_ready_at_msec.get(unit_id, 0)) > now_msec:
+	if _enemy_reposition_on_cooldown(unit_id):
 		return
 
 	var simulation_root = get_node_or_null(simulation_root_path)
@@ -5538,7 +5538,21 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY
 	))):
 		return
-	_enemy_reposition_ready_at_msec[unit_id] = now_msec + int(round(enemy_reposition_cooldown_seconds * 1000.0))
+	_enemy_reposition_ready_at_tick[unit_id] = _current_tick + maxi(enemy_reposition_cooldown_ticks, 0)
+
+
+# Wartezeit laeuft nur mit Spiel-Ticks. Ein Eintrag, der weiter in der Zukunft liegt als die
+# Abkuehlzeit selbst, stammt aus einem frueheren Tickzaehler (Neustart der Simulation) und gilt als abgelaufen.
+func _tick_cooldown_active(ready_at_tick: int, cooldown_ticks: int) -> bool:
+	return ready_at_tick > _current_tick and ready_at_tick - _current_tick <= maxi(cooldown_ticks, 0)
+
+
+func _enemy_reposition_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_enemy_reposition_ready_at_tick.get(unit_id, 0)), enemy_reposition_cooldown_ticks)
+
+
+func _enemy_limbo_cover_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_enemy_limbo_cover_ready_at_tick.get(unit_id, 0)), enemy_limbo_cover_cooldown_ticks)
 
 
 func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
