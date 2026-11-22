@@ -17,8 +17,7 @@
       "team_id": "team_bravo",
       "spawn_marker_id": "spawn_enemy_defense",
       "enemy_ids": [
-        "outpost_chip_recovery_guard_01",
-        "outpost_chip_recovery_guard_02"
+        "outpost_chip_recovery_guard_01"
       ],
       "tactics": {
         "profile_id": "defensive_cover",
@@ -45,6 +44,41 @@
         "air_asset_risk_profile": "none",
         "communication_intensity": "low",
         "weapon_id": "smg"
+      }
+    },
+    {
+      "group_id": "outpost_guards_rocket",
+      "display_name": "Außenpostenwache (Raketenwerfer)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": [
+        "outpost_chip_recovery_guard_02"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": [
+          "sidearm",
+          "smg"
+        ],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "anti_armor",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "anti_armor",
+        "anti_armor_threat": true,
+        "air_asset_risk_profile": "watch_warning",
+        "communication_intensity": "low",
+        "weapon_id": "rocket_launcher"
       }
     }
   ],
