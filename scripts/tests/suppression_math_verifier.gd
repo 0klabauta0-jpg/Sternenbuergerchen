@@ -33,6 +33,13 @@ func _run() -> void:
 	var rules: Dictionary = S.load_rules()
 	check(not rules.is_empty() and rules.has("levels") and Array(rules.levels).size() == 3, "shipped rules file loads with three levels")
 
+	# --- 0. step_ticks (FT-0b): Schrittlaenge in Spiel-Ticks ---
+	check(S.step_ticks(rules) == 30, "shipped rules: one suppression step is 30 game ticks")
+	check(S.step_ticks({}) == 30, "step_ticks default is 30")
+	check(S.step_ticks({"step_ticks": 0}) == 1, "step_ticks has a minimum of 1 (0 -> 1)")
+	check(S.step_ticks({"step_ticks": -7}) == 1, "step_ticks has a minimum of 1 (negative -> 1)")
+	check(S.step_ticks({"step_ticks": 45}) == 45, "step_ticks takes a configured value")
+
 	# --- 1. shot_gain ---
 	check(near(S.shot_gain(rules, 18.0, true), 1.0), "pistol hit (18) gains 1.0")
 	check(near(S.shot_gain(rules, 40.0, true), 1.7333), "rifle hit (40) gains about 1.733")

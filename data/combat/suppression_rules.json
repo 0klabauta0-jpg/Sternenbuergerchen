@@ -1,4 +1,5 @@
 {
+	"step_ticks": 30,
 	"gain_hit_base": 0.4,
 	"gain_hit_per_damage": 0.0333333,
 	"gain_miss_factor": 0.5,

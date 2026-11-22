@@ -4,12 +4,14 @@ extends RefCounted
 ## so that a missing file or field never crashes. Levels run 0..3 (0 = not suppressed).
 ## Level change: climb at value >= threshold of a level; a level already held is kept down to
 ## hysteresis x its threshold. The result is the highest level that is reached or held.
-## FT-0a: nothing in the game calls this yet.
+## Time is counted in game ticks: one suppression step every step_ticks ticks (30 = 0.5 s at 60 ticks/s).
+## Wired into the fight by suppression_tracker.gd, the combat loop driver, the tactical controller and SimulationRoot (FT-0b).
 
 const RULES_PATH := "res://data/combat/suppression_rules.json"
 const MAX_LEVEL := 3
 
 const DEFAULTS := {
+	"step_ticks": 30.0,
 	"gain_hit_base": 0.4,
 	"gain_hit_per_damage": 0.0333333,
 	"gain_miss_factor": 0.5,
@@ -81,6 +83,10 @@ static func load_rules(path: String = RULES_PATH) -> Dictionary:
 		levels.append(entry)
 	result["levels"] = levels
 	return result
+
+## Ticks between two suppression steps (at least 1).
+static func step_ticks(rules: Dictionary) -> int:
+	return maxi(1, roundi(_num(rules, "step_ticks")))
 
 static func shot_gain(rules: Dictionary, damage: float, hit: bool) -> float:
 	var gain: float = _num(rules, "gain_hit_base") + maxf(0.0, damage) * _num(rules, "gain_hit_per_damage")
