@@ -106,6 +106,9 @@ func _check(ok: bool, label: String) -> void:
 
 
 func _run() -> void:
+	# Gruppe 1: Takt-Massstab 1 (Grundschritte wie in der Waffentabelle) und Reaktion 20 Ticks je Initiativeinheit, damit die
+	# Ablauftests kurze, ueberschaubare Abstaende haben. Gruppe 2 (unten) rechnet mit den echten Werten aus der Datendatei.
+	CADENCE.override_config_for_test({"cadence_scale": 1.0, "reaction_initiative_ticks": 20})
 	_test_period_steps()
 	_test_is_due()
 	_test_duel_both_sides_shoot()
@@ -124,6 +127,11 @@ func _run() -> void:
 	_test_respawn_clears_warm_state()
 	_test_reaction_time_in_detection_delay()
 	_test_initiative_duel_balance_and_repeatability()
+	CADENCE.reset_config()
+	_test_default_config_values()
+	_test_default_cadence_over_600_steps()
+	_test_default_detection_and_window()
+	_test_default_duel_600_steps()
 	await process_frame
 	print("COMBAT_CADENCE passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -673,3 +681,82 @@ func _test_initiative_duel_balance_and_repeatability() -> void:
 	_check(_shots_by(a, "own") == 38 and _shots_by(a, "enemy") == 31, "INI-5: 0,72 schiesst 38, 0,40 schiesst 31 Mal in 100 Schritten (%d / %d)" % [_shots_by(a, "own"), _shots_by(a, "enemy")])
 	a.scope.free()
 	b.scope.free()
+
+
+# ---- Runde 2, Teil B mit Taktfaktor 8 (Werte aus data/combat/combat_cadence.json) ------------------
+
+func _test_default_config_values() -> void:
+	_check(CADENCE.period_milli(9, 0.5) == 24000, "Pistole 0,50 -> 24 Schritte = 72 Ticks = 1,2 s")
+	_check(CADENCE.period_milli(9, 0.4) == 25440 and CADENCE.period_milli(9, 0.55) == 23280 and CADENCE.period_milli(9, 0.72) == 20832, "Pistole: 0,40 -> 25,44; 0,55 -> 23,28; 0,72 -> 20,832")
+	_check(CADENCE.period_milli(6, 0.5) == 16000, "MP 0,50 -> 16 Schritte = 0,8 s")
+	_check(CADENCE.period_milli(26, 0.5) == 72000 and CADENCE.period_milli(26, 0.4) == 76320 and CADENCE.period_milli(26, 0.72) == 62496, "Rakete (9 Grundschritte): 0,50 -> 72; 0,40 -> 76,32; 0,72 -> 62,496")
+	_check(CADENCE.period_milli(0, 0.5) == 1000, "Waffe mit 0 Ticks bleibt bei einem Schritt")
+	_check(CADENCE.period_steps(9, 0.4) == 26 and CADENCE.period_steps(9, 0.72) == 21 and CADENCE.period_steps(9, 0.5) == 24, "aufgerundete Schritte fuer die Sperre: 26, 21, 24")
+	var expected_reaction := {0.0: 45, 0.25: 23, 0.4: 9, 0.475: 2, 0.5: 0, 0.525: -2, 0.55: -5, 0.72: -20, 1.0: -45}
+	for key in expected_reaction.keys():
+		_check(CADENCE.reaction_ticks(float(key)) == int(expected_reaction[key]), "Reaktionszuschlag (90 Ticks) bei Initiative %s = %d (%d)" % [str(key), int(expected_reaction[key]), CADENCE.reaction_ticks(float(key))])
+	# Datei fehlt oder Feld fehlt: Vorgabewerte, kein Absturz.
+	CADENCE.override_config_for_test({})
+	_check(CADENCE.period_milli(9, 0.5) == 24000, "ohne Angaben gelten dieselben Vorgabewerte")
+	CADENCE.override_config_for_test({"cadence_scale": 2.0})
+	_check(CADENCE.period_milli(9, 0.5) == 6000 and CADENCE.reaction_ticks(0.4) == 9, "ein geaendertes Feld wirkt, die anderen bleiben")
+	CADENCE.reset_config()
+	_check(CADENCE.period_milli(9, 0.5) == 24000, "reset_config liest wieder die Datei")
+
+
+func _test_default_cadence_over_600_steps() -> void:
+	# Faellige Schritte 1..600 = floor(600 / p), selbst nachgerechnet.
+	var expected := {"9:0.4": 23, "9:0.5": 25, "9:0.55": 25, "9:0.72": 28, "6:0.5": 37, "26:0.4": 7, "26:0.5": 8, "26:0.55": 8, "26:0.72": 9}
+	for key in expected.keys():
+		var parts: PackedStringArray = String(key).split(":")
+		var period: int = CADENCE.period_milli(int(parts[0]), float(parts[1]))
+		var count := 0
+		var last := 0
+		var min_gap := 100000
+		var max_gap := 0
+		for step in range(1, 601):
+			if CADENCE.is_due(step, period):
+				count += 1
+				if last > 0:
+					min_gap = mini(min_gap, step - last)
+					max_gap = maxi(max_gap, step - last)
+				last = step
+		_check(count == int(expected[key]), "Faellige Schritte in 600 (Waffe %s Ticks, Initiative %s): %d (%d)" % [parts[0], parts[1], int(expected[key]), count])
+		_check(count < 2 or max_gap - min_gap <= 1, "Abstaende gleichmaessig (%d bis %d Schritte)" % [min_gap, max_gap])
+	_check(CADENCE.steps_until_due(24, 24000) == 0 and CADENCE.steps_until_due(25, 24000) == 23 and CADENCE.steps_until_due(47, 24000) == 1, "steps_until_due bei 24,000")
+
+
+## Erkennung mit Reaktionszeit 90 und Fenster vor der Faelligkeit (laengste Erkennung bei Initiative 0: 15 + 45 = 60 Ticks = 20 Schritte).
+func _test_default_detection_and_window() -> void:
+	var cases: Array = [
+		{"id": "c1", "initiative": 0.4, "awareness": 0.4, "expected": 18},
+		{"id": "c2", "initiative": 0.72, "awareness": 0.4, "expected": 0},
+		{"id": "c3", "initiative": 0.9, "awareness": 1.0, "expected": 0},
+		{"id": "c4", "initiative": 0.4, "awareness": 1.0, "expected": 9},
+		{"id": "c5", "initiative": 0.5, "awareness": 0.4, "expected": 9},
+		{"id": "c6", "initiative": -1.0, "awareness": 0.4, "expected": 9},
+		{"id": "c7", "initiative": 0.0, "awareness": 0.0, "expected": 60},
+		{"id": "c8", "initiative": 1.0, "awareness": 0.0, "expected": 0},
+	]
+	var specs: Array = [{"id": "enemy", "team": "red", "grid": CENTER, "facing": 0, "weapon": "none"}]
+	for index in range(cases.size()):
+		specs.append({"id": cases[index].id, "team": "blue", "grid": CENTER + HEX.DIRECTIONS[index % 6] * (1 + index / 6), "facing": 0, "weapon": "pistol",
+			"initiative": cases[index].initiative, "awareness": cases[index].awareness})
+	var f := _rig(specs)
+	for entry in cases:
+		var delay: int = f.driver._get_detection_delay_ticks(f.units[entry.id])
+		_check(delay == int(entry.expected), "Erkennung: Initiative %s, Aufmerksamkeit %s -> %d Ticks (%d)" % [str(entry.initiative), str(entry.awareness), int(entry.expected), delay])
+	_check(f.driver._get_detection_window_steps(f.units["c7"]) == 20, "Fenster bei Initiative 0: 60 Ticks = 20 Schritte (%d)" % f.driver._get_detection_window_steps(f.units["c7"]))
+	_check(f.driver._get_detection_window_steps(f.units["c5"]) == 5, "Fenster bei Initiative 0,5: 15 Ticks = 5 Schritte (%d)" % f.driver._get_detection_window_steps(f.units["c5"]))
+	f.scope.free()
+
+
+## Pistole 0,72 gegen Pistole 0,40 ueber 600 Schritte: floor(600 / 20,832) = 28 gegen floor(600 / 25,44) = 23 Schuesse.
+func _test_default_duel_600_steps() -> void:
+	var specs: Array = _line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "pistol")
+	specs[0]["initiative"] = 0.72
+	specs[1]["initiative"] = 0.4
+	var f := _rig(specs, 5)
+	_run_ticks(f, 1800)
+	_check(_shots_by(f, "own") == 28 and _shots_by(f, "enemy") == 23, "Duell 600 Schritte: 0,72 -> 28 Schuesse, 0,40 -> 23 Schuesse (%d / %d)" % [_shots_by(f, "own"), _shots_by(f, "enemy")])
+	f.scope.free()

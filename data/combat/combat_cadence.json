@@ -1,0 +1,6 @@
+{
+	"cadence_scale": 8.0,
+	"initiative_base": 1.30,
+	"initiative_weight": 0.6,
+	"reaction_initiative_ticks": 90
+}
