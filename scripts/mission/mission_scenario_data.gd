@@ -200,11 +200,26 @@ func validate(referenced_map = null) -> Dictionary:
 		var slice_validation: Dictionary = SLICE_CONTRACT_SCRIPT.validate_slice(SLICE_CONTRACT_SCRIPT.normalize_slice(vertical_slice), terrain_map_data)
 		for issue in slice_validation.errors:
 			errors.append(String(issue))
+		_validate_flow_step_group_lists(errors)
 
 	return {
 		"valid": errors.is_empty(),
 		"errors": errors,
 	}
+
+
+## Ein Schritt mit enemy_group_ids darf nur Gruppen nennen, die das Szenario auch hat.
+func _validate_flow_step_group_lists(errors: PackedStringArray) -> void:
+	var known: PackedStringArray = PackedStringArray()
+	for group_variant in enemy_groups:
+		known.append(String(Dictionary(group_variant).get("group_id", "")).strip_edges())
+	var slice: Dictionary = SLICE_CONTRACT_SCRIPT.normalize_slice(vertical_slice)
+	for step_variant in Array(slice.get("flow_steps", [])):
+		var step: Dictionary = Dictionary(step_variant)
+		for group_id_variant in Array(step.get("enemy_group_ids", [])):
+			var group_id: String = String(group_id_variant)
+			if not known.has(group_id):
+				errors.append("vertical_slice.flow_steps[%s].enemy_group_ids has unknown group: %s" % [String(step.get("step_id", "")), group_id])
 
 
 func get_source_path() -> String:
