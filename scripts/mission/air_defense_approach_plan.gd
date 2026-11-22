@@ -206,6 +206,28 @@ static func sanitize_path(approach_path: String) -> String:
 	return path if not path.is_empty() else DEFAULT_APPROACH_PATH
 
 
+## Arrival mode per mission craft (task LB): its own axis next to path and style, no fourth path.
+## "land" = as before (touch down, troop leaves); "circle" = stays airborne over the landing zone.
+const ARRIVAL_LAND := "land"
+const ARRIVAL_CIRCLE := "circle"
+const ARRIVAL_MODES: PackedStringArray = ["land", "circle"]
+const DEFAULT_ARRIVAL_MODE := ARRIVAL_LAND
+const ARRIVAL_LABELS := {"land": "Landen", "circle": "Kreisen"}
+const ARRIVAL_CIRCLE_HINT := "Das Schiff landet nicht, sondern bleibt über der Landezone in der Luft. Der Trupp bleibt an Bord, bis du landen lässt."
+
+
+## Known arrival mode or "" for an unknown value (commands reject "", stored state falls back).
+static func normalize_arrival_mode(arrival_mode: String) -> String:
+	var mode: String = arrival_mode.strip_edges().to_lower()
+	return mode if ARRIVAL_MODES.has(mode) else ""
+
+
+## Unknown or empty mode behaves as "land".
+static func sanitize_arrival_mode(arrival_mode: String) -> String:
+	var mode: String = normalize_arrival_mode(arrival_mode)
+	return mode if not mode.is_empty() else DEFAULT_ARRIVAL_MODE
+
+
 ## Data of one path: {} for normal, an unknown path and a missing data block (= behaves like normal).
 ## rules: optional replacement of the whole data file (tests); default AD.definition().
 static func path_rules(approach_path: String, rules: Dictionary = {}) -> Dictionary:
@@ -357,7 +379,7 @@ static func path_tooltip(approach_path: String, pilot_skill: float = -1.0, rules
 		return "%s: ohne Wirkung (keine Daten)." % label
 	var parts: Array = []
 	if data.has("exposure_factor"):
-		parts.append("kürzer im Feuer (je Stellung nur %s %% der Zeit in deren Waffenreichweite; bei sehr kurzem Wirkbereich kaum spürbar)" % _percent_text(float(data.exposure_factor)))
+		parts.append("kürzer im Feuer (je Stellung nur %s %% der Zeit in deren Waffenreichweite). Hat eine Stellung nur ein oder zwei Feuergelegenheiten, bringt Steil nichts" % _percent_text(float(data.exposure_factor)))
 	if bool(data.get("terrain_masking", false)):
 		parts.append("Gelände kann die Flugabwehr verdecken")
 	var text: String = "%s: %s." % [label, ", ".join(parts)] if not parts.is_empty() else "%s." % label

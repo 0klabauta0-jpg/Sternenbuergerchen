@@ -97,8 +97,8 @@ sich jede Art wie "Normal". Regelkern: `scripts/mission/air_defense_approach_pla
   "Flugabwehr: 2 Treffer. Unfall im Steilflug: Rumpf -30 %, jetzt 55 %."
 - Wirkung auf GM02 (Zaehlung der Feuergelegenheiten ohne Wuerfel, alle Landezellen im Umkreis 30 der Stellungen x
   vier Anflugwinkel, `approach_profile_rules_verifier` (c3)): Steil 0,6 nimmt dem Hagel rund 47 %, dem Donnerkeil
-  rund 20 % (zwei Raketen, Nachladen 3); bei 0,5 sind es rund 63 % und 31 %. Tief verdeckt auf GM02 nur in wenigen
-  Anfluegen (rund 4 % der Kombinationen eine Stellung in Waffenreichweite).
+  rund 20 % (zwei Raketen, Nachladen 3); bei 0,5 sind es rund 63 % und 31 %. Tief verdeckt auf GM02 eine
+  Stellung ganz in etwa 4 % der Anfluege; wenigstens einige Salven verdeckt sind es in etwa 57 %.
 - Die Hoehenstufen der Karte gelten als Verdecker, auch wo ein Feld nicht `blocks_los` traegt (Huegel haben das
   in den Karten nicht gesetzt).
 

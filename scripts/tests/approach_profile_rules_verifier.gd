@@ -441,6 +441,6 @@ func _repeat_and_data() -> void:
 		check(digest(plain) == digest(without_block), "(i) without the data block %s behaves exactly like normal" % path)
 	var steil_tip: String = PLAN.path_tooltip("steil", 0.5)
 	check(steil_tip.contains("15 %") and steil_tip.contains("60 %") and PLAN.path_tooltip("tief", 0.5).contains("25 %"), "(i) the tooltips take their numbers from the data: " + steil_tip)
-	check(steil_tip.contains("Waffenreichweite") and steil_tip.contains("kurzem Wirkbereich"), "(i) the Steil tooltip says the cut counts in weapon range and is hardly felt in a very short effective area: " + steil_tip)
+	check(steil_tip.contains("Waffenreichweite") and steil_tip.contains("Hat eine Stellung nur ein oder zwei Feuergelegenheiten, bringt Steil nichts") and not steil_tip.contains("kaum spürbar"), "(i) the Steil tooltip says the cut counts in weapon range and that Steil brings nothing for one or two firing chances: " + steil_tip)
 	var changed_tip: String = PLAN.path_tooltip("steil", 0.5, rules)
 	check(changed_tip.contains("20 %") and changed_tip.contains("30 %") and not changed_tip.contains("15 %") and not changed_tip.contains("60 %"), "(i) and follow a changed block: " + changed_tip)
