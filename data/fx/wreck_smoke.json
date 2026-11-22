@@ -1,6 +1,7 @@
 {
   "version": 1,
   "unit_note": "Laengen in Welteinheiten; 1.0 = ein Hexfeld breit. Steighoehe ca. speed x lifetime. size_* = Kantenlaenge eines Rauchteilchens; size_end ist die Groesse am Ende der Lebensdauer. Farben als Hex; Alpha 0..1.",
+  "fallback_height": 1.2,
   "presets": {
     "grey": {
       "amount": 24,

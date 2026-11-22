@@ -41,8 +41,7 @@ static func build(parent: Node3D, presentation: Dictionary) -> Dictionary:
 		prop.scale=Vector3.ONE*float(spec.get("scale",1.0))
 		prop.rotation_degrees.y=float(spec.get("rotation_degrees",0.0))
 		blockers.append(mesh_bounds(prop,root))
-		if String(spec.get("asset",""))=="sat_wreck":
-			var smoke: Node3D=load("res://scripts/terrain/wreck_smoke.gd").build("grey",load("res://scripts/terrain/wreck_smoke.gd").load_rules()); if smoke!=null: smoke.position=prop.position+Vector3(0,.4,0); root.add_child(smoke)
+		if String(spec.get("asset",""))=="sat_wreck": load("res://scripts/terrain/wreck_smoke.gd").attach_to(prop,root,"grey")
 	for spec: Dictionary in Array(presentation.get("pads",[])):
 		var pad: Node3D=PAD.new(); root.add_child(pad)
 		var center: Array=spec.get("center",[0,0]); var size: Array=spec.get("size",[5,4])
