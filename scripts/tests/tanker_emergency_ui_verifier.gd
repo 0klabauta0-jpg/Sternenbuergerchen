@@ -219,17 +219,30 @@ func _scenario_cancel_texts() -> void:
 # --- f) zu wenig Geld -----------------------------------------------------------------------------------------------------
 
 func _scenario_too_poor() -> void:
+	# Abschnitt K (22.11.2026): zu wenig Credits sperrt den Knopf nicht mehr; das Angebot kommt mit der Zusatzzeile "Auf Kredit".
+	var credit_session: Dictionary = await _ui_orbit_session()
+	var credit_supply: Object = credit_session.supply
+	credit_supply.charge_credits_capped(credit_supply.get_credits() - 100)
+	var credit_panel: Node = _panel(credit_session)
+	var credit_before: Dictionary = _sync(credit_session)
+	_check(bool(credit_before.call_visible) and not bool(credit_before.call_disabled), "f: mit 100 Cr (Preis 280) ist der Knopf nicht grau (Kredit): " + str(credit_before))
+	_press(credit_panel, "TankerCall")
+	var credit_offer: Dictionary = _sync(credit_session)
+	_check(bool(credit_offer.offer_visible) and String(credit_offer.offer).contains("Auf Kredit: Kontostand danach -180 Cr. Zinsen 5 % alle 10 Minuten."), "f: das Angebot zeigt die Zusatzzeile 'Auf Kredit: Kontostand danach -180 Cr. Zinsen 5 % alle 10 Minuten.': " + String(credit_offer.offer))
+	_check(credit_supply.get_credits() == 100 and _orders_count(credit_session) == 0, "f: das Angebot allein bucht nichts")
+	await _ui_close(credit_session)
+	# Der Kreditrahmen ist ausgeschoepft: der Knopf ist grau mit dem Satz aus E3.
 	var s: Dictionary = await _ui_orbit_session()
 	var supply: Object = s.supply
-	supply.charge_credits_capped(supply.get_credits() - 100)
+	supply.charge_rescue_fee(supply.get_credits() + 1221)
 	var revision: int = supply.get_revision()
 	var panel: Node = _panel(s)
 	var poor: Dictionary = _sync(s)
-	_check(bool(poor.call_visible) and bool(poor.call_disabled), "f: bei zu wenig Geld ist der Knopf sichtbar, aber ausgegraut: " + str(poor))
-	_check(String(poor.reason).contains("Zu wenig Credits für den Tankerruf (280 Cr nötig).") and String(poor.reason).contains("Guthaben: 100 Cr."), "f: der Satz nennt Preis und Guthaben: " + String(poor.reason))
+	_check(bool(poor.call_visible) and bool(poor.call_disabled), "f: bei ausgeschoepftem Kreditrahmen ist der Knopf sichtbar, aber ausgegraut: " + str(poor))
+	_check(String(poor.reason).contains("Kreditrahmen ausgeschöpft: Der Nottankdienst liefert nicht mehr."), "f: der Satz nennt den Kreditrahmen: " + String(poor.reason))
 	_press(panel, "TankerCall")
 	var after: Dictionary = _sync(s)
-	_check(not bool(after.offer_visible) and supply.get_credits() == 100 and supply.get_revision() == revision and _orders_count(s) == 0, "f: ein Klick auf den grauen Knopf oeffnet nichts und bucht nichts")
+	_check(not bool(after.offer_visible) and supply.get_credits() == -1221 and supply.get_revision() == revision and _orders_count(s) == 0, "f: ein Klick auf den grauen Knopf oeffnet nichts und bucht nichts")
 	await _ui_close(s)
 
 # --- g, h) an der Schiffskarte des Ortes: dieselbe Wahrheit, Abflug bei offenem Auftrag -----------------------------

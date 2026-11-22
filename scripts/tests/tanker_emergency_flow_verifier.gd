@@ -166,13 +166,15 @@ func _scenario_rejections() -> void:
 	_check(not covered_order.get("ok", true) and String(covered_order.get("reason", "")) == "no_fuel_problem" and covered.supply.get_credits() == 500 and is_equal_approx(covered.supply.get_fuel(covered.craft_id), 49.0), "2: der Ruf mit gedeckter Etappe bucht nichts, Tank und Guthaben unveraendert")
 	await _close(covered)
 	var poor: Dictionary = await _orbit_session()
-	poor.supply.charge_credits_capped(poor.supply.get_credits() - 100)
+	# Abschnitt K (22.11.2026): zu wenig Credits ist kein Ablehnungsgrund mehr (Kredit, siehe campaign_debt_verifier); abgelehnt wird erst
+	# ausserhalb des Kreditrahmens (-1221 - 280 = -1501 < -1500).
+	poor.supply.charge_rescue_fee(poor.supply.get_credits() + 1221)
 	var revision: int = poor.supply.get_revision()
 	var poor_order: Dictionary = _order_request(poor, "flow:rej:poor")
-	_check(not poor_order.get("ok", true) and String(poor_order.get("reason", "")) == "insufficient_credits" and int(poor_order.get("price", -1)) == 280 and int(poor_order.get("credits", -1)) == 100, "2: zu wenig Credits (100 von 280) -> insufficient_credits mit price und credits: " + str(poor_order))
-	_check(poor.supply.get_credits() == 100 and is_equal_approx(poor.supply.get_fuel(poor.craft_id), 5.0) and poor.supply.get_revision() == revision and poor.runtime.get_emergency_tanker_snapshot().orders.is_empty(), "2: nichts gebucht, keine Teilmenge, keine Schulden, kein Auftrag")
+	_check(not poor_order.get("ok", true) and String(poor_order.get("reason", "")) == "debt_limit_reached" and int(poor_order.get("price", -1)) == 280 and int(poor_order.get("credits", 0)) == -1221, "2: Kreditrahmen ausgeschoepft (-1221, Preis 280) -> debt_limit_reached mit price und credits: " + str(poor_order))
+	_check(poor.supply.get_credits() == -1221 and is_equal_approx(poor.supply.get_fuel(poor.craft_id), 5.0) and poor.supply.get_revision() == revision and poor.runtime.get_emergency_tanker_snapshot().orders.is_empty(), "2: nichts gebucht, keine Teilmenge, kein Auftrag")
 	await _frames(30)
-	_check(is_equal_approx(poor.supply.get_fuel(poor.craft_id), 5.0) and poor.supply.get_credits() == 100, "2: auch spaeter kommt kein kostenloser Tanker")
+	_check(is_equal_approx(poor.supply.get_fuel(poor.craft_id), 5.0) and poor.supply.get_credits() == -1221, "2: auch spaeter kommt kein kostenloser Tanker")
 	await _close(poor)
 
 # --- 3. Stornieren ------------------------------------------------------------------------------------------------
