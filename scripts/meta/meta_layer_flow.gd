@@ -4691,7 +4691,11 @@ func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> D
 		var penalty: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_total_loss_penalty", Array(mission_result.get("team_states", [])), credits, rules))
 		fee = maxi(int(penalty.get("rescue_fee", 0)), 0)
 		if fee > 0:
-			_singleplayer_runtime.call("charge_campaign_rescue_fee", fee)
+			# LC2d A5: Das Ergebnis der Abbuchung wird geprueft; scheitert sie, steht im Beleg keine Gebuehr, die nie gebucht wurde.
+			var charged: Dictionary = Dictionary(_singleplayer_runtime.call("charge_campaign_rescue_fee", fee))
+			if not bool(charged.get("ok", false)):
+				push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
+				fee = 0
 	return {"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": outcome, "rescue_fee": fee}
 
 
