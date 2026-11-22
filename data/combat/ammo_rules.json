@@ -1,0 +1,10 @@
+{
+	"compartment_capacity_by_armor": {"suit": 1, "light": 3, "medium": 5, "heavy": 7},
+	"default_compartment_capacity": 1,
+	"ammo_items": {
+		"ammo_light": "Magazin leicht",
+		"ammo_rifle": "Magazin Gewehr",
+		"ammo_rail": "Schienenladung",
+		"ammo_rocket": "Rakete"
+	}
+}
