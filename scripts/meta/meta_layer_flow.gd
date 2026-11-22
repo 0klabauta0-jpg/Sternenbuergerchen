@@ -4037,6 +4037,7 @@ func _on_homebase_mission_start_requested() -> void:
 			return
 		_homecoming_forget_craft(requested_direct_craft_id) # the craft left the base for the star map
 		_last_mission_result.clear()
+		_report_launch_save(Dictionary(launch.get("pre_launch_save", {}))) # Speichern, erster Teil, Fix-Runde 1 (W1): der Spieler erfaehrt, was mit dem Speichern vor dem Abheben geschah
 		_show_star_map()
 		return
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
@@ -9188,6 +9189,9 @@ var _completion_save_warned: bool = false
 ## Speichern, erster Teil / 21.11. (S3): gemerkter Speicherwunsch des Spielers ({} = keiner) und die Rueckmeldungszeile am Bildschirmrand.
 var _save_wish: Dictionary = {}
 var _save_toast: Node = null
+## Fix-Runde 1 (W1): die Heimlandung hat ein Speichern angespannt und der Spieler hat noch keinen Ausgang gesehen / welchen Grund er zuletzt gelesen hat.
+var _landing_feedback_open: bool = false
+var _landing_told_reason: String = ""
 
 func _completed_campaign_job_count() -> int:
 	if _singleplayer_runtime == null: return -1
@@ -9207,6 +9211,10 @@ func _arm_landing_save() -> void:
 	if not is_campaign_start() or _singleplayer_runtime == null: return
 	_completion_save_open = true
 	_completion_save_next_msec = 0
+	# Fix-Runde 1 (W1): die Landungs-Speicherung meldet sich beim Spieler (Erfolg: "Gespeichert."; Ablehnung: einmal je Grund, ein
+	# Uebergangsgrund als Vormerkung, weil die Wiederholung weiterlaeuft).
+	_landing_feedback_open = true
+	_landing_told_reason = ""
 
 
 ## Setzt den zuletzt gesehenen Stand auf den jetzt geltenden Wert (Laden, Kampagnenstart): Laden loest kein Speichern aus.
@@ -9214,6 +9222,8 @@ func _reset_completion_save_baseline() -> void:
 	_completed_jobs_seen = _completed_campaign_job_count()
 	_completion_save_open = false
 	_completion_save_warned = false
+	_landing_feedback_open = false
+	_landing_told_reason = ""
 	_save_wish.clear() # Ein vorgemerkter Wunsch verfaellt beim Laden und beim Kampagnenstart.
 
 
@@ -9250,12 +9260,26 @@ func _poll_completion_save() -> void:
 			# Ein Schreibvorgang erledigt Wunsch und Abschluss/Landung zugleich.
 			_save_wish.clear()
 			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
+		elif _landing_feedback_open:
+			_show_save_feedback("Gespeichert.") # Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat
+		_landing_feedback_open = false
+		_landing_told_reason = ""
 		return
 	_completion_save_next_msec = now + 1000
-	if wish_open and not load("res://scripts/meta/campaign_save_projection.gd").is_transient(String(result.get("reason", ""))):
+	var failed_reason := String(result.get("reason", ""))
+	var projection = load("res://scripts/meta/campaign_save_projection.gd")
+	if wish_open and not projection.is_transient(failed_reason):
 		# Der Grund hat sich in einen ohne Aussicht verwandelt: ehrlicher Satz statt endlosem Warten.
 		_save_wish.clear()
 		_show_save_feedback(String(result.get("message", "")))
+	elif not wish_open and _landing_feedback_open and failed_reason != _landing_told_reason:
+		# Fix-Runde 1 (W1): die Landungs-Speicherung wurde abgelehnt. Der Spieler liest den Grund einmal je Grund (die Wiederholung jede Sekunde
+		# bleibt stumm); ein Uebergangsgrund heisst "vorgemerkt", weil es von selbst nachgeholt wird.
+		_landing_told_reason = failed_reason
+		if projection.is_transient(failed_reason):
+			_show_save_feedback(projection.pending_text(failed_reason, String(result.get("detail", ""))))
+		else:
+			_show_save_feedback(String(result.get("message", "")))
 	if not _completion_save_warned:
 		_completion_save_warned = true
 		push_warning("Speichern nach Auftragsabschluss abgelehnt (%s); wird wiederholt." % String(result.get("reason", "")))
@@ -9304,6 +9328,21 @@ func request_player_save() -> Dictionary:
 	return result
 
 
+## Fix-Runde 1 (W1): Meldung zum Speichern vor dem Abheben von der Basis (Antwort von _save_before_launch, leer = nichts versucht, etwa in der
+## Gefechtsprobe). Gelungen: "Gespeichert."; sonst "Vor dem Abheben nicht gespeichert: <Satz des Grundes>". Das Schiff startet in beiden Faellen.
+func _report_launch_save(saved: Dictionary) -> void:
+	if saved.is_empty(): return
+	if bool(saved.get("ok", false)):
+		_show_save_feedback("Gespeichert.")
+		return
+	var reason := String(saved.get("reason", ""))
+	var detail := String(saved.get("detail", ""))
+	var sentence := String(saved.get("message", ""))
+	if sentence.is_empty() or reason == "launch_during_mission":
+		sentence = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
+	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence)
+
+
 ## Der gemerkte Speicherwunsch (leer = keiner); nur lesen.
 func get_pending_save_wish() -> Dictionary:
 	return _save_wish.duplicate(true)
@@ -9314,6 +9353,7 @@ func get_pending_save_wish() -> Dictionary:
 func _show_save_feedback(text: String) -> void:
 	set_meta("campaign_save_feedback", text)
 	if text.is_empty(): return
+	set_meta("campaign_save_feedback_count", int(get_meta("campaign_save_feedback_count", 0)) + 1) # wie oft eine Zeile gezeigt wurde (Pruefer zaehlen damit)
 	if _save_toast == null or not is_instance_valid(_save_toast):
 		_save_toast = load("res://scripts/ui/campaign_save_toast.gd").new()
 		_save_toast.name = "CampaignSaveToast"

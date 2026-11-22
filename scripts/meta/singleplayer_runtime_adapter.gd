@@ -1498,13 +1498,17 @@ func validate_space_launch(craft_id: String, observe_progress: bool = true) -> D
 ## Speichern, erster Teil / 21.11.: Vor dem Abheben von der Heimatbasis wird einmal erzwungen gespeichert, damit das Ausruesten der
 ## ersten Minuten nicht an der Fuenf-Minuten-Drossel haengt. "Erzwungen" heisst nur: ohne Drossel, nicht ohne Pruefung
 ## (request_campaign_save laeuft ueber denselben get_home_checkpoint_guard). Wird abgelehnt, bleibt der vorige gueltige Stand
-## unberuehrt und das Schiff hebt trotzdem ab; die Antwort steht in der Rueckgabe (pre_launch_save) und im Meta des Flows.
+## unberuehrt und das Schiff hebt trotzdem ab; die Antwort steht in der Rueckgabe (pre_launch_save) und im Meta des Flows. Fix-Runde 1 (W1):
+## der Flow zeigt dem Spieler das Ergebnis (_report_launch_save: "Gespeichert." oder "Vor dem Abheben nicht gespeichert: <Grund>").
 func _save_before_launch() -> Dictionary:
 	if not _campaign_mode or _flow == null or not _flow.has_method("request_campaign_save"):
 		return {}
-	# Nur der Heimweg: Laeuft gerade ein Einsatz an einem Ort, ist das nicht der Moment fuer einen Einsatzstand.
+	# Nur der Heimweg: Laeuft gerade ein Einsatz an einem Ort, ist das nicht der Moment fuer einen Einsatzstand. Der Spieler erfaehrt es
+	# trotzdem (statt Stille): keine Speicherung, es gilt der zuletzt gespeicherte Stand.
 	if is_instance_valid(_flow.get("_active_mission")):
-		return {}
+		var skipped := {"ok": false, "reason": "launch_during_mission", "skipped": true}
+		_flow.set_meta("campaign_launch_save_result", skipped)
+		return skipped
 	var saved: Dictionary = Dictionary(_flow.call("request_campaign_save")).duplicate(true)
 	_flow.set_meta("campaign_launch_save_result", saved)
 	return saved

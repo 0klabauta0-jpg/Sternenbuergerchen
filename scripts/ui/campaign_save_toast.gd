@@ -35,11 +35,13 @@ func _ready() -> void:
 	_panel.hide()
 
 ## Zeigt den Satz und startet den Ablauf neu.
-func show_text(text: String, seconds: float = SHOW_SECONDS) -> void:
+func show_text(text: String, seconds: float = -1.0) -> void:
 	if _label == null: return
 	_label.text = text
 	_panel.show()
-	_timer.start(maxf(0.5, seconds))
+	# Lange Saetze (Grund plus Zeitpunkt, bis zu rund 190 Zeichen) bleiben laenger stehen als "Gespeichert.".
+	var shown_for: float = seconds if seconds > 0.0 else maxf(SHOW_SECONDS, float(text.length()) * 0.05)
+	_timer.start(maxf(0.5, shown_for))
 
 func _hide_toast() -> void:
 	if _panel != null: _panel.hide()
