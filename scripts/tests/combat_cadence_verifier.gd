@@ -122,6 +122,8 @@ func _run() -> void:
 	_test_normal_shot_sets_overwatch_lock()
 	_test_detection_runs_before_due()
 	_test_respawn_clears_warm_state()
+	_test_reaction_time_in_detection_delay()
+	_test_initiative_duel_balance_and_repeatability()
 	await process_frame
 	print("COMBAT_CADENCE passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -130,34 +132,59 @@ func _run() -> void:
 # ---- Teil 1: reine Rechnung -------------------------------------------------
 
 func _test_period_steps() -> void:
-	_check(CADENCE.period_steps(10, 0.5) == 4, "Gewehr 10 Ticks, Initiative 0,5 -> 4")
-	_check(CADENCE.period_steps(10, 0.9) == 3, "10 / 0,9 -> 3")
-	_check(CADENCE.period_steps(10, 0.1) == 5, "10 / 0,1 -> 5")
-	_check(CADENCE.period_steps(3, 0.9) == 1, "3 / 0,9 -> 1 (nie unter 1)")
-	_check(CADENCE.period_steps(1, 0.5) == 1, "1 / 0,5 -> 1")
-	_check(CADENCE.period_steps(0, 0.5) == 1, "0 Ticks -> 1")
-	_check(CADENCE.period_steps(9, 0.5) == 3, "Pistole 9 -> 3")
-	_check(CADENCE.period_steps(6, 0.5) == 2, "MP 6 -> 2")
-	_check(CADENCE.period_steps(26, 0.5) == 9, "Rakete 26 -> 9")
-	_check(CADENCE.period_steps(10, 0.67) == 3, "Grenze 0,67 gehoert zu schnell (-1)")
-	_check(CADENCE.period_steps(10, 0.66) == 4, "0,66 ohne Verschiebung")
-	_check(CADENCE.period_steps(10, 0.33) == 5, "Grenze 0,33 gehoert zu langsam (+1)")
-	_check(CADENCE.period_steps(10, 0.34) == 4, "0,34 ohne Verschiebung")
-	_check(CADENCE.period_steps(10, 0.0) == 5 and CADENCE.period_steps(10, 1.0) == 3, "0 und 1 an den Raendern")
-	for invalid in [NAN, -1.0, 1.5, INF]:
-		_check(CADENCE.period_steps(10, invalid) == CADENCE.period_steps(10, 0.5), "ungueltige Initiative %s wie 0,5" % str(invalid))
+	# INI-5: p = Grundschritte x (1,30 - 0,6 x Initiative), in Tausendsteln, nie unter 1,0.
+	_check(CADENCE.period_milli(10, 0.5) == 4000, "Gewehr 10 Ticks (4 Schritte), Initiative 0,5 -> 4,000")
+	_check(CADENCE.period_milli(10, 0.9) == 3040, "4 x (1,30 - 0,54) = 3,040")
+	_check(CADENCE.period_milli(10, 0.1) == 4960, "4 x (1,30 - 0,06) = 4,960")
+	_check(CADENCE.period_milli(10, 0.0) == 5200 and CADENCE.period_milli(10, 1.0) == 2800, "0 und 1 an den Raendern: 5,200 und 2,800")
+	_check(CADENCE.period_milli(3, 0.9) == 1000, "1 x 0,76 -> 1,000 (nie unter 1)")
+	_check(CADENCE.period_milli(1, 0.5) == 1000 and CADENCE.period_milli(0, 0.5) == 1000, "1 Tick und 0 Ticks -> 1,000")
+	_check(CADENCE.period_milli(9, 0.5) == 3000, "Pistole 9 -> 3,000")
+	_check(CADENCE.period_milli(9, 0.4) == 3180 and CADENCE.period_milli(9, 0.55) == 2910 and CADENCE.period_milli(9, 0.72) == 2604, "Pistole: 0,40 -> 3,180; 0,55 -> 2,910; 0,72 -> 2,604")
+	_check(CADENCE.period_milli(6, 0.5) == 2000, "MP 6 -> 2,000")
+	_check(CADENCE.period_milli(26, 0.5) == 9000 and CADENCE.period_milli(26, 0.4) == 9540 and CADENCE.period_milli(26, 0.72) == 7812, "Rakete: 0,50 -> 9,000; 0,40 -> 9,540; 0,72 -> 7,812")
+	_check(CADENCE.period_steps(9, 0.4) == 4 and CADENCE.period_steps(9, 0.72) == 3 and CADENCE.period_steps(9, 0.5) == 3, "aufgerundete Schritte (Sperre): 3,180 -> 4; 2,604 -> 3; 3,000 -> 3")
+	for invalid in [NAN, -1.0, INF]:
+		_check(CADENCE.period_milli(10, invalid) == CADENCE.period_milli(10, 0.5), "fehlende oder ungueltige Initiative %s wie 0,5" % str(invalid))
+	_check(CADENCE.period_milli(10, 1.5) == CADENCE.period_milli(10, 1.0), "Initiative ueber 1 wird auf 1 begrenzt")
+	# Reaktionszeit: round((0,5 - Initiative) x 20) Ticks, mit ganzen Zahlen, halbe Werte weg von null.
+	var expected_reaction := {0.0: 10, 0.25: 5, 0.4: 2, 0.475: 1, 0.5: 0, 0.525: -1, 0.55: -1, 0.72: -4, 1.0: -10}
+	for key in expected_reaction.keys():
+		_check(CADENCE.reaction_ticks(float(key)) == int(expected_reaction[key]), "Reaktionszuschlag bei Initiative %s = %d (%d)" % [str(key), int(expected_reaction[key]), CADENCE.reaction_ticks(float(key))])
+	_check(CADENCE.reaction_ticks(NAN) == 0 and CADENCE.reaction_ticks(-1.0) == 0, "ohne Initiative kein Zuschlag")
 
 
 func _test_is_due() -> void:
 	var due2: Array = []
 	var due5: Array = []
 	for step in range(1, 11):
-		if CADENCE.is_due(step, 2): due2.append(step)
-		if CADENCE.is_due(step, 5): due5.append(step)
-	_check(due2 == [2, 4, 6, 8, 10], "Periode 2 in 10 Schritten: 2,4,6,8,10 (%s)" % str(due2))
-	_check(due5 == [5, 10], "Periode 5 in 10 Schritten: 5,10 (%s)" % str(due5))
-	_check(CADENCE.is_due(7, 1) and CADENCE.is_due(7, 0), "Periode 1 (und Schutz fuer 0) ist immer dran")
-	_check(CADENCE.is_due(1000003, 1000003) and not CADENCE.is_due(1000002, 1000003), "Zaehler ohne Obergrenze")
+		if CADENCE.is_due(step, 2000): due2.append(step)
+		if CADENCE.is_due(step, 5000): due5.append(step)
+	_check(due2 == [2, 4, 6, 8, 10], "Periode 2,000 in 10 Schritten: 2,4,6,8,10 (%s)" % str(due2))
+	_check(due5 == [5, 10], "Periode 5,000 in 10 Schritten: 5,10 (%s)" % str(due5))
+	_check(CADENCE.is_due(0, 3000) and CADENCE.is_due(7, 1000) and CADENCE.is_due(7, 0), "Schritt 0 ist dran; Periode 1 (und Schutz fuer 0) immer")
+	_check(CADENCE.is_due(1000003, 1000003000) and not CADENCE.is_due(1000002, 1000003000), "Zaehler ohne Obergrenze")
+	# Faelligkeit ueber 100 Schritte (1..100), Pistole und Rakete, vier Initiativwerte; selbst nachgerechnet: floor(100 / p).
+	var expected := {"9:0.4": 31, "9:0.5": 33, "9:0.55": 34, "9:0.72": 38, "26:0.4": 10, "26:0.5": 11, "26:0.55": 11, "26:0.72": 12}
+	for key in expected.keys():
+		var parts: PackedStringArray = String(key).split(":")
+		var period: int = CADENCE.period_milli(int(parts[0]), float(parts[1]))
+		var count := 0
+		for step in range(1, 101):
+			if CADENCE.is_due(step, period):
+				count += 1
+		_check(count == int(expected[key]), "Faellige Schritte in 100 (Waffe %s Ticks, Initiative %s): %d (%d)" % [parts[0], parts[1], int(expected[key]), count])
+	# Gleichmaessig verteilt: bei 3,180 liegen je zwei Schuesse 3 oder 4 Schritte auseinander.
+	var gaps: Dictionary = {}
+	var last := 0
+	for step in range(1, 101):
+		if CADENCE.is_due(step, 3180):
+			if last > 0: gaps[step - last] = true
+			last = step
+	_check(gaps.keys().size() == 2 and gaps.has(3) and gaps.has(4), "3,180: Abstaende nur 3 und 4 Schritte (%s)" % str(gaps.keys()))
+	# Schritte bis zur Faelligkeit
+	_check(CADENCE.steps_until_due(9, 3000) == 0 and CADENCE.steps_until_due(10, 3000) == 2 and CADENCE.steps_until_due(11, 3000) == 1, "steps_until_due bei 3,000")
+	_check(CADENCE.steps_until_due(4, 3180) == 0 and CADENCE.steps_until_due(5, 3180) == 2 and CADENCE.steps_until_due(7, 3180) == 0 and CADENCE.steps_until_due(8, 3180) == 2, "steps_until_due bei 3,180: faellig in 4, 7, 10 (floor(s/3,18) steigt)")
 
 
 # ---- Teil 2: echter Treiber -------------------------------------------------
@@ -499,7 +526,7 @@ func _test_target_search_only_for_due_units() -> void:
 	# Rakete, Periode 9: gesucht wird im faelligen Schritt und im Erkennungsfenster davor (5 Schritte), sonst nicht.
 	var searched_steps := 0
 	for step in range(1, 31):
-		if CADENCE.steps_until_due(step, 9) <= 5:
+		if CADENCE.steps_until_due(step, 9000) <= 5:
 			searched_steps += 1
 	var due_unit_steps := 24 * searched_steps
 	var shots_total := 0
@@ -605,3 +632,44 @@ func _test_respawn_clears_warm_state() -> void:
 	_check(not f.driver._attack_warmed_ids.has("own") and not f.driver._attack_contact_ids.has("own"), "n2: Respawn leert Anlauf und Kontakt der Einheit")
 	_check(f.driver._attack_warmed_ids.has("enemy"), "n2: andere Einheiten bleiben unberuehrt")
 	f.scope.free()
+
+
+# ---- Runde 2, Teil B (INI-5) --------------------------------------------------
+
+## Erkennungsdauer = round((1 - Aufmerksamkeit) x 15) + round((0,5 - Initiative) x 20), nie unter 0.
+func _test_reaction_time_in_detection_delay() -> void:
+	var cases: Array = [
+		{"id": "c1", "initiative": 0.4, "awareness": 0.4, "expected": 11},
+		{"id": "c2", "initiative": 0.72, "awareness": 0.4, "expected": 5},
+		{"id": "c3", "initiative": 0.9, "awareness": 1.0, "expected": 0},
+		{"id": "c4", "initiative": 0.4, "awareness": 1.0, "expected": 2},
+		{"id": "c5", "initiative": 0.5, "awareness": 0.4, "expected": 9},
+		{"id": "c6", "initiative": -1.0, "awareness": 0.4, "expected": 9},
+		{"id": "c7", "initiative": 0.0, "awareness": 0.0, "expected": 25},
+		{"id": "c8", "initiative": 1.0, "awareness": 0.0, "expected": 5},
+	]
+	var specs: Array = [{"id": "enemy", "team": "red", "grid": CENTER, "facing": 0, "weapon": "none"}]
+	for index in range(cases.size()):
+		specs.append({"id": cases[index].id, "team": "blue", "grid": CENTER + HEX.DIRECTIONS[index % 6] * (1 + index / 6), "facing": 0, "weapon": "pistol",
+			"initiative": cases[index].initiative, "awareness": cases[index].awareness})
+	var f := _rig(specs)
+	for entry in cases:
+		var delay: int = f.driver._get_detection_delay_ticks(f.units[entry.id])
+		_check(delay == int(entry.expected), "Erkennung: Initiative %s, Aufmerksamkeit %s -> %d Ticks (%d)" % [str(entry.initiative), str(entry.awareness), int(entry.expected), delay])
+	f.scope.free()
+
+
+## Pistole 0,72 gegen Pistole 0,40 ueber 100 Schritte: 38 gegen 31 Schuesse (selbst nachgerechnet), und zwei Laeufe
+## mit gleichem Zufallsstart ergeben dieselbe Schussfolge.
+func _test_initiative_duel_balance_and_repeatability() -> void:
+	var specs: Array = _line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "pistol")
+	specs[0]["initiative"] = 0.72
+	specs[1]["initiative"] = 0.4
+	var a := _rig(specs, 5)
+	var b := _rig(specs, 5)
+	var log_a := _hit_log(a, 300)
+	var log_b := _hit_log(b, 300)
+	_check(log_a == log_b and not log_a.is_empty(), "INI-5: gleicher Zufallsstart -> gleiche Schussfolge (%d Schuesse)" % log_a.size())
+	_check(_shots_by(a, "own") == 38 and _shots_by(a, "enemy") == 31, "INI-5: 0,72 schiesst 38, 0,40 schiesst 31 Mal in 100 Schritten (%d / %d)" % [_shots_by(a, "own"), _shots_by(a, "enemy")])
+	a.scope.free()
+	b.scope.free()

@@ -2130,9 +2130,9 @@ func _combat_attack_phase(unit) -> int:
 	var unit_id: String = String(unit.call("get_unit_id"))
 	if _attack_excluded_unit_ids.has(unit_id):
 		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
-	var period: int = _get_attack_period_steps(unit)
+	var period: int = _get_attack_period_milli(unit)
 	if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id:
-		_attack_follow_next[unit_id] = (_attack_step / period + 1) * period
+		_attack_follow_next[unit_id] = _attack_step + 1 + COMBAT_CADENCE_SCRIPT.steps_until_due(_attack_step + 1, period)
 	if COMBAT_CADENCE_SCRIPT.is_due(_attack_step, period):
 		_attack_due_ids[unit_id] = true
 		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_DUE
@@ -2150,25 +2150,33 @@ func _combat_attack_phase(unit) -> int:
 
 ## Laengste Erkennungsdauer der Einheit in Entscheidungsschritten (Sichtbereitschaft 0 plus die Auftragszuschlaege).
 func _get_detection_window_steps(unit) -> int:
-	var longest_ticks: int = maxi(MAX_DETECTION_DELAY_TICKS + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
+	var longest_ticks: int = maxi(MAX_DETECTION_DELAY_TICKS + COMBAT_CADENCE_SCRIPT.reaction_ticks(_get_attack_initiative(unit)) + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
 	return int(ceil(float(longest_ticks) / float(COMBAT_DECISION_INTERVAL_TICKS)))
 
 
-func _get_attack_period_steps(attacker) -> int:
+## Initiative-Achse der Einheit (0..1), -1 wenn keine; einmal gelesen und gemerkt, keine Profilkopie je Aufruf.
+func _get_attack_initiative(unit) -> float:
+	if unit == null:
+		return -1.0
+	var key: int = unit.get_instance_id()
+	if _attack_initiative_cache.has(key):
+		return float(_attack_initiative_cache[key])
+	var initiative: float = -1.0
+	if unit.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(unit.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		initiative = float(axes.get("initiative", -1.0))
+	_attack_initiative_cache[key] = initiative
+	return initiative
+
+
+## Takt der Einheit in Tausendsteln von Schritten (siehe CombatCadence.period_milli), je Waffe gemerkt.
+func _get_attack_period_milli(attacker) -> int:
 	var weapon_id: String = String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", attacker))
 	var key: int = attacker.get_instance_id() if attacker != null else 0
 	var cached: Dictionary = Dictionary(_attack_period_cache.get(key, {}))
 	if not cached.is_empty() and String(cached.get("weapon_id", "")) == weapon_id:
 		return int(cached["period"])
-	var initiative: float = -1.0
-	if _attack_initiative_cache.has(key):
-		initiative = float(_attack_initiative_cache[key])
-	else:
-		if attacker != null and attacker.has_method("get_character_profile_bundle"):
-			var axes: Dictionary = Dictionary(Dictionary(attacker.call("get_character_profile_bundle")).get("behavior_axes", {}))
-			initiative = float(axes.get("initiative", -1.0))
-		_attack_initiative_cache[key] = initiative
-	var period: int = COMBAT_CADENCE_SCRIPT.period_steps(WEAPON_DATA_SCRIPT.get_ticks_between_attacks(weapon_id), initiative)
+	var period: int = COMBAT_CADENCE_SCRIPT.period_milli(WEAPON_DATA_SCRIPT.get_ticks_between_attacks(weapon_id), _get_attack_initiative(attacker))
 	_attack_period_cache[key] = {"weapon_id": weapon_id, "period": period}
 	return period
 
@@ -2227,7 +2235,7 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 	simulation_root.call("enqueue_effect", damage_effect)
 	# K1r: ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung eine Periode lang.
 	if _overwatch_controller != null and _overwatch_controller.has_method("note_member_fired"):
-		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + _get_attack_period_steps(attacker) * COMBAT_DECISION_INTERVAL_TICKS)
+		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + ((_get_attack_period_milli(attacker) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS)
 	_record_return_fire_window_if_needed(attacker, actual_target)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
@@ -3218,7 +3226,9 @@ func _get_detection_delay_ticks(unit) -> int:
 		unit_awareness = clampf(float(unit.call("get_awareness")), 0.0, 1.0)
 
 	var base_delay: int = int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
-	return maxi(base_delay + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
+	# INI-5: Reaktionszeit aus der Initiative, round((0,5 - Initiative) x 20) Ticks, fuer beide Seiten gleich.
+	var reaction_delta: int = COMBAT_CADENCE_SCRIPT.reaction_ticks(_get_attack_initiative(unit))
+	return maxi(base_delay + reaction_delta + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
 
 
 func _get_contact_initiative_delay_delta_ticks(unit) -> int:
