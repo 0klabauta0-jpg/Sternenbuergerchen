@@ -22,6 +22,8 @@ func _run() -> void:
 	await _save_part()
 	await _warning_part()
 	await _timing_part()
+	await _menu_part()
+	await _supply_part()
 	await _buttons_part()
 	await _loaded_part()
 	await _skirmish_part()
@@ -76,16 +78,20 @@ func _press(button_name: String) -> void:
 # ---------- Teil 1: die Regel ----------
 
 func _rules_part() -> void:
-	var r: Dictionary = _bankrupt(500, [_grounded_stuck(), _orbit_stuck()])
-	_check(not bool(r.get("bankrupt", true)) and String(r.get("reason", "")) != "", "Regel: mit Guthaben nicht pleite, auch wenn alle Schiffe festliegen (%s)" % [r])
+	# Abschnitt P, Nachbesserung 1 (W2): der Kreditrahmen ist keine eigene Bedingung mehr. Pleite ist man, wenn nichts Bezahlbares mehr
+	# geht UND der Nottankdienst nicht liefert (tanker_available kommt vom Adapter aus der echten Bestellpruefung mit dem erreichbaren Kontostand).
+	var tanker_orbit: Dictionary = _orbit_stuck()
+	tanker_orbit["tanker_available"] = true
+	var r: Dictionary = _bankrupt(10, [tanker_orbit])
+	_check(not bool(r.get("bankrupt", true)) and String(r.get("reason", "")) == "tanker_available", "Regel: +10 Credits und festliegend: nicht pleite, der Tanker liefert auf Kredit (%s)" % [r])
+	r = _bankrupt(-1450, [_orbit_stuck()])
+	_check(bool(r.get("bankrupt", false)), "Regel: -1450 und festliegend, der Tanker wuerde ueber den Rahmen fuehren (tanker_available false): pleite (%s)" % [r])
 	r = _bankrupt(-1500, [_can_fly()])
 	_check(not bool(r.get("bankrupt", true)), "Regel: -1500 mit einem flugfaehigen Schiff nicht pleite")
 	r = _bankrupt(-1500, [_grounded_stuck(), _orbit_stuck()])
 	_check(bool(r.get("bankrupt", false)) and String(r.get("reason", "")) != "", "Regel: -1500 und alle Schiffe liegen fest: pleite (%s)" % [r])
 	r = _bankrupt(-1500, [_grounded_stuck()])
 	_check(bool(r.get("bankrupt", false)), "Regel: ein Schiff am Boden ohne Treibstoff und ohne Geld zum Tanken zaehlt als festliegend")
-	r = _bankrupt(-1499, [_grounded_stuck(), _orbit_stuck()])
-	_check(not bool(r.get("bankrupt", true)), "Regel: -1499 und festliegend: nicht pleite (der Nottanker greift noch)")
 	var with_tanker: Dictionary = _orbit_stuck()
 	with_tanker["tanker_order_open"] = true
 	r = _bankrupt(-1500, [with_tanker, _grounded_stuck()])
@@ -177,11 +183,7 @@ func _warning_part() -> void:
 
 func _timing_part() -> void:
 	if not await _bankrupt_setup(): return
-	# Im laufenden Einsatz am Boden wird nicht geprueft.
-	_flow.get("_location_contexts")["testort"] = {}
-	_flow.call("_check_bankruptcy")
-	_check(_screen_node() == null and not paused, "Zeitpunkt: mit offenem Einsatzort wird nicht geprueft")
-	_flow.get("_location_contexts").erase("testort")
+	# Ein ungebuchtes Einsatzergebnis sperrt die Pruefung (echte Einsatzorte: campaign_bankruptcy_visit_verifier).
 	var pending: Dictionary = {"job_id": "x"}
 	_flow.set("_pending_campaign_mission_result", pending)
 	_flow.call("_check_bankruptcy")
@@ -189,6 +191,58 @@ func _timing_part() -> void:
 	_flow.set("_pending_campaign_mission_result", {})
 	_flow.call("_check_bankruptcy")
 	_check(_screens_count() == 1, "Zeitpunkt: nach der Buchung wird geprueft, Bildschirm erscheint")
+	await _close()
+
+## W3: ein offenes Spielmenue (Ebene 1000) wird beim Eintritt geschlossen; Beenden funktioniert im Pleite-Zustand ohne unsichtbare Nachfrage.
+func _menu_part() -> void:
+	var escape: Node = root.get_node_or_null("GlobalEscapeMenu")
+	if escape == null:
+		print("HINWEIS: kein GlobalEscapeMenu im Test-Baum, Menue-Pruefung ausgelassen")
+		return
+	if not await _bankrupt_setup(): return
+	escape.call("set_test_mode", true)
+	escape.call("open_menu")
+	_check(bool(escape.call("is_menu_visible")), "Menue: Fixture: das Spielmenue ist offen")
+	_flow.call("_check_bankruptcy")
+	await process_frame
+	_check(_screens_count() == 1 and not bool(escape.call("is_menu_visible")) and not bool(escape.call("is_settings_visible")), "Menue: beim Eintritt wird das offene Spielmenue geschlossen")
+	var quit_result: Dictionary = escape.call("request_quit_game")
+	_check(bool(quit_result.get("ok", false)) and bool(escape.call("was_quit_requested_for_tests")), "Menue: Beenden im Pleite-Zustand geht ohne Nachfrage (%s)" % [quit_result])
+	escape.call("set_test_mode", false)
+	await _close()
+
+## W1 und W2 am Besitzer des Geldes: Verkaufserloes und die echte Bestellpruefung des Nottankdienstes mit erreichbarem Kontostand.
+func _supply_part() -> void:
+	if not await _open("campaign", "new"): return
+	var supply: Object = _runtime.get("_supply")
+	var inventory: Dictionary = supply.get("_inventory")
+	var craft_container := "craft:" + _craft_id
+	_check(supply.has_method("get_sellable_proceeds") and int(supply.call("get_sellable_proceeds", "polisa", [craft_container])) == 0, "Verkauf: ohne Waren im Schiffslager ist der Erloes 0")
+	Dictionary(inventory[craft_container].items)["ore"] = 20
+	Dictionary(inventory[craft_container].items)["salvage"] = 10
+	_check(int(supply.call("get_sellable_proceeds", "polisa", [craft_container])) == 20 * 6 + 10 * 9, "Verkauf: Erz 20 x 6 + Bergungsgut 10 x 9 = 210 am Haendler von Polisa (gleiche Preise wie _sell)")
+	_check(int(supply.call("get_sellable_proceeds", "polisa", [craft_container, craft_container])) == 210, "Verkauf: ein Lager wird nicht doppelt gezaehlt")
+	_check(int(supply.call("get_sellable_proceeds", "fortified_outpost", [craft_container])) == 0, "Verkauf: ohne Handelsdienst am Ort 0")
+	_check(int(supply.call("get_sellable_proceeds", "homebase", [craft_container])) == 0, "Verkauf: an der Basis gibt es laut Daten keinen Handel (wie _sell)")
+	var before: int = int(supply.call("get_credits"))
+	var revision: int = int(supply.call("get_revision"))
+	supply.call("get_sellable_proceeds", "polisa", [craft_container])
+	_check(int(supply.call("get_credits")) == before and int(supply.call("get_revision")) == revision, "Verkauf: die Auskunft bucht nichts")
+	var context := {"craft_available": true, "at_service_point": false, "fuel_problem": true}
+	var tanks: Dictionary = supply.get("_fuel_by_craft_id")
+	tanks[_craft_id] = 5.0
+	var plain: Dictionary = supply.call("preview_emergency_tanker", {"craft_id": _craft_id}, context)
+	var price: int = int(plain.get("price", 0))
+	_check(bool(plain.get("ok", false)) and price == 280, "W2: Fixture: der Tanker kostet 280 Cr (%s)" % [plain])
+	var over: Dictionary = context.duplicate()
+	over["credits_override"] = -1450
+	var refused: Dictionary = supply.call("preview_emergency_tanker", {"craft_id": _craft_id}, over)
+	_check(not bool(refused.get("ok", true)) and String(refused.get("reason", "")) == "debt_limit_reached", "W2: bei -1450 fuehrt der Tanker (280) ueber den Rahmen: debt_limit_reached (%s)" % [refused])
+	over["credits_override"] = 10
+	var on_credit: Dictionary = supply.call("preview_emergency_tanker", {"craft_id": _craft_id}, over)
+	_check(bool(on_credit.get("ok", false)) and bool(on_credit.get("on_credit", false)), "W2: bei +10 liefert der Tanker auf Kredit (%s)" % [on_credit])
+	over["credits_override"] = -1220
+	_check(bool(supply.call("preview_emergency_tanker", {"craft_id": _craft_id}, over).get("ok", false)), "W2: genau -1500 danach (-1220 - 280) ist erlaubt, wie die echte Bestellung")
 	await _close()
 
 func _buttons_part() -> void:
@@ -229,7 +283,8 @@ func _buttons_part() -> void:
 func _loaded_part() -> void:
 	# Ein Stand, der schon pleite ist (etwa aus einer Zeit vor dieser Regel): gespeichert in dem Augenblick, bevor die Pruefung lief.
 	if not await _bankrupt_setup(): return
-	var saved: Dictionary = _flow.call("request_campaign_save")
+	# request_campaign_save prueft jetzt zuerst (k3); der Altstand wird deshalb direkt ueber den Speicherweg geschrieben.
+	var saved: Dictionary = _flow.get("_campaign_start").call("save_home_checkpoint", _flow, _runtime, true)
 	_check(bool(saved.get("ok", false)), "Laden: der Pleite-Stand liess sich vor der Pruefung schreiben (Grund: %s)" % [saved.get("reason", "")])
 	await _close()
 	if not await _open("campaign", "continue"): return
