@@ -85,6 +85,11 @@ func _ready() -> void:
 func set_debt_text(text: String) -> void:
 	if _debt_label != null: _debt_label.text = text
 
+## Sperrt die drei Knoepfe (waehrend des Szenenwechsels) oder gibt sie wieder frei.
+func set_buttons_disabled(disabled: bool) -> void:
+	for button: Button in [_load_button, _new_button, _menu_button]:
+		if button != null: button.disabled = disabled
+
 ## Neue Kampagne ersetzt den vorhandenen Stand: der erste Druck zeigt nur den Hinweis, der zweite loest aus.
 func is_new_campaign_armed() -> bool:
 	return _new_armed

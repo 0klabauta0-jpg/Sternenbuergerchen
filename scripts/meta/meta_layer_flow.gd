@@ -499,7 +499,7 @@ func _process(_delta: float) -> void:
 				scopes["observe_campaign_usec"] = Time.get_ticks_usec() - scope_started_usec
 				scope_started_usec = Time.get_ticks_usec()
 			_check_bankruptcy()
-			if is_instance_valid(_active_mission) and not bool(_campaign_start.get("active_restore_in_progress")):
+			if is_instance_valid(_active_mission) and not _bankrupt and not bool(_campaign_start.get("active_restore_in_progress")):
 				var now := Time.get_ticks_msec()
 				if _active_autosave_next_msec == 0: _active_autosave_next_msec = now + 300000
 				elif now >= _active_autosave_next_msec:
@@ -5680,7 +5680,7 @@ func _tick_debt_interest(delta: float) -> void:
 func _check_bankruptcy() -> void:
 	if _bankrupt or not is_campaign_start() or not is_instance_valid(_singleplayer_runtime):
 		return
-	if is_instance_valid(_active_mission) or not _location_contexts.is_empty() or not _pending_campaign_mission_result.is_empty():
+	if _campaign_ground_mission_running():
 		return
 	if _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
 		return
@@ -5689,13 +5689,36 @@ func _check_bankruptcy() -> void:
 	if bool(check.get("bankrupt", false)):
 		_enter_bankruptcy(credits)
 		return
-	var debt_limit: int = int(check.get("debt_limit", 0))
-	var at_limit: bool = debt_limit > 0 and credits <= -debt_limit
-	if not at_limit:
+	# Vorwarnung: der Nottankdienst wuerde wegen des Kreditrahmens ablehnen, man ist aber noch nicht pleite.
+	if not bool(check.get("debt_refused", false)):
 		_debt_limit_warned = false
-	elif not _debt_limit_warned and String(check.get("reason", "")) in ["craft_can_fly", "tanker_order_open"]:
+	elif not _debt_limit_warned:
 		_debt_limit_warned = true
 		_show_save_feedback(BANKRUPTCY_LIMIT_WARNING)
+
+
+## Abschnitt P: Laeuft gerade wirklich ein Bodeneinsatz mit ungebuchtem Ergebnis? Nur dann sperrt das die Pleite-Pruefung. Ein Besuch
+## ohne laufenden Auftrag (Polisa, Handelsposten, erledigter oder nie angenommener Auftrag, festsitzendes Schiff) sperrt nicht.
+## Vorhandene Eigenschaft: _campaign_location_visit_idle (Speichern, erster Teil / 21.11.) je registrierter Ortsinstanz.
+func _campaign_ground_mission_running() -> bool:
+	if not _pending_campaign_mission_result.is_empty():
+		return true
+	for context: Variant in _location_contexts.values():
+		if not Dictionary(Dictionary(context).get("pending", {})).is_empty():
+			return true
+	for id: Variant in _location_registry.location_ids():
+		var instance: Node = _location_registry.get_location(String(id))
+		if is_instance_valid(instance) and not _campaign_location_visit_idle(instance):
+			return true
+	# Altweg: ein aktiver Einsatz ohne Ortskennung (nicht ueber die Ortsregistratur gestartet).
+	return is_instance_valid(_active_mission) and String(_active_mission.get_meta("location_id", "")).is_empty()
+
+
+## Abschnitt P: Schliesst ein offenes Spielmenue (Menue, Einstellungen, Tastenbelegung) ueber seinen vorhandenen Weg close_menu.
+func _close_game_menu_for_bankruptcy() -> void:
+	var menu: Node = get_node_or_null("/root/GlobalEscapeMenu")
+	if menu != null and menu.has_method("is_overlay_open") and bool(menu.call("is_overlay_open")):
+		menu.call("close_menu")
 
 
 func is_campaign_bankrupt() -> bool:
@@ -5705,6 +5728,7 @@ func is_campaign_bankrupt() -> bool:
 func _enter_bankruptcy(credits: int) -> void:
 	_bankrupt = true
 	_save_wish.clear()
+	_close_game_menu_for_bankruptcy() # ein offenes Spielmenue schliesst ueber seinen eigenen Weg (close_menu)
 	set_meta("campaign_bankruptcy_shown_count", int(get_meta("campaign_bankruptcy_shown_count", 0)) + 1)
 	_bankruptcy_screen = BANKRUPTCY_SCREEN_SCRIPT.new()
 	add_child(_bankruptcy_screen)
@@ -5721,6 +5745,7 @@ func _enter_bankruptcy(credits: int) -> void:
 ## vor dem Szenenwechsel wieder an. Meta campaign_bankruptcy_no_scene_change (nur Pruefer) unterdrueckt den Szenenwechsel.
 func _on_bankruptcy_action(action: String) -> void:
 	var tree := get_tree()
+	_close_game_menu_for_bankruptcy() # gleiche Aufraeumung wie vor den Szenenwechseln des Menues (_end_modal_input, Feld schliessen)
 	if tree != null and _bankruptcy_paused_tree:
 		tree.paused = false
 		_bankruptcy_paused_tree = false
@@ -5737,7 +5762,15 @@ func _on_bankruptcy_action(action: String) -> void:
 	set_meta("campaign_bankruptcy_exit", {"action": action, "scene": scene})
 	if scene.is_empty() or tree == null or bool(get_meta("campaign_bankruptcy_no_scene_change", false)):
 		return
-	tree.change_scene_to_file(scene)
+	if is_instance_valid(_bankruptcy_screen) and _bankruptcy_screen.has_method("set_buttons_disabled"):
+		_bankruptcy_screen.call("set_buttons_disabled", true) # k1: kein zweiter Druck waehrend des Wechsels
+	var error: Error = tree.change_scene_to_file(scene)
+	if error != OK:
+		# k1: Wechsel gescheitert: der Bildschirm bleibt bedienbar, die Zeit steht wieder.
+		tree.paused = true
+		_bankruptcy_paused_tree = true
+		if is_instance_valid(_bankruptcy_screen) and _bankruptcy_screen.has_method("set_buttons_disabled"):
+			_bankruptcy_screen.call("set_buttons_disabled", false)
 
 
 ## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): sichtbar werden nur die
@@ -9262,6 +9295,8 @@ func get_campaign_save_projection() -> Dictionary:
 
 
 func get_exit_progress_projection() -> Dictionary:
+	# Abschnitt P: Im Pleite-Zustand gibt es nichts zu speichern; leer heisst: Beenden ohne versteckte Rueckfrage (das Fenster schliesst).
+	if _bankrupt: return {}
 	if is_campaign_start(): return get_campaign_save_projection()
 	if is_instance_valid(_active_mission):
 		return {"summary":"Skirmish beginnt wieder von vorn. Der aktuelle Einsatzfortschritt wird nicht gespeichert.", "has_unsaved_progress":true, "can_save":false, "save_blocked_text":"Szenenstart merken speichert keinen Einsatzfortschritt."}
@@ -9403,6 +9438,7 @@ func request_campaign_save() -> Dictionary:
 	set_meta("campaign_save_attempts", int(get_meta("campaign_save_attempts", 0)) + 1)
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
 	# Abschnitt P: im Pleite-Zustand wird nicht gespeichert, damit "Spielstand laden" nicht denselben Bildschirm zurueckbringt.
+	_check_bankruptcy() # k3: ein Speichern kurz vor dem naechsten Takt prueft zuerst
 	if _bankrupt: return {"ok":false,"reason":"campaign_bankrupt","message":load("res://scripts/meta/campaign_save_projection.gd").blocked_text("campaign_bankrupt")}
 	if not is_instance_valid(_active_mission): _reopen_retreated_jobs_before_home_checkpoint()
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
