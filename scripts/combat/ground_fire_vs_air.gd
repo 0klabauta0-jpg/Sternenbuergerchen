@@ -4,15 +4,17 @@ extends RefCounted
 ## Regeln (Auftraggeber, 22.11.2026):
 ## - Nur Raketenwerfer (rocket_launcher) und Schienenkanone (rail_gun) wirken gegen Schiffe; alle anderen
 ##   Waffen haelt der Schild ab, solche Einheiten schiessen gar nicht erst auf Schiffe.
-## - Eigener Takt je Einheit (Waffentakt), nicht der eine Schussplatz des Bodengefechts. Hat die Einheit ein
-##   Bodenziel in Kontakt, geht der Boden vor.
-## - Warnung, dann Treffer: das rechnet der vorhandene Baustein air_asset_threat_resolver.gd mit seinen Zahlen.
-##   Dazu kommt das Ausweichen des Piloten (air_defense_engagement.pilot_profile) als Faktor (1 - Ausweichen) auf
-##   die Trefferchance. Die Trefferchance ist die "risk" des Bausteins.
+## - Aufschaltzeit statt Waffentakt (Daten ground_fire_vs_air): vor jedem Schuss auf ein Schiff braucht die Einheit
+##   eine Aufschaltung in laufender Einsatzzeit (Raketenwerfer 4,0 s, Schienenkanone 2,5 s); nach jedem Schuss
+##   beginnt eine neue. Hat die Einheit ein Bodenziel in Kontakt, geht der Boden vor.
+## - Schaden rechnet der vorhandene Baustein air_asset_threat_resolver.gd. Die Trefferchance ist die
+##   base_hit_chance der Waffe x (1 - Ausweichen des Piloten, air_defense_engagement.pilot_profile), begrenzt auf
+##   hit_chance_min..hit_chance_max (0,05..0,60).
 ## - Zufall aus dem Strom des Luft-Boden-Feuers der SimulationRoot (Callable "roll"), kein eigener Strom.
 ## - Rumpf (AirAssetStatus.integrity) faellt durch Bodenbeschuss nie unter 1 %. Auf oder unter
-##   auto_break_off_hull_fraction (35 %) dreht das Schiff ab: Feuerstopp, kein Angriffsbefehl und kein Bodenfeuer
-##   bis zur Reparatur.
+##   der Grenze seines Anflugstils (vorsichtig 65 %, normal 50 %, aggressiv 10 % Rumpf, Daten; ohne Stil normal) dreht
+##   das Schiff ab: Feuerstopp, kein Angriffsbefehl und kein Bodenfeuer bis zur Reparatur oder bis ein Stil mit tieferer
+##   Grenze gewaehlt ist und der Rumpf darueber liegt.
 ## Die Klasse haelt nur Takt- und Meldungsgedaechtnis; die Spielwahrheit (Rumpf) schreibt die SimulationRoot.
 
 const RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
@@ -33,8 +35,10 @@ const WARNING_TEXT: Dictionary = {
 }
 
 var _resolver = RESOLVER_SCRIPT.new()
-var _next_shot_tick: Dictionary = {}
+# Aufschaltung: "Schiff|Einheit" -> Tick, an dem die laufende Aufschaltung begann. Nach jedem Schuss beginnt eine neue.
 var _locks: Dictionary = {}
+# Aufschaltungen, deren Meldung schon erschien; erst ein Zuruecksetzen (Sicht, Reichweite, Landung ...) loescht sie.
+var _announced: Dictionary = {}
 var _hit_reported: Dictionary = {}
 var _break_off_reported: Dictionary = {}
 var _cease_pending: Dictionary = {}
@@ -52,19 +56,26 @@ static func weapon_threatens_ships(weapon_id: String) -> bool:
 	return bool(WEAPON_DATA_SCRIPT.call("is_anti_armor_weapon_id", weapon_id))
 
 
-static func break_off_fraction() -> float:
-	var pilot: Dictionary = Dictionary(AIR_DEFENSE.definition().get("pilot", {}))
-	return float(pilot.get("auto_break_off_hull_fraction", 0.35))
+## Abdrehgrenze (verbleibender Rumpf) je Anflugstil des Schiffs: EINE Quelle fuer Angriff und Landeanflug,
+## air_defense_engagement.break_off_hull_fraction (Daten break_off_hull_fraction_by_style: vorsichtig 0.65, normal 0.50,
+## aggressiv 0.10; ohne Stil normal; ohne Datenblock der alte Einzelwert 0.35).
+static func break_off_fraction(style: String = "") -> float:
+	return AIR_DEFENSE.break_off_hull_fraction(style)
 
 
-## Rumpf auf oder unter der Abdrehgrenze. Ein leerer Stand (nie getroffen) ist nicht abgedreht.
-static func is_broken_off(status: Dictionary) -> bool:
+## Hinweissatz fuer die Stil-Schaltflaeche auf der Schiffskarte, mit der Zahl aus den Daten.
+static func attack_hint(style: String) -> String:
+	return "Bricht Anflug und Angriff ab, wenn der Rumpf unter %d %% fällt." % roundi(break_off_fraction(style) * 100.0)
+
+
+## Rumpf auf oder unter der Abdrehgrenze des Stils. Ein leerer Stand (nie getroffen) ist nicht abgedreht.
+static func is_broken_off(status: Dictionary, style: String = "") -> bool:
 	if status.is_empty():
 		return false
 	var max_integrity: int = int(status.get("max_integrity", 100))
 	if max_integrity <= 0:
 		return false
-	return float(int(status.get("integrity", max_integrity))) / float(max_integrity) <= break_off_fraction() + 0.000001
+	return float(int(status.get("integrity", max_integrity))) / float(max_integrity) <= break_off_fraction(style) + 0.000001
 
 
 static func refusal() -> Dictionary:
@@ -76,8 +87,25 @@ static func evasion_for(pilot_skill: float) -> float:
 	return float(AIR_DEFENSE.pilot_profile(pilot_skill).get("evasion", 0.0))
 
 
-static func hit_chance(risk: float, pilot_skill: float) -> float:
-	return clampf(risk * (1.0 - evasion_for(pilot_skill)), 0.0, 1.0)
+static func _rules() -> Dictionary:
+	return Dictionary(AIR_DEFENSE.definition().get("ground_fire_vs_air", {}))
+
+
+## Aufschaltzeit in Ticks (laufende Einsatzzeit): Raketenwerfer 4,0 s, Schienenkanone 2,5 s (Daten).
+static func lock_ticks(weapon_id: String) -> int:
+	var seconds: float = float(_rules().get("lock_seconds_" + weapon_id, 4.0))
+	return maxi(ceili(seconds * float(Engine.physics_ticks_per_second)), 1)
+
+
+## Trefferchance je Schuss: Basis x (1 - Ausweichen des Piloten), begrenzt auf hit_chance_min..hit_chance_max (Daten).
+static func hit_chance_for_base(base_chance: float, pilot_skill: float) -> float:
+	var rules: Dictionary = _rules()
+	return clampf(base_chance * (1.0 - evasion_for(pilot_skill)), float(rules.get("hit_chance_min", 0.05)), float(rules.get("hit_chance_max", 0.60)))
+
+
+## Basis ist die base_hit_chance der Waffe aus den vorhandenen Waffendaten (0,30 Raketenwerfer, 0,35 Schienenkanone).
+static func hit_chance(weapon_id: String, pilot_skill: float) -> float:
+	return hit_chance_for_base(float(WEAPON_DATA_SCRIPT.call("get_base_hit_chance", weapon_id)), pilot_skill)
 
 
 func mark_cease_done(craft_id: String) -> void:
@@ -114,6 +142,12 @@ func step(ctx: Dictionary) -> Dictionary:
 		var status: Dictionary = _seed_status(target, craft_id, display_name)
 		if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", String(status.get("state", "")))):
 			continue
+		# Die Abdrehgrenze folgt dem aktuellen Anflugstil des Schiffs (leer = normal). Wechselt der Spieler auf einen Stil mit
+		# tieferer Grenze und liegt der Rumpf darueber, darf das Schiff wieder angreifen; ein spaeteres Abdrehen meldet neu.
+		var style: String = String(target.get("approach_style", ""))
+		if (_break_off_reported.has(craft_id) or _cease_pending.has(craft_id)) and not is_broken_off(status, style):
+			_break_off_reported.erase(craft_id)
+			_cease_pending.erase(craft_id)
 		var changed: bool = false
 		var last_effect: Dictionary = {}
 		for unit in shooters:
@@ -124,15 +158,14 @@ func step(ctx: Dictionary) -> Dictionary:
 			var key: String = "%s|%s" % [craft_id, unit_id]
 			if not weapon_threatens_ships(weapon_id) or not bool(is_fit.call(unit)) or bool(has_ground_contact.call(unit)):
 				_locks.erase(key)
+				_announced.erase(key)
 				continue
 			var sight: Dictionary = Dictionary(sees.call(unit, target))
 			var range_tiles: float = float(sight.get("range_tiles", INF))
 			if not bool(sight.get("visible", false)) or range_tiles > float(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", weapon_id)):
 				_locks.erase(key)
+				_announced.erase(key)
 				continue
-			if tick < int(_next_shot_tick.get(unit_id, 0)):
-				continue
-			_next_shot_tick[unit_id] = tick + maxi(int(WEAPON_DATA_SCRIPT.call("get_ticks_between_attacks", weapon_id)), 1)
 			var threat_context: Dictionary = {
 				"weapon_id": weapon_id, "attacker_unit_id": unit_id, "attacker_label": unit_id, "asset_id": craft_id,
 				"range_tiles": range_tiles, "asset_position": target.get("position", Vector2.ZERO),
@@ -140,26 +173,43 @@ func step(ctx: Dictionary) -> Dictionary:
 				"allow_destroy": false,
 			}
 			if not _locks.has(key):
-				# Aufschaltung: erst Warnung (der Baustein richtet keinen Schaden an), dann Treffer im naechsten Takt.
-				_locks[key] = true
+				# Beginn einer Aufschaltung (die Zeit laeuft in laufender Einsatzzeit). Die Meldung erscheint beim
+				# Beginn der ersten Aufschaltung auf dieses Schiff, einmal je Schuetze, bis die Aufschaltung zurueckgesetzt wird.
 				threat_context["warning_seen"] = false
 				var warning: Dictionary = Dictionary(_resolver.call("evaluate_threat", status, threat_context))
 				if not bool(warning.get("eligible", false)):
-					_locks.erase(key)
 					continue
+				_locks[key] = tick
 				if not bool(AIR_ASSET_STATUS_SCRIPT.call("is_damage_state", String(status.get("state", "")))):
 					status = Dictionary(warning.get("next_status", status)).duplicate(true)
 					last_effect = Dictionary(warning.get("simulation_effect", {})).duplicate(true)
 					changed = true
-				out.events.append({"type": "warning", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick})
-				out.messages.append({"craft_id": craft_id, "text": String(WARNING_TEXT.get(weapon_id, "%s: Bodenfeuer schaltet auf!")) % display_name})
+				if not _announced.has(key):
+					_announced[key] = true
+					out.events.append({"type": "warning", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick})
+					out.messages.append({"craft_id": craft_id, "text": String(WARNING_TEXT.get(weapon_id, "%s: Bodenfeuer schaltet auf!")) % display_name})
+				continue
+			if tick - int(_locks[key]) < lock_ticks(weapon_id):
 				continue
 			threat_context["warning_seen"] = true
 			var probe: Dictionary = Dictionary(_resolver.call("evaluate_threat", status, threat_context))
 			if not bool(probe.get("eligible", false)) or not bool(probe.get("hit_allowed", false)):
+				# K6: Der Schuss kann nicht wirken (Warnstatus noch nicht gebucht). Weder Aufschaltung noch Zufallswurf
+				# werden verbraucht; fehlt der Warnstatus, wird er erneut angefordert (ohne neue Meldung).
+				if bool(probe.get("warning_required", false)) and not bool(AIR_ASSET_STATUS_SCRIPT.call("is_damage_state", String(status.get("state", "")))):
+					threat_context["warning_seen"] = false
+					var rewarn: Dictionary = Dictionary(_resolver.call("evaluate_threat", status, threat_context))
+					if bool(rewarn.get("eligible", false)):
+						status = Dictionary(rewarn.get("next_status", status)).duplicate(true)
+						last_effect = Dictionary(rewarn.get("simulation_effect", {})).duplicate(true)
+						changed = true
 				continue
 			var risk: float = float(probe.get("risk", 0.0))
-			var chance: float = hit_chance(risk, float(target.get("pilot_skill", 0.5)))
+			var chance: float = hit_chance(weapon_id, float(target.get("pilot_skill", 0.5)))
+			# Neue Aufschaltung nach jedem Schuss: hoechstens ein Schuss je Aufschaltzeit.
+			_locks[key] = tick
+			# Dieser Wurf teilt den Strom mit dem Bodenfeuer des Schiffs (Luft-Boden-Feuer der SimulationRoot);
+			# er verschiebt dessen Streuung, gewollt (E8). Genau ein Schritt je Schuss, keiner ohne Schuss.
 			var drawn: float = float(roll.call())
 			var hit: bool = drawn < chance
 			var event: Dictionary = {"type": "shot", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick,
@@ -177,7 +227,7 @@ func step(ctx: Dictionary) -> Dictionary:
 				if not _hit_reported.has(craft_id):
 					_hit_reported[craft_id] = true
 					out.messages.append({"craft_id": craft_id, "text": MESSAGE_FIRST_HIT % display_name})
-				if is_broken_off(status) and not _break_off_reported.has(craft_id):
+				if is_broken_off(status, style) and not _break_off_reported.has(craft_id):
 					_break_off_reported[craft_id] = true
 					_cease_pending[craft_id] = true
 					out.messages.append({"craft_id": craft_id, "text": MESSAGE_BREAK_OFF % [display_name, int(status.get("integrity", 0))]})
@@ -200,7 +250,9 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 		return {}
 	var adapter = driver.call("get_hex_sight_adapter")
 	var registry: Node = root.call("get_hex_ground_terrain_registry") if root.has_method("get_hex_ground_terrain_registry") else null
-	if not targets.is_empty() and (adapter == null or not adapter.is_active() or registry == null):
+	# Ohne Sichtrechnung (Adapter nicht bereit) wird nicht geschossen, ein ausstehender Feuerstopp wird trotzdem versucht.
+	var can_step: bool = targets.is_empty() or (adapter != null and adapter.is_active() and registry != null)
+	if not can_step and _cease_pending.is_empty():
 		return {}
 	for index in range(targets.size()):
 		var target: Dictionary = Dictionary(targets[index])
@@ -221,7 +273,7 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 		"sees": Callable(self, "_sees"),
 		"roll": Callable(root, "draw_air_ground_roll"),
 	}
-	var result: Dictionary = step(ctx)
+	var result: Dictionary = step(ctx) if can_step else {"events": [], "messages": [], "updates": {}, "cease": _cease_pending.keys()}
 	_driver = null
 	_adapter = null
 	_registry = null
@@ -312,6 +364,7 @@ func _forget_departed(targets: Array) -> void:
 		for craft_id in memory.keys():
 			if not present.has(craft_id):
 				memory.erase(craft_id)
-	for key in _locks.keys():
-		if not present.has(String(key).get_slice("|", 0)):
-			_locks.erase(key)
+	for memory in [_locks, _announced]:
+		for key in memory.keys():
+			if not present.has(String(key).get_slice("|", 0)):
+				memory.erase(key)

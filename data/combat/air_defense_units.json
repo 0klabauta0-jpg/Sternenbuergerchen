@@ -1,6 +1,18 @@
 {
   "status": "provisional_values_wired_at_landing_commit",
   "contract": "docs/dev/ground_air_defense_engagement_contract.md",
+  "ground_fire_vs_air": {
+    "lock_seconds_rocket_launcher": 4.0,
+    "lock_seconds_rail_gun": 2.5,
+    "hit_chance_min": 0.05,
+    "hit_chance_max": 0.60,
+    "balance_status": "initial"
+  },
+  "break_off_hull_fraction_by_style": {
+    "vorsichtig": 0.65,
+    "normal": 0.50,
+    "aggressiv": 0.10
+  },
   "units": {
     "hagel": {
       "name": "Hagel",

@@ -43,6 +43,22 @@ static func pilot_profile(pilot_skill: float) -> Dictionary:
 	}
 
 
+## Remaining hull fraction at which a ship breaks off (landing approach AND ground-fire attack), per approach style
+## ("vorsichtig" 0.65, "normal" 0.50, "aggressiv" 0.10; data block break_off_hull_fraction_by_style). An empty or unknown
+## style counts as "normal"; "cautious"/"aggressive" are accepted as spellings. Without the data block the old single
+## value pilot.auto_break_off_hull_fraction (0.35) is used.
+static func break_off_hull_fraction(approach_style: String = "") -> float:
+	var fallback: float = float(Dictionary(definition().get("pilot", {})).get("auto_break_off_hull_fraction", 0.35))
+	var table: Variant = definition().get("break_off_hull_fraction_by_style")
+	if typeof(table) != TYPE_DICTIONARY or table.is_empty():
+		return fallback
+	var style: String = approach_style.strip_edges().to_lower()
+	style = {"cautious": "vorsichtig", "aggressive": "aggressiv"}.get(style, style)
+	if not style in ["vorsichtig", "normal", "aggressiv"]:
+		style = "normal"
+	return float(table.get(style, table.get("normal", fallback)))
+
+
 ## Ship height minus weapon mount height, in terrain height levels.
 ## Negative means the ship is below the weapon's horizon.
 static func height_delta_levels(ship_ground_level: int, profile_id: String, unit_ground_level: int) -> int:
@@ -106,6 +122,8 @@ static func resolve_approach(context: Dictionary) -> Dictionary:
 	var ship_model: String = String(context.get("ship_model", "cutlass"))
 	var flares: int = int(context.get("flares", Dictionary(Dictionary(counter.get("ships", {})).get(ship_model, {})).get("flares", 0)))
 	var decision: String = String(context.get("decision", DECISION_PRESS_ON))
+	# The break-off limit follows the chosen approach style (context approach_style; missing = normal).
+	var break_off_limit: float = break_off_hull_fraction(String(context.get("approach_style", "")))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed_to_int("%s:%.2f:air_defense" % [String(context.get("seed", "")), float(pilot.pilot_skill)])
 
@@ -214,7 +232,7 @@ static func resolve_approach(context: Dictionary) -> Dictionary:
 		else:
 			state = SYSTEMS.advance(stats, state, VOLLEY_SECONDS).state
 		var reacted: bool = under_fire_volleys >= maxi(int(pilot.reaction_delay_volleys), 1)
-		var hull_low: bool = float(state.hull) / float(state.hull_capacity) < float(pilot.auto_break_off_hull_fraction)
+		var hull_low: bool = float(state.hull) / float(state.hull_capacity) < break_off_limit
 		if break_off_started_volley < 0 and reacted and (decision == DECISION_BREAK_OFF or hull_low):
 			break_off_started_volley = index
 			events.append({"volley": index, "type": "break_off_started", "forced": hull_low and decision != DECISION_BREAK_OFF})

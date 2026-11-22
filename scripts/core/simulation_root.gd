@@ -8140,7 +8140,7 @@ func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
 	for key in ["craft_id", "target_unit_id", "request_id"]:
 		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty() or String(command[key]).length() > 128: return {"ok":false, "reason":"invalid_command"}
-	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
+	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id)), _air_attack_style(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
 	var id: String = command.request_id
 	if _air_ground_order_receipts.has(id):
 		var prior: Dictionary = _air_ground_order_receipts[id]
@@ -8186,7 +8186,7 @@ func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
 	for key in ["craft_id", "target_unit_id", "weapon_slot"]:
 		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_command"}
-	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
+	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id)), _air_attack_style(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
 	var binding: Dictionary = _resolve_air_support_craft(command.craft_id)
 	if not binding.get("ok", false): return binding
 	var flight: RefCounted = binding.flight
@@ -8295,6 +8295,14 @@ func request_air_support_ground_fire(command: Dictionary) -> Dictionary:
 ## Luft-Boden-Feuers; Rechnen und Melden liegt im Baustein. Ohne Luftunterstuetzung (Skirmish, Mehrspieler) leer.
 const GROUND_FIRE_VS_AIR = preload("res://scripts/combat/ground_fire_vs_air.gd")
 
+## Aktueller Anflugstil des Schiffs (Zeile auf der Schiffskarte); ohne Karte oder Angabe: normal.
+func _air_attack_style(craft_id: String) -> String:
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	if controller == null or not controller.has_method("_find_mission_dropship_card_entry"): return "normal"
+	var card: Dictionary = controller.call("_find_mission_dropship_card_entry", craft_id)
+	var style := String(card.get("approach_style", "")).strip_edges().to_lower()
+	return style if style in ["vorsichtig", "normal", "aggressiv"] else "normal"
+
 func get_air_support_threat_targets() -> Array:
 	var targets: Array = []
 	if _air_support_sorties.is_empty() or _air_support_source == null or not is_hex_ground_runtime_active(): return targets
@@ -8314,7 +8322,7 @@ func get_air_support_threat_targets() -> Array:
 			if typeof(profile) == TYPE_DICTIONARY and typeof(profile.get("platform_values")) == TYPE_DICTIONARY:
 				var value: Variant = profile.platform_values.get(key)
 				if typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)): skill = clampf(float(value), 0.0, 1.0)
-		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill})
+		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill, "approach_style":_air_attack_style(craft_id)})
 	return targets
 
 func draw_air_ground_roll() -> float:

@@ -451,7 +451,7 @@ static func resolve(context: Dictionary) -> Dictionary:
 	var result: Dictionary = AD.resolve_approach({
 		"seed": String(context.get("seed", "")), "pilot_skill": float(context.get("pilot_skill", 0.5)),
 		"ship_model": String(ship.model_id), "ship_stats": ship.stats, "ship_state": ship.state, "decision": decision,
-		"volleys": volleys,
+		"volleys": volleys, "approach_style": style,
 	})
 	var plan: Dictionary = summarize(result, String(context.get("seed", "")))
 	plan["decision"] = decision

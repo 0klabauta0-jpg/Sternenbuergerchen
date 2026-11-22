@@ -13515,7 +13515,7 @@ func _append_mission_dropship_card_approach_style_row(host: VBoxContainer, card:
 	var active_style: String = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", _current_approach_style)))
 	var disabled: bool = _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_card_lz(card)
 	for style in AIR_DEFENSE_PLAN.APPROACH_STYLES:
-		var button := _build_mission_dropship_card_command_button(String(AIR_DEFENSE_PLAN.STYLE_LABELS[style]), String(AIR_DEFENSE_PLAN.STYLE_TOOLTIPS[style]), disabled,
+		var button := _build_mission_dropship_card_command_button(String(AIR_DEFENSE_PLAN.STYLE_LABELS[style]), "%s %s" % [String(AIR_DEFENSE_PLAN.STYLE_TOOLTIPS[style]), GROUND_FIRE_VS_AIR_HINTS.attack_hint(String(style))], disabled,
 			Callable(self, "_on_mission_dropship_card_approach_style_pressed").bind(craft_id, String(style)), craft_id, "style_%s" % String(style), String(style) == active_style)
 		button.custom_minimum_size = Vector2(0.0, MISSION_DROPSHIP_APPROACH_BUTTON_SIZE.y)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -38766,6 +38766,7 @@ func _mission_drop_pilot_skill_for_craft(craft_id: String) -> float:
 # Ground air defence at the landing commit point (ground_air_defense_engagement_contract).
 # Authoritative side only. Returns false when the approach is broken off.
 const AIR_DEFENSE_PLAN = preload("res://scripts/mission/air_defense_approach_plan.gd")
+const GROUND_FIRE_VS_AIR_HINTS = preload("res://scripts/combat/ground_fire_vs_air.gd")
 var _air_defense_feedback_text: String = ""
 
 func _resolve_air_defense_on_approach(lz: Vector2) -> bool:
