@@ -10,6 +10,7 @@ extends VBoxContainer
 ## Ein Klick klappt das Angebot an Ort und Stelle auf (kein neues Fenster); erst "Verbindlich bestellen" bucht.
 
 const SERVICE = preload("res://scripts/core/emergency_tanker_service.gd")
+const CREDIT_TEXT = preload("res://scripts/core/credit_text.gd")
 const HELP_ID := "campaign.emergency_tanker"
 const POLL_SECONDS := 0.2
 
@@ -166,6 +167,8 @@ func _offer_text(offer: Dictionary, view: Dictionary) -> String:
 	var lines: PackedStringArray = []
 	lines.append("Lieferung: %d Einheiten" % int(offer.get("quantity", 0)))
 	lines.append("Preis: Anfahrt %d Cr + %d × %s Cr = %d Cr" % [int(offer.get("callout_fee", 0)), int(offer.get("quantity", 0)), _number(offer.get("unit_price", 0)), int(offer.get("price", 0))])
+	if bool(offer.get("on_credit", false)):
+		lines.append(CREDIT_TEXT.credit_offer_line(int(offer.get("credits_after", 0)), float(offer.get("interest_rate", 0.0)), float(offer.get("interest_period_seconds", 0.0))))
 	lines.append("Wartezeit: etwa %d s bis zur Ankunft, dann %d s Betankung" % [int(ceil(float(offer.get("wait_seconds", 0.0)))), int(ceil(float(offer.get("refuel_seconds", 0.0))))])
 	lines.append(_reach_text(offer))
 	if bool(view.get("free_home_landing", false)):

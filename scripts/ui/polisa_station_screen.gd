@@ -3,6 +3,7 @@ const SKIN = preload("res://scripts/ui/base_management_skin.gd")
 const MENU_ICONS = preload("res://scripts/ui/menu_equipment_icons.gd")
 const CARGO_LIFT_FEEDBACK = preload("res://scripts/ui/polisa_cargo_lift_feedback.gd")
 const CAMPAIGN_HELP = preload("res://scripts/ui/campaign_context_help.gd")
+const CREDIT_TEXT = preload("res://scripts/core/credit_text.gd")
 const RECRUIT_VIEW = preload("res://scripts/ui/polisa_recruitment_view.gd")
 ## Read-only station projection. All purchases and equipment use runtime commands.
 var _adapter: Node
@@ -95,7 +96,7 @@ func refresh(snapshot: Dictionary) -> void:
 		_craft_picker.set_item_metadata(_craft_picker.item_count - 1, String(craft.craft_id))
 		if String(craft.craft_id) == String(snapshot.get("craft_id", "")): _craft_picker.select(_craft_picker.item_count - 1)
 	_craft_picker.disabled = _craft_picker.item_count < 2
-	_credits.text = "%d Credits" % int(snapshot.get("credits", 0))
+	_credits.text = CREDIT_TEXT.format(int(snapshot.get("credits", 0)), " Credits")
 	var quote := refuel_quote(snapshot)
 	_fuel_label.text = "Schiff: %s\nTank: %.2f / %.2f" % [String(snapshot.get("craft_name", snapshot.get("craft_id", "-"))), float(snapshot.get("fuel", 0.0)), float(snapshot.get("fuel_capacity", 0.0))]
 	_refuel_button.text = "Tanken / +%.2f / %d Cr" % [float(quote.amount), int(quote.cost)] if quote.amount > 0.0 else String(quote.reason)

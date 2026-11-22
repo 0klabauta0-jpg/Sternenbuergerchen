@@ -6,6 +6,7 @@ const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visu
 const SKIN=preload("res://scripts/ui/base_management_skin.gd")
 const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
+const CREDIT_TEXT = preload("res://scripts/core/credit_text.gd")
 const OFFER_ID := "medictool_supply"
 const DEBOUNCE_SECONDS := 0.35
 
@@ -230,7 +231,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		_craft_selector.select(0)
 	_craft_selector.disabled = ids.is_empty() or not _pending.is_empty()
 	_refresh_campaign_actions(supply)
-	_credits.text = "Kredite: %d" % int(supply.get("credits", 0)) if not supply.is_empty() else "Kredite: —"
+	_credits.text = "Kredite: " + CREDIT_TEXT.format(int(supply.get("credits", 0))) if not supply.is_empty() else "Kredite: —"
 	var quantities: Dictionary = Dictionary(supply.get("item_quantities", {}))
 	_items.text = "Sanitätswerkzeug: %d" % int(quantities.get("medictool", 0)) if not supply.is_empty() else "Bestand: —"
 	var fuel_values: Dictionary = Dictionary(supply.get("fuel_by_craft_id", {}))
