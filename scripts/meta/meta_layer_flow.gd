@@ -331,7 +331,7 @@ func _ready() -> void:
 	_star_map_screen.name = "StarMapScreen"
 	star_layer.add_child(_star_map_screen)
 	_star_map_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"), Callable(self, "_get_star_map_area_projection"))
+	_star_map_screen.call("configure", Callable(self, "_get_star_map_snapshot"), Callable(self, "_request_star_map_operation"), Callable(self, "_get_star_map_area_projection"), Callable(self, "_get_star_map_tanker_view"))
 	_star_map_screen.hide()
 	_bind_context_overlay_signals()
 	_ensure_meta_nav_timer_labels()
@@ -8788,6 +8788,12 @@ func _finish_space_approach(craft_id: String = "") -> void:
 		if _active_mission != null: _remember_location(_active_mission)
 		_last_mission_result = previous_result
 		_restore_location_view_context(previous_context, previous_view, _active_mission)
+
+## Rein lesender Zugang des Tankerfelds der Sternkarte zur Auskunft des Nottankdienstes (nicht ueber den Befehlsweg der Karte).
+func _get_star_map_tanker_view(craft_id: String) -> Dictionary:
+	if not is_instance_valid(_singleplayer_runtime) or not _singleplayer_runtime.has_method("get_emergency_tanker_view"): return {}
+	var view: Variant = _singleplayer_runtime.call("get_emergency_tanker_view", craft_id)
+	return view if view is Dictionary else {}
 
 func _get_star_map_area_projection(craft_id: String) -> Dictionary:
 	# Narrow read seam. No Area/Flight lookup or authority is manufactured here.

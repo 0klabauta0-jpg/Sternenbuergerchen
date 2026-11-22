@@ -800,9 +800,6 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
 	if operation in ["emergency_tanker_order", "emergency_tanker_cancel"]:
 		return _request_emergency_tanker(operation, payload)
-	# Reine Auskunft fuer Hosts, die nur den Befehlsweg kennen (Sternkarte): bucht nichts, hebt keine Revision.
-	if operation == "emergency_tanker_view":
-		return get_emergency_tanker_view(String(payload.get("craft_id", "")))
 	if operation in ["station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var target := String(payload.get("craft_id", ""))
 		if String(_service_context(target).get("location_id", "")) != "polisa": return _reject("station_service_required", "Schiff zuerst auf Polisa bereitstellen")

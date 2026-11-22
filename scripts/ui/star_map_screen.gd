@@ -35,6 +35,7 @@ var _show_fuel_help := false
 var _fuel_toggle: Button
 var _fuel_pinned := false
 var _tanker_panel: VBoxContainer
+var _tanker_view_provider: Callable
 var _boundary: Label
 var _error: Label
 var _progress: ProgressBar
@@ -56,10 +57,13 @@ var _destination_picture: TextureRect
 var _picture_location := ""
 var _destination_heading: Label
 
-func configure(snapshot_provider: Callable, command_handler: Callable, area_provider: Callable = Callable()) -> void:
+## tanker_view_provider (optional): rein lesender Zugang zur Auskunft des Nottankdienstes, Aufruf mit der Schiffskennung
+## (craft_id) -> Dictionary. Ohne ihn (eingebettete Karte, Test-Stubs) bleibt das Tankerfeld verborgen und fragt nichts.
+func configure(snapshot_provider: Callable, command_handler: Callable, area_provider: Callable = Callable(), tanker_view_provider: Callable = Callable()) -> void:
 	_provider = snapshot_provider
 	_commands = command_handler
 	_area_provider = area_provider
+	_tanker_view_provider = tanker_view_provider
 	if not _built:
 		_build()
 	else:
@@ -457,10 +461,10 @@ func _update_fuel_help() -> void:
 
 ## Auskunft des Nottankdienstes fuer das Schiff, das die Karte gerade zeigt (im Orbitbild das gewaehlte). Nur lesend.
 func _tanker_view() -> Dictionary:
-	if not _commands.is_valid(): return {}
+	if not _tanker_view_provider.is_valid(): return {}
 	var craft_id: String = _orbit_craft_id if _orbit_visible and not _orbit_craft_id.is_empty() else String(Dictionary(_runtime.get("space_travel", {})).get("craft_id", ""))
 	if craft_id.is_empty(): return {}
-	var result: Variant = _commands.call("emergency_tanker_view", {"craft_id": craft_id})
+	var result: Variant = _tanker_view_provider.call(craft_id)
 	return result if result is Dictionary else {}
 
 func _on_fleet_craft_selected(index: int) -> void:
