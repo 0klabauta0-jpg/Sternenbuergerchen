@@ -198,7 +198,8 @@ static func build_recovery_state(severity: String, rules: Dictionary) -> Diction
 static func build_total_loss_penalty(team_states: Array, credits: int, rules: Dictionary) -> Dictionary:
 	var cfg: Dictionary = rules.get("total_loss", {})
 	var fee := maxi(roundi(float(credits) * float(cfg.get("rescue_fee_fraction", 0.0))), int(cfg.get("rescue_fee_minimum", 0)))
-	fee = mini(fee, maxi(credits, 0))
+	# Abschnitt K (E4): die Gebuehr wird nicht mehr auf das Guthaben gedeckelt; sie ist die Notrettung als letzter Ausweg und darf
+	# das Konto ins Minus fuehren. Bei Credits <= 0 gilt die Mindestgebuehr (negatives Guthaben ergibt keinen negativen Anteil).
 	var wounded: Array = []
 	var morale_ids := PackedStringArray()
 	for raw in team_states:

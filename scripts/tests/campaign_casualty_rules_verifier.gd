@@ -44,11 +44,12 @@ func _run() -> void:
 	var state: Dictionary = R.build_recovery_state("severe", rules)
 	check(state.state == "wounded" and float(state.seconds_remaining) == 2400.0 and float(state.seconds_total) == 2400.0, "recovery state carries the configured time")
 	var lost_team: Array = [ts("lead", "down"), ts("two", "fit", true), ts("three", "fit"), ts("pilot", "fit", false, true, true)]
-	var penalty: Dictionary = R.build_total_loss_penalty(lost_team, 500, rules)
-	check(int(penalty.rescue_fee) == 125 and is_equal_approx(float(penalty.morale_delta), -0.08), "total loss costs a quarter of the credits and morale")
+	# Abschnitt K (22.11.2026): Mindestgebuehr 400 (casualty_rules.json), der Anteil 25 % gilt erst darueber.
+	var penalty: Dictionary = R.build_total_loss_penalty(lost_team, 4000, rules)
+	check(int(penalty.rescue_fee) == 1000 and is_equal_approx(float(penalty.morale_delta), -0.08), "total loss costs a quarter of the credits and morale")
 	check(penalty.wounded.size() == 2 and penalty.wounded[0].severity == "light" and Array(penalty.morale_unit_ids).size() == 4, "everyone who was down is lightly wounded, everyone loses morale")
-	check(int(R.build_total_loss_penalty(lost_team, 120, rules).rescue_fee) == 50, "the rescue fee has a minimum")
-	check(int(R.build_total_loss_penalty(lost_team, 30, rules).rescue_fee) == 30, "the rescue fee never exceeds the credits")
+	check(int(R.build_total_loss_penalty(lost_team, 120, rules).rescue_fee) == 400 and int(R.build_total_loss_penalty(lost_team, 500, rules).rescue_fee) == 400, "the rescue fee has a minimum of 400")
+	check(int(R.build_total_loss_penalty(lost_team, 30, rules).rescue_fee) == 400 and int(R.build_total_loss_penalty(lost_team, 0, rules).rescue_fee) == 400 and int(R.build_total_loss_penalty(lost_team, -200, rules).rescue_fee) == 400, "the rescue fee is not capped by the credits (the emergency rescue is the last way out; at credits <= 0 the minimum applies)")
 	check(R.rules_are_valid(rules), "shipped rules file is valid")
 	check(not R.rules_are_valid({}) and not R.rules_are_valid({"down_revive_window_seconds": 60.0}), "empty or partial rules are invalid")
 	check(R.load_rules("res://data/singleplayer/does_not_exist.json").is_empty(), "a missing rules file yields empty rules and reports an error")

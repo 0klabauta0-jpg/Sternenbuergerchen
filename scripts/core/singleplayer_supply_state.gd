@@ -23,6 +23,8 @@ static func get_campaign_recipe(blueprint_id:String)->Dictionary:
 
 var _definitions: Dictionary = {}
 var _credits: int = 0
+## Schulden (K): Restzeit bis zur naechsten Zinsbuchung in Sekunden; -1 = Uhr steht (Credits >= 0) bzw. volle Periode beim naechsten Minus.
+var _debt_remaining: float = -1.0
 var _item_quantities: Dictionary = {}
 var _fuel_by_craft_id: Dictionary = {}
 var _stock_by_offer_id: Dictionary = {}
@@ -75,10 +77,15 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	if data.has("emergency_fuel"):
 		var emergency_error: String = _emergency_fuel_error(data.emergency_fuel)
 		if not emergency_error.is_empty(): return _reject("invalid_supply_data", emergency_error)
+	# Schulden (K): Kreditrahmen und Zinsen stehen im Block debt; er darf fehlen (dann gibt es keine Schulden).
+	if data.has("debt"):
+		var debt_error: String = _debt_error(data.debt)
+		if not debt_error.is_empty(): return _reject("invalid_supply_data", debt_error)
 	_reset_route_fuel_preparation()
 	_station_purchase_cache_revision = -1
 	_definitions = data
 	_credits = int(data.initial_credits)
+	_debt_remaining = -1.0
 	_item_quantities.clear()
 	_inventory.clear()
 	_modular_capacity_baseline = -1
@@ -114,7 +121,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -476,13 +483,19 @@ func preview_emergency_tanker(payload: Dictionary, context: Dictionary = {}) -> 
 		return _tanker_reject("tank_nearly_full", {"quantity": quantity, "min_quantity": int(data.min_quantity)})
 	var callout_fee: int = int(data.callout_fee)
 	var price: int = callout_fee + int(ceil(float(quantity) * float(data.price_per_unit)))
-	if _credits < price:
-		return _tanker_reject("insufficient_credits", {"price": price, "credits": _credits, "quantity": quantity})
+	# Schulden (K, E2/E3): der Nottankdienst ist einer von zwei Wegen ins Minus; er liefert bis zum Kreditrahmen auf Kredit.
+	var credits_after: int = _credits - price
+	var debt: Dictionary = Dictionary(_definitions.get("debt", {}))
+	if credits_after < 0:
+		if debt.is_empty():
+			return _tanker_reject("insufficient_credits", {"price": price, "credits": _credits, "quantity": quantity})
+		if credits_after < -int(debt.debt_limit):
+			return _tanker_reject("debt_limit_reached", {"price": price, "credits": _credits, "credits_after": credits_after, "debt_limit": int(debt.debt_limit), "quantity": quantity})
 	var dispatch_seconds: float = float(data.dispatch_seconds)
 	var response_seconds: float = float(data.response_seconds)
 	var refuel_seconds: float = float(data.refuel_seconds)
 	return {"ok": true, "craft_id": craft_id, "quantity": quantity, "price": price, "callout_fee": callout_fee, "unit_price": float(data.price_per_unit),
-		"credits": _credits, "free_capacity": free, "dispatch_seconds": dispatch_seconds, "response_seconds": response_seconds, "refuel_seconds": refuel_seconds, "delivery_retry_seconds": float(data.delivery_retry_seconds),
+		"credits": _credits, "credits_after": credits_after, "on_credit": credits_after < 0, "interest_rate": float(debt.get("interest_rate", 0.0)), "interest_period_seconds": float(debt.get("interest_period_seconds", 0.0)), "free_capacity": free, "dispatch_seconds": dispatch_seconds, "response_seconds": response_seconds, "refuel_seconds": refuel_seconds, "delivery_retry_seconds": float(data.delivery_retry_seconds),
 		"wait_seconds": dispatch_seconds + response_seconds, "total_seconds": dispatch_seconds + response_seconds + refuel_seconds, "status": String(data.get("status", "")),
 		"message": "Tanker rufen: %d Einheiten für %d Cr, Ankunft in etwa %d s." % [quantity, price, int(ceil(dispatch_seconds + response_seconds))]}
 
@@ -495,10 +508,11 @@ func _emergency_tanker_order(payload: Dictionary, context: Dictionary, request_i
 	if not _tanker_authorized(context): return _tanker_reject("tanker_not_authorized")
 	var preview: Dictionary = preview_emergency_tanker(payload, context)
 	if not bool(preview.get("ok", false)): return preview
+	_debt_before_booking()
 	_credits -= int(preview.price)
 	_revision += 1
 	var receipt: Dictionary = preview.duplicate(true)
-	for key: String in ["credits", "free_capacity", "wait_seconds", "total_seconds", "status"]: receipt.erase(key)
+	for key: String in ["credits", "credits_after", "on_credit", "interest_rate", "interest_period_seconds", "free_capacity", "wait_seconds", "total_seconds", "status"]: receipt.erase(key)
 	receipt["order_id"] = request_id
 	receipt["message"] = "Tanker bestellt"
 	return receipt
@@ -615,6 +629,9 @@ func _valid_nonnegative_number(value: Variant) -> bool:
 func _valid_nonnegative_integer(value: Variant) -> bool:
 	return _valid_nonnegative_number(value) and float(value) == floor(float(value)) and float(value) <= 2147483647.0
 
+func _valid_integer(value: Variant) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) == floor(float(value)) and absf(float(value)) <= 2147483647.0
+
 func _valid_positive_integer(value: Variant) -> bool:
 	return _valid_nonnegative_integer(value) and int(value) > 0
 
@@ -622,14 +639,23 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
+	var exported: Dictionary = _export_state_base()
+	# Schulden (K): Restzeit bis zur naechsten Zinsbuchung, nur im Minus (additiver Schluessel; fehlt er, gilt die volle Periode).
+	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
+	return exported
+
+func _export_state_base() -> Dictionary:
 	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
 	if not fresh.configure().get("ok", false):
 		return _reject("invalid_supply_data", "Aktuelle Versorgungsdaten fehlen")
-	if data.get("schema_version") != 1 or not _valid_nonnegative_integer(data.get("credits")) or not _valid_nonnegative_integer(data.get("revision")):
+	# Credits duerfen negativ sein (Schulden, K); ein Guthaben ueber der Grenze oder keine ganze Zahl bleibt ungueltig.
+	if data.get("schema_version") != 1 or not _valid_integer(data.get("credits")) or not _valid_nonnegative_integer(data.get("revision")):
 		return _reject("invalid_supply_state", "Versorgungsstand ungueltig")
+	if data.has("debt_interest_remaining") and not _valid_nonnegative_number(data.debt_interest_remaining):
+		return _reject("invalid_supply_state", "Zinsuhr ungueltig")
 	for field in ["definitions", "item_quantities", "fuel_by_craft_id", "stock_by_offer_id", "requests", "reward_receipts"]:
 		if typeof(data.get(field)) != TYPE_DICTIONARY:
 			return _reject("invalid_supply_state", "Versorgungsfelder fehlen")
@@ -708,6 +734,11 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
+	# Zinsuhr: nur im Minus und mit gueltigem Schluessel; sonst steht sie (volle Periode beim naechsten Zinslauf).
+	_debt_remaining = -1.0
+	if _credits < 0 and data.has("debt_interest_remaining"):
+		var period: float = float(Dictionary(fresh._definitions.get("debt", {})).get("interest_period_seconds", 0.0))
+		_debt_remaining = minf(float(data.debt_interest_remaining), period) if period > 0.0 else -1.0
 	_item_quantities = data.item_quantities.duplicate(true)
 	_inventory = containers.duplicate(true)
 	_modular_capacity_baseline = int(modular_baseline)
@@ -891,6 +922,8 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	# eigenen Zahlen im Beleg. Darum wird der Block beim Vergleich ignoriert (ein Stand ohne ihn laedt, ein Stand mit ihm laedt auch,
 	# wenn die Zahlen spaeter neu abgestimmt werden).
 	left.erase("emergency_fuel"); right.erase("emergency_fuel")
+	# Schulden (K): Kreditrahmen und Zinsen gelten nur fuer kuenftige Buchungen; ein Stand ohne den Block laedt (alter Stand).
+	left.erase("debt"); right.erase("debt")
 	return JSON.stringify(left, "", true) == JSON.stringify(right, "", true)
 
 
@@ -1095,6 +1128,69 @@ func charge_credits_capped(amount: int) -> Dictionary:
 		_credits -= charged
 		_revision += 1
 	return {"ok": true, "charged": charged, "credits": _credits}
+
+# --- Schulden (Abschnitt K, 22.11.2026) -------------------------------------------------------------------------------
+# Credits duerfen negativ sein. Nur zwei Wege fuehren unter null: der Nottankdienst (_emergency_tanker_order, bis zum Kreditrahmen
+# debt_limit) und die Rettungsgebuehr der Notrettung (charge_rescue_fee, ohne Rahmen). Jeder andere Kauf behaelt "Preis <= Credits".
+# Solange die Credits negativ sind, laeuft die Zinsuhr (advance_debt_clock); alle Zahlen stehen im Block debt der Daten.
+
+static func _debt_error(block: Variant) -> String:
+	if typeof(block) != TYPE_DICTIONARY: return "Schulden: Block ungueltig"
+	var number_ok := func(value: Variant) -> bool: return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0.0
+	for key: String in ["debt_limit", "interest_min"]:
+		var value: Variant = block.get(key)
+		if not number_ok.call(value) or float(value) != floorf(float(value)) or float(value) > 2147483647.0: return "Schulden: Wert ungueltig: " + key
+	if not number_ok.call(block.get("interest_period_seconds")) or float(block.interest_period_seconds) <= 0.0: return "Schulden: Zinsperiode ungueltig"
+	if not number_ok.call(block.get("interest_rate")) or float(block.interest_rate) <= 0.0 or float(block.interest_rate) > 1.0: return "Schulden: Zinssatz ungueltig"
+	if typeof(block.get("balance_status")) != TYPE_STRING: return "Schulden: balance_status fehlt"
+	return ""
+
+## Vor einer Buchung, die unter null fuehren kann: stand das Konto im Plus, beginnt die Zinsuhr beim naechsten Minus von vorn.
+func _debt_before_booking() -> void:
+	if _credits >= 0: _debt_remaining = -1.0
+
+## Rettungsgebuehr der Notrettung (E4): wird voll gebucht, auch wenn das Konto dadurch ins Minus faellt oder tiefer als der
+## Kreditrahmen. Gibt die gebuchte Summe zurueck.
+func charge_rescue_fee(amount: int) -> Dictionary:
+	if amount < 0:
+		return _reject("invalid_amount", "Betrag darf nicht negativ sein")
+	if amount > 0:
+		_debt_before_booking()
+		_credits -= amount
+		_revision += 1
+	return {"ok": true, "charged": amount, "credits": _credits}
+
+## Zinsen fuer einen Betrag im Minus: max(ceil(|Credits| x Satz), Mindestzins).
+func debt_interest_for(credits: int) -> int:
+	var debt: Dictionary = Dictionary(_definitions.get("debt", {}))
+	if debt.is_empty() or credits >= 0: return 0
+	# Das kleine Abziehen faengt Fliesskomma-Reste ab (3000 x 0,05 darf nie 151 geben).
+	return maxi(int(ceil(float(-credits) * float(debt.interest_rate) - 0.000001)), int(debt.interest_min))
+
+## Die Zinsuhr. delta in Sekunden (der Aufrufer deckelt je Frame). Steht das Konto im Plus, steht die Uhr (volle Periode beim naechsten
+## Minus). Je volle Periode im Minus wird eine Zinsbuchung abgezogen; Zinsen duerfen ueber den Kreditrahmen hinausfuehren; Zins auf Zins.
+## Gibt die Buchungen dieses Aufrufs zurueck: charges = [{amount, credits}] (credits = Stand nach der Buchung).
+func advance_debt_clock(delta: float) -> Dictionary:
+	var charges: Array = []
+	var debt: Dictionary = Dictionary(_definitions.get("debt", {}))
+	if debt.is_empty() or not is_finite(delta) or delta < 0.0: return {"ok": true, "charges": charges, "credits": _credits}
+	if _credits >= 0:
+		_debt_remaining = -1.0
+		return {"ok": true, "charges": charges, "credits": _credits}
+	var period: float = float(debt.interest_period_seconds)
+	if _debt_remaining < 0.0: _debt_remaining = period
+	_debt_remaining -= delta
+	while _debt_remaining <= 0.000001 and _credits < 0:
+		var interest: int = debt_interest_for(_credits)
+		_credits -= interest
+		_revision += 1
+		_debt_remaining += period
+		charges.append({"amount": interest, "credits": _credits})
+	return {"ok": true, "charges": charges, "credits": _credits}
+
+## Restzeit bis zur naechsten Zinsbuchung (Sekunden) oder -1, wenn die Uhr steht (Konto im Plus).
+func get_debt_interest_remaining() -> float:
+	return _debt_remaining if _credits < 0 else -1.0
 
 func get_modular_base() -> Dictionary:
 	if _modular_plan_cache_revision != _revision:

@@ -27,6 +27,7 @@ const STATE_LABELS: Dictionary = {
 ## Deutsche Saetze je Ablehnungsgrund (tanker-phase1-report.md e6, dazu die Gruende aus T2).
 const REASON_TEXTS: Dictionary = {
 	"insufficient_credits": "Zu wenig Credits für den Tankerruf (%d Cr nötig).",
+	"debt_limit_reached": "Kreditrahmen ausgeschöpft: Der Nottankdienst liefert nicht mehr.",
 	"tank_nearly_full": "Tank fast voll, Notlieferung lohnt nicht.",
 	"at_service_point": "Hier kann normal getankt werden.",
 	"tanker_order_open": "Ein Tanker ist bereits unterwegs.",

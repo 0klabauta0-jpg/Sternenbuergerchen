@@ -4,6 +4,6 @@
   "down_revive_window_seconds": 60.0,
   "recovery_radius_world": 180.0,
   "recovery_seconds": { "light": 180.0, "medium": 900.0, "severe": 2400.0 },
-  "total_loss": { "rescue_fee_fraction": 0.25, "rescue_fee_minimum": 50, "wound_severity": "light", "morale_delta": -0.08 },
+  "total_loss": { "rescue_fee_fraction": 0.25, "rescue_fee_minimum": 400, "balance_status": "initial", "wound_severity": "light", "morale_delta": -0.08 },
   "respawn": { "outage_base_seconds": 3600, "outage_step_seconds": 1800, "pickup_location_id": "polisa", "balance_status": "initial_values_not_final" }
 }
