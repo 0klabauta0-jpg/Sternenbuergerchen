@@ -1772,6 +1772,7 @@ func _on_tick_processed(tick: int) -> void:
 				profile_scopes[fire_scope_name] = int(_combat_fire_decision_debug_scopes_usec.get(fire_scope_name_variant, 0))
 	elif profile_enabled:
 		profile_scopes["combat_fire_decision_usec"] = 0
+	_advance_ground_fire_vs_air(simulation_root)
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_sync_objective_countdown_state()
@@ -2013,6 +2014,18 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 		return
 
 	respawn_manager.call("request_respawn", unit_id, unit_team_id)
+
+
+## LC6: Bodentruppen mit Raketenwerfer oder Schienenkanone beschiessen eigene Schiffe in der Luft. Eigener Takt je
+## Einheit, der Schussplatz des Bodengefechts (_next_attack_tick) bleibt unberuehrt. Ohne Schiff in der Luft
+## (Skirmish, Mehrspieler) tut der Aufruf nichts. Siehe scripts/combat/ground_fire_vs_air.gd.
+const GROUND_FIRE_VS_AIR_SCRIPT: GDScript = preload("res://scripts/combat/ground_fire_vs_air.gd")
+var _ground_fire_vs_air = null
+
+func _advance_ground_fire_vs_air(simulation_root: Node) -> void:
+	if _ground_fire_vs_air == null:
+		_ground_fire_vs_air = GROUND_FIRE_VS_AIR_SCRIPT.new()
+	_ground_fire_vs_air.call("advance", self, simulation_root, _get_tactical_controller(), _current_tick)
 
 
 func _try_enqueue_attacks(simulation_root: Node) -> void:

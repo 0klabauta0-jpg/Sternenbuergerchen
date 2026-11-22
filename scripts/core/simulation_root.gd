@@ -8140,6 +8140,7 @@ func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
 	for key in ["craft_id", "target_unit_id", "request_id"]:
 		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty() or String(command[key]).length() > 128: return {"ok":false, "reason":"invalid_command"}
+	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
 	var id: String = command.request_id
 	if _air_ground_order_receipts.has(id):
 		var prior: Dictionary = _air_ground_order_receipts[id]
@@ -8185,6 +8186,7 @@ func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	if command.size() != 3: return {"ok":false, "reason":"invalid_command"}
 	for key in ["craft_id", "target_unit_id", "weapon_slot"]:
 		if typeof(command.get(key)) != TYPE_STRING or String(command[key]).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_command"}
+	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(String(command.craft_id))): return GROUND_FIRE_VS_AIR.refusal()
 	var binding: Dictionary = _resolve_air_support_craft(command.craft_id)
 	if not binding.get("ok", false): return binding
 	var flight: RefCounted = binding.flight
@@ -8287,6 +8289,38 @@ func request_air_support_ground_fire(command: Dictionary) -> Dictionary:
 	assert(applied.get("ok", false))
 	air_support_ground_fired.emit(visual.duplicate(true))
 	return result
+
+## LC6: Bodenbeschuss gegen eigene Schiffe in der Luft (scripts/combat/ground_fire_vs_air.gd). Dieser Block liefert
+## dem Gefechts-Driver nur die Ziele (Schiffe, die gerade in der Luft sind) und den Zufall aus dem Strom des
+## Luft-Boden-Feuers; Rechnen und Melden liegt im Baustein. Ohne Luftunterstuetzung (Skirmish, Mehrspieler) leer.
+const GROUND_FIRE_VS_AIR = preload("res://scripts/combat/ground_fire_vs_air.gd")
+
+func get_air_support_threat_targets() -> Array:
+	var targets: Array = []
+	if _air_support_sorties.is_empty() or _air_support_source == null or not is_hex_ground_runtime_active(): return targets
+	var terrain: Node = _air_ground_registry()
+	if terrain == null: return targets
+	var craft_ids: Array = _air_support_sorties.keys()
+	craft_ids.sort()
+	for craft_id: String in craft_ids:
+		var pose: Dictionary = get_air_support_world_pose(craft_id)
+		if pose.is_empty(): continue
+		var skill := 0.5
+		var binding: Dictionary = _resolve_air_support_craft(craft_id)
+		var pilot_check: Dictionary = _resolve_air_support_pilot(craft_id)
+		if binding.get("ok", false) and pilot_check.get("ok", false) and pilot_check.pilot.has_method("get_character_profile_bundle"):
+			var key := "dropship_piloting" if binding.equipment.get_snapshot(craft_id).get("model_id") == "cutlass" else "fighter_piloting"
+			var profile: Variant = pilot_check.pilot.call("get_character_profile_bundle")
+			if typeof(profile) == TYPE_DICTIONARY and typeof(profile.get("platform_values")) == TYPE_DICTIONARY:
+				var value: Variant = profile.platform_values.get(key)
+				if typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)): skill = clampf(float(value), 0.0, 1.0)
+		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill})
+	return targets
+
+func draw_air_ground_roll() -> float:
+	# Derselbe Strom wie das Bodenfeuer des Schiffs (im Spielstand gesichert), 0.0 <= Wert < 1.0.
+	_air_ground_rng_state = (_air_ground_rng_state * 1103515245 + 12345) & 0x7fffffff
+	return float(_air_ground_rng_state) / 2147483648.0
 
 func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) -> Dictionary:
 	# Admission is a separate transaction; bind only existing authoritative

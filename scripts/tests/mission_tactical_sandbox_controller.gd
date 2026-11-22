@@ -19841,6 +19841,17 @@ func apply_air_asset_threat(context: Dictionary = {}, options: Dictionary = {}) 
 	return result
 
 
+## LC6: Meldung des Bodenbeschusses gegen ein Schiff in der Luft (Baustein ground_fire_vs_air.gd). Der Rumpf selbst
+## wird ueber den Status-Effekt der SimulationRoot gebucht; hier nur die Karte (Rumpf wie nach dem Anflug) und der Text.
+func report_ground_fire_vs_air(craft_id: String, status_snapshot: Dictionary, texts: Array) -> void:
+	if not status_snapshot.is_empty() and _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id:
+		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", status_snapshot)
+	if not texts.is_empty():
+		_last_command_text = " ".join(PackedStringArray(texts))
+		_set_mission_dropship_card_feedback(craft_id, _last_command_text)
+	_refresh_mission_dropship_panel()
+
+
 func record_tactical_breakout(trigger: String, fireteam_id: String = "", context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() and not _selected_fireteam_ids.is_empty():
