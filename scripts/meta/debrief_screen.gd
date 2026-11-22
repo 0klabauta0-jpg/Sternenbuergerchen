@@ -846,11 +846,38 @@ func _apply_player_readout_texts() -> void:
 		# Task 5b: Notrettung nach Totalverlust, nur aus dem Ergebnis gelesen.
 		if bool(_mission_result.get("casualty_total_loss", false)) and typeof(_mission_result.get("total_loss_penalty")) == TYPE_DICTIONARY:
 			_native_review_confirmation.text += "\nNotrettung · %d Credits Rettungsgebühr" % int(Dictionary(_mission_result.get("total_loss_penalty")).get("rescue_fee", 0))
+	var loot_text := build_loot_text(_mission_result)
+	if not loot_text.is_empty():
+		_native_review_confirmation.text += "\n" + loot_text
 	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
 		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
 		if not button.has_meta("debrief_original_text"):
 			button.set_meta("debrief_original_text", button.text)
 		button.text = "Letzten sicheren Checkpoint fortsetzen" if checkpoint_retry else pair[1]
+
+
+## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.
+static func build_loot_text(mission_result: Dictionary) -> String:
+	if typeof(mission_result.get("loot_items")) != TYPE_ARRAY:
+		return ""
+	var labels: Dictionary = load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS
+	var taken := PackedStringArray()
+	var left := PackedStringArray()
+	for entry_variant in Array(mission_result.get("loot_items")):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		if int(entry.get("quantity", 0)) > 0:
+			taken.append("%d %s" % [int(entry.quantity), label])
+		if int(entry.get("left_behind", 0)) > 0:
+			left.append("%d %s" % [int(entry.left_behind), label])
+	var lines := PackedStringArray()
+	if not taken.is_empty():
+		lines.append("Erbeutet: " + ", ".join(taken))
+	if not left.is_empty():
+		lines.append("Kein Platz im Frachtraum: " + ", ".join(left) + " zurückgelassen")
+	return "\n".join(lines)
 
 
 func _player_ftl_feedback() -> String:
