@@ -363,6 +363,7 @@
     "dispatch_seconds": 5,
     "response_seconds": 60,
     "refuel_seconds": 10,
+    "delivery_retry_seconds": 30,
     "status": "vorlaeufig"
   },
   "benit_buy_orders": {

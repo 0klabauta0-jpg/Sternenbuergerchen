@@ -69,10 +69,16 @@ class Driver extends RefCounted:
 		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)): service.open_order(result)
 		return result
 
+	var authorized := true
+	var last_delivery: Dictionary = {}
+
 	func tick(delta: float) -> void:
 		for due: Dictionary in service.advance(delta):
-			var delivered: Dictionary = supply.apply_command(_cmd("emergency_tanker_deliver", {"order_id": String(due.order_id)}, String(due.order_id) + ":deliver"), {"emergency_tanker_authorized": true})
+			var delivered: Dictionary = supply.apply_command(_cmd("emergency_tanker_deliver", {"order_id": String(due.order_id)}, String(due.order_id) + ":deliver"), {"emergency_tanker_authorized": authorized})
+			last_delivery = delivered
 			if bool(delivered.get("ok", false)): service.complete(String(due.order_id), int(delivered.get("amount", 0)))
+			elif String(delivered.get("reason", "")) in ["craft_unavailable", "unknown_order", "order_closed"]: expire(String(due.craft_id))
+			elif service.note_delivery_failure(String(due.order_id), String(delivered.get("reason", "")), delta): expire(String(due.craft_id), String(delivered.get("reason", "")))
 		var order_state := String(service.get_order("ship").get("state", ""))
 		if order_state != "" and (states.is_empty() or states.back() != order_state): states.append(order_state)
 
@@ -83,11 +89,11 @@ class Driver extends RefCounted:
 		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)): service.close_order(String(order.order_id), "cancelled", int(result.get("refund", 0)))
 		return result
 
-	func expire(craft_id: String) -> Dictionary:
+	func expire(craft_id: String, why: String = "") -> Dictionary:
 		var order: Dictionary = service.get_order(craft_id)
 		if order.is_empty(): return {"ok": false, "reason": "no_open_order"}
 		var result: Dictionary = supply.apply_command(_cmd("emergency_tanker_cancel", {"order_id": String(order.order_id), "reason": "expired"}, String(order.order_id) + ":cancel"), {"emergency_tanker_authorized": true, "emergency_tanker_state": String(order.state)})
-		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)): service.close_order(String(order.order_id), "expired", int(result.get("refund", 0)))
+		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)): service.close_order(String(order.order_id), "expired", int(result.get("refund", 0)), why)
 		return result
 
 func _driver(fuel: float = 5.0, edit: Callable = Callable()) -> Driver:
@@ -108,6 +114,8 @@ func _run() -> void:
 	_scenario_cancel()
 	_scenario_expire()
 	_scenario_ship_stays()
+	_scenario_partial_delivery()
+	_scenario_delivery_failure()
 	_scenario_save_and_load()
 	_scenario_data_driven()
 	_scenario_texts()
@@ -121,11 +129,12 @@ func _scenario_data_block() -> void:
 	_check(not block.is_empty(), "A: trade_offers.json hat den Block emergency_fuel")
 	_check(int(block.get("callout_fee", -1)) == 100 and int(block.get("price_per_unit", -1)) == 6 and int(block.get("quantity", -1)) == 30 and int(block.get("min_quantity", -1)) == 10, "A: Anfahrtsgebuehr 100, Mengenpreis 6, Menge 30, Mindestmenge 10")
 	_check(is_equal_approx(float(block.get("dispatch_seconds", -1)), 5.0) and is_equal_approx(float(block.get("response_seconds", -1)), 60.0) and is_equal_approx(float(block.get("refuel_seconds", -1)), 10.0) and String(block.get("status", "")) == "vorlaeufig", "A: 5 s Abruf, 60 s Anfahrt, 10 s Betankung, Status vorlaeufig")
+	_check(is_equal_approx(float(block.get("delivery_retry_seconds", -1)), 30.0), "A: delivery_retry_seconds 30 (Frist fuer eine nicht buchbare Lieferung)")
 	var supply: RefCounted = _supply()
 	_check(Dictionary(supply.get_supply_snapshot().get("emergency_fuel", {})) == block, "A: der Versorgungsstand zeigt den Block unveraendert")
 	var bad_blocks: Array = [
 		{"callout_fee": -1}, {"callout_fee": 1.5}, {"price_per_unit": 0}, {"quantity": 0}, {"min_quantity": 31}, {"min_quantity": 0},
-		{"dispatch_seconds": -1}, {"response_seconds": "x"}, {"refuel_seconds": -0.5}, {"status": 3},
+		{"delivery_retry_seconds": -1}, {"delivery_retry_seconds": "x"}, {"dispatch_seconds": -1}, {"response_seconds": "x"}, {"refuel_seconds": -0.5}, {"status": 3},
 	]
 	var rejected := 0
 	for patch: Dictionary in bad_blocks:
@@ -375,6 +384,105 @@ func _scenario_ship_stays() -> void:
 	var jump_after: Dictionary = supply.apply_command(_leg("ship", "jump", "homebase", "trade_outpost", "i:jump:after"), context)
 	_check(bool(jump_after.get("ok", false)) and is_equal_approx(supply.get_fuel("ship"), 35.0 - 6.0), "I: nach der Lieferung startet die Etappe (35 - 6 = 29)")
 
+# --- I2. Tank wird zwischen Bestellung und Lieferung voller (Fix-Runde 1, W-T2-2) -----------------------------------
+## Herstellung: der echte Tankbefehl "refuel" am Besitzer mit Dienstkontext. Im Spiel ist das erreichbar, weil der Adapter die Dienste
+## des Orts live liest (_service_context); wird ein Dienst waehrend der 65-75 s erreichbar, steht refuel zur Verfuegung (kein Sperrgrund).
+
+func _refuel(driver: Driver, amount: float, request_id: String) -> Dictionary:
+	return driver.supply.apply_command(_cmd("refuel", {"craft_id": "ship", "amount": amount}, request_id), {"location_id": "homebase", "craft_busy": false})
+
+func _scenario_partial_delivery() -> void:
+	# Tank 70, Bestellung 30 Einheiten = 100 + 6 x 30 = 280 (Mengenpreis 180). Danach 25 Einheiten getankt (2 Cr je Einheit = 50 Cr): Tank 95.
+	var driver: Driver = _driver(70.0)
+	var supply: RefCounted = driver.supply
+	_check(bool(driver.order("ship", "w2:partial", _ctx()).get("ok", false)) and supply.get_credits() == 220, "W2/a: Bestellung bei Tank 70 (30 Einheiten, 280 Cr, Guthaben 220)")
+	_check(bool(_refuel(driver, 25.0, "w2:partial:refuel").get("ok", false)) and supply.get_credits() == 170 and is_equal_approx(supply.get_fuel("ship"), 95.0), "W2/a: normales Tanken bleibt bei offenem Auftrag moeglich (Tank 95, Guthaben 170)")
+	var revision: int = supply.get_revision()
+	driver.tick(1000.0)
+	driver.tick(1000.0)
+	var delivery: Dictionary = driver.last_delivery
+	_check(bool(delivery.get("ok", false)) and int(delivery.get("amount", -1)) == 5 and int(delivery.get("ordered", -1)) == 30, "W2/a: geliefert werden nur 5 von 30 Einheiten: " + str(delivery))
+	_check(int(delivery.get("refund", -1)) == 150 and int(delivery.get("callout_kept", -1)) == 100, "W2/a: Erstattung = 180 - ceil(5 x 6) = 150, die Anfahrt (100) bleibt beim Dienst: " + str(delivery))
+	_check(is_equal_approx(supply.get_fuel("ship"), 100.0) and supply.get_credits() == 320, "W2/a: Tank 100, Guthaben 320 (500 - 50 Tanken - 100 Anfahrt - 30 fuer 5 Einheiten)")
+	_check(supply.get_credits() == 500 - 50 - 100 - 5 * 6, "W2/a: die Summe geht auf den Credit auf")
+	_check(supply.get_revision() == revision + 1 and driver.service.get_order("ship").is_empty() and String(driver.service.get_finished("ship").get("state", "")) == "completed", "W2/a: eine Buchung (Revision +1), Auftrag completed")
+	# c) Wiederholung der Lieferung und weitere Ticks erstatten nicht noch einmal.
+	var again: Dictionary = supply.apply_command(_cmd("emergency_tanker_deliver", {"order_id": "w2:partial"}, "w2:partial:deliver"), {"emergency_tanker_authorized": true})
+	driver.tick(1000.0)
+	driver.tick(1000.0)
+	_check(bool(again.get("replayed", false)) and supply.get_credits() == 320 and is_equal_approx(supply.get_fuel("ship"), 100.0), "W2/c: derselbe Lieferbefehl und weitere Ticks erstatten nicht noch einmal (320, Tank 100)")
+	# b) 0 Einheiten: Tank wird ganz voll, nur die Anfahrt bleibt bezahlt.
+	var zero: Driver = _driver(70.0)
+	zero.order("ship", "w2:zero", _ctx())
+	_refuel(zero, 30.0, "w2:zero:refuel")
+	zero.tick(1000.0)
+	zero.tick(1000.0)
+	_check(is_equal_approx(zero.supply.get_fuel("ship"), 100.0) and int(zero.last_delivery.get("amount", -1)) == 0 and int(zero.last_delivery.get("refund", -1)) == 180, "W2/b: bei vollem Tank werden 0 Einheiten geliefert, der ganze Mengenpreis (180) wird erstattet: " + str(zero.last_delivery))
+	_check(zero.supply.get_credits() == 500 - 280 - 60 + 180 and 500 - zero.supply.get_credits() == 60 + 100, "W2/b: bezahlt bleiben nur Tanken (60) und Anfahrt (100)")
+	_check(String(zero.service.get_finished("ship").get("state", "")) == "completed" and zero.supply.get_open_tanker_orders().is_empty(), "W2/b: der Auftrag ist abgeschlossen, das Schiff frei")
+	# Teilerstattung bei Nachkommastellen im Satz: 2,5 Cr je Einheit, 13 bestellt, 5 geliefert -> 7 + ceil(13 x 2,5) = 40; Erstattung 33 - ceil(5 x 2,5) = 33 - 13 = 20.
+	var odd: Driver = _driver(95.0, func(data: Dictionary) -> void: data.emergency_fuel = {"callout_fee": 7, "price_per_unit": 2.5, "quantity": 13, "min_quantity": 4, "dispatch_seconds": 1.0, "response_seconds": 2.0, "refuel_seconds": 3.0, "delivery_retry_seconds": 4.0, "status": "test"})
+	odd.order("ship", "w2:odd", _ctx())
+	odd.tick(1000.0)
+	odd.tick(1000.0)
+	_check(int(odd.last_delivery.get("amount", -1)) == 5 and int(odd.last_delivery.get("refund", -1)) == 0 and odd.supply.get_credits() == 500 - 20, "W2: bestellt bei Tank 95 sind nur 5 Einheiten frei (7 + ceil(12,5) = 20 Cr), voll geliefert, keine Erstattung")
+	var odd2: Driver = _driver(80.0, func(data: Dictionary) -> void: data.emergency_fuel = {"callout_fee": 7, "price_per_unit": 2.5, "quantity": 13, "min_quantity": 4, "dispatch_seconds": 1.0, "response_seconds": 2.0, "refuel_seconds": 3.0, "delivery_retry_seconds": 4.0, "status": "test"})
+	odd2.order("ship", "w2:odd2", _ctx())
+	_refuel(odd2, 15.0, "w2:odd2:refuel")
+	odd2.tick(1000.0)
+	odd2.tick(1000.0)
+	_check(int(odd2.last_delivery.get("amount", -1)) == 5 and int(odd2.last_delivery.get("refund", -1)) == 20, "W2: Satz 2,5: 13 bestellt, 5 geliefert -> Erstattung 33 - ceil(12,5) = 20: " + str(odd2.last_delivery))
+
+# --- I3. Nicht buchbare Lieferung: Frist, dann expired (Fix-Runde 1, K-T2-2) ------------------------------------------
+
+func _scenario_delivery_failure() -> void:
+	var driver: Driver = _driver()
+	var supply: RefCounted = driver.supply
+	driver.authorized = false
+	driver.order("ship", "k2:fail", _ctx())
+	driver.tick(1000.0)
+	driver.tick(1000.0)
+	var revision: int = supply.get_revision()
+	_check(String(driver.service.get_order("ship").get("state", "")) == "refuelling" and String(driver.last_delivery.get("reason", "")) == "tanker_not_authorized", "K2/d: die Lieferung scheitert (tanker_not_authorized), der Auftrag bleibt offen")
+	driver.tick(10.0)
+	driver.tick(10.0)
+	driver.tick(9.9)
+	_check(not driver.service.get_order("ship").is_empty() and supply.get_credits() == 220, "K2/d: nach 29,9 s Wiederholung ist der Auftrag noch offen, nichts erstattet")
+	_check(supply.get_revision() == revision, "K2/d: das stille Wiederholen aendert die Revision nicht")
+	driver.tick(0.1)
+	var finished: Dictionary = driver.service.get_finished("ship")
+	_check(driver.service.get_order("ship").is_empty() and String(finished.get("state", "")) == "expired", "K2/d: nach 30 s (delivery_retry_seconds) verfaellt der Auftrag: " + str(finished))
+	_check(String(finished.get("reason", "")) == "tanker_not_authorized" and int(finished.get("refund", -1)) == 280, "K2/d: der Grund des Scheiterns steht im Ergebnis, volle Erstattung 280")
+	_check(supply.get_credits() == 500 and is_equal_approx(supply.get_fuel("ship"), 5.0) and supply.get_open_tanker_orders().is_empty() and supply.get_revision() == revision + 1, "K2/d: Guthaben 500, kein offener Beleg, nur der Verfall hat die Revision gehoben")
+	var landing: Dictionary = supply.apply_command(_leg("ship", "landing", "", "homebase", "k2:landing"), {"departure_authorized": true})
+	_check(bool(landing.get("ok", false)), "K2/d: das Schiff startet wieder eine Etappe (Heimlandung): " + str(landing.get("reason", "")))
+	driver.authorized = true
+	driver.tick(1000.0)
+	_check(supply.get_credits() == 500 and is_equal_approx(supply.get_fuel("ship"), 5.0), "K2/c: nach dem Verfall erstattet und liefert kein Tick mehr")
+	var late: Dictionary = supply.apply_command(_cmd("emergency_tanker_deliver", {"order_id": "k2:fail"}, "k2:fail:deliver"), {"emergency_tanker_authorized": true})
+	_check(not late.get("ok", true) and String(late.get("reason", "")) == "order_closed", "K2: eine spaete Lieferung an den verfallenen Auftrag wird abgelehnt (order_closed)")
+	# e) Die Frist kommt aus den Daten.
+	var short: Driver = _driver(5.0, func(data: Dictionary) -> void: data.emergency_fuel.delivery_retry_seconds = 2.0)
+	short.authorized = false
+	short.order("ship", "k2:short", _ctx())
+	short.tick(1000.0)
+	short.tick(1000.0)
+	short.tick(1.9)
+	_check(not short.service.get_order("ship").is_empty(), "K2/e: mit delivery_retry_seconds 2 ist der Auftrag nach 1,9 s noch offen")
+	short.tick(0.1)
+	_check(short.service.get_order("ship").is_empty() and String(short.service.get_finished("ship").get("state", "")) == "expired" and short.supply.get_credits() == 500, "K2/e: nach 2 s verfaellt er mit voller Erstattung (Frist aus den Daten)")
+	var long_run: Driver = _driver(5.0, func(data: Dictionary) -> void: data.emergency_fuel.delivery_retry_seconds = 100.0)
+	long_run.authorized = false
+	long_run.order("ship", "k2:long", _ctx())
+	long_run.tick(1000.0)
+	long_run.tick(1000.0)
+	long_run.tick(50.0)
+	long_run.tick(49.0)
+	_check(not long_run.service.get_order("ship").is_empty(), "K2/e: mit delivery_retry_seconds 100 ist er nach 99 s noch offen")
+	long_run.authorized = true
+	long_run.tick(1.0)
+	_check(String(long_run.service.get_finished("ship").get("state", "")) == "completed" and is_equal_approx(long_run.supply.get_fuel("ship"), 35.0), "K2/e: gelingt die Buchung innerhalb der Frist, wird normal geliefert (Tank 35)")
+
 # --- J. Speichern und Laden ----------------------------------------------------------------------------------------
 
 func _scenario_save_and_load() -> void:
@@ -473,7 +581,7 @@ func _scenario_save_and_load() -> void:
 
 func _scenario_data_driven() -> void:
 	var edit := func(data: Dictionary) -> void:
-		data.emergency_fuel = {"callout_fee": 7, "price_per_unit": 2.5, "quantity": 13, "min_quantity": 4, "dispatch_seconds": 1.0, "response_seconds": 2.0, "refuel_seconds": 3.0, "status": "test"}
+		data.emergency_fuel = {"callout_fee": 7, "price_per_unit": 2.5, "quantity": 13, "min_quantity": 4, "dispatch_seconds": 1.0, "response_seconds": 2.0, "refuel_seconds": 3.0, "delivery_retry_seconds": 4.0, "status": "test"}
 	var driver: Driver = _driver(5.0, edit)
 	var offer: Dictionary = driver.supply.preview_emergency_tanker({"craft_id": "ship"}, _ctx())
 	_check(int(offer.get("quantity", 0)) == 13 and int(offer.get("price", 0)) == 7 + 33 and int(offer.get("callout_fee", 0)) == 7, "K: mit geaenderten Daten: 13 Einheiten, Preis 7 + ceil(13 x 2,5) = 40")

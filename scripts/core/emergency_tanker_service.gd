@@ -75,6 +75,8 @@ func open_order(receipt: Dictionary) -> Dictionary:
 		"dispatch_seconds": float(receipt.get("dispatch_seconds", 0.0)),
 		"response_seconds": float(receipt.get("response_seconds", 0.0)),
 		"refuel_seconds": float(receipt.get("refuel_seconds", 0.0)),
+		"delivery_retry_seconds": float(receipt.get("delivery_retry_seconds", 0.0)),
+		"retry_elapsed": 0.0, "failure_reason": "",
 		"remaining": float(receipt.get("dispatch_seconds", 0.0)),
 	}
 	if int(order.quantity) <= 0 or int(order.price) < int(order.callout_fee): return _reject("invalid_command")
@@ -139,10 +141,27 @@ func advance(delta: float) -> Array:
 func complete(order_id: String, delivered: int) -> bool:
 	return _finish(order_id, "completed", {"delivered": delivered})
 
-## Storno oder Verfall (end_state cancelled / expired), nachdem der Versorgungsbesitzer erstattet hat.
-func close_order(order_id: String, end_state: String, refund: int = 0) -> bool:
+## Die faellige Lieferung konnte nicht gebucht werden (der Versorgungsbesitzer lehnte mit reason ab). Merkt den Grund und zaehlt die
+## Wiederholzeit; gibt true zurueck, sobald die Frist delivery_retry_seconds (aus den Daten, im Auftrag mitgefuehrt) abgelaufen ist.
+## Der Tick, der den Fehler zum ersten Mal sieht, zaehlt nicht mit (darin steckt noch die Betankungszeit). Aendert keinen Versorgungsstand.
+func note_delivery_failure(order_id: String, reason: String, delta: float) -> bool:
+	for craft_id: String in _orders:
+		var order: Dictionary = _orders[craft_id]
+		if String(order.order_id) != order_id: continue
+		if String(order.get("failure_reason", "")).is_empty():
+			order["retry_elapsed"] = 0.0
+		else:
+			order["retry_elapsed"] = float(order.get("retry_elapsed", 0.0)) + (maxf(delta, 0.0) if is_finite(delta) else 0.0)
+		order["failure_reason"] = reason if not reason.is_empty() else "unknown"
+		return float(order.retry_elapsed) + 0.000001 >= float(order.delivery_retry_seconds)
+	return false
+
+## Storno oder Verfall (end_state cancelled / expired), nachdem der Versorgungsbesitzer erstattet hat. why: Grund des Verfalls (Anzeige/Protokoll).
+func close_order(order_id: String, end_state: String, refund: int = 0, why: String = "") -> bool:
 	if end_state not in ["cancelled", "expired"]: return false
-	return _finish(order_id, end_state, {"refund": refund})
+	var extra := {"refund": refund}
+	if not why.is_empty(): extra["reason"] = why
+	return _finish(order_id, end_state, extra)
 
 func _finish(order_id: String, end_state: String, extra: Dictionary) -> bool:
 	for craft_id: String in _orders.keys():
@@ -209,8 +228,10 @@ func clear() -> void:
 func _checked_order(entry: Dictionary) -> Dictionary:
 	for key: String in ["order_id", "craft_id", "state"]:
 		if typeof(entry.get(key)) != TYPE_STRING or String(entry[key]).is_empty(): return _reject("invalid_tanker_state")
-	for key: String in ["quantity", "price", "callout_fee", "dispatch_seconds", "response_seconds", "refuel_seconds", "remaining"]:
+	for key: String in ["quantity", "price", "callout_fee", "dispatch_seconds", "response_seconds", "refuel_seconds", "delivery_retry_seconds", "remaining"]:
 		if not _is_number(entry.get(key)) or float(entry[key]) < 0.0: return _reject("invalid_tanker_state")
+	if entry.has("retry_elapsed") and (not _is_number(entry.retry_elapsed) or float(entry.retry_elapsed) < 0.0): return _reject("invalid_tanker_state")
+	if entry.has("failure_reason") and typeof(entry.failure_reason) != TYPE_STRING: return _reject("invalid_tanker_state")
 	var state := String(entry.state)
 	if state not in OPEN_STATES: return _reject("invalid_tanker_state")
 	var quantity := float(entry.quantity)
@@ -221,7 +242,9 @@ func _checked_order(entry: Dictionary) -> Dictionary:
 		"order_id": String(entry.order_id), "craft_id": String(entry.craft_id), "state": state,
 		"quantity": int(quantity), "price": int(entry.price), "callout_fee": int(entry.callout_fee),
 		"dispatch_seconds": float(entry.dispatch_seconds), "response_seconds": float(entry.response_seconds),
-		"refuel_seconds": float(entry.refuel_seconds), "remaining": float(entry.remaining),
+		"refuel_seconds": float(entry.refuel_seconds), "delivery_retry_seconds": float(entry.delivery_retry_seconds),
+		"retry_elapsed": float(entry.get("retry_elapsed", 0.0)), "failure_reason": String(entry.get("failure_reason", "")),
+		"remaining": float(entry.remaining),
 	}}
 
 ## Gleicht einen Dienstzustand (export_state) mit den offenen Bestellbelegen des Versorgungsbesitzers ab
@@ -237,7 +260,7 @@ static func validate_against_receipts(service_state: Dictionary, open_receipts: 
 	for order: Dictionary in probe.open_orders():
 		var receipt: Dictionary = Dictionary(open_receipts.get(order.order_id, {}))
 		if receipt.is_empty(): return _reject("tanker_order_without_receipt")
-		for key: String in ["craft_id", "quantity", "price", "callout_fee", "dispatch_seconds", "response_seconds", "refuel_seconds"]:
+		for key: String in ["craft_id", "quantity", "price", "callout_fee", "dispatch_seconds", "response_seconds", "refuel_seconds", "delivery_retry_seconds"]:
 			var same: bool = String(order[key]) == String(receipt.get(key, "")) if key == "craft_id" else is_equal_approx(float(order[key]), float(receipt.get(key, -1.0)))
 			if not same: return _reject("tanker_order_mismatch")
 		seen[order.order_id] = true

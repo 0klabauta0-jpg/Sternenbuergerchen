@@ -521,9 +521,9 @@ func _request_emergency_tanker(operation: String, payload: Dictionary) -> Dictio
 	return cancelled
 
 ## Verfall (Schiff zerstoert oder aus der Flotte entfernt): volle Rueckerstattung in jedem Zustand, genau einmal.
-func _tanker_close(order_id: String, end_state: String, state: String) -> void:
+func _tanker_close(order_id: String, end_state: String, state: String, why: String = "") -> void:
 	var cancelled: Dictionary = _commit("singleplayer_supply", "emergency_tanker_cancel", {"order_id": order_id, "reason": "expired"}, order_id + ":cancel", {"emergency_tanker_authorized": true, "emergency_tanker_state": state})
-	if bool(cancelled.get("ok", false)): _tanker.close_order(order_id, end_state, int(cancelled.get("refund", 0)))
+	if bool(cancelled.get("ok", false)): _tanker.close_order(order_id, end_state, int(cancelled.get("refund", 0)), why)
 	else: push_error("Tankerauftrag %s konnte nicht erstattet werden: %s" % [order_id, String(cancelled.get("reason", "?"))])
 
 ## Zeit des Nottankdienstes. Der Tick aendert den Versorgungsstand nicht (keine Revision); nur Lieferung und Verfall buchen.
@@ -534,7 +534,12 @@ func _advance_emergency_tanker(delta: float) -> void:
 	for due: Dictionary in _tanker.advance(delta):
 		var delivered: Dictionary = _commit("singleplayer_supply", "emergency_tanker_deliver", {"order_id": String(due.order_id)}, String(due.order_id) + ":deliver", {"emergency_tanker_authorized": true})
 		if bool(delivered.get("ok", false)): _tanker.complete(String(due.order_id), int(delivered.get("amount", 0)))
-		elif String(delivered.get("reason", "")) in ["craft_unavailable", "unknown_order", "order_closed"]: _tanker_close(String(due.order_id), "expired", String(due.state))
+		elif String(delivered.get("reason", "")) in ["craft_unavailable", "unknown_order", "order_closed"]: _tanker_close(String(due.order_id), "expired", String(due.state), String(delivered.get("reason", "")))
+		elif _tanker.note_delivery_failure(String(due.order_id), String(delivered.get("reason", "")), delta):
+			# Jeder andere Grund: der Dienst versucht es weiter, hoechstens delivery_retry_seconds (Daten). Danach verfaellt der Auftrag mit voller
+			# Erstattung, das Schiff ist wieder frei; der Grund steht im Ergebnis (get_finished -> reason) und im Protokoll.
+			push_error("Tankerlieferung %s nicht buchbar (%s), Auftrag verfaellt mit voller Erstattung" % [String(due.order_id), String(delivered.get("reason", "?"))])
+			_tanker_close(String(due.order_id), "expired", String(due.state), String(delivered.get("reason", "unknown")))
 
 ## Beim Laden: Dienstzustand (Schluessel emergency_tanker) gegen die Bestellbelege des Versorgungsstands pruefen und uebernehmen.
 ## Fehlt der Schluessel, gilt "kein Auftrag" (alter Stand); ein offener Beleg ohne Auftrag oder ein Auftrag ohne Beleg lehnt den Stand ab.

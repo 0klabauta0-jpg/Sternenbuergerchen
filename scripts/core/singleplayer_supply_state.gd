@@ -425,7 +425,7 @@ static func _emergency_fuel_error(block: Variant) -> String:
 	if not number_ok.call(block.get("price_per_unit")) or float(block.price_per_unit) <= 0.0: return "Tanker: Mengenpreis ungueltig"
 	if not integer_ok.call(block.get("quantity")) or float(block.quantity) <= 0.0: return "Tanker: Liefermenge ungueltig"
 	if not integer_ok.call(block.get("min_quantity")) or float(block.min_quantity) <= 0.0 or float(block.min_quantity) > float(block.quantity): return "Tanker: Mindestmenge ungueltig"
-	for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds"]:
+	for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds", "delivery_retry_seconds"]:
 		if not number_ok.call(block.get(key)): return "Tanker: Zeit ungueltig: " + key
 	if typeof(block.get("status")) != TYPE_STRING: return "Tanker: Status fehlt"
 	return ""
@@ -482,7 +482,7 @@ func preview_emergency_tanker(payload: Dictionary, context: Dictionary = {}) -> 
 	var response_seconds: float = float(data.response_seconds)
 	var refuel_seconds: float = float(data.refuel_seconds)
 	return {"ok": true, "craft_id": craft_id, "quantity": quantity, "price": price, "callout_fee": callout_fee, "unit_price": float(data.price_per_unit),
-		"credits": _credits, "free_capacity": free, "dispatch_seconds": dispatch_seconds, "response_seconds": response_seconds, "refuel_seconds": refuel_seconds,
+		"credits": _credits, "free_capacity": free, "dispatch_seconds": dispatch_seconds, "response_seconds": response_seconds, "refuel_seconds": refuel_seconds, "delivery_retry_seconds": float(data.delivery_retry_seconds),
 		"wait_seconds": dispatch_seconds + response_seconds, "total_seconds": dispatch_seconds + response_seconds + refuel_seconds, "status": String(data.get("status", "")),
 		"message": "Tanker rufen: %d Einheiten für %d Cr, Ankunft in etwa %d s." % [quantity, price, int(ceil(dispatch_seconds + response_seconds))]}
 
@@ -520,10 +520,16 @@ func _emergency_tanker_deliver(payload: Dictionary, context: Dictionary, request
 	if not _fuel_by_craft_id.has(craft_id): return _tanker_reject("craft_unavailable")
 	var capacity: float = float(_definitions.fuel_capacity)
 	var fuel: float = float(_fuel_by_craft_id[craft_id])
-	var amount: float = minf(float(order.quantity), maxf(capacity - fuel, 0.0))
-	_fuel_by_craft_id[craft_id] = minf(fuel + amount, capacity)
+	# Geliefert werden nur ganze Einheiten, die noch in den Tank passen (der Tank kann seit der Bestellung voller geworden sein).
+	var delivered: int = int(minf(float(order.quantity), floorf(maxf(capacity - fuel, 0.0) + 0.00001)))
+	# Fix-Runde 1 (W-T2-2): fuer jede bestellte, aber nicht gelieferte Einheit wird der Mengenpreis erstattet, mit dem Satz aus dem Beleg.
+	# Erstattung = bezahlter Mengenpreis - ceil(gelieferte Menge x Satz); die Anfahrtsgebuehr bleibt beim Dienst. Im selben Schritt, genau einmal.
+	var quantity_price: int = int(order.price) - int(order.callout_fee)
+	var refund: int = maxi(quantity_price - int(ceil(float(delivered) * float(order.unit_price))), 0)
+	_fuel_by_craft_id[craft_id] = minf(fuel + float(delivered), capacity)
+	_credits += refund
 	_revision += 1
-	return {"ok": true, "order_id": order_id, "craft_id": craft_id, "quantity": int(order.quantity), "amount": int(amount), "fuel_after": float(_fuel_by_craft_id[craft_id]), "message": "Tanker hat betankt"}
+	return {"ok": true, "order_id": order_id, "craft_id": craft_id, "quantity": int(order.quantity), "ordered": int(order.quantity), "amount": delivered, "refund": refund, "callout_kept": int(order.callout_fee), "fuel_after": float(_fuel_by_craft_id[craft_id]), "message": "Tanker hat betankt" if delivered == int(order.quantity) else "Tanker hat %d von %d Einheiten betankt, erstattet: %d Cr" % [delivered, int(order.quantity), refund]}
 
 ## Stornieren oder Verfall. reason "player": in requested volle Rueckerstattung, in en_route nur der Mengenpreis (die Anfahrtsgebuehr ist
 ## verloren), ab at_ship nicht mehr moeglich (tanker_already_arrived). reason "expired" (Schiff zerstoert oder aus der Flotte
@@ -563,7 +569,7 @@ func _valid_tanker_requests(requests: Dictionary) -> bool:
 			if craft_id.is_empty() or String(result.get("order_id", "")) != request_id or String(payload.get("craft_id", "")) != craft_id: return false
 			if not _valid_positive_integer(result.get("quantity")) or not _valid_nonnegative_integer(result.get("callout_fee")) or not _valid_nonnegative_integer(result.get("price")) or int(result.price) < int(result.callout_fee): return false
 			if not _valid_nonnegative_number(result.get("unit_price")) or int(result.price) != int(result.callout_fee) + int(ceil(float(result.quantity) * float(result.unit_price))): return false
-			for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds"]:
+			for key: String in ["dispatch_seconds", "response_seconds", "refuel_seconds", "delivery_retry_seconds"]:
 				if not _valid_nonnegative_number(result.get(key)): return false
 			continue
 		var order_id: String = String(payload.get("order_id", ""))
@@ -572,6 +578,8 @@ func _valid_tanker_requests(requests: Dictionary) -> bool:
 		if operation == "emergency_tanker_deliver":
 			if request_id != order_id + ":deliver" or requests.has(order_id + ":cancel"): return false
 			if not _valid_nonnegative_integer(result.get("amount")) or int(result.amount) > int(order.quantity): return false
+			var expected_refund: int = maxi(int(order.price) - int(order.callout_fee) - int(ceil(float(result.amount) * float(order.unit_price))), 0)
+			if not _valid_nonnegative_integer(result.get("refund")) or int(result.refund) != expected_refund: return false
 		else:
 			if request_id != order_id + ":cancel" or requests.has(order_id + ":deliver"): return false
 			var reason: String = String(result.get("reason", ""))
