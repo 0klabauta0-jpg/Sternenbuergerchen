@@ -10,6 +10,9 @@ const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd"
 const MODULAR = preload("res://scripts/core/campaign_modular_plan.gd")
 const EMERGENCY_TANKER = preload("res://scripts/core/emergency_tanker_service.gd")
 var _inventory: Dictionary = {}
+## Liefert zu einer Person die getragene Ruestung ("" = unbekannt). Gesetzt vom Besitzer der Ausruestung (SimulationRoot);
+## nichts davon wird gespeichert: die Fachgroesse im Behaelter wird daraus nur abgeleitet.
+var _armor_provider: Callable = Callable()
 var _location_resources: Dictionary = {}
 var _modular_capacity_baseline := -1
 var _modular_plan_cache: Dictionary = {}
@@ -121,6 +124,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
+	_sync_compartments()
 	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
@@ -641,6 +645,7 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
+	_sync_compartments()
 	var exported: Dictionary = _export_state_base()
 	# Schulden (K): Restzeit bis zur naechsten Zinsbuchung, nur im Minus (additiver Schluessel; fehlt er, gilt die volle Periode).
 	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
@@ -760,6 +765,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_station_purchase_cache_revision = -1
+	# Stand von vor M2 tragen Fachgroesse 1: hier aus der Ruestung neu bestimmen (Ueberschuss ins Lager, nie den Stand ablehnen).
+	_sync_compartments(true)
 	return {"ok":true}
 
 func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
@@ -789,10 +796,80 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 	# The fabrication projection also depends on this cold-initialized storage.
 	_research_snapshot_revision = -1
 
+func set_armor_provider(provider: Callable) -> void:
+	_armor_provider = provider
+
+## Fachgroesse zu einer Ruestung (ammo_rules.json); unbekannte oder leere Ruestung = Standardgroesse.
+func _compartment_size_for(armor_id: String) -> int:
+	return maxi(1, INVENTORY.AMMO_RULES.compartment_capacity(armor_id, INVENTORY.ammo_rules()))
+
+## Was beim Verkleinern des Fachs auf `size` ins Lager muss: zuerst Magazine, zuletzt Chips, je Gruppe nach Kennung.
+## Ergebnis {item: Anzahl}; leer, wenn alles Platz hat. Veraendert nichts.
+func _compartment_overflow(personal: String, size: int) -> Dictionary:
+	var bag: Dictionary = _inventory[personal]
+	var items: Dictionary = bag.items
+	var rules: Dictionary = INVENTORY.ammo_rules()
+	var left := maxi(0, INVENTORY.compartment_used(bag) - size)
+	var moves: Dictionary = {}
+	var order: Array = []
+	var ammo_ids: Array = []
+	for item in items:
+		if INVENTORY.AMMO_RULES.is_ammo_item(String(item), rules): ammo_ids.append(String(item))
+	ammo_ids.sort()
+	order.append_array(ammo_ids)
+	var chip_ids: Array = INVENTORY.DATA_CHIP_ITEMS.duplicate()
+	chip_ids.sort()
+	order.append_array(chip_ids)
+	for item in order:
+		if left <= 0: break
+		var take := mini(left, int(items.get(item, 0)))
+		if take > 0:
+			moves[item] = take
+			left -= take
+	return moves
+
+func _storage_accepts(storage: Dictionary, add: Dictionary, remove: Dictionary = {}) -> bool:
+	var probe_items: Dictionary = Dictionary(storage.items).duplicate()
+	for item in remove: probe_items[item] = int(probe_items.get(item, 0)) - int(remove[item])
+	for item in add: probe_items[item] = int(probe_items.get(item, 0)) + int(add[item])
+	for item in probe_items.keys():
+		if int(probe_items[item]) <= 0: probe_items.erase(item)
+	var probe := {"capacity": storage.capacity, "items": probe_items}
+	if storage.has("armor_chip_capacity"): probe["armor_chip_capacity"] = storage.armor_chip_capacity
+	return INVENTORY.valid_container(probe)
+
+func _apply_compartment_size(personal: String, size: int, moves: Dictionary, storage: Dictionary) -> void:
+	var bag: Dictionary = _inventory[personal]
+	for item in moves:
+		bag.items[item] = int(bag.items[item]) - int(moves[item])
+		if int(bag.items[item]) <= 0: bag.items.erase(item)
+		storage.items[item] = int(storage.items.get(item, 0)) + int(moves[item])
+	bag["armor_chip_capacity"] = size
+
+## Leitet die Fachgroesse jeder Person aus ihrer getragenen Ruestung ab (Alt-Staende tragen 1).
+## Verkleinern: Passt der Inhalt, wird die Groesse einfach gesetzt. Passt er nicht, wandert der Ueberschuss nur dann ins Basislager,
+## wenn `move_overflow` gesetzt ist (Laden) UND das Lager Platz hat; sonst bleibt die gespeicherte Groesse unveraendert - nichts geht verloren.
+func _sync_compartments(move_overflow: bool = false) -> void:
+	if not _armor_provider.is_valid() or INVENTORY.ammo_rules().is_empty(): return
+	for key in _inventory.keys():
+		var id := String(key)
+		if not (id.begins_with("unit:") and id.ends_with(":backpack")) or not Dictionary(_inventory[id]).has("armor_chip_capacity"): continue
+		var armor := String(_armor_provider.call(id.trim_prefix("unit:").trim_suffix(":backpack")))
+		if armor.is_empty(): continue
+		var size := _compartment_size_for(armor)
+		if size == int(_inventory[id].armor_chip_capacity): continue
+		var moves := _compartment_overflow(id, size)
+		if moves.is_empty():
+			_inventory[id]["armor_chip_capacity"] = size
+		elif move_overflow and _inventory.has("base:homebase") and _storage_accepts(_inventory["base:homebase"], moves):
+			_apply_compartment_size(id, size, moves, _inventory["base:homebase"])
+			_revision += 1
+
 func _inventory_access(id: String, context: Dictionary) -> bool:
 	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
 
 func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary:
+	_sync_compartments()
 	var source := String(payload.get("source_container_id",""))
 	var target := String(payload.get("destination_container_id",""))
 	var item := String(payload.get("item_id",""))
@@ -821,6 +898,7 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var source := String(payload.get("source_container_id",""))
 	var slot := String(payload.get("slot",""))
 	var item := String(payload.get("item_id",""))
+	_sync_compartments()
 	if String(payload.get("unit_id",""))!=String(context.get("unit_id","")) or not context.has("loadout") or not _inventory_access(source,context):
 		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
 	if slot == "backpack":
@@ -834,10 +912,24 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var returns_item := previous!="none" and INVENTORY.known(previous)
 	if INVENTORY.backpack_slots_used(_inventory[source]) - (0 if unequip else 1) + (1 if returns_item else 0) > int(_inventory[source].capacity):
 		return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
+	# Ruestungswechsel: Das Fach richtet sich nach der neuen Ruestung. ALLES wird geprueft, bevor irgendetwas gebucht wird.
+	var personal := "unit:" + String(payload.unit_id) + ":backpack"
+	var new_size := 0
+	var overflow: Dictionary = {}
+	if slot == "armor" and _inventory.has(personal) and Dictionary(_inventory[personal]).has("armor_chip_capacity") and not INVENTORY.ammo_rules().is_empty():
+		new_size = _compartment_size_for("suit" if unequip else item.trim_prefix("armor_"))
+		overflow = _compartment_overflow(personal, new_size)
+		if not overflow.is_empty():
+			var swap_remove: Dictionary = {} if unequip else {item: 1}
+			var swap_add: Dictionary = {previous: 1} if returns_item else {}
+			for moved in overflow: swap_add[moved] = int(swap_add.get(moved, 0)) + int(overflow[moved])
+			if source == personal or not _storage_accepts(_inventory[source], swap_add, swap_remove):
+				return _reject("compartment_overflow", "Erst das Rüstungsfach leeren: Die neue Rüstung hat weniger Plätze.")
 	if not unequip:
 		from[item]=int(from[item])-1
 		if from[item]==0: from.erase(item)
 	if returns_item: from[previous]=int(from.get(previous,0))+1
+	if new_size > 0: _apply_compartment_size(personal, new_size, overflow, _inventory[source])
 	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
 	_revision+=1
 	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}
@@ -1044,6 +1136,7 @@ func _campaign_research(payload: Dictionary, context: Dictionary, request_id: St
 
 func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)): return _reject("untrusted_cargo","Kein bestaetigter Bergungs-/Lieferbeleg")
+	_sync_compartments()
 	var container := String(payload.get("container_id",""))
 	var item := String(payload.get("item_id",""))
 	var raw: Variant = payload.get("amount",0)
