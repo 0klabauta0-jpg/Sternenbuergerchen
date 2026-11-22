@@ -5411,7 +5411,7 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_unit_command_status(cmd)
 		"set_fire_rule":
 			_apply_fire_rule_command(cmd)
-		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "set_dropship_approach_style", "set_dropship_approach_path", "return_dropship":
+		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "set_dropship_approach_style", "set_dropship_approach_path", "set_dropship_arrival_mode", "return_dropship":
 			_apply_dropship_command(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
@@ -7970,11 +7970,20 @@ func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
 	var pilots: Variant = flow.get("_assigned_aircraft_pilot_by_craft") if is_instance_valid(flow) else null
 	var pilot_id := String(guard.get("pilot_unit_id", ""))
 	if typeof(pilots) != TYPE_DICTIONARY or pilot_id.is_empty() or String(pilots.get(craft_id, "")) != pilot_id: return {"ok":false, "reason":"pilot_assignment_changed"}
-	var pilot = _resolve_unit(pilot_id)
+	# Task LB: the controller guard resolves through the known units; a pilot who never left the ship may not be in the registry yet.
+	var pilot = _resolve_known_unit(pilot_id)
 	if not is_instance_valid(pilot) or not bool(pilot.get_meta("dropship_embarked", false)) or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0 or not pilot.has_method("get_team_id"): return {"ok":false, "reason":"pilot_not_aboard"}
 	return {"ok":true, "pilot_id":pilot_id, "pilot":pilot}
 
 func request_air_support_takeoff(craft_id: String) -> Dictionary:
+	return _begin_air_sortie(craft_id, false, Vector2.INF)
+
+## Task LB: the ship arrives in the air over its resolved landing zone instead of touching down first.
+## Same body as the takeoff, without the "parked and landed" demand; the landing position is the given one.
+func request_air_support_arrival(craft_id: String, landing_position: Vector2) -> Dictionary:
+	return _begin_air_sortie(craft_id, true, landing_position)
+
+func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vector2) -> Dictionary:
 	var terrain: Node = _air_ground_registry()
 	if _should_skip_local_tick_processing() or terrain == null: return {"ok":false, "reason":"ground_unavailable"}
 	if _air_support_location_id == "polisa": return {"ok":false, "reason":"no_planetary_atmosphere"}
@@ -7984,9 +7993,11 @@ func request_air_support_takeoff(craft_id: String) -> Dictionary:
 	if not binding.get("ok", false): return binding
 	var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
 	if not pilot.get("ok", false): return pilot
-	var controller: Node = get_parent().get_node_or_null("TacticalController")
-	if controller == null or not controller.has_method("_is_parked_campaign_dropship") or not controller.call("_is_parked_campaign_dropship", craft_id): return {"ok":false, "reason":"craft_not_landed"}
-	var position: Variant = controller.call("_campaign_landed_craft_position", craft_id)
+	var position: Variant = arrival_position
+	if not arriving:
+		var controller: Node = get_parent().get_node_or_null("TacticalController")
+		if controller == null or not controller.has_method("_is_parked_campaign_dropship") or not controller.call("_is_parked_campaign_dropship", craft_id): return {"ok":false, "reason":"craft_not_landed"}
+		position = controller.call("_campaign_landed_craft_position", craft_id)
 	if typeof(position) != TYPE_VECTOR2 or not position.is_finite(): return {"ok":false, "reason":"landing_position_unavailable"}
 	var grid: Vector2i = terrain.call("world_to_grid", position)
 	if terrain.call("get_tile_at_grid", grid) == null: return {"ok":false, "reason":"invalid_landing_site"}
