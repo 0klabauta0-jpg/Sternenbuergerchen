@@ -107,10 +107,13 @@ func _normal_unchanged(vehicles: Array) -> void:
 	var ridge_vehicle: Array = [{"instance_id": "hagel@ridge", "unit_id": "hagel", "cell": Vector2i(0, 0), "ground_level": 4}]
 	var ridge_base := {"vehicles": ridge_vehicle, "start_plane": Vector2(-30.0, 0.0), "lz_plane": Vector2(6.0, 0.0), "height_at": flat_height_at, "crew_ready": true, "pilot_skill": 0.5, "seed": "ridge", "model_id": "cutlass", "integrity": 100}
 	var cases := [
-		["GM02 corner, no style", base.merged({"approach_style": ""}), "1668426422:1328"],
+		# Fix-Runde 2 (22.11.): alle Stile fliegen unter Beschuss weiter bis Rumpf unter der Stilgrenze; vorsichtig/normal
+		# brachen frueher beim ersten Beschuss ab. Neue Summen: corner ohne Stil = aggressiv (beide pressen durch),
+		# ridge normal 231239791:1176 -> 2889928051:1464, ridge vorsichtig 450075823:698 -> 2064685497:697.
+		["GM02 corner, no style", base.merged({"approach_style": ""}), "908210372:1362"],
 		["GM02 corner, aggressiv", base.merged({"approach_style": "aggressiv"}), "908210372:1362"],
-		["ridge battery, normal style", ridge_base.merged({"approach_style": "normal"}), "231239791:1176"],
-		["ridge battery, vorsichtig", ridge_base.merged({"approach_style": "vorsichtig"}), "450075823:698"],
+		["ridge battery, normal style", ridge_base.merged({"approach_style": "normal"}), "2889928051:1464"],
+		["ridge battery, vorsichtig", ridge_base.merged({"approach_style": "vorsichtig"}), "2064685497:697"],
 	]
 	for entry in cases:
 		var context: Dictionary = entry[1]
@@ -366,7 +369,8 @@ func _accident_without_flak_and_hull() -> void:
 	check(int(worn_snapshot.integrity) == 1 and String(worn.message) == "Unfall im Tiefflug: Rumpf -99 %.", "(f) the stored integrity is 1 and the sentence names the applied loss: %s / %s" % [str(worn_snapshot.integrity), String(worn.message)])
 	# An approach the air defence breaks off does not roll the accident.
 	var hot_context := {"vehicles": [{"instance_id": "hagel@C", "unit_id": "hagel", "cell": Vector2i(0, -2), "ground_level": 0}], "start_plane": cell_plane(Vector2i(-40, 0)), "lz_plane": cell_plane(Vector2i(6, 0)),
-		"height_at": flat_height_at, "crew_ready": true, "pilot_skill": 0.0, "seed": seed_text, "model_id": "cutlass", "integrity": 100, "approach_style": "", "approach_path": "tief"}
+		"height_at": flat_height_at, "crew_ready": true, "pilot_skill": 0.0, "seed": seed_text, "model_id": "cutlass", "integrity": 40, "approach_style": "", "approach_path": "tief"}
+	# Fix-Runde 2: Rumpf 40 % liegt unter der Grenze des Stils normal (50 %), der Anflug wird also abgebrochen (vorher: Integritaet 100, Abbruch beim ersten Beschuss).
 	var hot: Dictionary = PLAN.resolve(hot_context)
 	check(not bool(hot.landing_allowed) and not bool(Dictionary(Dictionary(hot.path_report).get("accident", {})).get("occurred", false)), "(f) a broken-off approach never lands, so it does not roll an accident")
 

@@ -77,25 +77,26 @@ func _run() -> void:
 
 	var near_corner := Vector2(126.0, 76.0)
 	var start: Vector2 = near_corner + inbound_offset(Vector2(-180.0, -112.0))
-	var hot: Dictionary = run_plan(vehicles, start, near_corner, true, "corner")
+	# Fix-Runde 2: kein Stil = normal fliegt unter Beschuss weiter und bricht erst unter 50 % Rumpf ab; das Schiff startet daher mit 40 % (vorher 100 %, Abbruch beim ersten Beschuss).
+	var hot: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 40)
 	var hot_types: Array = types(hot.result)
 	check(bool(hot.engaged) and hot_types.has("radar_contact"), "an approach that ends near the air-defence corner gets radar contact")
 	check(hot_types.has("flak_volley") or hot_types.has("missile_launch"), "and is fired upon")
 	check(hot_types.find("radar_contact") < maxi(hot_types.find("flak_volley"), hot_types.find("missile_launch")), "warning comes before fire")
 	check(bool(hot.result.broke_off) and not bool(hot.landing_allowed) and String(hot.outcome) == "broke_off", "with no stored approach style the pilot breaks off and the landing does not start")
 	check(String(hot.message).begins_with("Flugabwehr: Anflug abgebrochen, Rumpf ") and String(hot.message).ends_with(" %"), "break-off produces the German one-line message: " + String(hot.message))
-	var again: Dictionary = run_plan(vehicles, start, near_corner, true, "corner")
+	var again: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 40)
 	check(JSON.stringify(again.result) == JSON.stringify(hot.result) and again.message == hot.message, "same seed gives the same result")
 	var uncrewed: Dictionary = run_plan(vehicles, start, near_corner, false, "corner")
 	check(not bool(uncrewed.engaged) and Array(uncrewed.result.events).is_empty() and bool(uncrewed.landing_allowed), "with the crew group at zero fit members nothing fires")
 
 	var pressed: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 100, "aggressiv")
-	check(String(pressed.decision) == AD.DECISION_PRESS_ON and String(hot.decision) == AD.DECISION_BREAK_OFF, "approach style aggressiv presses on, no style breaks off")
+	check(String(pressed.decision) == AD.DECISION_PRESS_ON and String(hot.decision) == AD.DECISION_PRESS_ON, "every style presses on under fire (Fix-Runde 2); the break-off comes from the hull limit of the style")
 	if bool(pressed.landing_allowed):
 		check(String(pressed.message) == "Flugabwehr: %d Treffer, Rumpf %d %%" % [int(pressed.result.hits), int(pressed.hull_percent)], "pressing on keeps the landing and reports hits and hull: " + String(pressed.message))
 	else:
 		check(bool(pressed.result.broke_off) or bool(pressed.result.destroyed), "pressing on can still end in a forced break-off on low hull: " + String(pressed.message))
-	check(PLAN.decision_for_style("aggressiv") == AD.DECISION_PRESS_ON and PLAN.decision_for_style("vorsichtig") == AD.DECISION_BREAK_OFF and PLAN.decision_for_style("") == AD.DECISION_BREAK_OFF, "aggressiv presses on, vorsichtig / normal / none break off")
+	check(PLAN.decision_for_style("aggressiv") == AD.DECISION_PRESS_ON and PLAN.decision_for_style("vorsichtig") == AD.DECISION_PRESS_ON and PLAN.decision_for_style("normal") == AD.DECISION_PRESS_ON and PLAN.decision_for_style("") == AD.DECISION_PRESS_ON, "all styles and no style press on (the hull limit of the style ends the approach)")
 
 	var worn: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 60)
 	check(float(worn.result.ship_state.hull) <= 60.0 and int(worn.hull_percent) <= 60, "a ship already at 60 percent starts the approach at 60 percent hull")
@@ -125,12 +126,12 @@ func _run() -> void:
 ## Task docs/tasks/FLUGABWEHR_ANFLUGSTIL_REPARATUR_2026_11_15.md
 func _style_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> void:
 	var mapping := true
-	for row in [["vorsichtig", "low", AD.DECISION_BREAK_OFF], ["normal", "normal", AD.DECISION_BREAK_OFF], ["aggressiv", "normal", AD.DECISION_PRESS_ON]]:
+	for row in [["vorsichtig", "low", AD.DECISION_PRESS_ON], ["normal", "normal", AD.DECISION_PRESS_ON], ["aggressiv", "normal", AD.DECISION_PRESS_ON]]:
 		mapping = mapping and PLAN.sanitize_style(row[0]) == row[0] and PLAN.profile_for_style(row[0]) == row[1] and PLAN.decision_for_style(row[0]) == row[2]
-	check(mapping, "style -> profile and decision: vorsichtig low / break off, normal normal / break off, aggressiv normal / press on")
+	check(mapping, "style -> profile and decision: vorsichtig low, normal normal, aggressiv normal; all press on (Fix-Runde 2)")
 	var unknown := true
 	for raw in ["", "  ", "kamikaze", "aggressive", "LOW"]:
-		unknown = unknown and PLAN.sanitize_style(raw) == "normal" and PLAN.profile_for_style(raw) == "normal" and PLAN.decision_for_style(raw) == AD.DECISION_BREAK_OFF and PLAN.normalize_style(raw).is_empty()
+		unknown = unknown and PLAN.sanitize_style(raw) == "normal" and PLAN.profile_for_style(raw) == "normal" and PLAN.decision_for_style(raw) == AD.DECISION_PRESS_ON and PLAN.normalize_style(raw).is_empty()
 	check(unknown and PLAN.sanitize_style(" Aggressiv ") == "aggressiv", "unknown or empty style behaves as normal; case and spaces are tolerated")
 	check(is_equal_approx(PLAN.lz_radius_factor_for_style("vorsichtig"), 1.5) and is_equal_approx(PLAN.lz_radius_factor_for_style("normal"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("aggressiv"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("x"), 1.0), "landing scatter factor is 1.5 only for vorsichtig")
 	var base: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true)
@@ -145,7 +146,10 @@ func _style_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> voi
 	var ridge_context := {"vehicles": ridge, "start_plane": Vector2(-30.0, 0.0), "lz_plane": Vector2(6.0, 0.0), "height_at": flat, "crew_ready": true, "pilot_skill": 0.5, "seed": "ridge", "model_id": "cutlass", "integrity": 100}
 	var ridge_normal: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "normal"}))
 	var ridge_low: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "vorsichtig"}))
-	check(bool(ridge_normal.engaged) and types(ridge_normal.result).has("flak_volley") and not bool(ridge_normal.landing_allowed), "normal approach past a ridge battery is fired upon and breaks off: " + String(ridge_normal.message))
+	# Fix-Runde 2: normal bricht nicht mehr beim ersten Beschuss ab, sondern erst unter 50 % Rumpf; hier bleibt der Rumpf bei 100 %.
+	check(bool(ridge_normal.engaged) and types(ridge_normal.result).has("flak_volley") and bool(ridge_normal.landing_allowed), "normal approach past a ridge battery is fired upon and presses on while the hull stays above 50 percent: " + String(ridge_normal.message))
+	var ridge_worn: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "normal", "integrity": 40}, true))
+	check(bool(ridge_worn.engaged) and not bool(ridge_worn.landing_allowed), "normal approach past a ridge battery with a hull already under 50 percent breaks off: " + String(ridge_worn.message))
 	check(String(ridge_low.approach_profile) == "low" and not types(ridge_low.result).has("flak_volley") and int(ridge_low.hits) == 0 and bool(ridge_low.landing_allowed), "low approach stays below the ridge battery's horizon: no fire, landing allowed")
 	var same_level: Dictionary = PLAN.resolve(ridge_context.merged({"approach_style": "vorsichtig", "vehicles": [{"instance_id": "hagel@valley", "unit_id": "hagel", "cell": Vector2i(0, 0), "ground_level": 0}]}, true))
 	check(types(same_level.result).has("flak_volley"), "low flight does not protect against a battery on the same level")
@@ -154,7 +158,22 @@ func _style_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> voi
 	for style in ["vorsichtig", "normal", "aggressiv"]:
 		var plan: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", 100, style)
 		print("GM02 corner style=%s profile=%s engaged=%s hits=%d outcome=%s landing=%s" % [style, plan.approach_profile, plan.engaged, int(plan.hits), plan.outcome, plan.landing_allowed])
-		if style != "aggressiv" and bool(plan.engaged) and int(plan.hits) > 0:
-			check(not bool(plan.landing_allowed), style + " breaks off when hit on the GM02 corner approach")
-		if style == "aggressiv":
-			check(String(plan.decision) == AD.DECISION_PRESS_ON, "aggressiv presses on on the GM02 corner approach")
+		# Fix-Runde 2: alle Stile pressen durch, solange der Rumpf ueber der Stilgrenze bleibt.
+		check(String(plan.decision) == AD.DECISION_PRESS_ON, style + " presses on on the GM02 corner approach")
+	_limit_checks(vehicles, start, near_corner)
+
+
+## Fix-Runde 2 (E): der Stil kommt ueber den PLAN (plan.resolve -> resolve_approach) an die Abbruchgrenze.
+## Je Stil ein Anflug unter Feuer knapp ueber der Grenze (kommt durch) und knapp darunter (bricht ab);
+## aggressiv mit Rumpf zwischen 10 und 35 % kommt durch.
+func _limit_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> void:
+	for row in [["vorsichtig", 65], ["normal", 50], ["aggressiv", 10]]:
+		var style: String = row[0]
+		var limit: int = row[1]
+		var above: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", limit + 1, style)
+		var below: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", limit - 1, style)
+		check(bool(above.engaged) and bool(above.landing_allowed) and not bool(above.result.broke_off), "%s: under fire one point above %d percent hull the approach goes on: %s" % [style, limit, String(above.message)])
+		check(bool(below.engaged) and not bool(below.landing_allowed) and bool(below.result.broke_off), "%s: under fire one point below %d percent hull the approach breaks off: %s" % [style, limit, String(below.message)])
+	for hull in [11, 20, 30, 34]:
+		var bold: Dictionary = run_plan(vehicles, start, near_corner, true, "corner", hull, "aggressiv")
+		check(bool(bold.engaged) and bool(bold.landing_allowed), "aggressiv with %d percent hull (between 10 and 35) under fire gets through: %s" % [hull, String(bold.message)])

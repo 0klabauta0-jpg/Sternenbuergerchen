@@ -185,7 +185,10 @@ static func profile_for_style(approach_style: String) -> String:
 
 
 static func decision_for_style(approach_style: String) -> String:
-	return AD.DECISION_PRESS_ON if sanitize_style(approach_style) == STYLE_AGGRESSIVE else AD.DECISION_BREAK_OFF
+	# Alle drei Stile fliegen unter Beschuss weiter; abgebrochen wird erst, wenn der Rumpf unter die Grenze des Stils faellt
+	# (AD.break_off_hull_fraction: vorsichtig 65 %, normal 50 %, aggressiv 10 %). Der Stil steuert sonst nur Flugprofil
+	# (profile_for_style) und Streukreis der Landung (lz_radius_factor_for_style).
+	return AD.DECISION_PRESS_ON
 
 
 ## Landing scatter radius factor: the low profile's lz_radius_factor, 1.0 otherwise.

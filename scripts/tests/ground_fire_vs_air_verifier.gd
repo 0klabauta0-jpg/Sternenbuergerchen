@@ -121,6 +121,8 @@ func _run() -> void:
 	_test_lock_time_and_resets()
 	_test_unbooked_warning_consumes_nothing()
 	_test_landing_approach_styles()
+	_test_fixed_hit_damage()
+	_test_sight_adapter_not_ready_with_pending_cease_fire()
 	_test_driver_real_rig()
 	_test_hull_gate_in_root()
 	_test_real_outpost_guard()
@@ -156,8 +158,8 @@ func _shots(result: Dictionary) -> Array:
 
 
 func _test_resolver_numbers_and_takt() -> void:
-	for case in [{"weapon": "rocket_launcher", "ticks": 240, "warning": "Cutlass: Raketenwerfer schaltet auf!", "base": 90, "base_chance": 0.30},
-			{"weapon": "rail_gun", "ticks": 150, "warning": "Cutlass: Schienenkanone zielt!", "base": 70, "base_chance": 0.35}]:
+	for case in [{"weapon": "rocket_launcher", "ticks": 240, "warning": "Cutlass: Raketenwerfer schaltet auf!", "base": 34, "base_chance": 0.30},
+			{"weapon": "rail_gun", "ticks": 150, "warning": "Cutlass: Schienenkanone zielt!", "base": 25, "base_chance": 0.35}]:
 		var weapon: String = case.weapon
 		var ticks: int = case.ticks
 		var gfa = GFA.new()
@@ -178,8 +180,10 @@ func _test_resolver_numbers_and_takt() -> void:
 		_check(shots.size() == 1 and roller.used == 1, "a %s: genau ein Schuss im Takt, ein Wurf" % weapon)
 		if shots.size() == 1:
 			var risk: float = float(shots[0].risk)
-			var expected: int = int(round(float(case.base) * lerpf(0.65, 1.25, risk)))
-			_check(bool(shots[0].hit) and int(shots[0].damage) == expected, "a %s: Treffer senkt den Rumpf um den Wert des Bausteins (%d)" % [weapon, expected])
+			# Fix-Runde 2: fester Schaden je Waffe und Schiffsart (Landefaehre: Rakete 34, Schiene 25) statt der Zahl des Bausteins.
+			# Der Stand hat hier 1000 Punkte Rumpf: 34 Prozentpunkte = 340 Punkte.
+			var expected: int = int(case.base) * 10
+			_check(bool(shots[0].hit) and int(shots[0].damage) == expected, "a %s: Treffer senkt den Rumpf um den festen Prozentwert der Landefaehre (%d Punkte von 1000)" % [weapon, expected])
 			_check(int(shot.updates.cutlass.snapshot.integrity) == 1000 - expected, "a %s: der gebuchte Rumpf stimmt" % weapon)
 			_check(_near(float(shots[0].chance), float(case.base_chance) * (1.0 - 0.375)), "a %s: Chance = base_hit_chance %.2f x (1 - Ausweichen 0,375)" % [weapon, float(case.base_chance)])
 			_check(_near(float(WEAPONS.get_base_hit_chance(weapon)), float(case.base_chance)), "a %s: base_hit_chance stammt aus den Waffendaten" % weapon)
@@ -308,12 +312,14 @@ func _test_break_off_and_messages() -> void:
 	for case in [{"style": "vorsichtig", "limit": 65}, {"style": "normal", "limit": 50}, {"style": "aggressiv", "limit": 10}, {"style": "", "limit": 50}]:
 		var style: String = case.style
 		var limit: int = case.limit
-		_check(GFA.is_broken_off({"integrity": limit, "max_integrity": 100}, style), "f '%s': auf der Grenze (%d %%) dreht das Schiff ab" % [style, limit])
+		# Fix-Runde 2 (C): "unter X %" heisst strikt kleiner - genau auf der Grenze greift das Schiff noch an.
+		_check(not GFA.is_broken_off({"integrity": limit, "max_integrity": 100}, style), "f '%s': genau auf der Grenze (%d %%) greift es noch an" % [style, limit])
+		_check(GFA.is_broken_off({"integrity": limit - 1, "max_integrity": 100}, style), "f '%s': einen Prozentpunkt darunter (%d %%) dreht es ab" % [style, limit - 1])
 		_check(not GFA.is_broken_off({"integrity": limit + 1, "max_integrity": 100}, style), "f '%s': einen Prozentpunkt darueber (%d %%) greift es an" % [style, limit + 1])
 		_check(GFA.is_broken_off({"integrity": 1, "max_integrity": 100}, style), "f '%s': bei 1 %% abgedreht" % style)
 		_check(_near(GFA.break_off_fraction(style), float(limit) / 100.0), "f '%s': Wert aus den Daten %.2f" % [style, float(limit) / 100.0])
-	_check(_near(GFA.break_off_fraction("kamikaze"), 0.50) and GFA.is_broken_off({"integrity": 50, "max_integrity": 100}, "kamikaze"), "f: unbekannter Stil gilt als normal")
-	_check(not GFA.is_broken_off({"integrity": 140, "max_integrity": 260}, "normal") and GFA.is_broken_off({"integrity": 130, "max_integrity": 260}, "normal"), "f: das Verhaeltnis zaehlt, nicht der Absolutwert")
+	_check(_near(GFA.break_off_fraction("kamikaze"), 0.50) and GFA.is_broken_off({"integrity": 49, "max_integrity": 100}, "kamikaze") and not GFA.is_broken_off({"integrity": 50, "max_integrity": 100}, "kamikaze"), "f: unbekannter Stil gilt als normal")
+	_check(not GFA.is_broken_off({"integrity": 130, "max_integrity": 260}, "normal") and GFA.is_broken_off({"integrity": 129, "max_integrity": 260}, "normal"), "f: das Verhaeltnis zaehlt, nicht der Absolutwert (130/260 = 50 % greift an, 129/260 bricht ab)")
 	_check(not GFA.is_broken_off({}, "vorsichtig"), "f: leerer Stand ist nicht abgedreht")
 	_check(GFA.attack_hint("vorsichtig") == "Bricht Anflug und Angriff ab, wenn der Rumpf unter 65 % fällt." and GFA.attack_hint("normal") == "Bricht Anflug und Angriff ab, wenn der Rumpf unter 50 % fällt." and GFA.attack_hint("aggressiv") == "Bricht Anflug und Angriff ab, wenn der Rumpf unter 10 % fällt.", "f: Hinweissaetze der Stilschalter")
 	# Stilwechsel nach dem Abdrehen: Rumpf 60 %, vorsichtig = gesperrt; auf normal gewechselt darf das Schiff wieder angreifen.
@@ -337,16 +343,19 @@ func _test_break_off_and_messages() -> void:
 	roller.values = [0.0]
 	var shooter := _unit("g1", "rocket_launcher")
 	gfa.step(_ctx(0, [_target()], [shooter], roller))
-	var hit: Dictionary = gfa.step(_ctx(240, [_target(100, 100, 0.5, "locked")], [shooter], roller))
-	_check(_texts(hit) == ["Cutlass wird vom Boden beschossen.", "Cutlass schwer beschädigt – dreht ab. Rumpf 1 %."], "f/g: beide Meldungen wortgleich")
+	# Fix-Runde 2 (A): ein Treffer kostet fest 34 Punkte (Landefaehre/Rakete); aus 100 % wird 66 % = kein Abdrehen (normal 50 %).
+	var first_hit: Dictionary = gfa.step(_ctx(240, [_target(100, 100, 0.5, "locked")], [shooter], roller))
+	_check(_texts(first_hit) == ["Cutlass wird vom Boden beschossen."] and first_hit.cease.is_empty(), "f/g: erster Treffer aus 100 % (66 %): nur die Treffermeldung, kein Abdrehen")
+	var hit: Dictionary = gfa.step(_ctx(480, [_target(60, 100, 0.5, "locked")], [shooter], roller))
+	_check(_texts(hit) == ["Cutlass schwer beschädigt – dreht ab. Rumpf 26 %."], "f/g: Abdreh-Meldung wortgleich (60 % - 34 = 26 %, Treffermeldung nur einmal je Flug)")
 	_check(hit.cease == ["cutlass"], "f: Feuerstopp wird angefordert")
-	var again: Dictionary = gfa.step(_ctx(480, [_target(1, 100, 0.5, "damaged")], [shooter], roller))
+	var again: Dictionary = gfa.step(_ctx(720, [_target(26, 100, 0.5, "damaged")], [shooter], roller))
 	_check(_texts(again).is_empty() and again.cease == ["cutlass"], "g: Meldungen je Ereignis nur einmal; Feuerstopp bleibt ausstehend, bis er gelingt")
 	gfa.mark_cease_done("cutlass")
-	_check(gfa.step(_ctx(500, [_target(1, 100, 0.5, "damaged")], [shooter], roller)).cease.is_empty(), "f: nach gelungenem Feuerstopp nichts mehr ausstehend")
-	gfa.step(_ctx(520, [], [shooter], roller))
-	gfa.step(_ctx(560, [_target()], [shooter], roller))
-	var second_flight: Dictionary = gfa.step(_ctx(800, [_target(100, 100, 0.5, "locked")], [shooter], roller))
+	_check(gfa.step(_ctx(740, [_target(26, 100, 0.5, "damaged")], [shooter], roller)).cease.is_empty(), "f: nach gelungenem Feuerstopp nichts mehr ausstehend")
+	gfa.step(_ctx(760, [], [shooter], roller))
+	gfa.step(_ctx(780, [_target()], [shooter], roller))
+	var second_flight: Dictionary = gfa.step(_ctx(1100, [_target(100, 100, 0.5, "locked")], [shooter], roller))
 	_check(_texts(second_flight).has("Cutlass wird vom Boden beschossen."), "g: ein neuer Flug meldet seinen ersten Treffer erneut")
 
 
@@ -394,6 +403,79 @@ func _test_lock_time_and_resets() -> void:
 	_check(_texts(both) == ["Cutlass: Raketenwerfer schaltet auf!"], "L: der zweite Schuetze meldet seine eigene Aufschaltung")
 	var due: Dictionary = gfb.step(_ctx(240, [_target(100, 100, 0.5, "locked")], [first, second], roller2))
 	_check(_shots(due).size() == 1 and String(_shots(due)[0].attacker_id) == "g1", "L: nur der erste Schuetze ist nach 240 Ticks so weit")
+
+
+## Fix-Runde 2 (A): fester Schaden je Treffer in Rumpf-Prozentpunkten, nach Waffe und Schiffsart, unabhaengig vom Abstand.
+func _hit_sequence(weapon: String, craft_type: String, dist: float, hits: int) -> Array:
+	var gfa = GFA.new()
+	var roller := Roller.new()
+	roller.values = [0.0]
+	var shooter := _unit("g1", weapon, dist)
+	var ticks: int = GFA.lock_ticks(weapon)
+	var status := _target(100, 100, 0.5, "locked")
+	status["craft_type"] = craft_type
+	status["approach_style"] = "aggressiv"
+	var first := _target(100, 100, 0.5, "intact")
+	first["craft_type"] = craft_type
+	first["approach_style"] = "aggressiv"
+	gfa.step(_ctx(0, [first], [shooter], roller))
+	var integrity_after: Array = []
+	var tick := ticks
+	for i in range(hits):
+		var result: Dictionary = gfa.step(_ctx(tick, [status], [shooter], roller))
+		for shot in _shots(result):
+			if bool(shot.hit): integrity_after.append(int(shot.integrity_after))
+		if result.updates.has("cutlass"): status.status = result.updates.cutlass.snapshot
+		tick += ticks
+	return integrity_after
+
+
+func _test_fixed_hit_damage() -> void:
+	_check(_hit_sequence("rocket_launcher", "fighter", 6.0, 3) == [50, 1, 1], "A: leichter Jaeger, Raketenwerfer: erster Treffer 50 %, zweiter 1 % (Boden), ein dritter bleibt bei 1 %")
+	_check(_hit_sequence("rocket_launcher", "dropship", 6.0, 4) == [66, 32, 1, 1], "A: Landefaehre, Raketenwerfer: 66 %, 32 %, 1 %")
+	_check(_hit_sequence("rail_gun", "fighter", 6.0, 4) == [63, 26, 1, 1], "A: leichter Jaeger, Schienenkanone: 63 %, 26 %, 1 %")
+	_check(_hit_sequence("rail_gun", "dropship", 6.0, 5) == [75, 50, 25, 1, 1], "A: Landefaehre, Schienenkanone: 75 %, 50 %, 25 %, 1 %")
+	for weapon in ["rocket_launcher", "rail_gun"]:
+		var near_seq: Array = _hit_sequence(weapon, "fighter", 1.0, 2)
+		var far_seq: Array = _hit_sequence(weapon, "fighter", 18.0 if weapon == "rocket_launcher" else 20.0, 2)
+		_check(near_seq == far_seq and near_seq.size() == 2, "A %s: der Abstand aendert den Schaden nicht (nah %s, fern %s)" % [weapon, str(near_seq), str(far_seq)])
+	_check(_hit_sequence("rocket_launcher", "", 6.0, 2) == [66, 32] and _hit_sequence("rocket_launcher", "gunship", 6.0, 2) == [66, 32], "A: unbekannte oder fehlende Schiffsart gilt als Landefaehre")
+	_check(GFA.hit_damage_percent("rocket_launcher", "Fighter") == 50 and GFA.hit_damage_percent("rail_gun", "dropship") == 25 and GFA.hit_damage_percent("rail_gun", "fighter") == 37 and GFA.hit_damage_percent("rocket_launcher", "dropship") == 34, "A: die vier Werte stehen in den Daten (hit_damage_hull_percent)")
+
+
+class FakeCeaseDriver extends Node:
+	func get_hex_sight_adapter(): return null
+	func _get_friendly_combat_units() -> Array: return []
+	func _get_enemy_combat_units() -> Array: return []
+
+
+class FakeCeaseRoot extends Node:
+	var requested: Array = []
+	func get_air_support_threat_targets() -> Array:
+		return [{"craft_id": "cutlass", "position": Vector2(10, 10), "cell": Vector2i.ZERO, "pilot_skill": 0.5,
+			"status": {"asset_id": "cutlass", "asset_type": "dropship", "state": "damaged", "integrity": 20, "max_integrity": 100}}]
+	func request_air_support_cease_fire(craft_id: String, _request_id: String) -> Dictionary:
+		requested.append(craft_id)
+		return {"ok": true}
+	func enqueue_effect(_effect: Dictionary) -> void: pass
+
+
+## Fix-Runde 2 (F): Sichtrechnung (Adapter) nicht bereit, Feuerstopp ausstehend: kein Schuss, aber der Feuerstopp wird versucht.
+func _test_sight_adapter_not_ready_with_pending_cease_fire() -> void:
+	var gfa = GFA.new()
+	var driver := FakeCeaseDriver.new()
+	var fake_root := FakeCeaseRoot.new()
+	root.add_child(driver)
+	root.add_child(fake_root)
+	# Kein Feuerstopp offen und Adapter nicht bereit: nichts zu tun, kein Zugriff aufs Schiff.
+	_check(gfa.advance(driver, fake_root, null, 10).is_empty() and fake_root.requested.is_empty(), "F: Adapter nicht bereit, kein Feuerstopp offen - nichts passiert")
+	gfa._cease_pending["cutlass"] = true
+	var result: Dictionary = gfa.advance(driver, fake_root, null, 20)
+	_check(Array(result.get("events", [])).is_empty() and Array(result.get("messages", [])).is_empty(), "F: Adapter nicht bereit - kein Schuss, keine Meldung")
+	_check(fake_root.requested == ["cutlass"] and gfa._cease_pending.is_empty(), "F: der ausstehende Feuerstopp wird trotzdem angefordert und danach als erledigt gebucht")
+	_check(gfa.advance(driver, fake_root, null, 30).is_empty() and fake_root.requested == ["cutlass"], "F: danach ist wieder nichts zu tun, kein zweiter Feuerstopp")
+	driver.free()
+	fake_root.free()
 
 
 ## Landeanflug: dieselbe Grenze je Stil (eine Quelle in den Daten); fehlender Datenblock = 0,35 wie bisher.
@@ -570,8 +652,10 @@ func _first_roll(state: int) -> float:
 
 ## Ein Stand des Stroms, dessen erster Wurf kleiner als `limit` ist (trifft sicher: kleinste Chance ist ueber 0,3).
 func _stream_with_first_roll_below(limit: float) -> int:
-	for candidate in range(1, 5000):
-		if _first_roll(candidate) < limit: return candidate
+	# Fix-Runde 2: die ersten ZWEI Wuerfe muessen treffen (ein Treffer kostet fest 34 Prozentpunkte, das Abdrehen kommt beim zweiten).
+	for candidate in range(1, 20000):
+		var second_state: int = (candidate * 1103515245 + 12345) & 0x7fffffff
+		if _first_roll(candidate) < limit and _first_roll(second_state) < limit: return candidate
 	return 1
 
 
@@ -604,7 +688,7 @@ func _test_driver_real_rig() -> void:
 	_check(warnings.size() == 1 and _kinds(log, "shot").is_empty(), "a (Driver): innerhalb der Aufschaltzeit nur die Meldung, kein Schuss (%d)" % _kinds(log, "shot").size())
 	# K1: ohne Schuss rueckt der gemeinsame Strom nicht weiter.
 	_check(int(f.sim.export_gameplay_rng_state().air_ground) == hit_state, "K1 (Driver): ohne Schuss bleibt der Strom des Luft-Boden-Feuers unberuehrt")
-	log.append_array(_run_ticks(f, 100))
+	log.append_array(_run_ticks(f, 400))
 	var shots := _kinds(log, "shot")
 	_check(warnings.size() == 1 and shots.size() >= 1, "a (Driver): erst die Meldung, dann der Schuss (%d / %d)" % [warnings.size(), shots.size()])
 	if shots.size() >= 1 and warnings.size() == 1:
@@ -615,11 +699,11 @@ func _test_driver_real_rig() -> void:
 	for i in range(shots.size()): expected_state = (expected_state * 1103515245 + 12345) & 0x7fffffff
 	_check(int(f.sim.export_gameplay_rng_state().air_ground) == expected_state, "K1 (Driver): der Strom rueckt je Schuss genau einen Schritt weiter (%d Schuesse)" % shots.size())
 	var status: Dictionary = f.sim.get_air_asset_status_snapshot("cutlass")
-	_check(not status.is_empty() and int(status.integrity) == 1 and int(status.integrity) >= 1, "a/e (Driver): Treffer gebucht ueber den Status-Effekt, Rumpf auf 1 %%, nie darunter (%s)" % [str(status.get("integrity", "-"))])
+	_check(not status.is_empty() and int(status.integrity) == 32 and shots.size() == 2, "a/e (Driver): zwei Raketentreffer gebucht ueber den Status-Effekt (100 -> 66 -> 32 %%), dann Schluss (%s, %d Schuesse)" % [str(status.get("integrity", "-")), shots.size()])
 	_check(String(status.get("state", "")) == "damaged", "a (Driver): Zustand beschaedigt")
 	var texts: Array = _kinds(log, "message").map(func(e): return e.text)
 	# Ohne Controller (Aufbau) heisst das Schiff nach seiner Kennung; im Spiel kommt der Name von der Schiffskarte.
-	_check(texts == ["cutlass: Raketenwerfer schaltet auf!", "cutlass wird vom Boden beschossen.", "cutlass schwer beschädigt – dreht ab. Rumpf 1 %."], "g (Driver): Meldungen wortgleich, je einmal (%s)" % str(texts))
+	_check(texts == ["cutlass: Raketenwerfer schaltet auf!", "cutlass wird vom Boden beschossen.", "cutlass schwer beschädigt – dreht ab. Rumpf 32 %."], "g (Driver): Meldungen wortgleich, je einmal (%s)" % str(texts))
 	_check(f.sim.ceased == ["cutlass"], "f (Driver): Feuerstopp genau einmal angefordert und gelungen")
 	# Der Sichtbogen des Gegners gilt nicht: Schiff HINTER ihm.
 	f.scope.free()
@@ -670,12 +754,12 @@ func _test_driver_real_rig() -> void:
 	_set_air_stream(f, hit_state)
 	f.sim.tick_processed.connect(f.driver._on_tick_processed)
 	var seen_warning := false
-	for i in range(300):
+	for i in range(600):
 		f.sim._physics_process(0.1)
 		f.cache.begin_tick(f.sim.tick_counter)
 		var module = f.driver._ground_fire_vs_air
 		if module != null and not Array(module.last_result.get("events", [])).is_empty(): seen_warning = true
-	_check(seen_warning and int(f.sim.get_air_asset_status_snapshot("cutlass").get("integrity", 100)) == 1, "Anschluss: der echte Tick-Weg des Drivers (tick_processed) schiesst: Ereignisse gemeldet, Rumpf gebucht")
+	_check(seen_warning and int(f.sim.get_air_asset_status_snapshot("cutlass").get("integrity", 100)) == 32, "Anschluss: der echte Tick-Weg des Drivers (tick_processed) schiesst: Ereignisse gemeldet, Rumpf gebucht")
 	f.scope.free()
 	# i: Skirmish / Mehrspieler (keine Luftunterstuetzung): nichts feuert, nichts wird gewuerfelt
 	f = _fixture("rocket_launcher", -1, false)
@@ -754,9 +838,12 @@ func _test_hull_gate_in_root() -> void:
 	var preview: Dictionary = sim.preview_air_support_ground_fire({"craft_id": "cutlass", "target_unit_id": "enemy", "weapon_slot": "w1"})
 	var fire: Dictionary = sim.request_air_support_ground_fire({"craft_id": "cutlass", "target_unit_id": "enemy", "weapon_slot": "w1", "request_id": "r2"})
 	_check(preview.get("reason") == "hull_too_damaged" and fire.get("reason") == "hull_too_damaged" and fire.get("message") == "Schiff schwer beschädigt: kein Angriff mehr möglich.", "f (Root): Bodenfeuer abgelehnt (Vorschau und Feuer)")
+	sim.enqueue_effect(_hull_effect(49))
+	sim._physics_process(0.1)
+	_check(sim.request_air_support_attack_order({"craft_id": "cutlass", "target_unit_id": "enemy", "request_id": "r3"}).get("reason") == "hull_too_damaged", "f (Root): bei 49 % (Stil normal, ohne Angabe) gilt die Sperre (strikt unter 50 %)")
 	sim.enqueue_effect(_hull_effect(50))
 	sim._physics_process(0.1)
-	_check(sim.request_air_support_attack_order({"craft_id": "cutlass", "target_unit_id": "enemy", "request_id": "r3"}).get("reason") == "hull_too_damaged", "f (Root): bei genau 50 % (Stil normal, ohne Angabe) gilt die Sperre (auf oder darunter)")
+	_check(sim.request_air_support_attack_order({"craft_id": "cutlass", "target_unit_id": "enemy", "request_id": "r3b"}).get("reason") == "air_source_unavailable", "f (Root): bei genau 50 % keine Sperre (Fix-Runde 2, strikt kleiner)")
 	sim.enqueue_effect(_hull_effect(51))
 	sim._physics_process(0.1)
 	_check(sim.request_air_support_attack_order({"craft_id": "cutlass", "target_unit_id": "enemy", "request_id": "r4"}).get("reason") == "air_source_unavailable", "f (Root): bei 51 % keine Sperre, der Befehl geht an den normalen Weg")

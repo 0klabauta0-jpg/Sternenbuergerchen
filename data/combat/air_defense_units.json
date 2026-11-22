@@ -6,6 +6,10 @@
     "lock_seconds_rail_gun": 2.5,
     "hit_chance_min": 0.05,
     "hit_chance_max": 0.60,
+    "hit_damage_hull_percent": {
+      "rocket_launcher": {"fighter": 50, "dropship": 34},
+      "rail_gun": {"fighter": 37, "dropship": 25}
+    },
     "balance_status": "initial"
   },
   "break_off_hull_fraction_by_style": {

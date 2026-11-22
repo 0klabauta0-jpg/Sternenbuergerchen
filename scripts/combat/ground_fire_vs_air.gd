@@ -7,12 +7,14 @@ extends RefCounted
 ## - Aufschaltzeit statt Waffentakt (Daten ground_fire_vs_air): vor jedem Schuss auf ein Schiff braucht die Einheit
 ##   eine Aufschaltung in laufender Einsatzzeit (Raketenwerfer 4,0 s, Schienenkanone 2,5 s); nach jedem Schuss
 ##   beginnt eine neue. Hat die Einheit ein Bodenziel in Kontakt, geht der Boden vor.
-## - Schaden rechnet der vorhandene Baustein air_asset_threat_resolver.gd. Die Trefferchance ist die
+## - Schaden je Treffer: fest in Rumpf-Prozentpunkten aus den Daten (hit_damage_hull_percent, nach Waffe und Schiffsart:
+##   Raketenwerfer Jaeger 50 / Landefaehre 34, Schienenkanone Jaeger 37 / Landefaehre 25), nie unter 1 % Rumpf.
+##   Ablauf, Meldung und Zustand kommen weiter vom Baustein air_asset_threat_resolver.gd. Die Trefferchance ist die
 ##   base_hit_chance der Waffe x (1 - Ausweichen des Piloten, air_defense_engagement.pilot_profile), begrenzt auf
 ##   hit_chance_min..hit_chance_max (0,05..0,60).
 ## - Zufall aus dem Strom des Luft-Boden-Feuers der SimulationRoot (Callable "roll"), kein eigener Strom.
-## - Rumpf (AirAssetStatus.integrity) faellt durch Bodenbeschuss nie unter 1 %. Auf oder unter
-##   der Grenze seines Anflugstils (vorsichtig 65 %, normal 50 %, aggressiv 10 % Rumpf, Daten; ohne Stil normal) dreht
+## - Rumpf (AirAssetStatus.integrity) faellt durch Bodenbeschuss nie unter 1 %. Unter
+##   der Grenze seines Anflugstils (echt kleiner; vorsichtig 65 %, normal 50 %, aggressiv 10 % Rumpf, Daten; ohne Stil normal) dreht
 ##   das Schiff ab: Feuerstopp, kein Angriffsbefehl und kein Bodenfeuer bis zur Reparatur oder bis ein Stil mit tieferer
 ##   Grenze gewaehlt ist und der Rumpf darueber liegt.
 ## Die Klasse haelt nur Takt- und Meldungsgedaechtnis; die Spielwahrheit (Rumpf) schreibt die SimulationRoot.
@@ -68,14 +70,24 @@ static func attack_hint(style: String) -> String:
 	return "Bricht Anflug und Angriff ab, wenn der Rumpf unter %d %% fällt." % roundi(break_off_fraction(style) * 100.0)
 
 
-## Rumpf auf oder unter der Abdrehgrenze des Stils. Ein leerer Stand (nie getroffen) ist nicht abgedreht.
+## Rumpf UNTER der Abdrehgrenze des Stils (echt kleiner, wie im Landeanflug; genau auf der Grenze greift das Schiff noch an).
+## Ein leerer Stand (nie getroffen) ist nicht abgedreht.
 static func is_broken_off(status: Dictionary, style: String = "") -> bool:
 	if status.is_empty():
 		return false
 	var max_integrity: int = int(status.get("max_integrity", 100))
 	if max_integrity <= 0:
 		return false
-	return float(int(status.get("integrity", max_integrity))) / float(max_integrity) <= break_off_fraction(style) + 0.000001
+	return float(int(status.get("integrity", max_integrity))) / float(max_integrity) < break_off_fraction(style) - 0.000001
+
+
+## Schaden je Treffer in Rumpf-Prozentpunkten, fest je Waffe und Schiffsart (Daten hit_damage_hull_percent):
+## Raketenwerfer Jaeger 50 / Landefaehre 34, Schienenkanone Jaeger 37 / Landefaehre 25. Unbekannte Schiffsart = Landefaehre.
+## Der Abstand aendert den Schaden nicht.
+static func hit_damage_percent(weapon_id: String, craft_type: String) -> int:
+	var table: Dictionary = Dictionary(Dictionary(_rules().get("hit_damage_hull_percent", {})).get(weapon_id, {}))
+	var kind: String = "fighter" if craft_type.strip_edges().to_lower() == "fighter" else "dropship"
+	return int(table.get(kind, table.get("dropship", 25)))
 
 
 static func refusal() -> Dictionary:
@@ -216,7 +228,9 @@ func step(ctx: Dictionary) -> Dictionary:
 				"risk": risk, "evasion": evasion_for(float(target.get("pilot_skill", 0.5))), "chance": chance, "roll": drawn, "hit": hit, "damage": 0}
 			if hit:
 				var before: int = int(status.get("integrity", 100))
-				threat_context["damage"] = mini(int(probe.get("damage", 0)), maxi(before - HULL_FLOOR, 0))
+				# Feste Prozentpunkte je Waffe und Schiffsart (Daten), nicht die abstandsabhaengige Zahl des Bausteins.
+				var points: int = roundi(float(hit_damage_percent(weapon_id, String(target.get("craft_type", "")))) * float(status.get("max_integrity", 100)) / 100.0)
+				threat_context["damage"] = mini(points, maxi(before - HULL_FLOOR, 0))
 				var applied: Dictionary = Dictionary(_resolver.call("evaluate_threat", status, threat_context))
 				if bool(applied.get("eligible", false)):
 					status = Dictionary(applied.get("next_status", status)).duplicate(true)

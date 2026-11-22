@@ -8303,6 +8303,12 @@ func _air_attack_style(craft_id: String) -> String:
 	var style := String(card.get("approach_style", "")).strip_edges().to_lower()
 	return style if style in ["vorsichtig", "normal", "aggressiv"] else "normal"
 
+## Schiffsart der Schiffskarte ("fighter" / "dropship"); ohne Karte oder Angabe leer (zaehlt als Landefaehre).
+func _air_craft_type(craft_id: String) -> String:
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	if controller == null or not controller.has_method("_find_mission_dropship_card_entry"): return ""
+	return String(Dictionary(controller.call("_find_mission_dropship_card_entry", craft_id)).get("craft_type", "")).strip_edges().to_lower()
+
 func get_air_support_threat_targets() -> Array:
 	var targets: Array = []
 	if _air_support_sorties.is_empty() or _air_support_source == null or not is_hex_ground_runtime_active(): return targets
@@ -8322,7 +8328,7 @@ func get_air_support_threat_targets() -> Array:
 			if typeof(profile) == TYPE_DICTIONARY and typeof(profile.get("platform_values")) == TYPE_DICTIONARY:
 				var value: Variant = profile.platform_values.get(key)
 				if typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)): skill = clampf(float(value), 0.0, 1.0)
-		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill, "approach_style":_air_attack_style(craft_id)})
+		targets.append({"craft_id":craft_id, "position":pose.position, "cell":terrain.call("world_to_grid", pose.position), "status":get_air_asset_status_snapshot(craft_id), "pilot_skill":skill, "approach_style":_air_attack_style(craft_id), "craft_type":_air_craft_type(craft_id)})
 	return targets
 
 func draw_air_ground_roll() -> float:
