@@ -7116,6 +7116,9 @@ func _record_terrain_move_debug(cmd: Dictionary, unit, current_position: Vector2
 	}
 
 
+## Gefechtstakt: Gewuerfelt und gebucht wird hier je Effekt nacheinander. "Gleichzeitig" im Schritt gilt nur,
+## solange Trefferchance und Schussfreigabe nicht von Gesundheit oder Vitalzustand des Schuetzen abhaengen
+## (heute der Fall: combat_cadence_verifier pinnt es). Wer das aendert, muss erst alle Wuerfe, dann alle Buchungen machen.
 func _apply_damage_effect(effect: Dictionary) -> void:
 	var unit_id: String = String(effect.get("unit_id", ""))
 	if unit_id.is_empty():

@@ -49,8 +49,26 @@ static func _prepare_decision_context(context: Dictionary) -> Dictionary:
 	return context
 
 
+## Gefechtstakt: Der Treiber meldet je Einheit, ob sie in diesem Schritt dran ist (ATTACK_PHASE_DUE), nur ihre
+## Zielerfassung laufen lassen soll (ATTACK_PHASE_WARMUP: suchen und Erfassung starten, kein Schuss, kein
+## Disziplinwurf) oder gar nichts tun soll (ATTACK_PHASE_SKIP: keine Zielsuche). Ohne Rueckruf ist jede Einheit dran.
+const ATTACK_PHASE_DUE: int = 0
+const ATTACK_PHASE_WARMUP: int = 1
+const ATTACK_PHASE_SKIP: int = 2
+
+
+static func _attack_phase(unit, decision_context: Dictionary) -> int:
+	var phase_callable: Callable = decision_context.get("attack_phase", Callable())
+	if not phase_callable.is_valid():
+		return ATTACK_PHASE_DUE
+	return int(phase_callable.call(unit))
+
+
 static func _contact_pair_for_friendly(friendly, enemy_units: Array, decision_context: Dictionary) -> Dictionary:
 	if not _can_unit_seek_target(friendly):
+		return {}
+	var attack_phase: int = _attack_phase(friendly, decision_context)
+	if attack_phase == ATTACK_PHASE_SKIP:
 		return {}
 	var enemy = pick_target_from_units(friendly, _filter_targets_for_attacker(friendly, enemy_units, decision_context), decision_context)
 	if enemy == null:
@@ -62,6 +80,8 @@ static func _contact_pair_for_friendly(friendly, enemy_units: Array, decision_co
 		start_detection.call(friendly, f_id, e_id)
 	var is_detection_complete: Callable = decision_context.get("is_detection_complete", Callable())
 	if is_detection_complete.is_valid() and not bool(is_detection_complete.call(f_id, e_id)):
+		return {}
+	if attack_phase == ATTACK_PHASE_WARMUP:
 		return {}
 	var fireteam_id: String = ""
 	if friendly.has_method("get_fireteam_id"):
@@ -84,6 +104,9 @@ static func _contact_pair_for_friendly(friendly, enemy_units: Array, decision_co
 static func _contact_pair_for_enemy(enemy, friendly_units: Array, decision_context: Dictionary) -> Dictionary:
 	if not can_enemy_attack(enemy):
 		return {}
+	var attack_phase: int = _attack_phase(enemy, decision_context)
+	if attack_phase == ATTACK_PHASE_SKIP:
+		return {}
 	var friendly = pick_target_from_units(enemy, _filter_targets_for_attacker(enemy, friendly_units, decision_context), decision_context)
 	if friendly == null:
 		return {}
@@ -94,6 +117,8 @@ static func _contact_pair_for_enemy(enemy, friendly_units: Array, decision_conte
 		start_detection_enemy.call(enemy, en_id, fr_id)
 	var is_detection_complete_enemy: Callable = decision_context.get("is_detection_complete", Callable())
 	if is_detection_complete_enemy.is_valid() and not bool(is_detection_complete_enemy.call(en_id, fr_id)):
+		return {}
+	if attack_phase == ATTACK_PHASE_WARMUP:
 		return {}
 	return {
 		"attacker": enemy,

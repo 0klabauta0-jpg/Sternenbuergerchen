@@ -39,7 +39,8 @@ class NPC extends Node2D:
 	func get_stealth() -> float: return 0.0
 	func get_discipline() -> float: return 0.0
 	func get_fire_status() -> String: return String(command.get("fire_status")) if command != null else "fire_at_will"
-	func show_event_text(_text: String, _color: Color, _duration: float) -> void: pass
+	var events: Array = []
+	func show_event_text(text: String, _color: Color, _duration: float) -> void: events.append(text)
 	func get_character_profile_bundle() -> Dictionary:
 		return {"behavior_axes": {"initiative": initiative}} if initiative >= 0.0 else {}
 	func get_combat_hit_chance_multiplier() -> float:
@@ -49,13 +50,46 @@ class NPC extends Node2D:
 		return true
 
 
+## Ohne Verarbeitung; mit Hilfen fuer die Tests: Ueberwachungsschuesse nach Plan (Tick -> Schuetzen) mit Sperrzeit,
+## erzwungener Disziplinwurf mit Zaehler, Zaehler fuer Zielsuchen (start_detection wird je Suche mit Ziel gerufen).
 class QuietDriver extends DRIVER:
+	var overwatch_plan: Dictionary = {}
+	var overwatch_lock_ticks := 18
+	var overwatch_ready_tick: Dictionary = {}
+	var forced_roll := -1.0
+	var roll_calls := 0
+	var search_calls := 0
+
 	func _ready() -> void:
 		set_process(false)
 		set_physics_process(false)
 		var simulation_root = get_node_or_null(simulation_root_path)
 		if simulation_root != null:
 			simulation_root.damage_effect_resolved.connect(_on_damage_effect_resolved)
+
+	func _try_enqueue_overwatch(_simulation_root: Node) -> Array:
+		var shots: Array = []
+		for shooter in Array(overwatch_plan.get(_current_tick, [])):
+			overwatch_ready_tick[String(shooter)] = _current_tick + overwatch_lock_ticks
+			shots.append({"attacker_unit_id": String(shooter), "target_unit_id": "enemy"})
+		return shots
+
+	func get_overwatch_member_ready_snapshot() -> Dictionary:
+		var snapshot: Dictionary = {}
+		for shooter in overwatch_ready_tick.keys():
+			var ready_tick: int = int(overwatch_ready_tick[shooter])
+			snapshot[shooter] = {"ready": _current_tick >= ready_tick, "ready_tick": ready_tick, "cooldown_remaining_ticks": maxi(ready_tick - _current_tick, 0)}
+		return snapshot
+
+	func _next_authoritative_combat_roll() -> float:
+		if forced_roll < 0.0:
+			return super._next_authoritative_combat_roll()
+		roll_calls += 1
+		return forced_roll
+
+	func _start_or_continue_detection(attacker, attacker_id: String, target_id: String) -> void:
+		search_calls += 1
+		super._start_or_continue_detection(attacker, attacker_id, target_id)
 
 
 func _init() -> void:
@@ -79,6 +113,11 @@ func _run() -> void:
 	_test_twelve_shooters_twelve_events()
 	_test_simultaneous_kill()
 	_test_fixed_order_independent_of_creation()
+	_test_overwatch_does_not_displace_normal_fire()
+	_test_alternating_overwatch_enemy_keeps_cadence()
+	_test_discipline_roll_only_when_due()
+	_test_target_search_only_for_due_units()
+	_test_dead_shooter_keeps_hit_chance()
 	await process_frame
 	print("COMBAT_CADENCE passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -178,7 +217,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.hit_multiplier = float(spec.get("hit_multiplier", -1.0))
 		npc.position = terrain.grid_to_world(spec.grid)
 		if npc.team_id == "blue":
-			npc.command = COMMAND.new({"command_type": "hold_position", "fire_status": "fire_at_will", "fire_rule": "free"})
+			npc.command = COMMAND.new({"command_type": "hold_position", "fire_status": String(spec.get("fire_status", "fire_at_will")), "fire_rule": "free"})
 		scope.add_child(npc)
 		registry.register_unit(npc.unit_id, npc)
 		sim.register_known_unit(npc.unit_id, npc)
@@ -206,7 +245,7 @@ func _run_ticks(f: Dictionary, ticks: int) -> void:
 		_tick(f)
 		if f.sim.tick_counter % 3 == 0:
 			f.sim.effects_queue.clear()
-			f.driver._try_enqueue_attacks(f.sim)
+			f.driver._run_overwatch_and_attack_step(f.sim, false, {})
 			var shooters: Array = []
 			for effect in f.sim.effects_queue:
 				if String(effect.get("effect_type", "")) == "damage":
@@ -377,3 +416,110 @@ func _hit_log(f: Dictionary, ticks: int) -> Array:
 	_run_ticks(f, ticks)
 	_tick(f)
 	return entries
+
+
+# ---- Nachbesserung 1 ---------------------------------------------------------
+
+func _shooters_at(f: Dictionary, tick: int) -> Array:
+	for entry in f.calls:
+		if int(entry.tick) == tick:
+			return entry.shooters
+	return []
+
+
+## K1 Fall 1 und 3: Ein Ueberwachungsschuss des eigenen Schuetzen verdraengt den faelligen Gegner nicht, und der
+## Ueberwachungsschuetze gibt im selben Schritt und in seiner Sperrzeit keinen zusaetzlichen normalen Schuss ab.
+func _test_overwatch_does_not_displace_normal_fire() -> void:
+	var f := _rig(_line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "pistol"))
+	f.driver.overwatch_plan = {9: ["own"]}
+	_run_ticks(f, 30)
+	_check(_shooters_at(f, 9) == ["enemy"], "K1: Schritt 3: Ueberwachung des eigenen, der faellige Gegner schiesst trotzdem (%s)" % str(_shooters_at(f, 9)))
+	_check(not Array(_shooters_at(f, 9)).has("own"), "K1: kein zusaetzlicher normaler Schuss im Schritt des Ueberwachungsschusses")
+	_check(_shooters_at(f, 18) == ["enemy"], "K1: in der Sperrzeit (bis Tick 27) kein normaler Schuss des Ueberwachungsschuetzen (%s)" % str(_shooters_at(f, 18)))
+	_check(_shooters_at(f, 27) == ["enemy", "own"] or _shooters_at(f, 27) == ["own", "enemy"], "K1: nach der Sperrzeit schiesst er wieder normal (%s)" % str(_shooters_at(f, 27)))
+	f.scope.free()
+
+
+## K1 Fall 2: Zwei eigene Ueberwachungsschuetzen wechseln sich ab (Schritt 3, 6, 9 ...): der Gegner schiesst in
+## 30 Schritten so oft, wie seine Periode es hergibt (Pistole, Periode 3 -> 10).
+func _test_alternating_overwatch_enemy_keeps_cadence() -> void:
+	var specs: Array = [{"id": "enemy", "team": "red", "grid": CENTER, "facing": 0, "weapon": "pistol"}]
+	for index in range(2):
+		var direction: int = [0, 2][index]
+		specs.append({"id": "ow%d" % (index + 1), "team": "blue", "grid": CENTER + HEX.DIRECTIONS[direction], "facing": (direction + 3) % 6, "weapon": "pistol"})
+	var f := _rig(specs)
+	var plan: Dictionary = {}
+	for tick in range(9, 91, 18):
+		plan[tick] = ["ow1"]
+		plan[tick + 9] = ["ow2"]
+	f.driver.overwatch_plan = plan
+	_run_ticks(f, 90)
+	_check(_shots_by(f, "enemy") == 10, "K1: Gegner schiesst trotz abwechselnder Ueberwachung 10 Mal in 30 Schritten (%d)" % _shots_by(f, "enemy"))
+	_check(_shots_by(f, "ow1") == 0, "K1: ow1 (jeden zweiten Schritt Ueberwachung, dazwischen gesperrt) gibt keinen normalen Schuss ab (%d)" % _shots_by(f, "ow1"))
+	_check(_shots_by(f, "ow2") == 1, "K1: ow2 schiesst nur im Schritt 3 normal, danach Ueberwachung oder Sperrzeit (%d)" % _shots_by(f, "ow2"))
+	f.scope.free()
+
+
+## W2: Der Disziplinwurf faellt nur fuer faellige Einheiten; die Meldung nur, wenn der Schuss folgt.
+func _test_discipline_roll_only_when_due() -> void:
+	var specs: Array = [
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "weapon": "rifle", "fire_status": "hold_fire"},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "weapon": "none"},
+	]
+	var quiet := _rig(specs)
+	quiet.driver.forced_roll = 0.99
+	_run_ticks(quiet, 36)
+	_check(quiet.driver.roll_calls >= 1 and quiet.driver.roll_calls <= 3, "W2: Feuerstopp, Periode 4, 12 Schritte -> hoechstens 3 Wuerfe (%d)" % quiet.driver.roll_calls)
+	quiet.scope.free()
+	var breaking := _rig(specs)
+	breaking.driver.forced_roll = 0.0
+	_run_ticks(breaking, 36)
+	var messages: int = Array(breaking.units["own"].events).count("FEUERSTOPP GEBROCHEN!")
+	var shots := _shots_by(breaking, "own")
+	_check(shots >= 1 and messages == shots, "W2: Meldung nur mit folgendem Schuss (Meldungen %d, Schuesse %d)" % [messages, shots])
+	breaking.scope.free()
+
+
+## W3: 12 gegen 12, 30 Schritte: Zielsuchen hoechstens so viele wie faellige Einheiten-Schritte plus ein Anlauf je Einheit.
+func _test_target_search_only_for_due_units() -> void:
+	var specs: Array = []
+	for index in range(12):
+		var column: int = index % 6 - 3
+		var row: int = index / 6
+		specs.append({"id": "a%02d" % index, "team": "blue", "grid": CENTER + Vector2i(column, -1 - row), "facing": 0, "weapon": "rifle"})
+		specs.append({"id": "b%02d" % index, "team": "red", "grid": CENTER + Vector2i(column, 1 + row), "facing": 3, "weapon": "rifle"})
+	var f := _rig(specs)
+	_run_ticks(f, 90)
+	var due_unit_steps := 24 * 7
+	var shots_total := 0
+	for entry in f.calls:
+		shots_total += Array(entry.shooters).size()
+	print("W3 Zielsuchen: %d (faellige Einheiten-Schritte %d, ohne Gating %d), Schuesse %d" % [f.driver.search_calls, due_unit_steps, 24 * 30, shots_total])
+	_check(shots_total > 0, "W3: 12 gegen 12 schiessen (%d)" % shots_total)
+	_check(f.driver.search_calls <= due_unit_steps + 24, "W3: Zielsuchen <= faellige Einheiten-Schritte + ein Anlauf je Einheit (%d <= %d)" % [f.driver.search_calls, due_unit_steps + 24])
+	f.scope.free()
+
+
+## k1: Trefferchance und Schussfreigabe haengen nicht von der Gesundheit des Schuetzen ab; wer im selben Schritt
+## frueher in der Reihenfolge faellt, trifft mit unveraenderter Chance. Haengt das je an der Gesundheit, muss
+## das Buchen auf "erst alle Wuerfe, dann alle Buchungen" umgestellt werden (Kommentar in simulation_root.gd).
+func _test_dead_shooter_keeps_hit_chance() -> void:
+	var chances: Array = []
+	for own_hp in [1, 100000]:
+		var specs := _line(CENTER, CENTER + HEX.DIRECTIONS[0], "pistol", "pistol")
+		specs[0]["hp"] = own_hp
+		specs[0]["hit_multiplier"] = 1.0
+		specs[1]["hit_multiplier"] = 10.0
+		var f := _rig(specs, 7)
+		var seen: Array = []
+		f.sim.damage_effect_resolved.connect(func(result: Dictionary) -> void:
+			if String(result.get("attacker_unit_id", "")) == "own":
+				seen.append(float(result.get("hit_chance_resolved", -1.0))))
+		_run_ticks(f, 9)
+		_tick(f)
+		if own_hp == 1:
+			_check(f.units["own"].hp <= 0, "k1: der eigene Schuetze faellt im selben Schritt (hp %d)" % f.units["own"].hp)
+		_check(seen.size() == 1, "k1: sein Schuss wird trotzdem gewertet (%d)" % seen.size())
+		chances.append(seen[0] if not seen.is_empty() else -2.0)
+		f.scope.free()
+	_check(chances[0] > 0.0 and is_equal_approx(chances[0], chances[1]), "k1: Trefferchance unveraendert, ob der Schuetze faellt oder nicht (%s)" % str(chances))
