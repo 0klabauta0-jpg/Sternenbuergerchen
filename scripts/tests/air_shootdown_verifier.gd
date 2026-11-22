@@ -16,6 +16,8 @@ const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const STATUS = preload("res://scripts/mission/air_asset_status.gd")
 const CASUALTY = preload("res://scripts/core/campaign_casualty_rules.gd")
+const LIFECYCLE = preload("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
+const PROJECTION = preload("res://scripts/meta/campaign_save_projection.gd")
 const MISSION_SCENE = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const GM02_MAP := "res://maps/Ground_Mission02_128x128.json"
 const GM02_SCENARIO := "res://data/mission_scenarios/ground_mission02_128x128.json"
@@ -402,5 +404,12 @@ func _controller_case(forms: Array, with_guards: bool) -> void:
 	_check(not bool(controller.call("_can_request_mission_dropship_return", {"craft_id": "craft_a", "state": "waiting"})), "verlorenes Schiff: kein Heimflug anforderbar")
 	var boarding: Dictionary = controller.call("request_campaign_crew_boarding", "craft_a")
 	_check(not bool(boarding.get("ok", true)) and String(boarding.get("reason", "")) == "craft_lost", "verlorenes Schiff: Einsteigen abgelehnt (craft_lost): " + str(boarding))
+	# Speichern: mit einer Absturzstelle im Einsatz ehrlich abgelehnt, und der Satz nennt das abgestuerzte Schiff.
+	var driver: Node = controller.call("_get_combat_loop_driver")
+	var checkpoint: RefCounted = LIFECYCLE.new()
+	var saved: Dictionary = checkpoint.call("export_state", simulation, driver)
+	_check(not bool(saved.get("ok", true)) and String(saved.get("reason", "")) == "mission_lifecycle_unsupported", "Speichern mit Absturzstelle abgelehnt (mission_lifecycle_unsupported): " + str(saved).left(120))
+	var sentence: String = PROJECTION.blocked_text("mission_lifecycle_unsupported")
+	_check(sentence.contains("abgestürzt") and sentence.contains("zuletzt gespeicherte Stand"), "der Satz nennt das abgestuerzte Schiff und den letzten Stand: " + sentence)
 	mission.queue_free()
 	await process_frame

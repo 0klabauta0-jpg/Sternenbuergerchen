@@ -11,6 +11,8 @@ class PreparedLifecycle extends RefCounted:
 var _preparations: Dictionary = {}
 
 func _guard(sim: Node, driver: Node) -> Dictionary:
+	# LC2b: Ein abgestuerztes Schiff (Absturzstelle, Besatzung am Boden) hat keinen Speicherstand: ehrlich ablehnen, es gilt der letzte Stand.
+	if is_instance_valid(sim) and sim.has_method("get_air_crash_sites") and not Array(sim.get_air_crash_sites()).is_empty(): return _reject("mission_lifecycle_unsupported")
 	if not is_instance_valid(sim) or not is_instance_valid(driver) or not sim.has_method("get_unit_registry") or not sim.has_method("is_hex_ground_runtime_active") or not is_instance_valid(sim.get_unit_registry()) or sim.is_processing_tick or not sim.command_queue.is_empty() or not sim.effects_queue.is_empty() or driver._combat_finished or driver._current_tick != sim.tick_counter or driver._objective_owned_since_msec >= 0: return _reject("mission_lifecycle_busy")
 	if sim.is_hex_ground_runtime_active() and not sim.get_hex_checkpoint_guard().get("ok",false): return _reject("mission_lifecycle_busy")
 	for key in BLOCKING_DICTS:
