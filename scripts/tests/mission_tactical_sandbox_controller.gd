@@ -508,6 +508,7 @@ var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _current_approach_style: String = "normal" # per selected craft, like _current_approach_index
+var _current_approach_path: String = "normal" # steil / normal / tief, per selected craft like the style (task LA)
 var _selected_fireteam_ids: PackedStringArray = []
 var _default_fireteam_selection_initialized: bool = false
 var _focused_fireteam_id: String = ""
@@ -1241,6 +1242,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			_current_approach_index = angle_index
 	if planning_state.has("approach_style"):
 		_current_approach_style = AIR_DEFENSE_PLAN.sanitize_style(String(planning_state.get("approach_style", "")))
+	if planning_state.has("approach_path"):
+		_current_approach_path = AIR_DEFENSE_PLAN.sanitize_path(String(planning_state.get("approach_path", "")))
 	if planning_state.has("has_lz_position"):
 		_has_lz_position = bool(planning_state.get("has_lz_position", false))
 	if planning_state.has("lz_position"):
@@ -1298,6 +1301,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 					selected_drop_card["approach_angle"] = planning_state["approach_angle"]
 				if planning_state.has("approach_style") and (planning_has_lz_position or not selected_drop_card.has("approach_style")):
 					selected_drop_card["approach_style"] = planning_state["approach_style"]
+				if planning_state.has("approach_path") and (planning_has_lz_position or not selected_drop_card.has("approach_path")):
+					selected_drop_card["approach_path"] = planning_state["approach_path"]
 				if not selected_drop_card.has("drop_ship_requested") and planning_state.has("drop_ship_requested"):
 					selected_drop_card["drop_ship_requested"] = bool(planning_state.get("drop_ship_requested", false))
 				if not selected_drop_card.has("drop_ship_staged") and planning_state.has("drop_ship_staged"):
@@ -1474,6 +1479,7 @@ func get_planning_state() -> Dictionary:
 		"lz_position": _lz_position,
 		"approach_angle": _get_approach_angle_name(),
 		"approach_style": _current_approach_style,
+		"approach_path": _current_approach_path,
 		"drop_ship_requested": _drop_ship_requested,
 		"drop_ship_staged": _drop_ship_staged,
 		"mission_drop_source": _mission_drop_source,
@@ -2607,6 +2613,8 @@ func _does_authoritative_dropship_card_satisfy_pending(card: Dictionary, pending
 			return _sanitize_approach_angle_name(String(card.get("approach_angle", ""))) == _sanitize_approach_angle_name(String(payload.get("approach_angle", "")))
 		"set_dropship_approach_style":
 			return AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", ""))) == AIR_DEFENSE_PLAN.sanitize_style(String(payload.get("approach_style", "")))
+		"set_dropship_approach_path":
+			return AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", ""))) == AIR_DEFENSE_PLAN.sanitize_path(String(payload.get("approach_path", "")))
 		"call_dropship":
 			return String(card.get("state", "")).strip_edges().to_lower() != "waiting"
 		"return_dropship":
@@ -2622,6 +2630,8 @@ func _build_dropship_command_action_label(command_type: String) -> String:
 			return "APPROACH"
 		"set_dropship_approach_style":
 			return "ANFLUGSTIL"
+		"set_dropship_approach_path":
+			return "ANFLUGART"
 		"call_dropship":
 			return "DROP"
 		"return_dropship":
@@ -2663,6 +2673,8 @@ func apply_authoritative_dropship_command(command: Dictionary) -> bool:
 			return true
 		"set_dropship_approach_style":
 			return _select_approach_style(String(command.get("approach_style", "")))
+		"set_dropship_approach_path":
+			return _select_approach_path(String(command.get("approach_path", "")))
 		"call_dropship":
 			_request_selected_mission_dropship_drop(true, true)
 			return true
@@ -3808,6 +3820,19 @@ func _select_approach_style(style_name: String) -> bool:
 		return false
 	_current_approach_style = style
 	_last_command_text = "ANFLUGSTIL %s" % String(AIR_DEFENSE_PLAN.STYLE_LABELS.get(style, style))
+	_store_selected_mission_dropship_plan()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+## Approach path (steil / normal / tief): same route as the style. Unknown paths are rejected.
+func _select_approach_path(path_name: String) -> bool:
+	var path: String = AIR_DEFENSE_PLAN.normalize_path(path_name)
+	if path.is_empty():
+		return false
+	_current_approach_path = path
+	_last_command_text = "ANFLUGART %s" % String(AIR_DEFENSE_PLAN.PATH_LABELS.get(path, path))
 	_store_selected_mission_dropship_plan()
 	_update_ui()
 	_emit_planning_state_changed()
@@ -12145,6 +12170,8 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		result["approach_angle"] = approach_angle
 	if card.has("approach_style"):
 		result["approach_style"] = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", "")))
+	if card.has("approach_path"):
+		result["approach_path"] = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", "")))
 	if card.has("drop_ship_requested"):
 		result["drop_ship_requested"] = bool(card.get("drop_ship_requested", false))
 	if card.has("drop_ship_staged"):
@@ -12408,6 +12435,7 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 		result.erase("lz_name")
 	result["approach_angle"] = _get_approach_angle_name()
 	result["approach_style"] = _current_approach_style
+	result["approach_path"] = _current_approach_path
 	result["drop_ship_requested"] = _drop_ship_requested
 	result["drop_ship_staged"] = _drop_ship_staged
 	if not _mission_drop_source.is_empty() and not result.has("payload_source"):
@@ -12635,6 +12663,10 @@ func _apply_mission_dropship_card_selection(card: Dictionary) -> void:
 		_current_approach_style = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", "")))
 	elif card_count > 1:
 		_current_approach_style = AIR_DEFENSE_PLAN.DEFAULT_APPROACH_STYLE
+	if card.has("approach_path"):
+		_current_approach_path = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", "")))
+	elif card_count > 1:
+		_current_approach_path = AIR_DEFENSE_PLAN.DEFAULT_APPROACH_PATH
 	if card.has("has_lz_position"):
 		_has_lz_position = bool(card.get("has_lz_position", false))
 		_lz_position = _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)
@@ -13293,6 +13325,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	host.set_meta("mission_dropship_passenger_content", true)
 	_append_mission_dropship_card_command_row(host, card)
 	_append_mission_dropship_card_approach_style_row(host, card)
+	_append_mission_dropship_card_approach_path_row(host, card)
 	_append_air_support_card_row(host, card)
 	var content_changed := _refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
@@ -13320,7 +13353,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return content_changed
 	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
 	for child in host.get_children():
-		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
+		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "MissionDropshipApproachPathRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
 			continue
 		host.remove_child(child)
 		child.queue_free()
@@ -13454,6 +13487,36 @@ func _append_mission_dropship_card_approach_style_row(host: VBoxContainer, card:
 		row.add_child(button)
 
 
+## Approach path (task LA): second compact row "Anflug: Steil / Normal / Tief" under the style row.
+## Same command route as the style; tooltips come from the data and this craft's pilot.
+func _append_mission_dropship_card_approach_path_row(host: VBoxContainer, card: Dictionary) -> void:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if host == null or craft_id.is_empty() or host.get_node_or_null("MissionDropshipApproachPathRow") != null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "MissionDropshipApproachPathRow"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 1)
+	row.set_meta("mission_dropship_card_approach_path_row", true)
+	row.set_meta("mission_dropship_craft_id", craft_id)
+	host.add_child(row)
+	var row_label := Label.new()
+	row_label.text = "Anflug:"
+	row_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row_label.add_theme_font_size_override("font_size", MISSION_DROPSHIP_APPROACH_BUTTON_FONT_SIZE)
+	row.add_child(row_label)
+	var active_path: String = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", _current_approach_path)))
+	var disabled: bool = _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_card_lz(card)
+	var pilot_skill: float = _mission_drop_pilot_skill_for_craft(craft_id)
+	for path in AIR_DEFENSE_PLAN.APPROACH_PATHS:
+		var button := _build_mission_dropship_card_command_button(String(AIR_DEFENSE_PLAN.PATH_LABELS[path]), AIR_DEFENSE_PLAN.path_tooltip(String(path), pilot_skill), disabled,
+			Callable(self, "_on_mission_dropship_card_approach_path_pressed").bind(craft_id, String(path)), craft_id, "path_%s" % String(path), String(path) == active_path)
+		button.custom_minimum_size = Vector2(0.0, MISSION_DROPSHIP_APPROACH_BUTTON_SIZE.y)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.set_meta("mission_dropship_approach_path", String(path))
+		row.add_child(button)
+
+
 func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or simulation == null or simulation.get("_air_support_source") == null or String(get_parent().get_meta("location_id", "")) == "polisa": return
@@ -13523,6 +13586,14 @@ func _refresh_mission_dropship_card_command_row(host: VBoxContainer, card: Dicti
 		for style_button in style_row.get_children():
 			if style_button is Button:
 				changed = _apply_mission_dropship_command_button_delta(style_button, style_button.text, style_button.tooltip_text, lz_disabled, String(style_button.get_meta("mission_dropship_approach_style", "")) == active_style) or changed
+	var path_row := host.get_node_or_null("MissionDropshipApproachPathRow")
+	if path_row != null:
+		var active_path: String = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", _current_approach_path)))
+		var path_skill: float = _mission_drop_pilot_skill_for_craft(String(card.get("craft_id", "")))
+		for path_button in path_row.get_children():
+			if path_button is Button:
+				var path_id: String = String(path_button.get_meta("mission_dropship_approach_path", ""))
+				changed = _apply_mission_dropship_command_button_delta(path_button, path_button.text, AIR_DEFENSE_PLAN.path_tooltip(path_id, path_skill), lz_disabled, path_id == active_path) or changed
 	return changed
 
 
@@ -14571,6 +14642,16 @@ func _on_mission_dropship_card_approach_style_pressed(craft_id: String, style_na
 		request_network_authoritative_dropship_command("set_dropship_approach_style", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"approach_style": AIR_DEFENSE_PLAN.sanitize_style(style_name)})
 		return
 	_select_approach_style(style_name)
+
+
+func _on_mission_dropship_card_approach_path_pressed(craft_id: String, path_name: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	if _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("set_dropship_approach_path", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"approach_path": AIR_DEFENSE_PLAN.sanitize_path(path_name)})
+		return
+	_select_approach_path(path_name)
 
 
 func _on_mission_dropship_card_drop_pressed(craft_id: String) -> void:
@@ -38468,13 +38549,14 @@ func _resolve_campaign_field_lz() -> Dictionary:
 	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), _mission_drop_pilot_skill(),0.5, _campaign_occupied_landing_positions(), AIR_DEFENSE_PLAN.lz_radius_factor_for_style(_current_approach_style))
 
 func _mission_drop_pilot_skill() -> float:
-	var pilot_id := String(_find_mission_dropship_card_entry(_mission_drop_craft_id).get("pilot_unit_id", ""))
-	var pilot = _get_campaign_sortie_unit(pilot_id)
-	var skill: float = 0.5
-	if pilot != null:
-		var value: Variant = pilot.get("dropship_piloting")
-		if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0: skill = clampf(float(value),0.0,1.0)
-	return skill
+	return _mission_drop_pilot_skill_for_craft(_mission_drop_craft_id)
+
+# The pilot's flying skill FOR THIS SHIP: dropship_piloting in the dropship, fighter_piloting in the fighter (LA).
+func _mission_drop_pilot_skill_for_craft(craft_id: String) -> float:
+	var entry: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	var pilot = _get_campaign_sortie_unit(String(entry.get("pilot_unit_id", "")))
+	if pilot == null: return AIR_DEFENSE_PLAN.DEFAULT_PILOT_SKILL
+	return AIR_DEFENSE_PLAN.pilot_skill_for_model(String(entry.get("model_id", "")), {"dropship_piloting": pilot.get("dropship_piloting"), "fighter_piloting": pilot.get("fighter_piloting")})
 
 # Ground air defence at the landing commit point (ground_air_defense_engagement_contract).
 # Authoritative side only. Returns false when the approach is broken off.
@@ -38485,13 +38567,18 @@ func _resolve_air_defense_on_approach(lz: Vector2) -> bool:
 	var setup: Node = get_node_or_null("../MissionSetup")
 	var registry = _get_terrain_registry()
 	var driver = _get_combat_loop_driver()
-	if _is_connected_network_snapshot_client() or setup == null or registry == null or driver == null or not driver.has_method("get_enemy_group_fit_counts") or not setup.has_method("get_scenario_tactical_authoring_snapshot"): return true
-	var map = setup.get("_loaded_terrain_map_data")
-	if map == null or not map.has_method("get_place_presentation") or String(registry.call("get_grid_topology")) != POLISA_GLOBE_HEX.TOPOLOGY_ID: return true
+	if _is_connected_network_snapshot_client(): return true
+	# LA: steil / tief carry an accident risk even where no air defence stands, so they do not stop at "no air defence".
+	var path_rolls: bool = AIR_DEFENSE_PLAN.path_has_effect(_current_approach_path) and registry != null
+	var flak_ready: bool = setup != null and registry != null and driver != null and driver.has_method("get_enemy_group_fit_counts") and setup.has_method("get_scenario_tactical_authoring_snapshot")
+	var map = setup.get("_loaded_terrain_map_data") if flak_ready else null
+	flak_ready = flak_ready and map != null and map.has_method("get_place_presentation") and String(registry.call("get_grid_topology")) == POLISA_GLOBE_HEX.TOPOLOGY_ID
+	if not flak_ready and not path_rolls: return true
 	var height_at := func(cell: Vector2i) -> int: return int(registry.call("get_height_at", cell))
-	var vehicles: Array = AIR_DEFENSE_PLAN.vehicles_from_props(Array(map.get_place_presentation().get("props", [])), height_at)
-	var crew: Dictionary = AIR_DEFENSE_PLAN.crew_state(setup.call("get_scenario_tactical_authoring_snapshot"), driver.call("get_enemy_group_fit_counts"))
-	if vehicles.is_empty() or not bool(crew.known): return true
+	var vehicles: Array = AIR_DEFENSE_PLAN.vehicles_from_props(Array(map.get_place_presentation().get("props", [])), height_at) if flak_ready else []
+	var crew: Dictionary = AIR_DEFENSE_PLAN.crew_state(setup.call("get_scenario_tactical_authoring_snapshot"), driver.call("get_enemy_group_fit_counts")) if flak_ready else {"known": false, "crew_ready": false}
+	if not bool(crew.known): vehicles = []
+	if vehicles.is_empty() and not path_rolls: return true
 	var craft_id: String = _mission_drop_craft_id.strip_edges() if not _mission_drop_craft_id.strip_edges().is_empty() else "mission_dropship"
 	var offset: Vector2 = Vector2(APPROACH_OFFSETS.get(_get_approach_angle_name(), Vector2(180.0, -112.0)))
 	var start: Vector2 = lz + offset.normalized() * _get_drop_offmap_distance() # as _get_drop_sequence_staging_position
@@ -38500,8 +38587,14 @@ func _resolve_air_defense_on_approach(lz: Vector2) -> bool:
 	var plan: Dictionary = AIR_DEFENSE_PLAN.resolve({"vehicles": vehicles, "height_at": height_at, "crew_ready": bool(crew.crew_ready),
 		"start_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", start)), "lz_plane": AIR_DEFENSE_PLAN.axial_to_plane(registry.call("world_to_grid_float", lz)),
 		"pilot_skill": _mission_drop_pilot_skill(), "seed": craft_id + str(lz) + ":air_defense", "integrity": int(prior.get("integrity", 100)),
-		"model_id": String(_find_mission_dropship_card_entry(craft_id).get("model_id", "cutlass")), "approach_style": _current_approach_style})
-	if not bool(plan.get("engaged", false)): return true
+		"model_id": String(_find_mission_dropship_card_entry(craft_id).get("model_id", "cutlass")), "approach_style": _current_approach_style, "approach_path": _current_approach_path})
+	if not bool(plan.get("engaged", false)) and not bool(plan.get("accident_occurred", false)):
+		# Nothing fired and no accident: only the terrain-cover sentence (tief) is worth a card line, nothing is stored.
+		if String(plan.get("message", "")).is_empty(): return true
+		_air_defense_feedback_text = String(plan.message)
+		_last_command_text = _air_defense_feedback_text
+		_set_mission_dropship_card_feedback(craft_id, _air_defense_feedback_text)
+		return true
 	var snapshot: Dictionary = AIR_DEFENSE_PLAN.status_snapshot_after(prior, craft_id, _mission_drop_display_name, plan)
 	_enqueue_air_asset_status_effect(snapshot, {"event_id": String(plan.event_id)})
 	if _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id: _air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", snapshot)

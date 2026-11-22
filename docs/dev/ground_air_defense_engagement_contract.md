@@ -28,7 +28,9 @@ abbekommt. Zuerst als Gegner **[N]**.
 | Integritaet ueber das Missionsende | **nicht gespeichert**; Befund mit Belegen in der Task-Datei vom 15.11. |
 | Anflugstil je Schiff (statt Abfrage "abdrehen?") | `approach_style` in Schiffskarte und Planungszustand, Befehl `set_dropship_approach_style`, Dreier-Zeile "Vorsichtig / Normal / Aggressiv" in der Schiffskarte; Regeln unten |
 | Tiefflug mit Preis | Profil `low` bei "vorsichtig", Streukreis der Kampagnen-Feldlandung x 1,5 |
-| Sichtlinie gegen Gelaende im Anflug | **offen**; heute immer frei |
+| Anflugart je Schiff (Steil / Normal / Tief) | umgesetzt am 22.11. (Abschnitt LA): zweite Zeile "Anflug:" in der Schiffskarte, Planungszustand `approach_path`, Befehl `set_dropship_approach_path`; Regeln im Abschnitt "Anflugart" unten |
+| Sichtlinie gegen Gelaende im Anflug | umgesetzt **nur fuer Anflugart "Tief"** (22.11.); bei "Normal" und "Steil" weiter immer frei |
+| Unfall im Anflug (Steil / Tief), auch ohne Flugabwehr am Ort | umgesetzt am 22.11.: Rumpf -20 bis -40 Punkte, Landung geht weiter |
 | Absturz im Anflug | **offen**; Zerstoerung wird zum erzwungenen Abbruch mit Rumpf 1 % |
 | Start und Abholen (Abflug) unter Beschuss | **offen** |
 | Fahrzeug als Einheit am Boden (Besatzung, Schaden, Herausschiessen, Uebernehmen) | **offen**, Regeln unten |
@@ -63,6 +65,32 @@ Vorschlag des Grafik-Strangs, vom Nutzer am 14.11. als Richtung bestaetigt: Abdr
   mit Rumpf 1 %.
 - Der Stil wird je Schiff gespeichert wie der Anflugwinkel (Schiffskarte, Planungszustand, Netzbefehl).
 - Der "Donnerkeil" braucht Radar. Der "Hagel" kann auch nach Sicht richten.
+
+### Anflugart je Schiff (Abschnitt LA, 22.11.2026)
+Zweite Achse neben dem Stil, fuer jeden Anflug mit Landung (Kampagne und Skirmish, Landefaehre und Jaeger).
+Alle Zahlen stehen in `data/combat/air_defense_units.json`, Block `approach_paths`; fehlt der Block, verhaelt
+sich jede Art wie "Normal". Regelkern: `scripts/mission/air_defense_approach_plan.gd` (`resolve` mit
+`approach_path`), geprueft durch `approach_profile_rules_verifier` und `approach_profile_flow_verifier`.
+| Art | Flugabwehr | Unfallrisiko |
+| --- | --- | --- |
+| Normal (Standard) | rechnet exakt wie vor LA, kein Wurf | keines |
+| Steil | kuerzere Zeit im Wirkbereich: nur die letzten 60 % der Salven ab der ersten Stellung in Reichweite (`exposure_factor`); keine Gelaendedeckung, Flughoehe wie der Stil | `pmax` 0,15 |
+| Tief | Flughoehe `low`; fuer jede Stellung und jeden Stuetzpunkt (alle 4 Felder plus LZ, `sample_step_hex`) wird die Sichtlinie mit `LosSystem.find_first_blocker_grid` gegen die Hoehenstufen der Karte geprueft, zwischen Lafette (Boden + 1) und Schiff. Eine Stellung, die nie freie Sicht hat, greift nicht ein | `pmax` 0,25 |
+- Unfallwahrscheinlichkeit = `pmax x (1 - Pilot)^2`. "Pilot" ist die Flugfertigkeit des Piloten fuer dieses
+  Schiff: `dropship_piloting` bei der Landefaehre, `fighter_piloting` beim Jaeger (gilt fuer die ganze
+  Anflugrechnung, auch Flugabwehr und Landegenauigkeit).
+- Ein Wurf je Anflug, gesaet mit demselben Text wie die Salven (`<Schiff><LZ>:air_defense`), plus
+  `:approach_path:<Art>`; derselbe Befehl liefert dasselbe Ergebnis. Folge eines Unfalls: Rumpf minus 20 bis 40
+  Prozentpunkte (`accident.hull_loss_min_percent` / `_max_percent`), nie unter 1 %; die Landung geht weiter.
+  Wird der Anflug von der Flugabwehr abgebrochen, wird nicht gegen den Unfall gewuerfelt.
+- Der Unfallwurf laeuft auch, wenn am Ort keine Flugabwehr steht (Fruehausstieg in `_resolve_air_defense_on_approach`
+  gilt nur noch fuer "Normal").
+- Ergebnis des Anflugs: `path_report` mit `stations_total`, `stations_masked` (Instanz-IDs), `window`
+  (`in_range`, `kept`, `factor`) und `accident` (`probability`, `roll`, `occurred`, `hull_loss`, `reason`).
+  Rueckmeldung der Schiffskarte: "Tiefflug: 1 von 2 Stellungen durch Gelaende verdeckt." und/oder "Unfall im
+  Tiefflug: Rumpf -30 %." (nach dem Flugabwehr-Satz, falls es einen gibt).
+- Die Hoehenstufen der Karte gelten als Verdecker, auch wo ein Feld nicht `blocks_los` traegt (Huegel haben das
+  in den Karten nicht gesetzt).
 
 ### Warnung vor Schaden
 - Der erste Kontakt ist nur eine Meldung ("Radar erfasst"). Der "Donnerkeil" braucht danach einen Schritt zum
