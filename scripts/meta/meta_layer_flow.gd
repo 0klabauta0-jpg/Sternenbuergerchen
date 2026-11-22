@@ -177,6 +177,15 @@ var _singleplayer_services_elapsed: float = 0.0
 ## Ausfallzeit der Verwundeten (nur Kampagne): echte Sekunden werden gesammelt, je volle Sekunde einmal auf den Kader angewendet.
 const PERSONNEL_RECOVERY_SCRIPT = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const CREDIT_TEXT_SCRIPT = preload("res://scripts/core/credit_text.gd")
+## Abschnitt P (Pleite): Bildschirm, Szenenwege und Zustand. Regel: scripts/core/campaign_bankruptcy_rules.gd (ueber den Adapter).
+const BANKRUPTCY_SCREEN_SCRIPT = preload("res://scripts/ui/campaign_bankruptcy_screen.gd")
+const BANKRUPTCY_CAMPAIGN_SCENE := "res://scenes/meta/meta_layer_test.tscn"
+const BANKRUPTCY_MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
+const BANKRUPTCY_LIMIT_WARNING := "Kreditrahmen ausgeschöpft. Sitzt du jetzt ohne Treibstoff fest, bist du pleite."
+var _bankrupt: bool = false
+var _bankruptcy_screen: CanvasLayer
+var _bankruptcy_paused_tree: bool = false
+var _debt_limit_warned: bool = false
 ## Je Frame zaehlt hoechstens so viel mit: ein Haenger, Ladebildschirm oder Ruhezustand des Rechners ist keine Spielzeit.
 const PERSONNEL_RECOVERY_MAX_FRAME_SECONDS := 2.0
 var _recovery_clock: float = 0.0
@@ -489,6 +498,7 @@ func _process(_delta: float) -> void:
 			if profile_enabled:
 				scopes["observe_campaign_usec"] = Time.get_ticks_usec() - scope_started_usec
 				scope_started_usec = Time.get_ticks_usec()
+			_check_bankruptcy()
 			if is_instance_valid(_active_mission) and not bool(_campaign_start.get("active_restore_in_progress")):
 				var now := Time.get_ticks_msec()
 				if _active_autosave_next_msec == 0: _active_autosave_next_msec = now + 300000
@@ -5663,6 +5673,73 @@ func _tick_debt_interest(delta: float) -> void:
 	_show_save_feedback(CREDIT_TEXT_SCRIPT.interest_message(int(last.get("amount", 0)), int(last.get("credits", 0))))
 
 
+## Abschnitt P: Pleite-Pruefung (im 0,25-s-Takt von _process, in der Kampagne). Nicht waehrend eines Einsatzes (aktiver Einsatz, offener
+## Einsatzort, noch nicht gebuchtes Ergebnis) und nicht waehrend des Ladens eines Einsatzstands: erst wieder, wenn das Ergebnis gebucht ist.
+## Pleite: Bildschirm, Zeit steht, Speichern gesperrt. Erreichen die Schulden den Kreditrahmen, ein Schiff kann aber noch fliegen
+## (oder ein Nottanker ist unterwegs), kommt einmal die Vorwarnung; sie kommt erst wieder, wenn der Rahmen zwischendurch verlassen wurde.
+func _check_bankruptcy() -> void:
+	if _bankrupt or not is_campaign_start() or not is_instance_valid(_singleplayer_runtime):
+		return
+	if is_instance_valid(_active_mission) or not _location_contexts.is_empty() or not _pending_campaign_mission_result.is_empty():
+		return
+	if _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
+		return
+	var check: Dictionary = Dictionary(_singleplayer_runtime.call("get_bankruptcy_check"))
+	var credits: int = int(check.get("credits", 0))
+	if bool(check.get("bankrupt", false)):
+		_enter_bankruptcy(credits)
+		return
+	var debt_limit: int = int(check.get("debt_limit", 0))
+	var at_limit: bool = debt_limit > 0 and credits <= -debt_limit
+	if not at_limit:
+		_debt_limit_warned = false
+	elif not _debt_limit_warned and String(check.get("reason", "")) in ["craft_can_fly", "tanker_order_open"]:
+		_debt_limit_warned = true
+		_show_save_feedback(BANKRUPTCY_LIMIT_WARNING)
+
+
+func is_campaign_bankrupt() -> bool:
+	return _bankrupt
+
+
+func _enter_bankruptcy(credits: int) -> void:
+	_bankrupt = true
+	_save_wish.clear()
+	set_meta("campaign_bankruptcy_shown_count", int(get_meta("campaign_bankruptcy_shown_count", 0)) + 1)
+	_bankruptcy_screen = BANKRUPTCY_SCREEN_SCRIPT.new()
+	add_child(_bankruptcy_screen)
+	_bankruptcy_screen.call("set_debt_text", "Kontostand: " + CREDIT_TEXT_SCRIPT.format(credits, " Cr"))
+	_bankruptcy_screen.connect("action_requested", _on_bankruptcy_action)
+	var tree := get_tree()
+	if tree != null:
+		tree.paused = true # die Kampagnenzeit steht; der Bildschirm laeuft weiter (PROCESS_MODE_ALWAYS)
+		_bankruptcy_paused_tree = true
+
+
+## Die drei Knoepfe nutzen die vorhandenen Wege: Laden und neue Kampagne ueber die Startanforderung (game_start_contract, wie das Hauptmenue
+## und _continue_campaign_after_failed_extraction) mit Neuaufbau der Kampagnenszene, das Hauptmenue ueber dessen Szene. Die Zeit laeuft
+## vor dem Szenenwechsel wieder an. Meta campaign_bankruptcy_no_scene_change (nur Pruefer) unterdrueckt den Szenenwechsel.
+func _on_bankruptcy_action(action: String) -> void:
+	var tree := get_tree()
+	if tree != null and _bankruptcy_paused_tree:
+		tree.paused = false
+		_bankruptcy_paused_tree = false
+	var scene := ""
+	match action:
+		"load":
+			load("res://scripts/meta/game_start_contract.gd").request_start(tree, "campaign", "continue")
+			scene = BANKRUPTCY_CAMPAIGN_SCENE
+		"new":
+			load("res://scripts/meta/game_start_contract.gd").request_start(tree, "campaign", "new")
+			scene = BANKRUPTCY_CAMPAIGN_SCENE
+		"main_menu":
+			scene = BANKRUPTCY_MAIN_MENU_SCENE
+	set_meta("campaign_bankruptcy_exit", {"action": action, "scene": scene})
+	if scene.is_empty() or tree == null or bool(get_meta("campaign_bankruptcy_no_scene_change", false)):
+		return
+	tree.change_scene_to_file(scene)
+
+
 ## Bringt die Ausfallzeit auf die Basisansicht (Anzeige, aendert nichts am Kader): sichtbar werden nur die
 ## Statuszeilen der Verwundeten und der Genesenen neu gesetzt (Anzeigeprofil und Verfuegbarkeit der Ansicht ueber
 ## refresh_recovery_status), ohne Neuaufbau: Auswahl, Fokus, Truppkarten-Auswahl und eine angezeigte Rueckmeldung bleiben
@@ -8894,6 +8971,9 @@ func _poll_retired_terrain_workers() -> void:
 
 
 func _exit_tree() -> void:
+	if _bankruptcy_paused_tree and get_tree() != null:
+		get_tree().paused = false # Abschnitt P: die Pleite-Pause endet mit der Szene
+		_bankruptcy_paused_tree = false
 	for worker: Thread in _retired_terrain_workers:
 		if worker.is_started(): worker.wait_to_finish()
 	_retired_terrain_workers.clear()
@@ -9322,6 +9402,8 @@ func _poll_completion_save() -> void:
 func request_campaign_save() -> Dictionary:
 	set_meta("campaign_save_attempts", int(get_meta("campaign_save_attempts", 0)) + 1)
 	if not is_campaign_start() or _campaign_start == null or _singleplayer_runtime == null: return {"ok":false,"reason":"campaign_unavailable","message":"Kampagne ist noch nicht bereit."}
+	# Abschnitt P: im Pleite-Zustand wird nicht gespeichert, damit "Spielstand laden" nicht denselben Bildschirm zurueckbringt.
+	if _bankrupt: return {"ok":false,"reason":"campaign_bankrupt","message":load("res://scripts/meta/campaign_save_projection.gd").blocked_text("campaign_bankrupt")}
 	if not is_instance_valid(_active_mission): _reopen_retreated_jobs_before_home_checkpoint()
 	var result: Dictionary = _campaign_start.call("save_active_checkpoint",self,_singleplayer_runtime,true) if is_instance_valid(_active_mission) else _campaign_start.call("save_home_checkpoint",self,_singleplayer_runtime,true)
 	set_meta("campaign_active_checkpoint_result" if is_instance_valid(_active_mission) else "campaign_checkpoint_result", result.duplicate(true))
